@@ -107,10 +107,15 @@ export default class Navbar extends Component {
 		return (
 			<div id="topMenu"
 					style={{
-						padding: "0 10", background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
+						padding: "0 10px", background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
 						height: 40, borderRadius: 3, boxShadow: "3px 3px 7px rgba(0,0,0,.07)"
 					}}>
-				<a className="unselectable" style={{fontSize: 20}}
+				<a className="unselectable"
+						style={{
+							display: "inline-block", cursor: "pointer", verticalAlign: "middle",
+							lineHeight: "40px", color: "#FFF", padding: "0 15px", fontSize: 12,
+							textDecoration: "none", opacity: .9, fontSize: 20
+						}}
 						onClick={()=>{
 							// todo: navigate to home
 						}}>
@@ -147,7 +152,7 @@ class NavBarButton extends Component {
 			<a className="unselectable"
 					style={{
 						display: "inline-block", cursor: "pointer", verticalAlign: "middle",
-						lineHeight: "40px", color: "#FFF", padding: "0 15", fontSize: 12, textDecoration: "none", opacity: .9
+						lineHeight: "40px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9
 					}}
 					onClick={()=> {
 						// todo: navigate to page
