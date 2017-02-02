@@ -12,9 +12,9 @@ module.exports = {
     compiler_public_path: `http://${config.server_host}:${config.server_port}/`,
     firebase: {
       apiKey: 'AIzaSyBqz9vQ_xrL8tPMQk1SHb80GmRLHWNq0hY',
-      authDomain: 'thesismap.firebaseapp.com',
-      databaseURL: 'https://thesismap.firebaseio.com',
-      storageBucket: 'thesismap.appspot.com'
+      authDomain: 'thesis-map-82262.firebaseapp.com',
+      databaseURL: 'https://thesis-map-82262.firebaseio.com',
+      storageBucket: 'thesis-map-82262.appspot.com'
     },
     reduxFirebase: {
       userProfile: 'users', // root that user profiles are written to
@@ -39,9 +39,9 @@ module.exports = {
     },
     firebase: {
       apiKey: 'AIzaSyBqz9vQ_xrL8tPMQk1SHb80GmRLHWNq0hY',
-      authDomain: 'thesismap.firebaseapp.com',
-      databaseURL: 'https://thesismap.firebaseio.com',
-      storageBucket: 'thesismap.appspot.com'
+      authDomain: 'thesis-map-82262.firebaseapp.com',
+      databaseURL: 'https://thesis-map-82262.firebaseio.com',
+      storageBucket: 'thesis-map-82262.appspot.com'
     },
     reduxFirebase: {
       userProfile: 'users', // root that user profiles are written to
