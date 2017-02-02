@@ -17,7 +17,7 @@ const webpackConfig = {
   devtool: config.compiler_devtool,
   resolve: {
     root: paths.client(),
-    extensions: ['', '.js', '.jsx', '.json']
+    extensions: ['', '.js', '.jsx', ".ts", ".tsx", '.json']
   },
   module: {}
 }
@@ -109,15 +109,19 @@ if (!__TEST__) {
 // Loaders
 // ------------------------------------
 // JavaScript / JSON
-webpackConfig.module.loaders = [{
-  test: /\.(js|jsx)$/,
-  exclude: [/node_modules/, /react-redux-firebase/],
-  loader: 'babel',
-  query: config.compiler_babel
-}, {
-  test: /\.json$/,
-  loader: 'json'
-}]
+webpackConfig.module.loaders = [
+	{
+		test: /\.(jsx?|tsx?)$/,
+		exclude: [/node_modules/, /react-redux-firebase/],
+		loader: 'babel',
+		query: config.compiler_babel
+	},
+	{
+		test: /\.json$/,
+		loader: 'json'
+	},
+	{test: /\.tsx?$/, loader: "ts-loader"},
+]
 
 // ------------------------------------
 // Style Loaders

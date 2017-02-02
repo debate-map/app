@@ -1,0 +1,54 @@
+{
+    "compilerOptions": {
+		// general
+        "sourceMap": true,
+		"watch": true,
+		//"outDir": "Build",
+
+		// modules/paths
+		"moduleResolution": "node",
+		//"maxNodeModulesJsDepth": 1,
+        "rootDir": ".",
+		"baseUrl": ".",
+		"paths": {
+			"*": [
+				"*",
+				"node_modules_CustomExternal/*",
+				"node_modules_CustomInternal/*"
+			]
+		},
+
+		// compiler options
+		"target": "es2015",
+        "allowJs": true,
+		"jsx": "react",
+        "noImplicitAny": false,
+		"experimentalDecorators": true
+    },
+    "include": [
+        "Typings/**/*.d.ts",
+		//"Typings/globals/**/*.d.ts",
+        "**/*.ts",
+        "**/*.tsx"
+		//"**/*.js",
+		//"**/*.jsx"
+    ],
+    "exclude": [
+        /*"index.android.js",
+        "index.ios.js",*/
+        "Build",
+		"node_modules",
+
+		// temp
+		"node_modules_CustomExternal",
+		//"node_modules_CustomInternal",
+		"Packages/VDF/*.js",
+		"Packages/VDF/VDf.js"
+
+        /*"Typings/main",
+        "Typings/main.d.ts",
+        "Typings/browser",
+        "Typings/browser.d.ts",*/
+    ],
+	"compileOnSave": true
+}
