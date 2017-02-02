@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "stage": "thesismap",
+    "prod": "thesismap",
+    "default": "thesis-map-82262"
+  }
+}
