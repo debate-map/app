@@ -1,7 +1,7 @@
 // We only need to import the modules necessary for initial render
-import React, {Component} from "react"
-import Navbar from "../containers/Navbar/Navbar"
-import "../styles/core.scss"
+import React, {Component} from "react";
+import Navbar from "../containers/Navbar";
+import "../styles/core.scss";
 
 class CoreLayout extends Component {
 	static propTypes = {
@@ -21,26 +21,28 @@ class CoreLayout extends Component {
 	}
 }
 
-import Home from "./Home"
-import LoginRoute from "./Login"
-import SignupRoute from "./Signup"
-import ProjectsRoute from "./Projects"
-import AccountRoute from "./Account"
+import Home from "./Home";
+import LoginRoute from "./Login";
+import SignupRoute from "./Signup";
+import ProjectsRoute from "./Projects";
+import AccountRoute from "./Account";
 
 /*  Note: Instead of using JSX, we recommend using react-router
     PlainRoute objects to build route definitions.   */
 
-export const createRoutes = (store) => ({
-	path: "/",
-	component: CoreLayout,
-	indexRoute: Home,
-	childRoutes: [
-		AccountRoute(store),
-		LoginRoute(store),
-		SignupRoute(store),
-		ProjectsRoute(store)
-	]
-})
+export default function createRoutes(store) {
+	return {
+		path: "/",
+		component: CoreLayout,
+		indexRoute: Home,
+		childRoutes: [
+			AccountRoute(store),
+			LoginRoute(store),
+			SignupRoute(store),
+			ProjectsRoute(store)
+		]
+	};
+}
 
 /*  Note: childRoutes can be chunked or otherwise loaded programmatically
     using getChildRoutes with the following signature:
@@ -59,5 +61,3 @@ export const createRoutes = (store) => ({
     inside the route `getComponent` function, since it is only invoked
     when the route exists and matches.
 */
-
-export default createRoutes

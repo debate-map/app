@@ -3,7 +3,7 @@ import {browserHistory, Router} from "react-router";
 import {Provider} from "react-redux";
 
 // Themeing/Styling
-import Theme from "../../theme";
+import Theme from "../theme";
 import getMuiTheme from "material-ui/styles/getMuiTheme";
 
 // Tap Plugin
@@ -19,7 +19,9 @@ export default class AppContainer extends Component {
 		store: PropTypes.object.isRequired
 	};
 
-	getChildContext() { return {muiTheme: getMuiTheme(Theme)}; }
+	getChildContext() {
+		return {muiTheme: getMuiTheme(Theme)};
+	}
 
 	render() {
 		const {routes, store} = this.props;
