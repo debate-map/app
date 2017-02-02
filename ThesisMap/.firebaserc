@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "stage": "thesismap",
+    "prod": "thesismap"
+  }
+}
