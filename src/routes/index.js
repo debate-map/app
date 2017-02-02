@@ -1,24 +1,45 @@
 // We only need to import the modules necessary for initial render
-import CoreLayout from '../layouts/CoreLayout/CoreLayout'
-import Home from './Home'
-import LoginRoute from './Login'
-import SignupRoute from './Signup'
-import ProjectsRoute from './Projects'
-import AccountRoute from './Account'
+import React, {Component} from "react"
+import Navbar from "../containers/Navbar/Navbar"
+import "../styles/core.scss"
+
+class CoreLayout extends Component {
+	static propTypes = {
+		children: React.PropTypes.element.isRequired
+	};
+
+	render() {
+		var {children} = this.props;
+		return (
+			<div>
+				<Navbar/>
+				<div>
+					{children}
+				</div>
+			</div>
+		);
+	}
+}
+
+import Home from "./Home"
+import LoginRoute from "./Login"
+import SignupRoute from "./Signup"
+import ProjectsRoute from "./Projects"
+import AccountRoute from "./Account"
 
 /*  Note: Instead of using JSX, we recommend using react-router
     PlainRoute objects to build route definitions.   */
 
 export const createRoutes = (store) => ({
-  path: '/',
-  component: CoreLayout,
-  indexRoute: Home,
-  childRoutes: [
-    AccountRoute(store),
-    LoginRoute(store),
-    SignupRoute(store),
-    ProjectsRoute(store)
-  ]
+	path: "/",
+	component: CoreLayout,
+	indexRoute: Home,
+	childRoutes: [
+		AccountRoute(store),
+		LoginRoute(store),
+		SignupRoute(store),
+		ProjectsRoute(store)
+	]
 })
 
 /*  Note: childRoutes can be chunked or otherwise loaded programmatically
@@ -28,7 +49,7 @@ export const createRoutes = (store) => ({
       require.ensure([], (require) => {
         cb(null, [
           // Remove imports!
-          require('./Counter').default(store)
+          require("./Counter").default(store)
         ])
       })
     }

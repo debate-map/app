@@ -1,39 +1,34 @@
-import React, { Component, PropTypes } from 'react'
-import { browserHistory, Router } from 'react-router'
-import { Provider } from 'react-redux'
+import React, {Component, PropTypes} from "react";
+import {browserHistory, Router} from "react-router";
+import {Provider} from "react-redux";
 
 // Themeing/Styling
-import Theme from '../../theme'
-import getMuiTheme from 'material-ui/styles/getMuiTheme'
+import Theme from "../../theme";
+import getMuiTheme from "material-ui/styles/getMuiTheme";
 
 // Tap Plugin
-import injectTapEventPlugin from 'react-tap-event-plugin'
-injectTapEventPlugin()
+import injectTapEventPlugin from "react-tap-event-plugin";
+injectTapEventPlugin();
 
 export default class AppContainer extends Component {
-  static childContextTypes = {
-    muiTheme: PropTypes.object
-  }
+	static childContextTypes = {
+		muiTheme: PropTypes.object
+	};
+	static propTypes = {
+		routes: PropTypes.object.isRequired,
+		store: PropTypes.object.isRequired
+	};
 
-  getChildContext = () => (
-    {
-      muiTheme: getMuiTheme(Theme)
-    }
-  )
+	getChildContext() { return {muiTheme: getMuiTheme(Theme)}; }
 
-  static propTypes = {
-    routes: PropTypes.object.isRequired,
-    store: PropTypes.object.isRequired
-  }
-
-  render () {
-    const { routes, store } = this.props
-    return (
-      <Provider store={store}>
-        <div style={{ height: '100%' }}>
-          <Router history={browserHistory} children={routes} />
-        </div>
-      </Provider>
-    )
-  }
+	render() {
+		const {routes, store} = this.props;
+		return (
+			<Provider store={store}>
+				<div style={{height: "100%"}}>
+					<Router history={browserHistory} children={routes} />
+				</div>
+			</Provider>
+		);
+	}
 }

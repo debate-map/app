@@ -1,6 +1,13 @@
-import Home from './components/Home'
+import React, {Component} from "react" // eslint-disable-line
 
-// Sync route definition
-export default {
-  component: Home
+class Home extends Component {
+	render() {
+		return (
+			<div>
+				<h2>Home111123</h2>
+			</div>	
+		);
+	}
 }
+
+export default {component: Home};
