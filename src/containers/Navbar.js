@@ -123,6 +123,7 @@ export default class Navbar extends Component {
 				</a>
 				<NavBarButton page="" text="Home" active={page == ""}/>
 				<NavBarButton page="community" text="Community" active={page == "community"}/>
+				<NavBarButton page="forum" text="Forum" active={page == "forum"}/>
 				<NavBarButton page="definitions" text="Definitions" active={page == "definitions"}/>
 				<NavBarButton page="global-map" text="Global Map" active={page == "global-map"}/>
 				<NavBarButton page="discussion-maps" text="Discussion Maps" active={page == "discussion-maps"}/>
