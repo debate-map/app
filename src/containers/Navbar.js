@@ -51,7 +51,7 @@ export default class Navbar extends Component {
 		this.context.router.push("/");
 	}
 
-	render() {
+	/*render() {
 		const {auth} = this.props;
 
 		const iconButton = (
@@ -98,6 +98,62 @@ export default class Navbar extends Component {
 				iconElementRight={rightMenu}
 				iconStyleRight={menuStyle}
 			/>
+		);
+	}*/
+
+	render() {
+		var {store} = this.context;
+		var {page} = store || {};
+		return (
+			<div id="topMenu"
+					style={{
+						padding: "0 10", background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
+						height: 40, borderRadius: 3, boxShadow: "3px 3px 7px rgba(0,0,0,.07)"
+					}}>
+				<a className="unselectable" style={{fontSize: 20}}
+						onClick={()=>{
+							// todo: navigate to home
+						}}>
+					Thesis Map
+				</a>
+				<NavBarButton page="" text="Home" active={page == ""}/>
+				<NavBarButton page="community" text="Community" active={page == "community"}/>
+				<NavBarButton page="definitions" text="Definitions" active={page == "definitions"}/>
+				<NavBarButton page="global-map" text="Global Map" active={page == "global-map"}/>
+				<NavBarButton page="discussion-maps" text="Discussion Maps" active={page == "discussion-maps"}/>
+				<NavBarButton page="personal-maps" text="Personal Maps" active={page == "personal-maps"}/>
+
+				<div className="unselectable quickMenuToggler transition500 opacity100OnHover"
+					style={{
+						float: "right", padding: 0, width: 40, height: 40,
+						background: "url('/Images/Buttons/User.png') no-repeat 5px 5px",
+						backgroundSize: 30, marginRight: -10, opacity: .75, cursor: "pointer"}}
+					onClick={()=>{}}/>
+				<div className="unselectable quickMenuToggler transition500 opacity100OnHover"
+					style={{
+						float: "right", padding: 0, width: 40, height: 40,
+						background: "url('/Images/Buttons/PageOptions.png') no-repeat 5px 5px",
+						backgroundSize: 30, marginRight: -5, opacity: .75, cursor: "pointer"}}
+					onClick={()=>{}}/>
+			</div>
+		);
+	}
+}
+
+class NavBarButton extends Component {
+	render() {
+		var {page, text, active} = this.props;
+		return (
+			<a className="unselectable"
+					style={{
+						display: "inline-block", cursor: "pointer", verticalAlign: "middle",
+						lineHeight: "40px", color: "#FFF", padding: "0 15", fontSize: 12, textDecoration: "none", opacity: .9
+					}}
+					onClick={()=> {
+						// todo: navigate to page
+					}}>
+				{text}
+			</a>
 		);
 	}
 }
