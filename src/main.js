@@ -1,7 +1,5 @@
-import React from "react"
-import ReactDOM from "react-dom"
-import AppContainer from "./containers/App"
-import createStore from "./store/createStore"
+import ReactDOM from "react-dom";
+import createStore from "./store/createStore";
 
 // store and history instantiation
 // ==========
@@ -13,51 +11,82 @@ import createStore from "./store/createStore"
 const initialState = window.___INITIAL_STATE__;
 const store = createStore(initialState);
 
+// wrapper ui
+// ==========
+
+import React, {Component, PropTypes} from "react";
+import {browserHistory, Router} from "react-router";
+import {Provider} from "react-redux";
+
+// Themeing/Styling
+import Theme from "./theme";
+import getMuiTheme from "material-ui/styles/getMuiTheme";
+
+// Tap Plugin
+import injectTapEventPlugin from "react-tap-event-plugin";
+injectTapEventPlugin();
+
+export default class WrapperUI extends Component {
+	static childContextTypes = {
+		muiTheme: PropTypes.object
+	};
+	static propTypes = {
+		routes: PropTypes.object.isRequired,
+		store: PropTypes.object.isRequired
+	};
+
+	getChildContext() {
+		return {muiTheme: getMuiTheme(Theme)};
+	}
+
+	render() {
+		const {routes, store} = this.props;
+		return (
+			<Provider store={store}>
+				<div style={{height: "100%"}}>
+					<Router history={browserHistory} children={routes}/>
+				</div>
+			</Provider>
+		);
+	}
+}
+
 // render setup
 // ==========
 
-const MOUNT_NODE = document.getElementById("root");
+const mountNode = document.getElementById("root");
+function RenderWrapper() {
+	function Proceed() {
+		// dynamically require routes, so hot-reloading grabs new versions after each recompile
+		const routes = require("./RootUI").default(store);
+		ReactDOM.render(<WrapperUI store={store} routes={routes}/>, mountNode);
+	}
 
-let render = ()=> {
-	// dynamically require routes, so hot-reloading grabs new versions after each recompile
-	const routes = require("./routes/index").default(store);
-	ReactDOM.render(<AppContainer store={store} routes={routes}/>, MOUNT_NODE);
+	if (__DEV__) {
+		try {
+			Proceed();
+		} catch (error) {
+			const RedBox = require("redbox-react").default;
+			ReactDOM.render(<RedBox error={error}/>, mountNode);
+		}
+	} else {
+		Proceed();
+	}
 }
 
 // developer tools setup
 // ==========
 
-if (__DEV__) {
-	if (window.devToolsExtension) {
-		// window.devToolsExtension.open()
-	}
-}
-
 // this code is excluded from production bundle
 if (__DEV__) {
+	/*if (window.devToolsExtension)
+		window.devToolsExtension.open();*/
 	if (module.hot) {
-		// Development render functions
-		const renderApp = render;
-		const renderError = error=> {
-			const RedBox = require("redbox-react").default
-
-			ReactDOM.render(<RedBox error={error}/>, MOUNT_NODE)
-		};
-
-		// Wrap render in try/catch
-		render = ()=> {
-			try {
-				renderApp()
-			} catch (error) {
-				renderError(error)
-			}
-		};
-
 		// Setup hot module replacement
-		module.hot.accept("./routes/index", () => {
+		module.hot.accept("./RootUI", () => {
 			setTimeout(()=> {
-				ReactDOM.unmountComponentAtNode(MOUNT_NODE);
-				render();
+				ReactDOM.unmountComponentAtNode(mountNode);
+				RenderWrapper();
 			});
 		});
 	}
@@ -66,4 +95,4 @@ if (__DEV__) {
 // go!
 // ==========
 
-render();
+RenderWrapper();

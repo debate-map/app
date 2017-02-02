@@ -1,9 +1,9 @@
 // We only need to import the modules necessary for initial render
 import React, {Component} from "react";
-import Navbar from "../containers/Navbar";
-import "../styles/core.scss";
+import Navbar from "./containers/Navbar";
+import "./styles/core.scss";
 
-class CoreLayout extends Component {
+class RootUI extends Component {
 	static propTypes = {
 		children: React.PropTypes.element.isRequired
 	};
@@ -21,11 +21,11 @@ class CoreLayout extends Component {
 	}
 }
 
-import Home from "./Home";
-import LoginRoute from "./Login";
-import SignupRoute from "./Signup";
-import ProjectsRoute from "./Projects";
-import AccountRoute from "./Account";
+import Home from "./routes/Home";
+import LoginRoute from "./routes/Login";
+import SignupRoute from "./routes/Signup";
+import ProjectsRoute from "./routes/Projects";
+import AccountRoute from "./routes/Account";
 
 /*  Note: Instead of using JSX, we recommend using react-router
     PlainRoute objects to build route definitions.   */
@@ -33,7 +33,7 @@ import AccountRoute from "./Account";
 export default function createRoutes(store) {
 	return {
 		path: "/",
-		component: CoreLayout,
+		component: RootUI,
 		indexRoute: Home,
 		childRoutes: [
 			AccountRoute(store),
