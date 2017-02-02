@@ -56,25 +56,17 @@ export default class Navbar extends Component {
 
 		const iconButton = (
 			<IconButton iconStyle={avatarStyles.icon} style={avatarStyles.button}>
-				<Avatar
-					src={auth && auth.photoURL ? auth.photoURL : StockPhoto}
-				/>
+				<Avatar src={auth && auth.photoURL ? auth.photoURL : StockPhoto}/>
 			</IconButton>
 		);
 
 		const mainMenu = (
 			<div>
 				<Link to={SIGNUP_PATH}>
-					<FlatButton
-						label="Sign Up"
-						style={buttonStyle}
-					/>
+					<FlatButton label="Sign Up" style={buttonStyle}/>
 				</Link>
 				<Link to={LOGIN_PATH}>
-					<FlatButton
-						label="Login"
-						style={buttonStyle}
-					/>
+					<FlatButton label="Login" style={buttonStyle}/>
 				</Link>
 			</div>
 		);
@@ -84,7 +76,7 @@ export default class Navbar extends Component {
 					targetOrigin={{horizontal: "right", vertical: "bottom"}}
 					anchorOrigin={originSettings} animated={false}>
 				<MenuItem primaryText="Account" value="account"
-					onTouchTap={() => this.context.router.push(ACCOUNT_PATH)}/>
+					onTouchTap={()=> this.context.router.push(ACCOUNT_PATH)}/>
 				<MenuItem primaryText="Sign out" value="logout" onTouchTap={this.handleLogout}/>
 			</IconMenu>
 		) : mainMenu;
@@ -99,7 +91,7 @@ export default class Navbar extends Component {
 			<AppBar
 				title={
 					<Link to={brandPath}>
-						ThesisMap
+						Thesis Map
 					</Link>
 				}
 				showMenuIconButton={false}

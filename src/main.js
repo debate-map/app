@@ -56,21 +56,17 @@ export default class WrapperUI extends Component {
 
 const mountNode = document.getElementById("root");
 function RenderWrapper() {
-	function Proceed() {
+	try {
 		// dynamically require routes, so hot-reloading grabs new versions after each recompile
 		const routes = require("./RootUI").default(store);
 		ReactDOM.render(<WrapperUI store={store} routes={routes}/>, mountNode);
-	}
-
-	if (__DEV__) {
-		try {
-			Proceed();
-		} catch (error) {
+	} catch (error) {
+		if (__DEV__) {
 			const RedBox = require("redbox-react").default;
 			ReactDOM.render(<RedBox error={error}/>, mountNode);
+			return;
 		}
-	} else {
-		Proceed();
+		throw error;
 	}
 }
 
