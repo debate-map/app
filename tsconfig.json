@@ -23,7 +23,8 @@
         "allowJs": true,
 		"jsx": "react",
         "noImplicitAny": false,
-		"experimentalDecorators": true
+		"experimentalDecorators": true,
+		"allowSyntheticDefaultImports": true
     },
 	"files": ["src/main.tsx"],
     "include": [

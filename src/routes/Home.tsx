@@ -4,7 +4,7 @@ import {BaseComponent} from "../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../Frame/ReactComponents/VReactMarkdown";
 
 let pageText = `
-The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced (like Wikipedia), and the software is open-sourced (under MIT), promoting collaborative development and increased accountability. [if the project management falters or becomes biased, it's in the power of the users to "fork" the project themselves and launch their own version of it]
+The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced (like Wikipedia), and the software is open-sourced (under MIT), promoting collaborative development and increased accountability. [if the project management falters or becomes biased, it's in the power of the users to "fork" the project themselves and launch their own version]
 
 Here is an example question, on the shape of the earth:
 
@@ -42,7 +42,7 @@ Engaging with a tool that operates on percentages, numbers, and weights makes se
 He can then proceed to look more closely at those areas, examining the pool of existing evidence and reasoning, and referencing statistics on how the rest of the population considers each piece along the way.
 `;
 
-class Home extends BaseComponent<{}, {}> {
+export default class Home extends BaseComponent<{}, {}> {
 	render() {
 		return (
 			<div>
@@ -57,4 +57,3 @@ class Home extends BaseComponent<{}, {}> {
 		);
 	}
 }
-export default {component: Home};
