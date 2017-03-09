@@ -1,13 +1,33 @@
+import {Dispatch} from "redux";
 import {Component, PropTypes} from "react";
 import {Link} from "react-router";
-
-// Components
 import AppBar from "material-ui/AppBar";
 import IconMenu from "material-ui/IconMenu";
 import IconButton from "material-ui/IconButton";
 import MenuItem from "material-ui/MenuItem";
 import FlatButton from "material-ui/FlatButton";
 import Avatar from "material-ui/Avatar";
+
+import {connect} from "react-redux";
+import {firebase, helpers} from "react-redux-firebase";
+import {BaseComponent} from "../Frame/UI/ReactGlobals";
+//import {Component as BaseComponent} from "react";
+import {Debugger} from "../Frame/General/Globals_Free";
+const {pathToJS} = helpers;
+
+// actions
+// ==========
+
+export var SET_USER_PANEL_OPEN = "SET_USER_PANEL_OPEN";
+export function SetUserPanelOpen(open) {
+	return {
+		type: SET_USER_PANEL_OPEN,
+		payload: open
+	};
+}
+
+// main
+// ==========
 
 const originSettings = {horizontal: "right", vertical: "top"};
 const buttonStyle = {color: "white", textDecoration: "none"};
@@ -19,27 +39,18 @@ const avatarStyles = {
 	wrapper: {marginTop: 45 - avatarSize}
 };
 
-import {connect} from "react-redux";
-import {firebase, helpers} from "react-redux-firebase";
-import {BaseComponent} from "../Frame/UI/ReactGlobals";
-//import {Component as BaseComponent} from "react";
-const {pathToJS} = helpers;
-
-// Props decorators
 @firebase()
-@connect(({firebase})=>({
-	authError: pathToJS(firebase, "authError"),
-	auth: pathToJS(firebase, "auth"),
-	account: pathToJS(firebase, "profile")
-}))
-export default class Navbar extends BaseComponent<{}, {}> {
-	static contextTypes = {
-		router: PropTypes.object.isRequired
-	};
-	static propTypes = {
-		auth: PropTypes.object,
-		firebase: PropTypes.object.isRequired
-	};
+@(connect(state=>({
+	page: state.page,
+	userPanelOpen: state.main.userPanelOpen,
+	authError: pathToJS(state.firebase, "authError"),
+	auth: pathToJS(state.firebase, "auth"),
+	account: pathToJS(state.firebase, "profile")
+})) as any)
+export default class Navbar extends BaseComponent<{firebase?, authError?, auth?, account?, page?, userPanelOpen?, dispatch?}, {}> {
+	/*static contextTypes = {
+		store: PropTypes.object.isRequired
+	};*/
 
 	/*handleLogout() {
 		this.props.firebase.logout();
@@ -97,8 +108,7 @@ export default class Navbar extends BaseComponent<{}, {}> {
 	}*/
 
 	render() {
-		var {store} = this.context;
-		var {page} = store || {} as any;
+		let {page, userPanelOpen, auth, dispatch} = this.props;
 		return (
 			<div id="topMenu"
 					style={{
@@ -123,18 +133,20 @@ export default class Navbar extends BaseComponent<{}, {}> {
 						<NavBarButton page="personal-maps" text="Personal Maps" active={page == "personal-maps"}/>
 					</span>
 					<span style={{position: "absolute", right: 0}}>
-						<div className="unselectable quickMenuToggler transition500 opacity100OnHover"
+						<div className="transition500 opacity100OnHover"
 							style={{
 								display: "inline-block", padding: 0, width: 40, height: 40,
-								background: "url(/Images/Buttons/PageOptions.png) no-repeat 5px 5px",
-								backgroundSize: 30, opacity: .75, cursor: "pointer"}}
+								backgroundImage: "url(/Images/Buttons/PageOptions.png)", backgroundRepeat: "no-repeat",
+								backgroundPosition: "center center", backgroundSize: 30, opacity: .75, cursor: "pointer"}}
 							onClick={()=>{}}/>
-						<div className="unselectable quickMenuToggler transition500 opacity100OnHover"
+						<div className="transition500 opacity100OnHover"
 							style={{
 								display: "inline-block", padding: 0, width: 40, height: 40,
-								background: "url(/Images/Buttons/User.png) no-repeat 5px 5px",
-								backgroundSize: 30, opacity: .75, cursor: "pointer"}}
-							onClick={()=>{}}/>
+								backgroundImage: `url(${auth ? auth.photoURL : "/Images/Buttons/User.png"})`, backgroundRepeat: "no-repeat",
+								backgroundPosition: "center center", backgroundSize: 30, opacity: .75, cursor: "pointer"}}
+							onClick={()=> {
+								dispatch(SetUserPanelOpen(!userPanelOpen));
+							}}/>
 					</span>
 				</div>
 			</div>
