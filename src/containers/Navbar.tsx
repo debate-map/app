@@ -7,12 +7,14 @@ import IconButton from "material-ui/IconButton";
 import MenuItem from "material-ui/MenuItem";
 import FlatButton from "material-ui/FlatButton";
 import Avatar from "material-ui/Avatar";
+import GoogleButton from 'react-google-button';
 
 import {connect} from "react-redux";
-import {firebase, helpers} from "react-redux-firebase";
-import {BaseComponent} from "../Frame/UI/ReactGlobals";
-//import {Component as BaseComponent} from "react";
+import {firebaseConnect, helpers} from "react-redux-firebase";
+import {BaseComponent, RowLR} from "../Frame/UI/ReactGlobals";
 import {Debugger} from "../Frame/General/Globals_Free";
+import Button from "../Frame/ReactComponents/Button";
+import TextInput from "../Frame/ReactComponents/TextInput";
 const {pathToJS} = helpers;
 
 // actions
@@ -39,74 +41,13 @@ const avatarStyles = {
 	wrapper: {marginTop: 45 - avatarSize}
 };
 
-@firebase()
+@firebaseConnect()
 @(connect(state=>({
 	page: state.page,
 	userPanelOpen: state.main.userPanelOpen,
-	authError: pathToJS(state.firebase, "authError"),
 	auth: pathToJS(state.firebase, "auth"),
-	account: pathToJS(state.firebase, "profile")
 })) as any)
-export default class Navbar extends BaseComponent<{firebase?, authError?, auth?, account?, page?, userPanelOpen?, dispatch?}, {}> {
-	/*static contextTypes = {
-		store: PropTypes.object.isRequired
-	};*/
-
-	/*handleLogout() {
-		this.props.firebase.logout();
-		this.context.router.push("/");
-	}*/
-
-	/*render() {
-		const {auth} = this.props;
-
-		const iconButton = (
-			<IconButton iconStyle={avatarStyles.icon} style={avatarStyles.button}>
-				<Avatar src={auth && auth.photoURL ? auth.photoURL : StockPhoto}/>
-			</IconButton>
-		);
-
-		const mainMenu = (
-			<div>
-				<Link to={SIGNUP_PATH}>
-					<FlatButton label="Sign Up" style={buttonStyle}/>
-				</Link>
-				<Link to={LOGIN_PATH}>
-					<FlatButton label="Login" style={buttonStyle}/>
-				</Link>
-			</div>
-		);
-
-		const rightMenu = auth ? (
-			<IconMenu iconButtonElement={iconButton}
-					targetOrigin={{horizontal: "right", vertical: "bottom"}}
-					anchorOrigin={originSettings} animated={false}>
-				<MenuItem primaryText="Account" value="account"
-					onTouchTap={()=> this.context.router.push(ACCOUNT_PATH)}/>
-				<MenuItem primaryText="Sign out" value="logout" onTouchTap={this.handleLogout}/>
-			</IconMenu>
-		) : mainMenu;
-
-		// Only apply styling if avatar is showing
-		const menuStyle = auth ? avatarStyles.wrapper : {};
-
-		// Redirect to projects page if logged in
-		const brandPath = auth ? `/${LIST_PATH}` : "/";
-
-		return (
-			<AppBar
-				title={
-					<Link to={brandPath}>
-						Thesis Map
-					</Link>
-				}
-				showMenuIconButton={false}
-				iconElementRight={rightMenu}
-				iconStyleRight={menuStyle}
-			/>
-		);
-	}*/
-
+export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOpen?, auth?}, {}> {
 	render() {
 		let {page, userPanelOpen, auth, dispatch} = this.props;
 		return (
@@ -148,7 +89,42 @@ export default class Navbar extends BaseComponent<{firebase?, authError?, auth?,
 								dispatch(SetUserPanelOpen(!userPanelOpen));
 							}}/>
 					</span>
+					<div style={{position: "absolute", zIndex: 11, right: 0}}>
+						{userPanelOpen &&
+							<UserPanel/>}
+					</div>
 				</div>
+			</div>
+		);
+	}
+}
+
+@firebaseConnect()
+@(connect(state=>({
+	page: state.page,
+	userPanelOpen: state.main.userPanelOpen,
+	//authError: pathToJS(state.firebase, "authError"),
+	auth: pathToJS(state.firebase, "auth"),
+	account: pathToJS(state.firebase, "profile")
+})) as any)
+class UserPanel extends BaseComponent<{firebase?, auth?, account?}, {}> {
+	static contextTypes = {
+		router: PropTypes.object.isRequired
+	};
+	render() {
+		let {firebase, auth, account} = this.props;
+		let {router} = this.context;
+		return (
+			<div style={{width: 300, height: 200, background: "rgba(0,0,0,.7)"}}>
+				{auth
+					? <Button text="Sign out" onClick={()=> {
+						firebase.logout();
+					}}/>
+					: <div>
+						<GoogleButton onClick={async ()=> {
+							let account = await firebase.login({provider: "google", type: "popup"});
+						}}/>
+					</div>}
 			</div>
 		);
 	}
@@ -163,12 +139,7 @@ class NavBarButton extends BaseComponent<{page, text, active}, {}> {
 						display: "inline-block", cursor: "pointer", verticalAlign: "middle",
 						lineHeight: "45px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9
 					}}
-					to={page}
-					/*onClick={e=> {
-						if (!e.ctrlKey)
-							e.preventDefault();
-						// todo
-					}}*/>
+					to={page}>
 				{text}
 			</Link>
 		);

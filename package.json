@@ -155,6 +155,7 @@
     "nodemon": "^1.10.2",
     "phantomjs-prebuilt": "^2.1.12",
     "postcss-loader": "^0.13.0",
+    "radium": "^0.18.1",
     "react-addons-test-utils": "15.3.2",
     "react-autobind": "^1.0.6",
     "react-markdown": "^2.4.5",
