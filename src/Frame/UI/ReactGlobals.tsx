@@ -259,7 +259,7 @@ export function Equals_Shallow(objA, objB) {
 
 export function AddGlobalElement(str) {
     $(()=> {
-        $(str).appendTo("#hiddenPersistentHolder_early");
+        $(str).appendTo("#hidden_early");
     });
 };
 export function AddGlobalStyle(str) {
@@ -269,6 +269,12 @@ ${str}
 </style>
 	`);
 };
+
+AddGlobalStyle(`
+* {
+	color: rgba(255,255,255,.7);
+}
+`);
 
 //var classNames = require("classnames");
 export function Classes(...entries: (string | {[s: string]: boolean})[]) {

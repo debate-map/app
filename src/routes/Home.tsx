@@ -1,10 +1,10 @@
 import {Component} from "react" // eslint-disable-line
-//import {BaseComponent} from "../Frame/UI/ReactGlobals";
-import {Component as BaseComponent} from "react";
+import {BaseComponent} from "../Frame/UI/ReactGlobals";
+//import {Component as BaseComponent} from "react";
 import VReactMarkdown from "../Frame/ReactComponents/VReactMarkdown";
 
 let pageText = `
-The Thesis Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced (like Wikipedia), and the software is open-sourced (under MIT), promoting collaborative development and increased accountability. [if the project management falters or becomes biased, it's in the power of the users to "fork" the project themselves and launch their own version of it]
+The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced (like Wikipedia), and the software is open-sourced (under MIT), promoting collaborative development and increased accountability. [if the project management falters or becomes biased, it's in the power of the users to "fork" the project themselves and launch their own version of it]
 
 Here is an example question, on the shape of the earth:
 
@@ -12,8 +12,8 @@ As can be seen, the tree-like structure makes it easy to traverse the available 
 
 This has the potential to...
 
-Transform discussion on contentious issues
-==========
+## Transform discussion on contentious issues
+
 Instead of the traditional thread-based dialogue (which tends toward long and hard-to-follow threads), or the brief but less thorough exchanges of in-person speech, this project aims to bring the benefits of both:
 * Providing thoroughness and clarity-of-meaning by allowing arbitrarily deep subtrees. (each "supporting" or "implying" its parent)
 * Remaining traversable and easy to follow by having arguments mapped directly under the thesis they relate to, instead of sprawled out over many posts.
@@ -29,15 +29,15 @@ At some point it will occur that either:
 
 While the less desirable options are sure to occur (and more often than we'd like), we still believe that the "recursive unrolling of belief trees" is substantially clearer, less error-prone, less emotionally-heating, and more conducive to abstraction/reuse and statisticical analysis than the options previously available.
 
-Expedite and modernize the detailed sharing of one's worldview
-==========
+## Expedite and modernize the detailed sharing of one's worldview
+
 By acting as a global, flexible, and crowd-sourced tree of theses, communicating your view of the world becomes much faster. Instead of writing instance-specific text for each conversation, you can map your views once, and simply form a "remix" of your personal belief tree that is tailored for the conversation at hand.
 
 The conversation can then proceed from that point, with the reasoning behind your views now known and easily referencable in the background.
 
-Facilitate more careful examination of one's own belief system
-==========
-Engaging with a tool that operates on percentages, numbers, and weights makes self-accountability easier to achieve: by entering numbers, one is declaring to himself how much he considers his beliefs to be supported, and by what means. This allows him to then do tool-based analysis on his views, and more easily spot areas of possible bias or unjustified conclusions.
+## Facilitate more careful examination of one's own belief system
+
+Engaging with a tool that operates on percentages, numbers, and weights makes self-accountability easier to achieve: by entering numbers, one is declaring to himself how much he considers his beliefs to be supported, and by what means. This allows one to then do tool-based analysis on his views, and more easily spot areas of possible bias or unjustified conclusions.
 
 He can then proceed to look more closely at those areas, examining the pool of existing evidence and reasoning, and referencing statistics on how the rest of the population considers each piece along the way.
 `;
@@ -45,7 +45,15 @@ He can then proceed to look more closely at those areas, examining the pool of e
 class Home extends BaseComponent<{}, {}> {
 	render() {
 		return (
-			<VReactMarkdown source={pageText}/>
+			<div>
+				<VReactMarkdown containerProps={{style: {width: 960, margin: "0 auto", padding: "20px 50px", background: "rgba(0,0,0,.8)"}}} source={pageText}
+					renderers={{
+						Text: props=> {
+							return <span style={{color: "rgba(255,255,255,.7)"}}>{props.literal}</span>;
+						}
+					}}
+				/>
+			</div>
 		);
 	}
 }

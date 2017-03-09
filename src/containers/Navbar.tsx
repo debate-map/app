@@ -21,8 +21,8 @@ const avatarStyles = {
 
 import {connect} from "react-redux";
 import {firebase, helpers} from "react-redux-firebase";
-//import {BaseComponent} from "../Frame/UI/ReactGlobals";
-import {Component as BaseComponent} from "react";
+import {BaseComponent} from "../Frame/UI/ReactGlobals";
+//import {Component as BaseComponent} from "react";
 const {pathToJS} = helpers;
 
 // Props decorators
