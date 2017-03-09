@@ -1,11 +1,5 @@
-import React, {Component, PropTypes} from "react";
+import {Component, PropTypes} from "react";
 import {Link} from "react-router";
-import {
-	LIST_PATH,
-	ACCOUNT_PATH,
-	LOGIN_PATH,
-	SIGNUP_PATH
-} from "constants/paths";
 
 // Components
 import AppBar from "material-ui/AppBar";
@@ -14,7 +8,6 @@ import IconButton from "material-ui/IconButton";
 import MenuItem from "material-ui/MenuItem";
 import FlatButton from "material-ui/FlatButton";
 import Avatar from "material-ui/Avatar";
-import StockPhoto from "static/User.png";
 
 const originSettings = {horizontal: "right", vertical: "top"};
 const buttonStyle = {color: "white", textDecoration: "none"};
@@ -28,6 +21,8 @@ const avatarStyles = {
 
 import {connect} from "react-redux";
 import {firebase, helpers} from "react-redux-firebase";
+//import {BaseComponent} from "../Frame/UI/ReactGlobals";
+import {Component as BaseComponent} from "react";
 const {pathToJS} = helpers;
 
 // Props decorators
@@ -37,7 +32,7 @@ const {pathToJS} = helpers;
 	auth: pathToJS(firebase, "auth"),
 	account: pathToJS(firebase, "profile")
 }))
-export default class Navbar extends Component {
+export default class Navbar extends BaseComponent<{}, {}> {
 	static contextTypes = {
 		router: PropTypes.object.isRequired
 	};
@@ -46,10 +41,10 @@ export default class Navbar extends Component {
 		firebase: PropTypes.object.isRequired
 	};
 
-	handleLogout() {
+	/*handleLogout() {
 		this.props.firebase.logout();
 		this.context.router.push("/");
-	}
+	}*/
 
 	/*render() {
 		const {auth} = this.props;
@@ -103,60 +98,71 @@ export default class Navbar extends Component {
 
 	render() {
 		var {store} = this.context;
-		var {page} = store || {};
+		var {page} = store || {} as any;
 		return (
 			<div id="topMenu"
 					style={{
-						padding: "0 10px", background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
-						height: 40, borderRadius: 3, boxShadow: "3px 3px 7px rgba(0,0,0,.07)"
+						padding: "0 10px", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
+						//background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
+						background: "rgba(0,0,0,1)",
 					}}>
-				<a className="unselectable"
-						style={{
-							display: "inline-block", cursor: "pointer", verticalAlign: "middle",
-							lineHeight: "40px", color: "#FFF", padding: "0 15px", fontSize: 12,
-							textDecoration: "none", opacity: .9, fontSize: 20
-						}}
-						onClick={()=>{
-							// todo: navigate to home
-						}}>
-					Thesis Map
-				</a>
-				<NavBarButton page="" text="Home" active={page == ""}/>
-				<NavBarButton page="community" text="Community" active={page == "community"}/>
-				<NavBarButton page="forum" text="Forum" active={page == "forum"}/>
-				<NavBarButton page="definitions" text="Definitions" active={page == "definitions"}/>
-				<NavBarButton page="global-map" text="Global Map" active={page == "global-map"}/>
-				<NavBarButton page="discussion-maps" text="Discussion Maps" active={page == "discussion-maps"}/>
-				<NavBarButton page="personal-maps" text="Personal Maps" active={page == "personal-maps"}/>
-
-				<div className="unselectable quickMenuToggler transition500 opacity100OnHover"
-					style={{
-						float: "right", padding: 0, width: 40, height: 40,
-						background: "url('/Images/Buttons/User.png') no-repeat 5px 5px",
-						backgroundSize: 30, marginRight: -10, opacity: .75, cursor: "pointer"}}
-					onClick={()=>{}}/>
-				<div className="unselectable quickMenuToggler transition500 opacity100OnHover"
-					style={{
-						float: "right", padding: 0, width: 40, height: 40,
-						background: "url('/Images/Buttons/PageOptions.png') no-repeat 5px 5px",
-						backgroundSize: 30, marginRight: -5, opacity: .75, cursor: "pointer"}}
-					onClick={()=>{}}/>
+				<div style={{textAlign: "center"}}>
+					<span style={{display: "inline-block"}}>
+						<NavBarButton page="community" text="Community" active={page == "community"}/>
+						<NavBarButton page="forum" text="Forum" active={page == "forum"}/>
+						<NavBarButton page="terms" text="Terms" active={page == "terms"}/>
+						<a
+								style={{
+									display: "inline-block", margin: "0 auto", cursor: "pointer", verticalAlign: "middle",
+									lineHeight: "45px", textAlign: "center", color: "#FFF", padding: "0 15px",
+									textDecoration: "none", opacity: .9, fontSize: 23
+								}}
+								href="/"
+								onClick={e=> {
+									if (!e.ctrlKey)
+										e.preventDefault();
+									// todo
+								}}>
+							Debate Map
+						</a>
+						<NavBarButton page="global-map" text="Global Map" active={page == "global-map"}/>
+						<NavBarButton page="debate-maps" text="Debate Maps" active={page == "debate-maps"}/>
+						<NavBarButton page="personal-maps" text="Personal Maps" active={page == "personal-maps"}/>
+					</span>
+					<span style={{position: "absolute", right: 0}}>
+						<div className="unselectable quickMenuToggler transition500 opacity100OnHover"
+							style={{
+								display: "inline-block", padding: 0, width: 40, height: 40,
+								background: "url(/Images/Buttons/PageOptions.png) no-repeat 5px 5px",
+								backgroundSize: 30, opacity: .75, cursor: "pointer"}}
+							onClick={()=>{}}/>
+						<div className="unselectable quickMenuToggler transition500 opacity100OnHover"
+							style={{
+								display: "inline-block", padding: 0, width: 40, height: 40,
+								background: "url(/Images/Buttons/User.png) no-repeat 5px 5px",
+								backgroundSize: 30, opacity: .75, cursor: "pointer"}}
+							onClick={()=>{}}/>
+					</span>
+				</div>
 			</div>
 		);
 	}
 }
 
-class NavBarButton extends Component {
+class NavBarButton extends BaseComponent<{page, text, active}, {}> {
 	render() {
 		var {page, text, active} = this.props;
 		return (
 			<a className="unselectable"
 					style={{
 						display: "inline-block", cursor: "pointer", verticalAlign: "middle",
-						lineHeight: "40px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9
+						lineHeight: "45px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9
 					}}
-					onClick={()=> {
-						// todo: navigate to page
+					href={`/${page}`}
+					onClick={e=> {
+						if (!e.ctrlKey)
+							e.preventDefault();
+						// todo
 					}}>
 				{text}
 			</a>

@@ -1,3 +1,8 @@
+// special, early imports (eg type extensions)
+//import "./Frame/General/CE";
+
+var g = window as any;
+
 import ReactDOM from "react-dom";
 import createStore from "./store/createStore";
 
@@ -8,13 +13,16 @@ import createStore from "./store/createStore";
 // react-router-redux reducer under the routerKey "router" in src/routes/index.js,
 // so we need to provide a custom `selectLocationState` to inform
 // react-router-redux of its location.
-const initialState = window.___INITIAL_STATE__;
-const store = createStore(initialState);
+const initialState = (window as any).___INITIAL_STATE__;
+const store = createStore(initialState, {});
 
 // wrapper ui
 // ==========
 
-import React, {Component, PropTypes} from "react";
+//import {Component, PropTypes} from "react";
+import * as React from "react";
+g.React = React;
+import {Component as BaseComponent, PropTypes} from "react";
 import {browserHistory, Router} from "react-router";
 import {Provider} from "react-redux";
 
@@ -24,9 +32,10 @@ import getMuiTheme from "material-ui/styles/getMuiTheme";
 
 // Tap Plugin
 import injectTapEventPlugin from "react-tap-event-plugin";
+//import {BaseComponent} from "./Frame/UI/ReactGlobals";
 injectTapEventPlugin();
 
-export default class WrapperUI extends Component {
+export default class WrapperUI extends BaseComponent<{routes, store}, {}> {
 	static childContextTypes = {
 		muiTheme: PropTypes.object
 	};
@@ -56,24 +65,25 @@ export default class WrapperUI extends Component {
 
 const mountNode = document.getElementById("root");
 function RenderWrapper() {
-	try {
+	//try {
 		// dynamically require routes, so hot-reloading grabs new versions after each recompile
 		const routes = require("./RootUI").default(store);
 		ReactDOM.render(<WrapperUI store={store} routes={routes}/>, mountNode);
-	} catch (error) {
+	/*} catch (error) {
 		if (__DEV__) {
 			const RedBox = require("redbox-react").default;
 			ReactDOM.render(<RedBox error={error}/>, mountNode);
 			return;
 		}
 		throw error;
-	}
+	}*/
 }
 
 // developer tools setup
 // ==========
 
 // this code is excluded from production bundle
+declare var __DEV__, module;
 if (__DEV__) {
 	/*if (window.devToolsExtension)
 		window.devToolsExtension.open();*/

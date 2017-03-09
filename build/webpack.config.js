@@ -21,10 +21,11 @@ const webpackConfig = {
 	},
 	module: {}
 };
-// ------------------------------------
+
 // Entry Points
-// ------------------------------------
-const APP_ENTRY = paths.client("main.js");
+// ==========
+
+const APP_ENTRY = paths.client("main.tsx");
 
 webpackConfig.entry = {
 	app: __DEV__
@@ -33,18 +34,18 @@ webpackConfig.entry = {
 	vendor: config.compiler_vendors
 };
 
-// ------------------------------------
 // Bundle Output
-// ------------------------------------
+// ==========
+
 webpackConfig.output = {
 	filename: `[name].[${config.compiler_hash_type}].js`,
 	path: paths.dist(),
 	publicPath: config.compiler_public_path
 }
 
-// ------------------------------------
 // Plugins
-// ------------------------------------
+// ==========
+
 webpackConfig.plugins = [
 	// Plugin to show any webpack warnings and prevent tests from running
 	function () {
