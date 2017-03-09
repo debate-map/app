@@ -1,12 +1,6 @@
 // ClassExtensions.ts
 // ==========
 
-// special, early codes
-var g: any = window;
-g.g = g;
-Object.freeze = obj=>obj; // mwahahaha!! React can no longer freeze its objects, so we can do as we please
-Object.isFrozen = obj=>true;
-
 var {VDF} = require("../Serialization/VDF/VDF");
 var {List, Dictionary} = require("../Serialization/VDF/VDFExtras");
 var {VDFTypeInfo} = require("../Serialization/VDF/VDFTypeInfo");

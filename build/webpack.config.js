@@ -4,6 +4,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const config = require("../config");
 const debug = require("debug")("app:webpack:config");
+var path = require("path");
 
 const paths = config.utils_paths;
 const __DEV__ = config.globals.__DEV__;
@@ -17,7 +18,12 @@ const webpackConfig = {
 	devtool: config.compiler_devtool,
 	resolve: {
 		root: paths.client(),
-		extensions: ["", ".js", ".jsx", ".ts", ".tsx", ".json"]
+		extensions: ["", ".js", ".jsx", ".ts", ".tsx", ".json"],
+		fallback: [path.join(__dirname, "node_modules")]
+	},
+	// same issue, for loaders like babel
+	resolveLoader: {
+		fallback: [path.join(__dirname, "node_modules")]
 	},
 	module: {}
 };
