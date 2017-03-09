@@ -2,7 +2,9 @@
 import "./Frame/General/Start";
 import "./Frame/General/CE";
 
-var g = window as any;
+var JQuery = require("./Frame/JQuery/JQuery3.1.0");
+g.Extend({JQuery, jQuery: JQuery});
+g.$ = JQuery;
 
 import ReactDOM from "react-dom";
 import createStore from "./store/createStore";

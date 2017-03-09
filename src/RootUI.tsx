@@ -7,9 +7,10 @@ import LoginRoute from "./routes/Login";
 import SignupRoute from "./routes/Signup";
 import ProjectsRoute from "./routes/Projects";
 import AccountRoute from "./routes/Account";
-//import {BaseComponent} from "./Frame/UI/ReactGlobals";
-import {Component as BaseComponent} from "react";
-import ScrollView from "react-free-scrollbar";
+import {BaseComponent} from "./Frame/UI/ReactGlobals";
+//import {Component as BaseComponent} from "react";
+//import ScrollView from "react-free-scrollbar";
+var ScrollView = require("react-free-scrollbar").default;
 
 class RootUI extends BaseComponent<{}, {}> {
 	static propTypes = {
