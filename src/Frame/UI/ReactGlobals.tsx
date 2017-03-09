@@ -243,7 +243,7 @@ export class Row extends BaseComponent<any, any> {
 		var {style, height, children, ...otherProps} = this.props;
 		height = height != null ? height : (style||{}).height;
 		return (
-			<div {...otherProps} style={E({}, BasicStyles(this.props), style,
+			<div {...otherProps} style={E(BasicStyles(this.props), style,
 					//height != null ? {height} : {flex: 1})}>
 					height != null && {height})}>
 				{children}
