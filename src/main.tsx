@@ -1,5 +1,6 @@
-// special, early imports (eg type extensions)
-//import "./Frame/General/CE";
+// special, early imports
+import "./Frame/General/Start";
+import "./Frame/General/CE";
 
 var g = window as any;
 

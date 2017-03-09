@@ -9,6 +9,7 @@ import ProjectsRoute from "./routes/Projects";
 import AccountRoute from "./routes/Account";
 //import {BaseComponent} from "./Frame/UI/ReactGlobals";
 import {Component as BaseComponent} from "react";
+import ScrollView from "react-free-scrollbar";
 
 class RootUI extends BaseComponent<{}, {}> {
 	static propTypes = {
@@ -24,9 +25,9 @@ class RootUI extends BaseComponent<{}, {}> {
 				background: "url(/Images/Backgrounds/Nebula.jpg)", backgroundPosition: "center center", backgroundSize: "cover",
 			}}>
 				<Navbar/>
-				<div>
+				<ScrollView style={{height: "calc(100% - 45px)"}}>
 					{children}
-				</div>
+				</ScrollView>
 			</div>
 		);
 	}
