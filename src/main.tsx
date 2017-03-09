@@ -7,7 +7,8 @@ g.Extend({JQuery, jQuery: JQuery});
 g.$ = JQuery;
 
 import ReactDOM from "react-dom";
-import createStore from "./store/createStore";
+//import createStore from "./store/createStore";
+var createStore = require("./store/createStore").default;
 
 // store and history instantiation
 // ==========
@@ -24,7 +25,7 @@ const store = createStore(initialState, {});
 
 //import {Component, PropTypes} from "react";
 import * as React from "react";
-g.React = React;
+g.Extend({React});
 import {Component as BaseComponent, PropTypes} from "react";
 
 // Tap Plugin
