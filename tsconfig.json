@@ -25,6 +25,7 @@
         "noImplicitAny": false,
 		"experimentalDecorators": true
     },
+	"files": ["src/main.tsx"],
     "include": [
         "Typings/**/*.d.ts",
 		//"Typings/globals/**/*.d.ts",
@@ -40,10 +41,8 @@
 		"node_modules",
 
 		// temp
-		"node_modules_CustomExternal",
+		"node_modules_CustomExternal"
 		//"node_modules_CustomInternal",
-		"Packages/VDF/*.js",
-		"Packages/VDF/VDf.js"
 
         /*"Typings/main",
         "Typings/main.d.ts",
