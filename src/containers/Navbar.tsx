@@ -107,24 +107,17 @@ export default class Navbar extends BaseComponent<{}, {}> {
 						background: "rgba(0,0,0,1)",
 					}}>
 				<div style={{textAlign: "center"}}>
-					<span style={{display: "inline-block"}}>
+					<span style={{display: "inline-block", paddingLeft: 40}}>
 						<NavBarButton page="community" text="Community" active={page == "community"}/>
 						<NavBarButton page="forum" text="Forum" active={page == "forum"}/>
 						<NavBarButton page="terms" text="Terms" active={page == "terms"}/>
-						<a
-								style={{
-									display: "inline-block", margin: "0 auto", cursor: "pointer", verticalAlign: "middle",
-									lineHeight: "45px", textAlign: "center", color: "#FFF", padding: "0 15px",
-									textDecoration: "none", opacity: .9, fontSize: 23
-								}}
-								href="/"
-								onClick={e=> {
-									if (!e.ctrlKey)
-										e.preventDefault();
-									// todo
-								}}>
+						<Link to="/" style={{
+							display: "inline-block", margin: "0 auto", cursor: "pointer", verticalAlign: "middle",
+							lineHeight: "45px", textAlign: "center", color: "#FFF", padding: "0 15px",
+							textDecoration: "none", opacity: .9, fontSize: 23
+						}}>
 							Debate Map
-						</a>
+						</Link>
 						<NavBarButton page="global-map" text="Global Map" active={page == "global-map"}/>
 						<NavBarButton page="debate-maps" text="Debate Maps" active={page == "debate-maps"}/>
 						<NavBarButton page="personal-maps" text="Personal Maps" active={page == "personal-maps"}/>
@@ -153,19 +146,19 @@ class NavBarButton extends BaseComponent<{page, text, active}, {}> {
 	render() {
 		var {page, text, active} = this.props;
 		return (
-			<a className="unselectable"
+			<Link className="unselectable"
 					style={{
 						display: "inline-block", cursor: "pointer", verticalAlign: "middle",
 						lineHeight: "45px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9
 					}}
-					href={`/${page}`}
-					onClick={e=> {
+					to={page}
+					/*onClick={e=> {
 						if (!e.ctrlKey)
 							e.preventDefault();
 						// todo
-					}}>
+					}}*/>
 				{text}
-			</a>
+			</Link>
 		);
 	}
 }

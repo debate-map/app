@@ -26,61 +26,11 @@ const store = createStore(initialState, {});
 import * as React from "react";
 g.React = React;
 import {Component as BaseComponent, PropTypes} from "react";
-import {browserHistory, Router} from "react-router";
-import {Provider} from "react-redux";
-
-// Themeing/Styling
-import Theme from "./theme";
-import getMuiTheme from "material-ui/styles/getMuiTheme";
 
 // Tap Plugin
 import injectTapEventPlugin from "react-tap-event-plugin";
 //import {BaseComponent} from "./Frame/UI/ReactGlobals";
 injectTapEventPlugin();
-
-export default class WrapperUI extends BaseComponent<{routes, store}, {}> {
-	static childContextTypes = {
-		muiTheme: PropTypes.object
-	};
-	static propTypes = {
-		routes: PropTypes.object.isRequired,
-		store: PropTypes.object.isRequired
-	};
-
-	getChildContext() {
-		return {muiTheme: getMuiTheme(Theme)};
-	}
-
-	render() {
-		const {routes, store} = this.props;
-		return (
-			<Provider store={store}>
-				<div style={{height: "100%"}}>
-					<Router history={browserHistory} children={routes}/>
-				</div>
-			</Provider>
-		);
-	}
-}
-
-// render setup
-// ==========
-
-const mountNode = document.getElementById("root");
-function RenderWrapper() {
-	//try {
-		// dynamically require routes, so hot-reloading grabs new versions after each recompile
-		const routes = require("./RootUI").default(store);
-		ReactDOM.render(<WrapperUI store={store} routes={routes}/>, mountNode);
-	/*} catch (error) {
-		if (__DEV__) {
-			const RedBox = require("redbox-react").default;
-			ReactDOM.render(<RedBox error={error}/>, mountNode);
-			return;
-		}
-		throw error;
-	}*/
-}
 
 // developer tools setup
 // ==========
@@ -91,7 +41,7 @@ if (__DEV__) {
 	/*if (window.devToolsExtension)
 		window.devToolsExtension.open();*/
 	if (module.hot) {
-		// Setup hot module replacement
+		// setup hot module replacement
 		module.hot.accept("./RootUI", () => {
 			setTimeout(()=> {
 				ReactDOM.unmountComponentAtNode(mountNode);
@@ -104,4 +54,9 @@ if (__DEV__) {
 // go!
 // ==========
 
+const mountNode = document.getElementById("root");
+function RenderWrapper() {
+	let RootUI = require("./RootUI").default;
+	ReactDOM.render(<RootUI store={store}/>, mountNode);
+}
 RenderWrapper();

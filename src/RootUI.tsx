@@ -2,15 +2,55 @@
 import {PropTypes, Component} from "react";
 import Navbar from "./containers/Navbar";
 import "./styles/core.scss";
-import Home from "./routes/Home";
-import LoginRoute from "./routes/Login";
-import SignupRoute from "./routes/Signup";
-import ProjectsRoute from "./routes/Projects";
-import AccountRoute from "./routes/Account";
 import {BaseComponent} from "./Frame/UI/ReactGlobals";
 //import {Component as BaseComponent} from "react";
 //import ScrollView from "react-free-scrollbar";
 var ScrollView = require("react-free-scrollbar").default;
+
+import getMuiTheme from "material-ui/styles/getMuiTheme";
+// Themeing/Styling
+import Theme from "./theme";
+import {Route, Router, IndexRoute, browserHistory} from "react-router";
+import {Provider} from "react-redux";
+
+import Home from "./routes/Home";
+import GlobalMap from "./routes/GlobalMap";
+
+import LoginRoute from "./routes/Login";
+import SignupRoute from "./routes/Signup";
+import ProjectsRoute from "./routes/Projects";
+import AccountRoute from "./routes/Account";
+
+export default class RootUIWrapper extends BaseComponent<{store}, {}> {
+	static childContextTypes = {
+		muiTheme: PropTypes.object
+	};
+	
+	getChildContext() {
+		return {muiTheme: getMuiTheme(Theme)};
+	}
+
+	render() {
+		let {store} = this.props;
+		return (
+			<Provider store={store}>
+				<div style={{height: "100%"}}>
+					<Router history={browserHistory}>
+						<Route path="/" component={RootUI}>
+							<IndexRoute component={Home}/>
+							<Route path="community" component={()=><div/>}/>
+							<Route path="forum" component={()=><div/>}/>
+							<Route path="terms" component={()=><div/>}/>
+							<Route path="global-map" component={GlobalMap}/>
+							<Route path="debate-maps" component={()=><div/>}/>
+							<Route path="personal-maps" component={()=><div/>}/>
+						</Route>
+					</Router>
+				</div>
+			</Provider>
+		);
+	}
+}
 
 class RootUI extends BaseComponent<{}, {}> {
 	static propTypes = {
@@ -26,26 +66,12 @@ class RootUI extends BaseComponent<{}, {}> {
 				background: "url(/Images/Backgrounds/Nebula.jpg)", backgroundPosition: "center center", backgroundSize: "cover",
 			}}>
 				<Navbar/>
-				<ScrollView style={{height: "calc(100% - 45px)"}}>
+				<ScrollView style={{height: "calc(100% - 45px)"}} scrollVBarStyles={{width: 10}}>
 					{children}
 				</ScrollView>
 			</div>
 		);
 	}
-}
-
-export default function createRoutes(store) {
-	return {
-		path: "/",
-		component: RootUI,
-		indexRoute: Home,
-		childRoutes: [
-			AccountRoute(store),
-			LoginRoute(store),
-			SignupRoute(store),
-			ProjectsRoute(store)
-		]
-	};
 }
 
 /* Note: childRoutes can be chunked or otherwise loaded programmatically using getChildRoutes with the following signature:
