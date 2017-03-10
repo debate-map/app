@@ -1,7 +1,7 @@
 {
-  "projects": {
-    "stage": "thesismap",
-    "prod": "thesismap",
-    "default": "thesis-map-82262"
-  }
+	"projects": {
+		"default": "debate-map-dev",
+		"dev": "debate-map-dev",
+		"prod": "debate-map-prod"
+	}
 }
