@@ -5,6 +5,9 @@
 			displayName:"Stephen Wicklund"
 			email:"venryx@gmail.com"
 	maps:{^}
-		1234:
+		1234:{^}
 			name:"Global"
-	
+			type:"global"
+	nodes:{^}
+		1234:{^}
+			type:""
