@@ -1,0 +1,1 @@
+cmd /k firebase-bolt DatabaseRules_Stage1_BoltWithVersion.bolt --output DatabaseRules_Stage2_JSONWithVersion.json

@@ -1,0 +1,10 @@
+{^}
+	users:{^}
+		1234:{^}
+			avatarUrl:"https://lh6.googleusercontent.com/-CeOB1puP1U8/..."
+			displayName:"Stephen Wicklund"
+			email:"venryx@gmail.com"
+	maps:{^}
+		1234:
+			name:"Global"
+	

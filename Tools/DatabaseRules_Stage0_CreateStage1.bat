@@ -1,0 +1,1 @@
+cmd /k node DatabaseRules_Stage0_CreateStage1.js
