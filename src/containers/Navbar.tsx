@@ -22,7 +22,7 @@ const {pathToJS} = helpers;
 // actions
 // ==========
 
-export class ACTSetUserPanelOpen extends Action<{open: boolean}> {}
+export class ACTSetUserPanelOpen extends Action<boolean> {}
 
 // main
 // ==========
@@ -84,7 +84,7 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 								backgroundImage: `url(${auth ? auth.photoURL : "/Images/Buttons/User.png"})`, backgroundRepeat: "no-repeat",
 								backgroundPosition: "center center", backgroundSize: 30, opacity: .75, cursor: "pointer"}}
 							onClick={()=> {
-								dispatch(new ACTSetUserPanelOpen({open: !userPanelOpen}));
+								dispatch(new ACTSetUserPanelOpen(!userPanelOpen));
 							}}/>
 					</span>
 					<div style={{position: "absolute", zIndex: 11, right: 0}}>

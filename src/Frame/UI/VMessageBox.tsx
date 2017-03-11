@@ -10,12 +10,10 @@ export class ACTShowConfirmationBox extends Action<ConfirmationBoxOptions> {}
 export default class VMessageBox {
 	static ShowMessageBox(o: ConfirmationBoxOptions) {
 		o = {title: ""}.Extended2(o);
-		o["type"] = "something1";
 		store.dispatch(new ACTShowMessageBox(o));
 	}
 	static ShowConfirmationBox(o: ConfirmationBoxOptions) {
 		o = {title: ""}.Extended2(o);
-		o["type"] = "something2";
 		store.dispatch(new ACTShowConfirmationBox(o));
 	}
 }
