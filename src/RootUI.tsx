@@ -2,17 +2,16 @@
 import {PropTypes, Component} from "react";
 import Navbar from "./containers/Navbar";
 import "./styles/core.scss";
-import {BaseComponent} from "./Frame/UI/ReactGlobals";
+import {BaseComponent, AddGlobalStyle} from "./Frame/UI/ReactGlobals";
 //import {Component as BaseComponent} from "react";
 //import ScrollView from "react-free-scrollbar";
 var ScrollView = require("react-free-scrollbar").default;
-
 import getMuiTheme from "material-ui/styles/getMuiTheme";
 // Themeing/Styling
 import Theme from "./theme";
 import {BrowserRouter as Router, Route, browserHistory} from "react-router-dom";
-import {Provider} from "react-redux";
-
+import {Provider, connect} from "react-redux";
+import Modal from "react-modal";
 import GlobalUI from "./routes/Global";
 
 import LoginRoute from "./routes/Login";
@@ -22,7 +21,10 @@ import AccountRoute from "./routes/Account";
 import MoreUI from "./routes/More";
 import AdminUI from "./routes/More/Admin";
 import RootUI2 from "./routes/Root";
-import {GetUrlPath} from "./Frame/General/Globals_Free";
+import {GetUrlPath, E} from "./Frame/General/Globals_Free";
+import {MainState, RootState} from "./store/reducers";
+import {MessageBoxOptions, ConfirmationBoxOptions, ACTShowMessageBox, ACTShowConfirmationBox} from "./Frame/UI/VMessageBox";
+import Button from "./Frame/ReactComponents/Button";
 
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	static childContextTypes = {
@@ -44,6 +46,7 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 		);
 	}
 }
+
 class RootUI extends BaseComponent<{}, {}> {
 	render() {
 		let pages = ["forum", "community", "search", "more", "terms", "personal", "debates", "global"];
@@ -53,6 +56,7 @@ class RootUI extends BaseComponent<{}, {}> {
 				//background: "rgba(0,0,0,1)",
 				background: "url(/Images/Backgrounds/Nebula.jpg)", backgroundPosition: "center center", backgroundSize: "cover",
 			}}>
+				<OverlayUI/>
 				<Navbar/>
 				<div style={{position: "relative", flex: "1 1 100%", overflow: "hidden"}}>
 					{/*<Route exact path="/" component={RootUI2}/>
@@ -70,6 +74,72 @@ class RootUI extends BaseComponent<{}, {}> {
 					<Route path="/global" component={GlobalUI}/>
 				</div>
 			</div>
+		);
+	}
+}
+
+@(connect((state: RootState)=>({
+	openMessageBoxOptions: state.main.openMessageBoxOptions,
+	openConfirmationBoxOptions: state.main.openConfirmationBoxOptions,
+})) as any)
+class OverlayUI extends BaseComponent<{openMessageBoxOptions?: MessageBoxOptions, openConfirmationBoxOptions?: ConfirmationBoxOptions}, {}> {
+	render() {
+		let {openMessageBoxOptions, openConfirmationBoxOptions} = this.props;
+		return (
+			<div style={{position: "absolute"}}>
+				{openMessageBoxOptions && <ModalUI type="message" options={openMessageBoxOptions}/>}
+				{openConfirmationBoxOptions && <ModalUI type="confirmation" options={openConfirmationBoxOptions}/>}
+			</div>
+		);
+	}
+}
+
+
+AddGlobalStyle(`
+.ReactModal__Overlay { z-index: 1; }
+`);
+
+let styles = {
+	overlay: {position: "fixed", left: 0, right: 0, top: 0, bottom: 0, backgroundColor: "rgba(0,0,0,.5)"},
+	content: {
+		position: "absolute", overflow: "auto",
+		//top: "40px", left: "40px", right: "40px", bottom: "40px",
+		left: "50%", right: "initial", top: "50%", bottom: "initial", transform: "translate(-50%, -50%)",
+		background: "rgba(0,0,0,.8)", border: "1px solid #555", WebkitOverflowScrolling: "touch", borderRadius: "4px", outline: "none", padding: "20px"
+	}
+};
+class ModalUI extends BaseComponent<{type: "message" | "confirmation", options: MessageBoxOptions | ConfirmationBoxOptions}, {}> {
+	render() {
+		let {type, options} = this.props;
+		return (
+			<Modal isOpen={true} contentLabel={options.title || ""} style={E(styles, options.style)}
+					onRequestClose={()=> {
+						if (options.onCancel && options.onCancel() === false) return;
+						if (type == "message")
+							store.dispatch(new ACTShowMessageBox(null));
+						else
+							store.dispatch(new ACTShowConfirmationBox(null));
+					}}>
+				<h1>{options.title}</h1>
+				<p>{options.message}</p>
+				{type == "message" &&
+					<Button text="OK"
+						onClick={()=> {
+							if (options.onOK && options.onOK() === false) return;
+							store.dispatch(new ACTShowMessageBox(null));
+						}}/>}
+				{type == "confirmation" &&
+					<div>
+						<Button text="OK" onClick={()=> {
+							if (options.onOK && options.onOK() === false) return;
+							store.dispatch(new ACTShowConfirmationBox(null));
+						}}/>
+						<Button text="Cancel" onClick={()=> {
+							if (options.onCancel && options.onCancel() === false) return;
+							store.dispatch(new ACTShowConfirmationBox(null));
+						}}/>
+					</div>}
+			</Modal>
 		);
 	}
 }
