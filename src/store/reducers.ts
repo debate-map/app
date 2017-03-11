@@ -34,11 +34,10 @@ export class MainState {
 function MainReducer(state = {}, action: Action<any>) {
 	//case SET_USER_PANEL_OPEN: return {...state, userPanelOpen: action.payload};
 	if (action.Is(ACTSetUserPanelOpen))
-		//return {...state, userPanelOpen: action.payload};
-		return {...state, userPanelOpen: action.open};
+		return {...state, userPanelOpen: action.payload};
 	if (action.Is(ACTShowMessageBox))
-		return {...state, openMessageBoxOptions: action};
+		return {...state, openMessageBoxOptions: action.payload};
 	if (action.Is(ACTShowConfirmationBox))
-		return {...state, openConfirmationBoxOptions: action};
+		return {...state, openConfirmationBoxOptions: action.payload};
 	return state;
 }
