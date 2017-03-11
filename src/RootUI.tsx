@@ -10,16 +10,18 @@ var ScrollView = require("react-free-scrollbar").default;
 import getMuiTheme from "material-ui/styles/getMuiTheme";
 // Themeing/Styling
 import Theme from "./theme";
-import {Route, Router, IndexRoute, browserHistory} from "react-router";
+import {BrowserRouter as Router, Route, browserHistory} from "react-router-dom";
 import {Provider} from "react-redux";
 
-import Home from "./routes/Home";
 import GlobalMap from "./routes/GlobalMap";
 
 import LoginRoute from "./routes/Login";
 import SignupRoute from "./routes/Signup";
 import ProjectsRoute from "./routes/Projects";
 import AccountRoute from "./routes/Account";
+import MoreUI from "./routes/More";
+import AdminUI from "./routes/More/Admin";
+import Home from "./routes/Root";
 
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	static childContextTypes = {
@@ -34,41 +36,35 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 		let {store} = this.props;
 		return (
 			<Provider store={store}>
-				<div style={{height: "100%"}}>
-					<Router history={browserHistory}>
-						<Route path="/" component={RootUI}>
-							<IndexRoute component={Home}/>
-							<Route path="community" component={()=><div/>}/>
-							<Route path="forum" component={()=><div/>}/>
-							<Route path="terms" component={()=><div/>}/>
-							<Route path="global-map" component={GlobalMap}/>
-							<Route path="debate-maps" component={()=><div/>}/>
-							<Route path="personal-maps" component={()=><div/>}/>
-						</Route>
-					</Router>
-				</div>
+				<Router>
+					<RootUI/>
+				</Router>
 			</Provider>
 		);
 	}
 }
-
 class RootUI extends BaseComponent<{}, {}> {
-	static propTypes = {
-		children: PropTypes.element.isRequired
-	};
-
 	render() {
-		var {children} = this.props;
 		return (
 			<div style={{
-				height: "100%",
+				height: "100%", display: "flex", flexDirection: "column",
 				//background: "rgba(0,0,0,1)",
 				background: "url(/Images/Backgrounds/Nebula.jpg)", backgroundPosition: "center center", backgroundSize: "cover",
 			}}>
 				<Navbar/>
-				<ScrollView style={{height: "calc(100% - 45px)"}} scrollVBarStyles={{width: 10}}>
-					{children}
-				</ScrollView>
+				<div style={{position: "relative", flex: "1 1 100%", overflow: "hidden"}}>
+					<Route exact path="/" component={Home}/>
+
+					<Route path="/forum" component={()=><div/>}/>
+					<Route path="/community" component={()=><div/>}/>
+					<Route path="/search" component={()=><div/>}/>
+					<Route path="/more" component={MoreUI}/>
+
+					<Route path="/terms" component={()=><div/>}/>
+					<Route path="/personal" component={()=><div/>}/>
+					<Route path="/debates" component={()=><div/>}/>
+					<Route path="/global" component={GlobalMap}/>
+				</div>
 			</div>
 		);
 	}

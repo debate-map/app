@@ -1,13 +1,14 @@
 import {applyMiddleware, compose, createStore} from "redux";
 import thunk from "redux-thunk";
 import makeRootReducer from "./reducers";
-import {browserHistory} from "react-router";
+import {createBrowserHistory} from "react-router/node_modules/history";
 import {reduxFirebase, getFirebase} from "react-redux-firebase";
 import {firebase as fbConfig, reduxFirebase as reduxConfig} from "../config";
 //import {version} from "../../package.json";
 let {version} = require("../../package.json");
 import {updateLocation} from "./location";
 
+let browserHistory = createBrowserHistory();
 
 export default function(initialState = {}, history) {
 	// Window Vars Config

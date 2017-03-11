@@ -172,6 +172,8 @@ export interface BaseProps {
 	plr?; ptb?;
 
 	tabLabel?: string; active?: boolean;
+
+	page?; match?;
 }
 export function BasicStyles(props) {
 	var result: any = {};
@@ -344,3 +346,5 @@ export function Classes(...entries: (string | {[s: string]: boolean})[]) {
 /*export function PreRadium<T>(_: T, wrapperClass: Function): T {
 	return (wrapperClass as any).DecoratedComponent;
 }*/
+
+export type RouteProps = {match};

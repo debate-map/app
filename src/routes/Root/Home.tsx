@@ -1,7 +1,8 @@
-import {Component} from "react" // eslint-disable-line
-import {BaseComponent} from "../Frame/UI/ReactGlobals";
-//import {Component as BaseComponent} from "react";
-import VReactMarkdown from "../Frame/ReactComponents/VReactMarkdown";
+import {SubNavBarButton} from "../@Shared/SubNavbar";
+import SubNavbar from "../@Shared/SubNavbar";
+import {BaseComponent, BaseProps} from "../../Frame/UI/ReactGlobals";
+import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
+var ScrollView = require("react-free-scrollbar").default;
 
 let pageText = `
 The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced (like Wikipedia), and the software is open-sourced (under MIT), promoting collaborative development and increased accountability. [if the project management falters or becomes biased, it's in the power of the users to "fork" the project themselves and launch their own version]
@@ -42,18 +43,22 @@ Engaging with a tool that operates on percentages, numbers, and weights makes se
 He can then proceed to look more closely at those areas, examining the pool of existing evidence and reasoning, and referencing statistics on how the rest of the population considers each piece along the way.
 `;
 
-export default class Home extends BaseComponent<{}, {}> {
+export default class HomeUI extends BaseComponent<{} & BaseProps, {}> {
 	render() {
+		let {page, match} = this.props;
 		return (
-			<div>
-				<VReactMarkdown containerProps={{style: {width: 960, margin: "0 auto", padding: "20px 50px", background: "rgba(0,0,0,.8)"}}} source={pageText}
-					renderers={{
-						Text: props=> {
-							return <span style={{color: "rgba(255,255,255,.7)"}}>{props.literal}</span>;
-						}
-					}}
-				/>
-			</div>
+			<VReactMarkdown source={pageText}
+				containerProps={{
+					style: {
+						width: 960, margin: "100px auto", padding: "20px 50px", background: "rgba(0,0,0,.75)", borderRadius: 10,
+					}
+				}}
+				renderers={{
+					Text: props=> {
+						return <span style={{color: "rgba(255,255,255,.7)"}}>{props.literal}</span>;
+					}
+				}}
+			/>
 		);
 	}
 }
