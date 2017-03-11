@@ -12,7 +12,7 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 					VMessageBox.ShowConfirmationBox({
 						title: "Reset database?", message: "This will clear all existing data.",
 						onOK: ()=> {
-							
+							alert("Resetting database...");
 						}
 					});
 				}}/>

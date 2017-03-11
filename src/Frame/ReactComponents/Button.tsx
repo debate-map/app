@@ -34,11 +34,11 @@ export default class Button extends BaseComponent
 	    var {enabled, text, title, className, style, size, iconSize, height,
 			hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged} = this.props;
 		
-		var padding = "5 15";
+		var padding = "5px 15px";
 		if (height) {
 			var baseHeight = 20;
 			var heightDifPerSide = (height - baseHeight) / 2;
-			padding = (`${heightDifPerSide} 15`);
+			padding = (`${heightDifPerSide}px 15px`);
 		}
 
 	    return (
@@ -47,7 +47,7 @@ export default class Button extends BaseComponent
 				style={[
 					BasicStyles(this.props),
 					styles.root, style,
-					{padding: padding},
+					{padding},
 					!enabled && styles.root_disabled,
 					hasCheckbox && styles.root_hasCheckbox,
 					size && {padding: 0, width: size, height: size,
