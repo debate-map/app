@@ -174,6 +174,7 @@ export interface BaseProps {
 	tabLabel?: string; active?: boolean;
 
 	page?; match?;
+	firebase?: firebase.Database & FirebaseDatabase_Extensions;
 }
 export function BasicStyles(props) {
 	var result: any = {};

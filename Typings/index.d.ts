@@ -14,3 +14,5 @@ declare function require(name: string): any;
 
 // custom
 declare var g;
+
+declare type voidy = void | Promise<void>;
