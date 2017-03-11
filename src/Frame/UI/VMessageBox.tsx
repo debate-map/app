@@ -1,13 +1,12 @@
 import Action from "../General/Action";
-var s = VMessageBox;
 
-export type MessageBoxOptions = {title?: string, message: string, onOK: ()=>boolean | void, onCancel?: ()=>boolean | void, style?: {overlay?, content?}};
+export type MessageBoxOptions = {title?: string, message: string, onOK?: ()=>boolean | voidy, onCancel?: ()=>boolean | voidy, style?: {overlay?, content?}};
 export class ACTShowMessageBox extends Action<MessageBoxOptions> {}
 
-export type ConfirmationBoxOptions = {title?: string, message: string, onOK: ()=>boolean | void, onCancel?: ()=>boolean | void, style?: {overlay?, content?}};
+export type ConfirmationBoxOptions = {title?: string, message: string, onOK?: ()=>boolean | voidy, onCancel?: ()=>boolean | voidy, style?: {overlay?, content?}};
 export class ACTShowConfirmationBox extends Action<ConfirmationBoxOptions> {}
 
-export default class VMessageBox {
+/*export default class VMessageBox {
 	static ShowMessageBox(o: ConfirmationBoxOptions) {
 		o = {title: ""}.Extended2(o);
 		store.dispatch(new ACTShowMessageBox(o));
@@ -16,4 +15,13 @@ export default class VMessageBox {
 		o = {title: ""}.Extended2(o);
 		store.dispatch(new ACTShowConfirmationBox(o));
 	}
+}*/
+
+export function ShowMessageBox(o: ConfirmationBoxOptions) {
+	o = {title: ""}.Extended2(o);
+	store.dispatch(new ACTShowMessageBox(o));
+}
+export function ShowConfirmationBox(o: ConfirmationBoxOptions) {
+	o = {title: ""}.Extended2(o);
+	store.dispatch(new ACTShowConfirmationBox(o));
 }
