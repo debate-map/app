@@ -21,7 +21,8 @@ import ProjectsRoute from "./routes/Projects";
 import AccountRoute from "./routes/Account";
 import MoreUI from "./routes/More";
 import AdminUI from "./routes/More/Admin";
-import Home from "./routes/Root";
+import RootUI2 from "./routes/Root";
+import {GetUrlPath} from "./Frame/General/Globals_Free";
 
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	static childContextTypes = {
@@ -45,6 +46,7 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 }
 class RootUI extends BaseComponent<{}, {}> {
 	render() {
+		let pages = ["forum", "community", "search", "more", "terms", "personal", "debates", "global"];
 		return (
 			<div style={{
 				height: "100%", display: "flex", flexDirection: "column",
@@ -53,7 +55,9 @@ class RootUI extends BaseComponent<{}, {}> {
 			}}>
 				<Navbar/>
 				<div style={{position: "relative", flex: "1 1 100%", overflow: "hidden"}}>
-					<Route exact path="/" component={Home}/>
+					{/*<Route exact path="/" component={RootUI2}/>
+					<Route exact path="/about" component={RootUI2}/>*/}
+					{!GetUrlPath().StartsWithAny(...pages) && <RootUI2/>}
 
 					<Route path="/forum" component={()=><div/>}/>
 					<Route path="/community" component={()=><div/>}/>

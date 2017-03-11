@@ -326,6 +326,7 @@ Function.prototype._AddFunction_Inline = function RunThenReturn(args___) { this.
 // Number
 // ==========
 
+interface Number { IfN1Then<T>(valIfSelfIsNeg1: T): T; }
 Number.prototype._AddFunction_Inline = function IfN1Then(valIfSelfIsNeg1) {
 	return this != -1 ? this : valIfSelfIsNeg1;
 };
@@ -387,10 +388,6 @@ String.prototype.TrimEnd = function(chars___) {
 	return result;
 };
 
-String.prototype._AddFunction_Inline = function startsWith(str) { return this.indexOf(str) == 0; }; //return this.lastIndexOf(str, 0) === 0; };
-String.prototype._AddFunction_Inline = function endsWith(endStr) {
-	return this.indexOf(endStr, this.length - endStr.length) != -1;
-};
 interface String { contains: (str)=>boolean; }
 String.prototype._AddFunction_Inline = function contains(str, /*;optional:*/ startIndex) { return -1 !== String.prototype.indexOf.call(this, str, startIndex); };
 String.prototype._AddFunction_Inline = function hashCode() {
@@ -427,8 +424,7 @@ String.prototype._AddFunction_Inline = function Matches(strOrRegex) {
 		result.push(match);
 	return result;
 };
-/*String.prototype._AddFunction_Inline = function matches_group(regex, /*o:*#/ groupIndex)
-{
+/*String.prototype._AddFunction_Inline = function matches_group(regex, /*o:*#/ groupIndex) {
 	if (!regex.global)
 		throw new Error("Regex must have the 'g' flag added. (otherwise an infinite loop occurs)");
 
@@ -439,18 +435,11 @@ String.prototype._AddFunction_Inline = function Matches(strOrRegex) {
 		matches.push(match[groupIndex]);
 	return matches;
 };*/
-/*String.prototype._AddFunction_Inline = function lastIndexOf(str)
-{
-    for (var i = this.length - 1; i >= 0; i--)
-        if (this.substr(i).startsWith(str))
-            return i;
-    return -1;
-};*/
-String.prototype._AddFunction_Inline = function IndexOf_X(x, str) // (0-based)
-{
+interface String { IndexOf_X: (str: string, indexX: number)=>number; }
+/** indexX is 0-based */
+String.prototype._AddFunction_Inline = function IndexOf_X(str: string, indexX: number) {
 	var currentPos = -1;
-	for (var i = 0; i <= x; i++)
-	{
+	for (var i = 0; i <= indexX; i++) {
 		var subIndex = this.indexOf(str, currentPos + 1);
 		if (subIndex == -1)
 			return -1; // no such xth index
@@ -458,11 +447,11 @@ String.prototype._AddFunction_Inline = function IndexOf_X(x, str) // (0-based)
 	}
 	return currentPos;
 };
-String.prototype._AddFunction_Inline = function IndexOf_XFromLast(x, str) // (0-based)
-{
+interface String { IndexOf_X: (str: string, indexFromLastX: number)=>number; }
+/** indexFromLastX is 0-based */
+String.prototype._AddFunction_Inline = function IndexOf_XFromLast(str: string, indexFromLastX: number) {
 	var currentPos = (this.length - str.length) + 1; // index just after the last-index-where-match-could-occur
-	for (var i = 0; i <= x; i++)
-	{
+	for (var i = 0; i <= indexFromLastX; i++) {
 		var subIndex = this.lastIndexOf(str, currentPos - 1);
 		if (subIndex == -1)
 			return -1; // no such xth index
@@ -470,36 +459,39 @@ String.prototype._AddFunction_Inline = function IndexOf_XFromLast(x, str) // (0-
 	}
 	return currentPos;
 };
-String.prototype._AddFunction_Inline = function indexOfAny() {
-    var args = arguments[0] instanceof Array ? args[0] : arguments;
-
+interface String { IndexOfAny: (...strings: string[])=>number; }
+String.prototype._AddFunction_Inline = function IndexOfAny(this: string, ...strings: string[]) {
 	var lowestIndex = -1;
-	for (var i = 0; i < args.length; i++) {
-		var indexOfChar = this.indexOf(args[i]);
+	for (let str of strings) {
+		var indexOfChar = this.indexOf(str);
 		if (indexOfChar != -1 && (indexOfChar < lowestIndex || lowestIndex == -1))
 			lowestIndex = indexOfChar;
 	}
 	return lowestIndex;
 };
-String.prototype._AddFunction_Inline = function lastIndexOfAny() {
-    var args = arguments[0] instanceof Array ? args[0] : arguments;
-
+interface String { LastIndexOfAny: (...strings: string[])=>number; }
+String.prototype._AddFunction_Inline = function LastIndexOfAny(this: string, ...strings: string[]) {
 	var highestIndex = -1;
-	for (var i = 0; i < args.length; i++) {
-		var indexOfChar = this.lastIndexOf(args[i]);
+	for (let str of strings) {
+		var indexOfChar = this.lastIndexOf(str);
 		if (indexOfChar > highestIndex)
 			highestIndex = indexOfChar;
 	}
 	return highestIndex;
 };
-String.prototype._AddFunction_Inline = function startsWithAny() { return this.indexOfAny.apply(this, arguments) == 0; };
-String.prototype._AddFunction_Inline = function containsAny() {
-	for (var i = 0; i < arguments.length; i++)
-		if (this.contains(arguments[i]))
-			return true;
-	return false;
+interface String { StartsWithAny: (...strings: string[])=>boolean; }
+String.prototype._AddFunction_Inline = function StartsWithAny(this: string, ...strings: string[]) {
+	return strings.Any(str=>this.startsWith(str));
 };
-String.prototype._AddFunction_Inline = function splitByAny() {
+interface String { EndsWithAny: (...strings: string[])=>boolean; }
+String.prototype._AddFunction_Inline = function EndsWithAny(this: string, ...strings: string[]) {
+	return strings.Any(str=>this.endsWith(str));
+};
+interface String { ContainsAny: (...strings: string[])=>boolean; }
+String.prototype._AddFunction_Inline = function ContainsAny(this: string, ...strings: string[]) {
+	return strings.Any(str=>this.contains(str));
+};
+String.prototype._AddFunction_Inline = function SplitByAny() {
     var args = arguments;
 	if (args[0] instanceof Array)
 		args = args[0];
@@ -512,14 +504,16 @@ String.prototype._AddFunction_Inline = function splitByAny() {
 	return this.split(splitStr);
 };
 interface String { SplitAt: (index: number, includeCharAtIndex?)=>[string, string]; }
-String.prototype.SplitAt = function(index: number, includeCharAtIndex = true) {
+String.prototype.SplitAt = function(index: number, includeCharAtIndex = false) {
 	if (index == -1) // if no split-index, pass source-string as part2 (makes more sense for paths and such)
 		return ["", this];
 	let part1 = this.substr(0, index);
 	let part2 = includeCharAtIndex ? this.substr(index) : this.substr(index + 1);
 	return [part1, part2];
 };
-String.prototype._AddFunction_Inline = function splice(index, removeCount, insert) { return this.slice(0, index) + insert + this.slice(index + Math.abs(removeCount)); };
+String.prototype._AddFunction_Inline = function Splice(index, removeCount, insert) {
+	return this.slice(0, index) + insert + this.slice(index + Math.abs(removeCount));
+};
 String.prototype._AddFunction_Inline = function Indent(indentCount) {
     var indentStr = "\t".repeat(indentCount);
     return this.replace(/^|(\n)/g, "$1" + indentStr);

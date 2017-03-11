@@ -60,10 +60,10 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 					}}>
 				<div style={{textAlign: "center"}}>
 					<span style={{display: "inline-block", paddingLeft: 5}}>
-						<NavBarButton to="forum" text="Forum"/>
-						<NavBarButton to="community" text="Community"/>
-						<NavBarButton to="search" text="Search"/>
-						<NavBarButton to="more" text="More"/>
+						<NavBarButton to="/forum" text="Forum"/>
+						<NavBarButton to="/community" text="Community"/>
+						<NavBarButton to="/search" text="Search"/>
+						<NavBarButton to="/more" text="More"/>
 						<Link to="/" style={{
 							display: "inline-block", margin: "0 auto", cursor: "pointer", verticalAlign: "middle",
 							lineHeight: "45px", textAlign: "center", color: "#FFF", padding: "0 15px",
@@ -71,10 +71,10 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 						}}>
 							Debate Map
 						</Link>
-						<NavBarButton to="terms" text="Terms"/>
-						<NavBarButton to="personal" text="Personal"/>
-						<NavBarButton to="debates" text="Debates"/>
-						<NavBarButton to="global" text="Global"/>
+						<NavBarButton to="/terms" text="Terms"/>
+						<NavBarButton to="/personal" text="Personal"/>
+						<NavBarButton to="/debates" text="Debates"/>
+						<NavBarButton to="/global" text="Global"/>
 					</span>
 					<span style={{position: "absolute", right: 0}}>
 						<div className="transition500 opacity100OnHover"
