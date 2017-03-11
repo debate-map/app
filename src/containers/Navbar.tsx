@@ -16,18 +16,13 @@ import {BaseComponent, RowLR, BaseProps} from "../Frame/UI/ReactGlobals";
 import {Debugger} from "../Frame/General/Globals_Free";
 import Button from "../Frame/ReactComponents/Button";
 import TextInput from "../Frame/ReactComponents/TextInput";
+import Action from "../Frame/General/Action";
 const {pathToJS} = helpers;
 
 // actions
 // ==========
 
-export var SET_USER_PANEL_OPEN = "SET_USER_PANEL_OPEN";
-export function SetUserPanelOpen(open) {
-	return {
-		type: SET_USER_PANEL_OPEN,
-		payload: open
-	};
-}
+export class ACTSetUserPanelOpen extends Action<{open: boolean}> {}
 
 // main
 // ==========
@@ -63,7 +58,7 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 						<NavBarButton to="/forum" text="Forum"/>
 						<NavBarButton to="/community" text="Community"/>
 						<NavBarButton to="/search" text="Search"/>
-						<NavBarButton to="/more" text="More"/>
+						<NavBarButton to="/more/admin" text="More"/>
 						<Link to="/" style={{
 							display: "inline-block", margin: "0 auto", cursor: "pointer", verticalAlign: "middle",
 							lineHeight: "45px", textAlign: "center", color: "#FFF", padding: "0 15px",
@@ -74,7 +69,7 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 						<NavBarButton to="/terms" text="Terms"/>
 						<NavBarButton to="/personal" text="Personal"/>
 						<NavBarButton to="/debates" text="Debates"/>
-						<NavBarButton to="/global" text="Global"/>
+						<NavBarButton to="/global/map" text="Global"/>
 					</span>
 					<span style={{position: "absolute", right: 0}}>
 						<div className="transition500 opacity100OnHover"
@@ -89,7 +84,7 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 								backgroundImage: `url(${auth ? auth.photoURL : "/Images/Buttons/User.png"})`, backgroundRepeat: "no-repeat",
 								backgroundPosition: "center center", backgroundSize: 30, opacity: .75, cursor: "pointer"}}
 							onClick={()=> {
-								dispatch(SetUserPanelOpen(!userPanelOpen));
+								dispatch(new ACTSetUserPanelOpen({open: !userPanelOpen}));
 							}}/>
 					</span>
 					<div style={{position: "absolute", zIndex: 11, right: 0}}>

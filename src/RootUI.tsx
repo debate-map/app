@@ -13,7 +13,7 @@ import Theme from "./theme";
 import {BrowserRouter as Router, Route, browserHistory} from "react-router-dom";
 import {Provider} from "react-redux";
 
-import GlobalMap from "./routes/GlobalMap";
+import GlobalUI from "./routes/Global";
 
 import LoginRoute from "./routes/Login";
 import SignupRoute from "./routes/Signup";
@@ -67,7 +67,7 @@ class RootUI extends BaseComponent<{}, {}> {
 					<Route path="/terms" component={()=><div/>}/>
 					<Route path="/personal" component={()=><div/>}/>
 					<Route path="/debates" component={()=><div/>}/>
-					<Route path="/global" component={GlobalMap}/>
+					<Route path="/global" component={GlobalUI}/>
 				</div>
 			</div>
 		);
