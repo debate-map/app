@@ -1,6 +1,6 @@
 import {applyMiddleware, compose, createStore} from "redux";
 import thunk from "redux-thunk";
-import makeRootReducer from "./reducers";
+import {MakeRootReducer} from "./reducers";
 import {createBrowserHistory} from "react-router/node_modules/history";
 import {reduxFirebase, getFirebase} from "react-redux-firebase";
 import {firebase as fbConfig, reduxFirebase as reduxConfig} from "../config";
@@ -35,7 +35,7 @@ export default function(initialState = {}, history) {
 	// Store Instantiation and HMR Setup
 	// ==========
 	const store = createStore(
-		makeRootReducer(),
+		MakeRootReducer(),
 		initialState,
 		(compose as any)(
 			applyMiddleware(...middleware),

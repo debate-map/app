@@ -4,11 +4,13 @@
 // general
 // ==========
 
-declare var g;
+// system
 declare var O;
 declare var React;
 declare var __DEV__;
 declare var module;
-
 //declare var global: __React.GlobalStatic
 declare function require(name: string): any;
+
+// custom
+declare var g;

@@ -234,6 +234,10 @@ Object.prototype._AddFunction_Inline = function Extended(x) {
 	}
     return result;
 };
+interface Object { Extended2<T>(this, x: T): T; }
+Object.prototype._AddFunction_Inline = function Extended2(x) {
+	return this.Extended(x);
+};
 //Object.prototype._AddFunction_Inline = function E(x) { return this.Extended(x); };
 
 interface Object { Excluding(...propNames: string[]): Object; }

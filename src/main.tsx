@@ -19,6 +19,10 @@ var createStore = require("./store/createStore").default;
 // react-router-redux of its location.
 const initialState = (window as any).___INITIAL_STATE__;
 const store = createStore(initialState, {});
+g.Extend({store});
+declare global {
+	var store: Store<any>;
+}
 
 // wrapper ui
 // ==========
@@ -31,6 +35,7 @@ import {Component as BaseComponent, PropTypes} from "react";
 // Tap Plugin
 import injectTapEventPlugin from "react-tap-event-plugin";
 //import {BaseComponent} from "./Frame/UI/ReactGlobals";
+import {Store} from "redux";
 injectTapEventPlugin();
 
 // developer tools setup
