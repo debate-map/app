@@ -1,6 +1,7 @@
+import {styles, colors} from "../Frame/UI/GlobalStyles";
 import {Dispatch} from "redux";
 import {Component, PropTypes} from "react";
-import {Link} from "react-router";
+import {Link} from "react-router-dom";
 import AppBar from "material-ui/AppBar";
 import IconMenu from "material-ui/IconMenu";
 import IconButton from "material-ui/IconButton";
@@ -11,7 +12,7 @@ import GoogleButton from 'react-google-button';
 
 import {connect} from "react-redux";
 import {firebaseConnect, helpers} from "react-redux-firebase";
-import {BaseComponent, RowLR} from "../Frame/UI/ReactGlobals";
+import {BaseComponent, RowLR, BaseProps} from "../Frame/UI/ReactGlobals";
 import {Debugger} from "../Frame/General/Globals_Free";
 import Button from "../Frame/ReactComponents/Button";
 import TextInput from "../Frame/ReactComponents/TextInput";
@@ -53,15 +54,16 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 		return (
 			<div id="topMenu"
 					style={{
-						padding: "0 10px", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
+						padding: "0 10px", boxShadow: colors.navBarBoxShadow,
 						//background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
-						background: "rgba(0,0,0,1)",
+						background: "rgba(0,0,0,1)", zIndex: 1,
 					}}>
 				<div style={{textAlign: "center"}}>
-					<span style={{display: "inline-block", paddingLeft: 40}}>
-						<NavBarButton page="community" text="Community" active={page == "community"}/>
-						<NavBarButton page="forum" text="Forum" active={page == "forum"}/>
-						<NavBarButton page="terms" text="Terms" active={page == "terms"}/>
+					<span style={{display: "inline-block", paddingLeft: 5}}>
+						<NavBarButton to="forum" text="Forum"/>
+						<NavBarButton to="community" text="Community"/>
+						<NavBarButton to="search" text="Search"/>
+						<NavBarButton to="more" text="More"/>
 						<Link to="/" style={{
 							display: "inline-block", margin: "0 auto", cursor: "pointer", verticalAlign: "middle",
 							lineHeight: "45px", textAlign: "center", color: "#FFF", padding: "0 15px",
@@ -69,20 +71,21 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 						}}>
 							Debate Map
 						</Link>
-						<NavBarButton page="global-map" text="Global Map" active={page == "global-map"}/>
-						<NavBarButton page="debate-maps" text="Debate Maps" active={page == "debate-maps"}/>
-						<NavBarButton page="personal-maps" text="Personal Maps" active={page == "personal-maps"}/>
+						<NavBarButton to="terms" text="Terms"/>
+						<NavBarButton to="personal" text="Personal"/>
+						<NavBarButton to="debates" text="Debates"/>
+						<NavBarButton to="global" text="Global"/>
 					</span>
 					<span style={{position: "absolute", right: 0}}>
 						<div className="transition500 opacity100OnHover"
 							style={{
-								display: "inline-block", padding: 0, width: 40, height: 40,
+								display: "inline-block", padding: 0, width: 40, height: 45,
 								backgroundImage: "url(/Images/Buttons/PageOptions.png)", backgroundRepeat: "no-repeat",
 								backgroundPosition: "center center", backgroundSize: 30, opacity: .75, cursor: "pointer"}}
 							onClick={()=>{}}/>
 						<div className="transition500 opacity100OnHover"
 							style={{
-								display: "inline-block", padding: 0, width: 40, height: 40,
+								display: "inline-block", padding: 0, width: 40, height: 45,
 								backgroundImage: `url(${auth ? auth.photoURL : "/Images/Buttons/User.png"})`, backgroundRepeat: "no-repeat",
 								backgroundPosition: "center center", backgroundSize: 30, opacity: .75, cursor: "pointer"}}
 							onClick={()=> {
@@ -130,16 +133,15 @@ class UserPanel extends BaseComponent<{firebase?, auth?, account?}, {}> {
 	}
 }
 
-class NavBarButton extends BaseComponent<{page, text, active}, {}> {
+export class NavBarButton extends BaseComponent<{to, text} & BaseProps, {}> {
 	render() {
-		var {page, text, active} = this.props;
+		var {to, text, page} = this.props;
+		let active = to == page;
 		return (
-			<Link className="unselectable"
-					style={{
-						display: "inline-block", cursor: "pointer", verticalAlign: "middle",
-						lineHeight: "45px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9
-					}}
-					to={page}>
+			<Link to={to} style={{
+				display: "inline-block", cursor: "pointer", verticalAlign: "middle",
+				lineHeight: "45px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9
+			}}>
 				{text}
 			</Link>
 		);

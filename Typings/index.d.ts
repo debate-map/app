@@ -1,4 +1,5 @@
-/// <reference path="../node_modules/@types/react/index.d.ts"/>
+/*/// <reference path="../node_modules/@types/react/index.d.ts"/>
+/// <reference path="../node_modules/@types/react-router/index.d.ts"/>*/
 
 // general
 // ==========
