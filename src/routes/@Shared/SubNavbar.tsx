@@ -7,7 +7,7 @@ export default class SubNavbar extends BaseComponent<{}, {}> {
 		let {children} = this.props;
 		return (
 			<div style={{
-				position: "absolute", zIndex: 1, top: 0, width: "100%", paddingBottom: 150, textAlign: "center", overflow: "hidden",
+				position: "absolute", zIndex: 1, top: 0, width: "100%", textAlign: "center",
 				//background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
 				//background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
 			}}>
