@@ -12,9 +12,9 @@ export default class MoreUI extends BaseComponent<{page?} & RouteProps, {}> {
 		return (
 			<div>
 				<SubNavbar>
-					<SubNavBarButton to={`${match.url}/admin`} text="Admin"/>
+					<SubNavBarButton to={`${match.url}`} text="Admin"/>
 				</SubNavbar>
-				<Route path={`${match.url}/admin`} component={AdminUI}/>
+				<Route path={`${match.url}`} component={AdminUI}/>
 			</div>
 		);
 	}

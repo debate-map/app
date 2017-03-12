@@ -28,7 +28,7 @@ export interface MapNode {
 	approved: boolean;
 	accessLevel: AccessLevel;
 	voteLevel: AccessLevel;
-	supportChildren: any;
-	opposeChildren: any;
-	talkChildren: any;
+	supportChildren: ChildCollection;
+	opposeChildren: ChildCollection;
+	talkChildren: ChildCollection;
 }

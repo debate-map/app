@@ -49,7 +49,12 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 
 class RootUI extends BaseComponent<{}, {}> {
 	render() {
-		let pages = ["forum", "users", "search", "more", "terms", "personal", "debates", "global"];
+		let pages = [
+			"stream", "chat",
+			"users", "forum", "social", "more",
+			"terms", "personal", "debates", "global",
+			"search", "profile"
+		];
 		return (
 			<div style={{
 				height: "100%", display: "flex", flexDirection: "column",
@@ -63,15 +68,21 @@ class RootUI extends BaseComponent<{}, {}> {
 					<Route exact path="/about" component={RootUI2}/>*/}
 					{!GetUrlPath().StartsWithAny(...pages) && <RootUI2/>}
 
+					<Route path="/stream" component={()=><div/>}/>
+					<Route path="/chat" component={()=><div/>}/>
+
 					<Route path="/users" component={()=><div/>}/>
 					<Route path="/forum" component={()=><div/>}/>
-					<Route path="/search" component={()=><div/>}/>
+					<Route path="/social" component={()=><div/>}/>
 					<Route path="/more" component={MoreUI}/>
 
 					<Route path="/terms" component={()=><div/>}/>
 					<Route path="/personal" component={()=><div/>}/>
 					<Route path="/debates" component={()=><div/>}/>
 					<Route path="/global" component={GlobalUI}/>
+
+					<Route path="/search" component={()=><div/>}/>
+					<Route path="/profile" component={()=><div/>}/>
 				</div>
 			</div>
 		);
