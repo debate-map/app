@@ -50,7 +50,7 @@ export default function(initialState = {}, history) {
 
 	if (module.hot) {
 		module.hot.accept("./reducers", () => {
-			const reducers = require("./reducers").default;
+			const reducers = require("./reducers").MakeRootReducer;
 			store.replaceReducer(reducers(store.asyncReducers));
 		});
 	}
