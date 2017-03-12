@@ -41,7 +41,7 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 								opposeChildren: {},
 								talkChildren: {},
 							};
-							await firebase.Ref("nodes").push(rootNode);
+							await firebase.Ref(`nodes/${1}`).set(rootNode);
 							ShowMessageBox({message: "Done!"});
 						}
 					});
