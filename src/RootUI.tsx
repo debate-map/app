@@ -49,7 +49,7 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 
 class RootUI extends BaseComponent<{}, {}> {
 	render() {
-		let pages = ["forum", "community", "search", "more", "terms", "personal", "debates", "global"];
+		let pages = ["forum", "users", "search", "more", "terms", "personal", "debates", "global"];
 		return (
 			<div style={{
 				height: "100%", display: "flex", flexDirection: "column",
@@ -63,8 +63,8 @@ class RootUI extends BaseComponent<{}, {}> {
 					<Route exact path="/about" component={RootUI2}/>*/}
 					{!GetUrlPath().StartsWithAny(...pages) && <RootUI2/>}
 
+					<Route path="/users" component={()=><div/>}/>
 					<Route path="/forum" component={()=><div/>}/>
-					<Route path="/community" component={()=><div/>}/>
 					<Route path="/search" component={()=><div/>}/>
 					<Route path="/more" component={MoreUI}/>
 

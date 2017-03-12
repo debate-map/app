@@ -43,7 +43,7 @@ const avatarStyles = {
 	userPanelOpen: state.main.userPanelOpen,
 	auth: pathToJS(state.firebase, "auth"),
 })) as any)
-export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOpen?, auth?}, {}> {
+export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOpen?, auth?: firebase.User}, {}> {
 	render() {
 		let {page, userPanelOpen, auth, dispatch} = this.props;
 		return (
@@ -53,10 +53,14 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 						//background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
 						background: "rgba(0,0,0,1)", zIndex: 1,
 					}}>
-				<div style={{textAlign: "center"}}>
-					<span style={{display: "inline-block", paddingLeft: 5}}>
+				<div style={{display: "flex"}}>
+					<span style={{position: "absolute", left: 0}}>
+						<NavBarButton to="/stream" text="Stream" onClick={e=> { e.preventDefault(); }}/>
+						<NavBarButton to="/chat" text="Chat" onClick={e=> { e.preventDefault(); }}/>
+					</span>
+					<span style={{margin: "0 auto", paddingLeft: 30}}>
+						<NavBarButton to="/users" text="Users"/>
 						<NavBarButton to="/forum" text="Forum"/>
-						<NavBarButton to="/community" text="Community"/>
 						<NavBarButton to="/search" text="Search"/>
 						<NavBarButton to="/more/admin" text="More"/>
 						<Link to="/" style={{
@@ -71,23 +75,31 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 						<NavBarButton to="/debates" text="Debates"/>
 						<NavBarButton to="/global/map" text="Global"/>
 					</span>
-					<span style={{position: "absolute", right: 0}}>
-						<div className="transition500 opacity100OnHover"
+					<span style={{position: "absolute", right: 0, display: "flex"}}>
+						{/*<div className="transition500 opacity100OnHover"
 							style={{
 								display: "inline-block", padding: 0, width: 40, height: 45,
-								backgroundImage: "url(/Images/Buttons/PageOptions.png)", backgroundRepeat: "no-repeat",
+								backgroundImage: "url(/Images/Buttons/Search.png)", backgroundRepeat: "no-repeat",
 								backgroundPosition: "center center", backgroundSize: 30, opacity: .75, cursor: "pointer"}}
-							onClick={()=>{}}/>
-						<div className="transition500 opacity100OnHover"
+							onClick={()=>{}}/>*/}
+						{/*<div style={{display: "inline-block", height: 45, verticalAlign: "top"}}>
+							<TextInput value="" onChange={()=>{}} style={{width: 100}}/>
+						</div>*/}
+						<NavBarButton to="/search" text="Search" onClick={e=> { e.preventDefault(); }}/>
+						<NavBarButton to={auth ? "/profile" : "/sign-in"} text={auth ? auth.displayName.match(/(.+?)( |$)/)[1] : `Sign in`} onClick={e=> {
+							e.preventDefault();
+							dispatch(new ACTSetUserPanelOpen(!userPanelOpen));
+						}}/>
+						{/*<div className="transition500 opacity100OnHover"
 							style={{
 								display: "inline-block", padding: 0, width: 40, height: 45,
 								backgroundImage: `url(${auth ? auth.photoURL : "/Images/Buttons/User.png"})`, backgroundRepeat: "no-repeat",
 								backgroundPosition: "center center", backgroundSize: 30, opacity: .75, cursor: "pointer"}}
 							onClick={()=> {
 								dispatch(new ACTSetUserPanelOpen(!userPanelOpen));
-							}}/>
+							}}/>*/}
 					</span>
-					<div style={{position: "absolute", zIndex: 11, right: 0}}>
+					<div style={{position: "absolute", zIndex: 11, right: 0, top: 45}}>
 						{userPanelOpen &&
 							<UserPanel/>}
 					</div>
@@ -128,17 +140,18 @@ class UserPanel extends BaseComponent<{firebase?, auth?, account?}, {}> {
 	}
 }
 
-export class NavBarButton extends BaseComponent<{to, text} & BaseProps, {}> {
+export class NavBarButton extends BaseComponent<{to, text, onClick?}, {}> {
 	render() {
-		var {to, text, page} = this.props;
+		var {to, text, onClick} = this.props;
+		let {page} = this.props;
 		let active = to == page;
-		return (
-			<Link to={to} style={{
-				display: "inline-block", cursor: "pointer", verticalAlign: "middle",
-				lineHeight: "45px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9
-			}}>
-				{text}
-			</Link>
-		);
+
+		let style = {
+			display: "inline-block", cursor: "pointer", verticalAlign: "middle",
+			lineHeight: "45px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9
+		};
+		if (to)
+			return <Link to={to} style={style} onClick={onClick}>{text}</Link>;
+		return <div style={style} onClick={onClick}>{text}</div>
 	}
 }
