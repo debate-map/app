@@ -5,9 +5,10 @@ import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 var ScrollView = require("react-free-scrollbar").default;
 
 let pageText = `
-The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced (like Wikipedia), and the software is open-sourced (under MIT), promoting collaborative development and increased accountability. [if the project management falters or becomes biased, it's in the power of the users to "fork" the project themselves and launch their own version]
+The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them.${""
+} Its content is crowd-sourced (like Wikipedia), and the software is open-sourced (under MIT), promoting collaborative development and increased accountability.<sup>[1](#myfootnote1)</sup>
 
-Here is an example question, on the shape of the earth:
+Here is an example debate map: [Shape of the earth](/debates/shape-of-the-earth)
 
 As can be seen, the tree-like structure makes it easy to traverse the available evidence and reasoning on the topic: at each level, there is a "thesis" which makes a claim, and a set of simple "arguments" which support it. By keeping the form of these arguments simple, we're able to match them (in many cases) with the basic forms of logical arguments (modus ponens, etc.), removing them from consideration to then focus solely on the chain of evidence.
 
@@ -41,6 +42,8 @@ The conversation can then proceed from that point, with the reasoning behind you
 Engaging with a tool that operates on percentages, numbers, and weights makes self-accountability easier to achieve: by entering numbers, one is declaring to himself how much he considers his beliefs to be supported, and by what means. This allows one to then do tool-based analysis on his views, and more easily spot areas of possible bias or unjustified conclusions.
 
 He can then proceed to look more closely at those areas, examining the pool of existing evidence and reasoning, and referencing statistics on how the rest of the population considers each piece along the way.
+
+<a name="myfootnote1">1</a>: In case the project management falters or becomes biased, it's in the power of the users to create their own copy of the project, and to modify it as they see fit. See here: <https://opensource.com/resources/what-open-source>
 `;
 
 export default class HomeUI extends BaseComponent<{} & BaseProps, {}> {

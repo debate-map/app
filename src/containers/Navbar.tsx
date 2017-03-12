@@ -58,11 +58,11 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 						<NavBarButton to="/stream" text="Stream" onClick={e=> { e.preventDefault(); }}/>
 						<NavBarButton to="/chat" text="Chat" onClick={e=> { e.preventDefault(); }}/>
 					</span>
-					<span style={{margin: "0 auto", paddingLeft: 30}}>
+					<span style={{margin: "0 auto", paddingLeft: 35}}>
 						<NavBarButton to="/users" text="Users"/>
 						<NavBarButton to="/forum" text="Forum"/>
-						<NavBarButton to="/search" text="Search"/>
-						<NavBarButton to="/more/admin" text="More"/>
+						<NavBarButton to="/social" text="Social"/>
+						<NavBarButton to="/more" text="More"/>
 						<Link to="/" style={{
 							display: "inline-block", margin: "0 auto", cursor: "pointer", verticalAlign: "middle",
 							lineHeight: "45px", textAlign: "center", color: "#FFF", padding: "0 15px",
@@ -73,7 +73,7 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 						<NavBarButton to="/terms" text="Terms"/>
 						<NavBarButton to="/personal" text="Personal"/>
 						<NavBarButton to="/debates" text="Debates"/>
-						<NavBarButton to="/global/map" text="Global"/>
+						<NavBarButton to="/global" text="Global"/>
 					</span>
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
 						{/*<div className="transition500 opacity100OnHover"
