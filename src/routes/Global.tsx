@@ -12,11 +12,11 @@ export default class GlobalUI extends BaseComponent<{} & BaseProps, {}> {
 			<div>
 				{/*<SubNavbar fullWidth={true}>*/}
 				<SubNavbar>
-					<SubNavBarButton to="/global/map" text="Map"/>
+					<SubNavBarButton to="/global" text="Map"/>
 					<SubNavBarButton to="/global/list" text="List"/>
 				</SubNavbar>
 				<ScrollView style={{flex: "1 1 100%"}} scrollVBarStyles={{width: 10}}>
-					<Route path="/global/map" component={()=><div/>}/>
+					<Route path="/global" component={()=><div/>}/>
 					<Route path="/global/list" component={()=><div/>}/>
 				</ScrollView>
 			</div>

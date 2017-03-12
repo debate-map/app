@@ -6,7 +6,7 @@ var ScrollView = require("react-free-scrollbar").default;
 
 let pageText = `
 The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them.${""
-} Its content is crowd-sourced (like Wikipedia), and the software is open-sourced (under MIT), promoting collaborative development and increased accountability.<sup>[1](#myfootnote1)</sup>
+} Its content is crowd-sourced (like Wikipedia), and the software is open-sourced (under MIT), promoting collaborative development and increased accountability.<sup>[1](#footnote1)</sup>
 
 Here is an example debate map: [Shape of the earth](/debates/shape-of-the-earth)
 
@@ -43,7 +43,7 @@ Engaging with a tool that operates on percentages, numbers, and weights makes se
 
 He can then proceed to look more closely at those areas, examining the pool of existing evidence and reasoning, and referencing statistics on how the rest of the population considers each piece along the way.
 
-<a name="myfootnote1">1</a>: In case the project management falters or becomes biased, it's in the power of the users to create their own copy of the project, and to modify it as they see fit. See here: <https://opensource.com/resources/what-open-source>
+<a name="footnote1">1</a>: In case the project management falters or becomes biased, it's in the power of the users to create their own copy of the project, and to modify it as they see fit. See here: <https://opensource.com/resources/what-open-source>
 `;
 
 export default class HomeUI extends BaseComponent<{} & BaseProps, {}> {
