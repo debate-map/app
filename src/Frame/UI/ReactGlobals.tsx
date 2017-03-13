@@ -231,7 +231,8 @@ export class Div extends BaseComponent<any, any> {
 	    return true;
 	}
     render() {
-        return <div {...this.props.Excluding("shouldUpdate")}/>;
+		let {shouldUpdate, style, ...rest} = this.props;
+        return <div {...rest} style={E(BasicStyles(this.props), style)}/>;
     }
 }
 g.Extend({Div});
