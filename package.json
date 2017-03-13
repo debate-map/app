@@ -161,6 +161,7 @@
     "react-autobind": "^1.0.6",
     "react-markdown": "^2.4.5",
     "react-router-dom": "^4.0.0",
+    "react-router-redux": "^5.0.0-alpha.2",
     "redbox-react": "^1.2.10",
     "rimraf": "^2.5.4",
     "sass-loader": "^4.0.0",

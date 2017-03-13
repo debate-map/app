@@ -5,6 +5,7 @@ export enum MapType {
 	Global = 3,
 }
 export interface Map {
+	_key: string;
 	name: string;
 	type: MapType;
 	rootNode: string;

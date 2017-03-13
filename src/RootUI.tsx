@@ -9,7 +9,13 @@ var ScrollView = require("react-free-scrollbar").default;
 import getMuiTheme from "material-ui/styles/getMuiTheme";
 // Themeing/Styling
 import Theme from "./theme";
-import {BrowserRouter as Router, Route, browserHistory} from "react-router-dom";
+
+//import {BrowserRouter as Router, Route, browserHistory} from "react-router-dom";
+import {Route} from "react-router";
+import {ConnectedRouter as Router, routerReducer, routerMiddleware, push} from "react-router-redux";
+//import createHistory from "history/lib/createBrowserHistory";
+import {createBrowserHistory} from "react-router/node_modules/history";
+
 import {Provider, connect} from "react-redux";
 import Modal from "react-modal";
 import GlobalUI from "./routes/Global";
@@ -26,20 +32,21 @@ import {MainState, RootState} from "./store/reducers";
 import {MessageBoxOptions, ConfirmationBoxOptions, ACTShowMessageBox, ACTShowConfirmationBox} from "./Frame/UI/VMessageBox";
 import Button from "./Frame/ReactComponents/Button";
 
+// Create a history of your choosing (we're using a browser history in this case)
+const history = createBrowserHistory();
+
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {
-	static childContextTypes = {
+	/*static childContextTypes = {
 		muiTheme: PropTypes.object
 	};
-	
 	getChildContext() {
 		return {muiTheme: getMuiTheme(Theme)};
-	}
-
+	}*/
 	render() {
 		let {store} = this.props;
 		return (
 			<Provider store={store}>
-				<Router>
+				<Router history={history}>
 					<RootUI/>
 				</Router>
 			</Provider>
@@ -122,6 +129,7 @@ let styles = {
 class ModalUI extends BaseComponent<{type: "message" | "confirmation", options: MessageBoxOptions | ConfirmationBoxOptions}, {}> {
 	render() {
 		let {type, options} = this.props;
+		//let {dispatch} = this.context.store;
 		return (
 			<Modal isOpen={true} contentLabel={options.title || ""} style={E(styles, options.style)}
 					onRequestClose={()=> {

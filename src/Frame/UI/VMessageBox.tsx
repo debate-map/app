@@ -17,7 +17,7 @@ export class ACTShowConfirmationBox extends Action<ConfirmationBoxOptions> {}
 	}
 }*/
 
-export function ShowMessageBox(o: ConfirmationBoxOptions) {
+export function ShowMessageBox(o: MessageBoxOptions) {
 	o = {title: ""}.Extended2(o);
 	store.dispatch(new ACTShowMessageBox(o));
 }
