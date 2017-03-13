@@ -39,6 +39,11 @@
 		-webkit-appearance: none !important;
 	}
 
+	.unselectable { -moz-user-select: none; -webkit-user-select: none; user-select: none; }
+	.unselectable * { -moz-user-select: none; -webkit-user-select: none; user-select: none; }
+	.selectable { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
+	.selectable * { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
+
 	.clickThrough > * { pointer-events: auto; }
 	.clickThrough { pointer-events: none; }
 	.clickThroughChain { pointer-events: none; }

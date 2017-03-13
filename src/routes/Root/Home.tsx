@@ -52,7 +52,7 @@ export default class HomeUI extends BaseComponent<{} & BaseProps, {}> {
 	render() {
 		let {page, match} = this.props;
 		return (
-			<VReactMarkdown source={pageText}
+			<VReactMarkdown className="selectable" source={pageText}
 				containerProps={{
 					style: E(styles.page),
 				}}

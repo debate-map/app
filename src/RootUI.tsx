@@ -56,7 +56,7 @@ class RootUI extends BaseComponent<{}, {}> {
 			"search", "profile"
 		];
 		return (
-			<div style={{
+			<div className="unselectable" style={{
 				height: "100%", display: "flex", flexDirection: "column",
 				//background: "rgba(0,0,0,1)",
 				background: "url(/Images/Backgrounds/Nebula.jpg)", backgroundPosition: "center center", backgroundSize: "cover",
