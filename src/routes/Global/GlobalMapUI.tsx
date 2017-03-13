@@ -8,10 +8,10 @@ import MapUI from "../@Shared/Maps/MapUI";
 var ScrollView = require("react-free-scrollbar").default;
 
 @firebaseConnect([
-	DBPath("maps/1"),
+	DBPath("maps/e1"),
 ])
 @(connect(({firebase}: {firebase: FirebaseDatabase})=> ({
-	map: helpers.dataToJS(firebase, DBPath("maps/1")),
+	map: helpers.dataToJS(firebase, DBPath("maps/e1")),
 })) as any)
 export default class GlobalMapUI extends BaseComponent<{map: Map}, {}> {
 	render() {

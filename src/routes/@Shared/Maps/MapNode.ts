@@ -16,6 +16,10 @@ export enum AccessLevel {
 export interface ChildCollection {
 	//[key: string]?: boolean;
 }
+/*export interface ChildInfo {
+	id: number;
+	type: 
+}*/
 
 export interface MapNode {
 	type: Partial<MapNodeType>;
@@ -28,7 +32,6 @@ export interface MapNode {
 	approved: boolean;
 	accessLevel: AccessLevel;
 	voteLevel: AccessLevel;
-	supportChildren: ChildCollection;
-	opposeChildren: ChildCollection;
+	children: ChildCollection;
 	talkChildren: ChildCollection;
 }
