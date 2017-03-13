@@ -23,7 +23,7 @@ export default class MapUI extends BaseComponent<{map: Map, rootNode?: MapNode},
 			return <div>Loading root node...</div>;
 		return (
 			<ScrollView scrollVBarStyles={{width: 10}} backgroundDrag={true}>
-				<div style={{margin: 1000}}>
+				<div style={{margin: 100}}>
 					<MapNodeUI node={rootNode}/>
 				</div>
 			</ScrollView>
