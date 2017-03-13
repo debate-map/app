@@ -231,6 +231,7 @@ export class List<T> extends Array<T> {
 		/*for (var i = 0; i < items.length; i++)
 			this.push(items[i]);*/
 		this.push(...items);
+		return this;
 	}
 	Insert(index, item) { return this.splice(index, 0, item); }
 	InsertRange(index, items) { return this.splice.apply(this, [index, 0].concat(items)); }

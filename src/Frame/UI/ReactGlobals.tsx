@@ -16,6 +16,21 @@ g.Extend({ShallowCompare});
 
 g.Extend({React, Text});
 
+export function FindDOM(comp) { return ReactDOM.findDOMNode(comp); };
+export function FindDOM_(comp) { return $(FindDOM(comp)); };
+g.Extend({FindDOM, FindDOM_});
+export function FindReact(dom) {
+    for (var key in dom)
+        if (key.startsWith("__reactInternalInstance$")) {
+            var compInternals = dom[key]._currentElement;
+			var compWrapper = compInternals._owner;
+            var comp = compWrapper._instance;
+            return comp;
+        }
+    return null;
+}
+g.Extend({FindReact});
+
 export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	constructor(props) {
 		super(props);
