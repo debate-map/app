@@ -593,9 +593,10 @@ Array.prototype._AddFunction_Inline = function Prepend(...newItems) { this.splic
 Array.prototype._AddFunction_Inline = function Add(item) { return this.push(item); };
 Array.prototype._AddFunction_Inline = function CAdd(item) { this.push(item); return this; }; // CAdd = ChainAdd
 Array.prototype._AddFunction_Inline = function TAdd(item) { this.push(item); return item; }; // TAdd = TransparentAdd
-interface Array<T> { AddRange(items: T[]): void; }
+interface Array<T> { AddRange(items: T[]): this; }
 Array.prototype._AddFunction_Inline = function AddRange(array) {
 	this.push(...array);
+	return this;
 };
 interface Array<T> { Remove(item: T): boolean; }
 Array.prototype._AddFunction_Inline = function Remove(item) {
