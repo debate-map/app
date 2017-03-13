@@ -12,7 +12,7 @@ export default class AboutUI extends BaseComponent<{} & BaseProps, {}> {
 	render() {
 		let {page, match} = this.props;
 		return (
-			<VReactMarkdown source={pageText}
+			<VReactMarkdown className="selectable" source={pageText}
 				containerProps={{
 					style: {
 						width: 960, margin: "100px auto", padding: "20px 50px", background: "rgba(0,0,0,.75)", borderRadius: 10,
