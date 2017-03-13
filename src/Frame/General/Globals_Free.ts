@@ -116,7 +116,13 @@ export function Debugger_If(condition) {
     if (condition)
         debugger;
 }
-g.Extend({Debugger, Debugger_Wrap, Debugger_True, Debugger_If});
+export function WrapWithDebugger(func) {
+	return function() {
+		debugger;
+		func.apply(this, arguments);
+	};
+}
+g.Extend({Debugger, Debugger_Wrap, Debugger_True, Debugger_If, WrapWithDebugger});
 
 // general
 // ==========
