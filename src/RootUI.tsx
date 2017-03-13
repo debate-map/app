@@ -116,7 +116,7 @@ let styles = {
 		position: "absolute", overflow: "auto",
 		//top: "40px", left: "40px", right: "40px", bottom: "40px",
 		left: "50%", right: "initial", top: "50%", bottom: "initial", transform: "translate(-50%, -50%)",
-		background: "rgba(0,0,0,.8)", border: "1px solid #555", WebkitOverflowScrolling: "touch", borderRadius: "4px", outline: "none", padding: "20px"
+		background: "rgba(0,0,0,.75)", border: "1px solid #555", WebkitOverflowScrolling: "touch", borderRadius: "4px", outline: "none", padding: "20px"
 	}
 };
 class ModalUI extends BaseComponent<{type: "message" | "confirmation", options: MessageBoxOptions | ConfirmationBoxOptions}, {}> {
@@ -131,8 +131,8 @@ class ModalUI extends BaseComponent<{type: "message" | "confirmation", options: 
 						else
 							store.dispatch(new ACTShowConfirmationBox(null));
 					}}>
-				<h1>{options.title}</h1>
-				<p>{options.message}</p>
+				<div style={{fontSize: "18px", fontWeight: "bold"}}>{options.title}</div>
+				<p style={{marginTop: 15}}>{options.message}</p>
 				{type == "message" &&
 					<Button text="OK"
 						onClick={()=> {
@@ -145,7 +145,7 @@ class ModalUI extends BaseComponent<{type: "message" | "confirmation", options: 
 							if (options.onOK && options.onOK() === false) return;
 							store.dispatch(new ACTShowConfirmationBox(null));
 						}}/>
-						<Button text="Cancel" onClick={()=> {
+						<Button text="Cancel" ml={10} onClick={()=> {
 							if (options.onCancel && options.onCancel() === false) return;
 							store.dispatch(new ACTShowConfirmationBox(null));
 						}}/>

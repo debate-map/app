@@ -1,18 +1,28 @@
 import {BaseComponent, BasicStyles, BaseProps} from "../UI/ReactGlobals";
 import Radium from "radium";
+import {E} from "../General/Globals_Free";
 
 var styles = {
 	root: {
 		display: "inline-block",
-		backgroundColor: "rgba(0,0,0,.3)",
+		//backgroundColor: "rgba(0,0,0,.3)",
+		backgroundColor: "rgba(90,100,110,.6)",
+		//backgroundColor: "rgba(10,10,10,1)",
 		backgroundRepeat: "no-repeat",
+		boxShadow: "rgba(210,210,230,1) 0px 0px 3px",
+		//boxShadow: "rgba(150,150,150,1) 0px 0px 1px",
+		borderRadius: 5,
 		/*border: "1px solid rgba(255,255,255,.5)",
 		borderWidth: "0 0",*/
 		color: "#AAA",
 		/*fontFamily: "fancyFontSemibold, Trebuchet MS, Tahoma, sans-serif",*/
 		fontSize: 14,
 		cursor: "pointer",
-		":hover": {backgroundColor: "rgba(0,0,0,.7)"}
+		":hover": {
+			//backgroundColor: "rgba(0,0,0,.7)"
+			backgroundColor: "rgba(90,100,110,.8)",
+			//backgroundColor: "rgba(20,20,20,1)",
+		},
 	},
 	root_hasCheckbox: {paddingTop: 4, verticalAlign: 1},
 	root_disabled: {

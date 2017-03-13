@@ -1,6 +1,7 @@
-// special, early imports
+// "static" imports
 import "./Frame/General/Start";
 import "./Frame/General/CE";
+import "./Frame/Database/DatabaseHelpers";
 
 var JQuery = require("./Frame/JQuery/JQuery3.1.0");
 g.Extend({JQuery, jQuery: JQuery});
