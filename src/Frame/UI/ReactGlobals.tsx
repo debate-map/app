@@ -166,6 +166,8 @@ export function SimpleShouldUpdate(target) {
 	}
 }
 
+export type FirebaseDatabase = firebase.Database & FirebaseDatabase_Extensions;
+
 export interface BaseProps {
 	ml?; mr?; mt?; mb?;
 	pl?; pr?; pt?; pb?;
@@ -174,7 +176,7 @@ export interface BaseProps {
 	tabLabel?: string; active?: boolean;
 
 	page?; match?;
-	firebase?: firebase.Database & FirebaseDatabase_Extensions;
+	firebase?: FirebaseDatabase;
 }
 export function BasicStyles(props) {
 	var result: any = {};
