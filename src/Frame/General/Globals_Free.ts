@@ -183,16 +183,12 @@ export function GetUrlVars(url) {
 
 export var inFirefox = navigator.userAgent.toLowerCase().contains("firefox");
 
-// Unity-linked
+// others
 // ==================
 
 export var launchVars = GetUrlVars(CurrentUrl());
 
-//export var inUnity = launchVars.inUnity == "true"; // this var is set within the initial url of the Unity CoherentUIView
-export var inUnity = navigator.userAgent.contains("; Unity 3D; ZFBrowser ");
-
 export var inTestMode = true; //GetUrlVars(CurrentUrl()).inTestMode == "true";
-export function InUnity() { return inUnity; } //return window.Unity;
 export function InTestMode() { return inTestMode; }
 
 export var blockCSCalls = false;
@@ -212,3 +208,10 @@ window.eval = function(code) {
     }
     return evalOld.apply(this, arguments);
 };*/
+
+export function EStrToInt(eStr: string) {
+	return parseInt(eStr.substr(1));
+}
+export function IntToEStr(int: number) {
+	return "e" + int;
+}

@@ -22,7 +22,7 @@ const initialState = (window as any).___INITIAL_STATE__;
 const store = createStore(initialState, {});
 g.Extend({store});
 declare global {
-	var store: Store<any>;
+	var store: Store<RootState>;
 }
 
 // wrapper ui
@@ -37,6 +37,7 @@ import {Component as BaseComponent, PropTypes} from "react";
 import injectTapEventPlugin from "react-tap-event-plugin";
 //import {BaseComponent} from "./Frame/UI/ReactGlobals";
 import {Store} from "redux";
+import {RootState} from "./store/reducers";
 injectTapEventPlugin();
 
 // developer tools setup

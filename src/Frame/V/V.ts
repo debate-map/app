@@ -159,4 +159,22 @@ export default class V {
 	static Bind<T extends Function>(func: T, newThis: any): T {
 		return func.bind(newThis);
 	}
+
+	/*static ForEachChildInTreeXDoY(treeX: any, actionY: (value, key: string)=>void) {
+		for (let key in treeX) {
+			let value = treeX[key];
+			actionY(value, key);
+			if (typeof value == "object" || value instanceof Array)
+				V.ForEachChildInTreeXDoY(value, actionY);
+		}
+	}*/
+	static GetKeyValuePairsInObjTree(obj: any) {
+		let result = [] as {obj, prop, value}[];
+		for (let key in obj) {
+			let value = obj[key];
+			result.push({obj, prop: key, value});
+			result.AddRange(V.GetKeyValuePairsInObjTree(value));
+		}
+		return result;
+	}
 }

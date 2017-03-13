@@ -44,8 +44,10 @@ const avatarStyles = {
 	auth: pathToJS(state.firebase, "auth"),
 })) as any)
 export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOpen?, auth?: firebase.User}, {}> {
+	static contextTypes = {store: PropTypes.object.isRequired};
 	render() {
-		let {page, userPanelOpen, auth, dispatch} = this.props;
+		let {page, userPanelOpen, auth} = this.props;
+		let {dispatch} = this.context.store;
 		return (
 			<div style={{
 				padding: "0 10px", boxShadow: colors.navBarBoxShadow,
@@ -117,9 +119,7 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 	account: pathToJS(state.firebase, "profile")
 })) as any)
 class UserPanel extends BaseComponent<{firebase?, auth?, account?}, {}> {
-	static contextTypes = {
-		router: PropTypes.object.isRequired
-	};
+	static contextTypes = {router: PropTypes.object.isRequired};
 	render() {
 		let {firebase, auth, account} = this.props;
 		let {router} = this.context;

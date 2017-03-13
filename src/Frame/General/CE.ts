@@ -299,6 +299,12 @@ Object.prototype._AddFunction_Inline = function VAct(action) {
 	return this;
 };
 
+interface Object { As<T>(type: new(..._)=>T): T; }
+Object.prototype._AddFunction_Inline = function As<T>(type: new(..._)=>T) {
+	Object.setPrototypeOf(this, type.prototype);
+	return this as T;
+};
+
 // Function
 // ==========
 
@@ -749,12 +755,14 @@ Array.prototype._AddFunction_Inline = function ToMap(keyFunc, valFunc) {
 		result[keyFunc(item)] = valFunc(item);
 	return result;
 }
+interface Array<T> { Skip(count: number): T[]; }
 Array.prototype._AddFunction_Inline = function Skip(count) {
 	var result = [];
 	for (var i = count; i < this.length; i++)
 		result.push(this[i]);
 	return result;
 };
+interface Array<T> { Take(count: number): T[]; }
 Array.prototype._AddFunction_Inline = function Take(count) {
 	var result = [];
 	for (var i = 0; i < count && i < this.length; i++)

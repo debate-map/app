@@ -1,4 +1,3 @@
-import {inUnity} from "./Globals_Free";
 import V from "../V/V";
 /*var Debug = true;
 
@@ -44,10 +43,10 @@ export function Log(message, appendStackTrace = false, logLater = false) {
 
 	var finalMessage = message;
 	if (appendStackTrace) {
-		if (inUnity)
+		/*if (inUnity)
 			finalMessage += "\n\nStackTrace) " + new Error().Stack;
-		else
-			finalMessage += "\n@" + V.GetStackTraceStr();
+		else*/
+		finalMessage += "\n@" + V.GetStackTraceStr();
 	}
 
 	for (let onLogFunc of onLogFuncs)

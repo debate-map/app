@@ -31,6 +31,39 @@ export function FindReact(dom) {
 }
 g.Extend({FindReact});
 
+export interface BaseProps {
+	ml?; mr?; mt?; mb?;
+	pl?; pr?; pt?; pb?;
+	plr?; ptb?;
+
+	tabLabel?: string; active?: boolean;
+
+	page?; match?;
+	firebase?: FirebaseDatabase;
+}
+export function BasicStyles(props) {
+	var result: any = {};
+
+	var fullKeys = {
+		ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
+		pl: "paddingLeft", pr: "paddingRight", pt: "paddingTop", pb: "paddingBottom",
+	};
+	for (let key in props) {
+		if (key in fullKeys) {
+			let fullKey = fullKeys[key];
+			result[fullKey] = props[key];
+		} else if (key == "plr") {
+			result.paddingLeft = props[key];
+			result.paddingRight = props[key];
+		} else if (key == "ptb") {
+			result.paddingTop = props[key];
+			result.paddingBottom = props[key];
+		}
+	}
+
+	return result;
+}
+
 export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	constructor(props) {
 		super(props);
@@ -182,59 +215,6 @@ export function SimpleShouldUpdate(target) {
 }
 
 export type FirebaseDatabase = firebase.Database & FirebaseDatabase_Extensions;
-
-export interface BaseProps {
-	ml?; mr?; mt?; mb?;
-	pl?; pr?; pt?; pb?;
-	plr?; ptb?;
-
-	tabLabel?: string; active?: boolean;
-
-	page?; match?;
-	firebase?: FirebaseDatabase;
-}
-export function BasicStyles(props) {
-	var result: any = {};
-
-	// old way
-	/*for (let key in props) {
-		if (key.startsWith("ml"))
-			result.marginLeft = (key.startsWith("mlN") ? -1 : 1) * parseInt(key.substr(2));
-		else if (key.startsWith("mr"))
-			result.marginRight = (key.startsWith("mrN") ? -1 : 1) * parseInt(key.substr(2));
-		else if (key.startsWith("mt"))
-			result.marginTop = (key.startsWith("mtN") ? -1 : 1) * parseInt(key.substr(2));
-		else if (key.startsWith("mb"))
-			result.marginBottom = (key.startsWith("mbN") ? -1 : 1) * parseInt(key.substr(2));
-		else if (key.startsWith("pl"))
-			result.paddingLeft = (key.startsWith("plN") ? -1 : 1) * parseInt(key.substr(2));
-		else if (key.startsWith("pr"))
-			result.paddingRight = (key.startsWith("prN") ? -1 : 1) * parseInt(key.substr(2));
-		else if (key.startsWith("pt"))
-			result.paddingTop = (key.startsWith("ptN") ? -1 : 1) * parseInt(key.substr(2));
-		else if (key.startsWith("pb"))
-			result.paddingBottom = (key.startsWith("pbN") ? -1 : 1) * parseInt(key.substr(2));
-	}*/
-
-	var fullKeys = {
-		ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
-		pl: "paddingLeft", pr: "paddingRight", pt: "paddingTop", pb: "paddingBottom",
-	};
-	for (let key in props) {
-		if (key in fullKeys) {
-			let fullKey = fullKeys[key];
-			result[fullKey] = props[key];
-		} else if (key == "plr") {
-			result.paddingLeft = props[key];
-			result.paddingRight = props[key];
-		} else if (key == "ptb") {
-			result.paddingTop = props[key];
-			result.paddingBottom = props[key];
-		}
-	}
-
-	return result;
-}
 
 export class Span extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement>, any> {
     render() {

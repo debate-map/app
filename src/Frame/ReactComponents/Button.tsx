@@ -56,14 +56,15 @@ export default class Button extends BaseComponent
 				className={className}
 				style={[
 					BasicStyles(this.props),
-					styles.root, style,
+					styles.root,
 					{padding},
-					!enabled && styles.root_disabled,
-					hasCheckbox && styles.root_hasCheckbox,
 					size && {padding: 0, width: size, height: size,
 						backgroundPosition: `${(size - iconSize) / 2}px ${(size - iconSize) / 2}px`,
 						backgroundSize: iconSize
-					}
+					},
+					hasCheckbox && styles.root_hasCheckbox,
+					!enabled && styles.root_disabled,
+					style,
 				]}>
 				{/*hasCheckbox && <CheckBox checked={checked} style={E(styles.checkbox, checkboxStyle)} labelStyle={checkboxLabelStyle}
 					onChange={checked=>onCheckedChanged && onCheckedChanged(checked)}/>*/}
