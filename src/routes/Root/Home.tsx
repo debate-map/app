@@ -2,6 +2,8 @@ import {SubNavBarButton} from "../@Shared/SubNavbar";
 import SubNavbar from "../@Shared/SubNavbar";
 import {BaseComponent, BaseProps} from "../../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
+import {styles} from "../../Frame/UI/GlobalStyles";
+import {E} from "../../Frame/General/Globals_Free";
 var ScrollView = require("react-free-scrollbar").default;
 
 let pageText = `
@@ -52,9 +54,7 @@ export default class HomeUI extends BaseComponent<{} & BaseProps, {}> {
 		return (
 			<VReactMarkdown source={pageText}
 				containerProps={{
-					style: {
-						width: 960, margin: "100px auto", padding: "20px 50px", background: "rgba(0,0,0,.75)", borderRadius: 10,
-					}
+					style: E(styles.page),
 				}}
 				renderers={{
 					Text: props=> {

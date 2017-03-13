@@ -47,12 +47,11 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 	render() {
 		let {page, userPanelOpen, auth, dispatch} = this.props;
 		return (
-			<div id="topMenu"
-					style={{
-						padding: "0 10px", boxShadow: colors.navBarBoxShadow,
-						//background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
-						background: "rgba(0,0,0,1)", zIndex: 1,
-					}}>
+			<div style={{
+				padding: "0 10px", boxShadow: colors.navBarBoxShadow,
+				//background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
+				background: "rgba(0,0,0,1)", zIndex: 11,
+			}}>
 				<div style={{display: "flex"}}>
 					<span style={{position: "absolute", left: 0}}>
 						<NavBarButton to="/stream" text="Stream" onClick={e=> { e.preventDefault(); }}/>
