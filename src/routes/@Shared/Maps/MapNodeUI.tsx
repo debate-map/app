@@ -1,4 +1,4 @@
-import {BaseComponent} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Div} from "../../../Frame/UI/ReactGlobals";
 import {MapNode, MapNodePath, MapNodeType, MapNodeView, MapView} from "./MapNode";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
@@ -75,8 +75,8 @@ class MapNodeUI_Inner extends BaseComponent<{mapID: number, nodeID: number, node
 						filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 3px) drop-shadow(rgba(0,0,0,.35) 0px 0px 3px)",
 					}}>
 						<Button text="Agree | 1 (.7)" style={{padding: "3px 7px"}}/>
-						<div>Disagree | 0</div>
-						<div>Talk</div>
+						<Div ml={10}>Disagree | 0</Div>
+						<Div ml={10}>Talk</Div>
 					</div>}
 				<div style={{position: "relative", zIndex: 2, background: `rgba(${backgroundColor},.7)`, padding: 5, borderRadius: "5px 0 0 5px", cursor: "pointer"}}
 						onClick={()=> {
