@@ -1,5 +1,4 @@
 import {Map} from "../routes/@Shared/Maps/Map";
-import {MapView, MapNodeView, MapNodePath} from "../routes/@Shared/Maps/MapNode";
 import {combineReducers} from "redux";
 import {firebaseStateReducer} from "react-redux-firebase";
 import {reducer as formReducer} from "redux-form";
@@ -12,10 +11,15 @@ import {ToJSON, FromJSON} from "../Frame/General/Globals";
 import V from "../Frame/V/V";
 import {MainState, MainReducer} from "./Store/Main";
 import {createSelector} from "reselect";
+import {MapNodePath} from "./Store/Main/MapViews";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;
 	store.replaceReducer(MakeRootReducer(store.asyncReducers));
+}
+
+export function CombineReducers(reducerMap: {[key: string]: (state, action: Action<any>)=>any}) {
+	return combineReducers(reducerMap);
 }
 
 // class is used only for initialization
