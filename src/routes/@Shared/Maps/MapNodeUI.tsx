@@ -1,4 +1,4 @@
-import {BaseComponent, Div, Span} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Div, Span, Instant} from "../../../Frame/UI/ReactGlobals";
 import {MapNode, MapNodePath, MapNodeType, MapNodeView, MapView} from "./MapNode";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
@@ -9,7 +9,8 @@ import {PropTypes} from "react";
 import Action from "../../../Frame/General/Action";
 import {RootState} from "../../../store/reducers";
 import {Map} from "./Map";
-import {map} from "lodash";
+import {Log} from "../../../Frame/General/Logging";
+import {WaitXThenRun} from "../../../Frame/General/Timers";
 
 export class ACTSelectMapNode extends Action<{mapID: number, path: MapNodePath}> {}
 
@@ -30,10 +31,10 @@ export default class MapNodeUI extends BaseComponent<Props, {}> {
 		path = path || new MapNodePath([nodeID]);
 		return (
 			<div className="clickThrough" style={{display: "flex", padding: "3px 0"}}>
-				<div className="clickThrough" style={{transform: "translateY(calc(50% - 13px))", zIndex: 2}}>
+				<div className="clickThrough" style={{zIndex: 1, transform: "translateY(calc(50% - 13px))"}}>
 					<MapNodeUI_Inner map={map} nodeID={nodeID} node={node} nodeView={nodeView} path={path}/>
 				</div>
-				<div className="clickThrough" style={{marginLeft: 10, zIndex: 1}}>
+				<div className="clickThrough" style={{marginLeft: 10}}>
 					{nodeChildren.map((child, index)=> {
 						let childID = EStrToInt(node.children.VKeys()[index]);
 						return <MapNodeUI key={index} map={map} nodeID={childID} node={child} path={path.Extend(childID)}/>;
@@ -67,30 +68,8 @@ class MapNodeUI_Inner extends BaseComponent<{map: Map, nodeID: number, node: Map
 				boxShadow: "0 0 1px rgba(255,255,255,.5)",
 				filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 3px) drop-shadow(rgba(0,0,0,.35) 0px 0px 3px)",
 			}}>
-				{nodeView && nodeView.selected
-					? <div style={{
-						display: "flex", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap", height: 28,
-						zIndex: 3, background: `rgba(${backgroundColor},.7)`, padding: 3, borderRadius: 5,
-						boxShadow: "0 0 1px rgba(255,255,255,.5)",
-					}}>
-						<Button text="Probability" mr={7} style={{padding: "3px 7px"}}>
-							<Span ml={5}>90%</Span>
-						</Button>
-						<Button text="Degree" enabled={false} mr={7} style={{padding: "3px 7px"}}>
-							<Span ml={5}>70%</Span>
-						</Button>
-						<Button text="..." style={{padding: "3px 7px"}}/>
-					</div>
-					: <div
-							style={{
-								display: "flex", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap", height: 28,
-								zIndex: 3, borderRadius: 5,
-							}}
-							onClick={()=> {
-								store.dispatch(new ACTSelectMapNode({mapID: EStrToInt(map._key), path}));
-							}}>
-						<Div mt={7} mr={5} style={{fontSize: "13px"}}>90% at 70%</Div>
-					</div>}
+				<MapNodeUI_LeftBox map={map} nodeView={nodeView} path={path} backgroundColor={backgroundColor}/>
+				<div style={{position: "absolute", transform: "translateX(-100%)", width: 1, height: 28}}/> {/* fixes click-gap */}
 				<div style={{position: "relative", zIndex: 2, background: `rgba(${backgroundColor},.7)`, padding: 5, borderRadius: "5px 0 0 5px", cursor: "pointer"}}
 						onClick={()=> {
 							store.dispatch(new ACTSelectMapNode({mapID: EStrToInt(map._key), path}));
@@ -107,3 +86,92 @@ class MapNodeUI_Inner extends BaseComponent<{map: Map, nodeID: number, node: Map
 		);
 	}
 }
+
+export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, nodeView?: MapNodeView, path: MapNodePath, backgroundColor: string}, {}> {
+	render() {
+		let {map, nodeView, path, backgroundColor} = this.props;
+		if (nodeView && nodeView.selected)
+			return (
+				<div style={{
+					display: "flex", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap", height: 28,
+					zIndex: 3, background: `rgba(${backgroundColor},.7)`, padding: 3, borderRadius: 5,
+					boxShadow: "0 0 1px rgba(255,255,255,.5)",
+				}}>
+					<Button text="Probability" mr={7} style={{padding: "3px 7px"}}>
+						<Span ml={5}>90%</Span>
+					</Button>
+					<Button text="Degree" enabled={false} mr={7} style={{padding: "3px 7px"}}>
+						<Span ml={5}>70%</Span>
+					</Button>
+					<Button text="..." style={{padding: "3px 7px"}}/>
+				</div>
+			);
+		return (
+			<div ref="root"
+					style={{
+						display: "flex", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap", height: 28,
+						borderRadius: 5, //opacity: 0,
+					}}
+					onClick={()=> {
+						store.dispatch(new ACTSelectMapNode({mapID: EStrToInt(map._key), path}));
+					}}>
+				<Div mt={7} mr={5} style={{fontSize: "13px"}}>90% at 70%</Div>
+			</div>
+		);
+	}
+
+
+	get ShouldPopOut() {
+		let {nodeView, backgroundColor} = this.props;
+		return nodeView == null || !nodeView.selected;
+	}
+	PreRender() {
+		this.PopBackIn();
+	}
+	@Instant
+	PostRender() {
+		if (this.ShouldPopOut) {
+			this.PopOut();
+		}
+	}
+	ComponentWillUnmount() {
+		this.PopBackIn();
+	}
+
+	dom: HTMLElement;
+	domParent: HTMLElement;
+	poppedOut = false;
+	oldStyle;
+	PopOut() {
+		if (this.poppedOut) return;
+		this.dom = this.refs.root;
+		if (this.dom == null) return;
+		this.domParent = this.dom.parentElement;
+
+		let posFrom = ($(this.dom) as any).positionFrom($("#MapUI"));
+		document.querySelector("#MapUI").appendChild(this.dom);
+		this.oldStyle = $(this.dom).attr("style");
+		/*this.dom.style.left = ($(this.dom) as any).positionFrom($("#MapUI")).left;
+		this.dom.style.top = ($(this.dom) as any).positionFrom($("#MapUI")).top;*/
+		$(this.dom).css("left", posFrom.left);
+		$(this.dom).css("top", posFrom.top);
+		$(this.dom).css("transform", "");
+		//$(this.dom).css("opacity", "1");
+		this.poppedOut = true;
+	}
+	PopBackIn() {
+		if (!this.poppedOut) return;
+		this.domParent.appendChild(this.dom);
+		$(this.dom).attr("style", this.oldStyle);
+		this.poppedOut = false;
+	}
+}
+
+/*interface JQuery {
+	positionFrom(referenceControl): void;
+}*/
+$.fn.positionFrom = function(referenceControl) {
+	var offset = $(this).offset();
+	var referenceControlOffset = referenceControl.offset();
+	return {left: offset.left - referenceControlOffset.left, top: offset.top - referenceControlOffset.top};
+};

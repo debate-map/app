@@ -49,6 +49,8 @@ export function Log(message, appendStackTrace = false, logLater = false) {
 		finalMessage += "\n@" + V.GetStackTraceStr();
 	}
 
+	console.log(finalMessage);
+
 	for (let onLogFunc of onLogFuncs)
 		onLogFunc(message, appendStackTrace, logLater);
 
