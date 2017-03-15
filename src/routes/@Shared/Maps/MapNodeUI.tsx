@@ -31,7 +31,7 @@ export default class MapNodeUI extends BaseComponent<Props, {}> {
 		return (
 			<div className="clickThrough" style={{display: "flex", padding: "3px 0"}}>
 				<div className="clickThrough" style={{transform: "translateY(calc(50% - 13px))", zIndex: 2}}>
-					<MapNodeUI_Inner mapID={EStrToInt(map._key)} nodeID={nodeID} node={node} nodeView={nodeView} path={path}/>
+					<MapNodeUI_Inner map={map} nodeID={nodeID} node={node} nodeView={nodeView} path={path}/>
 				</div>
 				<div className="clickThrough" style={{marginLeft: 10, zIndex: 1}}>
 					{nodeChildren.map((child, index)=> {
@@ -54,10 +54,10 @@ let nodeTypeBackgroundColors = {
 let nodeTypeFontSizes = {
 	[MapNodeType.Category]: 16
 }
-class MapNodeUI_Inner extends BaseComponent<{mapID: number, nodeID: number, node: MapNode, nodeView: MapNodeView, path: MapNodePath}, {}> {
+class MapNodeUI_Inner extends BaseComponent<{map: Map, nodeID: number, node: MapNode, nodeView: MapNodeView, path: MapNodePath}, {}> {
 	//static contextTypes = {store: PropTypes.object.isRequired};
 	render() {
-		let {mapID, nodeID, node, nodeView, path} = this.props;
+		let {map, nodeID, node, nodeView, path} = this.props;
 		//let {dispatch} = this.context.store;
 		let backgroundColor = nodeTypeBackgroundColors[node.type];
 		let fontSize = nodeTypeFontSizes[node.type] || 14;
@@ -73,14 +73,11 @@ class MapNodeUI_Inner extends BaseComponent<{mapID: number, nodeID: number, node
 						zIndex: 3, background: `rgba(${backgroundColor},.7)`, padding: 3, borderRadius: 5,
 						boxShadow: "0 0 1px rgba(255,255,255,.5)",
 					}}>
-						<Button text="Agree" mr={7} style={{padding: "3px 7px"}}>
+						<Button text="Probability" mr={7} style={{padding: "3px 7px"}}>
 							<Span ml={5}>90%</Span>
 						</Button>
 						<Button text="Degree" enabled={false} mr={7} style={{padding: "3px 7px"}}>
 							<Span ml={5}>70%</Span>
-						</Button>
-						<Button text="Disagree" mr={7} style={{padding: "3px 7px"}}>
-							<Span ml={5}>0%</Span>
 						</Button>
 						<Button text="..." style={{padding: "3px 7px"}}/>
 					</div>
@@ -90,13 +87,13 @@ class MapNodeUI_Inner extends BaseComponent<{mapID: number, nodeID: number, node
 								zIndex: 3, borderRadius: 5,
 							}}
 							onClick={()=> {
-								store.dispatch(new ACTSelectMapNode({mapID, path}));
+								store.dispatch(new ACTSelectMapNode({mapID: EStrToInt(map._key), path}));
 							}}>
-						<Div mt={7} mr={5}>90%</Div>
+						<Div mt={7} mr={5} style={{fontSize: "13px"}}>90% at 70%</Div>
 					</div>}
 				<div style={{position: "relative", zIndex: 2, background: `rgba(${backgroundColor},.7)`, padding: 5, borderRadius: "5px 0 0 5px", cursor: "pointer"}}
 						onClick={()=> {
-							store.dispatch(new ACTSelectMapNode({mapID, path}));
+							store.dispatch(new ACTSelectMapNode({mapID: EStrToInt(map._key), path}));
 						}}>
 					<a style={{fontSize}}>{node.title}</a>
 				</div>
