@@ -5,9 +5,9 @@ import {connect} from "react-redux";
 import {DBPath} from "../../../Frame/Database/DatabaseHelpers";
 import {Debugger, QuickIncrement, EStrToInt} from "../../../Frame/General/Globals_Free";
 import Button from "../../../Frame/ReactComponents/Button";
-import {PropTypes} from "react";
+import {PropTypes, Component} from "react";
 import Action from "../../../Frame/General/Action";
-import {RootState, MainState} from "../../../store/reducers";
+import {GetNodeView, RootState, GetSelectedNodeID} from "../../../store/reducers";
 import {Map} from "./Map";
 import {Log} from "../../../Frame/General/Logging";
 import {WaitXThenRun} from "../../../Frame/General/Timers";
@@ -15,25 +15,29 @@ import V from "../../../Frame/V/V";
 
 export class ACTSelectMapNode extends Action<{mapID: number, path: MapNodePath}> {}
 
-interface Props {map: Map, nodeID: number, node: MapNode, path?: MapNodePath, nodeView?: MapNodeView, nodeChildren?: MapNode[]};
+interface Props {map: Map, nodeID: number, node: MapNode, path?: MapNodePath,
+	nodeView?: MapNodeView, nodeChildren?: MapNode[]};
 @firebaseConnect(({node}: {node: MapNode})=>[
 	...(node.children || {}).VKeys().Select(a=>DBPath(`nodes/${a}`))
 ])
-@(connect(({firebase, main}: RootState, {nodeID, node, path, map}: Props)=> ({
-	nodeView: map && main.mapViews[EStrToInt(map._key)] && main.mapViews[EStrToInt(map._key)].As(MapView).GetViewForPath(path || new MapNodePath([nodeID])),
-	nodeChildren: (node.children || {}).VKeys().Select(a=>helpers.dataToJS(firebase, DBPath(`nodes/${a}`))).Where(a=>a),
-})) as any)
+@(connect((state: RootState, {nodeID, node, path, map}: Props)=> {
+	var path = path || new MapNodePath([nodeID]);
+	return {
+		path,
+		nodeView: GetNodeView(state, {map, path}),
+		nodeChildren: (node.children || {}).VKeys().Select(a=>helpers.dataToJS(state.firebase, DBPath(`nodes/${a}`))).Where(a=>a)
+	};
+}) as any)
 export default class MapNodeUI extends BaseComponent<Props, {}> {
 	//static contextTypes = {map: PropTypes.object};
 	render() {
 		let {map, nodeID, node, path, nodeView, nodeChildren, children} = this.props;
 		/*let {map} = this.context;
 		if (map == null) return <div>Loading map, deep...</div>; // not sure why this occurs*/
-		path = path || new MapNodePath([nodeID]);
 		return (
 			<div className="clickThrough" style={{display: "flex", padding: "3px 0"}}>
 				<div className="clickThrough" style={{zIndex: 1, transform: "translateY(calc(50% - 13px))"}}>
-					<MapNodeUI_Inner map={map} nodeID={nodeID} node={node} nodeView={nodeView} path={path}/>
+					<MapNodeUI_Inner map={map} node={node} nodeView={nodeView} path={path}/>
 				</div>
 				<div className="clickThrough" style={{marginLeft: 10}}>
 					{nodeChildren.map((child, index)=> {
@@ -56,10 +60,15 @@ let nodeTypeBackgroundColors = {
 let nodeTypeFontSizes = {
 	[MapNodeType.Category]: 16
 }
-class MapNodeUI_Inner extends BaseComponent<{map: Map, nodeID: number, node: MapNode, nodeView: MapNodeView, path: MapNodePath}, {}> {
+
+type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: MapNodePath} & {selectedNodeID?: number};
+@connect((state: RootState, props: MapNodeUI_Inner_Props)=> ({
+	selectedNodeID: GetSelectedNodeID(state, props),
+}) as any)
+class MapNodeUI_Inner extends Component<MapNodeUI_Inner_Props, {} | void> {
 	//static contextTypes = {store: PropTypes.object.isRequired};
 	render() {
-		let {map, nodeID, node, nodeView, path} = this.props;
+		let {map, node, nodeView, path, selectedNodeID} = this.props;
 		//let {dispatch} = this.context.store;
 		let backgroundColor = nodeTypeBackgroundColors[node.type];
 		let fontSize = nodeTypeFontSizes[node.type] || 14;
@@ -73,7 +82,7 @@ class MapNodeUI_Inner extends BaseComponent<{map: Map, nodeID: number, node: Map
 				<div style={{position: "absolute", transform: "translateX(-100%)", width: 1, height: 28}}/> {/* fixes click-gap */}
 				<div style={{position: "relative", zIndex: 2, background: `rgba(${backgroundColor},.7)`, padding: 5, borderRadius: "5px 0 0 5px", cursor: "pointer"}}
 						onClick={()=> {
-							if (GetState().Main.OpenMapView.SelectedNodeID != EStrToInt((node as any)._key))
+							if (selectedNodeID != node._key.KeyToInt)
 								store.dispatch(new ACTSelectMapNode({mapID: EStrToInt(map._key), path}));
 						}}>
 					<a style={{fontSize}}>{node.title}</a>

@@ -530,6 +530,16 @@ String.prototype._AddFunction_Inline = function Indent(indentCount) {
     return this.replace(/^|(\n)/g, "$1" + indentStr);
 };
 
+// for firebase entry keys
+interface String { readonly KeyToInt: number; }
+String.prototype._AddGetter_Inline = function KeyToInt() {
+	return parseInt((this as string).substr(1));
+};
+interface Number { readonly IntToKey: string; }
+Number.prototype._AddGetter_Inline = function IntToKey() {
+	return "e" + this;
+};
+
 String.prototype._AddFunction_Inline = function Func(func) {
 	func.SetName(this);
     return func;

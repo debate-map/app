@@ -23,6 +23,7 @@ export interface ChildCollection {
 }*/
 
 export interface MapNode {
+	_key?: string;
 	type: Partial<MapNodeType>;
 	title: string;
 	agrees: number;
@@ -50,7 +51,7 @@ export class MapNodePath {
 export class MapView {
 	rootNodeID: number;
 	rootNodeView = new MapNodeView();
-	GetViewForPath(path: MapNodePath) {
+	/*GetViewForPath(path: MapNodePath) {
 		var currentNodeView = this.rootNodeView || {children: {}};
 		for (let [index, nodeID] of path.nodeIDs.Skip(1).entries()) {
 			currentNodeView = currentNodeView.children[nodeID];
@@ -64,7 +65,7 @@ export class MapView {
 		if (selectedNodeView && selectedNodeView.ancestorPairs.Last().prop == "rootNodeView")
 			return this.rootNodeID;
 		return selectedNodeView ? selectedNodeView.ancestorPairs.Last().prop : null;
-	}
+	}*/
 }
 export class MapNodeView {
 	selected?: boolean;

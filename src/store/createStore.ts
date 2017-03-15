@@ -6,7 +6,6 @@ import {reduxFirebase, getFirebase} from "react-redux-firebase";
 import {firebase as fbConfig, reduxFirebase as reduxConfig} from "../config";
 //import {version} from "../../package.json";
 let {version} = require("../../package.json");
-import {updateLocation} from "./location";
 
 let browserHistory = createBrowserHistory();
 
@@ -44,9 +43,6 @@ export default function(initialState = {}, history) {
 		)
 	) as any;
 	store.asyncReducers = {};
-
-	// To unsubscribe, invoke `store.unsubscribeHistory()` anytime
-	store.unsubscribeHistory = browserHistory.listen(updateLocation(store));
 
 	if (module.hot) {
 		module.hot.accept("./reducers", () => {
