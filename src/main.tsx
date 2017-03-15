@@ -23,11 +23,11 @@ const store = createStore(initialState, {});
 g.Extend({store});
 declare global { var store: Store<RootState>; }
 
-function GetState() {
+/*function GetState() {
 	return (store as Store<RootState>).getState().As(RootState);
 }
 g.Extend({GetState});
-declare global { function GetState(): RootState; }
+declare global { function GetState(): RootState; }*/
 
 // wrapper ui
 // ==========

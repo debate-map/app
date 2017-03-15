@@ -90,12 +90,13 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	refs;
 	timers = [] as Timer[];
 
-	get FlattenedChildren() {
+	// make all these optional, so fits Component type definition/shape
+	/*get FlattenedChildren() {
 	    var children = this.props.children;
 	    if (!(children instanceof Array))
 	        children = [children];
 	    return React.Children.map((children as any).Where(a=>a), a=>a);
-	}
+	}*/
 
 	/** safe force-update;*/
 	Update(postUpdate?) {
