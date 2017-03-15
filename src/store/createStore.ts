@@ -6,6 +6,7 @@ import {reduxFirebase, getFirebase} from "react-redux-firebase";
 import {firebase as fbConfig, reduxFirebase as reduxConfig} from "../config";
 import {persistStore, autoRehydrate} from "redux-persist";
 //import {version} from "../../package.json";
+import {GetUrlVars} from "../Frame/General/Globals_Free";
 let {version} = require("../../package.json");
 
 let browserHistory = createBrowserHistory();
@@ -47,7 +48,9 @@ export default function(initialState = {}, history) {
 	store.asyncReducers = {};
 
 	// begin periodically persisting the store
-	persistStore(store, {whitelist: ["main"]});
+	let persister = persistStore(store, {whitelist: ["main"]});
+	if (GetUrlVars().clearState)
+		persister.purge();
 
 	if (module.hot) {
 		module.hot.accept("./reducers", () => {
