@@ -209,9 +209,9 @@ window.eval = function(code) {
     return evalOld.apply(this, arguments);
 };*/
 
-export function EStrToInt(eStr: string) {
+/*export function EStrToInt(eStr: string) {
 	return parseInt(eStr.substr(1));
 }
 export function IntToEStr(int: number) {
 	return "e" + int;
-}
+}*/

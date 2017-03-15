@@ -36,12 +36,6 @@ import Button from "./Frame/ReactComponents/Button";
 const history = createBrowserHistory();
 
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {
-	/*static childContextTypes = {
-		muiTheme: PropTypes.object
-	};
-	getChildContext() {
-		return {muiTheme: getMuiTheme(Theme)};
-	}*/
 	render() {
 		let {store} = this.props;
 		return (

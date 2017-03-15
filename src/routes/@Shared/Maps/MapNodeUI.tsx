@@ -1,9 +1,9 @@
 import {BaseComponent, Div, Span, Instant} from "../../../Frame/UI/ReactGlobals";
-import {MapNode, MapNodePath, MapNodeType, MapNodeView, MapView} from "./MapNode";
+import {MapNode, MapNodeType} from "./MapNode";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
 import {DBPath} from "../../../Frame/Database/DatabaseHelpers";
-import {Debugger, QuickIncrement, EStrToInt} from "../../../Frame/General/Globals_Free";
+import {Debugger, QuickIncrement} from "../../../Frame/General/Globals_Free";
 import Button from "../../../Frame/ReactComponents/Button";
 import {PropTypes, Component} from "react";
 import Action from "../../../Frame/General/Action";
@@ -12,8 +12,10 @@ import {Map} from "./Map";
 import {Log} from "../../../Frame/General/Logging";
 import {WaitXThenRun} from "../../../Frame/General/Timers";
 import V from "../../../Frame/V/V";
+import {MapNodePath, MapNodeView} from "../../../store/Store/Main/MapViews";
 
 export class ACTSelectMapNode extends Action<{mapID: number, path: MapNodePath}> {}
+export class ACTToggleMapNodeExpanded extends Action<{mapID: number, path: MapNodePath}> {}
 
 interface Props {map: Map, nodeID: number, node: MapNode, path?: MapNodePath,
 	nodeView?: MapNodeView, nodeChildren?: MapNode[]};
@@ -40,8 +42,8 @@ export default class MapNodeUI extends BaseComponent<Props, {}> {
 					<MapNodeUI_Inner map={map} node={node} nodeView={nodeView} path={path}/>
 				</div>
 				<div className="clickThrough" style={{marginLeft: 10}}>
-					{nodeChildren.map((child, index)=> {
-						let childID = EStrToInt(node.children.VKeys()[index]);
+					{nodeView && nodeView.expanded && nodeChildren.map((child, index)=> {
+						let childID = node.children.VKeys()[index].KeyToInt;
 						return <MapNodeUI key={index} map={map} nodeID={childID} node={child} path={path.Extend(childID)}/>;
 					})}
 				</div>
@@ -83,16 +85,20 @@ class MapNodeUI_Inner extends Component<MapNodeUI_Inner_Props, {} | void> {
 				<div style={{position: "relative", zIndex: 2, background: `rgba(${backgroundColor},.7)`, padding: 5, borderRadius: "5px 0 0 5px", cursor: "pointer"}}
 						onClick={()=> {
 							if (selectedNodeID != node._key.KeyToInt)
-								store.dispatch(new ACTSelectMapNode({mapID: EStrToInt(map._key), path}));
+								store.dispatch(new ACTSelectMapNode({mapID: map._key.KeyToInt, path}));
 						}}>
 					<a style={{fontSize}}>{node.title}</a>
 				</div>
-				<Button text="+" size={28} style={{
-					position: "relative", zIndex: 2, borderRadius: "0 5px 5px 0",
-					width: 18, fontSize: 18, textAlign: "center", lineHeight: "28px",
-					backgroundColor: `rgba(${backgroundColor},.5)`, boxShadow: "none",
-					":hover": {backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>parseInt(a) - 20).join(",")},.7)`},
-				}}/>
+				<Button text={nodeView && nodeView.expanded ? "-" : "+"} size={28}
+					style={{
+						position: "relative", zIndex: 2, borderRadius: "0 5px 5px 0",
+						width: 18, fontSize: 18, textAlign: "center", lineHeight: "28px",
+						backgroundColor: `rgba(${backgroundColor},.5)`, boxShadow: "none",
+						":hover": {backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>parseInt(a) - 20).join(",")},.7)`},
+					}}
+					onClick={()=> {
+						store.dispatch(new ACTToggleMapNodeExpanded({mapID: map._key.KeyToInt, path}));
+					}}/>
 			</div>
 		);
 	}

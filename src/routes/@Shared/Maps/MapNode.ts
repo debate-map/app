@@ -19,7 +19,7 @@ export interface ChildCollection {
 }
 /*export interface ChildInfo {
 	id: number;
-	type: 
+	type;
 }*/
 
 export interface MapNode {
@@ -36,38 +36,4 @@ export interface MapNode {
 	voteLevel: AccessLevel;
 	children: ChildCollection;
 	talkChildren: ChildCollection;
-}
-
-export class MapNodePath {
-	constructor(nodeIDs?: number[]) {
-		this.nodeIDs = nodeIDs || [];
-	}
-	nodeIDs: number[];
-	Extend(nodeID: number) {
-		return new MapNodePath(this.nodeIDs.concat(nodeID));
-	}
-}
-
-export class MapView {
-	rootNodeID: number;
-	rootNodeView = new MapNodeView();
-	/*GetViewForPath(path: MapNodePath) {
-		var currentNodeView = this.rootNodeView || {children: {}};
-		for (let [index, nodeID] of path.nodeIDs.Skip(1).entries()) {
-			currentNodeView = currentNodeView.children[nodeID];
-			if (currentNodeView == null)
-				return null;
-		}
-		return currentNodeView;
-	}
-	get SelectedNodeID() {
-		let selectedNodeView = V.GetKeyValuePairsInObjTree(this).FirstOrX(a=>a.prop == "selected" && a.value);
-		if (selectedNodeView && selectedNodeView.ancestorPairs.Last().prop == "rootNodeView")
-			return this.rootNodeID;
-		return selectedNodeView ? selectedNodeView.ancestorPairs.Last().prop : null;
-	}*/
-}
-export class MapNodeView {
-	selected?: boolean;
-	children = {};
 }
