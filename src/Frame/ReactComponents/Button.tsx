@@ -42,7 +42,7 @@ export default class Button extends BaseComponent
 	
 	render() {
 	    var {enabled, text, title, className, style, size, iconSize, height,
-			hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged} = this.props;
+			hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged, children} = this.props;
 		
 		var padding = "5px 15px";
 		if (height) {
@@ -53,24 +53,25 @@ export default class Button extends BaseComponent
 
 	    return (
 			<div title={title} onClick={this.OnClick}
-				className={className}
-				style={[
-					BasicStyles(this.props),
-					styles.root,
-					{padding},
-					size && {padding: 0, width: size, height: size,
-						backgroundPosition: `${(size - iconSize) / 2}px ${(size - iconSize) / 2}px`,
-						backgroundSize: iconSize
-					},
-					hasCheckbox && styles.root_hasCheckbox,
-					!enabled && styles.root_disabled,
-					style,
-				]}>
+					className={className}
+					style={[
+						BasicStyles(this.props),
+						styles.root,
+						{padding},
+						size && {padding: 0, width: size, height: size,
+							backgroundPosition: `${(size - iconSize) / 2}px ${(size - iconSize) / 2}px`,
+							backgroundSize: iconSize
+						},
+						hasCheckbox && styles.root_hasCheckbox,
+						!enabled && styles.root_disabled,
+						style,
+					]}>
 				{/*hasCheckbox && <CheckBox checked={checked} style={E(styles.checkbox, checkboxStyle)} labelStyle={checkboxLabelStyle}
 					onChange={checked=>onCheckedChanged && onCheckedChanged(checked)}/>*/}
 				{hasCheckbox
 					? <span style={{verticalAlign: 4}}>{text}</span>
 					: text}
+				{children}
 			</div>
 		);
 	}

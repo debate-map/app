@@ -8,7 +8,7 @@ import {WaitXThenRun, Timer} from "../General/Timers";
 import autoBind from "react-autobind";
 import {IsString} from "../General/Types";
 import {Assert} from "../General/Assert";
-import {E} from "../General/Globals_Free";
+import {E, Global} from "../General/Globals_Free";
 
 var ReactInstanceMap = require("react/lib/ReactInstanceMap");
 export var ShallowCompare = require("react-addons-shallow-compare");
@@ -216,15 +216,16 @@ export function SimpleShouldUpdate(target) {
 
 export type FirebaseDatabase = firebase.Database & FirebaseDatabase_Extensions;
 
-export class Span extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement>, any> {
+@Global
+export class Span extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement>, {}> {
     render() {
 		var {pre, style, ...rest} = this.props;
-        return <span {...rest} style={E(pre && {whiteSpace: "pre"}, style)}/>;
+        return <span {...rest} style={E(BasicStyles(this.props), style, pre && {whiteSpace: "pre"})}/>;
     }
 }
-g.Extend({Span});
 
-export class Div extends BaseComponent<any, any> {
+@Global
+export class Div extends BaseComponent<{shouldUpdate?} & React.HTMLProps<HTMLDivElement>, {}> {
 	shouldComponentUpdate(nextProps, nextState) {
 		if (this.props.shouldUpdate)
 			return this.props.shouldUpdate(nextProps, nextState);
@@ -235,7 +236,6 @@ export class Div extends BaseComponent<any, any> {
         return <div {...rest} style={E(BasicStyles(this.props), style)}/>;
     }
 }
-g.Extend({Div});
 
 // todo: make Row and RowLR more consistent
 
