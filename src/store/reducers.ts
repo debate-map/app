@@ -60,13 +60,16 @@ function MainReducer(state = {mapViews: {} as {[key: string]: MapView}}, action:
 		return {...state, openMap: 1, mapViews: {...state.mapViews, 1: state.mapViews[1] || {rootNodeView: {children: {}}}}};
 	if (action.Is(ACTSelectMapNode)) {
 		let newRootNodeView = FromJSON(ToJSON(state.mapViews[action.payload.mapID].rootNodeView)) as MapNodeView;
-		let newRootNodeView_currentNode = newRootNodeView;
-		for (let nodeID of action.payload.path.nodeIDs.Skip(1)) {
-			if (newRootNodeView_currentNode.children[nodeID] == null)
-				newRootNodeView_currentNode.children[nodeID] = {children: {}};
-			newRootNodeView_currentNode = newRootNodeView_currentNode.children[nodeID];
+		let newRootNodeView_currentNode;
+		if (action.payload.path.nodeIDs.length) {
+			newRootNodeView_currentNode = newRootNodeView;
+			for (let nodeID of action.payload.path.nodeIDs.Skip(1)) {
+				if (newRootNodeView_currentNode.children[nodeID] == null)
+					newRootNodeView_currentNode.children[nodeID] = {children: {}};
+				newRootNodeView_currentNode = newRootNodeView_currentNode.children[nodeID];
+			}
+			newRootNodeView_currentNode.selected = true;
 		}
-		newRootNodeView_currentNode.selected = true;
 
 		let newState = {...state};
 		newState.mapViews[action.payload.mapID].rootNodeView = newRootNodeView;

@@ -41,16 +41,23 @@ export interface BaseProps {
 	page?; match?;
 	firebase?: FirebaseDatabase;
 }
+var basePropFullKeys = {
+	ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
+	pl: "paddingLeft", pr: "paddingRight", pt: "paddingTop", pb: "paddingBottom",
+	plr: null, ptb: null,
+
+	tabLabel: null, active: null,
+
+	page: null, match: null,
+	firebase: null,
+};
 export function BasicStyles(props) {
 	var result: any = {};
 
-	var fullKeys = {
-		ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
-		pl: "paddingLeft", pr: "paddingRight", pt: "paddingTop", pb: "paddingBottom",
-	};
+	
 	for (let key in props) {
-		if (key in fullKeys) {
-			let fullKey = fullKeys[key];
+		if (key in basePropFullKeys) {
+			let fullKey = basePropFullKeys[key];
 			result[fullKey] = props[key];
 		} else if (key == "plr") {
 			result.paddingLeft = props[key];
@@ -71,6 +78,7 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		this.state = this.state || {} as any;
 	}
 
+	refs;
 	timers = [] as Timer[];
 
 	get FlattenedChildren() {
@@ -220,6 +228,8 @@ export type FirebaseDatabase = firebase.Database & FirebaseDatabase_Extensions;
 export class Span extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement>, {}> {
     render() {
 		var {pre, style, ...rest} = this.props;
+		for (let key in basePropFullKeys)
+			delete rest[key];
         return <span {...rest} style={E(BasicStyles(this.props), style, pre && {whiteSpace: "pre"})}/>;
     }
 }
@@ -233,6 +243,8 @@ export class Div extends BaseComponent<{shouldUpdate?} & React.HTMLProps<HTMLDiv
 	}
     render() {
 		let {shouldUpdate, style, ...rest} = this.props;
+		for (let key in basePropFullKeys)
+			delete rest[key];
         return <div {...rest} style={E(BasicStyles(this.props), style)}/>;
     }
 }
