@@ -70,10 +70,10 @@ let nodeTypeFontSizes = {
 }
 
 type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: MapNodePath} & {selectedNodeID?: number};
-@connect((state: RootState, props: MapNodeUI_Inner_Props)=> ({
+@(connect((state: RootState, props: MapNodeUI_Inner_Props)=> ({
 	selectedNodeID: GetSelectedNodeID(state, props),
-}) as any)
-class MapNodeUI_Inner extends Component<MapNodeUI_Inner_Props, {} | void> {
+})) as any)
+class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 	//static contextTypes = {store: PropTypes.object.isRequired};
 	render() {
 		let {map, node, nodeView, path, selectedNodeID} = this.props;
