@@ -76,6 +76,15 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		super(props);
 		autoBind(this);
 		this.state = this.state || {} as any;
+
+		// if using PreRender, wrap render func
+		if (this.PreRender != BaseComponent.prototype.render) {
+			let oldRender = this.render;
+			this.render = function() {
+				this.PreRender();
+				return oldRender.apply(this, arguments);
+			};
+		}
 	}
 
 	refs;
@@ -165,17 +174,23 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		this.ComponentDidMount(...args);
 		this.ComponentDidMountOrUpdate(true);
 		this.mounted = true;
-		if (this.PostRender) {
-			WaitXThenRun(0, ()=>window.requestAnimationFrame(()=> {
-				if (!this.mounted) return;
-			    this.PostRender(true);
-			}));
-			/*WaitXThenRun(0, ()=> {
+		if (this.PostRender != BaseComponent.prototype.PostRender) {
+			if ((this.PostRender as any).instant)
 				this.PostRender(true);
-			});*/
+			else {
+				WaitXThenRun(0, ()=>window.requestAnimationFrame(()=> {
+					if (!this.mounted) return;
+					this.PostRender(true);
+				}));
+				/*WaitXThenRun(0, ()=> {
+					this.PostRender(true);
+				});*/
+			}
 		}
 	}
+	ComponentWillUnmount(): void {};
 	private componentWillUnmount() {
+		this.ComponentWillUnmount();
 		for (let timer of this.timers)
 			timer.Stop();
 		this.timers = [];
@@ -193,17 +208,22 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	private componentDidUpdate(...args) {
 	    this.ComponentDidUpdate(...args);
 		this.ComponentDidMountOrUpdate(false);
-		if (this.PostRender) {
-			WaitXThenRun(0, ()=>window.requestAnimationFrame(()=> {
-			    if (!this.mounted) return;
-			    this.PostRender(false);
-			}));
-			/*WaitXThenRun(0, ()=> {
+		if (this.PostRender != BaseComponent.prototype.PostRender) {
+			if ((this.PostRender as any).instant)
 				this.PostRender(false);
-			});*/
+			else {
+				WaitXThenRun(0, ()=>window.requestAnimationFrame(()=> {
+					if (!this.mounted) return;
+					this.PostRender(false);
+				}));
+				/*WaitXThenRun(0, ()=> {
+					this.PostRender(false);
+				});*/
+			}
 		}
 	}
 
+	PreRender(): void {};
 	PostRender(initialMount: boolean): void {};
 
 	// maybe temp
@@ -220,6 +240,11 @@ export function SimpleShouldUpdate(target) {
 		g.Log(result + ";" + g.ToJSON(this.props) + ";" + g.ToJSON(newProps));
 		return result;*/
 	}
+}
+
+// for PostRender() func
+export function Instant(target, name) {
+	target[name].instant = true;
 }
 
 export type FirebaseDatabase = firebase.Database & FirebaseDatabase_Extensions;
