@@ -1,3 +1,4 @@
+import {RootState} from "../../../store/reducers";
 import {BaseComponent, FirebaseDatabase, FindDOM} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
@@ -14,13 +15,14 @@ import V from "../../../Frame/V/V";
 import {MapNodePath} from "../../../store/Store/Main/MapViews";
 var ScrollView = require("react-free-scrollbar").default;
 
+type Props = {map: Map, rootNode?: MapNode};
 @firebaseConnect(({map}: {map: Map})=> [
 	map && DBPath(`nodes/${map.rootNode}`),
 ].Where(a=>!!a))
-@(connect(({firebase}, {map}: {map: Map})=> ({
+@(connect(({firebase}: RootState, {map}: Props)=> ({
 	rootNode: map && helpers.dataToJS(firebase, DBPath(`nodes/${map.rootNode}`)),
 })) as any)
-export default class MapUI extends BaseComponent<{map: Map, rootNode?: MapNode}, {}> {
+export default class MapUI extends BaseComponent<Props, {} | void> {
 	/*static childContextTypes = {
 		//mapID: PropTypes.number.isRequired,
 		map: PropTypes.object,
