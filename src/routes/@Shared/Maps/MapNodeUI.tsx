@@ -133,7 +133,7 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 			<div ref="root" className="clickThroughChain"
 					style={{
 						display: "flex", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap", height: 28,
-						borderRadius: 5, //opacity: 0,
+						borderRadius: 5, opacity: 0,
 					}}>
 				<Div mt={7} mr={5} style={{fontSize: "13px"}}>90% at 70%</Div>
 			</div>
@@ -145,7 +145,7 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 		return nodeView == null || !nodeView.selected;
 	}
 	PreRender() {
-		this.PopBackIn();
+		this.PopBackIn(true);
 	}
 	@Instant
 	PostRender() {
@@ -154,35 +154,47 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 		}
 	}
 	ComponentWillUnmount() {
-		this.PopBackIn();
+		this.PopBackIn(false);
+		if (this.tempCopy) {
+			this.tempCopy.remove();
+			this.tempCopy = null;
+		}
 	}
 
-	dom: HTMLElement;
-	domParent: HTMLElement;
+	dom: JQuery;
+	domParent: JQuery;
 	poppedOut = false;
 	oldStyle;
+	tempCopy: JQuery; // used to fix that text disappears for a moment (when unmounting then remounting)
 	PopOut() {
 		if (this.poppedOut) return;
-		this.dom = this.refs.root;
-		if (this.dom == null) return;
-		this.domParent = this.dom.parentElement;
 
-		let posFrom = ($(this.dom) as any).positionFrom($("#MapUI"));
-		//document.querySelector("#MapUI").appendChild(this.dom);
-		document.querySelector("#MapUI").insertBefore(this.dom, document.querySelector("#MapUI").firstChild);
-		this.oldStyle = $(this.dom).attr("style");
-		/*this.dom.style.left = ($(this.dom) as any).positionFrom($("#MapUI")).left;
-		this.dom.style.top = ($(this.dom) as any).positionFrom($("#MapUI")).top;*/
-		$(this.dom).css("left", posFrom.left);
-		$(this.dom).css("top", posFrom.top);
-		$(this.dom).css("transform", "");
-		//$(this.dom).css("opacity", "1");
+		if (this.tempCopy) {
+			this.tempCopy.remove();
+			this.tempCopy = null;
+		}
+		this.dom = $(this.refs.root);
+		if (this.dom == null) return;
+		this.domParent = this.dom.parent();
+
+		let posFrom = (this.dom as any).positionFrom($("#MapUI"));
+		this.dom.prependTo("#MapUI");
+		this.oldStyle = this.dom.attr("style");
+		/*this.dom.style.left = (this.dom as any).positionFrom($("#MapUI")).left;
+		this.dom.style.top = (this.dom as any).positionFrom($("#MapUI")).top;*/
+		this.dom.css("left", posFrom.left);
+		this.dom.css("top", posFrom.top);
+		this.dom.css("transform", "");
+		this.dom.css("opacity", "1");
 		this.poppedOut = true;
 	}
-	PopBackIn() {
+	PopBackIn(makeTempCopy) {
 		if (!this.poppedOut) return;
-		this.domParent.appendChild(this.dom);
-		$(this.dom).attr("style", this.oldStyle);
+
+		if (makeTempCopy)
+			this.tempCopy = this.dom.clone().prependTo("#MapUI"); // make a copy that stays here for a bit
+		this.dom.appendTo(this.domParent);
+		this.dom.attr("style", this.oldStyle);
 		this.poppedOut = false;
 	}
 }
