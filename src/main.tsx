@@ -21,9 +21,13 @@ var createStore = require("./store/createStore").default;
 const initialState = (window as any).___INITIAL_STATE__;
 const store = createStore(initialState, {});
 g.Extend({store});
-declare global {
-	var store: Store<RootState>;
+declare global { var store: Store<RootState>; }
+
+function GetState() {
+	return (store as Store<RootState>).getState().As(RootState);
 }
+g.Extend({GetState});
+declare global { function GetState(): RootState; }
 
 // wrapper ui
 // ==========

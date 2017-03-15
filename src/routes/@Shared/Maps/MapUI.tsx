@@ -6,10 +6,11 @@ import {Map} from "./Map";
 import MapNodeUI from "./MapNodeUI";
 import {DBPath} from "../../../Frame/Database/DatabaseHelpers";
 import {MapNode, MapNodePath} from "./MapNode";
-import {EStrToInt} from "../../../Frame/General/Globals_Free";
+import {EStrToInt, Debugger} from "../../../Frame/General/Globals_Free";
 import {PropTypes} from "react";
 import {ACTSelectMapNode} from "./MapNodeUI";
 import {Assert} from "../../../Frame/Serialization/VDF/VDF";
+import V from "../../../Frame/V/V";
 var ScrollView = require("react-free-scrollbar").default;
 
 @firebaseConnect(({map}: {map: Map})=> [
@@ -35,11 +36,14 @@ export default class MapUI extends BaseComponent<{map: Map, rootNode?: MapNode},
 		if (rootNode == null)
 			return <div>Loading root node...</div>;
 		return (
-			<ScrollView backgroundDrag={true} scrollVBarStyles={{width: 10}}>
+			<ScrollView backgroundDrag={true} backgroundDragMatchFunc={a=>a == this.refs.content} scrollVBarStyles={{width: 10}}>
 				<div id="MapUI" ref="content" style={{position: "relative", padding: "150px 870px"}}
 						onClick={e=> {
 							if (e.target != this.refs.content) return;
-							store.dispatch(new ACTSelectMapNode({mapID: EStrToInt(map._key), path: new MapNodePath()}));
+							let mapView = store.getState().main.mapViews[store.getState().main.openMap];
+							let isNodeSelected = V.GetKeyValuePairsInObjTree(mapView).Any(a=>a.prop == "selected" && a.value);
+							if (isNodeSelected)
+								store.dispatch(new ACTSelectMapNode({mapID: EStrToInt(map._key), path: new MapNodePath()}));
 						}}>
 					<MapNodeUI map={map} nodeID={EStrToInt(map.rootNode)} node={rootNode}/>
 				</div>
