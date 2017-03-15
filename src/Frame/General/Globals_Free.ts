@@ -148,7 +148,7 @@ window.Extend({E});
 
 export function CurrentUrl() { return window.location.href.replace(/%22/, "\""); } // note; look into the escaping issue more
 /** Returns [pathStr, varsStr, hashStr], without the separator-chars. */
-export function GetUrlParts(url: string = null): [string, string, string] {
+export function GetUrlParts(url?: string): [string, string, string] {
 	url = url || CurrentUrl();
 
 	let [pathStr, varsStr, hashStr] = Array(3).fill(0).Select(a=>"");
@@ -162,7 +162,7 @@ export function GetUrlParts(url: string = null): [string, string, string] {
 
 	return [pathStr, varsStr, hashStr];
 }
-export function GetUrlPath(url: string = null, fromDomain = true) {
+export function GetUrlPath(url?: string, fromDomain = true) {
 	let [pathStr, varsStr, hashStr] = GetUrlParts(url);
 	if (fromDomain)
 		pathStr = pathStr.SplitAt(pathStr.IndexOf_X("/", 2).IfN1Then(pathStr.length))[1];
@@ -170,9 +170,9 @@ export function GetUrlPath(url: string = null, fromDomain = true) {
 		pathStr = pathStr.substr(0, pathStr.length - 1);
 	return pathStr;
 }
-export function GetUrlVars(url) {
+export function GetUrlVars(url?: string) {
 	let [pathStr, varsStr, hashStr] = GetUrlParts(url);
-	var vars = {};
+	var vars = {} as any;
 	var parts = varsStr.split("&");
 	for (let part of parts) {
 		let [key, value] = part.SplitAt(part.indexOf("="))
