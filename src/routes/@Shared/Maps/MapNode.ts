@@ -1,3 +1,4 @@
+import V from "../../../Frame/V/V";
 export enum MapNodeType {
 	None = 0,
 	Category = 1,
@@ -47,7 +48,8 @@ export class MapNodePath {
 }
 
 export class MapView {
-	rootNodeView: MapNodeView;
+	rootNodeID: number;
+	rootNodeView = new MapNodeView();
 	GetViewForPath(path: MapNodePath) {
 		var currentNodeView = this.rootNodeView || {children: {}};
 		for (let [index, nodeID] of path.nodeIDs.Skip(1).entries()) {
@@ -57,8 +59,14 @@ export class MapView {
 		}
 		return currentNodeView;
 	}
+	get SelectedNodeID() {
+		let selectedNodeView = V.GetKeyValuePairsInObjTree(this).FirstOrX(a=>a.prop == "selected" && a.value);
+		if (selectedNodeView && selectedNodeView.ancestorPairs.Last().prop == "rootNodeView")
+			return this.rootNodeID;
+		return selectedNodeView ? selectedNodeView.ancestorPairs.Last().prop : null;
+	}
 }
-export interface MapNodeView {
+export class MapNodeView {
 	selected?: boolean;
-	children: any;
+	children = {};
 }

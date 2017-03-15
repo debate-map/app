@@ -168,12 +168,14 @@ export default class V {
 				V.ForEachChildInTreeXDoY(value, actionY);
 		}
 	}*/
-	static GetKeyValuePairsInObjTree(obj: any) {
-		let result = [] as {obj, prop, value}[];
+	static GetKeyValuePairsInObjTree(obj: any, ancestorPairs = []) {
+		type pair = {ancestorPairs, obj, prop, value};
+		let result = [] as {ancestorPairs: pair[], obj, prop, value}[];
 		for (let key in obj) {
 			let value = obj[key];
-			result.push({obj, prop: key, value});
-			result.AddRange(V.GetKeyValuePairsInObjTree(value));
+			let currentPair = {ancestorPairs, obj, prop: key, value};
+			result.push(currentPair);
+			result.AddRange(V.GetKeyValuePairsInObjTree(value, ancestorPairs.concat(currentPair)));
 		}
 		return result;
 	}

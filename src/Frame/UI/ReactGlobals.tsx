@@ -334,10 +334,22 @@ export function Equals_Shallow(objA, objB) {
 
 //require("./GlobalStyles");
 
-export function AddGlobalElement(str) {
-    $(()=> {
-        $(str).appendTo("#hidden_early");
-    });
+let loaded = false;
+export function AddGlobalElement(html) {
+	/*$(()=> {
+        $(html).appendTo("#hidden_early");
+    });*/
+	let proceed = ()=> {
+		loaded = true;
+		let nodeType = html.trim().substring(1, html.trim().IndexOfAny(" ", ">"));
+		let element = document.createElement(nodeType);
+		document.querySelector("#hidden_early").appendChild(element);
+		element.outerHTML = html;
+	};
+	if (loaded)
+		proceed();
+	else
+		window.addEventListener("load", proceed);
 };
 export function AddGlobalStyle(str) {
     AddGlobalElement(`

@@ -19,6 +19,7 @@ export function InjectReducer(store, {key, reducer}) {
 
 export class RootState {
 	main: MainState;
+	get Main() { return this.main.As(MainState); }
 	firebase: any;
 	form: any;
 	router: any;
@@ -41,9 +42,12 @@ export class MainState {
 
 	openMap: number;
 	//selectedNode: number;
-	mapViews: {[key: number]: MapView};
+	mapViews = {} as {[key: number]: MapView};
+	get OpenMapView() {
+		return store.getState().main.mapViews[store.getState().main.openMap].As(MapView);
+	}
 }
-function MainReducer(state = {mapViews: {} as {[key: string]: MapView}}, action: Action<any>) {
+function MainReducer(state = new MainState(), action: Action<any>) {
 	// cheats
 	if (action.type == "@@reactReduxFirebase/SET")
 		(action as any).data._key = ((action as any).path as string).split("/").Last();
@@ -57,7 +61,7 @@ function MainReducer(state = {mapViews: {} as {[key: string]: MapView}}, action:
 		return {...state, openConfirmationBoxOptions: action.payload};
 
 	if (action.type == "@@router/LOCATION_CHANGE" && action.payload.pathname == "/global")
-		return {...state, openMap: 1, mapViews: {...state.mapViews, 1: state.mapViews[1] || {rootNodeView: {children: {}}}}};
+		return {...state, openMap: 1, mapViews: {...state.mapViews, 1: state.mapViews[1] || new MapView()}};
 	if (action.Is(ACTSelectMapNode)) {
 		let newRootNodeView = FromJSON(ToJSON(state.mapViews[action.payload.mapID].rootNodeView)) as MapNodeView;
 		let newRootNodeView_currentNode;
@@ -72,6 +76,7 @@ function MainReducer(state = {mapViews: {} as {[key: string]: MapView}}, action:
 		}
 
 		let newState = {...state};
+		newState.mapViews[action.payload.mapID].rootNodeID = action.payload.path.nodeIDs[0];
 		newState.mapViews[action.payload.mapID].rootNodeView = newRootNodeView;
 		let pairs = V.GetKeyValuePairsInObjTree(newState);
 		for (let pair of pairs) {

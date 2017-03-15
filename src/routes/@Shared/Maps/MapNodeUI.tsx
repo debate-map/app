@@ -7,10 +7,11 @@ import {Debugger, QuickIncrement, EStrToInt} from "../../../Frame/General/Global
 import Button from "../../../Frame/ReactComponents/Button";
 import {PropTypes} from "react";
 import Action from "../../../Frame/General/Action";
-import {RootState} from "../../../store/reducers";
+import {RootState, MainState} from "../../../store/reducers";
 import {Map} from "./Map";
 import {Log} from "../../../Frame/General/Logging";
 import {WaitXThenRun} from "../../../Frame/General/Timers";
+import V from "../../../Frame/V/V";
 
 export class ACTSelectMapNode extends Action<{mapID: number, path: MapNodePath}> {}
 
@@ -68,11 +69,12 @@ class MapNodeUI_Inner extends BaseComponent<{map: Map, nodeID: number, node: Map
 				boxShadow: "0 0 1px rgba(255,255,255,.5)",
 				filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 3px) drop-shadow(rgba(0,0,0,.35) 0px 0px 3px)",
 			}}>
-				<MapNodeUI_LeftBox map={map} nodeView={nodeView} path={path} backgroundColor={backgroundColor}/>
+				<MapNodeUI_LeftBox map={map} node={node} nodeView={nodeView} path={path} backgroundColor={backgroundColor}/>
 				<div style={{position: "absolute", transform: "translateX(-100%)", width: 1, height: 28}}/> {/* fixes click-gap */}
 				<div style={{position: "relative", zIndex: 2, background: `rgba(${backgroundColor},.7)`, padding: 5, borderRadius: "5px 0 0 5px", cursor: "pointer"}}
 						onClick={()=> {
-							store.dispatch(new ACTSelectMapNode({mapID: EStrToInt(map._key), path}));
+							if (GetState().Main.OpenMapView.SelectedNodeID != EStrToInt((node as any)._key))
+								store.dispatch(new ACTSelectMapNode({mapID: EStrToInt(map._key), path}));
 						}}>
 					<a style={{fontSize}}>{node.title}</a>
 				</div>
@@ -87,9 +89,9 @@ class MapNodeUI_Inner extends BaseComponent<{map: Map, nodeID: number, node: Map
 	}
 }
 
-export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, nodeView?: MapNodeView, path: MapNodePath, backgroundColor: string}, {}> {
+export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, nodeView?: MapNodeView, path: MapNodePath, backgroundColor: string}, {}> {
 	render() {
-		let {map, nodeView, path, backgroundColor} = this.props;
+		let {map, node, nodeView, path, backgroundColor} = this.props;
 		if (nodeView && nodeView.selected)
 			return (
 				<div style={{
@@ -107,19 +109,15 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, nodeView?: MapNo
 				</div>
 			);
 		return (
-			<div ref="root"
+			<div ref="root" className="clickThroughChain"
 					style={{
 						display: "flex", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap", height: 28,
 						borderRadius: 5, //opacity: 0,
-					}}
-					onClick={()=> {
-						store.dispatch(new ACTSelectMapNode({mapID: EStrToInt(map._key), path}));
 					}}>
 				<Div mt={7} mr={5} style={{fontSize: "13px"}}>90% at 70%</Div>
 			</div>
 		);
 	}
-
 
 	get ShouldPopOut() {
 		let {nodeView, backgroundColor} = this.props;
@@ -170,8 +168,8 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, nodeView?: MapNo
 /*interface JQuery {
 	positionFrom(referenceControl): void;
 }*/
-$.fn.positionFrom = function(referenceControl) {
+setTimeout(()=>$.fn.positionFrom = function(referenceControl) {
 	var offset = $(this).offset();
 	var referenceControlOffset = referenceControl.offset();
 	return {left: offset.left - referenceControlOffset.left, top: offset.top - referenceControlOffset.top};
-};
+});
