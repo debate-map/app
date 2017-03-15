@@ -37,11 +37,17 @@ export default class MapNodeUI extends BaseComponent<Props, {}> {
 		/*let {map} = this.context;
 		if (map == null) return <div>Loading map, deep...</div>; // not sure why this occurs*/
 		return (
-			<div className="clickThrough" style={{display: "flex", padding: "3px 0"}}>
-				<div className="clickThrough" style={{zIndex: 1, transform: "translateY(calc(50% - 13px))"}}>
+			<div className="clickThrough" style={{padding: "3px 0"}}>
+				<div className="clickThrough" style={{
+					zIndex: 1, float: "left", transform: "translateX(0)" // fixes z-index issue
+				}}>
 					<MapNodeUI_Inner map={map} node={node} nodeView={nodeView} path={path}/>
 				</div>
-				<div className="clickThrough" style={{marginLeft: 10}}>
+				<div className="clickThrough"
+						style={{
+							zIndex: 1, marginLeft: 10, float: "left",
+							transform: "translateY(calc(-50% + 14px))", display: "flex", flexDirection: "column"
+						}}>
 					{nodeView && nodeView.expanded && nodeChildren.map((child, index)=> {
 						let childID = node.children.VKeys()[index].KeyToInt;
 						return <MapNodeUI key={index} map={map} nodeID={childID} node={child} path={path.Extend(childID)}/>;
@@ -76,7 +82,7 @@ class MapNodeUI_Inner extends Component<MapNodeUI_Inner_Props, {} | void> {
 		let fontSize = nodeTypeFontSizes[node.type] || 14;
 		return (
 			<div style={{
-				display: "flex", position: "relative", borderRadius: 5, cursor: "pointer",
+				display: "flex", position: "relative", borderRadius: 5, cursor: "pointer", zIndex: 1,
 				boxShadow: "0 0 1px rgba(255,255,255,.5)",
 				filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 3px) drop-shadow(rgba(0,0,0,.35) 0px 0px 3px)",
 			}}>
@@ -162,7 +168,8 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 		this.domParent = this.dom.parentElement;
 
 		let posFrom = ($(this.dom) as any).positionFrom($("#MapUI"));
-		document.querySelector("#MapUI").appendChild(this.dom);
+		//document.querySelector("#MapUI").appendChild(this.dom);
+		document.querySelector("#MapUI").insertBefore(this.dom, document.querySelector("#MapUI").firstChild);
 		this.oldStyle = $(this.dom).attr("style");
 		/*this.dom.style.left = ($(this.dom) as any).positionFrom($("#MapUI")).left;
 		this.dom.style.top = ($(this.dom) as any).positionFrom($("#MapUI")).top;*/
