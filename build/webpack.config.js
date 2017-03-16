@@ -19,7 +19,13 @@ const webpackConfig = {
 	resolve: {
 		root: paths.client(),
 		extensions: ["", ".js", ".jsx", ".ts", ".tsx", ".json"],
-		fallback: [path.join(__dirname, "node_modules")]
+		fallback: [path.join(__dirname, "node_modules")],
+		alias: {
+            //"react": __dirname + "/node_modules/react/",
+            "react": paths.base() + "/node_modules/react/",
+			"react-dom": paths.base() + "/node_modules/react-dom/",
+			//"@types/react": paths.base() + "/node_modules/@types/react/",
+        }
 	},
 	// same issue, for loaders like babel
 	resolveLoader: {
@@ -123,11 +129,11 @@ webpackConfig.module.loaders = [
 		loader: "babel",
 		query: config.compiler_babel
 	},
+	{test: /\.tsx?$/, loader: "ts-loader"},
 	{
 		test: /\.json$/,
 		loader: "json"
 	},
-	{ test: /\.tsx?$/, loader: "ts-loader" },
 ]
 
 // ------------------------------------

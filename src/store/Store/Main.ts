@@ -3,7 +3,7 @@ import {MapViews, MapViewsReducer} from "./Main/MapViews";
 import {combineReducers} from "redux";
 import {firebaseStateReducer} from "react-redux-firebase";
 import {reducer as formReducer} from "redux-form";
-import {ACTShowMessageBox, ACTShowConfirmationBox, MessageBoxOptions, ConfirmationBoxOptions} from "../../Frame/UI/VMessageBox";
+import {ACTShowMessageBox, MessageBoxOptions} from "../../Frame/UI/VMessageBox";
 import Action from "../../Frame/General/Action";
 import {ACTSetUserPanelOpen} from "../../containers/Navbar";
 import {routerReducer} from "react-router-redux";
@@ -15,7 +15,6 @@ import V from "../../Frame/V/V";
 export class MainState {
 	userPanelOpen = false;
 	openMessageBoxOptions: MessageBoxOptions;
-	openConfirmationBoxOptions: ConfirmationBoxOptions;
 
 	openMap: number;
 	mapViews = {} as MapViews;
@@ -24,7 +23,7 @@ export class MainState {
 export const MainReducer = CombineReducers({
 	userPanelOpen: (state = false, action)=> {
 		// cheats
-		if (action.type == "@@reactReduxFirebase/SET")
+		if (action.type == "@@reactReduxFirebase/SET" && (action as any).data)
 			(action as any).data._key = ((action as any).path as string).split("/").Last();
 
 		//case SET_USER_PANEL_OPEN: return {...state, userPanelOpen: action.payload};
@@ -35,11 +34,6 @@ export const MainReducer = CombineReducers({
 	openMessageBoxOptions: (state = null, action)=> {
 		if (action.Is(ACTShowMessageBox))
 			return action.payload;
-		return state;
-	},
-	openConfirmationBoxOptions: (state = null, action)=> {
-		if (action.Is(ACTShowConfirmationBox))
-			return {...state, openConfirmationBoxOptions: action.payload};
 		return state;
 	},
 	openMap: (state = null, action)=> {

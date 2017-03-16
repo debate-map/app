@@ -7,12 +7,17 @@ import {Debugger, QuickIncrement} from "../../../Frame/General/Globals_Free";
 import Button from "../../../Frame/ReactComponents/Button";
 import {PropTypes, Component} from "react";
 import Action from "../../../Frame/General/Action";
-import {GetNodeView, RootState, GetSelectedNodeID} from "../../../store/reducers";
+import {GetNodeView, RootState, GetSelectedNodeID, GetNodes_FBPaths, GetNodes} from "../../../store/reducers";
 import {Map} from "./Map";
 import {Log} from "../../../Frame/General/Logging";
 import {WaitXThenRun} from "../../../Frame/General/Timers";
 import V from "../../../Frame/V/V";
 import {MapNodePath, MapNodeView} from "../../../store/Store/Main/MapViews";
+import * as VMenuTest1 from "react-vmenu";
+import VMenu, {VMenuItem} from "react-vmenu";
+import Select from "../../../Frame/ReactComponents/Select";
+import {GetEntries} from "../../../Frame/General/Enums";
+import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
 
 export class ACTSelectMapNode extends Action<{mapID: number, path: MapNodePath}> {}
 export class ACTToggleMapNodeExpanded extends Action<{mapID: number, path: MapNodePath}> {}
@@ -20,14 +25,14 @@ export class ACTToggleMapNodeExpanded extends Action<{mapID: number, path: MapNo
 interface Props {map: Map, nodeID: number, node: MapNode, path?: MapNodePath,
 	nodeView?: MapNodeView, nodeChildren?: MapNode[]};
 @firebaseConnect(({node}: {node: MapNode})=>[
-	...(node.children || {}).VKeys().Select(a=>DBPath(`nodes/${a}`))
+	...GetNodes_FBPaths({nodeIDs: (node.children || {}).VKeys().Select(a=>a.KeyToInt)})
 ])
 @(connect((state: RootState, {nodeID, node, path, map}: Props)=> {
 	var path = path || new MapNodePath([nodeID]);
 	return {
 		path,
 		nodeView: GetNodeView(state, {map, path}),
-		nodeChildren: (node.children || {}).VKeys().Select(a=>helpers.dataToJS(state.firebase, DBPath(`nodes/${a}`))).Where(a=>a)
+		nodeChildren: GetNodes(state, {nodeIDs: (node.children || {}).VKeys().Select(a=>a.KeyToInt)})
 	};
 }) as any)
 export default class MapNodeUI extends BaseComponent<Props, {}> {
@@ -66,7 +71,7 @@ let nodeTypeBackgroundColors = {
 	[MapNodeType.NegativeArgument]: "0,100,180",
 }
 let nodeTypeFontSizes = {
-	[MapNodeType.Category]: 16
+	Category: 16
 }
 
 type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: MapNodePath} & {selectedNodeID?: number};
@@ -105,6 +110,23 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 					onClick={()=> {
 						store.dispatch(new ACTToggleMapNodeExpanded({mapID: map._key.KeyToInt, path}));
 					}}/>
+				<VMenu contextMenu={true} onBody={true}>
+					<VMenuItem text="Add child node" onClick={e=> {
+						if (e.button != 0) return;
+						let type: MapNodeType;
+						ShowMessageBox({
+							title: "Add child node", cancelButton: true,
+							messageUI: (
+								<div>
+									Type: <Select options={GetEntries(MapNodeType).Where(a=>a.name != "None")} value={MapNodeType.Category} onChange={val=>type = val}/>
+								</div>
+							),
+							onOK: ()=> {
+								alert("Type:" + type);
+							}
+						});
+					}}/>
+				</VMenu>
 			</div>
 		);
 	}
