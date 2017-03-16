@@ -4,7 +4,7 @@ import {firebaseConnect} from "react-redux-firebase";
 import Button from "../../Frame/ReactComponents/Button";
 import VMessageBox from "../../Frame/UI/VMessageBox";
 import {MapNode, MapNodeType} from "../@Shared/Maps/MapNode";
-import {ShowConfirmationBox, ShowMessageBox} from "../../Frame/UI/VMessageBox";
+import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
 import {Map, MapType} from "../@Shared/Maps/Map";
 import {E} from "../../Frame/General/Globals_Free";
 
@@ -15,8 +15,8 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 		return (
 			<div style={E(styles.page)}>
 				<Button text="Reset database" onClick={()=> {
-					ShowConfirmationBox({
-						title: "Reset database?", message: "This will clear all existing data.",
+					ShowMessageBox({
+						title: "Reset database?", message: "This will clear all existing data.", cancelButton: true,
 						onOK: async ()=> {
 							/*await firebase.Ref("nodes").remove();
 							let rootNode: MapNode = {

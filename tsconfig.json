@@ -12,6 +12,7 @@
 		"baseUrl": ".",
 		"paths": {
 			"*": [
+				"node_modules/@types/*", // prefer "/node_modules/@types" over "/node_modules/[something]/node_modules/@types" (eg, when using npm link)
 				"*",
 				"node_modules_CustomExternal/*",
 				"node_modules_CustomInternal/*"

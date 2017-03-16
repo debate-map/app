@@ -54,7 +54,6 @@ var basePropFullKeys = {
 export function BasicStyles(props) {
 	var result: any = {};
 
-	
 	for (let key in props) {
 		if (key in basePropFullKeys) {
 			let fullKey = basePropFullKeys[key];

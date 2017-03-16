@@ -1,8 +1,8 @@
 import {Map} from "../routes/@Shared/Maps/Map";
 import {combineReducers} from "redux";
-import {firebaseStateReducer} from "react-redux-firebase";
+import {firebaseStateReducer, helpers} from "react-redux-firebase";
 import {reducer as formReducer} from "redux-form";
-import {ACTShowMessageBox, ACTShowConfirmationBox, MessageBoxOptions, ConfirmationBoxOptions} from "../Frame/UI/VMessageBox";
+import {ACTShowMessageBox, MessageBoxOptions} from "../Frame/UI/VMessageBox";
 import Action from "../Frame/General/Action";
 import {ACTSetUserPanelOpen} from "../containers/Navbar";
 import {routerReducer} from "react-router-redux";
@@ -12,6 +12,7 @@ import V from "../Frame/V/V";
 import {MainState, MainReducer} from "./Store/Main";
 import {createSelector} from "reselect";
 import {MapNodePath} from "./Store/Main/MapViews";
+import {DBPath} from "../Frame/Database/DatabaseHelpers";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;
@@ -45,6 +46,12 @@ export function GetSelectedNodeID(state: RootState, {map}: {map: Map}) {
 	if (selectedNodeView && selectedNodeView.ancestorPairs.Last().prop == "rootNodeView")
 		return map.rootNode.KeyToInt;
 	return selectedNodeView ? selectedNodeView.ancestorPairs.Last().prop as number : null;
+}
+export function GetNodes_FBPaths({nodeIDs}: {nodeIDs: number[]}) {
+	return nodeIDs.Select(a=>DBPath(`nodes/${a}`));
+}
+export function GetNodes(state: RootState, {nodeIDs}: {nodeIDs: number[]}) {
+	return nodeIDs.Select(a=>helpers.dataToJS(state.firebase, DBPath(`nodes/${a}`))).Where(a=>a);
 }
 export function GetNodeView(state: RootState, {map, path}: {map: Map, path: MapNodePath}) {
 	if (map == null || path == null) return null;

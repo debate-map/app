@@ -151,7 +151,8 @@ export default class V {
 	    if (IsString(args[0])) var [stackTrace, sourceStackTrace = true] = args;
 	    else var [sourceStackTrace = true] = args;
 
-		stackTrace = stackTrace || new Error()[sourceStackTrace ? "Stack" : "stack"];
+		//stackTrace = stackTrace || new Error()[sourceStackTrace ? "Stack" : "stack"];
+		stackTrace = stackTrace || new Error().stack;
 		return stackTrace.substr(stackTrace.IndexOf_X(1, "\n")); // remove "Error" line and first stack-frame (that of this method)
 	}
 	static LogStackTrace() { Log(V.GetStackTraceStr()); }

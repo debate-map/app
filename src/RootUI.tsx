@@ -29,7 +29,7 @@ import AdminUI from "./routes/More/Admin";
 import RootUI2 from "./routes/Root";
 import {GetUrlPath, E} from "./Frame/General/Globals_Free";
 import {RootState} from "./store/reducers";
-import {MessageBoxOptions, ConfirmationBoxOptions, ACTShowMessageBox, ACTShowConfirmationBox} from "./Frame/UI/VMessageBox";
+import {MessageBoxOptions, ACTShowMessageBox, MessageBoxUI} from "./Frame/UI/VMessageBox";
 import Button from "./Frame/ReactComponents/Button";
 
 // Create a history of your choosing (we're using a browser history in this case)
@@ -92,67 +92,14 @@ class RootUI extends BaseComponent<{}, {}> {
 
 @(connect((state: RootState)=>({
 	openMessageBoxOptions: state.main.openMessageBoxOptions,
-	openConfirmationBoxOptions: state.main.openConfirmationBoxOptions,
 })) as any)
-class OverlayUI extends BaseComponent<{openMessageBoxOptions?: MessageBoxOptions, openConfirmationBoxOptions?: ConfirmationBoxOptions}, {}> {
+class OverlayUI extends BaseComponent<{openMessageBoxOptions?: MessageBoxOptions}, {}> {
 	render() {
-		let {openMessageBoxOptions, openConfirmationBoxOptions} = this.props;
+		let {openMessageBoxOptions} = this.props;
 		return (
 			<div style={{position: "absolute"}}>
-				{openMessageBoxOptions && <ModalUI type="message" options={openMessageBoxOptions}/>}
-				{openConfirmationBoxOptions && <ModalUI type="confirmation" options={openConfirmationBoxOptions}/>}
+				{openMessageBoxOptions && <MessageBoxUI options={openMessageBoxOptions}/>}
 			</div>
-		);
-	}
-}
-
-
-AddGlobalStyle(`
-.ReactModal__Overlay { z-index: 1; }
-`);
-
-let styles = {
-	overlay: {position: "fixed", left: 0, right: 0, top: 0, bottom: 0, backgroundColor: "rgba(0,0,0,.5)"},
-	content: {
-		position: "absolute", overflow: "auto",
-		//top: "40px", left: "40px", right: "40px", bottom: "40px",
-		left: "50%", right: "initial", top: "50%", bottom: "initial", transform: "translate(-50%, -50%)",
-		background: "rgba(0,0,0,.75)", border: "1px solid #555", WebkitOverflowScrolling: "touch", borderRadius: "4px", outline: "none", padding: "20px"
-	}
-};
-class ModalUI extends BaseComponent<{type: "message" | "confirmation", options: MessageBoxOptions | ConfirmationBoxOptions}, {}> {
-	render() {
-		let {type, options} = this.props;
-		//let {dispatch} = this.context.store;
-		return (
-			<Modal isOpen={true} contentLabel={options.title || ""} style={E(styles, options.style)}
-					onRequestClose={()=> {
-						if (options.onCancel && options.onCancel() === false) return;
-						if (type == "message")
-							store.dispatch(new ACTShowMessageBox(null));
-						else
-							store.dispatch(new ACTShowConfirmationBox(null));
-					}}>
-				<div style={{fontSize: "18px", fontWeight: "bold"}}>{options.title}</div>
-				<p style={{marginTop: 15}}>{options.message}</p>
-				{type == "message" &&
-					<Button text="OK"
-						onClick={()=> {
-							if (options.onOK && options.onOK() === false) return;
-							store.dispatch(new ACTShowMessageBox(null));
-						}}/>}
-				{type == "confirmation" &&
-					<div>
-						<Button text="OK" onClick={()=> {
-							if (options.onOK && options.onOK() === false) return;
-							store.dispatch(new ACTShowConfirmationBox(null));
-						}}/>
-						<Button text="Cancel" ml={10} onClick={()=> {
-							if (options.onCancel && options.onCancel() === false) return;
-							store.dispatch(new ACTShowConfirmationBox(null));
-						}}/>
-					</div>}
-			</Modal>
 		);
 	}
 }

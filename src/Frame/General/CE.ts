@@ -540,6 +540,10 @@ Number.prototype._AddGetter_Inline = function IntToKey() {
 	return "e" + this;
 };
 
+interface String {
+	/** Creates a function from "func", setting its name to the "this" string's value. */
+	Func(func: Function): Function;
+}
 String.prototype._AddFunction_Inline = function Func(func) {
 	func.SetName(this);
     return func;
