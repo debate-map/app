@@ -48,10 +48,10 @@ export function GetSelectedNodeID(state: RootState, {map}: {map: Map}) {
 	return selectedNodeView ? selectedNodeView.ancestorPairs.Last().prop as number : null;
 }
 export function GetNodes_FBPaths({nodeIDs}: {nodeIDs: number[]}) {
-	return nodeIDs.Select(a=>DBPath(`nodes/${a}`));
+	return nodeIDs.Select(a=>DBPath(`nodes/e${a}`));
 }
 export function GetNodes(state: RootState, {nodeIDs}: {nodeIDs: number[]}) {
-	return nodeIDs.Select(a=>helpers.dataToJS(state.firebase, DBPath(`nodes/${a}`))).Where(a=>a);
+	return nodeIDs.Select(a=>helpers.dataToJS(state.firebase, DBPath(`nodes/e${a}`))).Where(a=>a);
 }
 export function GetNodeView(state: RootState, {map, path}: {map: Map, path: MapNodePath}) {
 	if (map == null || path == null) return null;
