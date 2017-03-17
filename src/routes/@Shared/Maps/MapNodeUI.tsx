@@ -27,6 +27,7 @@ import {GetEntries} from "../../../Frame/General/Enums";
 import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
 import TextInput from "../../../Frame/ReactComponents/TextInput";
 import {DN} from "../../../Frame/General/Globals";
+import {DataSnapshot} from "firebase";
 
 export class ACTSelectMapNode extends Action<{mapID: number, path: MapNodePath}> {}
 export class ACTToggleMapNodeExpanded extends Action<{mapID: number, path: MapNodePath}> {}
@@ -136,7 +137,7 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 										</div>
 									),
 									onOK: ()=> {
-										let newID = 0;
+										let newID = 0; // todo
 										/*firebase.Ref(`/nodes`).update({
 											[node._key]: {
 												children: {[newID.IntToKey]: {}},
@@ -146,20 +147,43 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 												creator: userID, approved: true,
 											}),
 										});*/
-										firebase.Ref().child("nodes").transaction(nodes=> {
+										firebase.Ref("nodes").transaction(nodes=> {
 											if (nodes == null) return {};
-											nodes[node._key].children[newID.IntToKey] = {_: true};
+											nodes[node._key].children = {
+												...nodes[node._key].children,
+												[newID.IntToKey]: {_: true}
+											};
 											nodes[newID.IntToKey] = new MapNode({
 												type: childType, title,
 												creator: userID, approved: true,
 											});
 											return nodes;
-										})
+										});
 									}
 								});
 							}}/>
-						)
+						);
 					})}
+					<VMenuItem text="Delete" onClick={e=> {
+						if (e.button != 0) return;
+						firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
+							let nodes = (snapshot.val() as Object).Props.Select(a=>a.value.Extended({_key: a.name}));
+							let parentNodes = nodes.Where(a=>a.children && a.children[node._key]);
+							ShowMessageBox({
+								title: `Delete "${node.title}"`, cancelButton: true,
+								message: `Delete the node "${node.title}", and its links with ${parentNodes.length} parent-nodes?`,
+								onOK: ()=> {
+									firebase.Ref("nodes").transaction(nodes=> {
+										if (nodes == null) return {};
+										for (let parent of parentNodes)
+											nodes[parent._key].children[node._key] = null;
+										nodes[node._key] = null;
+										return nodes;
+									});
+								}
+							});
+						});
+					}}/>
 				</VMenu>
 			</div>
 		);

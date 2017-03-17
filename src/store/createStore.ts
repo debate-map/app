@@ -5,6 +5,7 @@ import {createBrowserHistory} from "react-router/node_modules/history";
 import {reduxFirebase, getFirebase} from "react-redux-firebase";
 import {firebase as fbConfig, reduxFirebase as reduxConfig} from "../config";
 import {persistStore, autoRehydrate} from "redux-persist";
+//import createFilter from "redux-persist-transform-filter";
 //import {version} from "../../package.json";
 import {GetUrlVars} from "../Frame/General/Globals_Free";
 let {version} = require("../../package.json");
@@ -48,11 +49,15 @@ export default function(initialState = {}, history) {
 	store.asyncReducers = {};
 
 	// begin periodically persisting the store
-	let persister = persistStore(store, {
-		whitelist: [
-			"main/openMap", "main/mapViews",
-		],
-	});
+	let persister = persistStore(store, {whitelist: ["main"]});
+	// you want to remove some keys before you save
+	/*const saveSubsetBlacklistFilter = createBlacklistFilter(
+		"main",
+		["keyYouDontWantToSave1", "keyYouDontWantToSave2"]
+	);
+	persistStore(store, {
+		transforms: [saveSubsetBlacklistFilter]
+	});*/
 	if (GetUrlVars().clearState)
 		persister.purge();
 
