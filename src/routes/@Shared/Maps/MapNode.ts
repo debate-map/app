@@ -6,8 +6,25 @@ export enum MapNodeType {
 	Category = 1,
 	Package = 2,
 	Thesis = 3,
-	PositiveArgument = 4,
-	NegativeArgument = 5,
+	SupportingArgument = 4,
+	OpposingArgument = 5,
+}
+export class MapNodeType_Info {
+	static for = {
+		[MapNodeType.Category]: new MapNodeType_Info("category", [MapNodeType.Category, MapNodeType.Package, MapNodeType.Thesis]),
+		[MapNodeType.Package]: new MapNodeType_Info("package", [MapNodeType.Thesis]),
+		[MapNodeType.Thesis]: new MapNodeType_Info("thesis", [MapNodeType.SupportingArgument, MapNodeType.OpposingArgument]),
+		[MapNodeType.SupportingArgument]: new MapNodeType_Info("supporting argument", [MapNodeType.Thesis]),
+		[MapNodeType.OpposingArgument]: new MapNodeType_Info("opposing argument", [MapNodeType.Thesis]),
+	} as {[key: string]: MapNodeType_Info};
+
+	constructor(displayName: string, childTypes: MapNodeType[]) {
+		this.displayName = displayName;
+		this.childTypes = childTypes;
+	}
+
+	displayName: string;
+	childTypes: MapNodeType[];
 }
 /*@_Enum export class MapNodeType extends Enum { static V: MapNodeType;
 	None = 0 as any as MapNodeType
@@ -28,26 +45,33 @@ export enum AccessLevel {
 	Admin = 3,
 }
 
-export interface ChildCollection {
-	//[key: string]?: boolean;
+export class ChildCollection {
+	[key: number]: {};
 }
 /*export interface ChildInfo {
 	id: number;
 	type;
 }*/
 
-export interface MapNode {
-	_key?: string;
-	type: Partial<MapNodeType>;
-	title: string;
-	agrees: number;
-	degree: number;
-	disagrees: number;
-	weight: number;
-	creator: string;
-	approved: boolean;
-	accessLevel: AccessLevel;
-	voteLevel: AccessLevel;
-	children: ChildCollection;
-	talkChildren: ChildCollection;
+export class MapNode {
+	constructor(initialData: {type: MapNodeType, title: string, creator: string} & Partial<MapNode>) {
+		this.Extend(initialData);
+	}
+
+	_key? = null as string;
+	type = null as MapNodeType;
+	title = null as string;
+
+	creator = null as string;
+	approved = false;
+	accessLevel = AccessLevel.Base;
+	voteLevel = AccessLevel.Base;
+
+	agrees = 0;
+	degree = 0;
+	disagrees = 0;
+	weight = 0;
+	
+	children = new ChildCollection();
+	talkRoot = null as number;
 }

@@ -1,13 +1,14 @@
 import {Assert} from "../../Frame/General/Assert";
 import * as React from "react";
 import {BaseComponent} from "../UI/ReactGlobals";
+import {E} from "../General/Globals_Free";
 
 export default class TextInput extends BaseComponent<{value, onChange, delayChangeTillDefocus?, style?}, {editedValue}> {
 	render() {
 		var {value, onChange, delayChangeTillDefocus, style} = this.props;
 		var {editedValue} = this.state;
 		return (
-			<input type="text" style={style}
+			<input type="text" style={E({color: "black"}, style)}
 				value={editedValue != null ? editedValue : value} onChange={e=> {
 					var newVal = $(e.target).val();
 					if (delayChangeTillDefocus) {

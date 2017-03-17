@@ -48,7 +48,11 @@ export default function(initialState = {}, history) {
 	store.asyncReducers = {};
 
 	// begin periodically persisting the store
-	let persister = persistStore(store, {whitelist: ["main"]});
+	let persister = persistStore(store, {
+		whitelist: [
+			"main/openMap", "main/mapViews",
+		],
+	});
 	if (GetUrlVars().clearState)
 		persister.purge();
 

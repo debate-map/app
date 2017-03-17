@@ -2,7 +2,7 @@ import {Map} from "../routes/@Shared/Maps/Map";
 import {combineReducers} from "redux";
 import {firebaseStateReducer, helpers} from "react-redux-firebase";
 import {reducer as formReducer} from "redux-form";
-import {ACTShowMessageBox, MessageBoxOptions} from "../Frame/UI/VMessageBox";
+import {ACTMessageBoxShow, MessageBoxOptions, MessageBoxReducer, MessageBoxState} from "../Frame/UI/VMessageBox";
 import Action from "../Frame/General/Action";
 import {ACTSetUserPanelOpen} from "../containers/Navbar";
 import {routerReducer} from "react-router-redux";
@@ -13,6 +13,7 @@ import {MainState, MainReducer} from "./Store/Main";
 import {createSelector} from "reselect";
 import {MapNodePath} from "./Store/Main/MapViews";
 import {DBPath} from "../Frame/Database/DatabaseHelpers";
+import {firebase} from "../config.js";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;
@@ -29,6 +30,7 @@ export class RootState {
 	firebase: any;
 	form: any;
 	router: any;
+	messageBox: MessageBoxState;
 }
 export function MakeRootReducer(asyncReducers?) {
 	return combineReducers({
@@ -36,8 +38,13 @@ export function MakeRootReducer(asyncReducers?) {
 		firebase: firebaseStateReducer,
 		form: formReducer,
 		router: routerReducer,
+		messageBox: MessageBoxReducer,
 		...asyncReducers
 	});
+}
+
+export function GetUserID(state: RootState): string { 
+	return state.firebase.auth ? state.firebase.auth.uid : null;
 }
 
 export function GetSelectedNodeID(state: RootState, {map}: {map: Map}) { 

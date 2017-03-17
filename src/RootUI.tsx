@@ -29,7 +29,7 @@ import AdminUI from "./routes/More/Admin";
 import RootUI2 from "./routes/Root";
 import {GetUrlPath, E} from "./Frame/General/Globals_Free";
 import {RootState} from "./store/reducers";
-import {MessageBoxOptions, ACTShowMessageBox, MessageBoxUI} from "./Frame/UI/VMessageBox";
+import {MessageBoxOptions, ACTMessageBoxShow, MessageBoxUI} from "./Frame/UI/VMessageBox";
 import Button from "./Frame/ReactComponents/Button";
 
 // Create a history of your choosing (we're using a browser history in this case)
@@ -90,15 +90,11 @@ class RootUI extends BaseComponent<{}, {}> {
 	}
 }
 
-@(connect((state: RootState)=>({
-	openMessageBoxOptions: state.main.openMessageBoxOptions,
-})) as any)
-class OverlayUI extends BaseComponent<{openMessageBoxOptions?: MessageBoxOptions}, {}> {
+class OverlayUI extends BaseComponent<{}, {}> {
 	render() {
-		let {openMessageBoxOptions} = this.props;
 		return (
 			<div style={{position: "absolute"}}>
-				{openMessageBoxOptions && <MessageBoxUI options={openMessageBoxOptions}/>}
+				<MessageBoxUI/>
 			</div>
 		);
 	}

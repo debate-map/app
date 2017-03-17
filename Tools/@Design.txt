@@ -12,7 +12,7 @@
 			rootNode:"node100"
 	nodes:{^}
 		node123:{^}
-			type:""
+			type:0 (thesis)
 			title:"Things that reach a length of X [light years] through expansion (in one direction) (from [negligible size]) are at least X years old"
 			agrees:7			// for thesis nodes, and talk nodes
 			degree:.7			// for some thesis nodes, and talk nodes
@@ -22,9 +22,9 @@
 			approved:true
 			accessLevel:0
 			voteLevel:1
-			supportChildren:{^}		// for thesis nodes
-			opposeChildren:{^}		// for thesis nodes
-			talkChildren:{^}		// never for talk nodes
+			children:{^}
+				node124: {type: 0 (supporting)}
+			talkRoot:1
 	nodeExtras:{^}
 		node123:{^}
 			/*title:{^}
