@@ -164,6 +164,7 @@
     "react-router-redux": "^5.0.0-alpha.2",
     "redbox-react": "^1.2.10",
     "redux-persist": "^4.4.2",
+    "redux-persist-transform-filter": "0.0.9",
     "reselect": "^2.5.4",
     "rimraf": "^2.5.4",
     "sass-loader": "^4.0.0",
