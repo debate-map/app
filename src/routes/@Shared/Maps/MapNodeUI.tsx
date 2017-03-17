@@ -1,5 +1,5 @@
 import {BaseComponent, Div, Span, Instant} from "../../../Frame/UI/ReactGlobals";
-import {MapNode, MapNodeType} from "./MapNode";
+import {MapNode, MapNodeType, MapNodeType_Info} from "./MapNode";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
 import {DBPath} from "../../../Frame/Database/DatabaseHelpers";
@@ -7,7 +7,14 @@ import {Debugger, QuickIncrement} from "../../../Frame/General/Globals_Free";
 import Button from "../../../Frame/ReactComponents/Button";
 import {PropTypes, Component} from "react";
 import Action from "../../../Frame/General/Action";
-import {GetNodeView, RootState, GetSelectedNodeID, GetNodes_FBPaths, GetNodes} from "../../../store/reducers";
+import {
+    GetNodes,
+    GetNodes_FBPaths,
+    GetNodeView,
+    GetSelectedNodeID,
+    GetUserID,
+    RootState
+} from "../../../store/reducers";
 import {Map} from "./Map";
 import {Log} from "../../../Frame/General/Logging";
 import {WaitXThenRun} from "../../../Frame/General/Timers";
@@ -18,6 +25,8 @@ import VMenu, {VMenuItem} from "react-vmenu";
 import Select from "../../../Frame/ReactComponents/Select";
 import {GetEntries} from "../../../Frame/General/Enums";
 import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
+import TextInput from "../../../Frame/ReactComponents/TextInput";
+import {DN} from "../../../Frame/General/Globals";
 
 export class ACTSelectMapNode extends Action<{mapID: number, path: MapNodePath}> {}
 export class ACTToggleMapNodeExpanded extends Action<{mapID: number, path: MapNodePath}> {}
@@ -67,21 +76,23 @@ let nodeTypeBackgroundColors = {
 	[MapNodeType.Category]: "40,60,80",
 	[MapNodeType.Package]: "0,100,180",
 	[MapNodeType.Thesis]: "0,100,180",
-	[MapNodeType.PositiveArgument]: "0,100,180",
-	[MapNodeType.NegativeArgument]: "0,100,180",
+	[MapNodeType.SupportingArgument]: "0,100,180",
+	[MapNodeType.OpposingArgument]: "0,100,180",
 }
 let nodeTypeFontSizes = {
 	Category: 16
 }
 
-type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: MapNodePath} & {selectedNodeID?: number};
+type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: MapNodePath} & Partial<{selectedNodeID: number, userID: string}>;
+@firebaseConnect()
 @(connect((state: RootState, props: MapNodeUI_Inner_Props)=> ({
 	selectedNodeID: GetSelectedNodeID(state, props),
+	userID: GetUserID(state),
 })) as any)
 class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 	//static contextTypes = {store: PropTypes.object.isRequired};
 	render() {
-		let {map, node, nodeView, path, selectedNodeID} = this.props;
+		let {firebase, map, node, nodeView, path, selectedNodeID, userID} = this.props;
 		//let {dispatch} = this.context.store;
 		let backgroundColor = nodeTypeBackgroundColors[node.type];
 		let fontSize = nodeTypeFontSizes[node.type] || 14;
@@ -111,21 +122,44 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 						store.dispatch(new ACTToggleMapNodeExpanded({mapID: map._key.KeyToInt, path}));
 					}}/>
 				<VMenu contextMenu={true} onBody={true}>
-					<VMenuItem text="Add child node" onClick={e=> {
-						if (e.button != 0) return;
-						let type: MapNodeType;
-						ShowMessageBox({
-							title: "Add child node", cancelButton: true,
-							messageUI: (
-								<div>
-									Type: <Select options={GetEntries(MapNodeType).Where(a=>a.name != "None")} value={MapNodeType.Category} onChange={val=>type = val}/>
-								</div>
-							),
-							onOK: ()=> {
-								alert("Type:" + type);
-							}
-						});
-					}}/>
+					{MapNodeType_Info.for[node.type].childTypes.map(childType=> {
+						let childTypeInfo = MapNodeType_Info.for[childType];
+						return (
+							<VMenuItem key={childType} text={`Add ${childTypeInfo.displayName}`} onClick={e=> {
+								if (e.button != 0) return;
+								let title = "";
+								let boxController = ShowMessageBox({
+									title: `Add ${childTypeInfo.displayName}`, cancelButton: true,
+									messageUI: ()=>(
+										<div>
+											Title: <TextInput value={title} onChange={val=>DN(title = val, boxController.UpdateUI())}/>
+										</div>
+									),
+									onOK: ()=> {
+										let newID = 0;
+										/*firebase.Ref(`/nodes`).update({
+											[node._key]: {
+												children: {[newID.IntToKey]: {}},
+											},
+											[newID.IntToKey]: new MapNode({
+												type: childType, title,
+												creator: userID, approved: true,
+											}),
+										});*/
+										firebase.Ref().child("nodes").transaction(nodes=> {
+											if (nodes == null) return {};
+											nodes[node._key].children[newID.IntToKey] = {_: true};
+											nodes[newID.IntToKey] = new MapNode({
+												type: childType, title,
+												creator: userID, approved: true,
+											});
+											return nodes;
+										})
+									}
+								});
+							}}/>
+						)
+					})}
 				</VMenu>
 			</div>
 		);

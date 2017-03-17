@@ -3,7 +3,7 @@ import {MapViews, MapViewsReducer} from "./Main/MapViews";
 import {combineReducers} from "redux";
 import {firebaseStateReducer} from "react-redux-firebase";
 import {reducer as formReducer} from "redux-form";
-import {ACTShowMessageBox, MessageBoxOptions} from "../../Frame/UI/VMessageBox";
+import {ACTMessageBoxShow, MessageBoxOptions} from "../../Frame/UI/VMessageBox";
 import Action from "../../Frame/General/Action";
 import {ACTSetUserPanelOpen} from "../../containers/Navbar";
 import {routerReducer} from "react-router-redux";
@@ -14,7 +14,6 @@ import V from "../../Frame/V/V";
 // class is used only for initialization
 export class MainState {
 	userPanelOpen = false;
-	openMessageBoxOptions: MessageBoxOptions;
 
 	openMap: number;
 	mapViews = {} as MapViews;
@@ -28,11 +27,6 @@ export const MainReducer = CombineReducers({
 
 		//case SET_USER_PANEL_OPEN: return {...state, userPanelOpen: action.payload};
 		if (action.Is(ACTSetUserPanelOpen))
-			return action.payload;
-		return state;
-	},
-	openMessageBoxOptions: (state = null, action)=> {
-		if (action.Is(ACTShowMessageBox))
 			return action.payload;
 		return state;
 	},
