@@ -22,7 +22,9 @@
     "build:dev": "better-npm-run build:dev",
     "build:prod": "better-npm-run build:prod",
     "codecov": "cat coverage/*/lcov.info | codecov",
-    "fb": "node ./build/deploy"
+    "fb": "node ./build/deploy",
+
+	"build-stats": "node_modules\\.bin\\webpack --config build/webpack.config.js --output-file Build/Bundle.js --profile --json > BuildStats.json"
   },
   "betterScripts": {
     "compile": {
@@ -97,7 +99,18 @@
     "react-tap-event-plugin": "1.0.0",
     "redux": "^3.6.0",
     "redux-form": "^6.2.0",
-    "redux-thunk": "^2.0.0"
+    "redux-thunk": "^2.0.0",
+    "radium": "^0.18.1",
+	"react-autobind": "^1.0.6",
+    "react-markdown": "^2.4.5",
+    "react-router-dom": "^4.0.0",
+    "react-router-redux": "^5.0.0-alpha.2",
+    "moment": "^2.17.1",
+    "reselect": "^2.5.4",
+	"redux-persist": "^4.4.2",
+    "redux-persist-transform-filter": "0.0.9",
+    "react-vmenu": "^0.0.0",
+    "react-free-scrollbar": "^0.1.2"
   },
   "devDependencies": {
     "@types/firebase": "^2.4.31",
@@ -151,21 +164,12 @@
     "karma-phantomjs-launcher": "^1.0.2",
     "karma-webpack-with-fast-source-maps": "^1.9.2",
     "mocha": "^3.2.0",
-    "moment": "^2.17.1",
     "node-sass": "^3.7.0",
     "nodemon": "^1.10.2",
     "phantomjs-prebuilt": "^2.1.12",
     "postcss-loader": "^0.13.0",
-    "radium": "^0.18.1",
     "react-addons-test-utils": "15.3.2",
-    "react-autobind": "^1.0.6",
-    "react-markdown": "^2.4.5",
-    "react-router-dom": "^4.0.0",
-    "react-router-redux": "^5.0.0-alpha.2",
     "redbox-react": "^1.2.10",
-    "redux-persist": "^4.4.2",
-    "redux-persist-transform-filter": "0.0.9",
-    "reselect": "^2.5.4",
     "rimraf": "^2.5.4",
     "sass-loader": "^4.0.0",
     "sinon": "^1.17.5",

@@ -1,6 +1,3 @@
-import {Log} from "./Logging";
-import {IsString} from "./Types";
-import V from "../V/V";
 import {VDFLoadOptions, VDFLoader} from "../Serialization/VDF/VDFLoader";
 import {VDFSerialize, VDFDeserialize} from "../Serialization/VDF/VDFTypeInfo";
 import {VDFSaveOptions, VDFTypeMarking, VDFSaver} from "../Serialization/VDF/VDFSaver";
@@ -8,16 +5,6 @@ import {VDFNode} from "../Serialization/VDF/VDFNode";
 import Moment from "moment";
 
 g.Extend({Moment});
-
-/*g.onerror = function(message, filePath, line, column, error) {
-	LogError(`JS) ${message} (at ${filePath}:${line}:${column})
-Stack) ${error.stack}`);
-};*/
-export function HandleError(error, isFatal = false) {
-	Log(`${error}
-Stack) ${error.stack}
-Fatal) ${isFatal}`);
-}
 
 export function DoNothing(...args) {}
 export function DN(...args) {}
@@ -106,7 +93,7 @@ export function ToJSON(obj, ...excludePropNames) {
 }
 g.Extend({ToJSON});
 export function ToJSON_Safe(obj, excludePropNames___) {
-	var excludePropNames = V.Slice(arguments, 1);
+	var excludePropNames = require("../V/V").default.Slice(arguments, 1);
 
 	var cache = [];
 	var foundDuplicates = false;
