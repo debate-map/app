@@ -28,6 +28,7 @@ import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
 import TextInput from "../../../Frame/ReactComponents/TextInput";
 import {DN} from "../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
+import {styles} from "../../../Frame/UI/GlobalStyles";
 
 export class ACTSelectMapNode extends Action<{mapID: number, path: MapNodePath}> {}
 export class ACTToggleMapNodeExpanded extends Action<{mapID: number, path: MapNodePath}> {}
@@ -52,16 +53,16 @@ export default class MapNodeUI extends BaseComponent<Props, {}> {
 		/*let {map} = this.context;
 		if (map == null) return <div>Loading map, deep...</div>; // not sure why this occurs*/
 		return (
-			<div className="clickThrough" style={{padding: "3px 0"}}>
+			<div className="clickThrough" style={{display: "flex", padding: "3px 0"}}>
 				<div className="clickThrough" style={{
-					zIndex: 1, float: "left", transform: "translateX(0)" // fixes z-index issue
+					zIndex: 1, transform: "translateX(0)", // fixes z-index issue
 				}}>
 					<MapNodeUI_Inner map={map} node={node} nodeView={nodeView} path={path}/>
 				</div>
 				<div className="clickThrough"
 						style={{
-							zIndex: 1, marginLeft: 10, float: "left",
-							transform: "translateY(calc(-50% + 14px))", display: "flex", flexDirection: "column"
+							zIndex: 1, marginLeft: 10,
+							display: "flex", flexDirection: "column", //transform: "translateY(calc(-50% + 14px))",
 						}}>
 					{nodeView && nodeView.expanded && nodeChildren.map((child, index)=> {
 						let childID = node.children.VKeys()[index].KeyToInt;
@@ -75,10 +76,14 @@ export default class MapNodeUI extends BaseComponent<Props, {}> {
 
 let nodeTypeBackgroundColors = {
 	[MapNodeType.Category]: "40,60,80",
-	[MapNodeType.Package]: "0,100,180",
-	[MapNodeType.Thesis]: "0,100,180",
-	[MapNodeType.SupportingArgument]: "0,100,180",
-	[MapNodeType.OpposingArgument]: "0,100,180",
+	//[MapNodeType.Package]: "0,100,180",
+	[MapNodeType.Package]: "40,60,80",
+	//[MapNodeType.Thesis]: "0,100,180",
+	//[MapNodeType.Thesis]: "100,50,100",
+	//[MapNodeType.Thesis]: "30,100,30",
+	[MapNodeType.Thesis]: "0,80,150",
+	[MapNodeType.SupportingArgument]: "30,100,30",
+	[MapNodeType.OpposingArgument]: "100,30,30",
 }
 let nodeTypeFontSizes = {
 	Category: 16
@@ -100,8 +105,12 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 		return (
 			<div style={{
 				display: "flex", position: "relative", borderRadius: 5, cursor: "pointer", zIndex: 1,
-				boxShadow: "0 0 1px rgba(255,255,255,.5)",
-				filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 3px) drop-shadow(rgba(0,0,0,.35) 0px 0px 3px)",
+				top: "50%", transform: "translateY(-50%)",
+				//boxShadow: "0 0 1px rgba(255,255,255,.5)",
+				/*boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
+				filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 3px) drop-shadow(rgba(0,0,0,.35) 0px 0px 3px)",*/
+				//boxShadow: "rgba(0, 0, 0, 1) 0px 0px 1px",
+				boxShadow: `rgba(${backgroundColor.split(",").Select(a=>parseInt(a) * .25).join(",")},1) 0px 0px 2px`,
 			}}>
 				<MapNodeUI_LeftBox map={map} node={node} nodeView={nodeView} path={path} backgroundColor={backgroundColor}/>
 				<div style={{position: "absolute", transform: "translateX(-100%)", width: 1, height: 28}}/> {/* fixes click-gap */}
@@ -126,18 +135,17 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 					{MapNodeType_Info.for[node.type].childTypes.map(childType=> {
 						let childTypeInfo = MapNodeType_Info.for[childType];
 						return (
-							<VMenuItem key={childType} text={`Add ${childTypeInfo.displayName}`} onClick={e=> {
+							<VMenuItem key={childType} text={`Add ${childTypeInfo.displayName}`} style={styles.vMenuItem} onClick={e=> {
 								if (e.button != 0) return;
 								let title = "";
 								let boxController = ShowMessageBox({
 									title: `Add ${childTypeInfo.displayName}`, cancelButton: true,
 									messageUI: ()=>(
-										<div>
+										<div style={{padding: "10px 0"}}>
 											Title: <TextInput value={title} onChange={val=>DN(title = val, boxController.UpdateUI())}/>
 										</div>
 									),
 									onOK: ()=> {
-										let newID = 0; // todo
 										/*firebase.Ref(`/nodes`).update({
 											[node._key]: {
 												children: {[newID.IntToKey]: {}},
@@ -148,7 +156,9 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 											}),
 										});*/
 										firebase.Ref("nodes").transaction(nodes=> {
-											if (nodes == null) return {};
+											if (!nodes) return nodes;
+
+											let newID = (nodes as Object).Props.Select(a=>a.name.KeyToInt).Max() + 1;
 											nodes[node._key].children = {
 												...nodes[node._key].children,
 												[newID.IntToKey]: {_: true}
@@ -158,28 +168,29 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 												creator: userID, approved: true,
 											});
 											return nodes;
-										});
+										}, undefined, false);
 									}
 								});
 							}}/>
 						);
 					})}
-					<VMenuItem text="Delete" onClick={e=> {
+					<VMenuItem text="Delete" style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
 						firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
 							let nodes = (snapshot.val() as Object).Props.Select(a=>a.value.Extended({_key: a.name}));
 							let parentNodes = nodes.Where(a=>a.children && a.children[node._key]);
+							let s_ifParents = parentNodes.length > 1 ? "s" : "";
 							ShowMessageBox({
 								title: `Delete "${node.title}"`, cancelButton: true,
-								message: `Delete the node "${node.title}", and its links with ${parentNodes.length} parent-nodes?`,
+								message: `Delete the node "${node.title}", and its link${s_ifParents} with ${parentNodes.length} parent-node${s_ifParents}?`,
 								onOK: ()=> {
 									firebase.Ref("nodes").transaction(nodes=> {
-										if (nodes == null) return {};
+										if (!nodes) return nodes;
 										for (let parent of parentNodes)
 											nodes[parent._key].children[node._key] = null;
 										nodes[node._key] = null;
 										return nodes;
-									});
+									}, undefined, false);
 								}
 							});
 						});
@@ -198,7 +209,8 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 				<div style={{
 					display: "flex", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap", height: 28,
 					zIndex: 3, background: `rgba(${backgroundColor},.7)`, padding: 3, borderRadius: 5,
-					boxShadow: "0 0 1px rgba(255,255,255,.5)",
+					//boxShadow: "0 0 1px rgba(255,255,255,.5)",
+					//boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
 				}}>
 					<Button text="Probability" mr={7} style={{padding: "3px 7px"}}>
 						<Span ml={5}>90%</Span>
@@ -210,7 +222,7 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 				</div>
 			);
 		return (
-			<div ref="root" className="clickThroughChain"
+			<div ref="root" //className="clickThroughChain"
 					style={{
 						display: "flex", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap", height: 28,
 						borderRadius: 5, opacity: 0,

@@ -67,34 +67,30 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 										children: {e2: {_}, e3: {_}, e4: {_}, e5: {_}, e6: {_}, e7: {_}, e8: {_}, e9: {_}}, talkRoot: null,
 									}),
 									e2: new MapNode({
-										type: MapNodeType.Category, title: "Featured",
-										creator: user1Key, approved: true,
-									}),
-									e3: new MapNode({
 										type: MapNodeType.Category, title: "Science",
 										creator: user1Key, approved: true,
 									}),
-									e4: new MapNode({
+									e3: new MapNode({
 										type: MapNodeType.Category, title: "Philosophy",
 										creator: user1Key, approved: true,
 									}),
-									e5: new MapNode({
-										type: MapNodeType.Category, title: "Religions",
+									e4: new MapNode({
+										type: MapNodeType.Category, title: "Religion",
 										creator: user1Key, approved: true,
 									}),
-									e6: new MapNode({
+									e5: new MapNode({
 										type: MapNodeType.Category, title: "History",
 										creator: user1Key, approved: true,
 									}),
+									e6: new MapNode({
+										type: MapNodeType.Category, title: "Politics",
+										creator: user1Key, approved: true,
+									}),
 									e7: new MapNode({
-										type: MapNodeType.Category, title: "Policies",
+										type: MapNodeType.Category, title: "Everyday",
 										creator: user1Key, approved: true,
 									}),
 									e8: new MapNode({
-										type: MapNodeType.Category, title: "Groups",
-										creator: user1Key, approved: true,
-									}),
-									e9: new MapNode({
 										type: MapNodeType.Category, title: "Others",
 										creator: user1Key, approved: true,
 									}),

@@ -40,13 +40,20 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 			return <div>Loading root node...</div>;
 		return (
 			<ScrollView backgroundDrag={true} backgroundDragMatchFunc={a=>a == this.refs.content} scrollVBarStyles={{width: 10}}>
-				<div id="MapUI" ref="content" style={{position: "relative", padding: "150px 870px"}}
+					<div id="MapUI" ref="content"
+						style={{
+							position: "relative", padding: "150px 870px", whiteSpace: "nowrap",
+							filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)",
+						}}
 						onClick={e=> {
 							if (e.target != this.refs.content) return;
 							let mapView = store.getState().main.mapViews[store.getState().main.openMap];
 							let isNodeSelected = V.GetKeyValuePairsInObjTree(mapView).Any(a=>a.prop == "selected" && a.value);
 							if (isNodeSelected)
 								store.dispatch(new ACTSelectMapNode({mapID: map._key.KeyToInt, path: new MapNodePath()}));
+						}}
+						onContextMenu={e=> {
+							e.preventDefault();
 						}}>
 					<MapNodeUI map={map} nodeID={map.rootNode.KeyToInt} node={rootNode}/>
 				</div>
