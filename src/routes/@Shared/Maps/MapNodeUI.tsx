@@ -110,9 +110,9 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 				/*boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
 				filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 3px) drop-shadow(rgba(0,0,0,.35) 0px 0px 3px)",*/
 				//boxShadow: "rgba(0, 0, 0, 1) 0px 0px 1px",
-				boxShadow: `rgba(${backgroundColor.split(",").Select(a=>parseInt(a) * .25).join(",")},1) 0px 0px 2px`,
+				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, willChange: "transform",
 			}}>
-				<MapNodeUI_LeftBox map={map} node={node} nodeView={nodeView} path={path} backgroundColor={backgroundColor}/>
+				{nodeView && nodeView.selected && <MapNodeUI_LeftBox map={map} node={node} nodeView={nodeView} path={path} backgroundColor={backgroundColor}/>}
 				<div style={{position: "absolute", transform: "translateX(-100%)", width: 1, height: 28}}/> {/* fixes click-gap */}
 				<div style={{position: "relative", zIndex: 2, background: `rgba(${backgroundColor},.7)`, padding: 5, borderRadius: "5px 0 0 5px", cursor: "pointer"}}
 						onClick={()=> {
@@ -204,24 +204,25 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, nodeView?: MapNodeView, path: MapNodePath, backgroundColor: string}, {}> {
 	render() {
 		let {map, node, nodeView, path, backgroundColor} = this.props;
-		if (nodeView && nodeView.selected)
-			return (
-				<div style={{
-					display: "flex", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap", height: 28,
-					zIndex: 3, background: `rgba(${backgroundColor},.7)`, padding: 3, borderRadius: 5,
-					//boxShadow: "0 0 1px rgba(255,255,255,.5)",
-					//boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
-				}}>
-					<Button text="Probability" mr={7} style={{padding: "3px 7px"}}>
-						<Span ml={5}>90%</Span>
-					</Button>
-					<Button text="Degree" enabled={false} mr={7} style={{padding: "3px 7px"}}>
-						<Span ml={5}>70%</Span>
-					</Button>
-					<Button text="..." style={{padding: "3px 7px"}}/>
-				</div>
-			);
+		//if (nodeView && nodeView.selected)
 		return (
+			<div style={{
+				display: "flex", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap", height: 28,
+				zIndex: 3, background: `rgba(${backgroundColor},.9)`, padding: 3, borderRadius: 5,
+				//boxShadow: "0 0 1px rgba(255,255,255,.5)",
+				//boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
+				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, willChange: "transform",
+			}}>
+				<Button text="Probability" mr={7} style={{padding: "3px 7px"}}>
+					<Span ml={5}>90%</Span>
+				</Button>
+				<Button text="Degree" enabled={false} mr={7} style={{padding: "3px 7px"}}>
+					<Span ml={5}>70%</Span>
+				</Button>
+				<Button text="..." style={{padding: "3px 7px"}}/>
+			</div>
+		);
+		/*return (
 			<div ref="root" //className="clickThroughChain"
 					style={{
 						display: "flex", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap", height: 28,
@@ -229,10 +230,10 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 					}}>
 				<Div mt={7} mr={5} style={{fontSize: "13px"}}>90% at 70%</Div>
 			</div>
-		);
+		);*/
 	}
 
-	get ShouldPopOut() {
+	/*get ShouldPopOut() {
 		let {nodeView, backgroundColor} = this.props;
 		return nodeView == null || !nodeView.selected;
 	}
@@ -251,9 +252,9 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 			this.tempCopy.remove();
 			this.tempCopy = null;
 		}
-	}
+	}*/
 
-	dom: JQuery;
+	/*dom: JQuery;
 	domParent: JQuery;
 	poppedOut = false;
 	oldStyle;
@@ -273,7 +274,7 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 		this.dom.prependTo("#MapUI");
 		this.oldStyle = this.dom.attr("style");
 		/*this.dom.style.left = (this.dom as any).positionFrom($("#MapUI")).left;
-		this.dom.style.top = (this.dom as any).positionFrom($("#MapUI")).top;*/
+		this.dom.style.top = (this.dom as any).positionFrom($("#MapUI")).top;*#/
 		this.dom.css("left", posFrom.left);
 		this.dom.css("top", posFrom.top);
 		this.dom.css("transform", "");
@@ -288,7 +289,7 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 		this.dom.appendTo(this.domParent);
 		this.dom.attr("style", this.oldStyle);
 		this.poppedOut = false;
-	}
+	}*/
 }
 
 /*interface JQuery {

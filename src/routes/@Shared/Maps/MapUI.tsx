@@ -43,7 +43,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					<div id="MapUI" ref="content"
 						style={{
 							position: "relative", padding: "150px 870px", whiteSpace: "nowrap",
-							filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)",
+							filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)", willChange: "transform",
 						}}
 						onClick={e=> {
 							if (e.target != this.refs.content) return;
