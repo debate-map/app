@@ -108,8 +108,8 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 		//let enemyBackgroundColor = nodeTypeBackgroundColors_enemy[node.type] || "150,150,150";
 		let enemyBackgroundColor = "0,0,0";
 		let fontSize = nodeTypeFontSizes[node.type] || 14;
-		let minWidth = node.type == MapNodeType.Thesis ? 300 : 100;
-		let maxWidth = node.type == MapNodeType.Thesis ? 1000 : 200;
+		let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
+		let maxWidth = node.type == MapNodeType.Thesis ? 500 : 200;
 		let barSize = 5;
 		return (
 			<div style={{
