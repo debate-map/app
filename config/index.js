@@ -36,10 +36,11 @@ const config = {
 		cacheDirectory : true,
 		/*plugins        : ['transform-runtime', 'lodash', 'transform-decorators-legacy'],
 		presets        : ['es2015', 'react', 'stage-0'],*/
-	plugins        : ['babel-plugin-transform-runtime', 'babel-plugin-lodash', 'babel-plugin-transform-decorators-legacy'].map(require.resolve),
+		plugins        : ['babel-plugin-transform-runtime', 'babel-plugin-lodash', 'babel-plugin-transform-decorators-legacy'].map(require.resolve),
 		presets        : ['babel-preset-es2015', 'babel-preset-react', 'babel-preset-stage-0'].map(require.resolve),
 	},
-	compiler_devtool         : 'source-map',
+	//compiler_devtool         : 'source-map',
+	compiler_devtool         : 'cheap-module-eval-source-map',
 	compiler_hash_type       : 'hash',
 	compiler_fail_on_warning : false,
 	compiler_quiet           : false,
@@ -50,10 +51,23 @@ const config = {
 		colors : true
 	},
 	compiler_vendors : [
-		'react',
-		'react-router',
-		'react-redux',
-		'redux'
+		"react",
+		"react-router",
+		"react-redux",
+		"redux",
+		"react-google-button",
+		"react-modal",
+		"moment",
+		"radium",
+		"react-autobind",
+		"react-markdown",
+		"react-router-dom",
+		"react-router-redux",
+		"react-redux-firebase",
+		"redux-persist",
+		"redux-persist-transform-filter",
+		"reselect",
+		"react-vmenu",
 	],
 
 	compiler_css_modules: true, // enable/disable css modules
