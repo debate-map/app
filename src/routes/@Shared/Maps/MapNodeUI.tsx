@@ -53,7 +53,7 @@ export default class MapNodeUI extends BaseComponent<Props, {}> {
 		/*let {map} = this.context;
 		if (map == null) return <div>Loading map, deep...</div>; // not sure why this occurs*/
 		return (
-			<div className="clickThrough" style={{display: "flex", padding: "3px 0"}}>
+			<div className="clickThrough" style={{display: "flex", padding: "5px 0"}}>
 				<div className="clickThrough" style={{
 					zIndex: 1, transform: "translateX(0)", // fixes z-index issue
 				}}>
@@ -85,6 +85,10 @@ let nodeTypeBackgroundColors = {
 	[MapNodeType.SupportingArgument]: "30,100,30",
 	[MapNodeType.OpposingArgument]: "100,30,30",
 }
+let nodeTypeBackgroundColors_enemy = {
+	[MapNodeType.SupportingArgument]: "100,30,30",
+	[MapNodeType.OpposingArgument]: "30,100,30",
+}
 let nodeTypeFontSizes = {
 	Category: 16
 }
@@ -101,7 +105,12 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 		let {firebase, map, node, nodeView, path, selectedNodeID, userID} = this.props;
 		//let {dispatch} = this.context.store;
 		let backgroundColor = nodeTypeBackgroundColors[node.type];
+		//let enemyBackgroundColor = nodeTypeBackgroundColors_enemy[node.type] || "150,150,150";
+		let enemyBackgroundColor = "0,0,0";
 		let fontSize = nodeTypeFontSizes[node.type] || 14;
+		let minWidth = node.type == MapNodeType.Thesis ? 300 : 100;
+		let maxWidth = node.type == MapNodeType.Thesis ? 1000 : 200;
+		let barSize = 5;
 		return (
 			<div style={{
 				display: "flex", position: "relative", borderRadius: 5, cursor: "pointer", zIndex: 1,
@@ -114,18 +123,36 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 			}}>
 				{nodeView && nodeView.selected && <MapNodeUI_LeftBox map={map} node={node} nodeView={nodeView} path={path} backgroundColor={backgroundColor}/>}
 				<div style={{position: "absolute", transform: "translateX(-100%)", width: 1, height: 28}}/> {/* fixes click-gap */}
-				<div style={{position: "relative", zIndex: 2, background: `rgba(${backgroundColor},.7)`, padding: 5, borderRadius: "5px 0 0 5px", cursor: "pointer"}}
+
+				{/* probability-and-such bars */}
+				{/*path.nodeIDs.length >= 3 && [
+					<div style={{position: "absolute", bottom: -barSize - 1, width: minWidth, height: barSize, background: `rgba(${enemyBackgroundColor},1)`}}/>,
+					<div style={{position: "absolute", bottom: -barSize - 1, width: .9 * minWidth, height: barSize, background: `rgba(${backgroundColor},1)`}}/>,
+				]*/}
+
+				<div
+						style={{
+							position: "relative", minWidth: minWidth - 20, maxWidth: maxWidth - 20, zIndex: 2, //background: `rgba(${backgroundColor},.7)`,
+							padding: 5, //node.type == MapNodeType.Category || node.type == MapNodeType.Package ? 5 : "3px 5px",
+							borderRadius: "5px 0 0 5px", cursor: "pointer"
+						}}
 						onClick={()=> {
 							if (selectedNodeID != node._key.KeyToInt)
 								store.dispatch(new ACTSelectMapNode({mapID: map._key.KeyToInt, path}));
 						}}>
-					<a style={{fontSize}}>{node.title}</a>
+					{path.nodeIDs.length >= 3 ? [
+						<div style={{position: "absolute", zIndex: 0, left: 0, top: 0, bottom: 0, width: "100%", background: `rgba(${enemyBackgroundColor},.7)`, borderRadius: "5px 0 0 5px"}}/>,
+						<div style={{position: "absolute", zIndex: 0, left: 0, top: 0, bottom: 0, width: "90%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"}}/>,
+					] : <div style={{position: "absolute", zIndex: 0, left: 0, top: 0, bottom: 0, width: "100%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"}}/>}
+					<a style={{position: "relative", zIndex: 1, fontSize}}>{node.title}</a>
 				</div>
 				<Button text={nodeView && nodeView.expanded ? "-" : "+"} size={28}
 					style={{
 						position: "relative", zIndex: 2, borderRadius: "0 5px 5px 0",
 						width: 18, fontSize: 18, textAlign: "center", lineHeight: "28px",
-						backgroundColor: `rgba(${backgroundColor},.5)`, boxShadow: "none",
+						backgroundColor: `rgba(${backgroundColor},.5)`,
+						//backgroundColor: `rgba(40,60,80,.5)`,
+						boxShadow: "none",
 						":hover": {backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>parseInt(a) - 20).join(",")},.7)`},
 					}}
 					onClick={()=> {
