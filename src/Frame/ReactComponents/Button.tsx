@@ -38,7 +38,7 @@ var styles = {
 /*AddGlobalStyle(`
 .Button:hover { background-color: rgba(90,100,110,.8) !important; }
 `);*/
-let buttonStyleKeys = {};
+let pseudoSelectorStyleKeys = {};
 
 //@Radium
 export default class Button extends BaseComponent
@@ -74,32 +74,29 @@ export default class Button extends BaseComponent
 
 		// experimental pseudo-selector-capable styling system
 		let pseudoSelectors = [":hover"];
-		if (pseudoSelectors.Any(selector=>finalStyle[selector])) {
-			var styleKey = ToJSON(finalStyle); // get a unique identifier for this particular style-composite
+		let currentPseudoSelectorStyleKeys = [];
+		for (let selector of pseudoSelectors) {
+			if (finalStyle[selector] == null) continue;
+			let styleText = createMarkupForStyles(finalStyle[selector]);
+
+			var styleKey = ToJSON(selector + "---" + styleText); // get a unique identifier for this particular pseudo-style
 			styleKey = styleKey.replace(/[^a-zA-Z0-9-]/g, ""); // make sure key is a valid class-name
+			currentPseudoSelectorStyleKeys.push(styleKey);
 
 			// if <style> element for the given style-composite has not been created yet, create it 
-			if (buttonStyleKeys[styleKey] == null) {
-				buttonStyleKeys[styleKey] = true;
-				
-				let pseudoSelectorCSSs = [];
-				for (let selector of pseudoSelectors) {
-					if (finalStyle[selector]) {
-						pseudoSelectorCSSs.push(`
+			if (pseudoSelectorStyleKeys[styleKey] == null) {
+				pseudoSelectorStyleKeys[styleKey] = true;
+				AddGlobalStyle(`
 		.Button.${styleKey}${selector} {
-			${createMarkupForStyles(finalStyle[selector]).replace(/([^ ]+?);/g, "$1 !important;")}
+			${styleText.replace(/([^ ]+?);/g, "$1 !important;")}
 		}
 						`);
-					}
-				}
-		
-				AddGlobalStyle(pseudoSelectorCSSs.join("\n"));
 			}
 		}
 
 	    return (
 			<div title={title} onClick={this.OnClick}
-					className={`Button ${styleKey || ""} ${className || ""}`}
+					className={`Button ${currentPseudoSelectorStyleKeys.join(" ")} ${className || ""}`}
 					style={finalStyle}>
 				{/*hasCheckbox && <CheckBox checked={checked} style={E(styles.checkbox, checkboxStyle)} labelStyle={checkboxLabelStyle}
 					onChange={checked=>onCheckedChanged && onCheckedChanged(checked)}/>*/}

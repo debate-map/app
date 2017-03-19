@@ -357,9 +357,10 @@ Number.prototype._AddFunction_Inline = function ToPercentStr(precision?: number)
 		return number.toFixed(precision) + "%";
 	return number.toString() + "%";
 };
-Number.prototype._AddFunction_Inline = function RoundToMultipleOf(step) {
-	var integeredAndRounded = Math.round((new Number(this) as any) / step);
-	var result = (integeredAndRounded * step).toFixed(step.toString().TrimStart("0").length); // - 1);
+interface Number { RoundTo: (multipleOf: number)=>number; }
+Number.prototype._AddFunction_Inline = function RoundTo(multipleOf) {
+	var integeredAndRounded = Math.round((new Number(this) as any) / multipleOf);
+	var result = (integeredAndRounded * multipleOf).toFixed(multipleOf.toString().TrimStart("0").length); // - 1);
 	if (result.contains("."))
 		result = result.TrimEnd("0").TrimEnd(".");
 	return result;
