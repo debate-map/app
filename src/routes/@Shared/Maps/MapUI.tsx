@@ -56,7 +56,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						onContextMenu={e=> {
 							e.preventDefault();
 						}}>
-					<MapNodeUI map={map} nodeID={map.rootNode.KeyToInt} node={rootNode}/>
+					<MapNodeUI map={map} node={rootNode}/>
 					<div style={{width: 1500}}/>
 				</div>
 			</ScrollView>
