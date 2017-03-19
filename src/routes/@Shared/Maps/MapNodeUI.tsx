@@ -88,30 +88,30 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 		return (
 			<div className="clickThrough" style={{position: "relative", display: "flex", padding: "5px 0"}}>
 				<div className="clickThrough" style={{
-					zIndex: 1, //transform: "translateX(0)", // fixes z-index issue
+					//transform: "translateX(0)", // fixes z-index issue
 					paddingTop: separateChildren ? (upChildrenHeight|0) - (expectedHeight / 2) : ((childrenHeight|0) / 2) - (expectedHeight / 2),
 				}}>
 					<MapNodeUI_Inner map={map} node={node} nodeView={nodeView} path={path} width={width}/>
 				</div>
 				{node.type != MapNodeType.Thesis &&
 					<div className="clickThrough" style={{
-						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10, zIndex: 2,
+						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10,
 					}} ref={c=>c && c.clientHeight != this.state.childrenHeight && this.setState({childrenHeight: c.clientHeight})}>
 						{nodeChildren.map((child, index)=> {
 							return <MapNodeUI key={index} map={map} node={child} path={path + "/" + child._key.KeyToInt}/>;
 						})}
 					</div>}
 				{node.type == MapNodeType.Thesis &&
-					<div className="clickThrough" style={{display: "flex", flexDirection: "column", zIndex: 2}}>
+					<div className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
 						<div className="clickThrough" style={{
-							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10, zIndex: 4,
+							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10,
 						}} ref={c=>c && c.clientHeight != this.state.upChildrenHeight && this.setState({upChildrenHeight: c.clientHeight})}>
 							{upChildren.map((child, index)=> {
 								return <MapNodeUI key={"up_" + index} map={map} node={child} path={path + "/" + child._key.KeyToInt}/>;
 							})}
 						</div>
 						<div className="clickThrough" style={{
-							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10, zIndex: 3,
+							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10,
 						}}>
 							{downChildren.map((child, index)=> {
 								return <MapNodeUI key={"down_" + index} map={map} node={child} path={path + "/" + child._key.KeyToInt}/>;
@@ -163,7 +163,7 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 		let fillPercent = pathNodeIDs.length <= 2 ? 1 : .9;
 		return (
 			<div style={{
-				display: "flex", position: "relative", borderRadius: 5, cursor: "pointer", zIndex: 1,
+				display: "flex", position: "relative", borderRadius: 5, cursor: "pointer",
 				//top: "50%", transform: "translateY(calc(-50% - .5px))", // -.5px is added so we end with integer (which avoids anti-aliasing)
 				//boxShadow: "0 0 1px rgba(255,255,255,.5)",
 				/*boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
@@ -181,7 +181,7 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 				]*/}
 
 				<div style={{
-					display: "flex", zIndex: 2, width: "100%", //background: `rgba(${backgroundColor},.7)`,
+					display: "flex", width: "100%", //background: `rgba(${backgroundColor},.7)`,
 					background: "rgba(0,0,0,.7)", borderRadius: 5, cursor: "pointer",
 				}}>
 					<div style={{
@@ -192,10 +192,10 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 							store.dispatch(new ACTSelectMapNode({mapID: map._key.KeyToInt, path}));
 					}}>
 						<div style={{
-							position: "absolute", zIndex: 0, left: 0, top: 0, bottom: 0,
+							position: "absolute", left: 0, top: 0, bottom: 0,
 							width: (fillPercent * 100).RoundTo(1) + "%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
 						}}/>
-						<a style={{position: "relative", zIndex: 1, fontSize, whiteSpace: "initial"}}>
+						<a style={{position: "relative", fontSize, whiteSpace: "initial"}}>
 							{node.title}
 						</a>
 						<VMenu contextMenu={true} onBody={true}>
@@ -266,7 +266,7 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 					</div>
 					<Button //text={nodeView && nodeView.expanded ? "-" : "+"} size={28}
 							style={{
-								display: "flex", justifyContent: "center", alignItems: "center", zIndex: 2, borderRadius: "0 5px 5px 0",
+								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
 								width: 18, padding: 0,
 								//fontSize: 18,
 								fontSize: nodeView && nodeView.expanded ? 23 : 17,
@@ -308,6 +308,12 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 				<Button text="Degree" enabled={false} mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}>
 					<Span ml={5}style={{float: "right"}}>70%</Span>
 				</Button>
+				<Button text="Definitions" mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}/>
+				<Button text="Questions" mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}/>
+				<Button text="Stats" mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}/>
+				<Button text="Tags" mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}/>
+				<Button text="Discuss (meta)" mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}/>
+				<Button text="History" mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}/>
 				<Button text="..."
 					style={{
 						margin: "5px -3px -3px -3px", height: 15, lineHeight: "8px", padding: "0 7px",
