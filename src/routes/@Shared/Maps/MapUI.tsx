@@ -12,7 +12,6 @@ import {PropTypes} from "react";
 import {ACTSelectMapNode} from "./MapNodeUI";
 import {Assert} from "../../../Frame/Serialization/VDF/VDF";
 import V from "../../../Frame/V/V";
-import {MapNodePath} from "../../../store/Store/Main/MapViews";
 var ScrollView = require("react-free-scrollbar").default;
 
 type Props = {map: Map, rootNode?: MapNode};
@@ -51,7 +50,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 							let mapView = store.getState().main.mapViews[store.getState().main.openMap];
 							let isNodeSelected = V.GetKeyValuePairsInObjTree(mapView).Any(a=>a.prop == "selected" && a.value);
 							if (isNodeSelected)
-								store.dispatch(new ACTSelectMapNode({mapID: map._key.KeyToInt, path: new MapNodePath()}));
+								store.dispatch(new ACTSelectMapNode({mapID: map._key.KeyToInt, path: null}));
 						}}
 						onContextMenu={e=> {
 							e.preventDefault();

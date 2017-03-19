@@ -22,7 +22,7 @@ let pathInfos = {} as {[path: string]: DBPathInfo};
 export function GetData(firebase: FirebaseDatabase, path: string) {
 	path = DBPath(path);
 	let info = pathInfos[path] || (pathInfos[path] = new DBPathInfo());
-	var timestamp = (firebase as any)._root.entries.First(a=>a[0] == "timestamp")[1].get(path);
+	var timestamp = (firebase as any)._root ? (firebase as any)._root.entries.First(a=>a[0] == "timestamp")[1].get(path) : null;
 	if (timestamp && timestamp != info.lastTimestamp) {
 		info.lastTimestamp = timestamp;
 		info.cachedData = helpers.dataToJS(firebase, path);

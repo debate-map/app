@@ -16,7 +16,6 @@ var ScrollView = require("react-free-scrollbar").default;
 	//map: helpers.dataToJS(firebase, DBPath("maps/e1")),
 	map: GetData(firebase, "maps/e1"),
 })) as any)
-@SimpleShouldUpdate
 export default class GlobalMapUI extends BaseComponent<{map: Map}, {}> {
 	render() {
 		let {map} = this.props;

@@ -1,3 +1,4 @@
+import {Log} from "../General/Logging";
 // React stuff
 // ==========
 
@@ -235,6 +236,9 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 
 export function SimpleShouldUpdate(target) {
 	target.prototype.shouldComponentUpdate = function(newProps, newState) {
+		/*if (ShallowCompare(this, newProps, newState))
+			//Log("" + newProps.path);
+			Log("Changed: " + this.props.Props.Where(a=>a.value !== newProps[a.name]).Select(a=>a.name));*/
 	    return ShallowCompare(this, newProps, newState);
 		/*var result = ShallowCompare(this, newProps, newState);
 		g.Log(result + ";" + g.ToJSON(this.props) + ";" + g.ToJSON(newProps));

@@ -1,5 +1,5 @@
 import {Vector2i} from "react-vmenu/dist/Helpers/General";
-import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate, BaseProps} from "../../../Frame/UI/ReactGlobals";
 import {MapNode, MapNodeType, MapNodeType_Info} from "./MapNode";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
@@ -8,19 +8,12 @@ import {Debugger, QuickIncrement} from "../../../Frame/General/Globals_Free";
 import Button from "../../../Frame/ReactComponents/Button";
 import {PropTypes, Component} from "react";
 import Action from "../../../Frame/General/Action";
-import {
-    GetNodes,
-    GetNodes_FBPaths,
-    GetNodeView,
-    GetSelectedNodeID,
-    GetUserID,
-    RootState
-} from "../../../store/reducers";
+import {GetNodes_FBPaths, GetSelectedNodeID, GetUserID, MakeGetNodeView, RootState, MakeGetNodeChildren, MakeGetNodeChildIDs} from "../../../store/reducers";
 import {Map} from "./Map";
 import {Log} from "../../../Frame/General/Logging";
 import {WaitXThenRun} from "../../../Frame/General/Timers";
 import V from "../../../Frame/V/V";
-import {MapNodePath, MapNodeView} from "../../../store/Store/Main/MapViews";
+import {MapNodeView} from "../../../store/Store/Main/MapViews";
 import * as VMenuTest1 from "react-vmenu";
 import VMenu, {VMenuItem} from "react-vmenu";
 import Select from "../../../Frame/ReactComponents/Select";
@@ -30,24 +23,30 @@ import TextInput from "../../../Frame/ReactComponents/TextInput";
 import {DN, ToJSON} from "../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
 import {styles} from "../../../Frame/UI/GlobalStyles";
+import {createSelector} from "reselect";
 
-export class ACTSelectMapNode extends Action<{mapID: number, path: MapNodePath}> {}
-export class ACTToggleMapNodeExpanded extends Action<{mapID: number, path: MapNodePath}> {}
+export class ACTSelectMapNode extends Action<{mapID: number, path: string}> {}
+export class ACTToggleMapNodeExpanded extends Action<{mapID: number, path: string}> {}
 
-interface Props {map: Map, node: MapNode, path?: MapNodePath,
+interface Props {map: Map, node: MapNode, path?: string,
 	nodeView?: MapNodeView, nodeChildren?: MapNode[]};
 @firebaseConnect(({node}: {node: MapNode})=>[
-	...GetNodes_FBPaths({nodeIDs: (node.children || {}).VKeys().Select(a=>a.KeyToInt)})
+	...GetNodes_FBPaths({nodeIDs: MakeGetNodeChildIDs()({}, {node})})
 ])
-@(connect((state: RootState, {node, path, map}: Props)=> {
-	var path = path || new MapNodePath([node._key.KeyToInt]);
-	return {
-		path,
-		nodeView: GetNodeView(state, {map, path}),
-		nodeChildren: GetNodes(state, {nodeIDs: (node.children || {}).VKeys().Select(a=>a.KeyToInt)})
-	};
+@(connect(()=> {
+	var getNodeView = MakeGetNodeView();
+	var getNodeChildren = MakeGetNodeChildren();
+	return ((state: RootState, {node, path, map}: Props & BaseProps)=> {
+		var path = path || node._key.KeyToInt.toString();
+		var firebase = store.getState().firebase;
+		//Log("Checking:" + node._key.KeyToInt);
+		return {
+			path,
+			nodeView: getNodeView(state, {firebase, map, path}),
+			nodeChildren: getNodeChildren(state, {firebase, node}),
+		};
+	}) as any;
 }) as any)
-@SimpleShouldUpdate
 export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: number, upChildrenHeight: number}> {
 	//static contextTypes = {map: PropTypes.object};
 
@@ -84,6 +83,8 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 		let expectedLines = (expectedTextWidth / maxTextWidth).CeilingTo(1);
 		let expectedHeight = (expectedLines * 17) + 10; // (lines * line-height) + top-plus-bottom-padding
 
+		//Log("Rendering:" + node._key.KeyToInt);
+
 		return (
 			<div className="clickThrough" style={{position: "relative", display: "flex", padding: "5px 0"}}>
 				<div className="clickThrough" style={{
@@ -97,7 +98,7 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10, zIndex: 2,
 					}} ref={c=>c && c.clientHeight != this.state.childrenHeight && this.setState({childrenHeight: c.clientHeight})}>
 						{nodeChildren.map((child, index)=> {
-							return <MapNodeUI key={index} map={map} node={child} path={new MapNodePath(path.nodeIDs.concat(child._key.KeyToInt))}/>;
+							return <MapNodeUI key={index} map={map} node={child} path={path + "/" + child._key.KeyToInt}/>;
 						})}
 					</div>}
 				{node.type == MapNodeType.Thesis &&
@@ -106,15 +107,14 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10, zIndex: 3,
 						}} ref={c=>c && c.clientHeight != this.state.upChildrenHeight && this.setState({upChildrenHeight: c.clientHeight})}>
 							{upChildren.map((child, index)=> {
-								return <MapNodeUI key={"up_" + index} map={map} node={child} path={new MapNodePath(path.nodeIDs.concat(child._key.KeyToInt))}/>;
+								return <MapNodeUI key={"up_" + index} map={map} node={child} path={path + "/" + child._key.KeyToInt}/>;
 							})}
 						</div>
 						<div className="clickThrough" style={{
-							
 							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10, zIndex: 3,
 						}}>
 							{downChildren.map((child, index)=> {
-								return <MapNodeUI key={"down_" + index} map={map} node={child} path={new MapNodePath(path.nodeIDs.concat(child._key.KeyToInt))}/>;
+								return <MapNodeUI key={"down_" + index} map={map} node={child} path={path + "/" + child._key.KeyToInt}/>;
 							})}
 						</div>
 					</div>}
@@ -142,13 +142,12 @@ let nodeTypeFontSizes = {
 	Category: 16
 }
 
-type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: MapNodePath, width: number} & Partial<{selectedNodeID: number, userID: string}>;
+type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number} & Partial<{selectedNodeID: number, userID: string}>;
 @firebaseConnect()
 @(connect((state: RootState, props: MapNodeUI_Inner_Props)=> ({
 	selectedNodeID: GetSelectedNodeID(state, props),
 	userID: GetUserID(state),
 })) as any)
-@SimpleShouldUpdate
 class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 	//static contextTypes = {store: PropTypes.object.isRequired};
 	render() {
@@ -160,7 +159,8 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 		/*let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
 		let maxWidth = node.type == MapNodeType.Thesis ? 500 : 200;*/
 		let barSize = 5;
-		let fillPercent = path.nodeIDs.length <= 2 ? 1 : .9;
+		let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
+		let fillPercent = pathNodeIDs.length <= 2 ? 1 : .9;
 		return (
 			<div style={{
 				display: "flex", position: "relative", borderRadius: 5, cursor: "pointer", zIndex: 1,
@@ -171,7 +171,7 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 				//boxShadow: "rgba(0, 0, 0, 1) 0px 0px 1px",
 				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, width,
 			}}>
-				{nodeView && nodeView.selected && <MapNodeUI_LeftBox map={map} node={node} nodeView={nodeView} path={path} backgroundColor={backgroundColor}/>}
+				{nodeView && nodeView.selected && <MapNodeUI_LeftBox map={map} node={node} nodeView={nodeView} backgroundColor={backgroundColor}/>}
 				<div style={{position: "absolute", transform: "translateX(-100%)", width: 1, height: 28}}/> {/* fixes click-gap */}
 
 				{/* probability-and-such bars */}
@@ -287,10 +287,9 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 	}
 }
 
-@SimpleShouldUpdate
-export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, nodeView?: MapNodeView, path: MapNodePath, backgroundColor: string}, {}> {
+export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, nodeView?: MapNodeView, backgroundColor: string}, {}> {
 	render() {
-		let {map, node, nodeView, path, backgroundColor} = this.props;
+		let {map, node, nodeView, backgroundColor} = this.props;
 		return (
 			<div style={{
 				display: "flex", flexDirection: "column", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap",

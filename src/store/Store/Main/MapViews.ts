@@ -6,12 +6,6 @@ import V from "../../../Frame/V/V";
 export class MapViews {
 	[key: number]: MapView;
 }
-export class MapNodePath {
-	constructor(nodeIDs?: number[]) {
-		this.nodeIDs = nodeIDs || [];
-	}
-	nodeIDs: number[];
-}
 export class MapView {
 	rootNodeView = new MapNodeView();
 }
@@ -40,10 +34,11 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 	return state;
 }
 
-function GetNodeViewAtPath(rootNodeView: MapNodeView, path: MapNodePath, createPathIfNotExisting = true) {
-	if (path.nodeIDs.length == 0) return null;
+function GetNodeViewAtPath(rootNodeView: MapNodeView, path: string, createPathIfNotExisting = true) {
+	if (!path) return null;
+	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 	let newRootNodeView_currentNode = rootNodeView;
-	for (let nodeID of path.nodeIDs.Skip(1)) {
+	for (let nodeID of pathNodeIDs.Skip(1)) {
 		if (newRootNodeView_currentNode.children[nodeID] == null) {
 			if (createPathIfNotExisting)
 				newRootNodeView_currentNode.children[nodeID] = {children: {}};
@@ -66,19 +61,26 @@ function MapViewReducer(state = new MapView(), action: Action<any>) {
 		let nodeView = GetNodeViewAtPath(newRootNodeView, action.payload.path, true);
 		if (nodeView) // (might be clicking background)
 			nodeView.selected = true;
-		return {
-			...state,
-			rootNodeView: newRootNodeView,
-		};
+		return {...state, rootNodeView: newRootNodeView};
 	}
 	if (action.Is(ACTToggleMapNodeExpanded)) {
-		let newRootNodeView = FromJSON(ToJSON(state.rootNodeView)) as MapNodeView;
+		/*let newRootNodeView = FromJSON(ToJSON(state.rootNodeView)) as MapNodeView;
 		let nodeView = GetNodeViewAtPath(newRootNodeView, action.payload.path, true);
 		nodeView.expanded = !nodeView.expanded;
 		return {
 			...state,
 			rootNodeView: newRootNodeView,
-		};
+		};*/
+		//let newRootNodeView = {...state.rootNodeView};
+		let newRootNodeView_2 = state.rootNodeView.Extended({});
+		let path = action.payload.path;
+		let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
+
+		let currentNodeInNewTree = newRootNodeView_2;
+		for (let nodeID of pathNodeIDs.Skip(1))
+			currentNodeInNewTree = currentNodeInNewTree.children[nodeID] = {...(currentNodeInNewTree.children[nodeID] || {children: {}})};
+		currentNodeInNewTree.expanded = !currentNodeInNewTree.expanded;
+		return {...state, rootNodeView: newRootNodeView_2};
 	}
 	return state;
 }
