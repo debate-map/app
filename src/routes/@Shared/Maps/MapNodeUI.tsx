@@ -71,19 +71,22 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 
 		let fontSize = nodeTypeFontSizes[node.type] || 14;
 		var textPreview = $(`<a style="fontSize: ${fontSize}; whiteSpace: initial;">${node.title}</a>`);
-		var textWidth = V.GetContentWidth(textPreview);
+		var expectedTextWidth = V.GetContentWidth(textPreview);
+		var expectedOtherStuffWidth = 60;
+		let expectedBoxWidth = expectedTextWidth + 60; // textWidth + extraStuffInBox
 
-		let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
-		let maxWidth = node.type == MapNodeType.Thesis ? 500 : 200;
-		let width = textWidth.KeepBetween(minWidth, maxWidth);
-		let lines = (textWidth / maxWidth).CeilingTo(1);
-		let height = (lines * 17) + 10; // (lines * line-height) + top-plus-bottom-padding
+		let minTextWidth = (node.type == MapNodeType.Thesis ? 350 : 100) - expectedOtherStuffWidth;
+		let maxTextWidth = (node.type == MapNodeType.Thesis ? 500 : 200) - expectedOtherStuffWidth;
+		let width = expectedBoxWidth.KeepBetween(minTextWidth, maxTextWidth);
+		
+		let expectedLines = (expectedTextWidth / maxTextWidth).CeilingTo(1);
+		let expectedHeight = (expectedLines * 17) + 10; // (lines * line-height) + top-plus-bottom-padding
 
 		return (
 			<div className="clickThrough" style={{position: "relative", display: "flex", padding: "5px 0"}}>
 				<div className="clickThrough" style={{
 					zIndex: 1, //transform: "translateX(0)", // fixes z-index issue
-					paddingTop: separateChildren ? (upChildrenHeight|0) - (height / 2) : ((childrenHeight|0) / 2) - (height / 2),
+					paddingTop: separateChildren ? (upChildrenHeight|0) - (expectedHeight / 2) : ((childrenHeight|0) / 2) - (expectedHeight / 2),
 				}}>
 					<MapNodeUI_Inner map={map} node={node} nodeView={nodeView} path={path} width={width}/>
 				</div>
