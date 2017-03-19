@@ -71,7 +71,7 @@ export default class MapNodeUI extends BaseComponent<Props, {}> {
 				</div>
 				<div className="clickThrough"
 						style={{
-							zIndex: 1, marginLeft: 10,
+							zIndex: 2, marginLeft: 10,
 							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", //transform: "translateY(calc(-50% + 14px))",
 						}}>
 					{/*nodeView && nodeView.expanded &&*/ nodeChildren.map((child, index)=> {
@@ -116,15 +116,15 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 		//let {dispatch} = this.context.store;
 		let backgroundColor = nodeTypeBackgroundColors[node.type];
 		//let enemyBackgroundColor = nodeTypeBackgroundColors_enemy[node.type] || "150,150,150";
-		let enemyBackgroundColor = "0,0,0";
 		let fontSize = nodeTypeFontSizes[node.type] || 14;
 		let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
 		let maxWidth = node.type == MapNodeType.Thesis ? 500 : 200;
 		let barSize = 5;
+		let fillPercent = path.nodeIDs.length <= 2 ? 1 : .9;
 		return (
 			<div style={{
 				display: "flex", position: "relative", borderRadius: 5, cursor: "pointer", zIndex: 1,
-				top: "50%", transform: "translateY(-50%)",
+				top: "50%", transform: "translateY(calc(-50% - .5px))", // -.5px is added so we end with integer (which avoids anti-aliasing)
 				//boxShadow: "0 0 1px rgba(255,255,255,.5)",
 				/*boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
 				filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 3px) drop-shadow(rgba(0,0,0,.35) 0px 0px 3px)",*/
@@ -142,38 +142,43 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 
 				<div
 						style={{
-							position: "relative", minWidth: minWidth - 20, maxWidth: maxWidth - 20, zIndex: 2, //background: `rgba(${backgroundColor},.7)`,
-							padding: 5, //node.type == MapNodeType.Category || node.type == MapNodeType.Package ? 5 : "3px 5px",
-							borderRadius: "5px 0 0 5px", cursor: "pointer"
+							display: "flex", zIndex: 2, //background: `rgba(${backgroundColor},.7)`,
+							background: "rgba(0,0,0,.7)", borderRadius: 5, cursor: "pointer",
 						}}
 						onClick={()=> {
 							if (selectedNodeID != node._key.KeyToInt)
 								store.dispatch(new ACTSelectMapNode({mapID: map._key.KeyToInt, path}));
 						}}>
-					{path.nodeIDs.length >= 3 ? [
-						<div style={{position: "absolute", zIndex: 0, left: 0, top: 0, bottom: 0, width: "100%", background: `rgba(${enemyBackgroundColor},.7)`, borderRadius: "5px 0 0 5px"}}/>,
-						<div style={{position: "absolute", zIndex: 0, left: 0, top: 0, bottom: 0, width: "90%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"}}/>,
-					] : <div style={{position: "absolute", zIndex: 0, left: 0, top: 0, bottom: 0, width: "100%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"}}/>}
-					<a style={{position: "relative", zIndex: 1, fontSize, whiteSpace: "initial"}}>
-						{node.title}
-					</a>
-				</div>
-				<Button //text={nodeView && nodeView.expanded ? "-" : "+"} size={28}
-						style={{
-							position: "relative", zIndex: 2, borderRadius: "0 5px 5px 0",
-							width: 18, padding: 0, fontSize: 18, textAlign: "center", //lineHeight: "28px",
-							backgroundColor: `rgba(${backgroundColor},.5)`,
-							//backgroundColor: `rgba(40,60,80,.5)`,
-							boxShadow: "none",
-							":hover": {backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>parseInt(a) - 20).join(",")},.7)`},
-						}}
-						onClick={()=> {
-							store.dispatch(new ACTToggleMapNodeExpanded({mapID: map._key.KeyToInt, path}));
-						}}>
-					<span style={{position: "absolute", left: 0, right: 0, top: "50%", transform: "translateY(-50%)"}}>
+					<div style={{
+						position: "relative", minWidth: minWidth - 20, maxWidth: maxWidth - 20,
+						padding: 5, //node.type == MapNodeType.Category || node.type == MapNodeType.Package ? 5 : "3px 5px",
+					}}>
+						<div style={{
+							position: "absolute", zIndex: 0, left: 0, top: 0, bottom: 0,
+							width: (fillPercent * 100).RoundTo(1) + "%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
+						}}/>
+						<a style={{position: "relative", zIndex: 1, fontSize, whiteSpace: "initial"}}>
+							{node.title}
+						</a>
+					</div>
+					<Button //text={nodeView && nodeView.expanded ? "-" : "+"} size={28}
+							style={{
+								display: "flex", justifyContent: "center", alignItems: "center", zIndex: 2, borderRadius: "0 5px 5px 0",
+								width: 18, padding: 0,
+								//fontSize: 18,
+								fontSize: nodeView && nodeView.expanded ? 23 : 17,
+								//lineHeight: "28px",
+								//backgroundColor: `rgba(${backgroundColor},.5)`,
+								backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>(parseInt(a) * .97).RoundTo(1)).join(",")},.5)`,
+								boxShadow: "none",
+								":hover": {backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>(parseInt(a) * .97).RoundTo(1)).join(",")},.7)`},
+							}}
+							onClick={()=> {
+								store.dispatch(new ACTToggleMapNodeExpanded({mapID: map._key.KeyToInt, path}));
+							}}>
 						{nodeView && nodeView.expanded ? "-" : "+"}
-					</span>
-				</Button>
+					</Button>
+				</div>
 				<VMenu contextMenu={true} onBody={true}>
 					{MapNodeType_Info.for[node.type].childTypes.map(childType=> {
 						let childTypeInfo = MapNodeType_Info.for[childType];
@@ -250,26 +255,28 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 		return (
 			<div style={{
 				display: "flex", flexDirection: "column", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap",
-				zIndex: 3, background: `rgba(${backgroundColor},.9)`, padding: 3,
-				//borderRadius: 5,
-				borderRadius: "5px 5px 0 0",
+				zIndex: 3, padding: 3,
+				//background: `rgba(${backgroundColor},.9)`,
+				background: `rgba(0,0,0,.7)`,
+				borderRadius: 5,
 				//boxShadow: "0 0 1px rgba(255,255,255,.5)",
 				//boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
 				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`,
 			}}>
-				<Button text="Probability" style={{padding: "3px 7px"}}>
+				<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
+				<Button text="Probability" style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}>
 					<Span ml={5} style={{float: "right"}}>90%</Span>
 				</Button>
-				<Button text="Degree" enabled={false} mt={5} style={{padding: "3px 7px"}}>
+				<Button text="Degree" enabled={false} mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}>
 					<Span ml={5}style={{float: "right"}}>70%</Span>
 				</Button>
 				<Button text="..."
 					style={{
-						position: "absolute", left: 0, right: 0, bottom: -10, height: 10, padding: "0 7px", textAlign: "center",
-						background: `rgba(${backgroundColor},.9)`,
-						boxShadow: `rgba(0,0,0,1) 0px 0px 2px`,
+						margin: "5px -3px -3px -3px", height: 15, lineHeight: "8px", padding: "0 7px",
+						position: "relative", display: "flex", justifyContent: "space-around", //alignItems: "center",
+						background: null, boxShadow: null, borderTop: "1px solid rgba(0,0,0,1)",
 						borderRadius: "0 0 5px 5px",
-						":hover": {background: `rgba(${backgroundColor},1)`},
+						":hover": {background: `rgba(${backgroundColor},.5)`},
 					}}/>
 			</div>
 		);
