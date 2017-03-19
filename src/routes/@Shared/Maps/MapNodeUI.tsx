@@ -34,13 +34,13 @@ import {styles} from "../../../Frame/UI/GlobalStyles";
 export class ACTSelectMapNode extends Action<{mapID: number, path: MapNodePath}> {}
 export class ACTToggleMapNodeExpanded extends Action<{mapID: number, path: MapNodePath}> {}
 
-interface Props {map: Map, nodeID: number, node: MapNode, path?: MapNodePath,
+interface Props {map: Map, node: MapNode, path?: MapNodePath,
 	nodeView?: MapNodeView, nodeChildren?: MapNode[]};
 @firebaseConnect(({node}: {node: MapNode})=>[
 	...GetNodes_FBPaths({nodeIDs: (node.children || {}).VKeys().Select(a=>a.KeyToInt)})
 ])
-@(connect((state: RootState, {nodeID, node, path, map}: Props)=> {
-	var path = path || new MapNodePath([nodeID]);
+@(connect((state: RootState, {node, path, map}: Props)=> {
+	var path = path || new MapNodePath([node._key.KeyToInt]);
 	return {
 		path,
 		nodeView: GetNodeView(state, {map, path}),
@@ -59,7 +59,7 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 	}*/
 
 	render() {
-		let {map, nodeID, node, path, nodeView, nodeChildren, children} = this.props;
+		let {map, node, path, nodeView, nodeChildren, children} = this.props;
 		let {childrenHeight, upChildrenHeight} = this.state;
 		/*let {map} = this.context;
 		if (map == null) return <div>Loading map, deep...</div>; // not sure why this occurs*/
@@ -93,8 +93,7 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", //transform: "translateY(calc(-50% + 14px))",
 					}} ref={c=>c && c.clientHeight != this.state.childrenHeight && this.setState({childrenHeight: c.clientHeight})}>
 						{nodeChildren.map((child, index)=> {
-							let childID = node.children.VKeys()[index].KeyToInt;
-							return <MapNodeUI key={index} map={map} nodeID={childID} node={child} path={path.Extend(childID)}/>;
+							return <MapNodeUI key={index} map={map} node={child} path={new MapNodePath(path.nodeIDs.concat(child._key.KeyToInt))}/>;
 						})}
 					</div>}
 				{node.type == MapNodeType.Thesis &&
@@ -104,8 +103,7 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", //transform: "translateY(calc(-50% + 14px))",
 						}} ref={c=>c && c.clientHeight != this.state.upChildrenHeight && this.setState({upChildrenHeight: c.clientHeight})}>
 							{upChildren.map((child, index)=> {
-								let childID = node.children.VKeys()[index].KeyToInt;
-								return <MapNodeUI key={index} map={map} nodeID={childID} node={child} path={path.Extend(childID)}/>;
+								return <MapNodeUI key={"up_" + index} map={map} node={child} path={new MapNodePath(path.nodeIDs.concat(child._key.KeyToInt))}/>;
 							})}
 						</div>
 						<div className="clickThrough" style={{
@@ -113,8 +111,7 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", //transform: "translateY(calc(-50% + 14px))",
 						}}>
 							{downChildren.map((child, index)=> {
-								let childID = node.children.VKeys()[index].KeyToInt;
-								return <MapNodeUI key={index} map={map} nodeID={childID} node={child} path={path.Extend(childID)}/>;
+								return <MapNodeUI key={"down_" + index} map={map} node={child} path={new MapNodePath(path.nodeIDs.concat(child._key.KeyToInt))}/>;
 							})}
 						</div>
 					</div>}

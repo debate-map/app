@@ -11,9 +11,6 @@ export class MapNodePath {
 		this.nodeIDs = nodeIDs || [];
 	}
 	nodeIDs: number[];
-	Extend(nodeID: number) {
-		return new MapNodePath(this.nodeIDs.concat(nodeID));
-	}
 }
 export class MapView {
 	rootNodeView = new MapNodeView();
