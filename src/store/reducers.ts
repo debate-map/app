@@ -12,7 +12,7 @@ import V from "../Frame/V/V";
 import {MainState, MainReducer} from "./Store/Main";
 import {createSelector} from "reselect";
 import {MapNodePath} from "./Store/Main/MapViews";
-import {DBPath} from "../Frame/Database/DatabaseHelpers";
+import {DBPath, GetData} from "../Frame/Database/DatabaseHelpers";
 import {firebase} from "../config.js";
 
 export function InjectReducer(store, {key, reducer}) {
@@ -58,7 +58,7 @@ export function GetNodes_FBPaths({nodeIDs}: {nodeIDs: number[]}) {
 	return nodeIDs.Select(a=>DBPath(`nodes/e${a}`));
 }
 export function GetNodes(state: RootState, {nodeIDs}: {nodeIDs: number[]}) {
-	return nodeIDs.Select(a=>helpers.dataToJS(state.firebase, DBPath(`nodes/e${a}`))).Where(a=>a);
+	return nodeIDs.Select(a=>GetData(state.firebase, `nodes/e${a}`)).Where(a=>a);
 }
 export function GetNodeView(state: RootState, {map, path}: {map: Map, path: MapNodePath}) {
 	if (map == null || path == null) return null;
