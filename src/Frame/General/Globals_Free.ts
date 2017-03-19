@@ -29,14 +29,14 @@ export function Grab(grabFunc) {
 	return target=>grabFunc(target);
 }
 
-export function SimpleShouldUpdate(target) {
+/*export function SimpleShouldUpdate(target) {
 	target.prototype.shouldComponentUpdate = function(newProps, newState) {
 	    return ShallowCompare(this, newProps, newState);
 		/*var result = ShallowCompare(this, newProps, newState);
 		g.Log(result + ";" + g.ToJSON(this.props) + ";" + g.ToJSON(newProps));
-		return result;*/
+		return result;*#/
 	}
-}
+}*/
 
 // property tags
 // ==========

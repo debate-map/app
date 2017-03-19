@@ -11,9 +11,12 @@ import {ToJSON, FromJSON} from "../Frame/General/Globals";
 import V from "../Frame/V/V";
 import {MainState, MainReducer} from "./Store/Main";
 import {createSelector} from "reselect";
-import {MapNodePath} from "./Store/Main/MapViews";
 import {DBPath, GetData} from "../Frame/Database/DatabaseHelpers";
 import {firebase} from "../config.js";
+import {MapView} from "./Store/Main/MapViews";
+import {MapNode} from "../routes/@Shared/Maps/MapNode";
+import {FirebaseDatabase} from "../Frame/UI/ReactGlobals";
+import {QuickIncrement} from "../Frame/General/Globals_Free";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;
@@ -57,19 +60,58 @@ export function GetSelectedNodeID(state: RootState, {map}: {map: Map}) {
 export function GetNodes_FBPaths({nodeIDs}: {nodeIDs: number[]}) {
 	return nodeIDs.Select(a=>DBPath(`nodes/e${a}`));
 }
-export function GetNodes(state: RootState, {nodeIDs}: {nodeIDs: number[]}) {
-	return nodeIDs.Select(a=>GetData(state.firebase, `nodes/e${a}`)).Where(a=>a);
-}
-export function GetNodeView(state: RootState, {map, path}: {map: Map, path: MapNodePath}) {
-	if (map == null || path == null) return null;
 
-	var mapView = state.main.mapViews[map._key.KeyToInt];
-	if (mapView == null) return;
-	var currentNodeView = mapView.rootNodeView || {children: {}};
-	for (let [index, nodeID] of path.nodeIDs.Skip(1).entries()) {
-		currentNodeView = currentNodeView.children[nodeID];
-		if (currentNodeView == null)
-			return null;
+function GetMapView(state: RootState, {map}: {map: Map}) {
+	if (map == null) return null;
+	return state.main.mapViews[map._key.KeyToInt];
+}
+
+export function MakeGetNodeView() {
+	var getParentNodeView; //= MakeGetNodeView();
+	return createSelector(
+		(_, {firebase}: {firebase: FirebaseDatabase})=>firebase,
+		(_, {map}: {map: Map})=>map._key.KeyToInt,
+		(state: RootState, {map})=>state.main.mapViews[map._key.KeyToInt] && state.main.mapViews[map._key.KeyToInt].rootNodeView,
+		(_, {path}: {path: string})=>path,
+		(state: RootState, props)=> {
+			let {path, ...rest} = props;
+			if (!props.path.contains("/")) return null;
+			getParentNodeView = getParentNodeView || MakeGetNodeView();
+			return getParentNodeView(state, {...rest, path: path.substring(0, path.lastIndexOf("/"))});
+		},
+		(firebase, mapID, rootNodeView, path, parentNodeView) => {
+			if (mapID == null || path == null) return null;
+			let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
+			/*var currentNodeView = mapView.rootNodeView || {children: {}};
+			for (let [index, nodeID] of pathNodeIDs.Skip(1).entries()) {
+				currentNodeView = currentNodeView.children[nodeID];
+				if (currentNodeView == null)
+					return null;
+			}
+			return currentNodeView;*/
+			return parentNodeView ? parentNodeView.children[pathNodeIDs.Last()] : rootNodeView;
+		}
+  	);
+}
+
+export var MakeGetNodeChildIDs = ()=>createSelector(
+	(_, {node}: {node: MapNode})=>node.children,
+	nodeChildren=> {
+		return (nodeChildren || {}).VKeys().Select(a=>a.KeyToInt);
 	}
-	return currentNodeView;
+);
+/*export function GetNodes(state: RootState, {nodeIDs}: {nodeIDs: number[]}) {
+	return ;
+}*/
+
+export function MakeGetNodeChildren() {
+	var getNodeChildIDs = MakeGetNodeChildIDs();
+	return createSelector(
+		({firebase})=>firebase,
+		getNodeChildIDs,
+		(firebase, childIDs)=> {
+			if (firebase == null) debugger;
+			return childIDs.Select(a=>GetData(firebase, `nodes/e${a}`)).Where(a=>a);
+		}
+	);
 }
