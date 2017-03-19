@@ -26,7 +26,7 @@ import Select from "../../../Frame/ReactComponents/Select";
 import {GetEntries} from "../../../Frame/General/Enums";
 import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
 import TextInput from "../../../Frame/ReactComponents/TextInput";
-import {DN} from "../../../Frame/General/Globals";
+import {DN, ToJSON} from "../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
 import {styles} from "../../../Frame/UI/GlobalStyles";
 
@@ -48,10 +48,20 @@ interface Props {map: Map, nodeID: number, node: MapNode, path?: MapNodePath,
 }) as any)
 export default class MapNodeUI extends BaseComponent<Props, {}> {
 	//static contextTypes = {map: PropTypes.object};
+
+	/*shouldComponentUpdate(oldProps: Props, newProps: Props) {
+		if (ToJSON(oldProps.Excluding("nodeView")) != ToJSON(newProps.Excluding("nodeView")))
+			return true;
+		if (oldProps.nodeView.expanded != newProps.nodeView.expanded || oldProps.nodeView.selected != newProps.nodeView.selected)
+			return true;
+		return false;
+	}*/
+
 	render() {
 		let {map, nodeID, node, path, nodeView, nodeChildren, children} = this.props;
 		/*let {map} = this.context;
 		if (map == null) return <div>Loading map, deep...</div>; // not sure why this occurs*/
+		Log("Updating MapNodeUI:" + nodeID);
 		return (
 			<div className="clickThrough" style={{display: "flex", padding: "5px 0"}}>
 				<div className="clickThrough" style={{
@@ -62,9 +72,9 @@ export default class MapNodeUI extends BaseComponent<Props, {}> {
 				<div className="clickThrough"
 						style={{
 							zIndex: 1, marginLeft: 10,
-							display: "flex", flexDirection: "column", //transform: "translateY(calc(-50% + 14px))",
+							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", //transform: "translateY(calc(-50% + 14px))",
 						}}>
-					{nodeView && nodeView.expanded && nodeChildren.map((child, index)=> {
+					{/*nodeView && nodeView.expanded &&*/ nodeChildren.map((child, index)=> {
 						let childID = node.children.VKeys()[index].KeyToInt;
 						return <MapNodeUI key={index} map={map} nodeID={childID} node={child} path={path.Extend(childID)}/>;
 					})}
@@ -119,7 +129,7 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 				/*boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
 				filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 3px) drop-shadow(rgba(0,0,0,.35) 0px 0px 3px)",*/
 				//boxShadow: "rgba(0, 0, 0, 1) 0px 0px 1px",
-				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, willChange: "transform",
+				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`,
 			}}>
 				{nodeView && nodeView.selected && <MapNodeUI_LeftBox map={map} node={node} nodeView={nodeView} path={path} backgroundColor={backgroundColor}/>}
 				<div style={{position: "absolute", transform: "translateX(-100%)", width: 1, height: 28}}/> {/* fixes click-gap */}
@@ -144,20 +154,26 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 						<div style={{position: "absolute", zIndex: 0, left: 0, top: 0, bottom: 0, width: "100%", background: `rgba(${enemyBackgroundColor},.7)`, borderRadius: "5px 0 0 5px"}}/>,
 						<div style={{position: "absolute", zIndex: 0, left: 0, top: 0, bottom: 0, width: "90%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"}}/>,
 					] : <div style={{position: "absolute", zIndex: 0, left: 0, top: 0, bottom: 0, width: "100%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"}}/>}
-					<a style={{position: "relative", zIndex: 1, fontSize}}>{node.title}</a>
+					<a style={{position: "relative", zIndex: 1, fontSize, whiteSpace: "initial"}}>
+						{node.title}
+					</a>
 				</div>
-				<Button text={nodeView && nodeView.expanded ? "-" : "+"} size={28}
-					style={{
-						position: "relative", zIndex: 2, borderRadius: "0 5px 5px 0",
-						width: 18, fontSize: 18, textAlign: "center", lineHeight: "28px",
-						backgroundColor: `rgba(${backgroundColor},.5)`,
-						//backgroundColor: `rgba(40,60,80,.5)`,
-						boxShadow: "none",
-						":hover": {backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>parseInt(a) - 20).join(",")},.7)`},
-					}}
-					onClick={()=> {
-						store.dispatch(new ACTToggleMapNodeExpanded({mapID: map._key.KeyToInt, path}));
-					}}/>
+				<Button //text={nodeView && nodeView.expanded ? "-" : "+"} size={28}
+						style={{
+							position: "relative", zIndex: 2, borderRadius: "0 5px 5px 0",
+							width: 18, padding: 0, fontSize: 18, textAlign: "center", //lineHeight: "28px",
+							backgroundColor: `rgba(${backgroundColor},.5)`,
+							//backgroundColor: `rgba(40,60,80,.5)`,
+							boxShadow: "none",
+							":hover": {backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>parseInt(a) - 20).join(",")},.7)`},
+						}}
+						onClick={()=> {
+							store.dispatch(new ACTToggleMapNodeExpanded({mapID: map._key.KeyToInt, path}));
+						}}>
+					<span style={{position: "absolute", left: 0, right: 0, top: "50%", transform: "translateY(-50%)"}}>
+						{nodeView && nodeView.expanded ? "-" : "+"}
+					</span>
+				</Button>
 				<VMenu contextMenu={true} onBody={true}>
 					{MapNodeType_Info.for[node.type].childTypes.map(childType=> {
 						let childTypeInfo = MapNodeType_Info.for[childType];
@@ -238,7 +254,7 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 				zIndex: 3, background: `rgba(${backgroundColor},.9)`, padding: 3, borderRadius: 5,
 				//boxShadow: "0 0 1px rgba(255,255,255,.5)",
 				//boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
-				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, willChange: "transform",
+				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`,
 			}}>
 				<Button text="Probability" mr={7} style={{padding: "3px 7px"}}>
 					<Span ml={5}>90%</Span>

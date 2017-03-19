@@ -21,7 +21,7 @@ import ShallowCompare from "react-addons-shallow-compare";
 }*/
 export function Global(target: Function) {
 	var name = target.GetName();
-	//console.log("Globalizing: " + name);
+	//console.log("Globalizing: " + name);//
 	g[name] = target;
 }
 

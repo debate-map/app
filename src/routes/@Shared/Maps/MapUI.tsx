@@ -39,11 +39,12 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		if (rootNode == null)
 			return <div>Loading root node...</div>;
 		return (
-			<ScrollView backgroundDrag={true} backgroundDragMatchFunc={a=>a == this.refs.content} scrollVBarStyles={{width: 10}}>
+			<ScrollView backgroundDrag={true} backgroundDragMatchFunc={a=>a == this.refs.content} scrollVBarStyles={{width: 10}} contentStyle={{willChange: "transform"}}
+						/*bufferScrollEventsBy={100000}*/>
 					<div id="MapUI" ref="content"
 						style={{
-							position: "relative", padding: "150px 870px", whiteSpace: "nowrap",
-							filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)", willChange: "transform",
+							position: "relative", padding: "150px 5000px 5000px 870px", whiteSpace: "nowrap",
+							filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)",
 						}}
 						onClick={e=> {
 							if (e.target != this.refs.content) return;
