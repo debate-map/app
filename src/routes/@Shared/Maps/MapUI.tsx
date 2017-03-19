@@ -5,7 +5,7 @@ import {Route} from "react-router-dom";
 import {connect} from "react-redux";
 import {Map} from "./Map";
 import MapNodeUI from "./MapNodeUI";
-import {DBPath} from "../../../Frame/Database/DatabaseHelpers";
+import {DBPath, GetData} from "../../../Frame/Database/DatabaseHelpers";
 import {MapNode} from "./MapNode";
 import {Debugger} from "../../../Frame/General/Globals_Free";
 import {PropTypes} from "react";
@@ -20,7 +20,7 @@ type Props = {map: Map, rootNode?: MapNode};
 	map && DBPath(`nodes/${map.rootNode}`),
 ].Where(a=>!!a))
 @(connect(({firebase}: RootState, {map}: Props)=> ({
-	rootNode: map && helpers.dataToJS(firebase, DBPath(`nodes/${map.rootNode}`)),
+	rootNode: map && GetData(firebase, `nodes/${map.rootNode}`),
 })) as any)
 export default class MapUI extends BaseComponent<Props, {} | void> {
 	/*static childContextTypes = {

@@ -1,3 +1,5 @@
+import {FirebaseDatabase} from "../UI/ReactGlobals";
+import {helpers} from "react-redux-firebase";
 let {dbRootVersion} = require("../../../config/DBVersion");
 export function DBPath(path: string) {
 	return `v${dbRootVersion}/` + path;
@@ -10,6 +12,22 @@ declare global { class FirebaseDatabase_Extensions {
 Object.prototype._AddFunction_Inline = function Ref(path = "") {
 	let finalPath = DBPath(path);
 	return this.ref(finalPath);
+}
+
+class DBPathInfo {
+	lastTimestamp = -1;
+	cachedData;
+}
+let pathInfos = {} as {[path: string]: DBPathInfo};
+export function GetData(firebase: FirebaseDatabase, path: string) {
+	path = DBPath(path);
+	let info = pathInfos[path] || (pathInfos[path] = new DBPathInfo());
+	var timestamp = (firebase as any)._root.entries.First(a=>a[0] == "timestamp")[1].get(path);
+	if (timestamp && timestamp != info.lastTimestamp) {
+		info.lastTimestamp = timestamp;
+		info.cachedData = helpers.dataToJS(firebase, path);
+	}
+	return info.cachedData;
 }
 
 /*;(function() {
