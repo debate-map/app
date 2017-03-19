@@ -240,6 +240,13 @@ Object.prototype._AddFunction_Inline = function Extended2(x) {
 };
 //Object.prototype._AddFunction_Inline = function E(x) { return this.Extended(x); };
 
+interface Object { Including(...propNames: string[]): Object; }
+Object.prototype._AddFunction_Inline = function Including(...propNames) {
+    var result = {};
+    for (let propName of propNames)
+        result[propName] = this[propName];
+    return result;
+}
 interface Object { Excluding(...propNames: string[]): Object; }
 Object.prototype._AddFunction_Inline = function Excluding(...propNames) {
     var result = this.Extended();
@@ -585,21 +592,6 @@ Array.prototype._AddFunction_Inline = function ContainsAny(...items) {
         if (this.indexOf(item) != -1)
             return true;
     return false;
-};
-Array.prototype._AddFunction_Inline = function Indexes()
-{
-	var result = {};
-	for (var i = 0; i < this.length; i++)
-		result[i] = null; //this[i]; //null;
-	return result;
-};
-Array.prototype._AddFunction_Inline = function Strings() // not recommended, because it doesn't allow for duplicates
-{
-	var result = {};
-	for (var key in this)
-		if (this.hasOwnProperty(key))
-			result[this[key]] = null;
-	return result;
 };
 
 // for some reason, this platform doesn't have entries() defined

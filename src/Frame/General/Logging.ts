@@ -1,4 +1,4 @@
-import V from "../V/V";
+//import V from "../V/V";
 /*var Debug = true;
 
 var Log = function(msg, type = 'default') { if(!Debug) return;
@@ -46,7 +46,8 @@ export function Log(message, appendStackTrace = false, logLater = false) {
 		/*if (inUnity)
 			finalMessage += "\n\nStackTrace) " + new Error().Stack;
 		else*/
-		finalMessage += "\n@" + V.GetStackTraceStr();
+		//finalMessage += "\n@" + V.GetStackTraceStr();
+		finalMessage += "\n@" + require("../V/V").GetStackTraceStr();
 	}
 
 	console.log(finalMessage);

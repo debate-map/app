@@ -61,7 +61,7 @@ export default class MapNodeUI extends BaseComponent<Props, {}> {
 		let {map, nodeID, node, path, nodeView, nodeChildren, children} = this.props;
 		/*let {map} = this.context;
 		if (map == null) return <div>Loading map, deep...</div>; // not sure why this occurs*/
-		Log("Updating MapNodeUI:" + nodeID);
+		//Log("Updating MapNodeUI:" + nodeID);
 		return (
 			<div className="clickThrough" style={{display: "flex", padding: "5px 0"}}>
 				<div className="clickThrough" style={{
@@ -247,92 +247,33 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, nodeView?: MapNodeView, path: MapNodePath, backgroundColor: string}, {}> {
 	render() {
 		let {map, node, nodeView, path, backgroundColor} = this.props;
-		//if (nodeView && nodeView.selected)
 		return (
 			<div style={{
-				display: "flex", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap", height: 28,
-				zIndex: 3, background: `rgba(${backgroundColor},.9)`, padding: 3, borderRadius: 5,
+				display: "flex", flexDirection: "column", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap",
+				zIndex: 3, background: `rgba(${backgroundColor},.9)`, padding: 3,
+				//borderRadius: 5,
+				borderRadius: "5px 5px 0 0",
 				//boxShadow: "0 0 1px rgba(255,255,255,.5)",
 				//boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
 				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`,
 			}}>
-				<Button text="Probability" mr={7} style={{padding: "3px 7px"}}>
-					<Span ml={5}>90%</Span>
+				<Button text="Probability" style={{padding: "3px 7px"}}>
+					<Span ml={5} style={{float: "right"}}>90%</Span>
 				</Button>
-				<Button text="Degree" enabled={false} mr={7} style={{padding: "3px 7px"}}>
-					<Span ml={5}>70%</Span>
+				<Button text="Degree" enabled={false} mt={5} style={{padding: "3px 7px"}}>
+					<Span ml={5}style={{float: "right"}}>70%</Span>
 				</Button>
-				<Button text="..." style={{padding: "3px 7px"}}/>
+				<Button text="..."
+					style={{
+						position: "absolute", left: 0, right: 0, bottom: -10, height: 10, padding: "0 7px", textAlign: "center",
+						background: `rgba(${backgroundColor},.9)`,
+						boxShadow: `rgba(0,0,0,1) 0px 0px 2px`,
+						borderRadius: "0 0 5px 5px",
+						":hover": {background: `rgba(${backgroundColor},1)`},
+					}}/>
 			</div>
 		);
-		/*return (
-			<div ref="root" //className="clickThroughChain"
-					style={{
-						display: "flex", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap", height: 28,
-						borderRadius: 5, opacity: 0,
-					}}>
-				<Div mt={7} mr={5} style={{fontSize: "13px"}}>90% at 70%</Div>
-			</div>
-		);*/
 	}
-
-	/*get ShouldPopOut() {
-		let {nodeView, backgroundColor} = this.props;
-		return nodeView == null || !nodeView.selected;
-	}
-	PreRender() {
-		this.PopBackIn(true);
-	}
-	@Instant
-	PostRender() {
-		if (this.ShouldPopOut) {
-			this.PopOut();
-		}
-	}
-	ComponentWillUnmount() {
-		this.PopBackIn(false);
-		if (this.tempCopy) {
-			this.tempCopy.remove();
-			this.tempCopy = null;
-		}
-	}*/
-
-	/*dom: JQuery;
-	domParent: JQuery;
-	poppedOut = false;
-	oldStyle;
-	tempCopy: JQuery; // used to fix that text disappears for a moment (when unmounting then remounting)
-	PopOut() {
-		if (this.poppedOut) return;
-
-		if (this.tempCopy) {
-			this.tempCopy.remove();
-			this.tempCopy = null;
-		}
-		this.dom = $(this.refs.root);
-		if (this.dom == null) return;
-		this.domParent = this.dom.parent();
-
-		let posFrom = (this.dom as any).positionFrom($("#MapUI"));
-		this.dom.prependTo("#MapUI");
-		this.oldStyle = this.dom.attr("style");
-		/*this.dom.style.left = (this.dom as any).positionFrom($("#MapUI")).left;
-		this.dom.style.top = (this.dom as any).positionFrom($("#MapUI")).top;*#/
-		this.dom.css("left", posFrom.left);
-		this.dom.css("top", posFrom.top);
-		this.dom.css("transform", "");
-		this.dom.css("opacity", "1");
-		this.poppedOut = true;
-	}
-	PopBackIn(makeTempCopy) {
-		if (!this.poppedOut) return;
-
-		if (makeTempCopy)
-			this.tempCopy = this.dom.clone().prependTo("#MapUI"); // make a copy that stays here for a bit
-		this.dom.appendTo(this.domParent);
-		this.dom.attr("style", this.oldStyle);
-		this.poppedOut = false;
-	}*/
 }
 
 /*interface JQuery {
