@@ -272,9 +272,9 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 								fontSize: nodeView && nodeView.expanded ? 23 : 17,
 								//lineHeight: "28px",
 								//backgroundColor: `rgba(${backgroundColor},.5)`,
-								backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>(parseInt(a) * .97).RoundTo(1)).join(",")},.5)`,
+								backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>(parseInt(a) * .8).RoundTo(1)).join(",")},.7)`,
 								boxShadow: "none",
-								":hover": {backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>(parseInt(a) * .97).RoundTo(1)).join(",")},.7)`},
+								":hover": {backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>(parseInt(a) * .9).RoundTo(1)).join(",")},.7)`},
 							}}
 							onClick={()=> {
 								store.dispatch(new ACTToggleMapNodeExpanded({mapID: map._key.KeyToInt, path}));
