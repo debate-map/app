@@ -104,7 +104,7 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 				{node.type == MapNodeType.Thesis &&
 					<div className="clickThrough" style={{display: "flex", flexDirection: "column", zIndex: 2}}>
 						<div className="clickThrough" style={{
-							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10, zIndex: 3,
+							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10, zIndex: 4,
 						}} ref={c=>c && c.clientHeight != this.state.upChildrenHeight && this.setState({upChildrenHeight: c.clientHeight})}>
 							{upChildren.map((child, index)=> {
 								return <MapNodeUI key={"up_" + index} map={map} node={child} path={path + "/" + child._key.KeyToInt}/>;
@@ -293,7 +293,7 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 		return (
 			<div style={{
 				display: "flex", flexDirection: "column", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap",
-				zIndex: 4, padding: 3,
+				zIndex: 5, padding: 3,
 				//background: `rgba(${backgroundColor},.9)`,
 				background: `rgba(0,0,0,.7)`,
 				borderRadius: 5,
