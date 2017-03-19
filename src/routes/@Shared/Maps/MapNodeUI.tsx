@@ -78,7 +78,7 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 		let minTextWidth = (node.type == MapNodeType.Thesis ? 350 : 100) - expectedOtherStuffWidth;
 		let maxTextWidth = (node.type == MapNodeType.Thesis ? 500 : 200) - expectedOtherStuffWidth;
 		let width = expectedBoxWidth.KeepBetween(minTextWidth, maxTextWidth);
-		
+
 		let expectedLines = (expectedTextWidth / maxTextWidth).CeilingTo(1);
 		let expectedHeight = (expectedLines * 17) + 10; // (lines * line-height) + top-plus-bottom-padding
 
@@ -100,7 +100,7 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 						})}
 					</div>}
 				{node.type == MapNodeType.Thesis &&
-					<div style={{display: "flex", flexDirection: "column"}}>
+					<div className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
 						<div className="clickThrough" style={{
 							zIndex: 2, marginLeft: 10,
 							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", //transform: "translateY(calc(-50% + 14px))",
