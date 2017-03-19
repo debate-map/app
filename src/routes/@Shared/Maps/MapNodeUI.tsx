@@ -70,15 +70,16 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 		let downChildren = node.type == MapNodeType.Thesis ? nodeChildren.Where(a=>a.type == MapNodeType.OpposingArgument) : [];
 
 		let fontSize = nodeTypeFontSizes[node.type] || 14;
-		var textPreview = $(`<a style="fontSize: ${fontSize}; whiteSpace: initial;">${node.title}</a>`);
-		var expectedTextWidth = V.GetContentWidth(textPreview);
-		var expectedOtherStuffWidth = 60;
-		let expectedBoxWidth = expectedTextWidth + 60; // textWidth + extraStuffInBox
+		let textPreview = $(`<a style="fontSize: ${fontSize}; whiteSpace: initial;">${node.title}</a>`);
+		let expectedTextWidth = V.GetContentWidth(textPreview);
+		let expectedOtherStuffWidth = 26;
+		let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
 
-		let minTextWidth = (node.type == MapNodeType.Thesis ? 350 : 100) - expectedOtherStuffWidth;
-		let maxTextWidth = (node.type == MapNodeType.Thesis ? 500 : 200) - expectedOtherStuffWidth;
-		let width = expectedBoxWidth.KeepBetween(minTextWidth, maxTextWidth);
+		let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
+		let maxWidth = node.type == MapNodeType.Thesis ? 500 : 200;
+		let width = expectedBoxWidth.KeepBetween(minWidth, maxWidth);
 
+		let maxTextWidth = maxWidth - expectedOtherStuffWidth;
 		let expectedLines = (expectedTextWidth / maxTextWidth).CeilingTo(1);
 		let expectedHeight = (expectedLines * 17) + 10; // (lines * line-height) + top-plus-bottom-padding
 
