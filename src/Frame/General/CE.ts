@@ -365,6 +365,22 @@ Number.prototype._AddFunction_Inline = function RoundTo(multipleOf) {
 		result = result.TrimEnd("0").TrimEnd(".");
 	return result;
 };
+interface Number { FloorTo: (multipleOf: number)=>number; }
+Number.prototype._AddFunction_Inline = function FloorTo(multipleOf) {
+	var integeredAndFloored = Math.floor((new Number(this) as any) / multipleOf);
+	var result = (integeredAndFloored * multipleOf).toFixed(multipleOf.toString().TrimStart("0").length); // - 1);
+	if (result.contains("."))
+		result = result.TrimEnd("0").TrimEnd(".");
+	return result;
+};
+interface Number { CeilingTo: (multipleOf: number)=>number; }
+Number.prototype._AddFunction_Inline = function CeilingTo(multipleOf) {
+	var integeredAndCeilinged = Math.ceil((new Number(this) as any) / multipleOf);
+	var result = (integeredAndCeilinged * multipleOf).toFixed(multipleOf.toString().TrimStart("0").length); // - 1);
+	if (result.contains("."))
+		result = result.TrimEnd("0").TrimEnd(".");
+	return result;
+};
 
 interface Number { KeepAtLeast: (min: number)=>number; }
 Number.prototype._AddFunction_Inline = function KeepAtLeast(min) {

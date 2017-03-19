@@ -43,7 +43,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						/*bufferScrollEventsBy={100000}*/>
 					<div id="MapUI" ref="content"
 						style={{
-							position: "relative", padding: "150px 5000px 5000px 870px", whiteSpace: "nowrap",
+							position: "relative", display: "flex", padding: "150px 5000px 5000px 870px", whiteSpace: "nowrap",
 							filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)",
 						}}
 						onClick={e=> {
@@ -57,6 +57,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 							e.preventDefault();
 						}}>
 					<MapNodeUI map={map} nodeID={map.rootNode.KeyToInt} node={rootNode}/>
+					<div style={{width: 1500}}/>
 				</div>
 			</ScrollView>
 		);
