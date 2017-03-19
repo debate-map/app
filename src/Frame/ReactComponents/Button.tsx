@@ -1,6 +1,9 @@
-import {BaseComponent, BasicStyles, BaseProps} from "../UI/ReactGlobals";
+import {BaseComponent, BasicStyles, BaseProps, AddGlobalStyle} from "../UI/ReactGlobals";
 import Radium from "radium";
 import {E} from "../General/Globals_Free";
+import {ToJSON} from "../General/Globals";
+import {createMarkupForStyles} from "react/lib/CSSPropertyOperations";
+import {Log} from "../General/Logging";
 
 var styles = {
 	root: {
@@ -27,12 +30,17 @@ var styles = {
 	root_hasCheckbox: {paddingTop: 4, verticalAlign: 1},
 	root_disabled: {
 	    opacity: .5, cursor: "default", pointerEvents: "none",
-		":hover": {backgroundColor: "rgba(0,0,0,.3)"}
+		//":hover": {backgroundColor: "rgba(0,0,0,.3)"}
 	},
 	checkbox: {marginLeft: -6},
 };
 
-@Radium
+/*AddGlobalStyle(`
+.Button:hover { background-color: rgba(90,100,110,.8) !important; }
+`);*/
+let buttonStyleKeys = {};
+
+//@Radium
 export default class Button extends BaseComponent
 		<{enabled?: boolean, text?: string, title?: string, className?: string, style?,
 			size?, iconSize?, height?,
@@ -51,21 +59,48 @@ export default class Button extends BaseComponent
 			padding = (`${heightDifPerSide}px 15px`);
 		}
 
+		let finalStyle = E(
+			BasicStyles(this.props),
+			styles.root,
+			{padding},
+			size && {padding: 0, width: size, height: size,
+				backgroundPosition: `${(size - iconSize) / 2}px ${(size - iconSize) / 2}px`,
+				backgroundSize: iconSize
+			},
+			hasCheckbox && styles.root_hasCheckbox,
+			!enabled && styles.root_disabled,
+			style,
+		);
+
+		// experimental pseudo-selector-capable styling system
+		let pseudoSelectors = [":hover"];
+		if (pseudoSelectors.Any(selector=>finalStyle[selector])) {
+			var styleKey = ToJSON(finalStyle); // get a unique identifier for this particular style-composite
+			styleKey = styleKey.replace(/[^a-zA-Z0-9-]/g, ""); // make sure key is a valid class-name
+
+			// if <style> element for the given style-composite has not been created yet, create it 
+			if (buttonStyleKeys[styleKey] == null) {
+				buttonStyleKeys[styleKey] = true;
+				
+				let pseudoSelectorCSSs = [];
+				for (let selector of pseudoSelectors) {
+					if (finalStyle[selector]) {
+						pseudoSelectorCSSs.push(`
+		.Button.${styleKey}${selector} {
+			${createMarkupForStyles(finalStyle[selector]).replace(/([^ ]+?);/g, "$1 !important;")}
+		}
+						`);
+					}
+				}
+		
+				AddGlobalStyle(pseudoSelectorCSSs.join("\n"));
+			}
+		}
+
 	    return (
 			<div title={title} onClick={this.OnClick}
-					className={className}
-					style={[
-						BasicStyles(this.props),
-						styles.root,
-						{padding},
-						size && {padding: 0, width: size, height: size,
-							backgroundPosition: `${(size - iconSize) / 2}px ${(size - iconSize) / 2}px`,
-							backgroundSize: iconSize
-						},
-						hasCheckbox && styles.root_hasCheckbox,
-						!enabled && styles.root_disabled,
-						style,
-					]}>
+					className={`Button ${styleKey || ""} ${className || ""}`}
+					style={finalStyle}>
 				{/*hasCheckbox && <CheckBox checked={checked} style={E(styles.checkbox, checkboxStyle)} labelStyle={checkboxLabelStyle}
 					onChange={checked=>onCheckedChanged && onCheckedChanged(checked)}/>*/}
 				{hasCheckbox
