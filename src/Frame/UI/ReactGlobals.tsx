@@ -128,6 +128,12 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		};
 	}
 
+	SetState(newState, callback?: ()=>any) {
+		let keys = this.state.VKeys().concat(newState.VKeys()).Distinct();
+		if (!keys.Any(key=>(this.state as any)[key] !== newState[key])) return;
+		this.setState(newState, callback);
+	}
+
 	changeListeners = [];
 	AddChangeListeners(host, ...funcs) {
 		if (host == null) return; // maybe temp
