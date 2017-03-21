@@ -221,6 +221,8 @@ export class TreeNode {
 	}
 }
 export function GetTreeNodesInObjTree(obj: any, includeRootNode = false, _ancestorNodes = []) {
+	if (_ancestorNodes.length > 300) debugger;
+
 	let result = [] as TreeNode[];
 	if (includeRootNode)
 		result.push(new TreeNode([], {_root: obj}, "_root"));
@@ -228,7 +230,8 @@ export function GetTreeNodesInObjTree(obj: any, includeRootNode = false, _ancest
 		let value = obj[key];
 		let currentNode = new TreeNode(_ancestorNodes, obj, key);
 		result.push(currentNode);
-		result.AddRange(GetTreeNodesInObjTree(value, false, _ancestorNodes.concat(currentNode)));
+		if (typeof value == "object")
+			result.AddRange(GetTreeNodesInObjTree(value, false, _ancestorNodes.concat(currentNode)));
 	}
 	return result;
 }

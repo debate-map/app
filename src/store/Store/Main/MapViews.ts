@@ -1,5 +1,4 @@
 import Action from "../../../Frame/General/Action";
-import {ACTSelectMapNode, ACTToggleMapNodeExpanded} from "../../../routes/@Shared/Maps/MapNodeUI";
 import {FromJSON, ToJSON} from "../../../Frame/General/Globals";
 import {GetTreeNodesInObjTree, GetTreeNodesInPath, VisitTreeNodesInPath, TreeNode} from "../../../Frame/V/V";
 import {IsNumberString} from "../../../Frame/General/Types";
@@ -14,25 +13,22 @@ export class MapView {
 export class MapNodeView {
 	expanded?: boolean;
 	selected?: boolean;
+	openPanel?: string;
 	children = {} as {[key: string]: MapNodeView};
 }
 
+export class ACTMapNodeSelect extends Action<{mapID: number, path: string}> {}
+export class ACTMapNodePanelOpen extends Action<{mapID: number, path: string, panel: string}> {}
+export class ACTMapNodeExpandedToggle extends Action<{mapID: number, path: string}> {}
 export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 	if (action.type == "@@router/LOCATION_CHANGE" && action.payload.pathname == "/global")
-		return {
-			...state,
-			1: state[1] || new MapView(),
-		};
-	if (action.Is(ACTSelectMapNode))
-		return {
-			...state,
-			[action.payload.mapID]: MapViewReducer(state[action.payload.mapID], action),
-		};
-	if (action.Is(ACTToggleMapNodeExpanded))
-		return {
-			...state,
-			[action.payload.mapID]: MapViewReducer(state[action.payload.mapID], action),
-		};
+		return {...state, 1: state[1] || new MapView()};
+	if (action.Is(ACTMapNodeSelect))
+		return {...state, [action.payload.mapID]: MapViewReducer(state[action.payload.mapID], action)};
+	if (action.Is(ACTMapNodePanelOpen))
+		return {...state, [action.payload.mapID]: MapViewReducer(state[action.payload.mapID], action)};
+	if (action.Is(ACTMapNodeExpandedToggle))
+		return {...state, [action.payload.mapID]: MapViewReducer(state[action.payload.mapID], action)};
 	return state;
 }
 
@@ -53,27 +49,15 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 }*/
 
 function MapViewReducer(state = new MapView(), action: Action<any>) {
-	if (action.Is(ACTSelectMapNode)) {
-		/*let newRootNodeView = FromJSON(ToJSON(state.rootNodeView)) as MapNodeView;
-		let nodes = GetTreeNodesInObjTree(newRootNodeView);
-		for (let pair of nodes) {
-			if (pair.prop == "selected")
-				pair.obj.selected = false;
-		}
-		let nodeView = GetNodeViewAtPath(newRootNodeView, action.payload.path, true);
-		if (nodeView) // (might be clicking background)
-			nodeView.selected = true;
-		return {...state, rootNodeView: newRootNodeView};*/
-
+	if (action.Is(ACTMapNodeSelect)) {
 		let nodes = GetTreeNodesInObjTree(state.rootNodeView, true);
-		let selectedNode = nodes.FirstOrX(a=>a.Value.selected);
-		//let rootNodeView_withDeselect = selectedNode ? CloneTreeDownToXWhileReplacingXValue(state.rootNodeView, selectedNode.PathStr + "/selected", false) : state.rootNodeView;
-		let rootNodeView_withDeselect = selectedNode
-			? VisitTreeNodesInPath({...state.rootNodeView}, selectedNode.PathNodes.concat(["selected"]), node=>node.Value = node.prop != "selected" ? {...node.Value} : false)
-			: state.rootNodeView;
+		let selectedNode = nodes.FirstOrX(a=>a.Value && a.Value.selected);
+		let rootNodeView_withClosePanel = selectedNode == null ? state.rootNodeView
+			: VisitTreeNodesInPath({...state.rootNodeView}, selectedNode.PathNodes.concat(["openPanel"]), node=>node.Value = node.prop == "openPanel" ? null : {...node.Value});
+		let rootNodeView_withDeselect = selectedNode == null ? rootNodeView_withClosePanel
+			: VisitTreeNodesInPath({...rootNodeView_withClosePanel}, selectedNode.PathNodes.concat(["selected"]), node=>node.Value = node.prop == "selected" ? false : {...node.Value});
 		if (action.payload.path == null)
 			return {...state, rootNodeView: rootNodeView_withDeselect};
-
 
 		let nodeToSelect_finalPath = action.payload.path.split("/").Skip(1).SelectMany((key, index)=>["children", key]);
 		Assert(GetTreeNodesInPath(rootNodeView_withDeselect, nodeToSelect_finalPath.concat(["selected"])).Last().Value !== true,
@@ -88,16 +72,17 @@ function MapViewReducer(state = new MapView(), action: Action<any>) {
 		});
 		return {...state, rootNodeView: rootNodeView_withSelect};
 	}
-	if (action.Is(ACTToggleMapNodeExpanded)) {
-		/*let newRootNodeView = FromJSON(ToJSON(state.rootNodeView)) as MapNodeView;
-		let nodeView = GetNodeViewAtPath(newRootNodeView, action.payload.path, true);
-		nodeView.expanded = !nodeView.expanded;
-		return {
-			...state,
-			rootNodeView: newRootNodeView,
-		};*/
-		//let newRootNodeView = {...state.rootNodeView};
-
+	if (action.Is(ACTMapNodePanelOpen)) {
+		let nodeToSelect_finalPath = action.payload.path.split("/").Skip(1).SelectMany((key, index)=>["children", key]);
+		let rootNodeView_withOpenPanel = VisitTreeNodesInPath({...state.rootNodeView}, nodeToSelect_finalPath.concat(["openPanel"]), node=> {
+			node.Value =
+				IsNumberString(node.prop) ? {...node.Value || {children: {}}} :
+				node.prop == "children" ? {...node.Value || {}} :
+				(Assert(node.prop == "openPanel"), action.payload.panel);
+		});
+		return {...state, rootNodeView: rootNodeView_withOpenPanel};
+	}
+	if (action.Is(ACTMapNodeExpandedToggle)) {
 		let newRootNodeView_2 = state.rootNodeView.Extended({});
 		let path = action.payload.path;
 		let pathNodeIDs = path.split("/").Select(a=>parseInt(a));

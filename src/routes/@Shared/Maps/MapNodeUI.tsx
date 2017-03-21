@@ -4,7 +4,7 @@ import {MapNode, MapNodeType, MapNodeType_Info} from "./MapNode";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
 import {DBPath} from "../../../Frame/Database/DatabaseHelpers";
-import {Debugger, QuickIncrement} from "../../../Frame/General/Globals_Free";
+import {Debugger, QuickIncrement, E} from "../../../Frame/General/Globals_Free";
 import Button from "../../../Frame/ReactComponents/Button";
 import {PropTypes, Component} from "react";
 import Action from "../../../Frame/General/Action";
@@ -13,7 +13,7 @@ import {Map} from "./Map";
 import {Log} from "../../../Frame/General/Logging";
 import {WaitXThenRun} from "../../../Frame/General/Timers";
 import V from "../../../Frame/V/V";
-import {MapNodeView} from "../../../store/Store/Main/MapViews";
+import {MapNodeView, ACTMapNodeSelect, ACTMapNodeExpandedToggle, ACTMapNodePanelOpen} from "../../../store/Store/Main/MapViews";
 import * as VMenuTest1 from "react-vmenu";
 import VMenu, {VMenuItem} from "react-vmenu";
 import Select from "../../../Frame/ReactComponents/Select";
@@ -24,9 +24,6 @@ import {DN, ToJSON} from "../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
 import {styles} from "../../../Frame/UI/GlobalStyles";
 import {createSelector} from "reselect";
-
-export class ACTSelectMapNode extends Action<{mapID: number, path: string}> {}
-export class ACTToggleMapNodeExpanded extends Action<{mapID: number, path: string}> {}
 
 type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
 @firebaseConnect(({node}: {node: MapNode})=>[
@@ -171,61 +168,61 @@ let nodeTypeFontSizes = {
 
 type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number} & Partial<{userID: string}>;
 @firebaseConnect()
-@(connect((state: RootState, props: MapNodeUI_Inner_Props)=> ({
-	userID: GetUserID(state),
-})) as any)
-class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
-	//static contextTypes = {store: PropTypes.object.isRequired};
+@(connect(()=> {
+	return (state: RootState, props: MapNodeUI_Inner_Props)=> ({
+		userID: GetUserID(state),
+	}) as any;
+}) as any)
+class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {hovered: boolean, openPanel_preview: string}> {
 	render() {
 		let {firebase, map, node, nodeView, path, width, widthOverride, userID} = this.props;
-		//let {dispatch} = this.context.store;
+		let {hovered, openPanel_preview} = this.state;
 		let backgroundColor = nodeTypeBackgroundColors[node.type];
-		//let enemyBackgroundColor = nodeTypeBackgroundColors_enemy[node.type] || "150,150,150";
 		let fontSize = nodeTypeFontSizes[node.type] || 14;
 		/*let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
 		let maxWidth = node.type == MapNodeType.Thesis ? 500 : 200;*/
 		let barSize = 5;
 		let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 		let fillPercent = pathNodeIDs.length <= 2 ? 1 : .9;
+
+		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
+		let panelToShow = openPanel_preview || (nodeView && nodeView.openPanel);
+		let bottomPanelShow = leftPanelShow && panelToShow;
+
 		return (
 			<div style={{
-				display: "flex", position: "relative", borderRadius: 5, cursor: "pointer",
-				//top: "50%", transform: "translateY(calc(-50% - .5px))", // -.5px is added so we end with integer (which avoids anti-aliasing)
-				//boxShadow: "0 0 1px rgba(255,255,255,.5)",
-				/*boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
-				filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 3px) drop-shadow(rgba(0,0,0,.35) 0px 0px 3px)",*/
-				//boxShadow: "rgba(0, 0, 0, 1) 0px 0px 1px",
-				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, width, minWidth: widthOverride,
-			}}>
-				{nodeView && nodeView.selected && <MapNodeUI_LeftBox map={map} node={node} nodeView={nodeView} backgroundColor={backgroundColor}/>}
+						display: "flex", position: "relative", borderRadius: 5, cursor: "pointer",
+						boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, width, minWidth: widthOverride,
+					}}
+					onMouseEnter={()=>this.setState({hovered: true})} onMouseLeave={()=>this.setState({hovered: false})}
+					onClick={e=> {
+						if ((e.nativeEvent as any).ignore) return;
+						if (nodeView == null || !nodeView.selected)
+							store.dispatch(new ACTMapNodeSelect({mapID: map._key.KeyToInt, path}));
+					}}>
+				{leftPanelShow &&
+					<MapNodeUI_LeftBox parent={this} map={map} path={path} node={node} nodeView={nodeView} backgroundColor={backgroundColor} asHover={hovered}/>}
 				{/* fixes click-gap */}
-				{nodeView && nodeView.selected && <div style={{
-					position: "absolute",
-					//transform: "translateX(-100%)", width: 1, height: 28,
-					right: "100%", width: 1, top: 0, bottom: 0,
-				}}/>}
-
-				{/* probability-and-such bars */}
-				{/*path.nodeIDs.length >= 3 && [
-					<div style={{position: "absolute", bottom: -barSize - 1, width: minWidth, height: barSize, background: `rgba(${enemyBackgroundColor},1)`}}/>,
-					<div style={{position: "absolute", bottom: -barSize - 1, width: .9 * minWidth, height: barSize, background: `rgba(${backgroundColor},1)`}}/>,
-				]*/}
+				{leftPanelShow &&
+					<div style={{
+						position: "absolute", //zIndex: hovered ? 6 : 5,
+						//transform: "translateX(-100%)", width: 1, height: 28,
+						//right: "100%",
+						left: -50, width: 100, top: 0, bottom: 0,
+					}}/>}
 
 				<div style={{
-					display: "flex", width: "100%", //background: `rgba(${backgroundColor},.7)`,
-					background: "rgba(0,0,0,.7)", borderRadius: 5, cursor: "pointer",
-				}}>
+							display: "flex", width: "100%", //background: `rgba(${backgroundColor},.7)`,
+							background: "rgba(0,0,0,.7)", borderRadius: 5, cursor: "pointer",
+						}}>
 					<div style={{
-						position: "relative", width: "100%", //minWidth: minWidth - 20, maxWidth: maxWidth - 20,
-						padding: 5, //node.type == MapNodeType.Category || node.type == MapNodeType.Package ? 5 : "3px 5px",
-					}} onClick={()=> {
-						if (nodeView == null || !nodeView.selected)
-							store.dispatch(new ACTSelectMapNode({mapID: map._key.KeyToInt, path}));
-					}}>
+								position: "relative", width: "100%", //minWidth: minWidth - 20, maxWidth: maxWidth - 20,
+								padding: 5, //node.type == MapNodeType.Category || node.type == MapNodeType.Package ? 5 : "3px 5px",
+							}}>
 						<div style={{
-							position: "absolute", left: 0, top: 0, bottom: 0,
-							width: (fillPercent * 100).RoundTo(1) + "%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
-						}}/>
+								position: "absolute", left: 0, top: 0, bottom: 0,
+								width: (fillPercent * 100).RoundTo(1) + "%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
+							}}/>
 						<a style={{position: "relative", fontSize, whiteSpace: "initial"}}>
 							{node.title}
 						</a>
@@ -244,15 +241,6 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 												</div>
 											),
 											onOK: ()=> {
-												/*firebase.Ref(`/nodes`).update({
-													[node._key]: {
-														children: {[newID.IntToKey]: {}},
-													},
-													[newID.IntToKey]: new MapNode({
-														type: childType, title,
-														creator: userID, approved: true,
-													}),
-												});*/
 												firebase.Ref("nodes").transaction(nodes=> {
 													if (!nodes) return nodes;
 
@@ -307,55 +295,89 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 								boxShadow: "none",
 								":hover": {backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>(parseInt(a) * .9).RoundTo(1)).join(",")},.7)`},
 							}}
-							onClick={()=> {
-								store.dispatch(new ACTToggleMapNodeExpanded({mapID: map._key.KeyToInt, path}));
+							onClick={e=> {
+								store.dispatch(new ACTMapNodeExpandedToggle({mapID: map._key.KeyToInt, path}));
+								//return false;
+								e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
 							}}>
 						{nodeView && nodeView.expanded ? "-" : "+"}
 					</Button>
+				</div>
+				{bottomPanelShow &&
+					<div style={{position: "absolute", top: "100%", zIndex: hovered ? 6 : 5}}>
+						{panelToShow == "probability" && <div>Probability that the thesis, as presented, is true.</div>}
+						{panelToShow == "intensity" && <div>Relative intensity, of the strongest statement-variant that's still true.</div>}
+					</div>}
+			</div>
+		);
+	}
+}
+
+export class MapNodeUI_LeftBox extends BaseComponent<
+		{parent: MapNodeUI_Inner, map: Map, path: string, node: MapNode, nodeView?: MapNodeView, backgroundColor: string, asHover: boolean},
+		{}> {
+	render() {
+		let {map, path, node, nodeView, backgroundColor, asHover} = this.props;
+		return (
+			<div style={{
+				display: "flex", flexDirection: "column", position: "absolute", whiteSpace: "nowrap",
+				right: "calc(100% + 1px)", zIndex: asHover ? 6 : 5,
+			}}>
+				<div style={{position: "relative", padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
+					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
+					<PanelButton parent={this} map={map} path={path} panel="probability" text="Probability" style={{marginTop: 0}}>
+						<Span ml={5} style={{float: "right"}}>90%</Span>
+					</PanelButton>
+					<PanelButton parent={this} map={map} path={path} panel="intensity" text="Intensity">
+						<Span ml={5}style={{float: "right"}}>70%</Span>
+					</PanelButton>
+					<Button text="..."
+						style={{
+							margin: "3px -3px -3px -3px", height: 17, lineHeight: "12px", padding: 0,
+							position: "relative", display: "flex", justifyContent: "space-around", //alignItems: "center",
+							background: null, boxShadow: null, borderRadius: "0 0 5px 5px",
+							":hover": {background: `rgba(${backgroundColor},.5)`},
+						}}/>
+				</div>
+				<div style={{position: "relative", marginTop: 1, padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
+					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
+					<PanelButton parent={this} map={map} path={path} panel="definitions" text="Definitions" style={{marginTop: 0}}/>
+					<PanelButton parent={this} map={map} path={path} panel="questions" text="Questions"/>
+					<PanelButton parent={this} map={map} path={path} panel="tags" text="Tags"/>
+					<PanelButton parent={this} map={map} path={path} panel="discuss" text="Discuss (meta)"/>
+					<PanelButton parent={this} map={map} path={path} panel="history" text="History"/>
+					<Button text="..."
+						style={{
+							margin: "3px -3px -3px -3px", height: 17, lineHeight: "12px", padding: 0,
+							position: "relative", display: "flex", justifyContent: "space-around", //alignItems: "center",
+							background: null, boxShadow: null, borderRadius: "0 0 5px 5px",
+							":hover": {background: `rgba(${backgroundColor},.5)`},
+						}}/>
 				</div>
 			</div>
 		);
 	}
 }
 
-export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, nodeView?: MapNodeView, backgroundColor: string}, {}> {
+class PanelButton extends BaseComponent<{parent: MapNodeUI_LeftBox, map: Map, path: string, panel: string, text: string, style?}, {}> {
 	render() {
-		let {map, node, nodeView, backgroundColor} = this.props;
+		let {map, path, panel, text, style, children} = this.props;
 		return (
-			<div style={{
-				display: "flex", flexDirection: "column", position: "absolute", whiteSpace: "nowrap",
-				//transform: "translateX(calc(-100% - 2px))", 
-				right: "calc(100% + 1px)",
-				zIndex: 5, padding: 3,
-				//background: `rgba(${backgroundColor},.9)`,
-				background: `rgba(0,0,0,.7)`,
-				borderRadius: 5,
-				//boxShadow: "0 0 1px rgba(255,255,255,.5)",
-				//boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
-				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`,
-			}}>
-				<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
-				<Button text="Probability" style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}>
-					<Span ml={5} style={{float: "right"}}>90%</Span>
-				</Button>
-				<Button text="Degree" enabled={false} mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}>
-					<Span ml={5}style={{float: "right"}}>70%</Span>
-				</Button>
-				<Button text="Definitions" mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}/>
-				<Button text="Questions" mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}/>
-				<Button text="Stats" mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}/>
-				<Button text="Tags" mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}/>
-				<Button text="Discuss (meta)" mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}/>
-				<Button text="History" mt={5} style={{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"}}/>
-				<Button text="..."
-					style={{
-						margin: "5px -3px -3px -3px", height: 15, lineHeight: "8px", padding: "0 7px",
-						position: "relative", display: "flex", justifyContent: "space-around", //alignItems: "center",
-						background: null, boxShadow: null, borderTop: "1px solid rgba(0,0,0,1)",
-						borderRadius: "0 0 5px 5px",
-						":hover": {background: `rgba(${backgroundColor},.5)`},
-					}}/>
-			</div>
+			<Button text={text} style={E({position: "relative", display: "flex", justifyContent: "space-between", marginTop: 5, padding: "3px 7px"}, style)}
+					onClick={()=> {
+						//parent.props.parent.SetState({openPanel: panel});
+						store.dispatch(new ACTMapNodePanelOpen({mapID: map._key.KeyToInt, path, panel}));
+					}}
+					onMouseEnter={()=> {
+						let {parent} = this.props;
+						parent.props.parent.SetState({openPanel_preview: panel});
+					}}
+					onMouseLeave={()=> {
+						let {parent} = this.props;
+						parent.props.parent.SetState({openPanel_preview: null});
+					}}>
+				{children}
+			</Button>
 		);
 	}
 }

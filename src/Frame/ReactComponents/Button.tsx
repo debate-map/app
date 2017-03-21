@@ -44,13 +44,13 @@ let pseudoSelectorStyleKeys = {};
 export default class Button extends BaseComponent
 		<{enabled?: boolean, text?: string, title?: string, className?: string, style?,
 			size?, iconSize?, height?,
-			hasCheckbox?, checked?, checkboxStyle?, checkboxLabelStyle?, onCheckedChanged?, onClick?, onDirectClick?} & BaseProps,
+			hasCheckbox?, checked?, checkboxStyle?, checkboxLabelStyle?, onCheckedChanged?, onClick?, onDirectClick?} & React.HTMLProps<HTMLDivElement>,
 		{}> {
 	static defaultProps = {enabled: true};
 	
 	render() {
 	    var {enabled, text, title, className, style, size, iconSize, height,
-			hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged, children} = this.props;
+			hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged, children, ...rest} = this.props;
 		
 		var padding = "5px 15px";
 		if (height) {
@@ -95,7 +95,7 @@ export default class Button extends BaseComponent
 		}
 
 	    return (
-			<div title={title} onClick={this.OnClick}
+			<div {...rest} title={title} onClick={this.OnClick}
 					className={`Button ${currentPseudoSelectorStyleKeys.join(" ")} ${className || ""}`}
 					style={finalStyle}>
 				{/*hasCheckbox && <CheckBox checked={checked} style={E(styles.checkbox, checkboxStyle)} labelStyle={checkboxLabelStyle}
