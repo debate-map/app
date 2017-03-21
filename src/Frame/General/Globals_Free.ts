@@ -109,14 +109,14 @@ if (Number.MAX_SAFE_INTEGER == null)
 	(Number as any).MAX_SAFE_INTEGER = 9007199254740991;
 
 //function Break() { debugger; };
-export function Debugger() { debugger; }
-export function Debugger_Wrap(arg1) { debugger; return arg1; }
-export function Debugger_True() { debugger; return true; }
-export function Debugger_If(condition) {
+export function Debugger(...args) { debugger; }
+export function Debugger_Wrap(arg1, ...args) { debugger; return arg1; }
+export function Debugger_True(...args) { debugger; return true; }
+export function Debugger_If(condition, ...args) {
     if (condition)
         debugger;
 }
-export function WrapWithDebugger(func) {
+export function WrapWithDebugger(func, ...args) {
 	return function() {
 		debugger;
 		func.apply(this, arguments);

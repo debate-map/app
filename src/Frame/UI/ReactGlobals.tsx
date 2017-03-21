@@ -17,8 +17,8 @@ g.Extend({ShallowCompare});
 
 g.Extend({React, Text});
 
-export function FindDOM(comp) { return ReactDOM.findDOMNode(comp); };
-export function FindDOM_(comp) { return $(FindDOM(comp)); };
+export function FindDOM(comp) { return ReactDOM.findDOMNode(comp) as HTMLElement; };
+export function FindDOM_(comp) { return $(FindDOM(comp)) as JQuery; };
 g.Extend({FindDOM, FindDOM_});
 export function FindReact(dom) {
     for (var key in dom)
@@ -26,11 +26,16 @@ export function FindReact(dom) {
             var compInternals = dom[key]._currentElement;
 			var compWrapper = compInternals._owner;
             var comp = compWrapper._instance;
-            return comp;
+            //return comp as React.Component<any, any>;
+            return comp as BaseComponent<any, any>;
         }
     return null;
 }
 g.Extend({FindReact});
+// needed for wrapper-components that don't provide way of accessing inner-component
+export function GetInnerComp(wrapperComp: React.Component<any, any>) {
+	return FindReact(FindDOM(wrapperComp));
+}
 
 export interface BaseProps {
 	ml?; mr?; mt?; mb?;
@@ -90,6 +95,11 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	refs;
 	timers = [] as Timer[];
 
+	get DOM() { return FindDOM(this); }
+	get DOM_() { return $(this.DOM); }
+	// needed for wrapper-components that don't provide way of accessing inner-component
+	//get InnerComp() { return FindReact(this.DOM); }
+
 	// make all these optional, so fits Component type definition/shape
 	/*get FlattenedChildren() {
 	    var children = this.props.children;
@@ -128,10 +138,12 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		};
 	}
 
-	SetState(newState, callback?: ()=>any) {
+	/** Returns whether the new-state differs (shallowly) from the old-state. */
+	SetState(newState: S, callback?: ()=>any): boolean {
 		let keys = this.state.VKeys().concat(newState.VKeys()).Distinct();
-		if (!keys.Any(key=>(this.state as any)[key] !== newState[key])) return;
+		if (!keys.Any(key=>(this.state as any)[key] !== newState[key])) return false;
 		this.setState(newState, callback);
+		return true;
 	}
 
 	changeListeners = [];
@@ -181,19 +193,7 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		this.ComponentDidMount(...args);
 		this.ComponentDidMountOrUpdate(true);
 		this.mounted = true;
-		if (this.PostRender != BaseComponent.prototype.PostRender) {
-			if ((this.PostRender as any).instant)
-				this.PostRender(true);
-			else {
-				WaitXThenRun(0, ()=>window.requestAnimationFrame(()=> {
-					if (!this.mounted) return;
-					this.PostRender(true);
-				}));
-				/*WaitXThenRun(0, ()=> {
-					this.PostRender(true);
-				});*/
-			}
-		}
+		this.CallPostRender();
 	}
 	ComponentWillUnmount(): void {};
 	private componentWillUnmount() {
@@ -215,18 +215,24 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	private componentDidUpdate(...args) {
 	    this.ComponentDidUpdate(...args);
 		this.ComponentDidMountOrUpdate(false);
-		if (this.PostRender != BaseComponent.prototype.PostRender) {
-			if ((this.PostRender as any).instant)
-				this.PostRender(false);
-			else {
-				WaitXThenRun(0, ()=>window.requestAnimationFrame(()=> {
-					if (!this.mounted) return;
-					this.PostRender(false);
-				}));
-				/*WaitXThenRun(0, ()=> {
-					this.PostRender(false);
-				});*/
-			}
+		this.CallPostRender();
+	}
+
+	private CallPostRender() {
+		if (this.PostRender == BaseComponent.prototype.PostRender) return;
+		let ownPostRender = this.PostRender as any;
+		// can be different, for wrapped components (apparently they copy the inner type's PostRender as their own PostRender -- except as a new function, for some reason)
+		let prototypePostRender = this.constructor.prototype.PostRender;
+		if (ownPostRender.instant || prototypePostRender.instant)
+			this.PostRender(true);
+		else {
+			WaitXThenRun(0, ()=>window.requestAnimationFrame(()=> {
+				if (!this.mounted) return;
+				this.PostRender(true);
+			}));
+			/*WaitXThenRun(0, ()=> {
+				this.PostRender(true);
+			});*/
 		}
 	}
 
