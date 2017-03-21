@@ -61,6 +61,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 							e.preventDefault();
 						}}>
 					<MapNodeUI map={map} node={rootNode}/>
+					<div style={{width: 1500}}/>
 				</div>
 			</ScrollView>
 		);
