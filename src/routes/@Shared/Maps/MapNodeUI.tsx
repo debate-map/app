@@ -304,9 +304,19 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {hovered: boo
 					</Button>
 				</div>
 				{bottomPanelShow &&
-					<div style={{position: "absolute", top: "100%", zIndex: hovered ? 6 : 5}}>
-						{panelToShow == "probability" && <div>Probability that the thesis, as presented, is true.</div>}
-						{panelToShow == "intensity" && <div>Relative intensity, of the strongest statement-variant that's still true.</div>}
+					<div style={{
+								position: "absolute", top: "calc(100% + 1px)", width: width, minWidth: widthOverride.KeepAtLeast(350), zIndex: hovered ? 6 : 5,
+								padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`,
+							}}>
+						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
+						{panelToShow == "probability" &&
+							<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
+								Probability that the statement, as presented, is true.
+							</div>}
+						{panelToShow == "intensity" &&
+							<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
+								Relative intensity of the strongest version of the statement that's still true.
+							</div>}
 					</div>}
 			</div>
 		);
@@ -376,6 +386,7 @@ class PanelButton extends BaseComponent<{parent: MapNodeUI_LeftBox, map: Map, pa
 						let {parent} = this.props;
 						parent.props.parent.SetState({openPanel_preview: null});
 					}}>
+				{/*<div style={{position: "absolute", right: -4, width: 4, top: 0, bottom: 0}}/>*/}
 				{children}
 			</Button>
 		);
