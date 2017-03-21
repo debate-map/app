@@ -17,6 +17,7 @@ import {MapView} from "./Store/Main/MapViews";
 import {MapNode} from "../routes/@Shared/Maps/MapNode";
 import {FirebaseDatabase} from "../Frame/UI/ReactGlobals";
 import {QuickIncrement} from "../Frame/General/Globals_Free";
+import {GetTreeNodesInObjTree} from "../Frame/V/V";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;
@@ -52,10 +53,10 @@ export function GetUserID(state: RootState): string {
 
 export function GetSelectedNodeID(state: RootState, {map}: {map: Map}) { 
 	let mapView = state.main.mapViews[map._key.KeyToInt];
-	let selectedNodeView = V.GetKeyValuePairsInObjTree(mapView).FirstOrX(a=>a.prop == "selected" && a.value);
-	if (selectedNodeView && selectedNodeView.ancestorPairs.Last().prop == "rootNodeView")
+	let selectedNodeView = GetTreeNodesInObjTree(mapView).FirstOrX(a=>a.prop == "selected" && a.Value);
+	if (selectedNodeView && selectedNodeView.ancestorNodes.Last().prop == "rootNodeView")
 		return map.rootNode.KeyToInt;
-	return selectedNodeView ? selectedNodeView.ancestorPairs.Last().prop as number : null;
+	return selectedNodeView ? selectedNodeView.ancestorNodes.Last().prop as number : null;
 }
 export function GetNodes_FBPaths({nodeIDs}: {nodeIDs: number[]}) {
 	return nodeIDs.Select(a=>DBPath(`nodes/e${a}`));
@@ -89,7 +90,7 @@ export function MakeGetNodeView() {
 					return null;
 			}
 			return currentNodeView;*/
-			return parentNodeView ? parentNodeView.children[pathNodeIDs.Last()] : rootNodeView;
+			return parentNodeView && parentNodeView.children ? parentNodeView.children[pathNodeIDs.Last()] : rootNodeView;
 		}
   	);
 }

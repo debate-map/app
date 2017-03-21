@@ -407,6 +407,10 @@ Number.prototype._AddFunction_Inline = function WrapToRange(min, max, asInt = tr
 Number.prototype._AddFunction_Inline = function Distance(other) {
 	return Math.abs(this - other);
 };
+interface Number { ToPower: (power: number)=>number; }
+Number.prototype._AddFunction_Inline = function ToPower(power: number) {
+	return Math.pow(this, power);
+};
 
 // String
 // ==========
