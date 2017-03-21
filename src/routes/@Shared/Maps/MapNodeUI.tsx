@@ -28,8 +28,7 @@ import {createSelector} from "reselect";
 export class ACTSelectMapNode extends Action<{mapID: number, path: string}> {}
 export class ACTToggleMapNodeExpanded extends Action<{mapID: number, path: string}> {}
 
-interface Props {map: Map, node: MapNode, path?: string,
-	nodeView?: MapNodeView, nodeChildren?: MapNode[]};
+type Props = {map: Map, node: MapNode, path?: string, minWidth?: number} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
 @firebaseConnect(({node}: {node: MapNode})=>[
 	...GetNodes_FBPaths({nodeIDs: MakeGetNodeChildIDs()({}, {node})})
 ])
@@ -47,8 +46,9 @@ interface Props {map: Map, node: MapNode, path?: string,
 		};
 	}) as any;
 }) as any)
-export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: number, upChildrenHeight: number}> {
+export default class MapNodeUI extends BaseComponent<Props, {childrenWidth: number, childrenCenterY: number}> {
 	//static contextTypes = {map: PropTypes.object};
+	static defaultProps = {minWidth: 0};
 
 	/*shouldComponentUpdate(oldProps: Props, newProps: Props) {
 		if (ToJSON(oldProps.Excluding("nodeView")) != ToJSON(newProps.Excluding("nodeView")))
@@ -59,8 +59,8 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 	}*/
 
 	render() {
-		let {map, node, path, nodeView, nodeChildren, children} = this.props;
-		let {childrenHeight, upChildrenHeight} = this.state;
+		let {map, node, path, minWidth, nodeView, nodeChildren, children} = this.props;
+		let {childrenWidth, childrenCenterY} = this.state;
 		/*let {map} = this.context;
 		if (map == null) return <div>Loading map, deep...</div>; // not sure why this occurs*/
 		//Log("Updating MapNodeUI:" + nodeID);
@@ -75,7 +75,8 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 		let expectedOtherStuffWidth = 26;
 		let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
 
-		let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
+		//let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
+		minWidth = minWidth.KeepAtLeast(node.type == MapNodeType.Thesis ? 350 : 100);
 		let maxWidth = node.type == MapNodeType.Thesis ? 500 : 200;
 		let width = expectedBoxWidth.KeepBetween(minWidth, maxWidth);
 
@@ -85,41 +86,53 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenHeight: num
 
 		//Log("Rendering:" + node._key.KeyToInt);
 
+		if (QuickIncrement("test1") > 100) debugger;
+		
 		return (
 			<div className="clickThrough" style={{position: "relative", display: "flex", padding: "5px 0"}}>
 				<div className="clickThrough" style={{
 					//transform: "translateX(0)", // fixes z-index issue
-					paddingTop: separateChildren ? (upChildrenHeight|0) - (expectedHeight / 2) : ((childrenHeight|0) / 2) - (expectedHeight / 2),
+					paddingTop: (childrenCenterY|0) - (expectedHeight / 2),
 				}}>
 					<MapNodeUI_Inner map={map} node={node} nodeView={nodeView} path={path} width={width}/>
 				</div>
-				{node.type != MapNodeType.Thesis &&
-					<div className="clickThrough" style={{
+				{!separateChildren &&
+					<div ref="childHolder" className="clickThrough" style={{
 						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10,
-					}} ref={c=>c && c.clientHeight != this.state.childrenHeight && this.setState({childrenHeight: c.clientHeight})}>
+					}}>
 						{nodeChildren.map((child, index)=> {
-							return <MapNodeUI key={index} map={map} node={child} path={path + "/" + child._key.KeyToInt}/>;
+							return <MapNodeUI key={index} map={map} node={child} path={path + "/" + child._key.KeyToInt} minWidth={childrenWidth}/>;
 						})}
 					</div>}
-				{node.type == MapNodeType.Thesis &&
-					<div className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
-						<div className="clickThrough" style={{
+				{separateChildren &&
+					<div ref="childHolder" className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
+						<div ref="upChildHolder" className="clickThrough" style={{
 							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10,
-						}} ref={c=>c && c.clientHeight != this.state.upChildrenHeight && this.setState({upChildrenHeight: c.clientHeight})}>
+						}}>
 							{upChildren.map((child, index)=> {
-								return <MapNodeUI key={"up_" + index} map={map} node={child} path={path + "/" + child._key.KeyToInt}/>;
+								return <MapNodeUI key={"up_" + index} map={map} node={child} path={path + "/" + child._key.KeyToInt} minWidth={childrenWidth}/>;
 							})}
 						</div>
 						<div className="clickThrough" style={{
 							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10,
 						}}>
 							{downChildren.map((child, index)=> {
-								return <MapNodeUI key={"down_" + index} map={map} node={child} path={path + "/" + child._key.KeyToInt}/>;
+								return <MapNodeUI key={"down_" + index} map={map} node={child} path={path + "/" + child._key.KeyToInt} minWidth={childrenWidth}/>;
 							})}
 						</div>
 					</div>}
 			</div>
 		);
+	}
+	doingSecondRender;
+	PostRender() {
+		if (this.doingSecondRender) {
+			this.doingSecondRender = false;
+			return;
+		}
+		let {childHolder, upChildHolder} = this.refs;
+		this.doingSecondRender = true;
+		this.SetState({childrenWidth: childHolder.clientWidth, childrenCenterY: upChildHolder ? upChildHolder.clientHeight : childHolder.clientHeight / 2});
 	}
 }
 
