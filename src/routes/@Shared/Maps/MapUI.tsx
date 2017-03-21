@@ -12,6 +12,8 @@ import {PropTypes} from "react";
 import {ACTSelectMapNode} from "./MapNodeUI";
 import {Assert} from "../../../Frame/Serialization/VDF/VDF";
 import V from "../../../Frame/V/V";
+import {GetTreeNodesInObjTree} from "../../../Frame/V/V";
+import {Vector2i} from "../../../Frame/General/VectorStructs";
 var ScrollView = require("react-free-scrollbar").default;
 
 type Props = {map: Map, rootNode?: MapNode};
@@ -30,6 +32,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		let {map} = this.props;
 		return {map};
 	}*/
+	downPos: Vector2i;
 	render() {
 		let {map, rootNode} = this.props;
 		if (map == null)
@@ -45,10 +48,12 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 							position: "relative", display: "flex", padding: "150px 5000px 5000px 870px", whiteSpace: "nowrap",
 							filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)",
 						}}
+						onMouseDown={e=>this.downPos = new Vector2i(e.clientX, e.clientY)}
 						onClick={e=> {
 							if (e.target != this.refs.content) return;
+							if (new Vector2i(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
 							let mapView = store.getState().main.mapViews[store.getState().main.openMap];
-							let isNodeSelected = V.GetKeyValuePairsInObjTree(mapView).Any(a=>a.prop == "selected" && a.value);
+							let isNodeSelected = GetTreeNodesInObjTree(mapView).Any(a=>a.prop == "selected" && a.Value);
 							if (isNodeSelected)
 								store.dispatch(new ACTSelectMapNode({mapID: map._key.KeyToInt, path: null}));
 						}}

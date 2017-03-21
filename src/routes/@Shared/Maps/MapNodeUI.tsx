@@ -142,16 +142,15 @@ let nodeTypeFontSizes = {
 	Category: 16
 }
 
-type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number} & Partial<{selectedNodeID: number, userID: string}>;
+type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number} & Partial<{userID: string}>;
 @firebaseConnect()
 @(connect((state: RootState, props: MapNodeUI_Inner_Props)=> ({
-	selectedNodeID: GetSelectedNodeID(state, props),
 	userID: GetUserID(state),
 })) as any)
 class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 	//static contextTypes = {store: PropTypes.object.isRequired};
 	render() {
-		let {firebase, map, node, nodeView, path, width, selectedNodeID, userID} = this.props;
+		let {firebase, map, node, nodeView, path, width, userID} = this.props;
 		//let {dispatch} = this.context.store;
 		let backgroundColor = nodeTypeBackgroundColors[node.type];
 		//let enemyBackgroundColor = nodeTypeBackgroundColors_enemy[node.type] || "150,150,150";
@@ -172,7 +171,12 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, width,
 			}}>
 				{nodeView && nodeView.selected && <MapNodeUI_LeftBox map={map} node={node} nodeView={nodeView} backgroundColor={backgroundColor}/>}
-				<div style={{position: "absolute", transform: "translateX(-100%)", width: 1, height: 28}}/> {/* fixes click-gap */}
+				{/* fixes click-gap */}
+				{nodeView && nodeView.selected && <div style={{
+					position: "absolute",
+					//transform: "translateX(-100%)", width: 1, height: 28,
+					right: "100%", width: 1, top: 0, bottom: 0,
+				}}/>}
 
 				{/* probability-and-such bars */}
 				{/*path.nodeIDs.length >= 3 && [
@@ -188,7 +192,7 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 						position: "relative", width: "100%", //minWidth: minWidth - 20, maxWidth: maxWidth - 20,
 						padding: 5, //node.type == MapNodeType.Category || node.type == MapNodeType.Package ? 5 : "3px 5px",
 					}} onClick={()=> {
-						if (selectedNodeID != node._key.KeyToInt)
+						if (nodeView == null || !nodeView.selected)
 							store.dispatch(new ACTSelectMapNode({mapID: map._key.KeyToInt, path}));
 					}}>
 						<div style={{
@@ -292,7 +296,9 @@ export class MapNodeUI_LeftBox extends BaseComponent<{map: Map, node: MapNode, n
 		let {map, node, nodeView, backgroundColor} = this.props;
 		return (
 			<div style={{
-				display: "flex", flexDirection: "column", position: "absolute", transform: "translateX(calc(-100% - 2px))", whiteSpace: "nowrap",
+				display: "flex", flexDirection: "column", position: "absolute", whiteSpace: "nowrap",
+				//transform: "translateX(calc(-100% - 2px))", 
+				right: "calc(100% + 1px)",
 				zIndex: 5, padding: 3,
 				//background: `rgba(${backgroundColor},.9)`,
 				background: `rgba(0,0,0,.7)`,

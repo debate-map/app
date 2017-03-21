@@ -24,7 +24,7 @@
     "codecov": "cat coverage/*/lcov.info | codecov",
     "fb": "node ./build/deploy",
     "@build-stats": "node_modules\\.bin\\webpack --config build/webpack.config.js --output-file ForStats/Bundle.js --profile --json > BuildStats.json",
-	"build-stats": "node_modules\\.bin\\webpack --config build/webpack.config.js --output-file ForStats/Bundle.js --profile --json > dist/ForStats/BuildStats.json"
+    "build-stats": "node_modules\\.bin\\webpack --config build/webpack.config.js --output-file ForStats/Bundle.js --profile --json > dist/ForStats/BuildStats.json"
   },
   "betterScripts": {
     "compile": {
@@ -89,28 +89,28 @@
   "dependencies": {
     "lodash": "^4.17.2",
     "material-ui": "0.16.0",
+    "moment": "^2.17.1",
     "normalize.css": "^4.1.1",
+    "radium": "^0.18.1",
     "react": "15.3.2",
+    "react-autobind": "^1.0.6",
     "react-dom": "15.3.2",
+    "react-free-scrollbar": "^0.1.2",
     "react-google-button": "^0.1.0",
+    "react-markdown": "^2.4.5",
     "react-modal": "^1.7.2",
     "react-redux": "^4.4.5",
     "react-redux-firebase": "^1.2.0",
-    "react-tap-event-plugin": "1.0.0",
-    "redux": "^3.6.0",
-    "redux-form": "^6.2.0",
-    "redux-thunk": "^2.0.0",
-    "radium": "^0.18.1",
-    "react-autobind": "^1.0.6",
-    "react-markdown": "^2.4.5",
     "react-router-dom": "^4.0.0",
     "react-router-redux": "^5.0.0-alpha.2",
-    "moment": "^2.17.1",
-    "reselect": "^2.5.4",
+    "react-tap-event-plugin": "1.0.0",
+    "react-vmenu": "^0.0.0",
+    "redux": "^3.6.0",
+    "redux-form": "^6.2.0",
     "redux-persist": "^4.4.2",
     "redux-persist-transform-filter": "0.0.9",
-    "react-vmenu": "^0.0.0",
-    "react-free-scrollbar": "^0.1.2"
+    "redux-thunk": "^2.0.0",
+    "reselect": "^2.5.4"
   },
   "devDependencies": {
     "@types/firebase": "^2.4.31",

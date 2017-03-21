@@ -1,3 +1,4 @@
+import {NodeType} from "react-markdown";
 import {Log} from "../General/Logging";
 import {Assert} from "../../Frame/General/Assert";
 import {IsPrimitive, IsString} from "../General/Types";
@@ -169,17 +170,6 @@ export default class V {
 				V.ForEachChildInTreeXDoY(value, actionY);
 		}
 	}*/
-	static GetKeyValuePairsInObjTree(obj: any, ancestorPairs = []) {
-		type pair = {ancestorPairs, obj, prop, value};
-		let result = [] as {ancestorPairs: pair[], obj, prop, value}[];
-		for (let key in obj) {
-			let value = obj[key];
-			let currentPair = {ancestorPairs, obj, prop: key, value};
-			result.push(currentPair);
-			result.AddRange(V.GetKeyValuePairsInObjTree(value, ancestorPairs.concat(currentPair)));
-		}
-		return result;
-	}
 
 	static GetContentSize(content) {
 		/*var holder = $("#hiddenTempHolder");
@@ -201,3 +191,83 @@ export default class V {
 	static GetContentWidth(content) { return V.GetContentSize(content).width; };
 	static GetContentHeight(content) { return V.GetContentSize(content).height; };
 }
+
+export class TreeNode {
+	constructor(ancestorNodes: TreeNode[], obj, prop) {
+		this.ancestorNodes = ancestorNodes;
+		this.obj = obj;
+		this.prop = prop;
+	}
+
+	ancestorNodes: TreeNode[];
+	get PathNodes() {
+		if (this.prop == "_root") return [];
+		return this.ancestorNodes.Select(a=>a.prop).concat(this.prop);
+	}
+	get PathStr() {
+		return this.PathNodes.join("/");
+	}
+
+	obj;
+	prop;
+	//value;
+	get Value() {
+		if (this.obj == null)
+			return undefined;
+		return this.obj[this.prop];
+	}
+	set Value(newVal) {
+		this.obj[this.prop] = newVal;
+	}
+}
+export function GetTreeNodesInObjTree(obj: any, includeRootNode = false, _ancestorNodes = []) {
+	let result = [] as TreeNode[];
+	if (includeRootNode)
+		result.push(new TreeNode([], {_root: obj}, "_root"));
+	for (let key in obj) {
+		let value = obj[key];
+		let currentNode = new TreeNode(_ancestorNodes, obj, key);
+		result.push(currentNode);
+		result.AddRange(GetTreeNodesInObjTree(value, false, _ancestorNodes.concat(currentNode)));
+	}
+	return result;
+}
+
+/*export function CloneTreeDownToXWhileReplacingXValue(treeRoot, pathToX: string, newValueForX) {
+	let pathNodes = pathToX.split("/");
+	let currentPathNode = pathNodes[0];
+	let currentPathNode_newValue = pathNodes.length > 1
+		? CloneTreeDownToXWhileReplacingXValue(treeRoot[currentPathNode], pathNodes.Skip(1).join("/"), newValueForX)
+		: newValueForX;
+	return {...treeRoot, [currentPathNode]: currentPathNode_newValue};
+}*/
+
+export function GetTreeNodesInPath(treeRoot, pathNodesOrStr: string[] | string, includeRootNode = false, _ancestorNodes = []) {
+	let descendantPathNodes = pathNodesOrStr instanceof Array ? pathNodesOrStr : pathNodesOrStr.split("/");
+	let childTreeNode = new TreeNode(_ancestorNodes, treeRoot, descendantPathNodes[0]);
+	var result = [];
+	if (includeRootNode)
+		result.push(new TreeNode([], {_root: treeRoot}, "_root"));
+	result.push(childTreeNode);
+	if (descendantPathNodes.length > 1) // if the path goes deeper than the current child-tree-node
+		result.push(...GetTreeNodesInPath(childTreeNode ? childTreeNode.Value : null, descendantPathNodes.Skip(1).join("/"), false, _ancestorNodes.concat(childTreeNode)));
+	return result;
+}
+/*export function GetTreeNodesInPath_WithRoot(treeRoot, path: string) {
+	return GetTreeNodesInPath({root: treeRoot}, "root/" + path).Skip(1);
+}*/
+
+export function VisitTreeNodesInPath(treeRoot, pathNodesOrStr: string[] | string, visitFunc: (node: TreeNode)=>any, visitRootNode = false, _ancestorNodes = []) {
+	if (visitRootNode)
+		visitFunc(new TreeNode([], {_root: treeRoot}, "_root"));
+	let descendantPathNodes = pathNodesOrStr instanceof Array ? pathNodesOrStr : pathNodesOrStr.split("/");
+	let childTreeNode = new TreeNode(_ancestorNodes, treeRoot, descendantPathNodes[0]);
+	visitFunc(childTreeNode);
+	if (descendantPathNodes.length > 1) // if the path goes deeper than the current child-tree-node
+		VisitTreeNodesInPath(childTreeNode.Value, descendantPathNodes.Skip(1).join("/"), visitFunc, false, _ancestorNodes.concat(childTreeNode));
+	return treeRoot;
+}
+/*export function VisitTreeNodesInPath_WithRoot(treeRoot, path: string, visitFunc: (node: TreeNode)=>any) {
+	VisitTreeNodesInPath({root: treeRoot}, "root/" + path, visitFunc);
+	return treeRoot;
+}*/
