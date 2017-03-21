@@ -139,10 +139,10 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	}
 
 	/** Returns whether the new-state differs (shallowly) from the old-state. */
-	SetState(newState: S, callback?: ()=>any): boolean {
+	SetState(newState: Partial<S>, callback?: ()=>any): boolean {
 		let keys = this.state.VKeys().concat(newState.VKeys()).Distinct();
-		if (!keys.Any(key=>(this.state as any)[key] !== newState[key])) return false;
-		this.setState(newState, callback);
+		if (!keys.Any(key=>(this.state as S)[key] !== (newState as S)[key])) return false;
+		this.setState(newState as S, callback);
 		return true;
 	}
 
