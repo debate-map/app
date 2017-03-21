@@ -1,5 +1,5 @@
 import {Vector2i} from "react-vmenu/dist/Helpers/General";
-import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate, BaseProps} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp} from "../../../Frame/UI/ReactGlobals";
 import {MapNode, MapNodeType, MapNodeType_Info} from "./MapNode";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
@@ -28,7 +28,7 @@ import {createSelector} from "reselect";
 export class ACTSelectMapNode extends Action<{mapID: number, path: string}> {}
 export class ACTToggleMapNodeExpanded extends Action<{mapID: number, path: string}> {}
 
-type Props = {map: Map, node: MapNode, path?: string, minWidth?: number} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
+type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
 @firebaseConnect(({node}: {node: MapNode})=>[
 	...GetNodes_FBPaths({nodeIDs: MakeGetNodeChildIDs()({}, {node})})
 ])
@@ -46,9 +46,8 @@ type Props = {map: Map, node: MapNode, path?: string, minWidth?: number} & Parti
 		};
 	}) as any;
 }) as any)
-export default class MapNodeUI extends BaseComponent<Props, {childrenWidth: number, childrenCenterY: number}> {
+export default class MapNodeUI extends BaseComponent<Props, {childrenWidthOverride: number, childrenCenterY: number}> {
 	//static contextTypes = {map: PropTypes.object};
-	static defaultProps = {minWidth: 0};
 
 	/*shouldComponentUpdate(oldProps: Props, newProps: Props) {
 		if (ToJSON(oldProps.Excluding("nodeView")) != ToJSON(newProps.Excluding("nodeView")))
@@ -59,8 +58,8 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenWidth: numb
 	}*/
 
 	render() {
-		let {map, node, path, minWidth, nodeView, nodeChildren, children} = this.props;
-		let {childrenWidth, childrenCenterY} = this.state;
+		let {map, node, path, widthOverride, nodeView, nodeChildren, children} = this.props;
+		let {childrenWidthOverride, childrenCenterY} = this.state;
 		/*let {map} = this.context;
 		if (map == null) return <div>Loading map, deep...</div>; // not sure why this occurs*/
 		//Log("Updating MapNodeUI:" + nodeID);
@@ -76,7 +75,7 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenWidth: numb
 		let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
 
 		//let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
-		minWidth = minWidth.KeepAtLeast(node.type == MapNodeType.Thesis ? 350 : 100);
+		let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
 		let maxWidth = node.type == MapNodeType.Thesis ? 500 : 200;
 		let width = expectedBoxWidth.KeepBetween(minWidth, maxWidth);
 
@@ -84,55 +83,70 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenWidth: numb
 		let expectedLines = (expectedTextWidth / maxTextWidth).CeilingTo(1);
 		let expectedHeight = (expectedLines * 17) + 10; // (lines * line-height) + top-plus-bottom-padding
 
-		//Log("Rendering:" + node._key.KeyToInt);
-
-		if (QuickIncrement("test1") > 100) debugger;
-		
+		this.childBoxes = [];
 		return (
-			<div className="clickThrough" style={{position: "relative", display: "flex", padding: "5px 0"}}>
-				<div className="clickThrough" style={{
+			<div className="clickThrough" style={{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}}>
+				<div className="clickThrough" ref="innerBoxHolder" style={{
 					//transform: "translateX(0)", // fixes z-index issue
-					paddingTop: (childrenCenterY|0) - (expectedHeight / 2),
+					paddingTop: ((childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0),
 				}}>
-					<MapNodeUI_Inner map={map} node={node} nodeView={nodeView} path={path} width={width}/>
+					<MapNodeUI_Inner ref="innerBox" /*ref={c=>(this as any).innerBox = c}*/ map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
 				</div>
 				{!separateChildren &&
 					<div ref="childHolder" className="clickThrough" style={{
 						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10,
+						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: nodeView && nodeView.expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 					}}>
 						{nodeChildren.map((child, index)=> {
-							return <MapNodeUI key={index} map={map} node={child} path={path + "/" + child._key.KeyToInt} minWidth={childrenWidth}/>;
+							return <MapNodeUI key={index} ref={c=>this.childBoxes.push(c)} map={map} node={child} path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride}/>;
 						})}
 					</div>}
 				{separateChildren &&
-					<div ref="childHolder" className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
-						<div ref="upChildHolder" className="clickThrough" style={{
-							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10,
-						}}>
+					<div ref="childHolder" className="clickThrough" style={{
+						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10,
+						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: nodeView && nodeView.expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
+					}}>
+						<div ref="upChildHolder" className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
 							{upChildren.map((child, index)=> {
-								return <MapNodeUI key={"up_" + index} map={map} node={child} path={path + "/" + child._key.KeyToInt} minWidth={childrenWidth}/>;
+								return <MapNodeUI key={"up_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child} path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride}/>;
 							})}
 						</div>
-						<div className="clickThrough" style={{
-							display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10,
-						}}>
+						<div className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
 							{downChildren.map((child, index)=> {
-								return <MapNodeUI key={"down_" + index} map={map} node={child} path={path + "/" + child._key.KeyToInt} minWidth={childrenWidth}/>;
+								return <MapNodeUI key={"down_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child} path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride}/>;
 							})}
 						</div>
 					</div>}
 			</div>
 		);
 	}
-	doingSecondRender;
+	childBoxes: MapNodeUI[];
+	renderingFromPostRender = false;
 	PostRender() {
-		if (this.doingSecondRender) {
-			this.doingSecondRender = false;
+		let {childHolder, upChildHolder} = this.refs;
+		if (this.renderingFromPostRender) {
+			this.renderingFromPostRender = false;
 			return;
 		}
-		let {childHolder, upChildHolder} = this.refs;
-		this.doingSecondRender = true;
-		this.SetState({childrenWidth: childHolder.clientWidth, childrenCenterY: upChildHolder ? upChildHolder.clientHeight : childHolder.clientHeight / 2});
+		/*Log(`Child-box-max-height(${this.props.node._key.KeyToInt}): ${
+			this.childBoxes.Any(a=>a != null) ? this.childBoxes.Where(a=>a != null).Select(a=>a.refs.innerBox ? a.refs.innerBox.clientWidth : ((childBoxes as any), Debugger(), 1)).Max() : 0
+		}`);*/
+		if (this.SetState({
+			childrenWidthOverride: this.childBoxes.Any(a=>a != null)
+				? this.childBoxes.Where(a=>a != null).Select(a=> {
+					var childDOM = FindDOM(GetInnerComp(a).refs.innerBox);
+					var oldMinWidth = childDOM.style.minWidth;
+					childDOM.style.minWidth = 0 + "px";
+					var result = childDOM.clientWidth;
+					childDOM.style.minWidth = oldMinWidth;
+					return result;
+				}).Max()
+				: 0,
+			childrenCenterY: upChildHolder
+				? (upChildHolder.style.display != "none" ? upChildHolder.clientHeight : 0)
+				: (childHolder.style.display != "none" ? childHolder.clientHeight / 2 : 0)
+		}))
+			this.renderingFromPostRender = true;
 	}
 }
 
@@ -155,7 +169,7 @@ let nodeTypeFontSizes = {
 	Category: 16
 }
 
-type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number} & Partial<{userID: string}>;
+type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number} & Partial<{userID: string}>;
 @firebaseConnect()
 @(connect((state: RootState, props: MapNodeUI_Inner_Props)=> ({
 	userID: GetUserID(state),
@@ -163,7 +177,7 @@ type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, pa
 class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 	//static contextTypes = {store: PropTypes.object.isRequired};
 	render() {
-		let {firebase, map, node, nodeView, path, width, userID} = this.props;
+		let {firebase, map, node, nodeView, path, width, widthOverride, userID} = this.props;
 		//let {dispatch} = this.context.store;
 		let backgroundColor = nodeTypeBackgroundColors[node.type];
 		//let enemyBackgroundColor = nodeTypeBackgroundColors_enemy[node.type] || "150,150,150";
@@ -181,7 +195,7 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {}> {
 				/*boxShadow: "rgba(0, 0, 0, 1) 0px 0px 100px",
 				filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 3px) drop-shadow(rgba(0,0,0,.35) 0px 0px 3px)",*/
 				//boxShadow: "rgba(0, 0, 0, 1) 0px 0px 1px",
-				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, width,
+				boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, width, minWidth: widthOverride,
 			}}>
 				{nodeView && nodeView.selected && <MapNodeUI_LeftBox map={map} node={node} nodeView={nodeView} backgroundColor={backgroundColor}/>}
 				{/* fixes click-gap */}
