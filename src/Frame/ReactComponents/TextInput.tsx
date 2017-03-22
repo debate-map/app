@@ -12,7 +12,7 @@ export default class TextInput extends BaseComponent<{value, onChange, delayChan
 				value={editedValue != null ? editedValue : value} onChange={e=> {
 					var newVal = $(e.target).val();
 					if (delayChangeTillDefocus) {
-						this.setState({editedValue: newVal});
+						this.SetState({editedValue: newVal});
 					} else {
 						onChange(newVal, e)
 					}
@@ -21,7 +21,7 @@ export default class TextInput extends BaseComponent<{value, onChange, delayChan
 					if (!delayChangeTillDefocus) return;
 					var newVal = $(e.target).val();
 					onChange(newVal, e);
-					this.setState({editedValue: null});
+					this.SetState({editedValue: null});
 				}}/>
 		);
 	}

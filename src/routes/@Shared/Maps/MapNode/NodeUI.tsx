@@ -1,6 +1,6 @@
 import {Vector2i} from "react-vmenu/dist/Helpers/General";
 import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp} from "../../../../Frame/UI/ReactGlobals";
-import {MapNode, MapNodeType, MapNodeType_Info} from "./MapNode";
+import {MapNode, MapNodeType, MapNodeType_Info} from "../MapNode";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
 import {DBPath} from "../../../../Frame/Database/DatabaseHelpers";
@@ -24,8 +24,8 @@ import {DN, ToJSON} from "../../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {createSelector} from "reselect";
-import MapNodeUI_Inner from "./MapNodeUI_Inner";
-import {nodeTypeFontSizes} from "./MapNodeUI_Inner";
+import NodeUI_Inner from "./NodeUI_Inner";
+import {nodeTypeFontSizes} from "./NodeUI_Inner";
 
 type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
 @firebaseConnect(({node}: {node: MapNode})=>[
@@ -45,7 +45,7 @@ type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number} & 
 		};
 	}) as any;
 }) as any)
-export default class MapNodeUI extends BaseComponent<Props, {childrenWidthOverride: number, childrenCenterY: number}> {
+export default class NodeUI extends BaseComponent<Props, {childrenWidthOverride: number, childrenCenterY: number}> {
 	//static contextTypes = {map: PropTypes.object};
 
 	/*shouldComponentUpdate(oldProps: Props, newProps: Props) {
@@ -89,7 +89,7 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenWidthOverri
 					//transform: "translateX(0)", // fixes z-index issue
 					paddingTop: ((childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0),
 				}}>
-					<MapNodeUI_Inner ref="innerBox" /*ref={c=>(this as any).innerBox = c}*/ map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
+					<NodeUI_Inner ref="innerBox" /*ref={c=>(this as any).innerBox = c}*/ map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
 				</div>
 				{!separateChildren &&
 					<div ref="childHolder" className="clickThrough" style={{
@@ -97,7 +97,7 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenWidthOverri
 						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: nodeView && nodeView.expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 					}}>
 						{nodeChildren.map((child, index)=> {
-							return <MapNodeUI key={index} ref={c=>this.childBoxes.push(c)} map={map} node={child} path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride}/>;
+							return <NodeUI key={index} ref={c=>this.childBoxes.push(c)} map={map} node={child} path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride}/>;
 						})}
 					</div>}
 				{separateChildren &&
@@ -107,19 +107,19 @@ export default class MapNodeUI extends BaseComponent<Props, {childrenWidthOverri
 					}}>
 						<div ref="upChildHolder" className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
 							{upChildren.map((child, index)=> {
-								return <MapNodeUI key={"up_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child} path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride}/>;
+								return <NodeUI key={"up_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child} path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride}/>;
 							})}
 						</div>
 						<div className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
 							{downChildren.map((child, index)=> {
-								return <MapNodeUI key={"down_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child} path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride}/>;
+								return <NodeUI key={"down_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child} path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride}/>;
 							})}
 						</div>
 					</div>}
 			</div>
 		);
 	}
-	childBoxes: MapNodeUI[];
+	childBoxes: NodeUI[];
 	renderingFromPostRender = false;
 	PostRender() {
 		let {childHolder, upChildHolder} = this.refs;

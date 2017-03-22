@@ -13,10 +13,10 @@ import {createSelector} from "reselect";
 import {DBPath, GetData} from "../Frame/Database/DatabaseHelpers";
 import {firebase} from "../config.js";
 import {MapView} from "./Store/Main/MapViews";
+import {MapNode} from "../routes/@Shared/Maps/MapNode";
 import {FirebaseDatabase} from "../Frame/UI/ReactGlobals";
 import {QuickIncrement} from "../Frame/General/Globals_Free";
 import {GetTreeNodesInObjTree} from "../Frame/V/V";
-import {MapNode} from "../routes/@Shared/Maps/MapNode/MapNode";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;

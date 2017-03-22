@@ -1,5 +1,5 @@
-import V from "../../../../Frame/V/V";
-import {_Enum, Enum} from "../../../../Frame/General/Enums";
+import V from "../../../Frame/V/V";
+import {_Enum, Enum} from "../../../Frame/General/Enums";
 
 export enum MapNodeType {
 	None = 0,

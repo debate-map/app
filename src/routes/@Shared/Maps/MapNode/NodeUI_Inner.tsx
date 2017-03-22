@@ -1,12 +1,11 @@
 import {VMenuItem} from "react-vmenu/dist/VMenu";
-import {MapNodeType, MapNode, MapNodeType_Info} from "./MapNode";
-import firebaseConnect from "../../../../../dist/ForStats/Bundle.js";
+import {MapNodeType, MapNode, MapNodeType_Info} from "../MapNode";
 import {connect} from "react-redux";
 import {MapNodeView, ACTMapNodeSelect, ACTMapNodeExpandedToggle} from "../../../../store/Store/Main/MapViews";
 import {GetUserID, RootState} from "../../../../store/reducers";
 import {Map} from "../Map";
 import {BaseComponent} from "../../../../Frame/UI/ReactGlobals";
-import MapNodeUI_LeftBox from "./MapNodeUI_LeftBox";
+import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
 import VMenu from "react-vmenu";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
@@ -16,6 +15,7 @@ import {DataSnapshot} from "firebase";
 import Button from "../../../../Frame/ReactComponents/Button";
 import RatingsUI from "./RatingsUI";
 import {ratingTypes, RatingType} from "./RatingsUI";
+import {firebaseConnect} from "react-redux-firebase";
 
 let nodeTypeBackgroundColors = {
 	[MapNodeType.Category]: "40,60,80",
@@ -36,14 +36,14 @@ export let nodeTypeFontSizes = {
 	Category: 16
 }
 
-type MapNodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number} & Partial<{userID: string}>;
+type NodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number} & Partial<{userID: string}>;
 @firebaseConnect()
 @(connect(()=> {
-	return (state: RootState, props: MapNodeUI_Inner_Props)=> ({
+	return (state: RootState, props: NodeUI_Inner_Props)=> ({
 		userID: GetUserID(state),
 	}) as any;
 }) as any)
-export default class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {hovered: boolean, openPanel_preview: string}> {
+export default class NodeUI_Inner extends BaseComponent<NodeUI_Inner_Props, {hovered: boolean, openPanel_preview: string}> {
 	render() {
 		let {firebase, map, node, nodeView, path, width, widthOverride, userID} = this.props;
 		let {hovered, openPanel_preview} = this.state;
@@ -64,7 +64,7 @@ export default class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props
 						display: "flex", position: "relative", borderRadius: 5, cursor: "pointer",
 						boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, width, minWidth: widthOverride,
 					}}
-					onMouseEnter={()=>this.setState({hovered: true})} onMouseLeave={()=>this.setState({hovered: false})}
+					onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})}
 					onClick={e=> {
 						if ((e.nativeEvent as any).ignore) return;
 						if (nodeView == null || !nodeView.selected)
