@@ -105,6 +105,7 @@
     "react-router-redux": "^5.0.0-alpha.2",
     "react-tap-event-plugin": "1.0.0",
     "react-vmenu": "^0.0.0",
+    "recharts": "^0.21.2",
     "redux": "^3.6.0",
     "redux-form": "^6.2.0",
     "redux-persist": "^4.4.2",

@@ -4,9 +4,7 @@ import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
 import {connect} from "react-redux";
 import {Map} from "./Map";
-import MapNodeUI from "./MapNodeUI";
 import {DBPath, GetData} from "../../../Frame/Database/DatabaseHelpers";
-import {MapNode} from "./MapNode";
 import {Debugger} from "../../../Frame/General/Globals_Free";
 import {PropTypes} from "react";
 import {Assert} from "../../../Frame/Serialization/VDF/VDF";
@@ -14,6 +12,8 @@ import V from "../../../Frame/V/V";
 import {GetTreeNodesInObjTree} from "../../../Frame/V/V";
 import {Vector2i} from "../../../Frame/General/VectorStructs";
 import {ACTMapNodeSelect} from "../../../store/Store/Main/MapViews";
+import {MapNode} from "./MapNode/MapNode";
+import MapNodeUI from "./MapNode/MapNodeUI";
 var ScrollView = require("react-free-scrollbar").default;
 
 type Props = {map: Map, rootNode?: MapNode};
