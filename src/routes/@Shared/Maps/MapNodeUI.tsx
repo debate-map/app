@@ -305,7 +305,7 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {hovered: boo
 				</div>
 				{bottomPanelShow &&
 					<div style={{
-								position: "absolute", top: "calc(100% + 1px)", width: width, minWidth: widthOverride.KeepAtLeast(350), zIndex: hovered ? 6 : 5,
+								position: "absolute", top: "calc(100% + 1px)", width: width, minWidth: (widthOverride|0).KeepAtLeast(350), zIndex: hovered ? 6 : 5,
 								padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`,
 							}}>
 						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
@@ -313,9 +313,13 @@ class MapNodeUI_Inner extends BaseComponent<MapNodeUI_Inner_Props, {hovered: boo
 							<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
 								Probability that the statement, as presented, is true.
 							</div>}
-						{panelToShow == "intensity" &&
+						{/*panelToShow == "intensity" &&
 							<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
 								Relative intensity of the strongest version of the statement that's still true.
+							</div>*/}
+						{panelToShow == "adjustment" &&
+							<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
+								What intensity the statement should be strengthened/weakened to, to reach its ideal state. (making substantial claims while maintaining accuracy)
 							</div>}
 					</div>}
 			</div>
@@ -336,10 +340,10 @@ export class MapNodeUI_LeftBox extends BaseComponent<
 				<div style={{position: "relative", padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 					<PanelButton parent={this} map={map} path={path} panel="probability" text="Probability" style={{marginTop: 0}}>
-						<Span ml={5} style={{float: "right"}}>90%</Span>
+						<Span ml={5} style={{float: "right"}}>90%<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>1</sup></Span>
 					</PanelButton>
-					<PanelButton parent={this} map={map} path={path} panel="intensity" text="Intensity">
-						<Span ml={5}style={{float: "right"}}>70%</Span>
+					<PanelButton parent={this} map={map} path={path} panel="adjustment" text="Adjustment">
+						<Span ml={5} style={{float: "right"}}>70%<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>1</sup></Span>
 					</PanelButton>
 					<Button text="..."
 						style={{
