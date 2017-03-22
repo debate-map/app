@@ -1,8 +1,8 @@
 import {BaseComponent, Span} from "../../../../Frame/UI/ReactGlobals";
-import {MapNode} from "./MapNode";
+import {MapNode} from "../MapNode";
 import {MapNodeView, ACTMapNodePanelOpen} from "../../../../store/Store/Main/MapViews";
 import {Map} from "../Map";
-import MapNodeUI_Inner from "./MapNodeUI_Inner";
+import MapNodeUI_Inner from "./NodeUI_Inner";
 import Button from "../../../../Frame/ReactComponents/Button";
 import {E} from "../../../../Frame/General/Globals_Free";
 

@@ -76,6 +76,12 @@ export function BasicStyles(props) {
 	return result;
 }
 
+export enum RenderSource {
+	Mount, // first render, after creation
+	PropChange, // from prop-change, and ancestor re-renders (e.g. ancestor.forceUpdate(), ancestor.setState())
+	SetState, // from this.SetState()
+	Update, // from this.Update()
+}
 export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	constructor(props) {
 		super(props);
@@ -108,9 +114,12 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	    return React.Children.map((children as any).Where(a=>a), a=>a);
 	}*/
 
-	/** safe force-update;*/
+	forceUpdate(_: ()=>"Do not call this. Call Update() instead.") {
+		throw new Error("Do not call this. Call Update() instead.");
+	}
 	Update(postUpdate?) {
 		//if (!this.Mounted) return;
+		this.lastRender_source = RenderSource.Update;
 		this.forceUpdate(postUpdate);
 	}
 	Clear(postClear?) {
@@ -131,18 +140,27 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	UpdateAndReceive(props) {
 		return ()=> {
 			//if (!this.Mounted) return;
-			this.forceUpdate();
+			//this.forceUpdate();
+			Component.prototype.forceUpdate.apply(this, arguments);
 			if (this.autoRemoveChangeListeners)
 				this.RemoveChangeListeners();
 			this.ComponentWillMountOrReceiveProps(props)
 		};
 	}
 
+	setState(_: ()=>"Do not call this. Call SetState() instead.") {
+		throw new Error("Do not call this. Call SetState() instead.");
+	}
 	/** Returns whether the new-state differs (shallowly) from the old-state. */
-	SetState(newState: Partial<S>, callback?: ()=>any): boolean {
-		let keys = this.state.VKeys().concat(newState.VKeys()).Distinct();
-		if (!keys.Any(key=>(this.state as S)[key] !== (newState as S)[key])) return false;
-		this.setState(newState as S, callback);
+	SetState(newState: Partial<S>, callback?: ()=>any, cancelIfPropsSame = true): boolean {
+		if (cancelIfPropsSame) {
+			let keys = this.state.VKeys().concat(newState.VKeys()).Distinct();
+			if (!keys.Any(key=>(this.state as S)[key] !== (newState as S)[key]))
+				return false;
+		}
+		this.lastRender_source = RenderSource.SetState;
+		//this.setState(newState as S, callback);
+		Component.prototype.setState.apply(this, arguments);
 		return true;
 	}
 
@@ -184,7 +202,8 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		if (this.autoRemoveChangeListeners)
 			this.RemoveChangeListeners();
 		this.ComponentWillMount(); 
-	    this.ComponentWillMountOrReceiveProps(this.props, true); 
+	    this.ComponentWillMountOrReceiveProps(this.props, true);
+		this.lastRender_source = RenderSource.Mount;
 	}
 	ComponentDidMount(...args: any[]): void {};
 	ComponentDidMountOrUpdate(forMount: boolean): void {};
@@ -210,6 +229,7 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 			this.RemoveChangeListeners();
 		this.ComponentWillReceiveProps(newProps);
 	    this.ComponentWillMountOrReceiveProps(newProps, false);
+		this.lastRender_source = RenderSource.PropChange;
 	}
 	ComponentDidUpdate(...args: any[]): void {};
 	private componentDidUpdate(...args) {
@@ -218,26 +238,29 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		this.CallPostRender();
 	}
 
+	// whether the current/upcoming render was triggered by a mount or prop-change (as opposed to setState() or forceUpdate())
+	lastRender_source: RenderSource;
 	private CallPostRender() {
 		if (this.PostRender == BaseComponent.prototype.PostRender) return;
+
 		let ownPostRender = this.PostRender as any;
 		// can be different, for wrapped components (apparently they copy the inner type's PostRender as their own PostRender -- except as a new function, for some reason)
 		let prototypePostRender = this.constructor.prototype.PostRender;
 		if (ownPostRender.instant || prototypePostRender.instant)
-			this.PostRender(true);
+			this.PostRender();
 		else {
 			WaitXThenRun(0, ()=>window.requestAnimationFrame(()=> {
 				if (!this.mounted) return;
-				this.PostRender(true);
+				this.PostRender();
 			}));
 			/*WaitXThenRun(0, ()=> {
-				this.PostRender(true);
+				this.PostRender();
 			});*/
 		}
 	}
 
 	PreRender(): void {};
-	PostRender(initialMount: boolean): void {};
+	PostRender(): void {};
 
 	// maybe temp
 	/*get Mounted() {
