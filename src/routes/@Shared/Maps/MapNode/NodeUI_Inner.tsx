@@ -61,7 +61,7 @@ export default class NodeUI_Inner extends BaseComponent<NodeUI_Inner_Props, {hov
 
 		return (
 			<div style={{
-						display: "flex", position: "relative", borderRadius: 5, cursor: "pointer",
+						display: "flex", position: "relative", borderRadius: 5, cursor: "default",
 						boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, width, minWidth: widthOverride,
 					}}
 					onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})}
