@@ -71,4 +71,8 @@ function RenderWrapper() {
 	let RootUI = require("./RootUI").default;
 	ReactDOM.render(<RootUI store={store}/>, mountNode);
 }
-RenderWrapper();
+
+//RenderWrapper();
+setTimeout(()=> {
+	RenderWrapper();
+});

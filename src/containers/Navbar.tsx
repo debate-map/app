@@ -17,12 +17,8 @@ import {Debugger} from "../Frame/General/Globals_Free";
 import Button from "../Frame/ReactComponents/Button";
 import TextInput from "../Frame/ReactComponents/TextInput";
 import Action from "../Frame/General/Action";
+import {ACTSetUserPanelOpen} from "../store/Store/Main";
 const {pathToJS} = helpers;
-
-// actions
-// ==========
-
-export class ACTSetUserPanelOpen extends Action<boolean> {}
 
 // main
 // ==========

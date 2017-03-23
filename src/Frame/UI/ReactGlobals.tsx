@@ -36,6 +36,7 @@ g.Extend({FindReact});
 export function GetInnerComp(wrapperComp: React.Component<any, any>) {
 	return FindReact(FindDOM(wrapperComp));
 }
+g.Extend({GetInnerComp});
 
 export interface BaseProps {
 	ml?; mr?; mt?; mb?;

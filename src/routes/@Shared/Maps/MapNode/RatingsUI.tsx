@@ -2,6 +2,11 @@ import {Log} from "../../../../Frame/General/Logging";
 import {BaseComponent, RenderSource, SimpleShouldUpdate} from "../../../../Frame/UI/ReactGlobals";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {Range} from "../../../../Frame/General/Globals";
+import Spinner from "../../../../Frame/ReactComponents/Spinner";
+import {connect} from "react-redux";
+import {RootState, GetRatingUISmoothing} from "../../../../store/reducers";
+import {ACTRatingUISmoothnessSet} from "../../../../store/Store/Main";
+import Select from "../../../../Frame/ReactComponents/Select";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -27,13 +32,13 @@ export type RatingType = "significance" | "probability" | "adjustment";
 interface RatingTypeInfo {
 	description: string;
 	options: number[];
-	ticks: number[];
+	ticks: number[]; // for x-axis labels
 }
 
 let ratingTypeInfos = {
 	significance: {
 		description: "TODO",
-		options: Range(1, 99),
+		options: Range(1, 100),
 		ticks: Range(0, 100, 5),
 	},
 	probability: {
@@ -59,42 +64,54 @@ let ratingTypeDescriptions = {
 	adjustment: "What intensity the statement should be strengthened/weakened to, to reach its ideal state. (making substantial claims while maintaining accuracy)",
 }
 
-@SimpleShouldUpdate
-export default class RatingsUI extends BaseComponent<{ratingType: RatingType}, {size: Vector2i}> {
+type RatingsUI_Props = {ratingType: RatingType} & Partial<{smoothing: number}>;
+@(connect(()=> {
+	return (state: RootState, props: RatingsUI_Props)=> ({
+		smoothing: GetRatingUISmoothing(state),
+	}) as any;
+}) as any)
+export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vector2i}> {
 	render() {
-		let {ratingType} = this.props;
+		let {ratingType, smoothing} = this.props;
 		let {size} = this.state;
 
-		let ratingTypeInfo = ratingTypeInfos[ratingType];
+		let ratingInfo = ratingTypeInfos[ratingType];
 		
 		/*let dataFinal = [...data];
 		for (let [index, rating] of ratingOptions.entries()) {
 			if (!dataFinal.Any(a=>a.rating == rating))
 				dataFinal.splice(rating - 1, 0, {rating: rating, count: 0});
 		}*/
-		let dataFinal = ratingTypeInfo.options.Select(a=>({rating: a, count: 0}));
+		//let ticksForDisplay = ratingInfo.options.Select(a=>a.RoundTo(smoothing).KeepBetween(ratingInfo.options.Min(), ratingInfo.options.Max())).Distinct();
+		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(ratingInfo.options.Max() == 200 ? [200] : []);
+		smoothing = smoothing.KeepBetween(ratingInfo.options.Min(), ratingInfo.options.Max()); // smoothing might have been set higher, from when on another rating-type
+		let ticksForDisplay = ratingInfo.options.Select(a=>a.RoundTo(smoothing)).Distinct();
+		let dataFinal = ticksForDisplay.Select(a=>({rating: a, count: 0}));
 		for (let entry of data) {
-			let placeholderIndex = dataFinal.findIndex(a=>a.rating == entry.rating);
-			dataFinal.splice(placeholderIndex, 1, entry);
+			let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(entry.rating)).First();
+			/*let slotIndex = dataFinal.indexOf(closestRatingSlot);
+			dataFinal.splice(slotIndex, 1, entry);*/
+			closestRatingSlot.count += entry.count;
 		}
 
 		return (
-			<div ref="root" className="area-chart-wrapper" style={{minWidth: 496}}>
+			<div ref="root" style={{position: "relative"/*, minWidth: 496*/}}>
 				<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
-					{ratingTypeInfo.description}
+					{ratingInfo.description}
 				</div>
 				<div>
-					TODO
+					{/*Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>*/}
+					Smoothing: <Select options={smoothingOptions} value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>
 				</div>
 				{this.lastRender_source == RenderSource.SetState &&
 					<AreaChart width={size.x} height={250} data={dataFinal}
 							margin={{top: 10, right: 10, bottom: 10, left: 10}}>
-						<XAxis dataKey="rating" ticks={ratingTypeInfo.ticks} type="number" domain={[1, 99]} minTickGap={0}/>
+						<XAxis dataKey="rating" ticks={ratingInfo.ticks} type="number" domain={[1, 99]} minTickGap={0}/>
 						{/*<YAxis tickCount={7} hasTick width={50}/>*/}
 						<YAxis orientation="left" x={20} width={20} height={250} viewBox={{x: 0, y: 0, width: 500, height: 500}} tickCount={10}/>
 						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>
 						<CartesianGrid stroke="#f5f5f5"/>
-						<Area type="monotone" dataKey="count" stroke="#ff7300" fill="#ff7300" fillOpacity={0.9}/>
+						<Area type="monotone" dataKey="count" stroke="#ff7300" fill="#ff7300" fillOpacity={0.9} animationDuration={500}/>
 					</AreaChart>}
 			</div>
 		);
