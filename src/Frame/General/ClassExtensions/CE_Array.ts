@@ -240,16 +240,19 @@ interface Array<T> { Max(valFunc?: (item: T)=>number): T; }
 Array.prototype._AddFunction_Inline = function Max(valFunc = a=>a) {
     return this.OrderBy(valFunc).Last();
 };
+interface Array<T> { Sum(): number; }
 Array.prototype._AddFunction_Inline = function Sum() {
     var total = 0;
 	for (let item of this)
 		total += item;
 	return total;
 };
+interface Array<T> { Average(): number; }
 Array.prototype._AddFunction_Inline = function Average() {
     var total = this.Sum();
 	return total / this.length;
 };
+interface Array<T> { Median(): number; }
 Array.prototype._AddFunction_Inline = function Median() {
     var ordered = this.OrderBy(a=>a);
 	if (this.length % 2 == 0) // if even number of elements, average two middlest ones

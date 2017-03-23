@@ -5,12 +5,22 @@ import {Map} from "../Map";
 import MapNodeUI_Inner from "./NodeUI_Inner";
 import Button from "../../../../Frame/ReactComponents/Button";
 import {E} from "../../../../Frame/General/Globals_Free";
+import {Rating, RootState, GetPaths_NodeRatingsRoot, GetNodeRatingsRoot, RatingsRoot} from "../../../../store/reducers";
+import {FirebaseConnect} from "./NodeUI";
+import {connect} from "react-redux";
+import {nodeTypeRatingTypes} from "./NodeUI_Inner";
+import {CachedTransform} from "../../../../Frame/V/VCache";
 
-export default class MapNodeUI_LeftBox extends BaseComponent<
-		{parent: MapNodeUI_Inner, map: Map, path: string, node: MapNode, nodeView?: MapNodeView, backgroundColor: string, asHover: boolean},
-		{}> {
+type Props = {
+	parent: MapNodeUI_Inner, map: Map, path: string, node: MapNode, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
+	backgroundColor: string, asHover: boolean
+};
+export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 	render() {
-		let {map, path, node, nodeView, backgroundColor, asHover} = this.props;
+		let {map, path, node, nodeView, ratingsRoot, backgroundColor, asHover} = this.props;
+
+		let ratingTypes = nodeTypeRatingTypes[node.type];
+
 		return (
 			<div style={{
 				display: "flex", flexDirection: "column", position: "absolute", whiteSpace: "nowrap",
@@ -18,12 +28,20 @@ export default class MapNodeUI_LeftBox extends BaseComponent<
 			}}>
 				<div style={{position: "relative", padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
-					<PanelButton parent={this} map={map} path={path} panel="probability" text="Probability" style={{marginTop: 0}}>
-						<Span ml={5} style={{float: "right"}}>90%<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>1</sup></Span>
-					</PanelButton>
-					<PanelButton parent={this} map={map} path={path} panel="adjustment" text="Adjustment">
-						<Span ml={5} style={{float: "right"}}>70%<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>1</sup></Span>
-					</PanelButton>
+					{ratingTypes.main.map((ratingType, index)=> {
+						let ratingSet = ratingsRoot && ratingsRoot[ratingType];
+						let average = CachedTransform({nodeKey: node._key, ratingType}, {ratingSet},
+							()=>ratingSet ? ratingSet.Props.Where(a=>a.name != "_key").Select(a=>a.value.value).Average().RoundTo(1) : 0);
+						return (
+							<PanelButton key={ratingType} parent={this} map={map} path={path}
+									panel={ratingType} text={ratingType.replace(/^(.)/, c=>c.toUpperCase())} style={E(index == 0 && {marginTop: 0})}>
+								<Span ml={5} style={{float: "right"}}>
+									{average}%
+									<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>{ratingSet ? ratingSet.Props.length /*- 1*/ : 0}</sup>
+								</Span>
+							</PanelButton>
+						);
+					})}
 					<Button text="..."
 						style={{
 							margin: "3px -3px -3px -3px", height: 17, lineHeight: "12px", padding: 0,
