@@ -2,7 +2,7 @@ import {VMenuItem} from "react-vmenu/dist/VMenu";
 import {MapNodeType, MapNode, MapNodeType_Info} from "../MapNode";
 import {connect} from "react-redux";
 import {MapNodeView, ACTMapNodeSelect, ACTMapNodeExpandedToggle} from "../../../../store/Store/Main/MapViews";
-import {GetUserID, RootState} from "../../../../store/reducers";
+import {GetUserID, RootState, GetNodeRatingsRoot, GetPaths_NodeRatingsRoot, RatingsRoot} from "../../../../store/reducers";
 import {Map} from "../Map";
 import {BaseComponent} from "../../../../Frame/UI/ReactGlobals";
 import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
@@ -16,6 +16,8 @@ import Button from "../../../../Frame/ReactComponents/Button";
 import RatingsUI from "./RatingsUI";
 import {ratingTypes, RatingType} from "./RatingsUI";
 import {firebaseConnect} from "react-redux-firebase";
+import {FirebaseConnect} from "./NodeUI";
+import {CachedTransform} from "../../../../Frame/V/VCache";
 
 let nodeTypeBackgroundColors = {
 	[MapNodeType.Category]: "40,60,80",
@@ -28,24 +30,34 @@ let nodeTypeBackgroundColors = {
 	[MapNodeType.SupportingArgument]: "30,100,30",
 	[MapNodeType.OpposingArgument]: "100,30,30",
 }
-let nodeTypeBackgroundColors_enemy = {
+/*let nodeTypeBackgroundColors_enemy = {
 	[MapNodeType.SupportingArgument]: "100,30,30",
 	[MapNodeType.OpposingArgument]: "30,100,30",
-}
+}*/
 export let nodeTypeFontSizes = {
 	Category: 16
 }
+export let nodeTypeRatingTypes = {
+	[MapNodeType.Category]: {main: ["significance"], others: []},
+	[MapNodeType.Package]: {main: ["significance"], others: []},
+	[MapNodeType.Thesis]: {main: ["probability", "adjustment"], others: []},
+	[MapNodeType.SupportingArgument]: {main: ["weight"], others: []},
+	[MapNodeType.OpposingArgument]: {main: ["weight"], others: []},
+} as {[key: string]: {main: RatingType[], others: RatingType[]}};
 
-type NodeUI_Inner_Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number} & Partial<{userID: string}>;
-@firebaseConnect()
+type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number} & Partial<{userID: string, ratingsRoot: RatingsRoot}>;
+@firebaseConnect(({node}: Props)=>[
+	...GetPaths_NodeRatingsRoot({node}),
+])
 @(connect(()=> {
-	return (state: RootState, props: NodeUI_Inner_Props)=> ({
+	return (state: RootState, {node, ratingsRoot}: Props)=> ({
 		userID: GetUserID(state),
+		ratingsRoot: GetNodeRatingsRoot(state, {node}),
 	}) as any;
 }) as any)
-export default class NodeUI_Inner extends BaseComponent<NodeUI_Inner_Props, {hovered: boolean, openPanel_preview: string}> {
+export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, openPanel_preview: string}> {
 	render() {
-		let {firebase, map, node, nodeView, path, width, widthOverride, userID} = this.props;
+		let {firebase, map, node, nodeView, path, width, widthOverride, userID, ratingsRoot} = this.props;
 		let {hovered, openPanel_preview} = this.state;
 		let backgroundColor = nodeTypeBackgroundColors[node.type];
 		let fontSize = nodeTypeFontSizes[node.type] || 14;
@@ -53,7 +65,16 @@ export default class NodeUI_Inner extends BaseComponent<NodeUI_Inner_Props, {hov
 		let maxWidth = node.type == MapNodeType.Thesis ? 500 : 200;*/
 		let barSize = 5;
 		let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
-		let fillPercent = pathNodeIDs.length <= 2 ? 1 : .9;
+		//let fillPercent = pathNodeIDs.length <= 2 ? 1 : .9;
+
+		/*let mainRatingType = nodeTypeMainRatingTypes[node.type];
+		let mainRatingSet = ratingsRoot ? ratingsRoot[mainRatingType] : {};
+		let fillPercent = mainRatingSet ? mainRatingSet.Props.Where(a=>a.name != "_key").Select(a=>a.value.value).Average() / 100 : 0;*/
+
+		let mainRatingTypes = nodeTypeRatingTypes[node.type].main;
+		let mainRatingSet = ratingsRoot && ratingsRoot[mainRatingTypes[0]];
+		let mainRatingAverage = CachedTransform({nodeKey: node._key, ratingType: mainRatingTypes[0]}, {ratingSet: mainRatingSet},
+			()=>mainRatingSet ? mainRatingSet.Props.Where(a=>a.name != "_key").Select(a=>a.value.value).Average() : 0);
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
 		let panelToShow = openPanel_preview || (nodeView && nodeView.openPanel);
@@ -71,7 +92,7 @@ export default class NodeUI_Inner extends BaseComponent<NodeUI_Inner_Props, {hov
 							store.dispatch(new ACTMapNodeSelect({mapID: map._key.KeyToInt, path}));
 					}}>
 				{leftPanelShow &&
-					<MapNodeUI_LeftBox parent={this} map={map} path={path} node={node} nodeView={nodeView} backgroundColor={backgroundColor} asHover={hovered}/>}
+					<MapNodeUI_LeftBox parent={this} map={map} path={path} node={node} nodeView={nodeView} ratingsRoot={ratingsRoot} backgroundColor={backgroundColor} asHover={hovered}/>}
 				{/* fixes click-gap */}
 				{leftPanelShow &&
 					<div style={{
@@ -91,7 +112,7 @@ export default class NodeUI_Inner extends BaseComponent<NodeUI_Inner_Props, {hov
 							}}>
 						<div style={{
 								position: "absolute", left: 0, top: 0, bottom: 0,
-								width: (fillPercent * 100).RoundTo(1) + "%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
+								width: mainRatingAverage + "%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
 							}}/>
 						<a style={{position: "relative", fontSize, whiteSpace: "initial"}}>
 							{node.title}
@@ -180,7 +201,8 @@ export default class NodeUI_Inner extends BaseComponent<NodeUI_Inner_Props, {hov
 							}}>
 						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 						{ratingTypes.Contains(panelToShow) &&
-							<RatingsUI node={node} ratingType={panelToShow as RatingType}/>}
+							<RatingsUI node={node} ratingType={panelToShow as RatingType}
+								ratings={ratingsRoot && ratingsRoot[panelToShow] ? ratingsRoot[panelToShow].Props.Where(a=>a.name != "_key").Select(a=>a.value) : []}/>}
 						{panelToShow == "definitions" &&
 							<div style={{position: "relative"}}>
 								<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>

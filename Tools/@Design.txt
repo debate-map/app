@@ -25,6 +25,12 @@
 			children:{^}
 				node124: {type: 0 (supporting)}
 			talkRoot:1
+	nodeRatings:{^}
+		node123:{^}
+			probability:{^}
+				user123:{updated: 012, value: 70}
+			adjustment:{^}
+				user2:{updated: 012, value: 130}
 	nodeExtras:{^}
 		node123:{^}
 			/*title:{^}
@@ -42,10 +48,6 @@
 						light-year-10:{^}
 							upvoters:{^}
 								user123:true*/
-			probability:{^}
-				user123:.7
-			adjustment:{^}
-				user2:true
 	/*terms:{^}
 		light-year-10:{^}
 			components:{^}

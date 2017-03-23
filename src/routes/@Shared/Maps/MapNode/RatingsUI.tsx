@@ -5,7 +5,7 @@ import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {Range, DN} from "../../../../Frame/General/Globals";
 import Spinner from "../../../../Frame/ReactComponents/Spinner";
 import {connect} from "react-redux";
-import {RootState, GetRatingUISmoothing, GetUserID, GetPaths_NodeRatings, MakeGetNodeRatings} from "../../../../store/reducers";
+import {RootState, GetRatingUISmoothing, GetUserID, Rating} from "../../../../store/reducers";
 import {ACTRatingUISmoothnessSet} from "../../../../store/Store/Main";
 import Select from "../../../../Frame/ReactComponents/Select";
 import {ShowMessageBox_Base, ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
@@ -69,17 +69,11 @@ let ratingTypeDescriptions = {
 	adjustment: "What intensity the statement should be strengthened/weakened to, to reach its ideal state. (making substantial claims while maintaining accuracy)",
 }
 
-type Rating = {updated: number, value: number};
-
-type RatingsUI_Props = {node: MapNode, ratingType: RatingType} & Partial<{userID: string, ratings: Rating[], smoothing: number}>;
-@FirebaseConnect(({node, ratingType}: RatingsUI_Props)=>[
-	...GetPaths_NodeRatings({node, ratingType}),
-])
+type RatingsUI_Props = {node: MapNode, ratingType: RatingType, ratings: Rating[]} & Partial<{userID: string, smoothing: number}>;
+@firebaseConnect()
 @(connect(()=> {
-	let getNodeRatings = MakeGetNodeRatings();
 	return (state: RootState, props: RatingsUI_Props)=> ({
 		userID: GetUserID(state),
-		ratings: getNodeRatings(state, props),
 		smoothing: GetRatingUISmoothing(state),
 	}) as any;
 }) as any)
@@ -112,7 +106,7 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 						let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(ratingOnChart_exact)).First();
 						let rating = closestRatingSlot.rating;
 						
-						let finalRating = rating;
+						let finalRating = rating; // range: 0-1
 						let boxController = ShowMessageBox({
 							title: `Rate ${ratingType} of ${MapNodeType_Info.for[node.type].displayName}`, cancelButton: true,
 							messageUI: ()=>(
@@ -123,7 +117,7 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 							),
 							onOK: ()=> {
 								// todo: have submitted date be based on local<>Firebase time-offset (retrieved from Firebase) [this prevents fail from security rules]
-								firebase.Ref(`nodeExtras/${node._key}/ratings/${ratingType}/${userID}`).set({updated: Date.now(), value: finalRating});
+								firebase.Ref(`nodeRatings/${node._key}/${ratingType}/${userID}`).set({updated: Date.now(), value: finalRating});
 							}
 						});
 					}}>
@@ -139,7 +133,7 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 							margin={{top: 10, right: 10, bottom: 10, left: 10}}>
 						<XAxis dataKey="rating" ticks={ratingInfo.ticks} type="number" domain={[1, 99]} minTickGap={0}/>
 						{/*<YAxis tickCount={7} hasTick width={50}/>*/}
-						<YAxis orientation="left" x={20} width={20} height={250} viewBox={{x: 0, y: 0, width: 500, height: 500}} tickCount={10}/>
+						<YAxis orientation="left" x={20} width={20} height={250} viewBox={{x: 0, y: 0, width: 500, height: 500}} tickCount={9}/>
 						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>
 						<CartesianGrid stroke="rgba(255,255,255,.3)"/>
 						<Area type="monotone" dataKey="count" stroke="#ff7300" fill="#ff7300" fillOpacity={0.9} layout="vertical" animationDuration={500}/>

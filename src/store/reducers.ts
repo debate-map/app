@@ -107,15 +107,24 @@ export function MakeGetNodeView() {
   	);
 }
 
-export function GetPaths_NodeRatings({node, ratingType}: {node: MapNode, ratingType: RatingType}) {
-	return [DBPath(`nodeExtras/${node._key}/ratings/${ratingType}`)];
+export type RatingsRoot = {[key: string]: RatingsSet};
+export type RatingsSet = {[key: string]: Rating};
+export type Rating = {updated: number, value: number};
+
+export function GetPaths_NodeRatingsRoot({node}: {node: MapNode}) {
+	return [DBPath(`nodeRatings/${node._key}`)];
+}
+export const GetNodeRatingsRoot = ({firebase}: RootState, {node}: {node: MapNode})=>GetData(firebase, GetPaths_NodeRatingsRoot({node})[0]);
+
+/*export function GetPaths_NodeRatings({node, ratingType}: {node: MapNode, ratingType: RatingType}) {
+	return [DBPath(`nodeRatings/${node._key}/${ratingType}`)];
 }
 export const MakeGetNodeRatings = ()=>createSelector(
-	({firebase}: RootState, {node, ratingType}: {node: MapNode, ratingType: RatingType})=>GetData(firebase, GetPaths_NodeRatings({node, ratingType})[0]),
+	()=>({firebase}: RootState, {node, ratingType}: {node: MapNode, ratingType: RatingType})=>GetData(firebase, GetPaths_NodeRatings({node, ratingType})[0]),
 	ratingRoot=> {
 		return ratingRoot ? ratingRoot.Props.Where(a=>a.name != "_key").Select(a=>a.value) : [];
 	}
-);
+);*/
 
 export var MakeGetNodeChildIDs = ()=>createSelector(
 	(_, {node}: {node: MapNode})=>node.children,
