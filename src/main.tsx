@@ -3,13 +3,28 @@ import "./Frame/General/Start";
 import "./Frame/General/CE";
 import "./Frame/Database/DatabaseHelpers";
 
+import * as React from "react";
+import {Component as BaseComponent, PropTypes} from "react";
+import ReactDOM from "react-dom";
+import injectTapEventPlugin from "react-tap-event-plugin";
+import {Store} from "redux";
+//import {BaseComponent} from "./Frame/UI/ReactGlobals";
+import {RootState} from "./store/reducers";
+import {GetTimeSinceLoad} from "./Frame/General/Globals_Free";
+
 var JQuery = require("./Frame/JQuery/JQuery3.1.0");
 g.Extend({JQuery, jQuery: JQuery});
 g.$ = JQuery;
 
-import ReactDOM from "react-dom";
 //import createStore from "./store/createStore";
 var createStore = require("./store/createStore").default;
+
+declare var process;
+if (process.env.NODE_ENV !== "production") {
+	// this logs warning if a component doesn't have any props or state change, yet is re-rendered
+	const {whyDidYouUpdate} = require("why-did-you-update");
+	whyDidYouUpdate(React, {exclude: /connect|Connect|Link|Animate|Animation|Dot|ComposedDataDecorator|Chart|Curve/});
+}
 
 // store and history instantiation
 // ==========
@@ -29,19 +44,21 @@ declare global { var store: Store<RootState>; }
 g.Extend({GetState});
 declare global { function GetState(): RootState; }*/
 
+// use this to intercept dispatches (for debugging)
+/*let oldDispatch = store.dispatch;
+store.dispatch = function(...args) {
+	if (GetTimeSinceLoad() > 5)
+		debugger;
+	oldDispatch.apply(this, args);
+};*/
+
 // wrapper ui
 // ==========
 
 //import {Component, PropTypes} from "react";
-import * as React from "react";
 g.Extend({React});
-import {Component as BaseComponent, PropTypes} from "react";
 
 // Tap Plugin
-import injectTapEventPlugin from "react-tap-event-plugin";
-//import {BaseComponent} from "./Frame/UI/ReactGlobals";
-import {Store} from "redux";
-import {RootState} from "./store/reducers";
 injectTapEventPlugin();
 
 // developer tools setup

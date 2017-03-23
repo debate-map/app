@@ -48,7 +48,7 @@ export interface BaseProps {
 	page?; match?;
 	firebase?: FirebaseDatabase;
 }
-var basePropFullKeys = {
+export var basePropFullKeys = {
 	ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
 	pl: "paddingLeft", pr: "paddingRight", pt: "paddingTop", pb: "paddingBottom",
 	plr: null, ptb: null,
@@ -58,6 +58,10 @@ var basePropFullKeys = {
 	page: null, match: null,
 	firebase: null,
 };
+export function RemoveBasePropKeys(restObj) {
+	for (let key in basePropFullKeys)
+		delete restObj[key];
+}
 export function BasicStyles(props) {
 	var result: any = {};
 
@@ -293,8 +297,7 @@ export type FirebaseDatabase = firebase.Database & FirebaseDatabase_Extensions;
 export class Span extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement>, {}> {
     render() {
 		var {pre, style, ...rest} = this.props;
-		for (let key in basePropFullKeys)
-			delete rest[key];
+		RemoveBasePropKeys(rest);
         return <span {...rest} style={E(BasicStyles(this.props), style, pre && {whiteSpace: "pre"})}/>;
     }
 }
@@ -316,8 +319,7 @@ export class Div extends BaseComponent<{shouldUpdate?} & React.HTMLProps<HTMLDiv
 	}
     render() {
 		let {shouldUpdate, style, ...rest} = this.props;
-		for (let key in basePropFullKeys)
-			delete rest[key];
+		RemoveBasePropKeys(rest);
         return <div {...rest} style={E(BasicStyles(this.props), style)}/>;
     }
 }

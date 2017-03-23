@@ -193,6 +193,16 @@ export function InTestMode() { return inTestMode; }
 
 export var blockCSCalls = false;
 
+export var loadTime = Date.now();
+/*setTimeout(()=> {
+	$(()=> {
+		loadTime = Date.now();
+	});
+});*/
+export function GetTimeSinceLoad() {
+	return (Date.now() - loadTime) / 1000;
+}
+
 //window.evalOld = window.eval;
 //window.eval = function() { try { evalOld.apply(this, arguments); } catch(error) { Log("JS error: " + error); }};
 

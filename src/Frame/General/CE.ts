@@ -266,7 +266,7 @@ Object.prototype._AddFunction_Inline = function Excluding(...propNames) {
 //Object.prototype._AddGetter_Inline = function VKeys() { return Object.keys(this); }; // "Keys" is already used for Dictionary prop
 interface Object { VKeys(): string[]; }
 Object.prototype._AddFunction_Inline = function VKeys() { return Object.keys(this); }; // "Keys" is already used for Dictionary prop
-interface Object { VValues(): string[]; }
+interface Object { VValues(): any[]; }
 Object.prototype._AddFunction_Inline = function VValues() { return Object.keys(this).Select(a=>this[a]); };
 // like Pairs for Dictionary, except for Object
 interface Object { readonly Props: {index: number, name: string, value: any}[]; }

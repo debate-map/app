@@ -1,3 +1,4 @@
+import {Assert} from "../General/Assert";
 import {FirebaseDatabase} from "../UI/ReactGlobals";
 import {helpers} from "react-redux-firebase";
 let {dbRootVersion} = require("../../../config/DBVersion");
@@ -20,12 +21,18 @@ class DBPathInfo {
 }
 let pathInfos = {} as {[path: string]: DBPathInfo};
 export function GetData(firebase: FirebaseDatabase, path: string) {
-	path = DBPath(path);
+	let versionPrefix = path.match(/^v[0-9]+/);
+	if (versionPrefix == null) // if no version prefix already, add one (referencing the current version)
+		path = DBPath(path);
+
 	let info = pathInfos[path] || (pathInfos[path] = new DBPathInfo());
-	var timestamp = (firebase as any)._root ? (firebase as any)._root.entries.First(a=>a[0] == "timestamp")[1].get(path) : null;
-	if (timestamp && timestamp != info.lastTimestamp) {
-		info.lastTimestamp = timestamp;
-		info.cachedData = helpers.dataToJS(firebase, path);
+	let timestampEntry = (firebase as any)._root.entries.FirstOrX(a=>a[0] == "timestamp");
+	if (timestampEntry) {
+		var timestamp = (firebase as any)._root ? timestampEntry[1].get(path) : null;
+		if (timestamp && timestamp != info.lastTimestamp) {
+			info.lastTimestamp = timestamp;
+			info.cachedData = helpers.dataToJS(firebase, path);
+		}
 	}
 	return info.cachedData;
 }

@@ -1,14 +1,14 @@
 import {Vector2i} from "react-vmenu/dist/Helpers/General";
-import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare} from "../../../../Frame/UI/ReactGlobals";
 import {MapNode, MapNodeType, MapNodeType_Info} from "../MapNode";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
-import {DBPath} from "../../../../Frame/Database/DatabaseHelpers";
-import {Debugger, QuickIncrement, E} from "../../../../Frame/General/Globals_Free";
+import {DBPath, GetData} from "../../../../Frame/Database/DatabaseHelpers";
+import {Debugger, QuickIncrement, E, GetTimeSinceLoad} from "../../../../Frame/General/Globals_Free";
 import Button from "../../../../Frame/ReactComponents/Button";
 import {PropTypes, Component} from "react";
 import Action from "../../../../Frame/General/Action";
-import {GetNodes_FBPaths, GetSelectedNodeID, GetUserID, MakeGetNodeView, RootState, MakeGetNodeChildren, MakeGetNodeChildIDs} from "../../../../store/reducers";
+import {GetSelectedNodeID, GetUserID, MakeGetNodeView, RootState, MakeGetNodeChildren, MakeGetNodeChildIDs} from "../../../../store/reducers";
 import {Map} from "../Map";
 import {Log} from "../../../../Frame/General/Logging";
 import {WaitXThenRun} from "../../../../Frame/General/Timers";
@@ -28,9 +28,24 @@ import NodeUI_Inner from "./NodeUI_Inner";
 import {nodeTypeFontSizes} from "./NodeUI_Inner";
 import {createMarkupForStyles} from "react/lib/CSSPropertyOperations";
 
+// modified version which only requests paths that do not yet exist in the store
+export function FirebaseConnect(innerFirebaseConnect) {
+	return firebaseConnect(props=> {
+		let firebase = store.getState().firebase;
+
+		let innerPaths = innerFirebaseConnect(props) as string[];
+		// if inner-paths are all already loaded, don't request the paths this time
+		let innerPaths_unrequested = innerPaths.Where(path=>GetData(firebase, path) == null);
+		/*Log(innerPaths.length + ";" + innerPaths_unrequested.length + "\n" + innerPaths + "\n" + innerPaths_unrequested);
+		if (GetTimeSinceLoad() > 5)
+			debugger;*/
+		return innerPaths_unrequested;
+	});
+}
+
 type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
-@firebaseConnect(({node}: {node: MapNode})=>[
-	...GetNodes_FBPaths({nodeIDs: MakeGetNodeChildIDs()({}, {node})})
+@FirebaseConnect(({node}: {node: MapNode})=>[
+	...MakeGetNodeChildIDs()({}, {node}).Select(a=>DBPath(`nodes/e${a}`))
 ])
 @(connect(()=> {
 	var getNodeView = MakeGetNodeView();
@@ -46,16 +61,21 @@ type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number} & 
 		};
 	}) as any;
 }) as any)
+@SimpleShouldUpdate
 export default class NodeUI extends BaseComponent<Props, {childrenWidthOverride: number, childrenCenterY: number}> {
 	//static contextTypes = {map: PropTypes.object};
 
-	/*shouldComponentUpdate(oldProps: Props, newProps: Props) {
-		if (ToJSON(oldProps.Excluding("nodeView")) != ToJSON(newProps.Excluding("nodeView")))
+	/*shouldComponentUpdate(newProps: Props, newState) {
+		/*if (ToJSON(oldProps.Excluding("nodeView")) != ToJSON(newProps.Excluding("nodeView")))
 			return true;
 		if (oldProps.nodeView.expanded != newProps.nodeView.expanded || oldProps.nodeView.selected != newProps.nodeView.selected)
 			return true;
-		return false;
-	}*/
+		return false;*#/
+		var result = ShallowCompare(this, newProps, newState);
+		if (GetTimeSinceLoad() > 5)
+			debugger;
+		return result;
+}*/
 
 	render() {
 		let {map, node, path, widthOverride, nodeView, nodeChildren, children} = this.props;
