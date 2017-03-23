@@ -399,7 +399,7 @@ ${str}
 };
 
 AddGlobalStyle(`
-* {
+*:not(.ignoreBaseCSS) {
 	color: rgba(255,255,255,.7);
 }
 `);

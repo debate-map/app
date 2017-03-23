@@ -1,49 +1,100 @@
 import {Log} from "../../../../Frame/General/Logging";
-import {BaseComponent, RenderSource} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, RenderSource, SimpleShouldUpdate} from "../../../../Frame/UI/ReactGlobals";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
+import {Range} from "../../../../Frame/General/Globals";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
-	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer} from "recharts";
+	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
 const data = [
-  {name: 'Page A', uv: 4000, pv: 2400, amt: 2400, time: 1},
-  {name: 'Page B', uv: 3000, pv: 1398, amt: 2210, time: 3},
-  {name: 'Page C', uv: 2000, pv: 9800, amt: 2290, time: 9},
-  {name: 'Page D', uv: 2780, pv: 3908, amt: 2000, time: 10},
-  {name: 'Page E', uv: 2500, pv: 4800, amt: 2181, time: 12},
-  {name: 'Page F', uv: 1220, pv: 3800, amt: 2500, time: 16},
-  {name: 'Page G', uv: 2300, pv: 4300, amt: 2100, time: 18},
+  {rating: 1, count: 0},
+  {rating: 25, count: 12},
+  {rating: 30, count: 16},
+  {rating: 40, count: 1},
+  {rating: 45, count: 3},
+  {rating: 50, count: 9},
+  {rating: 70, count: 18},
+  {rating: 75, count: 1},
+  {rating: 90, count: 5},
+  {rating: 92, count: 12},
+  {rating: 94, count: 6},
+  {rating: 96, count: 8},
+  {rating: 98, count: 4},
+  {rating: 99, count: 15},
 ];
 
 export let ratingTypes = ["significance",  "probability", "adjustment"];
 export type RatingType = "significance" | "probability" | "adjustment";
+interface RatingTypeInfo {
+	description: string;
+	options: number[];
+	ticks: number[];
+}
+
+let ratingTypeInfos = {
+	significance: {
+		description: "TODO",
+		options: Range(1, 99),
+		ticks: Range(0, 100, 5),
+	},
+	probability: {
+		description: "Probability that the statement, as presented, is true.",
+		//options: [1, 2, 4, 6, 8].concat(Range(10, 90, 5)).concat([92, 94, 96, 98, 99]),
+		//options: [1].concat(Range(2, 98, 2)).concat([99]),
+		/*options: Range(1, 99),
+		ticks: [1].concat(Range(5, 95, 5)).concat([99]),*/
+		options: Range(0, 100),
+		ticks: Range(0, 100, 5),
+	},
+	adjustment: {
+		description: "What intensity the statement should be strengthened/weakened to, to reach its ideal state. (making substantial claims while maintaining accuracy)",
+		/*options: [1, 2, 4, 6, 8].concat(Range(10, 200, 5)),
+		ticks: [1].concat(Range(20, 200, 20)),*/
+		options: Range(0, 200),
+		ticks: Range(0, 200, 10),
+	},
+} as {[key: string]: RatingTypeInfo};
 let ratingTypeDescriptions = {
 	significance: "",
 	probability: "Probability that the statement, as presented, is true.",
 	adjustment: "What intensity the statement should be strengthened/weakened to, to reach its ideal state. (making substantial claims while maintaining accuracy)",
 }
 
+@SimpleShouldUpdate
 export default class RatingsUI extends BaseComponent<{ratingType: RatingType}, {size: Vector2i}> {
 	render() {
 		let {ratingType} = this.props;
 		let {size} = this.state;
 
-		let ratingTypeDescription = ratingTypeDescriptions[ratingType];
+		let ratingTypeInfo = ratingTypeInfos[ratingType];
 		
+		/*let dataFinal = [...data];
+		for (let [index, rating] of ratingOptions.entries()) {
+			if (!dataFinal.Any(a=>a.rating == rating))
+				dataFinal.splice(rating - 1, 0, {rating: rating, count: 0});
+		}*/
+		let dataFinal = ratingTypeInfo.options.Select(a=>({rating: a, count: 0}));
+		for (let entry of data) {
+			let placeholderIndex = dataFinal.findIndex(a=>a.rating == entry.rating);
+			dataFinal.splice(placeholderIndex, 1, entry);
+		}
+
 		return (
-			<div ref="root" className="area-chart-wrapper">
+			<div ref="root" className="area-chart-wrapper" style={{minWidth: 496}}>
 				<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
-					{ratingTypeDescription}
+					{ratingTypeInfo.description}
+				</div>
+				<div>
+					TODO
 				</div>
 				{this.lastRender_source == RenderSource.SetState &&
-					<AreaChart width={size.x - 50} height={250} data={data} margin={{top: 10, right: 30, bottom: 10, left: 10}}>
-						<XAxis dataKey="name" hasTick/>
-						<YAxis tickCount={7} hasTick/>
-						<Tooltip content={<CustomTooltip external={data}/>}/>
+					<AreaChart width={size.x} height={250} data={dataFinal}
+							margin={{top: 10, right: 10, bottom: 10, left: 10}}>
+						<XAxis dataKey="rating" ticks={ratingTypeInfo.ticks} type="number" domain={[1, 99]} minTickGap={0}/>
+						{/*<YAxis tickCount={7} hasTick width={50}/>*/}
+						<YAxis orientation="left" x={20} width={20} height={250} viewBox={{x: 0, y: 0, width: 500, height: 500}} tickCount={10}/>
+						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>
 						<CartesianGrid stroke="#f5f5f5"/>
-						<ReferenceArea x1="Page A" x2="Page E"/>
-						<ReferenceLine y={7500} stroke="#387908"/>
-						<ReferenceDot x="Page C" y={1398} r={10} fill="#387908" isFront/>
-						<Area type="monotone" dataKey="pv" stroke="#ff7300" fill="#ff7300" fillOpacity={0.9}/>
+						<Area type="monotone" dataKey="count" stroke="#ff7300" fill="#ff7300" fillOpacity={0.9}/>
 					</AreaChart>}
 			</div>
 		);
@@ -54,7 +105,7 @@ export default class RatingsUI extends BaseComponent<{ratingType: RatingType}, {
 		let dom = this.refs.root;
 		let size = new Vector2i(dom.clientWidth, dom.clientHeight);
 		//if (!size.Equals(this.state.size))
-		this.SetState({size}, null, false);
+		this.SetState({size});
 	}
 }
 
@@ -67,13 +118,14 @@ class CustomTooltip extends BaseComponent<{active?, payload?, external?, label?}
 			padding: 6,
 			backgroundColor: '#fff',
 			border: '1px solid #ccc',
+			color: "black",
 		};
 
-		const currData = external.filter(entry => (entry.name === label))[0];
+		const currData = external.filter(entry=>entry.rating === label)[0];
 		return (
 			<div className="area-chart-tooltip" style={style}>
-				<p>{payload[0].name + ' : '}<em>{payload[0].value}</em></p>
-				<p>{'uv : '}<em>{currData.uv}</em></p>
+				<p className="ignoreBaseCSS">Rating: <em className="ignoreBaseCSS">{currData.rating}%</em></p>
+				<p className="ignoreBaseCSS">Count: <em className="ignoreBaseCSS">{currData.count}</em></p>
 			</div>
 		);
 	}
