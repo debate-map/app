@@ -300,6 +300,14 @@ export class Span extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement
 }
 
 @Global
+export class Pre extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement>, {}> {
+	render() {
+		let {children} = this.props;
+		return <span style={{whiteSpace: "pre"}}>{children}</span>;
+	}
+}
+
+@Global
 export class Div extends BaseComponent<{shouldUpdate?} & React.HTMLProps<HTMLDivElement>, {}> {
 	shouldComponentUpdate(nextProps, nextState) {
 		if (this.props.shouldUpdate)

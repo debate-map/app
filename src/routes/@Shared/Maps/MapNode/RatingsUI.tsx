@@ -1,5 +1,5 @@
 import {Log} from "../../../../Frame/General/Logging";
-import {BaseComponent, RenderSource, SimpleShouldUpdate} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, RenderSource, SimpleShouldUpdate, Pre} from "../../../../Frame/UI/ReactGlobals";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {Range} from "../../../../Frame/General/Globals";
 import Spinner from "../../../../Frame/ReactComponents/Spinner";
@@ -99,9 +99,9 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 				<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
 					{ratingInfo.description}
 				</div>
-				<div>
+				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
 					{/*Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>*/}
-					Smoothing: <Select options={smoothingOptions} value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>
+					Smoothing:<Pre> </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>
 				</div>
 				{this.lastRender_source == RenderSource.SetState &&
 					<AreaChart width={size.x} height={250} data={dataFinal}
@@ -110,8 +110,8 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 						{/*<YAxis tickCount={7} hasTick width={50}/>*/}
 						<YAxis orientation="left" x={20} width={20} height={250} viewBox={{x: 0, y: 0, width: 500, height: 500}} tickCount={10}/>
 						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>
-						<CartesianGrid stroke="#f5f5f5"/>
-						<Area type="monotone" dataKey="count" stroke="#ff7300" fill="#ff7300" fillOpacity={0.9} animationDuration={500}/>
+						<CartesianGrid stroke="rgba(255,255,255,.3)"/>
+						<Area type="monotone" dataKey="count" stroke="#ff7300" fill="#ff7300" fillOpacity={0.9} layout="vertical" animationDuration={500}/>
 					</AreaChart>}
 			</div>
 		);
