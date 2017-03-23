@@ -49,4 +49,7 @@
 	.clickThrough { pointer-events: none; }
 	.clickThroughChain { pointer-events: none; }
 	.clickThroughChain-break { pointer-events: auto; }
+
+	.recharts-cartesian-axis-tick { font-size: 12px; }
+	#recharts_measurement_span { font-size: 12px; }
 }

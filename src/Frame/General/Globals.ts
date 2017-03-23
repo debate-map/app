@@ -223,9 +223,9 @@ var ObservableArray = observableHelper.test1.constructor;
 // others
 // ==========
 
-export function Range(min, max, includeMax = true) {
+export function Range(min, max, step = 1, includeMax = true) {
 	var result: number[] = [];
-	for (let i = min; includeMax ? i <= max : i < max; i++)
+	for (let i = min; includeMax ? i <= max : i < max; i += step)
 		result.push(i);
 	return result;
 }
