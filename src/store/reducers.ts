@@ -14,8 +14,10 @@ import {firebase} from "../config.js";
 import {MapView} from "./Store/Main/MapViews";
 import {MapNode} from "../routes/@Shared/Maps/MapNode";
 import {FirebaseDatabase} from "../Frame/UI/ReactGlobals";
-import {QuickIncrement} from "../Frame/General/Globals_Free";
+import {QuickIncrement, Debugger} from "../Frame/General/Globals_Free";
 import {GetTreeNodesInObjTree} from "../Frame/V/V";
+import {Set} from "immutable";
+import {RatingType} from "../routes/@Shared/Maps/MapNode/RatingsUI";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;
@@ -45,12 +47,20 @@ export function MakeRootReducer(asyncReducers?) {
 	});
 }
 
+/*export function GetAuth(state: RootState) { 
+	return state.firebase.auth;
+}*/
 export function GetRatingUISmoothing(state: RootState) { 
 	return state.main.ratingUI.smoothing;
 }
 
 export function GetUserID(state: RootState): string { 
-	return state.firebase.auth ? state.firebase.auth.uid : null;
+	//return state.firebase.data.auth ? state.firebase.data.auth.uid : null;
+	//return GetData(state.firebase, "auth");
+	/*var result = helpers.pathToJS(firebase, "auth").uid;
+	return result;*/
+	let firebaseSet = store.getState().firebase as Set<any>;
+	return firebaseSet.toJS().auth.uid;
 }
 
 export function GetSelectedNodeID(state: RootState, {map}: {map: Map}) { 
@@ -60,9 +70,9 @@ export function GetSelectedNodeID(state: RootState, {map}: {map: Map}) {
 		return map.rootNode.KeyToInt;
 	return selectedNodeView ? selectedNodeView.ancestorNodes.Last().prop as number : null;
 }
-export function GetNodes_FBPaths({nodeIDs}: {nodeIDs: number[]}) {
+/*export function GetPaths_Nodes({nodeIDs}: {nodeIDs: number[]}) {
 	return nodeIDs.Select(a=>DBPath(`nodes/e${a}`));
-}
+}*/
 
 function GetMapView(state: RootState, {map}: {map: Map}) {
 	if (map == null) return null;
@@ -96,6 +106,16 @@ export function MakeGetNodeView() {
 		}
   	);
 }
+
+export function GetPaths_NodeRatings({node, ratingType}: {node: MapNode, ratingType: RatingType}) {
+	return [DBPath(`nodeExtras/${node._key}/ratings/${ratingType}`)];
+}
+export const MakeGetNodeRatings = ()=>createSelector(
+	({firebase}: RootState, {node, ratingType}: {node: MapNode, ratingType: RatingType})=>GetData(firebase, GetPaths_NodeRatings({node, ratingType})[0]),
+	ratingRoot=> {
+		return ratingRoot ? ratingRoot.Props.Where(a=>a.name != "_key").Select(a=>a.value) : [];
+	}
+);
 
 export var MakeGetNodeChildIDs = ()=>createSelector(
 	(_, {node}: {node: MapNode})=>node.children,

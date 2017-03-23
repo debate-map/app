@@ -182,6 +182,7 @@
     "webpack": "^1.13.3",
     "webpack-dev-middleware": "^1.6.1",
     "webpack-hot-middleware": "^2.12.2",
+    "why-did-you-update": "0.0.8",
     "yargs": "^6.3.0"
   }
 }

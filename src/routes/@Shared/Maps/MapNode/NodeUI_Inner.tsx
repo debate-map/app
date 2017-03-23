@@ -180,11 +180,11 @@ export default class NodeUI_Inner extends BaseComponent<NodeUI_Inner_Props, {hov
 							}}>
 						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 						{ratingTypes.Contains(panelToShow) &&
-							<RatingsUI ratingType={panelToShow as RatingType}/>}
+							<RatingsUI node={node} ratingType={panelToShow as RatingType}/>}
 						{panelToShow == "definitions" &&
 							<div style={{position: "relative"}}>
 								<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
-									Upvote the definitions matching your interpretation of the terms, as used in the thesis statement.
+									Upvote the definitions matching your understanding of the terms, as used in the thesis statement.
 								</div>
 							</div>}
 						{panelToShow == "questions" &&

@@ -1,31 +1,36 @@
+import * as jquery from "jquery";
 import {Log} from "../../../../Frame/General/Logging";
-import {BaseComponent, RenderSource, SimpleShouldUpdate, Pre} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, FindDOM, Pre, RenderSource, SimpleShouldUpdate, FindDOM_} from "../../../../Frame/UI/ReactGlobals";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
-import {Range} from "../../../../Frame/General/Globals";
+import {Range, DN} from "../../../../Frame/General/Globals";
 import Spinner from "../../../../Frame/ReactComponents/Spinner";
 import {connect} from "react-redux";
-import {RootState, GetRatingUISmoothing} from "../../../../store/reducers";
+import {RootState, GetRatingUISmoothing, GetUserID, GetPaths_NodeRatings, MakeGetNodeRatings} from "../../../../store/reducers";
 import {ACTRatingUISmoothnessSet} from "../../../../store/Store/Main";
 import Select from "../../../../Frame/ReactComponents/Select";
+import {ShowMessageBox_Base, ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
+import {firebaseConnect} from "react-redux-firebase";
+import {MapNode, MapNodeType_Info} from "../MapNode";
+import {FirebaseConnect} from "./NodeUI";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-const data = [
-  {rating: 1, count: 0},
-  {rating: 25, count: 12},
-  {rating: 30, count: 16},
-  {rating: 40, count: 1},
-  {rating: 45, count: 3},
-  {rating: 50, count: 9},
-  {rating: 70, count: 18},
-  {rating: 75, count: 1},
-  {rating: 90, count: 5},
-  {rating: 92, count: 12},
-  {rating: 94, count: 6},
-  {rating: 96, count: 8},
-  {rating: 98, count: 4},
-  {rating: 99, count: 15},
-];
+/*const data = [
+	{rating: 1, count: 0},
+	{rating: 25, count: 12},
+	{rating: 30, count: 16},
+	{rating: 40, count: 1},
+	{rating: 45, count: 3},
+	{rating: 50, count: 9},
+	{rating: 70, count: 18},
+	{rating: 75, count: 1},
+	{rating: 90, count: 5},
+	{rating: 92, count: 12},
+	{rating: 94, count: 6},
+	{rating: 96, count: 8},
+	{rating: 98, count: 4},
+	{rating: 99, count: 15},
+];*/
 
 export let ratingTypes = ["significance",  "probability", "adjustment"];
 export type RatingType = "significance" | "probability" | "adjustment";
@@ -64,38 +69,64 @@ let ratingTypeDescriptions = {
 	adjustment: "What intensity the statement should be strengthened/weakened to, to reach its ideal state. (making substantial claims while maintaining accuracy)",
 }
 
-type RatingsUI_Props = {ratingType: RatingType} & Partial<{smoothing: number}>;
+type Rating = {updated: number, value: number};
+
+type RatingsUI_Props = {node: MapNode, ratingType: RatingType} & Partial<{userID: string, ratings: Rating[], smoothing: number}>;
+@FirebaseConnect(({node, ratingType}: RatingsUI_Props)=>[
+	...GetPaths_NodeRatings({node, ratingType}),
+])
 @(connect(()=> {
+	let getNodeRatings = MakeGetNodeRatings();
 	return (state: RootState, props: RatingsUI_Props)=> ({
+		userID: GetUserID(state),
+		ratings: getNodeRatings(state, props),
 		smoothing: GetRatingUISmoothing(state),
 	}) as any;
 }) as any)
 export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vector2i}> {
 	render() {
-		let {ratingType, smoothing} = this.props;
+		let {node, ratingType, userID, ratings, smoothing, firebase} = this.props;
 		let {size} = this.state;
 
 		let ratingInfo = ratingTypeInfos[ratingType];
-		
-		/*let dataFinal = [...data];
-		for (let [index, rating] of ratingOptions.entries()) {
-			if (!dataFinal.Any(a=>a.rating == rating))
-				dataFinal.splice(rating - 1, 0, {rating: rating, count: 0});
-		}*/
-		//let ticksForDisplay = ratingInfo.options.Select(a=>a.RoundTo(smoothing).KeepBetween(ratingInfo.options.Min(), ratingInfo.options.Max())).Distinct();
+
 		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(ratingInfo.options.Max() == 200 ? [200] : []);
 		smoothing = smoothing.KeepBetween(ratingInfo.options.Min(), ratingInfo.options.Max()); // smoothing might have been set higher, from when on another rating-type
-		let ticksForDisplay = ratingInfo.options.Select(a=>a.RoundTo(smoothing)).Distinct();
-		let dataFinal = ticksForDisplay.Select(a=>({rating: a, count: 0}));
-		for (let entry of data) {
-			let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(entry.rating)).First();
-			/*let slotIndex = dataFinal.indexOf(closestRatingSlot);
-			dataFinal.splice(slotIndex, 1, entry);*/
-			closestRatingSlot.count += entry.count;
+		let ticksForChart = ratingInfo.options.Select(a=>a.RoundTo(smoothing)).Distinct();
+		let dataFinal = ticksForChart.Select(a=>({rating: a, count: 0}));
+		for (let entry of ratings) {
+			let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(entry.value)).First();
+			closestRatingSlot.count++;
 		}
 
 		return (
-			<div ref="root" style={{position: "relative"/*, minWidth: 496*/}}>
+			<div ref="root" style={{position: "relative"/*, minWidth: 496*/}}
+					onClick={e=> {
+						let target = FindDOM_(e.target);
+						//let chart = (target as any).plusParents().filter(".recharts-cartesian-grid");
+						let chart = (target as any).plusParents().filter("div.recharts-wrapper");
+						if (chart.length == 0) return;
+						let posOnChart = new Vector2i(e.pageX - chart.offset().left, e.pageY - chart.offset().top);
+						let percentOnChart = posOnChart.x / chart.width();
+						let ratingOnChart_exact = percentOnChart * ticksForChart.Max();
+						let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(ratingOnChart_exact)).First();
+						let rating = closestRatingSlot.rating;
+						
+						let finalRating = rating;
+						let boxController = ShowMessageBox({
+							title: `Rate ${ratingType} of ${MapNodeType_Info.for[node.type].displayName}`, cancelButton: true,
+							messageUI: ()=>(
+								<div style={{padding: "10px 0"}}>
+									Rating: <Spinner min={ratingInfo.options.Min()} max={ratingInfo.options.Max()} style={{width: 60}}
+										value={finalRating} onChange={val=>DN(finalRating = val, boxController.UpdateUI())}/>
+								</div>
+							),
+							onOK: ()=> {
+								// todo: have submitted date be based on local<>Firebase time-offset (retrieved from Firebase) [this prevents fail from security rules]
+								firebase.Ref(`nodeExtras/${node._key}/ratings/${ratingType}/${userID}`).set({updated: Date.now(), value: finalRating});
+							}
+						});
+					}}>
 				<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
 					{ratingInfo.description}
 				</div>
@@ -104,7 +135,7 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 					Smoothing:<Pre> </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>
 				</div>
 				{this.lastRender_source == RenderSource.SetState &&
-					<AreaChart width={size.x} height={250} data={dataFinal}
+					<AreaChart ref="chart" width={size.x} height={250} data={dataFinal}
 							margin={{top: 10, right: 10, bottom: 10, left: 10}}>
 						<XAxis dataKey="rating" ticks={ratingInfo.ticks} type="number" domain={[1, 99]} minTickGap={0}/>
 						{/*<YAxis tickCount={7} hasTick width={50}/>*/}
@@ -147,3 +178,13 @@ class CustomTooltip extends BaseComponent<{active?, payload?, external?, label?}
 		);
 	}
 }
+
+interface JQuery {
+	plusParents(topDown?: boolean): JQuery;
+}
+$.fn.plusParents = function(topDown = false) {
+	var parentsAndSelf = this.parents().addBack().toArray(); // addBack concats lists, and orders it top-down
+	if (!topDown)
+		parentsAndSelf.reverse();
+	return $(parentsAndSelf);
+};

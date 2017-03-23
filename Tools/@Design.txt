@@ -42,9 +42,9 @@
 						light-year-10:{^}
 							upvoters:{^}
 								user123:true*/
-			agrees:{^}
+			probability:{^}
 				user123:.7
-			disagrees:{^}
+			adjustment:{^}
 				user2:true
 	/*terms:{^}
 		light-year-10:{^}
