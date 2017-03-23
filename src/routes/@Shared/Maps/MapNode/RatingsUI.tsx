@@ -32,7 +32,6 @@ import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	{rating: 99, count: 15},
 ];*/
 
-export let ratingTypes = ["significance",  "probability", "adjustment"];
 export type RatingType = "significance" | "probability" | "adjustment";
 interface RatingTypeInfo {
 	description: string;
@@ -40,10 +39,10 @@ interface RatingTypeInfo {
 	ticks: number[]; // for x-axis labels
 }
 
-let ratingTypeInfos = {
+export let ratingTypeInfos = {
 	significance: {
 		description: "TODO",
-		options: Range(1, 100),
+		options: Range(0, 100),
 		ticks: Range(0, 100, 5),
 	},
 	probability: {
@@ -62,12 +61,18 @@ let ratingTypeInfos = {
 		options: Range(0, 200),
 		ticks: Range(0, 200, 10),
 	},
+	/*weight: {
+		description: "TODO",
+		options: Range(0, 100),
+		ticks: Range(0, 100, 5),
+	},*/
+	// todo
+	/*substantiation: {
+		description: "How much the parent thesis would be substantiated, IF all the (non-meta) theses of this argument were true.",
+		options: Range(0, 100),
+		ticks: Range(0, 100, 5),
+	},*/
 } as {[key: string]: RatingTypeInfo};
-let ratingTypeDescriptions = {
-	significance: "",
-	probability: "Probability that the statement, as presented, is true.",
-	adjustment: "What intensity the statement should be strengthened/weakened to, to reach its ideal state. (making substantial claims while maintaining accuracy)",
-}
 
 type RatingsUI_Props = {node: MapNode, ratingType: RatingType, ratings: Rating[]} & Partial<{userID: string, smoothing: number}>;
 @firebaseConnect()
@@ -98,8 +103,10 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 					onClick={e=> {
 						let target = FindDOM_(e.target);
 						//let chart = (target as any).plusParents().filter(".recharts-cartesian-grid");
-						let chart = (target as any).plusParents().filter("div.recharts-wrapper");
-						if (chart.length == 0) return;
+						let chartHolder = (target as any).plusParents().filter("div.recharts-wrapper");
+						if (chartHolder.length == 0) return;
+
+						let chart = chartHolder.find(".recharts-cartesian-grid");
 						let posOnChart = new Vector2i(e.pageX - chart.offset().left, e.pageY - chart.offset().top);
 						let percentOnChart = posOnChart.x / chart.width();
 						let ratingOnChart_exact = percentOnChart * ticksForChart.Max();

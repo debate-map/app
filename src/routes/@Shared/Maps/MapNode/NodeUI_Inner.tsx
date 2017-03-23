@@ -14,7 +14,7 @@ import {DN} from "../../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
 import Button from "../../../../Frame/ReactComponents/Button";
 import RatingsUI from "./RatingsUI";
-import {ratingTypes, RatingType} from "./RatingsUI";
+import {RatingType, ratingTypeInfos} from "./RatingsUI";
 import {firebaseConnect} from "react-redux-firebase";
 import {FirebaseConnect} from "./NodeUI";
 import {CachedTransform} from "../../../../Frame/V/VCache";
@@ -41,8 +41,11 @@ export let nodeTypeRatingTypes = {
 	[MapNodeType.Category]: {main: ["significance"], others: []},
 	[MapNodeType.Package]: {main: ["significance"], others: []},
 	[MapNodeType.Thesis]: {main: ["probability", "adjustment"], others: []},
-	[MapNodeType.SupportingArgument]: {main: ["weight"], others: []},
-	[MapNodeType.OpposingArgument]: {main: ["weight"], others: []},
+	/*[MapNodeType.SupportingArgument]: {main: ["weight"], others: []},
+	[MapNodeType.OpposingArgument]: {main: ["weight"], others: []},*/
+	// todo: add special argument sub-theses, and have argument's "weight" calculated automatically based on that (perhaps using a "substantiation" rating)
+	[MapNodeType.SupportingArgument]: {main: [], others: []},
+	[MapNodeType.OpposingArgument]: {main: [], others: []},
 } as {[key: string]: {main: RatingType[], others: RatingType[]}};
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number} & Partial<{userID: string, ratingsRoot: RatingsRoot}>;
@@ -200,19 +203,19 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								padding: 5, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`,
 							}}>
 						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
-						{ratingTypes.Contains(panelToShow) &&
+						{ratingTypeInfos[panelToShow] &&
 							<RatingsUI node={node} ratingType={panelToShow as RatingType}
 								ratings={ratingsRoot && ratingsRoot[panelToShow] ? ratingsRoot[panelToShow].Props.Where(a=>a.name != "_key").Select(a=>a.value) : []}/>}
 						{panelToShow == "definitions" &&
 							<div style={{position: "relative"}}>
 								<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
-									Upvote the definitions matching your understanding of the terms, as used in the thesis statement.
+									Proponents of the thesis can submit and upvote their definitions of the terms. (thus clarifying their meaning)
 								</div>
 							</div>}
 						{panelToShow == "questions" &&
 							<div style={{position: "relative"}}>
 								<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
-									Questions can be asked to clarify the meaning of the thesis statement.
+									Questions can be asked here concerning clarification of the statement's meaning. (other comments belong in the "Discuss" panel)
 								</div>
 							</div>}
 					</div>}
