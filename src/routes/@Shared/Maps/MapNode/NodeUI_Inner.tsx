@@ -175,12 +175,24 @@ export default class NodeUI_Inner extends BaseComponent<NodeUI_Inner_Props, {hov
 				</div>
 				{bottomPanelShow &&
 					<div style={{
-								position: "absolute", top: "calc(100% + 1px)", width: width, minWidth: (widthOverride|0).KeepAtLeast(400), zIndex: hovered ? 6 : 5,
+								position: "absolute", top: "calc(100% + 1px)", width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
 								padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`,
 							}}>
 						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 						{ratingTypes.Contains(panelToShow) &&
 							<RatingsUI ratingType={panelToShow as RatingType}/>}
+						{panelToShow == "definitions" &&
+							<div style={{position: "relative"}}>
+								<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
+									Upvote the definitions matching your interpretation of the terms, as used in the thesis statement.
+								</div>
+							</div>}
+						{panelToShow == "questions" &&
+							<div style={{position: "relative"}}>
+								<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
+									Ask questions here if the meaning of the thesis statement is unclear in some way.
+								</div>
+							</div>}
 					</div>}
 			</div>
 		);

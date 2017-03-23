@@ -4,7 +4,6 @@ import {firebaseStateReducer, helpers} from "react-redux-firebase";
 import {reducer as formReducer} from "redux-form";
 import {ACTMessageBoxShow, MessageBoxOptions, MessageBoxReducer, MessageBoxState} from "../Frame/UI/VMessageBox";
 import Action from "../Frame/General/Action";
-import {ACTSetUserPanelOpen} from "../containers/Navbar";
 import {routerReducer} from "react-router-redux";
 import {ToJSON, FromJSON} from "../Frame/General/Globals";
 import V from "../Frame/V/V";
@@ -44,6 +43,10 @@ export function MakeRootReducer(asyncReducers?) {
 		messageBox: MessageBoxReducer,
 		...asyncReducers
 	});
+}
+
+export function GetRatingUISmoothing(state: RootState) { 
+	return state.main.ratingUI.smoothing;
 }
 
 export function GetUserID(state: RootState): string { 

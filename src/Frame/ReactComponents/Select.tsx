@@ -17,8 +17,8 @@ import {Enum} from "../General/Enums";
 	style;
 }*/
 
-export default class Select extends BaseComponent<
-		{options: {name: string, value, style?}[] | string[] | (new()=>Enum) | {[s: string]: any},
+export default class Select extends BaseComponent
+		<{options: {name: string, value, style?}[] | string[] | (new()=>Enum) | {[s: string]: any},
 			displayType?: "dropdown" | "button bar",
 			compareBy?: "name" | "value" | "value toString",
 			value, verifyValue?: boolean,
@@ -96,7 +96,7 @@ export default class Select extends BaseComponent<
 		if (displayType == "dropdown") {
 			return (
 				<select ref="root" value={"value" + this.GetIndexOfValue(value)}
-						className={className} title={title} style={style} onChange={e=>onChange(this.GetSelectedValue())}>
+						className={className} title={title} style={E({color: "#000"}, style)} onChange={e=>onChange(this.GetSelectedValue())}>
 					{options.map((option, index)=> {
 						return <Dropdown_OptionUI key={option.name} index={index} style={E(childStyle, option.style)}>
 							{option.name}
@@ -124,7 +124,7 @@ export class Dropdown_OptionUI extends BaseComponent<{index, style}, {}> {
 	render() {
 	    var {index, style, children} = this.props;
 	    return (
-			<option value={`value${index}`} style={style}>
+			<option value={`value${index}`} style={E({color: "#000"}, style)}>
 				{children}
 			</option>
 		);
@@ -139,7 +139,7 @@ export class ButtonBar_OptionUI extends BaseComponent<{first, last, selected, on
 			<div className="ButtonBar_OptionUI"
 					style={E(
 						{display: "inline-block", background: "rgba(0,0,0,.3)", padding: "5 12",
-							cursor: "pointer", color: "#AAA",
+							cursor: "pointer", color: "#000",
 							":hover": {background: "rgba(0,0,0,.5)"}},
 						first && {borderRadius: "4px 0 0 4px"},
 						!first && {border: "solid #111", borderWidth: "0 0 0 1px"},
@@ -155,7 +155,7 @@ export class ButtonBar_OptionUI extends BaseComponent<{first, last, selected, on
 	}
 }
 
-export class Select_Auto extends BaseComponent<
+/*export class Select_Auto extends BaseComponent<
 		{options: {name: string, value, style?}[] | string[] | (new()=>Enum) | {[s: string]: any},
 			displayType?: "dropdown" | "button bar",
 			compareBy?: "name" | "value" | "value toString",
@@ -179,4 +179,4 @@ export class Select_Auto extends BaseComponent<
 			}}/>
 		);
 	}
-}
+}*/

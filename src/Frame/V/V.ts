@@ -186,7 +186,7 @@ export default class V {
 		var height = contentClone.outerHeight() as number;
 		holder.remove();
 
-		return {width: width, height: height};
+		return {width, height};
 	};
 	static GetContentWidth(content) { return V.GetContentSize(content).width; };
 	static GetContentHeight(content) { return V.GetContentSize(content).height; };

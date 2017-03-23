@@ -9,6 +9,7 @@ export default class Action<Payload> {
 	payload: Payload; // needed for Is() method's type-inference to work, for some reason
 
 	Is<Payload2>(actionType: new(..._)=>Action<Payload2>): this is Action<Payload2> {
+		if (actionType == null) return false; // this can occur during start-up "assert reducer sanity" phase
 		return this.type == actionType.name;
 		//return this instanceof actionType; // alternative
 	}

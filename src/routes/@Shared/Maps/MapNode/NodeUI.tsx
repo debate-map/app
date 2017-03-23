@@ -26,6 +26,7 @@ import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {createSelector} from "reselect";
 import NodeUI_Inner from "./NodeUI_Inner";
 import {nodeTypeFontSizes} from "./NodeUI_Inner";
+import {createMarkupForStyles} from "react/lib/CSSPropertyOperations";
 
 type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
 @firebaseConnect(({node}: {node: MapNode})=>[
@@ -68,19 +69,25 @@ export default class NodeUI extends BaseComponent<Props, {childrenWidthOverride:
 		let downChildren = node.type == MapNodeType.Thesis ? nodeChildren.Where(a=>a.type == MapNodeType.OpposingArgument) : [];
 
 		let fontSize = nodeTypeFontSizes[node.type] || 14;
-		let textPreview = $(`<a style="fontSize: ${fontSize}; whiteSpace: initial;">${node.title}</a>`);
-		let expectedTextWidth = V.GetContentWidth(textPreview);
-		let expectedOtherStuffWidth = 26;
+		let expectedTextWidth = V.GetContentWidth($(`<a style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${node.title}</a>`));
+		//let expectedOtherStuffWidth = 26;
+		let expectedOtherStuffWidth = 28;
 		let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
 
 		//let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
 		let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
-		let maxWidth = node.type == MapNodeType.Thesis ? 500 : 200;
+		let maxWidth = node.type == MapNodeType.Thesis ? 550 : 200;
 		let width = expectedBoxWidth.KeepBetween(minWidth, maxWidth);
 
-		let maxTextWidth = maxWidth - expectedOtherStuffWidth;
-		let expectedLines = (expectedTextWidth / maxTextWidth).CeilingTo(1);
-		let expectedHeight = (expectedLines * 17) + 10; // (lines * line-height) + top-plus-bottom-padding
+		let maxTextWidth = width - expectedOtherStuffWidth;
+		/*let expectedLines = (expectedTextWidth / maxTextWidth).CeilingTo(1);
+		let expectedHeight = (expectedLines * 17) + 10; // (lines * line-height) + top-plus-bottom-padding*/
+
+		let expectedTextHeight = V.GetContentHeight($(`<a style='${
+			createMarkupForStyles({fontSize: fontSize, whiteSpace: "initial", display: "inline-block", width: maxTextWidth})
+		}'>${node.title}</a>`));
+		let expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
+		this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight});
 
 		this.childBoxes = [];
 		return (
