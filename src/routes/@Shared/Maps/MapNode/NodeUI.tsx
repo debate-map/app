@@ -92,7 +92,7 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 	render() {
 		let {map, node, path, widthOverride, nodeView, nodeChildren, children} = this.props;
 		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY} = this.state;
-		Log("Updating NodeUI:" + node._key.KeyToInt + ";PropsChanged:" + this.GetPropsChanged());
+		Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._key.KeyToInt};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
 
 		let separateChildren = node.type == MapNodeType.Thesis;
 		let upChildren = node.type == MapNodeType.Thesis ? nodeChildren.Where(a=>a.type == MapNodeType.SupportingArgument) : [];
@@ -230,22 +230,25 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 		if (onHeightOrPosChange) onHeightOrPosChange();
 	}
 	UpdateState() {
+		let {nodeView} = this.props;
 		let {childHolder, upChildHolder} = this.refs;
-		this.SetState({
-			childrenWidthOverride: this.childBoxes.Any(a=>a != null)
-				? this.childBoxes.Where(a=>a != null).Select(a=> {
-					var childDOM = FindDOM(GetInnerComp(a).refs.innerBox);
-					var oldMinWidth = childDOM.style.minWidth;
-					childDOM.style.minWidth = 0 + "px";
-					var result = childDOM.clientWidth;
-					childDOM.style.minWidth = oldMinWidth;
-					return result;
-				}).Max()
-				: 0,
-			childrenCenterY: upChildHolder
+		var changedState = this.SetState(E(
+			nodeView && nodeView.expanded &&
+				{childrenWidthOverride: this.childBoxes.Any(a=>a != null)
+					? this.childBoxes.Where(a=>a != null).Select(a=> {
+						var childDOM = FindDOM(GetInnerComp(a).refs.innerBox);
+						var oldMinWidth = childDOM.style.minWidth;
+						childDOM.style.minWidth = 0 + "px";
+						var result = childDOM.clientWidth;
+						childDOM.style.minWidth = oldMinWidth;
+						return result;
+					}).Max()
+					: 0},
+			{childrenCenterY: upChildHolder
 				? (upChildHolder && upChildHolder.style.display != "none" ? upChildHolder.clientHeight : 0)
-				: (childHolder && childHolder.style.display != "none" ? childHolder.clientHeight / 2 : 0)
-		}, null, false); // always re-render, for node-connections
+				: (childHolder && childHolder.style.display != "none" ? childHolder.clientHeight / 2 : 0)}
+		));
+		//Log(`Changed state? (${this.props.node._key.KeyToInt}): ` + changedState);
 	}
 }
 
