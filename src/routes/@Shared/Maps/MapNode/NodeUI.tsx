@@ -44,7 +44,7 @@ export function FirebaseConnect(innerFirebaseConnect) {
 	});
 }
 
-type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number, postRender?: ()=>void} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
+type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
 @FirebaseConnect(({node}: {node: MapNode})=>[
 	...MakeGetNodeChildIDs()({}, {node}).Select(a=>DBPath(`nodes/e${a}`))
 ])
@@ -75,13 +75,13 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 		return result;
 	}*/
 
-	ComponentDidMount() {
+	/*ComponentDidMount() {
 		let {node} = this.props;
 		Log("Mounting NodeUI:" + node._key.KeyToInt); // + ";PropsChanged:" + this.GetPropsChanged());
-	}
+	}*/
 	ComponentWillReceiveProps(newProps) {
 		let {node} = this.props;
-		Log("ReceivingProps NodeUI:" + node._key.KeyToInt); // + ";PropsChanged:" + this.GetPropsChanged());
+		//Log("ReceivingProps NodeUI:" + node._key.KeyToInt); // + ";PropsChanged:" + this.GetPropsChanged());
 
 		let {nodeView} = newProps;
 		if (nodeView && nodeView.expanded)
@@ -132,6 +132,7 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 			this.lastSVGInfo = {mainBoxOffset, oldChildBoxOffsets};			
 		}
 		this.childBoxes = [];
+		this.childRenders = 0;
 		return (
 			<div className="clickThrough" style={{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}}>
 				<div className="clickThrough" ref="innerBoxHolder" style={{
@@ -149,7 +150,7 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 								childNodes={nodeChildren} childBoxOffsets={this.lastSVGInfo.oldChildBoxOffsets}/>}
 						{nodeChildren.map((child, index)=> {
 							return <NodeUI key={index} ref={c=>this.PostAddChildBox(c)} map={map} node={child}
-								path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} postRender={this.PostDescendantsRendered}/>;
+								path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
 						})}
 					</div>}
 				{hasBeenExpanded && separateChildren &&
@@ -163,13 +164,13 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 						<div ref="upChildHolder" className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
 							{upChildren.map((child, index)=> {
 								return <NodeUI key={"up_" + index} ref={c=>this.PostAddChildBox(c)} map={map} node={child}
-									path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} postRender={this.PostDescendantsRendered}/>;
+									path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
 							})}
 						</div>
 						<div ref="downChildHolder" className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
 							{downChildren.map((child, index)=> {
 								return <NodeUI key={"down_" + index} ref={c=>this.PostAddChildBox(c)} map={map} node={child}
-									path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} postRender={this.PostDescendantsRendered}/>;
+									path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
 							})}
 						</div>
 					</div>}
@@ -177,6 +178,7 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 		);
 	}
 	childBoxes: NodeUI[];
+	childRenders = 0;
 	PostAddChildBox(box) {
 		let {nodeChildren} = this.props;
 		this.childBoxes.push(box);
@@ -186,23 +188,48 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 		}*/
 	}
 
-	lastExpanded = false;
-	//lastVisible = false;
+	//lastExpanded = false;
+	lastHeight = 0;
 	PostRender() {
-		let {nodeView, postRender} = this.props;
+		/*let {nodeChildren, nodeView} = this.props;
 		let expanded = nodeView && nodeView.expanded;
-		//let visible = FindDOM_(this).is(":visible");
-		// if no children, or if our expansion-state changed, our post-render means our "descendants are done re-rendering" as well
+		// if no children, our post-render means our "descendants are done re-rendering" as well
 		// 		(else, we wait for descendants' postRender() callback to trigger)
-		if (this.childBoxes.length == 0 || expanded != this.lastExpanded)
-			this.PostDescendantsRendered();
-		this.lastExpanded = expanded;
-		//this.lastVisible = visible;
-
-		if (postRender) postRender();
+		if (nodeChildren.length == 0 || expanded != this.lastExpanded)
+			//this.PostDescendantsRendered();
+			this.OnHeightOrPosChange();
+		this.lastExpanded = expanded;*/
+		if (this.lastRender_source != RenderSource.SetState) {
+			this.UpdateState();
+		} else {
+			let height = FindDOM_(this).outerHeight();
+			if (height != this.lastHeight) {
+				this.lastHeight = height;
+				this.OnHeightOrPosChange();
+			}
+		}
 	}
+	OnChildHeightOrPosChange() {
+		this.OnHeightOrPosChange();
+		let {onHeightOrPosChange} = this.props;
+		if (onHeightOrPosChange) onHeightOrPosChange();
+	}
+
+	/*lastHeight = 0;
 	PostDescendantsRendered() {
-		if (this.lastRender_source == RenderSource.SetState) return;
+		let height = FindDOM_(this).outerHeight();
+		if (height != this.lastHeight) {
+			this.lastHeight = height;
+			this.OnHeightOrPosChange();
+		}
+	}*/
+
+	OnHeightOrPosChange() {
+		this.UpdateState();
+		let {onHeightOrPosChange} = this.props;
+		if (onHeightOrPosChange) onHeightOrPosChange();
+	}
+	UpdateState() {
 		let {childHolder, upChildHolder} = this.refs;
 		this.SetState({
 			childrenWidthOverride: this.childBoxes.Any(a=>a != null)
