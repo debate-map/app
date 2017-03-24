@@ -119,6 +119,15 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	    return React.Children.map((children as any).Where(a=>a), a=>a);
 	}*/
 
+	// helper for debugging
+	private lastProps = {};
+	GetPropsChanged() {
+		let keys = Object.keys(this.props).concat(Object.keys(this.lastProps)).Distinct();
+		let result = keys.Where(key=>!Object.is(this.props[key], this.lastProps[key]));
+		this.lastProps = this.props;
+		return result;
+	}
+
 	forceUpdate(_: ()=>"Do not call this. Call Update() instead.") {
 		throw new Error("Do not call this. Call Update() instead.");
 	}
