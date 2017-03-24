@@ -46,68 +46,95 @@ export function FirebaseConnect(innerFirebaseConnect) {
 }
 
 type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
+type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number, svgInfo: {mainBoxOffset: Vector2i, oldChildBoxOffsets: Vector2i[]}};
 @FirebaseConnect(({node}: {node: MapNode})=>[
 	...MakeGetNodeChildIDs()({}, {node}).Select(a=>DBPath(`nodes/e${a}`))
 ])
 @(connect(()=> {
 	var getNodeView = MakeGetNodeView();
-	//var getNodeChildren = MakeGetNodeChildren();
 	return ((state: RootState, {node, path, map}: Props & BaseProps)=> {
 		var path = path || node._key.KeyToInt.toString();
 		var firebase = store.getState().firebase;
-		//Log("Checking:" + node._key.KeyToInt);
-
 		let nodeChildren = (node.children || {}).VKeys().Select(key=>GetData(firebase, `nodes/${key}`));
 		return {
 			path,
 			nodeView: getNodeView(state, {firebase, map, path}),
-			//nodeChildren: getNodeChildren(state, {firebase, node}),
 			nodeChildren: CachedTransform({nodeKey: node._key}, nodeChildren, ()=>nodeChildren.All(a=>a) ? nodeChildren : []), // only pass nodeChildren when all are loaded
 		};
 	}) as any;
 }) as any)
-export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number}> {
-	/*shouldComponentUpdate(newProps: Props, newState) {
-		/*if (ToJSON(oldProps.Excluding("nodeView")) != ToJSON(newProps.Excluding("nodeView")))
-			return true;
-		if (oldProps.nodeView.expanded != newProps.nodeView.expanded || oldProps.nodeView.selected != newProps.nodeView.selected)
-			return true;
-		return false;*#/
-		var changed = ShallowCompare(this, newProps, newState);
-		if (!changed)
-			return false;
-		let {node, nodeChildren} = newProps;
-		// if not all children have been loaded yet
-		let allChildrenLength = MakeGetNodeChildIDs()({}, {node}).Select(a=>DBPath(`nodes/e${a}`)).length;
-		if (nodeChildren.length < allChildrenLength) {
-			Log(`Not updating because ${nodeChildren.length} != ${allChildrenLength}`);
-			return false;
-		}
-		return true;
-	}*/
-
-	/*ComponentDidMount() {
-		let {node} = this.props;
-		Log("Mounting NodeUI:" + node._key.KeyToInt); // + ";PropsChanged:" + this.GetPropsChanged());
-	}*/
+export default class NodeUI extends BaseComponent<Props, State> {
+	constructor(props) {
+		super(props);
+		this.state = {svgInfo: {}} as any;
+	}
 	ComponentWillReceiveProps(newProps) {
-		let {node} = this.props;
-		//Log("ReceivingProps NodeUI:" + node._key.KeyToInt); // + ";PropsChanged:" + this.GetPropsChanged());
-
 		let {nodeView} = newProps;
 		if (nodeView && nodeView.expanded)
 			this.SetState({hasBeenExpanded: true});
 	}
 
-	lastSVGInfo = {mainBoxOffset: null as Vector2i, oldChildBoxOffsets: [] as Vector2i[]};
 	render() {
 		let {map, node, path, widthOverride, nodeView, nodeChildren, children} = this.props;
-		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY} = this.state;
-		Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._key.KeyToInt};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
+		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
+		//Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._key.KeyToInt};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
 
 		let separateChildren = node.type == MapNodeType.Thesis;
 		let upChildren = node.type == MapNodeType.Thesis ? nodeChildren.Where(a=>a.type == MapNodeType.SupportingArgument) : [];
 		let downChildren = node.type == MapNodeType.Thesis ? nodeChildren.Where(a=>a.type == MapNodeType.OpposingArgument) : [];
+
+		let {width, expectedHeight} = this.GetMeasurementInfo(this.props, this.state);
+		let innerBoxOffset = ((childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
+
+		this.childBoxes = [];
+		return (
+			<div className="NodeUI clickThrough" style={{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}}>
+				<div ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{
+					paddingTop: innerBoxOffset,
+				}}>
+					<NodeUI_Inner ref="innerBox" /*ref={c=>(this as any).innerBox = c}*/ map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
+				</div>
+				{hasBeenExpanded && !separateChildren &&
+					<div ref="childHolder" className="childHolder clickThrough" style={{
+						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
+						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: nodeView && nodeView.expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
+					}}>
+						{svgInfo.mainBoxOffset &&
+							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset}
+								childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
+						{nodeChildren.map((child, index)=> {
+							return <NodeUI key={index} ref={c=>this.childBoxes.push(c)} map={map} node={child}
+								path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
+						})}
+					</div>}
+				{hasBeenExpanded && separateChildren &&
+					<div ref="childHolder" className="childHolder clickThrough" style={{
+						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
+						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: nodeView && nodeView.expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
+					}}>
+						{svgInfo.mainBoxOffset &&
+							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset}
+								childNodes={upChildren.concat(downChildren)} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
+						<div ref="upChildHolder" className="upChildHolder clickThrough" style={{display: "flex", flexDirection: "column"}}>
+							{upChildren.map((child, index)=> {
+								return <NodeUI key={"up_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child}
+									path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
+							})}
+						</div>
+						<div ref="downChildHolder" className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
+							{downChildren.map((child, index)=> {
+								return <NodeUI key={"down_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child}
+									path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
+							})}
+						</div>
+					</div>}
+			</div>
+		);
+	}
+	childBoxes: NodeUI[];
+
+	GetMeasurementInfo(props: Props, state: State) {
+		let {node} = this.props;
 
 		let fontSize = nodeTypeFontSizes[node.type] || 14;
 		let expectedTextWidth = V.GetContentWidth($(`<a style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${node.title}</a>`));
@@ -125,113 +152,16 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 		}'>${node.title}</a>`));
 		let expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
 		//this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
-		
-		let innerBoxOffset = ((childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
-		let childHolder = FindDOM_(this).children(".childHolder");
-		let upChildHolder = childHolder.children(".upChildHolder");
-		/*if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
-			let holderOffset = new Vector2i(FindDOM_(this.refs.childHolder).offset());*/
 
-		if (this.lastRender_source == RenderSource.SetState && childHolder.length) {
-		//if (childHolder.length) {
-			let holderOffset = new Vector2i(childHolder.offset());
-			let innerBox = FindDOM_(this.refs.innerBox);
-			//var mainBoxOffset = new Vector2i(innerBox.offset()).Minus(holderOffset);
-			let mainBoxOffset = new Vector2i(0, innerBoxOffset);
-			//mainBoxOffset = mainBoxOffset.Plus(new Vector2i(innerBox.width(), innerBox.outerHeight() / 2));
-			mainBoxOffset = mainBoxOffset.Plus(new Vector2i(-30, innerBox.outerHeight() / 2));
-			let oldChildBoxOffsets = this.childBoxes.Where(a=>a != null).Select(child=> {
-				let childBox = FindDOM_(child).find("> div:first-child > div"); // get inner-box of child
-				let childBoxOffset = new Vector2i(childBox.offset()).Minus(holderOffset);
-				childBoxOffset = childBoxOffset.Plus(new Vector2i(0, childBox.outerHeight() / 2));
-				return childBoxOffset;
-			});
-			/*let childBoxes = upChildHolder.length ? childHolder.find("> div > .NodeUI") : childHolder.children(".NodeUI");
-			let oldChildBoxOffsets = childBoxes.toArray().Select((child: HTMLElement)=> {
-				let childBox = $(child).find("> div:first-child > div"); // get inner-box of child
-				let childBoxOffset = new Vector2i(childBox.offset()).Minus(holderOffset);
-				childBoxOffset = childBoxOffset.Plus(new Vector2i(0, childBox.outerHeight() / 2));
-				return childBoxOffset;
-			});*/
-			this.lastSVGInfo = {mainBoxOffset, oldChildBoxOffsets};
-		}
-
-		this.childBoxes = [];
-		return (
-			<div className="NodeUI clickThrough" style={{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}}>
-				<div ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{
-					paddingTop: innerBoxOffset,
-				}}>
-					<NodeUI_Inner ref="innerBox" /*ref={c=>(this as any).innerBox = c}*/ map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
-				</div>
-				{hasBeenExpanded && !separateChildren &&
-					<div ref="childHolder" className="childHolder clickThrough" style={{
-						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
-						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: nodeView && nodeView.expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
-					}}>
-						{this.lastSVGInfo.mainBoxOffset &&
-							<NodeConnectorBackground node={node} mainBoxOffset={this.lastSVGInfo.mainBoxOffset}
-								childNodes={nodeChildren} childBoxOffsets={this.lastSVGInfo.oldChildBoxOffsets}/>}
-						{nodeChildren.map((child, index)=> {
-							return <NodeUI key={index} ref={c=>this.PostAddChildBox(c)} map={map} node={child}
-								path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
-						})}
-					</div>}
-				{hasBeenExpanded && separateChildren &&
-					<div ref="childHolder" className="childHolder clickThrough" style={{
-						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
-						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: nodeView && nodeView.expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
-					}}>
-						{this.lastSVGInfo.mainBoxOffset &&
-							<NodeConnectorBackground node={node} mainBoxOffset={this.lastSVGInfo.mainBoxOffset}
-								childNodes={upChildren.concat(downChildren)} childBoxOffsets={this.lastSVGInfo.oldChildBoxOffsets}/>}
-						<div ref="upChildHolder" className="upChildHolder clickThrough" style={{display: "flex", flexDirection: "column"}}>
-							{upChildren.map((child, index)=> {
-								return <NodeUI key={"up_" + index} ref={c=>this.PostAddChildBox(c)} map={map} node={child}
-									path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
-							})}
-						</div>
-						<div ref="downChildHolder" className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
-							{downChildren.map((child, index)=> {
-								return <NodeUI key={"down_" + index} ref={c=>this.PostAddChildBox(c)} map={map} node={child}
-									path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
-							})}
-						</div>
-					</div>}
-			</div>
-		);
-	}
-	childBoxes: NodeUI[];
-	PostAddChildBox(box) {
-		let {nodeChildren} = this.props;
-		this.childBoxes.push(box);
-		// if children done rendering
-		/*if (this.childBoxes.Where(a=>a != null).length == nodeChildren.length) {
-			//setTimeout(()=>this.PostDescendantsRendered());
-			if (this.onceChildBoxRefsRetrieved_callOnHeightOrPosChange) {
-				this.onceChildBoxRefsRetrieved_callOnHeightOrPosChange = false;
-				this.OnHeightOrPosChange();
-			}
-		}*/
+		return {width, expectedHeight};
 	}
 
-	//lastExpanded = false;
 	lastHeight = 0;
 	lastPos = 0;
 	PostRender() {
-		/*let {nodeChildren, nodeView} = this.props;
-		let expanded = nodeView && nodeView.expanded;
-		// if no children, our post-render means our "descendants are done re-rendering" as well
-		// 		(else, we wait for descendants' postRender() callback to trigger)
-		if (nodeChildren.length == 0 || expanded != this.lastExpanded)
-			//this.PostDescendantsRendered();
-			this.OnHeightOrPosChange();
-		this.lastExpanded = expanded;*/
-
 		//if (this.lastRender_source == RenderSource.SetState) return;
 
 		let height = FindDOM_(this).outerHeight();
-		//let pos = FindDOM_(this).children(".innerBoxHolder").css("")
 		let pos = this.state.childrenCenterY|0;
 		if (height != this.lastHeight || pos != this.lastPos) {
 			this.OnHeightOrPosChange();
@@ -242,11 +172,10 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 		this.lastHeight = height;
 		this.lastPos = pos;
 	}
-	//onceChildBoxRefsRetrieved_callOnHeightOrPosChange = false;
 	onHeightOrPosChangeQueued = false;
 	OnChildHeightOrPosChange() {
 		//this.OnHeightOrPosChange();
-		//this.onceChildBoxRefsRetrieved_callOnHeightOrPosChange = true;
+		// wait one frame, so that if multiple calls to this method occur in the same frame, we only have to call OnHeightOrPosChange() once
 		if (!this.onHeightOrPosChangeQueued) {
 			this.onHeightOrPosChangeQueued = true;
 			requestAnimationFrame(()=> {
@@ -256,18 +185,8 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 		}
 	}
 
-	/*lastHeight = 0;
-	PostDescendantsRendered() {
-		let height = FindDOM_(this).outerHeight();
-		if (height != this.lastHeight) {
-			this.lastHeight = height;
-			this.OnHeightOrPosChange();
-		}
-	}*/
-
 	OnHeightOrPosChange() {
-		//if (this.lastRender_source != RenderSource.SetState) return; // for now, ignore height-or-pos-changes that aren't from set-state (it seems to work)
-		Log(`OnHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._key.KeyToInt};centerY:${this.state.childrenCenterY}`);
+		//Log(`OnHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._key.KeyToInt};centerY:${this.state.childrenCenterY}`);
 		this.UpdateState(true);
 		let {onHeightOrPosChange} = this.props;
 		if (onHeightOrPosChange) onHeightOrPosChange();
@@ -277,7 +196,8 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 		//let {childHolder, upChildHolder} = this.refs;
 		let childHolder = FindDOM_(this).children(".childHolder");
 		let upChildHolder = childHolder.children(".upChildHolder");
-		var changedState = this.SetState(E(
+
+		let newState = E(
 			nodeView && nodeView.expanded &&
 				{childrenWidthOverride: this.childBoxes.Any(a=>a != null)
 					? this.childBoxes.Where(a=>a != null).Select(a=> {
@@ -295,7 +215,28 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 			{childrenCenterY: upChildHolder.length
 				? (upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0)
 				: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)}
-		), null, !forceUpdate);
+		) as State;
+
+		let {expectedHeight} = this.GetMeasurementInfo(this.props, E(this.state, newState) as State);
+
+		let innerBoxOffset = ((newState.childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
+		if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
+			let holderOffset = new Vector2i(FindDOM_(this.refs.childHolder).offset());
+			let innerBox = FindDOM_(this.refs.innerBox);
+			//var mainBoxOffset = new Vector2i(innerBox.offset()).Minus(holderOffset);
+			let mainBoxOffset = new Vector2i(0, innerBoxOffset);
+			//mainBoxOffset = mainBoxOffset.Plus(new Vector2i(innerBox.width(), innerBox.outerHeight() / 2));
+			mainBoxOffset = mainBoxOffset.Plus(new Vector2i(-30, innerBox.outerHeight() / 2));
+			let oldChildBoxOffsets = this.childBoxes.Where(a=>a != null).Select(child=> {
+				let childBox = FindDOM_(child).find("> div:first-child > div"); // get inner-box of child
+				let childBoxOffset = new Vector2i(childBox.offset()).Minus(holderOffset);
+				childBoxOffset = childBoxOffset.Plus(new Vector2i(0, childBox.outerHeight() / 2));
+				return childBoxOffset;
+			});
+			newState.svgInfo = {mainBoxOffset, oldChildBoxOffsets};
+		}
+
+		var changedState = this.SetState(newState, null, !forceUpdate);
 		//Log(`Changed state? (${this.props.node._key.KeyToInt}): ` + changedState);
 	}
 }
