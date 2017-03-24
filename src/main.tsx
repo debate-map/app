@@ -23,7 +23,12 @@ declare var process;
 if (process.env.NODE_ENV !== "production") {
 	// this logs warning if a component doesn't have any props or state change, yet is re-rendered
 	const {whyDidYouUpdate} = require("why-did-you-update");
-	whyDidYouUpdate(React, {exclude: /connect|Connect|Link|Animate|Animation|Dot|ComposedDataDecorator|Chart|Curve/});
+	whyDidYouUpdate(React, {
+		exclude: new RegExp(
+			`connect|Connect|Link|Animate|Animation|Dot|ComposedDataDecorator|Chart|Curve`
+			+ `|Div` // probably temp -- for use in ScrollView lib
+		),
+	});
 }
 
 // store and history instantiation

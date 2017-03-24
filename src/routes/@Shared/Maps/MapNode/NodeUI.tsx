@@ -1,5 +1,4 @@
-import {Vector2i} from "react-vmenu/dist/Helpers/General";
-import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, FindDOM_} from "../../../../Frame/UI/ReactGlobals";
 import {MapNode, MapNodeType, MapNodeType_Info} from "../MapNode";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
@@ -27,6 +26,8 @@ import {createSelector} from "reselect";
 import NodeUI_Inner from "./NodeUI_Inner";
 import {nodeTypeFontSizes} from "./NodeUI_Inner";
 import {createMarkupForStyles} from "react/lib/CSSPropertyOperations";
+import NodeConnectorBackground from "./NodeConnectorBackground";
+import {Vector2i} from "../../../../Frame/General/VectorStructs";
 
 // modified version which only requests paths that do not yet exist in the store
 export function FirebaseConnect(innerFirebaseConnect) {
@@ -63,8 +64,6 @@ type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number} & 
 }) as any)
 @SimpleShouldUpdate
 export default class NodeUI extends BaseComponent<Props, {childrenWidthOverride: number, childrenCenterY: number}> {
-	//static contextTypes = {map: PropTypes.object};
-
 	/*shouldComponentUpdate(newProps: Props, newState) {
 		/*if (ToJSON(oldProps.Excluding("nodeView")) != ToJSON(newProps.Excluding("nodeView")))
 			return true;
@@ -75,13 +74,11 @@ export default class NodeUI extends BaseComponent<Props, {childrenWidthOverride:
 		if (GetTimeSinceLoad() > 5)
 			debugger;
 		return result;
-}*/
+	}*/
 
 	render() {
 		let {map, node, path, widthOverride, nodeView, nodeChildren, children} = this.props;
 		let {childrenWidthOverride, childrenCenterY} = this.state;
-		/*let {map} = this.context;
-		if (map == null) return <div>Loading map, deep...</div>; // not sure why this occurs*/
 		//Log("Updating MapNodeUI:" + nodeID);
 
 		let separateChildren = node.type == MapNodeType.Thesis;
@@ -94,50 +91,64 @@ export default class NodeUI extends BaseComponent<Props, {childrenWidthOverride:
 		let expectedOtherStuffWidth = 28;
 		let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
 
-		//let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
 		let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
 		let maxWidth = node.type == MapNodeType.Thesis ? 550 : 200;
 		let width = expectedBoxWidth.KeepBetween(minWidth, maxWidth);
 
 		let maxTextWidth = width - expectedOtherStuffWidth;
-		/*let expectedLines = (expectedTextWidth / maxTextWidth).CeilingTo(1);
-		let expectedHeight = (expectedLines * 17) + 10; // (lines * line-height) + top-plus-bottom-padding*/
-
 		let expectedTextHeight = V.GetContentHeight($(`<a style='${
 			createMarkupForStyles({fontSize: fontSize, whiteSpace: "initial", display: "inline-block", width: maxTextWidth})
 		}'>${node.title}</a>`));
 		let expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
-		this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight});
-
+		//this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
+		
+		let innerBoxOffset = ((childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
+		if (this.lastRender_source == RenderSource.SetState) {
+			var holderOffset = new Vector2i(FindDOM_(this.refs.childHolder).offset());
+			let innerBox = FindDOM_(this.refs.innerBox);
+			//var mainBoxOffset = new Vector2i(innerBox.offset()).Minus(holderOffset);
+			var mainBoxOffset = new Vector2i(0, innerBoxOffset);
+			//mainBoxOffset = mainBoxOffset.Plus(new Vector2i(innerBox.width(), innerBox.outerHeight() / 2));
+			mainBoxOffset = mainBoxOffset.Plus(new Vector2i(-30, innerBox.outerHeight() / 2));
+			var oldChildBoxOffsets = this.childBoxes.Where(a=>a != null).Select(child=> {
+				let childBox = FindDOM_(child);
+				let childBoxOffset = new Vector2i(childBox.offset()).Minus(holderOffset);
+				childBoxOffset = childBoxOffset.Plus(new Vector2i(0, childBox.outerHeight() / 2));
+				return childBoxOffset;
+			});
+		}
 		this.childBoxes = [];
 		return (
 			<div className="clickThrough" style={{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}}>
 				<div className="clickThrough" ref="innerBoxHolder" style={{
-					//transform: "translateX(0)", // fixes z-index issue
-					paddingTop: ((childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0),
+					paddingTop: innerBoxOffset,
 				}}>
 					<NodeUI_Inner ref="innerBox" /*ref={c=>(this as any).innerBox = c}*/ map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
 				</div>
 				{!separateChildren &&
 					<div ref="childHolder" className="clickThrough" style={{
-						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10,
+						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
 						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: nodeView && nodeView.expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 					}}>
+						{this.lastRender_source == RenderSource.SetState &&
+							<NodeConnectorBackground node={node} mainBoxOffset={mainBoxOffset} childNodes={nodeChildren} childBoxOffsets={oldChildBoxOffsets}/>}
 						{nodeChildren.map((child, index)=> {
 							return <NodeUI key={index} ref={c=>this.childBoxes.push(c)} map={map} node={child} path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride}/>;
 						})}
 					</div>}
 				{separateChildren &&
 					<div ref="childHolder" className="clickThrough" style={{
-						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 10,
+						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
 						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: nodeView && nodeView.expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 					}}>
+						{this.lastRender_source == RenderSource.SetState &&
+							<NodeConnectorBackground node={node} mainBoxOffset={mainBoxOffset} childNodes={upChildren.concat(downChildren)} childBoxOffsets={oldChildBoxOffsets}/>}
 						<div ref="upChildHolder" className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
 							{upChildren.map((child, index)=> {
 								return <NodeUI key={"up_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child} path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride}/>;
 							})}
 						</div>
-						<div className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
+						<div ref="downChildHolder" className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
 							{downChildren.map((child, index)=> {
 								return <NodeUI key={"down_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child} path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride}/>;
 							})}
@@ -147,17 +158,10 @@ export default class NodeUI extends BaseComponent<Props, {childrenWidthOverride:
 		);
 	}
 	childBoxes: NodeUI[];
-	renderingFromPostRender = false;
 	PostRender() {
+		if (this.lastRender_source == RenderSource.SetState) return;
 		let {childHolder, upChildHolder} = this.refs;
-		if (this.renderingFromPostRender) {
-			this.renderingFromPostRender = false;
-			return;
-		}
-		/*Log(`Child-box-max-height(${this.props.node._key.KeyToInt}): ${
-			this.childBoxes.Any(a=>a != null) ? this.childBoxes.Where(a=>a != null).Select(a=>a.refs.innerBox ? a.refs.innerBox.clientWidth : ((childBoxes as any), Debugger(), 1)).Max() : 0
-		}`);*/
-		if (this.SetState({
+		this.SetState({
 			childrenWidthOverride: this.childBoxes.Any(a=>a != null)
 				? this.childBoxes.Where(a=>a != null).Select(a=> {
 					var childDOM = FindDOM(GetInnerComp(a).refs.innerBox);
@@ -171,8 +175,7 @@ export default class NodeUI extends BaseComponent<Props, {childrenWidthOverride:
 			childrenCenterY: upChildHolder
 				? (upChildHolder.style.display != "none" ? upChildHolder.clientHeight : 0)
 				: (childHolder.style.display != "none" ? childHolder.clientHeight / 2 : 0)
-		}))
-			this.renderingFromPostRender = true;
+		});
 	}
 }
 
