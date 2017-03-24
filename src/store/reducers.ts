@@ -136,7 +136,7 @@ export var MakeGetNodeChildIDs = ()=>createSelector(
 	return ;
 }*/
 
-export function MakeGetNodeChildren() {
+/*export function MakeGetNodeChildren() {
 	var getNodeChildIDs = MakeGetNodeChildIDs();
 	return createSelector(
 		({firebase})=>firebase,
@@ -146,4 +146,15 @@ export function MakeGetNodeChildren() {
 			return childIDs.Select(a=>GetData(firebase, `nodes/e${a}`)).Where(a=>a);
 		}
 	);
-}
+}*/
+/*export function MakeGetNodeChildren() {
+	var getNodeChildIDs = MakeGetNodeChildIDs();
+	return createSelector(
+		getNodeChildIDs,
+		childIDs=> {
+			let firebase = store.getState().firebase;
+			if (firebase == null) debugger;
+			return childIDs.Select(a=>GetData(firebase, `nodes/e${a}`)).Where(a=>a);
+		}
+	);
+}*/

@@ -76,7 +76,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 
 		let mainRatingTypes = nodeTypeRatingTypes[node.type].main;
 		let mainRatingSet = ratingsRoot && ratingsRoot[mainRatingTypes[0]];
-		let mainRatingAverage = CachedTransform({nodeKey: node._key, ratingType: mainRatingTypes[0]}, {ratingSet: mainRatingSet},
+		let mainRatingAverage = CachedTransform("getMainRatingAverage", {nodeKey: node._key, ratingType: mainRatingTypes[0]}, {ratingSet: mainRatingSet},
 			()=>mainRatingSet ? mainRatingSet.Props.Where(a=>a.name != "_key").Select(a=>a.value.value).Average() : 0);
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
