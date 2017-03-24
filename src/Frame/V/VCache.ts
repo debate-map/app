@@ -31,8 +31,24 @@ class Storage {
 }
 let storages = {} as {[storageKey: string]: Storage};
 
-export function CachedTransform<T, T2, T3>(staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3) {
-	let storageKey = JSON.stringify(staticProps);
+/**
+ * @param staticProps Can be either an object or array.
+ * @param dynamicProps Can be either an object or array.
+ * @param transformFunc The data-transformer. Whenever a dynamic-prop changes, this will be called, and the new result will be cached.
+ */
+export function CachedTransform<T, T2, T3>(staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3);
+export function CachedTransform<T, T2, T3>(transformType: string, staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3);
+export function CachedTransform<T, T2, T3>(...args) {
+	let transformType: string, staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3;
+	if (args.length == 3) {
+		[staticProps, dynamicProps, transformFunc] = args;
+		// if no transform-type specified, just use location of calling line of code
+		transformType = new Error().stack.split("\n")[2];
+	} else {
+		[transformType, staticProps, dynamicProps, transformFunc] = args;
+	}
+
+	let storageKey = transformType + "|" + JSON.stringify(staticProps);
 	let storage = storages[storageKey] || (storages[storageKey] = new Storage());
 	if (!shallowEqual(dynamicProps, storage.lastDynamicProps)) {
 		storage.lastDynamicProps = dynamicProps;

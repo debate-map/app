@@ -7,7 +7,7 @@ import {Debugger, QuickIncrement, E, GetTimeSinceLoad} from "../../../../Frame/G
 import Button from "../../../../Frame/ReactComponents/Button";
 import {PropTypes, Component} from "react";
 import Action from "../../../../Frame/General/Action";
-import {GetSelectedNodeID, GetUserID, MakeGetNodeView, RootState, MakeGetNodeChildren, MakeGetNodeChildIDs} from "../../../../store/reducers";
+import {GetSelectedNodeID, GetUserID, MakeGetNodeView, RootState, MakeGetNodeChildIDs} from "../../../../store/reducers";
 import {Map} from "../Map";
 import {Log} from "../../../../Frame/General/Logging";
 import {WaitXThenRun} from "../../../../Frame/General/Timers";
@@ -28,6 +28,7 @@ import {nodeTypeFontSizes} from "./NodeUI_Inner";
 import {createMarkupForStyles} from "react/lib/CSSPropertyOperations";
 import NodeConnectorBackground from "./NodeConnectorBackground";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
+import {CachedTransform} from "../../../../Frame/V/VCache";
 
 // modified version which only requests paths that do not yet exist in the store
 export function FirebaseConnect(innerFirebaseConnect) {
@@ -50,15 +51,18 @@ type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number, on
 ])
 @(connect(()=> {
 	var getNodeView = MakeGetNodeView();
-	var getNodeChildren = MakeGetNodeChildren();
+	//var getNodeChildren = MakeGetNodeChildren();
 	return ((state: RootState, {node, path, map}: Props & BaseProps)=> {
 		var path = path || node._key.KeyToInt.toString();
 		var firebase = store.getState().firebase;
 		//Log("Checking:" + node._key.KeyToInt);
+
+		let nodeChildren = (node.children || {}).VKeys().Select(key=>GetData(firebase, `nodes/${key}`));
 		return {
 			path,
 			nodeView: getNodeView(state, {firebase, map, path}),
-			nodeChildren: getNodeChildren(state, {firebase, node}),
+			//nodeChildren: getNodeChildren(state, {firebase, node}),
+			nodeChildren: CachedTransform({nodeKey: node._key}, nodeChildren, ()=>nodeChildren.All(a=>a) ? nodeChildren : []), // only pass nodeChildren when all are loaded
 		};
 	}) as any;
 }) as any)
@@ -69,10 +73,17 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 		if (oldProps.nodeView.expanded != newProps.nodeView.expanded || oldProps.nodeView.selected != newProps.nodeView.selected)
 			return true;
 		return false;*#/
-		var result = ShallowCompare(this, newProps, newState);
-		if (GetTimeSinceLoad() > 5)
-			debugger;
-		return result;
+		var changed = ShallowCompare(this, newProps, newState);
+		if (!changed)
+			return false;
+		let {node, nodeChildren} = newProps;
+		// if not all children have been loaded yet
+		let allChildrenLength = MakeGetNodeChildIDs()({}, {node}).Select(a=>DBPath(`nodes/e${a}`)).length;
+		if (nodeChildren.length < allChildrenLength) {
+			Log(`Not updating because ${nodeChildren.length} != ${allChildrenLength}`);
+			return false;
+		}
+		return true;
 	}*/
 
 	/*ComponentDidMount() {

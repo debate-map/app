@@ -30,7 +30,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 					{ratingTypes.main.map((ratingType, index)=> {
 						let ratingSet = ratingsRoot && ratingsRoot[ratingType];
-						let average = CachedTransform({nodeKey: node._key, ratingType}, {ratingSet},
+						let average = CachedTransform("getMainRatingAverage", {nodeKey: node._key, ratingType}, {ratingSet},
 							()=>ratingSet ? ratingSet.Props.Where(a=>a.name != "_key").Select(a=>a.value.value).Average().RoundTo(1) : 0);
 						return (
 							<PanelButton key={ratingType} parent={this} map={map} path={path}
