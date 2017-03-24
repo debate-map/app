@@ -124,7 +124,14 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	GetPropsChanged() {
 		let keys = Object.keys(this.props).concat(Object.keys(this.lastProps)).Distinct();
 		let result = keys.Where(key=>!Object.is(this.props[key], this.lastProps[key]));
-		this.lastProps = this.props;
+		this.lastProps = {...this.props as any};
+		return result;
+	}
+	private lastState = {};
+	GetStateChanged() {
+		let keys = Object.keys(this.state).concat(Object.keys(this.lastState)).Distinct();
+		let result = keys.Where(key=>!Object.is((this.state as any)[key], this.lastState[key]));
+		this.lastState = {...this.state as any};
 		return result;
 	}
 
@@ -166,16 +173,17 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		throw new Error("Do not call this. Call SetState() instead.");
 	}
 	/** Returns whether the new-state differs (shallowly) from the old-state. */
-	SetState(newState: Partial<S>, callback?: ()=>any, cancelIfPropsSame = true): boolean {
-		if (cancelIfPropsSame) {
-			let keys = this.state.VKeys().concat(newState.VKeys()).Distinct();
-			if (!keys.Any(key=>(this.state as S)[key] !== (newState as S)[key]))
-				return false;
-		}
+	SetState(newState: Partial<S>, callback?: ()=>any, cancelIfStateSame = true): string[] {
+		//let keys = this.state.VKeys().concat(newState.VKeys()).Distinct();
+		let keys = newState.VKeys(); // we only care about new-state's keys -- setState() leaves unmentioned keys untouched
+		let changedKeys = keys.Where(key=>!Object.is((this.state as S)[key], (newState as S)[key]));
+		if (changedKeys.length == 0 && cancelIfStateSame)
+			return [];
+		
 		this.lastRender_source = RenderSource.SetState;
 		//this.setState(newState as S, callback);
 		Component.prototype.setState.apply(this, arguments);
-		return true;
+		return changedKeys;
 	}
 
 	changeListeners = [];
