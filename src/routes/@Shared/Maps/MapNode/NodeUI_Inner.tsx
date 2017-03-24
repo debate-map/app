@@ -218,6 +218,12 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 									Questions can be asked here concerning clarification of the statement's meaning. (other comments belong in the "Discuss" panel)
 								</div>
 							</div>}
+						{panelToShow == "history" &&
+							<div style={{position: "relative"}}>
+								<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
+									NodeID: {node._key.KeyToInt}
+								</div>
+							</div>}
 					</div>}
 			</div>
 		);
