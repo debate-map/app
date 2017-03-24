@@ -19,7 +19,7 @@ import {firebaseConnect} from "react-redux-firebase";
 import {FirebaseConnect} from "./NodeUI";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 
-let nodeTypeBackgroundColors = {
+export let nodeTypeBackgroundColors = {
 	[MapNodeType.Category]: "40,60,80",
 	//[MapNodeType.Package]: "0,100,180",
 	[MapNodeType.Package]: "40,60,80",

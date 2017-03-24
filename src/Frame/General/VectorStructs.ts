@@ -9,16 +9,17 @@ export class Vector2i {
 	static get zero() { return new Vector2i(0, 0); }
 	static get one() { return new Vector2i(1, 1); }
 	
-	constructor(x = null, y = null) {
-	    if (x && x.x && x.y)
-			return new Vector2i(x.x, x.y);
-		if (x && x.left && x.top)
-			return new Vector2i(x.left, x.top);
-		/*if (x && x.Left && x.Top)
-			return new Vector2i(x.Left, x.Top);*/
+	constructor(x?, y?);
+	constructor(pos: {x: number, y: number});
+	constructor(pos: {left: number, top: number});
+	constructor(...args) {
+		var x: number, y: number;
+		if (typeof args[0] == "number") [x, y] = args;
+		else if (args[0].x != null) [x, y] = [args[0].x, args[0].y];
+		else if (args[0].left != null) [x, y] = [args[0].left, args[0].top];
 
-		this.x = x != null ? parseInt(x) : 0;
-		this.y = y != null ? parseInt(y) : 0;
+		this.x = x;
+		this.y = y;
 	}
 
 	x: number;
