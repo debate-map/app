@@ -233,16 +233,14 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 		let height = FindDOM_(this).outerHeight();
 		//let pos = FindDOM_(this).children(".innerBoxHolder").css("")
 		let pos = this.state.childrenCenterY|0;
-		if (height != this.lastHeight) {
-			this.lastHeight = height;
-			this.OnHeightOrPosChange();
-		} else if (pos != this.lastPos) {
-			this.lastPos = pos;
+		if (height != this.lastHeight || pos != this.lastPos) {
 			this.OnHeightOrPosChange();
 		} else {
 			if (this.lastRender_source == RenderSource.SetState) return;
 			this.UpdateState();
 		}
+		this.lastHeight = height;
+		this.lastPos = pos;
 	}
 	//onceChildBoxRefsRetrieved_callOnHeightOrPosChange = false;
 	onHeightOrPosChangeQueued = false;
@@ -294,7 +292,9 @@ export default class NodeUI extends BaseComponent<Props, {hasBeenExpanded: boole
 			/*{childrenCenterY: upChildHolder
 				? (upChildHolder && upChildHolder.style.display != "none" ? upChildHolder.clientHeight : 0)
 				: (childHolder && childHolder.style.display != "none" ? childHolder.clientHeight / 2 : 0)}*/
-			{childrenCenterY: upChildHolder.length ? upChildHolder.outerHeight() : childHolder.outerHeight() / 2}
+			{childrenCenterY: upChildHolder.length
+				? (upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0)
+				: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)}
 		), null, !forceUpdate);
 		//Log(`Changed state? (${this.props.node._key.KeyToInt}): ` + changedState);
 	}
