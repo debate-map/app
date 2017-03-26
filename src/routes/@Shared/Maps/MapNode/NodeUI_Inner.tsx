@@ -1,7 +1,7 @@
-import {VMenuItem} from "react-vmenu/dist/VMenu";
+import {ACTMapNodeExpandedToggle, ACTMapNodeSelect, MapNodeView} from "../../../../store/Root/Main/MapViews";
+import {GetNodeRatingsRoot, GetPaths_NodeRatingsRoot, GetUserID, RatingsRoot} from "../../../../store/Root/Firebase";
+import {RootState} from "../../../../store/Root";
 import {connect} from "react-redux";
-import {MapNodeView, ACTMapNodeSelect, ACTMapNodeExpandedToggle} from "../../../../store/Store/Main/MapViews";
-import {GetUserID, RootState, GetNodeRatingsRoot, GetPaths_NodeRatingsRoot, RatingsRoot} from "../../../../store/reducers";
 import {Map} from "../Map";
 import {BaseComponent} from "../../../../Frame/UI/ReactGlobals";
 import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
@@ -85,7 +85,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						<a style={{position: "relative", fontSize: nodeTypeInfo.fontSize, whiteSpace: "initial"}}>
 							{node.title}
 						</a>
-						<NodeUI_Menu node={node} userID={userID}/>
+						<NodeUI_Menu node={node} path={path} userID={userID}/>
 					</div>
 					<Button //text={nodeView && nodeView.expanded ? "-" : "+"} size={28}
 							style={{

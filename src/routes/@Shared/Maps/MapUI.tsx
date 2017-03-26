@@ -1,4 +1,4 @@
-import {RootState, GetMapView} from "../../../store/reducers";
+import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../store/Root/Main/MapViews";
 import {BaseComponent, FirebaseDatabase, FindDOM, FindReact} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
@@ -12,7 +12,6 @@ import {Assert, Log} from "../../../Frame/Serialization/VDF/VDF";
 import V from "../../../Frame/V/V";
 import {GetTreeNodesInObjTree} from "../../../Frame/V/V";
 import {Vector2i, VRect} from "../../../Frame/General/VectorStructs";
-import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../store/Store/Main/MapViews";
 import NodeUI from "./MapNode/NodeUI";
 import ScrollView from "react-vscrollview";
 import {GetDistanceBetweenRectAndPoint} from "../../../Frame/General/Geometry";
@@ -20,6 +19,8 @@ import NodeUI_Inner from "./MapNode/NodeUI_Inner";
 //import ReactResizeDetector from "react-resize-detector"; // this one doesn't seem to work reliably -- at least for the map-ui
 import ResizeSensor from "react-resize-sensor";
 import {WaitXThenRun} from "../../../Frame/General/Timers";
+import {GetMapView} from "../../../store/Root/Main";
+import {RootState} from "../../../store/Root";
 
 type Props = {map: Map, rootNode?: MapNode, focusNode?: string, viewOffset?: {x: number, y: number}};
 @firebaseConnect(({map}: {map: Map})=> [

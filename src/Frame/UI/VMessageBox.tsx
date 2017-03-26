@@ -4,7 +4,7 @@ import {BaseComponent, AddGlobalStyle} from "./ReactGlobals";
 import Modal from "react-modal";
 import Button from "../ReactComponents/Button";
 import {E} from "../General/Globals_Free";
-import {RootState} from "../../store/reducers";
+import {RootState} from "../../store/Root";
 import {connect} from "react-redux";
 
 export class MessageBoxOptions {

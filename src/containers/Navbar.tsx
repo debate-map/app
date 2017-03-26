@@ -17,7 +17,7 @@ import {Debugger} from "../Frame/General/Globals_Free";
 import Button from "../Frame/ReactComponents/Button";
 import TextInput from "../Frame/ReactComponents/TextInput";
 import Action from "../Frame/General/Action";
-import {ACTSetUserPanelOpen} from "../store/Store/Main";
+import {ACTUserPanelOpenSet} from "../store/Root/Main";
 const {pathToJS} = helpers;
 
 // main
@@ -85,7 +85,7 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 						<NavBarButton to="/search" text="Search" onClick={e=> { e.preventDefault(); }}/>
 						<NavBarButton to={auth ? "/profile" : "/sign-in"} text={auth ? auth.displayName.match(/(.+?)( |$)/)[1] : `Sign in`} onClick={e=> {
 							e.preventDefault();
-							dispatch(new ACTSetUserPanelOpen(!userPanelOpen));
+							dispatch(new ACTUserPanelOpenSet(!userPanelOpen));
 						}}/>
 						{/*<div className="transition500 opacity100OnHover"
 							style={{

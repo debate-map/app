@@ -9,7 +9,7 @@ import ReactDOM from "react-dom";
 import injectTapEventPlugin from "react-tap-event-plugin";
 import {Store} from "redux";
 //import {BaseComponent} from "./Frame/UI/ReactGlobals";
-import {RootState} from "./store/reducers";
+import {RootState} from "./store/Root";
 import {GetTimeSinceLoad} from "./Frame/General/Globals_Free";
 
 var JQuery = require("./Frame/JQuery/JQuery3.1.0");
@@ -39,9 +39,16 @@ if (process.env.NODE_ENV !== "production") {
 // so we need to provide a custom `selectLocationState` to inform
 // react-router-redux of its location.
 const initialState = (window as any).___INITIAL_STATE__;
-const store = createStore(initialState, {});
-g.Extend({store});
+
+const store = createStore(initialState, {}) as Store<RootState>;
 declare global { var store: Store<RootState>; }
+g.Extend({store});
+
+function State() {
+	return store.getState();
+}
+g.Extend({State});
+declare global { var State: ()=>RootState; }
 
 /*function GetState() {
 	return (store as Store<RootState>).getState().As(RootState);
