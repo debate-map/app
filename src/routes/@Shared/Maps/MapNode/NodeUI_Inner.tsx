@@ -14,39 +14,10 @@ import {DN} from "../../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
 import Button from "../../../../Frame/ReactComponents/Button";
 import RatingsUI from "./RatingsUI";
-import {RatingType, ratingTypeInfos} from "./RatingsUI";
 import {firebaseConnect} from "react-redux-firebase";
 import {FirebaseConnect} from "./NodeUI";
 import {CachedTransform} from "../../../../Frame/V/VCache";
-
-export let nodeTypeBackgroundColors = {
-	[MapNodeType.Category]: "40,60,80",
-	//[MapNodeType.Package]: "0,100,180",
-	[MapNodeType.Package]: "40,60,80",
-	//[MapNodeType.Thesis]: "0,100,180",
-	//[MapNodeType.Thesis]: "100,50,100",
-	//[MapNodeType.Thesis]: "30,100,30",
-	[MapNodeType.Thesis]: "0,80,150",
-	[MapNodeType.SupportingArgument]: "30,100,30",
-	[MapNodeType.OpposingArgument]: "100,30,30",
-}
-/*let nodeTypeBackgroundColors_enemy = {
-	[MapNodeType.SupportingArgument]: "100,30,30",
-	[MapNodeType.OpposingArgument]: "30,100,30",
-}*/
-export let nodeTypeFontSizes = {
-	Category: 16
-}
-export let nodeTypeRatingTypes = {
-	[MapNodeType.Category]: {main: ["significance"], others: []},
-	[MapNodeType.Package]: {main: ["significance"], others: []},
-	[MapNodeType.Thesis]: {main: ["probability", "adjustment"], others: []},
-	/*[MapNodeType.SupportingArgument]: {main: ["weight"], others: []},
-	[MapNodeType.OpposingArgument]: {main: ["weight"], others: []},*/
-	// todo: add special argument sub-theses, and have argument's "weight" calculated automatically based on that (perhaps using a "substantiation" rating)
-	[MapNodeType.SupportingArgument]: {main: [], others: []},
-	[MapNodeType.OpposingArgument]: {main: [], others: []},
-} as {[key: string]: {main: RatingType[], others: RatingType[]}};
+import {RatingType_Info, RatingType} from "./RatingType";
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number} & Partial<{userID: string, ratingsRoot: RatingsRoot}>;
 @firebaseConnect(({node}: Props)=>[
@@ -62,8 +33,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 	render() {
 		let {firebase, map, node, nodeView, path, width, widthOverride, userID, ratingsRoot} = this.props;
 		let {hovered, openPanel_preview} = this.state;
-		let backgroundColor = nodeTypeBackgroundColors[node.type];
-		let fontSize = nodeTypeFontSizes[node.type] || 14;
+		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		/*let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
 		let maxWidth = node.type == MapNodeType.Thesis ? 500 : 200;*/
 		let barSize = 5;
@@ -74,9 +44,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let mainRatingSet = ratingsRoot ? ratingsRoot[mainRatingType] : {};
 		let fillPercent = mainRatingSet ? mainRatingSet.Props.Where(a=>a.name != "_key").Select(a=>a.value.value).Average() / 100 : 0;*/
 
-		let mainRatingTypes = nodeTypeRatingTypes[node.type].main;
-		let mainRatingSet = ratingsRoot && ratingsRoot[mainRatingTypes[0]];
-		let mainRatingAverage = CachedTransform("getMainRatingAverage", {nodeKey: node._key, ratingType: mainRatingTypes[0]}, {ratingSet: mainRatingSet},
+		let mainRatingSet = ratingsRoot && ratingsRoot[nodeTypeInfo.mainRatingTypes[0]];
+		let mainRatingAverage = CachedTransform("getMainRatingAverage", {nodeKey: node._key, ratingType: nodeTypeInfo.mainRatingTypes[0]}, {ratingSet: mainRatingSet},
 			()=>mainRatingSet ? mainRatingSet.Props.Where(a=>a.name != "_key").Select(a=>a.value.value).Average() : 0);
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
@@ -95,7 +64,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							store.dispatch(new ACTMapNodeSelect({mapID: map._key.KeyToInt, path}));
 					}}>
 				{leftPanelShow &&
-					<MapNodeUI_LeftBox parent={this} map={map} path={path} node={node} nodeView={nodeView} ratingsRoot={ratingsRoot} backgroundColor={backgroundColor} asHover={hovered}/>}
+					<MapNodeUI_LeftBox parent={this} map={map} path={path} node={node} nodeView={nodeView} ratingsRoot={ratingsRoot}
+						backgroundColor={nodeTypeInfo.backgroundColor} asHover={hovered}/>}
 				{/* fixes click-gap */}
 				{leftPanelShow &&
 					<div style={{
@@ -115,9 +85,9 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							}}>
 						<div style={{
 								position: "absolute", left: 0, top: 0, bottom: 0,
-								width: mainRatingAverage + "%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
+								width: mainRatingAverage + "%", background: `rgba(${nodeTypeInfo.backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
 							}}/>
-						<a style={{position: "relative", fontSize, whiteSpace: "initial"}}>
+						<a style={{position: "relative", fontSize: nodeTypeInfo.fontSize, whiteSpace: "initial"}}>
 							{node.title}
 						</a>
 						<VMenu contextMenu={true} onBody={true}>
@@ -185,9 +155,9 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								fontSize: nodeView && nodeView.expanded ? 23 : 17,
 								//lineHeight: "28px",
 								//backgroundColor: `rgba(${backgroundColor},.5)`,
-								backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>(parseInt(a) * .8).RoundTo(1)).join(",")},.7)`,
+								backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(",").Select(a=>(parseInt(a) * .8).RoundTo(1)).join(",")},.7)`,
 								boxShadow: "none",
-								":hover": {backgroundColor: `rgba(${backgroundColor.split(",").Select(a=>(parseInt(a) * .9).RoundTo(1)).join(",")},.7)`},
+								":hover": {backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(",").Select(a=>(parseInt(a) * .9).RoundTo(1)).join(",")},.7)`},
 							}}
 							onClick={e=> {
 								store.dispatch(new ACTMapNodeExpandedToggle({mapID: map._key.KeyToInt, path}));
@@ -202,8 +172,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								position: "absolute", top: "calc(100% + 1px)", width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
 								padding: 5, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`,
 							}}>
-						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
-						{ratingTypeInfos[panelToShow] &&
+						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${nodeTypeInfo.backgroundColor},.7)`}}/>
+						{RatingType_Info.for[panelToShow] &&
 							<RatingsUI node={node} path={path} ratingType={panelToShow as RatingType}
 								ratings={ratingsRoot && ratingsRoot[panelToShow] ? ratingsRoot[panelToShow].Props.Where(a=>a.name != "_key").Select(a=>a.value) : []}/>}
 						{panelToShow == "definitions" &&

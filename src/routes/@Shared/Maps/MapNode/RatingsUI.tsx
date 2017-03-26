@@ -13,75 +13,9 @@ import {firebaseConnect} from "react-redux-firebase";
 import {MapNode, MapNodeType_Info, MapNodeType} from "../MapNode";
 import {FirebaseConnect} from "./NodeUI";
 import {GetData} from "../../../../Frame/Database/DatabaseHelpers";
+import {RatingType, RatingType_Info} from "./RatingType";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
-
-/*const data = [
-	{rating: 1, count: 0},
-	{rating: 25, count: 12},
-	{rating: 30, count: 16},
-	{rating: 40, count: 1},
-	{rating: 45, count: 3},
-	{rating: 50, count: 9},
-	{rating: 70, count: 18},
-	{rating: 75, count: 1},
-	{rating: 90, count: 5},
-	{rating: 92, count: 12},
-	{rating: 94, count: 6},
-	{rating: 96, count: 8},
-	{rating: 98, count: 4},
-	{rating: 99, count: 15},
-];*/
-
-export type RatingType = "significance" | "probability" | "adjustment";
-interface RatingTypeInfo {
-	description: string | ((parentNode: MapNode)=>string);
-	options: number[];
-	ticks: number[]; // for x-axis labels
-}
-
-export let ratingTypeInfos = {
-	significance: {
-		description: "TODO",
-		options: Range(0, 100),
-		ticks: Range(0, 100, 5),
-	},
-	probability: {
-		description: "What probability does this statement, as presented, have of being true?",
-		//options: [1, 2, 4, 6, 8].concat(Range(10, 90, 5)).concat([92, 94, 96, 98, 99]),
-		//options: [1].concat(Range(2, 98, 2)).concat([99]),
-		/*options: Range(1, 99),
-		ticks: [1].concat(Range(5, 95, 5)).concat([99]),*/
-		options: Range(0, 100),
-		ticks: Range(0, 100, 5),
-	},
-	adjustment: {
-		description: "What intensity should this statement be strengthened/weakened to, to reach its ideal state? (making substantial claims while maintaining accuracy)",
-		/*options: [1, 2, 4, 6, 8].concat(Range(10, 200, 5)),
-		ticks: [1].concat(Range(20, 200, 20)),*/
-		options: Range(0, 200),
-		ticks: Range(0, 200, 10),
-	},
-	/*weight: {
-		description: "TODO",
-		options: Range(0, 100),
-		ticks: Range(0, 100, 5),
-	},*/
-	// todo
-	/*substantiation: {
-		description: "How much would the parent thesis be substantiated, IF all the (non-meta) theses of this argument were true?",
-		options: Range(0, 100),
-		ticks: Range(0, 100, 5),
-	},*/
-	strengthIfTrue: {
-		description: parentNode=> {
-			var type = parentNode.type == MapNodeType.SupportingArgument ? "raise" : "lower";
-			return `IF all the premises of this argument were true, and the parent thesis' prior probability were 50%, to what level would this argument ${type} it?`;
-		},
-		options: Range(0, 100),
-		ticks: Range(0, 100, 5),
-	},
-} as {[key: string]: RatingTypeInfo};
 
 type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]} & Partial<{userID: string, smoothing: number}>;
 @firebaseConnect()
@@ -96,11 +30,11 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 		let {node, path, ratingType, userID, ratings, smoothing, firebase} = this.props;
 		let {size} = this.state;
 
-		let ratingInfo = ratingTypeInfos[ratingType];
+		let ratingTypeInfo = RatingType_Info.for[ratingType];
 
-		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(ratingInfo.options.Max() == 200 ? [200] : []);
-		smoothing = smoothing.KeepBetween(ratingInfo.options.Min(), ratingInfo.options.Max()); // smoothing might have been set higher, from when on another rating-type
-		let ticksForChart = ratingInfo.options.Select(a=>a.RoundTo(smoothing)).Distinct();
+		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(ratingTypeInfo.options.Max() == 200 ? [200] : []);
+		smoothing = smoothing.KeepBetween(ratingTypeInfo.options.Min(), ratingTypeInfo.options.Max()); // smoothing might have been set higher, from when on another rating-type
+		let ticksForChart = ratingTypeInfo.options.Select(a=>a.RoundTo(smoothing)).Distinct();
 		let dataFinal = ticksForChart.Select(a=>({rating: a, count: 0}));
 		for (let entry of ratings) {
 			let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(entry.value)).First();
@@ -127,7 +61,7 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 							title: `Rate ${ratingType} of ${MapNodeType_Info.for[node.type].displayName}`, cancelButton: true,
 							messageUI: ()=>(
 								<div style={{padding: "10px 0"}}>
-									Rating: <Spinner min={ratingInfo.options.Min()} max={ratingInfo.options.Max()} style={{width: 60}}
+									Rating: <Spinner min={ratingTypeInfo.options.Min()} max={ratingTypeInfo.options.Max()} style={{width: 60}}
 										value={finalRating} onChange={val=>DN(finalRating = val, boxController.UpdateUI())}/>
 								</div>
 							),
@@ -138,7 +72,7 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 						});
 					}}>
 				<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
-					{typeof ratingInfo.description == "function" ? ratingInfo.description(GetData(firebase, `nodes/${path.split("/").XFromLast(1)}`)) : ratingInfo.description}
+					{typeof ratingTypeInfo.description == "function" ? ratingTypeInfo.description(GetData(firebase, `nodes/${path.split("/").XFromLast(1)}`)) : ratingTypeInfo.description}
 				</div>
 				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
 					{/*Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>*/}
@@ -147,7 +81,7 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 				{this.lastRender_source == RenderSource.SetState &&
 					<AreaChart ref="chart" width={size.x} height={250} data={dataFinal}
 							margin={{top: 10, right: 10, bottom: 10, left: 10}}>
-						<XAxis dataKey="rating" ticks={ratingInfo.ticks} type="number" domain={[1, 99]} minTickGap={0}/>
+						<XAxis dataKey="rating" ticks={ratingTypeInfo.ticks} type="number" domain={[1, 99]} minTickGap={0}/>
 						{/*<YAxis tickCount={7} hasTick width={50}/>*/}
 						<YAxis orientation="left" x={20} width={20} height={250} viewBox={{x: 0, y: 0, width: 500, height: 500}} tickCount={9}/>
 						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>
