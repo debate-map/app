@@ -30,7 +30,7 @@ import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 
 // modified version which only requests paths that do not yet exist in the store
-export function FirebaseConnect(innerFirebaseConnect) {
+/*export function FirebaseConnect(innerFirebaseConnect) {
 	return firebaseConnect(props=> {
 		let firebase = store.getState().firebase;
 
@@ -39,14 +39,14 @@ export function FirebaseConnect(innerFirebaseConnect) {
 		let innerPaths_unrequested = innerPaths.Where(path=>GetData(firebase, path) == null);
 		/*Log(innerPaths.length + ";" + innerPaths_unrequested.length + "\n" + innerPaths + "\n" + innerPaths_unrequested);
 		if (GetTimeSinceLoad() > 5)
-			debugger;*/
+			debugger;*#/
 		return innerPaths_unrequested;
 	});
-}
+}*/
 
 type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
 type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number, svgInfo: {mainBoxOffset: Vector2i, oldChildBoxOffsets: Vector2i[]}};
-@FirebaseConnect(({node}: {node: MapNode})=>[
+@firebaseConnect(({node}: {node: MapNode})=>[
 	...MakeGetNodeChildIDs()({}, {node}).Select(a=>DBPath(`nodes/e${a}`))
 ])
 @(connect(()=> {
@@ -99,7 +99,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: nodeView && nodeView.expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 					}}>
 						{svgInfo.mainBoxOffset &&
-							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset}
+							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
 								childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
 						{nodeChildren.map((child, index)=> {
 							return <NodeUI key={index} ref={c=>this.childBoxes.push(c)} map={map} node={child}
@@ -112,7 +112,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: nodeView && nodeView.expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 					}}>
 						{svgInfo.mainBoxOffset &&
-							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset}
+							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
 								childNodes={upChildren.concat(downChildren)} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
 						<div ref="upChildHolder" className="upChildHolder clickThrough" style={{display: "flex", flexDirection: "column"}}>
 							{upChildren.map((child, index)=> {
@@ -219,7 +219,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let {expectedHeight} = this.GetMeasurementInfo(this.props, E(this.state, newState) as State);
 
 		let innerBoxOffset = ((newState.childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
-		if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
+		//if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
+		if (this.refs.childHolder) {
 			let holderOffset = new Vector2i(FindDOM_(this.refs.childHolder).offset());
 			let innerBox = FindDOM_(this.refs.innerBox);
 			//var mainBoxOffset = new Vector2i(innerBox.offset()).Minus(holderOffset);

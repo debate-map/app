@@ -1,3 +1,4 @@
+import {onLogFuncs} from "../General/Logging";
 import Action from "../General/Action";
 import {BaseComponent, AddGlobalStyle} from "./ReactGlobals";
 import Modal from "react-modal";
@@ -7,24 +8,36 @@ import {RootState} from "../../store/reducers";
 import {connect} from "react-redux";
 
 export class MessageBoxOptions {
-	boxID = null as number;
-	ui = null as ()=>JSX.Element;
-	title = null as string; // only for contentLabel prop
-	onCancel = null as ()=>boolean | voidy; // only for overlay-click
-	overlayStyle? = null;
-	containerStyle? = null;
+	title?: string;
+	titleUI?: ()=>JSX.Element
+	message?: string;
+	messageUI?: ()=>JSX.Element;
+	okButton = true;
+	cancelButton = false;
+	overlayStyle?;
+	containerStyle?;
+	onOK?: ()=>boolean | voidy;
+	onCancel?: ()=>boolean | voidy;
+	
+	ui: ()=>JSX.Element;
+	boxID: number;
 }
 export class ACTMessageBoxShow extends Action<MessageBoxOptions> {}
 export class ACTMessageBoxUpdate extends Action<{boxID: number}> {}
 
 export class BoxController {
-	constructor(boxID: number) {
+	constructor(options: MessageBoxOptions, boxID: number) {
+		this.options = options;
 		this.boxID = boxID;
 	}
+	options: MessageBoxOptions;
 	boxID: number;
 
 	UpdateUI() {
 		store.dispatch(new ACTMessageBoxUpdate({boxID: this.boxID}));
+	}
+	Close() {
+		store.dispatch(new ACTMessageBoxShow(null));
 	}
 }
 
@@ -39,19 +52,12 @@ export function ShowMessageBox_Base(o: MessageBoxOptions) {
 
 	store.dispatch(new ACTMessageBoxShow(o));
 
-	return new BoxController(o.boxID);
+	return new BoxController(o, o.boxID);
 }
-export function ShowMessageBox(o: {
-			title?: string, titleUI?: ()=>JSX.Element,
-			message?: string, messageUI?: ()=>JSX.Element,
-			okButton?: boolean, cancelButton?: boolean,
-			overlayStyle?, containerStyle?,
-			onOK?: ()=>boolean | voidy, onCancel?: ()=>boolean | voidy,
-		}) {
-	o = E({okButton: true}, o);
+export function ShowMessageBox(options: Partial<MessageBoxOptions>) {
+	let o = E(new MessageBoxOptions(), options) as MessageBoxOptions;
 
-	let oFinal = new MessageBoxOptions();
-	oFinal.ui = ()=>(
+	o.ui = ()=>(
 		<div>
 			{o.titleUI ? o.titleUI() : <div style={{fontSize: "18px", fontWeight: "bold"}}>{o.title}</div>}
 			{o.messageUI ? o.messageUI() : <p style={{marginTop: 15}}>{o.message}</p>}
@@ -59,20 +65,18 @@ export function ShowMessageBox(o: {
 				<Button text="OK"
 					onClick={()=> {
 						if (o.onOK && o.onOK() === false) return;
-						store.dispatch(new ACTMessageBoxShow(null));
+						boxController.Close();
 					}}/>}
 			{o.cancelButton &&
 				<Button text="Cancel" ml={o.okButton ? 10 : 0} onClick={()=> {
 					if (o.onCancel && o.onCancel() === false) return;
-					store.dispatch(new ACTMessageBoxShow(null));
+					boxController.Close();
 				}}/>}
 		</div>
 	);
-	oFinal.title = o.title;
-	oFinal.onCancel = o.onCancel;
-	oFinal.overlayStyle = o.overlayStyle;
-	oFinal.containerStyle = o.containerStyle;
-	return ShowMessageBox_Base(oFinal);
+
+	var boxController = ShowMessageBox_Base(o);
+	return boxController;
 }
 
 AddGlobalStyle(`

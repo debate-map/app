@@ -6,7 +6,6 @@ import MapNodeUI_Inner from "./NodeUI_Inner";
 import Button from "../../../../Frame/ReactComponents/Button";
 import {E} from "../../../../Frame/General/Globals_Free";
 import {Rating, RootState, GetPaths_NodeRatingsRoot, GetNodeRatingsRoot, RatingsRoot} from "../../../../store/reducers";
-import {FirebaseConnect} from "./NodeUI";
 import {connect} from "react-redux";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 
