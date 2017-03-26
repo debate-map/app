@@ -11,11 +11,11 @@ import ScrollView from "react-vscrollview";
 import {RootState} from "../../store/Root";
 
 @firebaseConnect([
-	DBPath("maps/e1"),
+	DBPath("maps/1"),
 ])
 @(connect(({firebase}: RootState)=> ({
-	//map: helpers.dataToJS(firebase, DBPath("maps/e1")),
-	map: GetData(firebase, "maps/e1"),
+	//map: helpers.dataToJS(firebase, DBPath("maps/1")),
+	map: GetData(firebase, "maps/1"),
 })) as any)
 export default class GlobalMapUI extends BaseComponent<{map: Map}, {}> {
 	render() {

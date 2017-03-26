@@ -50,7 +50,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		let {map, rootNode} = this.props;
 		if (map == null)
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading map...</div>;
-		Assert(map._key, "map._key is null!");
+		Assert(map._id, "map._id is null!");
 		if (rootNode == null)
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading root node...</div>;
 		return (
@@ -61,7 +61,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						let focusNodeBox = $(".NodeUI_Inner").ToList().Min(nodeBox=>GetDistanceBetweenRectAndPoint(nodeBox.GetScreenRect(), viewCenter_onScreen));
 						let focusNodeBoxComp = FindReact(focusNodeBox[0]) as NodeUI_Inner;
 						let viewOffset = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position);
-						store.dispatch(new ACTViewCenterChange({mapID: focusNodeBoxComp.props.map._key.KeyToInt, focusNode: focusNodeBoxComp.props.path, viewOffset}));
+						store.dispatch(new ACTViewCenterChange({mapID: focusNodeBoxComp.props.map._id, focusNode: focusNodeBoxComp.props.path, viewOffset}));
 					}}>
 				<div id="MapUI" ref="content"
 						style={{
@@ -75,7 +75,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 							let mapView = store.getState().main.mapViews[store.getState().main.openMap];
 							let isNodeSelected = GetTreeNodesInObjTree(mapView).Any(a=>a.prop == "selected" && a.Value);
 							if (isNodeSelected)
-								store.dispatch(new ACTMapNodeSelect({mapID: map._key.KeyToInt, path: null}));
+								store.dispatch(new ACTMapNodeSelect({mapID: map._id, path: null}));
 						}}
 						onContextMenu={e=> {
 							e.preventDefault();

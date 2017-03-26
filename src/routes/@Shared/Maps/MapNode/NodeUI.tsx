@@ -50,18 +50,18 @@ import {MapNodeView} from "../../../../store/Root/Main/MapViews";
 type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
 type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number, svgInfo: {mainBoxOffset: Vector2i, oldChildBoxOffsets: Vector2i[]}};
 @firebaseConnect(({node}: {node: MapNode})=>[
-	...MakeGetNodeChildIDs()({}, {node}).Select(a=>DBPath(`nodes/e${a}`))
+	...MakeGetNodeChildIDs()({}, {node}).Select(a=>DBPath(`nodes/${a}`))
 ])
 @(connect(()=> {
 	var getNodeView = MakeGetNodeView();
 	return ((state: RootState, {node, path, map}: Props & BaseProps)=> {
-		var path = path || node._key.KeyToInt.toString();
+		var path = path || node._id.toString();
 		var firebase = store.getState().firebase;
 		let nodeChildren = (node.children || {}).VKeys().Select(key=>GetData(firebase, `nodes/${key}`));
 		return {
 			path,
 			nodeView: getNodeView(state, {firebase, map, path}),
-			nodeChildren: CachedTransform({nodeKey: node._key}, nodeChildren, ()=>nodeChildren.All(a=>a) ? nodeChildren : []), // only pass nodeChildren when all are loaded
+			nodeChildren: CachedTransform({nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a) ? nodeChildren : []), // only pass nodeChildren when all are loaded
 		};
 	}) as any;
 }) as any)
@@ -79,7 +79,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	render() {
 		let {map, node, path, widthOverride, nodeView, nodeChildren, children} = this.props;
 		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
-		//Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._key.KeyToInt};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
+		//Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
 
 		let separateChildren = node.type == MapNodeType.Thesis;
 		let upChildren = node.type == MapNodeType.Thesis ? nodeChildren.Where(a=>a.type == MapNodeType.SupportingArgument) : [];
@@ -106,7 +106,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 								childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
 						{nodeChildren.map((child, index)=> {
 							return <NodeUI key={index} ref={c=>this.childBoxes.push(c)} map={map} node={child}
-								path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
+								path={path + "/" + child._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
 						})}
 					</div>}
 				{hasBeenExpanded && separateChildren &&
@@ -120,13 +120,13 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						<div ref="upChildHolder" className="upChildHolder clickThrough" style={{display: "flex", flexDirection: "column"}}>
 							{upChildren.map((child, index)=> {
 								return <NodeUI key={"up_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child}
-									path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
+									path={path + "/" + child._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
 							})}
 						</div>
 						<div ref="downChildHolder" className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
 							{downChildren.map((child, index)=> {
 								return <NodeUI key={"down_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child}
-									path={path + "/" + child._key.KeyToInt} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
+									path={path + "/" + child._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
 							})}
 						</div>
 					</div>}
@@ -187,7 +187,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	}
 
 	OnHeightOrPosChange() {
-		//Log(`OnHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._key.KeyToInt};centerY:${this.state.childrenCenterY}`);
+		//Log(`OnHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id};centerY:${this.state.childrenCenterY}`);
 		this.UpdateState(true);
 		let {onHeightOrPosChange} = this.props;
 		if (onHeightOrPosChange) onHeightOrPosChange();
@@ -239,7 +239,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		}
 
 		var changedState = this.SetState(newState, null, !forceUpdate);
-		//Log(`Changed state? (${this.props.node._key.KeyToInt}): ` + changedState);
+		//Log(`Changed state? (${this.props.node._id}): ` + changedState);
 	}
 }
 

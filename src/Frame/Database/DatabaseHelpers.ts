@@ -26,9 +26,12 @@ export function GetData(firebase: FirebaseDatabase, path: string) {
 		path = DBPath(path);
 
 	let info = pathInfos[path] || (pathInfos[path] = new DBPathInfo());
-	let timestampEntry = (firebase as any)._root.entries.FirstOrX(a=>a[0] == "timestamp");
+	/*let timestampEntry = (firebase as any)._root.entries.FirstOrX(a=>a[0] == "timestamp");
 	if (timestampEntry) {
-		var timestamp = (firebase as any)._root ? timestampEntry[1].get(path) : null;
+		var timestamp = (firebase as any)._root ? timestampEntry[1].get(path) : null;*/
+	let timestamps = (firebase as any).get("timestamp");
+	if (timestamps) {
+		var timestamp = (firebase as any)._root ? timestamps.get(path) : null;
 		if (timestamp && timestamp != info.lastTimestamp) {
 			info.lastTimestamp = timestamp;
 			info.cachedData = helpers.dataToJS(firebase, path);

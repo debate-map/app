@@ -8,10 +8,10 @@ import Action from "../../Frame/General/Action";
 import {routerReducer} from "react-router-redux";
 import {ToJSON, FromJSON, Debugger} from "../../Frame/General/Globals";
 import V from "../../Frame/V/V";
-import {GetTreeNodesInObjTree} from "../../Frame/V/V";
 import {Map} from "../../routes/@Shared/Maps/Map";
 import {createSelector} from "reselect";
 import {FirebaseDatabase} from "../../Frame/UI/ReactGlobals";
+import {GetTreeNodesInObjTree} from "../../Frame/V/V";
 
 // state and actions
 // ==========
@@ -37,8 +37,28 @@ export function MainReducer(state, action) {
 	MainReducer_Real = MainReducer_Real || CombineReducers({
 		userPanelOpen: (state = false, action)=> {
 			// cheats
-			if (action.type == "@@reactReduxFirebase/SET" && (action as any).data)
-				(action as any).data._key = ((action as any).path as string).split("/").Last();
+			if (action.type == "@@reactReduxFirebase/SET" && action["data"]) {
+				// turn annoying arrays into objects
+				var treeNodes = GetTreeNodesInObjTree(action["data"], true);
+				for (let treeNode of treeNodes) {
+					if (treeNode.Value instanceof Array) {
+						let objVersion = {}.Extend(treeNode.Value) as any;
+						for (let key in objVersion) {
+							// if fake array-item added by Firebase (just so it would be an array), remove it
+							if (objVersion[key] == null)
+								delete objVersion[key];
+						}
+						treeNode.obj[treeNode.prop] = objVersion;
+					}
+				}
+
+				// add special _key or _id prop
+				let key = (action["path"] as string).split("/").Last();
+				if (parseInt(key).toString() == key)
+					action["data"]._id = parseInt(key);
+				else
+					action["data"]._key = key;
+			}
 
 			//case SET_USER_PANEL_OPEN: return {...state, userPanelOpen: action.payload};
 			if (action.Is(ACTUserPanelOpenSet))
@@ -79,22 +99,22 @@ export function GetRatingUISmoothing(state: RootState) {
 	return state.main.ratingUI.smoothing;
 }
 export function GetSelectedNodeID(state: RootState, {map}: {map: Map}) { 
-	let mapView = state.main.mapViews[map._key.KeyToInt];
+	let mapView = state.main.mapViews[map._id];
 	let selectedNodeView = GetTreeNodesInObjTree(mapView).FirstOrX(a=>a.prop == "selected" && a.Value);
 	if (selectedNodeView && selectedNodeView.ancestorNodes.Last().prop == "rootNodeView")
-		return map.rootNode.KeyToInt;
+		return map.rootNode;
 	return selectedNodeView ? selectedNodeView.ancestorNodes.Last().prop as number : null;
 }
 export function GetMapView(state: RootState, {map}: {map: Map}) {
 	if (map == null) return null;
-	return state.main.mapViews[map._key.KeyToInt];
+	return state.main.mapViews[map._id];
 }
 export function MakeGetNodeView() {
 	var getParentNodeView; //= MakeGetNodeView();
 	return createSelector(
 		(_, {firebase}: {firebase: FirebaseDatabase})=>firebase,
-		(_, {map}: {map: Map})=>map._key.KeyToInt,
-		(state: RootState, {map})=>state.main.mapViews[map._key.KeyToInt] && state.main.mapViews[map._key.KeyToInt].rootNodeView,
+		(_, {map}: {map: Map})=>map._id,
+		(state: RootState, {map})=>state.main.mapViews[map._id] && state.main.mapViews[map._id].rootNodeView,
 		(_, {path}: {path: string})=>path,
 		(state: RootState, props)=> {
 			let {path, ...rest} = props;

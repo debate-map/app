@@ -68,7 +68,7 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 							),
 							onOK: ()=> {
 								// todo: have submitted date be based on local<>Firebase time-offset (retrieved from Firebase) [this prevents fail from security rules]
-								firebase.Ref(`nodeRatings/${node._key}/${ratingType}/${userID}`).set({updated: Date.now(), value: finalRating});
+								firebase.Ref(`nodeRatings/${node._id}/${ratingType}/${userID}`).set({updated: Date.now(), value: finalRating});
 							}
 						});
 					}}>
