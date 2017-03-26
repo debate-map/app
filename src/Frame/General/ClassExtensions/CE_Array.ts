@@ -140,7 +140,8 @@ Array.prototype._AddFunction_Inline = function LastOrX(matchFunc?, x = null) {
 		return this[this.length - 1];
 	return x;
 }
-Array.prototype._AddFunction_Inline = function XFromLast(x) { return this[(this.length - 1) - x]; };
+interface Array<T> { XFromLast(x: number): T; }
+Array.prototype._AddFunction_Inline = function XFromLast(x: number) { return this[(this.length - 1) - x]; };
 
 // since JS doesn't have basic "foreach" system
 Array.prototype._AddFunction_Inline = function ForEach(func) {

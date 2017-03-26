@@ -204,7 +204,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							}}>
 						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 						{ratingTypeInfos[panelToShow] &&
-							<RatingsUI node={node} ratingType={panelToShow as RatingType}
+							<RatingsUI node={node} path={path} ratingType={panelToShow as RatingType}
 								ratings={ratingsRoot && ratingsRoot[panelToShow] ? ratingsRoot[panelToShow].Props.Where(a=>a.name != "_key").Select(a=>a.value) : []}/>}
 						{panelToShow == "definitions" &&
 							<div style={{position: "relative"}}>

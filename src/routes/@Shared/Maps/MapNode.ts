@@ -13,7 +13,7 @@ export class MapNodeType_Info {
 	static for = {
 		[MapNodeType.Category]: new MapNodeType_Info("category", [MapNodeType.Category, MapNodeType.Package, MapNodeType.Thesis]),
 		[MapNodeType.Package]: new MapNodeType_Info("package", [MapNodeType.Thesis]),
-		[MapNodeType.Thesis]: new MapNodeType_Info("thesis", [MapNodeType.SupportingArgument, MapNodeType.OpposingArgument]),
+		[MapNodeType.Thesis]: new MapNodeType_Info("thesis (as premise)", [MapNodeType.SupportingArgument, MapNodeType.OpposingArgument]),
 		[MapNodeType.SupportingArgument]: new MapNodeType_Info("supporting argument", [MapNodeType.Thesis]),
 		[MapNodeType.OpposingArgument]: new MapNodeType_Info("opposing argument", [MapNodeType.Thesis]),
 	} as {[key: string]: MapNodeType_Info};
