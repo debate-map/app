@@ -73,7 +73,7 @@ export function GetSelectedNodeID(state: RootState, {map}: {map: Map}) {
 	return nodeIDs.Select(a=>DBPath(`nodes/e${a}`));
 }*/
 
-function GetMapView(state: RootState, {map}: {map: Map}) {
+export function GetMapView(state: RootState, {map}: {map: Map}) {
 	if (map == null) return null;
 	return state.main.mapViews[map._key.KeyToInt];
 }

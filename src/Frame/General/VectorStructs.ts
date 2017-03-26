@@ -9,7 +9,7 @@ export class Vector2i {
 	static get zero() { return new Vector2i(0, 0); }
 	static get one() { return new Vector2i(1, 1); }
 	
-	constructor(x?, y?);
+	constructor(x?: number, y?: number);
 	constructor(pos: {x: number, y: number});
 	constructor(pos: {left: number, top: number});
 	constructor(...args) {

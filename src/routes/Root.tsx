@@ -19,7 +19,7 @@ export default class RootUI2 extends BaseComponent<{} & BaseProps, {}> {
 					<SubNavBarButton to={`/`} text="Home"/>
 					<SubNavBarButton to={`/about`} text="About"/>
 				</SubNavbar>
-				<ScrollView style={{flex: "1 1 100%"}} scrollVBarStyles={{width: 10}}>
+				<ScrollView style={{flex: "1 1 100%"}} scrollVBarStyle={{width: 10}}>
 					{/*<Route path={`/`} component={HomeUI}/>
 					<Route path={`/about`} component={AboutUI}/>*/}
 					{GetUrlPath() == "" && <HomeUI/>}

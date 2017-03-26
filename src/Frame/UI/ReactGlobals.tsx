@@ -120,18 +120,18 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	}*/
 
 	// helper for debugging
-	private lastProps = {};
+	private GetPropsChanged_lastProps = {};
 	GetPropsChanged() {
-		let keys = Object.keys(this.props).concat(Object.keys(this.lastProps)).Distinct();
-		let result = keys.Where(key=>!Object.is(this.props[key], this.lastProps[key]));
-		this.lastProps = {...this.props as any};
+		let keys = Object.keys(this.props).concat(Object.keys(this.GetPropsChanged_lastProps)).Distinct();
+		let result = keys.Where(key=>!Object.is(this.props[key], this.GetPropsChanged_lastProps[key]));
+		this.GetPropsChanged_lastProps = {...this.props as any};
 		return result;
 	}
-	private lastState = {};
+	private GetStateChanged_lastState = {};
 	GetStateChanged() {
-		let keys = Object.keys(this.state).concat(Object.keys(this.lastState)).Distinct();
-		let result = keys.Where(key=>!Object.is((this.state as any)[key], this.lastState[key]));
-		this.lastState = {...this.state as any};
+		let keys = Object.keys(this.state).concat(Object.keys(this.GetStateChanged_lastState)).Distinct();
+		let result = keys.Where(key=>!Object.is((this.state as any)[key], this.GetStateChanged_lastState[key]));
+		this.GetStateChanged_lastState = {...this.state as any};
 		return result;
 	}
 
@@ -219,7 +219,7 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 
 	autoRemoveChangeListeners = true;
 	ComponentWillMount(): void {};
-	ComponentWillMountOrReceiveProps(props: any, forMount?: boolean): void {};
+	ComponentWillMountOrReceiveProps(newProps: any, forMount?: boolean): void {};
 	private componentWillMount() {
 		if (this.autoRemoveChangeListeners)
 			this.RemoveChangeListeners();
@@ -227,15 +227,22 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	    this.ComponentWillMountOrReceiveProps(this.props, true);
 		this.lastRender_source = RenderSource.Mount;
 	}
+
 	ComponentDidMount(...args: any[]): void {};
-	ComponentDidMountOrUpdate(forMount: boolean): void {};
+	ComponentDidMountOrUpdate(lastProps?: Readonly<P & BaseProps & {children?}>, lastState?: S): void {};
+	ComponentDidMountOrUpdate_lastProps: Readonly<P & BaseProps & {children?}>;
+	ComponentDidMountOrUpdate_lastState: S;
+
 	mounted = false;
 	private componentDidMount(...args) {
 		this.ComponentDidMount(...args);
-		this.ComponentDidMountOrUpdate(true);
+		this.ComponentDidMountOrUpdate(this.ComponentDidMountOrUpdate_lastProps, this.ComponentDidMountOrUpdate_lastState);
+		this.ComponentDidMountOrUpdate_lastProps = this.props;
+		this.ComponentDidMountOrUpdate_lastState = this.state;
 		this.mounted = true;
 		this.CallPostRender();
 	}
+
 	ComponentWillUnmount(): void {};
 	private componentWillUnmount() {
 		this.ComponentWillUnmount();
@@ -256,7 +263,9 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	ComponentDidUpdate(...args: any[]): void {};
 	private componentDidUpdate(...args) {
 	    this.ComponentDidUpdate(...args);
-		this.ComponentDidMountOrUpdate(false);
+		this.ComponentDidMountOrUpdate(this.ComponentDidMountOrUpdate_lastProps, this.ComponentDidMountOrUpdate_lastState);
+		this.ComponentDidMountOrUpdate_lastProps = this.props;
+		this.ComponentDidMountOrUpdate_lastState = this.state;
 		this.CallPostRender();
 	}
 
