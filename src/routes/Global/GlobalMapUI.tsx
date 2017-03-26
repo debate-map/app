@@ -7,7 +7,7 @@ import {Map} from "../@Shared/Maps/Map";
 import MapUI from "../@Shared/Maps/MapUI";
 import {Debugger} from "../../Frame/General/Globals_Free";
 import {P} from "../../Frame/Serialization/VDF/VDFTypeInfo";
-var ScrollView = require("react-free-scrollbar").default;
+import ScrollView from "react-vscrollview";
 
 @firebaseConnect([
 	DBPath("maps/e1"),
