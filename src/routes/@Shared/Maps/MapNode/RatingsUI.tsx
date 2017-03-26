@@ -10,8 +10,9 @@ import {ACTRatingUISmoothnessSet} from "../../../../store/Store/Main";
 import Select from "../../../../Frame/ReactComponents/Select";
 import {ShowMessageBox_Base, ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
 import {firebaseConnect} from "react-redux-firebase";
-import {MapNode, MapNodeType_Info} from "../MapNode";
+import {MapNode, MapNodeType_Info, MapNodeType} from "../MapNode";
 import {FirebaseConnect} from "./NodeUI";
+import {GetData} from "../../../../Frame/Database/DatabaseHelpers";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -34,7 +35,7 @@ import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 
 export type RatingType = "significance" | "probability" | "adjustment";
 interface RatingTypeInfo {
-	description: string;
+	description: string | ((parentNode: MapNode)=>string);
 	options: number[];
 	ticks: number[]; // for x-axis labels
 }
@@ -46,7 +47,7 @@ export let ratingTypeInfos = {
 		ticks: Range(0, 100, 5),
 	},
 	probability: {
-		description: "Probability that the statement, as presented, is true.",
+		description: "What probability does this statement, as presented, have of being true?",
 		//options: [1, 2, 4, 6, 8].concat(Range(10, 90, 5)).concat([92, 94, 96, 98, 99]),
 		//options: [1].concat(Range(2, 98, 2)).concat([99]),
 		/*options: Range(1, 99),
@@ -55,7 +56,7 @@ export let ratingTypeInfos = {
 		ticks: Range(0, 100, 5),
 	},
 	adjustment: {
-		description: "What intensity the statement should be strengthened/weakened to, to reach its ideal state. (making substantial claims while maintaining accuracy)",
+		description: "What intensity should this statement be strengthened/weakened to, to reach its ideal state? (making substantial claims while maintaining accuracy)",
 		/*options: [1, 2, 4, 6, 8].concat(Range(10, 200, 5)),
 		ticks: [1].concat(Range(20, 200, 20)),*/
 		options: Range(0, 200),
@@ -68,13 +69,21 @@ export let ratingTypeInfos = {
 	},*/
 	// todo
 	/*substantiation: {
-		description: "How much the parent thesis would be substantiated, IF all the (non-meta) theses of this argument were true.",
+		description: "How much would the parent thesis be substantiated, IF all the (non-meta) theses of this argument were true?",
 		options: Range(0, 100),
 		ticks: Range(0, 100, 5),
 	},*/
+	strengthIfTrue: {
+		description: parentNode=> {
+			var type = parentNode.type == MapNodeType.SupportingArgument ? "raise" : "lower";
+			return `IF all the premises of this argument were true, and the parent thesis' prior probability were 50%, to what level would this argument ${type} it?`;
+		},
+		options: Range(0, 100),
+		ticks: Range(0, 100, 5),
+	},
 } as {[key: string]: RatingTypeInfo};
 
-type RatingsUI_Props = {node: MapNode, ratingType: RatingType, ratings: Rating[]} & Partial<{userID: string, smoothing: number}>;
+type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]} & Partial<{userID: string, smoothing: number}>;
 @firebaseConnect()
 @(connect(()=> {
 	return (state: RootState, props: RatingsUI_Props)=> ({
@@ -84,7 +93,7 @@ type RatingsUI_Props = {node: MapNode, ratingType: RatingType, ratings: Rating[]
 }) as any)
 export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vector2i}> {
 	render() {
-		let {node, ratingType, userID, ratings, smoothing, firebase} = this.props;
+		let {node, path, ratingType, userID, ratings, smoothing, firebase} = this.props;
 		let {size} = this.state;
 
 		let ratingInfo = ratingTypeInfos[ratingType];
@@ -129,7 +138,7 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 						});
 					}}>
 				<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
-					{ratingInfo.description}
+					{typeof ratingInfo.description == "function" ? ratingInfo.description(GetData(firebase, `nodes/${path.split("/").XFromLast(1)}`)) : ratingInfo.description}
 				</div>
 				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
 					{/*Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>*/}

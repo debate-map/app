@@ -9,7 +9,7 @@ export default class NodeConnectorBackground extends BaseComponent<{node: MapNod
 		var {node, mainBoxOffset, childNodes, childBoxOffsets} = this.props;
 
 		return (
-			<svg className="clickThroughChain" style={{position: "absolute", overflow: "visible"}}>
+			<svg className="clickThroughChain" style={{position: "absolute", overflow: "visible", zIndex: -1}}>
 				{childBoxOffsets.map((childOffset, index)=> {
 					/*result.push(<line key={"inputLine" + result.length} x1={inputPos.x} y1={inputPos.y}
 						x2={inputVal.position.x} y2={inputVal.position.y + 10} style={{stroke: "rgba(0,0,0,.5)", strokeWidth: 2}}/>);*/
