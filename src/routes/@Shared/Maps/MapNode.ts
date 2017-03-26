@@ -1,5 +1,6 @@
 import V from "../../../Frame/V/V";
 import {_Enum, Enum} from "../../../Frame/General/Enums";
+import {RatingType} from "./MapNode/RatingType";
 
 export enum MapNodeType {
 	None = 0,
@@ -11,32 +12,57 @@ export enum MapNodeType {
 }
 export class MapNodeType_Info {
 	static for = {
-		[MapNodeType.Category]: new MapNodeType_Info("category", [MapNodeType.Category, MapNodeType.Package, MapNodeType.Thesis]),
-		[MapNodeType.Package]: new MapNodeType_Info("package", [MapNodeType.Thesis]),
-		[MapNodeType.Thesis]: new MapNodeType_Info("thesis (as premise)", [MapNodeType.SupportingArgument, MapNodeType.OpposingArgument]),
-		[MapNodeType.SupportingArgument]: new MapNodeType_Info("supporting argument", [MapNodeType.Thesis]),
-		[MapNodeType.OpposingArgument]: new MapNodeType_Info("opposing argument", [MapNodeType.Thesis]),
+		[MapNodeType.Category]: new MapNodeType_Info({
+			displayName: "category",
+			childTypes: [MapNodeType.Category, MapNodeType.Package, MapNodeType.Thesis],
+			backgroundColor: "40,60,80",
+			mainRatingTypes: ["significance"],
+			otherRatingTypes: [],
+		}),
+		[MapNodeType.Package]: new MapNodeType_Info({
+			displayName: "package",
+			childTypes: [MapNodeType.Thesis],
+			backgroundColor: "40,60,80",
+			mainRatingTypes: ["significance"],
+			otherRatingTypes: [],
+		}),
+		[MapNodeType.Thesis]: new MapNodeType_Info({
+			displayName: "thesis (as premise)",
+			childTypes: [MapNodeType.SupportingArgument, MapNodeType.OpposingArgument],
+			backgroundColor: "0,80,150",
+			mainRatingTypes: ["probability", "adjustment"],
+			otherRatingTypes: [],
+		}),
+		[MapNodeType.SupportingArgument]: new MapNodeType_Info({
+			displayName: "supporting argument",
+			childTypes: [MapNodeType.Thesis],
+			backgroundColor: "30,100,30",
+			mainRatingTypes: [],
+			otherRatingTypes: [],
+		}),
+		[MapNodeType.OpposingArgument]: new MapNodeType_Info({
+			displayName: "opposing argument",
+			childTypes: [MapNodeType.Thesis],
+			backgroundColor: "100,30,30",
+			mainRatingTypes: [],
+			otherRatingTypes: [],
+		}),
 	} as {[key: string]: MapNodeType_Info};
 
-	constructor(displayName: string, childTypes: MapNodeType[]) {
-		this.displayName = displayName;
-		this.childTypes = childTypes;
+	private constructor(info: Partial<MapNodeType_Info>) {
+		this.Extend({info});
 	}
 
 	displayName: string;
 	childTypes: MapNodeType[];
-}
-/*@_Enum export class MapNodeType extends Enum { static V: MapNodeType;
-	None = 0 as any as MapNodeType
-	Category = 1 as any as MapNodeType
-	Package = 2 as any as MapNodeType
-	Thesis = 3 as any as MapNodeType
-	PositiveArgument = 4 as any as MapNodeType
-	NegativeArgument = 5 as any as MapNodeType
+	backgroundColor: string;
+	//fontSize?: number;
+	get fontSize() { return 14; }
+	mainRatingTypes: RatingType[];
+	otherRatingTypes: RatingType[];
 
-	// since in db, we actually want to store this Enum's values as integers
-	toString() { return this.value as any; }
-}*/
+}
+// if any premises below are [true/false], they [strengthen/weaken/guarantee] the parent [/true/false]
 
 export enum AccessLevel {
 	Base = 0,

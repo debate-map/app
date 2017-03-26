@@ -17,7 +17,6 @@ import {FirebaseDatabase} from "../Frame/UI/ReactGlobals";
 import {QuickIncrement, Debugger} from "../Frame/General/Globals_Free";
 import {GetTreeNodesInObjTree} from "../Frame/V/V";
 import {Set} from "immutable";
-import {RatingType} from "../routes/@Shared/Maps/MapNode/RatingsUI";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;

@@ -1,5 +1,5 @@
 import {BaseComponent, Span} from "../../../../Frame/UI/ReactGlobals";
-import {MapNode} from "../MapNode";
+import {MapNode, MapNodeType_Info} from "../MapNode";
 import {MapNodeView, ACTMapNodePanelOpen} from "../../../../store/Store/Main/MapViews";
 import {Map} from "../Map";
 import MapNodeUI_Inner from "./NodeUI_Inner";
@@ -8,7 +8,6 @@ import {E} from "../../../../Frame/General/Globals_Free";
 import {Rating, RootState, GetPaths_NodeRatingsRoot, GetNodeRatingsRoot, RatingsRoot} from "../../../../store/reducers";
 import {FirebaseConnect} from "./NodeUI";
 import {connect} from "react-redux";
-import {nodeTypeRatingTypes} from "./NodeUI_Inner";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 
 type Props = {
@@ -19,7 +18,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 	render() {
 		let {map, path, node, nodeView, ratingsRoot, backgroundColor, asHover} = this.props;
 
-		let ratingTypes = nodeTypeRatingTypes[node.type];
+		let ratingTypeInfo = MapNodeType_Info.for[node.type];
 
 		return (
 			<div style={{
@@ -28,7 +27,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 			}}>
 				<div style={{position: "relative", padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
-					{ratingTypes.main.map((ratingType, index)=> {
+					{ratingTypeInfo.mainRatingTypes.map((ratingType, index)=> {
 						let ratingSet = ratingsRoot && ratingsRoot[ratingType];
 						let average = CachedTransform("getMainRatingAverage", {nodeKey: node._key, ratingType}, {ratingSet},
 							()=>ratingSet ? ratingSet.Props.Where(a=>a.name != "_key").Select(a=>a.value.value).Average().RoundTo(1) : 0);

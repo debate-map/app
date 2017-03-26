@@ -24,7 +24,6 @@ import {DataSnapshot} from "firebase";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {createSelector} from "reselect";
 import NodeUI_Inner from "./NodeUI_Inner";
-import {nodeTypeFontSizes} from "./NodeUI_Inner";
 import {createMarkupForStyles} from "react/lib/CSSPropertyOperations";
 import NodeConnectorBackground from "./NodeConnectorBackground";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
@@ -136,7 +135,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	GetMeasurementInfo(props: Props, state: State) {
 		let {node} = this.props;
 
-		let fontSize = nodeTypeFontSizes[node.type] || 14;
+		let fontSize = 14; // have 11px for meta-theses
 		let expectedTextWidth = V.GetContentWidth($(`<a style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${node.title}</a>`));
 		//let expectedOtherStuffWidth = 26;
 		let expectedOtherStuffWidth = 28;

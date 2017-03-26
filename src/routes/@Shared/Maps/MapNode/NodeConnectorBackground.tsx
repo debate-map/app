@@ -1,8 +1,7 @@
 import {BaseComponent, FindDOM} from "../../../../Frame/UI/ReactGlobals";
 import NodeUI from "./NodeUI";
-import {MapNode, MapNodeType} from "../MapNode";
+import {MapNode, MapNodeType, MapNodeType_Info} from "../MapNode";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
-import {nodeTypeBackgroundColors} from "./NodeUI_Inner";
 
 export default class NodeConnectorBackground extends BaseComponent<{node: MapNode, mainBoxOffset: Vector2i, childNodes: MapNode[], childBoxOffsets: Vector2i[]}, {}> {
 	render() {
@@ -15,8 +14,8 @@ export default class NodeConnectorBackground extends BaseComponent<{node: MapNod
 						x2={inputVal.position.x} y2={inputVal.position.y + 10} style={{stroke: "rgba(0,0,0,.5)", strokeWidth: 2}}/>);*/
 					let child = childNodes[index];
 					let backgroundColor = node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument
-						? nodeTypeBackgroundColors[node.type]
-						: nodeTypeBackgroundColors[child.type];
+						? MapNodeType_Info.for[node.type].backgroundColor
+						: MapNodeType_Info.for[child.type].backgroundColor;
 
 					/*var start = mainBoxOffset;
 					var startControl = start.Plus(30, 0);
