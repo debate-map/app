@@ -10,11 +10,11 @@ import autoBind from "react-autobind";
 import {IsString} from "../General/Types";
 import {Assert} from "../General/Assert";
 import {E, Global} from "../General/Globals_Free";
+import ShallowCompare from "react-addons-shallow-compare";
+export {ShallowCompare};
 
-var ReactInstanceMap = require("react/lib/ReactInstanceMap");
-export var ShallowCompare = require("react-addons-shallow-compare");
+//var ReactInstanceMap = require("react/lib/ReactInstanceMap");
 g.Extend({ShallowCompare});
-
 g.Extend({React, Text});
 
 export function FindDOM(comp) { return ReactDOM.findDOMNode(comp) as HTMLElement; };
@@ -101,6 +101,18 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 				return oldRender.apply(this, arguments);
 			};
 		}
+
+		// you know what, let's just always wrap the render() method, in this project; solves the annoying firebase-gobbling-errors issue
+		/*let oldRender = this.render;
+		this.render = function() {
+			try {
+				this.PreRender();
+				return oldRender.apply(this, arguments);
+			} catch (ex) {
+				debugger;
+				throw ex;
+			}
+		};*/
 	}
 
 	refs;
@@ -303,12 +315,19 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 export function SimpleShouldUpdate(target) {
 	target.prototype.shouldComponentUpdate = function(newProps, newState) {
 		/*if (ShallowCompare(this, newProps, newState))
-			//Log("" + newProps.path);
-			Log("Changed: " + this.props.Props.Where(a=>a.value !== newProps[a.name]).Select(a=>a.name));*/
+			Log("Changed: " + this.props.Props.Where(a=>a.value !== newProps[a.name]).Select(a=>a.name) + ";" + g.ToJSON(this.props) + ";" + g.ToJSON(newProps));*/
 	    return ShallowCompare(this, newProps, newState);
-		/*var result = ShallowCompare(this, newProps, newState);
-		g.Log(result + ";" + g.ToJSON(this.props) + ";" + g.ToJSON(newProps));
-		return result;*/
+	}
+}
+//export function SimpleShouldUpdate_Overridable(target: Component<{shouldUpdate: (newProps: React.Props<any>, newState: any)=>boolean}, {}>) {
+export function SimpleShouldUpdate_Overridable(target) {
+	target.prototype.shouldComponentUpdate = function(newProps, newState) {
+		let {shouldUpdate} = newProps;
+		if (typeof shouldUpdate == "boolean")
+			return shouldUpdate;
+		if (typeof shouldUpdate == "function")
+			return shouldUpdate(newProps, newState);
+	    return ShallowCompare(this, newProps, newState);
 	}
 }
 
@@ -337,11 +356,12 @@ export class Pre extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement>
 }
 
 @Global
+//@SimpleShouldUpdate_Overridable // we can't make these "pure", as their children may need updating
 export class Div extends BaseComponent<{shouldUpdate?} & React.HTMLProps<HTMLDivElement>, {}> {
 	shouldComponentUpdate(nextProps, nextState) {
-		if (this.props.shouldUpdate)
-			return this.props.shouldUpdate(nextProps, nextState);
-	    return true;
+		let {shouldUpdate} = this.props;
+		return shouldUpdate ? shouldUpdate(nextProps, nextState) : true;
+		//return (shouldUpdate && shouldUpdate(nextProps, nextState)) || ShallowCompare(this, nextProps, nextState);
 	}
     render() {
 		let {shouldUpdate, style, ...rest} = this.props;

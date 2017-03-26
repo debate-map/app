@@ -3,12 +3,12 @@ import * as React from "react";
 import {BaseComponent} from "../UI/ReactGlobals";
 import {E} from "../General/Globals_Free";
 
-export default class TextInput extends BaseComponent<{value, onChange, delayChangeTillDefocus?, style?}, {editedValue}> {
+export default class TextInput extends BaseComponent<{value, onChange, delayChangeTillDefocus?, style?} & React.HTMLProps<HTMLInputElement>, {editedValue}> {
 	render() {
-		var {value, onChange, delayChangeTillDefocus, style} = this.props;
+		var {value, onChange, delayChangeTillDefocus, style, ...rest} = this.props;
 		var {editedValue} = this.state;
 		return (
-			<input type="text" style={E({color: "black"}, style)}
+			<input {...rest} type="text" style={E({color: "black"}, style)}
 				value={editedValue != null ? editedValue : value} onChange={e=> {
 					var newVal = $(e.target).val();
 					if (delayChangeTillDefocus) {

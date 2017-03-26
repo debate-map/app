@@ -15,9 +15,10 @@ import {DataSnapshot} from "firebase";
 import Button from "../../../../Frame/ReactComponents/Button";
 import RatingsUI from "./RatingsUI";
 import {firebaseConnect} from "react-redux-firebase";
-import {FirebaseConnect} from "./NodeUI";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {RatingType_Info, RatingType} from "./RatingType";
+import {WaitXThenRun} from "../../../../Frame/General/Timers";
+import keycode from "keycode";
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number} & Partial<{userID: string, ratingsRoot: RatingsRoot}>;
 @firebaseConnect(({node}: Props)=>[
@@ -34,15 +35,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let {firebase, map, node, nodeView, path, width, widthOverride, userID, ratingsRoot} = this.props;
 		let {hovered, openPanel_preview} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
-		/*let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
-		let maxWidth = node.type == MapNodeType.Thesis ? 500 : 200;*/
 		let barSize = 5;
 		let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
-		//let fillPercent = pathNodeIDs.length <= 2 ? 1 : .9;
-
-		/*let mainRatingType = nodeTypeMainRatingTypes[node.type];
-		let mainRatingSet = ratingsRoot ? ratingsRoot[mainRatingType] : {};
-		let fillPercent = mainRatingSet ? mainRatingSet.Props.Where(a=>a.name != "_key").Select(a=>a.value.value).Average() / 100 : 0;*/
 
 		let mainRatingSet = ratingsRoot && ratingsRoot[nodeTypeInfo.mainRatingTypes[0]];
 		let mainRatingAverage = CachedTransform("getMainRatingAverage", {nodeKey: node._key, ratingType: nodeTypeInfo.mainRatingTypes[0]}, {ratingSet: mainRatingSet},
@@ -69,10 +63,9 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 				{/* fixes click-gap */}
 				{leftPanelShow &&
 					<div style={{
-						position: "absolute", //zIndex: hovered ? 6 : 5,
-						//transform: "translateX(-100%)", width: 1, height: 28,
-						//right: "100%",
-						left: -50, width: 100, top: 0, bottom: 0,
+						position: "absolute",
+						right: "100%", width: 1, top: 0, bottom: 0,
+						//left: -50, width: 100, top: 0, bottom: 0,
 					}}/>}
 
 				<div style={{
@@ -101,7 +94,14 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 											title: `Add ${childTypeInfo.displayName}`, cancelButton: true,
 											messageUI: ()=>(
 												<div style={{padding: "10px 0"}}>
-													Title: <TextInput value={title} onChange={val=>DN(title = val, boxController.UpdateUI())}/>
+													Title: <TextInput //autoFocus={true}
+														ref={a=>a && WaitXThenRun(0, ()=>a.DOM.focus())}
+														onKeyDown={e=> {
+															if (e.keyCode != keycode.codes.enter) return;
+															boxController.options.onOK();
+															boxController.Close();
+														}}
+														value={title} onChange={val=>DN(title = val, boxController.UpdateUI())}/>
 												</div>
 											),
 											onOK: ()=> {

@@ -1,9 +1,13 @@
-import {BaseComponent, FindDOM} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, FindDOM, SimpleShouldUpdate_Overridable} from "../../../../Frame/UI/ReactGlobals";
 import NodeUI from "./NodeUI";
 import {MapNode, MapNodeType, MapNodeType_Info} from "../MapNode";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
+import {A} from "../../../../Frame/General/Assert";
+import ShallowCompare from "react-addons-shallow-compare";
 
-export default class NodeConnectorBackground extends BaseComponent<{node: MapNode, mainBoxOffset: Vector2i, childNodes: MapNode[], childBoxOffsets: Vector2i[]}, {}> {
+type Props = {node: MapNode, mainBoxOffset: Vector2i, childNodes: MapNode[], childBoxOffsets: Vector2i[], shouldUpdate: boolean};
+@SimpleShouldUpdate_Overridable
+export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 	render() {
 		var {node, mainBoxOffset, childNodes, childBoxOffsets} = this.props;
 
@@ -12,7 +16,7 @@ export default class NodeConnectorBackground extends BaseComponent<{node: MapNod
 				{childBoxOffsets.map((childOffset, index)=> {
 					/*result.push(<line key={"inputLine" + result.length} x1={inputPos.x} y1={inputPos.y}
 						x2={inputVal.position.x} y2={inputVal.position.y + 10} style={{stroke: "rgba(0,0,0,.5)", strokeWidth: 2}}/>);*/
-					let child = childNodes[index];
+					let child = A.NonNull = childNodes[index];
 					let backgroundColor = node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument
 						? MapNodeType_Info.for[node.type].backgroundColor
 						: MapNodeType_Info.for[child.type].backgroundColor;
