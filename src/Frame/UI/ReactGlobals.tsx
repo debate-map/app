@@ -118,8 +118,8 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	refs;
 	timers = [] as Timer[];
 
-	get DOM() { return FindDOM(this); }
-	get DOM_() { return $(this.DOM); }
+	get DOM() { return this.mounted ? FindDOM(this) : null; }
+	get DOM_() { return this.mounted ? $(this.DOM) : null; }
 	// needed for wrapper-components that don't provide way of accessing inner-component
 	//get InnerComp() { return FindReact(this.DOM); }
 

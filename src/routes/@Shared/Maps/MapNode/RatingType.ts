@@ -1,5 +1,6 @@
 import {Range} from "../../../../Frame/General/Globals";
-import {MapNodeType, MapNode} from "../MapNode";
+import {MapNode} from "../MapNode";
+import {MapNodeType} from "../MapNodeType";
 
 export type RatingType = "significance" | "probability" | "adjustment";
 export class RatingType_Info {

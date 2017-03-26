@@ -1,5 +1,4 @@
 import {VMenuItem} from "react-vmenu/dist/VMenu";
-import {MapNodeType, MapNode, MapNodeType_Info} from "../MapNode";
 import {connect} from "react-redux";
 import {MapNodeView, ACTMapNodeSelect, ACTMapNodeExpandedToggle} from "../../../../store/Store/Main/MapViews";
 import {GetUserID, RootState, GetNodeRatingsRoot, GetPaths_NodeRatingsRoot, RatingsRoot} from "../../../../store/reducers";
@@ -19,6 +18,9 @@ import {CachedTransform} from "../../../../Frame/V/VCache";
 import {RatingType_Info, RatingType} from "./RatingType";
 import {WaitXThenRun} from "../../../../Frame/General/Timers";
 import keycode from "keycode";
+import NodeUI_Menu from "./NodeUI_Menu";
+import {MapNode} from "../MapNode";
+import {MapNodeType_Info} from "../MapNodeType";
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number} & Partial<{userID: string, ratingsRoot: RatingsRoot}>;
 @firebaseConnect(({node}: Props)=>[
@@ -83,69 +85,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						<a style={{position: "relative", fontSize: nodeTypeInfo.fontSize, whiteSpace: "initial"}}>
 							{node.title}
 						</a>
-						<VMenu contextMenu={true} onBody={true}>
-							{MapNodeType_Info.for[node.type].childTypes.map(childType=> {
-								let childTypeInfo = MapNodeType_Info.for[childType];
-								return (
-									<VMenuItem key={childType} text={`Add ${childTypeInfo.displayName}`} style={styles.vMenuItem} onClick={e=> {
-										if (e.button != 0) return;
-										let title = "";
-										let boxController = ShowMessageBox({
-											title: `Add ${childTypeInfo.displayName}`, cancelButton: true,
-											messageUI: ()=>(
-												<div style={{padding: "10px 0"}}>
-													Title: <TextInput //autoFocus={true}
-														ref={a=>a && WaitXThenRun(0, ()=>a.DOM.focus())}
-														onKeyDown={e=> {
-															if (e.keyCode != keycode.codes.enter) return;
-															boxController.options.onOK();
-															boxController.Close();
-														}}
-														value={title} onChange={val=>DN(title = val, boxController.UpdateUI())}/>
-												</div>
-											),
-											onOK: ()=> {
-												firebase.Ref("nodes").transaction(nodes=> {
-													if (!nodes) return nodes;
-
-													let newID = (nodes as Object).Props.Select(a=>a.name.KeyToInt).Max() + 1;
-													nodes[node._key].children = {
-														...nodes[node._key].children,
-														[newID.IntToKey]: {_: true}
-													};
-													nodes[newID.IntToKey] = new MapNode({
-														type: childType, title,
-														creator: userID, approved: true,
-													});
-													return nodes;
-												}, undefined, false);
-											}
-										});
-									}}/>
-								);
-							})}
-							<VMenuItem text="Delete" style={styles.vMenuItem} onClick={e=> {
-								if (e.button != 0) return;
-								firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
-									let nodes = (snapshot.val() as Object).Props.Select(a=>a.value.Extended({_key: a.name}));
-									let parentNodes = nodes.Where(a=>a.children && a.children[node._key]);
-									let s_ifParents = parentNodes.length > 1 ? "s" : "";
-									ShowMessageBox({
-										title: `Delete "${node.title}"`, cancelButton: true,
-										message: `Delete the node "${node.title}", and its link${s_ifParents} with ${parentNodes.length} parent-node${s_ifParents}?`,
-										onOK: ()=> {
-											firebase.Ref("nodes").transaction(nodes=> {
-												if (!nodes) return nodes;
-												for (let parent of parentNodes)
-													nodes[parent._key].children[node._key] = null;
-												nodes[node._key] = null;
-												return nodes;
-											}, undefined, false);
-										}
-									});
-								});
-							}}/>
-						</VMenu>
+						<NodeUI_Menu node={node} userID={userID}/>
 					</div>
 					<Button //text={nodeView && nodeView.expanded ? "-" : "+"} size={28}
 							style={{

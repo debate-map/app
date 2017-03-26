@@ -2,7 +2,6 @@ import V from "../../../Frame/V/V";
 import {_Enum, Enum} from "../../../Frame/General/Enums";
 import {RatingType} from "./MapNode/RatingType";
 import {MapNodeType, MapNodeType_Info} from "./MapNodeType";
-export {MapNodeType, MapNodeType_Info}; // temp
 
 export enum AccessLevel {
 	Base = 0,

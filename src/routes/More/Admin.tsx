@@ -3,10 +3,11 @@ import {BaseComponent, BaseProps} from "../../Frame/UI/ReactGlobals";
 import {firebaseConnect} from "react-redux-firebase";
 import Button from "../../Frame/ReactComponents/Button";
 import VMessageBox from "../../Frame/UI/VMessageBox";
-import {MapNode, MapNodeType} from "../@Shared/Maps/MapNode";
+import {MapNode} from "../@Shared/Maps/MapNode";
 import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
 import {Map, MapType} from "../@Shared/Maps/Map";
 import {E} from "../../Frame/General/Globals_Free";
+import {MapNodeType} from "../@Shared/Maps/MapNodeType";
 
 @firebaseConnect()
 export default class AdminUI extends BaseComponent<{}, {}> {

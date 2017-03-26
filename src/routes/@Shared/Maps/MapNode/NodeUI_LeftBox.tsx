@@ -1,5 +1,5 @@
 import {BaseComponent, Span} from "../../../../Frame/UI/ReactGlobals";
-import {MapNode, MapNodeType_Info} from "../MapNode";
+import {MapNode} from "../MapNode";
 import {MapNodeView, ACTMapNodePanelOpen} from "../../../../store/Store/Main/MapViews";
 import {Map} from "../Map";
 import MapNodeUI_Inner from "./NodeUI_Inner";
@@ -8,6 +8,7 @@ import {E} from "../../../../Frame/General/Globals_Free";
 import {Rating, RootState, GetPaths_NodeRatingsRoot, GetNodeRatingsRoot, RatingsRoot} from "../../../../store/reducers";
 import {connect} from "react-redux";
 import {CachedTransform} from "../../../../Frame/V/VCache";
+import {MapNodeType_Info} from "../MapNodeType";
 
 type Props = {
 	parent: MapNodeUI_Inner, map: Map, path: string, node: MapNode, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
