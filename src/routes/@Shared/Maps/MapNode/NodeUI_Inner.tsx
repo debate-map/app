@@ -41,8 +41,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 
 		let mainRatingSet = ratingsRoot && ratingsRoot[nodeTypeInfo.mainRatingTypes[0]];
-		let mainRatingAverage = CachedTransform("getMainRatingAverage", {nodeKey: node._key, ratingType: nodeTypeInfo.mainRatingTypes[0]}, {ratingSet: mainRatingSet},
-			()=>mainRatingSet ? mainRatingSet.Props.Where(a=>a.name != "_key").Select(a=>a.value.value).Average() : 0);
+		let mainRatingAverage = CachedTransform("getMainRatingAverage", {nodeID: node._id, ratingType: nodeTypeInfo.mainRatingTypes[0]}, {ratingSet: mainRatingSet},
+			()=>mainRatingSet ? mainRatingSet.Props.Where(a=>a.name != "_id").Select(a=>a.value.value).Average() : 0);
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
 		let panelToShow = openPanel_preview || (nodeView && nodeView.openPanel);
@@ -57,7 +57,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 					onClick={e=> {
 						if ((e.nativeEvent as any).ignore) return;
 						if (nodeView == null || !nodeView.selected)
-							store.dispatch(new ACTMapNodeSelect({mapID: map._key.KeyToInt, path}));
+							store.dispatch(new ACTMapNodeSelect({mapID: map._id, path}));
 					}}>
 				{leftPanelShow &&
 					<MapNodeUI_LeftBox parent={this} map={map} path={path} node={node} nodeView={nodeView} ratingsRoot={ratingsRoot}
@@ -100,7 +100,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								":hover": {backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(",").Select(a=>(parseInt(a) * .9).RoundTo(1)).join(",")},.7)`},
 							}}
 							onClick={e=> {
-								store.dispatch(new ACTMapNodeExpandedToggle({mapID: map._key.KeyToInt, path}));
+								store.dispatch(new ACTMapNodeExpandedToggle({mapID: map._id, path}));
 								//return false;
 								e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
 							}}>
@@ -115,7 +115,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${nodeTypeInfo.backgroundColor},.7)`}}/>
 						{RatingType_Info.for[panelToShow] &&
 							<RatingsUI node={node} path={path} ratingType={panelToShow as RatingType}
-								ratings={ratingsRoot && ratingsRoot[panelToShow] ? ratingsRoot[panelToShow].Props.Where(a=>a.name != "_key").Select(a=>a.value) : []}/>}
+								ratings={ratingsRoot && ratingsRoot[panelToShow] ? ratingsRoot[panelToShow].Props.Where(a=>a.name != "_id").Select(a=>a.value) : []}/>}
 						{panelToShow == "definitions" &&
 							<div style={{position: "relative"}}>
 								<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
@@ -131,7 +131,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						{panelToShow == "history" &&
 							<div style={{position: "relative"}}>
 								<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
-									NodeID: {node._key.KeyToInt}
+									NodeID: {node._id}
 								</div>
 							</div>}
 					</div>}

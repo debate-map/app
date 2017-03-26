@@ -55,12 +55,12 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 									firebase.Ref("nodes").transaction(nodes=> {
 										if (!nodes) return nodes;
 
-										let newID = (nodes as Object).Props.Select(a=>a.name.KeyToInt).Max() + 1;
-										nodes[node._key].children = {
-											...nodes[node._key].children,
-											[newID.IntToKey]: {_: true}
+										let newID = (nodes as Object).Props.Where(a=>a.name != "_").Select(a=>a.name).Max() + 1;
+										nodes[node._id].children = {
+											...nodes[node._id].children,
+											[newID]: {_: true}
 										};
-										nodes[newID.IntToKey] = new MapNode({
+										nodes[newID] = new MapNode({
 											type: childType, title,
 											creator: userID, approved: true,
 										});
@@ -73,13 +73,13 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 				})}
 				<VMenuItem text="Copy" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
-					store.dispatch(new ACTNodeCopy(node._key.KeyToInt));
+					store.dispatch(new ACTNodeCopy(node._id));
 				}}/>
 				{copiedNode &&
-					<VMenuItem text={`Paste "${copiedNode.title}"`} style={styles.vMenuItem} onClick={e=> {
+					<VMenuItem text={`Paste "${copiedNode.title.KeepAtMost(30)}"`} style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
 						//store.dispatch(new ACTNodeCopy(null));
-						firebase.Ref(`nodes/${node._key}/children`).update({[copiedNode._key]: {_: true}});
+						firebase.Ref(`nodes/${node._id}/children`).update({[copiedNode._id]: {_: true}});
 					}}/>}
 				<VMenuItem text="Edit title" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
@@ -102,16 +102,16 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							</div>
 						),
 						onOK: ()=> {
-							firebase.Ref(`nodes/${node._key}`).update({title});
+							firebase.Ref(`nodes/${node._id}`).update({title});
 						}
 					});
 				}}/>
 				<VMenuItem text="Unlink" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
 					firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
-						let nodes = (snapshot.val() as Object).Props.Select(a=>a.value.Extended({_key: a.name}));
+						let nodes = (snapshot.val() as Object).Props.Where(a=>a.name != "_").Select(a=>a.value.Extended({_id: a.name}));
 						//let childNodes = node.children.Select(a=>nodes[a]);
-						let parentNodes = nodes.Where(a=>a.children && a.children[node._key]);
+						let parentNodes = nodes.Where(a=>a.children && a.children[node._id]);
 						if (parentNodes.length <= 1)
 							return void ShowMessageBox({title: "Cannot unlink", message: "Cannot unlink this child, as doing so would orphan it. Try deleting it instead."});
 
@@ -122,7 +122,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							onOK: ()=> {
 								firebase.Ref("nodes").transaction(nodes=> {
 									if (!nodes) return nodes;
-									nodes[parentNode._key].children[node._key] = null;
+									nodes[parentNode._id].children[node._id] = null;
 									return nodes;
 								}, undefined, false);
 							}
@@ -134,9 +134,9 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 					if ((node.children || {}).VKeys().length)
 						return void ShowMessageBox({title: "Cannot delete", message: "Cannot delete this node until all its children have been deleted or unlinked."});
 					firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
-						let nodes = (snapshot.val() as Object).Props.Select(a=>a.value.Extended({_key: a.name}));
+						let nodes = (snapshot.val() as Object).Props.Select(a=>a.value.Extended({_id: a.name}));
 						//let childNodes = node.children.Select(a=>nodes[a]);
-						let parentNodes = nodes.Where(a=>a.children && a.children[node._key]);
+						let parentNodes = nodes.Where(a=>a.children && a.children[node._id]);
 						let s_ifParents = parentNodes.length > 1 ? "s" : "";
 						ShowMessageBox({
 							title: `Delete "${node.title}"`, cancelButton: true,
@@ -145,8 +145,8 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 								firebase.Ref("nodes").transaction(nodes=> {
 									if (!nodes) return nodes;
 									for (let parent of parentNodes)
-										nodes[parent._key].children[node._key] = null;
-									nodes[node._key] = null;
+										nodes[parent._id].children[node._id] = null;
+									nodes[node._id] = null;
 									return nodes;
 								}, undefined, false);
 							}

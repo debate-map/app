@@ -29,8 +29,8 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 					{ratingTypeInfo.mainRatingTypes.map((ratingType, index)=> {
 						let ratingSet = ratingsRoot && ratingsRoot[ratingType];
-						let average = CachedTransform("getMainRatingAverage", {nodeKey: node._key, ratingType}, {ratingSet},
-							()=>ratingSet ? ratingSet.Props.Where(a=>a.name != "_key").Select(a=>a.value.value).Average().RoundTo(1) : 0);
+						let average = CachedTransform("getMainRatingAverage", {nodeID: node._id, ratingType}, {ratingSet},
+							()=>ratingSet ? ratingSet.Props.Where(a=>a.name != "_id").Select(a=>a.value.value).Average().RoundTo(1) : 0);
 						return (
 							<PanelButton key={ratingType} parent={this} map={map} path={path}
 									panel={ratingType} text={ratingType.replace(/^(.)/, c=>c.toUpperCase())} style={E(index == 0 && {marginTop: 0})}>
@@ -76,7 +76,7 @@ class PanelButton extends BaseComponent<{parent: MapNodeUI_LeftBox, map: Map, pa
 			<Button text={text} style={E({position: "relative", display: "flex", justifyContent: "space-between", marginTop: 5, padding: "3px 7px"}, style)}
 					onClick={()=> {
 						//parent.props.parent.SetState({openPanel: panel});
-						store.dispatch(new ACTMapNodePanelOpen({mapID: map._key.KeyToInt, path, panel}));
+						store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel}));
 					}}
 					onMouseEnter={()=> {
 						let {parent} = this.props;

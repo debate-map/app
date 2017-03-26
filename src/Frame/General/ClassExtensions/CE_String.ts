@@ -146,16 +146,21 @@ String.prototype._AddFunction_Inline = function Indent(indentCount) {
     var indentStr = "\t".repeat(indentCount);
     return this.replace(/^|(\n)/g, "$1" + indentStr);
 };
+interface String { KeepAtMost: (maxLength: number, moreMarkerStr?: string)=>string; }
+String.prototype._AddFunction_Inline = function KeepAtMost(this: string, maxLength: number, moreMarkerStr = "...") {
+	if (this.length <= maxLength) return this;
+	return this.substr(0, maxLength - moreMarkerStr.length) + moreMarkerStr;
+};
 
 // for firebase entry keys
-interface String { readonly KeyToInt: number; }
+/*interface String { readonly KeyToInt: number; }
 String.prototype._AddGetter_Inline = function KeyToInt() {
 	return parseInt((this as string).substr(1));
 };
 interface Number { readonly IntToKey: string; }
 Number.prototype._AddGetter_Inline = function IntToKey() {
 	return "e" + this;
-};
+};*/
 
 interface String {
 	/** Creates a function from "func", setting its name to the "this" string's value. */

@@ -10,24 +10,16 @@ export enum AccessLevel {
 	Admin = 3,
 }
 
-export class ChildCollection {
-	[key: number]: {};
-}
-/*export interface ChildInfo {
-	id: number;
-	type;
-}*/
-
 export class MapNode {
 	constructor(initialData: {type: MapNodeType, title: string, creator: string} & Partial<MapNode>) {
 		this.Extend(initialData);
 	}
 
-	_key? = null as string;
-	type = null as MapNodeType;
-	title = null as string;
+	_id?: number;
+	type?: MapNodeType;
+	title?: string;
 
-	creator = null as string;
+	creator?: string;
 	approved = false;
 	accessLevel = AccessLevel.Base;
 	voteLevel = AccessLevel.Base;
@@ -38,5 +30,12 @@ export class MapNode {
 	weight = 0;
 	
 	children = new ChildCollection();
-	talkRoot = null as number;
+	talkRoot: number;
 }
+export class ChildCollection {
+	[key: number]: {};
+}
+/*export interface ChildInfo {
+	id: number;
+	type;
+}*/
