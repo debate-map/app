@@ -174,18 +174,18 @@ export class VVector3 {
 
 @Global
 export class VRect {
+	constructor(pos: Vector2i, size: Vector2i, y0IsBottom?: boolean);
+	constructor(x: number, y: number, width: number, height: number, y0IsBottom?: boolean);
 	constructor(...args) {
-	    if (args[0] && typeof args[0] != "number") {
-	        Assert(args[0] instanceof Vector2i || args[0] instanceof VVector2);
-			return new VRect(args[0].x, args[0].y, args[1].x, args[1].y);
-	    }
+		let x: number, y: number, width: number, height: number, y0IsBottom: boolean;
+		if (args.length == 2 || args.length == 3) [x, y, width, height, y0IsBottom] = [args[0].x, args[0].y, args[1].x, args[1].y, args[2]];
+		else [x, y, width, height, y0IsBottom] = args;
 
-	    var x = args[0], y = args[1], width = args[2], height = args[3], y0IsBottom = args[4];
 	    this.x = x;
 	    this.y = y;
 	    this.width = width != null ? width : 0;
 	    this.height = height != null ? height : 0;
-	    this.y0IsBottom = y0IsBottom || true;
+	    this.y0IsBottom = y0IsBottom != null ? y0IsBottom : true;
 	}
 
 	x: number;

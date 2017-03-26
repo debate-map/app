@@ -39,7 +39,7 @@ export class RatingType_Info {
 		strengthIfTrue: new RatingType_Info({
 			description: parentNode=> {
 				var type = parentNode.type == MapNodeType.SupportingArgument ? "raise" : "lower";
-				return `IF all the premises of this argument were true, and the parent thesis' prior probability were 50%, to what level would this argument ${type} it?`;
+				return `If all the premises of this argument were true, and the parent thesis' prior probability were 50%, to what level would this argument ${type} it?`;
 			},
 			options: Range(0, 100),
 			ticks: Range(0, 100, 5),
@@ -47,7 +47,7 @@ export class RatingType_Info {
 	} as {[key: string]: RatingType_Info};
 
 	private constructor(info: Partial<RatingType_Info>) {
-		this.Extend({info});
+		this.Extend(info);
 	}
 
 	description: string | ((parentNode: MapNode)=>string);

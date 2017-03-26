@@ -19,6 +19,7 @@ export class MainState {
 	mapViews = new MapViews();
 }
 export class ACTSetUserPanelOpen extends Action<boolean> {}
+
 let MainReducer_Real;
 export function MainReducer(state, action) {
 	MainReducer_Real = MainReducer_Real || CombineReducers({
@@ -47,6 +48,7 @@ export class RatingUIState {
 	smoothing = 5;
 }
 export class ACTRatingUISmoothnessSet extends Action<number> {}
+
 export function RatingUIReducer(state = new RatingUIState(), action: Action<any>): RatingUIState {
 	if (action.Is(ACTRatingUISmoothnessSet))
 		return {...state, smoothing: action.payload};
