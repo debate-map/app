@@ -16,7 +16,7 @@ export default class GlobalUI extends BaseComponent<{} & BaseProps, {}> {
 					<SubNavBarButton to="/global" text="Map"/>
 					<SubNavBarButton to="/global/list" text="List"/>
 				</SubNavbar>
-				{/*<ScrollView style={{flex: "1 1 100%"}} scrollVBarStyles={{width: 10}}>*/}
+				{/*<ScrollView style={{flex: "1 1 100%"}} scrollVBarStyle={{width: 10}}>*/}
 				<Route path="/global" component={GlobalMapUI}/>
 				<Route path="/global/list" component={()=><div/>}/>
 				{/*</ScrollView>*/}

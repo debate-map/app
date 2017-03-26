@@ -1,4 +1,4 @@
-import {RootState} from "../../../store/reducers";
+import {RootState, GetMapView} from "../../../store/reducers";
 import {BaseComponent, FirebaseDatabase, FindDOM, FindReact} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
@@ -17,50 +17,52 @@ import NodeUI from "./MapNode/NodeUI";
 import ScrollView from "react-vscrollview";
 import {GetDistanceBetweenRectAndPoint} from "../../../Frame/General/Geometry";
 import NodeUI_Inner from "./MapNode/NodeUI_Inner";
+//import ReactResizeDetector from "react-resize-detector"; // this one doesn't seem to work reliably -- at least for the map-ui
+import ResizeSensor from "react-resize-sensor";
+import {WaitXThenRun} from "../../../Frame/General/Timers";
 
-type Props = {map: Map, rootNode?: MapNode};
+type Props = {map: Map, rootNode?: MapNode, focusNode?: string, viewOffset?: {x: number, y: number}};
 @firebaseConnect(({map}: {map: Map})=> [
 	map && DBPath(`nodes/${map.rootNode}`),
 ].Where(a=>!!a))
-@(connect(({firebase}: RootState, {map}: Props)=> ({
-	rootNode: map && GetData(firebase, `nodes/${map.rootNode}`),
+@(connect((state: RootState, {map}: Props)=> ({
+	rootNode: map && GetData(state.firebase, `nodes/${map.rootNode}`),
+	/*focusNode: GetMapView(state, {map}) ? GetMapView(state, {map}).focusNode : null,
+	viewOffset: GetMapView(state, {map}) ? GetMapView(state, {map}).viewOffset : null,*/
+	/*focusNode_available: (GetMapView(state, {map}) && GetMapView(state, {map}).focusNode) != null,
+	viewOffset_available: (GetMapView(state, {map}) && GetMapView(state, {map}).viewOffset) != null,*/
 })) as any)
 export default class MapUI extends BaseComponent<Props, {} | void> {
-	/*static childContextTypes = {
-		//mapID: PropTypes.number.isRequired,
-		map: PropTypes.object,
-	};
-	getChildContext() {
-		let {map} = this.props;
-		return {map};
-	}*/
 	downPos: Vector2i;
+
+	/*ComponentDidMountOrUpdate(oldProps: Props) {
+		let {map, rootNode} = this.props;
+		// if 
+		if (map && rootNode && !(oldProps.map && oldProps.rootNode)) {
+
+		}
+	}*/
+
+	hasLoadedScroll = false;
 	render() {
+		//let {map, rootNode, focusNode: focusNode_target, viewOffset: viewOffset_target} = this.props;
 		let {map, rootNode} = this.props;
 		if (map == null)
-			return <div>Loading map...</div>;
+			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading map...</div>;
 		Assert(map._key, "map._key is null!");
 		if (rootNode == null)
-			return <div>Loading root node...</div>;
+			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading root node...</div>;
 		return (
-			<ScrollView backgroundDrag={true} backgroundDragMatchFunc={a=>a == this.refs.content} scrollVBarStyles={{width: 10}} contentStyle={{willChange: "transform"}}
-						/*bufferScrollEventsBy={100000}*/
-						onScrollEnd={pos=> {
-							//Log("ScrollEnd:" + pos.x + ";" + pos.y);
-							//let rootBox = $(".NodeUI_Inner.root");
-							let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
-							let closestNodeBox = $(".NodeUI_Inner").ToList().Min(nodeBox=> {
-								/*let nodeBoxRect_onScreen = new VRect(nodeBox[0].getBoundingClientRect().left, nodeBox[0].getBoundingClientRect().top,
-									nodeBox.outerWidth(), nodeBox.outerHeight());
-								return GetDistanceBetweenRectAndPoint(nodeBoxRect_onScreen, viewCenter_onScreen);*/
-								return GetDistanceBetweenRectAndPoint(nodeBox.GetScreenRect(), viewCenter_onScreen);
-							});
-							let closestNodeBoxComp = FindReact(closestNodeBox[0]) as NodeUI_Inner;
-							let closestNode_path = closestNodeBoxComp.props.path;
-							let viewOffset = viewCenter_onScreen.Minus(closestNodeBox.GetScreenRect().Position);
-							store.dispatch(new ACTViewCenterChange({mapID: closestNodeBoxComp.props.map._key.KeyToInt, focusNode: closestNode_path, viewOffset}));
-						}}>
-					<div id="MapUI" ref="content"
+			<ScrollView ref="scrollView" backgroundDrag={true} backgroundDragMatchFunc={a=>a == this.refs.content}
+					scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}
+					onScrollEnd={pos=> {
+						let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
+						let focusNodeBox = $(".NodeUI_Inner").ToList().Min(nodeBox=>GetDistanceBetweenRectAndPoint(nodeBox.GetScreenRect(), viewCenter_onScreen));
+						let focusNodeBoxComp = FindReact(focusNodeBox[0]) as NodeUI_Inner;
+						let viewOffset = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position);
+						store.dispatch(new ACTViewCenterChange({mapID: focusNodeBoxComp.props.map._key.KeyToInt, focusNode: focusNodeBoxComp.props.path, viewOffset}));
+					}}>
+				<div id="MapUI" ref="content"
 						style={{
 							position: "relative", display: "flex", padding: "150px 5000px 5000px 870px", whiteSpace: "nowrap",
 							filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)",
@@ -78,7 +80,29 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 							e.preventDefault();
 						}}>
 					<NodeUI map={map} node={rootNode}/>
-					<div style={{width: 1500}}/>
+					{/*<ReactResizeDetector handleWidth handleHeight onResize={()=> {*/}
+					<ResizeSensor onResize={()=> {
+						if (this.hasLoadedScroll) return;
+						let state = store.getState();
+						let focusNode_target = GetMapView(state, {map}) ? GetMapView(state, {map}).focusNode : null;
+						let viewOffset_target = GetMapView(state, {map}) ? GetMapView(state, {map}).viewOffset : null;
+						//Log(`Resizing:${focusNode_target};${viewOffset_target}`);
+						if (focusNode_target == null || viewOffset_target == null) return;
+
+						// load scroll from store
+						let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
+						let focusNodeBox = $(".NodeUI_Inner").ToList().FirstOrX(nodeBox=>(FindReact(nodeBox[0]) as NodeUI_Inner).props.path == focusNode_target);
+						if (focusNodeBox == null) return;
+
+						let viewOffset_current = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position);
+
+						let viewOffset_changeNeeded = new Vector2i(viewOffset_target).Minus(viewOffset_current);
+						//Log("Loading!" + viewOffset_changeNeeded);
+						/*this.refs.scrollView.refs.content.scrollLeft += viewOffset_changeNeeded.x;
+						this.refs.scrollView.refs.content.scrollTop += viewOffset_changeNeeded.y;*/
+						(this.refs.scrollView as ScrollView).ScrollBy(viewOffset_changeNeeded);
+						this.hasLoadedScroll = true;
+					}}/>
 				</div>
 			</ScrollView>
 		);
