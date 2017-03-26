@@ -1,3 +1,4 @@
+import {Vector2i} from "../../../Frame/General/VectorStructs";
 import Action from "../../../Frame/General/Action";
 import {FromJSON, ToJSON} from "../../../Frame/General/Globals";
 import {GetTreeNodesInObjTree, GetTreeNodesInPath, VisitTreeNodesInPath, TreeNode} from "../../../Frame/V/V";
@@ -7,19 +8,11 @@ import {A, Assert} from "../../../Frame/General/Assert";
 export class MapViews {
 	[key: number]: MapView;
 }
-export class MapView {
-	rootNodeView = new MapNodeView();
-}
-export class MapNodeView {
-	expanded?: boolean;
-	selected?: boolean;
-	openPanel?: string;
-	children = {} as {[key: string]: MapNodeView};
-}
-
 export class ACTMapNodeSelect extends Action<{mapID: number, path: string}> {}
 export class ACTMapNodePanelOpen extends Action<{mapID: number, path: string, panel: string}> {}
 export class ACTMapNodeExpandedToggle extends Action<{mapID: number, path: string}> {}
+export class ACTViewCenterChange extends Action<{mapID: number, focusNode: string, viewOffset: Vector2i}> {}
+
 export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 	if (action.type == "@@router/LOCATION_CHANGE" && action.payload.pathname == "/global")
 		return {...state, 1: state[1] || new MapView()};
@@ -29,24 +22,17 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 		return {...state, [action.payload.mapID]: MapViewReducer(state[action.payload.mapID], action)};
 	if (action.Is(ACTMapNodeExpandedToggle))
 		return {...state, [action.payload.mapID]: MapViewReducer(state[action.payload.mapID], action)};
+	if (action.Is(ACTViewCenterChange))
+		return {...state, [action.payload.mapID]: MapViewReducer(state[action.payload.mapID], action)};
 	return state;
 }
 
-/*function GetNodeViewAtPath(rootNodeView: MapNodeView, path: string, createPathIfNotExisting = true) {
-	if (!path) return null;
-	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
-	let newRootNodeView_currentNode = rootNodeView;
-	for (let nodeID of pathNodeIDs.Skip(1)) {
-		if (newRootNodeView_currentNode.children[nodeID] == null) {
-			if (createPathIfNotExisting)
-				newRootNodeView_currentNode.children[nodeID] = {children: {}};
-			else
-				return null;
-		}
-		newRootNodeView_currentNode = newRootNodeView_currentNode.children[nodeID];
-	}
-	return newRootNodeView_currentNode;
-}*/
+export class MapView {
+	rootNodeView = new MapNodeView();
+	focusNode: string;
+	/** Offset of view-center from focus-node. */
+	viewOffset: Vector2i;
+}
 
 function MapViewReducer(state = new MapView(), action: Action<any>) {
 	if (action.Is(ACTMapNodeSelect)) {
@@ -93,5 +79,14 @@ function MapViewReducer(state = new MapView(), action: Action<any>) {
 		currentNodeInNewTree.expanded = !currentNodeInNewTree.expanded;
 		return {...state, rootNodeView: newRootNodeView_2};
 	}
+	if (action.Is(ACTViewCenterChange))
+		return {...state, focusNode: action.payload.focusNode, viewOffset: action.payload.viewOffset};
 	return state;
+}
+
+export class MapNodeView {
+	expanded?: boolean;
+	selected?: boolean;
+	openPanel?: string;
+	children = {} as {[key: string]: MapNodeView};
 }

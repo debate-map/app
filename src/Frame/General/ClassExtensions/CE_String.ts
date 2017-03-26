@@ -26,10 +26,11 @@ String.prototype._AddFunction_Inline = function hashCode() {
 	}
 	return hash;
 };
-String.prototype._AddFunction_Inline = function Matches(strOrRegex) {
+interface String { Matches: (strOrRegex: string | RegExp)=>{index: number}[]; }
+String.prototype._AddFunction_Inline = function Matches(strOrRegex: string | RegExp) {
 	if (typeof strOrRegex == "string") {
 		var str = strOrRegex;
-		var result = [];
+		var result = [] as {index: number}[];
 		var lastMatchIndex = -1;
 		while (true) {
 			var matchIndex = this.indexOf(str, lastMatchIndex + 1);
@@ -45,7 +46,7 @@ String.prototype._AddFunction_Inline = function Matches(strOrRegex) {
 	if (!regex.global)
 		throw new Error("Regex must have the 'g' flag added. (otherwise an infinite loop occurs)");
 
-	var result = [];
+	var result = [] as {index: number}[];
 	var match;
 	while (match = regex.exec(this))
 		result.push(match);

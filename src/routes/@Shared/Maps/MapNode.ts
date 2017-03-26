@@ -50,7 +50,7 @@ export class MapNodeType_Info {
 	} as {[key: string]: MapNodeType_Info};
 
 	private constructor(info: Partial<MapNodeType_Info>) {
-		this.Extend({info});
+		this.Extend(info);
 	}
 
 	displayName: string;

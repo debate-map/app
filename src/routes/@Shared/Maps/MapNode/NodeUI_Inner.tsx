@@ -53,7 +53,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let bottomPanelShow = leftPanelShow && panelToShow;
 
 		return (
-			<div style={{
+			<div className={`NodeUI_Inner${pathNodeIDs.length == 0 ? " root" : ""}`} style={{
 						display: "flex", position: "relative", borderRadius: 5, cursor: "default",
 						boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, width, minWidth: widthOverride,
 					}}
