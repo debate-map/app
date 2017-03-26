@@ -7,12 +7,10 @@ import {Debugger, QuickIncrement, E, GetTimeSinceLoad} from "../../../../Frame/G
 import Button from "../../../../Frame/ReactComponents/Button";
 import {PropTypes, Component} from "react";
 import Action from "../../../../Frame/General/Action";
-import {GetSelectedNodeID, GetUserID, MakeGetNodeView, RootState, MakeGetNodeChildIDs} from "../../../../store/reducers";
 import {Map} from "../Map";
 import {Log} from "../../../../Frame/General/Logging";
 import {WaitXThenRun} from "../../../../Frame/General/Timers";
 import V from "../../../../Frame/V/V";
-import {MapNodeView, ACTMapNodeSelect, ACTMapNodeExpandedToggle, ACTMapNodePanelOpen} from "../../../../store/Store/Main/MapViews";
 import * as VMenuTest1 from "react-vmenu";
 import VMenu, {VMenuItem} from "react-vmenu";
 import Select from "../../../../Frame/ReactComponents/Select";
@@ -29,6 +27,10 @@ import NodeConnectorBackground from "./NodeConnectorBackground";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {MapNodeType_Info, MapNodeType} from "../MapNodeType";
+import {MakeGetNodeChildIDs} from "../../../../store/Root/Firebase";
+import {MakeGetNodeView} from "../../../../store/Root/Main";
+import {RootState} from "../../../../store/Root";
+import {MapNodeView} from "../../../../store/Root/Main/MapViews";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function FirebaseConnect(innerFirebaseConnect) {

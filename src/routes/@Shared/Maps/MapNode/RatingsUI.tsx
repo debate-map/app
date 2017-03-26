@@ -5,8 +5,6 @@ import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {Range, DN} from "../../../../Frame/General/Globals";
 import Spinner from "../../../../Frame/ReactComponents/Spinner";
 import {connect} from "react-redux";
-import {RootState, GetRatingUISmoothing, GetUserID, Rating} from "../../../../store/reducers";
-import {ACTRatingUISmoothnessSet} from "../../../../store/Store/Main";
 import Select from "../../../../Frame/ReactComponents/Select";
 import {ShowMessageBox_Base, ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
 import {firebaseConnect} from "react-redux-firebase";
@@ -14,6 +12,9 @@ import {MapNode} from "../MapNode";
 import {GetData} from "../../../../Frame/Database/DatabaseHelpers";
 import {RatingType, RatingType_Info} from "./RatingType";
 import {MapNodeType_Info} from "../MapNodeType";
+import {ACTRatingUISmoothnessSet, GetRatingUISmoothing} from "../../../../store/Root/Main";
+import {GetUserID, Rating} from "../../../../store/Root/Firebase";
+import {RootState} from "../../../../store/Root";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 

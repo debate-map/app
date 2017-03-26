@@ -11,11 +11,25 @@ import {DataSnapshot} from "firebase";
 import {DN} from "../../../../Frame/General/Globals";
 import keycode from "keycode";
 import {firebaseConnect} from "react-redux-firebase";
+import {connect} from "react-redux";
+import {RootState} from "../../../../store/Root";
+import {GetData} from "../../../../Frame/Database/DatabaseHelpers";
+import {ACTNodeCopy} from "../../../../store/Root/Main";
+import {GetNode} from "../../../../store/Root/Firebase";
 
+type Props = {node: MapNode, path: string, userID: string} & Partial<{parentNode: MapNode, copiedNode: MapNode}>;
 @firebaseConnect()
-export default class NodeUI_Menu extends BaseComponent<{node: MapNode, userID: string}, {}> {
+@(connect((state: RootState, {path}: Props)=> {
+	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
+	return {
+		parentNode: GetNode(pathNodeIDs.XFromLast(1)),
+		//copiedNode: state.main.copiedNode,
+		copiedNode: GetNode(state.main.copiedNode),
+	};
+}) as any)
+export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {
-		let {node, userID, firebase} = this.props;
+		let {node, userID, parentNode, copiedNode, firebase} = this.props;
 		return (
 			<VMenu contextMenu={true} onBody={true}>
 				{MapNodeType_Info.for[node.type].childTypes.map(childType=> {
@@ -57,6 +71,16 @@ export default class NodeUI_Menu extends BaseComponent<{node: MapNode, userID: s
 						}}/>
 					);
 				})}
+				<VMenuItem text="Copy" style={styles.vMenuItem} onClick={e=> {
+					if (e.button != 0) return;
+					store.dispatch(new ACTNodeCopy(node._key.KeyToInt));
+				}}/>
+				{copiedNode &&
+					<VMenuItem text={`Paste "${copiedNode.title}"`} style={styles.vMenuItem} onClick={e=> {
+						if (e.button != 0) return;
+						//store.dispatch(new ACTNodeCopy(null));
+						firebase.Ref(`nodes/${node._key}/children`).update({[copiedNode._key]: {_: true}});
+					}}/>}
 				<VMenuItem text="Edit title" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
 					let title = node.title;
@@ -80,6 +104,29 @@ export default class NodeUI_Menu extends BaseComponent<{node: MapNode, userID: s
 						onOK: ()=> {
 							firebase.Ref(`nodes/${node._key}`).update({title});
 						}
+					});
+				}}/>
+				<VMenuItem text="Unlink" style={styles.vMenuItem} onClick={e=> {
+					if (e.button != 0) return;
+					firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
+						let nodes = (snapshot.val() as Object).Props.Select(a=>a.value.Extended({_key: a.name}));
+						//let childNodes = node.children.Select(a=>nodes[a]);
+						let parentNodes = nodes.Where(a=>a.children && a.children[node._key]);
+						if (parentNodes.length <= 1)
+							return void ShowMessageBox({title: "Cannot unlink", message: "Cannot unlink this child, as doing so would orphan it. Try deleting it instead."});
+
+						//let parent = parentNodes[0];
+						ShowMessageBox({
+							title: `Unlink child "${node.title}"`, cancelButton: true,
+							message: `Unlink the child "${node.title}" from its parent "${parentNode.title}"?`,
+							onOK: ()=> {
+								firebase.Ref("nodes").transaction(nodes=> {
+									if (!nodes) return nodes;
+									nodes[parentNode._key].children[node._key] = null;
+									return nodes;
+								}, undefined, false);
+							}
+						});
 					});
 				}}/>
 				<VMenuItem text="Delete" style={styles.vMenuItem} onClick={e=> {

@@ -1,14 +1,14 @@
 import {BaseComponent, Span} from "../../../../Frame/UI/ReactGlobals";
 import {MapNode} from "../MapNode";
-import {MapNodeView, ACTMapNodePanelOpen} from "../../../../store/Store/Main/MapViews";
 import {Map} from "../Map";
 import MapNodeUI_Inner from "./NodeUI_Inner";
 import Button from "../../../../Frame/ReactComponents/Button";
 import {E} from "../../../../Frame/General/Globals_Free";
-import {Rating, RootState, GetPaths_NodeRatingsRoot, GetNodeRatingsRoot, RatingsRoot} from "../../../../store/reducers";
 import {connect} from "react-redux";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {MapNodeType_Info} from "../MapNodeType";
+import {MapNodeView, ACTMapNodePanelOpen} from "../../../../store/Root/Main/MapViews";
+import {RatingsRoot} from "../../../../store/Root/Firebase";
 
 type Props = {
 	parent: MapNodeUI_Inner, map: Map, path: string, node: MapNode, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,

@@ -1,6 +1,6 @@
 import {applyMiddleware, compose, createStore} from "redux";
 import thunk from "redux-thunk";
-import {MakeRootReducer} from "./reducers";
+import {MakeRootReducer} from "./Root";
 import {createBrowserHistory} from "react-router/node_modules/history";
 import {reduxFirebase, getFirebase} from "react-redux-firebase";
 import {firebase as fbConfig, reduxFirebase as reduxConfig} from "../config";
@@ -62,8 +62,8 @@ export default function(initialState = {}, history) {
 		persister.purge();
 
 	if (module.hot) {
-		module.hot.accept("./reducers", () => {
-			const reducers = require("./reducers").MakeRootReducer;
+		module.hot.accept("./Root", () => {
+			const reducers = require("./Root").MakeRootReducer;
 			store.replaceReducer(reducers(store.asyncReducers));
 		});
 	}

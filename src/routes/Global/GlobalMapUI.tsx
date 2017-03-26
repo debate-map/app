@@ -8,11 +8,12 @@ import MapUI from "../@Shared/Maps/MapUI";
 import {Debugger} from "../../Frame/General/Globals_Free";
 import {P} from "../../Frame/Serialization/VDF/VDFTypeInfo";
 import ScrollView from "react-vscrollview";
+import {RootState} from "../../store/Root";
 
 @firebaseConnect([
 	DBPath("maps/e1"),
 ])
-@(connect(({firebase}: {firebase: FirebaseDatabase})=> ({
+@(connect(({firebase}: RootState)=> ({
 	//map: helpers.dataToJS(firebase, DBPath("maps/e1")),
 	map: GetData(firebase, "maps/e1"),
 })) as any)
