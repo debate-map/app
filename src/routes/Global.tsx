@@ -4,7 +4,7 @@ import SubNavbar from "./@Shared/SubNavbar";
 import {SubNavBarButton} from "./@Shared/SubNavbar";
 import {Route} from "react-router-dom";
 import GlobalMapUI from "./Global/GlobalMapUI";
-var ScrollView = require("react-free-scrollbar").default;
+import ScrollView from "react-vscrollview";
 
 @firebaseConnect()
 export default class GlobalUI extends BaseComponent<{} & BaseProps, {}> {

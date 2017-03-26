@@ -2,7 +2,7 @@ import {SubNavBarButton} from "../@Shared/SubNavbar";
 import SubNavbar from "../@Shared/SubNavbar";
 import {BaseComponent, BaseProps} from "../../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
-var ScrollView = require("react-free-scrollbar").default;
+import ScrollView from "react-vscrollview";
 
 let pageText = `
 TODO

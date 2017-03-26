@@ -4,12 +4,11 @@ import {BaseComponent, BaseProps} from "../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../Frame/ReactComponents/VReactMarkdown";
 import SubNavbar from "./@Shared/SubNavbar";
 import {SubNavBarButton} from "./@Shared/SubNavbar";
-//import ScrollView from "react-free-scrollbar";
 import {Route} from "react-router-dom";
 import HomeUI from "./Root/Home";
 import AboutUI from "./Root/About";
 import {GetUrlVars, GetUrlPath} from "../Frame/General/Globals_Free";
-var ScrollView = require("react-free-scrollbar").default;
+import ScrollView from "react-vscrollview";
 
 export default class RootUI2 extends BaseComponent<{} & BaseProps, {}> {
 	render() {

@@ -8,13 +8,13 @@ import {DBPath, GetData} from "../../../Frame/Database/DatabaseHelpers";
 import {MapNode} from "./MapNode";
 import {Debugger} from "../../../Frame/General/Globals_Free";
 import {PropTypes} from "react";
-import {Assert} from "../../../Frame/Serialization/VDF/VDF";
+import {Assert, Log} from "../../../Frame/Serialization/VDF/VDF";
 import V from "../../../Frame/V/V";
 import {GetTreeNodesInObjTree} from "../../../Frame/V/V";
 import {Vector2i} from "../../../Frame/General/VectorStructs";
 import {ACTMapNodeSelect} from "../../../store/Store/Main/MapViews";
 import NodeUI from "./MapNode/NodeUI";
-var ScrollView = require("react-free-scrollbar").default;
+import ScrollView from "react-vscrollview";
 
 type Props = {map: Map, rootNode?: MapNode};
 @firebaseConnect(({map}: {map: Map})=> [
@@ -42,7 +42,10 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 			return <div>Loading root node...</div>;
 		return (
 			<ScrollView backgroundDrag={true} backgroundDragMatchFunc={a=>a == this.refs.content} scrollVBarStyles={{width: 10}} contentStyle={{willChange: "transform"}}
-						/*bufferScrollEventsBy={100000}*/>
+						/*bufferScrollEventsBy={100000}*/
+						onScrollEnd={pos=> {
+							Log("ScrollEnd:" + pos.x + ";" + pos.y);
+						}}>
 					<div id="MapUI" ref="content"
 						style={{
 							position: "relative", display: "flex", padding: "150px 5000px 5000px 870px", whiteSpace: "nowrap",

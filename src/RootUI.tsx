@@ -4,8 +4,7 @@ import Navbar from "./containers/Navbar";
 import "./styles/core.scss";
 import {BaseComponent, AddGlobalStyle} from "./Frame/UI/ReactGlobals";
 //import {Component as BaseComponent} from "react";
-//import ScrollView from "react-free-scrollbar";
-var ScrollView = require("react-free-scrollbar").default;
+import ScrollView from "react-vscrollview";
 import getMuiTheme from "material-ui/styles/getMuiTheme";
 // Themeing/Styling
 import Theme from "./theme";
