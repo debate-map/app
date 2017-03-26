@@ -55,6 +55,7 @@ export function ShowMessageBox_Base(o: MessageBoxOptions) {
 	return new BoxController(o, o.boxID);
 }
 export function ShowMessageBox(options: Partial<MessageBoxOptions>) {
+//export function ShowMessageBox(options: {[P in keyof MessageBoxOptions]?: MessageBoxOptions[P];}) { // do it this way, so the options are shown
 	let o = E(new MessageBoxOptions(), options) as MessageBoxOptions;
 
 	o.ui = ()=>(

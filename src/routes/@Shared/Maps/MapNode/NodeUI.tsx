@@ -1,5 +1,5 @@
 import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, FindDOM_} from "../../../../Frame/UI/ReactGlobals";
-import {MapNode, MapNodeType, MapNodeType_Info} from "../MapNode";
+import {MapNode} from "../MapNode";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
 import {DBPath, GetData} from "../../../../Frame/Database/DatabaseHelpers";
@@ -28,6 +28,7 @@ import {createMarkupForStyles} from "react/lib/CSSPropertyOperations";
 import NodeConnectorBackground from "./NodeConnectorBackground";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {CachedTransform} from "../../../../Frame/V/VCache";
+import {MapNodeType_Info, MapNodeType} from "../MapNodeType";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function FirebaseConnect(innerFirebaseConnect) {
@@ -141,9 +142,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let expectedOtherStuffWidth = 28;
 		let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
 
-		let minWidth = node.type == MapNodeType.Thesis ? 350 : 100;
-		let maxWidth = node.type == MapNodeType.Thesis ? 550 : 200;
-		let width = expectedBoxWidth.KeepBetween(minWidth, maxWidth);
+		let nodeTypeInfo = MapNodeType_Info.for[node.type];
+		let width = expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
 
 		let maxTextWidth = width - expectedOtherStuffWidth;
 		let expectedTextHeight = V.GetContentHeight($(`<a style='${

@@ -13,35 +13,35 @@ export class MapNodeType_Info {
 		[MapNodeType.Category]: new MapNodeType_Info({
 			displayName: "category",
 			childTypes: [MapNodeType.Category, MapNodeType.Package, MapNodeType.Thesis],
-			backgroundColor: "40,60,80",
+			minWidth: 100, maxWidth: 200, backgroundColor: "40,60,80",
 			mainRatingTypes: ["significance"],
 			otherRatingTypes: [],
 		}),
 		[MapNodeType.Package]: new MapNodeType_Info({
 			displayName: "package",
 			childTypes: [MapNodeType.Thesis],
-			backgroundColor: "40,60,80",
+			minWidth: 100, maxWidth: 200, backgroundColor: "40,60,80",
 			mainRatingTypes: ["significance"],
 			otherRatingTypes: [],
 		}),
 		[MapNodeType.Thesis]: new MapNodeType_Info({
 			displayName: "thesis (as premise)",
 			childTypes: [MapNodeType.SupportingArgument, MapNodeType.OpposingArgument],
-			backgroundColor: "0,80,150",
+			minWidth: 350, maxWidth: 550, backgroundColor: "0,80,150",
 			mainRatingTypes: ["probability", "adjustment"],
 			otherRatingTypes: [],
 		}),
 		[MapNodeType.SupportingArgument]: new MapNodeType_Info({
 			displayName: "supporting argument",
 			childTypes: [MapNodeType.Thesis],
-			backgroundColor: "30,100,30",
+			minWidth: 100, maxWidth: 300, backgroundColor: "30,100,30",
 			mainRatingTypes: [],
 			otherRatingTypes: [],
 		}),
 		[MapNodeType.OpposingArgument]: new MapNodeType_Info({
 			displayName: "opposing argument",
 			childTypes: [MapNodeType.Thesis],
-			backgroundColor: "100,30,30",
+			minWidth: 100, maxWidth: 300, backgroundColor: "100,30,30",
 			mainRatingTypes: [],
 			otherRatingTypes: [],
 		}),
@@ -53,11 +53,12 @@ export class MapNodeType_Info {
 
 	displayName: string;
 	childTypes: MapNodeType[];
+	minWidth: number;
+	maxWidth: number;
 	backgroundColor: string;
 	//fontSize?: number;
 	get fontSize() { return 14; }
 	mainRatingTypes: RatingType[];
 	otherRatingTypes: RatingType[];
-
 }
 // if any premises below are [true/false], they [strengthen/weaken/guarantee] the parent [/true/false]

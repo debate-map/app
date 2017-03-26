@@ -1,9 +1,10 @@
 import {BaseComponent, FindDOM, SimpleShouldUpdate_Overridable} from "../../../../Frame/UI/ReactGlobals";
 import NodeUI from "./NodeUI";
-import {MapNode, MapNodeType, MapNodeType_Info} from "../MapNode";
+import {MapNode} from "../MapNode";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {A} from "../../../../Frame/General/Assert";
 import ShallowCompare from "react-addons-shallow-compare";
+import {MapNodeType_Info, MapNodeType} from "../MapNodeType";
 
 type Props = {node: MapNode, mainBoxOffset: Vector2i, childNodes: MapNode[], childBoxOffsets: Vector2i[], shouldUpdate: boolean};
 @SimpleShouldUpdate_Overridable
