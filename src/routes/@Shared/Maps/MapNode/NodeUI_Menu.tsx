@@ -15,13 +15,24 @@ import {connect} from "react-redux";
 import {RootState} from "../../../../store/Root";
 import {GetData} from "../../../../Frame/Database/DatabaseHelpers";
 import {ACTNodeCopy} from "../../../../store/Root/Main";
-import {GetNode} from "../../../../store/Root/Firebase";
+import {PermissionGroupSet} from "../../Users/UserExtraInfo";
+import {FirebaseConnect, GetUserPermissionGroups_Path, GetUserID, GetUserPermissionGroups, GetNode} from "../../../../store/Root/Firebase";
 
-type Props = {node: MapNode, path: string, userID: string} & Partial<{parentNode: MapNode, copiedNode: MapNode}>;
-@firebaseConnect()
+/*export function BasicEditing(permissionGroups: PermissionGroupSet) {
+	return permissionGroups && permissionGroups.basic;
+}*/
+export function CreatorOrMod(node: MapNode, userID: string, permissionGroups: PermissionGroupSet) {
+	return (node.creator == userID && permissionGroups.basic) || permissionGroups.mod;
+}
+
+type Props = {node: MapNode, path: string, userID: string} & Partial<{permissionGroups: PermissionGroupSet, parentNode: MapNode, copiedNode: MapNode}>;
+@FirebaseConnect(()=>[
+	GetUserPermissionGroups_Path(GetUserID())
+])
 @(connect((state: RootState, {path}: Props)=> {
 	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 	return {
+		permissionGroups: GetUserPermissionGroups(GetUserID()), 
 		parentNode: GetNode(pathNodeIDs.XFromLast(1)),
 		//copiedNode: state.main.copiedNode,
 		copiedNode: GetNode(state.main.copiedNode),
@@ -29,10 +40,11 @@ type Props = {node: MapNode, path: string, userID: string} & Partial<{parentNode
 }) as any)
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {
-		let {node, userID, parentNode, copiedNode, firebase} = this.props;
+		let {node, userID, permissionGroups, parentNode, copiedNode, firebase} = this.props;
+		if (permissionGroups == null) return <div/>;
 		return (
 			<VMenuStub>
-				{MapNodeType_Info.for[node.type].childTypes.map(childType=> {
+				{permissionGroups.basic && MapNodeType_Info.for[node.type].childTypes.map(childType=> {
 					let childTypeInfo = MapNodeType_Info.for[childType];
 					return (
 						<VMenuItem key={childType} text={`Add ${childTypeInfo.displayName}`} style={styles.vMenuItem} onClick={e=> {
@@ -71,17 +83,17 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						}}/>
 					);
 				})}
-				<VMenuItem text="Copy" style={styles.vMenuItem} onClick={e=> {
+				{permissionGroups.basic && <VMenuItem text="Copy" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
 					store.dispatch(new ACTNodeCopy(node._id));
-				}}/>
-				{copiedNode &&
+				}}/>}
+				{permissionGroups.basic && copiedNode &&
 					<VMenuItem text={`Paste "${copiedNode.title.KeepAtMost(30)}"`} style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
 						//store.dispatch(new ACTNodeCopy(null));
 						firebase.Ref(`nodes/${node._id}/children`).update({[copiedNode._id]: {_: true}});
 					}}/>}
-				<VMenuItem text="Edit title" style={styles.vMenuItem} onClick={e=> {
+				{CreatorOrMod(node, userID, permissionGroups) && <VMenuItem text="Edit title" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
 					let title = node.title;
 					let boxController = ShowMessageBox({
@@ -105,8 +117,8 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							firebase.Ref(`nodes/${node._id}`).update({title});
 						}
 					});
-				}}/>
-				<VMenuItem text="Unlink" style={styles.vMenuItem} onClick={e=> {
+				}}/>}
+				{CreatorOrMod(node, userID, permissionGroups) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
 					firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
 						let nodes = (snapshot.val() as Object).Props.Where(a=>a.name != "_").Select(a=>a.value.Extended({_id: a.name}));
@@ -128,8 +140,8 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							}
 						});
 					});
-				}}/>
-				<VMenuItem text="Delete" style={styles.vMenuItem} onClick={e=> {
+				}}/>}
+				{CreatorOrMod(node, userID, permissionGroups) && <VMenuItem text="Delete" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
 					if ((node.children || {}).VKeys().length)
 						return void ShowMessageBox({title: "Cannot delete", message: "Cannot delete this node until all its children have been deleted or unlinked."});
@@ -152,7 +164,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							}
 						});
 					});
-				}}/>
+				}}/>}
 			</VMenuStub>
 		);
 	}

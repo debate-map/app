@@ -114,7 +114,8 @@
     "redux-persist": "^4.4.2",
     "redux-persist-transform-filter": "0.0.9",
     "redux-thunk": "^2.0.0",
-    "reselect": "^2.5.4"
+    "reselect": "^2.5.4",
+    "webpack-runtime-require": "0.0.1"
   },
   "devDependencies": {
     "@types/firebase": "^2.4.31",

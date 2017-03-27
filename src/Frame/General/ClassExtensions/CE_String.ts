@@ -26,14 +26,17 @@ String.prototype._AddFunction_Inline = function hashCode() {
 	}
 	return hash;
 };
-interface String { Matches: (strOrRegex: string | RegExp)=>{index: number}[]; }
+interface String {
+	Matches(str: string): {index: number}[];
+	Matches(regex: RegExp): RegExpMatchArray[];
+}
 String.prototype._AddFunction_Inline = function Matches(strOrRegex: string | RegExp) {
 	if (typeof strOrRegex == "string") {
-		var str = strOrRegex;
-		var result = [] as {index: number}[];
-		var lastMatchIndex = -1;
+		let str = strOrRegex;
+		let result = [] as {index: number}[];
+		let lastMatchIndex = -1;
 		while (true) {
-			var matchIndex = this.indexOf(str, lastMatchIndex + 1);
+			let matchIndex = this.indexOf(str, lastMatchIndex + 1);
 			if (matchIndex == -1) // if another match was not found
 				break;
 			result.push({index: matchIndex});
@@ -42,12 +45,12 @@ String.prototype._AddFunction_Inline = function Matches(strOrRegex: string | Reg
 		return result;
 	}
 
-	var regex = strOrRegex;
+	let regex = strOrRegex;
 	if (!regex.global)
 		throw new Error("Regex must have the 'g' flag added. (otherwise an infinite loop occurs)");
 
-	var result = [] as {index: number}[];
-	var match;
+	let result = [] as RegExpMatchArray[];
+	let match;
 	while (match = regex.exec(this))
 		result.push(match);
 	return result;

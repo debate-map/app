@@ -53,11 +53,13 @@ export function MainReducer(state, action) {
 				}
 
 				// add special _key or _id prop
-				let key = (action["path"] as string).split("/").Last();
-				if (parseInt(key).toString() == key)
-					action["data"]._id = parseInt(key);
-				else
-					action["data"]._key = key;
+				if (typeof action["data"] == "object") {
+					let key = (action["path"] as string).split("/").Last();
+					if (parseInt(key).toString() == key)
+						action["data"]._id = parseInt(key);
+					else
+						action["data"]._key = key;
+				}
 			}
 
 			//case SET_USER_PANEL_OPEN: return {...state, userPanelOpen: action.payload};

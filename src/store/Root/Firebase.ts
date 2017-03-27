@@ -3,18 +3,36 @@ import {MapNode} from "../../routes/@Shared/Maps/MapNode";
 import {DBPath, GetData} from "../../Frame/Database/DatabaseHelpers";
 import {RootState} from "../Root";
 import {Set} from "immutable";
+import {firebaseConnect} from "react-redux-firebase";
+
+//export function FirebaseConnect<T>(paths: string[]); // just disallow this atm, since you might as well just use a connect/getter func
+export function FirebaseConnect<T>(pathsGetterFunc: (props: T)=>string[]);
+export function FirebaseConnect<T>(pathsOrGetterFunc) {
+	return firebaseConnect(props=> {
+		let paths = pathsOrGetterFunc instanceof Array ? pathsOrGetterFunc : pathsOrGetterFunc(props);
+		paths = paths.map(a=>DBPath(a)); // add version prefix to paths
+		return paths;
+	});
+}
 
 /*export function GetAuth(state: RootState) { 
 	return state.firebase.auth;
 }*/
 
-export function GetUserID(state: RootState): string { 
+export function GetUserID(): string {
 	//return state.firebase.data.auth ? state.firebase.data.auth.uid : null;
 	//return GetData(state.firebase, "auth");
 	/*var result = helpers.pathToJS(firebase, "auth").uid;
 	return result;*/
-	let firebaseSet = store.getState().firebase as Set<any>;
-	return firebaseSet.toJS().auth.uid;
+	/*let firebaseSet = State().firebase as Set<any>;
+	return firebaseSet.toJS().auth.uid;*/
+	return State().firebase.get("auth") ? State().firebase.get("auth").uid : null;
+}
+export function GetUserPermissionGroups_Path(userID: string) {
+	return `userExtras/${userID}/permissionGroups`;
+}
+export function GetUserPermissionGroups(userID: string) {
+	return GetData(State().firebase, GetUserPermissionGroups_Path(userID));
 }
 
 //export function GetNode_Path() {}
@@ -27,12 +45,12 @@ export type RatingsSet = {[key: string]: Rating};
 export type Rating = {updated: number, value: number};
 
 export function GetPaths_NodeRatingsRoot({node}: {node: MapNode}) {
-	return [DBPath(`nodeRatings/${node._id}`)];
+	return [`nodeRatings/${node._id}`];
 }
 export const GetNodeRatingsRoot = ({firebase}: RootState, {node}: {node: MapNode})=>GetData(firebase, GetPaths_NodeRatingsRoot({node})[0]);
 
 /*export function GetPaths_NodeRatings({node, ratingType}: {node: MapNode, ratingType: RatingType}) {
-	return [DBPath(`nodeRatings/${node._id}/${ratingType}`)];
+	return [`nodeRatings/${node._id}/${ratingType}`];
 }
 export const MakeGetNodeRatings = ()=>createSelector(
 	()=>({firebase}: RootState, {node, ratingType}: {node: MapNode, ratingType: RatingType})=>GetData(firebase, GetPaths_NodeRatings({node, ratingType})[0]),
