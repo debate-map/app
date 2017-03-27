@@ -4,7 +4,7 @@ import {BaseComponent} from "../../../../Frame/UI/ReactGlobals";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
 import {WaitXThenRun} from "../../../../Frame/General/Timers";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
-import {VMenuItem} from "react-vmenu/dist/VMenu";
+import {VMenuItem, VMenuStub} from "react-vmenu/dist/VMenu";
 import {MapNode} from "../MapNode";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {DataSnapshot} from "firebase";
@@ -31,7 +31,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {
 		let {node, userID, parentNode, copiedNode, firebase} = this.props;
 		return (
-			<VMenu contextMenu={true} onBody={true}>
+			<VMenuStub>
 				{MapNodeType_Info.for[node.type].childTypes.map(childType=> {
 					let childTypeInfo = MapNodeType_Info.for[childType];
 					return (
@@ -153,7 +153,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						});
 					});
 				}}/>
-			</VMenu>
+			</VMenuStub>
 		);
 	}
 }

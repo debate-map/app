@@ -1,3 +1,4 @@
+import {VMenuLayer} from "react-vmenu";
 // We only need to import the modules necessary for initial render
 import {PropTypes, Component} from "react";
 import Navbar from "./containers/Navbar";
@@ -99,21 +100,8 @@ class OverlayUI extends BaseComponent<{}, {}> {
 		return (
 			<div style={{position: "absolute"}}>
 				<MessageBoxUI/>
+				<VMenuLayer/>
 			</div>
 		);
 	}
 }
-
-/* Note: childRoutes can be chunked or otherwise loaded programmatically using getChildRoutes with the following signature:
-
-getChildRoutes(location, cb) {
-	require.ensure([], require=> {
-			cb(null, [
-			// Remove imports!
-			require("./Counter").default(store)
-		])
-	})
-}
-
-However, this is not necessary for code-splitting! It simply provides an API for async route definitions.
-Your code splitting should occur inside the route `getComponent` function, since it is only invoked when the route exists and matches.*/
