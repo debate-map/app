@@ -22,7 +22,7 @@ type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, rat
 @firebaseConnect()
 @(connect(()=> {
 	return (state: RootState, props: RatingsUI_Props)=> ({
-		userID: GetUserID(state),
+		userID: GetUserID(),
 		smoothing: GetRatingUISmoothing(state),
 	}) as any;
 }) as any)

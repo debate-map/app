@@ -8,6 +8,7 @@ import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
 import {Map, MapType} from "../@Shared/Maps/Map";
 import {E} from "../../Frame/General/Globals_Free";
 import {MapNodeType} from "../@Shared/Maps/MapNodeType";
+import UserExtraInfo from "../@Shared/Users/UserExtraInfo";
 
 @firebaseConnect()
 export default class AdminUI extends BaseComponent<{}, {}> {
@@ -51,7 +52,12 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 												uid: "108415649882206100036"
 											}
 										]
-									}
+									},
+								},
+								userExtras: {
+									[user1Key]: new UserExtraInfo({
+										permissionGroups: {basic: true, verified: true, mod: true, dev: true},
+									}),
 								},
 								maps: {
 									1: {

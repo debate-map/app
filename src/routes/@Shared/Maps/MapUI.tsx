@@ -21,10 +21,11 @@ import ResizeSensor from "react-resize-sensor";
 import {WaitXThenRun} from "../../../Frame/General/Timers";
 import {GetMapView} from "../../../store/Root/Main";
 import {RootState} from "../../../store/Root";
+import {GetUserID, FirebaseConnect} from "../../../store/Root/Firebase";
 
-type Props = {map: Map, rootNode?: MapNode, focusNode?: string, viewOffset?: {x: number, y: number}};
-@firebaseConnect(({map}: {map: Map})=> [
-	map && DBPath(`nodes/${map.rootNode}`),
+type Props = {map: Map} & Partial<{rootNode: MapNode, focusNode: string, viewOffset: {x: number, y: number}}>;
+@FirebaseConnect(({map}: {map: Map})=> [
+	map && `nodes/${map.rootNode}`,
 ].Where(a=>!!a))
 @(connect((state: RootState, {map}: Props)=> ({
 	rootNode: map && GetData(state.firebase, `nodes/${map.rootNode}`),
@@ -36,19 +37,11 @@ type Props = {map: Map, rootNode?: MapNode, focusNode?: string, viewOffset?: {x:
 export default class MapUI extends BaseComponent<Props, {} | void> {
 	downPos: Vector2i;
 
-	/*ComponentDidMountOrUpdate(oldProps: Props) {
-		let {map, rootNode} = this.props;
-		// if 
-		if (map && rootNode && !(oldProps.map && oldProps.rootNode)) {
-
-		}
-	}*/
-
 	hasLoadedScroll = false;
 	render() {
 		//let {map, rootNode, focusNode: focusNode_target, viewOffset: viewOffset_target} = this.props;
 		let {map, rootNode} = this.props;
-		if (map == null)
+		if (map == null || GetUserID() == null)
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading map...</div>;
 		Assert(map._id, "map._id is null!");
 		if (rootNode == null)

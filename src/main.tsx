@@ -1,4 +1,6 @@
 // "static" imports
+import "webpack-runtime-require";
+//import {Require} from "webpack-runtime-require";
 import "./Frame/General/Start";
 import "./Frame/General/CE";
 import "./Frame/Database/DatabaseHelpers";

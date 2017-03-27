@@ -1,9 +1,13 @@
 import {Assert} from "../General/Assert";
 import {FirebaseDatabase} from "../UI/ReactGlobals";
 import {helpers} from "react-redux-firebase";
+
 let {dbRootVersion} = require("../../../config/DBVersion");
 export function DBPath(path: string) {
-	return `v${dbRootVersion}/` + path;
+	let versionPrefix = path.match(/^v[0-9]+/);
+	if (versionPrefix == null) // if no version prefix already, add one (referencing the current version)
+		path = `v${dbRootVersion}/${path}`;
+	return path;
 }
 
 //interface Object { Ref: ()=>firebase.Database; }
@@ -21,9 +25,7 @@ class DBPathInfo {
 }
 let pathInfos = {} as {[path: string]: DBPathInfo};
 export function GetData(firebase: FirebaseDatabase, path: string) {
-	let versionPrefix = path.match(/^v[0-9]+/);
-	if (versionPrefix == null) // if no version prefix already, add one (referencing the current version)
-		path = DBPath(path);
+	path = DBPath(path);
 
 	let info = pathInfos[path] || (pathInfos[path] = new DBPathInfo());
 	/*let timestampEntry = (firebase as any)._root.entries.FirstOrX(a=>a[0] == "timestamp");

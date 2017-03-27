@@ -13,7 +13,6 @@ import {DN} from "../../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
 import Button from "../../../../Frame/ReactComponents/Button";
 import RatingsUI from "./RatingsUI";
-import {firebaseConnect} from "react-redux-firebase";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {RatingType_Info, RatingType} from "./RatingType";
 import {WaitXThenRun} from "../../../../Frame/General/Timers";
@@ -21,14 +20,15 @@ import keycode from "keycode";
 import NodeUI_Menu from "./NodeUI_Menu";
 import {MapNode} from "../MapNode";
 import {MapNodeType_Info} from "../MapNodeType";
+import {FirebaseConnect} from "../../../../store/Root/Firebase";
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number} & Partial<{userID: string, ratingsRoot: RatingsRoot}>;
-@firebaseConnect(({node}: Props)=>[
+@FirebaseConnect(({node}: Props)=>[
 	...GetPaths_NodeRatingsRoot({node}),
 ])
 @(connect(()=> {
 	return (state: RootState, {node, ratingsRoot}: Props)=> ({
-		userID: GetUserID(state),
+		userID: GetUserID(),
 		ratingsRoot: GetNodeRatingsRoot(state, {node}),
 	}) as any;
 }) as any)

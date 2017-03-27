@@ -27,7 +27,7 @@ import NodeConnectorBackground from "./NodeConnectorBackground";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {MapNodeType_Info, MapNodeType} from "../MapNodeType";
-import {MakeGetNodeChildIDs} from "../../../../store/Root/Firebase";
+import {MakeGetNodeChildIDs, FirebaseConnect} from "../../../../store/Root/Firebase";
 import {MakeGetNodeView} from "../../../../store/Root/Main";
 import {RootState} from "../../../../store/Root";
 import {MapNodeView} from "../../../../store/Root/Main/MapViews";
@@ -49,8 +49,8 @@ import {MapNodeView} from "../../../../store/Root/Main/MapViews";
 
 type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
 type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number, svgInfo: {mainBoxOffset: Vector2i, oldChildBoxOffsets: Vector2i[]}};
-@firebaseConnect(({node}: {node: MapNode})=>[
-	...MakeGetNodeChildIDs()({}, {node}).Select(a=>DBPath(`nodes/${a}`))
+@FirebaseConnect(({node}: {node: MapNode})=>[
+	...MakeGetNodeChildIDs()({}, {node}).Select(a=>`nodes/${a}`)
 ])
 @(connect(()=> {
 	var getNodeView = MakeGetNodeView();
