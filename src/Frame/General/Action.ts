@@ -22,5 +22,5 @@ Object.prototype._AddFunction("Is", Action.prototype.Is);
 }*/
 /*export function IsACT<T, Props>(action: Action<T>, actionType: new(..._)=>Action<Props>): action is Props {
 	return this.type == actionType.name;
-		//return this instanceof actionType; // alternative
+	//return this instanceof actionType; // alternative
 }*/

@@ -1,3 +1,4 @@
+import {VMenuReducer, VMenuState} from "react-vmenu";
 import {Map} from "../routes/@Shared/Maps/Map";
 import {combineReducers} from "redux";
 import {firebaseStateReducer, helpers} from "react-redux-firebase";
@@ -33,6 +34,7 @@ export class RootState {
 	form: any;
 	router: any;
 	messageBox: MessageBoxState;
+	vMenu: VMenuState;
 }
 export function MakeRootReducer(asyncReducers?) {
 	return combineReducers({
@@ -41,6 +43,7 @@ export function MakeRootReducer(asyncReducers?) {
 		form: formReducer,
 		router: routerReducer,
 		messageBox: MessageBoxReducer,
+		vMenu: VMenuReducer,
 		...asyncReducers
 	});
 }
