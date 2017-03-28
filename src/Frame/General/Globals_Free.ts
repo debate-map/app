@@ -225,3 +225,6 @@ window.eval = function(code) {
 export function IntToEStr(int: number) {
 	return "e" + int;
 }*/
+
+// another way to require at runtime -- with full paths
+//g.RequireTest = (require as any).context("../../", true, /\.tsx?$/);

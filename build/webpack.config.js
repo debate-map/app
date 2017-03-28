@@ -58,6 +58,7 @@ webpackConfig.output = {
 // Plugins
 // ==========
 
+//let ExposeRequirePlugin = require("webpack-expose-require-plugin");
 webpackConfig.plugins = [
 	// Plugin to show any webpack warnings and prevent tests from running
 	function () {
@@ -86,6 +87,10 @@ webpackConfig.plugins = [
 			collapseWhitespace: true
 		}
 	}),
+	/*new ExposeRequirePlugin({
+		level: "dependency", // "all", "dependency", "application" 
+		pathPrefix: "Source", // in case if your source is not placed in root folder. 
+	}),*/
 ]
 
 if (__DEV__) {
