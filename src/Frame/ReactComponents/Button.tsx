@@ -44,13 +44,15 @@ let pseudoSelectorStyleKeys = {};
 export default class Button extends BaseComponent
 		<{enabled?: boolean, text?: string, title?: string, className?: string, style?,
 			size?, iconSize?, height?,
-			hasCheckbox?, checked?, checkboxStyle?, checkboxLabelStyle?, onCheckedChanged?, onClick?, onDirectClick?} & React.HTMLProps<HTMLDivElement>,
+			hasCheckbox?, checked?, checkboxStyle?, checkboxLabelStyle?, onCheckedChanged?,
+			onClick?, onLeftClick?, onDirectClick?} & React.HTMLProps<HTMLDivElement>,
 		{}> {
 	static defaultProps = {enabled: true};
 	
 	render() {
 	    var {enabled, text, title, className, style, size, iconSize, height,
-			hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged, children, ...rest} = this.props;
+			hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged, children,
+			onLeftClick, ...rest} = this.props;
 		RemoveBasePropKeys(rest);
 
 		var padding = "5px 15px";
@@ -109,10 +111,12 @@ export default class Button extends BaseComponent
 		);
 	}
 	OnClick(e) {
-	    var {onClick, onDirectClick} = this.props;
+	    var {onClick, onLeftClick, onDirectClick} = this.props;
 	    if (onDirectClick && (e.target == e.currentTarget || $(e.target).parent()[0] == e.currentTarget))
 	        onDirectClick(e);
 	    if (onClick)
 	        onClick(e);
+		if (onLeftClick && e.button == 0)
+			onLeftClick(e);
 	}
 }

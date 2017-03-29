@@ -57,7 +57,7 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 	return ((state: RootState, {node, path, map}: Props & BaseProps)=> {
 		var path = path || node._id.toString();
 		var firebase = store.getState().firebase;
-		let nodeChildren = (node.children || {}).VKeys().Select(key=>GetData(firebase, `nodes/${key}`));
+		let nodeChildren = (node.children || {}).VKeys().Select(key=>GetData(`nodes/${key}`));
 		return {
 			path,
 			nodeView: getNodeView(state, {firebase, map, path}),
@@ -138,7 +138,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	GetMeasurementInfo(props: Props, state: State) {
 		let {node} = this.props;
 
-		let fontSize = 14; // have 11px for meta-theses
+		let fontSize = MapNode.GetFontSize(node);
 		let expectedTextWidth = V.GetContentWidth($(`<a style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${node.title}</a>`));
 		//let expectedOtherStuffWidth = 26;
 		let expectedOtherStuffWidth = 28;
@@ -149,7 +149,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 
 		let maxTextWidth = width - expectedOtherStuffWidth;
 		let expectedTextHeight = V.GetContentHeight($(`<a style='${
-			createMarkupForStyles({fontSize: fontSize, whiteSpace: "initial", display: "inline-block", width: maxTextWidth})
+			createMarkupForStyles({fontSize, whiteSpace: "initial", display: "inline-block", width: maxTextWidth})
 		}'>${node.title}</a>`));
 		let expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
 		//this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging

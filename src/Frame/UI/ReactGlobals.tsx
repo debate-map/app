@@ -350,8 +350,8 @@ export class Span extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement
 @Global
 export class Pre extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement>, {}> {
 	render() {
-		let {children} = this.props;
-		return <span style={{whiteSpace: "pre"}}>{children}</span>;
+		let {style, children} = this.props;
+		return <span style={E({whiteSpace: "pre"}, style)}>{children}</span>;
 	}
 }
 

@@ -1,5 +1,5 @@
 import {BaseComponent, Span} from "../../../../Frame/UI/ReactGlobals";
-import {MapNode} from "../MapNode";
+import {MapNode, MetaThesis_IfType, MetaThesis_ThenType} from "../MapNode";
 import {Map} from "../Map";
 import MapNodeUI_Inner from "./NodeUI_Inner";
 import Button from "../../../../Frame/ReactComponents/Button";
@@ -9,6 +9,7 @@ import {CachedTransform} from "../../../../Frame/V/VCache";
 import {MapNodeType_Info} from "../MapNodeType";
 import {MapNodeView, ACTMapNodePanelOpen} from "../../../../store/Root/Main/MapViews";
 import {RatingsRoot} from "../../../../store/Root/Firebase";
+import {RatingType_Info} from "./RatingType";
 
 type Props = {
 	parent: MapNodeUI_Inner, map: Map, path: string, node: MapNode, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
@@ -27,15 +28,24 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 			}}>
 				<div style={{position: "relative", padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
-					{ratingTypeInfo.mainRatingTypes.map((ratingType, index)=> {
+					{MapNode.GetMainRatingTypes(node).map((ratingType, index)=> {
+						let ratingTypeInfo = RatingType_Info.for[ratingType];
 						let ratingSet = ratingsRoot && ratingsRoot[ratingType];
-						let average = CachedTransform("getMainRatingAverage", {nodeID: node._id, ratingType}, {ratingSet},
-							()=>ratingSet ? ratingSet.Props.Where(a=>a.name != "_id").Select(a=>a.value.value).Average().RoundTo(1) : 0);
+
+						let percentStr = "...";
+						if (ratingSet) {
+							let average = CachedTransform("getMainRatingAverage", {nodeID: node._id, ratingType}, {ratingSet},
+								()=>ratingSet ? ratingSet.Props.Where(a=>a.name != "_id").Select(a=>a.value.value).Average().RoundTo(1) : 0);
+							if (node.metaThesis)
+								percentStr = (node.metaThesis_thenType == MetaThesis_ThenType.StrengthenParent ? "+" : "-") + average.Distance(50) + "%";
+							else
+								percentStr = average + "%";
+						}
 						return (
 							<PanelButton key={ratingType} parent={this} map={map} path={path}
-									panel={ratingType} text={ratingType.replace(/^(.)/, c=>c.toUpperCase())} style={E(index == 0 && {marginTop: 0})}>
+									panel={ratingType} text={ratingTypeInfo.displayText} style={E(index == 0 && {marginTop: 0})}>
 								<Span ml={5} style={{float: "right"}}>
-									{average}%
+									{percentStr}
 									<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>{ratingSet ? ratingSet.Props.length /*- 1*/ : 0}</sup>
 								</Span>
 							</PanelButton>
@@ -56,6 +66,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 					<PanelButton parent={this} map={map} path={path} panel="tags" text="Tags"/>
 					<PanelButton parent={this} map={map} path={path} panel="discuss" text="Discuss (meta)"/>
 					<PanelButton parent={this} map={map} path={path} panel="history" text="History"/>
+					<PanelButton parent={this} map={map} path={path} panel="others" text="Others"/>
 					<Button text="..."
 						style={{
 							margin: "3px -3px -3px -3px", height: 17, lineHeight: "12px", padding: 0,

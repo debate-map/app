@@ -13,9 +13,9 @@ import {RootState} from "../../store/Root";
 @firebaseConnect([
 	DBPath("maps/1"),
 ])
-@(connect(({firebase}: RootState)=> ({
+@(connect(({}: RootState)=> ({
 	//map: helpers.dataToJS(firebase, DBPath("maps/1")),
-	map: GetData(firebase, "maps/1"),
+	map: GetData("maps/1"),
 })) as any)
 export default class GlobalMapUI extends BaseComponent<{map: Map}, {}> {
 	render() {

@@ -32,12 +32,15 @@ export function GetUserPermissionGroups_Path(userID: string) {
 	return `userExtras/${userID}/permissionGroups`;
 }
 export function GetUserPermissionGroups(userID: string) {
-	return GetData(State().firebase, GetUserPermissionGroups_Path(userID));
+	return GetData(GetUserPermissionGroups_Path(userID));
 }
 
 //export function GetNode_Path() {}
 export function GetNode(id: number) {
-	return GetData(State().firebase, `nodes/${id}`);
+	return GetData(`nodes/${id}`) as MapNode;
+}
+export function GetParentNode(path: string) {
+	return GetNode(path.split("/").map(a=>parseInt(a)).XFromLast(1));
 }
 
 export type RatingsRoot = {[key: string]: RatingsSet};
@@ -47,7 +50,7 @@ export type Rating = {updated: number, value: number};
 export function GetPaths_NodeRatingsRoot({node}: {node: MapNode}) {
 	return [`nodeRatings/${node._id}`];
 }
-export const GetNodeRatingsRoot = ({firebase}: RootState, {node}: {node: MapNode})=>GetData(firebase, GetPaths_NodeRatingsRoot({node})[0]);
+export const GetNodeRatingsRoot = ({firebase}: RootState, {node}: {node: MapNode})=>GetData(GetPaths_NodeRatingsRoot({node})[0]);
 
 /*export function GetPaths_NodeRatings({node, ratingType}: {node: MapNode, ratingType: RatingType}) {
 	return [`nodeRatings/${node._id}/${ratingType}`];

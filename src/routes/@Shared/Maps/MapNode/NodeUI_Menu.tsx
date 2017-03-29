@@ -1,11 +1,11 @@
 import VMenu from "react-vmenu";
-import {MapNodeType_Info} from "../MapNodeType";
-import {BaseComponent} from "../../../../Frame/UI/ReactGlobals";
+import {MapNodeType_Info, MapNodeType} from "../MapNodeType";
+import {BaseComponent, Pre, Div} from "../../../../Frame/UI/ReactGlobals";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
 import {WaitXThenRun} from "../../../../Frame/General/Timers";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
 import {VMenuItem, VMenuStub} from "react-vmenu/dist/VMenu";
-import {MapNode} from "../MapNode";
+import {MapNode, MetaThesis_IfType, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../MapNode";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {DataSnapshot} from "firebase";
 import {DN} from "../../../../Frame/General/Globals";
@@ -17,6 +17,8 @@ import {GetData} from "../../../../Frame/Database/DatabaseHelpers";
 import {ACTNodeCopy} from "../../../../store/Root/Main";
 import {PermissionGroupSet} from "../../Users/UserExtraInfo";
 import {FirebaseConnect, GetUserPermissionGroups_Path, GetUserID, GetUserPermissionGroups, GetNode} from "../../../../store/Root/Firebase";
+import Select from "../../../../Frame/ReactComponents/Select";
+import {GetEntries} from "../../../../Frame/General/Enums";
 
 /*export function BasicEditing(permissionGroups: PermissionGroupSet) {
 	return permissionGroups && permissionGroups.basic;
@@ -49,7 +51,14 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 					return (
 						<VMenuItem key={childType} text={`Add ${childTypeInfo.displayName}`} style={styles.vMenuItem} onClick={e=> {
 							if (e.button != 0) return;
+							let isArgument = childType == MapNodeType.SupportingArgument || childType == MapNodeType.OpposingArgument;
+							let thenTypes = childType == MapNodeType.SupportingArgument
+								? GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Take(2)
+								: GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Skip(2);
+
 							let title = "";
+							let metaThesis_ifType = MetaThesis_IfType.All;
+							let metaThesis_thenType = childType == MapNodeType.SupportingArgument ? MetaThesis_ThenType.StrengthenParent : MetaThesis_ThenType.WeakenParent;
 							let boxController = ShowMessageBox({
 								title: `Add ${childTypeInfo.displayName}`, cancelButton: true,
 								messageUI: ()=>(
@@ -61,21 +70,40 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 												boxController.Close();
 											}}
 											value={title} onChange={val=>DN(title = val, boxController.UpdateUI())}/>
+										{isArgument &&
+											<Div mt={5}>
+												<Pre>Type: If </Pre>
+												<Select options={GetEntries(MetaThesis_IfType, name=>name.toLowerCase())}
+													value={metaThesis_ifType} onChange={val=>(metaThesis_ifType = val, boxController.UpdateUI())}/>
+												<Pre> premises below are true, they </Pre>
+												<Select options={thenTypes} value={metaThesis_thenType} onChange={val=>(metaThesis_thenType = val, boxController.UpdateUI())}/>
+												<Pre>.</Pre>
+											</Div>}
 									</div>
 								),
 								onOK: ()=> {
 									firebase.Ref("nodes").transaction(nodes=> {
 										if (!nodes) return nodes;
 
-										let newID = (nodes as Object).Props.Where(a=>a.name != "_").Select(a=>a.name).Max() + 1;
-										nodes[node._id].children = {
-											...nodes[node._id].children,
-											[newID]: {_: true}
-										};
-										nodes[newID] = new MapNode({
+										let newID = nodes.Props.filter(a=>a.name != "_").map(a=>parseInt(a.name)).Max().KeepAtLeast(99) + 1;
+										nodes[node._id].children = {...nodes[node._id].children, [newID]: {_: true}};
+										let newNode = new MapNode({
 											type: childType, title,
 											creator: userID, approved: true,
 										});
+										nodes[newID] = newNode;
+
+										if (isArgument) {
+											let metaThesisID = newID + 1;
+											let metaThesisNode = new MapNode({
+												type: MapNodeType.Thesis,
+												metaThesis: true, metaThesis_ifType, metaThesis_thenType,
+												creator: userID, approved: true,
+											});
+											nodes[metaThesisID] = metaThesisNode;
+											newNode.children = {...newNode.children, [metaThesisID]: {_: true}};
+										}
+
 										return nodes;
 									}, undefined, false);
 								}
@@ -93,31 +121,6 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						//store.dispatch(new ACTNodeCopy(null));
 						firebase.Ref(`nodes/${node._id}/children`).update({[copiedNode._id]: {_: true}});
 					}}/>}
-				{CreatorOrMod(node, userID, permissionGroups) && <VMenuItem text="Edit title" style={styles.vMenuItem} onClick={e=> {
-					if (e.button != 0) return;
-					let title = node.title;
-					let boxController = ShowMessageBox({
-						title: `Edit title`, cancelButton: true,
-						messageUI: ()=>(
-							<div style={{padding: "10px 0"}}>
-								<div>Old title: {node.title}</div>
-								<div>
-									New title: {}
-									<TextInput ref={a=>a && WaitXThenRun(0, ()=>a.DOM.focus())} style={{width: 500}}
-										onKeyDown={e=> {
-											if (e.keyCode != keycode.codes.enter) return;
-											boxController.options.onOK();
-											boxController.Close();
-										}}
-										value={title} onChange={val=>DN(title = val, boxController.UpdateUI())}/>
-								</div>
-							</div>
-						),
-						onOK: ()=> {
-							firebase.Ref(`nodes/${node._id}`).update({title});
-						}
-					});
-				}}/>}
 				{CreatorOrMod(node, userID, permissionGroups) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
 					firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {

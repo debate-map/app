@@ -13,29 +13,37 @@ import {GetData} from "../../../../Frame/Database/DatabaseHelpers";
 import {RatingType, RatingType_Info} from "./RatingType";
 import {MapNodeType_Info} from "../MapNodeType";
 import {ACTRatingUISmoothnessSet, GetRatingUISmoothing} from "../../../../store/Root/Main";
-import {GetUserID, Rating} from "../../../../store/Root/Firebase";
+import {GetUserID, Rating, GetNode, GetParentNode} from "../../../../store/Root/Firebase";
 import {RootState} from "../../../../store/Root";
+import {Debugger} from "../../../../Frame/General/Globals_Free";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]} & Partial<{userID: string, smoothing: number}>;
-@firebaseConnect()
-@(connect(()=> {
-	return (state: RootState, props: RatingsUI_Props)=> ({
+type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: (Rating & {userID: string})[]} & Partial<{userID: string, smoothing: number}>;
+@firebaseConnect(({node, ratingType}: RatingsUI_Props)=>[
+	`nodeRatings/${node._id}/${ratingType}/${GetUserID()}/value`
+])
+@(connect((state: RootState, {node, ratingType}: RatingsUI_Props)=> {
+	return {
 		userID: GetUserID(),
+		//myVote: GetData(`nodeRatings/${node._id}/${ratingType}/${GetUserID()}/value`),
 		smoothing: GetRatingUISmoothing(state),
-	}) as any;
+	};
 }) as any)
 export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vector2i}> {
 	render() {
 		let {node, path, ratingType, userID, ratings, smoothing, firebase} = this.props;
 		let {size} = this.state;
 
+		let parentNode = GetParentNode(path);
 		let ratingTypeInfo = RatingType_Info.for[ratingType];
+		let options = typeof ratingTypeInfo.options == "function" ? ratingTypeInfo.options(node, parentNode) : ratingTypeInfo.options;
+		let myRatingValue = ratings.find(a=>a.userID == userID);
 
-		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(ratingTypeInfo.options.Max() == 200 ? [200] : []);
-		smoothing = smoothing.KeepBetween(ratingTypeInfo.options.Min(), ratingTypeInfo.options.Max()); // smoothing might have been set higher, from when on another rating-type
-		let ticksForChart = ratingTypeInfo.options.Select(a=>a.RoundTo(smoothing)).Distinct();
+		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(options.Max() == 200 ? [200] : []);
+		let minVal = options.Min(), maxVal = options.Max(), range = maxVal - minVal;
+		smoothing = smoothing.KeepAtMost(options.Max()); // smoothing might have been set higher, from when on another rating-type
+		let ticksForChart = options.Select(a=>a.RoundTo(smoothing)).Distinct();
 		let dataFinal = ticksForChart.Select(a=>({rating: a, count: 0}));
 		for (let entry of ratings) {
 			let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(entry.value)).First();
@@ -53,7 +61,7 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 						let chart = chartHolder.find(".recharts-cartesian-grid");
 						let posOnChart = new Vector2i(e.pageX - chart.offset().left, e.pageY - chart.offset().top);
 						let percentOnChart = posOnChart.x / chart.width();
-						let ratingOnChart_exact = percentOnChart * ticksForChart.Max();
+						let ratingOnChart_exact = minVal + (percentOnChart * range);
 						let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(ratingOnChart_exact)).First();
 						let rating = closestRatingSlot.rating;
 						
@@ -62,7 +70,7 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 							title: `Rate ${ratingType} of ${MapNodeType_Info.for[node.type].displayName}`, cancelButton: true,
 							messageUI: ()=>(
 								<div style={{padding: "10px 0"}}>
-									Rating: <Spinner min={ratingTypeInfo.options.Min()} max={ratingTypeInfo.options.Max()} style={{width: 60}}
+									Rating: <Spinner min={options.Min()} max={options.Max()} style={{width: 60}}
 										value={finalRating} onChange={val=>DN(finalRating = val, boxController.UpdateUI())}/>
 								</div>
 							),
@@ -71,18 +79,31 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 								firebase.Ref(`nodeRatings/${node._id}/${ratingType}/${userID}`).set({updated: Date.now(), value: finalRating});
 							}
 						});
+					}}
+					onContextMenu={e=> {
+						if (myRatingValue == null) return;
+						let boxController = ShowMessageBox({
+							title: `Delete rating`, cancelButton: true,
+							message: `Delete your "${ratingType}" rating for ${MapNodeType_Info.for[node.type].displayName}`,
+							onOK: ()=> {
+								firebase.Ref(`nodeRatings/${node._id}/${ratingType}/${userID}`).set(null);
+							}
+						});
 					}}>
 				<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
-					{typeof ratingTypeInfo.description == "function" ? ratingTypeInfo.description(GetData(firebase, `nodes/${path.split("/").XFromLast(1)}`)) : ratingTypeInfo.description}
+					{typeof ratingTypeInfo.description == "function"
+						? ratingTypeInfo.description(node, GetData(`nodes/${path.split("/").XFromLast(1)}`))
+						: ratingTypeInfo.description}
 				</div>
 				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
+					<Pre style={{marginRight: "auto", fontSize: 12, color: "rgba(255,255,255,.5)"}}>Click to vote. Right-click to remove vote.</Pre>
 					{/*Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>*/}
-					Smoothing:<Pre> </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>
+					<Pre>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>
 				</div>
 				{this.lastRender_source == RenderSource.SetState &&
 					<AreaChart ref="chart" width={size.x} height={250} data={dataFinal}
 							margin={{top: 10, right: 10, bottom: 10, left: 10}}>
-						<XAxis dataKey="rating" ticks={ratingTypeInfo.ticks} type="number" domain={[1, 99]} minTickGap={0}/>
+						<XAxis dataKey="rating" ticks={ratingTypeInfo.ticks(node, parentNode)} type="number" domain={[options.Min(), options.Max()]} minTickGap={0}/>
 						{/*<YAxis tickCount={7} hasTick width={50}/>*/}
 						<YAxis orientation="left" x={20} width={20} height={250} viewBox={{x: 0, y: 0, width: 500, height: 500}} tickCount={9}/>
 						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>

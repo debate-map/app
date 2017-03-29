@@ -28,7 +28,7 @@ export class MapNodeType_Info {
 			displayName: "thesis (as premise)",
 			childTypes: [MapNodeType.SupportingArgument, MapNodeType.OpposingArgument],
 			minWidth: 350, maxWidth: 550, backgroundColor: "0,80,150",
-			mainRatingTypes: ["probability", "adjustment"],
+			mainRatingTypes: ["probability", "idealIntensity"],
 			otherRatingTypes: [],
 		}),
 		[MapNodeType.SupportingArgument]: new MapNodeType_Info({
@@ -57,8 +57,7 @@ export class MapNodeType_Info {
 	maxWidth: number;
 	backgroundColor: string;
 	//fontSize?: number;
-	get fontSize() { return 14; }
+	//get fontSize() { return 14; }
 	mainRatingTypes: RatingType[];
 	otherRatingTypes: RatingType[];
 }
-// if any premises below are [true/false], they [strengthen/weaken/guarantee] the parent [/true/false]

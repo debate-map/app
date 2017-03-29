@@ -1,5 +1,5 @@
 import {ACTMapNodeExpandedToggle, ACTMapNodeSelect, MapNodeView} from "../../../../store/Root/Main/MapViews";
-import {GetNodeRatingsRoot, GetPaths_NodeRatingsRoot, GetUserID, RatingsRoot} from "../../../../store/Root/Firebase";
+import {GetNodeRatingsRoot, GetPaths_NodeRatingsRoot, GetUserID, RatingsRoot, GetParentNode} from "../../../../store/Root/Firebase";
 import {RootState} from "../../../../store/Root";
 import {connect} from "react-redux";
 import {Map} from "../Map";
@@ -18,9 +18,11 @@ import {RatingType_Info, RatingType} from "./RatingType";
 import {WaitXThenRun} from "../../../../Frame/General/Timers";
 import keycode from "keycode";
 import NodeUI_Menu from "./NodeUI_Menu";
-import {MapNode} from "../MapNode";
-import {MapNodeType_Info} from "../MapNodeType";
+import {MapNode, MetaThesis_ThenType} from "../MapNode";
+import {MapNodeType_Info, MapNodeType} from "../MapNodeType";
 import {FirebaseConnect} from "../../../../store/Root/Firebase";
+import NodeOthersUI from "./NodeOthersUI";
+import V from "../../../../Frame/V/V";
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number} & Partial<{userID: string, ratingsRoot: RatingsRoot}>;
 @FirebaseConnect(({node}: Props)=>[
@@ -39,10 +41,19 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let barSize = 5;
 		let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
+		let parentNode = GetParentNode(path);
 
-		let mainRatingSet = ratingsRoot && ratingsRoot[nodeTypeInfo.mainRatingTypes[0]];
-		let mainRatingAverage = CachedTransform("getMainRatingAverage", {nodeID: node._id, ratingType: nodeTypeInfo.mainRatingTypes[0]}, {ratingSet: mainRatingSet},
+		let mainRatingTypes = MapNode.GetMainRatingTypes(node);
+		let mainRatingSet = ratingsRoot && ratingsRoot[mainRatingTypes[0]];
+		let mainRatingAverage = CachedTransform("getMainRatingAverage", {nodeID: node._id, ratingType: mainRatingTypes[0]}, {ratingSet: mainRatingSet},
 			()=>mainRatingSet ? mainRatingSet.Props.Where(a=>a.name != "_id").Select(a=>a.value.value).Average() : 0);
+		if (node._id < 100) // if static category
+			mainRatingAverage = 100;
+		if (node.metaThesis && (node.metaThesis_thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis_thenType == MetaThesis_ThenType.WeakenParent)) {
+			mainRatingAverage = parentNode.type == MapNodeType.SupportingArgument
+				? V.GetPercentFromXToY(50, 100, mainRatingAverage) * 100
+				: V.GetPercentFromXToY(50, 0, mainRatingAverage) * 100;
+		}
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
 		let panelToShow = openPanel_preview || (nodeView && nodeView.openPanel);
@@ -76,14 +87,14 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						}}>
 					<div style={{
 								position: "relative", width: "100%", //minWidth: minWidth - 20, maxWidth: maxWidth - 20,
-								padding: 5, //node.type == MapNodeType.Category || node.type == MapNodeType.Package ? 5 : "3px 5px",
+								padding: MapNode.GetPadding(node), //node.type == MapNodeType.Category || node.type == MapNodeType.Package ? 5 : "3px 5px",
 							}}>
 						<div style={{
 								position: "absolute", left: 0, top: 0, bottom: 0,
 								width: mainRatingAverage + "%", background: `rgba(${nodeTypeInfo.backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
 							}}/>
-						<a style={{position: "relative", fontSize: nodeTypeInfo.fontSize, whiteSpace: "initial"}}>
-							{node.title}
+						<a style={{position: "relative", fontSize: MapNode.GetFontSize(node), whiteSpace: "initial"}}>
+							{MapNode.GetDisplayText(node)}
 						</a>
 						<NodeUI_Menu node={node} path={path} userID={userID}/>
 					</div>
@@ -93,11 +104,12 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								width: 18, padding: 0,
 								//fontSize: 18,
 								fontSize: nodeView && nodeView.expanded ? 23 : 17,
+								lineHeight: "1px", // keeps text from making meta-theses too tall
 								//lineHeight: "28px",
 								//backgroundColor: `rgba(${backgroundColor},.5)`,
-								backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(",").Select(a=>(parseInt(a) * .8).RoundTo(1)).join(",")},.7)`,
+								backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(",").map(a=>(parseInt(a) * .8).RoundTo(1)).join(",")},.7)`,
 								boxShadow: "none",
-								":hover": {backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(",").Select(a=>(parseInt(a) * .9).RoundTo(1)).join(",")},.7)`},
+								":hover": {backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(",").map(a=>(parseInt(a) * .9).RoundTo(1)).join(",")},.7)`},
 							}}
 							onClick={e=> {
 								store.dispatch(new ACTMapNodeExpandedToggle({mapID: map._id, path}));
@@ -113,9 +125,13 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								padding: 5, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`,
 							}}>
 						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${nodeTypeInfo.backgroundColor},.7)`}}/>
-						{RatingType_Info.for[panelToShow] &&
-							<RatingsUI node={node} path={path} ratingType={panelToShow as RatingType}
-								ratings={ratingsRoot && ratingsRoot[panelToShow] ? ratingsRoot[panelToShow].Props.Where(a=>a.name != "_id").Select(a=>a.value) : []}/>}
+						{RatingType_Info.for[panelToShow] && (()=> {
+							let ratings = CachedTransform({nodeID: node._id, ratingType: panelToShow}, {ratingsRoot},
+								()=>ratingsRoot && ratingsRoot[panelToShow]
+									? ratingsRoot[panelToShow].Props.filter(a=>a.name != "_id").map(a=>({...a.value, userID: a.name}))
+									: []);
+							return <RatingsUI node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
+						})()}
 						{panelToShow == "definitions" &&
 							<div style={{position: "relative"}}>
 								<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
@@ -128,12 +144,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 									Questions can be asked here concerning clarification of the statement's meaning. (other comments belong in the "Discuss" panel)
 								</div>
 							</div>}
-						{panelToShow == "history" &&
-							<div style={{position: "relative"}}>
-								<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
-									NodeID: {node._id}
-								</div>
-							</div>}
+						{panelToShow == "others" &&
+							<NodeOthersUI node={node} path={path} userID={userID}/>}
 					</div>}
 			</div>
 		);

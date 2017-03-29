@@ -18,16 +18,17 @@ class DBPathInfo {
 	cachedData;
 }
 let pathInfos = {} as {[path: string]: DBPathInfo};
-export function GetData(firebase: FirebaseDatabase, path: string) {
+export function GetData(path: string) {
+	let firebase = State().firebase;
 	path = DBPath(path);
 
 	let info = pathInfos[path] || (pathInfos[path] = new DBPathInfo());
 	/*let timestampEntry = (firebase as any)._root.entries.FirstOrX(a=>a[0] == "timestamp");
 	if (timestampEntry) {
 		var timestamp = (firebase as any)._root ? timestampEntry[1].get(path) : null;*/
-	let timestamps = (firebase as any).get("timestamp");
+	let timestamps = firebase.get("timestamp");
 	if (timestamps) {
-		var timestamp = (firebase as any)._root ? timestamps.get(path) : null;
+		var timestamp = firebase._root ? timestamps.get(path) : null;
 		if (timestamp && timestamp != info.lastTimestamp) {
 			info.lastTimestamp = timestamp;
 			info.cachedData = helpers.dataToJS(firebase, path);

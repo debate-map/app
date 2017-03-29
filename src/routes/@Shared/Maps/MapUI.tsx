@@ -28,7 +28,7 @@ type Props = {map: Map} & Partial<{rootNode: MapNode, focusNode: string, viewOff
 	map && `nodes/${map.rootNode}`,
 ].Where(a=>!!a))
 @(connect((state: RootState, {map}: Props)=> ({
-	rootNode: map && GetData(state.firebase, `nodes/${map.rootNode}`),
+	rootNode: map && GetData(`nodes/${map.rootNode}`),
 	/*focusNode: GetMapView(state, {map}) ? GetMapView(state, {map}).focusNode : null,
 	viewOffset: GetMapView(state, {map}) ? GetMapView(state, {map}).viewOffset : null,*/
 	/*focusNode_available: (GetMapView(state, {map}) && GetMapView(state, {map}).focusNode) != null,

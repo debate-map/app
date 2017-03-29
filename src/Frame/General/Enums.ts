@@ -60,6 +60,6 @@ export function _Enum(target: any) {
 // functions for if using TypeScript enums
 // ==========
 
-export function GetEntries(enumType) {
-	return Object.keys(enumType).Where(a=>a.match(/^\D/) != null).Select(name=>({name, value: enumType[name] as number}));
+export function GetEntries(enumType, nameModifierFunc?: (name: string)=>string) {
+	return Object.keys(enumType).Where(a=>a.match(/^\D/) != null).Select(name=>({name: nameModifierFunc ? nameModifierFunc(name) : name, value: enumType[name] as number}));
 }
