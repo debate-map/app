@@ -3,12 +3,13 @@ import thunk from "redux-thunk";
 import {MakeRootReducer} from "./Root";
 import {createBrowserHistory} from "react-router/node_modules/history";
 import {reduxFirebase, getFirebase} from "react-redux-firebase";
-import {firebase as fbConfig, reduxFirebase as reduxConfig} from "../config";
 import {persistStore, autoRehydrate} from "redux-persist";
 //import createFilter from "redux-persist-transform-filter";
 //import {version} from "../../package.json";
 import {GetUrlVars} from "../Frame/General/Globals_Free";
 let {version} = require("../../package.json");
+//import config from "../../config";
+let config = {} as any; // temp
 
 let browserHistory = createBrowserHistory();
 
@@ -41,7 +42,7 @@ export default function(initialState = {}, history) {
 		initialState,
 		(compose as any)(
 			applyMiddleware(...middleware),
-			reduxFirebase(fbConfig, reduxConfig),
+			reduxFirebase(config.firebase, config.reduxFirebase),
 			autoRehydrate(),
 			...enhancers
 		)

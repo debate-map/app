@@ -1,14 +1,8 @@
 import {Assert} from "../General/Assert";
 import {FirebaseDatabase} from "../UI/ReactGlobals";
 import {helpers} from "react-redux-firebase";
-
-let {dbRootVersion} = require("../../../config/DBVersion");
-export function DBPath(path: string) {
-	let versionPrefix = path.match(/^v[0-9]+/);
-	if (versionPrefix == null) // if no version prefix already, add one (referencing the current version)
-		path = `v${dbRootVersion}/${path}`;
-	return path;
-}
+import {DBPath} from "../../../config/DBVersion";
+export {DBPath};
 
 //interface Object { Ref: ()=>firebase.Database; }
 declare global { class FirebaseDatabase_Extensions {

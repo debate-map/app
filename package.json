@@ -17,7 +17,6 @@
     "dev:no-debug": "npm run dev -- --no_debug",
     "test": "better-npm-run test",
     "test:dev": "npm run test -- --watch",
-    "create-config": "better-npm-run create-config",
     "build": "better-npm-run build",
     "build:dev": "better-npm-run build:dev",
     "build:prod": "better-npm-run build:prod",
@@ -70,12 +69,6 @@
       "command": "node ./node_modules/karma/bin/karma start build/karma.conf",
       "env": {
         "NODE_ENV": "test",
-        "DEBUG": "app:*"
-      }
-    },
-    "create-config": {
-      "command": "node build/create-config",
-      "env": {
         "DEBUG": "app:*"
       }
     }
@@ -188,5 +181,6 @@
     "webpack-hot-middleware": "^2.12.2",
     "why-did-you-update": "0.0.8",
     "yargs": "^6.3.0"
-  }
+  },
+  "browser": {"fs": false, "fs-extra": false, "child_process": false }
 }
