@@ -6,7 +6,7 @@ export type RatingType = "significance" | "probability" | "adjustment";
 export class RatingType_Info {
 	static for = {
 		significance: new RatingType_Info({
-			description: "TODO",
+			description: "How significant/important is this subject, relative to the others on this site?",
 			options: Range(0, 100),
 			ticks: Range(0, 100, 5),
 		}),

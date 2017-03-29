@@ -20,7 +20,7 @@ export class MapNodeType_Info {
 		[MapNodeType.Package]: new MapNodeType_Info({
 			displayName: "package",
 			childTypes: [MapNodeType.Thesis],
-			minWidth: 100, maxWidth: 200, backgroundColor: "40,60,80",
+			minWidth: 100, maxWidth: 200, backgroundColor: "30,120,150",
 			mainRatingTypes: ["significance"],
 			otherRatingTypes: [],
 		}),
