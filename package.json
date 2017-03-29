@@ -17,11 +17,12 @@
     "dev:no-debug": "npm run dev -- --no_debug",
     "test": "better-npm-run test",
     "test:dev": "npm run test -- --watch",
+    "create-config": "better-npm-run create-config",
     "build": "better-npm-run build",
     "build:dev": "better-npm-run build:dev",
     "build:prod": "better-npm-run build:prod",
     "codecov": "cat coverage/*/lcov.info | codecov",
-    "fb": "node ./build/deploy",
+    "deploy": "node ./build/deploy",
     "@build-stats": "node_modules\\.bin\\webpack --config build/webpack.config.js --output-file ForStats/Bundle.js --profile --json > BuildStats.json",
     "build-stats": "node_modules\\.bin\\webpack --config build/webpack.config.js --output-file ForStats/Bundle.js --profile --json > dist/ForStats/BuildStats.json"
   },
@@ -29,13 +30,6 @@
     "compile": {
       "command": "node bin/compile",
       "env": {
-        "DEBUG": "app:*"
-      }
-    },
-    "dev": {
-      "command": "nodemon bin/server --ignore dist --ignore coverage --ignore tests --ignore src",
-      "env": {
-        "NODE_ENV": "development",
         "DEBUG": "app:*"
       }
     },
@@ -71,6 +65,23 @@
         "NODE_ENV": "test",
         "DEBUG": "app:*"
       }
+    },
+    "create-config": {
+      "command": "node build/create-config",
+      "env": {
+        "DEBUG": "app:*"
+      }
+    },
+
+	"dev": {
+      "command": "npm run create-config & nodemon bin/server --ignore dist --ignore coverage --ignore tests --ignore src",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "app:*"
+      }
+    },
+	"build-and-deploy": {
+      "command": "npm run create-config & npm run build:prod & npm run deploy"
     }
   },
   "repository": {
@@ -181,6 +192,5 @@
     "webpack-hot-middleware": "^2.12.2",
     "why-did-you-update": "0.0.8",
     "yargs": "^6.3.0"
-  },
-  "browser": {"fs": false, "fs-extra": false, "child_process": false }
+  }
 }

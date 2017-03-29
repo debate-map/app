@@ -1,11 +1,9 @@
-
 /* eslint key-spacing:0 spaced-comment:0 */
 const path = require('path')
 const debug = require('debug')('app:config')
 const argv = require('yargs').argv
 const ip = require('ip')
 const environments = require("./environments");
-const pkg = require('../package.json')
 
 debug('Creating default configuration.')
 
@@ -13,7 +11,7 @@ debug('Creating default configuration.')
 // ==========
 
 const config = {
-	//env : process.env.NODE_ENV || 'development',
+	env : process.env.NODE_ENV || 'development',
 
 	// ----------------------------------
 	// Project Structure
@@ -73,34 +71,21 @@ const config = {
 
 	compiler_css_modules: true, // enable/disable css modules
 
- 	// test configuration
+ 	// Test Configuration
 	// ----------
-
 	coverage_reporters : [
 		{ type : 'text-summary' },
 		{ type : 'lcov', dir : 'coverage' }
-	],
-
-	// from create-config logic
-	// ----------
-
-	firebase: null, // placeholder
-	reduxFirebase: null, // placeholder
-
-	version: pkg.version,
-	env: process.env.TRAVIS_PULL_REQUEST === false && process.env.TRAVIS_BRANCH === "prod"
-		? "production"
-		: process.env.NODE_ENV || 'development',
+	]
 };
 
 // All Internal Configuration Below
 // Edit at Your Own Risk
 // ==========
 // ==========
-// ==========
 
 // Environment
-// ----------
+// ==========
 
 // N.B.: globals added here must _also_ be added to .eslintrc
 config.globals = {
@@ -116,19 +101,23 @@ config.globals = {
 }
 
 // Validate Vendor Dependencies
-// ----------
+// ==========
 
-config.compiler_vendors = config.compiler_vendors.filter(dep=> {
-	if (pkg.dependencies[dep]) return true;
+const pkg = require('../package.json')
 
-	debug(
-`Package "${dep}" was not found as an npm dependency in package.json; it won't be included in the webpack vendor bundle.
-Consider removing it from \`compiler_vendors\` in ~/config/index.js`
-	);
-});
+config.compiler_vendors = config.compiler_vendors
+	.filter((dep) => {
+		if (pkg.dependencies[dep]) return true
+
+		debug(
+		  `Package "${dep}" was not found as an npm dependency in package.json; ` +
+		  `it won't be included in the webpack vendor bundle.
+		   Consider removing it from \`compiler_vendors\` in ~/config/index.js`
+		)
+	})
 
 // Utilities
-// ----------
+// ==========
 
 function base () {
 	const args = [config.path_base].concat([].slice.call(arguments))

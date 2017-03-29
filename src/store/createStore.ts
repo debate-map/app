@@ -3,13 +3,13 @@ import thunk from "redux-thunk";
 import {MakeRootReducer} from "./Root";
 import {createBrowserHistory} from "react-router/node_modules/history";
 import {reduxFirebase, getFirebase} from "react-redux-firebase";
+import {firebase as fbConfig} from "../config";
 import {persistStore, autoRehydrate} from "redux-persist";
 //import createFilter from "redux-persist-transform-filter";
 //import {version} from "../../package.json";
 import {GetUrlVars} from "../Frame/General/Globals_Free";
+import {DBPath} from "../Frame/Database/DatabaseHelpers";
 let {version} = require("../../package.json");
-//import config from "../../config";
-let config = {} as any; // temp
 
 let browserHistory = createBrowserHistory();
 
@@ -37,12 +37,21 @@ export default function(initialState = {}, history) {
 
 	// Store Instantiation and HMR Setup
 	// ==========
+
+	//reduxConfig["userProfile"] = DBPath("users"); // root that user profiles are written to
+	let reduxFirebaseConfig = {
+		userProfile: DBPath("users"), // root that user profiles are written to
+		enableLogging: false, // enable/disable Firebase Database Logging
+		updateProfileOnLogin: false // enable/disable updating of profile on login
+		// profileDecorator: (userData) => ({ email: userData.email }) // customize format of user profile
+	};
+
 	const store = createStore(
 		MakeRootReducer(),
 		initialState,
 		(compose as any)(
 			applyMiddleware(...middleware),
-			reduxFirebase(config.firebase, config.reduxFirebase),
+			reduxFirebase(fbConfig, reduxFirebaseConfig),
 			autoRehydrate(),
 			...enhancers
 		)

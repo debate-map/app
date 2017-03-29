@@ -1,11 +1,14 @@
 let {DBPath} = require("./DBVersion");
+
+// todo: pms this stuff is just moved to runtime code
+
 // Here is where you can define configuration overrides based on the execution environment.
 // Supply a key to the default export matching the NODE_ENV that you wish to target, and
 // the base configuration will apply your overrides before exporting itself.
 module.exports = {
 	// Overrides when NODE_ENV === "development"
 	// ==========
-	
+
 	// NOTE: In development, we use an explicit public path when the assets
 	// are served webpack by to fix this issue:
 	// http://stackoverflow.com/questions/34133808/webpack-ots-parsing-error-loading-fonts/34133809#34133809
@@ -16,12 +19,6 @@ module.exports = {
 			authDomain: "debate-map-dev.firebaseapp.com",
 			databaseURL: "https://debate-map-dev.firebaseio.com",
 			storageBucket: "debate-map-dev.appspot.com"
-		},
-		reduxFirebase: {
-			userProfile: DBPath("users"), // root that user profiles are written to
-			enableLogging: false, // enable/disable Firebase Database Logging
-			updateProfileOnLogin: false // enable/disable updating of profile on login
-			// profileDecorator: (userData) => ({ email: userData.email }) // customize format of user profile
 		}
 	}),
 
@@ -43,12 +40,6 @@ module.exports = {
 			authDomain: "debate-map-prod.firebaseapp.com",
 			databaseURL: "https://debate-map-prod.firebaseio.com",
 			storageBucket: "debate-map-prod.appspot.com"
-		},
-		reduxFirebase: {
-			userProfile: DBPath("users"), // root that user profiles are written to
-			enableLogging: false, // enable/disable Firebase Database Logging
-			updateProfileOnLogin: false // enable/disable updating of profile on login
-			// profileDecorator: (userData) => ({ email: userData.email }) // customize format of user profile
 		}
 	})
 };
