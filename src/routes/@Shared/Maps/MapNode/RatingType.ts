@@ -43,20 +43,24 @@ export class RatingType_Info {
 		adjustment: new RatingType_Info({
 			displayText: "Adjustment",
 			description: (node, parentNode)=> {
-				let ifType_str = MetaThesis_IfType[node.metaThesis_ifType].toLowerCase();
-				let support = parentNode.type == MapNodeType.SupportingArgument;
-				/*var raiseOrLower = parentNode.type == MapNodeType.SupportingArgument ? "raise" : "lower";
+				/*let ifType_str = MetaThesis_IfType[node.metaThesis_ifType].toLowerCase();
+				var raiseOrLower = parentNode.type == MapNodeType.SupportingArgument ? "raise" : "lower";
 				return `Supposing that ${ifType_str} premises of this argument were true, and the parent thesis' prior probability were 50%, to what level would this argument ${
 					raiseOrLower} it?`;*/
+				let all = node.metaThesis_ifType == MetaThesis_IfType.All;
+				let support = parentNode.type == MapNodeType.SupportingArgument;
 				/*return `Suppose that the other ${supporting ? "supporting" : "opposing"} arguments were only strong enough to yield a 50% probability for the parent`
 					+ ` (relative to the ${supporting ? "opposing" : "supporting"} arguments, which were kept the same).`
 					+ ` Assuming that all premises of this argument were true, to what level would it ${supporting ? "raise" : "lower"} the parent thesis' probability?`;*/
-				return `Suppose that the ${support ? "opposing" : "supporting"}  arguments were only strong enough`
-					+ ` to bring the parent's probability ${support ? "down" : "up"} to 50%.`
-					+ ` Suppose also that this were the only ${support ? "supporting" : "opposing"} argument, but that its premises were all true.`
-					+ ` If that were the case, to what level would this argument ${support ? "raise" : "lower"} the parent thesis' probability?`;
 				/*return `Suppose that all premises of this argument were true.`
 					+ ` If that were the case, how strong would this argument be relative to all of its peers (both supporting and opposing)?`;*/
+				/*return `Suppose that the ${support ? "opposing" : "supporting"}  arguments were only strong enough`
+					+ ` to bring the parent's probability ${support ? "down" : "up"} to 50%.`
+					+ ` Suppose also that this were the only ${support ? "supporting" : "opposing"} argument, but that its premises were all true.`
+					+ ` If that were the case, to what level would this argument ${support ? "raise" : "lower"} the parent thesis' probability?`;*/
+				return `Suppose that the other arguments -- supporting and opposing -- were equal in strength, so that the parent's probablity were 50%.`
+					+ (all ? ` Suppose also that this argument's premises were all true.` : ` Suppose also that at least one of this argument's premises were true.`)
+					+ ` If that were the case, to what level would this argument ${support ? "raise" : "lower"} the parent thesis' probability?`;
 			},
 			options: (node, parentNode)=> {
 				return parentNode.type == MapNodeType.SupportingArgument ? Range(50, 100) : Range(0, 50);
