@@ -35,7 +35,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 						let percentStr = "...";
 						let average = GetRatingAverage(node._id, ratingType, -1);
 						if (average != -1) {
-							if (node.metaThesis)
+							if (node.metaThesis && (node.metaThesis_thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis_thenType == MetaThesis_ThenType.WeakenParent))
 								percentStr = (node.metaThesis_thenType == MetaThesis_ThenType.StrengthenParent ? "+" : "-") + average.Distance(50) + "%";
 							else
 								percentStr = average + "%";
