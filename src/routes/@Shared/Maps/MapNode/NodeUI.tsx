@@ -47,6 +47,8 @@ import {MapNodeView} from "../../../../store/Root/Main/MapViews";
 	});
 }*/
 
+let childrenPlaceholder = [];
+
 type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
 type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number, svgInfo: {mainBoxOffset: Vector2i, oldChildBoxOffsets: Vector2i[]}};
 @FirebaseConnect(({node}: {node: MapNode})=>[
@@ -61,7 +63,8 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 		return {
 			path,
 			nodeView: getNodeView(state, {firebase, map, path}),
-			nodeChildren: CachedTransform({nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : []), // only pass nodeChildren when all are loaded
+			// only pass nodeChildren when all are loaded
+			nodeChildren: CachedTransform({nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : childrenPlaceholder),
 		};
 	}) as any;
 }) as any)
@@ -96,6 +99,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 				}}>
 					<NodeUI_Inner ref="innerBox" /*ref={c=>(this as any).innerBox = c}*/ map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
 				</div>
+				{nodeChildren == childrenPlaceholder &&
+					<div style={{margin: "auto 0 auto 10px"}}>...</div>}
 				{hasBeenExpanded && !separateChildren &&
 					<div ref="childHolder" className="childHolder clickThrough" style={{
 						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
