@@ -8,7 +8,7 @@ import {connect} from "react-redux";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {MapNodeType_Info} from "../MapNodeType";
 import {MapNodeView, ACTMapNodePanelOpen} from "../../../../store/Root/Main/MapViews";
-import {RatingsRoot, GetRatingAverage} from "../../../../store/Root/Firebase";
+import {RatingsRoot, GetRatingAverage, GetRatings} from "../../../../store/Root/Firebase";
 import {RatingType_Info} from "./RatingType";
 
 type Props = {
@@ -19,7 +19,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 	render() {
 		let {map, path, node, nodeView, ratingsRoot, backgroundColor, asHover} = this.props;
 
-		let ratingTypeInfo = MapNodeType_Info.for[node.type];
+		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		return (
 			<div style={{
@@ -30,9 +30,10 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 					{MapNode.GetMainRatingTypes(node).map((ratingType, index)=> {
 						let ratingTypeInfo = RatingType_Info.for[ratingType];
-						let ratingSet = ratingsRoot && ratingsRoot[ratingType];
+						//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
 
 						let percentStr = "...";
+						let ratings = GetRatings(node._id, ratingType);
 						let average = GetRatingAverage(node._id, ratingType, -1);
 						if (average != -1) {
 							if (node.metaThesis && (node.metaThesis_thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis_thenType == MetaThesis_ThenType.WeakenParent))
@@ -45,10 +46,10 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 									panel={ratingType} text={ratingTypeInfo.displayText} style={E(index == 0 && {marginTop: 0})}>
 								<Span ml={5} style={{float: "right"}}>
 									{percentStr}
-									{ratingType != "strength" &&
-										<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>
-											{ratingSet ? ratingSet.Props.filter(a=>a.name != "_key").length /*- 1*/ : 0}
-										</sup>}
+									<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>
+										{/*ratingSet ? ratingSet.Props.filter(a=>a.name != "_key").length /*- 1*#/ : 0*/}
+										{ratings.length}
+									</sup>
 								</Span>
 							</PanelButton>
 						);

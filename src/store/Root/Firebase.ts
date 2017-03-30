@@ -8,7 +8,7 @@ import {firebaseConnect} from "react-redux-firebase";
 import {CachedTransform} from "../../Frame/V/VCache";
 import {RatingType} from "../../routes/@Shared/Maps/MapNode/RatingType";
 import {MapNodeType} from "../../routes/@Shared/Maps/MapNodeType";
-import {CalculateArgumentStrength} from "../../routes/@Shared/Maps/MapNode/RatingProcessor";
+import {CalculateArgumentStrength, GetArgumentStrengthPseudoRatings} from "../../routes/@Shared/Maps/MapNode/RatingProcessor";
 import {IsNaN} from "../../Frame/General/Types";
 
 //export function FirebaseConnect<T>(paths: string[]); // just disallow this atm, since you might as well just use a connect/getter func
@@ -94,6 +94,8 @@ export function GetRatingSet(nodeID: number, ratingType: RatingType) {
 	return ratingsRoot ? ratingsRoot[ratingType] : null;
 }
 export function GetRatings(nodeID: number, ratingType: RatingType): Rating[] {
+	if (ratingType == "strength")
+		return GetArgumentStrengthPseudoRatings(GetNodeChildren(GetNode(nodeID)));
 	let ratingSet = GetRatingSet(nodeID, ratingType);
 	return CachedTransform({nodeID, ratingType}, {ratingSet},
 		()=>ratingSet ? ratingSet.Props.filter(a=>a.name != "_key").map(a=>a.value as Rating) : []);

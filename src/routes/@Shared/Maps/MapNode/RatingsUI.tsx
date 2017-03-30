@@ -41,18 +41,13 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 		let parentNode = GetParentNode(path);
 		let ratingTypeInfo = RatingType_Info.for[ratingType];
 		let options = typeof ratingTypeInfo.options == "function" ? ratingTypeInfo.options(node, parentNode) : ratingTypeInfo.options;
+		let myRatingValue = ratings.find(a=>a._key == userID);
 
 		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(options.Max() == 200 ? [200] : []);
 		let minVal = options.Min(), maxVal = options.Max(), range = maxVal - minVal;
 		smoothing = smoothing.KeepAtMost(options.Max()); // smoothing might have been set higher, from when on another rating-type
 		let ticksForChart = options.Select(a=>a.RoundTo(smoothing)).Distinct();
 		let dataFinal = ticksForChart.Select(a=>({rating: a, count: 0}));
-
-		if (ratingType == "strength") {
-			ratings = GetArgumentStrengthPseudoRatings(nodeChildren);
-		}
-		let myRatingValue = ratings.find(a=>a._key == userID);
-
 		for (let entry of ratings) {
 			let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(entry.value)).First();
 			closestRatingSlot.count++;
