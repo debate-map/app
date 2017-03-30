@@ -78,8 +78,8 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					<ResizeSensor onResize={()=> {
 						if (this.hasLoadedScroll) return;
 						let state = store.getState();
-						let focusNode_target = GetMapView(state, {map}) ? GetMapView(state, {map}).focusNode : null;
-						let viewOffset_target = GetMapView(state, {map}) ? GetMapView(state, {map}).viewOffset : null;
+						let focusNode_target = GetMapView(map._id) ? GetMapView(map._id).focusNode : null;
+						let viewOffset_target = GetMapView(map._id) ? GetMapView(map._id).viewOffset : null;
 						//Log(`Resizing:${focusNode_target};${viewOffset_target}`);
 						if (focusNode_target == null || viewOffset_target == null) return;
 

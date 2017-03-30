@@ -9,9 +9,9 @@ import {persistStore, autoRehydrate} from "redux-persist";
 //import {version} from "../../package.json";
 import {GetUrlVars} from "../Frame/General/Globals_Free";
 import {DBPath} from "../Frame/Database/DatabaseHelpers";
+import {routerMiddleware} from 'react-router-redux'
 let {version} = require("../../package.json");
-
-let browserHistory = createBrowserHistory();
+export const browserHistory = createBrowserHistory();
 
 export default function(initialState = {}, history) {
 	// Window Vars Config
@@ -21,8 +21,8 @@ export default function(initialState = {}, history) {
 	// Middleware Configuration
 	// ==========
 	const middleware = [
-		thunk.withExtraArgument(getFirebase)
-		// This is where you add other middleware like redux-observable
+		thunk.withExtraArgument(getFirebase),
+		routerMiddleware(browserHistory)
 	];
 
 	// Store Enhancers
@@ -49,7 +49,7 @@ export default function(initialState = {}, history) {
 	const store = createStore(
 		MakeRootReducer(),
 		initialState,
-		(compose as any)(
+		compose(
 			applyMiddleware(...middleware),
 			reduxFirebase(fbConfig, reduxFirebaseConfig),
 			autoRehydrate(),

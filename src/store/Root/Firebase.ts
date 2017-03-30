@@ -10,6 +10,7 @@ import {RatingType} from "../../routes/@Shared/Maps/MapNode/RatingType";
 import {MapNodeType} from "../../routes/@Shared/Maps/MapNodeType";
 import {CalculateArgumentStrength, GetArgumentStrengthPseudoRatings} from "../../routes/@Shared/Maps/MapNode/RatingProcessor";
 import {IsNaN} from "../../Frame/General/Types";
+import {Map} from "../../routes/@Shared/Maps/Map";
 
 //export function FirebaseConnect<T>(paths: string[]); // just disallow this atm, since you might as well just use a connect/getter func
 export function FirebaseConnect<T>(pathsGetterFunc: (props: T)=>string[]);
@@ -41,6 +42,9 @@ export function GetUserPermissionGroups(userID: string) {
 	return GetData(GetUserPermissionGroups_Path(userID));
 }
 
+export function GetMap(id: number): Map {
+	return GetData(`maps/${id}`);
+}
 //export function GetNode_Path() {}
 export function GetNode(id: number) {
 	//Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");

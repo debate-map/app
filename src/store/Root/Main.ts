@@ -1,5 +1,6 @@
+import {ToInt} from "../../Frame/General/Types";
 import {CombineReducers, RootState} from "../Root";
-import {MapViews, MapViewsReducer} from "./Main/MapViews";
+import {MapViews, MapViewsReducer, MapNodeView, MapView} from "./Main/MapViews";
 import {combineReducers} from "redux";
 import {firebaseStateReducer} from "react-redux-firebase";
 import {reducer as formReducer} from "redux-form";
@@ -12,6 +13,9 @@ import {Map} from "../../routes/@Shared/Maps/Map";
 import {createSelector} from "reselect";
 import {FirebaseDatabase} from "../../Frame/UI/ReactGlobals";
 import {GetTreeNodesInObjTree} from "../../Frame/V/V";
+import {ProcessAction} from "../ActionProcessor";
+import {CachedTransform} from "../../Frame/V/VCache";
+import {GetMap} from "./Firebase";
 
 // state and actions
 // ==========
@@ -36,40 +40,7 @@ let MainReducer_Real;
 export function MainReducer(state, action) {
 	MainReducer_Real = MainReducer_Real || CombineReducers({
 		userPanelOpen: (state = false, action)=> {
-			// cheats
-			if (action.type == "@@reactReduxFirebase/SET" && action["data"]) {
-				// turn annoying arrays into objects
-				var treeNodes = GetTreeNodesInObjTree(action["data"], true);
-				for (let treeNode of treeNodes) {
-					if (treeNode.Value instanceof Array) {
-						let objVersion = {}.Extend(treeNode.Value) as any;
-						for (let key in objVersion) {
-							// if fake array-item added by Firebase (just so it would be an array), remove it
-							if (objVersion[key] == null)
-								delete objVersion[key];
-						}
-						treeNode.obj[treeNode.prop] = objVersion;
-					}
-
-					// add special _key or _id prop
-					if (typeof treeNode.Value == "object") {
-						let key = treeNode.prop == "_root" ? (action["path"] as string).split("/").Last() : treeNode.prop;
-						if (parseInt(key).toString() == key)
-							treeNode.Value._id = parseInt(key);
-						else
-							treeNode.Value._key = key;
-					}
-				}
-
-				// add special _key or _id prop
-				/*if (typeof action["data"] == "object") {
-					let key = (action["path"] as string).split("/").Last();
-					if (parseInt(key).toString() == key)
-						action["data"]._id = parseInt(key);
-					else
-						action["data"]._key = key;
-				}*/
-			}
+			ProcessAction(action);
 
 			//case SET_USER_PANEL_OPEN: return {...state, userPanelOpen: action.payload};
 			if (action.Is(ACTUserPanelOpenSet))
@@ -109,18 +80,34 @@ export function RatingUIReducer(state = new RatingUIState(), action: Action<any>
 export function GetRatingUISmoothing(state: RootState) { 
 	return state.main.ratingUI.smoothing;
 }
-export function GetSelectedNodeID(state: RootState, {map}: {map: Map}) { 
-	let mapView = state.main.mapViews[map._id];
+export function GetOpenMapID() {
+	return State().main.openMap;
+}
+export function GetSelectedNodePathNodes(mapID: number): number[] {
+	let mapView = GetMapView(mapID);
+	let selectedTreeNode = GetTreeNodesInObjTree(mapView).FirstOrX(a=>a.prop == "selected" && a.Value);
+	if (selectedTreeNode == null) return [];
+	let selectedNodeView = selectedTreeNode.ancestorNodes.Last();
+
+	let map = GetMap(mapID);
+	if (map == null) return [];
+
+	let pathNodes = selectedNodeView.PathNodes.Where(a=>a != "children");
+	pathNodes[0] = map.rootNode.toString();
+	return pathNodes.map(ToInt);
+}
+export function GetSelectedNodePath(mapID: number): string {
+	return GetSelectedNodePathNodes(mapID).join("/");
+}
+export function GetSelectedNodeID(mapID: number): number {
+	/*let mapView = GetMapView(mapID);
 	let selectedNodeView = GetTreeNodesInObjTree(mapView).FirstOrX(a=>a.prop == "selected" && a.Value);
 	if (selectedNodeView && selectedNodeView.ancestorNodes.Last().prop == "rootNodeView")
-		return map.rootNode;
-	return selectedNodeView ? selectedNodeView.ancestorNodes.Last().prop as number : null;
+		return GetMap(mapID).rootNode;
+	return selectedNodeView ? selectedNodeView.ancestorNodes.Last().prop as number : null;*/
+	return GetSelectedNodePathNodes(mapID).LastOrX();
 }
-export function GetMapView(state: RootState, {map}: {map: Map}) {
-	if (map == null) return null;
-	return state.main.mapViews[map._id];
-}
-export function MakeGetNodeView() {
+/*export function MakeGetNodeView() {
 	var getParentNodeView; //= MakeGetNodeView();
 	return createSelector(
 		(_, {firebase}: {firebase: FirebaseDatabase})=>firebase,
@@ -142,8 +129,23 @@ export function MakeGetNodeView() {
 				if (currentNodeView == null)
 					return null;
 			}
-			return currentNodeView;*/
+			return currentNodeView;*#/
 			return parentNodeView && parentNodeView.children ? parentNodeView.children[pathNodeIDs.Last()] : rootNodeView;
 		}
   	);
+}*/
+export function GetMapView(mapID: number): MapView {
+	return State().main.mapViews[mapID];
+}
+export function GetNodeView(mapID: number, path: string): MapNodeView {
+	let pathNodeIDs = path.split("/").map(ToInt);
+	let parentNodeID = pathNodeIDs.length > 1 ? pathNodeIDs.XFromLast(1) : null;
+	if (parentNodeID) {
+		//let parentNodeView = CachedTransform({mapID, path}, )
+		let parentNodeView = GetNodeView(mapID, path.substr(0, path.lastIndexOf("/")));
+		return parentNodeView.children[pathNodeIDs.Last()];
+	}
+
+	let mapView = GetMapView(mapID);
+	return mapView.rootNodeView;
 }

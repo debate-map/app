@@ -13,8 +13,12 @@ export default class Action<Payload> {
 		return this.type == actionType.name;
 		//return this instanceof actionType; // alternative
 	}
+	IsAny(...actionTypes: (new(..._)=>Action<any>)[]) {
+		return actionTypes.Any(a=>this.type == a.name);
+	}
 }
 Object.prototype._AddFunction("Is", Action.prototype.Is);
+Object.prototype._AddFunction("IsAny", Action.prototype.IsAny);
 
 /*export function IsACT<Props>(action, actionType: new(..._)=>Action<Props>): action is Props {
 	return action.type == actionType.name;

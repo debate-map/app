@@ -200,7 +200,7 @@ export class TreeNode {
 	}
 
 	ancestorNodes: TreeNode[];
-	get PathNodes() {
+	get PathNodes(): string[] {
 		if (this.prop == "_root") return [];
 		return this.ancestorNodes.Select(a=>a.prop).concat(this.prop);
 	}

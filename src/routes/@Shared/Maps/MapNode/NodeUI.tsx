@@ -28,7 +28,7 @@ import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {MapNodeType_Info, MapNodeType} from "../MapNodeType";
 import {MakeGetNodeChildIDs, FirebaseConnect, GetNodeChildren} from "../../../../store/Root/Firebase";
-import {MakeGetNodeView} from "../../../../store/Root/Main";
+import {GetNodeView} from "../../../../store/Root/Main";
 import {RootState} from "../../../../store/Root";
 import {MapNodeView} from "../../../../store/Root/Main/MapViews";
 
@@ -55,14 +55,15 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 	...MakeGetNodeChildIDs()({}, {node}).Select(a=>`nodes/${a}`)
 ])
 @(connect(()=> {
-	var getNodeView = MakeGetNodeView();
+	//var getNodeView = MakeGetNodeView();
 	return ((state: RootState, {node, path, map}: Props & BaseProps)=> {
 		var path = path || node._id.toString();
 		var firebase = store.getState().firebase;
 		let nodeChildren = GetNodeChildren(node);
 		return {
 			path,
-			nodeView: getNodeView(state, {firebase, map, path}),
+			//nodeView: getNodeView(state, {firebase, map, path}),
+			nodeView: GetNodeView(map._id, path),
 			// only pass nodeChildren when all are loaded
 			nodeChildren: CachedTransform({nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : childrenPlaceholder),
 		};
