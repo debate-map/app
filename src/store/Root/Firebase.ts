@@ -1,3 +1,4 @@
+import {Assert} from "../../Frame/General/Assert";
 import {createSelector} from "reselect";
 import {MapNode, MetaThesis_ThenType} from "../../routes/@Shared/Maps/MapNode";
 import {DBPath, GetData, RequestPaths} from "../../Frame/Database/DatabaseHelpers";
@@ -8,6 +9,7 @@ import {CachedTransform} from "../../Frame/V/VCache";
 import {RatingType} from "../../routes/@Shared/Maps/MapNode/RatingType";
 import {MapNodeType} from "../../routes/@Shared/Maps/MapNodeType";
 import {CalculateArgumentStrength} from "../../routes/@Shared/Maps/MapNode/RatingProcessor";
+import {IsNaN} from "../../Frame/General/Types";
 
 //export function FirebaseConnect<T>(paths: string[]); // just disallow this atm, since you might as well just use a connect/getter func
 export function FirebaseConnect<T>(pathsGetterFunc: (props: T)=>string[]);
@@ -41,6 +43,8 @@ export function GetUserPermissionGroups(userID: string) {
 
 //export function GetNode_Path() {}
 export function GetNode(id: number) {
+	//Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");
+	if (id == null || IsNaN(id)) return null;
 	return GetData(`nodes/${id}`) as MapNode;
 }
 export function GetParentNode(path: string) {
@@ -60,12 +64,12 @@ export const MakeGetNodeRatings = ()=>createSelector(
 export var MakeGetNodeChildIDs = ()=>createSelector(
 	(_, {node}: {node: MapNode})=>node.children,
 	nodeChildren=> {
-		return (nodeChildren || {}).VKeys().Select(a=>parseInt(a));
+		return (nodeChildren || {}).VKeys().Except("_key").Select(a=>parseInt(a));
 	}
 );
 
 export function GetNodeChildren(node: MapNode) {
-	let children = (node.children || {}).VKeys().map(id=>GetNode(parseInt(id)));
+	let children = (node.children || {}).VKeys().Except("_key").map(id=>GetNode(parseInt(id)));
 	return CachedTransform({nodeID: node._id}, children, ()=>children);
 }
 
@@ -74,7 +78,8 @@ export function GetNodeChildren(node: MapNode) {
 
 export type RatingsRoot = {[key: string]: RatingsSet};
 export type RatingsSet = {[key: string]: Rating};
-export type Rating = {updated: number, value: number};
+export type Rating = {_key: string, updated: number, value: number};
+//export type RatingWithUserID = Rating & {userID: string};
 
 export function GetPaths_NodeRatingsRoot(nodeID: number) {
 	return [`nodeRatings/${nodeID}`];
@@ -88,18 +93,25 @@ export function GetRatingSet(nodeID: number, ratingType: RatingType) {
 	let ratingsRoot = GetNodeRatingsRoot(nodeID);
 	return ratingsRoot ? ratingsRoot[ratingType] : null;
 }
-export type RatingWithUserID = Rating & {userID: string};
-export function GetRatings(nodeID: number, ratingType: RatingType) {
+export function GetRatings(nodeID: number, ratingType: RatingType): Rating[] {
 	let ratingSet = GetRatingSet(nodeID, ratingType);
 	return CachedTransform({nodeID, ratingType}, {ratingSet},
-		()=>ratingSet ? ratingSet.Props.filter(a=>a.name != "_id").map(a=>({...a.value, userID: a.name}) as RatingWithUserID) : []);
+		()=>ratingSet ? ratingSet.Props.filter(a=>a.name != "_key").map(a=>a.value as Rating) : []);
+}
+export function GetRating(nodeID: number, ratingType: RatingType, userID: string) {
+	let ratingSet = GetRatingSet(nodeID, ratingType);
+	return ratingSet[userID];
+}
+export function GetRatingValue(nodeID: number, ratingType: RatingType, userID: string, resultIfNoData = null): number {
+	let rating = GetRating(nodeID, ratingType, userID);
+	return rating ? rating.value : resultIfNoData;
 }
 export function GetRatingAverage(nodeID: number, ratingType: RatingType, resultIfNoData = null): number {
 	if (ratingType == "strength")
 		return CalculateArgumentStrength(GetNodeChildren(GetNode(nodeID)));
 	let ratings = GetRatings(nodeID, ratingType);
 	if (ratings.length == 0) return resultIfNoData as any;
-	return CachedTransform({nodeID, ratingType}, {ratings}, ()=>ratings.map(a=>a.value).Average());
+	return CachedTransform({nodeID, ratingType}, {ratings}, ()=>ratings.map(a=>a.value).Average().RoundTo(1));
 }
 
 /*export function GetPaths_MainRatingSet(node: MapNode) {

@@ -27,7 +27,7 @@ import NodeConnectorBackground from "./NodeConnectorBackground";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {MapNodeType_Info, MapNodeType} from "../MapNodeType";
-import {MakeGetNodeChildIDs, FirebaseConnect} from "../../../../store/Root/Firebase";
+import {MakeGetNodeChildIDs, FirebaseConnect, GetNodeChildren} from "../../../../store/Root/Firebase";
 import {MakeGetNodeView} from "../../../../store/Root/Main";
 import {RootState} from "../../../../store/Root";
 import {MapNodeView} from "../../../../store/Root/Main/MapViews";
@@ -57,11 +57,11 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 	return ((state: RootState, {node, path, map}: Props & BaseProps)=> {
 		var path = path || node._id.toString();
 		var firebase = store.getState().firebase;
-		let nodeChildren = (node.children || {}).VKeys().Select(key=>GetData(`nodes/${key}`));
+		let nodeChildren = GetNodeChildren(node);
 		return {
 			path,
 			nodeView: getNodeView(state, {firebase, map, path}),
-			nodeChildren: CachedTransform({nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a) ? nodeChildren : []), // only pass nodeChildren when all are loaded
+			nodeChildren: CachedTransform({nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : []), // only pass nodeChildren when all are loaded
 		};
 	}) as any;
 }) as any)

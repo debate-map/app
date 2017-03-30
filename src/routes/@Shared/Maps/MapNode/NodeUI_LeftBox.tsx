@@ -47,7 +47,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 									{percentStr}
 									{ratingType != "strength" &&
 										<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>
-											{ratingSet ? ratingSet.Props.length /*- 1*/ : 0}
+											{ratingSet ? ratingSet.Props.filter(a=>a.name != "_key").length /*- 1*/ : 0}
 										</sup>}
 								</Span>
 							</PanelButton>

@@ -50,7 +50,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let barSize = 5;
 		let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
-		let parentNode = GetParentNode(path);
+		//let parentNode = GetParentNode(path);
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
 		let panelToShow = openPanel_preview || (nodeView && nodeView.openPanel);

@@ -11,6 +11,7 @@ export function Assert(condition, messageOrMessageFunc) {
 
 	Log(`Assert failed) ${message}\n\nStackTrace) ${V.GetStackTraceStr()}`);
 	console.error("Assert failed) " + message);
+	debugger;
 	throw new Error("Assert failed) " + message);
 };
 export function AssertWarn(condition, messageOrMessageFunc) {

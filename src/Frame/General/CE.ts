@@ -264,8 +264,15 @@ Object.prototype._AddFunction_Inline = function Excluding(...propNames) {
 };*/
 //Object.prototype._AddFunction_Inline = function Keys() { return Object.keys(this); }; // "Keys" is already used for Dictionary prop
 //Object.prototype._AddGetter_Inline = function VKeys() { return Object.keys(this); }; // "Keys" is already used for Dictionary prop
+
+// "Keys" is already used for Dictionary prop
 interface Object { VKeys(): string[]; }
-Object.prototype._AddFunction_Inline = function VKeys() { return Object.keys(this); }; // "Keys" is already used for Dictionary prop
+Object.prototype._AddFunction_Inline = function VKeys() { return Object.keys(this); };
+/*interface Object { VKeys(excludeKeyAndID?: boolean): string[]; }
+Object.prototype._AddFunction_Inline = function VKeys(excludeKeyAndID = true) {
+	return Object.keys(this).Except("_key", "_id");
+};*/
+
 interface Object { VValues(): any[]; }
 Object.prototype._AddFunction_Inline = function VValues() { return Object.keys(this).Select(a=>this[a]); };
 // like Pairs for Dictionary, except for Object

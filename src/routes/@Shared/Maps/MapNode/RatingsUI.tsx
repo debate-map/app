@@ -16,11 +16,12 @@ import {ACTRatingUISmoothnessSet, GetRatingUISmoothing} from "../../../../store/
 import {GetUserID, Rating, GetNode, GetParentNode, GetNodeChildren} from "../../../../store/Root/Firebase";
 import {RootState} from "../../../../store/Root";
 import {Debugger} from "../../../../Frame/General/Globals_Free";
-import {CalculateArgumentStrength} from "./RatingProcessor";
+import {CalculateArgumentStrength, GetArgumentStrengthPseudoRatings} from "./RatingProcessor";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: (Rating & {userID: string})[]} & Partial<{userID: string, smoothing: number}>;
+type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]}
+	& Partial<{userID: string, nodeChildren: MapNode[], smoothing: number}>;
 @firebaseConnect(({node, ratingType}: RatingsUI_Props)=>[
 	`nodeRatings/${node._id}/${ratingType}/${GetUserID()}/value`
 ])
@@ -29,34 +30,40 @@ type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, rat
 		userID: GetUserID(),
 		//myVote: GetData(`nodeRatings/${node._id}/${ratingType}/${GetUserID()}/value`),
 		smoothing: GetRatingUISmoothing(state),
+		nodeChildren: GetNodeChildren(node),
 	};
 }) as any)
 export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vector2i}> {
 	render() {
-		let {node, path, ratingType, userID, ratings, smoothing, firebase} = this.props;
+		let {node, path, ratingType, userID, ratings, nodeChildren, smoothing, firebase} = this.props;
 		let {size} = this.state;
 
 		let parentNode = GetParentNode(path);
 		let ratingTypeInfo = RatingType_Info.for[ratingType];
 		let options = typeof ratingTypeInfo.options == "function" ? ratingTypeInfo.options(node, parentNode) : ratingTypeInfo.options;
-		let myRatingValue = ratings.find(a=>a.userID == userID);
 
 		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(options.Max() == 200 ? [200] : []);
 		let minVal = options.Min(), maxVal = options.Max(), range = maxVal - minVal;
 		smoothing = smoothing.KeepAtMost(options.Max()); // smoothing might have been set higher, from when on another rating-type
 		let ticksForChart = options.Select(a=>a.RoundTo(smoothing)).Distinct();
 		let dataFinal = ticksForChart.Select(a=>({rating: a, count: 0}));
+
+		if (ratingType == "strength") {
+			ratings = GetArgumentStrengthPseudoRatings(nodeChildren);
+		}
+		let myRatingValue = ratings.find(a=>a._key == userID);
+
 		for (let entry of ratings) {
 			let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(entry.value)).First();
 			closestRatingSlot.count++;
 		}
 
-		if (ratingType == "strength") {
+		/*if (ratingType == "strength") {
 			let nodeChildren = GetNodeChildren(node);
 			let argumentStrength = CalculateArgumentStrength(nodeChildren);
 			let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(argumentStrength)).First();
 			closestRatingSlot.count++;
-		}
+		}*/
 
 		return (
 			<div ref="root" style={{position: "relative"/*, minWidth: 496*/}}
