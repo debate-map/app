@@ -53,7 +53,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
 						let focusNodeBox = $(".NodeUI_Inner").ToList().Min(nodeBox=>GetDistanceBetweenRectAndPoint(nodeBox.GetScreenRect(), viewCenter_onScreen));
 						let focusNodeBoxComp = FindReact(focusNodeBox[0]) as NodeUI_Inner;
-						let viewOffset = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position);
+						let viewOffset = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
 						store.dispatch(new ACTViewCenterChange({mapID: focusNodeBoxComp.props.map._id, focusNode: focusNodeBoxComp.props.path, viewOffset}));
 					}}>
 				<div id="MapUI" ref="content"
