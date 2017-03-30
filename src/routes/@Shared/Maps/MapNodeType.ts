@@ -35,14 +35,14 @@ export class MapNodeType_Info {
 			displayName: "supporting argument",
 			childTypes: [MapNodeType.Thesis],
 			minWidth: 100, maxWidth: 300, backgroundColor: "30,100,30",
-			mainRatingTypes: [],
+			mainRatingTypes: ["strength"],
 			otherRatingTypes: [],
 		}),
 		[MapNodeType.OpposingArgument]: new MapNodeType_Info({
 			displayName: "opposing argument",
 			childTypes: [MapNodeType.Thesis],
 			minWidth: 100, maxWidth: 300, backgroundColor: "100,30,30",
-			mainRatingTypes: [],
+			mainRatingTypes: ["strength"],
 			otherRatingTypes: [],
 		}),
 	} as {[key: string]: MapNodeType_Info};

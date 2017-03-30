@@ -1,3 +1,4 @@
+import {QuickIncrement} from "../General/Globals_Free";
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 // Performs equality by iterating through keys on an object and returning false when any key has values which are not strictly equal between the arguments.
 // Returns true when the values of all keys are strictly equal.
@@ -25,19 +26,19 @@ function shallowEqual(objA, objB) {
 
 
 
-class Storage {
-	lastDynamicProps;
-	lastResult;
+class Storage<T2, T3> {
+	lastDynamicProps: T2;
+	lastResult: T3;
 }
-let storages = {} as {[storageKey: string]: Storage};
+let storages = {} as {[storageKey: string]: Storage<any, any>};
 
 /**
  * @param staticProps Can be either an object or array.
  * @param dynamicProps Can be either an object or array.
  * @param transformFunc The data-transformer. Whenever a dynamic-prop changes, this will be called, and the new result will be cached.
  */
-export function CachedTransform<T, T2, T3>(staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3);
-export function CachedTransform<T, T2, T3>(transformType: string, staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3);
+export function CachedTransform<T, T2, T3>(staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3): T3;
+export function CachedTransform<T, T2, T3>(transformType: string, staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3): T3;
 export function CachedTransform<T, T2, T3>(...args) {
 	let transformType: string, staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3;
 	if (args.length == 3) {
@@ -49,8 +50,10 @@ export function CachedTransform<T, T2, T3>(...args) {
 	}
 
 	let storageKey = transformType + "|" + JSON.stringify(staticProps);
-	let storage = storages[storageKey] || (storages[storageKey] = new Storage());
+	let storage = storages[storageKey] as Storage<T2, T3> || (storages[storageKey] = new Storage<T2, T3>());
 	if (!shallowEqual(dynamicProps, storage.lastDynamicProps)) {
+		//console.log(`Recalculating cache. @Type:${transformType} @StaticProps:${staticProps.VKeys()} @DynamicProps:${dynamicProps.VKeys()} @TransformFunc:${transformFunc}`);
+
 		storage.lastDynamicProps = dynamicProps;
 		storage.lastResult = transformFunc(staticProps, dynamicProps);
 	}

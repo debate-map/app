@@ -99,3 +99,17 @@ export function GetData(path: string) {
 		return promise;
 	};
 })();*/
+
+// not sure if this makes sense yet...
+let requestedPaths = [] as string[];
+export function RequestPath(path: string) {
+	requestedPaths.push(path);
+}
+export function RequestPaths(paths: string[]) {
+	requestedPaths.push(...paths);
+}
+export function GetRequestedPathsAndClear() {
+	var result = requestedPaths;
+	requestedPaths = [];
+	return result;
+}

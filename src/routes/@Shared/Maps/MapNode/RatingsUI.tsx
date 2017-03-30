@@ -13,9 +13,10 @@ import {GetData} from "../../../../Frame/Database/DatabaseHelpers";
 import {RatingType, RatingType_Info} from "./RatingType";
 import {MapNodeType_Info} from "../MapNodeType";
 import {ACTRatingUISmoothnessSet, GetRatingUISmoothing} from "../../../../store/Root/Main";
-import {GetUserID, Rating, GetNode, GetParentNode} from "../../../../store/Root/Firebase";
+import {GetUserID, Rating, GetNode, GetParentNode, GetNodeChildren} from "../../../../store/Root/Firebase";
 import {RootState} from "../../../../store/Root";
 import {Debugger} from "../../../../Frame/General/Globals_Free";
+import {CalculateArgumentStrength} from "./RatingProcessor";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -50,9 +51,17 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 			closestRatingSlot.count++;
 		}
 
+		if (ratingType == "strength") {
+			let nodeChildren = GetNodeChildren(node);
+			let argumentStrength = CalculateArgumentStrength(nodeChildren);
+			let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(argumentStrength)).First();
+			closestRatingSlot.count++;
+		}
+
 		return (
 			<div ref="root" style={{position: "relative"/*, minWidth: 496*/}}
 					onClick={e=> {
+						if (ratingType == "strength") return;
 						let target = FindDOM_(e.target);
 						//let chart = (target as any).plusParents().filter(".recharts-cartesian-grid");
 						let chartHolder = (target as any).plusParents().filter("div.recharts-wrapper");
@@ -96,7 +105,11 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 						: ratingTypeInfo.description}
 				</div>
 				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
-					<Pre style={{marginRight: "auto", fontSize: 12, color: "rgba(255,255,255,.5)"}}>Click to vote. Right-click to remove vote.</Pre>
+					<Pre style={{marginRight: "auto", fontSize: 12, color: "rgba(255,255,255,.5)"}}>
+						{ratingType == "strength"
+							? "Cannot rate this directly. Instead, rate the premises and meta-thesis."
+							: "Click to rate. Right-click to remove rating."}
+					</Pre>
 					{/*Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>*/}
 					<Pre>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>
 				</div>

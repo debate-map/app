@@ -1,5 +1,5 @@
 import {ACTMapNodeExpandedToggle, ACTMapNodeSelect, MapNodeView} from "../../../../store/Root/Main/MapViews";
-import {GetNodeRatingsRoot, GetPaths_NodeRatingsRoot, GetUserID, RatingsRoot, GetParentNode} from "../../../../store/Root/Firebase";
+import {GetNodeRatingsRoot, GetPaths_NodeRatingsRoot, GetUserID, RatingsRoot, GetParentNode, GetRatingAverage, GetRatings, GetNodeChildren, GetMainRatingFillPercent} from "../../../../store/Root/Firebase";
 import {RootState} from "../../../../store/Root";
 import {connect} from "react-redux";
 import {Map} from "../Map";
@@ -23,37 +23,34 @@ import {MapNodeType_Info, MapNodeType} from "../MapNodeType";
 import {FirebaseConnect} from "../../../../store/Root/Firebase";
 import NodeOthersUI from "./NodeOthersUI";
 import V from "../../../../Frame/V/V";
+import {CalculateArgumentStrength} from "./RatingProcessor";
+import {GetRequestedPathsAndClear} from "../../../../Frame/Database/DatabaseHelpers";
 
-type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number} & Partial<{userID: string, ratingsRoot: RatingsRoot}>;
-@FirebaseConnect(({node}: Props)=>[
-	...GetPaths_NodeRatingsRoot({node}),
+type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
+	& Partial<{userID: string, ratingsRoot: RatingsRoot, mainRatingFillPercent: number}>;
+//@FirebaseConnect((props: Props)=>((props["holder"] = props["holder"] || {}), [
+@FirebaseConnect((props: Props)=>[
+	...GetPaths_NodeRatingsRoot(props.node._id),
+	//...GetPaths_MainRatingFillPercent(node),
+	//...(props["holder"]._pathsRequestedLastTime || []),
 ])
 @(connect(()=> {
+	//return (state: RootState, {node, ratingsRoot, holder}: (Props & {holder}))=> ({
 	return (state: RootState, {node, ratingsRoot}: Props)=> ({
 		userID: GetUserID(),
-		ratingsRoot: GetNodeRatingsRoot(state, {node}),
+		ratingsRoot: GetNodeRatingsRoot(node._id),
+		mainRatingFillPercent: GetMainRatingFillPercent(node),
+		//_: holder._pathsRequestedLastTime = GetRequestedPathsAndClear(),
 	}) as any;
 }) as any)
 export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, openPanel_preview: string}> {
 	render() {
-		let {firebase, map, node, nodeView, path, width, widthOverride, userID, ratingsRoot} = this.props;
+		let {firebase, map, node, nodeView, path, width, widthOverride, userID, ratingsRoot, mainRatingFillPercent} = this.props;
 		let {hovered, openPanel_preview} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let barSize = 5;
 		let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 		let parentNode = GetParentNode(path);
-
-		let mainRatingTypes = MapNode.GetMainRatingTypes(node);
-		let mainRatingSet = ratingsRoot && ratingsRoot[mainRatingTypes[0]];
-		let mainRatingAverage = CachedTransform("getMainRatingAverage", {nodeID: node._id, ratingType: mainRatingTypes[0]}, {ratingSet: mainRatingSet},
-			()=>mainRatingSet ? mainRatingSet.Props.Where(a=>a.name != "_id").Select(a=>a.value.value).Average() : 0);
-		if (node._id < 100) // if static category
-			mainRatingAverage = 100;
-		if (node.metaThesis && (node.metaThesis_thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis_thenType == MetaThesis_ThenType.WeakenParent)) {
-			mainRatingAverage = parentNode.type == MapNodeType.SupportingArgument
-				? V.GetPercentFromXToY(50, 100, mainRatingAverage) * 100
-				: V.GetPercentFromXToY(50, 0, mainRatingAverage) * 100;
-		}
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
 		let panelToShow = openPanel_preview || (nodeView && nodeView.openPanel);
@@ -91,7 +88,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							}}>
 						<div style={{
 								position: "absolute", left: 0, top: 0, bottom: 0,
-								width: mainRatingAverage + "%", background: `rgba(${nodeTypeInfo.backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
+								width: mainRatingFillPercent + "%", background: `rgba(${nodeTypeInfo.backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
 							}}/>
 						<a style={{position: "relative", fontSize: MapNode.GetFontSize(node), whiteSpace: "initial"}}>
 							{MapNode.GetDisplayText(node)}
@@ -126,10 +123,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							}}>
 						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${nodeTypeInfo.backgroundColor},.7)`}}/>
 						{RatingType_Info.for[panelToShow] && (()=> {
-							let ratings = CachedTransform({nodeID: node._id, ratingType: panelToShow}, {ratingsRoot},
-								()=>ratingsRoot && ratingsRoot[panelToShow]
-									? ratingsRoot[panelToShow].Props.filter(a=>a.name != "_id").map(a=>({...a.value, userID: a.name}))
-									: []);
+							let ratings = GetRatings(node._id, panelToShow as RatingType);
 							return <RatingsUI node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 						})()}
 						{panelToShow == "definitions" &&

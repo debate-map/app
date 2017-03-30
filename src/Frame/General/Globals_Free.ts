@@ -124,7 +124,7 @@ export function WrapWithDebugger(func, ...args) {
 }
 g.Extend({Debugger, Debugger_Wrap, Debugger_True, Debugger_If, WrapWithDebugger});
 
-export function QuickIncrement(name: string) {
+export function QuickIncrement(name = new Error().stack.split("\n")[2]) {
 	g[name] = (g[name]|0) + 1;
 	return g[name];
 }

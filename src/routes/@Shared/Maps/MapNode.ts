@@ -45,7 +45,7 @@ export class MapNode {
 		}
 		return node.title;
 	}
-	static GetMainRatingTypes(node: MapNode) {
+	static GetMainRatingTypes(node: MapNode): RatingType[] {
 		if (node._id < 100) // if static category, don't have any voting
 			return [];
 		if (node.metaThesis) {

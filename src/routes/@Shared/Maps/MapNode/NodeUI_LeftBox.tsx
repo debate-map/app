@@ -8,7 +8,7 @@ import {connect} from "react-redux";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {MapNodeType_Info} from "../MapNodeType";
 import {MapNodeView, ACTMapNodePanelOpen} from "../../../../store/Root/Main/MapViews";
-import {RatingsRoot} from "../../../../store/Root/Firebase";
+import {RatingsRoot, GetRatingAverage} from "../../../../store/Root/Firebase";
 import {RatingType_Info} from "./RatingType";
 
 type Props = {
@@ -33,9 +33,8 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 						let ratingSet = ratingsRoot && ratingsRoot[ratingType];
 
 						let percentStr = "...";
-						if (ratingSet) {
-							let average = CachedTransform("getMainRatingAverage", {nodeID: node._id, ratingType}, {ratingSet},
-								()=>ratingSet ? ratingSet.Props.Where(a=>a.name != "_id").Select(a=>a.value.value).Average().RoundTo(1) : 0);
+						let average = GetRatingAverage(node._id, ratingType, -1);
+						if (average != -1) {
 							if (node.metaThesis)
 								percentStr = (node.metaThesis_thenType == MetaThesis_ThenType.StrengthenParent ? "+" : "-") + average.Distance(50) + "%";
 							else
@@ -46,7 +45,10 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 									panel={ratingType} text={ratingTypeInfo.displayText} style={E(index == 0 && {marginTop: 0})}>
 								<Span ml={5} style={{float: "right"}}>
 									{percentStr}
-									<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>{ratingSet ? ratingSet.Props.length /*- 1*/ : 0}</sup>
+									{ratingType != "strength" &&
+										<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>
+											{ratingSet ? ratingSet.Props.length /*- 1*/ : 0}
+										</sup>}
 								</Span>
 							</PanelButton>
 						);
