@@ -6,7 +6,44 @@ import {FindReact} from "../UI/ReactGlobals";
 import NodeUI_Inner from "../../UI/@Shared/Maps/MapNode/NodeUI_Inner";
 import {GetOpenMapID} from "../../Store/main";
 import {GetMap} from "../../Store/firebase/maps";
-import {GetNodeView, GetMapView, GetSelectedNodeID} from "../../Store/main/mapViews";
+import {GetNodeView, GetMapView, GetSelectedNodeID, GetFocusNode, GetViewOffset} from "../../Store/main/mapViews";
+import {GetUrlVars} from "../General/Globals_Free";
+import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
+
+// loading
+// ==========
+
+function ParseMapView(viewStr: string) {
+	let result = {} as MapView;
+
+	let [rootNodeIDStr, rootNodeViewStr] = viewStr.SplitAt(1);
+	let rootNodeView = ParseNodeView(rootNodeViewStr);
+	result.rootNodeViews = {[rootNodeIDStr]: rootNodeView};
+	return result;
+}
+function ParseNodeView(viewStr: string) {
+	let result = {} as MapNodeView;
+
+	let ownStr = viewStr.contains(",") ? viewStr.substr(0, viewStr.indexOf(",")) : viewStr;
+	let childrenStr = viewStr.contains(",") ? viewStr.slice(viewStr.indexOf(",") + 1, -1) : "";
+
+	//if (ownStr.)
+	// todo: do something
+
+	return result;
+}
+
+export function LoadURL_Globals() {
+	let search = State().router.location.search;
+	let urlVars = GetUrlVars(search);
+	// example: /global?view=1,3,100,101f(384,111),102,.104,.....
+	let viewStr = urlVars.view || "";
+
+	
+}
+
+// saving
+// ==========
 
 export function UpdateURL_Globals() {
 	let newURL = CreateURL_Globals();
@@ -57,11 +94,11 @@ function GetNodeViewStr(mapID: number, path: string) {
 		let nodeBox = $(".NodeUI_Inner").ToList().FirstOrX(a=>(FindReact(a[0]) as NodeUI_Inner).props.path == path);
 		let nodeBoxComp = FindReact(nodeBox[0]) as NodeUI_Inner;
 		let viewOffset = viewCenter_onScreen.Minus(nodeBox.GetScreenRect().Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
-		let offsetStr = viewOffset.toString().replace(" ", ",");
+		let offsetStr = viewOffset.toString().replace(" ", "_");
 		ownStr += `(${offsetStr})`;
 	}
-	if (mapView.focusNode == path && GetSelectedNodeID(mapID) == null) {
-		let offsetStr = mapView.viewOffset.toString().replace(" ", ",");
+	if (nodeView.focus && GetSelectedNodeID(mapID) == null) {
+		let offsetStr = nodeView.viewOffset.toString().replace(" ", ",");
 		ownStr += `f(${offsetStr})`;
 	}
 	

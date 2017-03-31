@@ -4,14 +4,17 @@ export class MapViews {
 	[key: number]: MapView;
 }
 export class MapView {
-	rootNodeView = new MapNodeView();
-	focusNode: string;
-	/** Offset of view-center from focus-node. */
-	viewOffset: Vector2i;
+	//rootNodeView = new MapNodeView();
+	// include root-node-view as a keyed-child, so that it's consistent with descendants (of key signifying id)
+	rootNodeView;
+	rootNodeViews = {} as {[key: number]: MapNodeView};
 }
 export class MapNodeView {
 	expanded?: boolean;
 	selected?: boolean;
+	focus?: boolean;
+	/** Offset of view-center from self (since we're the focus-node). */
+	viewOffset?: Vector2i;
 	openPanel?: string;
-	children = {} as {[key: string]: MapNodeView};
+	children? = {} as {[key: string]: MapNodeView};
 }

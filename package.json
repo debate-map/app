@@ -72,15 +72,14 @@
         "DEBUG": "app:*"
       }
     },
-
-	"dev": {
+    "dev": {
       "command": "npm run create-config & nodemon bin/server --ignore dist --ignore coverage --ignore Tests --ignore Source",
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*"
       }
     },
-	"build-and-deploy": {
+    "build-and-deploy": {
       "command": "npm run create-config & npm run build:prod & npm run deploy"
     }
   },
@@ -119,6 +118,7 @@
     "redux-persist-transform-filter": "0.0.9",
     "redux-thunk": "^2.0.0",
     "reselect": "^2.5.4",
+    "updeep": "^1.0.0",
     "webpack-runtime-require": "0.0.1"
   },
   "devDependencies": {

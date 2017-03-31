@@ -1,15 +1,17 @@
 import {GetTreeNodesInObjTree} from "../V/V";
 import Action from "../General/Action";
 import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedToggle, ACTViewCenterChange} from "../../Store/main/mapViews";
-import {UpdateURL_Globals} from "../URL/URLManager";
+import {LoadURL_Globals, UpdateURL_Globals} from "../URL/URLManager";
+import {GetPathL1} from "../../Store/router";
+import {GetUrlVars} from "../General/Globals_Free";
 
 let lastPath = "";
 export function ProcessAction(action: Action<any>) {
 	if (action.type == "@@INIT") {
-		//if (State().router.location.pathname)
 		setTimeout(()=> {
-			let search = State().router.location;
-			//setTimeout(()=>UpdateURL_Globals());
+			if (GetPathL1() == "global") {
+				LoadURL_Globals();
+			}
 		});
 	}
 

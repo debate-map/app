@@ -207,6 +207,9 @@ export class TreeNode {
 	get PathStr() {
 		return this.PathNodes.join("/");
 	}
+	get PathStr_Updeep() {
+		return this.PathNodes.join(".");
+	}
 
 	obj;
 	prop;

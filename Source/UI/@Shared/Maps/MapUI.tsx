@@ -1,4 +1,4 @@
-import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../Store/main/mapViews";
+import {ACTMapNodeSelect, ACTViewCenterChange, GetFocusNode, GetViewOffset} from "../../../Store/main/mapViews";
 import {BaseComponent, FirebaseDatabase, FindDOM, FindReact} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
@@ -51,8 +51,12 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}
 					onScrollEnd={pos=> {
 						let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
-						let focusNodeBox = $(".NodeUI_Inner").ToList().Min(nodeBox=>GetDistanceBetweenRectAndPoint(nodeBox.GetScreenRect(), viewCenter_onScreen));
+
+						let nodeUIInners = $(".NodeUI_Inner").ToList();
+						let selectedNodeBox = nodeUIInners.FirstOrX(a=>FindReact(a[0]).props.node.selected);
+						let focusNodeBox = selectedNodeBox || nodeUIInners.Min(nodeBox=>GetDistanceBetweenRectAndPoint(nodeBox.GetScreenRect(), viewCenter_onScreen));
 						let focusNodeBoxComp = FindReact(focusNodeBox[0]) as NodeUI_Inner;
+
 						let viewOffset = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
 						store.dispatch(new ACTViewCenterChange({mapID: focusNodeBoxComp.props.map._id, focusNode: focusNodeBoxComp.props.path, viewOffset}));
 					}}>
@@ -73,13 +77,13 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						onContextMenu={e=> {
 							e.preventDefault();
 						}}>
-					<NodeUI map={map} node={rootNode}/>
+					<NodeUI map={map} node={rootNode} path={rootNode._id.toString()}/>
 					{/*<ReactResizeDetector handleWidth handleHeight onResize={()=> {*/}
 					<ResizeSensor onResize={()=> {
 						if (this.hasLoadedScroll) return;
 						let state = store.getState();
-						let focusNode_target = GetMapView(map._id) ? GetMapView(map._id).focusNode : null;
-						let viewOffset_target = GetMapView(map._id) ? GetMapView(map._id).viewOffset : null;
+						let focusNode_target = GetFocusNode(GetMapView(map._id));
+						let viewOffset_target = GetViewOffset(GetMapView(map._id));
 						//Log(`Resizing:${focusNode_target};${viewOffset_target}`);
 						if (focusNode_target == null || viewOffset_target == null) return;
 

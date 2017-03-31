@@ -97,7 +97,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 				<div ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{
 					paddingTop: innerBoxOffset,
 				}}>
-					<NodeUI_Inner ref="innerBox" /*ref={c=>(this as any).innerBox = c}*/ map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
+					<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
 				</div>
 				{nodeChildren == childrenPlaceholder &&
 					<div style={{margin: "auto 0 auto 10px"}}>...</div>}
