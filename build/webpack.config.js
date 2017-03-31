@@ -80,7 +80,7 @@ webpackConfig.plugins = [
 	new HtmlWebpackPlugin({
 		template: paths.client("index.html"),
 		hash: false,
-		// favicon  : paths.client("static/favicon.ico"), // for including single favicon
+		// favicon: paths.client("Resources/favicon.ico"), // for including single favicon
 		filename: "index.html",
 		inject: "body",
 		minify: {

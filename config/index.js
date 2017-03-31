@@ -17,10 +17,10 @@ const config = {
 	// Project Structure
 	// ----------------------------------
 	path_base  : path.resolve(__dirname, '..'),
-	dir_client : 'src',
+	dir_client : 'Source',
 	dir_dist   : 'dist',
-	dir_server : 'server',
-	dir_test   : 'tests',
+	dir_server : 'Server',
+	dir_test   : 'Tests',
 
 	// ----------------------------------
 	// Server Configuration

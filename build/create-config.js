@@ -2,7 +2,7 @@ const debug = require("debug")("app:build:config");
 const fs = require("fs");
 const path = require("path");
 const pkg = require("../package.json");
-const outputPath = path.join(__dirname, "..", "src/config.js");
+const outputPath = path.join(__dirname, "..", "Source/Config.ts");
 const config = require("../config");
 
 function createConfigFile(cb) {
@@ -37,6 +37,6 @@ function createConfigFile(cb) {
 
 (function () {
 	createConfigFile(() => {
-		debug("Config file successfully written to src/config.js");
+		debug("Config file successfully written to Source/Config.ts");
 	})
 })();

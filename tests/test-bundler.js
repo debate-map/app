@@ -27,15 +27,15 @@ global.should = chai.should()
 const __karmaWebpackManifest__ = new Array() // eslint-disable-line
 const inManifest = (path) => ~__karmaWebpackManifest__.indexOf(path)
 
-// require all `tests/**/*.spec.js`
+// require all `Tests/**/*.spec.js`
 const testsContext = require.context('./', true, /\.spec\.js$/)
 
 // only run tests that have changed after the first pass.
 const testsToRun = testsContext.keys().filter(inManifest)
 ;(testsToRun.length ? testsToRun : testsContext.keys()).forEach(testsContext)
 
-// require all `src/**/*.js` except for `main.js` (for isparta coverage reporting)
+// require all `Source/**/*.js` except for `main.js` (for isparta coverage reporting)
 if (__COVERAGE__) {
-  const componentsContext = require.context('../src/', true, /^((?!main).)*\.js$/)
+  const componentsContext = require.context('../Source/', true, /^((?!main).)*\.js$/)
   componentsContext.keys().forEach(componentsContext)
 }
