@@ -1,6 +1,6 @@
 import {MapNodeView} from "../@MapViews";
 import Action from "../../../../Frame/General/Action";
-import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedToggle, ACTViewCenterChange} from "../../mapViews";
+import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange} from "../../mapViews";
 import {GetTreeNodesInObjTree} from "../../../../Frame/V/V";
 import u from "updeep";
 import {RootNodeViews} from "./rootNodeViews/@RootNodeViews";
@@ -48,9 +48,18 @@ export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action
 		let targetNodePath = action.payload.path.split("/").join(".children.");
 		return u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, openPanel: action.payload.panel}), state);
 	}
-	if (action.Is(ACTMapNodeExpandedToggle)) {
+	if (action.Is(ACTMapNodeExpandedSet)) {
 		let targetNodePath = action.payload.path.split("/").join(".children.");
-		return u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, expanded: !old.expanded}), state);
+		return u.updateIn(targetNodePath, (old = new MapNodeView())=> {
+			let result = {...old, expanded: !old.expanded};
+			if (action.payload.recursive) {
+				let expandedNodes = GetTreeNodesInObjTree(result).Where(a=>a.Value.expanded);
+				for (let treeNode of expandedNodes) {
+					result = u.updateIn(treeNode.PathStr_Updeep + ".expanded", false, result);
+				}
+			}
+			return result;
+		}, state);
 	}
 	if (action.Is(ACTViewCenterChange)) {
 		//return {...state, focusNode: action.payload.focusNode, viewOffset: action.payload.viewOffset};

@@ -12,7 +12,7 @@ import {MapViewReducer} from "./mapViews/$mapView";
 
 export class ACTMapNodeSelect extends Action<{mapID: number, path: string}> {}
 export class ACTMapNodePanelOpen extends Action<{mapID: number, path: string, panel: string}> {}
-export class ACTMapNodeExpandedToggle extends Action<{mapID: number, path: string}> {}
+export class ACTMapNodeExpandedSet extends Action<{mapID: number, path: string, expanded: boolean, recursive: boolean}> {}
 export class ACTViewCenterChange extends Action<{mapID: number, focusNode: string, viewOffset: Vector2i}> {}
 
 export function MapViewsReducer(state = new MapViews(), action: Action<any>) {

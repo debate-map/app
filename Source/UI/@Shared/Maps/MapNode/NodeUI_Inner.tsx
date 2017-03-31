@@ -23,7 +23,7 @@ import {GetPaths_NodeRatingsRoot, GetNodeRatingsRoot, GetMainRatingFillPercent, 
 import {GetUserID} from "../../../../Store/firebase/users";
 import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RootState} from "../../../../Store/index";
-import {ACTMapNodeSelect, ACTMapNodeExpandedToggle} from "../../../../Store/main/mapViews";
+import {ACTMapNodeSelect, ACTMapNodeExpandedSet} from "../../../../Store/main/mapViews";
 import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 
@@ -56,6 +56,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
 		let panelToShow = openPanel_preview || (nodeView && nodeView.openPanel);
 		let bottomPanelShow = leftPanelShow && panelToShow;
+		let expanded = nodeView && nodeView.expanded;
 
 		return (
 			<div className={`NodeUI_Inner${pathNodeIDs.length == 0 ? " root" : ""}`} style={{
@@ -96,12 +97,12 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						</a>
 						<NodeUI_Menu node={node} path={path} userID={userID}/>
 					</div>
-					<Button //text={nodeView && nodeView.expanded ? "-" : "+"} size={28}
+					<Button //text={expanded ? "-" : "+"} size={28}
 							style={{
 								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
 								width: 18, padding: 0,
 								//fontSize: 18,
-								fontSize: nodeView && nodeView.expanded ? 23 : 17,
+								fontSize: expanded ? 23 : 17,
 								lineHeight: "1px", // keeps text from making meta-theses too tall
 								//lineHeight: "28px",
 								//backgroundColor: `rgba(${backgroundColor},.5)`,
@@ -110,11 +111,11 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								":hover": {backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(",").map(a=>(parseInt(a) * .9).RoundTo(1)).join(",")},.7)`},
 							}}
 							onClick={e=> {
-								store.dispatch(new ACTMapNodeExpandedToggle({mapID: map._id, path}));
+								store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path, expanded: !expanded, recursive: expanded && e.altKey}));
 								//return false;
 								e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
 							}}>
-						{nodeView && nodeView.expanded ? "-" : "+"}
+						{expanded ? "-" : "+"}
 					</Button>
 				</div>
 				{bottomPanelShow &&

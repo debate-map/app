@@ -1,6 +1,6 @@
 import {GetTreeNodesInObjTree} from "../V/V";
 import Action from "../General/Action";
-import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedToggle, ACTViewCenterChange} from "../../Store/main/mapViews";
+import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange} from "../../Store/main/mapViews";
 import {LoadURL_Globals, UpdateURL_Globals} from "../URL/URLManager";
 import {GetPathL1} from "../../Store/router";
 import {GetUrlVars} from "../General/Globals_Free";
@@ -58,7 +58,7 @@ export function ProcessAction(action: Action<any>) {
 			movingToGlobals = true;
 		lastPath = action.payload.pathname;
 	}
-	if (movingToGlobals || action.IsAny(ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedToggle, ACTViewCenterChange)) {
+	if (movingToGlobals || action.IsAny(ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange)) {
 		setTimeout(()=>UpdateURL_Globals());
 	}
 }
