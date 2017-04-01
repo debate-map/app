@@ -1,4 +1,4 @@
-import {ACTMapNodeSelect, ACTViewCenterChange, GetFocusNode, GetViewOffset} from "../../../Store/main/mapViews";
+import {ACTMapNodeSelect, ACTViewCenterChange, GetFocusNode, GetViewOffset, GetSelectedNodePath} from "../../../Store/main/mapViews";
 import {BaseComponent, FirebaseDatabase, FindDOM, FindReact} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
@@ -22,6 +22,26 @@ import {Map} from "../../../Store/firebase/maps/@Map";
 import {RootState} from "../../../Store/index";
 import {GetMapView} from "../../../Store/main/mapViews";
 import {GetUserID} from "../../../Store/firebase/users";
+
+export function GetNodeBoxForPath(path: string) {
+	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
+}
+export function GetNodeBoxClosestToViewCenter() {
+	let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
+	return $(".NodeUI_Inner").ToList().Min(nodeBox=>GetDistanceBetweenRectAndPoint(nodeBox.GetScreenRect(), viewCenter_onScreen));
+}
+export function GetViewOffsetForNodeBox(nodeBox: JQuery) {
+	let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
+	return viewCenter_onScreen.Minus(nodeBox.GetScreenRect().Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
+}
+
+export function UpdateFocusNodeAndViewOffset(mapID: number) {
+	let selectedNodePath = GetSelectedNodePath(mapID);
+	let focusNodeBox = selectedNodePath ? GetNodeBoxForPath(selectedNodePath) : GetNodeBoxClosestToViewCenter();
+	let focusNodeBoxComp = FindReact(focusNodeBox[0]) as NodeUI_Inner;
+	let viewOffset = GetViewOffsetForNodeBox(focusNodeBox);
+	store.dispatch(new ACTViewCenterChange({mapID, focusNode: focusNodeBoxComp.props.path, viewOffset}));
+}
 
 type Props = {map: Map} & Partial<{rootNode: MapNode, focusNode: string, viewOffset: {x: number, y: number}}>;
 @FirebaseConnect(({map}: {map: Map})=> [
@@ -50,15 +70,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 			<ScrollView ref="scrollView" backgroundDrag={true} backgroundDragMatchFunc={a=>a == this.refs.content}
 					scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}
 					onScrollEnd={pos=> {
-						let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
-
-						let nodeUIInners = $(".NodeUI_Inner").ToList();
-						let selectedNodeBox = nodeUIInners.FirstOrX(a=>FindReact(a[0]).props.node.selected);
-						let focusNodeBox = selectedNodeBox || nodeUIInners.Min(nodeBox=>GetDistanceBetweenRectAndPoint(nodeBox.GetScreenRect(), viewCenter_onScreen));
-						let focusNodeBoxComp = FindReact(focusNodeBox[0]) as NodeUI_Inner;
-
-						let viewOffset = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
-						store.dispatch(new ACTViewCenterChange({mapID: focusNodeBoxComp.props.map._id, focusNode: focusNodeBoxComp.props.path, viewOffset}));
+						UpdateFocusNodeAndViewOffset(map._id);
 					}}>
 				<div id="MapUI" ref="content"
 						style={{
@@ -71,8 +83,10 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 							if (new Vector2i(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
 							let mapView = store.getState().main.mapViews[store.getState().main.openMap];
 							let isNodeSelected = GetTreeNodesInObjTree(mapView).Any(a=>a.prop == "selected" && a.Value);
-							if (isNodeSelected)
+							if (isNodeSelected) {
 								store.dispatch(new ACTMapNodeSelect({mapID: map._id, path: null}));
+								UpdateFocusNodeAndViewOffset(map._id);
+							}
 						}}
 						onContextMenu={e=> {
 							e.preventDefault();

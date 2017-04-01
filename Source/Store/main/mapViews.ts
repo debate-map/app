@@ -34,16 +34,11 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 
 export function GetSelectedNodePathNodes(mapID: number): number[] {
 	let mapView = GetMapView(mapID);
-	let selectedTreeNode = GetTreeNodesInObjTree(mapView).FirstOrX(a=>a.prop == "selected" && a.Value);
+	let selectedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "selected" && a.Value);
 	if (selectedTreeNode == null) return [];
 	let selectedNodeView = selectedTreeNode.ancestorNodes.Last();
 
-	let map = GetMap(mapID);
-	if (map == null) return [];
-
-	let pathNodes = selectedNodeView.PathNodes.Where(a=>a != "children");
-	pathNodes[0] = map.rootNode.toString();
-	return pathNodes.map(ToInt);
+	return selectedNodeView.PathNodes.Where(a=>a != "children").map(ToInt);
 }
 export function GetSelectedNodePath(mapID: number): string {
 	return GetSelectedNodePathNodes(mapID).join("/");

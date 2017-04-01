@@ -6,7 +6,7 @@ export class MapViews {
 export class MapView {
 	//rootNodeView = new MapNodeView();
 	// include root-node-view as a keyed-child, so that it's consistent with descendants (of key signifying id)
-	rootNodeView;
+	//rootNodeView;
 	rootNodeViews = {} as {[key: number]: MapNodeView};
 }
 export class MapNodeView {

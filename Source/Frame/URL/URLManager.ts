@@ -1,3 +1,4 @@
+import {Assert} from "../General/Assert";
 import {replace} from "react-router-redux";
 import {ToInt} from "../General/Types";
 import {History} from "history";
@@ -9,26 +10,73 @@ import {GetMap} from "../../Store/firebase/maps";
 import {GetNodeView, GetMapView, GetSelectedNodeID, GetFocusNode, GetViewOffset} from "../../Store/main/mapViews";
 import {GetUrlVars} from "../General/Globals_Free";
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
+import {FromJSON} from "../General/Globals";
 
 // loading
 // ==========
 
-function ParseMapView(viewStr: string) {
-	let result = {} as MapView;
-
-	let [rootNodeIDStr, rootNodeViewStr] = viewStr.SplitAt(1);
-	let rootNodeView = ParseNodeView(rootNodeViewStr);
-	result.rootNodeViews = {[rootNodeIDStr]: rootNodeView};
+function ConvertViewStrIntoViewJSON(viewStr: string) {
+	// converts:	1,3,100,101f(460_53),102,.104,.....
+	// into:		{"1":{"3":{"100":{"101f(460_53)":{"102":{},"104":{}}}}}}
+	let result = "{";
+	result += viewStr
+		.replace(/[0-9sf()_]+/g, a=>`"${a}"`) // wrap own-str in quotes
+		.replace(/,/g, `:{`)
+		.replace(/\.(?=")/g, `},`)
+		.replace(/\./g, `}`)
+		.replace(/([sf])([0-9])/g, match=>match[1] + `","` + match[2]); // change `"108s104s"` into `"108s","104s"`
+	result += "}";
 	return result;
 }
-function ParseNodeView(viewStr: string) {
+
+function ParseMapView(viewStr: string) {
+	let viewJSON = ConvertViewStrIntoViewJSON(viewStr);
+	let viewData = FromJSON(viewJSON);
+
+	//let [rootNodeIDStr] = viewStr.match(/^[0-9]+/)[0];
+	let rootNodeOwnStr = viewJSON.VKeys()[0];
+	let rootNodeID = parseInt(rootNodeOwnStr.match(/^[0-9]+/)[0]);
+	let rootNodeView = ParseNodeView(rootNodeOwnStr, viewData[rootNodeOwnStr]);
+	
+	let result = {} as MapView;
+	result.rootNodeViews = {[rootNodeID]: rootNodeView};
+	return result;
+}
+/*function ParseNodeView(viewStr: string) {
 	let result = {} as MapNodeView;
 
 	let ownStr = viewStr.contains(",") ? viewStr.substr(0, viewStr.indexOf(",")) : viewStr;
-	let childrenStr = viewStr.contains(",") ? viewStr.slice(viewStr.indexOf(",") + 1, -1) : "";
+	if (ownStr.contains("s"))
+		result.selected = true;
+	if (ownStr.contains("f") || ownStr.contains("s"))
+		result.focus = true;
 
-	//if (ownStr.)
-	// todo: do something
+	let childrenStr = viewStr.contains(",") ? viewStr.slice(viewStr.indexOf(",") + 1, -1) : "";
+	if (childrenStr.length) {
+		result.children = {};
+
+		let childrenStrAsJSON = `["`
+			+ childrenStr.replace(/,/g, `":["`).replace(/./g, `"]`)
+			+ `"]`;
+	}
+
+	return result;
+}*/
+function ParseNodeView(ownStr: string, childrenData) {
+	let result = {} as MapNodeView;
+
+	if (ownStr.contains("s"))
+		result.selected = true;
+	if (ownStr.contains("f") || ownStr.contains("s"))
+		result.focus = true;
+
+	if (childrenData.VKeys().length) {
+		for (let {name: childOwnStr, value: childChildrenData} of childrenData.Props) {
+			let childID = parseInt(childOwnStr.match(/^[0-9]+/)[0]);
+			let childNodeView = ParseNodeView(childOwnStr, childChildrenData);
+			result[childID] = childNodeView;
+		}
+	}
 
 	return result;
 }
@@ -37,9 +85,10 @@ export function LoadURL_Globals() {
 	let search = State().router.location.search;
 	let urlVars = GetUrlVars(search);
 	// example: /global?view=1,3,100,101f(384,111),102,.104,.....
-	let viewStr = urlVars.view || "";
+	let mapViewStr = urlVars.view || "";
+	let mapView = ParseMapView(mapViewStr);
 
-	
+	// todo
 }
 
 // saving
@@ -90,15 +139,16 @@ function GetNodeViewStr(mapID: number, path: string) {
 	if (nodeView.selected) {
 		ownStr += "s";
 
-		let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
+		/*let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
 		let nodeBox = $(".NodeUI_Inner").ToList().FirstOrX(a=>(FindReact(a[0]) as NodeUI_Inner).props.path == path);
 		let nodeBoxComp = FindReact(nodeBox[0]) as NodeUI_Inner;
 		let viewOffset = viewCenter_onScreen.Minus(nodeBox.GetScreenRect().Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
 		let offsetStr = viewOffset.toString().replace(" ", "_");
-		ownStr += `(${offsetStr})`;
+		ownStr += `(${offsetStr})`;*/
 	}
-	if (nodeView.focus && GetSelectedNodeID(mapID) == null) {
-		let offsetStr = nodeView.viewOffset.toString().replace(" ", ",");
+	if (nodeView.focus) { // && GetSelectedNodeID(mapID) == null) {
+		Assert(nodeView.viewOffset != null);
+		let offsetStr = nodeView.viewOffset.toString().replace(" ", "_");
 		ownStr += `f(${offsetStr})`;
 	}
 	

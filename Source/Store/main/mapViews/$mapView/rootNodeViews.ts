@@ -4,47 +4,29 @@ import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCen
 import {GetTreeNodesInObjTree} from "../../../../Frame/V/V";
 import u from "updeep";
 import {RootNodeViews} from "./rootNodeViews/@RootNodeViews";
+import {GetViewOffsetForNodeBox, GetNodeBoxForPath} from "../../../../UI/@Shared/Maps/MapUI";
 
 export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action<any>) {
 	if (action.Is(ACTMapNodeSelect)) {
-		let nodes = GetTreeNodesInObjTree(state, true);
-		let selectedNode = nodes.FirstOrX(a=>a.Value && a.Value.selected);
 		let result = state;
-		/*if (selectedNode)
-			result = u.updateIn(selectedNode.PathStr_Updeep + ".selected", false, result);
-		if (selectedNode)
-			result = u.updateIn(selectedNode.PathStr_Updeep + ".openPanel", null, result);*/
+		let nodes = GetTreeNodesInObjTree(state, true);
+
+		let selectedNode = nodes.FirstOrX(a=>a.Value && a.Value.selected);
 		if (selectedNode)
 			result = u.updateIn(selectedNode.PathStr_Updeep, u.omit(["selected", "openPanel"]), result);
+		let focusNode = nodes.FirstOrX(a=>a.Value && a.Value.focus);
+		if (focusNode)
+			result = u.updateIn(focusNode.PathStr_Updeep, u.omit(["focus", "viewOffset"]), result);
 		if (action.payload.path == null)
 			return result;
-
-		/*let nodeToSelect_finalPath = action.payload.path.split("/").join("/children/").split("/");
-		Assert(GetTreeNodesInPath(newRootNodeViews, nodeToSelect_finalPath.concat(["selected"])).Last().Value !== true,
-			"Cannot dispatch select-node action for a node that's already selected.");*/
-		//let rootNodeView_withSelect = CloneTreeDownToXWhileReplacingXValue(rootNodeView_withDeselect, nodeToSelect_finalPath + "/selected", true);
-		/*let rootNodeView_withSelect = VisitTreeNodesInPath({...rootNodeView_withDeselect}, nodeToSelect_finalPath, node=> {
-			node.Value = {...node.Value};
-			if (node.PathNodes.length == nodeToSelect_finalPath.length) {
-				node.Value.selected = true;
-				node.Value.focus = true;
-			}
-		});*/
-
-		//let targetNodePath = action.payload.path.split("/").Skip(1).map(key=>["children", key]).join(".");
+		
 		let targetNodePath = action.payload.path.split("/").join(".children.");
-		result = u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, selected: true, focus: true}), result);
+		let nodeBox = GetNodeBoxForPath(action.payload.path);
+		let viewOffset = GetViewOffsetForNodeBox(nodeBox);
+		result = u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, selected: true, focus: true, viewOffset}), result);
 		return result;
 	}
 	if (action.Is(ACTMapNodePanelOpen)) {
-		/*let nodeToSelect_finalPath = action.payload.path.split("/").Skip(1).SelectMany(key=>["children", key]);
-		let rootNodeView_withOpenPanel = VisitTreeNodesInPath({...state.rootNodeView}, nodeToSelect_finalPath.concat(["openPanel"]), node=> {
-			node.Value =
-				IsNumberString(node.prop) ? {...node.Value || {children: {}}} :
-				node.prop == "children" ? {...node.Value || {}} :
-				(Assert(node.prop == "openPanel"), action.payload.panel);
-		});*/
-
 		let targetNodePath = action.payload.path.split("/").join(".children.");
 		return u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, openPanel: action.payload.panel}), state);
 	}
@@ -69,18 +51,6 @@ export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action
 		let result = state;
 		if (focusNode)
 			result = u.updateIn(focusNode.PathStr_Updeep, u.omit(["focus", "viewOffset"]), result);
-
-		/*let nodeToSelect_finalPath = action.payload.path.split("/").join("/children/").split("/");
-		Assert(GetTreeNodesInPath(newRootNodeViews, nodeToSelect_finalPath.concat(["selected"])).Last().Value !== true,
-			"Cannot dispatch select-node action for a node that's already selected.");*/
-		//let rootNodeView_withSelect = CloneTreeDownToXWhileReplacingXValue(rootNodeView_withDeselect, nodeToSelect_finalPath + "/selected", true);
-		/*let rootNodeView_withSelect = VisitTreeNodesInPath({...rootNodeView_withDeselect}, nodeToSelect_finalPath, node=> {
-			node.Value = {...node.Value};
-			if (node.PathNodes.length == nodeToSelect_finalPath.length) {
-				node.Value.selected = true;
-				node.Value.focus = true;
-			}
-		});*/
 		
 		let targetNodePath = action.payload.focusNode.split("/").join(".children.");
 		result = u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, focus: true, viewOffset: action.payload.viewOffset}), result);

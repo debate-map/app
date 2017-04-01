@@ -7,6 +7,6 @@ import {combineReducers} from "redux";
 import {CombineReducers} from "../../index";
 import {RootNodeViewsReducer} from "./$mapView/rootNodeViews";
 
-export let MapViewReducer = CombineReducers({
+export let MapViewReducer = CombineReducers(()=>({rootNodeViews: {}}), {
 	rootNodeViews: RootNodeViewsReducer,
 });
