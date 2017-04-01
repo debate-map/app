@@ -15,7 +15,7 @@ import keycode from "keycode";
 import NodeUI_Menu from "./NodeUI_Menu";
 import NodeOthersUI from "./NodeOthersUI";
 import V from "../../../../Frame/V/V";
-import {FirebaseConnect, GetRequestedPathsAndClear} from "../../../../Frame/Database/DatabaseHelpers";
+import {FirebaseConnect} from "../../../../Frame/Database/DatabaseHelpers";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
@@ -26,24 +26,21 @@ import {RootState} from "../../../../Store/index";
 import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {ACTMapNodeSelect, ACTMapNodeExpandedSet} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
+import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
 	& Partial<{userID: string, ratingsRoot: RatingsRoot, mainRatingFillPercent: number}>;
 //@FirebaseConnect((props: Props)=>((props["holder"] = props["holder"] || {}), [
-@FirebaseConnect((props: Props)=>[
+/*@FirebaseConnect((props: Props)=>[
 	...GetPaths_NodeRatingsRoot(props.node._id),
-	//...GetPaths_MainRatingFillPercent(node),
-	//...(props["holder"]._pathsRequestedLastTime || []),
-])
-@(connect(()=> {
-	//return (state: RootState, {node, ratingsRoot, holder}: (Props & {holder}))=> ({
+])*/
+@Connect(()=> {
 	return (state: RootState, {node, ratingsRoot}: Props)=> ({
 		userID: GetUserID(),
 		ratingsRoot: GetNodeRatingsRoot(node._id),
 		mainRatingFillPercent: GetMainRatingFillPercent(node),
-		//_: holder._pathsRequestedLastTime = GetRequestedPathsAndClear(),
-	}) as any;
-}) as any)
+	});
+})
 export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, openPanel_preview: string}> {
 	render() {
 		let {firebase, map, node, nodeView, path, width, widthOverride, userID, ratingsRoot, mainRatingFillPercent} = this.props;

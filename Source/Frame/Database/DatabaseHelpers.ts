@@ -1,3 +1,4 @@
+import {RequestPath} from "./FirebaseConnect";
 import {Assert} from "../General/Assert";
 import {FirebaseDatabase} from "../UI/ReactGlobals";
 import {helpers, firebaseConnect} from "react-redux-firebase";
@@ -25,7 +26,7 @@ class DBPathInfo {
 	cachedData;
 }
 let pathInfos = {} as {[path: string]: DBPathInfo};
-export function GetData(path: string) {
+export function GetData(path: string, makeRequest = true) {
 	let firebase = State().firebase;
 	path = DBPath(path);
 
@@ -41,6 +42,10 @@ export function GetData(path: string) {
 			info.cachedData = helpers.dataToJS(firebase, path);
 		}
 	}
+
+	if (makeRequest)
+		RequestPath(path);
+
 	return info.cachedData;
 }
 
@@ -118,18 +123,4 @@ export function FirebaseConnect<T>(pathsOrGetterFunc?) {
 		paths = paths.map(a=>DBPath(a)); // add version prefix to paths
 		return paths;
 	});
-}
-
-// not sure if this makes sense yet...
-let requestedPaths = [] as string[];
-export function RequestPath(path: string) {
-	requestedPaths.push(path);
-}
-export function RequestPaths(paths: string[]) {
-	requestedPaths.push(...paths);
-}
-export function GetRequestedPathsAndClear() {
-	var result = requestedPaths;
-	requestedPaths = [];
-	return result;
 }
