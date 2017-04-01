@@ -1,4 +1,4 @@
-import {ACTMapNodeSelect, ACTViewCenterChange, GetFocusNode, GetViewOffset, GetSelectedNodePath} from "../../../Store/main/mapViews";
+import {GetFocusNode, GetViewOffset, GetSelectedNodePath} from "../../../Store/main/mapViews";
 import {BaseComponent, FirebaseDatabase, FindDOM, FindReact} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
@@ -22,6 +22,7 @@ import {Map} from "../../../Store/firebase/maps/@Map";
 import {RootState} from "../../../Store/index";
 import {GetMapView} from "../../../Store/main/mapViews";
 import {GetUserID} from "../../../Store/firebase/users";
+import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../Store/main/mapViews/$mapView/rootNodeViews";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);

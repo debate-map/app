@@ -1,3 +1,4 @@
+import {Log} from "../General/Logging";
 import {Assert} from "../General/Assert";
 import {replace} from "react-router-redux";
 import {ToInt} from "../General/Types";
@@ -10,7 +11,8 @@ import {GetMap} from "../../Store/firebase/maps";
 import {GetNodeView, GetMapView, GetSelectedNodeID, GetFocusNode, GetViewOffset} from "../../Store/main/mapViews";
 import {GetUrlVars} from "../General/Globals_Free";
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
-import {FromJSON} from "../General/Globals";
+import {FromJSON, ToJSON} from "../General/Globals";
+import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 
 // loading
 // ==========
@@ -24,7 +26,8 @@ function ConvertViewStrIntoViewJSON(viewStr: string) {
 		.replace(/,/g, `:{`)
 		.replace(/\.(?=")/g, `},`)
 		.replace(/\./g, `}`)
-		.replace(/([sf])([0-9])/g, match=>match[1] + `","` + match[2]); // change `"108s104s"` into `"108s","104s"`
+		.replace(/([sf])([0-9])/g, match=>`${match[1]}","${match[2]}`) // change `"108s104s"` into `"108s","104s"`
+		.replace(/"[,}]/g, str=>`${str[0]}:null${str[1]}`); // change `"108s",` into `"108s":null,`
 	result += "}";
 	return result;
 }
@@ -34,7 +37,7 @@ function ParseMapView(viewStr: string) {
 	let viewData = FromJSON(viewJSON);
 
 	//let [rootNodeIDStr] = viewStr.match(/^[0-9]+/)[0];
-	let rootNodeOwnStr = viewJSON.VKeys()[0];
+	let rootNodeOwnStr = viewData.VKeys()[0];
 	let rootNodeID = parseInt(rootNodeOwnStr.match(/^[0-9]+/)[0]);
 	let rootNodeView = ParseNodeView(rootNodeOwnStr, viewData[rootNodeOwnStr]);
 	
@@ -67,14 +70,20 @@ function ParseNodeView(ownStr: string, childrenData) {
 
 	if (ownStr.contains("s"))
 		result.selected = true;
-	if (ownStr.contains("f") || ownStr.contains("s"))
+	if (ownStr.contains("f") || ownStr.contains("s")) {
 		result.focus = true;
+		let viewOffsetStr = ownStr.substring(ownStr.indexOf("(") + 1, ownStr.lastIndexOf(")"));
+		let viewOffsetParts = viewOffsetStr.split("_").map(ToInt);
+		result.viewOffset = new Vector2i(viewOffsetParts[0], viewOffsetParts[1]);
+	}
 
-	if (childrenData.VKeys().length) {
+	if (childrenData && childrenData.VKeys().length) {
+		result.expanded = true;
+		result.children = {};
 		for (let {name: childOwnStr, value: childChildrenData} of childrenData.Props) {
 			let childID = parseInt(childOwnStr.match(/^[0-9]+/)[0]);
 			let childNodeView = ParseNodeView(childOwnStr, childChildrenData);
-			result[childID] = childNodeView;
+			result.children[childID] = childNodeView;
 		}
 	}
 
@@ -82,13 +91,16 @@ function ParseNodeView(ownStr: string, childrenData) {
 }
 
 export function LoadURL_Globals() {
-	let search = State().router.location.search;
-	let urlVars = GetUrlVars(search);
+	//let search = State().router.location.search;
+	//let urlVars = GetUrlVars(search);
+	let urlVars = GetUrlVars();
 	// example: /global?view=1,3,100,101f(384,111),102,.104,.....
-	let mapViewStr = urlVars.view || "";
+	let mapViewStr = urlVars.view;
+	if (mapViewStr == null || mapViewStr.length == 0) return;
 	let mapView = ParseMapView(mapViewStr);
 
-	// todo
+	//Log("Loading map-view:" + ToJSON(mapView));
+	store.dispatch(new ACTMapViewMerge({mapView}));
 }
 
 // saving
@@ -148,7 +160,7 @@ function GetNodeViewStr(mapID: number, path: string) {
 	}
 	if (nodeView.focus) { // && GetSelectedNodeID(mapID) == null) {
 		Assert(nodeView.viewOffset != null);
-		let offsetStr = nodeView.viewOffset.toString().replace(" ", "_");
+		let offsetStr = Vector2i.prototype.toString.call(nodeView.viewOffset).replace(" ", "_");
 		ownStr += `f(${offsetStr})`;
 	}
 	

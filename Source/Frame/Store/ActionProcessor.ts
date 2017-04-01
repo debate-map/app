@@ -1,16 +1,24 @@
 import {GetTreeNodesInObjTree} from "../V/V";
 import Action from "../General/Action";
-import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange} from "../../Store/main/mapViews";
+import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange} from "../../Store/main/mapViews/$mapView/rootNodeViews";
 import {LoadURL_Globals, UpdateURL_Globals} from "../URL/URLManager";
 import {GetPathL1} from "../../Store/router";
 import {GetUrlVars} from "../General/Globals_Free";
 
 let lastPath = "";
 export function ProcessAction(action: Action<any>) {
-	if (action.type == "@@INIT") {
+	//if (action.type == "@@INIT") {
+	if (action.type == "persist/REHYDRATE" || action.type == "@@router/LOCATION_CHANGE") {
 		setTimeout(()=> {
 			if (GetPathL1() == "global") {
-				LoadURL_Globals();
+				if (action.type == "persist/REHYDRATE")
+					LoadURL_Globals();
+				//setTimeout(()=>UpdateURL_Globals());
+				// we don't yet have a good way of knowing when loading is fully done; so just do a timeout
+				setTimeout(UpdateURL_Globals, 200);
+				setTimeout(UpdateURL_Globals, 400);
+				setTimeout(UpdateURL_Globals, 800);
+				setTimeout(UpdateURL_Globals, 1600);
 			}
 		});
 	}
@@ -52,7 +60,7 @@ export function ProcessAction(action: Action<any>) {
 		}*/
 	}
 
-	let movingToGlobals = false;
+	/*let movingToGlobals = false;
 	if (action.type == "@@router/LOCATION_CHANGE") {
 		if (!lastPath.startsWith("/global") && action.payload.pathname.startsWith("/global"))
 			movingToGlobals = true;
@@ -60,5 +68,5 @@ export function ProcessAction(action: Action<any>) {
 	}
 	if (movingToGlobals || action.IsAny(ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange)) {
 		setTimeout(()=>UpdateURL_Globals());
-	}
+	}*/
 }

@@ -23,9 +23,9 @@ import {GetPaths_NodeRatingsRoot, GetNodeRatingsRoot, GetMainRatingFillPercent, 
 import {GetUserID} from "../../../../Store/firebase/users";
 import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RootState} from "../../../../Store/index";
-import {ACTMapNodeSelect, ACTMapNodeExpandedSet} from "../../../../Store/main/mapViews";
 import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {Map} from "../../../../Store/firebase/maps/@Map";
+import {ACTMapNodeSelect, ACTMapNodeExpandedSet} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
 	& Partial<{userID: string, ratingsRoot: RatingsRoot, mainRatingFillPercent: number}>;

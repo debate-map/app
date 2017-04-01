@@ -1,10 +1,15 @@
-import {MapNodeView} from "../@MapViews";
+import {MapNodeView, MapView} from "../@MapViews";
 import Action from "../../../../Frame/General/Action";
-import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange} from "../../mapViews";
 import {GetTreeNodesInObjTree} from "../../../../Frame/V/V";
 import u from "updeep";
 import {RootNodeViews} from "./rootNodeViews/@RootNodeViews";
 import {GetViewOffsetForNodeBox, GetNodeBoxForPath} from "../../../../UI/@Shared/Maps/MapUI";
+import {Vector2i} from "../../../../Frame/General/VectorStructs";
+
+export class ACTMapNodeSelect extends Action<{mapID: number, path: string}> {}
+export class ACTMapNodePanelOpen extends Action<{mapID: number, path: string, panel: string}> {}
+export class ACTMapNodeExpandedSet extends Action<{mapID: number, path: string, expanded: boolean, recursive: boolean}> {}
+export class ACTViewCenterChange extends Action<{mapID: number, focusNode: string, viewOffset: Vector2i}> {}
 
 export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action<any>) {
 	if (action.Is(ACTMapNodeSelect)) {

@@ -148,30 +148,34 @@ window.Extend({E});
 
 export function CurrentUrl() { return window.location.href.replace(/%22/, "\""); } // note; look into the escaping issue more
 /** Returns [pathStr, varsStr, hashStr], without the separator-chars. */
-export function GetUrlParts(url?: string): [string, string, string] {
+export function GetUrlParts(url?: string): [string, string, string, string] {
 	url = url || CurrentUrl();
 
-	let [pathStr, varsStr, hashStr] = Array(3).fill(0).Select(a=>"");
+	let [domainStr, pathStr, varsStr, hashStr] = Array(4).fill(0).map(a=>"");
 
 	let urlToProcess = url;
 	if (urlToProcess.contains("#") && !varsStr.contains("runJS="))
 		[urlToProcess, hashStr] = urlToProcess.SplitAt(urlToProcess.indexOf("#"));
 	if (urlToProcess.contains("?"))
 		[urlToProcess, varsStr] = urlToProcess.SplitAt(urlToProcess.indexOf("?"));
-	pathStr = urlToProcess;
+	//if (urlToProcess.Matches("/").length == )
+	[domainStr, pathStr] = urlToProcess.SplitAt(urlToProcess.IndexOf_X("/", 2));
 
-	return [pathStr, varsStr, hashStr];
+	return [domainStr, pathStr, varsStr, hashStr];
 }
 export function GetUrlPath(url?: string, fromDomain = true) {
-	let [pathStr, varsStr, hashStr] = GetUrlParts(url);
+	/*let [pathStr, varsStr, hashStr] = GetUrlParts(url);
 	if (fromDomain)
 		pathStr = pathStr.SplitAt(pathStr.IndexOf_X("/", 2).IfN1Then(pathStr.length))[1];
 	if (pathStr.endsWith("/"))
-		pathStr = pathStr.substr(0, pathStr.length - 1);
+		pathStr = pathStr.substr(0, pathStr.length - 1);*/
+	let [_, pathStr] = GetUrlParts(url);
+	if (pathStr.endsWith("/"))
+		pathStr = pathStr.slice(0, -1);
 	return pathStr;
 }
 export function GetUrlVars(url?: string) {
-	let [pathStr, varsStr, hashStr] = GetUrlParts(url);
+	let [_, __, varsStr] = GetUrlParts(url);
 	var vars = {} as any;
 	var parts = varsStr.split("&");
 	for (let part of parts) {

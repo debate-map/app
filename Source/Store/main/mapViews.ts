@@ -8,25 +8,18 @@ import {MapViews, MapView, MapNodeView} from "./mapViews/@MapViews";
 import {ToInt} from "../../../Source/Frame/General/Types";
 import {GetMap} from "../firebase/maps";
 import u from "updeep";
-import {MapViewReducer} from "./mapViews/$mapView";
-
-export class ACTMapNodeSelect extends Action<{mapID: number, path: string}> {}
-export class ACTMapNodePanelOpen extends Action<{mapID: number, path: string, panel: string}> {}
-export class ACTMapNodeExpandedSet extends Action<{mapID: number, path: string, expanded: boolean, recursive: boolean}> {}
-export class ACTViewCenterChange extends Action<{mapID: number, focusNode: string, viewOffset: Vector2i}> {}
+import {MapViewReducer, ACTMapViewMerge} from "./mapViews/$mapView";
+import {ShallowChanged} from "../../Frame/UI/ReactGlobals";
 
 export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 	if (action.type == "@@router/LOCATION_CHANGE" && action.payload.pathname == "/global")
 		return {...state, 1: state[1] || new MapView()};
 
-	let newState = {};
-	let hasChanged = false;
+	let newState = {...state};
 	for (let key of state.VKeys()) {
-		let newStateForKey = MapViewReducer(state[key], action);
-		hasChanged = hasChanged || newStateForKey !== state[key];
-		newState[key] = newStateForKey;
+		newState[key] = MapViewReducer(state[key], action);
 	}
-	return hasChanged ? newState : state;
+	return ShallowChanged(newState, state) ? newState : state;
 }
 
 // selectors

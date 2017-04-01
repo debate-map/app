@@ -427,6 +427,9 @@ export function Equals_Shallow(objA, objB) {
 
 	return true;
 }
+export function ShallowChanged(objA, objB) {
+	return !Equals_Shallow(objA, objB);
+}
 
 //require("./GlobalStyles");
 

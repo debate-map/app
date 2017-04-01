@@ -11,7 +11,7 @@ import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RatingType_Info} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {GetRatingAverage, GetRatings} from "../../../../Store/firebase/nodeRatings";
-import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews";
+import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 
 type Props = {
 	parent: MapNodeUI_Inner, map: Map, path: string, node: MapNode, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
