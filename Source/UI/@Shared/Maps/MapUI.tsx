@@ -62,7 +62,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	render() {
 		//let {map, rootNode, focusNode: focusNode_target, viewOffset: viewOffset_target} = this.props;
 		let {map, rootNode} = this.props;
-		if (map == null || GetUserID() == null)
+		if (map == null)
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading map...</div>;
 		Assert(map._id, "map._id is null!");
 		if (rootNode == null)
