@@ -22,7 +22,7 @@ function ConvertViewStrIntoViewJSON(viewStr: string) {
 	// into:		{"1":{"3":{"100":{"101f(460_53)":{"102":{},"104":{}}}}}}
 	let result = "{";
 	result += viewStr
-		.replace(/[0-9sf()_]+/g, a=>`"${a}"`) // wrap own-str in quotes
+		.replace(/[0-9sf()_-]+/g, a=>`"${a}"`) // wrap own-str in quotes
 		.replace(/,/g, `:{`)
 		.replace(/\.(?=")/g, `},`)
 		.replace(/\./g, `}`)

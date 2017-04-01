@@ -69,4 +69,7 @@ export function ProcessAction(action: Action<any>) {
 	if (movingToGlobals || action.IsAny(ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange)) {
 		setTimeout(()=>UpdateURL_Globals());
 	}*/
+	if (action.IsAny(ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange)) {
+		setTimeout(()=>UpdateURL_Globals());
+	}
 }
