@@ -1,10 +1,8 @@
 // String
 // ==========
 
-interface String { TrimEnd: (chars___)=>string; }
-String.prototype.TrimEnd = function(chars___) {
-	var chars = V_.Slice(arguments);
-
+interface String { TrimEnd: (...chars: string[])=>string; }
+String.prototype.TrimEnd = function(...chars) {
 	var result = "";
 	var doneTrimming = false;
 	for (var i = this.length - 1; i >= 0; i--)

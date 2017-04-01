@@ -18,23 +18,47 @@ import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 // ==========
 
 function ConvertViewStrIntoViewJSON(viewStr: string) {
-	// converts:	1,3,100,101f(460_53),102,.104,.....
+	//viewStr = viewStr.slice(0, -1); // remove ending "_"
+	let downChars = viewStr.Matches(":").length;
+	let upChars = viewStr.Matches(".").length;
+	viewStr += ".".repeat(downChars - upChars);
+
+	// converts:	1:3:100:101f(460_53):102:.104:.....
 	// into:		{"1":{"3":{"100":{"101f(460_53)":{"102":{},"104":{}}}}}}
 	let result = "{";
 	result += viewStr
-		.replace(/[0-9sf()_-]+/g, a=>`"${a}"`) // wrap own-str in quotes
+	
+		/*.replace(/!/g, `,`)
+		.replace(/,\./g, `:null`)
 		.replace(/,/g, `:{`)
-		.replace(/\.(?=")/g, `},`)
 		.replace(/\./g, `}`)
-		.replace(/([sf])([0-9])/g, match=>`${match[1]}","${match[2]}`) // change `"108s104s"` into `"108s","104s"`
-		.replace(/"[,}]/g, str=>`${str[0]}:null${str[1]}`); // change `"108s",` into `"108s":null,`
+		.replace(/(^|{)(.+?)(?=:)/g, (...m)=>`${m[1]}"${m[2]}"`) // wrap own-str in quotes
+		.replace(/}(?=")/g, `},`);*/
+
+		//.replace(/:\./g, `:null`)
+		/*.replace(/e/g, `:{}`)
+		.replace(/:(?!{)/g, `:{`)
+		.replace(/\./g, `}`)
+		.replace(/(^|{|,)([^:,}]+)/g, (...m)=>`${m[1]}"${m[2]}"`); // wrap own-str in quotes*/
+
+		.replace(/:/g, `:{`)
+		.replace(/\./g, `}`)
+		.replace(/(^|{|,)([^:,}]+)/g, (...m)=>`${m[1]}"${m[2]}"`); // wrap own-str in quotes
 	result += "}";
 	return result;
 }
 
 function ParseMapView(viewStr: string) {
 	let viewJSON = ConvertViewStrIntoViewJSON(viewStr);
-	let viewData = FromJSON(viewJSON);
+	try {
+		var viewData = FromJSON(viewJSON);
+	} catch (ex) {
+		debugger;
+		alert(`
+Failed to load the view specified in the url.
+
+JSON string: ${viewJSON}`);
+	}
 
 	//let [rootNodeIDStr] = viewStr.match(/^[0-9]+/)[0];
 	let rootNodeOwnStr = viewData.VKeys()[0];
@@ -65,19 +89,29 @@ function ParseMapView(viewStr: string) {
 
 	return result;
 }*/
+function GetDataStrForProp(ownStr: string, propChar: string) {
+	let dataStart = ownStr.indexOf(propChar + "(") + 2;
+	return ownStr.substring(dataStart, ownStr.indexOf(")", dataStart));
+}
 function ParseNodeView(ownStr: string, childrenData) {
 	let result = {} as MapNodeView;
 
-	if (ownStr.contains("s"))
+	let ownStr_withoutParentheses = ownStr.replace(/\(.+?\)/g, "");
+	if (ownStr_withoutParentheses.contains("s"))
 		result.selected = true;
-	if (ownStr.contains("f") || ownStr.contains("s")) {
+	if (ownStr_withoutParentheses.contains("f")) {
 		result.focus = true;
-		let viewOffsetStr = ownStr.substring(ownStr.indexOf("(") + 1, ownStr.lastIndexOf(")"));
+		let viewOffsetStr = GetDataStrForProp(ownStr, "f");
 		let viewOffsetParts = viewOffsetStr.split("_").map(ToInt);
 		result.viewOffset = new Vector2i(viewOffsetParts[0], viewOffsetParts[1]);
 	}
+	if (ownStr_withoutParentheses.contains("p")) {
+		result.openPanel = GetDataStrForProp(ownStr, "p");
+	}
 
-	if (childrenData && childrenData.VKeys().length) {
+	if (ownStr_withoutParentheses.contains("e"))
+		result.expanded = true;
+	else if (childrenData && childrenData.VKeys().length) {
 		result.expanded = true;
 		result.children = {};
 		for (let {name: childOwnStr, value: childChildrenData} of childrenData.Props) {
@@ -94,7 +128,7 @@ export function LoadURL_Globals() {
 	//let search = State().router.location.search;
 	//let urlVars = GetUrlVars(search);
 	let urlVars = GetUrlVars();
-	// example: /global?view=1,3,100,101f(384,111),102,.104,.....
+	// example: /global?view=1:3:100:101f(384_111):102:.104:.....
 	let mapViewStr = urlVars.view;
 	if (mapViewStr == null || mapViewStr.length == 0) return;
 	let mapView = ParseMapView(mapViewStr);
@@ -132,6 +166,8 @@ function GetMapViewStr(mapID: number) {
 	if (map == null) return "";
 	let rootNodeID = map.rootNode;
 	let rootNodeViewStr = GetNodeViewStr(mapID, rootNodeID.toString());
+	rootNodeViewStr = rootNodeViewStr.TrimEnd("."); // remove .'s to keep shorter and cleaner
+	//rootNodeViewStr += "_"; // add "_", so that Facebook doesn't cut off end special-chars
 	return rootNodeViewStr;
 }
 function GetNodeViewStr(mapID: number, path: string) {
@@ -141,7 +177,8 @@ function GetNodeViewStr(mapID: number, path: string) {
 	let childrenStr = "";
 	for (let {name: childID} of (nodeView.children || {}).Props) {
 		let childNodeViewStr = GetNodeViewStr(mapID, `${path}/${childID}`);
-		childrenStr += childNodeViewStr;
+		if (childNodeViewStr.length)
+			childrenStr += (childrenStr.length ? "," : "") + childNodeViewStr;
 	}
 
 	let ownID = path.split("/").map(ToInt).Last();
@@ -163,6 +200,9 @@ function GetNodeViewStr(mapID: number, path: string) {
 		let offsetStr = Vector2i.prototype.toString.call(nodeView.viewOffset).replace(" ", "_");
 		ownStr += `f(${offsetStr})`;
 	}
+	if (nodeView.openPanel) {
+		ownStr += `p(${nodeView.openPanel})`;
+	}
 	
 	/*let hasData = false;
 	if (childrenStr.length) hasData = true;
@@ -171,7 +211,11 @@ function GetNodeViewStr(mapID: number, path: string) {
 	if (!hasData) return "";
 
 	let result = ownStr;
-	if (nodeView.expanded)
-		result += `,${childrenStr}.`;
+	if (nodeView.expanded) {
+		if (childrenStr.length)
+			result += `:${childrenStr}.`;
+		else
+			result += "e";
+	}
 	return result;
 }
