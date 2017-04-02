@@ -63,6 +63,12 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 		return (
 			<div ref="root" style={{position: "relative"/*, minWidth: 496*/}}
 					onClick={e=> {
+						if (ratingType == "strength") return;
+						let target = FindDOM_(e.target);
+						//let chart = (target as any).plusParents().filter(".recharts-cartesian-grid");
+						let chartHolder = (target as any).plusParents().filter("div.recharts-wrapper");
+						if (chartHolder.length == 0) return;
+
 						if (userID == null) {
 							return ShowMessageBox({
 								title: "Sign in",
@@ -76,12 +82,6 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 								}
 							});
 						}
-
-						if (ratingType == "strength") return;
-						let target = FindDOM_(e.target);
-						//let chart = (target as any).plusParents().filter(".recharts-cartesian-grid");
-						let chartHolder = (target as any).plusParents().filter("div.recharts-wrapper");
-						if (chartHolder.length == 0) return;
 
 						let chart = chartHolder.find(".recharts-cartesian-grid");
 						let posOnChart = new Vector2i(e.pageX - chart.offset().left, e.pageY - chart.offset().top);
