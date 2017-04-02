@@ -17,53 +17,17 @@ import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 // loading
 // ==========
 
-function ConvertViewStrIntoViewJSON(viewStr: string) {
-	//viewStr = viewStr.slice(0, -1); // remove ending "_"
+function ParseMapView(viewStr: string) {
 	let downChars = viewStr.Matches(":").length;
 	let upChars = viewStr.Matches(".").length;
-	viewStr += ".".repeat(downChars - upChars);
-
-	// converts:	1:3:100:101f(460_53):102:.104:.....
-	// into:		{"1":{"3":{"100":{"101f(460_53)":{"102":{},"104":{}}}}}}
-	let result = "{";
-	result += viewStr
-	
-		/*.replace(/!/g, `,`)
-		.replace(/,\./g, `:null`)
-		.replace(/,/g, `:{`)
-		.replace(/\./g, `}`)
-		.replace(/(^|{)(.+?)(?=:)/g, (...m)=>`${m[1]}"${m[2]}"`) // wrap own-str in quotes
-		.replace(/}(?=")/g, `},`);*/
-
-		//.replace(/:\./g, `:null`)
-		/*.replace(/e/g, `:{}`)
-		.replace(/:(?!{)/g, `:{`)
-		.replace(/\./g, `}`)
-		.replace(/(^|{|,)([^:,}]+)/g, (...m)=>`${m[1]}"${m[2]}"`); // wrap own-str in quotes*/
-
-		.replace(/:/g, `:{`)
-		.replace(/\./g, `}`)
-		.replace(/(^|{|,)([^:,}]+)/g, (...m)=>`${m[1]}"${m[2]}"`); // wrap own-str in quotes
-	result += "}";
-	return result;
-}
-
-function ParseMapView(viewStr: string) {
-	let viewJSON = ConvertViewStrIntoViewJSON(viewStr);
-	try {
-		var viewData = FromJSON(viewJSON);
-	} catch (ex) {
-		debugger;
-		alert(`
-Failed to load the view specified in the url.
-
-JSON string: ${viewJSON}`);
-	}
+	viewStr += ".".repeat(downChars - upChars); // add .'s that were trimmed
 
 	//let [rootNodeIDStr] = viewStr.match(/^[0-9]+/)[0];
-	let rootNodeOwnStr = viewData.VKeys()[0];
+	/*let rootNodeOwnStr = viewData.VKeys()[0];
 	let rootNodeID = parseInt(rootNodeOwnStr.match(/^[0-9]+/)[0]);
-	let rootNodeView = ParseNodeView(rootNodeOwnStr, viewData[rootNodeOwnStr]);
+	let rootNodeView = ParseNodeView(rootNodeOwnStr, viewData[rootNodeOwnStr]);*/
+
+	let [rootNodeID, rootNodeView] = ParseNodeView(viewStr);
 	
 	let result = {} as MapView;
 	result.rootNodeViews = {[rootNodeID]: rootNodeView};
@@ -93,35 +57,55 @@ function GetDataStrForProp(ownStr: string, propChar: string) {
 	let dataStart = ownStr.indexOf(propChar + "(") + 2;
 	return ownStr.substring(dataStart, ownStr.indexOf(")", dataStart));
 }
-function ParseNodeView(ownStr: string, childrenData) {
-	let result = {} as MapNodeView;
+function ParseNodeView(viewStr: string): [number, MapNodeView] {
+	let nodeView = {} as MapNodeView;
+
+	let ownStr = viewStr.contains(":") ? viewStr.substr(0, viewStr.indexOf(":")) : viewStr;
+	let childrenStr = viewStr.contains(":") ? viewStr.slice(viewStr.indexOf(":") + 1, -1) : "";
+
+	let nodeID = parseInt(ownStr.match(/^[0-9]+/)[0]);
 
 	let ownStr_withoutParentheses = ownStr.replace(/\(.+?\)/g, "");
 	if (ownStr_withoutParentheses.contains("s"))
-		result.selected = true;
+		nodeView.selected = true;
 	if (ownStr_withoutParentheses.contains("f")) {
-		result.focus = true;
+		nodeView.focus = true;
 		let viewOffsetStr = GetDataStrForProp(ownStr, "f");
 		let viewOffsetParts = viewOffsetStr.split("_").map(ToInt);
-		result.viewOffset = new Vector2i(viewOffsetParts[0], viewOffsetParts[1]);
+		nodeView.viewOffset = new Vector2i(viewOffsetParts[0], viewOffsetParts[1]);
 	}
 	if (ownStr_withoutParentheses.contains("p")) {
-		result.openPanel = GetDataStrForProp(ownStr, "p");
+		nodeView.openPanel = GetDataStrForProp(ownStr, "p");
 	}
 
 	if (ownStr_withoutParentheses.contains("e"))
-		result.expanded = true;
-	else if (childrenData && childrenData.VKeys().length) {
-		result.expanded = true;
-		result.children = {};
-		for (let {name: childOwnStr, value: childChildrenData} of childrenData.Props) {
-			let childID = parseInt(childOwnStr.match(/^[0-9]+/)[0]);
-			let childNodeView = ParseNodeView(childOwnStr, childChildrenData);
-			result.children[childID] = childNodeView;
+		nodeView.expanded = true;
+	else if (childrenStr && childrenStr.length) {
+		nodeView.expanded = true;
+		nodeView.children = {};
+
+		let childStrings = [];
+		let depth = 0;
+		let currentChildStr = "";
+		for (let ch of childrenStr) {
+			if (ch == ":") depth++;
+			if (ch == ".") depth--;
+			if (depth == 0 && ch == ",") {
+				childStrings.push(currentChildStr);
+				currentChildStr = "";
+			} else {
+				currentChildStr += ch;
+			}
+		}
+		childStrings.push(currentChildStr);
+
+		for (let childStr of childStrings) {
+			let [childID, childNodeView] = ParseNodeView(childStr);
+			nodeView.children[childID] = childNodeView;
 		}
 	}
 
-	return result;
+	return [nodeID, nodeView];
 }
 
 export function LoadURL_Globals() {
