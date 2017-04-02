@@ -23,6 +23,20 @@ import {SignInPanel} from "../../Navbar/UserPanel";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
+export function ShowSignInPopup() {
+	ShowMessageBox({
+		title: "Sign in", okButton: false,
+		messageUI: ()=> {
+			return (
+				<div>
+					<div>Sign in quickly using...</div>
+					<SignInPanel/>
+				</div>	
+			);
+		}
+	});
+}
+
 type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]} & Partial<{nodeChildren: MapNode[]}>;
 @Connect((state: RootState, {node, ratingType}: RatingsUI_Props)=> {
 	return {
@@ -70,17 +84,7 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 						if (chartHolder.length == 0) return;
 
 						if (userID == null) {
-							return ShowMessageBox({
-								title: "Sign in",
-								messageUI: ()=> {
-									return (
-										<div>
-											<div>Sign in quickly using...</div>
-											<SignInPanel/>
-										</div>	
-									);
-								}
-							});
+							return ShowSignInPopup();
 						}
 
 						let chart = chartHolder.find(".recharts-cartesian-grid");

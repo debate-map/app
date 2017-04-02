@@ -154,7 +154,8 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	Update(postUpdate?) {
 		//if (!this.Mounted) return;
 		this.lastRender_source = RenderSource.Update;
-		this.forceUpdate(postUpdate);
+		//this.forceUpdate(postUpdate);
+		Component.prototype.forceUpdate.call(this, postUpdate);
 	}
 	Clear(postClear?) {
 		var oldRender = this.render;

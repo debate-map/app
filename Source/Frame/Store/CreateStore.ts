@@ -31,7 +31,8 @@ export default function(initialState = {}, history) {
 	if (__DEV__) {
 		const devToolsExtension = g.devToolsExtension;
 		if (typeof devToolsExtension === "function") {
-			enhancers.push(devToolsExtension());
+			//enhancers.push(devToolsExtension());
+			enhancers.push(devToolsExtension({maxAge: 100}));
 		}
 	}
 

@@ -71,7 +71,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		super(props);
 		this.state = {svgInfo: {}} as any;
 	}
-	ComponentWillReceiveProps(newProps) {
+	ComponentWillMountOrReceiveProps(newProps) {
 		let {nodeView} = newProps;
 		if (nodeView && nodeView.expanded)
 			this.SetState({hasBeenExpanded: true});

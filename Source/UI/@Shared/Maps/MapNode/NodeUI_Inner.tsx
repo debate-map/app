@@ -91,7 +91,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						<a style={{position: "relative", fontSize: MapNode.GetFontSize(node), whiteSpace: "initial"}}>
 							{MapNode.GetDisplayText(node)}
 						</a>
-						<NodeUI_Menu node={node} path={path} userID={GetUserID()}/>
+						<NodeUI_Menu node={node} path={path}/>
 					</div>
 					<Button //text={expanded ? "-" : "+"} size={28}
 							style={{

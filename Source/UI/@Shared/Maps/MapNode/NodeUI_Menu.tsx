@@ -22,16 +22,20 @@ import {GetEntries} from "../../../../Frame/General/Enums";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
 import {GetNode} from "../../../../Store/firebase/nodes";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
+import {SignInPanel} from "../../Navbar/UserPanel";
+import {ShowSignInPopup} from "./RatingsUI";
 
 /*export function BasicEditing(permissionGroups: PermissionGroupSet) {
 	return permissionGroups && permissionGroups.basic;
 }*/
+export function BasicOrAnon(permissionGroups: PermissionGroupSet) {
+	return permissionGroups == null || permissionGroups.basic;
+}
 export function CreatorOrMod(node: MapNode, userID: string, permissionGroups: PermissionGroupSet) {
-	if (!permissionGroups) return false;
-	return (node.creator == userID && permissionGroups.basic) || permissionGroups.mod;
+	return permissionGroups && ((node.creator == userID && permissionGroups.basic) || permissionGroups.mod);
 }
 
-type Props = {node: MapNode, path: string, userID: string} & Partial<{permissionGroups: PermissionGroupSet, parentNode: MapNode, copiedNode: MapNode}>;
+type Props = {node: MapNode, path: string} & Partial<{permissionGroups: PermissionGroupSet, parentNode: MapNode, copiedNode: MapNode}>;
 @Connect((state: RootState, {path}: Props)=> {
 	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 	return {
@@ -44,16 +48,18 @@ type Props = {node: MapNode, path: string, userID: string} & Partial<{permission
 })
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {
-		let {node, userID, permissionGroups, parentNode, copiedNode} = this.props;
+		let {node, permissionGroups, parentNode, copiedNode} = this.props;
+		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
-		if (permissionGroups == null) return <div/>;
 		return (
 			<VMenuStub>
-				{permissionGroups.basic && MapNodeType_Info.for[node.type].childTypes.map(childType=> {
+				{BasicOrAnon(permissionGroups) && MapNodeType_Info.for[node.type].childTypes.map(childType=> {
 					let childTypeInfo = MapNodeType_Info.for[childType];
 					return (
 						<VMenuItem key={childType} text={`Add ${childTypeInfo.displayName}`} style={styles.vMenuItem} onClick={e=> {
 							if (e.button != 0) return;
+							if (userID == null) return ShowSignInPopup();
+
 							let isArgument = childType == MapNodeType.SupportingArgument || childType == MapNodeType.OpposingArgument;
 							let thenTypes = childType == MapNodeType.SupportingArgument
 								? GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Take(2)
@@ -114,13 +120,18 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						}}/>
 					);
 				})}
-				{permissionGroups.basic && <VMenuItem text="Copy" style={styles.vMenuItem} onClick={e=> {
-					if (e.button != 0) return;
-					store.dispatch(new ACTNodeCopy(node._id));
-				}}/>}
-				{permissionGroups.basic && copiedNode &&
+				{BasicOrAnon(permissionGroups) &&
+					<VMenuItem text={copiedNode ? "Copy (right-click to clear)" : "Copy"} style={styles.vMenuItem}
+						onClick={e=> {
+							if (e.button == 0)
+								store.dispatch(new ACTNodeCopy(node._id));
+							else
+								store.dispatch(new ACTNodeCopy(null));
+						}}/>}
+				{BasicOrAnon(permissionGroups) && copiedNode &&
 					<VMenuItem text={`Paste "${copiedNode.title.KeepAtMost(30)}"`} style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
+						if (userID == null) return ShowSignInPopup();
 						//Store.dispatch(new ACTNodeCopy(null));
 						firebase.Ref(`nodes/${node._id}/children`).update({[copiedNode._id]: {_: true}});
 					}}/>}
