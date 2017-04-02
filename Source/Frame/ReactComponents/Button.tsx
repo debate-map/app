@@ -19,7 +19,7 @@ var styles = {
 		borderWidth: "0 0",*/
 		color: "#AAA",
 		/*fontFamily: "fancyFontSemibold, Trebuchet MS, Tahoma, sans-serif",*/
-		fontSize: 14,
+		fontSize: 14, textAlign: "center",
 		cursor: "pointer",
 		":hover": {
 			//backgroundColor: "rgba(0,0,0,.7)"
@@ -63,8 +63,8 @@ export default class Button extends BaseComponent
 		}
 		
 		let finalStyle = E(
-			BasicStyles(this.props),
 			styles.root,
+			BasicStyles(this.props),
 			{padding},
 			size && {padding: 0, width: size, height: size,
 				backgroundPosition: `${(size - iconSize) / 2}px ${(size - iconSize) / 2}px`,

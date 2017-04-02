@@ -12,7 +12,7 @@ import GoogleButton from 'react-google-button';
 
 import {connect} from "react-redux";
 import {firebaseConnect, helpers} from "react-redux-firebase";
-import {BaseComponent, RowLR, BaseProps} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, BaseProps} from "../../Frame/UI/ReactGlobals";
 import {Debugger} from "../../Frame/General/Globals_Free";
 import Button from "../../Frame/ReactComponents/Button";
 import TextInput from "../../Frame/ReactComponents/TextInput";
@@ -20,6 +20,7 @@ import Action from "../../Frame/General/Action";
 import {ACTUserPanelOpenSet} from "../../Store/main";
 import {HandleError} from "../../Frame/General/Errors";
 import UserPanel from "./Navbar/UserPanel";
+import {Connect} from "../../Frame/Database/FirebaseConnect";
 
 // main
 // ==========
@@ -34,16 +35,14 @@ const avatarStyles = {
 	wrapper: {marginTop: 45 - avatarSize}
 };
 
-@firebaseConnect()
-@(connect(state=>({
-	page: state.page,
+@Connect(state=>({
 	userPanelOpen: state.main.userPanelOpen,
 	auth: helpers.pathToJS(state.firebase, "auth"),
-})) as any)
+}))
 export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOpen?, auth?: firebase.User}, {}> {
 	static contextTypes = {store: PropTypes.object.isRequired};
 	render() {
-		let {page, userPanelOpen, auth} = this.props;
+		let {userPanelOpen, auth} = this.props;
 		let {dispatch} = this.context.store;
 		return (
 			<div style={{

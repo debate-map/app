@@ -19,23 +19,9 @@ import {GetRatingUISmoothing, ACTRatingUISmoothnessSet} from "../../../../Store/
 import {GetNodeChildren, GetParentNode} from "../../../../Store/firebase/nodes";
 import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {SignInPanel} from "../../Navbar/UserPanel";
+import {ShowSignInPopup} from "../../Navbar/UserPanel";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
-
-export function ShowSignInPopup() {
-	ShowMessageBox({
-		title: "Sign in", okButton: false,
-		messageUI: ()=> {
-			return (
-				<div>
-					<div>Sign in quickly using...</div>
-					<SignInPanel/>
-				</div>	
-			);
-		}
-	});
-}
 
 type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]} & Partial<{nodeChildren: MapNode[]}>;
 @Connect((state: RootState, {node, ratingType}: RatingsUI_Props)=> {

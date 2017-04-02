@@ -108,6 +108,7 @@
     "react-resize-sensor": "^1.0.0",
     "react-router-dom": "^4.0.0",
     "react-router-redux": "^5.0.0-alpha.2",
+    "react-social-button": "^1.0.2",
     "react-tap-event-plugin": "1.0.0",
     "react-vmenu": "^0.0.0",
     "react-vscrollview": "^0.0.1",

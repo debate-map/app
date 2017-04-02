@@ -28,8 +28,10 @@ if (process.env.NODE_ENV !== "production") {
 	const {whyDidYouUpdate} = require("why-did-you-update");
 	whyDidYouUpdate(React, {
 		exclude: new RegExp(
-			`connect|Connect|Link|Animate|Animation|Dot|ComposedDataDecorator|Chart|Curve|Route`
-			+ `|Div` // probably temp -- for use in ScrollView lib
+			`connect|Connect|Link`
+			+ `|Animate|Animation|Dot|ComposedDataDecorator|Chart|Curve|Route` // from recharts
+			+ `|Div` // from ScrollView (probably temp)
+			+ `|Button` // from react-bootstrap (from react-social-button)
 		),
 	});
 }

@@ -6,7 +6,6 @@ import {Route} from "react-router-dom";
 import GlobalMapUI from "./Global/GlobalMapUI";
 import ScrollView from "react-vscrollview";
 
-@firebaseConnect()
 export default class GlobalUI extends BaseComponent<{} & BaseProps, {}> {
 	render() {
 		return (
