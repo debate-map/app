@@ -1501,21 +1501,12 @@ declare namespace firebase {
         
     }
     
-    /**
-     * The Firebase Database service interface.
-     * 
-     * @export
-     * @class Database
-     */
+    /** The Firebase Database service interface. */
     export class Database {
-        /**
-         * The App associated with the Database service instance.
-         * 
-         * @type {FirebaseApplication}
-         */
+        /** The App associated with the Database service instance. */
         app:FirebaseApplication;
-        /**
-         * Disconnect from the server (all database operations will be completed offline).
+
+        /** Disconnect from the server (all database operations will be completed offline).
          * 
          * The client automatically maintains a persistent connection to the database server, 
          * which will remain active indefinitely and reconnect when disconnected. However, 
@@ -1528,23 +1519,23 @@ declare namespace firebase {
          * each operation performed locally will automatically be queued and retried upon reconnection to the database server.
          */
         goOffline():void;
-        /**
-         * (Re)connect to the server and synchronize the offline database state with the server state.
+
+        /** (Re)connect to the server and synchronize the offline database state with the server state.
          * 
          * This method should be used after disabling the active connection with goOffline(). 
          * Once reconnected, the client will transmit the proper data and fire the appropriate events so that your client 
          * "catches up" automatically.
          */
         goOnline():void;
-        /**
-         * Returns a {DatabaseReference} to the root or the specified path.
+
+        /** Returns a {DatabaseReference} to the root or the specified path.
          * 
          * @param {string} path the path to get a reference to.
          * @returns {DatabaseReference} 
          */
         ref(path?:string):DatabaseReference;
-        /**
-         * Returns a reference to the root or the path specified in url. 
+
+        /** Returns a reference to the root or the path specified in url. 
          * An exception is thrown if the url is not in the same domain as the current database. 
          * 
          * @param {string} url the reference's URL
@@ -1553,48 +1544,25 @@ declare namespace firebase {
         refFromURL(url:string):DatabaseReference;
     }
     
-    /**
-     * A Firebase App holds the initialization information for a collection of services.
-     * 
-     * @export
-     * @class FirebaseApplication
-     */
-    export class FirebaseApplication{
-        /**
-         * The (read-only) name (identifier) for this App. '[DEFAULT]' is the name of the default App.
-         * 
-         * @type {string}
-         */
+    /** A Firebase App holds the initialization information for a collection of services. */
+    export class FirebaseApplication {
+        /** The (read-only) name (identifier) for this App. '[DEFAULT]' is the name of the default App. */
         name:string;
-        /**
-         * The (read-only) configuration options (the original parameters given in firebase.initializeApp()).
-         * 
-         * @type {FirebaseConfig}
-         */
+
+        /** The (read-only) configuration options (the original parameters given in firebase.initializeApp()). */
         options:FirebaseConfig;
-        /**
-         * Gets the Firebase Auth Service object for an App.
-         * 
-         * @returns {Auth}  
-         */
+
+        /** Gets the Firebase Auth Service object for an App. */
         auth():Auth;
-        /**
-         * Access the Database service from an App instance.
-         * 
-         * @returns {Database} 
-         */
+
+        /** Access the Database service from an App instance. */
         database():Database;
 
-        /**
-         * Access the Storage service from an App instance.
-         * 
-         * @returns {FirebaseStorage}
-         */
+        /** Access the Storage service from an App instance. */
         storage():FirebaseStorage;
-        /**
-         * Make the given App unusable and free the resources of all associated services.
-         */
-        delete():Promise<void>;
+
+        /** Make the given App unusable and free the resources of all associated services. */
+        //delete():Promise<void>;
     }
   
 }

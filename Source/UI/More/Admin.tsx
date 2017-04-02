@@ -10,10 +10,9 @@ import {Map, MapType} from "../../Store/firebase/maps/@Map";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import UserExtraInfo from "../../Store/userExtras/@UserExtraInfo";
 
-@firebaseConnect()
 export default class AdminUI extends BaseComponent<{}, {}> {
 	render() {
-		let {firebase} = this.props;
+		let firebase = store.firebase.helpers;
 		return (
 			<div style={E(styles.page)}>
 				<Button text="Reset database" onClick={()=> {

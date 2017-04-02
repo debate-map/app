@@ -11,6 +11,7 @@ import {IsString} from "../General/Types";
 import {Assert} from "../General/Assert";
 import {E, Global} from "../General/Globals_Free";
 import ShallowCompare from "react-addons-shallow-compare";
+import {FirebaseApplication} from "firebase";
 export {ShallowCompare};
 
 //var ReactInstanceMap = require("react/lib/ReactInstanceMap");
@@ -46,7 +47,7 @@ export interface BaseProps {
 	tabLabel?: string; active?: boolean;
 
 	page?; match?;
-	firebase?: FirebaseDatabase;
+	//firebase?: FirebaseDatabase;
 }
 export var basePropFullKeys = {
 	ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
@@ -335,8 +336,6 @@ export function SimpleShouldUpdate_Overridable(target) {
 export function Instant(target, name) {
 	target[name].instant = true;
 }
-
-export type FirebaseDatabase = firebase.Database & FirebaseDatabase_Extensions;
 
 @Global
 export class Span extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement>, {}> {

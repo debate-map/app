@@ -1,6 +1,6 @@
 import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, FindDOM_} from "../../../../Frame/UI/ReactGlobals";
 import {connect} from "react-redux";
-import {DBPath, GetData, FirebaseConnect} from "../../../../Frame/Database/DatabaseHelpers";
+import {DBPath, GetData} from "../../../../Frame/Database/DatabaseHelpers";
 import {Debugger, QuickIncrement, E, GetTimeSinceLoad} from "../../../../Frame/General/Globals_Free";
 import Button from "../../../../Frame/ReactComponents/Button";
 import {PropTypes, Component} from "react";
@@ -30,6 +30,7 @@ import {Map} from "../../../../Store/firebase/maps/@Map";
 import {GetNodeChildIDs, GetNodeChildren} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -50,10 +51,7 @@ let childrenPlaceholder = [];
 
 type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
 type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number, svgInfo: {mainBoxOffset: Vector2i, oldChildBoxOffsets: Vector2i[]}};
-@FirebaseConnect(({node}: {node: MapNode})=>[
-	...GetNodeChildIDs(node._id).map(id=>`nodes/${id}`),
-])
-@(connect(()=> {
+@Connect(()=> {
 	//var getNodeView = MakeGetNodeView();
 	return ((state: RootState, {node, path, map}: Props & BaseProps)=> {
 		var path = path || node._id.toString();
@@ -66,8 +64,8 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 			// only pass nodeChildren when all are loaded
 			nodeChildren: CachedTransform({nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : childrenPlaceholder),
 		};
-	}) as any;
-}) as any)
+	});
+})
 export default class NodeUI extends BaseComponent<Props, State> {
 	constructor(props) {
 		super(props);

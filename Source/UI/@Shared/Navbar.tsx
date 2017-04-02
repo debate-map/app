@@ -19,7 +19,7 @@ import TextInput from "../../Frame/ReactComponents/TextInput";
 import Action from "../../Frame/General/Action";
 import {ACTUserPanelOpenSet} from "../../Store/main";
 import {HandleError} from "../../Frame/General/Errors";
-const {pathToJS} = helpers;
+import UserPanel from "./Navbar/UserPanel";
 
 // main
 // ==========
@@ -38,7 +38,7 @@ const avatarStyles = {
 @(connect(state=>({
 	page: state.page,
 	userPanelOpen: state.main.userPanelOpen,
-	auth: pathToJS(state.firebase, "auth"),
+	auth: helpers.pathToJS(state.firebase, "auth"),
 })) as any)
 export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOpen?, auth?: firebase.User}, {}> {
 	static contextTypes = {store: PropTypes.object.isRequired};
@@ -102,64 +102,6 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 							<UserPanel/>}
 					</div>
 				</div>
-			</div>
-		);
-	}
-}
-
-@firebaseConnect()
-@(connect(state=>({
-	page: state.page,
-	userPanelOpen: state.main.userPanelOpen,
-	//authError: pathToJS(state.firebase, "authError"),
-	auth: pathToJS(state.firebase, "auth"),
-	account: pathToJS(state.firebase, "profile")
-})) as any)
-class UserPanel extends BaseComponent<{firebase?, auth?, account?}, {}> {
-	static contextTypes = {router: PropTypes.object.isRequired};
-	render() {
-		let {firebase, auth, account} = this.props;
-		let {router} = this.context;
-		return (
-			<div style={{width: 300, height: 200, background: "rgba(0,0,0,.7)"}}>
-				{auth
-					? <Button text="Sign out" onClick={()=> {
-						firebase.logout();
-					}}/>
-					: <div>
-						<Button text="Google" onClick={async ()=> {
-							try {
-								let account = await firebase.login({provider: "google", type: "popup"});
-							} catch (ex) {
-								if (ex.message == "This operation has been cancelled due to another conflicting popup being opened.") return;
-								HandleError(ex);
-							}
-						}}/>
-						<Button text="Facebook" onClick={async ()=> {
-							try {
-								let account = await firebase.login({provider: "facebook", type: "popup"});
-							} catch (ex) {
-								if (ex.message == "This operation has been cancelled due to another conflicting popup being opened.") return;
-								HandleError(ex);
-							}
-						}}/>
-						<Button text="Twitter" onClick={async ()=> {
-							try {
-								let account = await firebase.login({provider: "twitter", type: "popup"});
-							} catch (ex) {
-								if (ex.message == "This operation has been cancelled due to another conflicting popup being opened.") return;
-								HandleError(ex);
-							}
-						}}/>
-						<Button text="Github" onClick={async ()=> {
-							try {
-								let account = await firebase.login({provider: "github", type: "popup"});
-							} catch (ex) {
-								if (ex.message == "This operation has been cancelled due to another conflicting popup being opened.") return;
-								HandleError(ex);
-							}
-						}}/>
-					</div>}
 			</div>
 		);
 	}

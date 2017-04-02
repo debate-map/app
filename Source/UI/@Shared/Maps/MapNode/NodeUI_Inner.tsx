@@ -15,7 +15,6 @@ import keycode from "keycode";
 import NodeUI_Menu from "./NodeUI_Menu";
 import NodeOthersUI from "./NodeOthersUI";
 import V from "../../../../Frame/V/V";
-import {FirebaseConnect} from "../../../../Frame/Database/DatabaseHelpers";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
@@ -29,21 +28,21 @@ import {ACTMapNodeSelect, ACTMapNodeExpandedSet} from "../../../../Store/main/ma
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
-	& Partial<{userID: string, ratingsRoot: RatingsRoot, mainRatingFillPercent: number}>;
+	& Partial<{ratingsRoot: RatingsRoot, mainRatingFillPercent: number}>;
 //@FirebaseConnect((props: Props)=>((props["holder"] = props["holder"] || {}), [
 /*@FirebaseConnect((props: Props)=>[
 	...GetPaths_NodeRatingsRoot(props.node._id),
 ])*/
 @Connect(()=> {
 	return (state: RootState, {node, ratingsRoot}: Props)=> ({
-		userID: GetUserID(),
 		ratingsRoot: GetNodeRatingsRoot(node._id),
 		mainRatingFillPercent: GetMainRatingFillPercent(node),
 	});
 })
 export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, openPanel_preview: string}> {
 	render() {
-		let {firebase, map, node, nodeView, path, width, widthOverride, userID, ratingsRoot, mainRatingFillPercent} = this.props;
+		let {map, node, nodeView, path, width, widthOverride, ratingsRoot, mainRatingFillPercent} = this.props;
+		let firebase = store.firebase.helpers;
 		let {hovered, openPanel_preview} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let barSize = 5;
@@ -92,7 +91,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						<a style={{position: "relative", fontSize: MapNode.GetFontSize(node), whiteSpace: "initial"}}>
 							{MapNode.GetDisplayText(node)}
 						</a>
-						<NodeUI_Menu node={node} path={path} userID={userID}/>
+						<NodeUI_Menu node={node} path={path} userID={GetUserID()}/>
 					</div>
 					<Button //text={expanded ? "-" : "+"} size={28}
 							style={{
@@ -138,7 +137,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								</div>
 							</div>}
 						{panelToShow == "others" &&
-							<NodeOthersUI node={node} path={path} userID={userID}/>}
+							<NodeOthersUI node={node} path={path} userID={GetUserID()}/>}
 					</div>}
 			</div>
 		);

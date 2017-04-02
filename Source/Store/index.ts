@@ -10,12 +10,12 @@ import {ToJSON, FromJSON} from "../Frame/General/Globals";
 import V from "../Frame/V/V";
 import {createSelector} from "reselect";
 import {DBPath, GetData} from "../Frame/Database/DatabaseHelpers";
-import {FirebaseDatabase} from "../Frame/UI/ReactGlobals";
 import {QuickIncrement, Debugger} from "../Frame/General/Globals_Free";
 import {GetTreeNodesInObjTree} from "../Frame/V/V";
 import {Set} from "immutable";
 import {MainState, MainReducer} from "./main";
 import {LocationDescriptorObject} from "history";
+import Immutable from "immutable";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;
@@ -47,7 +47,8 @@ export function CombineReducers(...args) {
 // class is used only for initialization
 export class RootState {
 	main: MainState;
-	firebase: any;
+	//firebase: FirebaseDatabase;
+	firebase: Immutable.Map<any, any>;
 	//form: any;
 	router: RouterState;
 	messageBox: MessageBoxState;

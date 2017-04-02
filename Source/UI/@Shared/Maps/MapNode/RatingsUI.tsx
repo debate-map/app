@@ -18,34 +18,33 @@ import {RootState} from "../../../../Store/index";
 import {GetRatingUISmoothing, ACTRatingUISmoothnessSet} from "../../../../Store/main/ratingUI";
 import {GetNodeChildren, GetParentNode} from "../../../../Store/firebase/nodes";
 import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {Connect} from "../../../../Frame/Database/FirebaseConnect";
+import {SignInPanel} from "../../Navbar/UserPanel";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]}
-	& Partial<{userID: string, nodeChildren: MapNode[], smoothing: number}>;
-@firebaseConnect(({node, ratingType}: RatingsUI_Props)=>[
-	`nodeRatings/${node._id}/${ratingType}/${GetUserID()}/value`
-])
-@(connect((state: RootState, {node, ratingType}: RatingsUI_Props)=> {
+type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]} & Partial<{nodeChildren: MapNode[]}>;
+@Connect((state: RootState, {node, ratingType}: RatingsUI_Props)=> {
 	return {
-		userID: GetUserID(),
 		//myVote: GetData(`nodeRatings/${node._id}/${ratingType}/${GetUserID()}/value`),
-		smoothing: GetRatingUISmoothing(),
 		nodeChildren: GetNodeChildren(node),
 	};
-}) as any)
+})
 export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vector2i}> {
 	render() {
-		let {node, path, ratingType, userID, ratings, nodeChildren, smoothing, firebase} = this.props;
+		let {node, path, ratingType, ratings, nodeChildren} = this.props;
+		let firebase = store.firebase.helpers;
 		let {size} = this.state;
 
 		let parentNode = GetParentNode(path);
 		let ratingTypeInfo = RatingType_Info.for[ratingType];
 		let options = typeof ratingTypeInfo.options == "function" ? ratingTypeInfo.options(node, parentNode) : ratingTypeInfo.options;
+		let userID = GetUserID();
 		let myRatingValue = ratings.find(a=>a._key == userID);
 
 		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(options.Max() == 200 ? [200] : []);
 		let minVal = options.Min(), maxVal = options.Max(), range = maxVal - minVal;
+		let smoothing = GetRatingUISmoothing();
 		smoothing = smoothing.KeepAtMost(options.Max()); // smoothing might have been set higher, from when on another rating-type
 		let ticksForChart = options.Select(a=>a.RoundTo(smoothing)).Distinct();
 		let dataFinal = ticksForChart.Select(a=>({rating: a, count: 0}));
@@ -64,6 +63,20 @@ export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vec
 		return (
 			<div ref="root" style={{position: "relative"/*, minWidth: 496*/}}
 					onClick={e=> {
+						if (userID == null) {
+							return ShowMessageBox({
+								title: "Sign in",
+								messageUI: ()=> {
+									return (
+										<div>
+											<div>Sign in quickly using...</div>
+											<SignInPanel/>
+										</div>	
+									);
+								}
+							});
+						}
+
 						if (ratingType == "strength") return;
 						let target = FindDOM_(e.target);
 						//let chart = (target as any).plusParents().filter(".recharts-cartesian-grid");

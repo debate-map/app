@@ -11,7 +11,6 @@ import {ToJSON, FromJSON, Debugger} from "../Frame/General/Globals";
 import V from "../Frame/V/V";
 import {Map} from "../Store/firebase/maps/@Map";
 import {createSelector} from "reselect";
-import {FirebaseDatabase} from "../Frame/UI/ReactGlobals";
 import {GetTreeNodesInObjTree} from "../Frame/V/V";
 import {ProcessAction} from "../Frame/Store/ActionProcessor";
 import {CachedTransform} from "../Frame/V/VCache";

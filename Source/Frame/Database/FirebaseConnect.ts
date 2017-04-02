@@ -7,11 +7,8 @@ import {getEventsFromInput} from "react-redux-firebase/dist/utils";
 import {Log} from "../Serialization/VDF/VDF";
 import {ToJSON} from "../General/Globals";
 
-/*type ComponentClass<P> = React.ComponentClass<P>;
-type StatelessComponent<P> = React.StatelessComponent<P>;
-interface ComponentDecorator<TOriginalProps, TOwnProps> {
-	(component: ComponentClass<TOriginalProps> | StatelessComponent<TOriginalProps>): ComponentClass<TOwnProps>;
-}*/
+// note: you only need to use selectors in Connect() when they might request db-paths
+//		the rest of the time, you can just use the selector directly (inside the comp)
 
 /*export function Connect<T, P>(getterFunc: (state: RootState, props: P)=>any) {
 	return (innerClass: new(...args)=>T) => {
@@ -45,7 +42,7 @@ export function Connect<T, P>(funcOrFuncWrapper) {
 		ClearRequestedPaths();
 		//let firebase = state.firebase;
 		//let firebase = props["firebase"];
-		let firebase = store["firebase"];
+		let firebase = store.firebase;
 
 		let result = innerConnectFunc(state, props);
 

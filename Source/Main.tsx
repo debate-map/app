@@ -10,8 +10,10 @@ import {Component as BaseComponent, PropTypes} from "react";
 import ReactDOM from "react-dom";
 import injectTapEventPlugin from "react-tap-event-plugin";
 import {Store} from "redux";
-//import {BaseComponent} from "./Frame/UI/ReactGlobals";
 import {GetTimeSinceLoad} from "./Frame/General/Globals_Free";
+
+import {RootState} from "./Store/index";
+import {FirebaseApplication} from "firebase";
 
 var JQuery = require("./Frame/JQuery/JQuery3.1.0");
 g.Extend({JQuery, jQuery: JQuery});
@@ -42,7 +44,7 @@ if (process.env.NODE_ENV !== "production") {
 const initialState = (window as any).___INITIAL_STATE__;
 
 var store;
-declare global { var store: Store<RootState>; }
+declare global { var store: Store<RootState> & {firebase: FirebaseApp}; }
 function CreateStore() {
 	store = createStore(initialState, {}) as Store<RootState>;
 	g.Extend({store});
@@ -72,7 +74,7 @@ store.dispatch = function(...args) {
 // ==========
 
 //import {Component, PropTypes} from "react";
-import {RootState} from "./Store/index";
+import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
 g.Extend({React});
 
 // Tap Plugin

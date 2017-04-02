@@ -1,9 +1,9 @@
 import {RequestPath} from "./FirebaseConnect";
 import {Assert} from "../General/Assert";
-import {FirebaseDatabase} from "../UI/ReactGlobals";
 import {helpers, firebaseConnect} from "react-redux-firebase";
 import {DBPath as DBPath_} from "../../../config/DBVersion";
 import {IsString} from "../General/Types";
+import {FirebaseApplication} from "firebase";
 //export {DBPath};
 
 export function DBPath(path = "") {
@@ -12,14 +12,36 @@ export function DBPath(path = "") {
 	return DBPath_(path);
 }
 
-//interface Object { Ref: ()=>firebase.Database; }
-declare global { class FirebaseDatabase_Extensions {
-	Ref: (path?: string)=>firebase.DatabaseReference;
-}}
 Object.prototype._AddFunction_Inline = function Ref(path = "") {
 	let finalPath = DBPath(path);
 	return this.ref(finalPath);
 }
+
+export type FirebaseApp = FirebaseApplication & {
+	// added by react-redux-firebase
+	_,
+	helpers: {
+		ref(path: string): firebase.DatabaseReference,
+		set,
+		uniqueSet,
+		push,
+		remove,
+		update,
+		login(options: {provider: "email?" | "google" | "facebook" | "twitter" | "github" | "anonymous?" | "?", type: "popup" | "?"}),
+		logout(),
+		uploadFile,
+		uploadFiles,
+		deleteFile,
+		createUser,
+		resetPassword,
+		watchEvent,
+		unWatchEvent,
+		storage(): firebase.FirebaseStorage,
+
+		// custom
+		Ref(path?: string): firebase.DatabaseReference,
+	},
+};
 
 class DBPathInfo {
 	lastTimestamp = -1;
@@ -36,7 +58,8 @@ export function GetData(path: string, makeRequest = true) {
 		var timestamp = (firebase as any)._root ? timestampEntry[1].get(path) : null;*/
 	let timestamps = firebase.get("timestamp");
 	if (timestamps) {
-		var timestamp = firebase._root ? timestamps.get(path) : null;
+		//var timestamp = firebase._root ? timestamps.get(path) : null;
+		var timestamp = timestamps.has(path) ? timestamps.get(path) : null;
 		if (timestamp && timestamp != info.lastTimestamp) {
 			info.lastTimestamp = timestamp;
 			info.cachedData = helpers.dataToJS(firebase, path);
@@ -113,7 +136,7 @@ export function GetData(path: string, makeRequest = true) {
 })();*/
 
 //export function FirebaseConnect<T>(paths: string[]); // just disallow this atm, since you might as well just use a connect/getter func
-export function FirebaseConnect<T>(pathsOrGetterFunc?: string[] | ((props: T)=>string[]));
+/*export function FirebaseConnect<T>(pathsOrGetterFunc?: string[] | ((props: T)=>string[]));
 export function FirebaseConnect<T>(pathsOrGetterFunc?) {
 	return firebaseConnect(props=> {
 		let paths =
@@ -123,4 +146,4 @@ export function FirebaseConnect<T>(pathsOrGetterFunc?) {
 		paths = paths.map(a=>DBPath(a)); // add version prefix to paths
 		return paths;
 	});
-}
+}*/

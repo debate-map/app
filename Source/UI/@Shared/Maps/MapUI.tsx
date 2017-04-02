@@ -1,9 +1,9 @@
 import {GetFocusNode, GetViewOffset, GetSelectedNodePath} from "../../../Store/main/mapViews";
-import {BaseComponent, FirebaseDatabase, FindDOM, FindReact} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, FindDOM, FindReact} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
 import {connect} from "react-redux";
-import {DBPath, FirebaseConnect, GetData} from "../../../Frame/Database/DatabaseHelpers";
+import {DBPath, GetData} from "../../../Frame/Database/DatabaseHelpers";
 import {Debugger} from "../../../Frame/General/Globals_Free";
 import {PropTypes} from "react";
 import {Assert, Log} from "../../../Frame/Serialization/VDF/VDF";
@@ -23,6 +23,7 @@ import {RootState} from "../../../Store/index";
 import {GetMapView} from "../../../Store/main/mapViews";
 import {GetUserID} from "../../../Store/firebase/users";
 import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../Store/main/mapViews/$mapView/rootNodeViews";
+import {Connect} from "../../../Frame/Database/FirebaseConnect";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -45,16 +46,13 @@ export function UpdateFocusNodeAndViewOffset(mapID: number) {
 }
 
 type Props = {map: Map} & Partial<{rootNode: MapNode, focusNode: string, viewOffset: {x: number, y: number}}>;
-@FirebaseConnect(({map}: {map: Map})=> [
-	map && `nodes/${map.rootNode}`,
-].Where(a=>!!a))
-@(connect((state: RootState, {map}: Props)=> ({
+@Connect((state: RootState, {map}: Props)=> ({
 	rootNode: map && GetData(`nodes/${map.rootNode}`),
 	/*focusNode: GetMapView(state, {map}) ? GetMapView(state, {map}).focusNode : null,
 	viewOffset: GetMapView(state, {map}) ? GetMapView(state, {map}).viewOffset : null,*/
 	/*focusNode_available: (GetMapView(state, {map}) && GetMapView(state, {map}).focusNode) != null,
 	viewOffset_available: (GetMapView(state, {map}) && GetMapView(state, {map}).viewOffset) != null,*/
-})) as any)
+}))
 export default class MapUI extends BaseComponent<Props, {} | void> {
 	downPos: Vector2i;
 

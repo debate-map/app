@@ -16,25 +16,25 @@ import {connect} from "react-redux";
 import Select from "../../../../Frame/ReactComponents/Select";
 import {ShowMessageBox_Base, ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
 import {firebaseConnect} from "react-redux-firebase";
-import {FirebaseConnect, GetData} from "../../../../Frame/Database/DatabaseHelpers";
 import {CreatorOrMod} from "./NodeUI_Menu";
 import {WaitXThenRun} from "../../../../Frame/General/Timers";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
 import Moment from "moment";
 import {GetParentNode} from "../../../../Store/firebase/nodes";
+import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
 type NodeOthersUI_Props = {node: MapNode, path: string, userID: string} & Partial<{permissionGroups: PermissionGroupSet}>;
-@FirebaseConnect()
-@(connect((state: RootState, props: NodeOthersUI_Props)=> {
+@Connect((state: RootState, props: NodeOthersUI_Props)=> {
 	return {
 		permissionGroups: GetUserPermissionGroups(GetUserID()),
 	};
-}) as any)
+})
 export default class NodeOthersUI extends BaseComponent<NodeOthersUI_Props, {}> {
 	render() {
-		let {node, path, userID, permissionGroups, firebase} = this.props;
+		let {node, path, userID, permissionGroups} = this.props;
+		let firebase = store.firebase.helpers;
 		if (node.metaThesis) {
 			var parentNode = GetParentNode(path);
 			var thenTypes = parentNode.type == MapNodeType.SupportingArgument

@@ -16,25 +16,23 @@ import {DN} from "../../../../Frame/General/Globals";
 import keycode from "keycode";
 import {firebaseConnect} from "react-redux-firebase";
 import {connect} from "react-redux";
-import {FirebaseConnect, GetData} from "../../../../Frame/Database/DatabaseHelpers";
 import {ACTNodeCopy} from "../../../../Store/main";
 import Select from "../../../../Frame/ReactComponents/Select";
 import {GetEntries} from "../../../../Frame/General/Enums";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
 import {GetNode} from "../../../../Store/firebase/nodes";
+import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 
 /*export function BasicEditing(permissionGroups: PermissionGroupSet) {
 	return permissionGroups && permissionGroups.basic;
 }*/
 export function CreatorOrMod(node: MapNode, userID: string, permissionGroups: PermissionGroupSet) {
+	if (!permissionGroups) return false;
 	return (node.creator == userID && permissionGroups.basic) || permissionGroups.mod;
 }
 
 type Props = {node: MapNode, path: string, userID: string} & Partial<{permissionGroups: PermissionGroupSet, parentNode: MapNode, copiedNode: MapNode}>;
-@FirebaseConnect(()=>[
-	GetUserPermissionGroups_Path(GetUserID())
-])
-@(connect((state: RootState, {path}: Props)=> {
+@Connect((state: RootState, {path}: Props)=> {
 	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 	return {
 		permissionGroups: GetUserPermissionGroups(GetUserID()), 
@@ -43,10 +41,11 @@ type Props = {node: MapNode, path: string, userID: string} & Partial<{permission
 		//copiedNode: state.main.copiedNode,
 		copiedNode: GetNode(state.main.copiedNode),
 	};
-}) as any)
+})
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {
-		let {node, userID, permissionGroups, parentNode, copiedNode, firebase} = this.props;
+		let {node, userID, permissionGroups, parentNode, copiedNode} = this.props;
+		let firebase = store.firebase.helpers;
 		if (permissionGroups == null) return <div/>;
 		return (
 			<VMenuStub>
