@@ -8,7 +8,7 @@ import {E} from "../../Frame/General/Globals_Free";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {Map, MapType} from "../../Store/firebase/maps/@Map";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
-import UserExtraInfo from "../../Store/userExtras/@UserExtraInfo";
+import UserExtraInfo from "../../Store/firebase/userExtras/@UserExtraInfo";
 
 export default class AdminUI extends BaseComponent<{}, {}> {
 	render() {
@@ -55,7 +55,7 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 								},
 								userExtras: {
 									[user1Key]: new UserExtraInfo({
-										permissionGroups: {basic: true, verified: true, mod: true, dev: true},
+										permissionGroups: {basic: true, verified: true, mod: true, admin: true},
 									}),
 								},
 								maps: {

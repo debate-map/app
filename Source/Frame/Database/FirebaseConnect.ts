@@ -32,7 +32,9 @@ export function Connect<T, P>(innerConnectFunc: (state: RootState, props: P)=>an
 export function Connect<T, P>(innerConnectFuncWrapper: ()=>(state: RootState, props: P)=>any);
 export function Connect<T, P>(funcOrFuncWrapper) {
 	let innerConnectFunc: (state: RootState, props: P)=>any, innerConnectFuncWrapper: ()=>(state: RootState, props: P)=>any;
-	if (funcOrFuncWrapper.length) innerConnectFunc = funcOrFuncWrapper;
+	/*if (funcOrFuncWrapper.length) innerConnectFunc = funcOrFuncWrapper;
+	else innerConnectFuncWrapper = funcOrFuncWrapper;*/
+	if (funcOrFuncWrapper.length || typeof funcOrFuncWrapper() != "function") innerConnectFunc = funcOrFuncWrapper;
 	else innerConnectFuncWrapper = funcOrFuncWrapper;
 
 	//return connect((state: RootState, props: P)=> {

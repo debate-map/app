@@ -1,5 +1,5 @@
 import {MapNode, MetaThesis_IfType, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../../../../Store/firebase/nodes/@MapNode";
-import {PermissionGroupSet} from "../../../../Store/userExtras/@UserExtraInfo";
+import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {VMenuStub} from "react-vmenu";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Type} from "../../../../Frame/General/Types";
@@ -24,16 +24,7 @@ import {GetNode} from "../../../../Store/firebase/nodes";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel} from "../../Navbar/UserPanel";
 import {ShowSignInPopup} from "./RatingsUI";
-
-/*export function BasicEditing(permissionGroups: PermissionGroupSet) {
-	return permissionGroups && permissionGroups.basic;
-}*/
-export function BasicOrAnon(permissionGroups: PermissionGroupSet) {
-	return permissionGroups == null || permissionGroups.basic;
-}
-export function CreatorOrMod(node: MapNode, userID: string, permissionGroups: PermissionGroupSet) {
-	return permissionGroups && ((node.creator == userID && permissionGroups.basic) || permissionGroups.mod);
-}
+import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
 
 type Props = {node: MapNode, path: string} & Partial<{permissionGroups: PermissionGroupSet, parentNode: MapNode, copiedNode: MapNode}>;
 @Connect((state: RootState, {path}: Props)=> {
@@ -53,7 +44,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 		let firebase = store.firebase.helpers;
 		return (
 			<VMenuStub>
-				{BasicOrAnon(permissionGroups) && MapNodeType_Info.for[node.type].childTypes.map(childType=> {
+				{IsUserBasicOrAnon(userID) && MapNodeType_Info.for[node.type].childTypes.map(childType=> {
 					let childTypeInfo = MapNodeType_Info.for[childType];
 					return (
 						<VMenuItem key={childType} text={`Add ${childTypeInfo.displayName}`} style={styles.vMenuItem} onClick={e=> {
@@ -120,7 +111,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						}}/>
 					);
 				})}
-				{BasicOrAnon(permissionGroups) &&
+				{IsUserBasicOrAnon(userID) &&
 					<VMenuItem text={copiedNode ? "Copy (right-click to clear)" : "Copy"} style={styles.vMenuItem}
 						onClick={e=> {
 							if (e.button == 0)
@@ -128,14 +119,14 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							else
 								store.dispatch(new ACTNodeCopy(null));
 						}}/>}
-				{BasicOrAnon(permissionGroups) && copiedNode &&
+				{IsUserBasicOrAnon(userID) && copiedNode &&
 					<VMenuItem text={`Paste "${copiedNode.title.KeepAtMost(30)}"`} style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 						//Store.dispatch(new ACTNodeCopy(null));
 						firebase.Ref(`nodes/${node._id}/children`).update({[copiedNode._id]: {_: true}});
 					}}/>}
-				{CreatorOrMod(node, userID, permissionGroups) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={e=> {
+				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
 					firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
 						let nodes = (snapshot.val() as Object).Props.Where(a=>a.name != "_").Select(a=>a.value.Extended({_id: a.name}));
@@ -158,7 +149,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						});
 					});
 				}}/>}
-				{CreatorOrMod(node, userID, permissionGroups) && <VMenuItem text="Delete" style={styles.vMenuItem} onClick={e=> {
+				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Delete" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
 					if ((node.children || {}).VKeys().length)
 						return void ShowMessageBox({title: "Cannot delete", message: "Cannot delete this node until all its children have been deleted or unlinked."});

@@ -8,5 +8,5 @@ export class PermissionGroupSet {
 	basic: boolean;
 	verified: boolean;
 	mod: boolean;
-	dev: boolean;
+	admin: boolean;
 }

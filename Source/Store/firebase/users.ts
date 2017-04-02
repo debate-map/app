@@ -1,4 +1,5 @@
 import {GetData} from "../../Frame/Database/DatabaseHelpers";
+import {PermissionGroupSet} from "./userExtras/@UserExtraInfo";
 
 /*export function GetAuth(state: RootState) { 
 	return state.firebase.auth;
@@ -16,6 +17,6 @@ export function GetUserID(): string {
 export function GetUserPermissionGroups_Path(userID: string) {
 	return `userExtras/${userID}/permissionGroups`;
 }
-export function GetUserPermissionGroups(userID: string) {
+export function GetUserPermissionGroups(userID: string): PermissionGroupSet {
 	return GetData(GetUserPermissionGroups_Path(userID));
 }

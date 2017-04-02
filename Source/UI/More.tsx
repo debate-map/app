@@ -4,17 +4,22 @@ import {Route} from "react-router";
 import AdminUI from "./More/Admin";
 import SubNavbar from "./@Shared/SubNavbar";
 import {SubNavBarButton} from "./@Shared/SubNavbar";
+import {IsUserAdmin} from "../Store/firebase/userExtras";
+import {Connect} from "../Frame/Database/FirebaseConnect";
+import {GetUserID, GetUserPermissionGroups} from "../Store/firebase/users";
 
-@firebaseConnect()
+@Connect(()=> ({
+	_: GetUserPermissionGroups(GetUserID()), // just to make sure we've retrieved this data (and re-render when it changes)
+}))
 export default class MoreUI extends BaseComponent<{page?} & RouteProps, {}> {
 	render() {
 		let {page, children, match} = this.props;
 		return (
 			<div>
 				<SubNavbar>
-					<SubNavBarButton to={`${match.url}`} text="Admin"/>
+					{IsUserAdmin(GetUserID()) && <SubNavBarButton to={`${match.url}`} text="Admin"/>}
 				</SubNavbar>
-				<Route path={`${match.url}`} component={AdminUI}/>
+				{IsUserAdmin(GetUserID()) && <Route path={`${match.url}`} component={AdminUI}/>}
 			</div>
 		);
 	}

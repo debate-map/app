@@ -1,5 +1,5 @@
 import {MapNode, MetaThesis_IfType, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../../../../Store/firebase/nodes/@MapNode";
-import {PermissionGroupSet} from "../../../../Store/userExtras/@UserExtraInfo";
+import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../Frame/General/Enums";
 import {RootState} from "../../../../Store";
@@ -16,24 +16,24 @@ import {connect} from "react-redux";
 import Select from "../../../../Frame/ReactComponents/Select";
 import {ShowMessageBox_Base, ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
 import {firebaseConnect} from "react-redux-firebase";
-import {CreatorOrMod} from "./NodeUI_Menu";
 import {WaitXThenRun} from "../../../../Frame/General/Timers";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
 import Moment from "moment";
 import {GetParentNode} from "../../../../Store/firebase/nodes";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
+import {IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
 type NodeOthersUI_Props = {node: MapNode, path: string, userID: string} & Partial<{permissionGroups: PermissionGroupSet}>;
 @Connect((state: RootState, props: NodeOthersUI_Props)=> {
 	return {
-		permissionGroups: GetUserPermissionGroups(GetUserID()),
+		_: GetUserPermissionGroups(GetUserID()),
 	};
 })
 export default class NodeOthersUI extends BaseComponent<NodeOthersUI_Props, {}> {
 	render() {
-		let {node, path, userID, permissionGroups} = this.props;
+		let {node, path, userID} = this.props;
 		let firebase = store.firebase.helpers;
 		if (node.metaThesis) {
 			var parentNode = GetParentNode(path);
@@ -46,7 +46,7 @@ export default class NodeOthersUI extends BaseComponent<NodeOthersUI_Props, {}> 
 			<div className="selectable" style={{position: "relative", padding: "5px"}}>
 				<Div style={{fontSize: 12}}>NodeID: {node._id}</Div>
 				<Div mt={3} style={{fontSize: 12}}>Created at: {Moment(node.createdAt).format("YYYY-MM-DD HH:mm:ss")}</Div>
-				{CreatorOrMod(node, userID, permissionGroups) &&
+				{IsUserCreatorOrMod(userID, node) &&
 					<div>
 						{!node.metaThesis &&
 							<div style={{display: "flex", alignItems: "center"}}>
