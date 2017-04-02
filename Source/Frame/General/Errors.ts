@@ -4,6 +4,7 @@ import {Log} from "../Serialization/VDF/VDF";
 Stack) ${error.stack}`);
 };*/
 export function HandleError(error, isFatal = false) {
+	//alert("An error occurred: " + error);
 	Log(`${error}
 Stack) ${error.stack}
 Fatal) ${isFatal}`);

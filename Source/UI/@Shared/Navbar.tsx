@@ -18,6 +18,7 @@ import Button from "../../Frame/ReactComponents/Button";
 import TextInput from "../../Frame/ReactComponents/TextInput";
 import Action from "../../Frame/General/Action";
 import {ACTUserPanelOpenSet} from "../../Store/main";
+import {HandleError} from "../../Frame/General/Errors";
 const {pathToJS} = helpers;
 
 // main
@@ -126,8 +127,37 @@ class UserPanel extends BaseComponent<{firebase?, auth?, account?}, {}> {
 						firebase.logout();
 					}}/>
 					: <div>
-						<GoogleButton onClick={async ()=> {
-							let account = await firebase.login({provider: "google", type: "popup"});
+						<Button text="Google" onClick={async ()=> {
+							try {
+								let account = await firebase.login({provider: "google", type: "popup"});
+							} catch (ex) {
+								if (ex.message == "This operation has been cancelled due to another conflicting popup being opened.") return;
+								HandleError(ex);
+							}
+						}}/>
+						<Button text="Facebook" onClick={async ()=> {
+							try {
+								let account = await firebase.login({provider: "facebook", type: "popup"});
+							} catch (ex) {
+								if (ex.message == "This operation has been cancelled due to another conflicting popup being opened.") return;
+								HandleError(ex);
+							}
+						}}/>
+						<Button text="Twitter" onClick={async ()=> {
+							try {
+								let account = await firebase.login({provider: "twitter", type: "popup"});
+							} catch (ex) {
+								if (ex.message == "This operation has been cancelled due to another conflicting popup being opened.") return;
+								HandleError(ex);
+							}
+						}}/>
+						<Button text="Github" onClick={async ()=> {
+							try {
+								let account = await firebase.login({provider: "github", type: "popup"});
+							} catch (ex) {
+								if (ex.message == "This operation has been cancelled due to another conflicting popup being opened.") return;
+								HandleError(ex);
+							}
 						}}/>
 					</div>}
 			</div>
