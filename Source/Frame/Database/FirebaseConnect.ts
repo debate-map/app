@@ -7,8 +7,10 @@ import {getEventsFromInput} from "react-redux-firebase/dist/utils";
 import {Log} from "../Serialization/VDF/VDF";
 import {ToJSON} from "../General/Globals";
 
-// note: you only need to use selectors in Connect() when they might request db-paths
-//		the rest of the time, you can just use the selector directly (inside the comp)
+// Place a selector in Connect() whenever it uses data that:
+// 1) might change during the component's lifetime, and:
+// 2) is not already used by an existing selector in Connect()
+// This way, it'll correctly trigger a re-render when the underlying data changes.
 
 /*export function Connect<T, P>(getterFunc: (state: RootState, props: P)=>any) {
 	return (innerClass: new(...args)=>T) => {
@@ -48,17 +50,17 @@ export function Connect<T, P>(funcOrFuncWrapper) {
 
 		let result = innerConnectFunc(state, props);
 
-		//Assert(s != null);
+		let oldRequestedPaths = s.lastRequestedPaths || [];
 		let requestedPaths = GetRequestedPaths();
-		if (firebase._ && ShallowChanged(requestedPaths, s.lastRequestedPaths || [])) {
+		if (firebase._ && ShallowChanged(requestedPaths, oldRequestedPaths)) {
 			setTimeout(()=> {
-				if (s._firebaseEvents)
-					unWatchEvents(firebase, store.dispatch, s._firebaseEvents)
 				s._firebaseEvents = getEventsFromInput(requestedPaths);
-				watchEvents(firebase, store.dispatch, s._firebaseEvents);
+				let removedPaths = oldRequestedPaths.Except(...requestedPaths);
+				unWatchEvents(firebase, store.dispatch, getEventsFromInput(removedPaths));
+				let addedPaths = requestedPaths.Except(...oldRequestedPaths);
+				watchEvents(firebase, store.dispatch, getEventsFromInput(addedPaths));
 			});
 			s.lastRequestedPaths = requestedPaths;
-
 			//Log("Requesting:" + ToJSON(requestedPaths) + "\n2:" + ToJSON(s._firebaseEvents)); 
 		}
 

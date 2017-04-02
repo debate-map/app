@@ -1,8 +1,17 @@
 :global {
-	@import 'base';
-	@import 'device-sizes';
-	@import 'standard-classes';
-	@import '~normalize.css/normalize';
+	@import "base";
+	@import "device-sizes";
+	@import "standard-classes";
+	@import "~normalize.css/normalize";
+
+	//@import "bootstrap/bootstrap";
+	/*@import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css");
+	@import url("https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css");
+	@import url("https://cdnjs.cloudflare.com/ajax/libs/bootstrap-social/4.12.0/bootstrap-social.min.css");*/
+	//@import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css");
+	@import "bootstrap";
+	@import "bootstrap-social";
+
 	//@import url(https://fonts.googleapis.com/css?family=Roboto:300,400,100,500,900);
 	@import url(http://fonts.googleapis.com/css?family=Roboto:300,400,100,500,900);
 

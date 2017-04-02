@@ -29,10 +29,9 @@ type Props = {node: MapNode, path: string} & Partial<{permissionGroups: Permissi
 @Connect((state: RootState, {path}: Props)=> {
 	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 	return {
+		//userID: GetUserID(), // not needed in Connect(), since permissionGroups already watches its data
 		permissionGroups: GetUserPermissionGroups(GetUserID()), 
-		//parentNode: pathNodeIDs.length > 1 ? GetNode(pathNodeIDs.XFromLast(1)) : null,
 		parentNode: GetNode(pathNodeIDs.XFromLast(1)),
-		//copiedNode: state.main.copiedNode,
 		copiedNode: GetNode(state.main.copiedNode),
 	};
 })
@@ -111,7 +110,8 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 					);
 				})}
 				{IsUserBasicOrAnon(userID) &&
-					<VMenuItem text={copiedNode ? "Copy (right-click to clear)" : "Copy"} style={styles.vMenuItem}
+					//<VMenuItem text={copiedNode ? "Copy (right-click to clear)" : "Copy"} style={styles.vMenuItem}
+					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : "Copy"} style={styles.vMenuItem}
 						onClick={e=> {
 							if (e.button == 0)
 								store.dispatch(new ACTNodeCopy(node._id));

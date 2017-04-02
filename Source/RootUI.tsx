@@ -1,13 +1,15 @@
 import {VMenuLayer} from "react-vmenu";
 // We only need to import the modules necessary for initial render
 import {PropTypes, Component} from "react";
-import "./Frame/Styles/Core.scss";
 import {BaseComponent, AddGlobalStyle} from "./Frame/UI/ReactGlobals";
 //import {Component as BaseComponent} from "react";
 import ScrollView from "react-vscrollview";
 import getMuiTheme from "material-ui/styles/getMuiTheme";
 // Themeing/Styling
 import Theme from "./theme";
+
+import "./Frame/Styles/Core.scss";
+//import "./Frame/Styles/bootstrap/bootstrap.scss";
 
 //import {BrowserRouter as Router, Route, browserHistory} from "react-router-dom";
 import {Route} from "react-router";

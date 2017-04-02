@@ -23,23 +23,23 @@ import {ShowSignInPopup} from "../../Navbar/UserPanel";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]} & Partial<{nodeChildren: MapNode[]}>;
+type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]} & Partial<{userID: string, nodeChildren: MapNode[]}>;
 @Connect((state: RootState, {node, ratingType}: RatingsUI_Props)=> {
 	return {
+		userID: GetUserID(),
 		//myVote: GetData(`nodeRatings/${node._id}/${ratingType}/${GetUserID()}/value`),
 		nodeChildren: GetNodeChildren(node),
 	};
 })
 export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vector2i}> {
 	render() {
-		let {node, path, ratingType, ratings, nodeChildren} = this.props;
+		let {node, path, ratingType, ratings, userID, nodeChildren} = this.props;
 		let firebase = store.firebase.helpers;
 		let {size} = this.state;
 
 		let parentNode = GetParentNode(path);
 		let ratingTypeInfo = RatingType_Info.for[ratingType];
 		let options = typeof ratingTypeInfo.options == "function" ? ratingTypeInfo.options(node, parentNode) : ratingTypeInfo.options;
-		let userID = GetUserID();
 		let myRatingValue = ratings.find(a=>a._key == userID);
 
 		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(options.Max() == 200 ? [200] : []);
