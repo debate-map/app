@@ -18,9 +18,9 @@ import {firebaseConnect} from "react-redux-firebase";
 import {connect} from "react-redux";
 import {ACTNodeCopy} from "../../../../Store/main";
 import Select from "../../../../Frame/ReactComponents/Select";
-import {GetEntries} from "../../../../Frame/General/Enums";
+import {GetEntries, GetValues} from "../../../../Frame/General/Enums";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
-import {GetNode} from "../../../../Store/firebase/nodes";
+import {GetNode, IsLinkValid} from "../../../../Store/firebase/nodes";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel, ShowSignInPopup} from "../../Navbar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
@@ -40,9 +40,12 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 		let {node, permissionGroups, parentNode, copiedNode} = this.props;
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
+		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
+		let validChildTypes = GetValues<MapNodeType>(MapNodeType).filter(type=>IsLinkValid(node, {type} as any));
+
 		return (
 			<VMenuStub>
-				{IsUserBasicOrAnon(userID) && MapNodeType_Info.for[node.type].childTypes.map(childType=> {
+				{IsUserBasicOrAnon(userID) && validChildTypes.map(childType=> {
 					let childTypeInfo = MapNodeType_Info.for[childType];
 					return (
 						<VMenuItem key={childType} text={`Add ${childTypeInfo.displayName}`} style={styles.vMenuItem} onClick={e=> {
@@ -118,7 +121,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							else
 								store.dispatch(new ACTNodeCopy(null));
 						}}/>}
-				{IsUserBasicOrAnon(userID) && copiedNode &&
+				{IsUserBasicOrAnon(userID) && copiedNode && IsLinkValid(node, copiedNode) &&
 					<VMenuItem text={`Paste "${copiedNode.title.KeepAtMost(30)}"`} style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
