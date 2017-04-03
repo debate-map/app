@@ -1,23 +1,21 @@
 import {SubNavBarButton} from "../@Shared/SubNavbar";
 import SubNavbar from "../@Shared/SubNavbar";
-import {BaseComponent, BaseProps} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, SimpleShouldUpdate} from "../../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import ScrollView from "react-vscrollview";
+import {styles} from "../../Frame/UI/GlobalStyles";
 
 let pageText = `
-TODO
+About page is under development.
 `;
 
-export default class AboutUI extends BaseComponent<{} & BaseProps, {}> {
+@SimpleShouldUpdate
+export default class AboutUI extends BaseComponent<{}, {}> {
 	render() {
 		let {page, match} = this.props;
 		return (
 			<VReactMarkdown className="selectable" source={pageText}
-				containerProps={{
-					style: {
-						width: 960, margin: "100px auto", padding: "20px 50px", background: "rgba(0,0,0,.75)", borderRadius: 10,
-					}
-				}}
+				containerProps={{style: styles.page}}
 				renderers={{
 					Text: props=> {
 						return <span style={{color: "rgba(255,255,255,.7)"}}>{props.literal}</span>;

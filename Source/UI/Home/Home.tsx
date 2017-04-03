@@ -1,6 +1,6 @@
 import {SubNavBarButton} from "../@Shared/SubNavbar";
 import SubNavbar from "../@Shared/SubNavbar";
-import {BaseComponent, BaseProps} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, SimpleShouldUpdate} from "../../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import {styles} from "../../Frame/UI/GlobalStyles";
 import {E} from "../../Frame/General/Globals_Free";
@@ -45,17 +45,16 @@ Engaging with a tool that operates on percentages, numbers, and weights makes se
 
 He can then proceed to look more closely at those areas, examining the pool of existing evidence and reasoning, and referencing statistics on how the rest of the population considers each piece along the way.
 
-<a name="footnote1">1</a>: In case the project management falters or becomes biased, it's in the power of the users to create their own copy of the project, and to modify it as they see fit. See here: <https://opensource.com/resources/what-open-source>
+<a name="footnote1">1</a>: In case the project management falters or becomes biased, it's in the power of users to create their own copy of the project, and to modify it as they see fit. See here: <https://opensource.com/resources/what-open-source>
 `;
 
-export default class HomeUI extends BaseComponent<{} & BaseProps, {}> {
+@SimpleShouldUpdate
+export default class HomeUI2 extends BaseComponent<{}, {}> {
 	render() {
 		let {page, match} = this.props;
 		return (
 			<VReactMarkdown className="selectable" source={pageText}
-				containerProps={{
-					style: E(styles.page),
-				}}
+				containerProps={{style: E(styles.page)}}
 				renderers={{
 					Text: props=> {
 						return <span style={{color: "rgba(255,255,255,.7)"}}>{props.literal}</span>;

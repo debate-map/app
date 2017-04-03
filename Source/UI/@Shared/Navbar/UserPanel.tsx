@@ -1,4 +1,4 @@
-import {BaseComponent, SimpleShouldUpdate, Div, ApplyBasicStyles} from "../../../Frame/UI/ReactGlobals";
+import {ApplyBasicStyles, BaseComponent, BasicStyles, Div, SimpleShouldUpdate} from "../../../Frame/UI/ReactGlobals";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {HandleError} from "../../../Frame/General/Errors";
@@ -71,7 +71,7 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {}
 }
 
 @SimpleShouldUpdate
-@ApplyBasicStyles
+//@ApplyBasicStyles
 class SignInButton extends BaseComponent<{provider: "google" | "facebook" | "twitter" | "github", text: string, style?, onSignIn?: ()=>void}, {loading: boolean}> {
 	render() {
 		let {provider, text, style, onSignIn} = this.props;
@@ -79,7 +79,7 @@ class SignInButton extends BaseComponent<{provider: "google" | "facebook" | "twi
 		let {loading} = this.state;
 		return (
 			<SocialButton social={provider} text={text} loading={loading} btnProps={{
-				style: E({outline: "none"}, style),
+				style: E({outline: "none"}, BasicStyles(this.props), style),
 				onClick: async ()=> {
 					this.SetState({loading: true});
 					try {

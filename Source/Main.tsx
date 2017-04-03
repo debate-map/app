@@ -92,7 +92,7 @@ if (__DEV__) {
 		window.devToolsExtension.open();*/
 	if (module.hot) {
 		// setup hot module replacement
-		module.hot.accept("./RootUI", () => {
+		module.hot.accept("./UI/Root", () => {
 			setTimeout(()=> {
 				ReactDOM.unmountComponentAtNode(mountNode);
 				RenderWrapper();
@@ -106,8 +106,8 @@ if (__DEV__) {
 
 const mountNode = document.getElementById("root");
 function RenderWrapper() {
-	let RootUI = require("./RootUI").default;
-	ReactDOM.render(<RootUI store={store}/>, mountNode);
+	let RootUIWrapper = require("./UI/Root").default;
+	ReactDOM.render(<RootUIWrapper store={store}/>, mountNode);
 }
 
 CreateStore();

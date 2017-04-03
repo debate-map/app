@@ -61,7 +61,7 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, topLeftOpen
 						<NavBarPanelButton to="/chat" text="Chat" panel="chat" corner="top-left"/>
 					</span>
 					<div style={{position: "absolute", zIndex: 11, left: 0, top: 45,
-							boxShadow: colors.navBarBoxShadow, clipPath: "polygon(0 0%, calc(100% + 150px) 0%, calc(100% + 150px) calc(100% + 150px), 0% calc(100% + 150px))"}}>
+							boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 -150px -150px 0)", display: "table"}}>
 						{topLeftOpenPanel == "stream" && <StreamPanel/>}
 						{topLeftOpenPanel == "chat" && <ChatPanel/>}
 					</div>
@@ -89,7 +89,7 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, topLeftOpen
 						<NavBarPanelButton to={auth ? "/profile" : "/sign-in"} text={auth ? auth.displayName.match(/(.+?)( |$)/)[1] : `Sign in`} panel="user" corner="top-right"/>
 					</span>
 					<div style={{position: "absolute", zIndex: 11, right: 0, top: 45,
-							boxShadow: colors.navBarBoxShadow, clipPath: "polygon(calc(0% - 150px) 0%, 100% 0%, 100% calc(100% + 150px), calc(0% - 150px) calc(100% + 150px))"}}>
+							boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 0 -150px -150px)", display: "table"}}>
 						{topRightOpenPanel == "search" && <SearchPanel/>}
 						{topRightOpenPanel == "user" && <UserPanel/>}
 					</div>

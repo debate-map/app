@@ -50,6 +50,9 @@
 		-webkit-appearance: none !important;
 	}
 
+	p:first-child { margin-top: 0; }
+	p:last-child { margin-bottom: 0; }
+
 	.unselectable { -moz-user-select: none; -webkit-user-select: none; user-select: none; }
 	.unselectable * { -moz-user-select: none; -webkit-user-select: none; user-select: none; }
 	.selectable { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
