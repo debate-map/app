@@ -1,5 +1,5 @@
 import {connect} from "react-redux";
-import {BaseComponent} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Div} from "../../../../Frame/UI/ReactGlobals";
 import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
 import VMenu from "react-vmenu";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
@@ -8,12 +8,10 @@ import TextInput from "../../../../Frame/ReactComponents/TextInput";
 import {DN} from "../../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
 import Button from "../../../../Frame/ReactComponents/Button";
-import RatingsUI from "./RatingsUI";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {WaitXThenRun} from "../../../../Frame/General/Timers";
 import keycode from "keycode";
 import NodeUI_Menu from "./NodeUI_Menu";
-import NodeOthersUI from "./NodeOthersUI";
 import V from "../../../../Frame/V/V";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
@@ -26,6 +24,14 @@ import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRating
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {ACTMapNodeSelect, ACTMapNodeExpandedSet} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
+import Column from "../../../../Frame/ReactComponents/Column";
+import DefinitionsPanel from "./NodeUI/DefinitionsPanel";
+import QuestionsPanel from "./NodeUI/QuestionsPanel";
+import TagsPanel from "./NodeUI/TagsPanel";
+import OthersPanel from "./NodeUI/OthersPanel";
+import HistoryPanel from "./NodeUI/HistoryPanel";
+import RatingsPanel from "./NodeUI/RatingsPanel";
+import DiscussPanel from "./NodeUI/DiscussPanel";
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
 	& Partial<{ratingsRoot: RatingsRoot, mainRatingFillPercent: number}>;
@@ -122,22 +128,14 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${nodeTypeInfo.backgroundColor},.7)`}}/>
 						{RatingType_Info.for[panelToShow] && (()=> {
 							let ratings = GetRatings(node._id, panelToShow as RatingType);
-							return <RatingsUI node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
+							return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 						})()}
-						{panelToShow == "definitions" &&
-							<div style={{position: "relative"}}>
-								<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
-									Proponents of the thesis can submit and upvote their definitions of the terms. (thus clarifying their meaning)
-								</div>
-							</div>}
-						{panelToShow == "questions" &&
-							<div style={{position: "relative"}}>
-								<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
-									Questions can be asked here concerning clarification of the statement's meaning. (other comments belong in the "Discuss" panel)
-								</div>
-							</div>}
-						{panelToShow == "others" &&
-							<NodeOthersUI node={node} path={path} userID={GetUserID()}/>}
+						{panelToShow == "definitions" && <DefinitionsPanel/>}
+						{panelToShow == "questions" && <QuestionsPanel/>}
+						{panelToShow == "tags" && <TagsPanel/>}
+						{panelToShow == "discuss" && <DiscussPanel/>}
+						{panelToShow == "history" && <HistoryPanel/>}
+						{panelToShow == "others" && <OthersPanel node={node} path={path} userID={GetUserID()}/>}
 					</div>}
 			</div>
 		);

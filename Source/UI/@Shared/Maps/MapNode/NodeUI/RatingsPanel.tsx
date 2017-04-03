@@ -1,37 +1,37 @@
 import * as jquery from "jquery";
-import {Log} from "../../../../Frame/General/Logging";
-import {BaseComponent, FindDOM, Pre, RenderSource, SimpleShouldUpdate, FindDOM_} from "../../../../Frame/UI/ReactGlobals";
-import {Vector2i} from "../../../../Frame/General/VectorStructs";
-import {Range, DN} from "../../../../Frame/General/Globals";
-import Spinner from "../../../../Frame/ReactComponents/Spinner";
+import {Log} from "../../../../../Frame/General/Logging";
+import {BaseComponent, FindDOM, Pre, RenderSource, SimpleShouldUpdate, FindDOM_} from "../../../../../Frame/UI/ReactGlobals";
+import {Vector2i} from "../../../../../Frame/General/VectorStructs";
+import {Range, DN} from "../../../../../Frame/General/Globals";
+import Spinner from "../../../../../Frame/ReactComponents/Spinner";
 import {connect} from "react-redux";
-import Select from "../../../../Frame/ReactComponents/Select";
-import {ShowMessageBox_Base, ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
+import Select from "../../../../../Frame/ReactComponents/Select";
+import {ShowMessageBox_Base, ShowMessageBox} from "../../../../../Frame/UI/VMessageBox";
 import {firebaseConnect} from "react-redux-firebase";
-import {GetData} from "../../../../Frame/Database/DatabaseHelpers";
-import {Debugger} from "../../../../Frame/General/Globals_Free";
-import {RatingType, RatingType_Info} from "../../../../Store/firebase/nodeRatings/@RatingType";
-import {Rating} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
-import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
-import {GetUserID} from "../../../../Store/firebase/users";
-import {RootState} from "../../../../Store/index";
-import {GetRatingUISmoothing, ACTRatingUISmoothnessSet} from "../../../../Store/main/ratingUI";
-import {GetNodeChildren, GetParentNode} from "../../../../Store/firebase/nodes";
-import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
-import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {ShowSignInPopup} from "../../Navbar/UserPanel";
+import {GetData} from "../../../../../Frame/Database/DatabaseHelpers";
+import {Debugger} from "../../../../../Frame/General/Globals_Free";
+import {RatingType, RatingType_Info} from "../../../../../Store/firebase/nodeRatings/@RatingType";
+import {Rating} from "../../../../../Store/firebase/nodeRatings/@RatingsRoot";
+import {MapNode} from "../../../../../Store/firebase/nodes/@MapNode";
+import {GetUserID} from "../../../../../Store/firebase/users";
+import {RootState} from "../../../../../Store/index";
+import {GetRatingUISmoothing, ACTRatingUISmoothnessSet} from "../../../../../Store/main/ratingUI";
+import {GetNodeChildren, GetParentNode} from "../../../../../Store/firebase/nodes";
+import {MapNodeType_Info} from "../../../../../Store/firebase/nodes/@MapNodeType";
+import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
+import {ShowSignInPopup} from "../../../Navbar/UserPanel";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-type RatingsUI_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]} & Partial<{userID: string, nodeChildren: MapNode[]}>;
-@Connect((state: RootState, {node, ratingType}: RatingsUI_Props)=> {
+type RatingsPanel_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]} & Partial<{userID: string, nodeChildren: MapNode[]}>;
+@Connect((state: RootState, {node, ratingType}: RatingsPanel_Props)=> {
 	return {
 		userID: GetUserID(),
 		//myVote: GetData(`nodeRatings/${node._id}/${ratingType}/${GetUserID()}/value`),
 		nodeChildren: GetNodeChildren(node),
 	};
 })
-export default class RatingsUI extends BaseComponent<RatingsUI_Props, {size: Vector2i}> {
+export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {size: Vector2i}> {
 	render() {
 		let {node, path, ratingType, ratings, userID, nodeChildren} = this.props;
 		let firebase = store.firebase.helpers;
