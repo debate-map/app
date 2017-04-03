@@ -6,7 +6,9 @@ export var styles = {
 	vMenuItem: {padding: "3px 5px", borderTop: "1px solid rgba(255,255,255,.1)"},
 };
 export var colors = {
-	navBarBoxShadow: "rgba(70, 70, 70, .5) 0px 0px 150px",
+	//navBarBoxShadow: "rgba(70,70,70,.5) 0px 0px 150px",
+	//navBarBoxShadow: "rgba(100,100,100,1) 0px 0px 3px",
+	navBarBoxShadow: "rgba(100, 100, 100, .3) 0px 0px 3px, rgba(70,70,70,.5) 0px 0px 150px",
 };
 
 AddGlobalStyle(`

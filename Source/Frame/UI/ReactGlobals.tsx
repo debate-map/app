@@ -40,9 +40,10 @@ export function GetInnerComp(wrapperComp: React.Component<any, any>) {
 g.Extend({GetInnerComp});
 
 export interface BaseProps {
-	ml?; mr?; mt?; mb?;
-	pl?; pr?; pt?; pb?;
+	m?; ml?; mr?; mt?; mb?;
+	p?; pl?; pr?; pt?; pb?;
 	plr?; ptb?;
+	sel?;
 
 	tabLabel?: string; active?: boolean;
 
@@ -50,16 +51,17 @@ export interface BaseProps {
 	//firebase?: FirebaseDatabase;
 }
 export var basePropFullKeys = {
-	ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
-	pl: "paddingLeft", pr: "paddingRight", pt: "paddingTop", pb: "paddingBottom",
+	m: "marginLeft", ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
+	p: "padding", pl: "paddingLeft", pr: "paddingRight", pt: "paddingTop", pb: "paddingBottom",
 	plr: null, ptb: null,
+	sel: null,
 
 	tabLabel: null, active: null,
 
 	page: null, match: null,
 	firebase: null,
 };
-export function RemoveBasePropKeys(restObj) {
+function RemoveBasePropKeys(restObj) {
 	for (let key in basePropFullKeys)
 		delete restObj[key];
 }
@@ -81,6 +83,26 @@ export function BasicStyles(props) {
 
 	return result;
 }
+export function ApplyBasicStyles(target: React.ComponentClass<any>) {
+	let oldRender = target.prototype.render;
+	target.prototype.render = function() {
+		let result = oldRender.call(this) as JSX.Element;
+		result.props.style = E(BasicStyles(result.props), result.props.style);
+		if (result.props.sel)
+			result.props.className = (result.props.className ? result.props.className + " " : "") + "selectable";
+		RemoveBasePropKeys(result.props);
+		return result;
+	}
+}
+/*export function ApplyBasicStyles(target: React.ComponentClass<any>, funcName: string) {
+	let oldRender = target.prototype.render;
+	target.prototype.render = function() {
+		let result = oldRender.call(this) as JSX.Element;
+		result.props.style = E(BasicStyles(result.props), result.props.style);
+		RemoveBasePropKeys(result.props);
+		return result;
+	}
+}*/
 
 export enum RenderSource {
 	Mount, // first render, after creation
@@ -339,15 +361,16 @@ export function Instant(target, name) {
 }
 
 @Global
+@ApplyBasicStyles
 export class Span extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement>, {}> {
     render() {
 		var {pre, style, ...rest} = this.props;
-		RemoveBasePropKeys(rest);
-        return <span {...rest} style={E(BasicStyles(this.props), style, pre && {whiteSpace: "pre"})}/>;
+        return <span {...rest} style={E(style, pre && {whiteSpace: "pre"})}/>;
     }
 }
 
 @Global
+@ApplyBasicStyles
 export class Pre extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement>, {}> {
 	render() {
 		let {style, children} = this.props;
@@ -357,6 +380,7 @@ export class Pre extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement>
 
 @Global
 //@SimpleShouldUpdate_Overridable // we can't make these "pure", as their children may need updating
+@ApplyBasicStyles
 export class Div extends BaseComponent<{shouldUpdate?} & React.HTMLProps<HTMLDivElement>, {}> {
 	shouldComponentUpdate(nextProps, nextState) {
 		let {shouldUpdate} = this.props;
@@ -365,8 +389,7 @@ export class Div extends BaseComponent<{shouldUpdate?} & React.HTMLProps<HTMLDiv
 	}
     render() {
 		let {shouldUpdate, style, ...rest} = this.props;
-		RemoveBasePropKeys(rest);
-        return <div {...rest} style={E(BasicStyles(this.props), style)}/>;
+        return <div {...rest} style={style}/>;
     }
 }
 

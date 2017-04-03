@@ -1,9 +1,10 @@
-import {BaseComponent, BasicStyles} from "../UI/ReactGlobals";
+import {BaseComponent, ApplyBasicStyles} from "../UI/ReactGlobals";
 import {E} from "../General/Globals_Free";
 
+@ApplyBasicStyles
 export default class Column extends BaseComponent<{style?}, {}> {
 	render() {
 		let {style, ...rest} = this.props;
-		return <div {...rest} style={E({display: "flex", flexDirection: "column"}, BasicStyles(this.props), style)}/>
+		return <div {...rest} style={E({display: "flex", flexDirection: "column"}, style)}/>
 	}
 }

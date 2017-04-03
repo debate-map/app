@@ -3,6 +3,7 @@ import {GetData} from "../../Frame/Database/DatabaseHelpers";
 import {MapNode} from "./nodes/@MapNode";
 import {CachedTransform} from "../../Frame/V/VCache";
 import {MapNodeType_Info} from "./nodes/@MapNodeType";
+import {P} from "../../Frame/Serialization/VDF/VDFTypeInfo";
 
 export function GetNode(id: number) {
 	//Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");
@@ -31,3 +32,9 @@ export function IsLinkValid(parent: MapNode, child: MapNode) {
 		return false;
 	return true;
 }
+
+/*export function GetUnlinkErrorMessage(parent: MapNode, child: MapNode) {
+	//let childNodes = node.children.Select(a=>nodes[a]);
+	let parentNodes = nodes.Where(a=>a.children && a.children[node._id]);
+	if (parentNodes.length <= 1)
+}*/

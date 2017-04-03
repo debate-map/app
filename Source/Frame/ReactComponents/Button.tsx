@@ -1,4 +1,4 @@
-import {BaseComponent, BasicStyles, BaseProps, AddGlobalStyle, basePropFullKeys, RemoveBasePropKeys} from "../UI/ReactGlobals";
+import {BaseComponent, BaseProps, AddGlobalStyle, basePropFullKeys, ApplyBasicStyles} from "../UI/ReactGlobals";
 import Radium from "radium";
 import {E} from "../General/Globals_Free";
 import {ToJSON} from "../General/Globals";
@@ -41,6 +41,7 @@ var styles = {
 let pseudoSelectorStyleKeys = {};
 
 //@Radium
+@ApplyBasicStyles
 export default class Button extends BaseComponent
 		<{enabled?: boolean, text?: string, title?: string, className?: string, style?,
 			size?, iconSize?, height?,
@@ -53,7 +54,6 @@ export default class Button extends BaseComponent
 	    var {enabled, text, title, className, style, size, iconSize, height,
 			hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged, children,
 			onLeftClick, ...rest} = this.props;
-		RemoveBasePropKeys(rest);
 
 		var padding = "5px 15px";
 		if (height) {
@@ -64,7 +64,6 @@ export default class Button extends BaseComponent
 		
 		let finalStyle = E(
 			styles.root,
-			BasicStyles(this.props),
 			{padding},
 			size && {padding: 0, width: size, height: size,
 				backgroundPosition: `${(size - iconSize) / 2}px ${(size - iconSize) / 2}px`,

@@ -8,7 +8,7 @@ export default class SubNavbar extends BaseComponent<{fullWidth?: boolean}, {}> 
 		let {fullWidth, children} = this.props;
 		return (
 			<div className="clickThrough" style={{
-				position: "absolute", zIndex: 1, top: 0, width: "100%", textAlign: "center",
+				position: "absolute", zIndex: 11, top: 0, width: "100%", textAlign: "center",
 				//background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
 				//background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
 			}}>

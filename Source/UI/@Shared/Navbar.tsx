@@ -17,10 +17,14 @@ import {Debugger} from "../../Frame/General/Globals_Free";
 import Button from "../../Frame/ReactComponents/Button";
 import TextInput from "../../Frame/ReactComponents/TextInput";
 import Action from "../../Frame/General/Action";
-import {ACTUserPanelOpenSet} from "../../Store/main";
 import {HandleError} from "../../Frame/General/Errors";
 import UserPanel from "./Navbar/UserPanel";
 import {Connect} from "../../Frame/Database/FirebaseConnect";
+import {ACTTopRightOpenPanelSet, ACTTopLeftOpenPanelSet} from "../../Store/main";
+import ChatPanel from "./Navbar/ChatPanel";
+import StreamPanel from "./Navbar/StreamPanel";
+import SearchPanel from "./Navbar/SearchPanel";
+import {SubNavBarButton} from "./SubNavbar";
 
 // main
 // ==========
@@ -36,13 +40,14 @@ const avatarStyles = {
 };
 
 @Connect(state=>({
-	userPanelOpen: state.main.userPanelOpen,
+	topLeftOpenPanel: state.main.topLeftOpenPanel,
+	topRightOpenPanel: state.main.topRightOpenPanel,
 	auth: helpers.pathToJS(state.firebase, "auth"),
 }))
-export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOpen?, auth?: firebase.User}, {}> {
+export default class Navbar extends BaseComponent<{dispatch?, page?, topLeftOpenPanel?, topRightOpenPanel?, auth?: firebase.User}, {}> {
 	static contextTypes = {store: PropTypes.object.isRequired};
 	render() {
-		let {userPanelOpen, auth} = this.props;
+		let {topLeftOpenPanel, topRightOpenPanel, auth} = this.props;
 		let {dispatch} = this.context.store;
 		return (
 			<div style={{
@@ -52,9 +57,15 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 			}}>
 				<div style={{display: "flex"}}>
 					<span style={{position: "absolute", left: 0}}>
-						<NavBarButton to="/stream" text="Stream" onClick={e=> { e.preventDefault(); }}/>
-						<NavBarButton to="/chat" text="Chat" onClick={e=> { e.preventDefault(); }}/>
+						<NavBarPanelButton to="/stream" text="Stream" panel="stream" corner="top-left"/>
+						<NavBarPanelButton to="/chat" text="Chat" panel="chat" corner="top-left"/>
 					</span>
+					<div style={{position: "absolute", zIndex: 11, left: 0, top: 45,
+							boxShadow: colors.navBarBoxShadow, clipPath: "polygon(0 0%, calc(100% + 150px) 0%, calc(100% + 150px) calc(100% + 150px), 0% calc(100% + 150px))"}}>
+						{topLeftOpenPanel == "stream" && <StreamPanel/>}
+						{topLeftOpenPanel == "chat" && <ChatPanel/>}
+					</div>
+					
 					<span style={{margin: "0 auto", paddingLeft: 35}}>
 						<NavBarButton to="/users" text="Users"/>
 						<NavBarButton to="/forum" text="Forum"/>
@@ -72,33 +83,15 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, userPanelOp
 						<NavBarButton to="/debates" text="Debates"/>
 						<NavBarButton to="/global" text="Global"/>
 					</span>
+
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
-						{/*<div className="transition500 opacity100OnHover"
-							style={{
-								display: "inline-block", padding: 0, width: 40, height: 45,
-								backgroundImage: "url(/Images/Buttons/Search.png)", backgroundRepeat: "no-repeat",
-								backgroundPosition: "center center", backgroundSize: 30, opacity: .75, cursor: "pointer"}}
-							onClick={()=>{}}/>*/}
-						{/*<div style={{display: "inline-block", height: 45, verticalAlign: "top"}}>
-							<TextInput value="" onChange={()=>{}} style={{width: 100}}/>
-						</div>*/}
-						<NavBarButton to="/search" text="Search" onClick={e=> { e.preventDefault(); }}/>
-						<NavBarButton to={auth ? "/profile" : "/sign-in"} text={auth ? auth.displayName.match(/(.+?)( |$)/)[1] : `Sign in`} onClick={e=> {
-							e.preventDefault();
-							dispatch(new ACTUserPanelOpenSet(!userPanelOpen));
-						}}/>
-						{/*<div className="transition500 opacity100OnHover"
-							style={{
-								display: "inline-block", padding: 0, width: 40, height: 45,
-								backgroundImage: `url(${auth ? auth.photoURL : "/Images/Buttons/User.png"})`, backgroundRepeat: "no-repeat",
-								backgroundPosition: "center center", backgroundSize: 30, opacity: .75, cursor: "pointer"}}
-							onClick={()=> {
-								dispatch(new ACTSetUserPanelOpen(!userPanelOpen));
-							}}/>*/}
+						<NavBarPanelButton to="/search" text="Search" panel="search" corner="top-right"/>
+						<NavBarPanelButton to={auth ? "/profile" : "/sign-in"} text={auth ? auth.displayName.match(/(.+?)( |$)/)[1] : `Sign in`} panel="user" corner="top-right"/>
 					</span>
-					<div style={{position: "absolute", zIndex: 11, right: 0, top: 45}}>
-						{userPanelOpen &&
-							<UserPanel/>}
+					<div style={{position: "absolute", zIndex: 11, right: 0, top: 45,
+							boxShadow: colors.navBarBoxShadow, clipPath: "polygon(calc(0% - 150px) 0%, 100% 0%, 100% calc(100% + 150px), calc(0% - 150px) calc(100% + 150px))"}}>
+						{topRightOpenPanel == "search" && <SearchPanel/>}
+						{topRightOpenPanel == "user" && <UserPanel/>}
 					</div>
 				</div>
 			</div>
@@ -119,5 +112,25 @@ export class NavBarButton extends BaseComponent<{to, text, onClick?}, {}> {
 		if (to)
 			return <Link to={to} style={style} onClick={onClick}>{text}</Link>;
 		return <div style={style} onClick={onClick}>{text}</div>
+	}
+}
+
+type NavBarPanelButton_Props = {to: string, text: string, panel: string, corner: "top-left" | "top-right"} & Partial<{topLeftOpenPanel, topRightOpenPanel}>;
+@Connect(state=> ({
+	topLeftOpenPanel: state.main.topLeftOpenPanel,
+	topRightOpenPanel: state.main.topRightOpenPanel,
+}))
+export class NavBarPanelButton extends BaseComponent<NavBarPanelButton_Props, {}> {
+	render() {
+		let {to, text, panel, corner, topLeftOpenPanel, topRightOpenPanel} = this.props;
+		return (
+			<NavBarButton to={to} text={text} onClick={e=> {
+				e.preventDefault();
+				if (corner == "top-left")
+					store.dispatch(new ACTTopLeftOpenPanelSet(topLeftOpenPanel == panel ? null : panel));
+				else
+					store.dispatch(new ACTTopRightOpenPanelSet(topRightOpenPanel == panel ? null : panel));
+			}}/>
+		);
 	}
 }

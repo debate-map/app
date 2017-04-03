@@ -19,7 +19,8 @@ import {RatingUIReducer, RatingUIState} from "./main/ratingUI";
 
 // class is used only for initialization
 export class MainState {
-	userPanelOpen = false;
+	topLeftOpenPanel: string;
+	topRightOpenPanel: string;
 	ratingUI: RatingUIState;
 	//ratingUI = new RatingUIState();
 
@@ -27,17 +28,24 @@ export class MainState {
 	mapViews = new MapViews();
 	copiedNode: number;
 }
-export class ACTUserPanelOpenSet extends Action<boolean> {}
+export class ACTTopLeftOpenPanelSet extends Action<string> {}
+export class ACTTopRightOpenPanelSet extends Action<string> {}
 export class ACTNodeCopy extends Action<number> {}
 
 let MainReducer_Real;
 export function MainReducer(state, action) {
 	MainReducer_Real = MainReducer_Real || CombineReducers({
-		userPanelOpen: (state = false, action)=> {
+		_: (state = null, action)=> {
 			ProcessAction(action);
-
-			//case SET_USER_PANEL_OPEN: return {...state, userPanelOpen: action.payload};
-			if (action.Is(ACTUserPanelOpenSet))
+			return null;
+		},
+		topLeftOpenPanel: (state = null, action)=> {
+			if (action.Is(ACTTopLeftOpenPanelSet))
+				return action.payload;
+			return state;
+		},
+		topRightOpenPanel: (state = null, action)=> {
+			if (action.Is(ACTTopRightOpenPanelSet))
 				return action.payload;
 			return state;
 		},
