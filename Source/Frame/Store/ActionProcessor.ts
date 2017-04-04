@@ -4,13 +4,21 @@ import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCen
 import {LoadURL_Globals, UpdateURL_Globals} from "../URL/URLManager";
 import {GetPathNodes, GetPath} from "../../Store/router";
 import {GetUrlVars} from "../General/Globals_Free";
+import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
+import {GetData, DBPath} from "../Database/DatabaseHelpers";
+import {GetMapView} from "../../Store/main/mapViews";
+import {Vector2i} from "../General/VectorStructs";
+import {RootState} from "../../Store/index";
+import {ACTOpenMapSet} from "../../Store/main";
 
 let lastPath = "";
+//export function ProcessAction(action: Action<any>, newState: RootState, oldState: RootState) {
 export function ProcessAction(action: Action<any>) {
 	//if (action.type == "@@INIT") {
 	if (action.type == "persist/REHYDRATE" || action.type == "@@router/LOCATION_CHANGE") {
 		setTimeout(()=> {
-			if (GetPath().startsWith("/global/map")) {
+			if (GetPath().startsWith("global/map")) {
+				store.dispatch(new ACTOpenMapSet(1));
 				if (action.type == "persist/REHYDRATE")
 					LoadURL_Globals();
 				//setTimeout(()=>UpdateURL_Globals());
@@ -57,6 +65,20 @@ export function ProcessAction(action: Action<any>) {
 				action["data"]._id = parseInt(key);
 			else
 				action["data"]._key = key;
+		}*/
+
+		/*let match = action["path"].match("^" + DBPath("maps") + "/([0-9]+)");
+		// if map-data was just loaded
+		if (match) {
+			let mapID = parseInt(match[1]);
+			// and no map-view exists for it yet, create one (by expanding root-node, and changing focus-node/view-offset)
+			//if (GetMapView(mapID) == null) {
+			if (GetMapView(mapID).rootNodeViews.VKeys().length == 0) {
+				setTimeout(()=> {
+					store.dispatch(new ACTMapNodeExpandedSet({mapID, path: action["data"].rootNode.toString(), expanded: true, recursive: false}));
+					store.dispatch(new ACTViewCenterChange({mapID, focusNode: action["data"].rootNode.toString(), viewOffset: new Vector2i(200, 0)}));
+				});
+			}
 		}*/
 	}
 

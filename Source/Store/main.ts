@@ -33,6 +33,7 @@ export class ACTTopLeftOpenPanelSet extends Action<string> {}
 export class ACTTopRightOpenPanelSet extends Action<string> {}
 export class ACTNotificationMessageAdd extends Action<NotificationMessage> {}
 export class ACTNotificationMessageRemove extends Action<number> {}
+export class ACTOpenMapSet extends Action<number> {}
 export class ACTNodeCopy extends Action<number> {}
 
 let MainReducer_Real;
@@ -62,8 +63,10 @@ export function MainReducer(state, action) {
 			return state;
 		},
 		openMap: (state = null, action)=> {
-			if (action.type == "@@router/LOCATION_CHANGE" && action.payload.pathname == "/global")
-				return 1;
+			/*if (action.type == "@@router/LOCATION_CHANGE" && action.payload.pathname == "/global")
+				return 1;*/
+			if (action.Is(ACTOpenMapSet))
+				return action.payload;
 			return state;
 		},
 		mapViews: MapViewsReducer,

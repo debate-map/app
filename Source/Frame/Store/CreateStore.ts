@@ -10,6 +10,9 @@ import {persistStore, autoRehydrate} from "redux-persist";
 import {routerMiddleware} from 'react-router-redux'
 import {GetUrlVars} from "../General/Globals_Free";
 import {MakeRootReducer} from "../../Store/index";
+import watch from "redux-watch";
+import {ProcessAction} from "./ActionProcessor";
+
 let {version} = require("../../../package.json");
 export const browserHistory = createBrowserHistory();
 
@@ -58,6 +61,11 @@ export default function(initialState = {}, history) {
 		)
 	) as any;
 	store.asyncReducers = {};
+
+	/*let w = watch(()=>store.getState());
+	store.subscribe(w((newVal, oldVal) => {
+		ProcessAction(g.lastAction, newVal, oldVal);
+	}));*/
 
 	// begin periodically persisting the store
 	let persister = persistStore(store, {whitelist: ["main"]});

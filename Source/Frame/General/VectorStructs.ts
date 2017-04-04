@@ -223,6 +223,8 @@ export class VRect {
 	    this.height = val.y;
 	}
 
+	get Center() { return new Vector2i(this.x + (this.width / 2), this.y + (this.height / 2)); }
+
 	@_VDFDeserialize() Deserialize(node) {
 		var strParts = node.primitiveValue.split(" ");
 		this.x = parseInt(strParts[0]);

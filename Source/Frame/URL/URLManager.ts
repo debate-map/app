@@ -126,7 +126,7 @@ export function LoadURL_Globals() {
 // ==========
 
 export function UpdateURL_Globals() {
-	if (GetPath().startsWith("/global/map")) {
+	if (GetPath().startsWith("global/map")) {
 		let newURL = CreateURL_Globals();
 		store.dispatch(replace(newURL))
 	}

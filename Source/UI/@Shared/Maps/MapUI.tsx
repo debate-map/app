@@ -66,14 +66,27 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		if (rootNode == null)
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading root node...</div>;
 		return (
-			<ScrollView ref="scrollView" backgroundDrag={true} backgroundDragMatchFunc={a=>a == this.refs.content}
+			<ScrollView ref="scrollView" backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.content}
 					scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}
 					onScrollEnd={pos=> {
 						UpdateFocusNodeAndViewOffset(map._id);
 					}}>
-				<div id="MapUI" ref="content"
+				<style>{`
+				.MapUI > :first-child:after {
+					content: ".";
+					font-size: 0;
+					opacity: 0;
+					visibility: hidden;
+					display: block;
+					height: 500;
+					width: 100%;
+					margin-right: 1000px;
+					pointer-events: none;
+				}
+				`}</style>
+				<div className="MapUI" ref="content"
 						style={{
-							position: "relative", display: "flex", padding: "150px 5000px 5000px 870px", whiteSpace: "nowrap",
+							position: "relative", display: "flex", padding: "500px 1000px", whiteSpace: "nowrap",
 							filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)",
 						}}
 						onMouseDown={e=>this.downPos = new Vector2i(e.clientX, e.clientY)}
@@ -92,27 +105,38 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						}}>
 					<NodeUI map={map} node={rootNode} path={rootNode._id.toString()}/>
 					{/*<ReactResizeDetector handleWidth handleHeight onResize={()=> {*/}
-					<ResizeSensor onResize={()=> {
-						if (this.hasLoadedScroll) return;
+					<ResizeSensor ref="resizeSensor" onResize={force=> {
+						if (this.hasLoadedScroll && force !== true) return;
 						let state = store.getState();
-						let focusNode_target = GetFocusNode(GetMapView(map._id));
-						let viewOffset_target = GetViewOffset(GetMapView(map._id));
+						let focusNode_target = GetFocusNode(GetMapView(map._id)); // || map.rootNode.toString();
+						let viewOffset_target = GetViewOffset(GetMapView(map._id)); // || new Vector2i(200, 0);
 						//Log(`Resizing:${focusNode_target};${viewOffset_target}`);
 						if (focusNode_target == null || viewOffset_target == null) return;
 
-						// load scroll from store
-						let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
-						let focusNodeBox = $(".NodeUI_Inner").ToList().FirstOrX(nodeBox=>(FindReact(nodeBox[0]) as NodeUI_Inner).props.path == focusNode_target);
+						let focusNodeBox;
+						let nextPathTry = focusNode_target;
+						while (true) {
+							 focusNodeBox = $(".NodeUI_Inner").ToList().FirstOrX(nodeBox=>(FindReact(nodeBox[0]) as NodeUI_Inner).props.path == nextPathTry);
+							 if (focusNodeBox || !nextPathTry.contains("/")) break;
+							 nextPathTry = nextPathTry.substr(0, nextPathTry.lastIndexOf("/"));
+						}
 						if (focusNodeBox == null) return;
-
-						let viewOffset_current = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position);
-
-						let viewOffset_changeNeeded = new Vector2i(viewOffset_target).Minus(viewOffset_current);
-						//Log("Loading!" + viewOffset_changeNeeded);
-						/*this.refs.scrollView.refs.content.scrollLeft += viewOffset_changeNeeded.x;
-						this.refs.scrollView.refs.content.scrollTop += viewOffset_changeNeeded.y;*/
-						(this.refs.scrollView as ScrollView).ScrollBy(viewOffset_changeNeeded);
-						this.hasLoadedScroll = true;
+						
+						// load scroll from store
+						let loadScroll = ()=> {
+							if (!this.mounted) return;
+							let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
+							let viewOffset_current = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position);
+							let viewOffset_changeNeeded = new Vector2i(viewOffset_target).Minus(viewOffset_current);
+							(this.refs.scrollView as ScrollView).ScrollBy(viewOffset_changeNeeded);
+						};
+						loadScroll();
+						//Log(viewCenter_onScreen + ";" + viewOffset_current + ";" + viewOffset_changeNeeded + "; final:" + (nextPathTry == focusNode_target));
+						if (nextPathTry == focusNode_target) {
+							setTimeout(loadScroll, 400);
+							setTimeout(loadScroll, 800);
+							setTimeout(()=>this.hasLoadedScroll = true, 3000);
+						}
 					}}/>
 				</div>
 			</ScrollView>

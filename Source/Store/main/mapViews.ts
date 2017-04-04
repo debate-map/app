@@ -6,16 +6,36 @@ import {IsNumberString} from "../../Frame/General/Types";
 import {A, Assert} from "../../Frame/General/Assert";
 import {MapViews, MapView, MapNodeView} from "./mapViews/@MapViews";
 import {ToInt} from "../../../Source/Frame/General/Types";
-import {GetMap} from "../firebase/maps";
+import {GetMap, GetRootNodeID} from "../firebase/maps";
 import u from "updeep";
 import {MapViewReducer, ACTMapViewMerge} from "./mapViews/$mapView";
 import {ShallowChanged} from "../../Frame/UI/ReactGlobals";
+import {ACTOpenMapSet} from "../main";
+import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 
 export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
-	if (action.type == "@@router/LOCATION_CHANGE" && action.payload.pathname == "/global")
-		return {...state, 1: state[1] || new MapView()};
+	/*if (action.Is(ACTOpenMapSet))
+		return {...state, [action.payload]: state[action.payload] || new MapView()};*/
 
 	let newState = {...state};
+	if (action.type == "@@reactReduxFirebase/SET" && action["data"]) {
+		let match = action["path"].match("^" + DBPath("maps") + "/([0-9]+)");
+		// if map-data was just loaded
+		if (match) {
+			let mapID = parseInt(match[1]);
+			// and no map-view exists for it yet, create one (by expanding root-node, and changing focus-node/view-offset)
+			//if (GetMapView(mapID) == null) {
+			//if (state[mapID].rootNodeViews.VKeys().length == 0) {
+			if (newState[mapID] == null) {
+				newState[mapID] = {...newState[mapID],
+					rootNodeViews: {
+						[action["data"].rootNode]: new MapNodeView().VSet({expanded: true, focus: true, viewOffset: new Vector2i(200, 0)})
+					}
+				};
+			}
+		}
+	}
+
 	for (let key of state.VKeys()) {
 		newState[key] = MapViewReducer(state[key], action);
 	}
@@ -84,9 +104,11 @@ export function GetNodeView(mapID: number, path: string): MapNodeView {
 	}
 
 	let mapView = GetMapView(mapID);
+	if (mapView == null) return null;
 	return mapView.rootNodeViews.VValues()[0] as MapNodeView;
 }
 export function GetFocusNode(mapView: MapView): string {
+	if (mapView == null) return null;
 	let treeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "focus" && a.Value);
 	if (treeNode == null) return null;
 	let focusNodeView = treeNode.ancestorNodes.Last();
@@ -95,6 +117,7 @@ export function GetFocusNode(mapView: MapView): string {
 	return pathNodes.join("/");
 }
 export function GetViewOffset(mapView: MapView): Vector2i {
+	if (mapView == null) return null;
 	let treeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "viewOffset" && a.Value);
 	return treeNode ? treeNode.Value : null;
 }
