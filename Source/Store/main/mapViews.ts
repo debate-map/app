@@ -27,7 +27,7 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 			//if (GetMapView(mapID) == null) {
 			//if (state[mapID].rootNodeViews.VKeys().length == 0) {
 			if (newState[mapID] == null) {
-				newState[mapID] = {...newState[mapID],
+				newState[mapID] = {
 					rootNodeViews: {
 						[action["data"].rootNode]: new MapNodeView().VSet({expanded: true, focus: true, viewOffset: new Vector2i(200, 0)})
 					}
