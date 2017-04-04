@@ -6,6 +6,7 @@ import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/quer
 import {getEventsFromInput} from "react-redux-firebase/dist/utils";
 import {Log} from "../Serialization/VDF/VDF";
 import {ToJSON} from "../General/Globals";
+import {TryCall} from "../General/Timers";
 
 // Place a selector in Connect() whenever it uses data that:
 // 1) might change during the component's lifetime, and:
@@ -30,13 +31,20 @@ import {ToJSON} from "../General/Globals";
 	}
 }*/
 
+/*export function Connect<T, P>(innerConnectFunc: (state: RootState, props: P)=>any, isFuncWrapper?: boolean);
+export function Connect<T, P>(innerConnectFuncWrapper: ()=>(state: RootState, props: P)=>any, isFuncWrapper?: boolean);
+export function Connect<T, P>(funcOrFuncWrapper, isConnectFuncWrapper = null) {*/
+
+// if you're sending in a connect-func rather than a connect-func-wrapper, then you need to make it have at least one argument (to mark it as such)
 export function Connect<T, P>(innerConnectFunc: (state: RootState, props: P)=>any);
 export function Connect<T, P>(innerConnectFuncWrapper: ()=>(state: RootState, props: P)=>any);
 export function Connect<T, P>(funcOrFuncWrapper) {
 	let innerConnectFunc: (state: RootState, props: P)=>any, innerConnectFuncWrapper: ()=>(state: RootState, props: P)=>any;
 	/*if (funcOrFuncWrapper.length) innerConnectFunc = funcOrFuncWrapper;
 	else innerConnectFuncWrapper = funcOrFuncWrapper;*/
-	if (funcOrFuncWrapper.length || typeof funcOrFuncWrapper() != "function") innerConnectFunc = funcOrFuncWrapper;
+	//if (isConnectFuncWrapper === null)
+	let isConnectFuncWrapper = funcOrFuncWrapper.length == 0; //&& typeof TryCall(funcOrFuncWrapper) == "function";
+	if (!isConnectFuncWrapper) innerConnectFunc = funcOrFuncWrapper;
 	else innerConnectFuncWrapper = funcOrFuncWrapper;
 
 	//return connect((state: RootState, props: P)=> {

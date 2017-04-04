@@ -13,6 +13,7 @@ import {GetUrlVars} from "../General/Globals_Free";
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
 import {FromJSON, ToJSON} from "../General/Globals";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
+import {GetPathNodes, GetPath} from "../../Store/router";
 
 // loading
 // ==========
@@ -125,8 +126,10 @@ export function LoadURL_Globals() {
 // ==========
 
 export function UpdateURL_Globals() {
-	let newURL = CreateURL_Globals();
-	store.dispatch(replace(newURL))
+	if (GetPath().startsWith("/global/map")) {
+		let newURL = CreateURL_Globals();
+		store.dispatch(replace(newURL))
+	}
 }
 function CreateURL_Globals() {
 	let pathStr = "/global";

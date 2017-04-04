@@ -19,7 +19,7 @@ import {GetRatingUISmoothing, ACTRatingUISmoothnessSet} from "../../../../../Sto
 import {GetNodeChildren, GetParentNode} from "../../../../../Store/firebase/nodes";
 import {MapNodeType_Info} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
-import {ShowSignInPopup} from "../../../Navbar/UserPanel";
+import {ShowSignInPopup} from "../../../NavBar/UserPanel";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 

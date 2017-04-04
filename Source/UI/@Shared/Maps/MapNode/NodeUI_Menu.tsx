@@ -22,7 +22,7 @@ import {GetEntries, GetValues} from "../../../../Frame/General/Enums";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
 import {GetNode, IsLinkValid} from "../../../../Store/firebase/nodes";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {SignInPanel, ShowSignInPopup} from "../../Navbar/UserPanel";
+import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
 
 type Props = {node: MapNode, path: string} & Partial<{permissionGroups: PermissionGroupSet, parentNode: MapNode, copiedNode: MapNode}>;

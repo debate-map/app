@@ -68,4 +68,5 @@ export function MakeRootReducer(asyncReducers?) {
 
 interface RouterState {
 	location: LocationDescriptorObject;
+	history: any;
 }

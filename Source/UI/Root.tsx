@@ -27,7 +27,7 @@ import HomeUI from "../UI/Home";
 import {GetUrlPath, E} from "../Frame/General/Globals_Free";
 import {MessageBoxOptions, ACTMessageBoxShow, MessageBoxUI} from "../Frame/UI/VMessageBox";
 import Button from "../Frame/ReactComponents/Button";
-import Navbar from "../UI/@Shared/Navbar";
+import NavBar from "../UI/@Shared/NavBar";
 import StreamUI from "./Stream";
 import ChatUI from "./Chat";
 import UsersUI from "./Users";
@@ -38,6 +38,7 @@ import PersonalUI from "./Personal";
 import DebatesUI from "./Debates";
 import SearchUI from "./Search";
 import ProfileUI from "./Profile";
+import {GetPathNodes} from "../Store/router";
 
 // Create a history of your choosing (we're using a browser history in this case)
 const history = createBrowserHistory();
@@ -55,14 +56,21 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	}
 }
 
+export const rootPages = [
+	"stream", "chat",
+	"users", "forum", "social", "more",
+	"home",
+	"terms", "personal", "debates", "global",
+	"search", "profile"
+];
+export const rootPageDefaultChilds = {
+	more: "admin",
+	home: "home",
+	global: "map",
+}
+
 class RootUI extends BaseComponent<{}, {}> {
 	render() {
-		let pages = [
-			"stream", "chat",
-			"users", "forum", "social", "more",
-			"terms", "personal", "debates", "global",
-			"search", "profile"
-		];
 		return (
 			<div className="unselectable" style={{
 				height: "100%", display: "flex", flexDirection: "column",
@@ -75,7 +83,7 @@ class RootUI extends BaseComponent<{}, {}> {
 					background: "url(/Images/Backgrounds/Nebula.jpg)", backgroundPosition: "center center", backgroundSize: "cover",
 				}}/>*/}
 				<OverlayUI/>
-				<Navbar/>
+				<NavBar/>
 				<div style={{position: "relative", flex: "1 1 100%", overflow: "hidden"}}>
 					<Route path="/stream" component={StreamUI}/>
 					<Route path="/chat" component={ChatUI}/>
@@ -87,7 +95,7 @@ class RootUI extends BaseComponent<{}, {}> {
 
 					{/*<Route exact path="/" component={HomeUI}/>
 					<Route exact path="/about" component={HomeUI}/>*/}
-					{!GetUrlPath().StartsWithAny(...pages) && <HomeUI/>}
+					{GetPathNodes()[0] == "home" && <HomeUI/>}
 
 					<Route path="/terms" component={TermsUI}/>
 					<Route path="/personal" component={PersonalUI}/>

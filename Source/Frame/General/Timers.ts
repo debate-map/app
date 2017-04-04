@@ -2,8 +2,19 @@ import V from "../V/V";
 // methods
 // ==========
 
-export function TryCall(func, /*optional:*/ args_) { if (func instanceof Function) func.apply(this, V.CloneArray(arguments).splice(0, 1)); }
-export function TryCall_OnX(obj, func, /*optional:*/ args_) { if (func instanceof Function) func.apply(obj, V.CloneArray(arguments).splice(0, 1)); }
+export function TryCall<T>(func: (..._)=>T, ...args): T {
+	//if (!(func instanceof Function)) return;
+	if (typeof func != "function") return;
+	try {
+		return func.apply(this, args);
+	} catch (ex) {}
+}
+export function TryCall_OnX(obj, func, ...args) {
+	if (typeof func != "function") return;
+	try {
+		return func.apply(obj, args);
+	} catch (ex) {}
+}
 g.Extend({TryCall, TryCall_OnX});
 
 //g.requestAnimationFrame = function() {};

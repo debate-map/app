@@ -183,6 +183,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		if (!this.onHeightOrPosChangeQueued) {
 			this.onHeightOrPosChangeQueued = true;
 			requestAnimationFrame(()=> {
+				if (!this.mounted) return;
 				this.OnHeightOrPosChange();
 				this.onHeightOrPosChangeQueued = false;
 			});

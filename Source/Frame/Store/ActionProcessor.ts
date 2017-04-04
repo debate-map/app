@@ -2,7 +2,7 @@ import {GetTreeNodesInObjTree} from "../V/V";
 import Action from "../General/Action";
 import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange} from "../../Store/main/mapViews/$mapView/rootNodeViews";
 import {LoadURL_Globals, UpdateURL_Globals} from "../URL/URLManager";
-import {GetPathL1} from "../../Store/router";
+import {GetPathNodes, GetPath} from "../../Store/router";
 import {GetUrlVars} from "../General/Globals_Free";
 
 let lastPath = "";
@@ -10,7 +10,7 @@ export function ProcessAction(action: Action<any>) {
 	//if (action.type == "@@INIT") {
 	if (action.type == "persist/REHYDRATE" || action.type == "@@router/LOCATION_CHANGE") {
 		setTimeout(()=> {
-			if (GetPathL1() == "global") {
+			if (GetPath().startsWith("/global/map")) {
 				if (action.type == "persist/REHYDRATE")
 					LoadURL_Globals();
 				//setTimeout(()=>UpdateURL_Globals());

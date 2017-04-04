@@ -36,11 +36,13 @@
 		}
 	}
 	a {
+		/*&:not(.ignoreBaseCSS) {
+			color: rgba(100,255,100,.7);
+			&:hover {
+				color: rgba(100,255,100,1);
+			}
+		}*/
 		text-decoration: none !important;
-		&:visited {
-			text-decoration: none;
-			color: inherit;
-		}
 	}
 	*, *:before, *:after {
 		box-sizing: inherit;
@@ -67,4 +69,15 @@
 	#recharts_measurement_span { font-size: 12px; }
 
 	.recharts-text.recharts-cartesian-axis-tick-value { fill: #AAA; }
+
+	.Markdown {
+		a {
+			&:not(.ignoreBaseCSS) {
+				color: rgba(100,255,100,.7);
+				&:hover {
+					color: rgba(100,255,100,1);
+				}
+			}
+		}
+	}
 }

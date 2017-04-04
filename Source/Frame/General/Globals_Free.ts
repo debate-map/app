@@ -147,7 +147,38 @@ window.Extend({E});
 // ==================
 
 export function CurrentUrl() { return window.location.href.replace(/%22/, "\""); } // note; look into the escaping issue more
-/** Returns [pathStr, varsStr, hashStr], without the separator-chars. */
+export function ToAbsoluteUrl(url: string) {
+	 // Handle absolute URLs (with protocol-relative prefix)
+	// Example: //domain.com/file.png
+	if (url.search(/^\/\//) != -1) {
+		return window.location.protocol + url
+	}
+
+	// Handle absolute URLs (with explicit origin)
+	// Example: http://domain.com/file.png
+	if (url.search(/:\/\//) != -1) {
+		return url
+	}
+
+	// Handle absolute URLs (without explicit origin)
+	// Example: /file.png
+	if (url.search(/^\//) != -1) {
+		return window.location.origin + url
+	}
+
+	// Handle relative URLs
+	// Example: file.png
+	var base = window.location.href.match(/(.*\/)/)[0]
+	return base + url
+}
+export function JumpToHash(hashStr: string) {
+    var url = location.href; // Save down the URL without hash.
+    location.href = "#" + hashStr; // Go to the target element.
+    history.replaceState(null, null, url); // Don't like hashes. Changing it back.
+	//document.getElementById(hashStr).scrollIntoView(); //Even IE6 supports this
+}
+
+/** Returns [domainStr, pathStr, varsStr, hashStr], without the separator-chars. */
 export function GetUrlParts(url?: string): [string, string, string, string] {
 	url = url || CurrentUrl();
 

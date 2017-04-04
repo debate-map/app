@@ -1,7 +1,6 @@
 import {styles, colors} from "../../Frame/UI/GlobalStyles";
 import {Dispatch} from "redux";
 import {Component, PropTypes} from "react";
-import {Link} from "react-router-dom";
 import AppBar from "material-ui/AppBar";
 import IconMenu from "material-ui/IconMenu";
 import IconButton from "material-ui/IconButton";
@@ -13,18 +12,23 @@ import GoogleButton from 'react-google-button';
 import {connect} from "react-redux";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {BaseComponent, BaseProps} from "../../Frame/UI/ReactGlobals";
-import {Debugger} from "../../Frame/General/Globals_Free";
+import {Debugger, E} from "../../Frame/General/Globals_Free";
 import Button from "../../Frame/ReactComponents/Button";
 import TextInput from "../../Frame/ReactComponents/TextInput";
 import Action from "../../Frame/General/Action";
 import {HandleError} from "../../Frame/General/Errors";
-import UserPanel from "./Navbar/UserPanel";
+import UserPanel from "./NavBar/UserPanel";
 import {Connect} from "../../Frame/Database/FirebaseConnect";
 import {ACTTopRightOpenPanelSet, ACTTopLeftOpenPanelSet} from "../../Store/main";
-import ChatPanel from "./Navbar/ChatPanel";
-import StreamPanel from "./Navbar/StreamPanel";
-import SearchPanel from "./Navbar/SearchPanel";
-import {SubNavBarButton} from "./SubNavbar";
+import ChatPanel from "./NavBar/ChatPanel";
+import StreamPanel from "./NavBar/StreamPanel";
+import SearchPanel from "./NavBar/SearchPanel";
+import {SubNavBarButton} from "./SubNavBar";
+import Radium from "radium";
+import Link from "../../Frame/ReactComponents/Link";
+import {GetPathNodes} from "../../Store/router";
+import {rootPages} from "../Root";
+import {Log} from "../../Frame/Serialization/VDF/VDF";
 
 // main
 // ==========
@@ -40,11 +44,12 @@ const avatarStyles = {
 };
 
 @Connect(state=>({
+	_: GetPathNodes(),
 	topLeftOpenPanel: state.main.topLeftOpenPanel,
 	topRightOpenPanel: state.main.topRightOpenPanel,
 	auth: helpers.pathToJS(state.firebase, "auth"),
 }))
-export default class Navbar extends BaseComponent<{dispatch?, page?, topLeftOpenPanel?, topRightOpenPanel?, auth?: firebase.User}, {}> {
+export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpenPanel?, topRightOpenPanel?, auth?: firebase.User}, {}> {
 	static contextTypes = {store: PropTypes.object.isRequired};
 	render() {
 		let {topLeftOpenPanel, topRightOpenPanel, auth} = this.props;
@@ -71,13 +76,7 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, topLeftOpen
 						<NavBarButton to="/forum" text="Forum"/>
 						<NavBarButton to="/social" text="Social"/>
 						<NavBarButton to="/more" text="More"/>
-						<Link to="/" style={{
-							display: "inline-block", margin: "0 auto", cursor: "pointer", verticalAlign: "middle",
-							lineHeight: "45px", textAlign: "center", color: "#FFF", padding: "0 15px",
-							textDecoration: "none", opacity: .9, fontSize: 23
-						}}>
-							Debate Map
-						</Link>
+						<NavBarButton to="/" toImplied="/home" text="Debate Map" style={{margin: "0 auto", textAlign: "center", fontSize: 23}}/>
 						<NavBarButton to="/terms" text="Terms"/>
 						<NavBarButton to="/personal" text="Personal"/>
 						<NavBarButton to="/debates" text="Debates"/>
@@ -99,19 +98,52 @@ export default class Navbar extends BaseComponent<{dispatch?, page?, topLeftOpen
 	}
 }
 
-export class NavBarButton extends BaseComponent<{to, text, onClick?}, {}> {
+//@Radium
+@Connect(state=> ({
+	page: GetPathNodes()[0],
+}))
+export class NavBarButton extends BaseComponent
+		<{to: string, toImplied?: string, text: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void} & Partial<{page: string}>,
+		{hovered: boolean}> {
 	render() {
-		var {to, text, onClick} = this.props;
-		let {page} = this.props;
-		let active = to == page;
+		var {to, toImplied, text, panel, active, style, onClick, page} = this.props;
+		//let {_radiumStyleState: {main: radiumState = {}} = {}} = this.state as any;
+		//let {_radiumStyleState} = this.state as any;
+		let {hovered} = this.state;
+		active = active != null ? active : to.substr(1) == page || (toImplied && toImplied.substr(1) == page);
 
-		let style = {
-			display: "inline-block", cursor: "pointer", verticalAlign: "middle",
-			lineHeight: "45px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9
-		};
-		if (to)
-			return <Link to={to} style={style} onClick={onClick}>{text}</Link>;
-		return <div style={style} onClick={onClick}>{text}</div>
+		let finalStyle = E(
+			{
+				position: "relative", display: "inline-block", cursor: "pointer", verticalAlign: "middle",
+				lineHeight: "45px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9,
+				//":hover": {color: "rgba(100,255,100,1)"}
+				//":hover": {color: "rgba(100,150,255,1)"}
+				//":hover": {}
+			},
+			/*panel && {":hover": {color: "rgba(100,255,100,1)"}},
+			panel && active && {color: "rgba(100,255,100,1)"},*/
+			style,
+		);
+
+		//let hoverOrActive = radiumState[":hover"] || active;
+		//let hoverOrActive = _radiumStyleState && _radiumStyleState.main && _radiumStyleState.main[":hover"] || active;
+		let hoverOrActive = hovered || active;
+		if (to) {
+			return (
+				<Link to={to} style={finalStyle} onClick={onClick} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})}>
+					{text}
+					{/*!panel &&*/ hoverOrActive &&
+						<div style={{position: "absolute", left: 0, right: 0, bottom: 0, height: 2, background: `rgba(100,255,100,1)`}}/>}
+				</Link>
+			);
+		}
+		return (
+			<div style={finalStyle} onClick={onClick} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})}>
+				{text}
+				{/*!panel &&*/ hoverOrActive &&
+					<div style={{position: "absolute", left: 0, right: 0, bottom: 0, height: 2, background: `rgba(100,255,100,1)`}}/>}
+			</div>
+		);
 	}
 }
 
@@ -123,13 +155,15 @@ type NavBarPanelButton_Props = {to: string, text: string, panel: string, corner:
 export class NavBarPanelButton extends BaseComponent<NavBarPanelButton_Props, {}> {
 	render() {
 		let {to, text, panel, corner, topLeftOpenPanel, topRightOpenPanel} = this.props;
+		let active = (corner == "top-left" ? topLeftOpenPanel : topRightOpenPanel) == panel;
 		return (
-			<NavBarButton to={to} text={text} onClick={e=> {
+			<NavBarButton to={to} text={text} panel={true} active={active} onClick={e=> {
 				e.preventDefault();
 				if (corner == "top-left")
-					store.dispatch(new ACTTopLeftOpenPanelSet(topLeftOpenPanel == panel ? null : panel));
+					store.dispatch(new ACTTopLeftOpenPanelSet(active ? null : panel));
 				else
-					store.dispatch(new ACTTopRightOpenPanelSet(topRightOpenPanel == panel ? null : panel));
+					store.dispatch(new ACTTopRightOpenPanelSet(active ? null : panel));
+				Log(window.location.href);
 			}}/>
 		);
 	}

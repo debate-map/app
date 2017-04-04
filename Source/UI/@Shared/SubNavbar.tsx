@@ -1,9 +1,11 @@
 import {BaseComponent, BaseProps} from "../../Frame/UI/ReactGlobals";
-import {Link} from "react-router-dom";
 import {colors} from "../../Frame/UI/GlobalStyles";
 import {E} from "../../Frame/General/Globals_Free";
+import {GetPathNodes} from "../../Store/router";
+import Radium from "radium";
+import Link from "../../Frame/ReactComponents/Link";
 
-export default class SubNavbar extends BaseComponent<{fullWidth?: boolean}, {}> {
+export default class SubNavBar extends BaseComponent<{fullWidth?: boolean}, {}> {
 	render() {
 		let {fullWidth, children} = this.props;
 		return (
@@ -23,15 +25,23 @@ export default class SubNavbar extends BaseComponent<{fullWidth?: boolean}, {}> 
 	}
 }
 
-export class SubNavBarButton extends BaseComponent<{to, text} & BaseProps, {}> {
+//export class SubNavBarButton extends BaseComponent<{to: string, toImplied?: string, page: string, text: string}, {}> {
+export class SubNavBarButton extends BaseComponent<{to: string, toImplied?: string, text: string}, {}> {
 	render() {
-		var {to, text, page} = this.props;
-		let active = to == page;
+		/*var {to, toImplied, page, text} = this.props;
+		let active = to.substr(1) == page || (toImplied && toImplied.substr(1) == page);*/
+		var {to, toImplied, text} = this.props;
+		let path = "/" + GetPathNodes().Take(2).join("/");
+		let active = to == path || (toImplied && toImplied == path);
 		return (
-			<Link to={to} style={{
-				display: "inline-block", cursor: "pointer", verticalAlign: "middle",
-				lineHeight: "30px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9
-			}}>
+			<Link to={to} style={E(
+				{
+					display: "inline-block", cursor: "pointer", verticalAlign: "middle",
+					lineHeight: "30px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9,
+					":hover": {color: "rgba(100,255,100,1)"},
+				},
+				active && {color: "rgba(100,255,100,1)"},
+			)}>
 				{text}
 			</Link>
 		);
