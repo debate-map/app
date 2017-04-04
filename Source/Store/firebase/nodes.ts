@@ -4,6 +4,7 @@ import {MapNode} from "./nodes/@MapNode";
 import {CachedTransform} from "../../Frame/V/VCache";
 import {MapNodeType_Info} from "./nodes/@MapNodeType";
 import {P} from "../../Frame/Serialization/VDF/VDFTypeInfo";
+import {IsUserCreatorOrMod} from "./userExtras";
 
 export function GetNode(id: number) {
 	//Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");
@@ -31,6 +32,20 @@ export function IsLinkValid(parent: MapNode, child: MapNode) {
 	if (!parentTypeInfo.Contains(child.type))
 		return false;
 	return true;
+}
+
+export function ForUnlink_GetError(userID: string, node: MapNode) {
+	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
+	if (node.metaThesis) return "Cannot unlink a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
+	return null;
+}
+export function ForDelete_GetError(userID: string, node: MapNode) {
+	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
+	if (node.metaThesis) return "Cannot delete a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
+	let nodeChildren = GetNodeChildren(node);
+	//if ((node.children || {}).VKeys().length) return "Cannot delete this node until all its (non-meta-thesis) children have been deleted or unlinked.";
+	if (nodeChildren.filter(a=>!a.metaThesis).length) return "Cannot delete this node until all its (non-meta-thesis) children have been deleted or unlinked.";
+	return null;
 }
 
 /*export function GetUnlinkErrorMessage(parent: MapNode, child: MapNode) {

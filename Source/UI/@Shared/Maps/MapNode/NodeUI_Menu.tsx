@@ -20,7 +20,7 @@ import {ACTNodeCopy} from "../../../../Store/main";
 import Select from "../../../../Frame/ReactComponents/Select";
 import {GetEntries, GetValues} from "../../../../Frame/General/Enums";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
-import {GetNode, IsLinkValid} from "../../../../Store/firebase/nodes";
+import {GetNode, IsLinkValid, ForDelete_GetError, ForUnlink_GetError} from "../../../../Store/firebase/nodes";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
@@ -130,9 +130,14 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 					}}/>}
 				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
+					let error = ForUnlink_GetError(userID, node);
+					if (error)
+						return void ShowMessageBox({title: "Cannot unlink", message: error});
+
 					firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
 						let nodes = (snapshot.val() as Object).Props.Where(a=>a.name != "_").Select(a=>a.value.Extended({_id: a.name}));
 						//let childNodes = node.children.Select(a=>nodes[a]);
+						// todo: remove need for downloading all nodes, by have children store their parents (redundant, but practical)
 						let parentNodes = nodes.Where(a=>a.children && a.children[node._id]);
 						if (parentNodes.length <= 1)
 							return void ShowMessageBox({title: "Cannot unlink", message: "Cannot unlink this child, as doing so would orphan it. Try deleting it instead."});
@@ -153,22 +158,32 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 				}}/>}
 				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Delete" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
-					if ((node.children || {}).VKeys().length)
-						return void ShowMessageBox({title: "Cannot delete", message: "Cannot delete this node until all its children have been deleted or unlinked."});
+					let error = ForDelete_GetError(userID, node);
+					if (error)
+						return void ShowMessageBox({title: "Cannot delete", message: error});
+
 					firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
 						let nodes = (snapshot.val() as Object).Props.Select(a=>a.value.Extended({_id: a.name}));
 						//let childNodes = node.children.Select(a=>nodes[a]);
 						let parentNodes = nodes.Where(a=>a.children && a.children[node._id]);
 						let s_ifParents = parentNodes.length > 1 ? "s" : "";
+						let metaThesisID = node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument ? node.children.VKeys()[0] : null;
+
 						ShowMessageBox({
 							title: `Delete "${node.title}"`, cancelButton: true,
-							message: `Delete the node "${node.title}", and its link${s_ifParents} with ${parentNodes.length} parent-node${s_ifParents}?`,
+							message: `Delete the node "${node.title}"`
+								+ `, ${metaThesisID ? "its 1 meta-thesis" : ""}`
+								+ `, and its link${s_ifParents} with ${parentNodes.length} parent-node${s_ifParents}?`,
 							onOK: ()=> {
 								firebase.Ref("nodes").transaction(nodes=> {
 									if (!nodes) return nodes;
 									for (let parent of parentNodes)
 										nodes[parent._id].children[node._id] = null;
 									nodes[node._id] = null;
+									// if has meta-thesis, delete it also
+									//for (let childID of node.children)
+									if (metaThesisID)
+										nodes[metaThesisID] = null;
 									return nodes;
 								}, undefined, false);
 							}

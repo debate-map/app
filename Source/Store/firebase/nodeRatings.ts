@@ -27,6 +27,7 @@ export function GetRatings(nodeID: number, ratingType: RatingType): Rating[] {
 }
 export function GetRating(nodeID: number, ratingType: RatingType, userID: string) {
 	let ratingSet = GetRatingSet(nodeID, ratingType);
+	if (ratingSet == null) return null;
 	return ratingSet[userID];
 }
 export function GetRatingValue(nodeID: number, ratingType: RatingType, userID: string, resultIfNoData = null): number {
