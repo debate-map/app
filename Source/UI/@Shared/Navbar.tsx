@@ -11,7 +11,7 @@ import GoogleButton from 'react-google-button';
 
 import {connect} from "react-redux";
 import {firebaseConnect, helpers} from "react-redux-firebase";
-import {BaseComponent, BaseProps} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, BaseProps, Div} from "../../Frame/UI/ReactGlobals";
 import {Debugger, E} from "../../Frame/General/Globals_Free";
 import Button from "../../Frame/ReactComponents/Button";
 import TextInput from "../../Frame/ReactComponents/TextInput";
@@ -29,6 +29,7 @@ import Link from "../../Frame/ReactComponents/Link";
 import {GetPathNodes} from "../../Store/router";
 import {rootPages} from "../Root";
 import {Log} from "../../Frame/Serialization/VDF/VDF";
+import NotificationsUI from "./NavBar/NotificationsUI";
 
 // main
 // ==========
@@ -70,6 +71,9 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 						{topLeftOpenPanel == "stream" && <StreamPanel/>}
 						{topLeftOpenPanel == "chat" && <ChatPanel/>}
 					</div>
+					<Div ct style={{position: "absolute", left: 0, right: 0, top: 45}}>
+						<NotificationsUI/>
+					</Div>
 					
 					<span style={{margin: "0 auto", paddingLeft: 35}}>
 						<NavBarButton to="/users" text="Users"/>
@@ -163,7 +167,6 @@ export class NavBarPanelButton extends BaseComponent<NavBarPanelButton_Props, {}
 					store.dispatch(new ACTTopLeftOpenPanelSet(active ? null : panel));
 				else
 					store.dispatch(new ACTTopRightOpenPanelSet(active ? null : panel));
-				Log(window.location.href);
 			}}/>
 		);
 	}

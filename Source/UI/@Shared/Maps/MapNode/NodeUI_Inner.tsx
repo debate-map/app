@@ -75,21 +75,10 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 					<MapNodeUI_LeftBox parent={this} map={map} path={path} node={node} nodeView={nodeView} ratingsRoot={ratingsRoot}
 						backgroundColor={nodeTypeInfo.backgroundColor} asHover={hovered}/>}
 				{/* fixes click-gap */}
-				{leftPanelShow &&
-					<div style={{
-						position: "absolute",
-						right: "100%", width: 1, top: 0, bottom: 0,
-						//left: -50, width: 100, top: 0, bottom: 0,
-					}}/>}
+				{leftPanelShow && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
 
-				<div style={{
-							display: "flex", width: "100%", //background: `rgba(${backgroundColor},.7)`,
-							background: "rgba(0,0,0,.7)", borderRadius: 5, cursor: "pointer",
-						}}>
-					<div style={{
-								position: "relative", width: "100%", //minWidth: minWidth - 20, maxWidth: maxWidth - 20,
-								padding: MapNode.GetPadding(node), //node.type == MapNodeType.Category || node.type == MapNodeType.Package ? 5 : "3px 5px",
-							}}>
+				<div style={{display: "flex", width: "100%", background: "rgba(0,0,0,.7)", borderRadius: 5, cursor: "pointer"}}>
+					<div style={{position: "relative", width: "100%", padding: MapNode.GetPadding(node)}}>
 						<div style={{
 								position: "absolute", left: 0, top: 0, bottom: 0,
 								width: mainRatingFillPercent + "%", background: `rgba(${nodeTypeInfo.backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
@@ -103,11 +92,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							style={{
 								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
 								width: 18, padding: 0,
-								//fontSize: 18,
 								fontSize: expanded ? 23 : 17,
 								lineHeight: "1px", // keeps text from making meta-theses too tall
-								//lineHeight: "28px",
-								//backgroundColor: `rgba(${backgroundColor},.5)`,
 								backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(",").map(a=>(parseInt(a) * .8).RoundTo(1)).join(",")},.7)`,
 								boxShadow: "none",
 								":hover": {backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(",").map(a=>(parseInt(a) * .9).RoundTo(1)).join(",")},.7)`},

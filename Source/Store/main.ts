@@ -16,20 +16,23 @@ import {ProcessAction} from "../Frame/Store/ActionProcessor";
 import {CachedTransform} from "../Frame/V/VCache";
 import {MapViewsReducer} from "./main/mapViews";
 import {RatingUIReducer, RatingUIState} from "./main/ratingUI";
+import NotificationMessage from "./main/@NotificationMessage";
 
 // class is used only for initialization
 export class MainState {
 	topLeftOpenPanel: string;
 	topRightOpenPanel: string;
 	ratingUI: RatingUIState;
-	//ratingUI = new RatingUIState();
+	notificationMessages: NotificationMessage[];
 
 	openMap: number;
-	mapViews = new MapViews();
+	mapViews: MapViews;
 	copiedNode: number;
 }
 export class ACTTopLeftOpenPanelSet extends Action<string> {}
 export class ACTTopRightOpenPanelSet extends Action<string> {}
+export class ACTNotificationMessageAdd extends Action<NotificationMessage> {}
+export class ACTNotificationMessageRemove extends Action<number> {}
 export class ACTNodeCopy extends Action<number> {}
 
 let MainReducer_Real;
@@ -50,6 +53,14 @@ export function MainReducer(state, action) {
 			return state;
 		},
 		ratingUI: RatingUIReducer,
+		notificationMessages: (state = [] as NotificationMessage[], action)=> {
+			if (action.Is(ACTNotificationMessageAdd))
+				return [...state, action.payload];
+			if (action.Is(ACTNotificationMessageRemove))
+				return state.filter(a=>a.id != action.payload);
+			NotificationMessage.lastID = Math.max(NotificationMessage.lastID, state.length ? state.map(a=>a.id).Max() : -1);
+			return state;
+		},
 		openMap: (state = null, action)=> {
 			if (action.type == "@@router/LOCATION_CHANGE" && action.payload.pathname == "/global")
 				return 1;

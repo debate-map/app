@@ -37,7 +37,7 @@ export class RowLR extends BaseComponent<{height?, className?, rowStyle?, leftSt
 export default class Row extends BaseComponent<{style?}, {}> {
 	render() {
 		let {style, ...rest} = this.props;
-		return <div {...rest} style={E({display: "flex"}, style)}/>
+		return <div {...rest} style={E({display: "flex", alignItems: "center"}, style)}/>
 	}
 }
 @ApplyBasicStyles

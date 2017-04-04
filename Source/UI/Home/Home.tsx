@@ -23,7 +23,7 @@ This has the potential to...
 ## Transform discussion on contentious issues
 
 Instead of the traditional thread-based dialogue (which tends toward long and hard-to-follow threads), or the brief but less thorough exchanges of in-person speech, this project aims to bring the benefits of both:
-* Providing thoroughness and clarity-of-meaning by allowing arbitrarily deep subtrees. (each "supporting" or "implying" its parent)
+* Providing thoroughness and clarity-of-meaning by allowing arbitrarily deep subtrees. (each "supporting" or "opposing" its parent)
 * Remaining traversable and easy to follow by having arguments mapped directly under the thesis they relate to, instead of sprawled out over many posts.
 * Not re-inventing the wheel: populating a line of evidence or reasoning once, and then sharing it in every part of the tree (and in every conversation) where it's relevant.
 

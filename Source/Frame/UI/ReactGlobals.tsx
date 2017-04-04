@@ -43,7 +43,7 @@ export interface BaseProps {
 	m?; ml?; mr?; mt?; mb?;
 	p?; pl?; pr?; pt?; pb?;
 	plr?; ptb?;
-	sel?;
+	sel?: boolean; ct?: boolean;
 
 	tabLabel?: string; active?: boolean;
 
@@ -54,7 +54,8 @@ export var basePropFullKeys = {
 	m: "marginLeft", ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
 	p: "padding", pl: "paddingLeft", pr: "paddingRight", pt: "paddingTop", pb: "paddingBottom",
 	plr: null, ptb: null,
-	sel: null,
+	sel: null, // selectable
+	ct: null, // clickthrough
 
 	tabLabel: null, active: null,
 
@@ -90,6 +91,8 @@ export function ApplyBasicStyles(target: React.ComponentClass<any>) {
 		result.props.style = E(BasicStyles(result.props), result.props.style);
 		if (result.props.sel)
 			result.props.className = (result.props.className ? result.props.className + " " : "") + "selectable";
+		if (result.props.ct)
+			result.props.className = (result.props.className ? result.props.className + " " : "") + "clickThrough";
 		RemoveBasePropKeys(result.props);
 		return result;
 	}

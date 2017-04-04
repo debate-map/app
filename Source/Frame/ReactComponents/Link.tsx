@@ -11,8 +11,9 @@ export default class Link extends BaseComponent<{to, target?: string, replace?: 
 	}
 }*/
 
-const isModifiedEvent = (event) =>
-	!!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
+function isModifiedEvent(event) {
+	return !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
+}
 
 @Radium
 export default class Link extends BaseComponent<{to, target?: string, replace?: boolean, style?, onClick?} & React.HTMLProps<HTMLAnchorElement>, {}> {
@@ -36,8 +37,8 @@ export default class Link extends BaseComponent<{to, target?: string, replace?: 
 				!isModifiedEvent(event)) { // ignore clicks with modifier keys
 			event.preventDefault()
 
-			const { history } = this.context.router
-			const { replace, to } = this.props
+			const {history} = this.context.router
+			const {replace, to} = this.props
 
 			if (replace) {
 				history.replace(to)
@@ -48,8 +49,8 @@ export default class Link extends BaseComponent<{to, target?: string, replace?: 
 	}
 
 	render() {
-		const { replace, to, ...rest } = this.props // eslint-disable-line no-unused-vars
-		const href = this.context.router.history.createHref(typeof to === 'string' ? { pathname: to } : to)
+		const {replace, to, ...rest} = this.props // eslint-disable-line no-unused-vars
+		const href = this.context.router.history.createHref(typeof to === 'string' ? {pathname: to} : to)
 		return <a {...rest} onClick={this.handleClick} href={href}/>
 	}
 }
