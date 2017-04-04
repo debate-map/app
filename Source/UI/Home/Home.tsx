@@ -49,7 +49,10 @@ Engaging with a tool that operates on percentages, numbers, and weights makes se
 
 He can then proceed to look more closely at those areas, examining the pool of existing evidence and reasoning, and referencing statistics on how the rest of the population considers each piece along the way.
 
-<a name="footnote1">1</a>: In case the project management falters or becomes biased, it's in the power of users to create their own copy of the project, and to modify it as they see fit. See here: <https://opensource.com/resources/what-open-source>
+<a name="footnote1">1</a>: In case the project management falters or becomes biased, it's in the power of users to create their own copy of the project, and to modify it as they see fit.
+
+More info on open-source projects: <https://opensource.com/resources/what-open-source>  
+This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 `;
 
 @SimpleShouldUpdate
