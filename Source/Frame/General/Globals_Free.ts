@@ -1,4 +1,5 @@
 import ShallowCompare from "react-addons-shallow-compare";
+import {CurrentUrl, GetUrlVars} from "./URLs";
 
 // class/function tags
 // ==========
@@ -21,7 +22,7 @@ import ShallowCompare from "react-addons-shallow-compare";
 }*/
 export function Global(target: Function) {
 	var name = target.GetName();
-	//console.log("Globalizing: " + name);//
+	//console.log("Globalizing: " + name);
 	g[name] = target;
 }
 
@@ -141,80 +142,10 @@ export function E(...objExtends: any[]) {
 	//return StyleSheet.create(result);
 }
 // for react-native-chart modifications...
-window.Extend({E});
+g.Extend({E});
 
 // methods: url writing/parsing
 // ==================
-
-export function CurrentUrl() { return window.location.href.replace(/%22/, "\""); } // note; look into the escaping issue more
-export function ToAbsoluteUrl(url: string) {
-	 // Handle absolute URLs (with protocol-relative prefix)
-	// Example: //domain.com/file.png
-	if (url.search(/^\/\//) != -1) {
-		return window.location.protocol + url
-	}
-
-	// Handle absolute URLs (with explicit origin)
-	// Example: http://domain.com/file.png
-	if (url.search(/:\/\//) != -1) {
-		return url
-	}
-
-	// Handle absolute URLs (without explicit origin)
-	// Example: /file.png
-	if (url.search(/^\//) != -1) {
-		return window.location.origin + url
-	}
-
-	// Handle relative URLs
-	// Example: file.png
-	var base = window.location.href.match(/(.*\/)/)[0]
-	return base + url
-}
-export function JumpToHash(hashStr: string) {
-    var url = location.href; // Save down the URL without hash.
-    location.href = "#" + hashStr; // Go to the target element.
-    history.replaceState(null, null, url); // Don't like hashes. Changing it back.
-	//document.getElementById(hashStr).scrollIntoView(); //Even IE6 supports this
-}
-
-/** Returns [domainStr, pathStr, varsStr, hashStr], without the separator-chars. */
-export function GetUrlParts(url?: string): [string, string, string, string] {
-	url = url || CurrentUrl();
-
-	let [domainStr, pathStr, varsStr, hashStr] = Array(4).fill(0).map(a=>"");
-
-	let urlToProcess = url;
-	if (urlToProcess.Contains("#") && !varsStr.Contains("runJS="))
-		[urlToProcess, hashStr] = urlToProcess.SplitAt(urlToProcess.indexOf("#"));
-	if (urlToProcess.Contains("?"))
-		[urlToProcess, varsStr] = urlToProcess.SplitAt(urlToProcess.indexOf("?"));
-	//if (urlToProcess.Matches("/").length == )
-	[domainStr, pathStr] = urlToProcess.SplitAt(urlToProcess.IndexOf_X("/", 2));
-
-	return [domainStr, pathStr, varsStr, hashStr];
-}
-export function GetUrlPath(url?: string, fromDomain = true) {
-	/*let [pathStr, varsStr, hashStr] = GetUrlParts(url);
-	if (fromDomain)
-		pathStr = pathStr.SplitAt(pathStr.IndexOf_X("/", 2).IfN1Then(pathStr.length))[1];
-	if (pathStr.endsWith("/"))
-		pathStr = pathStr.substr(0, pathStr.length - 1);*/
-	let [_, pathStr] = GetUrlParts(url);
-	if (pathStr.endsWith("/"))
-		pathStr = pathStr.slice(0, -1);
-	return pathStr;
-}
-export function GetUrlVars(url?: string) {
-	let [_, __, varsStr] = GetUrlParts(url);
-	var vars = {} as any;
-	var parts = varsStr.split("&");
-	for (let part of parts) {
-		let [key, value] = part.SplitAt(part.indexOf("="))
-		vars[key] = value;
-	}
-	return vars;
-}
 
 export var inFirefox = navigator.userAgent.toLowerCase().Contains("firefox");
 

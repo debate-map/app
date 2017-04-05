@@ -1,5 +1,5 @@
-import {GetUrlPath, GetUrlVars} from "../Frame/General/Globals_Free";
 import {rootPages, rootPageDefaultChilds} from "../UI/Root";
+import {GetUrlPath} from "../Frame/General/URLs";
 
 export function GetPathNodes(path = GetUrlPath(), makeFull = true) {
 	/*let location = State().router.location;

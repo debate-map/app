@@ -1,36 +1,21 @@
 import {GetTreeNodesInObjTree} from "../V/V";
 import Action from "../General/Action";
 import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange} from "../../Store/main/mapViews/$mapView/rootNodeViews";
-import {LoadURL_Globals, UpdateURL_Globals} from "../URL/URLManager";
+import {LoadURL, UpdateURL} from "../URL/URLManager";
 import {GetPathNodes, GetPath} from "../../Store/router";
-import {GetUrlVars} from "../General/Globals_Free";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 import {GetData, DBPath} from "../Database/DatabaseHelpers";
 import {GetMapView} from "../../Store/main/mapViews";
 import {Vector2i} from "../General/VectorStructs";
 import {RootState} from "../../Store/index";
-import {ACTOpenMapSet} from "../../Store/main";
+import ReactGA from "react-ga";
+import {URL} from "../General/URLs";
+import {Log} from "../Serialization/VDF/VDF";
 
 let lastPath = "";
 //export function ProcessAction(action: Action<any>, newState: RootState, oldState: RootState) {
-export function ProcessAction(action: Action<any>) {
-	//if (action.type == "@@INIT") {
-	if (action.type == "persist/REHYDRATE" || action.type == "@@router/LOCATION_CHANGE") {
-		setTimeout(()=> {
-			if (GetPath().startsWith("global/map")) {
-				store.dispatch(new ACTOpenMapSet(1));
-				if (action.type == "persist/REHYDRATE")
-					LoadURL_Globals();
-				//setTimeout(()=>UpdateURL_Globals());
-				// we don't yet have a good way of knowing when loading is fully done; so just do a timeout
-				setTimeout(UpdateURL_Globals, 200);
-				setTimeout(UpdateURL_Globals, 400);
-				setTimeout(UpdateURL_Globals, 800);
-				setTimeout(UpdateURL_Globals, 1600);
-			}
-		});
-	}
-
+// only use this if you actually need to change the action-data before it gets dispatched/applied (otherwise use [Mid/Post]DispatchAction)
+export function PreDispatchAction(action: Action<any>) {
 	if (action.type == "@@reactReduxFirebase/SET" && action["data"]) {
 		// turn annoying arrays into objects
 		var treeNodes = GetTreeNodesInObjTree(action["data"], true);
@@ -81,6 +66,47 @@ export function ProcessAction(action: Action<any>) {
 			}
 		}*/
 	}
+}
+
+export function MidDispatchAction(action: Action<any>, newState: RootState) {
+}
+
+export function PostDispatchAction(action: Action<any>) {
+	//if (action.type == "@@INIT") {
+	//if (action.type == "persist/REHYDRATE" && GetPath().startsWith("global/map"))
+	if (action.type == "persist/REHYDRATE") {
+		store.dispatch({type: "PostRehydrate"}); // todo: ms this also gets triggered when there is no saved-state (ie, first load)
+	}
+	if (action.type == "PostRehydrate") {
+		LoadURL();
+		UpdateURL();
+		if (prodEnv && State().main.analyticsEnabled) {
+			Log("Initialized Google Analytics.");
+			//ReactGA.initialize("UA-21256330-33", {debug: true});
+			ReactGA.initialize("UA-21256330-33");
+
+			let url = URL.FromState(State().router.location).toString(false);
+			ReactGA.set({page: url});
+			ReactGA.pageview(url || "/");
+		}
+	}
+	if (action.type == "@@router/LOCATION_CHANGE") {
+		let url = URL.FromState(action.payload).toString(false);
+		//let url = window.location.pathname;
+		ReactGA.set({page: url});
+		ReactGA.pageview(url || "/");
+		//Log("Page-view: " + url);
+
+		//setTimeout(()=>UpdateURL());
+		UpdateURL();
+		if (GetPath().startsWith("global/map")) {
+			// we don't yet have a good way of knowing when loading is fully done; so just do a timeout
+			setTimeout(UpdateURL, 200);
+			setTimeout(UpdateURL, 400);
+			setTimeout(UpdateURL, 800);
+			setTimeout(UpdateURL, 1600);
+		}
+	}
 
 	/*let movingToGlobals = false;
 	if (action.type == "@@router/LOCATION_CHANGE") {
@@ -92,6 +118,6 @@ export function ProcessAction(action: Action<any>) {
 		setTimeout(()=>UpdateURL_Globals());
 	}*/
 	if (action.IsAny(ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange)) {
-		setTimeout(()=>UpdateURL_Globals());
+		UpdateURL();
 	}
 }

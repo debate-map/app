@@ -9,11 +9,11 @@ import NodeUI_Inner from "../../UI/@Shared/Maps/MapNode/NodeUI_Inner";
 import {GetOpenMapID} from "../../Store/main";
 import {GetMap} from "../../Store/firebase/maps";
 import {GetNodeView, GetMapView, GetSelectedNodeID, GetFocusNode, GetViewOffset} from "../../Store/main/mapViews";
-import {GetUrlVars} from "../General/Globals_Free";
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
 import {FromJSON, ToJSON} from "../General/Globals";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 import {GetPathNodes, GetPath} from "../../Store/router";
+import {URL, QueryVar, GetUrlVars} from "../General/URLs";
 
 // loading
 // ==========
@@ -109,9 +109,8 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 	return [nodeID, nodeView];
 }
 
-export function LoadURL_Globals() {
-	//let search = State().router.location.search;
-	//let urlVars = GetUrlVars(search);
+export function LoadURL() {
+	if (!GetPath().startsWith("global/map")) return;
 	let urlVars = GetUrlVars();
 	// example: /global?view=1:3:100:101f(384_111):102:.104:.....
 	let mapViewStr = urlVars.view;
@@ -125,28 +124,24 @@ export function LoadURL_Globals() {
 // saving
 // ==========
 
-export function UpdateURL_Globals() {
-	if (GetPath().startsWith("global/map")) {
-		let newURL = CreateURL_Globals();
-		store.dispatch(replace(newURL))
-	}
+export function UpdateURL() {
+	//let newURL = URL.Current();
+	let newURL = new URL(URL.Current().domain);
+	if (GetPath().startsWith("global/map"))
+		newURL = CreateURL_Globals();
+	if (!State().main.analyticsEnabled && newURL.GetQueryVar("analytics") == null)
+		newURL.SetQueryVar("analytics", "false");
+	if (State().main.envOverride)
+		newURL.SetQueryVar("env", State().main.envOverride);
+	store.dispatch(replace(newURL.toString(false)));
 }
-function CreateURL_Globals() {
-	let pathStr = "/global";
+function CreateURL_Globals(): URL {
+	//let result = URL.Current().Clone();
+	let result = new URL(URL.Current().domain);
+	result.pathNodes = ["global"];
 	let mapID = GetOpenMapID();
-	/*let selectedNodeID = GetSelectedNodeID(mapID);
-	if (selectedNodeID)
-		pathStr += selectedNodeID;*/
-
-	let searchProps = {} as any;
-	searchProps.view = GetMapViewStr(mapID);
-	/*let mapView = GetMapView(mapID);
-	if (mapView) {
-		searchProps.focus = mapView.focusNode;
-		searchProps.offset = mapView.viewOffset.toString().replace(" ", ",");
-	}*/
-
-	return `${pathStr}?${searchProps.Props.map(a=>a.name + "=" + a.value).join("&")}`;
+	result.queryVars.push(new QueryVar("view", GetMapViewStr(mapID)));
+	return result;
 }
 function GetMapViewStr(mapID: number) {
 	let map = GetMap(mapID);

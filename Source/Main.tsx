@@ -6,7 +6,6 @@ import "./Frame/General/CE";
 import "./Frame/Database/DatabaseHelpers";
 
 import * as React from "react";
-import {Component as BaseComponent, PropTypes} from "react";
 import ReactDOM from "react-dom";
 import injectTapEventPlugin from "react-tap-event-plugin";
 import {Store} from "redux";
@@ -15,21 +14,39 @@ import {GetTimeSinceLoad} from "./Frame/General/Globals_Free";
 import {RootState} from "./Store/index";
 import {FirebaseApplication} from "firebase";
 import Raven from "raven-js";
+import ReactGA from "react-ga";
+import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
 
 var JQuery = require("./Frame/JQuery/JQuery3.1.0");
 g.Extend({JQuery, jQuery: JQuery});
 g.$ = JQuery;
 
+import {GetUrlVars, CurrentUrl, URL} from "./Frame/General/URLs";
+let startURL = URL.Current();
+declare global { export var startURL: URL; }
+g.Extend({startURL});
+
 //let {version} = require("../../../package.json");
-import {version, env, devEnv, prodEnv, testEnv} from "./BakedConfig";
+//import {version, env, devEnv, prodEnv, testEnv} from "./BakedConfig";
+let {version, env, devEnv, prodEnv, testEnv} = require("./BakedConfig");
+if (startURL.GetQueryVar("env") && startURL.GetQueryVar("env") != "null") {
+	env = startURL.GetQueryVar("env");
+	devEnv = env == "development";
+	prodEnv = env == "production";
+	testEnv = env == "test";
+	//alert("Using env: " + env);
+	console.log("Using env: " + env);
+}
 g.Extend({env, devEnv, prodEnv, testEnv});
 
-Raven.config("https://40c1e4f57e8b4bbeb1e5b0cf11abf9e9@sentry.io/155432", {
-	release: version,
-	environment: env,
-}).install();
+if (prodEnv) {
+	Raven.config("https://40c1e4f57e8b4bbeb1e5b0cf11abf9e9@sentry.io/155432", {
+		release: version,
+		environment: env,
+	}).install();
+}
 
-//import createStore from "./Store/createStore";
+//import createStore from "./Frame/Store/CreateStore";
 var createStore = require("./Frame/Store/CreateStore").default;
 
 if (devEnv) {
@@ -84,8 +101,6 @@ store.dispatch = function(...args) {
 // wrapper ui
 // ==========
 
-//import {Component, PropTypes} from "react";
-import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
 g.Extend({React});
 
 // Tap Plugin

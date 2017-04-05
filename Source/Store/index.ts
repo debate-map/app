@@ -67,6 +67,6 @@ export function MakeRootReducer(asyncReducers?) {
 }
 
 interface RouterState {
-	location: LocationDescriptorObject;
+	location: LocationDescriptorObject & {hash: string}; // typing must be outdated, as lacks hash prop
 	history: any;
 }

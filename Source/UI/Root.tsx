@@ -24,7 +24,6 @@ import GlobalUI from "../UI/Global";
 import MoreUI from "../UI/More";
 import AdminUI from "../UI/More/Admin";
 import HomeUI from "../UI/Home";
-import {GetUrlPath, E} from "../Frame/General/Globals_Free";
 import {MessageBoxOptions, ACTMessageBoxShow, MessageBoxUI} from "../Frame/UI/VMessageBox";
 import Button from "../Frame/ReactComponents/Button";
 import NavBar from "../UI/@Shared/NavBar";
@@ -39,6 +38,8 @@ import DebatesUI from "./Debates";
 import SearchUI from "./Search";
 import ProfileUI from "./Profile";
 import {GetPathNodes} from "../Store/router";
+import ReactGA from "react-ga";
+import {P} from "../Frame/Serialization/VDF/VDFTypeInfo";
 
 // Create a history of your choosing (we're using a browser history in this case)
 const history = createBrowserHistory();

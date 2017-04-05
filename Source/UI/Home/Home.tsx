@@ -3,10 +3,11 @@ import SubNavBar from "../@Shared/SubNavBar";
 import {BaseComponent, SimpleShouldUpdate} from "../../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import {styles} from "../../Frame/UI/GlobalStyles";
-import {E, GetUrlPath, GetUrlParts, ToAbsoluteUrl, JumpToHash} from "../../Frame/General/Globals_Free";
 import ScrollView from "react-vscrollview";
 import {GetPathNodes} from "../../Store/router";
 import {PropTypes} from "react";
+import {GetUrlParts, JumpToHash, ToAbsoluteUrl} from "../../Frame/General/URLs";
+import {E} from "../../Frame/General/Globals_Free";
 
 let pageText = `
 The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them.${""

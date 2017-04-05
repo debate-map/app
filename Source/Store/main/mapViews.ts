@@ -10,7 +10,6 @@ import {GetMap, GetRootNodeID} from "../firebase/maps";
 import u from "updeep";
 import {MapViewReducer, ACTMapViewMerge} from "./mapViews/$mapView";
 import {ShallowChanged} from "../../Frame/UI/ReactGlobals";
-import {ACTOpenMapSet} from "../main";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 
 export function MapViewsReducer(state = new MapViews(), action: Action<any>) {

@@ -7,7 +7,6 @@ import {SubNavBarButton} from "./@Shared/SubNavBar";
 import {Route} from "react-router-dom";
 import HomeUI2 from "./Home/Home";
 import AboutUI from "./Home/About";
-import {GetUrlVars, GetUrlPath} from "../Frame/General/Globals_Free";
 import ScrollView from "react-vscrollview";
 import {GetPathNodes} from "../Store/router";
 

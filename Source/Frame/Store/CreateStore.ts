@@ -7,10 +7,10 @@ import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 import {persistStore, autoRehydrate} from "redux-persist";
 //import createFilter from "redux-persist-transform-filter";
 import {routerMiddleware} from 'react-router-redux'
-import {GetUrlVars} from "../General/Globals_Free";
 import {MakeRootReducer} from "../../Store/index";
 import watch from "redux-watch";
-import {ProcessAction} from "./ActionProcessor";
+import {PreDispatchAction, MidDispatchAction, PostDispatchAction} from "./ActionProcessor";
+import {GetUrlVars} from "../General/URLs";
 
 export const browserHistory = createBrowserHistory();
 
@@ -23,19 +23,27 @@ export default function(initialState = {}, history) {
 	// ==========
 	const middleware = [
 		thunk.withExtraArgument(getFirebase),
-		routerMiddleware(browserHistory)
+		// for some reason, this breaks stuff if we have it the last one
+		store=>next=>action=> {
+			PreDispatchAction(action);
+			const returnValue = next(action);
+			MidDispatchAction(action, returnValue);
+			setTimeout(()=>PostDispatchAction(action));
+			return returnValue;
+		},
+		routerMiddleware(browserHistory),
 	];
 
 	// Store Enhancers
 	// ==========
 	const enhancers = [];
-	if (devEnv) {
-		const devToolsExtension = g.devToolsExtension;
-		if (typeof devToolsExtension === "function") {
-			//enhancers.push(devToolsExtension());
-			enhancers.push(devToolsExtension({maxAge: 100}));
-		}
+	//if (devEnv) {
+	const devToolsExtension = g.devToolsExtension;
+	if (typeof devToolsExtension === "function") {
+		//enhancers.push(devToolsExtension());
+		enhancers.push(devToolsExtension({maxAge: 100}));
 	}
+	//}
 
 	// Store Instantiation and HMR Setup
 	// ==========

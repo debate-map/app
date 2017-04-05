@@ -12,14 +12,18 @@ import V from "../Frame/V/V";
 import {Map} from "../Store/firebase/maps/@Map";
 import {createSelector} from "reselect";
 import {GetTreeNodesInObjTree} from "../Frame/V/V";
-import {ProcessAction} from "../Frame/Store/ActionProcessor";
+import {PreDispatchAction} from "../Frame/Store/ActionProcessor";
 import {CachedTransform} from "../Frame/V/VCache";
 import {MapViewsReducer} from "./main/mapViews";
 import {RatingUIReducer, RatingUIState} from "./main/ratingUI";
 import NotificationMessage from "./main/@NotificationMessage";
+import {GetPathNodes} from "./router";
+import {GetUrlVars} from "../Frame/General/URLs";
 
 // class is used only for initialization
 export class MainState {
+	envOverride: string;
+	analyticsEnabled: boolean;
 	topLeftOpenPanel: string;
 	topRightOpenPanel: string;
 	ratingUI: RatingUIState;
@@ -33,15 +37,28 @@ export class ACTTopLeftOpenPanelSet extends Action<string> {}
 export class ACTTopRightOpenPanelSet extends Action<string> {}
 export class ACTNotificationMessageAdd extends Action<NotificationMessage> {}
 export class ACTNotificationMessageRemove extends Action<number> {}
-export class ACTOpenMapSet extends Action<number> {}
+//export class ACTOpenMapSet extends Action<number> {}
 export class ACTNodeCopy extends Action<number> {}
 
 let MainReducer_Real;
 export function MainReducer(state, action) {
 	MainReducer_Real = MainReducer_Real || CombineReducers({
-		_: (state = null, action)=> {
-			ProcessAction(action);
+		/*_: (state = null, action)=> {
+			PreDispatchAction(action);
 			return null;
+		},*/
+		envOverride: (state = null, action)=> {
+			//if ((action.type == "@@INIT" || action.type == "persist/REHYDRATE") && startURL.GetQueryVar("env")) {
+			if ((action.type == "PostRehydrate") && startURL.GetQueryVar("env"))
+				return startURL.GetQueryVar("env") == "null" ? null : startURL.GetQueryVar("env");
+			return state;
+		},
+		analyticsEnabled: (state = true, action)=> {
+			if (action.type == "@@router/LOCATION_CHANGE" && action.payload.search.Contains("analytics=false"))
+				return false;
+			if (action.type == "@@router/LOCATION_CHANGE" && action.payload.search.Contains("analytics=true"))
+				return true;
+			return state;
 		},
 		topLeftOpenPanel: (state = null, action)=> {
 			if (action.Is(ACTTopLeftOpenPanelSet))
@@ -63,10 +80,10 @@ export function MainReducer(state, action) {
 			return state;
 		},
 		openMap: (state = null, action)=> {
-			/*if (action.type == "@@router/LOCATION_CHANGE" && action.payload.pathname == "/global")
-				return 1;*/
-			if (action.Is(ACTOpenMapSet))
-				return action.payload;
+			if (action.type == "@@router/LOCATION_CHANGE" && GetPathNodes(action.payload.pathname.substr(1))[0] == "global")
+				return 1;
+			/*if (action.Is(ACTOpenMapSet))
+				return action.payload;*/
 			return state;
 		},
 		mapViews: MapViewsReducer,

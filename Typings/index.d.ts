@@ -17,5 +17,6 @@ declare var NODE_ENV: string; // compile-time/magic
 declare var env: string; // run-time
 declare var __DEV__: boolean, __PROD__: boolean, __TEST__: boolean; // compile-time/magic
 declare var devEnv: boolean, prodEnv: boolean, testEnv: boolean; // run-time
+//declare var startURL;
 
 declare type voidy = void | Promise<void>;

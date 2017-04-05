@@ -100,8 +100,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							}}
 							onClick={e=> {
 								store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path, expanded: !expanded, recursive: expanded && e.altKey}));
-								//return false;
 								e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
+								//return false;
 							}}>
 						{expanded ? "-" : "+"}
 					</Button>
