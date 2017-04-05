@@ -14,10 +14,16 @@ import {GetTimeSinceLoad} from "./Frame/General/Globals_Free";
 
 import {RootState} from "./Store/index";
 import {FirebaseApplication} from "firebase";
+import Raven from "raven-js";
 
 var JQuery = require("./Frame/JQuery/JQuery3.1.0");
 g.Extend({JQuery, jQuery: JQuery});
 g.$ = JQuery;
+
+let {version} = require("../../../package.json");
+Raven.config("https://40c1e4f57e8b4bbeb1e5b0cf11abf9e9@sentry.io/155432", {
+	release: version,
+}).install();
 
 //import createStore from "./Store/createStore";
 var createStore = require("./Frame/Store/CreateStore").default;
@@ -115,12 +121,3 @@ CreateStore();
 setTimeout(()=> {
 	RenderWrapper();
 });
-
-let timer = setInterval(()=> {
-	let NodeUI = g.Require("nodeui").default;
-	let timeSinceLastNodeUIRender = Date.now() - NodeUI.lastRenderTime;
-	if (NodeUI.renderCount == 0 || timeSinceLastNodeUIRender < 500) return;
-
-	console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
-	clearInterval(timer);
-}, 100);

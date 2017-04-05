@@ -6,19 +6,19 @@ import SubNavBar from "./@Shared/SubNavBar";
 import {SubNavBarButton} from "./@Shared/SubNavBar";
 import {IsUserAdmin} from "../Store/firebase/userExtras";
 import {Connect} from "../Frame/Database/FirebaseConnect";
-import {GetUserID, GetUserPermissionGroups} from "../Store/firebase/users";
+import {GetUserID, GetUserPermissionGroups, GetUsers} from "../Store/firebase/users";
 import {styles} from "../Frame/UI/GlobalStyles";
 import {GetPathNodes} from "../Store/router";
 
 @Connect(state=> ({
 	_: GetUserPermissionGroups(GetUserID()), // just to make sure we've retrieved this data (and re-render when it changes)
+	userCount: (GetUsers() || []).length,
 }))
-export default class MoreUI extends BaseComponent<{page?} & RouteProps, {}> {
+export default class MoreUI extends BaseComponent<{page?} & Partial<{userCount: number}>, {}> {
 	render() {
-		//let {page, children, match: {url: path = ""} = {}} = this.props;
-		let {page, children} = this.props;
+		let {page, userCount, children} = this.props;
 		let path = "/more";
-		let admin = IsUserAdmin(GetUserID());
+		let admin = IsUserAdmin(GetUserID()) || userCount == 0;
 		return (
 			<div>
 				<SubNavBar>

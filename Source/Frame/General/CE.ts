@@ -14,6 +14,8 @@ Object.defineProperty(Object.prototype, "_AddItem", { // note; these functions s
 	//configurable: true,
 	enumerable: false,
 	value: function(name, value, forceAdd) {
+		if (name == null || name.length == 0)
+			throw new Error("No prop-name was specified for _AddItem() call.");
 		if (this[name])
 			delete this[name];
 		if (!this[name] || forceAdd) { // workaround for some properties not being deleted
@@ -147,10 +149,9 @@ Object.prototype._AddFunction_Inline = function GetTypeName(vdfType = true) { //
 		else if (result == "Boolean")
 			result = "bool";
 		else if (result == "Number")
-			result = this.toString().contains(".") ? "double" : "int";
+			result = this.toString().Contains(".") ? "double" : "int";
 	}
 	return result;*/
-
 
 	/*var result = vdfTypeName ? VDF.GetTypeNameOfObject(this) : this.constructor.name;
 	//if (simplifyForVScriptSystem)

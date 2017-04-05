@@ -102,7 +102,7 @@ export class Type {
 		//Assert(VSType_Type.GetTypeByName(name) == null, `Cannot create a Type with same name as existing VSType_Type. (${name})`);
 
 		this.name = name;
-		this.nameRoot = name.contains("(") ? name.substr(0, name.indexOf("(")) : name;
+		this.nameRoot = name.Contains("(") ? name.substr(0, name.indexOf("(")) : name;
 
 		//if (!(this instanceof VSType_Type))
 		types[name] = this;

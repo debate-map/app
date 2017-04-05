@@ -37,13 +37,13 @@ function ParseMapView(viewStr: string) {
 /*function ParseNodeView(viewStr: string) {
 	let result = {} as MapNodeView;
 
-	let ownStr = viewStr.contains(",") ? viewStr.substr(0, viewStr.indexOf(",")) : viewStr;
-	if (ownStr.contains("s"))
+	let ownStr = viewStr.Contains(",") ? viewStr.substr(0, viewStr.indexOf(",")) : viewStr;
+	if (ownStr.Contains("s"))
 		result.selected = true;
-	if (ownStr.contains("f") || ownStr.contains("s"))
+	if (ownStr.Contains("f") || ownStr.Contains("s"))
 		result.focus = true;
 
-	let childrenStr = viewStr.contains(",") ? viewStr.slice(viewStr.indexOf(",") + 1, -1) : "";
+	let childrenStr = viewStr.Contains(",") ? viewStr.slice(viewStr.indexOf(",") + 1, -1) : "";
 	if (childrenStr.length) {
 		result.children = {};
 
@@ -61,25 +61,25 @@ function GetDataStrForProp(ownStr: string, propChar: string) {
 function ParseNodeView(viewStr: string): [number, MapNodeView] {
 	let nodeView = {} as MapNodeView;
 
-	let ownStr = viewStr.contains(":") ? viewStr.substr(0, viewStr.indexOf(":")) : viewStr;
-	let childrenStr = viewStr.contains(":") ? viewStr.slice(viewStr.indexOf(":") + 1, -1) : "";
+	let ownStr = viewStr.Contains(":") ? viewStr.substr(0, viewStr.indexOf(":")) : viewStr;
+	let childrenStr = viewStr.Contains(":") ? viewStr.slice(viewStr.indexOf(":") + 1, -1) : "";
 
 	let nodeID = parseInt(ownStr.match(/^[0-9]+/)[0]);
 
 	let ownStr_withoutParentheses = ownStr.replace(/\(.+?\)/g, "");
-	if (ownStr_withoutParentheses.contains("s"))
+	if (ownStr_withoutParentheses.Contains("s"))
 		nodeView.selected = true;
-	if (ownStr_withoutParentheses.contains("f")) {
+	if (ownStr_withoutParentheses.Contains("f")) {
 		nodeView.focus = true;
 		let viewOffsetStr = GetDataStrForProp(ownStr, "f");
 		let viewOffsetParts = viewOffsetStr.split("_").map(ToInt);
 		nodeView.viewOffset = new Vector2i(viewOffsetParts[0], viewOffsetParts[1]);
 	}
-	if (ownStr_withoutParentheses.contains("p")) {
+	if (ownStr_withoutParentheses.Contains("p")) {
 		nodeView.openPanel = GetDataStrForProp(ownStr, "p");
 	}
 
-	if (ownStr_withoutParentheses.contains("e"))
+	if (ownStr_withoutParentheses.Contains("e"))
 		nodeView.expanded = true;
 	else if (childrenStr && childrenStr.length) {
 		nodeView.expanded = true;

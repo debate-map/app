@@ -16,7 +16,7 @@ import {GetDistanceBetweenRectAndPoint} from "../../../Frame/General/Geometry";
 import NodeUI_Inner from "./MapNode/NodeUI_Inner";
 //import ReactResizeDetector from "react-resize-detector"; // this one doesn't seem to work reliably -- at least for the map-ui
 import ResizeSensor from "react-resize-sensor";
-import {WaitXThenRun} from "../../../Frame/General/Timers";
+import {WaitXThenRun, Timer} from "../../../Frame/General/Timers";
 import {MapNode} from "../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../Store/firebase/maps/@Map";
 import {RootState} from "../../../Store/index";
@@ -54,6 +54,16 @@ type Props = {map: Map} & Partial<{rootNode: MapNode, focusNode: string, viewOff
 	viewOffset_available: (GetMapView(state, {map}) && GetMapView(state, {map}).viewOffset) != null,*/
 }))
 export default class MapUI extends BaseComponent<Props, {} | void> {
+	ComponentDidMount() {
+		let timer = new Timer(.1, ()=> {
+			let timeSinceLastNodeUIRender = Date.now() - NodeUI.lastRenderTime;
+			if (NodeUI.renderCount == 0 || timeSinceLastNodeUIRender < 500) return;
+
+			console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
+			timer.Stop();
+		}).Start();
+	}
+
 	downPos: Vector2i;
 
 	hasLoadedScroll = false;
@@ -78,15 +88,15 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					opacity: 0;
 					visibility: hidden;
 					display: block;
-					height: 500;
+					height: 1000;
 					width: 100%;
-					margin-right: 1000px;
+					margin-right: 2000px;
 					pointer-events: none;
 				}
 				`}</style>
 				<div className="MapUI" ref="content"
 						style={{
-							position: "relative", display: "flex", padding: "500px 1000px", whiteSpace: "nowrap",
+							position: "relative", display: "flex", padding: "1000px 2000px", whiteSpace: "nowrap",
 							filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)",
 						}}
 						onMouseDown={e=>this.downPos = new Vector2i(e.clientX, e.clientY)}
@@ -117,7 +127,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						let nextPathTry = focusNode_target;
 						while (true) {
 							 focusNodeBox = $(".NodeUI_Inner").ToList().FirstOrX(nodeBox=>(FindReact(nodeBox[0]) as NodeUI_Inner).props.path == nextPathTry);
-							 if (focusNodeBox || !nextPathTry.contains("/")) break;
+							 if (focusNodeBox || !nextPathTry.Contains("/")) break;
 							 nextPathTry = nextPathTry.substr(0, nextPathTry.lastIndexOf("/"));
 						}
 						if (focusNodeBox == null) return;

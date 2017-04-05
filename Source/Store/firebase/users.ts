@@ -1,9 +1,14 @@
 import {GetData} from "../../Frame/Database/DatabaseHelpers";
 import {PermissionGroupSet} from "./userExtras/@UserExtraInfo";
+import {User} from "firebase";
 
 /*export function GetAuth(state: RootState) { 
 	return state.firebase.auth;
 }*/
+
+export function GetUsers() {
+	return GetData(`users`) as User[];
+}
 
 export function GetUserID(): string {
 	//return state.firebase.data.auth ? state.firebase.data.auth.uid : null;
@@ -14,9 +19,6 @@ export function GetUserID(): string {
 	return firebaseSet.toJS().auth.uid;*/
 	return State().firebase.get("auth") ? State().firebase.get("auth").uid : null;
 }
-export function GetUserPermissionGroups_Path(userID: string) {
-	return `userExtras/${userID}/permissionGroups`;
-}
 export function GetUserPermissionGroups(userID: string): PermissionGroupSet {
-	return GetData(GetUserPermissionGroups_Path(userID));
+	return GetData(`userExtras/${userID}/permissionGroups`);
 }

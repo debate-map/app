@@ -117,6 +117,10 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	constructor(props) {
 		super(props);
 		autoBind(this);
+		// if had @Radium decorator, then "this" is actually an instance of a class-specific "RadiumEnhancer" derived-class
+		//		so reach in to original class, and set up auto-binding for its prototype members as well
+		if (this.constructor.name == "RadiumEnhancer")
+			autoBind(Object.getPrototypeOf(this));
 		this.state = this.state || {} as any;
 
 		// if using PreRender, wrap render func

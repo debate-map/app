@@ -13,8 +13,8 @@ String.prototype.TrimEnd = function(...chars) {
 	return result;
 };
 
-interface String { contains: (str)=>boolean; }
-String.prototype._AddFunction_Inline = function contains(str, /*;optional:*/ startIndex) { return -1 !== String.prototype.indexOf.call(this, str, startIndex); };
+//interface String { Contains: (str)=>boolean; }
+String.prototype._AddFunction_Inline = function Contains(str, /*;optional:*/ startIndex) { return -1 !== String.prototype.indexOf.call(this, str, startIndex); };
 String.prototype._AddFunction_Inline = function hashCode() {
 	var hash = 0;
 	for (var i = 0; i < this.length; i++) {
@@ -118,7 +118,7 @@ String.prototype._AddFunction_Inline = function EndsWithAny(this: string, ...str
 };
 interface String { ContainsAny: (...strings: string[])=>boolean; }
 String.prototype._AddFunction_Inline = function ContainsAny(this: string, ...strings: string[]) {
-	return strings.Any(str=>this.contains(str));
+	return strings.Any(str=>this.Contains(str));
 };
 String.prototype._AddFunction_Inline = function SplitByAny() {
     var args = arguments;

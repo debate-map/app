@@ -16,21 +16,21 @@ var Log = function(msg, type = 'default') { if(!Debug) return;
 /*console.log_orig = console.log;
 console.log = function(message) {
     var str = message + "";
-    if (str.contains("blacklist pattern [")) return; // disable smooth-scroller extension's message
+    if (str.Contains("blacklist pattern [")) return; // disable smooth-scroller extension's message
     console.log_orig.apply(this, arguments);
 };*/
 
 var warn_orig = console.warn;
 console.warn = function(message) {
     //var str = message + "";
-    if (arguments[2] && arguments[2].contains("do not mix longhand and shorthand properties in the same style object")) return;
+    if (arguments[2] && arguments[2].Contains("do not mix longhand and shorthand properties in the same style object")) return;
     warn_orig.apply(this, arguments);
 };
 
 var error_orig = console.error;
 console.error = function(exception) {
     var str = exception + "";
-    if (str.contains('Warning: A component is `contentEditable`')) return;
+    if (str.Contains('Warning: A component is `contentEditable`')) return;
     //if (str.Contains("Warning: Unknown prop `")) return;
     error_orig.apply(this, arguments);
 

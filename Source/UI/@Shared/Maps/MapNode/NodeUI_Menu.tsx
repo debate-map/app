@@ -3,7 +3,7 @@ import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExt
 import {VMenuStub} from "react-vmenu";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Type} from "../../../../Frame/General/Types";
-import {GetUserID, GetUserPermissionGroups, GetUserPermissionGroups_Path} from "../../../../Store/firebase/users";
+import {GetUserID, GetUserPermissionGroups} from "../../../../Store/firebase/users";
 import {RootState} from "../../../../Store";
 import VMenu from "react-vmenu";
 import {BaseComponent, Pre, Div} from "../../../../Frame/UI/ReactGlobals";

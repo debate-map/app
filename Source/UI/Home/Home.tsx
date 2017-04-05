@@ -80,7 +80,7 @@ export default class HomeUI2 extends BaseComponent<{}, {}> {
 						let {href, nodeKey, children, literal, ...rest} = props;
 						return (
 							<a {...rest} href={href} key={nodeKey} onClick={e=> {
-								//let fullURL = href.contains("://") ? href : GetUrlParts()[0] + "/" + href;
+								//let fullURL = href.Contains("://") ? href : GetUrlParts()[0] + "/" + href;
 								let fullURL = ToAbsoluteUrl(href);
 								let toURLParts = GetUrlParts(fullURL);
 								let currentURLParts = GetUrlParts();

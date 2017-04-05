@@ -73,7 +73,7 @@ export function GetSelectedNodeID(mapID: number): number {
 		(_, {path}: {path: string})=>path,
 		(state: RootState, props)=> {
 			let {path, ...rest} = props;
-			if (!props.path.contains("/")) return null;
+			if (!props.path.Contains("/")) return null;
 			getParentNodeView = getParentNodeView || MakeGetNodeView();
 			return getParentNodeView(state, {...rest, path: path.substring(0, path.lastIndexOf("/"))});
 		},

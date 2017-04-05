@@ -185,9 +185,9 @@ export function GetUrlParts(url?: string): [string, string, string, string] {
 	let [domainStr, pathStr, varsStr, hashStr] = Array(4).fill(0).map(a=>"");
 
 	let urlToProcess = url;
-	if (urlToProcess.contains("#") && !varsStr.contains("runJS="))
+	if (urlToProcess.Contains("#") && !varsStr.Contains("runJS="))
 		[urlToProcess, hashStr] = urlToProcess.SplitAt(urlToProcess.indexOf("#"));
-	if (urlToProcess.contains("?"))
+	if (urlToProcess.Contains("?"))
 		[urlToProcess, varsStr] = urlToProcess.SplitAt(urlToProcess.indexOf("?"));
 	//if (urlToProcess.Matches("/").length == )
 	[domainStr, pathStr] = urlToProcess.SplitAt(urlToProcess.IndexOf_X("/", 2));
@@ -216,7 +216,7 @@ export function GetUrlVars(url?: string) {
 	return vars;
 }
 
-export var inFirefox = navigator.userAgent.toLowerCase().contains("firefox");
+export var inFirefox = navigator.userAgent.toLowerCase().Contains("firefox");
 
 // others
 // ==================
@@ -243,7 +243,7 @@ export function GetTimeSinceLoad() {
 
 /*window.evalOld = eval;
 window.eval = function(code) {
-    if (true) { //new Error().stack.contains("Packages/VDF")) //!code.contains(";") && code != "CallCS_Callback")
+    if (true) { //new Error().stack.Contains("Packages/VDF")) //!code.Contains(";") && code != "CallCS_Callback")
         window.lastSpecialEvalExpression = code;
         window.lastSpecialEvalStack = new Error().stack;
         //window.evalStacks = window.evalStacks || [];
