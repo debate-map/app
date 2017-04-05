@@ -43,7 +43,7 @@ Anyway, long story short, I eventually suspended that plan, and came back to thi
 
 I got to work over the next few weeks, designing as I went, and the result is what you see today!
 
-The state it's in now is pretty basic, but it's enough to at least demonstrate the concept.
+The state it's in now is pretty basic, but it has a good foundation and achieves its basic function.
 There are many things that can be built on top of this now, which I believe will increase its usefulness a lot.
 	
 For example:
