@@ -57,7 +57,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	ComponentDidMount() {
 		let timer = new Timer(.1, ()=> {
 			let timeSinceLastNodeUIRender = Date.now() - NodeUI.lastRenderTime;
-			if (NodeUI.renderCount == 0 || timeSinceLastNodeUIRender < 500) return;
+			if (NodeUI.renderCount == 0 || timeSinceLastNodeUIRender < 1500) return;
 
 			console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
 			timer.Stop();

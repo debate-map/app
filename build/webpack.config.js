@@ -7,9 +7,7 @@ const debug = require("debug")("app:webpack:config");
 var path = require("path");
 
 const paths = config.utils_paths;
-const __DEV__ = config.globals.__DEV__;
-const __PROD__ = config.globals.__PROD__;
-const __TEST__ = config.globals.__TEST__;
+const {__DEV__, __PROD__, __TEST__} = config.globals;
 
 debug("Creating configuration.");
 const webpackConfig = {

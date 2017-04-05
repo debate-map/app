@@ -20,16 +20,19 @@ var JQuery = require("./Frame/JQuery/JQuery3.1.0");
 g.Extend({JQuery, jQuery: JQuery});
 g.$ = JQuery;
 
-let {version} = require("../../../package.json");
+//let {version} = require("../../../package.json");
+import {version, env, devEnv, prodEnv, testEnv} from "./BakedConfig";
+g.Extend({env, devEnv, prodEnv, testEnv});
+
 Raven.config("https://40c1e4f57e8b4bbeb1e5b0cf11abf9e9@sentry.io/155432", {
 	release: version,
+	environment: env,
 }).install();
 
 //import createStore from "./Store/createStore";
 var createStore = require("./Frame/Store/CreateStore").default;
 
-declare var process;
-if (process.env.NODE_ENV !== "production") {
+if (devEnv) {
 	// this logs warning if a component doesn't have any props or state change, yet is re-rendered
 	const {whyDidYouUpdate} = require("why-did-you-update");
 	whyDidYouUpdate(React, {
@@ -92,8 +95,7 @@ injectTapEventPlugin();
 // ==========
 
 // this code is excluded from production bundle
-declare var __DEV__, module;
-if (__DEV__) {
+if (devEnv) {
 	/*if (window.devToolsExtension)
 		window.devToolsExtension.open();*/
 	if (module.hot) {

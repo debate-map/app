@@ -2,18 +2,16 @@ import {applyMiddleware, compose, createStore} from "redux";
 import thunk from "redux-thunk";
 import {createBrowserHistory} from "react-router/node_modules/history";
 import {reduxFirebase, getFirebase} from "react-redux-firebase";
-import {firebase as fbConfig} from "../../config";
+import {version, firebaseConfig} from "../../BakedConfig";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 import {persistStore, autoRehydrate} from "redux-persist";
 //import createFilter from "redux-persist-transform-filter";
-//import {version} from "../../package.json";
 import {routerMiddleware} from 'react-router-redux'
 import {GetUrlVars} from "../General/Globals_Free";
 import {MakeRootReducer} from "../../Store/index";
 import watch from "redux-watch";
 import {ProcessAction} from "./ActionProcessor";
 
-let {version} = require("../../../package.json");
 export const browserHistory = createBrowserHistory();
 
 export default function(initialState = {}, history) {
@@ -31,7 +29,7 @@ export default function(initialState = {}, history) {
 	// Store Enhancers
 	// ==========
 	const enhancers = [];
-	if (__DEV__) {
+	if (devEnv) {
 		const devToolsExtension = g.devToolsExtension;
 		if (typeof devToolsExtension === "function") {
 			//enhancers.push(devToolsExtension());
@@ -55,7 +53,7 @@ export default function(initialState = {}, history) {
 		initialState,
 		compose(
 			applyMiddleware(...middleware),
-			reduxFirebase(fbConfig, reduxFirebaseConfig),
+			reduxFirebase(firebaseConfig, reduxFirebaseConfig),
 			autoRehydrate(),
 			...enhancers
 		)

@@ -2,28 +2,29 @@ const debug = require("debug")("app:build:config");
 const fs = require("fs");
 const path = require("path");
 const pkg = require("../package.json");
-const outputPath = path.join(__dirname, "..", "Source/Config.ts");
+const outputPath = path.join(__dirname, "..", "Source/BakedConfig.ts");
 const config = require("../config");
+
+// TODO: load config from environments
+/*let env = config.env;
+if (process.env.TRAVIS_PULL_REQUEST === false) {
+	if (process.env.TRAVIS_BRANCH === "prod")
+		env = "production";
+}*/
 
 function createConfigFile(cb) {
 	const configObj = {
 		version: pkg.version,
-		env: "development",
-		firebase: config.firebase
+		firebaseConfig: config.firebase,
+		env: config.env,
+		devEnv: config.globals.__DEV__,
+		prodEnv: config.globals.__PROD__,
+		testEnv: config.globals.__TEST__,
 	};
 
-	// TODO: load config from environments
-	if (process.env.TRAVIS_PULL_REQUEST === false) {
-		if (process.env.TRAVIS_BRANCH === "prod") {
-			configObj.env = "production";
-		}
-	}
-
-	const fileString = `export const firebase = ${JSON.stringify(configObj.firebase, null, 2)}\n` +
-		"\n// Config for react-redux-firebase" +
-		"\n// For more details, visit https://prescottprue.gitbooks.io/react-redux-firebase/content/config.html" +
-		`\nexport const env = ${JSON.stringify(configObj.env)}\n` +
-		`\nexport default { firebase, env }\n`;
+	const fileString = Object.keys(configObj).map(key=> {
+		return `export const ${key} = ${JSON.stringify(configObj[key])};`;
+	}).join("\n");
 
 	fs.writeFile(outputPath, fileString, "utf8", (err) => {
 		if (err) {
@@ -37,6 +38,6 @@ function createConfigFile(cb) {
 
 (function () {
 	createConfigFile(() => {
-		debug("Config file successfully written to Source/Config.ts");
+		debug("Config file successfully written to Source/BakedConfig.ts");
 	})
 })();

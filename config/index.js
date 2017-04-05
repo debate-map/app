@@ -1,55 +1,55 @@
 /* eslint key-spacing:0 spaced-comment:0 */
-const path = require('path')
-const debug = require('debug')('app:config')
-const argv = require('yargs').argv
-const ip = require('ip')
+const path = require("path")
+const debug = require("debug")("app:config")
+const argv = require("yargs").argv
+const ip = require("ip")
 const environments = require("./environments");
 
-debug('Creating default configuration.')
+debug("Creating default configuration.")
 
 // Default Configuration
 // ==========
 
 const config = {
-	env : process.env.NODE_ENV || 'development',
+	env: process.env.NODE_ENV || "development",
 
 	// ----------------------------------
 	// Project Structure
 	// ----------------------------------
-	path_base  : path.resolve(__dirname, '..'),
-	dir_client : 'Source',
-	dir_dist   : 'dist',
-	dir_server : 'Server',
-	dir_test   : 'Tests',
+	path_base  : path.resolve(__dirname, ".."),
+	dir_client : "Source",
+	dir_dist   : "dist",
+	dir_server : "Server",
+	dir_test   : "Tests",
 
 	// ----------------------------------
 	// Server Configuration
 	// ----------------------------------
-	server_host : ip.address(), // use string 'localhost' to prevent exposure on local network
-	server_port : process.env.PORT || 3000,
+	server_host: ip.address(), // use string "localhost" to prevent exposure on local network
+	server_port: process.env.PORT || 3000,
 
 	// ----------------------------------
 	// Compiler Configuration
 	// ----------------------------------
-	compiler_babel : {
+	compiler_babel: {
 		cacheDirectory : true,
-		/*plugins        : ['transform-runtime', 'lodash', 'transform-decorators-legacy'],
-		presets        : ['es2015', 'react', 'stage-0'],*/
-		plugins        : ['babel-plugin-transform-runtime', 'babel-plugin-lodash', 'babel-plugin-transform-decorators-legacy'].map(require.resolve),
-		presets        : ['babel-preset-es2015', 'babel-preset-react', 'babel-preset-stage-0'].map(require.resolve),
+		/*plugins        : ["transform-runtime", "lodash", "transform-decorators-legacy"],
+		presets        : ["es2015", "react", "stage-0"],*/
+		plugins        : ["babel-plugin-transform-runtime", "babel-plugin-lodash", "babel-plugin-transform-decorators-legacy"].map(require.resolve),
+		presets        : ["babel-preset-es2015", "babel-preset-react", "babel-preset-stage-0"].map(require.resolve),
 	},
-	//compiler_devtool         : 'source-map',
-	compiler_devtool         : 'cheap-module-eval-source-map',
-	compiler_hash_type       : 'hash',
+	//compiler_devtool         : "source-map",
+	compiler_devtool         : "cheap-module-eval-source-map",
+	compiler_hash_type       : "hash",
 	compiler_fail_on_warning : false,
 	compiler_quiet           : false,
-	compiler_public_path     : '/',
+	compiler_public_path     : "/",
 	compiler_stats           : {
 		chunks : false,
 		chunkModules : false,
 		colors : true
 	},
-	compiler_vendors : [
+	compiler_vendors: [
 		"react",
 		"react-router",
 		"react-redux",
@@ -73,9 +73,9 @@ const config = {
 
  	// Test Configuration
 	// ----------
-	coverage_reporters : [
-		{ type : 'text-summary' },
-		{ type : 'lcov', dir : 'coverage' }
+	coverage_reporters: [
+		{type : "text-summary"},
+		{type : "lcov", dir : "coverage"}
 	]
 };
 
@@ -89,31 +89,28 @@ const config = {
 
 // N.B.: globals added here must _also_ be added to .eslintrc
 config.globals = {
-	'process.env'  : {
-		'NODE_ENV' : JSON.stringify(config.env)
+	"process.env": {
+		"NODE_ENV": JSON.stringify(config.env)
 	},
-	'NODE_ENV'     : config.env,
-	'__DEV__'      : config.env === 'development',
-	'__PROD__'     : config.env === 'production',
-	'__TEST__'     : config.env === 'test',
-	'__COVERAGE__' : !argv.watch && config.env === 'test',
-	'__BASENAME__' : JSON.stringify(process.env.BASENAME || '')
+	"NODE_ENV": config.env,
+	"__DEV__": config.env == "development",
+	"__PROD__": config.env == "production",
+	"__TEST__": config.env == "test",
+	"__COVERAGE__": !argv.watch && config.env === "test",
+	"__BASENAME__": JSON.stringify(process.env.BASENAME || "")
 }
 
 // Validate Vendor Dependencies
 // ==========
 
-const pkg = require('../package.json')
+const pkg = require("../package.json")
 
 config.compiler_vendors = config.compiler_vendors
 	.filter((dep) => {
 		if (pkg.dependencies[dep]) return true
 
-		debug(
-		  `Package "${dep}" was not found as an npm dependency in package.json; ` +
-		  `it won't be included in the webpack vendor bundle.
-		   Consider removing it from \`compiler_vendors\` in ~/config/index.js`
-		)
+		debug(`Package "${dep}" was not found as an npm dependency in package.json; it won't be included in the webpack vendor bundle.`
+			+ ` Consider removing it from \`compiler_vendors\` in ~/config/index.js`)
 	})
 
 // Utilities
@@ -136,10 +133,10 @@ config.utils_paths = {
 debug(`Looking for environment overrides for NODE_ENV "${config.env}".`)
 const overrides = environments[config.env]
 if (overrides) {
-	debug('Found overrides, applying to default configuration.')
+	debug("Found overrides, applying to default configuration.")
 	Object.assign(config, overrides(config))
 } else {
-	debug('No environment overrides found, defaults will be used.')
+	debug("No environment overrides found, defaults will be used.")
 }
 
 module.exports = config;

@@ -40,7 +40,7 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 							// ==========
 
 							//let user1Keys = {dev: "Ecq3r7NvgahaMwQQ3PsdgqAFirD2", prod: "EElUKWc2RFNacoSrdgqKbrksQnA3"};
-							let user1Key = __DEV__ ? "Ecq3r7NvgahaMwQQ3PsdgqAFirD2" : "EElUKWc2RFNacoSrdgqKbrksQnA3";
+							let user1Key = devEnv ? "Ecq3r7NvgahaMwQQ3PsdgqAFirD2" : "EElUKWc2RFNacoSrdgqKbrksQnA3";
 							data.users = {
 								[user1Key]: {
 									avatarUrl: "https://lh6.googleusercontent.com/-CeOB1puP1U8/AAAAAAAAAAI/AAAAAAAAAZA/nk51qe4EF8w/photo.jpg",
