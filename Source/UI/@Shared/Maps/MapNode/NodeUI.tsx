@@ -67,6 +67,9 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 	});
 })
 export default class NodeUI extends BaseComponent<Props, State> {
+	static renderCount = 0;
+	static lastRenderTime = -1;
+	
 	constructor(props) {
 		super(props);
 		this.state = {svgInfo: {}} as any;
@@ -81,6 +84,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let {map, node, path, widthOverride, nodeView, nodeChildren, children} = this.props;
 		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
 		//Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
+		NodeUI.renderCount++;
+		NodeUI.lastRenderTime = Date.now();
 
 		let separateChildren = node.type == MapNodeType.Thesis;
 		let upChildren = node.type == MapNodeType.Thesis ? nodeChildren.Where(a=>a.type == MapNodeType.SupportingArgument) : [];
@@ -92,9 +97,11 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		this.childBoxes = [];
 		return (
 			<div className="NodeUI clickThrough" style={{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}}>
-				<div ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{
-					paddingTop: innerBoxOffset,
-				}}>
+				<div ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={E(
+					/*useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
+					!useAutoOffset && {paddingTop: innerBoxOffset},*/
+					{paddingTop: innerBoxOffset}
+				)}>
 					<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
 				</div>
 				{nodeChildren == childrenPlaceholder &&
@@ -191,9 +198,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	}
 
 	OnHeightOrPosChange() {
+		let {onHeightOrPosChange} = this.props;
 		//Log(`OnHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id};centerY:${this.state.childrenCenterY}`);
 		this.UpdateState(true);
-		let {onHeightOrPosChange} = this.props;
 		if (onHeightOrPosChange) onHeightOrPosChange();
 	}
 	UpdateState(forceUpdate = false) {
@@ -241,7 +248,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			});
 			newState.svgInfo = {mainBoxOffset, oldChildBoxOffsets};
 		}
-
+		
 		var changedState = this.SetState(newState, null, !forceUpdate);
 		//Log(`Changed state? (${this.props.node._id}): ` + changedState);
 	}

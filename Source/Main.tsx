@@ -115,3 +115,12 @@ CreateStore();
 setTimeout(()=> {
 	RenderWrapper();
 });
+
+let timer = setInterval(()=> {
+	let NodeUI = g.Require("nodeui").default;
+	let timeSinceLastNodeUIRender = Date.now() - NodeUI.lastRenderTime;
+	if (NodeUI.renderCount == 0 || timeSinceLastNodeUIRender < 500) return;
+
+	console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
+	clearInterval(timer);
+}, 100);
