@@ -13,7 +13,7 @@ Plain text would work fine as a pair started out:
 * Person A would express a position, and a basic argument.
 * Person B would make his response -- tied in with his own initial statement.
 * Person A would then defend his points, while also responding to the points just made by person B.
-* Person B would point out an invalid inference in person A's latest post, while tying that in rhetorically with some further, unnecessary elaboration of his initial argument.
+* Person B would point out an invalid inference in person A's latest post, while tying that in rhetorically with some further elaboration of his initial argument.
 
 In the best of cases, this process would occur linearly or with a slight narrowing of scope, and would eventually wrap up with both sides having learned something.
 In the worst of cases, the posts would increase in size by 50% or more each generation, leading it to very quickly
