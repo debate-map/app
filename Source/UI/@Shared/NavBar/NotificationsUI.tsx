@@ -13,7 +13,7 @@ export default class NotificationsUI extends BaseComponent<{} & Partial<{message
 	render() {
 		let {messages} = this.props;
 		return (
-			<Column ct style={{maxWidth: "30%", alignItems: "flex-start", filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)"}}>
+			<Column ct style={{maxWidth: "30%", alignItems: "flex-start", filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}>
 				{messages.map((message, index)=> {
 					return <MessageUI key={index} message={message}/>;
 				})}

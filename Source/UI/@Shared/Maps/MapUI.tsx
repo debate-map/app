@@ -97,7 +97,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 				<div className="MapUI" ref="content"
 						style={{
 							position: "relative", display: "flex", padding: "1000px 2000px", whiteSpace: "nowrap",
-							filter: "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)",
+							filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))",
 						}}
 						onMouseDown={e=>this.downPos = new Vector2i(e.clientX, e.clientY)}
 						onClick={e=> {
