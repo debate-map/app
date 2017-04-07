@@ -79,6 +79,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 			<ScrollView ref="scrollView" backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.content}
 					scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}
 					onScrollEnd={pos=> {
+						Log("Updating..." + pos);
 						UpdateFocusNodeAndViewOffset(map._id);
 					}}>
 				<style>{`
@@ -143,9 +144,9 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						loadScroll();
 						//Log(viewCenter_onScreen + ";" + viewOffset_current + ";" + viewOffset_changeNeeded + "; final:" + (nextPathTry == focusNode_target));
 						if (nextPathTry == focusNode_target) {
-							setTimeout(loadScroll, 400);
-							setTimeout(loadScroll, 800);
-							setTimeout(()=>this.hasLoadedScroll = true, 3000);
+							WaitXThenRun(0, loadScroll, 400);
+							WaitXThenRun(0, loadScroll, 800);
+							WaitXThenRun(0, ()=>this.hasLoadedScroll = true, 3000);
 						}
 					}}/>
 				</div>

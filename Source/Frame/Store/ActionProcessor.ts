@@ -101,10 +101,10 @@ export function PostDispatchAction(action: Action<any>) {
 		UpdateURL();
 		if (GetPath().startsWith("global/map")) {
 			// we don't yet have a good way of knowing when loading is fully done; so just do a timeout
-			setTimeout(UpdateURL, 200);
-			setTimeout(UpdateURL, 400);
-			setTimeout(UpdateURL, 800);
-			setTimeout(UpdateURL, 1600);
+			WaitXThenRun(0, UpdateURL, 200);
+			WaitXThenRun(0, UpdateURL, 400);
+			WaitXThenRun(0, UpdateURL, 800);
+			WaitXThenRun(0, UpdateURL, 1600);
 		}
 	}
 

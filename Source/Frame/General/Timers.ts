@@ -17,9 +17,24 @@ export function TryCall_OnX(obj, func, ...args) {
 }
 g.Extend({TryCall, TryCall_OnX});
 
-//g.requestAnimationFrame = function() {};
+/*let oldTimeout = setTimeout;
+g.setTimeout = function(func: Function, delayInMS = 0, ...args) {
+	// setTimeout can take really long on Chrome mobile (eg. while scrolling), for some reason (like, 1.5 seconds)
+	// on desktop, setImmediate is better as well, since it takes ~0ms instead of 1-15ms
+	if (delayInMS == 0)
+		return setImmediate(func, ...args);
+	return oldTimeout(func, delayInMS, ...args);
+}*/
 
-export function WaitXThenRun(waitTime, func): number { return setTimeout(func, waitTime); }
+declare global { function WaitXThenRun(delayInMS, func, ...args): number; }
+g.Extend({WaitXThenRun});
+export function WaitXThenRun(delayInMS, func, ...args): number {
+	// setTimeout can take really long on Chrome mobile (eg. while scrolling), for some reason (like, 1.5 seconds)
+	// on desktop, setImmediate is better as well, since it takes ~0ms instead of 1-15ms
+	if (delayInMS == 0)
+		return setImmediate(func, ...args);
+	return setTimeout(func, delayInMS, ...args);
+}
 export function Sleep(ms) {
 	var startTime = new Date().getTime();
 	while (new Date().getTime() - startTime < ms)

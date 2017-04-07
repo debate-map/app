@@ -28,7 +28,7 @@ export default function(initialState = {}, history) {
 			PreDispatchAction(action);
 			const returnValue = next(action);
 			MidDispatchAction(action, returnValue);
-			setTimeout(()=>PostDispatchAction(action));
+			WaitXThenRun(0, ()=>PostDispatchAction(action));
 			return returnValue;
 		},
 		routerMiddleware(browserHistory),

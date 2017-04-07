@@ -61,7 +61,7 @@ export function Connect<T, P>(funcOrFuncWrapper) {
 		let oldRequestedPaths = s.lastRequestedPaths || [];
 		let requestedPaths = GetRequestedPaths();
 		if (firebase._ && ShallowChanged(requestedPaths, oldRequestedPaths)) {
-			setTimeout(()=> {
+			setImmediate(()=> {
 				s._firebaseEvents = getEventsFromInput(requestedPaths);
 				let removedPaths = oldRequestedPaths.Except(...requestedPaths);
 				unWatchEvents(firebase, store.dispatch, getEventsFromInput(removedPaths));

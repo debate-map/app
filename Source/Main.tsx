@@ -85,11 +85,11 @@ function CreateStore() {
 	g.Extend({store});
 }
 
+declare global { function State(): RootState; }
+g.Extend({State});
 function State() {
 	return store.getState();
 }
-g.Extend({State});
-declare global { var State: ()=>RootState; }
 
 /*function GetState() {
 	return (store as Store<RootState>).getState().As(RootState);
