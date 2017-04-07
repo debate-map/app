@@ -19,8 +19,8 @@ import ReactGA from "react-ga";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
 
 let browser = GetBrowser().name;
-if (!["Chrome", "Safari", "Firefox", "Edge"].Contains(browser)) {
-	alert(`Sorry! Your browser (${browser}) is not supported. Please use a newer browser such as Chrome, Safari, Firefox, or Edge.`);
+if (!supportedBrowsers.Contains(browser)) {
+	alert(`Sorry! Your browser (${browser}) is not supported. Please use a supported browser such as Chrome, Firefox, or Safari.`);
 }
 
 var JQuery = require("./Frame/JQuery/JQuery3.1.0");
@@ -53,7 +53,7 @@ if (prodEnv) {
 }
 
 //import createStore from "./Frame/Store/CreateStore";
-import {GetBrowser} from "./Frame/General/UserAgent";
+import {GetBrowser, supportedBrowsers} from "./Frame/General/UserAgent";
 var createStore = require("./Frame/Store/CreateStore").default;
 
 if (devEnv) {

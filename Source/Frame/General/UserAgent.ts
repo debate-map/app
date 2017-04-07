@@ -1,9 +1,14 @@
 import {UAParser} from "ua-parser-js";
 
+export const supportedBrowsers = ["Chrome", "Firefox", "Safari", "Chrome WebView", "Mobile Safari", "Edge"];
+export type supportedBrowsers =
+	| "Chrome" // desktop and mobile
+	| "Firefox" // desktop and mobile
+	| "Safari" | "Mobile Safari" // desktop and mobile
+	// supported, but not promoted (eg, mentioned in browser-not-supported warning)
+	| "Chrome WebView" // android-browser
+	| "Edge" // desktop and mobile (they're the same);
 type BrowserName =
-	// main
-	"Chrome" | "Safari" | "Firefox" | "Edge"
-	// full
 	| "Amaya" | "Android Browser" | "Arora" | "Avant" | "Baidu" | "Blazer" | "Bolt" | "Camino" | "Chimera" | "Chrome"
 	| "Chromium" | "Comodo Dragon" | "Conkeror" | "Dillo" | "Dolphin" | "Doris" | "Edge" | "Epiphany" | "Fennec"
 	| "Firebird" | "Firefox" | "Flock" | "GoBrowser" | "iCab" | "ICE Browser" | "IceApe" | "IceCat" | "IceDragon"
