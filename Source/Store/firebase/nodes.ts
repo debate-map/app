@@ -19,7 +19,7 @@ export function GetNodeChildIDs(nodeID: number) {
 	let node = GetNode(nodeID);
 	// any time the childIDs changes, we know the node object changes as well; so just cache childIDs on node
 	if (node["@childIDs"] == null)
-		node._Set("@childIDs", (node.children || {}).VKeys().Except("_key").map(id=>parseInt(id)));
+		node.VSet("@childIDs", (node.children || {}).VKeys().Except("_key").map(id=>parseInt(id)), {});
 	return node["@childIDs"];
 }
 export function GetNodeChildren(node: MapNode) {

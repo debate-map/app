@@ -57,9 +57,9 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 		let {dispatch} = this.context.store;
 		return (
 			<div style={{
-				padding: "0 10px", boxShadow: colors.navBarBoxShadow,
+				position: "relative", zIndex: 11, padding: "0 10px", boxShadow: colors.navBarBoxShadow,
 				//background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
-				background: "rgba(0,0,0,1)", zIndex: 11,
+				background: "rgba(0,0,0,1)",
 			}}>
 				<div style={{display: "flex"}}>
 					<span style={{position: "absolute", left: 0}}>

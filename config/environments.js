@@ -30,7 +30,8 @@ module.exports = {
 		compiler_fail_on_warning: false,
 		compiler_hash_type: "chunkhash",
 		//compiler_devtool: null,
-		compiler_devtool: "source-map",
+		//compiler_devtool: "cheap-module-source-map",
+		//compiler_devtool: "source-map",
 		compiler_stats: {
 			chunks: true,
 			chunkModules: true,

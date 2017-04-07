@@ -45,6 +45,7 @@ export function CachedTransform<T, T2, T3>(...args) {
 		[staticProps, dynamicProps, transformFunc] = args;
 		// if no transform-type specified, just use location of calling line of code
 		transformType = new Error().stack.split("\n")[2];
+		//transformType = (()=>{try {throw new Error();}catch(ex) {return ex.stack.split("\n")[3];}})(); // for ie
 	} else {
 		[transformType, staticProps, dynamicProps, transformFunc] = args;
 	}

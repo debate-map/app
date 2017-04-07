@@ -16,17 +16,16 @@ Object.defineProperty(Object.prototype, "_AddItem", { // note; these functions s
 	value: function(name, value, forceAdd) {
 		if (name == null || name.length == 0)
 			throw new Error("No prop-name was specified for _AddItem() call.");
-		if (this[name])
-			delete this[name];
-		if (!this[name] || forceAdd) { // workaround for some properties not being deleted
-			Object.defineProperty(this, name, {
-				configurable: true, // for some reason, we get an error otherwise in non-dev mode (same for below)
-				enumerable: false,
-				value: value
-			});
-			/*if (this[name] == null)
-				throw new Error(`Failed to add property "${name}" to type "${this}".`);*/
-		}
+		if (name in this) delete this[name];
+		if (name in this && !forceAdd) return; // workaround for some properties not being deleted
+
+		Object.defineProperty(this, name, {
+			configurable: true, // for some reason, we get an error otherwise in non-dev mode (same for below)
+			enumerable: false,
+			value: value
+		});
+		/*if (this[name] == null)
+			throw new Error(`Failed to add property "${name}" to type "${this}".`);*/
 	}
 });
 interface Object { _AddFunction: (name: string, func: Function)=>void; }
@@ -39,34 +38,28 @@ Object.prototype._AddItem("_AddFunction", function(name, func) {
 interface Object { _AddGetterSetter: (name: string, getter: Function, setter: Function)=>void; }
 Object.prototype._AddFunction("_AddGetterSetter", function(name, getter, setter) {
 	//var name = (getter || setter).name || (getter || setter).toString().match(/^function\s*([^\s(]+)/)[1];
-	if (this[name])
-		delete this[name];
-	if (!this[name]) // workaround for some properties not being deleted
-		if (getter && setter)
-			Object.defineProperty(this, name, {configurable: true, enumerable: false, get: getter, set: setter});
-		else if (getter)
-			Object.defineProperty(this, name, {configurable: true, enumerable: false, get: getter});
-		else
-			Object.defineProperty(this, name, {configurable: true, enumerable: false, set: setter});
+	if (name in this) delete this[name];
+	if (name in this) return; // workaround for some properties not being deleted
+
+	let info = {configurable: true, enumerable: false} as PropertyDescriptor;
+	if (getter) info.get = getter;
+	if (setter) info.set = setter;
+	Object.defineProperty(this, name, info);
 });
 
 // the below lets you do stuff like this: Array.prototype._AddFunction_Inline = function AddX(value) { this.push(value); }; [].AddX = "newItem";
-// maybe make-so: these use func.GetName()
 interface Object { _AddFunction_Inline: Function; }
 Object.prototype._AddGetterSetter("_AddFunction_Inline", null, function(func) {
-	this._AddFunction(func.name_fake || func.name, func);
+	this._AddFunction(func.GetName(), func);
 });
 interface Object { _AddGetter_Inline: Function; }
 Object.prototype._AddGetterSetter("_AddGetter_Inline", null, function(func) {
-	this._AddGetterSetter(func.name_fake || func.name, func, null);
+	this._AddGetterSetter(func.GetName(), func, null);
 });
 interface Object { _AddSetter_Inline: Function; }
 Object.prototype._AddGetterSetter("_AddSetter_Inline", null, function(func) {
-	this._AddGetterSetter(func.name_fake || func.name, null, func);
+	this._AddGetterSetter(func.GetName(), null, func);
 });
-
-// alias for _AddFunction_Inline, since now we need to add functions to the "window" object relatively often
-//Object.prototype._AddGetterSetter("AddFunc", null, function(func) { this._AddFunction(func.name, func); });
 
 // Function (early)
 // ==========
@@ -77,30 +70,12 @@ interface Object { // add to Object interface, otherwise TS thinks "Function" re
 	SetName(name: string): Function;
 }
 
-//Function.prototype._AddFunction_Inline = function GetName() { return this.name || this.name_fake || this.toString().match(/^function\s*([^\s(]+)/)[1]; };
-Function.prototype._AddFunction_Inline = function GetName() { return this.name_fake || this.name || this.toString().match(/^function\s*([^\s(]+)/)[1]; };
+//Function.prototype._AddFunction_Inline = function GetName() { return this.name_fake || this.name || this.toString().match(/^function\s*([^\s(]+)/)[1]; };
+Function.prototype._AddFunction("GetName", function() { return this.name_fake || this.name || (this.toString().match(/^function\s*([^\s(]+)/) || [])[1]; });
 Function.prototype._AddFunction_Inline = function SetName(name: string) { this.name_fake = name; return this; };
-// probably make-so: SetName_Temp function exists
-//Function.prototype._AddFunction_Inline = function Call_Silent(self) { this.apply(self, V.Slice(arguments, 1)); return this; }
-//Function.prototype._AddFunction_Inline = function Call_Silent() { this.apply(this, arguments); return this; }
 
 // Object: C# polyfills/emulators
 // ==================
-
-/*Object.prototype._AddGetterSetter("AddMethod", null, function(func) { // for steamlined prototype-method-adding, that doesn't overwrite the method if it already exists (maybe just for use in this project)
-	if (this.prototype[func.GetName()] == null)
-		this._AddFunction(func.GetName(), func);
-});*/
-Object.prototype._AddSetter_Inline = function AddMethod(func) { // for steamlined prototype-method-adding, that doesn't overwrite the method if it already exists (maybe just for use in this project)
-	if (this[func.GetName()] == null)
-		this._AddFunction(func.GetName(), func);
-};
-// maybe temp; shorthand version (i.e.: p.method = function MethodName() {};)
-/*Object.prototype._AddSetter_Inline = function method(func) //Method, add, Add,
-{
-	if (this[func.GetName()] == null)
-		this._AddFunction(func.GetName(), func);
-};*/
 
 Object.prototype._AddFunction_Inline = function SetBaseClass(baseClassFunc) {
 	//this.prototype.__proto__ = baseClassFunc.prototype; // makes "(new ThisClass()) instanceof BaseClass" be true
@@ -136,11 +111,8 @@ Object.prototype._AddFunction_Inline = function CallBaseConstructor_Manual(deriv
 	return this;
 };*/
 
-//Object.prototype._AddFunction_Inline = function GetVDFTypeInfo() { return VDFTypeInfo.Get(this.GetTypeName()); };
-//Object.prototype._AddFunction_Inline = function GetVDFTypeInfo() { return VDFTypeInfo.Get(this.GetType()); };
 Object.prototype._AddFunction_Inline = function GetVDFTypeInfo() { return VDFTypeInfo.Get(this.constructor); };
 
-//Object.prototype._AddFunction_Inline = function GetType() { return this.constructor; };
 Object.prototype._AddFunction_Inline = function GetTypeName(vdfType = true) { //, simplifyForVScriptSystem)
 	/*var result = this.constructor.name;
 	if (allowProcessing) 	{
@@ -171,10 +143,6 @@ Object.prototype._AddFunction_Inline = function GetTypeName(vdfType = true) { //
     return result;
 };*/
 
-/*import V from "../Packages/V/V";
-import {GetTypeName, IsNumberString, SimplifyType} from "./Globals";
-import {max, min} from "moment";*/
-
 // Object: normal
 // ==================
 
@@ -185,8 +153,6 @@ import {max, min} from "moment";*/
 		this[itemName] = defaultValue;
 	return this[itemName];
 };*/
-//Object.prototype._AddFunction_Inline = function CopyXChildrenAsOwn(x) { $.extend(this, x); };
-//Object.prototype._AddFunction_Inline = function CopyXChildrenToClone(x) { return $.extend($.extend({}, this), x); };
 
 // must also do it on window/global, for some reason
 g.Extend = function(x) {
@@ -209,21 +175,33 @@ Object.prototype._AddFunction_Inline = function Extend(x) {
 };
 
 // as replacement for C#'s "new MyClass() {prop = true}"
-//interface Object { Init: (obj)=>Object; }
 // seems this should work, to be consistent with in-class usage, but whatever; below it's an alternative that works for interfaces
-//interface Object { Init(obj: any): this; }
-interface Object { Init<T>(this: T, obj: any): T; }
-Object.prototype._AddFunction_Inline = function Init(x) { return this.Extend(x); };
+//interface Object { VSet(props: any): this; }
+interface Object {
+	VSet<T>(this: T, props: any, defineProp_info?: PropertyDescriptor): T;
+	VSet<T>(this: T, propName: string, propValue, defineProp_info?: PropertyDescriptor): T;
+}
+Object.prototype._AddFunction_Inline = function VSet(...args) {
+	let props, defineProp_info: PropertyDescriptor, propName: string, propValue: string;
+	if (typeof args[0] == "object") [props, defineProp_info] = args;
+	else [propName, propValue, defineProp_info] = args;
 
-interface Object { Get(propName: any): any; }
-Object.prototype._AddFunction_Inline = function Get(propName) { return this[propName]; };
-interface Object { VSet<T>(this: T, obj: any): T; }
-Object.prototype._AddFunction_Inline = function VSet(other) {
-	for (var name in other)
-        this[name] = other[name];
+	const SetProp = (name, value)=> {
+		if (defineProp_info) {
+			Object.defineProperty(this, name, Object.assign({configurable: true}, defineProp_info, {value: props[name]}));
+		} else {
+			this[name] = props[name];
+		}
+	};
+	if (props) {
+		for (var name in props) {
+			SetProp(name, props[name]);
+		}
+	} else {
+		SetProp(propName, propValue);
+	}
 	return this;
 };
-
 interface Object { Extended<T>(this: T, x): T; }
 Object.prototype._AddFunction_Inline = function Extended(x) {
 	var result = {};
@@ -241,6 +219,17 @@ Object.prototype._AddFunction_Inline = function Extended2(x) {
 };
 //Object.prototype._AddFunction_Inline = function E(x) { return this.Extended(x); };
 
+Object.prototype._AddFunction_Inline = function VAct(action) {
+	action.call(this);
+	return this;
+};
+
+interface Object { As<T>(type: new(..._)=>T): T; }
+Object.prototype._AddFunction_Inline = function As<T>(type: new(..._)=>T) {
+	Object.setPrototypeOf(this, type.prototype);
+	return this as T;
+};
+
 interface Object { Including(...propNames: string[]): Object; }
 Object.prototype._AddFunction_Inline = function Including(...propNames) {
     var result = {};
@@ -256,17 +245,6 @@ Object.prototype._AddFunction_Inline = function Excluding(...propNames) {
     return result;
 }
 
-/*Object.prototype._AddFunction_Inline = function Keys() {
-	var result = [];
-	for (var key in this)
-		if (this.hasOwnProperty(key))
-			result.push(key);
-	return result;
-};*/
-//Object.prototype._AddFunction_Inline = function Keys() { return Object.keys(this); }; // "Keys" is already used for Dictionary prop
-//Object.prototype._AddGetter_Inline = function VKeys() { return Object.keys(this); }; // "Keys" is already used for Dictionary prop
-
-// "Keys" is already used for Dictionary prop
 interface Object { VKeys(): string[]; }
 Object.prototype._AddFunction_Inline = function VKeys() { return Object.keys(this); };
 /*interface Object { VKeys(excludeKeyAndID?: boolean): string[]; }
@@ -285,49 +263,6 @@ Object.prototype._AddGetter_Inline = function Props() {
 		//result.push({index: i++, key: propName, name: propName, value: this[propName]});
 		result.push({index: i++, name: propName, value: this[propName]});
 	return result;
-};
-/*Object.defineProperty(Object.prototype, "Keys", {
-	enumerable: false,
-	configurable: true,
-	get: function() { return Object.keys(this); }
-	//get: Object.keys
-});*/
-/*Object.prototype._AddGetter_Inline = function Items() {
-	var result = [];
-	for (var key in this)
-		if (this.hasOwnProperty(key))
-			result.push(this[key]);
-	return result;
-};*/
-//Object.prototype._AddFunction_Inline = function ToJson() { return JSON.stringify(this); };
-
-Object.prototype._AddFunction_Inline = function AddProp(name, value) {
-	this[name] = value;
-	return this;
-};
-interface Object { _Set: (name: string, value)=>void; }
-Object.prototype._AddFunction_Inline = function _Set(name, value) {
-	Object.defineProperty(this, name, {
-		configurable: true, // for some reason, we get an error otherwise in non-dev mode (same for below)
-		//enumerable: false,
-		value
-	});
-};
-
-/*Object.prototype._AddFunction_Inline = function GetVSData(context) {
-	this[name] = value;
-	return this;
-};*/
-
-Object.prototype._AddFunction_Inline = function VAct(action) {
-	action.call(this);
-	return this;
-};
-
-interface Object { As<T>(type: new(..._)=>T): T; }
-Object.prototype._AddFunction_Inline = function As<T>(type: new(..._)=>T) {
-	Object.setPrototypeOf(this, type.prototype);
-	return this as T;
 };
 
 // Function

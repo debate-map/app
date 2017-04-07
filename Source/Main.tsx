@@ -1,4 +1,5 @@
 // "static" imports
+import "babel-polyfill";
 import "webpack-runtime-require";
 //import {Require} from "webpack-runtime-require";
 import "./Frame/General/Start";
@@ -16,6 +17,11 @@ import {FirebaseApplication} from "firebase";
 import Raven from "raven-js";
 import ReactGA from "react-ga";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
+
+let browser = GetBrowser().name;
+if (!["Chrome", "Safari", "Firefox", "Edge"].Contains(browser)) {
+	alert(`Sorry! Your browser (${browser}) is not supported. Please use a newer browser such as Chrome, Safari, Firefox, or Edge.`);
+}
 
 var JQuery = require("./Frame/JQuery/JQuery3.1.0");
 g.Extend({JQuery, jQuery: JQuery});
@@ -47,6 +53,7 @@ if (prodEnv) {
 }
 
 //import createStore from "./Frame/Store/CreateStore";
+import {GetBrowser} from "./Frame/General/UserAgent";
 var createStore = require("./Frame/Store/CreateStore").default;
 
 if (devEnv) {

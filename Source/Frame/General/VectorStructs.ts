@@ -242,28 +242,28 @@ export class VRect {
 	}
 
 	NewX(valOrFunc) {
-		return this.Clone().Init<VRect>({x: valOrFunc instanceof Function ? valOrFunc(this.x) : valOrFunc});
+		return this.Clone().VSet({x: valOrFunc instanceof Function ? valOrFunc(this.x) : valOrFunc});
 	}
 	NewLeft(valOrFunc) {
-		return this.Clone().Init<VRect>({Left: valOrFunc instanceof Function ? valOrFunc(this.Left) : valOrFunc});
+		return this.Clone().VSet({Left: valOrFunc instanceof Function ? valOrFunc(this.Left) : valOrFunc});
 	}
 	NewRight(valOrFunc) {
-		return this.Clone().Init<VRect>({Right: valOrFunc instanceof Function ? valOrFunc(this.Right) : valOrFunc});
+		return this.Clone().VSet({Right: valOrFunc instanceof Function ? valOrFunc(this.Right) : valOrFunc});
 	}
 	NewY(valOrFunc) {
-	    return this.Clone().Init<VRect>({y: valOrFunc instanceof Function ? valOrFunc(this.y) : valOrFunc});
+	    return this.Clone().VSet({y: valOrFunc instanceof Function ? valOrFunc(this.y) : valOrFunc});
 	}
 	NewBottom(valOrFunc) {
-	    return this.Clone().Init<VRect>({Bottom: valOrFunc instanceof Function ? valOrFunc(this.Bottom) : valOrFunc});
+	    return this.Clone().VSet({Bottom: valOrFunc instanceof Function ? valOrFunc(this.Bottom) : valOrFunc});
 	}
 	NewTop(valOrFunc) {
-	    return this.Clone().Init<VRect>({Top: valOrFunc instanceof Function ? valOrFunc(this.Top) : valOrFunc});
+	    return this.Clone().VSet({Top: valOrFunc instanceof Function ? valOrFunc(this.Top) : valOrFunc});
 	}
 	NewWidth(valOrFunc) {
-	    return this.Clone().Init<VRect>({width: valOrFunc instanceof Function ? valOrFunc(this.width) : valOrFunc});
+	    return this.Clone().VSet({width: valOrFunc instanceof Function ? valOrFunc(this.width) : valOrFunc});
 	}
 	NewHeight(valOrFunc) {
-	    return this.Clone().Init<VRect>({height: valOrFunc instanceof Function ? valOrFunc(this.height) : valOrFunc});
+	    return this.Clone().VSet({height: valOrFunc instanceof Function ? valOrFunc(this.height) : valOrFunc});
 	}
 
 	Grow(amountOnEachSide) {

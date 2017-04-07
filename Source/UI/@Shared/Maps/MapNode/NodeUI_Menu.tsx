@@ -172,7 +172,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						ShowMessageBox({
 							title: `Delete "${node.title}"`, cancelButton: true,
 							message: `Delete the node "${node.title}"`
-								+ `, ${metaThesisID ? "its 1 meta-thesis" : ""}`
+								+ `${metaThesisID ? ", its 1 meta-thesis" : ""}`
 								+ `, and its link${s_ifParents} with ${parentNodes.length} parent-node${s_ifParents}?`,
 							onOK: ()=> {
 								firebase.Ref("nodes").transaction(nodes=> {

@@ -141,7 +141,7 @@ export class Type {
 	@_VDFSerialize() Serialize() { return new VDFNode(this.toString()); }
 	// old; fix for that C#-side crashes without metadata set to "Type"
 	/*s.Serialize = function() {
-		return new VDFNode(s.toString()).Init({metadata_override: "Type"});
+		return new VDFNode(s.toString()).VSet({metadata_override: "Type"});
 	}.AddTags(new VDFSerialize());*/
 
 	// make-so: this is-derived-from and get-base-type stuff is (more) automatic (based on prototype/Object.getPrototype)
