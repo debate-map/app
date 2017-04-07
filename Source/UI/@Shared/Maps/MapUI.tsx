@@ -117,6 +117,8 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	ComponentDidMount() {
 		let lastRenderCount = 0;
 		let timer = new Timer(100, ()=> {
+			if (!this.mounted) return timer.Stop();
+
 			// if more nodes have been rendered (ie, new nodes have come in)
 			if (NodeUI.renderCount > lastRenderCount)
 				this.LoadScroll();

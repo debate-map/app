@@ -126,7 +126,8 @@ export function LoadURL() {
 
 export function UpdateURL() {
 	//let newURL = URL.Current();
-	let newURL = new URL(URL.Current().domain);
+	let oldURL = URL.Current();
+	let newURL = new URL(oldURL.domain, oldURL.pathNodes);
 	if (GetPath().startsWith("global/map"))
 		newURL = CreateURL_Globals();
 	if (!State().main.analyticsEnabled && newURL.GetQueryVar("analytics") == null)
