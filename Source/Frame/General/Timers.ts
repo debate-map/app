@@ -53,13 +53,13 @@ export function DoNothingXTimesThenDoY(doNothingCount: number, func: Function, k
 
 // interval is in seconds (can be decimal)
 export class Timer {
-	constructor(interval, func, maxCallCount = -1) {
-	    this.interval = interval;
+	constructor(intervalInMS, func, maxCallCount = -1) {
+	    this.intervalInMS = intervalInMS;
 	    this.func = func;
 	    this.maxCallCount = maxCallCount;
 	}
 
-	interval;
+	intervalInMS;
 	func;
 	maxCallCount;
 	timerID = -1;
@@ -72,7 +72,7 @@ export class Timer {
 			this.callCount++;
 			if (this.maxCallCount != -1 && this.callCount >= this.maxCallCount)
 				this.Stop();
-		}, this.interval * 1000);
+		}, this.intervalInMS);
 		return this;
 	}
 	Stop() {
@@ -80,9 +80,9 @@ export class Timer {
 		this.timerID = -1;
 	}
 }
-export class TimerMS extends Timer {
+export class TimerS extends Timer {
     constructor(interval_decimal, func, maxCallCount = -1) {
-        super(interval_decimal / 1000, func, maxCallCount);
+        super(interval_decimal * 1000, func, maxCallCount);
     }
 }
 

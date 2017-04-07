@@ -54,19 +54,10 @@ type Props = {map: Map} & Partial<{rootNode: MapNode, focusNode: string, viewOff
 	viewOffset_available: (GetMapView(state, {map}) && GetMapView(state, {map}).viewOffset) != null,*/
 }))
 export default class MapUI extends BaseComponent<Props, {} | void> {
-	ComponentDidMount() {
-		let timer = new Timer(.1, ()=> {
-			let timeSinceLastNodeUIRender = Date.now() - NodeUI.lastRenderTime;
-			if (NodeUI.renderCount == 0 || timeSinceLastNodeUIRender < 1500) return;
-
-			console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
-			timer.Stop();
-		}).Start();
-	}
+	static padding = {topAndBottom: 1000, leftAndRight: 2000};
 
 	downPos: Vector2i;
 
-	hasLoadedScroll = false;
 	render() {
 		//let {map, rootNode, focusNode: focusNode_target, viewOffset: viewOffset_target} = this.props;
 		let {map, rootNode} = this.props;
@@ -79,7 +70,6 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 			<ScrollView ref="scrollView" backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.content}
 					scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}
 					onScrollEnd={pos=> {
-						Log("Updating..." + pos);
 						UpdateFocusNodeAndViewOffset(map._id);
 					}}>
 				<style>{`
@@ -89,15 +79,15 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					opacity: 0;
 					visibility: hidden;
 					display: block;
-					height: 1000;
+					height: ${MapUI.padding.topAndBottom}px;
 					width: 100%;
-					margin-right: 2000px;
+					margin-right: ${MapUI.padding.leftAndRight}px;
 					pointer-events: none;
 				}
 				`}</style>
 				<div className="MapUI" ref="content"
 						style={{
-							position: "relative", display: "flex", padding: "1000px 2000px", whiteSpace: "nowrap",
+							position: "relative", display: "flex", padding: `${MapUI.padding.topAndBottom}px ${MapUI.padding.leftAndRight}px`, whiteSpace: "nowrap",
 							filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))",
 						}}
 						onMouseDown={e=>this.downPos = new Vector2i(e.clientX, e.clientY)}
@@ -116,42 +106,86 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						}}>
 					<NodeUI map={map} node={rootNode} path={rootNode._id.toString()}/>
 					{/*<ReactResizeDetector handleWidth handleHeight onResize={()=> {*/}
-					<ResizeSensor ref="resizeSensor" onResize={force=> {
-						if (this.hasLoadedScroll && force !== true) return;
-						let state = store.getState();
-						let focusNode_target = GetFocusNode(GetMapView(map._id)); // || map.rootNode.toString();
-						let viewOffset_target = GetViewOffset(GetMapView(map._id)); // || new Vector2i(200, 0);
-						//Log(`Resizing:${focusNode_target};${viewOffset_target}`);
-						if (focusNode_target == null || viewOffset_target == null) return;
-
-						let focusNodeBox;
-						let nextPathTry = focusNode_target;
-						while (true) {
-							 focusNodeBox = $(".NodeUI_Inner").ToList().FirstOrX(nodeBox=>(FindReact(nodeBox[0]) as NodeUI_Inner).props.path == nextPathTry);
-							 if (focusNodeBox || !nextPathTry.Contains("/")) break;
-							 nextPathTry = nextPathTry.substr(0, nextPathTry.lastIndexOf("/"));
-						}
-						if (focusNodeBox == null) return;
-						
-						// load scroll from store
-						let loadScroll = ()=> {
-							if (!this.mounted) return;
-							let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
-							let viewOffset_current = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position);
-							let viewOffset_changeNeeded = new Vector2i(viewOffset_target).Minus(viewOffset_current);
-							(this.refs.scrollView as ScrollView).ScrollBy(viewOffset_changeNeeded);
-						};
-						loadScroll();
-						//Log(viewCenter_onScreen + ";" + viewOffset_current + ";" + viewOffset_changeNeeded + "; final:" + (nextPathTry == focusNode_target));
-						if (nextPathTry == focusNode_target) {
-							WaitXThenRun(0, loadScroll, 400);
-							WaitXThenRun(0, loadScroll, 800);
-							WaitXThenRun(0, ()=>this.hasLoadedScroll = true, 3000);
-						}
-					}}/>
+					{/*<ResizeSensor ref="resizeSensor" onResize={()=> {
+						this.LoadScroll();
+					}}/>*/}
 				</div>
 			</ScrollView>
 		);
+	}
+
+	ComponentDidMount() {
+		let lastRenderCount = 0;
+		let timer = new Timer(100, ()=> {
+			// if more nodes have been rendered (ie, new nodes have come in)
+			if (NodeUI.renderCount > lastRenderCount)
+				this.LoadScroll();
+			lastRenderCount = NodeUI.renderCount;
+
+			let timeSinceLastNodeUIRender = Date.now() - NodeUI.lastRenderTime;
+			if (NodeUI.renderCount > 0 && timeSinceLastNodeUIRender >= 1500) {
+				this.OnLoadComplete();
+				timer.Stop();
+			}
+		}).Start();
+
+		// start scroll at root // (this doesn't actually look as good)
+		/*if (this.refs.scrollView)
+			(this.refs.scrollView as ScrollView).ScrollBy({x: MapUI.padding.leftAndRight, y: MapUI.padding.topAndBottom});*/
+	}
+	OnLoadComplete() {
+		console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
+		this.LoadScroll();
+	}
+
+	/*PostRender() {
+		let {map, rootNode} = this.props;
+		if (map == null || rootNode == null) return;
+		this.StartLoadingScroll();
+	}
+	hasLoadedScroll = false;
+	StartLoadingScroll() {
+		let timer = new Timer(200, ()=> {
+			if (!this.mounted) return timer.Stop();
+			this.LoadScroll();
+			if (this.hasLoadedScroll) {
+				//WaitXThenRun(0, this.LoadScroll, 300); // do it once more, in case of ui late-tweak
+				timer.Stop();
+			}
+		}).Start();
+		WaitXThenRun(10000, ()=>timer.Stop()); // stop trying after 10s
+	}*/
+
+	// load scroll from store
+	LoadScroll() {
+		let {map, rootNode} = this.props;
+
+		// if user is already scrolling manually, return so we don't interrupt that process
+		if ((this.refs.scrollView as ScrollView).state.scrollOp_bar) return;
+
+		let state = store.getState();
+		let focusNode_target = GetFocusNode(GetMapView(map._id)); // || map.rootNode.toString();
+		let viewOffset_target = GetViewOffset(GetMapView(map._id)); // || new Vector2i(200, 0);
+		//Log(`Resizing:${focusNode_target};${viewOffset_target}`);
+		if (focusNode_target == null || viewOffset_target == null) return;
+
+		let focusNodeBox;
+		let nextPathTry = focusNode_target;
+		while (true) {
+			focusNodeBox = $(".NodeUI_Inner").ToList().FirstOrX(nodeBox=>(FindReact(nodeBox[0]) as NodeUI_Inner).props.path == nextPathTry);
+			if (focusNodeBox || !nextPathTry.Contains("/")) break;
+			nextPathTry = nextPathTry.substr(0, nextPathTry.lastIndexOf("/"));
+		}
+		if (focusNodeBox == null) return;
+
+		let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
+		let viewOffset_current = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position);
+		let viewOffset_changeNeeded = new Vector2i(viewOffset_target).Minus(viewOffset_current);
+		(this.refs.scrollView as ScrollView).ScrollBy(viewOffset_changeNeeded);
+		//Log("Loading scroll: " + Vector2i.prototype.toString.call(viewOffset_target));
+
+		/*if (nextPathTry == focusNode_target)
+			this.hasLoadedScroll = true;*/
 	}
 }
 
