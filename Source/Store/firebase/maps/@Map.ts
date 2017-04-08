@@ -1,8 +1,7 @@
 export enum MapType {
-	None = 0,
-	Personal = 1,
-	Debate = 2,
-	Global = 3,
+	Personal = 10,
+	Debate = 20,
+	Global = 30,
 }
 export interface Map {
 	_id: number;

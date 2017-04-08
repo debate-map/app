@@ -1,4 +1,12 @@
-import {MapNode, MetaThesis_IfType, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../../../../Store/firebase/nodes/@MapNode";
+import {
+    GetNodeDisplayText,
+    GetValidChildTypes,
+	GetValidNewChildTypes,
+    MapNode,
+    MetaThesis_IfType,
+    MetaThesis_ThenType,
+    MetaThesis_ThenType_Info
+} from "../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {VMenuStub} from "react-vmenu";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -20,35 +28,38 @@ import {ACTNodeCopy} from "../../../../Store/main";
 import Select from "../../../../Frame/ReactComponents/Select";
 import {GetEntries, GetValues} from "../../../../Frame/General/Enums";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
-import {GetNode, IsLinkValid, ForDelete_GetError, ForUnlink_GetError} from "../../../../Store/firebase/nodes";
+import {GetNode, IsLinkValid, IsNewLinkValid, ForDelete_GetError, ForUnlink_GetError, GetParentNode} from "../../../../Store/firebase/nodes";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
 
-type Props = {node: MapNode, path: string} & Partial<{permissionGroups: PermissionGroupSet, parentNode: MapNode, copiedNode: MapNode}>;
+type Props = {node: MapNode, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNode, copiedNode: MapNode}>;
 @Connect((state: RootState, {path}: Props)=> {
 	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 	return {
-		//userID: GetUserID(), // not needed in Connect(), since permissionGroups already watches its data
-		permissionGroups: GetUserPermissionGroups(GetUserID()), 
-		parentNode: GetNode(pathNodeIDs.XFromLast(1)),
+		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
+		permissions: GetUserPermissionGroups(GetUserID()), 
+		parentNode: GetParentNode(path),
 		copiedNode: GetNode(state.main.copiedNode),
 	};
 })
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {
-		let {node, permissionGroups, parentNode, copiedNode} = this.props;
+		let {node, path, permissions, parentNode, copiedNode} = this.props;
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
-		let validChildTypes = GetValues<MapNodeType>(MapNodeType).filter(type=>IsLinkValid(node, {type} as any));
+		let validChildTypes = GetValidNewChildTypes(node.type, path, permissions);
+
+		let nodeText = GetNodeDisplayText(node, path);
 
 		return (
 			<VMenuStub>
 				{IsUserBasicOrAnon(userID) && validChildTypes.map(childType=> {
 					let childTypeInfo = MapNodeType_Info.for[childType];
+					let displayName = childTypeInfo.displayName(node);
 					return (
-						<VMenuItem key={childType} text={`Add ${childTypeInfo.displayName}`} style={styles.vMenuItem} onClick={e=> {
+						<VMenuItem key={childType} text={`Add ${displayName}`} style={styles.vMenuItem} onClick={e=> {
 							if (e.button != 0) return;
 							if (userID == null) return ShowSignInPopup();
 
@@ -61,7 +72,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							let metaThesis_ifType = MetaThesis_IfType.All;
 							let metaThesis_thenType = childType == MapNodeType.SupportingArgument ? MetaThesis_ThenType.StrengthenParent : MetaThesis_ThenType.WeakenParent;
 							let boxController = ShowMessageBox({
-								title: `Add ${childTypeInfo.displayName}`, cancelButton: true,
+								title: `Add ${displayName}`, cancelButton: true,
 								messageUI: ()=>(
 									<div style={{padding: "10px 0"}}>
 										Title: <TextInput ref={a=>a && WaitXThenRun(0, ()=>a.DOM.focus())} style={{width: 500}}
@@ -89,7 +100,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 										let newID = nodes.Props.filter(a=>a.name != "_").map(a=>parseInt(a.name)).Max().KeepAtLeast(99) + 1;
 										nodes[node._id].children = {...nodes[node._id].children, [newID]: {_: true}};
 										let newNode = new MapNode({
-											type: childType, title,
+											type: childType, titles: {base: title},
 											creator: userID, approved: true,
 										});
 										nodes[newID] = newNode;
@@ -121,8 +132,8 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							else
 								store.dispatch(new ACTNodeCopy(null));
 						}}/>}
-				{IsUserBasicOrAnon(userID) && copiedNode && IsLinkValid(node, copiedNode) &&
-					<VMenuItem text={`Paste "${copiedNode.title.KeepAtMost(30)}"`} style={styles.vMenuItem} onClick={e=> {
+				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode, permissions) &&
+					<VMenuItem text={`Paste "${copiedNode.titles["base"].KeepAtMost(30)}"`} style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 						//Store.dispatch(new ACTNodeCopy(null));
@@ -143,9 +154,10 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							return void ShowMessageBox({title: "Cannot unlink", message: "Cannot unlink this child, as doing so would orphan it. Try deleting it instead."});
 
 						//let parent = parentNodes[0];
+						let parentText = GetNodeDisplayText(parentNode, path.substr(0, path.lastIndexOf("/")));
 						ShowMessageBox({
-							title: `Unlink child "${node.title}"`, cancelButton: true,
-							message: `Unlink the child "${node.title}" from its parent "${parentNode.title}"?`,
+							title: `Unlink child "${nodeText}"`, cancelButton: true,
+							message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,
 							onOK: ()=> {
 								firebase.Ref("nodes").transaction(nodes=> {
 									if (!nodes) return nodes;
@@ -170,8 +182,8 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						let metaThesisID = node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument ? node.children.VKeys()[0] : null;
 
 						ShowMessageBox({
-							title: `Delete "${node.title}"`, cancelButton: true,
-							message: `Delete the node "${node.title}"`
+							title: `Delete "${nodeText}"`, cancelButton: true,
+							message: `Delete the node "${nodeText}"`
 								+ `${metaThesisID ? ", its 1 meta-thesis" : ""}`
 								+ `, and its link${s_ifParents} with ${parentNodes.length} parent-node${s_ifParents}?`,
 							onOK: ()=> {

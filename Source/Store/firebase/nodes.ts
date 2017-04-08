@@ -1,10 +1,12 @@
+import {HasModPermissions, PermissionGroupSet} from "./userExtras/@UserExtraInfo";
 import {IsNaN, IsObjectOf, IsObject, IsNumber} from "../../Frame/General/Types";
 import {GetData} from "../../Frame/Database/DatabaseHelpers";
 import {MapNode} from "./nodes/@MapNode";
 import {CachedTransform} from "../../Frame/V/VCache";
-import {MapNodeType_Info} from "./nodes/@MapNodeType";
+import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
 import {P} from "../../Frame/Serialization/VDF/VDFTypeInfo";
 import {IsUserCreatorOrMod} from "./userExtras";
+import {GetUserPermissionGroups} from "./users";
 
 export function GetNode(id: number) {
 	//Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");
@@ -27,11 +29,15 @@ export function GetNodeChildren(node: MapNode) {
 	return CachedTransform({nodeID: node._id}, children, ()=>children);
 }
 
-export function IsLinkValid(parent: MapNode, child: MapNode) {
-	let parentTypeInfo = MapNodeType_Info.for[parent.type].childTypes;
-	if (!parentTypeInfo.Contains(child.type))
-		return false;
+export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNode) {
+	let parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;
+	if (!parentTypeInfo.Contains(child.type)) return false;
 	return true;
+}
+export function IsNewLinkValid(parentType: MapNodeType, parentPath: string, child: MapNode, permissions: PermissionGroupSet) {
+	if (parentPath.split("/").length == 1) return false; // if parent is l1(root), don't accept new children
+	if (parentPath.split("/").length == 2 && !HasModPermissions(permissions)) return false; // if parent is l2, and user is not a mod, don't accept new children
+	return IsLinkValid(parentType, parentPath, child);
 }
 
 export function ForUnlink_GetError(userID: string, node: MapNode) {

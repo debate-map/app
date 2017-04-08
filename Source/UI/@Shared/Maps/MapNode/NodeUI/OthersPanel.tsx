@@ -50,10 +50,26 @@ export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 					<Div mt={3}>
 						{!node.metaThesis &&
 							<div style={{display: "flex", alignItems: "center"}}>
-								<Pre>Title: </Pre>
-								<TextInput ref="title" style={{flex: 1}} delayChangeTillDefocus={true} value={node.title}/>
+								<Pre>Title (base): </Pre>
+								<TextInput ref="title" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["base"]}/>
 								<Button text="Save" ml={5} onLeftClick={()=> {
-									firebase.Ref(`nodes/${node._id}`).update({title: this.refs.title.GetValue()});
+									firebase.Ref(`nodes/${node._id}/titles`).update({base: this.refs.title.GetValue()});
+								}}/>
+							</div>}
+						{node.type == MapNodeType.Thesis &&
+							<div style={{display: "flex", alignItems: "center"}}>
+								<Pre>Title (negation): </Pre>
+								<TextInput ref="title" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["negation"]}/>
+								<Button text="Save" ml={5} onLeftClick={()=> {
+									firebase.Ref(`nodes/${node._id}/titles`).update({negation: this.refs.title.GetValue()});
+								}}/>
+							</div>}
+						{node.type == MapNodeType.Thesis &&
+							<div style={{display: "flex", alignItems: "center"}}>
+								<Pre>Title (yes-no question): </Pre>
+								<TextInput ref="title" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["yesNoQuestion"]}/>
+								<Button text="Save" ml={5} onLeftClick={()=> {
+									firebase.Ref(`nodes/${node._id}/titles`).update({yesNoQuestion: this.refs.title.GetValue()});
 								}}/>
 							</div>}
 						{node.metaThesis &&

@@ -25,7 +25,7 @@ import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {RootState} from "../../../../Store/index";
 import {GetNodeView} from "../../../../Store/main/mapViews";
-import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, GetNodeDisplayText} from "../../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {GetNodeChildIDs, GetNodeChildren} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
@@ -146,10 +146,11 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	childBoxes: NodeUI[];
 
 	GetMeasurementInfo(props: Props, state: State) {
-		let {node} = this.props;
+		let {node, path} = this.props;
 
+		let displayText = GetNodeDisplayText(node, path);
 		let fontSize = MapNode.GetFontSize(node);
-		let expectedTextWidth = V.GetContentWidth($(`<a style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${node.title}</a>`));
+		let expectedTextWidth = V.GetContentWidth($(`<a style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${displayText}</a>`));
 		//let expectedOtherStuffWidth = 26;
 		let expectedOtherStuffWidth = 28;
 		let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
@@ -160,7 +161,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let maxTextWidth = width - expectedOtherStuffWidth;
 		let expectedTextHeight = V.GetContentHeight($(`<a style='${
 			createMarkupForStyles({fontSize, whiteSpace: "initial", display: "inline-block", width: maxTextWidth})
-		}'>${node.title}</a>`));
+		}'>${displayText}</a>`));
 		let expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
 		//this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
 

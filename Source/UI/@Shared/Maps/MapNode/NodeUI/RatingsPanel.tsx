@@ -82,7 +82,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 						
 						let finalRating = rating; // range: 0-1
 						let boxController = ShowMessageBox({
-							title: `Rate ${ratingType} of ${MapNodeType_Info.for[node.type].displayName}`, cancelButton: true,
+							title: `Rate ${ratingType} of ${MapNodeType_Info.for[node.type].displayName(GetParentNode(path))}`, cancelButton: true,
 							messageUI: ()=>(
 								<div style={{padding: "10px 0"}}>
 									Rating: <Spinner min={options.Min()} max={options.Max()} style={{width: 60}}
@@ -99,7 +99,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 						if (myRatingValue == null) return;
 						let boxController = ShowMessageBox({
 							title: `Delete rating`, cancelButton: true,
-							message: `Delete your "${ratingType}" rating for ${MapNodeType_Info.for[node.type].displayName}`,
+							message: `Delete your "${ratingType}" rating for ${MapNodeType_Info.for[node.type].displayName(GetParentNode(path))}`,
 							onOK: ()=> {
 								firebase.Ref(`nodeRatings/${node._id}/${ratingType}/${userID}`).set(null);
 							}

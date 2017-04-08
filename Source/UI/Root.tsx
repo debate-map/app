@@ -32,7 +32,7 @@ import ChatUI from "./Chat";
 import UsersUI from "./Users";
 import ForumUI from "./Forum";
 import SocialUI from "./Social";
-import TermsUI from "./Terms";
+import ContentUI from "./Content";
 import PersonalUI from "./Personal";
 import DebatesUI from "./Debates";
 import SearchUI from "./Search";
@@ -61,7 +61,7 @@ export const rootPages = [
 	"stream", "chat",
 	"users", "forum", "social", "more",
 	"home",
-	"terms", "personal", "debates", "global",
+	"content", "personal", "debates", "global",
 	"search", "profile"
 ];
 export const rootPageDefaultChilds = {
@@ -98,7 +98,7 @@ class RootUI extends BaseComponent<{}, {}> {
 					<Route exact path="/about" component={HomeUI}/>*/}
 					{GetPathNodes()[0] == "home" && <HomeUI/>}
 
-					<Route path="/terms" component={TermsUI}/>
+					<Route path="/content" component={ContentUI}/>
 					<Route path="/personal" component={PersonalUI}/>
 					<Route path="/debates" component={DebatesUI}/>
 					<Route path="/global" component={GlobalUI}/>

@@ -161,6 +161,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	// load scroll from store
 	LoadScroll() {
 		let {map, rootNode} = this.props;
+		if (this.refs.scrollView == null) return;
 
 		// if user is already scrolling manually, return so we don't interrupt that process
 		if ((this.refs.scrollView as ScrollView).state.scrollOp_bar) return;

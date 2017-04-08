@@ -5,7 +5,7 @@ import {reduxFirebase, getFirebase} from "react-redux-firebase";
 import {version, firebaseConfig} from "../../BakedConfig";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 import {persistStore, autoRehydrate} from "redux-persist";
-//import createFilter from "redux-persist-transform-filter";
+import {createFilter, createBlacklistFilter} from "redux-persist-transform-filter";
 import {routerMiddleware} from 'react-router-redux'
 import {MakeRootReducer} from "../../Store/index";
 import watch from "redux-watch";
@@ -74,15 +74,14 @@ export default function(initialState = {}, history) {
 	}));*/
 
 	// begin periodically persisting the store
-	let persister = persistStore(store, {whitelist: ["main"]});
+	//let persister = persistStore(store, {whitelist: ["main"]});
 	// you want to remove some keys before you save
-	/*const saveSubsetBlacklistFilter = createBlacklistFilter(
-		"main",
-		["keyYouDontWantToSave1", "keyYouDontWantToSave2"]
-	);
-	persistStore(store, {
-		transforms: [saveSubsetBlacklistFilter]
-	});*/
+	let persister = persistStore(store, {
+		whitelist: ["main"],
+		transforms: [
+			createBlacklistFilter("main", ["notificationMessages"])
+		]
+	});
 	if (GetUrlVars().clearState)
 		persister.purge();
 

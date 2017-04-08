@@ -2,12 +2,18 @@ import {MapNode, MetaThesis_IfType} from "../nodes/@MapNode";
 import {Range} from "../../../Frame/General/Globals";
 import {MapNodeType} from "../nodes/@MapNodeType";
 
-export type RatingType = "significance" | "probability" | "idealIntensity" | "adjustment" | "strength";
+export type RatingType = "significance" | "neutrality" | "probability" | "idealIntensity" | "adjustment" | "strength";
 export class RatingType_Info {
 	static for = {
 		significance: new RatingType_Info({
 			displayText: "Significance",
-			description: ()=>"How significant/important is this subject, relative to the others on this site?",
+			description: ()=>"How significant/important is this subject? (0 = not worth any time discussing; 100 = vital to discuss)",
+			options: ()=>Range(0, 100),
+			ticks: ()=>Range(0, 100, 5),
+		}),
+		neutrality: new RatingType_Info({
+			displayText: "Neutrality",
+			description: ()=>"How neutral/impartial is the phrasing of this question? (0 = as biased as they come; 100 = no bias)",
 			options: ()=>Range(0, 100),
 			ticks: ()=>Range(0, 100, 5),
 		}),

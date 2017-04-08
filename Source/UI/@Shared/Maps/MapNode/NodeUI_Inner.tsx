@@ -15,7 +15,7 @@ import NodeUI_Menu from "./NodeUI_Menu";
 import V from "../../../../Frame/V/V";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, GetNodeDisplayText} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetPaths_NodeRatingsRoot, GetNodeRatingsRoot, GetMainRatingFillPercent, GetRatings} from "../../../../Store/firebase/nodeRatings";
 import {GetUserID} from "../../../../Store/firebase/users";
 import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -84,7 +84,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								width: mainRatingFillPercent + "%", background: `rgba(${nodeTypeInfo.backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
 							}}/>
 						<a style={{position: "relative", fontSize: MapNode.GetFontSize(node), whiteSpace: "initial"}}>
-							{MapNode.GetDisplayText(node)}
+							{GetNodeDisplayText(node, path)}
 						</a>
 						<NodeUI_Menu node={node} path={path}/>
 					</div>

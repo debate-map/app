@@ -1,24 +1,32 @@
 import V from "../../../Frame/V/V";
-import {_Enum, Enum} from "../../../Frame/General/Enums";
+import {_Enum, Enum, GetValues} from "../../../Frame/General/Enums";
 import {MapNodeType, MapNodeType_Info} from "./@MapNodeType";
 import {RatingType} from "../nodeRatings/@RatingType";
+import {GetParentNode, IsLinkValid, IsNewLinkValid} from "../nodes";
+import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
 
 export enum AccessLevel {
-	Base = 0,
-	Verified = 1,
-	Manager = 2,
-	Admin = 3,
+	Base = 10,
+	Verified = 20,
+	Manager = 30,
+	Admin = 40,
+}
+
+export enum ThesisForm {
+	Base = 10,
+	Negation = 20,
+	YesNoQuestion = 30,
 }
 
 export enum MetaThesis_IfType {
-	Any = 0,
-	All = 1,
+	Any = 10,
+	All = 20,
 }
 export enum MetaThesis_ThenType {
-	StrengthenParent = 0,
-	GuaranteeParentTrue = 1,
-	WeakenParent = 2,
-	GuaranteeParentFalse = 3,
+	StrengthenParent = 10,
+	GuaranteeParentTrue = 20,
+	WeakenParent = 30,
+	GuaranteeParentFalse = 40,
 }
 export class MetaThesis_ThenType_Info {
 	static for = {
@@ -38,13 +46,6 @@ export class MapNode {
 	static GetPadding(node: MapNode) {
 		return node.metaThesis ? "0 4px" : 5;
 	}
-	static GetDisplayText(node: MapNode) {
-		if (node.metaThesis) {
-			return `If ${MetaThesis_IfType[node.metaThesis_ifType].toLowerCase()} premises below are true, they ${
-				MetaThesis_ThenType_Info.for[MetaThesis_ThenType[node.metaThesis_thenType]].displayText}.`;
-		}
-		return node.title;
-	}
 	static GetMainRatingTypes(node: MapNode): RatingType[] {
 		if (node._id < 100) // if static category, don't have any voting
 			return [];
@@ -63,7 +64,7 @@ export class MapNode {
 
 	_id?: number;
 	type?: MapNodeType;
-	title?: string;
+	titles: {[key: string]: string};
 
 	creator?: string;
 	createdAt: number;
@@ -85,9 +86,40 @@ export class MapNode {
 	talkRoot: number;
 }
 export class ChildCollection {
-	[key: number]: {};
+	[key: number]: {_?, form?: ThesisForm};
 }
 /*export interface ChildInfo {
 	id: number;
 	type;
 }*/
+
+export function GetThesisFormAtPath(node: MapNode, path: string) {
+	let parent = GetParentNode(path);
+	if (parent == null) return ThesisForm;
+	let link = parent.children.Props.First(a=>a.name == node._id.toString());
+	return link.value.form;
+}
+export function GetNodeDisplayText(node: MapNode, formOrPath: ThesisForm | string) {
+	if (node.type == MapNodeType.Thesis) {
+		let form = typeof formOrPath == "string" ? GetThesisFormAtPath(node, formOrPath) : formOrPath;
+		if (node.metaThesis) {
+			return `If ${MetaThesis_IfType[node.metaThesis_ifType].toLowerCase()} premises below are true, they ${
+				MetaThesis_ThenType_Info.for[MetaThesis_ThenType[node.metaThesis_thenType]].displayText}.`;
+		}
+		if (form == ThesisForm.Negation)
+			return node.titles["negation"];
+		if (form == ThesisForm.YesNoQuestion)
+			return node.titles["yesNoQuestion"];
+	}
+	return node.titles["base"];	
+}
+export function GetValidChildTypes(nodeType: MapNodeType, path: string) {
+	let nodeTypes = GetValues<MapNodeType>(MapNodeType);
+	let validChildTypes = nodeTypes.filter(type=>IsLinkValid(nodeType, path, {type} as any));
+	return validChildTypes;
+}
+export function GetValidNewChildTypes(nodeType: MapNodeType, path: string, permissions: PermissionGroupSet) {
+	let nodeTypes = GetValues<MapNodeType>(MapNodeType);
+	let validChildTypes = nodeTypes.filter(type=>IsNewLinkValid(nodeType, path, {type} as any, permissions));
+	return validChildTypes;
+}

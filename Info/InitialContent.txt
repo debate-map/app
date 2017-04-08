@@ -1,0 +1,58 @@
+Science
+>Earth
+>>How old is the earth? [multi-choice]
+>>>The earth is between 5k and 7k years old
+>>>The earth is between 4b and 5b years old
+>Universe
+>>How old is the universe? [multi-choice]
+>>>The universe is between 5k and 7k years old
+>>>The universe is between 13b and 14b years old
+
+Philosophy
+>AI
+>>If a fully wrap-around, recursively self-improving AI were formed with about human intelligence, would it likely (>20% probability) improve to a point of domination over humans in less than a year?
+
+Religion
+>Christianity
+>>The Bible
+>>>Accuracy
+>>>>Is the Bible accurate on historical matters?
+>>>>Is the Bible accurate on scientific matters?
+>>>Consistency
+>>>>Is the Bible consistent on spiritual matters?
+>>>>Is the Bible consistent on historical matters?
+>Islam
+>>The Quran
+>>>Accuracy
+>>>>Is the Quran accurate on historical matters?
+>>>>Is the Quran accurate on scientific matters?
+>>>Consistency
+>>>>Is the Quran consistent on spiritual matters?
+>>>>Is the Quran consistent on historical matters?
+
+History
+>Modern
+>>World War II
+>>>Issues
+>>>>Concentration camps
+>>>>>Did concentration camps facilitate the deaths of millions of people?
+
+Politics
+>United States
+>>President
+>>>Is Donald Trump doing a good job as president?
+>>White House
+>>Supreme Court
+>>Congress
+>>Governors
+>>Bills
+
+Issues
+>Abortion
+>>Is abortion an acceptable practice?
+
+Everyday
+>Programming
+>>Are tabs better than spaces for indentation?
+
+Others

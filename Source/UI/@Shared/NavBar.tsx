@@ -81,7 +81,7 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 						<NavBarButton to="/social" text="Social"/>
 						<NavBarButton to="/more" text="More"/>
 						<NavBarButton to="/" toImplied="/home" text="Debate Map" style={{margin: "0 auto", textAlign: "center", fontSize: 23}}/>
-						<NavBarButton to="/terms" text="Terms"/>
+						<NavBarButton to="/content" text="Content"/>
 						<NavBarButton to="/personal" text="Personal"/>
 						<NavBarButton to="/debates" text="Debates"/>
 						<NavBarButton to="/global" text="Global"/>
