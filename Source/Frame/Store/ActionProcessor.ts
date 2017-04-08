@@ -12,6 +12,15 @@ import ReactGA from "react-ga";
 import {URL} from "../General/URLs";
 import {Log} from "../Serialization/VDF/VDF";
 
+// use this to intercept dispatches (for debugging)
+/*let oldDispatch = store.dispatch;
+store.dispatch = function(...args) {
+	if (GetTimeSinceLoad() > 5)
+		debugger;
+	oldDispatch.apply(this, args);
+};*/
+
+
 let lastPath = "";
 //export function ProcessAction(action: Action<any>, newState: RootState, oldState: RootState) {
 // only use this if you actually need to change the action-data before it gets dispatched/applied (otherwise use [Mid/Post]DispatchAction)

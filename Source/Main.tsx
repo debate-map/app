@@ -1,40 +1,43 @@
 // "static" imports
-import "babel-polyfill";
 import "webpack-runtime-require";
 //import {Require} from "webpack-runtime-require";
 import "./Frame/General/Start";
 import "./Frame/General/CE";
-import "./Frame/Database/DatabaseHelpers";
 
-import * as React from "react";
 import ReactDOM from "react-dom";
-import injectTapEventPlugin from "react-tap-event-plugin";
 import {Store} from "redux";
-import {GetTimeSinceLoad} from "./Frame/General/Globals_Free";
-
 import {RootState} from "./Store/index";
-import {FirebaseApplication} from "firebase";
-import Raven from "raven-js";
-import ReactGA from "react-ga";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
+import {GetUrlVars, CurrentUrl, URL} from "./Frame/General/URLs";
+import Raven from "raven-js";
+import {GetBrowser, supportedBrowsers} from "./Frame/General/UserAgent";
+import injectTapEventPlugin from "react-tap-event-plugin";
+import * as React from "react";
+
+// startup (non-hot)
+// ==========
+
+var JQuery = require("./Frame/JQuery/JQuery3.1.0");
+g.Extend({JQuery, jQuery: JQuery});
+g.$ = JQuery;
+
+g.Extend({React});
+
+// Tap Plugin
+injectTapEventPlugin();
 
 let browser = GetBrowser().name;
 if (!supportedBrowsers.Contains(browser)) {
 	alert(`Sorry! Your browser (${browser}) is not supported. Please use a supported browser such as Chrome, Firefox, or Safari.`);
 }
 
-var JQuery = require("./Frame/JQuery/JQuery3.1.0");
-g.Extend({JQuery, jQuery: JQuery});
-g.$ = JQuery;
-
-import {GetUrlVars, CurrentUrl, URL} from "./Frame/General/URLs";
 let startURL = URL.Current();
-declare global { export var startURL: URL; }
-g.Extend({startURL});
+g.Extend({startURL}); declare global { export var startURL: URL; }
 
 //let {version} = require("../../../package.json");
-//import {version, env, devEnv, prodEnv, testEnv} from "./BakedConfig";
+//mport {version, env, devEnv, prodEnv, testEnv} from "./BakedConfig";
 let {version, env, devEnv, prodEnv, testEnv} = require("./BakedConfig");
+//let version = "0.0.1", env = "development", devEnv = true, prodEnv = false, testEnv = false;
 if (startURL.GetQueryVar("env") && startURL.GetQueryVar("env") != "null") {
 	env = startURL.GetQueryVar("env");
 	devEnv = env == "development";
@@ -52,10 +55,6 @@ if (prodEnv) {
 	}).install();
 }
 
-//import createStore from "./Frame/Store/CreateStore";
-import {GetBrowser, supportedBrowsers} from "./Frame/General/UserAgent";
-var createStore = require("./Frame/Store/CreateStore").default;
-
 if (devEnv) {
 	// this logs warning if a component doesn't have any props or state change, yet is re-rendered
 	const {whyDidYouUpdate} = require("why-did-you-update");
@@ -69,79 +68,26 @@ if (devEnv) {
 	});
 }
 
-// store and history instantiation
-// ==========
-
-// Create redux store and sync with react-router-redux. We have installed the
-// react-router-redux reducer under the routerKey "router" in [?],
-// so we need to provide a custom `selectLocationState` to inform
-// react-router-redux of its location.
-const initialState = (window as any).___INITIAL_STATE__;
-
-var store;
-declare global { var store: Store<RootState> & {firebase: FirebaseApp}; }
-function CreateStore() {
-	store = createStore(initialState, {}) as Store<RootState>;
-	g.Extend({store});
-}
-
-declare global { function State(): RootState; }
-g.Extend({State});
-function State() {
-	return store.getState();
-}
-
-/*function GetState() {
-	return (store as Store<RootState>).getState().As(RootState);
-}
-g.Extend({GetState});
-declare global { function GetState(): RootState; }*/
-
-// use this to intercept dispatches (for debugging)
-/*let oldDispatch = store.dispatch;
-store.dispatch = function(...args) {
-	if (GetTimeSinceLoad() > 5)
-		debugger;
-	oldDispatch.apply(this, args);
-};*/
-
-// wrapper ui
-// ==========
-
-g.Extend({React});
-
-// Tap Plugin
-injectTapEventPlugin();
-
-// developer tools setup
+// set up hot-reloading
 // ==========
 
 // this code is excluded from production bundle
-if (devEnv) {
+if (__DEV__) {
 	/*if (window.devToolsExtension)
 		window.devToolsExtension.open();*/
 	if (module.hot) {
 		// setup hot module replacement
-		module.hot.accept("./UI/Root", () => {
+		module.hot.accept("./Main_Hot", () => {
 			setTimeout(()=> {
-				ReactDOM.unmountComponentAtNode(mountNode);
-				RenderWrapper();
+				ReactDOM.unmountComponentAtNode(document.getElementById("root"));
+				LoadHotModules();
 			});
 		});
 	}
 }
 
-// go!
-// ==========
-
-const mountNode = document.getElementById("root");
-function RenderWrapper() {
-	let RootUIWrapper = require("./UI/Root").default;
-	ReactDOM.render(<RootUIWrapper store={store}/>, mountNode);
+function LoadHotModules() {
+	//Log("Reloading hot modules...");
+	require("./Main_Hot");
 }
-
-CreateStore();
-//RenderWrapper();
-setTimeout(()=> {
-	RenderWrapper();
-});
+LoadHotModules();
