@@ -26,8 +26,9 @@ The fundamental limitation on this point is that plain text can only extend in o
 	without requiring ever-increasing gaps between the thread entries.
 
 The simple answer seemed to be to use a two-dimensional system, with responses trimmed down into single sentences, supporting or opposing some statement made before.
-I thought over the design for such a site for a few days, and then began the development process.
-I originally built it using PHP, HTML, and jQuery, and it worked fine as far as I took it; however, it was lacking a number of features that would really make it useful,
+The design for this took a few days to put together (particularly, with how to best prevent partiality, as perception of bias
+	can greatly reduce the impact of a website of this sort), but I formed a basic design and then began the development process.
+It was originally built using PHP, HTML, and jQuery, and it worked fine as far as it was taken; however, it was lacking a number of features that would really make it useful,
 and it had some performance limitations that I knew would cause problems if it started getting substantial traffic.
 
 Despite this, I was happy with the results. It was a nice "proof of concept", and even in its infant form, it had already proven helpful for
@@ -43,7 +44,7 @@ Anyway, long story short, I eventually suspended that plan, and came back to thi
 
 I got to work over the next few weeks, designing as I went, and the result is what you see today!
 
-The state it's in now is pretty basic, but it has a good foundation and achieves its basic function.
+The state it's in now is fairly basic, but it has a good foundation and achieves its basic function.
 There are many things that can be built on top of this now, which I believe will increase its usefulness a lot.
 	
 For example:
@@ -56,11 +57,11 @@ For example:
 There's much more -- and it's all firmly doable! (well, other than the whole-tree probability analysis, maybe) It's just a matter of investing the development time, and progressing carefully enough so as not to dilute the existing core.
 
 This is a major project for me, and I plan to spend thousands of hours on it over the years, as I believe it could have a substantial impact on the way we do discourse.
-While I don't know when or where exactly this time will invested, (for example, I might disappear for months at a time to work on other things for a period),
+While I don't know when or where exactly this time will be invested, (for example, I might disappear for months at a time to work on other things for a period),
 I'll definitely continue to come back to this.
 
 I hope all of you reading this are interested in it as well, as it obviously needs a rich community to actually take off and become relevant/useful.
-A few years down the road (especially if we can get together a solid development team!), we could have something really great to show the world.
+A few years down the road (especially if we can get together a solid development team!), we could have something really great to bring to the discussion table.
 `;
 
 @SimpleShouldUpdate
