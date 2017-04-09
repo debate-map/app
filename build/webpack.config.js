@@ -50,6 +50,7 @@ webpackConfig.entry = {
 webpackConfig.output = {
 	filename: `[name].[${config.compiler_hash_type}].js`,
 	path: paths.dist(),
+	//path: path.resolve(__dirname, "dist"),
 	publicPath: config.compiler_public_path,
 	//pathinfo: true, // include comments next to require-funcs saying path // (this seems to break webpack-runtime-require)
 }
@@ -69,9 +70,8 @@ webpackConfig.plugins = [
 					errors.push(error.message || error)
 				})
 
-				// Pretend no assets were generated. This prevents the tests
-				// from running making it clear that there were warnings.
-				throw new Error(errors)
+				// Pretend no assets were generated. This prevents the tests from running, making it clear that there were warnings.
+				//throw new Error(errors)
 			}
 		})
 	},

@@ -20,7 +20,6 @@ store.dispatch = function(...args) {
 	oldDispatch.apply(this, args);
 };*/
 
-
 let lastPath = "";
 //export function ProcessAction(action: Action<any>, newState: RootState, oldState: RootState) {
 // only use this if you actually need to change the action-data before it gets dispatched/applied (otherwise use [Mid/Post]DispatchAction)

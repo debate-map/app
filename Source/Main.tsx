@@ -68,7 +68,7 @@ if (devEnv) {
 	});
 }
 
-// set up hot-reloading
+// hot-reloading
 // ==========
 
 // this code is excluded from production bundle
