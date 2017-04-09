@@ -54,13 +54,12 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 @Connect(()=> {
 	//var getNodeView = MakeGetNodeView();
 	return ((state: RootState, {node, path, map}: Props & BaseProps)=> {
-		var path = path || node._id.toString();
-		var firebase = store.getState().firebase;
+		let nodeView = GetNodeView(map._id, path) || new MapNodeView();
 		let nodeChildren = GetNodeChildren(node);
 		return {
-			path,
-			//nodeView: getNodeView(state, {firebase, map, path}),
-			nodeView: GetNodeView(map._id, path),
+			path: path || node._id.toString(),
+			// only pass new nodeView when its local-props are different
+			nodeView: CachedTransform({path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
 			// only pass nodeChildren when all are loaded
 			nodeChildren: CachedTransform({nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : childrenPlaceholder),
 		};

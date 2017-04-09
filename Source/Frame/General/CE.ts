@@ -341,6 +341,13 @@ Object.prototype._AddFunction_Inline = function plus(offset) { return { left: th
 
 interface Error { readonly Stack: string; }
 
+// Node
+// ==========
+
+//(()=> {
+HTMLElement.prototype._AddGetter_Inline = function R() { return g.FindReact(this); };
+//})();
+
 // require other CE modules
 // ==========
 
