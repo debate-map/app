@@ -40,6 +40,7 @@ export function GetViewOffsetForNodeBox(nodeBox: JQuery) {
 export function UpdateFocusNodeAndViewOffset(mapID: number) {
 	let selectedNodePath = GetSelectedNodePath(mapID);
 	let focusNodeBox = selectedNodePath ? GetNodeBoxForPath(selectedNodePath) : GetNodeBoxClosestToViewCenter();
+	if (focusNodeBox == null) return; // can happen if node was just deleted
 	let focusNodeBoxComp = FindReact(focusNodeBox[0]) as NodeUI_Inner;
 	let viewOffset = GetViewOffsetForNodeBox(focusNodeBox);
 	store.dispatch(new ACTViewCenterChange({mapID, focusNode: focusNodeBoxComp.props.path, viewOffset}));

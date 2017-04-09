@@ -127,13 +127,16 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 					//<VMenuItem text={copiedNode ? "Copy (right-click to clear)" : "Copy"} style={styles.vMenuItem}
 					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : "Copy"} style={styles.vMenuItem}
 						onClick={e=> {
+							if (node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument)
+								return void ShowMessageBox({title: "Cannot copy",
+									message: "Sorry! For technical reasons, arguments cannot currently be copied. For now, copy the premises."});
 							if (e.button == 0)
 								store.dispatch(new ACTNodeCopy(node._id));
 							else
 								store.dispatch(new ACTNodeCopy(null));
 						}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode, permissions) &&
-					<VMenuItem text={`Paste "${copiedNode.titles["base"].KeepAtMost(30)}"`} style={styles.vMenuItem} onClick={e=> {
+					<VMenuItem text={`Paste as link: "${copiedNode.titles["base"].KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 						//Store.dispatch(new ACTNodeCopy(null));
