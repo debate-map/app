@@ -37,7 +37,7 @@ type RatingsPanel_Props = {node: MapNode, path: string, ratingType: RatingType, 
 @Connect((state: RootState, {node, ratingType}: RatingsPanel_Props)=> {
 	return {
 		userID: GetUserID(),
-		myRating: GetRatingValue(node._id, MapNode.GetMainRatingTypes(node)[0], GetUserID()),
+		myRating: GetRatingValue(node._id, ratingType, GetUserID()),
 		nodeChildren: GetNodeChildren(node),
 		smoothing: GetRatingUISmoothing(),
 	};
