@@ -51,25 +51,25 @@ export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 						{!node.metaThesis &&
 							<div style={{display: "flex", alignItems: "center"}}>
 								<Pre>Title (base): </Pre>
-								<TextInput ref="title" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["base"]}/>
+								<TextInput ref="title_base" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["base"]}/>
 								<Button text="Save" ml={5} onLeftClick={()=> {
-									firebase.Ref(`nodes/${node._id}/titles`).update({base: this.refs.title.GetValue()});
+									firebase.Ref(`nodes/${node._id}/titles`).update({base: this.refs.title_base.GetValue()});
 								}}/>
 							</div>}
-						{node.type == MapNodeType.Thesis &&
+						{node.type == MapNodeType.Thesis && !node.metaThesis &&
 							<div style={{display: "flex", alignItems: "center"}}>
 								<Pre>Title (negation): </Pre>
-								<TextInput ref="title" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["negation"]}/>
+								<TextInput ref="title_negation" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["negation"]}/>
 								<Button text="Save" ml={5} onLeftClick={()=> {
-									firebase.Ref(`nodes/${node._id}/titles`).update({negation: this.refs.title.GetValue()});
+									firebase.Ref(`nodes/${node._id}/titles`).update({negation: this.refs.title_negation.GetValue()});
 								}}/>
 							</div>}
-						{node.type == MapNodeType.Thesis &&
+						{node.type == MapNodeType.Thesis && !node.metaThesis &&
 							<div style={{display: "flex", alignItems: "center"}}>
 								<Pre>Title (yes-no question): </Pre>
-								<TextInput ref="title" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["yesNoQuestion"]}/>
+								<TextInput ref="title_yesNoQuestion" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["yesNoQuestion"]}/>
 								<Button text="Save" ml={5} onLeftClick={()=> {
-									firebase.Ref(`nodes/${node._id}/titles`).update({yesNoQuestion: this.refs.title.GetValue()});
+									firebase.Ref(`nodes/${node._id}/titles`).update({yesNoQuestion: this.refs.title_yesNoQuestion.GetValue()});
 								}}/>
 							</div>}
 						{node.metaThesis &&

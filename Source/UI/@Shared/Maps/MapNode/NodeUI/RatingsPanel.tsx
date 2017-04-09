@@ -1,3 +1,4 @@
+import {GetMainRatingAverage} from "../../../../../Store/firebase/nodeRatings";
 import * as jquery from "jquery";
 import {Log} from "../../../../../Frame/General/Logging";
 import {BaseComponent, FindDOM, Pre, RenderSource, SimpleShouldUpdate, FindDOM_} from "../../../../../Frame/UI/ReactGlobals";
@@ -23,17 +24,26 @@ import {ShowSignInPopup} from "../../../NavBar/UserPanel";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-type RatingsPanel_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]} & Partial<{userID: string, nodeChildren: MapNode[]}>;
+/*let sampleData = [
+	{rating: 0, count: 0},
+	{rating: 25, count: 1},
+	{rating: 50, count: 2},
+	{rating: 75, count: 3},
+	{rating: 100, count: 4},
+];*/
+
+type RatingsPanel_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]} & Partial<{userID: string, nodeChildren: MapNode[], smoothing: number}>;
 @Connect((state: RootState, {node, ratingType}: RatingsPanel_Props)=> {
 	return {
 		userID: GetUserID(),
 		//myVote: GetData(`nodeRatings/${node._id}/${ratingType}/${GetUserID()}/value`),
 		nodeChildren: GetNodeChildren(node),
+		smoothing: GetRatingUISmoothing(),
 	};
 })
 export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {size: Vector2i}> {
 	render() {
-		let {node, path, ratingType, ratings, userID, nodeChildren} = this.props;
+		let {node, path, ratingType, ratings, userID, nodeChildren, smoothing} = this.props;
 		let firebase = store.firebase.helpers;
 		let {size} = this.state;
 
@@ -44,7 +54,6 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 
 		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(options.Max() == 200 ? [200] : []);
 		let minVal = options.Min(), maxVal = options.Max(), range = maxVal - minVal;
-		let smoothing = GetRatingUISmoothing();
 		smoothing = smoothing.KeepAtMost(options.Max()); // smoothing might have been set higher, from when on another rating-type
 		let ticksForChart = options.Select(a=>a.RoundTo(smoothing)).Distinct();
 		let dataFinal = ticksForChart.Select(a=>({rating: a, count: 0}));
@@ -122,7 +131,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 				{this.lastRender_source == RenderSource.SetState &&
 					<AreaChart ref="chart" width={size.x} height={250} data={dataFinal}
 							margin={{top: 10, right: 10, bottom: 10, left: 10}}>
-						<XAxis dataKey="rating" ticks={ratingTypeInfo.ticks(node, parentNode)} type="number" domain={[options.Min(), options.Max()]} minTickGap={0}/>
+						<XAxis dataKey="rating" ticks={ratingTypeInfo.ticks(node, parentNode)} type="number" domain={[minVal, maxVal]} minTickGap={0}/>
 						{/*<YAxis tickCount={7} hasTick width={50}/>*/}
 						<YAxis orientation="left" x={20} width={20} height={250} viewBox={{x: 0, y: 0, width: 500, height: 500}} tickCount={9}/>
 						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>
@@ -138,7 +147,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 		let dom = this.refs.root;
 		let size = new Vector2i(dom.clientWidth, dom.clientHeight);
 		//if (!size.Equals(this.state.size))
-		this.SetState({size});
+		this.SetState({size}, null, false);
 	}
 }
 
