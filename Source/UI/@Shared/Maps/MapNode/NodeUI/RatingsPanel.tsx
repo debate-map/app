@@ -1,4 +1,4 @@
-import {GetMainRatingAverage} from "../../../../../Store/firebase/nodeRatings";
+import {GetMainRatingAverage, GetMainRatingFillPercent, GetRatingValue} from "../../../../../Store/firebase/nodeRatings";
 import * as jquery from "jquery";
 import {Log} from "../../../../../Frame/General/Logging";
 import {BaseComponent, FindDOM, Pre, RenderSource, SimpleShouldUpdate, FindDOM_} from "../../../../../Frame/UI/ReactGlobals";
@@ -32,18 +32,19 @@ import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	{rating: 100, count: 4},
 ];*/
 
-type RatingsPanel_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]} & Partial<{userID: string, nodeChildren: MapNode[], smoothing: number}>;
+type RatingsPanel_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]}
+	& Partial<{userID: string, myRating: number, nodeChildren: MapNode[], smoothing: number}>;
 @Connect((state: RootState, {node, ratingType}: RatingsPanel_Props)=> {
 	return {
 		userID: GetUserID(),
-		//myVote: GetData(`nodeRatings/${node._id}/${ratingType}/${GetUserID()}/value`),
+		myRating: GetRatingValue(node._id, MapNode.GetMainRatingTypes(node)[0], GetUserID()),
 		nodeChildren: GetNodeChildren(node),
 		smoothing: GetRatingUISmoothing(),
 	};
 })
 export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {size: Vector2i}> {
 	render() {
-		let {node, path, ratingType, ratings, userID, nodeChildren, smoothing} = this.props;
+		let {node, path, ratingType, ratings, userID, myRating, nodeChildren, smoothing} = this.props;
 		let firebase = store.firebase.helpers;
 		let {size} = this.state;
 
@@ -68,6 +69,9 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 			let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(argumentStrength)).First();
 			closestRatingSlot.count++;
 		}*/
+
+		/*let marginTop = myRating != null ? 20 : 10;
+		let height = myRating != null ? 260 : 250;*/
 
 		return (
 			<div ref="root" style={{position: "relative"/*, minWidth: 496*/}}
@@ -122,21 +126,22 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
 					<Pre style={{marginRight: "auto", fontSize: 12, color: "rgba(255,255,255,.5)"}}>
 						{ratingType == "strength"
-							? "Cannot rate this directly. Instead, rate the premises and meta-thesis."
-							: "Click to rate. Right-click to remove rating."}
+							? `Cannot rate this directly. Instead, rate the premises and meta-thesis.` //+ (myRating != null ? ` (yours: ${myRating})` : "")
+							: `Click to rate. Right-click to remove rating.` /*+ (myRating != null ? ` (yours: ${myRating})` : "")*/}
 					</Pre>
 					{/*Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>*/}
 					<Pre>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>
 				</div>
 				{this.lastRender_source == RenderSource.SetState &&
 					<AreaChart ref="chart" width={size.x} height={250} data={dataFinal}
-							margin={{top: 10, right: 10, bottom: 10, left: 10}}>
+							margin={{top: 20, right: 10, bottom: 0, left: 10}} /*viewBox={{x: 0, y: 250 - height, width: size.x, height: 250}}*/>
 						<XAxis dataKey="rating" ticks={ratingTypeInfo.ticks(node, parentNode)} type="number" domain={[minVal, maxVal]} minTickGap={0}/>
 						{/*<YAxis tickCount={7} hasTick width={50}/>*/}
-						<YAxis orientation="left" x={20} width={20} height={250} viewBox={{x: 0, y: 0, width: 500, height: 500}} tickCount={9}/>
-						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>
+						<YAxis orientation="left" x={20} width={20} height={250} tickCount={9}/>
 						<CartesianGrid stroke="rgba(255,255,255,.3)"/>
 						<Area type="monotone" dataKey="count" stroke="#ff7300" fill="#ff7300" fillOpacity={0.9} layout="vertical" animationDuration={500}/>
+						{myRating != null && <ReferenceLine x={myRating} stroke="rgba(0,255,0,1)" fill="rgba(0,255,0,1)" label="You"/>}
+						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>
 					</AreaChart>}
 			</div>
 		);

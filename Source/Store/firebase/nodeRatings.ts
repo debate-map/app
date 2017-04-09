@@ -1,4 +1,4 @@
-import {GetArgumentStrengthPseudoRatings, CalculateArgumentStrength} from "../../Frame/Store/RatingProcessor";
+import {GetArgumentStrengthPseudoRatings, CalculateArgumentStrength, GetArgumentStrengthPseudoRating} from "../../Frame/Store/RatingProcessor";
 import {RatingType} from "../../Store/firebase/nodeRatings/@RatingType";
 import {GetData} from "../../Frame/Database/DatabaseHelpers";
 import {CachedTransform} from "../../Frame/V/VCache";
@@ -30,8 +30,10 @@ export function GetRating(nodeID: number, ratingType: RatingType, userID: string
 	if (ratingSet == null) return null;
 	return ratingSet[userID];
 }
-export function GetRatingValue(nodeID: number, ratingType: RatingType, userID: string, resultIfNoData = null): number {
+export function GetRatingValue(nodeID: number, ratingType: RatingType, userID: string, allowGetPseudoRating = true, resultIfNoData = null): number {
 	let rating = GetRating(nodeID, ratingType, userID);
+	if (ratingType == "strength" && allowGetPseudoRating)
+		return (GetArgumentStrengthPseudoRating(GetNodeChildren(GetNode(nodeID)), userID) || {} as any).value;
 	return rating ? rating.value : resultIfNoData;
 }
 export function GetRatingAverage(nodeID: number, ratingType: RatingType, resultIfNoData = null): number {
