@@ -1,4 +1,4 @@
-import {GetFocusNode, GetViewOffset, GetSelectedNodePath} from "../../../Store/main/mapViews";
+import {GetFocusNode, GetViewOffset, GetSelectedNodePath, GetNodeView} from "../../../Store/main/mapViews";
 import {BaseComponent, FindDOM, FindReact} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
@@ -24,6 +24,7 @@ import {GetMapView} from "../../../Store/main/mapViews";
 import {GetUserID} from "../../../Store/firebase/users";
 import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
+import {UpdateURL} from "../../../Frame/URL/URLManager";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -41,9 +42,14 @@ export function UpdateFocusNodeAndViewOffset(mapID: number) {
 	let selectedNodePath = GetSelectedNodePath(mapID);
 	let focusNodeBox = selectedNodePath ? GetNodeBoxForPath(selectedNodePath) : GetNodeBoxClosestToViewCenter();
 	if (focusNodeBox == null) return; // can happen if node was just deleted
+
 	let focusNodeBoxComp = FindReact(focusNodeBox[0]) as NodeUI_Inner;
+	let focusNodePath = focusNodeBoxComp.props.path;
 	let viewOffset = GetViewOffsetForNodeBox(focusNodeBox);
-	store.dispatch(new ACTViewCenterChange({mapID, focusNode: focusNodeBoxComp.props.path, viewOffset}));
+
+	let oldNodeView = GetNodeView(mapID, focusNodePath);
+	if (oldNodeView == null || !oldNodeView.focus || !viewOffset.Equals(oldNodeView.viewOffset))
+		store.dispatch(new ACTViewCenterChange({mapID, focusNode: focusNodeBoxComp.props.path, viewOffset}));
 }
 
 type Props = {map: Map} & Partial<{rootNode: MapNode, focusNode: string, viewOffset: {x: number, y: number}}>;
@@ -74,21 +80,24 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						UpdateFocusNodeAndViewOffset(map._id);
 					}}>
 				<style>{`
-				.MapUI > :first-child:after {
+				.MapUI { display: inline-flex; writing-mode: vertical-lr; flex-wrap: wrap; }
+				.MapUI > * { writing-mode: horizontal-tb; }
+				/*.MapUI > :first-child:after {
 					content: ".";
 					font-size: 0;
 					opacity: 0;
 					visibility: hidden;
 					display: block;
 					height: ${MapUI.padding.topAndBottom}px;
-					width: 100%;
+					/*width: 100%;*#/
+					width: 0;
 					margin-right: ${MapUI.padding.leftAndRight}px;
 					pointer-events: none;
-				}
+				}*/
 				`}</style>
 				<div className="MapUI" ref="content"
 						style={{
-							position: "relative", display: "flex", padding: `${MapUI.padding.topAndBottom}px ${MapUI.padding.leftAndRight}px`, whiteSpace: "nowrap",
+							position: "relative", /*display: "flex",*/ padding: `${MapUI.padding.topAndBottom}px ${MapUI.padding.leftAndRight}px`, whiteSpace: "nowrap",
 							filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))",
 						}}
 						onMouseDown={e=>this.downPos = new Vector2i(e.clientX, e.clientY)}
@@ -96,8 +105,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 							if (e.target != this.refs.content) return;
 							if (new Vector2i(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
 							let mapView = store.getState().main.mapViews[store.getState().main.openMap];
-							let isNodeSelected = GetTreeNodesInObjTree(mapView).Any(a=>a.prop == "selected" && a.Value);
-							if (isNodeSelected) {
+							if (GetSelectedNodePath(map._id)) {
 								store.dispatch(new ACTMapNodeSelect({mapID: map._id, path: null}));
 								UpdateFocusNodeAndViewOffset(map._id);
 							}
@@ -139,6 +147,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	OnLoadComplete() {
 		console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
 		this.LoadScroll();
+		UpdateURL();
 	}
 
 	/*PostRender() {

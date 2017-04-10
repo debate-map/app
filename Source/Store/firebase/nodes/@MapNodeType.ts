@@ -34,7 +34,7 @@ export class MapNodeType_Info {
 			otherRatingTypes: [],
 		}),
 		[MapNodeType.Thesis]: new MapNodeType_Info({
-			displayName: parentNode=>parentNode.type == MapNodeType.Category ? "yes-no question (thesis form)" : "thesis",
+			displayName: parentNode=>parentNode.type == MapNodeType.Category ? "yes-no question (thesis)" : "thesis",
 			childTypes: [MapNodeType.SupportingArgument, MapNodeType.OpposingArgument],
 			minWidth: 350, maxWidth: 550, backgroundColor: "0,80,150",
 			mainRatingTypes: ["probability", "idealIntensity"],

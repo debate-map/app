@@ -61,7 +61,7 @@ if (devEnv) {
 	whyDidYouUpdate(React, {
 		exclude: new RegExp(
 			`connect|Connect|Link`
-			+ `|Animate|Animation|Dot|ComposedDataDecorator|Chart|Curve|Route|ReferenceLine` // from recharts
+			+ `|Animate|Animation|Dot|ComposedDataDecorator|Chart|Curve|Route|ReferenceLine|Text\\.state` // from recharts
 			+ `|Div` // from ScrollView (probably temp)
 			+ `|Button` // from react-bootstrap (from react-social-button)
 		),
