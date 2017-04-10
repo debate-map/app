@@ -32,6 +32,8 @@ import {GetNode, IsLinkValid, IsNewLinkValid, ForDelete_GetError, ForUnlink_GetE
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
+import {ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
+import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 
 type Props = {node: MapNode, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNode, copiedNode: MapNode}>;
 @Connect((state: RootState, {path}: Props)=> {
@@ -63,63 +65,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							if (e.button != 0) return;
 							if (userID == null) return ShowSignInPopup();
 
-							let isArgument = childType == MapNodeType.SupportingArgument || childType == MapNodeType.OpposingArgument;
-							let thenTypes = childType == MapNodeType.SupportingArgument
-								? GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Take(2)
-								: GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Skip(2);
-
-							let title = "";
-							let metaThesis_ifType = MetaThesis_IfType.All;
-							let metaThesis_thenType = childType == MapNodeType.SupportingArgument ? MetaThesis_ThenType.StrengthenParent : MetaThesis_ThenType.WeakenParent;
-							let boxController = ShowMessageBox({
-								title: `Add ${displayName}`, cancelButton: true,
-								messageUI: ()=>(
-									<div style={{padding: "10px 0"}}>
-										Title: <TextInput ref={a=>a && WaitXThenRun(0, ()=>a.DOM.focus())} style={{width: 500}}
-											onKeyDown={e=> {
-												if (e.keyCode != keycode.codes.enter) return;
-												boxController.options.onOK();
-												boxController.Close();
-											}}
-											value={title} onChange={val=>DN(title = val, boxController.UpdateUI())}/>
-										{isArgument &&
-											<Div mt={5}>
-												<Pre>Type: If </Pre>
-												<Select options={GetEntries(MetaThesis_IfType, name=>name.toLowerCase())}
-													value={metaThesis_ifType} onChange={val=>(metaThesis_ifType = val, boxController.UpdateUI())}/>
-												<Pre> premises below are true, they </Pre>
-												<Select options={thenTypes} value={metaThesis_thenType} onChange={val=>(metaThesis_thenType = val, boxController.UpdateUI())}/>
-												<Pre>.</Pre>
-											</Div>}
-									</div>
-								),
-								onOK: ()=> {
-									firebase.Ref("nodes").transaction(nodes=> {
-										if (!nodes) return nodes;
-
-										let newID = nodes.Props.filter(a=>a.name != "_").map(a=>parseInt(a.name)).Max().KeepAtLeast(99) + 1;
-										nodes[node._id].children = {...nodes[node._id].children, [newID]: {_: true}};
-										let newNode = new MapNode({
-											type: childType, titles: {base: title},
-											creator: userID, approved: true,
-										});
-										nodes[newID] = newNode;
-
-										if (isArgument) {
-											let metaThesisID = newID + 1;
-											let metaThesisNode = new MapNode({
-												type: MapNodeType.Thesis,
-												metaThesis: true, metaThesis_ifType, metaThesis_thenType,
-												creator: userID, approved: true,
-											});
-											nodes[metaThesisID] = metaThesisNode;
-											newNode.children = {...newNode.children, [metaThesisID]: {_: true}};
-										}
-
-										return nodes;
-									}, undefined, false);
-								}
-							});
+							ShowAddChildDialog(node, childType, userID);
 						}}/>
 					);
 				})}

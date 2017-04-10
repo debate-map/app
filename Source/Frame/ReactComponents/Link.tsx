@@ -53,5 +53,10 @@ export default class Link extends BaseComponent<{to, target?: string, replace?: 
 		const href = this.context.router.history.createHref(typeof to === 'string' ? {pathname: to} : to)
 		return <a {...rest} onClick={this.handleClick} href={href}/>
 	}
+
+	// add proxy, since using Radium
+	setState(newState, callback?) {
+		return this.SetState(newState, callback);
+	}
 }
-Link.prototype.setState = function(newState, callback?) { return this.SetState(newState, callback); }; // add proxy, since using Radium
+//Link.prototype.setState = function(newState, callback?) { return this.SetState(newState, callback); }; // add proxy, since using Radium

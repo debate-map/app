@@ -61,9 +61,9 @@ if (devEnv) {
 	whyDidYouUpdate(React, {
 		exclude: new RegExp(
 			`connect|Connect|Link`
-			+ `|Animate|Animation|Dot|ComposedDataDecorator|Chart|Curve|Route|ReferenceLine|Text\\.state` // from recharts
+			+ `|Animate|Animation|Dot|ComposedDataDecorator|Chart|Curve|Route|ReferenceLine|Text` // from recharts
 			+ `|Div` // from ScrollView (probably temp)
-			+ `|Button` // from react-bootstrap (from react-social-button)
+			+ `|Button` // from react-social-button>react-bootstrap
 		),
 	});
 }

@@ -1,8 +1,9 @@
 import {Assert} from "../../Frame/General/Assert";
 import * as React from "react";
-import {BaseComponent} from "../UI/ReactGlobals";
+import {BaseComponent, ApplyBasicStyles} from "../UI/ReactGlobals";
 import {E} from "../General/Globals_Free";
 
+@ApplyBasicStyles
 export default class TextInput extends BaseComponent<{value, onChange?, delayChangeTillDefocus?, style?} & React.HTMLProps<HTMLInputElement>, {editedValue}> {
 	render() {
 		var {value, onChange, delayChangeTillDefocus, style, ...rest} = this.props;

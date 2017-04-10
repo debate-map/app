@@ -107,7 +107,7 @@ export default class Select extends BaseComponent
 		}
 		
 		return (
-			<div style={E({padding: 5}, style)}>
+			<div style={E({/*borderRadius: 4, background: "rgba(255,255,255,.3)"*/}, style)}>
 				{options.map((option, index)=> {
 					return <ButtonBar_OptionUI key={option.name}
 							first={index == 0} last={index == options.length - 1} selected={option.value === value}
@@ -133,19 +133,23 @@ export class Dropdown_OptionUI extends BaseComponent<{index, style}, {}> {
 
 @Radium
 export class ButtonBar_OptionUI extends BaseComponent<{first, last, selected, onSelect, style}, {}> {
+	// add proxy, since using Radium
+	setState(newState, callback?) {
+		return this.SetState(newState, callback);
+	}
 	render() {
 	    var {first, last, selected, style, children, onSelect} = this.props;
 	    return (
 			<div className="ButtonBar_OptionUI"
 					style={E(
-						{display: "inline-block", background: "rgba(0,0,0,.3)", padding: "5 12",
-							cursor: "pointer", color: "#000",
-							":hover": {background: "rgba(0,0,0,.5)"}},
+						{display: "inline-block", background: "rgba(255,255,255,.3)", padding: "5px 12px",
+							cursor: "pointer",
+							":hover": {background: "rgba(255,255,255,.5)"}},
 						first && {borderRadius: "4px 0 0 4px"},
-						!first && {border: "solid #111", borderWidth: "0 0 0 1px"},
+						!first && {border: "solid #222", borderWidth: "0 0 0 1px"},
 						last && {borderRadius: "0 4px 4px 0"},
 						first && last && {borderRadius: "4px"},
-						selected && {":hover": {}, background: "rgba(0,0,0,.7)"},
+						selected && {":hover": {}, background: "rgba(255,255,255,.5)"},
 						style
 					)}
 					onClick={onSelect}>

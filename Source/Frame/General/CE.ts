@@ -219,8 +219,9 @@ Object.prototype._AddFunction_Inline = function Extended2(x) {
 };
 //Object.prototype._AddFunction_Inline = function E(x) { return this.Extended(x); };
 
+interface Object { VAct<T>(this: T, func: (self: T)=>any): T; }
 Object.prototype._AddFunction_Inline = function VAct(action) {
-	action.call(this);
+	action.call(this, this);
 	return this;
 };
 
