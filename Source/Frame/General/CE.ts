@@ -269,8 +269,8 @@ Object.prototype._AddGetter_Inline = function Props() {
 // Object[FakeArray]
 // ==========
 
-interface Object { FakeArray_Select<T2>(matchFunc: (item, index?: number)=>T2): T2[]; }
-Object.prototype._AddFunction_Inline = function FakeArray_Select(selectFunc) {
+interface Object { FakeArray_Select<T2>(selectFunc?: (item, index?: number)=>T2): T2[]; }
+Object.prototype._AddFunction_Inline = function FakeArray_Select(selectFunc = a=>a) {
 	/*var result = this instanceof List ? new List(this.itemType) : [];
 	for (let [index, item] of this.entries())
 		result.Add(selectFunc.call(item, item, index));

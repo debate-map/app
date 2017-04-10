@@ -70,10 +70,10 @@ export function GetArgumentStrengthPseudoRatingSet(nodeChildren: MapNode[]): {[k
 
 	let usersWhoRatedAllChildren = null;
 	for (let child of nodeChildren.Skip(1)) {
-		let childRatingSet = GetRatingSet(child._id, MapNode.GetMainRatingTypes(child)[0]);
+		let childRatingSet = GetRatingSet(child._id, MapNode.GetMainRatingTypes(child)[0]) || {};
 		if (usersWhoRatedAllChildren == null) {
 			usersWhoRatedAllChildren = {};
-			for (let userID in childRatingSet)
+			for (let userID in childRatingSet.FakeArray_Select())
 				usersWhoRatedAllChildren[userID] = true;
 		} else {
 			for (let userID in usersWhoRatedAllChildren) {
