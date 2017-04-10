@@ -108,7 +108,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			upChildPacks = upChildPacks.OrderBy(pack=>nodeChildren_fillPercents[pack.origIndex]);
 			downChildPacks = downChildPacks.OrderByDescending(pack=>nodeChildren_fillPercents[pack.origIndex]);
 		} else {
-			childPacks = childPacks.OrderByDescending(pack=>nodeChildren_fillPercents[pack.origIndex]);
+			childPacks = childPacks.OrderByDescending(pack=>pack.node.metaThesis ? 101 : nodeChildren_fillPercents[pack.origIndex]);
 		}
 
 		let {width, expectedHeight} = this.GetMeasurementInfo(this.props, this.state);

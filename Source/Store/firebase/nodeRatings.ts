@@ -51,6 +51,7 @@ export function GetPaths_MainRatingAverage(node: MapNode) {
 		result.AddRange(GetPaths_CalculateArgumentStrength(node, GetNodeChildren(node)));
 	return result;
 }*/
+/** Returns an int from 0 to 100. */
 export function GetMainRatingAverage(node: MapNode, resultIfNoData = null): number {
 	// if static category, always show full bar
 	if (node._id < 100)
@@ -58,6 +59,7 @@ export function GetMainRatingAverage(node: MapNode, resultIfNoData = null): numb
 	return GetRatingAverage(node._id, MapNode.GetMainRatingTypes(node)[0], resultIfNoData);
 }
 //export function GetPaths_MainRatingFillPercent(node: MapNode) { return GetPaths_MainRatingAverage(node); }
+/** Returns an int from 0 to 100. */
 export function GetMainRatingFillPercent(node: MapNode) {
 	let mainRatingAverage = GetMainRatingAverage(node);
 	if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
