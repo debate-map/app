@@ -71,13 +71,13 @@ export default class V {
 		return result;
 	}
 
-	static StableSort(array, compare) { // needed for Chrome
-		var array2 = array.map((obj, index)=>({index: index, obj: obj}));
+	static StableSort(array, compare: (aItem, bItem, aIndex: number, bIndex: number)=>number) { // needed for Chrome
+		var array2 = array.map((item, index)=>({index, item}));
 		array2.sort((a, b)=> {
-			var r = compare(a.obj, b.obj);
+			var r = compare(a.item, b.item, a.index, b.index);
 			return r != 0 ? r : V.Compare(a.index, b.index);
 		});
-		return array2.map(pack=>pack.obj);
+		return array2.map(pack=>pack.item);
 	}
 	static Compare(a, b, caseSensitive = true) {
 		if (!caseSensitive && typeof a == "string" && typeof b == "string") {

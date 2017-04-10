@@ -31,6 +31,7 @@ import {GetNodeChildIDs, GetNodeChildren} from "../../../../Store/firebase/nodes
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
+import {GetMainRatingFillPercent} from "../../../../Store/firebase/nodeRatings";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -49,19 +50,22 @@ import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 
 let childrenPlaceholder = [];
 
-type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void} & Partial<{nodeView: MapNodeView, nodeChildren: MapNode[]}>;
+type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void}
+	& Partial<{nodeView: MapNodeView, nodeChildren: MapNode[], nodeChildren_fillPercents: number[]}>;
 type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number, svgInfo: {mainBoxOffset: Vector2i, oldChildBoxOffsets: Vector2i[]}};
 @Connect(()=> {
 	//var getNodeView = MakeGetNodeView();
 	return ((state: RootState, {node, path, map}: Props & BaseProps)=> {
 		let nodeView = GetNodeView(map._id, path) || new MapNodeView();
 		let nodeChildren = GetNodeChildren(node);
+		let nodeChildren_fillPercents = nodeChildren.map(a=>a ? GetMainRatingFillPercent(a) : 0);
 		return {
 			path: path || node._id.toString(),
 			// only pass new nodeView when its local-props are different
 			nodeView: CachedTransform({path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
 			// only pass nodeChildren when all are loaded
 			nodeChildren: CachedTransform({nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : childrenPlaceholder),
+			nodeChildren_fillPercents,
 		};
 	});
 })
@@ -80,15 +84,32 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	}
 
 	render() {
-		let {map, node, path, widthOverride, nodeView, nodeChildren, children} = this.props;
+		let {map, node, path, widthOverride, nodeView, nodeChildren, nodeChildren_fillPercents, children} = this.props;
 		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
 		//Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
 		NodeUI.renderCount++;
 		NodeUI.lastRenderTime = Date.now();
 
 		let separateChildren = node.type == MapNodeType.Thesis;
-		let upChildren = node.type == MapNodeType.Thesis ? nodeChildren.Where(a=>a.type == MapNodeType.SupportingArgument) : [];
-		let downChildren = node.type == MapNodeType.Thesis ? nodeChildren.Where(a=>a.type == MapNodeType.OpposingArgument) : [];
+		type ChildPack = {origIndex: number, node: MapNode, ui: JSX.Element};
+		let childPacks: ChildPack[] = nodeChildren.map((child, index)=> {
+			return {
+				origIndex: index,
+				node: child,
+				ui: <NodeUI key={index} ref={c=>this.childBoxes[index] = c} map={map} node={child}
+					path={path + "/" + child._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>
+			};
+		});
+		let upChildPacks = separateChildren ? childPacks.Where(a=>a.node.type == MapNodeType.SupportingArgument) : [];
+		let downChildPacks = separateChildren ? childPacks.Where(a=>a.node.type == MapNodeType.OpposingArgument) : [];
+
+		// apply sorting
+		if (separateChildren) {
+			upChildPacks = upChildPacks.OrderBy(pack=>nodeChildren_fillPercents[pack.origIndex]);
+			downChildPacks = downChildPacks.OrderByDescending(pack=>nodeChildren_fillPercents[pack.origIndex]);
+		} else {
+			childPacks = childPacks.OrderByDescending(pack=>nodeChildren_fillPercents[pack.origIndex]);
+		}
 
 		let {width, expectedHeight} = this.GetMeasurementInfo(this.props, this.state);
 		let innerBoxOffset = ((childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
@@ -113,10 +134,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						{svgInfo.mainBoxOffset &&
 							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
 								childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
-						{nodeChildren.map((child, index)=> {
-							return <NodeUI key={index} ref={c=>this.childBoxes.push(c)} map={map} node={child}
-								path={path + "/" + child._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
-						})}
+						{childPacks.map(a=>a.ui)}
 					</div>}
 				{hasBeenExpanded && separateChildren &&
 					<div ref="childHolder" className="childHolder clickThrough" style={{
@@ -125,18 +143,12 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					}}>
 						{svgInfo.mainBoxOffset &&
 							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
-								childNodes={upChildren.concat(downChildren)} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
+								childNodes={upChildPacks.concat(downChildPacks).map(a=>a.node)} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
 						<div ref="upChildHolder" className="upChildHolder clickThrough" style={{display: "flex", flexDirection: "column"}}>
-							{upChildren.map((child, index)=> {
-								return <NodeUI key={"up_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child}
-									path={path + "/" + child._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
-							})}
+							{upChildPacks.map(a=>a.ui)}
 						</div>
 						<div ref="downChildHolder" className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
-							{downChildren.map((child, index)=> {
-								return <NodeUI key={"down_" + index} ref={c=>this.childBoxes.push(c)} map={map} node={child}
-									path={path + "/" + child._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>;
-							})}
+							{downChildPacks.map(a=>a.ui)}
 						</div>
 					</div>}
 			</div>
@@ -152,6 +164,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let expectedTextWidth = V.GetContentWidth($(`<a style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${displayText}</a>`));
 		//let expectedOtherStuffWidth = 26;
 		let expectedOtherStuffWidth = 28;
+		if (node.quote)
+			expectedOtherStuffWidth += 14;
 		let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
 
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];

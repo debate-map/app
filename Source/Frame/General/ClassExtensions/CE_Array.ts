@@ -209,14 +209,19 @@ Array.prototype._AddFunction_Inline = function FindIndex(matchFunc) {
             return index;
     return -1;
 };*/
-interface Array<T> { OrderBy(valFunc?: (item: T)=>number): T[]; }
-Array.prototype._AddFunction_Inline = function OrderBy(valFunc = a=>a) {
+interface Array<T> { OrderBy(valFunc?: (item: T, index: number)=>number): T[]; }
+Array.prototype._AddFunction_Inline = function OrderBy(valFunc = (item, index: number)=>item) {
 	/*var temp = this.ToList();
 	temp.sort((a, b)=>V.Compare(valFunc(a), valFunc(b)));
 	return temp;*/
 	var V_ = require("../../V/V").default;
-    return V_.StableSort(this, (a, b)=>V_.Compare(valFunc(a), valFunc(b)));
+    return V_.StableSort(this, (a, b, aIndex, bIndex)=>V_.Compare(valFunc(a, aIndex), valFunc(b, bIndex)));
 };
+interface Array<T> { OrderByDescending(valFunc?: (item: T, index: number)=>number): T[]; }
+Array.prototype._AddFunction_Inline = function OrderByDescending(valFunc = (item, index: number)=>item) {
+	return this.OrderBy((item, index)=>-valFunc(item, index));
+};
+
 interface Array<T> { Distinct(): T[]; }
 Array.prototype._AddFunction_Inline = function Distinct() {
 	var result = [];
