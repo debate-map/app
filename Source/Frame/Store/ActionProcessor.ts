@@ -86,7 +86,7 @@ export function PostDispatchAction(action: Action<any>) {
 		store.dispatch({type: "PostRehydrate"}); // todo: ms this also gets triggered when there is no saved-state (ie, first load)
 	}
 	if (action.type == "PostRehydrate") {
-		LoadURL();
+		LoadURL(startURL.toString());
 		UpdateURL();
 		if (prodEnv && State().main.analyticsEnabled) {
 			Log("Initialized Google Analytics.");

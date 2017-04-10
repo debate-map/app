@@ -13,7 +13,7 @@ import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
 import {FromJSON, ToJSON} from "../General/Globals";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 import {GetPathNodes, GetPath} from "../../Store/router";
-import {URL, QueryVar, GetUrlVars} from "../General/URLs";
+import {URL, QueryVar, GetUrlVars, GetUrlPath} from "../General/URLs";
 
 // loading
 // ==========
@@ -109,9 +109,9 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 	return [nodeID, nodeView];
 }
 
-export function LoadURL() {
-	if (!GetPath().startsWith("global/map")) return;
-	let urlVars = GetUrlVars();
+export function LoadURL(url: string) {
+	if (!GetPath(GetUrlPath(url)).startsWith("global/map")) return;
+	let urlVars = GetUrlVars(url);
 	// example: /global?view=1:3:100:101f(384_111):102:.104:.....
 	let mapViewStr = urlVars.view;
 	if (mapViewStr == null || mapViewStr.length == 0) return;

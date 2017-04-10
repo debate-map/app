@@ -90,4 +90,6 @@ function LoadHotModules() {
 	//Log("Reloading hot modules...");
 	require("./Main_Hot");
 }
+
+//setTimeout(()=>LoadHotModules());
 LoadHotModules();
