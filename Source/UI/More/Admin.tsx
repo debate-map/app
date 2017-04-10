@@ -10,6 +10,15 @@ import {Map, MapType} from "../../Store/firebase/maps/@Map";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import UserExtraInfo from "../../Store/firebase/userExtras/@UserExtraInfo";
 
+export interface FirebaseData {
+	users;
+	userExtras;
+	maps;
+	nodes;
+	nodeExtras;
+	nodeRatings;
+}
+
 export default class AdminUI extends BaseComponent<{}, {}> {
 	render() {
 		let firebase = store.firebase.helpers;
@@ -34,7 +43,8 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 							await firebase.Ref(`nodes/${1}`).set(rootNode);
 							ShowMessageBox({message: "Done!"});*/
 
-							let data = {} as any;
+							let data = {} as FirebaseData;
+							let _ = true; // placeholder, for prop-less objects, which we want to still be saved
 
 							// users
 							// ==========
@@ -66,7 +76,6 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 							// maps
 							// ==========
 
-							let _ = true; // placeholder, for prop-less objects, which we want to still be saved
 							data.maps = {
 								1: {
 									name: "Global",
@@ -114,8 +123,8 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 									creator: user1Key, approved: true,
 								}),
 							};
-							data.nodeExtras = {
-								1: {
+							data.nodeExtras = {_,
+								/*1: {
 									/*title:{^}
 										revisions:{^}
 											1:{^}
@@ -130,13 +139,15 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 											"light years":{^}
 												light-year-10:{^}
 													upvoters:{^}
-														user123:true*/
+														user123:true*#/
 									agrees: {
 										Ecq3r7NvgahaMwQQ3PsdgqAFirD2: .7
 									},
 									disagrees: {
 									}
-								}
+							}*/
+							};
+							data.nodeRatings = {_,
 							};
 
 							await firebase.Ref().update(data);

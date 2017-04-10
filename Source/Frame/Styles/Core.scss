@@ -52,8 +52,32 @@
 		-webkit-appearance: none !important;
 	}
 
+	// by tag
+	// ==========
+
+	a {
+		&:not(.ignoreBaseCSS) {
+			color: rgba(100,255,100,.7);
+			&:hover {
+				color: rgba(100,255,100,1);
+			}
+		}
+	}
+
+	select {
+		background: rgba(255,255,255,.8);
+	}
+	input[type=text] {
+		background: rgba(255,255,255,.8);
+		border: 1px solid rgba(0,0,0,.5);
+		padding: 2px;
+	}
+
 	p:first-child { margin-top: 0; }
 	p:last-child { margin-bottom: 0; }
+
+	// by class
+	// ==========
 
 	.unselectable { -moz-user-select: none; -webkit-user-select: none; user-select: none; }
 	.unselectable * { -moz-user-select: none; -webkit-user-select: none; user-select: none; }
@@ -69,8 +93,8 @@
 	#recharts_measurement_span { font-size: 12px; }
 
 	.recharts-text.recharts-cartesian-axis-tick-value { fill: #AAA; }
-
-	.Markdown {
+	
+	/*.Markdown {
 		a {
 			&:not(.ignoreBaseCSS) {
 				color: rgba(100,255,100,.7);
@@ -79,5 +103,5 @@
 				}
 			}
 		}
-	}
+	}*/
 }

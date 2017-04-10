@@ -266,6 +266,32 @@ Object.prototype._AddGetter_Inline = function Props() {
 	return result;
 };
 
+// Object[FakeArray]
+// ==========
+
+interface Object { FakeArray_Select<T2>(matchFunc: (item, index?: number)=>T2): T2[]; }
+Object.prototype._AddFunction_Inline = function FakeArray_Select(selectFunc) {
+	/*var result = this instanceof List ? new List(this.itemType) : [];
+	for (let [index, item] of this.entries())
+		result.Add(selectFunc.call(item, item, index));
+	return result;*/
+	return this.Props.Where(a=>a.name != "_key" && a.name != "_id").map(a=>a.value).map(selectFunc);
+};
+interface Object { FakeArray_RemoveAt(index: number); }
+Object.prototype._AddFunction_Inline = function FakeArray_RemoveAt(index: number) {
+	// remove target entry
+	delete this[index];
+	// move all the later entries down one index
+	for (var i = index + 1; i in this; i++)
+		this[i - 1] = this[i];
+	delete this[i];
+};
+interface Object { FakeArray_Add(item); }
+Object.prototype._AddFunction_Inline = function FakeArray_Add(item) {
+	for (var openIndex = 0; openIndex in this; openIndex++);
+	this[openIndex] = item;
+};
+
 // Function
 // ==========
 

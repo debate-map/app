@@ -52,6 +52,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
 		let validChildTypes = GetValidNewChildTypes(node.type, path, permissions);
+		let thesisFormForThesisChild = node.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base;
 
 		let nodeText = GetNodeDisplayText(node, path);
 
@@ -82,11 +83,14 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 								store.dispatch(new ACTNodeCopy(null));
 						}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode, permissions) &&
-					<VMenuItem text={`Paste as link: "${GetNodeDisplayText(node, path).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={e=> {
+					<VMenuItem text={`Paste as link: "${GetNodeDisplayText(copiedNode, thesisFormForThesisChild).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 						//Store.dispatch(new ACTNodeCopy(null));
-						firebase.Ref(`nodes/${node._id}/children`).update({[copiedNode._id]: {_: true}});
+						let linkInfo = {_: true} as any;
+						if (thesisFormForThesisChild)
+							linkInfo.form = thesisFormForThesisChild;
+						firebase.Ref(`nodes/${node._id}/children`).update({[copiedNode._id]: linkInfo});
 					}}/>}
 				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
@@ -127,17 +131,21 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						let nodes = (snapshot.val() as Object).Props.Select(a=>a.value.Extended({_id: a.name}));
 						//let childNodes = node.children.Select(a=>nodes[a]);
 						let parentNodes = nodes.Where(a=>a.children && a.children[node._id]);
-						let s_ifParents = parentNodes.length > 1 ? "s" : "";
+						if (parentNodes.length > 1)
+							return void ShowMessageBox({title: "Cannot delete", message: "Cannot delete this child, as it has more than one parent. Try unlinking it instead."});
+						//let s_ifParents = parentNodes.length > 1 ? "s" : "";
 						let metaThesisID = node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument ? node.children.VKeys()[0] : null;
 
 						ShowMessageBox({
 							title: `Delete "${nodeText}"`, cancelButton: true,
-							message: `Delete the node "${nodeText}"`
+							/*message: `Delete the node "${nodeText}"`
 								+ `${metaThesisID ? ", its 1 meta-thesis" : ""}`
-								+ `, and its link${s_ifParents} with ${parentNodes.length} parent-node${s_ifParents}?`,
+								+ `, and its link${s_ifParents} with ${parentNodes.length} parent${s_ifParents}?`,*/
+							message: `Delete the node "${nodeText}"${metaThesisID ? ", its 1 meta-thesis" : ""}, and its link with 1 parent?`,
 							onOK: ()=> {
 								firebase.Ref().transaction(data=> {
-									if (!data.nodes) return data.nodes;
+									if (!data) return data;
+
 									for (let parent of parentNodes)
 										data.nodes[parent._id].children[node._id] = null;
 									data.nodes[node._id] = null;
@@ -151,7 +159,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 										data.nodeRatings[metaThesisID] = null;
 									}
 									
-									return data.nodes;
+									return data;
 								}, undefined, false);
 							}
 						});

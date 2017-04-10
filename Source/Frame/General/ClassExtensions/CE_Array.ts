@@ -39,7 +39,7 @@ Array.prototype._AddFunction_Inline = function RemoveAll(items) {
         this.Remove(item);
 };
 interface Array<T> { RemoveAt(index: number): T; }
-Array.prototype._AddFunction_Inline = function RemoveAt(index) { return this.splice(index, 1)[0]; };
+Array.prototype._AddFunction_Inline = function RemoveAt(index: number) { return this.splice(index, 1)[0]; };
 interface Array<T> { Insert(index: number, obj: T): void; }
 Array.prototype._AddFunction_Inline = function Insert(index, obj) { this.splice(index, 0, obj); }
 

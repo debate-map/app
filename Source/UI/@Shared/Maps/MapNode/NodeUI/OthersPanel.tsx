@@ -1,4 +1,4 @@
-import {MapNode, MetaThesis_IfType, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, MetaThesis_IfType, MetaThesis_ThenType, MetaThesis_ThenType_Info, IsNodeTitleValid_GetError} from "../../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
@@ -22,6 +22,9 @@ import Moment from "moment";
 import {GetParentNode} from "../../../../../Store/firebase/nodes";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
+import {QuoteInfoEditorUI} from "../NodeUI_Menu/AddChildDialog";
+import {E} from "../../../../../Frame/General/Globals_Free";
+import Row from "../../../../../Frame/ReactComponents/Row";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -49,31 +52,25 @@ export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 				{IsUserCreatorOrMod(userID, node) &&
 					<Div mt={3}>
 						{!node.quote && !node.metaThesis &&
-							<div style={{display: "flex", alignItems: "center"}}>
+							<Row style={{display: "flex", alignItems: "center"}}>
 								<Pre>Title (base): </Pre>
 								<TextInput ref="title_base" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["base"]}/>
-								<Button text="Save" ml={5} onLeftClick={()=> {
-									firebase.Ref(`nodes/${node._id}/titles`).update({base: this.refs.title_base.GetValue()});
-								}}/>
-							</div>}
-						{node.type == MapNodeType.Thesis && !node.quote &&
-							<div style={{display: "flex", alignItems: "center"}}>
-								<Pre>Title (negation): </Pre>
-								<TextInput ref="title_negation" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["negation"]}/>
-								<Button text="Save" ml={5} onLeftClick={()=> {
-									firebase.Ref(`nodes/${node._id}/titles`).update({negation: this.refs.title_negation.GetValue()});
-								}}/>
-							</div>}
-						{node.type == MapNodeType.Thesis && !node.quote &&
-							<div style={{display: "flex", alignItems: "center"}}>
-								<Pre>Title (yes-no question): </Pre>
-								<TextInput ref="title_yesNoQuestion" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["yesNoQuestion"]}/>
-								<Button text="Save" ml={5} onLeftClick={()=> {
-									firebase.Ref(`nodes/${node._id}/titles`).update({yesNoQuestion: this.refs.title_yesNoQuestion.GetValue()});
-								}}/>
-							</div>}
+							</Row>}
+						{node.type == MapNodeType.Thesis &&
+							node.quote ? [
+								<QuoteInfoEditorUI key={0} ref="quoteEditor" info={node.quote.Extended({})} showPreview={false} justShowed={false}/>
+							] : [
+								<Row key={0} mt={5} style={{display: "flex", alignItems: "center"}}>
+									<Pre>Title (negation): </Pre>
+									<TextInput ref="title_negation" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["negation"]}/>
+								</Row>,
+								<Row key={1} mt={5} style={{display: "flex", alignItems: "center"}}>
+									<Pre>Title (yes-no question): </Pre>
+									<TextInput ref="title_yesNoQuestion" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["yesNoQuestion"]}/>
+								</Row>
+							]}
 						{node.metaThesis &&
-							<div>
+							<Row mt={5}>
 								<Pre>Type: If </Pre>
 								<Select options={GetEntries(MetaThesis_IfType, name=>name.toLowerCase())}
 									value={node.metaThesis.ifType} onChange={val=> {
@@ -84,9 +81,38 @@ export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 									firebase.Ref(`nodes/${node._id}`).update({metaThesis_thenType: val});
 								}}/>
 								<Pre>.</Pre>
-							</div>}
+							</Row>}
+						<Button text="Save" mt={10} onLeftClick={()=> {
+							/*firebase.Ref().update(E(
+								this.refs.title_base && {base: this.refs.title_base.GetValue()},
+								this.refs.title_negation && {negation: this.refs.title_negation.GetValue()},
+								this.refs.yesNoQuestion && {yesNoQuestion: this.refs.title_yesNoQuestion.GetValue()},
+							));*/
+							firebase.Ref(`nodes/${node._id}`).transaction(node=> {
+								if (!node) return node;
+
+								// todo: move these higher-up, and have errors shown in ui
+								/*if (this.refs.title_base) {
+									let error = IsNodeTitleValid_GetError(node, this.refs.title_base.GetValue());
+									if (error) return void ShowMessageBox({title: "Cannot set title", message: error});
+									node.titles.base = this.refs.title_base.GetValue();
+								}*/
+
+								if (this.refs.title_base) node.titles.base = this.refs.title_base.GetValue();
+								if (this.refs.title_negation) node.titles.negation = this.refs.title_negation.GetValue();
+								if (this.refs.title_yesNoQuestion) node.titles.yesNoQuestion = this.refs.title_yesNoQuestion.GetValue();
+
+								if (this.refs.quoteEditor) node.quote = this.refs.quoteEditor.props.info;
+
+								return node;
+							}, undefined, false);
+						}}/>
 					</Div>}
 			</div>
 		);
+	}
+
+	SaveInfo() {
+
 	}
 }

@@ -44,7 +44,7 @@ export class MapNode {
 		return node.metaThesis ? 11 : 14;
 	}
 	static GetPadding(node: MapNode) {
-		return node.metaThesis ? "3px 4px" : "5px 5px 4px 5px";
+		return node.metaThesis ? "1px 4px 2px" : "5px 5px 4px";
 	}
 	static GetMainRatingTypes(node: MapNode): RatingType[] {
 		if (node._id < 100) // if static category, don't have any voting
@@ -72,10 +72,7 @@ export class MapNode {
 	accessLevel = AccessLevel.Base;
 	voteLevel = AccessLevel.Base;
 
-	quote: {
-		author: string;
-		text: string;
-	};
+	quote: QuoteInfo;
 	metaThesis: {
 		ifType: MetaThesis_IfType;
 		thenType: MetaThesis_ThenType;		
@@ -90,6 +87,12 @@ export class MapNode {
 	children = new ChildCollection();
 	talkRoot: number;
 }
+export class QuoteInfo {
+	author = "";
+	text = "";
+	sources = {[0]: ""} as {[key: number]: string};
+}
+
 export class ChildCollection {
 	[key: number]: {_?, form?: ThesisForm};
 }
@@ -98,34 +101,34 @@ export class ChildCollection {
 	type;
 }*/
 
-export function GetThesisFormAtPath(node: MapNode, path: string) {
+export function GetThesisFormAtPath(node: MapNode, path: string): ThesisForm {
 	let parent = GetParentNode(path);
-	if (parent == null) return ThesisForm;
+	if (parent == null) return ThesisForm.Base;
 	let link = parent.children.Props.First(a=>a.name == node._id.toString());
 	return link.value.form;
+}
+
+export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
+	if (title.trim().length == 0) return "Title cannot be empty.";
+	return null;
 }
 
 export function GetNodeDisplayText(node: MapNode, formOrPath: ThesisForm | string) {
 	if (node.type == MapNodeType.Thesis) {
 		if (node.quote)
-			return `The quote below is authentic and unmodified.`;
-
-		let form = typeof formOrPath == "string" ? GetThesisFormAtPath(node, formOrPath) : formOrPath;
+			return `The statement below was made by ${node.quote.author}, and is unmodified.`;
 		if (node.metaThesis) {
 			return `If ${MetaThesis_IfType[node.metaThesis.ifType].toLowerCase()} premises below are true, they ${
 				MetaThesis_ThenType_Info.for[MetaThesis_ThenType[node.metaThesis.thenType]].displayText}.`;
 		}
+
+		let form = typeof formOrPath == "string" ? GetThesisFormAtPath(node, formOrPath) : formOrPath;
 		if (form == ThesisForm.Negation)
 			return node.titles["negation"];
 		if (form == ThesisForm.YesNoQuestion)
 			return node.titles["yesNoQuestion"];
 	}
 	return node.titles["base"];	
-}
-export function GetNodeSubDisplayText(node: MapNode) {
-	if (node.type == MapNodeType.Thesis && node.quote)
-		return `"${node.quote.text}" --${node.quote.author}`;
-	return null;
 }
 
 export function GetValidChildTypes(nodeType: MapNodeType, path: string) {
