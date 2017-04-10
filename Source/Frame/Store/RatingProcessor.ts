@@ -64,16 +64,16 @@ export function GetArgumentStrengthPseudoRating(nodeChildren: MapNode[], userID:
 }*/
 export function GetArgumentStrengthPseudoRatingSet(nodeChildren: MapNode[]): {[key: string]: Rating} {
 	if (nodeChildren.Any(a=>a == null)) return {}; // must still be loading
-	let metaThesis = nodeChildren.First(a=>a.metaThesis != null);
+	let metaThesis = nodeChildren.FirstOrX(a=>a.metaThesis != null); // meta-thesis might not be loaded yet
 	let premises = nodeChildren.Except(metaThesis);
 	if (premises.length == 0) return {};
 
 	let usersWhoRatedAllChildren = null;
-	for (let child of nodeChildren.Skip(1)) {
+	for (let child of nodeChildren) {
 		let childRatingSet = GetRatingSet(child._id, MapNode.GetMainRatingTypes(child)[0]) || {};
 		if (usersWhoRatedAllChildren == null) {
 			usersWhoRatedAllChildren = {};
-			for (let userID in childRatingSet.FakeArray_Select())
+			for (let userID of childRatingSet.Props().map(a=>a.name))
 				usersWhoRatedAllChildren[userID] = true;
 		} else {
 			for (let userID in usersWhoRatedAllChildren) {

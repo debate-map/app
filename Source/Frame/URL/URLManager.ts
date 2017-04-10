@@ -158,7 +158,7 @@ function GetNodeViewStr(mapID: number, path: string) {
 	if (nodeView == null) return "";
 
 	let childrenStr = "";
-	for (let {name: childID} of (nodeView.children || {}).Props) {
+	for (let {name: childID} of (nodeView.children || {}).Props()) {
 		let childNodeViewStr = GetNodeViewStr(mapID, `${path}/${childID}`);
 		if (childNodeViewStr.length)
 			childrenStr += (childrenStr.length ? "," : "") + childNodeViewStr;

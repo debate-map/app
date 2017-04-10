@@ -346,7 +346,7 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 export function SimpleShouldUpdate(target) {
 	target.prototype.shouldComponentUpdate = function(newProps, newState) {
 		/*if (ShallowCompare(this, newProps, newState))
-			Log("Changed: " + this.props.Props.Where(a=>a.value !== newProps[a.name]).Select(a=>a.name) + ";" + g.ToJSON(this.props) + ";" + g.ToJSON(newProps));*/
+			Log("Changed: " + this.props.Props().Where(a=>a.value !== newProps[a.name]).Select(a=>a.name) + ";" + g.ToJSON(this.props) + ";" + g.ToJSON(newProps));*/
 	    return ShallowCompare(this, newProps, newState);
 	}
 }

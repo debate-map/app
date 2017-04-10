@@ -254,15 +254,17 @@ Object.prototype._AddFunction_Inline = function VKeys(excludeKeyAndID = true) {
 };*/
 
 interface Object { VValues(): any[]; }
-Object.prototype._AddFunction_Inline = function VValues() { return Object.keys(this).Select(a=>this[a]); };
+Object.prototype._AddFunction_Inline = function VValues() { return Object.keys(this).map(a=>this[a]); };
 // like Pairs for Dictionary, except for Object
-interface Object { readonly Props: {index: number, name: string, value: any}[]; }
-Object.prototype._AddGetter_Inline = function Props() {
+interface Object { Props(): {index: number, name: string, value: any}[]; }
+Object.prototype._AddFunction_Inline = function Props(excludeSpecialProps = true) {
 	var result = [];
 	var i = 0;
-	for (var propName in this)
+	for (var propName in this) {
+		if (excludeSpecialProps && (propName == "_" || propName == "_key" || propName == "_id")) continue;
 		//result.push({index: i++, key: propName, name: propName, value: this[propName]});
 		result.push({index: i++, name: propName, value: this[propName]});
+	}
 	return result;
 };
 
@@ -275,7 +277,7 @@ Object.prototype._AddFunction_Inline = function FakeArray_Select(selectFunc = a=
 	for (let [index, item] of this.entries())
 		result.Add(selectFunc.call(item, item, index));
 	return result;*/
-	return this.Props.Where(a=>a.name != "_key" && a.name != "_id").map(a=>a.value).map(selectFunc);
+	return this.Props().map(a=>a.value).map(selectFunc);
 };
 interface Object { FakeArray_RemoveAt(index: number); }
 Object.prototype._AddFunction_Inline = function FakeArray_RemoveAt(index: number) {

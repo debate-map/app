@@ -132,9 +132,10 @@ export default class V {
 	    }
 
 	    let result = {};
-		for (let prop of obj.Props)
+		for (let prop of obj.Props()) {
 			if (!(prop.value instanceof Function) && (propMatchFunc == null || propMatchFunc.call(obj, prop.name, prop.value)))
 				result[prop.name] = V.CloneObject(prop.value, propMatchFunc, depth + 1);
+		}
 		return result;
 	}
 	static CloneArray(array) {

@@ -43,7 +43,7 @@ export default class Select extends BaseComponent
 			result = (options_raw as any).options;
 		} else {
 			let optionsMap = options_raw as any;
-			for (let {name, value} of optionsMap.Props)
+			for (let {name, value} of optionsMap.Props())
 				//result.push(new Option(name, value));
 				result.push({name, value});
 		}

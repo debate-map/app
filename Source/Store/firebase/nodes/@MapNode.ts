@@ -104,7 +104,7 @@ export class ChildCollection {
 export function GetThesisFormAtPath(node: MapNode, path: string): ThesisForm {
 	let parent = GetParentNode(path);
 	if (parent == null) return ThesisForm.Base;
-	let link = parent.children.Props.First(a=>a.name == node._id.toString());
+	let link = parent.children.Props().First(a=>a.name == node._id.toString());
 	return link.value.form;
 }
 
@@ -124,11 +124,11 @@ export function GetNodeDisplayText(node: MapNode, formOrPath: ThesisForm | strin
 
 		let form = typeof formOrPath == "string" ? GetThesisFormAtPath(node, formOrPath) : formOrPath;
 		if (form == ThesisForm.Negation)
-			return node.titles["negation"];
+			return node.titles["negation"] || "";
 		if (form == ThesisForm.YesNoQuestion)
-			return node.titles["yesNoQuestion"];
+			return node.titles["yesNoQuestion"] || "";
 	}
-	return node.titles["base"];	
+	return node.titles["base"] || "";
 }
 
 export function GetValidChildTypes(nodeType: MapNodeType, path: string) {

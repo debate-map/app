@@ -22,7 +22,7 @@ export function GetRatings(nodeID: number, ratingType: RatingType): Rating[] {
 		return GetArgumentStrengthPseudoRatings(GetNodeChildren(GetNode(nodeID)));*/
 	let ratingSet = GetRatingSet(nodeID, ratingType);
 	return CachedTransform({nodeID, ratingType}, {ratingSet},
-		()=>ratingSet ? ratingSet.Props.filter(a=>a.name != "_key").map(a=>a.value as Rating) : []);
+		()=>ratingSet ? ratingSet.Props().map(a=>a.value as Rating) : []);
 }
 export function GetRating(nodeID: number, ratingType: RatingType, userID: string) {
 	let ratingSet = GetRatingSet(nodeID, ratingType);
