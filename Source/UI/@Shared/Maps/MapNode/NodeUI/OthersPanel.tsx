@@ -56,7 +56,7 @@ export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 								<Pre>Title (base): </Pre>
 								<TextInput ref="title_base" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["base"]}/>
 							</Row>}
-						{node.type == MapNodeType.Thesis &&
+						{node.type == MapNodeType.Thesis && !node.metaThesis && (
 							node.quote ? [
 								<QuoteInfoEditorUI key={0} ref="quoteEditor" info={node.quote.Extended({})} showPreview={false} justShowed={false}/>
 							] : [
@@ -68,17 +68,18 @@ export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 									<Pre>Title (yes-no question): </Pre>
 									<TextInput ref="title_yesNoQuestion" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["yesNoQuestion"]}/>
 								</Row>
-							]}
+							]
+						)}
 						{node.metaThesis &&
 							<Row mt={5}>
 								<Pre>Type: If </Pre>
 								<Select options={GetEntries(MetaThesis_IfType, name=>name.toLowerCase())}
 									value={node.metaThesis.ifType} onChange={val=> {
-										firebase.Ref(`nodes/${node._id}`).update({metaThesis_ifType: val});
+										firebase.Ref(`nodes/${node._id}/metaThesis`).update({ifType: val});
 									}}/>
 								<Pre> premises below are true, they </Pre>
 								<Select options={thenTypes} value={node.metaThesis.thenType} onChange={val=> {
-									firebase.Ref(`nodes/${node._id}`).update({metaThesis_thenType: val});
+									firebase.Ref(`nodes/${node._id}/metaThesis`).update({thenType: val});
 								}}/>
 								<Pre>.</Pre>
 							</Row>}

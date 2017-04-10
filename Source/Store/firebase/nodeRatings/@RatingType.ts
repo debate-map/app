@@ -44,7 +44,7 @@ export class RatingType_Info {
 		adjustment: new RatingType_Info({
 			displayText: "Adjustment",
 			description: (node, parentNode)=> {
-				/*let ifType_str = MetaThesis_IfType[node.metaThesis_ifType].toLowerCase();
+				/*let ifType_str = MetaThesis_IfType[node.metaThesis.ifType].toLowerCase();
 				var raiseOrLower = parentNode.type == MapNodeType.SupportingArgument ? "raise" : "lower";
 				return `Supposing that ${ifType_str} premises of this argument were true, and the parent thesis' prior probability were 50%, to what level would this argument ${
 					raiseOrLower} it?`;*/
