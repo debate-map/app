@@ -82,7 +82,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 								store.dispatch(new ACTNodeCopy(null));
 						}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode, permissions) &&
-					<VMenuItem text={`Paste as link: "${copiedNode.titles["base"].KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={e=> {
+					<VMenuItem text={`Paste as link: "${GetNodeDisplayText(node, path).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 						//Store.dispatch(new ACTNodeCopy(null));
@@ -136,16 +136,22 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 								+ `${metaThesisID ? ", its 1 meta-thesis" : ""}`
 								+ `, and its link${s_ifParents} with ${parentNodes.length} parent-node${s_ifParents}?`,
 							onOK: ()=> {
-								firebase.Ref("nodes").transaction(nodes=> {
-									if (!nodes) return nodes;
+								firebase.Ref().transaction(data=> {
+									if (!data.nodes) return data.nodes;
 									for (let parent of parentNodes)
-										nodes[parent._id].children[node._id] = null;
-									nodes[node._id] = null;
+										data.nodes[parent._id].children[node._id] = null;
+									data.nodes[node._id] = null;
+									data.nodeExtras[node._id] = null;
+									data.nodeRatings[node._id] = null;
+
 									// if has meta-thesis, delete it also
-									//for (let childID of node.children)
-									if (metaThesisID)
-										nodes[metaThesisID] = null;
-									return nodes;
+									if (metaThesisID) {
+										data.nodes[metaThesisID] = null;
+										data.nodeExtras[metaThesisID] = null;
+										data.nodeRatings[metaThesisID] = null;
+									}
+									
+									return data.nodes;
 								}, undefined, false);
 							}
 						});

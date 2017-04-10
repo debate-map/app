@@ -48,7 +48,7 @@ export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 				<Div mt={3} style={{fontSize: 12}}>Created at: {Moment(node.createdAt).format("YYYY-MM-DD HH:mm:ss")}</Div>
 				{IsUserCreatorOrMod(userID, node) &&
 					<Div mt={3}>
-						{!node.metaThesis &&
+						{!node.quote && !node.metaThesis &&
 							<div style={{display: "flex", alignItems: "center"}}>
 								<Pre>Title (base): </Pre>
 								<TextInput ref="title_base" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["base"]}/>
@@ -56,7 +56,7 @@ export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 									firebase.Ref(`nodes/${node._id}/titles`).update({base: this.refs.title_base.GetValue()});
 								}}/>
 							</div>}
-						{node.type == MapNodeType.Thesis && !node.metaThesis &&
+						{node.type == MapNodeType.Thesis && !node.quote &&
 							<div style={{display: "flex", alignItems: "center"}}>
 								<Pre>Title (negation): </Pre>
 								<TextInput ref="title_negation" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["negation"]}/>
@@ -64,7 +64,7 @@ export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 									firebase.Ref(`nodes/${node._id}/titles`).update({negation: this.refs.title_negation.GetValue()});
 								}}/>
 							</div>}
-						{node.type == MapNodeType.Thesis && !node.metaThesis &&
+						{node.type == MapNodeType.Thesis && !node.quote &&
 							<div style={{display: "flex", alignItems: "center"}}>
 								<Pre>Title (yes-no question): </Pre>
 								<TextInput ref="title_yesNoQuestion" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["yesNoQuestion"]}/>
@@ -76,11 +76,11 @@ export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 							<div>
 								<Pre>Type: If </Pre>
 								<Select options={GetEntries(MetaThesis_IfType, name=>name.toLowerCase())}
-									value={node.metaThesis_ifType} onChange={val=> {
+									value={node.metaThesis.ifType} onChange={val=> {
 										firebase.Ref(`nodes/${node._id}`).update({metaThesis_ifType: val});
 									}}/>
 								<Pre> premises below are true, they </Pre>
-								<Select options={thenTypes} value={node.metaThesis_thenType} onChange={val=> {
+								<Select options={thenTypes} value={node.metaThesis.thenType} onChange={val=> {
 									firebase.Ref(`nodes/${node._id}`).update({metaThesis_thenType: val});
 								}}/>
 								<Pre>.</Pre>

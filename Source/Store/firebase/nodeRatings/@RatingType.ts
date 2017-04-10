@@ -48,7 +48,7 @@ export class RatingType_Info {
 				var raiseOrLower = parentNode.type == MapNodeType.SupportingArgument ? "raise" : "lower";
 				return `Supposing that ${ifType_str} premises of this argument were true, and the parent thesis' prior probability were 50%, to what level would this argument ${
 					raiseOrLower} it?`;*/
-				let all = node.metaThesis_ifType == MetaThesis_IfType.All;
+				let all = node.metaThesis.ifType == MetaThesis_IfType.All;
 				let support = parentNode.type == MapNodeType.SupportingArgument;
 				/*return `Suppose that the other ${supporting ? "supporting" : "opposing"} arguments were only strong enough to yield a 50% probability for the parent`
 					+ ` (relative to the ${supporting ? "opposing" : "supporting"} arguments, which were kept the same).`

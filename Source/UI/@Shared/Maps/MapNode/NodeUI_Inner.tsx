@@ -15,10 +15,10 @@ import NodeUI_Menu from "./NodeUI_Menu";
 import V from "../../../../Frame/V/V";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {MapNode, GetNodeDisplayText} from "../../../../Store/firebase/nodes/@MapNode";
-import {GetPaths_NodeRatingsRoot, GetNodeRatingsRoot, GetMainRatingFillPercent, GetRatings} from "../../../../Store/firebase/nodeRatings";
+import {MapNode, GetNodeDisplayText, GetNodeSubDisplayText} from "../../../../Store/firebase/nodes/@MapNode";
+import {GetNodeRatingsRoot, GetMainRatingFillPercent, GetRatings} from "../../../../Store/firebase/nodeRatings";
 import {GetUserID} from "../../../../Store/firebase/users";
-import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RootState} from "../../../../Store/index";
 import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {Map} from "../../../../Store/firebase/maps/@Map";
@@ -32,6 +32,7 @@ import OthersPanel from "./NodeUI/OthersPanel";
 import HistoryPanel from "./NodeUI/HistoryPanel";
 import RatingsPanel from "./NodeUI/RatingsPanel";
 import DiscussPanel from "./NodeUI/DiscussPanel";
+import Row from "../../../../Frame/ReactComponents/Row";
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
 	& Partial<{ratingsRoot: RatingsRoot, mainRatingFillPercent: number}>;
@@ -57,6 +58,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
 		let panelToShow = openPanel_preview || (nodeView && nodeView.openPanel);
+		let subPanelShow = node.type == MapNodeType.Thesis && node.quote;
 		let bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView && nodeView.expanded;
 
@@ -78,16 +80,33 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 				{leftPanelShow && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
 
 				<div style={{display: "flex", width: "100%", background: "rgba(0,0,0,.7)", borderRadius: 5, cursor: "pointer"}}>
-					<div style={{position: "relative", width: "100%", padding: MapNode.GetPadding(node)}}>
-						<div style={{
+					<Column style={{width: "100%"}}>
+						<Row style={{position: "relative", width: "100%", padding: MapNode.GetPadding(node)}}>
+							<div style={{
 								position: "absolute", left: 0, top: 0, bottom: 0,
-								width: mainRatingFillPercent + "%", background: `rgba(${nodeTypeInfo.backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
+								width: mainRatingFillPercent + "%", background: `rgba(${nodeTypeInfo.backgroundColor},.7)`,
+								borderRadius: `5px 0 0 ${subPanelShow ? 0 : "5px"}`
 							}}/>
-						<a style={{position: "relative", fontSize: MapNode.GetFontSize(node), whiteSpace: "initial"}}>
-							{GetNodeDisplayText(node, path)}
-						</a>
-						<NodeUI_Menu node={node} path={path}/>
-					</div>
+							<span style={{position: "relative", fontSize: MapNode.GetFontSize(node), whiteSpace: "initial"}}>
+								{GetNodeDisplayText(node, path)}
+							</span>
+							{node.type == MapNodeType.Thesis && node.quote &&
+								<Button size={13} iconSize={13} iconPath="/Images/Buttons/Info.png"
+									useOpacityForHover={true} style={{zIndex: 1, marginLeft: 1, marginTop: -1, backgroundColor: null, boxShadow: null}}
+									title="Allowed exceptions are: bold and [...] (expandable segments)"/>}
+							<NodeUI_Menu node={node} path={path}/>
+						</Row>
+						{subPanelShow &&
+							<Row style={{position: "relative", width: "100%", padding: "7px 5px 4px 5px"}}>
+								<div style={{
+									position: "absolute", left: 0, top: 0, bottom: 0,
+									width: "100%", background: `rgba(255,255,255,.05)`, borderRadius: "0 0 0 5px"
+								}}/>
+								<span style={{position: "relative", fontSize: MapNode.GetFontSize(node), whiteSpace: "initial"}}>
+									{GetNodeSubDisplayText(node)}
+								</span>
+							</Row>}
+					</Column>
 					<Button //text={expanded ? "-" : "+"} size={28}
 							style={{
 								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",

@@ -27,6 +27,12 @@ var styles = {
 			//backgroundColor: "rgba(20,20,20,1)",
 		},
 	},
+	root_opacityHover: {
+		opacity: .6,
+		":hover": {
+			opacity: 1,
+		}
+	},
 	root_hasCheckbox: {paddingTop: 4, verticalAlign: 1},
 	root_disabled: {
 	    opacity: .5, cursor: "default", pointerEvents: "none",
@@ -44,15 +50,15 @@ let pseudoSelectorStyleKeys = {};
 @ApplyBasicStyles
 export default class Button extends BaseComponent
 		<{enabled?: boolean, text?: string, title?: string, className?: string, style?,
-			size?, iconSize?, height?,
-			hasCheckbox?, checked?, checkboxStyle?, checkboxLabelStyle?, onCheckedChanged?,
+			size?: number, iconSize?: number, iconPath?: string, useOpacityForHover?: boolean,
+			height?: number, hasCheckbox?: boolean, checked?: boolean, checkboxStyle?, checkboxLabelStyle?, onCheckedChanged?,
 			onClick?, onLeftClick?, onDirectClick?} & React.HTMLProps<HTMLDivElement>,
 		{}> {
 	static defaultProps = {enabled: true};
 	
 	render() {
-	    var {enabled, text, title, className, style, size, iconSize, height,
-			hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged, children,
+	    var {enabled, text, title, className, style, size, iconSize, iconPath, useOpacityForHover,
+			height, hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged, children,
 			onLeftClick, ...rest} = this.props;
 
 		var padding = "5px 15px";
@@ -64,11 +70,13 @@ export default class Button extends BaseComponent
 		
 		let finalStyle = E(
 			styles.root,
+			useOpacityForHover && styles.root_opacityHover,
 			{padding},
 			size && {padding: 0, width: size, height: size,
 				backgroundPosition: `${(size - iconSize) / 2}px ${(size - iconSize) / 2}px`,
 				backgroundSize: iconSize
 			},
+			iconPath && {backgroundImage: `url(${iconPath})`},
 			hasCheckbox && styles.root_hasCheckbox,
 			!enabled && styles.root_disabled,
 			style,
