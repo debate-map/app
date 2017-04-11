@@ -62,7 +62,10 @@ export class RatingType_Info {
 				/*return `Suppose that the other arguments -- supporting and opposing -- were equal in strength, so that the parent's probability were 50%.`
 					+ (all ? ` Suppose also that this argument's premises were all true.` : ` Suppose also that at least one of this argument's premises were true.`)
 					+ ` If that were the case, to what level would this argument ${support ? "raise" : "lower"} the parent thesis' probability?`;*/
-				return `Suppose that your background evidence on this subject were evenly distributed, making the parent thesis' probability 50%.`
+				/*return `Suppose that your background knowledge on this subject were evenly distributed, placing the parent thesis' probability at 50%.`
+					+ (all ? ` Suppose also that this argument's premises were all true.` : ` Suppose also that at least one of this argument's premises were true.`)
+					+ ` If that were the case, to what level would this argument ${support ? "raise" : "lower"} the parent thesis' probability?`;*/
+				return `Suppose that the parent thesis were just introduced (a blank slate with no specific research), and that its base probability were 50%.`
 					+ (all ? ` Suppose also that this argument's premises were all true.` : ` Suppose also that at least one of this argument's premises were true.`)
 					+ ` If that were the case, to what level would this argument ${support ? "raise" : "lower"} the parent thesis' probability?`;
 			},
