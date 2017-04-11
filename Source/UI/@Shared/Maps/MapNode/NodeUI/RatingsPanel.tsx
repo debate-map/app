@@ -1,4 +1,4 @@
-import {GetMainRatingAverage, GetMainRatingFillPercent, GetRatingValue} from "../../../../../Store/firebase/nodeRatings";
+import {GetRatingValue} from "../../../../../Store/firebase/nodeRatings";
 import * as jquery from "jquery";
 import {Log} from "../../../../../Frame/General/Logging";
 import {BaseComponent, FindDOM, Pre, RenderSource, SimpleShouldUpdate, FindDOM_} from "../../../../../Frame/UI/ReactGlobals";
@@ -33,25 +33,25 @@ import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 ];*/
 
 type RatingsPanel_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]}
-	& Partial<{userID: string, myRating: number, nodeChildren: MapNode[], smoothing: number}>;
+	& Partial<{userID: string, /*myRating: number,*/ nodeChildren: MapNode[], smoothing: number}>;
 @Connect((state: RootState, {node, ratingType}: RatingsPanel_Props)=> {
 	return {
 		userID: GetUserID(),
-		myRating: GetRatingValue(node._id, ratingType, GetUserID()),
+		//myRating: GetRatingValue(node._id, ratingType, GetUserID()),
 		nodeChildren: GetNodeChildren(node),
 		smoothing: GetRatingUISmoothing(),
 	};
 })
 export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {size: Vector2i}> {
 	render() {
-		let {node, path, ratingType, ratings, userID, myRating, nodeChildren, smoothing} = this.props;
+		let {node, path, ratingType, ratings, userID, /*myRating,*/ nodeChildren, smoothing} = this.props;
 		let firebase = store.firebase.helpers;
 		let {size} = this.state;
 
 		let parentNode = GetParentNode(path);
 		let ratingTypeInfo = RatingType_Info.for[ratingType];
 		let options = typeof ratingTypeInfo.options == "function" ? ratingTypeInfo.options(node, parentNode) : ratingTypeInfo.options;
-		let myRatingValue = ratings.find(a=>a._key == userID);
+		let myRating = (ratings.find(a=>a._key == userID) || {} as any).value;
 
 		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(options.Max() == 200 ? [200] : []);
 		let minVal = options.Min(), maxVal = options.Max(), range = maxVal - minVal;
@@ -109,7 +109,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 						});
 					}}
 					onContextMenu={e=> {
-						if (myRatingValue == null) return;
+						if (myRating == null) return;
 						let boxController = ShowMessageBox({
 							title: `Delete rating`, cancelButton: true,
 							message: `Delete your "${ratingType}" rating for ${MapNodeType_Info.for[node.type].displayName(GetParentNode(path))}`,

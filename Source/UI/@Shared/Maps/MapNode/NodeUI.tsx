@@ -25,13 +25,18 @@ import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {RootState} from "../../../../Store/index";
 import {GetNodeView} from "../../../../Store/main/mapViews";
-import {MapNode, GetNodeDisplayText} from "../../../../Store/firebase/nodes/@MapNode";
+import {
+    GetFontSizeForNode,
+    GetMainRatingTypesForNode,
+    GetNodeDisplayText,
+    MapNode
+} from "../../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {GetNodeChildIDs, GetNodeChildren} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {GetMainRatingFillPercent} from "../../../../Store/firebase/nodeRatings";
+import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -58,7 +63,7 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 	return ((state: RootState, {node, path, map}: Props & BaseProps)=> {
 		let nodeView = GetNodeView(map._id, path) || new MapNodeView();
 		let nodeChildren = GetNodeChildren(node);
-		let nodeChildren_fillPercents = nodeChildren.map(a=>a ? GetMainRatingFillPercent(a) : 0);
+		let nodeChildren_fillPercents = nodeChildren.map(a=>a ? GetFillPercentForRatingAverage(a, GetRatingAverage(a._id, GetMainRatingTypesForNode(a)[0])) : 0);
 		return {
 			path: path || node._id.toString(),
 			// only pass new nodeView when its local-props are different
@@ -165,7 +170,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let {node, path} = this.props;
 
 		let displayText = GetNodeDisplayText(node, path);
-		let fontSize = MapNode.GetFontSize(node);
+		let fontSize = GetFontSizeForNode(node);
 		let expectedTextWidth = V.GetContentWidth($(`<a style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${displayText}</a>`));
 		//let expectedOtherStuffWidth = 26;
 		let expectedOtherStuffWidth = 28;

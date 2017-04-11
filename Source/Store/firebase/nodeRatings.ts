@@ -33,10 +33,11 @@ export function GetRatingValue(nodeID: number, ratingType: RatingType, userID: s
 	let rating = GetRating(nodeID, ratingType, userID);
 	return rating ? rating.value : resultIfNoData;
 }
-export function GetRatingAverage(nodeID: number, ratingType: RatingType, resultIfNoData = null): number {
-	/*if (ratingType == "strength")
-		return CalculateArgumentStrength(GetNodeChildren(GetNode(nodeID)));*/
-	let ratings = GetRatings(nodeID, ratingType);
+export function GetRatingAverage(nodeID: number, ratingType: RatingType, ratings?: Rating[], resultIfNoData = null): number {
+	// if static category, always show full bar
+	if (nodeID < 100)
+		return 100;
+	ratings = ratings || GetRatings(nodeID, ratingType);
 	if (ratings.length == 0) return resultIfNoData as any;
 	return CachedTransform({nodeID, ratingType}, {ratings}, ()=>ratings.map(a=>a.value).Average().RoundTo(1));
 }
@@ -51,18 +52,24 @@ export function GetPaths_MainRatingAverage(node: MapNode) {
 		result.AddRange(GetPaths_CalculateArgumentStrength(node, GetNodeChildren(node)));
 	return result;
 }*/
+
 /** Returns an int from 0 to 100. */
-export function GetMainRatingAverage(node: MapNode, resultIfNoData = null): number {
+/*export function GetMainRatingAverage(node: MapNode, resultIfNoData = null): number {
 	// if static category, always show full bar
 	if (node._id < 100)
 		return 100;
 	return GetRatingAverage(node._id, MapNode.GetMainRatingTypes(node)[0], resultIfNoData);
-}
-//export function GetPaths_MainRatingFillPercent(node: MapNode) { return GetPaths_MainRatingAverage(node); }
+}*/
+
 /** Returns an int from 0 to 100. */
-export function GetMainRatingFillPercent(node: MapNode) {
+/*export function GetMainRatingFillPercent(node: MapNode) {
 	let mainRatingAverage = GetMainRatingAverage(node);
 	if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
 		return mainRatingAverage != null ? mainRatingAverage.Distance(50) * 2 : 0;
 	return mainRatingAverage || 0;
+}*/
+export function GetFillPercentForRatingAverage(node: MapNode, ratingAverage: number) {
+	if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
+		return ratingAverage != null ? ratingAverage.Distance(50) * 2 : 0;
+	return ratingAverage || 0;
 }

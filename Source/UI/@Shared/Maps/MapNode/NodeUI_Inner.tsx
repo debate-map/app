@@ -15,8 +15,8 @@ import NodeUI_Menu from "./NodeUI_Menu";
 import V from "../../../../Frame/V/V";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {MapNode, GetNodeDisplayText, QuoteInfo} from "../../../../Store/firebase/nodes/@MapNode";
-import {GetNodeRatingsRoot, GetMainRatingFillPercent, GetRatings} from "../../../../Store/firebase/nodeRatings";
+import {MapNode, GetNodeDisplayText, QuoteInfo, GetMainRatingTypesForNode, GetPaddingForNode, GetFontSizeForNode} from "../../../../Store/firebase/nodes/@MapNode";
+import {GetNodeRatingsRoot, GetRatings, GetFillPercentForRatingAverage, GetRatingAverage, GetRatingValue} from "../../../../Store/firebase/nodeRatings";
 import {GetUserID} from "../../../../Store/firebase/users";
 import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RootState} from "../../../../Store/index";
@@ -35,7 +35,7 @@ import DiscussPanel from "./NodeUI/DiscussPanel";
 import Row from "../../../../Frame/ReactComponents/Row";
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
-	& Partial<{ratingsRoot: RatingsRoot, mainRatingFillPercent: number}>;
+	& Partial<{ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
 //@FirebaseConnect((props: Props)=>((props["holder"] = props["holder"] || {}), [
 /*@FirebaseConnect((props: Props)=>[
 	...GetPaths_NodeRatingsRoot(props.node._id),
@@ -43,18 +43,23 @@ type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, widt
 @Connect(()=> {
 	return (state: RootState, {node, ratingsRoot}: Props)=> ({
 		ratingsRoot: GetNodeRatingsRoot(node._id),
-		mainRatingFillPercent: GetMainRatingFillPercent(node),
+		mainRating_average: GetRatingAverage(node._id, GetMainRatingTypesForNode(node)[0]),
+		userID: GetUserID(),
 	});
 })
 export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, openPanel_preview: string}> {
 	render() {
-		let {map, node, nodeView, path, width, widthOverride, ratingsRoot, mainRatingFillPercent} = this.props;
+		let {map, node, nodeView, path, width, widthOverride, ratingsRoot, mainRating_average, userID} = this.props;
 		let firebase = store.firebase.helpers;
 		let {hovered, openPanel_preview} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let barSize = 5;
 		let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 		//let parentNode = GetParentNode(path);
+
+		let mainRating_mine = GetRatingValue(node._id, GetMainRatingTypesForNode(node)[0], userID);
+		let mainRating_fillPercent = GetFillPercentForRatingAverage(node, mainRating_average);
+		let mainRating_myFillPercent = mainRating_mine != null ? GetFillPercentForRatingAverage(node, mainRating_mine) : null;
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
 		let panelToShow = openPanel_preview || (nodeView && nodeView.openPanel);
@@ -80,12 +85,17 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 				{leftPanelShow && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
 
 				<div style={{display: "flex", width: "100%", background: "rgba(0,0,0,.7)", borderRadius: 5, cursor: "pointer"}}>
-					<Div style={{position: "relative", width: "100%", padding: MapNode.GetPadding(node)}}>
+					<Div style={{position: "relative", width: "100%", padding: GetPaddingForNode(node)}}>
 						<div style={{
 							position: "absolute", left: 0, top: 0, bottom: 0,
-							width: mainRatingFillPercent + "%", background: `rgba(${nodeTypeInfo.backgroundColor},.7)`, borderRadius: `5px 0 0 5px`
+							width: mainRating_fillPercent + "%", background: `rgba(${nodeTypeInfo.backgroundColor},.7)`, borderRadius: `5px 0 0 5px`
 						}}/>
-						<span style={{position: "relative", fontSize: MapNode.GetFontSize(node), whiteSpace: "initial"}}>
+						{mainRating_mine != null &&
+							<div style={{
+								position: "absolute", left: mainRating_myFillPercent + "%", top: 0, bottom: 0,
+								width: 2, background: `rgba(0,255,0,.5)`,
+							}}/>}
+						<span style={{position: "relative", fontSize: GetFontSizeForNode(node), whiteSpace: "initial"}}>
 							{GetNodeDisplayText(node, path)}
 						</span>
 						{node.type == MapNodeType.Thesis && node.quote &&
@@ -97,7 +107,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								//border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
 								background: "rgba(0,0,0,.5)", borderRadius: "0 0 0 5px",
 							}}>
-								<div style={{position: "relative", fontSize: MapNode.GetFontSize(node), whiteSpace: "initial"}}>
+								<div style={{position: "relative", fontSize: GetFontSizeForNode(node), whiteSpace: "initial"}}>
 									<div>{`"${node.quote.text}"`}</div>
 									<SourcesUI quote={node.quote}/>
 								</div>
@@ -137,7 +147,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						{panelToShow == "tags" && <TagsPanel/>}
 						{panelToShow == "discuss" && <DiscussPanel/>}
 						{panelToShow == "history" && <HistoryPanel/>}
-						{panelToShow == "others" && <OthersPanel node={node} path={path} userID={GetUserID()}/>}
+						{panelToShow == "others" && <OthersPanel node={node} path={path} userID={userID}/>}
 					</div>}
 			</div>
 		);

@@ -1,7 +1,7 @@
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {MapNode, MetaThesis_ThenType, MetaThesis_IfType} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, MetaThesis_ThenType, MetaThesis_IfType, GetMainRatingTypesForNode} from "../../Store/firebase/nodes/@MapNode";
 import {GetRating, GetRatingValue, GetRatingSet} from "../../Store/firebase/nodeRatings";
-import {GetMainRatingFillPercent, GetRatingAverage, GetRatings} from "../../Store/firebase/nodeRatings";
+import {GetRatingAverage, GetRatings} from "../../Store/firebase/nodeRatings";
 import {Rating} from "../../Store/firebase/nodeRatings/@RatingsRoot";
 
 /*export function CalculateArgumentStrength(nodeChildren: MapNode[]) {
@@ -70,7 +70,7 @@ export function GetArgumentStrengthPseudoRatingSet(nodeChildren: MapNode[]): {[k
 
 	let usersWhoRatedAllChildren = null;
 	for (let child of nodeChildren) {
-		let childRatingSet = GetRatingSet(child._id, MapNode.GetMainRatingTypes(child)[0]) || {};
+		let childRatingSet = GetRatingSet(child._id, GetMainRatingTypesForNode(child)[0]) || {};
 		if (usersWhoRatedAllChildren == null) {
 			usersWhoRatedAllChildren = {};
 			for (let userID of childRatingSet.Props().map(a=>a.name))

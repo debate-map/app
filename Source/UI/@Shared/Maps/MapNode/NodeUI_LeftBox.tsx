@@ -5,7 +5,7 @@ import {E} from "../../../../Frame/General/Globals_Free";
 import {connect} from "react-redux";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {MapNode, MetaThesis_ThenType} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, MetaThesis_ThenType, GetMainRatingTypesForNode} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -30,13 +30,13 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 			}}>
 				<div style={{position: "relative", padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
-					{MapNode.GetMainRatingTypes(node).map((ratingType, index)=> {
+					{GetMainRatingTypesForNode(node).map((ratingType, index)=> {
 						let ratingTypeInfo = RatingType_Info.for[ratingType];
 						//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
 
 						let percentStr = "...";
 						let ratings = GetRatings(node._id, ratingType);
-						let average = GetRatingAverage(node._id, ratingType, -1);
+						let average = GetRatingAverage(node._id, ratingType, null, -1);
 						if (average != -1) {
 							if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
 								percentStr = (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent ? "+" : "-") + average.Distance(50) + "%";

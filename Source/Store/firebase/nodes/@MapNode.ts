@@ -40,23 +40,6 @@ export class MetaThesis_ThenType_Info {
 }
 
 export class MapNode {
-	static GetFontSize(node: MapNode) {
-		return node.metaThesis ? 11 : 14;
-	}
-	static GetPadding(node: MapNode) {
-		return node.metaThesis ? "1px 4px 2px" : "5px 5px 4px";
-	}
-	static GetMainRatingTypes(node: MapNode): RatingType[] {
-		if (node._id < 100) // if static category, don't have any voting
-			return [];
-		if (node.metaThesis) {
-			if (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent)
-				return ["adjustment"];
-			return ["probability"];
-		}
-		return MapNodeType_Info.for[node.type].mainRatingTypes;
-	}
-
 	constructor(initialData: {type: MapNodeType, creator: string} & Partial<MapNode>) {
 		this.Extend(initialData);
 		this.createdAt = Date.now();
@@ -87,6 +70,24 @@ export class MapNode {
 	children = new ChildCollection();
 	talkRoot: number;
 }
+
+export function GetFontSizeForNode(node: MapNode) {
+	return node.metaThesis ? 11 : 14;
+}
+export function GetPaddingForNode(node: MapNode) {
+	return node.metaThesis ? "1px 4px 2px" : "5px 5px 4px";
+}
+export function GetMainRatingTypesForNode(node: MapNode): RatingType[] {
+	if (node._id < 100) // if static category, don't have any voting
+		return [];
+	if (node.metaThesis) {
+		if (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent)
+			return ["adjustment"];
+		return ["probability"];
+	}
+	return MapNodeType_Info.for[node.type].mainRatingTypes;
+}
+
 export class QuoteInfo {
 	author = "";
 	text = "";
