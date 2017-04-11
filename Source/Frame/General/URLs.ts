@@ -120,8 +120,9 @@ export class URL {
 		let result = "";
 		if (includeDomain)
 			result += this.domain;
+		result += "/";
 		if (this.pathNodes.length)
-			result += "/" + this.pathNodes.join("/");
+			result += this.pathNodes.join("/");
 		for (let [index, queryVar] of this.queryVars.entries()) {
 			result += (index == 0 ? "?" : "&") + queryVar.name + "=" + queryVar.value;
 		}
