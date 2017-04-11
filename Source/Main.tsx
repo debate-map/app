@@ -1,7 +1,7 @@
 // "static" imports
 import "webpack-runtime-require";
 //import {Require} from "webpack-runtime-require";
-import "./Frame/General/Start";
+import "./Frame/General/EarlyStart";
 import "./Frame/General/CE";
 
 import ReactDOM from "react-dom";
@@ -10,7 +10,6 @@ import {RootState} from "./Store/index";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
 import {GetUrlVars, CurrentUrl, URL} from "./Frame/General/URLs";
 import Raven from "raven-js";
-import {GetBrowser, supportedBrowsers} from "./Frame/General/UserAgent";
 import injectTapEventPlugin from "react-tap-event-plugin";
 import * as React from "react";
 //import Promise from "bluebird";
@@ -40,11 +39,6 @@ g.Extend({React, Promise: PromiseWrapper});*/
 
 // Tap Plugin
 injectTapEventPlugin();
-
-let browser = GetBrowser().name;
-if (!supportedBrowsers.Contains(browser)) {
-	alert(`Sorry! Your browser (${browser}) is not supported. Please use a supported browser such as Chrome, Firefox, or Safari.`);
-}
 
 let startURL = URL.Current();
 g.Extend({startURL}); declare global { export var startURL: URL; }
