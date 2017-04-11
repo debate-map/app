@@ -21,10 +21,11 @@ console.log = function(message) {
 };*/
 
 var warn_orig = console.warn;
-console.warn = function(message) {
+console.warn = function(...args) {
     //var str = message + "";
-    if (arguments[2] && arguments[2].Contains("do not mix longhand and shorthand properties in the same style object")) return;
-    warn_orig.apply(this, arguments);
+	if (args[2] && args[2].Contains("do not mix longhand and shorthand properties in the same style object")) return;
+	if (args[0] && args[0].Contains("a promise was created in a handler but was not returned from it, see http://goo.gl/rRqMUw")) return;
+    warn_orig.apply(this, args);
 };
 
 var error_orig = console.error;

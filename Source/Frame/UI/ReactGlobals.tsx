@@ -9,9 +9,10 @@ import {WaitXThenRun, Timer} from "../General/Timers";
 import autoBind from "react-autobind";
 import {IsString} from "../General/Types";
 import {Assert} from "../General/Assert";
-import {E, Global} from "../General/Globals_Free";
+import {E, Global, QuickIncrement} from "../General/Globals_Free";
 import ShallowCompare from "react-addons-shallow-compare";
 import {FirebaseApplication} from "firebase";
+import V from "../V/V";
 export {ShallowCompare};
 
 //var ReactInstanceMap = require("react/lib/ReactInstanceMap");
@@ -323,6 +324,9 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		if (ownPostRender.instant || prototypePostRender.instant)
 			this.PostRender();
 		else {
+			/*if (QuickIncrement("PostRenderLog") <= 1)
+				Log("Calling PostRender for: " + this.constructor.name + ";" + V.GetStackTraceStr());*/
+			Log("Calling PostRender for: " + this.constructor.name);
 			WaitXThenRun(0, ()=>window.requestAnimationFrame(()=> {
 				if (!this.mounted) return;
 				this.PostRender();

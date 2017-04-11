@@ -52,7 +52,7 @@ webpackConfig.output = {
 	path: paths.dist(),
 	//path: path.resolve(__dirname, "dist"),
 	publicPath: config.compiler_public_path,
-	//pathinfo: true, // include comments next to require-funcs saying path // (this seems to break webpack-runtime-require)
+	pathinfo: true, // include comments next to require-funcs saying path // (this seems to break webpack-runtime-require)
 }
 
 // Plugins
@@ -61,7 +61,7 @@ webpackConfig.output = {
 //let ExposeRequirePlugin = require("webpack-expose-require-plugin");
 webpackConfig.plugins = [
 	// Plugin to show any webpack warnings and prevent tests from running
-	function () {
+	function() {
 		let errors = []
 		this.plugin("done", function (stats) {
 			if (stats.compilation.errors.length) {

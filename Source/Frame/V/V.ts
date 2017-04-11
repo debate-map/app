@@ -2,6 +2,7 @@ import {NodeType} from "react-markdown";
 import {Log} from "../General/Logging";
 import {Assert} from "../../Frame/General/Assert";
 import {IsPrimitive, IsString} from "../General/Types";
+import StackTrace from "stacktrace-js";
 
 export default class V {
 	static minInt = Number.MIN_SAFE_INTEGER;
@@ -147,13 +148,15 @@ export default class V {
 		return _equals(a, b) && _equals(b, a);
 	};*/
 
-	static GetStackTraceStr(stackTrace?: string, sourceStackTrace?: boolean);
+	//static GetStackTraceStr(stackTrace?: string, sourceStackTrace?: boolean);
 	static GetStackTraceStr(sourceStackTrace?: boolean);
+	//@((()=> { if (g.onclick == null) g.onclick = ()=>console.log(V.GetStackTraceStr()); }) as any)
 	static GetStackTraceStr(...args) {
 	    if (IsString(args[0])) var [stackTrace, sourceStackTrace = true] = args;
 	    else var [sourceStackTrace = true] = args;
 
 		//stackTrace = stackTrace || new Error()[sourceStackTrace ? "Stack" : "stack"];
+		//stackTrace = stackTrace || (sourceStackTrace ? StackTrace.get().then(stack=>stackTrace = stack.map(a=>a.toString()).join("\n")) : new Error().stack);
 		stackTrace = stackTrace || new Error().stack;
 		return stackTrace.substr(stackTrace.IndexOf_X(1, "\n")); // remove "Error" line and first stack-frame (that of this method)
 	}
@@ -192,6 +195,7 @@ export default class V {
 	static GetContentWidth(content) { return V.GetContentSize(content).width; };
 	static GetContentHeight(content) { return V.GetContentSize(content).height; };
 }
+g.Extend({V});
 
 export class TreeNode {
 	constructor(ancestorNodes: TreeNode[], obj, prop) {

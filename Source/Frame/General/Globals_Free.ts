@@ -125,10 +125,12 @@ export function WrapWithDebugger(func, ...args) {
 }
 g.Extend({Debugger, Debugger_Wrap, Debugger_True, Debugger_If, WrapWithDebugger});
 
+//var quickIncrementValues = {};
 export function QuickIncrement(name = new Error().stack.split("\n")[2]) {
-	g[name] = (g[name]|0) + 1;
-	return g[name];
+	QuickIncrement["values"][name] = (QuickIncrement["values"][name]|0) + 1;
+	return QuickIncrement["values"][name];
 }
+QuickIncrement["values"] = [];
 g.Extend({QuickIncrement});
 
 // general

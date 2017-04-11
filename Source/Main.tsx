@@ -13,6 +13,7 @@ import Raven from "raven-js";
 import {GetBrowser, supportedBrowsers} from "./Frame/General/UserAgent";
 import injectTapEventPlugin from "react-tap-event-plugin";
 import * as React from "react";
+//import Promise from "bluebird";
 
 // startup (non-hot)
 // ==========
@@ -22,6 +23,20 @@ g.Extend({JQuery, jQuery: JQuery});
 g.$ = JQuery;
 
 g.Extend({React});
+
+//g.Extend({Promise});
+/*function PromiseWrapper(...args) {
+	//let promise = Promise.apply(this, ...args);
+	let promise = new Promise(...args);
+
+	//promise._setAsyncGuaranteed(false);
+    //this._bitField = this._bitField | 134217728;
+    promise._bitField = promise._bitField & (~134217728);
+	return promise;
+}
+for (var key in Promise)
+	PromiseWrapper[key] = Promise[key];
+g.Extend({React, Promise: PromiseWrapper});*/
 
 // Tap Plugin
 injectTapEventPlugin();
