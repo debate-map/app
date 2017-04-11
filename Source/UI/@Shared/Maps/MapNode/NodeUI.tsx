@@ -65,7 +65,7 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 			nodeView: CachedTransform({path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
 			// only pass nodeChildren when all are loaded
 			nodeChildren: CachedTransform({nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : childrenPlaceholder),
-			nodeChildren_fillPercents,
+			nodeChildren_fillPercents: CachedTransform({nodeID: node._id}, nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
 		};
 	});
 })
@@ -82,6 +82,11 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		if (nodeView && nodeView.expanded)
 			this.SetState({hasBeenExpanded: true});
 	}
+
+	/*shouldComponentUpdate(nextProps, nextState) {
+		debugger;
+		return true;
+	}*/
 
 	render() {
 		let {map, node, path, widthOverride, nodeView, nodeChildren, nodeChildren_fillPercents, children} = this.props;

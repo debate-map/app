@@ -326,7 +326,7 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		else {
 			/*if (QuickIncrement("PostRenderLog") <= 1)
 				Log("Calling PostRender for: " + this.constructor.name + ";" + V.GetStackTraceStr());*/
-			Log("Calling PostRender for: " + this.constructor.name);
+			//Log("Calling PostRender for: " + this.constructor.name);
 			WaitXThenRun(0, ()=>window.requestAnimationFrame(()=> {
 				if (!this.mounted) return;
 				this.PostRender();
