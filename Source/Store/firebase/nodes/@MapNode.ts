@@ -20,8 +20,13 @@ export enum ThesisForm {
 
 export enum MetaThesis_IfType {
 	Any = 10,
+	AnyTwo = 15,
 	All = 20,
 }
+export function GetMetaThesisIfTypeDisplayText(ifType: MetaThesis_IfType) {
+	return MetaThesis_IfType[ifType].replace(/[a-z][A-Z]/, m=>m[0] + " " + m[1].toLowerCase()).toLowerCase();
+}
+
 export enum MetaThesis_ThenType {
 	StrengthenParent = 10,
 	GuaranteeParentTrue = 20,
@@ -119,7 +124,7 @@ export function GetNodeDisplayText(node: MapNode, formOrPath: ThesisForm | strin
 		if (node.quote)
 			return `The statement below was made by ${node.quote.author}, and is unmodified.`;
 		if (node.metaThesis) {
-			return `If ${MetaThesis_IfType[node.metaThesis.ifType].toLowerCase()} premises below are true, they ${
+			return `If ${GetMetaThesisIfTypeDisplayText(node.metaThesis.ifType)} premises below are true, they ${
 				MetaThesis_ThenType_Info.for[MetaThesis_ThenType[node.metaThesis.thenType]].displayText}.`;
 		}
 

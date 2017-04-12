@@ -3,7 +3,6 @@ import {
     GetValidChildTypes,
 	GetValidNewChildTypes,
     MapNode,
-    MetaThesis_IfType,
     MetaThesis_ThenType,
     MetaThesis_ThenType_Info
 } from "../../../../Store/firebase/nodes/@MapNode";

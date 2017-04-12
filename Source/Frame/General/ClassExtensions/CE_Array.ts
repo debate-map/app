@@ -232,8 +232,19 @@ Array.prototype._AddFunction_Inline = function Distinct() {
 };
 interface Array<T> {
 	Except(...excludeItems: T[]): T[];
+	Except(excludeItems: T[], excludeEachOnlyOnce?: boolean): T[];
 }
-Array.prototype._AddFunction_Inline = function Except(...excludeItems) {
+Array.prototype._AddFunction_Inline = function Except(this: Array<any>, ...args) {
+	let excludeItems, excludeEachOnlyOnce = true;
+	if (args[0] instanceof Array) [excludeItems, excludeEachOnlyOnce] = args;
+	else excludeItems = args;
+
+	if (excludeEachOnlyOnce) {
+		let result = this.slice();
+		for (let excludeItem of excludeItems)
+			result.Remove(excludeItem);
+		return result;
+	}
 	return this.Where(a=>!excludeItems.Contains(a));
 };
 

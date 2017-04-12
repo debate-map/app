@@ -1,4 +1,4 @@
-import {MapNode, MetaThesis_IfType, MetaThesis_ThenType, MetaThesis_ThenType_Info, IsNodeTitleValid_GetError} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, MetaThesis_IfType, MetaThesis_ThenType, MetaThesis_ThenType_Info, IsNodeTitleValid_GetError, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
@@ -73,7 +73,7 @@ export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 						{node.metaThesis &&
 							<Row mt={5}>
 								<Pre>Type: If </Pre>
-								<Select options={GetEntries(MetaThesis_IfType, name=>name.toLowerCase())}
+								<Select options={GetEntries(MetaThesis_IfType, name=>GetMetaThesisIfTypeDisplayText(MetaThesis_IfType[name]))}
 									value={node.metaThesis.ifType} onChange={val=> {
 										firebase.Ref(`nodes/${node._id}/metaThesis`).update({ifType: val});
 									}}/>
