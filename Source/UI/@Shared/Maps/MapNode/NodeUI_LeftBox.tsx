@@ -9,7 +9,7 @@ import {MapNode, MetaThesis_ThenType, GetMainRatingTypesForNode} from "../../../
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
-import {RatingType_Info} from "../../../../Store/firebase/nodeRatings/@RatingType";
+import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {GetRatingAverage, GetRatings} from "../../../../Store/firebase/nodeRatings";
 import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 
@@ -40,6 +40,8 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 						if (average != -1) {
 							if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
 								percentStr = (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent ? "+" : "-") + average.Distance(50) + "%";
+							else if (ratingType == "evidence")
+								percentStr = (average >= 100 ? "+" : "-") + (average - 100) + "%";
 							else
 								percentStr = average + "%";
 						}

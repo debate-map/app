@@ -40,7 +40,7 @@ export class RatingType_Info {
 		}),*/
 		evidence: new RatingType_Info({
 			displayText: "Evidence",
-			description: ()=>"How much should the average opinion on this statement be shifted to match the evidence?",
+			description: ()=>"To what level should the average opinion on this statement be shifted to match the evidence?",
 			options: ()=>Range(0, 200),
 			ticks: ()=>Range(0, 200, 10),
 		}),
