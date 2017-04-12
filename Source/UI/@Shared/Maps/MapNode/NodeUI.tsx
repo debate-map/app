@@ -168,6 +168,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 
 	GetMeasurementInfo(props: Props, state: State) {
 		let {node, path} = this.props;
+		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		let displayText = GetNodeDisplayText(node, path);
 		let fontSize = GetFontSizeForNode(node);
@@ -177,8 +178,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		if (node.quote)
 			expectedOtherStuffWidth += 14;
 		let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
+		if (node.quote) // quotes are often long, so just always do full-width
+			expectedBoxWidth = nodeTypeInfo.maxWidth;
 
-		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let width = expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
 
 		let maxTextWidth = width - expectedOtherStuffWidth;

@@ -14,21 +14,21 @@ export class MapNodeType_Info {
 		[MapNodeType.Category]: new MapNodeType_Info({
 			displayName: ()=>"category",
 			childTypes: [MapNodeType.Category, MapNodeType.Package, MapNodeType.MultiChoiceQuestion, MapNodeType.Thesis],
-			minWidth: 100, maxWidth: 200, backgroundColor: "40,60,80",
+			minWidth: 100, maxWidth: 250, backgroundColor: "40,60,80",
 			mainRatingTypes: ["significance"],
 			otherRatingTypes: [],
 		}),
 		[MapNodeType.Package]: new MapNodeType_Info({
 			displayName: ()=>"package",
 			childTypes: [MapNodeType.Thesis],
-			minWidth: 100, maxWidth: 200, backgroundColor: "30,120,150",
+			minWidth: 100, maxWidth: 250, backgroundColor: "30,120,150",
 			mainRatingTypes: ["significance"],
 			otherRatingTypes: [],
 		}),
 		[MapNodeType.MultiChoiceQuestion]: new MapNodeType_Info({
 			displayName: ()=>"multi-choice question",
 			childTypes: [MapNodeType.Thesis],
-			minWidth: 100, maxWidth: 200, backgroundColor: "90,50,180",
+			minWidth: 100, maxWidth: 250, backgroundColor: "90,50,180",
 			//minWidth: 100, maxWidth: 200, backgroundColor: "230,150,50",
 			mainRatingTypes: ["significance"],
 			otherRatingTypes: [],
@@ -37,7 +37,7 @@ export class MapNodeType_Info {
 			displayName: parentNode=>parentNode.type == MapNodeType.Category ? "yes-no question (thesis)" : "thesis",
 			childTypes: [MapNodeType.SupportingArgument, MapNodeType.OpposingArgument],
 			minWidth: 350, maxWidth: 550, backgroundColor: "0,80,150",
-			mainRatingTypes: ["probability", "idealIntensity"],
+			mainRatingTypes: ["probability", "intensity"],
 			otherRatingTypes: [],
 		}),
 		[MapNodeType.SupportingArgument]: new MapNodeType_Info({

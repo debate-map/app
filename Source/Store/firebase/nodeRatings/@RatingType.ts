@@ -2,24 +2,24 @@ import {MapNode, MetaThesis_IfType} from "../nodes/@MapNode";
 import {Range} from "../../../Frame/General/Globals";
 import {MapNodeType} from "../nodes/@MapNodeType";
 
-export type RatingType = "significance" | "neutrality" | "probability" | "idealIntensity" | "adjustment" | "strength";
+export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 export class RatingType_Info {
 	static for = {
 		significance: new RatingType_Info({
 			displayText: "Significance",
-			description: ()=>"How significant/important is this subject? (0 = not worth any time discussing; 100 = vital to discuss)",
+			description: ()=>"How significant/important is this subject? (0: not worth any time discussing; 100: vital to discuss)",
 			options: ()=>Range(0, 100),
 			ticks: ()=>Range(0, 100, 5),
 		}),
 		neutrality: new RatingType_Info({
 			displayText: "Neutrality",
-			description: ()=>"How neutral/impartial is the phrasing of this question? (0 = as biased as they come; 100 = no bias)",
+			description: ()=>"How neutral/impartial is the phrasing of this question? (0: as biased as they come; 100: no bias)",
 			options: ()=>Range(0, 100),
 			ticks: ()=>Range(0, 100, 5),
 		}),
 		probability: new RatingType_Info({
 			displayText: "Probability",
-			description: ()=>"What probability does this statement, as presented, have of being true?",
+			description: ()=>"What probability does this statement, as presented, have of being completely true?",
 			//options: [1, 2, 4, 6, 8].concat(Range(10, 90, 5)).concat([92, 94, 96, 98, 99]),
 			//options: [1].concat(Range(2, 98, 2)).concat([99]),
 			/*options: Range(1, 99),
@@ -27,9 +27,11 @@ export class RatingType_Info {
 			options: ()=>Range(0, 100),
 			ticks: ()=>Range(0, 100, 5),
 		}),
-		idealIntensity: new RatingType_Info({
-			displayText: "Ideal intensity",
-			description: ()=>"What intensity should this statement be strengthened/weakened to, to reach its ideal state? (making substantial claims while maintaining accuracy)",
+		intensity: new RatingType_Info({
+			displayText: "Intensity",
+			//description: ()=>"What intensity should this statement be strengthened/weakened to, to reach its ideal state? (making substantial claims while maintaining accuracy)",*/
+			//description: ()=>"To what intensity is this statement true? (100 = your estimate of the average opinion)",
+			description: ()=>"To what intensity is the basic idea of this statement true? (100: your estimate of the average opinion)",
 			/*options: [1, 2, 4, 6, 8].concat(Range(10, 200, 5)),
 			ticks: [1].concat(Range(20, 200, 20)),*/
 			options: ()=>Range(0, 200),
