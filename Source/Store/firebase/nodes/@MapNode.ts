@@ -110,8 +110,8 @@ export class ChildCollection {
 export function GetThesisFormAtPath(node: MapNode, path: string): ThesisForm {
 	let parent = GetParentNode(path);
 	if (parent == null) return ThesisForm.Base;
-	let link = parent.children.Props().First(a=>a.name == node._id.toString());
-	return link.value.form;
+	let link = parent.children[node._id];
+	return link.form;
 }
 
 export function IsNodeTitleValid_GetError(node: MapNode, title: string) {

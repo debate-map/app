@@ -246,18 +246,10 @@ Object.prototype._AddFunction_Inline = function Excluding(...propNames) {
     return result;
 }
 
-interface Object { VKeys(): string[]; }
-Object.prototype._AddFunction_Inline = function VKeys() { return Object.keys(this); };
-/*interface Object { VKeys(excludeKeyAndID?: boolean): string[]; }
-Object.prototype._AddFunction_Inline = function VKeys(excludeKeyAndID = true) {
-	return Object.keys(this).Except("_key", "_id");
-};*/
+let specialProps = ["_", "_key", "_id"];
 
-interface Object { VValues(): any[]; }
-Object.prototype._AddFunction_Inline = function VValues() { return Object.keys(this).map(a=>this[a]); };
-// like Pairs for Dictionary, except for Object
-interface Object { Props(): {index: number, name: string, value: any}[]; }
-Object.prototype._AddFunction_Inline = function Props(excludeSpecialProps = true) {
+interface Object { Props(excludeSpecialProps?: boolean): {index: number, name: string, value: any}[]; }
+Object.prototype._AddFunction_Inline = function Props(excludeSpecialProps = false) {
 	var result = [];
 	var i = 0;
 	for (var propName in this) {
@@ -266,6 +258,18 @@ Object.prototype._AddFunction_Inline = function Props(excludeSpecialProps = true
 		result.push({index: i++, name: propName, value: this[propName]});
 	}
 	return result;
+};
+interface Object { VKeys(excludeSpecialProps?: boolean): string[]; }
+Object.prototype._AddFunction_Inline = function VKeys(excludeSpecialProps = false) {
+	//if (excludeSpecialProps) return this.Props(true).map(a=>a.name);
+	if (excludeSpecialProps) return Object.keys(this).Except(specialProps);
+	return Object.keys(this);
+};
+interface Object { VValues(excludeSpecialProps?: boolean): any[]; }
+Object.prototype._AddFunction_Inline = function VValues(excludeSpecialProps = false) {
+	//if (excludeSpecialProps) return this.Props(true).map(a=>a.value);
+	if (excludeSpecialProps) return Object.keys(this).Except(specialProps).map(a=>this[a]);
+	return Object.keys(this).map(a=>this[a]);
 };
 
 // Object[FakeArray]
@@ -277,7 +281,7 @@ Object.prototype._AddFunction_Inline = function FakeArray_Select(selectFunc = a=
 	for (let [index, item] of this.entries())
 		result.Add(selectFunc.call(item, item, index));
 	return result;*/
-	return this.Props().map(a=>a.value).map(selectFunc);
+	return this.VValues(true).map(selectFunc);
 };
 interface Object { FakeArray_RemoveAt(index: number); }
 Object.prototype._AddFunction_Inline = function FakeArray_RemoveAt(index: number) {

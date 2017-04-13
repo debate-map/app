@@ -4,7 +4,7 @@ import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCen
 import {LoadURL, UpdateURL} from "../URL/URLManager";
 import {GetPathNodes, GetPath} from "../../Store/router";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
-import {GetData, DBPath} from "../Database/DatabaseHelpers";
+import {DBPath, GetData, GetDataAsync} from "../Database/DatabaseHelpers";
 import {GetMapView} from "../../Store/main/mapViews";
 import {Vector2i} from "../General/VectorStructs";
 import {RootState} from "../../Store/index";
@@ -79,7 +79,7 @@ export function PreDispatchAction(action: Action<any>) {
 export function MidDispatchAction(action: Action<any>, newState: RootState) {
 }
 
-export function PostDispatchAction(action: Action<any>) {
+export async function PostDispatchAction(action: Action<any>) {
 	//if (action.type == "@@INIT") {
 	//if (action.type == "persist/REHYDRATE" && GetPath().startsWith("global/map"))
 	if (action.type == "persist/REHYDRATE") {
@@ -127,5 +127,14 @@ export function PostDispatchAction(action: Action<any>) {
 	}*/
 	if (action.IsAny(ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange)) {
 		UpdateURL();
+	}
+
+	if (action.type == "@@reactReduxFirebase/LOGIN") {
+		let userID = action["auth"].uid;
+		let joinDate = await GetDataAsync(`userExtras/${userID}/joinDate`);
+		if (joinDate == null) {
+			let firebase = store.firebase.helpers;
+			firebase.Ref(`userExtras/${userID}/joinDate`).set(Date.now());
+		}
 	}
 }

@@ -95,18 +95,11 @@ declare namespace firebase {
          * @type {string}
          */
         photoURL:string;
-        /**
-         * (description)
-         * 
-         * @type {string}
-         */
-        providerId:string;
-        /**
-         * (description)
-         * 
-         * @type {string}
-         */
-        uid:string;
+
+		// custom replaced
+        /*providerId:string;
+        uid:string;*/
+		providerData: any[];
     }
     
     /**
@@ -1246,14 +1239,9 @@ declare namespace firebase {
          * @returns {Function} (description)
          */
         on(eventType:string,callback:Function,cancelCallbackOrContext?:Function|any,context?:any):Function;
-        /**
-         * (description)
-         * 
-         * @param {string} eventType (description)
-         * @param {Function} userCallback (description)
-         * @returns {Promise<any>} (description)
-         */
-        once(eventType:string,userCallback?:Function):Promise<any>;
+		
+        once(eventType: string, onSuccess?: Function, onError?: Function): Promise<any>;
+
         /**
          * (description)
          * 

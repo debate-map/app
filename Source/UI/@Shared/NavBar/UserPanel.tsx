@@ -84,6 +84,7 @@ class SignInButton extends BaseComponent<{provider: "google" | "facebook" | "twi
 					this.SetState({loading: true});
 					try {
 						let account = await firebase.login({provider, type: "popup"});
+						if (this.mounted == false) return;
 						this.SetState({loading: false});
 						if (onSignIn) onSignIn();
 					} catch (ex) {

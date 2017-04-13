@@ -98,6 +98,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						return void ShowMessageBox({title: "Cannot unlink", message: error});
 
 					firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
+						//let nodes = snapshot.val().VValues(true);
 						let nodes = (snapshot.val() as Object).Props().Select(a=>a.value.Extended({_id: a.name}));
 						//let childNodes = node.children.Select(a=>nodes[a]);
 						// todo: remove need for downloading all nodes, by have children store their parents (redundant, but practical)
@@ -127,6 +128,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						return void ShowMessageBox({title: "Cannot delete", message: error});
 
 					firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
+						//let nodes = snapshot.val().VValues(true);
 						let nodes = (snapshot.val() as Object).Props().Select(a=>a.value.Extended({_id: a.name}));
 						//let childNodes = node.children.Select(a=>nodes[a]);
 						let parentNodes = nodes.Where(a=>a.children && a.children[node._id]);

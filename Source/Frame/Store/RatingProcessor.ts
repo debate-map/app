@@ -78,7 +78,7 @@ export function GetArgumentStrengthPseudoRatingSet(nodeChildren: MapNode[]): {[k
 		let childRatingSet = GetRatingSet(child._id, GetMainRatingTypesForNode(child)[0]) || {};
 		if (usersWhoRatedAllChildren == null) {
 			usersWhoRatedAllChildren = {};
-			for (let userID of childRatingSet.Props().map(a=>a.name))
+			for (let userID of childRatingSet.VKeys(true))
 				usersWhoRatedAllChildren[userID] = true;
 		} else {
 			for (let userID in usersWhoRatedAllChildren) {

@@ -1,15 +1,14 @@
 import {GetData} from "../../Frame/Database/DatabaseHelpers";
 import {PermissionGroupSet} from "./userExtras/@UserExtraInfo";
-import {User} from "firebase";
+import UserExtraInfo from "./userExtras/@UserExtraInfo";
+import {CachedTransform} from "../../Frame/V/VCache";
+import {UserInfo} from "firebase";
+
+export type User = UserInfo;
 
 /*export function GetAuth(state: RootState) { 
 	return state.firebase.auth;
 }*/
-
-export function GetUsers() {
-	return GetData(`users`) as User[];
-}
-
 export function GetUserID(): string {
 	//return state.firebase.data.auth ? state.firebase.data.auth.uid : null;
 	//return GetData(state.firebase, "auth");
@@ -18,6 +17,23 @@ export function GetUserID(): string {
 	/*let firebaseSet = State().firebase as Set<any>;
 	return firebaseSet.toJS().auth.uid;*/
 	return State().firebase.get("auth") ? State().firebase.get("auth").uid : null;
+}
+
+export type UserMap = {[key: string]: User};
+export function GetUserMap(): UserMap {
+	return GetData(`users`);
+}
+export function GetUsers(): User[] {
+	let userMap = GetUserMap();
+	return CachedTransform({}, userMap, ()=>userMap.VValues(true));
+}
+
+export type UserExtraInfoMap = {[key: string]: UserExtraInfo};
+export function GetUserExtraInfoMap(): UserExtraInfoMap {
+	return GetData(`userExtras`);
+}
+export function GetUserJoinDate(userID: string): number {
+	return GetData(`userExtras/${userID}/joinDate`);
 }
 export function GetUserPermissionGroups(userID: string): PermissionGroupSet {
 	return GetData(`userExtras/${userID}/permissionGroups`);

@@ -1,4 +1,4 @@
-import {applyMiddleware, compose, createStore} from "redux";
+import {applyMiddleware, compose, createStore, StoreEnhancer, Store} from "redux";
 import thunk from "redux-thunk";
 import {createBrowserHistory} from "react-router/node_modules/history";
 import {reduxFirebase, getFirebase} from "react-redux-firebase";
@@ -7,7 +7,7 @@ import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 import {persistStore, autoRehydrate} from "redux-persist";
 import {createFilter, createBlacklistFilter} from "redux-persist-transform-filter";
 import {routerMiddleware} from 'react-router-redux'
-import {MakeRootReducer} from "../../Store/index";
+import {MakeRootReducer, RootState} from "../../Store/index";
 import watch from "redux-watch";
 import {PreDispatchAction, MidDispatchAction, PostDispatchAction} from "./ActionProcessor";
 import {GetUrlVars} from "../General/URLs";
@@ -24,6 +24,18 @@ export default function(initialState = {}, history) {
 	const middleware = [
 		thunk.withExtraArgument(getFirebase),
 		// for some reason, this breaks stuff if we have it the last one
+		/*store=>next=>action=> {
+			Log("What!" + action.type);
+			PreDispatchAction(action);
+			const returnValue = next(action);
+			MidDispatchAction(action, returnValue);
+			WaitXThenRun(0, ()=>PostDispatchAction(action));
+			return returnValue;
+		},*/
+		routerMiddleware(browserHistory),
+	];
+	let lateMiddleware = [
+		// for some reason, this breaks stuff if we have it the last one
 		store=>next=>action=> {
 			PreDispatchAction(action);
 			const returnValue = next(action);
@@ -31,17 +43,16 @@ export default function(initialState = {}, history) {
 			WaitXThenRun(0, ()=>PostDispatchAction(action));
 			return returnValue;
 		},
-		routerMiddleware(browserHistory),
 	];
 
 	// Store Enhancers
 	// ==========
-	const enhancers = [];
+	const extraEnhancers = [];
 	//if (devEnv) {
 	const devToolsExtension = g.devToolsExtension;
 	if (typeof devToolsExtension === "function") {
 		//enhancers.push(devToolsExtension());
-		enhancers.push(devToolsExtension({maxAge: 100}));
+		extraEnhancers.push(devToolsExtension({maxAge: 100}));
 	}
 	//}
 
@@ -63,9 +74,10 @@ export default function(initialState = {}, history) {
 			applyMiddleware(...middleware),
 			reduxFirebase(firebaseConfig, reduxFirebaseConfig),
 			autoRehydrate(),
-			...enhancers
-		)
-	) as any;
+			applyMiddleware(...lateMiddleware), // place late-middleware after reduxFirebase, so it can intercept all its dispatched events
+			...extraEnhancers
+		) as StoreEnhancer<any>
+	) as Store<RootState> & {asyncReducers};
 	store.asyncReducers = {};
 
 	/*let w = watch(()=>store.getState());

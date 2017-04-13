@@ -2,6 +2,7 @@ export default class UserExtraInfo {
 	constructor(initialData: Partial<UserExtraInfo>) {
 		this.Extend(initialData);
 	}
+	joinDate: number;
 	permissionGroups: PermissionGroupSet;
 }
 export class PermissionGroupSet {

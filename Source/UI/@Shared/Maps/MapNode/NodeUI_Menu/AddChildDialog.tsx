@@ -70,7 +70,7 @@ export function ShowAddChildDialog(node: MapNode, childType: MapNodeType, userID
 			firebase.Ref("nodes").transaction(nodes=> {
 				if (!nodes) return nodes;
 
-				let newID = nodes.Props().filter(a=>a.name != "_").map(a=>parseInt(a.name)).Max().KeepAtLeast(99) + 1;
+				let newID = nodes.VKeys(true).map(a=>parseInt(a)).Max().KeepAtLeast(99) + 1;
 				// add node
 				let newNode = new MapNode({type: childType, creator: userID, approved: true});
 				if (childType == MapNodeType.Thesis && info.thesisType == "Quote")

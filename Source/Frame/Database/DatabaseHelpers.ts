@@ -1,9 +1,10 @@
-import {RequestPath} from "./FirebaseConnect";
+import {RequestPath, Connect} from "./FirebaseConnect";
 import {Assert} from "../General/Assert";
 import {helpers, firebaseConnect} from "react-redux-firebase";
 import {DBPath as DBPath_} from "../../../config/DBVersion";
 import {IsString} from "../General/Types";
-import {FirebaseApplication} from "firebase";
+import {FirebaseApplication, DataSnapshot} from "firebase";
+import {BaseComponent} from "../UI/ReactGlobals";
 //export {DBPath};
 
 export function DBPath(path = "") {
@@ -70,6 +71,15 @@ export function GetData(path: string, makeRequest = true) {
 		RequestPath(path);
 
 	return info.cachedData;
+}
+
+export async function GetDataAsync(path: string) {
+	return await new Promise((resolve, reject) => {
+		let firebase = store.firebase.helpers;
+		firebase.Ref(path).once("value",
+			(snapshot: DataSnapshot)=>resolve(snapshot.val()),
+			(ex: Error)=>reject(ex));
+	});
 }
 
 /*;(function() {
