@@ -8,13 +8,13 @@ export class RatingType_Info {
 	static for = {
 		significance: new RatingType_Info({
 			displayText: "Significance",
-			description: ()=>"How significant/important is this subject? (0: not worth any time discussing; 100: vital to discuss)",
+			description: ()=>"How significant/important is this subject? (0: not worth any time discussing, 100: vital to discuss)",
 			options: ()=>Range(0, 100),
 			ticks: ()=>Range(0, 100, 5),
 		}),
 		neutrality: new RatingType_Info({
 			displayText: "Neutrality",
-			description: ()=>"How neutral/impartial is the phrasing of this question? (0: as biased as they come; 100: no bias)",
+			description: ()=>"How neutral/impartial is the phrasing of this question? (0: as biased as they come, 100: no bias)",
 			options: ()=>Range(0, 100),
 			ticks: ()=>Range(0, 100, 5),
 		}),
