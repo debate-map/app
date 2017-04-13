@@ -3,7 +3,7 @@ import {Range} from "../../../Frame/General/Globals";
 import {MapNodeType} from "../nodes/@MapNodeType";
 
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
-export type RatingType = "significance" | "neutrality" | "probability" | "evidence" | "adjustment" | "strength";
+export type RatingType = "significance" | "neutrality" | "probability" | "opinion" | "adjustment" | "strength";
 export class RatingType_Info {
 	static for = {
 		significance: new RatingType_Info({
@@ -38,18 +38,54 @@ export class RatingType_Info {
 			options: ()=>Range(0, 200),
 			ticks: ()=>Range(0, 200, 10),
 		}),*/
-		evidence: new RatingType_Info({
+		/*evidence: new RatingType_Info({
 			displayText: "Evidence",
 			description: ()=>"To what level should the average opinion on this statement be shifted to match the evidence?",
 			options: ()=>Range(0, 200),
 			ticks: ()=>Range(0, 200, 10),
+		}),*/
+		/*backing: new RatingType_Info({
+			displayText: "Backing",
+			description: ()=>"How strong is the backing/evidence for this statement? (100: your estimate of the average opinion)",
+			options: ()=>Range(0, 200),
+			ticks: ()=>Range(0, 200, 10),
+		}),*/
+		/*correction: new RatingType_Info({
+			displayText: "Correction",
+			description: ()=>"How much should the average opinion on this statement be shifted to be most reasonable?",
+			options: ()=>Range(-100, 100),
+			ticks: ()=>Range(-100, 100, 10),
+		}),*/
+		opinion: new RatingType_Info({
+			displayText: "Opinion",
+			description: ()=>"Where do you consider your views on this statement, relative to the rest of the population? (-100: very critical, 0: neither critical nor supportive, +100: very supportive)",
+			options: ()=>Range(-100, 100),
+			ticks: ()=>Range(-100, 100, 10),
+			//tickFormatter: tick=>(tick < 0 ? "-" : tick > 1 ? "+" : "") + tick.Distance(0) //+ "%"
+			tickRender: props=> {
+				let {x, y, stroke, fill, payload} = props;
+				let tick = payload.value;
+				let tickStr = (tick < 0 ? "-" : tick == 0 ? "" : "+") + tick.Distance(0);
+				/*return (
+					<g transform={`translate(${tick < 0 ? x - 5 : x},${tick < 0 ? y - 7 : y - 5})`}>
+						<text x={0} y={0} dy={16} stroke={stroke} fill="#AAA"
+								textAnchor={tick < 0 ? "start" : tick == 0 ? "middle" : "end"}
+								transform={tick < 0 ? "rotate(25)" : tick == 0 ? "" : "rotate(-25)"}>
+							{tickStr}
+						</text>
+					</g>
+				);*/
+				return (
+					<g transform={`translate(${x},${y - 5})`}>
+						<text x={0} y={0} dy={16} stroke={stroke} fill="#AAA"
+								textAnchor={"end"}
+								transform={"rotate(-25)"}>
+							{tickStr}
+						</text>
+					</g>
+				);
+			}
 		}),
-		// todo
-		/*substantiation: {
-			description: "How much would the parent thesis be substantiated, IF all the (non-meta) theses of this argument were true?",
-			options: Range(0, 100),
-			ticks: Range(0, 100, 5),
-		},*/
 		adjustment: new RatingType_Info({
 			displayText: "Adjustment",
 			description: (node, parentNode)=> {
@@ -69,12 +105,12 @@ export class RatingType_Info {
 				return parentNode.type == MapNodeType.SupportingArgument ? Range(50, 100, 5) : Range(0, 50, 5);
 			},
 		}),
-		strength: {
+		strength: new RatingType_Info({
 			displayText: "Strength",
 			description: ()=>"Argument strength is calculated based on the probabilities of its premises, and the probability/adjustment of its meta-thesis.",
 			options: ()=>Range(0, 100),
 			ticks: ()=>Range(0, 100, 5),
-		},
+		}),
 	} as {[key: string]: RatingType_Info};
 
 	private constructor(info: Partial<RatingType_Info>) {
@@ -84,5 +120,48 @@ export class RatingType_Info {
 	displayText: string;
 	description: ((node: MapNode, parentNode: MapNode)=>string);
 	options: ((node: MapNode, parentNode: MapNode)=>number[]);
-	ticks: ((node: MapNode, parentNode: MapNode)=>number[]);; // for x-axis labels
+	ticks: ((node: MapNode, parentNode: MapNode)=>number[]); // for x-axis labels
+	//tickFormatter?: (tickValue: number)=>string = a=>a.toString();
+	tickRender?: (props: TickRenderProps)=>JSX.Element;
+	/*tickRender?: (props: TickRenderProps)=>JSX.Element = props=> {
+		let {x, y, stroke, fill, payload} = props;
+		let tickStr = payload.value + "%";
+		return (
+			<g transform={`translate(${x},${y - 5})`}>
+				<text x={0} y={0} dy={16} stroke={stroke} fill="#AAA"
+						textAnchor={"middle"}
+						transform={"rotate(-25)"}>
+					{tickStr}
+				</text>
+			</g>
+		);
+	}*/
+	/*tickRender?: (props: TickRenderProps)=>JSX.Element = props=> {
+		let {x, y, stroke, fill, payload} = props;
+		let tickStr = payload.value + "%";
+		return (
+			<g transform={`translate(${x},${y - 5})`}>
+				<text x={0} y={0} dy={16} stroke={stroke} fill="#AAA" textAnchor={"middle"}>
+					{tickStr}
+				</text>
+				<text x={0} y={10} dy={16} stroke={stroke} fill="#AAA" textAnchor={"middle"}>
+					{"%"}
+				</text>
+			</g>
+		);
+	}*/
+}
+
+type TickRenderProps = {
+	fill: string,
+	height: number,
+	index: number,
+	payload,
+	stroke: string,
+	textAnchor: string,
+	verticalAnchor: string,
+	viewBox,
+	width: number,
+	x: number,
+	y: number,
 }

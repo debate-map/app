@@ -40,8 +40,9 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 						if (average != -1) {
 							if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
 								percentStr = (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent ? "+" : "-") + average.Distance(50) + "%";
-							else if (ratingType == "evidence")
-								percentStr = (average >= 100 ? "+" : "-") + average.Distance(100) + "%";
+							else if (ratingType == "opinion")
+								//percentStr = (average >= 100 ? "+" : "-") + average.Distance(100) + "%";
+								percentStr = (average < 0 ? "-" : average == 0 ? "" : "+") + average.Distance(0);
 							else
 								percentStr = average + "%";
 						}

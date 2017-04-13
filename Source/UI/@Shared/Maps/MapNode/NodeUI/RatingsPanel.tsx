@@ -135,7 +135,9 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 				{this.lastRender_source == RenderSource.SetState &&
 					<AreaChart ref="chart" width={size.x} height={250} data={dataFinal}
 							margin={{top: 20, right: 10, bottom: 0, left: 10}} /*viewBox={{x: 0, y: 250 - height, width: size.x, height: 250}}*/>
-						<XAxis dataKey="rating" ticks={ratingTypeInfo.ticks(node, parentNode)} type="number" domain={[minVal, maxVal]} minTickGap={0}/>
+						<XAxis dataKey="rating" type="number" /*label={<XAxisLabel ratingType={ratingType}/>}*/ ticks={ratingTypeInfo.ticks(node, parentNode)}
+							tick={ratingTypeInfo.tickRender}
+							domain={[minVal, maxVal]} minTickGap={0}/>
 						{/*<YAxis tickCount={7} hasTick width={50}/>*/}
 						<YAxis orientation="left" x={20} width={20} height={250} tickCount={9}/>
 						<CartesianGrid stroke="rgba(255,255,255,.3)"/>
@@ -155,6 +157,17 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 		this.SetState({size}, null, false);
 	}
 }
+
+/*const XAxisLabel = props=> {
+	let {x, y, width, height, viewBox, stroke, ratingType} = props;
+	return (
+		<g transform={`translate(${(viewBox.width / 2) + 10},${y + 12})`}>
+			<text x={0} y={0} dy={16} fill="#AAA" textAnchor="middle">
+				{ratingType + " %"}
+			</text>
+		</g>
+	);
+}*/
 
 class CustomTooltip extends BaseComponent<{active?, payload?, external?, label?}, {}> {
 	render() {
