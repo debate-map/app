@@ -38,7 +38,7 @@ export class MapNodeType_Info {
 			childTypes: [MapNodeType.SupportingArgument, MapNodeType.OpposingArgument],
 			minWidth: 350, maxWidth: 550, backgroundColor: "0,80,150",
 			//mainRatingTypes: ["probability", "intensity"],
-			mainRatingTypes: ["probability", "opinion"],
+			mainRatingTypes: ["probability", "support"],
 			otherRatingTypes: [],
 		}),
 		[MapNodeType.SupportingArgument]: new MapNodeType_Info({

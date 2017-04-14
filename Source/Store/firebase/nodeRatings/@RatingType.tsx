@@ -3,7 +3,7 @@ import {Range} from "../../../Frame/General/Globals";
 import {MapNodeType} from "../nodes/@MapNodeType";
 
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
-export type RatingType = "significance" | "neutrality" | "probability" | "opinion" | "adjustment" | "strength";
+export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
 export class RatingType_Info {
 	static for = {
 		significance: new RatingType_Info({
@@ -56,8 +56,8 @@ export class RatingType_Info {
 			options: ()=>Range(-100, 100),
 			ticks: ()=>Range(-100, 100, 10),
 		}),*/
-		opinion: new RatingType_Info({
-			displayText: "Opinion",
+		support: new RatingType_Info({
+			displayText: "Support",
 			description: ()=>"Where do you consider your views on this statement, relative to the rest of the population? (-100: very critical, 0: neither critical nor supportive, +100: very supportive)",
 			options: ()=>Range(-100, 100),
 			ticks: ()=>Range(-100, 100, 10),
