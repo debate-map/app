@@ -69,13 +69,14 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						}}/>
 					);
 				})}
-				{IsUserBasicOrAnon(userID) &&
+				{IsUserBasicOrAnon(userID) && node.metaThesis == null &&
 					//<VMenuItem text={copiedNode ? "Copy (right-click to clear)" : "Copy"} style={styles.vMenuItem}
 					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : "Copy"} style={styles.vMenuItem}
 						onClick={e=> {
-							if (node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument)
+							if (node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument) {
 								return void ShowMessageBox({title: "Cannot copy",
 									message: "Sorry! For technical reasons, arguments cannot currently be copied. For now, copy the premises."});
+							}
 							if (e.button == 0)
 								store.dispatch(new ACTNodeCopy(node._id));
 							else
