@@ -2,15 +2,16 @@ import {applyMiddleware, compose, createStore, StoreEnhancer, Store} from "redux
 import thunk from "redux-thunk";
 import {createBrowserHistory} from "react-router/node_modules/history";
 import {reduxFirebase, getFirebase} from "react-redux-firebase";
-import {version, firebaseConfig} from "../../BakedConfig";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 import {persistStore, autoRehydrate} from "redux-persist";
 import {createFilter, createBlacklistFilter} from "redux-persist-transform-filter";
-import {routerMiddleware} from 'react-router-redux'
+import {routerMiddleware} from "react-router-redux"
 import {MakeRootReducer, RootState} from "../../Store/index";
 import watch from "redux-watch";
 import {PreDispatchAction, MidDispatchAction, PostDispatchAction} from "./ActionProcessor";
 import {GetUrlVars} from "../General/URLs";
+//import {version, firebaseConfig} from "../../BakedConfig";
+var {version, firebaseConfig} = require(devEnv ? "../../BakedConfig_Dev" : "../../BakedConfig_Prod");
 
 export const browserHistory = createBrowserHistory();
 

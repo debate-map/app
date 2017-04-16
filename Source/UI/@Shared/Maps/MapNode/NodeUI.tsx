@@ -95,6 +95,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 
 	render() {
 		let {map, node, path, widthOverride, nodeView, nodeChildren, nodeChildren_fillPercents, children} = this.props;
+		let expanded = nodeView && nodeView.expanded;
 		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
 		//Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
 		NodeUI.renderCount++;
@@ -136,10 +137,12 @@ export default class NodeUI extends BaseComponent<Props, State> {
 				</div>
 				{nodeChildren == childrenPlaceholder &&
 					<div style={{margin: "auto 0 auto 10px"}}>...</div>}
+				{nodeChildren != childrenPlaceholder && !expanded && nodeChildren.length != 0 &&
+					<div style={{margin: "auto 0 auto 7px", fontSize: 12, color: "rgba(255,255,255,.5)"}}>{nodeChildren.length}</div>}
 				{hasBeenExpanded && !separateChildren &&
 					<div ref="childHolder" className="childHolder clickThrough" style={{
-						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
-						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: nodeView && nodeView.expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
+						display: expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
+						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 					}}>
 						{svgInfo.mainBoxOffset &&
 							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
@@ -148,8 +151,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					</div>}
 				{hasBeenExpanded && separateChildren &&
 					<div ref="childHolder" className="childHolder clickThrough" style={{
-						display: nodeView && nodeView.expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
-						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: nodeView && nodeView.expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
+						display: expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
+						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 					}}>
 						{svgInfo.mainBoxOffset &&
 							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}

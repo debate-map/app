@@ -2,8 +2,10 @@ const debug = require("debug")("app:build:config");
 const fs = require("fs");
 const path = require("path");
 const pkg = require("../package.json");
-const outputPath = path.join(__dirname, "..", "Source/BakedConfig.ts");
 const config = require("../config");
+
+const pathRel = config.globals.__DEV__ ? "Source/BakedConfig_Dev.ts" : "Source/BakedConfig_Prod.ts";
+const outputPath = path.join(__dirname, "..", pathRel);
 
 // TODO: load config from environments
 /*let env = config.env;
@@ -38,6 +40,6 @@ function createConfigFile(cb) {
 
 (function () {
 	createConfigFile(() => {
-		debug("Config file successfully written to Source/BakedConfig.ts");
+		debug("Config file successfully written to " + pathRel);
 	})
 })();

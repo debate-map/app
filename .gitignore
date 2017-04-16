@@ -6,5 +6,6 @@
 node_modules
 coverage
 
-/Source/BakedConfig.ts
+/Source/BakedConfig_Dev.ts
+/Source/BakedConfig_Prod.ts
 /dist

@@ -44,8 +44,8 @@ let startURL = URL.Current();
 g.Extend({startURL}); declare global { export var startURL: URL; }
 
 //let {version} = require("../../../package.json");
-//mport {version, env, devEnv, prodEnv, testEnv} from "./BakedConfig";
-let {version, env, devEnv, prodEnv, testEnv} = require("./BakedConfig");
+// use two BakedConfig files, so that dev-server can continue running, with its own baked-config data, even while prod-deploy occurs
+let {version, env, devEnv, prodEnv, testEnv} = __DEV__ ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
 //let version = "0.0.1", env = "development", devEnv = true, prodEnv = false, testEnv = false;
 if (startURL.GetQueryVar("env") && startURL.GetQueryVar("env") != "null") {
 	env = startURL.GetQueryVar("env");
