@@ -101,7 +101,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						{node.type == MapNodeType.Thesis && node.quote &&
 							<Button size={13} iconSize={13} iconPath="/Images/Buttons/Info.png"
 								useOpacityForHover={true} style={{position: "relative", zIndex: 1, marginLeft: 1, backgroundColor: null, boxShadow: null}}
-								title="Allowed exceptions are: bold and [...] (expandable segments)"/>}
+								title="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
 						{subPanelShow &&
 							<div style={{position: "relative", margin: "5px -5px -5px -5px", padding: "6px 5px 5px 5px",
 								//border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"

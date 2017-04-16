@@ -61,7 +61,7 @@ export function ShowMessageBox(options: {[P in keyof MessageBoxOptions]?: Messag
 	o.ui = ()=>(
 		<div>
 			{o.titleUI ? o.titleUI() : <div style={{fontSize: "18px", fontWeight: "bold"}}>{o.title}</div>}
-			{o.messageUI ? o.messageUI() : <p style={{marginTop: 15}}>{o.message}</p>}
+			{o.messageUI ? o.messageUI() : <p style={{marginTop: 15, whiteSpace: "pre"}}>{o.message}</p>}
 			{o.okButton &&
 				<Button text="OK"
 					onClick={()=> {

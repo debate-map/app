@@ -73,14 +73,21 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 					//<VMenuItem text={copiedNode ? "Copy (right-click to clear)" : "Copy"} style={styles.vMenuItem}
 					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : "Copy"} style={styles.vMenuItem}
 						onClick={e=> {
+							e.persist();
 							if (node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument) {
-								return void ShowMessageBox({title: "Cannot copy",
-									message: "Sorry! For technical reasons, arguments cannot currently be copied. For now, copy the premises."});
+								return void ShowMessageBox({title: "Copy argument?", cancelButton: true, onOK: proceed, message:
+`Are you sure you want to copy this argument?
+
+Usually, it's best to make a new one (with the same title), and just copy the premises. (since an argument has a meta-thesis, which is usually specific to the parent thesis)`
+								});
 							}
-							if (e.button == 0)
-								store.dispatch(new ACTNodeCopy(node._id));
-							else
-								store.dispatch(new ACTNodeCopy(null));
+							proceed();
+							function proceed() {
+								if (e.button == 0)
+									store.dispatch(new ACTNodeCopy(node._id));
+								else
+									store.dispatch(new ACTNodeCopy(null));
+							}
 						}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode, permissions) &&
 					<VMenuItem text={`Paste as link: "${GetNodeDisplayText(copiedNode, thesisFormForThesisChild).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={e=> {
