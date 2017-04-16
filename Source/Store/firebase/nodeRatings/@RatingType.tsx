@@ -90,13 +90,20 @@ export class RatingType_Info {
 			displayText: "Adjustment",
 			description: (node, parentNode)=> {
 				let support = parentNode.type == MapNodeType.SupportingArgument;
-				return `Suppose that the parent thesis were just introduced (a blank slate with no specific research), and that its base probability were 50%.`
+				/*return `Suppose that the parent thesis were just introduced (a blank slate with no specific research), and that its base probability were 50%.`
 					+ (
 						node.metaThesis.ifType == MetaThesis_IfType.All ? ` Suppose also that this argument's premises were all true.` :
 						node.metaThesis.ifType == MetaThesis_IfType.AnyTwo ? ` Suppose also that at least two of this argument's premises were true.` :
 						` Suppose also that at least one of this argument's premises were true.`
 					)
-					+ ` If that were the case, to what level would this argument ${support ? "raise" : "lower"} the parent thesis' probability?`;
+					+ ` If that were the case, to what level would this argument ${support ? "raise" : "lower"} the parent thesis' probability?`;*/
+				return `Suppose someone is completely on the fence on the parent thesis -- giving it a 50% probability.`
+					+ (
+						node.metaThesis.ifType == MetaThesis_IfType.All ? ` Suppose also that you introduce this argument to them, and they accept all of the premises.` :
+						node.metaThesis.ifType == MetaThesis_IfType.AnyTwo ? ` Suppose also that you introduce this argument to them, and they accept at least two of the premises.` :
+						` Suppose also that you introduce this argument to them, and they accept at least one of the premises.`
+					)
+					+ ` To what level would you expect them (assuming they're reasonable) to shift their probability rating?`
 			},
 			options: (node, parentNode)=> {
 				return parentNode.type == MapNodeType.SupportingArgument ? Range(50, 100) : Range(0, 50);
