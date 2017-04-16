@@ -20,7 +20,7 @@ export class RatingType_Info {
 		}),
 		probability: new RatingType_Info({
 			displayText: "Probability",
-			description: ()=>"What probability does this statement, as presented, have of being true?",
+			description: ()=>"Suppose you were as sure as you are right now (of the parent thesis), one hundred different times. How many of those times would you expect to be correct?",
 			//options: [1, 2, 4, 6, 8].concat(Range(10, 90, 5)).concat([92, 94, 96, 98, 99]),
 			//options: [1].concat(Range(2, 98, 2)).concat([99]),
 			/*options: Range(1, 99),
