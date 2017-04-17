@@ -6,9 +6,9 @@ import {GetParentNode, IsLinkValid, IsNewLinkValid} from "../nodes";
 import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
 
 export enum AccessLevel {
-	Base = 10,
+	Basic = 10,
 	Verified = 20,
-	Manager = 30,
+	Mod = 30,
 	Admin = 40,
 }
 
@@ -57,8 +57,8 @@ export class MapNode {
 	creator?: string;
 	createdAt: number;
 	approved = false;
-	accessLevel = AccessLevel.Base;
-	voteLevel = AccessLevel.Base;
+	accessLevel = AccessLevel.Basic;
+	voteLevel = AccessLevel.Basic;
 
 	quote: QuoteInfo;
 	metaThesis: {

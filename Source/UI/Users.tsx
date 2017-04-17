@@ -17,8 +17,9 @@ export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], 
 		return (
 			<Div style={styles.page}>
 				<Row>
-					<span style={{flex: .5, fontWeight: 500, fontSize: 17}}>Name</span>
-					<span style={{flex: .5, fontWeight: 500, fontSize: 17}}>Join date</span>
+					<span style={{flex: .33, fontWeight: 500, fontSize: 17}}>Name</span>
+					<span style={{flex: .33, fontWeight: 500, fontSize: 17}}>Join date</span>
+					<span style={{flex: .33, fontWeight: 500, fontSize: 17}}>Permissions</span>
 				</Row>
 				{users.map((user, index)=> {
 					let userExtraInfo = userExtraInfoMap[user["_key"]];
@@ -33,9 +34,11 @@ class UserRow extends BaseComponent<{user: User, userExtraInfo: UserExtraInfo}, 
 	render() {
 		let {user, userExtraInfo} = this.props;
 		return (
-			<Row>
-				<span style={{flex: .5}}>{user.displayName}</span>
-				<span style={{flex: .5}}>{userExtraInfo ? Moment(userExtraInfo.joinDate).format("YYYY-MM-DD") : "n/a"}</span>
+			<Row sel>
+				<span style={{flex: .33}}>{user.displayName}</span>
+				<span style={{flex: .33}}>{userExtraInfo ? Moment(userExtraInfo.joinDate).format("YYYY-MM-DD") : "n/a"}</span>
+				<span style={{flex: .33}}>{userExtraInfo == null ? "n/a" :
+					["basic", "verified", "mod", "admin"].filter(a=>userExtraInfo.permissionGroups[a]).map(a=>a.replace(/^./, a=>a.toUpperCase())).join(", ")}</span>
 			</Row>
 		);
 	}
