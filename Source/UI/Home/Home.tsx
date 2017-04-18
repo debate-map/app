@@ -48,7 +48,7 @@ The end result is a relatively clear and compact tree where, if a pair of member
 	display where their belief trees differ, and each marking within the tree the paths/subtrees they see most strongly supporting their view. (feature not yet developed)
 
 At some point it will occur that either:
-1) One of them realizes that the arguments supporting his original position (or a sub-position) is weaker than a competitor's, and changes his views accordingly. (ideal!)
+1) One of them realizes that the arguments supporting his original position (or a sub-position) are weaker than a competitor's, and changes his views accordingly. (ideal!)
 2) One of them becomes forced to claim belief in a thesis which is admitted to have weaker mapped/presented arguments than a competitor.
 3) They'll disagree on something difficult to collaboratively break down, such as philosophical axioms or claims of personal experiences.
 4) They'll get so deep down in the belief tree that even if in theory the approach could work, it becomes too time-consuming to further develop the many branches.
@@ -69,7 +69,7 @@ Engaging with a tool that operates on percentages, numbers, and weights makes se
 	by entering numbers, one is declaring to himself how much he considers his beliefs to be supported, and by what means.
 This allows one to then do tool-based analysis on his views, and more easily spot areas of possible bias or unjustified conclusions.
 
-He can then proceed to look more closely at those areas, examining the pool of existing evidence and reasoning,
+One can then proceed to look more closely at those areas, examining the pool of existing evidence and reasoning,
 	and referencing statistics on how the rest of the population considers each piece along the way.
 
 <a name="footnote1">1</a>: In case the project management falters or becomes biased, it's in the power of users

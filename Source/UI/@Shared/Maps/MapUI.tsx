@@ -153,6 +153,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
 		this.LoadScroll();
 		UpdateURL();
+		NodeUI.lastRenderTime = -1; // reset for next load
 	}
 
 	/*PostRender() {
