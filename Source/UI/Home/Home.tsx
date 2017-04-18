@@ -54,7 +54,7 @@ At some point it will occur that either:
 4) They'll get so deep down in the belief tree that even if in theory the approach could work, it becomes too time-consuming to further develop the many branches.
 
 While the less desirable options are sure to occur (and more often than we'd like), we still believe that the "recursive unrolling of belief trees" is substantially
-	clearer, less error-prone, less emotionally-heating, and more conducive to abstraction/reuse and statisticical analysis than the options previously available.
+	clearer, less error-prone, less emotionally-heating, and more conducive to abstraction/reuse and statistical analysis than the options previously available.
 
 ## Expedite and modernize the detailed sharing of one's worldview
 
