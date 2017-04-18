@@ -23,6 +23,9 @@ export type UserMap = {[key: string]: User};
 export function GetUserMap(): UserMap {
 	return GetData(`users`);
 }
+export function GetUser(userID: string): User {
+	return (GetUserMap() || {})[userID];
+}
 export function GetUsers(): User[] {
 	let userMap = GetUserMap();
 	return CachedTransform({}, userMap, ()=>userMap.VValues(true));

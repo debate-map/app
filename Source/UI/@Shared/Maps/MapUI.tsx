@@ -4,7 +4,7 @@ import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
 import {connect} from "react-redux";
 import {DBPath, GetData} from "../../../Frame/Database/DatabaseHelpers";
-import {Debugger} from "../../../Frame/General/Globals_Free";
+import {Debugger, E} from "../../../Frame/General/Globals_Free";
 import {PropTypes} from "react";
 import {Assert, Log} from "../../../Frame/Serialization/VDF/VDF";
 import V from "../../../Frame/V/V";
@@ -52,30 +52,34 @@ export function UpdateFocusNodeAndViewOffset(mapID: number) {
 		store.dispatch(new ACTViewCenterChange({mapID, focusNode: focusNodeBoxComp.props.path, viewOffset}));
 }
 
-type Props = {map: Map} & Partial<{rootNode: MapNode, focusNode: string, viewOffset: {x: number, y: number}}>;
-@Connect((state: RootState, {map}: Props)=> ({
-	rootNode: map && GetData(`nodes/${map.rootNode}`),
+type Props = {map: Map, rootNode?: MapNode, padding?: {left: number, right: number, top: number, bottom: number}, withinPage?: boolean} & React.HTMLProps<HTMLDivElement>
+	& Partial<{rootNode: MapNode, focusNode: string, viewOffset: {x: number, y: number}}>;
+@Connect((state: RootState, {map, rootNode}: Props)=> ({
+	rootNode: rootNode || (map && GetData(`nodes/${map.rootNode}`)),
 	/*focusNode: GetMapView(state, {map}) ? GetMapView(state, {map}).focusNode : null,
 	viewOffset: GetMapView(state, {map}) ? GetMapView(state, {map}).viewOffset : null,*/
 	/*focusNode_available: (GetMapView(state, {map}) && GetMapView(state, {map}).focusNode) != null,
 	viewOffset_available: (GetMapView(state, {map}) && GetMapView(state, {map}).viewOffset) != null,*/
 }))
 export default class MapUI extends BaseComponent<Props, {} | void> {
-	static padding = {topAndBottom: 1000, leftAndRight: 2000};
+	static defaultProps = {padding: {left: 2000, right: 2000, top: 1000, bottom: 1000}};
 
 	downPos: Vector2i;
 
 	render() {
 		//let {map, rootNode, focusNode: focusNode_target, viewOffset: viewOffset_target} = this.props;
-		let {map, rootNode} = this.props;
+		let {map, rootNode, padding, withinPage, children, ...rest} = this.props;
 		if (map == null)
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading map...</div>;
 		Assert(map._id, "map._id is null!");
 		if (rootNode == null)
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading root node...</div>;
 		return (
-			<ScrollView ref="scrollView" backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.content}
-					scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}
+			<ScrollView {...rest} ref="scrollView"
+					backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.content}
+					style={E(withinPage && {overflow: "visible"})}
+					scrollHBarStyle={E(withinPage && {zIndex: 0})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
+					contentStyle={E({willChange: "transform"}, withinPage && {margin: "-300px 0", padding: "300px 0"})}
 					onScrollEnd={pos=> {
 						UpdateFocusNodeAndViewOffset(map._id);
 					}}>
@@ -88,16 +92,16 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					opacity: 0;
 					visibility: hidden;
 					display: block;
-					height: ${MapUI.padding.topAndBottom}px;
+					height: ${padding.bottom}px;
 					/*width: 100%;*#/
 					width: 0;
-					margin-right: ${MapUI.padding.leftAndRight}px;
+					margin-right: ${padding.right}px;
 					pointer-events: none;
 				}*/
 				`}</style>
 				<div className="MapUI" ref="content"
 						style={{
-							position: "relative", /*display: "flex",*/ padding: `${MapUI.padding.topAndBottom}px ${MapUI.padding.leftAndRight}px`, whiteSpace: "nowrap",
+							position: "relative", /*display: "flex",*/ padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`, whiteSpace: "nowrap",
 							filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))",
 						}}
 						onMouseDown={e=>this.downPos = new Vector2i(e.clientX, e.clientY)}
@@ -119,6 +123,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						this.LoadScroll();
 					}}/>*/}
 				</div>
+				{children}
 			</ScrollView>
 		);
 	}

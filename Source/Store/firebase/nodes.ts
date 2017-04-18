@@ -25,6 +25,11 @@ export function GetNodeChildIDs(nodeID: number) {
 	return node["@childIDs"];
 }
 export function GetNodeChildren(node: MapNode) {
+	// special case, for demo map
+	if (node.children && node.children[0] instanceof MapNode) {
+		return node.children as MapNode[];
+	}
+
 	let children = (node.children || {}).VKeys().Except("_key").map(id=>GetNode(parseInt(id)));
 	return CachedTransform({nodeID: node._id}, children, ()=>children);
 }

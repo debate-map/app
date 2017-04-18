@@ -11,11 +11,11 @@ import {RootState} from "../../Store/index";
 import {Map} from "../../Store/firebase/maps/@Map";
 import {Connect} from "../../Frame/Database/FirebaseConnect";
 
-@Connect(({}: RootState)=> ({
+@Connect(state=> ({
 	//map: helpers.dataToJS(firebase, DBPath("maps/1")),
 	map: GetData("maps/1"),
 }))
-export default class GlobalMapUI extends BaseComponent<{map: Map}, {}> {
+export default class GlobalMapUI extends BaseComponent<Partial<{map: Map}>, {}> {
 	render() {
 		let {map} = this.props;
 		return (

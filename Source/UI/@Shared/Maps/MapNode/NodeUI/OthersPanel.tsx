@@ -3,7 +3,7 @@ import {PermissionGroupSet} from "../../../../../Store/firebase/userExtras/@User
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
 import {RootState} from "../../../../../Store";
-import {GetUserID, GetUserPermissionGroups} from "../../../../../Store/firebase/users";
+import {GetUserID, GetUserPermissionGroups, GetUserMap, GetUser, User} from "../../../../../Store/firebase/users";
 import {Type} from "../../../../../Frame/General/Types";
 import Button from "../../../../../Frame/ReactComponents/Button";
 import * as jquery from "jquery";
@@ -28,15 +28,16 @@ import Row from "../../../../../Frame/ReactComponents/Row";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-type OthersPanel_Props = {node: MapNode, path: string, userID: string} & Partial<{permissionGroups: PermissionGroupSet}>;
-@Connect((state: RootState, props: OthersPanel_Props)=> {
+type OthersPanel_Props = {node: MapNode, path: string, userID: string} & Partial<{nodeCreator: User}>;
+@Connect((state: RootState, {node}: OthersPanel_Props)=> {
 	return {
 		_: GetUserPermissionGroups(GetUserID()),
+		nodeCreator: GetUser(node.creator),
 	};
 })
 export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 	render() {
-		let {node, path, userID} = this.props;
+		let {node, path, userID, nodeCreator} = this.props;
 		let firebase = store.firebase.helpers;
 		if (node.metaThesis) {
 			var parentNode = GetParentNode(path);
@@ -48,7 +49,7 @@ export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 		return (
 			<div className="selectable" style={{position: "relative", padding: "5px"}}>
 				<Div style={{fontSize: 12}}>NodeID: {node._id}</Div>
-				<Div mt={3} style={{fontSize: 12}}>Created at: {Moment(node.createdAt).format("YYYY-MM-DD HH:mm:ss")}</Div>
+				<Div mt={3} style={{fontSize: 12}}>Created at: {Moment(node.createdAt).format("YYYY-MM-DD HH:mm:ss")} (by: {nodeCreator ? nodeCreator.displayName : "n/a"})</Div>
 				{IsUserCreatorOrMod(userID, node) &&
 					<Div mt={3}>
 						{!node.quote && !node.metaThesis &&

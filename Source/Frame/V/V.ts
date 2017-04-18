@@ -282,3 +282,13 @@ export function VisitTreeNodesInPath(treeRoot, pathNodesOrStr: string[] | string
 	VisitTreeNodesInPath({root: treeRoot}, "root/" + path, visitFunc);
 	return treeRoot;
 }*/
+
+export function DeepGet(obj, path) {
+	let pathNodes = path.split(".");
+	let result = obj;
+	for (let pathNode of pathNodes) {
+		if (result == null) break;
+		result = result[pathNode];
+	}
+	return result;
+}
