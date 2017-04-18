@@ -21,7 +21,7 @@ import {GetNode} from "../../Store/firebase/nodes";
 
 let pageText = `
 The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced
-	(like Wikipedia), and the software is open-sourced (under MIT), promoting collaborative development and increased accountability.<sup>[1](#footnote1)</sup>
+	(like Wikipedia), and the software is open-source (under MIT), promoting collaborative development and increased accountability.<sup>[1](#footnote1)</sup>
 
 There are three types of maps present on this site: personal maps, debate maps, and [the global map](/global).
 
@@ -29,21 +29,12 @@ Here is a quick example:
 
 GlobalMapPlaceholder
 
-==========
-
-The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced
-	(like Wikipedia), and the software is open-sourced (under MIT), promoting collaborative development and increased accountability.<sup>[1](#footnote1)</sup>
-
-[#]:# "Here is an example debate map: [Shape of the earth](/debates/shape-of-the-earth)"
-
-Here is an example debate map: (Debate maps are currently under development. For now, see the [global map](/global).)
-
-As can be seen, the tree-like structure makes it easy to traverse the available evidence and reasoning on the topic:
+The tree-like structure assists in traversing the various lines of evidence:
 	at each level, there is a "thesis" which makes a claim, and a set of simple "arguments" which support it.
-By keeping the form of these arguments simple, we're able to match them (in many cases) with the basic forms of logical arguments (modus ponens, etc.),
-	removing them from consideration to then focus solely on the chain of evidence.
+By keeping the forms of these arguments simple, we're able to match them (in many cases) with the basic forms of logical arguments (modus ponens, etc.),
+	permitting quick evaluation of the logical connections -- this saves time, and lets us focus on the underlying chain of evidence instead of parsing statement meanings.
 
-This has the potential to...
+Along with other features (such as the crowd-sourced rating of nodes' strength, neutrality, etc.), this has the potential to...
 
 ## Transform discussion on contentious issues
 
@@ -53,13 +44,13 @@ Instead of the traditional thread-based dialogue (which tends toward long and ha
 * Remaining traversable and easy to follow by having arguments mapped directly under the thesis they relate to, instead of sprawled out over many posts.
 * Not re-inventing the wheel: populating a line of evidence or reasoning once, and then sharing it in every part of the tree (and in every conversation) where it's relevant.
 
-The end result is a relatively clear and compact tree where, if a pair of members disagree, they simply take turns "adding layers" -- having the software
-	display where their belief trees differ, and each marking within the tree the paths/subtrees they see most strongly supporting their view. (and thus opposing the other's)
+The end result is a relatively clear and compact tree where, if a pair of members disagree, they can simply take turns "adding layers" -- having the software
+	display where their belief trees differ, and each marking within the tree the paths/subtrees they see most strongly supporting their view. (feature not yet developed)
 
 At some point it will occur that either:
 1) One of them realizes that the arguments supporting his original position (or a sub-position) is weaker than a competitor's, and changes his views accordingly. (ideal!)
 2) One of them becomes forced to claim belief in a thesis which is admitted to have weaker mapped/presented arguments than a competitor.
-3) They'll disagree on something difficult to collaboratively break down, such as claims of personal experiences. (since only one person has direct access to the memories)
+3) They'll disagree on something difficult to collaboratively break down, such as philosophical axioms or claims of personal experiences.
 4) They'll get so deep down in the belief tree that even if in theory the approach could work, it becomes too time-consuming to further develop the many branches.
 
 While the less desirable options are sure to occur (and more often than we'd like), we still believe that the "recursive unrolling of belief trees" is substantially
@@ -81,8 +72,8 @@ This allows one to then do tool-based analysis on his views, and more easily spo
 He can then proceed to look more closely at those areas, examining the pool of existing evidence and reasoning,
 	and referencing statistics on how the rest of the population considers each piece along the way.
 
-<a name="footnote1">1</a>: In case the project management falters or becomes biased,
-	it's in the power of users to create their own copy of the project, and to modify it as they see fit.
+<a name="footnote1">1</a>: In case the project management falters or becomes biased, it's in the power of users
+	to create and modify their own copies of the project. (Though I hope you'll find we do a good job -- maintaining and moderating -- making this not necessary!)
 
 More info on open-source projects: <https://opensource.com/resources/what-open-source>  
 This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
