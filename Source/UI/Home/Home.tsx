@@ -30,7 +30,7 @@ Here is a quick example:
 GlobalMapPlaceholder
 
 The tree-like structure assists in traversing the various lines of evidence:
-	at each level, there is a "thesis" which makes a claim, and a set of simple "arguments" which support it.
+	at each level, there is a "thesis" (blue) which makes a claim, and a set of simple "arguments" (green and red) which support/oppose it.
 By keeping the forms of these arguments simple, we're able to match them (in many cases) with the basic forms of logical arguments (modus ponens, etc.),
 	permitting quick evaluation of the logical connections -- this saves time, and lets us focus on the underlying chain of evidence instead of parsing statement meanings.
 
