@@ -15,7 +15,7 @@ import {DBPath} from "../../../Frame/Database/DatabaseHelpers";
 
 export class ACTMapViewMerge extends Action<{mapView: MapView}> {}
 
-export function MapViewReducer(state = {rootNodeViews: {}}, action: Action<any>) {
+export function MapViewReducer(state = {rootNodeViews: {}}, action: Action<any>, mapID: number) {
 	if (action.Is(ACTMapViewMerge)) {
 		let newState = state;
 		let updatePrimitiveTreeNodes = GetTreeNodesInObjTree(action.payload.mapView).Where(a=>IsPrimitive(a.Value) || a.Value == null);
@@ -24,7 +24,7 @@ export function MapViewReducer(state = {rootNodeViews: {}}, action: Action<any>)
 		return newState;
 	}
 
-	let newState = {...state, rootNodeViews: RootNodeViewsReducer(state.rootNodeViews, action)};
+	let newState = {...state, rootNodeViews: RootNodeViewsReducer(state.rootNodeViews, action, mapID)};
 	if (!Equals_Shallow(state, newState))
 		return newState;
 	return state;

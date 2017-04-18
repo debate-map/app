@@ -40,8 +40,8 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 		}
 	}
 
-	for (let key of state.VKeys()) {
-		newState[key] = MapViewReducer(state[key], action);
+	for (let key in state) {
+		newState[key] = MapViewReducer(state[key], action, parseInt(key));
 	}
 	return ShallowChanged(newState, state) ? newState : state;
 }
@@ -109,7 +109,7 @@ export function GetNodeView(mapID: number, path: string): MapNodeView {
 
 	let mapView = GetMapView(mapID);
 	if (mapView == null) return null;
-	return mapView.rootNodeViews.VValues()[0] as MapNodeView;
+	return mapView.rootNodeViews[pathNodeIDs[0]] as MapNodeView;
 }
 export function GetFocusNode(mapView: MapView): string {
 	if (mapView == null) return null;
