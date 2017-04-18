@@ -79,7 +79,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.content}
 					style={E(withinPage && {overflow: "visible"})}
 					scrollHBarStyle={E(withinPage && {zIndex: 0})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
-					contentStyle={E({willChange: "transform"}, withinPage && {margin: "-300px 0", padding: "300px 0"})}
+					contentStyle={E({willChange: "transform"}, withinPage && {marginBottom: -300, paddingBottom: 300})}
 					onScrollEnd={pos=> {
 						UpdateFocusNodeAndViewOffset(map._id);
 					}}>

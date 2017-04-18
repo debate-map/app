@@ -176,7 +176,12 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> 
 						if (props.literal == "GlobalMapPlaceholder") {
 							return (
 								<div style={{margin: "0 -50px", /*height: 500,*/ userSelect: "none"}}>
-									<style>{`.DemoMap * { user-select: none; }`}</style>
+									<style>{`
+									.DemoMap * { user-select: none; }
+									.DemoMap.draggable > .content { cursor: default !important; pointer-events: none; }
+									.DemoMap .MapUI { pointer-events: initial; cursor: grab; cursor: -webkit-grab; cursor: -moz-grab; }
+									.DemoMap.scrollActive .MapUI { cursor: grabbing !important; cursor: -webkit-grabbing !important; cursor: -moz-grabbing !important; }
+									`}</style>
 									<MapUI className="DemoMap" map={demoMap} rootNode={demoRootNode} padding={{left: 200, right: 500, top: 100, bottom: 100}} withinPage={true}>
 										{/*<div style={{position: "absolute", right: "calc(100% + 50px)", top: 0, width: 5000, height: "100%", background: "rgba(0,0,0,.75)"}}/>
 										<div style={{position: "absolute", left: "calc(100% + 50px)", top: 0, width: 5000, height: "100%", background: "rgba(0,0,0,.75)"}}/>*/}
