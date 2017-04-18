@@ -129,6 +129,8 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	}
 
 	ComponentDidMount() {
+		NodeUI.renderCount = 0;
+		NodeUI.lastRenderTime = Date.now();
 		let lastRenderCount = 0;
 		let timer = new Timer(100, ()=> {
 			if (!this.mounted) return timer.Stop();
@@ -153,7 +155,6 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
 		this.LoadScroll();
 		UpdateURL();
-		NodeUI.lastRenderTime = -1; // reset for next load
 	}
 
 	/*PostRender() {
