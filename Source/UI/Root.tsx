@@ -2,6 +2,7 @@ import {VMenuLayer} from "react-vmenu";
 // We only need to import the modules necessary for initial render
 import {PropTypes, Component} from "react";
 import {BaseComponent, AddGlobalStyle} from "../Frame/UI/ReactGlobals";
+import "../Frame/UI/JQueryExtensions";
 //import {Component as BaseComponent} from "react";
 import ScrollView from "react-vscrollview";
 import getMuiTheme from "material-ui/styles/getMuiTheme";

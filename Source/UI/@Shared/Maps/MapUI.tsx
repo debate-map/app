@@ -67,8 +67,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	downPos: Vector2i;
 
 	render() {
-		//let {map, rootNode, focusNode: focusNode_target, viewOffset: viewOffset_target} = this.props;
-		let {map, rootNode, padding, withinPage, children, ...rest} = this.props;
+		let {map, rootNode, padding, withinPage, ...rest} = this.props;
 		if (map == null)
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading map...</div>;
 		Assert(map._id, "map._id is null!");
@@ -126,7 +125,6 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						this.LoadScroll();
 					}}/>*/}
 				</div>
-				{children}
 			</ScrollView>
 		);
 	}
@@ -158,30 +156,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
 		this.LoadScroll();
 		UpdateURL();
-
-		/*let last = new Vector2i(0, 0);
-		let timer = new Timer(50, ()=> {
-			this.SetScroll(last = last.NewX(x=>x < 500 ? x + 3 : 0));
-		}, 3000 / 50).Start();*/
 	}
-
-	/*PostRender() {
-		let {map, rootNode} = this.props;
-		if (map == null || rootNode == null) return;
-		this.StartLoadingScroll();
-	}
-	hasLoadedScroll = false;
-	StartLoadingScroll() {
-		let timer = new Timer(200, ()=> {
-			if (!this.mounted) return timer.Stop();
-			this.LoadScroll();
-			if (this.hasLoadedScroll) {
-				//WaitXThenRun(0, this.LoadScroll, 300); // do it once more, in case of ui late-tweak
-				timer.Stop();
-			}
-		}).Start();
-		WaitXThenRun(10000, ()=>timer.Stop()); // stop trying after 10s
-	}*/
 
 	// load scroll from store
 	LoadScroll() {
@@ -215,45 +190,4 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		/*if (nextPathTry == focusNode_target)
 			this.hasLoadedScroll = true;*/
 	}
-
-	/*cache;
-	SetScroll(scrollPos: Vector2i) {
-		//(this.refs.scrollView as ScrollView).SetScroll(scrollPos);
-		this.cache = this.cache || FindDOM(this.refs.scrollView.refs.content);
-		this.cache.scrollLeft = scrollPos.x;
-	}*/
 }
-
-declare global { interface JQuery { ToList(): JQuery[]; }}
-$.fn.ToList = function(this: JQuery) { return this.toArray().map(a=>$(a)); }
-/*declare global { interface JQuery { PositionFrom(referenceControl: JQuery): Vector2i; }}
-//$.fn.positionFrom = function(referenceControl, useCloneToCalculate = false) {
-$.fn.PositionFrom = function(referenceControl) {
-	/*if (useCloneToCalculate) { // 'this' must be descendent of 'referenceControl', for this code to work
-		$(this).attr("positionFrom_temp_controlB", true);
-		//$(this).data("positionFrom_temp_controlB", true);
-		if (!$(this).parents().toArray().Contains(referenceControl[0]))
-			throw new Error("'this' must be descendent of 'referenceControl'.");
-		var referenceControl_clone = referenceControl.clone(true).appendTo("#hiddenTempHolder");
-		var this_clone = referenceControl_clone.find("[positionFrom_temp_controlB]");
-		//var this_clone = referenceControl_clone.find(":data(positionFrom_temp_controlB)");
-		var result = this_clone.positionFrom(referenceControl_clone);
-		referenceControl_clone.remove();
-		$(this).attr("positionFrom_temp_controlB", null);
-		//$(this).data("positionFrom_temp_controlB", null);
-		return result;
-	}*#/
-
-	var offset = $(this).offset();
-	var referenceControlOffset = referenceControl.offset();
-	return new Vector2i(offset.left - referenceControlOffset.left, offset.top - referenceControlOffset.top);
-};*/
-declare global { interface JQuery { GetOffsetRect(): VRect; }}
-$.fn.GetOffsetRect = function(this: JQuery) {
-	return new VRect(this[0].clientLeft, this[0].clientTop, this.outerWidth(), this.outerHeight());
-};
-declare global { interface JQuery { GetScreenRect(): VRect; }}
-$.fn.GetScreenRect = function(this: JQuery) {
-	var clientRect = this[0].getBoundingClientRect();
-	return new VRect(clientRect.left, clientRect.top, clientRect.width, clientRect.height);
-};

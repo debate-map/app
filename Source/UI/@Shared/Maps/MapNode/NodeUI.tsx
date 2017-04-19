@@ -67,10 +67,10 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 		return {
 			path: path || node._id.toString(),
 			// only pass new nodeView when its local-props are different
-			nodeView: CachedTransform({mapID: map._id, path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
+			nodeView: CachedTransform("nodeView_process1", {mapID: map._id, path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
 			// only pass nodeChildren when all are loaded
-			nodeChildren: CachedTransform({nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : childrenPlaceholder),
-			nodeChildren_fillPercents: CachedTransform({nodeID: node._id}, nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
+			nodeChildren: CachedTransform("nodeChildren_process1", {nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : childrenPlaceholder),
+			nodeChildren_fillPercents: CachedTransform("fillPercents_process1", {nodeID: node._id}, nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
 		};
 	});
 })

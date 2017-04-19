@@ -189,26 +189,11 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> 
 									`}</style>
 									
 									<MapUI ref={c=>mapUI = c ? GetInnerComp(c) as any : null} className="DemoMap"
-											map={demoMap} rootNode={demoRootNode} padding={{left: 200, right: 500, top: 100, bottom: 100}} withinPage={true}>
-										{/*<div style={{position: "absolute", right: "calc(100% + 50px)", top: 0, width: 5000, height: "100%", background: "rgba(0,0,0,.75)"}}/>
-										<div style={{position: "absolute", left: "calc(100% + 50px)", top: 0, width: 5000, height: "100%", background: "rgba(0,0,0,.75)"}}/>*/}
-									</MapUI>
-									{/*<div ref={c=>test2 = c} className="hideScrollbar" style={{
-										position: "absolute", left: 0, right: 0, top: 0, bottom: "50%",
-										overflowX: "scroll",
-										webkitOverflowScrolling: "touch",
-										background: "linear-gradient(to right, red, green)",
-										willChange: "transform", touchAction: "pan-x pinch-zoom", 
-									}}
-										onScroll={e=>(test as MapUI).SetScroll(new Vector2i(test2.scrollLeft, test2.scrollTop))}>
-										<div style={{width: 3000, height: 3000, background: "linear-gradient(to right, yellow, blue)"}}/>
-									</div>*/}
+										map={demoMap} rootNode={demoRootNode} padding={{left: 200, right: 500, top: 100, bottom: 100}} withinPage={true}/>
 									<div className="in" style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}
-										onMouseEnter={()=>root.removeClass("below")}
-										onTouchStart={()=>root.removeClass("below")}/>
+										onMouseEnter={()=>root.removeClass("below")} onTouchStart={()=>root.removeClass("below")}/>
 									<div className="below" style={{position: "absolute", left: 0, right: 0, top: "100%", height: 300}}
-										onMouseEnter={()=>root.addClass("below")}
-										onTouchStart={()=>root.addClass("below")}/>
+										onMouseEnter={()=>root.addClass("below")} onTouchStart={()=>root.addClass("below")}/>
 								</div>
 							);
 						}

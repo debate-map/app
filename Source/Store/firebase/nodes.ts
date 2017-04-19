@@ -31,7 +31,7 @@ export function GetNodeChildren(node: MapNode) {
 	}
 
 	let children = (node.children || {}).VKeys().Except("_key").map(id=>GetNode(parseInt(id)));
-	return CachedTransform({nodeID: node._id}, children, ()=>children);
+	return CachedTransform("GetNodeChildren", {nodeID: node._id}, children, ()=>children);
 }
 
 export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNode) {

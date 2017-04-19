@@ -37,7 +37,7 @@ let storages = {} as {[storageKey: string]: Storage<any, any>};
  * @param dynamicProps Can be either an object or array.
  * @param transformFunc The data-transformer. Whenever a dynamic-prop changes, this will be called, and the new result will be cached.
  */
-export function CachedTransform<T, T2, T3>(staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3): T3;
+/*export function CachedTransform<T, T2, T3>(staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3): T3;
 export function CachedTransform<T, T2, T3>(transformType: string, staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3): T3;
 export function CachedTransform<T, T2, T3>(...args) {
 	let transformType: string, staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3;
@@ -48,8 +48,15 @@ export function CachedTransform<T, T2, T3>(...args) {
 		//transformType = (()=>{try {throw new Error();}catch(ex) {return ex.stack.split("\n")[3];}})(); // for ie
 	} else {
 		[transformType, staticProps, dynamicProps, transformFunc] = args;
-	}
+	}*/
 
+/**
+ * @param transformType The name of the transformation; usually a function-name like "GetSomeThing", or "connectProp_processX". (used, along with static-props, to form a "storage key", where cache is checked for and stored)
+ * @param staticProps Can be either an object or array.
+ * @param dynamicProps Can be either an object or array.
+ * @param transformFunc The data-transformer. Whenever a dynamic-prop changes, this will be called, and the new result will be cached.
+ */
+export function CachedTransform<T, T2, T3>(transformType: string, staticProps: T, dynamicProps: T2, transformFunc: (staticProps: T, dynamicProps: T2)=>T3): T3 {
 	let storageKey = transformType + "|" + JSON.stringify(staticProps);
 	let storage = storages[storageKey] as Storage<T2, T3> || (storages[storageKey] = new Storage<T2, T3>());
 	if (!shallowEqual(dynamicProps, storage.lastDynamicProps)) {

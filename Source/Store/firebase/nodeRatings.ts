@@ -21,7 +21,7 @@ export function GetRatings(nodeID: number, ratingType: RatingType): Rating[] {
 	/*if (ratingType == "strength")
 		return GetArgumentStrengthPseudoRatings(GetNodeChildren(GetNode(nodeID)));*/
 	let ratingSet = GetRatingSet(nodeID, ratingType);
-	return CachedTransform({nodeID, ratingType}, {ratingSet},
+	return CachedTransform("GetRatings", {nodeID, ratingType}, {ratingSet},
 		()=>ratingSet ? ratingSet.VValues(true) as Rating[] : []);
 }
 export function GetRating(nodeID: number, ratingType: RatingType, userID: string) {
@@ -39,7 +39,7 @@ export function GetRatingAverage(nodeID: number, ratingType: RatingType, ratings
 		return 100;
 	ratings = ratings || GetRatings(nodeID, ratingType);
 	if (ratings.length == 0) return resultIfNoData as any;
-	return CachedTransform({nodeID, ratingType}, {ratings}, ()=>ratings.map(a=>a.value).Average().RoundTo(1));
+	return CachedTransform("GetRatingAverage", {nodeID, ratingType}, {ratings}, ()=>ratings.map(a=>a.value).Average().RoundTo(1));
 }
 
 /*export function GetPaths_MainRatingSet(node: MapNode) {
