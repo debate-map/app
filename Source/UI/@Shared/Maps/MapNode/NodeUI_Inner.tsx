@@ -72,7 +72,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						display: "flex", position: "relative", borderRadius: 5, cursor: "default",
 						boxShadow: `rgba(0,0,0,1) 0px 0px 2px`, width, minWidth: widthOverride,
 					}}
-					onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})}
+					onMouseEnter={()=>$(".scrolling").length == 0 && this.SetState({hovered: true})}
+					onMouseLeave={()=>this.SetState({hovered: false})}
 					onClick={e=> {
 						if ((e.nativeEvent as any).ignore) return;
 						if (nodeView == null || !nodeView.selected)

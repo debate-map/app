@@ -1,5 +1,5 @@
 import {GetFocusNode, GetViewOffset, GetSelectedNodePath, GetNodeView} from "../../../Store/main/mapViews";
-import {BaseComponent, FindDOM, FindReact} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, FindDOM, FindReact, FindDOM_} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
 import {connect} from "react-redux";
@@ -75,7 +75,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading root node...</div>;
 		return (
 			<ScrollView {...rest} ref="scrollView"
-					backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.content}
+					backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.mapUI}
 					style={E(withinPage && {overflow: "visible"})}
 					scrollHBarStyle={E(withinPage && {zIndex: 0})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
 					contentStyle={E({willChange: "transform"}, withinPage && {marginBottom: -300, paddingBottom: 300})}
@@ -88,27 +88,23 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 				<style>{`
 				.MapUI { display: inline-flex; writing-mode: vertical-lr; flex-wrap: wrap; }
 				.MapUI > * { writing-mode: horizontal-tb; }
-				/*.MapUI > :first-child:after {
-					content: ".";
-					font-size: 0;
-					opacity: 0;
-					visibility: hidden;
-					display: block;
-					height: ${padding.bottom}px;
-					/*width: 100%;*#/
-					width: 0;
-					margin-right: ${padding.right}px;
-					pointer-events: none;
-				}*/
+				.MapUI.scrolling > * { pointer-events: none; }
 				`}</style>
-				<div className="MapUI" ref="content"
+				<div className="MapUI" ref="mapUI"
 						style={{
 							position: "relative", /*display: "flex",*/ padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`, whiteSpace: "nowrap",
 							filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))",
 						}}
-						onMouseDown={e=>this.downPos = new Vector2i(e.clientX, e.clientY)}
+						onMouseDown={e=>{
+							this.downPos = new Vector2i(e.clientX, e.clientY);
+							if (e.button == 1)
+								FindDOM_(this.refs.mapUI).addClass("scrolling");
+						}}
+						onMouseUp={e=> {
+							FindDOM_(this.refs.mapUI).removeClass("scrolling");
+						}}
 						onClick={e=> {
-							if (e.target != this.refs.content) return;
+							if (e.target != this.refs.mapUI) return;
 							if (new Vector2i(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
 							let mapView = store.getState().main.mapViews[store.getState().main.openMap];
 							if (GetSelectedNodePath(map._id)) {

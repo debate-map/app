@@ -156,7 +156,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					}}>
 						{svgInfo.mainBoxOffset &&
 							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
-								childNodes={upChildPacks.concat(downChildPacks).map(a=>a.node)} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
+								childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
 						<div ref="upChildHolder" className="upChildHolder clickThrough" style={{display: "flex", flexDirection: "column"}}>
 							{upChildPacks.map(a=>a.ui)}
 						</div>
