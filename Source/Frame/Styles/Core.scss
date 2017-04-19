@@ -89,6 +89,8 @@
 	.clickThroughChain { pointer-events: none; }
 	.clickThroughChain-break { pointer-events: auto; }
 
+	.hideScrollbar::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
+
 	.recharts-cartesian-axis-tick { font-size: 12px; }
 	#recharts_measurement_span { font-size: 12px; }
 

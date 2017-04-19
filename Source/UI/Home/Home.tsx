@@ -2,7 +2,7 @@ import {Connect} from "../../Frame/Database/FirebaseConnect";
 import {DeepGet} from "../../Frame/V/V";
 import {SubNavBarButton} from "../@Shared/SubNavBar";
 import SubNavBar from "../@Shared/SubNavBar";
-import {BaseComponent, SimpleShouldUpdate} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, SimpleShouldUpdate, GetInnerComp, FindDOM_} from "../../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import {styles} from "../../Frame/UI/GlobalStyles";
 import ScrollView from "react-vscrollview";
@@ -18,6 +18,7 @@ import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {MapView} from "../../Store/main/mapViews/@MapViews";
 import {GetNode} from "../../Store/firebase/nodes";
+import {Vector2i} from "../../Frame/General/VectorStructs";
 
 let pageText = `
 The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced
@@ -174,18 +175,40 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> 
 					},
 					Text: props=> {
 						if (props.literal == "GlobalMapPlaceholder") {
+							let root, mapUI: MapUI, test2;
 							return (
-								<div style={{margin: "0 -50px", /*height: 500,*/ userSelect: "none"}}>
+								<div ref={c=>root = FindDOM_(c)} style={{margin: "0 -50px", /*height: 500,*/ userSelect: "none", position: "relative"}}>
 									<style>{`
 									.DemoMap * { user-select: none; }
-									.DemoMap.draggable > .content { cursor: default !important; pointer-events: none; }
-									.DemoMap .MapUI { pointer-events: initial; cursor: grab; cursor: -webkit-grab; cursor: -moz-grab; }
-									.DemoMap.scrollActive .MapUI { cursor: grabbing !important; cursor: -webkit-grabbing !important; cursor: -moz-grabbing !important; }
+									.DemoMap.draggable > .content { cursor: default !important; /*pointer-events: none;*/ }
+									:not(.below) > .in { display: none; }
+									.below > .below { display: none; }
+									.below .content { pointer-events: none; }
+									.DemoMap.draggable .MapUI { pointer-events: initial; cursor: grab; cursor: -webkit-grab; cursor: -moz-grab; }
+									.DemoMap.draggable.scrollActive .MapUI { cursor: grabbing !important; cursor: -webkit-grabbing !important; cursor: -moz-grabbing !important; }
 									`}</style>
-									<MapUI className="DemoMap" map={demoMap} rootNode={demoRootNode} padding={{left: 200, right: 500, top: 100, bottom: 100}} withinPage={true}>
+									
+									<MapUI ref={c=>mapUI = c ? GetInnerComp(c) as any : null} className="DemoMap"
+											map={demoMap} rootNode={demoRootNode} padding={{left: 200, right: 500, top: 100, bottom: 100}} withinPage={true}>
 										{/*<div style={{position: "absolute", right: "calc(100% + 50px)", top: 0, width: 5000, height: "100%", background: "rgba(0,0,0,.75)"}}/>
 										<div style={{position: "absolute", left: "calc(100% + 50px)", top: 0, width: 5000, height: "100%", background: "rgba(0,0,0,.75)"}}/>*/}
 									</MapUI>
+									{/*<div ref={c=>test2 = c} className="hideScrollbar" style={{
+										position: "absolute", left: 0, right: 0, top: 0, bottom: "50%",
+										overflowX: "scroll",
+										webkitOverflowScrolling: "touch",
+										background: "linear-gradient(to right, red, green)",
+										willChange: "transform", touchAction: "pan-x pinch-zoom", 
+									}}
+										onScroll={e=>(test as MapUI).SetScroll(new Vector2i(test2.scrollLeft, test2.scrollTop))}>
+										<div style={{width: 3000, height: 3000, background: "linear-gradient(to right, yellow, blue)"}}/>
+									</div>*/}
+									<div className="in" style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}
+										onMouseEnter={()=>root.removeClass("below")}
+										onTouchStart={()=>root.removeClass("below")}/>
+									<div className="below" style={{position: "absolute", left: 0, right: 0, top: "100%", height: 300}}
+										onMouseEnter={()=>root.addClass("below")}
+										onTouchStart={()=>root.addClass("below")}/>
 								</div>
 							);
 						}

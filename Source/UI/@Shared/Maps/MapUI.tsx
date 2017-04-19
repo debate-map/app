@@ -80,7 +80,10 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					style={E(withinPage && {overflow: "visible"})}
 					scrollHBarStyle={E(withinPage && {zIndex: 0})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
 					contentStyle={E({willChange: "transform"}, withinPage && {marginBottom: -300, paddingBottom: 300})}
+					//contentStyle={E({willChange: "transform"}, withinPage && {marginTop: -300, paddingBottom: 300, transform: "translateY(300px)"})}
+					//bufferScrollEventsBy={10000}
 					onScrollEnd={pos=> {
+						if (withinPage) return;
 						UpdateFocusNodeAndViewOffset(map._id);
 					}}>
 				<style>{`
@@ -155,6 +158,11 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
 		this.LoadScroll();
 		UpdateURL();
+
+		/*let last = new Vector2i(0, 0);
+		let timer = new Timer(50, ()=> {
+			this.SetScroll(last = last.NewX(x=>x < 500 ? x + 3 : 0));
+		}, 3000 / 50).Start();*/
 	}
 
 	/*PostRender() {
@@ -207,6 +215,13 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		/*if (nextPathTry == focusNode_target)
 			this.hasLoadedScroll = true;*/
 	}
+
+	/*cache;
+	SetScroll(scrollPos: Vector2i) {
+		//(this.refs.scrollView as ScrollView).SetScroll(scrollPos);
+		this.cache = this.cache || FindDOM(this.refs.scrollView.refs.content);
+		this.cache.scrollLeft = scrollPos.x;
+	}*/
 }
 
 declare global { interface JQuery { ToList(): JQuery[]; }}
