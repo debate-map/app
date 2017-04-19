@@ -18,7 +18,7 @@ import {MapViewsReducer} from "./main/mapViews";
 import {RatingUIReducer, RatingUIState} from "./main/ratingUI";
 import NotificationMessage from "./main/@NotificationMessage";
 import {GetPathNodes} from "./router";
-import {GetUrlVars} from "../Frame/General/URLs";
+import {GetUrlVars, URL} from "../Frame/General/URLs";
 
 // class is used only for initialization
 export class MainState {
@@ -48,15 +48,16 @@ export function MainReducer(state, action) {
 			return null;
 		},*/
 		envOverride: (state = null, action)=> {
-			//if ((action.type == "@@INIT" || action.type == "persist/REHYDRATE") && startURL.GetQueryVar("env")) {
-			if ((action.type == "PostRehydrate") && startURL.GetQueryVar("env"))
-				return startURL.GetQueryVar("env") == "null" ? null : startURL.GetQueryVar("env");
+			//if ((action.type == "@@INIT" || action.type == "persist/REHYDRATE") && startURL.GetQueryVar("env"))
+			//if ((action.type == "PostRehydrate") && startURL.GetQueryVar("env"))
+			if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).GetQueryVar("env"))
+				return URL.FromState(action.payload).GetQueryVar("env");
 			return state;
 		},
 		analyticsEnabled: (state = true, action)=> {
-			if (action.type == "@@router/LOCATION_CHANGE" && action.payload.search.Contains("analytics=false"))
+			if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).GetQueryVar("analytics") == "false")
 				return false;
-			if (action.type == "@@router/LOCATION_CHANGE" && action.payload.search.Contains("analytics=true"))
+			if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).GetQueryVar("analytics") == "true")
 				return true;
 			return state;
 		},

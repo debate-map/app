@@ -94,7 +94,7 @@ export default function(initialState = {}, history) {
 		transforms: [
 			createBlacklistFilter("main", ["notificationMessages"])
 		]
-	});
+	}, ()=>g.storeRehydrated = true);
 	if (GetUrlVars().clearState)
 		persister.purge();
 

@@ -41,13 +41,31 @@ import ProfileUI from "./Profile";
 import {GetPathNodes} from "../Store/router";
 import ReactGA from "react-ga";
 import {P} from "../Frame/Serialization/VDF/VDFTypeInfo";
+import {persistStore} from "redux-persist";
+import {createBlacklistFilter} from "redux-persist-transform-filter";
+import {GetUrlVars} from "../Frame/General/URLs";
 
 // Create a history of your choosing (we're using a browser history in this case)
 const history = createBrowserHistory();
 
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {
+	ComponentWillMount() {
+		let startVal = g.storeRehydrated;
+		// wrap storeRehydrated property, so we know when it's set (from CreateStore.ts callback)
+		(g as Object)._AddGetterSetter("storeRehydrated",
+			()=>g.storeRehydrated_,
+			val=> {
+				g.storeRehydrated_ = val;
+				this.Update();
+			});
+		// trigger setter right now (in case value is already true)
+		g.storeRehydrated = startVal;
+	}
+
 	render() {
 		let {store} = this.props;
+		if (!g.storeRehydrated) return <div/>;
+
 		return (
 			<Provider store={store}>
 				<Router history={history}>
