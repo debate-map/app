@@ -19,6 +19,7 @@ import {RatingUIReducer, RatingUIState} from "./main/ratingUI";
 import NotificationMessage from "./main/@NotificationMessage";
 import {GetPathNodes} from "./router";
 import {GetUrlVars, URL} from "../Frame/General/URLs";
+import {Global} from "../Frame/General/Globals_Free";
 
 // class is used only for initialization
 export class MainState {
@@ -35,6 +36,7 @@ export class MainState {
 }
 export class ACTTopLeftOpenPanelSet extends Action<string> {}
 export class ACTTopRightOpenPanelSet extends Action<string> {}
+@Global
 export class ACTNotificationMessageAdd extends Action<NotificationMessage> {}
 export class ACTNotificationMessageRemove extends Action<number> {}
 //export class ACTOpenMapSet extends Action<number> {}

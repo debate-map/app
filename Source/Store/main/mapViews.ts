@@ -57,8 +57,8 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 		}
 	}
 
-	for (let key in state) {
-		newState[key] = MapViewReducer(state[key], action, parseInt(key));
+	for (let key in newState) {
+		newState[key] = MapViewReducer(newState[key], action, parseInt(key));
 	}
 	return ShallowChanged(newState, state) ? newState : state;
 }

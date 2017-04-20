@@ -1,3 +1,6 @@
+import {Global} from "../../Frame/General/Globals_Free";
+
+@Global
 export default class NotificationMessage {
 	static lastID = -1;
 	
