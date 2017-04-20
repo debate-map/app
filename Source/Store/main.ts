@@ -81,7 +81,7 @@ export function MainReducer(state, action) {
 			return state;
 		},
 		openMap: (state = null, action)=> {
-			if (action.type == "@@router/LOCATION_CHANGE" && GetPathNodes(action.payload.pathname.substr(1))[0] == "global")
+			if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).pathNodes[0] == "global")
 				return 1;
 			/*if (action.Is(ACTOpenMapSet))
 				return action.payload;*/

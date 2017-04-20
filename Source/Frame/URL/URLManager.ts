@@ -118,7 +118,7 @@ export function LoadURL(url: string) {
 	let mapView = ParseMapView(mapViewStr);
 
 	//Log("Loading map-view:" + ToJSON(mapView));
-	store.dispatch(new ACTMapViewMerge({mapView}));
+	store.dispatch(new ACTMapViewMerge({mapID: 1, mapView}));
 }
 
 // saving

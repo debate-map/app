@@ -12,6 +12,7 @@ import {MapViewReducer, ACTMapViewMerge} from "./mapViews/$mapView";
 import {ShallowChanged} from "../../Frame/UI/ReactGlobals";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 import {DemoMap_mapView} from "../../UI/Home/Home";
+import {URL} from "../../Frame/General/URLs";
 
 export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 	/*if (action.Is(ACTOpenMapSet))
@@ -37,6 +38,22 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 					}
 				};
 			}
+		}
+	}
+	/*if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).pathNodes[0] == "global") {
+		let mapID = 1, rootNode = 1;
+		// if no map-view exists for it yet, create one (by expanding root-node, and changing focus-node/view-offset)
+		if (newState[mapID] == null) {
+			newState[mapID] = {
+				rootNodeViews: {
+					[rootNode]: new MapNodeView().VSet({expanded: true, focus: true, viewOffset: new Vector2i(200, 0)})
+				}
+			};
+		}
+	}*/
+	if (action.Is(ACTMapViewMerge)) {
+		if (newState[action.payload.mapID] == null) {
+			newState[action.payload.mapID] = action.payload.mapView;
 		}
 	}
 

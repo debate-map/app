@@ -13,10 +13,10 @@ import {DBPath} from "../../../Frame/Database/DatabaseHelpers";
 	rootNodeViews: RootNodeViewsReducer,
 });*/
 
-export class ACTMapViewMerge extends Action<{mapView: MapView}> {}
+export class ACTMapViewMerge extends Action<{mapID: number, mapView: MapView}> {}
 
 export function MapViewReducer(state = {rootNodeViews: {}}, action: Action<any>, mapID: number) {
-	if (action.Is(ACTMapViewMerge)) {
+	if (action.Is(ACTMapViewMerge) && action.payload.mapID == mapID) {
 		let newState = state;
 		let updatePrimitiveTreeNodes = GetTreeNodesInObjTree(action.payload.mapView).Where(a=>IsPrimitive(a.Value) || a.Value == null);
 		for (let updatedNode of updatePrimitiveTreeNodes)
