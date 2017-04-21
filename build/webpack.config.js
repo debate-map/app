@@ -65,7 +65,9 @@ webpackConfig.output = {
 // Plugins
 // ==========
 
-//let ExposeRequirePlugin = require("webpack-expose-require-plugin");
+//let ExposeRequirePlugin = require("webpack-expose-require-plugin");\
+var HappyPack = require('happypack');
+
 webpackConfig.plugins = [
 	// Plugin to show any webpack warnings and prevent tests from running
 	function() {
@@ -98,6 +100,12 @@ webpackConfig.plugins = [
 		level: "dependency", // "all", "dependency", "application" 
 		pathPrefix: "Source", // in case if your source is not placed in root folder. 
 	}),*/
+
+	new HappyPack({
+		// loaders is the only required parameter:
+		//loaders: [ 'babel?presets[]=es2015' ],
+		loaders: ["babel"],
+	}),
 
 	new webpack.DllReferencePlugin({
 		context: path.join(__dirname, "Source"),
@@ -149,7 +157,9 @@ webpackConfig.module.loaders = [
 		test: USE_TSLOADER ? /\.(jsx?|tsx?)$/ : /\.jsx?$/,
 		//exclude: [/node_modules/, /react-redux-firebase/],
 		include: [paths.client()],
-		loader: "babel",
+		//loader: "babel",
+		//loaders: ["happypack/loader"],
+		loader: "happypack/loader",
 		query: config.compiler_babel
 	},
 	{

@@ -10,3 +10,4 @@ coverage
 /Source/BakedConfig_Prod.ts
 /dist
 /Source_JS
+/.happypack
