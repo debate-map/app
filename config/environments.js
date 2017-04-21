@@ -1,4 +1,4 @@
-let {DBPath} = require("./DBVersion");
+let {DBPath} = require("../Source/DBVersion");
 
 // todo: pms this stuff is just moved to runtime code
 

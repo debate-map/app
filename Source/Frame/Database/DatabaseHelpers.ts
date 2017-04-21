@@ -1,7 +1,8 @@
 import {RequestPath, Connect} from "./FirebaseConnect";
 import {Assert} from "../General/Assert";
 import {helpers, firebaseConnect} from "react-redux-firebase";
-import {DBPath as DBPath_} from "../../../config/DBVersion";
+//import {DBPath as DBPath_} from "../../../config/DBVersion";
+import {DBPath as DBPath_} from "../../DBVersion";
 import {IsString} from "../General/Types";
 import {FirebaseApplication, DataSnapshot} from "firebase";
 import {BaseComponent} from "../UI/ReactGlobals";

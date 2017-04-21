@@ -31,10 +31,11 @@ if (config.env === "development") {
 	app.use(require("webpack-hot-middleware")(compiler));
 
 	// Serve static assets from ~/Source/Resources since Webpack is unaware of
-	// these files. This middleware doesn"t need to be enabled outside
+	// these files. This middleware doesn't need to be enabled outside
 	// of development since this directory will be copied into ~/dist
 	// when the application is compiled.
-	app.use(express.static(paths.client("Resources")));
+	//app.use(express.static(paths.client("Resources")));
+	app.use(express.static(paths.base("Resources")));
 } else {
 	debug(
 		"Server is being run outside of live development mode, meaning it will " +

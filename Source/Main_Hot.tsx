@@ -17,6 +17,8 @@ declare global { var State: ()=>RootState; }
 function State() { return store.getState(); }
 g.Extend({State});
 
+//setTimeout(()=> {
 const mountNode = document.getElementById("root");
 let RootUIWrapper = require("./UI/Root").default;
 ReactDOM.render(<RootUIWrapper store={store}/>, mountNode);
+//});

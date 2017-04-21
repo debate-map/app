@@ -1,4 +1,4 @@
-import Action from "../../../Source/Frame/General/Action";
+import Action from "../../Frame/General/Action";
 import {RootState} from "../index";
 
 export class RatingUIState {

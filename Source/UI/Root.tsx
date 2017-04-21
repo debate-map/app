@@ -9,7 +9,8 @@ import getMuiTheme from "material-ui/styles/getMuiTheme";
 // Themeing/Styling
 import Theme from "../theme";
 
-import "../Frame/Styles/Core.scss";
+//import "../Frame/Styles/Core.scss";
+import "../../Source/Frame/Styles/Core.scss";
 //import "../Frame/Styles/bootstrap/bootstrap.scss";
 
 //import {BrowserRouter as Router, Route, browserHistory} from "react-router-dom";

@@ -9,3 +9,4 @@ coverage
 /Source/BakedConfig_Dev.ts
 /Source/BakedConfig_Prod.ts
 /dist
+/Source_JS

@@ -3,13 +3,16 @@
 		// general
         "sourceMap": true,
 		"watch": true,
-		//"outDir": "Build",
+		"outDir": "Source_JS",
 
 		// modules/paths
 		"moduleResolution": "node",
 		//"maxNodeModulesJsDepth": 1,
-        "rootDir": ".",
+        //"rootDir": ".",
+        "rootDir": "Source",
 		"baseUrl": ".",
+		/*"rootDir": "Source",
+		"baseUrl": "Source",*/
 		"paths": {
 			"*": [
 				"node_modules/@types/*", // prefer "/node_modules/@types" over "/node_modules/[something]/node_modules/@types" (eg, when using npm link)

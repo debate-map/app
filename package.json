@@ -26,6 +26,8 @@
     "just-deploy-prod": "firebase deploy -P prod",
     "deploy-dev": "better-npm-run deploy-dev",
     "deploy-prod": "better-npm-run deploy-prod",
+    "quick-deploy-dev": "better-npm-run quick-deploy-dev",
+    "quick-deploy-prod": "better-npm-run quick-deploy-prod",
     "@build-stats": "node_modules\\.bin\\webpack --config build/webpack.config.js --output-file ForStats/Bundle.js --profile --json > BuildStats.json",
     "build-stats": "node_modules\\.bin\\webpack --config build/webpack.config.js --output-file ForStats/Bundle.js --profile --json > dist/ForStats/BuildStats.json"
   },
@@ -76,24 +78,43 @@
       }
     },
     "dev": {
-      "command": "npm run create-config & nodemon bin/server --ignore dist --ignore coverage --ignore Tests --ignore Source",
+      "command": "npm run create-config && nodemon bin/server --ignore dist --ignore coverage --ignore Tests --ignore Source",
       "env": {
         "NODE_ENV": "development",
-        "DEBUG": "app:*"
+        "DEBUG": "app:*",
+		"USE_TSLOADER": "true"
       }
     },
+	
     "deploy-dev": {
-      "command": "npm run create-config & npm run build & npm run just-deploy-dev",
+      "command": "npm run create-config && npm run build && npm run just-deploy-dev",
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*"
       }
     },
     "deploy-prod": {
-      "command": "npm run create-config & npm run build & npm run just-deploy-prod",
+      "command": "npm run create-config && npm run build && npm run just-deploy-prod",
       "env": {
         "NODE_ENV": "production",
         "DEBUG": "app:*"
+      }
+    },
+
+	"quick-deploy-dev": {
+      "command": "npm run create-config && npm run build && npm run just-deploy-dev",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "app:*",
+		"QUICK_DEPLOY": "true"
+      }
+    },
+	"quick-deploy-prod": {
+      "command": "npm run create-config && npm run build && npm run just-deploy-prod",
+      "env": {
+        "NODE_ENV": "production",
+        "DEBUG": "app:*",
+		"QUICK_DEPLOY": "true"
       }
     }
   },

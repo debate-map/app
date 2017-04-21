@@ -8,6 +8,7 @@ var path = require("path");
 
 const paths = config.utils_paths;
 const {__DEV__, __PROD__, __TEST__} = config.globals;
+const {QUICK_DEPLOY, USE_TSLOADER} = process.env;
 
 debug("Creating configuration.");
 const webpackConfig = {
@@ -16,7 +17,7 @@ const webpackConfig = {
 	devtool: config.compiler_devtool,
 	resolve: {
 		root: paths.client(),
-		extensions: ["", ".js", ".jsx", ".ts", ".tsx", ".json"],
+		extensions: ["", ".js", ".jsx", ".json"].concat(USE_TSLOADER ? [".ts", ".tsx"] : []),
 		fallback: [path.join(__dirname, "node_modules")],
 		alias: {
             //"react": __dirname + "/node_modules/react/",
@@ -35,7 +36,7 @@ const webpackConfig = {
 // Entry Points
 // ==========
 
-const APP_ENTRY = paths.client("Main.tsx");
+const APP_ENTRY = paths.client(USE_TSLOADER ? "Main.tsx" : "Main.js");
 
 webpackConfig.entry = {
 	app: __DEV__
@@ -77,7 +78,8 @@ webpackConfig.plugins = [
 	},
 	new webpack.DefinePlugin(config.globals),
 	new HtmlWebpackPlugin({
-		template: paths.client("index.html"),
+		//template: paths.client("index.html"),
+		template: paths.base("Source/index.html"),
 		hash: false,
 		// favicon: paths.client("Resources/favicon.ico"), // for including single favicon
 		filename: "index.html",
@@ -98,7 +100,7 @@ if (__DEV__) {
 		new webpack.HotModuleReplacementPlugin(),
 		new webpack.NoErrorsPlugin()
 	)
-} else if (__PROD__) {
+} else if (__PROD__ && !QUICK_DEPLOY) {
 	debug("Enable plugins for production (OccurenceOrder, Dedupe & UglifyJS).")
 	webpackConfig.plugins.push(
 		new webpack.optimize.OccurrenceOrderPlugin(),
@@ -132,17 +134,18 @@ if (!__TEST__) {
 // JavaScript / JSON
 webpackConfig.module.loaders = [
 	{
-		test: /\.(jsx?|tsx?)$/,
+		test: USE_TSLOADER ? /\.(jsx?|tsx?)$/ : /\.jsx?$/,
 		exclude: [/node_modules/, /react-redux-firebase/],
 		loader: "babel",
 		query: config.compiler_babel
 	},
-	{test: /\.tsx?$/, loader: "ts-loader"},
 	{
 		test: /\.json$/,
 		loader: "json"
 	},
-]
+];
+if (USE_TSLOADER)
+	webpackConfig.module.loaders.push({test: /\.tsx?$/, loader: "ts-loader"});
 
 // Style Loaders
 // ==========

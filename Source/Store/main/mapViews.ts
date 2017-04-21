@@ -5,7 +5,7 @@ import {GetTreeNodesInObjTree, GetTreeNodesInPath, VisitTreeNodesInPath, TreeNod
 import {IsNumberString} from "../../Frame/General/Types";
 import {A, Assert} from "../../Frame/General/Assert";
 import {MapViews, MapView, MapNodeView} from "./mapViews/@MapViews";
-import {ToInt} from "../../../Source/Frame/General/Types";
+import {ToInt} from "../../Frame/General/Types";
 import {GetMap, GetRootNodeID} from "../firebase/maps";
 import u from "updeep";
 import {MapViewReducer, ACTMapViewMerge} from "./mapViews/$mapView";

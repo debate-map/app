@@ -1,4 +1,5 @@
 // "static" imports
+import "babel-polyfill";
 import "webpack-runtime-require";
 //import {Require} from "webpack-runtime-require";
 import "./Frame/General/EarlyStart";
@@ -17,7 +18,7 @@ import * as React from "react";
 // startup (non-hot)
 // ==========
 
-var JQuery = require("./Frame/JQuery/JQuery3.1.0");
+import JQuery from "./Frame/JQuery/JQuery3.1.0";
 g.Extend({JQuery, jQuery: JQuery});
 g.$ = JQuery;
 

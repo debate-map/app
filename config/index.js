@@ -5,32 +5,31 @@ const argv = require("yargs").argv
 const ip = require("ip")
 const environments = require("./environments");
 
+const {NODE_ENV, PORT, USE_TSLOADER, BASENAME} = process.env;
+
 debug("Creating default configuration.")
 
 // Default Configuration
 // ==========
 
 const config = {
-	env: process.env.NODE_ENV || "development",
+	env: NODE_ENV || "development",
 
-	// ----------------------------------
 	// Project Structure
-	// ----------------------------------
+	// ----------
 	path_base  : path.resolve(__dirname, ".."),
-	dir_client : "Source",
+	dir_client : USE_TSLOADER ? "Source" : "Source_JS",
 	dir_dist   : "dist",
 	dir_server : "Server",
 	dir_test   : "Tests",
 
-	// ----------------------------------
 	// Server Configuration
-	// ----------------------------------
+	// ----------
 	server_host: ip.address(), // use string "localhost" to prevent exposure on local network
-	server_port: process.env.PORT || 3000,
+	server_port: PORT || 3000,
 
-	// ----------------------------------
 	// Compiler Configuration
-	// ----------------------------------
+	// ----------
 	compiler_babel: {
 		cacheDirectory : true,
 		/*plugins        : ["transform-runtime", "lodash", "transform-decorators-legacy"],
@@ -98,7 +97,7 @@ config.globals = {
 	"__PROD__": config.env == "production",
 	"__TEST__": config.env == "test",
 	"__COVERAGE__": !argv.watch && config.env === "test",
-	"__BASENAME__": JSON.stringify(process.env.BASENAME || "")
+	"__BASENAME__": JSON.stringify(BASENAME || "")
 }
 
 // Validate Vendor Dependencies
