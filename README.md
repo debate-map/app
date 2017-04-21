@@ -49,6 +49,8 @@ Note that I haven't actually verified the project works on a fresh clone, so if 
 1) Run `npm run dev` in the root project folder.
 2) Navigate to `localhost:3000`.
 
+Note that if you add/remove/modify any modules required from `config/Vendors.js`, you'll then need to run `npm run create-vendors`. (those modules are compiled separately, to speed up the main compile process)
+
 ### Deploying to Firebase
 
 1) Run `tsc` in a console, and keep it running in the background. (this reduces quick-deploy compile times from ~59s to ~32s, by enabling incremental compilation)
