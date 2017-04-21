@@ -140,13 +140,14 @@ if (__DEV__) {
 }
 
 // Don't split bundles during testing, since we only want import one bundle
-/*if (!__TEST__) {
+if (!__TEST__) {
 	webpackConfig.plugins.push(
+		// maybe temp; the only reason we keep this for now, is because it makes the webpackJsonp function available (used in webpack-runtime-require)
 		new webpack.optimize.CommonsChunkPlugin({
 			names: ["vendor"]
 		})
 	)
-}*/
+}
 
 // Loaders
 // ==========

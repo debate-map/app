@@ -162,7 +162,7 @@ export class SourcesUI extends BaseComponent<{quote: QuoteInfo}, {}> {
 			<Column mt={3}>
 				<div style={{color: "rgba(255,255,255,.5)"}}>Sources:</div>
 				{quote.sources.FakeArray_Select(a=>a).map((source, index)=> {
-					return <a href={source} style={{marginLeft: 10, wordBreak: "break-word"}}>{source}</a>;
+					return <a key={index} href={source} style={{marginLeft: 10, wordBreak: "break-word"}}>{source}</a>;
 				})}	
 			</Column>
 		);

@@ -43,6 +43,7 @@
         /*"index.android.js",
         "index.ios.js",*/
         "Build",
+        "Tests",
 		"node_modules",
 
 		// temp
