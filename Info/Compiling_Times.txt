@@ -35,5 +35,6 @@ TSLoader Home change: 6.5s
 ATL-sync-checker start: 37s
 ATL-sync-checker change: 7.5s
 
+Note: drawback with async version is that it doesn't block hmr update, so causes error in browser.
 ATL-async-checker start: 29s
 ATL-async-checker change: 5s
