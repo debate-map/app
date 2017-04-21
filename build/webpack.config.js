@@ -94,12 +94,14 @@ webpackConfig.plugins = [
 	}),*/
 ]
 
+//const {CheckerPlugin} = require('awesome-typescript-loader')
 if (__DEV__) {
 	debug("Enable plugins for live development (HMR, NoErrors).")
 	webpackConfig.plugins.push(
 		new webpack.HotModuleReplacementPlugin(),
-		new webpack.NoErrorsPlugin()
-	)
+		new webpack.NoErrorsPlugin()//,
+		//new CheckerPlugin()
+	);
 } else if (__PROD__ && !QUICK_DEPLOY) {
 	debug("Enable plugins for production (OccurenceOrder, Dedupe & UglifyJS).")
 	webpackConfig.plugins.push(
@@ -145,7 +147,8 @@ webpackConfig.module.loaders = [
 	},
 ];
 if (USE_TSLOADER)
-	webpackConfig.module.loaders.push({test: /\.tsx?$/, loader: "ts-loader"});
+	//webpackConfig.module.loaders.push({test: /\.tsx?$/, loader: "ts-loader"});
+	webpackConfig.module.loaders.push({test: /\.tsx?$/, loader: "awesome-typescript-loader"});
 
 // Style Loaders
 // ==========

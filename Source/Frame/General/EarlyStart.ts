@@ -21,7 +21,7 @@ if (supportedBrowsers.indexOf(browser) == -1) {
 	});
 }
 
-// test1
+// test7
 
 // special, early codes
 Object.freeze = obj=>obj; // mwahahaha!! React can no longer freeze its objects, so we can do as we please

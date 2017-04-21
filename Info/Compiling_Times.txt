@@ -23,3 +23,17 @@ So: full compile seems to slow down initial by 54s.
 IntegratedTypeScript:
 * InitialCompile_Quick: 59-listed? (inferred from other stats -- 32s + 27s)
 * InitialCompile_Full: 113-listed? (inferred from other stats -- 86s + 27s)
+
+
+
+
+TSLoader vs ATL
+==========
+TSLoader start: 57s
+TSLoader Home change: 6.5s
+
+ATL-sync-checker start: 37s
+ATL-sync-checker change: 7.5s
+
+ATL-async-checker start: 29s
+ATL-async-checker change: 5s

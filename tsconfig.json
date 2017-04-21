@@ -30,6 +30,12 @@
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true
     },
+	"awesomeTypescriptLoaderOptions": {
+		"useBabel": true,
+		"useCache": true,
+		"useTranspileModule": true
+		//"transpileOnly": true
+	},
 	"files": ["Source/Main.tsx"],
     "include": [
         "Typings/**/*.d.ts",

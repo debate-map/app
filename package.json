@@ -82,10 +82,9 @@
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*",
-		"USE_TSLOADER": "true"
+        "USE_TSLOADER": "true"
       }
     },
-	
     "deploy-dev": {
       "command": "npm run create-config && npm run build && npm run just-deploy-dev",
       "env": {
@@ -100,21 +99,20 @@
         "DEBUG": "app:*"
       }
     },
-
-	"quick-deploy-dev": {
+    "quick-deploy-dev": {
       "command": "npm run create-config && npm run build && npm run just-deploy-dev",
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*",
-		"QUICK_DEPLOY": "true"
+        "QUICK_DEPLOY": "true"
       }
     },
-	"quick-deploy-prod": {
+    "quick-deploy-prod": {
       "command": "npm run create-config && npm run build && npm run just-deploy-prod",
       "env": {
         "NODE_ENV": "production",
         "DEBUG": "app:*",
-		"QUICK_DEPLOY": "true"
+        "QUICK_DEPLOY": "true"
       }
     }
   },
@@ -172,6 +170,7 @@
     "@types/react-redux": "^4.4.37",
     "@types/react-router": "^3.0.6",
     "@types/react-router-redux": "^5.0.0",
+    "awesome-typescript-loader": "^3.1.2",
     "babel-core": "^6.22.1",
     "babel-eslint": "^7.1.1",
     "babel-loader": "^6.2.10",
