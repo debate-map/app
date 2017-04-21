@@ -36,6 +36,7 @@ if (config.env === "development") {
 	// when the application is compiled.
 	//app.use(express.static(paths.client("Resources")));
 	app.use(express.static(paths.base("Resources")));
+	app.use(express.static(paths.base("config/dist/dll")));
 } else {
 	debug(
 		"Server is being run outside of live development mode, meaning it will " +

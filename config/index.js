@@ -49,7 +49,7 @@ const config = {
 		chunkModules : false,
 		colors : true
 	},
-	compiler_vendors: [
+	/*compiler_vendors: [
 		"react",
 		"react-router",
 		"react-redux",
@@ -67,7 +67,7 @@ const config = {
 		"redux-persist-transform-filter",
 		"reselect",
 		"react-vmenu",
-	],
+	],*/
 
 	compiler_css_modules: true, // enable/disable css modules
 
@@ -105,18 +105,18 @@ config.globals = {
 
 const pkg = require("../package.json")
 
-config.compiler_vendors = config.compiler_vendors
-	.filter((dep) => {
+/*config.compiler_vendors = config.compiler_vendors
+	.filter(dep=> {
 		if (pkg.dependencies[dep]) return true
 
 		debug(`Package "${dep}" was not found as an npm dependency in package.json; it won't be included in the webpack vendor bundle.`
 			+ ` Consider removing it from \`compiler_vendors\` in ~/config/index.js`)
-	})
+	})*/
 
 // Utilities
 // ==========
 
-function base () {
+function base() {
 	const args = [config.path_base].concat([].slice.call(arguments))
 	return path.resolve.apply(path, args)
 }

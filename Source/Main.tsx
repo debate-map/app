@@ -1,6 +1,6 @@
 // "static" imports
 import "babel-polyfill";
-import "webpack-runtime-require";
+//import "webpack-runtime-require"; // temp removed
 //import {Require} from "webpack-runtime-require";
 import "./Frame/General/EarlyStart";
 import "./Frame/General/CE";

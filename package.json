@@ -17,6 +17,7 @@
     "test": "better-npm-run test",
     "test:dev": "npm run test -- --watch",
     "create-config": "better-npm-run create-config",
+    "create-vendors": "better-npm-run create-vendors",
     "build": "better-npm-run build",
     "@build:dev": "better-npm-run build:dev",
     "@build:prod": "better-npm-run build:prod",
@@ -75,6 +76,12 @@
       "command": "node build/create-config",
       "env": {
         "DEBUG": "app:*"
+      }
+    },
+	"create-vendors": {
+      "command": ".\\node_modules\\.bin\\webpack --config=config/Vendors.webpack.js",
+      "env": {
+        "NODE_ENV": "production"
       }
     },
     "dev": {

@@ -21,7 +21,7 @@ import {GetNode} from "../../Store/firebase/nodes";
 import {Vector2i} from "../../Frame/General/VectorStructs";
 
 let pageText = `
-The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced
+The Debate Map (Testing 12345) project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced
 	(like Wikipedia), and the software is open-source (under MIT), promoting collaborative development and increased accountability.<sup>[1](#footnote1)</sup>
 
 There are three types of maps present on this site: personal maps, debate maps, and [the global map](/global).

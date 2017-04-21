@@ -93,9 +93,9 @@ export async function PostDispatchAction(action: Action<any>) {
 			//ReactGA.initialize("UA-21256330-33", {debug: true});
 			ReactGA.initialize("UA-21256330-33");
 
-			let url = URL.FromState(State().router.location).toString(false);
+			/*let url = URL.FromState(State().router.location).toString(false);
 			ReactGA.set({page: url});
-			ReactGA.pageview(url || "/");
+			ReactGA.pageview(url || "/");*/
 		}
 	}
 	if (action.type == "@@router/LOCATION_CHANGE") {

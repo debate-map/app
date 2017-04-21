@@ -42,7 +42,7 @@ webpackConfig.entry = {
 	app: __DEV__
 		? [APP_ENTRY].concat(`webpack-hot-middleware/client?path=${config.compiler_public_path}__webpack_hmr`)
 		: [APP_ENTRY],
-	vendor: config.compiler_vendors
+	//vendor: config.compiler_vendors
 };
 
 // Bundle Output
@@ -92,6 +92,12 @@ webpackConfig.plugins = [
 		level: "dependency", // "all", "dependency", "application" 
 		pathPrefix: "Source", // in case if your source is not placed in root folder. 
 	}),*/
+
+	new webpack.DllReferencePlugin({
+		context: path.join(__dirname, "Source"),
+		//context: paths.base(),
+		manifest: require("../config/dll/vendor-manifest.json")
+	}),
 ]
 
 if (__DEV__) {
@@ -120,13 +126,13 @@ if (__DEV__) {
 }
 
 // Don't split bundles during testing, since we only want import one bundle
-if (!__TEST__) {
+/*if (!__TEST__) {
 	webpackConfig.plugins.push(
 		new webpack.optimize.CommonsChunkPlugin({
 			names: ["vendor"]
 		})
 	)
-}
+}*/
 
 // Loaders
 // ==========
