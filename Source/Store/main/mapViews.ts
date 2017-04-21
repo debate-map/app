@@ -11,7 +11,7 @@ import u from "updeep";
 import {MapViewReducer, ACTMapViewMerge} from "./mapViews/$mapView";
 import {ShallowChanged} from "../../Frame/UI/ReactGlobals";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
-import {DemoMap_mapView} from "../../UI/Home/Home";
+import {CreateDemoMapView} from "../../UI/Home/Home";
 import {URL} from "../../Frame/General/URLs";
 
 export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
@@ -21,8 +21,8 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 	let newState = {...state};
 
 	// if demo map-view not added, add it (I know... this is not the best way... :-| )
-	//if (newState[-100] == null)
-	newState[-100] = DemoMap_mapView;
+	if (newState[-100] == null)
+		newState[-100] = CreateDemoMapView();
 	if (action.type == "@@reactReduxFirebase/SET" && action["data"]) {
 		let match = action["path"].match("^" + DBPath("maps") + "/([0-9]+)");
 		// if map-data was just loaded

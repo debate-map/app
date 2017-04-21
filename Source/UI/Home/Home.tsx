@@ -82,11 +82,13 @@ This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 
 let demoRootNodeID = devEnv ? 1 : 463; // hard-coded for now
 let demoMap = {_id: -100, name: "Demo", type: MapType.Personal, rootNode: demoRootNodeID} as Map;
-export var DemoMap_mapView: MapView = {rootNodeViews: {
-	[demoRootNodeID]: {
-		expanded: true,
-	}
-}};
+export function CreateDemoMapView(): MapView {
+	return {rootNodeViews: {
+		[demoRootNodeID]: {
+			expanded: true,
+		}
+	}};
+}
 
 /*if (devEnv) {
 	demoMap = {_id: -100, name: "Demo", type: MapType.Personal, rootNode: -101} as Map;
