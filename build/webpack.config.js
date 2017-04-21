@@ -33,6 +33,12 @@ const webpackConfig = {
 	module: {}
 };
 
+if (__PROD__) {
+	webpackConfig.module.preLoaders = [
+		{test: /\.jsx?$/, loader: "source-map", exclude: /react-hot-loader/}
+	];
+}
+
 // Entry Points
 // ==========
 
