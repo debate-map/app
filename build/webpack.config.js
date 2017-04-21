@@ -135,7 +135,8 @@ if (!__TEST__) {
 webpackConfig.module.loaders = [
 	{
 		test: USE_TSLOADER ? /\.(jsx?|tsx?)$/ : /\.jsx?$/,
-		exclude: [/node_modules/, /react-redux-firebase/],
+		//exclude: [/node_modules/, /react-redux-firebase/],
+		include: [paths.client()],
 		loader: "babel",
 		query: config.compiler_babel
 	},
@@ -146,7 +147,7 @@ webpackConfig.module.loaders = [
 ];
 if (USE_TSLOADER) {
 	//webpackConfig.module.loaders.push({test: /\.tsx?$/, loader: "awesome-typescript-loader"});
-	webpackConfig.module.loaders.push({test: /\.tsx?$/, loader: "ts-loader"});
+	webpackConfig.module.loaders.push({test: /\.tsx?$/, loader: "ts-loader", query: {include: [paths.client()]}});
 }
 
 // Style Loaders
