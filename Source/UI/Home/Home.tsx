@@ -20,6 +20,8 @@ import {MapView} from "../../Store/main/mapViews/@MapViews";
 import {GetNode} from "../../Store/firebase/nodes";
 import {Vector2i} from "../../Frame/General/VectorStructs";
 
+let red = "rgba(255,0,0,.7)";
+let green = "rgba(0,255,0,.6)";
 let pageText = `
 The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced
 	(like Wikipedia), and the software is open-source (under MIT), promoting collaborative development and increased accountability.<sup>[1](#footnote1)</sup>
@@ -35,36 +37,101 @@ The tree-like structure assists in traversing the various lines of evidence:
 By keeping the forms of these arguments simple, we're able to match them (in many cases) with the basic forms of logical arguments (modus ponens, etc.),
 	permitting quick evaluation of the logical connections -- this saves time, and lets us focus on the underlying chain of evidence instead of parsing statement meanings.
 
-Along with other features (such as the crowd-sourced rating of nodes' strength, neutrality, etc.), this has the potential to...
+## Advantages
 
-## Transform discussion on contentious issues
+### Preserve response context
 
-Instead of the traditional thread-based dialogue (which tends toward long and hard-to-follow threads),
-	or the brief but less thorough exchanges of in-person speech, this project aims to bring the benefits of both:
-* Providing thoroughness and clarity-of-meaning by allowing arbitrarily deep subtrees. (each "supporting" or "opposing" its parent)
-* Remaining traversable and easy to follow by having arguments mapped directly under the thesis they relate to, instead of sprawled out over many posts.
-* Not re-inventing the wheel: populating a line of evidence or reasoning once, and then sharing it in every part of the tree (and in every conversation) where it's relevant.
+<span style="color: ${red};">
+Problem:</span>
+On heated topics, debates often involve many points being made and responded to in each post.
+Because traditional dialogue is linear, this creates a large gap between each point and its responses.
 
-The end result is a relatively clear and compact tree where, if a pair of members disagree, they can simply take turns "adding layers" -- having the software
-	display where their belief trees differ, and each marking within the tree the paths/subtrees they see most strongly supporting their view. (feature not yet developed)
+<span style="color: ${green};">
+Solution:</span>
+Make use of both dimensions: have points flow down, and responses flow to the right.
+Responses are now directly next to the points they're made against -- easing the reading process.
 
-At some point it will occur that either:
-1) One of them realizes that the arguments supporting his original position (or a sub-position) are weaker than a competitor's, and changes his views accordingly. (ideal!)
-2) One of them becomes forced to claim belief in a thesis which is admitted to have weaker mapped/presented arguments than a competitor.
-3) They'll disagree on something difficult to collaboratively break down, such as philosophical axioms or claims of personal experiences.
-4) They'll get so deep down in the belief tree that even if in theory the approach could work, it becomes too time-consuming to further develop the many branches.
+### Sort the arguments by strength
 
-While the less desirable options are sure to occur (and more often than we'd like), we still believe that the "recursive unrolling of belief trees" is substantially
-	clearer, less error-prone, less emotionally-heating, and more conducive to abstraction/reuse and statistical analysis than the options previously available.
+<span style="color: ${red};">
+Problem:</span>
+The topic under debate is large, with dozens of points to consider. Thread-based mediums give no help in finding the strongest ones, forcing you to skim through them all.
 
-## Expedite and modernize the detailed sharing of one's worldview
+<span style="color: ${green};">
+Solution:</span>
+Provide built-in voting on the strength of each point. Even if you don't agree with the general population, the strongest points will still bubble up near to the top.
+
+### Reduce the power of rhetoric
+
+<span style="color: ${red};">
+Problem:</span>
+The perception of who "won" a debate often depends more on how skilled the debaters are, than how strongly their views are backed by evidence.
+
+<span style="color: ${green};">
+Solution:</span>
+Require points to be distilled to their simplest forms. Weasel words, exhaggerations, and other noise become easier to spot and point out. (just add a response right next to it!)
+
+### Don't reinvent the wheel
+
+<span style="color: ${red};">
+Problem:</span>
+Debates rage across the internet, with the same arguments being made hundreds, even thousands, of times. This means a lot of redundant thought and typing!
+
+<span style="color: ${green};">
+Solution:</span>
+Break down arguments into their constituent parts, and let each part be connected anywhere in the tree where relevant. Also, provide tools to easily merge duplicates.
+	Now whenever a response or other change is made, it becomes visible throughout the tree, wherever the parent point is connected.
+
+### Prevent burying of minority viewpoints
+
+<span style="color: ${red};">
+Problem:</span>
+Some viewpoints repeatedly encounter resistance whenever attempted to be argued for.
+This discourages new ideas from being presented -- and when they are presented, makes it harder for them to be heard,
+	as they can be "buried" (or even kept from publication) by the more numerous majority.
+
+<span style="color: ${green};">
+Solution:</span>
+Provide a level playing ground, with equal space for both sides: supporting arguments go above the line, and opposing ones below.
+	No matter how great the majority, the minority viewpoint maintains its position at the table, allowing its strongest points to be directly compared with those of its opposition.
+
+### No time commitment
+
+<span style="color: ${red};">
+Problem:</span>
+Engaging in traditional debate can be tiring, because once you start, you're often pulled in and are required to invest hours to provide a fair defense of your viewpoint.
+	This discourages many people from contributing at all, leaving debates only for the "hard-core".
+
+<span style="color: ${green};">
+Solution:</span>
+Because debates and arguments persist in the global debate map, you don't need to "explain it all" for your viewpoint to be fairly represented.
+	Instead, you can supply only what you see has not been added yet, letting you contribute often and on many topics.
+
+## Other features
+
+### Fine-grained statistical information
+
+With:
+* Beliefs and arguments broken down into their constituent parts.
+* Rating and tagging of each piece by users.
+* Filtering of the data based on user self-tagging (and other properties).
+
+it becomes possible to do very fine-grained studies of public opinion.
+
+For example, one can now easily answer questions such as:
+* How do flat-earthers reconcile the time-zone differences between east and west hemispheres?
+* What president would have been elected, if the candidates were voted on by those living in country X?
+* Is there any correlation between one's political group, and their preference in mobile phone operating systems?
+* How much has support for legal marijuana changed over the past 5 years? And what changes in arguments, perceptions, or demographics correspond with this?
+
+### Detailed worldview sharing
 
 By acting as a global, flexible, and crowd-sourced tree of theses, communicating your view of the world becomes much faster. Instead of writing instance-specific text
 	for each conversation, you can map your views once, and simply form a "remix" of your personal belief tree that is tailored for the conversation at hand.
 
 The conversation can then proceed from that point, with the reasoning behind your views now known and easily referencable in the background.
 
-## Facilitate more careful examination of one's own belief system
+### Assisted worldview examination
 
 Engaging with a tool that operates on percentages, numbers, and weights makes self-accountability easier to achieve:
 	by entering numbers, one is declaring to himself how much he considers his beliefs to be supported, and by what means.
