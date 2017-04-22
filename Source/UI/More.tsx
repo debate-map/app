@@ -9,7 +9,12 @@ import {Connect} from "../Frame/Database/FirebaseConnect";
 import {GetUserID, GetUserPermissionGroups, GetUsers} from "../Store/firebase/users";
 import {styles} from "../Frame/UI/GlobalStyles";
 import {GetPathNodes} from "../Store/router";
+import {connect} from "react-redux";
+import {RootState} from "../Store/index";
 
+/*@(connect((state: RootState)=> ({
+	userID: state.firebase.get("auth") ? state.firebase.get("auth").uid : null,
+}) as any) as any)*/
 @Connect(state=> ({
 	_: GetUserPermissionGroups(GetUserID()), // just to make sure we've retrieved this data (and re-render when it changes)
 	userCount: (GetUsers() || []).length,
@@ -18,7 +23,7 @@ export default class MoreUI extends BaseComponent<{page?} & Partial<{userCount: 
 	render() {
 		let {page, userCount, children} = this.props;
 		let path = "/more";
-		let admin = IsUserAdmin(GetUserID()) || userCount == 0;
+		let admin = IsUserAdmin(GetUserID());
 		return (
 			<div>
 				<SubNavBar>

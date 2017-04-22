@@ -1,3 +1,4 @@
+import {GetDataAsync} from "../../../../Frame/Database/DatabaseHelpers";
 import {
     GetNodeDisplayText,
     GetValidChildTypes,
@@ -94,18 +95,19 @@ Usually, it's best to make a new one (with the same title), and just copy the pr
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 						//Store.dispatch(new ACTNodeCopy(null));
+						firebase.Ref(`nodes/${copiedNode._id}/parents`).update({[node._id]: {_: true}});
 						let linkInfo = {_: true} as any;
 						if (thesisFormForThesisChild)
 							linkInfo.form = thesisFormForThesisChild;
 						firebase.Ref(`nodes/${node._id}/children`).update({[copiedNode._id]: linkInfo});
 					}}/>}
-				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={e=> {
+				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={async e=> {
 					if (e.button != 0) return;
 					let error = ForUnlink_GetError(userID, node);
 					if (error)
 						return void ShowMessageBox({title: "Cannot unlink", message: error});
 
-					firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
+					/*firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
 						//let nodes = snapshot.val().VValues(true);
 						let nodes = (snapshot.val() as Object).Props().Select(a=>a.value.Extended({_id: a.name}));
 						//let childNodes = node.children.Select(a=>nodes[a]);
@@ -122,56 +124,73 @@ Usually, it's best to make a new one (with the same title), and just copy the pr
 							onOK: ()=> {
 								firebase.Ref("nodes").transaction(nodes=> {
 									if (!nodes) return nodes;
+									nodes[node._id].parents[parentNode._id] = null;
 									nodes[parentNode._id].children[node._id] = null;
 									return nodes;
 								}, undefined, false);
 							}
 						});
+					});*/
+
+					let parentNodes = await Promise.all(node.parents.VKeys(true).map(parentID=>GetDataAsync(`nodes/${parentID}`)));
+					if (parentNodes.length <= 1)
+						return void ShowMessageBox({title: "Cannot unlink", message: "Cannot unlink this child, as doing so would orphan it. Try deleting it instead."});
+
+					//let parent = parentNodes[0];
+					let parentText = GetNodeDisplayText(parentNode, path.substr(0, path.lastIndexOf("/")));
+					ShowMessageBox({
+						title: `Unlink child "${nodeText}"`, cancelButton: true,
+						message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,
+						onOK: ()=> {
+							firebase.Ref("nodes").transaction(nodes=> {
+								if (!nodes) return nodes;
+								nodes[node._id].parents[parentNode._id] = null;
+								nodes[parentNode._id].children[node._id] = null;
+								return nodes;
+							}, undefined, false);
+						}
 					});
 				}}/>}
-				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Delete" style={styles.vMenuItem} onClick={e=> {
+				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Delete" style={styles.vMenuItem} onClick={async e=> {
 					if (e.button != 0) return;
 					let error = ForDelete_GetError(userID, node);
 					if (error)
 						return void ShowMessageBox({title: "Cannot delete", message: error});
 
-					firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
-						//let nodes = snapshot.val().VValues(true);
-						let nodes = (snapshot.val() as Object).Props().Select(a=>a.value.Extended({_id: a.name}));
-						//let childNodes = node.children.Select(a=>nodes[a]);
-						let parentNodes = nodes.Where(a=>a.children && a.children[node._id]);
-						if (parentNodes.length > 1)
-							return void ShowMessageBox({title: "Cannot delete", message: "Cannot delete this child, as it has more than one parent. Try unlinking it instead."});
-						//let s_ifParents = parentNodes.length > 1 ? "s" : "";
-						let metaThesisID = node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument ? node.children.VKeys()[0] : null;
+					let parentNodes = await Promise.all(node.parents.VKeys(true).map(parentID=>GetDataAsync(`nodes/${parentID}`))) as MapNode[];
+					if (parentNodes.length > 1)
+						return void ShowMessageBox({title: "Cannot delete", message: "Cannot delete this child, as it has more than one parent. Try unlinking it instead."});
+					//let s_ifParents = parentNodes.length > 1 ? "s" : "";
+					let metaThesisID = node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument ? node.children.VKeys()[0] : null;
 
-						ShowMessageBox({
-							title: `Delete "${nodeText}"`, cancelButton: true,
-							/*message: `Delete the node "${nodeText}"`
-								+ `${metaThesisID ? ", its 1 meta-thesis" : ""}`
-								+ `, and its link${s_ifParents} with ${parentNodes.length} parent${s_ifParents}?`,*/
-							message: `Delete the node "${nodeText}"${metaThesisID ? ", its 1 meta-thesis" : ""}, and its link with 1 parent?`,
-							onOK: ()=> {
-								firebase.Ref().transaction(data=> {
-									if (!data) return data;
+					ShowMessageBox({
+						title: `Delete "${nodeText}"`, cancelButton: true,
+						/*message: `Delete the node "${nodeText}"`
+							+ `${metaThesisID ? ", its 1 meta-thesis" : ""}`
+							+ `, and its link${s_ifParents} with ${parentNodes.length} parent${s_ifParents}?`,*/
+						message: `Delete the node "${nodeText}"${metaThesisID ? ", its 1 meta-thesis" : ""}, and its link with 1 parent?`,
+						onOK: ()=> {
+							firebase.Ref().transaction(data=> {
+								if (!data) return data;
 
-									for (let parent of parentNodes)
-										data.nodes[parent._id].children[node._id] = null;
-									data.nodes[node._id] = null;
-									data.nodeExtras[node._id] = null;
-									data.nodeRatings[node._id] = null;
+								for (let parent of parentNodes) {
+									//data.nodes[node._id].parents[parent._id] = null;
+									data.nodes[parent._id].children[node._id] = null;
+								}
+								data.nodes[node._id] = null;
+								data.nodeExtras[node._id] = null;
+								data.nodeRatings[node._id] = null;
 
-									// if has meta-thesis, delete it also
-									if (metaThesisID) {
-										data.nodes[metaThesisID] = null;
-										data.nodeExtras[metaThesisID] = null;
-										data.nodeRatings[metaThesisID] = null;
-									}
-									
-									return data;
-								}, undefined, false);
-							}
-						});
+								// if has meta-thesis, delete it also
+								if (metaThesisID) {
+									data.nodes[metaThesisID] = null;
+									data.nodeExtras[metaThesisID] = null;
+									data.nodeRatings[metaThesisID] = null;
+								}
+								
+								return data;
+							}, undefined, false);
+						}
 					});
 				}}/>}
 			</VMenuStub>

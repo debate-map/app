@@ -18,11 +18,17 @@ import * as React from "react";
 // startup (non-hot)
 // ==========
 
+declare global { function G(...globalHolders); } g.Extend({G});
+function G(...globalHolders) {
+	for (let globalHolder of globalHolders)
+		g.Extend(globalHolder);
+}
+
 import JQuery from "./Frame/JQuery/JQuery3.1.0";
-g.Extend({JQuery, jQuery: JQuery});
+G({JQuery, jQuery: JQuery});
 g.$ = JQuery;
 
-g.Extend({React});
+G({React});
 
 //g.Extend({Promise});
 /*function PromiseWrapper(...args) {

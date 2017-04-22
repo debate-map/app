@@ -4,7 +4,12 @@ import UserExtraInfo from "./userExtras/@UserExtraInfo";
 import {CachedTransform} from "../../Frame/V/VCache";
 import {UserInfo} from "firebase";
 
-export type User = UserInfo;
+export type User = {
+	avatarUrl: string;
+	displayName: string;
+	email: string;
+	providerData: UserInfo[];
+};
 
 /*export function GetAuth(state: RootState) { 
 	return state.firebase.auth;
@@ -28,7 +33,7 @@ export function GetUser(userID: string): User {
 }
 export function GetUsers(): User[] {
 	let userMap = GetUserMap();
-	return CachedTransform("GetUsers", {}, userMap, ()=>userMap.VValues(true));
+	return CachedTransform("GetUsers", {}, userMap, ()=>userMap ? userMap.VValues(true) : []);
 }
 
 export type UserExtraInfoMap = {[key: string]: UserExtraInfo};

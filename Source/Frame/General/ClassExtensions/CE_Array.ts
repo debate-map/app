@@ -26,12 +26,11 @@ Array.prototype._AddFunction_Inline = function AddRange(array) {
 };
 interface Array<T> { Remove(item: T): boolean; }
 Array.prototype._AddFunction_Inline = function Remove(item) {
-	/*for (var i = 0; i < this.length; i++)
-		if (this[i] === item)
-			return this.splice(i, 1);*/
 	var itemIndex = this.indexOf(item);
-	var removedItems = this.splice(itemIndex, 1);
-	return removedItems.length > 0;
+	if (itemIndex == -1) return false;
+
+	this.splice(itemIndex, 1);
+	return true;
 };
 interface Array<T> { RemoveAll(items: T[]): void; }
 Array.prototype._AddFunction_Inline = function RemoveAll(items) {

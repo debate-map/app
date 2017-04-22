@@ -11,10 +11,10 @@ import keycode from "keycode";
 import Button from "../../../../../Frame/ReactComponents/Button";
 import {SourcesUI} from "../NodeUI_Inner";
 
-export function ShowAddChildDialog(node: MapNode, childType: MapNodeType, userID: string) {
+export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, userID: string) {
 	let firebase = store.firebase.helpers;
 	let childTypeInfo = MapNodeType_Info.for[childType];
-	let displayName = childTypeInfo.displayName(node);
+	let displayName = childTypeInfo.displayName(parentNode);
 
 	let isArgument = childType == MapNodeType.SupportingArgument || childType == MapNodeType.OpposingArgument;
 	let thenTypes = childType == MapNodeType.SupportingArgument
@@ -23,7 +23,7 @@ export function ShowAddChildDialog(node: MapNode, childType: MapNodeType, userID
 
 	let thesisTypes = [{name: "Normal", value: "Normal"}, {name: "Quote", value: "Quote"}];
 	let thesisForm = childType == MapNodeType.Thesis
-		? (node.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base)
+		? (parentNode.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base)
 		: null;
 	let info = {
 		title: "",
@@ -71,21 +71,25 @@ export function ShowAddChildDialog(node: MapNode, childType: MapNodeType, userID
 				if (!nodes) return nodes;
 
 				let newID = nodes.VKeys(true).map(a=>parseInt(a)).Max().KeepAtLeast(99) + 1;
+
 				// add node
-				let newNode = new MapNode({type: childType, creator: userID, approved: true});
+				let newChildNode = new MapNode({type: childType, creator: userID, approved: true});
 				if (childType == MapNodeType.Thesis && info.thesisType == "Quote")
-					newNode.quote = info.quote;
+					newChildNode.quote = info.quote;
 				else
-					newNode.titles = thesisForm && thesisForm == ThesisForm.YesNoQuestion ? {yesNoQuestion: info.title} : {base: info.title};
-				nodes[newID] = newNode;
+					newChildNode.titles = thesisForm && thesisForm == ThesisForm.YesNoQuestion ? {yesNoQuestion: info.title} : {base: info.title};
+				nodes[newID] = newChildNode;
+
 				// link with parent
+				newChildNode.parents[parentNode._id] = {_: true};
 				let linkInfo = {_: true} as any;
 				if (thesisForm)
 					linkInfo.form = thesisForm;
-				nodes[node._id].children = {...nodes[node._id].children, [newID]: linkInfo};
+				nodes[parentNode._id].children = {...nodes[parentNode._id].children, [newID]: linkInfo};
 
 				if (isArgument) {
 					let metaThesisID = newID + 1;
+
 					// add node
 					let metaThesisNode = new MapNode({
 						type: MapNodeType.Thesis,
@@ -93,8 +97,10 @@ export function ShowAddChildDialog(node: MapNode, childType: MapNodeType, userID
 						creator: userID, approved: true,
 					});
 					nodes[metaThesisID] = metaThesisNode;
+
 					// link with parent
-					newNode.children = {...newNode.children, [metaThesisID]: {_: true}};
+					metaThesisNode.parents[newChildNode._id] = {_: true};
+					newChildNode.children = {...newChildNode.children, [metaThesisID]: {_: true}};
 				}
 
 				return nodes;

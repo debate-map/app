@@ -4,7 +4,7 @@ import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCen
 import {LoadURL, UpdateURL} from "../URL/URLManager";
 import {GetPathNodes, GetPath} from "../../Store/router";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
-import {DBPath, GetData, GetDataAsync} from "../Database/DatabaseHelpers";
+import {DBPath, GetData, GetDataAsync, ProcessDBData} from "../Database/DatabaseHelpers";
 import {GetMapView} from "../../Store/main/mapViews";
 import {Vector2i} from "../General/VectorStructs";
 import {RootState} from "../../Store/index";
@@ -25,31 +25,7 @@ let lastPath = "";
 // only use this if you actually need to change the action-data before it gets dispatched/applied (otherwise use [Mid/Post]DispatchAction)
 export function PreDispatchAction(action: Action<any>) {
 	if (action.type == "@@reactReduxFirebase/SET" && action["data"]) {
-		// turn annoying arrays into objects
-		var treeNodes = GetTreeNodesInObjTree(action["data"], true);
-		for (let treeNode of treeNodes) {
-			if (treeNode.Value instanceof Array) {
-				let objVersion = {}.Extend(treeNode.Value) as any;
-				for (let key in objVersion) {
-					// if fake array-item added by Firebase (just so it would be an array), remove it
-					if (objVersion[key] == null)
-						delete objVersion[key];
-				}
-				treeNode.obj[treeNode.prop] = objVersion;
-			}
-
-			// add special _key or _id prop
-			if (typeof treeNode.Value == "object") {
-				let key = treeNode.prop == "_root" ? (action["path"] as string).split("/").Last() : treeNode.prop;
-				if (parseInt(key).toString() == key) {
-					treeNode.Value._id = parseInt(key);
-					//treeNode.Value._Set("_id", parseInt(key));
-				} else {
-					treeNode.Value._key = key;
-					//treeNode.Value._Set("_key", key);
-				}
-			}
-		}
+		ProcessDBData(action["data"], true, true, (action["path"] as string).split("/").Last());
 
 		// add special _key or _id prop
 		/*if (typeof action["data"] == "object") {

@@ -21,8 +21,7 @@ export function GetRatings(nodeID: number, ratingType: RatingType): Rating[] {
 	/*if (ratingType == "strength")
 		return GetArgumentStrengthPseudoRatings(GetNodeChildren(GetNode(nodeID)));*/
 	let ratingSet = GetRatingSet(nodeID, ratingType);
-	return CachedTransform("GetRatings", {nodeID, ratingType}, {ratingSet},
-		()=>ratingSet ? ratingSet.VValues(true) as Rating[] : []);
+	return CachedTransform("GetRatings", {nodeID, ratingType}, {ratingSet}, ()=>ratingSet ? ratingSet.VValues(true) : []);
 }
 export function GetRating(nodeID: number, ratingType: RatingType, userID: string) {
 	let ratingSet = GetRatingSet(nodeID, ratingType);

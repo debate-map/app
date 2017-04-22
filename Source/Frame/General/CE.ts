@@ -77,7 +77,7 @@ Function.prototype._AddFunction_Inline = function SetName(name: string) { this.n
 // Object: C# polyfills/emulators
 // ==================
 
-Object.prototype._AddFunction_Inline = function SetBaseClass(baseClassFunc) {
+/*Object.prototype._AddFunction_Inline = function SetBaseClass(baseClassFunc) {
 	//this.prototype.__proto__ = baseClassFunc.prototype; // makes "(new ThisClass()) instanceof BaseClass" be true
 	//Object.setPrototypeOf(this, baseClassFunc); // makes it easier to find base-classes from derived-class
 	Object.setPrototypeOf(this.prototype, baseClassFunc.prototype); // makes "(new ThisClass()) instanceof BaseClass" be true
@@ -103,7 +103,7 @@ Object.prototype._AddFunction_Inline = function CallBaseConstructor(constructorA
 Object.prototype._AddFunction_Inline = function CallBaseConstructor_Manual(derivedClassFunc, constructorArgs___) {
 	derivedClassFunc.prototype.__proto__.constructor.apply(this, V_.AsArray(arguments));
 	return this;
-};
+};*/
 
 // probably temp; helper so "p" function is usable on objects that aren't Node's (e.g. to declare property types)
 /*Object.prototype._AddFunction_Inline = function AddHelpers(obj) {
@@ -265,7 +265,8 @@ Object.prototype._AddFunction_Inline = function VKeys(excludeSpecialProps = fals
 	if (excludeSpecialProps) return Object.keys(this).Except(specialProps);
 	return Object.keys(this);
 };
-interface Object { VValues(excludeSpecialProps?: boolean): any[]; }
+//interface Object { VValues(excludeSpecialProps?: boolean): any[]; }
+interface Object { VValues<T>(this: {[key: string]: T}, excludeSpecialProps?: boolean): T[]; }
 Object.prototype._AddFunction_Inline = function VValues(excludeSpecialProps = false) {
 	//if (excludeSpecialProps) return this.Props(true).map(a=>a.value);
 	if (excludeSpecialProps) return Object.keys(this).Except(specialProps).map(a=>this[a]);
@@ -323,7 +324,8 @@ Function.prototype._AddFunction_Inline = function GetTags(/*o:*/ type) {
 	return (this.tags || []).Where(a=>type == null || a instanceof type);
 };
 
-Function.prototype._AddFunction_Inline = function AsStr(args___) { return V_.Multiline.apply(null, [this].concat(V_.AsArray(arguments))); };
+//Function.prototype._AddFunction_Inline = function AsStr(...args) { return require("../V/V").Multiline(this, ...args); };
+Function.prototype._AddFunction_Inline = function AsStr(useExtraPreprocessing) { return require("../V/V").Multiline(this, useExtraPreprocessing); };
 
 Function.prototype._AddFunction_Inline = function RunThenReturn(args___) { this.apply(null, arguments); return this; };
 
@@ -393,5 +395,5 @@ require("./ClassExtensions/CE_Array");
 
 // use "require" instead, so doesn't make TS see this as an external module (and thus disable interface extension)
 // use alternate names, so doesn't get used in other files
-var V_ = require("../V/V").default;
+//var V_ = require("../V/V").default;
 //var {IsNumberString_} = require("./Globals");

@@ -13,7 +13,7 @@ import Moment from "moment";
 export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], userExtraInfoMap: UserExtraInfoMap}>, {}> {
 	render() {
 		let {users, userExtraInfoMap} = this.props;
-		if (users == null || userExtraInfoMap == null) return <div/>;
+		if (userExtraInfoMap == null) return <div/>;
 		return (
 			<Div style={styles.page}>
 				<Row>

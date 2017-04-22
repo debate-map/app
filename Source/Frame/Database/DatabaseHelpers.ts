@@ -2,20 +2,23 @@ import {RequestPath, Connect} from "./FirebaseConnect";
 import {Assert} from "../General/Assert";
 import {helpers, firebaseConnect} from "react-redux-firebase";
 //import {DBPath as DBPath_} from "../../../config/DBVersion";
-import {DBPath as DBPath_} from "../../DBVersion";
+import {dbRootVersion as dbRootVersion_, envSuffix as envSuffix_, DBPath as DBPath_} from "../../DBVersion";
 import {IsString} from "../General/Types";
 import {FirebaseApplication, DataSnapshot} from "firebase";
 import {BaseComponent} from "../UI/ReactGlobals";
+import {GetTreeNodesInObjTree} from "../V/V";
 //export {DBPath};
 
-export function DBPath(path = "") {
+export const dbRootVersion = dbRootVersion_;
+export const envSuffix = envSuffix_;
+export function DBPath(path = "", inVersionRoot = true) {
 	Assert(path != null, "Path cannot be null.");
 	Assert(IsString(path), "Path must be a string.");
-	return DBPath_(path);
+	return DBPath_(path, inVersionRoot);
 }
 
-Object.prototype._AddFunction_Inline = function Ref(path = "") {
-	let finalPath = DBPath(path);
+Object.prototype._AddFunction_Inline = function Ref(path = "", inVersionRoot = true) {
+	let finalPath = DBPath(path, inVersionRoot);
 	return this.ref(finalPath);
 }
 
@@ -41,18 +44,55 @@ export type FirebaseApp = FirebaseApplication & {
 		storage(): firebase.FirebaseStorage,
 
 		// custom
-		Ref(path?: string): firebase.DatabaseReference,
+		Ref(path?: string, inVersionRoot?: boolean): firebase.DatabaseReference,
 	},
 };
+
+export function ProcessDBData(data, forceAsObjects: boolean, addHelpers: boolean, rootKey: string) {
+	var treeNodes = GetTreeNodesInObjTree(data, true);
+	for (let treeNode of treeNodes) {
+		// turn annoying arrays into objects
+		if (forceAsObjects && treeNode.Value instanceof Array) {
+			let valueAsObject = {}.Extend(treeNode.Value) as any;
+			for (let key in valueAsObject) {
+				// if fake array-item added by Firebase (just so it would be an array), remove it
+				if (valueAsObject[key] == null)
+					delete valueAsObject[key];
+			}
+			treeNode.obj[treeNode.prop] = valueAsObject;
+		}
+
+		// add special _key or _id prop
+		if (addHelpers && typeof treeNode.Value == "object") {
+			let key = treeNode.prop == "_root" ? rootKey : treeNode.prop;
+			if (parseInt(key).toString() == key) {
+				treeNode.Value._id = parseInt(key);
+				//treeNode.Value._Set("_id", parseInt(key));
+			} else {
+				treeNode.Value._key = key;
+				//treeNode.Value._Set("_key", key);
+			}
+		}
+	}
+}
+let helperProps = ["_key", "_id"];
+export function RemoveHelpers(data) {
+	var treeNodes = GetTreeNodesInObjTree(data, true);
+	for (let treeNode of treeNodes) {
+		if (helperProps.Contains(treeNode.prop))
+			delete treeNode.obj[treeNode.prop];
+	}
+}
 
 class DBPathInfo {
 	lastTimestamp = -1;
 	cachedData;
 }
 let pathInfos = {} as {[path: string]: DBPathInfo};
-export function GetData(path: string, makeRequest = true) {
+g.Extend({GetData});
+export function GetData(path: string, inVersionRoot = true, makeRequest = true) {
 	let firebase = State().firebase;
-	path = DBPath(path);
+	path = DBPath(path, inVersionRoot);
 
 	let info = pathInfos[path] || (pathInfos[path] = new DBPathInfo());
 	/*let timestampEntry = (firebase as any)._root.entries.FirstOrX(a=>a[0] == "timestamp");
@@ -74,11 +114,17 @@ export function GetData(path: string, makeRequest = true) {
 	return info.cachedData;
 }
 
-export async function GetDataAsync(path: string) {
+g.Extend({GetDataAsync});
+export async function GetDataAsync(path: string, inVersionRoot = true, addHelpers = true) {
 	return await new Promise((resolve, reject) => {
 		let firebase = store.firebase.helpers;
-		firebase.Ref(path).once("value",
-			(snapshot: DataSnapshot)=>resolve(snapshot.val()),
+		firebase.Ref(path, inVersionRoot).once("value",
+			(snapshot: DataSnapshot)=> {
+				let result = snapshot.val();
+				if (result)
+					ProcessDBData(result, true, addHelpers, path.split("/").Last());
+				resolve(result);
+			},
 			(ex: Error)=>reject(ex));
 	});
 }

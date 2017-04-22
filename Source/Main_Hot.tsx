@@ -1,3 +1,4 @@
+import {ParseModuleData, Require} from "webpack-runtime-require";
 import {Store} from "redux";
 import {RootState} from "./Store/index";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
@@ -22,3 +23,17 @@ const mountNode = document.getElementById("root");
 let RootUIWrapper = require("./UI/Root").default;
 ReactDOM.render(<RootUIWrapper store={store}/>, mountNode);
 //});
+
+if (devEnv) {
+	setTimeout(()=> {
+		ParseModuleData();
+		G({R: Require});
+		let RR = {};
+		for (let moduleExports of (Require as any).VValues()) {
+			try {
+				RR.Extend(moduleExports);
+			} catch (ex) {}
+		}
+		G({RR});
+	});
+}

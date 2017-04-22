@@ -52,7 +52,7 @@ export interface BaseProps {
 	//firebase?: FirebaseDatabase;
 }
 export var basePropFullKeys = {
-	m: "marginLeft", ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
+	m: "margin", ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
 	p: "padding", pl: "paddingLeft", pr: "paddingRight", pt: "paddingTop", pb: "paddingBottom",
 	plr: null, ptb: null,
 	sel: null, // selectable

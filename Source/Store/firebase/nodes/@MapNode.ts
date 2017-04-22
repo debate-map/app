@@ -72,7 +72,8 @@ export class MapNode {
 	disagrees = 0;
 	weight = 0;*/
 	
-	children = new ChildCollection();
+	parents = {} as ParentSet;
+	children = {} as ChildSet;
 	talkRoot: number;
 }
 
@@ -99,9 +100,17 @@ export class QuoteInfo {
 	sources = {[0]: ""} as {[key: number]: string};
 }
 
-export class ChildCollection {
+/*export class ParentSet {
+	//[key: number]: {_?, form?: ThesisForm};
+	[key: number]: {_?};
+}*/
+export type ParentSet = {[key: number]: {_?}};
+
+/*export class ChildSet {
 	[key: number]: {_?, form?: ThesisForm};
-}
+}*/
+export type ChildSet = {[key: number]: {_?, form?: ThesisForm}};
+
 /*export interface ChildInfo {
 	id: number;
 	type;

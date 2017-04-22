@@ -58,10 +58,13 @@ export function Connect<T, P>(funcOrFuncWrapper) {
 
 		let result = innerConnectFunc(state, props);
 
-		let oldRequestedPaths = s.lastRequestedPaths || [];
-		let requestedPaths = GetRequestedPaths();
+		let oldRequestedPaths: string[] = s.lastRequestedPaths || [];
+		let requestedPaths: string[] = GetRequestedPaths();
 		if (firebase._ && ShallowChanged(requestedPaths, oldRequestedPaths)) {
 			setImmediate(()=> {
+				/*for (let path of requestedPaths)
+					Log("Requesting Stage2: " + path);*/
+
 				s._firebaseEvents = getEventsFromInput(requestedPaths);
 				let removedPaths = oldRequestedPaths.Except(...requestedPaths);
 				unWatchEvents(firebase, store.dispatch, getEventsFromInput(removedPaths));
@@ -97,9 +100,12 @@ export function GetRequestedPathsAndClear() {
 }*/
 
 let requestedPaths = {} as {[key: string]: boolean};
+/** This only adds paths to a "request list". Connect() is in charge of making the actual db requests. */
 export function RequestPath(path: string) {
+	//Log("Requesting Stage1: " + path);
 	requestedPaths[path] = true;
 }
+/** This only adds paths to a "request list". Connect() is in charge of making the actual db requests. */
 export function RequestPaths(paths: string[]) {
 	for (let path of paths)
 		RequestPath(path);

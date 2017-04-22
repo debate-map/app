@@ -123,7 +123,7 @@ export function WrapWithDebugger(func, ...args) {
 		func.apply(this, arguments);
 	};
 }
-g.Extend({Debugger, Debugger_Wrap, Debugger_True, Debugger_If, WrapWithDebugger});
+G({Debugger, Debugger_Wrap, Debugger_True, Debugger_If, WrapWithDebugger});
 
 //var quickIncrementValues = {};
 export function QuickIncrement(name = new Error().stack.split("\n")[2]) {
@@ -131,11 +131,12 @@ export function QuickIncrement(name = new Error().stack.split("\n")[2]) {
 	return QuickIncrement["values"][name];
 }
 QuickIncrement["values"] = [];
-g.Extend({QuickIncrement});
+G({QuickIncrement});
 
 // general
 // ==========
 
+G({E});
 export function E(...objExtends: any[]) {
     var result = {};
     for (var extend of objExtends)
@@ -144,7 +145,6 @@ export function E(...objExtends: any[]) {
 	//return StyleSheet.create(result);
 }
 // for react-native-chart modifications...
-g.Extend({E});
 
 // methods: url writing/parsing
 // ==================

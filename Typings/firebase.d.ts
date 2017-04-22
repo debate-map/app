@@ -77,29 +77,11 @@ declare namespace firebase {
      * @interface UserInfo
      */
     export interface UserInfo {
-        /**
-         * (description)
-         * 
-         * @type {string}
-         */
         displayName:string;
-        /**
-         * (description)
-         * 
-         * @type {string}
-         */
         email:string;
-        /**
-         * (description)
-         * 
-         * @type {string}
-         */
         photoURL:string;
-
-		// custom replaced
-        /*providerId:string;
-        uid:string;*/
-		providerData: any[];
+		providerId:string;
+        uid:string;
     }
     
     /**

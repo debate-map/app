@@ -72,9 +72,11 @@ g.Extend({E});
 // ==========
 
 // object-Json
-export function FromJSON(json) { return JSON.parse(json); }
-g.Extend({FromJSON});
-export function ToJSON(obj, ...excludePropNames) {
+declare global { function FromJSON(json: string); } g.Extend({FromJSON});
+export function FromJSON(json: string) { return JSON.parse(json); }
+
+declare global { function ToJSON(obj, ...excludePropNames): string; } g.Extend({ToJSON});
+export function ToJSON(obj, ...excludePropNames): string {
 	try {
 		if (arguments.length > 1) {
 			return JSON.stringify(obj, function(key, value) {
@@ -91,10 +93,9 @@ export function ToJSON(obj, ...excludePropNames) {
 		throw ex;
 	}
 }
-g.Extend({ToJSON});
-export function ToJSON_Safe(obj, excludePropNames___) {
-	var excludePropNames = require("../V/V").default.Slice(arguments, 1);
 
+declare global { function ToJSON_Safe(obj, ...excludePropNames): string; } g.Extend({ToJSON_Safe});
+export function ToJSON_Safe(obj, ...excludePropNames) {
 	var cache = [];
 	var foundDuplicates = false;
 	var result = JSON.stringify(obj, function(key, value) {
@@ -115,15 +116,14 @@ export function ToJSON_Safe(obj, excludePropNames___) {
 		result = "[was circular]" + result;
 	return result;
 }
-g.Extend({ToJSON_Safe});
 
+declare global { function ToJSON_Try(obj, ...excludePropNames): string; } g.Extend({ToJSON_Try});
 export function ToJSON_Try(...args) {
 	try {
 		return ToJSON.apply(this, args);
 	} catch (ex) {}
 	return "[converting to JSON failed]";
 }
-g.Extend({ToJSON_Try});
 
 // object-VDF
 // ----------
