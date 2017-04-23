@@ -9,7 +9,6 @@ import {routerMiddleware} from "react-router-redux"
 import {MakeRootReducer, RootState} from "../../Store/index";
 import watch from "redux-watch";
 import {PreDispatchAction, MidDispatchAction, PostDispatchAction} from "./ActionProcessor";
-import {GetUrlVars} from "../General/URLs";
 //import {version, firebaseConfig} from "../../BakedConfig";
 var {version, firebaseConfig} = require(devEnv ? "../../BakedConfig_Dev" : "../../BakedConfig_Prod");
 
@@ -95,7 +94,7 @@ export default function(initialState = {}, history) {
 			createBlacklistFilter("main", ["notificationMessages"])
 		]
 	}, ()=>g.storeRehydrated = true);
-	if (GetUrlVars().clearState)
+	if (startURL.GetQueryVar("clearState"))
 		persister.purge();
 
 	if (module.hot) {

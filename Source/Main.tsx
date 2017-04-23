@@ -2,33 +2,21 @@
 import "babel-polyfill";
 import "webpack-runtime-require";
 //import {Require} from "webpack-runtime-require";
-import "./Frame/General/EarlyStart";
+import "./Frame/General/Start_0";
 import "./Frame/General/CE";
+import "./Frame/General/Start_1";
 
 import ReactDOM from "react-dom";
 import {Store} from "redux";
 import {RootState} from "./Store/index";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
-import {GetUrlVars, CurrentUrl, URL} from "./Frame/General/URLs";
+import {CurrentUrl, URL} from "./Frame/General/URLs";
 import Raven from "raven-js";
 import injectTapEventPlugin from "react-tap-event-plugin";
-import * as React from "react";
 //import Promise from "bluebird";
 
 // startup (non-hot)
 // ==========
-
-declare global { function G(...globalHolders); } g.Extend({G});
-function G(...globalHolders) {
-	for (let globalHolder of globalHolders)
-		g.Extend(globalHolder);
-}
-
-import JQuery from "./Frame/JQuery/JQuery3.1.0";
-G({JQuery, jQuery: JQuery});
-g.$ = JQuery;
-
-G({React});
 
 //g.Extend({Promise});
 /*function PromiseWrapper(...args) {

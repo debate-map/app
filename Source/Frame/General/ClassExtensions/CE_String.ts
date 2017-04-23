@@ -1,16 +1,18 @@
 // String
 // ==========
 
-interface String { TrimEnd: (...chars: string[])=>string; }
-String.prototype.TrimEnd = function(...chars) {
-	var result = "";
-	var doneTrimming = false;
-	for (var i = this.length - 1; i >= 0; i--)
-		if (!chars.Contains(this[i]) || doneTrimming) {
-			result = this[i] + result;
-			doneTrimming = true;
-		}
-	return result;
+interface String { TrimStart(...chars: string[]): string; }
+String.prototype._AddFunction_Inline = function TrimStart(this: string, ...chars: string[]) {
+	// fix for if called by VDF (which has a different signature)
+	if (arguments[0] instanceof Array) chars = arguments[0];
+
+	for (var iOfFirstToKeep = 0; iOfFirstToKeep < this.length && chars.Contains(this[iOfFirstToKeep]); iOfFirstToKeep++);
+	return this.slice(iOfFirstToKeep, this.length);
+};
+interface String { TrimEnd(...chars: string[]): string; }
+String.prototype._AddFunction_Inline = function TrimEnd(this: string, ...chars: string[]) {
+	for (var iOfLastToKeep = this.length - 1; iOfLastToKeep >= 0 && chars.Contains(this[iOfLastToKeep]); iOfLastToKeep--);
+	return this.substr(0, iOfLastToKeep + 1);
 };
 
 //interface String { Contains: (str)=>boolean; }

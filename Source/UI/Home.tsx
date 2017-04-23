@@ -8,7 +8,6 @@ import {Route} from "react-router-dom";
 import HomeUI2 from "./Home/Home";
 import AboutUI from "./Home/About";
 import ScrollView from "react-vscrollview";
-import {GetPathNodes} from "../Store/router";
 
 export default class HomeUI extends BaseComponent<{}, {}> {
 	render() {

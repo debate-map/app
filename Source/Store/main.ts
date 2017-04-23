@@ -17,8 +17,7 @@ import {CachedTransform} from "../Frame/V/VCache";
 import {MapViewsReducer} from "./main/mapViews";
 import {RatingUIReducer, RatingUIState} from "./main/ratingUI";
 import NotificationMessage from "./main/@NotificationMessage";
-import {GetPathNodes} from "./router";
-import {GetUrlVars, URL} from "../Frame/General/URLs";
+import {URL} from "../Frame/General/URLs";
 import {Global} from "../Frame/General/Globals_Free";
 
 // class is used only for initialization

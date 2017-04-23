@@ -12,8 +12,7 @@ import {GetNodeView, GetMapView, GetSelectedNodeID, GetFocusNode, GetViewOffset}
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
 import {FromJSON, ToJSON} from "../General/Globals";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
-import {GetPathNodes, GetPath} from "../../Store/router";
-import {URL, QueryVar, GetUrlVars, GetUrlPath} from "../General/URLs";
+import {URL, QueryVar} from "../General/URLs";
 
 // loading
 // ==========
@@ -109,11 +108,12 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 	return [nodeID, nodeView];
 }
 
-export function LoadURL(url: string) {
-	if (!GetPath(GetUrlPath(url)).startsWith("global/map")) return;
-	let urlVars = GetUrlVars(url);
+export function LoadURL(urlStr: string) {
+	//if (!GetPath(GetUrlPath(url)).startsWith("global/map")) return;
+	let url = URL.Parse(urlStr);
+	if (!url.WithImpliedPathNodes().toString(false).startsWith("/global/map")) return;
 	// example: /global?view=1:3:100:101f(384_111):102:.104:.....
-	let mapViewStr = urlVars.view;
+	let mapViewStr = url.GetQueryVar("view");
 	if (mapViewStr == null || mapViewStr.length == 0) return;
 	let mapView = ParseMapView(mapViewStr);
 
@@ -124,11 +124,17 @@ export function LoadURL(url: string) {
 // saving
 // ==========
 
+/*let replaceState_old = history.replaceState;
+history.replaceState = function(stateObj, title, url) {
+	debugger;
+	replaceState_old.apply(this, arguments);
+}*/
+
 export function UpdateURL() {
 	//let newURL = URL.Current();
 	let oldURL = URL.Current();
 	let newURL = new URL(oldURL.domain, oldURL.pathNodes);
-	if (GetPath().startsWith("global/map"))
+	if (oldURL.WithImpliedPathNodes().toString(false).startsWith("/global/map") && !isBot)
 		newURL = CreateURL_Globals();
 	if (!State().main.analyticsEnabled && newURL.GetQueryVar("analytics") == null)
 		newURL.SetQueryVar("analytics", "false");

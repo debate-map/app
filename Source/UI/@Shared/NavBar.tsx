@@ -26,14 +26,13 @@ import SearchPanel from "./NavBar/SearchPanel";
 import {SubNavBarButton} from "./SubNavBar";
 import Radium from "radium";
 import Link from "../../Frame/ReactComponents/Link";
-import {GetPathNodes} from "../../Store/router";
-import {rootPages} from "../Root";
 import {Log} from "../../Frame/Serialization/VDF/VDF";
 import NotificationsUI from "./NavBar/NotificationsUI";
 import Column from "../../Frame/ReactComponents/Column";
 import Row from "../../Frame/ReactComponents/Row";
 import ReputationPanel from "./NavBar/ReputationPanel";
 import GuidePanel from "./NavBar/GuidePanel";
+import {URL} from "../../Frame/General/URLs";
 
 // main
 // ==========
@@ -49,7 +48,6 @@ const avatarStyles = {
 };
 
 @Connect(state=>({
-	_: GetPathNodes(),
 	topLeftOpenPanel: state.main.topLeftOpenPanel,
 	topRightOpenPanel: state.main.topRightOpenPanel,
 	auth: helpers.pathToJS(state.firebase, "auth"),
@@ -119,7 +117,7 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 
 //@Radium
 @Connect(state=> ({
-	page: GetPathNodes()[0],
+	page: URL.Current(false).WithImpliedPathNodes().pathNodes[0],
 }))
 export class NavBarButton extends BaseComponent
 		<{to: string, toImplied?: string, text: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void} & Partial<{page: string}>,

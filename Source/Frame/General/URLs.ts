@@ -1,4 +1,18 @@
-export function CurrentUrl() { return window.location.href.replace(/%22/, "\""); } // note; look into the escaping issue more
+export const rootPages = [
+	"stream", "chat",
+	"users", "forum", "social", "more",
+	"home",
+	"content", "personal", "debates", "global",
+	"search", "profile"
+];
+export const rootPageDefaultChilds = {
+	more: "admin",
+	home: "home",
+	global: "map",
+}
+
+// note; look into the escaping issue more
+export function CurrentUrl() { return window.location.href.replace(/%22/, "\""); }
 export function ToAbsoluteUrl(url: string) {
 	 // Handle absolute URLs (with protocol-relative prefix)
 	// Example: //domain.com/file.png
@@ -42,11 +56,11 @@ export function GetUrlParts(url?: string): [string, string, string, string] {
 	if (urlToProcess.Contains("?"))
 		[urlToProcess, varsStr] = urlToProcess.SplitAt(urlToProcess.indexOf("?"));
 	//if (urlToProcess.Matches("/").length == )
-	[domainStr, pathStr] = urlToProcess.SplitAt(urlToProcess.IndexOf_X("/", 2));
+	[domainStr, pathStr] = urlToProcess.SplitAt(urlToProcess.IndexOf_X("/", 2).IfN1Then(urlToProcess.length));
 
 	return [domainStr, pathStr, varsStr, hashStr];
 }
-export function GetUrlPath(url?: string, fromDomain = true) {
+function GetUrlPath(url?: string, fromDomain = true) {
 	/*let [pathStr, varsStr, hashStr] = GetUrlParts(url);
 	if (fromDomain)
 		pathStr = pathStr.SplitAt(pathStr.IndexOf_X("/", 2).IfN1Then(pathStr.length))[1];
@@ -57,7 +71,7 @@ export function GetUrlPath(url?: string, fromDomain = true) {
 		pathStr = pathStr.slice(0, -1);
 	return pathStr;
 }
-export function GetUrlVars(url?: string) {
+function GetUrlVars(url?: string) {
 	let [_, __, varsStr] = GetUrlParts(url);
 	var vars = {} as any; //{[key: string]: string};
 	var parts = varsStr.split("&").filter(a=>a);
@@ -72,7 +86,10 @@ export class URL {
 	static Current(fromAddressBar = true) {
 		return fromAddressBar ? URL.Parse(CurrentUrl()) : URL.FromState(State().router.location);
 	}
-	static Parse(urlStr: string) {
+	static Parse(urlStr: string, useCurrentDomainIfMissing = true) {
+		if (useCurrentDomainIfMissing && !urlStr.startsWith("http"))
+			urlStr = window.location.origin + (urlStr.startsWith("/") ? "" : "/") + urlStr;
+		
 		let [domainStr, pathStr, varsStr, hashStr] = GetUrlParts(urlStr);
 		let queryVarsMap = GetUrlVars(urlStr);
 		
@@ -85,8 +102,7 @@ export class URL {
 		return result;
 	}
 	static FromState(state: {pathname?: string, search?: string}) {
-		let url = ToAbsoluteUrl(state.pathname + state.search);
-		return URL.Parse(url);
+		return URL.Parse(state ? state.pathname + state.search : "");
 	}
 
 	constructor(domain = "", pathNodes = [] as string[], queryVars = [] as QueryVar[], hash = "") {
@@ -114,20 +130,37 @@ export class URL {
 
 	Clone() {
 		return new URL(this.domain, this.pathNodes.slice(), this.queryVars.map(a=>a.Clone()), this.hash);
-	}	
+	}
+	WithImpliedPathNodes() {
+		let result = this.Clone();
+		if (!rootPages.Contains(result.pathNodes[0]))
+			result.pathNodes.Insert(0, "home");
+		if (result.pathNodes[1] == null)
+			result.pathNodes.Insert(1, rootPageDefaultChilds[result.pathNodes[0]]);
+		return result;
+	}
 
 	toString(includeDomain = true) {
 		let result = "";
+		
+		// domain
 		if (includeDomain)
 			result += this.domain;
 		result += "/";
+
+		// path-nodes
 		if (this.pathNodes.length)
 			result += this.pathNodes.join("/");
+
+		// query-vars
 		for (let [index, queryVar] of this.queryVars.entries()) {
 			result += (index == 0 ? "?" : "&") + queryVar.name + "=" + queryVar.value;
 		}
+
+		// hash
 		if (this.hash)
 			result += "#" + this.hash;
+
 		return result;
 	}
 }
@@ -142,3 +175,22 @@ export class QueryVar {
 		return new QueryVar(this.name, this.value);
 	}
 }
+
+// todo: merge this functionality into the URL class
+/*export function GetPathNodes(path = GetUrlPath(), makeFull = true) {
+	/*let location = State().router.location;
+	if (location == null) return "/";
+	return location.pathname.split("/")[1];*#/
+	
+	let pathNodes = path.split("/").Where(a=>a.length > 0);
+	if (makeFull) {
+		if (!rootPages.Contains(pathNodes[0]))
+			pathNodes.Insert(0, "home");
+		if (pathNodes[1] == null)
+			pathNodes.Insert(1, rootPageDefaultChilds[pathNodes[0]]);
+	}
+	return pathNodes;
+}
+export function GetPath(path = GetUrlPath(), makeFull = true) {
+	return GetPathNodes(path, makeFull).join("/");
+}*/

@@ -8,7 +8,6 @@ import {IsUserAdmin} from "../Store/firebase/userExtras";
 import {Connect} from "../Frame/Database/FirebaseConnect";
 import {GetUserID, GetUserPermissionGroups, GetUsers} from "../Store/firebase/users";
 import {styles} from "../Frame/UI/GlobalStyles";
-import {GetPathNodes} from "../Store/router";
 import {connect} from "react-redux";
 import {RootState} from "../Store/index";
 

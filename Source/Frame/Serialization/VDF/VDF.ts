@@ -42,6 +42,7 @@ declare global {
 Object.defineProperty(Object.prototype, "_AddProperty", {
 	enumerable: false,
 	value: function(name, value) {
+		if (name in this) return; // don't overwrite existing properties (since this is just a library)
 		Object.defineProperty(this, name, {
 			configurable: true,
 			enumerable: false,

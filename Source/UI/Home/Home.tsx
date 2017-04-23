@@ -2,13 +2,12 @@ import {Connect} from "../../Frame/Database/FirebaseConnect";
 import {DeepGet} from "../../Frame/V/V";
 import {SubNavBarButton} from "../@Shared/SubNavBar";
 import SubNavBar from "../@Shared/SubNavBar";
-import {BaseComponent, SimpleShouldUpdate, GetInnerComp, FindDOM_} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, SimpleShouldUpdate, GetInnerComp, FindDOM_, Equals_Shallow} from "../../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import {styles} from "../../Frame/UI/GlobalStyles";
 import ScrollView from "react-vscrollview";
-import {GetPathNodes} from "../../Store/router";
 import {PropTypes} from "react";
-import {GetUrlParts, JumpToHash, ToAbsoluteUrl} from "../../Frame/General/URLs";
+import {JumpToHash, ToAbsoluteUrl, URL} from "../../Frame/General/URLs";
 import {E} from "../../Frame/General/Globals_Free";
 import {List} from "../../Frame/Serialization/VDF/VDFExtras";
 import GlobalMapUI from "../Global/GlobalMapUI";
@@ -276,11 +275,10 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> 
 						let {href, nodeKey, children, literal, ...rest} = props;
 						return (
 							<a {...rest} href={href} key={nodeKey} onClick={e=> {
+								let currentURL = URL.Current();
 								//let fullURL = href.Contains("://") ? href : GetUrlParts()[0] + "/" + href;
-								let fullURL = ToAbsoluteUrl(href);
-								let toURLParts = GetUrlParts(fullURL);
-								let currentURLParts = GetUrlParts();
-								if (toURLParts[0] == currentURLParts[0]) { // if domain names same
+								let toURL = URL.Parse(ToAbsoluteUrl(href));
+								if (toURL.domain == currentURL.domain) {
 									e.preventDefault();
 
 									if (href.startsWith("#")) {
@@ -291,7 +289,7 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> 
 
 									//let history = State().router.history;
 									let history = router.history;
-									if (toURLParts[1] == currentURLParts[1]) // if paths same
+									if (Equals_Shallow(toURL.pathNodes, currentURL.pathNodes)) // if paths same
 										history.replace(href);
 									else
 										history.push(href);

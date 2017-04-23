@@ -1,6 +1,3 @@
-import ShallowCompare from "react-addons-shallow-compare";
-import {CurrentUrl, GetUrlVars} from "./URLs";
-
 // class/function tags
 // ==========
 
@@ -154,10 +151,8 @@ export var inFirefox = navigator.userAgent.toLowerCase().Contains("firefox");
 // others
 // ==================
 
-export var launchVars = GetUrlVars(CurrentUrl());
-
-export var inTestMode = true; //GetUrlVars(CurrentUrl()).inTestMode == "true";
-export function InTestMode() { return inTestMode; }
+/*export var inTestMode = true; //GetUrlVars(CurrentUrl()).inTestMode == "true";
+export function InTestMode() { return inTestMode; }*/
 
 export var blockCSCalls = false;
 

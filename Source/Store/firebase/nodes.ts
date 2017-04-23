@@ -1,6 +1,6 @@
 import {HasModPermissions, PermissionGroupSet} from "./userExtras/@UserExtraInfo";
 import {IsNaN, IsObjectOf, IsObject, IsNumber} from "../../Frame/General/Types";
-import {GetData} from "../../Frame/Database/DatabaseHelpers";
+import {GetData, GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {MapNode} from "./nodes/@MapNode";
 import {CachedTransform} from "../../Frame/V/VCache";
 import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
@@ -13,6 +13,10 @@ export function GetNode(id: number) {
 	if (id == null || IsNaN(id)) return null;
 	return GetData(`nodes/${id}`) as MapNode;
 }
+export async function GetNodeAsync(id: number) {
+	return await GetDataAsync(`nodes/${id}`) as MapNode;
+}
+
 export function GetParentNode(path: string) {
 	return GetNode(path.split("/").map(a=>parseInt(a)).XFromLast(1));
 }
@@ -20,6 +24,9 @@ export function GetParentNode(path: string) {
 export function GetNodeParents(node: MapNode) {
 	let parents = (node.parents || {}).VKeys(true).map(id=>GetNode(parseInt(id)));
 	return CachedTransform("GetNodeParents", {nodeID: node._id}, parents, ()=>parents);
+}
+export async function GetNodeParentsAsync(node: MapNode) {
+	return await Promise.all(node.parents.VKeys(true).map(parentID=>GetDataAsync(`nodes/${parentID}`))) as MapNode[];
 }
 
 /*export function GetNodeChildIDs(nodeID: number) {

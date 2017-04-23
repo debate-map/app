@@ -1,9 +1,9 @@
 import {BaseComponent, BaseProps} from "../../Frame/UI/ReactGlobals";
 import {colors} from "../../Frame/UI/GlobalStyles";
 import {E} from "../../Frame/General/Globals_Free";
-import {GetPathNodes} from "../../Store/router";
 import Radium from "radium";
 import Link from "../../Frame/ReactComponents/Link";
+import {URL} from "../../Frame/General/URLs";
 
 export default class SubNavBar extends BaseComponent<{fullWidth?: boolean}, {}> {
 	render() {
@@ -31,7 +31,7 @@ export class SubNavBarButton extends BaseComponent<{to: string, toImplied?: stri
 		/*var {to, toImplied, page, text} = this.props;
 		let active = to.substr(1) == page || (toImplied && toImplied.substr(1) == page);*/
 		var {to, toImplied, text} = this.props;
-		let path = "/" + GetPathNodes().Take(2).join("/");
+		let path = "/" + URL.Current().WithImpliedPathNodes().pathNodes.Take(2).join("/");
 		let active = to == path || (toImplied && toImplied == path);
 		return (
 			<Link to={to} style={E(

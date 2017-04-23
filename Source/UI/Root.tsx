@@ -39,12 +39,11 @@ import PersonalUI from "./Personal";
 import DebatesUI from "./Debates";
 import SearchUI from "./Search";
 import ProfileUI from "./Profile";
-import {GetPathNodes} from "../Store/router";
 import ReactGA from "react-ga";
 import {P} from "../Frame/Serialization/VDF/VDFTypeInfo";
 import {persistStore} from "redux-persist";
 import {createBlacklistFilter} from "redux-persist-transform-filter";
-import {GetUrlVars} from "../Frame/General/URLs";
+import {URL} from "../Frame/General/URLs";
 
 // Create a history of your choosing (we're using a browser history in this case)
 const history = createBrowserHistory();
@@ -77,19 +76,6 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	}
 }
 
-export const rootPages = [
-	"stream", "chat",
-	"users", "forum", "social", "more",
-	"home",
-	"content", "personal", "debates", "global",
-	"search", "profile"
-];
-export const rootPageDefaultChilds = {
-	more: "admin",
-	home: "home",
-	global: "map",
-}
-
 class RootUI extends BaseComponent<{}, {}> {
 	render() {
 		return (
@@ -116,7 +102,7 @@ class RootUI extends BaseComponent<{}, {}> {
 
 					{/*<Route exact path="/" component={HomeUI}/>
 					<Route exact path="/about" component={HomeUI}/>*/}
-					{GetPathNodes()[0] == "home" && <HomeUI/>}
+					{URL.Current().WithImpliedPathNodes().pathNodes[0] == "home" && <HomeUI/>}
 
 					<Route path="/content" component={ContentUI}/>
 					<Route path="/personal" component={PersonalUI}/>

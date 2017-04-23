@@ -9,7 +9,7 @@ import {Vector2i} from "../../../../Frame/General/VectorStructs";
 export class ACTMapNodeSelect extends Action<{mapID: number, path: string}> {}
 export class ACTMapNodePanelOpen extends Action<{mapID: number, path: string, panel: string}> {}
 export class ACTMapNodeExpandedSet extends Action<{mapID: number, path: string, expanded: boolean, recursive: boolean}> {}
-export class ACTViewCenterChange extends Action<{mapID: number, focusNode: string, viewOffset: Vector2i}> {}
+export class ACTViewCenterChange extends Action<{mapID: number, focusNodePath: string, viewOffset: Vector2i}> {}
 
 export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action<any>, mapID: number) {
 	if (action.Is(ACTMapNodeSelect) && action.payload.mapID == mapID) {
@@ -57,7 +57,7 @@ export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action
 		if (focusNode)
 			result = u.updateIn(focusNode.PathStr_Updeep, u.omit(["focus", "viewOffset"]), result);
 		
-		let targetNodePath = action.payload.focusNode.split("/").join(".children.");
+		let targetNodePath = action.payload.focusNodePath.split("/").join(".children.");
 		result = u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, focus: true, viewOffset: action.payload.viewOffset}), result);
 		return result;
 	}

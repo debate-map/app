@@ -9,8 +9,17 @@ const paths = config.utils_paths;
 
 // This rewrites all routes requests to the root /index.html file
 // (ignoring file requests). If you want to implement universal
-// rendering, you"ll want to remove this middleware.
-app.use(require("connect-history-api-fallback")());
+// rendering, you'll want to remove this middleware.
+app.use(require("connect-history-api-fallback")({
+	rewrites: [
+		{
+			from: /^(.(?!\.(html|js|css|png|jpg)))+$/, // paths with these extensions will NOT be redirected to "index.html""
+			to: function(context) {
+				return "/index.html";
+			}
+		}
+	]
+}));
 
 // Apply Webpack HMR Middleware
 // ----------

@@ -5,7 +5,6 @@ import {SubNavBarButton} from "./@Shared/SubNavBar";
 import {Route, Switch} from "react-router-dom";
 import GlobalMapUI from "./Global/GlobalMapUI";
 import ScrollView from "react-vscrollview";
-import {GetPathNodes} from "../Store/router";
 import GlobalListUI from "./Global/GlobalListUI";
 
 export default class GlobalUI extends BaseComponent<{}, {}> {

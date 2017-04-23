@@ -1,6 +1,8 @@
+import "./Start_0"; // fake/empty import, so this module is correctly seen as module (rather than raw js script)
+
 // special, early, definitely-safe codes
 var g = window as any;
-g.g = g;
+declare global { const g; } g.g = g;
 /*var JQuery = require("../../../Source/Frame/JQuery/JQuery3.1.0"); // maybe temp; moved here for $().append testing
 g.JQuery = JQuery;
 g.jQuery = JQuery;
@@ -25,9 +27,10 @@ if (supportedBrowsers.indexOf(browser) == -1) {
 Object.freeze = obj=>obj; // mwahahaha!! React can no longer freeze its objects, so we can do as we please
 Object.isFrozen = obj=>true;
 
-// set this up, so we can see Googlebot errors!
+// set this up, so we can see Googlebot errors! (in "Fetch as Google" panel)
 let isBot = /bot|crawler|spider|robot|crawling|google|bing|duckduckgo|msn|slurp|yandex|baidu|aolbuild|teoma/i.test(navigator.userAgent);
-g.isBot = isBot;
+//declare global { const isBot: string; } g.Extend({isBot});
+declare global { const isBot: string; } g.isBot = isBot;
 if (isBot) {
 	g.onerror = function(message, url, line, column, error) {
 		console.log(arguments);
@@ -52,4 +55,10 @@ if (isBot) {
 
 		document.body.appendChild(container);
 	};
+}
+
+declare global { function G(...globalHolders); } g.G = G;
+function G(...globalHolders) {
+	for (let globalHolder of globalHolders)
+		g.Extend(globalHolder);
 }

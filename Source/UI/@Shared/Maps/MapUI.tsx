@@ -56,16 +56,21 @@ export function UpdateFocusNodeAndViewOffset(mapID: number) {
 
 	let oldNodeView = GetNodeView(mapID, focusNodePath);
 	if (oldNodeView == null || !oldNodeView.focus || !viewOffset.Equals(oldNodeView.viewOffset))
-		store.dispatch(new ACTViewCenterChange({mapID, focusNode: focusNodeBoxComp.props.path, viewOffset}));
+		store.dispatch(new ACTViewCenterChange({mapID, focusNodePath, viewOffset}));
 }
 
 type Props = {map: Map, rootNode?: MapNode, padding?: {left: number, right: number, top: number, bottom: number}, withinPage?: boolean} & React.HTMLProps<HTMLDivElement>
 	& Partial<{rootNode: MapNode, focusNode: string, viewOffset: {x: number, y: number}}>;
 @Connect((state: RootState, {map, rootNode}: Props)=> {
 	let url = URL.Current();
-	let rootNodeID = IsNumberString(url.pathNodes.LastOrX()) ? parseInt(url.pathNodes.LastOrX()) : (map ? map.rootNode : null);
-	if (rootNode == null && rootNodeID != null)
-		rootNode = GetNode(rootNodeID);
+	if (rootNode == null && map && map.rootNode)
+		rootNode = GetNode(map.rootNode);
+
+	let lastPathNode = url.pathNodes.LastOrX();
+	let crawlerURLMatch = lastPathNode && lastPathNode.match(/\.([0-9]+)$/);
+	if (isBot && crawlerURLMatch)
+		rootNode = GetNode(parseInt(crawlerURLMatch[1]));
+
 	return {
 		rootNode,
 		/*focusNode: GetMapView(state, {map}) ? GetMapView(state, {map}).focusNode : null,

@@ -28,7 +28,15 @@ import {ACTNodeCopy} from "../../../../Store/main";
 import Select from "../../../../Frame/ReactComponents/Select";
 import {GetEntries, GetValues} from "../../../../Frame/General/Enums";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
-import {GetNode, IsLinkValid, IsNewLinkValid, ForDelete_GetError, ForUnlink_GetError, GetParentNode} from "../../../../Store/firebase/nodes";
+import {
+    ForDelete_GetError,
+    ForUnlink_GetError,
+    GetNode,
+    GetNodeParentsAsync,
+    GetParentNode,
+    IsLinkValid,
+    IsNewLinkValid
+} from "../../../../Store/firebase/nodes";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
@@ -132,7 +140,7 @@ Usually, it's best to make a new one (with the same title), and just copy the pr
 						});
 					});*/
 
-					let parentNodes = await Promise.all(node.parents.VKeys(true).map(parentID=>GetDataAsync(`nodes/${parentID}`)));
+					let parentNodes = await GetNodeParentsAsync(node);
 					if (parentNodes.length <= 1)
 						return void ShowMessageBox({title: "Cannot unlink", message: "Cannot unlink this child, as doing so would orphan it. Try deleting it instead."});
 
@@ -157,7 +165,7 @@ Usually, it's best to make a new one (with the same title), and just copy the pr
 					if (error)
 						return void ShowMessageBox({title: "Cannot delete", message: error});
 
-					let parentNodes = await Promise.all(node.parents.VKeys(true).map(parentID=>GetDataAsync(`nodes/${parentID}`))) as MapNode[];
+					let parentNodes = await GetNodeParentsAsync(node);
 					if (parentNodes.length > 1)
 						return void ShowMessageBox({title: "Cannot delete", message: "Cannot delete this child, as it has more than one parent. Try unlinking it instead."});
 					//let s_ifParents = parentNodes.length > 1 ? "s" : "";

@@ -1,8 +1,8 @@
+import {GetNodeAsync} from "../../Store/firebase/nodes";
 import {GetTreeNodesInObjTree} from "../V/V";
 import Action from "../General/Action";
 import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange} from "../../Store/main/mapViews/$mapView/rootNodeViews";
 import {LoadURL, UpdateURL} from "../URL/URLManager";
-import {GetPathNodes, GetPath} from "../../Store/router";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 import {DBPath, GetData, GetDataAsync, ProcessDBData} from "../Database/DatabaseHelpers";
 import {GetMapView} from "../../Store/main/mapViews";
@@ -12,6 +12,10 @@ import ReactGA from "react-ga";
 import {URL} from "../General/URLs";
 import {Log} from "../Serialization/VDF/VDF";
 import {replace} from "react-router-redux";
+import {CreateMapViewForPath, GetShortestPathFromRootToNode} from "./PathFinder";
+import {ACTNotificationMessageAdd} from "../../Store/main";
+import NotificationMessage from "../../Store/main/@NotificationMessage";
+import {GetNodeDisplayText} from "../../Store/firebase/nodes/@MapNode";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -76,34 +80,53 @@ export async function PostDispatchAction(action: Action<any>) {
 		}
 	}
 	if (action.type == "@@router/LOCATION_CHANGE") {
-		let url = URL.FromState(action.payload).toString(false);
+		//let oldURL = URL.Current();
+		let url = URL.FromState(action.payload);
 		//let url = window.location.pathname;
-		ReactGA.set({page: url});
-		ReactGA.pageview(url || "/");
+		ReactGA.set({page: url.toString(false)});
+		ReactGA.pageview(url.toString(false) || "/");
 		//Log("Page-view: " + url);
 
 		//setTimeout(()=>UpdateURL());
 		UpdateURL();
-		if (GetPath().startsWith("global/map")) {
-			// we don't yet have a good way of knowing when loading is fully done; so just do a timeout
-			WaitXThenRun(0, UpdateURL, 200);
-			WaitXThenRun(0, UpdateURL, 400);
-			WaitXThenRun(0, UpdateURL, 800);
-			WaitXThenRun(0, UpdateURL, 1600);
+		if (url.WithImpliedPathNodes().toString(false).startsWith("/global/map")) {
+			if (isBot) {
+				/*let newURL = url.Clone();
+				let node = await GetNodeAsync(nodeID);
+				let node = await GetNodeAsync(nodeID);
+				newURL.pathNodes[1] = "";
+				store.dispatch(replace(newURL.toString(false)));*/
+			} else {
+				// we don't yet have a good way of knowing when loading is fully done; so just do a timeout
+				WaitXThenRun(0, UpdateURL, 200);
+				WaitXThenRun(0, UpdateURL, 400);
+				WaitXThenRun(0, UpdateURL, 800);
+				WaitXThenRun(0, UpdateURL, 1600);
+			}
 		}
 		// If user followed search-result link (eg. "debatemap.live/global/156"), we only know the node-id.
-		// Resolve this node-id into a "shortest path", from the map's root.
-		if (GetPath().match(/global\/[0-9]/) && !isBot) {
-			// todo
-			/*let oldURL = URL.Current();
-			let newURL = new URL(oldURL.domain, oldURL.pathNodes);
-			if (GetPath().startsWith("global/map"))
-				newURL = CreateURL_Globals();
-			if (!State().main.analyticsEnabled && newURL.GetQueryVar("analytics") == null)
-				newURL.SetQueryVar("analytics", "false");
-			if (State().main.envOverride)
-				newURL.SetQueryVar("env", State().main.envOverride);
-			store.dispatch(replace(newURL.toString(false)));*/
+		// Search for the shortest path from the map's root to this node, and update the view and url to that path.
+		//if (url.pathNodes[0] == "global" && url.pathNodes[1] != null && url.pathNodes[1].match(/^[0-9]+$/) && !isBot) {
+		if (url.toString(false).match(/^\/global\/[0-9]+$/) && !isBot) {
+			let nodeID = parseInt(url.pathNodes[1]);
+			let node = await GetNodeAsync(nodeID);
+			if (node) {
+				let shortestPathToNode = await GetShortestPathFromRootToNode(1, node);
+				if (shortestPathToNode) {
+					let mapViewForPath = CreateMapViewForPath(shortestPathToNode);
+					//Log(`Found shortest path (${shortestPathToNode}), so merging: ` + ToJSON(mapViewForPath));
+					store.dispatch(new ACTMapViewMerge({mapID: 1, mapView: mapViewForPath}));
+				} else {
+					store.dispatch(new ACTNotificationMessageAdd(new NotificationMessage(
+						`Could not find a path to the node specified in the url (#${nodeID}, title: "${GetNodeDisplayText(node)}").`)));
+				}
+			} else {
+				store.dispatch(new ACTNotificationMessageAdd(new NotificationMessage(`The node specified in the url (#${nodeID}) was not found.`)));
+			}
+
+			let newURL = url.Clone();
+			newURL.pathNodes.RemoveAt(1);
+			store.dispatch(replace(newURL.toString(false)));
 		}
 	}
 

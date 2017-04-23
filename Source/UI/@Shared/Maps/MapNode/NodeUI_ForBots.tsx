@@ -11,15 +11,14 @@ import Column from "../../../../Frame/ReactComponents/Column";
 import Row from "../../../../Frame/ReactComponents/Row";
 import {URL} from "../../../../Frame/General/URLs";
 import Link from "../../../../Frame/ReactComponents/Link";
-import {
-    GetMainRatingTypesForNode,
-    GetNodeDisplayText,
-    MapNode,
-    ThesisForm
-} from "../../../../Store/firebase/nodes/@MapNode";
 import {BaseComponent, BaseProps, Pre} from "../../../../Frame/UI/ReactGlobals";
+import {GetNodeDisplayText, MapNode} from "../../../../Store/firebase/nodes/@MapNode";
 
 let childrenPlaceholder = [];
+
+function GetCrawlerURLStrForNode(node: MapNode) {
+	return GetNodeDisplayText(node).toLowerCase().replace(/[^a-z]/g, "-").replace(/--/g, "-").TrimStart("-").TrimEnd("-") + "." + node._id.toString()
+}
 
 type Props = {map: Map, node: MapNode}
 	& Partial<{nodeParents: MapNode[], nodeChildren: MapNode[]}>;
@@ -38,13 +37,16 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 				<Row>
 					<Pre>Parents: </Pre>{nodeParents.map((parent, index)=> {
 						let toURL = URL.Current();
-						toURL.pathNodes[1] = parent._id.toString();
+						if (parent._id == map.rootNode)
+							toURL.pathNodes.RemoveAt(1);
+						else
+							toURL.pathNodes[1] = GetCrawlerURLStrForNode(parent);
 						toURL.queryVars = [];
 						return (
 							<span key={index}>
 								{index > 0 ? ", " : ""}
 								<Link to={toURL.toString(false)}>
-									{GetNodeDisplayText(parent, ThesisForm.Base) || parent.titles.VValues(true).FirstOrX(a=>!!a)} ({parent._id})
+									{GetNodeDisplayText(parent)} ({parent._id})
 								</Link>
 							</span>
 						);
@@ -53,20 +55,20 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 				<Row>
 					<Pre>Children: </Pre>{nodeChildren.map((child, index)=> {
 						let toURL = URL.Current();
-						toURL.pathNodes[1] = child._id.toString();
+						toURL.pathNodes[1] = GetCrawlerURLStrForNode(child);
 						toURL.queryVars = [];
 						return (
 							<span key={index}>
 								{index > 0 ? ", " : ""}
 								<Link to={toURL.toString(false)}>
-									{GetNodeDisplayText(child, ThesisForm.Base) || child.titles.VValues(true).FirstOrX(a=>!!a)} ({child._id})
+									{GetNodeDisplayText(child)} ({child._id})
 								</Link>
 							</span>
 						);
 					})}
 				</Row>
 				<Row>ID: {node._id}</Row>
-				<Row>Title: {GetNodeDisplayText(node, ThesisForm.Base) || node.titles.VValues(true).FirstOrX(a=>!!a)}</Row>
+				<Row>Title: {GetNodeDisplayText(node)}</Row>
 			</Column>
 		);
 	}
