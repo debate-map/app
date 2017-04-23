@@ -11,6 +11,7 @@ import {RootState} from "../../Store/index";
 import ReactGA from "react-ga";
 import {URL} from "../General/URLs";
 import {Log} from "../Serialization/VDF/VDF";
+import {replace} from "react-router-redux";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -89,6 +90,20 @@ export async function PostDispatchAction(action: Action<any>) {
 			WaitXThenRun(0, UpdateURL, 400);
 			WaitXThenRun(0, UpdateURL, 800);
 			WaitXThenRun(0, UpdateURL, 1600);
+		}
+		// If user followed search-result link (eg. "debatemap.live/global/156"), we only know the node-id.
+		// Resolve this node-id into a "shortest path", from the map's root.
+		if (GetPath().match(/global\/[0-9]/) && !isBot) {
+			// todo
+			/*let oldURL = URL.Current();
+			let newURL = new URL(oldURL.domain, oldURL.pathNodes);
+			if (GetPath().startsWith("global/map"))
+				newURL = CreateURL_Globals();
+			if (!State().main.analyticsEnabled && newURL.GetQueryVar("analytics") == null)
+				newURL.SetQueryVar("analytics", "false");
+			if (State().main.envOverride)
+				newURL.SetQueryVar("env", State().main.envOverride);
+			store.dispatch(replace(newURL.toString(false)));*/
 		}
 	}
 

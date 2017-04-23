@@ -63,9 +63,9 @@ type Props = {map: Map, rootNode?: MapNode, padding?: {left: number, right: numb
 	& Partial<{rootNode: MapNode, focusNode: string, viewOffset: {x: number, y: number}}>;
 @Connect((state: RootState, {map, rootNode}: Props)=> {
 	let url = URL.Current();
-	let rootNodeID = IsNumberString(url.pathNodes.Last()) ? parseInt(url.pathNodes.Last()) : map.rootNode;
-	if (rootNode == null)
-		rootNode = map && GetNode(rootNodeID);
+	let rootNodeID = IsNumberString(url.pathNodes.LastOrX()) ? parseInt(url.pathNodes.LastOrX()) : (map ? map.rootNode : null);
+	if (rootNode == null && rootNodeID != null)
+		rootNode = GetNode(rootNodeID);
 	return {
 		rootNode,
 		/*focusNode: GetMapView(state, {map}) ? GetMapView(state, {map}).focusNode : null,

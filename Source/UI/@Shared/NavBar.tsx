@@ -30,6 +30,10 @@ import {GetPathNodes} from "../../Store/router";
 import {rootPages} from "../Root";
 import {Log} from "../../Frame/Serialization/VDF/VDF";
 import NotificationsUI from "./NavBar/NotificationsUI";
+import Column from "../../Frame/ReactComponents/Column";
+import Row from "../../Frame/ReactComponents/Row";
+import ReputationPanel from "./NavBar/ReputationPanel";
+import GuidePanel from "./NavBar/GuidePanel";
 
 // main
 // ==========
@@ -65,11 +69,20 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 					<span style={{position: "absolute", left: 0}}>
 						<NavBarPanelButton to="/stream" text="Stream" panel="stream" corner="top-left"/>
 						<NavBarPanelButton to="/chat" text="Chat" panel="chat" corner="top-left"/>
+						<NavBarPanelButton to="/reputation" text={
+							<Div style={{position: "relative", height: 45}}>
+								<Div style={{color: "rgba(255,255,255,1)", justifyContent: "center"}}>Rep: n/a</Div>
+								{/*<Div style={{color: "rgba(255,255,255,1)", justifyContent: "center"}}>Rep: 100</Div>
+								<Div style={{position: "absolute", bottom: 3, width: "100%", textAlign: "center",
+									fontSize: 11, lineHeight: "11px", color: "rgba(0,255,0,.7)"}}>+100</Div>*/}
+							</Div> as any
+						} panel="reputation" corner="top-left"/>
 					</span>
 					<div style={{position: "absolute", zIndex: 11, left: 0, top: 45,
 							boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 -150px -150px 0)", display: "table"}}>
 						{topLeftOpenPanel == "stream" && <StreamPanel/>}
 						{topLeftOpenPanel == "chat" && <ChatPanel/>}
+						{topLeftOpenPanel == "reputation" && <ReputationPanel/>}
 					</div>
 					<Div ct style={{position: "absolute", left: 0, right: 0, top: 45}}>
 						<NotificationsUI/>
@@ -89,11 +102,13 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
 						<NavBarPanelButton to="/search" text="Search" panel="search" corner="top-right"/>
+						<NavBarPanelButton to="/guide" text="Guide" panel="guide" corner="top-right"/>
 						<NavBarPanelButton to={auth ? "/profile" : "/sign-in"} text={auth ? auth.displayName.match(/(.+?)( |$)/)[1] : `Sign in`} panel="user" corner="top-right"/>
 					</span>
 					<div style={{position: "absolute", zIndex: 11, right: 0, top: 45,
 							boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 0 -150px -150px)", display: "table"}}>
 						{topRightOpenPanel == "search" && <SearchPanel/>}
+						{topRightOpenPanel == "guide" && <GuidePanel/>}
 						{topRightOpenPanel == "user" && <UserPanel/>}
 					</div>
 				</div>

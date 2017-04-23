@@ -55,7 +55,7 @@ Responses are now directly next to the points they're made against -- easing the
 
 <span style="color: ${red};">
 Problem:</span>
-The topic under debate is large, with dozens of points to consider. Thread-based mediums give no help in finding the strongest ones, forcing you to skim through them all.
+Topics under debate can be large, with dozens of points to consider. Thread-based mediums give no help in finding the strongest ones, forcing you to skim through them all.
 
 <span style="color: ${green};">
 Solution:</span>
@@ -122,11 +122,11 @@ For example, one can now easily answer questions such as:
 * How do flat-earthers reconcile the time-zone differences between east and west hemispheres?
 * What president would have been elected, if the candidates were voted on by those living in country X?
 * Is there any correlation between one's political group, and their preference in mobile phone operating systems?
-* How much has support for legal marijuana changed over the past 5 years? And what changes in arguments, perceptions, or demographics correspond with this?
+* How much has support for legal marijuana changed over the past 5 years? And what changes in arguments and argument perceptions correspond with this?
 
 ### Detailed worldview sharing
 
-By acting as a global, flexible, and crowd-sourced tree of theses, communicating your view of the world becomes much faster. Instead of writing instance-specific text
+By acting as a global, crowd-sourced tree of theses, communicating your view of the world becomes much faster. Instead of writing instance-specific text
 	for each conversation, you can map your views once, and simply form a "remix" of your personal belief tree that is tailored for the conversation at hand.
 
 The conversation can then proceed from that point, with the reasoning behind your views now known and easily referencable in the background.
