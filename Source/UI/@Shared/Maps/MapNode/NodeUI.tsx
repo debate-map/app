@@ -32,11 +32,12 @@ import {
     MapNode
 } from "../../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {GetNodeChildIDs, GetNodeChildren} from "../../../../Store/firebase/nodes";
+import {GetNodeChildren} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
+import Column from "../../../../Frame/ReactComponents/Column";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -67,10 +68,10 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 		return {
 			path: path || node._id.toString(),
 			// only pass new nodeView when its local-props are different
-			nodeView: CachedTransform("nodeView_process1", {mapID: map._id, path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
+			nodeView: CachedTransform("nodeView_transform1", {mapID: map._id, path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
 			// only pass nodeChildren when all are loaded
-			nodeChildren: CachedTransform("nodeChildren_process1", {nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : childrenPlaceholder),
-			nodeChildren_fillPercents: CachedTransform("fillPercents_process1", {nodeID: node._id}, nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
+			nodeChildren: CachedTransform("nodeChildren_transform1", {nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : childrenPlaceholder),
+			nodeChildren_fillPercents: CachedTransform("fillPercents_transform1", {nodeID: node._id}, nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
 		};
 	});
 })

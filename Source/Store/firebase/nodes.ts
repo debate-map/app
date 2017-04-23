@@ -17,20 +17,25 @@ export function GetParentNode(path: string) {
 	return GetNode(path.split("/").map(a=>parseInt(a)).XFromLast(1));
 }
 
-export function GetNodeChildIDs(nodeID: number) {
+export function GetNodeParents(node: MapNode) {
+	let parents = (node.parents || {}).VKeys(true).map(id=>GetNode(parseInt(id)));
+	return CachedTransform("GetNodeParents", {nodeID: node._id}, parents, ()=>parents);
+}
+
+/*export function GetNodeChildIDs(nodeID: number) {
 	let node = GetNode(nodeID);
 	// any time the childIDs changes, we know the node object changes as well; so just cache childIDs on node
 	if (node["@childIDs"] == null)
-		node.VSet("@childIDs", (node.children || {}).VKeys().Except("_key").map(id=>parseInt(id)), {});
+		node.VSet("@childIDs", (node.children || {}).VKeys(true).map(id=>parseInt(id)), {});
 	return node["@childIDs"];
-}
+}*/
 export function GetNodeChildren(node: MapNode) {
 	// special case, for demo map
 	if (node.children && node.children[0] instanceof MapNode) {
 		return node.children as MapNode[];
 	}
 
-	let children = (node.children || {}).VKeys().Except("_key").map(id=>GetNode(parseInt(id)));
+	let children = (node.children || {}).VKeys(true).map(id=>GetNode(parseInt(id)));
 	return CachedTransform("GetNodeChildren", {nodeID: node._id}, children, ()=>children);
 }
 

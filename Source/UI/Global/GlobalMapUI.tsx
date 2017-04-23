@@ -10,14 +10,15 @@ import ScrollView from "react-vscrollview";
 import {RootState} from "../../Store/index";
 import {Map} from "../../Store/firebase/maps/@Map";
 import {Connect} from "../../Frame/Database/FirebaseConnect";
+import {GetMap} from "../../Store/firebase/maps";
 
 @Connect(state=> ({
-	//map: helpers.dataToJS(firebase, DBPath("maps/1")),
-	map: GetData("maps/1"),
+	map: GetMap(1),
 }))
 export default class GlobalMapUI extends BaseComponent<Partial<{map: Map}>, {}> {
 	render() {
 		let {map} = this.props;
+		
 		return (
 			<MapUI map={map}/>
 		);

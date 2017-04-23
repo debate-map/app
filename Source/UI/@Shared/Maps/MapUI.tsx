@@ -1,5 +1,5 @@
 import {GetFocusNode, GetViewOffset, GetSelectedNodePath, GetNodeView} from "../../../Store/main/mapViews";
-import {BaseComponent, FindDOM, FindReact, FindDOM_} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, FindDOM, FindReact, FindDOM_, Pre} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
 import {connect} from "react-redux";
@@ -17,7 +17,7 @@ import NodeUI_Inner from "./MapNode/NodeUI_Inner";
 //import ReactResizeDetector from "react-resize-detector"; // this one doesn't seem to work reliably -- at least for the map-ui
 import ResizeSensor from "react-resize-sensor";
 import {WaitXThenRun, Timer} from "../../../Frame/General/Timers";
-import {MapNode} from "../../../Store/firebase/nodes/@MapNode";
+import {MapNode, GetNodeDisplayText, ThesisForm} from "../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../Store/firebase/maps/@Map";
 import {RootState} from "../../../Store/index";
 import {GetMapView} from "../../../Store/main/mapViews";
@@ -25,6 +25,13 @@ import {GetUserID} from "../../../Store/firebase/users";
 import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import {UpdateURL} from "../../../Frame/URL/URLManager";
+import Column from "../../../Frame/ReactComponents/Column";
+import {GetNode} from "../../../Store/firebase/nodes";
+import Row from "../../../Frame/ReactComponents/Row";
+import Link from "../../../Frame/ReactComponents/Link";
+import {URL} from "../../../Frame/General/URLs";
+import NodeUI_ForBots from "./MapNode/NodeUI_ForBots";
+import {IsNumberString} from "../../../Frame/General/Types";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -54,13 +61,19 @@ export function UpdateFocusNodeAndViewOffset(mapID: number) {
 
 type Props = {map: Map, rootNode?: MapNode, padding?: {left: number, right: number, top: number, bottom: number}, withinPage?: boolean} & React.HTMLProps<HTMLDivElement>
 	& Partial<{rootNode: MapNode, focusNode: string, viewOffset: {x: number, y: number}}>;
-@Connect((state: RootState, {map, rootNode}: Props)=> ({
-	rootNode: rootNode || (map && GetData(`nodes/${map.rootNode}`)),
-	/*focusNode: GetMapView(state, {map}) ? GetMapView(state, {map}).focusNode : null,
-	viewOffset: GetMapView(state, {map}) ? GetMapView(state, {map}).viewOffset : null,*/
-	/*focusNode_available: (GetMapView(state, {map}) && GetMapView(state, {map}).focusNode) != null,
-	viewOffset_available: (GetMapView(state, {map}) && GetMapView(state, {map}).viewOffset) != null,*/
-}))
+@Connect((state: RootState, {map, rootNode}: Props)=> {
+	let url = URL.Current();
+	let rootNodeID = IsNumberString(url.pathNodes.Last()) ? parseInt(url.pathNodes.Last()) : map.rootNode;
+	if (rootNode == null)
+		rootNode = map && GetNode(rootNodeID);
+	return {
+		rootNode,
+		/*focusNode: GetMapView(state, {map}) ? GetMapView(state, {map}).focusNode : null,
+		viewOffset: GetMapView(state, {map}) ? GetMapView(state, {map}).viewOffset : null,*/
+		/*focusNode_available: (GetMapView(state, {map}) && GetMapView(state, {map}).focusNode) != null,
+		viewOffset_available: (GetMapView(state, {map}) && GetMapView(state, {map}).viewOffset) != null,*/
+	};
+})
 export default class MapUI extends BaseComponent<Props, {} | void> {
 	static defaultProps = {padding: {left: 2000, right: 2000, top: 1000, bottom: 1000}};
 
@@ -73,6 +86,10 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		Assert(map._id, "map._id is null!");
 		if (rootNode == null)
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading root node...</div>;
+
+		if (isBot)
+			return <NodeUI_ForBots map={map} node={rootNode}/>;
+
 		return (
 			<ScrollView {...rest} ref="scrollView"
 					backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.mapUI}

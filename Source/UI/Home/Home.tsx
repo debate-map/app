@@ -88,7 +88,7 @@ Break down arguments into their constituent parts, and let each part be connecte
 Problem:</span>
 Some viewpoints repeatedly encounter resistance whenever attempted to be argued for.
 This discourages new ideas from being presented -- and when they are presented, makes it harder for them to be heard,
-	as they can be "buried" (or even kept from publication) by the more numerous majority.
+	as they can be "buried" (or even blocked) by the more numerous majority.
 
 <span style="color: ${green};">
 Solution:</span>
@@ -245,6 +245,7 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> 
 					Text: props=> {
 						if (props.literal == "GlobalMapPlaceholder") {
 							let root, mapUI: MapUI, test2;
+							if (isBot) return <div/>;
 							return (
 								<div ref={c=>root = FindDOM_(c)} style={{margin: "0 -50px", /*height: 500,*/ userSelect: "none", position: "relative"}}>
 									<style>{`
