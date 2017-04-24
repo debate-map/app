@@ -31,13 +31,17 @@ export class MapNode {
 	disagrees = 0;
 	weight = 0;*/
 	
-	parents = {} as ParentSet;
-	children = {} as ChildSet;
+	parents: ParentSet;
+	children: ChildSet;
 	talkRoot: number;
 }
 ajv.addSchema({
 	properties: {
-		type: {oneOf: GetValues_ForSchema(MapNodeType)},
+		type: {
+			allOf: [
+				{oneOf: GetValues_ForSchema(MapNodeType)},
+			],
+		},
 		titles: {
 			properties: {
 				base: {type: "string"}, negation: {type: "string"}, yesNoQuestion: {type: "string"},
@@ -56,7 +60,10 @@ ajv.addSchema({
 		//talkRoot: {type: "number"},
 		additionalProperties: false,
 	},
-	required: ["type", "titles", "creator", "createdAt"],
+	required: ["type", "creator", "createdAt"],
+	// if not a meta-thesis, require "titles" prop
+	if: {not: {required: ["metaThesis"]}},
+	then: {required: ["titles"]},
 }, "MapNode");
 
 export enum AccessLevel {

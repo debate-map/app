@@ -81,7 +81,6 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 
 			if (isArgument) {
 				var metaThesisNode = new MapNode({
-					parents: {[newChildNode._id]: {_: true}},
 					type: MapNodeType.Thesis, creator: userID, approved: true,
 					metaThesis: {ifType: info.metaThesis.ifType, thenType: info.metaThesis.thenType},
 				});
