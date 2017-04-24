@@ -30,7 +30,7 @@
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true
     },
-	"files": ["Source/Main.tsx"],
+	"files": ["Source/Main.ts"],
     "include": [
         "Typings/**/*.d.ts",
 		//"Typings/globals/**/*.d.ts",

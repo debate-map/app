@@ -1,4 +1,4 @@
-import {MapNode, MetaThesis_IfType, MetaThesis_ThenType, MetaThesis_ThenType_Info, IsNodeTitleValid_GetError, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, IsNodeTitleValid_GetError} from "../../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
@@ -25,6 +25,7 @@ import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
 import {QuoteInfoEditorUI} from "../NodeUI_Menu/AddChildDialog";
 import {E} from "../../../../../Frame/General/Globals_Free";
 import Row from "../../../../../Frame/ReactComponents/Row";
+import {MetaThesis_ThenType, MetaThesis_ThenType_Info, MetaThesis_IfType, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 

@@ -199,3 +199,8 @@ String.prototype._AddFunction_Inline = function Substring(start, end) {
         end = this.length + end;
     return this.substring(start, end);
 };
+
+interface String { ToInt(): number; }
+String.prototype._AddFunction_Inline = function ToInt() { return parseInt(this); }
+interface String { ToFloat(): number; }
+String.prototype._AddFunction_Inline = function ToFloat() { return parseFloat(this); }

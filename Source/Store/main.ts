@@ -31,7 +31,7 @@ export class MainState {
 
 	openMap: number;
 	mapViews: MapViews;
-	copiedNode: number;
+	copiedNodePath: string;
 }
 export class ACTTopLeftOpenPanelSet extends Action<string> {}
 export class ACTTopRightOpenPanelSet extends Action<string> {}
@@ -39,7 +39,7 @@ export class ACTTopRightOpenPanelSet extends Action<string> {}
 export class ACTNotificationMessageAdd extends Action<NotificationMessage> {}
 export class ACTNotificationMessageRemove extends Action<number> {}
 //export class ACTOpenMapSet extends Action<number> {}
-export class ACTNodeCopy extends Action<number> {}
+export class ACTNodeCopy extends Action<{path: string}> {}
 
 let MainReducer_Real;
 export function MainReducer(state, action) {
@@ -89,9 +89,9 @@ export function MainReducer(state, action) {
 			return state;
 		},
 		mapViews: MapViewsReducer,
-		copiedNode: (state = null as number, action)=> {
+		copiedNodePath: (state = null as string, action)=> {
 			if (action.Is(ACTNodeCopy))
-				return action.payload;
+				return action.payload.path;
 			return state;
 		}
 	});

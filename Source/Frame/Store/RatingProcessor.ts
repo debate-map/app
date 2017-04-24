@@ -1,8 +1,9 @@
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {MapNode, MetaThesis_ThenType, MetaThesis_IfType, GetMainRatingTypesForNode} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, GetMainRatingTypesForNode} from "../../Store/firebase/nodes/@MapNode";
 import {GetRating, GetRatingValue, GetRatingSet} from "../../Store/firebase/nodeRatings";
 import {GetRatingAverage, GetRatings} from "../../Store/firebase/nodeRatings";
 import {Rating} from "../../Store/firebase/nodeRatings/@RatingsRoot";
+import {MetaThesis_IfType, MetaThesis_ThenType} from "../../Store/firebase/nodes/@MetaThesisInfo";
 
 /*export function CalculateArgumentStrength(nodeChildren: MapNode[]) {
 	if (nodeChildren.Any(a=>a == null)) return 0; // must still be loading

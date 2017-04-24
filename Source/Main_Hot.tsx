@@ -29,9 +29,18 @@ if (devEnv) {
 		ParseModuleData();
 		G({R: Require});
 		let RR = {};
-		for (let moduleExports of (Require as any).VValues()) {
+		for (let {name: moduleName, value: moduleExports} of (Require as any).Props()) {
 			try {
-				RR.Extend(moduleExports);
+				for (let key in moduleExports) {
+					let finalKey = key;
+					while (finalKey in RR) finalKey += "_";
+					RR[finalKey] = moduleExports[key];
+				}
+				if (moduleExports.default) {
+					let finalKey = moduleName;
+					while (finalKey in RR) finalKey += "_";
+					RR[finalKey] = moduleExports.default;
+				}
 			} catch (ex) {}
 		}
 		G({RR});

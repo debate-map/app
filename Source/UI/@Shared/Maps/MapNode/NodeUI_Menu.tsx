@@ -1,12 +1,5 @@
 import {GetDataAsync} from "../../../../Frame/Database/DatabaseHelpers";
-import {
-    GetNodeDisplayText,
-    GetValidChildTypes,
-	GetValidNewChildTypes,
-    MapNode,
-    MetaThesis_ThenType,
-    MetaThesis_ThenType_Info
-} from "../../../../Store/firebase/nodes/@MapNode";
+import {GetNodeDisplayText, GetValidChildTypes, GetValidNewChildTypes, MapNode} from "../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {VMenuStub} from "react-vmenu";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -32,6 +25,7 @@ import {
     ForDelete_GetError,
     ForUnlink_GetError,
     GetNode,
+    GetNodeChildrenAsync,
     GetNodeParentsAsync,
     GetParentNode,
     IsLinkValid,
@@ -40,8 +34,11 @@ import {
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
-import {ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
+import {ThesisForm, GetThesisFormAtPath} from "../../../../Store/firebase/nodes/@MapNode";
 import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
+import {GetNodeChildren} from "../../../../Store/firebase/nodes";
+import {E} from "../../../../Frame/General/Globals_Free";
+import AddNode from "../../../../Server/Commands/AddNode";
 
 type Props = {node: MapNode, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNode, copiedNode: MapNode}>;
 @Connect((state: RootState, {path}: Props)=> {
@@ -50,7 +47,7 @@ type Props = {node: MapNode, path: string} & Partial<{permissions: PermissionGro
 		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
 		permissions: GetUserPermissionGroups(GetUserID()), 
 		parentNode: GetParentNode(path),
-		copiedNode: GetNode(state.main.copiedNode),
+		copiedNode: state.main.copiedNodePath ? GetNode(state.main.copiedNodePath.split("/").Last().ToInt()) : null,
 	};
 })
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {
@@ -93,7 +90,7 @@ Usually, it's best to make a new one (with the same title), and just copy the pr
 							proceed();
 							function proceed() {
 								if (e.button == 0)
-									store.dispatch(new ACTNodeCopy(node._id));
+									store.dispatch(new ACTNodeCopy({path}));
 								else
 									store.dispatch(new ACTNodeCopy(null));
 							}
@@ -102,12 +99,26 @@ Usually, it's best to make a new one (with the same title), and just copy the pr
 					<VMenuItem text={`Paste as link: "${GetNodeDisplayText(copiedNode, thesisFormForThesisChild).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
-						//Store.dispatch(new ACTNodeCopy(null));
+
 						firebase.Ref(`nodes/${copiedNode._id}/parents`).update({[node._id]: {_: true}});
 						let linkInfo = {_: true} as any;
 						if (thesisFormForThesisChild)
 							linkInfo.form = thesisFormForThesisChild;
 						firebase.Ref(`nodes/${node._id}/children`).update({[copiedNode._id]: linkInfo});
+					}}/>}
+				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode, permissions) &&
+					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, thesisFormForThesisChild).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async e=> {
+						if (e.button != 0) return;
+						if (userID == null) return ShowSignInPopup();
+
+						let thesisForm = GetThesisFormAtPath(copiedNode, State().main.copiedNodePath);
+						let isArgument = copiedNode.type == MapNodeType.SupportingArgument || copiedNode.type == MapNodeType.OpposingArgument;
+						let copiedMetaThesis = isArgument ? (await GetNodeChildrenAsync(copiedNode)).First(a=>a.metaThesis != null) : null;
+
+						let newChildNode = FromJSON(ToJSON(copiedNode)).VSet({parents: {[node._id]: {_: true}}, children: {}});
+						if (isArgument)
+							var metaThesisNode = FromJSON(ToJSON(copiedMetaThesis)).VSet({parents: {}, children: {}});
+						new AddNode({node: newChildNode, form: thesisForm, metaThesisNode}).Run();
 					}}/>}
 				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={async e=> {
 					if (e.button != 0) return;

@@ -42,7 +42,7 @@ if (__PROD__) {
 // Entry Points
 // ==========
 
-const APP_ENTRY = paths.client(USE_TSLOADER ? "Main.tsx" : "Main.js");
+const APP_ENTRY = paths.client(USE_TSLOADER ? "Main.ts" : "Main.js");
 
 webpackConfig.entry = {
 	app: __DEV__

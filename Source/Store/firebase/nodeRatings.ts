@@ -2,9 +2,10 @@ import {GetArgumentStrengthPseudoRating, GetArgumentStrengthPseudoRatingSet} fro
 import {RatingType} from "../../Store/firebase/nodeRatings/@RatingType";
 import {GetData} from "../../Frame/Database/DatabaseHelpers";
 import {CachedTransform} from "../../Frame/V/VCache";
-import {MapNode, MetaThesis_ThenType} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {RatingsRoot, Rating} from "./nodeRatings/@RatingsRoot";
 import {GetNodeChildren, GetNode} from "./nodes";
+import {MetaThesis_ThenType} from "./nodes/@MetaThesisInfo";
 
 export function GetNodeRatingsRoot(nodeID: number) {
 	//RequestPaths(GetPaths_NodeRatingsRoot(nodeID));

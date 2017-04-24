@@ -5,6 +5,7 @@ import "webpack-runtime-require";
 import "./Frame/General/Start_0";
 import "./Frame/General/CE";
 import "./Frame/General/Start_1";
+import "./Server/Server";
 
 import ReactDOM from "react-dom";
 import {Store} from "redux";

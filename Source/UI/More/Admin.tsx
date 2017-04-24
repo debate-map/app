@@ -25,12 +25,16 @@ export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>F
 }
 
 export interface FirebaseData {
+	general: GeneralData;
 	users: {[key: string]: User};
 	userExtras: {[key: string]: UserExtraInfo};
 	maps: {[key: string]: Map};
 	nodes: {[key: string]: MapNode};
 	nodeExtras: {[key: string]: any};
 	nodeRatings: {[key: string]: RatingsSet};
+}
+export interface GeneralData {
+	lastNodeID: number;
 }
 
 export default class AdminUI extends BaseComponent<{}, {}> {

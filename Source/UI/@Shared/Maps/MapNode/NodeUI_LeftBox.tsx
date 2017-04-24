@@ -5,13 +5,14 @@ import {E} from "../../../../Frame/General/Globals_Free";
 import {connect} from "react-redux";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {MapNode, MetaThesis_ThenType, GetMainRatingTypesForNode} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, GetMainRatingTypesForNode} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {GetRatingAverage, GetRatings} from "../../../../Store/firebase/nodeRatings";
 import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
+import {MetaThesis_ThenType} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
 
 type Props = {
 	parent: MapNodeUI_Inner, map: Map, path: string, node: MapNode, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,

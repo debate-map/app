@@ -1,6 +1,6 @@
 import {MapNodeType, MapNodeType_Info} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
-import {MetaThesis_IfType, MetaThesis_ThenType, MetaThesis_ThenType_Info, MapNode, GetNodeDisplayText, ThesisForm, QuoteInfo} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, GetNodeDisplayText, ThesisForm, QuoteInfo} from "../../../../../Store/firebase/nodes/@MapNode";
 import {ShowMessageBox} from "../../../../../Frame/UI/VMessageBox";
 import Select from "../../../../../Frame/ReactComponents/Select";
 import TextInput from "../../../../../Frame/ReactComponents/TextInput";
@@ -10,6 +10,9 @@ import Column from "../../../../../Frame/ReactComponents/Column";
 import keycode from "keycode";
 import Button from "../../../../../Frame/ReactComponents/Button";
 import {SourcesUI} from "../NodeUI_Inner";
+import {E} from "../../../../../Frame/General/Globals_Free";
+import {MetaThesis_ThenType, MetaThesis_IfType, MetaThesis_ThenType_Info} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
+import AddNode from "../../../../../Server/Commands/AddNode";
 
 export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, userID: string) {
 	let firebase = store.firebase.helpers;
@@ -67,44 +70,24 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 			</Column>
 		),
 		onOK: ()=> {
-			firebase.Ref("nodes").transaction(nodes=> {
-				if (!nodes) return nodes;
+			let newChildNode = new MapNode({
+				parents: {[parentNode._id]: {_: true}},
+				type: childType, creator: userID, approved: true
+			});
+			if (childType == MapNodeType.Thesis && info.thesisType == "Quote")
+				newChildNode.quote = info.quote;
+			else
+				newChildNode.titles = thesisForm && thesisForm == ThesisForm.YesNoQuestion ? {yesNoQuestion: info.title} : {base: info.title};
 
-				let newID = nodes.VKeys(true).map(a=>parseInt(a)).Max().KeepAtLeast(99) + 1;
+			if (isArgument) {
+				var metaThesisNode = new MapNode({
+					parents: {[newChildNode._id]: {_: true}},
+					type: MapNodeType.Thesis, creator: userID, approved: true,
+					metaThesis: {ifType: info.metaThesis.ifType, thenType: info.metaThesis.thenType},
+				});
+			}
 
-				// add node
-				let newChildNode = new MapNode({type: childType, creator: userID, approved: true});
-				if (childType == MapNodeType.Thesis && info.thesisType == "Quote")
-					newChildNode.quote = info.quote;
-				else
-					newChildNode.titles = thesisForm && thesisForm == ThesisForm.YesNoQuestion ? {yesNoQuestion: info.title} : {base: info.title};
-				nodes[newID] = newChildNode;
-
-				// link with parent
-				newChildNode.parents[parentNode._id] = {_: true};
-				let linkInfo = {_: true} as any;
-				if (thesisForm)
-					linkInfo.form = thesisForm;
-				nodes[parentNode._id].children = {...nodes[parentNode._id].children, [newID]: linkInfo};
-
-				if (isArgument) {
-					let metaThesisID = newID + 1;
-
-					// add node
-					let metaThesisNode = new MapNode({
-						type: MapNodeType.Thesis,
-						metaThesis: {ifType: info.metaThesis.ifType, thenType: info.metaThesis.thenType},
-						creator: userID, approved: true,
-					});
-					nodes[metaThesisID] = metaThesisNode;
-
-					// link with parent
-					metaThesisNode.parents[newChildNode._id] = {_: true};
-					newChildNode.children = {...newChildNode.children, [metaThesisID]: {_: true}};
-				}
-
-				return nodes;
-			}, undefined, false);
+			new AddNode({node: newChildNode, form: thesisForm, metaThesisNode}).Run();
 		}
 	});
 }

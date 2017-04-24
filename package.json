@@ -130,6 +130,7 @@
   "author": "venryx (https://github.com/venryx)",
   "license": "MIT",
   "dependencies": {
+    "ajv": "^5.0.0",
     "bluebird": "^3.5.0",
     "keycode": "^2.1.8",
     "lodash": "^4.17.2",

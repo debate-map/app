@@ -1,6 +1,7 @@
-import {MapNode, MetaThesis_IfType} from "../nodes/@MapNode";
+import {MapNode} from "../nodes/@MapNode";
 import {Range} from "../../../Frame/General/Globals";
 import {MapNodeType} from "../nodes/@MapNodeType";
+import {MetaThesis_IfType} from "../nodes/@MetaThesisInfo";
 
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";

@@ -26,6 +26,13 @@ export default async function ResetCurrentDBRoot() {
 	let data = {} as FirebaseData;
 	let _ = true; // placeholder, for prop-less objects, which we want to still be saved
 
+	// general
+	// ==========
+
+	data.general = {
+		lastNodeID: 99,
+	};
+
 	// users
 	// ==========
 

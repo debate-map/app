@@ -63,6 +63,9 @@ export function _Enum(target: any) {
 export function GetEntries(enumType, nameModifierFunc?: (name: string)=>string) {
 	return Object.keys(enumType).Where(a=>a.match(/^\D/) != null).Select(name=>({name: nameModifierFunc ? nameModifierFunc(name) : name, value: enumType[name] as number}));
 }
-export function GetValues<T>(enumType, nameModifierFunc?: (name: string)=>string): T[] {
-	return GetEntries(enumType, nameModifierFunc).map(a=>a.value as any as T);
+export function GetValues<T>(enumType): T[] {
+	return GetEntries(enumType).map(a=>a.value as any as T);
+}
+export function GetValues_ForSchema<T>(enumType) {
+	return GetValues(enumType).map(value=>({const: value}));
 }

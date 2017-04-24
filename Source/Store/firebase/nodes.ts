@@ -45,6 +45,9 @@ export function GetNodeChildren(node: MapNode) {
 	let children = (node.children || {}).VKeys(true).map(id=>GetNode(parseInt(id)));
 	return CachedTransform("GetNodeChildren", {nodeID: node._id}, children, ()=>children);
 }
+export async function GetNodeChildrenAsync(node: MapNode) {
+	return await Promise.all(node.children.VKeys(true).map(id=>GetDataAsync(`nodes/${id}`))) as MapNode[];
+}
 
 export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNode) {
 	let parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;

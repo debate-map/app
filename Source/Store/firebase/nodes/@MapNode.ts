@@ -1,48 +1,10 @@
 import V from "../../../Frame/V/V";
-import {_Enum, Enum, GetValues} from "../../../Frame/General/Enums";
+import {_Enum, Enum, GetValues, GetValues_ForSchema} from "../../../Frame/General/Enums";
 import {MapNodeType, MapNodeType_Info} from "./@MapNodeType";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {GetParentNode, IsLinkValid, IsNewLinkValid} from "../nodes";
 import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
-
-export enum AccessLevel {
-	Basic = 10,
-	Verified = 20,
-	Mod = 30,
-	Admin = 40,
-}
-
-export enum ThesisForm {
-	Base = 10,
-	Negation = 20,
-	YesNoQuestion = 30,
-}
-
-export enum MetaThesis_IfType {
-	Any = 10,
-	AnyTwo = 15,
-	All = 20,
-}
-export function GetMetaThesisIfTypeDisplayText(ifType: MetaThesis_IfType) {
-	return MetaThesis_IfType[ifType].replace(/[a-z][A-Z]/, m=>m[0] + " " + m[1].toLowerCase()).toLowerCase();
-}
-
-export enum MetaThesis_ThenType {
-	StrengthenParent = 10,
-	GuaranteeParentTrue = 20,
-	WeakenParent = 30,
-	GuaranteeParentFalse = 40,
-}
-export class MetaThesis_ThenType_Info {
-	static for = {
-		StrengthenParent: {displayText: "strengthen the parent"},
-		GuaranteeParentTrue: {displayText: "guarantee the parent true"},
-		WeakenParent: {displayText: "weaken the parent"},
-		GuaranteeParentFalse: {displayText: "guarantee the parent false"},
-	} as {[key: string]: MetaThesis_ThenType_Info};
-
-	displayText: string;
-}
+import {MetaThesis_ThenType, MetaThesisInfo, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info} from "./@MetaThesisInfo";
 
 export class MapNode {
 	constructor(initialData: {type: MapNodeType, creator: string} & Partial<MapNode>) {
@@ -61,10 +23,7 @@ export class MapNode {
 	voteLevel = AccessLevel.Basic;
 
 	quote: QuoteInfo;
-	metaThesis: {
-		ifType: MetaThesis_IfType;
-		thenType: MetaThesis_ThenType;		
-	};
+	metaThesis: MetaThesisInfo;
 
 	// averages from server
 	/*agrees = 0;
@@ -75,6 +34,42 @@ export class MapNode {
 	parents = {} as ParentSet;
 	children = {} as ChildSet;
 	talkRoot: number;
+}
+ajv.addSchema({
+	properties: {
+		type: {oneOf: GetValues_ForSchema(MapNodeType)},
+		titles: {
+			properties: {
+				base: {type: "string"}, negation: {type: "string"}, yesNoQuestion: {type: "string"},
+			},
+			//required: ["base", "negation", "yesNoQuestion"],
+		},
+		creator: {type: "string"},
+		createdAt: {type: "number"},
+		//approved: {type: "boolean"},
+		//accessLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
+		//voteLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
+		//quote: {type: "QuoteInfo"},
+		metaThesis: {$ref: "MetaThesisInfo"},
+		//parents: {type: "ParentSet"},
+		//children: {type: "ParentSet"},
+		//talkRoot: {type: "number"},
+		additionalProperties: false,
+	},
+	required: ["type", "titles", "creator", "createdAt"],
+}, "MapNode");
+
+export enum AccessLevel {
+	Basic = 10,
+	Verified = 20,
+	Mod = 30,
+	Admin = 40,
+}
+
+export enum ThesisForm {
+	Base = 10,
+	Negation = 20,
+	YesNoQuestion = 30,
 }
 
 export function GetFontSizeForNode(node: MapNode) {
@@ -100,17 +95,8 @@ export class QuoteInfo {
 	sources = {[0]: ""} as {[key: number]: string};
 }
 
-/*export class ParentSet {
-	//[key: number]: {_?, form?: ThesisForm};
-	[key: number]: {_?};
-}*/
 export type ParentSet = {[key: number]: {_?}};
-
-/*export class ChildSet {
-	[key: number]: {_?, form?: ThesisForm};
-}*/
 export type ChildSet = {[key: number]: {_?, form?: ThesisForm}};
-
 /*export interface ChildInfo {
 	id: number;
 	type;
