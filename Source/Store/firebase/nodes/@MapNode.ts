@@ -6,6 +6,19 @@ import {GetParentNode, IsLinkValid, IsNewLinkValid} from "../nodes";
 import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
 import {MetaThesis_ThenType, MetaThesisInfo, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info} from "./@MetaThesisInfo";
 
+export enum AccessLevel {
+	Basic = 10,
+	Verified = 20,
+	Mod = 30,
+	Admin = 40,
+}
+
+export enum ThesisForm {
+	Base = 10,
+	Negation = 20,
+	YesNoQuestion = 30,
+}
+
 export class MapNode {
 	constructor(initialData: {type: MapNodeType, creator: string} & Partial<MapNode>) {
 		this.Extend(initialData);
@@ -33,7 +46,7 @@ export class MapNode {
 	
 	parents: ParentSet;
 	children: ChildSet;
-	talkRoot: number;
+	//talkRoot: number;
 }
 ajv.addSchema({
 	properties: {
@@ -50,34 +63,21 @@ ajv.addSchema({
 		},
 		creator: {type: "string"},
 		createdAt: {type: "number"},
-		//approved: {type: "boolean"},
-		//accessLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
-		//voteLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
-		//quote: {type: "QuoteInfo"},
+		approved: {type: "boolean"},
+		accessLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
+		voteLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
+		quote: {}, //quote: {type: "QuoteInfo"},
 		metaThesis: {$ref: "MetaThesisInfo"},
-		//parents: {type: "ParentSet"},
-		//children: {type: "ParentSet"},
+		parents: {}, //parents: {type: "ParentSet"},
+		children: {}, //children: {type: "ParentSet"},
 		//talkRoot: {type: "number"},
-		additionalProperties: false,
 	},
 	required: ["type", "creator", "createdAt"],
-	// if not a meta-thesis, require "titles" prop
-	if: {not: {required: ["metaThesis"]}},
+	additionalProperties: false,
+	// if not a meta-thesis or quote, require "titles" prop
+	if: {prohibited: ["metaThesis", "quote"]},
 	then: {required: ["titles"]},
 }, "MapNode");
-
-export enum AccessLevel {
-	Basic = 10,
-	Verified = 20,
-	Mod = 30,
-	Admin = 40,
-}
-
-export enum ThesisForm {
-	Base = 10,
-	Negation = 20,
-	YesNoQuestion = 30,
-}
 
 export function GetFontSizeForNode(node: MapNode) {
 	return node.metaThesis ? 11 : 14;

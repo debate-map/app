@@ -1,4 +1,4 @@
-import {GetDataAsync} from "../../../../Frame/Database/DatabaseHelpers";
+import {GetDataAsync, RemoveHelpers} from "../../../../Frame/Database/DatabaseHelpers";
 import {GetNodeDisplayText, GetValidChildTypes, GetValidNewChildTypes, MapNode} from "../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {VMenuStub} from "react-vmenu";
@@ -80,31 +80,33 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : "Copy"} style={styles.vMenuItem}
 						onClick={e=> {
 							e.persist();
-							if (node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument) {
-								return void ShowMessageBox({title: "Copy argument?", cancelButton: true, onOK: proceed, message:
-`Are you sure you want to copy this argument?
-
-Usually, it's best to make a new one (with the same title), and just copy the premises. (since an argument has a meta-thesis, which is usually specific to the parent thesis)`
-								});
-							}
-							proceed();
-							function proceed() {
-								if (e.button == 0)
-									store.dispatch(new ACTNodeCopy({path}));
-								else
-									store.dispatch(new ACTNodeCopy(null));
-							}
+							if (e.button == 0)
+								store.dispatch(new ACTNodeCopy({path}));
+							else
+								store.dispatch(new ACTNodeCopy({path: null}));
 						}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode, permissions) &&
 					<VMenuItem text={`Paste as link: "${GetNodeDisplayText(copiedNode, thesisFormForThesisChild).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
+						if (copiedNode.type == MapNodeType.SupportingArgument || copiedNode.type == MapNodeType.OpposingArgument) {
+							return void ShowMessageBox({title: "Argument at two locations?", cancelButton: true, onOK: proceed, message:
+`Are you sure you want to paste this argument as a linked child?
 
-						firebase.Ref(`nodes/${copiedNode._id}/parents`).update({[node._id]: {_: true}});
-						let linkInfo = {_: true} as any;
-						if (thesisFormForThesisChild)
-							linkInfo.form = thesisFormForThesisChild;
-						firebase.Ref(`nodes/${node._id}/children`).update({[copiedNode._id]: linkInfo});
+Only do this if you're sure that the meta-thesis applies exactly the same to both the old parent and the new parent.${""
+} (usually it does not, ie. usually it's specific to its original parent thesis)
+
+If not, paste the argument as a clone instead.`
+							});
+						}
+						proceed();
+						function proceed() {
+							firebase.Ref(`nodes/${copiedNode._id}/parents`).update({[node._id]: {_: true}});
+							let linkInfo = {_: true} as any;
+							if (thesisFormForThesisChild)
+								linkInfo.form = thesisFormForThesisChild;
+							firebase.Ref(`nodes/${node._id}/children`).update({[copiedNode._id]: linkInfo});
+						}
 					}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode, permissions) &&
 					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, thesisFormForThesisChild).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async e=> {
@@ -115,9 +117,11 @@ Usually, it's best to make a new one (with the same title), and just copy the pr
 						let isArgument = copiedNode.type == MapNodeType.SupportingArgument || copiedNode.type == MapNodeType.OpposingArgument;
 						let copiedMetaThesis = isArgument ? (await GetNodeChildrenAsync(copiedNode)).First(a=>a.metaThesis != null) : null;
 
-						let newChildNode = FromJSON(ToJSON(copiedNode)).VSet({parents: {[node._id]: {_: true}}, children: {}});
+						let newChildNode = RemoveHelpers(FromJSON(ToJSON(copiedNode))) as MapNode;
+						newChildNode.parents = {[node._id]: {_: true}}; // make new node's only parent the one on this path
+						delete newChildNode.children[copiedMetaThesis._id]; // remove old-meta-thesis as child
 						if (isArgument)
-							var metaThesisNode = FromJSON(ToJSON(copiedMetaThesis)).VSet({parents: {}, children: {}});
+							var metaThesisNode = RemoveHelpers(FromJSON(ToJSON(copiedMetaThesis))).VSet({parents: null}) as MapNode;
 						new AddNode({node: newChildNode, form: thesisForm, metaThesisNode}).Run();
 					}}/>}
 				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={async e=> {

@@ -10,6 +10,7 @@ ajv.addSchema({
 		thenType: {$ref: "MetaThesis_ThenType"},
 	},
 	required: ["ifType", "thenType"],
+	additionalProperties: false,
 }, "MetaThesisInfo");
 
 export enum MetaThesis_IfType {

@@ -76,12 +76,14 @@ export function ProcessDBData(data, forceAsObjects: boolean, addHelpers: boolean
 	}
 }
 let helperProps = ["_key", "_id"];
+/** Note: this mutates the original object. */
 export function RemoveHelpers(data) {
 	var treeNodes = GetTreeNodesInObjTree(data, true);
 	for (let treeNode of treeNodes) {
 		if (helperProps.Contains(treeNode.prop))
 			delete treeNode.obj[treeNode.prop];
 	}
+	return data;
 }
 
 class DBPathInfo {
