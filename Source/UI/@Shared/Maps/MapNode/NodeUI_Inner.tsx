@@ -5,7 +5,7 @@ import VMenu from "react-vmenu";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
-import {DN} from "../../../../Frame/General/Globals";
+import {DN, E} from "../../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
 import Button from "../../../../Frame/ReactComponents/Button";
 import {CachedTransform} from "../../../../Frame/V/VCache";
@@ -33,6 +33,7 @@ import HistoryPanel from "./NodeUI/HistoryPanel";
 import RatingsPanel from "./NodeUI/RatingsPanel";
 import DiscussPanel from "./NodeUI/DiscussPanel";
 import Row from "../../../../Frame/ReactComponents/Row";
+import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
 	& Partial<{ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
@@ -103,16 +104,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							<Button size={13} iconSize={13} iconPath="/Images/Buttons/Info.png"
 								useOpacityForHover={true} style={{position: "relative", zIndex: 1, marginLeft: 1, backgroundColor: null, boxShadow: null}}
 								title="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
-						{subPanelShow &&
-							<div style={{position: "relative", margin: "5px -5px -5px -5px", padding: "6px 5px 5px 5px",
-								//border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
-								background: "rgba(0,0,0,.5)", borderRadius: "0 0 0 5px",
-							}}>
-								<div style={{position: "relative", fontSize: GetFontSizeForNode(node), whiteSpace: "initial"}}>
-									<div>{`"${node.quote.text}"`}</div>
-									<SourcesUI quote={node.quote}/>
-								</div>
-							</div>}
+						{subPanelShow && <SubPanel node={node}/>}
 						<NodeUI_Menu node={node} path={path}/>
 					</Div>
 					<Button //text={expanded ? "-" : "+"} size={28}
@@ -154,6 +146,35 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		);
 	}
 }
+
+class SubPanel extends BaseComponent<{node: MapNode}, {}> {
+	render() {
+		let {node} = this.props;
+		return (
+			<div style={{position: "relative", margin: "5px -5px -5px -5px", padding: "6px 5px 5px 5px",
+				//border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
+				background: "rgba(0,0,0,.5)", borderRadius: "0 0 0 5px",
+			}}>
+				<div style={{position: "relative", fontSize: GetFontSizeForNode(node), whiteSpace: "initial"}}>
+					{/*<div>{`"${node.quote.text}"`}</div>*/}
+					<VReactMarkdown className="selectable Markdown" source={`"${node.quote.text}"`}
+						containerProps={{style: E()}}
+						renderers={{
+							Text: props=> {
+								//return <span {...props}>{props.literal}</span>;
+								//return React.DOM.span(null, props.literal, props);
+								//return React.createElement("section", props.Excluding("literal", "nodeKey"), props.literal);
+								return "[text]" as any;
+							},
+							Link: props=><div/>,
+						}}
+					/>
+					<SourcesUI quote={node.quote}/>
+				</div>
+			</div>
+		);
+	}
+} 
 
 export class SourcesUI extends BaseComponent<{quote: QuoteInfo}, {}> {
 	render() {
