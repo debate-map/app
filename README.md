@@ -20,10 +20,9 @@ For more information, visit the website at: <https://debatemap.live>
 2) Run `npm install` in the root project folder.
 3) Revert the `node_modules` folder. (it has some git-tracked modifications, which get overwritten during `npm install`)
 
-Recommended editor: [Visual Studio Code](https://code.visualstudio.com)  
-Recommended browser: [Chrome](https://www.google.com/chrome)
-
 Note that I haven't actually verified the project works on a fresh clone, so if it fails for you, I probably just forgot a step or two, so make an issue describing where you're stuck.
+
+For recommended setup of your code editor and other tools, see: [Editor setup](#editor-setup)
 
 ### Firebase setup + project config
 
@@ -55,3 +54,15 @@ Note that if you add/remove/modify any modules required from `config/Vendors.js`
 
 1) Run `tsc` in a console, and keep it running in the background. (this reduces quick-deploy compile times from ~59s to ~32s, by enabling incremental compilation)
 2) Run `npm run [quick-]deploy-[dev/prod]`. Quick-deploy time is ~32s, instead of ~86s for full (since it doesn't use minification and such). Dev/prod depends on which Firebase project you're targeting (as configured above).
+
+### Editor setup
+
+The below are optional recommendations on your editor setup, which will make editing the project more efficient and less error-prone. (since it matches the setup I use)
+
+Browser: [Chrome](https://www.google.com/chrome)  
+Editor: [Visual Studio Code](https://code.visualstudio.com)  
+VSCode extensions:
+* [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint): Shows warnings when code does not match the project's coding style.
+* [TypeScript Importer](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint): Lets you press alt+enter to auto-import the current symbol from whatever module it's in.
+* [TypeScript Hero](https://marketplace.visualstudio.com/items?itemName=rbbit.typescript-hero): Same as above. This one's not quite as nice, but picks up some that the above misses. Also, it has an "import all missing" command.
+* [Search node_modules](https://marketplace.visualstudio.com/items?itemName=jasonnutter.search-node-modules): Very helpful for quickly opening files in modules under `node_modules`.

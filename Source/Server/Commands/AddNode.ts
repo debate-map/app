@@ -16,10 +16,10 @@ export default class AddNode extends Command<{node: MapNode, form: ThesisForm, m
 		// validate call
 		// ==========
 
-		Assert(node.parents && node.parents.VKeys(true).length == 1, "Node must have exactly one parent");
+		Assert(node.parents && node.parents.VKeys(true).length == 1, `Node must have exactly one parent`);
 		if (metaThesisNode) {
-			//Assert(node.children == null, "Node cannot specify children. (server adds meta-thesis automatically)");
-			Assert(metaThesisNode.parents == null, "Meta-thesis cannot specify a parent. (server adds it automatically)");
+			//Assert(node.children == null, `Node cannot specify children. (server adds meta-thesis automatically)`);
+			Assert(metaThesisNode.parents == null, `Meta-thesis cannot specify a parent. (server adds it automatically)`);
 		}
 
 		// prepare
@@ -33,8 +33,8 @@ export default class AddNode extends Command<{node: MapNode, form: ThesisForm, m
 		// validate state
 		// ==========
 
-		if (!ajv.validate("MapNode", node)) throw new Error("Node invalid: " + ajv.errorsText());
-		if (!ajv.validate("MapNode", metaThesisNode)) throw new Error("Meta-thesis-node invalid: " + ajv.errorsText());
+		if (!ajv.validate(`MapNode`, node)) throw new Error(`Node invalid: ` + ajv.errorsText());
+		if (!ajv.validate(`MapNode`, metaThesisNode)) throw new Error(`Meta-thesis-node invalid: ` + ajv.errorsText());
 
 		// execute
 		// ==========
@@ -46,14 +46,16 @@ export default class AddNode extends Command<{node: MapNode, form: ThesisForm, m
 			[`nodes/${node.parents.VKeys(true)[0]}/children/${nodeID}`]: E({_: true}, form && {form}),
 		};
 		// add as parent of (pre-existing) children
-		for (let childID in (node.children || {}).Excluding(metaThesisID && metaThesisID.toString()))
+		for (let childID in (node.children || {}).Excluding(metaThesisID && metaThesisID.toString())) {
 			updates[`nodes/${childID}/parents/${nodeID}`] = {_: true};
+		}
 		if (metaThesisNode) {
 			// add meta-thesis
 			updates[`nodes/${metaThesisID}`] = metaThesisNode;
 			// add meta-thesis as parent of (pre-existing) children
-			for (let childID in metaThesisNode.children)
+			for (let childID in metaThesisNode.children) {
 				updates[`nodes/${childID}/parents/${metaThesisID}`] = {_: true};
+			}
 		}
 		await firebase.Ref().update(updates);
 	}

@@ -19,8 +19,8 @@ import {MapView} from "../../Store/main/mapViews/@MapViews";
 import {GetNode} from "../../Store/firebase/nodes";
 import {Vector2i} from "../../Frame/General/VectorStructs";
 
-let red = "rgba(255,0,0,.7)";
-let green = "rgba(0,255,0,.6)";
+let red = `rgba(255,0,0,.7)`;
+let green = `rgba(0,255,0,.6)`;
 let pageText = `
 The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced
 	(like Wikipedia), and the software is open-source (under MIT), promoting collaborative development and increased accountability.<sup>[1](#footnote1)</sup>
@@ -147,7 +147,7 @@ This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 `;
 
 let demoRootNodeID = devEnv ? 1 : 463; // hard-coded for now
-let demoMap = {_id: -100, name: "Demo", type: MapType.Personal, rootNode: demoRootNodeID} as Map;
+let demoMap = {_id: -100, name: `Demo`, type: MapType.Personal, rootNode: demoRootNodeID} as Map;
 export function CreateDemoMapView(): MapView {
 	return {rootNodeViews: {
 		[demoRootNodeID]: {
@@ -236,17 +236,18 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> 
 				containerProps={{style: E(styles.page)}}
 				renderers={{
 					Paragraph: props=> {
-						if (DeepGet(props, "children.0.props.literal") == "GlobalMapPlaceholder")
-							return <div {...props.Excluding("literal", "nodeKey")}>{props.children}</div>;
+						if (DeepGet(props, `children.0.props.literal`) == `GlobalMapPlaceholder`) {
+							return <div {...props.Excluding(`literal`, `nodeKey`)}>{props.children}</div>;
+						}
 						//return React.createElement(g.Markdown_defaultRenderers.paragraph, props);
-						return <p {...props.Excluding("literal", "nodeKey")}>{props.children}</p>;
+						return <p {...props.Excluding(`literal`, `nodeKey`)}>{props.children}</p>;
 					},
 					Text: props=> {
-						if (props.literal == "GlobalMapPlaceholder") {
+						if (props.literal == `GlobalMapPlaceholder`) {
 							let root, mapUI: MapUI, test2;
 							if (isBot) return <div/>;
 							return (
-								<div ref={c=>root = FindDOM_(c)} style={{margin: "0 -50px", /*height: 500,*/ userSelect: "none", position: "relative"}}>
+								<div ref={c=>root = FindDOM_(c)} style={{margin: `0 -50px`, /*height: 500,*/ userSelect: `none`, position: `relative`}}>
 									<style>{`
 									.DemoMap * { user-select: none; }
 									.DemoMap.draggable > .content { cursor: default !important; /*pointer-events: none;*/ }
@@ -259,17 +260,17 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> 
 									
 									<MapUI ref={c=>mapUI = c ? GetInnerComp(c) as any : null} className="DemoMap"
 										map={demoMap} rootNode={demoRootNode} padding={{left: 200, right: 500, top: 100, bottom: 100}} withinPage={true}/>
-									<div className="in" style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}
-										onMouseEnter={()=>root.removeClass("below")} onTouchStart={()=>root.removeClass("below")}/>
-									<div className="below" style={{position: "absolute", left: 0, right: 0, top: "100%", height: 300}}
-										onMouseEnter={()=>root.addClass("below")} onTouchStart={()=>root.addClass("below")}/>
+									<div className="in" style={{position: `absolute`, left: 0, right: 0, top: 0, bottom: 0}}
+										onMouseEnter={()=>root.removeClass(`below`)} onTouchStart={()=>root.removeClass(`below`)}/>
+									<div className="below" style={{position: `absolute`, left: 0, right: 0, top: `100%`, height: 300}}
+										onMouseEnter={()=>root.addClass(`below`)} onTouchStart={()=>root.addClass(`below`)}/>
 								</div>
 							);
 						}
 						//return <span {...props}>{props.literal}</span>;
 						//return React.DOM.span(null, props.literal, props);
 						//return React.createElement("section", props.Excluding("literal", "nodeKey"), props.literal);
-						return "[text]" as any;
+						return `[text]` as any;
 					},
 					Link: props=> {
 						let {href, nodeKey, children, literal, ...rest} = props;
@@ -281,7 +282,7 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> 
 								if (toURL.domain == currentURL.domain) {
 									e.preventDefault();
 
-									if (href.startsWith("#")) {
+									if (href.startsWith(`#`)) {
 										JumpToHash(href.substr(1));
 										//document.getElementById(h).scrollIntoView();   //Even IE6 supports this
 										return;
@@ -289,10 +290,11 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> 
 
 									//let history = State().router.history;
 									let history = router.history;
-									if (Equals_Shallow(toURL.pathNodes, currentURL.pathNodes)) // if paths same
+									if (Equals_Shallow(toURL.pathNodes, currentURL.pathNodes)) { // if paths same
 										history.replace(href);
-									else
+									} else {
 										history.push(href);
+									}
 								}
 							}}>
 								{children}

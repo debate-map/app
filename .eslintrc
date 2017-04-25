@@ -1,15 +1,26 @@
 {
-	"parser": "babel-eslint",
-	"extends": [
+	//"parser": "babel-eslint",
+	"parser": "typescript-eslint-parser",
+	"env": {
+		"browser": true,
+		"commonjs": true,
+		"es6": true,
+		"node": true
+	},
+	"parserOptions": {
+		"ecmaVersion": 8,
+		"ecmaFeatures": {
+			"jsx": true
+		},
+		"sourceType": "module"
+   },
+	/*"extends": [
 		"standard",
 		"standard-react"
-	],
+	],*/
 	"plugins": [
 		"babel"
 	],
-	"env": {
-		"browser": true
-	},
 	"globals" : {
 		"__DEV__": false,
 		"__PROD__": false,
@@ -18,10 +29,22 @@
 		"__BASENAME__": false
 	},
 	"rules": {
-		"semi": [2, "never"],
-		"max-len": [2, 120, 2],
-		"generator-star-spacing": 0,
-		"babel/generator-star-spacing": 1,
-		"jsx-quotes": ["error", "prefer-single"]
+		"no-const-assign": "warn",
+		"no-this-before-super": "warn",
+		//"no-undef": "warn",
+		"no-unreachable": "warn",
+		//"no-unused-vars": "warn",
+		"constructor-super": "warn",
+		"valid-typeof": "warn",
+
+		//"max-len": [2, 120, 2],
+		//"generator-star-spacing": 0,
+		//"babel/generator-star-spacing": 1,
+		"quotes": ["warn", "backtick"],
+		"jsx-quotes": ["warn", "prefer-double"],
+		"semi": ["error", "always"],
+		//"indent": ["error", "tab", {"ObjectExpression": "off"}],
+		"no-mixed-spaces-and-tabs": 1,
+		"curly": ["warn", "multi-line"]
 	}
 }
