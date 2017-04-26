@@ -1,5 +1,5 @@
 import {connect} from "react-redux";
-import {BaseComponent, Div} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Div, AddGlobalStyle} from "../../../../Frame/UI/ReactGlobals";
 import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
 import VMenu from "react-vmenu";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
@@ -34,6 +34,10 @@ import RatingsPanel from "./NodeUI/RatingsPanel";
 import DiscussPanel from "./NodeUI/DiscussPanel";
 import Row from "../../../../Frame/ReactComponents/Row";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
+
+/*AddGlobalStyle(`
+.NodeUI_Inner
+`);*/
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
 	& Partial<{ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
@@ -156,26 +160,34 @@ class SubPanel extends BaseComponent<{node: MapNode}, {}> {
 				//border: `solid rgba(0,0,0,.5)`, borderWidth: `1px 0 0 0`
 				background: `rgba(0,0,0,.5)`, borderRadius: `0 0 0 5px`,
 			}}>
-				<div style={{position: `relative`, fontSize: GetFontSizeForNode(node), whiteSpace: `initial`}}>
-					{/*<div>{``${node.quote.text}``}</div>*/}
-					<VReactMarkdown className="selectable Markdown" source={`"${node.quote.text}"`}
-						containerProps={{style: E()}}
-						renderers={{
-							Text: props=> {
-								//return <span {...props}>{props.literal}</span>;
-								//return React.DOM.span(null, props.literal, props);
-								//return React.createElement(`section`, props.Excluding(`literal`, `nodeKey`), props.literal);
-								return `[text]` as any;
-							},
-							Link: props=><div/>,
-						}}
-					/>
-					<SourcesUI quote={node.quote}/>
-				</div>
+				<SubPanel_Inner quote={node.quote} fontSize={GetFontSizeForNode(node)}/>
 			</div>
 		);
 	}
-} 
+}
+export class SubPanel_Inner extends BaseComponent<{quote: QuoteInfo, fontSize: number}, {}> {
+	render() {
+		let {quote, fontSize} = this.props;
+		return (
+			<div style={{position: `relative`, fontSize, whiteSpace: `initial`}}>
+				{/*<div>{``${node.quote.text}``}</div>*/}
+				<VReactMarkdown className="selectable Markdown" source={`"${quote.text}"`}
+					containerProps={{style: E()}}
+					renderers={{
+						Text: props=> {
+							//return <span {...props}>{props.literal}</span>;
+							//return React.DOM.span(null, props.literal, props);
+							//return React.createElement(`section`, props.Excluding(`literal`, `nodeKey`), props.literal);
+							return `[text]` as any;
+						},
+						Link: props=><span/>,
+					}}
+				/>
+				<SourcesUI quote={quote}/>
+			</div>
+		);
+	}
+}
 
 export class SourcesUI extends BaseComponent<{quote: QuoteInfo}, {}> {
 	render() {

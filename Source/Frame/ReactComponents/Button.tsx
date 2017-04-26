@@ -7,7 +7,11 @@ import {Log} from "../General/Logging";
 
 var styles = {
 	root: {
-		display: "inline-block",
+		//display: "inline-block",
+		display: "inline-flex",
+		alignItems: "center",
+    	justifyContent: "center",
+
 		//backgroundColor: "rgba(0,0,0,.3)",
 		backgroundColor: "rgba(90,100,110,.6)",
 		//backgroundColor: "rgba(10,10,10,1)",
@@ -50,16 +54,19 @@ let pseudoSelectorStyleKeys = {};
 @ApplyBasicStyles
 export default class Button extends BaseComponent
 		<{enabled?: boolean, text?: string, title?: string, className?: string, style?,
-			size?: number, iconSize?: number, iconPath?: string, useOpacityForHover?: boolean,
-			height?: number, hasCheckbox?: boolean, checked?: boolean, checkboxStyle?, checkboxLabelStyle?, onCheckedChanged?,
+			size?: number, width?: number, height?: number, iconSize?: number, iconPath?: string, useOpacityForHover?: boolean,
+			hasCheckbox?: boolean, checked?: boolean, checkboxStyle?, checkboxLabelStyle?, onCheckedChanged?,
 			onClick?, onLeftClick?, onDirectClick?} & React.HTMLProps<HTMLDivElement>,
 		{}> {
 	static defaultProps = {enabled: true};
 	
 	render() {
-	    var {enabled, text, title, className, style, size, iconSize, iconPath, useOpacityForHover,
-			height, hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged, children,
+	    var {enabled, text, title, className, style, size, width, height, iconSize, iconPath, useOpacityForHover,
+			hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged, children,
 			onLeftClick, ...rest} = this.props;
+
+		width = width || size;
+		height = height || size;
 
 		var padding = "5px 15px";
 		if (height) {
@@ -72,8 +79,9 @@ export default class Button extends BaseComponent
 			styles.root,
 			useOpacityForHover && styles.root_opacityHover,
 			{padding},
-			size && {padding: 0, width: size, height: size,
-				backgroundPosition: `${(size - iconSize) / 2}px ${(size - iconSize) / 2}px`,
+			(width || height) && {
+				padding: 0, width, height,
+				backgroundPosition: `${(width - iconSize) / 2}px ${(height - iconSize) / 2}px`,
 				backgroundSize: iconSize
 			},
 			iconPath && {backgroundImage: `url(${iconPath})`},

@@ -7,7 +7,7 @@ require("react-modal");
 require("moment");
 require("radium");
 require("react-autobind");
-//require("react-markdown");
+require("react-markdown");
 require("react-router-dom");
 require("react-router-redux");
 require("react-redux-firebase");
@@ -21,3 +21,9 @@ require("react-bootstrap");
 require("why-did-you-update");
 require("babel-polyfill");
 require("recharts");
+
+require("updeep");
+require("core-js");
+require("ajv");
+require("codemirror");
+require("react-md-editor");

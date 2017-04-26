@@ -42,8 +42,8 @@
 		//"babel/generator-star-spacing": 1,
 		"quotes": ["warn", "backtick"],
 		"jsx-quotes": ["warn", "prefer-double"],
-		"semi": ["error", "always"],
-		//"indent": ["error", "tab", {"ObjectExpression": "off"}],
+		"semi": ["warn", "always"],
+		//"indent": ["warn", "tab", {"ObjectExpression": "off"}],
 		"no-mixed-spaces-and-tabs": 1,
 		"curly": ["warn", "multi-line"]
 	}

@@ -12,16 +12,16 @@ import ScrollView from "react-vscrollview";
 export default class HomeUI extends BaseComponent<{}, {}> {
 	render() {
 		//let {page, match: {url: path} = {} as any} = this.props;
-		let path = "", pathImplied = "/home";
+		let path = ``, pathImplied = `/home`;
 		return (
-			<div style={{height: "100%", display: "flex", flexDirection: "column"}}>
+			<div style={{height: `100%`, display: `flex`, flexDirection: `column`}}>
 				<SubNavBar>
-					<SubNavBarButton to={path + "/"} toImplied={pathImplied + "/home"} text="Home"/>
-					<SubNavBarButton to={path + "/about"} toImplied={pathImplied + "/about"} text="About"/>
+					<SubNavBarButton to={path + `/`} toImplied={pathImplied + `/home`} text="Home"/>
+					<SubNavBarButton to={path + `/about`} toImplied={pathImplied + `/about`} text="About"/>
 				</SubNavBar>
-				<ScrollView style={{flex: "1 1 100%"}} scrollVBarStyle={{width: 10}}>
-					<Route path={path + "/"} exact={true} component={HomeUI2}/>
-					<Route path={path + "/about"} component={AboutUI}/>
+				<ScrollView style={{flex: `1 1 100%`}} scrollVBarStyle={{width: 10}}>
+					<Route path={path + `/`} exact={true} component={HomeUI2}/>
+					<Route path={path + `/about`} component={AboutUI}/>
 				</ScrollView>
 			</div>
 		);

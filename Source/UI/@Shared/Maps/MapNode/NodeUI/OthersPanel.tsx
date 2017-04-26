@@ -22,10 +22,10 @@ import Moment from "moment";
 import {GetParentNode} from "../../../../../Store/firebase/nodes";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
-import {QuoteInfoEditorUI} from "../NodeUI_Menu/AddChildDialog";
 import {E} from "../../../../../Frame/General/Globals_Free";
 import Row from "../../../../../Frame/ReactComponents/Row";
 import {MetaThesis_ThenType, MetaThesis_ThenType_Info, MetaThesis_IfType, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
+import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -48,27 +48,27 @@ export default class OthersPanel extends BaseComponent<OthersPanel_Props, {}> {
 		}
 
 		return (
-			<div className="selectable" style={{position: "relative", padding: "5px"}}>
+			<div className="selectable" style={{position: `relative`, padding: `5px`}}>
 				<Div style={{fontSize: 12}}>NodeID: {node._id}</Div>
-				<Div mt={3} style={{fontSize: 12}}>Created at: {Moment(node.createdAt).format("YYYY-MM-DD HH:mm:ss")} (by: {nodeCreator ? nodeCreator.displayName : "n/a"})</Div>
+				<Div mt={3} style={{fontSize: 12}}>Created at: {Moment(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)} (by: {nodeCreator ? nodeCreator.displayName : `n/a`})</Div>
 				{IsUserCreatorOrMod(userID, node) &&
 					<Div mt={3}>
 						{!node.quote && !node.metaThesis &&
-							<Row style={{display: "flex", alignItems: "center"}}>
+							<Row style={{display: `flex`, alignItems: `center`}}>
 								<Pre>Title (base): </Pre>
-								<TextInput ref="title_base" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["base"]}/>
+								<TextInput ref="title_base" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles[`base`]}/>
 							</Row>}
 						{node.type == MapNodeType.Thesis && !node.metaThesis && (
 							node.quote ? [
 								<QuoteInfoEditorUI key={0} ref="quoteEditor" info={node.quote.Extended({})} showPreview={false} justShowed={false}/>
 							] : [
-								<Row key={0} mt={5} style={{display: "flex", alignItems: "center"}}>
+								<Row key={0} mt={5} style={{display: `flex`, alignItems: `center`}}>
 									<Pre>Title (negation): </Pre>
-									<TextInput ref="title_negation" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["negation"]}/>
+									<TextInput ref="title_negation" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles[`negation`]}/>
 								</Row>,
-								<Row key={1} mt={5} style={{display: "flex", alignItems: "center"}}>
+								<Row key={1} mt={5} style={{display: `flex`, alignItems: `center`}}>
 									<Pre>Title (yes-no question): </Pre>
-									<TextInput ref="title_yesNoQuestion" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles["yesNoQuestion"]}/>
+									<TextInput ref="title_yesNoQuestion" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles[`yesNoQuestion`]}/>
 								</Row>
 							]
 						)}

@@ -6,6 +6,8 @@ import "./Frame/General/Start_0";
 import "./Frame/General/CE";
 import "./Frame/General/Start_1";
 import "./Server/Server";
+import "codemirror";
+import "codemirror/addon/scroll/simplescrollbars";
 
 import ReactDOM from "react-dom";
 import {Store} from "redux";
@@ -69,6 +71,7 @@ if (devEnv) {
 			+ `|Animate|Animation|Dot|ComposedDataDecorator|Chart|Curve|Route|ReferenceLine|Text` // from recharts
 			+ `|Div` // from ScrollView (probably temp)
 			+ `|Button` // from react-social-button>react-bootstrap
+			+ `|VReactMarkdown`
 		),
 	});
 }

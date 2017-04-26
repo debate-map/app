@@ -18,6 +18,7 @@ import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {MapView} from "../../Store/main/mapViews/@MapViews";
 import {GetNode} from "../../Store/firebase/nodes";
 import {Vector2i} from "../../Frame/General/VectorStructs";
+import Editor from "react-md-editor";
 
 let red = `rgba(255,0,0,.7)`;
 let green = `rgba(0,255,0,.6)`;
@@ -213,6 +214,8 @@ export function CreateDemoMapView(): MapView {
 	});
 }*/
 
+let info = {text: pageText};
+
 @Connect(state=> ({
 	demoRootNode: GetNode(demoRootNodeID),
 }))
@@ -231,6 +234,17 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> 
 		/*if (demoRootNode_override) // for dev
 			demoRootNode = demoRootNode_override;*/
 		let {router} = this.context;
+
+		/*if (1 == 1) {
+			let Change = _=>this.Update();
+			return (
+				<Editor value={info.text} onChange={val=>Change(info.text = val)} options={{
+					scrollbarStyle: `overlay`,
+					//viewportMargin: Infinity // temp fix for that it doesn't detect scroll-wheel scrolling
+				}}/>
+			);
+		}*/
+
 		return (
 			<VReactMarkdown className="selectable Markdown" source={pageText}
 				containerProps={{style: E(styles.page)}}

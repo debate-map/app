@@ -113,6 +113,7 @@ export function GetThesisFormAtPath(node: MapNode, path: string): ThesisForm {
 	let parent = GetParentNode(path);
 	if (parent == null) return ThesisForm.Base;
 	let link = parent.children[node._id];
+	if (link == null) return ThesisForm.Base;
 	return link.form;
 }
 

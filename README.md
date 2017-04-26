@@ -52,8 +52,8 @@ Note that if you add/remove/modify any modules required from `config/Vendors.js`
 
 ### Deploying to Firebase
 
-1) Run `tsc` in a console, and keep it running in the background. (this reduces quick-deploy compile times from ~59s to ~32s, by enabling incremental compilation)
-2) Run `npm run [quick-]deploy-[dev/prod]`. Quick-deploy time is ~32s, instead of ~86s for full (since it doesn't use minification and such). Dev/prod depends on which Firebase project you're targeting (as configured above).
+1) Run `tsc` in a console, and keep it running in the background. (this reduces deploy:prod-quick compile times from ~59s to ~32s, by enabling incremental compilation)
+2) Run `npm run deploy:[dev/prod/prod-quick]`. Note that deploy:prod-quick time is ~32s, vs ~86s for deploy:prod (since it doesn't use minification and such).
 
 ### Editor setup
 

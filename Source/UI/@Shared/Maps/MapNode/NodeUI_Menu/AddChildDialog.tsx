@@ -13,6 +13,8 @@ import {SourcesUI} from "../NodeUI_Inner";
 import {E} from "../../../../../Frame/General/Globals_Free";
 import {MetaThesis_ThenType, MetaThesis_IfType, MetaThesis_ThenType_Info} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
 import AddNode from "../../../../../Server/Commands/AddNode";
+import Editor from "react-md-editor";
+import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 
 export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, userID: string) {
 	let firebase = store.firebase.helpers;
@@ -24,35 +26,36 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 		? GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Take(2)
 		: GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Skip(2);
 
-	let thesisTypes = [{name: "Normal", value: "Normal"}, {name: "Quote", value: "Quote"}];
+	let thesisTypes = [{name: `Normal`, value: `Normal`}, {name: `Quote`, value: `Quote`}];
 	let thesisForm = childType == MapNodeType.Thesis
 		? (parentNode.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base)
 		: null;
 	let info = {
-		title: "",
-		thesisType: "Normal" as "Normal" | "Quote",
+		title: ``,
+		thesisType: `Normal` as "Normal" | "Quote", // eslint-disable-line quotes
 		quote: new QuoteInfo(),
 		metaThesis: {
 			ifType: MetaThesis_IfType.All,
 			thenType: childType == MapNodeType.SupportingArgument ? MetaThesis_ThenType.StrengthenParent : MetaThesis_ThenType.WeakenParent,
 		}
-	}
+	};
 	
 	let justShowed = true;
 	let Change = _=>boxController.UpdateUI();
 	let boxController = ShowMessageBox({
 		title: `Add ${displayName}`, cancelButton: true,
 		messageUI: ()=>(setTimeout(()=>justShowed = false),
-			<Column style={{padding: "10px 0", width: 600}}
-					onKeyDown={e=> {
-						if (e.keyCode != keycode.codes.enter) return;
-						boxController.options.onOK();
-						boxController.Close();
-					}}>
+			<Column style={{padding: `10px 0`, width: 600}}
+					/*onKeyDown={e=> {
+						if (e.keyCode == keycode.codes.enter) {
+							boxController.options.onOK();
+							boxController.Close();
+						}
+					}}*/>
 				{childType == MapNodeType.Thesis &&
-					<Row><Pre>Type: </Pre><Select displayType="button bar" options={thesisTypes} style={{display: "inline-block"}}
+					<Row><Pre>Type: </Pre><Select displayType="button bar" options={thesisTypes} style={{display: `inline-block`}}
 						value={info.thesisType} onChange={val=>Change(info.thesisType = val)}/></Row>}
-				{childType == MapNodeType.Thesis && info.thesisType == "Quote" ? (
+				{childType == MapNodeType.Thesis && info.thesisType == `Quote` ? (
 					<QuoteInfoEditorUI info={info.quote} showPreview={true} justShowed={justShowed}/>
 				) : (
 					<Row mt={5}><Pre>Title: </Pre><TextInput ref={a=>a && justShowed && WaitXThenRun(0, ()=>a.DOM.focus())} style={{flex: 1}}
@@ -74,10 +77,11 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 				parents: {[parentNode._id]: {_: true}},
 				type: childType, creator: userID, approved: true
 			});
-			if (childType == MapNodeType.Thesis && info.thesisType == "Quote")
+			if (childType == MapNodeType.Thesis && info.thesisType == `Quote`) {
 				newChildNode.quote = info.quote;
-			else
+			} else {
 				newChildNode.titles = thesisForm && thesisForm == ThesisForm.YesNoQuestion ? {yesNoQuestion: info.title} : {base: info.title};
+			}
 
 			if (isArgument) {
 				var metaThesisNode = new MapNode({
@@ -89,47 +93,4 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 			new AddNode({node: newChildNode, form: thesisForm, metaThesisNode}).Run();
 		}
 	});
-}
-
-//@ApplyBasicStyles
-export class QuoteInfoEditorUI extends BaseComponent<{info: QuoteInfo, showPreview: boolean, justShowed: boolean}, {}> {
-	render() {
-		let {info, showPreview, justShowed} = this.props;
-		let Change = _=>this.Update();
-		return (
-			<Column>
-				{showPreview && [
-					<Row key={0} mt={5}>Preview:</Row>,
-					<Column key={1} mt={5}>
-						<Pre style={{padding: 5, background: "rgba(255,255,255,.2)", borderRadius: 5}}>
-							{GetNodeDisplayText({type: MapNodeType.Thesis, quote: info} as any, ThesisForm.Base)}
-							<div style={{position: "relative", whiteSpace: "initial"}}>
-								<div>{`"${info.text}"`}</div>
-								<SourcesUI quote={info}/>
-							</div>
-						</Pre>
-					</Column>
-				]}
-				<Row mt={5}><Pre>Author: </Pre><TextInput ref={a=>a && justShowed && WaitXThenRun(0, ()=>a.DOM.focus())} style={{flex: 1}}
-					value={info.author} onChange={val=>Change(info.author = val)}/></Row>
-				<Row mt={5}><Pre>Quote: </Pre><TextInput style={{flex: 1}}
-					value={info.text} onChange={val=>Change(info.text = val)}/></Row>
-				<Row mt={5}>Sources:</Row>
-				<Row mt={5}>
-					<Column style={{flex: 1}}>
-						{info.sources.FakeArray_Select((source, index)=> {
-							return (
-								<Row key={index} mt={index == 0 ? 0 : 5}>
-									<TextInput style={{flex: 1}}
-										value={source} onChange={val=>Change(info.sources[index] = val)}/>
-									{index != 0 && <Button text="X" ml={5} onClick={()=>Change(info.sources.FakeArray_RemoveAt(index))}/>}
-								</Row>
-							);
-						})}
-						<Button text="Add" mt={5} style={{width: 60}} onClick={()=>Change(info.sources.FakeArray_Add(""))}/>
-					</Column>
-				</Row>
-			</Column>
-		);
-	}
 }
