@@ -20,11 +20,11 @@ const webpackConfig = {
 		extensions: ["", ".js", ".jsx", ".json"].concat(USE_TSLOADER ? [".ts", ".tsx"] : []),
 		fallback: [path.join(__dirname, "node_modules")],
 		alias: {
-            //"react": __dirname + "/node_modules/react/",
-            "react": paths.base() + "/node_modules/react/",
+			//"react": __dirname + "/node_modules/react/",
+			"react": paths.base() + "/node_modules/react/",
 			"react-dom": paths.base() + "/node_modules/react-dom/",
 			//"@types/react": paths.base() + "/node_modules/@types/react/",
-        }
+		}
 	},
 	// same issue, for loaders like babel
 	resolveLoader: {
@@ -55,7 +55,8 @@ webpackConfig.entry = {
 // ==========
 
 webpackConfig.output = {
-	filename: `[name].[${config.compiler_hash_type}].js`,
+	//filename: `[name].[${config.compiler_hash_type}].js`,
+	filename: `[name].js?[${config.compiler_hash_type}]`, // have js/css files have static names, so google can still display content (even when js file has changed)
 	path: paths.dist(),
 	//path: path.resolve(__dirname, "dist"),
 	publicPath: config.compiler_public_path,
@@ -301,9 +302,8 @@ if (!__DEV__ && !__TEST__) {
 	})
 
 	webpackConfig.plugins.push(
-		new ExtractTextPlugin("[name].[contenthash].css", {
-			allChunks: true
-		})
+		//new ExtractTextPlugin("[name].[contenthash].css", {allChunks: true})
+		new ExtractTextPlugin("[name].css?[contenthash]", {allChunks: true})
 	)
 }
 
