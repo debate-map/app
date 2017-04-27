@@ -23,10 +23,13 @@ import Editor from "react-md-editor";
 let red = `rgba(255,0,0,.7)`;
 let green = `rgba(0,255,0,.6)`;
 let pageText = `
-The Debate Map project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced
-	(like Wikipedia), and the software is open-source (under MIT), promoting collaborative development and increased accountability.<sup>[1](#footnote1)</sup>
+The Debate Map project is an interactive web platform aimed at improving the efficiency of discussion and debate.
+It's crowd-sourced and open-source, and welcomes reader contributions.
 
-There are three types of maps present on this site: personal maps, debate maps, and [the global map](/global).
+Its primary improvements are (in short):
+* Restructuring dialogue to make use of both dimensions.
+* Breaking down lines of reasoning into single-sentence "nodes".
+* Providing rich tools that operate on those nodes -- such as rating, tagging, statistical analysis, and belief-tree sharing and comparison.
 
 Here is a quick example:
 
@@ -139,9 +142,6 @@ This allows one to then do tool-based analysis on his views, and more easily spo
 
 One can then proceed to look more closely at those areas, examining the pool of existing evidence and reasoning,
 	and referencing statistics on how the rest of the population considers each piece along the way.
-
-<a name="footnote1">1</a>: In case the project management falters or becomes biased, it's in the power of users
-	to create and modify their own copies of the project. (Though I hope you'll find we do a good job -- maintaining and moderating -- making this not necessary!)
 
 More info on open-source projects: <https://opensource.com/resources/what-open-source>  
 This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
