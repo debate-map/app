@@ -9,7 +9,7 @@ export default class SubNavBar extends BaseComponent<{fullWidth?: boolean}, {}> 
 	render() {
 		let {fullWidth, children} = this.props;
 		return (
-			<div className="clickThrough" style={{
+			<nav className="clickThrough" style={{
 				position: "absolute", zIndex: 11, top: 0, width: "100%", textAlign: "center",
 				//background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
 				//background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
@@ -20,7 +20,7 @@ export default class SubNavBar extends BaseComponent<{fullWidth?: boolean}, {}> 
 				)}>
 					{children}
 				</div>
-			</div>
+			</nav>
 		);
 	}
 }

@@ -67,8 +67,10 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 						);
 					})}
 				</Row>
-				<Row>ID: {node._id}</Row>
-				<Row>Title: {GetNodeDisplayText(node)}</Row>
+				<article>
+					<Row>ID: {node._id}</Row>
+					<Row>Title: {GetNodeDisplayText(node)}</Row>
+				</article>
 			</Column>
 		);
 	}

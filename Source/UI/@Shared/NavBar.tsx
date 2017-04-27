@@ -58,7 +58,7 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 		let {topLeftOpenPanel, topRightOpenPanel, auth} = this.props;
 		let {dispatch} = this.context.store;
 		return (
-			<div style={{
+			<nav style={{
 				position: "relative", zIndex: 11, padding: "0 10px", boxShadow: colors.navBarBoxShadow,
 				//background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
 				background: "rgba(0,0,0,1)",
@@ -110,7 +110,7 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 						{topRightOpenPanel == "user" && <UserPanel/>}
 					</div>
 				</div>
-			</div>
+			</nav>
 		);
 	}
 }

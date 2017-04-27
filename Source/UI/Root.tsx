@@ -91,7 +91,7 @@ class RootUI extends BaseComponent<{}, {}> {
 				}}/>*/}
 				<OverlayUI/>
 				<NavBar/>
-				<div style={{position: "relative", flex: "1 1 100%", overflow: "hidden"}}>
+				<main style={{position: "relative", flex: "1 1 100%", overflow: "hidden"}}>
 					<Route path="/stream" component={StreamUI}/>
 					<Route path="/chat" component={ChatUI}/>
 
@@ -111,7 +111,7 @@ class RootUI extends BaseComponent<{}, {}> {
 
 					<Route path="/search" component={SearchUI}/>
 					<Route path="/profile" component={ProfileUI}/>
-				</div>
+				</main>
 			</div>
 		);
 	}
