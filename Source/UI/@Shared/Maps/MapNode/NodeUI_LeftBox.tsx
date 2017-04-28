@@ -62,7 +62,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 					})}
 					<Button text="..."
 						style={{
-							margin: "3px -3px -3px -3px", height: 17, lineHeight: "12px", padding: 0,
+							margin: "-1px 0 1px 0", height: 17, lineHeight: "12px", padding: 0,
 							position: "relative", display: "flex", justifyContent: "space-around", //alignItems: "center",
 							background: null, boxShadow: null, borderRadius: "0 0 5px 5px",
 							":hover": {background: `rgba(${backgroundColor},.5)`},
@@ -71,14 +71,14 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 				<div style={{position: "relative", marginTop: 1, padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 					<PanelButton parent={this} map={map} path={path} panel="definitions" text="Definitions" style={{marginTop: 0}}/>
-					<PanelButton parent={this} map={map} path={path} panel="questions" text="Questions"/>
+					<PanelButton parent={this} map={map} path={path} panel="discussion" text="Discussion"/>
+					<PanelButton parent={this} map={map} path={path} panel="social" text="Social"/>
 					<PanelButton parent={this} map={map} path={path} panel="tags" text="Tags"/>
-					<PanelButton parent={this} map={map} path={path} panel="discuss" text="Discuss (meta)"/>
-					<PanelButton parent={this} map={map} path={path} panel="history" text="History"/>
+					<PanelButton parent={this} map={map} path={path} panel="details" text="Details"/>
 					<PanelButton parent={this} map={map} path={path} panel="others" text="Others"/>
 					<Button text="..."
 						style={{
-							margin: "3px -3px -3px -3px", height: 17, lineHeight: "12px", padding: 0,
+							margin: "-1px 0 1px 0", height: 17, lineHeight: "12px", padding: 0,
 							position: "relative", display: "flex", justifyContent: "space-around", //alignItems: "center",
 							background: null, boxShadow: null, borderRadius: "0 0 5px 5px",
 							":hover": {background: `rgba(${backgroundColor},.5)`},

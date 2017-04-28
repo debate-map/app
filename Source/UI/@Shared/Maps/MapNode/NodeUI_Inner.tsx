@@ -28,10 +28,11 @@ import Column from "../../../../Frame/ReactComponents/Column";
 import DefinitionsPanel from "./NodeUI/DefinitionsPanel";
 import QuestionsPanel from "./NodeUI/QuestionsPanel";
 import TagsPanel from "./NodeUI/TagsPanel";
+import DetailsPanel from "./NodeUI/DetailsPanel";
 import OthersPanel from "./NodeUI/OthersPanel";
-import HistoryPanel from "./NodeUI/HistoryPanel";
+import SocialPanel from "./NodeUI/SocialPanel";
 import RatingsPanel from "./NodeUI/RatingsPanel";
-import DiscussPanel from "./NodeUI/DiscussPanel";
+import DiscussionPanel from "./NodeUI/DiscussionPanel";
 import Row from "../../../../Frame/ReactComponents/Row";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
 
@@ -141,11 +142,11 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 						})()}
 						{panelToShow == `definitions` && <DefinitionsPanel/>}
-						{panelToShow == `questions` && <QuestionsPanel/>}
+						{panelToShow == `discussion` && <DiscussionPanel/>}
+						{panelToShow == `social` && <SocialPanel/>}
 						{panelToShow == `tags` && <TagsPanel/>}
-						{panelToShow == `discuss` && <DiscussPanel/>}
-						{panelToShow == `history` && <HistoryPanel/>}
-						{panelToShow == `others` && <OthersPanel node={node} path={path} userID={userID}/>}
+						{panelToShow == `details` && <DetailsPanel node={node} path={path} userID={userID}/>}
+						{panelToShow == `others` && <OthersPanel/>}
 					</div>}
 			</div>
 		);
