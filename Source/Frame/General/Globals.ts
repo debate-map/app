@@ -223,6 +223,13 @@ var ObservableArray = observableHelper.test1.constructor;
 // others
 // ==========
 
+g.Extend({Delay}); declare global { function Delay(delay: number): Promise<any>; }
+function Delay(delay: number): Promise<any> {  
+	return new Promise(function(resolve, reject) {
+		setTimeout(()=>resolve(), delay);
+	});
+}
+
 export function Range(min, max, step = 1, includeMax = true) {
 	var result: number[] = [];
 	for (let i = min; includeMax ? i <= max : i < max; i += step)

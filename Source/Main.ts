@@ -69,7 +69,8 @@ if (prodEnv) {
 	}).install();
 }
 
-if (devEnv) {
+// You know what? It's better to just disable this until you specifically want to use it... (causes too many seemingly-false-positives otherwise)
+/*if (devEnv) {
 	// this logs warning if a component doesn't have any props or state change, yet is re-rendered
 	const {whyDidYouUpdate} = require("why-did-you-update");
 	whyDidYouUpdate(React, {
@@ -81,7 +82,7 @@ if (devEnv) {
 			+ `|VReactMarkdown`
 		),
 	});
-}
+}*/
 
 // hot-reloading
 // ==========

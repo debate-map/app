@@ -18,8 +18,8 @@ module.exports = {
 			name: "[name]",
 			context: path.resolve(__dirname, "Source")
 		}),
-		new webpack.optimize.OccurenceOrderPlugin(),
-		new webpack.optimize.DedupePlugin(),
+		//new webpack.optimize.OccurenceOrderPlugin(),
+		//new webpack.optimize.DedupePlugin(),
 		new webpack.optimize.UglifyJsPlugin({
 			compress: {
 				unused: true,
@@ -29,18 +29,21 @@ module.exports = {
 			},
 			mangle: {
 				keep_fnames: true,
-			}
+			},
+			sourceMap: true,
 		})
 	],
 	resolve: {
-		root: path.resolve(__dirname, "Source"),
-		modulesDirectories: ["node_modules"]
+		modules: [
+			path.resolve(__dirname, "Source"),
+			"node_modules",
+		],
 	},
 	module: {
 		loaders: [
 			{
 				test: /\.json$/,
-				loader: "json"
+				loader: "json-loader"
 			},
 		]
 	}

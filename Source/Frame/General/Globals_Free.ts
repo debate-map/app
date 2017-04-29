@@ -146,7 +146,7 @@ export function E(...objExtends: any[]) {
 // methods: url writing/parsing
 // ==================
 
-export var inFirefox = navigator.userAgent.toLowerCase().Contains("firefox");
+//export var inFirefox = navigator.userAgent.toLowerCase().Contains("firefox");
 
 // others
 // ==================

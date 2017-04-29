@@ -1,6 +1,7 @@
 import {UAParser} from "ua-parser-js";
 
-export const supportedBrowsers = ["Chrome", "Firefox", "Safari", "Chrome WebView", "Mobile Safari", "Edge"];
+//export const supportedBrowsers = ["Chrome", "Firefox", "Safari", "Chrome WebView", "Mobile Safari", "Edge"];
+export const supportedBrowsers = ["Chrome", "Firefox", "Safari", "Chrome WebView", "Mobile Safari"];
 export type supportedBrowsers =
 	| "Chrome" // desktop and mobile
 	| "Firefox" // desktop and mobile

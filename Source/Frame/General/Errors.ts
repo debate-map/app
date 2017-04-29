@@ -3,17 +3,22 @@ import {ACTNotificationMessageAdd} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import {LogError} from "./Logging";
 
-g.onerror = function(message: string, filePath: string, line: number, column: number, error: Error) {
+//g.onerror = function(message: string, filePath: string, line: number, column: number, error: Error) {
+g.addEventListener(`error`, e=> {
+	let {message, filename: filePath, lineno: line, colno: column, error} = e as {message: string, filename: string, lineno: number, colno: number, error: Error};
 	/*LogError(`JS) ${message} (at ${filePath}:${line}:${column})
 Stack) ${error.stack}`);*/
 	if (error != null)
 		HandleError(error);
 	else
 		HandleError({stack: filePath + ":" + line + ":" + column, toString: ()=>message} as any);
-};
-g.addEventListener('unhandledrejection', e=>{
-	alert("Yay!");
-    //console.error('Unhandled rejection (promise: ', e.promise, ', reason: ', e.reason, ').');
+});
+g.addEventListener(`unhandledrejection`, e=>{
+    //console.error(`Unhandled rejection (promise: `, e.promise, `, reason: `, e.reason, `).`);
+	 HandleError(e.reason);
+});
+g.addEventListener(`onrejectionhandled`, e=>{
+    //console.error(`Unhandled rejection (promise: `, e.promise, `, reason: `, e.reason, `).`);
 	 HandleError(e.reason);
 });
 

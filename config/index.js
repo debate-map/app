@@ -32,7 +32,7 @@ const config = {
 	// ----------
 	// remember that if you change the compiler settings, you'll need to clear the happypack cache
 	compiler_babel: {
-		cacheDirectory : true,
+		cacheDirectory: true,
 		presets: [
 			//"babel-preset-es2015",
 			"babel-preset-react",
@@ -60,25 +60,27 @@ const config = {
 			"babel-plugin-transform-es2015-template-literals",
 			"babel-plugin-transform-es2015-typeof-symbol",
 			"babel-plugin-transform-es2015-unicode-regex",
-			"babel-plugin-transform-regenerator",
+			//"babel-plugin-transform-regenerator",
 
 			// from stage-0
 			"babel-plugin-transform-object-rest-spread",
 			"babel-plugin-transform-class-properties",
 
-			//[require.resolve("babel-plugin-transform-runtime"), {"regenerator": false}],
+			[require.resolve("babel-plugin-transform-runtime"), {"regenerator": false}],
 			"babel-plugin-lodash",
 			"babel-plugin-transform-decorators-legacy"
 		].map(a=>typeof a == "string" ? require.resolve(a) : a),
 	},
-	//compiler_devtool         : "source-map",
-	//compiler_devtool         : "cheap-module-eval-source-map",
-	compiler_devtool         : "cheap-module-source-map",
-	compiler_hash_type       : "hash",
-	compiler_fail_on_warning : false,
-	compiler_quiet           : false,
-	compiler_public_path     : "/",
-	compiler_stats           : {
+	//compiler_devtool: "source-map", // shows: original (in error.stack, shows bundle line)
+	compiler_devtool: "cheap-module-eval-source-map", // shows: original (in error.stack, shows eval/transpiled-to-js-but-in-module line)
+	//compiler_devtool: "cheap-module-source-map", // in webpack-2 at least, shows: transpiled-to-js
+	//compiler_devtool: "cheap-source-map", // shows: transpiled-to-js I think?
+	//compiler_devtool: "eval", // shows: transpiled-to-js
+	compiler_hash_type: "hash",
+	compiler_fail_on_warning: false,
+	compiler_quiet: false,
+	compiler_public_path: "/",
+	compiler_stats: {
 		chunks : false,
 		chunkModules : false,
 		colors : true

@@ -83,6 +83,13 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 						return <UpgradeButton key={pair.name} newVersion={parseInt(pair.name)} upgradeFunc={pair.value}/>
 					})}
 				</Column>
+				<Row><h4>Testing</h4></Row>
+				<Row>
+					<Button text={`Throw async error`} onClick={async ()=> {
+						await Delay(1000);
+						throw new Error("Oh no!");
+					}}/>
+				</Row>
 			</Column>
 		);
 	}
