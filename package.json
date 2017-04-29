@@ -105,7 +105,8 @@
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*",
-		  "USE_TSLOADER": "true", "#":"maybe temp; fix for that source-maps weren't working perfectly"
+        "USE_TSLOADER": "true",
+        "#": "maybe temp; fix for that source-maps weren't working perfectly"
       }
     },
     "deploy:prod": {
@@ -246,6 +247,7 @@
     "typescript-eslint-parser": "^2.1.0",
     "url-loader": "^0.5.6",
     "webpack": "^1.13.3",
+    "webpack-bundle-analyzer": "^2.4.0",
     "webpack-dev-middleware": "^1.6.1",
     "webpack-hot-middleware": "^2.12.2",
     "why-did-you-update": "0.0.8",
