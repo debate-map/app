@@ -25,12 +25,7 @@ import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {RootState} from "../../../../Store/index";
 import {GetNodeView} from "../../../../Store/main/mapViews";
-import {
-    GetFontSizeForNode,
-    GetMainRatingTypesForNode,
-    GetNodeDisplayText,
-    MapNode
-} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {GetNodeChildren} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
@@ -38,6 +33,7 @@ import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@M
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import Column from "../../../../Frame/ReactComponents/Column";
+import {GetMainRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode} from "../../../../Store/firebase/nodes/$node";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {

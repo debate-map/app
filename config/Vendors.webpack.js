@@ -10,7 +10,8 @@ module.exports = {
 		filename: "dll.[name].js",
 		library: "[name]"
 	},
-	devtool: "cheap-module-source-map",
+	//devtool: "cheap-module-source-map",
+	devtool: "source-map",
 	plugins: [
 		new webpack.DllPlugin({
 			path: path.join(__dirname, "dll", "[name]-manifest.json"),

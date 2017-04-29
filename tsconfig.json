@@ -4,6 +4,7 @@
         "sourceMap": true,
 		"watch": true,
 		"outDir": "Source_JS",
+		"forceConsistentCasingInFileNames": true, // creates duplicates in import-helper plugins otherwise
 
 		// modules/paths
 		"moduleResolution": "node",
@@ -23,12 +24,18 @@
 		},
 
 		// compiler options
-		"target": "es2015",
-        "allowJs": true,
+		//"target": "es2015",
+		"target": "es2017",
+		"lib": [
+			"es6",
+			"es5",
+			"dom"
+		],
+		"allowJs": true,
 		"jsx": "react",
-        "noImplicitAny": false,
-		"experimentalDecorators": true,
-		"allowSyntheticDefaultImports": true
+		"noImplicitAny": false,
+		"experimentalDecorators": true
+		//"allowSyntheticDefaultImports": true
     },
 	"files": ["Source/Main.ts"],
     "include": [

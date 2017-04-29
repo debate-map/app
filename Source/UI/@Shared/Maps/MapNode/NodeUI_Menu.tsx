@@ -1,5 +1,5 @@
 import {GetDataAsync, RemoveHelpers} from "../../../../Frame/Database/DatabaseHelpers";
-import {GetNodeDisplayText, GetValidChildTypes, GetValidNewChildTypes, MapNode} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {VMenuStub} from "react-vmenu";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -25,11 +25,12 @@ import {ForDelete_GetError, ForUnlink_GetError, GetNode, GetNodeChildrenAsync, G
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
-import {ThesisForm, GetThesisFormAtPath} from "../../../../Store/firebase/nodes/@MapNode";
+import {ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
 import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import {GetNodeChildren} from "../../../../Store/firebase/nodes";
 import {E} from "../../../../Frame/General/Globals_Free";
 import AddNode from "../../../../Server/Commands/AddNode";
+import {GetNodeDisplayText, GetValidNewChildTypes, GetThesisFormAtPath} from "../../../../Store/firebase/nodes/$node";
 
 type Props = {node: MapNode, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNode, copiedNode: MapNode}>;
 @Connect((state: RootState, {path}: Props)=> {

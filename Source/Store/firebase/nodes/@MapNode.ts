@@ -5,6 +5,7 @@ import {RatingType} from "../nodeRatings/@RatingType";
 import {GetParentNode, IsLinkValid, IsNewLinkValid} from "../nodes";
 import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
 import {MetaThesis_ThenType, MetaThesisInfo, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info} from "./@MetaThesisInfo";
+import {QuoteInfo} from "./@QuoteInfo";
 
 export enum AccessLevel {
 	Basic = 10,
@@ -48,7 +49,7 @@ export class MapNode {
 	children: ChildSet;
 	//talkRoot: number;
 }
-ajv.addSchema({
+AddSchema({
 	properties: {
 		type: {
 			allOf: [
@@ -66,89 +67,33 @@ ajv.addSchema({
 		approved: {type: "boolean"},
 		accessLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
 		voteLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
-		quote: {}, //quote: {type: "QuoteInfo"},
+		quote: {$ref: "QuoteInfo"},
 		metaThesis: {$ref: "MetaThesisInfo"},
-		parents: {}, //parents: {type: "ParentSet"},
-		children: {}, //children: {type: "ParentSet"},
+		parents: {$ref: "ParentSet"},
+		children: {$ref: "ChildSet"},
 		//talkRoot: {type: "number"},
 	},
 	required: ["type", "creator", "createdAt"],
-	additionalProperties: false,
 	// if not a meta-thesis or quote, require "titles" prop
 	if: {prohibited: ["metaThesis", "quote"]},
 	then: {required: ["titles"]},
 }, "MapNode");
 
-export function GetFontSizeForNode(node: MapNode) {
-	return node.metaThesis ? 11 : 14;
-}
-export function GetPaddingForNode(node: MapNode) {
-	return node.metaThesis ? "1px 4px 2px" : "5px 5px 4px";
-}
-export function GetMainRatingTypesForNode(node: MapNode): RatingType[] {
-	if (node._id < 100) // if static category, don't have any voting
-		return [];
-	if (node.metaThesis) {
-		if (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent)
-			return ["adjustment"];
-		return ["probability"];
-	}
-	return MapNodeType_Info.for[node.type].mainRatingTypes;
-}
+export type ParentSet = { [key: number]: ParentEntry; };
+AddSchema({patternProperties: {"^[0-9]+$": {$ref: "ParentEntry"}}}, "ParentSet");
+export type ParentEntry = { _: boolean; }
+AddSchema({
+	properties: {_: {type: "boolean"}},
+	required: ["_"],
+}, "ParentEntry");
 
-export class QuoteInfo {
-	author = "";
-	text = "";
-	sources = {[0]: ""} as {[key: number]: string};
+export type ChildSet = { [key: number]: ChildEntry; };
+AddSchema({patternProperties: {"^[0-9]+$": {$ref: "ChildEntry"}}}, "ChildSet");
+export type ChildEntry = {
+	_: boolean;
+	form?: ThesisForm;
 }
-
-export type ParentSet = {[key: number]: {_?}};
-export type ChildSet = {[key: number]: {_?, form?: ThesisForm}};
-/*export interface ChildInfo {
-	id: number;
-	type;
-}*/
-
-export function GetThesisFormAtPath(node: MapNode, path: string): ThesisForm {
-	let parent = GetParentNode(path);
-	if (parent == null) return ThesisForm.Base;
-	let link = parent.children[node._id];
-	if (link == null) return ThesisForm.Base;
-	return link.form;
-}
-
-export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
-	if (title.trim().length == 0) return "Title cannot be empty.";
-	return null;
-}
-
-export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | string) {
-	if (node.type == MapNodeType.Thesis) {
-		if (node.quote)
-			return `The statement below was made by ${node.quote.author}, and is unmodified.`;
-		if (node.metaThesis) {
-			return `If ${GetMetaThesisIfTypeDisplayText(node.metaThesis.ifType)} premises below are true, they ${
-				MetaThesis_ThenType_Info.for[MetaThesis_ThenType[node.metaThesis.thenType]].displayText}.`;
-		}
-
-		if (formOrPath) {
-			let form = typeof formOrPath == "string" ? GetThesisFormAtPath(node, formOrPath) : formOrPath;
-			if (form == ThesisForm.Negation)
-				return node.titles["negation"] || "";
-			if (form == ThesisForm.YesNoQuestion)
-				return node.titles["yesNoQuestion"] || "";
-		}
-	}
-	return node.titles["base"] || node.titles["yesNoQuestion"] || node.titles["negation"] || "";
-}
-
-export function GetValidChildTypes(nodeType: MapNodeType, path: string) {
-	let nodeTypes = GetValues<MapNodeType>(MapNodeType);
-	let validChildTypes = nodeTypes.filter(type=>IsLinkValid(nodeType, path, {type} as any));
-	return validChildTypes;
-}
-export function GetValidNewChildTypes(nodeType: MapNodeType, path: string, permissions: PermissionGroupSet) {
-	let nodeTypes = GetValues<MapNodeType>(MapNodeType);
-	let validChildTypes = nodeTypes.filter(type=>IsNewLinkValid(nodeType, path, {type} as any, permissions));
-	return validChildTypes;
-}
+AddSchema({
+	properties: {_: {type: "boolean"}},
+	required: ["_"],
+}, "ChildEntry");

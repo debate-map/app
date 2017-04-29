@@ -51,8 +51,12 @@ export function MainReducer(state, action) {
 		envOverride: (state = null, action)=> {
 			//if ((action.type == "@@INIT" || action.type == "persist/REHYDRATE") && startURL.GetQueryVar("env"))
 			//if ((action.type == "PostRehydrate") && startURL.GetQueryVar("env"))
-			if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).GetQueryVar("env"))
-				return URL.FromState(action.payload).GetQueryVar("env");
+			if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).GetQueryVar("env")) {
+				let newVal = URL.FromState(action.payload).GetQueryVar("env");
+				if (newVal == "null")
+					newVal = null;
+				return newVal;
+			}
 			return state;
 		},
 		analyticsEnabled: (state = true, action)=> {

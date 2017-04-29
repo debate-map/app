@@ -10,7 +10,7 @@ import {MakeRootReducer, RootState} from "../../Store/index";
 import watch from "redux-watch";
 import {PreDispatchAction, MidDispatchAction, PostDispatchAction} from "./ActionProcessor";
 //import {version, firebaseConfig} from "../../BakedConfig";
-var {version, firebaseConfig} = require(devEnv ? "../../BakedConfig_Dev" : "../../BakedConfig_Prod");
+//var {version, firebaseConfig} = require(prodEnv ? "../../BakedConfig_Prod" : "../../BakedConfig_Dev");
 
 export const browserHistory = createBrowserHistory();
 

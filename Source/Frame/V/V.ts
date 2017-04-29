@@ -283,12 +283,19 @@ export function VisitTreeNodesInPath(treeRoot, pathNodesOrStr: string[] | string
 	return treeRoot;
 }*/
 
-export function DeepGet(obj, path) {
+//export function DeepGet(obj, path, resultIfNullOrUndefined = null, resultIfUndefined_override = undefined) {
+export function DeepGet<T>(obj, path, resultIfNull: T = null): T {
 	let pathNodes = path.split(".");
 	let result = obj;
 	for (let pathNode of pathNodes) {
 		if (result == null) break;
 		result = result[pathNode];
 	}
+	/*if (result === undefined)
+		return arguments.length == 4 ? resultIfUndefined_override : resultIfNullOrUndefined;
+	if (result == null)
+		return resultIfNullOrUndefined;*/
+	if (result == null)
+		return resultIfNull;
 	return result;
 }

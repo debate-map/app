@@ -2,19 +2,20 @@ import {RequestPath, Connect} from "./FirebaseConnect";
 import {Assert} from "../General/Assert";
 import {helpers, firebaseConnect} from "react-redux-firebase";
 //import {DBPath as DBPath_} from "../../../config/DBVersion";
-import {dbRootVersion as dbRootVersion_, envSuffix as envSuffix_, DBPath as DBPath_} from "../../DBVersion";
 import {IsString} from "../General/Types";
 import {FirebaseApplication, DataSnapshot} from "firebase";
 import {BaseComponent} from "../UI/ReactGlobals";
 import {GetTreeNodesInObjTree} from "../V/V";
 //export {DBPath};
 
-export const dbRootVersion = dbRootVersion_;
-export const envSuffix = envSuffix_;
 export function DBPath(path = "", inVersionRoot = true) {
 	Assert(path != null, "Path cannot be null.");
 	Assert(IsString(path), "Path must be a string.");
-	return DBPath_(path, inVersionRoot);
+	/*let versionPrefix = path.match(/^v[0-9]+/);
+	if (versionPrefix == null) // if no version prefix already, add one (referencing the current version)*/
+	if (inVersionRoot)
+		path = `v${dbVersion}-${env_short}/${path}`;
+	return path;
 }
 
 Object.prototype._AddFunction_Inline = function Ref(path = "", inVersionRoot = true) {
@@ -117,9 +118,11 @@ export function GetData(path: string, inVersionRoot = true, makeRequest = true) 
 }
 
 g.Extend({GetDataAsync});
+//export async function GetDataAsync(path: string, inVersionRoot = true, addHelpers = true, firebase: firebase.DatabaseReference = store.firebase.helpers.ref("")) {
 export async function GetDataAsync(path: string, inVersionRoot = true, addHelpers = true) {
+	let firebase = store.firebase.helpers;
 	return await new Promise((resolve, reject) => {
-		let firebase = store.firebase.helpers;
+		//firebase.child(DBPath(path, inVersionRoot)).once("value",
 		firebase.Ref(path, inVersionRoot).once("value",
 			(snapshot: DataSnapshot)=> {
 				let result = snapshot.val();

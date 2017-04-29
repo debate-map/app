@@ -39,7 +39,7 @@ export async function GetNodeParentsAsync(node: MapNode) {
 export function GetNodeChildren(node: MapNode) {
 	// special case, for demo map
 	if (node.children && node.children[0] instanceof MapNode) {
-		return node.children as MapNode[];
+		return node.children as any as MapNode[];
 	}
 
 	let children = (node.children || {}).VKeys(true).map(id=>GetNode(parseInt(id)));

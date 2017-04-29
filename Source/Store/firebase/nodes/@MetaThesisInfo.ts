@@ -4,7 +4,7 @@ export class MetaThesisInfo {
 	ifType: MetaThesis_IfType;
 	thenType: MetaThesis_ThenType;
 }
-ajv.addSchema({
+AddSchema({
 	properties: {
 		ifType: {$ref: "MetaThesis_IfType"},
 		thenType: {$ref: "MetaThesis_ThenType"},
@@ -18,7 +18,7 @@ export enum MetaThesis_IfType {
 	AnyTwo = 15,
 	All = 20,
 }
-ajv.addSchema({
+AddSchema({
 	oneOf: GetValues_ForSchema(MetaThesis_IfType),
 }, "MetaThesis_IfType");
 
@@ -32,7 +32,7 @@ export enum MetaThesis_ThenType {
 	WeakenParent = 30,
 	GuaranteeParentFalse = 40,
 }
-ajv.addSchema({
+AddSchema({
 	oneOf: GetValues_ForSchema(MetaThesis_ThenType),
 }, "MetaThesis_ThenType");
 

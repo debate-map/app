@@ -2,9 +2,8 @@ import {TT} from "./Types";
 import V from "../V/V";
 import {Log} from "./Logging";
 
-export function Assert(condition, messageOrMessageFunc?: string);
-export function Assert(condition, messageOrMessageFunc?: Function);
-export function Assert(condition, messageOrMessageFunc) {
+g.Extend({Assert});
+export function Assert(condition, messageOrMessageFunc?: string | Function) {
 	if (condition) return;
 
 	var message = (messageOrMessageFunc as any) instanceof Function ? (messageOrMessageFunc as any)() : messageOrMessageFunc;
@@ -13,15 +12,28 @@ export function Assert(condition, messageOrMessageFunc) {
 	console.error("Assert failed) " + message);
 	debugger;
 	throw new Error("Assert failed) " + message);
-};
-export function AssertWarn(condition, messageOrMessageFunc) {
+}
+g.Extend({AssertWarn});
+export function AssertWarn(condition, messageOrMessageFunc?: string | Function) {
 	if (condition) return;
 
 	var message = messageOrMessageFunc instanceof Function ? messageOrMessageFunc() : messageOrMessageFunc;
 
 	console.warn(`Assert-warn failed) ${message}\n\nStackTrace) ${V.GetStackTraceStr()}`);
-};
-g.Extend({Assert, AssertWarn});
+}
+
+// this version throws an error with only the provided message -- for ones the user may well see, and which don't need the stack (or "Assert failed) " text)
+/*g.Extend({AssertSimple});
+export function AssertSimple(condition, messageOrMessageFunc?: string | Function) {
+	if (condition) return;
+
+	var message = (messageOrMessageFunc as any) instanceof Function ? (messageOrMessageFunc as any)() : messageOrMessageFunc;
+
+	Log(`Assert failed) ${message}\n\nStackTrace) ${V.GetStackTraceStr()}`);
+	console.error("Assert failed) " + message);
+	debugger;
+	throw new Error(message);
+}*/
 
 export class A {
     static set NonNull(value) {

@@ -17,11 +17,12 @@ if (process.env.TRAVIS_PULL_REQUEST === false) {
 function createConfigFile(cb) {
 	const configObj = {
 		version: pkg.version,
+		dbVersion: 3,
 		firebaseConfig: config.firebase,
-		env: config.env,
+		/*env: config.env,
 		devEnv: config.globals.__DEV__,
 		prodEnv: config.globals.__PROD__,
-		testEnv: config.globals.__TEST__,
+		testEnv: config.globals.__TEST__,*/
 	};
 
 	const fileString = Object.keys(configObj).map(key=> {

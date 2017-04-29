@@ -15,7 +15,7 @@ import {replace} from "react-router-redux";
 import {CreateMapViewForPath, GetShortestPathFromRootToNode} from "./PathFinder";
 import {ACTNotificationMessageAdd} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
-import {GetNodeDisplayText} from "../../Store/firebase/nodes/@MapNode";
+import {GetNodeDisplayText} from "../../Store/firebase/nodes/$node";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;

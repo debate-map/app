@@ -1,10 +1,9 @@
-import {dbRootVersion, GetDataAsync, envSuffix, RemoveHelpers, DBPath} from "../../Frame/Database/DatabaseHelpers";
+import {DBPath, FirebaseApp, GetDataAsync, ProcessDBData, RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
 import ResetCurrentDBRoot from "./Admin/ResetCurrentDBRoot";
 import {styles} from "../../Frame/UI/GlobalStyles";
-import {BaseComponent, BaseProps} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, BaseProps, Pre} from "../../Frame/UI/ReactGlobals";
 import {firebaseConnect} from "react-redux-firebase";
 import Button from "../../Frame/ReactComponents/Button";
-import VMessageBox from "../../Frame/UI/VMessageBox";
 import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
 import {E} from "../../Frame/General/Globals_Free";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
@@ -13,11 +12,16 @@ import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import UserExtraInfo from "../../Store/firebase/userExtras/@UserExtraInfo";
 import Column from "../../Frame/ReactComponents/Column";
 import Row from "../../Frame/ReactComponents/Row";
-
-// upgrade-funcs
-import "./Admin/DBUpgrades/UpgradeDB_2";
 import {User} from "../../Store/firebase/users";
 import {RatingsSet} from "../../Store/firebase/nodeRatings/@RatingsRoot";
+import * as Firebase from "firebase";
+
+// upgrade-funcs
+//import "./Admin/DBUpgrades/UpgradeDB_2";
+import Select from "../../Frame/ReactComponents/Select";
+import {DataSnapshot} from "firebase";
+require("./Admin/DBUpgrades/UpgradeDB_2");
+require("./Admin/DBUpgrades/UpgradeDB_3");
 var upgradeFuncs; // populated by modules above
 export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>FirebaseData) {
 	upgradeFuncs = upgradeFuncs || {};
@@ -37,16 +41,35 @@ export interface GeneralData {
 	lastNodeID: number;
 }
 
+//export default class AdminUI extends BaseComponent<{}, {fb: firebase.FirebaseApplication, env: string}> {
 export default class AdminUI extends BaseComponent<{}, {}> {
+	/*constructor(props) {
+		super(props);
+		//this.state = {env: envSuffix};
+		this.SetEnvironment(envSuffix);
+	}
+	SetEnvironment(env: string) {
+		var {version, firebaseConfig} = require(env == "prod" ? "../../BakedConfig_Prod" : "../../BakedConfig_Dev");
+		try {
+			Firebase.initializeApp(firebaseConfig);
+		} catch (err) {} // silence reinitialize warning (hot-reloading)
+      Firebase.database.enableLogging(true);
+		const rootRef = (Firebase as any).database().ref();
+		this.SetState({fb: rootRef, env});
+	}*/
+
 	render() {
 		return (
 			<Column style={E(styles.page)}>
 				<Row m="-10px 0"><h2>Database</h2></Row>
+				{/*<Row>
+					<Pre>Environment: </Pre><Select options={["dev", "prod"]} value={this.state.env} onChange={val=>this.SetEnvironment(val)}/>
+				</Row>*/}
 				<Row><h4>General</h4></Row>
 				<Row>
-					<Button text={`Reset ${DBPath().slice(0, -1)}`} onClick={()=> {
+					<Button text={`Reset ${DBPath(`v${dbVersion}-${env_short}/`, false).slice(0, -1)}`} onClick={()=> {
 						ShowMessageBox({
-							title: `Reset ${DBPath().slice(0, -1)}?`,
+							title: `Reset ${DBPath(`v${dbVersion}-${env_short}/`, false).slice(0, -1)}?`,
 							message: `This will clear all existing data in this root, then replace it with a fresh, initial state.`, cancelButton: true,
 							onOK: ()=> {
 								ResetCurrentDBRoot();
@@ -55,11 +78,11 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 					}}/>
 				</Row>
 				<Row mt={5}><h4>Upgrader</h4></Row>
-				<Row>
+				<Column style={{alignItems: "flex-start"}}>
 					{upgradeFuncs.Props().map(pair=> {
 						return <UpgradeButton key={pair.name} newVersion={parseInt(pair.name)} upgradeFunc={pair.value}/>
 					})}
-				</Row>
+				</Column>
 			</Column>
 		);
 	}
@@ -71,8 +94,8 @@ export class UpgradeButton extends BaseComponent<{newVersion: number, upgradeFun
 	render() {
 		let {newVersion, upgradeFunc} = this.props;
 
-		let oldVersionPath = `v${newVersion - 1}-${envSuffix}`;
-		let newVersionPath = `v${newVersion}-${envSuffix}`;
+		let oldVersionPath = `v${newVersion - 1}-${env_short}`;
+		let newVersionPath = `v${newVersion}-${env_short}`;
 
 		return (
 			<Button text={`${oldVersionPath}   ->   ${newVersionPath}`} style={{whiteSpace: "pre"}} onClick={()=> {

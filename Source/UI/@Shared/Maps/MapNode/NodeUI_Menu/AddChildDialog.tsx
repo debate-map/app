@@ -1,6 +1,6 @@
 import {MapNodeType, MapNodeType_Info} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
-import {MapNode, GetNodeDisplayText, ThesisForm, QuoteInfo} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm} from "../../../../../Store/firebase/nodes/@MapNode";
 import {ShowMessageBox} from "../../../../../Frame/UI/VMessageBox";
 import Select from "../../../../../Frame/ReactComponents/Select";
 import TextInput from "../../../../../Frame/ReactComponents/TextInput";
@@ -15,6 +15,7 @@ import {MetaThesis_ThenType, MetaThesis_IfType, MetaThesis_ThenType_Info} from "
 import AddNode from "../../../../../Server/Commands/AddNode";
 import Editor from "react-md-editor";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
+import {QuoteInfo} from "../../../../../Store/firebase/nodes/@QuoteInfo";
 
 export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, userID: string) {
 	let firebase = store.firebase.helpers;
@@ -41,6 +42,7 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 	};
 	
 	let justShowed = true;
+	let quoteError = null;
 	let Change = _=>boxController.UpdateUI();
 	let boxController = ShowMessageBox({
 		title: `Add ${displayName}`, cancelButton: true,
@@ -56,7 +58,7 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 					<Row><Pre>Type: </Pre><Select displayType="button bar" options={thesisTypes} style={{display: `inline-block`}}
 						value={info.thesisType} onChange={val=>Change(info.thesisType = val)}/></Row>}
 				{childType == MapNodeType.Thesis && info.thesisType == `Quote` ? (
-					<QuoteInfoEditorUI info={info.quote} showPreview={true} justShowed={justShowed}/>
+					<QuoteInfoEditorUI info={info.quote} showPreview={true} justShowed={justShowed} onSetError={error=>Change(quoteError = error)}/>
 				) : (
 					<Row mt={5}><Pre>Title: </Pre><TextInput ref={a=>a && justShowed && WaitXThenRun(0, ()=>a.DOM.focus())} style={{flex: 1}}
 						value={info.title} onChange={val=>Change(info.title = val)}/></Row>
@@ -73,6 +75,10 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 			</Column>
 		),
 		onOK: ()=> {
+			if (quoteError) {
+				return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${quoteError}`}));
+			}
+			
 			let newChildNode = new MapNode({
 				parents: {[parentNode._id]: {_: true}},
 				type: childType, creator: userID, approved: true

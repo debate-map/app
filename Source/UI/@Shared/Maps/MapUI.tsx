@@ -17,7 +17,7 @@ import NodeUI_Inner from "./MapNode/NodeUI_Inner";
 //import ReactResizeDetector from "react-resize-detector"; // this one doesn't seem to work reliably -- at least for the map-ui
 import ResizeSensor from "react-resize-sensor";
 import {WaitXThenRun, Timer} from "../../../Frame/General/Timers";
-import {MapNode, GetNodeDisplayText, ThesisForm} from "../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm} from "../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../Store/firebase/maps/@Map";
 import {RootState} from "../../../Store/index";
 import {GetMapView} from "../../../Store/main/mapViews";

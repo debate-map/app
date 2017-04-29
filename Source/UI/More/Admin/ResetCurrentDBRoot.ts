@@ -5,6 +5,7 @@ import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
 import {MapType, Map} from "../../../Store/firebase/maps/@Map";
 import UserExtraInfo from "../../../Store/firebase/userExtras/@UserExtraInfo";
 
+//export default async function ResetCurrentDBRoot(database: firebase.Database) {
 export default async function ResetCurrentDBRoot() {
 	let firebase = store.firebase.helpers;
 
@@ -138,6 +139,6 @@ export default async function ResetCurrentDBRoot() {
 	data.nodeRatings = {_,
 	} as any;
 
-	await firebase.Ref().update(data);
+	await firebase.update(data);
 	ShowMessageBox({message: "Done!"});
 }

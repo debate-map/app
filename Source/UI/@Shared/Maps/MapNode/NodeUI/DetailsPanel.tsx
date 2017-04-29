@@ -1,4 +1,4 @@
-import {MapNode, IsNodeTitleValid_GetError} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode} from "../../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
@@ -26,6 +26,10 @@ import {E} from "../../../../../Frame/General/Globals_Free";
 import Row from "../../../../../Frame/ReactComponents/Row";
 import {MetaThesis_ThenType, MetaThesis_ThenType_Info, MetaThesis_IfType, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
+import UpdateNodeDetails from "../../../../../Server/Commands/UpdateNodeDetails";
+import {QuoteInfo} from "../../../../../Store/firebase/nodes/@QuoteInfo";
+import {RemoveHelpers} from "../../../../../Frame/Database/DatabaseHelpers";
+import {HandleError} from "../../../../../Frame/General/Errors";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -36,10 +40,14 @@ type DetailsPanel_Props = {node: MapNode, path: string, userID: string} & Partia
 		nodeCreator: GetUser(node.creator),
 	};
 })
-export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {}> {
+//export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {error: Error}> {
+export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {quoteError: string}> {
 	render() {
 		let {node, path, userID, nodeCreator} = this.props;
+		let {quoteError} = this.state;
 		let firebase = store.firebase.helpers;
+		//let {error} = this.state;
+
 		if (node.metaThesis) {
 			var parentNode = GetParentNode(path);
 			var thenTypes = parentNode.type == MapNodeType.SupportingArgument
@@ -60,7 +68,8 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {}> 
 							</Row>}
 						{node.type == MapNodeType.Thesis && !node.metaThesis && (
 							node.quote ? [
-								<QuoteInfoEditorUI key={0} ref="quoteEditor" info={node.quote.Extended({})} showPreview={false} justShowed={false}/>
+								<QuoteInfoEditorUI key={0} ref="quoteEditor" info={node.quote.Extended({})} showPreview={false} justShowed={false}
+									onSetError={error=>this.SetState({quoteError: error})}/>
 							] : [
 								<Row key={0} mt={5} style={{display: `flex`, alignItems: `center`}}>
 									<Pre>Title (negation): </Pre>
@@ -85,37 +94,58 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {}> 
 								}}/>
 								<Pre>.</Pre>
 							</Row>}
-						<Button text="Save" mt={10} onLeftClick={()=> {
-							/*firebase.Ref().update(E(
-								this.refs.title_base && {base: this.refs.title_base.GetValue()},
-								this.refs.title_negation && {negation: this.refs.title_negation.GetValue()},
-								this.refs.yesNoQuestion && {yesNoQuestion: this.refs.title_yesNoQuestion.GetValue()},
-							));*/
-							firebase.Ref(`nodes/${node._id}`).transaction(node=> {
-								if (!node) return node;
+						<Row>
+							<Button text="Save" enabled={quoteError == null} mt={10} onLeftClick={async ()=> {
+								/*firebase.Ref().update(E(
+									this.refs.title_base && {base: this.refs.title_base.GetValue()},
+									this.refs.title_negation && {negation: this.refs.title_negation.GetValue()},
+									this.refs.yesNoQuestion && {yesNoQuestion: this.refs.title_yesNoQuestion.GetValue()},
+								));*/
+								/*firebase.Ref(`nodes/${node._id}`).transaction(node=> {
+									if (!node) return node;
 
-								// todo: move these higher-up, and have errors shown in ui
-								/*if (this.refs.title_base) {
-									let error = IsNodeTitleValid_GetError(node, this.refs.title_base.GetValue());
-									if (error) return void ShowMessageBox({title: "Cannot set title", message: error});
-									node.titles.base = this.refs.title_base.GetValue();
+									// todo: move these higher-up, and have errors shown in ui
+									/*if (this.refs.title_base) {
+										let error = IsNodeTitleValid_GetError(node, this.refs.title_base.GetValue());
+										if (error) return void ShowMessageBox({title: "Cannot set title", message: error});
+										node.titles.base = this.refs.title_base.GetValue();
+									}*#/
+
+									if (this.refs.title_base) node.titles.base = this.refs.title_base.GetValue();
+									if (this.refs.title_negation) node.titles.negation = this.refs.title_negation.GetValue();
+									if (this.refs.title_yesNoQuestion) node.titles.yesNoQuestion = this.refs.title_yesNoQuestion.GetValue();
+
+									if (this.refs.quoteEditor) node.quote = this.refs.quoteEditor.props.info;
+
+									return node;
+								}, undefined, false);*/
+
+								/*let validationError = this.refs.quoteEditor && this.refs.quoteEditor.GetValidationError();
+								if (validationError) {
+									return void ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`});
 								}*/
 
-								if (this.refs.title_base) node.titles.base = this.refs.title_base.GetValue();
-								if (this.refs.title_negation) node.titles.negation = this.refs.title_negation.GetValue();
-								if (this.refs.title_yesNoQuestion) node.titles.yesNoQuestion = this.refs.title_yesNoQuestion.GetValue();
-
-								if (this.refs.quoteEditor) node.quote = this.refs.quoteEditor.props.info;
-
-								return node;
-							}, undefined, false);
-						}}/>
-					</Div>}
+								let updates = RemoveHelpers(E(
+									(this.refs.title_base || this.refs.title_negation || this.refs.title_yesNoQuestion) &&
+										{titles: E(
+											this.refs.title_base && {base: this.refs.title_base.GetValue()},
+											this.refs.title_negation && {negation: this.refs.title_negation.GetValue()},
+											this.refs.title_yesNoQuestion && {yesNoQuestion: this.refs.title_yesNoQuestion.GetValue()},
+										)},
+									this.refs.quoteEditor &&
+										{quote: this.refs.quoteEditor.props.info as QuoteInfo},
+								));
+								//try {
+								await new UpdateNodeDetails({nodeID: node._id, updates}).Run();
+								/*} catch (ex) {
+									//this.SetState({error: ex});
+									HandleError(ex);
+								}*/
+							}}/>
+						{/*error && <Pre>{error.message}</Pre>*/}
+					</Row>
+				</Div>}
 			</div>
 		);
-	}
-
-	SaveInfo() {
-
 	}
 }

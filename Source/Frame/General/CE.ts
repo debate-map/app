@@ -273,10 +273,19 @@ Object.prototype._AddFunction_Inline = function VValues(excludeSpecialProps = fa
 	return Object.keys(this).map(a=>this[a]);
 };
 
+// this is a total hack : P -- fixes typescript-es2017 "TypeError: [module].default is not a constructor" issue
+/*Object.prototype._AddGetterSetter("default", function() {
+	return this;
+}, function(value) {
+	/*delete this.default;
+	this.default = value;*#/
+	Object.defineProperty(this, "default", {configurable: true, enumerable: false, value});
+});*/
+
 // Object[FakeArray]
 // ==========
 
-interface Object { FakeArray_Select<T2>(selectFunc?: (item, index?: number)=>T2): T2[]; }
+interface Object { FakeArray_Select<T, T2>(this: {[key: string]: T}, selectFunc?: (item: T, index?: number)=>T2): T2[]; }
 Object.prototype._AddFunction_Inline = function FakeArray_Select(selectFunc = a=>a) {
 	/*var result = this instanceof List ? new List(this.itemType) : [];
 	for (let [index, item] of this.entries())
@@ -293,7 +302,7 @@ Object.prototype._AddFunction_Inline = function FakeArray_RemoveAt(index: number
 		this[i - 1] = this[i];
 	delete this[i];
 };
-interface Object { FakeArray_Add(item); }
+interface Object { FakeArray_Add<T>(this: {[key: string]: T}, item: T); }
 Object.prototype._AddFunction_Inline = function FakeArray_Add(item) {
 	for (var openIndex = 0; openIndex in this; openIndex++);
 	this[openIndex] = item;

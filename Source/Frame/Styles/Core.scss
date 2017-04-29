@@ -74,6 +74,10 @@
 		padding: 2px;
 	}
 
+	input:invalid {
+		outline: 1px solid rgba(255,0,0,1);
+	}
+
 	p:first-child { margin-top: 0; }
 	p:last-child { margin-bottom: 0; }
 

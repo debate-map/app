@@ -1,5 +1,5 @@
 import {connect} from "react-redux";
-import {BaseComponent, Div, AddGlobalStyle} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Div, AddGlobalStyle, Pre} from "../../../../Frame/UI/ReactGlobals";
 import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
 import VMenu from "react-vmenu";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
@@ -15,7 +15,7 @@ import NodeUI_Menu from "./NodeUI_Menu";
 import V from "../../../../Frame/V/V";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {MapNode, GetNodeDisplayText, QuoteInfo, GetMainRatingTypesForNode, GetPaddingForNode, GetFontSizeForNode} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeRatingsRoot, GetRatings, GetFillPercentForRatingAverage, GetRatingAverage, GetRatingValue} from "../../../../Store/firebase/nodeRatings";
 import {GetUserID} from "../../../../Store/firebase/users";
 import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -35,6 +35,8 @@ import RatingsPanel from "./NodeUI/RatingsPanel";
 import DiscussionPanel from "./NodeUI/DiscussionPanel";
 import Row from "../../../../Frame/ReactComponents/Row";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
+import {QuoteInfo, Source} from "../../../../Store/firebase/nodes/@QuoteInfo";
+import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetMainRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -195,9 +197,14 @@ export class SourcesUI extends BaseComponent<{quote: QuoteInfo}, {}> {
 		let {quote} = this.props;
 		return (
 			<Column mt={3}>
-				<div style={{color: `rgba(255,255,255,.5)`}}>Sources:</div>
-				{quote.sources.FakeArray_Select(a=>a).map((source, index)=> {
-					return <a key={index} href={source} style={{marginLeft: 10, wordBreak: `break-word`}}>{source}</a>;
+				<Row style={{color: `rgba(255,255,255,.5)`}}>Sources:</Row>
+				{quote.sources.FakeArray_Select(a=>a).map((source: Source, index)=> {
+					return (
+						<Row key={index}>
+							<Pre>{source.name}: </Pre>
+							<a href={source.link} style={{wordBreak: `break-word`}}>{source.link}</a>
+						</Row>
+					);
 				})}	
 			</Column>
 		);

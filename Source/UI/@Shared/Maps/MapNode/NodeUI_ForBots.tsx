@@ -12,7 +12,8 @@ import Row from "../../../../Frame/ReactComponents/Row";
 import {URL} from "../../../../Frame/General/URLs";
 import Link from "../../../../Frame/ReactComponents/Link";
 import {BaseComponent, BaseProps, Pre} from "../../../../Frame/UI/ReactGlobals";
-import {GetNodeDisplayText, MapNode} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
+import {GetNodeDisplayText} from "../../../../Store/firebase/nodes/$node";
 
 let childrenPlaceholder = [];
 

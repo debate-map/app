@@ -39,21 +39,28 @@ g.Extend({React, Promise: PromiseWrapper});*/
 injectTapEventPlugin();
 
 let startURL = URL.Current();
-g.Extend({startURL}); declare global { export var startURL: URL; }
+declare global { export var startURL: URL; } g.Extend({startURL});
 
-//let {version} = require("../../../package.json");
-// use two BakedConfig files, so that dev-server can continue running, with its own baked-config data, even while prod-deploy occurs
-let {version, env, devEnv, prodEnv, testEnv} = __DEV__ ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
-//let version = "0.0.1", env = "development", devEnv = true, prodEnv = false, testEnv = false;
+//let {version, env, devEnv, prodEnv, testEnv} = __DEV__ ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
+let env = __PROD__ ? "production" : "development";
 if (startURL.GetQueryVar("env") && startURL.GetQueryVar("env") != "null") {
 	env = startURL.GetQueryVar("env");
-	devEnv = env == "development";
-	prodEnv = env == "production";
-	testEnv = env == "test";
 	//alert("Using env: " + env);
 	console.log("Using env: " + env);
 }
-g.Extend({env, devEnv, prodEnv, testEnv});
+g.Extend({env}); declare global { var env: string; }
+
+let env_short = env == "production" ? "prod" : "dev";
+let devEnv = env == "development";
+let prodEnv = env == "production";
+let testEnv = env == "test";
+g.Extend({env_short, devEnv, prodEnv, testEnv}); declare global { var env_short: string, devEnv: boolean, prodEnv: boolean, testEnv: boolean; }
+
+//let {version} = require("../../../package.json");
+// Note: Use two BakedConfig files, so that dev-server can continue running, with its own baked-config data, even while prod-deploy occurs.
+// Note: Don't reference the BakedConfig files from anywhere but here (in runtime code) -- because we want to be able to override it, below.
+let {version, dbVersion, firebaseConfig} = devEnv ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
+g.Extend({version, dbVersion, firebaseConfig}); declare global { var version: string, dbVersion: number, firebaseConfig; }
 
 if (prodEnv) {
 	Raven.config("https://40c1e4f57e8b4bbeb1e5b0cf11abf9e9@sentry.io/155432", {

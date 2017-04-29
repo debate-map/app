@@ -11,6 +11,11 @@ Stack) ${error.stack}`);*/
 	else
 		HandleError({stack: filePath + ":" + line + ":" + column, toString: ()=>message} as any);
 };
+g.addEventListener('unhandledrejection', e=>{
+	alert("Yay!");
+    //console.error('Unhandled rejection (promise: ', e.promise, ', reason: ', e.reason, ').');
+	 HandleError(e.reason);
+});
 
 export function HandleError(error: Error, fatal = false) {
 	let message = error.message || error.toString();
@@ -19,9 +24,14 @@ export function HandleError(error: Error, fatal = false) {
 		: error.stack || "";
 
 	//alert("An error occurred: " + error);
-	let errorStr = `An error has occurred: ${message}${
-stackWithoutMessage ? "\n" + stackWithoutMessage : ""}${
-fatal ? "\n[fatal]" : ""}`;
+	let errorStr = "";
+	if (!message.startsWith("Assert failed) "))
+		errorStr += `An error has occurred: `;
+	errorStr += message;
+	if (stackWithoutMessage)
+		errorStr += "\n" + stackWithoutMessage;
+	if (fatal)
+		errorStr += "\n[fatal]";
 	LogError(errorStr);
 	store.dispatch(new ACTNotificationMessageAdd(new NotificationMessage(errorStr)));
 }
