@@ -23,18 +23,21 @@ g.addEventListener(`onrejectionhandled`, e=>{
 });
 
 export function HandleError(error: Error, fatal = false) {
-	let message = error.message || error.toString();
-	let stackWithoutMessage = error.stack && error.stack.substr(0, error.stack.IndexOfAny("\r", "\n")) == error.message
-		? error.stack.substr(error.stack.indexOf("\n") + 1)
-		: error.stack || "";
+	let message = (error.message || error.toString()).replace(/\r/g, "").TrimStart("\n");
+	/*let stackWithoutMessage = (
+		error.stack && error.message && error.stack.Contains(error.message)
+			? error.stack.replace(error.message, "")
+			: error.stack || ""
+	).TrimStart("\r", "\n");*/
+	let stack = (error.stack || "").replace(/\r/g, "").TrimStart("\n");
 
 	//alert("An error occurred: " + error);
 	let errorStr = "";
 	if (!message.startsWith("Assert failed) "))
 		errorStr += `An error has occurred: `;
-	errorStr += message;
-	if (stackWithoutMessage)
-		errorStr += "\n" + stackWithoutMessage;
+	if (!stack.Contains(message))
+		errorStr += message;
+	errorStr += (errorStr.length ? "\n" : "") + stack;
 	if (fatal)
 		errorStr += "\n[fatal]";
 	LogError(errorStr);

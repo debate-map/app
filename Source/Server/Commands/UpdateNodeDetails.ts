@@ -25,12 +25,12 @@ export default class UpdateNodeDetails extends Command<{nodeID: number, updates:
 		
 		let oldData = await GetDataAsync(`nodes/${nodeID}`, true, false);
 		let newData = {...oldData, ...updates};
-
+		
 		// validate state
 		// ==========
 
-		//if (!ajv.validate(`MapNode`, newData)) throw new Error(`New-data invalid: ` + ajv.errorsText());
-		Assert(ajv.validate(`MapNode`, newData), `New-data invalid: ` + ajv.errorsText());
+		//if (!ajv.validate(`MapNode`, newData)) throw new Error(`New-data invalid: ${ajv.FullErrorsText()}`);
+		Assert(ajv.validate(`MapNode`, newData), `New-data invalid: ${ajv.FullErrorsText()}`);
 
 		// execute
 		// ==========

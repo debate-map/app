@@ -33,8 +33,8 @@ export default class AddNode extends Command<{node: MapNode, form: ThesisForm, m
 		// validate state
 		// ==========
 
-		if (!ajv.validate(`MapNode`, node)) throw new Error(`Node invalid: ` + ajv.errorsText());
-		if (!ajv.validate(`MapNode`, metaThesisNode)) throw new Error(`Meta-thesis-node invalid: ` + ajv.errorsText());
+		if (!ajv.validate(`MapNode`, node)) throw new Error(`Node invalid: ${ajv.FullErrorsText()}`);
+		if (!ajv.validate(`MapNode`, metaThesisNode)) throw new Error(`Meta-thesis-node invalid: ${ajv.FullErrorsText()}`);
 
 		// execute
 		// ==========

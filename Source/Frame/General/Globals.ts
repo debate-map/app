@@ -75,7 +75,7 @@ g.Extend({E});
 declare global { function FromJSON(json: string); } g.Extend({FromJSON});
 export function FromJSON(json: string) { return JSON.parse(json); }
 
-declare global { function ToJSON(obj, ...excludePropNames): string; } g.Extend({ToJSON});
+/*declare global { function ToJSON(obj, ...excludePropNames): string; } g.Extend({ToJSON});
 export function ToJSON(obj, ...excludePropNames): string {
 	try {
 		if (arguments.length > 1) {
@@ -88,6 +88,16 @@ export function ToJSON(obj, ...excludePropNames): string {
 		return JSON.stringify(obj);
 	}
 	catch (ex) {
+		if (ex.toString() == "TypeError: Converting circular structure to JSON")
+			return ToJSON_Safe.apply(this, arguments);
+		throw ex;
+	}
+}*/
+g.Extend({ToJSON}); declare global { function ToJSON(obj, replacerFunc?, spacing?: number): string; }
+export function ToJSON(obj, replacerFunc?, spacing?: number): string {
+	try {
+		return JSON.stringify(obj, replacerFunc, spacing);
+	} catch (ex) {
 		if (ex.toString() == "TypeError: Converting circular structure to JSON")
 			return ToJSON_Safe.apply(this, arguments);
 		throw ex;
