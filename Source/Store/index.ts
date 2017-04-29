@@ -15,7 +15,7 @@ import {GetTreeNodesInObjTree} from "../Frame/V/V";
 import {Set} from "immutable";
 import {MainState, MainReducer} from "./main";
 import {LocationDescriptorObject} from "history";
-import Immutable from "immutable";
+import * as Immutable from "immutable";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;

@@ -18,7 +18,7 @@ import {ShowMessageBox_Base, ShowMessageBox} from "../../../../../Frame/UI/VMess
 import {firebaseConnect} from "react-redux-firebase";
 import {WaitXThenRun} from "../../../../../Frame/General/Timers";
 import TextInput from "../../../../../Frame/ReactComponents/TextInput";
-import Moment from "moment";
+import * as Moment from "moment";
 import {GetParentNode} from "../../../../../Store/firebase/nodes";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
@@ -58,7 +58,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {quo
 		return (
 			<div className="selectable" style={{position: `relative`, padding: `5px`}}>
 				<Div style={{fontSize: 12}}>NodeID: {node._id}</Div>
-				<Div mt={3} style={{fontSize: 12}}>Created at: {Moment(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)} (by: {nodeCreator ? nodeCreator.displayName : `n/a`})</Div>
+				<Div mt={3} style={{fontSize: 12}}>Created at: {(Moment as any)(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)} (by: {nodeCreator ? nodeCreator.displayName : `n/a`})</Div>
 				{IsUserCreatorOrMod(userID, node) &&
 					<Div mt={3}>
 						{!node.quote && !node.metaThesis &&

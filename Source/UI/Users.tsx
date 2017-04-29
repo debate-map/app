@@ -4,7 +4,7 @@ import {Connect} from "../Frame/Database/FirebaseConnect";
 import {GetUsers, GetUserExtraInfoMap, UserExtraInfoMap, User} from "../Store/firebase/users";
 import Row from "../Frame/ReactComponents/Row";
 import UserExtraInfo from "../Store/firebase/userExtras/@UserExtraInfo";
-import Moment from "moment";
+import * as Moment from "moment";
 
 @Connect(state=> ({
 	users: GetUsers(),
@@ -36,7 +36,7 @@ class UserRow extends BaseComponent<{user: User, userExtraInfo: UserExtraInfo}, 
 		return (
 			<Row sel>
 				<span style={{flex: .33}}>{user.displayName}</span>
-				<span style={{flex: .33}}>{userExtraInfo ? Moment(userExtraInfo.joinDate).format("YYYY-MM-DD") : "n/a"}</span>
+				<span style={{flex: .33}}>{userExtraInfo ? (Moment as any)(userExtraInfo.joinDate).format("YYYY-MM-DD") : "n/a"}</span>
 				<span style={{flex: .33}}>{userExtraInfo == null ? "n/a" :
 					["basic", "verified", "mod", "admin"].filter(a=>userExtraInfo.permissionGroups[a]).map(a=>a.replace(/^./, a=>a.toUpperCase())).join(", ")}</span>
 			</Row>

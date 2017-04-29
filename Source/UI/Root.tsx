@@ -39,7 +39,7 @@ import PersonalUI from "./Personal";
 import DebatesUI from "./Debates";
 import SearchUI from "./Search";
 import ProfileUI from "./Profile";
-import ReactGA from "react-ga";
+import * as ReactGA from "react-ga";
 import {P} from "../Frame/Serialization/VDF/VDFTypeInfo";
 import {persistStore} from "redux-persist";
 import {createBlacklistFilter} from "redux-persist-transform-filter";

@@ -10,7 +10,7 @@ import {DataSnapshot} from "firebase";
 import Button from "../../../../Frame/ReactComponents/Button";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {WaitXThenRun} from "../../../../Frame/General/Timers";
-import keycode from "keycode";
+import * as keycode from "keycode";
 import NodeUI_Menu from "./NodeUI_Menu";
 import V from "../../../../Frame/V/V";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";

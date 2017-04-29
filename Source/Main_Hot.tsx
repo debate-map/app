@@ -2,7 +2,7 @@ import {ParseModuleData, Require} from "webpack-runtime-require";
 import {Store} from "redux";
 import {RootState} from "./Store/index";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
-import ReactDOM from "react-dom";
+import * as ReactDOM from "react-dom";
 import StackTrace from "stacktrace-js";
 
 // uncomment this if you want to load the source-maps and such ahead of time (making-so the first actual call can get it synchronously)

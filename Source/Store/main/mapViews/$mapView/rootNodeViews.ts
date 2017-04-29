@@ -1,7 +1,7 @@
 import {MapNodeView, MapView} from "../@MapViews";
 import Action from "../../../../Frame/General/Action";
 import {GetTreeNodesInObjTree} from "../../../../Frame/V/V";
-import u from "updeep";
+import * as u from "updeep";
 import {RootNodeViews} from "./rootNodeViews/@RootNodeViews";
 import {GetViewOffsetForNodeBox, GetNodeBoxForPath} from "../../../../UI/@Shared/Maps/MapUI";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";

@@ -6,7 +6,7 @@ import * as React from "react";
 import {Component} from "react";
 import * as ReactDOM from "react-dom";
 import {WaitXThenRun, Timer} from "../General/Timers";
-import autoBind from "react-autobind";
+import * as autoBind from "react-autobind";
 import {IsString} from "../General/Types";
 import {Assert} from "../General/Assert";
 import {E, Global, QuickIncrement} from "../General/Globals_Free";

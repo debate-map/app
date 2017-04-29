@@ -14,8 +14,8 @@ import {Store} from "redux";
 import {RootState} from "./Store/index";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
 import {CurrentUrl, URL} from "./Frame/General/URLs";
-import Raven from "raven-js";
-import injectTapEventPlugin from "react-tap-event-plugin";
+import * as Raven from "raven-js";
+import * as injectTapEventPlugin from "react-tap-event-plugin";
 //import Promise from "bluebird";
 
 // startup (non-hot)

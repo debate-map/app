@@ -14,7 +14,7 @@ import TextInput from "../../../../Frame/ReactComponents/TextInput";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {DataSnapshot} from "firebase";
 import {DN} from "../../../../Frame/General/Globals";
-import keycode from "keycode";
+import * as keycode from "keycode";
 import {firebaseConnect} from "react-redux-firebase";
 import {connect} from "react-redux";
 import {ACTNodeCopy} from "../../../../Store/main";

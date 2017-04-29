@@ -6,11 +6,11 @@ import {Pre, Div} from "../../../../Frame/UI/ReactGlobals";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {SourcesUI, SubPanel_Inner} from "./NodeUI_Inner";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
-import Editor from "react-md-editor";
+import * as Editor from "react-md-editor";
 import Button from "../../../../Frame/ReactComponents/Button";
 import {applyFormat} from "../../MarkdownEditor/Formatter";
 import {Component} from "react";
-import Icons from "react-md-editor/lib/icons";
+import * as Icons from "react-md-editor/lib/icons";
 import {QuoteInfo, Source} from "../../../../Store/firebase/nodes/@QuoteInfo";
 import {GetNodeDisplayText} from "../../../../Store/firebase/nodes/$node";
 

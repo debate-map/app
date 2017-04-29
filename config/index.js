@@ -66,7 +66,7 @@ const config = {
 			"babel-plugin-transform-object-rest-spread",
 			"babel-plugin-transform-class-properties",
 
-			[require.resolve("babel-plugin-transform-runtime"), {"regenerator": false}],
+			//[require.resolve("babel-plugin-transform-runtime"), {"regenerator": false}],
 			"babel-plugin-lodash",
 			"babel-plugin-transform-decorators-legacy"
 		].map(a=>typeof a == "string" ? require.resolve(a) : a),

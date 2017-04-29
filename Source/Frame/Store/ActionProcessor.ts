@@ -8,7 +8,7 @@ import {DBPath, GetData, GetDataAsync, ProcessDBData} from "../Database/Database
 import {GetMapView} from "../../Store/main/mapViews";
 import {Vector2i} from "../General/VectorStructs";
 import {RootState} from "../../Store/index";
-import ReactGA from "react-ga";
+import * as ReactGA from "react-ga";
 import {URL} from "../General/URLs";
 import {Log} from "../Serialization/VDF/VDF";
 import {replace} from "react-router-redux";

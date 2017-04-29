@@ -7,7 +7,7 @@ import {A, Assert} from "../../Frame/General/Assert";
 import {MapViews, MapView, MapNodeView} from "./mapViews/@MapViews";
 import {ToInt} from "../../Frame/General/Types";
 import {GetMap, GetRootNodeID} from "../firebase/maps";
-import u from "updeep";
+import * as u from "updeep";
 import {MapViewReducer, ACTMapViewMerge} from "./mapViews/$mapView";
 import {ShallowChanged} from "../../Frame/UI/ReactGlobals";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";

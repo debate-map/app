@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react'
+import * as React from 'react';
+import { PropTypes } from "react";
 import {Link as LinkInner} from "react-router-dom";
 import {BaseComponent} from "../UI/ReactGlobals";
 import Radium from "radium";

@@ -2,7 +2,7 @@ import {VDFLoadOptions, VDFLoader} from "../Serialization/VDF/VDFLoader";
 import {VDFSerialize, VDFDeserialize} from "../Serialization/VDF/VDFTypeInfo";
 import {VDFSaveOptions, VDFTypeMarking, VDFSaver} from "../Serialization/VDF/VDFSaver";
 import {VDFNode} from "../Serialization/VDF/VDFNode";
-import Moment from "moment";
+import * as Moment from "moment";
 
 g.Extend({Moment});
 
@@ -207,11 +207,11 @@ export function GetTypeNameOf(obj) {
 // vdf extensions
 // ==========
 
-Moment.prototype.Serialize = (function() {
+(Moment as any).prototype.Serialize = (function() {
 	return new VDFNode(this.format("YYYY-MM-DD HH:mm:ss.SSS"));
 } as any).AddTags(new VDFSerialize());
-Moment.prototype.Deserialize = (function(node) {
-	return Moment(node.primitiveValue);
+(Moment as any).prototype.Deserialize = (function(node) {
+	return (Moment as any)(node.primitiveValue);
 } as any).AddTags(new VDFDeserialize(true));
 
 // fix for that ObservableArray's would be serialized as objects

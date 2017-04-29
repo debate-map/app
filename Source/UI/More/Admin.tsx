@@ -20,13 +20,13 @@ import * as Firebase from "firebase";
 //import "./Admin/DBUpgrades/UpgradeDB_2";
 import Select from "../../Frame/ReactComponents/Select";
 import {DataSnapshot} from "firebase";
-require("./Admin/DBUpgrades/UpgradeDB_2");
-require("./Admin/DBUpgrades/UpgradeDB_3");
 var upgradeFuncs; // populated by modules above
 export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>FirebaseData) {
 	upgradeFuncs = upgradeFuncs || {};
 	upgradeFuncs[version] = func;
 }
+require("./Admin/DBUpgrades/UpgradeDB_2");
+require("./Admin/DBUpgrades/UpgradeDB_3");
 
 export interface FirebaseData {
 	general: GeneralData;

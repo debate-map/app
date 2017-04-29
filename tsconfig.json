@@ -34,8 +34,9 @@
 		"allowJs": true,
 		"jsx": "react",
 		"noImplicitAny": false,
-		"experimentalDecorators": true
+		"experimentalDecorators": true,
 		//"allowSyntheticDefaultImports": true
+		"allowSyntheticDefaultImports": false
     },
 	"files": ["Source/Main.ts"],
     "include": [
