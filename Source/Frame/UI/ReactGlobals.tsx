@@ -10,7 +10,7 @@ import * as autoBind from "react-autobind";
 import {IsString} from "../General/Types";
 import {Assert} from "../General/Assert";
 import {E, Global, QuickIncrement} from "../General/Globals_Free";
-import ShallowCompare from "react-addons-shallow-compare";
+import * as ShallowCompare from "react-addons-shallow-compare";
 import {FirebaseApplication} from "firebase";
 import V from "../V/V";
 export {ShallowCompare};

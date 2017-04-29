@@ -3,7 +3,8 @@ import {Store} from "redux";
 import {RootState} from "./Store/index";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
 import * as ReactDOM from "react-dom";
-import StackTrace from "stacktrace-js";
+import * as StackTrace from "stacktrace-js";
+import * as React from "react";
 
 // uncomment this if you want to load the source-maps and such ahead of time (making-so the first actual call can get it synchronously)
 //StackTrace.get();

@@ -9,7 +9,8 @@ module.exports = {
 	// are served webpack by to fix this issue:
 	// http://stackoverflow.com/questions/34133808/webpack-ots-parsing-error-loading-fonts/34133809#34133809
 	development: config=> ({
-		compiler_public_path: `http://${config.server_host}:${config.server_port}/`,
+		//compiler_public_path: `http://${config.server_host}:${config.server_port}/`,
+		compiler_public_path: `/`,
 		firebase: {
 			apiKey: "AIzaSyB1UCTO2p6TLpifAQzsRw_Np39k9N92cpI",
 			authDomain: "debate-map-dev.firebaseapp.com",

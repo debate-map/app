@@ -5,24 +5,16 @@ import {BaseComponent, AddGlobalStyle} from "../Frame/UI/ReactGlobals";
 import "../Frame/UI/JQueryExtensions";
 //import {Component as BaseComponent} from "react";
 import ScrollView from "react-vscrollview";
-import getMuiTheme from "material-ui/styles/getMuiTheme";
-// Themeing/Styling
-import Theme from "../theme";
-
 //import "../Frame/Styles/Core.scss";
 import "../../Source/Frame/Styles/Core.scss";
 //import "../Frame/Styles/bootstrap/bootstrap.scss";
-
 //import {BrowserRouter as Router, Route, browserHistory} from "react-router-dom";
 import {Route} from "react-router";
 import {ConnectedRouter as Router, routerReducer, routerMiddleware, push} from "react-router-redux";
 //import createHistory from "history/lib/createBrowserHistory";
 import {createBrowserHistory} from "react-router/node_modules/history";
-
 import {Provider, connect} from "react-redux";
-import Modal from "react-modal";
 import GlobalUI from "../UI/Global";
-
 import MoreUI from "../UI/More";
 import AdminUI from "../UI/More/Admin";
 import HomeUI from "../UI/Home";

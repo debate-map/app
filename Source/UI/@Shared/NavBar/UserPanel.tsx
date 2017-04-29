@@ -4,7 +4,7 @@ import {firebaseConnect, helpers} from "react-redux-firebase";
 import {HandleError} from "../../../Frame/General/Errors";
 import Button from "../../../Frame/ReactComponents/Button";
 import {GetUserID} from "../../../Store/firebase/users";
-import SocialButton from "react-social-button";
+import * as SocialButton from "react-social-button";
 import Column from "../../../Frame/ReactComponents/Column";
 import {E} from "../../../Frame/General/Globals_Free";
 import {ShowMessageBox, BoxController} from "../../../Frame/UI/VMessageBox";

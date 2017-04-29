@@ -9,7 +9,7 @@ import "./Server/Server";
 import "codemirror";
 import "codemirror/addon/scroll/simplescrollbars";
 
-import ReactDOM from "react-dom";
+import * as ReactDOM from "react-dom";
 import {Store} from "redux";
 import {RootState} from "./Store/index";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";

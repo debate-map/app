@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
 		// general
-        "sourceMap": true,
+		"sourceMap": true,
 		"watch": true,
 		"outDir": "Source_JS",
 		"forceConsistentCasingInFileNames": true, // creates duplicates in import-helper plugins otherwise
@@ -9,8 +9,8 @@
 		// modules/paths
 		"moduleResolution": "node",
 		//"maxNodeModulesJsDepth": 1,
-        //"rootDir": ".",
-        "rootDir": "Source",
+		//"rootDir": ".",
+		"rootDir": "Source",
 		"baseUrl": ".",
 		/*"rootDir": "Source",
 		"baseUrl": "Source",*/
@@ -25,43 +25,44 @@
 
 		// compiler options
 		//"target": "es2015",
-		"target": "es2017",
+		//"target": "es2017",
+		"target": "esnext",
 		"lib": [
 			"es6",
 			"es5",
 			"dom"
 		],
 		"allowJs": true,
+		//"maxNodeModuleJsDepth": 1,
 		"jsx": "react",
 		"noImplicitAny": false,
-		"experimentalDecorators": true,
+		"experimentalDecorators": true
 		//"allowSyntheticDefaultImports": true
-		"allowSyntheticDefaultImports": false
     },
 	"files": ["Source/Main.ts"],
-    "include": [
-        "Typings/**/*.d.ts",
+	"include": [
+		"Typings/**/*.d.ts",
 		//"Typings/globals/**/*.d.ts",
-        "**/*.ts",
-        "**/*.tsx"
+		"**/*.ts",
+		"**/*.tsx"
 		//"**/*.js",
 		//"**/*.jsx"
-    ],
-    "exclude": [
-        /*"index.android.js",
-        "index.ios.js",*/
-        "Build",
-        "Tests",
+	],
+	"exclude": [
+		/*"index.android.js",
+		"index.ios.js",*/
+		"Build",
+		"Tests",
 		"node_modules",
 
 		// temp
 		"node_modules_CustomExternal"
 		//"node_modules_CustomInternal",
 
-        /*"Typings/main",
-        "Typings/main.d.ts",
-        "Typings/browser",
-        "Typings/browser.d.ts",*/
-    ],
+		/*"Typings/main",
+		"Typings/main.d.ts",
+		"Typings/browser",
+		"Typings/browser.d.ts",*/
+	],
 	"compileOnSave": true
 }

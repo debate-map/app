@@ -18,8 +18,6 @@ const webpackConfig = {
 	resolve: {
 		modules: [
 			"node_modules",
-			//path.join(__dirname, "node_modules"),
-			paths.base() + "/node_modules",
 			paths.client()
 		],
 		extensions: [".js", ".jsx", ".json"].concat(USE_TSLOADER ? [".ts", ".tsx"] : []),
@@ -33,20 +31,16 @@ const webpackConfig = {
 	// same issue, for loaders like babel
 	resolveLoader: {
 		//fallback: [path.join(__dirname, "node_modules")]
-		modules: [
-			"node_modules",
-			paths.base() + "/node_modules",
-			paths.client()
-		],
+		//modules: ["node_modules"],
 	},
 	module: {}
 };
 
-if (__PROD__) {
+/*if (__PROD__) {
 	webpackConfig.module.preLoaders = [
 		{test: /\.jsx?$/, loader: "source-map-loader", exclude: /react-hot-loader/}
 	];
-}
+}*/
 
 // Entry Points
 // ==========
@@ -97,7 +91,8 @@ webpackConfig.plugins = [
 	new webpack.DefinePlugin(config.globals),
 	new HtmlWebpackPlugin({
 		//template: paths.client("index.html"),
-		template: paths.base("Source/index.html"),
+		//template: paths.base("Source/index.html"),
+		template: "./Source/index.html",
 		hash: false,
 		// favicon: paths.client("Resources/favicon.ico"), // for including single favicon
 		filename: "index.html",
@@ -164,7 +159,7 @@ if (!__TEST__) {
 // ==========
 
 // JavaScript / JSON
-webpackConfig.module.loaders = [
+webpackConfig.module.rules = [
 	{
 		test: USE_TSLOADER ? /\.(jsx?|tsx?)$/ : /\.jsx?$/,
 		//exclude: [/node_modules/, /react-redux-firebase/],
@@ -179,20 +174,19 @@ webpackConfig.module.loaders = [
 	},
 ];
 if (USE_TSLOADER) {
-	//webpackConfig.module.loaders.push({test: /\.tsx?$/, loader: "awesome-typescript-loader"});
-	webpackConfig.module.loaders.push({test: /\.tsx?$/, loader: "ts-loader", query: {include: [paths.client()]}});
+	//webpackConfig.module.rules.push({test: /\.tsx?$/, loader: "awesome-typescript-loader"});
+	webpackConfig.module.rules.push({test: /\.tsx?$/, loader: "ts-loader", query: {include: [paths.client()]}});
 }
 
 // Style Loaders
 // ==========
 
-// We use cssnano with the postcss loader, so we tell
-// css-loader not to duplicate minimization.
+// We use cssnano with the postcss loader, so we tell css-loader not to duplicate minimization.
 const BASE_CSS_LOADER = "css-loader?sourceMap&-minimize"
 
 // Add any packge names here whose styles need to be treated as CSS modules.
 // These paths will be combined into a single regex.
-const PATHS_TO_TREAT_AS_CSS_MODULES = [
+/*const PATHS_TO_TREAT_AS_CSS_MODULES = [
 	// "react-toolbox", (example)
 ]
 
@@ -214,7 +208,7 @@ if (isUsingCSSModules) {
 		"localIdentName=[name]__[local]___[hash:base64:5]"
 	].join("&")
 
-	webpackConfig.module.loaders.push({
+	webpackConfig.module.rules.push({
 		test: /\.scss$/,
 		include: cssModulesRegex,
 		loaders: [
@@ -225,7 +219,7 @@ if (isUsingCSSModules) {
 		]
 	})
 
-	webpackConfig.module.loaders.push({
+	webpackConfig.module.rules.push({
 		test: /\.css$/,
 		include: cssModulesRegex,
 		loaders: [
@@ -234,51 +228,52 @@ if (isUsingCSSModules) {
 			"postcss-loader"
 		]
 	})
-}
+}*/
 
 // Loaders for files that should not be treated as CSS modules.
-const excludeCSSModules = isUsingCSSModules ? cssModulesRegex : false
-webpackConfig.module.loaders.push({
+//const excludeCSSModules = isUsingCSSModules ? cssModulesRegex : false
+webpackConfig.module.rules.push({
 	test: /\.scss$/,
-	exclude: excludeCSSModules,
-	loaders: [
-		"style-loader",
-		BASE_CSS_LOADER,
-		{
-			loader: "postcss-loader",
-			options: cssnano({
-				autoprefixer: {
-					add: true,
-					remove: true,
-					browsers: ["last 2 versions"]
-				},
-				discardComments: {
-					removeAll: true
-				},
-				discardUnused: false,
-				mergeIdents: false,
-				reduceIdents: false,
-				safe: true,
-				sourcemap: true
-			})
-		},
-		{
-			loader: "sass-loader?sourceMap",
-			options: {
-				includePaths: paths.client("styles")
+	//exclude: excludeCSSModules,
+	loader: ExtractTextPlugin.extract({
+		fallback: "style-loader",
+		loader: [
+			BASE_CSS_LOADER,
+			{
+				loader: "postcss-loader",
+				options: cssnano({
+					autoprefixer: {
+						add: true,
+						remove: true,
+						browsers: ["last 2 versions"]
+					},
+					discardComments: {
+						removeAll: true
+					},
+					discardUnused: false,
+					mergeIdents: false,
+					reduceIdents: false,
+					safe: true,
+					sourcemap: true
+				})
+			},
+			{
+				loader: "sass-loader?sourceMap",
+				options: {
+					includePaths: paths.client("styles")
+				}
 			}
-		}
-	]
-})
-webpackConfig.module.loaders.push({
+		],
+	}),
+});
+webpackConfig.module.rules.push({
 	test: /\.css$/,
-	exclude: excludeCSSModules,
-	loaders: [
-		"style-loader",
-		BASE_CSS_LOADER,
-		"postcss-loader"
-	]
-})
+	//exclude: excludeCSSModules,
+	loader: ExtractTextPlugin.extract({
+		fallback: "style-loader",
+		loader: [BASE_CSS_LOADER, "postcss-loader"],
+	}),
+});
 
 /*webpackConfig.sassLoader = {
 	includePaths: paths.client("styles")
@@ -304,7 +299,7 @@ webpackConfig.module.loaders.push({
 
 // File loaders
 /* eslint-disable */
-webpackConfig.module.loaders.push(
+webpackConfig.module.rules.push(
 	{ test: /\.woff(\?.*)?$/, loader: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=application/font-woff" },
 	{ test: /\.woff2(\?.*)?$/, loader: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=application/font-woff2" },
 	{ test: /\.otf(\?.*)?$/, loader: "file-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=font/opentype" },
@@ -318,24 +313,24 @@ webpackConfig.module.loaders.push(
 // Finalize Configuration
 // ==========
 
-// when we don"t know the public path (we know it only when HMR is enabled [in development]) we
+// when we don't know the public path (we know it only when HMR is enabled [in development]) we
 // need to use the extractTextPlugin to fix this issue:
 // http://stackoverflow.com/questions/34133808/webpack-ots-parsing-error-loading-fonts/34133809#34133809
-if (!__DEV__ && !__TEST__) {
-	debug("Apply ExtractTextPlugin to CSS loaders.")
-	webpackConfig.module.loaders.filter((loader) =>
-		loader.loaders && loader.loaders.find((name) => /css/.test(name.split("?")[0]))
-	).forEach((loader) => {
-		const first = loader.loaders[0]
-		const rest = loader.loaders.slice(1)
-		loader.loader = ExtractTextPlugin.extract(first, rest.join("!"))
-		delete loader.loaders
-	})
+//if (!__DEV__ && !__TEST__) {
+/*debug("Apply ExtractTextPlugin to CSS loaders.");
+webpackConfig.module.rules.filter(loader=>
+	loader.loaders && loader.loaders.find(name=>/css/.test(name.split("?")[0]))
+).forEach(loader=> {
+	const first = loader.loaders[0];
+	const rest = loader.loaders.slice(1);
+	loader.loader = ExtractTextPlugin.extract({fallback: first, use: rest.join("!")});
+	delete loader.loaders;
+});*/
 
-	webpackConfig.plugins.push(
-		//new ExtractTextPlugin("[name].[contenthash].css", {allChunks: true})
-		new ExtractTextPlugin("[name].css?[contenthash]", {allChunks: true})
-	)
-}
+webpackConfig.plugins.push(
+	//new ExtractTextPlugin("[name].[contenthash].css", {allChunks: true}),
+	new ExtractTextPlugin({filename: "[name].css?[contenthash]", allChunks: true})
+);
+//}
 
 module.exports = webpackConfig;

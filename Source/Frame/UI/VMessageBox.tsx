@@ -1,7 +1,7 @@
 import {onLogFuncs} from "../General/Logging";
 import Action from "../General/Action";
 import {BaseComponent, AddGlobalStyle} from "./ReactGlobals";
-import Modal from "react-modal";
+import * as Modal from "react-modal";
 import Button from "../ReactComponents/Button";
 import {E} from "../General/Globals_Free";
 import {connect} from "react-redux";
