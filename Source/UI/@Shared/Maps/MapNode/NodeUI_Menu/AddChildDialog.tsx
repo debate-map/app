@@ -11,7 +11,7 @@ import * as keycode from "keycode";
 import Button from "../../../../../Frame/ReactComponents/Button";
 import {SourcesUI} from "../NodeUI_Inner";
 import {E} from "../../../../../Frame/General/Globals_Free";
-import {MetaThesis_ThenType, MetaThesis_IfType, MetaThesis_ThenType_Info} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
+import {MetaThesis_ThenType, MetaThesis_IfType, MetaThesis_ThenType_Info, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
 import AddNode from "../../../../../Server/Commands/AddNode";
 import Editor from "react-md-editor";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
@@ -66,7 +66,7 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 				{isArgument &&
 					<Row mt={5}>
 						<Pre>Type: If </Pre>
-						<Select options={GetEntries(MetaThesis_IfType, name=>name.toLowerCase())}
+						<Select options={GetEntries(MetaThesis_IfType, name=>GetMetaThesisIfTypeDisplayText(MetaThesis_IfType[name]))}
 							value={info.metaThesis.ifType} onChange={val=>Change(info.metaThesis.ifType = val)}/>
 						<Pre> premises below are true, they </Pre>
 						<Select options={thenTypes} value={info.metaThesis.thenType} onChange={val=>Change(info.metaThesis.thenType = val)}/>

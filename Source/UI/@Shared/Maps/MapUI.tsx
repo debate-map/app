@@ -135,6 +135,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 							}
 						}}
 						onContextMenu={e=> {
+							if (e.nativeEvent["passThrough"]) return true;
 							e.preventDefault();
 						}}>
 					<NodeUI map={map} node={rootNode} path={rootNode._id.toString()}/>

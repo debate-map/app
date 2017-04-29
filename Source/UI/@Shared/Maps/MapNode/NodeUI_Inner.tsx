@@ -5,7 +5,7 @@ import VMenu from "react-vmenu";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
-import {DN, E} from "../../../../Frame/General/Globals";
+import {DN, E, Debugger} from "../../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
 import Button from "../../../../Frame/ReactComponents/Button";
 import {CachedTransform} from "../../../../Frame/V/VCache";
@@ -201,8 +201,7 @@ export class SourcesUI extends BaseComponent<{quote: QuoteInfo}, {}> {
 				{quote.sources.FakeArray_Select(a=>a).map((source: Source, index)=> {
 					return (
 						<Row key={index}>
-							<Pre>{source.name}: </Pre>
-							<a href={source.link} style={{wordBreak: `break-word`}}>{source.link}</a>
+							<a href={source.link} style={{wordBreak: `break-word`}} onContextMenu={e=>e.nativeEvent["passThrough"] = true}>{source.name}</a>
 						</Row>
 					);
 				})}	

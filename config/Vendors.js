@@ -14,7 +14,7 @@ require("react-redux-firebase");
 require("redux-persist");
 require("redux-persist-transform-filter");
 require("reselect");
-require("react-vmenu");
+//require("react-vmenu");
 
 require("react-ga");
 require("react-bootstrap");

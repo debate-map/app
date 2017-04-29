@@ -13,7 +13,7 @@ import {WaitXThenRun} from "../../../../Frame/General/Timers";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {DataSnapshot} from "firebase";
-import {DN} from "../../../../Frame/General/Globals";
+import {DN, Debugger} from "../../../../Frame/General/Globals";
 import * as keycode from "keycode";
 import {firebaseConnect} from "react-redux-firebase";
 import {connect} from "react-redux";
@@ -54,7 +54,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 		let nodeText = GetNodeDisplayText(node, path);
 
 		return (
-			<VMenuStub>
+			<VMenuStub preOpen={e=>e.passThrough != true}>
 				{IsUserBasicOrAnon(userID) && validChildTypes.map(childType=> {
 					let childTypeInfo = MapNodeType_Info.for[childType];
 					let displayName = childTypeInfo.displayName(node);
