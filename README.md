@@ -3,9 +3,12 @@
 [![Join the chat at https://gitter.im/DebateMap/Lobby](https://badges.gitter.im/DebateMap/Lobby.svg)](https://gitter.im/DebateMap/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![See the task list at https://trello.com/b/7ZhagPiN](https://img.shields.io/badge/tasks-on%20trello-blue.svg)](https://trello.com/b/7ZhagPiN)
 
-The [Debate Map](https://debatemap.live) project is an innovative new platform for presenting and analyzing beliefs (or "theses") and the arguments that support them. Its content is crowd-sourced (like Wikipedia), and the software is open-source (under MIT), promoting collaborative development and increased accountability.
+The [Debate Map](https://debatemap.live) project is an interactive web platform aimed at improving the efficiency of discussion and debate. It's crowd-sourced and open-source, and welcomes reader contributions.
 
-There are three types of maps present on the site: personal maps, debate maps, and [the global map](https://debatemap.live/global).
+Its primary improvements are (in short):
+* Restructuring dialogue to make use of both dimensions.
+* Breaking down lines of reasoning into single-sentence "nodes".
+* Providing rich tools that operate on those nodes -- such as rating, tagging, statistical analysis, and belief-tree sharing and comparison.
 
 The below is a screenshot from the global map:
 ![See the task list at https://trello.com/b/7ZhagPiN](/Info/Images/Screenshot1.png)
