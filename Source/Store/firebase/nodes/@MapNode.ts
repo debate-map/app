@@ -94,6 +94,6 @@ export type ChildEntry = {
 	form?: ThesisForm;
 }
 AddSchema({
-	properties: {_: {type: "boolean"}},
+	properties: {_: {type: "boolean"}, form: {oneOf: GetValues_ForSchema(ThesisForm)}},
 	required: ["_"],
 }, "ChildEntry");

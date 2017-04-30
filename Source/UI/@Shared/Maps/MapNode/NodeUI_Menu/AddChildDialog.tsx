@@ -63,7 +63,7 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 				{childType == MapNodeType.Thesis && info.thesisType == `Quote` ? (
 					<QuoteInfoEditorUI info={info.quote} showPreview={true} justShowed={justShowed} onSetError={error=>Change(quoteError = error)}/>
 				) : (
-					<Row>
+					<Row mt={5}>
 						<Pre>Title: </Pre>
 						<TextInput ref={a=>a && justShowed && WaitXThenRun(0, ()=>a.DOM.focus())} style={{flex: 1}}
 							value={info.title} onChange={val=>Change(info.title = val)}/>
