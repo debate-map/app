@@ -107,8 +107,9 @@ export async function PostDispatchAction(action: Action<any>) {
 		// If user followed search-result link (eg. "debatemap.live/global/156"), we only know the node-id.
 		// Search for the shortest path from the map's root to this node, and update the view and url to that path.
 		//if (url.pathNodes[0] == "global" && url.pathNodes[1] != null && url.pathNodes[1].match(/^[0-9]+$/) && !isBot) {
-		if (url.toString(false).match(/^\/global\/[0-9]+$/) && !isBot) {
-			let nodeID = parseInt(url.pathNodes[1]);
+		let match = url.toString(false).match(/^\/global\/[a-z-]*\.([0-9]+)$/);
+		if (match && !isBot) {
+			let nodeID = parseInt(match[1]);
 			let node = await GetNodeAsync(nodeID);
 			if (node) {
 				let shortestPathToNode = await GetShortestPathFromRootToNode(1, node);
