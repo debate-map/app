@@ -1,7 +1,7 @@
 export class QuoteInfo {
 	author = "";
 	text = "";
-	sources = {} as SourceSet;
+	sources = {[0]: new Source()} as SourceSet;
 }
 AddSchema({
 	properties: {
@@ -13,7 +13,7 @@ AddSchema({
 }, "QuoteInfo");
 
 export type SourceSet = { [key: number]: Source; }
-AddSchema({patternProperties: {"^[0-9]+$": {$ref: "Source"}}}, "SourceSet");
+AddSchema({patternProperties: {"^[0-9]+$": {$ref: "Source"}}, minProperties: 1}, "SourceSet");
 export class Source {
 	name = "";
 	link = "";

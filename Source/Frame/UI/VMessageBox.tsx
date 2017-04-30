@@ -13,6 +13,7 @@ export class MessageBoxOptions {
 	message?: string;
 	messageUI?: ()=>JSX.Element;
 	okButton = true;
+	okButtonClickable = true;
 	cancelButton = false;
 	overlayStyle?;
 	containerStyle?;
@@ -63,7 +64,7 @@ export function ShowMessageBox(options: {[P in keyof MessageBoxOptions]?: Messag
 			{o.titleUI ? o.titleUI() : <div style={{fontSize: "18px", fontWeight: "bold", whiteSpace: "pre"}}>{o.title}</div>}
 			{o.messageUI ? o.messageUI() : <p style={{marginTop: 15, whiteSpace: "pre"}}>{o.message}</p>}
 			{o.okButton &&
-				<Button text="OK"
+				<Button text="OK" enabled={o.okButtonClickable}
 					onClick={()=> {
 						if (o.onOK && o.onOK() === false) return;
 						boxController.Close();
