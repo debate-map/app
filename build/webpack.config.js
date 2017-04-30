@@ -39,7 +39,7 @@ const webpackConfig = {
 
 /*if (__PROD__) {
 	webpackConfig.module.preLoaders = [
-		{test: /\.jsx?$/, loader: "source-map-loader", exclude: /react-hot-loader/}
+		{test: /\.jsx?$/, use: "source-map-loader", exclude: /react-hot-loader/}
 	];
 }*/
 
@@ -195,8 +195,8 @@ webpackConfig.module.rules = [
 		//exclude: [/node_modules/, /react-redux-firebase/],
 		include: [paths.client()],
 		loader: "babel-loader",
-		//loader: "happypack/loader",
-		query: config.compiler_babel
+		//use: "happypack/loader",
+		options: config.compiler_babel
 	},
 	{
 		test: /\.json$/,
@@ -204,8 +204,8 @@ webpackConfig.module.rules = [
 	},
 ];
 if (USE_TSLOADER) {
-	//webpackConfig.module.rules.push({test: /\.tsx?$/, loader: "awesome-typescript-loader"});
-	webpackConfig.module.rules.push({test: /\.tsx?$/, loader: "ts-loader", query: {include: [paths.client()]}});
+	//webpackConfig.module.rules.push({test: /\.tsx?$/, use: "awesome-typescript-loader"});
+	webpackConfig.module.rules.push({test: /\.tsx?$/, loader: "ts-loader", options: {include: [paths.client()]}});
 }
 
 // Style Loaders
@@ -265,9 +265,9 @@ if (isUsingCSSModules) {
 webpackConfig.module.rules.push({
 	test: /\.scss$/,
 	//exclude: excludeCSSModules,
-	loader: ExtractTextPlugin.extract({
+	use: ExtractTextPlugin.extract({
 		fallback: "style-loader",
-		loader: [
+		use: [
 			BASE_CSS_LOADER,
 			{
 				loader: "postcss-loader",
@@ -299,9 +299,9 @@ webpackConfig.module.rules.push({
 webpackConfig.module.rules.push({
 	test: /\.css$/,
 	//exclude: excludeCSSModules,
-	loader: ExtractTextPlugin.extract({
+	use: ExtractTextPlugin.extract({
 		fallback: "style-loader",
-		loader: [BASE_CSS_LOADER, "postcss-loader"],
+		use: [BASE_CSS_LOADER, "postcss-loader"],
 	}),
 });
 
@@ -330,13 +330,13 @@ webpackConfig.module.rules.push({
 // File loaders
 /* eslint-disable */
 webpackConfig.module.rules.push(
-	{ test: /\.woff(\?.*)?$/, loader: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=application/font-woff" },
-	{ test: /\.woff2(\?.*)?$/, loader: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=application/font-woff2" },
-	{ test: /\.otf(\?.*)?$/, loader: "file-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=font/opentype" },
-	{ test: /\.ttf(\?.*)?$/, loader: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=application/octet-stream" },
-	{ test: /\.eot(\?.*)?$/, loader: "file-loader?prefix=fonts/&name=[path][name].[ext]" },
-	{ test: /\.svg(\?.*)?$/, loader: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=image/svg+xml" },
-	{ test: /\.(png|jpg)$/, loader: "url-loader?limit=8192" }
+	{test: /\.woff(\?.*)?$/, use: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=application/font-woff"},
+	{test: /\.woff2(\?.*)?$/, use: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=application/font-woff2"},
+	{test: /\.otf(\?.*)?$/, use: "file-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=font/opentype"},
+	{test: /\.ttf(\?.*)?$/, use: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=application/octet-stream"},
+	{test: /\.eot(\?.*)?$/, use: "file-loader?prefix=fonts/&name=[path][name].[ext]"},
+	{test: /\.svg(\?.*)?$/, use: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=image/svg+xml"},
+	{test: /\.(png|jpg)$/, use: "url-loader?limit=8192"}
 )
 /* eslint-enable */
 
