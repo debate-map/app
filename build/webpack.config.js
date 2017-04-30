@@ -9,7 +9,7 @@ var path = require("path");
 
 const paths = config.utils_paths;
 const {__DEV__, __PROD__, __TEST__} = config.globals;
-const {QUICK_DEPLOY, USE_TSLOADER} = process.env;
+const {QUICK, USE_TSLOADER} = process.env;
 
 debug("Creating configuration.");
 const webpackConfig = {
@@ -155,7 +155,7 @@ if (__DEV__) {
 		new webpack.HotModuleReplacementPlugin(),
 		new webpack.NoEmitOnErrorsPlugin()
 	);
-} else if (__PROD__ && !QUICK_DEPLOY) {
+} else if (__PROD__ && !QUICK) {
 	debug("Enable plugins for production (OccurenceOrder, Dedupe & UglifyJS).")
 	webpackConfig.plugins.push(
 		//new webpack.optimize.OccurrenceOrderPlugin(),

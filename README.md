@@ -48,7 +48,7 @@ For recommended setup of your code editor and other tools, see: [Editor setup](#
 1) Run `npm run dev` in the root project folder.
 2) Navigate to `localhost:3000`.
 
-Note that if you add/remove/modify any modules required from `config/Vendors.js`, you'll then need to run `npm run create-vendors`. (those modules are compiled separately, to speed up the main compile process)
+Note that if you add/remove/modify any modules required from `config/Vendors.js`, you'll then need to run `npm run create-vendors[-quick]`. (those modules are compiled separately, to speed up the main compile process)
 
 ### Deploying to Firebase
 

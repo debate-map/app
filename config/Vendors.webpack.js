@@ -1,6 +1,8 @@
 var path = require("path");
 var webpack = require("webpack");
 
+let QUICK = process.env.QUICK;
+
 module.exports = {
 	entry: {
 		vendor: [path.join(__dirname, "Vendors.js")]
@@ -20,7 +22,7 @@ module.exports = {
 		}),
 		//new webpack.optimize.OccurenceOrderPlugin(),
 		//new webpack.optimize.DedupePlugin(),
-		new webpack.optimize.UglifyJsPlugin({
+		QUICK ? ()=>{} : new webpack.optimize.UglifyJsPlugin({
 			compress: {
 				unused: true,
 				dead_code: true,

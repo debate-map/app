@@ -48,7 +48,7 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 			()=>g.storeRehydrated_,
 			val=> {
 				g.storeRehydrated_ = val;
-				this.Update();
+				setTimeout(()=>this.mounted && this.Update());
 			});
 		// trigger setter right now (in case value is already true)
 		g.storeRehydrated = startVal;

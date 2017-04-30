@@ -7,6 +7,7 @@ G({ajv}); declare global { const ajv: AJV_Extended; }
 G({AddSchema}); declare global { function AddSchema(schema, name: string); }
 export function AddSchema(schema, name: string) {
 	schema = E({additionalProperties: false}, schema);
+	ajv.removeSchema(name); // for hot-reloading
 	return ajv.addSchema(schema, name);
 }
 
