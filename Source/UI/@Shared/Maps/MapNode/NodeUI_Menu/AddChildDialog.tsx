@@ -55,14 +55,34 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 						}
 					}}*/>
 				{childType == MapNodeType.Thesis &&
-					<Row><Pre>Type: </Pre><Select displayType="button bar" options={thesisTypes} style={{display: `inline-block`}}
-						value={info.thesisType} onChange={val=>Change(info.thesisType = val)}/></Row>}
+					<Row>
+						<Pre>Type: </Pre>
+						<Select displayType="button bar" options={thesisTypes} style={{display: `inline-block`}}
+							value={info.thesisType} onChange={val=>Change(info.thesisType = val)}/>
+					</Row>}
 				{childType == MapNodeType.Thesis && info.thesisType == `Quote` ? (
 					<QuoteInfoEditorUI info={info.quote} showPreview={true} justShowed={justShowed} onSetError={error=>Change(quoteError = error)}/>
 				) : (
-					<Row mt={5}><Pre>Title: </Pre><TextInput ref={a=>a && justShowed && WaitXThenRun(0, ()=>a.DOM.focus())} style={{flex: 1}}
-						value={info.title} onChange={val=>Change(info.title = val)}/></Row>
+					<Row>
+						<Pre>Title: </Pre>
+						<TextInput ref={a=>a && justShowed && WaitXThenRun(0, ()=>a.DOM.focus())} style={{flex: 1}}
+							value={info.title} onChange={val=>Change(info.title = val)}/>
+					</Row>
 				)}
+				{isArgument &&
+					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
+						<Pre allowWrap={true}>{`
+An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
+
+Examples:
+* Shadow during lunar eclipses
+* May have used biased sources
+* Quote: Socrates
+
+The detailed version of the argument will be embodied in its premises/child-theses.
+						`.trim()}
+						</Pre>
+					</Row>}
 				{isArgument &&
 					<Row mt={5}>
 						<Pre>Type: If </Pre>
@@ -71,6 +91,14 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 						<Pre> premises below are true, they </Pre>
 						<Select options={thenTypes} value={info.metaThesis.thenType} onChange={val=>Change(info.metaThesis.thenType = val)}/>
 						<Pre>.</Pre>
+					</Row>}
+				{isArgument &&
+					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
+						<Pre allowWrap={true}>{`
+The "type" option above describes the way in which this argument's premises will affect the conclusion (the parent thesis).${""
+} The premises can be added to the map right after adding this argument node.
+						`.trim()}
+						</Pre>
 					</Row>}
 			</Column>
 		),

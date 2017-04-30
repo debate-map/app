@@ -382,10 +382,10 @@ export class Span extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement
 
 @Global
 @ApplyBasicStyles
-export class Pre extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement>, {}> {
+export class Pre extends BaseComponent<{allowWrap?: boolean} & React.HTMLProps<HTMLSpanElement>, {}> {
 	render() {
-		let {style, children} = this.props;
-		return <span style={E({whiteSpace: "pre"}, style)}>{children}</span>;
+		let {allowWrap, style, children} = this.props;
+		return <span style={E({whiteSpace: allowWrap ? "pre-wrap" : "pre"}, style)}>{children}</span>;
 	}
 }
 
