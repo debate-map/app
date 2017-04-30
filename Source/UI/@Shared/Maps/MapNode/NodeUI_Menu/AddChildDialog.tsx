@@ -98,8 +98,8 @@ The detailed version of the argument will be embodied in its premises/child-thes
 					{isArgument &&
 						<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 							<Pre allowWrap={true}>{`
-	The "type" option above describes the way in which this argument's premises will affect the conclusion (the parent thesis).${""
-	} The premises can be added to the map right after adding this argument node.
+The "type" option above describes the way in which this argument's premises will affect the conclusion (the parent thesis).${""
+} The premises can be added to the map right after adding this argument node.
 							`.trim()}
 							</Pre>
 						</Row>}
