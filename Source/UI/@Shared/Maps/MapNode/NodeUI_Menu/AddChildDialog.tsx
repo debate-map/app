@@ -75,14 +75,14 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 					{isArgument &&
 						<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 							<Pre allowWrap={true}>{`
-	An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
+An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
 
-	Examples:
-	* Shadow during lunar eclipses
-	* May have used biased sources
-	* Quote: Socrates
+Examples:
+* Shadow during lunar eclipses
+* May have used biased sources
+* Quote: Socrates
 
-	The detailed version of the argument will be embodied in its premises/child-theses.
+The detailed version of the argument will be embodied in its premises/child-theses.
 							`.trim()}
 							</Pre>
 						</Row>}
