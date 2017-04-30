@@ -90,8 +90,8 @@ export class RatingType_Info {
 		adjustment: new RatingType_Info({
 			displayText: "Adjustment",
 			description: (node, parentNode)=> {
-				let support = parentNode.type == MapNodeType.SupportingArgument;
-				/*return `Suppose that the parent thesis were just introduced (a blank slate with no specific research), and that its base probability were 50%.`
+				/*let support = parentNode.type == MapNodeType.SupportingArgument;
+				return `Suppose that the parent thesis were just introduced (a blank slate with no specific research), and that its base probability were 50%.`
 					+ (
 						node.metaThesis.ifType == MetaThesis_IfType.All ? ` Suppose also that this argument's premises were all true.` :
 						node.metaThesis.ifType == MetaThesis_IfType.AnyTwo ? ` Suppose also that at least two of this argument's premises were true.` :
@@ -107,9 +107,11 @@ export class RatingType_Info {
 					+ ` To what level would you expect them (assuming they're reasonable) to shift their probability rating?`
 			},
 			options: (node, parentNode)=> {
+				//if (parentNode == null) return Range(0, 100); // must support case where node is given standalone
 				return parentNode.type == MapNodeType.SupportingArgument ? Range(50, 100) : Range(0, 50);
 			},
 			ticks: (node, parentNode)=> {
+				//if (parentNode == null) return Range(0, 100);
 				return parentNode.type == MapNodeType.SupportingArgument ? Range(50, 100, 5) : Range(0, 50, 5);
 			},
 		}),
