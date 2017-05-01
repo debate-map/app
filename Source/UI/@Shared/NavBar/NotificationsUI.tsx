@@ -1,24 +1,38 @@
-import {BaseComponent, Span, Div} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Span, Div, AddGlobalStyle} from "../../../Frame/UI/ReactGlobals";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import NotificationMessage from "../../../Store/main/@NotificationMessage";
 import Button from "../../../Frame/ReactComponents/Button";
 import {ACTNotificationMessageRemove} from "../../../Store/main";
 import Column from "../../../Frame/ReactComponents/Column";
 import Row from "../../../Frame/ReactComponents/Row";
+import ScrollView from "react-vscrollview";
+
+AddGlobalStyle(`
+.NotificationScrollView > * { pointer-events: auto; }
+.NotificationScrollView { pointer-events: none; }
+.NotificationScrollView > .content > * { pointer-events: auto; }
+.NotificationScrollView > .content { pointer-events: none; }
+`);
 
 @Connect(state=> ({
 	messages: state.main.notificationMessages,
 }))
 export default class NotificationsUI extends BaseComponent<{} & Partial<{messages: NotificationMessage[]}>, {}> {
+	scrollView: ScrollView;
 	render() {
 		let {messages} = this.props;
 		return (
-			<Column ct style={{maxWidth: "30%", alignItems: "flex-start", filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}>
-				{messages.map((message, index)=> {
-					return <MessageUI key={index} message={message}/>;
-				})}
-			</Column>
+			<ScrollView ref={c=>this.scrollView = c} className="NotificationScrollView" scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}>
+				<Column ct style={{maxWidth: "calc(100% - 10px)", alignItems: "flex-start", filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}>
+					{messages.map((message, index)=> {
+						return <MessageUI key={index} message={message}/>;
+					})}
+				</Column>
+			</ScrollView>
 		);
+	}
+	PostRender() {
+		this.scrollView.UpdateSize();
 	}
 }
 

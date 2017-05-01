@@ -82,7 +82,7 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 						{topLeftOpenPanel == "chat" && <ChatPanel/>}
 						{topLeftOpenPanel == "reputation" && <ReputationPanel/>}
 					</div>
-					<Div ct style={{position: "absolute", left: 0, right: 0, top: 45}}>
+					<Div ct style={{position: "fixed", left: 0, width: "30%", top: 45, bottom: 0}}>
 						<NotificationsUI/>
 					</Div>
 					

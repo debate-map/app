@@ -28,14 +28,14 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 		? GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Take(2)
 		: GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Skip(2);
 
-	let thesisTypes = [{name: `Normal`, value: `Normal`}, {name: `Quote`, value: `Quote`}];
+	let thesisTypes = [{name: `Normal`, value: `Normal`}, {name: `Quote`, value: `Content_Quote`}];
 	let thesisForm = childType == MapNodeType.Thesis
 		? (parentNode.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base)
 		: null;
 	let info = {
 		title: ``,
 		thesisType: `Normal` as "Normal" | "Content_Quote", // eslint-disable-line quotes
-		contentNode: new ContentNode(),
+		//contentNode: new ContentNode(),
 		metaThesis: {
 			ifType: MetaThesis_IfType.All,
 			thenType: childType == MapNodeType.SupportingArgument ? MetaThesis_ThenType.StrengthenParent : MetaThesis_ThenType.WeakenParent,
@@ -44,6 +44,7 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 	
 	let justShowed = true;
 	let quoteError = null;
+	let quoteEditor: QuoteInfoEditorUI;
 	let Change = _=>boxController.UpdateUI();
 	let boxController: BoxController = ShowMessageBox({
 		title: `Add ${displayName}`, cancelButton: true,
@@ -64,8 +65,10 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 							<Select displayType="button bar" options={thesisTypes} style={{display: `inline-block`}}
 								value={info.thesisType} onChange={val=>Change(info.thesisType = val)}/>
 						</Row>}
-					{childType == MapNodeType.Thesis && info.thesisType == `Quote` ? (
-						<QuoteInfoEditorUI contentNode={info.contentNode} showPreview={true} justShowed={justShowed} onSetError={error=>Change(quoteError = error)}/>
+					{childType == MapNodeType.Thesis && info.thesisType == "Content_Quote" ? (
+						//<QuoteInfoEditorUI contentNode={info.contentNode} showPreview={true} justShowed={justShowed} onSetError={error=>Change(quoteError = error)}/>
+						<QuoteInfoEditorUI ref={c=>quoteEditor = c} contentNode={new ContentNode()}
+							showPreview={true} justShowed={justShowed} onSetError={error=>Change(quoteError = error)}/>
 					) : (
 						<Row mt={5}>
 							<Pre>Title: </Pre>
@@ -117,7 +120,8 @@ The "type" option above describes the way in which this argument's premises will
 				type: childType, creator: userID, approved: true
 			});
 			if (childType == MapNodeType.Thesis && info.thesisType == `Content_Quote`) {
-				newChildNode.contentNode = CleanUpdatedContentNode(Clone(info.contentNode));
+				//newChildNode.contentNode = CleanUpdatedContentNode(Clone(info.contentNode));
+				newChildNode.contentNode = quoteEditor.GetUpdatedContentNode();
 			} else {
 				newChildNode.titles = thesisForm && thesisForm == ThesisForm.YesNoQuestion ? {yesNoQuestion: info.title} : {base: info.title};
 			}

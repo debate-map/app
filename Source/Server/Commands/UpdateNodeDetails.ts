@@ -29,7 +29,7 @@ export default class UpdateNodeDetails extends Command<{nodeID: number, updates:
 		// ==========
 
 		//if (!ajv.validate(`MapNode`, newData)) throw new Error(`New-data invalid: ${ajv.FullErrorsText()}`);
-		Assert(ajv.validate(`MapNode`, newData), `New-data invalid: ${ajv.FullErrorsText()}`);
+		Assert(ajv.validate(`MapNode`, newData), `New-data invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(newData, null, 3)}\n`);
 
 		// execute
 		// ==========
