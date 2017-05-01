@@ -35,8 +35,8 @@ import RatingsPanel from "./NodeUI/RatingsPanel";
 import DiscussionPanel from "./NodeUI/DiscussionPanel";
 import Row from "../../../../Frame/ReactComponents/Row";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
-import {QuoteInfo, Source} from "../../../../Store/firebase/nodes/@QuoteInfo";
 import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetMainRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
+import {ContentNode, SourceChain} from "../../../../Store/firebase/contentNodes/@ContentNode";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -71,7 +71,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
 		let panelToShow = openPanel_preview || (nodeView && nodeView.openPanel);
-		let subPanelShow = node.type == MapNodeType.Thesis && node.quote;
+		let subPanelShow = node.type == MapNodeType.Thesis && node.contentNode;
 		let bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView && nodeView.expanded;
 
@@ -108,7 +108,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						<span style={{position: `relative`, fontSize: GetFontSizeForNode(node), whiteSpace: `initial`}}>
 							{GetNodeDisplayText(node, path)}
 						</span>
-						{node.type == MapNodeType.Thesis && node.quote &&
+						{node.type == MapNodeType.Thesis && node.contentNode &&
 							<Button size={13} iconSize={13} iconPath="/Images/Buttons/Info.png"
 								useOpacityForHover={true} style={{position: `relative`, zIndex: 1, marginLeft: 1, backgroundColor: null, boxShadow: null}}
 								title="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
@@ -163,18 +163,18 @@ class SubPanel extends BaseComponent<{node: MapNode}, {}> {
 				//border: `solid rgba(0,0,0,.5)`, borderWidth: `1px 0 0 0`
 				background: `rgba(0,0,0,.5)`, borderRadius: `0 0 0 5px`,
 			}}>
-				<SubPanel_Inner quote={node.quote} fontSize={GetFontSizeForNode(node)}/>
+				<SubPanel_Inner contentNode={node.contentNode} fontSize={GetFontSizeForNode(node)}/>
 			</div>
 		);
 	}
 }
-export class SubPanel_Inner extends BaseComponent<{quote: QuoteInfo, fontSize: number}, {}> {
+export class SubPanel_Inner extends BaseComponent<{contentNode: ContentNode, fontSize: number}, {}> {
 	render() {
-		let {quote, fontSize} = this.props;
+		let {contentNode, fontSize} = this.props;
 		return (
 			<div style={{position: `relative`, fontSize, whiteSpace: `initial`}}>
 				{/*<div>{``${node.quote.text}``}</div>*/}
-				<VReactMarkdown className="selectable Markdown" source={`"${quote.text}"`}
+				<VReactMarkdown className="selectable Markdown" source={`"${contentNode.content}"`}
 					containerProps={{style: E()}}
 					renderers={{
 						Text: props=> {
@@ -186,22 +186,30 @@ export class SubPanel_Inner extends BaseComponent<{quote: QuoteInfo, fontSize: n
 						Link: props=><span/>,
 					}}
 				/>
-				<SourcesUI quote={quote}/>
+				<SourcesUI contentNode={contentNode}/>
 			</div>
 		);
 	}
 }
 
-export class SourcesUI extends BaseComponent<{quote: QuoteInfo}, {}> {
+export class SourcesUI extends BaseComponent<{contentNode: ContentNode}, {}> {
 	render() {
-		let {quote} = this.props;
+		let {contentNode} = this.props;
 		return (
 			<Column mt={3}>
 				<Row style={{color: `rgba(255,255,255,.5)`}}>Sources:</Row>
-				{quote.sources.FakeArray_Select(a=>a).map((source: Source, index)=> {
+				{contentNode.sourceChains.FakeArray_Select(a=>a).map((chain: SourceChain, index)=> {
+					let linkTitle = chain.FakeArray_Select(a=>a).map(source=> {
+						if (source.link) {
+							let urlMatch = source.link.match(/https?:\/\/([^/]+)/);
+							if (urlMatch == null) return source.link; // temp, while updating data
+							return urlMatch[1];
+						}
+						return (source.name || "") + (source.author ? ` (${source.author})` : ""); 
+					}).join(" <- ");
 					return (
 						<Row key={index}>
-							<a href={source.link} style={{wordBreak: `break-word`}} onContextMenu={e=>e.nativeEvent["passThrough"] = true}>{source.name}</a>
+							<a href={chain.FakeArray_Select(a=>a).Last().link} style={{wordBreak: `break-word`}} onContextMenu={e=>e.nativeEvent["passThrough"] = true}>{linkTitle}</a>
 						</Row>
 					);
 				})}	

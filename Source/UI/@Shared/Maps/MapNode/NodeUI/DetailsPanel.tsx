@@ -27,9 +27,9 @@ import Row from "../../../../../Frame/ReactComponents/Row";
 import {MetaThesis_ThenType, MetaThesis_ThenType_Info, MetaThesis_IfType, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import UpdateNodeDetails from "../../../../../Server/Commands/UpdateNodeDetails";
-import {QuoteInfo} from "../../../../../Store/firebase/nodes/@QuoteInfo";
 import {RemoveHelpers} from "../../../../../Frame/Database/DatabaseHelpers";
 import {HandleError} from "../../../../../Frame/General/Errors";
+import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -41,10 +41,11 @@ type DetailsPanel_Props = {node: MapNode, path: string, userID: string} & Partia
 	};
 })
 //export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {error: Error}> {
-export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {quoteError: string}> {
+export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {contentNodeError: string}> {
+	quoteEditor: QuoteInfoEditorUI;
 	render() {
 		let {node, path, userID, nodeCreator} = this.props;
-		let {quoteError} = this.state;
+		let {contentNodeError} = this.state;
 		let firebase = store.firebase.helpers;
 		//let {error} = this.state;
 
@@ -61,15 +62,15 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {quo
 				<Div mt={3} style={{fontSize: 12}}>Created at: {(Moment as any)(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)} (by: {nodeCreator ? nodeCreator.displayName : `n/a`})</Div>
 				{IsUserCreatorOrMod(userID, node) &&
 					<Div mt={3}>
-						{!node.quote && !node.metaThesis &&
+						{!node.contentNode && !node.metaThesis &&
 							<Row style={{display: `flex`, alignItems: `center`}}>
 								<Pre>Title (base): </Pre>
 								<TextInput ref="title_base" style={{flex: 1}} delayChangeTillDefocus={true} value={node.titles[`base`]}/>
 							</Row>}
 						{node.type == MapNodeType.Thesis && !node.metaThesis && (
-							node.quote ? [
-								<QuoteInfoEditorUI key={0} ref="quoteEditor" info={node.quote.Extended({})} showPreview={false} justShowed={false}
-									onSetError={error=>this.SetState({quoteError: error})}/>
+							node.contentNode ? [
+								<QuoteInfoEditorUI key={0} ref={c=>this.quoteEditor = c} contentNode={node.contentNode} showPreview={false} justShowed={false}
+									onSetError={error=>this.SetState({contentNodeError: error})}/>
 							] : [
 								<Row key={0} mt={5} style={{display: `flex`, alignItems: `center`}}>
 									<Pre>Title (negation): </Pre>
@@ -95,7 +96,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {quo
 								<Pre>.</Pre>
 							</Row>}
 						<Row>
-							<Button text="Save" enabled={quoteError == null} mt={10} onLeftClick={async ()=> {
+							<Button text="Save" enabled={contentNodeError == null} mt={10} onLeftClick={async ()=> {
 								/*firebase.Ref().update(E(
 									this.refs.title_base && {base: this.refs.title_base.GetValue()},
 									this.refs.title_negation && {negation: this.refs.title_negation.GetValue()},
@@ -132,8 +133,8 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {quo
 											this.refs.title_negation && {negation: this.refs.title_negation.GetValue()},
 											this.refs.title_yesNoQuestion && {yesNoQuestion: this.refs.title_yesNoQuestion.GetValue()},
 										)},
-									this.refs.quoteEditor &&
-										{quote: this.refs.quoteEditor.props.info as QuoteInfo},
+									this.quoteEditor &&
+										{contentNode: this.quoteEditor.state.contentNodeCopy},
 								));
 								//try {
 								await new UpdateNodeDetails({nodeID: node._id, updates}).Run();

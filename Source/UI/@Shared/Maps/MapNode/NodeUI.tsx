@@ -175,10 +175,10 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let expectedTextWidth = V.GetContentWidth($(`<a style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${displayText}</a>`));
 		//let expectedOtherStuffWidth = 26;
 		let expectedOtherStuffWidth = 28;
-		if (node.quote)
+		if (node.contentNode)
 			expectedOtherStuffWidth += 14;
 		let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
-		if (node.quote) // quotes are often long, so just always do full-width
+		if (node.contentNode) // quotes are often long, so just always do full-width
 			expectedBoxWidth = nodeTypeInfo.maxWidth;
 
 		let width = expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);

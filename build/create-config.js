@@ -17,7 +17,7 @@ if (process.env.TRAVIS_PULL_REQUEST === false) {
 function createConfigFile(cb) {
 	const configObj = {
 		version: pkg.version,
-		dbVersion: 3,
+		dbVersion: 4,
 		firebaseConfig: config.firebase,
 		/*env: config.env,
 		devEnv: config.globals.__DEV__,

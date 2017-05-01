@@ -18,9 +18,7 @@ export enum MetaThesis_IfType {
 	AnyTwo = 15,
 	All = 20,
 }
-AddSchema({
-	oneOf: GetValues_ForSchema(MetaThesis_IfType),
-}, "MetaThesis_IfType");
+AddSchema({oneOf: GetValues_ForSchema(MetaThesis_IfType)}, "MetaThesis_IfType");
 
 export function GetMetaThesisIfTypeDisplayText(ifType: MetaThesis_IfType) {
 	return MetaThesis_IfType[ifType].replace(/[a-z][A-Z]/, m=>m[0] + " " + m[1].toLowerCase()).toLowerCase();
@@ -32,9 +30,7 @@ export enum MetaThesis_ThenType {
 	WeakenParent = 30,
 	GuaranteeParentFalse = 40,
 }
-AddSchema({
-	oneOf: GetValues_ForSchema(MetaThesis_ThenType),
-}, "MetaThesis_ThenType");
+AddSchema({oneOf: GetValues_ForSchema(MetaThesis_ThenType)}, "MetaThesis_ThenType");
 
 export class MetaThesis_ThenType_Info {
 	static for = {

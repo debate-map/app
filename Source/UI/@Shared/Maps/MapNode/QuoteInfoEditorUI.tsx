@@ -11,13 +11,25 @@ import Button from "../../../../Frame/ReactComponents/Button";
 import {applyFormat} from "../../MarkdownEditor/Formatter";
 import {Component} from "react";
 import * as Icons from "react-md-editor/lib/icons";
-import {QuoteInfo, Source} from "../../../../Store/firebase/nodes/@QuoteInfo";
 import {GetNodeDisplayText} from "../../../../Store/firebase/nodes/$node";
+import {GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText} from "../../../../Store/firebase/contentNodes/$contentNode";
+import Select from "../../../../Frame/ReactComponents/Select";
+import {SourceType, SourceChain, Source, ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
+import {GetEntries} from "../../../../Frame/General/Enums";
 
 //@ApplyBasicStyles
-export default class QuoteInfoEditorUI extends BaseComponent<{info: QuoteInfo, showPreview: boolean, justShowed: boolean, onSetError: (error: string)=>void}, {}> {
+export default class QuoteInfoEditorUI extends BaseComponent
+		<{contentNode: ContentNode, showPreview: boolean, justShowed: boolean, onSetError: (error: string)=>void},
+		{contentNodeCopy: ContentNode}> {
+	constructor(props) {
+		super(props);
+		let {contentNode} = this.props;
+		this.state = {contentNodeCopy: FromJSON(ToJSON(contentNode))};
+	}
+	
 	render() {
-		let {info, showPreview, justShowed} = this.props;
+		let {showPreview, justShowed} = this.props;
+		let {contentNodeCopy: contentNode} = this.state;
 		let Change = _=>this.Update();
 		return (
 			<Column>
@@ -25,46 +37,55 @@ export default class QuoteInfoEditorUI extends BaseComponent<{info: QuoteInfo, s
 					<Row key={0} mt={5}>Preview:</Row>,
 					<Column key={1} mt={5}>
 						<Pre style={{padding: 5, background: `rgba(255,255,255,.2)`, borderRadius: 5}}>
-							{GetNodeDisplayText({type: MapNodeType.Thesis, quote: info} as any, ThesisForm.Base)}
-							<SubPanel_Inner quote={info} fontSize={15}/>
+							{GetNodeDisplayText({type: MapNodeType.Thesis, contentNode} as any, ThesisForm.Base)}
+							<SubPanel_Inner contentNode={contentNode} fontSize={15}/>
 						</Pre>
 					</Column>
 				]}
-				<Row mt={5}><Pre>Author: </Pre><TextInput ref={a=>a && justShowed && WaitXThenRun(0, ()=>a.DOM.focus())} style={{flex: 1}}
-					value={info.author} onChange={val=>Change(info.author = val)}/></Row>
 				<Column mt={5}>
-					<Pre>Quote: </Pre>
+					<Pre>Quote text: </Pre>
 					{/*<TextInput style={{flex: 1}}
 						value={info.text} onChange={val=>Change(info.text = val)}/>*/}
 					<ToolBar editor={()=>this.refs.editor} excludeCommands={["h1", "h2", "h3", "h4", "italic", "quote"]}/>
-					<Editor ref="editor" value={info.text} onChange={val=>Change(info.text = val)} options={{
+					<Editor ref="editor" value={contentNode.content} onChange={val=>Change(contentNode.content = val)} options={{
 						scrollbarStyle: `overlay`,
 						lineWrapping: true,
 					}}/>
 				</Column>
-				<Row mt={5}>Sources:</Row>
+				<Row mt={5}>Source chains:</Row>
 				<Row mt={5}>
 					<Column style={{flex: 1}}>
-						{info.sources.FakeArray_Select((source: Source, index)=> {
+						{contentNode.sourceChains.FakeArray_Select((chain, chainIndex)=> {
 							return (
-								<Column key={index} mt={index == 0 ? 0 : 3} pt={index == 0 ? 0 : 3} style={E(index != 0 && {borderTop: "1px solid rgba(0,0,0,.7)"})}>
+								<Column key={chainIndex} mt={chainIndex == 0 ? 0 : 10} pt={chainIndex == 0 ? 0 : 10} style={E(chainIndex != 0 && {borderTop: "1px solid rgba(0,0,0,.7)"})}>
+									{chain.FakeArray_Select((source, sourceIndex)=> {
+										return (
+											<Row key={sourceIndex}>
+												<Select options={GetEntries(SourceType)}
+													value={source.type} onChange={val=>Change(source.type = val)}/>
+												{source.type != SourceType.Webpage &&
+													<TextInput style={{width: "90%"}} placeholder={GetSourceNamePlaceholderText(source.type)}
+														value={source.name} onChange={val=>Change(source.name = val)}/>}
+												{source.type != SourceType.Webpage &&
+													<TextInput style={{width: "90%"}} placeholder={GetSourceAuthorPlaceholderText(source.type)}
+														value={source.author} onChange={val=>Change(source.author = val)}/>}
+												{source.type == SourceType.Webpage &&
+													<TextInput ref={"url_" + chainIndex + "_" + sourceIndex} type="url"
+															//pattern="^(https?|ftp)://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
+															pattern="^https?://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
+															value={source.link} onChange={val=>Change(source.link = val)}/>}
+												{sourceIndex != 0 && <Button text="X" ml={5} onClick={()=>Change(chain.FakeArray_RemoveAt(sourceIndex))}/>}
+											</Row>
+										);
+									})}
 									<Row>
-										<Pre style={{flex: 1}}>Name: </Pre>
-										<TextInput required style={{width: "90%"}}
-											value={source.name} onChange={val=>Change(info.sources[index].name = val)}/>
-									</Row>
-									<Row style={{flex: .5}}>
-										<Pre style={{flex: 1}}>Link: </Pre>
-										<Row style={{width: "90%"}}>
-											<TextInput ref={"url_" + index} type="url" pattern="^(https?|ftp)://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
-												value={source.link} onChange={val=>Change(info.sources[index].link = val)}/>
-											{index != 0 && <Button text="X" ml={5} onClick={()=>Change(info.sources.FakeArray_RemoveAt(index))}/>}
-										</Row>
+										<Button text="Add source to this chain" mt={5} onClick={()=>Change(chain.FakeArray_Add(new Source()))}/>
+										{chainIndex > 0 && <Button text="Remove this source chain" ml={5} mt={5} onClick={()=>Change(delete contentNode.sourceChains[chainIndex])}/>}
 									</Row>
 								</Column>
 							);
 						})}
-						<Button text="Add" mt={5} style={{width: 60}} onClick={()=>Change(info.sources.FakeArray_Add({name: "", link: ""}))}/>
+						<Button text="Add source chain" mt={10} style={{alignSelf: "flex-start"}} onClick={()=>Change(contentNode.sourceChains.FakeArray_Add(new SourceChain()))}/>
 					</Column>
 				</Row>
 			</Column>
@@ -81,10 +102,12 @@ export default class QuoteInfoEditorUI extends BaseComponent<{info: QuoteInfo, s
 		}
 	}
 	GetValidationError() {
-		let {info} = this.props;
+		let {contentNode} = this.props;
 		//return (FindDOM(this.refs.url) as HTMLInputElement).validity.valid;
 		//return (FindDOM(this.refs.url) as HTMLInputElement).validationMessage;
-		for (let i = 0, urlComp; urlComp = this.refs["url_" + i]; i++) {
+		//for (let i = 0, urlComp; urlComp = this.refs["url_" + i]; i++) {
+		for (let key of this.refs.VKeys().filter(a=>a.startsWith("url_"))) {
+			let urlComp = this.refs[key];
 			let urlDOM = FindDOM(urlComp) as HTMLInputElement;
 			if (urlDOM.validationMessage)
 				return urlDOM.validationMessage;

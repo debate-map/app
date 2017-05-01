@@ -27,6 +27,7 @@ export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>F
 }
 require("./Admin/DBUpgrades/UpgradeDB_2");
 require("./Admin/DBUpgrades/UpgradeDB_3");
+require("./Admin/DBUpgrades/UpgradeDB_4");
 
 export interface FirebaseData {
 	general: GeneralData;

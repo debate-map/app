@@ -48,7 +48,7 @@ const config = {
 			"babel-plugin-transform-es2015-computed-properties",
 			"babel-plugin-transform-es2015-destructuring",
 			"babel-plugin-transform-es2015-duplicate-keys",
-			"babel-plugin-transform-es2015-for-of",
+			//"babel-plugin-transform-es2015-for-of", // ohhh, I hate this thing... (the try-catch wrapping within transpiled for-of's)
 			"babel-plugin-transform-es2015-function-name",
 			"babel-plugin-transform-es2015-literals",
 			["babel-plugin-transform-es2015-modules-commonjs", {strict: true, noInterop: true}],

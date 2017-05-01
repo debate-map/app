@@ -5,7 +5,7 @@ import {RatingType} from "../nodeRatings/@RatingType";
 import {GetParentNode, IsLinkValid, IsNewLinkValid} from "../nodes";
 import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
 import {MetaThesis_ThenType, MetaThesisInfo, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info} from "./@MetaThesisInfo";
-import {QuoteInfo} from "./@QuoteInfo";
+import {ContentNode} from "../contentNodes/@ContentNode";
 
 export enum AccessLevel {
 	Basic = 10,
@@ -36,7 +36,7 @@ export class MapNode {
 	accessLevel = AccessLevel.Basic;
 	voteLevel = AccessLevel.Basic;
 
-	quote: QuoteInfo;
+	contentNode: ContentNode;
 	metaThesis: MetaThesisInfo;
 
 	// averages from server
@@ -67,15 +67,15 @@ AddSchema({
 		approved: {type: "boolean"},
 		accessLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
 		voteLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
-		quote: {$ref: "QuoteInfo"},
+		contentNode: {$ref: "ContentNode"},
 		metaThesis: {$ref: "MetaThesisInfo"},
 		parents: {$ref: "ParentSet"},
 		children: {$ref: "ChildSet"},
 		//talkRoot: {type: "number"},
 	},
 	required: ["type", "creator", "createdAt"],
-	// if not a meta-thesis or quote, require "titles" prop
-	if: {prohibited: ["metaThesis", "quote"]},
+	// if not a meta-thesis or contentNode, require "titles" prop
+	if: {prohibited: ["metaThesis", "contentNode"]},
 	then: {required: ["titles"]},
 }, "MapNode");
 

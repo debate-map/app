@@ -15,7 +15,7 @@ import {MetaThesis_ThenType, MetaThesis_IfType, MetaThesis_ThenType_Info, GetMet
 import AddNode from "../../../../../Server/Commands/AddNode";
 import Editor from "react-md-editor";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
-import {QuoteInfo} from "../../../../../Store/firebase/nodes/@QuoteInfo";
+import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
 
 export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, userID: string) {
 	let firebase = store.firebase.helpers;
@@ -33,8 +33,8 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 		: null;
 	let info = {
 		title: ``,
-		thesisType: `Normal` as "Normal" | "Quote", // eslint-disable-line quotes
-		quote: new QuoteInfo(),
+		thesisType: `Normal` as "Normal" | "Content_Quote", // eslint-disable-line quotes
+		contentNode: new ContentNode(),
 		metaThesis: {
 			ifType: MetaThesis_IfType.All,
 			thenType: childType == MapNodeType.SupportingArgument ? MetaThesis_ThenType.StrengthenParent : MetaThesis_ThenType.WeakenParent,
@@ -64,7 +64,7 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 								value={info.thesisType} onChange={val=>Change(info.thesisType = val)}/>
 						</Row>}
 					{childType == MapNodeType.Thesis && info.thesisType == `Quote` ? (
-						<QuoteInfoEditorUI info={info.quote} showPreview={true} justShowed={justShowed} onSetError={error=>Change(quoteError = error)}/>
+						<QuoteInfoEditorUI contentNode={info.contentNode} showPreview={true} justShowed={justShowed} onSetError={error=>Change(quoteError = error)}/>
 					) : (
 						<Row mt={5}>
 							<Pre>Title: </Pre>
@@ -115,8 +115,8 @@ The "type" option above describes the way in which this argument's premises will
 				parents: {[parentNode._id]: {_: true}},
 				type: childType, creator: userID, approved: true
 			});
-			if (childType == MapNodeType.Thesis && info.thesisType == `Quote`) {
-				newChildNode.quote = info.quote;
+			if (childType == MapNodeType.Thesis && info.thesisType == `Content_Quote`) {
+				newChildNode.contentNode = info.contentNode;
 			} else {
 				newChildNode.titles = thesisForm && thesisForm == ThesisForm.YesNoQuestion ? {yesNoQuestion: info.title} : {base: info.title};
 			}

@@ -38,8 +38,11 @@ export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
 
 export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | string) {
 	if (node.type == MapNodeType.Thesis) {
-		if (node.quote)
-			return `The statement below was made by ${node.quote.author}, and is unmodified.`;
+		if (node.contentNode)
+			return `The statement below was made`
+				+ (node.contentNode.sourceChains[0][0].name ? " in " + node.contentNode.sourceChains[0][0].name : "")
+				+ (node.contentNode.sourceChains[0][0].author ? " by " + node.contentNode.sourceChains[0][0].author : "")
+				+ `, and is unmodified.`;
 		if (node.metaThesis) {
 			return `If ${GetMetaThesisIfTypeDisplayText(node.metaThesis.ifType)} premises below are true, they ${
 				MetaThesis_ThenType_Info.for[MetaThesis_ThenType[node.metaThesis.thenType]].displayText}.`;
