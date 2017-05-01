@@ -105,45 +105,20 @@ webpackConfig.plugins = [
 		}
 	}),
 	function() {
-		/*var stats = this.statsData.toJson();
-		if (stats.errors.length) return;*/
-
 		this.plugin("compilation", function(compilation) {
 			compilation.plugin("html-webpack-plugin-after-html-processing", function(htmlPluginData, callback) {
-				/*console.log(compilation.profiler);
-				console.log(compilation.entries[0]);
-				console.log("Keys2:" + Object.keys(compilation.chunks[0]));
-				console.log("Keys:" + Object.keys(compilation.assets[0]));*/
-
 				// this couldn't find the "manifest.json" asset
 				/*var chunk0_filename = compilation.assets["manifest.json"][0];
 				var hash = chunk0_filename.match(/?(.+)$/)[1];*/
+
 				// this worked, except it used the "app.js"-specific content-hash, rather than the build's hash which we want
-				//var hash = compilation.chunks[0].hash; // this 
+				//var hash = compilation.chunks[0].hash;
+
 				// this gets the build's hash like we want
-				console.log(htmlPluginData.html);
 				var hash = htmlPluginData.html.match(/\.js\?([0-9a-f]+)["']/)[1];
 				htmlPluginData.html = htmlPluginData.html.replace("/dll.vendor.js?[hash]", "/dll.vendor.js?" + hash);
 				callback(null, htmlPluginData);
 			});
-			/*compilation.plugin(
-				"html-webpack-plugin-alter-asset-tags",
-				(htmlPluginData, callback) => {
-					const asset = compilation.assets["manifest.json"];
-					if (asset) {
-						const newTag = {
-							tagName: "script",
-							closeTag: true,
-							attributes: {
-								type: "text/javascript"
-							},
-							innerHTML: `window.${manifestVariable}=${asset.source()}`
-						};
-						htmlPluginData.head.unshift(newTag);
-					}
-					callback(null, htmlPluginData);
-				}
-			);*/
 		});
 	},
 	/*new ExposeRequirePlugin({

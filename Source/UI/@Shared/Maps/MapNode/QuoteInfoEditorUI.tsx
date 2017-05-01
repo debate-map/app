@@ -73,7 +73,16 @@ export default class QuoteInfoEditorUI extends BaseComponent
 													<TextInput ref={"url_" + chainIndex + "_" + sourceIndex} type="url"
 															//pattern="^(https?|ftp)://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
 															pattern="^https?://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
-															value={source.link} onChange={val=>Change(source.link = val)}/>}
+															value={source.link} onChange={val=>Change((()=> {
+																if (val.endsWith("@bible")) {
+																	var reference = val.replace("@bible", "").replace(/:/g, ".").replace(/ /g, "%20");
+																	val = `https://biblia.com/bible/nkjv/${reference}`;
+																} else if (val.endsWith("@quran")) {
+																	var reference = val.replace("@quran", "").replace(/:/g, "/").replace(/ /g, "%20");
+																	val = `http://www.quran.com/${reference}`;
+																}
+																source.link = val;
+															})())}/>}
 												{sourceIndex != 0 && <Button text="X" ml={5} onClick={()=>Change(chain.FakeArray_RemoveAt(sourceIndex))}/>}
 											</Row>
 										);
