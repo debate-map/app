@@ -5,7 +5,7 @@ import {helpers, firebaseConnect} from "react-redux-firebase";
 import {IsString} from "../General/Types";
 import {FirebaseApplication, DataSnapshot} from "firebase";
 import {BaseComponent} from "../UI/ReactGlobals";
-import {GetTreeNodesInObjTree} from "../V/V";
+import {GetTreeNodesInObjTree, DeepGet, DeepSet} from "../V/V";
 //export {DBPath};
 
 export function DBPath(path = "", inVersionRoot = true) {
@@ -56,11 +56,14 @@ export function ProcessDBData(data, forceAsObjects: boolean, addHelpers: boolean
 		if (forceAsObjects && treeNode.Value instanceof Array) {
 			let valueAsObject = {}.Extend(treeNode.Value) as any;
 			for (let key in valueAsObject) {
-				// if fake array-item added by Firebase (just so it would be an array), remove it
-				if (valueAsObject[key] == null)
+				// if fake array-item added by Firebase/js (just so the array would have no holes), remove it
+				//if (valueAsObject[key] == null)
+				if (valueAsObject[key] === undefined)
 					delete valueAsObject[key];
 			}
-			treeNode.obj[treeNode.prop] = valueAsObject;
+			//treeNode.obj[treeNode.prop] = valueAsObject;
+			// we need to use deep-set, because ancestor objects may have already changed during this transform/processing
+			DeepSet(data, treeNode.PathStr_Updeep, valueAsObject);
 		}
 
 		// add special _key or _id prop

@@ -138,6 +138,11 @@ export function ToJSON_Try(...args) {
 	return "[converting to JSON failed]";
 }
 
+declare global { function Clone(obj): any; } g.Extend({Clone});
+function Clone(obj) {
+	return FromJSON(ToJSON(obj));
+}
+
 // object-VDF
 // ----------
 

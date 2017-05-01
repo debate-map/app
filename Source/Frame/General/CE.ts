@@ -287,6 +287,7 @@ Object.prototype._AddFunction_Inline = function VValues(excludeSpecialProps = fa
 
 interface Object { FakeArray_Select<T, T2>(this: {[key: number]: T} | {[key: string]: T}, selectFunc?: (item: T, index?: number)=>T2): T2[]; }
 Object.prototype._AddFunction_Inline = function FakeArray_Select(selectFunc = a=>a) {
+	g.Assert(!(this instanceof Array), "Cannot call FakeArray methods on a real array!");
 	/*var result = this instanceof List ? new List(this.itemType) : [];
 	for (let [index, item] of this.entries())
 		result.Add(selectFunc.call(item, item, index));
@@ -295,15 +296,18 @@ Object.prototype._AddFunction_Inline = function FakeArray_Select(selectFunc = a=
 };
 interface Object { FakeArray_RemoveAt(index: number); }
 Object.prototype._AddFunction_Inline = function FakeArray_RemoveAt(index: number) {
+	g.Assert(!(this instanceof Array), "Cannot call FakeArray methods on a real array!");
+	if (!(index in this)) return;
 	// remove target entry
 	delete this[index];
 	// move all the later entries down one index
 	for (var i = index + 1; i in this; i++)
 		this[i - 1] = this[i];
-	delete this[i];
+	delete this[i - 1]; // remove the extra copy of the last-item 
 };
 interface Object { FakeArray_Add<T>(this: {[key: number]: T} | {[key: string]: T}, item: T); }
 Object.prototype._AddFunction_Inline = function FakeArray_Add(item) {
+	g.Assert(!(this instanceof Array), "Cannot call FakeArray methods on a real array!");
 	for (var openIndex = 0; openIndex in this; openIndex++);
 	this[openIndex] = item;
 };

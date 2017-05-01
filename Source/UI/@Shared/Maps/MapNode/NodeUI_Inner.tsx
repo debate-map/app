@@ -37,6 +37,7 @@ import Row from "../../../../Frame/ReactComponents/Row";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
 import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetMainRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
 import {ContentNode, SourceChain} from "../../../../Store/firebase/contentNodes/@ContentNode";
+import {URL} from "../../../../Frame/General/URLs";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -201,9 +202,12 @@ export class SourcesUI extends BaseComponent<{contentNode: ContentNode}, {}> {
 				{contentNode.sourceChains.FakeArray_Select(a=>a).map((chain: SourceChain, index)=> {
 					let linkTitle = chain.FakeArray_Select(a=>a).map(source=> {
 						if (source.link) {
-							let urlMatch = source.link.match(/https?:\/\/([^/]+)/);
+							/*let urlMatch = source.link.match(/https?:\/\/([^/]+)/);
 							if (urlMatch == null) return source.link; // temp, while updating data
-							return urlMatch[1];
+							return urlMatch[1];*/
+							let url = URL.Parse(source.link);
+							url.domain = url.DomainWithoutProtocol;
+							return url.toString(true, false);
 						}
 						return (source.name || "") + (source.author ? ` (${source.author})` : ""); 
 					}).join(" <- ");

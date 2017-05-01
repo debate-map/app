@@ -1,3 +1,4 @@
+import {URL} from "../../../Frame/General/URLs";
 import {MapNode, ThesisForm} from "./@MapNode";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MetaThesis_ThenType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info} from "./@MetaThesisInfo";
@@ -40,8 +41,10 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 	if (node.type == MapNodeType.Thesis) {
 		if (node.contentNode)
 			return `The statement below was made`
-				+ (node.contentNode.sourceChains[0][0].name ? " in " + node.contentNode.sourceChains[0][0].name : "")
-				+ (node.contentNode.sourceChains[0][0].author ? " by " + node.contentNode.sourceChains[0][0].author : "")
+				+ (node.contentNode.sourceChains[0][0].name ? ` in "${node.contentNode.sourceChains[0][0].name}"` : "")
+				+ (node.contentNode.sourceChains[0][0].author ? ` by ${node.contentNode.sourceChains[0][0].author}` : "")
+				+ (node.contentNode.sourceChains[0][0].link ? ` at "${
+					URL.Parse(node.contentNode.sourceChains[0][0].link).VAct(a=>a.domain = a.DomainWithoutProtocol).toString(true, false)}"` : "") // maybe temp
 				+ `, and is unmodified.`;
 		if (node.metaThesis) {
 			return `If ${GetMetaThesisIfTypeDisplayText(node.metaThesis.ifType)} premises below are true, they ${

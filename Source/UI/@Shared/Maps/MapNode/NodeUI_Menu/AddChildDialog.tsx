@@ -16,6 +16,7 @@ import AddNode from "../../../../../Server/Commands/AddNode";
 import Editor from "react-md-editor";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
+import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";
 
 export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, userID: string) {
 	let firebase = store.firebase.helpers;
@@ -116,7 +117,7 @@ The "type" option above describes the way in which this argument's premises will
 				type: childType, creator: userID, approved: true
 			});
 			if (childType == MapNodeType.Thesis && info.thesisType == `Content_Quote`) {
-				newChildNode.contentNode = info.contentNode;
+				newChildNode.contentNode = CleanUpdatedContentNode(Clone(info.contentNode));
 			} else {
 				newChildNode.titles = thesisForm && thesisForm == ThesisForm.YesNoQuestion ? {yesNoQuestion: info.title} : {base: info.title};
 			}

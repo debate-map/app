@@ -113,6 +113,8 @@ export class URL {
 	}
 
 	domain: string;
+	get Protocol() { return this.domain.Contains("://") ? this.domain.substr(0, this.domain.indexOf("://")) : null; }
+	get DomainWithoutProtocol() { return this.domain.Contains("://") ? this.domain.substr(this.domain.indexOf("://") + 3) : this.domain; }
 	pathNodes: string[];
 	queryVars: QueryVar[];
 	GetQueryVar(name: string) {
@@ -140,13 +142,14 @@ export class URL {
 		return result;
 	}
 
-	toString(includeDomain = true) {
+	toString(includeDomain = true, forceSlashAfterDomain = true) {
 		let result = "";
 		
 		// domain
 		if (includeDomain)
 			result += this.domain;
-		result += "/";
+		if (forceSlashAfterDomain || this.pathNodes.length || this.queryVars.length || this.hash)
+			result += "/";
 
 		// path-nodes
 		if (this.pathNodes.length)

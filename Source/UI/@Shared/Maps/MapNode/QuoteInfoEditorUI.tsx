@@ -80,7 +80,7 @@ export default class QuoteInfoEditorUI extends BaseComponent
 									})}
 									<Row>
 										<Button text="Add source to this chain" mt={5} onClick={()=>Change(chain.FakeArray_Add(new Source()))}/>
-										{chainIndex > 0 && <Button text="Remove this source chain" ml={5} mt={5} onClick={()=>Change(delete contentNode.sourceChains[chainIndex])}/>}
+										{chainIndex > 0 && <Button text="Remove this source chain" ml={5} mt={5} onClick={()=>Change(contentNode.sourceChains.FakeArray_RemoveAt(chainIndex))}/>}
 									</Row>
 								</Column>
 							);
@@ -114,6 +114,27 @@ export default class QuoteInfoEditorUI extends BaseComponent
 		}
 		return null;
 	}
+	GetUpdatedContentNode() {
+		let {contentNodeCopy: contentNode} = this.state;
+		return CleanUpdatedContentNode(Clone(contentNode));
+	}
+}
+
+export function CleanUpdatedContentNode(contentNode: ContentNode) {
+	// clean data
+	for (let chain of contentNode.sourceChains.FakeArray_Select(a=>a)) {
+		for (let source of chain.FakeArray_Select(a=>a)) {
+			if (source.type == SourceType.Speech) {
+				delete source.link;
+			} else if (source.type == SourceType.Writing) {
+				delete source.link;
+			} else if (source.type == SourceType.Webpage) {
+				delete source.name;
+				delete source.author;
+			}
+		}
+	}
+	return contentNode;
 }
 
 class ToolBar extends BaseComponent<{editor: ()=>any, excludeCommands?: string[]}, {}> {

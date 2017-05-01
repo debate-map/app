@@ -299,3 +299,13 @@ export function DeepGet<T>(obj, path, resultIfNull: T = null): T {
 		return resultIfNull;
 	return result;
 }
+export function DeepSet(obj, path, newValue) {
+	let pathNodes = path.split(".");
+	let deepObj = obj;
+	// tunnel down to the object holding the path-specified prop
+	for (let pathNode of pathNodes.slice(0, -1)) {
+		if (deepObj == null) break;
+		deepObj = deepObj[pathNode];
+	}
+	deepObj[pathNodes.Last()] = newValue;
+}

@@ -134,7 +134,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {con
 											this.refs.title_yesNoQuestion && {yesNoQuestion: this.refs.title_yesNoQuestion.GetValue()},
 										)},
 									this.quoteEditor &&
-										{contentNode: this.quoteEditor.state.contentNodeCopy},
+										{contentNode: this.quoteEditor.GetUpdatedContentNode()},
 								));
 								//try {
 								await new UpdateNodeDetails({nodeID: node._id, updates}).Run();

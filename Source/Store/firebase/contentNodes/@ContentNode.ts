@@ -44,11 +44,11 @@ AddSchema({
 		link: {format: "uri"},
 	},
 	//required: ["name", "author", "link"],
-	/*anyOf: [
+	anyOf: [
 		{required: ["name"], prohibited: ["link"]},
 		{required: ["author"], prohibited: ["link"]},
 		{required: ["link"], prohibited: ["name", "author"]}
-	],*/
+	],
 }, "Source");
 
 export enum SourceType {

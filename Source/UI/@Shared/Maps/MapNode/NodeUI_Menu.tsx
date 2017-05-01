@@ -113,8 +113,8 @@ If not, paste the argument as a clone instead.`
 
 						let newChildNode = RemoveHelpers(FromJSON(ToJSON(copiedNode))) as MapNode;
 						newChildNode.parents = {[node._id]: {_: true}}; // make new node's only parent the one on this path
-						delete newChildNode.children[copiedMetaThesis._id]; // remove old-meta-thesis as child
 						if (isArgument) {
+							delete newChildNode.children[copiedMetaThesis._id]; // remove old-meta-thesis as child
 							var metaThesisNode = RemoveHelpers(FromJSON(ToJSON(copiedMetaThesis))).VSet({parents: null}) as MapNode;
 						}
 						new AddNode({node: newChildNode, form: thesisForm, metaThesisNode}).Run();
