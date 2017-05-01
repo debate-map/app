@@ -44,7 +44,7 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 				+ (node.contentNode.sourceChains[0][0].name ? ` in "${node.contentNode.sourceChains[0][0].name}"` : "")
 				+ (node.contentNode.sourceChains[0][0].author ? ` by ${node.contentNode.sourceChains[0][0].author}` : "")
 				+ (node.contentNode.sourceChains[0][0].link ? ` at "${
-					URL.Parse(node.contentNode.sourceChains[0][0].link).VAct(a=>a.domain = a.DomainWithoutProtocol).toString(true, false)}"` : "") // maybe temp
+					URL.Parse(node.contentNode.sourceChains[0][0].link, false).toString({domain_protocol: false, forceSlashAfterDomain: false})}"` : "") // maybe temp
 				+ `, and is unmodified.`;
 		if (node.metaThesis) {
 			return `If ${GetMetaThesisIfTypeDisplayText(node.metaThesis.ifType)} premises below are true, they ${

@@ -121,6 +121,7 @@ export function GetNodeView(mapID: number, path: string): MapNodeView {
 	if (parentNodeID) {
 		//let parentNodeView = CachedTransform({mapID, path}, )
 		let parentNodeView = GetNodeView(mapID, path.substr(0, path.lastIndexOf("/")));
+		Assert(parentNodeView != null, `When trying to get node-view for #${pathNodeIDs.Last()}, node-view for parent #${parentNodeID} was null! @path(${path})`);
 		return (parentNodeView.children || {})[pathNodeIDs.Last()];
 	}
 

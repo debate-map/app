@@ -142,31 +142,35 @@ export class URL {
 		return result;
 	}
 
-	toString(includeDomain = true, forceSlashAfterDomain = true) {
+	toString(options?: {domain?: boolean, domain_protocol?: boolean, forceSlashAfterDomain?: boolean, path?: boolean, queryVars?: boolean, hash?: boolean}) {
+		options = E({domain: true, domain_protocol: true, forceSlashAfterDomain: true, path: true, queryVars: true, hash: true}, options) as any; 		
 		let result = "";
 		
 		// domain
-		if (includeDomain)
-			result += this.domain;
-		if (forceSlashAfterDomain || this.pathNodes.length || this.queryVars.length || this.hash)
+		if (options.domain)
+			result += options.domain_protocol ? this.domain : this.DomainWithoutProtocol;
+		if (options.forceSlashAfterDomain || this.pathNodes.length || this.queryVars.length || this.hash)
 			result += "/";
 
 		// path-nodes
-		if (this.pathNodes.length)
+		if (options.path && this.pathNodes.length)
 			result += this.pathNodes.join("/");
 
 		// query-vars
-		for (let [index, queryVar] of this.queryVars.entries()) {
-			result += (index == 0 ? "?" : "&") + queryVar.name + "=" + queryVar.value;
+		if (options.queryVars) {
+			for (let [index, queryVar] of this.queryVars.entries()) {
+				result += (index == 0 ? "?" : "&") + queryVar.name + "=" + queryVar.value;
+			}
 		}
 
 		// hash
-		if (this.hash)
+		if (options.hash && this.hash)
 			result += "#" + this.hash;
 
 		return result;
 	}
 }
+function AsPartial<T>(obj: T): Partial<T> { return obj; }
 export class QueryVar {
 	constructor(name: string, value: string) {
 		this.name = name;

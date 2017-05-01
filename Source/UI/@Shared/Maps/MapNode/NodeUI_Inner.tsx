@@ -200,14 +200,16 @@ export class SourcesUI extends BaseComponent<{contentNode: ContentNode}, {}> {
 			<Column mt={3}>
 				<Row style={{color: `rgba(255,255,255,.5)`}}>Sources:</Row>
 				{contentNode.sourceChains.FakeArray_Select(a=>a).map((chain: SourceChain, index)=> {
-					let linkTitle = chain.FakeArray_Select(a=>a).map(source=> {
+					let linkTitle = chain.FakeArray_Select(a=>a).map((source, index)=> {
 						if (source.link) {
-							/*let urlMatch = source.link.match(/https?:\/\/([^/]+)/);
+							// if this is the first source, it's the most important, so show the link's whole url
+							if (index == 0) {
+								return URL.Parse(source.link, false).toString({domain_protocol: false, forceSlashAfterDomain: false});
+							}
+							// else, show just the domain-name
+							let urlMatch = source.link.match(/https?:\/\/(?:www\.)?([^/]+)/);
 							if (urlMatch == null) return source.link; // temp, while updating data
-							return urlMatch[1];*/
-							let url = URL.Parse(source.link);
-							url.domain = url.DomainWithoutProtocol;
-							return url.toString(true, false);
+							return urlMatch[1];
 						}
 						return (source.name || "") + (source.author ? ` (${source.author})` : ""); 
 					}).join(" <- ");

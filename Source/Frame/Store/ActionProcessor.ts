@@ -83,13 +83,13 @@ export async function PostDispatchAction(action: Action<any>) {
 		//let oldURL = URL.Current();
 		let url = URL.FromState(action.payload);
 		//let url = window.location.pathname;
-		ReactGA.set({page: url.toString(false)});
-		ReactGA.pageview(url.toString(false) || "/");
+		ReactGA.set({page: url.toString({domain: false})});
+		ReactGA.pageview(url.toString({domain: false}) || "/");
 		//Log("Page-view: " + url);
 
 		//setTimeout(()=>UpdateURL());
 		UpdateURL();
-		if (url.WithImpliedPathNodes().toString(false).startsWith("/global/map")) {
+		if (url.WithImpliedPathNodes().toString({domain: false}).startsWith("/global/map")) {
 			if (isBot) {
 				/*let newURL = url.Clone();
 				let node = await GetNodeAsync(nodeID);
@@ -107,7 +107,7 @@ export async function PostDispatchAction(action: Action<any>) {
 		// If user followed search-result link (eg. "debatemap.live/global/156"), we only know the node-id.
 		// Search for the shortest path from the map's root to this node, and update the view and url to that path.
 		//if (url.pathNodes[0] == "global" && url.pathNodes[1] != null && url.pathNodes[1].match(/^[0-9]+$/) && !isBot) {
-		let match = url.toString(false).match(/^\/global\/[a-z-]*\.([0-9]+)$/);
+		let match = url.toString({domain: false}).match(/^\/global\/[a-z-]*\.([0-9]+)$/);
 		if (match && !isBot) {
 			let nodeID = parseInt(match[1]);
 			let node = await GetNodeAsync(nodeID);
@@ -127,7 +127,7 @@ export async function PostDispatchAction(action: Action<any>) {
 
 			let newURL = url.Clone();
 			newURL.pathNodes.RemoveAt(1);
-			store.dispatch(replace(newURL.toString(false)));
+			store.dispatch(replace(newURL.toString({domain: false})));
 		}
 	}
 

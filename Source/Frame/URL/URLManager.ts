@@ -111,7 +111,7 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 export function LoadURL(urlStr: string) {
 	//if (!GetPath(GetUrlPath(url)).startsWith("global/map")) return;
 	let url = URL.Parse(urlStr);
-	if (!url.WithImpliedPathNodes().toString(false).startsWith("/global/map")) return;
+	if (!url.WithImpliedPathNodes().toString({domain: false}).startsWith("/global/map")) return;
 	// example: /global?view=1:3:100:101f(384_111):102:.104:.....
 	let mapViewStr = url.GetQueryVar("view");
 	if (mapViewStr == null || mapViewStr.length == 0) return;
@@ -134,13 +134,13 @@ export function UpdateURL() {
 	//let newURL = URL.Current();
 	let oldURL = URL.Current();
 	let newURL = new URL(oldURL.domain, oldURL.pathNodes);
-	if (oldURL.WithImpliedPathNodes().toString(false).startsWith("/global/map") && !isBot)
+	if (oldURL.WithImpliedPathNodes().toString({domain: false}).startsWith("/global/map") && !isBot)
 		newURL = CreateURL_Globals();
 	if (!State().main.analyticsEnabled && newURL.GetQueryVar("analytics") == null)
 		newURL.SetQueryVar("analytics", "false");
 	if (State().main.envOverride)
 		newURL.SetQueryVar("env", State().main.envOverride);
-	store.dispatch(replace(newURL.toString(false)));
+	store.dispatch(replace(newURL.toString({domain: false})));
 }
 function CreateURL_Globals(): URL {
 	//let result = URL.Current().Clone();

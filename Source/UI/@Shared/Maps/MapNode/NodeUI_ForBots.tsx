@@ -60,7 +60,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 						return (
 							<span key={index}>
 								{index > 0 ? ", " : ""}
-								<Link to={toURL.toString(false)}>
+								<Link to={toURL.toString({domain: false})}>
 									{GetNodeDisplayText(parent)} ({parent._id})
 								</Link>
 							</span>
@@ -75,7 +75,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 						return (
 							<span key={index}>
 								{index > 0 ? ", " : ""}
-								<Link to={toURL.toString(false)}>
+								<Link to={toURL.toString({domain: false})}>
 									{GetNodeDisplayText(child)} ({child._id})
 								</Link>
 							</span>
