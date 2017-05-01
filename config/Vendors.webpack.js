@@ -9,6 +9,8 @@ module.exports = {
 	},
 	output: {
 		path: path.join(__dirname, "dist", "dll"),
+		//filename: "dll.[name].js?[chunkhash]",
+		//filename: "dll.[name].js?[hash]",
 		filename: "dll.[name].js",
 		library: "[name]"
 	},

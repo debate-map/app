@@ -60,7 +60,8 @@ webpackConfig.entry = {
 
 webpackConfig.output = {
 	//filename: `[name].[${config.compiler_hash_type}].js`,
-	filename: `[name].js?[${config.compiler_hash_type}]`, // have js/css files have static names, so google can still display content (even when js file has changed)
+	//filename: `[name].js?[chunkhash]`, // have js/css files have static names, so google can still display content (even when js file has changed)
+	filename: `[name].js?[hash]`, // have js/css files have static names, so google can still display content (even when js file has changed)
 	path: paths.dist(),
 	//path: path.resolve(__dirname, "dist"),
 	publicPath: config.compiler_public_path,
@@ -95,6 +96,7 @@ webpackConfig.plugins = [
 		//template: paths.base("Source/index.html"),
 		template: "./Source/index.html",
 		hash: false,
+		//hash: true,
 		// favicon: paths.client("Resources/favicon.ico"), // for including single favicon
 		filename: "index.html",
 		inject: "body",
@@ -102,6 +104,48 @@ webpackConfig.plugins = [
 			collapseWhitespace: true
 		}
 	}),
+	function() {
+		/*var stats = this.statsData.toJson();
+		if (stats.errors.length) return;*/
+
+		this.plugin("compilation", function(compilation) {
+			compilation.plugin("html-webpack-plugin-after-html-processing", function(htmlPluginData, callback) {
+				/*console.log(compilation.profiler);
+				console.log(compilation.entries[0]);
+				console.log("Keys2:" + Object.keys(compilation.chunks[0]));
+				console.log("Keys:" + Object.keys(compilation.assets[0]));*/
+
+				// this couldn't find the "manifest.json" asset
+				/*var chunk0_filename = compilation.assets["manifest.json"][0];
+				var hash = chunk0_filename.match(/?(.+)$/)[1];*/
+				// this worked, except it used the "app.js"-specific content-hash, rather than the build's hash which we want
+				//var hash = compilation.chunks[0].hash; // this 
+				// this gets the build's hash like we want
+				console.log(htmlPluginData.html);
+				var hash = htmlPluginData.html.match(/\.js\?([0-9a-f]+)["']/)[1];
+				htmlPluginData.html = htmlPluginData.html.replace("/dll.vendor.js?[hash]", "/dll.vendor.js?" + hash);
+				callback(null, htmlPluginData);
+			});
+			/*compilation.plugin(
+				"html-webpack-plugin-alter-asset-tags",
+				(htmlPluginData, callback) => {
+					const asset = compilation.assets["manifest.json"];
+					if (asset) {
+						const newTag = {
+							tagName: "script",
+							closeTag: true,
+							attributes: {
+								type: "text/javascript"
+							},
+							innerHTML: `window.${manifestVariable}=${asset.source()}`
+						};
+						htmlPluginData.head.unshift(newTag);
+					}
+					callback(null, htmlPluginData);
+				}
+			);*/
+		});
+	},
 	/*new ExposeRequirePlugin({
 		level: "dependency", // "all", "dependency", "application" 
 		pathPrefix: "Source", // in case if your source is not placed in root folder. 

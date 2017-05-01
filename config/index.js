@@ -77,7 +77,6 @@ const config = {
 	//compiler_devtool: "cheap-module-source-map", // in webpack-2 at least, shows: transpiled-to-js
 	//compiler_devtool: "cheap-source-map", // shows: transpiled-to-js
 	//compiler_devtool: "eval", // shows: transpiled-to-js
-	compiler_hash_type: "hash",
 	compiler_fail_on_warning: false,
 	compiler_quiet: false,
 	compiler_public_path: "/",
