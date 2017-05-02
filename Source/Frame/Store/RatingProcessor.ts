@@ -34,7 +34,7 @@ export function GetArgumentStrengthPseudoRating(nodeChildren: MapNode[], userID:
 	let premises = nodeChildren.Except(metaThesis);
 	if (premises.length == 0) return null;
 
-	let premiseProbabilities = premises.map(child=>GetRatingValue(child._id, "probability", userID, 0) / 100);
+	let premiseProbabilities = premises.map(child=>GetRatingValue(child._id, GetRatingTypesForNode(child)[0].type, userID, 0) / 100);
 	let combinedProbabilityOfPremises;
 	if (metaThesis.metaThesis.ifType == MetaThesis_IfType.All)
 		combinedProbabilityOfPremises = premiseProbabilities.reduce((total, current)=>total * current, 1);
