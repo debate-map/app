@@ -2,9 +2,11 @@ import {MapNode} from "../nodes/@MapNode";
 import {Range} from "../../../Frame/General/Globals";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {MetaThesis_IfType} from "../nodes/@MetaThesisInfo";
+import {GetThesisFormAtPath} from "../nodes/$node";
 
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
-export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
+//export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
+export type RatingType = "significance" | "neutrality" | "probability" | "degree" | "adjustment" | "strength";
 export class RatingType_Info {
 	static for = {
 		significance: new RatingType_Info({
@@ -15,13 +17,16 @@ export class RatingType_Info {
 		}),
 		neutrality: new RatingType_Info({
 			displayText: "Neutrality",
-			description: ()=>"How neutral/impartial is the phrasing of this question? (0: as biased as they come, 100: no bias)",
+			description: (node, parentNode)=> {
+				//let form = node.type == MapNodeType.Thesis ? GetThesisFormAtPath(node, path) : null;
+				return `How neutral/impartial is the phrasing of this statement/question? (0: as biased as they come, 100: no bias)`;
+			},
 			options: ()=>Range(0, 100),
 			ticks: ()=>Range(0, 100, 5),
 		}),
 		probability: new RatingType_Info({
 			displayText: "Probability",
-			description: ()=>"Suppose you were as sure as you are right now (of this thesis being true), one hundred different times (on different topics). How many of those times would you expect to be correct?",
+			description: ()=>"Suppose you were as sure as you are right now (of this thesis being true, in its basic form), 100 different times (on different topics). How many of those times would you expect to be correct?",
 			//options: [1, 2, 4, 6, 8].concat(Range(10, 90, 5)).concat([92, 94, 96, 98, 99]),
 			//options: [1].concat(Range(2, 98, 2)).concat([99]),
 			/*options: Range(1, 99),
@@ -57,7 +62,7 @@ export class RatingType_Info {
 			options: ()=>Range(-100, 100),
 			ticks: ()=>Range(-100, 100, 10),
 		}),*/
-		support: new RatingType_Info({
+		/*support: new RatingType_Info({
 			displayText: "Support",
 			description: ()=>"Where do you consider your views on this statement, relative to the rest of the population? (-100: very critical, 0: neither critical nor supportive, +100: very supportive)",
 			options: ()=>Range(-100, 100),
@@ -67,15 +72,6 @@ export class RatingType_Info {
 				let {x, y, stroke, fill, payload} = props;
 				let tick = payload.value;
 				let tickStr = (tick < 0 ? "-" : tick == 0 ? "" : "+") + tick.Distance(0);
-				/*return (
-					<g transform={`translate(${tick < 0 ? x - 5 : x},${tick < 0 ? y - 7 : y - 5})`}>
-						<text x={0} y={0} dy={16} stroke={stroke} fill="#AAA"
-								textAnchor={tick < 0 ? "start" : tick == 0 ? "middle" : "end"}
-								transform={tick < 0 ? "rotate(25)" : tick == 0 ? "" : "rotate(-25)"}>
-							{tickStr}
-						</text>
-					</g>
-				);*/
 				return (
 					<g transform={`translate(${x},${y - 5})`}>
 						<text x={0} y={0} dy={16} stroke={stroke} fill="#AAA"
@@ -86,6 +82,12 @@ export class RatingType_Info {
 					</g>
 				);
 			}
+		}),*/
+		degree: new RatingType_Info({
+			displayText: "Degree",
+			description: ()=>"To what degree do you consider this statement true? (0: completely false, 50: true in its basic form, 100: true in its full form)",
+			options: ()=>Range(0, 100),
+			ticks: ()=>Range(0, 100, 5),
 		}),
 		adjustment: new RatingType_Info({
 			displayText: "Adjustment",

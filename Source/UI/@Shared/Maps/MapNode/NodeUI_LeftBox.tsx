@@ -13,7 +13,7 @@ import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRating
 import {GetRatingAverage, GetRatings} from "../../../../Store/firebase/nodeRatings";
 import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {MetaThesis_ThenType} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
-import {GetMainRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
 
 type Props = {
 	parent: MapNodeUI_Inner, map: Map, path: string, node: MapNode, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
@@ -32,25 +32,25 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 			}}>
 				<div style={{position: "relative", padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
-					{GetMainRatingTypesForNode(node).map((ratingType, index)=> {
-						let ratingTypeInfo = RatingType_Info.for[ratingType];
+					{GetRatingTypesForNode(node).map((ratingInfo, index)=> {
+						let ratingTypeInfo = RatingType_Info.for[ratingInfo.type];
 						//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
 
 						let percentStr = "...";
-						let ratings = GetRatings(node._id, ratingType);
-						let average = GetRatingAverage(node._id, ratingType, null, -1);
+						let ratings = GetRatings(node._id, ratingInfo.type);
+						let average = GetRatingAverage(node._id, ratingInfo.type, null, -1);
 						if (average != -1) {
 							if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
 								percentStr = (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent ? "+" : "-") + average.Distance(50) + "%";
-							else if (ratingType == "support")
+							/*else if (ratingInfo.type == "support")
 								//percentStr = (average >= 100 ? "+" : "-") + average.Distance(100) + "%";
-								percentStr = (average < 0 ? "-" : average == 0 ? "" : "+") + average.Distance(0);
+								percentStr = (average < 0 ? "-" : average == 0 ? "" : "+") + average.Distance(0);*/
 							else
 								percentStr = average + "%";
 						}
 						return (
-							<PanelButton key={ratingType} parent={this} map={map} path={path}
-									panel={ratingType} text={ratingTypeInfo.displayText} style={E(index == 0 && {marginTop: 0})}>
+							<PanelButton key={ratingInfo.type} parent={this} map={map} path={path}
+									panel={ratingInfo.type} text={ratingTypeInfo.displayText} style={E(index == 0 && {marginTop: 0})}>
 								<Span ml={5} style={{float: "right"}}>
 									{percentStr}
 									<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>

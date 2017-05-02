@@ -50,14 +50,14 @@ var styles = {
 `);*/
 let pseudoSelectorStyleKeys = {};
 
+export type ButtonProps = {enabled?: boolean, text?: string, title?: string, className?: string, style?,
+	size?: number, width?: number, height?: number, iconSize?: number, iconPath?: string, useOpacityForHover?: boolean,
+	hasCheckbox?: boolean, checked?: boolean, checkboxStyle?, checkboxLabelStyle?, onCheckedChanged?,
+	onClick?, onLeftClick?, onDirectClick?} & React.HTMLProps<HTMLDivElement>;
+
 //@Radium
 @ApplyBasicStyles
-export default class Button extends BaseComponent
-		<{enabled?: boolean, text?: string, title?: string, className?: string, style?,
-			size?: number, width?: number, height?: number, iconSize?: number, iconPath?: string, useOpacityForHover?: boolean,
-			hasCheckbox?: boolean, checked?: boolean, checkboxStyle?, checkboxLabelStyle?, onCheckedChanged?,
-			onClick?, onLeftClick?, onDirectClick?} & React.HTMLProps<HTMLDivElement>,
-		{}> {
+export default class Button extends BaseComponent<ButtonProps, {}> {
 	static defaultProps = {enabled: true};
 	
 	render() {

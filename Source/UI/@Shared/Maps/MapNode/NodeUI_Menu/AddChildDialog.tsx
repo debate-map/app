@@ -17,6 +17,8 @@ import Editor from "react-md-editor";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
 import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";
+import CheckBox from "../../../../../Frame/ReactComponents/CheckBox";
+import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 
 export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, userID: string) {
 	let firebase = store.firebase.helpers;
@@ -35,6 +37,7 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 	let info = {
 		title: ``,
 		thesisType: `Normal` as "Normal" | "Content_Quote", // eslint-disable-line quotes
+		relative: false,
 		//contentNode: new ContentNode(),
 		metaThesis: {
 			ifType: MetaThesis_IfType.All,
@@ -65,6 +68,13 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 							<Select displayType="button bar" options={thesisTypes} style={{display: `inline-block`}}
 								value={info.thesisType} onChange={val=>Change(info.thesisType = val)}/>
 						</Row>}
+					{childType == MapNodeType.Thesis && info.thesisType == "Normal" &&
+							<Row mt={5} style={{display: "flex", alignItems: "center"}}>
+								<Pre>Relative: </Pre>
+								<CheckBox ref={c=>this.relative = c} checked={info.relative} onChange={val=>info.relative = val}/>
+								<InfoButton text={`"Relative" means the statement/question is too loosely worded to give a simple yes/no answer,${""
+										} and should instead be evaluated in terms of the degree/intensity to which it is true. Eg. "How dangerous is sky-diving?"`}/>
+							</Row>}
 					{childType == MapNodeType.Thesis && info.thesisType == "Content_Quote" ? (
 						//<QuoteInfoEditorUI contentNode={info.contentNode} showPreview={true} justShowed={justShowed} onSetError={error=>Change(quoteError = error)}/>
 						<QuoteInfoEditorUI ref={c=>quoteEditor = c} contentNode={new ContentNode()}
@@ -119,6 +129,9 @@ The "type" option above describes the way in which this argument's premises will
 				parents: {[parentNode._id]: {_: true}},
 				type: childType, creator: userID, approved: true
 			});
+			if (childType == MapNodeType.Thesis && info.thesisType == "Normal") {
+				newChildNode.relative = info.relative;
+			}
 			if (childType == MapNodeType.Thesis && info.thesisType == `Content_Quote`) {
 				//newChildNode.contentNode = CleanUpdatedContentNode(Clone(info.contentNode));
 				newChildNode.contentNode = quoteEditor.GetUpdatedContentNode();

@@ -1,3 +1,4 @@
+import {Assert} from "../../../Frame/General/Assert";
 import {URL} from "../../../Frame/General/URLs";
 import {MapNode, ThesisForm} from "./@MapNode";
 import {RatingType} from "../nodeRatings/@RatingType";
@@ -13,15 +14,32 @@ export function GetFontSizeForNode(node: MapNode) {
 export function GetPaddingForNode(node: MapNode) {
 	return node.metaThesis ? "1px 4px 2px" : "5px 5px 4px";
 }
-export function GetMainRatingTypesForNode(node: MapNode): RatingType[] {
-	if (node._id < 100) // if static category, don't have any voting
-		return [];
-	if (node.metaThesis) {
-		if (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent)
-			return ["adjustment"];
-		return ["probability"];
+export type RatingTypeInfo = {type: RatingType, main: boolean};
+export function GetRatingTypesForNode(node: MapNode): RatingTypeInfo[] {
+	if (node.type == MapNodeType.Category) {
+		if (node._id < 100) // if static category, don't have any voting
+			return [];
+		return [{type: "significance", main: true}];
 	}
-	return MapNodeType_Info.for[node.type].mainRatingTypes;
+	if (node.type == MapNodeType.Package)
+		return [{type: "significance", main: true}];
+	if (node.type == MapNodeType.MultiChoiceQuestion)
+		return [{type: "significance", main: true}];
+	if (node.type == MapNodeType.Thesis) {
+		if (node.metaThesis) {
+			if (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent)
+				return [{type: "adjustment", main: true}];
+			return [{type: "probability", main: true}];
+		}
+		if (node.relative)
+			return [{type: "degree", main: true}, {type: "probability", main: true}];
+		return [{type: "probability", main: true}, {type: "degree", main: true}];
+	}
+	if (node.type == MapNodeType.SupportingArgument)
+		return [{type: "strength", main: true}];
+	if (node.type == MapNodeType.OpposingArgument)
+		return [{type: "strength", main: true}];
+	Assert(false);
 }
 
 export function GetThesisFormAtPath(node: MapNode, path: string): ThesisForm {

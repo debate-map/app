@@ -34,14 +34,14 @@ export class RowLR extends BaseComponent<{height?, className?, rowStyle?, leftSt
 }*/
 
 @ApplyBasicStyles
-export default class Row extends BaseComponent<{style?}, {}> {
+export default class Row extends BaseComponent<{style?} & React.HTMLProps<HTMLDivElement>, {}> {
 	render() {
 		let {style, ...rest} = this.props;
 		return <div {...rest} style={E({display: "flex", alignItems: "center"}, style)}/>
 	}
 }
 @ApplyBasicStyles
-export class RowLR extends BaseComponent<{leftWidth?: number, height?: number, className?: string, style?, leftStyle?, rightStyle?}, {}> {
+export class RowLR extends BaseComponent<{leftWidth?: number, height?: number, className?: string, style?, leftStyle?, rightStyle?} & React.HTMLProps<HTMLDivElement>, {}> {
 	render() {
 		var {leftWidth, height, className, style, leftStyle, rightStyle, children, ...rest} = this.props;
         Assert((children as any).length == 2, "Row child-count must be 2. (one for left-side, one for right-side)");

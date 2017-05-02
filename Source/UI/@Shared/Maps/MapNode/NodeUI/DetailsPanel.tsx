@@ -30,6 +30,8 @@ import UpdateNodeDetails from "../../../../../Server/Commands/UpdateNodeDetails"
 import {RemoveHelpers} from "../../../../../Frame/Database/DatabaseHelpers";
 import {HandleError} from "../../../../../Frame/General/Errors";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
+import CheckBox from "../../../../../Frame/ReactComponents/CheckBox";
+import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -43,6 +45,7 @@ type DetailsPanel_Props = {node: MapNode, path: string, userID: string} & Partia
 //export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {error: Error}> {
 export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {contentNodeError: string}> {
 	quoteEditor: QuoteInfoEditorUI;
+	relative: CheckBox;
 	render() {
 		let {node, path, userID, nodeCreator} = this.props;
 		let {contentNodeError} = this.state;
@@ -62,6 +65,13 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {con
 				<Div mt={3} style={{fontSize: 12}}>Created at: {(Moment as any)(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)} (by: {nodeCreator ? nodeCreator.displayName : `n/a`})</Div>
 				{IsUserCreatorOrMod(userID, node) &&
 					<Div mt={3}>
+						{!node.contentNode && !node.metaThesis &&
+							<Row style={{display: "flex", alignItems: "center"}}>
+								<Pre>Relative: </Pre>
+								<CheckBox ref={c=>this.relative = c} checked={node.relative}/>
+								<InfoButton text={`"Relative" means the statement/question is too loosely worded to give a simple yes/no answer,${""
+										} and should instead be evaluated in terms of the degree/intensity to which it is true. Eg. "How dangerous is sky-diving?"`}/>
+							</Row>}
 						{!node.contentNode && !node.metaThesis &&
 							<Row style={{display: `flex`, alignItems: `center`}}>
 								<Pre>Title (base): </Pre>
@@ -127,6 +137,8 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {con
 								}*/
 
 								let updates = RemoveHelpers(E(
+									this.relative &&
+										{relative: this.relative.Checked},
 									(this.refs.title_base || this.refs.title_negation || this.refs.title_yesNoQuestion) &&
 										{titles: E(
 											this.refs.title_base && {base: this.refs.title_base.GetValue()},

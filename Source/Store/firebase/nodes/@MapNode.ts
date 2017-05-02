@@ -36,6 +36,7 @@ export class MapNode {
 	accessLevel = AccessLevel.Basic;
 	voteLevel = AccessLevel.Basic;
 
+	relative: boolean;
 	contentNode: ContentNode;
 	metaThesis: MetaThesisInfo;
 
@@ -67,6 +68,7 @@ AddSchema({
 		approved: {type: "boolean"},
 		accessLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
 		voteLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
+		relative: {type: "boolean"},
 		contentNode: {$ref: "ContentNode"},
 		metaThesis: {$ref: "MetaThesisInfo"},
 		parents: {$ref: "ParentSet"},

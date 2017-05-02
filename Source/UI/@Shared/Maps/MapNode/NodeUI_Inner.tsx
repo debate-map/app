@@ -35,9 +35,10 @@ import RatingsPanel from "./NodeUI/RatingsPanel";
 import DiscussionPanel from "./NodeUI/DiscussionPanel";
 import Row from "../../../../Frame/ReactComponents/Row";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
-import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetMainRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
+import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
 import {ContentNode, SourceChain} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {URL} from "../../../../Frame/General/URLs";
+import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -52,7 +53,7 @@ type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, widt
 @Connect(()=> {
 	return (state: RootState, {node, ratingsRoot}: Props)=> ({
 		ratingsRoot: GetNodeRatingsRoot(node._id),
-		mainRating_average: GetRatingAverage(node._id, GetMainRatingTypesForNode(node)[0]),
+		mainRating_average: GetRatingAverage(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type),
 		userID: GetUserID(),
 	});
 })
@@ -66,7 +67,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
 		//let parentNode = GetParentNode(path);
 
-		let mainRating_mine = GetRatingValue(node._id, GetMainRatingTypesForNode(node)[0], userID);
+		let mainRating_mine = GetRatingValue(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type, userID);
 		let mainRating_fillPercent = GetFillPercentForRatingAverage(node, mainRating_average);
 		let mainRating_myFillPercent = mainRating_mine != null ? GetFillPercentForRatingAverage(node, mainRating_mine) : null;
 
@@ -110,9 +111,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							{GetNodeDisplayText(node, path)}
 						</span>
 						{node.type == MapNodeType.Thesis && node.contentNode &&
-							<Button size={13} iconSize={13} iconPath="/Images/Buttons/Info.png"
-								useOpacityForHover={true} style={{position: `relative`, zIndex: 1, marginLeft: 1, backgroundColor: null, boxShadow: null}}
-								title="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
+							<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
 						{subPanelShow && <SubPanel node={node}/>}
 						<NodeUI_Menu node={node} path={path}/>
 					</Div>

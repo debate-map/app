@@ -13,7 +13,7 @@ export default class UpdateNodeDetails extends Command<{nodeID: number, updates:
 		// validate call
 		// ==========
 
-		let allowedPropUpdates = ["titles", "contentNode"];
+		let allowedPropUpdates = ["relative", "titles", "contentNode"];
 		Assert(updates.VKeys().Except(...allowedPropUpdates).length == 0, `Cannot use this command to update props other than: ${allowedPropUpdates.join(", ")}`);
 		/*for (let source of DeepGet(updates, "quote.sources", {} as SourceSet).VValues<Source>()) {
 			AssertSimple(ajv.validate({format: "uri"}, source.link), `Link uri (${source.link}) is not valid. (make sure you include the "http://" and such)`);

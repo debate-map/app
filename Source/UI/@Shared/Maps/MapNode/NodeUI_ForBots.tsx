@@ -13,7 +13,7 @@ import {URL} from "../../../../Frame/General/URLs";
 import Link from "../../../../Frame/ReactComponents/Link";
 import {BaseComponent, BaseProps, Pre, FindDOM} from "../../../../Frame/UI/ReactGlobals";
 import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
-import {GetNodeDisplayText, GetMainRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeDisplayText, GetRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
 import NodeUI_Inner from "./NodeUI_Inner";
 import DefinitionsPanel from "./NodeUI/DefinitionsPanel";
 import SocialPanel from "./NodeUI/SocialPanel";
@@ -88,9 +88,9 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 					Main box:
 					<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={{}} path={path} width={null} widthOverride={null}/>
 					Panels:
-					{GetMainRatingTypesForNode(node).map((ratingType, index)=> {
-						let ratings = GetRatings(node._id, ratingType);
-						return <RatingsPanel key={index} node={node} path={path} ratingType={ratingType} ratings={ratings}/>;
+					{GetRatingTypesForNode(node).map((ratingInfo, index)=> {
+						let ratings = GetRatings(node._id, ratingInfo.type);
+						return <RatingsPanel key={index} node={node} path={path} ratingType={ratingInfo.type} ratings={ratings}/>;
 					})}
 					<DefinitionsPanel/>
 					<DiscussionPanel/>

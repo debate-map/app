@@ -133,7 +133,7 @@ G({QuickIncrement});
 // general
 // ==========
 
-declare global { function E(...objExtends: any[]): void; } G({E});
+declare global { function E(...objExtends: any[]): any; } G({E});
 export function E(...objExtends: any[]) {
     var result = {};
     for (var extend of objExtends)

@@ -4,7 +4,7 @@ import {GetRating, GetRatingValue, GetRatingSet} from "../../Store/firebase/node
 import {GetRatingAverage, GetRatings} from "../../Store/firebase/nodeRatings";
 import {Rating} from "../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MetaThesis_IfType, MetaThesis_ThenType} from "../../Store/firebase/nodes/@MetaThesisInfo";
-import {GetMainRatingTypesForNode} from "../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode} from "../../Store/firebase/nodes/$node";
 
 /*export function CalculateArgumentStrength(nodeChildren: MapNode[]) {
 	if (nodeChildren.Any(a=>a == null)) return 0; // must still be loading
@@ -77,7 +77,7 @@ export function GetArgumentStrengthPseudoRatingSet(nodeChildren: MapNode[]): {[k
 
 	let usersWhoRatedAllChildren = null;
 	for (let child of nodeChildren) {
-		let childRatingSet = GetRatingSet(child._id, GetMainRatingTypesForNode(child)[0]) || {};
+		let childRatingSet = GetRatingSet(child._id, GetRatingTypesForNode(child).FirstOrX(null, {}).type) || {};
 		if (usersWhoRatedAllChildren == null) {
 			usersWhoRatedAllChildren = {};
 			for (let userID of childRatingSet.VKeys(true))
