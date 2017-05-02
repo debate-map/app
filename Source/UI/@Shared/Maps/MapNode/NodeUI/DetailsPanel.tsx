@@ -65,7 +65,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {con
 				<Div mt={3} style={{fontSize: 12}}>Created at: {(Moment as any)(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)} (by: {nodeCreator ? nodeCreator.displayName : `n/a`})</Div>
 				{IsUserCreatorOrMod(userID, node) &&
 					<Div mt={3}>
-						{!node.contentNode && !node.metaThesis &&
+						{node.type == MapNodeType.Thesis && !node.contentNode && !node.metaThesis &&
 							<Row style={{display: "flex", alignItems: "center"}}>
 								<Pre>Relative: </Pre>
 								<CheckBox ref={c=>this.relative = c} internalChanging={true} checked={node.relative}/>
