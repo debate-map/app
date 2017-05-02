@@ -71,7 +71,7 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 					{childType == MapNodeType.Thesis && info.thesisType == "Normal" &&
 							<Row mt={5} style={{display: "flex", alignItems: "center"}}>
 								<Pre>Relative: </Pre>
-								<CheckBox ref={c=>this.relative = c} checked={info.relative} onChange={val=>info.relative = val}/>
+								<CheckBox checked={info.relative} onChange={val=>info.relative = val}/>
 								<InfoButton text={`"Relative" means the statement/question is too loosely worded to give a simple yes/no answer,${""
 										} and should instead be evaluated in terms of the degree/intensity to which it is true. Eg. "How dangerous is sky-diving?"`}/>
 							</Row>}

@@ -37,7 +37,7 @@ export default class QuoteInfoEditorUI extends BaseComponent
 					<Row key={0} mt={5}>Preview:</Row>,
 					<Column key={1} mt={5}>
 						<Pre style={{padding: 5, background: `rgba(255,255,255,.2)`, borderRadius: 5}}>
-							{GetNodeDisplayText({type: MapNodeType.Thesis, contentNode} as any, ThesisForm.Base)}
+							{GetNodeDisplayText({type: MapNodeType.Thesis, contentNode: CleanUpdatedContentNode(Clone(contentNode))} as any, ThesisForm.Base)}
 							<SubPanel_Inner contentNode={contentNode} fontSize={15}/>
 						</Pre>
 					</Column>
