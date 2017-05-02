@@ -68,7 +68,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {con
 						{!node.contentNode && !node.metaThesis &&
 							<Row style={{display: "flex", alignItems: "center"}}>
 								<Pre>Relative: </Pre>
-								<CheckBox ref={c=>this.relative = c} checked={node.relative}/>
+								<CheckBox ref={c=>this.relative = c} internalChanging={true} checked={node.relative}/>
 								<InfoButton text={`"Relative" means the statement/question is too loosely worded to give a simple yes/no answer,${""
 										} and should instead be evaluated in terms of the degree/intensity to which it is true. Eg. "How dangerous is sky-diving?"`}/>
 							</Row>}

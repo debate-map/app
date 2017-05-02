@@ -1,6 +1,8 @@
 import {BaseComponent} from "../UI/ReactGlobals";
 
-export default class CheckBox extends BaseComponent<{text?, title?, checked, style?, labelStyle?, onChange?: (val: boolean)=>void}, {}> {
+export default class CheckBox extends BaseComponent
+		<{text?, title?, checked, style?, labelStyle?, internalChanging?: boolean, onChange?: (val: boolean, e)=>void},
+		{editedValue: boolean}> {
 	static lastID = -1;
 	
     constructor(props) {
@@ -11,15 +13,24 @@ export default class CheckBox extends BaseComponent<{text?, title?, checked, sty
 	id;
 	input: HTMLInputElement;
 	render() {
-		var {text, title, checked, style, labelStyle, onChange} = this.props;
-	    return (
+		var {text, title, checked, style, labelStyle, internalChanging, onChange} = this.props;
+		let {editedValue} = this.state;
+		return (
 			/*<div style={E({display: "inline-block", position: "relative"}, style)}>
 				<input ref={c=>this.input = c} id={"checkBox_" + this.id} type="checkbox" checked={checked}
 					onChange={e=>onChange && onChange(this.input.checked)}/>
 				<label htmlFor={"checkBox_" + this.id} title={title} style={E({marginTop: 3}, labelStyle)}><span/>{text}</label>
 			</div>*/
-			<input ref={c=>this.input = c} type="checkbox" checked={checked}
-				onChange={e=>onChange && onChange(this.input.checked)}/>
+			<input ref={c=>this.input = c} type="checkbox"
+				checked={editedValue != null ? editedValue : checked}
+				onChange={e=> {
+					var newVal = this.input.checked;
+					if (internalChanging) {
+						this.SetState({editedValue: newVal});
+					} else {
+						onChange(newVal, e);
+					}
+				}}/>
 		);
 	}
 
