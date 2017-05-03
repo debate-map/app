@@ -30,7 +30,7 @@ let lastPath = "";
 // only use this if you actually need to change the action-data before it gets dispatched/applied (otherwise use [Mid/Post]DispatchAction)
 export function PreDispatchAction(action: Action<any>) {
 	if (action.type == "@@reactReduxFirebase/SET" && action["data"]) {
-		ProcessDBData(action["data"], true, true, (action["path"] as string).split("/").Last());
+		action["data"] = ProcessDBData(action["data"], true, true, (action["path"] as string).split("/").Last());
 
 		// add special _key or _id prop
 		/*if (typeof action["data"] == "object") {

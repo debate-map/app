@@ -1,5 +1,6 @@
 import {GetDataAsync} from "../../../../Frame/Database/DatabaseHelpers";
-import {AddUpgradeFunc, FirebaseData} from "../../Admin";
+import {AddUpgradeFunc} from "../../Admin";
+import {FirebaseData} from "../../../../Store/firebase";
 
 let newVersion = 2;
 AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {

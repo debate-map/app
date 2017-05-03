@@ -1,0 +1,22 @@
+import {User} from "./firebase/users";
+import UserExtraInfo from "./firebase/userExtras/@UserExtraInfo";
+import {MapNode} from "./firebase/nodes/@MapNode";
+import {RatingsSet} from "./firebase/nodeRatings/@RatingsRoot";
+import {Term, TermComponent} from "./firebase/terms/@Term";
+import {Map} from "./firebase/maps/@Map";
+
+export interface FirebaseData {
+	general: GeneralData;
+	users: {[key: string]: User};
+	userExtras: {[key: string]: UserExtraInfo};
+	maps: {[key: number]: Map};
+	nodes: {[key: number]: MapNode};
+	nodeExtras: {[key: number]: any};
+	nodeRatings: {[key: number]: RatingsSet};
+	terms: {[key: number]: Term};
+	termComponents: {[key: number]: TermComponent};
+}
+export interface GeneralData {
+	lastTermID: number;
+	lastNodeID: number;
+}

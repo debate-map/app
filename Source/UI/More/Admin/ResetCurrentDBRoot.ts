@@ -1,9 +1,9 @@
-import {FirebaseData} from "../Admin";
 import {MapNode} from "../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../../Store/firebase/nodes/@MapNodeType";
 import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
 import {MapType, Map} from "../../../Store/firebase/maps/@Map";
 import UserExtraInfo from "../../../Store/firebase/userExtras/@UserExtraInfo";
+import {FirebaseData} from "../../../Store/firebase";
 
 //export default async function ResetCurrentDBRoot(database: firebase.Database) {
 export default async function ResetCurrentDBRoot() {
@@ -31,6 +31,7 @@ export default async function ResetCurrentDBRoot() {
 	// ==========
 
 	data.general = {
+		lastTermID: 0,
 		lastNodeID: 99,
 	};
 
@@ -112,7 +113,7 @@ export default async function ResetCurrentDBRoot() {
 			creator: user1Key, approved: true,
 		}),
 	};
-	data.nodeExtras = {_,
+	data.nodeExtras = {//_,
 		/*1: {
 			/*title:{^}
 				revisions:{^}
@@ -136,7 +137,7 @@ export default async function ResetCurrentDBRoot() {
 			}
 	}*/
 	};
-	data.nodeRatings = {_,
+	data.nodeRatings = {//_,
 	} as any;
 
 	await firebase.update(data);

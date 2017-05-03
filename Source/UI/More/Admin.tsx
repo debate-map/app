@@ -1,4 +1,4 @@
-import {DBPath, FirebaseApp, GetDataAsync, ProcessDBData, RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
+import {DBPath, FirebaseApp, GetDataAsync, RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
 import ResetCurrentDBRoot from "./Admin/ResetCurrentDBRoot";
 import {styles} from "../../Frame/UI/GlobalStyles";
 import {BaseComponent, BaseProps, Pre} from "../../Frame/UI/ReactGlobals";
@@ -15,12 +15,14 @@ import Row from "../../Frame/ReactComponents/Row";
 import {User} from "../../Store/firebase/users";
 import {RatingsSet} from "../../Store/firebase/nodeRatings/@RatingsRoot";
 import * as Firebase from "firebase";
-
-// upgrade-funcs
 //import "./Admin/DBUpgrades/UpgradeDB_2";
 import Select from "../../Frame/ReactComponents/Select";
 import {DataSnapshot} from "firebase";
-var upgradeFuncs; // populated by modules above
+import {TermComponent, Term} from "../../Store/firebase/terms/@Term";
+import {FirebaseData} from "../../Store/firebase";
+
+// upgrade-funcs
+var upgradeFuncs; // populated by modules below
 export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>FirebaseData) {
 	upgradeFuncs = upgradeFuncs || {};
 	upgradeFuncs[version] = func;
@@ -28,19 +30,6 @@ export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>F
 require("./Admin/DBUpgrades/UpgradeDB_2");
 require("./Admin/DBUpgrades/UpgradeDB_3");
 require("./Admin/DBUpgrades/UpgradeDB_4");
-
-export interface FirebaseData {
-	general: GeneralData;
-	users: {[key: string]: User};
-	userExtras: {[key: string]: UserExtraInfo};
-	maps: {[key: string]: Map};
-	nodes: {[key: string]: MapNode};
-	nodeExtras: {[key: string]: any};
-	nodeRatings: {[key: string]: RatingsSet};
-}
-export interface GeneralData {
-	lastNodeID: number;
-}
 
 //export default class AdminUI extends BaseComponent<{}, {fb: firebase.FirebaseApplication, env: string}> {
 export default class AdminUI extends BaseComponent<{}, {}> {

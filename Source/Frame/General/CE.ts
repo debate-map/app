@@ -266,7 +266,7 @@ Object.prototype._AddFunction_Inline = function VKeys(excludeSpecialProps = fals
 	return Object.keys(this);
 };
 //interface Object { VValues(excludeSpecialProps?: boolean): any[]; }
-interface Object { VValues<T>(this: {[key: string]: T}, excludeSpecialProps?: boolean): T[]; }
+interface Object { VValues<T>(this: {[key: number]: T} | {[key: string]: T}, excludeSpecialProps?: boolean): T[]; }
 Object.prototype._AddFunction_Inline = function VValues(excludeSpecialProps = false) {
 	//if (excludeSpecialProps) return this.Props(true).map(a=>a.value);
 	if (excludeSpecialProps) return Object.keys(this).Except(specialProps).map(a=>this[a]);

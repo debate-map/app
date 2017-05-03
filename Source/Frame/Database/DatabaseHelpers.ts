@@ -2,7 +2,6 @@ import {RequestPath, Connect} from "./FirebaseConnect";
 import {Assert} from "../General/Assert";
 import {helpers, firebaseConnect} from "react-redux-firebase";
 //import {DBPath as DBPath_} from "../../../config/DBVersion";
-import {IsString} from "../General/Types";
 import {FirebaseApplication, DataSnapshot} from "firebase";
 import {BaseComponent} from "../UI/ReactGlobals";
 import {GetTreeNodesInObjTree, DeepGet, DeepSet} from "../V/V";
@@ -53,7 +52,17 @@ export function ProcessDBData(data, standardizeForm: boolean, addHelpers: boolea
 	var treeNodes = GetTreeNodesInObjTree(data, true);
 	for (let treeNode of treeNodes) {
 		// turn the should-not-have-been-array arrays (the ones without a "0" property) into objects
-		if (standardizeForm && treeNode.Value instanceof Array && !("0" in treeNode.Value)) {
+		if (standardizeForm && treeNode.Value instanceof Array && treeNode.Value[0] === undefined) {
+			// if changing root, we have to actually modify the prototype of the passed-in "data" object
+			/*if (treeNode.Value == data) {
+				Object.setPrototypeOf(data, Object.getPrototypeOf({}));
+				for (var key of Object.keys(data)) {
+					if (data[key] === undefined)
+						delete data[key];
+				}
+				continue;
+			}*/
+
 			let valueAsObject = {}.Extend(treeNode.Value) as any;
 			for (let key in valueAsObject) {
 				// if fake array-item added by Firebase/js (just so the array would have no holes), remove it
@@ -61,17 +70,24 @@ export function ProcessDBData(data, standardizeForm: boolean, addHelpers: boolea
 				if (valueAsObject[key] === undefined)
 					delete valueAsObject[key];
 			}
-			//treeNode.obj[treeNode.prop] = valueAsObject;
-			// we need to use deep-set, because ancestor objects may have already changed during this transform/processing
-			DeepSet(data, treeNode.PathStr_Updeep, valueAsObject);
+
+			if (treeNode.Value == data) treeNode.obj[treeNode.prop] = valueAsObject; // if changing root, we need to modify wrapper.data
+			else DeepSet(data, treeNode.PathStr_Updeep, valueAsObject); // else, we need to use deep-set, because ancestors may have already changed during this transform/processing
 		}
 
 		// turn the should-have-been-array objects (the ones with a "0" property) into arrays
-		if (standardizeForm && typeof treeNode.Value == "object" && !(treeNode.Value instanceof Array) && "0" in treeNode.Value) {
+		if (standardizeForm && typeof treeNode.Value == "object" && !(treeNode.Value instanceof Array) && treeNode.Value[0] !== undefined) {
+			// if changing root, we have to actually modify the prototype of the passed-in "data" object
+			/*if (treeNode.Value == data) {
+				Object.setPrototypeOf(data, Object.getPrototypeOf([]));
+				data.length = data.VKeys(true).filter(a=>IsNumberString(a));
+				continue;
+			}*/
+			
 			let valueAsArray = [].Extend(treeNode.Value) as any;
-			//treeNode.obj[treeNode.prop] = valueAsObject;
-			// we need to use deep-set, because ancestor objects may have already changed during this transform/processing
-			DeepSet(data, treeNode.PathStr_Updeep, valueAsArray);
+
+			if (treeNode.Value == data) treeNode.obj[treeNode.prop] = valueAsArray; // if changing root, we need to modify wrapper.data
+			else DeepSet(data, treeNode.PathStr_Updeep, valueAsArray); // else, we need to use deep-set, because ancestors may have already changed during this transform/processing
 		}
 
 		// add special _key or _id prop
@@ -86,6 +102,7 @@ export function ProcessDBData(data, standardizeForm: boolean, addHelpers: boolea
 			}
 		}
 	}
+	return treeNodes[0].Value; // get possibly-modified wrapper.data
 }
 let helperProps = ["_key", "_id"];
 /** Note: this mutates the original object. */
@@ -138,7 +155,7 @@ export async function GetDataAsync(path: string, inVersionRoot = true, addHelper
 			(snapshot: DataSnapshot)=> {
 				let result = snapshot.val();
 				if (result)
-					ProcessDBData(result, true, addHelpers, path.split("/").Last());
+					result = ProcessDBData(result, true, addHelpers, path.split("/").Last());
 				resolve(result);
 			},
 			(ex: Error)=>reject(ex));

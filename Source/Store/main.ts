@@ -29,6 +29,8 @@ export class MainState {
 	ratingUI: RatingUIState;
 	notificationMessages: NotificationMessage[];
 
+	selectedTerm: number;
+
 	openMap: number;
 	mapViews: MapViews;
 	copiedNodePath: string;
@@ -38,6 +40,7 @@ export class ACTTopRightOpenPanelSet extends Action<string> {}
 @Global
 export class ACTNotificationMessageAdd extends Action<NotificationMessage> {}
 export class ACTNotificationMessageRemove extends Action<number> {}
+export class ACTTermSelect extends Action<{id: number}> {}
 //export class ACTOpenMapSet extends Action<number> {}
 export class ACTNodeCopy extends Action<{path: string}> {}
 
@@ -85,6 +88,15 @@ export function MainReducer(state, action) {
 			NotificationMessage.lastID = Math.max(NotificationMessage.lastID, state.length ? state.map(a=>a.id).Max() : -1);
 			return state;
 		},
+		
+		// terms
+		selectedTerm: (state = null, action)=> {
+			if (action.Is(ACTTermSelect))
+				return action.payload.id;
+			return state;
+		},
+
+		// maps
 		openMap: (state = null, action)=> {
 			if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).pathNodes[0] == "global")
 				return 1;
@@ -107,4 +119,7 @@ export function MainReducer(state, action) {
 
 export function GetOpenMapID() {
 	return State().main.openMap;
+}
+export function GetSelectedTermID() {
+	return State().main.selectedTerm;
 }

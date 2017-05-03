@@ -37,7 +37,7 @@ type Props = {node: MapNode, path: string} & Partial<{permissions: PermissionGro
 	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 	return {
 		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
-		permissions: GetUserPermissionGroups(GetUserID()), 
+		permissions: GetUserPermissionGroups(GetUserID()),
 		parentNode: GetParentNode(path),
 		copiedNode: state.main.copiedNodePath ? GetNode(state.main.copiedNodePath.split("/").Last().ToInt()) : null,
 	};

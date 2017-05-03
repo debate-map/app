@@ -27,12 +27,14 @@ export function IsObjectOf<T>(obj) : obj is T { return typeof obj == "object"; }
 export function IsNumber(obj, allowNumberObj = false) : obj is number {
 	return typeof obj == "number" || (allowNumberObj && obj instanceof Number);
 }
+g.Extend({IsNumberString}); declare global { function IsNumberString(obj): boolean; }
 export function IsNumberString(obj) { return IsString(obj) && parseInt(obj).toString() == obj; }
 export function IsInt(obj) : obj is number { return typeof obj == "number" && parseFloat(obj as any) == parseInt(obj as any); }
 export function ToInt(stringOrFloatVal) { return parseInt(stringOrFloatVal); }
 export function IsDouble(obj) : obj is number { return typeof obj == "number" && parseFloat(obj as any) != parseInt(obj as any); }
 export function ToDouble(stringOrIntVal) { return parseFloat(stringOrIntVal); }
 
+g.Extend({IsString}); declare global { function IsString(obj, allowStringObj?: boolean): boolean; }
 export function IsString(obj, allowStringObj = false) : obj is string {
 	return typeof obj == "string" || (allowStringObj && obj instanceof String);
 }
