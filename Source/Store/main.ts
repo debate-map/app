@@ -19,6 +19,8 @@ import {RatingUIReducer, RatingUIState} from "./main/ratingUI";
 import NotificationMessage from "./main/@NotificationMessage";
 import {URL} from "../Frame/General/URLs";
 import {Global} from "../Frame/General/Globals_Free";
+import {GetData} from "../Frame/Database/DatabaseHelpers";
+import {GetTerms} from "./firebase/terms";
 
 // class is used only for initialization
 export class MainState {
@@ -122,4 +124,9 @@ export function GetOpenMapID() {
 }
 export function GetSelectedTermID() {
 	return State().main.selectedTerm;
+}
+export function GetSelectedTerm() {
+	let selectedID = State().main.selectedTerm;
+	//return GetData(`terms/${selectedID}`);
+	return (GetTerms() || []).find(a=>a._id == selectedID);
 }

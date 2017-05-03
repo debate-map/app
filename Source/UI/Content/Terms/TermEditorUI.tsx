@@ -4,32 +4,42 @@ import Column from "../../../Frame/ReactComponents/Column";
 import Row from "../../../Frame/ReactComponents/Row";
 import TextInput from "../../../Frame/ReactComponents/TextInput";
 
-export default class TermEditorUI extends BaseComponent<{term: Term, onChange: Function}, {termCopy: Term}> {
+export default class TermEditorUI extends BaseComponent<{startData: Term, onChange?: (updatedData: Term)=>void}, {data: Term}> {
 	constructor(props) {
 		super(props);
-		let {term} = this.props;
-		this.state = {termCopy: Clone(term)};
+		let {startData} = this.props;
+		this.state = {data: Clone(startData)};
 	}
+	/*ComponentWillMountOrReceiveProps(props) {
+		let {startData} = props;
+		if (startData != this.props.startData) // if start-data changed
+			this.SetState({data: Clone(startData)});
+	}*/
 	render() {
-		let {term, onChange} = this.props;
-		let Change = _=>onChange();
+		let {onChange} = this.props;
+		let {data} = this.state;
+		let Change = _=> {
+			if (onChange)
+				onChange(this.GetNewData());
+			this.Update();
+		};
 		return (
 			<Column>
-				<Row mt={5}>
+				<Row>
 					<Pre>Name: </Pre>
 					<TextInput ref={a=>a && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())} style={{flex: 1}}
-						value={term.name} onChange={val=>Change(term.name = val)}/>
+						value={data.name} onChange={val=>Change(data.name = val)}/>
 				</Row>
 				<Row mt={5}>
 					<Pre>Short description: </Pre>
 					<TextInput style={{flex: 1}}
-						value={term.shortDescription_current} onChange={val=>Change(term.shortDescription_current = val)}/>
+						value={data.shortDescription_current} onChange={val=>Change(data.shortDescription_current = val)}/>
 				</Row>
 			</Column>
 		);
 	}
-	GetUpdatedTerm() {
-		let {termCopy} = this.state;
-		return Clone(termCopy) as Term;
+	GetNewData() {
+		let {data} = this.state;
+		return Clone(data) as Term;
 	}
 }

@@ -14,4 +14,5 @@ export async function GetTermAsync(id: number) {
 export function GetTerms(): Term[] {
 	let termsMap = GetData(`terms`);
 	return CachedTransform("GetTerms", {}, termsMap, ()=>termsMap ? termsMap.VValues(true) : []);
+	//return CachedTransform("GetTerms", {}, termsMap, ()=>termsMap ? termsMap.VKeys(true).map(id=>GetTerm(parseInt(id))) : []);
 }

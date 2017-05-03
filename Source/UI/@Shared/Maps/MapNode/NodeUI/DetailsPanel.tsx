@@ -148,12 +148,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {con
 									this.quoteEditor &&
 										{contentNode: this.quoteEditor.GetUpdatedContentNode()},
 								));
-								//try {
 								await new UpdateNodeDetails({nodeID: node._id, updates}).Run();
-								/*} catch (ex) {
-									//this.SetState({error: ex});
-									HandleError(ex);
-								}*/
 							}}/>
 						{/*error && <Pre>{error.message}</Pre>*/}
 					</Row>
