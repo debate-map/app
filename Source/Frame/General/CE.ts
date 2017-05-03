@@ -285,8 +285,8 @@ Object.prototype._AddFunction_Inline = function VValues(excludeSpecialProps = fa
 // Object[FakeArray]
 // ==========
 
-interface Object { FakeArray_Select<T, T2>(this: {[key: number]: T} | {[key: string]: T}, selectFunc?: (item: T, index?: number)=>T2): T2[]; }
-Object.prototype._AddFunction_Inline = function FakeArray_Select(selectFunc = a=>a) {
+interface Object { FA_Select<T, T2>(this: {[key: number]: T} | {[key: string]: T}, selectFunc?: (item: T, index?: number)=>T2): T2[]; }
+Object.prototype._AddFunction_Inline = function FA_Select(selectFunc = a=>a) {
 	g.Assert(!(this instanceof Array), "Cannot call FakeArray methods on a real array!");
 	/*var result = this instanceof List ? new List(this.itemType) : [];
 	for (let [index, item] of this.entries())
@@ -294,8 +294,8 @@ Object.prototype._AddFunction_Inline = function FakeArray_Select(selectFunc = a=
 	return result;*/
 	return this.VValues(true).map(selectFunc);
 };
-interface Object { FakeArray_RemoveAt(index: number); }
-Object.prototype._AddFunction_Inline = function FakeArray_RemoveAt(index: number) {
+interface Object { FA_RemoveAt(index: number); }
+Object.prototype._AddFunction_Inline = function FA_RemoveAt(index: number) {
 	g.Assert(!(this instanceof Array), "Cannot call FakeArray methods on a real array!");
 	if (!(index in this)) return;
 	// remove target entry
@@ -305,8 +305,8 @@ Object.prototype._AddFunction_Inline = function FakeArray_RemoveAt(index: number
 		this[i - 1] = this[i];
 	delete this[i - 1]; // remove the extra copy of the last-item 
 };
-interface Object { FakeArray_Add<T>(this: {[key: number]: T} | {[key: string]: T}, item: T); }
-Object.prototype._AddFunction_Inline = function FakeArray_Add(item) {
+interface Object { FA_Add<T>(this: {[key: number]: T} | {[key: string]: T}, item: T); }
+Object.prototype._AddFunction_Inline = function FA_Add(item) {
 	g.Assert(!(this instanceof Array), "Cannot call FakeArray methods on a real array!");
 	for (var openIndex = 0; openIndex in this; openIndex++);
 	this[openIndex] = item;

@@ -55,10 +55,10 @@ export default class QuoteInfoEditorUI extends BaseComponent
 				<Row mt={5}>Source chains:</Row>
 				<Row mt={5}>
 					<Column style={{flex: 1}}>
-						{contentNode.sourceChains.FakeArray_Select((chain, chainIndex)=> {
+						{contentNode.sourceChains.map((chain, chainIndex)=> {
 							return (
 								<Column key={chainIndex} mt={chainIndex == 0 ? 0 : 10} pt={chainIndex == 0 ? 0 : 10} style={E(chainIndex != 0 && {borderTop: "1px solid rgba(0,0,0,.7)"})}>
-									{chain.FakeArray_Select((source, sourceIndex)=> {
+									{chain.map((source, sourceIndex)=> {
 										return (
 											<Row key={sourceIndex}>
 												<Select options={GetEntries(SourceType)}
@@ -83,18 +83,18 @@ export default class QuoteInfoEditorUI extends BaseComponent
 																}
 																source.link = val;
 															})())}/>}
-												{sourceIndex != 0 && <Button text="X" ml={5} onClick={()=>Change(chain.FakeArray_RemoveAt(sourceIndex))}/>}
+												{sourceIndex != 0 && <Button text="X" ml={5} onClick={()=>Change(chain.RemoveAt(sourceIndex))}/>}
 											</Row>
 										);
 									})}
 									<Row>
-										<Button text="Add source to this chain" mt={5} onClick={()=>Change(chain.FakeArray_Add(new Source()))}/>
-										{chainIndex > 0 && <Button text="Remove this source chain" ml={5} mt={5} onClick={()=>Change(contentNode.sourceChains.FakeArray_RemoveAt(chainIndex))}/>}
+										<Button text="Add source to this chain" mt={5} onClick={()=>Change(chain.push(new Source()))}/>
+										{chainIndex > 0 && <Button text="Remove this source chain" ml={5} mt={5} onClick={()=>Change(contentNode.sourceChains.RemoveAt(chainIndex))}/>}
 									</Row>
 								</Column>
 							);
 						})}
-						<Button text="Add source chain" mt={10} style={{alignSelf: "flex-start"}} onClick={()=>Change(contentNode.sourceChains.FakeArray_Add(new SourceChain()))}/>
+						<Button text="Add source chain" mt={10} style={{alignSelf: "flex-start"}} onClick={()=>Change(contentNode.sourceChains.push(new SourceChain()))}/>
 					</Column>
 				</Row>
 			</Column>
@@ -131,8 +131,8 @@ export default class QuoteInfoEditorUI extends BaseComponent
 
 export function CleanUpdatedContentNode(contentNode: ContentNode) {
 	// clean data
-	for (let chain of contentNode.sourceChains.FakeArray_Select(a=>a)) {
-		for (let source of chain.FakeArray_Select(a=>a)) {
+	for (let chain of contentNode.sourceChains) {
+		for (let source of chain) {
 			if (source.type == SourceType.Speech) {
 				delete source.link;
 			} else if (source.type == SourceType.Writing) {

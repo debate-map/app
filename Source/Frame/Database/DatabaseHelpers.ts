@@ -49,11 +49,11 @@ export type FirebaseApp = FirebaseApplication & {
 	},
 };
 
-export function ProcessDBData(data, forceAsObjects: boolean, addHelpers: boolean, rootKey: string) {
+export function ProcessDBData(data, standardizeForm: boolean, addHelpers: boolean, rootKey: string) {
 	var treeNodes = GetTreeNodesInObjTree(data, true);
 	for (let treeNode of treeNodes) {
-		// turn annoying arrays into objects
-		if (forceAsObjects && treeNode.Value instanceof Array) {
+		// turn the should-not-have-been-array arrays (the ones without a "0" property) into objects
+		if (standardizeForm && treeNode.Value instanceof Array && !("0" in treeNode.Value)) {
 			let valueAsObject = {}.Extend(treeNode.Value) as any;
 			for (let key in valueAsObject) {
 				// if fake array-item added by Firebase/js (just so the array would have no holes), remove it
@@ -64,6 +64,14 @@ export function ProcessDBData(data, forceAsObjects: boolean, addHelpers: boolean
 			//treeNode.obj[treeNode.prop] = valueAsObject;
 			// we need to use deep-set, because ancestor objects may have already changed during this transform/processing
 			DeepSet(data, treeNode.PathStr_Updeep, valueAsObject);
+		}
+
+		// turn the should-have-been-array objects (the ones with a "0" property) into arrays
+		if (standardizeForm && typeof treeNode.Value == "object" && !(treeNode.Value instanceof Array) && "0" in treeNode.Value) {
+			let valueAsArray = [].Extend(treeNode.Value) as any;
+			//treeNode.obj[treeNode.prop] = valueAsObject;
+			// we need to use deep-set, because ancestor objects may have already changed during this transform/processing
+			DeepSet(data, treeNode.PathStr_Updeep, valueAsArray);
 		}
 
 		// add special _key or _id prop

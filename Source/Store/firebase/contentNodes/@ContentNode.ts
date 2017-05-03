@@ -2,33 +2,25 @@ import {GetValues_ForSchema} from "../../../Frame/General/Enums";
 
 export class ContentNode {
 	content = "";
-	sourceChains = new SourceChainSet();
+	sourceChains = [new SourceChain()];
 }
 AddSchema({
 	properties: {
 		content: {type: "string"},
-		sourceChains: {$ref: "SourceChainSet"},
+		sourceChains: {items: {$ref: "SourceChain"}},
 	},
 	required: ["content", "sourceChains"],
 }, "ContentNode");
 
-/*export type SourceChainSet = { [key: number]: Source[]; }
-AddSchema({patternProperties: {"^[0-9]+$": {items: {$ref: "Source"}}}, minProperties: 1}, "SourceChainSet");*/
-
-//export type SourceChainSet = { [key: number]: SourceChain; }
-export class SourceChainSet {
-	[key: number]: SourceChain;
-	0 = new SourceChain();
-};
-AddSchema({patternProperties: {"^[0-9]+$": {$ref: "SourceChain"}}, minProperties: 1}, "SourceChainSet");
-
 //export type SourceChain = { [key: number]: Source; };
 //export type SourceChainI = {[key: number]: Source;};
-export class SourceChain /*implements SourceChainI*/ {
+//export class SourceChain /*implements SourceChainI*/ {
+export class SourceChain extends Array {
 	[key: number]: Source;
 	0 = new Source();
 };
-AddSchema({patternProperties: {"^[0-9]+$": {$ref: "Source"}}, minProperties: 1}, "SourceChain");
+//AddSchema({patternProperties: {"^[0-9]+$": {$ref: "Source"}}, minProperties: 1}, "SourceChain");
+AddSchema({items: {$ref: "Source"}, minItems: 1}, "SourceChain");
 
 export class Source {
 	type = SourceType.Writing;

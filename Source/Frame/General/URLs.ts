@@ -8,6 +8,7 @@ export const rootPages = [
 export const rootPageDefaultChilds = {
 	more: "admin",
 	home: "home",
+	content: "terms",
 	global: "map",
 }
 

@@ -197,9 +197,9 @@ export class SourcesUI extends BaseComponent<{contentNode: ContentNode}, {}> {
 		let {contentNode} = this.props;
 		return (
 			<Column mt={3}>
-				<Row style={{color: `rgba(255,255,255,.5)`}}>Sources:</Row>
-				{contentNode.sourceChains.FakeArray_Select(a=>a).map((chain: SourceChain, index)=> {
-					let linkTitle = chain.FakeArray_Select(a=>a).map((source, index)=> {
+				<Row style={{color: "rgba(255,255,255,.5)"}}>Sources:</Row>
+				{contentNode.sourceChains.map((chain: SourceChain, index)=> {
+					let linkTitle = chain.map((source, index)=> {
 						if (source.link) {
 							// if this is the first source, it's the most important, so show the link's whole url
 							if (index == 0) {
@@ -214,7 +214,7 @@ export class SourcesUI extends BaseComponent<{contentNode: ContentNode}, {}> {
 					}).join(" <- ");
 					return (
 						<Row key={index}>
-							<a href={chain.FakeArray_Select(a=>a).Last().link} style={{wordBreak: `break-word`}} onContextMenu={e=>e.nativeEvent["passThrough"] = true}>{linkTitle}</a>
+							<a href={chain.Last().link} style={{wordBreak: "break-word"}} onContextMenu={e=>e.nativeEvent["passThrough"] = true}>{linkTitle}</a>
 						</Row>
 					);
 				})}	
