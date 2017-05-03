@@ -36,12 +36,10 @@ import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
 type DetailsPanel_Props = {node: MapNode, path: string, userID: string} & Partial<{nodeCreator: User}>;
-@Connect((state: RootState, {node}: DetailsPanel_Props)=> {
-	return {
-		_: GetUserPermissionGroups(GetUserID()),
-		nodeCreator: GetUser(node.creator),
-	};
-})
+@Connect((state, props: DetailsPanel_Props)=>({
+	_: GetUserPermissionGroups(GetUserID()),
+	nodeCreator: GetUser(props.node.creator),
+}))
 //export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {error: Error}> {
 export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {contentNodeError: string}> {
 	quoteEditor: QuoteInfoEditorUI;
@@ -61,8 +59,9 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {con
 
 		return (
 			<div className="selectable" style={{position: `relative`, padding: `5px`}}>
-				<Div style={{fontSize: 12}}>NodeID: {node._id}</Div>
-				<Div mt={3} style={{fontSize: 12}}>Created at: {(Moment as any)(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)} (by: {nodeCreator ? nodeCreator.displayName : `n/a`})</Div>
+				<Div style={{fontSize: 12}}>ID: {node._id}</Div>
+				<Div mt={3} style={{fontSize: 12}}>Created at: {(Moment as any)(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)
+					} (by: {nodeCreator ? nodeCreator.displayName : `n/a`})</Div>
 				{IsUserCreatorOrMod(userID, node) &&
 					<Div mt={3}>
 						{node.type == MapNodeType.Thesis && !node.contentNode && !node.metaThesis &&

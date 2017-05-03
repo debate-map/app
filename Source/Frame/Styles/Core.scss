@@ -81,6 +81,27 @@
 	p:first-child { margin-top: 0; }
 	p:last-child { margin-bottom: 0; }
 
+	table {    
+		border-collapse: collapse;
+		border-spacing: 0;
+		empty-cells: show;
+		//min-width: 300;
+	}
+	table th {
+		color: #222;
+		background-color: rgba(0,0,0,.7);
+		//font-size: 12px;
+		font-weight: 600;
+		padding: 1px 3px;
+		border: 1px solid rgba(0,0,0,.5);
+	}
+	table td {
+		color: rgba(255,255,255,.7);
+		//font-size: 12px;
+		padding: 1px 3px;
+		border: 1px solid rgba(0,0,0,.5);
+	}
+
 	// by class
 	// ==========
 

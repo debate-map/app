@@ -24,7 +24,7 @@ export function ShowAddTermDialog(userID: string) {
 			setTimeout(()=>justShowed = false);
 			return (
 				<Column style={{padding: `10px 0`, width: 600}}>
-					<TermEditorUI startData={info as Term} onChange={val=>Change(info = val)}/>
+					<TermEditorUI baseData={info as Term} newTerm={true} onChange={val=>Change(info = val)}/>
 				</Column>
 			);
 		},

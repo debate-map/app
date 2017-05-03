@@ -268,7 +268,7 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		if (this.autoRemoveChangeListeners)
 			this.RemoveChangeListeners();
 		this.ComponentWillMount(); 
-	    this.ComponentWillMountOrReceiveProps(this.props, true);
+		this.ComponentWillMountOrReceiveProps(this.props, true);
 		this.lastRender_source = RenderSource.Mount;
 	}
 

@@ -19,9 +19,9 @@ export default class ContentUI extends BaseComponent<{}, {}> {
 				<SubNavBar>
 					<SubNavBarButton to={path + `/`} toImplied={path + `/terms`} text="Terms"/>
 				</SubNavBar>
-				<ScrollView style={{flex: "1 1 100%"}} scrollVBarStyle={{width: 10}}>
-					<Route path={path + "/"} exact={true} component={TermsUI}/>
-				</ScrollView>
+				{/*<ScrollView style={{flex: "1 1 100%"}} scrollVBarStyle={{width: 10}}>*/}
+				<Route path={path + "/"} exact={true} component={TermsUI}/>
+				{/*</ScrollView>*/}
 			</div>
 		);
 	}

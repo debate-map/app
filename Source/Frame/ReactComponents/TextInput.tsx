@@ -5,14 +5,14 @@ import {E} from "../General/Globals_Free";
 
 @ApplyBasicStyles
 export default class TextInput extends BaseComponent
-		<{value: string, onChange?: (newVal, event)=>void, delayChangeTillDefocus?: boolean, style?} & React.HTMLProps<HTMLInputElement>,
+		<{value: string, enabled?: boolean, onChange?: (newVal, event)=>void, delayChangeTillDefocus?: boolean, style?} & React.HTMLProps<HTMLInputElement>,
 		{editedValue}> {
 	static defaultProps = {type: "text"};
 	render() {
-		var {value, onChange, delayChangeTillDefocus, style, ...rest} = this.props;
+		var {value, enabled, onChange, delayChangeTillDefocus, style, ...rest} = this.props;
 		var {editedValue} = this.state;
 		return (
-			<input {...rest} ref="root" style={E({color: "black"}, style)}
+			<input {...rest} ref="root" disabled={enabled == false} style={E({color: "black"}, style)}
 				value={editedValue != null ? editedValue : value} onChange={e=> {
 					var newVal = $(e.target).val();
 					if (delayChangeTillDefocus) {

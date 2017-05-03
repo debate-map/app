@@ -1,6 +1,6 @@
 import {SubNavBarButton} from "../@Shared/SubNavBar";
 import SubNavBar from "../@Shared/SubNavBar";
-import {BaseComponent, SimpleShouldUpdate, FindDOM} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, SimpleShouldUpdate, FindDOM, Div} from "../../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import ScrollView from "react-vscrollview";
 import {styles} from "../../Frame/UI/GlobalStyles";
@@ -19,6 +19,10 @@ import TermEditorUI from "./Terms/TermEditorUI";
 import {RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
 import UpdateNodeDetails from "../../Server/Commands/UpdateNodeDetails";
 import UpdateTermData from "../../Server/Commands/UpdateTermData";
+import {IsUserCreatorOrMod} from "../../Store/firebase/userExtras";
+import DeleteTerm from "../../Server/Commands/DeleteTerm";
+import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
+import * as Moment from "moment";
 
 @Connect(state=> ({
 	terms: GetTerms(),
@@ -40,35 +44,61 @@ export default class TermsUI extends BaseComponent
 		if (terms == null) return <div>Loading terms...</div>;
 		let userID = GetUserID();
 		let {selectedTerm_newData} = this.state;
+
+		let creatorOrMod = selectedTerm != null && IsUserCreatorOrMod(userID, selectedTerm);
 		
 		return (
-			<Row p="10px 7px" style={{height: "100%"}}>
-				<Column style={{flex: .4, height: "100%"}} onClick={e=> {
-					if (e.target == e.currentTarget || e.target == FindDOM(this.scrollView.refs.content)) {
+			<Row p="10px 7px" style={{height: "100%", alignItems: "flex-start"}}>
+				<Column style={{position: "relative", flex: .4, height: "100%", background: "rgba(0,0,0,.5)", borderRadius: 10}} onClick={e=> {
+					if (e.target == e.currentTarget || e.target == FindDOM(this.scrollView) || e.target == FindDOM(this.scrollView.refs.content)) {
 						store.dispatch(new ACTTermSelect({id: null}));
 					}
 				}}>
-					<ScrollView ref={c=>this.scrollView = c} style={{flex: 1}}>
+					<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+						<Div p={7} style={{position: "absolute", left: 0}}>
+							<Button text="Add term" onClick={e=> {
+								if (userID == null) return ShowSignInPopup();
+								ShowAddTermDialog(userID);
+							}}/>
+						</Div>
+						<Div style={{fontSize: 17, fontWeight: 500}}>
+							Terms
+						</Div>
+					</Row>
+					<ScrollView ref={c=>this.scrollView = c} contentStyle={{flex: 1, padding: 10}}>
 						{terms.map((term, index)=> {
 							return <TermUI key={index} first={index == 0} term={term} selected={selectedTerm == term}/>;
 						})}
 					</ScrollView>
-					<Button text="Add term" style={{alignSelf: "flex-start"}} onClick={e=> {
-						if (userID == null) return ShowSignInPopup();
-						ShowAddTermDialog(userID);
-					}}/>
 				</Column>
-				<Column pl={10} style={{flex: .6, height: "100%"}}>
-					{selectedTerm &&
-						<TermEditorUI startData={selectedTerm} onChange={data=>this.SetState({selectedTerm_newData: data})}/>}
-					<Button mt={5} text="Save term" style={{alignSelf: "flex-start"}} enabled={selectedTerm_newData != null} onClick={async e=> {
-						//if (selectedTerm_newData == null) return; // no changes made
-						if (userID == null) return ShowSignInPopup();
-						let updates = RemoveHelpers(E(
-							{name: selectedTerm_newData.name, shortDescription_current: selectedTerm_newData.shortDescription_current}
-						));
-						await new UpdateTermData({termID: selectedTerm._id, updates}).Run();
-					}}/>
+				<Column ml={10} style={{position: "relative", flex: .6, maxHeight: "100%", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
+					<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+						{selectedTerm &&
+							<Div style={{fontSize: 17, fontWeight: 500}}>
+								{selectedTerm.name}
+							</Div>}
+						<Div p={7} style={{position: "absolute", right: 0}}>
+							<Button ml="auto" text="Save term" enabled={selectedTerm_newData != null} onClick={async e=> {
+								let updates = RemoveHelpers(E(
+									{name: selectedTerm_newData.name, shortDescription_current: selectedTerm_newData.shortDescription_current}
+								));
+								await new UpdateTermData({termID: selectedTerm._id, updates}).Run();
+							}}/>
+							<Button text="Delete term" ml={10} enabled={selectedTerm != null} onClick={async e=> {
+								ShowMessageBox({
+									title: `Delete "${selectedTerm.name}"`, cancelButton: true,
+									message: `Delete the term "${selectedTerm.name}"?`,
+									onOK: async ()=> {
+										await new DeleteTerm({termID: selectedTerm._id}).Run();
+									}
+								});
+							}}/>
+						</Div>
+					</Row>
+					{selectedTerm
+						? <TermEditorUI baseData={selectedTerm} newTerm={false} enabled={creatorOrMod} style={{padding: 10}}
+							onChange={data=>this.SetState({selectedTerm_newData: data})}/>
+						: <div style={{padding: 10}}>No term selected.</div>}
 				</Column>
 			</Row>
 		);
