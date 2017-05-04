@@ -14,6 +14,7 @@ export interface FirebaseData {
 	nodes: {[key: number]: MapNode};
 	nodeExtras: {[key: number]: any};
 	nodeRatings: {[key: number]: RatingsSet};
+	termNames: {[key: string]: any};
 	terms: {[key: number]: Term};
 	termComponents: {[key: number]: TermComponent};
 }

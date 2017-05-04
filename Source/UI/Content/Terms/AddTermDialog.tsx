@@ -4,7 +4,7 @@ import Column from "../../../Frame/ReactComponents/Column";
 import Row from "../../../Frame/ReactComponents/Row";
 import TextInput from "../../../Frame/ReactComponents/TextInput";
 import {Pre} from "../../../Frame/UI/ReactGlobals";
-import TermEditorUI from "./TermEditorUI";
+import TermDetailsUI from "./TermDetailsUI";
 import {Term, TermType} from "../../../Store/firebase/terms/@Term";
 import AddTerm from "../../../Server/Commands/AddTerm";
 
@@ -25,7 +25,7 @@ export function ShowAddTermDialog(userID: string) {
 			setTimeout(()=>justShowed = false);
 			return (
 				<Column style={{padding: `10px 0`, width: 600}}>
-					<TermEditorUI baseData={info as Term} newTerm={true} onChange={val=>Change(info = val)}/>
+					<TermDetailsUI baseData={info as Term} creating={true} onChange={val=>Change(info = val)}/>
 				</Column>
 			);
 		},

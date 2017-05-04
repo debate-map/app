@@ -20,7 +20,7 @@ export default class UpdateTermData extends Command<{termID: number, updates: Pa
 		// prepare
 		// ==========
 		
-		let oldData = await GetDataAsync(`terms/${termID}`, true, false);
+		let oldData = await GetDataAsync(`terms/${termID}`, true, false) as Term;
 		let newData = {...oldData, ...updates};
 		
 		// validate state
@@ -31,9 +31,13 @@ export default class UpdateTermData extends Command<{termID: number, updates: Pa
 		// execute
 		// ==========
 
-		let updates_db = {
+		let dbUpdates = {
 			[`terms/${termID}`]: newData,
-		};
-		await firebase.Ref().update(updates_db);
+		} as any;
+		if (newData.name != oldData.name) {
+			dbUpdates[`termNames/${oldData.name}/${termID}`] = null; 
+			dbUpdates[`termNames/${newData.name}/${termID}`] = true; 
+		}
+		await firebase.Ref().update(dbUpdates);
 	}
 }

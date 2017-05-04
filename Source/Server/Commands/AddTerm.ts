@@ -30,6 +30,7 @@ export default class AddTerm extends Command<{term: Term}> {
 		let updates = {
 			"general/lastTermID": lastTermID_new,
 			[`terms/${termID}`]: term,
+			[`termNames/${term.name}/${termID}`]: true,
 		};
 		await firebase.Ref().update(updates);
 	}

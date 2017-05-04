@@ -16,3 +16,10 @@ export function GetTerms(): Term[] {
 	return CachedTransform("GetTerms", {}, termsMap, ()=>termsMap ? termsMap.VValues(true) : []);
 	//return CachedTransform("GetTerms", {}, termsMap, ()=>termsMap ? termsMap.VKeys(true).map(id=>GetTerm(parseInt(id))) : []);
 }
+
+export function GetTermVariantNumber(term: Term): number {
+	let termsWithSameName_map = GetData(`termNames/${term.name}`);
+	if (termsWithSameName_map == null) return 1;
+	let termsWithSameNameAndLowerIDs = termsWithSameName_map.VKeys(true).map(a=>a.ToInt()).filter(a=>a < term._id);
+	return 1 + termsWithSameNameAndLowerIDs.length;
+}

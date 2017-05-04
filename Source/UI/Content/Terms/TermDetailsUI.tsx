@@ -15,12 +15,15 @@ import ScrollView from "react-vscrollview";
 import Button from "../../../Frame/ReactComponents/Button";
 import TermComponent from "../../../Store/firebase/termComponents/@TermComponent";
 import { GetNiceNameForTermType } from "../../../UI/Content/TermsUI";
+import {GetTermVariantNumber} from "../../../Store/firebase/terms";
 
-type Props = {baseData: Term, newTerm: boolean, enabled?: boolean, style?, onChange?: (newData: Term)=>void} & Partial<{nodeCreator: User}>;
+type Props = {baseData: Term, creating: boolean, enabled?: boolean, style?, onChange?: (newData: Term)=>void}
+	& Partial<{nodeCreator: User, variantNumber: number}>;
 @Connect((state, props: Props)=>({
 	nodeCreator: GetUser(props.baseData.creator),
+	variantNumber: GetTermVariantNumber(props.baseData),
 }))
-export default class TermEditorUI extends BaseComponent<Props, {newData: Term, selectedTermComponent: TermComponent}> {
+export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, selectedTermComponent: TermComponent}> {
 	/*constructor(props) {
 		super(props);
 		let {startData} = this.props;
@@ -33,7 +36,7 @@ export default class TermEditorUI extends BaseComponent<Props, {newData: Term, s
 
 	scrollView: ScrollView;
 	render() {
-		let {newTerm, enabled, style, onChange, nodeCreator} = this.props;
+		let {creating, enabled, style, onChange, nodeCreator, variantNumber} = this.props;
 		let {newData, selectedTermComponent} = this.state;
 		let Change = _=> {
 			if (onChange)
@@ -42,7 +45,7 @@ export default class TermEditorUI extends BaseComponent<Props, {newData: Term, s
 		};
 		return (
 			<Column style={style}>
-				{!newTerm &&
+				{!creating &&
 					<table className="selectable" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>
 						<thead>
 							<tr><th>ID</th><th>Creator</th><th>Created at</th></tr>
@@ -64,6 +67,11 @@ export default class TermEditorUI extends BaseComponent<Props, {newData: Term, s
 						enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
+				{!creating &&
+					<RowLR mt={5} splitAt={125} style={{width: 500}}>
+						<Pre>Variant #: </Pre>
+						<Pre>{variantNumber}</Pre>
+					</RowLR>}
 				<RowLR mt={5} splitAt={125} style={{width: 500}}>
 					<Pre>Type: </Pre>
 					<Select options={GetEntries(TermType, name=>GetNiceNameForTermType(TermType[name]))} enabled={enabled} style={{flex: 1}}

@@ -16,6 +16,8 @@ export default class DeleteTerm extends Command<{termID: number}> {
 
 		// prepare
 		// ==========
+
+		let oldData = await GetDataAsync(`terms/${termID}`, true, false) as Term;
 		
 		// validate state
 		// ==========
@@ -25,6 +27,7 @@ export default class DeleteTerm extends Command<{termID: number}> {
 
 		let updates_db = {
 			[`terms/${termID}`]: null,
+			[`termNames/${oldData.name}/${termID}`]: null,
 		};
 		await firebase.Ref().update(updates_db);
 	}
