@@ -17,6 +17,11 @@ export function GetTerms(): Term[] {
 	//return CachedTransform("GetTerms", {}, termsMap, ()=>termsMap ? termsMap.VKeys(true).map(id=>GetTerm(parseInt(id))) : []);
 }
 
+// "P" stands for "pure" (though really means something like "pure + synchronous")
+export function GetFullNameP(term: Term) {
+	return term.name + (term.disambiguation ? ` (${term.disambiguation})` : "");
+}
+
 export function GetTermVariantNumber(term: Term): number {
 	let termsWithSameName_map = GetData(`termNames/${term.name}`);
 	if (termsWithSameName_map == null) return 1;

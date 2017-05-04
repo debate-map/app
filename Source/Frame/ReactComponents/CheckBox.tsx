@@ -22,7 +22,7 @@ export default class CheckBox extends BaseComponent
 				<label htmlFor={"checkBox_" + this.id} title={title} style={E({marginTop: 3}, labelStyle)}><span/>{text}</label>
 			</div>*/
 			<input ref={c=>this.input = c} type="checkbox"
-				checked={editedValue != null ? editedValue : checked}
+				checked={editedValue != null ? editedValue : (checked || false)}
 				disabled={enabled == false}
 				onChange={e=> {
 					var newVal = this.input.checked;

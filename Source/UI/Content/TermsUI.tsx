@@ -9,7 +9,7 @@ import Column from "../../Frame/ReactComponents/Column";
 import Row from "../../Frame/ReactComponents/Row";
 import Button from "../../Frame/ReactComponents/Button";
 import {Connect} from "../../Frame/Database/FirebaseConnect";
-import {GetTerms, GetTermVariantNumber} from "../../Store/firebase/terms";
+import {GetTerms, GetTermVariantNumber, GetFullNameP} from "../../Store/firebase/terms";
 import {Term, TermType} from "../../Store/firebase/terms/@Term";
 import {PermissionGroupSet} from "../../Store/firebase/userExtras/@UserExtraInfo";
 import {GetUserPermissionGroups, GetUserID} from "../../Store/firebase/users";
@@ -79,20 +79,20 @@ export default class TermsUI extends BaseComponent
 						<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 							{selectedTerm &&
 								<Div style={{fontSize: 17, fontWeight: 500}}>
-									{selectedTerm.name}
+									{GetFullNameP(selectedTerm)}
 								</Div>}
 							<Div p={7} style={{position: "absolute", right: 0}}>
 								{creatorOrMod &&
 									<Button ml="auto" text="Save details" enabled={selectedTerm_newData != null} onClick={async e=> {
-										let updates = RemoveHelpers(selectedTerm_newData.Including("name", "type", "person", "shortDescription_current"));
+										let updates = RemoveHelpers(selectedTerm_newData.Including("name", "disambiguation", "type", "person", "shortDescription_current"));
 										await new UpdateTermData({termID: selectedTerm._id, updates}).Run();
 										this.SetState({selectedTerm_newData: null});
 									}}/>}
 								{creatorOrMod &&
 									<Button text="Delete term" ml={10} enabled={selectedTerm != null} onClick={async e=> {
 										ShowMessageBox({
-											title: `Delete "${selectedTerm.name}"`, cancelButton: true,
-											message: `Delete the term "${selectedTerm.name}"?`,
+											title: `Delete "${GetFullNameP(selectedTerm)}"`, cancelButton: true,
+											message: `Delete the term "${GetFullNameP(selectedTerm)}"?`,
 											onOK: async ()=> {
 												await new DeleteTerm({termID: selectedTerm._id}).Run();
 											}
@@ -131,30 +131,13 @@ export default class TermsUI extends BaseComponent
 }
 
 function GetHelperTextForTermType(term: Term) {
-	/*if (type == TermType.Noun_Object) return `Something is a${name.toLowerCase().StartsWithAny("a", "e", "i", "o", "u") ? "n" : ""} "${name}" (according to the above) if it...`;
-	if (type == TermType.Noun_Gerund) return `To be doing "${name}" (according to the above) is to be...`;
-	if (type == TermType.Adjective) return `To be "${name}" (according to the above) is to be...`;
-	if (type == TermType.Verb) return `To "${name}" (according to the above) is to...`;
-	if (type == TermType.Adverb) return `To do something "${name}" (according to the above) is to do something...`;*/
-	//if (type == TermType.Noun_Object) return `For a person/object to be a${name.toLowerCase().StartsWithAny("a", "e", "i", "o", "u") ? "n" : ""} "${name}", it must...`;
-	
-	/*if (type == TermType.Noun_Object) return `If something is a${name.toLowerCase().StartsWithAny("a", "e", "i", "o", "u") ? "n" : ""} "${name}" (according to the description above), it...`;
-	if (type == TermType.Noun_Gerund) return `If something is "${name}" (according to the description above), it is...`;
-	if (type == TermType.Adjective) return `If something is "${name}" (according to the description above), it...`;
-	//if (type == TermType.Verb) return `For something to "${name}", it...`;
-	if (type == TermType.Verb) return `To "${name}" (according to the description above) is to...`;
-	if (type == TermType.Adverb) return `If something performs an action "${name}" (according to the description above), it does so...`;*/
-
-	if (term.type == TermType.SpecificEntity) return `"${term.name}" (consistent with the description above) is ${term.person ? "someone who" : "something which"}...`;
-	/*if (term.type == TermType.EntityType) return `If something is a${term.name.toLowerCase().StartsWithAny(..."aeiou".split("")) ? "n" : ""
-		} ${term.name} (consistent with the description above), it is...`;*/
-	if (term.type == TermType.EntityType) return `A${term.name.toLowerCase().StartsWithAny(..."aeiou".split("")) ? "n" : ""} "${term.name
+	let fullName = GetFullNameP(term);
+	if (term.type == TermType.SpecificEntity) return `"${fullName}" (consistent with the description above) is ${term.person ? "someone who" : "something which"}...`;
+	if (term.type == TermType.EntityType) return `A${fullName.toLowerCase().StartsWithAny(..."aeiou".split("")) ? "n" : ""} "${fullName
 		}" (consistent with the description above) is ${term.person ? "someone who" : "something which"}...`;
-	if (term.type == TermType.Adjective) return `If something is "${term.name}" (consistent with the description above), it is...`;
-	//if (type == TermType.Verb) return `For something to "${name}", it...`;
-	if (term.type == TermType.Action) return `To "${term.name}" (consistent with the description above) is to...`;
-	if (term.type == TermType.Adverb) return `If an action is performed "${term.name}" (consistent with the description above), it is done...`;
-	
+	if (term.type == TermType.Adjective) return `If something is "${fullName}" (consistent with the description above), it is...`;
+	if (term.type == TermType.Action) return `To "${fullName}" (consistent with the description above) is to...`;
+	if (term.type == TermType.Adverb) return `If an action is performed "${fullName}" (consistent with the description above), it is done...`;
 	Assert(false);
 }
 
@@ -174,7 +157,7 @@ export class TermUI extends BaseComponent<TermUI_Props, {}> {
 					onClick={e=> {
 						store.dispatch(new ACTTermSelect({id: term._id}));
 					}}>
-				<Pre>{term.name}<sup>{variantNumber}</sup>: </Pre>
+				<Pre>{GetFullNameP(term)}<sup>{variantNumber}</sup>: </Pre>
 				{term.shortDescription_current}
 				<Span ml="auto">
 					<Pre style={{opacity: .7}}>({GetNiceNameForTermType(term.type)}) </Pre>
