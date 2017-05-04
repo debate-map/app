@@ -174,7 +174,8 @@ export class TermUI extends BaseComponent<TermUI_Props, {}> {
 					onClick={e=> {
 						store.dispatch(new ACTTermSelect({id: term._id}));
 					}}>
-				{term.name}<sup>{variantNumber}</sup>: {term.shortDescription_current}
+				<Pre>{term.name}<sup>{variantNumber}</sup>: </Pre>
+				{term.shortDescription_current}
 				<Span ml="auto">
 					<Pre style={{opacity: .7}}>({GetNiceNameForTermType(term.type)}) </Pre>
 					<span>#{term._id}</span>

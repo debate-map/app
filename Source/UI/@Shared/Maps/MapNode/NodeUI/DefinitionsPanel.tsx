@@ -43,7 +43,7 @@ export default class DefinitionsPanel extends BaseComponent
 		let {node, path, terms, terms_variantNumbers, hoverTerm, clickTerm, onHoverTerm, onClickTerm} = this.props;
 		//let {localHoverTerm, localClickTerm} = this.state;
 		//let term = localClickTerm || localHoverTerm || clickTerm || hoverTerm;
-		let term = clickTerm || hoverTerm;
+		let term = hoverTerm || clickTerm;
 
 		return (
 			<Column style={{position: "relative"}}>
@@ -51,11 +51,11 @@ export default class DefinitionsPanel extends BaseComponent
 					Proponents of the thesis can submit and upvote their definitions of the terms. (thus clarifying their meaning)
 				</div>*/}
 				{/*<Div style={{fontSize: 12, color: "rgba(255, 255, 255, 0.5)"}}>Definitions panel is under development.</Div>*/}
-				<Row>
+				{/*<Row>
 					<Pre>Terms: </Pre>
 					{terms.map((term, index)=> {
 						return (
-							<Button key={index} text={<span>{term.name}<sup>{terms_variantNumbers[index]}</sup></span> as any}
+							<Button key={index} ml={index == 0 ? 0 : 5} text={<span>{term.name}<sup>{terms_variantNumbers[index]}</sup></span> as any}
 							//<Button key={index} text={<span>{term.name}<sup>{term._id}</sup></span> as any}
 								//onMouseEnter={e=>this.SetState({localHoverTerm: term})} onMouseLeave={e=>this.SetState({localHoverTerm: null})}
 								onMouseEnter={e=>onHoverTerm(term._id)} onMouseLeave={e=>onHoverTerm(null)}
@@ -65,8 +65,12 @@ export default class DefinitionsPanel extends BaseComponent
 								}}/>
 						);
 					})}
-				</Row>
+				</Row>*/}
 				{term && <TermDefinitionPanel term={term} termVariantNumber={terms_variantNumbers[terms.indexOf(term)]}/>}
+				{!term && !!terms.length &&
+					<div style={{fontSize: 12, whiteSpace: "initial"}}>Select a highlighted term above to see the definition for it here.</div>}
+				{!term && terms.length == 0 &&
+					<div style={{fontSize: 12, whiteSpace: "initial"}}>This node does not currently have any term definitions attached.</div>}
 			</Column>
 		);
 	}
@@ -88,8 +92,9 @@ class TermDefinitionPanel extends BaseComponent<{term: Term, termVariantNumber: 
 		//let creatorOrMod = term != null && IsUserCreatorOrMod(GetUserID(), term);
 
 		return (
-			<Column mt={5}>
+			<Column sel mt={5} style={{whiteSpace: "normal"}}>
 				<Row>Name: {term.name} (variant #{termVariantNumber})</Row>
+				<Row mt={5}>Short description: {term.shortDescription_current}</Row>
 				<Row mt={5}>Components:</Row>
 				<TermComponentsUI term={term} editing={false} inMap={true} style={{padding: "5px 0 10px"}}/>
 				{/*<Row>Details:</Row>
