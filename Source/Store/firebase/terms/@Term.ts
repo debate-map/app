@@ -1,11 +1,13 @@
+import {GetValues_ForSchema} from "../../../Frame/General/Enums";
 export class Term {
-	constructor(initialData: {creator: string} & Partial<Term>) {
+	constructor(initialData: {name: string, type: TermType, creator: string} & Partial<Term>) {
 		this.Extend(initialData);
 		this.createdAt = Date.now();
 	}
 
 	_id?: number;
 	name: string;
+	type: TermType;
 	//variant_current: number; // server-generated
 
 	// "seed" is the original version; meant to preserve the identity of the entity, even after crowd-based submissions which may change its rendering
@@ -23,14 +25,23 @@ export class Term {
 AddSchema({
 	properties: {
 		name: {type: "string"},
+		type: {$ref: "TermType"},
 		//variant_current: {type: "number"},
 		shortDescription_current: {type: "string"},
 		components: {items: {$ref: "TermComponent"}},
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 	},
-	required: ["name", /*"variant_current",*/ "shortDescription_current", /*"components",*/ "creator", "createdAt"],
+	required: ["name", "type", /*"variant_current",*/ "shortDescription_current", /*"components",*/ "creator", "createdAt"],
 }, "Term");
+
+export enum TermType {
+	Noun = 10,
+	Adjective = 20,
+	Verb = 30,
+	Adverb = 40,
+}
+AddSchema({oneOf: GetValues_ForSchema(TermType)}, "TermType");
 
 export type TermComponentSet = { [key: number]: boolean; };
 AddSchema({patternProperties: {"^[0-9]+$": {type: "boolean"}}}, "TermComponentSet");

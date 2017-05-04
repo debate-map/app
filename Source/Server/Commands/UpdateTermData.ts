@@ -14,7 +14,7 @@ export default class UpdateTermData extends Command<{termID: number, updates: Pa
 		// validate call
 		// ==========
 
-		let allowedPropUpdates = ["name", "shortDescription_current"];
+		let allowedPropUpdates = ["name", "type", "shortDescription_current"];
 		Assert(updates.VKeys().Except(...allowedPropUpdates).length == 0, `Cannot use this command to update props other than: ${allowedPropUpdates.join(", ")}`);
 
 		// prepare

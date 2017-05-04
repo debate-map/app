@@ -5,7 +5,7 @@ import Row from "../../../Frame/ReactComponents/Row";
 import TextInput from "../../../Frame/ReactComponents/TextInput";
 import {Pre} from "../../../Frame/UI/ReactGlobals";
 import TermEditorUI from "./TermEditorUI";
-import {Term} from "../../../Store/firebase/terms/@Term";
+import {Term, TermType} from "../../../Store/firebase/terms/@Term";
 import AddTerm from "../../../Server/Commands/AddTerm";
 
 export function ShowAddTermDialog(userID: string) {
@@ -13,6 +13,7 @@ export function ShowAddTermDialog(userID: string) {
 
 	let info = {
 		name: "",
+		type: TermType.Noun,
 		shortDescription_current: "",
 	};
 	
@@ -31,6 +32,7 @@ export function ShowAddTermDialog(userID: string) {
 		onOK: ()=> {
 			let newTerm = new Term({
 				name: info.name,
+				type: info.type,
 				shortDescription_current: info.shortDescription_current,
 				creator: GetUserID(),
 			});

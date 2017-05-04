@@ -42,15 +42,16 @@ export default class Row extends BaseComponent<{style?} & React.HTMLProps<HTMLDi
 }
 @ApplyBasicStyles
 export class RowLR extends BaseComponent<{leftWidth?: number, height?: number, className?: string, style?, leftStyle?, rightStyle?} & React.HTMLProps<HTMLDivElement>, {}> {
+	static defaultProps = {leftWidth: 50};
 	render() {
 		var {leftWidth, height, className, style, leftStyle, rightStyle, children, ...rest} = this.props;
-        Assert((children as any).length == 2, "Row child-count must be 2. (one for left-side, one for right-side)");
+		Assert((children as any).length == 2, "Row child-count must be 2. (one for left-side, one for right-side)");
 		return (
 			<div {...rest} style={E({display: "flex"}, style)}>
-				<div style={E(leftWidth && {width: leftWidth + "%"}, leftStyle)}>
+				<div style={E({display: "flex"}, leftWidth && {width: leftWidth + "%"}, leftStyle)}>
 					{children[0]}
 				</div>
-				<div style={rightStyle}>
+				<div style={E({display: "flex"}, leftWidth && {width: (100 - leftWidth) + "%"}, rightStyle)}>
 					{children[1]}
 				</div>
 			</div>

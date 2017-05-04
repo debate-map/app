@@ -1,6 +1,6 @@
 import {SubNavBarButton} from "../@Shared/SubNavBar";
 import SubNavBar from "../@Shared/SubNavBar";
-import {BaseComponent, SimpleShouldUpdate, FindDOM, Div} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, SimpleShouldUpdate, FindDOM, Div, Span, Pre} from "../../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import ScrollView from "react-vscrollview";
 import {styles} from "../../Frame/UI/GlobalStyles";
@@ -9,7 +9,7 @@ import Row from "../../Frame/ReactComponents/Row";
 import Button from "../../Frame/ReactComponents/Button";
 import {Connect} from "../../Frame/Database/FirebaseConnect";
 import {GetTerms} from "../../Store/firebase/terms";
-import {Term} from "../../Store/firebase/terms/@Term";
+import {Term, TermType} from "../../Store/firebase/terms/@Term";
 import {PermissionGroupSet} from "../../Store/firebase/userExtras/@UserExtraInfo";
 import {GetUserPermissionGroups, GetUserID} from "../../Store/firebase/users";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
@@ -79,10 +79,9 @@ export default class TermsUI extends BaseComponent
 							</Div>}
 						<Div p={7} style={{position: "absolute", right: 0}}>
 							<Button ml="auto" text="Save term" enabled={selectedTerm_newData != null} onClick={async e=> {
-								let updates = RemoveHelpers(E(
-									{name: selectedTerm_newData.name, shortDescription_current: selectedTerm_newData.shortDescription_current}
-								));
+								let updates = RemoveHelpers(selectedTerm_newData.Including("name", "type", "shortDescription_current"));
 								await new UpdateTermData({termID: selectedTerm._id, updates}).Run();
+								this.SetState({selectedTerm_newData: null});
 							}}/>
 							<Button text="Delete term" ml={10} enabled={selectedTerm != null} onClick={async e=> {
 								ShowMessageBox({
@@ -97,7 +96,7 @@ export default class TermsUI extends BaseComponent
 					</Row>
 					{selectedTerm
 						? <TermEditorUI baseData={selectedTerm} newTerm={false} enabled={creatorOrMod} style={{padding: 10}}
-							onChange={data=>this.SetState({selectedTerm_newData: data})}/>
+								onChange={data=>this.SetState({selectedTerm_newData: data})}/>
 						: <div style={{padding: 10}}>No term selected.</div>}
 				</Column>
 			</Row>
@@ -112,14 +111,17 @@ export class TermUI extends BaseComponent<TermUI_Props, {}> {
 		return (
 			<Row mt={first ? 0 : 5}
 					style={E(
-						{padding: 5, background: "rgba(150,150,150,.5)", borderRadius: 5, cursor: "pointer", justifyContent: "space-between"},
-						selected && {background: "rgba(150,150,150,.7)"},
+						{padding: 5, background: "rgba(100,100,100,.5)", borderRadius: 5, cursor: "pointer"},
+						selected && {background: "rgba(100,100,100,.7)"},
 					)}
 					onClick={e=> {
 						store.dispatch(new ACTTermSelect({id: term._id}));
 					}}>
-				{term.name} ({term.shortDescription_current})
-				<span>#{term._id}</span>
+				{term.name}: {term.shortDescription_current}
+				<Span ml="auto">
+					<Pre style={{opacity: .7}}>({TermType[term.type].toLowerCase()}) </Pre>
+					<span>#{term._id}</span>
+				</Span>
 			</Row>
 		);
 	}

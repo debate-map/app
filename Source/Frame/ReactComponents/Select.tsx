@@ -22,7 +22,7 @@ export default class Select extends BaseComponent
 			displayType?: "dropdown" | "button bar",
 			compareBy?: "name" | "value" | "value toString",
 			value, verifyValue?: boolean,
-			className?, title?, style?, childStyle?, onChange}, {}> {
+			enabled?: boolean, className?, title?, style?, childStyle?, onChange}, {}> {
 	static defaultProps = {
 		displayType: "dropdown",
 		compareBy: "value",
@@ -75,7 +75,7 @@ export default class Select extends BaseComponent
 	}
 	
 	render() {
-	    var {displayType, value, verifyValue, className, title, style, childStyle, onChange} = this.props;
+		var {displayType, value, verifyValue, enabled, className, title, style, childStyle, onChange} = this.props;
 		var options = this.OptionsList;
 		Assert(options.Select(a=>a.name).Distinct().length == options.length, ()=> {
 			var optionsWithNonUniqueNames = options.Where(a=>options.VCount(b=>b.name == a.name) > 1);
@@ -95,7 +95,7 @@ export default class Select extends BaseComponent
 
 		if (displayType == "dropdown") {
 			return (
-				<select ref="root" value={"value" + this.GetIndexOfValue(value)}
+				<select ref="root" disabled={enabled == false} value={"value" + this.GetIndexOfValue(value)}
 						className={className} title={title} style={E({color: "#000"}, style)} onChange={e=>onChange(this.GetSelectedValue())}>
 					{options.map((option, index)=> {
 						return <Dropdown_OptionUI key={option.name} index={index} style={E(childStyle, option.style)}>
@@ -107,7 +107,7 @@ export default class Select extends BaseComponent
 		}
 		
 		return (
-			<div style={E({/*borderRadius: 4, background: "rgba(255,255,255,.3)"*/}, style)}>
+			<div disabled={enabled == false} style={E({/*borderRadius: 4, background: "rgba(255,255,255,.3)"*/}, style)}>
 				{options.map((option, index)=> {
 					return <ButtonBar_OptionUI key={option.name}
 							first={index == 0} last={index == options.length - 1} selected={option.value === value}
