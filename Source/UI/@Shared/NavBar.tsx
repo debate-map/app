@@ -68,7 +68,7 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 						<NavBarPanelButton to="/stream" text="Stream" panel="stream" corner="top-left"/>
 						<NavBarPanelButton to="/chat" text="Chat" panel="chat" corner="top-left"/>
 						<NavBarPanelButton to="/reputation" text={
-							<Div style={{position: "relative", height: 45}}>
+							<Div className="cursorSet" style={{position: "relative", height: 45}}>
 								<Div style={{color: "rgba(255,255,255,1)", justifyContent: "center"}}>Rep: n/a</Div>
 								{/*<Div style={{color: "rgba(255,255,255,1)", justifyContent: "center"}}>Rep: 100</Div>
 								<Div style={{position: "absolute", bottom: 3, width: "100%", textAlign: "center",

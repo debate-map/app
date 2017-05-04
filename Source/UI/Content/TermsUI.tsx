@@ -1,3 +1,4 @@
+import {Assert} from "../../Frame/General/Assert";
 import {SubNavBarButton} from "../@Shared/SubNavBar";
 import SubNavBar from "../@Shared/SubNavBar";
 import {BaseComponent, SimpleShouldUpdate, FindDOM, Div, Span, Pre} from "../../Frame/UI/ReactGlobals";
@@ -23,6 +24,7 @@ import {IsUserCreatorOrMod} from "../../Store/firebase/userExtras";
 import DeleteTerm from "../../Server/Commands/DeleteTerm";
 import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
 import * as Moment from "moment";
+import TermComponentsEditorUI from "../../UI/Content/Terms/TermComponentsEditorUI";
 
 @Connect(state=> ({
 	terms: GetTerms(),
@@ -71,37 +73,94 @@ export default class TermsUI extends BaseComponent
 						})}
 					</ScrollView>
 				</Column>
-				<Column ml={10} style={{position: "relative", flex: .6, maxHeight: "100%", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
-					<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
-						{selectedTerm &&
-							<Div style={{fontSize: 17, fontWeight: 500}}>
-								{selectedTerm.name}
-							</Div>}
-						<Div p={7} style={{position: "absolute", right: 0}}>
-							<Button ml="auto" text="Save term" enabled={selectedTerm_newData != null} onClick={async e=> {
-								let updates = RemoveHelpers(selectedTerm_newData.Including("name", "type", "person", "shortDescription_current"));
-								await new UpdateTermData({termID: selectedTerm._id, updates}).Run();
-								this.SetState({selectedTerm_newData: null});
-							}}/>
-							<Button text="Delete term" ml={10} enabled={selectedTerm != null} onClick={async e=> {
-								ShowMessageBox({
-									title: `Delete "${selectedTerm.name}"`, cancelButton: true,
-									message: `Delete the term "${selectedTerm.name}"?`,
-									onOK: async ()=> {
-										await new DeleteTerm({termID: selectedTerm._id}).Run();
-									}
-								});
-							}}/>
-						</Div>
-					</Row>
-					{selectedTerm
-						? <TermEditorUI baseData={selectedTerm} newTerm={false} enabled={creatorOrMod} style={{padding: 10}}
-								onChange={data=>this.SetState({selectedTerm_newData: data})}/>
-						: <div style={{padding: 10}}>No term selected.</div>}
+				<Column ml={10} style={{flex: .6}}>
+					<Column style={{position: "relative", maxHeight: "100%", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
+						<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+							{selectedTerm &&
+								<Div style={{fontSize: 17, fontWeight: 500}}>
+									{selectedTerm.name}
+								</Div>}
+							<Div p={7} style={{position: "absolute", right: 0}}>
+								<Button ml="auto" text="Save details" enabled={selectedTerm_newData != null} onClick={async e=> {
+									let updates = RemoveHelpers(selectedTerm_newData.Including("name", "type", "person", "shortDescription_current"));
+									await new UpdateTermData({termID: selectedTerm._id, updates}).Run();
+									this.SetState({selectedTerm_newData: null});
+								}}/>
+								<Button text="Delete term" ml={10} enabled={selectedTerm != null} onClick={async e=> {
+									ShowMessageBox({
+										title: `Delete "${selectedTerm.name}"`, cancelButton: true,
+										message: `Delete the term "${selectedTerm.name}"?`,
+										onOK: async ()=> {
+											await new DeleteTerm({termID: selectedTerm._id}).Run();
+										}
+									});
+								}}/>
+							</Div>
+						</Row>
+						{selectedTerm
+							? <TermEditorUI baseData={selectedTerm} newTerm={false} enabled={creatorOrMod} style={{padding: 10}}
+									onChange={data=>this.SetState({selectedTerm_newData: data})}/>
+							: <div style={{padding: 10}}>No term selected.</div>}
+					</Column>
+					<Column mt={10} style={{position: "relative", maxHeight: "100%", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
+						<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+							<Div style={{/*fontSize: 17,*/ fontWeight: 500}}>
+								{/*Components*/}
+								{selectedTerm ? GetHelperTextForTermType(selectedTerm) : null}
+							</Div>
+							{/*<Div p={7} style={{position: "absolute", right: 0}}>
+								<Button ml="auto" text="Save term" enabled={selectedTerm_newData != null} onClick={async e=> {
+									let updates = RemoveHelpers(selectedTerm_newData.Including("name", "type", "person", "shortDescription_current"));
+									await new UpdateTermData({termID: selectedTerm._id, updates}).Run();
+									this.SetState({selectedTerm_newData: null});
+								}}/>
+								<Button text="Delete term" ml={10} enabled={selectedTerm != null} onClick={async e=> {
+									ShowMessageBox({
+										title: `Delete "${selectedTerm.name}"`, cancelButton: true,
+										message: `Delete the term "${selectedTerm.name}"?`,
+										onOK: async ()=> {
+											await new DeleteTerm({termID: selectedTerm._id}).Run();
+										}
+									});
+								}}/>
+							</Div>*/}
+						</Row>
+						{/*<Pre style={{textAlign: "center"}}>{GetHelperTextForTermType(selectedTerm)}</Pre>*/}
+						{selectedTerm
+							? <TermComponentsEditorUI term={selectedTerm} style={{marginTop: 10, padding: 10}}/>
+							: <div style={{padding: 10}}>No term selected.</div>}
+					</Column>
 				</Column>
 			</Row>
 		);
 	}
+}
+
+function GetHelperTextForTermType(term: Term) {
+	/*if (type == TermType.Noun_Object) return `Something is a${name.toLowerCase().StartsWithAny("a", "e", "i", "o", "u") ? "n" : ""} "${name}" (according to the above) if it...`;
+	if (type == TermType.Noun_Gerund) return `To be doing "${name}" (according to the above) is to be...`;
+	if (type == TermType.Adjective) return `To be "${name}" (according to the above) is to be...`;
+	if (type == TermType.Verb) return `To "${name}" (according to the above) is to...`;
+	if (type == TermType.Adverb) return `To do something "${name}" (according to the above) is to do something...`;*/
+	//if (type == TermType.Noun_Object) return `For a person/object to be a${name.toLowerCase().StartsWithAny("a", "e", "i", "o", "u") ? "n" : ""} "${name}", it must...`;
+	
+	/*if (type == TermType.Noun_Object) return `If something is a${name.toLowerCase().StartsWithAny("a", "e", "i", "o", "u") ? "n" : ""} "${name}" (according to the description above), it...`;
+	if (type == TermType.Noun_Gerund) return `If something is "${name}" (according to the description above), it is...`;
+	if (type == TermType.Adjective) return `If something is "${name}" (according to the description above), it...`;
+	//if (type == TermType.Verb) return `For something to "${name}", it...`;
+	if (type == TermType.Verb) return `To "${name}" (according to the description above) is to...`;
+	if (type == TermType.Adverb) return `If something performs an action "${name}" (according to the description above), it does so...`;*/
+
+	if (term.type == TermType.SpecificEntity) return `"${term.name}" (according to the description above) is ${term.person ? "someone who" : "something which"}...`;
+	//if (term.type == TermType.EntityType) return `If something is a${term.name.toLowerCase().StartsWithAny(..."aeiou".split("")) ? "n" : ""} ${term.name} (according to the description above), it is...`;
+	if (term.type == TermType.EntityType) return `A${term.name.toLowerCase().StartsWithAny(..."aeiou".split("")) ? "n" : ""} "${term.name
+		}" (according to the description above) is ${term.person ? "someone who" : "something which"}...`;
+	if (term.type == TermType.Adjective) return `If something is "${term.name}" (according to the description above), it is...`;
+	//if (type == TermType.Verb) return `For something to "${name}", it...`;
+	if (term.type == TermType.Action) return `To "${term.name}" (according to the description above) is to...`;
+	if (term.type == TermType.Adverb) return `If an action is performed "${term.name}" (according to the description above), it is done...`;
+	
+	Assert(false);
 }
 
 type TermUI_Props = {term: Term, first: boolean, selected: boolean};
@@ -109,7 +168,7 @@ export class TermUI extends BaseComponent<TermUI_Props, {}> {
 	render() {
 		let {term, first, selected} = this.props;
 		return (
-			<Row mt={first ? 0 : 5}
+			<Row mt={first ? 0 : 5} className="cursorSet"
 					style={E(
 						{padding: 5, background: "rgba(100,100,100,.5)", borderRadius: 5, cursor: "pointer"},
 						selected && {background: "rgba(100,100,100,.7)"},

@@ -110,6 +110,21 @@
 	.selectable { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
 	.selectable * { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
 
+	.unselectable {
+		div, span, p, th, td { cursor: default; }
+	}
+	.selectable {
+		div, span, p, th, td { cursor: auto; }
+	}
+	/*.cursorAuto:not(.neverMatch) {
+		cursor: auto;
+		* { cursor: auto; }
+	}*/
+	.cursorSet:not(.neverMatch) {
+		cursor: inherit;
+		* { cursor: inherit; }
+	}
+
 	.clickThrough > * { pointer-events: auto; }
 	.clickThrough { pointer-events: none; }
 	.clickThroughChain { pointer-events: none; }

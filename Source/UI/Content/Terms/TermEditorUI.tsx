@@ -1,5 +1,5 @@
 import {Assert} from "../../../Frame/General/Assert";
-import {BaseComponent, Pre, RenderSource, Div} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Pre, RenderSource, Div, FindDOM} from "../../../Frame/UI/ReactGlobals";
 import {Term, TermType} from "../../../Store/firebase/terms/@Term";
 import Column from "../../../Frame/ReactComponents/Column";
 import Row from "../../../Frame/ReactComponents/Row";
@@ -11,12 +11,15 @@ import {GetEntries} from "../../../Frame/General/Enums";
 import Select from "../../../Frame/ReactComponents/Select";
 import {RowLR} from "../../../Frame/ReactComponents/Row";
 import CheckBox from "../../../Frame/ReactComponents/CheckBox";
+import ScrollView from "react-vscrollview";
+import Button from "../../../Frame/ReactComponents/Button";
+import TermComponent from "../../../Store/firebase/termComponents/@TermComponent";
 
 type Props = {baseData: Term, newTerm: boolean, enabled?: boolean, style?, onChange?: (newData: Term)=>void} & Partial<{nodeCreator: User}>;
 @Connect((state, props: Props)=>({
 	nodeCreator: GetUser(props.baseData.creator),
 }))
-export default class TermEditorUI extends BaseComponent<Props, {newData: Term}> {
+export default class TermEditorUI extends BaseComponent<Props, {newData: Term, selectedTermComponent: TermComponent}> {
 	/*constructor(props) {
 		super(props);
 		let {startData} = this.props;
@@ -26,9 +29,11 @@ export default class TermEditorUI extends BaseComponent<Props, {newData: Term}> 
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
 	}
+
+	scrollView: ScrollView;
 	render() {
 		let {newTerm, enabled, style, onChange, nodeCreator} = this.props;
-		let {newData} = this.state;
+		let {newData, selectedTermComponent} = this.state;
 		let Change = _=> {
 			if (onChange)
 				onChange(this.GetNewData());
@@ -79,11 +84,6 @@ export default class TermEditorUI extends BaseComponent<Props, {newData: Term}> 
 					<TextInput enabled={enabled} style={{flex: 1}}
 						value={newData.shortDescription_current} onChange={val=>Change(newData.shortDescription_current = val)}/>
 				</RowLR>
-				{!newTerm &&
-					<Column mt={5}>
-						<Pre>Components: </Pre>
-						<Pre>{GetHelperTextForTermType(newData)}</Pre>
-					</Column>}
 			</Column>
 		);
 	}
@@ -91,31 +91,4 @@ export default class TermEditorUI extends BaseComponent<Props, {newData: Term}> 
 		let {newData} = this.state;
 		return Clone(newData) as Term;
 	}
-}
-
-function GetHelperTextForTermType(term: Term) {
-	/*if (type == TermType.Noun_Object) return `Something is a${name.toLowerCase().StartsWithAny("a", "e", "i", "o", "u") ? "n" : ""} "${name}" (according to the above) if it...`;
-	if (type == TermType.Noun_Gerund) return `To be doing "${name}" (according to the above) is to be...`;
-	if (type == TermType.Adjective) return `To be "${name}" (according to the above) is to be...`;
-	if (type == TermType.Verb) return `To "${name}" (according to the above) is to...`;
-	if (type == TermType.Adverb) return `To do something "${name}" (according to the above) is to do something...`;*/
-	//if (type == TermType.Noun_Object) return `For a person/object to be a${name.toLowerCase().StartsWithAny("a", "e", "i", "o", "u") ? "n" : ""} "${name}", it must...`;
-	
-	/*if (type == TermType.Noun_Object) return `If something is a${name.toLowerCase().StartsWithAny("a", "e", "i", "o", "u") ? "n" : ""} "${name}" (according to the description above), it...`;
-	if (type == TermType.Noun_Gerund) return `If something is "${name}" (according to the description above), it is...`;
-	if (type == TermType.Adjective) return `If something is "${name}" (according to the description above), it...`;
-	//if (type == TermType.Verb) return `For something to "${name}", it...`;
-	if (type == TermType.Verb) return `To "${name}" (according to the description above) is to...`;
-	if (type == TermType.Adverb) return `If something performs an action "${name}" (according to the description above), it does so...`;*/
-
-	if (term.type == TermType.SpecificEntity) return `"${term.name}" (according to the description above) is ${term.person ? "someone who" : "something which"}...`;
-	//if (term.type == TermType.EntityType) return `If something is a${term.name.toLowerCase().StartsWithAny(..."aeiou".split("")) ? "n" : ""} ${term.name} (according to the description above), it is...`;
-	if (term.type == TermType.EntityType) return `A${term.name.toLowerCase().StartsWithAny(..."aeiou".split("")) ? "n" : ""} "${term.name
-		}" (according to the description above) is ${term.person ? "someone who" : "something which"}...`;
-	if (term.type == TermType.Adjective) return `If something is "${term.name}" (according to the description above), it is...`;
-	//if (type == TermType.Verb) return `For something to "${name}", it...`;
-	if (term.type == TermType.Action) return `To "${term.name}" (according to the description above) is to...`;
-	if (term.type == TermType.Adverb) return `If an action is performed "${term.name}" (according to the description above), it is done...`;
-	
-	Assert(false);
 }

@@ -400,7 +400,7 @@ export class Div extends BaseComponent<{shouldUpdate?} & React.HTMLProps<HTMLDiv
 	}
     render() {
 		let {shouldUpdate, style, ...rest} = this.props;
-        return <div {...rest} style={style}/>;
+		return <div {...rest} style={style}/>;
     }
 }
 

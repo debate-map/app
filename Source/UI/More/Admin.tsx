@@ -18,7 +18,8 @@ import * as Firebase from "firebase";
 //import "./Admin/DBUpgrades/UpgradeDB_2";
 import Select from "../../Frame/ReactComponents/Select";
 import {DataSnapshot} from "firebase";
-import {TermComponent, Term} from "../../Store/firebase/terms/@Term";
+import {Term} from "../../Store/firebase/terms/@Term";
+import TermComponent from "../../Store/firebase/termComponents/@TermComponent";
 import {FirebaseData} from "../../Store/firebase";
 
 // upgrade-funcs

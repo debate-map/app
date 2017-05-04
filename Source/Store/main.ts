@@ -32,6 +32,7 @@ export class MainState {
 	notificationMessages: NotificationMessage[];
 
 	selectedTerm: number;
+	//selectedTermComponent: number;
 
 	openMap: number;
 	mapViews: MapViews;
@@ -97,6 +98,11 @@ export function MainReducer(state, action) {
 				return action.payload.id;
 			return state;
 		},
+		/*selectedTermComponent: (state = null, action)=> {
+			if (action.Is(ACTTermSelect))
+				return action.payload.id;
+			return state;
+		},*/
 
 		// maps
 		openMap: (state = null, action)=> {
@@ -130,3 +136,7 @@ export function GetSelectedTerm() {
 	//return GetData(`terms/${selectedID}`);
 	return (GetTerms() || []).find(a=>a._id == selectedID);
 }
+/*export function GetSelectedTermComponent() {
+	let selectedID = State().main.selectedTermComponent;
+	return GetTermComponent(selectedID);
+}*/

@@ -2,8 +2,9 @@ import {User} from "./firebase/users";
 import UserExtraInfo from "./firebase/userExtras/@UserExtraInfo";
 import {MapNode} from "./firebase/nodes/@MapNode";
 import {RatingsSet} from "./firebase/nodeRatings/@RatingsRoot";
-import {Term, TermComponent} from "./firebase/terms/@Term";
+import {Term} from "./firebase/terms/@Term";
 import {Map} from "./firebase/maps/@Map";
+import TermComponent from "./firebase/termComponents/@TermComponent";
 
 export interface FirebaseData {
 	general: GeneralData;

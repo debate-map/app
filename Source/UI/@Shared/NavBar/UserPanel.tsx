@@ -28,7 +28,7 @@ export default class UserPanel extends BaseComponent<{auth?}, {}> {
 		}
 
 		return (
-			<Column style={{padding: 5, background: "rgba(0,0,0,.7)", borderRadius: "0 0 0 5px", cursor: "default"}}>
+			<Column style={{padding: 5, background: "rgba(0,0,0,.7)", borderRadius: "0 0 0 5px"}}>
 				<Column sel>
 					<div>Name: {auth.displayName}</div>
 					<div>ID: {GetUserID()}</div>

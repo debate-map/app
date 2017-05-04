@@ -71,7 +71,7 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 class RootUI extends BaseComponent<{}, {}> {
 	render() {
 		return (
-			<div className="unselectable" style={{
+			<div /*className="unselectable"*/ style={{
 				height: "100%", display: "flex", flexDirection: "column",
 				//background: "rgba(0,0,0,1)",
 				background: "url(/Images/Backgrounds/Nebula.jpg)", backgroundPosition: "center center", backgroundSize: "cover",

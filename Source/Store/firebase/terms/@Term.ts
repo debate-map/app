@@ -20,7 +20,8 @@ export class Term {
 	//shortDescriptions: string;
 
 	//openAccess: boolean;
-	components: TermComponent[];
+	//components: TermComponent[];
+	components: TermComponentSet;
 
 	creator: string;
 	createdAt: number;
@@ -33,7 +34,8 @@ AddSchema({
 		name_gerund: {type: "string"},
 		//variant_current: {type: "number"},
 		shortDescription_current: {type: "string"},
-		components: {items: {$ref: "TermComponent"}},
+		//components: {items: {$ref: "TermComponent"}},
+		components: {$ref: "TermComponentSet"},
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 	},
@@ -51,13 +53,3 @@ AddSchema({oneOf: GetValues_ForSchema(TermType)}, "TermType");
 
 export type TermComponentSet = { [key: number]: boolean; };
 AddSchema({patternProperties: {"^[0-9]+$": {type: "boolean"}}}, "TermComponentSet");
-
-//export type TermComponentType = "is a {God^1}" | "is a part of" | "has a" | "has property";
-export class TermComponent {
-	text: string;
-}
-AddSchema({
-	properties: {
-		text: {type: "string"},
-	},
-}, "TermComponent");
