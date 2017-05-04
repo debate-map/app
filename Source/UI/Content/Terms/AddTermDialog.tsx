@@ -11,11 +11,12 @@ import AddTerm from "../../../Server/Commands/AddTerm";
 export function ShowAddTermDialog(userID: string) {
 	let firebase = store.firebase.helpers;
 
-	let info = {
+	let newTerm = new Term({
 		name: "",
 		type: TermType.SpecificEntity,
 		shortDescription_current: "",
-	};
+		creator: GetUserID(),
+	});
 	
 	let justShowed = true;
 	let detailsUI: TermDetailsUI;
@@ -34,20 +35,20 @@ export function ShowAddTermDialog(userID: string) {
 			boxController.options.okButtonClickable = error == null;
 			return (
 				<Column style={{padding: `10px 0`, width: 600}}>
-					<TermDetailsUI ref={c=>detailsUI = GetInnerComp(c) as any} baseData={info as Term} creating={true}
-						onChange={val=>Change(info = val, error = detailsUI.GetValidationError())}/>
+					<TermDetailsUI ref={c=>detailsUI = GetInnerComp(c) as any} baseData={newTerm} creating={true}
+						onChange={val=>Change(newTerm = val, error = detailsUI.GetValidationError())}/>
 					<Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{error}</Row>
 				</Column>
 			);
 		},
 		onOK: ()=> {
-			let newTerm = new Term({
+			/*let newTerm = new Term({
 				name: info.name,
 				type: info.type,
 				shortDescription_current: info.shortDescription_current,
 				creator: GetUserID(),
-			});
-
+			});*/
+			//newTerm = newTerm.Including("name", "type", "person", "shortDescription_current", "creator", "createdAt") as Term;
 			new AddTerm({term: newTerm}).Run();
 		}
 	});
