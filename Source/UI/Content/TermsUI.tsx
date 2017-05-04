@@ -79,7 +79,7 @@ export default class TermsUI extends BaseComponent
 							</Div>}
 						<Div p={7} style={{position: "absolute", right: 0}}>
 							<Button ml="auto" text="Save term" enabled={selectedTerm_newData != null} onClick={async e=> {
-								let updates = RemoveHelpers(selectedTerm_newData.Including("name", "type", "shortDescription_current"));
+								let updates = RemoveHelpers(selectedTerm_newData.Including("name", "type", "person", "shortDescription_current"));
 								await new UpdateTermData({termID: selectedTerm._id, updates}).Run();
 								this.SetState({selectedTerm_newData: null});
 							}}/>
@@ -119,10 +119,12 @@ export class TermUI extends BaseComponent<TermUI_Props, {}> {
 					}}>
 				{term.name}: {term.shortDescription_current}
 				<Span ml="auto">
-					<Pre style={{opacity: .7}}>({TermType[term.type].toLowerCase()}) </Pre>
+					<Pre style={{opacity: .7}}>({TermType[term.type].replace(/.([A-Z])/g, m=>m[0] + " " + m[1]).toLowerCase()}) </Pre>
 					<span>#{term._id}</span>
 				</Span>
 			</Row>
 		);
 	}
 }
+
+/**/

@@ -41,17 +41,25 @@ export default class Row extends BaseComponent<{style?} & React.HTMLProps<HTMLDi
 	}
 }
 @ApplyBasicStyles
-export class RowLR extends BaseComponent<{leftWidth?: number, height?: number, className?: string, style?, leftStyle?, rightStyle?} & React.HTMLProps<HTMLDivElement>, {}> {
-	static defaultProps = {leftWidth: 50};
+export class RowLR extends BaseComponent<{splitAt?: number | string, height?: number, className?: string, style?, leftStyle?, rightStyle?} & React.HTMLProps<HTMLDivElement>, {}> {
+	static defaultProps = {splitAt: "50%"};
 	render() {
-		var {leftWidth, height, className, style, leftStyle, rightStyle, children, ...rest} = this.props;
+		var {splitAt, height, className, style, leftStyle, rightStyle, children, ...rest} = this.props;
 		Assert((children as any).length == 2, "Row child-count must be 2. (one for left-side, one for right-side)");
 		return (
 			<div {...rest} style={E({display: "flex"}, style)}>
-				<div style={E({display: "flex"}, leftWidth && {width: leftWidth + "%"}, leftStyle)}>
+				<div style={E(
+					{display: "flex", alignItems: "center"},
+					{width: typeof splitAt == "string" ? splitAt + "%" : splitAt},
+					leftStyle
+				)}>
 					{children[0]}
 				</div>
-				<div style={E({display: "flex"}, leftWidth && {width: (100 - leftWidth) + "%"}, rightStyle)}>
+				<div style={E(
+					{display: "flex", alignItems: "center"},
+					{width: typeof splitAt == "string" ? (100 - splitAt.slice(0, -1).ToInt()) + "%" : `calc(100% - ${splitAt}px)`},
+					rightStyle
+				)}>
 					{children[1]}
 				</div>
 			</div>

@@ -8,6 +8,8 @@ export class Term {
 	_id?: number;
 	name: string;
 	type: TermType;
+	person?: boolean;
+	name_gerund: string;
 	//variant_current: number; // server-generated
 
 	// "seed" is the original version; meant to preserve the identity of the entity, even after crowd-based submissions which may change its rendering
@@ -17,6 +19,7 @@ export class Term {
 	// "candidates" are the versions submitted by users for this entity, meant to be the "best rendering" of the seed; they're rated up and down
 	//shortDescriptions: string;
 
+	//openAccess: boolean;
 	components: TermComponent[];
 
 	creator: string;
@@ -26,6 +29,8 @@ AddSchema({
 	properties: {
 		name: {type: "string"},
 		type: {$ref: "TermType"},
+		person: {type: "boolean"},
+		name_gerund: {type: "string"},
 		//variant_current: {type: "number"},
 		shortDescription_current: {type: "string"},
 		components: {items: {$ref: "TermComponent"}},
@@ -36,10 +41,11 @@ AddSchema({
 }, "Term");
 
 export enum TermType {
-	Noun = 10,
-	Adjective = 20,
-	Verb = 30,
-	Adverb = 40,
+	SpecificEntity = 10,
+	EntityType = 20,
+	Adjective = 30,
+	Action = 40,
+	Adverb = 50,
 }
 AddSchema({oneOf: GetValues_ForSchema(TermType)}, "TermType");
 

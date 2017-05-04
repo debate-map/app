@@ -13,7 +13,7 @@ export function ShowAddTermDialog(userID: string) {
 
 	let info = {
 		name: "",
-		type: TermType.Noun,
+		type: TermType.SpecificEntity,
 		shortDescription_current: "",
 	};
 	

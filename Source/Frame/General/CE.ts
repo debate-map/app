@@ -233,10 +233,13 @@ Object.prototype._AddFunction_Inline = function As<T>(type: new(..._)=>T) {
 
 interface Object { Including(...propNames: string[]): Object; }
 Object.prototype._AddFunction_Inline = function Including(...propNames) {
-    var result = {};
-    for (let propName of propNames)
-        result[propName] = this[propName];
-    return result;
+	var result = {};
+	for (let propName of propNames) {
+		if (propName in this) {
+			result[propName] = this[propName];
+		}
+	}
+	return result;
 }
 interface Object { Excluding(...propNames: string[]): Object; }
 Object.prototype._AddFunction_Inline = function Excluding(...propNames) {
