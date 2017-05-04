@@ -247,7 +247,7 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> 
 
 		return (
 			<article>
-				<VReactMarkdown className="selectable Markdown" source={pageText}
+				<VReactMarkdown className="selectable" source={pageText}
 					containerProps={{style: E(styles.page)}}
 					renderers={{
 						Paragraph: props=> {

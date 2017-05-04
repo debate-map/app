@@ -46,7 +46,7 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 		return (
 			<Column style={style}>
 				{!creating &&
-					<table className="selectable" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>
+					<table className="selectableAC" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>
 						<thead>
 							<tr><th>ID</th><th>Creator</th><th>Created at</th></tr>
 						</thead>

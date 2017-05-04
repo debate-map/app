@@ -1,7 +1,7 @@
 import {AddGlobalStyle} from "./ReactGlobals";
 export var styles = {
 	page: {
-		width: 960, margin: "100px auto", padding: 50, background: "rgba(0,0,0,.75)", borderRadius: 10,
+		width: 960, margin: "100px auto", padding: 50, background: "rgba(0,0,0,.75)", borderRadius: 10, cursor: "auto",
 	},
 	vMenuItem: {padding: "3px 5px", borderTop: "1px solid rgba(255,255,255,.1)"},
 };

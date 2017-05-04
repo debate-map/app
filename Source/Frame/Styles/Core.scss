@@ -110,7 +110,14 @@
 	.selectable { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
 	.selectable * { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
 
-	.unselectable {
+	// selectable -- with auto-cursor
+	.selectableAC { -moz-user-select: text; -webkit-user-select: text; user-select: text; cursor: auto; }
+	.selectableAC * { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
+	
+	//.cursorAuto { cursor: auto; }
+	//.cursorAuto * { cursor: auto; }
+
+	/*.unselectable {
 		&:not(.neverMatch) { cursor: default; }
 		div, span, p, th, td { cursor: default; }
 	}
@@ -121,11 +128,13 @@
 	/*.cursorAuto:not(.neverMatch) {
 		cursor: auto;
 		* { cursor: auto; }
-	}*/
+	}*#/
 	.cursorSet:not(.neverMatch) {
 		cursor: inherit;
 		* { cursor: inherit; }
-	}
+	}*/
+
+	div, span, p, th, td { cursor: inherit; }
 
 	.clickThrough > * { pointer-events: auto; }
 	.clickThrough { pointer-events: none; }
