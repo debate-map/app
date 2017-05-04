@@ -61,7 +61,7 @@ export class MessageUI extends BaseComponent<{message: NotificationMessage}, {}>
 							position: "absolute", left: 0, right: 0, top: 0, bottom: 0,
 							background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
 						}}/>
-						<Div sel style={{position: "relative", fontSize: 14, whiteSpace: "pre-wrap"}}>
+						<Div sel style={{position: "relative", fontSize: 14, whiteSpace: "pre-wrap", wordBreak: "break-word"}}>
 							{message.text}
 						</Div>
 					</div>

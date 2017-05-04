@@ -55,21 +55,18 @@ let childrenPlaceholder = [];
 type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void}
 	& Partial<{nodeView: MapNodeView, nodeChildren: MapNode[], nodeChildren_fillPercents: number[]}>;
 type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number, svgInfo: {mainBoxOffset: Vector2i, oldChildBoxOffsets: Vector2i[]}};
-@Connect(()=> {
-	//var getNodeView = MakeGetNodeView();
-	return ((state: RootState, {node, path, map}: Props & BaseProps)=> {
-		let nodeView = GetNodeView(map._id, path) || new MapNodeView();
-		let nodeChildren = GetNodeChildren(node);
-		let nodeChildren_fillPercents = nodeChildren.map(a=>a ? GetFillPercentForRatingAverage(a, GetRatingAverage(a._id, GetRatingTypesForNode(a).FirstOrX(null, {}).type)) : 0);
-		return {
-			path: path || node._id.toString(),
-			// only pass new nodeView when its local-props are different
-			nodeView: CachedTransform("nodeView_transform1", {mapID: map._id, path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
-			// only pass nodeChildren when all are loaded
-			nodeChildren: CachedTransform("nodeChildren_transform1", {nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : childrenPlaceholder),
-			nodeChildren_fillPercents: CachedTransform("fillPercents_transform1", {nodeID: node._id}, nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
-		};
-	});
+@Connect((state: RootState, {node, path, map}: Props & BaseProps)=> {
+	let nodeView = GetNodeView(map._id, path) || new MapNodeView();
+	let nodeChildren = GetNodeChildren(node);
+	let nodeChildren_fillPercents = nodeChildren.map(a=>a ? GetFillPercentForRatingAverage(a, GetRatingAverage(a._id, GetRatingTypesForNode(a).FirstOrX(null, {}).type)) : 0);
+	return {
+		path: path || node._id.toString(),
+		// only pass new nodeView when its local-props are different
+		nodeView: CachedTransform("nodeView_transform1", {mapID: map._id, path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
+		// only pass nodeChildren when all are loaded
+		nodeChildren: CachedTransform("nodeChildren_transform1", {nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : childrenPlaceholder),
+		nodeChildren_fillPercents: CachedTransform("fillPercents_transform1", {nodeID: node._id}, nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
+	};
 })
 export default class NodeUI extends BaseComponent<Props, State> {
 	static renderCount = 0;

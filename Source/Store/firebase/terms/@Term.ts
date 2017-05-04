@@ -1,4 +1,5 @@
 import {GetValues_ForSchema} from "../../../Frame/General/Enums";
+
 export class Term {
 	constructor(initialData: {name: string, type: TermType, creator: string} & Partial<Term>) {
 		this.Extend(initialData);
@@ -9,7 +10,8 @@ export class Term {
 	name: string;
 	type: TermType;
 	person?: boolean;
-	name_gerund: string;
+	//name_gerund: string;
+	//otherForms: string[];
 	//variant_current: number; // server-generated
 
 	// "seed" is the original version; meant to preserve the identity of the entity, even after crowd-based submissions which may change its rendering
@@ -31,11 +33,15 @@ AddSchema({
 		name: {type: "string"},
 		type: {$ref: "TermType"},
 		person: {type: "boolean"},
-		name_gerund: {type: "string"},
+		//name_gerund: {type: "string"},
+		//otherForms: {items: {type: "string"}},
 		//variant_current: {type: "number"},
+
 		shortDescription_current: {type: "string"},
+
 		//components: {items: {$ref: "TermComponent"}},
 		components: {$ref: "TermComponentSet"},
+		
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 	},
@@ -51,5 +57,5 @@ export enum TermType {
 }
 AddSchema({oneOf: GetValues_ForSchema(TermType)}, "TermType");
 
-export type TermComponentSet = { [key: number]: boolean; };
+export type TermComponentSet = {[key: number]: boolean};
 AddSchema({patternProperties: {"^[0-9]+$": {type: "boolean"}}}, "TermComponentSet");

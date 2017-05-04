@@ -14,6 +14,7 @@ import CheckBox from "../../../Frame/ReactComponents/CheckBox";
 import ScrollView from "react-vscrollview";
 import Button from "../../../Frame/ReactComponents/Button";
 import TermComponent from "../../../Store/firebase/termComponents/@TermComponent";
+import { GetNiceNameForTermType } from "../../../UI/Content/TermsUI";
 
 type Props = {baseData: Term, newTerm: boolean, enabled?: boolean, style?, onChange?: (newData: Term)=>void} & Partial<{nodeCreator: User}>;
 @Connect((state, props: Props)=>({
@@ -65,7 +66,7 @@ export default class TermEditorUI extends BaseComponent<Props, {newData: Term, s
 				</RowLR>
 				<RowLR mt={5} splitAt={125} style={{width: 500}}>
 					<Pre>Type: </Pre>
-					<Select options={GetEntries(TermType, name=>name.replace(/.([A-Z])/g, m=>m[0] + " " + m[1]).toLowerCase())} enabled={enabled} style={{flex: 1}}
+					<Select options={GetEntries(TermType, name=>GetNiceNameForTermType(TermType[name]))} enabled={enabled} style={{flex: 1}}
 						value={newData.type} onChange={val=>Change(newData.type = val)}/>
 				</RowLR>
 				{(newData.type == TermType.SpecificEntity || newData.type == TermType.EntityType) &&
@@ -73,12 +74,12 @@ export default class TermEditorUI extends BaseComponent<Props, {newData: Term, s
 						<Pre>Person: </Pre>
 						<CheckBox enabled={enabled} checked={newData.person} onChange={val=>Change(newData.person = val)}/>
 					</RowLR>}
-				{newData.type == TermType.Action &&
+				{/*newData.type == TermType.Action &&
 					<RowLR mt={5} splitAt={125} style={{width: 500}}>
 						<Pre>As gerund (noun): </Pre>
 						<TextInput enabled={enabled} style={{width: "100%"}}
 							value={newData.name_gerund} onChange={val=>Change(newData.name_gerund = val)}/>
-					</RowLR>}
+					</RowLR>*/}
 				<RowLR mt={5} splitAt={125} style={{width: "100%"}}>
 					<Pre>Short description: </Pre>
 					<TextInput enabled={enabled} style={{flex: 1}}

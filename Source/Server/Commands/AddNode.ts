@@ -16,7 +16,7 @@ export default class AddNode extends Command<{node: MapNode, form: ThesisForm, m
 		// validate call
 		// ==========
 
-		Assert(node.parents && node.parents.VKeys(true).length == 1, `Node must have exactly one parent`);
+		Assert(node.parents && node.parents.VKeys().length == 1, `Node must have exactly one parent`);
 		if (metaThesisNode) {
 			//Assert(node.children == null, `Node cannot specify children. (server adds meta-thesis automatically)`);
 			Assert(metaThesisNode.parents == null, `Meta-thesis cannot specify a parent. (server adds it automatically)`);

@@ -19,5 +19,6 @@ export interface FirebaseData {
 }
 export interface GeneralData {
 	lastTermID: number;
+	lastTermComponentID: number;
 	lastNodeID: number;
 }

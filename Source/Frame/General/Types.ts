@@ -24,7 +24,8 @@ export function ToBool(boolStr) { return boolStr == "true" ? true : false; }
 
 export function IsObject(obj) : obj is Object { return typeof obj == "object"; }
 export function IsObjectOf<T>(obj) : obj is T { return typeof obj == "object"; }
-export function IsNumber(obj, allowNumberObj = false) : obj is number {
+g.Extend({IsNumber}); declare global { function IsNumber(obj): obj is number; }
+export function IsNumber(obj, allowNumberObj = false): obj is number {
 	return typeof obj == "number" || (allowNumberObj && obj instanceof Number);
 }
 g.Extend({IsNumberString}); declare global { function IsNumberString(obj): boolean; }

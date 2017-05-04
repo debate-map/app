@@ -24,7 +24,8 @@ import {IsUserCreatorOrMod} from "../../Store/firebase/userExtras";
 import DeleteTerm from "../../Server/Commands/DeleteTerm";
 import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
 import * as Moment from "moment";
-import TermComponentsEditorUI from "../../UI/Content/Terms/TermComponentsEditorUI";
+import TermComponentsUI from "../../UI/Content/Terms/TermComponentsUI";
+import {ShowAddTermComponentDialog} from "./Terms/AddTermComponentDialog";
 
 @Connect(state=> ({
 	terms: GetTerms(),
@@ -81,20 +82,22 @@ export default class TermsUI extends BaseComponent
 									{selectedTerm.name}
 								</Div>}
 							<Div p={7} style={{position: "absolute", right: 0}}>
-								<Button ml="auto" text="Save details" enabled={selectedTerm_newData != null} onClick={async e=> {
-									let updates = RemoveHelpers(selectedTerm_newData.Including("name", "type", "person", "shortDescription_current"));
-									await new UpdateTermData({termID: selectedTerm._id, updates}).Run();
-									this.SetState({selectedTerm_newData: null});
-								}}/>
-								<Button text="Delete term" ml={10} enabled={selectedTerm != null} onClick={async e=> {
-									ShowMessageBox({
-										title: `Delete "${selectedTerm.name}"`, cancelButton: true,
-										message: `Delete the term "${selectedTerm.name}"?`,
-										onOK: async ()=> {
-											await new DeleteTerm({termID: selectedTerm._id}).Run();
-										}
-									});
-								}}/>
+								{creatorOrMod &&
+									<Button ml="auto" text="Save details" enabled={selectedTerm_newData != null} onClick={async e=> {
+										let updates = RemoveHelpers(selectedTerm_newData.Including("name", "type", "person", "shortDescription_current"));
+										await new UpdateTermData({termID: selectedTerm._id, updates}).Run();
+										this.SetState({selectedTerm_newData: null});
+									}}/>}
+								{creatorOrMod &&
+									<Button text="Delete term" ml={10} enabled={selectedTerm != null} onClick={async e=> {
+										ShowMessageBox({
+											title: `Delete "${selectedTerm.name}"`, cancelButton: true,
+											message: `Delete the term "${selectedTerm.name}"?`,
+											onOK: async ()=> {
+												await new DeleteTerm({termID: selectedTerm._id}).Run();
+											}
+										});
+									}}/>}
 							</Div>
 						</Row>
 						{selectedTerm
@@ -108,26 +111,17 @@ export default class TermsUI extends BaseComponent
 								{/*Components*/}
 								{selectedTerm ? GetHelperTextForTermType(selectedTerm) : null}
 							</Div>
-							{/*<Div p={7} style={{position: "absolute", right: 0}}>
-								<Button ml="auto" text="Save term" enabled={selectedTerm_newData != null} onClick={async e=> {
-									let updates = RemoveHelpers(selectedTerm_newData.Including("name", "type", "person", "shortDescription_current"));
-									await new UpdateTermData({termID: selectedTerm._id, updates}).Run();
-									this.SetState({selectedTerm_newData: null});
-								}}/>
-								<Button text="Delete term" ml={10} enabled={selectedTerm != null} onClick={async e=> {
-									ShowMessageBox({
-										title: `Delete "${selectedTerm.name}"`, cancelButton: true,
-										message: `Delete the term "${selectedTerm.name}"?`,
-										onOK: async ()=> {
-											await new DeleteTerm({termID: selectedTerm._id}).Run();
-										}
-									});
-								}}/>
-							</Div>*/}
+							<Div p={7} style={{position: "absolute", right: 0}}>
+								{creatorOrMod &&
+									<Button ml="auto" text="Add component" enabled={selectedTerm != null} onClick={async e=> {
+										//if (userID == null) return ShowSignInPopup();
+										ShowAddTermComponentDialog(userID, selectedTerm._id);
+									}}/>}
+							</Div>
 						</Row>
 						{/*<Pre style={{textAlign: "center"}}>{GetHelperTextForTermType(selectedTerm)}</Pre>*/}
 						{selectedTerm
-							? <TermComponentsEditorUI term={selectedTerm} style={{marginTop: 10, padding: 10}}/>
+							? <TermComponentsUI term={selectedTerm} style={{marginTop: 10, padding: 10}}/>
 							: <div style={{padding: 10}}>No term selected.</div>}
 					</Column>
 				</Column>
@@ -151,14 +145,15 @@ function GetHelperTextForTermType(term: Term) {
 	if (type == TermType.Verb) return `To "${name}" (according to the description above) is to...`;
 	if (type == TermType.Adverb) return `If something performs an action "${name}" (according to the description above), it does so...`;*/
 
-	if (term.type == TermType.SpecificEntity) return `"${term.name}" (according to the description above) is ${term.person ? "someone who" : "something which"}...`;
-	//if (term.type == TermType.EntityType) return `If something is a${term.name.toLowerCase().StartsWithAny(..."aeiou".split("")) ? "n" : ""} ${term.name} (according to the description above), it is...`;
+	if (term.type == TermType.SpecificEntity) return `"${term.name}" (consistent with the description above) is ${term.person ? "someone who" : "something which"}...`;
+	/*if (term.type == TermType.EntityType) return `If something is a${term.name.toLowerCase().StartsWithAny(..."aeiou".split("")) ? "n" : ""
+		} ${term.name} (consistent with the description above), it is...`;*/
 	if (term.type == TermType.EntityType) return `A${term.name.toLowerCase().StartsWithAny(..."aeiou".split("")) ? "n" : ""} "${term.name
-		}" (according to the description above) is ${term.person ? "someone who" : "something which"}...`;
-	if (term.type == TermType.Adjective) return `If something is "${term.name}" (according to the description above), it is...`;
+		}" (consistent with the description above) is ${term.person ? "someone who" : "something which"}...`;
+	if (term.type == TermType.Adjective) return `If something is "${term.name}" (consistent with the description above), it is...`;
 	//if (type == TermType.Verb) return `For something to "${name}", it...`;
-	if (term.type == TermType.Action) return `To "${term.name}" (according to the description above) is to...`;
-	if (term.type == TermType.Adverb) return `If an action is performed "${term.name}" (according to the description above), it is done...`;
+	if (term.type == TermType.Action) return `To "${term.name}" (consistent with the description above) is to...`;
+	if (term.type == TermType.Adverb) return `If an action is performed "${term.name}" (consistent with the description above), it is done...`;
 	
 	Assert(false);
 }
@@ -178,7 +173,7 @@ export class TermUI extends BaseComponent<TermUI_Props, {}> {
 					}}>
 				{term.name}: {term.shortDescription_current}
 				<Span ml="auto">
-					<Pre style={{opacity: .7}}>({TermType[term.type].replace(/.([A-Z])/g, m=>m[0] + " " + m[1]).toLowerCase()}) </Pre>
+					<Pre style={{opacity: .7}}>({GetNiceNameForTermType(term.type)}) </Pre>
 					<span>#{term._id}</span>
 				</Span>
 			</Row>
@@ -186,4 +181,7 @@ export class TermUI extends BaseComponent<TermUI_Props, {}> {
 	}
 }
 
-/**/
+export function GetNiceNameForTermType(type: TermType) {
+	if (type == TermType.Action) return "action/process";
+	return TermType[type].replace(/.([A-Z])/g, m=>m[0] + " " + m[1]).toLowerCase();
+}
