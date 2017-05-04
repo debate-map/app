@@ -1,5 +1,6 @@
+import {Assert} from "../../../../Frame/General/Assert";
 import {connect} from "react-redux";
-import {BaseComponent, Div, AddGlobalStyle, Pre} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Div, AddGlobalStyle, Pre, GetInnerComp} from "../../../../Frame/UI/ReactGlobals";
 import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
 import VMenu from "react-vmenu";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
@@ -22,7 +23,7 @@ import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@M
 import {RootState} from "../../../../Store/index";
 import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {ACTMapNodeSelect, ACTMapNodeExpandedSet} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
+import {ACTMapNodeSelect, ACTMapNodeExpandedSet, ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import Column from "../../../../Frame/ReactComponents/Column";
 import DefinitionsPanel from "./NodeUI/DefinitionsPanel";
@@ -39,10 +40,15 @@ import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingType
 import {ContentNode, SourceChain} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {URL} from "../../../../Frame/General/URLs";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
+import {ParseSegmentsFromNodeDisplayText} from "./NodeDisplayTextParser";
+import {GetTerm, GetTermVariantNumber} from "../../../../Store/firebase/terms";
+import {Term} from "../../../../Store/firebase/terms/@Term";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
 `);*/
+
+//export type NodeHoverExtras = {panel?: string, term?: number};
 
 type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
 	& Partial<{ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
@@ -50,18 +56,16 @@ type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, widt
 /*@FirebaseConnect((props: Props)=>[
 	...GetPaths_NodeRatingsRoot(props.node._id),
 ])*/
-@Connect(()=> {
-	return (state: RootState, {node, ratingsRoot}: Props)=> ({
-		ratingsRoot: GetNodeRatingsRoot(node._id),
-		mainRating_average: GetRatingAverage(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type),
-		userID: GetUserID(),
-	});
-})
-export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, openPanel_preview: string}> {
+@Connect((state: RootState, {node, ratingsRoot}: Props)=> ({
+	ratingsRoot: GetNodeRatingsRoot(node._id),
+	mainRating_average: GetRatingAverage(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type),
+	userID: GetUserID(),
+}))
+export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, hoverPanel: string, hoverTermID: number, clickTermID: number}> {
 	render() {
 		let {map, node, nodeView, path, width, widthOverride, ratingsRoot, mainRating_average, userID} = this.props;
 		let firebase = store.firebase.helpers;
-		let {hovered, openPanel_preview} = this.state;
+		let {hovered, hoverPanel, hoverTermID, clickTermID} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let barSize = 5;
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
@@ -72,7 +76,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let mainRating_myFillPercent = mainRating_mine != null ? GetFillPercentForRatingAverage(node, mainRating_mine) : null;
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
-		let panelToShow = openPanel_preview || (nodeView && nodeView.openPanel);
+		let panelToShow = hoverPanel || (nodeView && nodeView.openPanel);
 		let subPanelShow = node.type == MapNodeType.Thesis && node.contentNode;
 		let bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView && nodeView.expanded;
@@ -108,7 +112,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								width: 2, background: `rgba(0,255,0,.5)`,
 							}}/>}
 						<span style={{position: `relative`, fontSize: GetFontSizeForNode(node), whiteSpace: `initial`}}>
-							{GetNodeDisplayText(node, path)}
+							{this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
 						</span>
 						{node.type == MapNodeType.Thesis && node.contentNode &&
 							<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
@@ -143,7 +147,9 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							let ratings = GetRatings(node._id, panelToShow as RatingType);
 							return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 						})()}
-						{panelToShow == `definitions` && <DefinitionsPanel/>}
+						{panelToShow == `definitions` &&
+							<DefinitionsPanel ref={c=>this.definitionsPanel = c} node={node} path={path} hoverTermID={hoverTermID} clickTermID={clickTermID}
+								onHoverTerm={termID=>this.SetState({hoverTermID: termID})} onClickTerm={termID=>this.SetState({clickTermID: termID})}/>}
 						{panelToShow == `discussion` && <DiscussionPanel/>}
 						{panelToShow == `social` && <SocialPanel/>}
 						{panelToShow == `tags` && <TagsPanel/>}
@@ -151,6 +157,65 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						{panelToShow == `others` && <OthersPanel/>}
 					</div>}
 			</div>
+		);
+	}
+	definitionsPanel: DefinitionsPanel;
+
+	RenderNodeDisplayText(text: string) {
+		let {map, path} = this.props;
+
+		let segments = ParseSegmentsFromNodeDisplayText(text);
+
+		let elements = [];
+		for (let [index, segment] of segments.entries()) {
+			if (segment.type == "text") {
+				elements.push(<span key={index}>{segment.textParts[0]}</span>);
+			} else if (segment.type == "term") {
+				let termName = segment.textParts[1];
+				let termID = segment.textParts[2].ToInt();
+				elements.push(
+					<TermPlaceholder key={index} termID={termID}
+						onHover={hovered=>this.SetState({hoverPanel: hovered ? "definitions" : null, hoverTermID: hovered ? termID : null})}
+						onClick={()=> {
+							//this.SetState({hoverPanel: "definitions", hoverTermID: termID});
+							store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel: "definitions"}));
+							this.SetState({clickTermID: termID});
+						}}/>
+				);
+			} else {
+				Assert(false);
+			}
+		}
+		return elements;
+	}
+}
+
+@Connect((state, {termID})=> {
+	let term = GetTerm(termID);
+	return {
+		term,
+		termVariantNumber: term ? GetTermVariantNumber(term) : null,
+	};
+})
+class TermPlaceholder extends BaseComponent
+		<{termID: number, onHover: (hovered: boolean)=>void, onClick: ()=>void}
+			& Partial<{term: Term, termVariantNumber: number}>,
+		{}> {
+	render() {
+		let {termID, onHover, onClick, term, termVariantNumber} = this.props;
+		if (term == null) return <a>...</a>;
+		return (
+			<a
+					onMouseEnter={e=>onHover(true)}
+					onMouseLeave={e=>onHover(false)}
+					onClick={e=> {
+						/*if (this.definitionsPanel == null) return;
+						GetInnerComp(this.definitionsPanel).SetState({termFromLocalClick: GetTerm(termID)});*/
+						//this.SetState({clickTermID: termID});
+						onClick();
+					}}>
+				{term.name}<sup>{termVariantNumber}</sup>
+			</a>
 		);
 	}
 }

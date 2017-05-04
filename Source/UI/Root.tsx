@@ -38,7 +38,7 @@ import {createBlacklistFilter} from "redux-persist-transform-filter";
 import {URL} from "../Frame/General/URLs";
 
 // Create a history of your choosing (we're using a browser history in this case)
-const history = createBrowserHistory();
+export const historyStore = createBrowserHistory();
 
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	ComponentWillMount() {
@@ -60,7 +60,7 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 
 		return (
 			<Provider store={store}>
-				<Router history={history}>
+				<Router history={historyStore}>
 					<RootUI/>
 				</Router>
 			</Provider>

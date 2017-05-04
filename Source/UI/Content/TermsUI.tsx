@@ -121,7 +121,7 @@ export default class TermsUI extends BaseComponent
 						</Row>
 						{/*<Pre style={{textAlign: "center"}}>{GetHelperTextForTermType(selectedTerm)}</Pre>*/}
 						{selectedTerm
-							? <TermComponentsUI term={selectedTerm} style={{marginTop: 10, padding: 10}}/>
+							? <TermComponentsUI term={selectedTerm} editing={true} style={{marginTop: 10, padding: 10}}/>
 							: <div style={{padding: 10}}>No term selected.</div>}
 					</Column>
 				</Column>

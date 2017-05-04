@@ -36,15 +36,6 @@
 			font-size: 12px;
 		}
 	}
-	a {
-		/*&:not(.ignoreBaseCSS) {
-			color: rgba(100,255,100,.7);
-			&:hover {
-				color: rgba(100,255,100,1);
-			}
-		}*/
-		text-decoration: none !important;
-	}
 	*, *:before, *:after {
 		box-sizing: inherit;
 	}
@@ -57,11 +48,12 @@
 	// ==========
 
 	a {
+		text-decoration: none !important;
 		&:not(.ignoreBaseCSS) {
 			color: rgba(100,255,100,.7);
-			&:hover {
-				color: rgba(100,255,100,1);
-			}
+			&:hover { color: rgba(100,255,100,1); }
+
+			> sup, > sub { color: inherit; }
 		}
 	}
 

@@ -92,7 +92,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 						let ratings = GetRatings(node._id, ratingInfo.type);
 						return <RatingsPanel key={index} node={node} path={path} ratingType={ratingInfo.type} ratings={ratings}/>;
 					})}
-					<DefinitionsPanel/>
+					<DefinitionsPanel node={node} path={path}/>
 					<DiscussionPanel/>
 					<SocialPanel/>
 					<TagsPanel/>

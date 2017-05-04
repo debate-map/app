@@ -65,7 +65,7 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 		nodeView: CachedTransform("nodeView_transform1", {mapID: map._id, path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
 		// only pass nodeChildren when all are loaded
 		nodeChildren: CachedTransform("nodeChildren_transform1", {nodeID: node._id}, nodeChildren, ()=>nodeChildren.All(a=>a != null) ? nodeChildren : childrenPlaceholder),
-		nodeChildren_fillPercents: CachedTransform("fillPercents_transform1", {nodeID: node._id}, nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
+		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", {nodeID: node._id}, nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
 	};
 })
 export default class NodeUI extends BaseComponent<Props, State> {

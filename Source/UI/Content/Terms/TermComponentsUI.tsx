@@ -25,7 +25,7 @@ import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
 
 let componentsPlaceholder = [];
 
-type Props = {term: Term, style?} & Partial<{components: TermComponent[]}>;
+type Props = {term: Term, editing: boolean, inMap?: boolean, style?} & Partial<{components: TermComponent[]}>;
 @Connect((state: RootState, {term}: Props)=> {
 	let termComponents = GetTermComponents(term);
 	return {
@@ -37,14 +37,14 @@ type Props = {term: Term, style?} & Partial<{components: TermComponent[]}>;
 })
 export default class TermComponentsUI extends BaseComponent<Props, {}> {
 	render() {
-		let {term, style, components} = this.props;
+		let {term, editing, inMap, style, components} = this.props;
 
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), term);
 
 		return (
-			<ScrollView contentStyle={{flex: 1, padding: 10}}>
+			<ScrollView contentStyle={E({flex: 1, padding: 10}, style)}>
 				{components.map((comp, index)=> {
-					return <TermComponentUI key={index} first={index == 0} termComponent={comp} editing={creatorOrMod}/>;
+					return <TermComponentUI key={index} first={index == 0} termComponent={comp} editing={editing && creatorOrMod} inMap={inMap}/>;
 				})}
 			</ScrollView>
 		);
@@ -52,7 +52,7 @@ export default class TermComponentsUI extends BaseComponent<Props, {}> {
 }
 
 export class TermComponentUI extends BaseComponent
-		<{termComponent: TermComponent, first: boolean, editing?: boolean, creating?: boolean, onChange?: (updatedTermComponent: TermComponent)=>void},
+		<{termComponent: TermComponent, first: boolean, editing?: boolean, creating?: boolean, inMap?: boolean, onChange?: (updatedTermComponent: TermComponent)=>void},
 		{updatedTermComponent: TermComponent}> {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (props.creating || props.editing) {
@@ -62,7 +62,7 @@ export class TermComponentUI extends BaseComponent
 	}
 
 	render() {
-		let {termComponent, first, editing, creating, onChange} = this.props;
+		let {termComponent, first, editing, creating, inMap, onChange} = this.props;
 		let {updatedTermComponent} = this.state;
 
 		//let data = updatedTermComponent || termComponent;
@@ -75,7 +75,7 @@ export class TermComponentUI extends BaseComponent
 		};
 		return (
 			<Row mt={first ? 0 : 5}>
-				{!creating && <Div mr={7} sel>#{termComponent._id}</Div>}
+				{!creating && <Div mr={7} sel style={E(inMap && {opacity: .5})}>#{termComponent._id}</Div>}
 				{(creating || editing)
 					? <TextInput ref={a=>a && creating && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())} style={{flex: 1}}
 						value={updatedTermComponent.text} onChange={val=>Change(updatedTermComponent.text = val)}/>
