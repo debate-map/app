@@ -171,10 +171,10 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 			if (segment.type == "text") {
 				elements.push(<span key={index}>{segment.textParts[0]}</span>);
 			} else if (segment.type == "term") {
-				let termName = segment.textParts[1];
+				let refText = segment.textParts[1];
 				let termID = segment.textParts[2].ToInt();
 				elements.push(
-					<TermPlaceholder key={index} termID={termID}
+					<TermPlaceholder key={index} refText={refText} termID={termID}
 						onHover={hovered=>this.SetState({hoverPanel: hovered ? "definitions" : null, hoverTermID: hovered ? termID : null})}
 						onClick={()=> {
 							//this.SetState({hoverPanel: "definitions", hoverTermID: termID});
@@ -198,11 +198,11 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 	};
 })
 class TermPlaceholder extends BaseComponent
-		<{termID: number, onHover: (hovered: boolean)=>void, onClick: ()=>void}
+		<{refText: string, termID: number, onHover: (hovered: boolean)=>void, onClick: ()=>void}
 			& Partial<{term: Term, termVariantNumber: number}>,
 		{}> {
 	render() {
-		let {termID, onHover, onClick, term, termVariantNumber} = this.props;
+		let {refText, termID, onHover, onClick, term, termVariantNumber} = this.props;
 		if (term == null) return <a>...</a>;
 		return (
 			<a
@@ -214,7 +214,9 @@ class TermPlaceholder extends BaseComponent
 						//this.SetState({clickTermID: termID});
 						onClick();
 					}}>
-				{term.name}<sup>{termVariantNumber}</sup>
+				{/*term.name*/}
+				{refText}
+				<sup>{termVariantNumber}</sup>
 			</a>
 		);
 	}

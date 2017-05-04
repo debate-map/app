@@ -28,16 +28,20 @@ export class Term {
 	creator: string;
 	createdAt: number;
 }
+//export const termNameFormat = "^[^.#$\\[\\]]+$";
+export const Term_nameFormat = `^[a-zA-Z0-9 (),'"%-]+$`;
+//export const Term_shortDescriptionFormat = "^[a-zA-Z ()[],;.!?-+*/]+$";
+export const Term_shortDescriptionFormat = `^.+$`;
 AddSchema({
 	properties: {
-		name: {type: "string"},
+		name: {type: "string", pattern: Term_nameFormat},
 		type: {$ref: "TermType"},
 		person: {type: "boolean"},
 		//name_gerund: {type: "string"},
 		//otherForms: {items: {type: "string"}},
 		//variant_current: {type: "number"},
 
-		shortDescription_current: {type: "string"},
+		shortDescription_current: {type: "string", pattern: Term_shortDescriptionFormat},
 
 		//components: {items: {$ref: "TermComponent"}},
 		components: {$ref: "TermComponentSet"},

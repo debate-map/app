@@ -93,7 +93,7 @@ class TermDefinitionPanel extends BaseComponent<{term: Term, termVariantNumber: 
 
 		return (
 			<Column sel mt={5} style={{whiteSpace: "normal"}}>
-				<Row>Name: {term.name} (variant #{termVariantNumber})</Row>
+				<Row>Name: {term.name} (variant #{termVariantNumber}) (id: {term._id})</Row>
 				<Row mt={5}>Short description: {term.shortDescription_current}</Row>
 				<Row mt={5}>Components:</Row>
 				<TermComponentsUI term={term} editing={false} inMap={true} style={{padding: "5px 0 10px"}}/>
