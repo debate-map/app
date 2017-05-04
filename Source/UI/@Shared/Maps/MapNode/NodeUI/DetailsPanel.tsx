@@ -35,17 +35,17 @@ import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-type DetailsPanel_Props = {node: MapNode, path: string, userID: string} & Partial<{nodeCreator: User}>;
+type DetailsPanel_Props = {node: MapNode, path: string, userID: string} & Partial<{creator: User}>;
 @Connect((state, props: DetailsPanel_Props)=>({
 	_: GetUserPermissionGroups(GetUserID()),
-	nodeCreator: GetUser(props.node.creator),
+	creator: GetUser(props.node.creator),
 }))
 //export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {error: Error}> {
 export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {contentNodeError: string}> {
 	quoteEditor: QuoteInfoEditorUI;
 	relative: CheckBox;
 	render() {
-		let {node, path, userID, nodeCreator} = this.props;
+		let {node, path, userID, creator} = this.props;
 		let {contentNodeError} = this.state;
 		let firebase = store.firebase.helpers;
 		//let {error} = this.state;
@@ -59,11 +59,23 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {con
 
 		return (
 			<div className="selectable" style={{position: `relative`, padding: `5px`}}>
-				<Div style={{fontSize: 12}}>ID: {node._id}</Div>
+				{/*<Div style={{fontSize: 12}}>ID: {node._id}</Div>
 				<Div mt={3} style={{fontSize: 12}}>Created at: {(Moment as any)(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)
-					} (by: {nodeCreator ? nodeCreator.displayName : `n/a`})</Div>
+					} (by: {creator ? creator.displayName : `n/a`})</Div>*/}
+				<table className="selectableAC lighterBackground" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>
+					<thead>
+						<tr><th>ID</th><th>Creator</th><th>Created at</th></tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>{node._id}</td>
+							<td>{creator ? creator.displayName : `n/a`}</td>
+							<td>{(Moment as any)(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)}</td>
+						</tr>
+					</tbody>
+				</table>
 				{IsUserCreatorOrMod(userID, node) &&
-					<Div mt={3}>
+					<Div mt={5}>
 						{node.type == MapNodeType.Thesis && !node.contentNode && !node.metaThesis &&
 							<Row style={{display: "flex", alignItems: "center"}}>
 								<Pre>Relative: </Pre>

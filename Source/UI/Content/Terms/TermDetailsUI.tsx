@@ -18,9 +18,9 @@ import { GetNiceNameForTermType } from "../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../Store/firebase/terms";
 
 type Props = {baseData: Term, creating: boolean, enabled?: boolean, style?, onChange?: (newData: Term)=>void}
-	& Partial<{nodeCreator: User, variantNumber: number}>;
+	& Partial<{creator: User, variantNumber: number}>;
 @Connect((state, props: Props)=>({
-	nodeCreator: GetUser(props.baseData.creator),
+	creator: GetUser(props.baseData.creator),
 	variantNumber: GetTermVariantNumber(props.baseData),
 }))
 export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, selectedTermComponent: TermComponent}> {
@@ -36,7 +36,7 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 
 	scrollView: ScrollView;
 	render() {
-		let {creating, enabled, style, onChange, nodeCreator, variantNumber} = this.props;
+		let {creating, enabled, style, onChange, creator, variantNumber} = this.props;
 		let {newData, selectedTermComponent} = this.state;
 		let Change = _=> {
 			if (onChange)
@@ -53,7 +53,7 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 						<tbody>
 							<tr>
 								<td>{newData._id}</td>
-								<td>{nodeCreator ? nodeCreator.displayName : `n/a`}</td>
+								<td>{creator ? creator.displayName : `n/a`}</td>
 								<td>{(Moment as any)(newData.createdAt).format(`YYYY-MM-DD HH:mm:ss`)}</td>
 							</tr>
 						</tbody>
