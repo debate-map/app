@@ -352,7 +352,7 @@ class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNode, style},
 				<MapUI ref={c=>mapUI = c ? GetInnerComp(c) as any : null} className="DemoMap"
 					map={demoMap} rootNode={demoRootNode} withinPage={true}
 					//padding={{left: 200, right: 500, top: 100, bottom: 100}}
-					padding={{left: (screen.availWidth / 2) - 200, right: (screen.availWidth / 2) - 200, top: 100, bottom: 100}}
+					padding={{left: (screen.availWidth / 2) - 300, right: screen.availWidth, top: 100, bottom: 100}}
 				/>
 				<div className="in" style={{position: `absolute`, left: 0, right: 0, top: 0, bottom: 0}}
 					onMouseEnter={()=>root.removeClass(`below`)} onTouchStart={()=>root.removeClass(`below`)}/>

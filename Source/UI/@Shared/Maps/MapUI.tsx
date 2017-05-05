@@ -104,7 +104,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					//contentStyle={E({willChange: "transform"}, withinPage && {marginTop: -300, paddingBottom: 300, transform: "translateY(300px)"})}
 					//bufferScrollEventsBy={10000}
 					onScrollEnd={pos=> {
-						if (withinPage) return;
+						//if (withinPage) return;
 						UpdateFocusNodeAndViewOffset(map._id);
 					}}>
 				<style>{`
@@ -185,7 +185,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 
 	// load scroll from store
 	LoadScroll() {
-		let {map, rootNode} = this.props;
+		let {map, rootNode, withinPage} = this.props;
 		if (this.refs.scrollView == null) return;
 
 		// if user is already scrolling manually, return so we don't interrupt that process
@@ -209,6 +209,8 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
 		let viewOffset_current = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position);
 		let viewOffset_changeNeeded = new Vector2i(viewOffset_target).Minus(viewOffset_current);
+		if (withinPage) // if within a page, don't apply stored vertical-scroll
+			viewOffset_changeNeeded.y = 0;
 		(this.refs.scrollView as ScrollView).ScrollBy(viewOffset_changeNeeded);
 		//Log("Loading scroll: " + Vector2i.prototype.toString.call(viewOffset_target));
 
