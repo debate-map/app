@@ -35,8 +35,8 @@ export default class UpdateTermData extends Command<{termID: number, updates: Pa
 			[`terms/${termID}`]: newData,
 		} as any;
 		if (newData.name != oldData.name) {
-			dbUpdates[`termNames/${oldData.name}/${termID}`] = null; 
-			dbUpdates[`termNames/${newData.name}/${termID}`] = true; 
+			dbUpdates[`termNames/${oldData.name.toLowerCase()}/${termID}`] = null; 
+			dbUpdates[`termNames/${newData.name.toLowerCase()}/${termID}`] = true; 
 		}
 		await firebase.Ref().update(dbUpdates);
 	}

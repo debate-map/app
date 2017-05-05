@@ -69,7 +69,7 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 					} (by: {nodeCreator ? nodeCreator.displayName : `n/a`})</Div>*/}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Name: </Pre>
-					<TextInput ref={a=>a && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
+					<TextInput
 						pattern={Term_nameFormat} required
 						enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>

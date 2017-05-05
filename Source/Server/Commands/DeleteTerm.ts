@@ -27,7 +27,7 @@ export default class DeleteTerm extends Command<{termID: number}> {
 
 		let updates_db = {
 			[`terms/${termID}`]: null,
-			[`termNames/${oldData.name}/${termID}`]: null,
+			[`termNames/${oldData.name.toLowerCase()}/${termID}`]: null,
 		};
 		await firebase.Ref().update(updates_db);
 	}
