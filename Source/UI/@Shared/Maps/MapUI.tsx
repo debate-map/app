@@ -80,7 +80,8 @@ type Props = {map: Map, rootNode?: MapNode, padding?: {left: number, right: numb
 	};
 })
 export default class MapUI extends BaseComponent<Props, {} | void> {
-	static defaultProps = {padding: {left: 2000, right: 2000, top: 1000, bottom: 1000}};
+	//static defaultProps = {padding: {left: 2000, right: 2000, top: 1000, bottom: 1000}};
+	static defaultProps = {padding: {left: screen.availWidth, right: screen.availWidth, top: screen.availHeight, bottom: screen.availHeight}};
 
 	downPos: Vector2i;
 	render() {
@@ -95,7 +96,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 			return <NodeUI_ForBots map={map} node={rootNode}/>;
 
 		return (
-			<ScrollView {...rest} ref="scrollView"
+			<ScrollView {...rest.Excluding("dispatch")} ref="scrollView"
 					backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.mapUI}
 					style={E(withinPage && {overflow: "visible"})}
 					scrollHBarStyle={E(withinPage && {zIndex: 0})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}

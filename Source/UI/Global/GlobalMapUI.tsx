@@ -18,7 +18,6 @@ import {GetMap} from "../../Store/firebase/maps";
 export default class GlobalMapUI extends BaseComponent<Partial<{map: Map}>, {}> {
 	render() {
 		let {map} = this.props;
-		
 		return (
 			<MapUI map={map}/>
 		);
