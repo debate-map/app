@@ -19,7 +19,7 @@ export default class HomeUI extends BaseComponent<{}, {}> {
 					<SubNavBarButton to={path + `/`} toImplied={pathImplied + `/home`} text="Home"/>
 					<SubNavBarButton to={path + `/about`} toImplied={pathImplied + `/about`} text="About"/>
 				</SubNavBar>
-				<ScrollView style={{flex: `1 1 100%`}} scrollVBarStyle={{width: 10}}>
+				<ScrollView id="HomeScrollView" style={{flex: `1 1 100%`}} scrollVBarStyle={{width: 10}}>
 					<Route path={path + `/`} exact={true} component={HomeUI2}/>
 					<Route path={path + `/about`} component={AboutUI}/>
 				</ScrollView>

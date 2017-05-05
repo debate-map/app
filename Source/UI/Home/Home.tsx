@@ -336,7 +336,9 @@ class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNode, style},
 				borderBottom: "5px solid rgba(255,255,255,.3)",*/
 			}}>
 				<style>{`
-				/*.DemoMap * { user-select: none; }*/
+				/* since it has less padding to avoid drag-from-unselect-area-to-select-area situation, just disable selection completely */
+				.DemoMap * { user-select: none; }
+
 				.DemoMap.draggable > .content { cursor: default !important; /*pointer-events: none;*/ }
 				:not(.below) > .in { display: none; }
 				.below > .below { display: none; }

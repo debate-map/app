@@ -83,7 +83,6 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	static defaultProps = {padding: {left: 2000, right: 2000, top: 1000, bottom: 1000}};
 
 	downPos: Vector2i;
-
 	render() {
 		let {map, rootNode, padding, withinPage, ...rest} = this.props;
 		if (map == null)
@@ -175,6 +174,12 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
 		this.LoadScroll();
 		UpdateURL();
+	}
+
+	PostRender() {
+		let {withinPage} = this.props;
+		if (withinPage && this.refs.scrollView)
+			(this.refs.scrollView as ScrollView).vScrollableDOM =  $("#HomeScrollView").children(".content")[0];
 	}
 
 	// load scroll from store
