@@ -3,7 +3,6 @@ import Column from "../../../../../Frame/ReactComponents/Column";
 import {Div, BaseComponent, Pre} from "../../../../../Frame/UI/ReactGlobals";
 import {MapNode} from "../../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeDisplayText} from "../../../../../Store/firebase/nodes/$node";
-import {ParseSegmentsFromNodeDisplayText} from "../NodeDisplayTextParser";
 import {GetTerm, GetTermVariantNumber} from "../../../../../Store/firebase/terms";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {CachedTransform} from "../../../../../Frame/V/VCache";
@@ -19,13 +18,17 @@ import {replace, push} from "react-router-redux";
 import {ACTTermSelect} from "../../../../../Store/main";
 import {PropTypes} from "react";
 import {historyStore} from "../../../../Root";
+import {ParseSegmentsForPatterns} from "../../../../../Frame/General/RegexHelpers";
 
 let termsPlaceholder = [];
 
 @Connect((state, {node, path, hoverTermID, clickTermID})=> {
 	let displayText = GetNodeDisplayText(node, path);
-	let segments = ParseSegmentsFromNodeDisplayText(displayText);
-	let terms = segments.filter(a=>a.type == "term").map(a=>GetTerm(a.textParts[2].ToInt()));
+	//let segments = ParseSegmentsFromNodeDisplayText(displayText);
+	let segments = ParseSegmentsForPatterns(displayText, [
+		{name: "term", regex: /{(.+?)\}\[(.+?)\]/}
+	]);
+	let terms = segments.filter(a=>a.patternMatched == "term").map(a=>GetTerm(a.textParts[2].ToInt()));
 	let terms_variantNumbers = terms.map(a=>a ? GetTermVariantNumber(a) : 1);
 	return {
 		// only pass terms when all are loaded

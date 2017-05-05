@@ -103,13 +103,13 @@
 	// ==========
 
 	.unselectable { -moz-user-select: none; -webkit-user-select: none; user-select: none; }
-	.unselectable * { -moz-user-select: none; -webkit-user-select: none; user-select: none; }
+	//.unselectable * { -moz-user-select: none; -webkit-user-select: none; user-select: none; }
 	.selectable { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
-	.selectable * { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
+	//.selectable * { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
 
 	// selectable -- with auto-cursor
 	.selectableAC { -moz-user-select: text; -webkit-user-select: text; user-select: text; cursor: auto; }
-	.selectableAC * { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
+	//.selectableAC * { -moz-user-select: text; -webkit-user-select: text; user-select: text; }
 	
 	//.cursorAuto { cursor: auto; }
 	//.cursorAuto * { cursor: auto; }
@@ -131,7 +131,10 @@
 		* { cursor: inherit; }
 	}*/
 
-	div, span, p, th, td { cursor: inherit; }
+	div, span, p, th, td {
+		//-moz-user-select: inherit; -webkit-user-select: inherit; user-select: inherit;
+		cursor: inherit;
+	}
 
 	.clickThrough > * { pointer-events: auto; }
 	.clickThrough { pointer-events: none; }

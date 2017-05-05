@@ -19,6 +19,7 @@ import {MapView} from "../../Store/main/mapViews/@MapViews";
 import {GetNode} from "../../Store/firebase/nodes";
 import {Vector2i} from "../../Frame/General/VectorStructs";
 import Editor from "react-md-editor";
+import * as ReactMarkdown from "react-markdown";
 
 let red = `rgba(255,0,0,.7)`;
 let green = `rgba(0,255,0,.6)`;
@@ -245,80 +246,114 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> 
 			);
 		}*/
 
+		let markdownProps = {
+			className: "selectable",
+			containerProps: {style: E(styles.page)},
+			renderers: {
+				Paragraph: Paragraph,
+				/*Text: props=> {
+					...
+					//return <span {...props}>{props.literal}</span>;
+					//return React.DOM.span(null, props.literal, props);
+					//return React.createElement("section", props.Excluding("literal", "nodeKey"), props.literal);
+					return `[text]` as any;
+				},*/
+				Link: props=>Link(props, router),
+			},
+		};
+
 		return (
 			<article>
-				<VReactMarkdown className="selectable" source={pageText}
-					containerProps={{style: E(styles.page)}}
-					renderers={{
-						Paragraph: props=> {
-							if (DeepGet(props, `children.0.props.literal`) == `GlobalMapPlaceholder`) {
-								return <div {...props.Excluding(`literal`, `nodeKey`)}>{props.children}</div>;
-							}
-							//return React.createElement(g.Markdown_defaultRenderers.paragraph, props);
-							return <p {...props.Excluding(`literal`, `nodeKey`)}>{props.children}</p>;
-						},
-						Text: props=> {
-							if (props.literal == `GlobalMapPlaceholder`) {
-								let root, mapUI: MapUI, test2;
-								if (isBot) return <div/>;
-								return (
-									<div ref={c=>root = FindDOM_(c)} style={{margin: `0 -50px`, /*height: 500,*/ userSelect: `none`, position: `relative`}}>
-										<style>{`
-										.DemoMap * { user-select: none; }
-										.DemoMap.draggable > .content { cursor: default !important; /*pointer-events: none;*/ }
-										:not(.below) > .in { display: none; }
-										.below > .below { display: none; }
-										.below .content { pointer-events: none; }
-										.DemoMap.draggable .MapUI { pointer-events: initial; cursor: grab; cursor: -webkit-grab; cursor: -moz-grab; }
-										.DemoMap.draggable.scrollActive .MapUI { cursor: grabbing !important; cursor: -webkit-grabbing !important; cursor: -moz-grabbing !important; }
-										`}</style>
-										
-										<MapUI ref={c=>mapUI = c ? GetInnerComp(c) as any : null} className="DemoMap"
-											map={demoMap} rootNode={demoRootNode} padding={{left: 200, right: 500, top: 100, bottom: 100}} withinPage={true}/>
-										<div className="in" style={{position: `absolute`, left: 0, right: 0, top: 0, bottom: 0}}
-											onMouseEnter={()=>root.removeClass(`below`)} onTouchStart={()=>root.removeClass(`below`)}/>
-										<div className="below" style={{position: `absolute`, left: 0, right: 0, top: `100%`, height: 300}}
-											onMouseEnter={()=>root.addClass(`below`)} onTouchStart={()=>root.addClass(`below`)}/>
-									</div>
-								);
-							}
-							//return <span {...props}>{props.literal}</span>;
-							//return React.DOM.span(null, props.literal, props);
-							//return React.createElement("section", props.Excluding("literal", "nodeKey"), props.literal);
-							return `[text]` as any;
-						},
-						Link: props=> {
-							let {href, nodeKey, children, literal, ...rest} = props;
-							return (
-								<a {...rest} href={href} key={nodeKey} onClick={e=> {
-									let currentURL = URL.Current();
-									//let fullURL = href.Contains("://") ? href : GetUrlParts()[0] + "/" + href;
-									let toURL = URL.Parse(ToAbsoluteUrl(href));
-									if (toURL.domain == currentURL.domain) {
-										e.preventDefault();
-
-										if (href.startsWith(`#`)) {
-											JumpToHash(href.substr(1));
-											//document.getElementById(h).scrollIntoView();   //Even IE6 supports this
-											return;
-										}
-
-										//let history = State().router.history;
-										let history = router.history;
-										if (Equals_Shallow(toURL.pathNodes, currentURL.pathNodes)) { // if paths same
-											history.replace(href);
-										} else {
-											history.push(href);
-										}
-									}
-								}}>
-									{children}
-								</a>
+				<VReactMarkdown {...markdownProps} source={pageText}
+					replacements={{
+						"default": (segment, index)=> {
+							let containerProps = E(markdownProps.containerProps) as any;
+							containerProps.style = E(
+								markdownProps.containerProps.style,
+								index == 0 && {marginBottom: 0},
+								index == 2 && {marginTop: 0},
 							);
+							return <ReactMarkdown {...markdownProps} source={segment.textParts[0]} containerProps={containerProps}/>;
+						},
+						"GlobalMapPlaceholder": (segment, index)=> {
+							return <GlobalMapPlaceholder demoRootNode={demoRootNode} style={{}}/>;
 						}
 					}}
 				/>
 			</article>
+		);
+	}
+}
+
+const Paragraph = props=> {
+	if (DeepGet(props, `children.0.props.literal`) == `GlobalMapPlaceholder`) {
+		return <div {...props.Excluding(`literal`, `nodeKey`)}>{props.children}</div>;
+	}
+	//return React.createElement(g.Markdown_defaultRenderers.paragraph, props);
+	return <p {...props.Excluding(`literal`, `nodeKey`)}>{props.children}</p>;
+};
+const Link = (props, router)=> {
+	let {href, nodeKey, children, literal, ...rest} = props;
+	return (
+		<a {...rest} href={href} key={nodeKey} onClick={e=> {
+			let currentURL = URL.Current();
+			//let fullURL = href.Contains("://") ? href : GetUrlParts()[0] + "/" + href;
+			let toURL = URL.Parse(ToAbsoluteUrl(href));
+			if (toURL.domain == currentURL.domain) {
+				e.preventDefault();
+
+				if (href.startsWith(`#`)) {
+					JumpToHash(href.substr(1));
+					//document.getElementById(h).scrollIntoView();   //Even IE6 supports this
+					return;
+				}
+
+				//let history = State().router.history;
+				let history = router.history;
+				if (Equals_Shallow(toURL.pathNodes, currentURL.pathNodes)) { // if paths same
+					history.replace(href);
+				} else {
+					history.push(href);
+				}
+			}
+		}}>
+			{children}
+		</a>
+	);
+};
+
+class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNode, style}, {}> {
+	render() {
+		let {demoRootNode, style} = this.props;
+		let root, mapUI: MapUI, test2;
+		if (isBot) return <div/>;
+
+		return (
+			<div ref={c=>root = FindDOM_(c)} style={{
+				//margin: `0 -50px`,
+				/*height: 500,*/ userSelect: "none", position: "relative",
+				/*borderTop: "5px solid rgba(255,255,255,.3)",
+				borderBottom: "5px solid rgba(255,255,255,.3)",*/
+			}}>
+				<style>{`
+				/*.DemoMap * { user-select: none; }*/
+				.DemoMap.draggable > .content { cursor: default !important; /*pointer-events: none;*/ }
+				:not(.below) > .in { display: none; }
+				.below > .below { display: none; }
+				.below .content { pointer-events: none; }
+				.DemoMap.draggable .MapUI { pointer-events: initial; cursor: grab; cursor: -webkit-grab; cursor: -moz-grab; }
+				.DemoMap.draggable.scrollActive .MapUI { cursor: grabbing !important; cursor: -webkit-grabbing !important; cursor: -moz-grabbing !important; }
+
+				.DemoMap > .scrollTrack { display: none; }
+				`}</style>
+				
+				<MapUI ref={c=>mapUI = c ? GetInnerComp(c) as any : null} className="DemoMap"
+					map={demoMap} rootNode={demoRootNode} padding={{left: 200, right: 500, top: 100, bottom: 100}} withinPage={true}/>
+				<div className="in" style={{position: `absolute`, left: 0, right: 0, top: 0, bottom: 0}}
+					onMouseEnter={()=>root.removeClass(`below`)} onTouchStart={()=>root.removeClass(`below`)}/>
+				<div className="below" style={{position: `absolute`, left: 0, right: 0, top: `100%`, height: 300}}
+					onMouseEnter={()=>root.addClass(`below`)} onTouchStart={()=>root.addClass(`below`)}/>
+			</div>
 		);
 	}
 }

@@ -40,9 +40,9 @@ import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingType
 import {ContentNode, SourceChain} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {URL} from "../../../../Frame/General/URLs";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import {ParseSegmentsFromNodeDisplayText} from "./NodeDisplayTextParser";
 import {GetTerm, GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import {Term} from "../../../../Store/firebase/terms/@Term";
+import {ParseSegmentsForPatterns} from "../../../../Frame/General/RegexHelpers";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -164,13 +164,16 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 	RenderNodeDisplayText(text: string) {
 		let {map, path} = this.props;
 
-		let segments = ParseSegmentsFromNodeDisplayText(text);
+		//let segments = ParseSegmentsFromNodeDisplayText(text);
+		let segments = ParseSegmentsForPatterns(text, [
+			{name: "term", regex: /{(.+?)\}\[(.+?)\]/}
+		]);
 
 		let elements = [];
 		for (let [index, segment] of segments.entries()) {
-			if (segment.type == "text") {
+			if (segment.patternMatched == null) {
 				elements.push(<span key={index}>{segment.textParts[0]}</span>);
-			} else if (segment.type == "term") {
+			} else if (segment.patternMatched == "term") {
 				let refText = segment.textParts[1];
 				let termID = segment.textParts[2].ToInt();
 				elements.push(
