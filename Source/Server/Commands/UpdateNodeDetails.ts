@@ -19,6 +19,7 @@ AddSchema({
 				},
 				relative: {type: "boolean"},
 				contentNode: {$ref: "ContentNode"},
+				metaThesis: {$ref: "MetaThesisInfo"},
 			},
 			//required: ["relative", "titles", "contentNode"],
 		}),

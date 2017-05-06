@@ -124,22 +124,24 @@ The detailed version of the argument will be embodied in its premises/child-thes
 							<Pre>Type: If </Pre>
 							<Select options={GetEntries(MetaThesis_IfType, name=>GetMetaThesisIfTypeDisplayText(MetaThesis_IfType[name]))}
 								enabled={editing} value={newData.metaThesis.ifType} onChange={val=> {
-									firebase.Ref(`nodes/${newData._id}/metaThesis`).update({ifType: val});
+									//firebase.Ref(`nodes/${newData._id}/metaThesis`).update({ifType: val});
+									Change(newData.metaThesis.ifType = val);
 								}}/>
 							<Pre> premises below are true, they </Pre>
 							<Select options={thenTypes} enabled={editing} value={newData.metaThesis.thenType} onChange={val=> {
-								firebase.Ref(`nodes/${newData._id}/metaThesis`).update({thenType: val});
+								//firebase.Ref(`nodes/${newData._id}/metaThesis`).update({thenType: val});
+								Change(newData.metaThesis.thenType = val);
 							}}/>
 							<Pre>.</Pre>
 						</Row>}
-					{creating && isArgument &&
+					{/*newData.metaThesis && creating &&
 						<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 							<Pre allowWrap={true}>{`
 The "type" option above describes the way in which this argument's premises will affect the conclusion (the parent thesis).${""
 } The premises can be added to the map right after adding this argument node.
 							`.trim()}
 							</Pre>
-						</Row>}
+						</Row>*/}
 					{newData.type == MapNodeType.Thesis && !newData.contentNode && !newData.metaThesis && newLinkData.form != ThesisForm.YesNoQuestion &&
 						<Column mt={10}>
 							<Row style={{fontWeight: "bold"}}>At this location:</Row>
