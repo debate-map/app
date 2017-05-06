@@ -17,8 +17,12 @@ export async function GetNodeAsync(id: number) {
 	return await GetDataAsync(`nodes/${id}`) as MapNode;
 }
 
+export function GetParentNodeID(path: string) {
+	let parentIDStr = path.split("/").XFromLast(1);
+	return parentIDStr ? parentIDStr.ToInt() : null;
+}
 export function GetParentNode(path: string) {
-	return GetNode(path.split("/").map(a=>parseInt(a)).XFromLast(1));
+	return GetNode(GetParentNodeID(path));
 }
 
 export function GetNodeParents(node: MapNode) {

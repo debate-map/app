@@ -1,10 +1,10 @@
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {MapNode} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";
 import {GetRating, GetRatingValue, GetRatingSet} from "../../Store/firebase/nodeRatings";
 import {GetRatingAverage, GetRatings} from "../../Store/firebase/nodeRatings";
 import {Rating} from "../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MetaThesis_IfType, MetaThesis_ThenType} from "../../Store/firebase/nodes/@MetaThesisInfo";
-import {GetRatingTypesForNode} from "../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetThesisFormAtPath, GetThesisFormUnderParent} from "../../Store/firebase/nodes/$node";
 
 /*export function CalculateArgumentStrength(nodeChildren: MapNode[]) {
 	if (nodeChildren.Any(a=>a == null)) return 0; // must still be loading
@@ -28,13 +28,19 @@ import {GetRatingTypesForNode} from "../../Store/firebase/nodes/$node";
 	return (result * 100).RoundTo(1);
 }*/
 
-export function GetArgumentStrengthPseudoRating(nodeChildren: MapNode[], userID: string): Rating {
+export function GetArgumentStrengthPseudoRating(argumentNode: MapNode, nodeChildren: MapNode[], userID: string): Rating {
 	if (nodeChildren.Any(a=>a == null)) return null; // must still be loading
 	let metaThesis = nodeChildren.First(a=>a.metaThesis != null);
 	let premises = nodeChildren.Except(metaThesis);
 	if (premises.length == 0) return null;
 
-	let premiseProbabilities = premises.map(child=>GetRatingValue(child._id, GetRatingTypesForNode(child)[0].type, userID, 0) / 100);
+	let premiseProbabilities = premises.map(child=> {
+		let ratingType = GetRatingTypesForNode(child)[0].type;
+		let ratingValue = GetRatingValue(child._id, ratingType, userID, 0) / 100;
+		let form = GetThesisFormUnderParent(child, argumentNode);
+		let probability = form == ThesisForm.Negation ? 1 - ratingValue : ratingValue;
+		return probability;
+	});
 	let combinedProbabilityOfPremises;
 	if (metaThesis.metaThesis.ifType == MetaThesis_IfType.All)
 		combinedProbabilityOfPremises = premiseProbabilities.reduce((total, current)=>total * current, 1);
@@ -69,7 +75,7 @@ export function GetArgumentStrengthPseudoRating(nodeChildren: MapNode[], userID:
 	let result = usersWhoRated.map(userID=>GetArgumentStrengthPseudoRating(nodeChildren, userID));
 	return result;
 }*/
-export function GetArgumentStrengthPseudoRatingSet(nodeChildren: MapNode[]): {[key: string]: Rating} {
+export function GetArgumentStrengthPseudoRatingSet(argumentNode: MapNode, nodeChildren: MapNode[]): {[key: string]: Rating} {
 	if (nodeChildren.Any(a=>a == null)) return {}; // must still be loading
 	let metaThesis = nodeChildren.FirstOrX(a=>a.metaThesis != null); // meta-thesis might not be loaded yet
 	let premises = nodeChildren.Except(metaThesis);
@@ -92,7 +98,7 @@ export function GetArgumentStrengthPseudoRatingSet(nodeChildren: MapNode[]): {[k
 
 	let result = {};
 	for (let userID in usersWhoRatedAllChildren)
-		result[userID] = GetArgumentStrengthPseudoRating(nodeChildren, userID);
+		result[userID] = GetArgumentStrengthPseudoRating(argumentNode, nodeChildren, userID);
 	return result;
 }
 

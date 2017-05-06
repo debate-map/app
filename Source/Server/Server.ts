@@ -4,9 +4,15 @@ import * as AJVKeywords from "ajv-keywords";
 export const ajv = AJVKeywords(new AJV()) as AJV_Extended;
 G({ajv}); declare global { const ajv: AJV_Extended; }
 
+G({Schema}); declare global { function Schema(schema); }
+export function Schema(schema) {
+	schema = E({additionalProperties: false}, schema);
+	return schema;
+}
+
 G({AddSchema}); declare global { function AddSchema(schema, name: string); }
 export function AddSchema(schema, name: string) {
-	schema = E({additionalProperties: false}, schema);
+	schema = Schema(schema);
 	ajv.removeSchema(name); // for hot-reloading
 	return ajv.addSchema(schema, name);
 }

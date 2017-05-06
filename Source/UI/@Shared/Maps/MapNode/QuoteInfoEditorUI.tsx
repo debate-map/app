@@ -16,10 +16,13 @@ import {GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText} from "../.
 import Select from "../../../../Frame/ReactComponents/Select";
 import {SourceType, SourceChain, Source, ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {GetEntries} from "../../../../Frame/General/Enums";
+//import {ButtonProps} from "../../../../Frame/ReactComponents/Button"; // "import" approach causes typescript rebuilds to fail
 
 //@ApplyBasicStyles
 export default class QuoteInfoEditorUI extends BaseComponent
-		<{contentNode: ContentNode, showPreview: boolean, justShowed: boolean, onSetError: (error: string)=>void},
+		<{
+			editing?: boolean, contentNode: ContentNode, showPreview: boolean, justShowed: boolean, onChange?: (newData: ContentNode)=>void,
+		},
 		{contentNodeCopy: ContentNode}> {
 	constructor(props) {
 		super(props);
@@ -28,9 +31,14 @@ export default class QuoteInfoEditorUI extends BaseComponent
 	}
 	
 	render() {
-		let {showPreview, justShowed} = this.props;
+		let {editing, showPreview, justShowed, onChange} = this.props;
 		let {contentNodeCopy: contentNode} = this.state;
-		let Change = _=>this.Update();
+		let Change = _=> {
+			if (onChange)
+				onChange(this.GetNewData());
+			this.Update();
+		};
+
 		return (
 			<Column>
 				{showPreview && [
@@ -46,10 +54,11 @@ export default class QuoteInfoEditorUI extends BaseComponent
 					<Pre>Quote text: </Pre>
 					{/*<TextInput style={{flex: 1}}
 						value={info.text} onChange={val=>Change(info.text = val)}/>*/}
-					<ToolBar editor={()=>this.refs.editor} excludeCommands={["h1", "h2", "h3", "h4", "italic", "quote"]}/>
+					{editing && <ToolBar enabled={editing} editor={()=>this.refs.editor} excludeCommands={["h1", "h2", "h3", "h4", "italic", "quote"]}/>}
 					<Editor ref="editor" value={contentNode.content} onChange={val=>Change(contentNode.content = val)} options={{
 						scrollbarStyle: `overlay`,
 						lineWrapping: true,
+						readOnly: !editing,
 					}}/>
 				</Column>
 				<Row mt={5}>Source chains:</Row>
@@ -61,16 +70,16 @@ export default class QuoteInfoEditorUI extends BaseComponent
 									{chain.map((source, sourceIndex)=> {
 										return (
 											<Row key={sourceIndex}>
-												<Select options={GetEntries(SourceType)}
+												<Select enabled={editing} options={GetEntries(SourceType)}
 													value={source.type} onChange={val=>Change(source.type = val)}/>
 												{source.type != SourceType.Webpage &&
-													<TextInput style={{width: "90%"}} placeholder={GetSourceNamePlaceholderText(source.type)}
+													<TextInput enabled={editing} style={{width: "90%"}} placeholder={GetSourceNamePlaceholderText(source.type)}
 														value={source.name} onChange={val=>Change(source.name = val)}/>}
 												{source.type != SourceType.Webpage &&
-													<TextInput style={{width: "90%"}} placeholder={GetSourceAuthorPlaceholderText(source.type)}
+													<TextInput enabled={editing} style={{width: "90%"}} placeholder={GetSourceAuthorPlaceholderText(source.type)}
 														value={source.author} onChange={val=>Change(source.author = val)}/>}
 												{source.type == SourceType.Webpage &&
-													<TextInput ref={"url_" + chainIndex + "_" + sourceIndex} type="url"
+													<TextInput ref={"url_" + chainIndex + "_" + sourceIndex} enabled={editing} type="url"
 															//pattern="^(https?|ftp)://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
 															pattern="^https?://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
 															value={source.link} onChange={val=>Change((()=> {
@@ -83,25 +92,26 @@ export default class QuoteInfoEditorUI extends BaseComponent
 																}
 																source.link = val;
 															})())}/>}
-												{sourceIndex != 0 && <Button text="X" ml={5} onClick={()=>Change(chain.RemoveAt(sourceIndex))}/>}
+												{sourceIndex != 0 && editing && <Button text="X" ml={5} onClick={()=>Change(chain.RemoveAt(sourceIndex))}/>}
 											</Row>
 										);
 									})}
-									<Row>
-										<Button text="Add source to this chain" mt={5} onClick={()=>Change(chain.push(new Source()))}/>
-										{chainIndex > 0 && <Button text="Remove this source chain" ml={5} mt={5} onClick={()=>Change(contentNode.sourceChains.RemoveAt(chainIndex))}/>}
-									</Row>
+									{editing &&
+										<Row>
+											<Button text="Add source to this chain" mt={5} onClick={()=>Change(chain.push(new Source()))}/>
+											{chainIndex > 0 && <Button text="Remove this source chain" ml={5} mt={5} onClick={()=>Change(contentNode.sourceChains.RemoveAt(chainIndex))}/>}
+										</Row>}
 								</Column>
 							);
 						})}
-						<Button text="Add source chain" mt={10} style={{alignSelf: "flex-start"}} onClick={()=>Change(contentNode.sourceChains.push(new SourceChain()))}/>
+						{editing && <Button text="Add source chain" mt={10} style={{alignSelf: "flex-start"}} onClick={()=>Change(contentNode.sourceChains.push(new SourceChain()))}/>}
 					</Column>
 				</Row>
 			</Column>
 		);
 	}
 
-	lastSetError = null;
+	/*lastSetError = null;
 	PostRender() {
 		let {onSetError} = this.props;
 		let error = this.GetValidationError();
@@ -109,7 +119,7 @@ export default class QuoteInfoEditorUI extends BaseComponent
 			onSetError(error);
 			this.lastSetError = error;
 		}
-	}
+	}*/
 	GetValidationError() {
 		let {contentNode} = this.props;
 		//return (FindDOM(this.refs.url) as HTMLInputElement).validity.valid;
@@ -123,7 +133,7 @@ export default class QuoteInfoEditorUI extends BaseComponent
 		}
 		return null;
 	}
-	GetUpdatedContentNode() {
+	GetNewData() {
 		let {contentNodeCopy: contentNode} = this.state;
 		return CleanUpdatedContentNode(Clone(contentNode));
 	}
@@ -146,9 +156,9 @@ export function CleanUpdatedContentNode(contentNode: ContentNode) {
 	return contentNode;
 }
 
-class ToolBar extends BaseComponent<{editor: ()=>any, excludeCommands?: string[]}, {}> {
+class ToolBar extends BaseComponent<{enabled?: boolean, editor: ()=>any, excludeCommands?: string[]}, {}> {
 	render() {
-		let {editor, excludeCommands} = this.props;
+		let {enabled, editor, excludeCommands} = this.props;
 
 		let commands = [
 			{name: "h1", label: "H1"},
@@ -165,19 +175,20 @@ class ToolBar extends BaseComponent<{editor: ()=>any, excludeCommands?: string[]
 		return (
 			<Row mt={3} mb={3}>
 				{commands.filter(a=>!excludeCommands.Contains(a.name)).map((command, index)=> {
-					return <ToolBarButton key={index} editor={editor} command={command.name} label={command.label} first={index == 0}/>;
+					return <ToolBarButton key={index} enabled={enabled} editor={editor} command={command.name} label={command.label} first={index == 0}/>;
 				})}
 			</Row>
 		);	
 	}
 }
 
-class ToolBarButton extends BaseComponent<{editor: ()=>any, command: string, label: string, first?: boolean}, {}> {
+type ButtonProps = {enabled: boolean}; // "import" approach causes typescript rebuilds to fail (for some reason)
+class ToolBarButton extends BaseComponent<{editor: ()=>any, command: string, label: string, first?: boolean} & ButtonProps, {}> {
 	render() {
-		let {editor, command, label, first} = this.props;
+		let {editor, command, label, first, ...rest} = this.props;
 		let icon = Icons[command];
 		return (
-			<Button width={24} height={24} ml={first ? 0 : 5}
+			<Button {...rest as any} width={24} height={24} ml={first ? 0 : 5}
 					//pt={icon ? 0 : 1}
 					style={{paddingTop: icon ? 0 : 1}}
 					onClick={()=> {

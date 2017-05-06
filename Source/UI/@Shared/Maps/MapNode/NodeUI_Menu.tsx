@@ -117,7 +117,7 @@ If not, paste the argument as a clone instead.`
 							delete newChildNode.children[copiedMetaThesis._id]; // remove old-meta-thesis as child
 							var metaThesisNode = RemoveHelpers(FromJSON(ToJSON(copiedMetaThesis))).VSet({parents: null}) as MapNode;
 						}
-						new AddNode({node: newChildNode, form: thesisForm, metaThesisNode}).Run();
+						new AddNode({node: newChildNode, link: {_: true, form: thesisForm}, metaThesisNode}).Run();
 					}}/>}
 				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={async e=> {
 					if (e.button != 0) return;

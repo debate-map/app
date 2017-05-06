@@ -6,6 +6,7 @@ import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {RatingsRoot, Rating} from "./nodeRatings/@RatingsRoot";
 import {GetNodeChildren, GetNode} from "./nodes";
 import {MetaThesis_ThenType} from "./nodes/@MetaThesisInfo";
+import {ThesisForm} from "./nodes/@MapNode";
 
 export function GetNodeRatingsRoot(nodeID: number) {
 	//RequestPaths(GetPaths_NodeRatingsRoot(nodeID));
@@ -13,15 +14,20 @@ export function GetNodeRatingsRoot(nodeID: number) {
 }
 
 export function GetRatingSet(nodeID: number, ratingType: RatingType) {
-	if (ratingType == "strength")
-		return GetArgumentStrengthPseudoRatingSet(GetNodeChildren(GetNode(nodeID)))
+	if (ratingType == "strength") {
+		let node = GetNode(nodeID);
+		return GetArgumentStrengthPseudoRatingSet(node, GetNodeChildren(node));
+	}
 	let ratingsRoot = GetNodeRatingsRoot(nodeID);
 	return ratingsRoot ? ratingsRoot[ratingType] : null;
 }
+//export function GetRatings(nodeID: number, ratingType: RatingType, thesisForm?: ThesisForm): Rating[] {
 export function GetRatings(nodeID: number, ratingType: RatingType): Rating[] {
-	/*if (ratingType == "strength")
-		return GetArgumentStrengthPseudoRatings(GetNodeChildren(GetNode(nodeID)));*/
 	let ratingSet = GetRatingSet(nodeID, ratingType);
+	/*return CachedTransform("GetRatings", {nodeID, ratingType}, {ratingSet}, ()=> {
+		if (ratingSet == null) return [];
+		let result = ratingSet.VValues();
+	});*/
 	return CachedTransform("GetRatings", {nodeID, ratingType}, {ratingSet}, ()=>ratingSet ? ratingSet.VValues(true) : []);
 }
 export function GetRating(nodeID: number, ratingType: RatingType, userID: string) {
@@ -68,8 +74,13 @@ export function GetPaths_MainRatingAverage(node: MapNode) {
 		return mainRatingAverage != null ? mainRatingAverage.Distance(50) * 2 : 0;
 	return mainRatingAverage || 0;
 }*/
-export function GetFillPercentForRatingAverage(node: MapNode, ratingAverage: number) {
+export function GetFillPercentForRatingAverage(node: MapNode, ratingAverage: number, thesisForm?: ThesisForm) {
 	if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
 		return ratingAverage != null ? ratingAverage.Distance(50) * 2 : 0;
-	return ratingAverage || 0;
+	return GetRatingForForm(ratingAverage || 0, thesisForm);
+}
+export function GetRatingForForm(ratingValue: number, thesisForm: ThesisForm) {
+	if (thesisForm == ThesisForm.Negation)
+		return 100 - ratingValue;
+	return ratingValue;
 }

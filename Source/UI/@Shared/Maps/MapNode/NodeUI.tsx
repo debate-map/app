@@ -33,7 +33,7 @@ import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@M
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import Column from "../../../../Frame/ReactComponents/Column";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetThesisFormUnderParent} from "../../../../Store/firebase/nodes/$node";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -58,7 +58,11 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 @Connect((state: RootState, {node, path, map}: Props & BaseProps)=> {
 	let nodeView = GetNodeView(map._id, path) || new MapNodeView();
 	let nodeChildren = GetNodeChildren(node);
-	let nodeChildren_fillPercents = nodeChildren.map(a=>a ? GetFillPercentForRatingAverage(a, GetRatingAverage(a._id, GetRatingTypesForNode(a).FirstOrX(null, {}).type)) : 0);
+	let nodeChildren_fillPercents = nodeChildren.map(child=> {
+		if (child == null) return 0;
+		let form = GetThesisFormUnderParent(child, node);
+		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetRatingTypesForNode(child).FirstOrX(null, {}).type), form);
+	});
 	return {
 		path: path || node._id.toString(),
 		// only pass new nodeView when its local-props are different

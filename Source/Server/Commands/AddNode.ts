@@ -1,12 +1,12 @@
 import {Assert} from "../../Frame/General/Assert";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command} from "../Command";
-import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 
-export default class AddNode extends Command<{node: MapNode, form: ThesisForm, metaThesisNode?: MapNode}> {
+export default class AddNode extends Command<{node: MapNode, link: ChildEntry, metaThesisNode?: MapNode}> {
 	async Run() {
-		let {node, form, metaThesisNode} = this.payload;
+		let {node, link, metaThesisNode} = this.payload;
 		let firebase = store.firebase.helpers;
 
 		let lastNodeID_new = await GetDataAsync(`general/lastNodeID`) as number;
@@ -34,6 +34,7 @@ export default class AddNode extends Command<{node: MapNode, form: ThesisForm, m
 		// ==========
 
 		if (!ajv.validate(`MapNode`, node)) throw new Error(`Node invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(node, null, 3)}\n`);
+		if (!ajv.validate(`ChildEntry`, link)) throw new Error(`Link invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(link, null, 3)}\n`);
 		if (!ajv.validate(`MapNode`, metaThesisNode)) throw new Error(`Meta-thesis-node invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(metaThesisNode)}\n`);
 
 		// execute
@@ -43,7 +44,7 @@ export default class AddNode extends Command<{node: MapNode, form: ThesisForm, m
 			"general/lastNodeID": lastNodeID_new,
 			[`nodes/${nodeID}`]: node,
 			// add as child of parent
-			[`nodes/${node.parents.VKeys(true)[0]}/children/${nodeID}`]: E({_: true}, form && {form}),
+			[`nodes/${node.parents.VKeys(true)[0]}/children/${nodeID}`]: link,
 		};
 		// add as parent of (pre-existing) children
 		for (let childID in (node.children || {}).Excluding(metaThesisID && metaThesisID.toString())) {

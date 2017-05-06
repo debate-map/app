@@ -101,7 +101,8 @@
       }
     },
     "dev": {
-      "command": "npm run create-config && nodemon bin/server --ignore dist --ignore coverage --ignore Tests --ignore Source",
+      "@command": "npm run create-config && nodemon bin/server --ignore dist --ignore coverage --ignore Tests --ignore Source ",
+      "command": "npm run create-config && nodemon bin/server --ignore dist --ignore coverage --ignore Tests --ignore Source --max_old_space_size=4096",
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*",

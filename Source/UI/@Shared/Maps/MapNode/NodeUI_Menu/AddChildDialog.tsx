@@ -1,6 +1,6 @@
 import {MapNodeType, MapNodeType_Info} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
-import {MapNode, ThesisForm} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry} from "../../../../../Store/firebase/nodes/@MapNode";
 import {ShowMessageBox, BoxController} from "../../../../../Frame/UI/VMessageBox";
 import Select from "../../../../../Frame/ReactComponents/Select";
 import TextInput from "../../../../../Frame/ReactComponents/TextInput";
@@ -19,6 +19,7 @@ import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNo
 import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";
 import CheckBox from "../../../../../Frame/ReactComponents/CheckBox";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
+import NodeDetailsUI from "../NodeDetailsUI";
 
 export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, userID: string) {
 	let firebase = store.firebase.helpers;
@@ -30,93 +31,48 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 		? GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Take(2)
 		: GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Skip(2);
 
-	let thesisTypes = [{name: `Normal`, value: `Normal`}, {name: `Quote`, value: `Content_Quote`}];
+	let thesisTypes = [{name: "Normal", value: "Normal"}, {name: "Quote", value: "Content_Quote"}];
 	let thesisForm = childType == MapNodeType.Thesis
 		? (parentNode.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base)
 		: null;
-	let info = {
-		title: ``,
-		thesisType: `Normal` as "Normal" | "Content_Quote", // eslint-disable-line quotes
+
+	let newNode = new MapNode({
+		titles: {},
+		parents: {[parentNode._id]: {_: true}},
+		type: childType,
 		relative: false,
 		//contentNode: new ContentNode(),
-		metaThesis: {
-			ifType: MetaThesis_IfType.All,
-			thenType: childType == MapNodeType.SupportingArgument ? MetaThesis_ThenType.StrengthenParent : MetaThesis_ThenType.WeakenParent,
-		}
-	};
+		creator: userID,
+		approved: true,
+	});
+	let newLink = E(
+		{_: true},
+		childType == MapNodeType.Thesis && {form: ThesisForm.Base},
+	) as ChildEntry;
+	let newMetaThesis: MapNode;
+	if (isArgument) {
+		newMetaThesis = new MapNode({
+			type: MapNodeType.Thesis, creator: userID, approved: true,
+			metaThesis: {
+				ifType: MetaThesis_IfType.All,
+				thenType: childType == MapNodeType.SupportingArgument ? MetaThesis_ThenType.StrengthenParent : MetaThesis_ThenType.WeakenParent
+			},
+		});
+	}
 	
 	let justShowed = true;
 	let quoteError = null;
 	let quoteEditor: QuoteInfoEditorUI;
-	let Change = _=>boxController.UpdateUI();
+	let Change = (..._)=>boxController.UpdateUI();
 	let boxController: BoxController = ShowMessageBox({
 		title: `Add ${displayName}`, cancelButton: true,
 		messageUI: ()=> {
 			setTimeout(()=>justShowed = false);
 			boxController.options.okButtonClickable = quoteError == null;
 			return (
-				<Column style={{padding: `10px 0`, width: 600}}
-						/*onKeyDown={e=> {
-							if (e.keyCode == keycode.codes.enter) {
-								boxController.options.onOK();
-								boxController.Close();
-							}
-						}}*/>
-					{childType == MapNodeType.Thesis &&
-						<Row>
-							<Pre>Type: </Pre>
-							<Select displayType="button bar" options={thesisTypes} style={{display: `inline-block`}}
-								value={info.thesisType} onChange={val=>Change(info.thesisType = val)}/>
-						</Row>}
-					{childType == MapNodeType.Thesis && info.thesisType == "Normal" &&
-							<Row mt={5} style={{display: "flex", alignItems: "center"}}>
-								<Pre>Relative: </Pre>
-								<CheckBox checked={info.relative} onChange={val=>Change(info.relative = val)}/>
-								<InfoButton text={`"Relative" means the statement/question is too loosely worded to give a simple yes/no answer,${""
-										} and should instead be evaluated in terms of the degree/intensity to which it is true. Eg. "How dangerous is sky-diving?"`}/>
-							</Row>}
-					{childType == MapNodeType.Thesis && info.thesisType == "Content_Quote" ? (
-						//<QuoteInfoEditorUI contentNode={info.contentNode} showPreview={true} justShowed={justShowed} onSetError={error=>Change(quoteError = error)}/>
-						<QuoteInfoEditorUI ref={c=>quoteEditor = c} contentNode={new ContentNode()}
-							showPreview={true} justShowed={justShowed} onSetError={error=>Change(quoteError = error)}/>
-					) : (
-						<Row mt={5}>
-							<Pre>Title: </Pre>
-							<TextInput ref={a=>a && justShowed && WaitXThenRun(0, ()=>a.DOM.focus())} style={{flex: 1}}
-								value={info.title} onChange={val=>Change(info.title = val)}/>
-						</Row>
-					)}
-					{isArgument &&
-						<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
-							<Pre allowWrap={true}>{`
-An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
-
-Examples:
-* Shadow during lunar eclipses
-* May have used biased sources
-* Quote: Socrates
-
-The detailed version of the argument will be embodied in its premises/child-theses.
-							`.trim()}
-							</Pre>
-						</Row>}
-					{isArgument &&
-						<Row mt={5}>
-							<Pre>Type: If </Pre>
-							<Select options={GetEntries(MetaThesis_IfType, name=>GetMetaThesisIfTypeDisplayText(MetaThesis_IfType[name]))}
-								value={info.metaThesis.ifType} onChange={val=>Change(info.metaThesis.ifType = val)}/>
-							<Pre> premises below are true, they </Pre>
-							<Select options={thenTypes} value={info.metaThesis.thenType} onChange={val=>Change(info.metaThesis.thenType = val)}/>
-							<Pre>.</Pre>
-						</Row>}
-					{isArgument &&
-						<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
-							<Pre allowWrap={true}>{`
-The "type" option above describes the way in which this argument's premises will affect the conclusion (the parent thesis).${""
-} The premises can be added to the map right after adding this argument node.
-							`.trim()}
-							</Pre>
-						</Row>}
+				<Column style={{padding: "10px 0", width: 600}}>
+					<NodeDetailsUI baseData={newNode} baseLinkData={newLink} creating={true} parent={parentNode}
+						onChange={(newNodeData, newLinkData)=>Change(newNode = newNodeData, newLink = newLinkData)}/>
 				</Column>
 			);
 		},
@@ -124,29 +80,8 @@ The "type" option above describes the way in which this argument's premises will
 			/*if (quoteError) {
 				return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${quoteError}`}));
 			}*/
-			
-			let newChildNode = new MapNode({
-				parents: {[parentNode._id]: {_: true}},
-				type: childType, creator: userID, approved: true
-			});
-			if (childType == MapNodeType.Thesis && info.thesisType == "Normal") {
-				newChildNode.relative = info.relative;
-			}
-			if (childType == MapNodeType.Thesis && info.thesisType == `Content_Quote`) {
-				//newChildNode.contentNode = CleanUpdatedContentNode(Clone(info.contentNode));
-				newChildNode.contentNode = quoteEditor.GetUpdatedContentNode();
-			} else {
-				newChildNode.titles = thesisForm && thesisForm == ThesisForm.YesNoQuestion ? {yesNoQuestion: info.title} : {base: info.title};
-			}
 
-			if (isArgument) {
-				var metaThesisNode = new MapNode({
-					type: MapNodeType.Thesis, creator: userID, approved: true,
-					metaThesis: {ifType: info.metaThesis.ifType, thenType: info.metaThesis.thenType},
-				});
-			}
-
-			new AddNode({node: newChildNode, form: thesisForm, metaThesisNode}).Run();
+			new AddNode({node: newNode, link: newLink, metaThesisNode: newMetaThesis}).Run();
 		}
 	});
 }

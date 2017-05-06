@@ -17,9 +17,7 @@
 		"paths": {
 			"*": [
 				"node_modules/@types/*", // prefer "/node_modules/@types" over "/node_modules/[something]/node_modules/@types" (eg, when using npm link)
-				"*",
-				"node_modules_CustomExternal/*",
-				"node_modules_CustomInternal/*"
+				"*"
 			]
 		},
 
@@ -43,21 +41,15 @@
 	"include": [
 		"Typings/**/*.d.ts",
 		//"Typings/globals/**/*.d.ts",
-		"**/*.ts",
-		"**/*.tsx"
-		//"**/*.js",
-		//"**/*.jsx"
+		"Source/**/*.ts",
+		"Source/**/*.tsx"
+		//"Source/**/*.js",
+		//"Source/**/*.jsx"
 	],
 	"exclude": [
-		/*"index.android.js",
-		"index.ios.js",*/
 		"Build",
 		"Tests",
-		"node_modules",
-
-		// temp
-		"node_modules_CustomExternal"
-		//"node_modules_CustomInternal",
+		"node_modules"
 
 		/*"Typings/main",
 		"Typings/main.d.ts",

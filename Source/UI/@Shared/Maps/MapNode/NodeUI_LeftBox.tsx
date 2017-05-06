@@ -5,23 +5,28 @@ import {E} from "../../../../Frame/General/Globals_Free";
 import {connect} from "react-redux";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
-import {GetRatingAverage, GetRatings} from "../../../../Store/firebase/nodeRatings";
+import {GetRatingAverage, GetRatings, GetRatingForForm} from "../../../../Store/firebase/nodeRatings";
 import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {MetaThesis_ThenType} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
-import {GetRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetThesisFormAtPath} from "../../../../Store/firebase/nodes/$node";
+import {RootState} from "../../../../Store/index";
+import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 
 type Props = {
 	parent: MapNodeUI_Inner, map: Map, path: string, node: MapNode, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
 	backgroundColor: string, asHover: boolean
-};
+} & Partial<{form: ThesisForm}>;
+@Connect((state: RootState, {node, path}: Props)=>({
+	form: GetThesisFormAtPath(node, path),
+}))
 export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 	render() {
-		let {map, path, node, nodeView, ratingsRoot, backgroundColor, asHover} = this.props;
+		let {map, path, node, form, nodeView, ratingsRoot, backgroundColor, asHover} = this.props;
 
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
@@ -46,7 +51,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 								//percentStr = (average >= 100 ? "+" : "-") + average.Distance(100) + "%";
 								percentStr = (average < 0 ? "-" : average == 0 ? "" : "+") + average.Distance(0);*/
 							else
-								percentStr = average + "%";
+								percentStr = GetRatingForForm(average, form) + "%";
 						}
 						return (
 							<PanelButton key={ratingInfo.type} parent={this} map={map} path={path}

@@ -1,6 +1,6 @@
 import {Assert} from "../../../Frame/General/Assert";
 import {URL} from "../../../Frame/General/URLs";
-import {MapNode, ThesisForm} from "./@MapNode";
+import {MapNode, ThesisForm, ChildEntry} from "./@MapNode";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MetaThesis_ThenType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info} from "./@MetaThesisInfo";
 import {MapNodeType_Info, MapNodeType} from "./@MapNodeType";
@@ -44,10 +44,17 @@ export function GetRatingTypesForNode(node: MapNode): RatingTypeInfo[] {
 
 export function GetThesisFormAtPath(node: MapNode, path: string): ThesisForm {
 	let parent = GetParentNode(path);
-	if (parent == null) return ThesisForm.Base;
-	let link = parent.children[node._id];
+	return GetThesisFormUnderParent(node, parent);
+}
+export function GetThesisFormUnderParent(node: MapNode, parent: MapNode): ThesisForm {
+	let link = GetLinkUnderParent(node._id, parent);
 	if (link == null) return ThesisForm.Base;
 	return link.form;
+}
+export function GetLinkUnderParent(nodeID: number, parent: MapNode): ChildEntry {
+	if (parent == null) return null;
+	let link = parent.children[nodeID];
+	return link;
 }
 
 export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
@@ -55,7 +62,7 @@ export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
 	return null;
 }
 
-export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | string) {
+export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | string): string {
 	if (node.type == MapNodeType.Thesis) {
 		if (node.contentNode) {
 			return `The statement below was made`
@@ -73,9 +80,10 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 		if (formOrPath) {
 			let form = typeof formOrPath == "string" ? GetThesisFormAtPath(node, formOrPath) : formOrPath;
 			if (form == ThesisForm.Negation)
-				return node.titles["negation"] || "";
+				return node.titles["negation"] || "[negation title not set]";
 			if (form == ThesisForm.YesNoQuestion)
-				return node.titles["yesNoQuestion"] || "";
+				return node.titles["yesNoQuestion"] || "[yes-no-question title not set]";
+			return node.titles["base"] || "[base title not set]";
 		}
 	}
 	return node.titles["base"] || node.titles["yesNoQuestion"] || node.titles["negation"] || "";
