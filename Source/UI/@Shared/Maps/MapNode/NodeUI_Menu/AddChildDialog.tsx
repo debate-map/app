@@ -47,7 +47,7 @@ export function ShowAddChildDialog(parentNode: MapNode, childType: MapNodeType, 
 	});
 	let newLink = E(
 		{_: true},
-		childType == MapNodeType.Thesis && {form: ThesisForm.Base},
+		childType == MapNodeType.Thesis && {form: thesisForm},
 	) as ChildEntry;
 	let newMetaThesis: MapNode;
 	if (isArgument) {
