@@ -76,7 +76,7 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 		// only pass new nodeView when its local-props are different
 		nodeView: CachedTransform("nodeView_transform1", {mapID: map._id, path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
 		// only pass nodeChildren when all are loaded (and pass with finalTypes attached)
-		nodeChildren: CachedTransform("nodeChildren_transform1", {nodeID: node._id}, CombineDynamicPropMaps(nodeChildren, nodeChildren_finalTypes),
+		nodeChildren: CachedTransform("nodeChildren_transform1", {path}, CombineDynamicPropMaps(nodeChildren, nodeChildren_finalTypes),
 			()=>nodeChildren.map((child, index)=> {
 				return child.Extended({finalType: nodeChildren_finalTypes[index]});
 			})),
@@ -106,7 +106,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let {map, node, path, nodeWithFinalType, form, widthOverride, children, nodeView, nodeChildren, nodeChildren_fillPercents} = this.props;
 		let expanded = nodeView && nodeView.expanded;
 		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
-		//Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
+		Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
 		NodeUI.renderCount++;
 		NodeUI.lastRenderTime = Date.now();
 
