@@ -5,29 +5,40 @@ import {E} from "../../../../Frame/General/Globals_Free";
 import {connect} from "react-redux";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {MapNode, ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeWithFinalType} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
-import {GetRatingAverage, GetRatings, GetRatingForForm} from "../../../../Store/firebase/nodeRatings";
+import {GetRatingAverage, GetRatings, TransformRatingForContext, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {MetaThesis_ThenType} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
-import {GetRatingTypesForNode, GetThesisFormAtPath} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetThesisFormAtPath, GetNodeWithFinalType, IsContextReversed} from "../../../../Store/firebase/nodes/$node";
 import {RootState} from "../../../../Store/index";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
+import {SplicePath} from "./NodeUI/RatingsPanel";
+import {GetParentNode} from "../../../../Store/firebase/nodes";
+import {ReverseThenType} from "../../../../Store/firebase/nodes/$node/$metaThesis";
 
 type Props = {
 	parent: MapNodeUI_Inner, map: Map, path: string, node: MapNode, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
 	backgroundColor: string, asHover: boolean
-} & Partial<{form: ThesisForm}>;
+} & Partial<{form: ThesisForm, parentNode: MapNodeWithFinalType}>;
 @Connect((state: RootState, {node, path}: Props)=>({
 	form: GetThesisFormAtPath(node, path),
+	parentNode: GetNodeWithFinalType(GetParentNode(path), SplicePath(path, 1)),
 }))
 export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 	render() {
-		let {map, path, node, form, nodeView, ratingsRoot, backgroundColor, asHover} = this.props;
+		let {map, path, node, nodeView, ratingsRoot, backgroundColor, asHover, form, parentNode} = this.props;
 
+		let nodeReversed = form == ThesisForm.Negation;
+		let contextReversed = IsContextReversed(node, parentNode);
+		if (node.metaThesis) {
+			var thenType_final = node.metaThesis.thenType;
+			if (contextReversed)
+				thenType_final = ReverseThenType(thenType_final);
+		}
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		return (
@@ -45,13 +56,14 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 						let ratings = GetRatings(node._id, ratingInfo.type);
 						let average = GetRatingAverage(node._id, ratingInfo.type, null, -1);
 						if (average != -1) {
-							if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
-								percentStr = (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent ? "+" : "-") + average.Distance(50) + "%";
+							average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(ratingInfo.type, nodeReversed, contextReversed));
+							if (node.metaThesis && (thenType_final == MetaThesis_ThenType.StrengthenParent || thenType_final == MetaThesis_ThenType.WeakenParent))
+								percentStr = (thenType_final == MetaThesis_ThenType.StrengthenParent ? "+" : "-") + average.Distance(50) + "%";
 							/*else if (ratingInfo.type == "support")
 								//percentStr = (average >= 100 ? "+" : "-") + average.Distance(100) + "%";
 								percentStr = (average < 0 ? "-" : average == 0 ? "" : "+") + average.Distance(0);*/
 							else
-								percentStr = GetRatingForForm(average, form) + "%";
+								percentStr = average + "%";
 						}
 						return (
 							<PanelButton key={ratingInfo.type} parent={this} map={map} path={path}

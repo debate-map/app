@@ -81,6 +81,9 @@ AddSchema({
 	then: {required: ["titles"]},
 }, "MapNode");
 
+// helpers
+export type MapNodeWithFinalType = MapNode & {finalType: MapNodeType};
+
 export type ParentSet = { [key: number]: ParentEntry; };
 AddSchema({patternProperties: {"^[0-9]+$": {$ref: "ParentEntry"}}}, "ParentSet");
 export type ParentEntry = { _: boolean; }

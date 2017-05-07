@@ -1,4 +1,4 @@
-import {MapNode, ThesisForm} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeWithFinalType} from "../../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
@@ -32,13 +32,13 @@ import {HandleError} from "../../../../../Frame/General/Errors";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
 import CheckBox from "../../../../../Frame/ReactComponents/CheckBox";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
-import {GetThesisFormAtPath, GetLinkUnderParent} from "../../../../../Store/firebase/nodes/$node";
+import {GetThesisFormAtPath, GetLinkUnderParent, GetNodeWithFinalType} from "../../../../../Store/firebase/nodes/$node";
 import Column from "../../../../../Frame/ReactComponents/Column";
 import NodeDetailsUI from "../NodeDetailsUI";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-type DetailsPanel_Props = {node: MapNode, path: string, userID: string} & Partial<{creator: User}>;
+type DetailsPanel_Props = {node: MapNodeWithFinalType, path: string, userID: string} & Partial<{creator: User}>;
 @Connect((state, {node, path}: DetailsPanel_Props)=>({
 	_: GetUserPermissionGroups(GetUserID()),
 	creator: GetUser(node.creator),
@@ -53,13 +53,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 		let firebase = store.firebase.helpers;
 		//let {error} = this.state;
 
-		var parentNode = GetParentNode(path);
-		if (node.metaThesis) {
-			var thenTypes = parentNode.type == MapNodeType.SupportingArgument
-				? GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Take(2)
-				: GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Skip(2);
-		}
-		let thesisForm = GetThesisFormAtPath(node, path);
+		var parentNode = GetNodeWithFinalType(GetParentNode(path), path.split("/").slice(0, -1).join("/"));
 		let link = GetLinkUnderParent(node._id, parentNode);
 
 		let creatorOrMod = IsUserCreatorOrMod(userID, node);
@@ -119,7 +113,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 								this.detailsUI.asNegation &&
 									{form: this.detailsUI.asNegation.Checked ? ThesisForm.Negation : ThesisForm.Base},
 							));*/
-							let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children");
+							let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "finalType");
 							let linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
 							await new UpdateNodeDetails({nodeID: node._id, nodeUpdates, linkParentID: GetParentNodeID(path), linkUpdates}).Run();
 						}}/>

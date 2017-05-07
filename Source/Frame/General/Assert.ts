@@ -2,7 +2,7 @@ import {TT} from "./Types";
 import V from "../V/V";
 import {Log} from "./Logging";
 
-g.Extend({Assert});
+g.Extend({Assert}); declare global { function Assert(condition, messageOrMessageFunc?: string | Function); }
 export function Assert(condition, messageOrMessageFunc?: string | Function) {
 	if (condition) return;
 
@@ -13,7 +13,7 @@ export function Assert(condition, messageOrMessageFunc?: string | Function) {
 	debugger;
 	throw new Error("Assert failed) " + message);
 }
-g.Extend({AssertWarn});
+g.Extend({AssertWarn}); declare global { function AssertWarn(condition, messageOrMessageFunc?: string | Function); }
 export function AssertWarn(condition, messageOrMessageFunc?: string | Function) {
 	if (condition) return;
 

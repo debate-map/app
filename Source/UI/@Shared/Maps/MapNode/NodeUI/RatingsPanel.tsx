@@ -1,4 +1,4 @@
-import {GetRatingValue, GetRatingForForm} from "../../../../../Store/firebase/nodeRatings";
+import {GetRatingValue, TransformRatingForContext, ShouldRatingTypeBeReversed} from "../../../../../Store/firebase/nodeRatings";
 import * as jquery from "jquery";
 import {Log} from "../../../../../Frame/General/Logging";
 import {BaseComponent, FindDOM, Pre, RenderSource, SimpleShouldUpdate, FindDOM_} from "../../../../../Frame/UI/ReactGlobals";
@@ -18,10 +18,10 @@ import {GetUserID} from "../../../../../Store/firebase/users";
 import {RootState} from "../../../../../Store/index";
 import {GetRatingUISmoothing, ACTRatingUISmoothnessSet} from "../../../../../Store/main/ratingUI";
 import {GetNodeChildren, GetParentNode} from "../../../../../Store/firebase/nodes";
-import {MapNodeType_Info} from "../../../../../Store/firebase/nodes/@MapNodeType";
+import {MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {ShowSignInPopup} from "../../../NavBar/UserPanel";
-import {GetThesisFormAtPath} from "../../../../../Store/firebase/nodes/$node";
+import {GetThesisFormAtPath, GetNodeWithFinalType, IsContextReversed} from "../../../../../Store/firebase/nodes/$node";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -32,6 +32,12 @@ import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	{rating: 75, count: 3},
 	{rating: 100, count: 4},
 ];*/
+
+export function SplicePath(path: string, removeFromEndCount: number, ...itemsToAdd: string[]) {
+	let parts = path.split("/");
+	parts.splice(parts.length - removeFromEndCount, removeFromEndCount, ...itemsToAdd);
+	return parts.join("/");
+}
 
 type RatingsPanel_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]}
 	& Partial<{userID: string, /*myRating: number,*/ form: ThesisForm, nodeChildren: MapNode[], smoothing: number}>;
@@ -47,10 +53,15 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 		let firebase = store.firebase.helpers;
 		let {size} = this.state;
 
-		let parentNode = GetParentNode(path);
+		let parentNode = GetNodeWithFinalType(GetParentNode(path), SplicePath(path, 1));
+		let nodeReversed = form == ThesisForm.Negation;
+		let contextReversed = IsContextReversed(node, parentNode);
+		let reverseRatings = ShouldRatingTypeBeReversed(ratingType, nodeReversed, contextReversed);
+		let nodeTypeDisplayName = GetMapNodeTypeDisplayName(node.type, node, form);
+
 		let ratingTypeInfo = RatingType_Info.for[ratingType];
 		let options = typeof ratingTypeInfo.options == "function" ? ratingTypeInfo.options(node, parentNode) : ratingTypeInfo.options;
-		let myRating = GetRatingForForm((ratings.find(a=>a._key == userID) || {} as any).value, form);
+		let myRating = TransformRatingForContext((ratings.find(a=>a._key == userID) || {} as any).value, reverseRatings);
 
 		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(options.Max() == 200 ? [200] : []);
 		let minVal = options.Min(), maxVal = options.Max(), range = maxVal - minVal;
@@ -58,7 +69,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 		let ticksForChart = options.Select(a=>a.RoundTo(smoothing)).Distinct();
 		let dataFinal = ticksForChart.Select(a=>({rating: a, count: 0}));
 		for (let entry of ratings) {
-			let ratingVal = GetRatingForForm(entry.value, form);
+			let ratingVal = TransformRatingForContext(entry.value, reverseRatings);
 			let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(ratingVal)).First();
 			closestRatingSlot.count++;
 		}
@@ -72,6 +83,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 
 		/*let marginTop = myRating != null ? 20 : 10;
 		let height = myRating != null ? 260 : 250;*/
+
 
 		return (
 			<div ref="root" style={{position: "relative"/*, minWidth: 496*/}}
@@ -96,7 +108,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 						let finalRating = rating;
 						//let finalRating = GetRatingForForm(rating, form);
 						let boxController = ShowMessageBox({
-							title: `Rate ${ratingType} of ${MapNodeType_Info.for[node.type].displayName(GetParentNode(path))}`, cancelButton: true,
+							title: `Rate ${ratingType} of ${nodeTypeDisplayName}`, cancelButton: true,
 							messageUI: ()=>(
 								<div style={{padding: "10px 0"}}>
 									Rating: <Spinner min={options.Min()} max={options.Max()} style={{width: 60}}
@@ -105,7 +117,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 							),
 							onOK: ()=> {
 								// todo: have submitted date be based on local<>Firebase time-offset (retrieved from Firebase) [this prevents fail from security rules]
-								firebase.Ref(`nodeRatings/${node._id}/${ratingType}/${userID}`).set({updated: Date.now(), value: GetRatingForForm(finalRating, form)});
+								firebase.Ref(`nodeRatings/${node._id}/${ratingType}/${userID}`).set({updated: Date.now(), value: TransformRatingForContext(finalRating, reverseRatings)});
 							}
 						});
 					}}
@@ -113,7 +125,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 						if (myRating == null) return;
 						let boxController = ShowMessageBox({
 							title: `Delete rating`, cancelButton: true,
-							message: `Delete your "${ratingType}" rating for ${MapNodeType_Info.for[node.type].displayName(GetParentNode(path))}`,
+							message: `Delete your "${ratingType}" rating for ${nodeTypeDisplayName}`,
 							onOK: ()=> {
 								firebase.Ref(`nodeRatings/${node._id}/${ratingType}/${userID}`).set(null);
 							}

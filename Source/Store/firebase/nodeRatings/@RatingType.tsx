@@ -1,4 +1,4 @@
-import {MapNode} from "../nodes/@MapNode";
+import {MapNode, MapNodeWithFinalType} from "../nodes/@MapNode";
 import {Range} from "../../../Frame/General/Globals";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {MetaThesis_IfType} from "../nodes/@MetaThesisInfo";
@@ -110,11 +110,11 @@ export class RatingType_Info {
 			},
 			options: (node, parentNode)=> {
 				//if (parentNode == null) return Range(0, 100); // must support case where node is given standalone
-				return parentNode.type == MapNodeType.SupportingArgument ? Range(50, 100) : Range(0, 50);
+				return (parentNode["finalType"] || parentNode.type) == MapNodeType.SupportingArgument ? Range(50, 100) : Range(0, 50);
 			},
 			ticks: (node, parentNode)=> {
 				//if (parentNode == null) return Range(0, 100);
-				return parentNode.type == MapNodeType.SupportingArgument ? Range(50, 100, 5) : Range(0, 50, 5);
+				return (parentNode["finalType"] || parentNode.type) == MapNodeType.SupportingArgument ? Range(50, 100, 5) : Range(0, 50, 5);
 			},
 		}),
 		strength: new RatingType_Info({
@@ -130,9 +130,9 @@ export class RatingType_Info {
 	}
 
 	displayText: string;
-	description: ((node: MapNode, parentNode: MapNode)=>string);
-	options: ((node: MapNode, parentNode: MapNode)=>number[]);
-	ticks: ((node: MapNode, parentNode: MapNode)=>number[]); // for x-axis labels
+	description: ((node: MapNode, parentNode: MapNode | MapNodeWithFinalType)=>string);
+	options: ((node: MapNode, parentNode: MapNode | MapNodeWithFinalType)=>number[]);
+	ticks: ((node: MapNode, parentNode: MapNode | MapNodeWithFinalType)=>number[]); // for x-axis labels
 	//tickFormatter?: (tickValue: number)=>string = a=>a.toString();
 	tickRender?: (props: TickRenderProps)=>JSX.Element;
 	/*tickRender?: (props: TickRenderProps)=>JSX.Element = props=> {

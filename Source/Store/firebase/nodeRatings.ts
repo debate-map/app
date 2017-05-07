@@ -74,13 +74,19 @@ export function GetPaths_MainRatingAverage(node: MapNode) {
 		return mainRatingAverage != null ? mainRatingAverage.Distance(50) * 2 : 0;
 	return mainRatingAverage || 0;
 }*/
-export function GetFillPercentForRatingAverage(node: MapNode, ratingAverage: number, thesisForm?: ThesisForm) {
+export function GetFillPercentForRatingAverage(node: MapNode, ratingAverage: number, reverseRating?: boolean) {
+	ratingAverage = TransformRatingForContext(ratingAverage, reverseRating);
 	if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
 		return ratingAverage != null ? ratingAverage.Distance(50) * 2 : 0;
-	return GetRatingForForm(ratingAverage || 0, thesisForm);
+	return ratingAverage || 0;
 }
-export function GetRatingForForm(ratingValue: number, thesisForm: ThesisForm) {
-	if (thesisForm == ThesisForm.Negation)
+export function TransformRatingForContext(ratingValue: number, reverseRating: boolean) {
+	if (ratingValue == null) return null;
+	if (reverseRating)
 		return 100 - ratingValue;
 	return ratingValue;
+}
+
+export function ShouldRatingTypeBeReversed(ratingType: RatingType, nodeReversed: boolean, contextReversed: boolean) {
+	return nodeReversed || (contextReversed && ratingType == "adjustment");
 }

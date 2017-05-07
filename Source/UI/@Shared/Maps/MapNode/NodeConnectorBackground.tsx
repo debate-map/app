@@ -3,11 +3,21 @@ import NodeUI from "./NodeUI";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {A} from "../../../../Frame/General/Assert";
 import ShallowCompare from "react-addons-shallow-compare";
-import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, MapNodeWithFinalType} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {Connect} from "../../../../Frame/Database/FirebaseConnect";
+import {GetThesisFormUnderParent, GetRatingTypesForNode, GetFinalNodeTypeAtPath} from "../../../../Store/firebase/nodes/$node";
+import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 
-type Props = {node: MapNode, mainBoxOffset: Vector2i, childNodes: MapNode[], childBoxOffsets: Vector2i[], shouldUpdate: boolean};
+type Props = {node: MapNodeWithFinalType, mainBoxOffset: Vector2i, childNodes: MapNodeWithFinalType[], childBoxOffsets: Vector2i[], shouldUpdate: boolean};
+	//& Partial<{nodeChildren_finalNodeTypes: MapNodeType[]}>;
 @SimpleShouldUpdate_Overridable
+/*@Connect((state, {path, childNodes}: Props)=> ({
+	node_finalType: GetFinalNodeTypeAtPath(child, path + "/" + child._id),
+	nodeChildren_fillPercents: childNodes.map(child=> {
+		return GetFinalNodeTypeAtPath(child, path + "/" + child._id);
+	})
+}))*/
 export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 	render() {
 		var {node, mainBoxOffset, childNodes, childBoxOffsets} = this.props;
@@ -18,9 +28,9 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					/*result.push(<line key={"inputLine" + result.length} x1={inputPos.x} y1={inputPos.y}
 						x2={inputVal.position.x} y2={inputVal.position.y + 10} style={{stroke: "rgba(0,0,0,.5)", strokeWidth: 2}}/>);*/
 					let child = A.NonNull = childNodes[index];
-					let backgroundColor = node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument
-						? MapNodeType_Info.for[node.type].backgroundColor
-						: MapNodeType_Info.for[child.type].backgroundColor;
+					let backgroundColor = node.finalType == MapNodeType.SupportingArgument || node.finalType == MapNodeType.OpposingArgument
+						? MapNodeType_Info.for[node.finalType].backgroundColor
+						: MapNodeType_Info.for[child.finalType].backgroundColor;
 
 					/*var start = mainBoxOffset;
 					var startControl = start.Plus(30, 0);

@@ -16,8 +16,8 @@ import NodeUI_Menu from "./NodeUI_Menu";
 import V from "../../../../Frame/V/V";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {MapNode, ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
-import {GetNodeRatingsRoot, GetRatings, GetFillPercentForRatingAverage, GetRatingAverage, GetRatingValue} from "../../../../Store/firebase/nodeRatings";
+import {MapNode, ThesisForm, MapNodeWithFinalType} from "../../../../Store/firebase/nodes/@MapNode";
+import {GetNodeRatingsRoot, GetRatings, GetFillPercentForRatingAverage, GetRatingAverage, GetRatingValue, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {GetUserID} from "../../../../Store/firebase/users";
 import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RootState} from "../../../../Store/index";
@@ -36,7 +36,7 @@ import RatingsPanel from "./NodeUI/RatingsPanel";
 import DiscussionPanel from "./NodeUI/DiscussionPanel";
 import Row from "../../../../Frame/ReactComponents/Row";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
-import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetThesisFormUnderParent} from "../../../../Store/firebase/nodes/$node";
+import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetThesisFormUnderParent, GetThesisFormAtPath, GetFinalNodeTypeAtPath, GetNodeWithFinalType, IsContextReversed} from "../../../../Store/firebase/nodes/$node";
 import {ContentNode, SourceChain} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {URL} from "../../../../Frame/General/URLs";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
@@ -44,6 +44,7 @@ import {GetTerm, GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import {Term} from "../../../../Store/firebase/terms/@Term";
 import {ParseSegmentsForPatterns} from "../../../../Frame/General/RegexHelpers";
 import {GetParentNode} from "../../../../Store/firebase/nodes";
+import {SplicePath} from "./NodeUI/RatingsPanel";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -51,31 +52,37 @@ import {GetParentNode} from "../../../../Store/firebase/nodes";
 
 //export type NodeHoverExtras = {panel?: string, term?: number};
 
-type Props = {map: Map, node: MapNode, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
-	& Partial<{form: ThesisForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
+type Props = {map: Map, node: MapNodeWithFinalType, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
+	& Partial<{finalNodeType: MapNodeType, form: ThesisForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
 //@FirebaseConnect((props: Props)=>((props[`holder`] = props[`holder`] || {}), [
 /*@FirebaseConnect((props: Props)=>[
 	...GetPaths_NodeRatingsRoot(props.node._id),
 ])*/
 @Connect((state: RootState, {node, path, ratingsRoot}: Props)=> ({
-	form: GetThesisFormUnderParent(node, GetParentNode(path)),
+	finalNodeType: GetFinalNodeTypeAtPath(node, path),
+	form: GetThesisFormAtPath(node, path),
 	ratingsRoot: GetNodeRatingsRoot(node._id),
 	mainRating_average: GetRatingAverage(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type),
 	userID: GetUserID(),
 }))
 export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, hoverPanel: string, hoverTermID: number, clickTermID: number}> {
 	render() {
-		let {map, node, nodeView, path, width, widthOverride, form, ratingsRoot, mainRating_average, userID} = this.props;
+		let {map, node, nodeView, path, width, widthOverride, finalNodeType, form, ratingsRoot, mainRating_average, userID} = this.props;
 		let firebase = store.firebase.helpers;
 		let {hovered, hoverPanel, hoverTermID, clickTermID} = this.state;
-		let nodeTypeInfo = MapNodeType_Info.for[node.type];
+		let nodeTypeInfo = MapNodeType_Info.for[finalNodeType];
 		let barSize = 5;
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
-		//let parentNode = GetParentNode(path);
+		let mainRatingType = GetRatingTypesForNode(node).FirstOrX(null, {}).type;
 
-		let mainRating_mine = GetRatingValue(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type, userID);
-		let mainRating_fillPercent = GetFillPercentForRatingAverage(node, mainRating_average, form);
-		let mainRating_myFillPercent = mainRating_mine != null ? GetFillPercentForRatingAverage(node, mainRating_mine, form) : null;
+		let parentNode = GetNodeWithFinalType(GetParentNode(path), SplicePath(path, 1));
+		let nodeReversed = form == ThesisForm.Negation;
+		let contextReversed = IsContextReversed(node, parentNode);
+		let ratingReversed = ShouldRatingTypeBeReversed(mainRatingType, nodeReversed, contextReversed);
+
+		let mainRating_mine = GetRatingValue(node._id, mainRatingType, userID);
+		let mainRating_fillPercent = GetFillPercentForRatingAverage(node, mainRating_average, form == ThesisForm.Negation);
+		let mainRating_myFillPercent = mainRating_mine != null ? GetFillPercentForRatingAverage(node, mainRating_mine, form == ThesisForm.Negation) : null;
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
 		let panelToShow = hoverPanel || (nodeView && nodeView.openPanel);

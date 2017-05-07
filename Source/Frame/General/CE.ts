@@ -202,7 +202,7 @@ Object.prototype._AddFunction_Inline = function VSet(...args) {
 	}
 	return this;
 };
-interface Object { Extended<T>(this: T, x): T; }
+interface Object { Extended<T, T2>(this: T, x: T2): T & T2; }
 Object.prototype._AddFunction_Inline = function Extended(x) {
 	var result = {};
 	for (var name in this)
@@ -213,10 +213,10 @@ Object.prototype._AddFunction_Inline = function Extended(x) {
 	}
     return result;
 };
-interface Object { Extended2<T>(this, x: T): T; }
+/*interface Object { Extended2<T>(this, x: T): T; }
 Object.prototype._AddFunction_Inline = function Extended2(x) {
 	return this.Extended(x);
-};
+};*/
 //Object.prototype._AddFunction_Inline = function E(x) { return this.Extended(x); };
 
 interface Object { VAct<T>(this: T, func: (self: T)=>any): T; }

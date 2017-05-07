@@ -1,12 +1,14 @@
 import {Assert} from "../../../Frame/General/Assert";
 import {URL} from "../../../Frame/General/URLs";
-import {MapNode, ThesisForm, ChildEntry} from "./@MapNode";
+import {MapNode, ThesisForm, ChildEntry, MapNodeWithFinalType} from "./@MapNode";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MetaThesis_ThenType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info} from "./@MetaThesisInfo";
 import {MapNodeType_Info, MapNodeType} from "./@MapNodeType";
-import {GetParentNode, IsLinkValid, IsNewLinkValid} from "../nodes";
+import {IsLinkValid, IsNewLinkValid, GetParentNode} from "../nodes";
 import {GetValues} from "../../../Frame/General/Enums";
 import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
+import {CachedTransform} from "../../../Frame/V/VCache";
+import {ReverseThenType} from "./$node/$metaThesis";
 
 export function GetFontSizeForNode(node: MapNode) {
 	return node.metaThesis ? 11 : 14;
@@ -42,6 +44,29 @@ export function GetRatingTypesForNode(node: MapNode): RatingTypeInfo[] {
 	Assert(false);
 }
 
+export function ReverseMapNodeType(nodeType: MapNodeType) {
+	if (nodeType == MapNodeType.SupportingArgument) return MapNodeType.OpposingArgument;
+	if (nodeType == MapNodeType.OpposingArgument) return MapNodeType.SupportingArgument;
+	return nodeType;
+}
+
+export function GetFinalNodeTypeAtPath(node: MapNode, path: string): MapNodeType {
+	let result = node.type;
+	if (node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument) {
+		let parent = GetParentNode(path);
+		let parentForm = GetThesisFormAtPath(parent, path.split("/").slice(0, -1).join("/"));
+		if (parentForm == ThesisForm.Negation)
+			result = ReverseMapNodeType(node.type);
+	}
+	return result;
+}
+export function GetNodeWithFinalType(node: MapNode, path: string) {
+	if (node == null) return null;
+	let node_finalType = GetFinalNodeTypeAtPath(node, path);
+	let nodeWithFinalType = node.Extended({finalType: node_finalType}) as MapNodeWithFinalType;
+	return CachedTransform("GetNodeWithFinalType", {nodeID: node._id}, nodeWithFinalType, ()=>nodeWithFinalType);
+}
+
 export function GetThesisFormAtPath(node: MapNode, path: string): ThesisForm {
 	let parent = GetParentNode(path);
 	return GetThesisFormUnderParent(node, parent);
@@ -73,8 +98,12 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 				+ `, and is unmodified.`;
 		}
 		if (node.metaThesis) {
+			let thenType_final = node.metaThesis.thenType;
+			let parent = IsString(formOrPath) ? GetParentNode(formOrPath as string) : null;
+			if (parent && GetNodeWithFinalType(parent, (formOrPath as string).split("/").slice(0, -1).join("/")).finalType != parent.type)
+				thenType_final = ReverseThenType(thenType_final);
 			return `If ${GetMetaThesisIfTypeDisplayText(node.metaThesis.ifType)} premises below are true, they ${
-				MetaThesis_ThenType_Info.for[MetaThesis_ThenType[node.metaThesis.thenType]].displayText}.`;
+				MetaThesis_ThenType_Info.for[MetaThesis_ThenType[thenType_final]].displayText}.`;
 		}
 
 		if (formOrPath) {
@@ -98,4 +127,8 @@ export function GetValidNewChildTypes(nodeType: MapNodeType, path: string, permi
 	let nodeTypes = GetValues<MapNodeType>(MapNodeType);
 	let validChildTypes = nodeTypes.filter(type=>IsNewLinkValid(nodeType, path, {type} as any, permissions));
 	return validChildTypes;
+}
+
+export function IsContextReversed(node: MapNode, parentNode: MapNodeWithFinalType) {
+	return node.metaThesis && parentNode.finalType != parentNode.type;
 }

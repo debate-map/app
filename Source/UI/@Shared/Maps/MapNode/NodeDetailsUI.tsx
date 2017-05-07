@@ -17,15 +17,16 @@ import TermComponent from "../../../../Store/firebase/termComponents/@TermCompon
 import {GetNiceNameForTermType} from "../../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import {MapNode, ThesisForm, ChildEntry} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry, MapNodeWithFinalType} from "../../../../Store/firebase/nodes/@MapNode";
 import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {MetaThesis_IfType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
 import {GetParentNode} from "../../../../Store/firebase/nodes";
-import {GetThesisFormAtPath, GetThesisFormUnderParent} from "../../../../Store/firebase/nodes/$node";
+import {GetThesisFormAtPath, GetThesisFormUnderParent, IsContextReversed} from "../../../../Store/firebase/nodes/$node";
+import {ReverseThenType} from "../../../../Store/firebase/nodes/$node/$metaThesis";
 
 type Props = {
-	baseData: MapNode, baseLinkData: ChildEntry, parent: MapNode, creating: boolean, editing?: boolean, style?, onChange?: (newData: MapNode, newLinkData: ChildEntry)=>void,
+	baseData: MapNodeWithFinalType, baseLinkData: ChildEntry, parent: MapNodeWithFinalType, creating: boolean, editing?: boolean, style?, onChange?: (newData: MapNode, newLinkData: ChildEntry)=>void,
 	//onSetError: (error: string)=>void,
 } & Partial<{creator: User}>;
 @Connect((state, {baseData, creating}: Props)=>({
@@ -34,14 +35,14 @@ type Props = {
 export default class NodeDetailsUI extends BaseComponent<Props, {newData: MapNode, newLinkData: ChildEntry}> {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
-			this.SetState({newData: Clone(props.baseData), newLinkData: Clone(props.baseLinkData)});
+			this.SetState({newData: Clone(props.baseData).Excluding("finalType"), newLinkData: Clone(props.baseLinkData)});
 	}
 
 	quoteEditor: QuoteInfoEditorUI;
 	relative: CheckBox;
 	asNegation: CheckBox;
 	render() {
-		let {parent, creating, editing, style, onChange, creator} = this.props;
+		let {baseData, parent, creating, editing, style, onChange, creator} = this.props;
 		let {newData, newLinkData} = this.state;
 		let firebase = store.firebase.helpers;
 		let Change = _=> {
@@ -51,10 +52,15 @@ export default class NodeDetailsUI extends BaseComponent<Props, {newData: MapNod
 		};
 
 		//var parentNode = GetParentNode(path);
-		let isArgument = newData.type == MapNodeType.SupportingArgument || newData.type == MapNodeType.OpposingArgument;
-		let thenTypes = newData.type == MapNodeType.SupportingArgument
+		let isArgument = baseData.finalType == MapNodeType.SupportingArgument || baseData.finalType == MapNodeType.OpposingArgument;
+		let reverseThenTypes = IsContextReversed(baseData, parent);
+		let GetThenType_ForRender = thenType=>reverseThenTypes ? ReverseThenType(thenType) : thenType;
+		let thenTypes_forRender = parent.finalType == MapNodeType.SupportingArgument
 			? GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Take(2)
 			: GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Skip(2);
+		/*for (let entry of thenTypes_final) {
+			entry.value = FinalizeThenType(entry.value);
+		}*/
 
 		let splitAt = 170, width = 600;
 		return (
@@ -128,7 +134,8 @@ The detailed version of the argument will be embodied in its premises/child-thes
 									Change(newData.metaThesis.ifType = val);
 								}}/>
 							<Pre> premises below are true, they </Pre>
-							<Select options={thenTypes} enabled={editing} value={newData.metaThesis.thenType} onChange={val=> {
+							<Select options={thenTypes_forRender} enabled={editing} value={GetThenType_ForRender(newData.metaThesis.thenType)} onChange={val=> {
+								val = GetThenType_ForRender(val);
 								//firebase.Ref(`nodes/${newData._id}/metaThesis`).update({thenType: val});
 								Change(newData.metaThesis.thenType = val);
 							}}/>
@@ -174,8 +181,14 @@ The "type" option above describes the way in which this argument's premises will
 	}
 
 	GetNewData() {
+		let {parent} = this.props;
 		let {newData} = this.state;
-		return Clone(newData) as MapNode;
+		let result = Clone(newData) as MapNode;
+		//if (baseData.finalType != baseData.type) { // if node's type was reversed, under "negation" thesis
+		/*if (IsContextReversed(newData, parent)) { // if parent is reversed, reverse ui-set then-type to get real then-type
+			result.metaThesis.thenType = ReverseThenType(result.metaThesis.thenType);
+		}*/
+		return result;
 	}
 	GetNewLinkData() {
 		let {newLinkData} = this.state;

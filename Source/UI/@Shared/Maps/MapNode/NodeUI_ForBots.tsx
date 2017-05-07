@@ -86,7 +86,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 					{/*<Row>ID: {node._id}</Row>
 					<Row>Title: {GetNodeDisplayText(node)}</Row>*/}
 					Main box:
-					<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={{}} path={path} width={null} widthOverride={null}/>
+					<NodeUI_Inner ref="innerBox" map={map} node={node.Extended({finalType: node.type})} nodeView={{}} path={path} width={null} widthOverride={null}/>
 					Panels:
 					{GetRatingTypesForNode(node).map((ratingInfo, index)=> {
 						let ratings = GetRatings(node._id, ratingInfo.type);
@@ -96,7 +96,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 					<DiscussionPanel/>
 					<SocialPanel/>
 					<TagsPanel/>
-					<DetailsPanel node={node} path={path} userID={null}/>
+					<DetailsPanel node={node.Extended({finalType: node.type})} path={path} userID={null}/>
 					<OthersPanel/>
 				</article>
 			</ScrollView>

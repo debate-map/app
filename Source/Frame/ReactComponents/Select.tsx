@@ -84,8 +84,8 @@ export default class Select extends BaseComponent
 		let valueValid = this.GetIndexOfValue(value) != -1;
 		// if there are no options yet, or value provided is null, don't require match, since this may be a pre-data render
 		if (options.length && value != null && verifyValue) {
-			Assert((valueValid), `Select's value must match one of the options. @options(${
-				options.Select(a=>a.name).join(", ")}) @value(${value})`);
+			AssertWarn((valueValid), `Select's value must match one of the options. @options(${
+				options.Select(a=>a.name + ":" + a.value).join(", ")}) @value(${value})`);
 		}
 
 	    /*var newChildren = this.FlattenedChildren.map((child: any, index)=> {

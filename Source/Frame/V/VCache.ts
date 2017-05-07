@@ -67,3 +67,13 @@ export function CachedTransform<T, T2, T3>(transformType: string, staticProps: T
 	}
 	return storage.lastResult;
 }
+
+export function CombineDynamicPropMaps(...maps) {
+	var result = {};
+	for (var [mapIndex, map] of maps.entries()) {
+		for (var key in map) {
+			result[mapIndex + "_" + key] = map[key];
+		}
+	}
+	return result;
+}

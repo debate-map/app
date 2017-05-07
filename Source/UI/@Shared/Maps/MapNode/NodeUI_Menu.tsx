@@ -1,8 +1,9 @@
+import DeleteNode from "../../../../Server/Commands/DeleteNode";
 import {GetDataAsync, RemoveHelpers} from "../../../../Frame/Database/DatabaseHelpers";
-import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, MapNodeWithFinalType} from "../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {VMenuStub} from "react-vmenu";
-import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Type} from "../../../../Frame/General/Types";
 import {GetUserID, GetUserPermissionGroups} from "../../../../Store/firebase/users";
 import {RootState} from "../../../../Store";
@@ -30,9 +31,9 @@ import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import {GetNodeChildren} from "../../../../Store/firebase/nodes";
 import {E} from "../../../../Frame/General/Globals_Free";
 import AddNode from "../../../../Server/Commands/AddNode";
-import {GetNodeDisplayText, GetValidNewChildTypes, GetThesisFormAtPath} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeDisplayText, GetValidNewChildTypes, GetThesisFormAtPath, ReverseMapNodeType, GetThesisFormUnderParent} from "../../../../Store/firebase/nodes/$node";
 
-type Props = {node: MapNode, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNode, copiedNode: MapNode}>;
+type Props = {node: MapNodeWithFinalType, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNodeWithFinalType, copiedNode: MapNode}>;
 @Connect((state: RootState, {path}: Props)=> {
 	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 	return {
@@ -49,6 +50,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
 		let validChildTypes = GetValidNewChildTypes(node.type, path, permissions);
+		let form = GetThesisFormAtPath(node, path);
 		let thesisFormForThesisChild = node.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base;
 
 		let nodeText = GetNodeDisplayText(node, path);
@@ -57,13 +59,17 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 			<VMenuStub preOpen={e=>e.passThrough != true}>
 				{IsUserBasicOrAnon(userID) && validChildTypes.map(childType=> {
 					let childTypeInfo = MapNodeType_Info.for[childType];
-					let displayName = childTypeInfo.displayName(node);
+					//let displayName = GetMapNodeTypeDisplayName(childType, node, form);
+					let displayName = GetMapNodeTypeDisplayName(childType, node, ThesisForm.Base);
 					return (
 						<VMenuItem key={childType} text={`Add ${displayName}`} style={styles.vMenuItem} onClick={e=> {
 							if (e.button != 0) return;
 							if (userID == null) return ShowSignInPopup();
-
-							ShowAddChildDialog(node, childType, userID);
+							
+							let childType_real = childType;
+							if (parentNode.finalType != parentNode.type)
+								childType_real = ReverseMapNodeType(childType_real);
+							ShowAddChildDialog(node, form, childType_real, userID);
 						}}/>
 					);
 				})}
@@ -171,15 +177,15 @@ If not, paste the argument as a clone instead.`
 						}
 					});
 				}}/>}
-				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Delete" style={styles.vMenuItem} onClick={async e=> {
+				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Delete" style={styles.vMenuItem} onClick={e=> {
 					if (e.button != 0) return;
 					let error = ForDelete_GetError(userID, node);
 					if (error) {
 						return void ShowMessageBox({title: `Cannot delete`, message: error});
 					}
 
-					let parentNodes = await GetNodeParentsAsync(node);
-					if (parentNodes.length > 1) {
+					//let parentNodes = await GetNodeParentsAsync(node);
+					if (node.parents.VKeys(true).length > 1) {
 						return void ShowMessageBox({title: `Cannot delete`, message: `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`});
 					}
 					//let s_ifParents = parentNodes.length > 1 ? "s" : "";
@@ -192,26 +198,7 @@ If not, paste the argument as a clone instead.`
 							+ `, and its link${s_ifParents} with ${parentNodes.length} parent${s_ifParents}?`,*/
 						message: `Delete the node "${nodeText}"${metaThesisID ? `, its 1 meta-thesis` : ``}, and its link with 1 parent?`,
 						onOK: ()=> {
-							firebase.Ref().transaction(data=> {
-								if (!data) return data;
-
-								for (let parent of parentNodes) {
-									//data.nodes[node._id].parents[parent._id] = null;
-									data.nodes[parent._id].children[node._id] = null;
-								}
-								data.nodes[node._id] = null;
-								data.nodeExtras[node._id] = null;
-								data.nodeRatings[node._id] = null;
-
-								// if has meta-thesis, delete it also
-								if (metaThesisID) {
-									data.nodes[metaThesisID] = null;
-									data.nodeExtras[metaThesisID] = null;
-									data.nodeRatings[metaThesisID] = null;
-								}
-								
-								return data;
-							}, undefined, false);
+							new DeleteNode({nodeID: node._id}).Run();
 						}
 					});
 				}}/>}
