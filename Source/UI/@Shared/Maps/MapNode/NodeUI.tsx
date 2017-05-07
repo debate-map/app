@@ -106,7 +106,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let {map, node, path, nodeWithFinalType, form, widthOverride, children, nodeView, nodeChildren, nodeChildren_fillPercents} = this.props;
 		let expanded = nodeView && nodeView.expanded;
 		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
-		Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
+		//Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
 		NodeUI.renderCount++;
 		NodeUI.lastRenderTime = Date.now();
 
