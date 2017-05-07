@@ -7,53 +7,7 @@ import {styles} from "../../Frame/UI/GlobalStyles";
 //import Markdown from "react-remarkable";
 var Markdown = require("react-remarkable");
 
-/*let pageText = `
-### Social
-
-* Facebook: <https://www.facebook.com/debatemap>
-* Twitter: <https://twitter.com/debatemaps>
-* Reddit: <https://www.reddit.com/r/DebateMap>
-* YouTube: <https://www.youtube.com/channel/UC2lP4zM7Mcm9_dO92gjpy_w>
-
-### Support and development
-
-* Gitter (chat): <https://gitter.im/DebateMap/Lobby>
-* Github (source code): <https://github.com/Venryx/DebateMap>
-
-### Other websites
-
-The following is a list of websites with goals similar to this project's.
-
-Clarity: how efficiently you can parse information and arguments from the presented data.
-
-| Site | Clarity, when shallow | Clarity, when deep | Editing efficiency |
-|---|---|---|---|---|
-| [Arguman](http://en.arguman.org) | 80% | 70% | 80%	|
-| [ProCon](http://www.procon.org) | ... | ... | ... |
-| [DebateGraph](http://debategraph.org) | ... | ... | ... |
-| [Netvist](https://netivist.org) | ... | ... | ... |
-| [Debucate](https://www.debucate.com) | ... | ... | ... |
-| [TruthMapping](https://www.truthmapping.com) | ... | ... | ... |
-| [Debate](http://www.debate.org): | ...  | ... | ... |
-| [YourView](http://yourview-production.herokuapp.com) | ... | ... | ... |
-| [DebateHub](https://debatehub.net) | ... | ... | ... |
-| [DebateWise](http://debatewise.org) | ... | ... | ... |
-| [CreateDebate](http://www.createdebate.com) | ... | ... | ... |
-| [ConvinceMe](http://www.convinceme.net) | ... | ... | ... |
-| [Quibl](http://www.quibl.com) | ... | ... | ... |
-| [Cohere](http://cohere.open.ac.uk) | ... | ... | ... |
-| [LettuceDebate](http://www.lettucedebate.com) | ... | ... | ... |
-| [Banter](https://banter.wiki) | ... | ... | ... |
-`;*/
-
-@SimpleShouldUpdate
-export default class LinksUI extends BaseComponent<{}, {}> {
-	render() {
-		let {page, match} = this.props;
-		return (
-			<article className="selectableAC" style={styles.page}>
-				{/*<VReactMarkdown className="selectable" source={pageText} containerProps={{style: styles.page}}/>*/}
-				<Markdown container="div" source={`
+let pageText = `
 ### Social
 
 * Facebook: [https://www.facebook.com/debatemap](https://www.facebook.com/debatemap)
@@ -95,7 +49,16 @@ Criteria:
 | [Cohere](http://cohere.open.ac.uk) | ... | ... | ... | ... |
 | [LettuceDebate](http://www.lettucedebate.com) | ... | ... | ... | ... |
 | [Banter](https://banter.wiki) | ... | ... | ... | ... |
-				`}/>
+`;
+
+@SimpleShouldUpdate
+export default class LinksUI extends BaseComponent<{}, {}> {
+	render() {
+		let {page, match} = this.props;
+		return (
+			<article className="selectableAC" style={styles.page}>
+				{/*<VReactMarkdown className="selectable" source={pageText} containerProps={{style: styles.page}}/>*/}
+				<Markdown container="div" source={pageText}/>
 			</article>
 		);
 	}
