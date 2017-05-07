@@ -12,7 +12,7 @@ import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import UserExtraInfo from "../../Store/firebase/userExtras/@UserExtraInfo";
 import Column from "../../Frame/ReactComponents/Column";
 import Row from "../../Frame/ReactComponents/Row";
-import {User} from "../../Store/firebase/users";
+import {User, GetUserID} from "../../Store/firebase/users";
 import {RatingsSet} from "../../Store/firebase/nodeRatings/@RatingsRoot";
 import * as Firebase from "firebase";
 //import "./Admin/DBUpgrades/UpgradeDB_2";
@@ -21,6 +21,7 @@ import {DataSnapshot} from "firebase";
 import {Term} from "../../Store/firebase/terms/@Term";
 import TermComponent from "../../Store/firebase/termComponents/@TermComponent";
 import {FirebaseData} from "../../Store/firebase";
+import {IsUserAdmin} from "../../Store/firebase/userExtras";
 
 // upgrade-funcs
 var upgradeFuncs; // populated by modules below
@@ -50,6 +51,9 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 	}*/
 
 	render() {
+		let admin = IsUserAdmin(GetUserID());
+		if (!admin) return <Column style={E(styles.page)}>Please sign in.</Column>;
+
 		return (
 			<Column style={E(styles.page)}>
 				<Row m="-10px 0"><h2>Database</h2></Row>

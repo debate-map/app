@@ -6,7 +6,7 @@ export const rootPages = [
 	"search", "profile"
 ];
 export const rootPageDefaultChilds = {
-	more: "admin",
+	more: "links",
 	home: "home",
 	content: "terms",
 	global: "map",

@@ -6,13 +6,14 @@ import {Route, Switch} from "react-router-dom";
 import GlobalMapUI from "./Global/GlobalMapUI";
 import ScrollView from "react-vscrollview";
 import GlobalListUI from "./Global/GlobalListUI";
+import Column from "../Frame/ReactComponents/Column";
 
 export default class GlobalUI extends BaseComponent<{}, {}> {
 	render() {
 		//let {match: {url: path} = {} as any} = this.props;
 		let path = "/global";
 		return (
-			<div style={{height: "100%"}}>
+			<Column style={{height: "100%"}}>
 				{/*<SubNavbar fullWidth={true}>*/}
 				<SubNavBar>
 					<SubNavBarButton to={path} toImplied={path + "/map"} text="Map"/>
@@ -22,7 +23,7 @@ export default class GlobalUI extends BaseComponent<{}, {}> {
 					<Route path={path + "/list"} component={GlobalListUI}/>
 					<Route component={GlobalMapUI}/>
 				</Switch>
-			</div>
+			</Column>
 		);
 	}
 }

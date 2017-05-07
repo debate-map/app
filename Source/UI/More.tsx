@@ -10,6 +10,10 @@ import {GetUserID, GetUserPermissionGroups, GetUsers} from "../Store/firebase/us
 import {styles} from "../Frame/UI/GlobalStyles";
 import {connect} from "react-redux";
 import {RootState} from "../Store/index";
+import LinksUI from "./More/Links";
+import {Switch} from "react-router-dom";
+import ScrollView from "react-vscrollview";
+import Column from "../Frame/ReactComponents/Column";
 
 /*@(connect((state: RootState)=> ({
 	userID: state.firebase.get("auth") ? state.firebase.get("auth").uid : null,
@@ -24,13 +28,18 @@ export default class MoreUI extends BaseComponent<{page?} & Partial<{userCount: 
 		let path = "/more";
 		let admin = IsUserAdmin(GetUserID());
 		return (
-			<div>
+			<Column style={{height: "100%"}}>
 				<SubNavBar>
-					{admin && <SubNavBarButton to={path} toImplied={path + "/admin"} text="Admin"/>}
+					<SubNavBarButton to={path} toImplied={path + "/links"} text="Links"/>
+					{admin && <SubNavBarButton to={path + "/admin"} text="Admin"/>}
 				</SubNavBar>
-				{admin && <Route path={path} component={AdminUI}/>}
-				{!admin && <div style={styles.page}>More page is under development.</div>}
-			</div>
+				<ScrollView style={{flex: `1 1 100%`}} scrollVBarStyle={{width: 10}}>
+					<Switch>
+						<Route path={path + "/admin"} component={AdminUI}/>
+						<Route component={LinksUI}/>
+					</Switch>
+				</ScrollView>
+			</Column>
 		);
 	}
 }

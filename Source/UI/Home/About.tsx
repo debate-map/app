@@ -65,11 +65,11 @@ export default class AboutUI extends BaseComponent<{}, {}> {
 			<article>
 				<VReactMarkdown className="selectable" source={pageText}
 					containerProps={{style: styles.page}}
-					renderers={{
+					/*renderers={{
 						Text: props=> {
 							return <span style={{color: "rgba(255,255,255,.7)"}}>{props.literal}</span>;
 						}
-					}}
+					}}*/
 				/>
 			</article>
 		);

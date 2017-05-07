@@ -4,26 +4,29 @@ import {BaseComponent, BaseProps} from "../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../Frame/ReactComponents/VReactMarkdown";
 import SubNavBar from "./@Shared/SubNavBar";
 import {SubNavBarButton} from "./@Shared/SubNavBar";
-import {Route} from "react-router-dom";
+import {Route, Switch} from "react-router-dom";
 import HomeUI2 from "./Home/Home";
 import AboutUI from "./Home/About";
 import ScrollView from "react-vscrollview";
+import Column from "../Frame/ReactComponents/Column";
 
 export default class HomeUI extends BaseComponent<{}, {}> {
 	render() {
 		//let {page, match: {url: path} = {} as any} = this.props;
 		let path = ``, pathImplied = `/home`;
 		return (
-			<div style={{height: `100%`, display: `flex`, flexDirection: `column`}}>
+			<Column style={{height: "100%"}}>
 				<SubNavBar>
 					<SubNavBarButton to={path + `/`} toImplied={pathImplied + `/home`} text="Home"/>
 					<SubNavBarButton to={path + `/about`} toImplied={pathImplied + `/about`} text="About"/>
 				</SubNavBar>
 				<ScrollView id="HomeScrollView" style={{flex: `1 1 100%`}} scrollVBarStyle={{width: 10}}>
-					<Route path={path + `/`} exact={true} component={HomeUI2}/>
-					<Route path={path + `/about`} component={AboutUI}/>
+					<Switch>
+						<Route path={path + `/about`} component={AboutUI}/>
+						<Route path={path + `/`} component={HomeUI2}/>
+					</Switch>
 				</ScrollView>
-			</div>
+			</Column>
 		);
 	}
 }
