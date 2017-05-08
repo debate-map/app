@@ -32,8 +32,9 @@ import {GetNodeChildren} from "../../../../Store/firebase/nodes";
 import {E} from "../../../../Frame/General/Globals_Free";
 import AddNode from "../../../../Server/Commands/AddNode";
 import {GetNodeDisplayText, GetValidNewChildTypes, GetThesisFormAtPath, ReverseMapNodeType} from "../../../../Store/firebase/nodes/$node";
+import {Map} from "../../../../Store/firebase/maps/@Map";
 
-type Props = {node: MapNodeEnhanced, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode}>;
+type Props = {map: Map, node: MapNodeEnhanced, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode}>;
 @Connect((state: RootState, {path}: Props)=> {
 	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 	return {
@@ -45,7 +46,7 @@ type Props = {node: MapNodeEnhanced, path: string} & Partial<{permissions: Permi
 })
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {
-		let {node, path, permissions, parentNode, copiedNode} = this.props;
+		let {map, node, path, permissions, parentNode, copiedNode} = this.props;
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
@@ -69,7 +70,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							let childType_real = childType;
 							if (parentNode.finalType != parentNode.type)
 								childType_real = ReverseMapNodeType(childType_real);
-							ShowAddChildDialog(node, form, childType_real, userID);
+							ShowAddChildDialog(node, form, childType_real, userID, map._id, path);
 						}}/>
 					);
 				})}

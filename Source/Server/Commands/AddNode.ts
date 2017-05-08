@@ -59,5 +59,7 @@ export default class AddNode extends Command<{node: MapNode, link: ChildEntry, m
 			}
 		}
 		await firebase.Ref().update(updates);
+
+		return nodeID;
 	}
 }

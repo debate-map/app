@@ -35,7 +35,7 @@ type Props = {
 export default class NodeDetailsUI extends BaseComponent<Props, {newData: MapNode, newLinkData: ChildEntry}> {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
-			this.SetState({newData: Clone(props.baseData).Excluding("finalType"), newLinkData: Clone(props.baseLinkData)});
+			this.SetState({newData: Clone(props.baseData).Excluding("finalType", "link"), newLinkData: Clone(props.baseLinkData)});
 	}
 
 	quoteEditor: QuoteInfoEditorUI;

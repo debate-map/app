@@ -126,7 +126,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						{node.type == MapNodeType.Thesis && node.contentNode &&
 							<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
 						{subPanelShow && <SubPanel node={node}/>}
-						<NodeUI_Menu node={node} path={path}/>
+						<NodeUI_Menu map={map} node={node} path={path}/>
 					</Div>
 					<Button //text={expanded ? "-" : "+"} size={28}
 							style={{

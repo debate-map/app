@@ -21,8 +21,9 @@ import CheckBox from "../../../../../Frame/ReactComponents/CheckBox";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import NodeDetailsUI from "../NodeDetailsUI";
 import {ReverseMapNodeType} from "../../../../../Store/firebase/nodes/$node";
+import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";
 
-export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: ThesisForm, childType: MapNodeType, userID: string) {
+export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: ThesisForm, childType: MapNodeType, userID: string, mapID: number, path: string) {
 	let firebase = store.firebase.helpers;
 	let childTypeInfo = MapNodeType_Info.for[childType];
 	let displayName = GetMapNodeTypeDisplayName(childType, parentNode, parentForm);
@@ -77,12 +78,13 @@ export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: Thes
 				</Column>
 			);
 		},
-		onOK: ()=> {
+		onOK: async ()=> {
 			/*if (quoteError) {
 				return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${quoteError}`}));
 			}*/
 
-			new AddNode({node: newNode, link: newLink, metaThesisNode: newMetaThesis}).Run();
+			let newNodeID = await new AddNode({node: newNode, link: newLink, metaThesisNode: newMetaThesis}).Run();
+			store.dispatch(new ACTMapNodeExpandedSet({mapID, path: path + "/" + newNodeID, expanded: true, recursive: false}));
 		}
 	});
 }
