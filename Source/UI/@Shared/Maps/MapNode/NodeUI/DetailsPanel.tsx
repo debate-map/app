@@ -114,7 +114,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 								this.detailsUI.asNegation &&
 									{form: this.detailsUI.asNegation.Checked ? ThesisForm.Negation : ThesisForm.Base},
 							));*/
-							let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "finalType");
+							let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "finalType", "link");
 							let linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
 							await new UpdateNodeDetails({nodeID: node._id, nodeUpdates, linkParentID: GetParentNodeID(path), linkUpdates}).Run();
 						}}/>

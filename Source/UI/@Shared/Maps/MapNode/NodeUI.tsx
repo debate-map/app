@@ -80,7 +80,7 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 		path: path || node._id.toString(),
 
 		//node_finalType: GetFinalNodeTypeAtPath(node, path),
-		nodeEnhanced: GetNodeEnhanced(node, path),
+		//nodeEnhanced: GetNodeEnhanced(node, path),
 		form: GetNodeForm(node, GetParentNode(path)),
 		// only pass new nodeView when its local-props are different
 		nodeView: CachedTransform("nodeView_transform1", {mapID: map._id, path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),

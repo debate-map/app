@@ -31,8 +31,9 @@ import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import {GetNodeChildren} from "../../../../Store/firebase/nodes";
 import {E} from "../../../../Frame/General/Globals_Free";
 import AddNode from "../../../../Server/Commands/AddNode";
-import {GetNodeDisplayText, GetValidNewChildTypes, GetThesisFormAtPath, ReverseMapNodeType} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeDisplayText, GetValidNewChildTypes, GetThesisFormAtPath, ReverseMapNodeType, IsReversedArgumentNode, GetNodeEnhanced, GetNodeForm} from "../../../../Store/firebase/nodes/$node";
 import {Map} from "../../../../Store/firebase/maps/@Map";
+import {SlicePath} from "./NodeUI/RatingsPanel";
 
 type Props = {map: Map, node: MapNodeEnhanced, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode}>;
 @Connect((state: RootState, {path}: Props)=> {
@@ -40,7 +41,7 @@ type Props = {map: Map, node: MapNodeEnhanced, path: string} & Partial<{permissi
 	return {
 		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
 		permissions: GetUserPermissionGroups(GetUserID()),
-		parentNode: GetParentNode(path),
+		parentNode: GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1)),
 		copiedNode: state.main.copiedNodePath ? GetNode(state.main.copiedNodePath.split("/").Last().ToInt()) : null,
 	};
 })
@@ -68,7 +69,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							if (userID == null) return ShowSignInPopup();
 							
 							let childType_real = childType;
-							if (parentNode.finalType != parentNode.type)
+							if (GetNodeForm(node) == ThesisForm.Negation)
 								childType_real = ReverseMapNodeType(childType_real);
 							ShowAddChildDialog(node, form, childType_real, userID, map._id, path);
 						}}/>

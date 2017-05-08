@@ -64,6 +64,9 @@ export function GetSortByRatingType(node: MapNodeEnhanced): RatingType {
 	return GetMainRatingType(node);
 }
 
+export function IsReversedArgumentNode(node: MapNodeEnhanced) {
+	return node.finalType != node.type;
+}
 export function ReverseMapNodeType(nodeType: MapNodeType) {
 	if (nodeType == MapNodeType.SupportingArgument) return MapNodeType.OpposingArgument;
 	if (nodeType == MapNodeType.OpposingArgument) return MapNodeType.SupportingArgument;
@@ -113,6 +116,7 @@ export function GetNodeForm(node: MapNode | MapNodeEnhanced, parent?: MapNode) {
 }
 export function GetLinkUnderParent(nodeID: number, parent: MapNode): ChildEntry {
 	if (parent == null) return null;
+	if (parent.children == null) return null; // post-delete, parent-data might have updated before child-data
 	let link = parent.children[nodeID];
 	return link;
 }
@@ -165,5 +169,5 @@ export function GetValidNewChildTypes(nodeType: MapNodeType, path: string, permi
 }
 
 export function IsContextReversed(node: MapNode, parent: MapNodeEnhanced) {
-	return node.metaThesis && parent.finalType != parent.type;
+	return node.metaThesis && IsReversedArgumentNode(parent);
 }

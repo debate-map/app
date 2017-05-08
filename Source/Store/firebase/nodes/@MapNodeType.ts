@@ -84,7 +84,8 @@ export function GetMapNodeTypeDisplayName(type: MapNodeType, parentNode: MapNode
 	}
 	if (type == MapNodeType.OpposingArgument) {
 		//if (parent.finalType != parent.type) return "supporting argument";
-		if (parentNodeForm == ThesisForm.Negation) return "supporting argument";
+		//if (IsContextReversed( parent.finalType != parent.type) return "supporting argument";
+		if ( parentNodeForm == ThesisForm.Negation) return "supporting argument";
 		return "opposing argument";
 	}
 	Assert(false);
