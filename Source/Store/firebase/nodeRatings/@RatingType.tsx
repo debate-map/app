@@ -5,6 +5,7 @@ import {MetaThesis_IfType} from "../nodes/@MetaThesisInfo";
 import {GetThesisFormAtPath, GetMainRatingType, GetNodeEnhanced} from "../nodes/$node";
 import {GetNode} from "../nodes";
 import {SlicePath} from "../../../UI/@Shared/Maps/MapNode/NodeUI/RatingsPanel";
+import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 //export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
@@ -97,22 +98,25 @@ export class RatingType_Info {
 				let grandParentID = path.split("/").length >= 3 ? path.split("/").XFromLast(2).ToInt() : null;
 				let grandParent = grandParentID ? GetNodeEnhanced(GetNode(grandParentID), SlicePath(path, 2)) : null;
 				let grandParentRatingType = grandParent ? GetMainRatingType(grandParent) : "probability";
-				/*let support = parentNode.type == MapNodeType.SupportingArgument;
-				return `Suppose that the parent thesis were just introduced (a blank slate with no specific research), and that its base probability were 50%.`
-					+ (
-						node.metaThesis.ifType == MetaThesis_IfType.All ? ` Suppose also that this argument's premises were all true.` :
-						node.metaThesis.ifType == MetaThesis_IfType.AnyTwo ? ` Suppose also that at least two of this argument's premises were true.` :
-						` Suppose also that at least one of this argument's premises were true.`
-					)
-					+ ` If that were the case, to what level would this argument ${support ? "raise" : "lower"} the parent thesis' probability?`;*/
-				return `Suppose someone is completely on the fence on the parent thesis -- giving it a 50% ${
+				/*return `Suppose someone is completely on the fence on the parent thesis -- giving it a 50% ${
 					grandParentRatingType == "probability" ? "probability" : grandParentRatingType + " rating"}.`
 					+ (
 						node.metaThesis.ifType == MetaThesis_IfType.All ? ` Suppose also that you introduce this argument to them, and they accept all of the premises.` :
 						node.metaThesis.ifType == MetaThesis_IfType.AnyTwo ? ` Suppose also that you introduce this argument to them, and they accept at least two of the premises.` :
 						` Suppose also that you introduce this argument to them, and they accept at least one of the premises.`
 					)
-					+ ` To what level would you expect them (assuming they're reasonable) to shift their ${grandParentRatingType} rating?`
+					+ ` To what level would you expect them (assuming they're reasonable) to shift their ${grandParentRatingType} rating?`;*/
+				let premiseCountrStrMap = {All: `all of the premises`, AnyTwo: `at least two of the premises`, Any: `at least one of the premises.`};
+				let premiseCountStr = premiseCountrStrMap[MetaThesis_IfType[node.metaThesis.ifType]];
+				return (
+					<span>
+						Suppose someone is completely on the fence on the parent thesis -- giving it a 50% {
+							grandParentRatingType == "probability" ? "probability" : grandParentRatingType + " rating"}.
+						<br/>Suppose you then introduce this argument to them, and they accept {premiseCountStr}.
+						<InfoButton text={`In other words, pretend that ${premiseCountStr} are 100% true/full, on their main rating type.`}/>
+						<br/>To what level would you expect them (assuming they're reasonable) to shift their {grandParentRatingType} rating?
+					</span>
+				);
 			},
 			options: (node, parent)=> {
 				//if (parentNode == null) return Range(0, 100); // must support case where node is given standalone
@@ -136,7 +140,7 @@ export class RatingType_Info {
 	}
 
 	displayText: string;
-	description: ((node: MapNode, parent: MapNode | MapNodeEnhanced, path: string)=>string);
+	description: ((node: MapNode, parent: MapNode | MapNodeEnhanced, path: string)=>string | JSX.Element);
 	options: ((node: MapNode, parent: MapNode | MapNodeEnhanced)=>number[]);
 	ticks: ((node: MapNode, parent: MapNode | MapNodeEnhanced)=>number[]); // for x-axis labels
 	//tickFormatter?: (tickValue: number)=>string = a=>a.toString();
