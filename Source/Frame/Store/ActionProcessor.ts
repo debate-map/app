@@ -16,6 +16,7 @@ import {CreateMapViewForPath, GetShortestPathFromRootToNode} from "./PathFinder"
 import {ACTNotificationMessageAdd} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import {GetNodeDisplayText} from "../../Store/firebase/nodes/$node";
+import * as Raven from "raven-js";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -60,7 +61,13 @@ export function PreDispatchAction(action: Action<any>) {
 export function MidDispatchAction(action: Action<any>, newState: RootState) {
 }
 
+let postInitCalled = false;
 export async function PostDispatchAction(action: Action<any>) {
+	if (!postInitCalled) {
+		PostInit();
+		postInitCalled = true;
+	}
+
 	//if (action.type == "@@INIT") {
 	//if (action.type == "persist/REHYDRATE" && GetPath().startsWith("global/map"))
 	if (action.type == "persist/REHYDRATE") {
@@ -154,5 +161,22 @@ export async function PostDispatchAction(action: Action<any>) {
 				joinDate: Date.now(),
 			});
 		}
-	}
+
+		//Raven.setUserContext(action["auth"].Including("uid", "displayName", "email"));
+	} /*else if (action.type == "@@reactReduxFirebase/LOGOUT") {
+		Raven.setUserContext();
+	}*/
+}
+
+function PostInit() {
+	let lastAuth;
+	//Log("Subscribed");
+	store.subscribe(()=> {
+		let auth = State().firebase.get("auth");
+		if (auth != lastAuth) {
+			//Log("Setting user-context: " + auth);
+			Raven.setUserContext(auth);
+			lastAuth = auth;
+		}
+	});
 }

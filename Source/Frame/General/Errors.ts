@@ -2,29 +2,32 @@ import {Log} from "../Serialization/VDF/VDF";
 import {ACTNotificationMessageAdd} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import {LogError} from "./Logging";
+import * as Raven from "raven-js";
 
 if (!hotReloading) {
 	//g.onerror = function(message: string, filePath: string, line: number, column: number, error: Error) {
-	g.addEventListener(`error`, e=> {
+	g.addEventListener("error", e=> {
 		let {message, filename: filePath, lineno: line, colno: column, error} = e as {message: string, filename: string, lineno: number, colno: number, error: Error};
 		/*LogError(`JS) ${message} (at ${filePath}:${line}:${column})
 	Stack) ${error.stack}`);*/
-		if (error != null)
-			HandleError(error);
-		else
-			HandleError({stack: filePath + ":" + line + ":" + column, toString: ()=>message} as any);
+		// sentry already picks up errors that make it here; so don't send it to sentry again
+		if (error != null) {
+			HandleError(error, false, false);
+		} else {
+			HandleError({stack: filePath + ":" + line + ":" + column, toString: ()=>message} as any, false, false);
+		}
 	});
-	g.addEventListener(`unhandledrejection`, e=>{
+	g.addEventListener("unhandledrejection", e=>{
 		//console.error(`Unhandled rejection (promise: `, e.promise, `, reason: `, e.reason, `).`);
 		HandleError(e.reason);
 	});
-	g.addEventListener(`onrejectionhandled`, e=>{
+	g.addEventListener("onrejectionhandled", e=>{
 		//console.error(`Unhandled rejection (promise: `, e.promise, `, reason: `, e.reason, `).`);
 		HandleError(e.reason);
 	});
 }
 
-export function HandleError(error: Error, fatal = false) {
+export function HandleError(error: Error, fatal = false, recordWithSentry = true) {
 	let message = (error.message || error.toString()).replace(/\r/g, "").TrimStart("\n");
 	/*let stackWithoutMessage = (
 		error.stack && error.message && error.stack.Contains(error.message)
@@ -43,5 +46,10 @@ export function HandleError(error: Error, fatal = false) {
 	if (fatal)
 		errorStr += "\n[fatal]";
 	LogError(errorStr);
+
+	if (recordWithSentry) {
+		Raven.captureException(error);
+	}
+
 	store.dispatch(new ACTNotificationMessageAdd(new NotificationMessage(errorStr)));
 }
