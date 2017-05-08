@@ -33,7 +33,7 @@ export function GetUser(userID: string): User {
 }
 export function GetUsers(): User[] {
 	let userMap = GetUserMap();
-	return CachedTransform("GetUsers", {}, userMap, ()=>userMap ? userMap.VValues(true) : []);
+	return CachedTransform("GetUsers", [], userMap, ()=>userMap ? userMap.VValues(true) : []);
 }
 
 export type UserExtraInfoMap = {[key: string]: UserExtraInfo};

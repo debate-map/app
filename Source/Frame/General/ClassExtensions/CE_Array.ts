@@ -248,13 +248,25 @@ Array.prototype._AddFunction_Inline = function Except(this: Array<any>, ...args)
 };
 
 //Array.prototype._AddFunction_Inline = function JoinUsing(separator) { return this.join(separator);};
-interface Array<T> { Min(valFunc?: (item: T)=>number): T; }
-Array.prototype._AddFunction_Inline = function Min(valFunc = a=>a) {
+interface Array<T> { Min(valFunc?: (item: T)=>number, asNumbers?: boolean): T; }
+Array.prototype._AddFunction_Inline = function Min(valFunc?, asNumbers = false) {
+	if (asNumbers) {
+		/*let values = valFunc ? this.map(valFunc) : this;
+		return Math.min(...values);*/
+		Assert(valFunc == null, "Cannot use valFunc if asNumbers is set to true.");
+		return Math.min(...this);
+	}
     return this.OrderBy(valFunc).First();
 };
-interface Array<T> { Max(valFunc?: (item: T)=>number): T; }
-Array.prototype._AddFunction_Inline = function Max(valFunc = a=>a) {
-    return this.OrderBy(valFunc).Last();
+interface Array<T> { Max(valFunc?: (item: T)=>number, asNumbers?: boolean): T; }
+Array.prototype._AddFunction_Inline = function Max(valFunc?, asNumbers = false) {
+	if (asNumbers) {
+		/*let values = valFunc ? this.map(valFunc) : this;
+		return Math.max(...values);*/
+		Assert(valFunc == null, "Cannot use valFunc if asNumbers is set to true.");
+		return Math.max(...this);
+	}
+	return this.OrderBy(valFunc).Last();
 };
 interface Array<T> { Sum(): number; }
 Array.prototype._AddFunction_Inline = function Sum() {

@@ -28,7 +28,7 @@ export function GetParentNode(path: string) {
 
 export function GetNodeParents(node: MapNode) {
 	let parents = (node.parents || {}).VKeys(true).map(id=>GetNode(parseInt(id)));
-	return CachedTransform("GetNodeParents", {nodeID: node._id}, parents, ()=>parents);
+	return CachedTransform("GetNodeParents", [node._id], parents, ()=>parents);
 }
 export async function GetNodeParentsAsync(node: MapNode) {
 	return await Promise.all(node.parents.VKeys(true).map(parentID=>GetDataAsync(`nodes/${parentID}`))) as MapNode[];
@@ -48,7 +48,7 @@ export function GetNodeChildren(node: MapNode) {
 	}
 
 	let children = (node.children || {}).VKeys(true).map(id=>GetNode(parseInt(id)));
-	return CachedTransform("GetNodeChildren", {nodeID: node._id}, children, ()=>children);
+	return CachedTransform("GetNodeChildren", [node._id], children, ()=>children);
 }
 export async function GetNodeChildrenAsync(node: MapNode) {
 	return await Promise.all(node.children.VKeys(true).map(id=>GetDataAsync(`nodes/${id}`))) as MapNode[];
@@ -57,7 +57,7 @@ export async function GetNodeChildrenAsync(node: MapNode) {
 export function GetNodeChildrenEnhanced(node: MapNode, path: string) {
 	let nodeChildren = GetNodeChildren(node);
 	let nodeChildrenEnhanced = nodeChildren.map(child=>child ? GetNodeEnhanced(child, path + "/" + child._id) : null);
-	return CachedTransform("GetNodeChildrenEnhanced", {path}, nodeChildrenEnhanced, ()=>nodeChildrenEnhanced);
+	return CachedTransform("GetNodeChildrenEnhanced", [path], nodeChildrenEnhanced, ()=>nodeChildrenEnhanced);
 }
 
 export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNode) {

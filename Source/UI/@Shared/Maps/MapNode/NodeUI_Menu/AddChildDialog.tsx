@@ -72,6 +72,13 @@ export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: Thes
 			boxController.options.okButtonClickable = quoteError == null;
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
+					{childType == MapNodeType.Thesis &&
+						<Row>
+							<Pre>Type: </Pre>
+							<Select displayType="button bar" options={thesisTypes} style={{display: `inline-block`}}
+								value={newNode.contentNode ? "Content_Quote" : "Normal"}
+								onChange={val=>Change(newNode.contentNode = val == "Content_Quote" ? newNode.contentNode || new ContentNode() : null)}/>
+						</Row>}
 					<NodeDetailsUI baseData={newNode.Extended({finalType: newNode.type, link: null})} baseLinkData={newLink} creating={true}
 						parent={parentNode.Extended({finalType: parentNode.type})}
 						onChange={(newNodeData, newLinkData)=>Change(newNode = newNodeData, newLink = newLinkData)}/>

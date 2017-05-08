@@ -96,7 +96,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, {newData: MapNod
 							<TextInput ref="title_base" enabled={editing} style={{flex: 1}} value={newData.titles["base"]} onChange={val=>Change(newData.titles["base"] = val)}/>
 						</Row>}
 					{newData.type == MapNodeType.Thesis && !newData.metaThesis && newData.contentNode &&
-						<QuoteInfoEditorUI key={0} ref={c=>this.quoteEditor = c} editing={editing}
+						<QuoteInfoEditorUI key={0} ref={c=>this.quoteEditor = c} editing={creating || editing}
 							contentNode={newData.contentNode} onChange={val=>Change(newData.contentNode = val)}
 							showPreview={false} justShowed={false}
 							//onSetError={error=>onSetError && onSetError(error)}

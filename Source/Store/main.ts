@@ -83,12 +83,12 @@ export function MainReducer(state, action) {
 			return state;
 		},
 		ratingUI: RatingUIReducer,
-		notificationMessages: (state = [] as NotificationMessage[], action)=> {
+		notificationMessages: (state: NotificationMessage[] = [], action)=> {
 			if (action.Is(ACTNotificationMessageAdd))
 				return [...state, action.payload];
 			if (action.Is(ACTNotificationMessageRemove))
 				return state.filter(a=>a.id != action.payload);
-			NotificationMessage.lastID = Math.max(NotificationMessage.lastID, state.length ? state.map(a=>a.id).Max() : -1);
+			NotificationMessage.lastID = Math.max(NotificationMessage.lastID, state.length ? state.map(a=>a.id).Max(null, true) : -1);
 			return state;
 		},
 		

@@ -31,7 +31,7 @@ type Props = {term: Term, editing: boolean, inMap?: boolean, style?} & Partial<{
 	return {
 		//components: GetTermComponents(props.term),
 		// only pass components when all are loaded
-		components: CachedTransform("components_transform1", {termID: term._id}, termComponents, ()=>termComponents.All(a=>a != null) ? termComponents : componentsPlaceholder),
+		components: CachedTransform("components_transform1", [term._id], termComponents, ()=>termComponents.All(a=>a != null) ? termComponents : componentsPlaceholder),
 		//selectedTermComponent: GetSelectedTermComponent(),
 	};
 })

@@ -83,14 +83,14 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 		//nodeEnhanced: GetNodeEnhanced(node, path),
 		form: GetNodeForm(node, GetParentNode(path)),
 		// only pass new nodeView when its local-props are different
-		nodeView: CachedTransform("nodeView_transform1", {mapID: map._id, path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
+		nodeView: CachedTransform("nodeView_transform1", [map._id, path], nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
 		/*nodeChildren: CachedTransform("nodeChildren_transform1", {path}, CombineDynamicPropMaps(nodeChildren, nodeChildren_finalTypes),
 			()=>nodeChildren.map((child, index)=> {
 				return child.Extended({finalType: nodeChildren_finalTypes[index]});
 			})),*/
 		nodeChildren,
-		nodeChildren_sortValues: CachedTransform("nodeChildren_sortValues_transform1", {nodeID: node._id}, nodeChildren_sortValues, ()=>nodeChildren_sortValues),
-		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", {nodeID: node._id}, nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
+		nodeChildren_sortValues: CachedTransform("nodeChildren_sortValues_transform1", [node._id], nodeChildren_sortValues, ()=>nodeChildren_sortValues),
+		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", [node._id], nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
 	};
 })
 export default class NodeUI extends BaseComponent<Props, State> {
@@ -268,7 +268,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						var result = childDOM.clientWidth;
 						childDOM.style.minWidth = oldMinWidth;
 						return result;
-					}).Max()
+					}).Max(null, true)
 					: 0},
 			/*{childrenCenterY: upChildHolder
 				? (upChildHolder && upChildHolder.style.display != "none" ? upChildHolder.clientHeight : 0)

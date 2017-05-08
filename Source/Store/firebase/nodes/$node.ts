@@ -94,7 +94,7 @@ export function GetNodeEnhanced(node: MapNode, path: string) {
 	if (link == null && path.Contains("/")) return null;
 
 	let nodeEnhanced = node.Extended({finalType: node_finalType, link}) as MapNodeEnhanced;
-	return CachedTransform("GetNodeEnhanced", {path}, nodeEnhanced, ()=>nodeEnhanced);
+	return CachedTransform("GetNodeEnhanced", [path], nodeEnhanced, ()=>nodeEnhanced);
 }
 
 export function GetThesisFormAtPath(node: MapNode, path: string): ThesisForm {

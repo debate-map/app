@@ -63,9 +63,9 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 		let options = typeof ratingTypeInfo.options == "function" ? ratingTypeInfo.options(node, parentNode) : ratingTypeInfo.options;
 		let myRating = TransformRatingForContext((ratings.find(a=>a._key == userID) || {} as any).value, reverseRatings);
 
-		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(options.Max() == 200 ? [200] : []);
-		let minVal = options.Min(), maxVal = options.Max(), range = maxVal - minVal;
-		smoothing = smoothing.KeepAtMost(options.Max()); // smoothing might have been set higher, from when on another rating-type
+		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(options.Max(null, true) == 200 ? [200] : []);
+		let minVal = options.Min(null, true), maxVal = options.Max(null, true), range = maxVal - minVal;
+		smoothing = smoothing.KeepAtMost(options.Max(null, true)); // smoothing might have been set higher, from when on another rating-type
 		let ticksForChart = options.Select(a=>a.RoundTo(smoothing)).Distinct();
 		let dataFinal = ticksForChart.Select(a=>({rating: a, count: 0}));
 		for (let entry of ratings) {
@@ -111,7 +111,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 							title: `Rate ${ratingType} of ${nodeTypeDisplayName}`, cancelButton: true,
 							messageUI: ()=>(
 								<div style={{padding: "10px 0"}}>
-									Rating: <Spinner min={options.Min()} max={options.Max()} style={{width: 60}}
+									Rating: <Spinner min={options.Min(null, true)} max={options.Max(null, true)} style={{width: 60}}
 										value={finalRating} onChange={val=>DN(finalRating = val, boxController.UpdateUI())}/>
 								</div>
 							),

@@ -14,8 +14,8 @@ export async function GetTermComponentAsync(id: number) {
 
 export function GetTermComponents(term: Term) {
 	let components = (term.components || {}).VKeys(true).map(id=>GetTermComponent(parseInt(id)));
-	return CachedTransform("GetTermComponents", {termID: term._id}, components, ()=>components);
+	return CachedTransform("GetTermComponents", [term._id], components, ()=>components);
 }
-export async function GetNodeChildrenAsync(term: Term) {
+export async function GetTermComponentsAsync(term: Term) {
 	return await Promise.all(term.components.VKeys(true).map(id=>GetDataAsync(`termComponents/${id}`))) as TermComponent[];
 }

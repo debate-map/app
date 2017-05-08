@@ -16,7 +16,7 @@ import {GetRatingTypesForNode, GetThesisFormAtPath, GetNodeForm} from "../../Sto
 	let all = metaThesis.metaThesis.ifType == MetaThesis_IfType.All;
 	let combinedProbabilityOfPremises = all
 		? premiseProbabilities.reduce((total, current)=>total * current, 1)
-		: premiseProbabilities.Max();
+		: premiseProbabilities.Max(null, true);
 	
 	if (metaThesis.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || metaThesis.metaThesis.thenType == MetaThesis_ThenType.WeakenParent) {
 		let averageAdjustment = GetRatingAverage(metaThesis._id, "adjustment", 50);
@@ -45,11 +45,11 @@ export function GetArgumentStrengthPseudoRating(argumentNode: MapNode, nodeChild
 	if (metaThesis.metaThesis.ifType == MetaThesis_IfType.All)
 		combinedProbabilityOfPremises = premiseProbabilities.reduce((total, current)=>total * current, 1);
 	else if (metaThesis.metaThesis.ifType == MetaThesis_IfType.AnyTwo) {
-		let strongest = premiseProbabilities.Max();
-		let secondStrongest = premiseProbabilities.length > 1 ? premiseProbabilities.Except(strongest).Max() : 0;
+		let strongest = premiseProbabilities.Max(null, true);
+		let secondStrongest = premiseProbabilities.length > 1 ? premiseProbabilities.Except(strongest).Max(null, true) : 0;
 		combinedProbabilityOfPremises = strongest * secondStrongest;
 	} else 
-		combinedProbabilityOfPremises = premiseProbabilities.Max();
+		combinedProbabilityOfPremises = premiseProbabilities.Max(null, true);
 	
 	if (metaThesis.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || metaThesis.metaThesis.thenType == MetaThesis_ThenType.WeakenParent) {
 		let adjustment = GetRatingValue(metaThesis._id, "adjustment", userID, 50);
@@ -112,7 +112,7 @@ export function GetArgumentStrengthPseudoRatingSet(argumentNode: MapNode, nodeCh
 	let all = metaThesis.metaThesis.ifType == MetaThesis_IfType.All;
 	let combinedProbabilityOfPremises = all
 		? premiseProbabilities.reduce((total, current)=>total * current, 1)
-		: premiseProbabilities.Max();
+		: premiseProbabilities.Max(null, true);
 	
 	if (metaThesis.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || metaThesis.metaThesis.thenType == MetaThesis_ThenType.WeakenParent) {
 		let averageAdjustment = GetRatingAverage(metaThesis._id, "adjustment", 50);
