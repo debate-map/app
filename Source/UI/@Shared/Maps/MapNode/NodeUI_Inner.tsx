@@ -16,7 +16,7 @@ import NodeUI_Menu from "./NodeUI_Menu";
 import V from "../../../../Frame/V/V";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {MapNode, ThesisForm, MapNodeWithFinalType} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeRatingsRoot, GetRatings, GetFillPercentForRatingAverage, GetRatingAverage, GetRatingValue, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {GetUserID} from "../../../../Store/firebase/users";
 import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -36,7 +36,7 @@ import RatingsPanel from "./NodeUI/RatingsPanel";
 import DiscussionPanel from "./NodeUI/DiscussionPanel";
 import Row from "../../../../Frame/ReactComponents/Row";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
-import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetThesisFormUnderParent, GetThesisFormAtPath, GetFinalNodeTypeAtPath, GetNodeWithFinalType, IsContextReversed} from "../../../../Store/firebase/nodes/$node";
+import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetThesisFormAtPath, GetFinalNodeTypeAtPath, IsContextReversed, GetNodeEnhanced} from "../../../../Store/firebase/nodes/$node";
 import {ContentNode, SourceChain} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {URL} from "../../../../Frame/General/URLs";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
@@ -44,7 +44,7 @@ import {GetTerm, GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import {Term} from "../../../../Store/firebase/terms/@Term";
 import {ParseSegmentsForPatterns} from "../../../../Frame/General/RegexHelpers";
 import {GetParentNode} from "../../../../Store/firebase/nodes";
-import {SplicePath} from "./NodeUI/RatingsPanel";
+import {SlicePath} from "./NodeUI/RatingsPanel";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -52,7 +52,7 @@ import {SplicePath} from "./NodeUI/RatingsPanel";
 
 //export type NodeHoverExtras = {panel?: string, term?: number};
 
-type Props = {map: Map, node: MapNodeWithFinalType, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
+type Props = {map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
 	& Partial<{finalNodeType: MapNodeType, form: ThesisForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
 //@FirebaseConnect((props: Props)=>((props[`holder`] = props[`holder`] || {}), [
 /*@FirebaseConnect((props: Props)=>[
@@ -75,7 +75,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
 		let mainRatingType = GetRatingTypesForNode(node).FirstOrX(null, {}).type;
 
-		let parentNode = GetNodeWithFinalType(GetParentNode(path), SplicePath(path, 1));
+		let parentNode = GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1));
 		let nodeReversed = form == ThesisForm.Negation;
 		let contextReversed = IsContextReversed(node, parentNode);
 		let ratingReversed = ShouldRatingTypeBeReversed(mainRatingType, nodeReversed, contextReversed);

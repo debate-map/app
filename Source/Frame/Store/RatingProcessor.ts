@@ -1,10 +1,10 @@
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeEnhanced} from "../../Store/firebase/nodes/@MapNode";
 import {GetRating, GetRatingValue, GetRatingSet} from "../../Store/firebase/nodeRatings";
 import {GetRatingAverage, GetRatings} from "../../Store/firebase/nodeRatings";
 import {Rating} from "../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MetaThesis_IfType, MetaThesis_ThenType} from "../../Store/firebase/nodes/@MetaThesisInfo";
-import {GetRatingTypesForNode, GetThesisFormAtPath, GetThesisFormUnderParent} from "../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetThesisFormAtPath, GetNodeForm} from "../../Store/firebase/nodes/$node";
 
 /*export function CalculateArgumentStrength(nodeChildren: MapNode[]) {
 	if (nodeChildren.Any(a=>a == null)) return 0; // must still be loading
@@ -37,7 +37,7 @@ export function GetArgumentStrengthPseudoRating(argumentNode: MapNode, nodeChild
 	let premiseProbabilities = premises.map(child=> {
 		let ratingType = GetRatingTypesForNode(child)[0].type;
 		let ratingValue = GetRatingValue(child._id, ratingType, userID, 0) / 100;
-		let form = GetThesisFormUnderParent(child, argumentNode);
+		let form = GetNodeForm(child, argumentNode);
 		let probability = form == ThesisForm.Negation ? 1 - ratingValue : ratingValue;
 		return probability;
 	});

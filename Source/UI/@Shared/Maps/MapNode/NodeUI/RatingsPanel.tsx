@@ -21,7 +21,7 @@ import {GetNodeChildren, GetParentNode} from "../../../../../Store/firebase/node
 import {MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {ShowSignInPopup} from "../../../NavBar/UserPanel";
-import {GetThesisFormAtPath, GetNodeWithFinalType, IsContextReversed} from "../../../../../Store/firebase/nodes/$node";
+import {GetThesisFormAtPath, GetNodeEnhanced, IsContextReversed} from "../../../../../Store/firebase/nodes/$node";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -33,7 +33,7 @@ import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	{rating: 100, count: 4},
 ];*/
 
-export function SplicePath(path: string, removeFromEndCount: number, ...itemsToAdd: string[]) {
+export function SlicePath(path: string, removeFromEndCount: number, ...itemsToAdd: string[]) {
 	let parts = path.split("/");
 	parts.splice(parts.length - removeFromEndCount, removeFromEndCount, ...itemsToAdd);
 	return parts.join("/");
@@ -53,7 +53,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 		let firebase = store.firebase.helpers;
 		let {size} = this.state;
 
-		let parentNode = GetNodeWithFinalType(GetParentNode(path), SplicePath(path, 1));
+		let parentNode = GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1));
 		let nodeReversed = form == ThesisForm.Negation;
 		let contextReversed = IsContextReversed(node, parentNode);
 		let reverseRatings = ShouldRatingTypeBeReversed(ratingType, nodeReversed, contextReversed);

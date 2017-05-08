@@ -1,6 +1,6 @@
 import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
-import {MapNode, ThesisForm, ChildEntry, MapNodeWithFinalType} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced} from "../../../../../Store/firebase/nodes/@MapNode";
 import {ShowMessageBox, BoxController} from "../../../../../Frame/UI/VMessageBox";
 import Select from "../../../../../Frame/ReactComponents/Select";
 import TextInput from "../../../../../Frame/ReactComponents/TextInput";
@@ -22,7 +22,7 @@ import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import NodeDetailsUI from "../NodeDetailsUI";
 import {ReverseMapNodeType} from "../../../../../Store/firebase/nodes/$node";
 
-export function ShowAddChildDialog(parentNode: MapNodeWithFinalType, parentForm: ThesisForm, childType: MapNodeType, userID: string) {
+export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: ThesisForm, childType: MapNodeType, userID: string) {
 	let firebase = store.firebase.helpers;
 	let childTypeInfo = MapNodeType_Info.for[childType];
 	let displayName = GetMapNodeTypeDisplayName(childType, parentNode, parentForm);
@@ -71,7 +71,7 @@ export function ShowAddChildDialog(parentNode: MapNodeWithFinalType, parentForm:
 			boxController.options.okButtonClickable = quoteError == null;
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
-					<NodeDetailsUI baseData={newNode.Extended({finalType: newNode.type})} baseLinkData={newLink} creating={true}
+					<NodeDetailsUI baseData={newNode.Extended({finalType: newNode.type, link: null})} baseLinkData={newLink} creating={true}
 						parent={parentNode.Extended({finalType: parentNode.type})}
 						onChange={(newNodeData, newLinkData)=>Change(newNode = newNodeData, newLink = newLinkData)}/>
 				</Column>

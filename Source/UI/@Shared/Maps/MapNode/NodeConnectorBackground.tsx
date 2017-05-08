@@ -3,13 +3,13 @@ import NodeUI from "./NodeUI";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {A} from "../../../../Frame/General/Assert";
 import ShallowCompare from "react-addons-shallow-compare";
-import {MapNode, MapNodeWithFinalType} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {GetThesisFormUnderParent, GetRatingTypesForNode, GetFinalNodeTypeAtPath} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeForm, GetRatingTypesForNode, GetFinalNodeTypeAtPath} from "../../../../Store/firebase/nodes/$node";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 
-type Props = {node: MapNodeWithFinalType, mainBoxOffset: Vector2i, childNodes: MapNodeWithFinalType[], childBoxOffsets: Vector2i[], shouldUpdate: boolean};
+type Props = {node: MapNodeEnhanced, mainBoxOffset: Vector2i, childNodes: MapNodeEnhanced[], childBoxOffsets: Vector2i[], shouldUpdate: boolean};
 	//& Partial<{nodeChildren_finalNodeTypes: MapNodeType[]}>;
 @SimpleShouldUpdate_Overridable
 /*@Connect((state, {path, childNodes}: Props)=> ({

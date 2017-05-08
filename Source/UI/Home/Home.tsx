@@ -13,13 +13,14 @@ import {List} from "../../Frame/Serialization/VDF/VDFExtras";
 import GlobalMapUI from "../Global/GlobalMapUI";
 import MapUI from "../@Shared/Maps/MapUI";
 import {MapType, Map} from "../../Store/firebase/maps/@Map";
-import {MapNode} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, MapNodeEnhanced} from "../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {MapView} from "../../Store/main/mapViews/@MapViews";
 import {GetNode} from "../../Store/firebase/nodes";
 import {Vector2i} from "../../Frame/General/VectorStructs";
 import Editor from "react-md-editor";
 import * as ReactMarkdown from "react-markdown";
+import {GetNodeEnhanced} from "../../Store/firebase/nodes/$node";
 
 let red = `rgba(255,0,0,.7)`;
 let green = `rgba(0,255,0,.6)`;
@@ -218,9 +219,9 @@ export function CreateDemoMapView(): MapView {
 let info = {text: pageText};
 
 @Connect(state=> ({
-	demoRootNode: GetNode(demoRootNodeID),
+	demoRootNode: GetNodeEnhanced(GetNode(demoRootNodeID), demoRootNodeID+""),
 }))
-export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNode}, {}> {
+export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNodeEnhanced}, {}> {
 	static contextTypes = {
 		router: PropTypes.shape({
 			history: PropTypes.shape({
@@ -322,7 +323,7 @@ const Link = (props, router)=> {
 	);
 };
 
-class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNode, style}, {}> {
+class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNodeEnhanced, style}, {}> {
 	render() {
 		let {demoRootNode, style} = this.props;
 		let root, mapUI: MapUI, test2;

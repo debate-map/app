@@ -1,6 +1,6 @@
 import DeleteNode from "../../../../Server/Commands/DeleteNode";
 import {GetDataAsync, RemoveHelpers} from "../../../../Frame/Database/DatabaseHelpers";
-import {MapNode, MapNodeWithFinalType} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {VMenuStub} from "react-vmenu";
 import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -31,9 +31,9 @@ import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import {GetNodeChildren} from "../../../../Store/firebase/nodes";
 import {E} from "../../../../Frame/General/Globals_Free";
 import AddNode from "../../../../Server/Commands/AddNode";
-import {GetNodeDisplayText, GetValidNewChildTypes, GetThesisFormAtPath, ReverseMapNodeType, GetThesisFormUnderParent} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeDisplayText, GetValidNewChildTypes, GetThesisFormAtPath, ReverseMapNodeType} from "../../../../Store/firebase/nodes/$node";
 
-type Props = {node: MapNodeWithFinalType, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNodeWithFinalType, copiedNode: MapNode}>;
+type Props = {node: MapNodeEnhanced, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode}>;
 @Connect((state: RootState, {path}: Props)=> {
 	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 	return {

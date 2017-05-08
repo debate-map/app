@@ -17,7 +17,7 @@ import NodeUI_Inner from "./MapNode/NodeUI_Inner";
 //import ReactResizeDetector from "react-resize-detector"; // this one doesn't seem to work reliably -- at least for the map-ui
 import ResizeSensor from "react-resize-sensor";
 import {WaitXThenRun, Timer} from "../../../Frame/General/Timers";
-import {MapNode, ThesisForm} from "../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeEnhanced} from "../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../Store/firebase/maps/@Map";
 import {RootState} from "../../../Store/index";
 import {GetMapView} from "../../../Store/main/mapViews";
@@ -32,6 +32,7 @@ import Link from "../../../Frame/ReactComponents/Link";
 import {URL} from "../../../Frame/General/URLs";
 import NodeUI_ForBots from "./MapNode/NodeUI_ForBots";
 import {IsNumberString} from "../../../Frame/General/Types";
+import {GetNodeEnhanced} from "../../../Store/firebase/nodes/$node";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -60,16 +61,19 @@ export function UpdateFocusNodeAndViewOffset(mapID: number) {
 }
 
 type Props = {map: Map, rootNode?: MapNode, padding?: {left: number, right: number, top: number, bottom: number}, withinPage?: boolean} & React.HTMLProps<HTMLDivElement>
-	& Partial<{rootNode: MapNode, focusNode: string, viewOffset: {x: number, y: number}}>;
+	& Partial<{rootNode: MapNodeEnhanced, focusNode: string, viewOffset: {x: number, y: number}}>;
 @Connect((state: RootState, {map, rootNode}: Props)=> {
 	let url = URL.Current();
-	if (rootNode == null && map && map.rootNode)
-		rootNode = GetNode(map.rootNode);
+	if (rootNode == null && map && map.rootNode) {
+		rootNode = GetNodeEnhanced(GetNode(map.rootNode), map.rootNode+"");
+	}
 
 	let lastPathNode = url.pathNodes.LastOrX();
 	let crawlerURLMatch = lastPathNode && lastPathNode.match(/\.([0-9]+)$/);
-	if (isBot && crawlerURLMatch)
-		rootNode = GetNode(parseInt(crawlerURLMatch[1]));
+	if (isBot && crawlerURLMatch) {
+		let nodeID = parseInt(crawlerURLMatch[1]);
+		rootNode = GetNodeEnhanced(GetNode(nodeID), nodeID+"");
+	}
 
 	return {
 		rootNode,

@@ -82,7 +82,9 @@ AddSchema({
 }, "MapNode");
 
 // helpers
-export type MapNodeWithFinalType = MapNode & {finalType: MapNodeType};
+//export type MapNodeEnhanced = MapNode & {finalType: MapNodeType};
+// similar to a database entry, after having related data from other tables "joined"
+export type MapNodeEnhanced = MapNode & {finalType: MapNodeType, link: ChildEntry};
 
 export type ParentSet = { [key: number]: ParentEntry; };
 AddSchema({patternProperties: {"^[0-9]+$": {$ref: "ParentEntry"}}}, "ParentSet");

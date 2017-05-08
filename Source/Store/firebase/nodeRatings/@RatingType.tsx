@@ -1,9 +1,10 @@
-import {MapNode, MapNodeWithFinalType} from "../nodes/@MapNode";
+import {MapNode, MapNodeEnhanced} from "../nodes/@MapNode";
 import {Range} from "../../../Frame/General/Globals";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {MetaThesis_IfType} from "../nodes/@MetaThesisInfo";
-import {GetThesisFormAtPath, GetMainRatingType} from "../nodes/$node";
+import {GetThesisFormAtPath, GetMainRatingType, GetNodeEnhanced} from "../nodes/$node";
 import {GetNode} from "../nodes";
+import {SlicePath} from "../../../UI/@Shared/Maps/MapNode/NodeUI/RatingsPanel";
 
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 //export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
@@ -93,7 +94,8 @@ export class RatingType_Info {
 		adjustment: new RatingType_Info({
 			displayText: "Adjustment",
 			description: (node, parent, path)=> {
-				let grandParent = path.split("/").length >= 3 ? GetNode(path.split("/").XFromLast(2).ToInt()) : null;
+				let grandParentID = path.split("/").length >= 3 ? path.split("/").XFromLast(2).ToInt() : null;
+				let grandParent = grandParentID ? GetNodeEnhanced(GetNode(grandParentID), SlicePath(path, 2)) : null;
 				let grandParentRatingType = grandParent ? GetMainRatingType(grandParent) : "probability";
 				/*let support = parentNode.type == MapNodeType.SupportingArgument;
 				return `Suppose that the parent thesis were just introduced (a blank slate with no specific research), and that its base probability were 50%.`
@@ -134,9 +136,9 @@ export class RatingType_Info {
 	}
 
 	displayText: string;
-	description: ((node: MapNode, parent: MapNode | MapNodeWithFinalType, path: string)=>string);
-	options: ((node: MapNode, parent: MapNode | MapNodeWithFinalType)=>number[]);
-	ticks: ((node: MapNode, parent: MapNode | MapNodeWithFinalType)=>number[]); // for x-axis labels
+	description: ((node: MapNode, parent: MapNode | MapNodeEnhanced, path: string)=>string);
+	options: ((node: MapNode, parent: MapNode | MapNodeEnhanced)=>number[]);
+	ticks: ((node: MapNode, parent: MapNode | MapNodeEnhanced)=>number[]); // for x-axis labels
 	//tickFormatter?: (tickValue: number)=>string = a=>a.toString();
 	tickRender?: (props: TickRenderProps)=>JSX.Element;
 	/*tickRender?: (props: TickRenderProps)=>JSX.Element = props=> {

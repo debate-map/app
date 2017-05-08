@@ -17,16 +17,16 @@ import TermComponent from "../../../../Store/firebase/termComponents/@TermCompon
 import {GetNiceNameForTermType} from "../../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import {MapNode, ThesisForm, ChildEntry, MapNodeWithFinalType} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
 import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {MetaThesis_IfType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
 import {GetParentNode} from "../../../../Store/firebase/nodes";
-import {GetThesisFormAtPath, GetThesisFormUnderParent, IsContextReversed} from "../../../../Store/firebase/nodes/$node";
+import {GetThesisFormAtPath, GetNodeForm, IsContextReversed} from "../../../../Store/firebase/nodes/$node";
 import {ReverseThenType} from "../../../../Store/firebase/nodes/$node/$metaThesis";
 
 type Props = {
-	baseData: MapNodeWithFinalType, baseLinkData: ChildEntry, parent: MapNodeWithFinalType, creating: boolean, editing?: boolean, style?, onChange?: (newData: MapNode, newLinkData: ChildEntry)=>void,
+	baseData: MapNodeEnhanced, baseLinkData: ChildEntry, parent: MapNodeEnhanced, creating: boolean, editing?: boolean, style?, onChange?: (newData: MapNode, newLinkData: ChildEntry)=>void,
 	//onSetError: (error: string)=>void,
 } & Partial<{creator: User}>;
 @Connect((state, {baseData, creating}: Props)=>({

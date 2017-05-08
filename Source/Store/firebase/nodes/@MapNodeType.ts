@@ -1,6 +1,6 @@
 import {Assert} from "../../../Frame/General/Assert";
 import {RatingType} from "../nodeRatings/@RatingType";
-import {MapNode, MapNodeWithFinalType, ThesisForm} from "./@MapNode";
+import {MapNode, MapNodeEnhanced, ThesisForm} from "./@MapNode";
 
 export enum MapNodeType {
 	Category = 10,
@@ -57,7 +57,7 @@ export class MapNodeType_Info {
 		this.Extend(info);
 	}
 
-	//displayName: (parentNode: MapNodeWithFinalType)=>string;
+	//displayName: (parentNode: MapNodeEnhanced)=>string;
 	childTypes: MapNodeType[];
 	minWidth: number;
 	maxWidth: number;

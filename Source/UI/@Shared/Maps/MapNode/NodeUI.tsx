@@ -25,15 +25,15 @@ import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {CachedTransform, CombineDynamicPropMaps} from "../../../../Frame/V/VCache";
 import {RootState} from "../../../../Store/index";
 import {GetNodeView} from "../../../../Store/main/mapViews";
-import {MapNode, ThesisForm, MapNodeWithFinalType} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {GetNodeChildren, GetParentNode} from "../../../../Store/firebase/nodes";
+import {GetNodeChildren, GetParentNode, GetNodeChildrenEnhanced} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import Column from "../../../../Frame/ReactComponents/Column";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetThesisFormUnderParent, GetFinalNodeTypeAtPath, GetNodeWithFinalType, GetMainRatingType} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType} from "../../../../Store/firebase/nodes/$node";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -52,34 +52,44 @@ import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetThesis
 
 let childrenPlaceholder = [];
 
-type Props = {map: Map, node: MapNode, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void}
-	& Partial<{nodeWithFinalType: MapNodeWithFinalType, form: ThesisForm, nodeView: MapNodeView,
-		nodeChildren: MapNodeWithFinalType[], nodeChildren_fillPercents: number[]}>;
+type Props = {map: Map, node: MapNodeEnhanced, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void}
+	& Partial<{form: ThesisForm, nodeView: MapNodeView,
+		nodeChildren: MapNodeEnhanced[],
+		//nodeChildren_fillPercents: number[],
+		nodeChildren_sortValues: number[],
+	}>;
 type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number, svgInfo: {mainBoxOffset: Vector2i, oldChildBoxOffsets: Vector2i[]}};
 @Connect((state: RootState, {node, path, map}: Props & BaseProps)=> {
 	let nodeView = GetNodeView(map._id, path) || new MapNodeView();
-	let nodeChildren = GetNodeChildren(node);
+
+	let nodeChildren = GetNodeChildrenEnhanced(node, path);
+	// only pass nodeChildren when all are loaded
 	nodeChildren = nodeChildren.Any(a=>a == null) ? childrenPlaceholder : nodeChildren;
-	let nodeChildren_fillPercents = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
-		let form = GetThesisFormUnderParent(child, node);
-		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetMainRatingType(child)), form == ThesisForm.Negation);
-	});
-	let nodeChildren_finalTypes = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
+	/*let nodeChildren_finalTypes = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
 		return GetFinalNodeTypeAtPath(child, path + "/" + child._id);
+	});*/
+
+	let nodeChildren_sortValues = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
+		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetSortByRatingType(child)), GetNodeForm(child) == ThesisForm.Negation);
 	});
+	let nodeChildren_fillPercents = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
+		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetMainRatingType(child)), GetNodeForm(child) == ThesisForm.Negation);
+	});
+	
 	return {
 		path: path || node._id.toString(),
 
 		//node_finalType: GetFinalNodeTypeAtPath(node, path),
-		nodeWithFinalType: GetNodeWithFinalType(node, path),
-		form: GetThesisFormUnderParent(node, GetParentNode(path)),
+		nodeEnhanced: GetNodeEnhanced(node, path),
+		form: GetNodeForm(node, GetParentNode(path)),
 		// only pass new nodeView when its local-props are different
 		nodeView: CachedTransform("nodeView_transform1", {mapID: map._id, path}, nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
-		// only pass nodeChildren when all are loaded (and pass with finalTypes attached)
-		nodeChildren: CachedTransform("nodeChildren_transform1", {path}, CombineDynamicPropMaps(nodeChildren, nodeChildren_finalTypes),
+		/*nodeChildren: CachedTransform("nodeChildren_transform1", {path}, CombineDynamicPropMaps(nodeChildren, nodeChildren_finalTypes),
 			()=>nodeChildren.map((child, index)=> {
 				return child.Extended({finalType: nodeChildren_finalTypes[index]});
-			})),
+			})),*/
+		nodeChildren,
+		nodeChildren_sortValues: CachedTransform("nodeChildren_sortValues_transform1", {nodeID: node._id}, nodeChildren_sortValues, ()=>nodeChildren_sortValues),
 		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", {nodeID: node._id}, nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
 	};
 })
@@ -103,15 +113,15 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	}*/
 
 	render() {
-		let {map, node, path, nodeWithFinalType, form, widthOverride, children, nodeView, nodeChildren, nodeChildren_fillPercents} = this.props;
+		let {map, node, path, form, widthOverride, children, nodeView, nodeChildren, nodeChildren_sortValues} = this.props;
 		let expanded = nodeView && nodeView.expanded;
 		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
 		//Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
 		NodeUI.renderCount++;
 		NodeUI.lastRenderTime = Date.now();
 
-		let separateChildren = nodeWithFinalType.finalType == MapNodeType.Thesis;
-		type ChildPack = {origIndex: number, node: MapNodeWithFinalType, ui: JSX.Element};
+		let separateChildren = node.finalType == MapNodeType.Thesis;
+		type ChildPack = {origIndex: number, node: MapNodeEnhanced, ui: JSX.Element};
 		let childPacks: ChildPack[] = nodeChildren.map((child, index)=> {
 			return {
 				origIndex: index,
@@ -125,10 +135,10 @@ export default class NodeUI extends BaseComponent<Props, State> {
 
 		// apply sorting
 		if (separateChildren) {
-			upChildPacks = upChildPacks.OrderBy(pack=>nodeChildren_fillPercents[pack.origIndex]);
-			downChildPacks = downChildPacks.OrderByDescending(pack=>nodeChildren_fillPercents[pack.origIndex]);
+			upChildPacks = upChildPacks.OrderBy(pack=>nodeChildren_sortValues[pack.origIndex]);
+			downChildPacks = downChildPacks.OrderByDescending(pack=>nodeChildren_sortValues[pack.origIndex]);
 		} else {
-			childPacks = childPacks.OrderByDescending(pack=>pack.node.metaThesis ? 101 : nodeChildren_fillPercents[pack.origIndex]);
+			childPacks = childPacks.OrderByDescending(pack=>pack.node.metaThesis ? 101 : nodeChildren_sortValues[pack.origIndex]);
 		}
 
 		let {width, expectedHeight} = this.GetMeasurementInfo(this.props, this.state);
@@ -142,7 +152,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					!useAutoOffset && {paddingTop: innerBoxOffset},*/
 					{paddingTop: innerBoxOffset}
 				)}>
-					<NodeUI_Inner ref="innerBox" map={map} node={nodeWithFinalType} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
+					<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
 					{/*<NodeUI_Inner ref="innerBox" {...{map, node: nodeWithFinalType, nodeView, path, width}} widthOverride={widthOverride}/>*/}
 				</div>
 				{nodeChildren == childrenPlaceholder &&
@@ -155,7 +165,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 					}}>
 						{svgInfo.mainBoxOffset &&
-							<NodeConnectorBackground node={nodeWithFinalType} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
+							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
 								childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
 						{childPacks.map(a=>a.ui)}
 					</div>}
@@ -165,7 +175,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 					}}>
 						{svgInfo.mainBoxOffset &&
-							<NodeConnectorBackground node={nodeWithFinalType} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
+							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
 								childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
 						<div ref="upChildHolder" className="upChildHolder clickThrough" style={{display: "flex", flexDirection: "column"}}>
 							{upChildPacks.map(a=>a.ui)}

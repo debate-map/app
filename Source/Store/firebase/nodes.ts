@@ -7,6 +7,7 @@ import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
 import {P} from "../../Frame/Serialization/VDF/VDFTypeInfo";
 import {IsUserCreatorOrMod} from "./userExtras";
 import {GetUserPermissionGroups} from "./users";
+import {GetNodeEnhanced} from "./nodes/$node";
 
 export function GetNode(id: number) {
 	//Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");
@@ -51,6 +52,12 @@ export function GetNodeChildren(node: MapNode) {
 }
 export async function GetNodeChildrenAsync(node: MapNode) {
 	return await Promise.all(node.children.VKeys(true).map(id=>GetDataAsync(`nodes/${id}`))) as MapNode[];
+}
+
+export function GetNodeChildrenEnhanced(node: MapNode, path: string) {
+	let nodeChildren = GetNodeChildren(node);
+	let nodeChildrenEnhanced = nodeChildren.map(child=>child ? GetNodeEnhanced(child, path + "/" + child._id) : null);
+	return CachedTransform("GetNodeChildrenEnhanced", {path}, nodeChildrenEnhanced, ()=>nodeChildrenEnhanced);
 }
 
 export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNode) {

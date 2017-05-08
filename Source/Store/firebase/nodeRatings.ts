@@ -13,7 +13,8 @@ export function GetNodeRatingsRoot(nodeID: number) {
 	return GetData(`nodeRatings/${nodeID}`) as RatingsRoot;
 }
 
-export function GetRatingSet(nodeID: number, ratingType: RatingType) {
+// path is needed if you want 
+export function GetRatingSet(nodeID: number, ratingType: RatingType, path?: string) {
 	if (ratingType == "strength") {
 		let node = GetNode(nodeID);
 		return GetArgumentStrengthPseudoRatingSet(node, GetNodeChildren(node));

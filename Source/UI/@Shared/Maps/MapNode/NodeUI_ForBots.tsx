@@ -4,7 +4,7 @@ import {Map} from "../../../../Store/firebase/maps/@Map";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {RootState} from "../../../../Store";
-import {GetNodeChildren, GetNodeParents} from "../../../../Store/firebase/nodes";
+import {GetNodeChildren, GetNodeParents, GetParentNode} from "../../../../Store/firebase/nodes";
 import {GetFillPercentForRatingAverage, GetRatingAverage, GetRatings} from "../../../../Store/firebase/nodeRatings";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import Column from "../../../../Frame/ReactComponents/Column";
@@ -32,12 +32,10 @@ function GetCrawlerURLStrForNode(node: MapNode) {
 
 type Props = {map: Map, node: MapNode}
 	& Partial<{nodeParents: MapNode[], nodeChildren: MapNode[]}>;
-@Connect((state: RootState, {node}: Props)=> {
-	return {
-		nodeParents: GetNodeParents(node),
-		nodeChildren: GetNodeChildren(node),
-	};
-})
+@Connect((state: RootState, {node}: Props)=> ({
+	nodeParents: GetNodeParents(node),
+	nodeChildren: GetNodeChildren(node),
+}))
 export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 	render() {
 		let {map, node, nodeParents, nodeChildren} = this.props;
@@ -45,6 +43,8 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 
 		// just list one of the parents as the "current parent", so code relying on a parent doesn't error
 		let path = `${nodeParents.length ? nodeParents[0]._id + "/" : ""}${node._id}`;
+		let parent = GetParentNode(path);
+		let nodeEnhanced = node.Extended({finalType: node.type, link: null});
 		return (
 			<ScrollView ref="scrollView"
 					//backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.mapUI}
@@ -86,9 +86,9 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 					{/*<Row>ID: {node._id}</Row>
 					<Row>Title: {GetNodeDisplayText(node)}</Row>*/}
 					Main box:
-					<NodeUI_Inner ref="innerBox" map={map} node={node.Extended({finalType: node.type})} nodeView={{}} path={path} width={null} widthOverride={null}/>
+					<NodeUI_Inner ref="innerBox" map={map} node={nodeEnhanced} nodeView={{}} path={path} width={null} widthOverride={null}/>
 					Panels:
-					{GetRatingTypesForNode(node).map((ratingInfo, index)=> {
+					{GetRatingTypesForNode(nodeEnhanced).map((ratingInfo, index)=> {
 						let ratings = GetRatings(node._id, ratingInfo.type);
 						return <RatingsPanel key={index} node={node} path={path} ratingType={ratingInfo.type} ratings={ratings}/>;
 					})}
@@ -96,7 +96,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 					<DiscussionPanel/>
 					<SocialPanel/>
 					<TagsPanel/>
-					<DetailsPanel node={node.Extended({finalType: node.type})} path={path} userID={null}/>
+					<DetailsPanel node={nodeEnhanced} path={path} userID={null}/>
 					<OthersPanel/>
 				</article>
 			</ScrollView>
