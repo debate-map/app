@@ -133,7 +133,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 					}}>
 				<div style={{position: "relative", fontSize: 12, whiteSpace: "initial"}}>
 					{typeof ratingTypeInfo.description == "function"
-						? ratingTypeInfo.description(node, parentNode)
+						? ratingTypeInfo.description(node, parentNode, path)
 						: ratingTypeInfo.description}
 				</div>
 				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>

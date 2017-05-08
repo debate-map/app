@@ -2,7 +2,8 @@ import {MapNode, MapNodeWithFinalType} from "../nodes/@MapNode";
 import {Range} from "../../../Frame/General/Globals";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {MetaThesis_IfType} from "../nodes/@MetaThesisInfo";
-import {GetThesisFormAtPath} from "../nodes/$node";
+import {GetThesisFormAtPath, GetMainRatingType} from "../nodes/$node";
+import {GetNode} from "../nodes";
 
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 //export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
@@ -91,7 +92,9 @@ export class RatingType_Info {
 		}),
 		adjustment: new RatingType_Info({
 			displayText: "Adjustment",
-			description: (node, parentNode)=> {
+			description: (node, parent, path)=> {
+				let grandParent = path.split("/").length >= 3 ? GetNode(path.split("/").XFromLast(2).ToInt()) : null;
+				let grandParentRatingType = grandParent ? GetMainRatingType(grandParent) : "probability";
 				/*let support = parentNode.type == MapNodeType.SupportingArgument;
 				return `Suppose that the parent thesis were just introduced (a blank slate with no specific research), and that its base probability were 50%.`
 					+ (
@@ -100,21 +103,22 @@ export class RatingType_Info {
 						` Suppose also that at least one of this argument's premises were true.`
 					)
 					+ ` If that were the case, to what level would this argument ${support ? "raise" : "lower"} the parent thesis' probability?`;*/
-				return `Suppose someone is completely on the fence on the parent thesis -- giving it a 50% probability.`
+				return `Suppose someone is completely on the fence on the parent thesis -- giving it a 50% ${
+					grandParentRatingType == "probability" ? "probability" : grandParentRatingType + " rating"}.`
 					+ (
 						node.metaThesis.ifType == MetaThesis_IfType.All ? ` Suppose also that you introduce this argument to them, and they accept all of the premises.` :
 						node.metaThesis.ifType == MetaThesis_IfType.AnyTwo ? ` Suppose also that you introduce this argument to them, and they accept at least two of the premises.` :
 						` Suppose also that you introduce this argument to them, and they accept at least one of the premises.`
 					)
-					+ ` To what level would you expect them (assuming they're reasonable) to shift their probability rating?`
+					+ ` To what level would you expect them (assuming they're reasonable) to shift their ${grandParentRatingType} rating?`
 			},
-			options: (node, parentNode)=> {
+			options: (node, parent)=> {
 				//if (parentNode == null) return Range(0, 100); // must support case where node is given standalone
-				return (parentNode["finalType"] || parentNode.type) == MapNodeType.SupportingArgument ? Range(50, 100) : Range(0, 50);
+				return (parent["finalType"] || parent.type) == MapNodeType.SupportingArgument ? Range(50, 100) : Range(0, 50);
 			},
-			ticks: (node, parentNode)=> {
+			ticks: (node, parent)=> {
 				//if (parentNode == null) return Range(0, 100);
-				return (parentNode["finalType"] || parentNode.type) == MapNodeType.SupportingArgument ? Range(50, 100, 5) : Range(0, 50, 5);
+				return (parent["finalType"] || parent.type) == MapNodeType.SupportingArgument ? Range(50, 100, 5) : Range(0, 50, 5);
 			},
 		}),
 		strength: new RatingType_Info({
@@ -130,9 +134,9 @@ export class RatingType_Info {
 	}
 
 	displayText: string;
-	description: ((node: MapNode, parentNode: MapNode | MapNodeWithFinalType)=>string);
-	options: ((node: MapNode, parentNode: MapNode | MapNodeWithFinalType)=>number[]);
-	ticks: ((node: MapNode, parentNode: MapNode | MapNodeWithFinalType)=>number[]); // for x-axis labels
+	description: ((node: MapNode, parent: MapNode | MapNodeWithFinalType, path: string)=>string);
+	options: ((node: MapNode, parent: MapNode | MapNodeWithFinalType)=>number[]);
+	ticks: ((node: MapNode, parent: MapNode | MapNodeWithFinalType)=>number[]); // for x-axis labels
 	//tickFormatter?: (tickValue: number)=>string = a=>a.toString();
 	tickRender?: (props: TickRenderProps)=>JSX.Element;
 	/*tickRender?: (props: TickRenderProps)=>JSX.Element = props=> {

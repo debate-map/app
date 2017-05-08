@@ -33,7 +33,7 @@ import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@M
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import Column from "../../../../Frame/ReactComponents/Column";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetThesisFormUnderParent, GetFinalNodeTypeAtPath, GetNodeWithFinalType} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetThesisFormUnderParent, GetFinalNodeTypeAtPath, GetNodeWithFinalType, GetMainRatingType} from "../../../../Store/firebase/nodes/$node";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -62,7 +62,7 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 	nodeChildren = nodeChildren.Any(a=>a == null) ? childrenPlaceholder : nodeChildren;
 	let nodeChildren_fillPercents = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
 		let form = GetThesisFormUnderParent(child, node);
-		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetRatingTypesForNode(child).FirstOrX(null, {}).type), form == ThesisForm.Negation);
+		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetMainRatingType(child)), form == ThesisForm.Negation);
 	});
 	let nodeChildren_finalTypes = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
 		return GetFinalNodeTypeAtPath(child, path + "/" + child._id);
@@ -143,6 +143,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					{paddingTop: innerBoxOffset}
 				)}>
 					<NodeUI_Inner ref="innerBox" map={map} node={nodeWithFinalType} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
+					{/*<NodeUI_Inner ref="innerBox" {...{map, node: nodeWithFinalType, nodeView, path, width}} widthOverride={widthOverride}/>*/}
 				</div>
 				{nodeChildren == childrenPlaceholder &&
 					<div style={{margin: "auto 0 auto 10px"}}>...</div>}

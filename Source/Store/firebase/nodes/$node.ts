@@ -43,6 +43,9 @@ export function GetRatingTypesForNode(node: MapNode): RatingTypeInfo[] {
 		return [{type: "strength", main: true}];
 	Assert(false);
 }
+export function GetMainRatingType(node: MapNode): RatingType {
+	return GetRatingTypesForNode(node).FirstOrX(null, {}).type;
+}
 
 export function ReverseMapNodeType(nodeType: MapNodeType) {
 	if (nodeType == MapNodeType.SupportingArgument) return MapNodeType.OpposingArgument;
