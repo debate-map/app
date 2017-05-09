@@ -122,7 +122,7 @@ class DBPathInfo {
 let pathInfos = {} as {[path: string]: DBPathInfo};
 g.Extend({GetData});
 export function GetData(path: string, inVersionRoot = true, makeRequest = true) {
-	let firebase = State().firebase;
+	let firebase = State(a=>a.firebase);
 	path = DBPath(path, inVersionRoot);
 
 	let info = pathInfos[path] || (pathInfos[path] = new DBPathInfo());

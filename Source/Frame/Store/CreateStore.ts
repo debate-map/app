@@ -85,7 +85,7 @@ export default function(initialState = {}, history) {
 	) as Store<RootState> & {asyncReducers};
 	store.asyncReducers = {};
 
-	/*let w = watch(()=>store.getState());
+	/*let w = watch(()=>State());
 	store.subscribe(w((newVal, oldVal) => {
 		ProcessAction(g.lastAction, newVal, oldVal);
 	}));*/

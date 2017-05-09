@@ -1,4 +1,4 @@
-import {GetFocusNode, GetViewOffset, GetSelectedNodePath, GetNodeView} from "../../../Store/main/mapViews";
+import {GetFocusNode, GetViewOffset, GetSelectedNodePath, GetNodeView, GetMapView} from "../../../Store/main/mapViews";
 import {BaseComponent, FindDOM, FindReact, FindDOM_, Pre} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
@@ -20,7 +20,6 @@ import {WaitXThenRun, Timer} from "../../../Frame/General/Timers";
 import {MapNode, ThesisForm, MapNodeEnhanced} from "../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../Store/firebase/maps/@Map";
 import {RootState} from "../../../Store/index";
-import {GetMapView} from "../../../Store/main/mapViews";
 import {GetUserID} from "../../../Store/firebase/users";
 import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
@@ -33,6 +32,7 @@ import {URL} from "../../../Frame/General/URLs";
 import NodeUI_ForBots from "./MapNode/NodeUI_ForBots";
 import {IsNumberString} from "../../../Frame/General/Types";
 import {GetNodeEnhanced} from "../../../Store/firebase/nodes/$node";
+import {GetOpenMapID} from "../../../Store/main";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -132,7 +132,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						onClick={e=> {
 							if (e.target != this.refs.mapUI) return;
 							if (new Vector2i(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
-							let mapView = store.getState().main.mapViews[store.getState().main.openMap];
+							let mapView = GetMapView(GetOpenMapID());
 							if (GetSelectedNodePath(map._id)) {
 								store.dispatch(new ACTMapNodeSelect({mapID: map._id, path: null}));
 								UpdateFocusNodeAndViewOffset(map._id);
@@ -195,7 +195,6 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		// if user is already scrolling manually, return so we don't interrupt that process
 		if ((this.refs.scrollView as ScrollView).state.scrollOp_bar) return;
 
-		let state = store.getState();
 		let focusNode_target = GetFocusNode(GetMapView(map._id)); // || map.rootNode.toString();
 		let viewOffset_target = GetViewOffset(GetMapView(map._id)); // || new Vector2i(200, 0);
 		//Log(`Resizing:${focusNode_target};${viewOffset_target}`);

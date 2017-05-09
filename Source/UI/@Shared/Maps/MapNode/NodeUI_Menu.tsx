@@ -115,7 +115,7 @@ If not, paste the argument as a clone instead.`
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 
-						let thesisForm = GetThesisFormAtPath(copiedNode, State().main.copiedNodePath);
+						let thesisForm = GetThesisFormAtPath(copiedNode, State(a=>a.main.copiedNodePath));
 						let isArgument = copiedNode.type == MapNodeType.SupportingArgument || copiedNode.type == MapNodeType.OpposingArgument;
 						let copiedMetaThesis = isArgument ? (await GetNodeChildrenAsync(copiedNode)).First(a=>a.metaThesis != null) : null;
 

@@ -126,13 +126,13 @@ export function MainReducer(state, action) {
 // ==========
 
 export function GetOpenMapID() {
-	return State().main.openMap;
+	return State(a=>a.main.openMap);
 }
 export function GetSelectedTermID() {
-	return State().main.selectedTerm;
+	return State(a=>a.main.selectedTerm);
 }
 export function GetSelectedTerm() {
-	let selectedID = State().main.selectedTerm;
+	let selectedID = State(a=>a.main.selectedTerm);
 	//return GetData(`terms/${selectedID}`);
 	return (GetTerms() || []).find(a=>a._id == selectedID);
 }

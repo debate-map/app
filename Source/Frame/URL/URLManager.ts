@@ -136,10 +136,10 @@ export function UpdateURL() {
 	let newURL = new URL(oldURL.domain, oldURL.pathNodes);
 	if (oldURL.WithImpliedPathNodes().toString({domain: false}).startsWith("/global/map") && !isBot)
 		newURL = CreateURL_Globals();
-	if (!State().main.analyticsEnabled && newURL.GetQueryVar("analytics") == null)
+	if (!State(a=>a.main.analyticsEnabled) && newURL.GetQueryVar("analytics") == null)
 		newURL.SetQueryVar("analytics", "false");
-	if (State().main.envOverride)
-		newURL.SetQueryVar("env", State().main.envOverride);
+	if (State(a=>a.main.envOverride))
+		newURL.SetQueryVar("env", State(a=>a.main.envOverride));
 	store.dispatch(replace(newURL.toString({domain: false})));
 }
 function CreateURL_Globals(): URL {

@@ -21,7 +21,7 @@ export function GetUserID(): string {
 	return result;*/
 	/*let firebaseSet = State().firebase as Set<any>;
 	return firebaseSet.toJS().auth.uid;*/
-	return State().firebase.get("auth") ? State().firebase.get("auth").uid : null;
+	return State(a=>a.firebase.get("auth")) ? State(a=>a.firebase.get("auth").uid) : null;
 }
 
 export type UserMap = {[key: string]: User};

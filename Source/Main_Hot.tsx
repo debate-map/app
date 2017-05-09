@@ -15,9 +15,15 @@ declare global { var store: Store<RootState> & {firebase: FirebaseApp}; }
 var store = createStore(g.__InitialState__, {}) as Store<RootState>;
 g.Extend({store});
 
-declare global { var State: ()=>RootState; }
-function State() { return store.getState(); }
-g.Extend({State});
+//declare global { var State: ()=>RootState; }
+// State() actually also returns the root-state (if no data-getter is supplied), but we don't reveal that in type-info (as its only to be used in console)
+g.Extend({State}); declare global { function State<T>(dataGetter: (state: RootState)=>T): T; }
+function State(dataGetter) {
+	let state = store.getState();
+	if (!dataGetter) return state;
+	let selectedData = dataGetter(state);
+	return selectedData;
+}
 
 //setTimeout(()=> {
 const mountNode = document.getElementById(`root`);

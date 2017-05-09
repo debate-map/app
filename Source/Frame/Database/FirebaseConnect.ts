@@ -31,32 +31,23 @@ import {TryCall} from "../General/Timers";
 	}
 }*/
 
-/*export function Connect<T, P>(innerConnectFunc: (state: RootState, props: P)=>any, isFuncWrapper?: boolean);
-export function Connect<T, P>(innerConnectFuncWrapper: ()=>(state: RootState, props: P)=>any, isFuncWrapper?: boolean);
-export function Connect<T, P>(funcOrFuncWrapper, isConnectFuncWrapper = null) {*/
-
 // if you're sending in a connect-func rather than a connect-func-wrapper, then you need to make it have at least one argument (to mark it as such)
-export function Connect<T, P>(innerConnectFunc: (state: RootState, props: P)=>any);
-export function Connect<T, P>(innerConnectFuncWrapper: ()=>(state: RootState, props: P)=>any);
-export function Connect<T, P>(funcOrFuncWrapper) {
-	let innerConnectFunc: (state: RootState, props: P)=>any, innerConnectFuncWrapper: ()=>(state: RootState, props: P)=>any;
-	/*if (funcOrFuncWrapper.length) innerConnectFunc = funcOrFuncWrapper;
-	else innerConnectFuncWrapper = funcOrFuncWrapper;*/
-	//if (isConnectFuncWrapper === null)
-	let isConnectFuncWrapper = funcOrFuncWrapper.length == 0; //&& typeof TryCall(funcOrFuncWrapper) == "function";
-	if (!isConnectFuncWrapper) innerConnectFunc = funcOrFuncWrapper;
-	else innerConnectFuncWrapper = funcOrFuncWrapper;
+export function Connect<T, P>(innerMapStateToPropsFunc: (state: RootState, props: P)=>any);
+export function Connect<T, P>(mapStateToProps_inner_getter: ()=>(state: RootState, props: P)=>any);
+export function Connect<T, P>(funcOrFuncGetter) {
+	let mapStateToProps_inner: (state: RootState, props: P)=>any, mapStateToProps_inner_getter: ()=>(state: RootState, props: P)=>any;
+	let isFuncGetter = funcOrFuncGetter.length == 0; //&& typeof TryCall(funcOrFuncGetter) == "function";
+	if (!isFuncGetter) mapStateToProps_inner = funcOrFuncGetter;
+	else mapStateToProps_inner_getter = funcOrFuncGetter;
 
-	//return connect((state: RootState, props: P)=> {
-	//return connect(function(state: RootState, props: P) {
-	let ourConnectFunc = function(state: RootState, props: P) {
+	let mapStateToProps_wrapper = function(state: RootState, props: P) {
 		let s = this;
 		ClearRequestedPaths();
 		//let firebase = state.firebase;
 		//let firebase = props["firebase"];
 		let firebase = store.firebase;
 
-		let result = innerConnectFunc(state, props);
+		let result = mapStateToProps_inner(state, props);
 
 		let oldRequestedPaths: string[] = s.lastRequestedPaths || [];
 		let requestedPaths: string[] = GetRequestedPaths();
@@ -78,26 +69,13 @@ export function Connect<T, P>(funcOrFuncWrapper) {
 		return result;
 	};
 
-	if (innerConnectFunc)
-		return connect(ourConnectFunc);
+	if (mapStateToProps_inner)
+		return connect(mapStateToProps_wrapper);
 	return connect(()=> {
-		innerConnectFunc = innerConnectFuncWrapper();
-		return ourConnectFunc;
+		mapStateToProps_inner = mapStateToProps_inner_getter();
+		return mapStateToProps_wrapper;
 	});
 }
-
-/*let requestedPaths = [] as string[];
-export function RequestPath(path: string) {
-	requestedPaths.push(path);
-}
-export function RequestPaths(paths: string[]) {
-	requestedPaths.push(...paths);
-}
-export function GetRequestedPathsAndClear() {
-	var result = requestedPaths;
-	requestedPaths = [];
-	return result;
-}*/
 
 let requestedPaths = {} as {[key: string]: boolean};
 /** This only adds paths to a "request list". Connect() is in charge of making the actual db requests. */
@@ -110,11 +88,6 @@ export function RequestPaths(paths: string[]) {
 	for (let path of paths)
 		RequestPath(path);
 }
-/*export function GetRequestedPathsAndClear() {
-	var result = requestedPaths.VKeys();
-	requestedPaths = {};
-	return result;
-}*/
 export function ClearRequestedPaths() {
 	requestedPaths = {};
 }

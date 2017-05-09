@@ -15,5 +15,5 @@ export function RatingUIReducer(state = new RatingUIState(), action: Action<any>
 // ==========
 
 export function GetRatingUISmoothing() { 
-	return State().main.ratingUI.smoothing;
+	return State(a=>a.main.ratingUI.smoothing);
 }

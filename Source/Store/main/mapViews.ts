@@ -113,7 +113,7 @@ export function GetSelectedNodeID(mapID: number): number {
   	);
 }*/
 export function GetMapView(mapID: number): MapView {
-	return State().main.mapViews[mapID];
+	return State(a=>a.main.mapViews[mapID]);
 }
 export function GetNodeView(mapID: number, path: string): MapNodeView {
 	let pathNodeIDs = path.split("/").map(ToInt);

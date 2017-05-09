@@ -76,7 +76,7 @@ export async function PostDispatchAction(action: Action<any>) {
 	if (action.type == "PostRehydrate") {
 		LoadURL(startURL.toString());
 		UpdateURL();
-		if (prodEnv && State().main.analyticsEnabled) {
+		if (prodEnv && State(a=>a.main.analyticsEnabled)) {
 			Log("Initialized Google Analytics.");
 			//ReactGA.initialize("UA-21256330-33", {debug: true});
 			ReactGA.initialize("UA-21256330-33");
@@ -172,7 +172,7 @@ function PostInit() {
 	let lastAuth;
 	//Log("Subscribed");
 	store.subscribe(()=> {
-		let auth = State().firebase.get("auth");
+		let auth = State(a=>a.firebase.get("auth"));
 		if (auth != lastAuth) {
 			//Log("Setting user-context: " + auth);
 			Raven.setUserContext(auth);

@@ -38,7 +38,7 @@ import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeFo
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
 	return firebaseConnect(props=> {
-		let firebase = store.getState().firebase;
+		let firebase = State().firebase;
 
 		let innerPaths = innerFirebaseConnect(props) as string[];
 		// if inner-paths are all already loaded, don't request the paths this time
