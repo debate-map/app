@@ -1,13 +1,7 @@
 import {styles, colors} from "../../Frame/UI/GlobalStyles";
 import {Dispatch} from "redux";
 import {Component, PropTypes} from "react";
-import AppBar from "material-ui/AppBar";
-import IconMenu from "material-ui/IconMenu";
-import IconButton from "material-ui/IconButton";
-import MenuItem from "material-ui/MenuItem";
-import FlatButton from "material-ui/FlatButton";
-import Avatar from "material-ui/Avatar";
-import GoogleButton from 'react-google-button';
+import GoogleButton from "react-google-button";
 
 import {connect} from "react-redux";
 import {firebaseConnect, helpers} from "react-redux-firebase";

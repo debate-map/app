@@ -4,12 +4,12 @@ import {RootState} from "./Store/index";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
 import * as ReactDOM from "react-dom";
 import * as StackTrace from "stacktrace-js";
-import * as React from "react";
+import * as React from "react/lib/ReactWithAddons";
 
 // uncomment this if you want to load the source-maps and such ahead of time (making-so the first actual call can get it synchronously)
 //StackTrace.get();
 
-let createStore = require(`./Frame/Store/CreateStore`).default;
+let createStore = require("./Frame/Store/CreateStore").default;
 
 declare global { var store: Store<RootState> & {firebase: FirebaseApp}; }
 var store = createStore(g.__InitialState__, {}) as Store<RootState>;

@@ -16,7 +16,6 @@ import {GetUserID} from "../../../../../Store/firebase/users";
 import {URL} from "../../../../../Frame/General/URLs";
 import {replace, push} from "react-router-redux";
 import {ACTTermSelect} from "../../../../../Store/main";
-import {PropTypes} from "react";
 import {historyStore} from "../../../../Root";
 import {ParseSegmentsForPatterns} from "../../../../../Frame/General/RegexHelpers";
 

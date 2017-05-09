@@ -19,7 +19,7 @@ import {DataSnapshot} from "firebase";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {createSelector} from "reselect";
 import NodeUI_Inner from "./NodeUI_Inner";
-import {createMarkupForStyles} from "react/lib/CSSPropertyOperations";
+import {createMarkupForStyles} from "react-dom/lib/CSSPropertyOperations";
 import NodeConnectorBackground from "./NodeConnectorBackground";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {CachedTransform, CombineDynamicPropMaps} from "../../../../Frame/V/VCache";

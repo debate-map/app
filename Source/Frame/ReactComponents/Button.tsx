@@ -2,7 +2,7 @@ import {BaseComponent, BaseProps, AddGlobalStyle, basePropFullKeys, ApplyBasicSt
 import Radium from "radium";
 import {E} from "../General/Globals_Free";
 import {ToJSON} from "../General/Globals";
-import {createMarkupForStyles} from "react/lib/CSSPropertyOperations";
+import {createMarkupForStyles} from "react-dom/lib/CSSPropertyOperations";
 import {Log} from "../General/Logging";
 
 var styles = {

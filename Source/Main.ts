@@ -8,6 +8,7 @@ import "./Frame/General/Start_1";
 import "./Server/Server";
 import "codemirror";
 import "codemirror/addon/scroll/simplescrollbars";
+//import * as ReactPerf from "react-addons-perf";
 
 import * as ReactDOM from "react-dom";
 import {Store} from "redux";
@@ -15,7 +16,6 @@ import {RootState} from "./Store/index";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
 import {CurrentUrl, URL} from "./Frame/General/URLs";
 import * as Raven from "raven-js";
-import * as injectTapEventPlugin from "react-tap-event-plugin";
 //import Promise from "bluebird";
 
 // startup (non-hot)
@@ -35,8 +35,7 @@ for (var key in Promise)
 	PromiseWrapper[key] = Promise[key];
 g.Extend({React, Promise: PromiseWrapper});*/
 
-// Tap Plugin
-injectTapEventPlugin();
+//g.Extend({ReactPerf});
 
 let startURL = URL.Current();
 declare global { export var startURL: URL; } g.Extend({startURL});

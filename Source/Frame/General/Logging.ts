@@ -22,10 +22,10 @@ console.log = function(message) {
 
 var warn_orig = console.warn;
 console.warn = function(...args) {
-    //var str = message + "";
+	//var str = message + "";
 	if (args[2] && args[2].Contains("do not mix longhand and shorthand properties in the same style object")) return;
 	if (args[0] && args[0].Contains("a promise was created in a handler but was not returned from it, see http://goo.gl/rRqMUw")) return;
-    warn_orig.apply(this, args);
+	warn_orig.apply(this, args);
 };
 
 var error_orig = console.error;
@@ -37,6 +37,9 @@ console.error = function(exception) {
 
     //LogSourceStackTraceFrom(new Error());
 };
+
+// fix for that console.table doesn't seem to be working (as used by react-addons-perf)
+//console.table = function() { console.log.apply(this, arguments); };
 
 export var onLogFuncs = [];
 declare global { function Log(...args); } g.Extend({Log});

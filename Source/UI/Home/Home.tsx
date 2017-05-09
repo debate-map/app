@@ -6,7 +6,6 @@ import {BaseComponent, SimpleShouldUpdate, GetInnerComp, FindDOM_, Equals_Shallo
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import {styles} from "../../Frame/UI/GlobalStyles";
 import ScrollView from "react-vscrollview";
-import {PropTypes} from "react";
 import {JumpToHash, ToAbsoluteUrl, URL} from "../../Frame/General/URLs";
 import {E} from "../../Frame/General/Globals_Free";
 import {List} from "../../Frame/Serialization/VDF/VDFExtras";
@@ -222,7 +221,7 @@ let info = {text: pageText};
 	demoRootNode: GetNodeEnhanced(GetNode(demoRootNodeID), demoRootNodeID+""),
 }))
 export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNodeEnhanced}, {}> {
-	static contextTypes = {
+	/*static contextTypes = {
 		router: PropTypes.shape({
 			history: PropTypes.shape({
 				push: PropTypes.func.isRequired,
@@ -230,7 +229,8 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNodeEnhance
 				createHref: PropTypes.func.isRequired
 			}).isRequired
 		}).isRequired
-	};
+	};*/
+	static contextTypes = {router: ()=>{}};
 	render() {
 		let {demoRootNode} = this.props;
 		/*if (demoRootNode_override) // for dev

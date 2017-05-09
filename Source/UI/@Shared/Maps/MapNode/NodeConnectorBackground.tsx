@@ -2,7 +2,7 @@ import {BaseComponent, FindDOM, SimpleShouldUpdate_Overridable} from "../../../.
 import NodeUI from "./NodeUI";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {A} from "../../../../Frame/General/Assert";
-import ShallowCompare from "react-addons-shallow-compare";
+import ShallowCompare from "react/lib/shallowCompare";
 import {MapNode, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
