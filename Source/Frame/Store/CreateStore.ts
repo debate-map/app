@@ -11,6 +11,9 @@ import watch from "redux-watch";
 import {PreDispatchAction, MidDispatchAction, PostDispatchAction} from "./ActionProcessor";
 //import {version, firebaseConfig} from "../../BakedConfig";
 //var {version, firebaseConfig} = require(prodEnv ? "../../BakedConfig_Prod" : "../../BakedConfig_Dev");
+//import {batchedUpdatesMiddleware} from "redux-batched-updates";
+import {batchedSubscribe} from "redux-batched-subscribe";
+import {unstable_batchedUpdates} from "react-dom";
 
 export const browserHistory = createBrowserHistory();
 
@@ -70,10 +73,12 @@ export default function(initialState = {}, history) {
 	const store = createStore(
 		MakeRootReducer(),
 		initialState,
+		// note: compose applies functions from right to left
 		compose(
 			applyMiddleware(...middleware),
 			reduxFirebase(firebaseConfig, reduxFirebaseConfig),
 			autoRehydrate(),
+			batchedSubscribe(unstable_batchedUpdates),
 			applyMiddleware(...lateMiddleware), // place late-middleware after reduxFirebase, so it can intercept all its dispatched events
 			...extraEnhancers
 		) as StoreEnhancer<any>
