@@ -125,10 +125,10 @@ export function GetData(path: string, inVersionRoot = true, makeRequest = true) 
 	let firebase = State(a=>a.firebase);
 	path = DBPath(path, inVersionRoot);
 
-	let info = pathInfos[path] || (pathInfos[path] = new DBPathInfo());
+	/*let info = pathInfos[path] || (pathInfos[path] = new DBPathInfo());
 	/*let timestampEntry = (firebase as any)._root.entries.FirstOrX(a=>a[0] == "timestamp");
 	if (timestampEntry) {
-		var timestamp = (firebase as any)._root ? timestampEntry[1].get(path) : null;*/
+		var timestamp = (firebase as any)._root ? timestampEntry[1].get(path) : null;*#/
 	let timestamps = firebase.timestamp;
 	if (timestamps) {
 		//var timestamp = firebase._root ? timestamps.get(path) : null;
@@ -139,12 +139,13 @@ export function GetData(path: string, inVersionRoot = true, makeRequest = true) 
 			//info.cachedData = helpers.dataToJS(firebase, path);
 			info.cachedData = DeepGet(firebase, "data/" + path);
 		}
-	}
+	}*/
 
 	if (makeRequest)
 		RequestPath(path);
 
-	return info.cachedData;
+	//return info.cachedData;
+	return DeepGet(firebase, "data/" + path) as any;
 }
 
 g.Extend({GetDataAsync});
