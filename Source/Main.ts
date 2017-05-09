@@ -9,6 +9,7 @@ import "./Server/Server";
 import "codemirror";
 import "codemirror/addon/scroll/simplescrollbars";
 //import * as ReactPerf from "react-addons-perf";
+import "./Frame/General/Profiling";
 
 import * as ReactDOM from "react-dom";
 import {Store} from "redux";

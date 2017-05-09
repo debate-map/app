@@ -33,6 +33,10 @@ export default class UserPanel extends BaseComponent<{auth?}, {}> {
 					<div>Name: {auth.displayName}</div>
 					<div>ID: {GetUserID()}</div>
 				</Column>
+				{/*devEnv &&
+					<Row>
+						<CheckBox value={State().main.
+					</Row>*/}
 				<Button text="Sign out" mt={5} style={{alignSelf: "flex-end", width: 100}} onClick={()=> {
 					firebase.logout();
 				}}/>

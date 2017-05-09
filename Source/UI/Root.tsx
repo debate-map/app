@@ -66,6 +66,12 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 			</Provider>
 		);
 	}
+
+	ComponentDidMount() {
+		WaitXThenRun(100, ()=> {
+			React.addons.Perf.start();
+		});
+	}
 }
 
 class RootUI extends BaseComponent<{}, {}> {
