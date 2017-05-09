@@ -129,13 +129,15 @@ export function GetData(path: string, inVersionRoot = true, makeRequest = true) 
 	/*let timestampEntry = (firebase as any)._root.entries.FirstOrX(a=>a[0] == "timestamp");
 	if (timestampEntry) {
 		var timestamp = (firebase as any)._root ? timestampEntry[1].get(path) : null;*/
-	let timestamps = firebase.get("timestamp");
+	let timestamps = firebase.timestamp;
 	if (timestamps) {
 		//var timestamp = firebase._root ? timestamps.get(path) : null;
-		var timestamp = timestamps.has(path) ? timestamps.get(path) : null;
+		//var timestamp = timestamps.has(path) ? timestamps.get(path) : null;
+		var timestamp = timestamps[path];
 		if (timestamp && timestamp != info.lastTimestamp) {
 			info.lastTimestamp = timestamp;
-			info.cachedData = helpers.dataToJS(firebase, path);
+			//info.cachedData = helpers.dataToJS(firebase, path);
+			info.cachedData = DeepGet(firebase, "data/" + path);
 		}
 	}
 

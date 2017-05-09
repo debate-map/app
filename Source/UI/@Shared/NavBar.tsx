@@ -44,7 +44,7 @@ const avatarStyles = {
 @Connect(state=>({
 	topLeftOpenPanel: state.main.topLeftOpenPanel,
 	topRightOpenPanel: state.main.topRightOpenPanel,
-	auth: helpers.pathToJS(state.firebase, "auth"),
+	auth: state.firebase.auth,
 }))
 export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpenPanel?, topRightOpenPanel?, auth?: firebase.User}, {}> {
 	static contextTypes = {store: PropTypes.object.isRequired};

@@ -48,7 +48,8 @@ export function CombineReducers(...args) {
 export class RootState {
 	main: MainState;
 	//firebase: FirebaseDatabase;
-	firebase: Immutable.Map<any, any>;
+	//firebase: Immutable.Map<any, any>;
+	firebase: any;
 	//form: any;
 	router: RouterState;
 	messageBox: MessageBoxState;

@@ -10,7 +10,7 @@ require("react-autobind");
 require("react-markdown");
 require("react-router-dom");
 require("react-router-redux");
-require("react-redux-firebase");
+//require("react-redux-firebase");
 require("redux-persist");
 require("redux-persist-transform-filter");
 require("reselect");

@@ -122,17 +122,15 @@ interface String { ContainsAny: (...strings: string[])=>boolean; }
 String.prototype._AddFunction_Inline = function ContainsAny(this: string, ...strings: string[]) {
 	return strings.Any(str=>this.Contains(str));
 };
-String.prototype._AddFunction_Inline = function SplitByAny() {
-    var args = arguments;
-	if (args[0] instanceof Array)
-		args = args[0];
-
-	var splitStr = "/";
-	for (var i = 0; i < args.length; i++)
-		splitStr += (splitStr.length > 1 ? "|" : "") + args[i];
+/** Separator-strings must be escaped. (they're passed into a regular-expression) */
+String.prototype._AddFunction_Inline = function SplitByAny(...separators) {
+	/*var splitStr = "/";
+	for (let sep of separators)
+		splitStr += (splitStr.length > 1 ? "|" : "") + sep;
 	splitStr += "/";
-
-	return this.split(splitStr);
+	return this.split(splitStr);*/
+	let regex = new RegExp(separators.join("|"));
+	return this.split(regex);
 };
 interface String { SplitAt: (index: number, includeCharAtIndex?)=>[string, string]; }
 String.prototype.SplitAt = function(index: number, includeCharAtIndex = false) {
