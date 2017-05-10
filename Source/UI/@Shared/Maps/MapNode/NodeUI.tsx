@@ -288,7 +288,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					: 0},*/
 				{childrenWidthOverride: this.childBoxes.filter(a=>a != null).map(a=> {
 					let comp = GetInnerComp(a) as NodeUI;
-					return comp.GetMeasurementInfo().expectedBoxWidth;
+					return comp.GetMeasurementInfo().width;
 				}).concat(0).Max(null, true)},
 			/*{childrenCenterY: upChildHolder
 				? (upChildHolder && upChildHolder.style.display != "none" ? upChildHolder.clientHeight : 0)
