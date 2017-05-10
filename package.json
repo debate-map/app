@@ -145,6 +145,7 @@
     "ajv-keywords": "^2.0.0",
     "bluebird": "^3.5.0",
     "codemirror": "^5.25.2",
+    "fastdom": "^1.0.6",
     "keycode": "^2.1.8",
     "lodash": "^4.17.2",
     "moment": "^2.17.1",

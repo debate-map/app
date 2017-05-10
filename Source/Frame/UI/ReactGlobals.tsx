@@ -328,6 +328,7 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 				Log("Calling PostRender for: " + this.constructor.name + ";" + V.GetStackTraceStr());*/
 			//Log("Calling PostRender for: " + this.constructor.name);
 			WaitXThenRun(0, ()=>window.requestAnimationFrame(()=> {
+			//WaitXThenRun(0, ()=>g.requestIdleCallback(()=> {
 				if (!this.mounted) return;
 				this.PostRender();
 			}));
@@ -404,7 +405,7 @@ export class Div extends BaseComponent<{shouldUpdate?} & React.HTMLProps<HTMLDiv
     }
 }
 
-export function Equals_Shallow(objA, objB) {
+export function ShallowEquals(objA, objB) {
 	if (objA === objB)
 		return true;
 
@@ -430,7 +431,7 @@ export function Equals_Shallow(objA, objB) {
 	return true;
 }
 export function ShallowChanged(objA, objB) {
-	return !Equals_Shallow(objA, objB);
+	return !ShallowEquals(objA, objB);
 }
 
 //require("./GlobalStyles");

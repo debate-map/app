@@ -2,7 +2,7 @@ import {Connect} from "../../Frame/Database/FirebaseConnect";
 import {DeepGet} from "../../Frame/V/V";
 import {SubNavBarButton} from "../@Shared/SubNavBar";
 import SubNavBar from "../@Shared/SubNavBar";
-import {BaseComponent, SimpleShouldUpdate, GetInnerComp, FindDOM_, Equals_Shallow} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, SimpleShouldUpdate, GetInnerComp, FindDOM_, ShallowEquals} from "../../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import {styles} from "../../Frame/UI/GlobalStyles";
 import ScrollView from "react-vscrollview";
@@ -311,7 +311,7 @@ const Link = (props, router)=> {
 
 				//let history = State().router.history;
 				let history = router.history;
-				if (Equals_Shallow(toURL.pathNodes, currentURL.pathNodes)) { // if paths same
+				if (ShallowEquals(toURL.pathNodes, currentURL.pathNodes)) { // if paths same
 					history.replace(href);
 				} else {
 					history.push(href);

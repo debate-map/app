@@ -2,7 +2,7 @@ import {CombineReducers} from "../../index";
 import {RootNodeViewsReducer} from "./$mapView/rootNodeViews";
 import Action from "../../../Frame/General/Action";
 import {MapView} from "./@MapViews";
-import {Equals_Shallow} from "../../../Frame/UI/ReactGlobals";
+import {ShallowEquals} from "../../../Frame/UI/ReactGlobals";
 import {FromJSON, ToJSON} from "../../../Frame/General/Globals";
 import {GetTreeNodesInObjTree} from "../../../Frame/V/V";
 import {IsPrimitive} from "../../../Frame/General/Types";
@@ -25,7 +25,7 @@ export function MapViewReducer(state = {rootNodeViews: {}}, action: Action<any>,
 	}
 
 	let newState = {...state, rootNodeViews: RootNodeViewsReducer(state.rootNodeViews, action, mapID)};
-	if (!Equals_Shallow(state, newState))
+	if (!ShallowEquals(state, newState))
 		return newState;
 	return state;
 }

@@ -1,4 +1,4 @@
-import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, FindDOM_} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, FindDOM_, ShallowEquals} from "../../../../Frame/UI/ReactGlobals";
 import {connect} from "react-redux";
 import {DBPath, GetData} from "../../../../Frame/Database/DatabaseHelpers";
 import {Debugger, QuickIncrement, E, GetTimeSinceLoad} from "../../../../Frame/General/Globals_Free";
@@ -34,6 +34,7 @@ import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import Column from "../../../../Frame/ReactComponents/Column";
 import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType} from "../../../../Store/firebase/nodes/$node";
+import * as FastDOM from "fastdom";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -142,7 +143,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			childPacks = childPacks.OrderByDescending(pack=>pack.node.metaThesis ? 101 : nodeChildren_sortValues[pack.origIndex]);
 		}
 
-		let {width, expectedHeight} = this.GetMeasurementInfo(this.props, this.state);
+		//let {width, expectedHeight} = this.GetMeasurementInfo(this.props, this.state);
+		let {width, expectedHeight} = this.GetMeasurementInfo();
 		let innerBoxOffset = ((childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
 
 		this.childBoxes = [];
@@ -190,8 +192,19 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	}
 	childBoxes: NodeUI[];
 
-	GetMeasurementInfo(props: Props, state: State) {
-		let {node, path} = this.props;
+	//GetMeasurementInfo(/*props: Props, state: State*/) {
+	measurementInfo_cache;
+	measurementInfo_cache_lastUsedProps;
+	/*ComponentWillReceiveProps(newProps) {
+		this.GetMeasurementInfo(newProps, false); // refresh measurement-info when props change
+	}*/
+	//GetMeasurementInfo(useCached: boolean) {
+	GetMeasurementInfo() {
+		let props_used = this.props.Including("node", "path") as any;
+		//Log("Checking whether should remeasure info for: " + props_used.node._id);
+		if (this.measurementInfo_cache && ShallowEquals(this.measurementInfo_cache_lastUsedProps, props_used)) return this.measurementInfo_cache;
+
+		let {node, path} = props_used as Props;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		let displayText = GetNodeDisplayText(node, path);
@@ -214,7 +227,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
 		//this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
 
-		return {width, expectedHeight};
+		this.measurementInfo_cache = {expectedBoxWidth, width, expectedHeight};
+		this.measurementInfo_cache_lastUsedProps = props_used;
+		return this.measurementInfo_cache;
 	}
 
 	lastHeight = 0;
@@ -261,7 +276,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 
 		let newState = E(
 			nodeView && nodeView.expanded &&
-				{childrenWidthOverride: this.childBoxes.Any(a=>a != null)
+				/*{childrenWidthOverride: this.childBoxes.Any(a=>a != null)
 					? this.childBoxes.Where(a=>a != null).Select(a=> {
 						var childDOM = FindDOM(GetInnerComp(a).refs.innerBox);
 						var oldMinWidth = childDOM.style.minWidth;
@@ -270,7 +285,11 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						childDOM.style.minWidth = oldMinWidth;
 						return result;
 					}).Max(null, true)
-					: 0},
+					: 0},*/
+				{childrenWidthOverride: this.childBoxes.filter(a=>a != null).map(a=> {
+					let comp = GetInnerComp(a) as NodeUI;
+					return comp.GetMeasurementInfo().expectedBoxWidth;
+				}).concat(0).Max(null, true)},
 			/*{childrenCenterY: upChildHolder
 				? (upChildHolder && upChildHolder.style.display != "none" ? upChildHolder.clientHeight : 0)
 				: (childHolder && childHolder.style.display != "none" ? childHolder.clientHeight / 2 : 0)}*/
@@ -279,7 +298,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 				: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)}
 		) as State;
 
-		let {expectedHeight} = this.GetMeasurementInfo(this.props, E(this.state, newState) as State);
+		//let {width, expectedHeight} = this.GetMeasurementInfo(this.props, E(this.state, newState) as State);
+		let {expectedBoxWidth, expectedHeight} = this.GetMeasurementInfo();
 
 		let innerBoxOffset = ((newState.childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
 		//if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
