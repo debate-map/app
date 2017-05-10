@@ -68,10 +68,12 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	}
 
 	ComponentDidMount() {
-		WaitXThenRun(100, ()=> {
-			G({Perf: React.addons.Perf});
-			React.addons.Perf.start();
-		});
+		if (devEnv) {
+			WaitXThenRun(100, ()=> {
+				G({Perf: React.addons.Perf});
+				React.addons.Perf.start();
+			});
+		}
 	}
 }
 
