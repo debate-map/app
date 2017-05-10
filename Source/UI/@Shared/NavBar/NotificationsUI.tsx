@@ -15,7 +15,7 @@ AddGlobalStyle(`
 `);
 
 @Connect(state=> ({
-	messages: state.main.notificationMessages,
+	messages: State(a=>a.main.notificationMessages),
 }))
 export default class NotificationsUI extends BaseComponent<{} & Partial<{messages: NotificationMessage[]}>, {}> {
 	scrollView: ScrollView;

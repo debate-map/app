@@ -108,7 +108,7 @@ export function MessageBoxReducer(state = new MessageBoxState(), action: Action<
 }
 
 @(connect((state: RootState)=>({
-	options: state.messageBox.openOptions,
+	options: State(a=>a.messageBox.openOptions),
 })) as any)
 export class MessageBoxUI extends BaseComponent<{} & Partial<{options: MessageBoxOptions}>, {}> {
 	render() {

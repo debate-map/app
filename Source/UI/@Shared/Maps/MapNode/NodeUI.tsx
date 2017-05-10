@@ -60,6 +60,7 @@ type Props = {map: Map, node: MapNodeEnhanced, path?: string, widthOverride?: nu
 	}>;
 type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number, svgInfo: {mainBoxOffset: Vector2i, oldChildBoxOffsets: Vector2i[]}};
 @Connect((state: RootState, {node, path, map}: Props & BaseProps)=> {
+	//Log("Calling NodeUI connect func.");
 	let nodeView = GetNodeView(map._id, path) || new MapNodeView();
 
 	let nodeChildren = GetNodeChildrenEnhanced(node, path);

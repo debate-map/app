@@ -36,13 +36,13 @@ import {Map} from "../../../../Store/firebase/maps/@Map";
 import {SlicePath} from "./NodeUI/RatingsPanel";
 
 type Props = {map: Map, node: MapNodeEnhanced, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode}>;
-@Connect((state: RootState, {path}: Props)=> {
+@Connect((_: RootState, {path}: Props)=> {
 	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 	return {
 		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
 		permissions: GetUserPermissionGroups(GetUserID()),
 		parentNode: GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1)),
-		copiedNode: state.main.copiedNodePath ? GetNode(state.main.copiedNodePath.split("/").Last().ToInt()) : null,
+		copiedNode: State(a=>a.main.copiedNodePath) ? GetNode(State(a=>a.main.copiedNodePath).split("/").Last().ToInt()) : null,
 	};
 })
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {

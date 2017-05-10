@@ -172,7 +172,7 @@ function PostInit() {
 	let lastAuth;
 	//Log("Subscribed");
 	store.subscribe(()=> {
-		let auth = State(a=>a.firebase.auth);
+		let auth = State(a=>a.firebase.auth, false);
 		if (auth != lastAuth) {
 			//Log("Setting user-context: " + auth);
 			Raven.setUserContext(auth);

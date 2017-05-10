@@ -113,10 +113,10 @@ export function GetSelectedNodeID(mapID: number): number {
   	);
 }*/
 export function GetMapView(mapID: number): MapView {
-	return State(a=>a.main.mapViews[mapID]);
+	return State([a=>a.main.mapViews, mapID]);
 }
 export function GetNodeView(mapID: number, path: string): MapNodeView {
-	let pathNodeIDs = path.split("/").map(ToInt);
+	/*let pathNodeIDs = path.split("/").map(ToInt);
 	let parentNodeID = pathNodeIDs.length > 1 ? pathNodeIDs.XFromLast(1) : null;
 	if (parentNodeID) {
 		//let parentNodeView = CachedTransform({mapID, path}, )
@@ -127,7 +127,11 @@ export function GetNodeView(mapID: number, path: string): MapNodeView {
 
 	let mapView = GetMapView(mapID);
 	if (mapView == null) return null;
-	return mapView.rootNodeViews[pathNodeIDs[0]] as MapNodeView;
+	return mapView.rootNodeViews[pathNodeIDs[0]] as MapNodeView;*/
+
+	let pathNodeIDs = path.split("/").map(ToInt);
+	let storePathNodes = ["main", "mapViews", mapID, "rootNodeViews", pathNodeIDs[0]].concat(pathNodeIDs.Skip(1).SelectMany(childID=>["children", childID]));
+	return State(storePathNodes);
 }
 export function GetFocusNode(mapView: MapView): string {
 	if (mapView == null) return null;

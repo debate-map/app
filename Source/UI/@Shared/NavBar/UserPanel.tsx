@@ -11,7 +11,8 @@ import {ShowMessageBox, BoxController} from "../../../Frame/UI/VMessageBox";
 
 @Connect(state=>({
 	//authError: pathToJS(state.firebase, "authError"),
-	auth: helpers.pathToJS(state.firebase, "auth"),
+	//auth: helpers.pathToJS(state.firebase, "auth"),
+	auth: State(a=>a.firebase.auth),
 	//account: helpers.pathToJS(state.firebase, "profile")
 }))
 export default class UserPanel extends BaseComponent<{auth?}, {}> {

@@ -6,7 +6,7 @@ import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/quer
 import {getEventsFromInput} from "react-redux-firebase/dist/utils";
 import {Log} from "../Serialization/VDF/VDF";
 import {ToJSON} from "../General/Globals";
-import {TryCall} from "../General/Timers";
+import {TryCall, Timer} from "../General/Timers";
 
 // Place a selector in Connect() whenever it uses data that:
 // 1) might change during the component's lifetime, and:
@@ -42,16 +42,36 @@ export function Connect<T, P>(funcOrFuncGetter) {
 
 	let mapStateToProps_wrapper = function(state: RootState, props: P) {
 		let s = this;
+		//g.inConnectFunc = true;
 		ClearRequestedPaths();
+		ClearAccessedPaths();
+		//Assert(GetAccessedPaths().length == 0, "Accessed-path must be empty at start of mapStateToProps call (ie. the code in Connect()).");
 		//let firebase = state.firebase;
 		//let firebase = props["firebase"];
 		let firebase = store.firebase;
 
+		let storeDataChanged = false;
+		if (s.lastAccessedStorePaths_withData == null) {
+			storeDataChanged = true;
+		} else {
+			for (let path in s.lastAccessedStorePaths_withData) {
+				if (State(path, false) !== s.lastAccessedStorePaths_withData[path]) {
+					//store.dispatch({type: "Data changed!" + path});
+					storeDataChanged = true;
+					break;
+				}
+			}
+		}
+		let propsChanged = ShallowChanged(props, s.lastProps || {});
+
+		//let result = storeDataChanged ? mapStateToProps_inner(state, props) : s.lastResult;
+		if (!storeDataChanged && !propsChanged) return s.lastResult;
 		let result = mapStateToProps_inner(state, props);
 
 		let oldRequestedPaths: string[] = s.lastRequestedPaths || [];
 		let requestedPaths: string[] = GetRequestedPaths();
-		if (firebase._ && ShallowChanged(requestedPaths, oldRequestedPaths)) {
+		//if (firebase._ && ShallowChanged(requestedPaths, oldRequestedPaths)) {
+		if (ShallowChanged(requestedPaths, oldRequestedPaths)) {
 			setImmediate(()=> {
 				/*for (let path of requestedPaths)
 					Log("Requesting Stage2: " + path);*/
@@ -65,6 +85,39 @@ export function Connect<T, P>(funcOrFuncGetter) {
 			s.lastRequestedPaths = requestedPaths;
 			//Log("Requesting:" + ToJSON(requestedPaths) + "\n2:" + ToJSON(s._firebaseEvents)); 
 		}
+		/*if (ShallowChanged(requestedPaths, oldRequestedPaths)) {
+			if (s.waitTimer) s.waitTimer.Stop();
+			s.waitTimer = new Timer(100, ()=> {
+				Log("Checking");
+				if (firebase._ == null) return;
+				Log("Timer succeeded.");
+				s._firebaseEvents = getEventsFromInput(requestedPaths);
+				let removedPaths = oldRequestedPaths.Except(...requestedPaths);
+				unWatchEvents(firebase, store.dispatch, getEventsFromInput(removedPaths));
+				let addedPaths = requestedPaths.Except(...oldRequestedPaths);
+				Log("Added paths:" + addedPaths.join(","));
+				watchEvents(firebase, store.dispatch, getEventsFromInput(addedPaths));
+				s.waitTimer.Stop();
+				s.waitTimer = null;
+			}).Start();
+			s.lastRequestedPaths = requestedPaths;
+		}*/
+
+		/*let oldAccessedStorePaths: string[] = s.lastAccessedStorePaths || [];
+		let accessedStorePaths: string[] = GetAccessedPaths();
+		if (ShallowChanged(accessedStorePaths, oldAccessedStorePaths)) {
+		}*/
+
+		let accessedStorePaths: string[] = GetAccessedPaths();
+		//ClearAccessedPaths();
+		s.lastAccessedStorePaths_withData = {};
+		for (let path of accessedStorePaths) {
+			s.lastAccessedStorePaths_withData[path] = State(path, false);
+		}
+		s.lastProps = props;
+		s.lastResult = result;
+
+		//g.inConnectFunc = false;
 
 		return result;
 	};
@@ -93,4 +146,21 @@ export function ClearRequestedPaths() {
 }
 export function GetRequestedPaths() {
 	return requestedPaths.VKeys();
+}
+
+let accessedStorePaths = {} as {[key: string]: boolean};
+export function OnAccessPath(path: string) {
+	//Log("Accessing-path Stage1: " + path);
+	accessedStorePaths[path] = true;
+}
+export function OnAccessPaths(paths: string[]) {
+	for (let path of paths)
+		OnAccessPath(path);
+}
+export function ClearAccessedPaths() {
+	accessedStorePaths = {};
+}
+export function GetAccessedPaths() {
+	//Log("GetAccessedPaths:" + accessedStorePaths.VKeys());
+	return accessedStorePaths.VKeys();
 }

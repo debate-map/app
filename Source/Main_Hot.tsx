@@ -5,6 +5,8 @@ import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
 import * as ReactDOM from "react-dom";
 import * as StackTrace from "stacktrace-js";
 import * as React from "react/lib/ReactWithAddons";
+import {DeepGet} from "./Frame/V/V";
+import {OnAccessPath} from "./Frame/Database/FirebaseConnect";
 
 // uncomment this if you want to load the source-maps and such ahead of time (making-so the first actual call can get it synchronously)
 //StackTrace.get();
@@ -17,11 +19,24 @@ g.Extend({store});
 
 //declare global { var State: ()=>RootState; }
 // State() actually also returns the root-state (if no data-getter is supplied), but we don't reveal that in type-info (as its only to be used in console)
-g.Extend({State}); declare global { function State<T>(dataGetter: (state: RootState)=>T): T; }
-function State(dataGetter) {
+g.Extend({State}); declare global {
+	function State<T>(pathSegment: ((state: RootState)=>T) | string | number, countAsAccess?: boolean): T;
+	function State<T>(pathSegments: (((state: RootState)=>T) | string | number)[], countAsAccess?: boolean): any;
+}
+function State<T>(pathSegmentOrSegments, countAsAccess = true) {
 	let state = store.getState();
-	if (!dataGetter) return state;
-	let selectedData = dataGetter(state);
+	let pathSegments = pathSegmentOrSegments instanceof Array ? pathSegmentOrSegments : [pathSegmentOrSegments];
+	if (pathSegments.length == 0) return state;
+
+	let path = pathSegments.map(segment=> {
+		return segment instanceof Function ? (segment as any).toString().match("return a.(.+?);")[1].replace(/\./g, "/") : segment;
+	}).join("/");
+
+	let selectedData = DeepGet(state, path);
+	if (countAsAccess) {
+		//Assert(g.inConnectFunc, "State(), with countAsAccess:true, must be called from within a Connect() func.");
+		OnAccessPath(path);
+	}
 	return selectedData;
 }
 

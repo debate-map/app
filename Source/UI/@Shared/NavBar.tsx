@@ -41,10 +41,10 @@ const avatarStyles = {
 	wrapper: {marginTop: 45 - avatarSize}
 };
 
-@Connect(state=>({
-	topLeftOpenPanel: state.main.topLeftOpenPanel,
-	topRightOpenPanel: state.main.topRightOpenPanel,
-	auth: state.firebase.auth,
+@Connect(_=>({
+	topLeftOpenPanel: State(a=>a.main.topLeftOpenPanel),
+	topRightOpenPanel: State(a=>a.main.topRightOpenPanel),
+	auth: State(a=>a.firebase.auth),
 }))
 export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpenPanel?, topRightOpenPanel?, auth?: firebase.User}, {}> {
 	static contextTypes = {store: PropTypes.object.isRequired};
@@ -159,9 +159,9 @@ export class NavBarButton extends BaseComponent
 }
 
 type NavBarPanelButton_Props = {to: string, text: string, panel: string, corner: "top-left" | "top-right"} & Partial<{topLeftOpenPanel, topRightOpenPanel}>;
-@Connect(state=> ({
-	topLeftOpenPanel: state.main.topLeftOpenPanel,
-	topRightOpenPanel: state.main.topRightOpenPanel,
+@Connect(_=> ({
+	topLeftOpenPanel: State(a=>a.main.topLeftOpenPanel),
+	topRightOpenPanel: State(a=>a.main.topRightOpenPanel),
 }))
 export class NavBarPanelButton extends BaseComponent<NavBarPanelButton_Props, {}> {
 	render() {

@@ -31,24 +31,24 @@ Criteria:
 * Editing efficiency: how easy it is to create and edit arguments and premises.
 * Features: how substantial the additional features provided are. (beyond argument/premise presentation) 
 
-| Site | Clarity, when shallow | Clarity, when deep | Editing efficiency | Features |
-| --- | --- | --- | --- | --- |
-| [Arguman](http://en.arguman.org) | 80% | 70% | 80%	| 60% |
-| [ProCon](http://www.procon.org) | ... | ... | ... | ... |
-| [DebateGraph](http://debategraph.org) | ... | ... | ... | ... |
-| [Netivist](https://netivist.org) | ... | ... | ... | ... |
-| [Debucate](https://www.debucate.com) | ... | ... | ... | ... |
-| [TruthMapping](https://www.truthmapping.com) | ... | ... | ... | ... |
-| [Debate.org](http://www.debate.org) | ...  | ... | ... | ... |
-| [YourView](http://yourview-production.herokuapp.com) | ... | ... | ... | ... |
-| [DebateHub](https://debatehub.net) | ... | ... | ... | ... |
-| [DebateWise](http://debatewise.org) | ... | ... | ... | ... |
-| [CreateDebate](http://www.createdebate.com) | ... | ... | ... | ... |
-| [ConvinceMe](http://www.convinceme.net) | ... | ... | ... | ... |
-| [Quibl](http://www.quibl.com) | ... | ... | ... | ... |
-| [Cohere](http://cohere.open.ac.uk) | ... | ... | ... | ... |
-| [LettuceDebate](http://www.lettucedebate.com) | ... | ... | ... | ... |
-| [Banter](https://banter.wiki) | ... | ... | ... | ... |
+| Site | Clarity, when shallow | Clarity, when deep | Editing efficiency | Features | Open source |
+| --- | --- | --- | --- | --- | --- |
+| [Arguman](http://en.arguman.org) | 80% | 70% | 80%	| 60% | yes |
+| [ProCon](http://www.procon.org) | ... | ... | ... | ... | ... |
+| [DebateGraph](http://debategraph.org) | ... | ... | ... | ... | ... |
+| [Netivist](https://netivist.org) | ... | ... | ... | ... | ... |
+| [Debucate](https://www.debucate.com) | ... | ... | ... | ... | ... |
+| [TruthMapping](https://www.truthmapping.com) | ... | ... | ... | ... | ... |
+| [Debate.org](http://www.debate.org) | ...  | ... | ... | ... | ... |
+| [YourView](http://yourview-production.herokuapp.com) | ... | ... | ... | ... | ... |
+| [DebateHub](https://debatehub.net) | ... | ... | ... | ... | ... |
+| [DebateWise](http://debatewise.org) | ... | ... | ... | ... | ... |
+| [CreateDebate](http://www.createdebate.com) | ... | ... | ... | ... | ... |
+| [ConvinceMe](http://www.convinceme.net) | ... | ... | ... | ... | ... |
+| [Quibl](http://www.quibl.com) | ... | ... | ... | ... | ... |
+| [Cohere](http://cohere.open.ac.uk) | ... | ... | ... | ... | ... |
+| [LettuceDebate](http://www.lettucedebate.com) | ... | ... | ... | ... | ... |
+| [Banter](https://banter.wiki) | ... | ... | ... | ... | ... |
 `;
 
 @SimpleShouldUpdate

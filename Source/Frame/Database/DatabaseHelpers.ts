@@ -122,7 +122,7 @@ class DBPathInfo {
 let pathInfos = {} as {[path: string]: DBPathInfo};
 g.Extend({GetData});
 export function GetData(path: string, inVersionRoot = true, makeRequest = true) {
-	let firebase = State(a=>a.firebase);
+	//let firebase = State(a=>a.firebase);
 	path = DBPath(path, inVersionRoot);
 
 	/*let info = pathInfos[path] || (pathInfos[path] = new DBPathInfo());
@@ -145,7 +145,8 @@ export function GetData(path: string, inVersionRoot = true, makeRequest = true) 
 		RequestPath(path);
 
 	//return info.cachedData;
-	return DeepGet(firebase, "data/" + path) as any;
+	//return DeepGet(firebase, "data/" + path) as any;
+	return State(`firebase/data/${path}`) as any;
 }
 
 g.Extend({GetDataAsync});

@@ -4,7 +4,7 @@ import {BaseComponent, SimpleShouldUpdate} from "../../Frame/UI/ReactGlobals";
 import {DBPath, GetData} from "../../Frame/Database/DatabaseHelpers";
 import {connect} from "react-redux";
 import MapUI from "../@Shared/Maps/MapUI";
-import {Debugger} from "../../Frame/General/Globals_Free";
+import {Debugger, Debugger_Wrap} from "../../Frame/General/Globals_Free";
 import {P} from "../../Frame/Serialization/VDF/VDFTypeInfo";
 import ScrollView from "react-vscrollview";
 import {RootState} from "../../Store/index";
