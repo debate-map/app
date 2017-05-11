@@ -6,8 +6,8 @@ import {CachedTransform} from "../../Frame/V/VCache";
 import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
 import {P} from "../../Frame/Serialization/VDF/VDFTypeInfo";
 import {IsUserCreatorOrMod} from "./userExtras";
-import {GetUserPermissionGroups} from "./users";
-import {GetNodeEnhanced} from "./nodes/$node";
+import {GetUserPermissionGroups, GetUserID} from "./users";
+import { GetNodeEnhanced, IsArgumentNode, IsNodeVisibleToNonModNonCreators } from "./nodes/$node";
 
 export function GetNode(id: number) {
 	//Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");
@@ -48,6 +48,9 @@ export function GetNodeChildren(node: MapNode) {
 	}
 
 	let children = (node.children || {}).VKeys(true).map(id=>GetNode(parseInt(id)));
+	children = children.filter(child=> {
+		return child == null || IsNodeVisibleToNonModNonCreators(child) || IsUserCreatorOrMod(GetUserID(), child);
+	});
 	return CachedTransform("GetNodeChildren", [node._id], children, ()=>children);
 }
 export async function GetNodeChildrenAsync(node: MapNode) {

@@ -33,7 +33,7 @@ import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@M
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import Column from "../../../../Frame/ReactComponents/Column";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType} from "../../../../Store/firebase/nodes/$node";
+import { GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType, IsArgumentNode } from "../../../../Store/firebase/nodes/$node";
 import * as FastDOM from "fastdom";
 
 // modified version which only requests paths that do not yet exist in the store
@@ -151,12 +151,20 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		return (
 			<div className="NodeUI clickThrough" style={{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}}>
 				<div ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={E(
+					//{position: "relative"},
 					/*useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
 					!useAutoOffset && {paddingTop: innerBoxOffset},*/
 					{paddingTop: innerBoxOffset}
 				)}>
 					<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
 					{/*<NodeUI_Inner ref="innerBox" {...{map, node: nodeWithFinalType, nodeView, path, width}} widthOverride={widthOverride}/>*/}
+					{IsArgumentNode(node) && nodeChildren.length > 0 && nodeChildren.length < 3 &&
+						<Div ct style={{
+							//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
+							marginTop: 5, fontSize: 12
+						}}>
+							Needs 2 premises to be visible.
+						</Div>}
 				</div>
 				{nodeChildren == childrenPlaceholder &&
 					<div style={{margin: "auto 0 auto 10px"}}>...</div>}

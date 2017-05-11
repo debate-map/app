@@ -171,3 +171,11 @@ export function GetValidNewChildTypes(nodeType: MapNodeType, path: string, permi
 export function IsContextReversed(node: MapNode, parent: MapNodeEnhanced) {
 	return node.metaThesis && IsReversedArgumentNode(parent);
 }
+
+export function IsArgumentNode(node: MapNode) {
+	return node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument;
+}
+export function IsNodeVisibleToNonModNonCreators(node: MapNode) {
+	if (IsArgumentNode(node) && (node.children || {}).VKeys(true).length < 3) return false;
+	return true;
+}
