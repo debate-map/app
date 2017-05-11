@@ -68,7 +68,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 					}}/>
 				{creatorOrMod &&
 					<Row>
-						<Button text="Save" enabled={dataError == null} mt={10} onLeftClick={async ()=> {
+						<Button text="Save" enabled={dataError == null} onLeftClick={async ()=> {
 							/*firebase.Ref().update(E(
 								this.refs.title_base && {base: this.refs.title_base.GetValue()},
 								this.refs.title_negation && {negation: this.refs.title_negation.GetValue()},

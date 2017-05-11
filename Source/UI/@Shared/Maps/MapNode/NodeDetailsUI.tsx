@@ -22,7 +22,7 @@ import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {MetaThesis_IfType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
 import {GetParentNode} from "../../../../Store/firebase/nodes";
-import {GetThesisFormAtPath, GetNodeForm, IsContextReversed} from "../../../../Store/firebase/nodes/$node";
+import {GetThesisFormAtPath, GetNodeForm, IsContextReversed, IsArgumentNode} from "../../../../Store/firebase/nodes/$node";
 import {ReverseThenType} from "../../../../Store/firebase/nodes/$node/$metaThesis";
 
 type Props = {
@@ -156,7 +156,7 @@ The "type" option above describes the way in which this argument's premises will
 									onChange={val=>Change(newLinkData.form = val ? ThesisForm.Negation : ThesisForm.Base)}/>
 							</Row>
 						</Column>}
-					{!creating &&
+					{!creating && !IsArgumentNode(newData) &&
 						<Column mt={10}>
 							<Row style={{fontWeight: "bold"}}>Advanced:</Row>
 							<Row style={{display: "flex", alignItems: "center"}}>
