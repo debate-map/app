@@ -39,6 +39,7 @@ export class MapNode {
 	relative: boolean;
 	contentNode: ContentNode;
 	metaThesis: MetaThesisInfo;
+	chainAfter: string;
 
 	// averages from server
 	/*agrees = 0;
@@ -50,6 +51,7 @@ export class MapNode {
 	children: ChildSet;
 	//talkRoot: number;
 }
+export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
 AddSchema({
 	properties: {
 		type: {
@@ -71,6 +73,7 @@ AddSchema({
 		relative: {type: "boolean"},
 		contentNode: {$ref: "ContentNode"},
 		metaThesis: {$ref: "MetaThesisInfo"},
+		chainAfter: {oneOf: [{type: "null"}, {type: "string", pattern: MapNode_chainAfterFormat}]},
 		parents: {$ref: "ParentSet"},
 		children: {$ref: "ChildSet"},
 		//talkRoot: {type: "number"},

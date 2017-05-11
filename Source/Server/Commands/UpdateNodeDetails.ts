@@ -1,7 +1,7 @@
 import {Assert} from "../../Frame/General/Assert";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command} from "../Command";
-import {MapNode, ThesisForm, ChildEntry} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry, MapNode_chainAfterFormat} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {DeepGet} from "../../Frame/V/V";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
@@ -20,6 +20,7 @@ AddSchema({
 				relative: {type: "boolean"},
 				contentNode: {$ref: "ContentNode"},
 				metaThesis: {$ref: "MetaThesisInfo"},
+				chainAfter: {oneOf: [{type: "null"}, {type: "string", pattern: MapNode_chainAfterFormat}]},
 			},
 			//required: ["relative", "titles", "contentNode"],
 		}),

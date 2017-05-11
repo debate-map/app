@@ -74,6 +74,18 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 	let nodeChildren_sortValues = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
 		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetSortByRatingType(child)), GetNodeForm(child) == ThesisForm.Negation);
 	});
+	/*for (var i = 0; i < nodeChildren.length; i++) {
+		let child = nodeChildren[i];
+		if (child.chainAfter == "[start]") {
+			nodeChildren_sortValues[i] = -1;
+			continue;
+		}
+		let chainAfterNode = nodeChildren.FirstOrX(a=>a._id.toString() == child.chainAfter);
+		if (chainAfterNode) {
+			let chainAfterNode_sortValue = nodeChildren_sortValues[nodeChildren.indexOf(chainAfterNode)];
+			nodeChildren_sortValues[i] = chainAfterNode_sortValue + .000001;
+		}
+	}*/
 	let nodeChildren_fillPercents = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
 		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetMainRatingType(child)), GetNodeForm(child) == ThesisForm.Negation);
 	});
@@ -139,8 +151,30 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		if (separateChildren) {
 			upChildPacks = upChildPacks.OrderBy(pack=>nodeChildren_sortValues[pack.origIndex]);
 			downChildPacks = downChildPacks.OrderByDescending(pack=>nodeChildren_sortValues[pack.origIndex]);
+			ApplyOrderPostProcessingForChildPacks(upChildPacks);
+			ApplyOrderPostProcessingForChildPacks(downChildPacks);
 		} else {
-			childPacks = childPacks.OrderByDescending(pack=>pack.node.metaThesis ? 101 : nodeChildren_sortValues[pack.origIndex]);
+			childPacks = childPacks.OrderByDescending(pack=>nodeChildren_sortValues[pack.origIndex]);
+			ApplyOrderPostProcessingForChildPacks(childPacks);
+		}
+		function ApplyOrderPostProcessingForChildPacks(packs) {
+			for (let pack of packs) {
+				if (pack.node.chainAfter == "[start]") {
+					packs.Remove(pack);
+					packs.Insert(0, pack); 
+				}
+				let chainAfterNode = nodeChildren.FirstOrX(a=>a._id.toString() == pack.node.chainAfter);
+				if (chainAfterNode) {
+					packs.Remove(pack);
+					let chainAfterNode_index = packs.findIndex(a=>a.node == chainAfterNode);
+					packs.Insert(chainAfterNode_index + 1, pack); 
+				}
+			}
+			let metaThesisPack = packs.FirstOrX(a=>a.node.metaThesis);
+			if (metaThesisPack) {
+				packs.Remove(metaThesisPack);
+				packs.Insert(0, metaThesisPack); 
+			}
 		}
 
 		//let {width, expectedHeight} = this.GetMeasurementInfo(this.props, this.state);

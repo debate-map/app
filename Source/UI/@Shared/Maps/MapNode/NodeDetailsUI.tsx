@@ -17,7 +17,7 @@ import TermComponent from "../../../../Store/firebase/termComponents/@TermCompon
 import {GetNiceNameForTermType} from "../../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, MapNode_chainAfterFormat} from "../../../../Store/firebase/nodes/@MapNode";
 import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {MetaThesis_IfType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
@@ -39,8 +39,6 @@ export default class NodeDetailsUI extends BaseComponent<Props, {newData: MapNod
 	}
 
 	quoteEditor: QuoteInfoEditorUI;
-	relative: CheckBox;
-	asNegation: CheckBox;
 	render() {
 		let {baseData, parent, creating, editing, style, onChange, creator} = this.props;
 		let {newData, newLinkData} = this.state;
@@ -86,7 +84,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, {newData: MapNod
 					{newData.type == MapNodeType.Thesis && !newData.contentNode && !newData.metaThesis &&
 						<Row style={{display: "flex", alignItems: "center"}}>
 							<Pre>Relative: </Pre>
-							<CheckBox ref={c=>this.relative = c} enabled={editing} checked={newData.relative} onChange={val=>Change(newData.relative = val)}/>
+							<CheckBox enabled={editing} checked={newData.relative} onChange={val=>Change(newData.relative = val)}/>
 							<InfoButton text={`"Relative" means the statement/question is too loosely worded to give a simple yes/no answer,${""
 									} and should instead be evaluated in terms of the degree/intensity to which it is true. Eg. "How dangerous is sky-diving?"`}/>
 						</Row>}
@@ -154,8 +152,18 @@ The "type" option above describes the way in which this argument's premises will
 							<Row style={{fontWeight: "bold"}}>At this location:</Row>
 							<Row style={{display: "flex", alignItems: "center"}}>
 								<Pre>Show as negation: </Pre>
-								<CheckBox ref={c=>this.asNegation = c} enabled={editing} checked={newLinkData.form == ThesisForm.Negation}
+								<CheckBox enabled={editing} checked={newLinkData.form == ThesisForm.Negation}
 									onChange={val=>Change(newLinkData.form = val ? ThesisForm.Negation : ThesisForm.Base)}/>
+							</Row>
+						</Column>}
+					{!creating &&
+						<Column mt={10}>
+							<Row style={{fontWeight: "bold"}}>Advanced:</Row>
+							<Row style={{display: "flex", alignItems: "center"}}>
+								<Pre>Chain after: </Pre>
+								<TextInput enabled={editing} style={{width: 100}} pattern={MapNode_chainAfterFormat}
+									value={newData.chainAfter} onChange={val=>Change(newData.chainAfter = val || null)}/>
+								<InfoButton text={`If entered, the current node will be displayed directly after the listed node. (type "[start]" to anchor as first item)`}/>
 							</Row>
 						</Column>}
 					{newData.type == MapNodeType.Thesis && !newData.contentNode && !newData.metaThesis && newLinkData.form == ThesisForm.YesNoQuestion && creating &&
