@@ -158,7 +158,7 @@ The "type" option above describes the way in which this argument's premises will
 									onChange={val=>Change(newLinkData.form = val ? ThesisForm.Negation : ThesisForm.Base)}/>
 							</Row>
 						</Column>}
-					{!creating && !IsArgumentNode(newData) &&
+					{!creating && !IsArgumentNode(newData) && !newData.metaThesis &&
 						<Column mt={10}>
 							<Row style={{fontWeight: "bold"}}>Advanced:</Row>
 							<Row style={{display: "flex", alignItems: "center"}}>
