@@ -195,7 +195,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					{IsArgumentNode(node) && nodeChildren.length > 0 && nodeChildren.length < 3 &&
 						<Div ct style={{
 							//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
-							marginTop: 5, fontSize: 12
+							marginTop: 5, fontSize: 12,
+							width: 0, // fixes that link-lines would have gap on left
 						}}>
 							Needs 2 premises to be visible.
 						</Div>}
