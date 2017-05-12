@@ -38,7 +38,10 @@ export default class DeleteNode extends Command<{nodeID: number}> {
 		// delete links with parents
 		for (let parentID in oldData.parents) {
 			dbUpdates[`nodes/${parentID}/children/${nodeID}`] = null;
-			dbUpdates[`nodes/${parentID}/childrenOrder`] = (await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[]).Except(nodeID);
+			let parent_oldChildrenOrder = await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[];
+			if (parent_oldChildrenOrder) {
+				dbUpdates[`nodes/${parentID}/childrenOrder`] = parent_oldChildrenOrder.Except(nodeID);
+			}
 		}
 		// if has meta-thesis, delete it also
 		if (metaThesisID) {

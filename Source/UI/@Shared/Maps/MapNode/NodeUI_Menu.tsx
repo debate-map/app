@@ -33,7 +33,9 @@ import {E} from "../../../../Frame/General/Globals_Free";
 import AddNode from "../../../../Server/Commands/AddNode";
 import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, ReverseMapNodeType, IsReversedArgumentNode, GetNodeEnhanced} from "../../../../Store/firebase/nodes/$node";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {SlicePath} from "./NodeUI/RatingsPanel";
+import { SlicePath } from "./NodeUI/RatingsPanel";
+import LinkNode from "Server/Commands/LinkNode";
+import UnlinkNode from "Server/Commands/UnlinkNode";
 
 type Props = {map: Map, node: MapNodeEnhanced, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode}>;
 @Connect((_: RootState, {path}: Props)=> {
@@ -53,7 +55,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
 		let validChildTypes = GetValidNewChildTypes(node.type, path, permissions);
 		let form = GetNodeForm(node, path);
-		let thesisFormForThesisChild = node.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base;
+		let formForChildren = node.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base;
 
 		let nodeText = GetNodeDisplayText(node, path);
 
@@ -87,7 +89,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							}
 						}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode, permissions) &&
-					<VMenuItem text={`Paste as link: "${GetNodeDisplayText(copiedNode, thesisFormForThesisChild).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={e=> {
+					<VMenuItem text={`Paste as link: "${GetNodeDisplayText(copiedNode, formForChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 						if (copiedNode.type == MapNodeType.SupportingArgument || copiedNode.type == MapNodeType.OpposingArgument) {
@@ -102,16 +104,11 @@ If not, paste the argument as a clone instead.`
 						}
 						proceed();
 						function proceed() {
-							firebase.Ref(`nodes/${copiedNode._id}/parents`).update({[node._id]: {_: true}});
-							let linkInfo = {_: true} as any;
-							if (thesisFormForThesisChild) {
-								linkInfo.form = thesisFormForThesisChild;
-							}
-							firebase.Ref(`nodes/${node._id}/children`).update({[copiedNode._id]: linkInfo});
+							new LinkNode({parentID: node._id, childID: copiedNode._id, childForm: formForChildren}).Run();
 						}
 					}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode, permissions) &&
-					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, thesisFormForThesisChild).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async e=> {
+					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, formForChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 
@@ -133,32 +130,7 @@ If not, paste the argument as a clone instead.`
 					if (error) {
 						return void ShowMessageBox({title: `Cannot unlink`, message: error});
 					}
-
-					/*firebase.Ref("nodes").once("value", (snapshot: DataSnapshot)=> {
-						//let nodes = snapshot.val().VValues(true);
-						let nodes = (snapshot.val() as Object).Props().Select(a=>a.value.Extended({_id: a.name}));
-						//let childNodes = node.children.Select(a=>nodes[a]);
-						// todo: remove need for downloading all nodes, by have children store their parents (redundant, but practical)
-						let parentNodes = nodes.Where(a=>a.children && a.children[node._id]);
-						if (parentNodes.length <= 1)
-							return void ShowMessageBox({title: "Cannot unlink", message: "Cannot unlink this child, as doing so would orphan it. Try deleting it instead."});
-
-						//let parent = parentNodes[0];
-						let parentText = GetNodeDisplayText(parentNode, path.substr(0, path.lastIndexOf("/")));
-						ShowMessageBox({
-							title: `Unlink child "${nodeText}"`, cancelButton: true,
-							message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,
-							onOK: ()=> {
-								firebase.Ref("nodes").transaction(nodes=> {
-									if (!nodes) return nodes;
-									nodes[node._id].parents[parentNode._id] = null;
-									nodes[parentNode._id].children[node._id] = null;
-									return nodes;
-								}, undefined, false);
-							}
-						});
-					});*/
-
+					
 					let parentNodes = await GetNodeParentsAsync(node);
 					if (parentNodes.length <= 1) {
 						return void ShowMessageBox({title: `Cannot unlink`, message: `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`});
@@ -170,12 +142,7 @@ If not, paste the argument as a clone instead.`
 						title: `Unlink child "${nodeText}"`, cancelButton: true,
 						message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,
 						onOK: ()=> {
-							firebase.Ref(`nodes`).transaction(nodes=> {
-								if (!nodes) return nodes;
-								nodes[node._id].parents[parentNode._id] = null;
-								nodes[parentNode._id].children[node._id] = null;
-								return nodes;
-							}, undefined, false);
+							new UnlinkNode({parentID: parentNode._id, childID: node._id}).Run();
 						}
 					});
 				}}/>}

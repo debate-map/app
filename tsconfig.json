@@ -11,12 +11,12 @@
 		//"maxNodeModulesJsDepth": 1,
 		//"rootDir": ".",
 		"rootDir": "Source",
-		"baseUrl": ".",
-		/*"rootDir": "Source",
-		"baseUrl": "Source",*/
-		"paths": {
+		//"baseUrl": ".",
+		"baseUrl": "Source",
+		"paths": { // ("paths" is relative to "baseUrl")
 			"*": [
-				"node_modules/@types/*", // prefer "/node_modules/@types" over "/node_modules/[something]/node_modules/@types" (eg, when using npm link)
+				//"node_modules/@types/*", // prefer "/node_modules/@types" over "/node_modules/[something]/node_modules/@types" (eg, when using npm link)
+				"../node_modules/@types/*", // prefer "/node_modules/@types" over "/node_modules/[something]/node_modules/@types" (eg, when using npm link)
 				"*"
 			]
 		},

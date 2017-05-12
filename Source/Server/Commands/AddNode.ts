@@ -48,7 +48,10 @@ export default class AddNode extends Command<{node: MapNode, link: ChildEntry, m
 		// add as child of parent
 		let parentID = node.parents.VKeys(true)[0];
 		dbUpdates[`nodes/${parentID}/children/${nodeID}`] = link;
-		dbUpdates[`nodes/${parentID}/childrenOrder`] = (await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[]).concat([nodeID]);
+		let parent_oldChildrenOrder = await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[];
+		if (parent_oldChildrenOrder) {
+			dbUpdates[`nodes/${parentID}/childrenOrder`] = parent_oldChildrenOrder.concat([nodeID]);
+		}
 		// add as parent of (pre-existing) children
 		for (let childID in (node.children || {}).Excluding(metaThesisID && metaThesisID.toString())) {
 			dbUpdates[`nodes/${childID}/parents/${nodeID}`] = {_: true};
