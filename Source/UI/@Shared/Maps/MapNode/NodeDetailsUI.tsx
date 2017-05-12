@@ -171,16 +171,17 @@ The "type" option above describes the way in which this argument's premises will
 								let childTitle = child ? GetNodeDisplayText(child, GetNodeForm(child, newData)) : "...";
 								return (
 									<Row key={index} style={{display: "flex", alignItems: "center"}}>
-										<Pre>Child ID: </Pre>
-										<TextInput enabled={false} style={{flex: 1}} required pattern={MapNode_id}
-											value={`#${newData.childrenOrder[index].toString()} (${childTitle})`}
-											/*onChange={val=>Change(!IsNaN(val.ToInt()) && (newData.childrenOrder[index] = val.ToInt()))}*/
-										/>
+										<Div mr={7} sel style={{opacity: .5}}>#{childID}</Div>
+										<Div sel style={{flex: 1, whiteSpace: "normal"}}>{childTitle}</Div>
+										{/*<TextInput enabled={false} style={{flex: 1}} required pattern={MapNode_id}
+											value={`#${childID.toString()}: ${childTitle}`}
+											//onChange={val=>Change(!IsNaN(val.ToInt()) && (newData.childrenOrder[index] = val.ToInt()))}
+										/>*/}
 										{index > 0 &&
-											<Button text={<Icon size={16} icon="arrow-up"/> as any} ml={5} enabled={index > 1}
+											<Button text={<Icon size={16} icon="arrow-up"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index > 1}
 												onClick={()=>Change(newData.childrenOrder.RemoveAt(index), newData.childrenOrder.Insert(index - 1, childID))}/>}
 										{index > 0 &&
-											<Button text={<Icon size={16} icon="arrow-down"/> as any} ml={5} enabled={index < newData.childrenOrder.length - 1}
+											<Button text={<Icon size={16} icon="arrow-down"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index < newData.childrenOrder.length - 1}
 												onClick={()=>Change(newData.childrenOrder.RemoveAt(index), newData.childrenOrder.Insert(index + 1, childID))}/>}
 									</Row>
 								);

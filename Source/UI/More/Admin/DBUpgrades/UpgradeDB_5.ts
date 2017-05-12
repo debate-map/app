@@ -11,6 +11,11 @@ AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {
 		delete node.chainAfter;
 		if (node.children) {
 			node.childrenOrder = node.children.VKeys(true).map(a=>a.ToInt());
+			let metaThesisNode = node.children.VKeys(true).map(id=>data.nodes[id]).find(a=>a.metaThesis);
+			if (metaThesisNode) {
+				node.childrenOrder.Remove(metaThesisNode._id);
+				node.childrenOrder.Insert(0, metaThesisNode._id);
+			}
 		}
 	}
 
