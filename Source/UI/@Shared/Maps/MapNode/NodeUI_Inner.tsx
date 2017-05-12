@@ -247,13 +247,14 @@ class SubPanel extends BaseComponent<{node: MapNode}, {}> {
 		);
 	}
 }
+var Markdown = require("react-remarkable");
 export class SubPanel_Inner extends BaseComponent<{contentNode: ContentNode, fontSize: number}, {}> {
 	render() {
 		let {contentNode, fontSize} = this.props;
 		return (
 			<div style={{position: "relative", fontSize, whiteSpace: "initial"}}>
 				{/*<div>{`"${node.quote.text}"`}</div>*/}
-				<VReactMarkdown className="selectable Markdown" source={`"${contentNode.content}"`}
+				{/*<VReactMarkdown className="selectable Markdown" source={`"${contentNode.content}"`}
 					containerProps={{style: E()}}
 					renderers={{
 						Text: props=> {
@@ -264,7 +265,8 @@ export class SubPanel_Inner extends BaseComponent<{contentNode: ContentNode, fon
 						},
 						Link: props=><span/>,
 					}}
-				/>
+				/>*/}
+				"<Markdown container="div" source={contentNode.content}/>"
 				<SourcesUI contentNode={contentNode}/>
 			</div>
 		);
