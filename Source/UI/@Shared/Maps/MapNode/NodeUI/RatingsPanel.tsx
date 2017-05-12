@@ -21,7 +21,7 @@ import {GetNodeChildren, GetParentNode} from "../../../../../Store/firebase/node
 import {MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {ShowSignInPopup} from "../../../NavBar/UserPanel";
-import {GetThesisFormAtPath, GetNodeEnhanced, IsContextReversed} from "../../../../../Store/firebase/nodes/$node";
+import {GetNodeForm, GetNodeEnhanced, IsContextReversed} from "../../../../../Store/firebase/nodes/$node";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -43,7 +43,7 @@ type RatingsPanel_Props = {node: MapNode, path: string, ratingType: RatingType, 
 	& Partial<{userID: string, /*myRating: number,*/ form: ThesisForm, nodeChildren: MapNode[], smoothing: number}>;
 @Connect((state: RootState, {node, path, ratingType}: RatingsPanel_Props)=>({
 	userID: GetUserID(),
-	form: GetThesisFormAtPath(node, path),
+	form: GetNodeForm(node, path),
 	nodeChildren: GetNodeChildren(node),
 	smoothing: GetRatingUISmoothing(),
 }))

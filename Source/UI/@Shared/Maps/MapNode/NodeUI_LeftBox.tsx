@@ -13,7 +13,7 @@ import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRating
 import {GetRatingAverage, GetRatings, TransformRatingForContext, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {MetaThesis_ThenType} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
-import {GetRatingTypesForNode, GetThesisFormAtPath, IsContextReversed, GetNodeEnhanced} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeForm, IsContextReversed, GetNodeEnhanced} from "../../../../Store/firebase/nodes/$node";
 import {RootState} from "../../../../Store/index";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SlicePath} from "./NodeUI/RatingsPanel";
@@ -25,7 +25,7 @@ type Props = {
 	backgroundColor: string, asHover: boolean
 } & Partial<{form: ThesisForm, parentNode: MapNodeEnhanced}>;
 @Connect((state: RootState, {node, path}: Props)=>({
-	form: GetThesisFormAtPath(node, path),
+	form: GetNodeForm(node, path),
 	parentNode: GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1)),
 }))
 export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {

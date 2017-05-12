@@ -2,7 +2,7 @@ import {MapNode, MapNodeEnhanced} from "../nodes/@MapNode";
 import {Range} from "../../../Frame/General/Globals";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {MetaThesis_IfType} from "../nodes/@MetaThesisInfo";
-import {GetThesisFormAtPath, GetMainRatingType, GetNodeEnhanced} from "../nodes/$node";
+import {GetNodeForm, GetMainRatingType, GetNodeEnhanced} from "../nodes/$node";
 import {GetNode} from "../nodes";
 import {SlicePath} from "../../../UI/@Shared/Maps/MapNode/NodeUI/RatingsPanel";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
@@ -21,7 +21,7 @@ export class RatingType_Info {
 		neutrality: new RatingType_Info({
 			displayText: "Neutrality",
 			description: (node, parentNode)=> {
-				//let form = node.type == MapNodeType.Thesis ? GetThesisFormAtPath(node, path) : null;
+				//let form = node.type == MapNodeType.Thesis ? GetNodeForm(node, path) : null;
 				return `How neutral/impartial is the phrasing of this statement/question? (0: as biased as they come, 100: no bias)`;
 			},
 			options: ()=>Range(0, 100),

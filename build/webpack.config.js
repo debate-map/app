@@ -19,7 +19,7 @@ const webpackConfig = {
 	resolve: {
 		modules: [
 			"node_modules",
-			paths.client()
+			paths.client(),
 		],
 		extensions: [".js", ".jsx", ".json"].concat(USE_TSLOADER ? [".ts", ".tsx"] : []),
 		alias: {
@@ -354,7 +354,7 @@ webpackConfig.module.rules.push(
 	{test: /\.otf(\?.*)?$/, use: "file-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=font/opentype"},
 	{test: /\.ttf(\?.*)?$/, use: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=application/octet-stream"},
 	{test: /\.eot(\?.*)?$/, use: "file-loader?prefix=fonts/&name=[path][name].[ext]"},
-	{test: /\.svg(\?.*)?$/, use: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=image/svg+xml"},
+	//{test: /\.svg(\?.*)?$/, use: "url-loader?prefix=fonts/&name=[path][name].[ext]&limit=10000&mimetype=image/svg+xml"},
 	{test: /\.(png|jpg)$/, use: "url-loader?limit=8192"}
 )
 /* eslint-enable */
@@ -381,5 +381,23 @@ webpackConfig.plugins.push(
 	new ExtractTextPlugin({filename: "[name].css?[contenthash]", allChunks: true})
 );
 //}
+
+const SpriteLoaderPlugin = require("svg-sprite-loader/plugin");
+webpackConfig.plugins.push(
+	new SpriteLoaderPlugin()
+);
+webpackConfig.module.rules.push({
+	test: /\.svg$/,
+	loader: "svg-sprite-loader",
+	/*include: path.resolve("./Resources/SVGs"),
+	options: {
+		extract: true,
+		spriteFilename: "svg-sprite.svg",
+	}*/
+	/*use: [
+		"svg-sprite-loader",
+		"svgo-loader",
+	]*/
+});
 
 module.exports = webpackConfig;

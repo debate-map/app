@@ -3,7 +3,6 @@ const path = require("path")
 const debug = require("debug")("app:config")
 const argv = require("yargs").argv
 const ip = require("ip")
-const environments = require("./environments");
 
 const {NODE_ENV, PORT, USE_TSLOADER, BASENAME} = process.env;
 
@@ -13,8 +12,6 @@ debug("Creating default configuration.")
 // ==========
 
 const config = {
-	env: NODE_ENV || "development",
-
 	// Project Structure
 	// ----------
 	path_base  : path.resolve(__dirname, ".."),
@@ -123,6 +120,12 @@ const config = {
 // Environment
 // ==========
 
+let env = global.env = NODE_ENV;
+let devEnv = global.devEnv = env == "development";
+let prodEnv = global.prodEnv = env == "production";
+let testEnv = global.testEnv = env == "test";
+config.env = env;
+
 // N.B.: globals added here must _also_ be added to .eslintrc
 config.globals = {
 	"process.env": {
@@ -166,13 +169,34 @@ config.utils_paths = {
 // Environment Configuration
 // ==========
 
-debug(`Looking for environment overrides for NODE_ENV "${config.env}".`);
+/*debug(`Looking for environment overrides for NODE_ENV "${config.env}".`);
 const overrides = environments[config.env];
 if (overrides) {
 	debug("Found overrides, applying to default configuration.");
 	Object.assign(config, overrides(config));
 } else {
 	debug("No environment overrides found, defaults will be used.");
+}*/
+
+config.compiler_public_path = devEnv
+	// NOTE: In development, we use an explicit public path when the assets
+	// are served webpack by to fix this issue:
+	// http://stackoverflow.com/questions/34133808/webpack-ots-parsing-error-loading-fonts/34133809#34133809
+	//? "http://${config.server_host}:${config.server_port}/",
+	? "/"
+	: "/";
+
+if (prodEnv) {
+	config.compiler_fail_on_warning = false;
+	config.compiler_hash_type = "chunkhash";
+	//config.compiler_devtool = null;
+	//config.compiler_devtool = "cheap-module-source-map";
+	config.compiler_devtool = "source-map";
+	config.compiler_stats = {
+		chunks: true,
+		chunkModules: true,
+		colors: true
+	};
 }
 
 module.exports = config;

@@ -17,6 +17,7 @@ export var int = ()=>"int" as any as (new(..._)=>number);
 export var double = ()=>"double" as any as (new(..._)=>number);
 export var string = ()=>"string" as any as (new(..._)=>string);
 
+g.Extend({IsNaN}); declare global { function IsNaN(obj): boolean; }
 export function IsNaN(obj) { return typeof obj == "number" && obj != obj; }
 export function IsPrimitive(obj) { return IsBool(obj) || IsNumber(obj) || IsString(obj); }
 export function IsBool(obj) : obj is boolean { return typeof obj == "boolean"; } //|| obj instanceof Boolean

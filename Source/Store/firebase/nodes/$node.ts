@@ -77,7 +77,7 @@ export function GetFinalNodeTypeAtPath(node: MapNode, path: string): MapNodeType
 	let result = node.type;
 	if (node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument) {
 		let parent = GetParentNode(path);
-		let parentForm = GetThesisFormAtPath(parent, path.split("/").slice(0, -1).join("/"));
+		let parentForm = GetNodeForm(parent, path.split("/").slice(0, -1).join("/"));
 		if (parentForm == ThesisForm.Negation)
 			result = ReverseMapNodeType(node.type);
 	}
@@ -97,16 +97,17 @@ export function GetNodeEnhanced(node: MapNode, path: string) {
 	return CachedTransform("GetNodeEnhanced", [path], nodeEnhanced, ()=>nodeEnhanced);
 }
 
-export function GetThesisFormAtPath(node: MapNode, path: string): ThesisForm {
+/*export function GetNodeForm(node: MapNode, path: string): ThesisForm {
 	let parent = GetParentNode(path);
 	return GetNodeForm(node, parent);
 }
-/*export function GetThesisFormUnderParent(node: MapNode, parent: MapNode): ThesisForm {
+export function GetThesisFormUnderParent(node: MapNode, parent: MapNode): ThesisForm {
 	let link = GetLinkUnderParent(node._id, parent);
 	if (link == null) return ThesisForm.Base;
 	return link.form;
 }*/
-export function GetNodeForm(node: MapNode | MapNodeEnhanced, parent?: MapNode) {
+export function GetNodeForm(node: MapNode | MapNodeEnhanced, pathOrParent?: string | MapNode) {
+	let parent: MapNode = IsString(pathOrParent) ? GetParentNode(pathOrParent as string) : pathOrParent as MapNode;
 	if ((node as MapNodeEnhanced).link) {
 		return (node as MapNodeEnhanced).link.form;
 	}
@@ -146,7 +147,7 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 		}
 
 		if (formOrPath) {
-			let form = typeof formOrPath == "string" ? GetThesisFormAtPath(node, formOrPath) : formOrPath;
+			let form = typeof formOrPath == "string" ? GetNodeForm(node, formOrPath) : formOrPath;
 			if (form == ThesisForm.Negation)
 				return node.titles["negation"] || "[negation title not set]";
 			if (form == ThesisForm.YesNoQuestion)

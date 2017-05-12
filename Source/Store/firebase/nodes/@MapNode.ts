@@ -39,7 +39,6 @@ export class MapNode {
 	relative: boolean;
 	contentNode: ContentNode;
 	metaThesis: MetaThesisInfo;
-	chainAfter: string;
 
 	// averages from server
 	/*agrees = 0;
@@ -49,9 +48,11 @@ export class MapNode {
 	
 	parents: ParentSet;
 	children: ChildSet;
+	childrenOrder: number[];
 	//talkRoot: number;
 }
-export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
+export const MapNode_id = "^[0-9]+$";
+//export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
 AddSchema({
 	properties: {
 		type: {
@@ -73,15 +74,27 @@ AddSchema({
 		relative: {type: "boolean"},
 		contentNode: {$ref: "ContentNode"},
 		metaThesis: {$ref: "MetaThesisInfo"},
-		chainAfter: {oneOf: [{type: "null"}, {type: "string", pattern: MapNode_chainAfterFormat}]},
 		parents: {$ref: "ParentSet"},
 		children: {$ref: "ChildSet"},
+		childrenOrder: {items: {type: "number"}},
 		//talkRoot: {type: "number"},
 	},
 	required: ["type", "creator", "createdAt"],
-	// if not a meta-thesis or contentNode, require "titles" prop
-	if: {prohibited: ["metaThesis", "contentNode"]},
-	then: {required: ["titles"]},
+	allOf: [
+		// if not a meta-thesis or contentNode, require "titles" prop
+		{
+			if: {prohibited: ["metaThesis", "contentNode"]},
+			then: {required: ["titles"]},
+		},
+		// if an argument, require "childrenOrder" prop
+		{
+			if: {properties: {
+				type: {oneOf: [{const: MapNodeType.SupportingArgument}, {const: MapNodeType.OpposingArgument}]},
+			}},
+			then: {required: ["childrenOrder"]},
+			else: {prohibited: ["childrenOrder"]}
+		}
+	],
 }, "MapNode");
 
 // helpers

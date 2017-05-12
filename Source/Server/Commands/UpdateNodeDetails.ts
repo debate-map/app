@@ -1,7 +1,7 @@
 import {Assert} from "../../Frame/General/Assert";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command} from "../Command";
-import {MapNode, ThesisForm, ChildEntry, MapNode_chainAfterFormat} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {DeepGet} from "../../Frame/V/V";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
@@ -20,7 +20,8 @@ AddSchema({
 				relative: {type: "boolean"},
 				contentNode: {$ref: "ContentNode"},
 				metaThesis: {$ref: "MetaThesisInfo"},
-				chainAfter: {oneOf: [{type: "null"}, {type: "string", pattern: MapNode_chainAfterFormat}]},
+				//chainAfter: {oneOf: [{type: "null"}, {type: "string", pattern: MapNode_chainAfterFormat}]},
+				childrenOrder: {items: {type: "number"}},
 			},
 			//required: ["relative", "titles", "contentNode"],
 		}),
@@ -70,10 +71,9 @@ export default class UpdateNodeDetails extends Command<{nodeID: number, nodeUpda
 		// execute
 		// ==========
 
-		let updates_db = {
-			[`nodes/${nodeID}`]: newNodeData,
-			[`nodes/${linkParentID}/children/${nodeID}`]: newLinkData,
-		};
-		await firebase.Ref().update(updates_db);
+		let dbUpdates = {};
+		dbUpdates[`nodes/${nodeID}`] = newNodeData;
+		dbUpdates[`nodes/${linkParentID}/children/${nodeID}`] = newLinkData;
+		await firebase.Ref().update(dbUpdates);
 	}
 }

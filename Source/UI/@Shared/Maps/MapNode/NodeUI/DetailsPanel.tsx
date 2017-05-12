@@ -32,7 +32,7 @@ import {HandleError} from "../../../../../Frame/General/Errors";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
 import CheckBox from "../../../../../Frame/ReactComponents/CheckBox";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
-import {GetThesisFormAtPath, GetLinkUnderParent, GetNodeEnhanced} from "../../../../../Store/firebase/nodes/$node";
+import {GetNodeForm, GetLinkUnderParent, GetNodeEnhanced} from "../../../../../Store/firebase/nodes/$node";
 import Column from "../../../../../Frame/ReactComponents/Column";
 import NodeDetailsUI from "../NodeDetailsUI";
 import {SlicePath} from "./RatingsPanel";

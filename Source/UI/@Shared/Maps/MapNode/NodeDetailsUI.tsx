@@ -17,13 +17,14 @@ import TermComponent from "../../../../Store/firebase/termComponents/@TermCompon
 import {GetNiceNameForTermType} from "../../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, MapNode_chainAfterFormat} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, MapNode_id} from "../../../../Store/firebase/nodes/@MapNode";
 import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {MetaThesis_IfType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
-import {GetParentNode} from "../../../../Store/firebase/nodes";
-import {GetThesisFormAtPath, GetNodeForm, IsContextReversed, IsArgumentNode} from "../../../../Store/firebase/nodes/$node";
+import {GetParentNode, GetNodeChildren, GetNode} from "../../../../Store/firebase/nodes";
+import {GetNodeForm, IsContextReversed, IsArgumentNode, GetNodeDisplayText} from "../../../../Store/firebase/nodes/$node";
 import {ReverseThenType} from "../../../../Store/firebase/nodes/$node/$metaThesis";
+import Icon from "../../../../Frame/ReactComponents/Icon";
 
 type Props = {
 	baseData: MapNodeEnhanced, baseLinkData: ChildEntry, parent: MapNodeEnhanced, creating: boolean, editing?: boolean, style?, onChange?: (newData: MapNode, newLinkData: ChildEntry)=>void,
@@ -43,7 +44,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, {newData: MapNod
 		let {baseData, parent, creating, editing, style, onChange, creator} = this.props;
 		let {newData, newLinkData} = this.state;
 		let firebase = store.firebase.helpers;
-		let Change = _=> {
+		let Change = (..._)=> {
 			if (onChange)
 				onChange(this.GetNewData(), this.GetNewLinkData());
 			this.Update();
@@ -158,20 +159,33 @@ The "type" option above describes the way in which this argument's premises will
 									onChange={val=>Change(newLinkData.form = val ? ThesisForm.Negation : ThesisForm.Base)}/>
 							</Row>
 						</Column>}
-					{!creating && !IsArgumentNode(newData) && !newData.metaThesis &&
-						<Column mt={10}>
-							<Row style={{fontWeight: "bold"}}>Advanced:</Row>
-							<Row style={{display: "flex", alignItems: "center"}}>
-								<Pre>Chain after: </Pre>
-								<TextInput enabled={editing} style={{width: 100}} pattern={MapNode_chainAfterFormat}
-									value={newData.chainAfter} onChange={val=>Change(newData.chainAfter = val || null)}/>
-								<InfoButton text={`If entered, the current node will be displayed directly after the listed node. (type "[start]" to anchor as first item)`}/>
-							</Row>
-						</Column>}
 					{newData.type == MapNodeType.Thesis && !newData.contentNode && !newData.metaThesis && newLinkData.form == ThesisForm.YesNoQuestion && creating &&
 						<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 							<Pre allowWrap={true}>At this location (under a category node), the node will be displayed with the yes-no question title.</Pre>
 						</Row>}
+					{!creating && editing && IsArgumentNode(newData) && newData.childrenOrder &&
+						<Column mt={5}>
+							<Row style={{fontWeight: "bold"}}>Children order:</Row>
+							{newData.childrenOrder.map((childID, index)=> {
+								let child = GetNode(childID);
+								let childTitle = child ? GetNodeDisplayText(child, GetNodeForm(child, newData)) : "...";
+								return (
+									<Row key={index} style={{display: "flex", alignItems: "center"}}>
+										<Pre>Child ID: </Pre>
+										<TextInput enabled={false} style={{flex: 1}} required pattern={MapNode_id}
+											value={`#${newData.childrenOrder[index].toString()} (${childTitle})`}
+											/*onChange={val=>Change(!IsNaN(val.ToInt()) && (newData.childrenOrder[index] = val.ToInt()))}*/
+										/>
+										{index > 0 &&
+											<Button text={<Icon size={16} icon="arrow-up"/> as any} ml={5} enabled={index > 1}
+												onClick={()=>Change(newData.childrenOrder.RemoveAt(index), newData.childrenOrder.Insert(index - 1, childID))}/>}
+										{index > 0 &&
+											<Button text={<Icon size={16} icon="arrow-down"/> as any} ml={5} enabled={index < newData.childrenOrder.length - 1}
+												onClick={()=>Change(newData.childrenOrder.RemoveAt(index), newData.childrenOrder.Insert(index + 1, childID))}/>}
+									</Row>
+								);
+							})}
+						</Column>}
 				</Div>
 			</Column>
 			</div>

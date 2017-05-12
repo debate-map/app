@@ -27,6 +27,7 @@ export default class AddNode extends Command<{node: MapNode, link: ChildEntry, m
 		
 		if (metaThesisNode) {
 			node.children = {...node.children, [metaThesisID]: {_: true}};
+			node.childrenOrder = [metaThesisID];
 			metaThesisNode.parents = {[nodeID]: {_: true}};
 		}
 
@@ -40,25 +41,27 @@ export default class AddNode extends Command<{node: MapNode, link: ChildEntry, m
 		// execute
 		// ==========
 
-		let updates = {
-			"general/lastNodeID": lastNodeID_new,
-			[`nodes/${nodeID}`]: node,
-			// add as child of parent
-			[`nodes/${node.parents.VKeys(true)[0]}/children/${nodeID}`]: link,
-		};
+		let dbUpdates = {};
+		// add node
+		dbUpdates["general/lastNodeID"] = lastNodeID_new;
+		dbUpdates[`nodes/${nodeID}`] = node;
+		// add as child of parent
+		let parentID = node.parents.VKeys(true)[0];
+		dbUpdates[`nodes/${parentID}/children/${nodeID}`] = link;
+		dbUpdates[`nodes/${parentID}/childrenOrder`] = (await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[]).concat([nodeID]);
 		// add as parent of (pre-existing) children
 		for (let childID in (node.children || {}).Excluding(metaThesisID && metaThesisID.toString())) {
-			updates[`nodes/${childID}/parents/${nodeID}`] = {_: true};
+			dbUpdates[`nodes/${childID}/parents/${nodeID}`] = {_: true};
 		}
 		if (metaThesisNode) {
 			// add meta-thesis
-			updates[`nodes/${metaThesisID}`] = metaThesisNode;
+			dbUpdates[`nodes/${metaThesisID}`] = metaThesisNode;
 			// add meta-thesis as parent of (pre-existing) children
 			for (let childID in metaThesisNode.children) {
-				updates[`nodes/${childID}/parents/${metaThesisID}`] = {_: true};
+				dbUpdates[`nodes/${childID}/parents/${metaThesisID}`] = {_: true};
 			}
 		}
-		await firebase.Ref().update(updates);
+		await firebase.Ref().update(dbUpdates);
 
 		return nodeID;
 	}

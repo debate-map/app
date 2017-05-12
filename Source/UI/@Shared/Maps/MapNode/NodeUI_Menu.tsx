@@ -31,7 +31,7 @@ import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import {GetNodeChildren} from "../../../../Store/firebase/nodes";
 import {E} from "../../../../Frame/General/Globals_Free";
 import AddNode from "../../../../Server/Commands/AddNode";
-import {GetNodeDisplayText, GetValidNewChildTypes, GetThesisFormAtPath, ReverseMapNodeType, IsReversedArgumentNode, GetNodeEnhanced, GetNodeForm} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, ReverseMapNodeType, IsReversedArgumentNode, GetNodeEnhanced} from "../../../../Store/firebase/nodes/$node";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {SlicePath} from "./NodeUI/RatingsPanel";
 
@@ -52,7 +52,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
 		let validChildTypes = GetValidNewChildTypes(node.type, path, permissions);
-		let form = GetThesisFormAtPath(node, path);
+		let form = GetNodeForm(node, path);
 		let thesisFormForThesisChild = node.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base;
 
 		let nodeText = GetNodeDisplayText(node, path);
@@ -115,7 +115,7 @@ If not, paste the argument as a clone instead.`
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 
-						let thesisForm = GetThesisFormAtPath(copiedNode, State(a=>a.main.copiedNodePath));
+						let nodeForm = GetNodeForm(copiedNode, State(a=>a.main.copiedNodePath));
 						let isArgument = copiedNode.type == MapNodeType.SupportingArgument || copiedNode.type == MapNodeType.OpposingArgument;
 						let copiedMetaThesis = isArgument ? (await GetNodeChildrenAsync(copiedNode)).First(a=>a.metaThesis != null) : null;
 
@@ -125,7 +125,7 @@ If not, paste the argument as a clone instead.`
 							delete newChildNode.children[copiedMetaThesis._id]; // remove old-meta-thesis as child
 							var metaThesisNode = RemoveHelpers(FromJSON(ToJSON(copiedMetaThesis))).VSet({parents: null}) as MapNode;
 						}
-						new AddNode({node: newChildNode, link: {_: true, form: thesisForm}, metaThesisNode}).Run();
+						new AddNode({node: newChildNode, link: E({_: true}, nodeForm && {form: nodeForm}) as any, metaThesisNode}).Run();
 					}}/>}
 				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={async e=> {
 					if (e.button != 0) return;

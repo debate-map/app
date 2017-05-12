@@ -36,7 +36,7 @@ import RatingsPanel from "./NodeUI/RatingsPanel";
 import DiscussionPanel from "./NodeUI/DiscussionPanel";
 import Row from "../../../../Frame/ReactComponents/Row";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
-import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetThesisFormAtPath, GetFinalNodeTypeAtPath, IsContextReversed, GetNodeEnhanced} from "../../../../Store/firebase/nodes/$node";
+import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetNodeForm, GetFinalNodeTypeAtPath, IsContextReversed, GetNodeEnhanced} from "../../../../Store/firebase/nodes/$node";
 import {ContentNode, SourceChain} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {URL} from "../../../../Frame/General/URLs";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
@@ -60,7 +60,7 @@ type Props = {map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: stri
 ])*/
 @Connect((state: RootState, {node, path, ratingsRoot}: Props)=> ({
 	finalNodeType: GetFinalNodeTypeAtPath(node, path),
-	form: GetThesisFormAtPath(node, path),
+	form: GetNodeForm(node, path),
 	ratingsRoot: GetNodeRatingsRoot(node._id),
 	mainRating_average: GetRatingAverage(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type),
 	userID: GetUserID(),

@@ -30,7 +30,7 @@ For recommended setup of your code editor and other tools, see: [Editor setup](#
 ### Firebase setup + project config
 
 1) Create two Google Firebase projects -- one for development, one for production.
-2) Edit the `.firebaserc` and `config/environments.js` files, replacing their paths and data with your own.
+2) Edit the `.firebaserc` and `config/index.js` files, replacing their paths and data with your own.
 3) Add at least one form of authentication to your Firebase projects. (Google sign-in is easiest)
 4) Run the project locally. (see "Running locally" section below)
 5) Sign in once (using the panel at the top-right), then check the database and copy your user ID.
