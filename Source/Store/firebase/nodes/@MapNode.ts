@@ -88,9 +88,11 @@ AddSchema({
 		},
 		// if an argument, require "childrenOrder" prop
 		{
-			if: {properties: {
-				type: {oneOf: [{const: MapNodeType.SupportingArgument}, {const: MapNodeType.OpposingArgument}]},
-			}},
+			if: {
+				properties: {
+					type: {oneOf: [{const: MapNodeType.SupportingArgument}, {const: MapNodeType.OpposingArgument}]},
+				}
+			},
 			then: {required: ["childrenOrder"]},
 			else: {prohibited: ["childrenOrder"]}
 		}

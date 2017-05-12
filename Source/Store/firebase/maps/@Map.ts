@@ -1,3 +1,4 @@
+import {GetValues_ForSchema} from "../../../Frame/General/Enums";
 export enum MapType {
 	Personal = 10,
 	Debate = 20,
@@ -9,3 +10,11 @@ export interface Map {
 	type: MapType;
 	rootNode: number;
 }
+AddSchema({
+	properties: {
+		name: {type: "string"},
+		type: {oneOf: GetValues_ForSchema(MapType)},
+		rootNode: {type: "number"},
+	},
+	required: ["name", "type", "rootNode"],
+}, "Map");
