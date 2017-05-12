@@ -266,7 +266,8 @@ export class SubPanel_Inner extends BaseComponent<{contentNode: ContentNode, fon
 						Link: props=><span/>,
 					}}
 				/>*/}
-				"<Markdown container="div" source={contentNode.content}/>"
+				<Markdown container="div" source={contentNode.content}/>
+				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
 				<SourcesUI contentNode={contentNode}/>
 			</div>
 		);
