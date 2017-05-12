@@ -69,51 +69,6 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 				{creatorOrMod &&
 					<Row>
 						<Button text="Save" enabled={dataError == null} onLeftClick={async ()=> {
-							/*firebase.Ref().update(E(
-								this.refs.title_base && {base: this.refs.title_base.GetValue()},
-								this.refs.title_negation && {negation: this.refs.title_negation.GetValue()},
-								this.refs.yesNoQuestion && {yesNoQuestion: this.refs.title_yesNoQuestion.GetValue()},
-							));*/
-							/*firebase.Ref(`nodes/${node._id}`).transaction(node=> {
-								if (!node) return node;
-
-								// todo: move these higher-up, and have errors shown in ui
-								/*if (this.refs.title_base) {
-									let error = IsNodeTitleValid_GetError(node, this.refs.title_base.GetValue());
-									if (error) return void ShowMessageBox({title: "Cannot set title", message: error});
-									node.titles.base = this.refs.title_base.GetValue();
-								}*#/
-
-								if (this.refs.title_base) node.titles.base = this.refs.title_base.GetValue();
-								if (this.refs.title_negation) node.titles.negation = this.refs.title_negation.GetValue();
-								if (this.refs.title_yesNoQuestion) node.titles.yesNoQuestion = this.refs.title_yesNoQuestion.GetValue();
-
-								if (this.refs.quoteEditor) node.quote = this.refs.quoteEditor.props.info;
-
-								return node;
-							}, undefined, false);*/
-
-							/*let validationError = this.refs.quoteEditor && this.refs.quoteEditor.GetValidationError();
-							if (validationError) {
-								return void ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`});
-							}*/
-
-							/*let nodeUpdates = RemoveHelpers(E(
-								this.detailsUI.relative &&
-									{relative: this.detailsUI.relative.Checked},
-								(this.refs.title_base || this.refs.title_negation || this.refs.title_yesNoQuestion) &&
-									{titles: E(
-										this.refs.title_base && {base: this.refs.title_base.GetValue()},
-										this.refs.title_negation && {negation: this.refs.title_negation.GetValue()},
-										this.refs.title_yesNoQuestion && {yesNoQuestion: this.refs.title_yesNoQuestion.GetValue()},
-									)},
-								this.detailsUI.quoteEditor &&
-									{contentNode: this.detailsUI.quoteEditor.GetUpdatedContentNode()},
-							));
-							let linkUpdates = RemoveHelpers(E(
-								this.detailsUI.asNegation &&
-									{form: this.detailsUI.asNegation.Checked ? ThesisForm.Negation : ThesisForm.Base},
-							));*/
 							let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "finalType", "link");
 							let linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
 							await new UpdateNodeDetails({nodeID: node._id, nodeUpdates, linkParentID: GetParentNodeID(path), linkUpdates}).Run();

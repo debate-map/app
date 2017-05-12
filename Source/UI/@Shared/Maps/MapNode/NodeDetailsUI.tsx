@@ -91,7 +91,9 @@ export default class NodeDetailsUI extends BaseComponent<Props, {newData: MapNod
 					{!newData.contentNode && !newData.metaThesis &&
 						<Row style={{display: "flex", alignItems: "center"}}>
 							<Pre>Title (base): </Pre>
-							<TextInput ref="title_base" enabled={editing} style={{flex: 1}} value={newData.titles["base"]} onChange={val=>Change(newData.titles["base"] = val)}/>
+							<TextInput enabled={editing} style={{flex: 1}}
+								ref={a=>a && creating && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
+								value={newData.titles["base"]} onChange={val=>Change(newData.titles["base"] = val)}/>
 						</Row>}
 					{newData.type == MapNodeType.Thesis && !newData.metaThesis && newData.contentNode &&
 						<QuoteInfoEditorUI key={0} ref={c=>this.quoteEditor = c} editing={creating || editing}
@@ -102,11 +104,11 @@ export default class NodeDetailsUI extends BaseComponent<Props, {newData: MapNod
 					{newData.type == MapNodeType.Thesis && !newData.metaThesis && !newData.contentNode && [
 						<Row key={0} mt={5} style={{display: "flex", alignItems: "center"}}>
 							<Pre>Title (negation): </Pre>
-							<TextInput ref="title_negation" enabled={editing} style={{flex: 1}} value={newData.titles["negation"]} onChange={val=>Change(newData.titles["negation"] = val)}/>
+							<TextInput enabled={editing} style={{flex: 1}} value={newData.titles["negation"]} onChange={val=>Change(newData.titles["negation"] = val)}/>
 						</Row>,
 						<Row key={1} mt={5} style={{display: "flex", alignItems: "center"}}>
 							<Pre>Title (yes-no question): </Pre>
-							<TextInput ref="title_yesNoQuestion" enabled={editing} style={{flex: 1}} value={newData.titles["yesNoQuestion"]} onChange={val=>Change(newData.titles["yesNoQuestion"] = val)}/>
+							<TextInput enabled={editing} style={{flex: 1}} value={newData.titles["yesNoQuestion"]} onChange={val=>Change(newData.titles["yesNoQuestion"] = val)}/>
 						</Row>
 					]}
 					{creating && isArgument &&
