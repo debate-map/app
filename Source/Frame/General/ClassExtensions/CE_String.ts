@@ -4,7 +4,7 @@
 interface String { TrimStart(...chars: string[]): string; }
 String.prototype._AddFunction_Inline = function TrimStart(this: string, ...chars: string[]) {
 	// fix for if called by VDF (which has a different signature)
-	if (arguments[0] instanceof Array) chars = arguments[0];
+	//if (arguments[0] instanceof Array) chars = arguments[0];
 
 	for (var iOfFirstToKeep = 0; iOfFirstToKeep < this.length && chars.Contains(this[iOfFirstToKeep]); iOfFirstToKeep++);
 	return this.slice(iOfFirstToKeep, this.length);
@@ -15,7 +15,7 @@ String.prototype._AddFunction_Inline = function TrimEnd(this: string, ...chars: 
 	return this.substr(0, iOfLastToKeep + 1);
 };
 
-//interface String { Contains: (str)=>boolean; }
+interface String { Contains: (str)=>boolean; }
 String.prototype._AddFunction_Inline = function Contains(str, /*;optional:*/ startIndex) { return -1 !== String.prototype.indexOf.call(this, str, startIndex); };
 String.prototype._AddFunction_Inline = function hashCode() {
 	var hash = 0;

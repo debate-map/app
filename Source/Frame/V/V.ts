@@ -123,14 +123,14 @@ export default class V {
 		//if (obj.GetType() == Array)
 		if (obj.constructor == Array)
 			return V.CloneArray(obj);
-		if (obj instanceof List)
+		/*if (obj instanceof List)
 			return List.apply(null, [obj.itemType].concat(V.CloneArray(obj)));
 	    if (obj instanceof Dictionary) {
 	        let result = new Dictionary(obj.keyType, obj.valueType);
 	        for (let pair of obj.Pairs)
 	            result.Add(pair.key, pair.value);
 	        return result;
-	    }
+	    }*/
 
 	    let result = {};
 		for (let prop of obj.Props()) {

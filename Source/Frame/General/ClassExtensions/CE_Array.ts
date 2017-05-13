@@ -1,5 +1,5 @@
 interface Array<T> { Contains(item: T): boolean; }
-//Array.prototype._AddFunction_Inline = function Contains(items) { return this.indexOf(items) != -1; };
+Array.prototype._AddFunction_Inline = function Contains(items) { return this.indexOf(items) != -1; };
 Array.prototype._AddFunction_Inline = function ContainsAny(...items) {
     for (let item of items)
         if (this.indexOf(item) != -1)
@@ -70,22 +70,22 @@ Array.prototype._AddFunction_Inline = function All(matchFunc) {
 };
 interface Array<T> { Where(matchFunc: (item: T, index?: number)=>boolean): T[]; }
 Array.prototype._AddFunction_Inline = function Where(matchFunc) {
-	var result = this instanceof List ? new List(this.itemType) : [];
+	var result = [];
 	for (let [index, item] of this.entries())
 		if (matchFunc.call(item, item, index)) // call, having the item be "this", as well as the first argument
-			result.Add(item);
+			result.push(item);
 	return result;
 };
 interface Array<T> { Select<T2>(matchFunc: (item: T, index?: number)=>T2): T2[]; }
 Array.prototype._AddFunction_Inline = function Select(selectFunc) {
-	var result = this instanceof List ? new List(this.itemType) : [];
+	var result = [];
 	for (let [index, item] of this.entries())
-		result.Add(selectFunc.call(item, item, index));
+		result.push(selectFunc.call(item, item, index));
 	return result;
 };
 interface Array<T> { SelectMany<T2>(matchFunc: (item: T, index?: number)=>T2[]): T2[]; }
 Array.prototype._AddFunction_Inline = function SelectMany(selectFunc) {
-	var result = this instanceof List ? new List(this.itemType) : [];
+	var result = [];
 	for (let [index, item] of this.entries())
 		result.AddRange(selectFunc.call(item, item, index));
 	return result;
@@ -156,17 +156,13 @@ Array.prototype._AddFunction_Inline = function Move(item, newIndex) {
 	this.Insert(newIndex, item);
 };
 
-Array.prototype._AddFunction_Inline = function ToList(itemType = null) {
-	if (this instanceof List)
-		return List.apply(null, [itemType || "object"].concat(this));
-    return [].concat(this);
-}
-Array.prototype._AddFunction_Inline = function ToDictionary(keyFunc, valFunc) {
+Array.prototype._AddFunction_Inline = function ToList(itemType = null) { return [].concat(this); }
+/*Array.prototype._AddFunction_Inline = function ToDictionary(keyFunc, valFunc) {
 	var result = new Dictionary();
 	for (var i in this)
 		result.Add(keyFunc(this[i]), valFunc(this[i]));
 	return result;
-}
+}*/
 interface Array<T> { ToMap(keyFunc: (item: T)=>string, valFunc: (item: T)=>any): any; }
 Array.prototype._AddFunction_Inline = function ToMap(keyFunc, valFunc) {
 	var result = {};

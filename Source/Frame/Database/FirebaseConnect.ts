@@ -4,7 +4,6 @@ import {connect} from "react-redux";
 import {ShallowChanged} from "../UI/ReactGlobals";
 import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/query";
 import {getEventsFromInput} from "react-redux-firebase/dist/utils";
-import {Log} from "../Serialization/VDF/VDF";
 import {ToJSON} from "../General/Globals";
 import {TryCall, Timer} from "../General/Timers";
 

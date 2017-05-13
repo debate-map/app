@@ -1,4 +1,3 @@
-import {Log} from "../Serialization/VDF/VDF";
 import {ACTNotificationMessageAdd} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import {LogError} from "./Logging";

@@ -1,8 +1,9 @@
 import {Global} from "../General/Globals_Free";
 import {Assert} from "../General/Assert";
-import {VDFNode} from "../Serialization/VDF/VDFNode";
-import {_VDFSerialize, _VDFDeserialize} from "../Serialization/VDF/VDFTypeInfo";
 import {IsNumber} from "../General/Types";
+
+/*function _VDFSerialize(): any {}
+function _VDFDeserialize(): any {}*/
 
 @Global
 export class Vector2i {
@@ -25,12 +26,12 @@ export class Vector2i {
 	x: number;
 	y: number;
     
-	@_VDFDeserialize() Deserialize(node) {
+	/*@_VDFDeserialize() Deserialize(node) {
 		var strParts = node.primitiveValue.split(" ");
 		this.x = parseInt(strParts[0]);
 		this.y = parseInt(strParts[1]);
 	}
-	@_VDFSerialize() Serialize() { return new VDFNode(this.toString()); }
+	@_VDFSerialize() Serialize() { return new VDFNode(this.toString()); }*/
 	toString() { return this.x + " " + this.y; }
     Equals(other) { return other && this.toString() == other.toString(); }
 
@@ -77,12 +78,12 @@ export class VVector2 {
 	x: number;
 	y: number;
 
-	@_VDFDeserialize() Deserialize(node) {
+	/*@_VDFDeserialize() Deserialize(node) {
 		var strParts = node.primitiveValue.split(" ");
 		this.x = parseInt(strParts[0]);
 		this.y = parseInt(strParts[1]);
 	}
-	@_VDFSerialize() Serialize() { return new VDFNode(this.toString()); }
+	@_VDFSerialize() Serialize() { return new VDFNode(this.toString()); }*/
 	toString() { return this.x + " " + this.y; }
 
 	NewX(xOrFunc) { return new VVector2(xOrFunc instanceof Function ? xOrFunc(this.x) : xOrFunc, this.y); }
@@ -115,14 +116,14 @@ export class Vector3i {
 	y: number;
 	z: number;
 
-	@_VDFDeserialize() Deserialize(node) {
+	/*@_VDFDeserialize() Deserialize(node) {
 		var strParts = node.primitiveValue.split(" ");
 		this.x = parseInt(strParts[0]);
 		this.y = parseInt(strParts[1]);
 		this.z = parseInt(strParts[2]);
 	}
 	//VDFSerialize() { return this.toString(); } //Swapped().toString(); }
-	@_VDFSerialize() Serialize() { return new VDFNode(this.toString()); }
+	@_VDFSerialize() Serialize() { return new VDFNode(this.toString()); }*/
 	toString() { return this.x + " " + this.y + " " + this.z; }
 
 	NewX(xOrFunc) { return new Vector3i(xOrFunc instanceof Function ? xOrFunc(this.x) : xOrFunc, this.y, this.z); }
@@ -145,7 +146,7 @@ export class VVector3 {
 	y: number;
 	z: number;
 
-	@_VDFDeserialize() Deserialize(node) {
+	/*@_VDFDeserialize() Deserialize(node) {
 		var strParts = node.primitiveValue.split(" ");
 		this.x = parseInt(strParts[0]);
 		this.y = parseInt(strParts[1]);
@@ -153,7 +154,7 @@ export class VVector3 {
 		//this.Swap();
 	}
 	//VDFSerialize() { return this.toString(); }; //Swapped().toString(); };
-	@_VDFSerialize() Serialize() { return new VDFNode(this.toString()); }
+	@_VDFSerialize() Serialize() { return new VDFNode(this.toString()); }*/
 	toString = ()=> { return this.x + " " + this.y + " " + this.z; };
 
 	NewX(xOrFunc) { return new VVector3(xOrFunc instanceof Function ? xOrFunc(this.x) : xOrFunc, this.y, this.z); }
@@ -225,14 +226,14 @@ export class VRect {
 
 	get Center() { return new Vector2i(this.x + (this.width / 2), this.y + (this.height / 2)); }
 
-	@_VDFDeserialize() Deserialize(node) {
+	/*@_VDFDeserialize() Deserialize(node) {
 		var strParts = node.primitiveValue.split(" ");
 		this.x = parseInt(strParts[0]);
 		this.y = parseInt(strParts[1]);
 		this.width = parseInt(strParts[2]);
 		this.height = parseInt(strParts[3]);
 	}
-	@_VDFSerialize() Serialize() { return new VDFNode(this.toString()); }
+	@_VDFSerialize() Serialize() { return new VDFNode(this.toString()); }*/
 	toString() { return this.x + " " + this.y + " " + this.width + " " + this.height; }
 
 	Equals(other) {
@@ -301,13 +302,13 @@ export class VBounds {
 	position = null;
 	size = null;
 
-	@_VDFDeserialize() Deserialize(node) {
+	/*@_VDFDeserialize() Deserialize(node) {
 		var parts = node.primitiveValue.split("|");
 		var posParts = parts[0].split(" ");
 		this.position = new VVector3(parseFloat(posParts[0]), parseFloat(posParts[1]), parseFloat(posParts[2]));
 		var sizeParts = parts[1].split(" ");
 		this.size = new VVector3(parseFloat(sizeParts[0]), parseFloat(sizeParts[1]), parseFloat(sizeParts[2]));
 	}
-	@_VDFSerialize() Serialize() { return new VDFNode(this.toString()); }
+	@_VDFSerialize() Serialize() { return new VDFNode(this.toString()); }*/
 	toString() { return this.position.x + " " + this.position.y + " " + this.position.z + "|" + this.size.x + " " + this.size.y + " " + this.size.z; }
 }

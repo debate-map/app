@@ -1,5 +1,4 @@
 import {BaseComponent} from "../UI/ReactGlobals";
-import {E} from "../General/Globals";
 
 export default class Spinner extends BaseComponent
 		<{step?, min?, max?, value?, enabled?, title?, style?, onChange, onFocus?}, {}> {

@@ -1,4 +1,3 @@
-import {TT} from "./Types";
 import V from "../V/V";
 import {Log} from "./Logging";
 
@@ -42,10 +41,10 @@ export class A {
 	static NotEqualTo(val1) {
 	    return new A_NotEqualTo_Wrapper(val1);
 	}
-	static OfType(typeNameOrType) {
+	/*static OfType(typeNameOrType) {
 	    var type = TT(typeNameOrType);
 	    return new A_OfType_Wrapper(type);
-	}
+	}*/
 } 
 export class A_NotEqualTo_Wrapper {
 	constructor(val1) { this.val1 = val1; }

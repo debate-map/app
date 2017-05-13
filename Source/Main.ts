@@ -3,7 +3,7 @@ import "babel-polyfill";
 import "webpack-runtime-require";
 //import {Require} from "webpack-runtime-require";
 import "./Frame/General/Start_0";
-import "./Frame/General/CE";
+import "./Frame/General/ClassExtensions/CE";
 import "./Frame/General/Start_1";
 import "./Server/Server";
 import "codemirror";

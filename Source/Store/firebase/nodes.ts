@@ -4,7 +4,6 @@ import {GetData, GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {MapNode} from "./nodes/@MapNode";
 import {CachedTransform} from "../../Frame/V/VCache";
 import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
-import {P} from "../../Frame/Serialization/VDF/VDFTypeInfo";
 import {IsUserCreatorOrMod} from "./userExtras";
 import {GetUserPermissionGroups, GetUserID} from "./users";
 import { GetNodeEnhanced, IsArgumentNode, IsNodeVisibleToNonModNonCreators } from "./nodes/$node";

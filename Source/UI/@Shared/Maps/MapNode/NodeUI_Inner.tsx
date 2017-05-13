@@ -6,7 +6,7 @@ import VMenu from "react-vmenu";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
-import {DN, E, Debugger} from "../../../../Frame/General/Globals";
+import {DN, Debugger} from "../../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
 import Button from "../../../../Frame/ReactComponents/Button";
 import {CachedTransform} from "../../../../Frame/V/VCache";

@@ -10,7 +10,6 @@ import {Vector2i} from "../General/VectorStructs";
 import {RootState} from "../../Store/index";
 import * as ReactGA from "react-ga";
 import {URL} from "../General/URLs";
-import {Log} from "../Serialization/VDF/VDF";
 import {replace} from "react-router-redux";
 import {CreateMapViewForPath, GetShortestPathFromRootToNode} from "./PathFinder";
 import {ACTNotificationMessageAdd} from "../../Store/main";

@@ -36,68 +36,6 @@ export function Grab(grabFunc) {
 	}
 }*/
 
-// property tags
-// ==========
-
-// add to prop to say "don't set the attachPoint prop, and don't call the PreAdd, PostAdd, and such methods)
-export class NoAttach {}
-export function _NoAttach() {
-    return (target, name)=> {
-        var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
-        propInfo.AddTags(new NoAttach());
-    };
-};
-
-export class ByPath extends NoAttach {
-    constructor(saveNormallyForParentlessNode = false) {
-        super();
-        this.saveNormallyForParentlessNode = saveNormallyForParentlessNode;
-    }
-	saveNormallyForParentlessNode = false;
-};
-export function _ByPath(saveNormallyForParentlessNode = false) {
-    return (target, name)=> {
-        var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
-        propInfo.AddTags(new ByPath(saveNormallyForParentlessNode));
-    };
-};
-
-// maybe temp
-export class ByPathStr extends ByPath {
-    constructor(saveNormallyForParentlessNode = false) {
-        super(saveNormallyForParentlessNode);
-    }
-};
-export function _ByPathStr(saveNormallyForParentlessNode = false) {
-	return (target, name)=> {
-		var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
-	    propInfo.AddTags(new ByPathStr(saveNormallyForParentlessNode));
-	};
-};
-
-// save name of Node in prop, rather than the actual data in that Node
-export class ByName extends NoAttach {}
-export function _ByName() {
-    return (target, name)=> {
-        var propInfo = VDFTypeInfo.Get(target.constructor).GetProp(name);
-        propInfo.AddTags(new ByName());
-    };
-};
-
-// method tags
-// ==========
-
-export class IgnoreStartData {}
-export function _IgnoreStartData() {
-    return (target, name)=>target[name].AddTags(new IgnoreStartData());
-};
-export class IgnoreSetItem {}
-
-// others
-// ==========
-
-export var vsInitFuncs = [];
-
 // polyfills for constants
 // ==========
 
@@ -133,7 +71,7 @@ G({QuickIncrement});
 // general
 // ==========
 
-declare global { function E(...objExtends: any[]): any; } G({E});
+G({E}); declare global { function E(...objExtends: any[]); }
 export function E(...objExtends: any[]) {
     var result = {};
     for (var extend of objExtends)

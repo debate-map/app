@@ -8,7 +8,6 @@ import {styles} from "../../Frame/UI/GlobalStyles";
 import ScrollView from "react-vscrollview";
 import {JumpToHash, ToAbsoluteUrl, URL} from "../../Frame/General/URLs";
 import {E} from "../../Frame/General/Globals_Free";
-import {List} from "../../Frame/Serialization/VDF/VDFExtras";
 import GlobalMapUI from "../Global/GlobalMapUI";
 import MapUI from "../@Shared/Maps/MapUI";
 import {MapType, Map} from "../../Store/firebase/maps/@Map";

@@ -1,9 +1,4 @@
-// ClassExtensions.ts
-// ==========
-
-var {VDF} = require("../Serialization/VDF/VDF");
-var {List, Dictionary} = require("../Serialization/VDF/VDFExtras");
-var {VDFTypeInfo} = require("../Serialization/VDF/VDFTypeInfo");
+// (ClassExtensions.ts)
 
 // Object: base
 // ==================
@@ -73,75 +68,6 @@ interface Object { // add to Object interface, otherwise TS thinks "Function" re
 //Function.prototype._AddFunction_Inline = function GetName() { return this.name_fake || this.name || this.toString().match(/^function\s*([^\s(]+)/)[1]; };
 Function.prototype._AddFunction("GetName", function() { return this.name_fake || this.name || (this.toString().match(/^function\s*([^\s(]+)/) || [])[1]; });
 Function.prototype._AddFunction_Inline = function SetName(name: string) { this.name_fake = name; return this; };
-
-// Object: C# polyfills/emulators
-// ==================
-
-/*Object.prototype._AddFunction_Inline = function SetBaseClass(baseClassFunc) {
-	//this.prototype.__proto__ = baseClassFunc.prototype; // makes "(new ThisClass()) instanceof BaseClass" be true
-	//Object.setPrototypeOf(this, baseClassFunc); // makes it easier to find base-classes from derived-class
-	Object.setPrototypeOf(this.prototype, baseClassFunc.prototype); // makes "(new ThisClass()) instanceof BaseClass" be true
-
-	//self.constructor = List; // makes "(new List()).constructor == List" be true
-
-	var name = this.GetName();
-	if (name != "")
-		// this only runs on class constructor functions, so if function has name (i.e. name sucked in for self-knowledge purposes), create a variable by that name for global access
-		window[name] = this;
-};
-Object.prototype._AddSetter_Inline = function SetAsBaseClassFor(derivedClassFunc) {
-	derivedClassFunc.SetBaseClass(this);
-	//window[derivedClassFunc.GetName()] = derivedClassFunc;
-};
-Object.prototype._AddFunction_Inline = function CallBaseConstructor(constructorArgs___) {
-	//return this.prototype.__proto__.apply(this, V.AsArray(arguments));
-	//this.__proto__.__proto__.constructor.apply(this, V.AsArray(arguments));
-    var derivedClassFunc = arguments.callee.caller;
-	derivedClassFunc.prototype.__proto__.constructor.apply(this, V_.AsArray(arguments));
-	return this;
-};
-Object.prototype._AddFunction_Inline = function CallBaseConstructor_Manual(derivedClassFunc, constructorArgs___) {
-	derivedClassFunc.prototype.__proto__.constructor.apply(this, V_.AsArray(arguments));
-	return this;
-};*/
-
-// probably temp; helper so "p" function is usable on objects that aren't Node's (e.g. to declare property types)
-/*Object.prototype._AddFunction_Inline = function AddHelpers(obj) {
-	this.p = Node_p;
-	return this;
-};*/
-
-Object.prototype._AddFunction_Inline = function GetVDFTypeInfo() { return VDFTypeInfo.Get(this.constructor); };
-
-Object.prototype._AddFunction_Inline = function GetTypeName(vdfType = true) { //, simplifyForVScriptSystem)
-	/*var result = this.constructor.name;
-	if (allowProcessing) 	{
-		if (result == "String")
-			result = "string";
-		else if (result == "Boolean")
-			result = "bool";
-		else if (result == "Number")
-			result = this.toString().Contains(".") ? "double" : "int";
-	}
-	return result;*/
-
-	/*var result = vdfTypeName ? VDF.GetTypeNameOfObject(this) : this.constructor.name;
-	//if (simplifyForVScriptSystem)
-	//	result = SimplifyTypeName(result);
-	return result;*/
-	if (vdfType) {
-		/*if (this instanceof Multi)
-			return "Multi(" + this.itemType + ")";*/
-		return VDF.GetTypeNameOfObject(this);
-	}
-	return this.constructor.name;
-};
-/*Object.prototype._AddFunction_Inline = function GetType(vdfType = true, simplifyForVScriptSystem = false) {
-    var result = Type(this.GetTypeName(vdfType));
-    if (simplifyForVScriptSystem)
-        result = SimplifyType(result);
-    return result;
-};*/
 
 // Object: normal
 // ==================
@@ -340,8 +266,8 @@ Function.prototype._AddFunction_Inline = function GetTags(/*o:*/ type) {
 	return (this.tags || []).Where(a=>type == null || a instanceof type);
 };
 
-//Function.prototype._AddFunction_Inline = function AsStr(...args) { return require("../V/V").Multiline(this, ...args); };
-Function.prototype._AddFunction_Inline = function AsStr(useExtraPreprocessing) { return require("../V/V").Multiline(this, useExtraPreprocessing); };
+//Function.prototype._AddFunction_Inline = function AsStr(...args) { return require("../../V/V").Multiline(this, ...args); };
+Function.prototype._AddFunction_Inline = function AsStr(useExtraPreprocessing) { return require("../../V/V").Multiline(this, useExtraPreprocessing); };
 
 Function.prototype._AddFunction_Inline = function RunThenReturn(args___) { this.apply(null, arguments); return this; };
 
@@ -402,9 +328,9 @@ HTMLElement.prototype._AddGetter_Inline = function R() { return g.FindReact(this
 // require other CE modules
 // ==========
 
-require("./ClassExtensions/CE_Number");
-require("./ClassExtensions/CE_String");
-require("./ClassExtensions/CE_Array");
+require("./CE_Number");
+require("./CE_String");
+require("./CE_Array");
 
 // late-require things from other modules, that are used in the methods
 // ==========

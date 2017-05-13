@@ -2,7 +2,6 @@ import {styles, colors} from "../../Frame/UI/GlobalStyles";
 import {Dispatch} from "redux";
 import {Component, PropTypes} from "react";
 import GoogleButton from "react-google-button";
-
 import {connect} from "react-redux";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {BaseComponent, BaseProps, Div} from "../../Frame/UI/ReactGlobals";
@@ -20,7 +19,6 @@ import SearchPanel from "./NavBar/SearchPanel";
 import {SubNavBarButton} from "./SubNavBar";
 import Radium from "radium";
 import Link from "../../Frame/ReactComponents/Link";
-import {Log} from "../../Frame/Serialization/VDF/VDF";
 import NotificationsUI from "./NavBar/NotificationsUI";
 import Column from "../../Frame/ReactComponents/Column";
 import Row from "../../Frame/ReactComponents/Row";

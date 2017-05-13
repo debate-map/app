@@ -6,7 +6,6 @@ import {connect} from "react-redux";
 import {DBPath, GetData} from "../../../Frame/Database/DatabaseHelpers";
 import {Debugger, E} from "../../../Frame/General/Globals_Free";
 import {PropTypes} from "react";
-import {Assert, Log} from "../../../Frame/Serialization/VDF/VDF";
 import V from "../../../Frame/V/V";
 import {GetTreeNodesInObjTree} from "../../../Frame/V/V";
 import {Vector2i, VRect} from "../../../Frame/General/VectorStructs";

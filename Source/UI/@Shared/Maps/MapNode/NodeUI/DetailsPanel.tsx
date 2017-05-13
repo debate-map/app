@@ -4,7 +4,6 @@ import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
 import {RootState} from "../../../../../Store";
 import {GetUserID, GetUserPermissionGroups, GetUserMap, GetUser, User} from "../../../../../Store/firebase/users";
-import {Type} from "../../../../../Frame/General/Types";
 import Button from "../../../../../Frame/ReactComponents/Button";
 import * as jquery from "jquery";
 import {Log} from "../../../../../Frame/General/Logging";

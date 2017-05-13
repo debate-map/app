@@ -6,7 +6,6 @@
 
 // libraries
 declare var O;
-declare var React;
 declare var module;
 //declare var global: __React.GlobalStatic
 declare function require(name: string): any;
