@@ -65,7 +65,9 @@ The below are optional recommendations on your editor setup, which will make edi
 Browser: [Chrome](https://www.google.com/chrome)  
 Editor: [Visual Studio Code](https://code.visualstudio.com)  
 VSCode extensions:
-* [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint): Shows warnings when code does not match the project's coding style.
+* [Search node_modules](https://marketplace.visualstudio.com/items?itemName=jasonnutter.search-node-modules): Very helpful for quickly opening files in modules under `node_modules`.
 * [TypeScript Importer](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint): Lets you press alt+enter to auto-import the current symbol from whatever module it's in.
 * [TypeScript Hero](https://marketplace.visualstudio.com/items?itemName=rbbit.typescript-hero): Same as above. This one's not quite as nice, but picks up some that the above misses. Also, it has an "import all missing" command.
-* [Search node_modules](https://marketplace.visualstudio.com/items?itemName=jasonnutter.search-node-modules): Very helpful for quickly opening files in modules under `node_modules`.
+<!--
+* [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint): Shows warnings when code does not match the project's coding style.
+-->

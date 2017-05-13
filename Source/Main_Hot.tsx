@@ -8,6 +8,8 @@ import * as React from "react/lib/ReactWithAddons";
 import {DeepGet} from "./Frame/V/V";
 import {OnAccessPath} from "./Frame/Database/FirebaseConnect";
 
+import "./Store/firebase/nodeRatings/@RatingsRoot";
+
 // uncomment this if you want to load the source-maps and such ahead of time (making-so the first actual call can get it synchronously)
 //StackTrace.get();
 

@@ -30,3 +30,15 @@ AJV.prototype.FullErrorsText = function(this: AJV_Extended) {
 Details: ${ToJSON(this.errors, null, 3)}
 `;
 };
+
+// validation
+// ==========
+
+G({AssertValidate}); declare global { function AssertValidate(schemaName: string, data, failureMessage: string, addDataStr?: boolean); }
+function AssertValidate(schemaName: string, data, failureMessage: string, addDataStr = true) {
+	if (addDataStr) {
+		failureMessage += `\nData: ${ToJSON(data, null, 3)}`;
+	}
+	failureMessage += "\n";
+	Assert(ajv.validate(schemaName, data), failureMessage);
+}

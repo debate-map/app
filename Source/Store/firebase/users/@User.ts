@@ -1,0 +1,1 @@
+export const User_id = "^[a-zA-Z0-9]+$";

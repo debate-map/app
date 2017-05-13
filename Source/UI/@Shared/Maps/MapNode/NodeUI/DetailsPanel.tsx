@@ -39,17 +39,17 @@ import {SlicePath} from "./RatingsPanel";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-type DetailsPanel_Props = {node: MapNodeEnhanced, path: string, userID: string} & Partial<{creator: User}>;
+type DetailsPanel_Props = {node: MapNodeEnhanced, path: string} & Partial<{creator: User}>;
 @Connect((state, {node, path}: DetailsPanel_Props)=>({
 	_: GetUserPermissionGroups(GetUserID()),
-	creator: GetUser(node.creator),
 	_link: GetLinkUnderParent(node._id, GetParentNode(path)),
+	creator: GetUser(node.creator),
 }))
 //export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {error: Error}> {
 export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dataError: string}> {
 	detailsUI: NodeDetailsUI;
 	render() {
-		let {node, path, userID, creator} = this.props;
+		let {node, path, creator} = this.props;
 		let {dataError} = this.state;
 		let firebase = store.firebase.helpers;
 		//let {error} = this.state;
@@ -57,10 +57,10 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 		var parentNode = GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1));
 		let link = GetLinkUnderParent(node._id, parentNode);
 
-		let creatorOrMod = IsUserCreatorOrMod(userID, node);
+		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
 
 		return (
-			<div style={{position: "relative"}}>
+			<Column style={{position: "relative"}}>
 				<NodeDetailsUI ref={c=>this.detailsUI = GetInnerComp(c) as any} baseData={node} baseLinkData={link} parent={parentNode}
 					creating={false} editing={creatorOrMod}
 					onChange={(newData, newLinkData)=> {
@@ -75,7 +75,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 						}}/>
 						{/*error && <Pre>{error.message}</Pre>*/}
 					</Row>}
-			</div>
+			</Column>
 		);
 	}
 }
