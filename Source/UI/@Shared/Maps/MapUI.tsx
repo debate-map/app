@@ -31,8 +31,12 @@ import {URL} from "../../../Frame/General/URLs";
 import NodeUI_ForBots from "./MapNode/NodeUI_ForBots";
 import {IsNumberString} from "../../../Frame/General/Types";
 import {GetNodeEnhanced} from "../../../Store/firebase/nodes/$node";
-import {GetOpenMapID} from "../../../Store/main";
+import {GetOpenMapID, ACTSetInitialArgumentDisplayCount} from "../../../Store/main";
 import {colors} from "../../../Frame/UI/GlobalStyles";
+import Button from "Frame/ReactComponents/Button";
+import DropDown from "../../../Frame/ReactComponents/DropDown";
+import {DropDownTrigger, DropDownContent} from "../../../Frame/ReactComponents/DropDown";
+import Spinner from "../../../Frame/ReactComponents/Spinner";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -99,35 +103,12 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		if (isBot)
 			return <NodeUI_ForBots map={map} node={rootNode}/>;
 
-		let tabBarWidth = 104;
 		return (
 			<div style={{height: "100%"}}>
 				{!withinPage &&
-					<nav style={{
-						position: "absolute", zIndex: 1, left: 0, width: `calc(50% - ${tabBarWidth / 2}px)`, top: 0, textAlign: "center",
-						//background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
-					}}>
-						<div style={E(
-							{
-								display: "inline-block", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
-								width: "100%", height: 30, borderRadius: "0 0 10px 0",
-							},
-						)}>
-						</div>
-					</nav>}
+					<ActionBar_Left/>}
 				{!withinPage &&
-					<nav style={{
-						position: "absolute", zIndex: 1, left: `calc(50% + ${tabBarWidth / 2}px)`, right: 0, top: 0, textAlign: "center",
-						//background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
-					}}>
-						<div style={E(
-							{
-								display: "inline-block", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
-								width: "100%", height: 30, borderRadius: "0 0 0 10px",
-							},
-						)}>
-						</div>
-					</nav>}
+					<ActionBar_Right/>}
 				<ScrollView {...rest.Excluding("dispatch")} ref="scrollView"
 						backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.mapUI}
 						style={E(withinPage && {overflow: "visible"})}
@@ -248,5 +229,59 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 
 		/*if (nextPathTry == focusNode_target)
 			this.hasLoadedScroll = true;*/
+	}
+}
+
+class ActionBar_Left extends BaseComponent<{}, {}> {
+	render() {
+		let tabBarWidth = 104;
+		return (
+			<nav style={{
+				position: "absolute", zIndex: 1, left: 0, width: `calc(50% - ${tabBarWidth / 2}px)`, top: 0, textAlign: "center",
+				//background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
+			}}>
+				<Row style={{
+					justifyContent: "flex-start", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
+					width: "100%", height: 30, borderRadius: "0 0 10px 0",
+				}}>
+				</Row>
+			</nav>
+		);
+	}
+}
+
+@Connect((state, props)=> ({
+	initialArgumentDisplayCount: State(a=>a.main.initialArgumentDisplayCount),
+}))
+class ActionBar_Right extends BaseComponent<{} & Partial<{initialArgumentDisplayCount: number}>, {}> {
+	render() {
+		let {initialArgumentDisplayCount} = this.props;
+		let tabBarWidth = 104;
+		return (
+			<nav style={{
+				position: "absolute", zIndex: 1, left: `calc(50% + ${tabBarWidth / 2}px)`, right: 0, top: 0, textAlign: "center",
+				//background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
+			}}>
+				<Row style={{
+					justifyContent: "flex-end", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
+					width: "100%", height: 30, borderRadius: "0 0 0 10px",
+				}}>
+					<DropDown>
+						<DropDownTrigger>
+							<Button text="Layout" onClick={()=> {
+							}}/>
+						</DropDownTrigger>
+						<DropDownContent style={{right: 0}}>
+							<Column>
+								<Row>
+									<Pre>Initial argument display count: </Pre>
+									<Spinner value={initialArgumentDisplayCount} onChange={val=>store.dispatch(new ACTSetInitialArgumentDisplayCount({value: val}))}/>
+								</Row>
+							</Column>
+						</DropDownContent>
+					</DropDown>
+				</Row>
+			</nav>
+		);
 	}
 }

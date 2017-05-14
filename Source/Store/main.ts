@@ -31,12 +31,20 @@ export class MainState {
 	ratingUI: RatingUIState;
 	notificationMessages: NotificationMessage[];
 
+	// terms
+	// ==========
+
 	selectedTerm: number;
 	//selectedTermComponent: number;
+
+	// maps
+	// ==========
 
 	openMap: number;
 	mapViews: MapViews;
 	copiedNodePath: string;
+
+	initialArgumentDisplayCount: number;
 }
 export class ACTTopLeftOpenPanelSet extends Action<string> {}
 export class ACTTopRightOpenPanelSet extends Action<string> {}
@@ -46,6 +54,7 @@ export class ACTNotificationMessageRemove extends Action<number> {}
 export class ACTTermSelect extends Action<{id: number}> {}
 //export class ACTOpenMapSet extends Action<number> {}
 export class ACTNodeCopy extends Action<{path: string}> {}
+export class ACTSetInitialArgumentDisplayCount extends Action<{value: number}> {}
 
 let MainReducer_Real;
 export function MainReducer(state, action) {
@@ -93,6 +102,8 @@ export function MainReducer(state, action) {
 		},
 		
 		// terms
+		// ==========
+
 		selectedTerm: (state = null, action)=> {
 			if (action.Is(ACTTermSelect))
 				return action.payload.id;
@@ -105,6 +116,8 @@ export function MainReducer(state, action) {
 		},*/
 
 		// maps
+		// ==========
+
 		openMap: (state = null, action)=> {
 			if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).pathNodes[0] == "global")
 				return 1;
@@ -117,7 +130,11 @@ export function MainReducer(state, action) {
 			if (action.Is(ACTNodeCopy))
 				return action.payload.path;
 			return state;
-		}
+		},
+		initialArgumentDisplayCount: (state = 3, action)=> {
+			if (action.Is(ACTSetInitialArgumentDisplayCount)) return action.payload.value;
+			return state;
+		},
 	});
 	return MainReducer_Real(state, action);
 }
