@@ -32,6 +32,7 @@ import NodeUI_ForBots from "./MapNode/NodeUI_ForBots";
 import {IsNumberString} from "../../../Frame/General/Types";
 import {GetNodeEnhanced} from "../../../Store/firebase/nodes/$node";
 import {GetOpenMapID} from "../../../Store/main";
+import {colors} from "../../../Frame/UI/GlobalStyles";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -98,56 +99,85 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		if (isBot)
 			return <NodeUI_ForBots map={map} node={rootNode}/>;
 
+		let tabBarWidth = 104;
 		return (
-			<ScrollView {...rest.Excluding("dispatch")} ref="scrollView"
-					backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.mapUI}
-					style={E(withinPage && {overflow: "visible"})}
-					scrollHBarStyle={E(withinPage && {zIndex: 0})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
-					contentStyle={E({willChange: "transform"}, withinPage && {marginBottom: -300, paddingBottom: 300})}
-					//contentStyle={E({willChange: "transform"}, withinPage && {marginTop: -300, paddingBottom: 300, transform: "translateY(300px)"})}
-					//bufferScrollEventsBy={10000}
-					onScrollEnd={pos=> {
-						//if (withinPage) return;
-						UpdateFocusNodeAndViewOffset(map._id);
+			<div style={{height: "100%"}}>
+				{!withinPage &&
+					<nav style={{
+						position: "absolute", zIndex: 1, left: 0, width: `calc(50% - ${tabBarWidth / 2}px)`, top: 0, textAlign: "center",
+						//background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
 					}}>
-				<style>{`
-				.MapUI { display: inline-flex; writing-mode: vertical-lr; flex-wrap: wrap; }
-				.MapUI > * { writing-mode: horizontal-tb; }
-				.MapUI.scrolling > * { pointer-events: none; }
-				`}</style>
-				<div className="MapUI" ref="mapUI"
-						style={{
-							position: "relative", /*display: "flex",*/ padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`, whiteSpace: "nowrap",
-							filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))",
-						}}
-						onMouseDown={e=>{
-							this.downPos = new Vector2i(e.clientX, e.clientY);
-							if (e.button == 1)
-								FindDOM_(this.refs.mapUI).addClass("scrolling");
-						}}
-						onMouseUp={e=> {
-							FindDOM_(this.refs.mapUI).removeClass("scrolling");
-						}}
-						onClick={e=> {
-							if (e.target != this.refs.mapUI) return;
-							if (new Vector2i(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
-							let mapView = GetMapView(GetOpenMapID());
-							if (GetSelectedNodePath(map._id)) {
-								store.dispatch(new ACTMapNodeSelect({mapID: map._id, path: null}));
-								UpdateFocusNodeAndViewOffset(map._id);
-							}
-						}}
-						onContextMenu={e=> {
-							if (e.nativeEvent["passThrough"]) return true;
-							e.preventDefault();
+						<div style={E(
+							{
+								display: "inline-block", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
+								width: "100%", height: 30, borderRadius: "0 0 10px 0",
+							},
+						)}>
+						</div>
+					</nav>}
+				{!withinPage &&
+					<nav style={{
+						position: "absolute", zIndex: 1, left: `calc(50% + ${tabBarWidth / 2}px)`, right: 0, top: 0, textAlign: "center",
+						//background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
+					}}>
+						<div style={E(
+							{
+								display: "inline-block", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
+								width: "100%", height: 30, borderRadius: "0 0 0 10px",
+							},
+						)}>
+						</div>
+					</nav>}
+				<ScrollView {...rest.Excluding("dispatch")} ref="scrollView"
+						backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.mapUI}
+						style={E(withinPage && {overflow: "visible"})}
+						scrollHBarStyle={E(withinPage && {zIndex: 0})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
+						contentStyle={E({willChange: "transform"}, withinPage && {marginBottom: -300, paddingBottom: 300})}
+						//contentStyle={E({willChange: "transform"}, withinPage && {marginTop: -300, paddingBottom: 300, transform: "translateY(300px)"})}
+						//bufferScrollEventsBy={10000}
+						onScrollEnd={pos=> {
+							//if (withinPage) return;
+							UpdateFocusNodeAndViewOffset(map._id);
 						}}>
-					<NodeUI map={map} node={rootNode} path={rootNode._id.toString()}/>
-					{/*<ReactResizeDetector handleWidth handleHeight onResize={()=> {*/}
-					{/*<ResizeSensor ref="resizeSensor" onResize={()=> {
-						this.LoadScroll();
-					}}/>*/}
-				</div>
-			</ScrollView>
+					<style>{`
+					.MapUI { display: inline-flex; writing-mode: vertical-lr; flex-wrap: wrap; }
+					.MapUI > * { writing-mode: horizontal-tb; }
+					.MapUI.scrolling > * { pointer-events: none; }
+					`}</style>
+					<div className="MapUI" ref="mapUI"
+							style={{
+								position: "relative", /*display: "flex",*/ padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`, whiteSpace: "nowrap",
+								filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))",
+							}}
+							onMouseDown={e=>{
+								this.downPos = new Vector2i(e.clientX, e.clientY);
+								if (e.button == 1)
+									FindDOM_(this.refs.mapUI).addClass("scrolling");
+							}}
+							onMouseUp={e=> {
+								FindDOM_(this.refs.mapUI).removeClass("scrolling");
+							}}
+							onClick={e=> {
+								if (e.target != this.refs.mapUI) return;
+								if (new Vector2i(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
+								let mapView = GetMapView(GetOpenMapID());
+								if (GetSelectedNodePath(map._id)) {
+									store.dispatch(new ACTMapNodeSelect({mapID: map._id, path: null}));
+									UpdateFocusNodeAndViewOffset(map._id);
+								}
+							}}
+							onContextMenu={e=> {
+								if (e.nativeEvent["passThrough"]) return true;
+								e.preventDefault();
+							}}>
+						<NodeUI map={map} node={rootNode} path={rootNode._id.toString()}/>
+						{/*<ReactResizeDetector handleWidth handleHeight onResize={()=> {*/}
+						{/*<ResizeSensor ref="resizeSensor" onResize={()=> {
+							this.LoadScroll();
+						}}/>*/}
+					</div>
+				</ScrollView>
+			</div>
 		);
 	}
 
