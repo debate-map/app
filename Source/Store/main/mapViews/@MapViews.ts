@@ -23,5 +23,6 @@ export class MapNodeView {
 	viewOffset?: Vector2i;
 	openPanel?: string;
 	children? = {} as {[key: string]: MapNodeView};
-	childLimit?: number;
+	childLimit_up?: number;
+	childLimit_down?: number;
 }

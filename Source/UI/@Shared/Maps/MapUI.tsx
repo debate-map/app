@@ -275,7 +275,7 @@ class ActionBar_Right extends BaseComponent<{} & Partial<{initialChildLimit: num
 							<Column>
 								<Row>
 									<Pre>Initial child limit: </Pre>
-									<Spinner min={3} value={initialChildLimit} onChange={val=>store.dispatch(new ACTSetInitialChildLimit({value: val}))}/>
+									<Spinner min={1} value={initialChildLimit} onChange={val=>store.dispatch(new ACTSetInitialChildLimit({value: val}))}/>
 								</Row>
 							</Column>
 						</DropDownContent>

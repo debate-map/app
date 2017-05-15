@@ -9,6 +9,7 @@ import {Vector2i} from "../../../../Frame/General/VectorStructs";
 export class ACTMapNodeSelect extends Action<{mapID: number, path: string}> {}
 export class ACTMapNodePanelOpen extends Action<{mapID: number, path: string, panel: string}> {}
 export class ACTMapNodeExpandedSet extends Action<{mapID: number, path: string, expanded: boolean, recursive: boolean}> {}
+export class ACTMapNodeChildLimitSet extends Action<{mapID: number, path: string, direction: "down" | "up", value: number}> {}
 export class ACTViewCenterChange extends Action<{mapID: number, focusNodePath: string, viewOffset: Vector2i}> {}
 
 export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action<any>, mapID: number) {
@@ -46,6 +47,12 @@ export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action
 				}
 			}
 			return result;
+		}, state);
+	}
+	if (action.Is(ACTMapNodeChildLimitSet) && action.payload.mapID == mapID) {
+		let targetNodePath = action.payload.path.split("/").join(".children.");
+		return u.updateIn(targetNodePath, (old = new MapNodeView())=> {
+			return {...old, [`childLimit_${action.payload.direction}`]: action.payload.value};
 		}, state);
 	}
 	if (action.Is(ACTViewCenterChange) && action.payload.mapID == mapID) {

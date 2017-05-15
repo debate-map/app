@@ -161,7 +161,7 @@ export class TermUI extends BaseComponent<TermUI_Props, {}> {
 				{term.shortDescription_current}
 				<Span ml="auto">
 					<Pre style={{opacity: .7}}>({GetNiceNameForTermType(term.type)}) </Pre>
-					<span>#{term._id}</span>
+					<Pre>#{term._id}</Pre>
 				</Span>
 			</Row>
 		);

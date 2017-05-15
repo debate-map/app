@@ -131,7 +131,7 @@ export function MainReducer(state, action) {
 				return action.payload.path;
 			return state;
 		},
-		initialChildLimit: (state = 3, action)=> {
+		initialChildLimit: (state = 5, action)=> {
 			if (action.Is(ACTSetInitialChildLimit)) return action.payload.value;
 			return state;
 		},
