@@ -41,6 +41,8 @@ interface Array<T> { RemoveAt(index: number): T; }
 Array.prototype._AddFunction_Inline = function RemoveAt(index: number) { return this.splice(index, 1)[0]; };
 interface Array<T> { Insert(index: number, obj: T): void; }
 Array.prototype._AddFunction_Inline = function Insert(index, obj) { this.splice(index, 0, obj); }
+interface Array<T> { SetItems(items: T[]): this; }
+Array.prototype._AddFunction_Inline = function SetItems(items) { this.splice(0, this.length, ...items); }
 
 interface Array<T> { Reversed(): T[]; }
 Array.prototype._AddFunction_Inline = function Reversed() { 
@@ -204,7 +206,7 @@ Array.prototype._AddFunction_Inline = function FindIndex(matchFunc) {
             return index;
     return -1;
 };*/
-interface Array<T> { OrderBy(valFunc?: (item: T, index: number)=>number): T[]; }
+interface Array<T> { OrderBy(valFunc?: (item: T, index: number)=>any): T[]; }
 Array.prototype._AddFunction_Inline = function OrderBy(valFunc = (item, index: number)=>item) {
 	/*var temp = this.ToList();
 	temp.sort((a, b)=>V.Compare(valFunc(a), valFunc(b)));
@@ -212,7 +214,7 @@ Array.prototype._AddFunction_Inline = function OrderBy(valFunc = (item, index: n
 	var V_ = require("../../V/V").default;
     return V_.StableSort(this, (a, b, aIndex, bIndex)=>V_.Compare(valFunc(a, aIndex), valFunc(b, bIndex)));
 };
-interface Array<T> { OrderByDescending(valFunc?: (item: T, index: number)=>number): T[]; }
+interface Array<T> { OrderByDescending(valFunc?: (item: T, index: number)=>any): T[]; }
 Array.prototype._AddFunction_Inline = function OrderByDescending(valFunc = (item, index: number)=>item) {
 	return this.OrderBy((item, index)=>-valFunc(item, index));
 };

@@ -26,10 +26,10 @@ Icon packs:
 ;*/
 
 //export default class Icon extends BaseComponent<{icon: IconType, color?: string}, {}> {
-export default class Icon extends BaseComponent<{icon: string, size: number, color?: string}, {}> {
+export default class Icon extends BaseComponent<{icon: string, size: number, color?: string} & React.HTMLProps<SVGElement>, {}> {
 	static defaultProps = {color: "rgba(255,255,255,.7)"};
 	render() {
-		let {icon, size, color} = this.props;
+		let {icon, size, color, ...rest} = this.props;
 		//let data = iconData[icon];
 	   /*return (
 			<svg>
@@ -38,7 +38,7 @@ export default class Icon extends BaseComponent<{icon: string, size: number, col
 		);*/
 		let info = require(`../../../Resources/SVGs/${icon}.svg`).default;
 		return (
-			<svg viewBox={info.viewBox} width={size} height={size}>
+			<svg {...rest} viewBox={info.viewBox} width={size} height={size}>
 				<use xlinkHref={`#${info.id}`} style={{fill: color}}/>
 			</svg>
 		);

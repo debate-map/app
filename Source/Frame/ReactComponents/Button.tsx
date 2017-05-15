@@ -50,7 +50,7 @@ var styles = {
 `);*/
 let pseudoSelectorStyleKeys = {};
 
-export type ButtonProps = {enabled?: boolean, text?: string, title?: string, className?: string, style?,
+export type ButtonProps = {enabled?: boolean, text?: string | JSX.Element, title?: string, className?: string, style?,
 	size?: number, width?: number, height?: number, iconSize?: number, iconPath?: string, useOpacityForHover?: boolean,
 	hasCheckbox?: boolean, checked?: boolean, checkboxStyle?, checkboxLabelStyle?, onCheckedChanged?,
 	onClick?, onLeftClick?, onDirectClick?} & React.HTMLProps<HTMLDivElement>;

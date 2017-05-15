@@ -6,6 +6,7 @@ String.prototype._AddFunction_Inline = function TrimStart(this: string, ...chars
 	// fix for if called by VDF (which has a different signature)
 	//if (arguments[0] instanceof Array) chars = arguments[0];
 
+	debugger;
 	for (var iOfFirstToKeep = 0; iOfFirstToKeep < this.length && chars.Contains(this[iOfFirstToKeep]); iOfFirstToKeep++);
 	return this.slice(iOfFirstToKeep, this.length);
 };

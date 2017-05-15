@@ -31,7 +31,7 @@ import {URL} from "../../../Frame/General/URLs";
 import NodeUI_ForBots from "./MapNode/NodeUI_ForBots";
 import {IsNumberString} from "../../../Frame/General/Types";
 import {GetNodeEnhanced} from "../../../Store/firebase/nodes/$node";
-import {GetOpenMapID, ACTSetInitialArgumentDisplayCount} from "../../../Store/main";
+import {GetOpenMapID, ACTSetInitialChildLimit} from "../../../Store/main";
 import {colors} from "../../../Frame/UI/GlobalStyles";
 import Button from "Frame/ReactComponents/Button";
 import DropDown from "../../../Frame/ReactComponents/DropDown";
@@ -251,11 +251,11 @@ class ActionBar_Left extends BaseComponent<{}, {}> {
 }
 
 @Connect((state, props)=> ({
-	initialArgumentDisplayCount: State(a=>a.main.initialArgumentDisplayCount),
+	initialChildLimit: State(a=>a.main.initialChildLimit),
 }))
-class ActionBar_Right extends BaseComponent<{} & Partial<{initialArgumentDisplayCount: number}>, {}> {
+class ActionBar_Right extends BaseComponent<{} & Partial<{initialChildLimit: number}>, {}> {
 	render() {
-		let {initialArgumentDisplayCount} = this.props;
+		let {initialChildLimit} = this.props;
 		let tabBarWidth = 104;
 		return (
 			<nav style={{
@@ -274,8 +274,8 @@ class ActionBar_Right extends BaseComponent<{} & Partial<{initialArgumentDisplay
 						<DropDownContent style={{right: 0}}>
 							<Column>
 								<Row>
-									<Pre>Initial argument display count: </Pre>
-									<Spinner value={initialArgumentDisplayCount} onChange={val=>store.dispatch(new ACTSetInitialArgumentDisplayCount({value: val}))}/>
+									<Pre>Initial child limit: </Pre>
+									<Spinner min={3} value={initialChildLimit} onChange={val=>store.dispatch(new ACTSetInitialChildLimit({value: val}))}/>
 								</Row>
 							</Column>
 						</DropDownContent>

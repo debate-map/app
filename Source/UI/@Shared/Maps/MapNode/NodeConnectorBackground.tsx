@@ -9,7 +9,12 @@ import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetNodeForm, GetRatingTypesForNode, GetFinalNodeTypeAtPath} from "../../../../Store/firebase/nodes/$node";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 
-type Props = {node: MapNodeEnhanced, mainBoxOffset: Vector2i, childNodes: MapNodeEnhanced[], childBoxOffsets: Vector2i[], shouldUpdate: boolean};
+type Props = {
+	node: MapNodeEnhanced, mainBoxOffset: Vector2i, childNodes: MapNodeEnhanced[],
+	//childBoxOffsets: Vector2i[],
+	childBoxOffsets: {[key: number]: Vector2i},
+	shouldUpdate: boolean
+};
 	//& Partial<{nodeChildren_finalNodeTypes: MapNodeType[]}>;
 @SimpleShouldUpdate_Overridable
 /*@Connect((state, {path, childNodes}: Props)=> ({
@@ -24,10 +29,10 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 
 		return (
 			<svg className="clickThroughChain" style={{position: "absolute", overflow: "visible", zIndex: -1}}>
-				{childBoxOffsets.map((childOffset, index)=> {
+				{childBoxOffsets.Props(true).OrderBy(a=>a.name).map(({name: childIDStr, value: childOffset})=> {
 					/*result.push(<line key={"inputLine" + result.length} x1={inputPos.x} y1={inputPos.y}
 						x2={inputVal.position.x} y2={inputVal.position.y + 10} style={{stroke: "rgba(0,0,0,.5)", strokeWidth: 2}}/>);*/
-					let child = A.NonNull = childNodes[index];
+					let child = A.NonNull = childNodes.First(a=>a._id == childIDStr.ToInt());
 					let backgroundColor = node.finalType == MapNodeType.SupportingArgument || node.finalType == MapNodeType.OpposingArgument
 						? MapNodeType_Info.for[node.finalType].backgroundColor
 						: MapNodeType_Info.for[child.finalType].backgroundColor;
@@ -54,7 +59,7 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					startControl = startControl.Plus(middleControl).Times(.5); // average with middle-control
 					endControl = endControl.Plus(middleControl).Times(.5); // average with middle-control
 
-					return <path key={"connectorLine_" + index} style={{stroke: `rgba(${backgroundColor},1)`, strokeWidth: 3, fill: "none"}}
+					return <path key={"connectorLine_" + child._id} style={{stroke: `rgba(${backgroundColor},1)`, strokeWidth: 3, fill: "none"}}
 						d={`M${start.x},${start.y} C${startControl.x},${startControl.y} ${endControl.x},${endControl.y} ${end.x},${end.y}`}/>;
 				})}
 			</svg>

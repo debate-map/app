@@ -33,8 +33,10 @@ import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@M
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import Column from "../../../../Frame/ReactComponents/Column";
-import { GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType, IsArgumentNode } from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType, IsArgumentNode, IsReversedArgumentNode} from "../../../../Store/firebase/nodes/$node";
 import * as FastDOM from "fastdom";
+import Row from "Frame/ReactComponents/Row";
+import Icon from "../../../../Frame/ReactComponents/Icon";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -54,12 +56,20 @@ import * as FastDOM from "fastdom";
 let childrenPlaceholder = [];
 
 type Props = {map: Map, node: MapNodeEnhanced, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void}
-	& Partial<{form: ThesisForm, nodeView: MapNodeView,
+	& Partial<{initialChildLimit: number, form: ThesisForm, nodeView: MapNodeView,
 		nodeChildren: MapNodeEnhanced[],
 		//nodeChildren_fillPercents: number[],
 		nodeChildren_sortValues: number[],
 	}>;
-type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number, svgInfo: {mainBoxOffset: Vector2i, oldChildBoxOffsets: Vector2i[]}};
+type State = {
+	hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number,
+	svgInfo: {
+		mainBoxOffset: Vector2i,
+		//oldChildBoxOffsets: Vector2i[],
+		oldChildBoxOffsets: {[key: number]: Vector2i},
+	},
+	//childrenStartY: number, childrenEndY: number, // positions at which to place limit-bars
+};
 @Connect((state: RootState, {node, path, map}: Props & BaseProps)=> {
 	//Log("Calling NodeUI connect func.");
 	let nodeView = GetNodeView(map._id, path) || new MapNodeView();
@@ -93,6 +103,7 @@ type State = {hasBeenExpanded: boolean, childrenWidthOverride: number, childrenC
 	return {
 		path: path || node._id.toString(),
 
+		initialChildLimit: State(a=>a.main.initialChildLimit),
 		//node_finalType: GetFinalNodeTypeAtPath(node, path),
 		//nodeEnhanced: GetNodeEnhanced(node, path),
 		form: GetNodeForm(node, GetParentNode(path)),
@@ -127,9 +138,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	}*/
 
 	render() {
-		let {map, node, path, form, widthOverride, children, nodeView, nodeChildren, nodeChildren_sortValues} = this.props;
+		let {map, node, path, initialChildLimit, form, widthOverride, children, nodeView, nodeChildren, nodeChildren_sortValues} = this.props;
 		let expanded = nodeView && nodeView.expanded;
-		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
+		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo, /*childrenStartY, childrenEndY*/} = this.state;
 		if (g.logNodeRenders) {
 			Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
 		}
@@ -137,57 +148,35 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		NodeUI.lastRenderTime = Date.now();
 
 		let separateChildren = node.finalType == MapNodeType.Thesis;
-		type ChildPack = {origIndex: number, node: MapNodeEnhanced, ui: JSX.Element};
-		let childPacks: ChildPack[] = nodeChildren.map((child, index)=> {
-			return {
-				origIndex: index,
-				node: child,
-				ui: <NodeUI key={index} ref={c=>this.childBoxes[index] = c} map={map} node={child}
-					path={path + "/" + child._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>
-			};
-		});
+		type ChildPack = {origIndex: number, node: MapNodeEnhanced};
+		let childPacks: ChildPack[] = nodeChildren.map((child, index)=>({origIndex: index, node: child}));
 		let upChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalType == MapNodeType.SupportingArgument) : [];
 		let downChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalType == MapNodeType.OpposingArgument) : [];
+
+		let childLimit = nodeView.childLimit || initialChildLimit;
 
 		// apply sorting
 		if (separateChildren) {
 			upChildPacks = upChildPacks.OrderBy(pack=>nodeChildren_sortValues[pack.origIndex]);
 			downChildPacks = downChildPacks.OrderByDescending(pack=>nodeChildren_sortValues[pack.origIndex]);
-			/*ApplyOrderPostProcessingForChildPacks(upChildPacks);
-			ApplyOrderPostProcessingForChildPacks(downChildPacks);*/
 		} else {
 			childPacks = childPacks.OrderByDescending(pack=>nodeChildren_sortValues[pack.origIndex]);
-			if (IsArgumentNode(node)) {
-				childPacks = ApplyOrderPostProcessingForChildPacks(childPacks);
+			//if (IsArgumentNode(node)) {
+			if (node.childrenOrder) {
+				childPacks.SetItems(childPacks.OrderBy(pack=>node.childrenOrder.indexOf(pack.node._id).IfN1Then(Number.MAX_SAFE_INTEGER)));
 			}
-		}
-		function ApplyOrderPostProcessingForChildPacks(packs) {
-			/*for (let pack of packs) {
-				if (pack.node.chainAfter == "[start]") {
-					packs.Remove(pack);
-					packs.Insert(0, pack); 
-				}
-				let chainAfterNode = nodeChildren.FirstOrX(a=>a._id.toString() == pack.node.chainAfter);
-				if (chainAfterNode) {
-					packs.Remove(pack);
-					let chainAfterNode_index = packs.findIndex(a=>a.node == chainAfterNode);
-					packs.Insert(chainAfterNode_index + 1, pack);
-				}
-			}
-			let metaThesisPack = packs.FirstOrX(a=>a.node.metaThesis);
-			if (metaThesisPack) {
-				packs.Remove(metaThesisPack);
-				packs.Insert(0, metaThesisPack); 
-			}*/
-			//if (node.childrenOrder) {
-			return packs.OrderBy(pack=>node.childrenOrder.indexOf(pack.node._id).IfN1Then(Number.MAX_SAFE_INTEGER));
 		}
 
 		//let {width, expectedHeight} = this.GetMeasurementInfo(this.props, this.state);
 		let {width, expectedHeight} = this.GetMeasurementInfo();
 		let innerBoxOffset = ((childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
 
-		this.childBoxes = [];
+		let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
+		let limitBar_above = node.type == MapNodeType.SupportingArgument;
+		if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
+		let showBelowMessage = IsArgumentNode(node) && nodeChildren.length > 0 && nodeChildren.length < 3;
+
+		this.childBoxes = {};
 		return (
 			<div className="NodeUI clickThrough" style={{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}}>
 				<div ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={E(
@@ -196,9 +185,10 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					!useAutoOffset && {paddingTop: innerBoxOffset},*/
 					{paddingTop: innerBoxOffset}
 				)}>
+					{limitBar_above && children}
 					<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
 					{/*<NodeUI_Inner ref="innerBox" {...{map, node: nodeWithFinalType, nodeView, path, width}} widthOverride={widthOverride}/>*/}
-					{IsArgumentNode(node) && nodeChildren.length > 0 && nodeChildren.length < 3 &&
+					{showBelowMessage &&
 						<Div ct style={{
 							//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
 							marginTop: 5, fontSize: 12,
@@ -206,11 +196,18 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						}}>
 							Needs 2 premises to be visible.
 						</Div>}
+					{!limitBar_above && children}
 				</div>
 				{nodeChildren == childrenPlaceholder &&
 					<div style={{margin: "auto 0 auto 10px"}}>...</div>}
 				{nodeChildren != childrenPlaceholder && !expanded && nodeChildren.length != 0 &&
-					<div style={{margin: "auto 0 auto 7px", fontSize: 12, color: "rgba(255,255,255,.5)"}}>{nodeChildren.length}</div>}
+					<div style={E({
+						margin: "auto 0 auto 7px", fontSize: 12, color: "rgba(255,255,255,.5)"},
+						showLimitBar && {[limitBar_above ? "paddingTop" : "paddingBottom"]: ChildLimitBar.HEIGHT},
+						showBelowMessage && {paddingBottom: 13},
+					)}>
+						{nodeChildren.length}
+					</div>}
 				{hasBeenExpanded && !separateChildren &&
 					<div ref="childHolder" className="childHolder clickThrough" style={{
 						display: expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
@@ -219,7 +216,17 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						{svgInfo.mainBoxOffset &&
 							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
 								childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
-						{childPacks.map(a=>a.ui)}
+						{childPacks/*.slice(-childLimit)*/.map((pack, index)=> {
+							return (
+								<NodeUI key={pack.origIndex} ref={c=>this.childBoxes[pack.node._id] = c} map={map} node={pack.node}
+										path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
+									{/*index == childLimit - 1 && childPacks.length > childLimit &&
+										<ChildLimitBar key={index} {...{childrenWidthOverride, childLimit}} childCount={childPacks.length}/>*/}
+								</NodeUI>
+							);
+						})}
+						{/*childPacks.length > childLimit &&
+							<Button text="..."/>*/}
 					</div>}
 				{hasBeenExpanded && separateChildren &&
 					<div ref="childHolder" className="childHolder clickThrough" style={{
@@ -229,17 +236,40 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						{svgInfo.mainBoxOffset &&
 							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
 								childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
-						<div ref="upChildHolder" className="upChildHolder clickThrough" style={{display: "flex", flexDirection: "column"}}>
-							{upChildPacks.map(a=>a.ui)}
-						</div>
-						<div ref="downChildHolder" className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
-							{downChildPacks.map(a=>a.ui)}
-						</div>
+						{/*upChildPacks.length > childLimit &&
+							<ChildLimitBar {...{childrenWidthOverride, childLimit}} childCount={upChildPacks.length}/>*/}
+						<Column ref="upChildHolder" ct className="upChildHolder">
+							{/*upChildPacks.slice(-childLimit).map(a=>a.ui)*/}
+							{upChildPacks.slice(-childLimit).map((pack, index)=> {
+								return (
+									<NodeUI key={pack.origIndex} ref={c=>this.childBoxes[pack.node._id] = c} map={map} node={pack.node}
+											path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
+										{index == 0 && upChildPacks.length > childLimit &&
+											<ChildLimitBar key={index} {...{childrenWidthOverride, childLimit}} direction="up" childCount={upChildPacks.length}/>}
+									</NodeUI>
+								);
+							})}
+						</Column>
+						<Column ref="downChildHolder" ct>
+							{/*downChildPacks.slice(0, childLimit).map(a=>a.ui)*/}
+							{downChildPacks.slice(0, childLimit).map((pack, index)=> {
+								return (
+									<NodeUI key={pack.origIndex} ref={c=>this.childBoxes[pack.node._id] = c} map={map} node={pack.node}
+											path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
+										{index == childLimit - 1 && downChildPacks.length > childLimit &&
+											<ChildLimitBar key={index} {...{childrenWidthOverride, childLimit}} direction="down" childCount={downChildPacks.length}/>}
+									</NodeUI>
+								);
+							})}
+						</Column>
+						{/*downChildPacks.length > childLimit &&
+							<ChildLimitBar {...{childrenWidthOverride, childLimit}} childCount={downChildPacks.length}/>*/}
 					</div>}
 			</div>
 		);
 	}
-	childBoxes: NodeUI[];
+	//childBoxes: NodeUI[];
+	childBoxes: {[key: number]: NodeUI};
 
 	//GetMeasurementInfo(/*props: Props, state: State*/) {
 	measurementInfo_cache;
@@ -318,24 +348,17 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		if (onHeightOrPosChange) onHeightOrPosChange();
 	}
 	UpdateState(forceUpdate = false) {
-		let {nodeView} = this.props;
+		let {children, nodeView} = this.props;
 		//let {childHolder, upChildHolder} = this.refs;
 		let childHolder = FindDOM_(this).children(".childHolder");
 		let upChildHolder = childHolder.children(".upChildHolder");
+		let downChildHolder = childHolder.children(".downChildHolder");
+		/*let firstChild = (upChildHolder.length ? upChildHolder : childHolder).children().ToList()[0];
+		let lastChild = (downChildHolder.length ? downChildHolder : childHolder).children().ToList().Last();*/
 
 		let newState = E(
 			nodeView && nodeView.expanded &&
-				/*{childrenWidthOverride: this.childBoxes.Any(a=>a != null)
-					? this.childBoxes.Where(a=>a != null).Select(a=> {
-						var childDOM = FindDOM(GetInnerComp(a).refs.innerBox);
-						var oldMinWidth = childDOM.style.minWidth;
-						childDOM.style.minWidth = 0 + "px";
-						var result = childDOM.clientWidth;
-						childDOM.style.minWidth = oldMinWidth;
-						return result;
-					}).Max(null, true)
-					: 0},*/
-				{childrenWidthOverride: this.childBoxes.filter(a=>a != null).map(a=> {
+				{childrenWidthOverride: this.childBoxes.VValues().filter(a=>a != null).map(a=> {
 					let comp = GetInnerComp(a) as NodeUI;
 					return comp.GetMeasurementInfo().width;
 				}).concat(0).Max(null, true)},
@@ -344,7 +367,10 @@ export default class NodeUI extends BaseComponent<Props, State> {
 				: (childHolder && childHolder.style.display != "none" ? childHolder.clientHeight / 2 : 0)}*/
 			{childrenCenterY: upChildHolder.length
 				? (upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0)
-				: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)}
+				: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)},
+			/*{childrenStartY: upChildHolder.length
+				? (upChildHolder.css("display") != "none" ? firstChild.GetScreenRect().y -  : 0)
+				: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)}*/
 		) as State;
 
 		//let {width, expectedHeight} = this.GetMeasurementInfo(this.props, E(this.state, newState) as State);
@@ -359,8 +385,13 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			let mainBoxOffset = new Vector2i(0, innerBoxOffset);
 			//mainBoxOffset = mainBoxOffset.Plus(new Vector2i(innerBox.width(), innerBox.outerHeight() / 2));
 			mainBoxOffset = mainBoxOffset.Plus(new Vector2i(-30, innerBox.outerHeight() / 2));
-			let oldChildBoxOffsets = this.childBoxes.Where(a=>a != null).Select(child=> {
-				let childBox = FindDOM_(child).find("> div:first-child > div"); // get inner-box of child
+
+			let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
+			if (showLimitBar) mainBoxOffset.y += ChildLimitBar.HEIGHT;
+
+			let oldChildBoxOffsets = this.childBoxes.Props().Where(pair=>pair.value != null).ToMap(pair=>pair.name, pair=> {
+				//let childBox = FindDOM_(pair.value).find("> div:first-child > div"); // get inner-box of child
+				let childBox = FindDOM_(pair.value).find("> .innerBoxHolder > .NodeUI_Inner"); // get inner-box of child
 				let childBoxOffset = new Vector2i(childBox.offset()).Minus(holderOffset);
 				childBoxOffset = childBoxOffset.Plus(new Vector2i(0, childBox.outerHeight() / 2));
 				return childBoxOffset;
@@ -381,3 +412,41 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	var referenceControlOffset = referenceControl.offset();
 	return {left: offset.left - referenceControlOffset.left, top: offset.top - referenceControlOffset.top};
 });*/
+
+@Connect((state, props)=> ({
+	initialChildLimit: State(a=>a.main.initialChildLimit),
+}))
+class ChildLimitBar extends BaseComponent
+		<{childrenWidthOverride: number, direction: "up" | "down", childCount: number, childLimit: number}
+			& Partial<{initialChildLimit: number}>,
+		{}> {
+	static HEIGHT = 36;
+	render() {
+		let {childrenWidthOverride, direction, childCount, childLimit, initialChildLimit} = this.props;
+		return (
+			<Row style={{
+				//position: "absolute", marginTop: -30,
+				[direction == "up" ? "marginBottom" : "marginTop"]: 10, width: childrenWidthOverride, cursor: "default",
+			}}>
+				<Button text={
+					<Row>
+						<Icon icon={`arrow-${direction}`} size={15}/>
+						<Div ml={3}>{childCount > childLimit ? childCount - childLimit : null}</Div>
+					</Row>
+				} title="Show more"
+				enabled={childLimit < childCount} style={{flex: 1}} onClick={()=> {
+					// todo: ms this increases the child-limit
+				}}/>
+				<Button ml={5} text={
+					<Row>
+						<Icon icon={`arrow-${direction == "up" ? "down" : "up"}`} size={15}/>
+						{/*<Div ml={3}>{childCount > childLimit ? childCount - childLimit : null}</Div>*/}
+					</Row>
+				} title="Show less"
+				enabled={childLimit > initialChildLimit} style={{flex: 1}} onClick={()=> {
+					// todo: ms this decreases the child-limit
+				}}/>
+			</Row>
+		);
+	}
+}

@@ -10,6 +10,12 @@ export class MapView {
 	rootNodeViews = {} as {[key: number]: MapNodeView};
 }
 export class MapNodeView {
+	//constructor(childLimit?: number) {
+	//constructor(childLimit: number) {
+	/*constructor() {
+		this.childLimit = State(a=>a.main.initialChildLimit);
+	}*/
+
 	expanded?: boolean;
 	selected?: boolean;
 	focus?: boolean;
@@ -17,4 +23,5 @@ export class MapNodeView {
 	viewOffset?: Vector2i;
 	openPanel?: string;
 	children? = {} as {[key: string]: MapNodeView};
+	childLimit?: number;
 }
