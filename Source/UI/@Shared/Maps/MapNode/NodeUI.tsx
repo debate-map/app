@@ -157,7 +157,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let childLimit_up = (nodeView.childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 		let childLimit_down = (nodeView.childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 		// if the map's root node, or an argument node, show all children
-		if (node._id == map.rootNode || IsArgumentNode(node)) [childLimit_up, childLimit_down] = [100, 100];
+		let showAll = node._id == map.rootNode || IsArgumentNode(node);
+		if (showAll) [childLimit_up, childLimit_down] = [100, 100];
 
 		// apply sorting
 		if (separateChildren) {
@@ -247,7 +248,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 								return (
 									<NodeUI key={pack.origIndex} ref={c=>this.childBoxes[pack.node._id] = c} map={map} node={pack.node}
 											path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
-										{index == 0 && (upChildPacks.length > childLimit_up || childLimit_up != initialChildLimit) &&
+										{index == 0 && !showAll && (upChildPacks.length > childLimit_up || childLimit_up != initialChildLimit) &&
 											<ChildLimitBar key={index} {...{map, path, childrenWidthOverride, childLimit: childLimit_up}}
 												direction="up" childCount={upChildPacks.length}/>}
 									</NodeUI>
@@ -260,7 +261,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 								return (
 									<NodeUI key={pack.origIndex} ref={c=>this.childBoxes[pack.node._id] = c} map={map} node={pack.node}
 											path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
-										{index == childLimit_down - 1 && (downChildPacks.length > childLimit_down || childLimit_down != initialChildLimit) &&
+										{index == childLimit_down - 1 && !showAll && (downChildPacks.length > childLimit_down || childLimit_down != initialChildLimit) &&
 											<ChildLimitBar key={index} {...{map, path, childrenWidthOverride, childLimit: childLimit_down}}
 												direction="down" childCount={downChildPacks.length}/>}
 									</NodeUI>

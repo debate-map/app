@@ -27,6 +27,7 @@ g.Extend({State}); declare global {
 }
 function State<T>(pathSegmentOrSegments, countAsAccess = true) {
 	let state = store.getState();
+	if (pathSegmentOrSegments == null) return state;
 	let pathSegments = pathSegmentOrSegments instanceof Array ? pathSegmentOrSegments : [pathSegmentOrSegments];
 	if (pathSegments.length == 0) return state;
 
