@@ -79,7 +79,7 @@ export class TermComponentUI extends BaseComponent
 				{(creating || editing)
 					? <TextInput ref={a=>a && creating && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())} style={{flex: 1}}
 						value={updatedTermComponent.text} onChange={val=>Change(updatedTermComponent.text = val)}/>
-					: <Div sel>{termComponent.text}</Div>}
+					: <Pre sel>{termComponent.text}</Pre>}
 				{editing &&
 					<Button ml={5} text="Save" enabled={changes} onClick={e=> {
 						new UpdateTermComponentData({termComponentID: termComponent._id, updates: updatedTermComponent.Including("text")}).Run();
