@@ -68,8 +68,11 @@ export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: 
 	return true;
 }
 export function IsNewLinkValid(parentType: MapNodeType, parentPath: string, child: MapNode, permissions: PermissionGroupSet) {
-	if (parentPath.split("/").length == 1) return false; // if parent is l1(root), don't accept new children
-	if (parentPath.split("/").length == 2 && !HasModPermissions(permissions)) return false; // if parent is l2, and user is not a mod, don't accept new children
+	let parentPathIDs = parentPath.split("/").map(a=>a.ToInt());
+	if (parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
+	if (parentPathIDs.length == 2 && !HasModPermissions(permissions)) return false; // if parent is l2, and user is not a mod, don't accept new children
+	let parent = GetNode(parentPathIDs.Last());
+	if (parent && (parent.children || {}).VKeys(true).Contains(child._id+"")) return false; // if already a child of this parent, reject
 	return IsLinkValid(parentType, parentPath, child);
 }
 

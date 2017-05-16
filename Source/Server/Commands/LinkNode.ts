@@ -16,6 +16,9 @@ export default class LinkNode extends Command<{parentID: number, childID: number
 		// validate call
 		// ==========
 		
+		let parent_oldChildrenOrder = await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[];
+		Assert(!parent_oldChildrenOrder.Contains(childID), `Node #${childID} is already a child of node #${parentID}.`);
+
 		// prepare
 		// ==========
 
@@ -30,7 +33,6 @@ export default class LinkNode extends Command<{parentID: number, childID: number
 		dbUpdates[`nodes/${childID}/parents/${parentID}`] = {_: true};
 		// add child as child-of-parent
 		dbUpdates[`nodes/${parentID}/children/${childID}`] = E({_: true}, childForm && {form: childForm});
-		let parent_oldChildrenOrder = await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[];
 		if (parent_oldChildrenOrder) {
 			dbUpdates[`nodes/${parentID}/childrenOrder`] = parent_oldChildrenOrder.concat([childID]);
 		}
