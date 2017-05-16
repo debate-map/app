@@ -13,6 +13,7 @@ import {E, Global, QuickIncrement} from "../General/Globals_Free";
 import * as ShallowCompare from "react/lib/shallowCompare";
 import {FirebaseApplication} from "firebase";
 import V from "../V/V";
+import * as classNames from "classnames";
 export {ShallowCompare};
 
 //var ReactInstanceMap = require("react/lib/ReactInstanceMap");
@@ -89,12 +90,12 @@ export function ApplyBasicStyles(target: React.ComponentClass<any>) {
 	let oldRender = target.prototype.render;
 	target.prototype.render = function() {
 		let result = oldRender.call(this) as JSX.Element;
-		result.props.style = E(BasicStyles(result.props), result.props.style);
-		if (result.props.sel)
-			result.props.className = (result.props.className ? result.props.className + " " : "") + "selectable";
-		if (result.props.ct)
-			result.props.className = (result.props.className ? result.props.className + " " : "") + "clickThrough";
+
+		let props = this.props;
+		result.props.className = classNames({selectable: props.sel, clickThrough: props.ct}, result.props.className);
+		result.props.style = E(BasicStyles(props), result.props.style);
 		RemoveBasePropKeys(result.props);
+		
 		return result;
 	}
 }
