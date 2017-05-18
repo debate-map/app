@@ -106,7 +106,7 @@ If not, paste the argument as a clone instead.`
 							new LinkNode({parentID: node._id, childID: copiedNode._id, childForm: formForChildren}).Run();
 						}
 					}}/>}
-				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode, permissions) &&
+				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode.Extended({_id: -1}), permissions) &&
 					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, formForChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
@@ -115,11 +115,12 @@ If not, paste the argument as a clone instead.`
 						let isArgument = copiedNode.type == MapNodeType.SupportingArgument || copiedNode.type == MapNodeType.OpposingArgument;
 						let copiedMetaThesis = isArgument ? (await GetNodeChildrenAsync(copiedNode)).First(a=>a.metaThesis != null) : null;
 
-						let newChildNode = RemoveHelpers(FromJSON(ToJSON(copiedNode))) as MapNode;
+						let newChildNode = RemoveHelpers(Clone(copiedNode)) as MapNode;
 						newChildNode.parents = {[node._id]: {_: true}}; // make new node's only parent the one on this path
 						if (isArgument) {
+							newChildNode.childrenOrder.RemoveAt(0); // remove old-meta-thesis id from children-order
 							delete newChildNode.children[copiedMetaThesis._id]; // remove old-meta-thesis as child
-							var metaThesisNode = RemoveHelpers(FromJSON(ToJSON(copiedMetaThesis))).VSet({parents: null}) as MapNode;
+							var metaThesisNode = RemoveHelpers(Clone(copiedMetaThesis)).VSet({parents: null}) as MapNode;
 						}
 						new AddNode({node: newChildNode, link: E({_: true}, nodeForm && {form: nodeForm}) as any, metaThesisNode}).Run();
 					}}/>}

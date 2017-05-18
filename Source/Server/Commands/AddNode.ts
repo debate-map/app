@@ -27,7 +27,7 @@ export default class AddNode extends Command<{node: MapNode, link: ChildEntry, m
 		
 		if (metaThesisNode) {
 			node.children = {...node.children, [metaThesisID]: {_: true}};
-			node.childrenOrder = [metaThesisID];
+			node.childrenOrder = [metaThesisID, ...node.childrenOrder];
 			metaThesisNode.parents = {[nodeID]: {_: true}};
 		}
 

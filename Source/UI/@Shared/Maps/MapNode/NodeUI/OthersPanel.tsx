@@ -24,17 +24,20 @@ export default class OthersPanel extends BaseComponent<Props, {}> {
 
 		return (
 			<Column style={{position: "relative"}}>
-				<Row>
-					<Button text="Reverse argument polarity" enabled={IsArgumentNode(node) && creatorOrMod} onLeftClick={()=> {
-						ShowMessageBox({
-							title: `Reverse argument polarity?`, cancelButton: true,
-							message: `Reverse polarity of argument "${GetNodeDisplayText(node)}"?\n\nAll meta-thesis ratings will be deleted.`,
-							onOK: ()=> {
-								new ReverseArgumentPolarity({nodeID: node._id}).Run();
-							}
-						});
-					}}/>
-				</Row>
+				<Row>Parents: {node.parents == null ? "none" : node.parents.VKeys(true).join(", ")}</Row>
+				<Row>Children: {node.children == null ? "none" : node.children.VKeys(true).join(", ")}</Row>
+				{IsArgumentNode(node) && creatorOrMod &&
+					<Row>
+						<Button mt={3} text="Reverse argument polarity" onLeftClick={()=> {
+							ShowMessageBox({
+								title: `Reverse argument polarity?`, cancelButton: true,
+								message: `Reverse polarity of argument "${GetNodeDisplayText(node)}"?\n\nAll meta-thesis ratings will be deleted.`,
+								onOK: ()=> {
+									new ReverseArgumentPolarity({nodeID: node._id}).Run();
+								}
+							});
+						}}/>
+					</Row>}
 			</Column>
 		);
 	}
