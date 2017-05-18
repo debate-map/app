@@ -18,47 +18,49 @@ AddSchema({
 }, "ReverseArgumentPolarity_payload");
 
 export default class ReverseArgumentPolarity extends Command<{nodeID: number}> {
-	async Run() {
+	Validate_Early() {
+		AssertValidate("UpdateNodeDetails_payload", this.payload, `Payload invalid`);
+	}
+
+	oldNodeData: MapNode;
+	newNodeData: MapNode;
+	metaThesisID: number;
+	newMetaThesisData: MapNode;
+	async Prepare() {
 		let {nodeID} = this.payload;
-		let firebase = store.firebase.helpers;
-		
-		// validate call
-		// ==========
 
-		let oldNodeData = await GetDataAsync(`nodes/${nodeID}`, true, false) as MapNode;
-		Assert(IsArgumentNode(oldNodeData), "Can only reverse polarity of an argument node.");		
-
-		// prepare
-		// ==========
-		
+		this.oldNodeData = await GetDataAsync(`nodes/${nodeID}`, true, false) as MapNode;
 		//let newNodeData = u.updateIn("type", ReverseMapNodeType(oldNodeData.type), oldNodeData);
-		let newNodeData = {...oldNodeData, type: ReverseMapNodeType(oldNodeData.type)};
-		let metaThesisID = oldNodeData.childrenOrder[0];
-		let oldMetaThesisData = await GetDataAsync(`nodes/${metaThesisID}`, true, false) as MapNode;
-		let newMetaThesisData = u.updateIn("metaThesis.thenType", ReverseThenType(oldMetaThesisData.metaThesis.thenType), oldMetaThesisData);
+		this.newNodeData = {...this.oldNodeData, type: ReverseMapNodeType(this.oldNodeData.type)};
+
+		this.metaThesisID = this.oldNodeData.childrenOrder[0];
+		let oldMetaThesisData = await GetDataAsync(`nodes/${this.metaThesisID}`, true, false) as MapNode;
+		this.newMetaThesisData = u.updateIn("metaThesis.thenType", ReverseThenType(oldMetaThesisData.metaThesis.thenType), oldMetaThesisData);
+
 		/*let oldMetaThesisAdjustmentRatingSet = await GetDataAsync(`nodeRatings/${metaThesisID}/adjustment`, true, false) as RatingsSet;
 		let newMetaThesisAdjustmentRatingSet = Clone(oldMetaThesisAdjustmentRatingSet) as RatingsSet;
 		for (let rating of (newMetaThesisAdjustmentRatingSet || {}).VValues(true)) {
 			rating.value = 100 - rating.value;
 		}*/
-		
-		// validate state
-		// ==========
+	}
+	async Validate() {
+		Assert(IsArgumentNode(this.oldNodeData), "Can only reverse polarity of an argument node.");
 
-		AssertValidate("MapNode", newNodeData, `New node-data invalid: ${ajv.FullErrorsText()}`);
-		AssertValidate("MapNode", newMetaThesisData, `New meta-thesis-data invalid: ${ajv.FullErrorsText()}`);
-		//AssertValidate("RatingsSet", newMetaThesisAdjustmentRatingSet, `New meta-thesis adjustment-ratings-set invalid: ${ajv.FullErrorsText()}`);
+		AssertValidate("MapNode", this.newNodeData, `New node-data invalid`);
+		AssertValidate("MapNode", this.newMetaThesisData, `New meta-thesis-data invalid`);
+		//AssertValidate("RatingsSet", newMetaThesisAdjustmentRatingSet, `New meta-thesis adjustment-ratings-set invalid`);
+	}
 
-		// execute
-		// ==========
+	GetDBUpdates() {
+		let {nodeID} = this.payload;
 
-		let dbUpdates = {};
-		dbUpdates[`nodes/${nodeID}`] = newNodeData;
-		dbUpdates[`nodes/${metaThesisID}`] = newMetaThesisData;
+		let updates = {};
+		updates[`nodes/${nodeID}`] = this.newNodeData;
+		updates[`nodes/${this.metaThesisID}`] = this.newMetaThesisData;
 		// reverse meta-thesis ratings
 		//dbUpdates[`nodeRatings/${metaThesisID}/adjustment`] = newMetaThesisAdjustmentRatingSet;
 		// delete meta-thesis ratings
-		dbUpdates[`nodeRatings/${metaThesisID}`] = null;
-		await firebase.Ref().update(dbUpdates);
+		updates[`nodeRatings/${this.metaThesisID}`] = null;
+		return updates;
 	}
 }

@@ -7,48 +7,58 @@ import {E} from "../../Frame/General/Globals_Free";
 import {DeepGet} from "../../Frame/V/V";
 import {Term} from "../../Store/firebase/terms/@Term";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
+import {IsArgumentNode} from "../../Store/firebase/nodes/$node";
 
 export default class DeleteNode extends Command<{nodeID: number}> {
-	async Run() {
+	oldData: MapNode;
+	//oldParentID__childrenOrder: {};
+	oldParentChildrenOrders: number[][];
+	metaThesisID: number;
+	async Prepare() {
 		let {nodeID} = this.payload;
-		let firebase = store.firebase.helpers;
-		
-		// validate call
-		// ==========
+		this.oldData = await GetDataAsync(`nodes/${nodeID}`, true, false) as MapNode;
 
-		let oldData = await GetDataAsync(`nodes/${nodeID}`, true, false) as MapNode;
-		Assert(oldData.parents.VKeys(true).length == 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
+		/*let parentIDs = this.oldData.parents.VKeys();
+		let oldParentChildrenOrders = await Promise.all(parentIDs.map(parentID=> {
+			return GetDataAsync(`nodes/${parentID}/childrenOrder`) as Promise<number[]>;
+		}));
+		this.oldParentID__childrenOrder = oldParentChildrenOrders.reduce((result, current, index)=>result.VSet(parentIDs[index], current), {});*/
+		this.oldParentChildrenOrders = await Promise.all(this.oldData.parents.VKeys().map(parentID=> {
+			return GetDataAsync(`nodes/${parentID}/childrenOrder`) as Promise<number[]>;
+		}));
 
-		// prepare
-		// ==========
+		this.metaThesisID = IsArgumentNode(this.oldData) ? this.oldData.children.VKeys()[0].ToInt() : null;
+	}
+	async Validate() {
+		Assert(this.oldData.parents.VKeys(true).length == 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
+	}
 
-		let metaThesisID = oldData.type == MapNodeType.SupportingArgument || oldData.type == MapNodeType.OpposingArgument ? oldData.children.VKeys()[0] : null;
+	GetDBUpdates() {
+		let {nodeID} = this.payload;
+		let updates = {};
 
-		// validate state
-		// ==========
-
-		// execute
-		// ==========
-
-		let dbUpdates = {};
 		// delete node's own data
-		dbUpdates[`nodes/${nodeID}`] = null;
-		dbUpdates[`nodeExtras/${nodeID}`] = null;
-		dbUpdates[`nodeRatings/${nodeID}`] = null;
+		updates[`nodes/${nodeID}`] = null;
+		updates[`nodeExtras/${nodeID}`] = null;
+		updates[`nodeRatings/${nodeID}`] = null;
+
 		// delete links with parents
-		for (let parentID in oldData.parents) {
-			dbUpdates[`nodes/${parentID}/children/${nodeID}`] = null;
-			let parent_oldChildrenOrder = await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[];
-			if (parent_oldChildrenOrder) {
-				dbUpdates[`nodes/${parentID}/childrenOrder`] = parent_oldChildrenOrder.Except(nodeID);
+		for (let {index, name: parentID} of this.oldData.parents.Props()) {
+			updates[`nodes/${parentID}/children/${nodeID}`] = null;
+			//let parent_childrenOrder = this.oldParentID__childrenOrder[parentID];
+			let parent_childrenOrder = this.oldParentChildrenOrders[index];
+			if (parent_childrenOrder) {
+				updates[`nodes/${parentID}/childrenOrder`] = parent_childrenOrder.Except(nodeID);
 			}
 		}
+
 		// if has meta-thesis, delete it also
-		if (metaThesisID) {
-			dbUpdates[`nodes/${metaThesisID}`] = null;
-			dbUpdates[`nodeExtras/${metaThesisID}`] = null;
-			dbUpdates[`nodeRatings/${metaThesisID}`] = null;
+		if (this.metaThesisID) {
+			updates[`nodes/${this.metaThesisID}`] = null;
+			updates[`nodeExtras/${this.metaThesisID}`] = null;
+			updates[`nodeRatings/${this.metaThesisID}`] = null;
 		}
-		await firebase.Ref().update(dbUpdates);
+
+		return updates;
 	}
 }

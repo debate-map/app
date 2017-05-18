@@ -114,9 +114,9 @@ Object.prototype._AddFunction_Inline = function VSet(...args) {
 
 	const SetProp = (name, value)=> {
 		if (defineProp_info) {
-			Object.defineProperty(this, name, Object.assign({configurable: true}, defineProp_info, {value: props[name]}));
+			Object.defineProperty(this, name, Object.assign({configurable: true}, defineProp_info, {value}));
 		} else {
-			this[name] = props[name];
+			this[name] = value;
 		}
 	};
 	if (props) {

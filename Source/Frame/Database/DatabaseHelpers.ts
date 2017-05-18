@@ -1,10 +1,12 @@
-import {RequestPath, Connect} from "./FirebaseConnect";
+import {RequestPath, Connect, ClearRequestedPaths, GetRequestedPaths} from "./FirebaseConnect";
 import {Assert} from "../General/Assert";
 import {helpers, firebaseConnect} from "react-redux-firebase";
 //import {DBPath as DBPath_} from "../../../config/DBVersion";
 import {FirebaseApplication, DataSnapshot} from "firebase";
-import {BaseComponent} from "../UI/ReactGlobals";
+import {BaseComponent, ShallowChanged} from "../UI/ReactGlobals";
 import {GetTreeNodesInObjTree, DeepGet, DeepSet} from "../V/V";
+import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/query";
+import {getEventsFromInput} from "react-redux-firebase/dist/utils";
 //export {DBPath};
 
 export function DBPath(path = "", inVersionRoot = true) {
@@ -163,6 +165,72 @@ export async function GetDataAsync(path: string, inVersionRoot = true, addHelper
 				resolve(result);
 			},
 			(ex: Error)=>reject(ex));
+	});
+}
+
+/**
+ * Usage: await GetAsync(()=>GetNode(123))
+ * It has the same processing as in Connect(), except callable using async/await.
+ * It basically makes a pretend component -- connecting to firebase, and resolving the promise once:
+ * It re-calls the db-getter func (after the last generation's requested-path-data was all received), and finds that no new paths are requested.
+ */
+g.Extend({GetAsync});
+export async function GetAsync(dbGetterFunc: ()=>any) {
+	Assert(!g.inConnectFunc, "Cannot run GetAsync() from within a Connect() function.");
+	//Assert(!g.inGetAsyncFunc, "Cannot run GetAsync() from within a GetAsync() function.");
+	let firebase = store.firebase;
+
+	let result;
+
+	let requestedPathsSoFar = {};
+	let requestedPathsSoFar_last;
+	do {
+		requestedPathsSoFar_last = requestedPathsSoFar;
+
+		ClearRequestedPaths();
+		result = dbGetterFunc();
+		let newRequestedPaths = GetRequestedPaths().Except(requestedPathsSoFar.VKeys());
+
+		// start watching paths (causes paths to be requested)
+		watchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths));
+
+		for (let path of newRequestedPaths) {
+			requestedPathsSoFar[path] = true;
+			// wait till data is received
+			await WaitTillPathDataIsReceived(path);
+		}
+
+		// stop watching paths (since we already got their data)
+		unWatchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths));
+	} while (ShallowChanged(requestedPathsSoFar, requestedPathsSoFar_last))
+
+	/*let paths_final = requestedPathsSoFar.VKeys();
+	let paths_data = await Promise.all(paths_final.map(path=>GetDataAsync(path)));
+	let listener = ()=> {
+		listener(); // unsubscribe
+	};
+	store.subscribe(listener);*/
+
+	return result;
+}
+export function WaitTillPathDataIsReceived(path: string): Promise<any> {
+	return new Promise((resolve, reject)=> {
+		let pathDataReceived = (State as any)().firebase.requested[path];
+		// if data already received, return right away
+		if (pathDataReceived) {
+			resolve();
+		}
+
+		// else, add listener, and wait till store received the data (then return it)
+		let listener = ()=> {
+			//pathDataReceived = State(a=>a.firebase.requested[path]);
+			pathDataReceived = (State as any)().firebase.requested[path];
+			if (pathDataReceived) {
+				unsubscribe();
+				resolve();
+			}
+		};
+		let unsubscribe = store.subscribe(listener);
 	});
 }
 

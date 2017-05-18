@@ -35,6 +35,7 @@ import {Map} from "../../../../Store/firebase/maps/@Map";
 import { SlicePath } from "./NodeUI/RatingsPanel";
 import LinkNode from "Server/Commands/LinkNode";
 import UnlinkNode from "Server/Commands/UnlinkNode";
+import CloneNode from "Server/Commands/CloneNode";
 
 type Props = {map: Map, node: MapNodeEnhanced, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode}>;
 @Connect((_: RootState, {path}: Props)=> {
@@ -111,18 +112,8 @@ If not, paste the argument as a clone instead.`
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 
-						let nodeForm = GetNodeForm(copiedNode, State(a=>a.main.copiedNodePath));
-						let isArgument = copiedNode.type == MapNodeType.SupportingArgument || copiedNode.type == MapNodeType.OpposingArgument;
-						let copiedMetaThesis = isArgument ? (await GetNodeChildrenAsync(copiedNode)).First(a=>a.metaThesis != null) : null;
-
-						let newChildNode = RemoveHelpers(Clone(copiedNode)) as MapNode;
-						newChildNode.parents = {[node._id]: {_: true}}; // make new node's only parent the one on this path
-						if (isArgument) {
-							newChildNode.childrenOrder.RemoveAt(0); // remove old-meta-thesis id from children-order
-							delete newChildNode.children[copiedMetaThesis._id]; // remove old-meta-thesis as child
-							var metaThesisNode = RemoveHelpers(Clone(copiedMetaThesis)).VSet({parents: null}) as MapNode;
-						}
-						new AddNode({node: newChildNode, link: E({_: true}, nodeForm && {form: nodeForm}) as any, metaThesisNode}).Run();
+						let baseNodePath = State(a=>a.main.copiedNodePath);						
+						new CloneNode({baseNodePath, newParentID: node._id}).Run();
 					}}/>}
 				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={async e=> {
 					if (e.button != 0) return;

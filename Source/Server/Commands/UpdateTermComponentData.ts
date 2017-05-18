@@ -8,33 +8,27 @@ import {Term} from "../../Store/firebase/terms/@Term";
 import TermComponent from "../../Store/firebase/termComponents/@TermComponent";
 
 export default class UpdateTermComponentData extends Command<{termComponentID: number, updates: Partial<TermComponent>}> {
-	async Run() {
+	Validate_Early() {
 		let {termComponentID, updates} = this.payload;
-		let firebase = store.firebase.helpers;
-		
-		// validate call
-		// ==========
-
 		let allowedPropUpdates = ["text"];
 		Assert(updates.VKeys().Except(...allowedPropUpdates).length == 0, `Cannot use this command to update props other than: ${allowedPropUpdates.join(", ")}`);
+	}
 
-		// prepare
-		// ==========
-		
-		let oldData = await GetDataAsync(`termComponents/${termComponentID}`, true, false);
-		let newData = {...oldData, ...updates};
-		
-		// validate state
-		// ==========
-
-		Assert(ajv.validate(`TermComponent`, newData), `New-data invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(newData, null, 3)}\n`);
-
-		// execute
-		// ==========
-
-		let updates_db = {
-			[`termComponents/${termComponentID}`]: newData,
+	newData: TermComponent;
+	async Prepare() {
+		let {termComponentID, updates} = this.payload;
+		let oldData = await GetDataAsync(`termComponents/${termComponentID}`, true, false) as TermComponent;
+		this.newData = {...oldData, ...updates};
+	}
+	async Validate() {
+		AssertValidate("TermComponent", this.newData, `New-data invalid`);
+	}
+	
+	GetDBUpdates() {
+		let {termComponentID} = this.payload;
+		let updates = {
+			[`termComponents/${termComponentID}`]: this.newData,
 		};
-		await firebase.Ref().update(updates_db);
+		return updates;
 	}
 }

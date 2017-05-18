@@ -8,34 +8,28 @@ import {Term} from "../../Store/firebase/terms/@Term";
 import TermComponent from "../../Store/firebase/termComponents/@TermComponent";
 
 export default class DeleteTermComponent extends Command<{termComponentID: number}> {
-	async Run() {
+	Validate_Early() {
 		let {termComponentID} = this.payload;
-		let firebase = store.firebase.helpers;
-		
-		// validate call
-		// ==========
-
 		Assert(IsNumber(termComponentID)); 
+	}
 
-		// prepare
-		// ==========
-		
-		let oldData = await GetDataAsync(`termComponents/${termComponentID}`, true, false) as TermComponent;
-		//let newData = {...oldData, ...updates};
-
-		// validate state
-		// ==========
-
-		// execute
-		// ==========
-
-		let dbUpdates = {
+	oldData: TermComponent;
+	async Prepare() {
+		let {termComponentID} = this.payload;
+		this.oldData = await GetDataAsync(`termComponents/${termComponentID}`, true, false) as TermComponent;
+	}
+	async Validate() {
+	}
+	
+	GetDBUpdates() {
+		let {termComponentID} = this.payload;
+		let updates = {
 			[`termComponents/${termComponentID}`]: null,
 		};
 		// delete as child of parent-terms
-		for (let parentTermID in oldData.parentTerms) {
-			dbUpdates[`terms/${parentTermID}/components/${termComponentID}`] = null;
+		for (let parentTermID in this.oldData.parentTerms) {
+			updates[`terms/${parentTermID}/components/${termComponentID}`] = null;
 		}
-		await firebase.Ref().update(dbUpdates);
+		return updates;
 	}
 }

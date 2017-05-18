@@ -41,7 +41,8 @@ export function Connect<T, P>(funcOrFuncGetter) {
 
 	let mapStateToProps_wrapper = function(state: RootState, props: P) {
 		let s = this;
-		//g.inConnectFunc = true;
+		g.inConnectFunc = true;
+		
 		ClearRequestedPaths();
 		ClearAccessedPaths();
 		//Assert(GetAccessedPaths().length == 0, "Accessed-path must be empty at start of mapStateToProps call (ie. the code in Connect()).");
@@ -64,7 +65,10 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		let propsChanged = ShallowChanged(props, s.lastProps || {});
 
 		//let result = storeDataChanged ? mapStateToProps_inner(state, props) : s.lastResult;
-		if (!storeDataChanged && !propsChanged) return s.lastResult;
+		if (!storeDataChanged && !propsChanged) {
+			g.inConnectFunc = false;
+			return s.lastResult;
+		}
 		let result = mapStateToProps_inner(state, props);
 
 		let oldRequestedPaths: string[] = s.lastRequestedPaths || [];
@@ -116,7 +120,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		s.lastProps = props;
 		s.lastResult = result;
 
-		//g.inConnectFunc = false;
+		g.inConnectFunc = false;
 
 		return result;
 	};

@@ -173,6 +173,7 @@ export function IsContextReversed(node: MapNode, parent: MapNodeEnhanced) {
 	return node.metaThesis && IsReversedArgumentNode(parent);
 }
 
+/** [pure] */
 export function IsArgumentNode(node: MapNode) {
 	return node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument;
 }

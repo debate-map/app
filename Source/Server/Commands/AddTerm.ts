@@ -6,32 +6,24 @@ import {E} from "../../Frame/General/Globals_Free";
 import {Term} from "../../Store/firebase/terms/@Term";
 
 export default class AddTerm extends Command<{term: Term}> {
-	async Run() {
+	lastTermID_new: number;
+	termID: number;
+	async Prepare() {
+		this.lastTermID_new = await GetDataAsync(`general/lastTermID`) as number;
+		this.termID = ++this.lastTermID_new;
+	}
+	async Validate() {
 		let {term} = this.payload;
-		let firebase = store.firebase.helpers;
-
-		let lastTermID_new = await GetDataAsync(`general/lastTermID`) as number;
-		let termID = ++lastTermID_new;
-
-		// validate call
-		// ==========
-
-		// prepare
-		// ==========
-		
-		// validate state
-		// ==========
-
-		if (!ajv.validate(`Term`, term)) throw new Error(`Term invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(term, null, 3)}\n`);
-
-		// execute
-		// ==========
-
+		AssertValidate("Term", term, `Term invalid`);
+	}
+	
+	GetDBUpdates() {
+		let {term} = this.payload;
 		let updates = {
-			"general/lastTermID": lastTermID_new,
-			[`terms/${termID}`]: term,
-			[`termNames/${term.name.toLowerCase()}/${termID}`]: true,
+			"general/lastTermID": this.lastTermID_new,
+			[`terms/${this.termID}`]: term,
+			[`termNames/${term.name.toLowerCase()}/${this.termID}`]: true,
 		};
-		await firebase.Ref().update(updates);
+		return updates;
 	}
 }

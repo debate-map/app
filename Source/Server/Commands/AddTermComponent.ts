@@ -7,36 +7,33 @@ import {Term} from "../../Store/firebase/terms/@Term";
 import TermComponent from "../../Store/firebase/termComponents/@TermComponent";
 
 export default class AddTermComponent extends Command<{termID: number, termComponent: TermComponent}> {
-	async Run() {
+	/*Validate_Early() {
+		//Assert(termComponent.termParents && termComponent.termParents.VKeys().length == 1, `Term-component must have exactly one term-parent`);
+	}*/
+
+	lastTermComponentID_new: number;
+	termComponentID: number;
+	async Prepare() {
 		let {termID, termComponent} = this.payload;
 		let firebase = store.firebase.helpers;
 
-		let lastTermComponentID_new = await GetDataAsync(`general/lastTermComponentID`) as number;
-		let termComponentID = ++lastTermComponentID_new;
-
-		// validate call
-		// ==========
-
-		//Assert(termComponent.termParents && termComponent.termParents.VKeys().length == 1, `Term-component must have exactly one term-parent`);
-
-		// prepare
-		// ==========
+		this.lastTermComponentID_new = await GetDataAsync(`general/lastTermComponentID`) as number;
+		this.termComponentID = ++this.lastTermComponentID_new;
 
 		termComponent.parentTerms = {[termID]: true};
-		
-		// validate state
-		// ==========
-
-		if (!ajv.validate(`TermComponent`, termComponent)) throw new Error(`Term-component invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(termComponent, null, 3)}\n`);
-
-		// execute
-		// ==========
-
+	}
+	async Validate() {
+		let {termID, termComponent} = this.payload;
+		AssertValidate("TermComponent", termComponent, `Term-component invalid`);
+	}
+	
+	GetDBUpdates() {
+		let {termID, termComponent} = this.payload;
 		let updates = {
-			"general/lastTermComponentID": lastTermComponentID_new,
-			[`terms/${termID}/components/${termComponentID}`]: true,
-			[`termComponents/${termComponentID}`]: termComponent,
+			"general/lastTermComponentID": this.lastTermComponentID_new,
+			[`terms/${termID}/components/${this.termComponentID}`]: true,
+			[`termComponents/${this.termComponentID}`]: termComponent,
 		};
-		await firebase.Ref().update(updates);
+		return updates;
 	}
 }

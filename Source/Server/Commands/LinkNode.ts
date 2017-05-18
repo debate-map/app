@@ -9,33 +9,31 @@ import {Term} from "../../Store/firebase/terms/@Term";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 
 export default class LinkNode extends Command<{parentID: number, childID: number, childForm: ThesisForm}> {
-	async Run() {
+	parent_oldChildrenOrder: number[];
+	/*async Prepare(parent_oldChildrenOrder_override?: number[]) {
 		let {parentID, childID, childForm} = this.payload;
-		let firebase = store.firebase.helpers;
-		
-		// validate call
-		// ==========
-		
-		let parent_oldChildrenOrder = await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[];
-		Assert(!parent_oldChildrenOrder.Contains(childID), `Node #${childID} is already a child of node #${parentID}.`);
+		this.parent_oldChildrenOrder = parent_oldChildrenOrder_override || await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[];
+	}*/
+	async Prepare() {
+		let {parentID, childID, childForm} = this.payload;
+		this.parent_oldChildrenOrder = await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[] || []; // can be null, if called from CloneNode
+	}
+	async Validate() {
+		let {parentID, childID, childForm} = this.payload;
+		Assert(!this.parent_oldChildrenOrder.Contains(childID), `Node #${childID} is already a child of node #${parentID}.`);
+	}
 
-		// prepare
-		// ==========
+	GetDBUpdates() {
+		let {parentID, childID, childForm} = this.payload;
 
-		// validate state
-		// ==========
-
-		// execute
-		// ==========
-
-		let dbUpdates = {};
+		let updates = {};
 		// add parent as parent-of-child
-		dbUpdates[`nodes/${childID}/parents/${parentID}`] = {_: true};
+		updates[`nodes/${childID}/parents/${parentID}`] = {_: true};
 		// add child as child-of-parent
-		dbUpdates[`nodes/${parentID}/children/${childID}`] = E({_: true}, childForm && {form: childForm});
-		if (parent_oldChildrenOrder) {
-			dbUpdates[`nodes/${parentID}/childrenOrder`] = parent_oldChildrenOrder.concat([childID]);
+		updates[`nodes/${parentID}/children/${childID}`] = E({_: true}, childForm && {form: childForm});
+		if (this.parent_oldChildrenOrder) {
+			updates[`nodes/${parentID}/childrenOrder`] = this.parent_oldChildrenOrder.concat([childID]);
 		}
-		await firebase.Ref().update(dbUpdates);
+		return updates;
 	}
 }

@@ -7,37 +7,33 @@ import {DeepGet} from "../../Frame/V/V";
 import {Term} from "../../Store/firebase/terms/@Term";
 
 export default class UpdateTermData extends Command<{termID: number, updates: Partial<Term>}> {
-	async Run() {
+	Validate_Early() {
 		let {termID, updates} = this.payload;
-		let firebase = store.firebase.helpers;
-		
-		// validate call
-		// ==========
-
 		let allowedPropUpdates = ["name", "disambiguation", "type", "person", "shortDescription_current"];
 		Assert(updates.VKeys().Except(...allowedPropUpdates).length == 0, `Cannot use this command to update props other than: ${allowedPropUpdates.join(", ")}`);
+	}
 
-		// prepare
-		// ==========
+	oldData: Term;
+	newData: Term;
+	async Prepare() {
+		let {termID, updates} = this.payload;
+		this.oldData = await GetDataAsync(`terms/${termID}`, true, false) as Term;
+		this.newData = {...this.oldData, ...updates};
+	}
+	async Validate() {
+		AssertValidate("Term", this.newData, `New-data invalid`);
+	}
+	
+	GetDBUpdates() {
+		let {termID} = this.payload;
 		
-		let oldData = await GetDataAsync(`terms/${termID}`, true, false) as Term;
-		let newData = {...oldData, ...updates};
-		
-		// validate state
-		// ==========
-
-		Assert(ajv.validate(`Term`, newData), `New-data invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(newData, null, 3)}\n`);
-
-		// execute
-		// ==========
-
-		let dbUpdates = {
-			[`terms/${termID}`]: newData,
+		let updates = {
+			[`terms/${termID}`]: this.newData,
 		} as any;
-		if (newData.name != oldData.name) {
-			dbUpdates[`termNames/${oldData.name.toLowerCase()}/${termID}`] = null; 
-			dbUpdates[`termNames/${newData.name.toLowerCase()}/${termID}`] = true; 
+		if (this.newData.name != this.oldData.name) {
+			updates[`termNames/${this.oldData.name.toLowerCase()}/${termID}`] = null; 
+			updates[`termNames/${this.newData.name.toLowerCase()}/${termID}`] = true; 
 		}
-		await firebase.Ref().update(dbUpdates);
+		return updates;
 	}
 }

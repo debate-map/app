@@ -35,10 +35,19 @@ Details: ${ToJSON(this.errors, null, 3)}
 // ==========
 
 G({AssertValidate}); declare global { function AssertValidate(schemaName: string, data, failureMessage: string, addDataStr?: boolean); }
-function AssertValidate(schemaName: string, data, failureMessage: string, addDataStr = true) {
+function AssertValidate(schemaName: string, data, failureMessageOrGetter: string | ((errorsText: string)=>string), addErrorsText = true, addDataStr = true) {
+	let validationResult = ajv.validate(schemaName, data);
+	if (validationResult == true) return;
+
+	let errorsText = ajv.FullErrorsText();
+	let failureMessage = IsString(failureMessageOrGetter) ? failureMessageOrGetter : failureMessageOrGetter(errorsText);
+	if (addErrorsText) {
+		failureMessage += `: ${errorsText}`;
+	}
 	if (addDataStr) {
 		failureMessage += `\nData: ${ToJSON(data, null, 3)}`;
 	}
 	failureMessage += "\n";
-	Assert(ajv.validate(schemaName, data), failureMessage);
+
+	Assert(validationResult, failureMessage);
 }

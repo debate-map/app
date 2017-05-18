@@ -56,11 +56,7 @@ export const MapNode_id = "^[0-9]+$";
 //export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
 AddSchema({
 	properties: {
-		type: {
-			allOf: [
-				{oneOf: GetValues_ForSchema(MapNodeType)},
-			],
-		},
+		type: {oneOf: GetValues_ForSchema(MapNodeType)},
 		titles: {
 			properties: {
 				base: {type: "string"}, negation: {type: "string"}, yesNoQuestion: {type: "string"},

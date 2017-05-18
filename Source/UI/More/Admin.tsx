@@ -134,15 +134,15 @@ The old db-root will not be modified.`,
 
 function ValidateDBData(data: FirebaseData) {
 	for (let map of data.maps.VValues(true)) {
-		if (!ajv.validate("Map", map)) throw new Error(`Map invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(map)}\n`);
+		AssertValidate("Map", map, `Map invalid`);
 	}
 	for (let node of data.nodes.VValues(true)) {
-		if (!ajv.validate("MapNode", node)) throw new Error(`Node invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(node)}\n`);
+		AssertValidate("MapNode", node, `Node invalid`);
 	}
 	for (let termComp of data.termComponents.VValues(true)) {
-		if (!ajv.validate("TermComponent", termComp)) throw new Error(`Term-component invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(termComp)}\n`);
+		AssertValidate("TermComponent", termComp, `Term-component invalid`);
 	}
 	for (let term of data.terms.VValues(true)) {
-		if (!ajv.validate("Term", term)) throw new Error(`Term invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(term)}\n`);
+		AssertValidate("Term", term, `Term invalid`);
 	}
 }

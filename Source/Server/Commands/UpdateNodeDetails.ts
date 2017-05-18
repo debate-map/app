@@ -24,25 +24,17 @@ AddSchema({
 				//chainAfter: {oneOf: [{type: "null"}, {type: "string", pattern: MapNode_chainAfterFormat}]},
 				childrenOrder: {items: {type: "number"}},
 			},
-			//required: ["relative", "titles", "contentNode"],
 		}),
 		linkParentID: {type: "number"},
 		linkUpdates: Schema({
 			properties: {_: {type: "boolean"}, form: {oneOf: GetValues_ForSchema(ThesisForm)}},
-			//required: ["_"],
 		}),
 	},
 	required: ["nodeID", "nodeUpdates", "linkParentID", "linkUpdates"],
 }, "UpdateNodeDetails_payload");
 
 export default class UpdateNodeDetails extends Command<{nodeID: number, nodeUpdates: Partial<MapNode>, linkParentID: number, linkUpdates: Partial<ChildEntry>}> {
-	async Run() {
-		let {nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
-		let firebase = store.firebase.helpers;
-		
-		// validate call
-		// ==========
-
+	Validate_Early() {
 		/*let allowedNodePropUpdates = ["relative", "titles", "contentNode"];
 		Assert(nodeUpdates.VKeys().Except(...allowedNodePropUpdates).length == 0,
 			`Cannot use this command to update node-props other than: ${allowedNodePropUpdates.join(", ")
@@ -52,29 +44,33 @@ export default class UpdateNodeDetails extends Command<{nodeID: number, nodeUpda
 			`Cannot use this command to update link-props other than: ${allowedLinkPropUpdates.join(", ")
 			}\n\nYou provided: ${linkUpdates.VKeys().Except(...allowedLinkPropUpdates).join(", ")}`);*/
 		
-		Assert(ajv.validate("UpdateNodeDetails_payload", this.payload), `Payload invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(this.payload, null, 3)}\n`);
+		AssertValidate("UpdateNodeDetails_payload", this.payload, `Payload invalid`);
+	}
 
-		// prepare
-		// ==========
+	oldNodeData: MapNode;
+	newNodeData: MapNode;
+	oldLinkData: ChildEntry;
+	newLinkData: ChildEntry;
+	async Prepare() {
+		let {nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
+		let firebase = store.firebase.helpers;
 		
-		let oldNodeData = await GetDataAsync(`nodes/${nodeID}`, true, false);
-		let newNodeData = {...oldNodeData, ...nodeUpdates};
-		let oldLinkData = await GetDataAsync(`nodes/${linkParentID}/children/${nodeID}`, true, false);
-		let newLinkData = {...oldLinkData, ...linkUpdates};
-		
-		// validate state
-		// ==========
-
-		//if (!ajv.validate("MapNode", newData)) throw new Error(`New-data invalid: ${ajv.FullErrorsText()}`);
-		Assert(ajv.validate("MapNode", newNodeData), `New node-data invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(newNodeData, null, 3)}\n`);
-		Assert(ajv.validate("ChildEntry", newLinkData), `New link-data invalid: ${ajv.FullErrorsText()}\nData: ${ToJSON(newLinkData, null, 3)}\n`);
-
-		// execute
-		// ==========
-
-		let dbUpdates = {};
-		dbUpdates[`nodes/${nodeID}`] = newNodeData;
-		dbUpdates[`nodes/${linkParentID}/children/${nodeID}`] = newLinkData;
-		await firebase.Ref().update(dbUpdates);
+		this.oldNodeData = await GetDataAsync(`nodes/${nodeID}`, true, false) as MapNode;
+		this.newNodeData = {...this.oldNodeData, ...nodeUpdates};
+		this.oldLinkData = await GetDataAsync(`nodes/${linkParentID}/children/${nodeID}`, true, false) as ChildEntry;
+		this.newLinkData = {...this.oldLinkData, ...linkUpdates};
+	}
+	async Validate() {
+		//if (!AssertValidate("MapNode", newData, `New-data invalid`);
+		AssertValidate("MapNode", this.newNodeData, `New node-data invalid`);
+		AssertValidate("ChildEntry", this.newLinkData, `New link-data invalid`);
+	}
+	
+	GetDBUpdates() {
+		let {nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
+		let updates = {};
+		updates[`nodes/${nodeID}`] = this.newNodeData;
+		updates[`nodes/${linkParentID}/children/${nodeID}`] = this.newLinkData;
+		return updates;
 	}
 }

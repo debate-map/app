@@ -34,8 +34,8 @@ export function ToInt(stringOrFloatVal) { return parseInt(stringOrFloatVal); }
 export function IsDouble(obj) : obj is number { return typeof obj == "number" && parseFloat(obj as any) != parseInt(obj as any); }
 export function ToDouble(stringOrIntVal) { return parseFloat(stringOrIntVal); }
 
-g.Extend({IsString}); declare global { function IsString(obj, allowStringObj?: boolean): boolean; }
-export function IsString(obj, allowStringObj = false) : obj is string {
+g.Extend({IsString}); declare global { function IsString(obj, allowStringObj?: boolean): obj is string; }
+export function IsString(obj, allowStringObj = false): obj is string {
 	return typeof obj == "string" || (allowStringObj && obj instanceof String);
 }
 export function ToString(val) { return "" + val; }
