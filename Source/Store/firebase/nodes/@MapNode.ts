@@ -39,6 +39,7 @@ export class MapNode {
 	relative: boolean;
 	contentNode: ContentNode;
 	metaThesis: MetaThesisInfo;
+	widthOverride: number;
 
 	// averages from server
 	/*agrees = 0;
@@ -74,6 +75,7 @@ AddSchema({
 		relative: {type: "boolean"},
 		contentNode: {$ref: "ContentNode"},
 		metaThesis: {$ref: "MetaThesisInfo"},
+		widthOverride: {oneOf: [{type: "null"}, {type: "number"}]},
 		parents: {$ref: "ParentSet"},
 		children: {$ref: "ChildSet"},
 		childrenOrder: {items: {type: "number"}},

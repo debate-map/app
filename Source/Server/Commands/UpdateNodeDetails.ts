@@ -20,6 +20,7 @@ AddSchema({
 				relative: {type: "boolean"},
 				contentNode: {$ref: "ContentNode"},
 				metaThesis: {$ref: "MetaThesisInfo"},
+				widthOverride: {oneOf: [{type: "null"}, {type: "number"}]},
 				//chainAfter: {oneOf: [{type: "null"}, {type: "string", pattern: MapNode_chainAfterFormat}]},
 				childrenOrder: {items: {type: "number"}},
 			},

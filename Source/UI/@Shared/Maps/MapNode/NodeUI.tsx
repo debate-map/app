@@ -301,7 +301,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		if (node.contentNode) // quotes are often long, so just always do full-width
 			expectedBoxWidth = nodeTypeInfo.maxWidth;
 
-		let width = expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
+		let width = node.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
 
 		let maxTextWidth = width - expectedOtherStuffWidth;
 		let expectedTextHeight = V.GetContentHeight($(`<a style='${

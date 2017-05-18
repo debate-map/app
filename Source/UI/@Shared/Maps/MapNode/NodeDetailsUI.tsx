@@ -25,6 +25,7 @@ import {GetParentNode, GetNodeChildren, GetNode} from "../../../../Store/firebas
 import {GetNodeForm, IsContextReversed, IsArgumentNode, GetNodeDisplayText} from "../../../../Store/firebase/nodes/$node";
 import {ReverseThenType} from "../../../../Store/firebase/nodes/$node/$metaThesis";
 import Icon from "../../../../Frame/ReactComponents/Icon";
+import Spinner from "../../../../Frame/ReactComponents/Spinner";
 
 type Props = {
 	baseData: MapNodeEnhanced, baseLinkData: ChildEntry, parent: MapNodeEnhanced, creating: boolean, editing?: boolean, style?, onChange?: (newData: MapNode, newLinkData: ChildEntry)=>void,
@@ -150,6 +151,14 @@ The "type" option above describes the way in which this argument's premises will
 							`.trim()}
 							</Pre>
 						</Row>*/}
+					<Column mt={10}>
+						<Row style={{fontWeight: "bold"}}>Advanced:</Row>
+						<Row style={{display: "flex", alignItems: "center"}}>
+							<Pre>Width override: </Pre>
+							<Spinner step={10} max={1000} value={newData.widthOverride|0} onChange={val=>Change(newData.widthOverride = val != 0 ? val : null)}/>
+							<Pre> px (0 for auto)</Pre>
+						</Row>
+					</Column>
 					{newData.type == MapNodeType.Thesis && !newData.contentNode && !newData.metaThesis && newLinkData.form != ThesisForm.YesNoQuestion &&
 						<Column mt={10}>
 							<Row style={{fontWeight: "bold"}}>At this location:</Row>
