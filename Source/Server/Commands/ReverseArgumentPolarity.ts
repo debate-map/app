@@ -19,7 +19,7 @@ AddSchema({
 
 export default class ReverseArgumentPolarity extends Command<{nodeID: number}> {
 	Validate_Early() {
-		AssertValidate("UpdateNodeDetails_payload", this.payload, `Payload invalid`);
+		AssertValidate("ReverseArgumentPolarity_payload", this.payload, `Payload invalid`);
 	}
 
 	oldNodeData: MapNode;
