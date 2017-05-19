@@ -43,7 +43,7 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 			this.Update();
 		};
 
-		let splitAt = 120; //, width = 600;
+		let splitAt = 100; //, width = 600;
 		return (
 			//<form ref={c=>this.form = c}>
 			<div> {/* needed so GetInnerComp() work */}

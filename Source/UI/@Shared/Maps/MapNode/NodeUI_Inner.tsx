@@ -189,7 +189,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 					<Pre style={{
 						fontSize: 11, color: "rgba(255,255,255,.5)",
 						//marginLeft: "auto",
-						marginTop: 3, float: "right",
+						marginLeft: 15, marginTop: 3, float: "right",
 					}}>
 						{node.equation.explanation}
 					</Pre>}
