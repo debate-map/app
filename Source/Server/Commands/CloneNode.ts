@@ -40,7 +40,7 @@ export default class CloneNode extends Command<{baseNodePath: string, newParentI
 		// ==========
 
 		//let childrenToLink = baseNode.children.VKeys(true).map(a=>a.ToInt());
-		let childrenToLink = baseNode.childrenOrder.slice();
+		let childrenToLink = (baseNode.childrenOrder || []).slice();
 		if (isArgument) {
 			childrenToLink.Remove(baseNode.childrenOrder[0]); // don't link old-meta-thesis
 		}

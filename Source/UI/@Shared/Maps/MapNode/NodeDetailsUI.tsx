@@ -17,15 +17,16 @@ import TermComponent from "../../../../Store/firebase/termComponents/@TermCompon
 import {GetNiceNameForTermType} from "../../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, MapNode_id} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, MapNode_id, ThesisType} from "../../../../Store/firebase/nodes/@MapNode";
 import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {MetaThesis_IfType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
 import {GetParentNode, GetNodeChildren, GetNode} from "../../../../Store/firebase/nodes";
-import {GetNodeForm, IsContextReversed, IsArgumentNode, GetNodeDisplayText} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeForm, IsContextReversed, IsArgumentNode, GetNodeDisplayText, IsArgumentType, GetThesisType} from "../../../../Store/firebase/nodes/$node";
 import {ReverseThenType} from "../../../../Store/firebase/nodes/$node/$metaThesis";
 import Icon from "../../../../Frame/ReactComponents/Icon";
 import Spinner from "../../../../Frame/ReactComponents/Spinner";
+import EquationEditorUI from "./EquationEditorUI";
 
 type Props = {
 	baseData: MapNodeEnhanced, baseLinkData: ChildEntry, parent: MapNodeEnhanced, creating: boolean, editing?: boolean, style?, onChange?: (newData: MapNode, newLinkData: ChildEntry)=>void,
@@ -40,7 +41,6 @@ export default class NodeDetailsUI extends BaseComponent<Props, {newData: MapNod
 			this.SetState({newData: Clone(props.baseData).Excluding("finalType", "link"), newLinkData: Clone(props.baseLinkData)});
 	}
 
-	quoteEditor: QuoteInfoEditorUI;
 	render() {
 		let {baseData, parent, creating, editing, style, onChange, creator} = this.props;
 		let {newData, newLinkData} = this.state;
@@ -52,7 +52,8 @@ export default class NodeDetailsUI extends BaseComponent<Props, {newData: MapNod
 		};
 
 		//var parentNode = GetParentNode(path);
-		let isArgument = baseData.finalType == MapNodeType.SupportingArgument || baseData.finalType == MapNodeType.OpposingArgument;
+		let thesisType = GetThesisType(baseData);
+		let isArgument = IsArgumentType(baseData.finalType);
 		let reverseThenTypes = IsContextReversed(baseData, parent);
 		let GetThenType_ForRender = thenType=>reverseThenTypes ? ReverseThenType(thenType) : thenType;
 		let thenTypes_forRender = parent.finalType == MapNodeType.SupportingArgument
@@ -83,27 +84,21 @@ export default class NodeDetailsUI extends BaseComponent<Props, {newData: MapNod
 						</tbody>
 					</table>}
 				<Div mt={5}>
-					{newData.type == MapNodeType.Thesis && !newData.contentNode && !newData.metaThesis &&
+					{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Normal && !newData.metaThesis &&
 						<Row style={{display: "flex", alignItems: "center"}}>
 							<Pre>Relative: </Pre>
 							<CheckBox enabled={editing} checked={newData.relative} onChange={val=>Change(newData.relative = val)}/>
 							<InfoButton text={`"Relative" means the statement/question is too loosely worded to give a simple yes/no answer,${""
 									} and should instead be evaluated in terms of the degree/intensity to which it is true. Eg. "How dangerous is sky-diving?"`}/>
 						</Row>}
-					{!newData.contentNode && !newData.metaThesis &&
+					{!newData.equation && !newData.contentNode && !newData.metaThesis &&
 						<Row style={{display: "flex", alignItems: "center"}}>
 							<Pre>Title (base): </Pre>
 							<TextInput enabled={editing} style={{flex: 1}}
 								ref={a=>a && creating && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
 								value={newData.titles["base"]} onChange={val=>Change(newData.titles["base"] = val)}/>
 						</Row>}
-					{newData.type == MapNodeType.Thesis && !newData.metaThesis && newData.contentNode &&
-						<QuoteInfoEditorUI key={0} ref={c=>this.quoteEditor = c} editing={creating || editing}
-							contentNode={newData.contentNode} onChange={val=>Change(newData.contentNode = val)}
-							showPreview={false} justShowed={false}
-							//onSetError={error=>onSetError && onSetError(error)}
-						/>}
-					{newData.type == MapNodeType.Thesis && !newData.metaThesis && !newData.contentNode && [
+					{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Normal && !newData.metaThesis && [
 						<Row key={0} mt={5} style={{display: "flex", alignItems: "center"}}>
 							<Pre>Title (negation): </Pre>
 							<TextInput enabled={editing} style={{flex: 1}} value={newData.titles["negation"]} onChange={val=>Change(newData.titles["negation"] = val)}/>
@@ -113,6 +108,15 @@ export default class NodeDetailsUI extends BaseComponent<Props, {newData: MapNod
 							<TextInput enabled={editing} style={{flex: 1}} value={newData.titles["yesNoQuestion"]} onChange={val=>Change(newData.titles["yesNoQuestion"] = val)}/>
 						</Row>
 					]}
+					{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Equation &&
+						<EquationEditorUI key={0} creating={creating} editing={editing}
+							baseData={newData.equation} onChange={val=>Change(newData.equation = val)}/>}
+					{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Quote &&
+						<QuoteInfoEditorUI key={1} editing={creating || editing}
+							contentNode={newData.contentNode} onChange={val=>Change(newData.contentNode = val)}
+							showPreview={false} justShowed={false}
+							//onSetError={error=>onSetError && onSetError(error)}
+						/>}
 					{creating && isArgument &&
 						<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 							<Pre allowWrap={true}>{`
@@ -151,15 +155,16 @@ The "type" option above describes the way in which this argument's premises will
 							`.trim()}
 							</Pre>
 						</Row>*/}
-					<Column mt={10}>
-						<Row style={{fontWeight: "bold"}}>Advanced:</Row>
-						<Row style={{display: "flex", alignItems: "center"}}>
-							<Pre>Width override: </Pre>
-							<Spinner step={10} max={1000} value={newData.widthOverride|0} onChange={val=>Change(newData.widthOverride = val != 0 ? val : null)}/>
-							<Pre> px (0 for auto)</Pre>
-						</Row>
-					</Column>
-					{newData.type == MapNodeType.Thesis && !newData.contentNode && !newData.metaThesis && newLinkData.form != ThesisForm.YesNoQuestion &&
+					{!creating &&
+						<Column mt={10}>
+							<Row style={{fontWeight: "bold"}}>Advanced:</Row>
+							<Row style={{display: "flex", alignItems: "center"}}>
+								<Pre>Width override: </Pre>
+								<Spinner step={10} max={1000} value={newData.widthOverride|0} onChange={val=>Change(newData.widthOverride = val != 0 ? val : null)}/>
+								<Pre> px (0 for auto)</Pre>
+							</Row>
+						</Column>}
+					{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Normal && !newData.metaThesis && newLinkData.form != ThesisForm.YesNoQuestion &&
 						<Column mt={10}>
 							<Row style={{fontWeight: "bold"}}>At this location:</Row>
 							<Row style={{display: "flex", alignItems: "center"}}>

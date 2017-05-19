@@ -1,6 +1,6 @@
 import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
-import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced} from "../../../../../Store/firebase/nodes/@MapNode";
+import { MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, ThesisType } from "../../../../../Store/firebase/nodes/@MapNode";
 import {ShowMessageBox, BoxController} from "../../../../../Frame/UI/VMessageBox";
 import Select from "../../../../../Frame/ReactComponents/Select";
 import TextInput from "../../../../../Frame/ReactComponents/TextInput";
@@ -20,8 +20,9 @@ import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";
 import CheckBox from "../../../../../Frame/ReactComponents/CheckBox";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import NodeDetailsUI from "../NodeDetailsUI";
-import {ReverseMapNodeType} from "../../../../../Store/firebase/nodes/$node";
+import {ReverseMapNodeType, GetThesisType} from "../../../../../Store/firebase/nodes/$node";
 import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";
+import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
 
 export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: ThesisForm, childType: MapNodeType, userID: string, mapID: number, path: string) {
 	let firebase = store.firebase.helpers;
@@ -32,7 +33,6 @@ export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: Thes
 	/*let thenTypes = childType == MapNodeType.SupportingArgument
 		? GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Take(2)
 		: GetEntries(MetaThesis_ThenType, name=>MetaThesis_ThenType_Info.for[name].displayText).Skip(2);*/
-	let thesisTypes = [{name: "Normal", value: "Normal"}, {name: "Quote", value: "Content_Quote"}];
 	let thesisForm = childType == MapNodeType.Thesis
 		? (parentNode.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base)
 		: null;
@@ -70,14 +70,27 @@ export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: Thes
 		messageUI: ()=> {
 			setTimeout(()=>justShowed = false);
 			boxController.options.okButtonClickable = quoteError == null;
+
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
 					{childType == MapNodeType.Thesis &&
 						<Row>
 							<Pre>Type: </Pre>
-							<Select displayType="button bar" options={thesisTypes} style={{display: `inline-block`}}
-								value={newNode.contentNode ? "Content_Quote" : "Normal"}
-								onChange={val=>Change(newNode.contentNode = val == "Content_Quote" ? newNode.contentNode || new ContentNode() : null)}/>
+							<Select displayType="button bar" options={GetEntries(ThesisType)} style={{display: "inline-block"}}
+								value={GetThesisType(newNode)}
+								onChange={val=> {
+									if (val == ThesisType.Normal) {
+										newNode.equation = null;
+										newNode.contentNode = null;
+									} else if (val == ThesisType.Equation) {
+										newNode.equation = new Equation();
+										newNode.contentNode = null;
+									} else {
+										newNode.equation = null;
+										newNode.contentNode = newNode.contentNode || new ContentNode();
+									}
+									Change();
+								}}/>
 						</Row>}
 					<NodeDetailsUI baseData={newNode.Extended({finalType: newNode.type, link: null})} baseLinkData={newLink} creating={true}
 						parent={parentNode.Extended({finalType: parentNode.type})}

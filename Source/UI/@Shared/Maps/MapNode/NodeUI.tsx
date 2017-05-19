@@ -168,7 +168,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			childPacks = childPacks.OrderByDescending(pack=>nodeChildren_sortValues[pack.origIndex]);
 			//if (IsArgumentNode(node)) {
 			if (node.childrenOrder) {
-				childPacks.SetItems(childPacks.OrderBy(pack=>node.childrenOrder.indexOf(pack.node._id).IfN1Then(Number.MAX_SAFE_INTEGER)));
+				childPacks = childPacks.OrderBy(pack=>node.childrenOrder.indexOf(pack.node._id).IfN1Then(Number.MAX_SAFE_INTEGER));
 			}
 		}
 
@@ -291,6 +291,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		let displayText = GetNodeDisplayText(node, path);
+		if (node.equation) {
+			displayText += node.equation.explanation;
+		}
 		let fontSize = GetFontSizeForNode(node);
 		let expectedTextWidth = V.GetContentWidth($(`<a style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${displayText}</a>`));
 		//let expectedOtherStuffWidth = 26;

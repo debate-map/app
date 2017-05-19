@@ -29,31 +29,36 @@ let lastPath = "";
 //export function ProcessAction(action: Action<any>, newState: RootState, oldState: RootState) {
 // only use this if you actually need to change the action-data before it gets dispatched/applied (otherwise use [Mid/Post]DispatchAction)
 export function PreDispatchAction(action: Action<any>) {
-	if (action.type == "@@reactReduxFirebase/SET" && action["data"]) {
-		action["data"] = ProcessDBData(action["data"], true, true, (action["path"] as string).split("/").Last());
+	if (action.type == "@@reactReduxFirebase/SET") {
+		if (action["data"]) {
+			action["data"] = ProcessDBData(action["data"], true, true, (action["path"] as string).split("/").Last());
 
-		// add special _key or _id prop
-		/*if (typeof action["data"] == "object") {
-			let key = (action["path"] as string).split("/").Last();
-			if (parseInt(key).toString() == key)
-				action["data"]._id = parseInt(key);
-			else
-				action["data"]._key = key;
-		}*/
+			// add special _key or _id prop
+			/*if (typeof action["data"] == "object") {
+				let key = (action["path"] as string).split("/").Last();
+				if (parseInt(key).toString() == key)
+					action["data"]._id = parseInt(key);
+				else
+					action["data"]._key = key;
+			}*/
 
-		/*let match = action["path"].match("^" + DBPath("maps") + "/([0-9]+)");
-		// if map-data was just loaded
-		if (match) {
-			let mapID = parseInt(match[1]);
-			// and no map-view exists for it yet, create one (by expanding root-node, and changing focus-node/view-offset)
-			//if (GetMapView(mapID) == null) {
-			if (GetMapView(mapID).rootNodeViews.VKeys().length == 0) {
-				setTimeout(()=> {
-					store.dispatch(new ACTMapNodeExpandedSet({mapID, path: action["data"].rootNode.toString(), expanded: true, recursive: false}));
-					store.dispatch(new ACTViewCenterChange({mapID, focusNode: action["data"].rootNode.toString(), viewOffset: new Vector2i(200, 0)}));
-				});
-			}
-		}*/
+			/*let match = action["path"].match("^" + DBPath("maps") + "/([0-9]+)");
+			// if map-data was just loaded
+			if (match) {
+				let mapID = parseInt(match[1]);
+				// and no map-view exists for it yet, create one (by expanding root-node, and changing focus-node/view-offset)
+				//if (GetMapView(mapID) == null) {
+				if (GetMapView(mapID).rootNodeViews.VKeys().length == 0) {
+					setTimeout(()=> {
+						store.dispatch(new ACTMapNodeExpandedSet({mapID, path: action["data"].rootNode.toString(), expanded: true, recursive: false}));
+						store.dispatch(new ACTViewCenterChange({mapID, focusNode: action["data"].rootNode.toString(), viewOffset: new Vector2i(200, 0)}));
+					});
+				}
+			}*/
+		} else {
+			// don't add the property to the store, if it is just null anyway (this makes it consistent with how firebase returns the whole db-state)
+			delete action["data"];
+		}
 	}
 }
 
@@ -164,6 +169,10 @@ export async function PostDispatchAction(action: Action<any>) {
 		//Raven.setUserContext(action["auth"].Including("uid", "displayName", "email"));
 	} /*else if (action.type == "@@reactReduxFirebase/LOGOUT") {
 		Raven.setUserContext();
+	}*/
+
+	/*if (action.type == "@@reactReduxFirebase/SET" && action["data"] == null) {
+		// remove the property from the store, if it is just null anyway (this makes it consistent with how firebase returns the whole db-state)
 	}*/
 }
 

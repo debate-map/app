@@ -18,9 +18,12 @@ AddSchema({
 					//required: ["base", "negation", "yesNoQuestion"],
 				},
 				relative: {type: "boolean"},
-				contentNode: {$ref: "ContentNode"},
+				widthOverride: {type: ["null", "number"]},
+
 				metaThesis: {$ref: "MetaThesisInfo"},
-				widthOverride: {oneOf: [{type: "null"}, {type: "number"}]},
+				contentNode: {$ref: "ContentNode"},
+				equation: {$ref: "Equation"},
+
 				//chainAfter: {oneOf: [{type: "null"}, {type: "string", pattern: MapNode_chainAfterFormat}]},
 				childrenOrder: {items: {type: "number"}},
 			},

@@ -1,0 +1,4 @@
+From "compiled successfully" message, to cursor changing smoothly:
+* hot-reload: 10s
+* refresh: 13s
+* hard-refresh: 

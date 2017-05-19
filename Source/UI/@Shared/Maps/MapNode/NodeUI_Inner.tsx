@@ -45,6 +45,8 @@ import {Term} from "../../../../Store/firebase/terms/@Term";
 import {ParseSegmentsForPatterns} from "../../../../Frame/General/RegexHelpers";
 import {GetParentNode} from "../../../../Store/firebase/nodes";
 import {SlicePath} from "./NodeUI/RatingsPanel";
+import * as classNames from "classnames";
+import {GetEquationStepNumber} from "../../../../Store/firebase/nodes/$node/equation";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -68,7 +70,6 @@ type Props = {map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: stri
 export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, hoverPanel: string, hoverTermID: number, clickTermID: number}> {
 	render() {
 		let {map, node, nodeView, path, width, widthOverride, finalNodeType, form, ratingsRoot, mainRating_average, userID} = this.props;
-		let firebase = store.firebase.helpers;
 		let {hovered, hoverPanel, hoverTermID, clickTermID} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[finalNodeType];
 		let barSize = 5;
@@ -91,7 +92,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let expanded = nodeView && nodeView.expanded;
 
 		return (
-			<div className={`NodeUI_Inner${pathNodeIDs.length == 0 ? " root" : ""}`} style={{
+			<div className={classNames("NodeUI_Inner", pathNodeIDs.length == 0 && " root")} style={{
 						display: "flex", position: "relative", borderRadius: 5, cursor: "default",
 						boxShadow: "rgba(0,0,0,1) 0px 0px 2px", width, minWidth: widthOverride,
 					}}
@@ -104,8 +105,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						}
 					}}>
 				{leftPanelShow &&
-					<MapNodeUI_LeftBox parent={this} map={map} path={path} node={node} nodeView={nodeView} ratingsRoot={ratingsRoot}
-						backgroundColor={nodeTypeInfo.backgroundColor} asHover={hovered}/>}
+					<MapNodeUI_LeftBox {...{parent: this, map, path, node, nodeView, ratingsRoot}} backgroundColor={nodeTypeInfo.backgroundColor} asHover={hovered}/>}
 				{/* fixes click-gap */}
 				{leftPanelShow && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
 
@@ -120,13 +120,9 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								position: "absolute", left: mainRating_myFillPercent + "%", top: 0, bottom: 0,
 								width: 2, background: "rgba(0,255,0,.5)",
 							}}/>}
-						<span style={{position: "relative", fontSize: GetFontSizeForNode(node), whiteSpace: "initial"}}>
-							{this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
-						</span>
-						{node.type == MapNodeType.Thesis && node.contentNode &&
-							<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
+						<TitlePanel {...{parent: this, map, node, nodeView, path}}/>
 						{subPanelShow && <SubPanel node={node}/>}
-						<NodeUI_Menu map={map} node={node} path={path}/>
+						<NodeUI_Menu {...{map, node, path}}/>
 					</Div>
 					<Button //text={expanded ? "-" : "+"} size={28}
 							style={{
@@ -157,7 +153,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 						})()}
 						{panelToShow == "definitions" &&
-							<DefinitionsPanel ref={c=>this.definitionsPanel = c} node={node} path={path} hoverTermID={hoverTermID} clickTermID={clickTermID}
+							<DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{node, path, hoverTermID, clickTermID}}
 								onHoverTerm={termID=>this.SetState({hoverTermID: termID})} onClickTerm={termID=>this.SetState({clickTermID: termID})}/>}
 						{panelToShow == "discussion" && <DiscussionPanel/>}
 						{panelToShow == "social" && <SocialPanel/>}
@@ -169,9 +165,42 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		);
 	}
 	definitionsPanel: DefinitionsPanel;
+}
+
+type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: string} & Partial<{equationNumber: number}>;
+@Connect((state, {node, path}: TitlePanelProps)=> ({
+	equationNumber: node.equation ? GetEquationStepNumber(path) : null,
+}))
+class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
+	render() {
+		let {map, node, nodeView, path, equationNumber} = this.props;
+		return (
+			//<Row style={{position: "relative"}}>
+			<Div style={{position: "relative"}}>
+				{equationNumber != null &&
+					<Pre>{equationNumber}) </Pre>}
+				<span style={E(
+					{position: "relative", fontSize: GetFontSizeForNode(node), whiteSpace: "initial"},
+					node.metaThesis && {margin: "4px 0 1px 0"},
+				)}>
+					{this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
+				</span>
+				{node.equation && node.equation.explanation &&
+					<Pre style={{
+						fontSize: 11, color: "rgba(255,255,255,.5)",
+						//marginLeft: "auto",
+						marginTop: 3, float: "right",
+					}}>
+						{node.equation.explanation}
+					</Pre>}
+				{node.type == MapNodeType.Thesis && node.contentNode &&
+					<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
+			</Div>
+		);
+	}
 
 	RenderNodeDisplayText(text: string) {
-		let {map, path} = this.props;
+		let {parent, map, path} = this.props;
 
 		//let segments = ParseSegmentsFromNodeDisplayText(text);
 		let segments = ParseSegmentsForPatterns(text, [
@@ -187,11 +216,11 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 				let termID = segment.textParts[2].ToInt();
 				elements.push(
 					<TermPlaceholder key={index} refText={refText} termID={termID}
-						onHover={hovered=>this.SetState({hoverPanel: hovered ? "definitions" : null, hoverTermID: hovered ? termID : null})}
+						onHover={hovered=>parent.SetState({hoverPanel: hovered ? "definitions" : null, hoverTermID: hovered ? termID : null})}
 						onClick={()=> {
-							//this.SetState({hoverPanel: "definitions", hoverTermID: termID});
+							//parent.SetState({hoverPanel: "definitions", hoverTermID: termID});
 							store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel: "definitions"}));
-							this.SetState({clickTermID: termID});
+							parent.SetState({clickTermID: termID});
 						}}/>
 				);
 			} else {

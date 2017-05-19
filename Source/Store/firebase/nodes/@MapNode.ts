@@ -6,6 +6,7 @@ import {GetParentNode, IsLinkValid, IsNewLinkValid} from "../nodes";
 import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
 import {MetaThesis_ThenType, MetaThesisInfo, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info} from "./@MetaThesisInfo";
 import {ContentNode} from "../contentNodes/@ContentNode";
+import {Equation} from "./@Equation";
 
 export enum AccessLevel {
 	Basic = 10,
@@ -14,6 +15,11 @@ export enum AccessLevel {
 	Admin = 40,
 }
 
+export enum ThesisType {
+	Normal,
+	Equation,
+	Quote,
+}
 export enum ThesisForm {
 	Base = 10,
 	Negation = 20,
@@ -37,9 +43,12 @@ export class MapNode {
 	voteLevel = AccessLevel.Basic;
 
 	relative: boolean;
-	contentNode: ContentNode;
-	metaThesis: MetaThesisInfo;
 	widthOverride: number;
+
+	// components (for theses)
+	metaThesis: MetaThesisInfo;
+	contentNode: ContentNode;
+	equation: Equation;
 
 	// averages from server
 	/*agrees = 0;
@@ -69,9 +78,12 @@ AddSchema({
 		accessLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
 		voteLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
 		relative: {type: "boolean"},
-		contentNode: {$ref: "ContentNode"},
+		widthOverride: {type: ["null", "number"]},
+
 		metaThesis: {$ref: "MetaThesisInfo"},
-		widthOverride: {oneOf: [{type: "null"}, {type: "number"}]},
+		contentNode: {$ref: "ContentNode"},
+		equation: {$ref: "Equation"},
+
 		parents: {$ref: "ParentSet"},
 		children: {$ref: "ChildSet"},
 		childrenOrder: {items: {type: "number"}},
@@ -81,7 +93,7 @@ AddSchema({
 	allOf: [
 		// if not a meta-thesis or contentNode, require "titles" prop
 		{
-			if: {prohibited: ["metaThesis", "contentNode"]},
+			if: {prohibited: ["metaThesis", "equation", "contentNode"]},
 			then: {required: ["titles"]},
 		},
 		// if an argument, require "childrenOrder" prop

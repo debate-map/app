@@ -1,6 +1,6 @@
 import {Assert} from "../../../Frame/General/Assert";
 import {URL} from "../../../Frame/General/URLs";
-import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced} from "./@MapNode";
+import { MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, ThesisType } from "./@MapNode";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MetaThesis_ThenType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info} from "./@MetaThesisInfo";
 import {MapNodeType_Info, MapNodeType} from "./@MapNodeType";
@@ -12,7 +12,9 @@ import {ReverseThenType} from "./$node/$metaThesis";
 import {SlicePath} from "../../../UI/@Shared/Maps/MapNode/NodeUI/RatingsPanel";
 
 export function GetFontSizeForNode(node: MapNode) {
-	return node.metaThesis ? 11 : 14;
+	if (node.metaThesis) return 11;
+	if (node.equation) return 13;
+	return 14;
 }
 export function GetPaddingForNode(node: MapNode) {
 	return node.metaThesis ? "1px 4px 2px" : "5px 5px 4px";
@@ -127,8 +129,12 @@ export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
 	return null;
 }
 
+/** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
 export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | string): string {
 	if (node.type == MapNodeType.Thesis) {
+		if (node.equation) {
+			return node.equation.text;
+		}
 		if (node.contentNode) {
 			return `The statement below was made`
 				+ (node.contentNode.sourceChains[0][0].name ? ` in "${node.contentNode.sourceChains[0][0].name}"` : "")
@@ -173,10 +179,20 @@ export function IsContextReversed(node: MapNode, parent: MapNodeEnhanced) {
 	return node.metaThesis && IsReversedArgumentNode(parent);
 }
 
+export function GetThesisType(node: MapNode) {
+	return node.equation ? ThesisType.Equation : node.contentNode ? ThesisType.Quote : ThesisType.Normal
+}
+
+/** [pure] */
+export function IsArgumentType(type: MapNodeType) {
+	return type == MapNodeType.SupportingArgument || type == MapNodeType.OpposingArgument;
+}
 /** [pure] */
 export function IsArgumentNode(node: MapNode) {
-	return node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument;
+	//return IsArgumentType(node.finalType || node.type);
+	return IsArgumentType(node.type);
 }
+/** [pure] */
 export function IsNodeVisibleToNonModNonCreators(node: MapNode) {
 	if (IsArgumentNode(node) && (node.children || {}).VKeys(true).length < 3) return false;
 	return true;

@@ -18,11 +18,13 @@ export async function GetNodeAsync(id: number) {
 }
 
 export function GetParentNodeID(path: string) {
-	let parentIDStr = path.split("/").XFromLast(1);
-	return parentIDStr ? parentIDStr.ToInt() : null;
+	return path.split("/").map(a=>a.ToInt()).XFromLast(1);
 }
 export function GetParentNode(path: string) {
 	return GetNode(GetParentNodeID(path));
+}
+export function GetNodeID(path: string) {
+	return path.split("/").map(a=>a.ToInt()).LastOrX();
 }
 
 export function GetNodeParents(node: MapNode) {
