@@ -12,8 +12,9 @@ import {ReverseThenType} from "./$node/$metaThesis";
 import {SlicePath} from "../../../UI/@Shared/Maps/MapNode/NodeUI/RatingsPanel";
 
 export function GetFontSizeForNode(node: MapNode) {
+	if (node.fontSizeOverride) return node.fontSizeOverride;
 	if (node.metaThesis) return 11;
-	if (node.equation) return 13;
+	if (node.equation) return node.equation.latex ? 14 : 13;
 	return 14;
 }
 export function GetPaddingForNode(node: MapNode) {

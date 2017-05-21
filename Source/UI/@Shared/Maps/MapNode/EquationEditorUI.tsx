@@ -19,6 +19,7 @@ import {GetNiceNameForTermType} from "../../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import {Equation} from "../../../../Store/firebase/nodes/@Equation";
+import {TextArea_AutoSize} from "../../../../Frame/ReactComponents/TextArea";
 
 type Props = {baseData: Equation, creating: boolean, editing?: boolean, style?, onChange?: (newData: Equation)=>void};
 	//& Partial<{creator: User, variantNumber: number}>;
@@ -49,13 +50,21 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 			<div> {/* needed so GetInnerComp() work */}
 			<Column style={style}>
 				<RowLR mt={5} splitAt={splitAt}>
+					<Pre>LaTeX: </Pre>
+					<CheckBox enabled={creating || editing} style={{width: "100%"}}
+						checked={newData.latex} onChange={val=>Change(val ? newData.latex = true : delete newData.latex)}/>
+				</RowLR>
+				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Text: </Pre>
-					<TextInput required enabled={editing} style={{width: "100%"}}
-						value={newData.text} onChange={val=>Change(newData.text = val)}/>
+					{!newData.latex
+						? <TextInput required enabled={creating || editing} style={{width: "100%"}}
+							value={newData.text} onChange={val=>Change(newData.text = val)}/>
+						: <TextArea_AutoSize required enabled={creating || editing} style={{width: "100%"}}
+							value={newData.text} onChange={val=>Change(newData.text = val)}/>}
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Explanation: </Pre>
-					<TextInput enabled={editing} style={{width: "100%"}}
+					<TextInput enabled={creating || editing} style={{width: "100%"}}
 						value={newData.explanation} onChange={val=>Change(newData.explanation = val)}/>
 				</RowLR>
 			</Column>

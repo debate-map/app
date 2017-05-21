@@ -47,6 +47,7 @@ import {GetParentNode} from "../../../../Store/firebase/nodes";
 import {SlicePath} from "./NodeUI/RatingsPanel";
 import * as classNames from "classnames";
 import {GetEquationStepNumber} from "../../../../Store/firebase/nodes/$node/equation";
+import {InlineMath} from "react-katex";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -174,6 +175,7 @@ type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeEnhanced, n
 class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 	render() {
 		let {map, node, nodeView, path, equationNumber} = this.props;
+		let latex = node.equation && node.equation.latex;
 		return (
 			//<Row style={{position: "relative"}}>
 			<Div style={{position: "relative"}}>
@@ -183,7 +185,8 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 					{position: "relative", fontSize: GetFontSizeForNode(node), whiteSpace: "initial"},
 					node.metaThesis && {margin: "4px 0 1px 0"},
 				)}>
-					{this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
+					{latex && <InlineMath math={node.equation.text}/>}
+					{!latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
 				</span>
 				{node.equation && node.equation.explanation &&
 					<Pre style={{

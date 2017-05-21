@@ -18,6 +18,7 @@ AddSchema({
 					//required: ["base", "negation", "yesNoQuestion"],
 				},
 				relative: {type: "boolean"},
+				fontSizeOverride: {type: ["null", "number"]},
 				widthOverride: {type: ["null", "number"]},
 
 				metaThesis: {$ref: "MetaThesisInfo"},

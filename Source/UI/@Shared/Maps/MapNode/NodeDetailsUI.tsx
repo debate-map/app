@@ -27,6 +27,8 @@ import {ReverseThenType} from "../../../../Store/firebase/nodes/$node/$metaThesi
 import Icon from "../../../../Frame/ReactComponents/Icon";
 import Spinner from "../../../../Frame/ReactComponents/Spinner";
 import EquationEditorUI from "./EquationEditorUI";
+import {IsUserAdmin} from "../../../../Store/firebase/userExtras";
+import {GetUserID} from "Store/firebase/users";
 
 type Props = {
 	baseData: MapNodeEnhanced, baseLinkData: ChildEntry, parent: MapNodeEnhanced, creating: boolean, editing?: boolean, style?, onChange?: (newData: MapNode, newLinkData: ChildEntry)=>void,
@@ -158,7 +160,13 @@ The "type" option above describes the way in which this argument's premises will
 					{!creating &&
 						<Column mt={10}>
 							<Row style={{fontWeight: "bold"}}>Advanced:</Row>
-							<Row style={{display: "flex", alignItems: "center"}}>
+							{IsUserAdmin(GetUserID()) &&
+								<Row style={{display: "flex", alignItems: "center"}}>
+									<Pre>Font-size override: </Pre>
+									<Spinner max={25} value={newData.fontSizeOverride|0} onChange={val=>Change(newData.fontSizeOverride = val != 0 ? val : null)}/>
+									<Pre> px (0 for auto)</Pre>
+								</Row>}
+							<Row mt={5} style={{display: "flex", alignItems: "center"}}>
 								<Pre>Width override: </Pre>
 								<Spinner step={10} max={1000} value={newData.widthOverride|0} onChange={val=>Change(newData.widthOverride = val != 0 ? val : null)}/>
 								<Pre> px (0 for auto)</Pre>

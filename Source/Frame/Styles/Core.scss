@@ -4,6 +4,7 @@
 	@import "standard-classes";
 	@import "~normalize.css/normalize";
 	@import "Markdown";
+	//@import "~katex/dist/katex.min.css"; // has issues with fonts atm (trying to load from server from "/node_modules...")
 
 	//@import "bootstrap/bootstrap";
 	/*@import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css");
@@ -59,11 +60,17 @@
 
 	select {
 		background: rgba(255,255,255,.8);
+		color: rgba(0,0,0,1);
 	}
 	input {
 		background: rgba(255,255,255,.8);
+		color: rgba(0,0,0,1);
 		border: 1px solid rgba(0,0,0,.5);
 		padding: 2px;
+	}
+	textarea:not(neverMatch) {
+		background: rgba(255,255,255,.8);
+		color: rgba(0,0,0,1);
 	}
 
 	input:invalid {

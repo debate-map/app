@@ -462,11 +462,11 @@ ${str}
 	`);
 };
 
-AddGlobalStyle(`
+/*AddGlobalStyle(`
 *:not(.ignoreBaseCSS) {
 	color: rgba(255,255,255,.7);
 }
-`);
+`);*/
 
 //var classNames = require("classnames");
 export function Classes(...entries: (string | {[s: string]: boolean})[]) {

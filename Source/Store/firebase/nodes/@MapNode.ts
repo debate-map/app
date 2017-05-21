@@ -43,6 +43,7 @@ export class MapNode {
 	voteLevel = AccessLevel.Basic;
 
 	relative: boolean;
+	fontSizeOverride: number;
 	widthOverride: number;
 
 	// components (for theses)
@@ -78,6 +79,7 @@ AddSchema({
 		accessLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
 		voteLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
 		relative: {type: "boolean"},
+		fontSizeOverride: {type: ["null", "number"]},
 		widthOverride: {type: ["null", "number"]},
 
 		metaThesis: {$ref: "MetaThesisInfo"},
