@@ -38,9 +38,10 @@ import UnlinkNode from "Server/Commands/UnlinkNode";
 import CloneNode from "Server/Commands/CloneNode";
 
 type Props = {map: Map, node: MapNodeEnhanced, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode}>;
-@Connect((_: RootState, {path}: Props)=> {
+@Connect((_: RootState, {node, path}: Props)=> {
 	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
 	return {
+		_: (ForUnlink_GetError(GetUserID(), node), ForDelete_GetError(GetUserID(), node)),
 		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
 		permissions: GetUserPermissionGroups(GetUserID()),
 		parentNode: GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1)),
@@ -115,53 +116,58 @@ If not, paste the argument as a clone instead.`
 						let baseNodePath = State(a=>a.main.copiedNodePath);						
 						new CloneNode({baseNodePath, newParentID: node._id}).Run();
 					}}/>}
-				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Unlink" style={styles.vMenuItem} onClick={async e=> {
-					if (e.button != 0) return;
-					let error = ForUnlink_GetError(userID, node);
-					if (error) {
-						return void ShowMessageBox({title: `Cannot unlink`, message: error});
-					}
-					
-					let parentNodes = await GetNodeParentsAsync(node);
-					if (parentNodes.length <= 1) {
-						return void ShowMessageBox({title: `Cannot unlink`, message: `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`});
-					}
+				{IsUserCreatorOrMod(userID, node) &&
+					<VMenuItem text="Unlink" enabled={ForUnlink_GetError(userID, node) == null} title={ForUnlink_GetError(userID, node)}
+						style={styles.vMenuItem} onClick={async e=> {
+							if (e.button != 0) return;
+							/*let error = ForUnlink_GetError(userID, node);
+							if (error) {
+								return void ShowMessageBox({title: `Cannot unlink`, message: error});
+							}*/
+							
+							/*let parentNodes = await GetNodeParentsAsync(node);
+							if (parentNodes.length <= 1) {*/
+							/*if (node.parents.VKeys(true).length <= 1) {
+								return void ShowMessageBox({title: `Cannot unlink`, message: `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`});
+							}*/
 
-					//let parent = parentNodes[0];
-					let parentText = GetNodeDisplayText(parentNode, path.substr(0, path.lastIndexOf(`/`)));
-					ShowMessageBox({
-						title: `Unlink child "${nodeText}"`, cancelButton: true,
-						message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,
-						onOK: ()=> {
-							new UnlinkNode({parentID: parentNode._id, childID: node._id}).Run();
-						}
-					});
-				}}/>}
-				{IsUserCreatorOrMod(userID, node) && <VMenuItem text="Delete" style={styles.vMenuItem} onClick={e=> {
-					if (e.button != 0) return;
-					let error = ForDelete_GetError(userID, node);
-					if (error) {
-						return void ShowMessageBox({title: `Cannot delete`, message: error});
-					}
+							//let parent = parentNodes[0];
+							let parentText = GetNodeDisplayText(parentNode, path.substr(0, path.lastIndexOf(`/`)));
+							ShowMessageBox({
+								title: `Unlink child "${nodeText}"`, cancelButton: true,
+								message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,
+								onOK: ()=> {
+									new UnlinkNode({parentID: parentNode._id, childID: node._id}).Run();
+								}
+							});
+						}}/>}
+				{IsUserCreatorOrMod(userID, node) &&
+					<VMenuItem text="Delete" enabled={ForDelete_GetError(userID, node) == null} title={ForDelete_GetError(userID, node)}
+						style={styles.vMenuItem} onClick={e=> {
+							if (e.button != 0) return;
+							/*let error = ForDelete_GetError(userID, node);
+							if (error) {
+								return void ShowMessageBox({title: `Cannot delete`, message: error});
+							}*/
 
-					//let parentNodes = await GetNodeParentsAsync(node);
-					if (node.parents.VKeys(true).length > 1) {
-						return void ShowMessageBox({title: `Cannot delete`, message: `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`});
-					}
-					//let s_ifParents = parentNodes.length > 1 ? "s" : "";
-					let metaThesisID = node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument ? node.children.VKeys()[0] : null;
+							//let parentNodes = await GetNodeParentsAsync(node);
+							/*if (node.parents.VKeys(true).length > 1) {
+								return void ShowMessageBox({title: `Cannot delete`, message: `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`});
+							}*/
+							//let s_ifParents = parentNodes.length > 1 ? "s" : "";
+							let metaThesisID = node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument ? node.children.VKeys()[0] : null;
 
-					ShowMessageBox({
-						title: `Delete "${nodeText}"`, cancelButton: true,
-						/*message: `Delete the node "${nodeText}"`
-							+ `${metaThesisID ? ", its 1 meta-thesis" : ""}`
-							+ `, and its link${s_ifParents} with ${parentNodes.length} parent${s_ifParents}?`,*/
-						message: `Delete the node "${nodeText}"${metaThesisID ? `, its 1 meta-thesis` : ``}, and its link with 1 parent?`,
-						onOK: ()=> {
-							new DeleteNode({nodeID: node._id}).Run();
-						}
-					});
-				}}/>}
+							ShowMessageBox({
+								title: `Delete "${nodeText}"`, cancelButton: true,
+								/*message: `Delete the node "${nodeText}"`
+									+ `${metaThesisID ? ", its 1 meta-thesis" : ""}`
+									+ `, and its link${s_ifParents} with ${parentNodes.length} parent${s_ifParents}?`,*/
+								message: `Delete the node "${nodeText}"${metaThesisID ? `, its 1 meta-thesis` : ``}, and its link with 1 parent?`,
+								onOK: ()=> {
+									new DeleteNode({nodeID: node._id}).Run();
+								}
+							});
+						}}/>}
 			</VMenuStub>
 		);
 	}

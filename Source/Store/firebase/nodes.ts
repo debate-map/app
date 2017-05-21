@@ -81,12 +81,16 @@ export function IsNewLinkValid(parentType: MapNodeType, parentPath: string, chil
 export function ForUnlink_GetError(userID: string, node: MapNode) {
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
 	if (node.metaThesis) return "Cannot unlink a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
+	if ((node.parents || {}).VKeys(true).length <= 1)  return `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`;
 	return null;
 }
 export function ForDelete_GetError(userID: string, node: MapNode) {
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
 	if (node.metaThesis) return "Cannot delete a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
+	if ((node.parents || {}).VKeys(true).length > 1) return `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`;
+
 	let nodeChildren = GetNodeChildren(node);
+	if (nodeChildren.Any(a=>a == null)) return "[still loading children...]";
 	//if ((node.children || {}).VKeys().length) return "Cannot delete this node until all its (non-meta-thesis) children have been deleted or unlinked.";
 	if (nodeChildren.filter(a=>!a.metaThesis).length) return "Cannot delete this node until all its (non-meta-thesis) children have been deleted or unlinked.";
 	return null;
