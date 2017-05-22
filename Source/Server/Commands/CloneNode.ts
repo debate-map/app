@@ -39,7 +39,7 @@ export default class CloneNode extends Command<{baseNodePath: string, newParentI
 		// prepare link-children
 		// ==========
 
-		let childrenToLink = baseNode.children.VKeys(true).map(a=>a.ToInt());
+		let childrenToLink = (baseNode.children || {}).VKeys(true).map(a=>a.ToInt());
 		if (isArgument) {
 			// if argument, use childrenOrder instead, since it's sorted
 			childrenToLink = (baseNode.childrenOrder || []).slice();
