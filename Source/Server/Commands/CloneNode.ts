@@ -4,7 +4,7 @@ import {GetDataAsync, GetAsync, RemoveHelpers} from "../../Frame/Database/Databa
 import { Command, MergeDBUpdates } from "../Command";
 import {MapNode, ThesisForm, ChildEntry} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
-import {GetNodeForm, IsArgumentNode} from "../../Store/firebase/nodes/$node";
+import {GetNodeForm, IsArgumentNode, IsArgumentType} from "../../Store/firebase/nodes/$node";
 import AddNode from "./AddNode";
 import LinkNode from "./LinkNode";
 
@@ -39,11 +39,13 @@ export default class CloneNode extends Command<{baseNodePath: string, newParentI
 		// prepare link-children
 		// ==========
 
-		//let childrenToLink = baseNode.children.VKeys(true).map(a=>a.ToInt());
-		let childrenToLink = (baseNode.childrenOrder || []).slice();
+		let childrenToLink = baseNode.children.VKeys(true).map(a=>a.ToInt());
 		if (isArgument) {
-			childrenToLink.Remove(baseNode.childrenOrder[0]); // don't link old-meta-thesis
+			// if argument, use childrenOrder instead, since it's sorted
+			childrenToLink = (baseNode.childrenOrder || []).slice();
+			childrenToLink.Remove(baseNode.childrenOrder[0]); // but don't link old-meta-thesis
 		}
+
 		this.sub_linkChildren = [];
 		for (let childID of childrenToLink) {
 			let child = await GetAsync(()=>GetNode(childID)) as MapNode;
@@ -76,12 +78,14 @@ export default class CloneNode extends Command<{baseNodePath: string, newParentI
 
 		// override the setting of new-node/childrenOrder (otherwise each link-node sub-command tries to set it to: [old-list] + [its-own-child])
 		//updates[`nodes/${this.sub_addNode.nodeID}/childrenOrder`] = this.sub_linkChildren.map(a=>a.payload.childID);
-		let childrenOrder = [];
-		if (this.sub_addNode.metaThesisID) {
-			childrenOrder.push(this.sub_addNode.metaThesisID);
+		if (IsArgumentType(this.sub_addNode.payload.node.type)) {
+			let childrenOrder = [];
+			if (this.sub_addNode.metaThesisID) {
+				childrenOrder.push(this.sub_addNode.metaThesisID);
+			}
+			childrenOrder.push(...this.sub_linkChildren.map(a=>a.payload.childID));
+			updates[`nodes/${this.sub_addNode.nodeID}`].childrenOrder = childrenOrder;
 		}
-		childrenOrder.push(...this.sub_linkChildren.map(a=>a.payload.childID));
-		updates[`nodes/${this.sub_addNode.nodeID}`].childrenOrder = childrenOrder;
 
 		return updates;
 	}

@@ -16,11 +16,11 @@ export default class LinkNode extends Command<{parentID: number, childID: number
 	}*/
 	async Prepare() {
 		let {parentID, childID, childForm} = this.payload;
-		this.parent_oldChildrenOrder = await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[] || []; // can be null, if called from CloneNode
+		this.parent_oldChildrenOrder = await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[];
 	}
 	async Validate() {
 		let {parentID, childID, childForm} = this.payload;
-		Assert(!this.parent_oldChildrenOrder.Contains(childID), `Node #${childID} is already a child of node #${parentID}.`);
+		Assert(this.parent_oldChildrenOrder == null || !this.parent_oldChildrenOrder.Contains(childID), `Node #${childID} is already a child of node #${parentID}.`);
 	}
 
 	GetDBUpdates() {
