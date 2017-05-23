@@ -20,20 +20,16 @@ import {GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import {Equation} from "../../../../Store/firebase/nodes/@Equation";
 import {TextArea_AutoSize} from "../../../../Frame/ReactComponents/TextArea";
+import {ImageAttachment} from "../../../../Store/firebase/nodes/@MapNode";
+import Spinner from "../../../../Frame/ReactComponents/Spinner";
 
-type Props = {baseData: Equation, creating: boolean, editing?: boolean, style?, onChange?: (newData: Equation)=>void};
-	//& Partial<{creator: User, variantNumber: number}>;
-/*@Connect((state, {baseData, creating}: Props)=>({
-	creator: !creating && GetUser(baseData.creator),
-	variantNumber: !creating && GetTermVariantNumber(baseData),
-}))*/
-export default class EquationEditorUI extends BaseComponent<Props, {newData: Equation}> {
+type Props = {baseData: ImageAttachment, creating: boolean, editing?: boolean, style?, onChange?: (newData: ImageAttachment)=>void};
+export default class ImageAttachmentEditorUI extends BaseComponent<Props, {newData: ImageAttachment}> {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
 	}
 
-	//form: HTMLFormElement;
 	scrollView: ScrollView;
 	render() {
 		let {creating, editing, style, onChange} = this.props;
@@ -44,32 +40,17 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 			this.Update();
 		};
 
-		let splitAt = 100; //, width = 600;
+		let splitAt = 100;
 		return (
-			//<form ref={c=>this.form = c}>
 			<div> {/* needed so GetInnerComp() work */}
 			<Column style={style}>
 				<RowLR mt={5} splitAt={splitAt}>
-					<Pre>LaTeX: </Pre>
-					<CheckBox enabled={creating || editing} style={{width: "100%"}}
-						checked={newData.latex} onChange={val=>Change(val ? newData.latex = true : delete newData.latex)}/>
-				</RowLR>
-				<RowLR mt={5} splitAt={splitAt}>
-					<Pre>Text: </Pre>
-					{!newData.latex
-						? <TextInput required enabled={creating || editing} style={{width: "100%"}}
-							value={newData.text} onChange={val=>Change(newData.text = val)}/>
-						: <TextArea_AutoSize required enabled={creating || editing} style={{width: "100%"}}
-							value={newData.text} onChange={val=>Change(newData.text = val)}/>}
-				</RowLR>
-				<RowLR mt={5} splitAt={splitAt}>
-					<Pre>Explanation: </Pre>
-					<TextInput enabled={creating || editing} style={{width: "100%"}}
-						value={newData.explanation} onChange={val=>Change(newData.explanation = val)}/>
+					<Pre>Image ID: </Pre>
+					<Spinner min={1} enabled={creating || editing} style={{width: "100%"}}
+						value={newData.id} onChange={val=>Change(newData.id = val)}/>
 				</RowLR>
 			</Column>
 			</div>
-			//</form>
 		);
 	}
 	GetValidationError() {
@@ -78,6 +59,6 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 
 	GetNewData() {
 		let {newData} = this.state;
-		return Clone(newData) as Equation;
+		return Clone(newData) as ImageAttachment;
 	}
 }

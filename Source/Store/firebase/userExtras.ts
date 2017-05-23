@@ -19,8 +19,18 @@ export function IsUserCreatorOrMod(userID: string, termOrNode: Term | MapNode) {
 	if (permissionGroups == null) return false;
 	return (termOrNode.creator == userID && permissionGroups.basic) || permissionGroups.mod;
 }
+export function IsUserMod(userID: string) {
+	let permissionGroups = GetUserPermissionGroups(userID);
+	if (permissionGroups == null) return false;
+	return permissionGroups.mod;
+}
 export function IsUserAdmin(userID: string) {
 	let permissionGroups = GetUserPermissionGroups(userID);
 	if (permissionGroups == null) return false;
 	return permissionGroups.admin;
 }
+/*export function IsUserModOrAdmin(userID: string) {
+	let permissionGroups = GetUserPermissionGroups(userID);
+	if (permissionGroups == null) return false;
+	return permissionGroups.mod || permissionGroups.admin;
+}*/

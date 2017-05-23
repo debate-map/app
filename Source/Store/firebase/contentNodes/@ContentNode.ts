@@ -1,5 +1,6 @@
 import {GetValues_ForSchema} from "../../../Frame/General/Enums";
 
+// todo: probably rename to "Quote"
 export class ContentNode {
 	content = "";
 	sourceChains = [new SourceChain()];

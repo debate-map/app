@@ -17,8 +17,10 @@ export enum AccessLevel {
 
 export enum ThesisType {
 	Normal,
+	MetaThesis,
 	Equation,
 	Quote,
+	Image,
 }
 export enum ThesisForm {
 	Base = 10,
@@ -48,8 +50,9 @@ export class MapNode {
 
 	// components (for theses)
 	metaThesis: MetaThesisInfo;
-	contentNode: ContentNode;
 	equation: Equation;
+	contentNode: ContentNode;
+	image: ImageAttachment;
 
 	// averages from server
 	/*agrees = 0;
@@ -83,8 +86,9 @@ AddSchema({
 		widthOverride: {type: ["null", "number"]},
 
 		metaThesis: {$ref: "MetaThesisInfo"},
-		contentNode: {$ref: "ContentNode"},
 		equation: {$ref: "Equation"},
+		contentNode: {$ref: "ContentNode"},
+		image: {$ref: "ImageAttachment"},
 
 		parents: {$ref: "ParentSet"},
 		children: {$ref: "ChildSet"},
@@ -134,3 +138,13 @@ AddSchema({
 	properties: {_: {type: "boolean"}, form: {oneOf: GetValues_ForSchema(ThesisForm)}},
 	required: ["_"],
 }, "ChildEntry");
+
+export class ImageAttachment {
+	id: number;
+}
+AddSchema({
+	properties: {
+		id: {type: "number"},
+	},
+	required: ["id"],
+}, "ImageAttachment");

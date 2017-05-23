@@ -499,3 +499,7 @@ export function Classes(...entries: (string | {[s: string]: boolean})[]) {
 }*/
 
 export type RouteProps = {match};
+
+export function GetErrorMessagesUnderElement(element) {
+	return $(element).find(":invalid").ToList().map(node=>(node[0] as any).validationMessage || `Invalid value.`);
+}

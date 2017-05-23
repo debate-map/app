@@ -1,6 +1,6 @@
 import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
-import { MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, ThesisType } from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, ThesisType, ImageAttachment} from "../../../../../Store/firebase/nodes/@MapNode";
 import {ShowMessageBox, BoxController} from "../../../../../Frame/UI/VMessageBox";
 import Select from "../../../../../Frame/ReactComponents/Select";
 import TextInput from "../../../../../Frame/ReactComponents/TextInput";
@@ -23,6 +23,7 @@ import NodeDetailsUI from "../NodeDetailsUI";
 import {ReverseMapNodeType, GetThesisType} from "../../../../../Store/firebase/nodes/$node";
 import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
+import { IsUserAdmin, IsUserMod } from "../../../../../Store/firebase/userExtras";
 
 export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: ThesisForm, childType: MapNodeType, userID: string, mapID: number, path: string) {
 	let firebase = store.firebase.helpers;
@@ -71,23 +72,28 @@ export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: Thes
 			setTimeout(()=>justShowed = false);
 			boxController.options.okButtonClickable = quoteError == null;
 
+			let thesisTypes = GetEntries(ThesisType);
+			thesisTypes.Remove(thesisTypes.find(a=>a.value == ThesisType.MetaThesis));
+			if (!IsUserMod(userID)) {
+				thesisTypes.Remove(thesisTypes.find(a=>a.value == ThesisType.Image));
+			}
+
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
 					{childType == MapNodeType.Thesis &&
 						<Row>
 							<Pre>Type: </Pre>
-							<Select displayType="button bar" options={GetEntries(ThesisType)} style={{display: "inline-block"}}
+							<Select displayType="button bar" options={thesisTypes} style={{display: "inline-block"}}
 								value={GetThesisType(newNode)}
 								onChange={val=> {
+									newNode.Extend({equation: null, contentNode: null, image: null});
 									if (val == ThesisType.Normal) {
-										newNode.equation = null;
-										newNode.contentNode = null;
 									} else if (val == ThesisType.Equation) {
 										newNode.equation = new Equation();
-										newNode.contentNode = null;
+									} else if (val == ThesisType.Quote) {
+										newNode.contentNode = new ContentNode();
 									} else {
-										newNode.equation = null;
-										newNode.contentNode = newNode.contentNode || new ContentNode();
+										newNode.image = new ImageAttachment();
 									}
 									Change();
 								}}/>

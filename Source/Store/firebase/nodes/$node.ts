@@ -133,6 +133,14 @@ export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
 export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | string): string {
 	if (node.type == MapNodeType.Thesis) {
+		if (node.metaThesis) {
+			let thenType_final = node.metaThesis.thenType;
+			let parent = IsString(formOrPath) ? GetParentNode(formOrPath as string) : null;
+			if (parent && GetNodeEnhanced(parent, SlicePath(formOrPath as string, 1)).finalType != parent.type)
+				thenType_final = ReverseThenType(thenType_final);
+			return `If ${GetMetaThesisIfTypeDisplayText(node.metaThesis.ifType)} premises below are true, they ${
+				MetaThesis_ThenType_Info.for[MetaThesis_ThenType[thenType_final]].displayText}.`;
+		}
 		if (node.equation) {
 			return node.equation.text;
 		}
@@ -144,13 +152,9 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 					URL.Parse(node.contentNode.sourceChains[0][0].link, false).toString({domain_protocol: false, forceSlashAfterDomain: false})}"` : "") // maybe temp
 				+ `, and is unmodified.`;
 		}
-		if (node.metaThesis) {
-			let thenType_final = node.metaThesis.thenType;
-			let parent = IsString(formOrPath) ? GetParentNode(formOrPath as string) : null;
-			if (parent && GetNodeEnhanced(parent, SlicePath(formOrPath as string, 1)).finalType != parent.type)
-				thenType_final = ReverseThenType(thenType_final);
-			return `If ${GetMetaThesisIfTypeDisplayText(node.metaThesis.ifType)} premises below are true, they ${
-				MetaThesis_ThenType_Info.for[MetaThesis_ThenType[thenType_final]].displayText}.`;
+		if (node.image) {
+			//let image = GetImage(node.image.id);
+			return `The image below is authentic.`;
 		}
 
 		if (formOrPath) {
@@ -181,7 +185,14 @@ export function IsContextReversed(node: MapNode, parent: MapNodeEnhanced) {
 }
 
 export function GetThesisType(node: MapNode) {
-	return node.equation ? ThesisType.Equation : node.contentNode ? ThesisType.Quote : ThesisType.Normal
+	if (node.type != MapNodeType.Thesis) return null;
+	return (
+		node.metaThesis ? ThesisType.MetaThesis :
+		node.equation ? ThesisType.Equation :
+		node.contentNode ? ThesisType.Quote :
+		node.image ? ThesisType.Image :
+		ThesisType.Normal
+	);
 }
 
 /** [pure] */
