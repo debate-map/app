@@ -1,4 +1,3 @@
-import {CombineReducers} from "../../index";
 import {RootNodeViewsReducer} from "./$mapView/rootNodeViews";
 import Action from "../../../Frame/General/Action";
 import {MapView} from "./@MapViews";

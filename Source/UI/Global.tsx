@@ -14,7 +14,6 @@ export default class GlobalUI extends BaseComponent<{}, {}> {
 		let path = "/global";
 		return (
 			<Column style={{height: "100%"}}>
-				{/*<SubNavbar fullWidth={true}>*/}
 				<SubNavBar>
 					<SubNavBarButton to={path} toImplied={path + "/map"} text="Map"/>
 					<SubNavBarButton to={path + "/list"} text="List"/>

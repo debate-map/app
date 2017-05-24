@@ -15,9 +15,9 @@ import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
 import {GetUserID} from "../../../../../Store/firebase/users";
 import {URL} from "../../../../../Frame/General/URLs";
 import {replace, push} from "react-router-redux";
-import {ACTTermSelect} from "../../../../../Store/main";
 import {historyStore} from "../../../../Root";
 import {ParseSegmentsForPatterns} from "../../../../../Frame/General/RegexHelpers";
+import {ACTTermSelect} from "../../../../../Store/main/content";
 
 let termsPlaceholder = [];
 

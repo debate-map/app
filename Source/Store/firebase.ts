@@ -5,6 +5,7 @@ import {RatingsSet} from "./firebase/nodeRatings/@RatingsRoot";
 import {Term} from "./firebase/terms/@Term";
 import {Map} from "./firebase/maps/@Map";
 import TermComponent from "./firebase/termComponents/@TermComponent";
+import {GeneralData} from "./firebase/general";
 
 export interface FirebaseData {
 	general: GeneralData;
@@ -17,9 +18,4 @@ export interface FirebaseData {
 	termNames: {[key: string]: any};
 	terms: {[key: number]: Term};
 	termComponents: {[key: number]: TermComponent};
-}
-export interface GeneralData {
-	lastTermID: number;
-	lastTermComponentID: number;
-	lastNodeID: number;
 }

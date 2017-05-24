@@ -33,6 +33,7 @@ export default async function ResetCurrentDBRoot() {
 	data.general = {
 		lastTermID: 0,
 		lastTermComponentID: 0,
+		lastImageID: 0,
 		lastNodeID: 99,
 	};
 

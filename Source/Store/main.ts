@@ -1,5 +1,5 @@
 import {ToInt} from "../Frame/General/Types";
-import {CombineReducers, RootState} from "./index";
+import {RootState} from "./index";
 import {MapViews, MapNodeView, MapView} from "./main/mapViews/@MapViews";
 import {combineReducers} from "redux";
 import {firebaseStateReducer} from "react-redux-firebase";
@@ -21,6 +21,9 @@ import {URL} from "../Frame/General/URLs";
 import {Global} from "../Frame/General/Globals_Free";
 import {GetData} from "../Frame/Database/DatabaseHelpers";
 import {GetTerms} from "./firebase/terms";
+import {Content} from "./main/content/@Content";
+import {CombineReducers} from "../Frame/Store/ReducerUtils";
+import {ContentReducer} from "./main/content";
 
 // class is used only for initialization
 export class MainState {
@@ -31,11 +34,8 @@ export class MainState {
 	ratingUI: RatingUIState;
 	notificationMessages: NotificationMessage[];
 
-	// terms
-	// ==========
-
-	selectedTerm: number;
-	//selectedTermComponent: number;
+	// pages
+	content: Content;
 
 	// maps
 	// ==========
@@ -51,7 +51,6 @@ export class ACTTopRightOpenPanelSet extends Action<string> {}
 @Global
 export class ACTNotificationMessageAdd extends Action<NotificationMessage> {}
 export class ACTNotificationMessageRemove extends Action<number> {}
-export class ACTTermSelect extends Action<{id: number}> {}
 //export class ACTOpenMapSet extends Action<number> {}
 export class ACTNodeCopy extends Action<{path: string}> {}
 export class ACTSetInitialChildLimit extends Action<{value: number}> {}
@@ -100,21 +99,12 @@ export function MainReducer(state, action) {
 			NotificationMessage.lastID = Math.max(NotificationMessage.lastID, state.length ? state.map(a=>a.id).Max(null, true) : -1);
 			return state;
 		},
-		
-		// terms
+
+		// pages
 		// ==========
 
-		selectedTerm: (state = null, action)=> {
-			if (action.Is(ACTTermSelect))
-				return action.payload.id;
-			return state;
-		},
-		/*selectedTermComponent: (state = null, action)=> {
-			if (action.Is(ACTTermSelect))
-				return action.payload.id;
-			return state;
-		},*/
-
+		content: ContentReducer,
+		
 		// maps
 		// ==========
 
@@ -145,15 +135,3 @@ export function MainReducer(state, action) {
 export function GetOpenMapID() {
 	return State(a=>a.main.openMap);
 }
-export function GetSelectedTermID() {
-	return State(a=>a.main.selectedTerm);
-}
-export function GetSelectedTerm() {
-	let selectedID = State(a=>a.main.selectedTerm);
-	//return GetData(`terms/${selectedID}`);
-	return (GetTerms() || []).find(a=>a._id == selectedID);
-}
-/*export function GetSelectedTermComponent() {
-	let selectedID = State().main.selectedTermComponent;
-	return GetTermComponent(selectedID);
-}*/

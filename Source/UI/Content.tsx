@@ -4,11 +4,12 @@ import {BaseComponent, BaseProps} from "../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../Frame/ReactComponents/VReactMarkdown";
 import SubNavBar from "./@Shared/SubNavBar";
 import {SubNavBarButton} from "./@Shared/SubNavBar";
-import {Route} from "react-router-dom";
+import {Route, Switch} from "react-router-dom";
 import HomeUI2 from "./Home/Home";
 import AboutUI from "./Home/About";
 import ScrollView from "react-vscrollview";
 import TermsUI from "./Content/TermsUI";
+import ImagesUI from "./Content/ImagesUI";
 
 export default class ContentUI extends BaseComponent<{}, {}> {
 	render() {
@@ -17,11 +18,13 @@ export default class ContentUI extends BaseComponent<{}, {}> {
 		return (
 			<div style={{height: "100%", display: "flex", flexDirection: "column"}}>
 				<SubNavBar>
-					<SubNavBarButton to={path + `/`} toImplied={path + `/terms`} text="Terms"/>
+					<SubNavBarButton to={`${path}/`} toImplied={`${path}/terms`} text="Terms"/>
+					<SubNavBarButton to={`${path}/images`} text="Images"/>
 				</SubNavBar>
-				{/*<ScrollView style={{flex: "1 1 100%"}} scrollVBarStyle={{width: 10}}>*/}
-				<Route path={path + "/"} exact={true} component={TermsUI}/>
-				{/*</ScrollView>*/}
+				<Switch>
+					<Route path={`${path}/images`} component={ImagesUI}/>
+					<Route component={TermsUI}/>
+				</Switch>
 			</div>
 		);
 	}

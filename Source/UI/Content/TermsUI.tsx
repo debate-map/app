@@ -15,7 +15,7 @@ import {PermissionGroupSet} from "../../Store/firebase/userExtras/@UserExtraInfo
 import {GetUserPermissionGroups, GetUserID} from "../../Store/firebase/users";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
 import {ShowAddTermDialog} from "./Terms/AddTermDialog";
-import {ACTTermSelect, GetSelectedTermID, GetSelectedTerm} from "../../Store/main";
+import {ACTTermSelect, GetSelectedTermID, GetSelectedTerm} from "../../Store/main/content";
 import TermDetailsUI from "./Terms/TermDetailsUI";
 import {RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
 import UpdateNodeDetails from "../../Server/Commands/UpdateNodeDetails";
