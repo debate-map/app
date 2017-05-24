@@ -67,7 +67,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 					} (by: {creator ? creator.displayName : `n/a`})</Div>*/}
 				{!creating &&
 					<InfoTable {...propsEnhanced}/>}
-				{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Normal && !newData.metaThesis &&
+				{newData.type == MapNodeType.Thesis && (thesisType == ThesisType.Normal || thesisType == ThesisType.Equation) && !newData.metaThesis &&
 					<RelativeToggle {...propsEnhanced}/>}
 				{(newData.type != MapNodeType.Thesis || thesisType == ThesisType.Normal) &&
 					<Title_Base {...propsEnhanced}/>}
@@ -85,6 +85,11 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 						baseData={newData.image} onChange={val=>Change(newData.image = val)}/>}
 				{newData.metaThesis &&
 					<MetaThesisInfo {...propsEnhanced}/>}
+				<Row mt={5}>
+					<Pre>Note: </Pre>
+					<TextInput enabled={creating || editing} style={{width: "100%"}}
+						value={newData.note} onChange={val=>Change(newData.note = val)}/>
+				</Row>
 				{!creating &&
 					<AdvancedOptions {...propsEnhanced}/>}
 				<AtThisLocation {...propsEnhanced}/>
@@ -269,8 +274,8 @@ class AtThisLocation extends BaseComponent<Props_Enhanced, {}> {
 
 		let thesisType = GetThesisType(newData);
 		let canSetAsNegation = thesisType == ThesisType.Normal && !newData.metaThesis && newLinkData.form != ThesisForm.YesNoQuestion;
-		let canSetAsStep = thesisType == ThesisType.Equation; //&& !creating;
-		if (!canSetAsNegation && !canSetAsStep) return <div/>;
+		let canSetAsSeriesAnchor = thesisType == ThesisType.Equation && !newData.equation.isStep; //&& !creating;
+		if (!canSetAsNegation && !canSetAsSeriesAnchor) return <div/>;
 		
 		return (
 			<Column mt={10}>
@@ -281,12 +286,12 @@ class AtThisLocation extends BaseComponent<Props_Enhanced, {}> {
 						<CheckBox enabled={editing} checked={newLinkData.form == ThesisForm.Negation}
 							onChange={val=>Change(newLinkData.form = val ? ThesisForm.Negation : ThesisForm.Base)}/>
 					</Row>}
-				{canSetAsStep &&
+				{canSetAsSeriesAnchor &&
 					<Row style={{display: "flex", alignItems: "center"}}>
-						<Pre>As step: </Pre>
-						<CheckBox enabled={editing} checked={newLinkData.asStep}
-							//onChange={val=>Change(val ? newLinkData.asStep = true : delete newLinkData.asStep)}/>
-							onChange={val=>Change(newLinkData.asStep = val || null)}/>
+						<Pre>Show as series anchor: </Pre>
+						<CheckBox enabled={editing} checked={newLinkData.seriesAnchor}
+							//onChange={val=>Change(val ? newLinkData.isStep = true : delete newLinkData.isStep)}/>
+							onChange={val=>Change(newLinkData.seriesAnchor = val || null)}/>
 					</Row>}
 			</Column>
 		);

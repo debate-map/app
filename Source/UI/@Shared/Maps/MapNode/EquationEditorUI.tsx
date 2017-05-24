@@ -62,11 +62,18 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 						: <TextArea_AutoSize required enabled={creating || editing} style={{width: "100%"}}
 							value={newData.text} onChange={val=>Change(newData.text = val)}/>}
 				</RowLR>
-				<RowLR mt={5} splitAt={splitAt}>
-					<Pre>Explanation: </Pre>
-					<TextInput enabled={creating || editing} style={{width: "100%"}}
-						value={newData.explanation} onChange={val=>Change(newData.explanation = val)}/>
-				</RowLR>
+				<Row mt={5} style={{display: "flex", alignItems: "center"}}>
+					<Pre>Step in series: </Pre>
+					<CheckBox enabled={editing} checked={newData.isStep}
+						//onChange={val=>Change(val ? newLinkData.isStep = true : delete newLinkData.isStep)}/>
+						onChange={val=>Change(newData.isStep = val || null)}/>
+				</Row>
+				{newData.isStep &&
+					<RowLR mt={5} splitAt={splitAt}>
+						<Pre>Explanation: </Pre>
+						<TextInput enabled={creating || editing} style={{width: "100%"}}
+							value={newData.explanation} onChange={val=>Change(newData.explanation = val)}/>
+					</RowLR>}
 			</Column>
 			</div>
 			//</form>
@@ -78,6 +85,10 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 
 	GetNewData() {
 		let {newData} = this.state;
-		return Clone(newData) as Equation;
+		let result = Clone(newData) as Equation;
+		if (!result.isStep) {
+			delete result.explanation;
+		}
+		return result;
 	}
 }

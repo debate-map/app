@@ -3,13 +3,18 @@ import {BaseComponent, FindDOM_} from "../../../../Frame/UI/ReactGlobals";
 import * as ReactDOM from "react-dom";
 import {TermPlaceholder} from "./NodeUI_Inner";
 
+export function PreProcessLatex(text: string) {
+	//text = text.replace(/\\term{/g, "\\text{");
+	// "\term{some-term}{123}" -> "\text{@term[some-term,123]} 
+	text = text.replace(/\\term{(.+?)}{([0-9]+?)}/g, (m, g1, g2)=>`\\text{@term[${g1},${g2}]}`);
+	text = text.replace(/\\term/g, ()=>`[syntax wrong]`); // for user syntax mistakes, keep from causing error
+	return text;
+}
+
 export default class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termID: number, hovered: boolean)=>void, onTermClick: (termID: number)=>void}, {}> {
 	render() {
 		let {text} = this.props;
-		//text = text.replace(/\\term{/g, "\\text{");
-		// "\term{some-term}{123}" -> "\text{@term[some-term,123]} 
-		text = text.replace(/\\term{(.+?)}{([0-9]+?)}/g, (m, g1, g2)=>`\\text{@term[${g1},${g2}]}`);
-		text = text.replace(/\\term/g, ()=>`[syntax wrong]`); // for user syntax mistakes, keep from causing error
+		text = PreProcessLatex(text);
 		return (
 			<InlineMath math={text}/>
 		);

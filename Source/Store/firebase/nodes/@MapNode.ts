@@ -39,6 +39,7 @@ export class MapNode {
 	_id?: number;
 	type?: MapNodeType;
 	titles: {[key: string]: string};
+	note: string;
 
 	creator?: string;
 	createdAt: number;
@@ -78,6 +79,7 @@ AddSchema({
 			},
 			//required: ["base", "negation", "yesNoQuestion"],
 		},
+		note: {type: ["null", "string"]}, // add null-type, for later when the payload-validation schema is derived from the main schema
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 		approved: {type: "boolean"},
@@ -135,13 +137,13 @@ AddSchema({patternProperties: {"^[0-9]+$": {$ref: "ChildEntry"}}}, "ChildSet");
 export type ChildEntry = {
 	_: boolean;
 	form?: ThesisForm;
-	asStep?: boolean;
+	seriesAnchor?: boolean;
 }
 AddSchema({
 	properties: {
 		_: {type: "boolean"},
 		form: {oneOf: GetValues_ForSchema(ThesisForm)},
-		asStep: {type: ["null", "boolean"]},
+		seriesAnchor: {type: ["null", "boolean"]},
 	},
 	required: ["_"],
 }, "ChildEntry");

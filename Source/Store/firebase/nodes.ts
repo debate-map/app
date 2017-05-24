@@ -50,7 +50,7 @@ export function GetNodeChildren(node: MapNode) {
 
 	let children = (node.children || {}).VKeys(true).map(id=>GetNode(parseInt(id)));
 	children = children.filter(child=> {
-		return child == null || IsNodeVisibleToNonModNonCreators(child) || IsUserCreatorOrMod(GetUserID(), child);
+		return child == null || IsNodeVisibleToNonModNonCreators(child, children) || IsUserCreatorOrMod(GetUserID(), child);
 	});
 	return CachedTransform("GetNodeChildren", [node._id], children, ()=>children);
 }

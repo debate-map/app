@@ -34,10 +34,11 @@ import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@M
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import Column from "../../../../Frame/ReactComponents/Column";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType, IsArgumentNode, IsReversedArgumentNode} from "../../../../Store/firebase/nodes/$node";
+import { GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType, IsArgumentNode, IsReversedArgumentNode, GetMinChildCountToBeVisibleToNonModNonCreators } from "../../../../Store/firebase/nodes/$node";
 import * as FastDOM from "fastdom";
 import Row from "Frame/ReactComponents/Row";
 import Icon from "../../../../Frame/ReactComponents/Icon";
+import {MetaThesis_IfType} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -179,7 +180,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
 		let limitBar_above = node.type == MapNodeType.SupportingArgument;
 		if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
-		let showBelowMessage = IsArgumentNode(node) && nodeChildren.length > 0 && nodeChildren.length < 3;
+		let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
+		let showBelowMessage = nodeChildren.length > 0 && nodeChildren.length < minChildCount;
 
 		this.childBoxes = {};
 		return (

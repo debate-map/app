@@ -17,6 +17,7 @@ AddSchema({
 					},
 					//required: ["base", "negation", "yesNoQuestion"],
 				},
+				note: {type: ["null", "string"]},
 				relative: {type: "boolean"},
 				fontSizeOverride: {type: ["null", "number"]},
 				widthOverride: {type: ["null", "number"]},
@@ -35,7 +36,7 @@ AddSchema({
 			properties: {
 				_: {type: "boolean"},
 				form: {oneOf: GetValues_ForSchema(ThesisForm)},
-				asStep: {type: ["null", "boolean"]},
+				seriesAnchor: {type: ["null", "boolean"]},
 			},
 		}),
 	},

@@ -5,7 +5,7 @@ import {Assert} from '../../../Frame/General/Assert';
 import {URL} from '../../../Frame/General/URLs';
 import {MapNode, MapNodeEnhanced, ThesisForm, ChildEntry, ThesisType} from './@MapNode';
 import {RatingType} from "../nodeRatings/@RatingType";
-import {MetaThesis_ThenType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info} from './@MetaThesisInfo';
+import {MetaThesis_ThenType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info, MetaThesis_IfType} from "./@MetaThesisInfo";
 import {MapNodeType} from './@MapNodeType';
 import {GetParentNode, IsLinkValid, IsNewLinkValid} from '../nodes';
 import {GetValues} from '../../../Frame/General/Enums';
@@ -14,6 +14,8 @@ import {CachedTransform} from '../../../Frame/V/VCache';
 import {ReverseThenType} from './$node/$metaThesis';
 import {SlicePath} from "../../../UI/@Shared/Maps/MapNode/NodeUI/RatingsPanel";
 import {ImageType} from '../images/@Image';
+import * as katex from "katex";
+import {PreProcessLatex} from "../../../UI/@Shared/Maps/MapNode/NodeMathUI";
 
 export function GetFontSizeForNode(node: MapNode) {
 	if (node.fontSizeOverride) return node.fontSizeOverride;
@@ -146,7 +148,15 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 				MetaThesis_ThenType_Info.for[MetaThesis_ThenType[thenType_final]].displayText}.`;
 		}
 		if (node.equation) {
-			return node.equation.text;
+			let result = node.equation.text;
+			if (node.equation.latex) {
+				//result = result.replace(/\\[^{]+/g, "").replace(/[{}]/g, "");
+				let latex = PreProcessLatex(result);
+				let html = katex.renderToString(latex);
+				let dom = $(html).children(".katex-html");
+				result = dom.text();
+			}
+			return result;
 		}
 		if (node.contentNode) {
 			return `The statement below was made`
@@ -210,7 +220,21 @@ export function IsArgumentNode(node: MapNode) {
 	return IsArgumentType(node.type);
 }
 /** [pure] */
-export function IsNodeVisibleToNonModNonCreators(node: MapNode) {
-	if (IsArgumentNode(node) && (node.children || {}).VKeys(true).length < 3) return false;
+export function GetMinChildCountToBeVisibleToNonModNonCreators(node: MapNode, nodeChildren: MapNode[]) {
+	if (IsArgumentNode(node)) {
+		let metaThesisNode = nodeChildren.find(a=>a != null && a.metaThesis != null);
+		// if meta-thesis not loaded yet, don't show child yet (since might suppossed to be hidden)
+		if (metaThesisNode == null) return Number.MAX_SAFE_INTEGER;
+		let minChildCount = metaThesisNode.metaThesis.ifType == MetaThesis_IfType.Any ? 2 : 3;
+		return minChildCount;
+	}
+	return 0;
+}
+/** [pure] */
+export function IsNodeVisibleToNonModNonCreators(node: MapNode, nodeChildren: MapNode[]) {
+	if (IsArgumentNode(node)) {
+		let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
+		if (nodeChildren.length < minChildCount) return false;
+	}
 	return true;
 }

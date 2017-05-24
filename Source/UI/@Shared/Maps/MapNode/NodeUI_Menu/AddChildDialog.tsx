@@ -87,11 +87,9 @@ export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: Thes
 								value={GetThesisType(newNode)}
 								onChange={val=> {
 									newNode.Extend({equation: null, contentNode: null, image: null});
-									newLink.Extend({asStep: null});
 									if (val == ThesisType.Normal) {
 									} else if (val == ThesisType.Equation) {
 										newNode.equation = new Equation();
-										newLink.asStep = true;
 									} else if (val == ThesisType.Quote) {
 										newNode.contentNode = new ContentNode();
 									} else {
