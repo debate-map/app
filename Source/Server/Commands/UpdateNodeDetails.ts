@@ -32,7 +32,11 @@ AddSchema({
 		}),
 		linkParentID: {type: "number"},
 		linkUpdates: Schema({
-			properties: {_: {type: "boolean"}, form: {oneOf: GetValues_ForSchema(ThesisForm)}},
+			properties: {
+				_: {type: "boolean"},
+				form: {oneOf: GetValues_ForSchema(ThesisForm)},
+				asStep: {type: ["null", "boolean"]},
+			},
 		}),
 	},
 	required: ["nodeID", "nodeUpdates", "linkParentID", "linkUpdates"],

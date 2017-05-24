@@ -135,9 +135,14 @@ AddSchema({patternProperties: {"^[0-9]+$": {$ref: "ChildEntry"}}}, "ChildSet");
 export type ChildEntry = {
 	_: boolean;
 	form?: ThesisForm;
+	asStep?: boolean;
 }
 AddSchema({
-	properties: {_: {type: "boolean"}, form: {oneOf: GetValues_ForSchema(ThesisForm)}},
+	properties: {
+		_: {type: "boolean"},
+		form: {oneOf: GetValues_ForSchema(ThesisForm)},
+		asStep: {type: ["null", "boolean"]},
+	},
 	required: ["_"],
 }, "ChildEntry");
 

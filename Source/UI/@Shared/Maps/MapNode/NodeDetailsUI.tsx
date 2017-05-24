@@ -56,8 +56,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 		};
 
 		let propsEnhanced = {...this.props, Change, ...this.state, SetState: this.SetState};
-
-		let thesisType = GetThesisType(baseData);
+		let thesisType = GetThesisType(newData);
 
 		let splitAt = 170, width = 600;
 		return (
@@ -88,8 +87,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 					<MetaThesisInfo {...propsEnhanced}/>}
 				{!creating &&
 					<AdvancedOptions {...propsEnhanced}/>}
-				{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Normal && !newData.metaThesis && newLinkData.form != ThesisForm.YesNoQuestion &&
-					<AtThisLocation {...propsEnhanced}/>}
+				<AtThisLocation {...propsEnhanced}/>
 				{!creating && editing && IsArgumentNode(newData) && newData.childrenOrder &&
 					<ChildrenOrder {...propsEnhanced}/>}
 			</Column>
@@ -266,15 +264,30 @@ class AdvancedOptions extends BaseComponent<Props_Enhanced, {}> {
 
 class AtThisLocation extends BaseComponent<Props_Enhanced, {}> {
 	render() {
-		let {editing, newLinkData, Change} = this.props;
+		let {newData, creating, editing, newLinkData, Change} = this.props;
+		if (newData.type != MapNodeType.Thesis) return <div/>;
+
+		let thesisType = GetThesisType(newData);
+		let canSetAsNegation = thesisType == ThesisType.Normal && !newData.metaThesis && newLinkData.form != ThesisForm.YesNoQuestion;
+		let canSetAsStep = thesisType == ThesisType.Equation; //&& !creating;
+		if (!canSetAsNegation && !canSetAsStep) return <div/>;
+		
 		return (
 			<Column mt={10}>
 				<Row style={{fontWeight: "bold"}}>At this location:</Row>
-				<Row style={{display: "flex", alignItems: "center"}}>
-					<Pre>Show as negation: </Pre>
-					<CheckBox enabled={editing} checked={newLinkData.form == ThesisForm.Negation}
-						onChange={val=>Change(newLinkData.form = val ? ThesisForm.Negation : ThesisForm.Base)}/>
-				</Row>
+				{canSetAsNegation &&
+					<Row style={{display: "flex", alignItems: "center"}}>
+						<Pre>Show as negation: </Pre>
+						<CheckBox enabled={editing} checked={newLinkData.form == ThesisForm.Negation}
+							onChange={val=>Change(newLinkData.form = val ? ThesisForm.Negation : ThesisForm.Base)}/>
+					</Row>}
+				{canSetAsStep &&
+					<Row style={{display: "flex", alignItems: "center"}}>
+						<Pre>As step: </Pre>
+						<CheckBox enabled={editing} checked={newLinkData.asStep}
+							//onChange={val=>Change(val ? newLinkData.asStep = true : delete newLinkData.asStep)}/>
+							onChange={val=>Change(newLinkData.asStep = val || null)}/>
+					</Row>}
 			</Column>
 		);
 	}

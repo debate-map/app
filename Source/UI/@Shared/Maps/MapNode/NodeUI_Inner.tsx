@@ -283,6 +283,7 @@ export class TermPlaceholder extends BaseComponent
 				{refText}
 				{showVariantNumber &&
 					<sup>{termVariantNumber}</sup>}
+					{/*<sub>{termVariantNumber}</sub>}*/}
 			</a>
 		);
 	}
