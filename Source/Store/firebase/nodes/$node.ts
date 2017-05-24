@@ -1,15 +1,19 @@
-import {Assert} from "../../../Frame/General/Assert";
-import {URL} from "../../../Frame/General/URLs";
-import { MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, ThesisType } from "./@MapNode";
+import {IsString} from '../../../Frame/General/Types';
+import {GetNiceNameForImageType} from "../../../UI/Content/ImagesUI";
+import {GetImage} from '../images';
+import {Assert} from '../../../Frame/General/Assert';
+import {URL} from '../../../Frame/General/URLs';
+import {MapNode, MapNodeEnhanced, ThesisForm, ChildEntry, ThesisType} from './@MapNode';
 import {RatingType} from "../nodeRatings/@RatingType";
-import {MetaThesis_ThenType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info} from "./@MetaThesisInfo";
-import {MapNodeType_Info, MapNodeType} from "./@MapNodeType";
-import {IsLinkValid, IsNewLinkValid, GetParentNode} from "../nodes";
-import {GetValues} from "../../../Frame/General/Enums";
-import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
-import {CachedTransform} from "../../../Frame/V/VCache";
-import {ReverseThenType} from "./$node/$metaThesis";
+import {MetaThesis_ThenType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info} from './@MetaThesisInfo';
+import {MapNodeType} from './@MapNodeType';
+import {GetParentNode, IsLinkValid, IsNewLinkValid} from '../nodes';
+import {GetValues} from '../../../Frame/General/Enums';
+import {PermissionGroupSet} from '../userExtras/@UserExtraInfo';
+import {CachedTransform} from '../../../Frame/V/VCache';
+import {ReverseThenType} from './$node/$metaThesis';
 import {SlicePath} from "../../../UI/@Shared/Maps/MapNode/NodeUI/RatingsPanel";
+import {ImageType} from '../images/@Image';
 
 export function GetFontSizeForNode(node: MapNode) {
 	if (node.fontSizeOverride) return node.fontSizeOverride;
@@ -153,8 +157,9 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 				+ `, and is unmodified.`;
 		}
 		if (node.image) {
-			//let image = GetImage(node.image.id);
-			return `The image below is authentic.`;
+			let image = GetImage(node.image.id);
+			if (image == null) return `...`;
+			return `The ${GetNiceNameForImageType(image.type)} below (#${node.image.id}) is ${image.type == ImageType.Photo ? "authentic" : "accurate"}.`;
 		}
 
 		if (formOrPath) {

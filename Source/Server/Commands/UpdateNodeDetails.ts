@@ -22,8 +22,9 @@ AddSchema({
 				widthOverride: {type: ["null", "number"]},
 
 				metaThesis: {$ref: "MetaThesisInfo"},
-				contentNode: {$ref: "ContentNode"},
 				equation: {$ref: "Equation"},
+				contentNode: {$ref: "ContentNode"},
+				image: {$ref: "ImageAttachment"},
 
 				//chainAfter: {oneOf: [{type: "null"}, {type: "string", pattern: MapNode_chainAfterFormat}]},
 				childrenOrder: {items: {type: "number"}},

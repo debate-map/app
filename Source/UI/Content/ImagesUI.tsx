@@ -1,6 +1,6 @@
 import {ACTImageSelect, GetSelectedImage} from "../../Store/main/content";
 import DeleteImage from "../../Server/Commands/DeleteImage";
-import UpdateImageData from "../../Server/Commands/UpdateImageData";
+import UpdateImageData, { UpdateImageData_allowedPropUpdates } from "../../Server/Commands/UpdateImageData";
 import {Assert} from "../../Frame/General/Assert";
 import {SubNavBarButton} from "../@Shared/SubNavBar";
 import SubNavBar from "../@Shared/SubNavBar";
@@ -82,7 +82,7 @@ export default class ImagesUI extends BaseComponent
 							<Div p={7} style={{position: "absolute", right: 0}}>
 								{creatorOrMod &&
 									<Button ml="auto" text="Save details" enabled={selectedImage_newData != null} onClick={async e=> {
-										let updates = RemoveHelpers(selectedImage_newData.Including("name", "type", "description"));
+										let updates = RemoveHelpers(selectedImage_newData.Including(...UpdateImageData_allowedPropUpdates));
 										await new UpdateImageData({id: selectedImage._id, updates}).Run();
 										this.SetState({selectedImage_newData: null});
 									}}/>}

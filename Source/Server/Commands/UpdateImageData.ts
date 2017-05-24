@@ -3,11 +3,12 @@ import {Command} from "../Command";
 import {Assert} from "../../Frame/General/Assert";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 
+export const UpdateImageData_allowedPropUpdates = ["name", "type", "url", "description", "previewWidth"];
 export default class UpdateImageData extends Command<{id: number, updates: Partial<Image>}> {
 	Validate_Early() {
 		let {id, updates} = this.payload;
-		let allowedPropUpdates = ["name", "type", "description"];
-		Assert(updates.VKeys().Except(...allowedPropUpdates).length == 0, `Cannot use this command to update props other than: ${allowedPropUpdates.join(", ")}`);
+		Assert(updates.VKeys().Except(...UpdateImageData_allowedPropUpdates).length == 0,
+			`Cannot use this command to update props other than: ${UpdateImageData_allowedPropUpdates.join(", ")}`);
 	}
 
 	oldData: Image;

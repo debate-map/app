@@ -18,6 +18,7 @@ export class Image {
 	type: ImageType;
 	url = "";
 	description: string;
+	previewWidth: number;
 
 	creator: string;
 	createdAt: number;
@@ -30,6 +31,7 @@ AddSchema({
 		type: {$ref: "ImageType"},
 		url: {type: "string"},
 		description: {type: "string"},
+		previewWidth: {type: ["null", "number"]},
 
 		creator: {type: "string"},
 		createdAt: {type: "number"},

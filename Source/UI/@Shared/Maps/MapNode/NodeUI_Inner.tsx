@@ -1,3 +1,5 @@
+import {Image} from "../../../../Store/firebase/images/@Image";
+import {GetImage} from "../../../../Store/firebase/images";
 import {Assert} from "../../../../Frame/General/Assert";
 import {connect} from "react-redux";
 import {BaseComponent, Div, AddGlobalStyle, Pre, GetInnerComp} from "../../../../Frame/UI/ReactGlobals";
@@ -16,7 +18,7 @@ import NodeUI_Menu from "./NodeUI_Menu";
 import V from "../../../../Frame/V/V";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {MapNode, ThesisForm, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
+import {ImageAttachment, MapNode, MapNodeEnhanced, ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeRatingsRoot, GetRatings, GetFillPercentForRatingAverage, GetRatingAverage, GetRatingValue, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {GetUserID} from "../../../../Store/firebase/users";
 import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -88,7 +90,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
 		let panelToShow = hoverPanel || (nodeView && nodeView.openPanel);
-		let subPanelShow = node.type == MapNodeType.Thesis && node.contentNode;
+		let subPanelShow = node.type == MapNodeType.Thesis && (node.contentNode || node.image);
 		let bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView && nodeView.expanded;
 
@@ -170,6 +172,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 
 type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: string} & Partial<{equationNumber: number}>;
 @Connect((state, {node, path}: TitlePanelProps)=> ({
+	$1: node.image && GetImage(node.image.id),
 	equationNumber: node.equation ? GetEquationStepNumber(path) : null,
 }))
 class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
@@ -274,13 +277,16 @@ class SubPanel extends BaseComponent<{node: MapNode}, {}> {
 				//border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
 				background: "rgba(0,0,0,.5)", borderRadius: "0 0 0 5px",
 			}}>
-				<SubPanel_Inner contentNode={node.contentNode} fontSize={GetFontSizeForNode(node)}/>
+				{node.contentNode &&
+					<SubPanel_Quote contentNode={node.contentNode} fontSize={GetFontSizeForNode(node)}/>}
+				{node.image &&
+					<SubPanel_Image imageAttachment={node.image}/>}
 			</div>
 		);
 	}
 }
 var Markdown = require("react-remarkable");
-export class SubPanel_Inner extends BaseComponent<{contentNode: ContentNode, fontSize: number}, {}> {
+export class SubPanel_Quote extends BaseComponent<{contentNode: ContentNode, fontSize: number}, {}> {
 	render() {
 		let {contentNode, fontSize} = this.props;
 		return (
@@ -301,6 +307,21 @@ export class SubPanel_Inner extends BaseComponent<{contentNode: ContentNode, fon
 				<Markdown container="div" source={contentNode.content}/>
 				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
 				<SourcesUI contentNode={contentNode}/>
+			</div>
+		);
+	}
+}
+type SubPanel_ImageProps = {imageAttachment: ImageAttachment} & Partial<{image: Image}>;
+@Connect((state, {imageAttachment}: SubPanel_ImageProps)=> ({
+	image: GetImage(imageAttachment.id),
+}))
+export class SubPanel_Image extends BaseComponent<SubPanel_ImageProps, {}> {
+	render() {
+		let {image} = this.props;
+		if (image == null) return <div/>;
+		return (
+			<div style={{position: "relative"}}>
+				<img src={image.url} style={{width: image.previewWidth != null ? `${image.previewWidth}%` : null, maxWidth: "100%"}}/>
 			</div>
 		);
 	}

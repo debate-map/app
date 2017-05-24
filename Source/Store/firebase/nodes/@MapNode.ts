@@ -1,12 +1,14 @@
+import {AddSchema} from '../../../Server/Server';
 import V from "../../../Frame/V/V";
-import {_Enum, Enum, GetValues, GetValues_ForSchema} from "../../../Frame/General/Enums";
-import {MapNodeType, MapNodeType_Info} from "./@MapNodeType";
+import {GetValues_ForSchema} from '../../../Frame/General/Enums';
+import {MapNodeType} from './@MapNodeType';
 import {RatingType} from "../nodeRatings/@RatingType";
 import {GetParentNode, IsLinkValid, IsNewLinkValid} from "../nodes";
 import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
-import {MetaThesis_ThenType, MetaThesisInfo, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info} from "./@MetaThesisInfo";
-import {ContentNode} from "../contentNodes/@ContentNode";
-import {Equation} from "./@Equation";
+import {MetaThesisInfo} from './@MetaThesisInfo';
+import {ContentNode} from '../contentNodes/@ContentNode';
+import {Equation} from './@Equation';
+import {Image} from '../images/@Image';
 
 export enum AccessLevel {
 	Basic = 10,
@@ -99,7 +101,7 @@ AddSchema({
 	allOf: [
 		// if not a meta-thesis or contentNode, require "titles" prop
 		{
-			if: {prohibited: ["metaThesis", "equation", "contentNode"]},
+			if: {prohibited: ["metaThesis", "equation", "contentNode", "image"]},
 			then: {required: ["titles"]},
 		},
 		// if an argument, require "childrenOrder" prop

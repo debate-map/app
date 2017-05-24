@@ -1,3 +1,4 @@
+import Spinner from "../../../Frame/ReactComponents/Spinner";
 import {Assert} from "../../../Frame/General/Assert";
 import {BaseComponent, Pre, RenderSource, Div, FindDOM, GetErrorMessagesUnderElement} from "../../../Frame/UI/ReactGlobals";
 import {Term, TermType, Term_nameFormat, Term_disambiguationFormat} from "../../../Store/firebase/terms/@Term";
@@ -79,6 +80,19 @@ export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image
 					<TextInput enabled={enabled} style={{flex: 1}}
 						value={newData.description} onChange={val=>Change(newData.description = val)}/>
 				</RowLR>
+				<RowLR mt={5} splitAt={splitAt}style={{display: "flex", alignItems: "center"}}>
+					<Pre>Preview width: </Pre>
+					<Div>
+						<Spinner max={100} value={newData.previewWidth|0} onChange={val=>Change(newData.previewWidth = val != 0 ? val : null)}/>
+						<Pre>% (0 for auto)</Pre>
+					</Div>
+				</RowLR>
+				<Column mt={10}>
+				<Row style={{fontWeight: "bold"}}>Preview:</Row>
+					<Row mt={5} style={{display: "flex", alignItems: "center"}}>
+						<img src={newData.url} style={{width: newData.previewWidth != null ? `${newData.previewWidth}%` : null, maxWidth: "100%"}}/>
+					</Row>
+				</Column>
 			</Column>
 			</div>
 		);

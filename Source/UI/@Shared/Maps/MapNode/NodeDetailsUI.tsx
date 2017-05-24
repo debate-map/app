@@ -155,11 +155,13 @@ class Title_Base extends BaseComponent<Props_Enhanced, {}> {
 	render() {
 		let {creating, editing, newData, Change} = this.props;
 		return (
-			<Row style={{display: "flex", alignItems: "center"}}>
-				<Pre>Title (base): </Pre>
-				<TextInput enabled={editing} style={{flex: 1}}
-					ref={a=>a && creating && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
-					value={newData.titles["base"]} onChange={val=>Change(newData.titles["base"] = val)}/>
+			<div>
+				<Row style={{display: "flex", alignItems: "center"}}>
+					<Pre>Title (base): </Pre>
+					<TextInput enabled={editing} style={{flex: 1}}
+						ref={a=>a && creating && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
+						value={newData.titles["base"]} onChange={val=>Change(newData.titles["base"] = val)}/>
+				</Row>
 				{creating && IsArgumentNode(newData) &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 						<Pre allowWrap={true}>{`
@@ -174,7 +176,7 @@ The detailed version of the argument will be embodied in its premises/child-thes
 						`.trim()}
 						</Pre>
 					</Row>}
-			</Row>
+			</div>
 		);
 	}
 }

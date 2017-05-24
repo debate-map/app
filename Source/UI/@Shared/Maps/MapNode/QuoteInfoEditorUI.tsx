@@ -4,7 +4,7 @@ import Column from "../../../../Frame/ReactComponents/Column";
 import Row from "../../../../Frame/ReactComponents/Row";
 import {Pre, Div} from "../../../../Frame/UI/ReactGlobals";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
-import {SourcesUI, SubPanel_Inner} from "./NodeUI_Inner";
+import { SourcesUI, SubPanel_Quote } from "./NodeUI_Inner";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
 import * as Editor from "react-md-editor";
 import Button from "../../../../Frame/ReactComponents/Button";
@@ -46,7 +46,7 @@ export default class QuoteInfoEditorUI extends BaseComponent
 					<Column key={1} mt={5}>
 						<Pre style={{padding: 5, background: `rgba(255,255,255,.2)`, borderRadius: 5}}>
 							{GetNodeDisplayText({type: MapNodeType.Thesis, contentNode: CleanUpdatedContentNode(Clone(contentNode))} as any, ThesisForm.Base)}
-							<SubPanel_Inner contentNode={contentNode} fontSize={15}/>
+							<SubPanel_Quote contentNode={contentNode} fontSize={15}/>
 						</Pre>
 					</Column>
 				]}
