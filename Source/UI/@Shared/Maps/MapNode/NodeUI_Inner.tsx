@@ -2,7 +2,7 @@ import {Image} from "../../../../Store/firebase/images/@Image";
 import {GetImage} from "../../../../Store/firebase/images";
 import {Assert} from "../../../../Frame/General/Assert";
 import {connect} from "react-redux";
-import {BaseComponent, Div, AddGlobalStyle, Pre, GetInnerComp} from "../../../../Frame/UI/ReactGlobals";
+import { BaseComponent, Div, AddGlobalStyle, Pre, GetInnerComp, FindDOM_ } from "../../../../Frame/UI/ReactGlobals";
 import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
 import VMenu from "react-vmenu";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
@@ -48,8 +48,8 @@ import {ParseSegmentsForPatterns} from "../../../../Frame/General/RegexHelpers";
 import {GetParentNode} from "../../../../Store/firebase/nodes";
 import {SlicePath} from "./NodeUI/RatingsPanel";
 import * as classNames from "classnames";
-import {GetEquationStepNumber} from "../../../../Store/firebase/nodes/$node/equation";
-import {InlineMath} from "react-katex";
+import { GetEquationStepNumber } from "../../../../Store/firebase/nodes/$node/equation";
+import NodeMathUI from "UI/@Shared/Maps/MapNode/NodeMathUI";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -99,8 +99,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						display: "flex", position: "relative", borderRadius: 5, cursor: "default",
 						boxShadow: "rgba(0,0,0,1) 0px 0px 2px", width, minWidth: widthOverride,
 					}}
-					onMouseEnter={()=>$(".scrolling").length == 0 && this.SetState({hovered: true})}
-					onMouseLeave={()=>this.SetState({hovered: false})}
+					/*onMouseEnter={()=>$(".scrolling").length == 0 && this.SetState({hovered: true})}
+					onMouseLeave={()=>this.SetState({hovered: false})}*/
 					onClick={e=> {
 						if ((e.nativeEvent as any).ignore) return;
 						if (nodeView == null || !nodeView.selected) {
@@ -168,6 +168,18 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		);
 	}
 	definitionsPanel: DefinitionsPanel;
+	ComponentDidMount() {
+		// we have to use native/jquery hover/mouseenter+mouseleave, to fix that in-equation term-placeholders would cause "mouseleave" to be triggered
+		let dom = FindDOM_(this);
+		//dom.off("mouseenter mouseleave");
+		$(dom).hover(()=> {
+			if ($(".scrolling").length == 0) {
+				this.SetState({hovered: true});
+			}
+		}, ()=> {
+			this.SetState({hovered: false})
+		});
+	}
 }
 
 type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: string} & Partial<{equationNumber: number}>;
@@ -188,7 +200,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 					{position: "relative", fontSize: GetFontSizeForNode(node), whiteSpace: "initial"},
 					node.metaThesis && {margin: "4px 0 1px 0"},
 				)}>
-					{latex && <InlineMath math={node.equation.text}/>}
+					{latex && <NodeMathUI text={node.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
 					{!latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
 				</span>
 				{node.equation && node.equation.explanation &&
@@ -203,6 +215,17 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 					<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
 			</Div>
 		);
+	}
+
+	OnTermHover(termID: number, hovered: boolean) {
+		let {parent} = this.props;
+		parent.SetState({hoverPanel: hovered ? "definitions" : null, hoverTermID: hovered ? termID : null});
+	}
+	OnTermClick(termID: number) {
+		let {parent, map, path} = this.props;
+		//parent.SetState({hoverPanel: "definitions", hoverTermID: termID});
+		store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel: "definitions"}));
+		parent.SetState({clickTermID: termID});
 	}
 
 	RenderNodeDisplayText(text: string) {
@@ -221,13 +244,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 				let refText = segment.textParts[1];
 				let termID = segment.textParts[2].ToInt();
 				elements.push(
-					<TermPlaceholder key={index} refText={refText} termID={termID}
-						onHover={hovered=>parent.SetState({hoverPanel: hovered ? "definitions" : null, hoverTermID: hovered ? termID : null})}
-						onClick={()=> {
-							//parent.SetState({hoverPanel: "definitions", hoverTermID: termID});
-							store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel: "definitions"}));
-							parent.SetState({clickTermID: termID});
-						}}/>
+					<TermPlaceholder key={index} refText={refText} termID={termID} onHover={hovered=>this.OnTermHover(termID, hovered)} onClick={()=>this.OnTermClick(termID)}/>
 				);
 			} else {
 				Assert(false);
@@ -244,12 +261,13 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 		termVariantNumber: term ? GetTermVariantNumber(term) : null,
 	};
 })
-class TermPlaceholder extends BaseComponent
-		<{refText: string, termID: number, onHover: (hovered: boolean)=>void, onClick: ()=>void}
+export class TermPlaceholder extends BaseComponent
+		<{refText: string, termID: number, showVariantNumber?: boolean, onHover: (hovered: boolean)=>void, onClick: ()=>void}
 			& Partial<{term: Term, termVariantNumber: number}>,
 		{}> {
+	static defaultProps = {showVariantNumber: true};
 	render() {
-		let {refText, termID, onHover, onClick, term, termVariantNumber} = this.props;
+		let {refText, termID, showVariantNumber, onHover, onClick, term, termVariantNumber} = this.props;
 		if (term == null) return <a>...</a>;
 		return (
 			<a
@@ -263,7 +281,8 @@ class TermPlaceholder extends BaseComponent
 					}}>
 				{/*term.name*/}
 				{refText}
-				<sup>{termVariantNumber}</sup>
+				{showVariantNumber &&
+					<sup>{termVariantNumber}</sup>}
 			</a>
 		);
 	}
