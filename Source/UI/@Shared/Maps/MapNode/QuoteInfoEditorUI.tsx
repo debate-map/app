@@ -66,7 +66,7 @@ export default class QuoteInfoEditorUI extends BaseComponent
 				</Column>
 				<Row mt={5}>Source chains:</Row>
 				<Row mt={5}>
-					<SourceChainsEditorUI creating={creating} editing={editing} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
+					<SourceChainsEditorUI enabled={creating || editing} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
 				</Row>
 			</Column>
 			</div>

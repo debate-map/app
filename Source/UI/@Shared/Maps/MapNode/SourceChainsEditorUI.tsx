@@ -8,20 +8,24 @@ import {GetEntries} from "../../../../Frame/General/Enums";
 import {GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText} from "../../../../Store/firebase/contentNodes/$contentNode";
 import Select from "../../../../Frame/ReactComponents/Select";
 
-type Props = {baseData: SourceChain[], creating: boolean, editing?: boolean, style?, onChange?: (newData: SourceChain[])=>void};
+// todo: maybe update other editors to use this approach ("enabled" and "forNew" props, instead of "creating" and "editing")
+
+type Props = {baseData: SourceChain[], enabled?: boolean, style?, onChange?: (newData: SourceChain[])=>void};
 	//& Partial<{creator: User, variantNumber: number}>;
 /*@Connect((state, {baseData, creating}: Props)=>({
 	creator: !creating && GetUser(baseData.creator),
 	variantNumber: !creating && GetTermVariantNumber(baseData),
 }))*/
 export default class SourceChainsEditorUI extends BaseComponent<Props, {newData: SourceChain[]}> {
+	static defaultProps = {enabled: true};
+
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
 	}
 	
 	render() {
-		let {creating, editing, style, onChange} = this.props;
+		let {enabled, style, onChange} = this.props;
 		let {newData} = this.state;
 		let Change = _=> {
 			if (onChange)
@@ -39,16 +43,16 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 							{chain.map((source, sourceIndex)=> {
 								return (
 									<Row key={sourceIndex}>
-										<Select enabled={editing} options={GetEntries(SourceType)}
+										<Select enabled={enabled} options={GetEntries(SourceType)}
 											value={source.type} onChange={val=>Change(source.type = val)}/>
 										{source.type != SourceType.Webpage &&
-											<TextInput enabled={editing} style={{width: "90%"}} placeholder={GetSourceNamePlaceholderText(source.type)}
+											<TextInput enabled={enabled} style={{width: "90%"}} placeholder={GetSourceNamePlaceholderText(source.type)}
 												value={source.name} onChange={val=>Change(source.name = val)}/>}
 										{source.type != SourceType.Webpage &&
-											<TextInput enabled={editing} style={{width: "90%"}} placeholder={GetSourceAuthorPlaceholderText(source.type)}
+											<TextInput enabled={enabled} style={{width: "90%"}} placeholder={GetSourceAuthorPlaceholderText(source.type)}
 												value={source.author} onChange={val=>Change(source.author = val)}/>}
 										{source.type == SourceType.Webpage &&
-											<TextInput ref={"url_" + chainIndex + "_" + sourceIndex} enabled={editing} type="url"
+											<TextInput ref={"url_" + chainIndex + "_" + sourceIndex} enabled={enabled} type="url"
 													//pattern="^(https?|ftp)://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
 													pattern="^https?://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
 													value={source.link} onChange={val=>Change((()=> {
@@ -61,11 +65,11 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 														}
 														source.link = val;
 													})())}/>}
-										{sourceIndex != 0 && editing && <Button text="X" ml={5} onClick={()=>Change(chain.RemoveAt(sourceIndex))}/>}
+										{sourceIndex != 0 && enabled && <Button text="X" ml={5} onClick={()=>Change(chain.RemoveAt(sourceIndex))}/>}
 									</Row>
 								);
 							})}
-							{editing &&
+							{enabled &&
 								<Row>
 									<Button text="Add source to this chain" mt={5} onClick={()=>Change(chain.push(new Source()))}/>
 									{chainIndex > 0 && <Button text="Remove this source chain" ml={5} mt={5} onClick={()=>Change(newData.RemoveAt(chainIndex))}/>}
@@ -73,7 +77,7 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 						</Column>
 					);
 				})}
-				{editing && <Button text="Add source chain" mt={10} style={{alignSelf: "flex-start"}} onClick={()=>Change(newData.push(new SourceChain()))}/>}
+				{enabled && <Button text="Add source chain" mt={10} style={{alignSelf: "flex-start"}} onClick={()=>Change(newData.push(new SourceChain()))}/>}
 			</Column>
 			</div>
 		);

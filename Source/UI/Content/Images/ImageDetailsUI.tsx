@@ -90,7 +90,7 @@ export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image
 				</RowLR>
 				<Row mt={10}>Source chains:</Row>
 				<Row mt={5}>
-					<SourceChainsEditorUI creating={creating} editing={editing} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
+					<SourceChainsEditorUI enabled={creating || editing} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
 				</Row>
 				<Column mt={10}>
 					<Row style={{fontWeight: "bold"}}>Preview:</Row>
