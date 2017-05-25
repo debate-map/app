@@ -32,9 +32,7 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
 	}
-
-	//form: HTMLFormElement;
-	scrollView: ScrollView;
+	
 	render() {
 		let {creating, editing, style, onChange} = this.props;
 		let {newData} = this.state;
@@ -46,7 +44,6 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 
 		let splitAt = 100; //, width = 600;
 		return (
-			//<form ref={c=>this.form = c}>
 			<div> {/* needed so GetInnerComp() work */}
 			<Column style={style}>
 				<RowLR mt={5} splitAt={splitAt}>
@@ -76,7 +73,6 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 					</RowLR>}
 			</Column>
 			</div>
-			//</form>
 		);
 	}
 	GetValidationError() {

@@ -1,5 +1,5 @@
 import {Assert} from "../../../Frame/General/Assert";
-import {SourceType} from "./@ContentNode";
+import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
 
 export function GetSourceNamePlaceholderText(sourceType: SourceType) {
 	if (sourceType == SourceType.Speech) return "speech name";

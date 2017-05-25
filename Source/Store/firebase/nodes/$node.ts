@@ -159,17 +159,23 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 			return result;
 		}
 		if (node.contentNode) {
-			return `The statement below was made`
+			return `The statement below was made` //(as shown)`
 				+ (node.contentNode.sourceChains[0][0].name ? ` in "${node.contentNode.sourceChains[0][0].name}"` : "")
 				+ (node.contentNode.sourceChains[0][0].author ? ` by ${node.contentNode.sourceChains[0][0].author}` : "")
 				+ (node.contentNode.sourceChains[0][0].link ? ` at "${
 					URL.Parse(node.contentNode.sourceChains[0][0].link, false).toString({domain_protocol: false, forceSlashAfterDomain: false})}"` : "") // maybe temp
-				+ `, and is unmodified.`;
+				+ `.`;
 		}
 		if (node.image) {
 			let image = GetImage(node.image.id);
 			if (image == null) return `...`;
-			return `The ${GetNiceNameForImageType(image.type)} below (#${node.image.id}) is ${image.type == ImageType.Photo ? "authentic" : "accurate"}.`;
+			//if (image.sourceChains == null) return `The ${GetNiceNameForImageType(image.type)} below is unmodified.`; // temp
+			return `The ${GetNiceNameForImageType(image.type)} below was published` //(as shown)`
+				+ (image.sourceChains[0][0].name ? ` in "${image.sourceChains[0][0].name}"` : "")
+				+ (image.sourceChains[0][0].author ? ` by ${image.sourceChains[0][0].author}` : "")
+				+ (image.sourceChains[0][0].link ? ` at "${
+					URL.Parse(image.sourceChains[0][0].link, false).toString({domain_protocol: false, forceSlashAfterDomain: false})}"` : "") // maybe temp
+				+ `.`;
 		}
 
 		if (formOrPath) {

@@ -1,6 +1,7 @@
 import {GetDataAsync} from "../../../../Frame/Database/DatabaseHelpers";
 import {AddUpgradeFunc} from "../../Admin";
-import {ContentNode, SourceChain, Source, SourceType} from "../../../../Store/firebase/contentNodes/@ContentNode";
+import {ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
+import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
 import {FirebaseData} from "../../../../Store/firebase";
 import {IsArgumentNode} from "../../../../Store/firebase/nodes/$node";
 

@@ -1,4 +1,4 @@
-import {BaseComponent, FindDOM} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, FindDOM, GetErrorMessagesUnderElement} from "../../../../Frame/UI/ReactGlobals";
 import {ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
 import Column from "../../../../Frame/ReactComponents/Column";
 import Row from "../../../../Frame/ReactComponents/Row";
@@ -14,25 +14,27 @@ import * as Icons from "react-md-editor/lib/icons";
 import {GetNodeDisplayText} from "../../../../Store/firebase/nodes/$node";
 import {GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText} from "../../../../Store/firebase/contentNodes/$contentNode";
 import Select from "../../../../Frame/ReactComponents/Select";
-import {SourceType, SourceChain, Source, ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
+import {ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
+import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
 import {GetEntries} from "../../../../Frame/General/Enums";
 //import {ButtonProps} from "../../../../Frame/ReactComponents/Button"; // "import" approach causes typescript rebuilds to fail
+import {CleanUpdatedSourceChains} from "./SourceChainsEditorUI";
+import SourceChainsEditorUI from "./SourceChainsEditorUI";
 
 //@ApplyBasicStyles
 export default class QuoteInfoEditorUI extends BaseComponent
 		<{
-			editing?: boolean, contentNode: ContentNode, showPreview: boolean, justShowed: boolean, onChange?: (newData: ContentNode)=>void,
+			creating?: boolean, editing?: boolean, baseData: ContentNode, showPreview: boolean, justShowed: boolean, onChange?: (newData: ContentNode)=>void,
 		},
-		{contentNodeCopy: ContentNode}> {
-	constructor(props) {
-		super(props);
-		let {contentNode} = this.props;
-		this.state = {contentNodeCopy: FromJSON(ToJSON(contentNode))};
+		{newData: ContentNode}> {
+	ComponentWillMountOrReceiveProps(props, forMount) {
+		if (forMount || props.baseData != this.props.baseData) // if base-data changed
+			this.SetState({newData: Clone(props.baseData)});
 	}
 	
 	render() {
-		let {editing, showPreview, justShowed, onChange} = this.props;
-		let {contentNodeCopy: contentNode} = this.state;
+		let {creating, editing, showPreview, justShowed, onChange} = this.props;
+		let {newData} = this.state;
 		let Change = _=> {
 			if (onChange)
 				onChange(this.GetNewData());
@@ -40,13 +42,14 @@ export default class QuoteInfoEditorUI extends BaseComponent
 		};
 
 		return (
+			<div> {/* needed so GetInnerComp() work */}
 			<Column>
 				{showPreview && [
 					<Row key={0} mt={5}>Preview:</Row>,
 					<Column key={1} mt={5}>
 						<Pre style={{padding: 5, background: `rgba(255,255,255,.2)`, borderRadius: 5}}>
-							{GetNodeDisplayText({type: MapNodeType.Thesis, contentNode: CleanUpdatedContentNode(Clone(contentNode))} as any, ThesisForm.Base)}
-							<SubPanel_Quote contentNode={contentNode} fontSize={15}/>
+							{GetNodeDisplayText({type: MapNodeType.Thesis, contentNode: CleanUpdatedContentNode(Clone(newData))} as any, ThesisForm.Base)}
+							<SubPanel_Quote contentNode={newData} fontSize={15}/>
 						</Pre>
 					</Column>
 				]}
@@ -54,105 +57,43 @@ export default class QuoteInfoEditorUI extends BaseComponent
 					<Pre>Quote text: </Pre>
 					{/*<TextInput style={{flex: 1}}
 						value={info.text} onChange={val=>Change(info.text = val)}/>*/}
-					{editing && <ToolBar enabled={editing} editor={()=>this.refs.editor} excludeCommands={["h1", "h2", "h3", "h4", "italic", "quote"]}/>}
-					<Editor ref="editor" value={contentNode.content} onChange={val=>Change(contentNode.content = val)} options={{
+					{(creating || editing) && <ToolBar editor={()=>this.refs.editor} excludeCommands={["h1", "h2", "h3", "h4", "italic", "quote"]}/>}
+					<Editor ref="editor" value={newData.content} onChange={val=>Change(newData.content = val)} options={{
 						scrollbarStyle: `overlay`,
 						lineWrapping: true,
-						readOnly: !editing,
+						readOnly: !(creating || editing),
 					}}/>
 				</Column>
 				<Row mt={5}>Source chains:</Row>
 				<Row mt={5}>
-					<Column style={{flex: 1}}>
-						{contentNode.sourceChains.map((chain, chainIndex)=> {
-							return (
-								<Column key={chainIndex} mt={chainIndex == 0 ? 0 : 10} pt={chainIndex == 0 ? 0 : 10} style={E(chainIndex != 0 && {borderTop: "1px solid rgba(0,0,0,.7)"})}>
-									{chain.map((source, sourceIndex)=> {
-										return (
-											<Row key={sourceIndex}>
-												<Select enabled={editing} options={GetEntries(SourceType)}
-													value={source.type} onChange={val=>Change(source.type = val)}/>
-												{source.type != SourceType.Webpage &&
-													<TextInput enabled={editing} style={{width: "90%"}} placeholder={GetSourceNamePlaceholderText(source.type)}
-														value={source.name} onChange={val=>Change(source.name = val)}/>}
-												{source.type != SourceType.Webpage &&
-													<TextInput enabled={editing} style={{width: "90%"}} placeholder={GetSourceAuthorPlaceholderText(source.type)}
-														value={source.author} onChange={val=>Change(source.author = val)}/>}
-												{source.type == SourceType.Webpage &&
-													<TextInput ref={"url_" + chainIndex + "_" + sourceIndex} enabled={editing} type="url"
-															//pattern="^(https?|ftp)://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
-															pattern="^https?://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
-															value={source.link} onChange={val=>Change((()=> {
-																if (val.endsWith("@bible")) {
-																	var reference = val.replace("@bible", "").replace(/:/g, ".").replace(/ /g, "%20");
-																	val = `https://biblia.com/bible/nkjv/${reference}`;
-																} else if (val.endsWith("@quran")) {
-																	var reference = val.replace("@quran", "").replace(/:/g, "/").replace(/ /g, "%20");
-																	val = `http://www.quran.com/${reference}`;
-																}
-																source.link = val;
-															})())}/>}
-												{sourceIndex != 0 && editing && <Button text="X" ml={5} onClick={()=>Change(chain.RemoveAt(sourceIndex))}/>}
-											</Row>
-										);
-									})}
-									{editing &&
-										<Row>
-											<Button text="Add source to this chain" mt={5} onClick={()=>Change(chain.push(new Source()))}/>
-											{chainIndex > 0 && <Button text="Remove this source chain" ml={5} mt={5} onClick={()=>Change(contentNode.sourceChains.RemoveAt(chainIndex))}/>}
-										</Row>}
-								</Column>
-							);
-						})}
-						{editing && <Button text="Add source chain" mt={10} style={{alignSelf: "flex-start"}} onClick={()=>Change(contentNode.sourceChains.push(new SourceChain()))}/>}
-					</Column>
+					<SourceChainsEditorUI creating={creating} editing={editing} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
 				</Row>
 			</Column>
+			</div>
 		);
 	}
 
-	/*lastSetError = null;
-	PostRender() {
-		let {onSetError} = this.props;
-		let error = this.GetValidationError();
-		if (error != this.lastSetError) {
-			onSetError(error);
-			this.lastSetError = error;
-		}
-	}*/
 	GetValidationError() {
-		let {contentNode} = this.props;
 		//return (FindDOM(this.refs.url) as HTMLInputElement).validity.valid;
 		//return (FindDOM(this.refs.url) as HTMLInputElement).validationMessage;
 		//for (let i = 0, urlComp; urlComp = this.refs["url_" + i]; i++) {
-		for (let key of this.refs.VKeys().filter(a=>a.startsWith("url_"))) {
+		/*for (let key of this.refs.VKeys().filter(a=>a.startsWith("url_"))) {
 			let urlComp = this.refs[key];
 			let urlDOM = FindDOM(urlComp) as HTMLInputElement;
 			if (urlDOM.validationMessage)
 				return urlDOM.validationMessage;
 		}
-		return null;
+		return null;*/
+		return GetErrorMessagesUnderElement(FindDOM(this))[0];
 	}
 	GetNewData() {
-		let {contentNodeCopy: contentNode} = this.state;
+		let {newData: contentNode} = this.state;
 		return CleanUpdatedContentNode(Clone(contentNode));
 	}
 }
 
 export function CleanUpdatedContentNode(contentNode: ContentNode) {
-	// clean data
-	for (let chain of contentNode.sourceChains) {
-		for (let source of chain) {
-			if (source.type == SourceType.Speech) {
-				delete source.link;
-			} else if (source.type == SourceType.Writing) {
-				delete source.link;
-			} else if (source.type == SourceType.Webpage) {
-				delete source.name;
-				delete source.author;
-			}
-		}
-	}
+	CleanUpdatedSourceChains(contentNode.sourceChains);
 	return contentNode;
 }
 

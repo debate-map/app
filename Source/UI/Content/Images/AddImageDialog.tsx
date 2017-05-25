@@ -37,7 +37,7 @@ export function ShowAddImageDialog(userID: string) {
 			boxController.options.okButtonClickable = error == null;
 			return (
 				<Column style={{padding: `10px 0`, width: 600}}>
-					<ImageDetailsUI ref={c=>detailsUI = GetInnerComp(c) as any} baseData={newImage} creating={true}
+					<ImageDetailsUI ref={c=>detailsUI = GetInnerComp(c) as any} baseData={newImage} creating={true} editing={false}
 						onChange={val=>Change(newImage = val, error = detailsUI.GetValidationError())}/>
 					{error && error != "Please fill out this field." && <Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{error}</Row>}
 				</Column>

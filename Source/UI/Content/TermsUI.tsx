@@ -51,8 +51,8 @@ export default class TermsUI extends BaseComponent
 		let creatorOrMod = selectedTerm != null && IsUserCreatorOrMod(userID, selectedTerm);
 		
 		return (
-			<Row p="10px 7px" style={{height: "100%", alignItems: "flex-start"}}>
-				<Column style={{position: "relative", flex: .4, height: "100%", background: "rgba(0,0,0,.5)", borderRadius: 10}} onClick={e=> {
+			<Row plr={7} style={{height: "100%", alignItems: "flex-start"}}>
+				<Column mtb={10} style={{position: "relative", flex: .4, height: "calc(100% - 20px)", background: "rgba(0,0,0,.5)", borderRadius: 10}} onClick={e=> {
 					if (e.target == e.currentTarget || e.target == FindDOM(this.scrollView) || e.target == FindDOM(this.scrollView.refs.content)) {
 						store.dispatch(new ACTTermSelect({id: null}));
 					}
@@ -74,8 +74,8 @@ export default class TermsUI extends BaseComponent
 						})}
 					</ScrollView>
 				</Column>
-				<Column ml={10} style={{flex: .6}}>
-					<Column style={{position: "relative", maxHeight: "100%", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
+				<ScrollView ref={c=>this.scrollView = c} style={{marginLeft: 10, flex: .6}} contentStyle={{flex: 1, padding: 10}}>
+					<Column style={{position: "relative", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
 						<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 							{selectedTerm &&
 								<Div style={{fontSize: 17, fontWeight: 500}}>
@@ -124,7 +124,7 @@ export default class TermsUI extends BaseComponent
 							? <TermComponentsUI term={selectedTerm} editing={true} style={{marginTop: 10, padding: 10}}/>
 							: <div style={{padding: 10}}>No term selected.</div>}
 					</Column>
-				</Column>
+				</ScrollView>
 			</Row>
 		);
 	}

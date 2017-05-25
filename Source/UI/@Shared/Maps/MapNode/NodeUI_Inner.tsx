@@ -39,7 +39,7 @@ import DiscussionPanel from "./NodeUI/DiscussionPanel";
 import Row from "../../../../Frame/ReactComponents/Row";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
 import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetNodeForm, GetFinalNodeTypeAtPath, IsContextReversed, GetNodeEnhanced} from "../../../../Store/firebase/nodes/$node";
-import {ContentNode, SourceChain} from "../../../../Store/firebase/contentNodes/@ContentNode";
+import {ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {URL} from "../../../../Frame/General/URLs";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import {GetTerm, GetTermVariantNumber} from "../../../../Store/firebase/terms";
@@ -50,6 +50,7 @@ import {SlicePath} from "./NodeUI/RatingsPanel";
 import * as classNames from "classnames";
 import { GetEquationStepNumber } from "../../../../Store/firebase/nodes/$node/equation";
 import NodeMathUI from "UI/@Shared/Maps/MapNode/NodeMathUI";
+import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -333,7 +334,7 @@ export class SubPanel_Quote extends BaseComponent<{contentNode: ContentNode, fon
 				/>*/}
 				<Markdown container="div" source={contentNode.content}/>
 				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
-				<SourcesUI contentNode={contentNode}/>
+				<SourcesUI sourceChains={contentNode.sourceChains}/>
 			</div>
 		);
 	}
@@ -349,18 +350,20 @@ export class SubPanel_Image extends BaseComponent<SubPanel_ImageProps, {}> {
 		return (
 			<div style={{position: "relative"}}>
 				<img src={image.url} style={{width: image.previewWidth != null ? `${image.previewWidth}%` : null, maxWidth: "100%"}}/>
+				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
+				<SourcesUI sourceChains={image.sourceChains}/>
 			</div>
 		);
 	}
 }
 
-export class SourcesUI extends BaseComponent<{contentNode: ContentNode}, {}> {
+export class SourcesUI extends BaseComponent<{sourceChains: SourceChain[]}, {}> {
 	render() {
-		let {contentNode} = this.props;
+		let {sourceChains} = this.props;
 		return (
-			<Column mt={3}>
+			<Column mt={3} style={{whiteSpace: "normal"}}>
 				<Row style={{color: "rgba(255,255,255,.5)"}}>Sources:</Row>
-				{contentNode.sourceChains.map((chain: SourceChain, index)=> {
+				{sourceChains.map((chain: SourceChain, index)=> {
 					let linkTitle = chain.map((source, index)=> {
 						if (source.link) {
 							// if this is the first source, it's the most important, so show the link's whole url

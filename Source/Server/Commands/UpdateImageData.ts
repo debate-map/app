@@ -3,7 +3,7 @@ import {Command} from "../Command";
 import {Assert} from "../../Frame/General/Assert";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 
-export const UpdateImageData_allowedPropUpdates = ["name", "type", "url", "description", "previewWidth"];
+export const UpdateImageData_allowedPropUpdates = ["name", "type", "url", "description", "previewWidth", "sourceChains"];
 export default class UpdateImageData extends Command<{id: number, updates: Partial<Image>}> {
 	Validate_Early() {
 		let {id, updates} = this.payload;

@@ -43,8 +43,9 @@ g.Extend({GetInnerComp});
 
 export interface BaseProps {
 	m?; ml?; mr?; mt?; mb?;
+	mlr?: number | "margin left-right"; mtb?: number | "margin top-bottom";
 	p?; pl?; pr?; pt?; pb?;
-	plr?; ptb?;
+	plr?: number | "padding left-right"; ptb?: number | "padding top-bottom";
 	sel?: boolean; ct?: boolean;
 
 	tabLabel?: string; active?: boolean;
@@ -54,6 +55,7 @@ export interface BaseProps {
 }
 export var basePropFullKeys = {
 	m: "margin", ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
+	mlr: null, mtb: null,
 	p: "padding", pl: "paddingLeft", pr: "paddingRight", pt: "paddingTop", pb: "paddingBottom",
 	plr: null, ptb: null,
 	sel: null, // selectable
@@ -72,9 +74,15 @@ export function BasicStyles(props) {
 	var result: any = {};
 
 	for (let key in props) {
-		if (key in basePropFullKeys) {
+		if (basePropFullKeys[key] != null) {
 			let fullKey = basePropFullKeys[key];
 			result[fullKey] = props[key];
+		} else if (key == "mlr") {
+			result.marginLeft = props[key];
+			result.marginRight = props[key];
+		} else if (key == "mtb") {
+			result.marginTop = props[key];
+			result.marginBottom = props[key];
 		} else if (key == "plr") {
 			result.paddingLeft = props[key];
 			result.paddingRight = props[key];

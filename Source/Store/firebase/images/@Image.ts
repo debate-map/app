@@ -1,4 +1,5 @@
 import {GetValues_ForSchema} from "../../../Frame/General/Enums";
+import {SourceChain} from "Store/firebase/contentNodes/@SourceChain";
 
 export enum ImageType {
 	Photo = 10,
@@ -20,6 +21,8 @@ export class Image {
 	description: string;
 	previewWidth: number;
 
+	sourceChains = [new SourceChain()];
+
 	creator: string;
 	createdAt: number;
 }
@@ -33,8 +36,10 @@ AddSchema({
 		description: {type: "string"},
 		previewWidth: {type: ["null", "number"]},
 
+		sourceChains: {items: {$ref: "SourceChain"}},
+
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 	},
-	required: ["name", "type", "url", "description", "creator", "createdAt"],
+	required: ["name", "type", "url", "description", "sourceChains", "creator", "createdAt"],
 }, "Image");

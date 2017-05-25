@@ -77,8 +77,8 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 					<EquationEditorUI key={0} creating={creating} editing={editing}
 						baseData={newData.equation} onChange={val=>Change(newData.equation = val)}/>}
 				{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Quote &&
-					<QuoteInfoEditorUI key={1} editing={creating || editing}
-						contentNode={newData.contentNode} onChange={val=>Change(newData.contentNode = val)}
+					<QuoteInfoEditorUI key={1} creating={creating} editing={editing}
+						baseData={newData.contentNode} onChange={val=>Change(newData.contentNode = val)}
 						showPreview={false} justShowed={false}/>}
 				{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Image &&
 					<ImageAttachmentEditorUI key={1} creating={creating} editing={editing}
