@@ -297,14 +297,16 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let fontSize = GetFontSizeForNode(node);
 		let expectedTextWidth = GetContentWidth($(`<span style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${displayText}</span>`));
 
+		let noteWidth = 0;
 		if (node.note) {
-			expectedTextWidth = Math.max(expectedTextWidth,
+			noteWidth = Math.max(noteWidth,
 				GetContentWidth($(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.note}</span>`), true));
 		}
 		if (node.equation && node.equation.explanation) {
-			expectedTextWidth = Math.max(expectedTextWidth,
+			noteWidth = Math.max(noteWidth,
 				GetContentWidth($(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.equation.explanation}</span>`), true));
 		}
+		expectedTextWidth += noteWidth;
 
 		//let expectedOtherStuffWidth = 26;
 		let expectedOtherStuffWidth = 28;
