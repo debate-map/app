@@ -63,8 +63,6 @@ export default class UpdateNodeDetails extends Command<{nodeID: number, nodeUpda
 	newLinkData: ChildEntry;
 	async Prepare() {
 		let {nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
-		let firebase = store.firebase.helpers;
-		
 		this.oldNodeData = await GetDataAsync(`nodes/${nodeID}`, true, false) as MapNode;
 		this.newNodeData = {...this.oldNodeData, ...nodeUpdates};
 		this.oldLinkData = await GetDataAsync(`nodes/${linkParentID}/children/${nodeID}`, true, false) as ChildEntry;

@@ -18,11 +18,11 @@ export enum AccessLevel {
 }
 
 export enum ThesisType {
-	Normal,
-	MetaThesis,
-	Equation,
-	Quote,
-	Image,
+	Normal = 10,
+	MetaThesis = 20,
+	Equation = 30,
+	Quote = 40,
+	Image = 50,
 }
 export enum ThesisForm {
 	Base = 10,

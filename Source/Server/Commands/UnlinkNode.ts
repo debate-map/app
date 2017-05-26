@@ -18,7 +18,7 @@ export default class UnlinkNode extends Command<{parentID: number, childID: numb
 		let {parentID, childID} = this.payload;
 		let childNode = await GetNodeAsync(childID);
 		let parentNodes = await GetNodeParentsAsync(childNode);
-		if (parentNodes.length <= 1) throw new Error("Cannot unlink this child, as doing so would orphan it. Try deleting it instead.");
+		Assert(parentNodes.length > 1, "Cannot unlink this child, as doing so would orphan it. Try deleting it instead.");
 	}
 	
 	GetDBUpdates() {

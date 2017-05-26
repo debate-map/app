@@ -98,10 +98,12 @@ export function ProcessDBData(data, standardizeForm: boolean, addHelpers: boolea
 			if (parseInt(key).toString() == key) {
 				treeNode.Value._id = parseInt(key);
 				//treeNode.Value._Set("_id", parseInt(key));
-			} else {
-				treeNode.Value._key = key;
-				//treeNode.Value._Set("_key", key);
 			}
+
+			// actually, always set "_key" (in case it's a "_key" that also happens to look like an "_id"/integer)
+			//else {
+			treeNode.Value._key = key;
+			//treeNode.Value._Set("_key", key);
 		}
 	}
 	return treeNodes[0].Value; // get possibly-modified wrapper.data

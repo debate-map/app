@@ -131,7 +131,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 					<Button //text={expanded ? "-" : "+"} size={28}
 							style={{
 								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
-								width: 18, padding: 0,
+								width: 18, //minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
+								padding: 0,
 								fontSize: expanded ? 23 : 17,
 								lineHeight: "1px", // keeps text from making meta-theses too tall
 								backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(`,`).map(a=>(parseInt(a) * .8).RoundTo(1)).join(`,`)},.7)`,

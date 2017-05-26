@@ -174,28 +174,28 @@ export default class V {
 				V.ForEachChildInTreeXDoY(value, actionY);
 		}
 	}*/
-
-	static GetContentSize(content) {
-		/*var holder = $("#hiddenTempHolder");
-		var contentClone = content.clone();
-		holder.append(contentClone);
-		var width = contentClone.outerWidth();
-		var height = contentClone.outerHeight();
-		contentClone.remove();*/
-
-		var holder = $("<div id='hiddenTempHolder2' style='position: absolute; left: -1000; top: -1000; width: 1000; height: 1000; overflow: hidden;'>").appendTo("body");
-		var contentClone = content.clone();
-		holder.append(contentClone);
-		var width = contentClone.outerWidth() as number;
-		var height = contentClone.outerHeight() as number;
-		holder.remove();
-
-		return {width, height};
-	};
-	static GetContentWidth(content) { return V.GetContentSize(content).width; };
-	static GetContentHeight(content) { return V.GetContentSize(content).height; };
 }
 g.Extend({V});
+
+export function GetContentSize(content, includeMargin = false) {
+	/*var holder = $("#hiddenTempHolder");
+	var contentClone = content.clone();
+	holder.append(contentClone);
+	var width = contentClone.outerWidth();
+	var height = contentClone.outerHeight();
+	contentClone.remove();*/
+
+	var holder = $("<div id='hiddenTempHolder2' style='position: absolute; left: -1000; top: -1000; width: 1000; height: 1000; overflow: hidden;'>").appendTo("body");
+	var contentClone = content.clone();
+	holder.append(contentClone);
+	var width = contentClone.outerWidth(includeMargin) as number;
+	var height = contentClone.outerHeight(includeMargin) as number;
+	holder.remove();
+
+	return {width, height};
+}
+export function GetContentWidth(content, includeMargin = false) { return GetContentSize(content, includeMargin).width; }
+export function GetContentHeight(content, includeMargin = false) { return GetContentSize(content, includeMargin).height; }
 
 export class TreeNode {
 	constructor(ancestorNodes: TreeNode[], obj, prop) {

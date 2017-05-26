@@ -39,6 +39,7 @@ import * as FastDOM from "fastdom";
 import Row from "Frame/ReactComponents/Row";
 import Icon from "../../../../Frame/ReactComponents/Icon";
 import {MetaThesis_IfType} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
+import {GetContentWidth, GetContentHeight} from "../../../../Frame/V/V";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -293,11 +294,18 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		let displayText = GetNodeDisplayText(node, path);
-		if (node.equation) {
-			displayText += node.equation.explanation;
-		}
 		let fontSize = GetFontSizeForNode(node);
-		let expectedTextWidth = V.GetContentWidth($(`<a style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${displayText}</a>`));
+		let expectedTextWidth = GetContentWidth($(`<span style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${displayText}</span>`));
+
+		if (node.note) {
+			expectedTextWidth = Math.max(expectedTextWidth,
+				GetContentWidth($(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.note}</span>`), true));
+		}
+		if (node.equation && node.equation.explanation) {
+			expectedTextWidth = Math.max(expectedTextWidth,
+				GetContentWidth($(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.equation.explanation}</span>`), true));
+		}
+
 		//let expectedOtherStuffWidth = 26;
 		let expectedOtherStuffWidth = 28;
 		if (node.contentNode)
@@ -309,7 +317,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let width = node.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
 
 		let maxTextWidth = width - expectedOtherStuffWidth;
-		let expectedTextHeight = V.GetContentHeight($(`<a style='${
+		let expectedTextHeight = GetContentHeight($(`<a style='${
 			createMarkupForStyles({fontSize, whiteSpace: "initial", display: "inline-block", width: maxTextWidth})
 		}'>${displayText}</a>`));
 		let expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
