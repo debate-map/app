@@ -100,8 +100,9 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		if (rootNode == null)
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading root node...</div>;
 
-		if (isBot)
+		if (isBot) {
 			return <NodeUI_ForBots map={map} node={rootNode}/>;
+		}
 
 		return (
 			<div style={{height: "100%"}}>

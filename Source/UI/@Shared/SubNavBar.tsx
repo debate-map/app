@@ -31,7 +31,7 @@ export class SubNavBarButton extends BaseComponent<{to: string, toImplied?: stri
 		/*var {to, toImplied, page, text} = this.props;
 		let active = to.substr(1) == page || (toImplied && toImplied.substr(1) == page);*/
 		var {to, toImplied, text} = this.props;
-		let path = "/" + URL.Current().WithImpliedPathNodes().pathNodes.Take(2).join("/");
+		let path = "/" + URL.Current(true).WithImpliedPathNodes().pathNodes.Take(2).join("/");
 		let active = to == path || (toImplied && toImplied == path);
 		return (
 			<Link to={to} style={E(

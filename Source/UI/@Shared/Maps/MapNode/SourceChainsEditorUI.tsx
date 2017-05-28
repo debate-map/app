@@ -8,8 +8,6 @@ import {GetEntries} from "../../../../Frame/General/Enums";
 import {GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText} from "../../../../Store/firebase/contentNodes/$contentNode";
 import Select from "../../../../Frame/ReactComponents/Select";
 
-// todo: maybe update other editors to use this approach ("enabled" and "forNew" props, instead of "creating" and "editing")
-
 type Props = {baseData: SourceChain[], enabled?: boolean, style?, onChange?: (newData: SourceChain[])=>void};
 	//& Partial<{creator: User, variantNumber: number}>;
 /*@Connect((state, {baseData, creating}: Props)=>({

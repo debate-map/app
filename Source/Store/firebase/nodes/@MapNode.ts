@@ -12,7 +12,7 @@ import {Image} from '../images/@Image';
 
 export enum AccessLevel {
 	Basic = 10,
-	Verified = 20,
+	Verified = 20, // for accounts we're pretty sure are legitimate (an actual person's only account)
 	Mod = 30,
 	Admin = 40,
 }
@@ -44,8 +44,9 @@ export class MapNode {
 	creator?: string;
 	createdAt: number;
 	approved = false;
+	// only applied client-side; would need to be in protected branch of tree (or use a long, random, and unreferenced node-id) to be "actually" inaccessible
 	accessLevel = AccessLevel.Basic;
-	voteLevel = AccessLevel.Basic;
+	//voteLevel = AccessLevel.Basic;
 
 	relative: boolean;
 	fontSizeOverride: number;
@@ -83,8 +84,9 @@ AddSchema({
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 		approved: {type: "boolean"},
-		accessLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
-		voteLevel: {oneOf: GetValues_ForSchema(AccessLevel)},
+		accessLevel: {oneOf: GetValues_ForSchema(AccessLevel).concat({const: null})},
+		voteLevel: {oneOf: GetValues_ForSchema(AccessLevel).concat({const: null})}, // not currently used
+
 		relative: {type: "boolean"},
 		fontSizeOverride: {type: ["null", "number"]},
 		widthOverride: {type: ["null", "number"]},

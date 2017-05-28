@@ -120,6 +120,7 @@ String.prototype._AddFunction_Inline = function ContainsAny(this: string, ...str
 	return strings.Any(str=>this.Contains(str));
 };
 /** Separator-strings must be escaped. (they're passed into a regular-expression) */
+interface String { SplitByAny: (...separators: string[])=>string[]; }
 String.prototype._AddFunction_Inline = function SplitByAny(...separators) {
 	/*var splitStr = "/";
 	for (let sep of separators)

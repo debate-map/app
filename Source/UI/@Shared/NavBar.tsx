@@ -109,7 +109,7 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 
 //@Radium
 @Connect(state=> ({
-	page: URL.Current(false).WithImpliedPathNodes().pathNodes[0],
+	page: URL.Current().WithImpliedPathNodes().pathNodes[0],
 }))
 export class NavBarButton extends BaseComponent
 		<{to: string, toImplied?: string, text: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void} & Partial<{page: string}>,

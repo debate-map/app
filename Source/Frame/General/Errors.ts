@@ -47,6 +47,11 @@ export function HandleError(error: Error, fatal = false, recordWithSentry = true
 	LogError(errorStr);
 
 	if (recordWithSentry) {
+		/*(()=> {
+			// errors that should be shown to user, but not recorded
+			if (message.startsWith("KaTeX parse error: ")) return;
+			Raven.captureException(error);
+		})();*/
 		Raven.captureException(error);
 	}
 

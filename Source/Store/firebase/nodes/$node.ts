@@ -86,9 +86,12 @@ export function GetFinalNodeTypeAtPath(node: MapNode, path: string): MapNodeType
 	let result = node.type;
 	if (node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument) {
 		let parent = GetParentNode(path);
-		let parentForm = GetNodeForm(parent, path.split("/").slice(0, -1).join("/"));
-		if (parentForm == ThesisForm.Negation)
-			result = ReverseMapNodeType(node.type);
+		if (parent != null) { // can be null, if for NodeUI_ForBots
+			let parentForm = GetNodeForm(parent, path.split("/").slice(0, -1).join("/"));
+			if (parentForm == ThesisForm.Negation) {
+				result = ReverseMapNodeType(node.type);
+			}
+		}
 	}
 	return result;
 }
@@ -152,9 +155,15 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 			if (node.equation.latex) {
 				//result = result.replace(/\\[^{]+/g, "").replace(/[{}]/g, "");
 				let latex = PreProcessLatex(result);
-				let html = katex.renderToString(latex);
-				let dom = $(html).children(".katex-html");
-				result = dom.text();
+				try {
+					let html = katex.renderToString(latex);
+					let dom = $(html).children(".katex-html");
+					result = dom.text();
+				} catch (ex) {
+					if (ex.message.startsWith("KaTeX parse error: ")) {
+						return ex.message.replace(/^KaTeX/, "LaTeX");
+					}
+				}
 			}
 			return result;
 		}

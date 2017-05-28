@@ -284,8 +284,8 @@ export function VisitTreeNodesInPath(treeRoot, pathNodesOrStr: string[] | string
 }*/
 
 //export function DeepGet(obj, path, resultIfNullOrUndefined = null, resultIfUndefined_override = undefined) {
-export function DeepGet<T>(obj, path, resultIfNull: T = null): T {
-	let pathNodes = path.SplitByAny("\\.", "\\/");
+export function DeepGet<T>(obj, path: string, resultIfNull: T = null): T {
+	var pathNodes = path.SplitByAny("\\.", "\\/");
 	let result = obj;
 	for (let pathNode of pathNodes) {
 		if (result == null) break;

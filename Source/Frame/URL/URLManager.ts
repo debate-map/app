@@ -132,7 +132,7 @@ history.replaceState = function(stateObj, title, url) {
 
 export function UpdateURL() {
 	//let newURL = URL.Current();
-	let oldURL = URL.Current();
+	let oldURL = URL.Current(true);
 	let newURL = new URL(oldURL.domain, oldURL.pathNodes);
 	if (oldURL.WithImpliedPathNodes().toString({domain: false}).startsWith("/global/map") && !isBot)
 		newURL = CreateURL_Globals();
@@ -144,7 +144,7 @@ export function UpdateURL() {
 }
 function CreateURL_Globals(): URL {
 	//let result = URL.Current().Clone();
-	let result = new URL(URL.Current().domain);
+	let result = new URL(URL.Current(true).domain);
 	result.pathNodes = ["global"];
 	let mapID = GetOpenMapID();
 	result.queryVars.push(new QueryVar("view", GetMapViewStr(mapID)));

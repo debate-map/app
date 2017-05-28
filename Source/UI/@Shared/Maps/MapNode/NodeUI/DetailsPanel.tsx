@@ -61,7 +61,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 		return (
 			<Column style={{position: "relative"}}>
 				<NodeDetailsUI ref={c=>this.detailsUI = GetInnerComp(c) as any} baseData={node} baseLinkData={link} parent={parentNode}
-					creating={false} editing={creatorOrMod}
+					forNew={false} enabled={creatorOrMod}
 					onChange={(newData, newLinkData)=> {
 						this.SetState({dataError: this.detailsUI.GetValidationError()});
 					}}/>

@@ -98,7 +98,7 @@ export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: Thes
 									Change();
 								}}/>
 						</Row>}
-					<NodeDetailsUI baseData={newNode.Extended({finalType: newNode.type, link: null})} baseLinkData={newLink} creating={true}
+					<NodeDetailsUI baseData={newNode.Extended({finalType: newNode.type, link: null})} baseLinkData={newLink} forNew={true}
 						parent={parentNode.Extended({finalType: parentNode.type})}
 						onChange={(newNodeData, newLinkData)=>Change(newNode = newNodeData, newLink = newLinkData)}/>
 				</Column>

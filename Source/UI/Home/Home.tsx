@@ -296,7 +296,7 @@ const Link = (props, router)=> {
 	let {href, nodeKey, children, literal, ...rest} = props;
 	return (
 		<a {...rest} href={href} key={nodeKey} onClick={e=> {
-			let currentURL = URL.Current();
+			let currentURL = URL.Current(true);
 			//let fullURL = href.Contains("://") ? href : GetUrlParts()[0] + "/" + href;
 			let toURL = URL.Parse(ToAbsoluteUrl(href));
 			if (toURL.domain == currentURL.domain) {

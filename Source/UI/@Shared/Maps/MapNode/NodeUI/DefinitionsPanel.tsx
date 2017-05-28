@@ -103,7 +103,7 @@ class TermDefinitionPanel extends BaseComponent<{term: Term, termVariantNumber: 
 				<TermDetailsUI baseData={term} creating={false} enabled={/*creatorOrMod*#/ false} style={{padding: 10}}
 					onChange={data=>this.SetState({selectedTerm_newData: data})}/>*/}
 				<Button text="Show details" onClick={e=> {
-					let newURL = URL.Current().Clone();
+					let newURL = URL.Current(true).Clone();
 					newURL.pathNodes = ["content"];
 					newURL.queryVars = [];
 					//browserHistory.push(newURL.toString({domain: false}));

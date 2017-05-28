@@ -84,7 +84,7 @@ function GetUrlVars(url?: string) {
 }
 
 export class URL {
-	static Current(fromAddressBar = true) {
+	static Current(fromAddressBar = false) {
 		return fromAddressBar ? URL.Parse(CurrentUrl()) : URL.FromState(State(a=>a.router.location));
 	}
 	static Parse(urlStr: string, useCurrentDomainIfMissing = true) {

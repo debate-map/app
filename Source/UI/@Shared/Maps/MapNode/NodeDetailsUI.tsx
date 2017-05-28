@@ -5,7 +5,7 @@ import Column from "../../../../Frame/ReactComponents/Column";
 import Row from "../../../../Frame/ReactComponents/Row";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
 import * as Moment from "moment";
-import {GetUser, User} from "../../../../Store/firebase/users";
+import {GetUser, User, GetUserPermissionGroups} from "../../../../Store/firebase/users";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../../Frame/General/Enums";
 import Select from "../../../../Frame/ReactComponents/Select";
@@ -17,7 +17,7 @@ import TermComponent from "../../../../Store/firebase/termComponents/@TermCompon
 import {GetNiceNameForTermType} from "../../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, MapNode_id, ThesisType} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, MapNode_id, ThesisType, AccessLevel} from "../../../../Store/firebase/nodes/@MapNode";
 import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {MetaThesis_IfType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
@@ -28,25 +28,29 @@ import Icon from "../../../../Frame/ReactComponents/Icon";
 import Spinner from "../../../../Frame/ReactComponents/Spinner";
 import EquationEditorUI from "./EquationEditorUI";
 import {IsUserAdmin} from "../../../../Store/firebase/userExtras";
-import {GetUserID} from "Store/firebase/users";
+import {GetUserID, GetUserAccessLevel} from "Store/firebase/users";
 import ImageAttachmentEditorUI from "./ImageAttachmentEditorUI";
 
 type Props = {
-	baseData: MapNodeEnhanced, baseLinkData: ChildEntry, parent: MapNodeEnhanced, creating: boolean, editing?: boolean, style?, onChange?: (newData: MapNode, newLinkData: ChildEntry)=>void,
+	baseData: MapNodeEnhanced, baseLinkData: ChildEntry, parent: MapNodeEnhanced, forNew: boolean, enabled?: boolean,
+	style?, onChange?: (newData: MapNode, newLinkData: ChildEntry)=>void,
 	//onSetError: (error: string)=>void,
 } & Partial<{creator: User}>;
 type State = {newData: MapNode, newLinkData: ChildEntry};
-@Connect((state, {baseData, creating}: Props)=>({
-	creator: !creating && GetUser(baseData.creator),
+@Connect((state, {baseData, forNew}: Props)=>({
+	_: GetUserAccessLevel(GetUserID()),
+	creator: !forNew && GetUser(baseData.creator),
 }))
 export default class NodeDetailsUI extends BaseComponent<Props, State> {
+	static defaultProps = {enabled: true};
+
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
 			this.SetState({newData: Clone(props.baseData).Excluding("finalType", "link"), newLinkData: Clone(props.baseLinkData)});
 	}
 
 	render() {
-		let {baseData, parent, creating, editing, style, onChange, creator} = this.props;
+		let {baseData, parent, forNew, enabled, style, onChange, creator} = this.props;
 		let {newData, newLinkData} = this.state;
 		let firebase = store.firebase.helpers;
 		let Change = (..._)=> {
@@ -65,7 +69,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 				{/*<Div style={{fontSize: 12}}>ID: {node._id}</Div>
 				<Div mt={3} style={{fontSize: 12}}>Created at: {(Moment as any)(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)
 					} (by: {creator ? creator.displayName : `n/a`})</Div>*/}
-				{!creating &&
+				{!forNew &&
 					<InfoTable {...propsEnhanced}/>}
 				{newData.type == MapNodeType.Thesis && (thesisType == ThesisType.Normal || thesisType == ThesisType.Equation) && !newData.metaThesis &&
 					<RelativeToggle {...propsEnhanced}/>}
@@ -74,26 +78,26 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 				{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Normal &&
 					<OtherTitles {...propsEnhanced}/>}
 				{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Equation &&
-					<EquationEditorUI key={0} creating={creating} editing={editing}
+					<EquationEditorUI key={0} creating={forNew} editing={enabled}
 						baseData={newData.equation} onChange={val=>Change(newData.equation = val)}/>}
 				{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Quote &&
-					<QuoteInfoEditorUI key={1} creating={creating} editing={editing}
+					<QuoteInfoEditorUI key={1} creating={forNew} editing={enabled}
 						baseData={newData.contentNode} onChange={val=>Change(newData.contentNode = val)}
 						showPreview={false} justShowed={false}/>}
 				{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Image &&
-					<ImageAttachmentEditorUI key={1} creating={creating} editing={editing}
+					<ImageAttachmentEditorUI key={1} creating={forNew} editing={enabled}
 						baseData={newData.image} onChange={val=>Change(newData.image = val)}/>}
 				{newData.metaThesis &&
 					<MetaThesisInfo {...propsEnhanced}/>}
 				<Row mt={5}>
 					<Pre>Note: </Pre>
-					<TextInput enabled={creating || editing} style={{width: "100%"}}
+					<TextInput enabled={enabled} style={{width: "100%"}}
 						value={newData.note} onChange={val=>Change(newData.note = val)}/>
 				</Row>
-				{!creating &&
+				{!forNew &&
 					<AdvancedOptions {...propsEnhanced}/>}
 				<AtThisLocation {...propsEnhanced}/>
-				{!creating && editing && IsArgumentNode(newData) && newData.childrenOrder &&
+				{!forNew && enabled && IsArgumentNode(newData) && newData.childrenOrder &&
 					<ChildrenOrder {...propsEnhanced}/>}
 			</Column>
 			</div>
@@ -142,11 +146,11 @@ class InfoTable extends BaseComponent<Props_Enhanced, {}> {
 
 class RelativeToggle extends BaseComponent<Props_Enhanced, {}> {
 	render() {
-		let {editing, newData, Change} = this.props;
+		let {enabled, newData, Change} = this.props;
 		return (
 			<Row style={{display: "flex", alignItems: "center"}}>
 				<Pre>Relative: </Pre>
-				<CheckBox enabled={editing} checked={newData.relative} onChange={val=>Change(newData.relative = val)}/>
+				<CheckBox enabled={enabled} checked={newData.relative} onChange={val=>Change(newData.relative = val)}/>
 				<InfoButton text={`"Relative" means the statement/question is too loosely worded to give a simple yes/no answer,${""
 						} and should instead be evaluated in terms of the degree/intensity to which it is true. Eg. "How dangerous is sky-diving?"`}/>
 			</Row>
@@ -156,16 +160,16 @@ class RelativeToggle extends BaseComponent<Props_Enhanced, {}> {
 
 class Title_Base extends BaseComponent<Props_Enhanced, {}> {
 	render() {
-		let {creating, editing, newData, Change} = this.props;
+		let {forNew, enabled, newData, Change} = this.props;
 		return (
 			<div>
 				<Row style={{display: "flex", alignItems: "center"}}>
 					<Pre>Title (base): </Pre>
-					<TextInput enabled={editing} style={{flex: 1}}
-						ref={a=>a && creating && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
+					<TextInput enabled={enabled} style={{flex: 1}}
+						ref={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
 						value={newData.titles["base"]} onChange={val=>Change(newData.titles["base"] = val)}/>
 				</Row>
-				{creating && IsArgumentNode(newData) &&
+				{forNew && IsArgumentNode(newData) &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 						<Pre allowWrap={true}>{`
 An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
@@ -186,18 +190,18 @@ The detailed version of the argument will be embodied in its premises/child-thes
 
 class OtherTitles extends BaseComponent<Props_Enhanced, {}> {
 	render() {
-		let {newData, editing, newLinkData, creating, Change} = this.props;
+		let {newData, forNew, enabled, newLinkData, Change} = this.props;
 		return (
 			<Div>
 				<Row key={0} mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Title (negation): </Pre>
-					<TextInput enabled={editing} style={{flex: 1}} value={newData.titles["negation"]} onChange={val=>Change(newData.titles["negation"] = val)}/>
+					<TextInput enabled={enabled} style={{flex: 1}} value={newData.titles["negation"]} onChange={val=>Change(newData.titles["negation"] = val)}/>
 				</Row>
 				<Row key={1} mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Title (yes-no question): </Pre>
-					<TextInput enabled={editing} style={{flex: 1}} value={newData.titles["yesNoQuestion"]} onChange={val=>Change(newData.titles["yesNoQuestion"] = val)}/>
+					<TextInput enabled={enabled} style={{flex: 1}} value={newData.titles["yesNoQuestion"]} onChange={val=>Change(newData.titles["yesNoQuestion"] = val)}/>
 				</Row>
-				{newData.type == MapNodeType.Thesis && !newData.contentNode && !newData.metaThesis && newLinkData.form == ThesisForm.YesNoQuestion && creating &&
+				{newData.type == MapNodeType.Thesis && !newData.contentNode && !newData.metaThesis && newLinkData.form == ThesisForm.YesNoQuestion && forNew &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 						<Pre allowWrap={true}>At this location (under a category node), the node will be displayed with the yes-no question title.</Pre>
 					</Row>}
@@ -208,7 +212,7 @@ class OtherTitles extends BaseComponent<Props_Enhanced, {}> {
 
 class MetaThesisInfo extends BaseComponent<Props_Enhanced, {}> {
 	render() {
-		let {editing, baseData, parent, newData, Change} = this.props;
+		let {enabled, baseData, parent, newData, Change} = this.props;
 
 		let isArgument = IsArgumentType(baseData.finalType);
 		let reverseThenTypes = IsContextReversed(baseData, parent);
@@ -221,12 +225,12 @@ class MetaThesisInfo extends BaseComponent<Props_Enhanced, {}> {
 			<Row mt={5}>
 				<Pre>Type: If </Pre>
 				<Select options={GetEntries(MetaThesis_IfType, name=>GetMetaThesisIfTypeDisplayText(MetaThesis_IfType[name]))}
-					enabled={editing} value={newData.metaThesis.ifType} onChange={val=> {
+					enabled={enabled} value={newData.metaThesis.ifType} onChange={val=> {
 						//firebase.Ref(`nodes/${newData._id}/metaThesis`).update({ifType: val});
 						Change(newData.metaThesis.ifType = val);
 					}}/>
 				<Pre> premises below are true, they </Pre>
-				<Select options={thenTypes_forRender} enabled={editing} value={GetThenType_ForRender(newData.metaThesis.thenType)} onChange={val=> {
+				<Select options={thenTypes_forRender} enabled={enabled} value={GetThenType_ForRender(newData.metaThesis.thenType)} onChange={val=> {
 					val = GetThenType_ForRender(val);
 					//firebase.Ref(`nodes/${newData._id}/metaThesis`).update({thenType: val});
 					Change(newData.metaThesis.thenType = val);
@@ -247,20 +251,26 @@ The "type" option above describes the way in which this argument's premises will
 
 class AdvancedOptions extends BaseComponent<Props_Enhanced, {}> {
 	render() {
-		let {newData, Change} = this.props;
+		let {newData, forNew, enabled, Change} = this.props;
 		return (
 			<Column mt={10}>
 				<Row style={{fontWeight: "bold"}}>Advanced:</Row>
 				{IsUserAdmin(GetUserID()) &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Font-size override: </Pre>
-						<Spinner max={25} value={newData.fontSizeOverride|0} onChange={val=>Change(newData.fontSizeOverride = val != 0 ? val : null)}/>
+						<Spinner max={25} enabled={enabled} value={newData.fontSizeOverride|0} onChange={val=>Change(newData.fontSizeOverride = val != 0 ? val : null)}/>
 						<Pre> px (0 for auto)</Pre>
 					</Row>}
 				<Row mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Width override: </Pre>
-					<Spinner step={10} max={1000} value={newData.widthOverride|0} onChange={val=>Change(newData.widthOverride = val != 0 ? val : null)}/>
+					<Spinner step={10} max={1000} enabled={enabled} value={newData.widthOverride|0} onChange={val=>Change(newData.widthOverride = val != 0 ? val : null)}/>
 					<Pre> px (0 for auto)</Pre>
+				</Row>
+				<Row mt={5} style={{display: "flex", alignItems: "center"}}>
+					<Pre>Access level: </Pre>
+					<Select options={GetEntries(AccessLevel).filter(a=>a.value <= GetUserAccessLevel(GetUserID()))} enabled={enabled}
+						value={newData.accessLevel || AccessLevel.Basic}
+						onChange={val=>Change(val == AccessLevel.Basic ? delete newData.accessLevel : newData.accessLevel = val)}/>
 				</Row>
 			</Column>
 		);
@@ -269,7 +279,7 @@ class AdvancedOptions extends BaseComponent<Props_Enhanced, {}> {
 
 class AtThisLocation extends BaseComponent<Props_Enhanced, {}> {
 	render() {
-		let {newData, creating, editing, newLinkData, Change} = this.props;
+		let {newData, forNew, enabled, newLinkData, Change} = this.props;
 		if (newData.type != MapNodeType.Thesis) return <div/>;
 
 		let thesisType = GetThesisType(newData);
@@ -283,13 +293,13 @@ class AtThisLocation extends BaseComponent<Props_Enhanced, {}> {
 				{canSetAsNegation &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Show as negation: </Pre>
-						<CheckBox enabled={editing} checked={newLinkData.form == ThesisForm.Negation}
+						<CheckBox enabled={enabled} checked={newLinkData.form == ThesisForm.Negation}
 							onChange={val=>Change(newLinkData.form = val ? ThesisForm.Negation : ThesisForm.Base)}/>
 					</Row>}
 				{canSetAsSeriesAnchor &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Show as series anchor: </Pre>
-						<CheckBox enabled={editing} checked={newLinkData.seriesAnchor}
+						<CheckBox enabled={enabled} checked={newLinkData.seriesAnchor}
 							//onChange={val=>Change(val ? newLinkData.isStep = true : delete newLinkData.isStep)}/>
 							onChange={val=>Change(newLinkData.seriesAnchor = val || null)}/>
 					</Row>}

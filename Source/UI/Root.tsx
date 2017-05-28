@@ -102,7 +102,7 @@ class RootUI extends BaseComponent<{}, {}> {
 
 					{/*<Route exact path="/" component={HomeUI}/>
 					<Route exact path="/about" component={HomeUI}/>*/}
-					{URL.Current().WithImpliedPathNodes().pathNodes[0] == "home" && <HomeUI/>}
+					{URL.Current(true).WithImpliedPathNodes().pathNodes[0] == "home" && <HomeUI/>}
 
 					<Route path="/content" component={ContentUI}/>
 					<Route path="/personal" component={PersonalUI}/>

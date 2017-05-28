@@ -32,7 +32,7 @@ function State<T>(pathSegmentOrSegments, countAsAccess = true) {
 	if (pathSegments.length == 0) return state;
 
 	let path = pathSegments.map(segment=> {
-		return segment instanceof Function ? (segment as any).toString().match("return a.(.+?);")[1].replace(/\./g, "/") : segment;
+		return segment instanceof Function ? (segment as any).toString().match(/return a\.(.+?);/)[1].replace(/\./g, "/") : segment;
 	}).join("/");
 
 	let selectedData = DeepGet(state, path);

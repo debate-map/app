@@ -34,12 +34,15 @@ import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@M
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import Column from "../../../../Frame/ReactComponents/Column";
-import { GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType, IsArgumentNode, IsReversedArgumentNode, GetMinChildCountToBeVisibleToNonModNonCreators } from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType, IsArgumentNode, IsReversedArgumentNode, GetMinChildCountToBeVisibleToNonModNonCreators, IsNodeVisibleToNonModNonCreators} from "../../../../Store/firebase/nodes/$node";
 import * as FastDOM from "fastdom";
 import Row from "Frame/ReactComponents/Row";
 import Icon from "../../../../Frame/ReactComponents/Icon";
 import {MetaThesis_IfType} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
 import {GetContentWidth, GetContentHeight} from "../../../../Frame/V/V";
+import {GetUserAccessLevel} from "../../../../Store/firebase/users";
+import {GetUserID} from "Store/firebase/users";
+import {IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -78,6 +81,15 @@ type State = {
 	let nodeView = GetNodeView(map._id, path) || new MapNodeView();
 
 	let nodeChildren = GetNodeChildrenEnhanced(node, path);
+	nodeChildren = nodeChildren.filter(child=> {
+		// if null, keep (so receiver knows there's an entry here, but it's still loading)
+		if (child == null) return true;
+		// filter out any nodes whose access-level is higher than our own
+		if (child.accessLevel > GetUserAccessLevel(GetUserID())) return false;
+		// hide nodes that don't have the required premise-count
+		if (!IsNodeVisibleToNonModNonCreators(child, GetNodeChildren(child)) && !IsUserCreatorOrMod(GetUserID(), child)) return false;
+		return true;
+	});
 	// only pass nodeChildren when all are loaded
 	nodeChildren = nodeChildren.Any(a=>a == null) ? childrenPlaceholder : nodeChildren;
 	/*let nodeChildren_finalTypes = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {

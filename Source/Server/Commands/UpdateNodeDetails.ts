@@ -1,7 +1,7 @@
 import {Assert} from "../../Frame/General/Assert";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command} from "../Command";
-import {MapNode, ThesisForm, ChildEntry} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry, AccessLevel} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {DeepGet} from "../../Frame/V/V";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
@@ -18,6 +18,10 @@ AddSchema({
 					//required: ["base", "negation", "yesNoQuestion"],
 				},
 				note: {type: ["null", "string"]},
+
+				accessLevel: {oneOf: GetValues_ForSchema(AccessLevel).concat({const: null})},
+				voteLevel: {oneOf: GetValues_ForSchema(AccessLevel).concat({const: null})},
+
 				relative: {type: "boolean"},
 				fontSizeOverride: {type: ["null", "number"]},
 				widthOverride: {type: ["null", "number"]},

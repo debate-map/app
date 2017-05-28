@@ -5,7 +5,7 @@ import {MapNode} from "./nodes/@MapNode";
 import {CachedTransform} from "../../Frame/V/VCache";
 import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
 import {IsUserCreatorOrMod} from "./userExtras";
-import {GetUserPermissionGroups, GetUserID} from "./users";
+import {GetUserPermissionGroups, GetUserID, GetUserAccessLevel} from "./users";
 import { GetNodeEnhanced, IsArgumentNode, IsNodeVisibleToNonModNonCreators } from "./nodes/$node";
 
 export function GetNode(id: number) {
@@ -49,9 +49,6 @@ export function GetNodeChildren(node: MapNode) {
 	}
 
 	let children = (node.children || {}).VKeys(true).map(id=>GetNode(parseInt(id)));
-	children = children.filter(child=> {
-		return child == null || IsNodeVisibleToNonModNonCreators(child, children) || IsUserCreatorOrMod(GetUserID(), child);
-	});
 	return CachedTransform("GetNodeChildren", [node._id], children, ()=>children);
 }
 export async function GetNodeChildrenAsync(node: MapNode) {

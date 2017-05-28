@@ -38,7 +38,7 @@ g.Extend({React, Promise: PromiseWrapper});*/
 
 //g.Extend({ReactPerf});
 
-let startURL = URL.Current();
+let startURL = URL.Current(true);
 declare global { export var startURL: URL; } g.Extend({startURL});
 
 //let {version, env, devEnv, prodEnv, testEnv} = __DEV__ ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");

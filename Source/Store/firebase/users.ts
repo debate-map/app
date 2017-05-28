@@ -3,6 +3,7 @@ import {PermissionGroupSet} from "./userExtras/@UserExtraInfo";
 import UserExtraInfo from "./userExtras/@UserExtraInfo";
 import {CachedTransform} from "../../Frame/V/VCache";
 import {UserInfo} from "firebase";
+import {AccessLevel} from "./nodes/@MapNode";
 
 export type User = {
 	avatarUrl: string;
@@ -41,8 +42,20 @@ export function GetUserExtraInfoMap(): UserExtraInfoMap {
 	return GetData(`userExtras`);
 }
 export function GetUserJoinDate(userID: string): number {
+	if (userID == null) return null;
 	return GetData(`userExtras/${userID}/joinDate`);
 }
 export function GetUserPermissionGroups(userID: string): PermissionGroupSet {
+	if (userID == null) return null;
 	return GetData(`userExtras/${userID}/permissionGroups`);
+}
+export function GetUserAccessLevel(userID: string) {
+	let groups = GetUserPermissionGroups(userID);
+	if (groups == null) return AccessLevel.Basic;
+	
+	if (groups.admin) return AccessLevel.Admin;
+	if (groups.mod) return AccessLevel.Mod;
+	if (groups.verified) return AccessLevel.Verified;
+	//if (groups.basic) return AccessLevel.Basic;
+	Assert(false);
 }

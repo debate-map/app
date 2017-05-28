@@ -27,7 +27,13 @@ import ScrollView from "react-vscrollview";
 let childrenPlaceholder = [];
 
 function GetCrawlerURLStrForNode(node: MapNode) {
-	return GetNodeDisplayText(node).toLowerCase().replace(/[^a-z]/g, "-").replace(/--/g, "-").TrimStart("-").TrimEnd("-") + "." + node._id.toString()
+	let result = GetNodeDisplayText(node).toLowerCase().replace(/[^a-z]/g, "-");
+	// need to loop, in some cases, since regex doesn't reprocess "---" as two sets of "--".
+	while (result.Contains("--")) {
+		result = result.replace(/--/g, "-");
+	}
+	result = result.TrimStart("-").TrimEnd("-") + "." + node._id.toString();
+	return result;
 }
 
 type Props = {map: Map, node: MapNode}
@@ -51,7 +57,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 					scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}>
 				<Row>
 					<Pre>Parents: </Pre>{nodeParents.map((parent, index)=> {
-						let toURL = URL.Current();
+						let toURL = URL.Current(true);
 						if (parent._id == map.rootNode)
 							toURL.pathNodes.RemoveAt(1);
 						else
@@ -69,7 +75,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 				</Row>
 				<Row>
 					<Pre>Children: </Pre>{nodeChildren.map((child, index)=> {
-						let toURL = URL.Current();
+						let toURL = URL.Current(true);
 						toURL.pathNodes[1] = GetCrawlerURLStrForNode(child);
 						toURL.queryVars = [];
 						return (

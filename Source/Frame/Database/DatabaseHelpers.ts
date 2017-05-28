@@ -129,6 +129,9 @@ export function GetData(path: string, inVersionRoot = true, makeRequest = true) 
 	//let firebase = State(a=>a.firebase);
 	path = DBPath(path, inVersionRoot);
 
+	Assert(!path.endsWith("/"), "Path cannot end with a slash. (This may mean a path parameter is missing)");
+	Assert(!path.Contains("//"), "Path cannot contain a double-slash. (This may mean a path parameter is missing)");
+
 	/*let info = pathInfos[path] || (pathInfos[path] = new DBPathInfo());
 	/*let timestampEntry = (firebase as any)._root.entries.FirstOrX(a=>a[0] == "timestamp");
 	if (timestampEntry) {

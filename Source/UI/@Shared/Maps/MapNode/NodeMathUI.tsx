@@ -3,6 +3,19 @@ import {BaseComponent, FindDOM_} from "../../../../Frame/UI/ReactGlobals";
 import * as ReactDOM from "react-dom";
 import {TermPlaceholder} from "./NodeUI_Inner";
 
+// change InlineMath's generateHtml function to not break on katex parse-errors
+let oldGenerateHtml = InlineMath.prototype.generateHtml;
+InlineMath.prototype.generateHtml = function() {
+	try {
+		return oldGenerateHtml.apply(this, arguments);
+	} catch (ex) {
+		//return ex.message;
+		if (ex.message.startsWith("KaTeX parse error: ")) {
+			return ex.message.replace(/^KaTeX/, "LaTeX");
+		}
+	}
+};
+
 export function PreProcessLatex(text: string) {
 	//text = text.replace(/\\term{/g, "\\text{");
 	// "\term{some-term}{123}" -> "\text{@term[some-term,123]} 
