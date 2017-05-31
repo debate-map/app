@@ -62,7 +62,8 @@ export function Connect<T, P>(funcOrFuncGetter) {
 				}
 			}
 		}
-		let propsChanged = ShallowChanged(props, s.lastProps || {});
+		//let propsChanged = ShallowChanged(props, s.lastProps || {});
+		let propsChanged = ShallowChanged(props, s.lastProps || {}, "children");
 
 		//let result = storeDataChanged ? mapStateToProps_inner(state, props) : s.lastResult;
 		if (!storeDataChanged && !propsChanged) {

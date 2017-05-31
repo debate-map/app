@@ -155,3 +155,6 @@ export class IDProvider {
 		return ++this.lastID;
 	}
 }
+
+const nl = "\n";
+g.Extend({nl}); declare global { const nl: string; }

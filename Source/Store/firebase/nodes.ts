@@ -55,9 +55,20 @@ export async function GetNodeChildrenAsync(node: MapNode) {
 	return await Promise.all(node.children.VKeys(true).map(id=>GetDataAsync(`nodes/${id}`))) as MapNode[];
 }
 
-export function GetNodeChildrenEnhanced(node: MapNode, path: string) {
+export function GetNodeChildrenEnhanced(node: MapNode, path: string, filterForPath = false) {
 	let nodeChildren = GetNodeChildren(node);
 	let nodeChildrenEnhanced = nodeChildren.map(child=>child ? GetNodeEnhanced(child, path + "/" + child._id) : null);
+	if (filterForPath) {
+		nodeChildrenEnhanced = nodeChildrenEnhanced.filter(child=> {
+			// if null, keep (so receiver knows there's an entry here, but it's still loading)
+			if (child == null) return true;
+			// filter out any nodes whose access-level is higher than our own
+			if (child.accessLevel > GetUserAccessLevel(GetUserID())) return false;
+			// hide nodes that don't have the required premise-count
+			if (!IsNodeVisibleToNonModNonCreators(child, GetNodeChildren(child)) && !IsUserCreatorOrMod(GetUserID(), child)) return false;
+			return true;
+		});
+	}
 	return CachedTransform("GetNodeChildrenEnhanced", [path], nodeChildrenEnhanced, ()=>nodeChildrenEnhanced);
 }
 

@@ -62,7 +62,9 @@ export function CachedTransform<T, T2, T3>(transformType: string, staticProps: a
 	let storageKey = transformType + "|" + staticProps.join("|");
 	let storage = storages[storageKey] as Storage<T2, T3> || (storages[storageKey] = new Storage<T2, T3>());
 	if (!shallowEqual(dynamicProps, storage.lastDynamicProps)) {
-		//console.log(`Recalculating cache. @Type:${transformType} @StaticProps:${staticProps.VKeys()} @DynamicProps:${dynamicProps.VKeys()} @TransformFunc:${transformFunc}`);
+		if (g.logCacheUpdates) {
+			console.log(`Recalculating cache. @Type:${transformType} @StaticProps:${ToJSON(staticProps)} @DynamicProps:${ToJSON(dynamicProps)} @TransformFunc:${transformFunc}`);
+		}
 
 		storage.lastDynamicProps = dynamicProps;
 		storage.lastResult = transformFunc(staticProps, dynamicProps);

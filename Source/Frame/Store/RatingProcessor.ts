@@ -5,6 +5,8 @@ import {GetRatingAverage, GetRatings} from "../../Store/firebase/nodeRatings";
 import {Rating} from "../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MetaThesis_IfType, MetaThesis_ThenType} from "../../Store/firebase/nodes/@MetaThesisInfo";
 import {GetRatingTypesForNode, GetNodeForm} from "../../Store/firebase/nodes/$node";
+import {CachedTransform} from "../V/VCache";
+import {emptyObj} from "./ReducerUtils";
 
 /*export function CalculateArgumentStrength(nodeChildren: MapNode[]) {
 	if (nodeChildren.Any(a=>a == null)) return 0; // must still be loading
@@ -76,29 +78,36 @@ export function GetArgumentStrengthPseudoRating(argumentNode: MapNode, nodeChild
 	return result;
 }*/
 export function GetArgumentStrengthPseudoRatingSet(argumentNode: MapNode, nodeChildren: MapNode[]): {[key: string]: Rating} {
-	if (nodeChildren.Any(a=>a == null)) return {}; // must still be loading
+	if (nodeChildren.Any(a=>a == null)) return emptyObj; // must still be loading
 	let metaThesis = nodeChildren.FirstOrX(a=>a.metaThesis != null); // meta-thesis might not be loaded yet
 	let premises = nodeChildren.Except(metaThesis);
-	if (premises.length == 0) return {};
+	if (premises.length == 0) return emptyObj;
 
-	let usersWhoRatedAllChildren = null;
-	for (let child of nodeChildren) {
-		let childRatingSet = GetRatingSet(child._id, GetRatingTypesForNode(child).FirstOrX(null, {}).type) || {};
-		if (usersWhoRatedAllChildren == null) {
-			usersWhoRatedAllChildren = {};
-			for (let userID of childRatingSet.VKeys(true))
-				usersWhoRatedAllChildren[userID] = true;
-		} else {
-			for (let userID in usersWhoRatedAllChildren) {
-				if (childRatingSet[userID] == null)
-					delete usersWhoRatedAllChildren[userID];
+	let childRatingSets = nodeChildren.map(child=> {
+		return GetRatingSet(child._id, GetRatingTypesForNode(child).FirstOrX(null, {}).type) || emptyObj;
+	});
+
+	let result = CachedTransform("GetArgumentStrengthPseudoRatingSet", [argumentNode._id], childRatingSets, ()=> {
+		let usersWhoRatedAllChildren = null;
+		for (let [index, child] of nodeChildren.entries()) {
+			let childRatingSet = childRatingSets[index];
+			if (usersWhoRatedAllChildren == null) {
+				usersWhoRatedAllChildren = {};
+				for (let userID of childRatingSet.VKeys(true))
+					usersWhoRatedAllChildren[userID] = true;
+			} else {
+				for (let userID in usersWhoRatedAllChildren) {
+					if (childRatingSet[userID] == null)
+						delete usersWhoRatedAllChildren[userID];
+				}
 			}
 		}
-	}
 
-	let result = {};
-	for (let userID in usersWhoRatedAllChildren)
-		result[userID] = GetArgumentStrengthPseudoRating(argumentNode, nodeChildren, userID);
+		let result = {};
+		for (let userID in usersWhoRatedAllChildren)
+			result[userID] = GetArgumentStrengthPseudoRating(argumentNode, nodeChildren, userID);
+		return result;
+	});
 	return result;
 }
 

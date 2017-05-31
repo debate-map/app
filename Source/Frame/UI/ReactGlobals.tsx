@@ -179,12 +179,18 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		this.GetPropsChanged_lastProps = {...this.props as any};
 		return result;
 	}
+	GetPropsChanged_Data() {
+		return ToJSON(this.props.Including(...this.GetPropsChanged()));
+	}
 	private GetStateChanged_lastState = {};
 	GetStateChanged() {
 		let keys = Object.keys(this.state).concat(Object.keys(this.GetStateChanged_lastState)).Distinct();
 		let result = keys.Where(key=>!Object.is((this.state as any)[key], this.GetStateChanged_lastState[key]));
 		this.GetStateChanged_lastState = {...this.state as any};
 		return result;
+	}
+	GetStateChanged_Data() {
+		return ToJSON(this.state.Including(...this.GetStateChanged()));
 	}
 
 	forceUpdate(_: ()=>"Do not call this. Call Update() instead.") {
@@ -225,18 +231,20 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	setState(_: ()=>"Do not call this. Call SetState() instead.") {
 		throw new Error("Do not call this. Call SetState() instead.");
 	}
-	/** Returns whether the new-state differs (shallowly) from the old-state. */
-	SetState(newState: Partial<S>, callback?: ()=>any, cancelIfStateSame = true): string[] {
-		//let keys = this.state.VKeys().concat(newState.VKeys()).Distinct();
-		let keys = newState.VKeys(); // we only care about new-state's keys -- setState() leaves unmentioned keys untouched
-		let changedKeys = keys.Where(key=>!Object.is((this.state as S)[key], (newState as S)[key]));
-		if (changedKeys.length == 0 && cancelIfStateSame)
-			return [];
+	SetState(newState: Partial<S>, callback?: ()=>any, cancelIfStateSame = true, deepCompare = false) {
+		if (cancelIfStateSame) {
+			// we only care about new-state's keys -- setState() leaves unmentioned keys untouched
+			let oldState_forNewStateKeys = this.state.Including(...newState.VKeys());
+			if (deepCompare) {
+				if (ToJSON(newState) == ToJSON(oldState_forNewStateKeys)) return [];
+			} else {
+				if (ShallowEquals(newState, oldState_forNewStateKeys)) return [];
+			}
+		}
 		
 		this.lastRender_source = RenderSource.SetState;
 		//this.setState(newState as S, callback);
 		Component.prototype.setState.apply(this, arguments);
-		return changedKeys;
 	}
 
 	changeListeners = [];
@@ -415,31 +423,45 @@ export class Div extends BaseComponent<{shouldUpdate?} & React.HTMLProps<HTMLDiv
 }
 
 export function ShallowEquals(objA, objB) {
-	if (objA === objB)
-		return true;
+	if (objA === objB) return true;
 
-	const keysA = Object.keys(objA);
-	const keysB = Object.keys(objB);
-
-	if (keysA.length !== keysB.length)
-		return false;
+	const keysA = Object.keys(objA || {});
+	const keysB = Object.keys(objB || {});
+	if (keysA.length !== keysB.length) return false;
 
 	// Test for A's keys different from B.
 	const hasOwn = Object.prototype.hasOwnProperty;
 	for (let i = 0; i < keysA.length; i++) {
-		if (!hasOwn.call(objB, keysA[i]) || objA[keysA[i]] !== objB[keysA[i]])
+		if (!hasOwn.call(objB, keysA[i]) || objA[keysA[i]] !== objB[keysA[i]]) {
 			return false;
+		}
 
 		const valA = objA[keysA[i]];
 		const valB = objB[keysA[i]];
-
-		if (valA !== valB)
-			return false;
+		if (valA !== valB) return false;
 	}
 
 	return true;
 }
-export function ShallowChanged(objA, objB) {
+G({ShallowChanged});
+export function ShallowChanged(objA, objB, ...propsToCompareMoreDeeply: string[]) {
+	if (propsToCompareMoreDeeply.length) {
+		if (ShallowChanged(objA.Excluding(...propsToCompareMoreDeeply), objB.Excluding(...propsToCompareMoreDeeply))) {
+			return true;
+		}
+
+		for (let key of propsToCompareMoreDeeply) {
+			// for "children", shallow-compare at two levels deeper
+			if (key == "children") {
+				for (let childKey of (objA.children || {}).VKeys().concat((objB.children || {}).VKeys())) {
+					if (ShallowChanged(objA.children[childKey], objB.children[childKey])) return true;
+				}
+			} else {
+				if (ShallowChanged(objA[key], objB[key])) return true;
+			}
+		}
+		return false;
+	}
 	return !ShallowEquals(objA, objB);
 }
 

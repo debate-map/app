@@ -22,3 +22,7 @@ export function CombineReducers(...args) {
 	}
 	return combineReducers(reducerMap);
 }
+
+// use a singleton for empty-obj and empty-array (that way VCache and other shallow-compare systems work with them)
+export const emptyObj = {};
+export const emptyArray = [];

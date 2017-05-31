@@ -80,16 +80,7 @@ type State = {
 	//Log("Calling NodeUI connect func.");
 	let nodeView = GetNodeView(map._id, path) || new MapNodeView();
 
-	let nodeChildren = GetNodeChildrenEnhanced(node, path);
-	nodeChildren = nodeChildren.filter(child=> {
-		// if null, keep (so receiver knows there's an entry here, but it's still loading)
-		if (child == null) return true;
-		// filter out any nodes whose access-level is higher than our own
-		if (child.accessLevel > GetUserAccessLevel(GetUserID())) return false;
-		// hide nodes that don't have the required premise-count
-		if (!IsNodeVisibleToNonModNonCreators(child, GetNodeChildren(child)) && !IsUserCreatorOrMod(GetUserID(), child)) return false;
-		return true;
-	});
+	let nodeChildren = GetNodeChildrenEnhanced(node, path, true);
 	// only pass nodeChildren when all are loaded
 	nodeChildren = nodeChildren.Any(a=>a == null) ? childrenPlaceholder : nodeChildren;
 	/*let nodeChildren_finalTypes = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
@@ -143,8 +134,15 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	}
 	ComponentWillMountOrReceiveProps(newProps) {
 		let {nodeView} = newProps;
-		if (nodeView && nodeView.expanded)
-			this.SetState({hasBeenExpanded: true});
+		if (nodeView) {
+			if (nodeView.expanded) {
+				this.SetState({hasBeenExpanded: true}, null, false);
+			} else {
+				// if non-expanded, always have node-box at the very top (fixes that an extra render was occuring, when collapsing a node)
+				//this.SetState({svgInfo: null, childrenCenterY: 0}, null, false);
+				//this.SetState({childrenCenterY: 0}, null, false);
+			}
+		}
 	}
 
 	/*shouldComponentUpdate(nextProps, nextState) {
@@ -157,7 +155,17 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let expanded = nodeView && nodeView.expanded;
 		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo, /*childrenStartY, childrenEndY*/} = this.state;
 		if (g.logNodeRenders) {
-			Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id};PropsChanged:${this.GetPropsChanged()};StateChanged:${this.GetStateChanged()}`);
+			if (g.logNodeRenders_for) {
+				if (g.logNodeRenders_for == node._id) {
+					Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id}${nl
+						}PropsChanged:${this.GetPropsChanged_Data()}${nl
+						}StateChanged:${this.GetStateChanged_Data()}`);
+				}
+			} else {
+				Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id}${nl
+					}PropsChanged:${this.GetPropsChanged()}${nl
+					}StateChanged:${this.GetStateChanged()}`);
+			}
 		}
 		NodeUI.renderCount++;
 		NodeUI.lastRenderTime = Date.now();
@@ -189,6 +197,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		//let {width, expectedHeight} = this.GetMeasurementInfo(this.props, this.state);
 		let {width, expectedHeight} = this.GetMeasurementInfo();
 		let innerBoxOffset = ((childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
+		if (!expanded) innerBoxOffset = 0;
 
 		let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
 		let limitBar_above = node.type == MapNodeType.SupportingArgument;
@@ -349,8 +358,10 @@ export default class NodeUI extends BaseComponent<Props, State> {
 
 		let height = FindDOM_(this).outerHeight();
 		let pos = this.state.childrenCenterY|0;
-		if (height != this.lastHeight || pos != this.lastPos) {
-			this.OnHeightOrPosChange();
+		if (height != this.lastHeight) {
+			this.OnHeightChange();
+		} else if (pos != this.lastPos) {
+			this.OnPosChange();
 		} else {
 			if (this.lastRender_source == RenderSource.SetState) return;
 			this.UpdateState();
@@ -358,28 +369,48 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		this.lastHeight = height;
 		this.lastPos = pos;
 	}
-	onHeightOrPosChangeQueued = false;
+	OnChildHeightOrPosChange_updateStateQueued = false;
 	OnChildHeightOrPosChange() {
+		if (g.OnChildHeightOrPosChange_log) {
+			Log(`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+				}centerY:${this.state.childrenCenterY}`);
+		}
+
 		//this.OnHeightOrPosChange();
 		// wait one frame, so that if multiple calls to this method occur in the same frame, we only have to call OnHeightOrPosChange() once
-		if (!this.onHeightOrPosChangeQueued) {
-			this.onHeightOrPosChangeQueued = true;
+		if (!this.OnChildHeightOrPosChange_updateStateQueued) {
+			this.OnChildHeightOrPosChange_updateStateQueued = true;
 			requestAnimationFrame(()=> {
 				if (!this.mounted) return;
-				this.OnHeightOrPosChange();
-				this.onHeightOrPosChangeQueued = false;
+				this.UpdateState();
+				this.OnChildHeightOrPosChange_updateStateQueued = false;
 			});
 		}
 	}
 
-	OnHeightOrPosChange() {
+	OnHeightChange() {
 		let {onHeightOrPosChange} = this.props;
-		//Log(`OnHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id};centerY:${this.state.childrenCenterY}`);
-		this.UpdateState(true);
+		if (g.OnHeightChange_log) {
+			Log(`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+				}centerY:${this.state.childrenCenterY}`);
+		}
+		
+		//this.UpdateState(true);
+		this.UpdateState();
+		if (onHeightOrPosChange) onHeightOrPosChange();
+	}
+	OnPosChange() {
+		let {onHeightOrPosChange} = this.props;
+		if (g.OnPosChange_log) {
+			Log(`OnPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+				}centerY:${this.state.childrenCenterY}`);
+		}
+
 		if (onHeightOrPosChange) onHeightOrPosChange();
 	}
 	UpdateState(forceUpdate = false) {
 		let {node, children, nodeView} = this.props;
+		let expanded = nodeView && nodeView.expanded;
 		//let {childHolder, upChildHolder} = this.refs;
 		let childHolder = FindDOM_(this).children(".childHolder");
 		let upChildHolder = childHolder.children(".upChildHolder");
@@ -387,8 +418,17 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		/*let firstChild = (upChildHolder.length ? upChildHolder : childHolder).children().ToList()[0];
 		let lastChild = (downChildHolder.length ? downChildHolder : childHolder).children().ToList().Last();*/
 
+		// if children are supposed to show, but are not rendered yet, do not call set-state (yet)
+		/*if (expanded) {
+			if (upChildHolder.length) {
+				if (upChildHolder.css("display") == "none") return;
+			} else {
+				if (childHolder.css("display") == "none") return;
+			}
+		}*/
+
 		let newState = E(
-			nodeView && nodeView.expanded &&
+			expanded &&
 				{childrenWidthOverride: this.childBoxes.VValues().filter(a=>a != null).map(a=> {
 					let comp = GetInnerComp(a) as NodeUI;
 					return comp.GetMeasurementInfo().width;
@@ -396,7 +436,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			/*{childrenCenterY: upChildHolder
 				? (upChildHolder && upChildHolder.style.display != "none" ? upChildHolder.clientHeight : 0)
 				: (childHolder && childHolder.style.display != "none" ? childHolder.clientHeight / 2 : 0)}*/
-			{childrenCenterY: upChildHolder.length
+			expanded && {childrenCenterY: upChildHolder.length
 				? (upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0)
 				: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)},
 			/*{childrenStartY: upChildHolder.length
@@ -409,7 +449,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 
 		let innerBoxOffset = ((newState.childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
 		//if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
-		if (this.refs.childHolder) {
+		//if (this.refs.childHolder) {
+		if (expanded) {
 			let holderOffset = new Vector2i(FindDOM_(this.refs.childHolder).offset());
 			let innerBox = FindDOM_(this.refs.innerBox);
 			//var mainBoxOffset = new Vector2i(innerBox.offset()).Minus(holderOffset);
@@ -432,7 +473,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			newState.svgInfo = {mainBoxOffset, oldChildBoxOffsets};
 		}
 		
-		var changedState = this.SetState(newState, null, !forceUpdate);
+		var changedState = this.SetState(newState, null, !forceUpdate, true);
 		//Log(`Changed state? (${this.props.node._id}): ` + changedState);
 	}
 }
