@@ -284,8 +284,9 @@ export function VisitTreeNodesInPath(treeRoot, pathNodesOrStr: string[] | string
 }*/
 
 //export function DeepGet(obj, path, resultIfNullOrUndefined = null, resultIfUndefined_override = undefined) {
-export function DeepGet<T>(obj, path: string, resultIfNull: T = null): T {
-	var pathNodes = path.SplitByAny("\\.", "\\/");
+export function DeepGet<T>(obj, path: string, resultIfNull: T = null, sepChar = "/"): T {
+	//let pathNodes = path.SplitByAny("\\.", "\\/");
+	let pathNodes = path.split(sepChar);
 	let result = obj;
 	for (let pathNode of pathNodes) {
 		if (result == null) break;
@@ -299,8 +300,9 @@ export function DeepGet<T>(obj, path: string, resultIfNull: T = null): T {
 		return resultIfNull;
 	return result;
 }
-export function DeepSet(obj, path, newValue) {
-	let pathNodes = path.SplitByAny("\\.", "\\/");
+export function DeepSet(obj, path, newValue, sepChar = "/") {
+	//let pathNodes = path.SplitByAny("\\.", "\\/");
+	let pathNodes = path.split(sepChar);
 	let deepObj = obj;
 	// tunnel down to the object holding the path-specified prop
 	for (let pathNode of pathNodes.slice(0, -1)) {

@@ -129,9 +129,16 @@ export function GetNodeView(mapID: number, path: string): MapNodeView {
 	if (mapView == null) return null;
 	return mapView.rootNodeViews[pathNodeIDs[0]] as MapNodeView;*/
 
-	let pathNodeIDs = path.split("/").map(ToInt);
-	let storePathNodes = ["main", "mapViews", mapID, "rootNodeViews", pathNodeIDs[0]].concat(pathNodeIDs.Skip(1).SelectMany(childID=>["children", childID]));
-	return State(storePathNodes);
+	/*let pathNodeIDs = path.split("/").map(ToInt);
+	let storePathNodes = ["main", "mapViews", mapID, "rootNodeViews", pathNodeIDs[0]].concat(pathNodeIDs.Skip(1).SelectMany(childID=>["children", childID]));*/
+	/*let path_preAndPostFirstSep = path.SplitAt(path.indexOf("/").IfN1Then(path.length));
+	let storePathNodes = ["main", "mapViews", mapID, "rootNodeViews", path_preAndPostFirstSep[0]].concat(path_preAndPostFirstSep[1].replace(childID=>["children", childID]));*/
+	/*let pathNodeIDs = path.split("/");
+	let storePathNodes = ["main", "mapViews", mapID, "rootNodeViews", pathNodeIDs[0]].concat(pathNodeIDs.Skip(1).SelectMany(childID=>["children", childID]));*/
+	let pathNodeIDs = path.split("/");
+	let childPath = pathNodeIDs.map(childID=>`${childID}/children`).join("/").slice(0, -9);
+	let storePath = `main/mapViews/${mapID}/rootNodeViews/${childPath}`;
+	return State(storePath);
 }
 export function GetFocusNode(mapView: MapView): string {
 	if (mapView == null) return null;

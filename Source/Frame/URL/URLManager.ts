@@ -170,10 +170,12 @@ function GetNodeViewStr(mapID: number, path: string) {
 			childrenStr += (childrenStr.length ? "," : "") + childNodeViewStr;
 	}
 
-	let ownID = path.split("/").map(ToInt).Last();
-	let ownStr = ownID.toString();
+	/*let ownID = path.split("/").map(ToInt).Last();
+	let ownStr = ownID.toString();*/
+	let ownIDStr = path.substr(path.lastIndexOf("/") + 1);
+	let ownStr = ownIDStr;
 	//if (nodeView.expanded && !childrenStr.length) ownStr += "e";
-	let mapView = GetMapView(mapID);
+	//let mapView = GetMapView(mapID);
 	if (nodeView.selected) {
 		ownStr += "s";
 
@@ -196,7 +198,7 @@ function GetNodeViewStr(mapID: number, path: string) {
 	/*let hasData = false;
 	if (childrenStr.length) hasData = true;
 	else if (nodeView.expanded) hasData = true;*/
-	let hasData = ownStr.length > ownID.toString().length || nodeView.expanded;
+	let hasData = ownStr.length > ownIDStr.length || nodeView.expanded;
 	if (!hasData) return "";
 
 	let result = ownStr;

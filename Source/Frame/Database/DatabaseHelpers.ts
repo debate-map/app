@@ -74,7 +74,7 @@ export function ProcessDBData(data, standardizeForm: boolean, addHelpers: boolea
 			}
 
 			if (treeNode.Value == data) treeNode.obj[treeNode.prop] = valueAsObject; // if changing root, we need to modify wrapper.data
-			else DeepSet(data, treeNode.PathStr_Updeep, valueAsObject); // else, we need to use deep-set, because ancestors may have already changed during this transform/processing
+			else DeepSet(data, treeNode.PathStr, valueAsObject); // else, we need to use deep-set, because ancestors may have already changed during this transform/processing
 		}
 
 		// turn the should-have-been-array objects (the ones with a "0" property) into arrays
@@ -89,7 +89,7 @@ export function ProcessDBData(data, standardizeForm: boolean, addHelpers: boolea
 			let valueAsArray = [].Extend(treeNode.Value) as any;
 
 			if (treeNode.Value == data) treeNode.obj[treeNode.prop] = valueAsArray; // if changing root, we need to modify wrapper.data
-			else DeepSet(data, treeNode.PathStr_Updeep, valueAsArray); // else, we need to use deep-set, because ancestors may have already changed during this transform/processing
+			else DeepSet(data, treeNode.PathStr, valueAsArray); // else, we need to use deep-set, because ancestors may have already changed during this transform/processing
 		}
 
 		// add special _key or _id prop

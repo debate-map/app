@@ -286,7 +286,7 @@ export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNodeEnhance
 }
 
 const Paragraph = props=> {
-	if (DeepGet(props, `children.0.props.literal`) == `GlobalMapPlaceholder`) {
+	if (DeepGet(props, `children/0/props/literal`) == `GlobalMapPlaceholder`) {
 		return <div {...props.Excluding(`literal`, `nodeKey`)}>{props.children}</div>;
 	}
 	//return React.createElement(g.Markdown_defaultRenderers.paragraph, props);
