@@ -52,7 +52,7 @@ Because traditional dialogue is linear, this creates a large gap between each po
 <span style="color: ${green};">
 Solution:</span>
 Make use of both dimensions: have points flow down, and responses flow to the right.
-Responses are now directly next to the points they're made against -- easing the reading process.
+Responses are now directly next to the points they're made against.
 
 ### Sort the arguments by strength
 
@@ -62,7 +62,7 @@ Topics under debate can be large, with dozens of points to consider. Thread-base
 
 <span style="color: ${green};">
 Solution:</span>
-Provide built-in voting on the strength of each point. Even if you don't agree with the general population, the strongest points will still bubble up near to the top.
+Provide built-in voting on the strength of each point. Even if you don't agree with the general population, the strongest points will still rise near to the top.
 
 ### Reduce the power of rhetoric
 
@@ -72,7 +72,7 @@ The perception of who "won" a debate often depends more on how skilled the debat
 
 <span style="color: ${green};">
 Solution:</span>
-Require points to be distilled to their simplest forms. Weasel words, exhaggerations, and other noise become easier to spot and point out. (just add a response right next to it!)
+Require points to be distilled to their simplest forms. "Weasel words", exhaggerations, and other noise become easier to spot and point out. (just add a response right next to it!)
 
 ### Don't reinvent the wheel
 
@@ -89,7 +89,7 @@ Break down arguments into their constituent parts, and let each part be connecte
 
 <span style="color: ${red};">
 Problem:</span>
-Some viewpoints repeatedly encounter resistance whenever attempted to be argued for.
+Some viewpoints encounter sharp resistance whenever attempted to be argued for.
 This discourages new ideas from being presented -- and when they are presented, makes it harder for them to be heard,
 	as they can be "buried" (or even blocked) by the more numerous majority.
 

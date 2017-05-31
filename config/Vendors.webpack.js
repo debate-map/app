@@ -1,5 +1,6 @@
 var path = require("path");
 var webpack = require("webpack");
+const config = require("../config");
 
 let QUICK = process.env.QUICK;
 
@@ -24,6 +25,7 @@ module.exports = {
 		}),
 		//new webpack.optimize.OccurenceOrderPlugin(),
 		//new webpack.optimize.DedupePlugin(),
+		new webpack.DefinePlugin(config.globals),
 		QUICK ? ()=>{} : new webpack.optimize.UglifyJsPlugin({
 			compress: {
 				unused: true,
