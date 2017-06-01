@@ -6,15 +6,18 @@ import { MapType } from "../firebase/maps/@Map";
 import { GetMapsOfType } from "Store/firebase/maps";
 import {URL} from "../../Frame/General/URLs";
 import {IsNumber} from "../../Frame/General/Types";
+import SubpageReducer from "./@Shared/$subpage";
 
 export class ACTDebateMapSelect extends Action<{id: number}> {}
 export class ACTDebateMapSelect_WithData extends Action<{id: number, rootNodeID: number}> {}
 
 export class Debates {
+	//subpage: string;
 	selectedDebateMapID: number;
 }
 
 export const DebatesReducer = CombineReducers({
+	//subpage: SubpageReducer("debates"),
 	selectedDebateMapID: (state = null, action)=> {
 		//if (action.Is(ACTDebateMapSelect)) return action.payload.id;
 		if (action.Is(ACTDebateMapSelect_WithData)) return action.payload.id;

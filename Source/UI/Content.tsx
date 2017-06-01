@@ -4,26 +4,32 @@ import {BaseComponent, BaseProps} from "../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../Frame/ReactComponents/VReactMarkdown";
 import SubNavBar from "./@Shared/SubNavBar";
 import {SubNavBarButton} from "./@Shared/SubNavBar";
-import {Route, Switch} from "react-router-dom";
+import {Route} from "react-router-dom";
 import HomeUI2 from "./Home/Home";
 import AboutUI from "./Home/About";
 import ScrollView from "react-vscrollview";
 import TermsUI from "./Content/TermsUI";
 import ImagesUI from "./Content/ImagesUI";
+import {Connect} from "../Frame/Database/FirebaseConnect";
+import Switch from "Frame/ReactComponents/Switch";
 
-export default class ContentUI extends BaseComponent<{}, {}> {
+type Props = {} & Partial<{currentSubpage: string}>;
+@Connect(state=> ({
+	currentSubpage: State(a=>a.main.content.subpage),
+}))
+export default class ContentUI extends BaseComponent<Props, {}> {
 	render() {
-		//let {page, match: {url: path} = {} as any} = this.props;
-		let path = "/content";
+		let {currentSubpage} = this.props;
+		let page = "content";
 		return (
 			<div style={{height: "100%", display: "flex", flexDirection: "column"}}>
 				<SubNavBar>
-					<SubNavBarButton to={`${path}/`} toImplied={`${path}/terms`} text="Terms"/>
-					<SubNavBarButton to={`${path}/images`} text="Images"/>
+					<SubNavBarButton {...{page}} subpage="terms" text="Terms"/>
+					<SubNavBarButton {...{page}} subpage="images" text="Images"/>
 				</SubNavBar>
 				<Switch>
-					<Route path={`${path}/images`} component={ImagesUI}/>
-					<Route component={TermsUI}/>
+					{currentSubpage == "images" && <ImagesUI/>}
+					<TermsUI/>
 				</Switch>
 			</div>
 		);

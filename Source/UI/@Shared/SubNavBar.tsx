@@ -4,6 +4,8 @@ import {E} from "../../Frame/General/Globals_Free";
 import Radium from "radium";
 import Link from "../../Frame/ReactComponents/Link";
 import {URL} from "../../Frame/General/URLs";
+import {Connect} from "../../Frame/Database/FirebaseConnect";
+import {ACTSetSubpage} from "../../Store/main";
 
 export default class SubNavBar extends BaseComponent<{fullWidth?: boolean}, {}> {
 	render() {
@@ -25,25 +27,28 @@ export default class SubNavBar extends BaseComponent<{fullWidth?: boolean}, {}> 
 	}
 }
 
-//export class SubNavBarButton extends BaseComponent<{to: string, toImplied?: string, page: string, text: string}, {}> {
-export class SubNavBarButton extends BaseComponent<{to: string, toImplied?: string, text: string}, {}> {
+type SubNavBarButtonProps = {page: string, subpage: string, text: string} & Partial<{currentSubpage: string}>;
+@Connect((state, {page})=> ({
+	currentSubpage: State(`main/${page}/subpage`),
+}))
+export class SubNavBarButton extends BaseComponent<SubNavBarButtonProps, {}> {
 	render() {
-		/*var {to, toImplied, page, text} = this.props;
-		let active = to.substr(1) == page || (toImplied && toImplied.substr(1) == page);*/
-		var {to, toImplied, text} = this.props;
-		let path = "/" + URL.Current(true).WithImpliedPathNodes().pathNodes.Take(2).join("/");
-		let active = to == path || (toImplied && toImplied == path);
+		var {page, subpage, text, currentSubpage} = this.props;
+		let active = subpage == currentSubpage;
 		return (
-			<Link to={to} style={E(
+			<a href={`/${page}/${subpage}`} style={E(
 				{
 					display: "inline-block", cursor: "pointer", verticalAlign: "middle",
 					lineHeight: "30px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9,
 					":hover": {color: "rgba(100,255,100,1)"},
 				},
 				active && {color: "rgba(100,255,100,1)"},
-			)}>
+			)} onClick={e=> {
+				e.preventDefault();
+				store.dispatch(new ACTSetSubpage({page, subpage}));
+			}}>
 				{text}
-			</Link>
+			</a>
 		);
 	}
 }

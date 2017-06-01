@@ -197,7 +197,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	OnLoadComplete() {
 		console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
 		this.LoadScroll();
-		UpdateURL();
+		UpdateURL(false);
 	}
 
 	PostRender() {

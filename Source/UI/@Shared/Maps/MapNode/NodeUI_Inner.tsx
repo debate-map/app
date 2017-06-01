@@ -369,7 +369,7 @@ export class SourcesUI extends BaseComponent<{sourceChains: SourceChain[]}, {}> 
 						if (source.link) {
 							// if this is the first source, it's the most important, so show the link's whole url
 							if (index == 0) {
-								return URL.Parse(source.link, false).toString({domain_protocol: false, forceSlashAfterDomain: false});
+								return URL.Parse(source.link, false).toString({domain_protocol: false});
 							}
 							// else, show just the domain-name
 							let urlMatch = source.link.match(/https?:\/\/(?:www\.)?([^/]+)/);

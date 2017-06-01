@@ -172,7 +172,7 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 				+ (node.contentNode.sourceChains[0][0].name ? ` in "${node.contentNode.sourceChains[0][0].name}"` : "")
 				+ (node.contentNode.sourceChains[0][0].author ? ` by ${node.contentNode.sourceChains[0][0].author}` : "")
 				+ (node.contentNode.sourceChains[0][0].link ? ` at "${
-					URL.Parse(node.contentNode.sourceChains[0][0].link, false).toString({domain_protocol: false, forceSlashAfterDomain: false})}"` : "") // maybe temp
+					URL.Parse(node.contentNode.sourceChains[0][0].link, false).toString({domain_protocol: false})}"` : "") // maybe temp
 				+ `.`;
 		}
 		if (node.image) {
@@ -183,7 +183,7 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 				+ (image.sourceChains[0][0].name ? ` in "${image.sourceChains[0][0].name}"` : "")
 				+ (image.sourceChains[0][0].author ? ` by ${image.sourceChains[0][0].author}` : "")
 				+ (image.sourceChains[0][0].link ? ` at "${
-					URL.Parse(image.sourceChains[0][0].link, false).toString({domain_protocol: false, forceSlashAfterDomain: false})}"` : "") // maybe temp
+					URL.Parse(image.sourceChains[0][0].link, false).toString({domain_protocol: false})}"` : "") // maybe temp
 				+ `.`;
 		}
 

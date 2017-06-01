@@ -3,17 +3,20 @@ import {GetTerms} from "../firebase/terms";
 import Action from "../../Frame/General/Action";
 import {CombineReducers} from "../../Frame/Store/ReducerUtils";
 import {Vector2i} from "../../Frame/General/VectorStructs";
+import SubpageReducer from "./@Shared/$subpage";
 
 export class ACTTermSelect extends Action<{id: number}> {}
 export class ACTImageSelect extends Action<{id: number}> {}
 
 export class Content {
+	subpage: string;
 	selectedTermID: number;
 	//selectedTermComponentID: number;
 	selectedImageID: number;
 }
 
 export const ContentReducer = CombineReducers({
+	subpage: SubpageReducer("content"),
 	selectedTermID: (state = null, action)=> {
 		if (action.Is(ACTTermSelect))
 			return action.payload.id;

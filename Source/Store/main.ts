@@ -24,9 +24,11 @@ import {GetTerms} from "./firebase/terms";
 import {CombineReducers} from "../Frame/Store/ReducerUtils";
 import {ContentReducer, Content} from "./main/content";
 import {DebatesReducer, Debates} from "./main/debates";
+import SubpageReducer from "./main/@Shared/$subpage";
 
 // class is used only for initialization
 export class MainState {
+	page: string;
 	envOverride: string;
 	analyticsEnabled: boolean;
 	topLeftOpenPanel: string;
@@ -34,9 +36,26 @@ export class MainState {
 	ratingUI: RatingUIState;
 	notificationMessages: NotificationMessage[];
 
-	// pages
+	// pages (and nav-bar panels)
+	// ==========
+
+	stream: {subpage: string};
+	chat: {subpage: string};
+	reputation: {subpage: string};
+
+	users: {subpage: string};
+	forum: {subpage: string};
+	social: {subpage: string};
+	more: {subpage: string};
+	home: {subpage: string};
 	content: Content;
+	personal: {subpage: string};
 	debates: Debates;
+	global: {subpage: string};
+
+	search: {subpage: string};
+	guide: {subpage: string};
+	profile: {subpage: string};
 
 	// maps
 	// ==========
@@ -48,6 +67,7 @@ export class MainState {
 	initialChildLimit: number;
 }
 export class ACTSetPage extends Action<string> {}
+export class ACTSetSubpage extends Action<{page: string, subpage: string}> {}
 export class ACTTopLeftOpenPanelSet extends Action<string> {}
 export class ACTTopRightOpenPanelSet extends Action<string> {}
 @Global
@@ -60,7 +80,6 @@ export class ACTSetInitialChildLimit extends Action<{value: number}> {}
 let MainReducer_Real;
 export function MainReducer(state, action) {
 	MainReducer_Real = MainReducer_Real || CombineReducers({
-		// break point
 		page: (state = "/", action)=> {
 			if (action.Is(ACTSetPage)) return action.payload;
 			return state;
@@ -108,11 +127,26 @@ export function MainReducer(state, action) {
 			return state;
 		},
 
-		// pages
+		// pages (and nav-bar panels)
 		// ==========
 
+		stream: CombineReducers({subpage: SubpageReducer("stream")}),
+		chat: CombineReducers({subpage: SubpageReducer("chat")}),
+		reputation: CombineReducers({subpage: SubpageReducer("reputation")}),
+
+		users: CombineReducers({subpage: SubpageReducer("users")}),
+		forum: CombineReducers({subpage: SubpageReducer("forum")}),
+		social: CombineReducers({subpage: SubpageReducer("social")}),
+		more: CombineReducers({subpage: SubpageReducer("more")}),
+		home: CombineReducers({subpage: SubpageReducer("home")}),
 		content: ContentReducer,
+		personal: CombineReducers({subpage: SubpageReducer("personal")}),
 		debates: DebatesReducer,
+		global: CombineReducers({subpage: SubpageReducer("global")}),
+
+		search: CombineReducers({subpage: SubpageReducer("search")}),
+		guide: CombineReducers({subpage: SubpageReducer("guide")}),
+		profile: CombineReducers({subpage: SubpageReducer("profile")}),
 		
 		// maps
 		// ==========

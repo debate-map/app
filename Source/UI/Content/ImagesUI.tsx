@@ -50,11 +50,7 @@ export default class ImagesUI extends BaseComponent
 		
 		return (
 			<Row plr={7} style={{height: "100%", alignItems: "flex-start"}}>
-				<Column mtb={10} style={{position: "relative", flex: .4, height: "calc(100% - 20px)", background: "rgba(0,0,0,.5)", borderRadius: 10}} onClick={e=> {
-					if (e.target == e.currentTarget || e.target == FindDOM(this.scrollView) || e.target == FindDOM(this.scrollView.refs.content)) {
-						store.dispatch(new ACTImageSelect({id: null}));
-					}
-				}}>
+				<Column mtb={10} style={{position: "relative", flex: .4, height: "calc(100% - 20px)", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
 					<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 						<Div p={7} style={{position: "absolute", left: 0}}>
 							<Button text="Add image" onClick={e=> {
@@ -66,7 +62,10 @@ export default class ImagesUI extends BaseComponent
 							Images
 						</Div>
 					</Row>
-					<ScrollView ref={c=>this.scrollView = c} contentStyle={{flex: 1, padding: 10}}>
+					<ScrollView ref={c=>this.scrollView = c} contentStyle={{flex: 1, padding: 10}} onClick={e=> {
+						if (e.target != e.currentTarget) return;
+						store.dispatch(new ACTImageSelect({id: null}));
+					}}>
 						{images.map((image, index)=> {
 							return <ImageUI key={index} first={index == 0} image={image} selected={selectedImage == image}/>;
 						})}

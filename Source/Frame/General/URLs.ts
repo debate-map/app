@@ -1,3 +1,5 @@
+import {IsNumberString} from "./Types";
+
 export const rootPages = [
 	"stream", "chat",
 	"users", "forum", "social", "more",
@@ -5,6 +7,7 @@ export const rootPages = [
 	"content", "personal", "debates", "global",
 	"search", "profile"
 ];
+// a default-child is only used (ie. removed from url) if there are no path-nodes after it
 export const rootPageDefaultChilds = {
 	more: "links",
 	home: "home",
@@ -112,8 +115,8 @@ export class URL {
 	ToState() {
 		return {
 			pathname: this.toString({domain: false, path: true, queryVars: false, hash: false}),
-			search: this.toString({domain: false, path: false, queryVars: true, hash: false}),
-			hash: this.toString({domain: false, path: false, queryVars: false, hash: true}),
+			search: this.toString({domain: false, pathStartSlash: false, path: false, queryVars: true, hash: false}),
+			hash: this.toString({domain: false, pathStartSlash: false, path: false, queryVars: false, hash: true}),
 			key: "URLKey_" + Date.now(),
 		}
 	}
@@ -148,22 +151,27 @@ export class URL {
 	}
 	WithImpliedPathNodes() {
 		let result = this.Clone();
-		if (!rootPages.Contains(result.pathNodes[0]))
+		if (!rootPages.Contains(result.pathNodes[0])) {
 			result.pathNodes.Insert(0, "home");
-		if (result.pathNodes[1] == null)
+		}
+		if (result.pathNodes[1] == null) {
 			result.pathNodes.Insert(1, rootPageDefaultChilds[result.pathNodes[0]]);
+		}
 		return result;
 	}
 
-	toString(options?: {domain?: boolean, domain_protocol?: boolean, forceSlashAfterDomain?: boolean, path?: boolean, queryVars?: boolean, hash?: boolean}) {
-		options = E({domain: true, domain_protocol: true, forceSlashAfterDomain: true, path: true, queryVars: true, hash: true}, options) as any; 		
+	toString(options?: {domain?: boolean, domain_protocol?: boolean, pathStartSlash?: boolean | "auto", path?: boolean, queryVars?: boolean, hash?: boolean}) {
+		options = E({domain: true, domain_protocol: true, pathStartSlash: "auto", path: true, queryVars: true, hash: true}, options) as any; 		
 		let result = "";
 		
 		// domain
 		if (options.domain)
 			result += options.domain_protocol ? this.domain : this.DomainWithoutProtocol;
-		if (options.forceSlashAfterDomain || this.pathNodes.length || this.queryVars.length || this.hash)
+		//if (options.forceSlashAfterDomain || (options.path && this.pathNodes.length) || (options.queryVars && this.queryVars.length) || (options.hash && this.hash))
+		let pathStartSlash_auto = result.length == 0 || (options.path && this.pathNodes.length) || (options.queryVars && this.queryVars.length) || (options.hash && this.hash);
+		if (options.pathStartSlash != false && (options.pathStartSlash == true || pathStartSlash_auto)) {
 			result += "/";
+		}
 
 		// path-nodes
 		if (options.path && this.pathNodes.length)

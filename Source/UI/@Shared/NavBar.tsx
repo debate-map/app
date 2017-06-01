@@ -12,7 +12,7 @@ import Action from "../../Frame/General/Action";
 import {HandleError} from "../../Frame/General/Errors";
 import UserPanel from "./NavBar/UserPanel";
 import {Connect} from "../../Frame/Database/FirebaseConnect";
-import {ACTTopRightOpenPanelSet, ACTTopLeftOpenPanelSet} from "../../Store/main";
+import {ACTTopRightOpenPanelSet, ACTTopLeftOpenPanelSet, ACTSetPage} from "../../Store/main";
 import ChatPanel from "./NavBar/ChatPanel";
 import StreamPanel from "./NavBar/StreamPanel";
 import SearchPanel from "./NavBar/SearchPanel";
@@ -57,9 +57,9 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 			}}>
 				<div style={{display: "flex"}}>
 					<span style={{position: "absolute", left: 0}}>
-						<NavBarPanelButton to="/stream" text="Stream" panel="stream" corner="top-left"/>
-						<NavBarPanelButton to="/chat" text="Chat" panel="chat" corner="top-left"/>
-						<NavBarPanelButton to="/reputation" text={
+						<NavBarPanelButton text="Stream" panel="stream" corner="top-left"/>
+						<NavBarPanelButton text="Chat" panel="chat" corner="top-left"/>
+						<NavBarPanelButton text={
 							<Div className="cursorSet" style={{position: "relative", height: 45}}>
 								<Div style={{color: "rgba(255,255,255,1)", justifyContent: "center"}}>Rep: n/a</Div>
 								{/*<Div style={{color: "rgba(255,255,255,1)", justifyContent: "center"}}>Rep: 100</Div>
@@ -79,27 +79,27 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 					</Div>
 					
 					<span style={{margin: "0 auto", paddingLeft: 45}}>
-						<NavBarButton to="/users" text="Users"/>
-						<NavBarButton to="/forum" text="Forum"/>
-						<NavBarButton to="/social" text="Social"/>
-						<NavBarButton to="/more" text="More"/>
-						<NavBarButton to="/" toImplied="/home" text="Debate Map" style={{margin: "0 auto", textAlign: "center", fontSize: 23}}/>
-						<NavBarButton to="/content" text="Content"/>
-						<NavBarButton to="/personal" text="Personal"/>
-						<NavBarButton to="/debates" text="Debates"/>
-						<NavBarButton to="/global" text="Global"/>
+						<NavBarButton page="users" text="Users"/>
+						<NavBarButton page="forum" text="Forum"/>
+						<NavBarButton page="social" text="Social"/>
+						<NavBarButton page="more" text="More"/>
+						<NavBarButton page="home" text="Debate Map" style={{margin: "0 auto", textAlign: "center", fontSize: 23}}/>
+						<NavBarButton page="content" text="Content"/>
+						<NavBarButton page="personal" text="Personal"/>
+						<NavBarButton page="debates" text="Debates"/>
+						<NavBarButton page="global" text="Global"/>
 					</span>
 
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
-						<NavBarPanelButton to="/search" text="Search" panel="search" corner="top-right"/>
-						<NavBarPanelButton to="/guide" text="Guide" panel="guide" corner="top-right"/>
-						<NavBarPanelButton to={auth ? "/profile" : "/sign-in"} text={auth ? auth.displayName.match(/(.+?)( |$)/)[1] : `Sign in`} panel="user" corner="top-right"/>
+						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
+						<NavBarPanelButton text="Guide" panel="guide" corner="top-right"/>
+						<NavBarPanelButton text={auth ? auth.displayName.match(/(.+?)( |$)/)[1] : `Sign in`} panel="profile" corner="top-right"/>
 					</span>
 					<div style={{position: "absolute", zIndex: 11, right: 0, top: 45,
 							boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 0 -150px -150px)", display: "table"}}>
 						{topRightOpenPanel == "search" && <SearchPanel/>}
 						{topRightOpenPanel == "guide" && <GuidePanel/>}
-						{topRightOpenPanel == "user" && <UserPanel/>}
+						{topRightOpenPanel == "profile" && <UserPanel/>}
 					</div>
 				</div>
 			</nav>
@@ -109,17 +109,17 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 
 //@Radium
 @Connect(state=> ({
-	page: URL.Current().WithImpliedPathNodes().pathNodes[0],
+	currentPage: State(a=>a.main.page),
 }))
 export class NavBarButton extends BaseComponent
-		<{to: string, toImplied?: string, text: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void} & Partial<{page: string}>,
+		<{page: string, text: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void} & Partial<{currentPage: string}>,
 		{hovered: boolean}> {
 	render() {
-		var {to, toImplied, text, panel, active, style, onClick, page} = this.props;
+		var {page, text, panel, active, style, onClick, currentPage} = this.props;
 		//let {_radiumStyleState: {main: radiumState = {}} = {}} = this.state as any;
 		//let {_radiumStyleState} = this.state as any;
 		let {hovered} = this.state;
-		active = active != null ? active : to.substr(1) == page || (toImplied && toImplied.substr(1) == page);
+		active = active != null ? active : page == currentPage;
 
 		let finalStyle = E(
 			{
@@ -137,36 +137,35 @@ export class NavBarButton extends BaseComponent
 		//let hoverOrActive = radiumState[":hover"] || active;
 		//let hoverOrActive = _radiumStyleState && _radiumStyleState.main && _radiumStyleState.main[":hover"] || active;
 		let hoverOrActive = hovered || active;
-		if (to) {
-			return (
-				<Link to={to} style={finalStyle} onClick={onClick} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})}>
-					{text}
-					{/*!panel &&*/ hoverOrActive &&
-						<div style={{position: "absolute", left: 0, right: 0, bottom: 0, height: 2, background: `rgba(100,255,100,1)`}}/>}
-				</Link>
-			);
-		}
 		return (
-			<div style={finalStyle} onClick={onClick} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})}>
+			<a href={`/${page}`} style={finalStyle} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})} onClick={e=> {
+				e.preventDefault();
+				if (!panel) {
+					store.dispatch(new ACTSetPage(page));
+				}
+				if (onClick) {
+					onClick(e);
+				}
+			}}>
 				{text}
 				{/*!panel &&*/ hoverOrActive &&
 					<div style={{position: "absolute", left: 0, right: 0, bottom: 0, height: 2, background: `rgba(100,255,100,1)`}}/>}
-			</div>
+			</a>
 		);
 	}
 }
 
-type NavBarPanelButton_Props = {to: string, text: string, panel: string, corner: "top-left" | "top-right"} & Partial<{topLeftOpenPanel, topRightOpenPanel}>;
+type NavBarPanelButton_Props = {text: string, panel: string, corner: "top-left" | "top-right"} & Partial<{topLeftOpenPanel, topRightOpenPanel}>;
 @Connect(_=> ({
 	topLeftOpenPanel: State(a=>a.main.topLeftOpenPanel),
 	topRightOpenPanel: State(a=>a.main.topRightOpenPanel),
 }))
 export class NavBarPanelButton extends BaseComponent<NavBarPanelButton_Props, {}> {
 	render() {
-		let {to, text, panel, corner, topLeftOpenPanel, topRightOpenPanel} = this.props;
+		let {text, panel, corner, topLeftOpenPanel, topRightOpenPanel} = this.props;
 		let active = (corner == "top-left" ? topLeftOpenPanel : topRightOpenPanel) == panel;
 		return (
-			<NavBarButton to={to} text={text} panel={true} active={active} onClick={e=> {
+			<NavBarButton page={panel} text={text} panel={true} active={active} onClick={e=> {
 				e.preventDefault();
 				if (corner == "top-left")
 					store.dispatch(new ACTTopLeftOpenPanelSet(active ? null : panel));

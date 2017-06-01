@@ -12,11 +12,12 @@ import * as ReactGA from "react-ga";
 import {URL} from "../General/URLs";
 import {replace} from "react-router-redux";
 import {CreateMapViewForPath, GetShortestPathFromRootToNode} from "./PathFinder";
-import {ACTNotificationMessageAdd} from "../../Store/main";
+import {ACTNotificationMessageAdd, ACTSetPage, ACTSetSubpage} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import {GetNodeDisplayText} from "../../Store/firebase/nodes/$node";
 import * as Raven from "raven-js";
 import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "../../Store/main/debates";
+import {ACTTermSelect, ACTImageSelect} from "../../Store/main/content";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -80,7 +81,7 @@ export async function PostDispatchAction(action: Action<any>) {
 	}
 	if (action.type == "PostRehydrate") {
 		LoadURL(startURL.toString());
-		UpdateURL();
+		UpdateURL(false);
 		if (prodEnv && State(a=>a.main.analyticsEnabled)) {
 			Log("Initialized Google Analytics.");
 			//ReactGA.initialize("UA-21256330-33", {debug: true});
@@ -91,6 +92,7 @@ export async function PostDispatchAction(action: Action<any>) {
 			ReactGA.pageview(url || "/");*/
 		}
 	}
+	// can be triggered by back/forward navigation
 	if (action.type == "@@router/LOCATION_CHANGE") {
 		//let oldURL = URL.Current();
 		let url = URL.FromState(action.payload);
@@ -100,7 +102,8 @@ export async function PostDispatchAction(action: Action<any>) {
 		//Log("Page-view: " + url);
 
 		//setTimeout(()=>UpdateURL());
-		UpdateURL();
+		await LoadURL(url.toString());
+		UpdateURL(false);
 		if (url.WithImpliedPathNodes().toString({domain: false}).startsWith("/global/map")) {
 			if (isBot) {
 				/*let newURL = url.Clone();
@@ -115,35 +118,6 @@ export async function PostDispatchAction(action: Action<any>) {
 				WaitXThenRun(0, UpdateURL, 800);
 				WaitXThenRun(0, UpdateURL, 1600);
 			}
-		}
-		// If user followed search-result link (eg. "debatemap.live/global/156"), we only know the node-id.
-		// Search for the shortest path from the map's root to this node, and update the view and url to that path.
-		//if (url.pathNodes[0] == "global" && url.pathNodes[1] != null && url.pathNodes[1].match(/^[0-9]+$/) && !isBot) {
-		let match = url.toString({domain: false}).match(/^\/global\/[a-z-]*\.([0-9]+)$/);
-		if (match && !isBot) {
-			let nodeID = parseInt(match[1]);
-			let node = await GetNodeAsync(nodeID);
-			if (node) {
-				let shortestPathToNode = await GetShortestPathFromRootToNode(1, node);
-				if (shortestPathToNode) {
-					let mapViewForPath = CreateMapViewForPath(shortestPathToNode);
-					//Log(`Found shortest path (${shortestPathToNode}), so merging: ` + ToJSON(mapViewForPath));
-					store.dispatch(new ACTMapViewMerge({mapID: 1, mapView: mapViewForPath}));
-				} else {
-					store.dispatch(new ACTNotificationMessageAdd(new NotificationMessage(
-						`Could not find a path to the node specified in the url (#${nodeID}, title: "${GetNodeDisplayText(node)}").`)));
-				}
-			} else {
-				store.dispatch(new ACTNotificationMessageAdd(new NotificationMessage(`The node specified in the url (#${nodeID}) was not found.`)));
-			}
-
-			let newURL = url.Clone();
-			newURL.pathNodes.RemoveAt(1);
-			store.dispatch(replace(newURL.toString({domain: false})));
-		}
-
-		if (url.pathNodes[0] == "debates" && IsNumberString(url.pathNodes[1])) {
-			store.dispatch(new ACTDebateMapSelect({id: url.pathNodes[1].ToInt()}))
 		}
 	}
 	if (action.Is(ACTDebateMapSelect)) {
@@ -160,8 +134,18 @@ export async function PostDispatchAction(action: Action<any>) {
 	if (movingToGlobals || action.IsAny(ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange)) {
 		setTimeout(()=>UpdateURL_Globals());
 	}*/
-	if (action.IsAny(ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange)) {
-		UpdateURL();
+	let pushURL_actions = [
+		ACTSetPage, ACTSetSubpage, // general
+		ACTTermSelect, ACTImageSelect, // content
+		ACTDebateMapSelect, // debates
+	];
+	let replaceURL_actions = [
+		ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange, // global
+	];
+	let isPushURLAction = action.IsAny(...pushURL_actions);
+	let isReplaceURLAction = action.IsAny(...replaceURL_actions);
+	if (isPushURLAction || isReplaceURLAction) {
+		UpdateURL(isPushURLAction && !action["fromURL"]);
 	}
 
 	if (action.type == "@@reactReduxFirebase/LOGIN") {

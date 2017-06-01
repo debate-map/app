@@ -35,6 +35,8 @@ import * as ReactGA from "react-ga";
 import {persistStore} from "redux-persist";
 import {createBlacklistFilter} from "redux-persist-transform-filter";
 import {URL} from "../Frame/General/URLs";
+import { Connect } from "../Frame/Database/FirebaseConnect";
+import Switch from "Frame/ReactComponents/Switch";
 
 // Create a history of your choosing (we're using a browser history in this case)
 export const historyStore = createBrowserHistory();
@@ -76,8 +78,13 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	}
 }
 
-class RootUI extends BaseComponent<{}, {}> {
+type Props = {} & Partial<{currentPage: string}>;
+@Connect((state, props)=> ({
+	currentPage: State(a=>a.main.page),
+}))
+class RootUI extends BaseComponent<Props, {}> {
 	render() {
+		let {currentPage} = this.props;
 		return (
 			<div /*className="unselectable"*/ style={{
 				height: "100%", display: "flex", flexDirection: "column",
@@ -92,25 +99,25 @@ class RootUI extends BaseComponent<{}, {}> {
 				<OverlayUI/>
 				<NavBar/>
 				<main style={{position: "relative", flex: "1 1 100%", overflow: "hidden"}}>
-					<Route path="/stream" component={StreamUI}/>
-					<Route path="/chat" component={ChatUI}/>
+					<Switch>
+						{currentPage == "stream" && <StreamUI/>}
+						{currentPage == "chat" && <ChatUI/>}
 
-					<Route path="/users" component={UsersUI}/>
-					<Route path="/forum" component={ForumUI}/>
-					<Route path="/social" component={SocialUI}/>
-					<Route path="/more" component={MoreUI}/>
+						{currentPage == "users" && <UsersUI/>}
+						{currentPage == "forum" && <ForumUI/>}
+						{currentPage == "social" && <SocialUI/>}
+						{currentPage == "more" && <MoreUI/>}
 
-					{/*<Route exact path="/" component={HomeUI}/>
-					<Route exact path="/about" component={HomeUI}/>*/}
-					{URL.Current(true).WithImpliedPathNodes().pathNodes[0] == "home" && <HomeUI/>}
+						{currentPage == "content" && <ContentUI/>}
+						{currentPage == "personal" && <PersonalUI/>}
+						{currentPage == "debates" && <DebatesUI/>}
+						{currentPage == "global" && <GlobalUI/>}
 
-					<Route path="/content" component={ContentUI}/>
-					<Route path="/personal" component={PersonalUI}/>
-					<Route path="/debates" component={DebatesUI}/>
-					<Route path="/global" component={GlobalUI}/>
+						{currentPage == "search" && <SearchUI/>}
+						{currentPage == "profile" && <ProfileUI/>}
 
-					<Route path="/search" component={SearchUI}/>
-					<Route path="/profile" component={ProfileUI}/>
+						<HomeUI/>
+					</Switch>
 				</main>
 			</div>
 		);

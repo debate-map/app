@@ -4,26 +4,32 @@ import {BaseComponent, BaseProps} from "../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../Frame/ReactComponents/VReactMarkdown";
 import SubNavBar from "./@Shared/SubNavBar";
 import {SubNavBarButton} from "./@Shared/SubNavBar";
-import {Route, Switch} from "react-router-dom";
+import {Route} from "react-router-dom";
 import HomeUI2 from "./Home/Home";
 import AboutUI from "./Home/About";
 import ScrollView from "react-vscrollview";
 import Column from "../Frame/ReactComponents/Column";
+import Switch from "Frame/ReactComponents/Switch";
+import {Connect} from "../Frame/Database/FirebaseConnect";
 
-export default class HomeUI extends BaseComponent<{}, {}> {
+type Props = {} & Partial<{currentSubpage: string}>;
+@Connect(state=> ({
+	currentSubpage: State(a=>a.main.home.subpage),
+}))
+export default class HomeUI extends BaseComponent<Props, {}> {
 	render() {
-		//let {page, match: {url: path} = {} as any} = this.props;
-		let path = ``, pathImplied = `/home`;
+		let {currentSubpage} = this.props;
+		let page = "home";
 		return (
 			<Column style={{height: "100%"}}>
 				<SubNavBar>
-					<SubNavBarButton to={path + `/`} toImplied={pathImplied + `/home`} text="Home"/>
-					<SubNavBarButton to={path + `/about`} toImplied={pathImplied + `/about`} text="About"/>
+					<SubNavBarButton {...{page}} subpage="home" text="Home"/>
+					<SubNavBarButton {...{page}} subpage="about" text="About"/>
 				</SubNavBar>
 				<ScrollView id="HomeScrollView" style={{flex: `1 1 100%`}} scrollVBarStyle={{width: 10}}>
 					<Switch>
-						<Route path={path + `/about`} component={AboutUI}/>
-						<Route path={path + `/`} component={HomeUI2}/>
+						{currentSubpage == "about" && <AboutUI/>}
+						<HomeUI2/>
 					</Switch>
 				</ScrollView>
 			</Column>

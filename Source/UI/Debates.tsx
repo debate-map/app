@@ -23,6 +23,7 @@ type Props = {} & Partial<{permissions: PermissionGroupSet, maps: Map[], selecte
 	selectedMap: GetSelectedDebateMap(),
 	//url: GetCurrentURL(),
 }))
+
 export default class DebatesUI extends BaseComponent<Props, {}> {
 	render() {
 		let {permissions, maps, selectedMap} = this.props;

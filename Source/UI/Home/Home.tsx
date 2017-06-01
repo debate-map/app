@@ -216,10 +216,11 @@ export function CreateDemoMapView(): MapView {
 
 let info = {text: pageText};
 
+type Props = {} & Partial<{demoRootNode: MapNodeEnhanced}>;
 @Connect(state=> ({
 	demoRootNode: GetNodeEnhanced(GetNode(demoRootNodeID), demoRootNodeID+""),
 }))
-export default class HomeUI2 extends BaseComponent<{demoRootNode: MapNodeEnhanced}, {}> {
+export default class HomeUI2 extends BaseComponent<Props, {}> {
 	/*static contextTypes = {
 		router: PropTypes.shape({
 			history: PropTypes.shape({

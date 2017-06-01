@@ -11,32 +11,31 @@ import {styles} from "../Frame/UI/GlobalStyles";
 import {connect} from "react-redux";
 import {RootState} from "../Store/index";
 import LinksUI from "./More/Links";
-import {Switch} from "react-router-dom";
 import ScrollView from "react-vscrollview";
 import Column from "../Frame/ReactComponents/Column";
+import Switch from "Frame/ReactComponents/Switch";
 
-/*@(connect((state: RootState)=> ({
-	userID: state.firebase.get("auth") ? state.firebase.get("auth").uid : null,
-}) as any) as any)*/
+type Props = {} & Partial<{currentSubpage: string, userCount: number}>;
 @Connect(state=> ({
+	currentSubpage: State(a=>a.main.more.subpage),
 	_: GetUserPermissionGroups(GetUserID()), // just to make sure we've retrieved this data (and re-render when it changes)
 	userCount: (GetUsers() || []).length,
 }))
-export default class MoreUI extends BaseComponent<{page?} & Partial<{userCount: number}>, {}> {
+export default class MoreUI extends BaseComponent<Props, {}> {
 	render() {
-		let {page, userCount, children} = this.props;
-		let path = "/more";
+		let {userCount, currentSubpage, children} = this.props;
+		let page = "more";
 		let admin = IsUserAdmin(GetUserID());
 		return (
 			<Column style={{height: "100%"}}>
 				<SubNavBar>
-					<SubNavBarButton to={path} toImplied={path + "/links"} text="Links"/>
-					{admin && <SubNavBarButton to={path + "/admin"} text="Admin"/>}
+					<SubNavBarButton {...{page}} subpage="links" text="Links"/>
+					{admin && <SubNavBarButton {...{page}} subpage="admin" text="Admin"/>}
 				</SubNavBar>
 				<ScrollView style={{flex: `1 1 100%`}} scrollVBarStyle={{width: 10}}>
 					<Switch>
-						<Route path={path + "/admin"} component={AdminUI}/>
-						<Route component={LinksUI}/>
+						{currentSubpage == "admin" && <AdminUI/>}
+						<LinksUI/>
 					</Switch>
 				</ScrollView>
 			</Column>
