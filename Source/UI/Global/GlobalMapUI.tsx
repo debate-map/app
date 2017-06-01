@@ -18,7 +18,7 @@ export default class GlobalMapUI extends BaseComponent<Partial<{map: Map}>, {}> 
 	render() {
 		let {map} = this.props;
 		return (
-			<MapUI map={map}/>
+			<MapUI map={map} subNavBarWidth={104}/>
 		);
 	}
 }

@@ -31,6 +31,7 @@ export default async function ResetCurrentDBRoot() {
 	// ==========
 
 	data.general = {
+		lastMapID: 99,
 		lastTermID: 0,
 		lastTermComponentID: 0,
 		lastImageID: 0,

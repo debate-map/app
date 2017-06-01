@@ -1,11 +1,17 @@
 import {GetImages} from "../firebase/images";
 import {GetTerms} from "../firebase/terms";
 import Action from "../../Frame/General/Action";
-import {Content} from "./content/@Content";
 import {CombineReducers} from "../../Frame/Store/ReducerUtils";
+import {Vector2i} from "../../Frame/General/VectorStructs";
 
 export class ACTTermSelect extends Action<{id: number}> {}
 export class ACTImageSelect extends Action<{id: number}> {}
+
+export class Content {
+	selectedTermID: number;
+	//selectedTermComponentID: number;
+	selectedImageID: number;
+}
 
 export const ContentReducer = CombineReducers({
 	selectedTermID: (state = null, action)=> {

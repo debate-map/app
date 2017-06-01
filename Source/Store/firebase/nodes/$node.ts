@@ -204,9 +204,9 @@ export function GetValidChildTypes(nodeType: MapNodeType, path: string) {
 	let validChildTypes = nodeTypes.filter(type=>IsLinkValid(nodeType, path, {type} as any));
 	return validChildTypes;
 }
-export function GetValidNewChildTypes(nodeType: MapNodeType, path: string, permissions: PermissionGroupSet) {
+export function GetValidNewChildTypes(parentNode: MapNode, path: string, permissions: PermissionGroupSet) {
 	let nodeTypes = GetValues<MapNodeType>(MapNodeType);
-	let validChildTypes = nodeTypes.filter(type=>IsNewLinkValid(nodeType, path, {type} as any, permissions));
+	let validChildTypes = nodeTypes.filter(type=>IsNewLinkValid(parentNode, path, {type} as any, permissions));
 	return validChildTypes;
 }
 

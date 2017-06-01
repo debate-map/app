@@ -1,4 +1,5 @@
 import {browserHistory} from "../../../../../Frame/Store/CreateStore";
+//import {browserHistory} from "react-router";
 import Column from "../../../../../Frame/ReactComponents/Column";
 import {Div, BaseComponent, Pre} from "../../../../../Frame/UI/ReactGlobals";
 import {MapNode} from "../../../../../Store/firebase/nodes/@MapNode";

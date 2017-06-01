@@ -35,7 +35,7 @@ export function ShowAddTermDialog(userID: string) {
 			boxController.options.okButtonClickable = error == null;
 			return (
 				<Column style={{padding: `10px 0`, width: 600}}>
-					<TermDetailsUI ref={c=>detailsUI = GetInnerComp(c) as any} baseData={newTerm} creating={true}
+					<TermDetailsUI ref={c=>detailsUI = GetInnerComp(c) as any} baseData={newTerm} forNew={true}
 						onChange={val=>Change(newTerm = val, error = detailsUI.GetValidationError())}/>
 					{error && error != "Please fill out this field." && <Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{error}</Row>}
 				</Column>

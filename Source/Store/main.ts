@@ -21,9 +21,9 @@ import {URL} from "../Frame/General/URLs";
 import {Global} from "../Frame/General/Globals_Free";
 import {GetData} from "../Frame/Database/DatabaseHelpers";
 import {GetTerms} from "./firebase/terms";
-import {Content} from "./main/content/@Content";
 import {CombineReducers} from "../Frame/Store/ReducerUtils";
-import {ContentReducer} from "./main/content";
+import {ContentReducer, Content} from "./main/content";
+import {DebatesReducer, Debates} from "./main/debates";
 
 // class is used only for initialization
 export class MainState {
@@ -36,6 +36,7 @@ export class MainState {
 
 	// pages
 	content: Content;
+	debates: Debates;
 
 	// maps
 	// ==========
@@ -46,6 +47,7 @@ export class MainState {
 
 	initialChildLimit: number;
 }
+export class ACTSetPage extends Action<string> {}
 export class ACTTopLeftOpenPanelSet extends Action<string> {}
 export class ACTTopRightOpenPanelSet extends Action<string> {}
 @Global
@@ -58,6 +60,12 @@ export class ACTSetInitialChildLimit extends Action<{value: number}> {}
 let MainReducer_Real;
 export function MainReducer(state, action) {
 	MainReducer_Real = MainReducer_Real || CombineReducers({
+		// break point
+		page: (state = "/", action)=> {
+			if (action.Is(ACTSetPage)) return action.payload;
+			return state;
+		},
+
 		/*_: (state = null, action)=> {
 			PreDispatchAction(action);
 			return null;
@@ -104,6 +112,7 @@ export function MainReducer(state, action) {
 		// ==========
 
 		content: ContentReducer,
+		debates: DebatesReducer,
 		
 		// maps
 		// ==========

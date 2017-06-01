@@ -59,3 +59,6 @@ export function GetUserAccessLevel(userID: string) {
 	//if (groups.basic) return AccessLevel.Basic;
 	Assert(false);
 }
+
+/*export function GetUserInfo(userID: string) {
+}*/

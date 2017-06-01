@@ -13,6 +13,7 @@ import {ShallowChanged} from "../../Frame/UI/ReactGlobals";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 import {CreateDemoMapView} from "../../UI/Home/Home";
 import {URL} from "../../Frame/General/URLs";
+import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "./debates";
 
 export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 	/*if (action.Is(ACTOpenMapSet))
@@ -32,12 +33,23 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 			//if (GetMapView(mapID) == null) {
 			//if (state[mapID].rootNodeViews.VKeys().length == 0) {
 			if (newState[mapID] == null) {
+				//newState[mapID] = new MapView();
 				newState[mapID] = {
 					rootNodeViews: {
 						[action["data"].rootNode]: new MapNodeView().VSet({expanded: true, focus: true, viewOffset: new Vector2i(200, 0)})
 					}
 				};
 			}
+		}
+	}
+	if (action.Is(ACTDebateMapSelect_WithData)) {
+		if (newState[action.payload.id] == null) {
+			//newState[action.payload.id] = new MapView();
+			newState[action.payload.id] = {
+				rootNodeViews: {
+					[action.payload.rootNodeID]: new MapNodeView().VSet({expanded: true, focus: true, viewOffset: new Vector2i(200, 0)})
+				}
+			};
 		}
 	}
 	/*if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).pathNodes[0] == "global") {

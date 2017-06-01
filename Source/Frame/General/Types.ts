@@ -24,11 +24,15 @@ export function ToBool(boolStr) { return boolStr == "true" ? true : false; }
 export function IsObject(obj) : obj is Object { return typeof obj == "object"; }
 export function IsObjectOf<T>(obj) : obj is T { return typeof obj == "object"; }
 g.Extend({IsNumber}); declare global { function IsNumber(obj): obj is number; }
-export function IsNumber(obj, allowNumberObj = false): obj is number {
+export function IsNumber(obj, allowNumberObj = false, allowNaN = false): obj is number {
+	if (!allowNaN && IsNaN(obj)) return false;
 	return typeof obj == "number" || (allowNumberObj && obj instanceof Number);
 }
-g.Extend({IsNumberString}); declare global { function IsNumberString(obj): boolean; }
-export function IsNumberString(obj) { return IsString(obj) && parseInt(obj).toString() == obj; }
+g.Extend({IsNumberString}); declare global { function IsNumberString(obj, allowNaN?): boolean; }
+export function IsNumberString(obj, allowNaN = false) {
+	if (!allowNaN && obj == "NaN") return false;
+	return IsString(obj) && parseInt(obj).toString() == obj;
+}
 export function IsInt(obj) : obj is number { return typeof obj == "number" && parseFloat(obj as any) == parseInt(obj as any); }
 export function ToInt(stringOrFloatVal) { return parseInt(stringOrFloatVal); }
 export function IsDouble(obj) : obj is number { return typeof obj == "number" && parseFloat(obj as any) != parseInt(obj as any); }

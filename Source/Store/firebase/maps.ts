@@ -1,6 +1,15 @@
 import {GetData} from "../../Frame/Database/DatabaseHelpers";
-import {Map} from "./maps/@Map";
+import {Map, MapType} from "./maps/@Map";
+import {CachedTransform} from "../../Frame/V/VCache";
 
+export function GetMaps(): Map[] {
+	let mapsMap = GetData(`maps`);
+	return CachedTransform("GetMaps", [], mapsMap, ()=>mapsMap ? mapsMap.VValues(true) : []);
+}
+export function GetMapsOfType(type: MapType): Map[] {
+	let mapsMap = GetData(`maps`);
+	return CachedTransform("GetMaps", [type], mapsMap, ()=>mapsMap ? mapsMap.VValues(true).filter(a=>a.type == type) : []);
+}
 export function GetMap(id: number): Map {
 	return GetData(`maps/${id}`);
 }

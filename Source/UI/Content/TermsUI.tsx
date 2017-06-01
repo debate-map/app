@@ -101,7 +101,7 @@ export default class TermsUI extends BaseComponent
 							</Div>
 						</Row>
 						{selectedTerm
-							? <TermDetailsUI baseData={selectedTerm} creating={false} enabled={creatorOrMod} style={{padding: 10}}
+							? <TermDetailsUI baseData={selectedTerm} forNew={false} enabled={creatorOrMod} style={{padding: 10}}
 									onChange={data=>this.SetState({selectedTerm_newData: data})}/>
 							: <div style={{padding: 10}}>No term selected.</div>}
 					</Column>

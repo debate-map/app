@@ -16,6 +16,7 @@ import {batchedSubscribe} from "redux-batched-subscribe";
 import {unstable_batchedUpdates} from "react-dom";
 
 export const browserHistory = createBrowserHistory();
+//import {browserHistory} from "react-router";
 
 export default function(initialState = {}, history) {
 	// Window Vars Config

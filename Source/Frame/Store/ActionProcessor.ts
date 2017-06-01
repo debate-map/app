@@ -16,6 +16,7 @@ import {ACTNotificationMessageAdd} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import {GetNodeDisplayText} from "../../Store/firebase/nodes/$node";
 import * as Raven from "raven-js";
+import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "../../Store/main/debates";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -140,6 +141,14 @@ export async function PostDispatchAction(action: Action<any>) {
 			newURL.pathNodes.RemoveAt(1);
 			store.dispatch(replace(newURL.toString({domain: false})));
 		}
+
+		if (url.pathNodes[0] == "debates" && IsNumberString(url.pathNodes[1])) {
+			store.dispatch(new ACTDebateMapSelect({id: url.pathNodes[1].ToInt()}))
+		}
+	}
+	if (action.Is(ACTDebateMapSelect)) {
+		let rootNodeID = await GetDataAsync(`maps/${action.payload.id}/rootNode`) as number;
+		store.dispatch(new ACTDebateMapSelect_WithData({id: action.payload.id, rootNodeID}))
 	}
 
 	/*let movingToGlobals = false;

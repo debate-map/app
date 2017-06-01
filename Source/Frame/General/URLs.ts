@@ -83,9 +83,13 @@ function GetUrlVars(url?: string) {
 	return vars;
 }
 
+export function GetCurrentURL(fromAddressBar = false) {
+	return fromAddressBar ? URL.Parse(CurrentUrl()) : URL.FromState(State(a=>a.router.location));
+}
+
 export class URL {
 	static Current(fromAddressBar = false) {
-		return fromAddressBar ? URL.Parse(CurrentUrl()) : URL.FromState(State(a=>a.router.location));
+		return GetCurrentURL(fromAddressBar);
 	}
 	static Parse(urlStr: string, useCurrentDomainIfMissing = true) {
 		if (useCurrentDomainIfMissing && !urlStr.startsWith("http"))
@@ -104,6 +108,14 @@ export class URL {
 	}
 	static FromState(state: {pathname?: string, search?: string}) {
 		return URL.Parse(state ? state.pathname + state.search : "");
+	}
+	ToState() {
+		return {
+			pathname: this.toString({domain: false, path: true, queryVars: false, hash: false}),
+			search: this.toString({domain: false, path: false, queryVars: true, hash: false}),
+			hash: this.toString({domain: false, path: false, queryVars: false, hash: true}),
+			key: "URLKey_" + Date.now(),
+		}
 	}
 
 	constructor(domain = "", pathNodes = [] as string[], queryVars = [] as QueryVar[], hash = "") {

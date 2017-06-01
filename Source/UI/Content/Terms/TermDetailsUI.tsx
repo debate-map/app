@@ -1,5 +1,5 @@
 import {Assert} from "../../../Frame/General/Assert";
-import {BaseComponent, Pre, RenderSource, Div, FindDOM} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Pre, RenderSource, Div, FindDOM, GetErrorMessagesUnderElement} from "../../../Frame/UI/ReactGlobals";
 import {Term, TermType, Term_nameFormat, Term_disambiguationFormat} from "../../../Store/firebase/terms/@Term";
 import Column from "../../../Frame/ReactComponents/Column";
 import Row from "../../../Frame/ReactComponents/Row";
@@ -18,27 +18,20 @@ import {GetNiceNameForTermType} from "../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../Store/firebase/terms";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 
-type Props = {baseData: Term, creating: boolean, enabled?: boolean, style?, onChange?: (newData: Term)=>void}
+type Props = {baseData: Term, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Term)=>void}
 	& Partial<{creator: User, variantNumber: number}>;
-@Connect((state, {baseData, creating}: Props)=>({
-	creator: !creating && GetUser(baseData.creator),
-	variantNumber: !creating && GetTermVariantNumber(baseData),
+@Connect((state, {baseData, forNew}: Props)=>({
+	creator: !forNew && GetUser(baseData.creator),
+	variantNumber: !forNew && GetTermVariantNumber(baseData),
 }))
 export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, selectedTermComponent: TermComponent}> {
-	/*constructor(props) {
-		super(props);
-		let {startData} = this.props;
-		this.state = {data: Clone(startData)};
-	}*/
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
 	}
 
-	//form: HTMLFormElement;
-	scrollView: ScrollView;
 	render() {
-		let {creating, enabled, style, onChange, creator, variantNumber} = this.props;
+		let {forNew, enabled, style, onChange, creator, variantNumber} = this.props;
 		let {newData, selectedTermComponent} = this.state;
 		let Change = _=> {
 			if (onChange)
@@ -48,10 +41,9 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 
 		let splitAt = 170, width = 600;
 		return (
-			//<form ref={c=>this.form = c}>
 			<div> {/* needed so GetInnerComp() work */}
 			<Column style={style}>
-				{!creating &&
+				{!forNew &&
 					<table className="selectableAC" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>
 						<thead>
 							<tr><th>ID</th><th>Creator</th><th>Created at</th></tr>
@@ -64,9 +56,6 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 							</tr>
 						</tbody>
 					</table>}
-				{/*<Div>ID: {newData._id}</Div>
-				<Div mt={3}>Created at: {(Moment as any)(newData.createdAt).format(`YYYY-MM-DD HH:mm:ss`)
-					} (by: {nodeCreator ? nodeCreator.displayName : `n/a`})</Div>*/}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Name: </Pre>
 					<TextInput
@@ -74,7 +63,7 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 						enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
-				{!creating &&
+				{!forNew &&
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>
 						<Pre>Variant #: </Pre>
 						<Pre>{variantNumber}</Pre>
@@ -111,29 +100,14 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 				</RowLR>
 			</Column>
 			</div>
-			//</form>
 		);
 	}
 	GetValidationError() {
-		/*for (let key of this.refs.VKeys().filter(a=>a.startsWith("url_"))) {
-			let urlComp = this.refs[key];
-			let urlDOM = FindDOM(urlComp) as HTMLInputElement;
-			if (urlDOM.validationMessage)
-				return urlDOM.validationMessage;
-		}
-		return null;*/
-		//return this.form.checkValidity();
-		//return GetErrorMessagesForForm(this.form)[0];
-		return GetErrorMessagesForForm(FindDOM(this))[0];
+		return GetErrorMessagesUnderElement(FindDOM(this))[0];
 	}
 
 	GetNewData() {
 		let {newData} = this.state;
 		return Clone(newData) as Term;
 	}
-}
-
-//function GetErrorMessagesForForm(form: HTMLFormElement) {
-function GetErrorMessagesForForm(form) {
-	return $(form).find(":invalid").ToList().map(node=>(node[0] as any).validationMessage || 'Invalid value.');
 }

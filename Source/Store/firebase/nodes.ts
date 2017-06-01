@@ -7,6 +7,7 @@ import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
 import {IsUserCreatorOrMod} from "./userExtras";
 import {GetUserPermissionGroups, GetUserID, GetUserAccessLevel} from "./users";
 import { GetNodeEnhanced, IsArgumentNode, IsNodeVisibleToNonModNonCreators } from "./nodes/$node";
+import {Map} from "./maps/@Map";
 
 export function GetNode(id: number) {
 	//Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");
@@ -77,13 +78,16 @@ export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: 
 	if (!parentTypeInfo.Contains(child.type)) return false;
 	return true;
 }
-export function IsNewLinkValid(parentType: MapNodeType, parentPath: string, child: MapNode, permissions: PermissionGroupSet) {
+export function IsNewLinkValid(parentNode: MapNode, parentPath: string, child: MapNode, permissions: PermissionGroupSet) {
 	let parentPathIDs = parentPath.split("/").map(a=>a.ToInt());
-	if (parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
-	if (parentPathIDs.length == 2 && !HasModPermissions(permissions)) return false; // if parent is l2, and user is not a mod, don't accept new children
+	//if (map.name == "Global" && parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
+	if (parentPathIDs[0] == 1) return false; // if parent is global-root, don't accept new children
+	// if parent is l2, and user is not a mod (and not node creator), don't accept new children
+	if (parentPathIDs.length == 2 && !HasModPermissions(permissions) && parentNode.creator != GetUserID()) return false;
+
 	let parent = GetNode(parentPathIDs.Last());
 	if (parent && (parent.children || {}).VKeys(true).Contains(child._id+"")) return false; // if already a child of this parent, reject
-	return IsLinkValid(parentType, parentPath, child);
+	return IsLinkValid(parentNode.type, parentPath, child);
 }
 
 export function ForUnlink_GetError(userID: string, node: MapNode) {

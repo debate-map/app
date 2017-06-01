@@ -54,7 +54,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
-		let validChildTypes = GetValidNewChildTypes(node.type, path, permissions);
+		let validChildTypes = GetValidNewChildTypes(node, path, permissions);
 		let form = GetNodeForm(node, path);
 		let formForChildren = node.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base;
 
@@ -89,7 +89,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 								store.dispatch(new ACTNodeCopy({path: null}));
 							}
 						}}/>}
-				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode, permissions) &&
+				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node, path, copiedNode, permissions) &&
 					<VMenuItem text={`Paste as link: "${GetNodeDisplayText(copiedNode, formForChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
@@ -108,7 +108,7 @@ If not, paste the argument as a clone instead.`
 							new LinkNode({parentID: node._id, childID: copiedNode._id, childForm: formForChildren}).Run();
 						}
 					}}/>}
-				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node.type, path, copiedNode.Extended({_id: -1}), permissions) &&
+				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node, path, copiedNode.Extended({_id: -1}), permissions) &&
 					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, formForChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();

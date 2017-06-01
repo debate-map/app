@@ -11,11 +11,17 @@ import V from "../Frame/V/V";
 import {createSelector} from "reselect";
 import {DBPath, GetData} from "../Frame/Database/DatabaseHelpers";
 import {QuickIncrement, Debugger} from "../Frame/General/Globals_Free";
-import {GetTreeNodesInObjTree} from "../Frame/V/V";
+import {GetTreeNodesInObjTree, DeepGet} from "../Frame/V/V";
 import {Set} from "immutable";
 import {MainState, MainReducer} from "./main";
 import {LocationDescriptorObject} from "history";
 import * as Immutable from "immutable";
+import {ACTDebateMapSelect} from "./main/debates";
+import * as u from "updeep";
+import {URL} from "../Frame/General/URLs";
+
+//import {browserHistory} from "react-router";
+import {browserHistory} from "../Frame/Store/CreateStore";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;
@@ -38,11 +44,25 @@ export function MakeRootReducer(asyncReducers?) {
 		main: MainReducer,
 		firebase: firebaseStateReducer,
 		//form: formReducer,
-		router: routerReducer,
+		router: RouterReducer,
 		messageBox: MessageBoxReducer,
 		vMenu: VMenuReducer,
 		...asyncReducers
 	});
+}
+
+function RouterReducer(state = {location: null}, action) {
+	let oldURL = URL.FromState(state.location);
+	let newURL = oldURL.Clone();
+	if (action.Is(ACTDebateMapSelect) && action.payload.id == null) {
+		newURL.pathNodes.length = 1;
+	}
+	if (oldURL.toString() != newURL.toString()) {
+		browserHistory.push(newURL.toString({domain: false}));
+		return {...state, location: newURL.ToState()};
+	}
+
+	return routerReducer(state, action);
 }
 
 interface RouterState {

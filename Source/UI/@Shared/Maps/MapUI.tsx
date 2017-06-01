@@ -17,7 +17,7 @@ import NodeUI_Inner from "./MapNode/NodeUI_Inner";
 import ResizeSensor from "react-resize-sensor";
 import {WaitXThenRun, Timer} from "../../../Frame/General/Timers";
 import {MapNode, ThesisForm, MapNodeEnhanced} from "../../../Store/firebase/nodes/@MapNode";
-import {Map} from "../../../Store/firebase/maps/@Map";
+import {Map, MapType} from "../../../Store/firebase/maps/@Map";
 import {RootState} from "../../../Store/index";
 import {GetUserID} from "../../../Store/firebase/users";
 import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../Store/main/mapViews/$mapView/rootNodeViews";
@@ -37,6 +37,7 @@ import Button from "Frame/ReactComponents/Button";
 import DropDown from "../../../Frame/ReactComponents/DropDown";
 import {DropDownTrigger, DropDownContent} from "../../../Frame/ReactComponents/DropDown";
 import Spinner from "../../../Frame/ReactComponents/Spinner";
+import {ACTDebateMapSelect} from "../../../Store/main/debates";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -64,7 +65,11 @@ export function UpdateFocusNodeAndViewOffset(mapID: number) {
 		store.dispatch(new ACTViewCenterChange({mapID, focusNodePath, viewOffset}));
 }
 
-type Props = {map: Map, rootNode?: MapNode, padding?: {left: number, right: number, top: number, bottom: number}, withinPage?: boolean} & React.HTMLProps<HTMLDivElement>
+type Props = {
+	map: Map, rootNode?: MapNode, withinPage?: boolean,
+	padding?: {left: number, right: number, top: number, bottom: number},
+	subNavBarWidth?: number,
+} & React.HTMLProps<HTMLDivElement>
 	& Partial<{rootNode: MapNodeEnhanced, focusNode: string, viewOffset: {x: number, y: number}}>;
 @Connect((state: RootState, {map, rootNode}: Props)=> {
 	let url = URL.Current();
@@ -89,11 +94,14 @@ type Props = {map: Map, rootNode?: MapNode, padding?: {left: number, right: numb
 })
 export default class MapUI extends BaseComponent<Props, {} | void> {
 	//static defaultProps = {padding: {left: 2000, right: 2000, top: 1000, bottom: 1000}};
-	static defaultProps = {padding: {left: screen.availWidth, right: screen.availWidth, top: screen.availHeight, bottom: screen.availHeight}};
+	static defaultProps = {
+		padding: {left: screen.availWidth, right: screen.availWidth, top: screen.availHeight, bottom: screen.availHeight},
+		subNavBarWidth: 0,
+	};
 
 	downPos: Vector2i;
 	render() {
-		let {map, rootNode, padding, withinPage, ...rest} = this.props;
+		let {map, rootNode, withinPage, padding, subNavBarWidth, ...rest} = this.props;
 		if (map == null)
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading map...</div>;
 		Assert(map._id, "map._id is null!");
@@ -107,9 +115,9 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		return (
 			<div style={{height: "100%"}}>
 				{!withinPage &&
-					<ActionBar_Left/>}
+					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth}/>}
 				{!withinPage &&
-					<ActionBar_Right/>}
+					<ActionBar_Right map={map} subNavBarWidth={subNavBarWidth}/>}
 				<ScrollView {...rest.Excluding("dispatch")} ref="scrollView"
 						backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.mapUI}
 						style={E(withinPage && {overflow: "visible"})}
@@ -233,18 +241,22 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	}
 }
 
-class ActionBar_Left extends BaseComponent<{}, {}> {
+class ActionBar_Left extends BaseComponent<{map: Map, subNavBarWidth: number}, {}> {
 	render() {
-		let tabBarWidth = 104;
+		let {map, subNavBarWidth} = this.props;
 		return (
 			<nav style={{
-				position: "absolute", zIndex: 1, left: 0, width: `calc(50% - ${tabBarWidth / 2}px)`, top: 0, textAlign: "center",
+				position: "absolute", zIndex: 1, left: 0, width: `calc(50% - ${subNavBarWidth / 2}px)`, top: 0, textAlign: "center",
 				//background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
 			}}>
 				<Row style={{
 					justifyContent: "flex-start", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
 					width: "100%", height: 30, borderRadius: "0 0 10px 0",
 				}}>
+					{map.type == MapType.Debate &&
+						<Button text="Back" onClick={()=> {
+							store.dispatch(new ACTDebateMapSelect({id: null}));
+						}}/>}
 				</Row>
 			</nav>
 		);
@@ -254,13 +266,13 @@ class ActionBar_Left extends BaseComponent<{}, {}> {
 @Connect((state, props)=> ({
 	initialChildLimit: State(a=>a.main.initialChildLimit),
 }))
-class ActionBar_Right extends BaseComponent<{} & Partial<{initialChildLimit: number}>, {}> {
+class ActionBar_Right extends BaseComponent<{map: Map, subNavBarWidth: number} & Partial<{initialChildLimit: number}>, {}> {
 	render() {
-		let {initialChildLimit} = this.props;
+		let {map, subNavBarWidth, initialChildLimit} = this.props;
 		let tabBarWidth = 104;
 		return (
 			<nav style={{
-				position: "absolute", zIndex: 1, left: `calc(50% + ${tabBarWidth / 2}px)`, right: 0, top: 0, textAlign: "center",
+				position: "absolute", zIndex: 1, left: `calc(50% + ${subNavBarWidth / 2}px)`, right: 0, top: 0, textAlign: "center",
 				//background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
 			}}>
 				<Row style={{
