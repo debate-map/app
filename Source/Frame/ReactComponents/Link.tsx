@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { PropTypes } from "react";
-import {Link as LinkInner} from "react-router-dom";
 import {BaseComponent} from "../UI/ReactGlobals";
 import Radium from "radium";
-import {historyStore} from "../../UI/Root";
+import {replace, push} from "redux-little-router";
 
 /*@Radium
 export default class Link extends BaseComponent<{to, target?: string, replace?: boolean, style?, onClick?}, {}> {
@@ -19,16 +18,6 @@ function isModifiedEvent(event) {
 
 @Radium
 export default class Link extends BaseComponent<{to, target?: string, replace?: boolean, style?, onClick?} & React.HTMLProps<HTMLAnchorElement>, {}> {
-	/*static contextTypes = {
-		router: PropTypes.shape({
-			history: PropTypes.shape({
-				push: PropTypes.func.isRequired,
-				replace: PropTypes.func.isRequired,
-				createHref: PropTypes.func.isRequired
-			}).isRequired
-		}).isRequired
-	};*/
-
 	handleClick(event) {
 		if (this.props.onClick)
 			this.props.onClick(event)
@@ -39,14 +28,11 @@ export default class Link extends BaseComponent<{to, target?: string, replace?: 
 				!isModifiedEvent(event)) { // ignore clicks with modifier keys
 			event.preventDefault()
 
-			//const {history} = this.context.router
-			let history = historyStore;
-			const {replace, to} = this.props
-
-			if (replace) {
-				history.replace(to)
+			const {replace: replaceURL, to: toURL} = this.props
+			if (replaceURL) {
+				store.dispatch(replace(toURL));
 			} else {
-				history.push(to)
+				store.dispatch(push(toURL));
 			}
 		}
 	}

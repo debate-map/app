@@ -8,11 +8,6 @@ import ScrollView from "react-vscrollview";
 //import "../Frame/Styles/Core.scss";
 import "../../Source/Frame/Styles/Core.scss";
 //import "../Frame/Styles/bootstrap/bootstrap.scss";
-//import {BrowserRouter as Router, Route, browserHistory} from "react-router-dom";
-import {Route} from "react-router";
-import {ConnectedRouter as Router, routerReducer, routerMiddleware, push} from "react-router-redux";
-//import createHistory from "history/lib/createBrowserHistory";
-import {createBrowserHistory} from "react-router/node_modules/history";
 import {Provider, connect} from "react-redux";
 import GlobalUI from "../UI/Global";
 import MoreUI from "../UI/More";
@@ -37,8 +32,8 @@ import {createBlacklistFilter} from "redux-persist-transform-filter";
 import {URL} from "../Frame/General/URLs";
 import { Connect } from "../Frame/Database/FirebaseConnect";
 import Switch from "Frame/ReactComponents/Switch";
-
-export const historyStore = createBrowserHistory();
+import {RouterProvider} from 'redux-little-router';
+import Route from "../Frame/ReactComponents/Route";
 
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	ComponentWillMount() {
@@ -60,9 +55,9 @@ export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 
 		return (
 			<Provider store={store}>
-				<Router history={historyStore}>
+				<RouterProvider store={store}>
 					<RootUI/>
-				</Router>
+				</RouterProvider>
 			</Provider>
 		);
 	}
@@ -98,25 +93,21 @@ class RootUI extends BaseComponent<Props, {}> {
 				<OverlayUI/>
 				<NavBar/>
 				<main style={{position: "relative", flex: "1 1 100%", overflow: "hidden"}}>
-					<Switch>
-						{currentPage == "stream" && <StreamUI/>}
-						{currentPage == "chat" && <ChatUI/>}
+					<Route path="/stream"><StreamUI/></Route>
+					<Route path="/chat"><ChatUI/></Route>
 
-						{currentPage == "users" && <UsersUI/>}
-						{currentPage == "forum" && <ForumUI/>}
-						{currentPage == "social" && <SocialUI/>}
-						{currentPage == "more" && <MoreUI/>}
+					<Route path="/users"><UsersUI/></Route>
+					<Route path="/forum"><ForumUI/></Route>
+					<Route path="/social"><SocialUI/></Route>
+					<Route path="/more"><MoreUI/></Route>
+					<Route withConditions={url=>URL.FromState(url).Normalized().pathNodes[0] == "home"}><HomeUI/></Route>
+					<Route path="/content"><ContentUI/></Route>
+					<Route path="/personal"><PersonalUI/></Route>
+					<Route path="/debates"><DebatesUI/></Route>
+					<Route path="/global"><GlobalUI/></Route>
 
-						{currentPage == "content" && <ContentUI/>}
-						{currentPage == "personal" && <PersonalUI/>}
-						{currentPage == "debates" && <DebatesUI/>}
-						{currentPage == "global" && <GlobalUI/>}
-
-						{currentPage == "search" && <SearchUI/>}
-						{currentPage == "profile" && <ProfileUI/>}
-
-						<HomeUI/>
-					</Switch>
+					<Route path="/search"><SearchUI/></Route>
+					<Route path="/profile"><ProfileUI/></Route>
 				</main>
 			</div>
 		);

@@ -1,5 +1,4 @@
 import {firebaseConnect, helpers} from "react-redux-firebase";
-import {Route} from "react-router-dom";
 import {BaseComponent, SimpleShouldUpdate} from "../../Frame/UI/ReactGlobals";
 import {DBPath, GetData} from "../../Frame/Database/DatabaseHelpers";
 import {connect} from "react-redux";

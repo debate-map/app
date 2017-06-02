@@ -2,7 +2,6 @@ import {BaseComponent, BaseProps} from "../Frame/UI/ReactGlobals";
 import {firebaseConnect} from "react-redux-firebase";
 import SubNavBar from "./@Shared/SubNavBar";
 import {SubNavBarButton} from "./@Shared/SubNavBar";
-import {Route} from "react-router-dom";
 import GlobalMapUI from "./Global/GlobalMapUI";
 import ScrollView from "react-vscrollview";
 import GlobalListUI from "./Global/GlobalListUI";

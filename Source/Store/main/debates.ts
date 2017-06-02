@@ -21,7 +21,7 @@ export const DebatesReducer = CombineReducers({
 	selectedDebateMapID: (state = null, action)=> {
 		//if (action.Is(ACTDebateMapSelect)) return action.payload.id;
 		if (action.Is(ACTDebateMapSelect_WithData)) return action.payload.id;
-		/*if (action.type == "@@router/LOCATION_CHANGE") {
+		/*if (action.type == LOCATION_CHANGED) {
 			let id = parseInt(URL.FromState(action.payload).pathNodes[1]);
 			if (IsNumber(id)) return id;
 		}*/

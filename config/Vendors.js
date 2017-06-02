@@ -1,5 +1,4 @@
 require("react");
-require("react-router");
 require("react-redux");
 require("redux");
 require("react-google-button");
@@ -8,8 +7,10 @@ require("moment");
 require("radium");
 require("react-autobind");
 require("react-markdown");
-require("react-router-dom");
-require("react-router-redux");
+//require("react-router");
+//require("react-router-dom");
+//require("react-router-redux");
+//require("redux-little-router");
 //require("react-redux-firebase");
 require("redux-persist");
 require("redux-persist-transform-filter");

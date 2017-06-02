@@ -87,7 +87,7 @@ function GetUrlVars(url?: string) {
 }
 
 export function GetCurrentURL(fromAddressBar = false) {
-	return fromAddressBar ? URL.Parse(CurrentUrl()) : URL.FromState(State(a=>a.router.location));
+	return fromAddressBar ? URL.Parse(CurrentUrl()) : URL.FromState(State(a=>a.router));
 }
 
 export class URL {
@@ -109,8 +109,10 @@ export class URL {
 		result.hash = hashStr;
 		return result;
 	}
-	static FromState(state: {pathname?: string, search?: string}) {
-		return URL.Parse(state ? state.pathname + state.search : "");
+	static FromState(state: {pathname?: string, search?: string, hash?: string}) {
+		let result = URL.Parse(state ? (state.pathname||"") + (state.search||"") + (state.hash||"") : "");
+		//if (normalize) result = result.Normalized();
+		return result;
 	}
 	ToState() {
 		return {
@@ -149,7 +151,7 @@ export class URL {
 	Clone() {
 		return new URL(this.domain, this.pathNodes.slice(), this.queryVars.map(a=>a.Clone()), this.hash);
 	}
-	WithImpliedPathNodes() {
+	Normalized() {
 		let result = this.Clone();
 		if (!rootPages.Contains(result.pathNodes[0])) {
 			result.pathNodes.Insert(0, "home");
@@ -206,7 +208,7 @@ export class QueryVar {
 
 // todo: merge this functionality into the URL class
 /*export function GetPathNodes(path = GetUrlPath(), makeFull = true) {
-	/*let location = State().router.location;
+	/*let location = State().router;
 	if (location == null) return "/";
 	return location.pathname.split("/")[1];*#/
 	

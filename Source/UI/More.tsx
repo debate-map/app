@@ -1,6 +1,5 @@
 import {BaseComponent, RouteProps, Div} from "../Frame/UI/ReactGlobals";
 import {firebaseConnect} from "react-redux-firebase";
-import {Route} from "react-router";
 import AdminUI from "./More/Admin";
 import SubNavBar from "./@Shared/SubNavBar";
 import {SubNavBarButton} from "./@Shared/SubNavBar";
@@ -14,6 +13,7 @@ import LinksUI from "./More/Links";
 import ScrollView from "react-vscrollview";
 import Column from "../Frame/ReactComponents/Column";
 import Switch from "Frame/ReactComponents/Switch";
+import {Fragment} from "redux-little-router";
 
 type Props = {} & Partial<{currentSubpage: string, userCount: number}>;
 @Connect(state=> ({
@@ -34,6 +34,10 @@ export default class MoreUI extends BaseComponent<Props, {}> {
 				</SubNavBar>
 				<ScrollView style={{flex: `1 1 100%`}} scrollVBarStyle={{width: 10}}>
 					<Switch>
+						{/*<Fragment forRoute="/admin">
+							<AdminUI/>
+						</Fragment>*/}
+						{/*<Route path="/more/admin"><AdminUI/></Route>*/}
 						{currentSubpage == "admin" && <AdminUI/>}
 						<LinksUI/>
 					</Switch>

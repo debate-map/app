@@ -10,7 +10,6 @@ import {Vector2i} from "../General/VectorStructs";
 import {RootState} from "../../Store/index";
 import * as ReactGA from "react-ga";
 import {URL} from "../General/URLs";
-import {replace} from "react-router-redux";
 import {CreateMapViewForPath, GetShortestPathFromRootToNode} from "./PathFinder";
 import {ACTNotificationMessageAdd, ACTSetPage, ACTSetSubpage} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
@@ -18,6 +17,7 @@ import {GetNodeDisplayText} from "../../Store/firebase/nodes/$node";
 import * as Raven from "raven-js";
 import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "../../Store/main/debates";
 import {ACTTermSelect, ACTImageSelect} from "../../Store/main/content";
+import {LOCATION_CHANGED} from "redux-little-router";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -87,36 +87,40 @@ export async function PostDispatchAction(action: Action<any>) {
 			//ReactGA.initialize("UA-21256330-33", {debug: true});
 			ReactGA.initialize("UA-21256330-33");
 
-			/*let url = URL.FromState(State().router.location).toString(false);
+			/*let url = URL.FromState(State().router).toString(false);
 			ReactGA.set({page: url});
 			ReactGA.pageview(url || "/");*/
 		}
 	}
-	// can be triggered by back/forward navigation
-	if (action.type == "@@router/LOCATION_CHANGE") {
-		//let oldURL = URL.Current();
-		let url = URL.FromState(action.payload);
-		//let url = window.location.pathname;
-		ReactGA.set({page: url.toString({domain: false})});
-		ReactGA.pageview(url.toString({domain: false}) || "/");
-		//Log("Page-view: " + url);
+	// is triggered by back/forward navigation, as well things that call store.dispatch([push/replace]()) -- such as UpdateURL()
+	if (action.type == LOCATION_CHANGED) {
+		if (g.justChangedURLFromCode) {
+			g.justChangedURLFromCode = false;
+		} else {
+			//let oldURL = URL.Current();
+			let url = URL.FromState(action.payload);
+			//let url = window.location.pathname;
+			ReactGA.set({page: url.toString({domain: false})});
+			ReactGA.pageview(url.toString({domain: false}) || "/");
+			//Log("Page-view: " + url);
 
-		//setTimeout(()=>UpdateURL());
-		await LoadURL(url.toString());
-		UpdateURL(false);
-		if (url.WithImpliedPathNodes().toString({domain: false}).startsWith("/global/map")) {
-			if (isBot) {
-				/*let newURL = url.Clone();
-				let node = await GetNodeAsync(nodeID);
-				let node = await GetNodeAsync(nodeID);
-				newURL.pathNodes[1] = "";
-				store.dispatch(replace(newURL.toString(false)));*/
-			} else {
-				// we don't yet have a good way of knowing when loading is fully done; so just do a timeout
-				WaitXThenRun(0, UpdateURL, 200);
-				WaitXThenRun(0, UpdateURL, 400);
-				WaitXThenRun(0, UpdateURL, 800);
-				WaitXThenRun(0, UpdateURL, 1600);
+			//setTimeout(()=>UpdateURL());
+			await LoadURL(url.toString());
+			UpdateURL(false);
+			if (url.toString({domain: false}).startsWith("/global/map")) {
+				if (isBot) {
+					/*let newURL = url.Clone();
+					let node = await GetNodeAsync(nodeID);
+					let node = await GetNodeAsync(nodeID);
+					newURL.pathNodes[1] = "";
+					store.dispatch(replace(newURL.toString(false)));*/
+				} else {
+					// we don't yet have a good way of knowing when loading is fully done; so just do a timeout
+					WaitXThenRun(0, UpdateURL, 200);
+					WaitXThenRun(0, UpdateURL, 400);
+					WaitXThenRun(0, UpdateURL, 800);
+					WaitXThenRun(0, UpdateURL, 1600);
+				}
 			}
 		}
 	}
@@ -126,7 +130,7 @@ export async function PostDispatchAction(action: Action<any>) {
 	}
 
 	/*let movingToGlobals = false;
-	if (action.type == "@@router/LOCATION_CHANGE") {
+	if (action.type == LOCATION_CHANGED) {
 		if (!lastPath.startsWith("/global") && action.payload.pathname.startsWith("/global"))
 			movingToGlobals = true;
 		lastPath = action.payload.pathname;

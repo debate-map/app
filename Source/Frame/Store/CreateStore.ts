@@ -1,11 +1,9 @@
 import {applyMiddleware, compose, createStore, StoreEnhancer, Store} from "redux";
 import thunk from "redux-thunk";
-import {createBrowserHistory} from "react-router/node_modules/history";
 import {reduxFirebase, getFirebase} from "react-redux-firebase";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 import {persistStore, autoRehydrate} from "redux-persist";
 import {createFilter, createBlacklistFilter} from "redux-persist-transform-filter";
-import {routerMiddleware} from "react-router-redux"
 import {MakeRootReducer, RootState} from "../../Store/index";
 import watch from "redux-watch";
 import {PreDispatchAction, MidDispatchAction, PostDispatchAction} from "./ActionProcessor";
@@ -14,8 +12,21 @@ import {PreDispatchAction, MidDispatchAction, PostDispatchAction} from "./Action
 //import {batchedUpdatesMiddleware} from "redux-batched-updates";
 import {batchedSubscribe} from "redux-batched-subscribe";
 import {unstable_batchedUpdates} from "react-dom";
+import {routerForBrowser} from 'redux-little-router';
 
-export const browserHistory = createBrowserHistory();
+let routes = {
+	"/": {},
+	"/:seg": {},
+	"/:seg/:seg": {},
+	"/:seg/:seg/:seg": {},
+	"/:seg/:seg/:seg/:seg": {},
+	"/:seg/:seg/:seg/:seg/:seg": {},
+};
+const {reducer: routerReducer, middleware: routerMiddleware, enhancer: routerEnhancer} = routerForBrowser({
+  routes,
+});
+
+//export const browserHistory = createBrowserHistory();
 //import {browserHistory} from "react-router";
 
 export default function(initialState = {}, history) {
@@ -36,7 +47,8 @@ export default function(initialState = {}, history) {
 			WaitXThenRun(0, ()=>PostDispatchAction(action));
 			return returnValue;
 		},*/
-		routerMiddleware(browserHistory),
+		//routerMiddleware(browserHistory),
+		routerMiddleware,
 	];
 	let lateMiddleware = [
 		// for some reason, this breaks stuff if we have it the last one
@@ -71,11 +83,15 @@ export default function(initialState = {}, history) {
 		// profileDecorator: (userData) => ({ email: userData.email }) // customize format of user profile
 	};
 
+	let extraReducers = {
+		router: routerReducer,
+	};
 	const store = createStore(
-		MakeRootReducer(),
+		MakeRootReducer(extraReducers),
 		initialState,
 		// note: compose applies functions from right to left
 		compose(
+			routerEnhancer,
 			applyMiddleware(...middleware),
 			reduxFirebase(firebaseConfig, reduxFirebaseConfig),
 			autoRehydrate(),
@@ -83,8 +99,7 @@ export default function(initialState = {}, history) {
 			applyMiddleware(...lateMiddleware), // place late-middleware after reduxFirebase, so it can intercept all its dispatched events
 			...extraEnhancers
 		) as StoreEnhancer<any>
-	) as Store<RootState> & {asyncReducers};
-	store.asyncReducers = {};
+	) as Store<RootState>; //& {extraReducers};
 
 	/*let w = watch(()=>State());
 	store.subscribe(w((newVal, oldVal) => {
@@ -105,8 +120,8 @@ export default function(initialState = {}, history) {
 
 	if (module.hot) {
 		module.hot.accept("../../Store", () => {
-			const reducers = require("../../Store").MakeRootReducer;
-			store.replaceReducer(reducers(store.asyncReducers));
+			let {MakeRootReducer} = require("../../Store");
+			store.replaceReducer(MakeRootReducer(extraReducers));
 		});
 	}
 

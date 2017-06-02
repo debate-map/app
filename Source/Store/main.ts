@@ -6,7 +6,6 @@ import {firebaseStateReducer} from "react-redux-firebase";
 import {reducer as formReducer} from "redux-form";
 import {ACTMessageBoxShow, MessageBoxOptions} from "../Frame/UI/VMessageBox";
 import Action from "../Frame/General/Action";
-import {routerReducer} from "react-router-redux";
 import {ToJSON, FromJSON, Debugger} from "../Frame/General/Globals";
 import V from "../Frame/V/V";
 import {Map} from "../Store/firebase/maps/@Map";
@@ -25,6 +24,7 @@ import {CombineReducers} from "../Frame/Store/ReducerUtils";
 import {ContentReducer, Content} from "./main/content";
 import {DebatesReducer, Debates} from "./main/debates";
 import SubpageReducer from "./main/@Shared/$subpage";
+import {LOCATION_CHANGED} from "redux-little-router";
 
 // class is used only for initialization
 export class MainState {
@@ -92,7 +92,7 @@ export function MainReducer(state, action) {
 		envOverride: (state = null, action)=> {
 			//if ((action.type == "@@INIT" || action.type == "persist/REHYDRATE") && startURL.GetQueryVar("env"))
 			//if ((action.type == "PostRehydrate") && startURL.GetQueryVar("env"))
-			if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).GetQueryVar("env")) {
+			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).GetQueryVar("env")) {
 				let newVal = URL.FromState(action.payload).GetQueryVar("env");
 				if (newVal == "null")
 					newVal = null;
@@ -101,9 +101,9 @@ export function MainReducer(state, action) {
 			return state;
 		},
 		analyticsEnabled: (state = true, action)=> {
-			if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).GetQueryVar("analytics") == "false")
+			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).GetQueryVar("analytics") == "false")
 				return false;
-			if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).GetQueryVar("analytics") == "true")
+			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).GetQueryVar("analytics") == "true")
 				return true;
 			return state;
 		},
@@ -152,7 +152,7 @@ export function MainReducer(state, action) {
 		// ==========
 
 		openMap: (state = null, action)=> {
-			if (action.type == "@@router/LOCATION_CHANGE" && URL.FromState(action.payload).pathNodes[0] == "global")
+			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).pathNodes[0] == "global")
 				return 1;
 			/*if (action.Is(ACTOpenMapSet))
 				return action.payload;*/

@@ -1,6 +1,6 @@
 import {Log} from "../General/Logging";
 import {Assert} from "../General/Assert";
-import {replace, push} from "react-router-redux";
+import {replace, push} from "redux-little-router";
 import {ToInt} from "../General/Types";
 import {History} from "history";
 import {Vector2i} from "../General/VectorStructs";
@@ -20,8 +20,6 @@ import { GetShortestPathFromRootToNode } from "Frame/Store/PathFinder";
 import {CreateMapViewForPath} from "../Store/PathFinder";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import {ACTDebateMapSelect} from "../../Store/main/debates";
-import {browserHistory} from "../Store/CreateStore";
-import {historyStore} from "../../UI/Root";
 
 // loading
 // ==========
@@ -120,7 +118,7 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 const pagesWithSimpleSubpages = ["home", "more", "content", "global"].ToMap(page=>page, ()=>null);
 export async function LoadURL(urlStr: string) {
 	//if (!GetPath(GetUrlPath(url)).startsWith("global/map")) return;
-	let url = URL.Parse(urlStr).WithImpliedPathNodes();
+	let url = URL.Parse(urlStr).Normalized();
 
 	let page = url.pathNodes[0];
 	store.dispatch(new ACTSetPage(page).VSet({fromURL: true}));
@@ -137,7 +135,7 @@ export async function LoadURL(urlStr: string) {
 		}
 	}
 
-	if (url.WithImpliedPathNodes().toString({domain: false}).startsWith("/global/map")) {
+	if (url.Normalized().toString({domain: false}).startsWith("/global/map")) {
 		// example: /global?view=1:3:100:101f(384_111):102:.104:.....
 		let mapViewStr = url.GetQueryVar("view");
 		if (mapViewStr == null || mapViewStr.length == 0) return;
@@ -181,6 +179,7 @@ export async function LoadURL(urlStr: string) {
 // saving
 // ==========
 
+g.justChangedURLFromCode = false;
 export function UpdateURL(pushNewURL: boolean) {
 	//let newURL = URL.Current();
 	/*let oldURL = URL.Current(true);
@@ -226,17 +225,21 @@ export function UpdateURL(pushNewURL: boolean) {
 	if (subpage && subpage == rootPageDefaultChilds[page] && newURL.pathNodes.length == 2) newURL.pathNodes.length = 1;
 	if (page == "home" && newURL.pathNodes.length == 1) newURL.pathNodes.length = 0;
 
+	let oldURLState = State(a=>a.router);
+	let oldURL = URL.FromState(oldURLState);
 	//let newURLStr = newURL.toString({domain: false});
 	let newURLState = newURL.ToState();
-	if (ShallowChanged(newURLState.Excluding("key"), (State(a=>a.router.location) || {}).Excluding("key"))) {
-		if (g.logURLUpdates) Log(`Updating url to: ${newURL}`);
-		//store.dispatch(pushNewURL ? push(newURLState) : replace(newURLState));
+	//if (ShallowChanged(newURLState.Including("pathname", "search", "hash"), (State(a=>a.router) || {}).Including("pathname", "search", "hash"))) {
+	if (oldURL.toString({domain: false}) != newURL.toString({domain: false})) {
+		if (g.logURLUpdates) Log(`Updating url from "${oldURL.toString({domain: false})}" to "${newURL.toString({domain: false})}".`);
+		g.justChangedURLFromCode = true;
+		store.dispatch(pushNewURL ? push(newURLState) : replace(newURLState));
 		// for some reason, we need to use the lower-level historyStore.[set/replace]State() -- otherwise the redux store isn't always updated
-		if (pushNewURL) {
+		/*if (pushNewURL) {
 			historyStore.push(newURLState);
 		} else {
 			historyStore.replace(newURLState);
-		}
+		}*/
 	}
 }
 function GetMapViewStr(mapID: number) {

@@ -4,7 +4,6 @@ import {BaseComponent, BaseProps} from "../Frame/UI/ReactGlobals";
 import VReactMarkdown from "../Frame/ReactComponents/VReactMarkdown";
 import SubNavBar from "./@Shared/SubNavBar";
 import {SubNavBarButton} from "./@Shared/SubNavBar";
-import {Route} from "react-router-dom";
 import HomeUI2 from "./Home/Home";
 import AboutUI from "./Home/About";
 import ScrollView from "react-vscrollview";

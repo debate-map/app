@@ -82,25 +82,6 @@ const config = {
 		chunkModules : false,
 		colors : true
 	},
-	/*compiler_vendors: [
-		"react",
-		"react-router",
-		"react-redux",
-		"redux",
-		"react-google-button",
-		"react-modal",
-		"moment",
-		"radium",
-		"react-autobind",
-		"react-markdown",
-		"react-router-dom",
-		"react-router-redux",
-		"react-redux-firebase",
-		"redux-persist",
-		"redux-persist-transform-filter",
-		"reselect",
-		"react-vmenu",
-	],*/
 
 	//compiler_css_modules: true, // enable/disable css modules
 

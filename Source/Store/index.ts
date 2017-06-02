@@ -5,7 +5,6 @@ import {firebaseStateReducer, helpers} from "react-redux-firebase";
 //import {reducer as formReducer} from "redux-form";
 import {ACTMessageBoxShow, MessageBoxOptions, MessageBoxReducer, MessageBoxState} from "../Frame/UI/VMessageBox";
 import Action from "../Frame/General/Action";
-import {routerReducer} from "react-router-redux";
 import {ToJSON, FromJSON} from "../Frame/General/Globals";
 import V from "../Frame/V/V";
 import {createSelector} from "reselect";
@@ -19,9 +18,6 @@ import * as Immutable from "immutable";
 import {ACTDebateMapSelect} from "./main/debates";
 import * as u from "updeep";
 import {URL} from "../Frame/General/URLs";
-
-//import {browserHistory} from "react-router";
-import {browserHistory} from "../Frame/Store/CreateStore";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;
@@ -39,16 +35,16 @@ export class RootState {
 	messageBox: MessageBoxState;
 	vMenu: VMenuState;
 }
-export function MakeRootReducer(asyncReducers?) {
+export function MakeRootReducer(extraReducers?) {
 	return combineReducers({
 		main: MainReducer,
 		firebase: firebaseStateReducer,
 		//form: formReducer,
-		router: routerReducer,
+		//router: routerReducer,
 		//router: RouterReducer,
 		messageBox: MessageBoxReducer,
 		vMenu: VMenuReducer,
-		...asyncReducers
+		...extraReducers
 	});
 }
 

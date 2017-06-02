@@ -19,7 +19,7 @@ import {Vector2i} from "../../Frame/General/VectorStructs";
 import Editor from "react-md-editor";
 import * as ReactMarkdown from "react-markdown";
 import {GetNodeEnhanced} from "../../Store/firebase/nodes/$node";
-import {historyStore} from "../Root";
+import {replace, push} from "redux-little-router";
 
 let red = `rgba(255,0,0,.7)`;
 let green = `rgba(0,255,0,.6)`;
@@ -310,13 +310,10 @@ const Link = (props)=> {
 					return;
 				}
 
-				//let history = State().router.history;
-				//let history = router.history;
-				let history = historyStore;
 				if (ShallowEquals(toURL.pathNodes, currentURL.pathNodes)) { // if paths same
-					history.replace(href);
+					store.dispatch(replace(href));
 				} else {
-					history.push(href);
+					store.dispatch(push(href));
 				}
 			}
 		}}>

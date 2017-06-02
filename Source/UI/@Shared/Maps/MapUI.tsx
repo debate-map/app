@@ -1,7 +1,6 @@
 import {GetFocusNode, GetViewOffset, GetSelectedNodePath, GetNodeView, GetMapView} from "../../../Store/main/mapViews";
 import {BaseComponent, FindDOM, FindReact, FindDOM_, Pre, GetInnerComp} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
-import {Route} from "react-router-dom";
 import {connect} from "react-redux";
 import {DBPath, GetData} from "../../../Frame/Database/DatabaseHelpers";
 import {Debugger, E} from "../../../Frame/General/Globals_Free";
@@ -294,7 +293,7 @@ class ActionBar_Left extends BaseComponent<ActionBar_LeftProps, {dataError: stri
 										<Column mt={10}>
 											<Row style={{fontWeight: "bold"}}>Advanced:</Row>
 											<Row>
-												<Button mt={5} text="Delete" enabled={dataError == null} onLeftClick={async ()=> {
+												<Button mt={5} text="Delete" onLeftClick={async ()=> {
 													ShowMessageBox({
 														title: `Delete "${map.name}"`, cancelButton: true,
 														message: `Delete the map "${map.name}"?`,

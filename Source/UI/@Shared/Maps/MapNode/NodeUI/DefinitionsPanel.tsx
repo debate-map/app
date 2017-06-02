@@ -1,5 +1,3 @@
-import {browserHistory} from "../../../../../Frame/Store/CreateStore";
-//import {browserHistory} from "react-router";
 import Column from "../../../../../Frame/ReactComponents/Column";
 import {Div, BaseComponent, Pre} from "../../../../../Frame/UI/ReactGlobals";
 import {MapNode} from "../../../../../Store/firebase/nodes/@MapNode";
@@ -15,10 +13,9 @@ import TermComponentsUI from "../../../../Content/Terms/TermComponentsUI";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
 import {GetUserID} from "../../../../../Store/firebase/users";
 import {URL} from "../../../../../Frame/General/URLs";
-import {replace, push} from "react-router-redux";
-import {historyStore} from "../../../../Root";
 import {ParseSegmentsForPatterns} from "../../../../../Frame/General/RegexHelpers";
 import {ACTTermSelect} from "../../../../../Store/main/content";
+import {push} from "redux-little-router";
 
 let termsPlaceholder = [];
 
@@ -109,10 +106,10 @@ class TermDefinitionPanel extends BaseComponent<{term: Term, termVariantNumber: 
 					newURL.queryVars = [];
 					//browserHistory.push(newURL.toString({domain: false}));
 					//(this.props as any).router.push(newURL.toString({domain: false}));
-					//store.dispatch(push(newURL.toString({domain: false})));
-					historyStore.push(newURL.toString({domain: false}));
+					store.dispatch(push(newURL.toString({domain: false})));
+					//historyStore.push(newURL.toString({domain: false}));
 					/*store.dispatch({
-						type: "@@router/LOCATION_CHANGE",
+						type: LOCATION_CHANGED,
 						payload: {
 							pathname: "/content",
 							search: "",

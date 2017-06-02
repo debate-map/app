@@ -19,7 +19,7 @@ export class Map {
 	creator: string;
 	createdAt: number;
 }
-export const Map_nameFormat = `^[a-zA-Z0-9 ,'"%-]+$`;
+export const Map_nameFormat = `^[a-zA-Z0-9 ,'"%:.?-]+$`;
 AddSchema({
 	properties: {
 		name: {type: "string", pattern: Map_nameFormat},
