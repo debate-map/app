@@ -64,12 +64,12 @@ export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
 						enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
-				{!forNew &&
+				{/*!forNew &&
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>
 						<Pre>Root-node ID: </Pre>
 						<Spinner enabled={enabled} style={{width: "100%"}}
 							value={newData.rootNode} onChange={val=>Change(newData.rootNode = val)}/>
-					</RowLR>}
+					</RowLR>*/}
 			</Column>
 			</div>
 		);

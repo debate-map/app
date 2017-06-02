@@ -28,7 +28,7 @@ export default class AddMap extends Command<{map: Map}> {
 	async Validate() {
 		let {map} = this.payload;
 		AssertValidate("Map", map, `Map invalid`);
-		this.sub_addNode.Validate();
+		await this.sub_addNode.Validate();
 	}
 	
 	GetDBUpdates() {

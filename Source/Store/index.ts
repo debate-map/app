@@ -44,14 +44,15 @@ export function MakeRootReducer(asyncReducers?) {
 		main: MainReducer,
 		firebase: firebaseStateReducer,
 		//form: formReducer,
-		router: RouterReducer,
+		router: routerReducer,
+		//router: RouterReducer,
 		messageBox: MessageBoxReducer,
 		vMenu: VMenuReducer,
 		...asyncReducers
 	});
 }
 
-function RouterReducer(state = {location: null}, action) {
+/*function RouterReducer(state = {location: null}, action) {
 	let oldURL = URL.FromState(state.location);
 	let newURL = oldURL.Clone();
 	if (action.Is(ACTDebateMapSelect) && action.payload.id == null) {
@@ -63,7 +64,7 @@ function RouterReducer(state = {location: null}, action) {
 	}
 
 	return routerReducer(state, action);
-}
+}*/
 
 interface RouterState {
 	location: LocationDescriptorObject & {hash: string}; // typing must be outdated, as lacks hash prop

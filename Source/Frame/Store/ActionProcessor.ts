@@ -137,7 +137,8 @@ export async function PostDispatchAction(action: Action<any>) {
 	let pushURL_actions = [
 		ACTSetPage, ACTSetSubpage, // general
 		ACTTermSelect, ACTImageSelect, // content
-		ACTDebateMapSelect, // debates
+		//ACTDebateMapSelect, // debates
+		ACTDebateMapSelect_WithData, // debates
 	];
 	let replaceURL_actions = [
 		ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange, // global

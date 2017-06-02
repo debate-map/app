@@ -38,7 +38,6 @@ import {URL} from "../Frame/General/URLs";
 import { Connect } from "../Frame/Database/FirebaseConnect";
 import Switch from "Frame/ReactComponents/Switch";
 
-// Create a history of your choosing (we're using a browser history in this case)
 export const historyStore = createBrowserHistory();
 
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {

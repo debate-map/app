@@ -1,5 +1,5 @@
 import {GetFocusNode, GetViewOffset, GetSelectedNodePath, GetNodeView, GetMapView} from "../../../Store/main/mapViews";
-import {BaseComponent, FindDOM, FindReact, FindDOM_, Pre} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, FindDOM, FindReact, FindDOM_, Pre, GetInnerComp} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {Route} from "react-router-dom";
 import {connect} from "react-redux";
@@ -38,6 +38,12 @@ import DropDown from "../../../Frame/ReactComponents/DropDown";
 import {DropDownTrigger, DropDownContent} from "../../../Frame/ReactComponents/DropDown";
 import Spinner from "../../../Frame/ReactComponents/Spinner";
 import {ACTDebateMapSelect} from "../../../Store/main/debates";
+import MapDetailsUI from "./MapDetailsUI";
+import {GetUpdates} from "../../../Frame/General/Others";
+import UpdateMapDetails from "../../../Server/Commands/UpdateMapDetails";
+import {IsUserCreatorOrMod} from "../../../Store/firebase/userExtras";
+import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
+import DeleteMap from "../../../Server/Commands/DeleteMap";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -241,9 +247,17 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	}
 }
 
-class ActionBar_Left extends BaseComponent<{map: Map, subNavBarWidth: number}, {}> {
+type ActionBar_LeftProps = {map: Map, subNavBarWidth: number};
+@Connect((state, {map}: ActionBar_LeftProps)=> ({
+	_: IsUserCreatorOrMod(GetUserID(), map),
+}))
+class ActionBar_Left extends BaseComponent<ActionBar_LeftProps, {dataError: string}> {
+	detailsUI: MapDetailsUI;
 	render() {
 		let {map, subNavBarWidth} = this.props;
+		let {dataError} = this.state;
+
+		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), map);
 		return (
 			<nav style={{
 				position: "absolute", zIndex: 1, left: 0, width: `calc(50% - ${subNavBarWidth / 2}px)`, top: 0, textAlign: "center",
@@ -257,6 +271,44 @@ class ActionBar_Left extends BaseComponent<{map: Map, subNavBarWidth: number}, {
 						<Button text="Back" onClick={()=> {
 							store.dispatch(new ACTDebateMapSelect({id: null}));
 						}}/>}
+					{map.type == MapType.Debate &&
+						<DropDown>
+							<DropDownTrigger>
+								<Button ml={5} text="Details"/>
+							</DropDownTrigger>
+							<DropDownContent style={{left: 0}}>
+								<Column>
+									<MapDetailsUI ref={c=>this.detailsUI = GetInnerComp(c) as any} baseData={map}
+										forNew={false} enabled={creatorOrMod}
+										onChange={newData=> {
+											this.SetState({dataError: this.detailsUI.GetValidationError()});
+										}}/>
+									{creatorOrMod &&
+										<Row>
+											<Button mt={5} text="Save" enabled={dataError == null} onLeftClick={async ()=> {
+												let mapUpdates = GetUpdates(map, this.detailsUI.GetNewData());
+												await new UpdateMapDetails({mapID: map._id, mapUpdates}).Run();
+											}}/>
+										</Row>}
+									{creatorOrMod &&
+										<Column mt={10}>
+											<Row style={{fontWeight: "bold"}}>Advanced:</Row>
+											<Row>
+												<Button mt={5} text="Delete" enabled={dataError == null} onLeftClick={async ()=> {
+													ShowMessageBox({
+														title: `Delete "${map.name}"`, cancelButton: true,
+														message: `Delete the map "${map.name}"?`,
+														onOK: async ()=> {
+															await new DeleteMap({mapID: map._id}).Run();
+															store.dispatch(new ACTDebateMapSelect({id: null}));
+														}
+													});
+												}}/>
+											</Row>
+										</Column>}
+								</Column>
+							</DropDownContent>
+						</DropDown>}
 				</Row>
 			</nav>
 		);
@@ -281,8 +333,7 @@ class ActionBar_Right extends BaseComponent<{map: Map, subNavBarWidth: number} &
 				}}>
 					<DropDown>
 						<DropDownTrigger>
-							<Button text="Layout" onClick={()=> {
-							}}/>
+							<Button text="Layout"/>
 						</DropDownTrigger>
 						<DropDownContent style={{right: 0}}>
 							<Column>

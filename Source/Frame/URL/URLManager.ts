@@ -20,6 +20,8 @@ import { GetShortestPathFromRootToNode } from "Frame/Store/PathFinder";
 import {CreateMapViewForPath} from "../Store/PathFinder";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import {ACTDebateMapSelect} from "../../Store/main/debates";
+import {browserHistory} from "../Store/CreateStore";
+import {historyStore} from "../../UI/Root";
 
 // loading
 // ==========
@@ -227,7 +229,14 @@ export function UpdateURL(pushNewURL: boolean) {
 	//let newURLStr = newURL.toString({domain: false});
 	let newURLState = newURL.ToState();
 	if (ShallowChanged(newURLState.Excluding("key"), (State(a=>a.router.location) || {}).Excluding("key"))) {
-		store.dispatch(pushNewURL ? push(newURLState) : replace(newURLState));
+		if (g.logURLUpdates) Log(`Updating url to: ${newURL}`);
+		//store.dispatch(pushNewURL ? push(newURLState) : replace(newURLState));
+		// for some reason, we need to use the lower-level historyStore.[set/replace]State() -- otherwise the redux store isn't always updated
+		if (pushNewURL) {
+			historyStore.push(newURLState);
+		} else {
+			historyStore.replace(newURLState);
+		}
 	}
 }
 function GetMapViewStr(mapID: number) {

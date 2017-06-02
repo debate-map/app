@@ -179,6 +179,7 @@
     "redux-batched-subscribe": "^0.1.6",
     "redux-batched-updates": "^0.1.0",
     "redux-form": "^6.2.0",
+    "redux-little-router": "^13.1.2",
     "redux-persist": "^4.4.2",
     "redux-persist-transform-filter": "0.0.9",
     "redux-thunk": "^2.0.0",

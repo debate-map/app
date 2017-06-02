@@ -35,6 +35,7 @@ import {GetNodeForm, GetLinkUnderParent, GetNodeEnhanced} from "../../../../../S
 import Column from "../../../../../Frame/ReactComponents/Column";
 import NodeDetailsUI from "../NodeDetailsUI";
 import {SlicePath} from "./RatingsPanel";
+import {GetUpdates} from "../../../../../Frame/General/Others";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -77,17 +78,4 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 			</Column>
 		);
 	}
-}
-
-function GetUpdates(oldData, newData, useNullInsteadOfUndefined = true) {
-	let result = {};
-	for (let key of oldData.VKeys(true).concat(newData.VKeys(true))) {
-		if (newData[key] !== oldData[key]) {
-			result[key] = newData[key];
-			if (newData[key] === undefined && useNullInsteadOfUndefined) {
-				result[key] = null;
-			}
-		}
-	}
-	return RemoveHelpers(result);
 }

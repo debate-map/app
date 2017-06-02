@@ -22,14 +22,14 @@ export default class DeleteNode extends Command<{nodeID: number}> {
 			return GetDataAsync(`nodes/${parentID}/childrenOrder`) as Promise<number[]>;
 		}));
 		this.oldParentID__childrenOrder = oldParentChildrenOrders.reduce((result, current, index)=>result.VSet(parentIDs[index], current), {});*/
-		this.oldParentChildrenOrders = await Promise.all(this.oldData.parents.VKeys().map(parentID=> {
+		this.oldParentChildrenOrders = await Promise.all((this.oldData.parents || {}).VKeys().map(parentID=> {
 			return GetDataAsync(`nodes/${parentID}/childrenOrder`) as Promise<number[]>;
 		}));
 
 		this.metaThesisID = IsArgumentNode(this.oldData) ? this.oldData.children.VKeys()[0].ToInt() : null;
 	}
 	async Validate() {
-		Assert(this.oldData.parents.VKeys(true).length == 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
+		Assert((this.oldData.parents || {}).VKeys(true).length <= 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
 	}
 
 	GetDBUpdates() {
@@ -42,7 +42,7 @@ export default class DeleteNode extends Command<{nodeID: number}> {
 		updates[`nodeRatings/${nodeID}`] = null;
 
 		// delete links with parents
-		for (let {index, name: parentID} of this.oldData.parents.Props()) {
+		for (let {index, name: parentID} of (this.oldData.parents || {}).Props()) {
 			updates[`nodes/${parentID}/children/${nodeID}`] = null;
 			//let parent_childrenOrder = this.oldParentID__childrenOrder[parentID];
 			let parent_childrenOrder = this.oldParentChildrenOrders[index];

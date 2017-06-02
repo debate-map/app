@@ -19,6 +19,7 @@ import {Vector2i} from "../../Frame/General/VectorStructs";
 import Editor from "react-md-editor";
 import * as ReactMarkdown from "react-markdown";
 import {GetNodeEnhanced} from "../../Store/firebase/nodes/$node";
+import {historyStore} from "../Root";
 
 let red = `rgba(255,0,0,.7)`;
 let green = `rgba(0,255,0,.6)`;
@@ -230,12 +231,12 @@ export default class HomeUI2 extends BaseComponent<Props, {}> {
 			}).isRequired
 		}).isRequired
 	};*/
-	static contextTypes = {router: ()=>{}};
+	//static contextTypes = {router: ()=>{}};
 	render() {
 		let {demoRootNode} = this.props;
 		/*if (demoRootNode_override) // for dev
 			demoRootNode = demoRootNode_override;*/
-		let {router} = this.context;
+		//let {router} = this.context;
 
 		/*if (1 == 1) {
 			let Change = _=>this.Update();
@@ -259,7 +260,7 @@ export default class HomeUI2 extends BaseComponent<Props, {}> {
 					//return React.createElement("section", props.Excluding("literal", "nodeKey"), props.literal);
 					return `[text]` as any;
 				},*/
-				Link: props=>Link(props, router),
+				Link: props=>Link(props),
 			},
 		};
 
@@ -293,7 +294,7 @@ const Paragraph = props=> {
 	//return React.createElement(g.Markdown_defaultRenderers.paragraph, props);
 	return <p {...props.Excluding(`literal`, `nodeKey`)}>{props.children}</p>;
 };
-const Link = (props, router)=> {
+const Link = (props)=> {
 	let {href, nodeKey, children, literal, ...rest} = props;
 	return (
 		<a {...rest} href={href} key={nodeKey} onClick={e=> {
@@ -310,7 +311,8 @@ const Link = (props, router)=> {
 				}
 
 				//let history = State().router.history;
-				let history = router.history;
+				//let history = router.history;
+				let history = historyStore;
 				if (ShallowEquals(toURL.pathNodes, currentURL.pathNodes)) { // if paths same
 					history.replace(href);
 				} else {

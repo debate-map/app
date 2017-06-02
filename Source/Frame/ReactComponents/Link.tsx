@@ -3,6 +3,7 @@ import { PropTypes } from "react";
 import {Link as LinkInner} from "react-router-dom";
 import {BaseComponent} from "../UI/ReactGlobals";
 import Radium from "radium";
+import {historyStore} from "../../UI/Root";
 
 /*@Radium
 export default class Link extends BaseComponent<{to, target?: string, replace?: boolean, style?, onClick?}, {}> {
@@ -18,7 +19,7 @@ function isModifiedEvent(event) {
 
 @Radium
 export default class Link extends BaseComponent<{to, target?: string, replace?: boolean, style?, onClick?} & React.HTMLProps<HTMLAnchorElement>, {}> {
-	static contextTypes = {
+	/*static contextTypes = {
 		router: PropTypes.shape({
 			history: PropTypes.shape({
 				push: PropTypes.func.isRequired,
@@ -26,7 +27,7 @@ export default class Link extends BaseComponent<{to, target?: string, replace?: 
 				createHref: PropTypes.func.isRequired
 			}).isRequired
 		}).isRequired
-	};
+	};*/
 
 	handleClick(event) {
 		if (this.props.onClick)
@@ -38,7 +39,8 @@ export default class Link extends BaseComponent<{to, target?: string, replace?: 
 				!isModifiedEvent(event)) { // ignore clicks with modifier keys
 			event.preventDefault()
 
-			const {history} = this.context.router
+			//const {history} = this.context.router
+			let history = historyStore;
 			const {replace, to} = this.props
 
 			if (replace) {
