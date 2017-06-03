@@ -10,6 +10,8 @@ import {ContentNode} from '../contentNodes/@ContentNode';
 import {Equation} from './@Equation';
 import {Image} from '../images/@Image';
 
+export const globalRootNodeID = 1;
+
 export enum AccessLevel {
 	Basic = 10,
 	Verified = 20, // for accounts we're pretty sure are legitimate (an actual person's only account)

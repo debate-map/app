@@ -1,7 +1,7 @@
 import {HasModPermissions, PermissionGroupSet} from "./userExtras/@UserExtraInfo";
 import {IsNaN, IsObjectOf, IsObject, IsNumber} from "../../Frame/General/Types";
 import {GetData, GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {MapNode} from "./nodes/@MapNode";
+import { MapNode, globalRootNodeID } from "./nodes/@MapNode";
 import {CachedTransform} from "../../Frame/V/VCache";
 import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
 import {IsUserCreatorOrMod} from "./userExtras";
@@ -81,7 +81,7 @@ export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: 
 export function IsNewLinkValid(parentNode: MapNode, parentPath: string, child: MapNode, permissions: PermissionGroupSet) {
 	let parentPathIDs = parentPath.split("/").map(a=>a.ToInt());
 	//if (map.name == "Global" && parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
-	if (parentPathIDs[0] == 1) return false; // if parent is global-root, don't accept new children
+	if (parentNode._id == globalRootNodeID) return false; // if parent is global-root, don't accept new children
 	// if parent is l2, and user is not a mod (and not node creator), don't accept new children
 	if (parentPathIDs.length == 2 && !HasModPermissions(permissions) && parentNode.creator != GetUserID()) return false;
 

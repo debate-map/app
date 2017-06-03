@@ -38,16 +38,13 @@ import UnlinkNode from "Server/Commands/UnlinkNode";
 import CloneNode from "Server/Commands/CloneNode";
 
 type Props = {map: Map, node: MapNodeEnhanced, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode}>;
-@Connect((_: RootState, {node, path}: Props)=> {
-	let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
-	return {
-		_: (ForUnlink_GetError(GetUserID(), node), ForDelete_GetError(GetUserID(), node)),
-		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
-		permissions: GetUserPermissionGroups(GetUserID()),
-		parentNode: GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1)),
-		copiedNode: State(a=>a.main.copiedNodePath) ? GetNode(State(a=>a.main.copiedNodePath).split("/").Last().ToInt()) : null,
-	};
-})
+@Connect((_: RootState, {node, path}: Props)=> ({
+	_: (ForUnlink_GetError(GetUserID(), node), ForDelete_GetError(GetUserID(), node)),
+	//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
+	permissions: GetUserPermissionGroups(GetUserID()),
+	parentNode: GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1)),
+	copiedNode: State(a=>a.main.copiedNodePath) ? GetNode(State(a=>a.main.copiedNodePath).split("/").Last().ToInt()) : null,
+}))
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {
 		let {map, node, path, permissions, parentNode, copiedNode} = this.props;
