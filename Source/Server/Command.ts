@@ -8,6 +8,7 @@ export abstract class Command<Payload> {
 	}
 	type: string;
 	payload: Payload;
+	returnData;
 
 	// these methods are executed on the server (well, will be later)
 	// ==========
@@ -30,6 +31,9 @@ export abstract class Command<Payload> {
 		let dbUpdates = this.GetDBUpdates();
 		//FixDBUpdates(dbUpdates);
 		await store.firebase.helpers.Ref().update(dbUpdates);
+
+		// later on (once set up on server), this will send the data back to the client, rather than return it
+		return this.returnData;
 	}
 }
 

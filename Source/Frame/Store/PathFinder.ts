@@ -3,6 +3,8 @@ import {GetDataAsync} from "../Database/DatabaseHelpers";
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
 import {Vector2i} from "../General/VectorStructs";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
+import {ToInt} from "../General/Types";
+import {GetPathNodes} from "../../Store/main/mapViews";
 
 export async function GetShortestPathFromRootToNode(rootNodeID: number, node: MapNode): Promise<string> {
 	type Head = {id: number, path: string[]};
@@ -27,18 +29,19 @@ export async function GetShortestPathFromRootToNode(rootNodeID: number, node: Ma
 }
 
 export function CreateMapViewForPath(path: string): MapView {
-	let pathNodes = path.split("/");
+	let pathNodes = GetPathNodes(path);
 	let result = new MapView();
 	result.rootNodeViews[pathNodes[0]] = CreateNodeViewForPath(pathNodes.Skip(1));
 	return result;
 }
-export function CreateNodeViewForPath(pathFromSelfToDescendent: string[]): MapNodeView {
+export function CreateNodeViewForPath(pathFromSelfToDescendent: number[]): MapNodeView {
 	let result = new MapNodeView();
 	result.expanded = true;
 
-	if (pathFromSelfToDescendent.length)
+	if (pathFromSelfToDescendent.length) {
+		Assert(IsNumber(pathFromSelfToDescendent[0]), "pathFromSelfToDescendent must contain only numbers.");
 		result.children[pathFromSelfToDescendent[0]] = CreateNodeViewForPath(pathFromSelfToDescendent.Skip(1));
-	else {
+	} else {
 		result.selected = true;
 		result.focus = true;
 		result.viewOffset = new Vector2i(200, 0);

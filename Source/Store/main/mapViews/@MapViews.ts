@@ -22,7 +22,7 @@ export class MapNodeView {
 	/** Offset of view-center from self (since we're the focus-node). */
 	viewOffset?: Vector2i;
 	openPanel?: string;
-	children? = {} as {[key: string]: MapNodeView};
+	children? = {} as {[key: number]: MapNodeView};
 	childLimit_up?: number;
 	childLimit_down?: number;
 }

@@ -78,6 +78,11 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 // selectors
 // ==========
 
+export function GetPathNodes(path: string) {
+	let pathSegments = path.split("/");
+	Assert(pathSegments.All(a=>IsNumberString(a)), `Path contains non-number segments: ${path}`);
+	return pathSegments.map(ToInt);
+}
 export function GetSelectedNodePathNodes(mapID: number): number[] {
 	let mapView = GetMapView(mapID);
 	let selectedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "selected" && a.Value);
@@ -147,7 +152,7 @@ export function GetNodeView(mapID: number, path: string): MapNodeView {
 	let storePathNodes = ["main", "mapViews", mapID, "rootNodeViews", path_preAndPostFirstSep[0]].concat(path_preAndPostFirstSep[1].replace(childID=>["children", childID]));*/
 	/*let pathNodeIDs = path.split("/");
 	let storePathNodes = ["main", "mapViews", mapID, "rootNodeViews", pathNodeIDs[0]].concat(pathNodeIDs.Skip(1).SelectMany(childID=>["children", childID]));*/
-	let pathNodeIDs = path.split("/");
+	let pathNodeIDs = GetPathNodes(path);
 	let childPath = pathNodeIDs.map(childID=>`${childID}/children`).join("/").slice(0, -9);
 	let storePath = `main/mapViews/${mapID}/rootNodeViews/${childPath}`;
 	return State(storePath);

@@ -43,6 +43,8 @@ export default class AddNode extends Command<{node: MapNode, link?: ChildEntry, 
 			this.parentID = node.parents.VKeys(true)[0].ToInt();
 			this.parent_oldChildrenOrder = await GetDataAsync(`nodes/${this.parentID}/childrenOrder`) as number[];
 		}
+
+		this.returnData = this.nodeID;
 	}
 	async Validate() {
 		let {node, link, metaThesisNode, asMapRoot} = this.payload;

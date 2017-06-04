@@ -115,8 +115,10 @@ export default function(initialState = {}, history) {
 			createBlacklistFilter("main", ["notificationMessages"])
 		]
 	}, ()=>g.storeRehydrated = true);
-	if (startURL.GetQueryVar("clearState"))
+	if (startURL.GetQueryVar("clearState")) {
+		Log("Clearing redux-store's state...");
 		persister.purge();
+	}
 
 	if (module.hot) {
 		module.hot.accept("../../Store", () => {

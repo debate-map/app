@@ -5,6 +5,7 @@ import * as u from "updeep";
 import {RootNodeViews} from "./rootNodeViews/@RootNodeViews";
 import {GetViewOffsetForNodeBox, GetNodeBoxForPath} from "../../../../UI/@Shared/Maps/MapUI";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
+import {GetPathNodes} from "../../mapViews";
 
 export class ACTMapNodeSelect extends Action<{mapID: number, path: string}> {}
 export class ACTMapNodePanelOpen extends Action<{mapID: number, path: string, panel: string}> {}
@@ -26,18 +27,18 @@ export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action
 		if (action.payload.path == null)
 			return result;
 		
-		let targetNodePath = action.payload.path.split("/").join(".children.");
+		let targetNodePath = GetPathNodes(action.payload.path).join(".children.");
 		let nodeBox = GetNodeBoxForPath(action.payload.path);
 		let viewOffset = GetViewOffsetForNodeBox(nodeBox);
 		result = u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, selected: true, focus: true, viewOffset}), result);
 		return result;
 	}
 	if (action.Is(ACTMapNodePanelOpen) && action.payload.mapID == mapID) {
-		let targetNodePath = action.payload.path.split("/").join(".children.");
+		let targetNodePath = GetPathNodes(action.payload.path).join(".children.");
 		return u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, openPanel: action.payload.panel}), state);
 	}
 	if (action.Is(ACTMapNodeExpandedSet) && action.payload.mapID == mapID) {
-		let targetNodePath = action.payload.path.split("/").join(".children.");
+		let targetNodePath = GetPathNodes(action.payload.path).join(".children.");
 		return u.updateIn(targetNodePath, (old = new MapNodeView())=> {
 			let result = {...old, expanded: !old.expanded};
 			if (action.payload.recursive) {
@@ -50,7 +51,7 @@ export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action
 		}, state);
 	}
 	if (action.Is(ACTMapNodeChildLimitSet) && action.payload.mapID == mapID) {
-		let targetNodePath = action.payload.path.split("/").join(".children.");
+		let targetNodePath = GetPathNodes(action.payload.path).join(".children.");
 		return u.updateIn(targetNodePath, (old = new MapNodeView())=> {
 			return {...old, [`childLimit_${action.payload.direction}`]: action.payload.value};
 		}, state);
@@ -64,7 +65,7 @@ export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action
 		if (focusNode)
 			result = u.updateIn(focusNode.PathStr_Updeep, u.omit(["focus", "viewOffset"]), result);
 		
-		let targetNodePath = action.payload.focusNodePath.split("/").join(".children.");
+		let targetNodePath = GetPathNodes(action.payload.focusNodePath).join(".children.");
 		result = u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, focus: true, viewOffset: action.payload.viewOffset}), result);
 		return result;
 	}

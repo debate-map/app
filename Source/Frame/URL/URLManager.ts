@@ -108,6 +108,7 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 
 		for (let childStr of childStrings) {
 			let [childID, childNodeView] = ParseNodeView(childStr);
+			Assert(IsNumber(childID), "childID must be a number.");
 			nodeView.children[childID] = childNodeView;
 		}
 	}
