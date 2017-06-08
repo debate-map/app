@@ -235,7 +235,7 @@ export function IsArgumentNode(node: MapNode) {
 	return IsArgumentType(node.type);
 }
 /** [pure] */
-export function GetMinChildCountToBeVisibleToNonModNonCreators(node: MapNode, nodeChildren: MapNode[]) {
+/*export function GetMinChildCountToBeVisibleToNonModNonCreators(node: MapNode, nodeChildren: MapNode[]) {
 	if (IsArgumentNode(node)) {
 		let metaThesisNode = nodeChildren.find(a=>a != null && a.metaThesis != null);
 		// if meta-thesis not loaded yet, don't show child yet (since might suppossed to be hidden)
@@ -245,11 +245,11 @@ export function GetMinChildCountToBeVisibleToNonModNonCreators(node: MapNode, no
 	}
 	return 0;
 }
-/** [pure] */
+/** [pure] *#/
 export function IsNodeVisibleToNonModNonCreators(node: MapNode, nodeChildren: MapNode[]) {
 	if (IsArgumentNode(node)) {
 		let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
 		if (nodeChildren.length < minChildCount) return false;
 	}
 	return true;
-}
+}*/

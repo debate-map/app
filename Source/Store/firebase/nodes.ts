@@ -6,7 +6,7 @@ import {CachedTransform} from "../../Frame/V/VCache";
 import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
 import {IsUserCreatorOrMod} from "./userExtras";
 import {GetUserPermissionGroups, GetUserID, GetUserAccessLevel} from "./users";
-import { GetNodeEnhanced, IsArgumentNode, IsNodeVisibleToNonModNonCreators } from "./nodes/$node";
+import {GetNodeEnhanced, IsArgumentNode} from "./nodes/$node";
 import {Map} from "./maps/@Map";
 
 export function GetNode(id: number) {
@@ -66,7 +66,7 @@ export function GetNodeChildrenEnhanced(node: MapNode, path: string, filterForPa
 			// filter out any nodes whose access-level is higher than our own
 			if (child.accessLevel > GetUserAccessLevel(GetUserID())) return false;
 			// hide nodes that don't have the required premise-count
-			if (!IsNodeVisibleToNonModNonCreators(child, GetNodeChildren(child)) && !IsUserCreatorOrMod(GetUserID(), child)) return false;
+			//if (!IsNodeVisibleToNonModNonCreators(child, GetNodeChildren(child)) && !IsUserCreatorOrMod(GetUserID(), child)) return false;
 			return true;
 		});
 	}

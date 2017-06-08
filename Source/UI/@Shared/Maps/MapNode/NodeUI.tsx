@@ -34,7 +34,7 @@ import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@M
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import Column from "../../../../Frame/ReactComponents/Column";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType, IsArgumentNode, IsReversedArgumentNode, GetMinChildCountToBeVisibleToNonModNonCreators, IsNodeVisibleToNonModNonCreators} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType, IsArgumentNode, IsReversedArgumentNode} from "../../../../Store/firebase/nodes/$node";
 import * as FastDOM from "fastdom";
 import Row from "Frame/ReactComponents/Row";
 import Icon from "../../../../Frame/ReactComponents/Icon";
@@ -202,8 +202,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
 		let limitBar_above = node.type == MapNodeType.SupportingArgument;
 		if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
-		let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
-		let showBelowMessage = nodeChildren.length > 0 && nodeChildren.length < minChildCount;
+		/*let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
+		let showBelowMessage = nodeChildren.length > 0 && nodeChildren.length < minChildCount;*/
 
 		this.childBoxes = {};
 		return (
@@ -217,14 +217,14 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					{limitBar_above && children}
 					<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
 					{/*<NodeUI_Inner ref="innerBox" {...{map, node: nodeWithFinalType, nodeView, path, width}} widthOverride={widthOverride}/>*/}
-					{showBelowMessage &&
+					{/*showBelowMessage &&
 						<Div ct style={{
 							//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
 							marginTop: 5, fontSize: 12,
 							width: 0, // fixes that link-lines would have gap on left
 						}}>
 							Needs 2 premises to be visible.
-						</Div>}
+						</Div>*/}
 					{!limitBar_above && children}
 				</div>
 				{nodeChildren == childrenPlaceholder &&
@@ -235,7 +235,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						/*showLimitBar && {[limitBar_above ? "paddingTop" : "paddingBottom"]: ChildLimitBar.HEIGHT},
 						showBelowMessage && {paddingBottom: 13},*/
 						showLimitBar && limitBar_above && {paddingTop: ChildLimitBar.HEIGHT},
-						{paddingBottom: 0 + (showBelowMessage ? 13 : 0) + (showLimitBar && !limitBar_above ? ChildLimitBar.HEIGHT : 0)}
+						{paddingBottom: 0 + /*(showBelowMessage ? 13 : 0) +*/ (showLimitBar && !limitBar_above ? ChildLimitBar.HEIGHT : 0)}
 					)}>
 						{nodeChildren.length}
 					</div>}
