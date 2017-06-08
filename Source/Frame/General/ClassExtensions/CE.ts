@@ -103,18 +103,24 @@ Object.prototype._AddFunction_Inline = function Extend(x) {
 // as replacement for C#'s "new MyClass() {prop = true}"
 // seems this should work, to be consistent with in-class usage, but whatever; below it's an alternative that works for interfaces
 //interface Object { VSet(props: any): this; }
+type VSet_Options = {prop?: PropertyDescriptor, deleteEmpty?: boolean};
 interface Object {
-	VSet<T>(this: T, props: any, defineProp_info?: PropertyDescriptor): T;
-	VSet<T>(this: T, propName: string, propValue, defineProp_info?: PropertyDescriptor): T;
+	VSet<T>(this: T, props: any, options?: VSet_Options): T;
+	VSet<T>(this: T, propName: string, propValue, options?: VSet_Options): T;
 }
 Object.prototype._AddFunction_Inline = function VSet(...args) {
-	let props, defineProp_info: PropertyDescriptor, propName: string, propValue: string;
-	if (typeof args[0] == "object") [props, defineProp_info] = args;
-	else [propName, propValue, defineProp_info] = args;
+	let props, options: VSet_Options, propName: string, propValue: string;
+	if (typeof args[0] == "object") [props, options] = args;
+	else [propName, propValue, options] = args;
+	options = options || {};
 
 	const SetProp = (name, value)=> {
-		if (defineProp_info) {
-			Object.defineProperty(this, name, Object.assign({configurable: true}, defineProp_info, {value}));
+		if (value == "" && options.deleteEmpty) {
+			delete this[name];
+			return;
+		}
+		if (options.prop) {
+			Object.defineProperty(this, name, Object.assign({configurable: true}, options.prop, {value}));
 		} else {
 			this[name] = value;
 		}

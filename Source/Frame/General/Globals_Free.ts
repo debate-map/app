@@ -79,7 +79,6 @@ export function E(...objExtends: any[]) {
 	return result;
 	//return StyleSheet.create(result);
 }
-// for react-native-chart modifications...
 
 // methods: url writing/parsing
 // ==================

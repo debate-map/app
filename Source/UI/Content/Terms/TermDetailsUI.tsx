@@ -75,7 +75,7 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 							+ `\n\nExample: "element", "planet", and "mythology" would be suitable "disambiguation" texts for the different terms of "Mercury".`}/>
 					</Row>
 					<TextInput enabled={enabled} style={{width: "100%"}} pattern={Term_disambiguationFormat}
-						value={newData.disambiguation} onChange={val=>Change(newData.disambiguation = val)}/>
+						value={newData.disambiguation} onChange={val=>Change(newData.VSet("disambiguation", val, {deleteEmpty: true}))}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Type: </Pre>
