@@ -15,7 +15,7 @@
 	@import "bootstrap-social"; 
 
 	//@import url(https://fonts.googleapis.com/css?family=Roboto:300,400,100,500,900);
-	@import url(//fonts.googleapis.com/css?family=Roboto:300,400,100,500,900);
+	@import url("//fonts.googleapis.com/css?family=Roboto:300,400,100,500,900");
 
 	// Some best-practice CSS that's useful for most apps
 	// Just remove them if they're not what you want
@@ -168,5 +168,16 @@
 
 	.CodeMirror {
 		color: rgba(255,255,255,.7);
+	}
+
+	.background {
+		background-image: url(/Images/Backgrounds/Ocean_x1920.jpg);
+		background-position: center bottom;
+		background-size: cover;
+	}
+	@media (min-width: 1921px) {
+		.background {
+			background-image: url(/Images/Backgrounds/Ocean_x3840.jpg);
+		}
 	}
 }

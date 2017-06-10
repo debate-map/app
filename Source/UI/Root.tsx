@@ -80,15 +80,12 @@ class RootUI extends BaseComponent<Props, {}> {
 	render() {
 		let {currentPage} = this.props;
 		return (
-			<div /*className="unselectable"*/ style={{
+			<div className="background"/*"unselectable"*/ style={{
 				height: "100%", display: "flex", flexDirection: "column",
 				//background: "rgba(0,0,0,1)",
-				background: "url(/Images/Backgrounds/Nebula.jpg)", backgroundPosition: "center center", backgroundSize: "cover",
-				//background: "rgba(0,0,0,1)",
 			}}>
-				{/*<div style={{
+				{/*<div className="background" style={{
 					position: "absolute", left: 0, right: 0, top: 0, bottom: 0, opacity: .5,
-					background: "url(/Images/Backgrounds/Nebula.jpg)", backgroundPosition: "center center", backgroundSize: "cover",
 				}}/>*/}
 				<OverlayUI/>
 				<NavBar/>

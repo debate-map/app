@@ -136,10 +136,21 @@ function Delay(delay: number): Promise<any> {
 	});
 }
 
-export function Range(min, max, step = 1, includeMax = true) {
+/*export function Range(min, max, step = 1, includeMax = true) {
 	var result: number[] = [];
 	for (let i = min; includeMax ? i <= max : i < max; i += step)
 		result.push(i);
+	return result;
+}*/
+export function Range(min: number, max: number, step = 1, includeMax = true, roundToStep = true) {
+	var result: number[] = [];
+	for (
+		let i = min;
+		includeMax ? i <= max : i < max;
+		i = roundToStep ? (i + step).RoundTo(step) : i + step
+	) {
+		result.push(i);
+	}
 	return result;
 }
 
