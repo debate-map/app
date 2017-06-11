@@ -201,7 +201,7 @@ class OtherTitles extends BaseComponent<Props_Enhanced, {}> {
 					<Pre>Title (yes-no question): </Pre>
 					<TextInput enabled={enabled} style={{flex: 1}} value={newData.titles["yesNoQuestion"]} onChange={val=>Change(newData.titles["yesNoQuestion"] = val)}/>
 				</Row>
-				{newData.type == MapNodeType.Thesis && !newData.contentNode && !newData.metaThesis && newLinkData.form == ThesisForm.YesNoQuestion && forNew &&
+				{newData.type == MapNodeType.Thesis && !newData.contentNode && !newData.metaThesis && newLinkData && newLinkData.form == ThesisForm.YesNoQuestion && forNew &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 						<Pre allowWrap={true}>At this location (under a category node), the node will be displayed with the yes-no question title.</Pre>
 					</Row>}
@@ -281,6 +281,7 @@ class AtThisLocation extends BaseComponent<Props_Enhanced, {}> {
 	render() {
 		let {newData, forNew, enabled, newLinkData, Change} = this.props;
 		if (newData.type != MapNodeType.Thesis) return <div/>;
+		if (newLinkData == null) return <div/>; // if the root of a map
 
 		let thesisType = GetThesisType(newData);
 		let canSetAsNegation = thesisType == ThesisType.Normal && !newData.metaThesis && newLinkData.form != ThesisForm.YesNoQuestion;
