@@ -189,7 +189,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		} else {
 			childPacks = childPacks.OrderByDescending(pack=>nodeChildren_sortValues[pack.origIndex]);
 			//if (IsArgumentNode(node)) {
-			if (node.childrenOrder) {
+			let metaThesisNode = nodeChildren.FirstOrX(a=>a.metaThesis != null);
+			let isArgument_any = metaThesisNode && metaThesisNode.metaThesis.ifType == MetaThesis_IfType.Any;
+			if (node.childrenOrder && !isArgument_any) {
 				childPacks = childPacks.OrderBy(pack=>node.childrenOrder.indexOf(pack.node._id).IfN1Then(Number.MAX_SAFE_INTEGER));
 			}
 		}

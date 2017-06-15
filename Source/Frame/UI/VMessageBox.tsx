@@ -119,6 +119,7 @@ export class MessageBoxUI extends BaseComponent<{} & Partial<{options: MessageBo
 		let ui = boxUIs[boxID];
 		return (
 			<Modal isOpen={true} contentLabel={title || ""} style={{overlay: E(styles.overlay, overlayStyle), content: E(styles.container, containerStyle)}}
+					shouldCloseOnOverlayClick={false}
 					onRequestClose={()=> {
 						if (onCancel && onCancel() === false) return;
 						store.dispatch(new ACTMessageBoxShow(null));

@@ -277,7 +277,8 @@ export class TermPlaceholder extends BaseComponent
 	static defaultProps = {showVariantNumber: true};
 	render() {
 		let {refText, termID, showVariantNumber, onHover, onClick, term, termVariantNumber} = this.props;
-		if (term == null) return <a>...</a>;
+		//if (term == null) return <a>...</a>;
+		//if (term == null) return <a>{refText}</a>;
 		return (
 			<a
 					onMouseEnter={e=>onHover(true)}
@@ -291,7 +292,7 @@ export class TermPlaceholder extends BaseComponent
 				{/*term.name*/}
 				{refText}
 				{showVariantNumber &&
-					<sup>{termVariantNumber}</sup>}
+					<sup>{termVariantNumber || "?"}</sup>}
 					{/*<sub>{termVariantNumber}</sub>}*/}
 			</a>
 		);

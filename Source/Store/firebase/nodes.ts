@@ -73,6 +73,11 @@ export function GetNodeChildrenEnhanced(node: MapNode, path: string, filterForPa
 	return CachedTransform("GetNodeChildrenEnhanced", [path], nodeChildrenEnhanced, ()=>nodeChildrenEnhanced);
 }
 
+export function GetMetaThesisChildNode(node: MapNode) {
+	let nodeChildren = GetNodeChildren(node);
+	return CachedTransform("GetMetaThesisChildNode", [node._id], nodeChildren, ()=>nodeChildren.FirstOrX(a=>a.metaThesis != null));
+}
+
 export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNode) {
 	let parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;
 	if (!parentTypeInfo.Contains(child.type)) return false;

@@ -21,7 +21,7 @@ import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, MapNode_id, ThesisType
 import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {MetaThesis_IfType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
-import {GetParentNode, GetNodeChildren, GetNode} from "../../../../Store/firebase/nodes";
+import {GetParentNode, GetNodeChildren, GetNode, GetMetaThesisChildNode} from "../../../../Store/firebase/nodes";
 import {GetNodeForm, IsContextReversed, IsArgumentNode, GetNodeDisplayText, IsArgumentType, GetThesisType} from "../../../../Store/firebase/nodes/$node";
 import {ReverseThenType} from "../../../../Store/firebase/nodes/$node/$metaThesis";
 import Icon from "../../../../Frame/ReactComponents/Icon";
@@ -35,11 +35,12 @@ type Props = {
 	baseData: MapNodeEnhanced, baseLinkData: ChildEntry, parent: MapNodeEnhanced, forNew: boolean, enabled?: boolean,
 	style?, onChange?: (newData: MapNode, newLinkData: ChildEntry)=>void,
 	//onSetError: (error: string)=>void,
-} & Partial<{creator: User}>;
+} & Partial<{creator: User, metaThesis: MapNode}>;
 type State = {newData: MapNode, newLinkData: ChildEntry};
 @Connect((state, {baseData, forNew}: Props)=>({
 	_: GetUserAccessLevel(GetUserID()),
 	creator: !forNew && GetUser(baseData.creator),
+	metaThesisNode: GetMetaThesisChildNode(baseData),
 }))
 export default class NodeDetailsUI extends BaseComponent<Props, State> {
 	static defaultProps = {enabled: true};
@@ -50,7 +51,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 	}
 
 	render() {
-		let {baseData, parent, forNew, enabled, style, onChange, creator} = this.props;
+		let {baseData, metaThesisNode, parent, forNew, enabled, style, onChange, creator} = this.props;
 		let {newData, newLinkData} = this.state;
 		let firebase = store.firebase.helpers;
 		let Change = (..._)=> {
@@ -63,6 +64,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 		let thesisType = GetThesisType(newData);
 
 		let splitAt = 170, width = 600;
+		let isArgument_any = metaThesisNode && metaThesisNode.metaThesis.ifType == MetaThesis_IfType.Any;
 		return (
 			<div> {/* needed so GetInnerComp() work */}
 			<Column style={E({padding: 5}, style)}>
@@ -97,7 +99,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 				{!forNew &&
 					<AdvancedOptions {...propsEnhanced}/>}
 				<AtThisLocation {...propsEnhanced}/>
-				{!forNew && enabled && IsArgumentNode(newData) && newData.childrenOrder &&
+				{!forNew && enabled && IsArgumentNode(newData) && newData.childrenOrder && !isArgument_any &&
 					<ChildrenOrder {...propsEnhanced}/>}
 			</Column>
 			</div>
