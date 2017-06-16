@@ -80,7 +80,7 @@ export class ACTSetInitialChildLimit extends Action<{value: number}> {}
 let MainReducer_Real;
 export function MainReducer(state, action) {
 	MainReducer_Real = MainReducer_Real || CombineReducers({
-		page: (state = "/", action)=> {
+		page: (state = null, action)=> {
 			if (action.Is(ACTSetPage)) return action.payload;
 			return state;
 		},

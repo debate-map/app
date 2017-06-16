@@ -8,6 +8,9 @@ export class MapView {
 	// include root-node-view as a keyed-child, so that it's consistent with descendants (of key signifying id)
 	//rootNodeView;
 	rootNodeViews = {} as {[key: number]: MapNodeView};
+
+	// if bot
+	rootNodeID?: number;
 }
 export class MapNodeView {
 	//constructor(childLimit?: number) {
@@ -18,7 +21,7 @@ export class MapNodeView {
 
 	expanded?: boolean;
 	selected?: boolean;
-	focus?: boolean;
+	focused?: boolean;
 	/** Offset of view-center from self (since we're the focus-node). */
 	viewOffset?: Vector2i;
 	openPanel?: string;

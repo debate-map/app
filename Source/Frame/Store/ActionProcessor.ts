@@ -2,14 +2,14 @@ import {GetNodeAsync} from "../../Store/firebase/nodes";
 import {GetTreeNodesInObjTree} from "../V/V";
 import Action from "../General/Action";
 import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange} from "../../Store/main/mapViews/$mapView/rootNodeViews";
-import {LoadURL, UpdateURL} from "../URL/URLManager";
+import {LoadURL, GetSyncLoadActionsForURL} from "../URL/URLManager";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 import {DBPath, GetData, GetDataAsync, ProcessDBData} from "../Database/DatabaseHelpers";
-import {GetMapView} from "../../Store/main/mapViews";
+import { GetMapView, GetSelectedNodePath, GetFocusedNodePath } from "../../Store/main/mapViews";
 import {Vector2i} from "../General/VectorStructs";
 import {RootState} from "../../Store/index";
 import * as ReactGA from "react-ga";
-import {URL} from "../General/URLs";
+import {URL, CurrentUrl, GetCurrentURL} from "../General/URLs";
 import {CreateMapViewForPath, GetShortestPathFromRootToNode} from "./PathFinder";
 import {ACTNotificationMessageAdd, ACTSetPage, ACTSetSubpage} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
@@ -18,6 +18,7 @@ import * as Raven from "raven-js";
 import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "../../Store/main/debates";
 import {ACTTermSelect, ACTImageSelect} from "../../Store/main/content";
 import {LOCATION_CHANGED} from "redux-little-router";
+import {GetCurrentURL_SimplifiedForPageViewTracking} from "../../UI/@Shared/Maps/MapNode/NodeUI_ForBots";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -62,16 +63,60 @@ export function PreDispatchAction(action: Action<any>) {
 			delete action["data"];
 		}
 	}
+
+	if (g.actionStacks || (devEnv && !actionStacks_actionTypeIgnorePatterns.Any(a=>action.type.startsWith(a)))) {
+		action["stack"] = new Error().stack.split("\n").slice(1); // add stack, so we can inspect in redux-devtools
+	}
 }
+const actionStacks_actionTypeIgnorePatterns = [
+	"@@reactReduxFirebase/", // ignore redux actions
+];
 
 export function MidDispatchAction(action: Action<any>, newState: RootState) {
 }
 
+export function DoesURLChangeCountAsPageChange(oldURL: URL, newURL: URL, directURLChange: boolean) {
+	if (oldURL == null) return true;
+	if (oldURL.PathStr() != newURL.PathStr()) return true;
+
+	let oldSyncLoadActions = GetSyncLoadActionsForURL(oldURL, directURLChange);
+	let oldMapViewMergeAction = oldSyncLoadActions.find(a=>a.Is(ACTMapViewMerge));
+	
+	let newSyncLoadActions = GetSyncLoadActionsForURL(newURL, directURLChange);
+	let newMapViewMergeAction = newSyncLoadActions.find(a=>a.Is(ACTMapViewMerge));
+
+	let oldViewStr = oldURL.GetQueryVar("view");
+	let oldURLWasTemp = oldViewStr == "";
+	if (newMapViewMergeAction != oldMapViewMergeAction && !oldURLWasTemp) {
+		//let oldFocused = GetFocusedNodePath(GetMapView(mapViewMergeAction.payload.mapID));
+		let oldFocused = oldMapViewMergeAction ? GetFocusedNodePath(oldMapViewMergeAction.payload.mapView) : null;
+		let newFocused = newMapViewMergeAction ? GetFocusedNodePath(newMapViewMergeAction.payload.mapView) : null;
+		if (newFocused != oldFocused) return true;
+	}
+	return false;
+}
+export function RecordPageView(url: URL) {
+	//let url = window.location.pathname;
+	ReactGA.set({page: url.toString({domain: false})});
+	ReactGA.pageview(url.toString({domain: false}) || "/");
+	MaybeLog(a=>a.pageViews, ()=>"Page-view: " + url);
+}
+
 let postInitCalled = false;
+let pageViewTracker_lastURL: URL;
 export async function PostDispatchAction(action: Action<any>) {
 	if (!postInitCalled) {
 		PostInit();
 		postInitCalled = true;
+	}
+
+	let url = GetCurrentURL();
+	//let oldURL = URL.Current();
+	//let url = URL.FromState(action.payload);
+	let simpleURL = GetCurrentURL_SimplifiedForPageViewTracking();
+	if (DoesURLChangeCountAsPageChange(pageViewTracker_lastURL, simpleURL, true)) {
+		pageViewTracker_lastURL = simpleURL;
+		RecordPageView(simpleURL);
 	}
 
 	//if (action.type == "@@INIT") {
@@ -81,7 +126,7 @@ export async function PostDispatchAction(action: Action<any>) {
 	}
 	if (action.type == "PostRehydrate") {
 		LoadURL(startURL.toString());
-		UpdateURL(false);
+		//UpdateURL(false);
 		if (prodEnv && State(a=>a.main.analyticsEnabled)) {
 			Log("Initialized Google Analytics.");
 			//ReactGA.initialize("UA-21256330-33", {debug: true});
@@ -97,16 +142,9 @@ export async function PostDispatchAction(action: Action<any>) {
 		if (g.justChangedURLFromCode) {
 			g.justChangedURLFromCode = false;
 		} else {
-			//let oldURL = URL.Current();
-			let url = URL.FromState(action.payload);
-			//let url = window.location.pathname;
-			ReactGA.set({page: url.toString({domain: false})});
-			ReactGA.pageview(url.toString({domain: false}) || "/");
-			//Log("Page-view: " + url);
-
 			//setTimeout(()=>UpdateURL());
 			await LoadURL(url.toString());
-			UpdateURL(false);
+			//UpdateURL(false);
 			if (url.toString({domain: false}).startsWith("/global/map")) {
 				if (isBot) {
 					/*let newURL = url.Clone();
@@ -116,10 +154,10 @@ export async function PostDispatchAction(action: Action<any>) {
 					store.dispatch(replace(newURL.toString(false)));*/
 				} else {
 					// we don't yet have a good way of knowing when loading is fully done; so just do a timeout
-					WaitXThenRun(0, UpdateURL, 200);
+					/*WaitXThenRun(0, UpdateURL, 200);
 					WaitXThenRun(0, UpdateURL, 400);
 					WaitXThenRun(0, UpdateURL, 800);
-					WaitXThenRun(0, UpdateURL, 1600);
+					WaitXThenRun(0, UpdateURL, 1600);*/
 				}
 			}
 		}
@@ -138,7 +176,7 @@ export async function PostDispatchAction(action: Action<any>) {
 	if (movingToGlobals || action.IsAny(ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange)) {
 		setTimeout(()=>UpdateURL_Globals());
 	}*/
-	let pushURL_actions = [
+	/*let pushURL_actions = [
 		ACTSetPage, ACTSetSubpage, // general
 		ACTTermSelect, ACTImageSelect, // content
 		//ACTDebateMapSelect, // debates
@@ -151,7 +189,7 @@ export async function PostDispatchAction(action: Action<any>) {
 	let isReplaceURLAction = action.IsAny(...replaceURL_actions);
 	if (isPushURLAction || isReplaceURLAction) {
 		UpdateURL(isPushURLAction && !action["fromURL"]);
-	}
+	}*/
 
 	if (action.type == "@@reactReduxFirebase/LOGIN") {
 		let userID = action["auth"].uid;
@@ -172,13 +210,18 @@ export async function PostDispatchAction(action: Action<any>) {
 	/*if (action.type == "@@reactReduxFirebase/SET" && action["data"] == null) {
 		// remove the property from the store, if it is just null anyway (this makes it consistent with how firebase returns the whole db-state)
 	}*/
+
+	/*if (action.Is(ACTViewCenterChange) || action.Is(ACTMapNodeSelect)) {
+		let simpleURL = GetSimpleURLForCurrentMapView();
+		RecordPageView(simpleURL);
+	}*/
 }
 
 function PostInit() {
 	let lastAuth;
 	//Log("Subscribed");
 	store.subscribe(()=> {
-		let auth = State(a=>a.firebase.auth, false);
+		let auth = State(a=>a.firebase.auth, null, false);
 		if (auth && auth != lastAuth) {
 			//Log("Setting user-context: " + auth);
 			//Raven.setUserContext(auth);

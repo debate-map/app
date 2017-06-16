@@ -1,4 +1,4 @@
-import {GetFocusNode, GetViewOffset, GetSelectedNodePath, GetNodeView, GetMapView} from "../../../Store/main/mapViews";
+import {GetViewOffset, GetSelectedNodePath, GetNodeView, GetMapView, GetFocusedNodePathNodes, GetFocusedNodePath} from "../../../Store/main/mapViews";
 import {BaseComponent, FindDOM, FindReact, FindDOM_, Pre, GetInnerComp} from "../../../Frame/UI/ReactGlobals";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
@@ -21,7 +21,6 @@ import {RootState} from "../../../Store/index";
 import {GetUserID} from "../../../Store/firebase/users";
 import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
-import {UpdateURL} from "../../../Frame/URL/URLManager";
 import Column from "../../../Frame/ReactComponents/Column";
 import {GetNode} from "../../../Store/firebase/nodes";
 import Row from "../../../Frame/ReactComponents/Row";
@@ -57,8 +56,9 @@ export function GetViewOffsetForNodeBox(nodeBox: JQuery) {
 }
 
 export function UpdateFocusNodeAndViewOffset(mapID: number) {
-	let selectedNodePath = GetSelectedNodePath(mapID);
-	let focusNodeBox = selectedNodePath ? GetNodeBoxForPath(selectedNodePath) : GetNodeBoxClosestToViewCenter();
+	/*let selectedNodePath = GetSelectedNodePath(mapID);
+	let focusNodeBox = selectedNodePath ? GetNodeBoxForPath(selectedNodePath) : GetNodeBoxClosestToViewCenter();*/
+	let focusNodeBox = GetNodeBoxClosestToViewCenter();
 	if (focusNodeBox == null) return; // can happen if node was just deleted
 
 	let focusNodeBoxComp = FindReact(focusNodeBox[0]) as NodeUI_Inner;
@@ -66,7 +66,7 @@ export function UpdateFocusNodeAndViewOffset(mapID: number) {
 	let viewOffset = GetViewOffsetForNodeBox(focusNodeBox);
 
 	let oldNodeView = GetNodeView(mapID, focusNodePath);
-	if (oldNodeView == null || !oldNodeView.focus || !viewOffset.Equals(oldNodeView.viewOffset))
+	if (oldNodeView == null || !oldNodeView.focused || !viewOffset.Equals(oldNodeView.viewOffset))
 		store.dispatch(new ACTViewCenterChange({mapID, focusNodePath, viewOffset}));
 }
 
@@ -77,16 +77,15 @@ type Props = {
 } & React.HTMLProps<HTMLDivElement>
 	& Partial<{rootNode: MapNodeEnhanced, focusNode: string, viewOffset: {x: number, y: number}}>;
 @Connect((state: RootState, {map, rootNode}: Props)=> {
-	let url = URL.Current();
 	if (rootNode == null && map && map.rootNode) {
 		rootNode = GetNodeEnhanced(GetNode(map.rootNode), map.rootNode+"");
 	}
 
-	let lastPathNode = url.pathNodes.LastOrX();
-	let crawlerURLMatch = lastPathNode && lastPathNode.match(/\.([0-9]+)$/);
-	if (isBot && crawlerURLMatch) {
-		let nodeID = parseInt(crawlerURLMatch[1]);
-		rootNode = GetNodeEnhanced(GetNode(nodeID), nodeID+"");
+	if (map) {
+		let nodeID = State([a=>a.main.mapViews, map._id, "rootNodeID"]);
+		if (isBot && nodeID) {
+			rootNode = GetNodeEnhanced(GetNode(nodeID), nodeID+"");
+		}
 	}
 
 	return {
@@ -158,7 +157,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 								let mapView = GetMapView(GetOpenMapID());
 								if (GetSelectedNodePath(map._id)) {
 									store.dispatch(new ACTMapNodeSelect({mapID: map._id, path: null}));
-									UpdateFocusNodeAndViewOffset(map._id);
+									//UpdateFocusNodeAndViewOffset(map._id);
 								}
 							}}
 							onContextMenu={e=> {
@@ -202,7 +201,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	OnLoadComplete() {
 		console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
 		this.LoadScroll();
-		UpdateURL(false);
+		//UpdateURL(false);
 	}
 
 	PostRender() {
@@ -219,7 +218,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		// if user is already scrolling manually, return so we don't interrupt that process
 		if ((this.refs.scrollView as ScrollView).state.scrollOp_bar) return;
 
-		let focusNode_target = GetFocusNode(GetMapView(map._id)); // || map.rootNode.toString();
+		let focusNode_target = GetFocusedNodePath(GetMapView(map._id)); // || map.rootNode.toString();
 		let viewOffset_target = GetViewOffset(GetMapView(map._id)); // || new Vector2i(200, 0);
 		//Log(`Resizing:${focusNode_target};${viewOffset_target}`);
 		if (focusNode_target == null || viewOffset_target == null) return;

@@ -131,22 +131,50 @@ export class URL {
 	}
 
 	domain: string;
-	get Protocol() { return this.domain.Contains("://") ? this.domain.substr(0, this.domain.indexOf("://")) : null; }
-	get DomainWithoutProtocol() { return this.domain.Contains("://") ? this.domain.substr(this.domain.indexOf("://") + 3) : this.domain; }
+	DomainStr(withProtocol = true) {
+		return withProtocol ? this.domain : this.DomainWithoutProtocol;
+	}
+	get Protocol() { return this.domain && this.domain.Contains("://") ? this.domain.substr(0, this.domain.indexOf("://")) : null; }
+	get DomainWithoutProtocol() { return this.domain && this.domain.Contains("://") ? this.domain.substr(this.domain.indexOf("://") + 3) : this.domain; }
+
 	pathNodes: string[];
+	PathStr(pathStartSlash?: boolean) {
+		let result = "";
+		if (pathStartSlash) {
+			result += "/";
+		}
+		// path-nodes
+		if (this.pathNodes.length)
+			result += this.pathNodes.join("/");
+		return result;
+	}
+
 	queryVars: QueryVar[];
+	get QueryStr() {
+		let result = "";
+		for (let [index, queryVar] of this.queryVars.entries()) {
+			result += (index == 0 ? "?" : "&") + queryVar.name + "=" + queryVar.value;
+		}
+		return result;
+	}
 	GetQueryVar(name: string) {
 		let entry = this.queryVars.find(a=>a.name == name);
 		return entry ? entry.value : undefined;
 	}
 	SetQueryVar(name: string, value) {
 		let existingEntry = this.queryVars.find(a=>a.name == name);
-		if (existingEntry)
+		if (existingEntry) {
 			existingEntry.value = value;
-		else
+		} else {
 			this.queryVars.push(new QueryVar(name, value));
+		}
 	}
+
 	hash: string;
+	get HashStr() {
+		if (!this.hash) return "";
+		return "#" + this.hash;
+	}
 
 	Clone() {
 		return new URL(this.domain, this.pathNodes.slice(), this.queryVars.map(a=>a.Clone()), this.hash);
@@ -163,34 +191,28 @@ export class URL {
 	}
 
 	toString(options?: {domain?: boolean, domain_protocol?: boolean, pathStartSlash?: boolean | "auto", path?: boolean, queryVars?: boolean, hash?: boolean}) {
-		options = E({domain: true, domain_protocol: true, pathStartSlash: "auto", path: true, queryVars: true, hash: true}, options) as any; 		
+		options = E({domain: true, domain_protocol: true, pathStartSlash: "auto", path: true, queryVars: true, hash: true}, options);
 		let result = "";
 		
 		// domain
-		if (options.domain)
-			result += options.domain_protocol ? this.domain : this.DomainWithoutProtocol;
+		if (options.domain) result += this.DomainStr(options.domain_protocol);
+		
 		//if (options.forceSlashAfterDomain || (options.path && this.pathNodes.length) || (options.queryVars && this.queryVars.length) || (options.hash && this.hash))
 		let pathStartSlash_auto = result.length == 0 || (options.path && this.pathNodes.length) || (options.queryVars && this.queryVars.length) || (options.hash && this.hash);
-		if (options.pathStartSlash != false && (options.pathStartSlash == true || pathStartSlash_auto)) {
+		let pathStartSlash = options.pathStartSlash == true || (options.pathStartSlash == "auto" && pathStartSlash_auto);
+		if (pathStartSlash) {
 			result += "/";
 		}
 
-		// path-nodes
-		if (options.path && this.pathNodes.length)
-			result += this.pathNodes.join("/");
-
-		// query-vars
-		if (options.queryVars) {
-			for (let [index, queryVar] of this.queryVars.entries()) {
-				result += (index == 0 ? "?" : "&") + queryVar.name + "=" + queryVar.value;
-			}
-		}
-
-		// hash
-		if (options.hash && this.hash)
-			result += "#" + this.hash;
-
+		if (options.path) result += this.PathStr(false);
+		if (options.queryVars) result += this.QueryStr;
+		if (options.hash) result += this.HashStr;
+		Assert(!result.startsWith("//"), `URL toString() result cannot start with "//". (it's probably an error)`);
 		return result;
+	}
+	toString_OptIn(options?: {domain?: boolean, domain_protocol?: boolean, pathStartSlash?: boolean | "auto", path?: boolean, queryVars?: boolean, hash?: boolean}) {
+		options = E({domain: false, path: false, queryVars: false, hash: false}, options) as any;	
+		return this.toString(options);
 	}
 }
 function AsPartial<T>(obj: T): Partial<T> { return obj; }

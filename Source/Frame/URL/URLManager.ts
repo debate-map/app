@@ -8,18 +8,22 @@ import {FindReact, ShallowChanged} from "../UI/ReactGlobals";
 import NodeUI_Inner from "../../UI/@Shared/Maps/MapNode/NodeUI_Inner";
 import {GetOpenMapID, ACTSetPage, ACTSetSubpage, ACTNotificationMessageAdd} from "../../Store/main";
 import {GetMap} from "../../Store/firebase/maps";
-import {GetNodeView, GetMapView, GetSelectedNodeID, GetFocusNode, GetViewOffset} from "../../Store/main/mapViews";
+import {GetNodeView, GetMapView, GetSelectedNodeID, GetViewOffset} from "../../Store/main/mapViews";
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
 import {FromJSON, ToJSON} from "../General/Globals";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 import {URL, QueryVar, rootPageDefaultChilds} from "../General/URLs";
 import {ACTTermSelect, ACTImageSelect} from "../../Store/main/content";
 import { GetNodeDisplayText } from "../../Store/firebase/nodes/$node";
-import { GetNodeAsync } from "Store/firebase/nodes";
+import { GetNodeAsync, GetNode } from "Store/firebase/nodes";
 import { GetShortestPathFromRootToNode } from "Frame/Store/PathFinder";
 import {CreateMapViewForPath} from "../Store/PathFinder";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
-import {ACTDebateMapSelect} from "../../Store/main/debates";
+import { ACTDebateMapSelect } from "../../Store/main/debates";
+import { ACTSet } from "Store";
+import { RootState } from "../../Store/index";
+import { GetCrawlerURLStrForNode } from "UI/@Shared/Maps/MapNode/NodeUI_ForBots";
+import MapUI from "../../UI/@Shared/Maps/MapUI";
 
 // loading
 // ==========
@@ -47,7 +51,7 @@ function ParseMapView(viewStr: string) {
 	if (ownStr.Contains("s"))
 		result.selected = true;
 	if (ownStr.Contains("f") || ownStr.Contains("s"))
-		result.focus = true;
+		result.focused = true;
 
 	let childrenStr = viewStr.Contains(",") ? viewStr.slice(viewStr.indexOf(",") + 1, -1) : "";
 	if (childrenStr.length) {
@@ -76,7 +80,7 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 	if (ownStr_withoutParentheses.Contains("s"))
 		nodeView.selected = true;
 	if (ownStr_withoutParentheses.Contains("f")) {
-		nodeView.focus = true;
+		nodeView.focused = true;
 		let viewOffsetStr = GetDataStrForProp(ownStr, "f");
 		let viewOffsetParts = viewOffsetStr.split("_").map(ToInt);
 		nodeView.viewOffset = new Vector2i(viewOffsetParts[0], viewOffsetParts[1]);
@@ -117,39 +121,82 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 }
 
 const pagesWithSimpleSubpages = ["home", "more", "content", "global"].ToMap(page=>page, ()=>null);
-export async function LoadURL(urlStr: string) {
-	//if (!GetPath(GetUrlPath(url)).startsWith("global/map")) return;
-	let url = URL.Parse(urlStr).Normalized();
+export function GetSyncLoadActionsForURL(url: URL, directURLChange: boolean) {
+	let result = [];
 
 	let page = url.pathNodes[0];
-	store.dispatch(new ACTSetPage(page).VSet({fromURL: true}));
+	result.push(new ACTSetPage(page).VSet({fromURL: true}));
 	let subpage = url.pathNodes[1];
 	if (url.pathNodes[1] && page in pagesWithSimpleSubpages) {
-		store.dispatch(new ACTSetSubpage({page, subpage}).VSet({fromURL: true}));
+		result.push(new ACTSetSubpage({page, subpage}).VSet({fromURL: true}));
 	}
 
 	if (page == "content") {
 		if (subpage == "terms" && url.pathNodes[2]) {
-			store.dispatch(new ACTTermSelect({id: url.pathNodes[2].ToInt()}).VSet({fromURL: true}));
+			result.push(new ACTTermSelect({id: url.pathNodes[2].ToInt()}).VSet({fromURL: true}));
 		} else if (subpage == "images" && url.pathNodes[2]) {
-			store.dispatch(new ACTImageSelect({id: url.pathNodes[2].ToInt()}).VSet({fromURL: true}));
+			result.push(new ACTImageSelect({id: url.pathNodes[2].ToInt()}).VSet({fromURL: true}));
 		}
 	}
 
 	if (url.Normalized().toString({domain: false}).startsWith("/global/map")) {
-		// example: /global?view=1:3:100:101f(384_111):102:.104:.....
-		let mapViewStr = url.GetQueryVar("view");
-		if (mapViewStr == null || mapViewStr.length == 0) return;
-		let mapView = ParseMapView(mapViewStr);
+		if (isBot) {
+			// example: /global/map/some-node.123
+			let lastPathNode = url.pathNodes.LastOrX();
+			let crawlerURLMatch = lastPathNode && lastPathNode.match(/\.([0-9]+)$/);
+			if (isBot) {
+				if (crawlerURLMatch) {
+					let nodeID = parseInt(crawlerURLMatch[1]);
+					result.push(new ACTSet({path: `main/mapViews/${1}/rootNodeID`, value: nodeID}));
+				} else if (directURLChange) {
+					result.push(new ACTSet({path: `main/mapViews/${1}/rootNodeID`, value: null}));
+				}
+			}
+		} else {
+			// example: /global?view=1:3:100:101f(384_111):102:.104:.....
+			let mapViewStr = url.GetQueryVar("view");
+			if (mapViewStr != null && mapViewStr.length) {
+				let mapView = ParseMapView(mapViewStr);
 
-		//Log("Loading map-view:" + ToJSON(mapView));
-		store.dispatch(new ACTMapViewMerge({mapID: 1, mapView}).VSet({fromURL: true}));
+				//Log("Loading map-view:" + ToJSON(mapView));
+				result.push(new ACTMapViewMerge({mapID: 1, mapView}).VSet({fromURL: true}));
+			}
+		}
+	}
+
+	if (url.pathNodes[0] == "debates") { //&& IsNumberString(url.pathNodes[1])) {
+		result.push(new ACTDebateMapSelect({id: url.pathNodes[1] ? url.pathNodes[1].ToInt() : null}).VSet({fromURL: true}))
+	}
+
+	return result;
+}
+
+// maybe temp; easier than using the "fromURL" prop, since AddressBarWrapper class currently doesn't have access to the triggering action itself
+export var loadingURL = false;
+export async function LoadURL(urlStr: string) {
+	MaybeLog(a=>a.urlLoads, ()=>"Loading url: " + urlStr);
+	loadingURL = true;
+
+	//if (!GetPath(GetUrlPath(url)).startsWith("global/map")) return;
+	let url = URL.Parse(urlStr).Normalized();
+
+	let syncActions = GetSyncLoadActionsForURL(url, true);
+	for (let action of syncActions) {
+		store.dispatch(action);
+	}
+
+	let loadingMapView = syncActions.Any(a=>a.Is(ACTMapViewMerge));
+	if (loadingMapView) {
+		let mapUI = FindReact($(".MapUI")[0]) as MapUI;
+		if (mapUI) {
+			mapUI.LoadScroll();
+		}
 	}
 
 	// If user followed search-result link (eg. "debatemap.live/global/156"), we only know the node-id.
 	// Search for the shortest path from the map's root to this node, and update the view and url to that path.
 	//if (url.pathNodes[0] == "global" && url.pathNodes[1] != null && url.pathNodes[1].match(/^[0-9]+$/) && !isBot) {
-	let match = url.toString({domain: false}).match(/^\/global\/[a-z-]*\.([0-9]+)$/);
+	let match = url.toString({domain: false}).match(/^\/global\/map\/[a-z-]*\.([0-9]+)$/);
 	if (match && !isBot) {
 		let nodeID = parseInt(match[1]);
 		let node = await GetNodeAsync(nodeID);
@@ -172,16 +219,14 @@ export async function LoadURL(urlStr: string) {
 		store.dispatch(replace(newURL.toString({domain: false})));
 	}
 
-	if (url.pathNodes[0] == "debates") { //&& IsNumberString(url.pathNodes[1])) {
-		store.dispatch(new ACTDebateMapSelect({id: url.pathNodes[1] ? url.pathNodes[1].ToInt() : null}).VSet({fromURL: true}))
-	}
+	loadingURL = false;
 }
 
 // saving
 // ==========
 
 g.justChangedURLFromCode = false;
-export function UpdateURL(pushNewURL: boolean) {
+export function GetNewURL() {
 	//let newURL = URL.Current();
 	/*let oldURL = URL.Current(true);
 	let newURL = new URL(oldURL.domain, oldURL.pathNodes);*/
@@ -210,9 +255,23 @@ export function UpdateURL(pushNewURL: boolean) {
 		}
 	}
 
-	if (page == "global" && subpage == "map" && !isBot) {
-		let mapID = GetOpenMapID();
-		newURL.queryVars.push(new QueryVar("view", GetMapViewStr(mapID)));
+	// break point
+	if (page == "global" && subpage == "map") {
+		if (isBot) {
+			let mapID = GetOpenMapID();
+			let map = GetMap(mapID);
+			let rootNodeID = State([a=>a.main.mapViews, mapID, "rootNodeID"]);
+			let rootNode = GetNode(rootNodeID);
+			if (rootNode) {
+				let nodeStr = GetCrawlerURLStrForNode(rootNode);
+				if (rootNodeID && rootNodeID != map.rootNode) {
+					newURL.pathNodes.push(nodeStr);
+				}
+			}
+		} else {
+			let mapID = GetOpenMapID();
+			newURL.queryVars.push(new QueryVar("view", GetMapViewStr(mapID)));
+		}
 	}
 
 	if (!State(a=>a.main.analyticsEnabled) && newURL.GetQueryVar("analytics") == null) {
@@ -226,22 +285,9 @@ export function UpdateURL(pushNewURL: boolean) {
 	if (subpage && subpage == rootPageDefaultChilds[page] && newURL.pathNodes.length == 2) newURL.pathNodes.length = 1;
 	if (page == "home" && newURL.pathNodes.length == 1) newURL.pathNodes.length = 0;
 
-	let oldURLState = State(a=>a.router);
-	let oldURL = URL.FromState(oldURLState);
-	//let newURLStr = newURL.toString({domain: false});
-	let newURLState = newURL.ToState();
-	//if (ShallowChanged(newURLState.Including("pathname", "search", "hash"), (State(a=>a.router) || {}).Including("pathname", "search", "hash"))) {
-	if (oldURL.toString({domain: false}) != newURL.toString({domain: false})) {
-		if (g.logURLUpdates) Log(`Updating url from "${oldURL.toString({domain: false})}" to "${newURL.toString({domain: false})}".`);
-		g.justChangedURLFromCode = true;
-		store.dispatch(pushNewURL ? push(newURLState) : replace(newURLState));
-		// for some reason, we need to use the lower-level historyStore.[set/replace]State() -- otherwise the redux store isn't always updated
-		/*if (pushNewURL) {
-			historyStore.push(newURLState);
-		} else {
-			historyStore.replace(newURLState);
-		}*/
-	}
+	Assert(!newURL.pathNodes.Any(a=>a == "/"), `A path-node cannot be just "/". @url(${newURL})`);
+
+	return newURL;
 }
 function GetMapViewStr(mapID: number) {
 	let map = GetMap(mapID);
@@ -279,7 +325,7 @@ function GetNodeViewStr(mapID: number, path: string) {
 		let offsetStr = viewOffset.toString().replace(" ", "_");
 		ownStr += `(${offsetStr})`;*/
 	}
-	if (nodeView.focus) { // && GetSelectedNodeID(mapID) == null) {
+	if (nodeView.focused) { // && GetSelectedNodeID(mapID) == null) {
 		Assert(nodeView.viewOffset != null);
 		let offsetStr = Vector2i.prototype.toString.call(nodeView.viewOffset).replace(" ", "_");
 		ownStr += `f(${offsetStr})`;

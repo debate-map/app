@@ -152,7 +152,7 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 		}
 		if (node.equation) {
 			let result = node.equation.text;
-			if (node.equation.latex) {
+			if (node.equation.latex && !isBot) {
 				//result = result.replace(/\\[^{]+/g, "").replace(/[{}]/g, "");
 				let latex = PreProcessLatex(result);
 				try {

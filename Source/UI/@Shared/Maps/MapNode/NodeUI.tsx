@@ -114,7 +114,7 @@ type State = {
 		//nodeEnhanced: GetNodeEnhanced(node, path),
 		form: GetNodeForm(node, GetParentNode(path)),
 		// only pass new nodeView when its local-props are different
-		nodeView: CachedTransform("nodeView_transform1", [map._id, path], nodeView.Excluding("focus", "viewOffset", "children"), ()=>nodeView),
+		nodeView: CachedTransform("nodeView_transform1", [map._id, path], nodeView.Excluding("focused", "viewOffset", "children"), ()=>nodeView),
 		/*nodeChildren: CachedTransform("nodeChildren_transform1", {path}, CombineDynamicPropMaps(nodeChildren, nodeChildren_finalTypes),
 			()=>nodeChildren.map((child, index)=> {
 				return child.Extended({finalType: nodeChildren_finalTypes[index]});
@@ -154,7 +154,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let {map, node, path, initialChildLimit, form, widthOverride, children, nodeView, nodeChildren, nodeChildren_sortValues} = this.props;
 		let expanded = nodeView && nodeView.expanded;
 		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo, /*childrenStartY, childrenEndY*/} = this.state;
-		if (g.logNodeRenders) {
+		if (ShouldLog(a=>a.nodeRenders)) {
 			if (g.logNodeRenders_for) {
 				if (g.logNodeRenders_for == node._id) {
 					Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id}${nl

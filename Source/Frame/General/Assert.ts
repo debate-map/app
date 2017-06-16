@@ -1,4 +1,4 @@
-import V from "../V/V";
+import V, {GetStackTraceStr} from "../V/V";
 import {Log} from "./Logging";
 
 g.Extend({Assert}); declare global { function Assert(condition, messageOrMessageFunc?: string | Function); }
@@ -7,7 +7,7 @@ export function Assert(condition, messageOrMessageFunc?: string | Function) {
 
 	var message = (messageOrMessageFunc as any) instanceof Function ? (messageOrMessageFunc as any)() : messageOrMessageFunc;
 
-	Log(`Assert failed) ${message}\n\nStackTrace) ${V.GetStackTraceStr()}`);
+	Log(`Assert failed) ${message}\n\nStackTrace) ${GetStackTraceStr()}`);
 	console.error("Assert failed) " + message);
 	debugger;
 	throw new Error("Assert failed) " + message);
@@ -18,7 +18,7 @@ export function AssertWarn(condition, messageOrMessageFunc?: string | Function) 
 
 	var message = messageOrMessageFunc instanceof Function ? messageOrMessageFunc() : messageOrMessageFunc;
 
-	console.warn(`Assert-warn failed) ${message}\n\nStackTrace) ${V.GetStackTraceStr()}`);
+	console.warn(`Assert-warn failed) ${message}\n\nStackTrace) ${GetStackTraceStr()}`);
 }
 
 // this version throws an error with only the provided message -- for ones the user may well see, and which don't need the stack (or "Assert failed) " text)

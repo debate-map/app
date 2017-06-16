@@ -134,7 +134,7 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		this.state = this.state || {} as any;
 
 		// if using PreRender, wrap render func
-		if (this.PreRender != BaseComponent.prototype.render) {
+		if (this.PreRender != BaseComponent.prototype.PreRender) {
 			let oldRender = this.render;
 			this.render = function() {
 				this.PreRender();
@@ -416,10 +416,10 @@ export class Div extends BaseComponent<{shouldUpdate?} & React.HTMLProps<HTMLDiv
 		return shouldUpdate ? shouldUpdate(nextProps, nextState) : true;
 		//return (shouldUpdate && shouldUpdate(nextProps, nextState)) || ShallowCompare(this, nextProps, nextState);
 	}
-    render() {
+	render() {
 		let {shouldUpdate, style, ...rest} = this.props;
 		return <div {...rest} style={style}/>;
-    }
+	}
 }
 
 export function ShallowEquals(objA, objB) {

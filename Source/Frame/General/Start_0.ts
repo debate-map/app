@@ -8,11 +8,15 @@ g.JQuery = JQuery;
 g.jQuery = JQuery;
 g.$ = JQuery;*/
 
+let isBot = /bot|crawler|spider|robot|crawling|google|bing|duckduckgo|msn|slurp|yandex|baidu|aolbuild|teoma/i.test(navigator.userAgent);
+//declare global { const isBot: string; } g.Extend({isBot});
+declare global { const isBot: string; } g.isBot = isBot;
+
 // browser-check
 var GetBrowser = require("./UserAgent").GetBrowser;
 var supportedBrowsers = require("./UserAgent").supportedBrowsers;
 var browser = GetBrowser().name || navigator.userAgent;
-if (supportedBrowsers.indexOf(browser) == -1) {
+if (supportedBrowsers.indexOf(browser) == -1 && !isBot) {
 	var message = "Sorry! Your browser (" + browser + ") is not supported. Please use a supported browser such as Chrome, Firefox, or Safari.";
 	setTimeout(()=> {
 		try {
@@ -28,9 +32,6 @@ Object.freeze = obj=>obj; // mwahahaha!! React can no longer freeze its objects,
 Object.isFrozen = obj=>true;
 
 // set this up, so we can see Googlebot errors! (in "Fetch as Google" panel)
-let isBot = /bot|crawler|spider|robot|crawling|google|bing|duckduckgo|msn|slurp|yandex|baidu|aolbuild|teoma/i.test(navigator.userAgent);
-//declare global { const isBot: string; } g.Extend({isBot});
-declare global { const isBot: string; } g.isBot = isBot;
 if (isBot) {
 	g.onerror = function(message, url, line, column, error) {
 		console.log(arguments);

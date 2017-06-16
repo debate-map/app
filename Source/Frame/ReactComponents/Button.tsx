@@ -4,6 +4,7 @@ import {E} from "../General/Globals_Free";
 import {ToJSON} from "../General/Globals";
 import {createMarkupForStyles} from "react-dom/lib/CSSPropertyOperations";
 import {Log} from "../General/Logging";
+import Link from "./Link";
 
 var styles = {
 	root: {
@@ -62,8 +63,8 @@ export default class Button extends BaseComponent<ButtonProps, {}> {
 	
 	render() {
 	    var {enabled, text, title, className, style, size, width, height, iconSize, iconPath, useOpacityForHover,
-			hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged, children,
-			onLeftClick, ...rest} = this.props;
+			hasCheckbox, checked, checkboxStyle, checkboxLabelStyle, onCheckedChanged,
+			onLeftClick, children, ...rest} = this.props;
 
 		width = width || size;
 		height = height || size;
@@ -126,11 +127,11 @@ export default class Button extends BaseComponent<ButtonProps, {}> {
 		);
 	}
 	OnClick(e) {
-	    var {onClick, onLeftClick, onDirectClick} = this.props;
-	    if (onDirectClick && (e.target == e.currentTarget || $(e.target).parent()[0] == e.currentTarget))
-	        onDirectClick(e);
-	    if (onClick)
-	        onClick(e);
+		var {onClick, onLeftClick, onDirectClick} = this.props;
+		if (onDirectClick && (e.target == e.currentTarget || $(e.target).parent()[0] == e.currentTarget))
+			onDirectClick(e);
+		if (onClick)
+			onClick(e);
 		if (onLeftClick && e.button == 0)
 			onLeftClick(e);
 	}

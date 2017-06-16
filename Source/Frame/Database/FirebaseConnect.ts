@@ -55,7 +55,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 			storeDataChanged = true;
 		} else {
 			for (let path in s.lastAccessedStorePaths_withData) {
-				if (State(path, false) !== s.lastAccessedStorePaths_withData[path]) {
+				if (State(path, null, false) !== s.lastAccessedStorePaths_withData[path]) {
 					//store.dispatch({type: "Data changed!" + path});
 					storeDataChanged = true;
 					break;
@@ -117,7 +117,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		//ClearAccessedPaths();
 		s.lastAccessedStorePaths_withData = {};
 		for (let path of accessedStorePaths) {
-			s.lastAccessedStorePaths_withData[path] = State(path, false);
+			s.lastAccessedStorePaths_withData[path] = State(path, null, false);
 		}
 		s.lastProps = props;
 		s.lastResult = result;

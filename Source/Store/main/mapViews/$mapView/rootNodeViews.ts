@@ -21,16 +21,17 @@ export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action
 		let selectedNode = nodes.FirstOrX(a=>a.Value && a.Value.selected);
 		if (selectedNode)
 			result = u.updateIn(selectedNode.PathStr_Updeep, u.omit(["selected", "openPanel"]), result);
-		let focusNode = nodes.FirstOrX(a=>a.Value && a.Value.focus);
+		/*let focusNode = nodes.FirstOrX(a=>a.Value && a.Value.focused);
 		if (focusNode)
-			result = u.updateIn(focusNode.PathStr_Updeep, u.omit(["focus", "viewOffset"]), result);
+			result = u.updateIn(focusNode.PathStr_Updeep, u.omit(["focused", "viewOffset"]), result);*/
 		if (action.payload.path == null)
 			return result;
 		
 		let targetNodePath = GetPathNodes(action.payload.path).join(".children.");
-		let nodeBox = GetNodeBoxForPath(action.payload.path);
+		/*let nodeBox = GetNodeBoxForPath(action.payload.path);
 		let viewOffset = GetViewOffsetForNodeBox(nodeBox);
-		result = u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, selected: true, focus: true, viewOffset}), result);
+		result = u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, selected: true, focused: true, viewOffset}), result);*/
+		result = u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, selected: true}), result);
 		return result;
 	}
 	if (action.Is(ACTMapNodePanelOpen) && action.payload.mapID == mapID) {
@@ -60,13 +61,13 @@ export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action
 		//return {...state, focusNode: action.payload.focusNode, viewOffset: action.payload.viewOffset};
 		
 		let nodes = GetTreeNodesInObjTree(state, true);
-		let focusNode = nodes.FirstOrX(a=>a.Value && a.Value.focus);
+		let focusNode = nodes.FirstOrX(a=>a.Value && a.Value.focused);
 		let result = state;
 		if (focusNode)
-			result = u.updateIn(focusNode.PathStr_Updeep, u.omit(["focus", "viewOffset"]), result);
+			result = u.updateIn(focusNode.PathStr_Updeep, u.omit(["focused", "viewOffset"]), result);
 		
 		let targetNodePath = GetPathNodes(action.payload.focusNodePath).join(".children.");
-		result = u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, focus: true, viewOffset: action.payload.viewOffset}), result);
+		result = u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, focused: true, viewOffset: action.payload.viewOffset}), result);
 		return result;
 	}
 	return state;

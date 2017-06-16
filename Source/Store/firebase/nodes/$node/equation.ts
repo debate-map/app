@@ -7,7 +7,7 @@ export function GetEquationStepNumber(path: string) {
 	let parent = GetParentNode(path);
 	//let equationStepNodeIDs = parent.children.VKeys(true).map(a=>a.ToInt());
 	let equationStepNodes = GetNodeChildren(parent).filter(a=> {
-		return a.equation && (GetLinkUnderParent(a._id, parent).seriesAnchor || a.equation.isStep);
+		return a && a.equation && (GetLinkUnderParent(a._id, parent).seriesAnchor || a.equation.isStep);
 	});
 	// if node is not included "as a step" in this chain (ie. the series under this parent), return null
 	if (!equationStepNodes.Any(a=>a._id == nodeID)) return null;

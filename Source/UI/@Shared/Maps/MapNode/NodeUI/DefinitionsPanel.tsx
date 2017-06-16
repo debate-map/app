@@ -16,6 +16,7 @@ import {URL} from "../../../../../Frame/General/URLs";
 import {ParseSegmentsForPatterns} from "../../../../../Frame/General/RegexHelpers";
 import {ACTTermSelect} from "../../../../../Store/main/content";
 import {push} from "redux-little-router";
+import Link from "../../../../../Frame/ReactComponents/Link";
 
 let termsPlaceholder = [];
 
@@ -90,35 +91,27 @@ class TermDefinitionPanel extends BaseComponent<{term: Term, termVariantNumber: 
 		let {term, termVariantNumber} = this.props;
 
 		//let creatorOrMod = term != null && IsUserCreatorOrMod(GetUserID(), term);
+		let showDetailsURL = URL.Current(true).Clone();
+		showDetailsURL.pathNodes = ["content", "terms", term._id+""];
+		showDetailsURL.queryVars = [];
 
 		return (
 			<Column sel mt={5} style={{whiteSpace: "normal"}}>
 				<Row>Term: {term.name}{term.disambiguation ? ` (${term.disambiguation})` : ""} (variant #{termVariantNumber}) (id: {term._id})</Row>
 				<Row mt={5}>Short description: {term.shortDescription_current}</Row>
-				<Row mt={5}>Components:</Row>
-				<TermComponentsUI term={term} editing={false} inMap={true} style={{padding: "5px 0 10px"}}/>
+				{term.components && term.components.VKeys(true).length && [
+					<Row mt={5}>Components:</Row>,
+					<TermComponentsUI term={term} editing={false} inMap={true} style={{padding: "5px 0"}}/>
+				]}
 				{/*<Row>Details:</Row>
 				<TermDetailsUI baseData={term} creating={false} enabled={/*creatorOrMod*#/ false} style={{padding: 10}}
 					onChange={data=>this.SetState({selectedTerm_newData: data})}/>*/}
-				<Button text="Show details" onClick={e=> {
-					let newURL = URL.Current(true).Clone();
-					newURL.pathNodes = ["content"];
-					newURL.queryVars = [];
-					//browserHistory.push(newURL.toString({domain: false}));
-					//(this.props as any).router.push(newURL.toString({domain: false}));
-					store.dispatch(push(newURL.toString({domain: false})));
-					//historyStore.push(newURL.toString({domain: false}));
-					/*store.dispatch({
-						type: LOCATION_CHANGED,
-						payload: {
-							pathname: "/content",
-							search: "",
-							hash: "",
-							key: Math.random(),
-						}
-					});*/
-					store.dispatch(new ACTTermSelect({id: term._id}));
-				}}/>
+				<Link to={showDetailsURL.toString({domain: false})} onContextMenu={e=>e.nativeEvent["passThrough"] = true}>
+					<Button mt={5} text="Show details" /*onClick={e=> {
+						store.dispatch(push());
+						//store.dispatch(new ACTTermSelect({id: term._id}));
+					}}*//>
+				</Link>
 			</Column>
 		);
 	}

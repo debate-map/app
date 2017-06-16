@@ -31,7 +31,7 @@ export function Grab(grabFunc) {
 	target.prototype.shouldComponentUpdate = function(newProps, newState) {
 	    return ShallowCompare(this, newProps, newState);
 		/*var result = ShallowCompare(this, newProps, newState);
-		g.Log(result + ";" + g.ToJSON(this.props) + ";" + g.ToJSON(newProps));
+		Log(result + ";" + g.ToJSON(this.props) + ";" + g.ToJSON(newProps));
 		return result;*#/
 	}
 }*/

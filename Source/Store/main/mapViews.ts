@@ -36,7 +36,7 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 				//newState[mapID] = new MapView();
 				newState[mapID] = {
 					rootNodeViews: {
-						[action["data"].rootNode]: new MapNodeView().VSet({expanded: true, focus: true, viewOffset: new Vector2i(200, 0)})
+						[action["data"].rootNode]: new MapNodeView().VSet({expanded: true, focused: true, viewOffset: new Vector2i(200, 0)})
 					}
 				};
 			}
@@ -47,7 +47,7 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 			//newState[action.payload.id] = new MapView();
 			newState[action.payload.id] = {
 				rootNodeViews: {
-					[action.payload.rootNodeID]: new MapNodeView().VSet({expanded: true, focus: true, viewOffset: new Vector2i(200, 0)})
+					[action.payload.rootNodeID]: new MapNodeView().VSet({expanded: true, focused: true, viewOffset: new Vector2i(200, 0)})
 				}
 			};
 		}
@@ -58,7 +58,7 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 		if (newState[mapID] == null) {
 			newState[mapID] = {
 				rootNodeViews: {
-					[rootNode]: new MapNodeView().VSet({expanded: true, focus: true, viewOffset: new Vector2i(200, 0)})
+					[rootNode]: new MapNodeView().VSet({expanded: true, focused: true, viewOffset: new Vector2i(200, 0)})
 				}
 			};
 		}
@@ -83,88 +83,48 @@ export function GetPathNodes(path: string) {
 	Assert(pathSegments.All(a=>IsNumberString(a)), `Path contains non-number segments: ${path}`);
 	return pathSegments.map(ToInt);
 }
-export function GetSelectedNodePathNodes(mapID: number): number[] {
-	let mapView = GetMapView(mapID);
+
+export function GetSelectedNodePathNodes(mapViewOrMapID: number | MapView): number[] {
+	let mapView = IsNumber(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
+	if (mapView == null) return [];
 	let selectedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "selected" && a.Value);
 	if (selectedTreeNode == null) return [];
-	let selectedNodeView = selectedTreeNode.ancestorNodes.Last();
 
+	let selectedNodeView = selectedTreeNode.ancestorNodes.Last();
 	return selectedNodeView.PathNodes.Where(a=>a != "children").map(ToInt);
 }
-export function GetSelectedNodePath(mapID: number): string {
-	return GetSelectedNodePathNodes(mapID).join("/");
+export function GetSelectedNodePath(mapViewOrMapID: number | MapView): string {
+	return GetSelectedNodePathNodes(mapViewOrMapID).join("/");
 }
 export function GetSelectedNodeID(mapID: number): number {
-	/*let mapView = GetMapView(mapID);
-	let selectedNodeView = GetTreeNodesInObjTree(mapView).FirstOrX(a=>a.prop == "selected" && a.Value);
-	if (selectedNodeView && selectedNodeView.ancestorNodes.Last().prop == "rootNodeView")
-		return GetMap(mapID).rootNode;
-	return selectedNodeView ? selectedNodeView.ancestorNodes.Last().prop as number : null;*/
 	return GetSelectedNodePathNodes(mapID).LastOrX();
 }
-/*export function MakeGetNodeView() {
-	var getParentNodeView; //= MakeGetNodeView();
-	return createSelector(
-		(_, {firebase}: {firebase: FirebaseDatabase})=>firebase,
-		(_, {map}: {map: Map})=>map._id,
-		(state: RootState, {map})=>state.main.mapViews[map._id] && state.main.mapViews[map._id].rootNodeView,
-		(_, {path}: {path: string})=>path,
-		(state: RootState, props)=> {
-			let {path, ...rest} = props;
-			if (!props.path.Contains("/")) return null;
-			getParentNodeView = getParentNodeView || MakeGetNodeView();
-			return getParentNodeView(state, {...rest, path: path.substring(0, path.lastIndexOf("/"))});
-		},
-		(firebase, mapID, rootNodeView, path, parentNodeView) => {
-			if (mapID == null || path == null) return null;
-			let pathNodeIDs = path.split("/").Select(a=>parseInt(a));
-			/*var currentNodeView = mapView.rootNodeView || {children: {}};
-			for (let [index, nodeID] of pathNodeIDs.Skip(1).entries()) {
-				currentNodeView = currentNodeView.children[nodeID];
-				if (currentNodeView == null)
-					return null;
-			}
-			return currentNodeView;*#/
-			return parentNodeView && parentNodeView.children ? parentNodeView.children[pathNodeIDs.Last()] : rootNodeView;
-		}
-  	);
-}*/
+
+export function GetFocusedNodePathNodes(mapViewOrMapID: number | MapView): number[] {
+	let mapView = IsNumber(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
+	if (mapView == null) return [];
+	let focusedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "focused" && a.Value);
+	if (focusedTreeNode == null) return [];
+
+	let focusedNodeView = focusedTreeNode.ancestorNodes.Last();
+	return focusedNodeView.PathNodes.Where(a=>a != "children").map(ToInt);
+}
+export function GetFocusedNodePath(mapViewOrMapID: number | MapView): string {
+	return GetFocusedNodePathNodes(mapViewOrMapID).join("/");
+}
+export function GetFocusedNodeID(mapID: number): number {
+	return GetFocusedNodePathNodes(mapID).LastOrX();
+}
+
 export function GetMapView(mapID: number): MapView {
 	return State([a=>a.main.mapViews, mapID]);
 }
 export function GetNodeView(mapID: number, path: string): MapNodeView {
-	/*let pathNodeIDs = path.split("/").map(ToInt);
-	let parentNodeID = pathNodeIDs.length > 1 ? pathNodeIDs.XFromLast(1) : null;
-	if (parentNodeID) {
-		//let parentNodeView = CachedTransform({mapID, path}, )
-		let parentNodeView = GetNodeView(mapID, path.substr(0, path.lastIndexOf("/")));
-		Assert(parentNodeView != null, `When trying to get node-view for #${pathNodeIDs.Last()}, node-view for parent #${parentNodeID} was null! @path(${path})`);
-		return (parentNodeView.children || {})[pathNodeIDs.Last()];
-	}
-
-	let mapView = GetMapView(mapID);
-	if (mapView == null) return null;
-	return mapView.rootNodeViews[pathNodeIDs[0]] as MapNodeView;*/
-
-	/*let pathNodeIDs = path.split("/").map(ToInt);
-	let storePathNodes = ["main", "mapViews", mapID, "rootNodeViews", pathNodeIDs[0]].concat(pathNodeIDs.Skip(1).SelectMany(childID=>["children", childID]));*/
-	/*let path_preAndPostFirstSep = path.SplitAt(path.indexOf("/").IfN1Then(path.length));
-	let storePathNodes = ["main", "mapViews", mapID, "rootNodeViews", path_preAndPostFirstSep[0]].concat(path_preAndPostFirstSep[1].replace(childID=>["children", childID]));*/
-	/*let pathNodeIDs = path.split("/");
-	let storePathNodes = ["main", "mapViews", mapID, "rootNodeViews", pathNodeIDs[0]].concat(pathNodeIDs.Skip(1).SelectMany(childID=>["children", childID]));*/
 	let pathNodeIDs = GetPathNodes(path);
-	let childPath = pathNodeIDs.map(childID=>`${childID}/children`).join("/").slice(0, -9);
+	// this has better perf than the simpler approaches
+	let childPath = pathNodeIDs.map(childID=>`${childID}/children`).join("/").slice(0, -"/children".length);
 	let storePath = `main/mapViews/${mapID}/rootNodeViews/${childPath}`;
 	return State(storePath);
-}
-export function GetFocusNode(mapView: MapView): string {
-	if (mapView == null) return null;
-	let treeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "focus" && a.Value);
-	if (treeNode == null) return null;
-	let focusNodeView = treeNode.ancestorNodes.Last();
-
-	let pathNodes = focusNodeView.PathNodes.Where(a=>a != "children");
-	return pathNodes.join("/");
 }
 export function GetViewOffset(mapView: MapView): Vector2i {
 	if (mapView == null) return null;

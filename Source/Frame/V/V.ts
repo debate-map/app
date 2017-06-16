@@ -148,20 +148,6 @@ export default class V {
 		return _equals(a, b) && _equals(b, a);
 	};*/
 
-	//static GetStackTraceStr(stackTrace?: string, sourceStackTrace?: boolean);
-	static GetStackTraceStr(sourceStackTrace?: boolean);
-	//@((()=> { if (g.onclick == null) g.onclick = ()=>console.log(V.GetStackTraceStr()); }) as any)
-	static GetStackTraceStr(...args) {
-	    if (IsString(args[0])) var [stackTrace, sourceStackTrace = true] = args;
-	    else var [sourceStackTrace = true] = args;
-
-		//stackTrace = stackTrace || new Error()[sourceStackTrace ? "Stack" : "stack"];
-		//stackTrace = stackTrace || (sourceStackTrace ? StackTrace.get().then(stack=>stackTrace = stack.map(a=>a.toString()).join("\n")) : new Error().stack);
-		stackTrace = stackTrace || new Error().stack;
-		return stackTrace.substr(stackTrace.IndexOf_X(1, "\n")); // remove "Error" line and first stack-frame (that of this method)
-	}
-	static LogStackTrace() { Log(V.GetStackTraceStr()); }
-
 	static Bind<T extends Function>(func: T, newThis: any): T {
 		return func.bind(newThis);
 	}
@@ -217,7 +203,7 @@ export class TreeNode {
 	}
 
 	obj;
-	prop;
+	prop: string;
 	//value;
 	get Value() {
 		if (this.obj == null)
@@ -311,3 +297,17 @@ export function DeepSet(obj, path, newValue, sepChar = "/") {
 	}
 	deepObj[pathNodes.Last()] = newValue;
 }
+
+//static GetStackTraceStr(stackTrace?: string, sourceStackTrace?: boolean);
+export function GetStackTraceStr(sourceStackTrace?: boolean);
+//@((()=> { if (g.onclick == null) g.onclick = ()=>console.log(V.GetStackTraceStr()); }) as any)
+export function GetStackTraceStr(...args) {
+		if (IsString(args[0])) var [stackTrace, sourceStackTrace = true] = args;
+		else var [sourceStackTrace = true] = args;
+
+	//stackTrace = stackTrace || new Error()[sourceStackTrace ? "Stack" : "stack"];
+	//stackTrace = stackTrace || (sourceStackTrace ? StackTrace.get().then(stack=>stackTrace = stack.map(a=>a.toString()).join("\n")) : new Error().stack);
+	stackTrace = stackTrace || new Error().stack;
+	return stackTrace.substr(stackTrace.IndexOf_X(1, "\n")); // remove "Error" line and first stack-frame (that of this method)
+}
+export function LogStackTrace() { Log(GetStackTraceStr()); }

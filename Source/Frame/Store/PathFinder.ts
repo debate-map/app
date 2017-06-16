@@ -43,7 +43,7 @@ export function CreateNodeViewForPath(pathFromSelfToDescendent: number[]): MapNo
 		result.children[pathFromSelfToDescendent[0]] = CreateNodeViewForPath(pathFromSelfToDescendent.Skip(1));
 	} else {
 		result.selected = true;
-		result.focus = true;
+		result.focused = true;
 		result.viewOffset = new Vector2i(200, 0);
 	}
 

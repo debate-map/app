@@ -1,10 +1,10 @@
-import {GetNodeView} from "../../../../Store/main/mapViews";
+import {GetNodeView, GetFocusedNodeID} from "../../../../Store/main/mapViews";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {RootState} from "../../../../Store";
-import {GetNodeChildren, GetNodeParents, GetParentNode} from "../../../../Store/firebase/nodes";
+import {GetNodeChildren, GetNodeParents, GetParentNode, GetNode} from "../../../../Store/firebase/nodes";
 import {GetFillPercentForRatingAverage, GetRatingAverage, GetRatings} from "../../../../Store/firebase/nodeRatings";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import Column from "../../../../Frame/ReactComponents/Column";
@@ -23,16 +23,40 @@ import OthersPanel from "./NodeUI/OthersPanel";
 import DiscussionPanel from "./NodeUI/DiscussionPanel";
 import RatingsPanel from "./NodeUI/RatingsPanel";
 import ScrollView from "react-vscrollview";
+import {ACTSet} from "Store";
+import {GetOpenMapID} from "../../../../Store/main";
+import {GetNewURL} from "../../../../Frame/URL/URLManager";
 
 let childrenPlaceholder = [];
 
-function GetCrawlerURLStrForNode(node: MapNode) {
+export function GetCrawlerURLStrForNode(node: MapNode) {
 	let result = GetNodeDisplayText(node).toLowerCase().replace(/[^a-z]/g, "-");
 	// need to loop, in some cases, since regex doesn't reprocess "---" as two sets of "--".
 	while (result.Contains("--")) {
 		result = result.replace(/--/g, "-");
 	}
 	result = result.TrimStart("-").TrimEnd("-") + "." + node._id.toString();
+	return result;
+}
+export function GetCurrentURL_SimplifiedForPageViewTracking() {
+	//let result = URL.Current();
+	let result = GetNewURL();
+
+	let mapID = GetOpenMapID();
+	let onMapPage = result.Normalized().toString({domain: false}).startsWith("/global/map");
+	if (mapID && onMapPage) {
+		let nodeID = GetFocusedNodeID(mapID);
+		let node = nodeID ? GetNode(nodeID) : null;
+		//if (result.pathNodes.length == 1) {
+		/*if (result.Normalized().toString({domain: false}).startsWith("/global/map") && result.pathNodes.length == 1) {
+			result.pathNodes.push("map");
+		}*/
+		if (node) {
+			result = result.Normalized();
+			result.pathNodes.push(GetCrawlerURLStrForNode(node));
+		}
+	}
+	result.queryVars = [];
 	return result;
 }
 
@@ -57,16 +81,23 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 					scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}>
 				<Row>
 					<Pre>Parents: </Pre>{nodeParents.map((parent, index)=> {
-						let toURL = URL.Current(true);
-						if (parent._id == map.rootNode)
+						/*let toURL = URL.Current(true);
+						/*if (parent._id == map.rootNode) {
 							toURL.pathNodes.RemoveAt(1);
-						else
-							toURL.pathNodes[1] = GetCrawlerURLStrForNode(parent);
-						toURL.queryVars = [];
+						} else {*#/
+						toURL.pathNodes[1] = "map";
+						toURL.pathNodes[2] = GetCrawlerURLStrForNode(parent);
+						//}
+						toURL.queryVars = [];*/
 						return (
 							<span key={index}>
 								{index > 0 ? ", " : ""}
-								<Link to={toURL.toString({domain: false})}>
+								<Link
+									//to={toURL.toString({domain: false})}
+									actions={dispatch=> {
+										dispatch(new ACTSet({path: `main/mapViews/${1}/rootNodeID`, value: parent._id}));
+									}}
+								>
 									{GetNodeDisplayText(parent)} ({parent._id})
 								</Link>
 							</span>
@@ -75,13 +106,19 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 				</Row>
 				<Row>
 					<Pre>Children: </Pre>{nodeChildren.map((child, index)=> {
-						let toURL = URL.Current(true);
-						toURL.pathNodes[1] = GetCrawlerURLStrForNode(child);
-						toURL.queryVars = [];
+						/*let toURL = URL.Current(true);
+						toURL.pathNodes[1] = "map";
+						toURL.pathNodes[2] = GetCrawlerURLStrForNode(child);
+						toURL.queryVars = [];*/
 						return (
 							<span key={index}>
 								{index > 0 ? ", " : ""}
-								<Link to={toURL.toString({domain: false})}>
+								<Link
+									//to={toURL.toString({domain: false})}
+									actions={dispatch=> {
+										dispatch(new ACTSet({path: `main/mapViews/${1}/rootNodeID`, value: child._id}));
+									}}
+								>
 									{GetNodeDisplayText(child)} ({child._id})
 								</Link>
 							</span>

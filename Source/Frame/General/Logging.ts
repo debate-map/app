@@ -1,4 +1,5 @@
 //import V from "../V/V";
+import {GetStackTraceStr} from "../V/V";
 /*var Debug = true;
 
 var Log = function(msg, type = 'default') { if(!Debug) return;
@@ -41,8 +42,26 @@ console.error = function(exception) {
 // fix for that console.table doesn't seem to be working (as used by react-addons-perf)
 //console.table = function() { console.log.apply(this, arguments); };
 
+export type LogTypes = {
+	nodeRenders: boolean;
+	pageViews: boolean;
+	urlLoads: boolean;
+	cacheUpdates: boolean;
+}
+
+g.Extend({ShouldLog}); declare global { function ShouldLog(logTypeGetter: (logTypes: LogTypes)=>boolean); }
+function ShouldLog(logTypeGetter: (logTypes: LogTypes)=>boolean) {
+	return logTypeGetter(g.logTypes || {});
+}
+g.Extend({MaybeLog}); declare global { function MaybeLog(logTypeGetter: (logTypes: LogTypes)=>boolean, logMessageGetter: ()=>string); }
+function MaybeLog(logTypeGetter: (logTypes: LogTypes)=>boolean, logMessageGetter: ()=>string) {
+	if (!ShouldLog(logTypeGetter)) return;
+	Log(logMessageGetter());
+}
+
 export var onLogFuncs = [];
-declare global { function Log(...args); } g.Extend({Log});
+//declare global { function Log(...args); } g.Extend({Log});
+g.Extend({Log}); declare global { function Log(message, appendStackTrace?: boolean, logLater?: boolean); }
 export function Log(message, appendStackTrace = false, logLater = false) {
 	// #mms: add-stack-trace-and-current-call-info-to-logs setting exists
 
@@ -51,8 +70,7 @@ export function Log(message, appendStackTrace = false, logLater = false) {
 		/*if (inUnity)
 			finalMessage += "\n\nStackTrace) " + new Error().Stack;
 		else*/
-		//finalMessage += "\n@" + V.GetStackTraceStr();
-		finalMessage += "\n@" + require("../V/V").GetStackTraceStr();
+		finalMessage += "\n@" + GetStackTraceStr();
 	}
 
 	console.log(finalMessage);

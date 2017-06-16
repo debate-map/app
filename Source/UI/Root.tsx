@@ -1,7 +1,7 @@
 import {VMenuLayer} from "react-vmenu";
 // We only need to import the modules necessary for initial render
 import {PropTypes, Component} from "react";
-import {BaseComponent, AddGlobalStyle} from "../Frame/UI/ReactGlobals";
+import {BaseComponent, AddGlobalStyle, ShallowChanged} from "../Frame/UI/ReactGlobals";
 import "../Frame/UI/JQueryExtensions";
 //import {Component as BaseComponent} from "react";
 import ScrollView from "react-vscrollview";
@@ -34,6 +34,7 @@ import { Connect } from "../Frame/Database/FirebaseConnect";
 import Switch from "Frame/ReactComponents/Switch";
 import {RouterProvider} from 'redux-little-router';
 import Route from "../Frame/ReactComponents/Route";
+import AddressBarWrapper from "UI/@Shared/AddressBarWrapper";
 
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	ComponentWillMount() {
@@ -77,6 +78,10 @@ type Props = {} & Partial<{currentPage: string}>;
 	currentPage: State(a=>a.main.page),
 }))
 class RootUI extends BaseComponent<Props, {}> {
+	shouldComponentUpdate(newProps, newState) {
+		// ignore change of "router" prop -- we don't use it
+		return ShallowChanged(newProps.Excluding("router"), this.props.Excluding("router")) || ShallowChanged(newState, this.state);
+	}
 	render() {
 		let {currentPage} = this.props;
 		return (
@@ -87,6 +92,7 @@ class RootUI extends BaseComponent<Props, {}> {
 				{/*<div className="background" style={{
 					position: "absolute", left: 0, right: 0, top: 0, bottom: 0, opacity: .5,
 				}}/>*/}
+				<AddressBarWrapper/>
 				<OverlayUI/>
 				<NavBar/>
 				<main style={{position: "relative", flex: "1 1 100%", overflow: "hidden"}}>

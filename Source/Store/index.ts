@@ -24,6 +24,13 @@ export function InjectReducer(store, {key, reducer}) {
 	store.replaceReducer(MakeRootReducer(store.asyncReducers));
 }
 
+export class ACTSet extends Action<{path: string, value}> {
+	constructor(payload) {
+		super(payload);
+		this.type = "ACTSet_" + payload.path; // add path to action-type, for easier debugging in dev-tools
+	}
+}
+
 // class is used only for initialization
 export class RootState {
 	main: MainState;
@@ -36,7 +43,7 @@ export class RootState {
 	vMenu: VMenuState;
 }
 export function MakeRootReducer(extraReducers?) {
-	return combineReducers({
+	const innerReducer = combineReducers({
 		main: MainReducer,
 		firebase: firebaseStateReducer,
 		//form: formReducer,
@@ -46,6 +53,15 @@ export function MakeRootReducer(extraReducers?) {
 		vMenu: VMenuReducer,
 		...extraReducers
 	});
+
+	return (state, action)=> {
+		let result = innerReducer(state, action);
+		//if (action.Is(ACTSet)) {
+		if (action.type.startsWith("ACTSet_")) {
+			result = u.updateIn(action.payload.path.replace(/\//g, "."), u.constant(action.payload.value), result);
+		}
+		return result;
+	};
 }
 
 /*function RouterReducer(state = {location: null}, action) {
