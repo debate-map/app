@@ -24,7 +24,7 @@ type Props = {node: MapNodeEnhanced, path: string};
 }))
 export default class OthersPanel extends BaseComponent<Props, {convertToType: ThesisType}> {
 	render() {
-		let {node} = this.props;
+		let {node, path} = this.props;
 		let {convertToType} = this.state;
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
 
@@ -32,9 +32,10 @@ export default class OthersPanel extends BaseComponent<Props, {convertToType: Th
 		convertToType = convertToType || convertToTypes.map(a=>a.value).FirstOrX();
 
 		return (
-			<Column style={{position: "relative"}}>
+			<Column sel style={{position: "relative"}}>
 				<Row>Parents: {node.parents == null ? "none" : node.parents.VKeys(true).join(", ")}</Row>
 				<Row>Children: {node.children == null ? "none" : node.children.VKeys(true).join(", ")}</Row>
+				<Row>Path: {path}</Row>
 				{IsArgumentNode(node) && creatorOrMod &&
 					<Row>
 						<Button mt={3} text="Reverse argument polarity" onLeftClick={()=> {

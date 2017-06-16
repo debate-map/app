@@ -35,7 +35,7 @@ type Props = {
 	baseData: MapNodeEnhanced, baseLinkData: ChildEntry, parent: MapNodeEnhanced, forNew: boolean, enabled?: boolean,
 	style?, onChange?: (newData: MapNode, newLinkData: ChildEntry)=>void,
 	//onSetError: (error: string)=>void,
-} & Partial<{creator: User, metaThesis: MapNode}>;
+} & Partial<{creator: User, metaThesisNode: MapNode}>;
 type State = {newData: MapNode, newLinkData: ChildEntry};
 @Connect((state, {baseData, forNew}: Props)=>({
 	_: GetUserAccessLevel(GetUserID()),

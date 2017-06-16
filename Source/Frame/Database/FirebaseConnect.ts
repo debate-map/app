@@ -85,6 +85,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 				unWatchEvents(firebase, store.dispatch, getEventsFromInput(removedPaths));
 				let addedPaths = requestedPaths.Except(...oldRequestedPaths);
 				watchEvents(firebase, store.dispatch, getEventsFromInput(addedPaths));
+				// for debugging, you can check currently-watched-paths using: store.firebase._.watchers
 			});
 			s.lastRequestedPaths = requestedPaths;
 			//Log("Requesting:" + ToJSON(requestedPaths) + "\n2:" + ToJSON(s._firebaseEvents)); 
