@@ -43,6 +43,9 @@ import {GetContentWidth, GetContentHeight} from "../../../../Frame/V/V";
 import {GetUserAccessLevel} from "../../../../Store/firebase/users";
 import {GetUserID} from "Store/firebase/users";
 import {IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
+import {ViewedNodeSet} from "../../../../Store/firebase/userViewedNodes/@ViewedNodeSet";
+import {GetUserViewedNodes} from "../../../../Store/firebase/userViewedNodes";
+import NotifyNodeViewed from "../../../../Server/Commands/NotifyNodeViewed";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -62,10 +65,12 @@ import {IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
 let childrenPlaceholder = [];
 
 type Props = {map: Map, node: MapNodeEnhanced, path?: string, widthOverride?: number, onHeightOrPosChange?: ()=>void}
-	& Partial<{initialChildLimit: number, form: ThesisForm, nodeView: MapNodeView,
+	& Partial<{
+		initialChildLimit: number, form: ThesisForm, nodeView: MapNodeView,
 		nodeChildren: MapNodeEnhanced[],
 		//nodeChildren_fillPercents: number[],
 		nodeChildren_sortValues: number[],
+		userViewedNodes: ViewedNodeSet,
 	}>;
 type State = {
 	hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number,
@@ -76,7 +81,7 @@ type State = {
 	},
 	//childrenStartY: number, childrenEndY: number, // positions at which to place limit-bars
 };
-@Connect((state: RootState, {node, path, map}: Props & BaseProps)=> {
+@Connect((state: RootState, {node, path, map}: Props)=> {
 	//Log("Calling NodeUI connect func.");
 	let nodeView = GetNodeView(map._id, path) || new MapNodeView();
 
@@ -122,6 +127,7 @@ type State = {
 		nodeChildren,
 		nodeChildren_sortValues: CachedTransform("nodeChildren_sortValues_transform1", [node._id], nodeChildren_sortValues, ()=>nodeChildren_sortValues),
 		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", [node._id], nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
+		userViewedNodes: GetUserViewedNodes(GetUserID()),
 	};
 })
 export default class NodeUI extends BaseComponent<Props, State> {
@@ -145,18 +151,13 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		}
 	}
 
-	/*shouldComponentUpdate(nextProps, nextState) {
-		debugger;
-		return true;
-	}*/
-
 	render() {
 		let {map, node, path, initialChildLimit, form, widthOverride, children, nodeView, nodeChildren, nodeChildren_sortValues} = this.props;
 		let expanded = nodeView && nodeView.expanded;
 		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo, /*childrenStartY, childrenEndY*/} = this.state;
 		if (ShouldLog(a=>a.nodeRenders)) {
-			if (g.logNodeRenders_for) {
-				if (g.logNodeRenders_for == node._id) {
+			if (logTypes.nodeRenders_for) {
+				if (logTypes.nodeRenders_for == node._id) {
 					Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._id}${nl
 						}PropsChanged:${this.GetPropsChanged_Data()}${nl
 						}StateChanged:${this.GetStateChanged_Data()}`);
@@ -357,6 +358,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	lastPos = 0;
 	PostRender() {
 		//if (this.lastRender_source == RenderSource.SetState) return;
+		let {node, userViewedNodes} = this.props;
 
 		let height = FindDOM_(this).outerHeight();
 		let pos = this.state.childrenCenterY|0;
@@ -370,6 +372,11 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		}
 		this.lastHeight = height;
 		this.lastPos = pos;
+
+		let userViewedNodes_doneLoading = userViewedNodes !== undefined;
+		if (userViewedNodes_doneLoading && !(userViewedNodes || {}).VKeys(true).map(ToInt).Contains(node._id)) {
+			new NotifyNodeViewed({nodeID: node._id}).Run();
+		}
 	}
 	OnChildHeightOrPosChange_updateStateQueued = false;
 	OnChildHeightOrPosChange() {

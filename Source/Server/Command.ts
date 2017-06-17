@@ -1,11 +1,19 @@
 import * as u from "updeep";
+import {GetUserID} from "Store/firebase/users";
+
+export class CommandUserInfo {
+	id: string;
+}
+
 export abstract class Command<Payload> {
 	constructor(payload: Payload) {
+		this.userInfo = {id: GetUserID()}; // temp
 		this.type = this.constructor.name;
 		this.payload = payload;
 		//this.Extend(payload);
 		//Object.setPrototypeOf(this, Object.getPrototypeOf({}));
 	}
+	userInfo: CommandUserInfo;
 	type: string;
 	payload: Payload;
 	returnData;
@@ -24,6 +32,8 @@ export abstract class Command<Payload> {
 
 	/** [async] Validates the data, prepares it, and executes it -- thus applying it into the database. */
 	async Run() {
+		MaybeLog(a=>a.commands, ()=>`Running command. @type:${this.constructor.name} @payload(${ToJSON(this.payload)})`);
+
 		this.Validate_Early();
 		await this.Prepare();
 		await this.Validate();

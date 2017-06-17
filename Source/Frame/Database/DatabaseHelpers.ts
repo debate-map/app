@@ -124,7 +124,11 @@ class DBPathInfo {
 	cachedData;
 }
 let pathInfos = {} as {[path: string]: DBPathInfo};
-g.Extend({GetData});
+G({GetData});
+/** Begins request to get data at the given path in the Firebase database.
+ * 
+ * Returns undefined when the current-data for the path is null/non-existent, but a request is in-progress.
+ * Returns null when we've completed the request, and there is no data at that path. */
 export function GetData(path: string, inVersionRoot = true, makeRequest = true) {
 	//let firebase = State(a=>a.firebase);
 	path = DBPath(path, inVersionRoot);
@@ -132,28 +136,18 @@ export function GetData(path: string, inVersionRoot = true, makeRequest = true) 
 	Assert(!path.endsWith("/"), "Path cannot end with a slash. (This may mean a path parameter is missing)");
 	Assert(!path.Contains("//"), "Path cannot contain a double-slash. (This may mean a path parameter is missing)");
 
-	/*let info = pathInfos[path] || (pathInfos[path] = new DBPathInfo());
-	/*let timestampEntry = (firebase as any)._root.entries.FirstOrX(a=>a[0] == "timestamp");
-	if (timestampEntry) {
-		var timestamp = (firebase as any)._root ? timestampEntry[1].get(path) : null;*#/
-	let timestamps = firebase.timestamp;
-	if (timestamps) {
-		//var timestamp = firebase._root ? timestamps.get(path) : null;
-		//var timestamp = timestamps.has(path) ? timestamps.get(path) : null;
-		var timestamp = timestamps[path];
-		if (timestamp && timestamp != info.lastTimestamp) {
-			info.lastTimestamp = timestamp;
-			//info.cachedData = helpers.dataToJS(firebase, path);
-			info.cachedData = DeepGet(firebase, "data/" + path);
-		}
-	}*/
-
-	if (makeRequest)
+	if (makeRequest) {
 		RequestPath(path);
+	}
 
-	//return info.cachedData;
-	//return DeepGet(firebase, "data/" + path) as any;
-	return State(`firebase/data/${path}`) as any;
+	let requestCompleted = State(`firebase/requested`, null, false)[path];
+
+	let result = State(`firebase/data/${path}`) as any;
+	if (result == null) {
+		if (!requestCompleted) return undefined; // undefined means, current-data for path is null/non-existent, but we haven't completed the current request yet
+		else return null; // null means, we've completed the request, and there is no data at that path
+	}
+	return result;
 }
 
 g.Extend({GetDataAsync});

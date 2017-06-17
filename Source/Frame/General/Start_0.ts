@@ -60,6 +60,7 @@ if (isBot) {
 
 declare global { function G(...globalHolders); } g.G = G;
 function G(...globalHolders) {
-	for (let globalHolder of globalHolders)
+	for (let globalHolder of globalHolders) {
 		g.Extend(globalHolder);
+	}
 }

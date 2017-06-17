@@ -1,5 +1,6 @@
 //import V from "../V/V";
 import {GetStackTraceStr} from "../V/V";
+import {Global} from "./Globals_Free";
 /*var Debug = true;
 
 var Log = function(msg, type = 'default') { if(!Debug) return;
@@ -42,12 +43,18 @@ console.error = function(exception) {
 // fix for that console.table doesn't seem to be working (as used by react-addons-perf)
 //console.table = function() { console.log.apply(this, arguments); };
 
-export type LogTypes = {
-	nodeRenders: boolean;
-	pageViews: boolean;
-	urlLoads: boolean;
-	cacheUpdates: boolean;
+@Global
+export class LogTypes {
+	nodeRenders = false;
+	nodeRenders_for = null as number;
+	pageViews = false;
+	urlLoads = false;
+	cacheUpdates = false;
+	commands = false;
 }
+
+declare global { var logTypes: LogTypes; }
+g.logTypes = new LogTypes();
 
 g.Extend({ShouldLog}); declare global { function ShouldLog(logTypeGetter: (logTypes: LogTypes)=>boolean); }
 function ShouldLog(logTypeGetter: (logTypes: LogTypes)=>boolean) {

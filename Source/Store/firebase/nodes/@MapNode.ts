@@ -59,12 +59,6 @@ export class MapNode {
 	equation: Equation;
 	contentNode: ContentNode;
 	image: ImageAttachment;
-
-	// averages from server
-	/*agrees = 0;
-	degree = 0;
-	disagrees = 0;
-	weight = 0;*/
 	
 	parents: ParentSet;
 	children: ChildSet;
