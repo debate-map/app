@@ -40,7 +40,7 @@ export function GetCrawlerURLStrForNode(node: MapNode) {
 }
 export function GetCurrentURL_SimplifiedForPageViewTracking() {
 	//let result = URL.Current();
-	let result = GetNewURL();
+	let result = GetNewURL(false);
 
 	let mapID = GetOpenMapID();
 	let onMapPage = result.Normalized().toString({domain: false}).startsWith("/global/map");
@@ -56,7 +56,6 @@ export function GetCurrentURL_SimplifiedForPageViewTracking() {
 			result.pathNodes.push(GetCrawlerURLStrForNode(node));
 		}
 	}
-	result.queryVars = [];
 	return result;
 }
 

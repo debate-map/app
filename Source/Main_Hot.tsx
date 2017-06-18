@@ -38,37 +38,75 @@ export var State_overrides = {
 
 // State() actually also returns the root-state (if no data-getter is supplied), but we don't reveal that in type-info (as its only to be used in console)
 g.Extend({State});
-declare global {
+/*declare global {
 	function State<T>(pathSegment: ((state: RootState)=>T) | string | number, state?: RootState, countAsAccess?: boolean): T;
 	function State<T>(pathSegments: (((state: RootState)=>T) | string | number)[], state?: RootState, countAsAccess?: boolean): any;
 }
 //function State<T>(pathSegmentOrSegments, state = State_extras.overrideState || store.getState(), countAsAccess = true) {
-function State<T>(pathSegmentOrSegments, state?: RootState, countAsAccess?: boolean) {
+function State<T>(pathOrPathSegments, state?: RootState, countAsAccess?: boolean) {
 	state = state || State_overrides.state || store.getState();
 	countAsAccess = countAsAccess != null ? countAsAccess : (State_overrides.countAsAccess != null ? State_overrides.countAsAccess : true);
+	if (pathOrPathSegments == null) return state;
 
-	if (pathSegmentOrSegments == null) return state;
-	let pathSegments = pathSegmentOrSegments instanceof Array ? pathSegmentOrSegments : [pathSegmentOrSegments];
-	if (pathSegments.length == 0) return state;
+	let propChain: string[];
+	if (typeof pathOrPathSegments == "string") {
+		propChain = pathOrPathSegments.split("/");
+	} else if (typeof pathOrPathSegments == "function") {
+		propChain = ConvertPathGetterFuncToPropChain(pathOrPathSegments);
+	} else {
+		if (pathOrPathSegments.length == 0) return state;
 
-	let path = pathSegments.map(segment=> {
-		if (segment instanceof Function) {
-			let pathStr = (segment as any).toString().match(/return a\.(.+?);/)[1];
-			Assert(!pathStr.includes("["), `State-getter-func can only contain plain paths. (eg: "state.main.mapViews")\n${nl
-				}For variable inclusion, use strings as in "State(\`main.mapViews.\${mapID}\`)", or use multiple segments as in "State([a=>a.main.mapViews, mapID])".`)
-			let result = pathStr.replace(/\./g, "/");
-			return result;
-		}
-		return segment;
-	}).join("/");
+		propChain = pathOrPathSegments.SelectMany(segment=> {
+			if (segment instanceof Function) {
+				return ConvertPathGetterFuncToPropChain(segment);
+			}
+			Assert(typeof segment == "number" || !segment.Contains("/"),
+				`Each string path-segment must be a plain prop-name. (ie. contain no "/" separators) @segment(${segment})`);
+			return [segment];
+		});
+	}
 
-	let selectedData = DeepGet(state, path);
+	let selectedData = DeepGet(state, propChain);
 	if (countAsAccess) {
+		let path = propChain.join("/");
 		//Assert(g.inConnectFunc, "State(), with countAsAccess:true, must be called from within a Connect() func.");
 		OnAccessPath(path);
 	}
 	return selectedData;
 }
+function ConvertPathGetterFuncToPropChain(pathGetterFunc: Function) {
+	let pathStr = pathGetterFunc.toString().match(/return a\.(.+?);/)[1] as string;
+	Assert(!pathStr.includes("["), `State-getter-func cannot contain bracket-based property-access.\n${nl
+		}For variable inclusion, use strings as in "State(\`main.mapViews.\${mapID}\`)", or use multiple segments as in "State([a=>a.main.mapViews, mapID])".`);
+	//let result = pathStr.replace(/\./g, "/");
+	let result = pathStr.split(".");
+	return result;
+}*/
+// for substantially better perf, we now only accept string-or-number arrays
+declare global {
+	function State<T>(pathSegments: (string | number)[], state?: RootState, countAsAccess?: boolean);
+}
+function State<T>(pathSegments: (string | number)[], state?: RootState, countAsAccess?: boolean) {
+	state = state || State_overrides.state || store.getState();
+	countAsAccess = countAsAccess != null ? countAsAccess : (State_overrides.countAsAccess != null ? State_overrides.countAsAccess : true);
+
+	let selectedData = DeepGet(state, pathSegments);
+	if (countAsAccess) {
+		let path = pathSegments.join("/");
+		//Assert(g.inConnectFunc, "State(), with countAsAccess:true, must be called from within a Connect() func.");
+		OnAccessPath(path);
+	}
+	return selectedData;
+}
+function ConvertPathGetterFuncToPropChain(pathGetterFunc: Function) {
+	let pathStr = pathGetterFunc.toString().match(/return a\.(.+?);/)[1] as string;
+	Assert(!pathStr.includes("["), `State-getter-func cannot contain bracket-based property-access.\n${nl
+		}For variable inclusion, use strings as in "State(\`main.mapViews.\${mapID}\`)", or use multiple segments as in "State([a=>a.main.mapViews, mapID])".`);
+	//let result = pathStr.replace(/\./g, "/");
+	let result = pathStr.split(".");
+	return result;
+}
+
 
 //setTimeout(()=> {
 const mountNode = document.getElementById(`root`);

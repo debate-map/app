@@ -270,9 +270,9 @@ export function VisitTreeNodesInPath(treeRoot, pathNodesOrStr: string[] | string
 }*/
 
 //export function DeepGet(obj, path, resultIfNullOrUndefined = null, resultIfUndefined_override = undefined) {
-export function DeepGet<T>(obj, path: string, resultIfNull: T = null, sepChar = "/"): T {
+export function DeepGet<T>(obj, pathOrPathNodes: string | (string | number)[], resultIfNull: T = null, sepChar = "/"): T {
 	//let pathNodes = path.SplitByAny("\\.", "\\/");
-	let pathNodes = path.split(sepChar);
+	let pathNodes = pathOrPathNodes instanceof Array ? pathOrPathNodes : pathOrPathNodes.split(sepChar);
 	let result = obj;
 	for (let pathNode of pathNodes) {
 		if (result == null) break;

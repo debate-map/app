@@ -149,10 +149,9 @@ export function GetData(path: string, options?: GetData_Options) {
 		RequestPath(path);
 	}
 
-	let requestCompleted = State(`firebase/requested`, null, false)[path];
-
-	let result = State(`firebase/data/${path}`) as any;
+	let result = State(["firebase", "data"].concat(path.split("/"))) as any;
 	if (result == null && options.useUndefinedForInProgress) {
+		let requestCompleted = State(["firebase", "requested", "path"], null, false);
 		if (!requestCompleted) return undefined; // undefined means, current-data for path is null/non-existent, but we haven't completed the current request yet
 		else return null; // null means, we've completed the request, and there is no data at that path
 	}

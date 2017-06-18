@@ -226,7 +226,7 @@ export async function LoadURL(urlStr: string) {
 // ==========
 
 g.justChangedURLFromCode = false;
-export function GetNewURL() {
+export function GetNewURL(includeMapViewStr = true) {
 	//let newURL = URL.Current();
 	/*let oldURL = URL.Current(true);
 	let newURL = new URL(oldURL.domain, oldURL.pathNodes);*/
@@ -235,7 +235,7 @@ export function GetNewURL() {
 	let page = State(a=>a.main.page) || "home";
 	newURL.pathNodes.push(page);
 
-	var subpage = (State(`main/${page}/subpage`) as string) || rootPageDefaultChilds[page];
+	var subpage = (State(["main", page, "subpage"]) as string) || rootPageDefaultChilds[page];
 	if (page in pagesWithSimpleSubpages) {
 		newURL.pathNodes.push(subpage);
 	}
@@ -260,7 +260,7 @@ export function GetNewURL() {
 		if (isBot) {
 			let mapID = GetOpenMapID();
 			let map = GetMap(mapID);
-			let rootNodeID = State([a=>a.main.mapViews, mapID, "rootNodeID"]);
+			let rootNodeID = State(["main", "mapViews", mapID, "rootNodeID"]);
 			let rootNode = GetNode(rootNodeID);
 			if (rootNode) {
 				let nodeStr = GetCrawlerURLStrForNode(rootNode);
@@ -269,8 +269,10 @@ export function GetNewURL() {
 				}
 			}
 		} else {
-			let mapID = GetOpenMapID();
-			newURL.queryVars.push(new QueryVar("view", GetMapViewStr(mapID)));
+			if (includeMapViewStr) {
+				let mapID = GetOpenMapID();
+				newURL.queryVars.push(new QueryVar("view", GetMapViewStr(mapID)));
+			}
 		}
 	}
 

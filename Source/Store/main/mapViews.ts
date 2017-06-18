@@ -14,6 +14,7 @@ import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 import {CreateDemoMapView} from "../../UI/Home/Home";
 import {URL} from "../../Frame/General/URLs";
 import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "./debates";
+import {CachedTransform} from "../../Frame/V/VCache";
 
 export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 	/*if (action.Is(ACTOpenMapSet))
@@ -87,11 +88,14 @@ export function GetPathNodes(path: string) {
 export function GetSelectedNodePathNodes(mapViewOrMapID: number | MapView): number[] {
 	let mapView = IsNumber(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
 	if (mapView == null) return [];
-	let selectedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "selected" && a.Value);
-	if (selectedTreeNode == null) return [];
 
-	let selectedNodeView = selectedTreeNode.ancestorNodes.Last();
-	return selectedNodeView.PathNodes.Where(a=>a != "children").map(ToInt);
+	return CachedTransform("GetSelectedNodePathNodes", [mapView.rootNodeID], {rootNodeViews: mapView.rootNodeViews}, ()=> {
+		let selectedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "selected" && a.Value);
+		if (selectedTreeNode == null) return [];
+
+		let selectedNodeView = selectedTreeNode.ancestorNodes.Last();
+		return selectedNodeView.PathNodes.Where(a=>a != "children").map(ToInt);
+	});
 }
 export function GetSelectedNodePath(mapViewOrMapID: number | MapView): string {
 	return GetSelectedNodePathNodes(mapViewOrMapID).join("/");
@@ -103,11 +107,14 @@ export function GetSelectedNodeID(mapID: number): number {
 export function GetFocusedNodePathNodes(mapViewOrMapID: number | MapView): number[] {
 	let mapView = IsNumber(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
 	if (mapView == null) return [];
-	let focusedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "focused" && a.Value);
-	if (focusedTreeNode == null) return [];
+	
+	return CachedTransform("GetFocusedNodePathNodes", [mapView.rootNodeID], {rootNodeViews: mapView.rootNodeViews}, ()=> {
+		let focusedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "focused" && a.Value);
+		if (focusedTreeNode == null) return [];
 
-	let focusedNodeView = focusedTreeNode.ancestorNodes.Last();
-	return focusedNodeView.PathNodes.Where(a=>a != "children").map(ToInt);
+		let focusedNodeView = focusedTreeNode.ancestorNodes.Last();
+		return focusedNodeView.PathNodes.Where(a=>a != "children").map(ToInt);
+	});
 }
 export function GetFocusedNodePath(mapViewOrMapID: number | MapView): string {
 	return GetFocusedNodePathNodes(mapViewOrMapID).join("/");
