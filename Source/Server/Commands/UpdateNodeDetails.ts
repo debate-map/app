@@ -66,9 +66,9 @@ export default class UpdateNodeDetails extends Command<{nodeID: number, nodeUpda
 	newLinkData: ChildEntry;
 	async Prepare() {
 		let {nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
-		this.oldNodeData = await GetDataAsync(`nodes/${nodeID}`, true, false) as MapNode;
+		this.oldNodeData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
 		this.newNodeData = {...this.oldNodeData, ...nodeUpdates};
-		this.oldLinkData = await GetDataAsync(`nodes/${linkParentID}/children/${nodeID}`, true, false) as ChildEntry;
+		this.oldLinkData = await GetDataAsync({addHelpers: false}, "nodes", linkParentID, "children", nodeID) as ChildEntry;
 		this.newLinkData = {...this.oldLinkData, ...linkUpdates};
 	}
 	async Validate() {

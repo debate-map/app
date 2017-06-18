@@ -32,7 +32,7 @@ export default class ChangeThesisType extends Command<{nodeID: number, newType: 
 	async Prepare() {
 		let {nodeID, newType} = this.payload;
 
-		let oldData = await GetDataAsync(`nodes/${nodeID}`, true, false) as MapNode;
+		let oldData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
 		this.oldType = GetThesisType(oldData);
 
 		this.newData = {...oldData};

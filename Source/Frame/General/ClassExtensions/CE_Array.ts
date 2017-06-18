@@ -286,6 +286,23 @@ Array.prototype._AddFunction_Inline = function Median() {
 	return ordered[this.length / 2]; // otherwise, return the exactly-middle one
 };
 
+let oldJoin = [].join;
+Array.prototype._AddFunction_Inline = function join(separator = ",") {
+	if (this.length == 0) return "";
+	
+	//let result = "" + this[0];
+	let result = this[0] != null ? this[0] : ""; // to match behavior of native join
+	for (var i = 1, len = this.length; i < len; i++) {
+		result += separator;
+		result += this[i] != null ? this[i] : "";
+	}
+
+	/*let oldResult = oldJoin.apply(this, arguments);
+	if (oldResult != result) debugger;*/
+
+	return result;
+};
+
 // ArrayIterator
 // ==========
 

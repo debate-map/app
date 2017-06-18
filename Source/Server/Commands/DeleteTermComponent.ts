@@ -15,7 +15,7 @@ export default class DeleteTermComponent extends Command<{termComponentID: numbe
 	oldData: TermComponent;
 	async Prepare() {
 		let {termComponentID} = this.payload;
-		this.oldData = await GetDataAsync(`termComponents/${termComponentID}`, true, false) as TermComponent;
+		this.oldData = await GetDataAsync({addHelpers: false}, "termComponents", termComponentID) as TermComponent;
 	}
 	async Validate() {
 	}

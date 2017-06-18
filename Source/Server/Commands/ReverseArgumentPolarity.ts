@@ -28,12 +28,12 @@ export default class ReverseArgumentPolarity extends Command<{nodeID: number}> {
 	async Prepare() {
 		let {nodeID} = this.payload;
 
-		this.oldNodeData = await GetDataAsync(`nodes/${nodeID}`, true, false) as MapNode;
+		this.oldNodeData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
 		//let newNodeData = u.updateIn("type", ReverseMapNodeType(oldNodeData.type), oldNodeData);
 		this.newNodeData = {...this.oldNodeData, type: ReverseMapNodeType(this.oldNodeData.type)};
 
 		this.metaThesisID = this.oldNodeData.childrenOrder[0];
-		let oldMetaThesisData = await GetDataAsync(`nodes/${this.metaThesisID}`, true, false) as MapNode;
+		let oldMetaThesisData = await GetDataAsync({addHelpers: false}, "nodes", this.metaThesisID) as MapNode;
 		this.newMetaThesisData = u.updateIn("metaThesis.thenType", ReverseThenType(oldMetaThesisData.metaThesis.thenType), oldMetaThesisData);
 
 		/*let oldMetaThesisAdjustmentRatingSet = await GetDataAsync(`nodeRatings/${metaThesisID}/adjustment`, true, false) as RatingsSet;

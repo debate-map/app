@@ -11,7 +11,7 @@ export default class UnlinkNode extends Command<{parentID: number, childID: numb
 	parent_oldChildrenOrder: number[];
 	async Prepare() {
 		let {parentID, childID} = this.payload;
-		this.parent_oldChildrenOrder = await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[];
+		this.parent_oldChildrenOrder = await GetDataAsync("nodes", parentID, "childrenOrder") as number[];
 	}
 	async Validate() {
 		let {parentID, childID} = this.payload;

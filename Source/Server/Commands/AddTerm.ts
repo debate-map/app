@@ -9,7 +9,7 @@ export default class AddTerm extends Command<{term: Term}> {
 	lastTermID_new: number;
 	termID: number;
 	async Prepare() {
-		this.lastTermID_new = await GetDataAsync(`general/lastTermID`) as number;
+		this.lastTermID_new = await GetDataAsync("general", "lastTermID") as number;
 		this.termID = ++this.lastTermID_new;
 	}
 	async Validate() {

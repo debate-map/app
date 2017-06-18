@@ -359,7 +359,6 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	lastPos = 0;
 	PostRender() {
 		//if (this.lastRender_source == RenderSource.SetState) return;
-		let {node, userViewedNodes} = this.props;
 
 		let height = FindDOM_(this).outerHeight();
 		let pos = this.state.childrenCenterY|0;
@@ -373,7 +372,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		}
 		this.lastHeight = height;
 		this.lastPos = pos;
-
+	}
+	ComponentDidMount() {
+		let {node, userViewedNodes} = this.props;
 		let userViewedNodes_doneLoading = userViewedNodes !== undefined;
 		if (userViewedNodes_doneLoading && !(userViewedNodes || {}).VKeys(true).map(ToInt).Contains(node._id)) {
 			new NotifyNodeViewed({nodeID: node._id}).Run();

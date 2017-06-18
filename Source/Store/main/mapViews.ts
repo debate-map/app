@@ -15,6 +15,7 @@ import {CreateDemoMapView} from "../../UI/Home/Home";
 import {URL} from "../../Frame/General/URLs";
 import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "./debates";
 import {CachedTransform} from "../../Frame/V/VCache";
+import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
 export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 	/*if (action.Is(ACTOpenMapSet))
@@ -80,7 +81,7 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 // ==========
 
 export function GetPathNodes(path: string) {
-	let pathSegments = path.split("/");
+	let pathSegments = SplitStringBySlash_Cached(path);
 	Assert(pathSegments.All(a=>IsNumberString(a)), `Path contains non-number segments: ${path}`);
 	return pathSegments.map(ToInt);
 }
@@ -124,14 +125,14 @@ export function GetFocusedNodeID(mapID: number): number {
 }
 
 export function GetMapView(mapID: number): MapView {
-	return State([a=>a.main.mapViews, mapID]);
+	return State("main", "mapViews", mapID);
 }
 export function GetNodeView(mapID: number, path: string): MapNodeView {
 	let pathNodeIDs = GetPathNodes(path);
 	// this has better perf than the simpler approaches
-	let childPath = pathNodeIDs.map(childID=>`${childID}/children`).join("/").slice(0, -"/children".length);
-	let storePath = `main/mapViews/${mapID}/rootNodeViews/${childPath}`;
-	return State(storePath);
+	//let childPath = pathNodeIDs.map(childID=>`${childID}/children`).join("/").slice(0, -"/children".length);
+	let childPathNodes = pathNodeIDs.SelectMany(childID=>[childID, "children"]).slice(0, -1);
+	return State("main", "mapViews", mapID, "rootNodeViews", ...childPathNodes);
 }
 export function GetViewOffset(mapView: MapView): Vector2i {
 	if (mapView == null) return null;

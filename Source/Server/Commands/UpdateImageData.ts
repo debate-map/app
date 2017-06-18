@@ -15,7 +15,7 @@ export default class UpdateImageData extends Command<{id: number, updates: Parti
 	newData: Image;
 	async Prepare() {
 		let {id, updates} = this.payload;
-		this.oldData = await GetDataAsync(`images/${id}`, true, false) as Image;
+		this.oldData = await GetDataAsync({addHelpers: false}, "images", id) as Image;
 		this.newData = {...this.oldData, ...updates};
 	}
 	async Validate() {

@@ -17,7 +17,7 @@ export default class AddTermComponent extends Command<{termID: number, termCompo
 		let {termID, termComponent} = this.payload;
 		let firebase = store.firebase.helpers;
 
-		this.lastTermComponentID_new = await GetDataAsync(`general/lastTermComponentID`) as number;
+		this.lastTermComponentID_new = await GetDataAsync("general", "lastTermComponentID") as number;
 		this.termComponentID = ++this.lastTermComponentID_new;
 
 		termComponent.parentTerms = {[termID]: true};

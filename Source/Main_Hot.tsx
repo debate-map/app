@@ -73,25 +73,38 @@ function State<T>(pathOrPathSegments, state?: RootState, countAsAccess?: boolean
 		OnAccessPath(path);
 	}
 	return selectedData;
-}
-function ConvertPathGetterFuncToPropChain(pathGetterFunc: Function) {
-	let pathStr = pathGetterFunc.toString().match(/return a\.(.+?);/)[1] as string;
-	Assert(!pathStr.includes("["), `State-getter-func cannot contain bracket-based property-access.\n${nl
-		}For variable inclusion, use strings as in "State(\`main.mapViews.\${mapID}\`)", or use multiple segments as in "State([a=>a.main.mapViews, mapID])".`);
-	//let result = pathStr.replace(/\./g, "/");
-	let result = pathStr.split(".");
-	return result;
 }*/
+
+export class State_Options {
+	state?: RootState;
+	countAsAccess?: boolean;
+}
+
 // for substantially better perf, we now only accept string-or-number arrays
 declare global {
-	function State<T>(pathSegments: (string | number)[], state?: RootState, countAsAccess?: boolean);
+	function State<T>(): RootState;
+	function State<T>(pathGetterFunc: (state: RootState)=>T);
+	function State<T>(...pathSegments: (string | number)[]);
+	function State<T>(options: State_Options, ...pathSegments: (string | number)[]);
 }
-function State<T>(pathSegments: (string | number)[], state?: RootState, countAsAccess?: boolean) {
-	state = state || State_overrides.state || store.getState();
-	countAsAccess = countAsAccess != null ? countAsAccess : (State_overrides.countAsAccess != null ? State_overrides.countAsAccess : true);
+function State<T>(...args) {
+	let pathSegments: (string | number)[], options = new State_Options();
+	if (args.length == 0) return State_overrides.state || store.getState();
+	else if (typeof args[0] == "function") pathSegments = ConvertPathGetterFuncToPropChain(args[0]);
+	else if (typeof args[0] == "string") pathSegments = args;
+	else [options, ...pathSegments] = args;
 
-	let selectedData = DeepGet(state, pathSegments);
-	if (countAsAccess) {
+	if (__DEV__) {
+		Assert(pathSegments.All(segment=>typeof segment == "number" || !segment.Contains("/")),
+			`Each string path-segment must be a plain prop-name. (ie. contain no "/" separators) @segments(${pathSegments})`);
+	}
+
+	options.state = options.state || State_overrides.state || store.getState();
+	options.countAsAccess = options.countAsAccess != null ? options.countAsAccess : (State_overrides.countAsAccess != null ? State_overrides.countAsAccess : true);
+
+	let selectedData = DeepGet(options.state, pathSegments);
+	//if (options.countAsAccess && pathSegments.length) {
+	if (options.countAsAccess) {
 		let path = pathSegments.join("/");
 		//Assert(g.inConnectFunc, "State(), with countAsAccess:true, must be called from within a Connect() func.");
 		OnAccessPath(path);
@@ -101,7 +114,7 @@ function State<T>(pathSegments: (string | number)[], state?: RootState, countAsA
 function ConvertPathGetterFuncToPropChain(pathGetterFunc: Function) {
 	let pathStr = pathGetterFunc.toString().match(/return a\.(.+?);/)[1] as string;
 	Assert(!pathStr.includes("["), `State-getter-func cannot contain bracket-based property-access.\n${nl
-		}For variable inclusion, use strings as in "State(\`main.mapViews.\${mapID}\`)", or use multiple segments as in "State([a=>a.main.mapViews, mapID])".`);
+		}For variable inclusion, use multiple segments as in "State("main", "mapViews", mapID)".`);
 	//let result = pathStr.replace(/\./g, "/");
 	let result = pathStr.split(".");
 	return result;

@@ -61,7 +61,8 @@ export function WrapWithDebugger(func, ...args) {
 G({Debugger, Debugger_Wrap, Debugger_True, Debugger_If, WrapWithDebugger});
 
 //var quickIncrementValues = {};
-export function QuickIncrement(name = new Error().stack.split("\n")[2]) {
+//export function QuickIncrement(name = new Error().stack.split("\n")[2]) { // this doesn't always work, fsr
+export function QuickIncrement(name = "default") {
 	QuickIncrement["values"][name] = (QuickIncrement["values"][name]|0) + 1;
 	return QuickIncrement["values"][name];
 }

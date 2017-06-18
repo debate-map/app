@@ -27,7 +27,7 @@ export function GetUserID(): string {
 
 export type UserMap = {[key: string]: User};
 export function GetUserMap(): UserMap {
-	return GetData(`users`);
+	return GetData("users");
 }
 export function GetUser(userID: string): User {
 	return (GetUserMap() || {})[userID];
@@ -39,15 +39,15 @@ export function GetUsers(): User[] {
 
 export type UserExtraInfoMap = {[key: string]: UserExtraInfo};
 export function GetUserExtraInfoMap(): UserExtraInfoMap {
-	return GetData(`userExtras`);
+	return GetData("userExtras");
 }
 export function GetUserJoinDate(userID: string): number {
 	if (userID == null) return null;
-	return GetData(`userExtras/${userID}/joinDate`);
+	return GetData("userExtras", userID, "joinDate");
 }
 export function GetUserPermissionGroups(userID: string): PermissionGroupSet {
 	if (userID == null) return null;
-	return GetData(`userExtras/${userID}/permissionGroups`);
+	return GetData("userExtras", userID, "permissionGroups");
 }
 export function GetUserAccessLevel(userID: string) {
 	let groups = GetUserPermissionGroups(userID);

@@ -9,7 +9,7 @@ export default class DeleteTerm extends Command<{termID: number}> {
 	oldData: Term;
 	async Prepare() {
 		let {termID} = this.payload;
-		this.oldData = await GetDataAsync(`terms/${termID}`, true, false) as Term;
+		this.oldData = await GetDataAsync({addHelpers: false}, "terms", termID) as Term;
 	}
 	async Validate() {
 	}

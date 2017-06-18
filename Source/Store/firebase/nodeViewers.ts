@@ -5,7 +5,7 @@ import {CachedTransform} from "../../Frame/V/VCache";
 
 export function GetNodeViewerSet(nodeID: number) {
 	if (nodeID == null) return null;
-	return GetData(`nodeViewers/${nodeID}`) as ViewerSet;
+	return GetData("nodeViewers", nodeID) as ViewerSet;
 }
 export function GetNodeViewers(nodeID: number) {
 	let viewerSet = GetNodeViewerSet(nodeID);

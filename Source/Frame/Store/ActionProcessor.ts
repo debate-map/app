@@ -19,6 +19,7 @@ import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "../../Store/main/
 import {ACTTermSelect, ACTImageSelect} from "../../Store/main/content";
 import {LOCATION_CHANGED} from "redux-little-router";
 import {GetCurrentURL_SimplifiedForPageViewTracking} from "../../UI/@Shared/Maps/MapNode/NodeUI_ForBots";
+import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -34,7 +35,7 @@ let lastPath = "";
 export function PreDispatchAction(action: Action<any>) {
 	if (action.type == "@@reactReduxFirebase/SET") {
 		if (action["data"]) {
-			action["data"] = ProcessDBData(action["data"], true, true, (action["path"] as string).split("/").Last());
+			action["data"] = ProcessDBData(action["data"], true, true, SplitStringBySlash_Cached(action["path"]).Last());
 
 			// add special _key or _id prop
 			/*if (typeof action["data"] == "object") {
@@ -127,7 +128,7 @@ export async function PostDispatchAction(action: Action<any>) {
 	if (action.type == "PostRehydrate") {
 		LoadURL(startURL.toString());
 		//UpdateURL(false);
-		if (prodEnv && State(a=>a.main.analyticsEnabled)) {
+		if (prodEnv && State("main", "analyticsEnabled")) {
 			Log("Initialized Google Analytics.");
 			//ReactGA.initialize("UA-21256330-33", {debug: true});
 			ReactGA.initialize("UA-21256330-33");
@@ -163,7 +164,7 @@ export async function PostDispatchAction(action: Action<any>) {
 		}
 	}
 	if (action.Is(ACTDebateMapSelect)) {
-		let rootNodeID = await GetDataAsync(`maps/${action.payload.id}/rootNode`) as number;
+		let rootNodeID = await GetDataAsync("maps", action.payload.id, "rootNode") as number;
 		store.dispatch(new ACTDebateMapSelect_WithData({id: action.payload.id, rootNodeID}))
 	}
 
@@ -193,7 +194,7 @@ export async function PostDispatchAction(action: Action<any>) {
 
 	if (action.type == "@@reactReduxFirebase/LOGIN") {
 		let userID = action["auth"].uid;
-		let joinDate = await GetDataAsync(`userExtras/${userID}/joinDate`);
+		let joinDate = await GetDataAsync("userExtras", userID, "joinDate");
 		if (joinDate == null) {
 			let firebase = store.firebase.helpers;
 			firebase.Ref(`userExtras/${userID}`).update({
@@ -221,7 +222,7 @@ function PostInit() {
 	let lastAuth;
 	//Log("Subscribed");
 	store.subscribe(()=> {
-		let auth = State(a=>a.firebase.auth, null, false);
+		let auth = State().firebase.auth;
 		if (auth && auth != lastAuth) {
 			//Log("Setting user-context: " + auth);
 			//Raven.setUserContext(auth);

@@ -36,6 +36,7 @@ import { SlicePath } from "./NodeUI/RatingsPanel";
 import LinkNode from "Server/Commands/LinkNode";
 import UnlinkNode from "Server/Commands/UnlinkNode";
 import CloneNode from "Server/Commands/CloneNode";
+import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
 type Props = {map: Map, node: MapNodeEnhanced, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode}>;
 @Connect((_: RootState, {node, path}: Props)=> ({
@@ -43,7 +44,7 @@ type Props = {map: Map, node: MapNodeEnhanced, path: string} & Partial<{permissi
 	//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
 	permissions: GetUserPermissionGroups(GetUserID()),
 	parentNode: GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1)),
-	copiedNode: State(a=>a.main.copiedNodePath) ? GetNode(State(a=>a.main.copiedNodePath).split("/").Last().ToInt()) : null,
+	copiedNode: State(a=>a.main.copiedNodePath) ? GetNode(SplitStringBySlash_Cached(State(a=>a.main.copiedNodePath)).Last().ToInt()) : null,
 }))
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {

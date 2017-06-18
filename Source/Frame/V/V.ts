@@ -286,9 +286,9 @@ export function DeepGet<T>(obj, pathOrPathNodes: string | (string | number)[], r
 		return resultIfNull;
 	return result;
 }
-export function DeepSet(obj, path, newValue, sepChar = "/") {
+export function DeepSet(obj, pathOrPathNodes: string | (string | number)[], newValue, sepChar = "/") {
 	//let pathNodes = path.SplitByAny("\\.", "\\/");
-	let pathNodes = path.split(sepChar);
+	let pathNodes = pathOrPathNodes instanceof Array ? pathOrPathNodes : pathOrPathNodes.split(sepChar);
 	let deepObj = obj;
 	// tunnel down to the object holding the path-specified prop
 	for (let pathNode of pathNodes.slice(0, -1)) {

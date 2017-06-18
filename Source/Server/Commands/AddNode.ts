@@ -29,7 +29,7 @@ export default class AddNode extends Command<{node: MapNode, link?: ChildEntry, 
 		let {node, link, metaThesisNode, asMapRoot} = this.payload;
 		let firebase = store.firebase.helpers;
 
-		this.lastNodeID_new = await GetDataAsync(`general/lastNodeID`) as number;
+		this.lastNodeID_new = await GetDataAsync("general", "lastNodeID") as number;
 		this.nodeID = ++this.lastNodeID_new;
 		this.metaThesisID = metaThesisNode ? ++this.lastNodeID_new : null;
 
@@ -41,7 +41,7 @@ export default class AddNode extends Command<{node: MapNode, link?: ChildEntry, 
 
 		if (!asMapRoot) {
 			this.parentID = node.parents.VKeys(true)[0].ToInt();
-			this.parent_oldChildrenOrder = await GetDataAsync(`nodes/${this.parentID}/childrenOrder`) as number[];
+			this.parent_oldChildrenOrder = await GetDataAsync("nodes", this.parentID, "childrenOrder") as number[];
 		}
 
 		this.returnData = this.nodeID;

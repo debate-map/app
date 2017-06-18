@@ -10,7 +10,7 @@ export default class DeleteImage extends Command<{id: number}> {
 	oldData: Image;
 	async Prepare() {
 		let {id} = this.payload;
-		this.oldData = await GetDataAsync(`images/${id}`, true, false) as Image;
+		this.oldData = await GetDataAsync({addHelpers: false}, "images", id) as Image;
 	}
 	async Validate() {
 	}

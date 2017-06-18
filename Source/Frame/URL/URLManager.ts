@@ -235,7 +235,7 @@ export function GetNewURL(includeMapViewStr = true) {
 	let page = State(a=>a.main.page) || "home";
 	newURL.pathNodes.push(page);
 
-	var subpage = (State(["main", page, "subpage"]) as string) || rootPageDefaultChilds[page];
+	var subpage = (State("main", page, "subpage") as string) || rootPageDefaultChilds[page];
 	if (page in pagesWithSimpleSubpages) {
 		newURL.pathNodes.push(subpage);
 	}
@@ -260,7 +260,7 @@ export function GetNewURL(includeMapViewStr = true) {
 		if (isBot) {
 			let mapID = GetOpenMapID();
 			let map = GetMap(mapID);
-			let rootNodeID = State(["main", "mapViews", mapID, "rootNodeID"]);
+			let rootNodeID = State("main", "mapViews", mapID, "rootNodeID");
 			let rootNode = GetNode(rootNodeID);
 			if (rootNode) {
 				let nodeStr = GetCrawlerURLStrForNode(rootNode);

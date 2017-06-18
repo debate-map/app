@@ -17,18 +17,18 @@ export default class DeleteNode extends Command<{nodeID: number}> {
 	viewerIDs_metaThesis: number[];
 	async Prepare() {
 		let {nodeID} = this.payload;
-		this.oldData = await GetDataAsync(`nodes/${nodeID}`, true, false) as MapNode;
+		this.oldData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
 
 		this.oldParentChildrenOrders = await Promise.all((this.oldData.parents || {}).VKeys().map(parentID=> {
-			return GetDataAsync(`nodes/${parentID}/childrenOrder`) as Promise<number[]>;
+			return GetDataAsync("nodes", parentID, "childrenOrder") as Promise<number[]>;
 		}));
 
 		// this works, because we only let you delete a node when it has no non-meta-thesis children
 		this.metaThesisID = IsArgumentNode(this.oldData) ? this.oldData.children.VKeys()[0].ToInt() : null;
 
-		this.viewerIDs_main = GetDataAsync(`nodeViewers/${nodeID}`).VKeys(true).map(ToInt);
+		this.viewerIDs_main = GetDataAsync("nodeViewers", nodeID).VKeys(true).map(ToInt);
 		if (this.metaThesisID) {
-			this.viewerIDs_metaThesis = GetDataAsync(`nodeViewers/${this.metaThesisID}`).VKeys(true).map(ToInt);
+			this.viewerIDs_metaThesis = GetDataAsync("nodeViewers", this.metaThesisID).VKeys(true).map(ToInt);
 		}
 	}
 	async Validate() {

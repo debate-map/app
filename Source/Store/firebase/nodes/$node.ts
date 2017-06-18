@@ -16,6 +16,7 @@ import {SlicePath} from "../../../UI/@Shared/Maps/MapNode/NodeUI/RatingsPanel";
 import {ImageType} from '../images/@Image';
 import * as katex from "katex";
 import {PreProcessLatex} from "../../../UI/@Shared/Maps/MapNode/NodeMathUI";
+import {SplitStringBySlash_Cached} from "../../../Frame/Database/StringSplitCache";
 
 export function GetFontSizeForNode(node: MapNode) {
 	if (node.fontSizeOverride) return node.fontSizeOverride;
@@ -87,7 +88,7 @@ export function GetFinalNodeTypeAtPath(node: MapNode, path: string): MapNodeType
 	if (node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument) {
 		let parent = GetParentNode(path);
 		if (parent != null) { // can be null, if for NodeUI_ForBots
-			let parentForm = GetNodeForm(parent, path.split("/").slice(0, -1).join("/"));
+			let parentForm = GetNodeForm(parent, SplitStringBySlash_Cached(path).slice(0, -1).join("/"));
 			if (parentForm == ThesisForm.Negation) {
 				result = ReverseMapNodeType(node.type);
 			}

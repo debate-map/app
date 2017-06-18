@@ -11,7 +11,7 @@ export default class NotifyNodeViewed extends Command<{nodeID: number}> {
 	async Prepare() {}
 	async Validate() {
 		let {nodeID} = this.payload;
-		let nodeData = await GetDataAsync(`nodes/${nodeID}`) as MapNode;
+		let nodeData = await GetDataAsync("nodes", nodeID) as MapNode;
 		Assert(nodeData, "Node must exist for you to view it!");
 	}
 	

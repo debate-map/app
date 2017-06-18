@@ -7,6 +7,7 @@ import {E} from "../../Frame/General/Globals_Free";
 import {GetNodeForm, IsArgumentNode, IsArgumentType} from "../../Store/firebase/nodes/$node";
 import AddNode from "./AddNode";
 import LinkNode from "./LinkNode";
+import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
 export default class CloneNode extends Command<{baseNodePath: string, newParentID: number}> {
 	sub_addNode: AddNode;
@@ -17,7 +18,7 @@ export default class CloneNode extends Command<{baseNodePath: string, newParentI
 		// prepare add-node
 		// ==========
 
-		let baseNodeID = baseNodePath.split("/").map(a=>a.ToInt()).Last();
+		let baseNodeID = SplitStringBySlash_Cached(baseNodePath).map(a=>a.ToInt()).Last();
 		let baseNode = await GetAsync(()=>GetNode(baseNodeID)) as MapNode;
 		let isArgument = IsArgumentNode(baseNode);
 		

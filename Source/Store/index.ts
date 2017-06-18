@@ -54,8 +54,8 @@ export function MakeRootReducer(extraReducers?) {
 		...extraReducers
 	});
 
-	return (state, action)=> {
-		let result = innerReducer(state, action);
+	return (state: RootState, action)=> {
+		let result = innerReducer(state, action) as RootState;
 		//if (action.Is(ACTSet)) {
 		if (action.type.startsWith("ACTSet_")) {
 			result = u.updateIn(action.payload.path.replace(/\//g, "."), u.constant(action.payload.value), result);

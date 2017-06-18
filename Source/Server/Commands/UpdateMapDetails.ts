@@ -27,7 +27,7 @@ export default class UpdateMapDetails extends Command<{mapID: number, mapUpdates
 	newMapData: Map;
 	async Prepare() {
 		let {mapID, mapUpdates} = this.payload;
-		this.oldMapData = await GetDataAsync(`maps/${mapID}`, true, false) as Map;
+		this.oldMapData = await GetDataAsync({addHelpers: false}, "maps", mapID) as Map;
 		this.newMapData = {...this.oldMapData, ...mapUpdates};
 	}
 	async Validate() {

@@ -5,7 +5,8 @@ import {ShallowChanged} from "../UI/ReactGlobals";
 import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/query";
 import {getEventsFromInput} from "react-redux-firebase/dist/utils";
 import {ToJSON} from "../General/Globals";
-import {TryCall, Timer} from "../General/Timers";
+import { TryCall, Timer } from "../General/Timers";
+import { SplitStringBySlash_Cached } from "Frame/Database/StringSplitCache";
 
 // Place a selector in Connect() whenever it uses data that:
 // 1) might change during the component's lifetime, and:
@@ -55,7 +56,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 			storeDataChanged = true;
 		} else {
 			for (let path in s.lastAccessedStorePaths_withData) {
-				if (State(path, null, false) !== s.lastAccessedStorePaths_withData[path]) {
+				if (State({countAsAccess: false}, ...SplitStringBySlash_Cached(path)) !== s.lastAccessedStorePaths_withData[path]) {
 					//store.dispatch({type: "Data changed!" + path});
 					storeDataChanged = true;
 					break;
@@ -117,7 +118,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		//ClearAccessedPaths();
 		s.lastAccessedStorePaths_withData = {};
 		for (let path of accessedStorePaths) {
-			s.lastAccessedStorePaths_withData[path] = State(path, null, false);
+			s.lastAccessedStorePaths_withData[path] = State({countAsAccess: false}, ...SplitStringBySlash_Cached(path));
 		}
 		s.lastProps = props;
 		s.lastResult = result;
@@ -156,12 +157,13 @@ export function GetRequestedPaths() {
 let accessedStorePaths = {} as {[key: string]: boolean};
 export function OnAccessPath(path: string) {
 	//Log("Accessing-path Stage1: " + path);
+	//let path = pathSegments.join("/");
 	accessedStorePaths[path] = true;
 }
-export function OnAccessPaths(paths: string[]) {
+/*export function OnAccessPaths(paths: string[]) {
 	for (let path of paths)
 		OnAccessPath(path);
-}
+}*/
 export function ClearAccessedPaths() {
 	accessedStorePaths = {};
 }

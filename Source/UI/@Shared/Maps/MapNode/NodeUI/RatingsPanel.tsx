@@ -22,6 +22,7 @@ import {MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../Store/
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {ShowSignInPopup} from "../../../NavBar/UserPanel";
 import {GetNodeForm, GetNodeEnhanced, IsContextReversed} from "../../../../../Store/firebase/nodes/$node";
+import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -34,7 +35,8 @@ import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 ];*/
 
 export function SlicePath(path: string, removeFromEndCount: number, ...itemsToAdd: string[]) {
-	let parts = path.split("/");
+	//let parts = path.split("/");
+	let parts = SplitStringBySlash_Cached(path).slice();
 	parts.splice(parts.length - removeFromEndCount, removeFromEndCount, ...itemsToAdd);
 	return parts.join("/");
 }

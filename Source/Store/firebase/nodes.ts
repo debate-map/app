@@ -8,24 +8,25 @@ import {IsUserCreatorOrMod} from "./userExtras";
 import {GetUserPermissionGroups, GetUserID, GetUserAccessLevel} from "./users";
 import {GetNodeEnhanced, IsArgumentNode} from "./nodes/$node";
 import {Map} from "./maps/@Map";
+import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
 export function GetNode(id: number) {
 	//Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");
 	if (id == null || IsNaN(id)) return null;
-	return GetData(`nodes/${id}`) as MapNode;
+	return GetData("nodes", id) as MapNode;
 }
 export async function GetNodeAsync(id: number) {
-	return await GetDataAsync(`nodes/${id}`) as MapNode;
+	return await GetDataAsync("nodes", id) as MapNode;
 }
 
 export function GetParentNodeID(path: string) {
-	return path.split("/").map(a=>a.ToInt()).XFromLast(1);
+	return SplitStringBySlash_Cached(path).map(a=>a.ToInt()).XFromLast(1);
 }
 export function GetParentNode(path: string) {
 	return GetNode(GetParentNodeID(path));
 }
 export function GetNodeID(path: string) {
-	return path.split("/").map(a=>a.ToInt()).LastOrX();
+	return SplitStringBySlash_Cached(path).map(a=>a.ToInt()).LastOrX();
 }
 
 export function GetNodeParents(node: MapNode) {
@@ -33,7 +34,7 @@ export function GetNodeParents(node: MapNode) {
 	return CachedTransform("GetNodeParents", [node._id], parents, ()=>parents);
 }
 export async function GetNodeParentsAsync(node: MapNode) {
-	return await Promise.all(node.parents.VKeys(true).map(parentID=>GetDataAsync(`nodes/${parentID}`))) as MapNode[];
+	return await Promise.all(node.parents.VKeys(true).map(parentID=>GetDataAsync("nodes", parentID))) as MapNode[];
 }
 
 /*export function GetNodeChildIDs(nodeID: number) {
@@ -53,7 +54,7 @@ export function GetNodeChildren(node: MapNode) {
 	return CachedTransform("GetNodeChildren", [node._id], children, ()=>children);
 }
 export async function GetNodeChildrenAsync(node: MapNode) {
-	return await Promise.all(node.children.VKeys(true).map(id=>GetDataAsync(`nodes/${id}`))) as MapNode[];
+	return await Promise.all(node.children.VKeys(true).map(id=>GetDataAsync("nodes", id))) as MapNode[];
 }
 
 export function GetNodeChildrenEnhanced(node: MapNode, path: string, filterForPath = false) {
@@ -84,7 +85,7 @@ export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: 
 	return true;
 }
 export function IsNewLinkValid(parentNode: MapNode, parentPath: string, child: MapNode, permissions: PermissionGroupSet) {
-	let parentPathIDs = parentPath.split("/").map(a=>a.ToInt());
+	let parentPathIDs = SplitStringBySlash_Cached(parentPath).map(a=>a.ToInt());
 	//if (map.name == "Global" && parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
 	if (parentNode._id == globalRootNodeID) return false; // if parent is global-root, don't accept new children
 	// if parent is l2, and user is not a mod (and not node creator), don't accept new children

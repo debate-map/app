@@ -7,6 +7,7 @@ import {BaseComponent, ShallowChanged} from "../UI/ReactGlobals";
 import {GetTreeNodesInObjTree, DeepGet, DeepSet} from "../V/V";
 import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/query";
 import {getEventsFromInput} from "react-redux-firebase/dist/utils";
+import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 //export {DBPath};
 
 export function DBPath(path = "", inVersionRoot = true) {
@@ -17,6 +18,13 @@ export function DBPath(path = "", inVersionRoot = true) {
 	if (inVersionRoot)
 		path = `v${dbVersion}-${env_short}/${path}`;
 	return path;
+}
+export function DBPathSegments(pathSegments: (string | number)[], inVersionRoot = true) {
+	let result = pathSegments;
+	if (inVersionRoot) {
+		result = ([`v${dbVersion}-${env_short}`] as any).concat(result);
+	}
+	return result;
 }
 
 Object.prototype._AddFunction_Inline = function Ref(path = "", inVersionRoot = true) {
@@ -136,39 +144,72 @@ G({GetData});
  * 
  * Returns undefined when the current-data for the path is null/non-existent, but a request is in-progress.
  * Returns null when we've completed the request, and there is no data at that path. */
-export function GetData(path: string, options?: GetData_Options) {
+//export function GetData(pathSegments: (string | number)[], options?: GetData_Options) {
+/*export function GetData(pathSegment1: string | number, pathSegment2: string | number, ...pathSegments: (string | number)[]);
+export function GetData(options: GetData_Options, pathSegment1: string | number, pathSegment2: string | number, ...pathSegments: (string | number)[]);*/
+export function GetData(...pathSegments: (string | number)[]);
+export function GetData(options: GetData_Options, ...pathSegments: (string | number)[]);
+export function GetData(...args) {
+	let pathSegments: (string | number)[], options: GetData_Options;
+	if (typeof args[0] == "string") pathSegments = args;
+	else [options, ...pathSegments] = args;
 	options = E(new GetData_Options(), options);
 
-	//let firebase = State(a=>a.firebase);
-	path = DBPath(path, options.inVersionRoot);
+	if (__DEV__) {
+		Assert(pathSegments.All(segment=>typeof segment == "number" || !segment.Contains("/")),
+			`Each string path-segment must be a plain prop-name. (ie. contain no "/" separators) @segments(${pathSegments})`);
+	}
 
-	Assert(!path.endsWith("/"), "Path cannot end with a slash. (This may mean a path parameter is missing)");
-	Assert(!path.Contains("//"), "Path cannot contain a double-slash. (This may mean a path parameter is missing)");
+	pathSegments = DBPathSegments(pathSegments, options.inVersionRoot);
 
+	/*Assert(!path.endsWith("/"), "Path cannot end with a slash. (This may mean a path parameter is missing)");
+	Assert(!path.Contains("//"), "Path cannot contain a double-slash. (This may mean a path parameter is missing)");*/
+
+	let path: string;
 	if (options.makeRequest) {
+		path = path || pathSegments.join("/");
 		RequestPath(path);
 	}
 
-	let result = State(["firebase", "data"].concat(path.split("/"))) as any;
+	//let result = State("firebase", "data", ...SplitStringByForwardSlash_Cached(path)) as any;
+	let result = State("firebase", "data", ...pathSegments) as any;
+	//let result = State("firebase", "data", ...pathSegments) as any;
 	if (result == null && options.useUndefinedForInProgress) {
-		let requestCompleted = State(["firebase", "requested", "path"], null, false);
+		path = path || pathSegments.join("/");
+		let requestCompleted = State().firebase.requested[path];
 		if (!requestCompleted) return undefined; // undefined means, current-data for path is null/non-existent, but we haven't completed the current request yet
 		else return null; // null means, we've completed the request, and there is no data at that path
 	}
 	return result;
 }
 
+export class GetDataAsync_Options {
+	inVersionRoot? = true;
+	addHelpers? = true;
+}
+
 g.Extend({GetDataAsync});
 //export async function GetDataAsync(path: string, inVersionRoot = true, addHelpers = true, firebase: firebase.DatabaseReference = store.firebase.helpers.ref("")) {
-export async function GetDataAsync(path: string, inVersionRoot = true, addHelpers = true) {
+//export async function GetDataAsync(path: string, inVersionRoot = true, addHelpers = true) {
+/*export async function GetDataAsync(pathSegment1: string | number, pathSegment2: string | number, ...pathSegments: (string | number)[]);
+export async function GetDataAsync(options: GetDataAsync_Options, pathSegment1: string | number, pathSegment2: string | number, ...pathSegments: (string | number)[]);*/
+export async function GetDataAsync(...pathSegments: (string | number)[]);
+export async function GetDataAsync(options: GetDataAsync_Options, ...pathSegments: (string | number)[]);
+export async function GetDataAsync(...args) {
+	let pathSegments: (string | number)[], options: GetDataAsync_Options;
+	if (typeof args[0] == "string") pathSegments = args;
+	else [options, ...pathSegments] = args;
+	options = E(new GetDataAsync_Options(), options);
+
 	let firebase = store.firebase.helpers;
 	return await new Promise((resolve, reject) => {
 		//firebase.child(DBPath(path, inVersionRoot)).once("value",
-		firebase.Ref(path, inVersionRoot).once("value",
+		let path = pathSegments.join("/");
+		firebase.Ref(path, options.inVersionRoot).once("value",
 			(snapshot: DataSnapshot)=> {
 				let result = snapshot.val();
 				if (result)
-					result = ProcessDBData(result, true, addHelpers, path.split("/").Last());
+					result = ProcessDBData(result, true, options.addHelpers, pathSegments.Last()+"");
 				resolve(result);
 			},
 			(ex: Error)=>reject(ex));

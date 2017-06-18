@@ -10,7 +10,7 @@ export default class AddImage extends Command<{image: Image}> {
 	lastImageID_new: number;
 	imageID: number;
 	async Prepare() {
-		this.lastImageID_new = await GetDataAsync(`general/lastImageID`) as number;
+		this.lastImageID_new = await GetDataAsync("general", "lastImageID") as number;
 		this.imageID = ++this.lastImageID_new;
 	}
 	async Validate() {

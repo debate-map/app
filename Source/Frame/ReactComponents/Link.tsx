@@ -34,7 +34,7 @@ type Props = {
 		}
 		actions(dispatch);
 
-		let newState = State([]);
+		let newState = State();
 		let rootReducer = MakeRootReducer();
 		for (let action of actionsToDispatch) {
 			newState = rootReducer(newState, action);

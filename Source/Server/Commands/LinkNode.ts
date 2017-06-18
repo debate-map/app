@@ -15,7 +15,7 @@ export default class LinkNode extends Command<{parentID: number, childID: number
 	}*/
 	async Prepare() {
 		let {parentID, childID, childForm} = this.payload;
-		this.parent_oldChildrenOrder = await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[];
+		this.parent_oldChildrenOrder = await GetDataAsync("nodes", parentID, "childrenOrder") as number[];
 	}
 	async Validate() {
 		let {parentID, childID, childForm} = this.payload;

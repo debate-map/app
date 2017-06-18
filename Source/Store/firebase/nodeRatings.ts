@@ -10,7 +10,7 @@ import {ThesisForm} from "./nodes/@MapNode";
 
 export function GetNodeRatingsRoot(nodeID: number) {
 	//RequestPaths(GetPaths_NodeRatingsRoot(nodeID));
-	return GetData(`nodeRatings/${nodeID}`) as RatingsRoot;
+	return GetData("nodeRatings", nodeID) as RatingsRoot;
 }
 
 // path is needed if you want 

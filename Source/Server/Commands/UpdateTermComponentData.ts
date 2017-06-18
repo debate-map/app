@@ -16,7 +16,7 @@ export default class UpdateTermComponentData extends Command<{termComponentID: n
 	newData: TermComponent;
 	async Prepare() {
 		let {termComponentID, updates} = this.payload;
-		let oldData = await GetDataAsync(`termComponents/${termComponentID}`, true, false) as TermComponent;
+		let oldData = await GetDataAsync({addHelpers: false}, "termComponents", termComponentID) as TermComponent;
 		this.newData = {...oldData, ...updates};
 	}
 	async Validate() {

@@ -6,6 +6,7 @@ import {GetNodeForm, GetMainRatingType, GetNodeEnhanced} from "../nodes/$node";
 import {GetNode} from "../nodes";
 import {SlicePath} from "../../../UI/@Shared/Maps/MapNode/NodeUI/RatingsPanel";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
+import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 //export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
@@ -95,7 +96,7 @@ export class RatingType_Info {
 		adjustment: new RatingType_Info({
 			displayText: "Adjustment",
 			description: (node, parent, path)=> {
-				let grandParentID = path.split("/").length >= 3 ? path.split("/").XFromLast(2).ToInt() : null;
+				let grandParentID = SplitStringBySlash_Cached(path).length >= 3 ? SplitStringBySlash_Cached(path).XFromLast(2).ToInt() : null;
 				let grandParent = grandParentID ? GetNodeEnhanced(GetNode(grandParentID), SlicePath(path, 2)) : null;
 				let grandParentRatingType = grandParent ? GetMainRatingType(grandParent) : "probability";
 				/*return `Suppose someone is completely on the fence on the parent thesis -- giving it a 50% ${

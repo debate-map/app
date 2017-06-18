@@ -110,7 +110,7 @@ export class UpgradeButton extends BaseComponent<{newVersion: number, upgradeFun
 The old db-root will not be modified.`,
 					cancelButton: true,
 					onOK: async ()=> {
-						let oldData = await GetDataAsync(`${oldVersionPath}/`, false) as FirebaseData;
+						let oldData = await GetDataAsync({inVersionRoot: false}, ...oldVersionPath.split("/")) as FirebaseData;
 						let newData = upgradeFunc(oldData);
 						RemoveHelpers(newData); // remove "_key" and such
 

@@ -83,7 +83,7 @@ type Props = {
 	}
 
 	if (map) {
-		let nodeID = State([a=>a.main.mapViews, map._id, "rootNodeID"]);
+		let nodeID = State("main", "mapViews", map._id, "rootNodeID");
 		if (isBot && nodeID) {
 			rootNode = GetNodeEnhanced(GetNode(nodeID), nodeID+"");
 		}

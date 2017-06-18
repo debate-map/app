@@ -29,7 +29,7 @@ export default class SubNavBar extends BaseComponent<{fullWidth?: boolean}, {}> 
 
 type SubNavBarButtonProps = {page: string, subpage: string, text: string} & Partial<{currentSubpage: string}>;
 @Connect((state, {page})=> ({
-	currentSubpage: State(["main", page, "subpage"]) || rootPageDefaultChilds[page],
+	currentSubpage: State("main", page, "subpage") || rootPageDefaultChilds[page],
 }))
 export class SubNavBarButton extends BaseComponent<SubNavBarButtonProps, {}> {
 	render() {

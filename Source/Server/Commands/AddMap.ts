@@ -15,7 +15,7 @@ export default class AddMap extends Command<{map: Map}> {
 	async Prepare() {
 		let {map} = this.payload;
 
-		this.lastMapID_new = await GetDataAsync(`general/lastMapID`) as number;
+		this.lastMapID_new = await GetDataAsync("general", "lastMapID") as number;
 		this.mapID = ++this.lastMapID_new;
 
 		let newRootNode = new MapNode({type: MapNodeType.Category, creator: map.creator, titles: {base: "Root"}})
