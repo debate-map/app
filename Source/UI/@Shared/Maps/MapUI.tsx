@@ -42,6 +42,7 @@ import UpdateMapDetails from "../../../Server/Commands/UpdateMapDetails";
 import {IsUserCreatorOrMod} from "../../../Store/firebase/userExtras";
 import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
 import DeleteMap from "../../../Server/Commands/DeleteMap";
+import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -140,7 +141,8 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					`}</style>
 					<div className="MapUI" ref="mapUI"
 							style={{
-								position: "relative", /*display: "flex",*/ padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`, whiteSpace: "nowrap",
+								position: "relative", /*display: "flex",*/ whiteSpace: "nowrap",
+								padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
 								filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))",
 							}}
 							onMouseDown={e=>{

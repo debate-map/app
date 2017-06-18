@@ -124,26 +124,35 @@ class DBPathInfo {
 	cachedData;
 }
 let pathInfos = {} as {[path: string]: DBPathInfo};
+
+export class GetData_Options {
+	inVersionRoot? = true;
+	makeRequest? = true;
+	useUndefinedForInProgress? = false;
+}
+
 G({GetData});
 /** Begins request to get data at the given path in the Firebase database.
  * 
  * Returns undefined when the current-data for the path is null/non-existent, but a request is in-progress.
  * Returns null when we've completed the request, and there is no data at that path. */
-export function GetData(path: string, inVersionRoot = true, makeRequest = true) {
+export function GetData(path: string, options?: GetData_Options) {
+	options = E(new GetData_Options(), options);
+
 	//let firebase = State(a=>a.firebase);
-	path = DBPath(path, inVersionRoot);
+	path = DBPath(path, options.inVersionRoot);
 
 	Assert(!path.endsWith("/"), "Path cannot end with a slash. (This may mean a path parameter is missing)");
 	Assert(!path.Contains("//"), "Path cannot contain a double-slash. (This may mean a path parameter is missing)");
 
-	if (makeRequest) {
+	if (options.makeRequest) {
 		RequestPath(path);
 	}
 
 	let requestCompleted = State(`firebase/requested`, null, false)[path];
 
 	let result = State(`firebase/data/${path}`) as any;
-	if (result == null) {
+	if (result == null && options.useUndefinedForInProgress) {
 		if (!requestCompleted) return undefined; // undefined means, current-data for path is null/non-existent, but we haven't completed the current request yet
 		else return null; // null means, we've completed the request, and there is no data at that path
 	}

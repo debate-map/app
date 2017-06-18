@@ -170,6 +170,7 @@
     "react-resize-sensor": "^1.0.0",
     "react-social-button": "^1.0.2",
     "react-textarea-autosize": "^4.3.2",
+    "react-tooltip": "^3.3.0",
     "react-vmenu": "^0.0.0",
     "react-vscrollview": "^0.0.1",
     "recharts": "^0.21.2",

@@ -81,23 +81,10 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 					scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}>
 				<Row>
 					<Pre>Parents: </Pre>{nodeParents.map((parent, index)=> {
-						/*let toURL = URL.Current(true);
-						/*if (parent._id == map.rootNode) {
-							toURL.pathNodes.RemoveAt(1);
-						} else {*#/
-						toURL.pathNodes[1] = "map";
-						toURL.pathNodes[2] = GetCrawlerURLStrForNode(parent);
-						//}
-						toURL.queryVars = [];*/
 						return (
 							<span key={index}>
 								{index > 0 ? ", " : ""}
-								<Link
-									//to={toURL.toString({domain: false})}
-									actions={dispatch=> {
-										dispatch(new ACTSet({path: `main/mapViews/${1}/rootNodeID`, value: parent._id}));
-									}}
-								>
+								<Link actions={d=>d(new ACTSet({path: `main/mapViews/${1}/rootNodeID`, value: parent._id}))}>
 									{GetNodeDisplayText(parent)} ({parent._id})
 								</Link>
 							</span>
@@ -106,19 +93,10 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 				</Row>
 				<Row>
 					<Pre>Children: </Pre>{nodeChildren.map((child, index)=> {
-						/*let toURL = URL.Current(true);
-						toURL.pathNodes[1] = "map";
-						toURL.pathNodes[2] = GetCrawlerURLStrForNode(child);
-						toURL.queryVars = [];*/
 						return (
 							<span key={index}>
 								{index > 0 ? ", " : ""}
-								<Link
-									//to={toURL.toString({domain: false})}
-									actions={dispatch=> {
-										dispatch(new ACTSet({path: `main/mapViews/${1}/rootNodeID`, value: child._id}));
-									}}
-								>
+								<Link actions={d=>d(new ACTSet({path: `main/mapViews/${1}/rootNodeID`, value: child._id}))}>
 									{GetNodeDisplayText(child)} ({child._id})
 								</Link>
 							</span>

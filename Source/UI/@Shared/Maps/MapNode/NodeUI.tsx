@@ -46,6 +46,7 @@ import {IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
 import {ViewedNodeSet} from "../../../../Store/firebase/userViewedNodes/@ViewedNodeSet";
 import {GetUserViewedNodes} from "../../../../Store/firebase/userViewedNodes";
 import NotifyNodeViewed from "../../../../Server/Commands/NotifyNodeViewed";
+import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 
 // modified version which only requests paths that do not yet exist in the store
 /*export function Firebase_Connect(innerFirebaseConnect) {
@@ -127,7 +128,7 @@ type State = {
 		nodeChildren,
 		nodeChildren_sortValues: CachedTransform("nodeChildren_sortValues_transform1", [node._id], nodeChildren_sortValues, ()=>nodeChildren_sortValues),
 		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", [node._id], nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
-		userViewedNodes: GetUserViewedNodes(GetUserID()),
+		userViewedNodes: GetUserViewedNodes(GetUserID(), {useUndefinedForInProgress: true}),
 	};
 })
 export default class NodeUI extends BaseComponent<Props, State> {
@@ -207,7 +208,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
 		/*let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
 		let showBelowMessage = nodeChildren.length > 0 && nodeChildren.length < minChildCount;*/
-
+		
 		this.childBoxes = {};
 		return (
 			<div className="NodeUI clickThrough" style={{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}}>

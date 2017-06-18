@@ -1,6 +1,6 @@
 import {GetArgumentStrengthPseudoRating, GetArgumentStrengthPseudoRatingSet} from "../../Frame/Store/RatingProcessor";
 import {RatingType} from "../../Store/firebase/nodeRatings/@RatingType";
-import {GetData} from "../../Frame/Database/DatabaseHelpers";
+import { GetData, GetData_Options } from "../../Frame/Database/DatabaseHelpers";
 import {CachedTransform} from "../../Frame/V/VCache";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {RatingsRoot, Rating} from "./nodeRatings/@RatingsRoot";
@@ -25,10 +25,6 @@ export function GetRatingSet(nodeID: number, ratingType: RatingType, path?: stri
 //export function GetRatings(nodeID: number, ratingType: RatingType, thesisForm?: ThesisForm): Rating[] {
 export function GetRatings(nodeID: number, ratingType: RatingType): Rating[] {
 	let ratingSet = GetRatingSet(nodeID, ratingType);
-	/*return CachedTransform("GetRatings", {nodeID, ratingType}, {ratingSet}, ()=> {
-		if (ratingSet == null) return [];
-		let result = ratingSet.VValues();
-	});*/
 	return CachedTransform("GetRatings", [nodeID, ratingType], {ratingSet}, ()=>ratingSet ? ratingSet.VValues(true) : []);
 }
 export function GetRating(nodeID: number, ratingType: RatingType, userID: string) {

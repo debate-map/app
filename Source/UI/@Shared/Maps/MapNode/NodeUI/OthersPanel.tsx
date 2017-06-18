@@ -16,15 +16,19 @@ import {CanConvertFromThesisTypeXToY} from "../../../../../Server/Commands/Chang
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import Select from "../../../../../Frame/ReactComponents/Select";
 import ChangeThesisType from "../../../../../Server/Commands/ChangeThesisType";
+import { User } from "../../../../../Store/firebase/users";
+import { GetNodeViewers } from "Store/firebase/nodeViewers";
+import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 
-type Props = {node: MapNodeEnhanced, path: string};
+type Props = {node: MapNodeEnhanced, path: string} & Partial<{creator: User, viewers: string[]}>;
 @Connect((state, {node, path}: Props)=>({
 	_: GetUserPermissionGroups(GetUserID()),
 	creator: GetUser(node.creator),
+	viewers: GetNodeViewers(node._id),
 }))
 export default class OthersPanel extends BaseComponent<Props, {convertToType: ThesisType}> {
 	render() {
-		let {node, path} = this.props;
+		let {node, path, viewers} = this.props;
 		let {convertToType} = this.state;
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
 
@@ -33,9 +37,10 @@ export default class OthersPanel extends BaseComponent<Props, {convertToType: Th
 
 		return (
 			<Column sel style={{position: "relative"}}>
+				<Row>Path: {path}</Row>
 				<Row>Parents: {node.parents == null ? "none" : node.parents.VKeys(true).join(", ")}</Row>
 				<Row>Children: {node.children == null ? "none" : node.children.VKeys(true).join(", ")}</Row>
-				<Row>Path: {path}</Row>
+				<Row>Viewers: {viewers.length || "..."} <InfoButton text="The number of registered users who have had this node displayed in-map at some point."/></Row>
 				{IsArgumentNode(node) && creatorOrMod &&
 					<Row>
 						<Button mt={3} text="Reverse argument polarity" onLeftClick={()=> {
