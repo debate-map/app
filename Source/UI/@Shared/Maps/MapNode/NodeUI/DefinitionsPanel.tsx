@@ -20,7 +20,7 @@ import Link from "../../../../../Frame/ReactComponents/Link";
 
 let termsPlaceholder = [];
 
-@Connect((state, {node, path, hoverTermID, clickTermID})=> {
+@Connect((state, {node, path, hoverTermID, openTermID})=> {
 	let displayText = GetNodeDisplayText(node, path);
 	//let segments = ParseSegmentsFromNodeDisplayText(displayText);
 	let segments = ParseSegmentsForPatterns(displayText, [
@@ -33,11 +33,11 @@ let termsPlaceholder = [];
 		terms: CachedTransform("terms_transform1", [path], terms, ()=>terms.All(a=>a != null) ? terms : termsPlaceholder),
 		terms_variantNumbers: CachedTransform("terms_variantNumbers_transform1", [path], terms_variantNumbers, ()=>terms_variantNumbers),
 		hoverTerm: hoverTermID ? GetTerm(hoverTermID) : null,
-		clickTerm: clickTermID ? GetTerm(clickTermID) : null,
+		clickTerm: openTermID ? GetTerm(openTermID) : null,
 	};
 })
 export default class DefinitionsPanel extends BaseComponent
-		<{node: MapNode, path: string, hoverTermID?: number, clickTermID?: number, onHoverTerm?: (termID: number)=>void, onClickTerm?: (termID: number)=>void}
+		<{node: MapNode, path: string, hoverTermID?: number, openTermID?: number, onHoverTerm?: (termID: number)=>void, onClickTerm?: (termID: number)=>void}
 			& Partial<{terms: Term[], terms_variantNumbers: number[], hoverTerm: Term, clickTerm: Term}>,
 		{/*localHoverTerm: Term, localClickTerm: Term*/}> {
 	render() {

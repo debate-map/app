@@ -11,6 +11,8 @@ export class ACTMapNodeSelect extends Action<{mapID: number, path: string}> {}
 export class ACTMapNodePanelOpen extends Action<{mapID: number, path: string, panel: string}> {}
 export class ACTMapNodeExpandedSet extends Action<{mapID: number, path: string, expanded: boolean, recursive: boolean}> {}
 export class ACTMapNodeChildLimitSet extends Action<{mapID: number, path: string, direction: "down" | "up", value: number}> {}
+export class ACTMapNodeTermOpen extends Action<{mapID: number, path: string, termID: number}> {}
+
 export class ACTViewCenterChange extends Action<{mapID: number, focusNodePath: string, viewOffset: Vector2i}> {}
 
 export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action<any>, mapID: number) {
@@ -37,6 +39,10 @@ export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action
 	if (action.Is(ACTMapNodePanelOpen) && action.payload.mapID == mapID) {
 		let targetNodePath = GetPathNodes(action.payload.path).join(".children.");
 		return u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, openPanel: action.payload.panel}), state);
+	}
+	if (action.Is(ACTMapNodeTermOpen) && action.payload.mapID == mapID) {
+		let targetNodePath = GetPathNodes(action.payload.path).join(".children.");
+		return u.updateIn(targetNodePath, (old = new MapNodeView())=>({...old, openTermID: action.payload.termID}), state);
 	}
 	if (action.Is(ACTMapNodeExpandedSet) && action.payload.mapID == mapID) {
 		let targetNodePath = GetPathNodes(action.payload.path).join(".children.");

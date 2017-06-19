@@ -139,7 +139,7 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 								return <RatingsPanel ref="ratingsPanel" node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 							})()}
 							{panelToShow == "definitions" &&
-								<DefinitionsPanel {...{node, path, hoverTermID: null, clickTermID: null}}
+								<DefinitionsPanel {...{node, path, hoverTermID: null}} openTermID={null}
 									/*onHoverTerm={termID=>this.SetState({hoverTermID: termID})} onClickTerm={termID=>this.SetState({clickTermID: termID})}*//>}
 							{panelToShow == "discussion" && <DiscussionPanel/>}
 							{panelToShow == "social" && <SocialPanel/>}

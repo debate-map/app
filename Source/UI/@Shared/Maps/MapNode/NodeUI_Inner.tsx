@@ -25,7 +25,7 @@ import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@M
 import {RootState} from "../../../../Store/index";
 import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {ACTMapNodeSelect, ACTMapNodeExpandedSet, ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
+import {ACTMapNodeSelect, ACTMapNodeExpandedSet, ACTMapNodePanelOpen, ACTMapNodeTermOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import Column from "../../../../Frame/ReactComponents/Column";
 import DefinitionsPanel from "./NodeUI/DefinitionsPanel";
@@ -71,10 +71,10 @@ type Props = {map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: stri
 	mainRating_average: GetRatingAverage(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type),
 	userID: GetUserID(),
 }))
-export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, hoverPanel: string, hoverTermID: number, clickTermID: number}> {
+export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, hoverPanel: string, hoverTermID: number}> {
 	render() {
 		let {map, node, nodeView, path, width, widthOverride, finalNodeType, form, ratingsRoot, mainRating_average, userID} = this.props;
-		let {hovered, hoverPanel, hoverTermID, clickTermID} = this.state;
+		let {hovered, hoverPanel, hoverTermID} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[finalNodeType];
 		let barSize = 5;
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
@@ -161,8 +161,10 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 						})()}
 						{panelToShow == "definitions" &&
-							<DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{node, path, hoverTermID, clickTermID}}
-								onHoverTerm={termID=>this.SetState({hoverTermID: termID})} onClickTerm={termID=>this.SetState({clickTermID: termID})}/>}
+							<DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{node, path, hoverTermID}}
+								openTermID={nodeView.openTermID}
+								onHoverTerm={termID=>this.SetState({hoverTermID: termID})}
+								onClickTerm={termID=>store.dispatch(new ACTMapNodeTermOpen({mapID: map._id, path, termID: termID}))}/>}
 						{panelToShow == "discussion" && <DiscussionPanel/>}
 						{panelToShow == "social" && <SocialPanel/>}
 						{panelToShow == "tags" && <TagsPanel/>}
@@ -237,7 +239,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 		let {parent, map, path} = this.props;
 		//parent.SetState({hoverPanel: "definitions", hoverTermID: termID});
 		store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel: "definitions"}));
-		parent.SetState({clickTermID: termID});
+		store.dispatch(new ACTMapNodeTermOpen({mapID: map._id, path, termID: termID}));
 	}
 
 	RenderNodeDisplayText(text: string) {
