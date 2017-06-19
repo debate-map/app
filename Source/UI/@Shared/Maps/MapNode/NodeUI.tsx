@@ -94,6 +94,7 @@ type State = {
 	});*/
 
 	let nodeChildren_sortValues = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
+		if (child.metaThesis) return Number.MAX_SAFE_INTEGER; // always place the meta-thesis first
 		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetSortByRatingType(child)), GetNodeForm(child) == ThesisForm.Negation);
 	});
 	/*for (var i = 0; i < nodeChildren.length; i++) {
