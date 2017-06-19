@@ -35,11 +35,14 @@ type Props = {
 	nodes: MapNode[],
 	selectedNode: MapNodeEnhanced,
 }>;
-@Connect((state, {map}: Props)=> ({
-	//nodes: GetNodes({limitToFirst: 10}).Take(10), // need to filter results, since other requests may have added extra data
-	nodes: GetNodes(),
-	selectedNode: GetSelectedNode_InList(map._id),
-}))
+@Connect((state, {map}: Props)=> {
+	let selectedNode = GetSelectedNode_InList(map._id);
+	return {
+		//nodes: GetNodes({limitToFirst: 10}).Take(10), // need to filter results, since other requests may have added extra data
+		nodes: GetNodes(),
+		selectedNode: selectedNode ? GetNodeEnhanced(selectedNode, selectedNode._id+"") : null,
+	};
+})
 export default class ListUI extends BaseComponent<Props, {panelToShow}> {
 	render() {
 		let {map, nodes, selectedNode} = this.props;
@@ -80,7 +83,7 @@ class NodeRow extends BaseComponent<NodeRow_Props, {}> {
 	render() {
 		let {map, node, first, creator, selected} = this.props;
 		return (
-			<Row sel mt={first ? 0 : 5} className="cursorSet"
+			<Row mt={first ? 0 : 5} className="cursorSet"
 					style={E(
 						{padding: 5, background: "rgba(100,100,100,.5)", borderRadius: 5, cursor: "pointer"},
 						selected && {background: "rgba(100,100,100,.7)"},
@@ -108,6 +111,9 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 		let {width, hoverPanel} = this.state;
 
 		let path = node._id+"";
+		if (node.metaThesis) { // if meta-thesis, we only have one parent, so might as well fetch it, for accurate polarity and such
+			path = node.parents.VKeys(true)[0] + "/" + node._id;
+		}
 		let nodeTypeInfo = MapNodeType_Info.for[finalNodeType];
 		let nodeView = new MapNodeView();
 

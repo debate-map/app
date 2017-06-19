@@ -55,6 +55,9 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 		//let {error} = this.state;
 
 		var parentNode = GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1));
+		// if parent-node not loaded yet, don't render yet
+		if (path.includes("/") && parentNode == null) return null;
+		
 		let link = GetLinkUnderParent(node._id, parentNode);
 
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
