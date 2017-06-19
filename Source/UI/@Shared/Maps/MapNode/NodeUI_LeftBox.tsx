@@ -21,8 +21,9 @@ import {GetParentNode} from "../../../../Store/firebase/nodes";
 import {ReverseThenType} from "../../../../Store/firebase/nodes/$node/$metaThesis";
 
 type Props = {
-	parent: MapNodeUI_Inner, map: Map, path: string, node: MapNodeEnhanced, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
-	backgroundColor: string, asHover: boolean
+	map: Map, path: string, node: MapNodeEnhanced, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
+	backgroundColor: string, asHover: boolean, inList?: boolean, style?,
+	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
 } & Partial<{form: ThesisForm, parentNode: MapNodeEnhanced}>;
 @Connect((state: RootState, {node, path}: Props)=>({
 	form: GetNodeForm(node, path),
@@ -30,7 +31,7 @@ type Props = {
 }))
 export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 	render() {
-		let {map, path, node, nodeView, ratingsRoot, backgroundColor, asHover, form, parentNode} = this.props;
+		let {map, path, node, nodeView, ratingsRoot, backgroundColor, asHover, inList, onPanelButtonHover, onPanelButtonClick, style, form, parentNode} = this.props;
 
 		let nodeReversed = form == ThesisForm.Negation;
 		let contextReversed = IsContextReversed(node, parentNode);
@@ -42,10 +43,11 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		return (
-			<div style={{
-				display: "flex", flexDirection: "column", position: "absolute", whiteSpace: "nowrap",
-				right: "calc(100% + 1px)", zIndex: asHover ? 6 : 5,
-			}}>
+			<div style={E(
+				{display: "flex", flexDirection: "column", whiteSpace: "nowrap", zIndex: asHover ? 6 : 5},
+				!inList && {position: "absolute", right: "calc(100% + 1px)"},
+				style,
+			)}>
 				<div style={{position: "relative", padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 					{GetRatingTypesForNode(node).map((ratingInfo, index)=> {
@@ -66,7 +68,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 								percentStr = average + "%";
 						}
 						return (
-							<PanelButton key={ratingInfo.type} parent={this} map={map} path={path}
+							<PanelButton key={ratingInfo.type} {...{onPanelButtonHover, onPanelButtonClick, map, path}}
 									panel={ratingInfo.type} text={ratingTypeInfo.displayText} style={E(index == 0 && {marginTop: 0})}>
 								<Span ml={5} style={{float: "right"}}>
 									{percentStr}
@@ -88,12 +90,12 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 				</div>
 				<div style={{position: "relative", marginTop: 1, padding: 3, background: `rgba(0,0,0,.7)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
-					<PanelButton parent={this} map={map} path={path} panel="definitions" text="Definitions" style={{marginTop: 0}}/>
-					<PanelButton parent={this} map={map} path={path} panel="discussion" text="Discussion"/>
-					<PanelButton parent={this} map={map} path={path} panel="social" text="Social"/>
-					<PanelButton parent={this} map={map} path={path} panel="tags" text="Tags"/>
-					<PanelButton parent={this} map={map} path={path} panel="details" text="Details"/>
-					<PanelButton parent={this} map={map} path={path} panel="others" text="Others"/>
+					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path}} panel="definitions" text="Definitions" style={{marginTop: 0}}/>
+					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path}} panel="discussion" text="Discussion"/>
+					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path}} panel="social" text="Social"/>
+					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path}} panel="tags" text="Tags"/>
+					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path}} panel="details" text="Details"/>
+					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path}} panel="others" text="Others"/>
 					<Button text="..."
 						style={{
 							margin: "-1px 0 1px 0", height: 17, lineHeight: "12px", padding: 0,
@@ -107,22 +109,26 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 	}
 }
 
-class PanelButton extends BaseComponent<{parent: MapNodeUI_LeftBox, map: Map, path: string, panel: string, text: string, style?}, {}> {
+type PanelButton_Props = {
+	map: Map, path: string, panel: string, text: string, style?,
+	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
+};
+class PanelButton extends BaseComponent<PanelButton_Props, {}> {
 	render() {
 		let {map, path, panel, text, style, children} = this.props;
 		return (
 			<Button text={text} style={E({position: "relative", display: "flex", justifyContent: "space-between", marginTop: 5, padding: "3px 7px"}, style)}
 					onClick={()=> {
-						//parent.props.parent.SetState({openPanel: panel});
-						store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel}));
+						let {onPanelButtonClick} = this.props;
+						onPanelButtonClick(panel);
 					}}
 					onMouseEnter={()=> {
-						let {parent} = this.props;
-						parent.props.parent.SetState({hoverPanel: panel});
+						let {onPanelButtonHover} = this.props;
+						onPanelButtonHover(panel);
 					}}
 					onMouseLeave={()=> {
-						let {parent} = this.props;
-						parent.props.parent.SetState({hoverPanel: null});
+						let {onPanelButtonHover} = this.props;
+						onPanelButtonHover(null);
 					}}>
 				{/*<div style={{position: "absolute", right: -4, width: 4, top: 0, bottom: 0}}/>*/}
 				{/* capture mouse events in gap above and below self */}

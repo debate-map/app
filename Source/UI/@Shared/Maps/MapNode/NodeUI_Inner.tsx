@@ -109,7 +109,10 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						}
 					}}>
 				{leftPanelShow &&
-					<MapNodeUI_LeftBox {...{parent: this, map, path, node, nodeView, ratingsRoot}} backgroundColor={nodeTypeInfo.backgroundColor} asHover={hovered}/>}
+					<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot}}
+						onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
+						onPanelButtonClick={panel=>store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel}))}
+						backgroundColor={nodeTypeInfo.backgroundColor} asHover={hovered}/>}
 				{/* fixes click-gap */}
 				{leftPanelShow && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
 
