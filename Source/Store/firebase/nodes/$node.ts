@@ -212,7 +212,7 @@ export function GetValidNewChildTypes(parentNode: MapNode, path: string, permiss
 }
 
 export function IsContextReversed(node: MapNode, parent: MapNodeEnhanced) {
-	return node.metaThesis && IsReversedArgumentNode(parent);
+	return node.metaThesis && parent && IsReversedArgumentNode(parent);
 }
 
 export function GetThesisType(node: MapNode) {

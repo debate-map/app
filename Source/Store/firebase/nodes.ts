@@ -1,7 +1,7 @@
 import {HasModPermissions, PermissionGroupSet} from "./userExtras/@UserExtraInfo";
 import {IsNaN, IsObjectOf, IsObject, IsNumber} from "../../Frame/General/Types";
 import {GetData, GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import { MapNode, globalRootNodeID } from "./nodes/@MapNode";
+import {MapNode, globalRootNodeID} from "./nodes/@MapNode";
 import {CachedTransform} from "../../Frame/V/VCache";
 import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
 import {IsUserCreatorOrMod} from "./userExtras";
@@ -18,6 +18,19 @@ export function GetNode(id: number) {
 export async function GetNodeAsync(id: number) {
 	return await GetDataAsync("nodes", id) as MapNode;
 }
+
+export type NodeMap = {[key: string]: MapNode};
+export function GetNodeMap(queries?): NodeMap {
+	return GetData({queries}, "nodes");
+}
+export function GetNodes(queries?): MapNode[] {
+	let nodeMap = GetNodeMap(queries);
+	return CachedTransform("GetNodes", [ToJSON(queries)], nodeMap, ()=>nodeMap ? nodeMap.VValues(true) : []);
+}
+/*export function GetNodes_Enhanced(): MapNode[] {
+	let nodeMap = GetNodeMap();
+	return CachedTransform("GetNodes_Enhanced", [], nodeMap, ()=>nodeMap ? nodeMap.VValues(true) : []);
+}*/
 
 export function GetParentNodeID(path: string) {
 	return SplitStringBySlash_Cached(path).map(a=>a.ToInt()).XFromLast(1);

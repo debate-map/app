@@ -5,6 +5,8 @@ import {GetLinkUnderParent} from "../$node";
 export function GetEquationStepNumber(path: string) {
 	let nodeID = GetNodeID(path);
 	let parent = GetParentNode(path);
+	if (parent == null) return 0;
+	
 	//let equationStepNodeIDs = parent.children.VKeys(true).map(a=>a.ToInt());
 	let equationStepNodes = GetNodeChildren(parent).filter(a=> {
 		return a && a.equation && (GetLinkUnderParent(a._id, parent).seriesAnchor || a.equation.isStep);

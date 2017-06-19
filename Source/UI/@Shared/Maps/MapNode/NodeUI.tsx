@@ -178,8 +178,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let upChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalType == MapNodeType.SupportingArgument) : [];
 		let downChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalType == MapNodeType.OpposingArgument) : [];
 
-		let childLimit_up = (nodeView.childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
-		let childLimit_down = (nodeView.childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
+		let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
+		let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 		// if the map's root node, or an argument node, show all children
 		let showAll = node._id == map.rootNode || IsArgumentNode(node);
 		if (showAll) [childLimit_up, childLimit_down] = [100, 100];

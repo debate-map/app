@@ -10,6 +10,7 @@ import {ContentNode} from '../contentNodes/@ContentNode';
 import {Equation} from './@Equation';
 import {Image} from '../images/@Image';
 
+export const globalMapID = 1;
 export const globalRootNodeID = 1;
 
 export enum AccessLevel {

@@ -27,21 +27,19 @@ import * as Moment from "moment";
 import TermComponentsUI from "../../UI/Content/Terms/TermComponentsUI";
 import {ShowAddTermComponentDialog} from "./Terms/AddTermComponentDialog";
 
+type Props = {} & Partial<{terms: Term[], selectedTerm: Term, permissions: PermissionGroupSet}>;
 @Connect(state=> ({
 	terms: GetTerms(),
 	selectedTerm: GetSelectedTerm(),
 	permissions: GetUserPermissionGroups(GetUserID()),
 }))
-export default class TermsUI extends BaseComponent
-		<{} & Partial<{terms: Term[], selectedTerm: Term, permissions: PermissionGroupSet}>,
-		{selectedTerm_newData: Term}> {
+export default class TermsUI extends BaseComponent<Props, {selectedTerm_newData: Term}> {
 	ComponentWillReceiveProps(props) {
 		if (props.selectedTerm != this.props.selectedTerm) {
 			this.SetState({selectedTerm_newData: null});
 		}
 	}
 
-	scrollView: ScrollView;
 	render() {
 		let {terms, selectedTerm, permissions} = this.props;
 		if (terms == null) return <div>Loading terms...</div>;
@@ -64,7 +62,7 @@ export default class TermsUI extends BaseComponent
 							Terms
 						</Div>
 					</Row>
-					<ScrollView ref={c=>this.scrollView = c} contentStyle={{flex: 1, padding: 10}} onClick={e=> {
+					<ScrollView contentStyle={{flex: 1, padding: 10}} onClick={e=> {
 						if (e.target != e.currentTarget) return;
 						store.dispatch(new ACTTermSelect({id: null}));
 					}}>
@@ -73,7 +71,7 @@ export default class TermsUI extends BaseComponent
 						})}
 					</ScrollView>
 				</Column>
-				<ScrollView ref={c=>this.scrollView = c} style={{marginLeft: 10, flex: .6}} contentStyle={{flex: 1, padding: 10}}>
+				<ScrollView style={{marginLeft: 10, flex: .6}} contentStyle={{flex: 1, padding: 10}}>
 					<Column style={{position: "relative", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
 						<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 							{selectedTerm &&

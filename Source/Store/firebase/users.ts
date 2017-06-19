@@ -6,6 +6,7 @@ import {UserInfo} from "firebase";
 import {AccessLevel} from "./nodes/@MapNode";
 
 export type User = {
+	_key?: string;
 	avatarUrl: string;
 	displayName: string;
 	email: string;

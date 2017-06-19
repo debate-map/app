@@ -5,6 +5,8 @@ import {GetUsers, GetUserExtraInfoMap, UserExtraInfoMap, User} from "../Store/fi
 import Row from "../Frame/ReactComponents/Row";
 import UserExtraInfo from "../Store/firebase/userExtras/@UserExtraInfo";
 import * as Moment from "moment";
+import ScrollView from "react-vscrollview";
+import Column from "../Frame/ReactComponents/Column";
 
 @Connect(state=> ({
 	users: GetUsers(),
@@ -15,17 +17,19 @@ export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], 
 		let {users, userExtraInfoMap} = this.props;
 		if (userExtraInfoMap == null) return <div/>;
 		return (
-			<Div style={styles.page}>
+			<Column style={styles.page}>
 				<Row>
 					<span style={{flex: .33, fontWeight: 500, fontSize: 17}}>Name</span>
 					<span style={{flex: .33, fontWeight: 500, fontSize: 17}}>Join date</span>
 					<span style={{flex: .33, fontWeight: 500, fontSize: 17}}>Permissions</span>
 				</Row>
-				{users.map((user, index)=> {
-					let userExtraInfo = userExtraInfoMap[user["_key"]];
-					return <UserRow key={user["_key"]} user={user} userExtraInfo={userExtraInfo}/>;
-				})}
-			</Div>
+				<ScrollView contentStyle={{flex: 1, padding: 10}}>
+					{users.OrderBy(a=>userExtraInfoMap[a._key] ? userExtraInfoMap[a._key].joinDate : Number.MAX_SAFE_INTEGER).map((user, index)=> {
+						let userExtraInfo = userExtraInfoMap[user._key];
+						return <UserRow key={user._key} user={user} userExtraInfo={userExtraInfo}/>;
+					})}
+				</ScrollView>
+			</Column>
 		);
 	}
 }

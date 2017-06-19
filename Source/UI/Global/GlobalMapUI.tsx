@@ -10,10 +10,11 @@ import {Map} from "../../Store/firebase/maps/@Map";
 import {Connect} from "../../Frame/Database/FirebaseConnect";
 import {GetMap} from "../../Store/firebase/maps";
 
+type Props = {} & Partial<{map: Map}>;
 @Connect(state=> ({
 	map: GetMap(1),
 }))
-export default class GlobalMapUI extends BaseComponent<Partial<{map: Map}>, {}> {
+export default class GlobalMapUI extends BaseComponent<Props, {}> {
 	render() {
 		let {map} = this.props;
 		return (

@@ -24,7 +24,11 @@ import {CombineReducers} from "../Frame/Store/ReducerUtils";
 import {ContentReducer, Content} from "./main/content";
 import {DebatesReducer, Debates} from "./main/debates";
 import SubpageReducer from "./main/@Shared/$subpage";
-import {LOCATION_CHANGED} from "redux-little-router";
+import { LOCATION_CHANGED } from "redux-little-router";
+import { MapInfo } from "Store/main/maps/@MapInfo";
+import {globalMapID} from "./firebase/nodes/@MapNode";
+import { ShallowChanged } from "../Frame/UI/ReactGlobals";
+import { MapInfoReducer } from "Store/main/maps/$map";
 
 // class is used only for initialization
 export class MainState {
@@ -59,6 +63,8 @@ export class MainState {
 
 	// maps
 	// ==========
+
+	maps: {[key: number]: MapInfo};
 
 	openMap: number;
 	mapViews: MapViews;
@@ -151,17 +157,26 @@ export function MainReducer(state, action) {
 		// maps
 		// ==========
 
+		maps: (state = {}, action)=> {
+			if (action.Is(ACTSetPage) && action.payload == "global" && state[globalMapID] == null) {
+				return {...state, [globalMapID]: new MapInfo()};
+			}
+
+			let newState = {...state};
+			for (let key in newState) {
+				newState[key] = MapInfoReducer(newState[key], action, parseInt(key));
+			}
+			return ShallowChanged(newState, state) ? newState : state;
+		},
+
 		openMap: (state = null, action)=> {
-			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).pathNodes[0] == "global")
-				return 1;
-			/*if (action.Is(ACTOpenMapSet))
-				return action.payload;*/
+			if (action.Is(ACTSetPage) && action.payload == "global") return globalMapID;
+			//if (action.Is(ACTOpenMapSet)) return action.payload;
 			return state;
 		},
 		mapViews: MapViewsReducer,
 		copiedNodePath: (state = null as string, action)=> {
-			if (action.Is(ACTNodeCopy))
-				return action.payload.path;
+			if (action.Is(ACTNodeCopy)) return action.payload.path;
 			return state;
 		},
 		initialChildLimit: (state = 5, action)=> {

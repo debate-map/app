@@ -137,6 +137,7 @@ export class GetData_Options {
 	inVersionRoot? = true;
 	makeRequest? = true;
 	useUndefinedForInProgress? = false;
+	queries?: any;
 }
 
 G({GetData});
@@ -165,17 +166,30 @@ export function GetData(...args) {
 	/*Assert(!path.endsWith("/"), "Path cannot end with a slash. (This may mean a path parameter is missing)");
 	Assert(!path.Contains("//"), "Path cannot contain a double-slash. (This may mean a path parameter is missing)");*/
 
-	let path: string;
+	let path = pathSegments.join("/");
+	/*if (options.queries && options.queries.VKeys().length) {
+		let queriesStr = "";
+		for (let {name, value, index} of options.queries.Props()) {
+			queriesStr += (index == 0 ? "#" : "&") + name + "=" + value;
+		}
+		pathSegments[pathSegments.length - 1] = pathSegments.Last() + queriesStr;
+		path += queriesStr.replace(/[#=]/g, "_");
+	}*/
+
 	if (options.makeRequest) {
-		path = path || pathSegments.join("/");
-		RequestPath(path);
+		let queriesStr = "";
+		if (options.queries && options.queries.VKeys().length) {
+			for (let {name, value, index} of options.queries.Props()) {
+				queriesStr += (index == 0 ? "#" : "&") + name + "=" + value;
+			}
+		}
+		RequestPath(path + queriesStr);
 	}
 
 	//let result = State("firebase", "data", ...SplitStringByForwardSlash_Cached(path)) as any;
 	let result = State("firebase", "data", ...pathSegments) as any;
 	//let result = State("firebase", "data", ...pathSegments) as any;
 	if (result == null && options.useUndefinedForInProgress) {
-		path = path || pathSegments.join("/");
 		let requestCompleted = State().firebase.requested[path];
 		if (!requestCompleted) return undefined; // undefined means, current-data for path is null/non-existent, but we haven't completed the current request yet
 		else return null; // null means, we've completed the request, and there is no data at that path
