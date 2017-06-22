@@ -26,7 +26,7 @@ import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {CachedTransform, CombineDynamicPropMaps} from "../../../../Frame/V/VCache";
 import {RootState} from "../../../../Store/index";
 import {GetNodeView} from "../../../../Store/main/mapViews";
-import {MapNode, ThesisForm, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeEnhanced, AccessLevel} from "../../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {GetNodeChildren, GetParentNode, GetNodeChildrenEnhanced} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
@@ -213,23 +213,29 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		this.childBoxes = {};
 		return (
 			<div className="NodeUI clickThrough" style={{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}}>
-				<div ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={E(
-					//{position: "relative"},
+				<div ref="innerBoxAndSuchHolder" className="innerBoxAndSuchHolder clickThrough" style={E(
+					{position: "relative"},
 					/*useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
 					!useAutoOffset && {paddingTop: innerBoxOffset},*/
 					{paddingTop: innerBoxOffset}
 				)}>
 					{limitBar_above && children}
-					<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
-					{/*<NodeUI_Inner ref="innerBox" {...{map, node: nodeWithFinalType, nodeView, path, width}} widthOverride={widthOverride}/>*/}
-					{/*showBelowMessage &&
-						<Div ct style={{
-							//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
-							marginTop: 5, fontSize: 12,
-							width: 0, // fixes that link-lines would have gap on left
-						}}>
-							Needs 2 premises to be visible.
-						</Div>*/}
+					<div ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{position: "relative"}}>
+						{node.accessLevel != AccessLevel.Basic &&
+							<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
+								<span style={{margin: "auto 0"}}>{AccessLevel[node.accessLevel][0].toUpperCase()}</span>
+							</div>}
+						<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
+						{/*<NodeUI_Inner ref="innerBox" {...{map, node: nodeWithFinalType, nodeView, path, width}} widthOverride={widthOverride}/>*/}
+						{/*showBelowMessage &&
+							<Div ct style={{
+								//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
+								marginTop: 5, fontSize: 12,
+								width: 0, // fixes that link-lines would have gap on left
+							}}>
+								Needs 2 premises to be visible.
+							</Div>*/}
+					</div>
 					{!limitBar_above && children}
 				</div>
 				{nodeChildren == childrenPlaceholder &&
@@ -477,7 +483,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 
 			let oldChildBoxOffsets = this.childBoxes.Props().Where(pair=>pair.value != null).ToMap(pair=>pair.name, pair=> {
 				//let childBox = FindDOM_(pair.value).find("> div:first-child > div"); // get inner-box of child
-				let childBox = FindDOM_(pair.value).find("> .innerBoxHolder > .NodeUI_Inner"); // get inner-box of child
+				let childBox = FindDOM_(pair.value).find("> .innerBoxAndSuchHolder > .innerBoxHolder > .NodeUI_Inner"); // get inner-box of child
 				let childBoxOffset = new Vector2i(childBox.offset()).Minus(holderOffset);
 				childBoxOffset = childBoxOffset.Plus(new Vector2i(0, childBox.outerHeight() / 2));
 				return childBoxOffset;

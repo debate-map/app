@@ -1,0 +1,19 @@
+207/206 (excluding common/start pb) = .4279
+
+radiogenic 207, portion of radiogenic 207+206 pb: 0.29967084529728972617130051124028
+radiogenic 206, portion of radiogenic 207+206 pb: 0.70032915470271027382869948875972
+non-radiogenic 206, portion of 206 pb: 0.011
+
+assumed: (non-radiogenic) 204, portion of 206 pb: 0.011
+
+radiogenic (excluding "common"/start/non-radiogenic pb) 207+206 = 248 ppm
+
+radiogenic 207: 74.318369633727852090482526787589 ppm
+radiogenic 206: 173.68163036627214790951747321241 ppm
+assumed: (non-radiogenic) 204: 2.48 ppm
+
+
+
+
+206 / 204, initial: 9.5
+207 / 204, initial: 10.5
