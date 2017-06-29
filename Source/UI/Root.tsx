@@ -122,7 +122,7 @@ class RootUI extends BaseComponent<Props, {}> {
 class OverlayUI extends BaseComponent<{}, {}> {
 	render() {
 		return (
-			<div style={{position: "absolute"}}>
+			<div style={{position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: "hidden"}}>
 				<MessageBoxUI/>
 				<VMenuLayer/>
 			</div>

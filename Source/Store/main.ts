@@ -69,6 +69,7 @@ export class MainState {
 	openMap: number;
 	mapViews: MapViews;
 	copiedNodePath: string;
+	copiedNodePath_asCut: boolean;
 
 	initialChildLimit: number;
 }
@@ -80,7 +81,7 @@ export class ACTTopRightOpenPanelSet extends Action<string> {}
 export class ACTNotificationMessageAdd extends Action<NotificationMessage> {}
 export class ACTNotificationMessageRemove extends Action<number> {}
 //export class ACTOpenMapSet extends Action<number> {}
-export class ACTNodeCopy extends Action<{path: string}> {}
+export class ACTNodeCopy extends Action<{path: string, asCut: boolean}> {}
 export class ACTSetInitialChildLimit extends Action<{value: number}> {}
 
 let MainReducer_Real;
@@ -177,6 +178,10 @@ export function MainReducer(state, action) {
 		mapViews: MapViewsReducer,
 		copiedNodePath: (state = null as string, action)=> {
 			if (action.Is(ACTNodeCopy)) return action.payload.path;
+			return state;
+		},
+		copiedNodePath_asCut: (state = null as string, action)=> {
+			if (action.Is(ACTNodeCopy)) return action.payload.asCut;
 			return state;
 		},
 		initialChildLimit: (state = 5, action)=> {

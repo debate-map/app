@@ -30,25 +30,27 @@ import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import {GetNodeChildren} from "../../../../Store/firebase/nodes";
 import {E} from "../../../../Frame/General/Globals_Free";
 import AddNode from "../../../../Server/Commands/AddNode";
-import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, ReverseMapNodeType, IsReversedArgumentNode, GetNodeEnhanced} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, ReverseMapNodeType, IsReversedArgumentNode, GetNodeEnhanced, IsArgumentNode} from "../../../../Store/firebase/nodes/$node";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import { SlicePath } from "./NodeUI/RatingsPanel";
+import {SlicePath} from "./NodeUI/RatingsPanel";
 import LinkNode from "Server/Commands/LinkNode";
 import UnlinkNode from "Server/Commands/UnlinkNode";
 import CloneNode from "Server/Commands/CloneNode";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
-type Props = {map: Map, node: MapNodeEnhanced, path: string} & Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode}>;
+type Props = {map: Map, node: MapNodeEnhanced, path: string}
+	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode, copiedNode_asCut: boolean}>;
 @Connect((_: RootState, {node, path}: Props)=> ({
 	_: (ForUnlink_GetError(GetUserID(), node), ForDelete_GetError(GetUserID(), node)),
 	//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
 	permissions: GetUserPermissionGroups(GetUserID()),
 	parentNode: GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1)),
 	copiedNode: State(a=>a.main.copiedNodePath) ? GetNode(SplitStringBySlash_Cached(State(a=>a.main.copiedNodePath)).Last().ToInt()) : null,
+	copiedNode_asCut: State(a=>a.main.copiedNodePath_asCut),
 }))
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {
-		let {map, node, path, permissions, parentNode, copiedNode} = this.props;
+		let {map, node, path, permissions, parentNode, copiedNode, copiedNode_asCut} = this.props;
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
@@ -77,42 +79,63 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 					);
 				})}
 				{IsUserBasicOrAnon(userID) && node.metaThesis == null &&
-					//<VMenuItem text={copiedNode ? "Copy (right-click to clear)" : "Copy"} style={styles.vMenuItem}
+					<VMenuItem text={copiedNode ? <span>Cut <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Cut`} style={styles.vMenuItem}
+						onClick={e=> {
+							e.persist();
+							if (e.button == 0) {
+								store.dispatch(new ACTNodeCopy({path, asCut: true}));
+							} else {
+								store.dispatch(new ACTNodeCopy({path: null, asCut: true}));
+							}
+						}}/>}
+				{IsUserBasicOrAnon(userID) && node.metaThesis == null &&
 					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Copy`} style={styles.vMenuItem}
 						onClick={e=> {
 							e.persist();
 							if (e.button == 0) {
-								store.dispatch(new ACTNodeCopy({path}));
+								store.dispatch(new ACTNodeCopy({path, asCut: false}));
 							} else {
-								store.dispatch(new ACTNodeCopy({path: null}));
+								store.dispatch(new ACTNodeCopy({path: null, asCut: false}));
 							}
 						}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node, path, copiedNode, permissions) &&
-					<VMenuItem text={`Paste as link: "${GetNodeDisplayText(copiedNode, formForChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={e=> {
-						if (e.button != 0) return;
-						if (userID == null) return ShowSignInPopup();
-						if (copiedNode.type == MapNodeType.SupportingArgument || copiedNode.type == MapNodeType.OpposingArgument) {
-							return void ShowMessageBox({title: `Argument at two locations?`, cancelButton: true, onOK: proceed, message:
+					<VMenuItem text={`Paste${copiedNode_asCut ? "" : " as link"}: "${GetNodeDisplayText(copiedNode, formForChildren).KeepAtMost(50)}"`}
+						style={styles.vMenuItem} onClick={e=> {
+							if (e.button != 0) return;
+							if (userID == null) return ShowSignInPopup();
+
+							if (IsArgumentNode(copiedNode) && !copiedNode_asCut) {
+								return void ShowMessageBox({title: `Argument at two locations?`, cancelButton: true, onOK: proceed, message:
 `Are you sure you want to paste this argument as a linked child?
 
-Only do this if you're sure that the meta-thesis applies exactly the same to both the old parent and the new parent.${``
-} (usually it does not, ie. usually it's specific to its original parent thesis)
+Only do this if you're sure that the meta-thesis applies exactly the same to both the old parent and the new parent.${""
+	} (usually it does not, ie. usually it's specific to its original parent thesis)
 
 If not, paste the argument as a clone instead.`
-							});
-						}
-						proceed();
-						function proceed() {
-							new LinkNode({parentID: node._id, childID: copiedNode._id, childForm: formForChildren}).Run();
-						}
-					}}/>}
-				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node, path, copiedNode.Extended({_id: -1}), permissions) &&
+								});
+							}
+							proceed();
+
+							async function proceed() {
+								await new LinkNode({parentID: node._id, childID: copiedNode._id, childForm: formForChildren}).Run();
+								if (copiedNode_asCut) {
+									let baseNodePath = State(a=>a.main.copiedNodePath);		
+									let baseNodePath_ids = baseNodePath.split("/").map(ToInt);			
+									await new UnlinkNode({parentID: baseNodePath_ids.slice(-2)[0], childID: baseNodePath_ids.Last()}).Run();
+								}
+							}
+						}}/>}
+				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node, path, copiedNode.Extended({_id: -1}), permissions) && !copiedNode_asCut &&
 					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, formForChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 
-						let baseNodePath = State(a=>a.main.copiedNodePath);						
-						new CloneNode({baseNodePath, newParentID: node._id}).Run();
+						let baseNodePath = State(a=>a.main.copiedNodePath);		
+						let baseNodePath_ids = baseNodePath.split("/").map(ToInt);				
+						await new CloneNode({baseNodePath, newParentID: node._id}).Run();
+						if (copiedNode_asCut) {
+							await new UnlinkNode({parentID: baseNodePath_ids.slice(-2)[0], childID: baseNodePath_ids.Last()}).Run();
+						}
 					}}/>}
 				{IsUserCreatorOrMod(userID, node) &&
 					<VMenuItem text="Unlink" enabled={ForUnlink_GetError(userID, node) == null} title={ForUnlink_GetError(userID, node)}
