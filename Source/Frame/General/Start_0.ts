@@ -5,10 +5,6 @@ import "./Start_0"; // fake/empty import, so this module is correctly seen as mo
 // special, early, definitely-safe codes
 var g = window as any;
 declare global { const g; } g.g = g;
-/*var JQuery = require("../../../Source/Frame/JQuery/JQuery3.1.0"); // maybe temp; moved here for $().append testing
-g.JQuery = JQuery;
-g.jQuery = JQuery;
-g.$ = JQuery;*/
 
 let isBot = /bot|crawler|spider|robot|crawling|google|bing|duckduckgo|msn|slurp|yandex|baidu|aolbuild|teoma/i.test(navigator.userAgent);
 //declare global { const isBot: string; } g.Extend({isBot});

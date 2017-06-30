@@ -1,8 +1,5 @@
-import {Log} from "../General/Logging";
-import {Assert} from "../General/Assert";
 import {replace, push} from "redux-little-router";
 import {ToInt} from "../General/Types";
-import {History} from "history";
 import {Vector2i} from "../General/VectorStructs";
 import {FindReact, ShallowChanged} from "../UI/ReactGlobals";
 import NodeUI_Inner from "../../UI/@Shared/Maps/MapNode/NodeUI_Inner";
@@ -10,7 +7,6 @@ import {GetOpenMapID, ACTSetPage, ACTSetSubpage, ACTNotificationMessageAdd} from
 import {GetMap} from "../../Store/firebase/maps";
 import {GetNodeView, GetMapView, GetSelectedNodeID, GetViewOffset} from "../../Store/main/mapViews";
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
-import {FromJSON, ToJSON} from "../General/Globals";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 import {URL, QueryVar, rootPageDefaultChilds} from "../General/URLs";
 import {ACTTermSelect, ACTImageSelect} from "../../Store/main/content";
@@ -21,7 +17,6 @@ import {CreateMapViewForPath} from "../Store/PathFinder";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import { ACTDebateMapSelect } from "../../Store/main/debates";
 import { ACTSet } from "Store";
-import { RootState } from "../../Store/index";
 import { GetCrawlerURLStrForNode } from "UI/@Shared/Maps/MapNode/NodeUI_ForBots";
 import MapUI from "../../UI/@Shared/Maps/MapUI";
 

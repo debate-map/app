@@ -417,10 +417,10 @@ if (OUTPUT_STATS) {
 		}
 	);
 
-	/*let CircularDependencyPlugin = require("circular-dependency-plugin");
+	let CircularDependencyPlugin = require("circular-dependency-plugin");
 	webpackConfig.plugins.push(
 		new CircularDependencyPlugin({exclude: /node_modules/})
-	);*/
+	);
 
 	webpackConfig.profile = true;
 	webpackConfig.stats = "verbose";

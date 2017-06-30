@@ -29,10 +29,10 @@ export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>F
 	upgradeFuncs = upgradeFuncs || {};
 	upgradeFuncs[version] = func;
 }
-require("./Admin/DBUpgrades/UpgradeDB_2");
-require("./Admin/DBUpgrades/UpgradeDB_3");
-require("./Admin/DBUpgrades/UpgradeDB_4");
-require("./Admin/DBUpgrades/UpgradeDB_5");
+//require("./Admin/DBUpgrades/UpgradeDB_2");
+//require("./Admin/DBUpgrades/UpgradeDB_3");
+//require("./Admin/DBUpgrades/UpgradeDB_4");
+//require("./Admin/DBUpgrades/UpgradeDB_5");
 
 //export default class AdminUI extends BaseComponent<{}, {fb: firebase.FirebaseApplication, env: string}> {
 export default class AdminUI extends BaseComponent<{}, {}> {
