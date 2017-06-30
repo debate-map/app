@@ -18,6 +18,7 @@
 		<!-- <script src="https://cdn.ravenjs.com/3.14.0/raven.min.js" crossorigin="anonymous"></script>
 		<script>Raven.config("https://40c1e4f57e8b4bbeb1e5b0cf11abf9e9@sentry.io/155432").install();</script> -->
 
+		<meta name="google-site-verification" content="1thuOi5v1CBAAYEfkAwR2BlKMPAYwFfzMnRp7zv9M-U" /> <!-- for debate-map-dev.firebaseapp.com -->
 		<script>
 		if (window.location.hostname != "localhost") {
 			// for some odd reason, we need this here, even though we call ReactGA.initialize() (which is claimed to be enough on its own)
@@ -30,8 +31,15 @@
 
 		<script src="/dll.vendor.js?[hash]"></script>
 	</head>
-	<body class="unselectable" style="cursor: default; word-break: break-word; color: rgba(255,255,255,.7);">
+	<body class="unselectable" style="cursor: default; word-break: break-word; color: rgba(255,255,255,.7); height: 100%; min-height: 500px;">
 		<div id="hidden_early" style="position: absolute; left: -1000px; top: -1000px; width: 1000px; height: 1000px; overflow: hidden;"></div>
-		<div id="root" style="height: 100%"></div>
+		<div id="root" style="height: 100%">
+			<div style="height: 100%; display: flex; align-items: center; justify-content: center;">
+				<div style="color: black; font-size: 25px;">Loading...</div>
+			</div>
+		</div>
+		<!-- <div style="position: absolute; z-index: 1000; left: 0; top: 0; width: 1000px; height: 1000px;">
+			<pre id="botLog" style="color: red; font-size: 20px; font-weight: bold;"></pre>
+		</div> -->
 	</body>
 </html>

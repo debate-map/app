@@ -1,8 +1,8 @@
 // "static" imports
+import "./Frame/General/Start_0";
 import "babel-polyfill";
 import "webpack-runtime-require";
 //import {Require} from "webpack-runtime-require";
-import "./Frame/General/Start_0";
 import "./Frame/General/ClassExtensions/CE";
 import "./Frame/General/Start_1";
 import "./Server/Server";
@@ -15,7 +15,7 @@ import * as ReactDOM from "react-dom";
 import {Store} from "redux";
 import {RootState} from "./Store/index";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
-import {CurrentUrl, URL} from "./Frame/General/URLs";
+import {URL, GetCurrentURL} from "./Frame/General/URLs";
 import * as Raven from "raven-js";
 //import Promise from "bluebird";
 
@@ -38,7 +38,7 @@ g.Extend({React, Promise: PromiseWrapper});*/
 
 //g.Extend({ReactPerf});
 
-let startURL = URL.Current(true);
+let startURL = GetCurrentURL(true);
 declare global { export var startURL: URL; } g.Extend({startURL});
 
 //let {version, env, devEnv, prodEnv, testEnv} = __DEV__ ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");

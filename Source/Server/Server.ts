@@ -1,5 +1,5 @@
-import * as AJV from "ajv";
-import * as AJVKeywords from "ajv-keywords";
+import AJV from "ajv";
+import AJVKeywords from "ajv-keywords";
 
 export const ajv = AJVKeywords(new AJV()) as AJV_Extended;
 G({ajv}); declare global { const ajv: AJV_Extended; }
@@ -14,7 +14,7 @@ G({AddSchema}); declare global { function AddSchema(schema, name: string); }
 export function AddSchema(schema, name: string) {
 	schema = Schema(schema);
 	ajv.removeSchema(name); // for hot-reloading
-	return ajv.addSchema(schema, name);
+	return ajv.addSchema(schema, name); 
 }
 
 type AJV_Extended = AJV.Ajv & {

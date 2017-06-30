@@ -276,6 +276,9 @@ export function GetNewURL(includeMapViewStr = true) {
 		}
 	}
 
+	if (State(a=>a.main.urlExtraStr)) {
+		newURL.SetQueryVar("extra", State(a=>a.main.urlExtraStr));
+	}
 	if (!State(a=>a.main.analyticsEnabled) && newURL.GetQueryVar("analytics") == null) {
 		newURL.SetQueryVar("analytics", "false");
 	}

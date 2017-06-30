@@ -12,7 +12,7 @@ import TermDetailsUI from "../../../../Content/Terms/TermDetailsUI";
 import TermComponentsUI from "../../../../Content/Terms/TermComponentsUI";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
 import {GetUserID} from "../../../../../Store/firebase/users";
-import {URL} from "../../../../../Frame/General/URLs";
+import {URL, GetCurrentURL} from "../../../../../Frame/General/URLs";
 import {ParseSegmentsForPatterns} from "../../../../../Frame/General/RegexHelpers";
 import {ACTTermSelect} from "../../../../../Store/main/content";
 import {push} from "redux-little-router";
@@ -91,7 +91,7 @@ class TermDefinitionPanel extends BaseComponent<{term: Term, termVariantNumber: 
 		let {term, termVariantNumber} = this.props;
 
 		//let creatorOrMod = term != null && IsUserCreatorOrMod(GetUserID(), term);
-		let showDetailsURL = URL.Current(true).Clone();
+		let showDetailsURL = GetCurrentURL(true).Clone();
 		showDetailsURL.pathNodes = ["content", "terms", term._id+""];
 		showDetailsURL.queryVars = [];
 

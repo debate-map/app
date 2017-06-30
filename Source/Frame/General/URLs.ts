@@ -15,8 +15,6 @@ export const rootPageDefaultChilds = {
 	global: "map",
 }
 
-// note; look into the escaping issue more
-export function CurrentUrl() { return window.location.href.replace(/%22/, "\""); }
 export function ToAbsoluteUrl(url: string) {
 	 // Handle absolute URLs (with protocol-relative prefix)
 	// Example: //domain.com/file.png
@@ -49,8 +47,11 @@ export function JumpToHash(hashStr: string) {
 }
 
 /** Returns [domainStr, pathStr, varsStr, hashStr], without the separator-chars. */
+export function GetCurrentURLString() {
+	return window.location.href.replace(/%22/, "\"");
+}
 export function GetUrlParts(url?: string): [string, string, string, string] {
-	url = url || CurrentUrl();
+	url = url || GetCurrentURLString();
 
 	let [domainStr, pathStr, varsStr, hashStr] = Array(4).fill(0).map(a=>"");
 
@@ -87,13 +88,10 @@ function GetUrlVars(url?: string) {
 }
 
 export function GetCurrentURL(fromAddressBar = false) {
-	return fromAddressBar ? URL.Parse(CurrentUrl()) : URL.FromState(State("router"));
+	return fromAddressBar ? URL.Parse(GetCurrentURLString()) : URL.FromState(State("router"));
 }
 
 export class URL {
-	static Current(fromAddressBar = false) {
-		return GetCurrentURL(fromAddressBar);
-	}
 	static Parse(urlStr: string, useCurrentDomainIfMissing = true) {
 		if (useCurrentDomainIfMissing && !urlStr.startsWith("http"))
 			urlStr = window.location.origin + (urlStr.startsWith("/") ? "" : "/") + urlStr;

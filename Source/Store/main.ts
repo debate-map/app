@@ -33,6 +33,7 @@ import { MapInfoReducer } from "Store/main/maps/$map";
 // class is used only for initialization
 export class MainState {
 	page: string;
+	urlExtraStr: string;
 	envOverride: string;
 	analyticsEnabled: boolean;
 	topLeftOpenPanel: string;
@@ -96,9 +97,18 @@ export function MainReducer(state, action) {
 			PreDispatchAction(action);
 			return null;
 		},*/
-		envOverride: (state = null, action)=> {
+		// use this for eg. conditional debug displaying on live site
+		urlExtraStr: (state = null, action)=> {
 			//if ((action.type == "@@INIT" || action.type == "persist/REHYDRATE") && startURL.GetQueryVar("env"))
 			//if ((action.type == "PostRehydrate") && startURL.GetQueryVar("env"))
+			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).GetQueryVar("extra")) {
+				let newVal = URL.FromState(action.payload).GetQueryVar("extra");
+				if (newVal == "null") newVal = null;
+				return newVal;
+			}
+			return state;
+		},
+		envOverride: (state = null, action)=> {
 			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).GetQueryVar("env")) {
 				let newVal = URL.FromState(action.payload).GetQueryVar("env");
 				if (newVal == "null")

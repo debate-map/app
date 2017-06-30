@@ -46,9 +46,11 @@ const config = {
 			"babel-plugin-transform-es2015-destructuring",
 			"babel-plugin-transform-es2015-duplicate-keys",
 			//"babel-plugin-transform-es2015-for-of", // ohhh, I hate this thing... (the try-catch wrapping within transpiled for-of's)
+			["babel-plugin-transform-es2015-for-of", {loose: true}], // loose removes the try-catch wrapping
 			"babel-plugin-transform-es2015-function-name",
 			"babel-plugin-transform-es2015-literals",
-			["babel-plugin-transform-es2015-modules-commonjs", {strict: true, noInterop: true}],
+			"babel-plugin-transform-es2015-modules-commonjs", // uncommented; went back to using interop... (regenerator needs it -_-)
+			//["babel-plugin-transform-es2015-modules-commonjs", {strict: true, noInterop: true}],
 			"babel-plugin-transform-es2015-object-super",
 			"babel-plugin-transform-es2015-parameters",
 			"babel-plugin-transform-es2015-shorthand-properties",
@@ -57,14 +59,14 @@ const config = {
 			"babel-plugin-transform-es2015-template-literals",
 			"babel-plugin-transform-es2015-typeof-symbol",
 			"babel-plugin-transform-es2015-unicode-regex",
-			//"babel-plugin-transform-regenerator",
+			"babel-plugin-transform-regenerator", // for "async" transpilation; had been disabled, but found still needed for googlebot
 
 			// from stage-0
 			"babel-plugin-transform-object-rest-spread",
 			"babel-plugin-transform-class-properties",
 
-			//"babel-plugin-transform-runtime",
-			["babel-plugin-transform-runtime", {"regenerator": false}],
+			"babel-plugin-transform-runtime", // for "async" transpilation; had been disabled, but found still needed for googlebot
+			//["babel-plugin-transform-runtime", {"regenerator": false}],
 			"babel-plugin-lodash",
 			"babel-plugin-transform-decorators-legacy"
 		],

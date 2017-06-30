@@ -56,6 +56,13 @@ export class LogTypes {
 declare global { var logTypes: LogTypes; }
 g.logTypes = new LogTypes();
 
+if (localStorage.getItem("logTypes")) {
+	g.logTypes = JSON.parse(localStorage.getItem("logTypes"));
+}
+g.addEventListener("beforeunload", ()=> {
+	localStorage.setItem("logTypes", JSON.stringify(logTypes));
+});
+
 g.Extend({ShouldLog}); declare global { function ShouldLog(logTypeGetter: (logTypes: LogTypes)=>boolean); }
 function ShouldLog(logTypeGetter: (logTypes: LogTypes)=>boolean) {
 	return logTypeGetter(g.logTypes || {});

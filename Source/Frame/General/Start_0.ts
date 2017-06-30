@@ -1,3 +1,5 @@
+// Note: This file is where the very first custom Javascript code runs. (it's the first file imported from Main.ts, and imports run before the file itself)
+
 import "./Start_0"; // fake/empty import, so this module is correctly seen as module (rather than raw js script)
 
 // special, early, definitely-safe codes
@@ -11,6 +13,31 @@ g.$ = JQuery;*/
 let isBot = /bot|crawler|spider|robot|crawling|google|bing|duckduckgo|msn|slurp|yandex|baidu|aolbuild|teoma/i.test(navigator.userAgent);
 //declare global { const isBot: string; } g.Extend({isBot});
 declare global { const isBot: string; } g.isBot = isBot;
+
+function ShowBotMessage(message) {
+	if (document.body == null) {
+		g.addEventListener("load", ()=>ShowBotMessage(message));
+		return;
+	}
+
+	let container = document.createElement("div");
+	container.style.color = "red";
+	container.style.position = "fixed";
+	container.style.background = "#eee";
+	container.style.padding = "2em";
+	container.style.top = "1em";
+	container.style.left = "1em";
+
+	let msg = document.createElement("pre");
+	msg.innerText = message;
+	container.appendChild(msg);
+
+	document.body.appendChild(container);
+}
+if (location.href.indexOf("bot-test-1") != -1) {
+	ShowBotMessage("isBot: " + isBot);
+}
+//g.addEventListener("load", ()=>document.getElementById("botLog").innerText += "Test1" + "\n");
 
 // browser-check
 var GetBrowser = require("./UserAgent").GetBrowser;
@@ -36,25 +63,13 @@ if (isBot) {
 	g.onerror = function(message, url, line, column, error) {
 		console.log(arguments);
 
-		let container = document.createElement("div");
-		container.style.color = "red";
-		container.style.position = "fixed";
-		container.style.background = "#eee";
-		container.style.padding = "2em";
-		container.style.top = "1em";
-		container.style.left = "1em";
-
-		let msg = document.createElement("pre");
-		msg.innerText = [
-			"Message: " + message,
-			"URL: " + url,
-			"Line: " + line,
-			"Column: " + column,
-			"Stack: " + (error && error.stack)
-		].join("\n");
-		container.appendChild(msg);
-
-		document.body.appendChild(container);
+		ShowBotMessage(
+`Message: ${message}
+URL: ${url}
+Line: ${line}
+Column: ${column}
+Stack: ${error && error.stack}`
+		);
 	};
 }
 

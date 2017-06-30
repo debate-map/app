@@ -6,7 +6,7 @@ import {BaseComponent, SimpleShouldUpdate, GetInnerComp, FindDOM_, ShallowEquals
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import {styles} from "../../Frame/UI/GlobalStyles";
 import ScrollView from "react-vscrollview";
-import {JumpToHash, ToAbsoluteUrl, URL} from "../../Frame/General/URLs";
+import {JumpToHash, ToAbsoluteUrl, URL, GetCurrentURL} from "../../Frame/General/URLs";
 import {E} from "../../Frame/General/Globals_Free";
 import GlobalMapUI from "../Global/GlobalMapUI";
 import MapUI from "../@Shared/Maps/MapUI";
@@ -298,7 +298,7 @@ const Link = (props)=> {
 	let {href, nodeKey, children, literal, ...rest} = props;
 	return (
 		<a {...rest} href={href} key={nodeKey} onClick={e=> {
-			let currentURL = URL.Current(true);
+			let currentURL = GetCurrentURL(true);
 			//let fullURL = href.Contains("://") ? href : GetUrlParts()[0] + "/" + href;
 			let toURL = URL.Parse(ToAbsoluteUrl(href));
 			if (toURL.domain == currentURL.domain) {

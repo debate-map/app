@@ -7,6 +7,7 @@
 		"forceConsistentCasingInFileNames": true, // creates duplicates in import-helper plugins otherwise
 
 		// modules/paths
+		"module": "es2015",
 		"moduleResolution": "node",
 		//"maxNodeModulesJsDepth": 1,
 		//"rootDir": ".",
@@ -34,8 +35,8 @@
 		//"maxNodeModuleJsDepth": 1,
 		"jsx": "react",
 		"noImplicitAny": false,
-		"experimentalDecorators": true
-		//"allowSyntheticDefaultImports": true
+		"experimentalDecorators": true,
+		"allowSyntheticDefaultImports": true
     },
 	"files": ["Source/Main.ts"],
 	"include": [

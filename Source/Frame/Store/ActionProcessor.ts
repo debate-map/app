@@ -9,7 +9,7 @@ import { GetMapView, GetSelectedNodePath, GetFocusedNodePath } from "../../Store
 import {Vector2i} from "../General/VectorStructs";
 import {RootState} from "../../Store/index";
 import * as ReactGA from "react-ga";
-import {URL, CurrentUrl, GetCurrentURL} from "../General/URLs";
+import {URL, GetCurrentURL} from "../General/URLs";
 import {CreateMapViewForPath, GetShortestPathFromRootToNode} from "./PathFinder";
 import {ACTNotificationMessageAdd, ACTSetPage, ACTSetSubpage} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
