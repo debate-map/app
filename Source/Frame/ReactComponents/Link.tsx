@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { PropTypes } from "react";
 import {BaseComponent} from "../UI/ReactGlobals";
 import Radium from "radium";

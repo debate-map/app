@@ -14,7 +14,7 @@ import Column from "../../Frame/ReactComponents/Column";
 import Row from "../../Frame/ReactComponents/Row";
 import {User, GetUserID} from "../../Store/firebase/users";
 import {RatingsSet} from "../../Store/firebase/nodeRatings/@RatingsRoot";
-import * as Firebase from "firebase";
+import Firebase from "firebase";
 //import "./Admin/DBUpgrades/UpgradeDB_2";
 import Select from "../../Frame/ReactComponents/Select";
 import {DataSnapshot} from "firebase";

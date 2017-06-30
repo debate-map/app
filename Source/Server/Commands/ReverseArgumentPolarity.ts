@@ -6,7 +6,7 @@ import {E} from "../../Frame/General/Globals_Free";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import {ReverseMapNodeType, IsArgumentNode} from "../../Store/firebase/nodes/$node";
 import {ReverseThenType} from "../../Store/firebase/nodes/$node/$metaThesis";
-import * as u from "updeep";
+import u from "updeep";
 import {RatingsSet} from "../../Store/firebase/nodeRatings/@RatingsRoot";
 
 AddSchema({

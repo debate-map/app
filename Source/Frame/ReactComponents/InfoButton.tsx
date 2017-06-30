@@ -1,7 +1,7 @@
 import {BaseComponent, Pre} from "../UI/ReactGlobals";
 import {ButtonProps} from "./Button";
 import Button from "./Button";
-import * as ReactTooltip from "react-tooltip";
+import ReactTooltip from "react-tooltip";
 
 type EffectType = "float" | "solid";
 class TooltipInfo {

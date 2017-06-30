@@ -1,5 +1,5 @@
 import {GetRatingValue, TransformRatingForContext, ShouldRatingTypeBeReversed} from "../../../../../Store/firebase/nodeRatings";
-import * as jquery from "jquery";
+import jquery from "jquery";
 import {Log} from "../../../../../Frame/General/Logging";
 import {BaseComponent, FindDOM, Pre, RenderSource, SimpleShouldUpdate, FindDOM_} from "../../../../../Frame/UI/ReactGlobals";
 import {Vector2i} from "../../../../../Frame/General/VectorStructs";

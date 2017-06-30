@@ -8,15 +8,15 @@ import "./Frame/General/Start_1";
 import "./Server/Server";
 import "codemirror";
 import "codemirror/addon/scroll/simplescrollbars";
-//import * as ReactPerf from "react-addons-perf";
+//import ReactPerf from "react-addons-perf";
 import "./Frame/General/Profiling";
 
-import * as ReactDOM from "react-dom";
+import ReactDOM from "react-dom";
 import {Store} from "redux";
 import {RootState} from "./Store/index";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
 import {URL, GetCurrentURL} from "./Frame/General/URLs";
-import * as Raven from "raven-js";
+import Raven from "raven-js";
 //import Promise from "bluebird";
 
 // startup (non-hot)

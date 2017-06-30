@@ -5,7 +5,7 @@ import {GetEntries} from "../../../../../Frame/General/Enums";
 import {RootState} from "../../../../../Store";
 import {GetUserID, GetUserPermissionGroups, GetUserMap, GetUser, User} from "../../../../../Store/firebase/users";
 import Button from "../../../../../Frame/ReactComponents/Button";
-import * as jquery from "jquery";
+import jquery from "jquery";
 import {Log} from "../../../../../Frame/General/Logging";
 import {BaseComponent, FindDOM, Pre, RenderSource, SimpleShouldUpdate, FindDOM_, Div, GetInnerComp} from "../../../../../Frame/UI/ReactGlobals";
 import {Vector2i} from "../../../../../Frame/General/VectorStructs";
@@ -17,7 +17,7 @@ import {ShowMessageBox_Base, ShowMessageBox} from "../../../../../Frame/UI/VMess
 import {firebaseConnect} from "react-redux-firebase";
 import {WaitXThenRun} from "../../../../../Frame/General/Timers";
 import TextInput from "../../../../../Frame/ReactComponents/TextInput";
-import * as Moment from "moment";
+import Moment from "moment";
 import {GetParentNode, GetParentNodeID} from "../../../../../Store/firebase/nodes";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";

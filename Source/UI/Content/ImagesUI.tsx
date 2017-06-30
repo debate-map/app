@@ -19,7 +19,7 @@ import {RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
 import UpdateNodeDetails from "../../Server/Commands/UpdateNodeDetails";
 import {IsUserCreatorOrMod} from "../../Store/firebase/userExtras";
 import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
-import * as Moment from "moment";
+import Moment from "moment";
 import {GetImages} from "../../Store/firebase/images";
 import {Image, ImageType} from "../../Store/firebase/images/@Image";
 import ImageDetailsUI from "./Images/ImageDetailsUI";

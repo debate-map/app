@@ -1,7 +1,7 @@
 import {cloneElement} from "react";
 import PropTypes from "prop-types";
 import {BaseComponent, FindDOM, AddGlobalStyle} from "../UI/ReactGlobals";
-import * as classNames from "classnames";
+import classNames from "classnames";
 
 AddGlobalStyle(`
 .dropdown {

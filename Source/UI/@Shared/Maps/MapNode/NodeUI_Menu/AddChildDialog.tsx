@@ -7,7 +7,7 @@ import TextInput from "../../../../../Frame/ReactComponents/TextInput";
 import {Div, Pre, BaseComponent} from "../../../../../Frame/UI/ReactGlobals";
 import Row from "../../../../../Frame/ReactComponents/Row";
 import Column from "../../../../../Frame/ReactComponents/Column";
-import * as keycode from "keycode";
+import keycode from "keycode";
 import Button from "../../../../../Frame/ReactComponents/Button";
 import {SourcesUI} from "../NodeUI_Inner";
 import {E} from "../../../../../Frame/General/Globals_Free";

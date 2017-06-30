@@ -1,5 +1,5 @@
 {
-    "compilerOptions": {
+	"compilerOptions": {
 		// general
 		"sourceMap": true,
 		"watch": true,
@@ -37,7 +37,7 @@
 		"noImplicitAny": false,
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true
-    },
+	},
 	"files": ["Source/Main.ts"],
 	"include": [
 		"Typings/**/*.d.ts",

@@ -14,9 +14,9 @@ import {GetTreeNodesInObjTree, DeepGet} from "../Frame/V/V";
 import {Set} from "immutable";
 import {MainState, MainReducer} from "./main";
 import {LocationDescriptorObject} from "history";
-import * as Immutable from "immutable";
+import Immutable from "immutable";
 import {ACTDebateMapSelect} from "./main/debates";
-import * as u from "updeep";
+import u from "updeep";
 import {URL} from "../Frame/General/URLs";
 
 export function InjectReducer(store, {key, reducer}) {

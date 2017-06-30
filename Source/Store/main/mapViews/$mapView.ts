@@ -5,7 +5,7 @@ import {ShallowEquals} from "../../../Frame/UI/ReactGlobals";
 import {FromJSON, ToJSON} from "../../../Frame/General/Globals";
 import {GetTreeNodesInObjTree} from "../../../Frame/V/V";
 import {IsPrimitive} from "../../../Frame/General/Types";
-import * as u from "updeep";
+import u from "updeep";
 import {DBPath} from "../../../Frame/Database/DatabaseHelpers";
 import {GetFocusedNodePath} from "../mapViews";
 

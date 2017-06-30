@@ -14,7 +14,7 @@ import {CachedTransform} from '../../../Frame/V/VCache';
 import {ReverseThenType} from './$node/$metaThesis';
 import {SlicePath} from "../../../UI/@Shared/Maps/MapNode/NodeUI/RatingsPanel";
 import {ImageType} from '../images/@Image';
-import * as katex from "katex";
+import katex from "katex";
 import {PreProcessLatex} from "../../../UI/@Shared/Maps/MapNode/NodeMathUI";
 import {SplitStringBySlash_Cached} from "../../../Frame/Database/StringSplitCache";
 

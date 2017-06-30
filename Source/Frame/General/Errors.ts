@@ -1,7 +1,7 @@
 import {ACTNotificationMessageAdd} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import {LogError} from "./Logging";
-import * as Raven from "raven-js";
+import Raven from "raven-js";
 
 if (!hotReloading) {
 	//g.onerror = function(message: string, filePath: string, line: number, column: number, error: Error) {

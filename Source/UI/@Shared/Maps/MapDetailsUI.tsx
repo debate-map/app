@@ -3,7 +3,7 @@ import {BaseComponent, Pre, RenderSource, Div, FindDOM, GetErrorMessagesUnderEle
 import Column from "../../../Frame/ReactComponents/Column";
 import Row from "../../../Frame/ReactComponents/Row";
 import TextInput from "../../../Frame/ReactComponents/TextInput";
-import * as Moment from "moment";
+import Moment from "moment";
 import {GetUser, User} from "../../../Store/firebase/users";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../Frame/General/Enums";

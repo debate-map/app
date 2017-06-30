@@ -23,7 +23,7 @@ import UpdateTermData from "../../Server/Commands/UpdateTermData";
 import {IsUserCreatorOrMod} from "../../Store/firebase/userExtras";
 import DeleteTerm from "../../Server/Commands/DeleteTerm";
 import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
-import * as Moment from "moment";
+import Moment from "moment";
 import TermComponentsUI from "../../UI/Content/Terms/TermComponentsUI";
 import {ShowAddTermComponentDialog} from "./Terms/AddTermComponentDialog";
 

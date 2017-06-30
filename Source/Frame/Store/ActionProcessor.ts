@@ -8,13 +8,13 @@ import {DBPath, GetData, GetDataAsync, ProcessDBData} from "../Database/Database
 import { GetMapView, GetSelectedNodePath, GetFocusedNodePath } from "../../Store/main/mapViews";
 import {Vector2i} from "../General/VectorStructs";
 import {RootState} from "../../Store/index";
-import * as ReactGA from "react-ga";
+import ReactGA from "react-ga";
 import {URL, GetCurrentURL} from "../General/URLs";
 import {CreateMapViewForPath, GetShortestPathFromRootToNode} from "./PathFinder";
 import {ACTNotificationMessageAdd, ACTSetPage, ACTSetSubpage} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import {GetNodeDisplayText} from "../../Store/firebase/nodes/$node";
-import * as Raven from "raven-js";
+import Raven from "raven-js";
 import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "../../Store/main/debates";
 import {ACTTermSelect, ACTImageSelect} from "../../Store/main/content";
 import {LOCATION_CHANGED} from "redux-little-router";

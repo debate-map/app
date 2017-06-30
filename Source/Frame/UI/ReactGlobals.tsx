@@ -2,18 +2,18 @@ import {Log} from "../General/Logging";
 // React stuff
 // ==========
 
-import * as React from "react";
+import React from "react";
 import {Component} from "react";
-import * as ReactDOM from "react-dom";
+import ReactDOM from "react-dom";
 import {WaitXThenRun, Timer} from "../General/Timers";
-import * as autoBind from "react-autobind";
+import autoBind from "react-autobind";
 import {IsString} from "../General/Types";
 import {Assert} from "../General/Assert";
 import {E, Global, QuickIncrement} from "../General/Globals_Free";
-import * as ShallowCompare from "react/lib/shallowCompare";
+import ShallowCompare from "react/lib/shallowCompare";
 import {FirebaseApplication} from "firebase";
 import V from "../V/V";
-import * as classNames from "classnames";
+import classNames from "classnames";
 export {ShallowCompare};
 
 //var ReactInstanceMap = require("react/lib/ReactInstanceMap");

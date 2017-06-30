@@ -4,7 +4,7 @@ import {Connect} from "../Frame/Database/FirebaseConnect";
 import {GetUsers, GetUserExtraInfoMap, UserExtraInfoMap, User} from "../Store/firebase/users";
 import Row from "../Frame/ReactComponents/Row";
 import UserExtraInfo from "../Store/firebase/userExtras/@UserExtraInfo";
-import * as Moment from "moment";
+import Moment from "moment";
 import ScrollView from "react-vscrollview";
 import Column from "../Frame/ReactComponents/Column";
 

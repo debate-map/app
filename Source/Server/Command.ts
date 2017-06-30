@@ -1,4 +1,4 @@
-import * as u from "updeep";
+import u from "updeep";
 import {GetUserID} from "Store/firebase/users";
 
 export class CommandUserInfo {

@@ -2,9 +2,9 @@ import {ParseModuleData, Require} from "webpack-runtime-require";
 import {Store} from "redux";
 import {RootState} from "./Store/index";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
-import * as ReactDOM from "react-dom";
-import * as StackTrace from "stacktrace-js";
-import * as React from "react/lib/ReactWithAddons";
+import ReactDOM from "react-dom";
+import StackTrace from "stacktrace-js";
+import React from "react/lib/ReactWithAddons";
 import {DeepGet} from "./Frame/V/V";
 import {OnAccessPath} from "./Frame/Database/FirebaseConnect";
 

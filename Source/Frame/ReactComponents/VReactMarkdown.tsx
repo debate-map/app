@@ -1,7 +1,7 @@
 import {ReactMarkdownProps} from "react-markdown";
 //import {BaseComponent} from "../UI/ReactGlobals";
 import {Component as BaseComponent} from "react";
-import * as ReactMarkdown from "react-markdown";
+import ReactMarkdown from "react-markdown";
 import {Segment, ParseSegmentsForPatterns} from "../General/RegexHelpers";
 
 export type ReplacementFunc = (segment: Segment, index: number)=>JSX.Element;

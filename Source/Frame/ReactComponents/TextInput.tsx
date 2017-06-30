@@ -1,5 +1,5 @@
 import {Assert} from "../../Frame/General/Assert";
-import * as React from "react";
+import React from "react";
 import {BaseComponent, ApplyBasicStyles} from "../UI/ReactGlobals";
 import {E} from "../General/Globals_Free";
 

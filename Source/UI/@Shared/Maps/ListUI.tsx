@@ -21,13 +21,13 @@ import TagsPanel from "../../@Shared/Maps/MapNode/NodeUI/TagsPanel";
 import OthersPanel from "../../@Shared/Maps/MapNode/NodeUI/OthersPanel";
 import DetailsPanel from "../../@Shared/Maps/MapNode/NodeUI/DetailsPanel";
 import {MapNodeType, MapNodeType_Info} from "../../../Store/firebase/nodes/@MapNodeType";
-import * as Moment from "moment";
+import Moment from "moment";
 import {GetSelectedNode_InList, ACTSelectedNode_InListSet, GetMap_List_SelectedNode_OpenPanel, ACTMap_List_SelectedNode_OpenPanelSet} from "../../../Store/main/maps/$map";
 import {GetUser, User} from "../../../Store/firebase/users";
 import {MapNodeView} from "../../../Store/main/mapViews/@MapViews";
 import {RatingsRoot} from "../../../Store/firebase/nodeRatings/@RatingsRoot";
 import MapNodeUI_LeftBox from "./MapNode/NodeUI_LeftBox";
-import * as ResizeSensor from "react-resize-sensor";
+import ResizeSensor from "react-resize-sensor";
 
 type Props = {
 	map: Map,
