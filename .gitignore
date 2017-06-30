@@ -12,3 +12,5 @@ coverage
 /Source_JS
 /.happypack
 /Tools/Dependency Analysis/Stats.json
+/Tools/Dependency Analysis/ModuleTimings_Incremental.json
+/Tools/Dependency Analysis/Stats_Incremental.json

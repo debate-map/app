@@ -35,7 +35,11 @@ const webpackConfig = {
 		//fallback: [path.join(__dirname, "node_modules")]
 		//modules: ["node_modules"],
 	},
-	module: {}
+	module: {
+		/*noParse: [
+			/JQuery3.1.0.js$/
+		]*/
+	}
 };
 
 /*if (__PROD__) {
@@ -228,63 +232,15 @@ if (USE_TSLOADER) {
 	webpackConfig.module.rules.push({test: /\.tsx?$/, loader: "ts-loader", options: {include: [paths.client()]}});
 }
 
-// Style Loaders
+// css loaders
 // ==========
 
 // We use cssnano with the postcss loader, so we tell css-loader not to duplicate minimization.
-const BASE_CSS_LOADER = "css-loader?sourceMap&-minimize"
+//const BASE_CSS_LOADER = "css-loader?sourceMap&-minimize"
+const BASE_CSS_LOADER = "css-loader?-minimize"
 
-// Add any packge names here whose styles need to be treated as CSS modules.
-// These paths will be combined into a single regex.
-/*const PATHS_TO_TREAT_AS_CSS_MODULES = [
-	// "react-toolbox", (example)
-]
-
-// If config has CSS modules enabled, treat this project"s styles as CSS modules.
-if (config.compiler_css_modules) {
-	PATHS_TO_TREAT_AS_CSS_MODULES.push(
-		paths.client().replace(/[\^\$\.\*\+\-\?\=\!\:\|\\\/\(\)\[\]\{\}\,]/g, "\\$&") // eslint-disable-line
-	)
-}
-const isUsingCSSModules = !!PATHS_TO_TREAT_AS_CSS_MODULES.length
-const cssModulesRegex = new RegExp(`(${PATHS_TO_TREAT_AS_CSS_MODULES.join("|")})`)
-
-// Loaders for styles that need to be treated as CSS modules.
-if (isUsingCSSModules) {
-	const cssModulesLoader = [
-		BASE_CSS_LOADER,
-		"modules",
-		"importLoaders=1",
-		"localIdentName=[name]__[local]___[hash:base64:5]"
-	].join("&")
-
-	webpackConfig.module.rules.push({
-		test: /\.scss$/,
-		include: cssModulesRegex,
-		loaders: [
-			"style-loader",
-			cssModulesLoader,
-			"postcss-loader",
-			"sass-loader?sourceMap"
-		]
-	})
-
-	webpackConfig.module.rules.push({
-		test: /\.css$/,
-		include: cssModulesRegex,
-		loaders: [
-			"style-loader",
-			cssModulesLoader,
-			"postcss-loader"
-		]
-	})
-}*/
-
-// Loaders for files that should not be treated as CSS modules.
-//const excludeCSSModules = isUsingCSSModules ? cssModulesRegex : false
 webpackConfig.module.rules.push({
 	test: /\.scss$/,
-	//exclude: excludeCSSModules,
 	use: ExtractTextPlugin.extract({
 		fallback: "style-loader",
 		use: [
@@ -304,15 +260,22 @@ webpackConfig.module.rules.push({
 					mergeIdents: false,
 					reduceIdents: false,
 					safe: true,
-					sourcemap: true
+					//sourcemap: true
 				})
 			},
 			{
-				loader: "sass-loader?sourceMap",
+				//loader: "sass-loader?sourceMap",
+				loader: "sass-loader",
 				options: {
-					includePaths: paths.client("styles")
+					includePaths: [paths.client("styles")],
 				}
 			}
+			/*{
+				loader: "fast-sass-loader",
+				options: {
+					includePaths: [paths.client("styles")],
+				}
+			}*/
 		],
 	}),
 });
@@ -324,28 +287,6 @@ webpackConfig.module.rules.push({
 		use: [BASE_CSS_LOADER, "postcss-loader"],
 	}),
 });
-
-/*webpackConfig.sassLoader = {
-	includePaths: paths.client("styles")
-}*/
-
-/*webpackConfig.postcss = [
-	cssnano({
-		autoprefixer: {
-			add: true,
-			remove: true,
-			browsers: ["last 2 versions"]
-		},
-		discardComments: {
-			removeAll: true
-		},
-		discardUnused: false,
-		mergeIdents: false,
-		reduceIdents: false,
-		safe: true,
-		sourcemap: true
-	})
-]*/
 
 // File loaders
 /* eslint-disable */
@@ -381,7 +322,6 @@ webpackConfig.plugins.push(
 	//new ExtractTextPlugin("[name].[contenthash].css", {allChunks: true}),
 	new ExtractTextPlugin({filename: "[name].css?[contenthash]", allChunks: true})
 );
-//}
 
 const SpriteLoaderPlugin = require("svg-sprite-loader/plugin");
 webpackConfig.plugins.push(
@@ -402,6 +342,7 @@ webpackConfig.module.rules.push({
 });
 
 if (OUTPUT_STATS) {
+	let firstOutput = true;
 	webpackConfig.plugins.push(
 		{
 			apply: function(compiler) {
@@ -451,7 +392,7 @@ if (OUTPUT_STATS) {
 						warnings: false,
 						publicPath: false,
 					});
-					fs.writeFile("./Tools/Dependency Analysis/Stats.json", JSON.stringify(stats), done);
+					fs.writeFile(`./Tools/Dependency Analysis/Stats${firstOutput ? "" : "_Incremental"}.json`, JSON.stringify(stats), done);
 
 					let modules_justTimings = stats.modules.map(mod=> {
 						let timings = mod.profile;
@@ -468,7 +409,9 @@ if (OUTPUT_STATS) {
 						modules_justTimings_asMap[mod.name] = mod;
 						delete mod.name;
 					}
-					fs.writeFile("./Tools/Dependency Analysis/ModuleTimings.json", JSON.stringify(modules_justTimings_asMap, null, 2), done);
+					fs.writeFile(`./Tools/Dependency Analysis/ModuleTimings${firstOutput ? "" : "_Incremental"}.json`, JSON.stringify(modules_justTimings_asMap, null, 2), done);
+
+					firstOutput = false;
 				});
 			}
 		}
