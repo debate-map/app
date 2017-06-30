@@ -2,14 +2,15 @@ const webpack = require("webpack");
 const cssnano = require("cssnano");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
-var BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
+const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const config = require("../config");
 const debug = require("debug")("app:webpack:config");
-var path = require("path");
+const path = require("path");
+const fs = require("fs");
 
 const paths = config.utils_paths;
 const {__DEV__, __PROD__, __TEST__} = config.globals;
-const {QUICK, USE_TSLOADER} = process.env;
+const {QUICK, USE_TSLOADER, OUTPUT_STATS} = process.env;
 
 debug("Creating configuration.");
 const webpackConfig = {
@@ -399,5 +400,109 @@ webpackConfig.module.rules.push({
 		"svgo-loader",
 	]*/
 });
+
+if (OUTPUT_STATS) {
+	webpackConfig.plugins.push(
+		{
+			apply: function(compiler) {
+				compiler.plugin("after-emit", function(compilation, done) {
+					/*var stats = compilation.getStats().toJson({
+						// node_modules/webpack/lib/Stats.js
+						hash: true,
+						version: true,
+						timings: true,
+						assets: true,
+						chunks: false,
+						chunkModules: false,
+						chunkOrigins: false,
+						modules: false,
+						cached: false,
+						reasons: false,
+						children: false,
+						source: false,
+						errors: false,
+						errorDetails: false,
+						warnings: false,
+						publicPath: true,
+					});*/
+					//delete stats.assets;
+					/*var stats = compilation.getStats().toJson({
+						chunks: true,
+						chunkModules: true,
+						modules: true
+					});*/
+					//var stats = compilation.getStats().toJson();
+
+					var stats = compilation.getStats().toJson({
+						hash: false,
+						version: false,
+						timings: true,
+						assets: false,
+						chunks: false,
+						chunkModules: false,
+						chunkOrigins: false,
+						modules: true,
+						cached: false,
+						reasons: false,
+						children: false,
+						source: false,
+						errors: false,
+						errorDetails: false,
+						warnings: false,
+						publicPath: false,
+					});
+					fs.writeFile("./Tools/Dependency Analysis/Stats.json", JSON.stringify(stats), done);
+
+					let modules_justTimings = stats.modules.map(mod=> {
+						let timings = mod.profile;
+						return {
+							name: mod.name,
+							totalTime: (timings.factory|0) + (timings.building|0) + (timings.dependencies|0),
+							timings: timings,
+						};
+					});
+					modules_justTimings = SortArrayDescending(modules_justTimings, a=>a.totalTime);
+
+					let modules_justTimings_asMap = {};
+					for (let mod of modules_justTimings) {
+						modules_justTimings_asMap[mod.name] = mod;
+						delete mod.name;
+					}
+					fs.writeFile("./Tools/Dependency Analysis/ModuleTimings.json", JSON.stringify(modules_justTimings_asMap, null, 2), done);
+				});
+			}
+		}
+	);
+
+	/*let CircularDependencyPlugin = require("circular-dependency-plugin");
+	webpackConfig.plugins.push(
+		new CircularDependencyPlugin({exclude: /node_modules/})
+	);*/
+
+	webpackConfig.profile = true;
+	webpackConfig.stats = "verbose";
+}
+
+function SortArray(array, valFunc = (item, index)=>item) {
+    return StableSort(array, (a, b, aIndex, bIndex)=>Compare(valFunc(a, aIndex), valFunc(b, bIndex)));
+};
+function SortArrayDescending(array, valFunc = (item, index)=>item) {
+	return SortArray(array, (item, index)=>-valFunc(item, index));
+};
+function StableSort(array, compareFunc) { // needed for Chrome
+	var array2 = array.map((item, index)=>({index, item}));
+	array2.sort((a, b)=> {
+		var r = compareFunc(a.item, b.item, a.index, b.index);
+		return r != 0 ? r : Compare(a.index, b.index);
+	});
+	return array2.map(pack=>pack.item);
+}
+function Compare(a, b, caseSensitive = true) {
+	if (!caseSensitive && typeof a == "string" && typeof b == "string") {
+		a = a.toLowerCase();
+		b = b.toLowerCase();
+	}
+	return a < b ? -1 : (a > b ? 1 : 0);
+}
 
 module.exports = webpackConfig;

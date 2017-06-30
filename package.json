@@ -13,6 +13,7 @@
     "lint:fix": "npm run lint -- --fix",
     "start": "better-npm-run start",
     "dev": "better-npm-run dev",
+    "dev-with-stats": "better-npm-run dev-with-stats",
     "dev:no-debug": "npm run dev -- --no_debug",
     "test": "better-npm-run test",
     "test:dev": "npm run test -- --watch",
@@ -101,12 +102,21 @@
       }
     },
     "dev": {
-      "@command": "npm run create-config && nodemon bin/server --ignore dist --ignore coverage --ignore Tests --ignore Source ",
-      "command": "npm run create-config && nodemon bin/server --ignore dist --ignore coverage --ignore Tests --ignore Source --max_old_space_size=4096",
+      "@command": "npm run create-config && nodemon bin/server --watch bin --watch build --watch config --watch Server",
+      "command": "npm run create-config && nodemon bin/server --watch bin --watch build --watch config --watch Server --max_old_space_size=4096",
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*",
         "USE_TSLOADER": "true"
+      }
+    },
+    "dev-with-stats": {
+      "command": "npm run create-config && nodemon bin/server --watch bin --watch build --watch config --watch Server --max_old_space_size=4096",
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "app:*",
+        "USE_TSLOADER": "true",
+        "OUTPUT_STATS": "true"
       }
     },
     "deploy:dev": {
@@ -214,6 +224,7 @@
     "chai-as-promised": "^5.3.0",
     "chai-enzyme": "^0.5.0",
     "cheerio": "^0.20.0",
+    "circular-dependency-plugin": "^3.0.0",
     "codecov": "^1.0.1",
     "connect-history-api-fallback": "^1.3.0",
     "css-loader": "^0.25.0",
@@ -263,6 +274,7 @@
     "url-loader": "^0.5.6",
     "webpack": "^1.13.3",
     "webpack-bundle-analyzer": "^2.4.0",
+    "webpack-cyclic-dependency-checker": "0.0.1",
     "webpack-dev-middleware": "^1.6.1",
     "webpack-hot-middleware": "^2.12.2",
     "why-did-you-update": "0.0.8",

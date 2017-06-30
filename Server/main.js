@@ -27,6 +27,8 @@ app.use(require("connect-history-api-fallback")({
 if (config.env === "development") {
 	const compiler = webpack(webpackConfig);
 
+	compiler.apply(new webpack.ProgressPlugin({profile: true}));
+
 	debug("Enable webpack dev and HMR middleware");
 	app.use(require("webpack-dev-middleware")(compiler, {
 		publicPath: webpackConfig.output.publicPath,
@@ -35,7 +37,8 @@ if (config.env === "development") {
 		quiet: config.compiler_quiet,
 		noInfo: config.compiler_quiet,
 		lazy: false,
-		stats: config.compiler_stats
+		stats: config.compiler_stats,
+		progress: true
 	}));
 	app.use(require("webpack-hot-middleware")(compiler));
 

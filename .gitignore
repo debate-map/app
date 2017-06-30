@@ -11,3 +11,4 @@ coverage
 /dist
 /Source_JS
 /.happypack
+/Tools/Dependency Analysis/Stats.json

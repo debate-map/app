@@ -1,6 +1,5 @@
 import {NodeType} from "react-markdown";
 import {Log} from "../General/Logging";
-import {Assert} from "../../Frame/General/Assert";
 import {IsPrimitive, IsString} from "../General/Types";
 import StackTrace from "stacktrace-js";
 
@@ -114,7 +113,8 @@ export default class V {
 	}
 
 	static CloneObject(obj, propMatchFunc?: Function, depth = 0) {
-	    Assert(depth < 100, "CloneObject cannot work past depth 100! (probably circular ref)");
+		/*var Assert = require("../../Frame/General/Assert").Assert;
+		Assert(depth < 100, "CloneObject cannot work past depth 100! (probably circular ref)");*/
 
 		if (obj == null)
 			return null;

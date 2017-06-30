@@ -1,0 +1,5106 @@
+{
+  "./Source/Frame/Styles/Core.scss": {
+    "totalTime": 21960,
+    "timings": {
+      "factory": 1121,
+      "building": 20839
+    }
+  },
+  "./Source/Frame/JQuery/JQuery3.1.0.js": {
+    "totalTime": 19564,
+    "timings": {
+      "factory": 144,
+      "building": 19334,
+      "dependencies": 86
+    }
+  },
+  "./Source/Main.ts": {
+    "totalTime": 10829,
+    "timings": {
+      "factory": 90,
+      "building": 10739
+    }
+  },
+  "./~/strip-ansi/index.js": {
+    "totalTime": 9176,
+    "timings": {
+      "factory": 8674,
+      "building": 502
+    }
+  },
+  "delegated ../../node_modules/webpack/buildin/module.js from dll-reference vendor": {
+    "totalTime": 8673,
+    "timings": {
+      "factory": 8672,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/querystring-es3/index.js from dll-reference vendor": {
+    "totalTime": 8668,
+    "timings": {
+      "factory": 8667,
+      "building": 1
+    }
+  },
+  "(webpack)-hot-middleware/process-update.js": {
+    "totalTime": 8666,
+    "timings": {
+      "factory": 8564,
+      "building": 102
+    }
+  },
+  "(webpack)-hot-middleware/client-overlay.js": {
+    "totalTime": 8642,
+    "timings": {
+      "factory": 8563,
+      "building": 79
+    }
+  },
+  "./Source/Frame/URL/URLManager.ts": {
+    "totalTime": 7549,
+    "timings": {
+      "factory": 1275,
+      "building": 4321,
+      "dependencies": 1953
+    }
+  },
+  "./~/redux-little-router/~/history/createMemoryHistory.js": {
+    "totalTime": 7208,
+    "timings": {
+      "factory": 1408,
+      "building": 1861,
+      "dependencies": 3939
+    }
+  },
+  "C:/Root/Apps/@V/@Modules/react-vscrollview/Main/dist/ScrollView.js": {
+    "totalTime": 7143,
+    "timings": {
+      "factory": 3933,
+      "building": 3204,
+      "dependencies": 6
+    }
+  },
+  "./Source/Store/main/maps/$map.ts": {
+    "totalTime": 7098,
+    "timings": {
+      "factory": 2520,
+      "building": 3900,
+      "dependencies": 678
+    }
+  },
+  "./Source/Store/main/maps/@MapInfo.ts": {
+    "totalTime": 7098,
+    "timings": {
+      "factory": 2519,
+      "building": 3896,
+      "dependencies": 683
+    }
+  },
+  "./Source/Frame/General/URLs.ts": {
+    "totalTime": 7018,
+    "timings": {
+      "factory": 48,
+      "building": 1939,
+      "dependencies": 5031
+    }
+  },
+  "./Source/Frame/General/Start_0.ts": {
+    "totalTime": 7016,
+    "timings": {
+      "factory": 44,
+      "building": 1916,
+      "dependencies": 5056
+    }
+  },
+  "./Source/Frame/General/ClassExtensions/CE.ts": {
+    "totalTime": 7016,
+    "timings": {
+      "factory": 49,
+      "building": 1956,
+      "dependencies": 5011
+    }
+  },
+  "./Source/UI/More/Admin/ResetCurrentDBRoot.ts": {
+    "totalTime": 6693,
+    "timings": {
+      "factory": 1511,
+      "building": 4374,
+      "dependencies": 808
+    }
+  },
+  "./Source/Store/main/mapViews/$mapView/rootNodeViews.ts": {
+    "totalTime": 6675,
+    "timings": {
+      "factory": 1687,
+      "building": 4768,
+      "dependencies": 220
+    }
+  },
+  "./Source/UI/Content/Images/ImageDetailsUI.tsx": {
+    "totalTime": 6670,
+    "timings": {
+      "factory": 1546,
+      "building": 4592,
+      "dependencies": 532
+    }
+  },
+  "./Source/Server/Commands/UpdateImageData.ts": {
+    "totalTime": 6669,
+    "timings": {
+      "factory": 1541,
+      "building": 4320,
+      "dependencies": 808
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeUI_Inner.tsx": {
+    "totalTime": 6633,
+    "timings": {
+      "factory": 446,
+      "building": 5789,
+      "dependencies": 398
+    }
+  },
+  "./Source/Store/firebase/nodes/@MapNode.ts": {
+    "totalTime": 6590,
+    "timings": {
+      "factory": 2343,
+      "building": 4153,
+      "dependencies": 94
+    }
+  },
+  "./Source/UI/@Shared/Maps/ListUI.tsx": {
+    "totalTime": 6540,
+    "timings": {
+      "factory": 1986,
+      "building": 4118,
+      "dependencies": 436
+    }
+  },
+  "./Source/UI/Root.tsx": {
+    "totalTime": 6466,
+    "timings": {
+      "factory": 227,
+      "building": 5249,
+      "dependencies": 990
+    }
+  },
+  "./Source/UI/Content/Terms/TermDetailsUI.tsx": {
+    "totalTime": 6456,
+    "timings": {
+      "factory": 2377,
+      "building": 3545,
+      "dependencies": 534
+    }
+  },
+  "./Source/UI/Content/Terms/TermComponentsUI.tsx": {
+    "totalTime": 6452,
+    "timings": {
+      "factory": 2378,
+      "building": 3658,
+      "dependencies": 416
+    }
+  },
+  "./Source/Server/Commands/AddMap.ts": {
+    "totalTime": 6352,
+    "timings": {
+      "factory": 1225,
+      "building": 4342,
+      "dependencies": 785
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeUI.tsx": {
+    "totalTime": 6350,
+    "timings": {
+      "factory": 1513,
+      "building": 4685,
+      "dependencies": 152
+    }
+  },
+  "./Source/Frame/V/VCache.ts": {
+    "totalTime": 6340,
+    "timings": {
+      "factory": 1543,
+      "building": 4787,
+      "dependencies": 10
+    }
+  },
+  "./Source/Frame/Store/ReducerUtils.ts": {
+    "totalTime": 6297,
+    "timings": {
+      "factory": 1704,
+      "building": 4585,
+      "dependencies": 8
+    }
+  },
+  "./Source/Store/main/@Shared/$subpage.ts": {
+    "totalTime": 6249,
+    "timings": {
+      "factory": 2351,
+      "building": 3894,
+      "dependencies": 4
+    }
+  },
+  "./Source/UI/More/Admin/DBUpgrades/UpgradeDB_2.ts": {
+    "totalTime": 6209,
+    "timings": {
+      "factory": 1642,
+      "building": 3906,
+      "dependencies": 661
+    }
+  },
+  "./Source/UI/More/Admin/DBUpgrades/UpgradeDB_5.ts": {
+    "totalTime": 6209,
+    "timings": {
+      "factory": 1645,
+      "building": 4196,
+      "dependencies": 368
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeUI/RatingsPanel.tsx": {
+    "totalTime": 6132,
+    "timings": {
+      "factory": 1964,
+      "building": 4042,
+      "dependencies": 126
+    }
+  },
+  "./Source/Server/Commands/DeleteImage.ts": {
+    "totalTime": 6129,
+    "timings": {
+      "factory": 1540,
+      "building": 4276,
+      "dependencies": 313
+    }
+  },
+  "./Source/Store/main/content.ts": {
+    "totalTime": 6093,
+    "timings": {
+      "factory": 1467,
+      "building": 4603,
+      "dependencies": 23
+    }
+  },
+  "./Source/UI/Content/Images/AddImageDialog.tsx": {
+    "totalTime": 6092,
+    "timings": {
+      "factory": 1547,
+      "building": 4499,
+      "dependencies": 46
+    }
+  },
+  "./Source/Store/firebase/nodes/$node.ts": {
+    "totalTime": 6071,
+    "timings": {
+      "factory": 1019,
+      "building": 4985,
+      "dependencies": 67
+    }
+  },
+  "./Source/Store/main/@NotificationMessage.ts": {
+    "totalTime": 6067,
+    "timings": {
+      "factory": 1466,
+      "building": 4591,
+      "dependencies": 10
+    }
+  },
+  "./Source/Store/main/ratingUI.ts": {
+    "totalTime": 6035,
+    "timings": {
+      "factory": 1465,
+      "building": 4558,
+      "dependencies": 12
+    }
+  },
+  "./Source/Server/Commands/DeleteTerm.ts": {
+    "totalTime": 6000,
+    "timings": {
+      "factory": 875,
+      "building": 4414,
+      "dependencies": 711
+    }
+  },
+  "./Source/Server/Commands/UpdateTermData.ts": {
+    "totalTime": 6000,
+    "timings": {
+      "factory": 874,
+      "building": 4386,
+      "dependencies": 740
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeUI/OthersPanel.tsx": {
+    "totalTime": 5985,
+    "timings": {
+      "factory": 1961,
+      "building": 3168,
+      "dependencies": 856
+    }
+  },
+  "./Source/Store/firebase/images/@Image.ts": {
+    "totalTime": 5951,
+    "timings": {
+      "factory": 1406,
+      "building": 3899,
+      "dependencies": 646
+    }
+  },
+  "./~/redux-little-router/~/query-string/index.js": {
+    "totalTime": 5939,
+    "timings": {
+      "factory": 2890,
+      "building": 2065,
+      "dependencies": 984
+    }
+  },
+  "./Source/UI/More/Admin/DBUpgrades/UpgradeDB_4.ts": {
+    "totalTime": 5901,
+    "timings": {
+      "factory": 1644,
+      "building": 4257
+    }
+  },
+  "./Source/UI/More/Admin/DBUpgrades/UpgradeDB_3.ts": {
+    "totalTime": 5882,
+    "timings": {
+      "factory": 1643,
+      "building": 4239
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeUI/DefinitionsPanel.tsx": {
+    "totalTime": 5820,
+    "timings": {
+      "factory": 1956,
+      "building": 3785,
+      "dependencies": 79
+    }
+  },
+  "./Source/Frame/ReactComponents/VReactMarkdown.tsx": {
+    "totalTime": 5791,
+    "timings": {
+      "factory": 1228,
+      "building": 4522,
+      "dependencies": 41
+    }
+  },
+  "./Source/Frame/Database/FirebaseConnect.ts": {
+    "totalTime": 5744,
+    "timings": {
+      "factory": 221,
+      "building": 5230,
+      "dependencies": 293
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeUI/DetailsPanel.tsx": {
+    "totalTime": 5735,
+    "timings": {
+      "factory": 1960,
+      "building": 3265,
+      "dependencies": 510
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeUI/DiscussionPanel.tsx": {
+    "totalTime": 5735,
+    "timings": {
+      "factory": 1963,
+      "building": 3338,
+      "dependencies": 434
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeUI/TagsPanel.tsx": {
+    "totalTime": 5735,
+    "timings": {
+      "factory": 1959,
+      "building": 3248,
+      "dependencies": 528
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeUI/SocialPanel.tsx": {
+    "totalTime": 5734,
+    "timings": {
+      "factory": 1958,
+      "building": 3152,
+      "dependencies": 624
+    }
+  },
+  "./Source/Frame/ReactComponents/Link.tsx": {
+    "totalTime": 5731,
+    "timings": {
+      "factory": 408,
+      "building": 4436,
+      "dependencies": 887
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeUI_ForBots.tsx": {
+    "totalTime": 5697,
+    "timings": {
+      "factory": 1314,
+      "building": 3994,
+      "dependencies": 389
+    }
+  },
+  "./~/react-tooltip/dist/decorators/windowListener.js": {
+    "totalTime": 5687,
+    "timings": {
+      "factory": 2605,
+      "building": 2043,
+      "dependencies": 1039
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapUI.tsx": {
+    "totalTime": 5686,
+    "timings": {
+      "factory": 925,
+      "building": 4454,
+      "dependencies": 307
+    }
+  },
+  "./Source/Frame/V/V.ts": {
+    "totalTime": 5635,
+    "timings": {
+      "factory": 220,
+      "building": 5328,
+      "dependencies": 87
+    }
+  },
+  "./Source/Frame/General/Enums.ts": {
+    "totalTime": 5603,
+    "timings": {
+      "factory": 1498,
+      "building": 4095,
+      "dependencies": 10
+    }
+  },
+  "./Source/Store/firebase/nodeRatings/@RatingsRoot.ts": {
+    "totalTime": 5587,
+    "timings": {
+      "factory": 302,
+      "building": 5285
+    }
+  },
+  "./Source/UI/Content/Terms/AddTermComponentDialog.tsx": {
+    "totalTime": 5576,
+    "timings": {
+      "factory": 2380,
+      "building": 3162,
+      "dependencies": 34
+    }
+  },
+  "./Source/Store/main/mapViews/@MapViews.ts": {
+    "totalTime": 5575,
+    "timings": {
+      "factory": 1733,
+      "building": 3840,
+      "dependencies": 2
+    }
+  },
+  "./Source/Frame/Store/CreateStore.ts": {
+    "totalTime": 5567,
+    "timings": {
+      "factory": 222,
+      "building": 5159,
+      "dependencies": 186
+    }
+  },
+  "./Source/UI/Debates.tsx": {
+    "totalTime": 5566,
+    "timings": {
+      "factory": 175,
+      "building": 1783,
+      "dependencies": 3608
+    }
+  },
+  "./Source/UI/Users.tsx": {
+    "totalTime": 5566,
+    "timings": {
+      "factory": 170,
+      "building": 1619,
+      "dependencies": 3777
+    }
+  },
+  "./Source/UI/More.tsx": {
+    "totalTime": 5565,
+    "timings": {
+      "factory": 164,
+      "building": 1597,
+      "dependencies": 3804
+    }
+  },
+  "./Source/Frame/General/ClassExtensions/CE_Array.ts": {
+    "totalTime": 5536,
+    "timings": {
+      "factory": 126,
+      "building": 5402,
+      "dependencies": 8
+    }
+  },
+  "./Source/Server/Commands/DeleteMap.ts": {
+    "totalTime": 5511,
+    "timings": {
+      "factory": 1745,
+      "building": 3750,
+      "dependencies": 16
+    }
+  },
+  "./Source/Frame/General/ClassExtensions/CE_String.ts": {
+    "totalTime": 5508,
+    "timings": {
+      "factory": 125,
+      "building": 5381,
+      "dependencies": 2
+    }
+  },
+  "./Source/Server/Commands/UpdateMapDetails.ts": {
+    "totalTime": 5491,
+    "timings": {
+      "factory": 1744,
+      "building": 3701,
+      "dependencies": 46
+    }
+  },
+  "./Source/UI/Content/Terms/AddTermDialog.tsx": {
+    "totalTime": 5457,
+    "timings": {
+      "factory": 2375,
+      "building": 3059,
+      "dependencies": 23
+    }
+  },
+  "./Source/Frame/ReactComponents/Spinner.tsx": {
+    "totalTime": 5443,
+    "timings": {
+      "factory": 1741,
+      "building": 3689,
+      "dependencies": 13
+    }
+  },
+  "./Source/Store/firebase/nodes.ts": {
+    "totalTime": 5442,
+    "timings": {
+      "factory": 886,
+      "building": 4079,
+      "dependencies": 477
+    }
+  },
+  "./Source/Store/firebase/terms/@Term.ts": {
+    "totalTime": 5432,
+    "timings": {
+      "factory": 867,
+      "building": 4272,
+      "dependencies": 293
+    }
+  },
+  "./Source/Frame/General/Others.ts": {
+    "totalTime": 5427,
+    "timings": {
+      "factory": 1743,
+      "building": 3679,
+      "dependencies": 5
+    }
+  },
+  "./Source/Frame/ReactComponents/DropDown.tsx": {
+    "totalTime": 5419,
+    "timings": {
+      "factory": 1740,
+      "building": 3632,
+      "dependencies": 47
+    }
+  },
+  "./~/react-remarkable/dist/index.js": {
+    "totalTime": 5415,
+    "timings": {
+      "factory": 4503,
+      "building": 910,
+      "dependencies": 2
+    }
+  },
+  "./Source/Frame/General/Geometry.ts": {
+    "totalTime": 5367,
+    "timings": {
+      "factory": 1738,
+      "building": 3629
+    }
+  },
+  "./Source/Frame/General/ClassExtensions/CE_Number.ts": {
+    "totalTime": 5355,
+    "timings": {
+      "factory": 124,
+      "building": 5231
+    }
+  },
+  "./~/babel-runtime/core-js/get-iterator.js": {
+    "totalTime": 5350,
+    "timings": {
+      "factory": 5181,
+      "building": 169
+    }
+  },
+  "./~/ajv-keywords/index.js": {
+    "totalTime": 5346,
+    "timings": {
+      "factory": 355,
+      "building": 4991
+    }
+  },
+  "./~/react/lib/ReactWithAddons.js": {
+    "totalTime": 5329,
+    "timings": {
+      "factory": 305,
+      "building": 5024
+    }
+  },
+  "./~/jwt-decode/lib/index.js": {
+    "totalTime": 5293,
+    "timings": {
+      "factory": 4708,
+      "building": 585
+    }
+  },
+  "./Source/Store/firebase/images.ts": {
+    "totalTime": 5281,
+    "timings": {
+      "factory": 1405,
+      "building": 3865,
+      "dependencies": 11
+    }
+  },
+  "./Source/Store/main.ts": {
+    "totalTime": 5266,
+    "timings": {
+      "factory": 738,
+      "building": 2521,
+      "dependencies": 2007
+    }
+  },
+  "./Source/Frame/General/UserAgent.ts": {
+    "totalTime": 5247,
+    "timings": {
+      "factory": 88,
+      "building": 5159
+    }
+  },
+  "delegated ../../node_modules/ajv/lib/ajv.js from dll-reference vendor": {
+    "totalTime": 5208,
+    "timings": {
+      "factory": 5207,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/babel-runtime/helpers/slicedToArray.js": {
+    "totalTime": 5204,
+    "timings": {
+      "factory": 5033,
+      "building": 170,
+      "dependencies": 1
+    }
+  },
+  "./~/babel-runtime/helpers/createClass.js": {
+    "totalTime": 5201,
+    "timings": {
+      "factory": 5032,
+      "building": 168,
+      "dependencies": 1
+    }
+  },
+  "./~/babel-runtime/core-js/object/define-property.js": {
+    "totalTime": 5186,
+    "timings": {
+      "factory": 5024,
+      "building": 162
+    }
+  },
+  "delegated ../../node_modules/babel-runtime/helpers/classCallCheck.js from dll-reference vendor": {
+    "totalTime": 5184,
+    "timings": {
+      "factory": 5183,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/babel-runtime/core-js/object/keys.js": {
+    "totalTime": 5181,
+    "timings": {
+      "factory": 5020,
+      "building": 161
+    }
+  },
+  "./Source/Store/firebase/terms.ts": {
+    "totalTime": 5134,
+    "timings": {
+      "factory": 866,
+      "building": 4257,
+      "dependencies": 11
+    }
+  },
+  "./~/raven-js/vendor/json-stringify-safe/stringify.js": {
+    "totalTime": 5087,
+    "timings": {
+      "factory": 4916,
+      "building": 171
+    }
+  },
+  "./~/raven-js/vendor/TraceKit/tracekit.js": {
+    "totalTime": 5086,
+    "timings": {
+      "factory": 4914,
+      "building": 170,
+      "dependencies": 2
+    }
+  },
+  "delegated ../../node_modules/react/react.js from dll-reference vendor": {
+    "totalTime": 5077,
+    "timings": {
+      "factory": 5076,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./Source/Frame/Store/PathFinder.ts": {
+    "totalTime": 5076,
+    "timings": {
+      "factory": 1687,
+      "building": 3372,
+      "dependencies": 17
+    }
+  },
+  "./~/raven-js/src/console.js": {
+    "totalTime": 5062,
+    "timings": {
+      "factory": 42,
+      "building": 5020
+    }
+  },
+  "./~/raven-js/src/utils.js": {
+    "totalTime": 5061,
+    "timings": {
+      "factory": 41,
+      "building": 5020
+    }
+  },
+  "./~/raven-js/src/configError.js": {
+    "totalTime": 5060,
+    "timings": {
+      "factory": 41,
+      "building": 5019
+    }
+  },
+  "./Source/UI/Global/GlobalListUI.tsx": {
+    "totalTime": 5050,
+    "timings": {
+      "factory": 977,
+      "building": 2478,
+      "dependencies": 1595
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapDetailsUI.tsx": {
+    "totalTime": 5033,
+    "timings": {
+      "factory": 1093,
+      "building": 3905,
+      "dependencies": 35
+    }
+  },
+  "delegated ../../node_modules/babel-runtime/core-js/object/assign.js from dll-reference vendor": {
+    "totalTime": 5024,
+    "timings": {
+      "factory": 5023,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./Source/Frame/General/Globals.ts": {
+    "totalTime": 5024,
+    "timings": {
+      "factory": 1037,
+      "building": 3946,
+      "dependencies": 41
+    }
+  },
+  "delegated ../../node_modules/babel-runtime/core-js/object/set-prototype-of.js from dll-reference vendor": {
+    "totalTime": 5022,
+    "timings": {
+      "factory": 5022,
+      "building": 0,
+      "dependencies": 0
+    }
+  },
+  "./Source/Frame/General/Errors.ts": {
+    "totalTime": 5019,
+    "timings": {
+      "factory": 1159,
+      "building": 3847,
+      "dependencies": 13
+    }
+  },
+  "delegated ../../node_modules/babel-runtime/helpers/typeof.js from dll-reference vendor": {
+    "totalTime": 5018,
+    "timings": {
+      "factory": 5016,
+      "building": 2,
+      "dependencies": 0
+    }
+  },
+  "./Source/Frame/General/VectorStructs.ts": {
+    "totalTime": 4869,
+    "timings": {
+      "factory": 634,
+      "building": 4223,
+      "dependencies": 12
+    }
+  },
+  "./Source/Store/firebase/maps.ts": {
+    "totalTime": 4865,
+    "timings": {
+      "factory": 1042,
+      "building": 3817,
+      "dependencies": 6
+    }
+  },
+  "./Source/UI/Content/TermsUI.tsx": {
+    "totalTime": 4863,
+    "timings": {
+      "factory": 831,
+      "building": 3649,
+      "dependencies": 383
+    }
+  },
+  "./Source/UI/Content/ImagesUI.tsx": {
+    "totalTime": 4862,
+    "timings": {
+      "factory": 833,
+      "building": 2978,
+      "dependencies": 1051
+    }
+  },
+  "./Source/UI/@Shared/NavBar/UserPanel.tsx": {
+    "totalTime": 4850,
+    "timings": {
+      "factory": 807,
+      "building": 3223,
+      "dependencies": 820
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapEntryUI.tsx": {
+    "totalTime": 4834,
+    "timings": {
+      "factory": 923,
+      "building": 3067,
+      "dependencies": 844
+    }
+  },
+  "./~/react-social-button/lib/SocialButton.js": {
+    "totalTime": 4756,
+    "timings": {
+      "factory": 4285,
+      "building": 469,
+      "dependencies": 2
+    }
+  },
+  "./Source/UI/Home/Home.tsx": {
+    "totalTime": 4696,
+    "timings": {
+      "factory": 1029,
+      "building": 3586,
+      "dependencies": 81
+    }
+  },
+  "./~/react-tooltip/dist/utils/nodeListToArray.js": {
+    "totalTime": 4676,
+    "timings": {
+      "factory": 2611,
+      "building": 2065
+    }
+  },
+  "./~/react-tooltip/dist/utils/getPosition.js": {
+    "totalTime": 4674,
+    "timings": {
+      "factory": 2609,
+      "building": 2065
+    }
+  },
+  "./~/react-tooltip/dist/utils/aria.js": {
+    "totalTime": 4664,
+    "timings": {
+      "factory": 2611,
+      "building": 2053
+    }
+  },
+  "./~/react-tooltip/dist/utils/getTipContent.js": {
+    "totalTime": 4663,
+    "timings": {
+      "factory": 2610,
+      "building": 2049,
+      "dependencies": 4
+    }
+  },
+  "./~/react-tooltip/dist/decorators/getEffect.js": {
+    "totalTime": 4657,
+    "timings": {
+      "factory": 2607,
+      "building": 2050
+    }
+  },
+  "./~/react-tooltip/dist/decorators/trackRemoval.js": {
+    "totalTime": 4656,
+    "timings": {
+      "factory": 2608,
+      "building": 2048
+    }
+  },
+  "./~/react-tooltip/dist/decorators/isCapture.js": {
+    "totalTime": 4653,
+    "timings": {
+      "factory": 2607,
+      "building": 2046
+    }
+  },
+  "./~/react-tooltip/dist/decorators/customEvent.js": {
+    "totalTime": 4652,
+    "timings": {
+      "factory": 2606,
+      "building": 2046
+    }
+  },
+  "./Source/Frame/General/Timers.ts": {
+    "totalTime": 4648,
+    "timings": {
+      "factory": 792,
+      "building": 3841,
+      "dependencies": 15
+    }
+  },
+  "./~/react-tooltip/dist/decorators/staticMethods.js": {
+    "totalTime": 4645,
+    "timings": {
+      "factory": 2603,
+      "building": 2042
+    }
+  },
+  "./~/url-pattern/lib/url-pattern.js": {
+    "totalTime": 4630,
+    "timings": {
+      "factory": 4404,
+      "building": 224,
+      "dependencies": 2
+    }
+  },
+  "./~/react-tooltip/dist/style.js": {
+    "totalTime": 4410,
+    "timings": {
+      "factory": 1716,
+      "building": 2694
+    }
+  },
+  "./Source/Store/main/mapViews.ts": {
+    "totalTime": 4374,
+    "timings": {
+      "factory": 959,
+      "building": 2818,
+      "dependencies": 597
+    }
+  },
+  "delegated ../../node_modules/react-markdown/src/react-markdown.js from dll-reference vendor": {
+    "totalTime": 4374,
+    "timings": {
+      "factory": 4373,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/lodash/toFinite.js": {
+    "totalTime": 4364,
+    "timings": {
+      "factory": 1665,
+      "building": 2699
+    }
+  },
+  "./~/core-js/library/modules/es6.promise.js": {
+    "totalTime": 4354,
+    "timings": {
+      "factory": 1091,
+      "building": 3249,
+      "dependencies": 14
+    }
+  },
+  "./~/firebase/storage.js": {
+    "totalTime": 4303,
+    "timings": {
+      "factory": 1027,
+      "building": 3273,
+      "dependencies": 3
+    }
+  },
+  "./Source/Store/firebase/nodeRatings.ts": {
+    "totalTime": 4271,
+    "timings": {
+      "factory": 276,
+      "building": 3985,
+      "dependencies": 10
+    }
+  },
+  "./~/firebase/database.js": {
+    "totalTime": 4238,
+    "timings": {
+      "factory": 1027,
+      "building": 3209,
+      "dependencies": 2
+    }
+  },
+  "./~/lodash/_hasUnicode.js": {
+    "totalTime": 4179,
+    "timings": {
+      "factory": 1428,
+      "building": 2751
+    }
+  },
+  "./~/lodash/_unicodeSize.js": {
+    "totalTime": 4178,
+    "timings": {
+      "factory": 1429,
+      "building": 2749
+    }
+  },
+  "./~/lodash/_asciiSize.js": {
+    "totalTime": 4176,
+    "timings": {
+      "factory": 1427,
+      "building": 2749
+    }
+  },
+  "./Source/Store/firebase/maps/@Map.ts": {
+    "totalTime": 4148,
+    "timings": {
+      "factory": 812,
+      "building": 2546,
+      "dependencies": 790
+    }
+  },
+  "./Source/UI/@Shared/Maps/AddMapDialog.tsx": {
+    "totalTime": 4148,
+    "timings": {
+      "factory": 924,
+      "building": 3173,
+      "dependencies": 51
+    }
+  },
+  "./Source/UI/@Shared/NavBar/GuidePanel.tsx": {
+    "totalTime": 4145,
+    "timings": {
+      "factory": 304,
+      "building": 3829,
+      "dependencies": 12
+    }
+  },
+  "./Source/UI/@Shared/NavBar/NotificationsUI.tsx": {
+    "totalTime": 4117,
+    "timings": {
+      "factory": 300,
+      "building": 3634,
+      "dependencies": 183
+    }
+  },
+  "./Source/UI/@Shared/NavBar/ReputationPanel.tsx": {
+    "totalTime": 4117,
+    "timings": {
+      "factory": 302,
+      "building": 3800,
+      "dependencies": 15
+    }
+  },
+  "./Source/UI/@Shared/NavBar/SearchPanel.tsx": {
+    "totalTime": 4116,
+    "timings": {
+      "factory": 298,
+      "building": 3397,
+      "dependencies": 421
+    }
+  },
+  "./Source/UI/@Shared/NavBar/StreamPanel.tsx": {
+    "totalTime": 4116,
+    "timings": {
+      "factory": 297,
+      "building": 3355,
+      "dependencies": 464
+    }
+  },
+  "./Source/UI/@Shared/NavBar/ChatPanel.tsx": {
+    "totalTime": 4115,
+    "timings": {
+      "factory": 296,
+      "building": 3343,
+      "dependencies": 476
+    }
+  },
+  "./Source/Frame/ReactComponents/Switch.tsx": {
+    "totalTime": 4096,
+    "timings": {
+      "factory": 1240,
+      "building": 2845,
+      "dependencies": 11
+    }
+  },
+  "./Source/UI/More/Admin.tsx": {
+    "totalTime": 3950,
+    "timings": {
+      "factory": 913,
+      "building": 2951,
+      "dependencies": 86
+    }
+  },
+  "./Source/UI/Home/About.tsx": {
+    "totalTime": 3950,
+    "timings": {
+      "factory": 1030,
+      "building": 2437,
+      "dependencies": 483
+    }
+  },
+  "./Source/UI/More/Links.tsx": {
+    "totalTime": 3950,
+    "timings": {
+      "factory": 915,
+      "building": 2617,
+      "dependencies": 418
+    }
+  },
+  "./~/redux-little-router/~/history/createTransitionManager.js": {
+    "totalTime": 3945,
+    "timings": {
+      "factory": 1031,
+      "building": 2375,
+      "dependencies": 539
+    }
+  },
+  "delegated ../../node_modules/lodash.assign/index.js from dll-reference vendor": {
+    "totalTime": 3944,
+    "timings": {
+      "factory": 3943,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/warning/browser.js from dll-reference vendor": {
+    "totalTime": 3932,
+    "timings": {
+      "factory": 3930,
+      "building": 2,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/invariant/browser.js from dll-reference vendor": {
+    "totalTime": 3925,
+    "timings": {
+      "factory": 3923,
+      "building": 2,
+      "dependencies": 0
+    }
+  },
+  "./Source/UI/Global/GlobalMapUI.tsx": {
+    "totalTime": 3924,
+    "timings": {
+      "factory": 976,
+      "building": 2507,
+      "dependencies": 441
+    }
+  },
+  "./Source/Store/firebase/contentNodes/@SourceChain.ts": {
+    "totalTime": 3856,
+    "timings": {
+      "factory": 1564,
+      "building": 1852,
+      "dependencies": 440
+    }
+  },
+  "./Source/Store/main/mapViews/$mapView.ts": {
+    "totalTime": 3843,
+    "timings": {
+      "factory": 960,
+      "building": 1945,
+      "dependencies": 938
+    }
+  },
+  "./~/firebase/messaging.js": {
+    "totalTime": 3802,
+    "timings": {
+      "factory": 1028,
+      "building": 2770,
+      "dependencies": 4
+    }
+  },
+  "./Source/Store/main/debates.ts": {
+    "totalTime": 3770,
+    "timings": {
+      "factory": 962,
+      "building": 1924,
+      "dependencies": 884
+    }
+  },
+  "./~/firebase/auth.js": {
+    "totalTime": 3770,
+    "timings": {
+      "factory": 1026,
+      "building": 2741,
+      "dependencies": 3
+    }
+  },
+  "./~/react-redux-firebase/dist/utils/auth.js": {
+    "totalTime": 3730,
+    "timings": {
+      "factory": 1656,
+      "building": 2060,
+      "dependencies": 14
+    }
+  },
+  "./~/react-redux-firebase/dist/utils/storage.js": {
+    "totalTime": 3725,
+    "timings": {
+      "factory": 1650,
+      "building": 2075
+    }
+  },
+  "./~/react-redux-firebase/dist/utils/actions.js": {
+    "totalTime": 3724,
+    "timings": {
+      "factory": 1649,
+      "building": 2075
+    }
+  },
+  "./Source/Frame/ReactComponents/Button.tsx": {
+    "totalTime": 3697,
+    "timings": {
+      "factory": 327,
+      "building": 3345,
+      "dependencies": 25
+    }
+  },
+  "./~/regenerator-runtime/runtime-module.js": {
+    "totalTime": 3591,
+    "timings": {
+      "factory": 1277,
+      "building": 2312,
+      "dependencies": 2
+    }
+  },
+  "./Source/Frame/UI/GlobalStyles.ts": {
+    "totalTime": 3514,
+    "timings": {
+      "factory": 952,
+      "building": 2559,
+      "dependencies": 3
+    }
+  },
+  "./Source/Frame/ReactComponents/Row.tsx": {
+    "totalTime": 3502,
+    "timings": {
+      "factory": 891,
+      "building": 2559,
+      "dependencies": 52
+    }
+  },
+  "./Source/Store/firebase/nodeRatings/@RatingType.tsx": {
+    "totalTime": 3487,
+    "timings": {
+      "factory": 1067,
+      "building": 2393,
+      "dependencies": 27
+    }
+  },
+  "./Source/Store/main/mapViews/$mapView/rootNodeViews/@RootNodeViews.ts": {
+    "totalTime": 3456,
+    "timings": {
+      "factory": 904,
+      "building": 2487,
+      "dependencies": 65
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeUI_Menu.tsx": {
+    "totalTime": 3447,
+    "timings": {
+      "factory": 396,
+      "building": 2318,
+      "dependencies": 733
+    }
+  },
+  "./Source/Frame/General/RegexHelpers.ts": {
+    "totalTime": 3443,
+    "timings": {
+      "factory": 694,
+      "building": 2747,
+      "dependencies": 2
+    }
+  },
+  "./~/redux-little-router/~/history/DOMUtils.js": {
+    "totalTime": 3425,
+    "timings": {
+      "factory": 1032,
+      "building": 2393
+    }
+  },
+  "./~/redux-little-router/~/history/LocationUtils.js": {
+    "totalTime": 3421,
+    "timings": {
+      "factory": 1030,
+      "building": 2386,
+      "dependencies": 5
+    }
+  },
+  "./Source/Store/firebase/userExtras.ts": {
+    "totalTime": 3413,
+    "timings": {
+      "factory": 914,
+      "building": 2495,
+      "dependencies": 4
+    }
+  },
+  "./Source/Frame/Store/RatingProcessor.ts": {
+    "totalTime": 3413,
+    "timings": {
+      "factory": 1080,
+      "building": 2308,
+      "dependencies": 25
+    }
+  },
+  "./Source/Store/firebase/nodes/@MapNodeType.ts": {
+    "totalTime": 3407,
+    "timings": {
+      "factory": 792,
+      "building": 2606,
+      "dependencies": 9
+    }
+  },
+  "./~/redux-little-router/~/history/PathUtils.js": {
+    "totalTime": 3403,
+    "timings": {
+      "factory": 1030,
+      "building": 2373
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeUI_LeftBox.tsx": {
+    "totalTime": 3403,
+    "timings": {
+      "factory": 1068,
+      "building": 2239,
+      "dependencies": 96
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeDetailsUI.tsx": {
+    "totalTime": 3377,
+    "timings": {
+      "factory": 771,
+      "building": 2449,
+      "dependencies": 157
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/SourceChainsEditorUI.tsx": {
+    "totalTime": 3361,
+    "timings": {
+      "factory": 986,
+      "building": 2308,
+      "dependencies": 67
+    }
+  },
+  "./Source/UI/@Shared/AddressBarWrapper.tsx": {
+    "totalTime": 3353,
+    "timings": {
+      "factory": 321,
+      "building": 2455,
+      "dependencies": 577
+    }
+  },
+  "C:/Root/Apps/@V/@Modules/react-vmenu/Main/dist/VMenu.js": {
+    "totalTime": 3351,
+    "timings": {
+      "factory": 2383,
+      "building": 965,
+      "dependencies": 3
+    }
+  },
+  "./Source/Store/firebase/termComponents/@TermComponent.ts": {
+    "totalTime": 3349,
+    "timings": {
+      "factory": 1106,
+      "building": 2084,
+      "dependencies": 159
+    }
+  },
+  "./Source/Store/firebase/userExtras/@UserExtraInfo.ts": {
+    "totalTime": 3341,
+    "timings": {
+      "factory": 1107,
+      "building": 2065,
+      "dependencies": 169
+    }
+  },
+  "./Source/Frame/ReactComponents/TextInput.tsx": {
+    "totalTime": 3321,
+    "timings": {
+      "factory": 932,
+      "building": 2366,
+      "dependencies": 23
+    }
+  },
+  "./~/firebase/app.js": {
+    "totalTime": 3311,
+    "timings": {
+      "factory": 1025,
+      "building": 2285,
+      "dependencies": 1
+    }
+  },
+  "./~/redux-little-router/~/history/createBrowserHistory.js": {
+    "totalTime": 3277,
+    "timings": {
+      "factory": 1420,
+      "building": 1857
+    }
+  },
+  "./Source/Frame/ReactComponents/Column.tsx": {
+    "totalTime": 3267,
+    "timings": {
+      "factory": 1032,
+      "building": 2182,
+      "dependencies": 53
+    }
+  },
+  "./Source/Frame/General/Assert.ts": {
+    "totalTime": 3246,
+    "timings": {
+      "factory": 618,
+      "building": 2618,
+      "dependencies": 10
+    }
+  },
+  "./Source/Store/firebase/nodes/@MetaThesisInfo.ts": {
+    "totalTime": 3242,
+    "timings": {
+      "factory": 1082,
+      "building": 2156,
+      "dependencies": 4
+    }
+  },
+  "./Source/UI/@Shared/SubNavBar.tsx": {
+    "totalTime": 3211,
+    "timings": {
+      "factory": 1028,
+      "building": 2128,
+      "dependencies": 55
+    }
+  },
+  "./~/value-equal/index.js": {
+    "totalTime": 3209,
+    "timings": {
+      "factory": 1342,
+      "building": 1867
+    }
+  },
+  "./~/resolve-pathname/index.js": {
+    "totalTime": 3208,
+    "timings": {
+      "factory": 1341,
+      "building": 1867
+    }
+  },
+  "./~/redux-little-router/lib/environment/express-router.js": {
+    "totalTime": 3199,
+    "timings": {
+      "factory": 438,
+      "building": 1356,
+      "dependencies": 1405
+    }
+  },
+  "./Source/Frame/ReactComponents/Select.tsx": {
+    "totalTime": 3181,
+    "timings": {
+      "factory": 985,
+      "building": 2166,
+      "dependencies": 30
+    }
+  },
+  "./Source/Frame/UI/ReactGlobals.tsx": {
+    "totalTime": 3178,
+    "timings": {
+      "factory": 267,
+      "building": 2849,
+      "dependencies": 62
+    }
+  },
+  "./Source/Frame/General/Globals_Free.ts": {
+    "totalTime": 3144,
+    "timings": {
+      "factory": 643,
+      "building": 2497,
+      "dependencies": 4
+    }
+  },
+  "./~/base64-js/index.js": {
+    "totalTime": 3064,
+    "timings": {
+      "factory": 1263,
+      "building": 1801
+    }
+  },
+  "./~/isarray/index.js": {
+    "totalTime": 3056,
+    "timings": {
+      "factory": 1265,
+      "building": 1791
+    }
+  },
+  "./~/ieee754/index.js": {
+    "totalTime": 3055,
+    "timings": {
+      "factory": 1266,
+      "building": 1789
+    }
+  },
+  "./~/core-js/library/modules/es6.object.is.js": {
+    "totalTime": 3054,
+    "timings": {
+      "factory": 1609,
+      "building": 1441,
+      "dependencies": 4
+    }
+  },
+  "./~/strict-uri-encode/index.js": {
+    "totalTime": 3047,
+    "timings": {
+      "factory": 1650,
+      "building": 1397
+    }
+  },
+  "./Source/Frame/Database/DatabaseHelpers.ts": {
+    "totalTime": 3004,
+    "timings": {
+      "factory": 184,
+      "building": 2145,
+      "dependencies": 675
+    }
+  },
+  "./~/remarkable/index.js": {
+    "totalTime": 2982,
+    "timings": {
+      "factory": 2150,
+      "building": 832
+    }
+  },
+  "./~/redux-little-router/lib/components/fragment.js": {
+    "totalTime": 2928,
+    "timings": {
+      "factory": 443,
+      "building": 1356,
+      "dependencies": 1129
+    }
+  },
+  "./~/redux-little-router/lib/components/link.js": {
+    "totalTime": 2928,
+    "timings": {
+      "factory": 442,
+      "building": 1364,
+      "dependencies": 1122
+    }
+  },
+  "./~/redux-little-router/lib/components/provider.js": {
+    "totalTime": 2928,
+    "timings": {
+      "factory": 440,
+      "building": 1343,
+      "dependencies": 1145
+    }
+  },
+  "./Source/Frame/General/Action.ts": {
+    "totalTime": 2911,
+    "timings": {
+      "factory": 737,
+      "building": 2167,
+      "dependencies": 7
+    }
+  },
+  "./Source/Server/Commands/AddTermComponent.ts": {
+    "totalTime": 2909,
+    "timings": {
+      "factory": 918,
+      "building": 1944,
+      "dependencies": 47
+    }
+  },
+  "./Source/Server/Commands/ChangeThesisType.ts": {
+    "totalTime": 2891,
+    "timings": {
+      "factory": 863,
+      "building": 1998,
+      "dependencies": 30
+    }
+  },
+  "./~/react-tooltip/dist/index.js": {
+    "totalTime": 2881,
+    "timings": {
+      "factory": 1764,
+      "building": 238,
+      "dependencies": 879
+    }
+  },
+  "./Source/UI/@Shared/NavBar.tsx": {
+    "totalTime": 2876,
+    "timings": {
+      "factory": 289,
+      "building": 2403,
+      "dependencies": 184
+    }
+  },
+  "./Source/UI/Content.tsx": {
+    "totalTime": 2872,
+    "timings": {
+      "factory": 173,
+      "building": 1754,
+      "dependencies": 945
+    }
+  },
+  "./Source/UI/Global.tsx": {
+    "totalTime": 2872,
+    "timings": {
+      "factory": 163,
+      "building": 1531,
+      "dependencies": 1178
+    }
+  },
+  "./Source/Server/Commands/AddTerm.ts": {
+    "totalTime": 2868,
+    "timings": {
+      "factory": 1020,
+      "building": 1801,
+      "dependencies": 47
+    }
+  },
+  "./Source/Store/firebase/nodeViewers.ts": {
+    "totalTime": 2858,
+    "timings": {
+      "factory": 865,
+      "building": 1987,
+      "dependencies": 6
+    }
+  },
+  "./Source/Server/Commands/UpdateNodeDetails.ts": {
+    "totalTime": 2852,
+    "timings": {
+      "factory": 770,
+      "building": 2029,
+      "dependencies": 53
+    }
+  },
+  "./Source/Server/Command.ts": {
+    "totalTime": 2849,
+    "timings": {
+      "factory": 851,
+      "building": 1984,
+      "dependencies": 14
+    }
+  },
+  "./Source/Frame/UI/VMessageBox.tsx": {
+    "totalTime": 2840,
+    "timings": {
+      "factory": 271,
+      "building": 2203,
+      "dependencies": 366
+    }
+  },
+  "./Source/Server/Commands/AddNode.ts": {
+    "totalTime": 2835,
+    "timings": {
+      "factory": 785,
+      "building": 2028,
+      "dependencies": 22
+    }
+  },
+  "./~/react-redux-firebase/dist/reducer.js": {
+    "totalTime": 2811,
+    "timings": {
+      "factory": 302,
+      "building": 1161,
+      "dependencies": 1348
+    }
+  },
+  "./Source/Store/firebase/termComponents.ts": {
+    "totalTime": 2810,
+    "timings": {
+      "factory": 613,
+      "building": 2185,
+      "dependencies": 12
+    }
+  },
+  "./Source/Server/Commands/ReverseArgumentPolarity.ts": {
+    "totalTime": 2801,
+    "timings": {
+      "factory": 863,
+      "building": 1907,
+      "dependencies": 31
+    }
+  },
+  "./Source/Frame/ReactComponents/InfoButton.tsx": {
+    "totalTime": 2772,
+    "timings": {
+      "factory": 292,
+      "building": 2148,
+      "dependencies": 332
+    }
+  },
+  "./Source/Frame/ReactComponents/Route.tsx": {
+    "totalTime": 2772,
+    "timings": {
+      "factory": 291,
+      "building": 2102,
+      "dependencies": 379
+    }
+  },
+  "./~/core-js/library/fn/object/is.js": {
+    "totalTime": 2757,
+    "timings": {
+      "factory": 62,
+      "building": 2694,
+      "dependencies": 1
+    }
+  },
+  "./Source/Frame/ReactComponents/CheckBox.tsx": {
+    "totalTime": 2742,
+    "timings": {
+      "factory": 708,
+      "building": 2023,
+      "dependencies": 11
+    }
+  },
+  "./Source/Server/Commands/AddImage.ts": {
+    "totalTime": 2734,
+    "timings": {
+      "factory": 972,
+      "building": 1715,
+      "dependencies": 47
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeMathUI.tsx": {
+    "totalTime": 2733,
+    "timings": {
+      "factory": 764,
+      "building": 1950,
+      "dependencies": 19
+    }
+  },
+  "./Source/Server/Commands/DeleteNode.ts": {
+    "totalTime": 2724,
+    "timings": {
+      "factory": 676,
+      "building": 1979,
+      "dependencies": 69
+    }
+  },
+  "./Source/Server/Commands/UpdateTermComponentData.ts": {
+    "totalTime": 2723,
+    "timings": {
+      "factory": 614,
+      "building": 2086,
+      "dependencies": 23
+    }
+  },
+  "./Source/Store/firebase/users/@User.ts": {
+    "totalTime": 2721,
+    "timings": {
+      "factory": 213,
+      "building": 2508
+    }
+  },
+  "./Source/Store/firebase/nodes/$node/$metaThesis.ts": {
+    "totalTime": 2711,
+    "timings": {
+      "factory": 762,
+      "building": 1945,
+      "dependencies": 4
+    }
+  },
+  "./Source/Server/Commands/DeleteTermComponent.ts": {
+    "totalTime": 2695,
+    "timings": {
+      "factory": 615,
+      "building": 2016,
+      "dependencies": 64
+    }
+  },
+  "./Source/UI/Forum.tsx": {
+    "totalTime": 2674,
+    "timings": {
+      "factory": 171,
+      "building": 1699,
+      "dependencies": 804
+    }
+  },
+  "./Source/UI/Personal.tsx": {
+    "totalTime": 2674,
+    "timings": {
+      "factory": 174,
+      "building": 1710,
+      "dependencies": 790
+    }
+  },
+  "./Source/UI/Profile.tsx": {
+    "totalTime": 2674,
+    "timings": {
+      "factory": 178,
+      "building": 1837,
+      "dependencies": 659
+    }
+  },
+  "./Source/UI/Search.tsx": {
+    "totalTime": 2674,
+    "timings": {
+      "factory": 176,
+      "building": 1854,
+      "dependencies": 644
+    }
+  },
+  "./Source/UI/Social.tsx": {
+    "totalTime": 2674,
+    "timings": {
+      "factory": 172,
+      "building": 1671,
+      "dependencies": 831
+    }
+  },
+  "./Source/UI/Stream.tsx": {
+    "totalTime": 2674,
+    "timings": {
+      "factory": 168,
+      "building": 1688,
+      "dependencies": 818
+    }
+  },
+  "./Source/Store/firebase/users.ts": {
+    "totalTime": 2667,
+    "timings": {
+      "factory": 555,
+      "building": 2083,
+      "dependencies": 29
+    }
+  },
+  "./Source/Frame/Database/StringSplitCache.ts": {
+    "totalTime": 2652,
+    "timings": {
+      "factory": 336,
+      "building": 2316
+    }
+  },
+  "delegated ../../node_modules/react-bootstrap/es/index.js from dll-reference vendor": {
+    "totalTime": 2560,
+    "timings": {
+      "factory": 2559,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-ga/src/index.js from dll-reference vendor": {
+    "totalTime": 2497,
+    "timings": {
+      "factory": 2494,
+      "building": 3,
+      "dependencies": 0
+    }
+  },
+  "./~/babel-runtime/regenerator/index.js": {
+    "totalTime": 2492,
+    "timings": {
+      "factory": 1339,
+      "building": 1153
+    }
+  },
+  "./Source/Store/index.ts": {
+    "totalTime": 2478,
+    "timings": {
+      "factory": 185,
+      "building": 1387,
+      "dependencies": 906
+    }
+  },
+  "./Source/Store/firebase/nodes/$node/equation.ts": {
+    "totalTime": 2461,
+    "timings": {
+      "factory": 397,
+      "building": 2048,
+      "dependencies": 16
+    }
+  },
+  "delegated ../../node_modules/updeep/dist/index.js from dll-reference vendor": {
+    "totalTime": 2435,
+    "timings": {
+      "factory": 2434,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/redux-little-router/lib/environment/browser-router.js": {
+    "totalTime": 2304,
+    "timings": {
+      "factory": 438,
+      "building": 1339,
+      "dependencies": 527
+    }
+  },
+  "./~/redux-little-router/lib/environment/hapi-router.js": {
+    "totalTime": 2304,
+    "timings": {
+      "factory": 439,
+      "building": 1352,
+      "dependencies": 513
+    }
+  },
+  "./Source/Server/Commands/NotifyNodeViewed.ts": {
+    "totalTime": 2251,
+    "timings": {
+      "factory": 673,
+      "building": 1559,
+      "dependencies": 19
+    }
+  },
+  "./Source/Frame/ReactComponents/Icon.tsx": {
+    "totalTime": 2229,
+    "timings": {
+      "factory": 671,
+      "building": 1488,
+      "dependencies": 70
+    }
+  },
+  "./Source/Frame/UI/JQueryExtensions.ts": {
+    "totalTime": 2210,
+    "timings": {
+      "factory": 270,
+      "building": 1940
+    }
+  },
+  "delegated ../../node_modules/moment/moment.js from dll-reference vendor": {
+    "totalTime": 2157,
+    "timings": {
+      "factory": 2155,
+      "building": 1,
+      "dependencies": 1
+    }
+  },
+  "./~/immutable/dist/immutable.js": {
+    "totalTime": 2156,
+    "timings": {
+      "factory": 1651,
+      "building": 505
+    }
+  },
+  "./~/babel-runtime/core-js/object/get-own-property-names.js": {
+    "totalTime": 2153,
+    "timings": {
+      "factory": 922,
+      "building": 1231
+    }
+  },
+  "./Source/Frame/General/Logging.ts": {
+    "totalTime": 2136,
+    "timings": {
+      "factory": 188,
+      "building": 1934,
+      "dependencies": 14
+    }
+  },
+  "./~/lodash/upperFirst.js": {
+    "totalTime": 2134,
+    "timings": {
+      "factory": 208,
+      "building": 1926
+    }
+  },
+  "./~/jwt-decode/lib/base64_url_decode.js": {
+    "totalTime": 2132,
+    "timings": {
+      "factory": 261,
+      "building": 1871
+    }
+  },
+  "C:/Root/Apps/@V/@Modules/webpack-runtime-require/Main/dist/Main.js": {
+    "totalTime": 2121,
+    "timings": {
+      "factory": 1815,
+      "building": 306
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeConnectorBackground.tsx": {
+    "totalTime": 2118,
+    "timings": {
+      "factory": 670,
+      "building": 1392,
+      "dependencies": 56
+    }
+  },
+  "./Source/Frame/General/Types.ts": {
+    "totalTime": 2115,
+    "timings": {
+      "factory": 190,
+      "building": 1922,
+      "dependencies": 3
+    }
+  },
+  "./~/lodash/_isIterateeCall.js": {
+    "totalTime": 2113,
+    "timings": {
+      "factory": 140,
+      "building": 499,
+      "dependencies": 1474
+    }
+  },
+  "./~/katex/katex.js": {
+    "totalTime": 2073,
+    "timings": {
+      "factory": 1961,
+      "building": 112
+    }
+  },
+  "./Source/Store/firebase/userViewedNodes.ts": {
+    "totalTime": 2059,
+    "timings": {
+      "factory": 672,
+      "building": 1384,
+      "dependencies": 3
+    }
+  },
+  "./~/buffer/index.js": {
+    "totalTime": 2047,
+    "timings": {
+      "factory": 1133,
+      "building": 911,
+      "dependencies": 3
+    }
+  },
+  "./~/redux-little-router/lib/util/flatten-routes.js": {
+    "totalTime": 2004,
+    "timings": {
+      "factory": 141,
+      "building": 1863
+    }
+  },
+  "./~/redux-little-router/lib/util/validate-routes.js": {
+    "totalTime": 1989,
+    "timings": {
+      "factory": 137,
+      "building": 1852
+    }
+  },
+  "./~/redux-little-router/lib/enhancer.js": {
+    "totalTime": 1988,
+    "timings": {
+      "factory": 136,
+      "building": 1850,
+      "dependencies": 2
+    }
+  },
+  "./~/redux-little-router/lib/reducer.js": {
+    "totalTime": 1984,
+    "timings": {
+      "factory": 134,
+      "building": 1849,
+      "dependencies": 1
+    }
+  },
+  "./~/redux-little-router/lib/util/create-matcher.js": {
+    "totalTime": 1980,
+    "timings": {
+      "factory": 137,
+      "building": 1843
+    }
+  },
+  "./~/redux-little-router/lib/middleware.js": {
+    "totalTime": 1978,
+    "timings": {
+      "factory": 135,
+      "building": 1842,
+      "dependencies": 1
+    }
+  },
+  "./Source/Store/firebase/nodes/@Equation.ts": {
+    "totalTime": 1959,
+    "timings": {
+      "factory": 431,
+      "building": 1527,
+      "dependencies": 1
+    }
+  },
+  "./Source/Frame/General/Start_1.ts": {
+    "totalTime": 1955,
+    "timings": {
+      "factory": 45,
+      "building": 1910
+    }
+  },
+  "./Source/Frame/General/Profiling.ts": {
+    "totalTime": 1954,
+    "timings": {
+      "factory": 47,
+      "building": 1907
+    }
+  },
+  "./~/core-js/library/modules/_invoke.js": {
+    "totalTime": 1951,
+    "timings": {
+      "factory": 144,
+      "building": 1807
+    }
+  },
+  "./~/core-js/library/modules/_redefine-all.js": {
+    "totalTime": 1946,
+    "timings": {
+      "factory": 439,
+      "building": 1507
+    }
+  },
+  "./~/core-js/library/modules/_species-constructor.js": {
+    "totalTime": 1945,
+    "timings": {
+      "factory": 437,
+      "building": 1506,
+      "dependencies": 2
+    }
+  },
+  "./~/core-js/library/modules/_set-species.js": {
+    "totalTime": 1942,
+    "timings": {
+      "factory": 442,
+      "building": 1496,
+      "dependencies": 4
+    }
+  },
+  "./~/core-js/library/modules/_microtask.js": {
+    "totalTime": 1937,
+    "timings": {
+      "factory": 438,
+      "building": 1497,
+      "dependencies": 2
+    }
+  },
+  "./~/core-js/library/modules/_an-instance.js": {
+    "totalTime": 1933,
+    "timings": {
+      "factory": 434,
+      "building": 1499
+    }
+  },
+  "./~/core-js/library/modules/_for-of.js": {
+    "totalTime": 1932,
+    "timings": {
+      "factory": 435,
+      "building": 1494,
+      "dependencies": 3
+    }
+  },
+  "./Source/Main_Hot.tsx": {
+    "totalTime": 1903,
+    "timings": {
+      "factory": 32,
+      "building": 1802,
+      "dependencies": 69
+    }
+  },
+  "./~/core-js/library/modules/_object-sap.js": {
+    "totalTime": 1868,
+    "timings": {
+      "factory": 1026,
+      "building": 840,
+      "dependencies": 2
+    }
+  },
+  "./~/lodash/isString.js": {
+    "totalTime": 1866,
+    "timings": {
+      "factory": 1035,
+      "building": 830,
+      "dependencies": 1
+    }
+  },
+  "./~/babel-runtime/core-js/json/stringify.js": {
+    "totalTime": 1865,
+    "timings": {
+      "factory": 712,
+      "building": 1153
+    }
+  },
+  "./~/lodash/filter.js": {
+    "totalTime": 1864,
+    "timings": {
+      "factory": 1036,
+      "building": 827,
+      "dependencies": 1
+    }
+  },
+  "./~/lodash/set.js": {
+    "totalTime": 1862,
+    "timings": {
+      "factory": 1026,
+      "building": 836
+    }
+  },
+  "./~/lodash/has.js": {
+    "totalTime": 1860,
+    "timings": {
+      "factory": 1025,
+      "building": 835
+    }
+  },
+  "./~/react-katex/dist/react-katex.js": {
+    "totalTime": 1854,
+    "timings": {
+      "factory": 1206,
+      "building": 462,
+      "dependencies": 186
+    }
+  },
+  "./~/firebase/firebase-browser.js": {
+    "totalTime": 1852,
+    "timings": {
+      "factory": 1611,
+      "building": 241
+    }
+  },
+  "./Source/Server/Server.ts": {
+    "totalTime": 1826,
+    "timings": {
+      "factory": 40,
+      "building": 1786
+    }
+  },
+  "./~/lodash/toNumber.js": {
+    "totalTime": 1803,
+    "timings": {
+      "factory": 667,
+      "building": 1135,
+      "dependencies": 1
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/QuoteInfoEditorUI.tsx": {
+    "totalTime": 1791,
+    "timings": {
+      "factory": 261,
+      "building": 1455,
+      "dependencies": 75
+    }
+  },
+  "./Source/UI/Chat.tsx": {
+    "totalTime": 1755,
+    "timings": {
+      "factory": 169,
+      "building": 1552,
+      "dependencies": 34
+    }
+  },
+  "delegated ../../node_modules/react-modal/lib/index.js from dll-reference vendor": {
+    "totalTime": 1737,
+    "timings": {
+      "factory": 1736,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./Source/BakedConfig_Prod.ts": {
+    "totalTime": 1733,
+    "timings": {
+      "factory": 31,
+      "building": 1702
+    }
+  },
+  "./Source/BakedConfig_Dev.ts": {
+    "totalTime": 1730,
+    "timings": {
+      "factory": 29,
+      "building": 1701
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/ImageAttachmentEditorUI.tsx": {
+    "totalTime": 1706,
+    "timings": {
+      "factory": 266,
+      "building": 1419,
+      "dependencies": 21
+    }
+  },
+  "./~/redux-little-router/lib/actions.js": {
+    "totalTime": 1695,
+    "timings": {
+      "factory": 335,
+      "building": 1359,
+      "dependencies": 1
+    }
+  },
+  "./~/babel-runtime/core-js/promise.js": {
+    "totalTime": 1692,
+    "timings": {
+      "factory": 619,
+      "building": 1073
+    }
+  },
+  "./~/redux-little-router/lib/types.js": {
+    "totalTime": 1692,
+    "timings": {
+      "factory": 334,
+      "building": 1358
+    }
+  },
+  "./Source/UI/Home.tsx": {
+    "totalTime": 1685,
+    "timings": {
+      "factory": 166,
+      "building": 1466,
+      "dependencies": 53
+    }
+  },
+  "./Source/Frame/Store/ActionProcessor.ts": {
+    "totalTime": 1684,
+    "timings": {
+      "factory": 187,
+      "building": 1477,
+      "dependencies": 20
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/EquationEditorUI.tsx": {
+    "totalTime": 1682,
+    "timings": {
+      "factory": 262,
+      "building": 1361,
+      "dependencies": 59
+    }
+  },
+  "./Source/Store/firebase/contentNodes/$contentNode.ts": {
+    "totalTime": 1673,
+    "timings": {
+      "factory": 134,
+      "building": 1533,
+      "dependencies": 6
+    }
+  },
+  "(webpack)-hot-middleware/client.js?path=/__webpack_hmr": {
+    "totalTime": 1672,
+    "timings": {
+      "factory": 83,
+      "building": 1589
+    }
+  },
+  "(webpack)/buildin/amd-options.js": {
+    "totalTime": 1671,
+    "timings": {
+      "factory": 309,
+      "building": 1362
+    }
+  },
+  "delegated ../../node_modules/lodash/_isIndex.js from dll-reference vendor": {
+    "totalTime": 1666,
+    "timings": {
+      "factory": 1666,
+      "building": 0,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/_baseUnset.js from dll-reference vendor": {
+    "totalTime": 1665,
+    "timings": {
+      "factory": 1664,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/omit.js from dll-reference vendor": {
+    "totalTime": 1659,
+    "timings": {
+      "factory": 1658,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/raven-js/src/singleton.js": {
+    "totalTime": 1644,
+    "timings": {
+      "factory": 1603,
+      "building": 41
+    }
+  },
+  "./~/codemirror/addon/scroll/simplescrollbars.js": {
+    "totalTime": 1640,
+    "timings": {
+      "factory": 57,
+      "building": 1563,
+      "dependencies": 20
+    }
+  },
+  "./~/lodash/drop.js": {
+    "totalTime": 1634,
+    "timings": {
+      "factory": 363,
+      "building": 1139,
+      "dependencies": 132
+    }
+  },
+  "./~/ansi-regex/index.js": {
+    "totalTime": 1628,
+    "timings": {
+      "factory": 1589,
+      "building": 39
+    }
+  },
+  "./~/react-tooltip/dist/constant.js": {
+    "totalTime": 1626,
+    "timings": {
+      "factory": 1041,
+      "building": 585
+    }
+  },
+  "./~/react-redux-firebase/dist/actions/index.js": {
+    "totalTime": 1615,
+    "timings": {
+      "factory": 693,
+      "building": 920,
+      "dependencies": 2
+    }
+  },
+  "delegated ../../node_modules/babel-polyfill/lib/index.js from dll-reference vendor": {
+    "totalTime": 1608,
+    "timings": {
+      "factory": 1607,
+      "building": 0,
+      "dependencies": 1
+    }
+  },
+  "delegated ../../node_modules/codemirror/lib/codemirror.js from dll-reference vendor": {
+    "totalTime": 1606,
+    "timings": {
+      "factory": 1605,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./Source/UI/@Shared/Maps/MapNode/NodeUI_Menu/AddChildDialog.tsx": {
+    "totalTime": 1592,
+    "timings": {
+      "factory": 280,
+      "building": 1120,
+      "dependencies": 192
+    }
+  },
+  "./Source/Server/Commands/CloneNode.ts": {
+    "totalTime": 1589,
+    "timings": {
+      "factory": 285,
+      "building": 1262,
+      "dependencies": 42
+    }
+  },
+  "./~/core-js/library/modules/es6.object.get-own-property-descriptor.js": {
+    "totalTime": 1584,
+    "timings": {
+      "factory": 716,
+      "building": 867,
+      "dependencies": 1
+    }
+  },
+  "./~/core-js/library/modules/es6.object.get-prototype-of.js": {
+    "totalTime": 1582,
+    "timings": {
+      "factory": 626,
+      "building": 955,
+      "dependencies": 1
+    }
+  },
+  "./~/fbjs/lib/performanceNow.js": {
+    "totalTime": 1582,
+    "timings": {
+      "factory": 737,
+      "building": 845
+    }
+  },
+  "./~/react-dom/lib/ReactHostOperationHistoryHook.js": {
+    "totalTime": 1581,
+    "timings": {
+      "factory": 736,
+      "building": 845
+    }
+  },
+  "./~/react-dom/lib/ReactInvalidSetStateWarningHook.js": {
+    "totalTime": 1580,
+    "timings": {
+      "factory": 734,
+      "building": 844,
+      "dependencies": 2
+    }
+  },
+  "./~/lodash/capitalize.js": {
+    "totalTime": 1574,
+    "timings": {
+      "factory": 990,
+      "building": 584
+    }
+  },
+  "./~/react-redux-firebase/dist/helpers.js": {
+    "totalTime": 1539,
+    "timings": {
+      "factory": 303,
+      "building": 1179,
+      "dependencies": 57
+    }
+  },
+  "./~/react-redux-firebase/dist/utils/events.js": {
+    "totalTime": 1535,
+    "timings": {
+      "factory": 304,
+      "building": 1161,
+      "dependencies": 70
+    }
+  },
+  "./~/core-js/library/modules/es6.number.max-safe-integer.js": {
+    "totalTime": 1529,
+    "timings": {
+      "factory": 655,
+      "building": 873,
+      "dependencies": 1
+    }
+  },
+  "./~/core-js/library/modules/es6.number.min-safe-integer.js": {
+    "totalTime": 1529,
+    "timings": {
+      "factory": 655,
+      "building": 873,
+      "dependencies": 1
+    }
+  },
+  "./~/ajv-keywords/keywords/dotjs/_formatLimit.js": {
+    "totalTime": 1528,
+    "timings": {
+      "factory": 655,
+      "building": 873
+    }
+  },
+  "./~/lodash/remove.js": {
+    "totalTime": 1528,
+    "timings": {
+      "factory": 370,
+      "building": 1136,
+      "dependencies": 22
+    }
+  },
+  "./~/lodash/isEqual.js": {
+    "totalTime": 1525,
+    "timings": {
+      "factory": 392,
+      "building": 1133
+    }
+  },
+  "./~/lodash/reduce.js": {
+    "totalTime": 1515,
+    "timings": {
+      "factory": 360,
+      "building": 1138,
+      "dependencies": 17
+    }
+  },
+  "./~/lodash/some.js": {
+    "totalTime": 1515,
+    "timings": {
+      "factory": 365,
+      "building": 1138,
+      "dependencies": 12
+    }
+  },
+  "./~/lodash/size.js": {
+    "totalTime": 1511,
+    "timings": {
+      "factory": 366,
+      "building": 1143,
+      "dependencies": 2
+    }
+  },
+  "delegated ../../node_modules/process/browser.js from dll-reference vendor": {
+    "totalTime": 1511,
+    "timings": {
+      "factory": 1509,
+      "building": 2,
+      "dependencies": 0
+    }
+  },
+  "./~/core-js/library/modules/web.immediate.js": {
+    "totalTime": 1508,
+    "timings": {
+      "factory": 136,
+      "building": 1371,
+      "dependencies": 1
+    }
+  },
+  "./~/lodash/dropRight.js": {
+    "totalTime": 1507,
+    "timings": {
+      "factory": 375,
+      "building": 1132
+    }
+  },
+  "./~/lodash/flatMap.js": {
+    "totalTime": 1505,
+    "timings": {
+      "factory": 371,
+      "building": 1132,
+      "dependencies": 2
+    }
+  },
+  "./~/lodash/first.js": {
+    "totalTime": 1500,
+    "timings": {
+      "factory": 365,
+      "building": 1135
+    }
+  },
+  "delegated ../../node_modules/lodash/eq.js from dll-reference vendor": {
+    "totalTime": 1476,
+    "timings": {
+      "factory": 1475,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/regenerator-runtime/runtime.js from dll-reference vendor": {
+    "totalTime": 1470,
+    "timings": {
+      "factory": 1468,
+      "building": 1,
+      "dependencies": 1
+    }
+  },
+  "./~/react-redux-firebase/dist/connect.js": {
+    "totalTime": 1447,
+    "timings": {
+      "factory": 300,
+      "building": 1143,
+      "dependencies": 4
+    }
+  },
+  "./~/react-redux-firebase/dist/compose.js": {
+    "totalTime": 1439,
+    "timings": {
+      "factory": 301,
+      "building": 1135,
+      "dependencies": 3
+    }
+  },
+  "./~/html-entities/lib/html5-entities.js": {
+    "totalTime": 1432,
+    "timings": {
+      "factory": 1326,
+      "building": 106
+    }
+  },
+  "./Resources/SVGs/arrow-down.svg": {
+    "totalTime": 1423,
+    "timings": {
+      "factory": 849,
+      "building": 427,
+      "dependencies": 147
+    }
+  },
+  "./Resources/SVGs/arrow-right.svg": {
+    "totalTime": 1423,
+    "timings": {
+      "factory": 900,
+      "building": 379,
+      "dependencies": 144
+    }
+  },
+  "./Resources/SVGs/arrow-up.svg": {
+    "totalTime": 1423,
+    "timings": {
+      "factory": 900,
+      "building": 382,
+      "dependencies": 141
+    }
+  },
+  "./~/ajv-keywords/keywords/dotjs/switch.js": {
+    "totalTime": 1413,
+    "timings": {
+      "factory": 345,
+      "building": 1068
+    }
+  },
+  "./~/ajv-keywords/keywords/dotjs/patternRequired.js": {
+    "totalTime": 1410,
+    "timings": {
+      "factory": 345,
+      "building": 1065
+    }
+  },
+  "./~/prop-types/index.js": {
+    "totalTime": 1409,
+    "timings": {
+      "factory": 1144,
+      "building": 265
+    }
+  },
+  "delegated ../../node_modules/recharts/es6/index.js from dll-reference vendor": {
+    "totalTime": 1403,
+    "timings": {
+      "factory": 1402,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./Source/Server/Commands/UnlinkNode.ts": {
+    "totalTime": 1382,
+    "timings": {
+      "factory": 284,
+      "building": 1073,
+      "dependencies": 25
+    }
+  },
+  "./~/redux-little-router/lib/util/normalize-href.js": {
+    "totalTime": 1371,
+    "timings": {
+      "factory": 610,
+      "building": 761
+    }
+  },
+  "./~/redux-little-router/lib/util/location-state.js": {
+    "totalTime": 1369,
+    "timings": {
+      "factory": 611,
+      "building": 758
+    }
+  },
+  "./~/html-entities/lib/html4-entities.js": {
+    "totalTime": 1367,
+    "timings": {
+      "factory": 1325,
+      "building": 42
+    }
+  },
+  "./~/babel-runtime/helpers/objectDestructuringEmpty.js": {
+    "totalTime": 1361,
+    "timings": {
+      "factory": 228,
+      "building": 1133
+    }
+  },
+  "./~/html-entities/lib/xml-entities.js": {
+    "totalTime": 1361,
+    "timings": {
+      "factory": 1324,
+      "building": 37
+    }
+  },
+  "./~/remarkable/lib/configs/full.js": {
+    "totalTime": 1358,
+    "timings": {
+      "factory": 560,
+      "building": 798
+    }
+  },
+  "./~/remarkable/lib/configs/default.js": {
+    "totalTime": 1357,
+    "timings": {
+      "factory": 559,
+      "building": 798
+    }
+  },
+  "./~/remarkable/lib/common/utils.js": {
+    "totalTime": 1356,
+    "timings": {
+      "factory": 558,
+      "building": 798
+    }
+  },
+  "./~/jwt-decode/lib/atob.js": {
+    "totalTime": 1354,
+    "timings": {
+      "factory": 214,
+      "building": 1140
+    }
+  },
+  "./~/lodash/_createCaseFirst.js": {
+    "totalTime": 1354,
+    "timings": {
+      "factory": 215,
+      "building": 1137,
+      "dependencies": 2
+    }
+  },
+  "./~/remarkable/lib/configs/commonmark.js": {
+    "totalTime": 1354,
+    "timings": {
+      "factory": 561,
+      "building": 793
+    }
+  },
+  "./Source/Server/Commands/LinkNode.ts": {
+    "totalTime": 1353,
+    "timings": {
+      "factory": 282,
+      "building": 1016,
+      "dependencies": 55
+    }
+  },
+  "./~/remarkable/lib/parser_inline.js": {
+    "totalTime": 1334,
+    "timings": {
+      "factory": 551,
+      "building": 778,
+      "dependencies": 5
+    }
+  },
+  "./~/remarkable/lib/ruler.js": {
+    "totalTime": 1327,
+    "timings": {
+      "factory": 552,
+      "building": 775
+    }
+  },
+  "./~/remarkable/lib/parser_block.js": {
+    "totalTime": 1324,
+    "timings": {
+      "factory": 550,
+      "building": 770,
+      "dependencies": 4
+    }
+  },
+  "./~/react-redux-firebase/dist/actions/storage.js": {
+    "totalTime": 1317,
+    "timings": {
+      "factory": 181,
+      "building": 1103,
+      "dependencies": 33
+    }
+  },
+  "delegated ../../node_modules/radium/lib/index.js from dll-reference vendor": {
+    "totalTime": 1304,
+    "timings": {
+      "factory": 1303,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/core-js/library/modules/_task.js": {
+    "totalTime": 1302,
+    "timings": {
+      "factory": 451,
+      "building": 851
+    }
+  },
+  "./~/remarkable/lib/parser_core.js": {
+    "totalTime": 1285,
+    "timings": {
+      "factory": 549,
+      "building": 733,
+      "dependencies": 3
+    }
+  },
+  "./~/redux-little-router/lib/install.js": {
+    "totalTime": 1282,
+    "timings": {
+      "factory": 521,
+      "building": 761
+    }
+  },
+  "./~/react-redux-firebase/dist/actions/auth.js": {
+    "totalTime": 1281,
+    "timings": {
+      "factory": 181,
+      "building": 1093,
+      "dependencies": 7
+    }
+  },
+  "./~/remarkable/lib/renderer.js": {
+    "totalTime": 1281,
+    "timings": {
+      "factory": 548,
+      "building": 732,
+      "dependencies": 1
+    }
+  },
+  "./~/redux-batched-subscribe/lib/index.js": {
+    "totalTime": 1274,
+    "timings": {
+      "factory": 991,
+      "building": 283
+    }
+  },
+  "./~/redux-little-router/lib/util/match-cache.js": {
+    "totalTime": 1270,
+    "timings": {
+      "factory": 507,
+      "building": 763
+    }
+  },
+  "./~/redux-little-router/lib/index.js": {
+    "totalTime": 1269,
+    "timings": {
+      "factory": 985,
+      "building": 284
+    }
+  },
+  "./~/redux-little-router/lib/util/generate-id.js": {
+    "totalTime": 1267,
+    "timings": {
+      "factory": 508,
+      "building": 759
+    }
+  },
+  "./~/redux-thunk/lib/index.js": {
+    "totalTime": 1267,
+    "timings": {
+      "factory": 982,
+      "building": 285
+    }
+  },
+  "./~/ua-parser-js/src/ua-parser.js": {
+    "totalTime": 1267,
+    "timings": {
+      "factory": 764,
+      "building": 503
+    }
+  },
+  "./~/core-js/library/fn/json/stringify.js": {
+    "totalTime": 1261,
+    "timings": {
+      "factory": 241,
+      "building": 1019,
+      "dependencies": 1
+    }
+  },
+  "./~/fbjs/lib/performance.js": {
+    "totalTime": 1261,
+    "timings": {
+      "factory": 687,
+      "building": 573,
+      "dependencies": 1
+    }
+  },
+  "./~/redux-little-router/lib/util/stringify-href.js": {
+    "totalTime": 1261,
+    "timings": {
+      "factory": 502,
+      "building": 759
+    }
+  },
+  "./~/katex/src/parseTree.js": {
+    "totalTime": 1259,
+    "timings": {
+      "factory": 664,
+      "building": 595
+    }
+  },
+  "./~/katex/src/utils.js": {
+    "totalTime": 1258,
+    "timings": {
+      "factory": 664,
+      "building": 594
+    }
+  },
+  "./~/katex/src/buildTree.js": {
+    "totalTime": 1256,
+    "timings": {
+      "factory": 663,
+      "building": 591,
+      "dependencies": 2
+    }
+  },
+  "./Resources/SVGs/arrow-left.svg": {
+    "totalTime": 1255,
+    "timings": {
+      "factory": 899,
+      "building": 356
+    }
+  },
+  "./~/katex/src/Settings.js": {
+    "totalTime": 1253,
+    "timings": {
+      "factory": 662,
+      "building": 591
+    }
+  },
+  "./~/katex/src/ParseError.js": {
+    "totalTime": 1252,
+    "timings": {
+      "factory": 661,
+      "building": 591
+    }
+  },
+  "delegated ../../node_modules/react-autobind/index.js from dll-reference vendor": {
+    "totalTime": 1247,
+    "timings": {
+      "factory": 1246,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/classnames/index.js from dll-reference vendor": {
+    "totalTime": 1245,
+    "timings": {
+      "factory": 1244,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/core-js/library/fn/object/define-property.js": {
+    "totalTime": 1236,
+    "timings": {
+      "factory": 401,
+      "building": 613,
+      "dependencies": 222
+    }
+  },
+  "./~/babel-runtime/core-js/object/is.js": {
+    "totalTime": 1214,
+    "timings": {
+      "factory": 794,
+      "building": 420
+    }
+  },
+  "./~/react-redux-firebase/dist/index.js": {
+    "totalTime": 1202,
+    "timings": {
+      "factory": 601,
+      "building": 595,
+      "dependencies": 6
+    }
+  },
+  "./~/core-js/library/fn/number/max-safe-integer.js": {
+    "totalTime": 1196,
+    "timings": {
+      "factory": 182,
+      "building": 1014
+    }
+  },
+  "./~/core-js/library/fn/number/min-safe-integer.js": {
+    "totalTime": 1196,
+    "timings": {
+      "factory": 181,
+      "building": 1015
+    }
+  },
+  "./~/core-js/library/fn/object/get-own-property-names.js": {
+    "totalTime": 1165,
+    "timings": {
+      "factory": 444,
+      "building": 720,
+      "dependencies": 1
+    }
+  },
+  "./~/react-redux-firebase/dist/utils/index.js": {
+    "totalTime": 1130,
+    "timings": {
+      "factory": 533,
+      "building": 597
+    }
+  },
+  "./~/ajv-keywords/keywords/_util.js": {
+    "totalTime": 1127,
+    "timings": {
+      "factory": 97,
+      "building": 1030
+    }
+  },
+  "./~/ajv-keywords/keywords/_formatLimit.js": {
+    "totalTime": 1127,
+    "timings": {
+      "factory": 96,
+      "building": 1031
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/es6.object.to-string.js from dll-reference vendor": {
+    "totalTime": 1090,
+    "timings": {
+      "factory": 1089,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/autolinker/dist/Autolinker.js": {
+    "totalTime": 1083,
+    "timings": {
+      "factory": 696,
+      "building": 387
+    }
+  },
+  "./~/katex/src/buildCommon.js": {
+    "totalTime": 1067,
+    "timings": {
+      "factory": 505,
+      "building": 348,
+      "dependencies": 214
+    }
+  },
+  "./~/lodash/_unicodeToArray.js": {
+    "totalTime": 1066,
+    "timings": {
+      "factory": 767,
+      "building": 299
+    }
+  },
+  "./~/lodash/_asciiToArray.js": {
+    "totalTime": 1065,
+    "timings": {
+      "factory": 766,
+      "building": 299
+    }
+  },
+  "./~/katex/src/Style.js": {
+    "totalTime": 1064,
+    "timings": {
+      "factory": 507,
+      "building": 352,
+      "dependencies": 205
+    }
+  },
+  "./~/katex/src/buildMathML.js": {
+    "totalTime": 1064,
+    "timings": {
+      "factory": 505,
+      "building": 340,
+      "dependencies": 219
+    }
+  },
+  "./~/katex/src/Parser.js": {
+    "totalTime": 1062,
+    "timings": {
+      "factory": 511,
+      "building": 398,
+      "dependencies": 153
+    }
+  },
+  "./~/core-js/library/modules/es6.object.get-own-property-names.js": {
+    "totalTime": 1061,
+    "timings": {
+      "factory": 78,
+      "building": 951,
+      "dependencies": 32
+    }
+  },
+  "./~/remarkable/lib/index.js": {
+    "totalTime": 1054,
+    "timings": {
+      "factory": 595,
+      "building": 459
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/CSSPropertyOperations.js from dll-reference vendor": {
+    "totalTime": 1039,
+    "timings": {
+      "factory": 1038,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/isArray.js from dll-reference vendor": {
+    "totalTime": 1034,
+    "timings": {
+      "factory": 1033,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/core-js/library/fn/is-iterable.js": {
+    "totalTime": 1034,
+    "timings": {
+      "factory": 202,
+      "building": 612,
+      "dependencies": 220
+    }
+  },
+  "delegated ../../node_modules/lodash/isObject.js from dll-reference vendor": {
+    "totalTime": 1032,
+    "timings": {
+      "factory": 1031,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_object-dp.js from dll-reference vendor": {
+    "totalTime": 1031,
+    "timings": {
+      "factory": 1027,
+      "building": 4,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/map.js from dll-reference vendor": {
+    "totalTime": 1030,
+    "timings": {
+      "factory": 1029,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/react-dom/lib/ReactPerf.js": {
+    "totalTime": 1030,
+    "timings": {
+      "factory": 276,
+      "building": 435,
+      "dependencies": 319
+    }
+  },
+  "./~/react-dom/lib/ReactTestUtils.js": {
+    "totalTime": 1030,
+    "timings": {
+      "factory": 277,
+      "building": 445,
+      "dependencies": 308
+    }
+  },
+  "delegated ../../node_modules/lodash/get.js from dll-reference vendor": {
+    "totalTime": 1028,
+    "timings": {
+      "factory": 1027,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_descriptors.js from dll-reference vendor": {
+    "totalTime": 1027,
+    "timings": {
+      "factory": 1026,
+      "building": 0,
+      "dependencies": 1
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_iterators.js from dll-reference vendor": {
+    "totalTime": 1027,
+    "timings": {
+      "factory": 1026,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_wks.js from dll-reference vendor": {
+    "totalTime": 1026,
+    "timings": {
+      "factory": 1025,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_export.js from dll-reference vendor": {
+    "totalTime": 1025,
+    "timings": {
+      "factory": 1024,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/core.get-iterator-method.js from dll-reference vendor": {
+    "totalTime": 1025,
+    "timings": {
+      "factory": 1024,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_object-keys.js from dll-reference vendor": {
+    "totalTime": 1025,
+    "timings": {
+      "factory": 1025,
+      "building": 0,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_an-object.js from dll-reference vendor": {
+    "totalTime": 1024,
+    "timings": {
+      "factory": 1023,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_to-object.js from dll-reference vendor": {
+    "totalTime": 1024,
+    "timings": {
+      "factory": 1023,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_classof.js from dll-reference vendor": {
+    "totalTime": 1024,
+    "timings": {
+      "factory": 1023,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/react-redux-firebase/dist/actions/query.js": {
+    "totalTime": 1020,
+    "timings": {
+      "factory": 339,
+      "building": 681
+    }
+  },
+  "./~/core-js/library/fn/get-iterator.js": {
+    "totalTime": 1019,
+    "timings": {
+      "factory": 406,
+      "building": 613
+    }
+  },
+  "./~/core-js/library/fn/object/keys.js": {
+    "totalTime": 1018,
+    "timings": {
+      "factory": 406,
+      "building": 612
+    }
+  },
+  "delegated ../../node_modules/react-redux/lib/index.js from dll-reference vendor": {
+    "totalTime": 1014,
+    "timings": {
+      "factory": 1013,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/redux-persist-transform-filter/dist/index.js from dll-reference vendor": {
+    "totalTime": 984,
+    "timings": {
+      "factory": 983,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/redux-persist/es/index.js from dll-reference vendor": {
+    "totalTime": 981,
+    "timings": {
+      "factory": 980,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/redux/es/index.js from dll-reference vendor": {
+    "totalTime": 979,
+    "timings": {
+      "factory": 978,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./Source/UI/@Shared/MarkdownEditor/Formatter.ts": {
+    "totalTime": 968,
+    "timings": {
+      "factory": 379,
+      "building": 586,
+      "dependencies": 3
+    }
+  },
+  "./Source/Frame/ReactComponents/TextArea.tsx": {
+    "totalTime": 967,
+    "timings": {
+      "factory": 175,
+      "building": 773,
+      "dependencies": 19
+    }
+  },
+  "./~/ajv-keywords/keywords/formatMinimum.js": {
+    "totalTime": 914,
+    "timings": {
+      "factory": 104,
+      "building": 717,
+      "dependencies": 93
+    }
+  },
+  "./~/babel-runtime/core-js/number/min-safe-integer.js": {
+    "totalTime": 913,
+    "timings": {
+      "factory": 237,
+      "building": 676
+    }
+  },
+  "./~/ajv-keywords/keywords/switch.js": {
+    "totalTime": 913,
+    "timings": {
+      "factory": 108,
+      "building": 712,
+      "dependencies": 93
+    }
+  },
+  "./~/ajv-keywords/keywords/select.js": {
+    "totalTime": 913,
+    "timings": {
+      "factory": 109,
+      "building": 715,
+      "dependencies": 89
+    }
+  },
+  "./~/babel-runtime/core-js/number/max-safe-integer.js": {
+    "totalTime": 911,
+    "timings": {
+      "factory": 235,
+      "building": 676
+    }
+  },
+  "./~/react-dom/lib/ReactDebugTool.js": {
+    "totalTime": 907,
+    "timings": {
+      "factory": 389,
+      "building": 412,
+      "dependencies": 106
+    }
+  },
+  "./~/fbjs/lib/CSSCore.js": {
+    "totalTime": 906,
+    "timings": {
+      "factory": 492,
+      "building": 413,
+      "dependencies": 1
+    }
+  },
+  "./~/react/lib/flattenChildren.js": {
+    "totalTime": 903,
+    "timings": {
+      "factory": 485,
+      "building": 415,
+      "dependencies": 3
+    }
+  },
+  "./~/core-js/library/fn/set-immediate.js": {
+    "totalTime": 901,
+    "timings": {
+      "factory": 487,
+      "building": 412,
+      "dependencies": 2
+    }
+  },
+  "./~/lodash/_baseHas.js": {
+    "totalTime": 899,
+    "timings": {
+      "factory": 623,
+      "building": 276
+    }
+  },
+  "./~/react/lib/ReactTransitionEvents.js": {
+    "totalTime": 899,
+    "timings": {
+      "factory": 489,
+      "building": 410
+    }
+  },
+  "./~/babel-runtime/helpers/defineProperty.js": {
+    "totalTime": 864,
+    "timings": {
+      "factory": 183,
+      "building": 680,
+      "dependencies": 1
+    }
+  },
+  "./~/katex/src/Options.js": {
+    "totalTime": 856,
+    "timings": {
+      "factory": 506,
+      "building": 350
+    }
+  },
+  "./~/core-js/library/modules/_same-value.js": {
+    "totalTime": 845,
+    "timings": {
+      "factory": 523,
+      "building": 322
+    }
+  },
+  "./~/katex/src/buildHTML.js": {
+    "totalTime": 838,
+    "timings": {
+      "factory": 504,
+      "building": 330,
+      "dependencies": 4
+    }
+  },
+  "./~/react-dom/lib/EventConstants.js": {
+    "totalTime": 830,
+    "timings": {
+      "factory": 384,
+      "building": 446
+    }
+  },
+  "./~/react-dom/lib/ReactShallowRenderer.js": {
+    "totalTime": 828,
+    "timings": {
+      "factory": 396,
+      "building": 401,
+      "dependencies": 31
+    }
+  },
+  "./~/remarkable/lib/rules_core/abbr.js": {
+    "totalTime": 822,
+    "timings": {
+      "factory": 273,
+      "building": 392,
+      "dependencies": 157
+    }
+  },
+  "./~/ajv-keywords/keywords/patternRequired.js": {
+    "totalTime": 819,
+    "timings": {
+      "factory": 107,
+      "building": 712
+    }
+  },
+  "./~/ajv-keywords/keywords/formatMaximum.js": {
+    "totalTime": 818,
+    "timings": {
+      "factory": 106,
+      "building": 712
+    }
+  },
+  "./~/ajv-keywords/keywords/deepRequired.js": {
+    "totalTime": 817,
+    "timings": {
+      "factory": 103,
+      "building": 714
+    }
+  },
+  "./~/ajv-keywords/keywords/deepProperties.js": {
+    "totalTime": 815,
+    "timings": {
+      "factory": 102,
+      "building": 713
+    }
+  },
+  "./~/ajv-keywords/keywords/if.js": {
+    "totalTime": 813,
+    "timings": {
+      "factory": 97,
+      "building": 715,
+      "dependencies": 1
+    }
+  },
+  "./~/ajv-keywords/keywords/prohibited.js": {
+    "totalTime": 813,
+    "timings": {
+      "factory": 101,
+      "building": 712
+    }
+  },
+  "./~/html-entities/index.js": {
+    "totalTime": 813,
+    "timings": {
+      "factory": 552,
+      "building": 261
+    }
+  },
+  "./~/ansi-html/index.js": {
+    "totalTime": 812,
+    "timings": {
+      "factory": 551,
+      "building": 261
+    }
+  },
+  "./~/ajv-keywords/keywords/dynamicDefaults.js": {
+    "totalTime": 811,
+    "timings": {
+      "factory": 97,
+      "building": 714
+    }
+  },
+  "./~/ajv-keywords/keywords/regexp.js": {
+    "totalTime": 809,
+    "timings": {
+      "factory": 95,
+      "building": 714
+    }
+  },
+  "./~/ajv-keywords/keywords/instanceof.js": {
+    "totalTime": 808,
+    "timings": {
+      "factory": 93,
+      "building": 715
+    }
+  },
+  "./~/ajv-keywords/keywords/typeof.js": {
+    "totalTime": 806,
+    "timings": {
+      "factory": 96,
+      "building": 710
+    }
+  },
+  "./~/core-js/library/fn/object/get-own-property-descriptor.js": {
+    "totalTime": 806,
+    "timings": {
+      "factory": 390,
+      "building": 414,
+      "dependencies": 2
+    }
+  },
+  "./~/core-js/library/fn/object/get-prototype-of.js": {
+    "totalTime": 806,
+    "timings": {
+      "factory": 391,
+      "building": 413,
+      "dependencies": 2
+    }
+  },
+  "./~/ajv-keywords/keywords/range.js": {
+    "totalTime": 805,
+    "timings": {
+      "factory": 94,
+      "building": 711
+    }
+  },
+  "./~/react/lib/update.js": {
+    "totalTime": 805,
+    "timings": {
+      "factory": 37,
+      "building": 78,
+      "dependencies": 690
+    }
+  },
+  "./~/react/lib/ReactFragment.js": {
+    "totalTime": 803,
+    "timings": {
+      "factory": 35,
+      "building": 72,
+      "dependencies": 696
+    }
+  },
+  "./~/react/lib/ReactTransitionGroup.js": {
+    "totalTime": 801,
+    "timings": {
+      "factory": 36,
+      "building": 64,
+      "dependencies": 701
+    }
+  },
+  "./Source/Store/firebase/contentNodes/@ContentNode.ts": {
+    "totalTime": 791,
+    "timings": {
+      "factory": 252,
+      "building": 533,
+      "dependencies": 6
+    }
+  },
+  "./~/remarkable/lib/rules_inline/links.js": {
+    "totalTime": 778,
+    "timings": {
+      "factory": 253,
+      "building": 437,
+      "dependencies": 88
+    }
+  },
+  "./~/remarkable/lib/rules_inline/footnote_inline.js": {
+    "totalTime": 775,
+    "timings": {
+      "factory": 254,
+      "building": 438,
+      "dependencies": 83
+    }
+  },
+  "delegated ../../node_modules/react-md-editor/lib/icons/index.js from dll-reference vendor": {
+    "totalTime": 768,
+    "timings": {
+      "factory": 767,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-md-editor/lib/MDEditor.js from dll-reference vendor": {
+    "totalTime": 767,
+    "timings": {
+      "factory": 766,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./Resources/SVGs ^\\.\\/.*\\.svg$": {
+    "totalTime": 759,
+    "timings": {
+      "factory": 519,
+      "building": 240
+    }
+  },
+  "delegated ../../node_modules/babel-runtime/helpers/extends.js from dll-reference vendor": {
+    "totalTime": 741,
+    "timings": {
+      "factory": 739,
+      "building": 1,
+      "dependencies": 1
+    }
+  },
+  "delegated ../../node_modules/fbjs/lib/emptyObject.js from dll-reference vendor": {
+    "totalTime": 738,
+    "timings": {
+      "factory": 737,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react/lib/getNextDebugID.js from dll-reference vendor": {
+    "totalTime": 737,
+    "timings": {
+      "factory": 736,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/ReactReconcileTransaction.js from dll-reference vendor": {
+    "totalTime": 735,
+    "timings": {
+      "factory": 735,
+      "building": 0,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/ReactReconciler.js from dll-reference vendor": {
+    "totalTime": 734,
+    "timings": {
+      "factory": 733,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/ReactDefaultBatchingStrategy.js from dll-reference vendor": {
+    "totalTime": 733,
+    "timings": {
+      "factory": 732,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/core-js/library/modules/es6.object.define-property.js": {
+    "totalTime": 732,
+    "timings": {
+      "factory": 223,
+      "building": 509
+    }
+  },
+  "./~/core-js/library/modules/es6.object.keys.js": {
+    "totalTime": 732,
+    "timings": {
+      "factory": 222,
+      "building": 510
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/ReactCompositeComponent.js from dll-reference vendor": {
+    "totalTime": 732,
+    "timings": {
+      "factory": 731,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/object-assign/index.js from dll-reference vendor": {
+    "totalTime": 729,
+    "timings": {
+      "factory": 727,
+      "building": 2,
+      "dependencies": 0
+    }
+  },
+  "./~/core-js/library/modules/core.is-iterable.js": {
+    "totalTime": 729,
+    "timings": {
+      "factory": 223,
+      "building": 504,
+      "dependencies": 2
+    }
+  },
+  "./~/core-js/library/modules/core.get-iterator.js": {
+    "totalTime": 728,
+    "timings": {
+      "factory": 222,
+      "building": 505,
+      "dependencies": 1
+    }
+  },
+  "./~/remarkable/lib/common/entities.js": {
+    "totalTime": 720,
+    "timings": {
+      "factory": 231,
+      "building": 489
+    }
+  },
+  "delegated ../../node_modules/fbjs/lib/emptyFunction.js from dll-reference vendor": {
+    "totalTime": 703,
+    "timings": {
+      "factory": 702,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/remarkable/lib/rules_inline/entity.js": {
+    "totalTime": 702,
+    "timings": {
+      "factory": 257,
+      "building": 443,
+      "dependencies": 2
+    }
+  },
+  "delegated ../../node_modules/fbjs/lib/warning.js from dll-reference vendor": {
+    "totalTime": 699,
+    "timings": {
+      "factory": 698,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/fbjs/lib/invariant.js from dll-reference vendor": {
+    "totalTime": 698,
+    "timings": {
+      "factory": 697,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/remarkable/lib/rules_inline/htmltag.js": {
+    "totalTime": 698,
+    "timings": {
+      "factory": 256,
+      "building": 442
+    }
+  },
+  "delegated ../../node_modules/fbjs/lib/shallowEqual.js from dll-reference vendor": {
+    "totalTime": 697,
+    "timings": {
+      "factory": 696,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/lodash/head.js": {
+    "totalTime": 696,
+    "timings": {
+      "factory": 140,
+      "building": 556
+    }
+  },
+  "./~/remarkable/lib/rules_core/linkify.js": {
+    "totalTime": 696,
+    "timings": {
+      "factory": 279,
+      "building": 417
+    }
+  },
+  "./~/remarkable/lib/rules_inline/autolink.js": {
+    "totalTime": 696,
+    "timings": {
+      "factory": 256,
+      "building": 440
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_object-gpo.js from dll-reference vendor": {
+    "totalTime": 696,
+    "timings": {
+      "factory": 694,
+      "building": 2,
+      "dependencies": 0
+    }
+  },
+  "./~/remarkable/lib/rules_inline/footnote_ref.js": {
+    "totalTime": 694,
+    "timings": {
+      "factory": 255,
+      "building": 439
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_object-gopd.js from dll-reference vendor": {
+    "totalTime": 694,
+    "timings": {
+      "factory": 693,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_to-iobject.js from dll-reference vendor": {
+    "totalTime": 693,
+    "timings": {
+      "factory": 692,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/remarkable/lib/rules_core/smartquotes.js": {
+    "totalTime": 691,
+    "timings": {
+      "factory": 278,
+      "building": 413
+    }
+  },
+  "./~/lodash/_stringSize.js": {
+    "totalTime": 688,
+    "timings": {
+      "factory": 138,
+      "building": 550
+    }
+  },
+  "./~/remarkable/lib/rules_core/replacements.js": {
+    "totalTime": 688,
+    "timings": {
+      "factory": 277,
+      "building": 411
+    }
+  },
+  "./~/remarkable/lib/rules_inline/sup.js": {
+    "totalTime": 687,
+    "timings": {
+      "factory": 252,
+      "building": 435
+    }
+  },
+  "./~/remarkable/lib/rules_inline/sub.js": {
+    "totalTime": 686,
+    "timings": {
+      "factory": 251,
+      "building": 435
+    }
+  },
+  "./~/remarkable/lib/rules_inline/emphasis.js": {
+    "totalTime": 685,
+    "timings": {
+      "factory": 250,
+      "building": 435
+    }
+  },
+  "./~/remarkable/lib/rules_inline/mark.js": {
+    "totalTime": 683,
+    "timings": {
+      "factory": 250,
+      "building": 433
+    }
+  },
+  "./~/remarkable/lib/rules_block/paragraph.js": {
+    "totalTime": 681,
+    "timings": {
+      "factory": 252,
+      "building": 429
+    }
+  },
+  "./~/remarkable/lib/rules_inline/ins.js": {
+    "totalTime": 681,
+    "timings": {
+      "factory": 249,
+      "building": 432
+    }
+  },
+  "./~/remarkable/lib/rules_block/deflist.js": {
+    "totalTime": 680,
+    "timings": {
+      "factory": 251,
+      "building": 429
+    }
+  },
+  "./~/remarkable/lib/rules_inline/del.js": {
+    "totalTime": 679,
+    "timings": {
+      "factory": 248,
+      "building": 431
+    }
+  },
+  "./~/remarkable/lib/rules_block/table.js": {
+    "totalTime": 677,
+    "timings": {
+      "factory": 250,
+      "building": 427
+    }
+  },
+  "./~/remarkable/lib/rules_inline/backticks.js": {
+    "totalTime": 677,
+    "timings": {
+      "factory": 247,
+      "building": 430
+    }
+  },
+  "./~/remarkable/lib/rules_inline/escape.js": {
+    "totalTime": 676,
+    "timings": {
+      "factory": 246,
+      "building": 430
+    }
+  },
+  "./~/remarkable/lib/rules_inline/newline.js": {
+    "totalTime": 675,
+    "timings": {
+      "factory": 246,
+      "building": 429
+    }
+  },
+  "./~/remarkable/lib/rules_block/lheading.js": {
+    "totalTime": 674,
+    "timings": {
+      "factory": 249,
+      "building": 425
+    }
+  },
+  "./~/remarkable/lib/rules_inline/text.js": {
+    "totalTime": 674,
+    "timings": {
+      "factory": 245,
+      "building": 429
+    }
+  },
+  "./~/remarkable/lib/rules_inline/state_inline.js": {
+    "totalTime": 673,
+    "timings": {
+      "factory": 244,
+      "building": 429
+    }
+  },
+  "./~/remarkable/lib/rules_block/htmlblock.js": {
+    "totalTime": 673,
+    "timings": {
+      "factory": 249,
+      "building": 424
+    }
+  },
+  "./~/remarkable/lib/rules_block/heading.js": {
+    "totalTime": 671,
+    "timings": {
+      "factory": 248,
+      "building": 423
+    }
+  },
+  "./~/remarkable/lib/rules_core/footnote_tail.js": {
+    "totalTime": 671,
+    "timings": {
+      "factory": 276,
+      "building": 395
+    }
+  },
+  "./~/remarkable/lib/rules_block/list.js": {
+    "totalTime": 670,
+    "timings": {
+      "factory": 246,
+      "building": 424
+    }
+  },
+  "./~/remarkable/lib/rules_core/abbr2.js": {
+    "totalTime": 669,
+    "timings": {
+      "factory": 276,
+      "building": 393
+    }
+  },
+  "./~/remarkable/lib/rules_block/footnote.js": {
+    "totalTime": 667,
+    "timings": {
+      "factory": 247,
+      "building": 420
+    }
+  },
+  "./~/remarkable/lib/rules_core/inline.js": {
+    "totalTime": 667,
+    "timings": {
+      "factory": 275,
+      "building": 392
+    }
+  },
+  "./~/remarkable/lib/rules_block/hr.js": {
+    "totalTime": 665,
+    "timings": {
+      "factory": 246,
+      "building": 419
+    }
+  },
+  "./~/remarkable/lib/rules_block/blockquote.js": {
+    "totalTime": 664,
+    "timings": {
+      "factory": 245,
+      "building": 419
+    }
+  },
+  "./~/remarkable/lib/rules_block/fences.js": {
+    "totalTime": 662,
+    "timings": {
+      "factory": 244,
+      "building": 418
+    }
+  },
+  "./~/remarkable/lib/rules_block/code.js": {
+    "totalTime": 660,
+    "timings": {
+      "factory": 243,
+      "building": 417
+    }
+  },
+  "./~/remarkable/lib/rules_block/state_block.js": {
+    "totalTime": 656,
+    "timings": {
+      "factory": 242,
+      "building": 414
+    }
+  },
+  "./~/lodash/_baseReduce.js": {
+    "totalTime": 640,
+    "timings": {
+      "factory": 141,
+      "building": 499
+    }
+  },
+  "./~/lodash/_baseSome.js": {
+    "totalTime": 638,
+    "timings": {
+      "factory": 139,
+      "building": 498,
+      "dependencies": 1
+    }
+  },
+  "./~/remarkable/lib/rules_core/references.js": {
+    "totalTime": 633,
+    "timings": {
+      "factory": 274,
+      "building": 357,
+      "dependencies": 2
+    }
+  },
+  "delegated ../../node_modules/lodash/_baseIteratee.js from dll-reference vendor": {
+    "totalTime": 630,
+    "timings": {
+      "factory": 629,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/isObjectLike.js from dll-reference vendor": {
+    "totalTime": 630,
+    "timings": {
+      "factory": 629,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/remarkable/lib/rules_core/block.js": {
+    "totalTime": 629,
+    "timings": {
+      "factory": 272,
+      "building": 357
+    }
+  },
+  "delegated ../../node_modules/lodash/_baseGetTag.js from dll-reference vendor": {
+    "totalTime": 629,
+    "timings": {
+      "factory": 628,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/_baseFilter.js from dll-reference vendor": {
+    "totalTime": 628,
+    "timings": {
+      "factory": 627,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/_arrayFilter.js from dll-reference vendor": {
+    "totalTime": 627,
+    "timings": {
+      "factory": 626,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/_hasPath.js from dll-reference vendor": {
+    "totalTime": 625,
+    "timings": {
+      "factory": 624,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/_baseSet.js from dll-reference vendor": {
+    "totalTime": 624,
+    "timings": {
+      "factory": 623,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/react-redux-firebase/dist/utils/populate.js": {
+    "totalTime": 616,
+    "timings": {
+      "factory": 112,
+      "building": 498,
+      "dependencies": 6
+    }
+  },
+  "./~/babel-runtime/core-js/object/get-own-property-descriptor.js": {
+    "totalTime": 615,
+    "timings": {
+      "factory": 185,
+      "building": 430
+    }
+  },
+  "./~/babel-runtime/core-js/object/get-prototype-of.js": {
+    "totalTime": 613,
+    "timings": {
+      "factory": 181,
+      "building": 432
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_fails.js from dll-reference vendor": {
+    "totalTime": 613,
+    "timings": {
+      "factory": 612,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/_baseProperty.js from dll-reference vendor": {
+    "totalTime": 609,
+    "timings": {
+      "factory": 608,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/react-redux-firebase/dist/constants.js": {
+    "totalTime": 605,
+    "timings": {
+      "factory": 112,
+      "building": 493
+    }
+  },
+  "./~/react-redux-firebase/dist/utils/query.js": {
+    "totalTime": 604,
+    "timings": {
+      "factory": 113,
+      "building": 490,
+      "dependencies": 1
+    }
+  },
+  "delegated ../../node_modules/prop-types/factory.js from dll-reference vendor": {
+    "totalTime": 568,
+    "timings": {
+      "factory": 567,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/react/lib/ReactCSSTransitionGroupChild.js": {
+    "totalTime": 568,
+    "timings": {
+      "factory": 191,
+      "building": 370,
+      "dependencies": 7
+    }
+  },
+  "./~/react/lib/ReactStateSetters.js": {
+    "totalTime": 563,
+    "timings": {
+      "factory": 195,
+      "building": 368
+    }
+  },
+  "./~/remarkable/lib/helpers/normalize_reference.js": {
+    "totalTime": 562,
+    "timings": {
+      "factory": 193,
+      "building": 369
+    }
+  },
+  "./~/remarkable/lib/helpers/parse_link_title.js": {
+    "totalTime": 562,
+    "timings": {
+      "factory": 192,
+      "building": 369,
+      "dependencies": 1
+    }
+  },
+  "./~/react/lib/ReactLink.js": {
+    "totalTime": 561,
+    "timings": {
+      "factory": 194,
+      "building": 366,
+      "dependencies": 1
+    }
+  },
+  "delegated ../../node_modules/babel-runtime/core-js/array/from.js from dll-reference vendor": {
+    "totalTime": 561,
+    "timings": {
+      "factory": 560,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/remarkable/lib/helpers/parse_link_destination.js": {
+    "totalTime": 560,
+    "timings": {
+      "factory": 191,
+      "building": 367,
+      "dependencies": 2
+    }
+  },
+  "./~/remarkable/lib/helpers/parse_link_label.js": {
+    "totalTime": 556,
+    "timings": {
+      "factory": 190,
+      "building": 366
+    }
+  },
+  "./~/katex/src/fontMetricsData.js": {
+    "totalTime": 556,
+    "timings": {
+      "factory": 116,
+      "building": 440
+    }
+  },
+  "./~/remarkable/lib/rules.js": {
+    "totalTime": 556,
+    "timings": {
+      "factory": 90,
+      "building": 465,
+      "dependencies": 1
+    }
+  },
+  "./~/react/lib/ReactTransitionChildMapping.js": {
+    "totalTime": 541,
+    "timings": {
+      "factory": 165,
+      "building": 376
+    }
+  },
+  "./~/katex/src/Lexer.js": {
+    "totalTime": 539,
+    "timings": {
+      "factory": 175,
+      "building": 363,
+      "dependencies": 1
+    }
+  },
+  "./~/match-at/lib/matchAt.js": {
+    "totalTime": 532,
+    "timings": {
+      "factory": 413,
+      "building": 119
+    }
+  },
+  "./~/babel-runtime/core-js/set-immediate.js": {
+    "totalTime": 525,
+    "timings": {
+      "factory": 181,
+      "building": 344
+    }
+  },
+  "./~/babel-runtime/helpers/toConsumableArray.js": {
+    "totalTime": 524,
+    "timings": {
+      "factory": 182,
+      "building": 342
+    }
+  },
+  "./~/katex/src/fontMetrics.js": {
+    "totalTime": 508,
+    "timings": {
+      "factory": 229,
+      "building": 277,
+      "dependencies": 2
+    }
+  },
+  "./~/katex/src/mathMLTree.js": {
+    "totalTime": 500,
+    "timings": {
+      "factory": 220,
+      "building": 279,
+      "dependencies": 1
+    }
+  },
+  "./~/katex/src/symbols.js": {
+    "totalTime": 491,
+    "timings": {
+      "factory": 221,
+      "building": 270
+    }
+  },
+  "delegated ../../node_modules/react/lib/onlyChild.js from dll-reference vendor": {
+    "totalTime": 491,
+    "timings": {
+      "factory": 490,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/core-js/library/fn/promise.js": {
+    "totalTime": 469,
+    "timings": {
+      "factory": 230,
+      "building": 236,
+      "dependencies": 3
+    }
+  },
+  "./~/lodash/toInteger.js": {
+    "totalTime": 460,
+    "timings": {
+      "factory": 146,
+      "building": 314
+    }
+  },
+  "./~/katex/src/domTree.js": {
+    "totalTime": 457,
+    "timings": {
+      "factory": 228,
+      "building": 228,
+      "dependencies": 1
+    }
+  },
+  "./~/lodash/_basePullAt.js": {
+    "totalTime": 457,
+    "timings": {
+      "factory": 143,
+      "building": 314
+    }
+  },
+  "./~/raven-js/src/raven.js": {
+    "totalTime": 454,
+    "timings": {
+      "factory": 154,
+      "building": 298,
+      "dependencies": 2
+    }
+  },
+  "./~/remarkable/lib/helpers/normalize_link.js": {
+    "totalTime": 452,
+    "timings": {
+      "factory": 82,
+      "building": 370,
+      "dependencies": 0
+    }
+  },
+  "./~/katex/src/delimiter.js": {
+    "totalTime": 451,
+    "timings": {
+      "factory": 227,
+      "building": 219,
+      "dependencies": 5
+    }
+  },
+  "delegated ../../node_modules/babel-runtime/helpers/objectWithoutProperties.js from dll-reference vendor": {
+    "totalTime": 449,
+    "timings": {
+      "factory": 448,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/katex/src/parseData.js": {
+    "totalTime": 449,
+    "timings": {
+      "factory": 160,
+      "building": 289
+    }
+  },
+  "./~/katex/src/MacroExpander.js": {
+    "totalTime": 448,
+    "timings": {
+      "factory": 158,
+      "building": 290
+    }
+  },
+  "./~/katex/src/unicodeRegexes.js": {
+    "totalTime": 446,
+    "timings": {
+      "factory": 159,
+      "building": 287
+    }
+  },
+  "./~/katex/src/environments.js": {
+    "totalTime": 446,
+    "timings": {
+      "factory": 158,
+      "building": 285,
+      "dependencies": 3
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_iter-detect.js from dll-reference vendor": {
+    "totalTime": 445,
+    "timings": {
+      "factory": 444,
+      "building": 0,
+      "dependencies": 1
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_set-to-string-tag.js from dll-reference vendor": {
+    "totalTime": 441,
+    "timings": {
+      "factory": 440,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/katex/src/functions.js": {
+    "totalTime": 440,
+    "timings": {
+      "factory": 157,
+      "building": 281,
+      "dependencies": 2
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_a-function.js from dll-reference vendor": {
+    "totalTime": 434,
+    "timings": {
+      "factory": 432,
+      "building": 1,
+      "dependencies": 1
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_is-object.js from dll-reference vendor": {
+    "totalTime": 432,
+    "timings": {
+      "factory": 431,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_library.js from dll-reference vendor": {
+    "totalTime": 430,
+    "timings": {
+      "factory": 429,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/prop-types/factoryWithTypeCheckers.js from dll-reference vendor": {
+    "totalTime": 416,
+    "timings": {
+      "factory": 415,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/findDOMNode.js from dll-reference vendor": {
+    "totalTime": 397,
+    "timings": {
+      "factory": 397,
+      "building": 0,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/SyntheticEvent.js from dll-reference vendor": {
+    "totalTime": 395,
+    "timings": {
+      "factory": 395,
+      "building": 0,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/ReactUpdates.js from dll-reference vendor": {
+    "totalTime": 394,
+    "timings": {
+      "factory": 393,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/ReactInstanceMap.js from dll-reference vendor": {
+    "totalTime": 392,
+    "timings": {
+      "factory": 392,
+      "building": 0,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/ReactBrowserEventEmitter.js from dll-reference vendor": {
+    "totalTime": 391,
+    "timings": {
+      "factory": 389,
+      "building": 2,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/ReactDOMComponentTree.js from dll-reference vendor": {
+    "totalTime": 389,
+    "timings": {
+      "factory": 388,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/EventPropagators.js from dll-reference vendor": {
+    "totalTime": 388,
+    "timings": {
+      "factory": 387,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/EventPluginRegistry.js from dll-reference vendor": {
+    "totalTime": 387,
+    "timings": {
+      "factory": 386,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/EventPluginHub.js from dll-reference vendor": {
+    "totalTime": 385,
+    "timings": {
+      "factory": 385,
+      "building": 0,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/reactProdInvariant.js from dll-reference vendor": {
+    "totalTime": 384,
+    "timings": {
+      "factory": 383,
+      "building": 0,
+      "dependencies": 1
+    }
+  },
+  "./~/remarkable/lib/common/html_blocks.js": {
+    "totalTime": 382,
+    "timings": {
+      "factory": 98,
+      "building": 284
+    }
+  },
+  "./~/ajv-keywords/keywords/index.js": {
+    "totalTime": 371,
+    "timings": {
+      "factory": 36,
+      "building": 335
+    }
+  },
+  "delegated ../../node_modules/lodash/mapValues.js from dll-reference vendor": {
+    "totalTime": 362,
+    "timings": {
+      "factory": 361,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/remarkable/lib/common/url_schemas.js": {
+    "totalTime": 351,
+    "timings": {
+      "factory": 67,
+      "building": 284
+    }
+  },
+  "./~/remarkable/lib/common/html_re.js": {
+    "totalTime": 350,
+    "timings": {
+      "factory": 66,
+      "building": 284
+    }
+  },
+  "./~/lodash/_stringToArray.js": {
+    "totalTime": 322,
+    "timings": {
+      "factory": 27,
+      "building": 294,
+      "dependencies": 1
+    }
+  },
+  "./~/lodash/_castSlice.js": {
+    "totalTime": 320,
+    "timings": {
+      "factory": 27,
+      "building": 292,
+      "dependencies": 1
+    }
+  },
+  "delegated ../../node_modules/react-dom/index.js from dll-reference vendor": {
+    "totalTime": 319,
+    "timings": {
+      "factory": 318,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/isFunction.js from dll-reference vendor": {
+    "totalTime": 306,
+    "timings": {
+      "factory": 305,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/svg-baker-runtime/browser-symbol.js": {
+    "totalTime": 286,
+    "timings": {
+      "factory": 166,
+      "building": 120
+    }
+  },
+  "./~/svg-sprite-loader/runtime/browser-sprite.build.js": {
+    "totalTime": 276,
+    "timings": {
+      "factory": 160,
+      "building": 115,
+      "dependencies": 1
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/ReactDOM.js from dll-reference vendor": {
+    "totalTime": 275,
+    "timings": {
+      "factory": 273,
+      "building": 2,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_object-gopn-ext.js from dll-reference vendor": {
+    "totalTime": 227,
+    "timings": {
+      "factory": 225,
+      "building": 2,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_core.js from dll-reference vendor": {
+    "totalTime": 224,
+    "timings": {
+      "factory": 223,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/es6.string.iterator.js from dll-reference vendor": {
+    "totalTime": 222,
+    "timings": {
+      "factory": 221,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/web.dom.iterable.js from dll-reference vendor": {
+    "totalTime": 220,
+    "timings": {
+      "factory": 219,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/toString.js from dll-reference vendor": {
+    "totalTime": 208,
+    "timings": {
+      "factory": 207,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/babel-runtime/core-js/is-iterable.js": {
+    "totalTime": 201,
+    "timings": {
+      "factory": 14,
+      "building": 187
+    }
+  },
+  "delegated ../../node_modules/babel-runtime/helpers/inherits.js from dll-reference vendor": {
+    "totalTime": 185,
+    "timings": {
+      "factory": 184,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/babel-runtime/helpers/possibleConstructorReturn.js from dll-reference vendor": {
+    "totalTime": 183,
+    "timings": {
+      "factory": 182,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react/lib/ReactElement.js from dll-reference vendor": {
+    "totalTime": 162,
+    "timings": {
+      "factory": 161,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react/lib/ReactChildren.js from dll-reference vendor": {
+    "totalTime": 161,
+    "timings": {
+      "factory": 160,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react/lib/reactProdInvariant.js from dll-reference vendor": {
+    "totalTime": 160,
+    "timings": {
+      "factory": 159,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_cof.js from dll-reference vendor": {
+    "totalTime": 150,
+    "timings": {
+      "factory": 149,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_global.js from dll-reference vendor": {
+    "totalTime": 149,
+    "timings": {
+      "factory": 148,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_dom-create.js from dll-reference vendor": {
+    "totalTime": 147,
+    "timings": {
+      "factory": 147,
+      "building": 0,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/_baseFlatten.js from dll-reference vendor": {
+    "totalTime": 146,
+    "timings": {
+      "factory": 145,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_html.js from dll-reference vendor": {
+    "totalTime": 146,
+    "timings": {
+      "factory": 145,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/_baseSlice.js from dll-reference vendor": {
+    "totalTime": 145,
+    "timings": {
+      "factory": 145,
+      "building": 0,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/fbjs/lib/ExecutionEnvironment.js from dll-reference vendor": {
+    "totalTime": 145,
+    "timings": {
+      "factory": 144,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/_baseIsEqual.js from dll-reference vendor": {
+    "totalTime": 145,
+    "timings": {
+      "factory": 144,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_ctx.js from dll-reference vendor": {
+    "totalTime": 144,
+    "timings": {
+      "factory": 143,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react-dom/lib/getVendorPrefixedEventName.js from dll-reference vendor": {
+    "totalTime": 143,
+    "timings": {
+      "factory": 142,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/_baseEach.js from dll-reference vendor": {
+    "totalTime": 141,
+    "timings": {
+      "factory": 140,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react/lib/ReactComponentTreeHook.js from dll-reference vendor": {
+    "totalTime": 140,
+    "timings": {
+      "factory": 140,
+      "building": 0,
+      "dependencies": 0
+    }
+  },
+  "./~/react-textarea-autosize/es/index.js": {
+    "totalTime": 140,
+    "timings": {
+      "factory": 128,
+      "building": 7,
+      "dependencies": 5
+    }
+  },
+  "delegated ../../node_modules/lodash/_arrayReduce.js from dll-reference vendor": {
+    "totalTime": 140,
+    "timings": {
+      "factory": 139,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/_arraySome.js from dll-reference vendor": {
+    "totalTime": 139,
+    "timings": {
+      "factory": 138,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react/lib/traverseAllChildren.js from dll-reference vendor": {
+    "totalTime": 139,
+    "timings": {
+      "factory": 138,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/isArrayLike.js from dll-reference vendor": {
+    "totalTime": 138,
+    "timings": {
+      "factory": 137,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react/lib/KeyEscapeUtils.js from dll-reference vendor": {
+    "totalTime": 138,
+    "timings": {
+      "factory": 136,
+      "building": 2,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/_getTag.js from dll-reference vendor": {
+    "totalTime": 137,
+    "timings": {
+      "factory": 136,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/_baseKeys.js from dll-reference vendor": {
+    "totalTime": 136,
+    "timings": {
+      "factory": 135,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/lodash/forEach.js from dll-reference vendor": {
+    "totalTime": 116,
+    "timings": {
+      "factory": 115,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/react/lib/shallowCompare.js": {
+    "totalTime": 110,
+    "timings": {
+      "factory": 37,
+      "building": 73
+    }
+  },
+  "delegated ../../node_modules/babel-runtime/core-js/symbol/iterator.js from dll-reference vendor": {
+    "totalTime": 100,
+    "timings": {
+      "factory": 99,
+      "building": 0,
+      "dependencies": 1
+    }
+  },
+  "delegated ../../node_modules/babel-runtime/core-js/symbol.js from dll-reference vendor": {
+    "totalTime": 98,
+    "timings": {
+      "factory": 96,
+      "building": 2,
+      "dependencies": 0
+    }
+  },
+  "./~/react/lib/ReactCSSTransitionGroup.js": {
+    "totalTime": 76,
+    "timings": {
+      "factory": 34,
+      "building": 38,
+      "dependencies": 4
+    }
+  },
+  "./~/react/lib/LinkedStateMixin.js": {
+    "totalTime": 67,
+    "timings": {
+      "factory": 30,
+      "building": 37
+    }
+  },
+  "./~/react/lib/ReactComponentWithPureRenderMixin.js": {
+    "totalTime": 66,
+    "timings": {
+      "factory": 33,
+      "building": 32,
+      "dependencies": 1
+    }
+  },
+  "./~/react/lib/ReactAddonsDOMDependencies.js": {
+    "totalTime": 63,
+    "timings": {
+      "factory": 32,
+      "building": 31
+    }
+  },
+  "delegated ../../node_modules/lodash/isSymbol.js from dll-reference vendor": {
+    "totalTime": 59,
+    "timings": {
+      "factory": 58,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_to-length.js from dll-reference vendor": {
+    "totalTime": 59,
+    "timings": {
+      "factory": 58,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_is-array-iter.js from dll-reference vendor": {
+    "totalTime": 58,
+    "timings": {
+      "factory": 57,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_iter-call.js from dll-reference vendor": {
+    "totalTime": 57,
+    "timings": {
+      "factory": 56,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/core-js/library/modules/_hide.js from dll-reference vendor": {
+    "totalTime": 44,
+    "timings": {
+      "factory": 43,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "delegated ../../node_modules/react/lib/React.js from dll-reference vendor": {
+    "totalTime": 32,
+    "timings": {
+      "factory": 31,
+      "building": 1,
+      "dependencies": 0
+    }
+  },
+  "./~/react-textarea-autosize/es/calculateNodeHeight.js": {
+    "totalTime": 29,
+    "timings": {
+      "factory": 6,
+      "building": 23
+    }
+  },
+  "multi ./Source/Main.ts webpack-hot-middleware/client?path=/__webpack_hmr": {
+    "totalTime": 3,
+    "timings": {
+      "factory": 0,
+      "building": 3
+    }
+  },
+  "delegated ../../node_modules/webpack/buildin/global.js from dll-reference vendor": {
+    "totalTime": 2,
+    "timings": {
+      "factory": 1,
+      "building": 1,
+      "dependencies": 0
+    }
+  }
+}
