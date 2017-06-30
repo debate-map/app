@@ -1,6 +1,5 @@
 import {Image} from "../../../../Store/firebase/images/@Image";
 import {GetImage} from "../../../../Store/firebase/images";
-import {Assert} from "../../../../Frame/General/Assert";
 import {connect} from "react-redux";
 import { BaseComponent, Div, AddGlobalStyle, Pre, GetInnerComp, FindDOM_ } from "../../../../Frame/UI/ReactGlobals";
 import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
@@ -51,6 +50,7 @@ import classNames from "classnames";
 import { GetEquationStepNumber } from "../../../../Store/firebase/nodes/$node/equation";
 import NodeMathUI from "UI/@Shared/Maps/MapNode/NodeMathUI";
 import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
+import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -265,42 +265,6 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 			}
 		}
 		return elements;
-	}
-}
-
-@Connect((state, {termID})=> {
-	let term = GetTerm(termID);
-	return {
-		term,
-		termVariantNumber: term ? GetTermVariantNumber(term) : null,
-	};
-})
-export class TermPlaceholder extends BaseComponent
-		<{refText: string, termID: number, showVariantNumber?: boolean, onHover: (hovered: boolean)=>void, onClick: ()=>void}
-			& Partial<{term: Term, termVariantNumber: number}>,
-		{}> {
-	static defaultProps = {showVariantNumber: true};
-	render() {
-		let {refText, termID, showVariantNumber, onHover, onClick, term, termVariantNumber} = this.props;
-		//if (term == null) return <a>...</a>;
-		//if (term == null) return <a>{refText}</a>;
-		return (
-			<a
-					onMouseEnter={e=>onHover(true)}
-					onMouseLeave={e=>onHover(false)}
-					onClick={e=> {
-						/*if (this.definitionsPanel == null) return;
-						GetInnerComp(this.definitionsPanel).SetState({termFromLocalClick: GetTerm(termID)});*/
-						//this.SetState({clickTermID: termID});
-						onClick();
-					}}>
-				{/*term.name*/}
-				{refText}
-				{showVariantNumber &&
-					<sup>{termVariantNumber || "?"}</sup>}
-					{/*<sub>{termVariantNumber}</sub>}*/}
-			</a>
-		);
 	}
 }
 

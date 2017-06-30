@@ -1,7 +1,6 @@
 import {IsString} from '../../../Frame/General/Types';
 import {GetNiceNameForImageType} from "../../../UI/Content/ImagesUI";
 import {GetImage} from '../images';
-import {Assert} from '../../../Frame/General/Assert';
 import {URL} from '../../../Frame/General/URLs';
 import {MapNode, MapNodeEnhanced, ThesisForm, ChildEntry, ThesisType} from './@MapNode';
 import {RatingType} from "../nodeRatings/@RatingType";

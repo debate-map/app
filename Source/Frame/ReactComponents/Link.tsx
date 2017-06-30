@@ -6,7 +6,7 @@ import {replace, push} from "redux-little-router";
 import {Connect} from "../Database/FirebaseConnect";
 import {MakeRootReducer} from "../../Store/index";
 import { GetNewURL } from "../URL/URLManager";
-import { State_overrides } from "Main_Hot";
+import {State_overrides} from "../../UI/@Shared/StateOverrides";
 
 /*@Radium
 export default class Link extends BaseComponent<{to, target?: string, replace?: boolean, style?, onClick?}, {}> {

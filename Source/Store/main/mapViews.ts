@@ -11,11 +11,11 @@ import u from "updeep";
 import {MapViewReducer, ACTMapViewMerge} from "./mapViews/$mapView";
 import {ShallowChanged} from "../../Frame/UI/ReactGlobals";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
-import {CreateDemoMapView} from "../../UI/Home/Home";
 import {URL} from "../../Frame/General/URLs";
 import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "./debates";
 import {CachedTransform} from "../../Frame/V/VCache";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
+import {CreateDemoMapView} from "../../UI/Home/DemoMap";
 
 export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 	/*if (action.Is(ACTOpenMapSet))

@@ -19,7 +19,8 @@ import {Vector2i} from "../../Frame/General/VectorStructs";
 import Editor from "react-md-editor";
 import ReactMarkdown from "react-markdown";
 import {GetNodeEnhanced} from "../../Store/firebase/nodes/$node";
-import {replace, push} from "redux-little-router";
+import { replace, push } from "redux-little-router";
+import { demoMap, demoRootNodeID } from "UI/Home/DemoMap";
 
 let red = `rgba(255,0,0,.7)`;
 let green = `rgba(0,255,0,.6)`;
@@ -147,16 +148,6 @@ One can then proceed to look more closely at those areas, examining the pool of 
 More info on open-source projects: <https://opensource.com/resources/what-open-source>  
 This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 `;
-
-let demoRootNodeID = devEnv ? 1 : 463; // hard-coded for now
-let demoMap = {_id: -100, name: `Demo`, type: MapType.Personal, rootNode: demoRootNodeID} as Map;
-export function CreateDemoMapView(): MapView {
-	return {rootNodeViews: {
-		[demoRootNodeID]: {
-			expanded: true,
-		}
-	}};
-}
 
 /*if (devEnv) {
 	demoMap = {_id: -100, name: "Demo", type: MapType.Personal, rootNode: -101} as Map;

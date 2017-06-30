@@ -1,7 +1,7 @@
 import {InlineMath} from "react-katex";
 import {BaseComponent, FindDOM_} from "../../../../Frame/UI/ReactGlobals";
 import ReactDOM from "react-dom";
-import {TermPlaceholder} from "./NodeUI_Inner";
+import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
 
 // change InlineMath's generateHtml function to not break on katex parse-errors
 let oldGenerateHtml = InlineMath.prototype.generateHtml;

@@ -9,6 +9,7 @@ import {DeepGet} from "./Frame/V/V";
 import {OnAccessPath} from "./Frame/Database/FirebaseConnect";
 
 import "./Store/firebase/nodeRatings/@RatingsRoot";
+import {State_overrides, State_Options} from "./UI/@Shared/StateOverrides";
 
 // uncomment this if you want to load the source-maps and such ahead of time (making-so the first actual call can get it synchronously)
 //StackTrace.get();
@@ -30,11 +31,6 @@ let createStore = require("./Frame/Store/CreateStore").default;
 declare global { var store: Store<RootState> & {firebase: FirebaseApp}; }
 var store = createStore(g.__InitialState__, {}) as Store<RootState>;
 g.Extend({store});
-
-export var State_overrides = {
-	state: null as RootState,
-	countAsAccess: null,
-};
 
 // State() actually also returns the root-state (if no data-getter is supplied), but we don't reveal that in type-info (as its only to be used in console)
 g.Extend({State});
@@ -74,11 +70,6 @@ function State<T>(pathOrPathSegments, state?: RootState, countAsAccess?: boolean
 	}
 	return selectedData;
 }*/
-
-export class State_Options {
-	state?: RootState;
-	countAsAccess?: boolean;
-}
 
 // for substantially better perf, we now only accept string-or-number arrays
 declare global {
