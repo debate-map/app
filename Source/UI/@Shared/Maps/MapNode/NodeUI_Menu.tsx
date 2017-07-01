@@ -1,5 +1,5 @@
 import DeleteNode from "../../../../Server/Commands/DeleteNode";
-import {GetDataAsync, RemoveHelpers} from "../../../../Frame/Database/DatabaseHelpers";
+import {GetDataAsync, RemoveHelpers, SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import {MapNode, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {VMenuStub} from "react-vmenu";
@@ -32,7 +32,6 @@ import {E} from "../../../../Frame/General/Globals_Free";
 import AddNode from "../../../../Server/Commands/AddNode";
 import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, ReverseMapNodeType, IsReversedArgumentNode, GetNodeEnhanced, IsArgumentNode} from "../../../../Store/firebase/nodes/$node";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {SlicePath} from "./NodeUI/RatingsPanel";
 import LinkNode from "Server/Commands/LinkNode";
 import UnlinkNode from "Server/Commands/UnlinkNode";
 import CloneNode from "Server/Commands/CloneNode";

@@ -29,36 +29,6 @@ import {GetNewURL} from "../../../../Frame/URL/URLManager";
 
 let childrenPlaceholder = [];
 
-export function GetCrawlerURLStrForNode(node: MapNode) {
-	let result = GetNodeDisplayText(node).toLowerCase().replace(/[^a-z]/g, "-");
-	// need to loop, in some cases, since regex doesn't reprocess "---" as two sets of "--".
-	while (result.Contains("--")) {
-		result = result.replace(/--/g, "-");
-	}
-	result = result.TrimStart("-").TrimEnd("-") + "." + node._id.toString();
-	return result;
-}
-export function GetCurrentURL_SimplifiedForPageViewTracking() {
-	//let result = URL.Current();
-	let result = GetNewURL(false);
-
-	let mapID = GetOpenMapID();
-	let onMapPage = result.Normalized().toString({domain: false}).startsWith("/global/map");
-	if (mapID && onMapPage) {
-		let nodeID = GetFocusedNodeID(mapID);
-		let node = nodeID ? GetNode(nodeID) : null;
-		//if (result.pathNodes.length == 1) {
-		/*if (result.Normalized().toString({domain: false}).startsWith("/global/map") && result.pathNodes.length == 1) {
-			result.pathNodes.push("map");
-		}*/
-		if (node) {
-			result = result.Normalized();
-			result.pathNodes.push(GetCrawlerURLStrForNode(node));
-		}
-	}
-	return result;
-}
-
 type Props = {map: Map, node: MapNode}
 	& Partial<{nodeParents: MapNode[], nodeChildren: MapNode[]}>;
 @Connect((state: RootState, {node}: Props)=> ({

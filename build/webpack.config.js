@@ -277,6 +277,7 @@ webpackConfig.module.rules.push({
 				}
 			}*/
 		],
+		allChunks: true, // makes it slightly faster, I think?
 	}),
 });
 webpackConfig.module.rules.push({
@@ -285,6 +286,7 @@ webpackConfig.module.rules.push({
 	use: ExtractTextPlugin.extract({
 		fallback: "style-loader",
 		use: [BASE_CSS_LOADER, "postcss-loader"],
+		allChunks: true, // makes it slightly faster, I think?
 	}),
 });
 
@@ -347,33 +349,6 @@ if (OUTPUT_STATS) {
 		{
 			apply: function(compiler) {
 				compiler.plugin("after-emit", function(compilation, done) {
-					/*var stats = compilation.getStats().toJson({
-						// node_modules/webpack/lib/Stats.js
-						hash: true,
-						version: true,
-						timings: true,
-						assets: true,
-						chunks: false,
-						chunkModules: false,
-						chunkOrigins: false,
-						modules: false,
-						cached: false,
-						reasons: false,
-						children: false,
-						source: false,
-						errors: false,
-						errorDetails: false,
-						warnings: false,
-						publicPath: true,
-					});*/
-					//delete stats.assets;
-					/*var stats = compilation.getStats().toJson({
-						chunks: true,
-						chunkModules: true,
-						modules: true
-					});*/
-					//var stats = compilation.getStats().toJson();
-
 					var stats = compilation.getStats().toJson({
 						hash: false,
 						version: false,
@@ -384,7 +359,7 @@ if (OUTPUT_STATS) {
 						chunkOrigins: false,
 						modules: true,
 						cached: false,
-						reasons: false,
+						reasons: true,
 						children: false,
 						source: false,
 						errors: false,
@@ -392,7 +367,7 @@ if (OUTPUT_STATS) {
 						warnings: false,
 						publicPath: false,
 					});
-					fs.writeFile(`./Tools/Dependency Analysis/Stats${firstOutput ? "" : "_Incremental"}.json`, JSON.stringify(stats), done);
+					fs.writeFile(`./Tools/Webpack Profiling/Stats${firstOutput ? "" : "_Incremental"}.json`, JSON.stringify(stats));
 
 					let modules_justTimings = stats.modules.map(mod=> {
 						let timings = mod.profile;
@@ -409,17 +384,43 @@ if (OUTPUT_STATS) {
 						modules_justTimings_asMap[mod.name] = mod;
 						delete mod.name;
 					}
-					fs.writeFile(`./Tools/Dependency Analysis/ModuleTimings${firstOutput ? "" : "_Incremental"}.json`, JSON.stringify(modules_justTimings_asMap, null, 2), done);
+					fs.writeFile(`./Tools/Webpack Profiling/ModuleTimings${firstOutput ? "" : "_Incremental"}.json`, JSON.stringify(modules_justTimings_asMap, null, 2));
 
 					firstOutput = false;
+
+					done();
 				});
+
+				// uncomment this to output the module-info that can be used later to see cyclic-dependencies, using AnalyzeDependencies.bat
+				/*compiler.plugin("done", function(stats) {
+					let moduleInfos = {};
+					for (let module of stats.compilation.modules) {
+						//if (!module.resource) continue;
+						//if (module.dependencies == null) continue;
+						let moduleInfo = {};
+						//moduleInfo.name = module.name;
+						if (module.resource) {
+							moduleInfo.name = path.relative(process.cwd(), module.resource).replace(/\\/g, "/");
+						}
+						if (module.dependencies) {
+							moduleInfo.dependencies = module.dependencies.filter(a=>a.module).map(a=>a.module.id);
+						}
+						moduleInfos[module.id] = moduleInfo;
+					}
+					fs.writeFile(`./Tools/Webpack Profiling/ModuleInfo.json`, JSON.stringify(moduleInfos));
+				});*/
 			}
 		}
 	);
 
-	let CircularDependencyPlugin = require("circular-dependency-plugin");
+	/*let CircularDependencyPlugin = require("circular-dependency-plugin");
 	webpackConfig.plugins.push(
 		new CircularDependencyPlugin({exclude: /node_modules/})
+	);*/
+
+	let CyclicDependencyChecker = require("webpack-cyclic-dependency-checker").CyclicDependencyChecker;
+	webpackConfig.plugins.push(
+		new CyclicDependencyChecker()
 	);
 
 	webpackConfig.profile = true;

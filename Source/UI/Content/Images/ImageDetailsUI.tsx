@@ -15,8 +15,7 @@ import CheckBox from "../../../Frame/ReactComponents/CheckBox";
 import ScrollView from "react-vscrollview";
 import Button from "../../../Frame/ReactComponents/Button";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
-import {Image, Image_nameFormat, Image_urlFormat, ImageType} from "../../../Store/firebase/images/@Image";
-import {GetNiceNameForImageType} from "../ImagesUI";
+import {Image, Image_nameFormat, Image_urlFormat, ImageType, GetNiceNameForImageType} from "../../../Store/firebase/images/@Image";
 import SourceChainsEditorUI from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
 
 type Props = {baseData: Image, creating: boolean, editing: boolean, style?, onChange?: (newData: Image)=>void}

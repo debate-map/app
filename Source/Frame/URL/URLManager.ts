@@ -5,7 +5,7 @@ import {FindReact, ShallowChanged} from "../UI/ReactGlobals";
 import NodeUI_Inner from "../../UI/@Shared/Maps/MapNode/NodeUI_Inner";
 import {GetOpenMapID, ACTSetPage, ACTSetSubpage, ACTNotificationMessageAdd} from "../../Store/main";
 import {GetMap} from "../../Store/firebase/maps";
-import {GetNodeView, GetMapView, GetSelectedNodeID, GetViewOffset} from "../../Store/main/mapViews";
+import {GetNodeView, GetMapView, GetSelectedNodeID, GetViewOffset, GetFocusedNodeID} from "../../Store/main/mapViews";
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 import {URL, QueryVar, rootPageDefaultChilds} from "../General/URLs";
@@ -17,8 +17,38 @@ import {CreateMapViewForPath} from "../Store/PathFinder";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import { ACTDebateMapSelect } from "../../Store/main/debates";
 import { ACTSet } from "Store";
-import { GetCrawlerURLStrForNode } from "UI/@Shared/Maps/MapNode/NodeUI_ForBots";
 import MapUI from "../../UI/@Shared/Maps/MapUI";
+import {MapNode} from "../../Store/firebase/nodes/@MapNode";
+
+export function GetCrawlerURLStrForNode(node: MapNode) {
+	let result = GetNodeDisplayText(node).toLowerCase().replace(/[^a-z]/g, "-");
+	// need to loop, in some cases, since regex doesn't reprocess "---" as two sets of "--".
+	while (result.Contains("--")) {
+		result = result.replace(/--/g, "-");
+	}
+	result = result.TrimStart("-").TrimEnd("-") + "." + node._id.toString();
+	return result;
+}
+export function GetCurrentURL_SimplifiedForPageViewTracking() {
+	//let result = URL.Current();
+	let result = GetNewURL(false);
+
+	let mapID = GetOpenMapID();
+	let onMapPage = result.Normalized().toString({domain: false}).startsWith("/global/map");
+	if (mapID && onMapPage) {
+		let nodeID = GetFocusedNodeID(mapID);
+		let node = nodeID ? GetNode(nodeID) : null;
+		//if (result.pathNodes.length == 1) {
+		/*if (result.Normalized().toString({domain: false}).startsWith("/global/map") && result.pathNodes.length == 1) {
+			result.pathNodes.push("map");
+		}*/
+		if (node) {
+			result = result.Normalized();
+			result.pathNodes.push(GetCrawlerURLStrForNode(node));
+		}
+	}
+	return result;
+}
 
 // loading
 // ==========

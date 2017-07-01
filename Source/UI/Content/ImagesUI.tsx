@@ -21,7 +21,7 @@ import {IsUserCreatorOrMod} from "../../Store/firebase/userExtras";
 import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
 import Moment from "moment";
 import {GetImages} from "../../Store/firebase/images";
-import {Image, ImageType} from "../../Store/firebase/images/@Image";
+import {Image, ImageType, GetNiceNameForImageType} from "../../Store/firebase/images/@Image";
 import ImageDetailsUI from "./Images/ImageDetailsUI";
 import {ShowAddImageDialog} from "./Images/AddImageDialog";
 
@@ -130,8 +130,4 @@ export class ImageUI extends BaseComponent<ImageUI_Props, {}> {
 			</Row>
 		);
 	}
-}
-
-export function GetNiceNameForImageType(type: ImageType) {
-	return ImageType[type].toLowerCase();
 }

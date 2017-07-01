@@ -2,7 +2,7 @@ import {GetNodeAsync} from "../../Store/firebase/nodes";
 import {GetTreeNodesInObjTree} from "../V/V";
 import Action from "../General/Action";
 import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange} from "../../Store/main/mapViews/$mapView/rootNodeViews";
-import {LoadURL, GetSyncLoadActionsForURL} from "../URL/URLManager";
+import { LoadURL, GetSyncLoadActionsForURL, GetCurrentURL_SimplifiedForPageViewTracking } from "../URL/URLManager";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 import {DBPath, GetData, GetDataAsync, ProcessDBData} from "../Database/DatabaseHelpers";
 import { GetMapView, GetSelectedNodePath, GetFocusedNodePath } from "../../Store/main/mapViews";
@@ -18,7 +18,6 @@ import Raven from "raven-js";
 import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "../../Store/main/debates";
 import {ACTTermSelect, ACTImageSelect} from "../../Store/main/content";
 import {LOCATION_CHANGED} from "redux-little-router";
-import {GetCurrentURL_SimplifiedForPageViewTracking} from "../../UI/@Shared/Maps/MapNode/NodeUI_ForBots";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
 // use this to intercept dispatches (for debugging)

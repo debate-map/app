@@ -45,12 +45,13 @@ import {GetTerm, GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import {Term} from "../../../../Store/firebase/terms/@Term";
 import {ParseSegmentsForPatterns} from "../../../../Frame/General/RegexHelpers";
 import {GetParentNode} from "../../../../Store/firebase/nodes";
-import {SlicePath} from "./NodeUI/RatingsPanel";
 import classNames from "classnames";
 import { GetEquationStepNumber } from "../../../../Store/firebase/nodes/$node/equation";
 import NodeMathUI from "UI/@Shared/Maps/MapNode/NodeMathUI";
 import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
 import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
+import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
+import SubPanel from "./NodeUI_Inner/SubPanel";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -265,96 +266,5 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 			}
 		}
 		return elements;
-	}
-}
-
-class SubPanel extends BaseComponent<{node: MapNode}, {}> {
-	render() {
-		let {node} = this.props;
-		return (
-			<div style={{position: "relative", margin: "5px -5px -5px -5px", padding: "6px 5px 5px 5px",
-				//border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
-				background: "rgba(0,0,0,.5)", borderRadius: "0 0 0 5px",
-			}}>
-				{node.contentNode &&
-					<SubPanel_Quote contentNode={node.contentNode} fontSize={GetFontSizeForNode(node)}/>}
-				{node.image &&
-					<SubPanel_Image imageAttachment={node.image}/>}
-			</div>
-		);
-	}
-}
-var Markdown = require("react-remarkable");
-export class SubPanel_Quote extends BaseComponent<{contentNode: ContentNode, fontSize: number}, {}> {
-	render() {
-		let {contentNode, fontSize} = this.props;
-		return (
-			<div style={{position: "relative", fontSize, whiteSpace: "initial"}}>
-				{/*<div>{`"${node.quote.text}"`}</div>*/}
-				{/*<VReactMarkdown className="selectable Markdown" source={`"${contentNode.content}"`}
-					containerProps={{style: E()}}
-					renderers={{
-						Text: props=> {
-							//return <span {...props}>{props.literal}</span>;
-							//return React.DOM.span(null, props.literal, props);
-							//return React.createElement("section", props.Excluding("literal", "nodeKey"), props.literal);
-							return "[text]" as any;
-						},
-						Link: props=><span/>,
-					}}
-				/>*/}
-				<Markdown container="div" source={contentNode.content}/>
-				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
-				<SourcesUI sourceChains={contentNode.sourceChains}/>
-			</div>
-		);
-	}
-}
-type SubPanel_ImageProps = {imageAttachment: ImageAttachment} & Partial<{image: Image}>;
-@Connect((state, {imageAttachment}: SubPanel_ImageProps)=> ({
-	image: GetImage(imageAttachment.id),
-}))
-export class SubPanel_Image extends BaseComponent<SubPanel_ImageProps, {}> {
-	render() {
-		let {image} = this.props;
-		if (image == null) return <div/>;
-		return (
-			<div style={{position: "relative"}}>
-				<img src={image.url} style={{width: image.previewWidth != null ? `${image.previewWidth}%` : null, maxWidth: "100%"}}/>
-				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
-				<SourcesUI sourceChains={image.sourceChains}/>
-			</div>
-		);
-	}
-}
-
-export class SourcesUI extends BaseComponent<{sourceChains: SourceChain[]}, {}> {
-	render() {
-		let {sourceChains} = this.props;
-		return (
-			<Column mt={3} style={{whiteSpace: "normal"}}>
-				<Row style={{color: "rgba(255,255,255,.5)"}}>Sources:</Row>
-				{sourceChains.map((chain: SourceChain, index)=> {
-					let linkTitle = chain.map((source, index)=> {
-						if (source.link) {
-							// if this is the first source, it's the most important, so show the link's whole url
-							if (index == 0) {
-								return URL.Parse(source.link, false).toString({domain_protocol: false});
-							}
-							// else, show just the domain-name
-							let urlMatch = source.link.match(/https?:\/\/(?:www\.)?([^/]+)/);
-							if (urlMatch == null) return source.link; // temp, while updating data
-							return urlMatch[1];
-						}
-						return (source.name || "") + (source.author ? ` (${source.author})` : ""); 
-					}).join(" <- ");
-					return (
-						<Row key={index}>
-							<a href={chain.Last().link} style={{wordBreak: "break-word"}} onContextMenu={e=>e.nativeEvent["passThrough"] = true}>{linkTitle}</a>
-						</Row>
-					);
-				})}	
-			</Column>
-		);
 	}
 }

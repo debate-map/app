@@ -9,7 +9,7 @@ import {connect} from "react-redux";
 import Select from "../../../../../Frame/ReactComponents/Select";
 import {ShowMessageBox_Base, ShowMessageBox} from "../../../../../Frame/UI/VMessageBox";
 import {firebaseConnect} from "react-redux-firebase";
-import {GetData} from "../../../../../Frame/Database/DatabaseHelpers";
+import {GetData, SlicePath} from "../../../../../Frame/Database/DatabaseHelpers";
 import {Debugger} from "../../../../../Frame/General/Globals_Free";
 import {RatingType, RatingType_Info} from "../../../../../Store/firebase/nodeRatings/@RatingType";
 import {Rating} from "../../../../../Store/firebase/nodeRatings/@RatingsRoot";
@@ -33,13 +33,6 @@ import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	{rating: 75, count: 3},
 	{rating: 100, count: 4},
 ];*/
-
-export function SlicePath(path: string, removeFromEndCount: number, ...itemsToAdd: string[]) {
-	//let parts = path.split("/");
-	let parts = SplitStringBySlash_Cached(path).slice();
-	parts.splice(parts.length - removeFromEndCount, removeFromEndCount, ...itemsToAdd);
-	return parts.join("/");
-}
 
 type RatingsPanel_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]}
 	& Partial<{userID: string, /*myRating: number,*/ form: ThesisForm, nodeChildren: MapNode[], smoothing: number}>;

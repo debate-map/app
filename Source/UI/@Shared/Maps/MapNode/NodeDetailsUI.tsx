@@ -1,6 +1,4 @@
-import {Assert} from "../../../../Frame/General/Assert";
 import {BaseComponent, Pre, RenderSource, Div, FindDOM} from "../../../../Frame/UI/ReactGlobals";
-import {Term, TermType, Term_nameFormat, Term_disambiguationFormat} from "../../../../Store/firebase/terms/@Term";
 import Column from "../../../../Frame/ReactComponents/Column";
 import Row from "../../../../Frame/ReactComponents/Row";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
@@ -9,13 +7,9 @@ import {GetUser, User, GetUserPermissionGroups} from "../../../../Store/firebase
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../../Frame/General/Enums";
 import Select from "../../../../Frame/ReactComponents/Select";
-import {RowLR} from "../../../../Frame/ReactComponents/Row";
 import CheckBox from "../../../../Frame/ReactComponents/CheckBox";
 import ScrollView from "react-vscrollview";
 import Button from "../../../../Frame/ReactComponents/Button";
-import TermComponent from "../../../../Store/firebase/termComponents/@TermComponent";
-import {GetNiceNameForTermType} from "../../../../UI/Content/TermsUI";
-import {GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, MapNode_id, ThesisType, AccessLevel} from "../../../../Store/firebase/nodes/@MapNode";
 import QuoteInfoEditorUI from "./QuoteInfoEditorUI";

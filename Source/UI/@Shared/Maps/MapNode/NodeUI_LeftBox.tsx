@@ -16,9 +16,9 @@ import {MetaThesis_ThenType} from "../../../../Store/firebase/nodes/@MetaThesisI
 import {GetRatingTypesForNode, GetNodeForm, IsContextReversed, GetNodeEnhanced} from "../../../../Store/firebase/nodes/$node";
 import {RootState} from "../../../../Store/index";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {SlicePath} from "./NodeUI/RatingsPanel";
 import {GetParentNode} from "../../../../Store/firebase/nodes";
 import {ReverseThenType} from "../../../../Store/firebase/nodes/$node/$metaThesis";
+import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 
 type Props = {
 	map: Map, path: string, node: MapNodeEnhanced, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,

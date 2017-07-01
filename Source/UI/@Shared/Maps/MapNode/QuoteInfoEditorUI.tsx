@@ -4,7 +4,6 @@ import Column from "../../../../Frame/ReactComponents/Column";
 import Row from "../../../../Frame/ReactComponents/Row";
 import {Pre, Div} from "../../../../Frame/UI/ReactGlobals";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
-import { SourcesUI, SubPanel_Quote } from "./NodeUI_Inner";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
 import Editor from "react-md-editor";
 import Button from "../../../../Frame/ReactComponents/Button";
@@ -20,6 +19,7 @@ import {GetEntries} from "../../../../Frame/General/Enums";
 //import {ButtonProps} from "../../../../Frame/ReactComponents/Button"; // "import" approach causes typescript rebuilds to fail
 import {CleanUpdatedSourceChains} from "./SourceChainsEditorUI";
 import SourceChainsEditorUI from "./SourceChainsEditorUI";
+import {SubPanel_Quote} from "./NodeUI_Inner/SubPanel";
 
 //@ApplyBasicStyles
 export default class QuoteInfoEditorUI extends BaseComponent

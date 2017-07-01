@@ -7,6 +7,10 @@ export enum ImageType {
 }
 AddSchema({oneOf: GetValues_ForSchema(ImageType)}, "ImageType");
 
+export function GetNiceNameForImageType(type: ImageType) {
+	return ImageType[type].toLowerCase();
+}
+
 export class Image {
 	constructor(initialData: {name: string, type: ImageType, creator: string} & Partial<Image>) {
 		this.Extend(initialData);

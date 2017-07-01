@@ -4,9 +4,9 @@ import {MapNodeType} from "../nodes/@MapNodeType";
 import {MetaThesis_IfType} from "../nodes/@MetaThesisInfo";
 import {GetNodeForm, GetMainRatingType, GetNodeEnhanced} from "../nodes/$node";
 import {GetNode} from "../nodes";
-import {SlicePath} from "../../../UI/@Shared/Maps/MapNode/NodeUI/RatingsPanel";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
+import {SlicePath} from "../../../Frame/Database/DatabaseHelpers";
 
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 //export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";

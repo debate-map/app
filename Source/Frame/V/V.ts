@@ -1,5 +1,4 @@
 import {NodeType} from "react-markdown";
-import {Log} from "../General/Logging";
 import {IsPrimitive, IsString} from "../General/Types";
 import StackTrace from "stacktrace-js";
 
@@ -310,4 +309,3 @@ export function GetStackTraceStr(...args) {
 	stackTrace = stackTrace || new Error().stack;
 	return stackTrace.substr(stackTrace.IndexOf_X(1, "\n")); // remove "Error" line and first stack-frame (that of this method)
 }
-export function LogStackTrace() { Log(GetStackTraceStr()); }

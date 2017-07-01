@@ -26,7 +26,7 @@ import Row from "../../../../../Frame/ReactComponents/Row";
 import {MetaThesis_ThenType, MetaThesis_ThenType_Info, MetaThesis_IfType, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import UpdateNodeDetails from "../../../../../Server/Commands/UpdateNodeDetails";
-import {RemoveHelpers} from "../../../../../Frame/Database/DatabaseHelpers";
+import {RemoveHelpers, SlicePath} from "../../../../../Frame/Database/DatabaseHelpers";
 import {HandleError} from "../../../../../Frame/General/Errors";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
 import CheckBox from "../../../../../Frame/ReactComponents/CheckBox";
@@ -34,7 +34,6 @@ import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import {GetNodeForm, GetLinkUnderParent, GetNodeEnhanced} from "../../../../../Store/firebase/nodes/$node";
 import Column from "../../../../../Frame/ReactComponents/Column";
 import NodeDetailsUI from "../NodeDetailsUI";
-import {SlicePath} from "./RatingsPanel";
 import {GetUpdates} from "../../../../../Frame/General/Others";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";

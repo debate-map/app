@@ -9,7 +9,6 @@ import Row from "../../../../../Frame/ReactComponents/Row";
 import Column from "../../../../../Frame/ReactComponents/Column";
 import keycode from "keycode";
 import Button from "../../../../../Frame/ReactComponents/Button";
-import {SourcesUI} from "../NodeUI_Inner";
 import {E} from "../../../../../Frame/General/Globals_Free";
 import {MetaThesis_ThenType, MetaThesis_IfType, MetaThesis_ThenType_Info, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
 import AddNode from "../../../../../Server/Commands/AddNode";

@@ -27,6 +27,13 @@ export function DBPathSegments(pathSegments: (string | number)[], inVersionRoot 
 	return result;
 }
 
+export function SlicePath(path: string, removeFromEndCount: number, ...itemsToAdd: string[]) {
+	//let parts = path.split("/");
+	let parts = SplitStringBySlash_Cached(path).slice();
+	parts.splice(parts.length - removeFromEndCount, removeFromEndCount, ...itemsToAdd);
+	return parts.join("/");
+}
+
 Object.prototype._AddFunction_Inline = function Ref(path = "", inVersionRoot = true) {
 	let finalPath = DBPath(path, inVersionRoot);
 	return this.ref(finalPath);

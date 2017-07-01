@@ -1,5 +1,4 @@
 import {IsString} from '../../../Frame/General/Types';
-import {GetNiceNameForImageType} from "../../../UI/Content/ImagesUI";
 import {GetImage} from '../images';
 import {URL} from '../../../Frame/General/URLs';
 import {MapNode, MapNodeEnhanced, ThesisForm, ChildEntry, ThesisType} from './@MapNode';
@@ -11,11 +10,11 @@ import {GetValues} from '../../../Frame/General/Enums';
 import {PermissionGroupSet} from '../userExtras/@UserExtraInfo';
 import {CachedTransform} from '../../../Frame/V/VCache';
 import {ReverseThenType} from './$node/$metaThesis';
-import {SlicePath} from "../../../UI/@Shared/Maps/MapNode/NodeUI/RatingsPanel";
-import {ImageType} from '../images/@Image';
+import {ImageType, GetNiceNameForImageType} from "../images/@Image";
 import katex from "katex";
 import {PreProcessLatex} from "../../../UI/@Shared/Maps/MapNode/NodeMathUI";
 import {SplitStringBySlash_Cached} from "../../../Frame/Database/StringSplitCache";
+import {SlicePath} from "../../../Frame/Database/DatabaseHelpers";
 
 export function GetFontSizeForNode(node: MapNode) {
 	if (node.fontSizeOverride) return node.fontSizeOverride;

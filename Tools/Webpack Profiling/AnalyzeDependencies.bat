@@ -1,0 +1,1 @@
+node ..\..\node_modules\webpack-cyclic-dependency-checker\src\cli.js ModuleInfo.json & pause & AnalyzeDependencies
