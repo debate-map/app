@@ -35,7 +35,9 @@ import Switch from "Frame/ReactComponents/Switch";
 import {RouterProvider} from 'redux-little-router';
 import Route from "../Frame/ReactComponents/Route";
 import AddressBarWrapper from "UI/@Shared/AddressBarWrapper";
-import {InfoButton_TooltipWrapper} from "../Frame/ReactComponents/InfoButton";
+import { InfoButton_TooltipWrapper } from "../Frame/ReactComponents/InfoButton";
+import GuideUI from "UI/Guide";
+import ReputationUI from "./Reputation";
 
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	ComponentWillMount() {
@@ -100,6 +102,7 @@ class RootUI extends BaseComponent<Props, {}> {
 				<main style={{position: "relative", flex: "1 1 100%", overflow: "hidden"}}>
 					<Route path="/stream"><StreamUI/></Route>
 					<Route path="/chat"><ChatUI/></Route>
+					<Route path="/reputation"><ReputationUI/></Route>
 
 					<Route path="/users"><UsersUI/></Route>
 					<Route path="/forum"><ForumUI/></Route>
@@ -112,6 +115,7 @@ class RootUI extends BaseComponent<Props, {}> {
 					<Route path="/global"><GlobalUI/></Route>
 
 					<Route path="/search"><SearchUI/></Route>
+					<Route path="/guide"><GuideUI/></Route>
 					<Route path="/profile"><ProfileUI/></Route>
 				</main>
 			</div>
