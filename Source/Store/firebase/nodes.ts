@@ -103,6 +103,7 @@ export function IsNewLinkValid(parentNode: MapNode, parentPath: string, child: M
 	if (parentNode._id == globalRootNodeID) return false; // if parent is global-root, don't accept new children
 	// if parent is l2, and user is not a mod (and not node creator), don't accept new children
 	if (parentPathIDs.length == 2 && !HasModPermissions(permissions) && parentNode.creator != GetUserID()) return false;
+	if (parentNode._id == child._id) return false; // cannot link node as its own child
 
 	let parent = GetNode(parentPathIDs.Last());
 	if (parent && (parent.children || {}).VKeys(true).Contains(child._id+"")) return false; // if already a child of this parent, reject
