@@ -22,7 +22,7 @@ import OthersPanel from "../../@Shared/Maps/MapNode/NodeUI/OthersPanel";
 import DetailsPanel from "../../@Shared/Maps/MapNode/NodeUI/DetailsPanel";
 import {MapNodeType, MapNodeType_Info} from "../../../Store/firebase/nodes/@MapNodeType";
 import Moment from "moment";
-import { GetSelectedNode_InList, ACTSelectedNode_InListSet, GetMap_List_SelectedNode_OpenPanel, ACTMap_List_SelectedNode_OpenPanelSet, ACTMapNodeListSortBySet, ACTMapNodeListFilterSet } from "../../../Store/main/maps/$map";
+import {GetSelectedNode_InList, ACTSelectedNode_InListSet, GetMap_List_SelectedNode_OpenPanel, ACTMap_List_SelectedNode_OpenPanelSet, ACTMapNodeListSortBySet, ACTMapNodeListFilterSet, SortType} from "../../../Store/main/maps/$map";
 import {GetUser, User} from "../../../Store/firebase/users";
 import {MapNodeView} from "../../../Store/main/mapViews/@MapViews";
 import {RatingsRoot} from "../../../Store/firebase/nodeRatings/@RatingsRoot";
@@ -33,13 +33,6 @@ import Select from "../../../Frame/ReactComponents/Select";
 import TextInput from "../../../Frame/ReactComponents/TextInput";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 import { EnumNameToDisplayName } from "Frame/V/V";
-
-export enum SortType {
-	CreatorID,
-	CreationDate,
-	//UpdateDate,
-	//ViewerCount,
-}
 
 type Props = {
 	map: Map,
@@ -132,9 +125,10 @@ type NodeRow_Props = {map: Map, node: MapNode, first: boolean} & Partial<{creato
 	creator: GetUser(node.creator),
 	selected: GetSelectedNode_InList(map._id) == node,
 }))
-class NodeRow extends BaseComponent<NodeRow_Props, {}> {
+class NodeRow extends BaseComponent<NodeRow_Props, {menuOpened: boolean}> {
 	render() {
 		let {map, node, first, creator, selected} = this.props;
+		let {menuOpened} = this.state;
 
 		let nodeEnhanced = {...node, finalType: node.type} as MapNodeEnhanced;
 
@@ -146,12 +140,16 @@ class NodeRow extends BaseComponent<NodeRow_Props, {}> {
 					)}
 					onClick={e=> {
 						store.dispatch(new ACTSelectedNode_InListSet({mapID: map._id, nodeID: node._id}));
+					}}
+					onMouseDown={e=> {
+						if (e.button != 2) return false;
+						this.SetState({menuOpened: true});
 					}}>
 				<span style={{flex: .65}}>{GetNodeDisplayText(node)}</span>
 				<span style={{flex: .2}}>{creator ? creator.displayName : "..."}</span>
-				<span style={{flex: .15}}>{(Moment as any)(node.createdAt).format("YYYY-MM-DD")}</span>
+				<span style={{flex: .15}}>{Moment(node.createdAt).format("YYYY-MM-DD")}</span>
 				{/*<NodeUI_Menu_Helper {...{map, node}}/>*/}
-				<NodeUI_Menu {...{map, node: nodeEnhanced, path: ""+node._id, inList: true}}/>
+				{menuOpened && <NodeUI_Menu {...{map, node: nodeEnhanced, path: ""+node._id, inList: true}}/>}
 			</Row>
 		);
 	}

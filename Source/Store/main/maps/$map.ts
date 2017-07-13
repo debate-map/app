@@ -2,7 +2,13 @@ import {GetNode} from "../../firebase/nodes";
 import Action from "../../../Frame/General/Action";
 import {MapInfo} from "./@MapInfo";
 import {CombineReducers} from "../../../Frame/Store/ReducerUtils";
-import {SortType} from "../../../UI/@Shared/Maps/ListUI";
+
+export enum SortType {
+	CreatorID,
+	CreationDate,
+	//UpdateDate,
+	//ViewerCount,
+}
 
 export class ACTMapNodeListSortBySet extends Action<{mapID: number, sortBy: SortType}> {}
 export class ACTMapNodeListFilterSet extends Action<{mapID: number, filter: string}> {}
