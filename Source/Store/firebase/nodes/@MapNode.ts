@@ -46,6 +46,7 @@ export class MapNode {
 
 	creator?: string;
 	createdAt: number;
+	//updatedAt: number;
 	approved = false;
 	// only applied client-side; would need to be in protected branch of tree (or use a long, random, and unreferenced node-id) to be "actually" inaccessible
 	accessLevel = AccessLevel.Basic;

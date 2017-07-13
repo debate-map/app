@@ -2,7 +2,10 @@ import {GetNode} from "../../firebase/nodes";
 import Action from "../../../Frame/General/Action";
 import {MapInfo} from "./@MapInfo";
 import {CombineReducers} from "../../../Frame/Store/ReducerUtils";
+import {SortType} from "../../../UI/@Shared/Maps/ListUI";
 
+export class ACTMapNodeListSortBySet extends Action<{mapID: number, sortBy: SortType}> {}
+export class ACTMapNodeListFilterSet extends Action<{mapID: number, filter: string}> {}
 export class ACTSelectedNode_InListSet extends Action<{mapID: number, nodeID: number}> {}
 export class ACTMap_List_SelectedNode_OpenPanelSet extends Action<{mapID: number, panel: string}> {}
 
@@ -12,6 +15,15 @@ export class ACTMap_List_SelectedNode_OpenPanelSet extends Action<{mapID: number
 }*/
 
 export const MapInfoReducer = CombineReducers({
+	list_sortBy: (state = SortType.CreationDate, action)=> {
+		if (action.Is(ACTMapNodeListSortBySet)) return action.payload.sortBy;
+		return state;
+	},
+	list_filter: (state = "", action)=> {
+		if (action.Is(ACTMapNodeListFilterSet)) return action.payload.filter;
+		return state;
+	},
+
 	list_selectedNodeID: (state = null, action)=> {
 		if (action.Is(ACTSelectedNode_InListSet)) return action.payload.nodeID;
 		return state;

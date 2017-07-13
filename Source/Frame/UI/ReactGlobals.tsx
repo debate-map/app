@@ -41,11 +41,12 @@ export function GetInnerComp(wrapperComp: React.Component<any, any>) {
 }
 g.Extend({GetInnerComp});
 
+type numberOrSuch = number | string;
 export interface BaseProps {
-	m?; ml?; mr?; mt?; mb?;
-	mlr?: number | "margin left-right"; mtb?: number | "margin top-bottom";
-	p?; pl?; pr?; pt?; pb?;
-	plr?: number | "padding left-right"; ptb?: number | "padding top-bottom";
+	m?: numberOrSuch; ml?: numberOrSuch; mr?: numberOrSuch; mt?: numberOrSuch; mb? : numberOrSuch;
+	mlr?: numberOrSuch | "margin left-right"; mtb?: numberOrSuch | "margin top-bottom";
+	p?: numberOrSuch; pl?: numberOrSuch; pr?: numberOrSuch; pt?: numberOrSuch; pb?: numberOrSuch;
+	plr?: numberOrSuch | "padding left-right"; ptb?: numberOrSuch | "padding top-bottom";
 	sel?: boolean; ct?: boolean;
 
 	tabLabel?: string; active?: boolean;

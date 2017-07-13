@@ -14,3 +14,4 @@ coverage
 /Tools/Webpack Profiling/Stats.json
 /Tools/Webpack Profiling/Stats_Incremental.json
 /Tools/Webpack Profiling/ModuleTimings_Incremental.json
+/Tools/Webpack Profiling/ModuleTimings.json

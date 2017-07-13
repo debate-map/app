@@ -1,4 +1,4 @@
-import {Div, BaseComponent, FindDOM_, GetInnerComp} from "../../../Frame/UI/ReactGlobals";
+import {Div, BaseComponent, FindDOM_, GetInnerComp, Pre} from "../../../Frame/UI/ReactGlobals";
 import {styles} from "../../../Frame/UI/GlobalStyles";
 import {MapNode, MapNodeEnhanced, globalMapID} from "../../../Store/firebase/nodes/@MapNode";
 import Row from "Frame/ReactComponents/Row";
@@ -22,17 +22,31 @@ import OthersPanel from "../../@Shared/Maps/MapNode/NodeUI/OthersPanel";
 import DetailsPanel from "../../@Shared/Maps/MapNode/NodeUI/DetailsPanel";
 import {MapNodeType, MapNodeType_Info} from "../../../Store/firebase/nodes/@MapNodeType";
 import Moment from "moment";
-import {GetSelectedNode_InList, ACTSelectedNode_InListSet, GetMap_List_SelectedNode_OpenPanel, ACTMap_List_SelectedNode_OpenPanelSet} from "../../../Store/main/maps/$map";
+import { GetSelectedNode_InList, ACTSelectedNode_InListSet, GetMap_List_SelectedNode_OpenPanel, ACTMap_List_SelectedNode_OpenPanelSet, ACTMapNodeListSortBySet, ACTMapNodeListFilterSet } from "../../../Store/main/maps/$map";
 import {GetUser, User} from "../../../Store/firebase/users";
 import {MapNodeView} from "../../../Store/main/mapViews/@MapViews";
 import {RatingsRoot} from "../../../Store/firebase/nodeRatings/@RatingsRoot";
 import MapNodeUI_LeftBox from "./MapNode/NodeUI_LeftBox";
 import ResizeSensor from "react-resize-sensor";
+import {GetEntries} from "../../../Frame/General/Enums";
+import Select from "../../../Frame/ReactComponents/Select";
+import TextInput from "../../../Frame/ReactComponents/TextInput";
+import InfoButton from "../../../Frame/ReactComponents/InfoButton";
+import { EnumNameToDisplayName } from "Frame/V/V";
+
+export enum SortType {
+	CreatorID,
+	CreationDate,
+	//UpdateDate,
+	//ViewerCount,
+}
 
 type Props = {
 	map: Map,
 } & Partial<{
 	nodes: MapNode[],
+	sortBy: SortType,
+	filter: string,
 	selectedNode: MapNodeEnhanced,
 }>;
 @Connect((state, {map}: Props)=> {
@@ -40,17 +54,52 @@ type Props = {
 	return {
 		//nodes: GetNodes({limitToFirst: 10}).Take(10), // need to filter results, since other requests may have added extra data
 		nodes: GetNodes(),
+		sortBy: State("main", "maps", map._id, "list_sortBy"),
+		filter: State("main", "maps", map._id, "list_filter"),
 		selectedNode: selectedNode ? GetNodeEnhanced(selectedNode, selectedNode._id+"") : null,
 	};
 })
 export default class ListUI extends BaseComponent<Props, {panelToShow}> {
 	render() {
-		let {map, nodes, selectedNode} = this.props;
+		let {map, nodes, sortBy, filter, selectedNode} = this.props;
+
+		nodes = nodes.OrderBy(node=> {
+			if (sortBy == SortType.CreatorID) return node.creator;
+			if (sortBy == SortType.CreationDate) return node.createdAt;
+			//if (sortBy == SortType.UpdateDate) return node.;
+			//if (sortBy == SortType.ViewerCount) return node.;
+			Assert(false);
+		});
+
+		if (filter.length) {
+			let regExp;
+			if (filter.startsWith("/") && filter.endsWith("/")) {
+				try {
+					regExp = new RegExp(filter.slice(1, -1), "i");
+				} catch (ex) {}
+			};
+			nodes = nodes.filter(node=> {
+				let titles = node.titles ? node.titles.VValues(true) : [];
+				if (regExp) {
+					return titles.find(a=>a.match(regExp) != null);
+				}
+				return titles.find(a=>a.toLowerCase().includes(filter.toLowerCase()));
+			});
+		}
 
 		return (
 			<Row style={{height: "100%", alignItems: "flex-start"}}>
 				<Column ml={10} mt={10} mb={10} style={{position: "relative", flex: .5, height: "calc(100% - 20px)", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
 					<Row style={{height: 40, padding: 10, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+						<Pre>Sort by: </Pre>
+						<Select options={GetEntries(SortType, name=>EnumNameToDisplayName(name))}
+							value={sortBy} onChange={val=>store.dispatch(new ACTMapNodeListSortBySet({mapID: map._id, sortBy: val}))}/>
+						<Div mlr="auto"/>
+						<Pre>Filter:</Pre>
+						<InfoButton text="Hides nodes without the given text. Regular expressions can be used, ex: /there are [0-9]+ dimensions/"/>
+						<TextInput ml={2} value={filter} onChange={val=>store.dispatch(new ACTMapNodeListFilterSet({mapID: map._id, filter: val}))}/>
+					</Row>
+					<Row style={{height: 40, padding: 10, background: "rgba(0,0,0,.7)"}}>
 						<span style={{flex: .65, fontWeight: 500, fontSize: 17}}>Title</span>
 						<span style={{flex: .2, fontWeight: 500, fontSize: 17}}>Creator</span>
 						<span style={{flex: .15, fontWeight: 500, fontSize: 17}}>Creation date</span>

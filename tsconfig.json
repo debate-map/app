@@ -9,7 +9,6 @@
 		// modules/paths
 		"module": "es2015",
 		"moduleResolution": "node",
-		//"maxNodeModulesJsDepth": 1,
 		//"rootDir": ".",
 		"rootDir": "Source",
 		//"baseUrl": ".",
@@ -31,7 +30,7 @@
 			"es5",
 			"dom"
 		],
-		"allowJs": true,
+		//"allowJs": true,
 		//"maxNodeModuleJsDepth": 1,
 		"jsx": "react",
 		"noImplicitAny": false,
