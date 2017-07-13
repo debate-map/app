@@ -110,10 +110,10 @@ export function IsNewLinkValid(parentNode: MapNode, parentPath: string, child: M
 	return IsLinkValid(parentNode.type, parentPath, child);
 }
 
-export function ForUnlink_GetError(userID: string, node: MapNode) {
+export function ForUnlink_GetError(userID: string, node: MapNode, asPartOfCut = false) {
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
 	if (node.metaThesis) return "Cannot unlink a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
-	if ((node.parents || {}).VKeys(true).length <= 1)  return `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`;
+	if (!asPartOfCut && (node.parents || {}).VKeys(true).length <= 1)  return `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`;
 	return null;
 }
 export function ForDelete_GetError(userID: string, node: MapNode) {
@@ -126,6 +126,10 @@ export function ForDelete_GetError(userID: string, node: MapNode) {
 	//if ((node.children || {}).VKeys().length) return "Cannot delete this node until all its (non-meta-thesis) children have been deleted or unlinked.";
 	if (nodeChildren.filter(a=>!a.metaThesis).length) return "Cannot delete this node until all its (non-meta-thesis) children have been deleted or unlinked.";
 	return null;
+}
+
+export function ForCut_GetError(userID: string, node: MapNode) {
+	return ForUnlink_GetError(userID, node, true);
 }
 
 /*export function GetUnlinkErrorMessage(parent: MapNode, child: MapNode) {

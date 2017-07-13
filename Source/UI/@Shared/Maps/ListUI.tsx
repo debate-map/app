@@ -107,6 +107,10 @@ export default class ListUI extends BaseComponent<Props, {panelToShow}> {
 					<ScrollView contentStyle={{flex: 1, padding: 10}} onClick={e=> {
 						if (e.target != e.currentTarget) return;
 						store.dispatch(new ACTSelectedNode_InListSet({mapID: map._id, nodeID: null}));
+					}}
+					onContextMenu={e=> {
+						if (e.nativeEvent["passThrough"]) return true;
+						e.preventDefault();
 					}}>
 						{nodes.map((node, index)=> {
 							return <NodeRow key={node._id} map={map} node={node} first={index == 0}/>;
@@ -131,6 +135,9 @@ type NodeRow_Props = {map: Map, node: MapNode, first: boolean} & Partial<{creato
 class NodeRow extends BaseComponent<NodeRow_Props, {}> {
 	render() {
 		let {map, node, first, creator, selected} = this.props;
+
+		let nodeEnhanced = {...node, finalType: node.type} as MapNodeEnhanced;
+
 		return (
 			<Row mt={first ? 0 : 5} className="cursorSet"
 					style={E(
@@ -143,10 +150,24 @@ class NodeRow extends BaseComponent<NodeRow_Props, {}> {
 				<span style={{flex: .65}}>{GetNodeDisplayText(node)}</span>
 				<span style={{flex: .2}}>{creator ? creator.displayName : "..."}</span>
 				<span style={{flex: .15}}>{(Moment as any)(node.createdAt).format("YYYY-MM-DD")}</span>
+				{/*<NodeUI_Menu_Helper {...{map, node}}/>*/}
+				<NodeUI_Menu {...{map, node: nodeEnhanced, path: ""+node._id, inList: true}}/>
 			</Row>
 		);
 	}
 }
+
+/*@Connect((state, {map, node}: NodeRow_Props)=> ({
+	nodeEnhanced: GetNodeEnhanced(node._id),
+}))
+class NodeUI_Menu_Helper extends BaseComponent<{map: Map, node: MapNode, nodeEnhanced: MapNodeEnhanced}, {}> {
+	render() {
+		let {map, node} = this.props;
+		return (
+			<NodeUI_Menu_Helper {...{map, node}}/>
+		);
+	}
+}*/
 
 type NodeColumn_Props = {map: Map, node: MapNodeEnhanced} & Partial<{finalNodeType: MapNodeType, ratingsRoot: RatingsRoot, openPanel: string}>;
 @Connect((state, {map, node}: NodeColumn_Props)=> ({
