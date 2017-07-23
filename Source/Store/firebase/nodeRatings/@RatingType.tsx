@@ -119,11 +119,12 @@ export class RatingType_Info {
 						<br/>To what level would you expect them (assuming they're reasonable) to shift their {grandParentRatingType} rating?
 					</span>
 				);*/
+				let shiftType = parent.type == MapNodeType.SupportingArgument ? "raise" : "lower";
 				return (
 					<span>
 						Suppose this were the only argument (ie. line of support or opposition) specifically on this subject.
-						<br/>Suppose also that {premiseCountStr} were 100% true/full.
-						<br/>If that were the case, to what level would this argument shift your {grandParentRatingType} rating?
+						<br/>Suppose also that {premiseCountStr} are 100% true/full.
+						<br/>If so, how much should it {shiftType} the {grandParentRatingType} rating of someone whose initial evaluation was 50%?
 					</span>
 				);
 			},
