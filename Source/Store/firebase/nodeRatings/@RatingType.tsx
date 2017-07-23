@@ -107,15 +107,23 @@ export class RatingType_Info {
 						` Suppose also that you introduce this argument to them, and they accept at least one of the premises.`
 					)
 					+ ` To what level would you expect them (assuming they're reasonable) to shift their ${grandParentRatingType} rating?`;*/
-				let premiseCountrStrMap = {All: `all of the premises`, AnyTwo: `at least two of the premises`, Any: `at least one of the premises.`};
+				//let premiseCountrStrMap = {All: `all of the premises`, AnyTwo: `at least two of the premises`, Any: `at least one of the premises.`};
+				let premiseCountrStrMap = {All: `all of its premises`, AnyTwo: `at least two of its premises`, Any: `at least one of its premises.`};
 				let premiseCountStr = premiseCountrStrMap[MetaThesis_IfType[node.metaThesis.ifType]];
-				return (
+				/*return (
 					<span>
 						Suppose someone is completely on the fence on the parent thesis -- giving it a 50% {
 							grandParentRatingType == "probability" ? "probability" : grandParentRatingType + " rating"}.
 						<br/>Suppose you then introduce this argument to them, and they accept {premiseCountStr}.
 						<InfoButton text={`In other words, pretend that ${premiseCountStr} are 100% true/full, on their main rating type.`}/>
 						<br/>To what level would you expect them (assuming they're reasonable) to shift their {grandParentRatingType} rating?
+					</span>
+				);*/
+				return (
+					<span>
+						Suppose this were the only argument (ie. line of support or opposition) specifically on this subject.
+						<br/>Suppose also that {premiseCountStr} were 100% true/full.
+						<br/>If that were the case, to what level would this argument shift your {grandParentRatingType} rating?
 					</span>
 				);
 			},

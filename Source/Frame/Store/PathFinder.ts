@@ -8,7 +8,7 @@ import {GetPathNodes} from "../../Store/main/mapViews";
 
 export async function GetShortestPathFromRootToNode(rootNodeID: number, node: MapNode): Promise<string> {
 	type Head = {id: number, path: string[]};
-	let currentLayerHeads: Head[] = node.parents.VKeys(true).map(id=>({id: parseInt(id), path: [id, node._id.toString()]}));
+	let currentLayerHeads: Head[] = (node.parents || {}).VKeys(true).map(id=>({id: parseInt(id), path: [id, node._id.toString()]}));
 	while (currentLayerHeads.length) {
 		// first, quickly check if any current-layer-head parents are the root-node (and if so, return right away, as we found a shortest path)
 		for (let layerHead of currentLayerHeads) {
@@ -20,7 +20,7 @@ export async function GetShortestPathFromRootToNode(rootNodeID: number, node: Ma
 		let newLayerHeads = [];
 		for (let layerHead of currentLayerHeads) {
 			let node = await GetNodeAsync(layerHead.id);
-			for (let parentID of node.parents.VKeys(true).map(id=>parseInt(id)))
+			for (let parentID of (node.parents || {}).VKeys(true).map(id=>parseInt(id)))
 				newLayerHeads.push({id: parentID, path: [parentID.toString()].concat(layerHead.path)})
 		}
 		currentLayerHeads = newLayerHeads;
