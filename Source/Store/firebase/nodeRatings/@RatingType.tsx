@@ -107,8 +107,8 @@ export class RatingType_Info {
 						` Suppose also that you introduce this argument to them, and they accept at least one of the premises.`
 					)
 					+ ` To what level would you expect them (assuming they're reasonable) to shift their ${grandParentRatingType} rating?`;*/
-				//let premiseCountrStrMap = {All: `all of the premises`, AnyTwo: `at least two of the premises`, Any: `at least one of the premises.`};
-				let premiseCountrStrMap = {All: `all of its premises`, AnyTwo: `at least two of its premises`, Any: `at least one of its premises.`};
+				let premiseCountrStrMap = {All: `all of the premises`, AnyTwo: `at least two of the premises`, Any: `at least one of the premises.`};
+				//let premiseCountrStrMap = {All: `all of its premises`, AnyTwo: `at least two of its premises`, Any: `at least one of its premises.`};
 				let premiseCountStr = premiseCountrStrMap[MetaThesis_IfType[node.metaThesis.ifType]];
 				/*return (
 					<span>
@@ -120,11 +120,23 @@ export class RatingType_Info {
 					</span>
 				);*/
 				let shiftType = parent.type == MapNodeType.SupportingArgument ? "raise" : "lower";
-				return (
+				/*return (
 					<span>
 						Suppose this were the only argument (ie. line of support or opposition) specifically on this subject.
 						<br/>Suppose also that {premiseCountStr} are 100% true/full.
 						<br/>If so, how much should it {shiftType} the {grandParentRatingType} rating of someone whose initial evaluation was 50%?
+					</span>
+				);*/
+				/*return (
+					<span>
+						Suppose that {premiseCountStr} of this argument were 100% true/full.
+						<br/>If so, how much should it {shiftType} the {grandParentRatingType} rating of someone whose initial evaluation was 50%?
+					</span>
+				);*/
+				return (
+					<span>
+						If {premiseCountStr} of this argument were true/full, to what level would it {shiftType} your {grandParentRatingType
+							} rating of the parent thesis? (assuming your initial evaluation were 50%)
 					</span>
 				);
 			},
