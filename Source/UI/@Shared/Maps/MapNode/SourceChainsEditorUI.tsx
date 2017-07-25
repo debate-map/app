@@ -57,9 +57,11 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 														if (val.endsWith("@bible")) {
 															var reference = val.replace("@bible", "").replace(/:/g, ".").replace(/ /g, "%20");
 															val = `https://biblia.com/bible/nkjv/${reference}`;
+															setTimeout(Change);
 														} else if (val.endsWith("@quran")) {
-															var reference = val.replace("@quran", "").replace(/:/g, "/").replace(/ /g, "%20");
+															var reference = val.replace("Quran ", "").replace("@quran", "").replace(/:/g, "/").replace(/ /g, "%20");
 															val = `http://www.quran.com/${reference}`;
+															setTimeout(Change);
 														}
 														source.link = val;
 													})())}/>}
