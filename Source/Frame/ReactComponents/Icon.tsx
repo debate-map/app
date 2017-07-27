@@ -25,6 +25,14 @@ Icon packs:
 | "arrow-up" | "arrow-down"
 ;*/
 
+// SVG's not used during the initial icon-rendering batch were never getting rendered.
+// For now, we'll fix this by importing all SVG's from the get-go.
+var context = (require as any).context("../../../Resources/SVGs/", true /* include subfolders */, /\.svg$/);
+var files = {};
+context.keys().forEach((filename)=>{
+	files[filename] = context(filename);
+});
+
 //export default class Icon extends BaseComponent<{icon: IconType, color?: string}, {}> {
 export default class Icon extends BaseComponent<{icon: string, size: number, color?: string} & React.HTMLProps<SVGElement>, {}> {
 	static defaultProps = {color: "rgba(255,255,255,.7)"};
