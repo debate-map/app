@@ -99,9 +99,12 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 		let nodesForPage = nodesFiltered.Skip(page * entriesPerPage).Take(entriesPerPage);
 
 		return (
-			<Row style={{height: "100%", alignItems: "flex-start"}}>
-				<Column ml={10} mt={10} mb={10} style={{position: "relative", flex: .5, height: "calc(100% - 20px)", borderRadius: 10, filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}>
-					<Column style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: 10}}>
+			<Row style={{height: "100%", alignItems: "flex-start"}} onClick={e=> {
+				if (e.target != e.currentTarget) return;
+				store.dispatch(new ACTSelectedNode_InListSet({mapID: map._id, nodeID: null}));
+			}}>
+				<Column className="clickThrough" ml={10} mt={10} mb={10} style={{position: "relative", flex: .5, height: "calc(100% - 20px)", borderRadius: 10, filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}>
+					<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: 10}}>
 						<Row style={{height: 40, padding: 10}}>
 							<Pre>Sort by: </Pre>
 							<Select options={GetEntries(SortType, name=>EnumNameToDisplayName(name))}
@@ -233,7 +236,11 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 		}
 
 		return (
-			<Row style={{flex: .5, padding: 10, alignItems: "flex-start", position: "relative", filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))", /*background: "rgba(0,0,0,.5)", borderRadius: 10*/}}>
+			<Row className="clickThrough"
+					style={{
+						flex: .5, padding: 10, alignItems: "flex-start", position: "relative",
+						filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))", /*background: "rgba(0,0,0,.5)", borderRadius: 10*/
+					}}>
 				{/*<ResizeSensor ref={()=> {
 					if (this.refs.ratingsPanel) GetInnerComp(this.refs.ratingsPanel).Update();
 				}} onResize={()=> {
