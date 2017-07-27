@@ -22,7 +22,7 @@ import {GetNodeRatingsRoot, GetRatings, GetFillPercentForRatingAverage, GetRatin
 import {GetUserID} from "../../../../Store/firebase/users";
 import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RootState} from "../../../../Store/index";
-import {RatingType_Info, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
+import {RatingType_Info, RatingType, ratingTypes} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {ACTMapNodeSelect, ACTMapNodeExpandedSet, ACTMapNodePanelOpen, ACTMapNodeTermOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
@@ -157,7 +157,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								padding: 5, background: "rgba(0,0,0,.7)", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 							}}>
 						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${nodeTypeInfo.backgroundColor},.7)`}}/>
-						{RatingType_Info.for[panelToShow] && (()=> {
+						{ratingTypes.Contains(panelToShow) && (()=> {
 							let ratings = GetRatings(node._id, panelToShow as RatingType);
 							return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 						})()}

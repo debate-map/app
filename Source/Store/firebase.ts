@@ -1,7 +1,7 @@
 import {User} from "./firebase/users";
 import UserExtraInfo from "./firebase/userExtras/@UserExtraInfo";
 import {MapNode} from "./firebase/nodes/@MapNode";
-import {RatingsSet} from "./firebase/nodeRatings/@RatingsRoot";
+import {RatingsSet, RatingsRoot} from "./firebase/nodeRatings/@RatingsRoot";
 import {Term} from "./firebase/terms/@Term";
 import {Map} from "./firebase/maps/@Map";
 import TermComponent from "./firebase/termComponents/@TermComponent";
@@ -17,7 +17,7 @@ export interface FirebaseData {
 	maps: {[key: number]: Map};
 	nodes: {[key: number]: MapNode};
 	nodeExtras: {[key: number]: any};
-	nodeRatings: {[key: number]: RatingsSet};
+	nodeRatings: {[key: number]: RatingsRoot}; // node-id (key) -> rating-type -> user-id -> rating -> value
 	nodeStats: {[key: number]: MapNodeStats};
 	nodeViewers: {[key: number]: ViewerSet};
 	terms: {[key: number]: Term};

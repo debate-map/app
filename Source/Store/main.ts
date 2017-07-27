@@ -21,6 +21,7 @@ export class MainState {
 	page: string;
 	urlExtraStr: string;
 	envOverride: string;
+	dbVersionOverride: string;
 	analyticsEnabled: boolean;
 	topLeftOpenPanel: string;
 	topRightOpenPanel: string;
@@ -97,9 +98,15 @@ export function MainReducer(state, action) {
 		envOverride: (state = null, action)=> {
 			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).GetQueryVar("env")) {
 				let newVal = URL.FromState(action.payload).GetQueryVar("env");
-				if (newVal == "null")
-					newVal = null;
+				if (newVal == "null") newVal = null;
 				return newVal;
+			}
+			return state;
+		},
+		dbVersionOverride: (state = null, action)=> {
+			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).GetQueryVar("dbVersion")) {
+				let str = URL.FromState(action.payload).GetQueryVar("dbVersion");
+				return str == "null" ? null : parseInt(str);
 			}
 			return state;
 		},

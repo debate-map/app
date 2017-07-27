@@ -59,7 +59,7 @@ export default class ReverseArgumentPolarity extends Command<{nodeID: number}> {
 		// reverse meta-thesis ratings
 		//dbUpdates[`nodeRatings/${metaThesisID}/adjustment`] = newMetaThesisAdjustmentRatingSet;
 		// delete meta-thesis ratings
-		updates[`nodeRatings/${this.metaThesisID}`] = null;
+		//updates[`nodeRatings/${this.metaThesisID}`] = null;
 		return updates;
 	}
 }

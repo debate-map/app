@@ -205,7 +205,7 @@ export class TreeNode {
 	}
 }
 export function GetTreeNodesInObjTree(obj: any, includeRootNode = false, _ancestorNodes = []) {
-	if (_ancestorNodes.length > 300) debugger;
+	Assert(_ancestorNodes.length <= 300, "Cannot traverse more than 300 levels into object tree. (probably circular)");
 
 	let result = [] as TreeNode[];
 	if (includeRootNode)

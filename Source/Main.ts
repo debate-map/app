@@ -59,7 +59,13 @@ g.Extend({env_short, devEnv, prodEnv, testEnv}); declare global { var env_short:
 //let {version} = require("../../../package.json");
 // Note: Use two BakedConfig files, so that dev-server can continue running, with its own baked-config data, even while prod-deploy occurs.
 // Note: Don't reference the BakedConfig files from anywhere but here (in runtime code) -- because we want to be able to override it, below.
-let {version, dbVersion, firebaseConfig} = devEnv ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
+//let {version, dbVersion, firebaseConfig} = devEnv ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
+let {version, firebaseConfig} = devEnv ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
+let dbVersion = 6;
+if (startURL.GetQueryVar("dbVersion") && startURL.GetQueryVar("dbVersion") != "null") {
+	dbVersion = parseInt(startURL.GetQueryVar("dbVersion"));
+	console.log("Using dbVersion: " + dbVersion);
+}
 g.Extend({version, dbVersion, firebaseConfig}); declare global { var version: string, dbVersion: number, firebaseConfig; }
 
 if (prodEnv) {

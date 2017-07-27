@@ -310,6 +310,9 @@ export function GetNewURL(includeMapViewStr = true) {
 	if (State(a=>a.main.envOverride)) {
 		newURL.SetQueryVar("env", State(a=>a.main.envOverride));
 	}
+	if (State(a=>a.main.dbVersionOverride)) {
+		newURL.SetQueryVar("dbVersion", State(a=>a.main.dbVersionOverride));
+	}
 
 	// a default-child is only used (ie. removed from url) if there are no path-nodes after it
 	if (subpage && subpage == rootPageDefaultChilds[page] && newURL.pathNodes.length == 2) newURL.pathNodes.length = 1;

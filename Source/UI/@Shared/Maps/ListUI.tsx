@@ -11,7 +11,7 @@ import {GetNodeEnhanced, GetFinalNodeTypeAtPath, GetNodeDisplayText, GetRatingTy
 import Column from "../../../Frame/ReactComponents/Column";
 import ScrollView from "react-vscrollview";
 import NodeUI_Menu from "../../@Shared/Maps/MapNode/NodeUI_Menu";
-import {RatingType_Info, RatingType} from "../../../Store/firebase/nodeRatings/@RatingType";
+import {RatingType_Info, RatingType, GetRatingTypeInfo, ratingTypes} from "../../../Store/firebase/nodeRatings/@RatingType";
 import {GetRatings, GetNodeRatingsRoot} from "../../../Store/firebase/nodeRatings";
 import RatingsPanel from "../../@Shared/Maps/MapNode/NodeUI/RatingsPanel";
 import DefinitionsPanel from "../../@Shared/Maps/MapNode/NodeUI/DefinitionsPanel";
@@ -228,9 +228,8 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 		let nodeView = new MapNodeView();
 
 		let panelToShow = hoverPanel || openPanel;
-		let isRatingPanel = RatingType_Info.for[panelToShow] != null;
 		// if we're supposed to show a rating panel, but its rating-type is not applicable for this node-type, fall back to main rating-type
-		if (isRatingPanel && !GetRatingTypesForNode(node).Any(a=>a.type == panelToShow)) {
+		if (ratingTypes.Contains(panelToShow) && !GetRatingTypesForNode(node).Any(a=>a.type == panelToShow)) {
 			let mainRatingType = GetRatingTypesForNode(node).find(a=>a.main);
 			panelToShow = mainRatingType ? mainRatingType.type : null;
 		}
@@ -255,7 +254,7 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 						{panelToShow &&
 							<div style={{position: "relative", padding: 5, background: "rgba(0,0,0,.7)", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
 								<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${nodeTypeInfo.backgroundColor},.7)`}}/>
-								{RatingType_Info.for[panelToShow] && (()=> {
+								{ratingTypes.Contains(panelToShow) && (()=> {
 									let ratings = GetRatings(node._id, panelToShow as RatingType);
 									return <RatingsPanel ref="ratingsPanel" node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 								})()}

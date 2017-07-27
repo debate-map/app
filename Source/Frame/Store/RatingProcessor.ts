@@ -55,7 +55,8 @@ export function GetArgumentStrengthPseudoRating(argumentNode: MapNode, nodeChild
 	
 	if (metaThesis.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || metaThesis.metaThesis.thenType == MetaThesis_ThenType.WeakenParent) {
 		let adjustment = GetRatingValue(metaThesis._id, "adjustment", userID, 50);
-		let strengthForType = adjustment.Distance(50) / 50;
+		//let strengthForType = adjustment.Distance(50) / 50;
+		let strengthForType = adjustment / 100;
 		var result = combinedProbabilityOfPremises * strengthForType;
 	} else {
 		var result = combinedProbabilityOfPremises * (GetRatingValue(metaThesis._id, "probability", userID, 0) / 100);

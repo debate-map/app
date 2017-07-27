@@ -11,7 +11,7 @@ import {ShowMessageBox_Base, ShowMessageBox} from "../../../../../Frame/UI/VMess
 import {firebaseConnect} from "react-redux-firebase";
 import {GetData, SlicePath} from "../../../../../Frame/Database/DatabaseHelpers";
 import {Debugger} from "../../../../../Frame/General/Globals_Free";
-import {RatingType, RatingType_Info} from "../../../../../Store/firebase/nodeRatings/@RatingType";
+import {RatingType, RatingType_Info, GetRatingTypeInfo} from "../../../../../Store/firebase/nodeRatings/@RatingType";
 import {Rating} from "../../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNode, ThesisForm} from "../../../../../Store/firebase/nodes/@MapNode";
 import {GetUserID} from "../../../../../Store/firebase/users";
@@ -54,18 +54,23 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 		let reverseRatings = ShouldRatingTypeBeReversed(ratingType, nodeReversed, contextReversed);
 		let nodeTypeDisplayName = GetMapNodeTypeDisplayName(node.type, node, form);
 
-		let ratingTypeInfo = RatingType_Info.for[ratingType];
-		let options = typeof ratingTypeInfo.options == "function" ? ratingTypeInfo.options(node, parentNode) : ratingTypeInfo.options;
+		let ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
+		let {labels, values} = ratingTypeInfo;
+		function GetValueForLabel(label) { return values[labels.indexOf(label)]; }
+		function GetLabelForValue(value) { return labels[values.indexOf(value)]; }
 		let myRating = TransformRatingForContext((ratings.find(a=>a._key == userID) || {} as any).value, reverseRatings);
 
-		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100].concat(options.Max(null, true) == 200 ? [200] : []);
-		let minVal = options.Min(null, true), maxVal = options.Max(null, true), range = maxVal - minVal;
-		smoothing = smoothing.KeepAtMost(options.Max(null, true)); // smoothing might have been set higher, from when on another rating-type
-		let ticksForChart = options.Select(a=>a.RoundTo(smoothing)).Distinct();
-		let dataFinal = ticksForChart.Select(a=>({rating: a, count: 0}));
+		let smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100]; //.concat(labels.Max(null, true) == 200 ? [200] : []);
+		let minLabel = labels.Min(null, true), maxLabel = labels.Max(null, true), range = maxLabel - minLabel;
+		smoothing = smoothing.KeepAtMost(labels.Max(null, true)); // smoothing might have been set higher, from when on another rating-type
+		let ticksForChart = labels.Select(a=>a.RoundTo(smoothing)).Distinct();
+		let dataFinal = ticksForChart.Select(tick=> {
+			let rating = tick;
+			return {label: tick, value: GetValueForLabel(tick), count: 0};
+		});
 		for (let entry of ratings) {
 			let ratingVal = TransformRatingForContext(entry.value, reverseRatings);
-			let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(ratingVal)).First();
+			let closestRatingSlot = dataFinal.OrderBy(a=>a.value.Distance(ratingVal)).First();
 			closestRatingSlot.count++;
 		}
 
@@ -96,23 +101,24 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 						let chart = chartHolder.find(".recharts-cartesian-grid");
 						let posOnChart = new Vector2i(e.pageX - chart.offset().left, e.pageY - chart.offset().top);
 						let percentOnChart = posOnChart.x / chart.width();
-						let ratingOnChart_exact = minVal + (percentOnChart * range);
-						let closestRatingSlot = dataFinal.OrderBy(a=>a.rating.Distance(ratingOnChart_exact)).First();
-						let rating = closestRatingSlot.rating;
+						let ratingOnChart_exact = minLabel + (percentOnChart * range);
+						let closestRatingSlot = dataFinal.OrderBy(a=>a.label.Distance(ratingOnChart_exact)).First();
+						let newRating_label = closestRatingSlot.label;
 						
-						let finalRating = rating;
 						//let finalRating = GetRatingForForm(rating, form);
 						let boxController = ShowMessageBox({
 							title: `Rate ${ratingType} of ${nodeTypeDisplayName}`, cancelButton: true,
 							messageUI: ()=>(
 								<div style={{padding: "10px 0"}}>
-									Rating: <Spinner min={options.Min(null, true)} max={options.Max(null, true)} style={{width: 60}}
-										value={finalRating} onChange={val=>DN(finalRating = val, boxController.UpdateUI())}/>
+									Rating: <Spinner min={minLabel} max={maxLabel} style={{width: 60}}
+										value={newRating_label} onChange={val=>DN(newRating_label = val, boxController.UpdateUI())}/>
 								</div>
 							),
 							onOK: ()=> {
 								// todo: have submitted date be based on local<>Firebase time-offset (retrieved from Firebase) [this prevents fail from security rules]
-								firebase.Ref(`nodeRatings/${node._id}/${ratingType}/${userID}`).set({updated: Date.now(), value: TransformRatingForContext(finalRating, reverseRatings)});
+								let newRating_value = GetValueForLabel(newRating_label);
+								newRating_value = TransformRatingForContext(newRating_value, reverseRatings);
+								firebase.Ref(`nodeRatings/${node._id}/${ratingType}/${userID}`).set({updated: Date.now(), value: newRating_value});
 							}
 						});
 					}}
@@ -143,14 +149,14 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 				{this.lastRender_source == RenderSource.SetState &&
 					<AreaChart ref="chart" width={size.x} height={250} data={dataFinal}
 							margin={{top: 20, right: 10, bottom: 0, left: 10}} /*viewBox={{x: 0, y: 250 - height, width: size.x, height: 250}}*/>
-						<XAxis dataKey="rating" type="number" /*label={<XAxisLabel ratingType={ratingType}/>}*/ ticks={ratingTypeInfo.ticks(node, parentNode)}
+						<XAxis dataKey="label" type="number" /*label={<XAxisLabel ratingType={ratingType}/>}*/ ticks={Range(minLabel, maxLabel, ratingTypeInfo.tickInterval)}
 							tick={ratingTypeInfo.tickRender}
-							domain={[minVal, maxVal]} minTickGap={0}/>
+							domain={[minLabel, maxLabel]} minTickGap={0}/>
 						{/*<YAxis tickCount={7} hasTick width={50}/>*/}
 						<YAxis orientation="left" x={20} width={20} height={250} tickCount={9}/>
 						<CartesianGrid stroke="rgba(255,255,255,.3)"/>
 						<Area type="monotone" dataKey="count" stroke="#ff7300" fill="#ff7300" fillOpacity={0.9} layout="vertical" animationDuration={500}/>
-						{myRating != null && <ReferenceLine x={myRating} stroke="rgba(0,255,0,1)" fill="rgba(0,255,0,1)" label="You"/>}
+						{myRating != null && <ReferenceLine x={GetLabelForValue(myRating)} stroke="rgba(0,255,0,1)" fill="rgba(0,255,0,1)" label="You"/>}
 						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>
 					</AreaChart>}
 			</div>
@@ -189,10 +195,10 @@ class CustomTooltip extends BaseComponent<{active?, payload?, external?, label?}
 			color: "black",
 		};
 
-		const currData = external.filter(entry=>entry.rating === label)[0];
+		const currData = external.filter(entry=>entry.label === label)[0];
 		return (
 			<div className="area-chart-tooltip" style={style}>
-				<p className="ignoreBaseCSS">Rating: <em className="ignoreBaseCSS">{currData.rating}%</em></p>
+				<p className="ignoreBaseCSS">Rating: <em className="ignoreBaseCSS">{currData.label}%</em></p>
 				<p className="ignoreBaseCSS">Count: <em className="ignoreBaseCSS">{currData.count}</em></p>
 			</div>
 		);

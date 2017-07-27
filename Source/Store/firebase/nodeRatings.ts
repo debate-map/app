@@ -73,8 +73,8 @@ export function GetPaths_MainRatingAverage(node: MapNode) {
 }*/
 export function GetFillPercentForRatingAverage(node: MapNode, ratingAverage: number, reverseRating?: boolean) {
 	ratingAverage = TransformRatingForContext(ratingAverage, reverseRating);
-	if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
-		return ratingAverage != null ? ratingAverage.Distance(50) * 2 : 0;
+	/*if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
+		return ratingAverage != null ? ratingAverage.Distance(50) * 2 : 0;*/
 	return ratingAverage || 0;
 }
 export function TransformRatingForContext(ratingValue: number, reverseRating: boolean) {

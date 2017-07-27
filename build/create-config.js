@@ -14,7 +14,7 @@ if (process.env.TRAVIS_PULL_REQUEST === false) {
 function createConfigFile(callback, environment) {
 	let configObj = {
 		version: pkg.version,
-		dbVersion: 5,
+		//dbVersion: 5,
 		firebaseConfig: environment == "development"
 			? {
 				apiKey: "AIzaSyB1UCTO2p6TLpifAQzsRw_Np39k9N92cpI",

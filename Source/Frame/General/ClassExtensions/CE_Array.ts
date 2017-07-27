@@ -21,7 +21,11 @@ Array.prototype._AddFunction_Inline = function CAdd(item) { this.push(item); ret
 Array.prototype._AddFunction_Inline = function TAdd(item) { this.push(item); return item; }; // TAdd = TransparentAdd
 interface Array<T> { AddRange(items: T[]): this; }
 Array.prototype._AddFunction_Inline = function AddRange(array) {
-	this.push(...array);
+	//this.push(...array);
+	// use loop, since sending them all as arguments fails when there are ~10000+ items
+	for (let item of array) {
+		this.push(item);
+	}
 	return this;
 };
 interface Array<T> { Remove(item: T): boolean; }

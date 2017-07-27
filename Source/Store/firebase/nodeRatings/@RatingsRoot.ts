@@ -1,7 +1,7 @@
 import {User_id} from "../users/@User";
 
-export type RatingsRoot = {[key: string]: RatingsSet};
-export type RatingsSet = {[key: string]: Rating};
+export type RatingsRoot = {[key: string]: RatingsSet}; // rating-type (key) -> user-id -> rating -> value
+export type RatingsSet = {[key: string]: Rating}; // user-id (key) -> rating -> value
 AddSchema({patternProperties: {[User_id]: {$ref: "Rating"}}}, "RatingsSet");
 export type Rating = {_key: string, updated: number, value: number};
 AddSchema({
