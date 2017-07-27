@@ -12,6 +12,7 @@ export enum SortType {
 
 export class ACTMapNodeListSortBySet extends Action<{mapID: number, sortBy: SortType}> {}
 export class ACTMapNodeListFilterSet extends Action<{mapID: number, filter: string}> {}
+export class ACTMapNodeListPageSet extends Action<{mapID: number, page: number}> {}
 export class ACTSelectedNode_InListSet extends Action<{mapID: number, nodeID: number}> {}
 export class ACTMap_List_SelectedNode_OpenPanelSet extends Action<{mapID: number, panel: string}> {}
 
@@ -27,6 +28,10 @@ export const MapInfoReducer = CombineReducers({
 	},
 	list_filter: (state = "", action)=> {
 		if (action.Is(ACTMapNodeListFilterSet)) return action.payload.filter;
+		return state;
+	},
+	list_page: (state = 0, action)=> {
+		if (action.Is(ACTMapNodeListPageSet)) return action.payload.page;
 		return state;
 	},
 

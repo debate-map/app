@@ -229,9 +229,11 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		};
 	}
 
-	setState(_: ()=>"Do not call this. Call SetState() instead.") {
+	//setState(_: ()=>"Do not call this. Call SetState() instead.") {
+	/*setState() {
 		throw new Error("Do not call this. Call SetState() instead.");
-	}
+	}*/
+	setState(): "Do not call this. Call SetState() instead." { return null as any; }
 	SetState(newState: Partial<S>, callback?: ()=>any, cancelIfStateSame = true, deepCompare = false) {
 		if (cancelIfStateSame) {
 			// we only care about new-state's keys -- setState() leaves unmentioned keys untouched

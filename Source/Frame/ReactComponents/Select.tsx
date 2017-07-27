@@ -134,8 +134,8 @@ export class Dropdown_OptionUI extends BaseComponent<{index, style}, {}> {
 @Radium
 export class ButtonBar_OptionUI extends BaseComponent<{first, last, selected, onSelect, style}, {}> {
 	// add proxy, since using Radium
-	setState(newState, callback?) {
-		return this.SetState(newState, callback);
+	setState(newState?, callback?) {
+		return this.SetState(newState, callback) as any;
 	}
 	render() {
 	    var {first, last, selected, style, children, onSelect} = this.props;

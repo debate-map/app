@@ -132,7 +132,7 @@ export function GetNodeView(mapID: number, path: string): MapNodeView {
 	// this has better perf than the simpler approaches
 	//let childPath = pathNodeIDs.map(childID=>`${childID}/children`).join("/").slice(0, -"/children".length);
 	let childPathNodes = pathNodeIDs.SelectMany(childID=>[childID, "children"]).slice(0, -1);
-	return State("main", "mapViews", mapID, "rootNodeViews", ...childPathNodes);
+	return State("main", "mapViews", mapID, "rootNodeViews", ...childPathNodes) as any;
 }
 export function GetViewOffset(mapView: MapView): Vector2i {
 	if (mapView == null) return null;
