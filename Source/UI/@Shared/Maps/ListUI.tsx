@@ -116,7 +116,7 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 								<TextInput mr={10} pattern="[0-9]+" style={{width: 30}} value={page + 1}
 									onChange={val=> {
 										if (!IsNumberString(val)) return;
-										store.dispatch(new ACTMapNodeListPageSet({mapID: map._id, page: (parseInt(val) - 1).KeepBetween(0, lastPage - 1)}))
+										store.dispatch(new ACTMapNodeListPageSet({mapID: map._id, page: (parseInt(val) - 1).KeepBetween(0, lastPage)}))
 									}}/>
 								<Button text={<Icon icon="arrow-right" size={15}/>} title="Next page"
 									enabled={page < lastPage} onClick={()=> {

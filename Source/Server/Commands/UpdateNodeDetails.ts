@@ -43,10 +43,11 @@ AddSchema({
 			},
 		}),
 	},
-	required: ["nodeID", "nodeUpdates", "linkParentID", "linkUpdates"],
+	//required: ["nodeID", "nodeUpdates", "linkParentID", "linkUpdates"],
+	required: ["nodeID", "nodeUpdates"],
 }, "UpdateNodeDetails_payload");
 
-export default class UpdateNodeDetails extends Command<{nodeID: number, nodeUpdates: Partial<MapNode>, linkParentID: number, linkUpdates: Partial<ChildEntry>}> {
+export default class UpdateNodeDetails extends Command<{nodeID: number, nodeUpdates: Partial<MapNode>, linkParentID?: number, linkUpdates?: Partial<ChildEntry>}> {
 	Validate_Early() {
 		/*let allowedNodePropUpdates = ["relative", "titles", "contentNode"];
 		Assert(nodeUpdates.VKeys().Except(...allowedNodePropUpdates).length == 0,
@@ -68,20 +69,26 @@ export default class UpdateNodeDetails extends Command<{nodeID: number, nodeUpda
 		let {nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
 		this.oldNodeData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
 		this.newNodeData = {...this.oldNodeData, ...nodeUpdates};
-		this.oldLinkData = await GetDataAsync({addHelpers: false}, "nodes", linkParentID, "children", nodeID) as ChildEntry;
-		this.newLinkData = {...this.oldLinkData, ...linkUpdates};
+		if (linkUpdates) {
+			this.oldLinkData = await GetDataAsync({addHelpers: false}, "nodes", linkParentID, "children", nodeID) as ChildEntry;
+			this.newLinkData = {...this.oldLinkData, ...linkUpdates};
+		}
 	}
 	async Validate() {
 		//if (!AssertValidate("MapNode", newData, `New-data invalid`);
 		AssertValidate("MapNode", this.newNodeData, `New node-data invalid`);
-		AssertValidate("ChildEntry", this.newLinkData, `New link-data invalid`);
+		if (this.newLinkData) {
+			AssertValidate("ChildEntry", this.newLinkData, `New link-data invalid`);
+		}
 	}
 	
 	GetDBUpdates() {
 		let {nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
 		let updates = {};
 		updates[`nodes/${nodeID}`] = this.newNodeData;
-		updates[`nodes/${linkParentID}/children/${nodeID}`] = this.newLinkData;
+		if (this.newLinkData) {
+			updates[`nodes/${linkParentID}/children/${nodeID}`] = this.newLinkData;
+		}
 		return updates;
 	}
 }
