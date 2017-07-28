@@ -221,7 +221,7 @@ export async function LoadURL(urlStr: string) {
 	// If user followed search-result link (eg. "debatemap.live/global/156"), we only know the node-id.
 	// Search for the shortest path from the map's root to this node, and update the view and url to that path.
 	//if (url.pathNodes[0] == "global" && url.pathNodes[1] != null && url.pathNodes[1].match(/^[0-9]+$/) && !isBot) {
-	let match = url.toString({domain: false}).match(/^\/global\/map\/[a-z-]*\.([0-9]+)$/);
+	let match = url.toString({domain: false}).match(/^\/global\/map\/[a-z-]*\.?([0-9]+)$/);
 	if (match && !isBot) {
 		let nodeID = parseInt(match[1]);
 		let node = await GetNodeAsync(nodeID);
@@ -239,9 +239,9 @@ export async function LoadURL(urlStr: string) {
 			store.dispatch(new ACTNotificationMessageAdd(new NotificationMessage(`The node specified in the url (#${nodeID}) was not found.`)));
 		}
 
-		let newURL = url.Clone();
-		newURL.pathNodes.RemoveAt(1);
-		store.dispatch(replace(newURL.toString({domain: false})));
+		/*let newURL = url.Clone();
+		//newURL.pathNodes.RemoveAt(2);
+		store.dispatch(replace(newURL.toString({domain: false})));*/
 	}
 
 	loadingURL = false;
