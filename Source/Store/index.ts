@@ -54,11 +54,16 @@ export function MakeRootReducer(extraReducers?) {
 		...extraReducers
 	});
 
-	return (state: RootState, action)=> {
-		let result = innerReducer(state, action) as RootState;
-		//if (action.Is(ACTSet)) {
-		if (action.type.startsWith("ACTSet_")) {
-			result = u.updateIn(action.payload.path.replace(/\//g, "."), u.constant(action.payload.value), result);
+	return (state: RootState, rootAction)=> {
+		let actions = rootAction.type == "ApplyActionSet" ? rootAction.actions : [rootAction];
+
+		let result = state;
+		for (let action of actions) {
+			result = innerReducer(result, action) as RootState;
+			//if (action.Is(ACTSet)) {
+			if (action.type.startsWith("ACTSet_")) {
+				result = u.updateIn(action.payload.path.replace(/\//g, "."), u.constant(action.payload.value), result);
+			}
 		}
 		return result;
 	};

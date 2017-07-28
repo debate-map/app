@@ -51,6 +51,8 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		//let firebase = props["firebase"];
 		let firebase = store.firebase;
 
+		let changedPath = null;
+
 		let storeDataChanged = false;
 		if (s.lastAccessedStorePaths_withData == null) {
 			storeDataChanged = true;
@@ -59,6 +61,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 				if (State({countAsAccess: false}, ...SplitStringBySlash_Cached(path)) !== s.lastAccessedStorePaths_withData[path]) {
 					//store.dispatch({type: "Data changed!" + path});
 					storeDataChanged = true;
+					changedPath = path;
 					break;
 				}
 			}
@@ -71,7 +74,12 @@ export function Connect<T, P>(funcOrFuncGetter) {
 			g.inConnectFunc = false;
 			return s.lastResult;
 		}
-		let result = mapStateToProps_inner(state, props);
+		//let result = mapStateToProps_inner.call(s, state, props);
+		// for debugging in profiler
+		//let debugText = ToJSON(props).replace(/[^a-zA-Z0-9]/g, "_");
+		let debugText = (props["node"] ? " @ID:" + props["node"]._id : "") + " @changedPath: " + changedPath;
+		let wrapperFunc = eval(`(function ${debugText.replace(/[^a-zA-Z0-9]/g, "_")}() { return mapStateToProps_inner.apply(s, arguments); })`);
+		let result = wrapperFunc.call(s, state, props);
 
 		let oldRequestedPaths: string[] = s.lastRequestedPaths || [];
 		let requestedPaths: string[] = GetRequestedPaths();
@@ -83,10 +91,34 @@ export function Connect<T, P>(funcOrFuncGetter) {
 
 				s._firebaseEvents = getEventsFromInput(requestedPaths);
 				let removedPaths = oldRequestedPaths.Except(...requestedPaths);
-				unWatchEvents(firebase, store.dispatch, getEventsFromInput(removedPaths));
+				unWatchEvents(firebase, dispatch, getEventsFromInput(removedPaths));
 				let addedPaths = requestedPaths.Except(...oldRequestedPaths);
-				watchEvents(firebase, store.dispatch, getEventsFromInput(addedPaths));
+				watchEvents(firebase, dispatch, getEventsFromInput(addedPaths));
 				// for debugging, you can check currently-watched-paths using: store.firebase._.watchers
+
+				function dispatch(action) {
+					let timeSinceLastDBChangeDispatch = Date.now() - (s.lastDBChangeDispatchTime || 0);
+					if (timeSinceLastDBChangeDispatch < 300) {
+						// if timer not started, start it now
+						if (s.bufferedActions == null) {
+							setTimeout(()=> {
+								// now that wait is over, apply any buffered event-triggers
+								let combinedAction = {type: "ApplyActionSet", actions: s.bufferedActions} as any;
+								store.dispatch(combinedAction);
+								
+								s.lastDBChangeDispatchTime = Date.now();
+								s.bufferedActions = null;
+							}, (s.timeSinceLastDBChangeDispatch + 300) - Date.now());
+						}
+
+						// add action to buffer, to be run when timer ends
+						s.bufferedActions = (s.bufferedActions || []).concat(action);
+					} else {
+						// dispatch action right away
+						store.dispatch(action);
+						s.lastDBChangeDispatchTime = Date.now();
+					}
+				}
 			});
 			s.lastRequestedPaths = requestedPaths;
 			//Log("Requesting:" + ToJSON(requestedPaths) + "\n2:" + ToJSON(s._firebaseEvents)); 

@@ -166,7 +166,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 								if (e.nativeEvent["passThrough"]) return true;
 								e.preventDefault();
 							}}>
-						<NodeUI map={map} node={rootNode} path={rootNode._id.toString()}/>
+						<NodeUI map={map} node={rootNode} path={Assert(rootNode._id != null) || rootNode._id.toString()}/>
 						{/*<ReactResizeDetector handleWidth handleHeight onResize={()=> {*/}
 						{/*<ResizeSensor ref="resizeSensor" onResize={()=> {
 							this.LoadScroll();

@@ -82,7 +82,7 @@ type State = {
 	},
 	//childrenStartY: number, childrenEndY: number, // positions at which to place limit-bars
 };
-@Connect((state: RootState, {node, path, map}: Props)=> {
+@Connect(function connectFunc(state: RootState, {node, path, map}: Props, asRecall?) {
 	//Log("Calling NodeUI connect func.");
 	let nodeView = GetNodeView(map._id, path) || new MapNodeView();
 
@@ -92,6 +92,18 @@ type State = {
 	/*let nodeChildren_finalTypes = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
 		return GetFinalNodeTypeAtPath(child, path + "/" + child._id);
 	});*/
+
+	/*let timeSinceLastConnect = Date.now() - (this.lastConnectTime || 0);
+	if (timeSinceLastConnect < 300 && !asRecall) {
+		let s = this, args = [].slice.call(arguments);
+		setTimeout(()=> {
+			g.test1 = true;
+			s.props = {...s.props, ...connectFunc.apply(s, args.concat(true))};
+			s.forceUpdate();
+		}, (this.lastConnectTime + 300) - Date.now());
+		//return this.lastConnectData;
+		return {...this.lastConnectData}; // for some reason, we need to make new object, else causes slowdown!
+	}*/
 
 	let nodeChildren_sortValues = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
 		if (child.metaThesis) return Number.MAX_SAFE_INTEGER; // always place the meta-thesis first
@@ -112,8 +124,10 @@ type State = {
 	let nodeChildren_fillPercents = nodeChildren == childrenPlaceholder ? childrenPlaceholder : nodeChildren.map(child=> {
 		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetMainRatingType(child)), GetNodeForm(child) == ThesisForm.Negation);
 	});
+
+	//this.lastConnectTime = Date.now();
 	
-	return {
+	return /*this.lastConnectData =*/ {
 		path: path || node._id.toString(),
 
 		initialChildLimit: State(a=>a.main.initialChildLimit),

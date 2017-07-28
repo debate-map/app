@@ -53,10 +53,12 @@ export default function(initialState = {}, history) {
 	let lateMiddleware = [
 		// for some reason, this breaks stuff if we have it the last one
 		store=>next=>action=> {
-			PreDispatchAction(action);
+			PreDispatchAction(action); if (action.type == "ApplyActionSet") for (let sub of action.actions) PreDispatchAction(sub);
 			const returnValue = next(action);
-			MidDispatchAction(action, returnValue);
-			WaitXThenRun(0, ()=>PostDispatchAction(action));
+			MidDispatchAction(action, returnValue); if (action.type == "ApplyActionSet") for (let sub of action.actions) MidDispatchAction(sub, returnValue);
+			WaitXThenRun(0, ()=> {
+				PostDispatchAction(action); if (action.type == "ApplyActionSet") for (let sub of action.actions) PostDispatchAction(sub);
+			});
 			return returnValue;
 		},
 	];

@@ -68,7 +68,7 @@ if (startURL.GetQueryVar("dbVersion") && startURL.GetQueryVar("dbVersion") != "n
 }
 g.Extend({version, dbVersion, firebaseConfig}); declare global { var version: string, dbVersion: number, firebaseConfig; }
 
-if (prodEnv) {
+if (prodEnv && window.location.hostname != "localhost") { // if localhost, never enable Raven (even if env-override is set to production)
 	Raven.config("https://40c1e4f57e8b4bbeb1e5b0cf11abf9e9@sentry.io/155432", {
 		release: version,
 		environment: env,
