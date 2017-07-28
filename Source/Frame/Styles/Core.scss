@@ -5,6 +5,12 @@
 	@import "~normalize.css/normalize";
 	@import "Markdown";
 	//@import "~katex/dist/katex.min.css"; // has issues with fonts atm (trying to load from server from "/node_modules...")
+	@import "~rc-tooltip/assets/bootstrap.css";
+	.rc-tooltip-inner {
+		padding: 4px 7px;
+		background-color: rgb(30,30,30);
+		min-height: initial !important;
+	}
 
 	//@import "bootstrap/bootstrap";
 	/*@import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css");

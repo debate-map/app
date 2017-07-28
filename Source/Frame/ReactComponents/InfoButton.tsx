@@ -1,7 +1,9 @@
 import {BaseComponent, Pre} from "../UI/ReactGlobals";
 import {ButtonProps} from "./Button";
 import Button from "./Button";
-import ReactTooltip from "react-tooltip";
+//import ReactTooltip from "react-tooltip";
+import Tooltip from "rc-tooltip";
+import {InTooltip} from "./Tooltip";
 
 type EffectType = "float" | "solid";
 class TooltipInfo {
@@ -38,28 +40,30 @@ export default class InfoButton extends BaseComponent<{text: string, effect?: Ef
 		let {text, effect} = props;
 		this.tooltip = new TooltipInfo(text, effect);
 		tooltips.push(this.tooltip);
-		if (InfoButton_TooltipWrapper.main) {
+		/*if (InfoButton_TooltipWrapper.main) {
 			InfoButton_TooltipWrapper.main.Update(()=>ReactTooltip.rebuild());
-		}
+		}*/
 	}
 
 	render() {
 		let {text, effect, ...rest} = this.props;
 		return (
-			<Button {...rest as any} size={13} iconSize={13} iconPath="/Images/Buttons/Info.png"
-					useOpacityForHover={true} style={{position: `relative`, zIndex: 1, marginLeft: 1, backgroundColor: null, boxShadow: null}}
-					//title={text}
-					data-tip data-for={this.tooltip.IDStr}>
-				{/*<ReactTooltip id={tipID} effect={effect}>
-					<Pre>{text}</Pre>
-				</ReactTooltip>*/}
-			</Button>
+			<Tooltip placement="top" overlay={<InTooltip>{text}</InTooltip>}>
+				<Button {...rest as any} size={13} iconSize={13} iconPath="/Images/Buttons/Info.png"
+						useOpacityForHover={true} style={{position: `relative`, zIndex: 1, marginLeft: 1, backgroundColor: null, boxShadow: null}}
+						//title={text}
+						data-tip data-for={this.tooltip.IDStr}>
+					{/*<ReactTooltip id={tipID} effect={effect}>
+						<Pre>{text}</Pre>
+					</ReactTooltip>*/}
+				</Button>
+			</Tooltip>
 		);
 	}
 }
 
 // we have to use an outside-of-scrollview tooltip-wrapper, because "position: fixed" does not work under an element with "willChange: transform" 
-export class InfoButton_TooltipWrapper extends BaseComponent<{}, {}> {
+/*export class InfoButton_TooltipWrapper extends BaseComponent<{}, {}> {
 	static main: InfoButton_TooltipWrapper;
 	ComponentDidMount() {
 		InfoButton_TooltipWrapper.main = this;
@@ -80,4 +84,4 @@ export class InfoButton_TooltipWrapper extends BaseComponent<{}, {}> {
 			</div>
 		);
 	}
-}
+}*/
