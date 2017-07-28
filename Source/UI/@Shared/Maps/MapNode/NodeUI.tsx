@@ -147,7 +147,6 @@ type State = {
 	};
 })
 export default class NodeUI extends BaseComponent<Props, State> {
-	//static bufferDBUpdatesFromConnect = true;
 	static renderCount = 0;
 	static lastRenderTime = -1;
 	

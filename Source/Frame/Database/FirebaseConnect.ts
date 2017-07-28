@@ -179,16 +179,16 @@ let actionTypeBufferedActions = {};
 
 function DispatchDBAction(action) {
 	let timeSinceLastDispatch = Date.now() - (actionTypeLastDispatchTimes[action.type] || 0);
-	/*let innerComp = GetInnerComp(s);
-	if (timeSinceLastDBChangeDispatch < 300 && innerComp && (innerComp.constructor as any).bufferChanges) {*/
-	//if (timeSinceLastDispatch < 300 && s.constructor.WrappedComponent.bufferChanges) {
 	let bufferInfo = actionTypeBufferInfos[action.type];
+
 	// if we're not supposed to buffer this action type, or it's been long enough since last dispatch of this type
 	if (bufferInfo == null || timeSinceLastDispatch >= bufferInfo.time) {
 		// dispatch action right away
 		store.dispatch(action);
 		actionTypeLastDispatchTimes[action.type] = Date.now();
-	} else { // else, buffer action to be dispatched later
+	}
+	// else, buffer action to be dispatched later
+	else {
 		// if timer not started, start it now
 		if (actionTypeBufferedActions[action.type] == null) {
 			setTimeout(()=> {

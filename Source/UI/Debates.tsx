@@ -34,7 +34,10 @@ export default class DebatesUI extends BaseComponent<Props, {}> {
 		}
 
 		return (
-			<Column style={styles.page}>
+			<Column style={E(styles.page, {
+				//maxHeight: "calc(100% - 200px)"
+				height: "calc(100% - 200px)"
+			})}>
 				<Row>
 					{/*<Button text="Latest"/>*/}
 					<Button text="Add debate" ml="auto" onClick={()=> {
@@ -42,7 +45,7 @@ export default class DebatesUI extends BaseComponent<Props, {}> {
 						ShowAddMapDialog(userID, MapType.Debate);
 					}}/>
 				</Row>
-				<ScrollView style={{/*marginTop: 10,*/ flex: `1 1 100%`}} scrollVBarStyle={{width: 10}}>
+				<ScrollView style={{/*marginTop: 10,*/ flex: `1 1 100%`, marginRight: -10, paddingRight: 10}} scrollVBarStyle={{width: 10}}>
 					{maps.map((map, index)=> {
 						return <MapEntryUI key={index} map={map}/>;
 					})}
