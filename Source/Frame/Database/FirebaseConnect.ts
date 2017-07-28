@@ -1,7 +1,7 @@
 import {Assert} from "../General/Assert";
 import {RootState} from "../../Store/index";
 import {connect} from "react-redux";
-import {ShallowChanged} from "../UI/ReactGlobals";
+import {ShallowChanged, GetInnerComp} from "../UI/ReactGlobals";
 import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/query";
 import {getEventsFromInput} from "react-redux-firebase/dist/utils";
 import {ToJSON} from "../General/Globals";
@@ -91,21 +91,23 @@ export function Connect<T, P>(funcOrFuncGetter) {
 
 				s._firebaseEvents = getEventsFromInput(requestedPaths);
 				let removedPaths = oldRequestedPaths.Except(...requestedPaths);
-				unWatchEvents(firebase, dispatch, getEventsFromInput(removedPaths));
+				unWatchEvents(firebase, DispatchDBAction, getEventsFromInput(removedPaths));
 				let addedPaths = requestedPaths.Except(...oldRequestedPaths);
-				watchEvents(firebase, dispatch, getEventsFromInput(addedPaths));
+				watchEvents(firebase, DispatchDBAction, getEventsFromInput(addedPaths));
 				// for debugging, you can check currently-watched-paths using: store.firebase._.watchers
 
-				function dispatch(action) {
+				/*function dispatch(action) {
 					let timeSinceLastDBChangeDispatch = Date.now() - (s.lastDBChangeDispatchTime || 0);
-					if (timeSinceLastDBChangeDispatch < 300) {
+					/*let innerComp = GetInnerComp(s);
+					if (timeSinceLastDBChangeDispatch < 300 && innerComp && (innerComp.constructor as any).bufferChanges) {*#/
+					if (timeSinceLastDBChangeDispatch < 300 && s.constructor.WrappedComponent.bufferChanges) {
 						// if timer not started, start it now
 						if (s.bufferedActions == null) {
 							setTimeout(()=> {
 								// now that wait is over, apply any buffered event-triggers
 								let combinedAction = {type: "ApplyActionSet", actions: s.bufferedActions} as any;
 								store.dispatch(combinedAction);
-								
+
 								s.lastDBChangeDispatchTime = Date.now();
 								s.bufferedActions = null;
 							}, (s.timeSinceLastDBChangeDispatch + 300) - Date.now());
@@ -118,7 +120,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 						store.dispatch(action);
 						s.lastDBChangeDispatchTime = Date.now();
 					}
-				}
+			}*/
 			});
 			s.lastRequestedPaths = requestedPaths;
 			//Log("Requesting:" + ToJSON(requestedPaths) + "\n2:" + ToJSON(s._firebaseEvents)); 
@@ -166,6 +168,42 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		mapStateToProps_inner = mapStateToProps_inner_getter();
 		return mapStateToProps_wrapper;
 	});
+}
+
+let actionTypeBufferInfos = {
+	"@@reactReduxFirebase/START": {time: 300},
+	"@@reactReduxFirebase/SET": {time: 300},
+};
+let actionTypeLastDispatchTimes = {};
+let actionTypeBufferedActions = {};
+
+function DispatchDBAction(action) {
+	let timeSinceLastDispatch = Date.now() - (actionTypeLastDispatchTimes[action.type] || 0);
+	/*let innerComp = GetInnerComp(s);
+	if (timeSinceLastDBChangeDispatch < 300 && innerComp && (innerComp.constructor as any).bufferChanges) {*/
+	//if (timeSinceLastDispatch < 300 && s.constructor.WrappedComponent.bufferChanges) {
+	let bufferInfo = actionTypeBufferInfos[action.type];
+	// if we're not supposed to buffer this action type, or it's been long enough since last dispatch of this type
+	if (bufferInfo == null || timeSinceLastDispatch >= bufferInfo.time) {
+		// dispatch action right away
+		store.dispatch(action);
+		actionTypeLastDispatchTimes[action.type] = Date.now();
+	} else { // else, buffer action to be dispatched later
+		// if timer not started, start it now
+		if (actionTypeBufferedActions[action.type] == null) {
+			setTimeout(()=> {
+				// now that wait is over, apply any buffered event-triggers
+				let combinedAction = {type: "ApplyActionSet", actions: actionTypeBufferedActions[action.type]} as any;
+				store.dispatch(combinedAction);
+
+				actionTypeLastDispatchTimes[action.type] = Date.now();
+				actionTypeBufferedActions[action.type] = null;
+			}, (actionTypeLastDispatchTimes[action.type] + bufferInfo.time) - Date.now());
+		}
+
+		// add action to buffer, to be run when timer ends
+		actionTypeBufferedActions[action.type] = (actionTypeBufferedActions[action.type] || []).concat(action);
+	}
 }
 
 let requestedPaths = {} as {[key: string]: boolean};
