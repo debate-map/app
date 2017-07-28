@@ -87,8 +87,12 @@ export function GetArgumentStrengthPseudoRatingSet(argumentNode: MapNode, nodeCh
 	let childRatingSets = nodeChildren.map(child=> {
 		return GetRatingSet(child._id, GetRatingTypesForNode(child).FirstOrX(null, {}).type) || emptyObj;
 	});
+	let dataUsedInCalculation = {...childRatingSets};
+	for (let child of nodeChildren) {
+		dataUsedInCalculation["metaThesisForChild_" + child._id] = child.metaThesis;
+	}
 
-	let result = CachedTransform("GetArgumentStrengthPseudoRatingSet", [argumentNode._id], childRatingSets, ()=> {
+	let result = CachedTransform("GetArgumentStrengthPseudoRatingSet", [argumentNode._id], dataUsedInCalculation, ()=> {
 		let usersWhoRatedAllChildren = null;
 		for (let [index, child] of nodeChildren.entries()) {
 			let childRatingSet = childRatingSets[index];
