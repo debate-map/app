@@ -71,6 +71,7 @@ type Props = {map: Map, node: MapNodeEnhanced, path?: string, widthOverride?: nu
 		nodeChildren: MapNodeEnhanced[],
 		//nodeChildren_fillPercents: number[],
 		nodeChildren_sortValues: number[],
+		userID: string,
 		userViewedNodes: ViewedNodeSet,
 	}>;
 type State = {
@@ -143,6 +144,7 @@ type State = {
 		nodeChildren,
 		nodeChildren_sortValues: CachedTransform("nodeChildren_sortValues_transform1", [node._id], nodeChildren_sortValues, ()=>nodeChildren_sortValues),
 		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", [node._id], nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
+		userID: GetUserID(),
 		userViewedNodes: GetUserViewedNodes(GetUserID(), {useUndefinedForInProgress: true}),
 	};
 })
@@ -395,7 +397,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		this.lastPos = pos;
 	}
 	ComponentDidMount() {
-		let {node, userViewedNodes} = this.props;
+		let {node, userID, userViewedNodes} = this.props;
+		if (userID == null) return;
+		
 		let userViewedNodes_doneLoading = userViewedNodes !== undefined;
 		if (userViewedNodes_doneLoading && !(userViewedNodes || {}).VKeys(true).map(ToInt).Contains(node._id)) {
 			new NotifyNodeViewed({nodeID: node._id}).Run();
