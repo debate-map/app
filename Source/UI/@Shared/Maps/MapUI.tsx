@@ -135,8 +135,8 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 							UpdateFocusNodeAndViewOffset(map._id);
 						}}>
 					<style>{`
-					.MapUI { display: inline-flex; writing-mode: vertical-lr; flex-wrap: wrap; }
-					.MapUI > * { writing-mode: horizontal-tb; }
+					.MapUI { display: inline-flex; #writing-mode: vertical-lr; flex-wrap: wrap; }
+					.MapUI > * { #writing-mode: horizontal-tb; }
 					.MapUI.scrolling > * { pointer-events: none; }
 					`}</style>
 					<div className="MapUI" ref="mapUI"
