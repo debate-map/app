@@ -75,7 +75,8 @@ type Props = {map: Map, node: MapNodeEnhanced, path?: string, widthOverride?: nu
 		userViewedNodes: ViewedNodeSet,
 	}>;
 type State = {
-	hasBeenExpanded: boolean, childrenWidthOverride: number, childrenCenterY: number,
+	//hasBeenExpanded: boolean,
+	childrenWidthOverride: number, childrenCenterY: number,
 	svgInfo: {
 		mainBoxOffset: Vector2i,
 		//oldChildBoxOffsets: Vector2i[],
@@ -160,7 +161,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let {nodeView} = newProps;
 		if (nodeView) {
 			if (nodeView.expanded) {
-				this.SetState({hasBeenExpanded: true}, null, false);
+				//this.SetState({hasBeenExpanded: true}, null, false);
 			} else {
 				// if non-expanded, always have node-box at the very top (fixes that an extra render was occuring, when collapsing a node)
 				//this.SetState({svgInfo: null, childrenCenterY: 0}, null, false);
@@ -172,7 +173,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	render() {
 		let {map, node, path, initialChildLimit, form, widthOverride, children, nodeView, nodeChildren, nodeChildren_sortValues} = this.props;
 		let expanded = nodeView && nodeView.expanded;
-		let {hasBeenExpanded, childrenWidthOverride, childrenCenterY, svgInfo, /*childrenStartY, childrenEndY*/} = this.state;
+		let {/*hasBeenExpanded,*/ childrenWidthOverride, childrenCenterY, svgInfo, /*childrenStartY, childrenEndY*/} = this.state;
 		if (ShouldLog(a=>a.nodeRenders)) {
 			if (logTypes.nodeRenders_for) {
 				if (logTypes.nodeRenders_for == node._id) {
@@ -266,11 +267,15 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					)}>
 						{nodeChildren.length}
 					</div>}
-				{hasBeenExpanded && !separateChildren &&
-					<div ref="childHolder" className="childHolder clickThrough" style={{
-						display: expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
-						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
-					}}>
+				{expanded && !separateChildren &&
+					<div ref="childHolder" className="childHolder clickThrough" style={E(
+						{
+							//display: expanded ? "flex" : "none",
+							flexDirection: "column", marginLeft: 30,
+							//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
+						},
+						//!expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
+					)}>
 						{svgInfo.mainBoxOffset &&
 							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
 								childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
@@ -285,11 +290,15 @@ export default class NodeUI extends BaseComponent<Props, State> {
 							);
 						})}
 					</div>}
-				{hasBeenExpanded && separateChildren &&
-					<div ref="childHolder" className="childHolder clickThrough" style={{
-						display: expanded ? "flex" : "none", flexDirection: "column", marginLeft: 30,
-						//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
-					}}>
+				{expanded && separateChildren &&
+					<div ref="childHolder" className="childHolder clickThrough" style={E(
+						{
+							//display: expanded ? "flex" : "none",
+							flexDirection: "column", marginLeft: 30,
+							//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
+						},
+						//!expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
+					)}>
 						{svgInfo.mainBoxOffset &&
 							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
 								childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
@@ -399,7 +408,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	ComponentDidMount() {
 		let {node, userID, userViewedNodes} = this.props;
 		if (userID == null) return;
-		
+
 		let userViewedNodes_doneLoading = userViewedNodes !== undefined;
 		if (userViewedNodes_doneLoading && !(userViewedNodes || {}).VKeys(true).map(ToInt).Contains(node._id)) {
 			new NotifyNodeViewed({nodeID: node._id}).Run();
@@ -407,10 +416,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	}
 	OnChildHeightOrPosChange_updateStateQueued = false;
 	OnChildHeightOrPosChange() {
-		if (g.OnChildHeightOrPosChange_log) {
-			Log(`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
-				}centerY:${this.state.childrenCenterY}`);
-		}
+		let {node} = this.props;
+		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
+			()=>`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}\ncenterY:${this.state.childrenCenterY}`)
 
 		//this.OnHeightOrPosChange();
 		// wait one frame, so that if multiple calls to this method occur in the same frame, we only have to call OnHeightOrPosChange() once
@@ -425,27 +433,25 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	}
 
 	OnHeightChange() {
-		let {onHeightOrPosChange} = this.props;
-		if (g.OnHeightChange_log) {
-			Log(`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+		let {node, onHeightOrPosChange} = this.props;
+		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
+			()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
 				}centerY:${this.state.childrenCenterY}`);
-		}
 		
 		//this.UpdateState(true);
 		this.UpdateState();
 		if (onHeightOrPosChange) onHeightOrPosChange();
 	}
 	OnPosChange() {
-		let {onHeightOrPosChange} = this.props;
-		if (g.OnPosChange_log) {
-			Log(`OnPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+		let {node, onHeightOrPosChange} = this.props;
+		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
+			()=>`OnPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
 				}centerY:${this.state.childrenCenterY}`);
-		}
 
 		if (onHeightOrPosChange) onHeightOrPosChange();
 	}
 	UpdateState(forceUpdate = false) {
-		let {node, children, nodeView} = this.props;
+		let {map, node, path, children, nodeView} = this.props;
 		let expanded = nodeView && nodeView.expanded;
 		//let {childHolder, upChildHolder} = this.refs;
 		let childHolder = FindDOM_(this).children(".childHolder");
@@ -463,6 +469,21 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			}
 		}*/
 
+		/*let wholePathExpanded = expanded;
+		let pathToCheck = path;
+		while (pathToCheck.includes("/")) {
+			let viewForPath = GetNodeView(map._id, pathToCheck);
+			if (viewForPath && !viewForPath.expanded) {
+				wholePathExpanded = false;
+				break;
+			}
+			pathToCheck = pathToCheck.substr(0, pathToCheck.lastIndexOf("/"));
+		}
+		
+		if (!wholePathExpanded) {
+			debugger;
+		}*/
+
 		let newState = E(
 			expanded &&
 				{childrenWidthOverride: this.childBoxes.VValues().filter(a=>a != null).map(a=> {
@@ -473,8 +494,10 @@ export default class NodeUI extends BaseComponent<Props, State> {
 				? (upChildHolder && upChildHolder.style.display != "none" ? upChildHolder.clientHeight : 0)
 				: (childHolder && childHolder.style.display != "none" ? childHolder.clientHeight / 2 : 0)}*/
 			expanded && {childrenCenterY: upChildHolder.length
-				? (upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0)
-				: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)},
+				//? (upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0)
+				? (upChildHolder.css("visibility") != "hidden" ? upChildHolder.outerHeight() : 0)
+				//: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)},
+				: (childHolder.css("visibility") != "hidden" ? childHolder.outerHeight() / 2 : 0)},
 			/*{childrenStartY: upChildHolder.length
 				? (upChildHolder.css("display") != "none" ? firstChild.GetScreenRect().y -  : 0)
 				: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)}*/

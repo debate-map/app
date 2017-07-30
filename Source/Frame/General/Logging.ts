@@ -47,6 +47,8 @@ console.error = function(exception) {
 export class LogTypes {
 	nodeRenders = false;
 	nodeRenders_for = null as number;
+	nodeRenderDetails = false;
+	nodeRenderDetails_for = null as number;
 	pageViews = false;
 	urlLoads = false;
 	cacheUpdates = false;
@@ -63,13 +65,13 @@ g.addEventListener("beforeunload", ()=> {
 	localStorage.setItem("logTypes", JSON.stringify(logTypes));
 });
 
-g.Extend({ShouldLog}); declare global { function ShouldLog(logTypeGetter: (logTypes: LogTypes)=>boolean); }
-function ShouldLog(logTypeGetter: (logTypes: LogTypes)=>boolean) {
-	return logTypeGetter(g.logTypes || {});
+g.Extend({ShouldLog}); declare global { function ShouldLog(shouldLogFunc: (logTypes: LogTypes)=>boolean); }
+function ShouldLog(shouldLogFunc: (logTypes: LogTypes)=>boolean) {
+	return shouldLogFunc(g.logTypes || {});
 }
-g.Extend({MaybeLog}); declare global { function MaybeLog(logTypeGetter: (logTypes: LogTypes)=>boolean, logMessageGetter: ()=>string); }
-function MaybeLog(logTypeGetter: (logTypes: LogTypes)=>boolean, logMessageGetter: ()=>string) {
-	if (!ShouldLog(logTypeGetter)) return;
+g.Extend({MaybeLog}); declare global { function MaybeLog(shouldLogFunc: (logTypes: LogTypes)=>boolean, logMessageGetter: ()=>string); }
+function MaybeLog(shouldLogFunc: (logTypes: LogTypes)=>boolean, logMessageGetter: ()=>string) {
+	if (!ShouldLog(shouldLogFunc)) return;
 	Log(logMessageGetter());
 }
 
