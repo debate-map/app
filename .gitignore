@@ -2,6 +2,8 @@
 **/*.log
 .DS_Store
 **/.DS_Store
+**/*-autosave.kra
+**/*.kra~
 
 node_modules
 coverage

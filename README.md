@@ -10,8 +10,8 @@ Its primary improvements are (in short):
 * Breaking down lines of reasoning into single-sentence "nodes".
 * Providing rich tools that operate on those nodes -- such as rating, tagging, statistical analysis, and belief-tree sharing and comparison.
 
-The below is a screenshot from the global map:
-![See the task list at https://trello.com/b/7ZhagPiN](/Info/Images/Screenshot1.png)
+The below is a screenshot from one of the debates:
+![See the task list at https://trello.com/b/7ZhagPiN](/Info/Images/Screenshot2.png)
 
 The tree-like structure assists in traversing the various lines of evidence: at each level, there is a "thesis" (blue) which makes a claim, and a set of simple "arguments" (green and red) which support/oppose it. By keeping the forms of these arguments simple, we're able to match them (in many cases) with the basic forms of logical arguments (modus ponens, etc.), permitting quick evaluation of the logical connections -- this saves time, and lets us focus on the underlying chain of evidence instead of parsing statement meanings.
 
