@@ -29,8 +29,7 @@ export type RatingTypeInfo = {type: RatingType, main: boolean};
 /** If passed an (un-enhanced) MapNode, this will fail to realize a yes-no-question thesis has "significance" as its main rating type. */
 export function GetRatingTypesForNode(node: MapNode | MapNodeEnhanced): RatingTypeInfo[] {
 	if (node.type == MapNodeType.Category) {
-		if (node._id < 100) // if static category, don't have any voting
-			return [];
+		if (node.votingDisabled) return [];
 		return [{type: "significance", main: true}];
 	}
 	if (node.type == MapNodeType.Package)

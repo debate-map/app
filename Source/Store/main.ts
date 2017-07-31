@@ -15,6 +15,7 @@ import { MapInfo } from "Store/main/maps/@MapInfo";
 import {globalMapID} from "./firebase/nodes/@MapNode";
 import { ShallowChanged } from "../Frame/UI/ReactGlobals";
 import { MapInfoReducer } from "Store/main/maps/$map";
+import {demoMap} from "../UI/Home/DemoMap";
 
 // class is used only for initialization
 export class MainState {
@@ -54,7 +55,7 @@ export class MainState {
 
 	maps: {[key: number]: MapInfo};
 
-	openMap: number;
+	//openMap: number;
 	mapViews: MapViews;
 	copiedNodePath: string;
 	copiedNodePath_asCut: boolean;
@@ -173,11 +174,11 @@ export function MainReducer(state, action) {
 			return ShallowChanged(newState, state) ? newState : state;
 		},
 
-		openMap: (state = null, action)=> {
+		/*openMap: (state = null, action)=> {
 			if (action.Is(ACTSetPage) && action.payload == "global") return globalMapID;
 			//if (action.Is(ACTOpenMapSet)) return action.payload;
 			return state;
-		},
+		},*/
 		mapViews: MapViewsReducer,
 		copiedNodePath: (state = null as string, action)=> {
 			if (action.Is(ACTNodeCopy)) return action.payload.path;
@@ -199,5 +200,10 @@ export function MainReducer(state, action) {
 // ==========
 
 export function GetOpenMapID() {
-	return State(a=>a.main.openMap);
+	//return State(a=>a.main.openMap);
+	let page = State(a=>a.main.page);
+	if (page == "home") return demoMap._id;
+	if (page == "debates") return State(a=>a.main.debates.selectedDebateMapID);
+	if (page == "global") return globalMapID;
+	return null;
 }

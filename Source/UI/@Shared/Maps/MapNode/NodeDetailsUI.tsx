@@ -253,6 +253,11 @@ class AdvancedOptions extends BaseComponent<Props_Enhanced, {}> {
 				<Row style={{fontWeight: "bold"}}>Advanced:</Row>
 				{IsUserAdmin(GetUserID()) &&
 					<Row style={{display: "flex", alignItems: "center"}}>
+						<Pre>Voting enabled: </Pre>
+						<CheckBox enabled={enabled} checked={!newData.votingDisabled} onChange={val=>Change(newData.votingDisabled = val ? null : true)}/>
+					</Row>}
+				{IsUserAdmin(GetUserID()) &&
+					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Font-size override: </Pre>
 						<Spinner max={25} enabled={enabled} value={newData.fontSizeOverride|0} onChange={val=>Change(newData.fontSizeOverride = val != 0 ? val : null)}/>
 						<Pre> px (0 for auto)</Pre>

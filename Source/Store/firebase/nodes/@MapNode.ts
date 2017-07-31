@@ -48,6 +48,7 @@ export class MapNode {
 	createdAt: number;
 	//updatedAt: number;
 	approved = false;
+	votingDisabled: boolean;
 	// only applied client-side; would need to be in protected branch of tree (or use a long, random, and unreferenced node-id) to be "actually" inaccessible
 	accessLevel = AccessLevel.Basic;
 	//voteLevel = AccessLevel.Basic;
@@ -82,6 +83,7 @@ AddSchema({
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 		approved: {type: "boolean"},
+		votingDisabled: {type: ["null", "boolean"]},
 		accessLevel: {oneOf: GetValues_ForSchema(AccessLevel).concat({const: null})},
 		voteLevel: {oneOf: GetValues_ForSchema(AccessLevel).concat({const: null})}, // not currently used
 

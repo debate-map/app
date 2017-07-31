@@ -37,9 +37,10 @@ export function GetRatingValue(nodeID: number, ratingType: RatingType, userID: s
 	return rating ? rating.value : resultIfNoData;
 }
 export function GetRatingAverage(nodeID: number, ratingType: RatingType, ratings?: Rating[], resultIfNoData = null): number {
-	// if static category, always show full bar
-	if (nodeID < 100)
-		return 100;
+	// if voting disabled, always show full bar
+	let node = GetNode(nodeID);
+	if (node && node.votingDisabled) return 100;
+
 	ratings = ratings || GetRatings(nodeID, ratingType);
 	if (ratings.length == 0) return resultIfNoData as any;
 	return CachedTransform("GetRatingAverage", [nodeID, ratingType], {ratings}, ()=>ratings.map(a=>a.value).Average().RoundTo(1));

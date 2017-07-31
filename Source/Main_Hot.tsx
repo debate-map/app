@@ -86,6 +86,7 @@ function State<T>(...args) {
 	else [options, ...pathSegments] = args;
 
 	if (__DEV__) {
+		Assert(pathSegments.All(segment=>segment != null), `Path-segment cannot be null. @segments(${pathSegments})`);
 		Assert(pathSegments.All(segment=>typeof segment == "number" || !segment.Contains("/")),
 			`Each string path-segment must be a plain prop-name. (ie. contain no "/" separators) @segments(${pathSegments})`);
 	}
