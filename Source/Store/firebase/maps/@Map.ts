@@ -15,7 +15,7 @@ export class Map {
 	name: string;
 	type: MapType;
 	rootNode: number;
-	defaultExpandDepth = 1;
+	defaultExpandDepth = 2;
 
 	creator: string;
 	createdAt: number;
