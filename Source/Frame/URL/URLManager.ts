@@ -19,6 +19,20 @@ import { ACTDebateMapSelect } from "../../Store/main/debates";
 import { ACTSet } from "Store";
 import MapUI from "../../UI/@Shared/Maps/MapUI";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
+import {Map} from "../../Store/firebase/maps/@Map";
+
+export function GetCrawlerURLStrForMap(mapID: number) {
+	let map = GetMap(mapID);
+	if (map == null) return mapID.toString();
+
+	let result = map.name.toLowerCase().replace(/[^a-z]/g, "-");
+	// need to loop, in some cases, since regex doesn't reprocess "---" as two sets of "--".
+	while (result.Contains("--")) {
+		result = result.replace(/--/g, "-");
+	}
+	result = result.TrimStart("-").TrimEnd("-") + "." + map._id.toString();
+	return result;
+}
 
 export function GetCrawlerURLStrForNode(node: MapNode) {
 	let result = GetNodeDisplayText(node).toLowerCase().replace(/[^a-z]/g, "-");
@@ -168,7 +182,7 @@ export function GetSyncLoadActionsForURL(url: URL, directURLChange: boolean) {
 		if (isBot) {
 			// example: /global/map/some-node.123
 			let lastPathNode = url.pathNodes.LastOrX();
-			let crawlerURLMatch = lastPathNode && lastPathNode.match(/\.([0-9]+)$/);
+			let crawlerURLMatch = lastPathNode && lastPathNode.match(/([0-9]+)$/);
 			if (isBot) {
 				if (crawlerURLMatch) {
 					let nodeID = parseInt(crawlerURLMatch[1]);
@@ -190,7 +204,10 @@ export function GetSyncLoadActionsForURL(url: URL, directURLChange: boolean) {
 	}
 
 	if (url.pathNodes[0] == "debates") { //&& IsNumberString(url.pathNodes[1])) {
-		result.push(new ACTDebateMapSelect({id: url.pathNodes[1] ? url.pathNodes[1].ToInt() : null}).VSet({fromURL: true}))
+		let urlStr = url.pathNodes[1];
+		let match = urlStr && urlStr.match(/([0-9]+)$/);
+		let mapID = match ? match[1].ToInt() : null;
+		result.push(new ACTDebateMapSelect({id: mapID}).VSet({fromURL: true}));
 	}
 
 	return result;
@@ -276,7 +293,9 @@ export function GetNewURL(includeMapViewStr = true) {
 	if (page == "debates") {
 		let mapID = State(a=>a.main.debates.selectedDebateMapID);
 		if (mapID) {
-			newURL.pathNodes.push(mapID+"");
+			//newURL.pathNodes.push(mapID+"");
+			let urlStr = GetCrawlerURLStrForMap(mapID);
+			newURL.pathNodes.push(urlStr);
 		}
 	}
 
