@@ -267,7 +267,7 @@ export async function LoadURL(urlStr: string) {
 // saving
 // ==========
 
-g.justChangedURLFromCode = false;
+//g.justChangedURLFromCode = false;
 export function GetNewURL(includeMapViewStr = true) {
 	//let newURL = URL.Current();
 	/*let oldURL = URL.Current(true);

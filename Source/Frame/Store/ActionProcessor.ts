@@ -5,7 +5,7 @@ import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCen
 import { LoadURL, GetSyncLoadActionsForURL, GetCurrentURL_SimplifiedForPageViewTracking } from "../URL/URLManager";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 import {DBPath, GetData, GetDataAsync, ProcessDBData} from "../Database/DatabaseHelpers";
-import { GetMapView, GetSelectedNodePath, GetFocusedNodePath } from "../../Store/main/mapViews";
+import {GetMapView, GetSelectedNodePath, GetFocusedNodePath, GetNodeView} from "../../Store/main/mapViews";
 import {Vector2i} from "../General/VectorStructs";
 import {RootState} from "../../Store/index";
 import ReactGA from "react-ga";
@@ -19,6 +19,7 @@ import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "../../Store/main/
 import {ACTTermSelect, ACTImageSelect} from "../../Store/main/content";
 import {LOCATION_CHANGED} from "redux-little-router";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
+import {Map} from "../../Store/firebase/maps/@Map";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -139,9 +140,10 @@ export async function PostDispatchAction(action: Action<any>) {
 	}
 	// is triggered by back/forward navigation, as well things that call store.dispatch([push/replace]()) -- such as UpdateURL()
 	if (action.type == LOCATION_CHANGED) {
-		if (g.justChangedURLFromCode) {
+		/*if (g.justChangedURLFromCode) {
 			g.justChangedURLFromCode = false;
-		} else {
+		} else {*/
+		if (!(action as any).payload.byCode) {
 			//setTimeout(()=>UpdateURL());
 			await LoadURL(url.toString());
 			//UpdateURL(false);
@@ -163,8 +165,26 @@ export async function PostDispatchAction(action: Action<any>) {
 		}
 	}
 	if (action.Is(ACTDebateMapSelect)) {
-		let rootNodeID = await GetDataAsync("maps", action.payload.id, "rootNode") as number;
-		store.dispatch(new ACTDebateMapSelect_WithData({id: action.payload.id, rootNodeID}))
+		let map = action.payload.id ? await GetDataAsync("maps", action.payload.id) as Map : null;
+		store.dispatch(new ACTDebateMapSelect_WithData({id: action.payload.id, rootNodeID: map ? map.rootNode : null}));
+
+		if (map) {
+			let pathsToExpand = [""+map.rootNode];
+			for (var depth = 0; depth < map.defaultExpandDepth; depth++) {
+				let newPathsToExpand = [];
+				for (let path of pathsToExpand) {
+					let nodeID = path.split("/").Last().ToInt();
+					let node = await GetNodeAsync(nodeID);
+					if (GetNodeView(map._id, path) == null) {
+						store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path, expanded: true, recursive: false}));
+					}
+					if (node.children) {
+						newPathsToExpand.push(...node.children.VKeys(true).map(childID=>path + "/" + childID));
+					}
+				}
+				pathsToExpand = newPathsToExpand;
+			}
+		}
 	}
 
 	/*let movingToGlobals = false;

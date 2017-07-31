@@ -15,6 +15,7 @@ export class Map {
 	name: string;
 	type: MapType;
 	rootNode: number;
+	defaultExpandDepth = 1;
 
 	creator: string;
 	createdAt: number;
@@ -25,6 +26,7 @@ AddSchema({
 		name: {type: "string", pattern: Map_nameFormat},
 		type: {oneOf: GetValues_ForSchema(MapType)},
 		rootNode: {type: "number"},
+		defaultExpandDepth: {type: "number"},
 
 		creator: {type: "string"},
 		createdAt: {type: "number"},

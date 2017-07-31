@@ -12,6 +12,7 @@ AddSchema({
 		mapUpdates: Schema({
 			properties: {
 				name: {type: "string", pattern: Map_nameFormat},
+				defaultExpandDepth: {type: "number"},
 			},
 		}),
 	},

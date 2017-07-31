@@ -47,7 +47,7 @@ export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action
 	if (action.Is(ACTMapNodeExpandedSet) && action.payload.mapID == mapID) {
 		let targetNodePath = GetPathNodes(action.payload.path).join(".children.");
 		return u.updateIn(targetNodePath, (old = new MapNodeView())=> {
-			let result = {...old, expanded: !old.expanded};
+			let result = {...old, expanded: action.payload.expanded};
 			if (action.payload.recursive) {
 				let expandedNodes = GetTreeNodesInObjTree(result).Where(a=>a.Value.expanded);
 				for (let treeNode of expandedNodes) {

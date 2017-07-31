@@ -70,7 +70,8 @@ export default function(initialState = {}, history) {
 	const devToolsExtension = g.devToolsExtension;
 	if (typeof devToolsExtension === "function") {
 		//enhancers.push(devToolsExtension());
-		extraEnhancers.push(devToolsExtension({maxAge: 100}));
+		//extraEnhancers.push(devToolsExtension({maxAge: 100}));
+		extraEnhancers.push(devToolsExtension({maxAge: 70}));
 	}
 	//}
 

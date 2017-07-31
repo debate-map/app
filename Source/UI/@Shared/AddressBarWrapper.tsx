@@ -32,7 +32,8 @@ export default class AddressBarWrapper extends BaseComponent<Props, {}> {
 		}
 		
 		//action.byUser = false;
-		g.justChangedURLFromCode = true;
+		//g.justChangedURLFromCode = true;
+		action.payload.byCode = true;
 		store.dispatch(action);
 		return <div/>;
 	}
