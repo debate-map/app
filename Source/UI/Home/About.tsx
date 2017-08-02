@@ -44,7 +44,7 @@ For example:
 * Social features organizing communal mapping of external media and resources. Similar to fact-checking websites, except "by the people",
 	and more open-ended and in much finer detail.
 * Expanded tagging, rating, statistical analysis, and group/camp/cohort categorization (with UI filtering).
-* Forums tightly integrated with the debate-mapping tools, combining the appeal of open-ended writing with the clarity that's achived through mapping it.
+* Forums tightly integrated with the debate-mapping tools, combining the appeal of open-ended writing with the clarity that's achieved through mapping it.
 
 There's much more -- and it's all firmly doable! (well, other than the whole-tree probability analysis, maybe) It's just a matter of investing
 	the development time, and progressing carefully enough so as not to dilute the existing core.
