@@ -83,7 +83,7 @@ export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], 
 class UserRow extends BaseComponent<{index: number, last: boolean, user: User, userExtraInfo: UserExtraInfo}, {}> {
 	render() {
 		let {index, last, user, userExtraInfo} = this.props;
-		if (userExtraInfo == null) return;
+		if (userExtraInfo == null) return <div/>;
 
 		return (
 			<Column p="7px 10px" style={E(
