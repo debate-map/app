@@ -31,6 +31,7 @@ export default class AddNode extends Command<{node: MapNode, link?: ChildEntry, 
 
 		this.lastNodeID_new = await GetDataAsync("general", "lastNodeID") as number;
 		this.nodeID = ++this.lastNodeID_new;
+		this.payload.node.createdAt = Date.now();
 		this.metaThesisID = metaThesisNode ? ++this.lastNodeID_new : null;
 
 		if (metaThesisNode) {

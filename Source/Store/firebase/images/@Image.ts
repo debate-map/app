@@ -14,7 +14,7 @@ export function GetNiceNameForImageType(type: ImageType) {
 export class Image {
 	constructor(initialData: {name: string, type: ImageType, creator: string} & Partial<Image>) {
 		this.Extend(initialData);
-		this.createdAt = Date.now();
+		//this.createdAt = Date.now();
 	}
 
 	_id: number;

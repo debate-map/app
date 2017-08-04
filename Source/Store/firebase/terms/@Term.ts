@@ -3,7 +3,7 @@ import {GetValues_ForSchema} from "../../../Frame/General/Enums";
 export class Term {
 	constructor(initialData: {name: string, type: TermType, creator: string} & Partial<Term>) {
 		this.Extend(initialData);
-		this.createdAt = Date.now();
+		//this.createdAt = Date.now();
 	}
 
 	_id?: number;

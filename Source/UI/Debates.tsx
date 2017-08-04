@@ -35,11 +35,12 @@ export default class DebatesUI extends BaseComponent<Props, {}> {
 		}
 
 		return (
-			<Column style={E(styles.page, {
+			/*<Column style={E(styles.page, {
 				//maxHeight: "calc(100% - 200px)"
 				height: "calc(100% - 200px)",
 				padding: 20,
-			})}>
+			})}>*/
+			<Column style={{width: 960, margin: "20px auto 20px auto", height: "calc(100% - 40px)", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
 				<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: 10}}>
 					<Row style={{height: 40, padding: 10}}>
 						{/*<Row width={200} style={{position: "absolute", left: "calc(50% - 100px)"}}>

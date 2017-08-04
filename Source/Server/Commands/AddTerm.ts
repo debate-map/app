@@ -11,6 +11,7 @@ export default class AddTerm extends Command<{term: Term}> {
 	async Prepare() {
 		this.lastTermID_new = await GetDataAsync("general", "lastTermID") as number;
 		this.termID = ++this.lastTermID_new;
+		this.payload.term.createdAt = Date.now();
 	}
 	async Validate() {
 		let {term} = this.payload;

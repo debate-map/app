@@ -8,7 +8,7 @@ export enum MapType {
 export class Map {
 	constructor(initialData: {name: string, type: MapType, creator: string} & Partial<Map>) {
 		this.Extend(initialData);
-		this.createdAt = Date.now();
+		//this.createdAt = Date.now();
 	}
 
 	_id: number;

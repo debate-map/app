@@ -12,6 +12,7 @@ export default class AddImage extends Command<{image: Image}> {
 	async Prepare() {
 		this.lastImageID_new = await GetDataAsync("general", "lastImageID") as number;
 		this.imageID = ++this.lastImageID_new;
+		this.payload.image.createdAt = Date.now();
 	}
 	async Validate() {
 		let {image} = this.payload;

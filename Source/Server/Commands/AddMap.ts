@@ -17,6 +17,8 @@ export default class AddMap extends Command<{map: Map}> {
 
 		this.lastMapID_new = await GetDataAsync("general", "lastMapID") as number;
 		this.mapID = ++this.lastMapID_new;
+		this.payload.map.createdAt = Date.now();
+		this.payload.map.editedAt = this.payload.map.createdAt;
 
 		let newRootNode = new MapNode({type: MapNodeType.Category, creator: map.creator, titles: {base: "Root"}, votingDisabled: true})
 		this.sub_addNode = new AddNode({node: newRootNode, asMapRoot: true});
