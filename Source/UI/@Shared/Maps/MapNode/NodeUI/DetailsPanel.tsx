@@ -21,7 +21,6 @@ import Moment from "moment";
 import {GetParentNode, GetParentNodeID} from "../../../../../Store/firebase/nodes";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
-import {E} from "../../../../../Frame/General/Globals_Free";
 import Row from "../../../../../Frame/ReactComponents/Row";
 import {MetaThesis_ThenType, MetaThesis_ThenType_Info, MetaThesis_IfType, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
@@ -50,6 +49,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 	detailsUI: NodeDetailsUI;
 	render() {
 		let {map, node, path, creator} = this.props;
+		let mapID = map ? map._id : null;
 		let {dataError} = this.state;
 		let firebase = store.firebase.helpers;
 		//let {error} = this.state;
@@ -75,9 +75,9 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 							let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "finalType", "link");
 							if (link) {
 								let linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
-								await new UpdateNodeDetails({mapID: map ? map._id : null, nodeID: node._id, nodeUpdates, linkParentID: GetParentNodeID(path), linkUpdates}).Run();
+								await new UpdateNodeDetails(E(mapID && {mapID}, {nodeID: node._id, nodeUpdates, linkParentID: GetParentNodeID(path), linkUpdates})).Run();
 							} else {
-								await new UpdateNodeDetails({mapID: map ? map._id : null, nodeID: node._id, nodeUpdates}).Run();
+								await new UpdateNodeDetails(E(mapID && {mapID}, {nodeID: node._id, nodeUpdates})).Run();
 							}
 						}}/>
 						{/*error && <Pre>{error.message}</Pre>*/}

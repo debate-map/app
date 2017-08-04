@@ -5,7 +5,9 @@ import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {Term} from "../../Store/firebase/terms/@Term";
 import {Image} from "../../Store/firebase/images/@Image";
+import {UserEdit} from "Server/CommandMacros";
 
+@UserEdit
 export default class AddImage extends Command<{image: Image}> {
 	lastImageID_new: number;
 	imageID: number;

@@ -9,7 +9,9 @@ import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {IsArgumentNode} from "../../Store/firebase/nodes/$node";
 import {Map} from "../../Store/firebase/maps/@Map";
 import DeleteNode from "Server/Commands/DeleteNode";
+import {UserEdit} from "Server/CommandMacros";
 
+@UserEdit
 export default class DeleteMap extends Command<{mapID: number}> {
 	oldData: Map;
 	sub_deleteNode: DeleteNode;
@@ -17,7 +19,7 @@ export default class DeleteMap extends Command<{mapID: number}> {
 		let {mapID} = this.payload;
 		this.oldData = await GetDataAsync({addHelpers: false}, "maps", mapID) as Map;
 
-		this.sub_deleteNode = new DeleteNode({nodeID: this.oldData.rootNode});
+		this.sub_deleteNode = new DeleteNode({mapID, nodeID: this.oldData.rootNode});
 		this.sub_deleteNode.Validate_Early();
 		await this.sub_deleteNode.Prepare();
 	}

@@ -108,7 +108,7 @@ export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: Thes
 				return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${quoteError}`}));
 			}*/
 
-			let newNodeID = await new AddNode({node: newNode, link: newLink, metaThesisNode: newMetaThesis}).Run();
+			let newNodeID = await new AddNode({mapID: mapID, node: newNode, link: newLink, metaThesisNode: newMetaThesis}).Run();
 			store.dispatch(new ACTMapNodeExpandedSet({mapID, path: path + "/" + newNodeID, expanded: true, recursive: false}));
 		}
 	});

@@ -8,8 +8,11 @@ import {Term} from "../../Store/firebase/terms/@Term";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {IsArgumentNode} from "../../Store/firebase/nodes/$node";
 import {ToInt} from "../../Frame/General/Types";
+import {MapEdit, UserEdit} from "../CommandMacros";
 
-export default class DeleteNode extends Command<{nodeID: number}> {
+@MapEdit
+@UserEdit
+export default class DeleteNode extends Command<{mapID: number, nodeID: number}> {
 	oldData: MapNode;
 	oldParentChildrenOrders: number[][];
 	metaThesisID: number;

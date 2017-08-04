@@ -6,6 +6,8 @@ import {E} from "../../Frame/General/Globals_Free";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import {GetThesisType} from "../../Store/firebase/nodes/$node";
 import {Equation} from "../../Store/firebase/nodes/@Equation";
+import {UserEdit} from "../CommandMacros";
+import {MapEdit} from "Server/CommandMacros";
 
 export const conversionTypes = [
 	"Normal>Equation",
@@ -22,7 +24,9 @@ AddSchema({
 	required: ["nodeID", "newType"],
 }, "ChangeThesisType_payload");
 
-export default class ChangeThesisType extends Command<{nodeID: number, newType: ThesisType}> {
+@MapEdit
+@UserEdit
+export default class ChangeThesisType extends Command<{mapID?: number, nodeID: number, newType: ThesisType}> {
 	Validate_Early() {
 		AssertValidate("ChangeThesisType_payload", this.payload, `Payload invalid`);
 	}

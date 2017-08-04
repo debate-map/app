@@ -5,8 +5,11 @@ import {MapNode, ThesisForm, ChildEntry, AccessLevel} from "../../Store/firebase
 import {E} from "../../Frame/General/Globals_Free";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
+import { UserEdit, MapEdit } from "Server/CommandMacros";
 
-export default class AddNode extends Command<{node: MapNode, link?: ChildEntry, metaThesisNode?: MapNode, asMapRoot?: boolean}> {
+@MapEdit
+@UserEdit
+export default class AddNode extends Command<{mapID: number, node: MapNode, link?: ChildEntry, metaThesisNode?: MapNode, asMapRoot?: boolean}> {
 	Validate_Early() {
 		let {node, link, metaThesisNode, asMapRoot} = this.payload;
 		
@@ -31,10 +34,11 @@ export default class AddNode extends Command<{node: MapNode, link?: ChildEntry, 
 
 		this.lastNodeID_new = await GetDataAsync("general", "lastNodeID") as number;
 		this.nodeID = ++this.lastNodeID_new;
-		this.payload.node.createdAt = Date.now();
+		node.createdAt = Date.now();
 		this.metaThesisID = metaThesisNode ? ++this.lastNodeID_new : null;
 
 		if (metaThesisNode) {
+			metaThesisNode.createdAt = Date.now();
 			node.children = {[this.metaThesisID]: {_: true}};
 			node.childrenOrder = [this.metaThesisID];
 			metaThesisNode.parents = {[this.nodeID]: {_: true}};

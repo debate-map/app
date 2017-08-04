@@ -5,6 +5,8 @@ import {MapNode, ThesisForm, ChildEntry, AccessLevel} from "../../Store/firebase
 import {E} from "../../Frame/General/Globals_Free";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import {Map_nameFormat, Map} from "../../Store/firebase/maps/@Map";
+import {UserEdit} from "../CommandMacros";
+import {MapEdit} from "Server/CommandMacros";
 
 AddSchema({
 	properties: {
@@ -19,6 +21,8 @@ AddSchema({
 	required: ["mapID", "mapUpdates"],
 }, "UpdateMapDetails_payload");
 
+@MapEdit
+@UserEdit
 export default class UpdateMapDetails extends Command<{mapID: number, mapUpdates: Partial<Map>}> {
 	Validate_Early() {
 		AssertValidate("UpdateMapDetails_payload", this.payload, `Payload invalid`);

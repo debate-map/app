@@ -5,7 +5,9 @@ import {Command} from "../Command";
 import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {Term} from "../../Store/firebase/terms/@Term";
+import {UserEdit} from "Server/CommandMacros";
 
+@UserEdit
 export default class DeleteImage extends Command<{id: number}> {
 	oldData: Image;
 	async Prepare() {

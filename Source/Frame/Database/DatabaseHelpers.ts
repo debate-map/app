@@ -233,7 +233,9 @@ export async function GetDataAsync(...args) {
 					result = ProcessDBData(result, true, options.addHelpers, pathSegments.Last()+"");
 				resolve(result);
 			},
-			(ex: Error)=>reject(ex));
+			(ex: Error)=> {
+				reject(ex);
+			});
 	});
 }
 

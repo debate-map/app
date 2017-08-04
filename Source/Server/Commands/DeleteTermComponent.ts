@@ -5,7 +5,9 @@ import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {Term} from "../../Store/firebase/terms/@Term";
 import TermComponent from "../../Store/firebase/termComponents/@TermComponent";
+import {UserEdit} from "Server/CommandMacros";
 
+@UserEdit
 export default class DeleteTermComponent extends Command<{termComponentID: number}> {
 	Validate_Early() {
 		let {termComponentID} = this.payload;

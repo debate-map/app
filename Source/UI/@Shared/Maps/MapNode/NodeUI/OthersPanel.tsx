@@ -19,8 +19,9 @@ import ChangeThesisType from "../../../../../Server/Commands/ChangeThesisType";
 import { User } from "../../../../../Store/firebase/users";
 import { GetNodeViewers } from "Store/firebase/nodeViewers";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
+import {Map} from "../../../../../Store/firebase/maps/@Map";
 
-type Props = {node: MapNodeEnhanced, path: string} & Partial<{creator: User, viewers: string[]}>;
+type Props = {map?: Map, node: MapNodeEnhanced, path: string} & Partial<{creator: User, viewers: string[]}>;
 @Connect((state, {node, path}: Props)=>({
 	_: GetUserPermissionGroups(GetUserID()),
 	creator: GetUser(node.creator),
@@ -28,7 +29,8 @@ type Props = {node: MapNodeEnhanced, path: string} & Partial<{creator: User, vie
 }))
 export default class OthersPanel extends BaseComponent<Props, {convertToType: ThesisType}> {
 	render() {
-		let {node, path, viewers} = this.props;
+		let {map, node, path, viewers} = this.props;
+		let mapID = map ? map._id : null;
 		let {convertToType} = this.state;
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
 
@@ -48,7 +50,7 @@ export default class OthersPanel extends BaseComponent<Props, {convertToType: Th
 								title: `Reverse argument polarity?`, cancelButton: true,
 								message: `Reverse polarity of argument "${GetNodeDisplayText(node)}"?\n\nAll meta-thesis ratings will be deleted.`,
 								onOK: ()=> {
-									new ReverseArgumentPolarity({nodeID: node._id}).Run();
+									new ReverseArgumentPolarity(E(mapID && {mapID}, {nodeID: node._id})).Run();
 								}
 							});
 						}}/>
@@ -58,7 +60,7 @@ export default class OthersPanel extends BaseComponent<Props, {convertToType: Th
 						<Pre>Convert to: </Pre>
 						<Select options={convertToTypes} value={convertToType} onChange={val=>this.SetState({convertToType: val})}/>
 						<Button ml={5} text="Convert" onClick={()=> {
-							new ChangeThesisType({nodeID: node._id, newType: convertToType}).Run();
+							new ChangeThesisType(E({mapID}, {nodeID: node._id, newType: convertToType})).Run();
 						}}/>
 					</Row>}
 			</Column>

@@ -86,7 +86,7 @@ class UserRow extends BaseComponent<{index: number, last: boolean, user: User, u
 		if (userExtraInfo == null) return;
 
 		return (
-			<Column p={10} style={E(
+			<Column p="7px 10px" style={E(
 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
 				last && {borderRadius: "0 0 10px 10px"}
 			)}>

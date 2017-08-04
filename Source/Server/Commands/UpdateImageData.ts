@@ -2,8 +2,10 @@ import {Image} from "../../Store/firebase/images/@Image";
 import {Command} from "../Command";
 import {Assert} from "../../Frame/General/Assert";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
+import {UserEdit} from "Server/CommandMacros";
 
 export const UpdateImageData_allowedPropUpdates = ["name", "type", "url", "description", "previewWidth", "sourceChains"];
+@UserEdit
 export default class UpdateImageData extends Command<{id: number, updates: Partial<Image>}> {
 	Validate_Early() {
 		let {id, updates} = this.payload;

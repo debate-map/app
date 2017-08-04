@@ -27,9 +27,8 @@ import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
 import {ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
 import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
-import { GetNodeChildren, ForCut_GetError } from "../../../../Store/firebase/nodes";
+import { GetNodeChildren, ForCut_GetError, ForCopy_GetError } from "../../../../Store/firebase/nodes";
 import {E} from "../../../../Frame/General/Globals_Free";
-import AddNode from "../../../../Server/Commands/AddNode";
 import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, ReverseMapNodeType, IsReversedArgumentNode, GetNodeEnhanced, IsArgumentNode} from "../../../../Store/firebase/nodes/$node";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import LinkNode from "Server/Commands/LinkNode";
@@ -39,8 +38,8 @@ import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
 type Props = {map: Map, node: MapNodeEnhanced, path: string, inList?: boolean}
 	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode, copiedNode_asCut: boolean}>;
-@Connect((_: RootState, {node, path}: Props)=> ({
-	_: (ForUnlink_GetError(GetUserID(), node), ForDelete_GetError(GetUserID(), node)),
+@Connect((_: RootState, {map, node, path}: Props)=> ({
+	_: (ForUnlink_GetError(GetUserID(), map, node), ForDelete_GetError(GetUserID(), map, node)),
 	//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
 	permissions: GetUserPermissionGroups(GetUserID()),
 	parentNode: GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1)),
@@ -79,7 +78,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 				})}
 				{IsUserBasicOrAnon(userID) && node.metaThesis == null && !inList &&
 					<VMenuItem text={copiedNode ? <span>Cut <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Cut`}
-						enabled={ForCut_GetError(userID, node) == null} title={ForCut_GetError(userID, node)}
+						enabled={ForCut_GetError(userID, map, node) == null} title={ForCut_GetError(userID, map, node)}
 						style={styles.vMenuItem}
 						onClick={e=> {
 							e.persist();
@@ -91,6 +90,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						}}/>}
 				{IsUserBasicOrAnon(userID) && node.metaThesis == null &&
 					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Copy`} style={styles.vMenuItem}
+						enabled={ForCopy_GetError(userID, map, node) == null} title={ForCopy_GetError(userID, map, node)}
 						onClick={e=> {
 							e.persist();
 							if (e.button == 0) {
@@ -118,11 +118,11 @@ If not, paste the argument as a clone instead.`
 							proceed();
 
 							async function proceed() {
-								await new LinkNode({parentID: node._id, childID: copiedNode._id, childForm: formForChildren}).Run();
+								await new LinkNode({mapID: map._id, parentID: node._id, childID: copiedNode._id, childForm: formForChildren}).Run();
 								if (copiedNode_asCut) {
 									let baseNodePath = State(a=>a.main.copiedNodePath);		
 									let baseNodePath_ids = baseNodePath.split("/").map(ToInt);			
-									await new UnlinkNode({parentID: baseNodePath_ids.slice(-2)[0], childID: baseNodePath_ids.Last()}).Run();
+									await new UnlinkNode({mapID: map._id, parentID: baseNodePath_ids.slice(-2)[0], childID: baseNodePath_ids.Last()}).Run();
 								}
 							}
 						}}/>}
@@ -133,13 +133,13 @@ If not, paste the argument as a clone instead.`
 
 						let baseNodePath = State(a=>a.main.copiedNodePath);		
 						let baseNodePath_ids = baseNodePath.split("/").map(ToInt);				
-						await new CloneNode({baseNodePath, newParentID: node._id}).Run();
+						await new CloneNode({mapID: map._id, baseNodePath, newParentID: node._id}).Run();
 						if (copiedNode_asCut) {
-							await new UnlinkNode({parentID: baseNodePath_ids.slice(-2)[0], childID: baseNodePath_ids.Last()}).Run();
+							await new UnlinkNode({mapID: map._id, parentID: baseNodePath_ids.slice(-2)[0], childID: baseNodePath_ids.Last()}).Run();
 						}
 					}}/>}
 				{IsUserCreatorOrMod(userID, node) && !inList &&
-					<VMenuItem text="Unlink" enabled={ForUnlink_GetError(userID, node) == null} title={ForUnlink_GetError(userID, node)}
+					<VMenuItem text="Unlink" enabled={ForUnlink_GetError(userID, map, node) == null} title={ForUnlink_GetError(userID, map, node)}
 						style={styles.vMenuItem} onClick={async e=> {
 							if (e.button != 0) return;
 							/*let error = ForUnlink_GetError(userID, node);
@@ -159,12 +159,12 @@ If not, paste the argument as a clone instead.`
 								title: `Unlink child "${nodeText}"`, cancelButton: true,
 								message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,
 								onOK: ()=> {
-									new UnlinkNode({parentID: parentNode._id, childID: node._id}).Run();
+									new UnlinkNode({mapID: map._id, parentID: parentNode._id, childID: node._id}).Run();
 								}
 							});
 						}}/>}
 				{IsUserCreatorOrMod(userID, node) &&
-					<VMenuItem text="Delete" enabled={ForDelete_GetError(userID, node) == null} title={ForDelete_GetError(userID, node)}
+					<VMenuItem text="Delete" enabled={ForDelete_GetError(userID, map, node) == null} title={ForDelete_GetError(userID, map, node)}
 						style={styles.vMenuItem} onClick={e=> {
 							if (e.button != 0) return;
 							/*let error = ForDelete_GetError(userID, node);
@@ -186,7 +186,7 @@ If not, paste the argument as a clone instead.`
 									+ `, and its link${s_ifParents} with ${parentNodes.length} parent${s_ifParents}?`,*/
 								message: `Delete the node "${nodeText}"${metaThesisID ? `, its 1 meta-thesis` : ``}, and its link with 1 parent?`,
 								onOK: ()=> {
-									new DeleteNode({nodeID: node._id}).Run();
+									new DeleteNode({mapID: map._id, nodeID: node._id}).Run();
 								}
 							});
 						}}/>}

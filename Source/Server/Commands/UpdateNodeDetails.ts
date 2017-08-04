@@ -4,6 +4,7 @@ import {Command} from "../Command";
 import {MapNode, ThesisForm, ChildEntry, AccessLevel} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
+import { UserEdit, MapEdit } from "Server/CommandMacros";
 
 AddSchema({
 	properties: {
@@ -49,8 +50,10 @@ AddSchema({
 	required: ["nodeID", "nodeUpdates"],
 }, "UpdateNodeDetails_payload");
 
+@MapEdit
+@UserEdit
 export default class UpdateNodeDetails extends Command
-		<{mapID: number, nodeID: number, nodeUpdates: Partial<MapNode>, linkParentID?: number, linkUpdates?: Partial<ChildEntry>}> {
+		<{mapID?: number, nodeID: number, nodeUpdates: Partial<MapNode>, linkParentID?: number, linkUpdates?: Partial<ChildEntry>}> {
 	Validate_Early() {
 		/*let allowedNodePropUpdates = ["relative", "titles", "contentNode"];
 		Assert(nodeUpdates.VKeys().Except(...allowedNodePropUpdates).length == 0,
@@ -78,10 +81,6 @@ export default class UpdateNodeDetails extends Command
 			this.oldLinkData = await GetDataAsync({addHelpers: false}, "nodes", linkParentID, "children", nodeID) as ChildEntry;
 			this.newLinkData = {...this.oldLinkData, ...linkUpdates};
 		}
-		if (mapID) {
-			this.map_oldEditCount = await GetDataAsync({addHelpers: false}, "maps", mapID, "edits") as number || 0;
-		}
-		this.user_oldEditCount = await GetDataAsync({addHelpers: false}, "userExtras", this.userInfo.id, "edits") as number || 0;
 	}
 	async Validate() {
 		//if (!AssertValidate("MapNode", newData, `New-data invalid`);
@@ -92,18 +91,12 @@ export default class UpdateNodeDetails extends Command
 	}
 	
 	GetDBUpdates() {
-		let {mapID, nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
+		let {nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
 		let updates = {};
 		updates[`nodes/${nodeID}`] = this.newNodeData;
 		if (this.newLinkData) {
 			updates[`nodes/${linkParentID}/children/${nodeID}`] = this.newLinkData;
 		}
-		if (mapID) {
-			updates[`maps/${mapID}/edits`] = this.map_oldEditCount + 1;
-			updates[`maps/${mapID}/editedAt`] = Date.now();
-		}
-		updates[`userExtras/${this.userInfo.id}/edits`] = this.user_oldEditCount + 1;
-		updates[`userExtras/${this.userInfo.id}/lastEditAt`] = Date.now();
 		return updates;
 	}
 }

@@ -8,15 +8,20 @@ import {ReverseMapNodeType, IsArgumentNode} from "../../Store/firebase/nodes/$no
 import {ReverseThenType} from "../../Store/firebase/nodes/$node/$metaThesis";
 import u from "updeep";
 import {RatingsSet} from "../../Store/firebase/nodeRatings/@RatingsRoot";
+import {UserEdit} from "../CommandMacros";
+import {MapEdit} from "Server/CommandMacros";
 
 AddSchema({
 	properties: {
+		mapID: {type: "number"},
 		nodeID: {type: "number"},
 	},
 	required: ["nodeID"],
 }, "ReverseArgumentPolarity_payload");
 
-export default class ReverseArgumentPolarity extends Command<{nodeID: number}> {
+@MapEdit
+@UserEdit
+export default class ReverseArgumentPolarity extends Command<{mapID?: number, nodeID: number}> {
 	Validate_Early() {
 		AssertValidate("ReverseArgumentPolarity_payload", this.payload, `Payload invalid`);
 	}

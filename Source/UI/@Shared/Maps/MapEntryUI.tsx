@@ -20,12 +20,12 @@ export default class MapEntryUI extends BaseComponent<Props, {}> {
 		let {index, last, map, creator} = this.props;
 		let toURL = new URL(null, ["debates", map._id+""]);
 		return (
-			<Column p={10} style={E(
+			<Column p="7px 10px" style={E(
 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
 				last && {borderRadius: "0 0 10px 10px"}
 			)}>
 				<Row>
-					<a href={toURL.toString({domain: false})} style={{fontSize: 18, flex: columnWidths[0]}} onClick={e=> {
+					<a href={toURL.toString({domain: false})} style={{fontSize: 17, flex: columnWidths[0]}} onClick={e=> {
 						e.preventDefault();
 						store.dispatch(new ACTDebateMapSelect({id: map._id}));
 					}}>

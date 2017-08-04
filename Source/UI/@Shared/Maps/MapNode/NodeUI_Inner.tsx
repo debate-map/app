@@ -170,7 +170,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						{panelToShow == "social" && <SocialPanel/>}
 						{panelToShow == "tags" && <TagsPanel/>}
 						{panelToShow == "details" && <DetailsPanel map={map} node={node} path={path}/>}
-						{panelToShow == "others" && <OthersPanel node={node} path={path}/>}
+						{panelToShow == "others" && <OthersPanel map={map} node={node} path={path}/>}
 					</div>}
 			</div>
 		);

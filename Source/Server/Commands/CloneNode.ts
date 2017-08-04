@@ -9,11 +9,11 @@ import AddNode from "./AddNode";
 import LinkNode from "./LinkNode";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
-export default class CloneNode extends Command<{baseNodePath: string, newParentID: number}> {
+export default class CloneNode extends Command<{mapID: number, baseNodePath: string, newParentID: number}> {
 	sub_addNode: AddNode;
 	sub_linkChildren: LinkNode[];
 	async Prepare() {
-		let {baseNodePath, newParentID} = this.payload;
+		let {mapID, baseNodePath, newParentID} = this.payload;
 
 		// prepare add-node
 		// ==========
@@ -33,7 +33,7 @@ export default class CloneNode extends Command<{baseNodePath: string, newParentI
 		if (isArgument) {
 			var metaThesisNode = RemoveHelpers(Clone(baseMetaThesis)).VSet({parents: null}) as MapNode;
 		}
-		this.sub_addNode = new AddNode({node: newChildNode, link: E({_: true}, nodeForm && {form: nodeForm}) as any, metaThesisNode});
+		this.sub_addNode = new AddNode({mapID, node: newChildNode, link: E({_: true}, nodeForm && {form: nodeForm}) as any, metaThesisNode});
 		this.sub_addNode.Validate_Early();
 		await this.sub_addNode.Prepare();
 
@@ -51,7 +51,7 @@ export default class CloneNode extends Command<{baseNodePath: string, newParentI
 		for (let childID of childrenToLink) {
 			let child = await GetAsync(()=>GetNode(childID)) as MapNode;
 			let childForm = await GetAsync(()=>GetNodeForm(child, baseNodePath + "/" + childID)) as ThesisForm;
-			let linkChildSub = new LinkNode({parentID: this.sub_addNode.nodeID, childID: childID, childForm});
+			let linkChildSub = new LinkNode({mapID, parentID: this.sub_addNode.nodeID, childID: childID, childForm});
 			linkChildSub.Validate_Early();
 
 			//linkChildSub.Prepare([]);
