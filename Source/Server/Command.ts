@@ -74,8 +74,13 @@ export function MergeDBUpdates(baseUpdatesMap, updatesToMergeMap) {
 		});
 		for (let updateToMerge of updatesToMergeIntoThisOne) {
 			let updateToMerge_relativePath = updateToMerge.path.substr(`${update.path}/`.length);
-			// assume that the update-to-merge has priority, so have it completely overwrite the data at its path
-			update.data = u.updateIn(updateToMerge_relativePath.replace(/\//g, "."), u.constant(updateToMerge.data), update.data);
+
+			// if data at path has not been nullified by any updates yet (if one sets it to null, that has priority)
+			if (update.data != null) {
+				// assume that the update-to-merge has priority, so have it completely overwrite the data at its path
+				update.data = u.updateIn(updateToMerge_relativePath.replace(/\//g, "."), u.constant(updateToMerge.data), update.data);
+			}
+
 			// remove from updates-to-merge list (since we just merged it)
 			updatesToMerge.Remove(updateToMerge);
 		}
