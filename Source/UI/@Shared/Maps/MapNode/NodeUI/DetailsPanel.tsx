@@ -35,10 +35,11 @@ import {GetNodeForm, GetLinkUnderParent, GetNodeEnhanced} from "../../../../../S
 import Column from "../../../../../Frame/ReactComponents/Column";
 import NodeDetailsUI from "../NodeDetailsUI";
 import {GetUpdates} from "../../../../../Frame/General/Others";
+import {Map} from "../../../../../Store/firebase/maps/@Map";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-type DetailsPanel_Props = {node: MapNodeEnhanced, path: string} & Partial<{creator: User}>;
+type DetailsPanel_Props = {map?: Map, node: MapNodeEnhanced, path: string} & Partial<{creator: User}>;
 @Connect((state, {node, path}: DetailsPanel_Props)=>({
 	_: GetUserPermissionGroups(GetUserID()),
 	_link: GetLinkUnderParent(node._id, GetParentNode(path)),
@@ -48,7 +49,7 @@ type DetailsPanel_Props = {node: MapNodeEnhanced, path: string} & Partial<{creat
 export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dataError: string}> {
 	detailsUI: NodeDetailsUI;
 	render() {
-		let {node, path, creator} = this.props;
+		let {map, node, path, creator} = this.props;
 		let {dataError} = this.state;
 		let firebase = store.firebase.helpers;
 		//let {error} = this.state;
@@ -74,9 +75,9 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 							let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "finalType", "link");
 							if (link) {
 								let linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
-								await new UpdateNodeDetails({nodeID: node._id, nodeUpdates, linkParentID: GetParentNodeID(path), linkUpdates}).Run();
+								await new UpdateNodeDetails({mapID: map ? map._id : null, nodeID: node._id, nodeUpdates, linkParentID: GetParentNodeID(path), linkUpdates}).Run();
 							} else {
-								await new UpdateNodeDetails({nodeID: node._id, nodeUpdates}).Run();
+								await new UpdateNodeDetails({mapID: map ? map._id : null, nodeID: node._id, nodeUpdates}).Run();
 							}
 						}}/>
 						{/*error && <Pre>{error.message}</Pre>*/}

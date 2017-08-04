@@ -86,7 +86,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 					<DiscussionPanel/>
 					<SocialPanel/>
 					<TagsPanel/>
-					<DetailsPanel node={nodeEnhanced} path={path}/>
+					<DetailsPanel map={map} node={nodeEnhanced} path={path}/>
 					<OthersPanel node={nodeEnhanced} path={path}/>
 				</article>
 			</ScrollView>

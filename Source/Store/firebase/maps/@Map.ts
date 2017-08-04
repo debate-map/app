@@ -19,6 +19,8 @@ export class Map {
 
 	creator: string;
 	createdAt: number;
+	edits: number;
+	editedAt: number;
 }
 export const Map_nameFormat = `^[a-zA-Z0-9 ,'"%:.?-]+$`;
 AddSchema({

@@ -7,6 +7,7 @@ import {GetValues_ForSchema} from "../../Frame/General/Enums";
 
 AddSchema({
 	properties: {
+		mapID: {type: "number"},
 		nodeID: {type: "number"},
 		nodeUpdates: Schema({
 			properties: {
@@ -48,7 +49,8 @@ AddSchema({
 	required: ["nodeID", "nodeUpdates"],
 }, "UpdateNodeDetails_payload");
 
-export default class UpdateNodeDetails extends Command<{nodeID: number, nodeUpdates: Partial<MapNode>, linkParentID?: number, linkUpdates?: Partial<ChildEntry>}> {
+export default class UpdateNodeDetails extends Command
+		<{mapID: number, nodeID: number, nodeUpdates: Partial<MapNode>, linkParentID?: number, linkUpdates?: Partial<ChildEntry>}> {
 	Validate_Early() {
 		/*let allowedNodePropUpdates = ["relative", "titles", "contentNode"];
 		Assert(nodeUpdates.VKeys().Except(...allowedNodePropUpdates).length == 0,
@@ -66,13 +68,17 @@ export default class UpdateNodeDetails extends Command<{nodeID: number, nodeUpda
 	newNodeData: MapNode;
 	oldLinkData: ChildEntry;
 	newLinkData: ChildEntry;
+	map_oldEditCount: number;
 	async Prepare() {
-		let {nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
+		let {mapID, nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
 		this.oldNodeData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
 		this.newNodeData = {...this.oldNodeData, ...nodeUpdates};
 		if (linkUpdates) {
 			this.oldLinkData = await GetDataAsync({addHelpers: false}, "nodes", linkParentID, "children", nodeID) as ChildEntry;
 			this.newLinkData = {...this.oldLinkData, ...linkUpdates};
+		}
+		if (mapID) {
+			this.map_oldEditCount = await GetDataAsync({addHelpers: false}, "maps", mapID, "edits") as number || 0;
 		}
 	}
 	async Validate() {
@@ -84,11 +90,15 @@ export default class UpdateNodeDetails extends Command<{nodeID: number, nodeUpda
 	}
 	
 	GetDBUpdates() {
-		let {nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
+		let {mapID, nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
 		let updates = {};
 		updates[`nodes/${nodeID}`] = this.newNodeData;
 		if (this.newLinkData) {
 			updates[`nodes/${linkParentID}/children/${nodeID}`] = this.newLinkData;
+		}
+		if (mapID) {
+			updates[`maps/${mapID}/edits`] = this.map_oldEditCount + 1;
+			updates[`maps/${mapID}/editedAt`] = Date.now();
 		}
 		return updates;
 	}
