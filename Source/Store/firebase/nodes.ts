@@ -35,6 +35,9 @@ export function GetNodes(queries?): MapNode[] {
 export function GetParentCount(node: MapNode) {
 	return (node.parents || {}).VKeys(true).length;
 }
+export function GetChildCount(node: MapNode) {
+	return (node.children || {}).VKeys(true).length;
+}
 
 export function GetParentNodeID(path: string) {
 	return SplitStringBySlash_Cached(path).map(a=>a.ToInt()).XFromLast(1);
@@ -129,8 +132,8 @@ export function ForDelete_GetError(userID: string, map: Map, node: MapNode) {
 
 	let nodeChildren = GetNodeChildren(node);
 	if (nodeChildren.Any(a=>a == null)) return "[still loading children...]";
-	//if ((node.children || {}).VKeys().length) return "Cannot delete this node until all its (non-meta-thesis) children have been deleted or unlinked.";
-	if (nodeChildren.filter(a=>!a.metaThesis).length) return "Cannot delete this node until all its (non-meta-thesis) children have been deleted or unlinked.";
+	//if ((node.children || {}).VKeys().length) return "Cannot delete this node until all its (non-meta-thesis) children have been unlinked or deleted.";
+	if (nodeChildren.filter(a=>!a.metaThesis).length) return "Cannot delete this node until all its (non-meta-thesis) children have been unlinked or deleted.";
 	return null;
 }
 

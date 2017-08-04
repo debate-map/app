@@ -29,9 +29,9 @@ export default class DeleteMap extends Command<{mapID: number}> {
 
 	GetDBUpdates() {
 		let {mapID} = this.payload;
-		let updates = {};
-		updates[`maps/${mapID}`] = null;
-		updates = MergeDBUpdates(updates, this.sub_deleteNode.GetDBUpdates());
-		return updates;
+		let updates = this.sub_deleteNode.GetDBUpdates();
+		let newUpdates = {};
+		newUpdates[`maps/${mapID}`] = null;
+		return MergeDBUpdates(updates, newUpdates);
 	}
 }

@@ -43,6 +43,7 @@ import {IsUserCreatorOrMod} from "../../../Store/firebase/userExtras";
 import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
 import DeleteMap from "../../../Server/Commands/DeleteMap";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
+import { GetNodeAsync, GetChildCount } from "Store/firebase/nodes";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -295,6 +296,12 @@ class ActionBar_Left extends BaseComponent<ActionBar_LeftProps, {dataError: stri
 											<Row style={{fontWeight: "bold"}}>Advanced:</Row>
 											<Row>
 												<Button mt={5} text="Delete" onLeftClick={async ()=> {
+													let rootNode = await GetNodeAsync(map.rootNode);
+													if (GetChildCount(rootNode) != 0) {
+														return void ShowMessageBox({title: `Still has children`,
+															message: `Cannot delete this map until all the children of its root-node have been unlinked or deleted.`});
+													}
+
 													ShowMessageBox({
 														title: `Delete "${map.name}"`, cancelButton: true,
 														message: `Delete the map "${map.name}"?`,

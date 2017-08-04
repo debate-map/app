@@ -67,6 +67,17 @@ export function MergeDBUpdates(baseUpdatesMap, updatesToMergeMap) {
 	let baseUpdates = baseUpdatesMap.Props().map(prop=>({path: prop.name, data: prop.value})) as Update[];
 	let updatesToMerge = updatesToMergeMap.Props().map(prop=>({path: prop.name, data: prop.value})) as Update[];
 
+	for (let update of updatesToMerge) {
+		// if an update-to-merge exists for a path, remove any base-updates starting with that path (since the to-merge ones have priority)
+		if (update.data == null) {
+			for (let update2 of baseUpdates.slice()) { // make copy, since Remove() seems to break iteration otherwise
+				if (update2.path.startsWith(update.path)) {
+					baseUpdates.Remove(update2);
+				}
+			}
+		}
+	}
+
 	let finalUpdates = [] as Update[];
 	for (let update of baseUpdates) {
 		let updatesToMergeIntoThisOne: Update[] = updatesToMerge.filter(update2=> {
@@ -75,11 +86,12 @@ export function MergeDBUpdates(baseUpdatesMap, updatesToMergeMap) {
 		for (let updateToMerge of updatesToMergeIntoThisOne) {
 			let updateToMerge_relativePath = updateToMerge.path.substr(`${update.path}/`.length);
 
-			// if data at path has not been nullified by any updates yet (if one sets it to null, that has priority)
-			if (update.data != null) {
-				// assume that the update-to-merge has priority, so have it completely overwrite the data at its path
-				update.data = u.updateIn(updateToMerge_relativePath.replace(/\//g, "."), u.constant(updateToMerge.data), update.data);
-			}
+			//if (updateToMerge.data) {
+			// assume that the update-to-merge has priority, so have it completely overwrite the data at its path
+			update.data = u.updateIn(updateToMerge_relativePath.replace(/\//g, "."), u.constant(updateToMerge.data), update.data);
+			/*} else {
+				update.data = null;
+			}*/
 
 			// remove from updates-to-merge list (since we just merged it)
 			updatesToMerge.Remove(updateToMerge);
