@@ -94,7 +94,8 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 			});
 		}
 
-		let lastPage = Math.ceil(nodesFiltered.length / entriesPerPage) - 1;
+		let pageCount = Math.ceil(nodesFiltered.length / entriesPerPage);
+		let lastPage = Math.max(0, pageCount - 1);
 		page = Math.min(page, lastPage);
 		let nodesForPage = nodesFiltered.Skip(page * entriesPerPage).Take(entriesPerPage);
 
