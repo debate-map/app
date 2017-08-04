@@ -19,7 +19,8 @@ export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], 
 		let {users, userExtraInfoMap} = this.props;
 		if (userExtraInfoMap == null) return <div/>;
 
-		users = users.OrderBy(a=>userExtraInfoMap[a._key] ? userExtraInfoMap[a._key].joinDate : Number.MAX_SAFE_INTEGER);
+		//users = users.OrderBy(a=>userExtraInfoMap[a._key] ? userExtraInfoMap[a._key].joinDate : Number.MAX_SAFE_INTEGER);
+		users = users.OrderByDescending(a=>userExtraInfoMap[a._key] ? userExtraInfoMap[a._key].edits : Number.MIN_SAFE_INTEGER);
 
 		return (
 			<Column style={{width: 960, margin: "20px auto 20px auto", height: "calc(100% - 40px)", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
@@ -102,7 +103,7 @@ class UserRow extends BaseComponent<{index: number, last: boolean, user: User, u
 						<span style={{flex: columnWidths[0]}}>{user.displayName}</span>
 						<span style={{flex: columnWidths[1]}}>{Moment(userExtraInfo.joinDate).format("YYYY-MM-DD")}</span>
 						<span style={{flex: columnWidths[2]}}>{userExtraInfo.edits || 0}</span>
-						<span style={{flex: columnWidths[3]}}>{Moment(userExtraInfo.lastEditAt).format("YYYY-MM-DD")}</span>
+						<span style={{flex: columnWidths[3]}}>{userExtraInfo.lastEditAt ? Moment(userExtraInfo.lastEditAt).format("YYYY-MM-DD") : "n/a"}</span>
 						<span style={{flex: columnWidths[4]}}>
 							{["basic", "verified", "mod", "admin"].filter(a=>userExtraInfo.permissionGroups[a]).map(a=>a.replace(/^./, a=>a.toUpperCase())).join(", ")}
 						</span>
