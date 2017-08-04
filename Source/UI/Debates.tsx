@@ -35,11 +35,6 @@ export default class DebatesUI extends BaseComponent<Props, {}> {
 		}
 
 		return (
-			/*<Column style={E(styles.page, {
-				//maxHeight: "calc(100% - 200px)"
-				height: "calc(100% - 200px)",
-				padding: 20,
-			})}>*/
 			<Column style={{width: 960, margin: "20px auto 20px auto", height: "calc(100% - 40px)", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
 				<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 					<Row style={{height: 40, padding: 10}}>
@@ -64,7 +59,6 @@ export default class DebatesUI extends BaseComponent<Props, {}> {
 						<Pre>Filter:</Pre>
 						<InfoButton text="Hides nodes without the given text. Regular expressions can be used, ex: /there are [0-9]+ dimensions/"/>
 						<TextInput ml={2} value={filter} onChange={val=>store.dispatch(new ACTMapNodeListFilterSet({mapID: map._id, filter: val}))}/>*/}
-						{/*<Button text="Latest"/>*/}
 						<Button text="Add debate" ml="auto" onClick={()=> {
 							if (userID == null) return ShowSignInPopup();
 							ShowAddMapDialog(userID, MapType.Debate);

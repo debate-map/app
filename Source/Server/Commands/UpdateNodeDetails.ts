@@ -69,6 +69,7 @@ export default class UpdateNodeDetails extends Command
 	oldLinkData: ChildEntry;
 	newLinkData: ChildEntry;
 	map_oldEditCount: number;
+	user_oldEditCount: number;
 	async Prepare() {
 		let {mapID, nodeID, nodeUpdates, linkParentID, linkUpdates} = this.payload;
 		this.oldNodeData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
@@ -80,6 +81,7 @@ export default class UpdateNodeDetails extends Command
 		if (mapID) {
 			this.map_oldEditCount = await GetDataAsync({addHelpers: false}, "maps", mapID, "edits") as number || 0;
 		}
+		this.user_oldEditCount = await GetDataAsync({addHelpers: false}, "userExtras", this.userInfo.id, "edits") as number || 0;
 	}
 	async Validate() {
 		//if (!AssertValidate("MapNode", newData, `New-data invalid`);
@@ -100,6 +102,8 @@ export default class UpdateNodeDetails extends Command
 			updates[`maps/${mapID}/edits`] = this.map_oldEditCount + 1;
 			updates[`maps/${mapID}/editedAt`] = Date.now();
 		}
+		updates[`userExtras/${this.userInfo.id}/edits`] = this.user_oldEditCount + 1;
+		updates[`userExtras/${this.userInfo.id}/lastEditAt`] = Date.now();
 		return updates;
 	}
 }

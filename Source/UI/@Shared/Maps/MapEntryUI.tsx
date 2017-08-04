@@ -21,7 +21,7 @@ export default class MapEntryUI extends BaseComponent<Props, {}> {
 		let toURL = new URL(null, ["debates", map._id+""]);
 		return (
 			<Column p={10} style={E(
-				{background: index % 2 == 0 ? "rgba(25,25,25,.7)" : "rgba(0,0,0,.7)"},
+				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
 				last && {borderRadius: "0 0 10px 10px"}
 			)}>
 				<Row>

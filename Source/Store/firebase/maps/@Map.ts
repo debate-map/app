@@ -32,6 +32,8 @@ AddSchema({
 
 		creator: {type: "string"},
 		createdAt: {type: "number"},
+		edits: {type: "number"},
+		editedAt: {type: "number"},
 	},
 	required: ["name", "type", "rootNode", "creator", "createdAt"],
 }, "Map");
