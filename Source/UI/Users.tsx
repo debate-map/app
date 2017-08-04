@@ -83,26 +83,30 @@ export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], 
 class UserRow extends BaseComponent<{index: number, last: boolean, user: User, userExtraInfo: UserExtraInfo}, {}> {
 	render() {
 		let {index, last, user, userExtraInfo} = this.props;
+		if (userExtraInfo == null) return;
 
 		return (
 			<Column p={10} style={E(
 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
 				last && {borderRadius: "0 0 10px 10px"}
 			)}>
-				<Row>
-					{/*<a href={toURL.toString({domain: false})} style={{fontSize: 18, flex: columnWidths[0]}} onClick={e=> {
-						e.preventDefault();
-						store.dispatch(new ACTDebateMapSelect({id: map._id}));
-					}}>
-						{map.name}
-					</a>*/}
-					<span style={{flex: columnWidths[0]}}>{user.displayName}</span>
-					<span style={{flex: columnWidths[1]}}>{userExtraInfo ? Moment(userExtraInfo.joinDate).format("YYYY-MM-DD") : "n/a"}</span>
-					<span style={{flex: columnWidths[2]}}>{userExtraInfo.edits || 0}</span>
-					<span style={{flex: columnWidths[3]}}>{Moment(userExtraInfo.lastEditAt).format("YYYY-MM-DD")}</span>
-					<span style={{flex: columnWidths[4]}}>{userExtraInfo == null ? "n/a" :
-						["basic", "verified", "mod", "admin"].filter(a=>userExtraInfo.permissionGroups[a]).map(a=>a.replace(/^./, a=>a.toUpperCase())).join(", ")}</span>
-				</Row>
+				{userExtraInfo == null && <div style={{textAlign: "center"}}>Loading...</div>}
+				{userExtraInfo &&
+					<Row>
+						{/*<a href={toURL.toString({domain: false})} style={{fontSize: 18, flex: columnWidths[0]}} onClick={e=> {
+							e.preventDefault();
+							store.dispatch(new ACTDebateMapSelect({id: map._id}));
+						}}>
+							{map.name}
+						</a>*/}
+						<span style={{flex: columnWidths[0]}}>{user.displayName}</span>
+						<span style={{flex: columnWidths[1]}}>{Moment(userExtraInfo.joinDate).format("YYYY-MM-DD")}</span>
+						<span style={{flex: columnWidths[2]}}>{userExtraInfo.edits || 0}</span>
+						<span style={{flex: columnWidths[3]}}>{Moment(userExtraInfo.lastEditAt).format("YYYY-MM-DD")}</span>
+						<span style={{flex: columnWidths[4]}}>
+							{["basic", "verified", "mod", "admin"].filter(a=>userExtraInfo.permissionGroups[a]).map(a=>a.replace(/^./, a=>a.toUpperCase())).join(", ")}
+						</span>
+					</Row>}
 			</Column>
 		);
 	}
