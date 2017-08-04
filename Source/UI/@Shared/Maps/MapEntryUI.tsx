@@ -11,16 +11,19 @@ import {ACTDebateMapSelect} from "../../../Store/main/debates";
 import { columnWidths } from "UI/Debates";
 import Moment from "moment";
 
-type Props = {map: Map} & Partial<{creator: User}>;
+type Props = {index: number, last: boolean, map: Map} & Partial<{creator: User}>;
 @Connect((state, {map})=> ({
 	creator: map && GetUser(map.creator),
 }))
 export default class MapEntryUI extends BaseComponent<Props, {}> {
 	render() {
-		let {map, creator} = this.props;
+		let {index, last, map, creator} = this.props;
 		let toURL = new URL(null, ["debates", map._id+""]);
 		return (
-			<Column mt={10} p={10} style={{background: "rgba(0,0,0,.7)", borderRadius: 5}}>
+			<Column p={10} style={E(
+				{background: index % 2 == 0 ? "rgba(25,25,25,.7)" : "rgba(0,0,0,.7)"},
+				last && {borderRadius: "0 0 10px 10px"}
+			)}>
 				<Row>
 					<a href={toURL.toString({domain: false})} style={{fontSize: 18, flex: columnWidths[0]}} onClick={e=> {
 						e.preventDefault();
