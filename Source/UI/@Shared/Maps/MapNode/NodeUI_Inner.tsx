@@ -112,7 +112,14 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 				{leftPanelShow &&
 					<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot}}
 						onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
-						onPanelButtonClick={panel=>store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel}))}
+						onPanelButtonClick={panel=> {
+							if (nodeView.openPanel != panel) {
+								store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel}));
+							} else {
+								store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel: null}));
+								this.SetState({hoverPanel: null});
+							}
+						}}
 						backgroundColor={nodeTypeInfo.backgroundColor} asHover={hovered}/>}
 				{/* fixes click-gap */}
 				{leftPanelShow && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}

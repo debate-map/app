@@ -48,7 +48,7 @@ export default class UserPanel extends BaseComponent<{auth?}, {}> {
 
 export function ShowSignInPopup() {
 	let boxController: BoxController = ShowMessageBox({
-		title: "Sign in", okButton: false,
+		title: "Sign in", okButton: false, cancelOnOverlayClick: true,
 		messageUI: ()=> {
 			return (
 				<div>
