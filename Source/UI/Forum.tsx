@@ -7,19 +7,20 @@ import UserExtraInfo from "../Store/firebase/userExtras/@UserExtraInfo";
 import Moment from "moment";
 import ScrollView from "react-vscrollview";
 import Column from "../Frame/ReactComponents/Column";
-import { GetSections, GetSubforums, GetSectionSubforums } from "Store/firebase/forum";
+import {GetSections, GetSubforums, GetSectionSubforums, GetSubforumThreads} from "Store/firebase/forum";
 import {Section} from "../Store/firebase/forum/@Section";
 import {Subforum} from "../Store/firebase/forum/@Subforum";
 import {URL} from "../Frame/General/URLs";
 import {ACTSubforumSelect, GetSelectedSubforum} from "../Store/main/forum";
 import {SubforumUI} from "./Forum/SubforumUI";
-import {IsUserMod} from "../Store/firebase/userExtras";
+import {IsUserMod, IsUserAdmin} from "../Store/firebase/userExtras";
 import Button from "Frame/ReactComponents/Button";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddSectionDialog} from "./Forum/AddSectionDialog";
 import {ShowAddSubforumDialog} from "./Forum/AddSubforumDialog";
+import {Thread} from "Store/firebase/forum/@Thread";
 
-export const columnWidths = [1];
+export const columnWidths = [.7, .3];
 
 @Connect(state=> ({
 	_: GetUserPermissionGroups(GetUserID()),
@@ -35,18 +36,17 @@ export default class ForumUI extends BaseComponent<{} & Partial<{sections: Secti
 		}
 
 		let userID = GetUserID();
-		let isMod = IsUserMod(userID);
+		let isAdmin = IsUserAdmin(userID);
 		return (
 			<Column style={{width: 960, margin: "20px auto 20px auto", height: "calc(100% - 40px)", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
-				<Column className="clickThrough" style={{height: 40, background: "rgba(0,0,0,.7)", borderRadius: 10}}>
+				{isAdmin && <Column className="clickThrough" style={{height: 40, background: "rgba(0,0,0,.7)", borderRadius: 10}}>
 					<Row style={{height: 40, padding: 10}}>
-						{isMod &&
-							<Button text="Add section" ml="auto" onClick={()=> {
-								if (userID == null) return ShowSignInPopup();
-								ShowAddSectionDialog(userID);
-							}}/>}
+						<Button text="Add section" ml="auto" onClick={()=> {
+							if (userID == null) return ShowSignInPopup();
+							ShowAddSectionDialog(userID);
+						}}/>
 					</Row>
-				</Column>
+				</Column>}
 				<ScrollView contentStyle={{flex: 1}}>
 					{sections.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
 					{sections.map((section, index)=> {
@@ -66,18 +66,21 @@ class SectionUI extends BaseComponent<SectionUI_Props, {}> {
 	render() {
 		let {section, subforums} = this.props;
 		let userID = GetUserID();
+		let isAdmin = IsUserAdmin(userID);
 		return (
 			<Column style={{width: 960, margin: "20px auto 20px auto"}}>
-				<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+				<Column className="clickThrough" style={{height: 70, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 					<Row style={{height: 40, padding: 10, fontSize: 18}}>
-						{section.name}
-						<Button text="Add subforum" ml="auto" onClick={()=> {
-							if (userID == null) return ShowSignInPopup();
-							ShowAddSubforumDialog(userID, section._id);
-						}}/>
+						<span style={{position: "absolute", width: "100%", textAlign: "center"}}>{section.name}</span>
+						{isAdmin &&
+							<Button text="Add subforum" ml="auto" onClick={()=> {
+								if (userID == null) return ShowSignInPopup();
+								ShowAddSubforumDialog(userID, section._id);
+							}}/>}
 					</Row>
-					<Row style={{height: 40, padding: 10}}>
-						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>Name</span>
+					<Row style={{height: 30, padding: 10}}>
+						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 15}}>Subforum</span>
+						<span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 15}}>Threads</span>
 					</Row>
 				</Column>
 				<Column>
@@ -91,9 +94,13 @@ class SectionUI extends BaseComponent<SectionUI_Props, {}> {
 	}
 }
 
-class SubforumEntryUI extends BaseComponent<{index: number, last: boolean, subforum: Subforum}, {}> {
+type SubforumEntryUIProps = {index: number, last: boolean, subforum: Subforum} & Partial<{threads: Thread[]}>;
+@Connect((state, {subforum}: SubforumEntryUIProps)=> ({
+	threads: GetSubforumThreads(subforum),
+}))
+class SubforumEntryUI extends BaseComponent<SubforumEntryUIProps, {}> {
 	render() {
-		let {index, last, subforum} = this.props;
+		let {index, last, subforum, threads} = this.props;
 		let toURL = new URL(null, [subforum._id+""]);
 		return (
 			<Column p="7px 10px" style={E(
@@ -107,6 +114,7 @@ class SubforumEntryUI extends BaseComponent<{index: number, last: boolean, subfo
 					}}>
 						{subforum.name}
 					</a>
+					<span style={{flex: columnWidths[1]}}>{threads.length}</span>
 				</Row>
 			</Column>
 		);

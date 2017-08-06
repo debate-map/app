@@ -45,7 +45,7 @@ export class SubforumUI extends BaseComponent<Props, {}> {
 		}
 
 		return (
-			<div style={{height: "100%"}}>
+			<Column style={{width: 960, margin: "50px auto 20px auto", height: "calc(100% - 70px)", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
 				<ActionBar_Left subforum={subforum} subNavBarWidth={subNavBarWidth}/>
 				<ActionBar_Right subforum={subforum} subNavBarWidth={subNavBarWidth}/>
 				<ScrollView ref="scrollView" scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}>
@@ -61,13 +61,13 @@ export class SubforumUI extends BaseComponent<Props, {}> {
 							<span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 17}}>Creator</span>
 						</Row>
 					</Column>
-					<div style={{position: "relative", whiteSpace: "nowrap", padding: 300}}>
+					<Column>
 						{threads.map((thread, index)=> {
 							return <ThreadEntryUI key={index} index={index} last={index == threads.length - 1} thread={thread}/>;
 						})}
-					</div>
+					</Column>
 				</ScrollView>
-			</div>
+			</Column>
 		);
 	}
 }
