@@ -19,6 +19,7 @@ export default class AddSubforum extends Command<{sectionID: number, subforum: S
 
 		let lastSubforumID = await GetDataAsync("forum", "general", "lastSubforumID") as number;
 		this.subforumID = lastSubforumID + 1;
+		subforum.section = sectionID;
 
 		this.oldSubforumOrder = await GetDataAsync("forum", "sections", sectionID, "subforumOrder") || [];
 

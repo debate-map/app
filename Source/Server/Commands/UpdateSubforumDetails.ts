@@ -12,13 +12,13 @@ import {Subforum_nameFormat, Subforum} from "../../Store/firebase/forum/@Subforu
 AddSchema({
 	properties: {
 		subforumID: {type: "number"},
-		updates: Schema({
+		subforumUpdates: Schema({
 			properties: {
 				name: {type: "string", pattern: Subforum_nameFormat},
 			},
 		}),
 	},
-	required: ["subforumID", "updates"],
+	required: ["subforumID", "subforumUpdates"],
 }, "UpdateSubforumDetails_payload");
 
 @UserEdit
