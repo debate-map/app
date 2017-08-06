@@ -9,11 +9,10 @@ import {UserEdit} from "Server/CommandMacros";
 
 @UserEdit
 export default class AddImage extends Command<{image: Image}> {
-	lastImageID_new: number;
 	imageID: number;
 	async Prepare() {
-		this.lastImageID_new = await GetDataAsync("general", "lastImageID") as number;
-		this.imageID = ++this.lastImageID_new;
+		let lastImageID = await GetDataAsync("general", "lastImageID") as number;
+		this.imageID = lastImageID + 1;
 		this.payload.image.createdAt = Date.now();
 	}
 	async Validate() {
@@ -24,7 +23,7 @@ export default class AddImage extends Command<{image: Image}> {
 	GetDBUpdates() {
 		let {image} = this.payload;
 		let updates = {
-			"general/lastImageID": this.lastImageID_new,
+			"general/lastImageID": this.imageID,
 			[`images/${this.imageID}`]: image,
 		};
 		return updates;

@@ -8,11 +8,10 @@ import {UserEdit} from "Server/CommandMacros";
 
 @UserEdit
 export default class AddTerm extends Command<{term: Term}> {
-	lastTermID_new: number;
 	termID: number;
 	async Prepare() {
-		this.lastTermID_new = await GetDataAsync("general", "lastTermID") as number;
-		this.termID = ++this.lastTermID_new;
+		let lastTermID = await GetDataAsync("general", "lastTermID") as number;
+		this.termID = lastTermID + 1;
 		this.payload.term.createdAt = Date.now();
 	}
 	async Validate() {
@@ -23,7 +22,7 @@ export default class AddTerm extends Command<{term: Term}> {
 	GetDBUpdates() {
 		let {term} = this.payload;
 		let updates = {
-			"general/lastTermID": this.lastTermID_new,
+			"general/lastTermID": this.termID,
 			[`terms/${this.termID}`]: term,
 			[`termNames/${term.name.toLowerCase()}/${this.termID}`]: true,
 		};

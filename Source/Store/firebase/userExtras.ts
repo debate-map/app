@@ -4,6 +4,7 @@ import {GetUserPermissionGroups} from "./users";
 import {Term} from "./terms/@Term";
 import {Image} from "./images/@Image";
 import {Map} from "./maps/@Map";
+import {Subforum} from "./forum/@Subforum";
 
 
 // selectors

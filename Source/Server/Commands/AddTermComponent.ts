@@ -13,14 +13,13 @@ export default class AddTermComponent extends Command<{termID: number, termCompo
 		//Assert(termComponent.termParents && termComponent.termParents.VKeys().length == 1, `Term-component must have exactly one term-parent`);
 	}*/
 
-	lastTermComponentID_new: number;
 	termComponentID: number;
 	async Prepare() {
 		let {termID, termComponent} = this.payload;
 		let firebase = store.firebase.helpers;
 
-		this.lastTermComponentID_new = await GetDataAsync("general", "lastTermComponentID") as number;
-		this.termComponentID = ++this.lastTermComponentID_new;
+		let lastTermComponentID = await GetDataAsync("general", "lastTermComponentID") as number;
+		this.termComponentID = lastTermComponentID + 1;
 
 		termComponent.parentTerms = {[termID]: true};
 	}
@@ -32,7 +31,7 @@ export default class AddTermComponent extends Command<{termID: number, termCompo
 	GetDBUpdates() {
 		let {termID, termComponent} = this.payload;
 		let updates = {
-			"general/lastTermComponentID": this.lastTermComponentID_new,
+			"general/lastTermComponentID": this.termComponentID,
 			[`terms/${termID}/components/${this.termComponentID}`]: true,
 			[`termComponents/${this.termComponentID}`]: termComponent,
 		};

@@ -19,7 +19,7 @@ export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], 
 		let {users, userExtraInfoMap} = this.props;
 		if (userExtraInfoMap == null) return <div/>;
 
-		//users = users.OrderBy(a=>userExtraInfoMap[a._key] ? userExtraInfoMap[a._key].joinDate : Number.MAX_SAFE_INTEGER);
+		users = users.OrderBy(a=>userExtraInfoMap[a._key] ? userExtraInfoMap[a._key].joinDate : Number.MAX_SAFE_INTEGER);
 		users = users.OrderByDescending(a=>userExtraInfoMap[a._key] ? userExtraInfoMap[a._key].edits : Number.MIN_SAFE_INTEGER);
 
 		return (
@@ -58,7 +58,7 @@ export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], 
 				</Column>
 				<ScrollView contentStyle={{flex: 1}}>
 					{users.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
-					{users.OrderBy(a=>userExtraInfoMap[a._key] ? userExtraInfoMap[a._key].joinDate : Number.MAX_SAFE_INTEGER).map((user, index)=> {
+					{users.map((user, index)=> {
 						let userExtraInfo = userExtraInfoMap[user._key];
 						return <UserRow key={user._key} index={index} last={index == users.length - 1} user={user} userExtraInfo={userExtraInfo}/>;
 					})}

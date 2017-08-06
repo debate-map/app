@@ -3,7 +3,7 @@ import {GetTerms} from "../firebase/terms";
 import Action from "../../Frame/General/Action";
 import {CombineReducers} from "../../Frame/Store/ReducerUtils";
 import { MapType } from "../firebase/maps/@Map";
-import { GetMapsOfType } from "Store/firebase/maps";
+import {GetMapsOfType, GetMap} from "Store/firebase/maps";
 import {URL} from "../../Frame/General/URLs";
 import {IsNumber} from "../../Frame/General/Types";
 import SubpageReducer from "./@Shared/$subpage";
@@ -35,5 +35,6 @@ export function GetSelectedDebateMapID() {
 export function GetSelectedDebateMap() {
 	let selectedID = GetSelectedDebateMapID();
 	//return GetData(`maps/${selectedID}`);
-	return (GetMapsOfType(MapType.Debate) || []).find(a=>a._id == selectedID);
+	//return (GetMapsOfType(MapType.Debate) || []).find(a=>a._id == selectedID);
+	return GetMap(selectedID);
 }

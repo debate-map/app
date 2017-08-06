@@ -26,15 +26,11 @@ export function GetUserID(): string {
 	return State(a=>a.firebase.auth) ? State(a=>a.firebase.auth.uid) : null;
 }
 
-export type UserMap = {[key: string]: User};
-export function GetUserMap(): UserMap {
-	return GetData("users");
-}
 export function GetUser(userID: string): User {
-	return (GetUserMap() || {})[userID];
+	return GetData("users", userID);
 }
 export function GetUsers(): User[] {
-	let userMap = GetUserMap();
+	let userMap = GetData("users");
 	return CachedTransform("GetUsers", [], userMap, ()=>userMap ? userMap.VValues(true) : []);
 }
 

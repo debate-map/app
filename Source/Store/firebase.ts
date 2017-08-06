@@ -10,8 +10,10 @@ import {ViewerSet} from "./firebase/nodeViewers/@ViewerSet";
 import {Image} from "./firebase/images/@Image";
 import {MapNodeStats} from "Store/firebase/nodeStats/@MapNodeStats";
 import {ViewedNodeSet} from "./firebase/userViewedNodes/@ViewedNodeSet";
+import { ForumData } from "Store/firebase/forum";
 
 export interface FirebaseData {
+	forum: ForumData;
 	general: GeneralData;
 	images: {[key: string]: Image};
 	maps: {[key: number]: Map};

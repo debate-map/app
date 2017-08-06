@@ -16,6 +16,7 @@ import {globalMapID} from "./firebase/nodes/@MapNode";
 import { ShallowChanged } from "../Frame/UI/ReactGlobals";
 import { MapInfoReducer } from "Store/main/maps/$map";
 import {demoMap} from "../UI/Home/DemoMap";
+import { Forum, ForumReducer } from "Store/main/forum";
 
 // class is used only for initialization
 export class MainState {
@@ -37,7 +38,7 @@ export class MainState {
 	reputation: {subpage: string};
 
 	users: {subpage: string};
-	forum: {subpage: string};
+	forum: Forum;
 	social: {subpage: string};
 	more: {subpage: string};
 	home: {subpage: string};
@@ -146,7 +147,7 @@ export function MainReducer(state, action) {
 		reputation: CombineReducers({subpage: SubpageReducer("reputation")}),
 
 		users: CombineReducers({subpage: SubpageReducer("users")}),
-		forum: CombineReducers({subpage: SubpageReducer("forum")}),
+		forum: ForumReducer,
 		social: CombineReducers({subpage: SubpageReducer("social")}),
 		more: CombineReducers({subpage: SubpageReducer("more")}),
 		home: CombineReducers({subpage: SubpageReducer("home")}),

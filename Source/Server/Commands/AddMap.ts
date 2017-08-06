@@ -11,14 +11,13 @@ import {UserEdit} from "Server/CommandMacros";
 
 @UserEdit
 export default class AddMap extends Command<{map: Map}> {
-	lastMapID_new: number;
 	mapID: number;
 	sub_addNode: AddNode;
 	async Prepare() {
 		let {map} = this.payload;
 
-		this.lastMapID_new = await GetDataAsync("general", "lastMapID") as number;
-		this.mapID = ++this.lastMapID_new;
+		let lastMapID = await GetDataAsync("general", "lastMapID") as number;
+		this.mapID = lastMapID + 1;
 		map.createdAt = Date.now();
 		map.editedAt = map.createdAt;
 
@@ -38,7 +37,7 @@ export default class AddMap extends Command<{map: Map}> {
 	GetDBUpdates() {
 		let {map} = this.payload;
 		let updates = {
-			"general/lastMapID": this.lastMapID_new,
+			"general/lastMapID": this.mapID,
 			[`maps/${this.mapID}`]: map,
 		} as any;
 		updates = MergeDBUpdates(updates, this.sub_addNode.GetDBUpdates());
