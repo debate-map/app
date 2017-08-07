@@ -59,15 +59,15 @@ export class PostUI extends BaseComponent<Props, {editing: boolean, dataError: s
 				<Column p={10} style={{flex: 1}}>
 					<Row style={{width: "100%"}}>
 						{/*post.text*/}
-						<Markdown container="div" source={post.text ? post.text : "*This post has been deleted.*"}/>
+						<Markdown container="div" source={post.text != null ? post.text : "*This post has been deleted.*"}/>
 					</Row>
 					<Row mt="auto">
-						<span style={{opacity: .5}}>{creator ? creator.displayName : "..."}, at {Moment(post.createdAt).format("YYYY-MM-DD HH:mm:ss")}</span>
+						<span style={{color: "rgba(255,255,255,.5)"}}>{creator ? creator.displayName : "..."}, at {Moment(post.createdAt).format("YYYY-MM-DD HH:mm:ss")}</span>
 						{post.creator == GetUserID() &&
 							<Button ml={5} text="Edit" onClick={()=> {
 								this.SetState({editing: true});
 							}}/>}
-						{post.creator == GetUserID() && index != 0 &&
+						{post.creator == GetUserID() && index != 0 && post.text != null &&
 							<Button ml={5} text="Delete" onClick={()=> {
 								ShowMessageBox({
 									title: `Delete post`, cancelButton: true,
@@ -77,7 +77,9 @@ export class PostUI extends BaseComponent<Props, {editing: boolean, dataError: s
 									}
 								});
 							}}/>}
-						{post.editedAt && <Span ml="auto" style={{opacity: .5}}>edited at {Moment(post.editedAt).format("YYYY-MM-DD HH:mm:ss")}</Span>}
+						{post.editedAt && <Span ml="auto" style={{color: "rgba(255,255,255,.5)"}}>
+							{post.text != null ? "edited" : "deleted"} at {Moment(post.editedAt).format("YYYY-MM-DD HH:mm:ss")}
+						</Span>}
 					</Row>
 				</Column>
 			</Row>

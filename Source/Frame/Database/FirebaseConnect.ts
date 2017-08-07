@@ -97,7 +97,9 @@ export function Connect<T, P>(funcOrFuncGetter) {
 
 				s._firebaseEvents = getEventsFromInput(requestedPaths);
 				let removedPaths = oldRequestedPaths.Except(...requestedPaths);
-				unWatchEvents(firebase, DispatchDBAction, getEventsFromInput(removedPaths));
+				// todo: find correct way of unwatching events; the way below seems to sometimes unwatch while still needed watched
+				// for now, we just never unwatch
+				//unWatchEvents(firebase, DispatchDBAction, getEventsFromInput(removedPaths));
 				let addedPaths = requestedPaths.Except(...oldRequestedPaths);
 				watchEvents(firebase, DispatchDBAction, getEventsFromInput(addedPaths));
 				// for debugging, you can check currently-watched-paths using: store.firebase._.watchers

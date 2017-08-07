@@ -12,6 +12,9 @@ import ThreadDetailsUI from "./ThreadDetailsUI";
 import {Thread} from "../../Store/firebase/forum/@Thread";
 import AddThread from "../../Server/Commands/AddThread";
 import {Post} from "Store/firebase/forum/@Post";
+import {ACTThreadSelect} from "../../Store/main/forum";
+
+export const firstPostPlaceholderText = "*Press the Edit button below to write the text for your thread's first post.*";
 
 export function ShowAddThreadDialog(userID: string, subforumID: number) {
 	let newThread = new Thread({
@@ -20,7 +23,7 @@ export function ShowAddThreadDialog(userID: string, subforumID: number) {
 		subforum: subforumID,
 	});
 	let newPost = new Post({
-		text: "Test",
+		text: firstPostPlaceholderText,
 		creator: GetUserID(),
 	});
 	
@@ -39,8 +42,9 @@ export function ShowAddThreadDialog(userID: string, subforumID: number) {
 				</Column>
 			);
 		},
-		onOK: ()=> {
-			new AddThread({thread: newThread, post: newPost}).Run();
+		onOK: async ()=> {
+			let threadID = await new AddThread({thread: newThread, post: newPost}).Run() as number;
+			store.dispatch(new ACTThreadSelect({id: threadID}));
 		}
 	});
 }

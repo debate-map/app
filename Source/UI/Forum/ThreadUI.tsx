@@ -23,7 +23,7 @@ import DeleteSubforum from "../../Server/Commands/DeleteSubforum";
 import ThreadEntryUI from "UI/Forum/ThreadEntryUI";
 import { ShowSignInPopup } from "UI/@Shared/NavBar/UserPanel";
 import {PermissionGroupSet} from "../../Store/firebase/userExtras/@UserExtraInfo";
-import {ShowAddThreadDialog} from "./AddThreadDialog";
+import { ShowAddThreadDialog, firstPostPlaceholderText } from "./AddThreadDialog";
 import {Post} from "../../Store/firebase/forum/@Post";
 import {GetThreadPosts} from "../../Store/firebase/forum";
 import {PostUI} from "./Thread/PostUI";
@@ -45,9 +45,11 @@ export class ThreadUI extends BaseComponent<Props, {dataError: string}> {
 		let {dataError} = this.state;
 		let userID = GetUserID();
 		
-		if (thread == null || posts == null) {
+		if (thread == null || posts == null || posts.length == 0) {
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading posts...</div>;
 		}
+
+		let firstPostWritten = posts.length > 1 || posts[0].text != firstPostPlaceholderText;
 
 		return (
 			<Column style={{height: "100%"}}>
@@ -67,19 +69,20 @@ export class ThreadUI extends BaseComponent<Props, {dataError: string}> {
 							{posts.map((post, index)=> {
 								return <PostUI key={index} index={index} post={post}/>;
 							})}
-							<Column sel mt={20} style={{flexShrink: 0, background: "rgba(0,0,0,.7)", borderRadius: 10, padding: 10, alignItems: "flex-start", cursor: "auto"}}>
-								<PostEditorUI ref={c=>this.postEditorUI = GetInnerComp(c) as any} baseData={new Post({creator: GetUserID()})} forNew={true}
-									onChange={(newData, comp)=> {
-										this.SetState({dataError: comp.GetValidationError()});
-									}}/>
-								<Row mt={5}>
-									<Button text="Post reply" enabled={dataError == null} onLeftClick={async ()=> {
-										let post = this.postEditorUI.GetNewData();
-										await new AddPost({threadID: thread._id, post: post}).Run();
-									}}/>
-									{/*error && <Pre>{error.message}</Pre>*/}
-								</Row>
-							</Column>
+							{firstPostWritten &&
+								<Column sel mt={20} style={{flexShrink: 0, background: "rgba(0,0,0,.7)", borderRadius: 10, padding: 10, alignItems: "flex-start", cursor: "auto"}}>
+									<PostEditorUI ref={c=>this.postEditorUI = GetInnerComp(c) as any} baseData={new Post({creator: GetUserID()})} forNew={true}
+										onChange={(newData, comp)=> {
+											this.SetState({dataError: comp.GetValidationError()});
+										}}/>
+									<Row mt={5}>
+										<Button text="Post reply" enabled={dataError == null} onLeftClick={async ()=> {
+											let post = this.postEditorUI.GetNewData();
+											await new AddPost({threadID: thread._id, post: post}).Run();
+										}}/>
+										{/*error && <Pre>{error.message}</Pre>*/}
+									</Row>
+								</Column>}
 						</Column>
 					</Column>
 				</ScrollView>

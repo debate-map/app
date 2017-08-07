@@ -21,5 +21,5 @@ AddSchema({
 		createdAt: {type: "number"},
 		editedAt: {type: "number"},
 	},
-	required: ["text", "creator", "createdAt", "editedAt"],
+	required: ["text", "creator", "createdAt"],
 }, "Post");

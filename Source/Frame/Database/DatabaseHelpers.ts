@@ -272,7 +272,9 @@ export async function GetAsync<T>(dbGetterFunc: ()=>T): Promise<T> {
 		}
 
 		// stop watching paths (since we already got their data)
-		unWatchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths));
+		// todo: find correct way of unwatching events; the way below seems to sometimes unwatch while still needed watched
+		// for now, we just never unwatch
+		//unWatchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths));
 	} while (ShallowChanged(requestedPathsSoFar, requestedPathsSoFar_last))
 
 	/*let paths_final = requestedPathsSoFar.VKeys();

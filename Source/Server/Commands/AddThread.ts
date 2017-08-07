@@ -30,6 +30,8 @@ export default class AddThread extends Command<{thread: Thread, post: Post}> {
 		await this.sub_addPost.Prepare();
 
 		thread.posts = [this.sub_addPost.postID];
+
+		this.returnData = this.threadID;
 	}
 	async Validate() {
 		let {thread} = this.payload;

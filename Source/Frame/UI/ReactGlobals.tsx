@@ -241,7 +241,20 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 			if (deepCompare) {
 				if (ToJSON(newState) == ToJSON(oldState_forNewStateKeys)) return [];
 			} else {
-				if (ShallowEquals(newState, oldState_forNewStateKeys)) return [];
+				//if (ShallowEquals(newState, oldState_forNewStateKeys)) return [];
+				// use a looser comparison (we want a missing prop to be equivalent to null and undefined)
+				let same = true;
+				for (let key of this.state.VKeys().concat(newState.VKeys()).Distinct()) {
+					let valA = this.state[key as any];
+					let valB = newState[key as any];
+					if (valA == null && valB == null) continue;
+
+					if (valA !== valB) {
+						same = false;
+						break;
+					}
+				}
+				if (same) return [];
 			}
 		}
 		
