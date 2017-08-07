@@ -12,14 +12,17 @@ import Moment from "moment";
 import {Thread} from "../../Store/firebase/forum/@Thread";
 import { columnWidths } from "UI/Forum/SubforumUI";
 import {ACTThreadSelect} from "../../Store/main/forum";
+import {GetThreadPosts} from "../../Store/firebase/forum";
+import {Post} from "Store/firebase/forum/@Post";
 
-type Props = {index: number, last: boolean, thread: Thread} & Partial<{creator: User}>;
+type Props = {index: number, last: boolean, thread: Thread} & Partial<{creator: User, posts: Post[]}>;
 @Connect((state, {thread})=> ({
 	creator: thread && GetUser(thread.creator),
+	posts: thread && GetThreadPosts(thread),
 }))
 export default class ThreadEntryUI extends BaseComponent<Props, {}> {
 	render() {
-		let {index, last, thread, creator} = this.props;
+		let {index, last, thread, creator, posts} = this.props;
 		let toURL = new URL(null, ["forum", "threads", thread._id+""]);
 		return (
 			<Column p="7px 10px" style={E(
@@ -34,6 +37,7 @@ export default class ThreadEntryUI extends BaseComponent<Props, {}> {
 						{thread.title}
 					</a>
 					<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
+					<span style={{flex: columnWidths[2]}}>{posts ? posts.length : "..."}</span>
 				</Row>
 			</Column>
 		);

@@ -7,6 +7,8 @@ import {getEventsFromInput} from "react-redux-firebase/dist/utils";
 import {ToJSON} from "../General/Globals";
 import { TryCall, Timer } from "../General/Timers";
 import { SplitStringBySlash_Cached } from "Frame/Database/StringSplitCache";
+import {GetUser, GetUserPermissionGroups} from "../../Store/firebase/users";
+import {GetUserID} from "Store/firebase/users";
 
 // Place a selector in Connect() whenever it uses data that:
 // 1) might change during the component's lifetime, and:
@@ -80,6 +82,10 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		let debugText = (props["node"] ? " @ID:" + props["node"]._id : "") + " @changedPath: " + changedPath;
 		let wrapperFunc = eval(`(function ${debugText.replace(/[^a-zA-Z0-9]/g, "_")}() { return mapStateToProps_inner.apply(s, arguments); })`);
 		let result = wrapperFunc.call(s, state, props);
+
+		// also access some other paths here, so that when they change, they trigger ui updates for everything
+		result._user = GetUser(GetUserID());
+		result._permissions = GetUserPermissionGroups(GetUserID());
 
 		let oldRequestedPaths: string[] = s.lastRequestedPaths || [];
 		let requestedPaths: string[] = GetRequestedPaths();

@@ -25,7 +25,7 @@ import { ShowSignInPopup } from "UI/@Shared/NavBar/UserPanel";
 import {PermissionGroupSet} from "../../Store/firebase/userExtras/@UserExtraInfo";
 import {ShowAddThreadDialog} from "./AddThreadDialog";
 
-export const columnWidths = [.8, .2];
+export const columnWidths = [.7, .2, .1];
 
 type Props = {subforum: Subforum, subNavBarWidth?: number} & Partial<{permissions: PermissionGroupSet, threads: Thread[]}>;
 @Connect((state, {subforum}: Props)=> {
@@ -45,26 +45,29 @@ export class SubforumUI extends BaseComponent<Props, {}> {
 		}
 
 		return (
-			<Column style={{width: 960, margin: "50px auto 20px auto", height: "calc(100% - 70px)", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
+			<Column style={{height: "100%"}}>
 				<ActionBar_Left subforum={subforum} subNavBarWidth={subNavBarWidth}/>
 				<ActionBar_Right subforum={subforum} subNavBarWidth={subNavBarWidth}/>
 				<ScrollView ref="scrollView" scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}>
-					<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
-						<Row style={{height: 40, padding: 10}}>
-							<Button text="Add thread" ml="auto" onClick={()=> {
-								if (userID == null) return ShowSignInPopup();
-								ShowAddThreadDialog(userID, subforum._id);
-							}}/>
-						</Row>
-						<Row style={{height: 40, padding: 10}}>
-							<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>Title</span>
-							<span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 17}}>Creator</span>
-						</Row>
-					</Column>
-					<Column>
-						{threads.map((thread, index)=> {
-							return <ThreadEntryUI key={index} index={index} last={index == threads.length - 1} thread={thread}/>;
-						})}
+					<Column style={{width: 960, margin: "50px auto 20px auto", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
+						<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+							<Row style={{height: 40, padding: 10}}>
+								<Button text="Add thread" ml="auto" onClick={()=> {
+									if (userID == null) return ShowSignInPopup();
+									ShowAddThreadDialog(userID, subforum._id);
+								}}/>
+							</Row>
+							<Row style={{height: 40, padding: 10}}>
+								<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>Title</span>
+								<span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 17}}>Creator</span>
+								<span style={{flex: columnWidths[2], fontWeight: 500, fontSize: 17}}>Posts</span>
+							</Row>
+						</Column>
+						<Column>
+							{threads.map((thread, index)=> {
+								return <ThreadEntryUI key={index} index={index} last={index == threads.length - 1} thread={thread}/>;
+							})}
+						</Column>
 					</Column>
 				</ScrollView>
 			</Column>

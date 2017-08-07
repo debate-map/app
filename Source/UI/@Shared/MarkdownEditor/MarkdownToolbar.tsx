@@ -7,6 +7,7 @@ import {applyFormat} from "./Formatter";
 export class MarkdownToolbar extends BaseComponent<{enabled?: boolean, editor: ()=>any, excludeCommands?: string[]}, {}> {
 	render() {
 		let {enabled, editor, excludeCommands} = this.props;
+		excludeCommands = excludeCommands || [];
 
 		let commands = [
 			{name: "h1", label: "H1"},
@@ -43,7 +44,9 @@ class ToolBarButton extends BaseComponent<{editor: ()=>any, command: string, lab
 						applyFormat(editor().codeMirror, command);
 					}}>
 				{icon
-					? <span dangerouslySetInnerHTML={{__html: icon}} className="MDEditor_toolbarButton_icon"/>
+					? <span dangerouslySetInnerHTML={{__html: icon}} className="MDEditor_toolbarButton_icon"
+						style={{position: "relative"}} // fix for odd icon-disappearing issue
+					/>
 					: label}
 			</Button>
 		);

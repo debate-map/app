@@ -33,7 +33,7 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 
 		let splitAt = 100; //, width = 600;
 		return (
-			<div> {/* needed so GetInnerComp() work */}
+			<div> {/* needed so GetInnerComp() works */}
 			<Column style={{flex: 1}}>
 				{newData.map((chain, chainIndex)=> {
 					return (

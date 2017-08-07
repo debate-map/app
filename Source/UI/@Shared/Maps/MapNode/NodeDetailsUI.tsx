@@ -32,7 +32,6 @@ type Props = {
 } & Partial<{creator: User, metaThesisNode: MapNode}>;
 type State = {newData: MapNode, newLinkData: ChildEntry};
 @Connect((state, {baseData, forNew}: Props)=>({
-	_: GetUserAccessLevel(GetUserID()),
 	creator: !forNew && GetUser(baseData.creator),
 	metaThesisNode: GetMetaThesisChildNode(baseData),
 }))
@@ -61,7 +60,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 		let splitAt = 170, width = 600;
 		let isArgument_any = metaThesisNode && metaThesisNode.metaThesis.ifType == MetaThesis_IfType.Any;
 		return (
-			<div> {/* needed so GetInnerComp() work */}
+			<div> {/* needed so GetInnerComp() works */}
 			<Column style={E({padding: 5}, style)}>
 				{/*<Div style={{fontSize: 12}}>ID: {node._id}</Div>
 				<Div mt={3} style={{fontSize: 12}}>Created at: {(Moment as any)(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)

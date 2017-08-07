@@ -42,7 +42,7 @@ export default class ImageAttachmentEditorUI extends BaseComponent<Props, {newDa
 
 		let splitAt = 100;
 		return (
-			<div> {/* needed so GetInnerComp() work */}
+			<div> {/* needed so GetInnerComp() works */}
 			<Column style={style}>
 				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Image ID: </Pre>

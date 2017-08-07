@@ -27,6 +27,7 @@ export function GetUserID(): string {
 }
 
 export function GetUser(userID: string): User {
+	if (userID == null) return null;
 	return GetData("users", userID);
 }
 export function GetUsers(): User[] {

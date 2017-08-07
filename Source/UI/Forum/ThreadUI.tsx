@@ -31,16 +31,18 @@ import ThreadDetailsUI from "./Thread/ThreadDetailsUI";
 import UpdateThreadDetails from "../../Server/Commands/UpdateThreadDetails";
 import DeleteThread from "Server/Commands/DeleteThread";
 import PostEditorUI from "./Thread/PostEditorUI";
+import AddPost from "../../Server/Commands/AddPost";
 
 type Props = {thread: Thread, subNavBarWidth?: number} & Partial<{permissions: PermissionGroupSet, posts: Post[]}>;
 @Connect((state, {thread}: Props)=> ({
 	posts: GetThreadPosts(thread),
 }))
-export class ThreadUI extends BaseComponent<Props, {}> {
+export class ThreadUI extends BaseComponent<Props, {dataError: string}> {
 	static defaultProps = {subNavBarWidth: 0};
 	postEditorUI: PostEditorUI;
 	render() {
 		let {thread, posts} = this.props;
+		let {dataError} = this.state;
 		let userID = GetUserID();
 		
 		if (thread == null || posts == null) {
@@ -48,44 +50,37 @@ export class ThreadUI extends BaseComponent<Props, {}> {
 		}
 
 		return (
-			<Column style={{width: 960, margin: "50px auto 20px auto", height: "calc(100% - 70px)", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
+			<Column style={{height: "100%"}}>
 				<ActionBar_Left thread={thread}/>
 				<ActionBar_Right thread={thread}/>
-				<ScrollView ref="scrollView" scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}>
-					{/*<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
-						<Row style={{height: 40, padding: 10}}>
-							<Button text="Add thread" ml="auto" onClick={()=> {
-								if (userID == null) return ShowSignInPopup();
-								ShowAddThreadDialog(userID, thread._id);
-							}}/>
-						</Row>
-					</Column>*/}
-					<Column>
-						{posts.map((post, index)=> {
-							return <PostUI key={index} index={index} post={post}/>;
-						})}
-						{/*<Column style={{position: "relative"}}>
-							<PostEditorUI ref={c=>this.postEditorUI = GetInnerComp(c) as any} baseData={node} baseLinkData={link} parent={parentNode}
-								forNew={false} enabled={creatorOrMod}
-								onChange={(newData, newLinkData)=> {
-									this.SetState({dataError: this.detailsUI.GetValidationError()});
-								}}/><NodeDetailsUI baseData={newNode.Extended({finalType: newNode.type, link: null})} baseLinkData={newLink} forNew={true}
-						parent={parentNode.Extended({finalType: parentNode.type})}
-						onChange={(newNodeData, newLinkData)=>Change(newNode = newNodeData, newLink = newLinkData)}/>
-							{creatorOrMod &&
-								<Row>
-									<Button text="Save" enabled={dataError == null} onLeftClick={async ()=> {
-										let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "finalType", "link");
-										if (link) {
-											let linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
-											await new UpdateNodeDetails(E(mapID && {mapID}, {nodeID: node._id, nodeUpdates, linkParentID: GetParentNodeID(path), linkUpdates})).Run();
-										} else {
-											await new UpdateNodeDetails(E(mapID && {mapID}, {nodeID: node._id, nodeUpdates})).Run();
-										}
-									}}/>
-									{/*error && <Pre>{error.message}</Pre>*#/}
-								</Row>}
+				<ScrollView ref="scrollView" scrollVBarStyle={{width: 10}} style={{height: "100%"}} contentStyle={{willChange: "transform"}}>
+					<Column style={{width: 960, margin: "50px auto 20px auto", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
+						{/*<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
+							<Row style={{height: 40, padding: 10}}>
+								<Button text="Add thread" ml="auto" onClick={()=> {
+									if (userID == null) return ShowSignInPopup();
+									ShowAddThreadDialog(userID, thread._id);
+								}}/>
+							</Row>
 						</Column>*/}
+						<Column>
+							{posts.map((post, index)=> {
+								return <PostUI key={index} index={index} post={post}/>;
+							})}
+							<Column sel mt={20} style={{flexShrink: 0, background: "rgba(0,0,0,.7)", borderRadius: 10, padding: 10, alignItems: "flex-start", cursor: "auto"}}>
+								<PostEditorUI ref={c=>this.postEditorUI = GetInnerComp(c) as any} baseData={new Post({creator: GetUserID()})} forNew={true}
+									onChange={(newData, comp)=> {
+										this.SetState({dataError: comp.GetValidationError()});
+									}}/>
+								<Row mt={5}>
+									<Button text="Post reply" enabled={dataError == null} onLeftClick={async ()=> {
+										let post = this.postEditorUI.GetNewData();
+										await new AddPost({threadID: thread._id, post: post}).Run();
+									}}/>
+									{/*error && <Pre>{error.message}</Pre>*/}
+								</Row>
+							</Column>
+						</Column>
 					</Column>
 				</ScrollView>
 			</Column>

@@ -25,6 +25,7 @@ type Props = {baseData: Map, forNew: boolean, enabled?: boolean, style?, onChang
 	creator: !forNew && GetUser(baseData.creator),
 }))
 export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
+	static defaultProps = {enabled: true};
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
@@ -42,7 +43,7 @@ export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
 
 		let splitAt = 170, width = 600;
 		return (
-			<div> {/* needed so GetInnerComp() work */}
+			<div> {/* needed so GetInnerComp() works */}
 			<Column style={style}>
 				{!forNew &&
 					<table className="selectableAC" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>

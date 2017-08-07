@@ -41,7 +41,7 @@ export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image
 
 		let splitAt = 170, width = 600;
 		return (
-			<div> {/* needed so GetInnerComp() work */}
+			<div> {/* needed so GetInnerComp() works */}
 			<Column style={style}>
 				{!creating &&
 					<table className="selectableAC" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>

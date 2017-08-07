@@ -19,35 +19,34 @@ import { MarkdownToolbar } from "UI/@Shared/MarkdownEditor/MarkdownToolbar";
 import {Post} from "../../../Store/firebase/forum/@Post";
 
 export default class PostEditorUI extends BaseComponent
-		<{
-			creating?: boolean, editing?: boolean, baseData: Post, showPreview: boolean, justShowed: boolean, onChange?: (newData: Post)=>void,
-		},
+		<{forNew?: boolean, enabled?: boolean, baseData: Post, options?: any, onChange?: (newData: Post, comp: PostEditorUI)=>void},
 		{newData: Post}> {
+	static defaultProps = {enabled: true};
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
 	}
 	
 	render() {
-		let {creating, editing, showPreview, justShowed, onChange} = this.props;
+		let {forNew, enabled, onChange, options} = this.props;
 		let {newData} = this.state;
 		let Change = _=> {
-			if (onChange)
-				onChange(this.GetNewData());
+			if (onChange) onChange(this.GetNewData(), this);
 			this.Update();
 		};
 
 		return (
-			<div> {/* needed so GetInnerComp() work */}
+			<div style={{width: "100%"}}> {/* needed so GetInnerComp() works */}
 			<Column>
-				<Column mt={5}>
-					<Pre>Text: </Pre>
-					{(creating || editing) && <MarkdownToolbar editor={()=>this.refs.editor}/>}
-					<Editor ref="editor" value={newData.text} onChange={val=>Change(newData.text = val)} options={{
-						scrollbarStyle: `overlay`,
-						lineWrapping: true,
-						readOnly: !(creating || editing),
-					}}/>
+				<Column>
+					{enabled && <MarkdownToolbar editor={()=>this.refs.editor}/>}
+					<Editor ref="editor" value={newData.text} onChange={val=>Change(newData.text = val)}
+						options={E({
+							scrollbarStyle: "overlay",
+							lineWrapping: true,
+							readOnly: !enabled,
+							placeholder: "Write your reply..."
+						}, options)}/>
 				</Column>
 			</Column>
 			</div>

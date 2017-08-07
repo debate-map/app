@@ -1,10 +1,10 @@
 export class Post {
-	constructor(initialData: Partial<Post>) {
+	constructor(initialData: {creator: string} & Partial<Post>) {
 		this.Extend(initialData);
 	}
 
 	_id: number;
-	text: string;
+	text = "";
 
 	creator: string;
 	createdAt: number;

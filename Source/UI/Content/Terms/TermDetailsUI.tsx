@@ -41,7 +41,7 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 
 		let splitAt = 170, width = 600;
 		return (
-			<div> {/* needed so GetInnerComp() work */}
+			<div> {/* needed so GetInnerComp() works */}
 			<Column style={style}>
 				{!forNew &&
 					<table className="selectableAC" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>

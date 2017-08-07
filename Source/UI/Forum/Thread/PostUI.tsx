@@ -13,7 +13,7 @@ export class PostUI extends BaseComponent<Props, {}> {
 	render() {
 		let {index, post, creator} = this.props;
 		return (
-			<Row sel mt={index != 0 ? 50 : 0} style={{background: "rgba(0,0,0,.7)", borderRadius: 10, alignItems: "flex-start", cursor: "auto"}}>
+			<Row sel mt={index != 0 ? 20 : 0} style={{flexShrink: 0, background: "rgba(0,0,0,.7)", borderRadius: 10, alignItems: "flex-start", cursor: "auto"}}>
 				<Column style={{width: 125}}>
 					<Div p="5px 5px 0 5px" style={{textAlign: "center"}}>
 						{creator ? creator.displayName : "..."}

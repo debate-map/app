@@ -46,7 +46,7 @@ export class RowLR extends BaseComponent<{splitAt?: number | string, height?: nu
 		var {splitAt, height, className, style, leftStyle, rightStyle, children, ...rest} = this.props;
 		Assert((children as any).length == 2, "Row child-count must be 2. (one for left-side, one for right-side)");
 		return (
-			<div {...rest} style={E({display: "flex"}, style)}>
+			<div {...rest} style={E({display: "flex", flexShrink: 0}, style)}>
 				<div style={E(
 					{display: "flex", alignItems: "center"},
 					{width: typeof splitAt == "string" ? splitAt + "%" : splitAt},
