@@ -20,7 +20,7 @@ export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], 
 		if (userExtraInfoMap == null) return <div/>;
 
 		users = users.OrderBy(a=>userExtraInfoMap[a._key] ? userExtraInfoMap[a._key].joinDate : Number.MAX_SAFE_INTEGER);
-		users = users.OrderByDescending(a=>userExtraInfoMap[a._key] ? userExtraInfoMap[a._key].edits : Number.MIN_SAFE_INTEGER);
+		users = users.OrderByDescending(a=>userExtraInfoMap[a._key] ? (userExtraInfoMap[a._key].edits|0) : Number.MIN_SAFE_INTEGER);
 
 		return (
 			<Column style={{width: 960, margin: "20px auto 20px auto", height: "calc(100% - 40px)", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
