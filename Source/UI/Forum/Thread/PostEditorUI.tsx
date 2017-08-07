@@ -40,7 +40,7 @@ export default class PostEditorUI extends BaseComponent
 			<Column>
 				<Column>
 					{enabled && <MarkdownToolbar editor={()=>this.refs.editor}/>}
-					<Editor ref="editor" value={newData.text} onChange={val=>Change(newData.text = val)}
+					<Editor ref="editor" value={newData.text || ""} onChange={val=>Change(newData.text = val)}
 						options={E({
 							scrollbarStyle: "overlay",
 							lineWrapping: true,

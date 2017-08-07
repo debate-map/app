@@ -4,6 +4,10 @@ import {Post} from "Store/firebase/forum/@Post";
 import Row from "Frame/ReactComponents/Row";
 import {User, GetUser} from "../../../Store/firebase/users";
 import {Connect} from "Frame/Database/FirebaseConnect";
+import Button from "Frame/ReactComponents/Button";
+import Moment from "moment";
+import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
+import DeletePost from "Server/Commands/DeletePost";
 
 type Props = {index: number, post: Post} & Partial<{creator: User}>;
 @Connect((state, {post}: Props)=> ({
@@ -13,7 +17,7 @@ export class PostUI extends BaseComponent<Props, {}> {
 	render() {
 		let {index, post, creator} = this.props;
 		return (
-			<Row sel mt={index != 0 ? 20 : 0} style={{flexShrink: 0, background: "rgba(0,0,0,.7)", borderRadius: 10, alignItems: "flex-start", cursor: "auto"}}>
+			<Row sel mt={index != 0 ? 20 : 0} style={{flexShrink: 0, background: "rgba(0,0,0,.7)", borderRadius: 10, alignItems: "initial", cursor: "auto"}}>
 				<Column style={{width: 125}}>
 					<Div p="5px 5px 0 5px" style={{textAlign: "center"}}>
 						{creator ? creator.displayName : "..."}
@@ -25,6 +29,19 @@ export class PostUI extends BaseComponent<Props, {}> {
 				<Column p={10}>
 					<Row style={{width: "100%"}}>
 						{post.text}
+					</Row>
+					<Row mt="auto">
+						<span style={{opacity: .5}}>{creator ? creator.displayName : "..."}, at {Moment(post.createdAt).format("YYYY-MM-DD HH:mm:ss")}</span>
+						<Button ml={5} text="Edit"/>
+						{index != 0 && <Button ml={5} text="Delete" onClick={()=> {
+							ShowMessageBox({
+								title: `Delete post`, cancelButton: true,
+								message: `Delete this post?`,
+								onOK: async ()=> {
+									await new DeletePost({postID: post._id}).Run();
+								}
+							});
+						}}/>}
 					</Row>
 				</Column>
 			</Row>

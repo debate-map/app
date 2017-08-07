@@ -4,6 +4,7 @@ export class Post {
 	}
 
 	_id: number;
+	thread: number;
 	text = "";
 
 	creator: string;
@@ -12,6 +13,7 @@ export class Post {
 
 AddSchema({
 	properties: {
+		thread: {type: "number"},
 		text: {type: "string"},
 		
 		creator: {type: "string"},

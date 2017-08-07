@@ -22,6 +22,7 @@ export default class AddPost extends Command<{threadID: number, post: Post}> {
 
 		let lastPostID = await GetDataAsync("forum", "general", "lastPostID") as number;
 		this.postID = lastPostID + 1;
+		post.thread = threadID;
 		post.createdAt = Date.now();
 
 		this.thread_oldPosts = await GetDataAsync("forum", "threads", threadID, "posts") || [];

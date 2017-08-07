@@ -246,7 +246,7 @@ export async function GetDataAsync(...args) {
  * It re-calls the db-getter func (after the last generation's requested-path-data was all received), and finds that no new paths are requested.
  */
 g.Extend({GetAsync});
-export async function GetAsync(dbGetterFunc: ()=>any) {
+export async function GetAsync<T>(dbGetterFunc: ()=>T): Promise<T> {
 	Assert(!g.inConnectFunc, "Cannot run GetAsync() from within a Connect() function.");
 	//Assert(!g.inGetAsyncFunc, "Cannot run GetAsync() from within a GetAsync() function.");
 	let firebase = store.firebase;

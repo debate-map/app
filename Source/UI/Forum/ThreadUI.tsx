@@ -144,8 +144,8 @@ class DetailsDropdown extends BaseComponent<DetailsDropdownProps, {dataError: st
 						{isMod &&
 							<Column mt={10}>
 								<Row style={{fontWeight: "bold"}}>Advanced:</Row>
-								<Row>
-									<Button mt={5} text="Delete" enabled={posts.length <= 1} onLeftClick={async ()=> {
+								<Row mt={5}>
+									<Button text="Delete" enabled={posts.length <= 1} onLeftClick={async ()=> {
 										/*let posts = await GetAsync(()=>GetThreadPosts(thread));
 										if (posts.length > 1) {
 											return void ShowMessageBox({title: `Still has posts`,
@@ -161,7 +161,7 @@ class DetailsDropdown extends BaseComponent<DetailsDropdownProps, {dataError: st
 											}
 										});
 									}}/>
-									<Pre> (note: threads with responses cannot be deleted)</Pre>
+									<Pre style={{opacity: .5}}> (note: threads with responses cannot be deleted)</Pre>
 								</Row>
 							</Column>}
 					</Column>

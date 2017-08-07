@@ -13,31 +13,26 @@ import {UserEdit} from "Server/CommandMacros";
 import {Subforum} from "../../Store/firebase/forum/@Subforum";
 import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
 import {GetAsync} from "Frame/Database/DatabaseHelpers";
-import {GetThreadPosts, GetThread} from "../../Store/firebase/forum";
+import {GetThreadPosts, GetThread, GetPost} from "../../Store/firebase/forum";
 import {Post} from "Store/firebase/forum/@Post";
 
 @UserEdit
-export default class DeleteThread extends Command<{threadID: number}> {
-	posts: Post[];
+export default class DeletePost extends Command<{postID: number}> {
+	oldData: Post;
+	thread_oldPosts: number[];
 	async Prepare() {
-		let {threadID} = this.payload;
-		let thread = await GetAsync(()=>GetThread(threadID))
-		this.posts = await GetAsync(()=>GetThreadPosts(thread));
+		let {postID} = this.payload;
+		this.oldData = await GetAsync(()=>GetPost(postID));
+		let thread = await GetAsync(()=>GetThread(this.oldData.thread));
+		this.thread_oldPosts = thread.posts;
 	}
-	async Validate() {
-		if (this.posts.filter(a=>a.creator != this.userInfo.id && a.text).length) {
-			return void ShowMessageBox({title: `Thread contains responses`,
-				message: `Threads with responses by other people cannot be deleted.`});
-		}
-	}
+	async Validate() {}
 
 	GetDBUpdates() {
-		let {threadID} = this.payload;
+		let {postID} = this.payload;
 		let updates = {};
-		updates[`forum/threads/${threadID}`] = null;
-		for (let post of this.posts) {
-			updates[`forum/posts/${post._id}`] = null;
-		}
+		updates[`forum/threads/${this.oldData.thread}/posts`] = this.thread_oldPosts.Except(postID);
+		updates[`forum/posts/${postID}`] = null;
 		return updates;
 	}
 }

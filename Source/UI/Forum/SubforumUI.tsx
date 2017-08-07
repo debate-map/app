@@ -52,6 +52,7 @@ export class SubforumUI extends BaseComponent<Props, {}> {
 					<Column style={{width: 960, margin: "50px auto 20px auto", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
 						<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 							<Row style={{height: 40, padding: 10}}>
+								<span style={{position: "absolute", left: "50%", transform: "translateX(-50%)", fontSize: 18}}>{subforum.name}</span>
 								<Button text="Add thread" ml="auto" onClick={()=> {
 									if (userID == null) return ShowSignInPopup();
 									ShowAddThreadDialog(userID, subforum._id);
