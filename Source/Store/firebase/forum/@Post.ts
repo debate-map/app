@@ -9,6 +9,7 @@ export class Post {
 
 	creator: string;
 	createdAt: number;
+	editedAt: number;
 }
 
 AddSchema({
@@ -18,6 +19,7 @@ AddSchema({
 		
 		creator: {type: "string"},
 		createdAt: {type: "number"},
+		editedAt: {type: "number"},
 	},
-	required: ["text", "creator", "createdAt"],
+	required: ["text", "creator", "createdAt", "editedAt"],
 }, "Post");

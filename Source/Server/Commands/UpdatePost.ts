@@ -7,43 +7,42 @@ import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import {Map_nameFormat, Map} from "../../Store/firebase/maps/@Map";
 import {UserEdit} from "../CommandMacros";
 import {MapEdit} from "Server/CommandMacros";
+import {Post} from "Store/firebase/forum/@Post";
 
 AddSchema({
 	properties: {
-		mapID: {type: "number"},
-		mapUpdates: Schema({
+		postID: {type: "number"},
+		postUpdates: Schema({
 			properties: {
-				name: {type: "string", pattern: Map_nameFormat},
-				defaultExpandDepth: {type: "number"},
+				text: {type: "string"},
 			},
 		}),
 	},
-	required: ["mapID", "mapUpdates"],
-}, "UpdateMapDetails_payload");
+	required: ["postID", "postUpdates"],
+}, "UpdatePost_payload");
 
-@MapEdit
 @UserEdit
-export default class UpdateMapDetails extends Command<{mapID: number, mapUpdates: Partial<Map>}> {
+export class UpdatePost extends Command<{postID: number, postUpdates: Partial<Post>}> {
 	Validate_Early() {
-		AssertValidate("UpdateMapDetails_payload", this.payload, `Payload invalid`);
+		AssertValidate("UpdatePost_payload", this.payload, `Payload invalid`);
 	}
 
-	oldData: Map;
-	newData: Map;
+	oldData: Post;
+	newData: Post;
 	async Prepare() {
-		let {mapID, mapUpdates} = this.payload;
-		this.oldData = await GetDataAsync({addHelpers: false}, "maps", mapID) as Map;
-		this.newData = {...this.oldData, ...mapUpdates};
+		let {postID, postUpdates} = this.payload;
+		this.oldData = await GetDataAsync({addHelpers: false}, "forum", "posts", postID) as Post;
+		this.newData = {...this.oldData, ...postUpdates};
 		this.newData.editedAt = Date.now();
 	}
 	async Validate() {
-		AssertValidate("Map", this.newData, `New map-data invalid`);
+		AssertValidate("Post", this.newData, `New post-data invalid`);
 	}
 	
 	GetDBUpdates() {
-		let {mapID, mapUpdates} = this.payload;
+		let {postID} = this.payload;
 		let updates = {};
-		updates[`maps/${mapID}`] = this.newData;
+		updates[`forum/posts/${postID}`] = this.newData;
 		return updates;
 	}
 }
