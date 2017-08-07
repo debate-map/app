@@ -1,5 +1,5 @@
 export class Post {
-	constructor(initialData: {creator: string} & Partial<Post>) {
+	constructor(initialData: Partial<Post>) {
 		this.Extend(initialData);
 	}
 

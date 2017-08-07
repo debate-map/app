@@ -96,9 +96,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 						let chartHolder = (target as any).plusParents().filter("div.recharts-wrapper");
 						if (chartHolder.length == 0) return;
 
-						if (userID == null) {
-							return ShowSignInPopup();
-						}
+						if (userID == null) return ShowSignInPopup();
 
 						let chart = chartHolder.find(".recharts-cartesian-grid");
 						let posOnChart = new Vector2i(e.pageX - chart.offset().left, e.pageY - chart.offset().top);

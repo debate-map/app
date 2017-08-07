@@ -262,6 +262,7 @@ export async function GetAsync<T>(dbGetterFunc: ()=>T): Promise<T> {
 		result = dbGetterFunc();
 		let newRequestedPaths = GetRequestedPaths().Except(requestedPathsSoFar.VKeys());
 
+		unWatchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths)); // do this just to trigger re-get
 		// start watching paths (causes paths to be requested)
 		watchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths));
 

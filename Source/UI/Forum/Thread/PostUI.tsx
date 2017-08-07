@@ -12,17 +12,19 @@ import {GetUserID} from "Store/firebase/users";
 import PostEditorUI from "./PostEditorUI";
 import {GetUpdates} from "../../../Frame/General/Others";
 import { UpdatePost } from "Server/Commands/UpdatePost";
+import {Thread} from "Store/firebase/forum/@Thread";
+import {IsUserCreatorOrMod} from "../../../Store/firebase/userExtras";
 
 var Markdown = require("react-remarkable");
 
-type Props = {index: number, post: Post} & Partial<{creator: User}>;
+type Props = {index: number, thread: Thread, post: Post} & Partial<{creator: User}>;
 @Connect((state, {post}: Props)=> ({
 	creator: GetUser(post.creator),
 }))
 export class PostUI extends BaseComponent<Props, {editing: boolean, dataError: string}> {
 	postEditorUI: PostEditorUI;
 	render() {
-		let {index, post, creator} = this.props;
+		let {index, thread, post, creator} = this.props;
 		let {editing, dataError} = this.state;
 
 		if (editing) {
@@ -46,6 +48,7 @@ export class PostUI extends BaseComponent<Props, {editing: boolean, dataError: s
 			)
 		}
 
+		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), post);
 		return (
 			<Row sel mt={index != 0 ? 20 : 0} style={{flexShrink: 0, background: "rgba(0,0,0,.7)", borderRadius: 10, alignItems: "initial", cursor: "auto"}}>
 				<Column style={{width: 125}}>
@@ -63,11 +66,11 @@ export class PostUI extends BaseComponent<Props, {editing: boolean, dataError: s
 					</Row>
 					<Row mt="auto">
 						<span style={{color: "rgba(255,255,255,.5)"}}>{creator ? creator.displayName : "..."}, at {Moment(post.createdAt).format("YYYY-MM-DD HH:mm:ss")}</span>
-						{post.creator == GetUserID() &&
+						{creatorOrMod &&
 							<Button ml={5} text="Edit" onClick={()=> {
 								this.SetState({editing: true});
 							}}/>}
-						{post.creator == GetUserID() && index != 0 && post.text != null &&
+						{creatorOrMod && index != 0 && (post.text != null || post._id == thread.posts.Last()) &&
 							<Button ml={5} text="Delete" onClick={()=> {
 								ShowMessageBox({
 									title: `Delete post`, cancelButton: true,

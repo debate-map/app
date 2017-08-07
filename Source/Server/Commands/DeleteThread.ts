@@ -26,8 +26,7 @@ export default class DeleteThread extends Command<{threadID: number}> {
 	}
 	async Validate() {
 		if (this.posts.filter(a=>a.creator != this.userInfo.id && a.text).length) {
-			return void ShowMessageBox({title: `Thread contains responses`,
-				message: `Threads with responses by other people cannot be deleted.`});
+			throw new Error(`Threads with responses by other people cannot be deleted.`);
 		}
 	}
 

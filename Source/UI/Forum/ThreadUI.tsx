@@ -37,12 +37,10 @@ type Props = {thread: Thread, subNavBarWidth?: number} & Partial<{permissions: P
 @Connect((state, {thread}: Props)=> ({
 	posts: GetThreadPosts(thread),
 }))
-export class ThreadUI extends BaseComponent<Props, {dataError: string}> {
+export class ThreadUI extends BaseComponent<Props, {}> {
 	static defaultProps = {subNavBarWidth: 0};
-	postEditorUI: PostEditorUI;
 	render() {
 		let {thread, posts} = this.props;
-		let {dataError} = this.state;
 		let userID = GetUserID();
 		
 		if (thread == null || posts == null || posts.length == 0) {
@@ -67,27 +65,44 @@ export class ThreadUI extends BaseComponent<Props, {dataError: string}> {
 						</Column>*/}
 						<Column>
 							{posts.map((post, index)=> {
-								return <PostUI key={index} index={index} post={post}/>;
+								return <PostUI key={index} index={index} thread={thread} post={post}/>;
 							})}
 							{firstPostWritten &&
-								<Column sel mt={20} style={{flexShrink: 0, background: "rgba(0,0,0,.7)", borderRadius: 10, padding: 10, alignItems: "flex-start", cursor: "auto"}}>
-									<PostEditorUI ref={c=>this.postEditorUI = GetInnerComp(c) as any} baseData={new Post({creator: GetUserID()})} forNew={true}
-										onChange={(newData, comp)=> {
-											this.SetState({dataError: comp.GetValidationError()});
-										}}/>
-									<Row mt={5}>
-										<Button text="Post reply" enabled={dataError == null} onLeftClick={async ()=> {
-											let post = this.postEditorUI.GetNewData();
-											await new AddPost({threadID: thread._id, post: post}).Run();
-										}}/>
-										{/*error && <Pre>{error.message}</Pre>*/}
-									</Row>
-								</Column>}
+								<ReplyBox thread={thread}/>}
 						</Column>
 					</Column>
 				</ScrollView>
 			</Column>
 		);
+	}
+}
+
+class ReplyBox extends BaseComponent<{thread: Thread}, {dataError: string}> {
+	postEditorUI: PostEditorUI;
+	newPost: Post;
+	render() {
+		let {thread} = this.props;
+		let {dataError} = this.state;
+		this.newPost = this.newPost || new Post({});
+		return (
+			<Column sel mt={20} style={{flexShrink: 0, background: "rgba(0,0,0,.7)", borderRadius: 10, padding: 10, alignItems: "flex-start", cursor: "auto"}}>
+				<PostEditorUI ref={c=>this.postEditorUI = GetInnerComp(c) as any} baseData={this.newPost} forNew={true}
+					onChange={(newData, comp)=> {
+						this.newPost = newData;
+						this.SetState({dataError: comp.GetValidationError()});
+					}}/>
+				<Row mt={5}>
+					<Button text="Post reply" enabled={dataError == null} onLeftClick={async ()=> {
+						if (GetUserID() == null) return ShowSignInPopup();
+						
+						let post = this.postEditorUI.GetNewData();
+						await new AddPost({threadID: thread._id, post: post}).Run();
+						this.newPost = null;
+					}}/>
+					{/*error && <Pre>{error.message}</Pre>*/}
+				</Row>
+			</Column>
+		)
 	}
 }
 
@@ -124,7 +139,8 @@ class DetailsDropdown extends BaseComponent<DetailsDropdownProps, {dataError: st
 	render() {
 		let {thread, posts} = this.props;
 		let {dataError} = this.state;
-		let isMod = IsUserMod(GetUserID());
+		
+		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), thread);
 		return (
 			<DropDown>
 				<DropDownTrigger>
@@ -133,18 +149,18 @@ class DetailsDropdown extends BaseComponent<DetailsDropdownProps, {dataError: st
 				<DropDownContent style={{left: 0}}>
 					<Column>
 						<ThreadDetailsUI ref={c=>this.detailsUI = GetInnerComp(c) as any} baseData={thread}
-							forNew={false} enabled={isMod}
+							forNew={false} enabled={creatorOrMod}
 							onChange={newData=> {
 								this.SetState({dataError: this.detailsUI.GetValidationError()});
 							}}/>
-						{isMod &&
+						{creatorOrMod &&
 							<Row>
 								<Button mt={5} text="Save" enabled={dataError == null} onLeftClick={async ()=> {
 									let threadUpdates = GetUpdates(thread, this.detailsUI.GetNewData()).Excluding("posts");
 									await new UpdateThreadDetails({threadID: thread._id, threadUpdates}).Run();
 								}}/>
 							</Row>}
-						{isMod &&
+						{creatorOrMod &&
 							<Column mt={10}>
 								<Row style={{fontWeight: "bold"}}>Advanced:</Row>
 								<Row mt={5}>

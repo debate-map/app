@@ -5,6 +5,8 @@ import {Term} from "./terms/@Term";
 import {Image} from "./images/@Image";
 import {Map} from "./maps/@Map";
 import {Subforum} from "./forum/@Subforum";
+import {Post} from "./forum/@Post";
+import {Thread} from "Store/firebase/forum/@Thread";
 
 
 // selectors
@@ -17,7 +19,7 @@ export function IsUserBasicOrAnon(userID: string) {
 	let permissionGroups = GetUserPermissionGroups(userID);
 	return permissionGroups == null || permissionGroups.basic;
 }
-export function IsUserCreatorOrMod(userID: string, entity: Term | Image | Map | MapNode) {
+export function IsUserCreatorOrMod(userID: string, entity: Term | Image | Map | MapNode | Post | Thread) {
 	let permissionGroups = GetUserPermissionGroups(userID);
 	if (permissionGroups == null) return false;
 	return (entity.creator == userID && permissionGroups.basic) || permissionGroups.mod;
