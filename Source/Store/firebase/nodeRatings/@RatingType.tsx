@@ -32,6 +32,7 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNode, parent:
 	} else if (ratingType == "strength") {
 		result.description = "Argument strength is calculated based on the probabilities of its premises, and the probability/adjustment of its meta-thesis.";
 	} else if (ratingType == "adjustment") {
+		Assert(parent, `Invalid state. Node with rating-type "adjustment" must have a "parent" argument passed alongside. @path:${path}`);
 		Assert(node.metaThesis, `Invalid state. Node with rating-type "adjustment" should have a metaThesis property attached. @path:${path}`);
 
 		let grandParentID = SplitStringBySlash_Cached(path).length >= 3 ? SplitStringBySlash_Cached(path).XFromLast(2).ToInt() : null;

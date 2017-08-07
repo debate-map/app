@@ -17,6 +17,7 @@ import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@Sour
 import {GetEntries} from "../../../Frame/General/Enums";
 import { MarkdownToolbar } from "UI/@Shared/MarkdownEditor/MarkdownToolbar";
 import {Post} from "../../../Store/firebase/forum/@Post";
+import Link from "../../../Frame/ReactComponents/Link";
 
 export default class PostEditorUI extends BaseComponent
 		<{forNew?: boolean, enabled?: boolean, baseData: Post, options?: any, onChange?: (newData: Post, comp: PostEditorUI)=>void},
@@ -39,7 +40,10 @@ export default class PostEditorUI extends BaseComponent
 			<div style={{width: "100%"}}> {/* needed so GetInnerComp() works */}
 			<Column>
 				<Column>
-					{enabled && <MarkdownToolbar editor={()=>this.refs.editor}/>}
+					{enabled &&
+						<MarkdownToolbar editor={()=>this.refs.editor}>
+							<Link to="https://guides.github.com/features/mastering-markdown" style={{marginLeft: 10}}>How to add links, images, etc.</Link>
+						</MarkdownToolbar>}
 					<Editor ref="editor" value={newData.text || ""} onChange={val=>Change(newData.text = val)}
 						options={E({
 							scrollbarStyle: "overlay",

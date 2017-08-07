@@ -18,21 +18,21 @@ import {Post} from "Store/firebase/forum/@Post";
 
 @UserEdit
 export default class DeletePost extends Command<{postID: number}> {
-	oldData: Post;
-	thread_oldPosts: number[];
+	/*oldData: Post;
+	thread_oldPosts: number[];*/
 	async Prepare() {
-		let {postID} = this.payload;
+		/*let {postID} = this.payload;
 		this.oldData = await GetAsync(()=>GetPost(postID));
 		let thread = await GetAsync(()=>GetThread(this.oldData.thread));
-		this.thread_oldPosts = thread.posts;
+		this.thread_oldPosts = thread.posts;*/
 	}
 	async Validate() {}
 
 	GetDBUpdates() {
 		let {postID} = this.payload;
 		let updates = {};
-		updates[`forum/threads/${this.oldData.thread}/posts`] = this.thread_oldPosts.Except(postID);
-		updates[`forum/posts/${postID}`] = null;
+		//updates[`forum/threads/${this.oldData.thread}/posts`] = this.thread_oldPosts.Except(postID);
+		updates[`forum/posts/${postID}/text`] = null;
 		return updates;
 	}
 }

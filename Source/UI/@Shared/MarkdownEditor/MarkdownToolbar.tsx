@@ -6,7 +6,7 @@ import {applyFormat} from "./Formatter";
 
 export class MarkdownToolbar extends BaseComponent<{enabled?: boolean, editor: ()=>any, excludeCommands?: string[]}, {}> {
 	render() {
-		let {enabled, editor, excludeCommands} = this.props;
+		let {enabled, editor, excludeCommands, children} = this.props;
 		excludeCommands = excludeCommands || [];
 
 		let commands = [
@@ -26,6 +26,7 @@ export class MarkdownToolbar extends BaseComponent<{enabled?: boolean, editor: (
 				{commands.filter(a=>!excludeCommands.Contains(a.name)).map((command, index)=> {
 					return <ToolBarButton key={index} enabled={enabled} editor={editor} command={command.name} label={command.label} first={index == 0}/>;
 				})}
+				{children}
 			</Row>
 		);	
 	}

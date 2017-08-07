@@ -7,6 +7,7 @@ import {Connect} from "../Database/FirebaseConnect";
 import {MakeRootReducer} from "../../Store/index";
 import { GetNewURL } from "../URL/URLManager";
 import {State_overrides} from "../../UI/@Shared/StateOverrides";
+import {URL, GetCurrentURL} from "../General/URLs";
 
 /*@Radium
 export default class Link extends BaseComponent<{to, target?: string, replace?: boolean, style?, onClick?}, {}> {
@@ -61,22 +62,29 @@ export default class Link extends BaseComponent<Props, {}> {
 		if (event.button !== 0) return; // ignore right clicks
 		if (isModifiedEvent(event)) return; // ignore clicks with modifier keys
 
-		event.preventDefault();
-
 		if (actions) {
+			event.preventDefault();
 			actions(store.dispatch); // apply actions
 		} else {
-			if (target) return; // let browser handle "target=_blank" etc.
+			let isExternal = URL.Parse(to, true).domain != GetCurrentURL().domain;
+			if (isExternal || target) return; // let browser handle external links, and "target=_blank"
+
+			event.preventDefault();
 			store.dispatch(replaceURL ? replace(to) : push(to));
 		}
 	}
 
 	render() {
-		let {to, actions, children, ...rest} = this.props // eslint-disable-line no-unused-vars
+		let {to, target, actions, children, ...rest} = this.props // eslint-disable-line no-unused-vars
 		//const href = this.context.router.history.createHref(typeof to === 'string' ? {pathname: to} : to)
+		let isExternal = URL.Parse(to, true).domain != GetCurrentURL().domain;
+		if (isExternal && target === undefined) {
+			target = "_blank";
+		}
+
 		if (to) {
 			return (
-				<a {...rest} onClick={this.handleClick} href={to}>
+				<a {...rest} onClick={this.handleClick} href={to} target={target}>
 					{children}
 				</a>
 			);

@@ -35,6 +35,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 	render() {
 		let {map, path, node, nodeView, ratingsRoot, backgroundColor, asHover, inList, onPanelButtonHover, onPanelButtonClick, style, form, parentNode} = this.props;
 		let openPanel = nodeView.openPanel;
+		if (node.metaThesis && parentNode == null) return <div/>; // if meta-thesis, but no parent-node connected, must still be loading
 
 		let nodeReversed = form == ThesisForm.Negation;
 		let contextReversed = IsContextReversed(node, parentNode);

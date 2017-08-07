@@ -9,6 +9,8 @@ import Moment from "moment";
 import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
 import DeletePost from "Server/Commands/DeletePost";
 
+var Markdown = require("react-remarkable");
+
 type Props = {index: number, post: Post} & Partial<{creator: User}>;
 @Connect((state, {post}: Props)=> ({
 	creator: GetUser(post.creator),
@@ -28,7 +30,8 @@ export class PostUI extends BaseComponent<Props, {}> {
 				</Column>
 				<Column p={10}>
 					<Row style={{width: "100%"}}>
-						{post.text}
+						{/*post.text*/}
+						<Markdown container="div" source={post.text ? post.text : "*This post has been deleted.*"}/>
 					</Row>
 					<Row mt="auto">
 						<span style={{opacity: .5}}>{creator ? creator.displayName : "..."}, at {Moment(post.createdAt).format("YYYY-MM-DD HH:mm:ss")}</span>
