@@ -30,6 +30,7 @@ import {PostUI} from "./Thread/PostUI";
 import ThreadDetailsUI from "./Thread/ThreadDetailsUI";
 import UpdateThreadDetails from "../../Server/Commands/UpdateThreadDetails";
 import DeleteThread from "Server/Commands/DeleteThread";
+import PostEditorUI from "./Thread/PostEditorUI";
 
 type Props = {thread: Thread, subNavBarWidth?: number} & Partial<{permissions: PermissionGroupSet, posts: Post[]}>;
 @Connect((state, {thread}: Props)=> ({
@@ -37,6 +38,7 @@ type Props = {thread: Thread, subNavBarWidth?: number} & Partial<{permissions: P
 }))
 export class ThreadUI extends BaseComponent<Props, {}> {
 	static defaultProps = {subNavBarWidth: 0};
+	postEditorUI: PostEditorUI;
 	render() {
 		let {thread, posts} = this.props;
 		let userID = GetUserID();
@@ -60,8 +62,30 @@ export class ThreadUI extends BaseComponent<Props, {}> {
 					</Column>*/}
 					<Column>
 						{posts.map((post, index)=> {
-							return <PostUI key={index} post={post}/>;
+							return <PostUI key={index} index={index} post={post}/>;
 						})}
+						{/*<Column style={{position: "relative"}}>
+							<PostEditorUI ref={c=>this.postEditorUI = GetInnerComp(c) as any} baseData={node} baseLinkData={link} parent={parentNode}
+								forNew={false} enabled={creatorOrMod}
+								onChange={(newData, newLinkData)=> {
+									this.SetState({dataError: this.detailsUI.GetValidationError()});
+								}}/><NodeDetailsUI baseData={newNode.Extended({finalType: newNode.type, link: null})} baseLinkData={newLink} forNew={true}
+						parent={parentNode.Extended({finalType: parentNode.type})}
+						onChange={(newNodeData, newLinkData)=>Change(newNode = newNodeData, newLink = newLinkData)}/>
+							{creatorOrMod &&
+								<Row>
+									<Button text="Save" enabled={dataError == null} onLeftClick={async ()=> {
+										let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "finalType", "link");
+										if (link) {
+											let linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
+											await new UpdateNodeDetails(E(mapID && {mapID}, {nodeID: node._id, nodeUpdates, linkParentID: GetParentNodeID(path), linkUpdates})).Run();
+										} else {
+											await new UpdateNodeDetails(E(mapID && {mapID}, {nodeID: node._id, nodeUpdates})).Run();
+										}
+									}}/>
+									{/*error && <Pre>{error.message}</Pre>*#/}
+								</Row>}
+						</Column>*/}
 					</Column>
 				</ScrollView>
 			</Column>

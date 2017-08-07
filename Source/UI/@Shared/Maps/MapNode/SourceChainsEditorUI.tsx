@@ -77,7 +77,7 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 						</Column>
 					);
 				})}
-				{enabled && <Button text="Add source chain" mt={10} style={{alignSelf: "flex-start"}} onClick={()=>Change(newData.push(new SourceChain()))}/>}
+				{enabled && <Button text="Add source chain" mt={10} style={{alignSelf: "flex-start"}} onClick={()=>Change(newData.push([new Source()]))}/>}
 			</Column>
 			</div>
 		);

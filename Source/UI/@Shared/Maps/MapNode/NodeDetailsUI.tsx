@@ -27,7 +27,7 @@ import ImageAttachmentEditorUI from "./ImageAttachmentEditorUI";
 
 type Props = {
 	baseData: MapNodeEnhanced, baseLinkData: ChildEntry, parent: MapNodeEnhanced, forNew: boolean, enabled?: boolean,
-	style?, onChange?: (newData: MapNode, newLinkData: ChildEntry)=>void,
+	style?, onChange?: (newData: MapNode, newLinkData: ChildEntry, component: NodeDetailsUI)=>void,
 	//onSetError: (error: string)=>void,
 } & Partial<{creator: User, metaThesisNode: MapNode}>;
 type State = {newData: MapNode, newLinkData: ChildEntry};
@@ -44,13 +44,14 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 			this.SetState({newData: Clone(props.baseData).Excluding("finalType", "link"), newLinkData: Clone(props.baseLinkData)});
 	}
 
+	quoteEditor: QuoteInfoEditorUI;
 	render() {
 		let {baseData, metaThesisNode, parent, forNew, enabled, style, onChange, creator} = this.props;
 		let {newData, newLinkData} = this.state;
 		let firebase = store.firebase.helpers;
 		let Change = (..._)=> {
 			if (onChange)
-				onChange(this.GetNewData(), this.GetNewLinkData());
+				onChange(this.GetNewData(), this.GetNewLinkData(), this);
 			this.Update();
 		};
 
@@ -77,7 +78,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 					<EquationEditorUI key={0} creating={forNew} editing={enabled}
 						baseData={newData.equation} onChange={val=>Change(newData.equation = val)}/>}
 				{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Quote &&
-					<QuoteInfoEditorUI key={1} creating={forNew} editing={enabled}
+					<QuoteInfoEditorUI ref={c=>this.quoteEditor = c} key={1} creating={forNew} editing={enabled}
 						baseData={newData.contentNode} onChange={val=>Change(newData.contentNode = val)}
 						showPreview={false} justShowed={false}/>}
 				{newData.type == MapNodeType.Thesis && thesisType == ThesisType.Image &&
@@ -100,6 +101,10 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 		);
 	}
 	GetValidationError() {
+		if (this.quoteEditor) {
+			let quoteError = this.quoteEditor.GetValidationError();
+			if (quoteError) return quoteError;
+		}
 		return GetErrorMessagesForForm(FindDOM(this))[0];
 	}
 

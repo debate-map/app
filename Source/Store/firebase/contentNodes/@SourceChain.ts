@@ -2,10 +2,11 @@ import {GetValues_ForSchema} from "../../../Frame/General/Enums";
 //export type SourceChain = { [key: number]: Source; };
 //export type SourceChainI = {[key: number]: Source;};
 //export class SourceChain /*implements SourceChainI*/ {
-export class SourceChain extends Array {
+/*export class SourceChain extends Array {
 	[key: number]: Source;
 	0 = new Source();
-};
+};*/
+export type SourceChain = Source[];
 //AddSchema({patternProperties: {"^[0-9]+$": {$ref: "Source"}}, minProperties: 1}, "SourceChain");
 AddSchema({items: {$ref: "Source"}, minItems: 1}, "SourceChain");
 

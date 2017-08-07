@@ -1,10 +1,14 @@
 import {GetValues_ForSchema} from "../../../Frame/General/Enums";
 import {SourceChain} from "./@SourceChain";
+import {Source} from "Store/firebase/contentNodes/@SourceChain";
 
 // todo: probably rename to "Quote"
 export class ContentNode {
+	constructor() {
+		this.sourceChains = [[new Source()]];
+	}
 	content = "";
-	sourceChains = [new SourceChain()];
+	sourceChains: SourceChain[];
 }
 AddSchema({
 	properties: {

@@ -1,5 +1,5 @@
 import {GetValues_ForSchema} from "../../../Frame/General/Enums";
-import {SourceChain} from "Store/firebase/contentNodes/@SourceChain";
+import {SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
 
 export enum ImageType {
 	Photo = 10,
@@ -13,6 +13,7 @@ export function GetNiceNameForImageType(type: ImageType) {
 
 export class Image {
 	constructor(initialData: {name: string, type: ImageType, creator: string} & Partial<Image>) {
+		this.sourceChains = [[new Source()]];
 		this.Extend(initialData);
 		//this.createdAt = Date.now();
 	}
@@ -25,7 +26,7 @@ export class Image {
 	description: string;
 	previewWidth: number;
 
-	sourceChains = [new SourceChain()];
+	sourceChains: SourceChain[];
 
 	creator: string;
 	createdAt: number;

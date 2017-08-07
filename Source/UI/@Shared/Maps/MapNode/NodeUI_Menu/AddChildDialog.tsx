@@ -4,7 +4,7 @@ import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, ThesisType, ImageAttac
 import {ShowMessageBox, BoxController} from "../../../../../Frame/UI/VMessageBox";
 import Select from "../../../../../Frame/ReactComponents/Select";
 import TextInput from "../../../../../Frame/ReactComponents/TextInput";
-import {Div, Pre, BaseComponent} from "../../../../../Frame/UI/ReactGlobals";
+import {Div, Pre, BaseComponent, GetInnerComp} from "../../../../../Frame/UI/ReactGlobals";
 import Row from "../../../../../Frame/ReactComponents/Row";
 import Column from "../../../../../Frame/ReactComponents/Column";
 import keycode from "keycode";
@@ -62,14 +62,14 @@ export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: Thes
 	}
 	
 	let justShowed = true;
-	let quoteError = null;
-	let quoteEditor: QuoteInfoEditorUI;
+	let nodeEditorUI: NodeDetailsUI;
+	let validationError = null;
 	let Change = (..._)=>boxController.UpdateUI();
 	let boxController: BoxController = ShowMessageBox({
 		title: `Add ${displayName}`, cancelButton: true,
 		messageUI: ()=> {
 			setTimeout(()=>justShowed = false);
-			boxController.options.okButtonClickable = quoteError == null;
+			boxController.options.okButtonClickable = validationError == null;
 
 			let thesisTypes = GetEntries(ThesisType);
 			thesisTypes.Remove(thesisTypes.find(a=>a.value == ThesisType.MetaThesis));
@@ -95,17 +95,31 @@ export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: Thes
 										newNode.image = new ImageAttachment();
 									}
 									Change();
+
+									let oldError = validationError;
+									setTimeout(()=> {
+										validationError = nodeEditorUI.GetValidationError();
+										if (validationError != oldError) {
+											Change();
+										}
+									});
 								}}/>
 						</Row>}
-					<NodeDetailsUI baseData={newNode.Extended({finalType: newNode.type, link: null})} baseLinkData={newLink} forNew={true}
+					<NodeDetailsUI ref={c=>nodeEditorUI = GetInnerComp(c) as any}
+						baseData={newNode.Extended({finalType: newNode.type, link: null})} baseLinkData={newLink} forNew={true}
 						parent={parentNode.Extended({finalType: parentNode.type})}
-						onChange={(newNodeData, newLinkData)=>Change(newNode = newNodeData, newLink = newLinkData)}/>
+						onChange={(newNodeData, newLinkData, comp)=> {
+							newNode = newNodeData;
+							newLink = newLinkData;
+							validationError = comp.GetValidationError();
+							Change();
+						}}/>
 				</Column>
 			);
 		},
 		onOK: async ()=> {
-			/*if (quoteError) {
-				return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${quoteError}`}));
+			/*if (validationError) {
+				return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`}));
 			}*/
 
 			let newNodeID = await new AddNode({mapID: mapID, node: newNode, link: newLink, metaThesisNode: newMetaThesis}).Run();
