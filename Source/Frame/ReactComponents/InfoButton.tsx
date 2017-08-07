@@ -50,7 +50,7 @@ export default class InfoButton extends BaseComponent<{text: string, effect?: Ef
 		return (
 			<Tooltip placement="top" overlay={<InTooltip>{text}</InTooltip>}>
 				<Button {...rest as any} size={13} iconSize={13} iconPath="/Images/Buttons/Info.png"
-						useOpacityForHover={true} style={{position: `relative`, zIndex: 1, marginLeft: 1, backgroundColor: null, boxShadow: null}}
+						useOpacityForHover={true} style={{position: `relative`, zIndex: 1, marginLeft: 1, backgroundColor: null, boxShadow: null, border: null}}
 						//title={text}
 						data-tip data-for={this.tooltip.IDStr}>
 					{/*<ReactTooltip id={tipID} effect={effect}>

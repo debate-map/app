@@ -94,7 +94,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 						style={{
 							margin: "-1px 0 1px 0", height: 17, lineHeight: "12px", padding: 0,
 							position: "relative", display: "flex", justifyContent: "space-around", //alignItems: "center",
-							background: null, boxShadow: null, borderRadius: "0 0 5px 5px",
+							background: null, boxShadow: null, border: null, borderRadius: "0 0 5px 5px",
 							":hover": {background: `rgba(${backgroundColor},.5)`},
 						}}/>
 				</div>
@@ -111,7 +111,8 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 						style={{
 							margin: "-1px 0 1px 0", height: 17, lineHeight: "12px", padding: 0,
 							position: "relative", display: "flex", justifyContent: "space-around", //alignItems: "center",
-							background: null, boxShadow: null, borderRadius: "0 0 5px 5px",
+							background: null, boxShadow: null, border: null,
+							borderRadius: "0 0 5px 5px",
 							":hover": {background: `rgba(${backgroundColor},.5)`},
 						}}/>
 				</div>
@@ -131,8 +132,12 @@ class PanelButton extends BaseComponent<PanelButton_Props, {}> {
 			<Button text={text}
 					style={E(
 						{position: "relative", display: "flex", justifyContent: "space-between", padding: "3px 7px"},
-						{border: "1px outset rgba(0,0,0,.35)", boxShadow: "none", borderRadius: 0,
-							backgroundColor: "rgba(255,255,255,.1)", ":hover": {backgroundColor: "rgba(255,255,255,.2)"}},
+						{
+							//border: "1px outset rgba(0,0,0,.35)",
+							border: "solid rgba(0,0,0,.4)", borderWidth: "0 0 1px 0",
+							boxShadow: "none", borderRadius: 0,
+							backgroundColor: "rgba(255,255,255,.1)", ":hover": {backgroundColor: "rgba(255,255,255,.2)"}
+						},
 						openPanel == panel && {backgroundColor: "rgba(255,255,255,.2)"},
 						style
 					)}

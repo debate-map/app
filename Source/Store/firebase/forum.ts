@@ -46,6 +46,7 @@ export function GetSectionSubforums(section: Section): Subforum[] {
 }
 
 export function GetThread(id: number): Thread {
+	if (id == null) return null;
 	return GetData("forum", "threads", id);
 }
 export function GetThreads(): Thread[] {
@@ -55,4 +56,18 @@ export function GetThreads(): Thread[] {
 export function GetSubforumThreads(subforum: Subforum): Thread[] {
 	let threads = GetThreads();
 	return CachedTransform("GetSubforumThreads", [subforum._id], threads, ()=>threads.filter(thread=>thread.subforum == subforum._id));
+}
+
+export function GetPost(id: number): Post {
+	if (id == null) return null;
+	return GetData("forum", "posts", id);
+}
+export function GetPosts(): Post[] {
+	let postsMap = GetData("forum", "posts");
+	return CachedTransform("GetPosts", [], postsMap, ()=>postsMap ? postsMap.VValues(true) : []);
+}
+export function GetThreadPosts(thread: Thread): Post[] {
+	let posts = thread.posts.map(id=>GetPost(id));
+	if (posts.Any(a=>a == null)) return emptyArray;
+	return CachedTransform("GetThreadPosts", [thread._id], posts, ()=>posts);
 }

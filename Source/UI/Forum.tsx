@@ -11,7 +11,7 @@ import {GetSections, GetSubforums, GetSectionSubforums, GetSubforumThreads} from
 import {Section} from "../Store/firebase/forum/@Section";
 import {Subforum} from "../Store/firebase/forum/@Subforum";
 import {URL} from "../Frame/General/URLs";
-import {ACTSubforumSelect, GetSelectedSubforum} from "../Store/main/forum";
+import {ACTSubforumSelect, GetSelectedSubforum, GetSelectedThread} from "../Store/main/forum";
 import {SubforumUI} from "./Forum/SubforumUI";
 import {IsUserMod, IsUserAdmin} from "../Store/firebase/userExtras";
 import Button from "Frame/ReactComponents/Button";
@@ -19,6 +19,7 @@ import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddSectionDialog} from "./Forum/AddSectionDialog";
 import {ShowAddSubforumDialog} from "./Forum/AddSubforumDialog";
 import {Thread} from "Store/firebase/forum/@Thread";
+import {ThreadUI} from "./Forum/ThreadUI";
 
 export const columnWidths = [.7, .3];
 
@@ -26,11 +27,15 @@ export const columnWidths = [.7, .3];
 	_: GetUserPermissionGroups(GetUserID()),
 	sections: GetSections(),
 	selectedSubforum: GetSelectedSubforum(),
+	selectedThread: GetSelectedThread(),
 }))
-export default class ForumUI extends BaseComponent<{} & Partial<{sections: Section[], selectedSubforum: Subforum}>, {}> {
+export default class ForumUI extends BaseComponent<{} & Partial<{sections: Section[], selectedSubforum: Subforum, selectedThread: Thread}>, {}> {
 	render() {
-		let {sections, selectedSubforum} = this.props;
+		let {sections, selectedSubforum, selectedThread} = this.props;
 
+		if (selectedThread) {
+			return <ThreadUI thread={selectedThread}/>;
+		}
 		if (selectedSubforum) {
 			return <SubforumUI subforum={selectedSubforum}/>;
 		}
@@ -71,7 +76,7 @@ class SectionUI extends BaseComponent<SectionUI_Props, {}> {
 			<Column style={{width: 960, margin: "20px auto 20px auto"}}>
 				<Column className="clickThrough" style={{height: 70, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 					<Row style={{height: 40, padding: 10, fontSize: 18}}>
-						<span style={{position: "absolute", width: "100%", textAlign: "center"}}>{section.name}</span>
+						<span style={{position: "absolute", left: "50%", transform: "translateX(-50%)"}}>{section.name}</span>
 						{isAdmin &&
 							<Button text="Add subforum" ml="auto" onClick={()=> {
 								if (userID == null) return ShowSignInPopup();

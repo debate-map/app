@@ -69,7 +69,9 @@ export class MessageUI extends BaseComponent<{message: NotificationMessage}, {}>
 							style={{
 								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
 								width: 18, padding: "2px 4px", fontSize: 13, lineHeight: "1px", // keeps text from making meta-theses too tall
-								backgroundColor: `rgba(${backgroundColor.split(",").map(a=>(parseInt(a) * .8).RoundTo(1)).join(",")},.7)`, boxShadow: "none",
+								backgroundColor: `rgba(${backgroundColor.split(",").map(a=>(parseInt(a) * .8).RoundTo(1)).join(",")},.7)`,
+								//boxShadow: "none",
+								border: "none",
 								":hover": {backgroundColor: `rgba(${backgroundColor.split(",").map(a=>(parseInt(a) * .9).RoundTo(1)).join(",")},.7)`},
 							}}
 							onClick={e=> {

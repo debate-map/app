@@ -147,7 +147,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								fontSize: expanded ? 23 : 17,
 								lineHeight: "1px", // keeps text from making meta-theses too tall
 								backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(`,`).map(a=>(parseInt(a) * .8).RoundTo(1)).join(`,`)},.7)`,
-								boxShadow: "none",
+								border: "none",
 								":hover": {backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(`,`).map(a=>(parseInt(a) * .9).RoundTo(1)).join(`,`)},.7)`},
 							}}
 							onClick={e=> {
