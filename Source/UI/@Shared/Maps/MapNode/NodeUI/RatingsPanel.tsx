@@ -166,6 +166,8 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 		if (this.lastRender_source == RenderSource.SetState) return;
 
 		let dom = this.refs.root;
+		if (!dom) return;
+		 
 		let size = new Vector2i(dom.clientWidth, dom.clientHeight);
 		//if (!size.Equals(this.state.size))
 		this.SetState({size}, null, false);
