@@ -160,9 +160,9 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 				</div>
 				{bottomPanelShow &&
 					<div style={{
-								position: "absolute", top: "calc(100% + 1px)", width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
-								padding: 5, background: "rgba(0,0,0,.7)", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-							}}>
+						position: "absolute", left: 0, top: "calc(100% + 1px)", width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
+						padding: 5, background: "rgba(0,0,0,.7)", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+					}}>
 						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${nodeTypeInfo.backgroundColor},.7)`}}/>
 						{ratingTypes.Contains(panelToShow) && (()=> {
 							let ratings = GetRatings(node._id, panelToShow as RatingType);

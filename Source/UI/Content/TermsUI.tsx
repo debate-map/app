@@ -50,7 +50,11 @@ export default class TermsUI extends BaseComponent<Props, {selectedTerm_newData:
 		
 		return (
 			<Row plr={7} style={{height: "100%", alignItems: "flex-start"}}>
-				<Column mtb={10} style={{position: "relative", flex: .4, height: "calc(100% - 20px)", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
+				<Column mtb={10} style={{
+					//position: "relative", flex: .4, height: "calc(100% - 20px)",
+					position: "absolute", left: 0, right: "40%", height: "calc(100% - 20px)", // fix for safari
+					background: "rgba(0,0,0,.5)", borderRadius: 10
+				}}>
 					<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 						<Div p={7} style={{position: "absolute", left: 0}}>
 							<Button text="Add term" onClick={e=> {
@@ -71,7 +75,11 @@ export default class TermsUI extends BaseComponent<Props, {selectedTerm_newData:
 						})}
 					</ScrollView>
 				</Column>
-				<ScrollView style={{marginLeft: 10, flex: .6}} contentStyle={{flex: 1, padding: 10}}>
+				<ScrollView style={{
+					marginLeft: 10,
+					//flex: .6,
+					position: "absolute", left: "60%", right: 0, height: "100%", // fix for safari
+				}} contentStyle={{flex: 1, padding: 10}}>
 					<Column style={{position: "relative", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
 						<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 							{selectedTerm &&

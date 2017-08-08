@@ -106,8 +106,8 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 			}}>
 				<Column className="clickThrough" ml={10} mt={10} mb={10}
 						style={{
-							position: "relative", flex: .5, height: "calc(100% - 20px)",
-							//position: "absolute", left: 0, right: "50%", height: "calc(100% - 20px)", // fix for safari
+							//position: "relative", flex: .5, height: "calc(100% - 20px)",
+							position: "absolute", left: 0, right: "50%", height: "calc(100% - 20px)", // fix for safari
 							borderRadius: 10, filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))",
 						}}>
 					<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: 10}}>
@@ -158,8 +158,8 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 					</ScrollView>
 				</Column>
 				<Column style={{
-					flex: .5,
-					//position: "absolute", left: "50%", right: 0, height: "100%", // fix for safari
+					//flex: .5,
+					position: "absolute", left: "50%", right: 0, height: "100%", // fix for safari
 				}}>
 					{selectedNode == null && <div style={{padding: 10, textAlign: "center"}}>No node selected.</div>}
 					{selectedNode && <NodeColumn map={map} node={selectedNode}/>}
@@ -236,6 +236,7 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 		}
 		let nodeTypeInfo = MapNodeType_Info.for[finalNodeType];
 		let nodeView = new MapNodeView();
+		nodeView.openPanel = openPanel;
 
 		let panelToShow = hoverPanel || openPanel;
 		// if we're supposed to show a rating panel, but its rating-type is not applicable for this node-type, fall back to main rating-type
@@ -247,7 +248,7 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 		return (
 			<Row className="clickThrough"
 					style={{
-						padding: 10, alignItems: "flex-start", position: "relative",
+						height: "100%", padding: 10, alignItems: "flex-start", position: "relative",
 						filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))", /*background: "rgba(0,0,0,.5)", borderRadius: 10*/
 					}}>
 				{/*<ResizeSensor ref={()=> {

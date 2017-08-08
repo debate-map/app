@@ -109,24 +109,24 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	render() {
 		let {map, rootNode, withinPage, padding, subNavBarWidth, ...rest} = this.props;
 		if (map == null)
-			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading map...</div>;
+			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25}}>Loading map...</div>;
 		Assert(map._id, "map._id is null!");
 		if (rootNode == null)
-			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading root node...</div>;
+			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25}}>Loading root node...</div>;
 
 		if (isBot) {
 			return <NodeUI_ForBots map={map} node={rootNode}/>;
 		}
 
 		return (
-			<div style={{height: "100%"}}>
+			<Column style={{flex: 1}}>
 				{!withinPage &&
 					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth}/>}
 				{!withinPage &&
 					<ActionBar_Right map={map} subNavBarWidth={subNavBarWidth}/>}
 				<ScrollView {...rest.Excluding("dispatch")} ref="scrollView"
 						backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.mapUI}
-						style={E(withinPage && {overflow: "visible"})}
+						style={E({flex: 1}, withinPage && {overflow: "visible"})}
 						scrollHBarStyle={E(withinPage && {zIndex: 0})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
 						contentStyle={E({willChange: "transform"}, withinPage && {position: "relative", marginBottom: -300, paddingBottom: 300})}
 						//contentStyle={E({willChange: "transform"}, withinPage && {marginTop: -300, paddingBottom: 300, transform: "translateY(300px)"})}
@@ -173,7 +173,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						}}/>*/}
 					</div>
 				</ScrollView>
-			</div>
+			</Column>
 		);
 	}
 
