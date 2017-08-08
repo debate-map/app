@@ -42,11 +42,11 @@ export default class TermComponentsUI extends BaseComponent<Props, {}> {
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), term);
 
 		return (
-			<ScrollView style={{flex: 1}} contentStyle={E({flex: 1, padding: 10}, style)}>
+			<Column style={{padding: 10}}>
 				{components.map((comp, index)=> {
 					return <TermComponentUI key={index} first={index == 0} termComponent={comp} editing={editing && creatorOrMod} inMap={inMap}/>;
 				})}
-			</ScrollView>
+			</Column>
 		);
 	}
 }

@@ -110,7 +110,7 @@ export default class TermsUI extends BaseComponent<Props, {selectedTerm_newData:
 									onChange={data=>this.SetState({selectedTerm_newData: data})}/>
 							: <div style={{padding: 10}}>No term selected.</div>}
 					</Column>
-					<Column mt={10} style={{position: "relative", maxHeight: "100%", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
+					<Column mt={10} style={{position: "relative", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
 						<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 							<Div style={{/*fontSize: 17,*/ fontWeight: 500}}>
 								{/*Components*/}
@@ -125,9 +125,8 @@ export default class TermsUI extends BaseComponent<Props, {selectedTerm_newData:
 							</Div>
 						</Row>
 						{/*<Pre style={{textAlign: "center"}}>{GetHelperTextForTermType(selectedTerm)}</Pre>*/}
-						{selectedTerm
-							? <TermComponentsUI term={selectedTerm} editing={true} style={{marginTop: 10, padding: 10}}/>
-							: <div style={{padding: 10}}>No term selected.</div>}
+						{selectedTerm == null && <div style={{padding: 10}}>No term selected.</div>}
+						{selectedTerm && <TermComponentsUI term={selectedTerm} editing={true} style={{marginTop: 10, padding: 10}}/>}
 					</Column>
 				</ScrollView>
 			</Row>
