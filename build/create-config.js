@@ -34,21 +34,24 @@ function createConfigFile(callback, environment) {
 		testEnv: config.globals.__TEST__,*/
 	};
 
-	let fileString = Object.keys(configObj).map(key=> {
+	let newText = Object.keys(configObj).map(key=> {
 		return `export const ${key} = ${JSON.stringify(configObj[key])};`;
 	}).join("\n");
 
 	let pathRel = environment == "development" ? "Source/BakedConfig_Dev.ts" : "Source/BakedConfig_Prod.ts";
 	let outputPath = path.join(__dirname, "..", pathRel);
 
-	fs.writeFile(outputPath, fileString, "utf8", (err) => {
-		if (err) {
-			debug("Error writing config file:", err);
-			if (callback) callback(err, null);
-			return;
-		}
-		if (callback) callback();
-	})
+	let oldText = fs.readFileSync(outputPath, {encoding: "utf8"});
+	if (newText != oldText) {
+		fs.writeFile(outputPath, newText, "utf8", (err) => {
+			if (err) {
+				debug("Error writing config file:", err);
+				if (callback) callback(err, null);
+				return;
+			}
+			if (callback) callback();
+		});
+	}
 }
 
 (()=> {

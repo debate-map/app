@@ -65,19 +65,6 @@ export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], 
 				</ScrollView>
 			</Column>
 		);
-
-		/*return (
-			<Column style={styles.page}>
-				<Row>
-					<span style={{flex: .33, fontWeight: 500, fontSize: 17}}>Name</span>
-					<span style={{flex: .33, fontWeight: 500, fontSize: 17}}>Join date</span>
-					<span style={{flex: .33, fontWeight: 500, fontSize: 17}}>Permissions</span>
-				</Row>
-				<ScrollView contentStyle={{flex: 1, padding: 10}}>
-					
-				</ScrollView>
-			</Column>
-		);*/
 	}
 }
 
