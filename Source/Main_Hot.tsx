@@ -112,7 +112,6 @@ function ConvertPathGetterFuncToPropChain(pathGetterFunc: Function) {
 	return result;
 }
 
-
 //setTimeout(()=> {
 const mountNode = document.getElementById(`root`);
 let RootUIWrapper = require(`./UI/Root`).default;
