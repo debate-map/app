@@ -100,11 +100,16 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 		let nodesForPage = nodesFiltered.Skip(page * entriesPerPage).Take(entriesPerPage);
 
 		return (
-			<Row style={{height: "100%", alignItems: "flex-start"}} onClick={e=> {
+			<Row style={{flex: 1, alignItems: "flex-start"}} onClick={e=> {
 				if (e.target != e.currentTarget) return;
 				store.dispatch(new ACTSelectedNode_InListSet({mapID: map._id, nodeID: null}));
 			}}>
-				<Column className="clickThrough" ml={10} mt={10} mb={10} style={{position: "relative", flex: .5, height: "calc(100% - 20px)", borderRadius: 10, filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}>
+				<Column className="clickThrough" ml={10} mt={10} mb={10}
+						style={{
+							//position: "relative", flex: .5, height: "calc(100% - 20px)",
+							position: "absolute", left: 0, right: "50%", height: "calc(100% - 20px)", // fix for safari
+							borderRadius: 10, filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))",
+						}}>
 					<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: 10}}>
 						<Row style={{height: 40, padding: 10}}>
 							<Pre>Sort by: </Pre>
@@ -138,7 +143,7 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 							<span style={{flex: columnWidths[2], fontWeight: 500, fontSize: 17}}>Creation date</span>
 						</Row>
 					</Column>
-					<ScrollView contentStyle={{flex: 1, paddingTop: 10}} onClick={e=> {
+					<ScrollView style={{flex: 1}} contentStyle={{paddingTop: 10}} onClick={e=> {
 						if (e.target != e.currentTarget) return;
 						store.dispatch(new ACTSelectedNode_InListSet({mapID: map._id, nodeID: null}));
 					}}
@@ -152,9 +157,13 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 						})}
 					</ScrollView>
 				</Column>
-				{selectedNode
-					? <NodeColumn map={map} node={selectedNode}/>
-					: <div style={{flex: .5, padding: 10, textAlign: "center"}}>No node selected.</div>}
+				<Column style={{
+					//flex: .5,
+					position: "absolute", left: "50%", right: 0, height: "100%", // fix for safari
+				}}>
+					{selectedNode == null && <div style={{padding: 10, textAlign: "center"}}>No node selected.</div>}
+					{selectedNode && <NodeColumn map={map} node={selectedNode}/>}
+				</Column>
 			</Row>
 		);
 	}
@@ -238,7 +247,7 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 		return (
 			<Row className="clickThrough"
 					style={{
-						flex: .5, padding: 10, alignItems: "flex-start", position: "relative",
+						padding: 10, alignItems: "flex-start", position: "relative",
 						filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))", /*background: "rgba(0,0,0,.5)", borderRadius: 10*/
 					}}>
 				{/*<ResizeSensor ref={()=> {

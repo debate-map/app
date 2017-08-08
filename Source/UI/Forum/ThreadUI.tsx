@@ -53,7 +53,7 @@ export class ThreadUI extends BaseComponent<Props, {}> {
 			<Column style={{height: "100%"}}>
 				<ActionBar_Left thread={thread}/>
 				<ActionBar_Right thread={thread}/>
-				<ScrollView ref="scrollView" scrollVBarStyle={{width: 10}} style={{height: "100%"}} contentStyle={{willChange: "transform"}}>
+				<ScrollView ref="scrollView" scrollVBarStyle={{width: 10}} style={{flex: 1}} contentStyle={{willChange: "transform"}}>
 					<Column style={{width: 960, margin: "50px auto 20px auto", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
 						{/*<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 							<Row style={{height: 40, padding: 10}}>

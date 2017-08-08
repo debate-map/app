@@ -27,12 +27,12 @@ export default class MoreUI extends BaseComponent<Props, {}> {
 		let page = "more";
 		let admin = IsUserAdmin(GetUserID());
 		return (
-			<Column style={{height: "100%"}}>
+			<Column style={{flex: 1}}>
 				<SubNavBar>
 					<SubNavBarButton {...{page}} subpage="links" text="Links"/>
 					{admin && <SubNavBarButton {...{page}} subpage="admin" text="Admin"/>}
 				</SubNavBar>
-				<ScrollView style={{flex: `1 1 100%`}} scrollVBarStyle={{width: 10}}>
+				<ScrollView style={{flex: 1}} scrollVBarStyle={{width: 10}}>
 					<Switch>
 						{/*<Fragment forRoute="/admin">
 							<AdminUI/>

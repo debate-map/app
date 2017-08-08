@@ -37,7 +37,7 @@ export default class DebatesUI extends BaseComponent<Props, {}> {
 		maps = maps.OrderByDescending(a=>a.edits);
 
 		return (
-			<Column style={{width: 960, margin: "20px auto 20px auto", height: "calc(100% - 40px)", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
+			<Column style={{width: 960, margin: "20px auto 20px auto", flex: 1, filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
 				<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 					<Row style={{height: 40, padding: 10}}>
 						{/*<Row width={200} style={{position: "absolute", left: "calc(50% - 100px)"}}>
@@ -73,7 +73,7 @@ export default class DebatesUI extends BaseComponent<Props, {}> {
 						<span style={{flex: columnWidths[3], fontWeight: 500, fontSize: 17}}>Creator</span>
 					</Row>
 				</Column>
-				<ScrollView contentStyle={{flex: 1}}>
+				<ScrollView style={{flex: 1}} contentStyle={{flex: 1}}>
 					{maps.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
 					{maps.map((map, index)=> {
 						return <MapEntryUI key={index} index={index} last={index == maps.length - 1} map={map}/>;

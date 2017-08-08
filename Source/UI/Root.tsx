@@ -37,6 +37,7 @@ import Route from "../Frame/ReactComponents/Route";
 import AddressBarWrapper from "UI/@Shared/AddressBarWrapper";
 import GuideUI from "UI/Guide";
 import ReputationUI from "./Reputation";
+import Column from "../Frame/ReactComponents/Column";
 
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	ComponentWillMount() {
@@ -87,10 +88,7 @@ class RootUI extends BaseComponent<Props, {}> {
 	render() {
 		let {currentPage} = this.props;
 		return (
-			<div className="background"/*"unselectable"*/ style={{
-				height: "100%", display: "flex", flexDirection: "column",
-				//background: "rgba(0,0,0,1)",
-			}}>
+			<Column className="background"/*"unselectable"*/ style={{height: "100%"}}>
 				{/*<div className="background" style={{
 					position: "absolute", left: 0, right: 0, top: 0, bottom: 0, opacity: .5,
 				}}/>*/}
@@ -98,7 +96,7 @@ class RootUI extends BaseComponent<Props, {}> {
 				<OverlayUI/>
 				<NavBar/>
 				{/*<InfoButton_TooltipWrapper/>*/}
-				<main style={{position: "relative", flex: "1 1 100%", overflow: "hidden"}}>
+				<main style={{position: "relative", flex: 1, overflow: "hidden", display: "flex", flexDirection: "column"}}>
 					<Route path="/stream"><StreamUI/></Route>
 					<Route path="/chat"><ChatUI/></Route>
 					<Route path="/reputation"><ReputationUI/></Route>
@@ -117,7 +115,7 @@ class RootUI extends BaseComponent<Props, {}> {
 					<Route path="/guide"><GuideUI/></Route>
 					<Route path="/profile"><ProfileUI/></Route>
 				</main>
-			</div>
+			</Column>
 		);
 	}
 }

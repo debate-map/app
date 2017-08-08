@@ -62,7 +62,7 @@ export default class ImagesUI extends BaseComponent
 							Images
 						</Div>
 					</Row>
-					<ScrollView ref={c=>this.scrollView = c} contentStyle={{flex: 1, padding: 10}} onClick={e=> {
+					<ScrollView ref={c=>this.scrollView = c} style={{flex: 1}} contentStyle={{flex: 1, padding: 10}} onClick={e=> {
 						if (e.target != e.currentTarget) return;
 						store.dispatch(new ACTImageSelect({id: null}));
 					}}>

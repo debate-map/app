@@ -21,7 +21,7 @@ export default class ContentUI extends BaseComponent<Props, {}> {
 		let {currentSubpage} = this.props;
 		let page = "content";
 		return (
-			<div style={{height: "100%", display: "flex", flexDirection: "column"}}>
+			<div style={{flex: 1, display: "flex", flexDirection: "column"}}>
 				<SubNavBar>
 					<SubNavBarButton {...{page}} subpage="terms" text="Terms"/>
 					<SubNavBarButton {...{page}} subpage="images" text="Images"/>

@@ -62,7 +62,7 @@ export default class TermsUI extends BaseComponent<Props, {selectedTerm_newData:
 							Terms
 						</Div>
 					</Row>
-					<ScrollView contentStyle={{flex: 1, padding: 10}} onClick={e=> {
+					<ScrollView style={{flex: 1}} contentStyle={{flex: 1, padding: 10}} onClick={e=> {
 						if (e.target != e.currentTarget) return;
 						store.dispatch(new ACTTermSelect({id: null}));
 					}}>

@@ -18,7 +18,7 @@ export default class GlobalUI extends BaseComponent<Props, {}> {
 		let {currentSubpage} = this.props;
 		let page = "global";
 		return (
-			<Column style={{height: "100%"}}>
+			<Column style={{flex: 1}}>
 				<SubNavBar>
 					<SubNavBarButton {...{page}} subpage="map" text="Map"/>
 					<SubNavBarButton {...{page}} subpage="list" text="List"/>

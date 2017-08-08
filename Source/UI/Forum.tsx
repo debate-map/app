@@ -43,7 +43,7 @@ export default class ForumUI extends BaseComponent<{} & Partial<{sections: Secti
 		let userID = GetUserID();
 		let isAdmin = IsUserAdmin(userID);
 		return (
-			<Column style={{width: 960, margin: "20px auto 20px auto", height: "calc(100% - 40px)", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
+			<Column style={{width: 960, margin: "20px auto 20px auto", flex: 1, filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
 				{isAdmin && <Column className="clickThrough" style={{height: 40, background: "rgba(0,0,0,.7)", borderRadius: 10}}>
 					<Row style={{height: 40, padding: 10}}>
 						<Button text="Add section" ml="auto" onClick={()=> {
@@ -52,7 +52,7 @@ export default class ForumUI extends BaseComponent<{} & Partial<{sections: Secti
 						}}/>
 					</Row>
 				</Column>}
-				<ScrollView contentStyle={{flex: 1}}>
+				<ScrollView style={{flex: 1}} contentStyle={{flex: 1}}>
 					{sections.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
 					{sections.map((section, index)=> {
 						return <SectionUI key={index} section={section}/>;
