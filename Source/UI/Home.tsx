@@ -20,7 +20,7 @@ export default class HomeUI extends BaseComponent<Props, {}> {
 		let {currentSubpage} = this.props;
 		let page = "home";
 		return (
-			<Column style={{height: "100%"}}>
+			<Column style={{flex: 1}}>
 				<SubNavBar>
 					<SubNavBarButton {...{page}} subpage="home" text="Home"/>
 					<SubNavBarButton {...{page}} subpage="about" text="About"/>

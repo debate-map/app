@@ -32,7 +32,7 @@ export default class MoreUI extends BaseComponent<Props, {}> {
 					<SubNavBarButton {...{page}} subpage="links" text="Links"/>
 					{admin && <SubNavBarButton {...{page}} subpage="admin" text="Admin"/>}
 				</SubNavBar>
-				<ScrollView style={{flex: 1}} scrollVBarStyle={{width: 10}}>
+				<ScrollView style={{flex: 1} /*styles.fillParent_abs*/} scrollVBarStyle={{width: 10}}>
 					<Switch>
 						{/*<Fragment forRoute="/admin">
 							<AdminUI/>

@@ -128,7 +128,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.mapUI}
 						style={E(withinPage && {overflow: "visible"})}
 						scrollHBarStyle={E(withinPage && {zIndex: 0})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
-						contentStyle={E({willChange: "transform"}, withinPage && {marginBottom: -300, paddingBottom: 300})}
+						contentStyle={E({willChange: "transform"}, withinPage && {position: "relative", marginBottom: -300, paddingBottom: 300})}
 						//contentStyle={E({willChange: "transform"}, withinPage && {marginTop: -300, paddingBottom: 300, transform: "translateY(300px)"})}
 						//bufferScrollEventsBy={10000}
 						onScrollEnd={pos=> {
@@ -136,8 +136,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 							UpdateFocusNodeAndViewOffset(map._id);
 						}}>
 					<style>{`
-					.MapUI { display: inline-flex; #writing-mode: vertical-lr; flex-wrap: wrap; }
-					.MapUI > * { #writing-mode: horizontal-tb; }
+					.MapUI { display: inline-flex; flex-wrap: wrap; }
 					.MapUI.scrolling > * { pointer-events: none; }
 					`}</style>
 					<div className="MapUI" ref="mapUI"

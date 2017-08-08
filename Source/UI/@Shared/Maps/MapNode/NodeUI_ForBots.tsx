@@ -47,7 +47,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 		return (
 			<ScrollView ref="scrollView"
 					//backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.mapUI}
-					scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}>
+					scrollVBarStyle={{width: 10}} /*contentStyle={{willChange: "transform"}}*/>
 				<Row>
 					<Pre>Parents: </Pre>{nodeParents.map((parent, index)=> {
 						return (

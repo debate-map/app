@@ -8,7 +8,7 @@ export var styles = {
 	vMenuItem: {padding: "3px 5px", borderTop: "1px solid rgba(255,255,255,.1)"},
 
 	// fixes that height:100% doesn't work in safari, when in flex container
-	//fillParentFix: {position: "absolute", left: 0, right: 0, top: 0, bottom: 0},
+	fillParent_abs: {position: "absolute", left: 0, right: 0, top: 0, bottom: 0},
 };
 export var colors = {
 	//navBarBoxShadow: "rgba(70,70,70,.5) 0px 0px 150px",

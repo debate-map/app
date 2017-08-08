@@ -1,7 +1,7 @@
 import {BaseComponent, GetInnerComp, Pre} from "../../Frame/UI/ReactGlobals";
 import {Subforum} from "../../Store/firebase/forum/@Subforum";
 import Row from "Frame/ReactComponents/Row";
-import {colors} from "../../Frame/UI/GlobalStyles";
+import {colors, styles} from "../../Frame/UI/GlobalStyles";
 import Button from "Frame/ReactComponents/Button";
 import {ACTSubforumSelect, ACTThreadSelect} from "../../Store/main/forum";
 import DropDown from "../../Frame/ReactComponents/DropDown";
@@ -44,16 +44,16 @@ export class ThreadUI extends BaseComponent<Props, {}> {
 		let userID = GetUserID();
 		
 		if (thread == null || posts == null || posts.length == 0) {
-			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 25}}>Loading posts...</div>;
+			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25}}>Loading posts...</div>;
 		}
 
 		let firstPostWritten = posts.length > 1 || posts[0].text != firstPostPlaceholderText;
 
 		return (
-			<Column style={{height: "100%"}}>
+			<Column style={{flex: 1}}>
 				<ActionBar_Left thread={thread}/>
 				<ActionBar_Right thread={thread}/>
-				<ScrollView ref="scrollView" scrollVBarStyle={{width: 10}} style={{flex: 1}} contentStyle={{willChange: "transform"}}>
+				<ScrollView ref="scrollView" scrollVBarStyle={{width: 10}} style={{flex: 1}/*styles.fillParent_abs*/}>
 					<Column style={{width: 960, margin: "50px auto 20px auto", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
 						{/*<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 							<Row style={{height: 40, padding: 10}}>
@@ -85,7 +85,7 @@ class ReplyBox extends BaseComponent<{thread: Thread}, {dataError: string}> {
 		let {dataError} = this.state;
 		this.newPost = this.newPost || new Post({});
 		return (
-			<Column sel mt={20} style={{flexShrink: 0, background: "rgba(0,0,0,.7)", borderRadius: 10, padding: 10, alignItems: "flex-start", cursor: "auto"}}>
+			<Column sel mt={20} style={{background: "rgba(0,0,0,.7)", borderRadius: 10, padding: 10, alignItems: "flex-start", cursor: "auto"}}>
 				<PostEditorUI ref={c=>this.postEditorUI = GetInnerComp(c) as any} baseData={this.newPost} forNew={true}
 					onChange={(newData, comp)=> {
 						this.newPost = newData;

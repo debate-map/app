@@ -56,7 +56,7 @@ export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], 
 						<span style={{flex: columnWidths[4], fontWeight: 500, fontSize: 17}}>Permissions</span>
 					</Row>
 				</Column>
-				<ScrollView contentStyle={{flex: 1}} style={{flex: 1}}>
+				<ScrollView style={{flex: 1}} contentStyle={{flex: 1}}>
 					{users.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
 					{users.map((user, index)=> {
 						let userExtraInfo = userExtraInfoMap[user._key];
