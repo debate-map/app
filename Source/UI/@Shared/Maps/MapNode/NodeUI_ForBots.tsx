@@ -46,7 +46,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 		let nodeEnhanced = node.Extended({finalType: node.type, link: null});
 		return (
 			<ScrollView ref="scrollView"
-					//backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.mapUI}
+					//backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.content) || a == this.refs.mapUI}
 					scrollVBarStyle={{width: 10}} /*contentStyle={{willChange: "transform"}}*/>
 				<Row>
 					<Pre>Parents: </Pre>{nodeParents.map((parent, index)=> {

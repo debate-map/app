@@ -3,7 +3,7 @@ import {BaseComponent, FindDOM, FindReact, FindDOM_, Pre, GetInnerComp} from "..
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
 import {DBPath, GetData} from "../../../Frame/Database/DatabaseHelpers";
-import {Debugger, E} from "../../../Frame/General/Globals_Free";
+import {Debugger, E, inFirefox} from "../../../Frame/General/Globals_Free";
 import {PropTypes} from "react";
 import V from "../../../Frame/V/V";
 import {GetTreeNodesInObjTree} from "../../../Frame/V/V";
@@ -105,6 +105,8 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		subNavBarWidth: 0,
 	};
 
+	scrollView: ScrollView;
+	mapUI: HTMLDivElement;
 	downPos: Vector2i;
 	render() {
 		let {map, rootNode, withinPage, padding, subNavBarWidth, ...rest} = this.props;
@@ -124,11 +126,15 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth}/>}
 				{!withinPage &&
 					<ActionBar_Right map={map} subNavBarWidth={subNavBarWidth}/>}
-				<ScrollView {...rest.Excluding("dispatch")} ref="scrollView"
-						backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.refs.content) || a == this.refs.mapUI}
+				<ScrollView {...rest.Excluding("dispatch")} ref={c=>this.scrollView = c}
+						backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.scrollView.content) || a == this.mapUI}
 						style={E({flex: 1}, withinPage && {overflow: "visible"})}
-						scrollHBarStyle={E(withinPage && {zIndex: 0})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
-						contentStyle={E({willChange: "transform"}, withinPage && {position: "relative", marginBottom: -300, paddingBottom: 300})}
+						scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
+						contentStyle={E(
+							{willChange: "transform"},
+							withinPage && {position: "relative", marginBottom: -300, paddingBottom: 300},
+							withinPage && inFirefox && {overflow: "hidden"},
+						)}
 						//contentStyle={E({willChange: "transform"}, withinPage && {marginTop: -300, paddingBottom: 300, transform: "translateY(300px)"})}
 						//bufferScrollEventsBy={10000}
 						onScrollEnd={pos=> {
@@ -139,7 +145,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					.MapUI { display: inline-flex; flex-wrap: wrap; }
 					.MapUI.scrolling > * { pointer-events: none; }
 					`}</style>
-					<div className="MapUI" ref="mapUI"
+					<div className="MapUI" ref={c=>this.mapUI = c}
 							style={{
 								position: "relative", /*display: "flex",*/ whiteSpace: "nowrap",
 								padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
@@ -148,13 +154,13 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 							onMouseDown={e=>{
 								this.downPos = new Vector2i(e.clientX, e.clientY);
 								if (e.button == 1)
-									FindDOM_(this.refs.mapUI).addClass("scrolling");
+									FindDOM_(this.mapUI).addClass("scrolling");
 							}}
 							onMouseUp={e=> {
-								FindDOM_(this.refs.mapUI).removeClass("scrolling");
+								FindDOM_(this.mapUI).removeClass("scrolling");
 							}}
 							onClick={e=> {
-								if (e.target != this.refs.mapUI) return;
+								if (e.target != this.mapUI) return;
 								if (new Vector2i(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
 								let mapView = GetMapView(GetOpenMapID());
 								if (GetSelectedNodePath(map._id)) {
@@ -197,8 +203,8 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		}).Start();
 
 		// start scroll at root // (this doesn't actually look as good)
-		/*if (this.refs.scrollView)
-			(this.refs.scrollView as ScrollView).ScrollBy({x: MapUI.padding.leftAndRight, y: MapUI.padding.topAndBottom});*/
+		/*if (this.scrollView)
+			this.scrollView.ScrollBy({x: MapUI.padding.leftAndRight, y: MapUI.padding.topAndBottom});*/
 	}
 	OnLoadComplete() {
 		console.log(`NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)`);
@@ -208,17 +214,17 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 
 	PostRender() {
 		let {withinPage} = this.props;
-		if (withinPage && this.refs.scrollView)
-			(this.refs.scrollView as ScrollView).vScrollableDOM =  $("#HomeScrollView").children(".content")[0];
+		if (withinPage && this.scrollView)
+			this.scrollView.vScrollableDOM =  $("#HomeScrollView").children(".content")[0];
 	}
 
 	// load scroll from store
 	LoadScroll() {
 		let {map, rootNode, withinPage} = this.props;
-		if (this.refs.scrollView == null) return;
+		if (this.scrollView == null) return;
 
 		// if user is already scrolling manually, return so we don't interrupt that process
-		if ((this.refs.scrollView as ScrollView).state.scrollOp_bar) return;
+		if (this.scrollView.state.scrollOp_bar) return;
 
 		let focusNode_target = GetFocusedNodePath(GetMapView(map._id)); // || map.rootNode.toString();
 		let viewOffset_target = GetViewOffset(GetMapView(map._id)); // || new Vector2i(200, 0);
@@ -239,7 +245,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		let viewOffset_changeNeeded = new Vector2i(viewOffset_target).Minus(viewOffset_current);
 		if (withinPage) // if within a page, don't apply stored vertical-scroll
 			viewOffset_changeNeeded.y = 0;
-		(this.refs.scrollView as ScrollView).ScrollBy(viewOffset_changeNeeded);
+		this.scrollView.ScrollBy(viewOffset_changeNeeded);
 		//Log("Loading scroll: " + Vector2i.prototype.toString.call(viewOffset_target));
 
 		/*if (nextPathTry == focusNode_target)

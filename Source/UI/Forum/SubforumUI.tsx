@@ -65,6 +65,10 @@ export class SubforumUI extends BaseComponent<Props, {}> {
 							</Row>
 						</Column>
 						<Column>
+							{threads.length == 0 &&
+								<Row p="7px 10px" style={{background: "rgba(30,30,30,.7)", borderRadius: "0 0 10px 10px"}}>
+									There are currently no threads in this subforum.
+								</Row>}
 							{threads.map((thread, index)=> {
 								return <ThreadEntryUI key={index} index={index} last={index == threads.length - 1} thread={thread}/>;
 							})}

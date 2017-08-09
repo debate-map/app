@@ -92,7 +92,7 @@ export							function E<E1,E2,E3,E4,E5,E6,E7,E8>(e1?:E1,e2?:E2,e3?:E3,e4?:E4,e5?
 // methods: url writing/parsing
 // ==================
 
-//export var inFirefox = navigator.userAgent.toLowerCase().Contains("firefox");
+export var inFirefox = navigator.userAgent.toLowerCase().includes("firefox");
 
 // others
 // ==================
