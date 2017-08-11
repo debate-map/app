@@ -44,6 +44,8 @@ import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
 import DeleteMap from "../../../Server/Commands/DeleteMap";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 import { GetNodeAsync, GetChildCount } from "Store/firebase/nodes";
+import {ActionBar_Left} from "./MapUI/ActionBar_Left";
+import {ActionBar_Right} from "./MapUI/ActionBar_Right";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -250,114 +252,5 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 
 		/*if (nextPathTry == focusNode_target)
 			this.hasLoadedScroll = true;*/
-	}
-}
-
-type ActionBar_LeftProps = {map: Map, subNavBarWidth: number};
-@Connect((state, {map}: ActionBar_LeftProps)=> ({
-	_: IsUserCreatorOrMod(GetUserID(), map),
-}))
-class ActionBar_Left extends BaseComponent<ActionBar_LeftProps, {dataError: string}> {
-	detailsUI: MapDetailsUI;
-	render() {
-		let {map, subNavBarWidth} = this.props;
-		let {dataError} = this.state;
-
-		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), map);
-		return (
-			<nav style={{
-				position: "absolute", zIndex: 1, left: 0, width: `calc(50% - ${subNavBarWidth / 2}px)`, top: 0, textAlign: "center",
-				//background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
-			}}>
-				<Row style={{
-					justifyContent: "flex-start", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
-					width: "100%", height: 30, borderRadius: "0 0 10px 0",
-				}}>
-					{map.type == MapType.Debate &&
-						<Button text="Back" onClick={()=> {
-							store.dispatch(new ACTDebateMapSelect({id: null}));
-						}}/>}
-					{map.type == MapType.Debate &&
-						<DropDown>
-							<DropDownTrigger>
-								<Button ml={5} text="Details"/>
-							</DropDownTrigger>
-							<DropDownContent style={{left: 0}}>
-								<Column>
-									<MapDetailsUI ref={c=>this.detailsUI = GetInnerComp(c) as any} baseData={map}
-										forNew={false} enabled={creatorOrMod}
-										onChange={newData=> {
-											this.SetState({dataError: this.detailsUI.GetValidationError()});
-										}}/>
-									{creatorOrMod &&
-										<Row>
-											<Button mt={5} text="Save" enabled={dataError == null} onLeftClick={async ()=> {
-												let mapUpdates = GetUpdates(map, this.detailsUI.GetNewData());
-												await new UpdateMapDetails({mapID: map._id, mapUpdates}).Run();
-											}}/>
-										</Row>}
-									{creatorOrMod &&
-										<Column mt={10}>
-											<Row style={{fontWeight: "bold"}}>Advanced:</Row>
-											<Row>
-												<Button mt={5} text="Delete" onLeftClick={async ()=> {
-													let rootNode = await GetNodeAsync(map.rootNode);
-													if (GetChildCount(rootNode) != 0) {
-														return void ShowMessageBox({title: `Still has children`,
-															message: `Cannot delete this map until all the children of its root-node have been unlinked or deleted.`});
-													}
-
-													ShowMessageBox({
-														title: `Delete "${map.name}"`, cancelButton: true,
-														message: `Delete the map "${map.name}"?`,
-														onOK: async ()=> {
-															await new DeleteMap({mapID: map._id}).Run();
-															store.dispatch(new ACTDebateMapSelect({id: null}));
-														}
-													});
-												}}/>
-											</Row>
-										</Column>}
-								</Column>
-							</DropDownContent>
-						</DropDown>}
-				</Row>
-			</nav>
-		);
-	}
-}
-
-@Connect((state, props)=> ({
-	initialChildLimit: State(a=>a.main.initialChildLimit),
-}))
-class ActionBar_Right extends BaseComponent<{map: Map, subNavBarWidth: number} & Partial<{initialChildLimit: number}>, {}> {
-	render() {
-		let {map, subNavBarWidth, initialChildLimit} = this.props;
-		let tabBarWidth = 104;
-		return (
-			<nav style={{
-				position: "absolute", zIndex: 1, left: `calc(50% + ${subNavBarWidth / 2}px)`, right: 0, top: 0, textAlign: "center",
-				//background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
-			}}>
-				<Row style={{
-					justifyContent: "flex-end", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
-					width: "100%", height: 30, borderRadius: "0 0 0 10px",
-				}}>
-					<DropDown>
-						<DropDownTrigger>
-							<Button text="Layout"/>
-						</DropDownTrigger>
-						<DropDownContent style={{right: 0}}>
-							<Column>
-								<Row>
-									<Pre>Initial child limit: </Pre>
-									<Spinner min={1} value={initialChildLimit} onChange={val=>store.dispatch(new ACTSetInitialChildLimit({value: val}))}/>
-								</Row>
-							</Column>
-						</DropDownContent>
-					</DropDown>
-				</Row>
-			</nav>
-		);
 	}
 }

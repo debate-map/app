@@ -63,7 +63,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 			<div> {/* needed so GetInnerComp() works */}
 			<Column style={E({padding: 5}, style)}>
 				{/*<Div style={{fontSize: 12}}>ID: {node._id}</Div>
-				<Div mt={3} style={{fontSize: 12}}>Created at: {(Moment as any)(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)
+				<Div mt={3} style={{fontSize: 12}}>Created at: {Moment(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)
 					} (by: {creator ? creator.displayName : `n/a`})</Div>*/}
 				{!forNew &&
 					<InfoTable {...propsEnhanced}/>}
@@ -98,6 +98,11 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 			</Column>
 			</div>
 		);
+	}
+	PostRender(source: RenderSource) {
+		if (source != RenderSource.Mount) return;
+		let {onChange} = this.props;
+		if (onChange) onChange(this.GetNewData(), this.GetNewLinkData(), this); // trigger on-change once, to check for validation-error
 	}
 	GetValidationError() {
 		if (this.quoteEditor) {
@@ -136,7 +141,7 @@ class InfoTable extends BaseComponent<Props_Enhanced, {}> {
 					<tr>
 						<td>{newData._id}</td>
 						<td>{creator ? creator.displayName : `n/a`}</td>
-						<td>{(Moment as any)(newData.createdAt).format(`YYYY-MM-DD HH:mm:ss`)}</td>
+						<td>{Moment(newData.createdAt).format(`YYYY-MM-DD HH:mm:ss`)}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -161,11 +166,13 @@ class RelativeToggle extends BaseComponent<Props_Enhanced, {}> {
 class Title_Base extends BaseComponent<Props_Enhanced, {}> {
 	render() {
 		let {forNew, enabled, newData, Change} = this.props;
+		let thesisType = GetThesisType(newData);
+		let hasOtherTitles = newData.type == MapNodeType.Thesis && thesisType == ThesisType.Normal;
 		return (
 			<div>
 				<Row style={{display: "flex", alignItems: "center"}}>
 					<Pre>Title (base): </Pre>
-					<TextInput enabled={enabled} style={{flex: 1}}
+					<TextInput {...E(!hasOtherTitles && {required: true})} enabled={enabled} style={{flex: 1}}
 						ref={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
 						value={newData.titles["base"]} onChange={val=>Change(newData.titles["base"] = val)}/>
 				</Row>

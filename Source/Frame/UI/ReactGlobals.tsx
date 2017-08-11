@@ -351,19 +351,21 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	private CallPostRender() {
 		if (this.PostRender == BaseComponent.prototype.PostRender) return;
 
+		let renderSource = this.lastRender_source;
+
 		let ownPostRender = this.PostRender as any;
 		// can be different, for wrapped components (apparently they copy the inner type's PostRender as their own PostRender -- except as a new function, for some reason)
 		let prototypePostRender = this.constructor.prototype.PostRender;
-		if (ownPostRender.instant || prototypePostRender.instant)
-			this.PostRender();
-		else {
+		if (ownPostRender.instant || prototypePostRender.instant) {
+			this.PostRender(renderSource);
+		} else {
 			/*if (QuickIncrement("PostRenderLog") <= 1)
 				Log("Calling PostRender for: " + this.constructor.name + ";" + V.GetStackTraceStr());*/
 			//Log("Calling PostRender for: " + this.constructor.name);
 			WaitXThenRun(0, ()=>window.requestAnimationFrame(()=> {
 			//WaitXThenRun(0, ()=>g.requestIdleCallback(()=> {
 				if (!this.mounted) return;
-				this.PostRender();
+				this.PostRender(renderSource);
 			}));
 			/*WaitXThenRun(0, ()=> {
 				this.PostRender();
@@ -372,7 +374,7 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	}
 
 	PreRender(): void {};
-	PostRender(): void {};
+	PostRender(source?: RenderSource): void {};
 
 	// maybe temp
 	/*get Mounted() {

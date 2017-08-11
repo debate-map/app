@@ -52,7 +52,7 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 							<tr>
 								<td>{newData._id}</td>
 								<td>{creator ? creator.displayName : `n/a`}</td>
-								<td>{(Moment as any)(newData.createdAt).format(`YYYY-MM-DD HH:mm:ss`)}</td>
+								<td>{Moment(newData.createdAt).format(`YYYY-MM-DD HH:mm:ss`)}</td>
 							</tr>
 						</tbody>
 					</table>}

@@ -12,7 +12,7 @@ import { columnWidths } from "UI/Debates";
 import Moment from "moment";
 
 type Props = {index: number, last: boolean, map: Map} & Partial<{creator: User}>;
-@Connect((state, {map})=> ({
+@Connect((state, {map}: Props)=> ({
 	creator: map && GetUser(map.creator),
 }))
 export default class MapEntryUI extends BaseComponent<Props, {}> {

@@ -17,7 +17,6 @@ export function ShowAddMapDialog(userID: string, type: MapType) {
 		creator: GetUserID(),
 	});
 	
-	let detailsUI: MapDetailsUI;
 	let error = null;
 	let Change = (..._)=>boxController.UpdateUI();
 	let boxController: BoxController = ShowMessageBox({
@@ -26,8 +25,7 @@ export function ShowAddMapDialog(userID: string, type: MapType) {
 			boxController.options.okButtonClickable = error == null;
 			return (
 				<Column style={{padding: `10px 0`, width: 600}}>
-					<MapDetailsUI ref={c=>detailsUI = GetInnerComp(c) as any} baseData={newMap} forNew={true}
-						onChange={val=>Change(newMap = val, error = detailsUI.GetValidationError())}/>
+					<MapDetailsUI baseData={newMap} forNew={true} onChange={(val, ui)=>Change(newMap = val, error = ui.GetValidationError())}/>
 					{error && error != "Please fill out this field." && <Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{error}</Row>}
 				</Column>
 			);

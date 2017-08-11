@@ -1,7 +1,9 @@
 import {BaseComponent} from "../UI/ReactGlobals";
 
 export default class CheckBox extends BaseComponent
-		<{text?, title?, checked, enabled?: boolean, style?, labelStyle?, internalChanging?: boolean, onChange?: (val: boolean, e)=>void},
+		<{
+			text?, title?, checked: boolean, indeterminate?: boolean,
+			enabled?: boolean, style?, labelStyle?, internalChanging?: boolean, onChange?: (val: boolean, e)=>void},
 		{editedValue: boolean}> {
 	static lastID = -1;
 	
@@ -13,7 +15,7 @@ export default class CheckBox extends BaseComponent
 	id;
 	input: HTMLInputElement;
 	render() {
-		var {text, title, checked, enabled, style, labelStyle, internalChanging, onChange} = this.props;
+		var {text, title, checked,  enabled, style, labelStyle, internalChanging, onChange} = this.props;
 		let {editedValue} = this.state;
 		return (
 			/*<div style={E({display: "inline-block", position: "relative"}, style)}>
@@ -33,6 +35,10 @@ export default class CheckBox extends BaseComponent
 					}
 				}}/>
 		);
+	}
+	PostRender() {
+		let {indeterminate} = this.props;
+		this.input.indeterminate = indeterminate;
 	}
 
 	get Checked() { return this.input.checked; }

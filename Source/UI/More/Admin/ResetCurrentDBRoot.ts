@@ -5,6 +5,8 @@ import {MapType, Map} from "../../../Store/firebase/maps/@Map";
 import UserExtraInfo from "../../../Store/firebase/userExtras/@UserExtraInfo";
 import {FirebaseData} from "../../../Store/firebase";
 
+// Note: This is currently not used, and probably doesn't even work atm.
+
 //export default async function ResetCurrentDBRoot(database: firebase.Database) {
 export default async function ResetCurrentDBRoot() {
 	let firebase = store.firebase.helpers;
@@ -30,13 +32,13 @@ export default async function ResetCurrentDBRoot() {
 	// general
 	// ==========
 
-	data.general = {
+	/*data.general = {
 		lastMapID: 99,
 		lastTermID: 0,
 		lastTermComponentID: 0,
 		lastImageID: 0,
 		lastNodeID: 99,
-	};
+	};*/
 
 	// users
 	// ==========

@@ -16,15 +16,15 @@ import TermComponent from "../../../Store/firebase/termComponents/@TermComponent
 import {GetNiceNameForTermType} from "../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../Store/firebase/terms";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
-import {Map, Map_nameFormat} from "../../../Store/firebase/maps/@Map";
 import Spinner from "../../../Frame/ReactComponents/Spinner";
+import {Layer} from "Store/firebase/layers/@Layer";
 
-type Props = {baseData: Map, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Map, ui: MapDetailsUI)=>void}
+type Props = {baseData: Layer, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Layer, ui: LayerDetailsUI)=>void}
 	& Partial<{creator: User}>;
 @Connect((state, {baseData, forNew}: Props)=>({
 	creator: !forNew && GetUser(baseData.creator),
 }))
-export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
+export default class LayerDetailsUI extends BaseComponent<Props, {newData: Layer}> {
 	static defaultProps = {enabled: true};
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
@@ -59,21 +59,9 @@ export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
 					</table>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Name: </Pre>
-					<TextInput
-						pattern={Map_nameFormat} required
-						enabled={enabled} style={{width: "100%"}}
+					<TextInput required enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
-				<RowLR mt={5} splitAt={splitAt} style={{width}}>
-					<Pre>Default expand depth: </Pre>
-					<Spinner min={1} max={3} value={newData.defaultExpandDepth|0} onChange={val=>Change(newData.defaultExpandDepth = val)}/>
-				</RowLR>
-				{/*!forNew &&
-					<RowLR mt={5} splitAt={splitAt} style={{width}}>
-						<Pre>Root-node ID: </Pre>
-						<Spinner enabled={enabled} style={{width: "100%"}}
-							value={newData.rootNode} onChange={val=>Change(newData.rootNode = val)}/>
-					</RowLR>*/}
 			</Column>
 			</div>
 		);
@@ -84,6 +72,6 @@ export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
 
 	GetNewData() {
 		let {newData} = this.state;
-		return Clone(newData) as Map;
+		return Clone(newData) as Layer;
 	}
 }

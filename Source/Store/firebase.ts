@@ -11,15 +11,18 @@ import {Image} from "./firebase/images/@Image";
 import {MapNodeStats} from "Store/firebase/nodeStats/@MapNodeStats";
 import {ViewedNodeSet} from "./firebase/userViewedNodes/@ViewedNodeSet";
 import { ForumData } from "Store/firebase/forum";
+import { Layer } from "Store/firebase/layers/@Layer";
+import {UserMapInfoSet} from "./firebase/userMapInfo/@UserMapInfo";
 
 export interface FirebaseData {
 	forum: ForumData;
 	general: GeneralData;
 	images: {[key: string]: Image};
+	layers: {[key: number]: Layer};
 	maps: {[key: number]: Map};
 	nodes: {[key: number]: MapNode};
 	nodeExtras: {[key: number]: any};
-	nodeRatings: {[key: number]: RatingsRoot}; // node-id (key) -> rating-type -> user-id -> rating -> value
+	nodeRatings: {[key: number]: RatingsRoot}; // $nodeID (key) -> $ratingType -> $userID -> value
 	nodeStats: {[key: number]: MapNodeStats};
 	nodeViewers: {[key: number]: ViewerSet};
 	terms: {[key: number]: Term};
@@ -27,5 +30,6 @@ export interface FirebaseData {
 	termNames: {[key: string]: any};
 	users: {[key: string]: User};
 	userExtras: {[key: string]: UserExtraInfo};
+	userMapInfo: {[key: string]: UserMapInfoSet}; // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
 	userViewedNodes: {[key: string]: ViewedNodeSet};
 }
