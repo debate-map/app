@@ -118,7 +118,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 								// todo: have submitted date be based on local<>Firebase time-offset (retrieved from Firebase) [this prevents fail from security rules]
 								let newRating_value = GetValueForLabel(newRating_label);
 								newRating_value = TransformRatingForContext(newRating_value, reverseRatings);
-								firebase.Ref(`nodeRatings/${node._id}/${ratingType}/${userID}`).set({updated: Date.now(), value: newRating_value});
+								firebase.DBRef(`nodeRatings/${node._id}/${ratingType}/${userID}`).set({updated: Date.now(), value: newRating_value});
 							}
 						});
 					}}
@@ -128,7 +128,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 							title: `Delete rating`, cancelButton: true,
 							message: `Delete your "${ratingType}" rating for ${nodeTypeDisplayName}`,
 							onOK: ()=> {
-								firebase.Ref(`nodeRatings/${node._id}/${ratingType}/${userID}`).set(null);
+								firebase.DBRef(`nodeRatings/${node._id}/${ratingType}/${userID}`).set(null);
 							}
 						});
 					}}>

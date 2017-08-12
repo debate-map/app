@@ -1,4 +1,4 @@
-import {BaseComponent, Pre, RenderSource, Div, FindDOM} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Pre, RenderSource, Div, FindDOM, GetErrorMessagesUnderElement} from "../../../../Frame/UI/ReactGlobals";
 import Column from "../../../../Frame/ReactComponents/Column";
 import Row from "../../../../Frame/ReactComponents/Row";
 import TextInput from "../../../../Frame/ReactComponents/TextInput";
@@ -109,7 +109,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 			let quoteError = this.quoteEditor.GetValidationError();
 			if (quoteError) return quoteError;
 		}
-		return GetErrorMessagesForForm(FindDOM(this))[0];
+		return GetErrorMessagesUnderElement(FindDOM(this))[0];
 	}
 
 	GetNewData() {
@@ -123,11 +123,6 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 }
 
 type Props_Enhanced = Props & State & {Change};
-
-//function GetErrorMessagesForForm(form: HTMLFormElement) {
-function GetErrorMessagesForForm(form) {
-	return $(form).find(":invalid").ToList().map(node=>(node[0] as any).validationMessage || `Invalid value.`);
-}
 
 class InfoTable extends BaseComponent<Props_Enhanced, {}> {
 	render() {
@@ -233,13 +228,13 @@ class MetaThesisInfo extends BaseComponent<Props_Enhanced, {}> {
 				<Pre>Type: If </Pre>
 				<Select options={GetEntries(MetaThesis_IfType, name=>GetMetaThesisIfTypeDisplayText(MetaThesis_IfType[name]))}
 					enabled={enabled} value={newData.metaThesis.ifType} onChange={val=> {
-						//firebase.Ref(`nodes/${newData._id}/metaThesis`).update({ifType: val});
+						//firebase.DBRef(`nodes/${newData._id}/metaThesis`).update({ifType: val});
 						Change(newData.metaThesis.ifType = val);
 					}}/>
 				<Pre> premises below are true, they </Pre>
 				<Select options={thenTypes_forRender} enabled={enabled} value={GetThenType_ForRender(newData.metaThesis.thenType)} onChange={val=> {
 					val = GetThenType_ForRender(val);
-					//firebase.Ref(`nodes/${newData._id}/metaThesis`).update({thenType: val});
+					//firebase.DBRef(`nodes/${newData._id}/metaThesis`).update({thenType: val});
 					Change(newData.metaThesis.thenType = val);
 				}}/>
 				<Pre>.</Pre>

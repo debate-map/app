@@ -40,7 +40,7 @@ export abstract class Command<Payload> {
 
 		let dbUpdates = this.GetDBUpdates();
 		//FixDBUpdates(dbUpdates);
-		await store.firebase.helpers.Ref().update(dbUpdates);
+		await store.firebase.helpers.DBRef().update(dbUpdates);
 
 		// later on (once set up on server), this will send the data back to the client, rather than return it
 		return this.returnData;

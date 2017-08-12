@@ -34,7 +34,7 @@ export enum ThesisForm {
 }
 
 export class MapNode {
-	constructor(initialData: {type: MapNodeType, creator: string} & Partial<MapNode>) {
+	constructor(initialData: {type: MapNodeType} & Partial<MapNode>) {
 		this.Extend(initialData);
 		//this.createdAt = Date.now();
 	}

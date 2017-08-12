@@ -34,18 +34,20 @@ export default class Select extends BaseComponent
 
 		let result = [] as {name: string, value, style?}[];
 		if (options_raw instanceof Array) {
-			if (options_raw[0] && (options_raw[0] as any).name)
+			if (options_raw[0] && (options_raw[0] as any).name != null) {
 				result = options_raw as any;
-			else
+			} else {
 				result = (options_raw as string[]).Select(a=>({name: a, value: a}));
+			}
 		} else if (IsConstructor(options_raw)) {
 			Assert(options_raw.prototype instanceof Enum, "Class provided must derive from class 'Enum'.");
 			result = (options_raw as any).options;
 		} else {
 			let optionsMap = options_raw as any;
-			for (let {name, value} of optionsMap.Props())
+			for (let {name, value} of optionsMap.Props()) {
 				//result.push(new Option(name, value));
 				result.push({name, value});
+			}
 		}
 		return result;
 	}
@@ -55,13 +57,11 @@ export default class Select extends BaseComponent
 	}
 	GetIndexOfValue(value) {
 		var {compareBy} = this.props;
-	    var options = this.OptionsList;
+		var options = this.OptionsList;
 		return options.FindIndex((option: any)=> {
-	        if (compareBy == "name")
-				return option.name === value;
-			if (compareBy == "value")
-		    	return option.value === value;
-		    return option.value == null ? value == null : option.value.toString() === value.toString();
+			if (compareBy == "name") return option.name === value;
+			if (compareBy == "value") return option.value === value;
+			return option.value == null ? value == null : option.value.toString() === value.toString();
 		});
 	}
 	//GetIndexForValue(value) { return this.FlattenedChildren.FindIndex(a=>a.props.value == value); }

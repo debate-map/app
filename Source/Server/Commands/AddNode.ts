@@ -7,15 +7,10 @@ import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import { UserEdit, MapEdit } from "Server/CommandMacros";
 
-@MapEdit
-@UserEdit
-export default class AddNode extends Command<{mapID: number, node: MapNode, link?: ChildEntry, metaThesisNode?: MapNode, asMapRoot?: boolean}> {
+export default class AddNode extends Command<{node: MapNode, metaThesisNode?: MapNode}> {
+	asSubcommand = false; // must be set to true, by a parent command, for this command to validate
 	Validate_Early() {
-		let {node, link, metaThesisNode, asMapRoot} = this.payload;
-		
-		if (!asMapRoot) {
-			Assert(node.parents && node.parents.VKeys().length == 1, `Node must have exactly one parent`);
-		}
+		let {node, metaThesisNode} = this.payload;
 		if (metaThesisNode) {
 			Assert(node.children == null, `Node cannot specify children. (server adds meta-thesis automatically)`);
 			Assert(node.childrenOrder == null, `Node cannot specify children-order. (server adds meta-thesis automatically)`);
@@ -29,11 +24,11 @@ export default class AddNode extends Command<{mapID: number, node: MapNode, link
 	parentID: number;
 	parent_oldChildrenOrder: number[];
 	async Prepare() {
-		let {node, link, metaThesisNode, asMapRoot} = this.payload;
-		let firebase = store.firebase.helpers;
+		let {node, metaThesisNode} = this.payload;
 
 		this.lastNodeID_new = await GetDataAsync("general", "lastNodeID") as number;
 		this.nodeID = ++this.lastNodeID_new;
+		node.creator = this.userInfo.id;
 		node.createdAt = Date.now();
 		this.metaThesisID = metaThesisNode ? ++this.lastNodeID_new : null;
 
@@ -43,38 +38,20 @@ export default class AddNode extends Command<{mapID: number, node: MapNode, link
 			node.childrenOrder = [this.metaThesisID];
 			metaThesisNode.parents = {[this.nodeID]: {_: true}};
 		}
-
-		if (!asMapRoot) {
-			this.parentID = node.parents.VKeys(true)[0].ToInt();
-			this.parent_oldChildrenOrder = await GetDataAsync("nodes", this.parentID, "childrenOrder") as number[];
-		}
-
-		this.returnData = this.nodeID;
 	}
 	async Validate() {
-		let {node, link, metaThesisNode, asMapRoot} = this.payload;
+		let {node, metaThesisNode} = this.payload;
 		AssertValidate(`MapNode`, node, `Node invalid`);
-		if (!asMapRoot) {
-			AssertValidate(`ChildEntry`, link, `Link invalid`);
-		}
 		AssertValidate(`MapNode`, metaThesisNode, `Meta-thesis-node invalid`);
 	}
 	
 	GetDBUpdates() {
-		let {node, link, metaThesisNode, asMapRoot} = this.payload;
+		let {node, metaThesisNode} = this.payload;
 
 		let updates = {};
 		// add node
 		updates["general/lastNodeID"] = this.lastNodeID_new;
 		updates[`nodes/${this.nodeID}`] = node;
-
-		// add as child of parent
-		if (!asMapRoot) {
-			updates[`nodes/${this.parentID}/children/${this.nodeID}`] = link;
-			if (this.parent_oldChildrenOrder) {
-				updates[`nodes/${this.parentID}/childrenOrder`] = this.parent_oldChildrenOrder.concat([this.nodeID]);
-			}
-		}
 
 		// add as parent of (pre-existing) children
 		for (let childID in (node.children || {}).Excluding(this.metaThesisID && this.metaThesisID.toString())) {

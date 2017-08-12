@@ -8,9 +8,10 @@ import {GetNodeForm, IsArgumentNode, IsArgumentType} from "../../Store/firebase/
 import AddNode from "./AddNode";
 import LinkNode from "./LinkNode";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
+import AddChildNode from "./AddChildNode";
 
 export default class CloneNode extends Command<{mapID: number, baseNodePath: string, newParentID: number}> {
-	sub_addNode: AddNode;
+	sub_addNode: AddChildNode;
 	sub_linkChildren: LinkNode[];
 	async Prepare() {
 		let {mapID, baseNodePath, newParentID} = this.payload;
@@ -33,7 +34,7 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 		if (isArgument) {
 			var metaThesisNode = RemoveHelpers(Clone(baseMetaThesis)).VSet({parents: null}) as MapNode;
 		}
-		this.sub_addNode = new AddNode({mapID, node: newChildNode, link: E({_: true}, nodeForm && {form: nodeForm}) as any, metaThesisNode});
+		this.sub_addNode = new AddChildNode({mapID, node: newChildNode, link: E({_: true}, nodeForm && {form: nodeForm}) as any, metaThesisNode});
 		this.sub_addNode.Validate_Early();
 		await this.sub_addNode.Prepare();
 
@@ -51,7 +52,7 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 		for (let childID of childrenToLink) {
 			let child = await GetAsync(()=>GetNode(childID)) as MapNode;
 			let childForm = await GetAsync(()=>GetNodeForm(child, baseNodePath + "/" + childID)) as ThesisForm;
-			let linkChildSub = new LinkNode({mapID, parentID: this.sub_addNode.nodeID, childID: childID, childForm});
+			let linkChildSub = new LinkNode({mapID, parentID: this.sub_addNode.sub_addNode.nodeID, childID: childID, childForm});
 			linkChildSub.Validate_Early();
 
 			//linkChildSub.Prepare([]);
@@ -81,11 +82,11 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 		//updates[`nodes/${this.sub_addNode.nodeID}/childrenOrder`] = this.sub_linkChildren.map(a=>a.payload.childID);
 		if (IsArgumentType(this.sub_addNode.payload.node.type)) {
 			let childrenOrder = [];
-			if (this.sub_addNode.metaThesisID) {
-				childrenOrder.push(this.sub_addNode.metaThesisID);
+			if (this.sub_addNode.sub_addNode.metaThesisID) {
+				childrenOrder.push(this.sub_addNode.sub_addNode.metaThesisID);
 			}
 			childrenOrder.push(...this.sub_linkChildren.map(a=>a.payload.childID));
-			updates[`nodes/${this.sub_addNode.nodeID}`].childrenOrder = childrenOrder;
+			updates[`nodes/${this.sub_addNode.sub_addNode.nodeID}`].childrenOrder = childrenOrder;
 		}
 
 		return updates;

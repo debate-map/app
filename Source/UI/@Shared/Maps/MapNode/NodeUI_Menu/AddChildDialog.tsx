@@ -23,9 +23,9 @@ import {ReverseMapNodeType, GetThesisType} from "../../../../../Store/firebase/n
 import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
 import { IsUserAdmin, IsUserMod } from "../../../../../Store/firebase/userExtras";
+import AddChildNode from "../../../../../Server/Commands/AddChildNode";
 
 export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: ThesisForm, childType: MapNodeType, userID: string, mapID: number, path: string) {
-	let firebase = store.firebase.helpers;
 	let childTypeInfo = MapNodeType_Info.for[childType];
 	let displayName = GetMapNodeTypeDisplayName(childType, parentNode, parentForm);
 
@@ -43,7 +43,6 @@ export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: Thes
 		type: childType,
 		relative: false,
 		//contentNode: new ContentNode(),
-		creator: userID,
 		approved: true,
 	});
 	let newLink = E(
@@ -122,7 +121,7 @@ export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: Thes
 				return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`}));
 			}*/
 
-			let newNodeID = await new AddNode({mapID: mapID, node: newNode, link: newLink, metaThesisNode: newMetaThesis}).Run();
+			let newNodeID = await new AddChildNode({mapID: mapID, node: newNode, link: newLink, metaThesisNode: newMetaThesis}).Run();
 			store.dispatch(new ACTMapNodeExpandedSet({mapID, path: path + "/" + newNodeID, expanded: true, recursive: false}));
 		}
 	});

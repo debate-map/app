@@ -34,7 +34,7 @@ export function SlicePath(path: string, removeFromEndCount: number, ...itemsToAd
 	return parts.join("/");
 }
 
-Object.prototype._AddFunction_Inline = function Ref(path = "", inVersionRoot = true) {
+Object.prototype._AddFunction_Inline = function DBRef(path = "", inVersionRoot = true) {
 	let finalPath = DBPath(path, inVersionRoot);
 	return this.ref(finalPath);
 }
@@ -61,7 +61,7 @@ export type FirebaseApp = FirebaseApplication & {
 		storage(): firebase.FirebaseStorage,
 
 		// custom
-		Ref(path?: string, inVersionRoot?: boolean): firebase.DatabaseReference,
+		DBRef(path?: string, inVersionRoot?: boolean): firebase.DatabaseReference,
 	},
 };
 
@@ -226,7 +226,7 @@ export async function GetDataAsync(...args) {
 	return await new Promise((resolve, reject) => {
 		//firebase.child(DBPath(path, inVersionRoot)).once("value",
 		let path = pathSegments.join("/");
-		firebase.Ref(path, options.inVersionRoot).once("value",
+		firebase.DBRef(path, options.inVersionRoot).once("value",
 			(snapshot: DataSnapshot)=> {
 				let result = snapshot.val();
 				if (result)

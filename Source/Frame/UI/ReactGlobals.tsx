@@ -53,6 +53,8 @@ export interface BaseProps {
 
 	page?; match?;
 	//firebase?: FirebaseDatabase;
+
+	Ref?: (comp: any)=>any;
 }
 export var basePropFullKeys = {
 	m: "margin", ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
@@ -316,6 +318,8 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		this.ComponentDidMountOrUpdate(this.ComponentDidMountOrUpdate_lastProps, this.ComponentDidMountOrUpdate_lastState);
 		this.ComponentDidMountOrUpdate_lastProps = this.props;
 		this.ComponentDidMountOrUpdate_lastState = this.state;
+		let {Ref} = this.props;
+		if (Ref) Ref(this);
 		this.mounted = true;
 		this.CallPostRender();
 	}
@@ -323,9 +327,12 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	ComponentWillUnmount(): void {};
 	private componentWillUnmount() {
 		this.ComponentWillUnmount();
-		for (let timer of this.timers)
+		for (let timer of this.timers) {
 			timer.Stop();
+		}
 		this.timers = [];
+		let {Ref} = this.props;
+		if (Ref) Ref(null);
 		this.mounted = false;
 	}
 	

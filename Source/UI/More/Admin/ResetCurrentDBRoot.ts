@@ -11,7 +11,7 @@ import {FirebaseData} from "../../../Store/firebase";
 export default async function ResetCurrentDBRoot() {
 	let firebase = store.firebase.helpers;
 
-	/*await firebase.Ref("nodes").remove();
+	/*await firebase.DBRef("nodes").remove();
 	let rootNode: MapNode = {
 		type: MapNodeType.Category,
 		title: "Root",
@@ -23,7 +23,7 @@ export default async function ResetCurrentDBRoot() {
 		opposeChildren: {},
 		talkChildren: {},
 	};
-	await firebase.Ref(`nodes/${1}`).set(rootNode);
+	await firebase.DBRef(`nodes/${1}`).set(rootNode);
 	ShowMessageBox({message: "Done!"});*/
 
 	let data = {} as FirebaseData;

@@ -35,6 +35,7 @@ import LinkNode from "Server/Commands/LinkNode";
 import UnlinkNode from "Server/Commands/UnlinkNode";
 import CloneNode from "Server/Commands/CloneNode";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
+import { ShowAddSubnodeDialog } from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSubnodeDialog";
 
 type Props = {map: Map, node: MapNodeEnhanced, path: string, inList?: boolean}
 	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode, copiedNode_asCut: boolean}>;
@@ -76,6 +77,13 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						}}/>
 					);
 				})}
+				{IsUserBasicOrAnon(userID) && !inList &&
+					<VMenuItem text="Add subnode (in layer)" style={styles.vMenuItem}
+						onClick={e=> {
+							if (e.button != 0) return;
+							if (userID == null) return ShowSignInPopup();
+							ShowAddSubnodeDialog(map._id, node, path);
+						}}/>}
 				{IsUserBasicOrAnon(userID) && node.metaThesis == null && !inList &&
 					<VMenuItem text={copiedNode ? <span>Cut <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Cut`}
 						enabled={ForCut_GetError(userID, map, node) == null} title={ForCut_GetError(userID, map, node)}
