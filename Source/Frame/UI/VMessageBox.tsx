@@ -25,7 +25,7 @@ export class MessageBoxOptions {
 	boxID: number;
 }
 export class ACTMessageBoxShow extends Action<MessageBoxOptions> {}
-export class ACTMessageBoxUpdate extends Action<{boxID: number}> {}
+export class ACTMessageBoxUpdate extends Action<{boxID: number, updateInnerUI: boolean}> {}
 
 export class BoxController {
 	constructor(options: MessageBoxOptions, boxID: number) {
@@ -35,8 +35,8 @@ export class BoxController {
 	options: MessageBoxOptions;
 	boxID: number;
 
-	UpdateUI() {
-		store.dispatch(new ACTMessageBoxUpdate({boxID: this.boxID}));
+	UpdateUI(updateInnerUI = true) {
+		store.dispatch(new ACTMessageBoxUpdate({boxID: this.boxID, updateInnerUI}));
 	}
 	Close() {
 		store.dispatch(new ACTMessageBoxShow(null));
@@ -104,7 +104,7 @@ export function MessageBoxReducer(state = new MessageBoxState(), action: Action<
 	if (action.Is(ACTMessageBoxShow))
 		return {...state, openOptions: action.payload};
 	if (action.Is(ACTMessageBoxUpdate))
-		return {...state, openOptions: {...state.openOptions}};
+		return {...state, openOptions: {...state.openOptions, updateInnerUI: action.payload.updateInnerUI}};
 	return state;
 }
 
@@ -112,12 +112,19 @@ export function MessageBoxReducer(state = new MessageBoxState(), action: Action<
 	options: State(a=>a.messageBox.openOptions),
 })) as any)
 export class MessageBoxUI extends BaseComponent<{} & Partial<{options: MessageBoxOptions}>, {}> {
+	lastInnerUIResult;
 	render() {
 		let {options} = this.props;
 		if (options == null) return <div/>;
 
+		let updateInnerUI = true; // options["updateInnerUI"] != false;
+		options["updateInnerUI"] = false; // have it only happen once
+
 		let {boxID, title, onCancel, overlayStyle, containerStyle} = options;
 		let ui = boxUIs[boxID];
+
+		let innerUI = updateInnerUI ? ui() : this.lastInnerUIResult;
+		this.lastInnerUIResult = innerUI;
 		return (
 			<Modal isOpen={true} contentLabel={title || ""} style={{overlay: E(styles.overlay, overlayStyle), content: E(styles.container, containerStyle)}}
 					shouldCloseOnOverlayClick={options.cancelOnOverlayClick}
@@ -125,7 +132,7 @@ export class MessageBoxUI extends BaseComponent<{} & Partial<{options: MessageBo
 						if (onCancel && onCancel() === false) return;
 						store.dispatch(new ACTMessageBoxShow(null));
 					}}>
-				{ui()}
+				{innerUI}
 			</Modal>
 		);
 	}

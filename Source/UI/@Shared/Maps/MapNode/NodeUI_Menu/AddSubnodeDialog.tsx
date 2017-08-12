@@ -54,14 +54,16 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 		});
 		let newLink = E({_: true}, newNode.type == MapNodeType.Thesis && {form: ThesisForm.Base}) as ChildEntry; // not actually used
 		this.state = {newNode, newLink} as any;
-
-		this.UpdateOKButton();
 	}
 	UpdateOKButton() {
 		let {boxController} = this.props;
 		let {validationError} = this.state;
 		// update ok-button
-		boxController.options.okButtonClickable = validationError == null;
+		let newClickable = validationError == null;
+		if (newClickable != boxController.options.okButtonClickable) {
+			boxController.options.okButtonClickable = newClickable;
+			boxController.UpdateUI(false);
+		}
 	}
 
 	nodeEditorUI: NodeDetailsUI;
@@ -75,9 +77,9 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 			thesisTypes.Remove(thesisTypes.find(a=>a.value == ThesisType.Image));
 		}
 
-		this.UpdateOKButton();
-
-		let layerOptions = [{name: "", value: null}].concat(layers.map(a=>({name: a.name, value: a})));
+		let layersWeCanAddTo = layers.filter(a=>a.creator == GetUserID());
+		let layerOptions = [{name: "", value: null}].concat(layersWeCanAddTo.map(a=>({name: a.name, value: a})));
+		
 		return (
 			<div>
 			<Column style={{padding: "10px 0", width: 600}}>
@@ -101,25 +103,27 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 									newNode.image = new ImageAttachment();
 								}
 								this.Update();
-
-								let oldError = validationError;
-								setTimeout(()=> {
-									validationError = this.GetValidationError();
-									if (validationError != oldError) {
-										this.Update();
-									}
-								});
 							}}/>
 					</Row>}
 				<NodeDetailsUI ref={c=>this.nodeEditorUI = GetInnerComp(c) as any} parent={null}
 					baseData={newNode.Extended({finalType: newNode.type, link: null})} baseLinkData={this.state.newLink} forNew={true}
 					onChange={(newNodeData, newLinkData, comp)=> {
-						this.SetState({newNode: newNodeData, validationError: this.GetValidationError()});
+						this.SetState({newNode: newNodeData});
 					}}/>
+				{/*validationError && <Row mt={3} style={{color: "rgba(255,200,200,.5)"}}>{FinalizeValidationError(validationError)}</Row>*/}
 			</Column>
 			</div>
 		);
 	}
+	PostRender() {
+		let oldError = this.state.validationError;
+		let newError = this.GetValidationError();
+		if (newError != oldError) {
+			//this.Update();
+			this.SetState({validationError: newError}, ()=>this.UpdateOKButton());
+		}
+	}
+
 	GetValidationError() {
 		if (this.nodeEditorUI && this.nodeEditorUI.GetValidationError()) return this.nodeEditorUI.GetValidationError();
 		let {layer} = this.state;
@@ -138,4 +142,9 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 		let newNodeID = await new AddSubnode({layerID: layer._id, anchorNodeID: anchorNode._id, subnode: newNode}).Run();
 		//store.dispatch(new ACTMapNodeExpandedSet_InLayer({mapID, anchorNodePath, layerID: layer._id, layerPath: newNodeID, expanded: true, recursive: false}));
 	}
+}
+
+function FinalizeValidationError(message: string) {
+	if (message == "Please fill out this field.") return "Please fill out the highlighted field.";
+	return message;
 }
