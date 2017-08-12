@@ -113,7 +113,9 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 	let ownStr = viewStr.Contains(":") ? viewStr.substr(0, viewStr.indexOf(":")) : viewStr;
 	let childrenStr = viewStr.Contains(":") ? viewStr.slice(viewStr.indexOf(":") + 1, -1) : "";
 
-	let nodeID = parseInt(ownStr.match(/^[0-9]+/)[0]);
+	let match = ownStr.match(/(L?)(^[0-9]+)/);
+	let isSubnode = match[1].length != 0;
+	let nodeID = parseInt(match[2]);
 
 	let ownStr_withoutParentheses = ownStr.replace(/\(.+?\)/g, "");
 	if (ownStr_withoutParentheses.Contains("s"))
@@ -152,7 +154,11 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 		for (let childStr of childStrings) {
 			let [childID, childNodeView] = ParseNodeView(childStr);
 			Assert(IsNumber(childID), "childID must be a number.");
-			nodeView.children[childID] = childNodeView;
+			if (isSubnode) {
+				nodeView.subnodes[childID] = childNodeView;
+			} else {
+				nodeView.children[childID] = childNodeView;
+			}
 		}
 	}
 
@@ -357,12 +363,17 @@ function GetNodeViewStr(mapID: number, path: string) {
 	let childrenStr = "";
 	for (let childID of (nodeView.children || {}).VKeys(true)) {
 		let childNodeViewStr = GetNodeViewStr(mapID, `${path}/${childID}`);
-		if (childNodeViewStr.length)
+		if (childNodeViewStr.length) {
 			childrenStr += (childrenStr.length ? "," : "") + childNodeViewStr;
+		}
+	}
+	for (let childID of (nodeView.subnodes || {}).VKeys(true)) {
+		let childNodeViewStr = GetNodeViewStr(mapID, `${path}/L${childID}`);
+		if (childNodeViewStr.length) {
+			childrenStr += (childrenStr.length ? "," : "") + childNodeViewStr;
+		}
 	}
 
-	/*let ownID = path.split("/").map(ToInt).Last();
-	let ownStr = ownID.toString();*/
 	let ownIDStr = path.substr(path.lastIndexOf("/") + 1);
 	let ownStr = ownIDStr;
 	//if (nodeView.expanded && !childrenStr.length) ownStr += "e";

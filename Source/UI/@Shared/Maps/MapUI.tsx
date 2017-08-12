@@ -230,7 +230,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 
 		let focusNode_target = GetFocusedNodePath(GetMapView(map._id)); // || map.rootNode.toString();
 		let viewOffset_target = GetViewOffset(GetMapView(map._id)); // || new Vector2i(200, 0);
-		//Log(`Resizing:${focusNode_target};${viewOffset_target}`);
+		//Log(`LoadingScroll:${focusNode_target};${ToJSON(viewOffset_target)}`);
 		if (focusNode_target == null || viewOffset_target == null) return;
 
 		let focusNodeBox;
@@ -245,8 +245,9 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
 		let viewOffset_current = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position);
 		let viewOffset_changeNeeded = new Vector2i(viewOffset_target).Minus(viewOffset_current);
-		if (withinPage) // if within a page, don't apply stored vertical-scroll
+		if (withinPage) { // if within a page, don't apply stored vertical-scroll
 			viewOffset_changeNeeded.y = 0;
+		}
 		this.scrollView.ScrollBy(viewOffset_changeNeeded);
 		//Log("Loading scroll: " + Vector2i.prototype.toString.call(viewOffset_target));
 

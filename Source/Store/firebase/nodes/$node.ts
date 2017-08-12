@@ -5,7 +5,7 @@ import {MapNode, MapNodeEnhanced, ThesisForm, ChildEntry, ThesisType} from './@M
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MetaThesis_ThenType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info, MetaThesis_IfType} from "./@MetaThesisInfo";
 import {MapNodeType} from './@MapNodeType';
-import {GetParentNode, IsLinkValid, IsNewLinkValid} from '../nodes';
+import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode} from "../nodes";
 import {GetValues} from '../../../Frame/General/Enums';
 import {PermissionGroupSet} from '../userExtras/@UserExtraInfo';
 import {CachedTransform} from '../../../Frame/V/VCache';
@@ -16,15 +16,15 @@ import {PreProcessLatex} from "../../../UI/@Shared/Maps/MapNode/NodeMathUI";
 import {SplitStringBySlash_Cached} from "../../../Frame/Database/StringSplitCache";
 import {SlicePath} from "../../../Frame/Database/DatabaseHelpers";
 
-export function GetFontSizeForNode(node: MapNode, asSubnode = false) {
+export function GetFontSizeForNode(node: MapNode, isSubnode = false) {
 	if (node.fontSizeOverride) return node.fontSizeOverride;
 	if (node.metaThesis) return 11;
 	if (node.equation) return node.equation.latex ? 14 : 13;
-	if (asSubnode) return 11;
+	if (isSubnode) return 11;
 	return 14;
 }
-export function GetPaddingForNode(node: MapNode, asSubnode = false) {
-	return (node.metaThesis || asSubnode) ? "1px 4px 2px" : "5px 5px 4px";
+export function GetPaddingForNode(node: MapNode, isSubnode = false) {
+	return (node.metaThesis || isSubnode) ? "1px 4px 2px" : "5px 5px 4px";
 }
 export type RatingTypeInfo = {type: RatingType, main: boolean};
 /** If passed an (un-enhanced) MapNode, this will fail to realize a yes-no-question thesis has "significance" as its main rating type. */
@@ -99,10 +99,14 @@ export function GetNodeEnhanced(node: MapNode, path: string) {
 	if (node == null) return null;
 	let node_finalType = GetFinalNodeTypeAtPath(node, path);
 	if (node_finalType == null) return null;
-	let parent = GetParentNode(path);
-	if (parent == null && path.Contains("/")) return null;
-	let link = GetLinkUnderParent(node._id, parent);
-	if (link == null && path.Contains("/")) return null;
+
+	let isSubnode = IsNodeSubnode(node);
+	if (!isSubnode) {
+		let parent = GetParentNode(path);
+		if (parent == null && path.Contains("/")) return null;
+		var link = GetLinkUnderParent(node._id, parent);
+		if (link == null && path.Contains("/")) return null;
+	}
 
 	let nodeEnhanced = node.Extended({finalType: node_finalType, link}) as MapNodeEnhanced;
 	return CachedTransform("GetNodeEnhanced", [path], nodeEnhanced, ()=>nodeEnhanced);

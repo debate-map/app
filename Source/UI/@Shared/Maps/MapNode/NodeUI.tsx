@@ -220,7 +220,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					{subnodes.map((subnode, index)=> {
 						return (
 							<NodeUI key={index} map={map} node={subnode} asSubnode={true} style={E({marginTop: -5 + (index == 0 ? 5 : 0)})}
-								path={/*path + "/"*/"" + subnode._id} widthOverride={widthOverride} /*onHeightOrPosChange={this.OnChildHeightOrPosChange}*//>
+								path={`${path}/L${subnode._id}`} widthOverride={widthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>
 						);
 					})}
 				</div>
@@ -381,7 +381,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		if (onHeightOrPosChange) onHeightOrPosChange();
 	}
 	UpdateState(forceUpdate = false) {
-		let {map, node, path, children, nodeView} = this.props;
+		let {map, node, path, children, subnodes, nodeView} = this.props;
 		let expanded = nodeView && nodeView.expanded;
 		//let {childHolder, upChildHolder} = this.refs;
 		let childHolder = FindDOM_(this).children(".childHolder");
@@ -445,7 +445,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			newState.svgInfo = {mainBoxOffset, oldChildBoxOffsets};
 		}
 		
-		var changedState = this.SetState(newState, null, !forceUpdate, true);
+		let cancelIfStateSame = !forceUpdate && subnodes.length == 0;
+		var changedState = this.SetState(newState, null, cancelIfStateSame, true);
 		//Log(`Changed state? (${this.props.node._id}): ` + changedState);
 	}
 }

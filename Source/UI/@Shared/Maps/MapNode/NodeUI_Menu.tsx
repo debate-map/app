@@ -77,7 +77,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 						}}/>
 					);
 				})}
-				{IsUserBasicOrAnon(userID) && !inList &&
+				{IsUserBasicOrAnon(userID) && !inList && path.includes("/") && !path.includes("L") &&
 					<VMenuItem text="Add subnode (in layer)" style={styles.vMenuItem}
 						onClick={e=> {
 							if (e.button != 0) return;

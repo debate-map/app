@@ -39,14 +39,22 @@ export function GetChildCount(node: MapNode) {
 	return (node.children || {}).VKeys(true).length;
 }
 
+export function IsNodeSubnode(node: MapNode) {
+	return node.layerPlusAnchorParents != null;
+}
+
 export function GetParentNodeID(path: string) {
-	return SplitStringBySlash_Cached(path).map(a=>a.ToInt()).XFromLast(1);
+	let pathNodes = SplitStringBySlash_Cached(path);
+	if (pathNodes.Last()[0] == "L") return null;
+	let parentNodeStr = pathNodes.XFromLast(1);
+	return parentNodeStr ? parentNodeStr.replace("L", "").ToInt() : null;
 }
 export function GetParentNode(path: string) {
 	return GetNode(GetParentNodeID(path));
 }
 export function GetNodeID(path: string) {
-	return SplitStringBySlash_Cached(path).map(a=>a.ToInt()).LastOrX();
+	let ownNodeStr = SplitStringBySlash_Cached(path).LastOrX();
+	return ownNodeStr ? ownNodeStr.replace("L", "").ToInt() : null;
 }
 
 export function GetNodeParents(node: MapNode) {

@@ -26,7 +26,10 @@ export class MapNodeView {
 	viewOffset?: Vector2i;
 	openPanel?: string;
 	openTermID?: number;
+
 	children? = {} as {[key: number]: MapNodeView};
 	childLimit_up?: number;
 	childLimit_down?: number;
+
+	subnodes? = {} as {[key: number]: MapNodeView};
 }

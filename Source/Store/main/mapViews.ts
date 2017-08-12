@@ -82,11 +82,12 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 
 export function GetPathNodes(path: string) {
 	let pathSegments = SplitStringBySlash_Cached(path);
-	Assert(pathSegments.All(a=>IsNumberString(a)), `Path contains non-number segments: ${path}`);
-	return pathSegments.map(ToInt);
+	Assert(pathSegments.All(a=>IsNumberString(a) || a[0] == "L"), `Path contains non-number, non-L-prefixed segments: ${path}`);
+	//return pathSegments.map(ToInt);
+	return pathSegments;
 }
 
-export function GetSelectedNodePathNodes(mapViewOrMapID: number | MapView): number[] {
+export function GetSelectedNodePathNodes(mapViewOrMapID: number | MapView): string[] {
 	let mapView = IsNumber(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
 	if (mapView == null) return [];
 
@@ -95,17 +96,32 @@ export function GetSelectedNodePathNodes(mapViewOrMapID: number | MapView): numb
 		if (selectedTreeNode == null) return [];
 
 		let selectedNodeView = selectedTreeNode.ancestorNodes.Last();
-		return selectedNodeView.PathNodes.Where(a=>a != "children").map(ToInt);
+		//return selectedNodeView.PathNodes.Where(a=>a != "children").map(ToInt);
+		return GetPathFromDataPath(selectedNodeView.PathNodes);
 	});
 }
 export function GetSelectedNodePath(mapViewOrMapID: number | MapView): string {
 	return GetSelectedNodePathNodes(mapViewOrMapID).join("/");
 }
 export function GetSelectedNodeID(mapID: number): number {
-	return GetSelectedNodePathNodes(mapID).LastOrX();
+	return GetSelectedNodePathNodes(mapID).LastOrX().replace("L", "").ToInt();
 }
 
-export function GetFocusedNodePathNodes(mapViewOrMapID: number | MapView): number[] {
+export function GetPathFromDataPath(dataPathUnderRootNodeViews: string[]): string[] {
+	let result = [];
+	for (let [index, prop] of dataPathUnderRootNodeViews.entries()) {
+		if (index == 0) { // first one is the root-node-id
+			result.push(prop);
+		} else if (prop == "children") {
+			result.push(dataPathUnderRootNodeViews[index + 1]);
+		} else if (prop == "subnodes") {
+			result.push("L" + dataPathUnderRootNodeViews[index + 1]);
+		}
+	}
+	return result;
+}
+
+export function GetFocusedNodePathNodes(mapViewOrMapID: number | MapView): string[] {
 	let mapView = IsNumber(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
 	if (mapView == null) return [];
 	
@@ -114,25 +130,33 @@ export function GetFocusedNodePathNodes(mapViewOrMapID: number | MapView): numbe
 		if (focusedTreeNode == null) return [];
 
 		let focusedNodeView = focusedTreeNode.ancestorNodes.Last();
-		return focusedNodeView.PathNodes.Where(a=>a != "children").map(ToInt);
+		//return focusedNodeView.PathNodes.Where(a=>a != "children").map(ToInt);
+		return GetPathFromDataPath(focusedNodeView.PathNodes);
 	});
 }
 export function GetFocusedNodePath(mapViewOrMapID: number | MapView): string {
 	return GetFocusedNodePathNodes(mapViewOrMapID).join("/").toString(); // toString() needed if only 1 item
 }
 export function GetFocusedNodeID(mapID: number): number {
-	return GetFocusedNodePathNodes(mapID).LastOrX();
+	return GetFocusedNodePathNodes(mapID).LastOrX().replace("L", "").ToInt();
 }
 
 export function GetMapView(mapID: number): MapView {
 	return State("main", "mapViews", mapID);
 }
-export function GetNodeView(mapID: number, path: string): MapNodeView {
-	let pathNodeIDs = GetPathNodes(path);
+export function GetNodeViewDataPath(mapID: number, path: string): string[] {
+	let pathNodes = GetPathNodes(path);
 	// this has better perf than the simpler approaches
 	//let childPath = pathNodeIDs.map(childID=>`${childID}/children`).join("/").slice(0, -"/children".length);
-	let childPathNodes = pathNodeIDs.SelectMany(childID=>[childID, "children"]).slice(0, -1);
-	return State("main", "mapViews", mapID, "rootNodeViews", ...childPathNodes) as any;
+	let childPathNodes = pathNodes.SelectMany(nodeStr=> {
+		if (nodeStr[0] == "L") return ["subnodes", nodeStr.slice(1)];
+		return ["children", nodeStr];
+	}).slice(1);
+	return ["main", "mapViews", mapID+"", "rootNodeViews", ...childPathNodes];
+}
+export function GetNodeView(mapID: number, path: string): MapNodeView {
+	let dataPath = GetNodeViewDataPath(mapID, path);
+	return State(...dataPath) as any;
 }
 export function GetViewOffset(mapView: MapView): Vector2i {
 	if (mapView == null) return null;

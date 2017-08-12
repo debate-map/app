@@ -18,7 +18,7 @@ import {firebaseConnect} from "react-redux-firebase";
 import {WaitXThenRun} from "../../../../../Frame/General/Timers";
 import TextInput from "../../../../../Frame/ReactComponents/TextInput";
 import Moment from "moment";
-import {GetParentNode, GetParentNodeID} from "../../../../../Store/firebase/nodes";
+import { GetParentNode, GetParentNodeID, IsNodeSubnode } from "../../../../../Store/firebase/nodes";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
 import Row from "../../../../../Frame/ReactComponents/Row";
@@ -54,9 +54,11 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 		let firebase = store.firebase.helpers;
 		//let {error} = this.state;
 
+		let isSubnode = IsNodeSubnode(node);
+
 		var parentNode = GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1));
 		// if parent-node not loaded yet, don't render yet
-		if (path.includes("/") && parentNode == null) return null;
+		if (!isSubnode && path.includes("/") && parentNode == null) return null;
 		
 		let link = GetLinkUnderParent(node._id, parentNode);
 

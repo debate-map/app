@@ -44,7 +44,7 @@ import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import {GetTerm, GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import {Term} from "../../../../Store/firebase/terms/@Term";
 import {ParseSegmentsForPatterns} from "../../../../Frame/General/RegexHelpers";
-import {GetParentNode} from "../../../../Store/firebase/nodes";
+import {GetParentNode, IsNodeSubnode} from "../../../../Store/firebase/nodes";
 import classNames from "classnames";
 import { GetEquationStepNumber } from "../../../../Store/firebase/nodes/$node/equation";
 import NodeMathUI from "UI/@Shared/Maps/MapNode/NodeMathUI";
@@ -79,6 +79,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let nodeTypeInfo = MapNodeType_Info.for[finalNodeType];
 		let barSize = 5;
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
+		let isSubnode = IsNodeSubnode(node);
 		let mainRatingType = GetRatingTypesForNode(node).FirstOrX(null, {}).type;
 
 		let parentNode = GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1));
@@ -95,8 +96,6 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let subPanelShow = node.type == MapNodeType.Thesis && (node.contentNode || node.image);
 		let bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView && nodeView.expanded;
-
-		let asSubnode = !path.includes("/") && node.type != MapNodeType.Category;
 
 		return (
 			<div className={classNames("NodeUI_Inner", pathNodeIDs.length == 0 && " root")} style={{
@@ -127,7 +126,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 				{leftPanelShow && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
 
 				<div style={{display: "flex", width: "100%", background: "rgba(0,0,0,.7)", borderRadius: 5, cursor: "pointer"}}>
-					<Div style={{position: "relative", width: "100%", padding: GetPaddingForNode(node, asSubnode)}}>
+					<Div style={{position: "relative", width: "100%", padding: GetPaddingForNode(node, isSubnode)}}>
 						<div style={{
 							position: "absolute", left: 0, top: 0, bottom: 0,
 							width: mainRating_fillPercent + "%", background: `rgba(${nodeTypeInfo.backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
@@ -208,8 +207,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 	render() {
 		let {map, node, nodeView, path, equationNumber} = this.props;
 		let latex = node.equation && node.equation.latex;
-
-		let asSubnode = !path.includes("/") && node.type != MapNodeType.Category;
+		let isSubnode = IsNodeSubnode(node);
 
 		return (
 			//<Row style={{position: "relative"}}>
@@ -217,8 +215,8 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 				{equationNumber != null &&
 					<Pre>{equationNumber}) </Pre>}
 				<span style={E(
-					{position: "relative", fontSize: GetFontSizeForNode(node, asSubnode), whiteSpace: "initial"},
-					(node.metaThesis || asSubnode) && {margin: "4px 0 1px 0"},
+					{position: "relative", fontSize: GetFontSizeForNode(node, isSubnode), whiteSpace: "initial"},
+					(node.metaThesis || isSubnode) && {margin: "4px 0 1px 0"},
 				)}>
 					{latex && <NodeMathUI text={node.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
 					{!latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}

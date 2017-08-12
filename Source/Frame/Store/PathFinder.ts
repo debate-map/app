@@ -34,7 +34,7 @@ export function CreateMapViewForPath(path: string): MapView {
 	result.rootNodeViews[pathNodes[0]] = CreateNodeViewForPath(pathNodes.Skip(1));
 	return result;
 }
-export function CreateNodeViewForPath(pathFromSelfToDescendent: number[]): MapNodeView {
+export function CreateNodeViewForPath(pathFromSelfToDescendent: string[]): MapNodeView {
 	let result = new MapNodeView();
 	result.expanded = true;
 

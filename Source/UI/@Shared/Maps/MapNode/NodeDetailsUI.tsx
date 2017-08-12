@@ -288,7 +288,7 @@ class AtThisLocation extends BaseComponent<Props_Enhanced, {}> {
 	render() {
 		let {newData, forNew, enabled, newLinkData, Change} = this.props;
 		if (newData.type != MapNodeType.Thesis) return <div/>;
-		if (newLinkData == null) return <div/>; // if the root of a map
+		if (newLinkData == null) return <div/>; // if the root of a map, or subnode
 
 		let thesisType = GetThesisType(newData);
 		let canSetAsNegation = thesisType == ThesisType.Normal && !newData.metaThesis && newLinkData.form != ThesisForm.YesNoQuestion;
