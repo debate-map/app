@@ -8,6 +8,7 @@ export class Layer {
 	creator: string;
 	createdAt: number;
 
+	mapsWhereEnabled: {[key: number]: boolean};
 	nodeSubnodes: {[key: number]: LayerNodeSubnodes}; // key: node-id
 }
 AddSchema({
@@ -16,6 +17,7 @@ AddSchema({
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 
+		mapsWhereEnabled: {patternProperties: {"^[0-9]+$": {type: "boolean"}}},
 		nodeSubnodes: {patternProperties: {"^[0-9]+$": {$ref: "LayerNodeSubnodes"}}},
 	},
 	required: ["name", "creator", "createdAt"],

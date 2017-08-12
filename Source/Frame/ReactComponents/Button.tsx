@@ -12,40 +12,11 @@ var styles = {
 		alignItems: "center",
     	justifyContent: "center",
 
-		//margin: 2, // maybe temp
-		//boxShadow: "rgba(150,150,150,1) 0px 0px 1px",
-		//boxShadow: "rgba(210,210,230,1) 0px 0px 3px",
-		//border: "1px solid rgba(255,255,255,.5)",
-		border: "1px solid rgba(210,210,230,.12)",
-		/*borderWidth: 3,
-		borderBottomColors: "#897048 #917953 #a18a66",
-		borderTopColors: "#897048 #917953 #a18a66",
-		borderLeftColors: "#897048 #917953 #a18a66",
-		borderRightColors: "#897048 #917953 #a18a66",*/
-		/*border: `
-linear-gradient(rgba(90,100,110,.6), rgba(90,100,110,.6)) 3px 3px / calc(100% - 6px) calc(100% - 6px) no-repeat,
-linear-gradient(to bottom, rgba(210,210,230,.5), rgba(210,210,230,0)) 3px bottom / calc(100% - 6px) 3px no-repeat,
-linear-gradient(to top, rgba(210,210,230,.5), rgba(210,210,230,0)) 3px top / calc(100% - 6px) 3px no-repeat, 
-linear-gradient(to left, rgba(210,210,230,.5), rgba(210,210,230,0)) left 3px / 3px calc(100% - 6px) no-repeat,
-linear-gradient(to right, rgba(210,210,230,.5), rgba(210,210,230,0)) right 3px / 3px calc(100% - 6px) no-repeat,
-linear-gradient(to top left, rgba(210,210,230,.3), rgba(210,210,230,0)) left top / 3px 3px no-repeat,
-linear-gradient(to top right, rgba(210,210,230,.3), rgba(210,210,230,0)) right top / 3px 3px no-repeat,
-linear-gradient(to bottom left, rgba(210,210,230,.3), rgba(210,210,230,0)) left bottom / 3px 3px no-repeat,
-linear-gradient(to bottom right, rgba(210,210,230,.3), rgba(210,210,230,0)) right bottom / 3px 3px no-repeat
-`.replace(/[\r\n]/g, ""),*/
-		/*background: `
-linear-gradient(to bottom, rgba(92,7,52,1) 0%, rgba(83,0,30,0) 100%) left bottom no-repeat,
-linear-gradient(to top, rgba(92,7,52,1) 0%, rgba(83,0,30,0) 100%) left top no-repeat
-`.replace(/[\r\n]/g, ""),
-		backgroundSize: "100% 5px",*/
-
-		//backgroundColor: "rgba(0,0,0,.3)",
-		//backgroundColor: "rgba(10,10,10,1)",
 		backgroundColor: "rgba(90,100,110,.6)",
 		backgroundRepeat: "no-repeat",
-
-		//borderWidth: "0 0",
 		borderRadius: 5,
+		border: "1px solid rgba(210,210,230,.12)",
+
 		color: "#AAA",
 		/*fontFamily: "fancyFontSemibold, Trebuchet MS, Tahoma, sans-serif",*/
 		fontSize: 14, textAlign: "center",
@@ -64,7 +35,8 @@ linear-gradient(to top, rgba(92,7,52,1) 0%, rgba(83,0,30,0) 100%) left top no-re
 	},
 	root_hasCheckbox: {paddingTop: 4, verticalAlign: 1},
 	root_disabled: {
-	    opacity: .5, cursor: "default", pointerEvents: "none",
+		opacity: .5, cursor: "default",
+		//pointerEvents: "none",
 		//":hover": {backgroundColor: "rgba(0,0,0,.3)"}
 	},
 	checkbox: {marginLeft: -6},
@@ -118,22 +90,24 @@ export default class Button extends BaseComponent<ButtonProps, {}> {
 		// experimental pseudo-selector-capable styling system
 		let pseudoSelectors = [":hover"];
 		let currentPseudoSelectorStyleKeys = [];
-		for (let selector of pseudoSelectors) {
-			if (finalStyle[selector] == null) continue;
-			let styleText = createMarkupForStyles(finalStyle[selector]);
+		if (enabled) {
+			for (let selector of pseudoSelectors) {
+				if (finalStyle[selector] == null) continue;
+				let styleText = createMarkupForStyles(finalStyle[selector]);
 
-			var styleKey = ToJSON(selector + "---" + styleText); // get a unique identifier for this particular pseudo-style
-			styleKey = styleKey.replace(/[^a-zA-Z0-9-]/g, ""); // make sure key is a valid class-name
-			currentPseudoSelectorStyleKeys.push(styleKey);
+				var styleKey = ToJSON(selector + "---" + styleText); // get a unique identifier for this particular pseudo-style
+				styleKey = styleKey.replace(/[^a-zA-Z0-9-]/g, ""); // make sure key is a valid class-name
+				currentPseudoSelectorStyleKeys.push(styleKey);
 
-			// if <style> element for the given style-composite has not been created yet, create it 
-			if (pseudoSelectorStyleKeys[styleKey] == null) {
-				pseudoSelectorStyleKeys[styleKey] = true;
-				AddGlobalStyle(`
-		.Button.${styleKey}${selector} {
-			${styleText.replace(/([^ ]+?);/g, "$1 !important;")}
-		}
-						`);
+				// if <style> element for the given style-composite has not been created yet, create it 
+				if (pseudoSelectorStyleKeys[styleKey] == null) {
+					pseudoSelectorStyleKeys[styleKey] = true;
+					AddGlobalStyle(`
+			.Button.${styleKey}${selector} {
+				${styleText.replace(/([^ ]+?);/g, "$1 !important;")}
+			}
+							`);
+				}
 			}
 		}
 
@@ -151,12 +125,10 @@ export default class Button extends BaseComponent<ButtonProps, {}> {
 		);
 	}
 	OnClick(e) {
-		var {onClick, onLeftClick, onDirectClick} = this.props;
-		if (onDirectClick && (e.target == e.currentTarget || $(e.target).parent()[0] == e.currentTarget))
-			onDirectClick(e);
-		if (onClick)
-			onClick(e);
-		if (onLeftClick && e.button == 0)
-			onLeftClick(e);
+		var {enabled, onClick, onLeftClick, onDirectClick} = this.props;
+		if (!enabled) return;
+		if (onDirectClick && (e.target == e.currentTarget || $(e.target).parent()[0] == e.currentTarget)) onDirectClick(e);
+		if (onClick) onClick(e);
+		if (onLeftClick && e.button == 0) onLeftClick(e);
 	}
 }

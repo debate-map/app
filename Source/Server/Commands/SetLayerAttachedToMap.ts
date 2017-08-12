@@ -7,6 +7,7 @@ import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import {Map_nameFormat, Map} from "../../Store/firebase/maps/@Map";
 import {UserEdit} from "../CommandMacros";
 import {MapEdit} from "Server/CommandMacros";
+import {GetUserMapInfo} from "../../Store/firebase/userMapInfo";
 
 AddSchema({
 	properties: {
@@ -37,6 +38,7 @@ export default class SetLayerAttachedToMap extends Command<{mapID: number, layer
 		let {mapID, layerID, attached} = this.payload;
 		let updates = {};
 		updates[`maps/${mapID}/layers/${layerID}`] = attached || null;
+		updates[`layers/${layerID}/mapsWhereEnabled/${mapID}`] = attached || null;
 		return updates;
 	}
 }

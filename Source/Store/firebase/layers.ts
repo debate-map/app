@@ -14,7 +14,7 @@ export function GetLayers(): Layer[] {
 }
 export function GetLayer(id: number): Layer {
 	if (id == null) return null;
-	return GetData("maps", id);
+	return GetData("layers", id);
 }
 
 export function GetMapLayerIDs(map: Map) {
@@ -44,6 +44,9 @@ export function GetSubnodesInLayer(anchorNodeID: number, layerID: number) {
 
 export function GetSubnodesInEnabledLayersEnhanced(userID: string, map: Map, anchorNodeID: number) {
 	let layersEnabled = GetMapLayers(map);
+	// if some layers aren't loaded yet, return nothing
+	if (layersEnabled.Any(a=>a == null)) return emptyArray;
+	
 	let userLayerStates = GetUserLayerStatesForMap(userID, map._id) || {};
 	for (let {name: layerIDStr, value: state} of userLayerStates.Props(true)) {
 		let layerID = layerIDStr.ToInt();
@@ -58,8 +61,6 @@ export function GetSubnodesInEnabledLayersEnhanced(userID: string, map: Map, anc
 			}
 		}
 	}
-	// if some layers aren't loaded yet, return nothing
-	//if (layersEnabled.Any(a=>a == null)) return emptyArray;
 
 	let subnodeIDs = [];
 	for (let layer of layersEnabled) {
@@ -71,4 +72,8 @@ export function GetSubnodesInEnabledLayersEnhanced(userID: string, map: Map, anc
 		return {...child, finalType: child.type, link: null};
 	});
 	return CachedTransform("GetSubnodesInEnabledLayersEnhanced", [map._id, userID, anchorNodeID], subnodesEnhanced, ()=>subnodesEnhanced);
+}
+
+export function ForDeleteLayer_GetError(userID: string, layer: Layer) {
+	if ((layer.nodeSubnodes || {}).VKeys(true).length) return `Cannot delete layer until all the subnodes within it are deleted.`;
 }

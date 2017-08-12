@@ -35,6 +35,7 @@ export default class SetMapLayerStateForUser extends Command<{userID: string, ma
 		let {userID, mapID, layerID, state} = this.payload;
 		let updates = {};
 		updates[`userMapInfo/${userID}/${mapID}/layerStates/${layerID}`] = state;
+		//updates[`layers/${layerID}/usersWhereStateSet/${userID}`] = state;
 		return updates;
 	}
 }

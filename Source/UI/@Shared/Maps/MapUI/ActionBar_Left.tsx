@@ -16,7 +16,7 @@ import {GetNodeAsync, GetChildCount} from "Store/firebase/nodes";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
 import DeleteMap from "../../../../Server/Commands/DeleteMap";
 import {colors} from "../../../../Frame/UI/GlobalStyles";
-import {GetLayers, GetMapLayerIDs} from "../../../../Store/firebase/layers";
+import { GetLayers, GetMapLayerIDs, ForDeleteLayer_GetError } from "../../../../Store/firebase/layers";
 import {Layer} from "Store/firebase/layers/@Layer";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddLayerDialog} from "../Layers/AddLayerDialog";
@@ -28,6 +28,7 @@ import { LayerStatesMap } from "Store/firebase/userMapInfo/@UserMapInfo";
 import {GetUserLayerStateForMap} from "../../../../Store/firebase/userMapInfo";
 import SetLayerAttachedToMap from "../../../../Server/Commands/SetLayerAttachedToMap";
 import SetMapLayerStateForUser from "../../../../Server/Commands/SetMapLayerStateForUser";
+import DeleteLayer from "../../../../Server/Commands/DeleteLayer";
 
 type ActionBar_LeftProps = {map: Map, subNavBarWidth: number};
 @Connect((state, {map}: ActionBar_LeftProps)=> ({
@@ -187,13 +188,27 @@ class LayerUI extends BaseComponent<LayerUIProps, {}> {
 	render() {
 		let {index, last, map, layer, creator, userLayerState} = this.props;
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), map);
+		let deleteLayerError = ForDeleteLayer_GetError(GetUserID(), layer);
 		return (
 			<Column p="7px 10px" style={E(
 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
 				last && {borderRadius: "0 0 10px 10px"}
 			)}>
 				<Row>
-					<span style={{flex: columnWidths[0]}}>{layer.name}</span>
+					<span style={{flex: columnWidths[0]}}>
+						{layer.name}
+						{creator._key == GetUserID() &&
+							<Button text="X" ml={5} style={{padding: "3px 5px"}} enabled={deleteLayerError == null} title={deleteLayerError}
+								onClick={()=> {
+									ShowMessageBox({
+										title: `Delete "${layer.name}"`, cancelButton: true,
+										message: `Delete the layer "${layer.name}"?`,
+										onOK: async ()=> {
+											new DeleteLayer({layerID: layer._id}).Run();
+										}
+									});
+								}}/>}
+					</span>
 					<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
 					<span style={{flex: columnWidths[2]}}>
 						<CheckBox enabled={creatorOrMod} checked={GetMapLayerIDs(map).Contains(layer._id)} onChange={val=> {

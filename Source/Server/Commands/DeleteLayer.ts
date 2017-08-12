@@ -10,38 +10,40 @@ import {IsArgumentNode} from "../../Store/firebase/nodes/$node";
 import {Map} from "../../Store/firebase/maps/@Map";
 import DeleteNode from "Server/Commands/DeleteNode";
 import {UserEdit} from "Server/CommandMacros";
-import {UserMapInfo, UserMapInfoSet} from "../../Store/firebase/userMapInfo/@UserMapInfo";
+import {ForDeleteLayer_GetError, GetLayer} from "../../Store/firebase/layers";
+import {GetAsync} from "Frame/Database/DatabaseHelpers";
+import {Layer} from "../../Store/firebase/layers/@Layer";
+import {UserMapInfoSet} from "../../Store/firebase/userMapInfo/@UserMapInfo";
 
 @UserEdit
-export default class DeleteMap extends Command<{mapID: number}> {
-	oldData: Map;
+export default class DeleteLayer extends Command<{layerID: number}> {
+	oldData: Layer;
 	userMapInfoSets: {[key: string]: UserMapInfoSet};
-	sub_deleteNode: DeleteNode;
 	async Prepare() {
-		let {mapID} = this.payload;
-		this.oldData = await GetDataAsync({addHelpers: false}, "maps", mapID) as Map;
+		let {layerID} = this.payload;
+		this.oldData = await GetDataAsync({addHelpers: false}, "layers", layerID) as Layer;
 		this.userMapInfoSets = await GetDataAsync("userMapInfo") as {[key: string]: UserMapInfoSet};
-
-		this.sub_deleteNode = new DeleteNode({mapID, nodeID: this.oldData.rootNode});
-		this.sub_deleteNode.Validate_Early();
-		await this.sub_deleteNode.Prepare();
 	}
 	async Validate() {
-		await this.sub_deleteNode.Validate();
+		let {layerID} = this.payload;
+		let earlyError = await GetAsync(()=>ForDeleteLayer_GetError(this.userInfo.id, this.oldData));
+		Assert(earlyError == null, earlyError);
 	}
 
 	GetDBUpdates() {
-		let {mapID} = this.payload;
-		let updates = this.sub_deleteNode.GetDBUpdates();
-		let newUpdates = {};
-		newUpdates[`maps/${mapID}`] = null;
+		let {layerID} = this.payload;
+		let updates = {};
+		updates[`layers/${layerID}`] = null;
+		for (let mapID in (this.oldData.mapsWhereEnabled || {})) {
+			updates[`maps/${mapID}/layers/${layerID}`] = null;
+		}
 		for (let {name: userID, value: userMapInfoSet} of this.userMapInfoSets.Props(true)) {
 			for (let {name: mapID2, value: userMapInfo} of userMapInfoSet.Props(true)) {
-				if (mapID2 == mapID) {
-					newUpdates[`userMapInfo/${userID}/${mapID}`] = null;
+				if (userMapInfo.layerStates[layerID] != null) {
+					updates[`userMapInfo/${userID}/${mapID2}/layerStates/${layerID}`] = null;
 				}
 			}
 		}
-		return MergeDBUpdates(updates, newUpdates);
+		return updates;
 	}
 }
