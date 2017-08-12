@@ -7,6 +7,8 @@ import {E} from "../../Frame/General/Globals_Free";
 import {Term} from "../../Store/firebase/terms/@Term";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {MapEdit, UserEdit} from "../CommandMacros";
+import {GetAsync} from "Frame/Database/DatabaseHelpers";
+import {GetMap} from "Store/firebase/maps";
 
 @MapEdit
 @UserEdit
@@ -17,10 +19,14 @@ export default class UnlinkNode extends Command<{mapID: number, parentID: number
 		this.parent_oldChildrenOrder = await GetDataAsync("nodes", parentID, "childrenOrder") as number[];
 	}
 	async Validate() {
-		let {parentID, childID} = this.payload;
+		/*let {parentID, childID} = this.payload;
 		let childNode = await GetNodeAsync(childID);
 		let parentNodes = await GetNodeParentsAsync(childNode);
-		Assert(parentNodes.length > 1, "Cannot unlink this child, as doing so would orphan it. Try deleting it instead.");
+		Assert(parentNodes.length > 1, "Cannot unlink this child, as doing so would orphan it. Try deleting it instead.");*/
+		let {mapID, childID} = this.payload;
+		let oldData = await GetNodeAsync(childID);
+		let earlyError = await GetAsync(()=>ForUnlink_GetError(this.userInfo.id, GetMap(mapID), oldData));
+		Assert(earlyError == null, earlyError);
 	}
 	
 	GetDBUpdates() {

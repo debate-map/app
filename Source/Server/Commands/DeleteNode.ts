@@ -1,4 +1,4 @@
-import {GetNodeParentsAsync} from "../../Store/firebase/nodes";
+import {GetNodeParentsAsync, ForDelete_GetError} from "../../Store/firebase/nodes";
 import {Assert} from "../../Frame/General/Assert";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command} from "../Command";
@@ -9,6 +9,8 @@ import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {IsArgumentNode} from "../../Store/firebase/nodes/$node";
 import {ToInt} from "../../Frame/General/Types";
 import {MapEdit, UserEdit} from "../CommandMacros";
+import {GetAsync} from "Frame/Database/DatabaseHelpers";
+import {GetMap} from "Store/firebase/maps";
 
 @MapEdit
 @UserEdit
@@ -35,7 +37,13 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number}>
 		}
 	}
 	async Validate() {
-		Assert((this.oldData.parents || {}).VKeys(true).length <= 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
+		/*Assert((this.oldData.parents || {}).VKeys(true).length <= 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
+		let normalChildCount = (this.oldData.children || {}).VKeys(true).length;
+		if (this.metaThesisID) normalChildCount--;
+		Assert(normalChildCount == 0, "Cannot delete this node until all its (non-meta-thesis) children have been unlinked or deleted.");*/
+		let {mapID} = this.payload;
+		let earlyError = await GetAsync(()=>ForDelete_GetError(this.userInfo.id, GetMap(mapID), this.oldData));
+		Assert(earlyError == null, earlyError);
 	}
 
 	GetDBUpdates() {
@@ -58,6 +66,14 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number}>
 			let parent_childrenOrder = this.oldParentChildrenOrders[index];
 			if (parent_childrenOrder) {
 				updates[`nodes/${parentID}/childrenOrder`] = parent_childrenOrder.Except(nodeID);
+			}
+		}
+
+		// delete placement in layer
+		if (this.oldData.layerPlusAnchorParents) {
+			for (let layerPlusAnchorStr in this.oldData.layerPlusAnchorParents) {
+				let [layerID, anchorNodeID] = layerPlusAnchorStr.split("_").map(ToInt);
+				updates[`layers/${layerID}/nodeSubnodes/${anchorNodeID}/${nodeID}`] = null;
 			}
 		}
 

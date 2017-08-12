@@ -21,7 +21,7 @@ import {ACTNodeCopy} from "../../../../Store/main";
 import Select from "../../../../Frame/ReactComponents/Select";
 import {GetEntries, GetValues} from "../../../../Frame/General/Enums";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
-import {ForDelete_GetError, ForUnlink_GetError, GetNode, GetNodeChildrenAsync, GetNodeParentsAsync, GetParentNode, IsLinkValid, IsNewLinkValid} from "../../../../Store/firebase/nodes";
+import {ForDelete_GetError, ForUnlink_GetError, GetNode, GetNodeChildrenAsync, GetNodeParentsAsync, GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode} from "../../../../Store/firebase/nodes";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
@@ -186,13 +186,14 @@ If not, paste the argument as a clone instead.`
 							}*/
 							//let s_ifParents = parentNodes.length > 1 ? "s" : "";
 							let metaThesisID = node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument ? node.children.VKeys()[0] : null;
+							let contextStr = IsNodeSubnode(node) ? ", and its placement in-layer" : ", and its link with 1 parent";
 
 							ShowMessageBox({
 								title: `Delete "${nodeText}"`, cancelButton: true,
 								/*message: `Delete the node "${nodeText}"`
 									+ `${metaThesisID ? ", its 1 meta-thesis" : ""}`
 									+ `, and its link${s_ifParents} with ${parentNodes.length} parent${s_ifParents}?`,*/
-								message: `Delete the node "${nodeText}"${metaThesisID ? `, its 1 meta-thesis` : ``}, and its link with 1 parent?`,
+								message: `Delete the node "${nodeText}"${metaThesisID ? `, its 1 meta-thesis` : ``}${contextStr}?`,
 								onOK: ()=> {
 									new DeleteNode({mapID: map._id, nodeID: node._id}).Run();
 								}

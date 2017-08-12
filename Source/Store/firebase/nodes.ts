@@ -39,6 +39,10 @@ export function GetChildCount(node: MapNode) {
 	return (node.children || {}).VKeys(true).length;
 }
 
+export function IsRootNode(node: MapNode) {
+	if (IsNodeSubnode(node)) return false;
+	return GetParentCount(node) == 0;
+}
 export function IsNodeSubnode(node: MapNode) {
 	return node.layerPlusAnchorParents != null;
 }
@@ -129,14 +133,15 @@ export function ForUnlink_GetError(userID: string, map: Map, node: MapNode, asPa
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
 	if (node.metaThesis) return "Cannot unlink a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
 	if (!asPartOfCut && (node.parents || {}).VKeys(true).length <= 1)  return `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`;
-	if (map.rootNode == node._id || GetParentCount(node) == 0) return `Cannot unlink the root-node of a map.`;
+	if (IsRootNode(node)) return `Cannot unlink the root-node of a map.`;
+	if (IsNodeSubnode(node)) return `Cannot unlink a subnode. Try deleting it instead.`;
 	return null;
 }
 export function ForDelete_GetError(userID: string, map: Map, node: MapNode) {
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
 	if (node.metaThesis) return "Cannot delete a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
 	if (GetParentCount(node) > 1) return `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`;
-	if (map.rootNode == node._id || GetParentCount(node) == 0) return `Cannot delete the root-node of a map.`;
+	if (IsRootNode(node)) return `Cannot delete the root-node of a map.`;
 
 	let nodeChildren = GetNodeChildren(node);
 	if (nodeChildren.Any(a=>a == null)) return "[still loading children...]";
@@ -150,7 +155,8 @@ export function ForCut_GetError(userID: string, map: Map, node: MapNode) {
 }
 
 export function ForCopy_GetError(userID: string, map: Map, node: MapNode) {
-	if (map.rootNode == node._id || GetParentCount(node) == 0) return `Cannot copy the root-node of a map.`;
+	if (IsRootNode(node)) return `Cannot copy the root-node of a map.`;
+	if (IsNodeSubnode(node)) return `Cannot copy a subnode.`;
 	return null;
 }
 
