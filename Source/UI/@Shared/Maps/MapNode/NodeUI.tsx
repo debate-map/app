@@ -116,6 +116,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		this.state = {svgInfo: {}} as any;
 	}
 
+	nodeUI: HTMLDivElement;
 	render() {
 		let {map, node, path, asSubnode, widthOverride, style,
 			initialChildLimit, form, children, nodeView, nodeChildren, nodeChildren_sortValues, subnodes} = this.props;
@@ -175,8 +176,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let showBelowMessage = nodeChildren.length > 0 && nodeChildren.length < minChildCount;*/
 		
 		this.childBoxes = {};
-		return (
-			<div className="NodeUI clickThrough"
+		let nodeUIResult_withoutSubnodes = (
+			<div ref={c=>this.nodeUI = c} className="NodeUI clickThrough"
 					style={E({position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}, style)}>
 				<div ref="innerBoxAndSuchHolder" className="innerBoxAndSuchHolder clickThrough" style={E(
 					{position: "relative"},
@@ -216,13 +217,6 @@ export default class NodeUI extends BaseComponent<Props, State> {
 							</Div>*/}
 					</div>
 					{!limitBar_above && children}
-					
-					{subnodes.map((subnode, index)=> {
-						return (
-							<NodeUI key={index} map={map} node={subnode} asSubnode={true} style={E({marginTop: -5 + (index == 0 ? 5 : 0)})}
-								path={`${path}/L${subnode._id}`} widthOverride={widthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>
-						);
-					})}
 				</div>
 
 				{nodeChildren == emptyArray &&
@@ -287,6 +281,21 @@ export default class NodeUI extends BaseComponent<Props, State> {
 								})}
 							</Column>}
 					</div>}
+			</div>
+		);
+
+		if (subnodes.length == 0) {
+			return nodeUIResult_withoutSubnodes;
+		}
+		return (
+			<div className="clickThrough" style={{display: "flex", flexDirection: "column"}}>
+				{nodeUIResult_withoutSubnodes}
+				{subnodes.map((subnode, index)=> {
+					return (
+						<NodeUI key={index} map={map} node={subnode} asSubnode={true} style={E({marginTop: -5})}
+							path={`${path}/L${subnode._id}`} widthOverride={widthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>
+					);
+				})}
 			</div>
 		);
 	}
@@ -384,7 +393,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let {map, node, path, children, subnodes, nodeView} = this.props;
 		let expanded = nodeView && nodeView.expanded;
 		//let {childHolder, upChildHolder} = this.refs;
-		let childHolder = FindDOM_(this).children(".childHolder");
+		let childHolder = $(this.nodeUI).children(".childHolder");
 		let upChildHolder = childHolder.children(".upChildHolder");
 		let downChildHolder = childHolder.children(".downChildHolder");
 		/*let firstChild = (upChildHolder.length ? upChildHolder : childHolder).children().ToList()[0];
@@ -437,7 +446,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 
 			let oldChildBoxOffsets = this.childBoxes.Props().Where(pair=>pair.value != null).ToMap(pair=>pair.name, pair=> {
 				//let childBox = FindDOM_(pair.value).find("> div:first-child > div"); // get inner-box of child
-				let childBox = FindDOM_(pair.value).find("> .innerBoxAndSuchHolder > .innerBoxHolder > .NodeUI_Inner"); // get inner-box of child
+				let childBox = FindDOM_(pair.value).find(".NodeUI_Inner").first(); // get inner-box of child
 				let childBoxOffset = new Vector2i(childBox.offset()).Minus(holderOffset);
 				childBoxOffset = childBoxOffset.Plus(new Vector2i(0, childBox.outerHeight() / 2));
 				return childBoxOffset;
