@@ -96,6 +96,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView && nodeView.expanded;
 
+		let asSubnode = !path.includes("/") && node.type != MapNodeType.Category;
+
 		return (
 			<div className={classNames("NodeUI_Inner", pathNodeIDs.length == 0 && " root")} style={{
 						display: "flex", position: "relative", borderRadius: 5, cursor: "default",
@@ -125,7 +127,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 				{leftPanelShow && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
 
 				<div style={{display: "flex", width: "100%", background: "rgba(0,0,0,.7)", borderRadius: 5, cursor: "pointer"}}>
-					<Div style={{position: "relative", width: "100%", padding: GetPaddingForNode(node)}}>
+					<Div style={{position: "relative", width: "100%", padding: GetPaddingForNode(node, asSubnode)}}>
 						<div style={{
 							position: "absolute", left: 0, top: 0, bottom: 0,
 							width: mainRating_fillPercent + "%", background: `rgba(${nodeTypeInfo.backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
@@ -206,14 +208,17 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 	render() {
 		let {map, node, nodeView, path, equationNumber} = this.props;
 		let latex = node.equation && node.equation.latex;
+
+		let asSubnode = !path.includes("/") && node.type != MapNodeType.Category;
+
 		return (
 			//<Row style={{position: "relative"}}>
 			<Div style={{position: "relative"}}>
 				{equationNumber != null &&
 					<Pre>{equationNumber}) </Pre>}
 				<span style={E(
-					{position: "relative", fontSize: GetFontSizeForNode(node), whiteSpace: "initial"},
-					node.metaThesis && {margin: "4px 0 1px 0"},
+					{position: "relative", fontSize: GetFontSizeForNode(node, asSubnode), whiteSpace: "initial"},
+					(node.metaThesis || asSubnode) && {margin: "4px 0 1px 0"},
 				)}>
 					{latex && <NodeMathUI text={node.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
 					{!latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}

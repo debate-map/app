@@ -16,14 +16,15 @@ import {PreProcessLatex} from "../../../UI/@Shared/Maps/MapNode/NodeMathUI";
 import {SplitStringBySlash_Cached} from "../../../Frame/Database/StringSplitCache";
 import {SlicePath} from "../../../Frame/Database/DatabaseHelpers";
 
-export function GetFontSizeForNode(node: MapNode) {
+export function GetFontSizeForNode(node: MapNode, asSubnode = false) {
 	if (node.fontSizeOverride) return node.fontSizeOverride;
 	if (node.metaThesis) return 11;
 	if (node.equation) return node.equation.latex ? 14 : 13;
+	if (asSubnode) return 11;
 	return 14;
 }
-export function GetPaddingForNode(node: MapNode) {
-	return node.metaThesis ? "1px 4px 2px" : "5px 5px 4px";
+export function GetPaddingForNode(node: MapNode, asSubnode = false) {
+	return (node.metaThesis || asSubnode) ? "1px 4px 2px" : "5px 5px 4px";
 }
 export type RatingTypeInfo = {type: RatingType, main: boolean};
 /** If passed an (un-enhanced) MapNode, this will fail to realize a yes-no-question thesis has "significance" as its main rating type. */

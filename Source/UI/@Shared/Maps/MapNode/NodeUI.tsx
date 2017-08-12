@@ -195,9 +195,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 							//width: 14, height: 7, transform: "rotate(45deg)", background: "rgba(255,255,0,.7)"
 							width: 0, height: 0, borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderBottom: "10px solid rgba(255,255,0,.7)",
 						}}/>*/
-						<div style={{position: "absolute", left: "calc(50% - 7px)", top: -8, width: 14, height: 7,
-							borderRadius: "7px 7px 0 0", background: "rgba(255,255,0,.7)"}}/>
-						//<div style={{position: "absolute", left: 2, right: 2, top: -3, height: 3, borderRadius: "3px 3px 0 0", background: "rgba(255,255,0,.7)"}}/>
+						/*<div style={{position: "absolute", left: "calc(50% - 7px)", top: -8, width: 14, height: 7,
+							borderRadius: "7px 7px 0 0", background: "rgba(255,255,0,.7)"}}/>*/
+						<div style={{position: "absolute", left: 2, right: 2, top: -3, height: 3, borderRadius: "3px 3px 0 0", background: "rgba(255,255,0,.7)"}}/>
 					}
 					<div ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{position: "relative"}}>
 						{node.accessLevel != AccessLevel.Basic &&
@@ -219,7 +219,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					
 					{subnodes.map((subnode, index)=> {
 						return (
-							<NodeUI key={index} map={map} node={subnode} asSubnode={true} style={E({marginTop: 3 + (index == 0 ? 5 : 0)})}
+							<NodeUI key={index} map={map} node={subnode} asSubnode={true} style={E({marginTop: -5 + (index == 0 ? 5 : 0)})}
 								path={/*path + "/"*/"" + subnode._id} widthOverride={widthOverride} /*onHeightOrPosChange={this.OnChildHeightOrPosChange}*//>
 						);
 					})}

@@ -37,6 +37,8 @@ export default class AddSubnode extends Command<{layerID: number, anchorNodeID: 
 		let newUpdates = {};
 		// add into layer
 		newUpdates[`layers/${layerID}/nodeSubnodes/${anchorNodeID}/${this.sub_addNode.nodeID}`] = true;
+		let layerPlusAnchorStr = `${layerID}_${anchorNodeID}`;
+		newUpdates[`nodes/${this.sub_addNode.nodeID}/layerPlusAnchorParents/${layerPlusAnchorStr}`] = true;
 
 		return MergeDBUpdates(updates, newUpdates);
 	}

@@ -72,7 +72,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 				{creatorOrMod &&
 					<Row>
 						<Button text="Save" enabled={dataError == null} onLeftClick={async ()=> {
-							let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "finalType", "link");
+							let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "layerPlusAnchorParents", "finalType", "link");
 							if (link) {
 								let linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
 								await new UpdateNodeDetails(E(mapID && {mapID}, {nodeID: node._id, nodeUpdates, linkParentID: GetParentNodeID(path), linkUpdates})).Run();

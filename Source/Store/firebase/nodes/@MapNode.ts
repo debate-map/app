@@ -67,6 +67,8 @@ export class MapNode {
 	children: ChildSet;
 	childrenOrder: number[];
 	//talkRoot: number;
+
+	layerPlusAnchorParents: LayerPlusAnchorParentSet;
 }
 export const MapNode_id = "^[0-9]+$";
 //export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
@@ -100,6 +102,8 @@ AddSchema({
 		children: {$ref: "ChildSet"},
 		childrenOrder: {items: {type: "number"}},
 		//talkRoot: {type: "number"},
+
+		layerPlusAnchorParents: {$ref: "LayerPlusAnchorParentSet"},
 	},
 	required: ["type", "creator", "createdAt"],
 	allOf: [
@@ -126,6 +130,9 @@ AddSchema({
 // similar to a database entry, after having related data from other tables "joined"
 export type MapNodeEnhanced = MapNode & {finalType: MapNodeType, link: ChildEntry};
 
+// regular parents
+// ==========
+
 export type ParentSet = { [key: number]: ParentEntry; };
 AddSchema({patternProperties: {"^[0-9]+$": {$ref: "ParentEntry"}}}, "ParentSet");
 export type ParentEntry = { _: boolean; }
@@ -149,6 +156,15 @@ AddSchema({
 	},
 	required: ["_"],
 }, "ChildEntry");
+
+// layer+anchor parents
+// ==========
+
+export type LayerPlusAnchorParentSet = { [key: string]: boolean; };
+AddSchema({patternProperties: {"^[0-9_]+$": {type: "boolean"}}}, "LayerPlusAnchorParentSet");
+
+// others
+// ==========
 
 export class ImageAttachment {
 	id: number;
