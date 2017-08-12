@@ -27,8 +27,6 @@ import {ACTSet} from "Store";
 import {GetOpenMapID} from "../../../../Store/main";
 import {GetNewURL} from "../../../../Frame/URL/URLManager";
 
-let childrenPlaceholder = [];
-
 type Props = {map: Map, node: MapNode}
 	& Partial<{nodeParents: MapNode[], nodeChildren: MapNode[]}>;
 @Connect((state: RootState, {node}: Props)=> ({

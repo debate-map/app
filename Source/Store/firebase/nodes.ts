@@ -10,15 +10,6 @@ import {GetNodeEnhanced, IsArgumentNode} from "./nodes/$node";
 import {Map} from "./maps/@Map";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
-export function GetNode(id: number) {
-	//Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");
-	if (id == null || IsNaN(id)) return null;
-	return GetData("nodes", id) as MapNode;
-}
-export async function GetNodeAsync(id: number) {
-	return await GetDataAsync("nodes", id) as MapNode;
-}
-
 export type NodeMap = {[key: string]: MapNode};
 export function GetNodeMap(queries?): NodeMap {
 	return GetData({queries}, "nodes");
@@ -31,6 +22,15 @@ export function GetNodes(queries?): MapNode[] {
 	let nodeMap = GetNodeMap();
 	return CachedTransform("GetNodes_Enhanced", [], nodeMap, ()=>nodeMap ? nodeMap.VValues(true) : []);
 }*/
+
+export function GetNode(id: number) {
+	//Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");
+	if (id == null || IsNaN(id)) return null;
+	return GetData("nodes", id) as MapNode;
+}
+export async function GetNodeAsync(id: number) {
+	return await GetDataAsync("nodes", id) as MapNode;
+}
 
 export function GetParentCount(node: MapNode) {
 	return (node.parents || {}).VKeys(true).length;

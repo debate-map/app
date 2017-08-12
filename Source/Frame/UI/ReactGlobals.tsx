@@ -37,7 +37,7 @@ export function FindReact(dom) {
 g.Extend({FindReact});
 // needed for wrapper-components that don't provide way of accessing inner-component
 export function GetInnerComp(wrapperComp: React.Component<any, any>) {
-	return FindReact(FindDOM(wrapperComp));
+	return FindReact(FindDOM(wrapperComp)) as any;
 }
 g.Extend({GetInnerComp});
 
@@ -54,7 +54,8 @@ export interface BaseProps {
 	page?; match?;
 	//firebase?: FirebaseDatabase;
 
-	Ref?: (comp: any)=>any;
+	// removed, because ReactJS does not recognize "Ref" as special prop like "ref" is 
+	//Ref?: (comp: any)=>any;
 }
 export var basePropFullKeys = {
 	m: "margin", ml: "marginLeft", mr: "marginRight", mt: "marginTop", mb: "marginBottom",
@@ -318,8 +319,8 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 		this.ComponentDidMountOrUpdate(this.ComponentDidMountOrUpdate_lastProps, this.ComponentDidMountOrUpdate_lastState);
 		this.ComponentDidMountOrUpdate_lastProps = this.props;
 		this.ComponentDidMountOrUpdate_lastState = this.state;
-		let {Ref} = this.props;
-		if (Ref) Ref(this);
+		/*let {Ref} = this.props;
+		if (Ref) Ref(this);*/
 		this.mounted = true;
 		this.CallPostRender();
 	}
@@ -331,8 +332,8 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 			timer.Stop();
 		}
 		this.timers = [];
-		let {Ref} = this.props;
-		if (Ref) Ref(null);
+		/*let {Ref} = this.props;
+		if (Ref) Ref(null);*/
 		this.mounted = false;
 	}
 	

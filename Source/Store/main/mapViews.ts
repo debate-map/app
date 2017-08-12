@@ -118,7 +118,7 @@ export function GetFocusedNodePathNodes(mapViewOrMapID: number | MapView): numbe
 	});
 }
 export function GetFocusedNodePath(mapViewOrMapID: number | MapView): string {
-	return GetFocusedNodePathNodes(mapViewOrMapID).join("/");
+	return GetFocusedNodePathNodes(mapViewOrMapID).join("/").toString(); // toString() needed if only 1 item
 }
 export function GetFocusedNodeID(mapID: number): number {
 	return GetFocusedNodePathNodes(mapID).LastOrX();

@@ -33,7 +33,7 @@ export function ShowAddSubnodeDialog(mapID: number, anchorNode: MapNodeEnhanced,
 	let dialog: AddSubnodeDialog;
 	let boxController: BoxController = ShowMessageBox({
 		title: `Add subnode (to layer)`, cancelButton: true,
-		messageUI: ()=><AddSubnodeDialog Ref={c=>dialog = c} {...{mapID, anchorNode, anchorNodePath, boxController}}/>,
+		messageUI: ()=><AddSubnodeDialog ref={c=>dialog = GetInnerComp(c)} {...{mapID, anchorNode, anchorNodePath, boxController}}/>,
 		onOK: ()=>dialog.OnOK(),
 	});
 }
@@ -79,6 +79,7 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 
 		let layerOptions = [{name: "", value: null}].concat(layers.map(a=>({name: a.name, value: a})));
 		return (
+			<div>
 			<Column style={{padding: "10px 0", width: 600}}>
 				<Row>
 					<Pre>Layer: </Pre>
@@ -116,6 +117,7 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 						this.SetState({newNode: newNodeData, validationError: this.GetValidationError()});
 					}}/>
 			</Column>
+			</div>
 		);
 	}
 	GetValidationError() {
