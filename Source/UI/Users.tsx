@@ -81,12 +81,10 @@ class UserRow extends BaseComponent<{index: number, last: boolean, user: User, u
 				{userExtraInfo == null && <div style={{textAlign: "center"}}>Loading...</div>}
 				{userExtraInfo &&
 					<Row>
-						{/*<a href={toURL.toString({domain: false})} style={{fontSize: 18, flex: columnWidths[0]}} onClick={e=> {
+						{/*<Link text={map.name} to={toURL.toString({domain: false})} style={{fontSize: 18, flex: columnWidths[0]}} onClick={e=> {
 							e.preventDefault();
 							store.dispatch(new ACTDebateMapSelect({id: map._id}));
-						}}>
-							{map.name}
-						</a>*/}
+						}}/>*/}
 						<span style={{flex: columnWidths[0]}}>{user.displayName}</span>
 						<span style={{flex: columnWidths[1]}}>{Moment(userExtraInfo.joinDate).format("YYYY-MM-DD")}</span>
 						<span style={{flex: columnWidths[2]}}>{userExtraInfo.edits || 0}</span>

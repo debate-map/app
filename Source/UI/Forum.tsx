@@ -20,6 +20,7 @@ import {ShowAddSectionDialog} from "./Forum/AddSectionDialog";
 import {ShowAddSubforumDialog} from "./Forum/AddSubforumDialog";
 import {Thread} from "Store/firebase/forum/@Thread";
 import {ThreadUI} from "./Forum/ThreadUI";
+import Link from "../Frame/ReactComponents/Link";
 
 export const columnWidths = [.7, .3];
 
@@ -106,19 +107,18 @@ type SubforumEntryUIProps = {index: number, last: boolean, subforum: Subforum} &
 class SubforumEntryUI extends BaseComponent<SubforumEntryUIProps, {}> {
 	render() {
 		let {index, last, subforum, threads} = this.props;
-		let toURL = new URL(null, [subforum._id+""]);
+		//let toURL = new URL(null, [subforum._id+""]);
 		return (
 			<Column p="7px 10px" style={E(
 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
 				last && {borderRadius: "0 0 10px 10px"}
 			)}>
 				<Row>
-					<a href={toURL.toString({domain: false})} style={{fontSize: 18, flex: columnWidths[0]}} onClick={e=> {
+					{/*<Link text={subforum.name} to={toURL.toString({domain: false})} style={{fontSize: 18, flex: columnWidths[0]}} onClick={e=> {
 						e.preventDefault();
 						store.dispatch(new ACTSubforumSelect({id: subforum._id}));
-					}}>
-						{subforum.name}
-					</a>
+					}}/>*/}
+					<Link text={subforum.name} actions={d=>d(new ACTSubforumSelect({id: subforum._id}))} style={{fontSize: 18, flex: columnWidths[0]}}/>
 					<span style={{flex: columnWidths[1]}}>{threads.length}</span>
 				</Row>
 			</Column>

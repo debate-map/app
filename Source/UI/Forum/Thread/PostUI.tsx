@@ -14,8 +14,7 @@ import {GetUpdates} from "../../../Frame/General/Others";
 import { UpdatePost } from "Server/Commands/UpdatePost";
 import {Thread} from "Store/firebase/forum/@Thread";
 import {IsUserCreatorOrMod} from "../../../Store/firebase/userExtras";
-
-var Markdown = require("react-remarkable");
+import VReactMarkdown_Remarkable from "../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
 
 type Props = {index: number, thread: Thread, post: Post} & Partial<{creator: User}>;
 @Connect((state, {post}: Props)=> ({
@@ -62,7 +61,7 @@ export class PostUI extends BaseComponent<Props, {editing: boolean, dataError: s
 				<Column p={10} style={{flex: 1}}>
 					<Row style={{width: "100%"}}>
 						{/*post.text*/}
-						<Markdown container="div" source={post.text != null ? post.text : "*This post has been deleted.*"}/>
+						<VReactMarkdown_Remarkable source={post.text != null ? post.text : "*This post has been deleted.*"}/>
 					</Row>
 					<Row mt="auto">
 						<span style={{color: "rgba(255,255,255,.5)"}}>{creator ? creator.displayName : "..."}, at {Moment(post.createdAt).format("YYYY-MM-DD HH:mm:ss")}</span>

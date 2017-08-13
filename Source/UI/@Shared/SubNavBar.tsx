@@ -36,7 +36,7 @@ export class SubNavBarButton extends BaseComponent<SubNavBarButtonProps, {}> {
 		var {page, subpage, text, currentSubpage} = this.props;
 		let active = subpage == currentSubpage;
 		return (
-			<a href={`/${page}/${subpage}`} style={E(
+			<Link text={text} to={`/${page}/${subpage}`} style={E(
 				{
 					display: "inline-block", cursor: "pointer", verticalAlign: "middle",
 					lineHeight: "30px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9,
@@ -46,9 +46,7 @@ export class SubNavBarButton extends BaseComponent<SubNavBarButtonProps, {}> {
 			)} onClick={e=> {
 				e.preventDefault();
 				store.dispatch(new ACTSetSubpage({page, subpage}));
-			}}>
-				{text}
-			</a>
+			}}/>
 		);
 	}
 }

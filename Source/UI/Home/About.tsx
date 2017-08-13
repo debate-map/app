@@ -63,8 +63,13 @@ export default class AboutUI extends BaseComponent<{}, {}> {
 		let {page, match} = this.props;
 		return (
 			<article>
-				<VReactMarkdown className="selectable" source={pageText}
-					containerProps={{style: styles.page}}
+				<VReactMarkdown className="selectable" style={styles.page} source={pageText}
+					/*markdownOptions={{breaks: false}} rendererOptions={{breaks: false}}
+					rendererOptions={{
+						components: {
+							br: ()=><span> </span>
+						}
+					}}*/
 					/*renderers={{
 						Text: props=> {
 							return <span style={{color: "rgba(255,255,255,.7)"}}>{props.literal}</span>;

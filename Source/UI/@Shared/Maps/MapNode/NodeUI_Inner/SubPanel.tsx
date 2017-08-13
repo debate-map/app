@@ -6,6 +6,7 @@ import {Connect} from "Frame/Database/FirebaseConnect";
 import {GetImage} from "../../../../../Store/firebase/images";
 import {Image} from "../../../../../Store/firebase/images/@Image";
 import SourcesUI from "./SourcesUI";
+import VReactMarkdown_Remarkable from "../../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
 
 export default class SubPanel extends BaseComponent<{node: MapNode}, {}> {
 	render() {
@@ -23,7 +24,6 @@ export default class SubPanel extends BaseComponent<{node: MapNode}, {}> {
 		);
 	}
 }
-var Markdown = require("react-remarkable");
 export class SubPanel_Quote extends BaseComponent<{contentNode: ContentNode, fontSize: number}, {}> {
 	render() {
 		let {contentNode, fontSize} = this.props;
@@ -42,7 +42,7 @@ export class SubPanel_Quote extends BaseComponent<{contentNode: ContentNode, fon
 						Link: props=><span/>,
 					}}
 				/>*/}
-				<Markdown container="div" source={contentNode.content}/>
+				<VReactMarkdown_Remarkable source={contentNode.content}/>
 				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
 				<SourcesUI sourceChains={contentNode.sourceChains}/>
 			</div>

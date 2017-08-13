@@ -30,12 +30,7 @@ export default class ThreadEntryUI extends BaseComponent<Props, {}> {
 				last && {borderRadius: "0 0 10px 10px"}
 			)}>
 				<Row>
-					<a href={toURL.toString({domain: false})} style={{fontSize: 17, flex: columnWidths[0]}} onClick={e=> {
-						e.preventDefault();
-						store.dispatch(new ACTThreadSelect({id: thread._id}));
-					}}>
-						{thread.title}
-					</a>
+					<Link text={thread.title} actions={d=>d(new ACTThreadSelect({id: thread._id}))} style={{fontSize: 17, flex: columnWidths[0]}}/>
 					<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
 					<span style={{flex: columnWidths[2]}}>{posts ? posts.length : "..."}</span>
 				</Row>

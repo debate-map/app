@@ -39,8 +39,14 @@ export function CreateNodeViewForPath(pathFromSelfToDescendent: string[]): MapNo
 	result.expanded = true;
 
 	if (pathFromSelfToDescendent.length) {
-		Assert(IsNumber(pathFromSelfToDescendent[0]), "pathFromSelfToDescendent must contain only numbers.");
-		result.children[pathFromSelfToDescendent[0]] = CreateNodeViewForPath(pathFromSelfToDescendent.Skip(1));
+		//Assert(IsNumber(pathFromSelfToDescendent[0]), "pathFromSelfToDescendent must contain only numbers.");
+		let nextNodeStr = pathFromSelfToDescendent[0];
+		let childNodeView = CreateNodeViewForPath(pathFromSelfToDescendent.Skip(1));
+		if (nextNodeStr[0] == "L") {
+			result.subnodes[nextNodeStr.replace("L", "")] = childNodeView;
+		} else {
+			result.children[nextNodeStr] = childNodeView;
+		}
 	} else {
 		result.selected = true;
 		result.focused = true;

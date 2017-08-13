@@ -35,7 +35,7 @@ Its primary improvements are (in short):
 
 Here is a quick example:
 
-GlobalMapPlaceholder
+$mapPlaceholder
 
 The tree-like structure assists in traversing the various lines of evidence:
 	at each level, there is a "thesis" (blue) which makes a claim, and a set of simple "arguments" (green and red) which support/oppose it.
@@ -228,90 +228,16 @@ export default class HomeUI2 extends BaseComponent<Props, {}> {
 		/*if (demoRootNode_override) // for dev
 			demoRootNode = demoRootNode_override;*/
 		//let {router} = this.context;
-
-		/*if (1 == 1) {
-			let Change = _=>this.Update();
-			return (
-				<Editor value={info.text} onChange={val=>Change(info.text = val)} options={{
-					scrollbarStyle: `overlay`,
-					//viewportMargin: Infinity // temp fix for that it doesn't detect scroll-wheel scrolling
-				}}/>
-			);
-		}*/
-
-		let markdownProps = {
-			className: "selectable",
-			containerProps: {style: E(styles.page)},
-			renderers: {
-				Paragraph: Paragraph,
-				/*Text: props=> {
-					...
-					//return <span {...props}>{props.literal}</span>;
-					//return React.DOM.span(null, props.literal, props);
-					//return React.createElement("section", props.Excluding("literal", "nodeKey"), props.literal);
-					return `[text]` as any;
-				},*/
-				Link: props=>Link(props),
-			},
-		};
-
+		
 		return (
 			<article>
-				<VReactMarkdown {...markdownProps} source={pageText}
-					replacements={{
-						"default": (segment, index)=> {
-							let containerProps = E(markdownProps.containerProps) as any;
-							containerProps.style = E(
-								markdownProps.containerProps.style,
-								index == 0 && {marginBottom: 0},
-								index == 2 && {marginTop: 0},
-							);
-							return <ReactMarkdown {...markdownProps} source={segment.textParts[0]} containerProps={containerProps}/>;
-						},
-						"GlobalMapPlaceholder": (segment, index)=> {
-							return <GlobalMapPlaceholder demoRootNode={demoRootNode} style={{}}/>;
-						}
-					}}
-				/>
+				<VReactMarkdown source={pageText.split("$mapPlaceholder")[0]} className="selectable" style={E(styles.page, {marginBottom: 0})}/>
+				<GlobalMapPlaceholder demoRootNode={demoRootNode} style={{}}/>
+				<VReactMarkdown source={pageText.split("$mapPlaceholder")[1]} className="selectable" style={E(styles.page, {marginTop: 0})}/>
 			</article>
 		);
 	}
 }
-
-const Paragraph = props=> {
-	if (DeepGet(props, `children/0/props/literal`) == `GlobalMapPlaceholder`) {
-		return <div {...props.Excluding(`literal`, `nodeKey`)}>{props.children}</div>;
-	}
-	//return React.createElement(g.Markdown_defaultRenderers.paragraph, props);
-	return <p {...props.Excluding(`literal`, `nodeKey`)}>{props.children}</p>;
-};
-const Link = (props)=> {
-	let {href, nodeKey, children, literal, ...rest} = props;
-	return (
-		<a {...rest} href={href} key={nodeKey} onClick={e=> {
-			let currentURL = GetCurrentURL(true);
-			//let fullURL = href.Contains("://") ? href : GetUrlParts()[0] + "/" + href;
-			let toURL = URL.Parse(ToAbsoluteUrl(href));
-			if (toURL.domain == currentURL.domain) {
-				e.preventDefault();
-
-				if (href.startsWith(`#`)) {
-					JumpToHash(href.substr(1));
-					//document.getElementById(h).scrollIntoView();   //Even IE6 supports this
-					return;
-				}
-
-				if (ShallowEquals(toURL.pathNodes, currentURL.pathNodes)) { // if paths same
-					store.dispatch(replace(href));
-				} else {
-					store.dispatch(push(href));
-				}
-			}
-		}}>
-			{children}
-		</a>
-	);
-};
 
 class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNodeEnhanced, style}, {}> {
 	render() {
@@ -345,10 +271,10 @@ class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNodeEnhanced,
 					//padding={{left: 200, right: 500, top: 100, bottom: 100}}
 					padding={{left: (screen.availWidth / 2) - 300, right: screen.availWidth, top: 100, bottom: 100}}
 				/>
-				<div className="in" style={{position: `absolute`, left: 0, right: 0, top: 0, bottom: 0}}
-					onMouseEnter={()=>root.removeClass(`below`)} onTouchStart={()=>root.removeClass(`below`)}/>
-				<div className="below" style={{position: `absolute`, left: 0, right: 0, top: `100%`, height: 300}}
-					onMouseEnter={()=>root.addClass(`below`)} onTouchStart={()=>root.addClass(`below`)}/>
+				<div className="in" style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}
+					onMouseEnter={()=>root.removeClass("below")} onTouchStart={()=>root.removeClass("below")}/>
+				<div className="below" style={{position: "absolute", left: 0, right: 0, top: "100%", height: 300}}
+					onMouseEnter={()=>root.addClass("below")} onTouchStart={()=>root.addClass("below")}/>
 			</div>
 		);
 	}

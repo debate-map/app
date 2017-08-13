@@ -138,7 +138,7 @@ export class NavBarButton extends BaseComponent
 		//let hoverOrActive = _radiumStyleState && _radiumStyleState.main && _radiumStyleState.main[":hover"] || active;
 		let hoverOrActive = hovered || active;
 		return (
-			<a href={`/${page}`} style={finalStyle} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})} onClick={e=> {
+			<Link to={`/${page}`} style={finalStyle} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})} onClick={e=> {
 				e.preventDefault();
 				if (!panel) {
 					store.dispatch(new ACTSetPage(page));
@@ -150,7 +150,7 @@ export class NavBarButton extends BaseComponent
 				{text}
 				{/*!panel &&*/ hoverOrActive &&
 					<div style={{position: "absolute", left: 0, right: 0, bottom: 0, height: 2, background: `rgba(100,255,100,1)`}}/>}
-			</a>
+			</Link>
 		);
 	}
 }

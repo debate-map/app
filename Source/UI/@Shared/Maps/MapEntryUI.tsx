@@ -25,12 +25,11 @@ export default class MapEntryUI extends BaseComponent<Props, {}> {
 				last && {borderRadius: "0 0 10px 10px"}
 			)}>
 				<Row>
-					<a href={toURL.toString({domain: false})} style={{fontSize: 17, flex: columnWidths[0]}} onClick={e=> {
+					{/*<Link text={map.name} actions={d=>d(new ACTDebateMapSelect({id: map._id}))} style={{fontSize: 17, flex: columnWidths[0]}}/>*/}
+					<Link text={map.name} to={toURL.toString({domain: false})} style={{fontSize: 17, flex: columnWidths[0]}} onClick={e=> {
 						e.preventDefault();
 						store.dispatch(new ACTDebateMapSelect({id: map._id}));
-					}}>
-						{map.name}
-					</a>
+					}}/>
 					<span style={{flex: columnWidths[1]}}>{map.edits || 0}</span>
 					<span style={{flex: columnWidths[2]}}>{Moment(map.editedAt).format("YYYY-MM-DD")}</span>
 					<span style={{flex: columnWidths[3]}}>{creator ? creator.displayName : "..."}</span>

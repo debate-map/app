@@ -8,6 +8,7 @@ import "./Frame/General/Start_1";
 import "./Server/Server";
 import "codemirror";
 import "codemirror/addon/scroll/simplescrollbars";
+import "./Frame/UI/CodeMirrorConfig";
 //import ReactPerf from "react-addons-perf";
 import "./Frame/General/Profiling";
 

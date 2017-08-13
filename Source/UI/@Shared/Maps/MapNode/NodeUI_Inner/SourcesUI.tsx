@@ -3,6 +3,7 @@ import {SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
 import Row from "Frame/ReactComponents/Row";
 import Column from "../../../../../Frame/ReactComponents/Column";
 import {URL} from "../../../../../Frame/General/URLs";
+import Link from "../../../../../Frame/ReactComponents/Link";
 
 export default class SourcesUI extends BaseComponent<{sourceChains: SourceChain[]}, {}> {
 	render() {
@@ -30,7 +31,7 @@ export default class SourcesUI extends BaseComponent<{sourceChains: SourceChain[
 					}).join(" <- ");
 					return (
 						<Row key={index}>
-							<a href={chain.Last().link} style={{wordBreak: "break-word"}} onContextMenu={e=>e.nativeEvent["passThrough"] = true}>{linkTitle}</a>
+							<Link text={linkTitle} to={chain.Last().link} style={{wordBreak: "break-word"}} onContextMenu={e=>e.nativeEvent["passThrough"] = true}/>
 						</Row>
 					);
 				})}

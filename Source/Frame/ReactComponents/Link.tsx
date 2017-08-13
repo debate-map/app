@@ -23,7 +23,7 @@ function isModifiedEvent(event) {
 
 type Props = {
 	onClick?, style?,
-	to?: string, target?: string, replace?: boolean, // url-based
+	text?: string, to?: string, target?: string, replace?: boolean, // url-based
 	actions?: (dispatch: Function)=>void, //updateURLOnActions?: boolean, // action-based
 } & React.HTMLProps<HTMLAnchorElement>;
 //@Connect((state, {to, actions, updateURLOnActions}: Props)=> {
@@ -75,7 +75,7 @@ export default class Link extends BaseComponent<Props, {}> {
 	}
 
 	render() {
-		let {to, target, actions, children, ...rest} = this.props // eslint-disable-line no-unused-vars
+		let {text, to, target, actions, children, ...rest} = this.props // eslint-disable-line no-unused-vars
 		//const href = this.context.router.history.createHref(typeof to === 'string' ? {pathname: to} : to)
 		let isExternal = URL.Parse(to, true).domain != GetCurrentURL().domain;
 		if (isExternal && target === undefined) {
@@ -85,6 +85,7 @@ export default class Link extends BaseComponent<Props, {}> {
 		if (to) {
 			return (
 				<a {...rest} onClick={this.handleClick} href={to} target={target}>
+					{text}
 					{children}
 				</a>
 			);
