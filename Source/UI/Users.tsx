@@ -73,6 +73,8 @@ class UserRow extends BaseComponent<{index: number, last: boolean, user: User, u
 		let {index, last, user, userExtraInfo} = this.props;
 		if (userExtraInfo == null) return <div/>;
 
+		let displayName = user.displayName;
+		if (displayName.includes("@")) displayName = displayName.split("@")[0];
 		return (
 			<Column p="7px 10px" style={E(
 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
@@ -85,7 +87,7 @@ class UserRow extends BaseComponent<{index: number, last: boolean, user: User, u
 							e.preventDefault();
 							store.dispatch(new ACTDebateMapSelect({id: map._id}));
 						}}/>*/}
-						<span style={{flex: columnWidths[0]}}>{user.displayName}</span>
+						<span style={{flex: columnWidths[0]}}>{displayName}</span>
 						<span style={{flex: columnWidths[1]}}>{Moment(userExtraInfo.joinDate).format("YYYY-MM-DD")}</span>
 						<span style={{flex: columnWidths[2]}}>{userExtraInfo.edits || 0}</span>
 						<span style={{flex: columnWidths[3]}}>{userExtraInfo.lastEditAt ? Moment(userExtraInfo.lastEditAt).format("YYYY-MM-DD") : "n/a"}</span>
