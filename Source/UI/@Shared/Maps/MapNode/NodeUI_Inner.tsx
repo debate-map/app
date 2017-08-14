@@ -52,6 +52,7 @@ import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@Sour
 import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
 import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import SubPanel from "./NodeUI_Inner/SubPanel";
+import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -264,7 +265,18 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 		let elements = [];
 		for (let [index, segment] of segments.entries()) {
 			if (segment.patternMatched == null) {
-				elements.push(<span key={index}>{segment.textParts[0]}</span>);
+				let segmentText = segment.textParts[0];
+				let edgeWhiteSpaceMatch = segmentText.match(/^( *).+?( *)$/);
+				if (edgeWhiteSpaceMatch[1]) elements.push(<span>{edgeWhiteSpaceMatch[1]}</span>);
+				elements.push(
+					<VReactMarkdown_Remarkable key={index} containerType="span" source={segmentText}
+						rendererOptions={{
+							components: {
+								p: props=><span>{props.children}</span>
+							},
+						}}/>
+				);
+				if (edgeWhiteSpaceMatch[2]) elements.push(<span>{edgeWhiteSpaceMatch[2]}</span>);
 			} else if (segment.patternMatched == "term") {
 				let refText = segment.textParts[1];
 				let termID = segment.textParts[2].ToInt();

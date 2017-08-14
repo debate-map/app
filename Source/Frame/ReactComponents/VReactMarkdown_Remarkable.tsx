@@ -54,9 +54,11 @@ import {ReplacementFunc} from "./VReactMarkdown";
 
 type Props = {
 	source: string, markdownOptions?, rendererOptions?,
-	replacements?: {[key: string]: ReplacementFunc}, style?
+	replacements?: {[key: string]: ReplacementFunc}, containerType?, style?
 } & React.HTMLProps<HTMLDivElement>;
 export default class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> {
+	static defaultProps = {containerType: "div"};
+	
 	markdown: Remarkable;
 	InitMarkdown(props) {
 		let {markdownOptions, rendererOptions} = props;
@@ -94,7 +96,7 @@ export default class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> 
 	}
 
 	render() {
-		let {source, markdownOptions, rendererOptions, replacements, style, ...rest} = this.props;
+		let {source, markdownOptions, rendererOptions, replacements, containerType, style, ...rest} = this.props;
 
 		if (this.markdown == null) {
 			this.InitMarkdown(this.props);
@@ -103,27 +105,20 @@ export default class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> 
 		if (replacements) {
 			let patterns = replacements.VKeys().map((regexStr, index)=>({name: index+"", regex: new RegExp(regexStr)}));
 			let segments = ParseSegmentsForPatterns(source, patterns);
-			return (
-				<div>
-					{segments.map((segment, index)=> {
-						if (segment.patternMatched == null) {
-							if (replacements.default) {
-								return replacements.default(segment, index).VAct(a=>a.key = index);
-							}
-							return <VReactMarkdown_Remarkable key={index} source={segment.textParts[0]} markdownOptions={markdownOptions} rendererOptions={rendererOptions}/>;
-						}
-						let renderFuncForReplacement = replacements.VValues()[segment.patternMatched];
-						return renderFuncForReplacement(segment, index).VAct(a=>a.key = index);
-					})}
-				</div>
-			);
+			let segmentUIs = segments.map((segment, index)=> {
+				if (segment.patternMatched == null) {
+					if (replacements.default) {
+						return replacements.default(segment, index).VAct(a=>a.key = index);
+					}
+					return <VReactMarkdown_Remarkable key={index} source={segment.textParts[0]} markdownOptions={markdownOptions} rendererOptions={rendererOptions}/>;
+				}
+				let renderFuncForReplacement = replacements.VValues()[segment.patternMatched];
+				return renderFuncForReplacement(segment, index).VAct(a=>a.key = index);
+			});
+			return React.createElement(containerType, null, segmentUIs);
 		}
 
 		let markdownResult = this.markdown.render(source);
-		return (
-			<div {...rest} style={style}>
-				{markdownResult}
-			</div>
-		);
+		return React.createElement(containerType, {...rest, style}, markdownResult);
 	}
 }

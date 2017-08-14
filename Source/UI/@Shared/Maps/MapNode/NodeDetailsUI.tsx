@@ -164,7 +164,7 @@ class Title_Base extends BaseComponent<Props_Enhanced, {}> {
 		let thesisType = GetThesisType(newData);
 		let hasOtherTitles = newData.type == MapNodeType.Thesis && thesisType == ThesisType.Normal;
 		let hasOtherTitlesEntered = newData.titles["negation"] || newData.titles["yesNoQuestion"];
-		let willUseYesNoTitleHere = WillNodeUseYesNoTitleHere(newData, newLinkData);
+		let willUseYesNoTitleHere = WillNodeUseQuestionTitleHere(newData, newLinkData);
 		return (
 			<div>
 				<Row style={{display: "flex", alignItems: "center"}}>
@@ -192,14 +192,14 @@ The detailed version of the argument will be embodied in its premises/child-thes
 	}
 }
 
-function WillNodeUseYesNoTitleHere(node: MapNode, linkData: ChildEntry) {
+function WillNodeUseQuestionTitleHere(node: MapNode, linkData: ChildEntry) {
 	return node.type == MapNodeType.Thesis && !node.contentNode && !node.metaThesis && linkData && linkData.form == ThesisForm.YesNoQuestion;
 }
 
 class OtherTitles extends BaseComponent<Props_Enhanced, {}> {
 	render() {
 		let {newData, forNew, enabled, newLinkData, Change} = this.props;
-		let willUseYesNoTitleHere = WillNodeUseYesNoTitleHere(newData, newLinkData);
+		let willUseQuestionTitleHere = WillNodeUseQuestionTitleHere(newData, newLinkData);
 		return (
 			<Div>
 				<Row key={0} mt={5} style={{display: "flex", alignItems: "center"}}>
@@ -207,13 +207,13 @@ class OtherTitles extends BaseComponent<Props_Enhanced, {}> {
 					<TextInput enabled={enabled} style={{flex: 1}} value={newData.titles["negation"]} onChange={val=>Change(newData.titles["negation"] = val)}/>
 				</Row>
 				<Row key={1} mt={5} style={{display: "flex", alignItems: "center"}}>
-					<Pre>Title (yes-no question): </Pre>
-					<TextInput enabled={enabled} style={{flex: 1}} required={willUseYesNoTitleHere}
+					<Pre>Title (question): </Pre>
+					<TextInput enabled={enabled} style={{flex: 1}} required={willUseQuestionTitleHere}
 						value={newData.titles["yesNoQuestion"]} onChange={val=>Change(newData.titles["yesNoQuestion"] = val)}/>
 				</Row>
-				{willUseYesNoTitleHere && forNew &&
+				{willUseQuestionTitleHere && forNew &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
-						<Pre allowWrap={true}>At this location (under a category node), the node will be displayed with the yes-no question title.</Pre>
+						<Pre allowWrap={true}>At this location (under a category node), the node will be displayed with the (yes or no) question title.</Pre>
 					</Row>}
 			</Div>
 		);
