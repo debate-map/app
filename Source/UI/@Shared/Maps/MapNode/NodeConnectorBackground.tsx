@@ -32,7 +32,12 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 				{childBoxOffsets.Props(true).OrderBy(a=>a.name).map(({name: childIDStr, value: childOffset})=> {
 					/*result.push(<line key={"inputLine" + result.length} x1={inputPos.x} y1={inputPos.y}
 						x2={inputVal.position.x} y2={inputVal.position.y + 10} style={{stroke: "rgba(0,0,0,.5)", strokeWidth: 2}}/>);*/
-					let child = A.NonNull = childNodes.First(a=>a._id == childIDStr.ToInt());
+
+					//let child = A.NonNull = childNodes.First(a=>a._id == childIDStr.ToInt());
+					// maybe temp; see if causes problems ignoring not-found error
+					let child = childNodes.FirstOrX(a=>a._id == childIDStr.ToInt());
+					if (child == null) return null;
+
 					let backgroundColor = node.finalType == MapNodeType.SupportingArgument || node.finalType == MapNodeType.OpposingArgument
 						? MapNodeType_Info.for[node.finalType].backgroundColor
 						: MapNodeType_Info.for[child.finalType].backgroundColor;
