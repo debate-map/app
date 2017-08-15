@@ -217,6 +217,7 @@ class LayerUI extends BaseComponent<LayerUIProps, {}> {
 					</span>
 					<span style={{flex: columnWidths[3]}}>
 						<CheckBox checked={userLayerState} indeterminate={userLayerState == null} onChange={val=> {
+							if (GetUserID() == null) return ShowSignInPopup();
 							let newState =
 								userLayerState == null ? true :
 								userLayerState == true ? false :

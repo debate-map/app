@@ -66,7 +66,8 @@ export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Default expand depth: </Pre>
-					<Spinner min={1} max={3} value={newData.defaultExpandDepth|0} onChange={val=>Change(newData.defaultExpandDepth = val)}/>
+					<Spinner min={1} max={3} enabled={enabled}
+						value={newData.defaultExpandDepth|0} onChange={val=>Change(newData.defaultExpandDepth = val)}/>
 				</RowLR>
 				{/*!forNew &&
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>
