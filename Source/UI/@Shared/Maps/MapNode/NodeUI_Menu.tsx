@@ -36,6 +36,7 @@ import UnlinkNode from "Server/Commands/UnlinkNode";
 import CloneNode from "Server/Commands/CloneNode";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import { ShowAddSubnodeDialog } from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSubnodeDialog";
+import { GetPathNodes, GetPathNodeIDs } from "../../../../Store/main/mapViews";
 
 type Props = {map: Map, node: MapNodeEnhanced, path: string, inList?: boolean}
 	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode, copiedNode_asCut: boolean}>;
@@ -129,8 +130,8 @@ If not, paste the argument as a clone instead.`
 								await new LinkNode({mapID: map._id, parentID: node._id, childID: copiedNode._id, childForm: formForChildren}).Run();
 								if (copiedNode_asCut) {
 									let baseNodePath = State(a=>a.main.copiedNodePath);		
-									let baseNodePath_ids = baseNodePath.split("/").map(ToInt);			
-									await new UnlinkNode({mapID: map._id, parentID: baseNodePath_ids.slice(-2)[0], childID: baseNodePath_ids.Last()}).Run();
+									let baseNodePath_ids = GetPathNodeIDs(baseNodePath);
+									await new UnlinkNode({mapID: map._id, parentID: baseNodePath_ids.XFromLast(1), childID: baseNodePath_ids.Last()}).Run();
 								}
 							}
 						}}/>}
@@ -139,11 +140,11 @@ If not, paste the argument as a clone instead.`
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 
-						let baseNodePath = State(a=>a.main.copiedNodePath);		
-						let baseNodePath_ids = baseNodePath.split("/").map(ToInt);				
+						let baseNodePath = State(a=>a.main.copiedNodePath);
+						let baseNodePath_ids = GetPathNodeIDs(baseNodePath);
 						await new CloneNode({mapID: map._id, baseNodePath, newParentID: node._id}).Run();
 						if (copiedNode_asCut) {
-							await new UnlinkNode({mapID: map._id, parentID: baseNodePath_ids.slice(-2)[0], childID: baseNodePath_ids.Last()}).Run();
+							await new UnlinkNode({mapID: map._id, parentID: baseNodePath_ids.XFromLast(1), childID: baseNodePath_ids.Last()}).Run();
 						}
 					}}/>}
 				{IsUserCreatorOrMod(userID, node) && !inList &&

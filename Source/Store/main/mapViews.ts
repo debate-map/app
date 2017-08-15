@@ -86,6 +86,10 @@ export function GetPathNodes(path: string) {
 	//return pathSegments.map(ToInt);
 	return pathSegments;
 }
+export function GetPathNodeIDs(path: string) {
+	let nodes = GetPathNodes(path);
+	return nodes.map(a=>parseInt(a.replace("L", "")));
+}
 
 export function GetSelectedNodePathNodes(mapViewOrMapID: number | MapView): string[] {
 	let mapView = IsNumber(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
