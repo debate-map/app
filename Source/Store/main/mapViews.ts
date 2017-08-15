@@ -142,7 +142,8 @@ export function GetFocusedNodePath(mapViewOrMapID: number | MapView): string {
 	return GetFocusedNodePathNodes(mapViewOrMapID).join("/").toString(); // toString() needed if only 1 item
 }
 export function GetFocusedNodeID(mapID: number): number {
-	return GetFocusedNodePathNodes(mapID).LastOrX().replace("L", "").ToInt();
+	let focusedNodeStr = GetFocusedNodePathNodes(mapID).LastOrX();
+	return focusedNodeStr ? focusedNodeStr.replace("L", "").ToInt() : null;
 }
 
 export function GetMapView(mapID: number): MapView {
