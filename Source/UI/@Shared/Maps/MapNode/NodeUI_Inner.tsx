@@ -89,8 +89,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let ratingReversed = ShouldRatingTypeBeReversed(mainRatingType, nodeReversed, contextReversed);
 
 		let mainRating_mine = GetRatingValue(node._id, mainRatingType, userID);
-		let mainRating_fillPercent = GetFillPercentForRatingAverage(node, mainRating_average, form == ThesisForm.Negation);
-		let mainRating_myFillPercent = mainRating_mine != null ? GetFillPercentForRatingAverage(node, mainRating_mine, form == ThesisForm.Negation) : null;
+		let mainRating_fillPercent = GetFillPercentForRatingAverage(node, mainRating_average, ratingReversed);
+		let mainRating_myFillPercent = mainRating_mine != null ? GetFillPercentForRatingAverage(node, mainRating_mine, ratingReversed) : null;
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
 		let panelToShow = hoverPanel || (nodeView && nodeView.openPanel);

@@ -80,11 +80,11 @@ export function GetFillPercentForRatingAverage(node: MapNode, ratingAverage: num
 }
 export function TransformRatingForContext(ratingValue: number, reverseRating: boolean) {
 	if (ratingValue == null) return null;
-	if (reverseRating)
-		return 100 - ratingValue;
+	if (reverseRating) return 100 - ratingValue;
 	return ratingValue;
 }
 
 export function ShouldRatingTypeBeReversed(ratingType: RatingType, nodeReversed: boolean, contextReversed: boolean) {
-	return nodeReversed || (contextReversed && ratingType == "adjustment");
+	//return nodeReversed || (contextReversed && ratingType == "adjustment");
+	return nodeReversed;
 }
