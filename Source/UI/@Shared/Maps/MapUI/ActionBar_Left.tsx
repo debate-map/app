@@ -197,7 +197,7 @@ class LayerUI extends BaseComponent<LayerUIProps, {}> {
 				<Row>
 					<span style={{flex: columnWidths[0]}}>
 						{layer.name}
-						{creator._key == GetUserID() &&
+						{creator && creator._key == GetUserID() &&
 							<Button text="X" ml={5} style={{padding: "3px 5px"}} enabled={deleteLayerError == null} title={deleteLayerError}
 								onClick={()=> {
 									ShowMessageBox({
