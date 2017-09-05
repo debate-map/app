@@ -26,7 +26,8 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNode, parent:
 	} else if (ratingType == "neutrality") {
 		result.description = `How neutral/impartial is the phrasing of this statement/question? (0: as biased as they come, 100: no bias)`;
 	} else if (ratingType == "probability") {
-		result.description = "Suppose you were as sure as you are right now (of this thesis being true, in its basic form), 100 different times (on different topics). How many of those times do you expect you'd be correct?";
+		//result.description = "Suppose you were as sure as you are right now (of this thesis being true, in its basic form), 100 different times (on different topics). How many of those times do you expect you'd be correct?";
+		result.description = "Consider how sure you are of this statement being true (in its basic form). If you were this sure 100 times (on a variety of things), how many of those times do you think you'd be correct?";
 	} else if (ratingType == "degree") {
 		result.description = "To what degree do you consider this statement true? (0: completely false, 50: true in its basic form, 100: true in its full form)";
 	} else if (ratingType == "strength") {

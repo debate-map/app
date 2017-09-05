@@ -19,3 +19,7 @@ export function GetRootNodeID(mapID: number): number {
 	if (map == null) return null;
 	return map.rootNode;
 }
+
+export function IsUserMap(map: Map) {
+	return map.type == MapType.Personal || map.type == MapType.Debate;
+}

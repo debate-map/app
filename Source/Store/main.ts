@@ -17,6 +17,8 @@ import { ShallowChanged } from "../Frame/UI/ReactGlobals";
 import { MapInfoReducer } from "Store/main/maps/$map";
 import {demoMap} from "../UI/Home/DemoMap";
 import { Forum, ForumReducer } from "Store/main/forum";
+import { Personal } from "Store/main/personal";
+import {PersonalReducer} from "./main/personal";
 
 // class is used only for initialization
 export class MainState {
@@ -43,7 +45,7 @@ export class MainState {
 	more: {subpage: string};
 	home: {subpage: string};
 	content: Content;
-	personal: {subpage: string};
+	personal: Personal;
 	debates: Debates;
 	global: {subpage: string};
 
@@ -152,7 +154,7 @@ export function MainReducer(state, action) {
 		more: CombineReducers({subpage: SubpageReducer("more")}),
 		home: CombineReducers({subpage: SubpageReducer("home")}),
 		content: ContentReducer,
-		personal: CombineReducers({subpage: SubpageReducer("personal")}),
+		personal: PersonalReducer,
 		debates: DebatesReducer,
 		global: CombineReducers({subpage: SubpageReducer("global")}),
 
@@ -204,7 +206,8 @@ export function GetOpenMapID() {
 	//return State(a=>a.main.openMap);
 	let page = State(a=>a.main.page);
 	if (page == "home") return demoMap._id;
-	if (page == "debates") return State(a=>a.main.debates.selectedDebateMapID);
+	if (page == "personal") return State(a=>a.main.personal.selectedMapID);
+	if (page == "debates") return State(a=>a.main.debates.selectedMapID);
 	if (page == "global") return globalMapID;
 	return null;
 }

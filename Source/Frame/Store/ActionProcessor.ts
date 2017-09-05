@@ -20,6 +20,7 @@ import {ACTTermSelect, ACTImageSelect} from "../../Store/main/content";
 import {LOCATION_CHANGED} from "redux-little-router";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import {Map} from "../../Store/firebase/maps/@Map";
+import {ACTPersonalMapSelect, ACTPersonalMapSelect_WithData} from "../../Store/main/personal";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -164,9 +165,10 @@ export async function PostDispatchAction(action: Action<any>) {
 			}
 		}
 	}
-	if (action.Is(ACTDebateMapSelect)) {
+	if (action.Is(ACTPersonalMapSelect) || action.Is(ACTDebateMapSelect)) {
 		let map = action.payload.id ? await GetDataAsync("maps", action.payload.id) as Map : null;
-		store.dispatch(new ACTDebateMapSelect_WithData({id: action.payload.id, rootNodeID: map ? map.rootNode : null}));
+		let actionType = action.Is(ACTPersonalMapSelect) ? ACTPersonalMapSelect_WithData : ACTDebateMapSelect_WithData;
+		store.dispatch(new actionType({id: action.payload.id, rootNodeID: map ? map.rootNode : null}));
 
 		if (map) {
 			let pathsToExpand = [""+map.rootNode];

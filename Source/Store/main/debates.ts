@@ -13,12 +13,12 @@ export class ACTDebateMapSelect_WithData extends Action<{id: number, rootNodeID:
 
 export class Debates {
 	//subpage: string;
-	selectedDebateMapID: number;
+	selectedMapID: number;
 }
 
 export const DebatesReducer = CombineReducers({
 	//subpage: SubpageReducer("debates"),
-	selectedDebateMapID: (state = null, action)=> {
+	selectedMapID: (state = null, action)=> {
 		//if (action.Is(ACTDebateMapSelect)) return action.payload.id;
 		if (action.Is(ACTDebateMapSelect_WithData)) return action.payload.id;
 		/*if (action.type == LOCATION_CHANGED) {
@@ -30,7 +30,7 @@ export const DebatesReducer = CombineReducers({
 });
 
 export function GetSelectedDebateMapID() {
-	return State(a=>a.main.debates.selectedDebateMapID);
+	return State(a=>a.main.debates.selectedMapID);
 }
 export function GetSelectedDebateMap() {
 	let selectedID = GetSelectedDebateMapID();

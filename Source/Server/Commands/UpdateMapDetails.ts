@@ -14,6 +14,8 @@ AddSchema({
 		mapUpdates: Schema({
 			properties: {
 				name: {type: "string", pattern: Map_nameFormat},
+				note: {type: "string"},
+				noteInline: {type: "boolean"},
 				defaultExpandDepth: {type: "number"},
 			},
 		}),

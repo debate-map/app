@@ -13,6 +13,8 @@ export class Map {
 
 	_id: number;
 	name: string;
+	note: string;
+	noteInline = true;
 	type: MapType;
 	rootNode: number;
 	defaultExpandDepth = 2;
@@ -24,10 +26,12 @@ export class Map {
 
 	layers: {[key: number]: boolean};
 }
-export const Map_nameFormat = `^[a-zA-Z0-9 ,'"%:.?-]+$`;
+export const Map_nameFormat = `^[a-zA-Z0-9 ,'"%:.?\\-()]+$`;
 AddSchema({
 	properties: {
 		name: {type: "string", pattern: Map_nameFormat},
+		note: {type: "string"},
+		noteInline: {type: "boolean"},
 		type: {oneOf: GetValues_ForSchema(MapType)},
 		rootNode: {type: "number"},
 		defaultExpandDepth: {type: "number"},

@@ -12,18 +12,16 @@ import {PermissionGroupSet} from "../Store/firebase/userExtras/@UserExtraInfo";
 import {ShowSignInPopup} from "./@Shared/NavBar/UserPanel";
 import {ShowAddMapDialog} from "./@Shared/Maps/AddMapDialog";
 import ScrollView from "react-vscrollview";
-import {URL, GetCurrentURL} from "../Frame/General/URLs";
 import {GetSelectedDebateMapID, GetSelectedDebateMap} from "../Store/main/debates";
 import MapUI from "./@Shared/Maps/MapUI";
 
-export const columnWidths = [.6, .1, .12, .18];
+export const columnWidths = [.64, .06, .12, .18];
 
 type Props = {} & Partial<{permissions: PermissionGroupSet, maps: Map[], selectedMap: Map}>;
 @Connect((state, props)=> ({
 	permissions: GetUserPermissionGroups(GetUserID()),
 	maps: GetMaps().filter(a=>a.type == MapType.Debate),
 	selectedMap: GetSelectedDebateMap(),
-	//url: GetCurrentURL(),
 }))
 export default class DebatesUI extends BaseComponent<Props, {}> {
 	render() {

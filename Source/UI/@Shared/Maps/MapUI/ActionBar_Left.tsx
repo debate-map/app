@@ -29,6 +29,8 @@ import {GetUserLayerStateForMap} from "../../../../Store/firebase/userMapInfo";
 import SetLayerAttachedToMap from "../../../../Server/Commands/SetLayerAttachedToMap";
 import SetMapLayerStateForUser from "../../../../Server/Commands/SetMapLayerStateForUser";
 import DeleteLayer from "../../../../Server/Commands/DeleteLayer";
+import {ACTPersonalMapSelect} from "../../../../Store/main/personal";
+import {IsUserMap} from "../../../../Store/firebase/maps";
 
 type ActionBar_LeftProps = {map: Map, subNavBarWidth: number};
 @Connect((state, {map}: ActionBar_LeftProps)=> ({
@@ -46,12 +48,12 @@ export class ActionBar_Left extends BaseComponent<ActionBar_LeftProps, {}> {
 					justifyContent: "flex-start", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
 					width: "100%", height: 30, borderRadius: "0 0 10px 0",
 				}}>
-					{map.type == MapType.Debate &&
+					{IsUserMap(map) &&
 						<Button text="Back" onClick={()=> {
-							store.dispatch(new ACTDebateMapSelect({id: null}));
+							store.dispatch(new (map.type == MapType.Personal ? ACTPersonalMapSelect : ACTDebateMapSelect)({id: null}));
 						}}/>}
-					{map.type == MapType.Debate && <DetailsDropDown map={map}/>}
-					{map.type == MapType.Debate && <LayersDropDown map={map}/>}
+					{IsUserMap(map) && <DetailsDropDown map={map}/>}
+					{IsUserMap(map) && <LayersDropDown map={map}/>}
 				</Row>
 			</nav>
 		);

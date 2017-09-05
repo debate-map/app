@@ -4,7 +4,6 @@ import {BaseComponent, SimpleShouldUpdate} from "./../../Frame/UI/ReactGlobals";
 import VReactMarkdown from "./../../Frame/ReactComponents/VReactMarkdown";
 import ScrollView from "react-vscrollview";
 import {styles} from "./../../Frame/UI/GlobalStyles";
-import {URL, GetCurrentURL} from "./../../Frame/General/URLs";
 import VReactMarkdown_Remarkable from "./../../Frame/ReactComponents/VReactMarkdown_Remarkable";
 import Column from "./../../Frame/ReactComponents/Column";
 import Row from "Frame/ReactComponents/Row";

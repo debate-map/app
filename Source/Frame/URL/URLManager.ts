@@ -20,6 +20,7 @@ import { ACTSet } from "Store";
 import MapUI from "../../UI/@Shared/Maps/MapUI";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../Store/firebase/maps/@Map";
+import {ACTPersonalMapSelect} from "../../Store/main/personal";
 
 export function GetCrawlerURLStrForMap(mapID: number) {
 	let map = GetMap(mapID);
@@ -209,6 +210,13 @@ export function GetSyncLoadActionsForURL(url: URL, directURLChange: boolean) {
 		}
 	}
 
+	if (url.pathNodes[0] == "personal") {
+		let urlStr = url.pathNodes[1];
+		let match = urlStr && urlStr.match(/([0-9]+)$/);
+		let mapID = match ? match[1].ToInt() : null;
+		result.push(new ACTPersonalMapSelect({id: mapID}).VSet({fromURL: true}));
+	}
+
 	if (url.pathNodes[0] == "debates") { //&& IsNumberString(url.pathNodes[1])) {
 		let urlStr = url.pathNodes[1];
 		let match = urlStr && urlStr.match(/([0-9]+)$/);
@@ -296,8 +304,16 @@ export function GetNewURL(includeMapViewStr = true) {
 		}
 	}
 
+	if (page == "personal") {
+		let mapID = State(a=>a.main.personal.selectedMapID);
+		if (mapID) {
+			//newURL.pathNodes.push(mapID+"");
+			let urlStr = GetCrawlerURLStrForMap(mapID);
+			newURL.pathNodes.push(urlStr);
+		}
+	}
 	if (page == "debates") {
-		let mapID = State(a=>a.main.debates.selectedDebateMapID);
+		let mapID = State(a=>a.main.debates.selectedMapID);
 		if (mapID) {
 			//newURL.pathNodes.push(mapID+"");
 			let urlStr = GetCrawlerURLStrForMap(mapID);

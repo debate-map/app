@@ -28,7 +28,7 @@ import {RootState} from "../../../../Store/index";
 import {GetNodeView} from "../../../../Store/main/mapViews";
 import {MapNode, ThesisForm, MapNodeEnhanced, AccessLevel} from "../../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {GetNodeChildren, GetParentNode, GetNodeChildrenEnhanced} from "../../../../Store/firebase/nodes";
+import {GetNodeChildren, GetParentNode, GetNodeChildrenEnhanced, IsRootNode} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
@@ -221,6 +221,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 
 				{nodeChildren == emptyArray &&
 					<div style={{margin: "auto 0 auto 10px"}}>...</div>}
+				{IsRootNode(node) && nodeChildren.length == 0 &&
+					<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 				{nodeChildren != emptyArray && !expanded && nodeChildren.length != 0 &&
 					<div style={E({
 						margin: "auto 0 auto 7px", fontSize: 12, color: "rgba(255,255,255,.5)"},

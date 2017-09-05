@@ -231,12 +231,12 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 						{node.equation.explanation}
 					</Pre>}
 				{node.note &&
-					<Pre style={{
+					<Div style={{
 						fontSize: 11, color: "rgba(255,255,255,.5)",
 						marginLeft: 15, marginTop: 3, float: "right",
 					}}>
 						{node.note}
-					</Pre>}
+					</Div>}
 				{node.type == MapNodeType.Thesis && node.contentNode &&
 					<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
 			</Div>

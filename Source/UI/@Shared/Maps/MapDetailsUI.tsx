@@ -65,6 +65,16 @@ export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
+					<Pre>Note: </Pre>
+					<TextInput enabled={enabled} style={{width: "100%"}}
+						value={newData.note} onChange={val=>Change(newData.note = val)}/>
+				</RowLR>
+				<RowLR mt={5} splitAt={splitAt} style={{width}}>
+					<Pre>Inline note: </Pre>
+					<CheckBox enabled={enabled} style={{width: "100%"}}
+						checked={newData.noteInline} onChange={val=>Change(newData.noteInline = val)}/>
+				</RowLR>
+				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Default expand depth: </Pre>
 					<Spinner min={1} max={3} enabled={enabled}
 						value={newData.defaultExpandDepth|0} onChange={val=>Change(newData.defaultExpandDepth = val)}/>

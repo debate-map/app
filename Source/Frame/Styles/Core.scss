@@ -36,13 +36,13 @@
 		height: 100%;
 		background-color: $background;
 		font-family: 'Roboto', 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-		@include desktop {
+		font-size: 15px;
+		/*@include desktop {
 			font-size: 15px;
 		}
-
 		@include mobile {
 			font-size: 12px;
-		}
+		}*/
 	}
 	*, *:before, *:after {
 		box-sizing: inherit;

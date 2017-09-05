@@ -22,7 +22,7 @@ import {GetUserID} from "../../../Store/firebase/users";
 import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import Column from "../../../Frame/ReactComponents/Column";
-import {GetNode} from "../../../Store/firebase/nodes";
+import {GetNode, GetNodeChildren} from "../../../Store/firebase/nodes";
 import Row from "../../../Frame/ReactComponents/Row";
 import Link from "../../../Frame/ReactComponents/Link";
 import {URL} from "../../../Frame/General/URLs";
@@ -30,7 +30,7 @@ import NodeUI_ForBots from "./MapNode/NodeUI_ForBots";
 import {IsNumberString} from "../../../Frame/General/Types";
 import {GetNodeEnhanced} from "../../../Store/firebase/nodes/$node";
 import {GetOpenMapID, ACTSetInitialChildLimit} from "../../../Store/main";
-import {colors} from "../../../Frame/UI/GlobalStyles";
+import {colors, styles} from "../../../Frame/UI/GlobalStyles";
 import Button from "Frame/ReactComponents/Button";
 import DropDown from "../../../Frame/ReactComponents/DropDown";
 import {DropDownTrigger, DropDownContent} from "../../../Frame/ReactComponents/DropDown";
@@ -46,6 +46,9 @@ import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 import { GetNodeAsync, GetChildCount } from "Store/firebase/nodes";
 import {ActionBar_Left} from "./MapUI/ActionBar_Left";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right";
+import {VMenuStub} from "react-vmenu";
+import {VMenuItem} from "react-vmenu/dist/VMenu";
+import {emptyArray} from "../../../Frame/Store/ReducerUtils";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -79,7 +82,7 @@ type Props = {
 	padding?: {left: number, right: number, top: number, bottom: number},
 	subNavBarWidth?: number,
 } & React.HTMLProps<HTMLDivElement>
-	& Partial<{rootNode: MapNodeEnhanced, focusNode: string, viewOffset: {x: number, y: number}}>;
+	& Partial<{rootNode: MapNodeEnhanced, rootChildren?: MapNode[], focusNode: string, viewOffset: {x: number, y: number}}>;
 @Connect((state: RootState, {map, rootNode}: Props)=> {
 	if (rootNode == null && map && map.rootNode) {
 		rootNode = GetNodeEnhanced(GetNode(map.rootNode), map.rootNode+"");
@@ -94,6 +97,7 @@ type Props = {
 
 	return {
 		rootNode,
+		rootChildren: rootNode ? GetNodeChildren(rootNode) : emptyArray,
 		/*focusNode: GetMapView(state, {map}) ? GetMapView(state, {map}).focusNode : null,
 		viewOffset: GetMapView(state, {map}) ? GetMapView(state, {map}).viewOffset : null,*/
 		/*focusNode_available: (GetMapView(state, {map}) && GetMapView(state, {map}).focusNode) != null,
@@ -111,7 +115,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	mapUI: HTMLDivElement;
 	downPos: Vector2i;
 	render() {
-		let {map, rootNode, withinPage, padding, subNavBarWidth, ...rest} = this.props;
+		let {map, rootNode, rootChildren, withinPage, padding, subNavBarWidth, ...rest} = this.props;
 		if (map == null)
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25}}>Loading map...</div>;
 		Assert(map._id, "map._id is null!");
@@ -179,6 +183,9 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 						{/*<ResizeSensor ref="resizeSensor" onResize={()=> {
 							this.LoadScroll();
 						}}/>*/}
+						<VMenuStub preOpen={e=>e.passThrough != true}>
+							<VMenuItem text="(To add a node, right click on an existing node.)" style={styles.vMenuItem}/>
+						</VMenuStub>
 					</div>
 				</ScrollView>
 			</Column>
