@@ -14,6 +14,7 @@ import ScrollView from "react-vscrollview";
 import Column from "../Frame/ReactComponents/Column";
 import Switch from "Frame/ReactComponents/Switch";
 import {Fragment} from "redux-little-router";
+import TasksUI from "./More/Tasks";
 
 type Props = {} & Partial<{currentSubpage: string, userCount: number}>;
 @Connect(state=> ({
@@ -30,14 +31,12 @@ export default class MoreUI extends BaseComponent<Props, {}> {
 			<Column style={{flex: 1}}>
 				<SubNavBar>
 					<SubNavBarButton {...{page}} subpage="links" text="Links"/>
+					{/*<SubNavBarButton {...{page}} subpage="tasks" text="Tasks"/>*/}
 					{admin && <SubNavBarButton {...{page}} subpage="admin" text="Admin"/>}
 				</SubNavBar>
 				<ScrollView style={{flex: 1} /*styles.fillParent_abs*/} scrollVBarStyle={{width: 10}}>
 					<Switch>
-						{/*<Fragment forRoute="/admin">
-							<AdminUI/>
-						</Fragment>*/}
-						{/*<Route path="/more/admin"><AdminUI/></Route>*/}
+						{/*currentSubpage == "tasks" && <TasksUI/>*/}
 						{currentSubpage == "admin" && <AdminUI/>}
 						<LinksUI/>
 					</Switch>
