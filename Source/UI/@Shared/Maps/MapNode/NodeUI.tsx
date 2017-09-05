@@ -47,7 +47,7 @@ import {ViewedNodeSet} from "../../../../Store/firebase/userViewedNodes/@ViewedN
 import {GetUserViewedNodes} from "../../../../Store/firebase/userViewedNodes";
 import NotifyNodeViewed from "../../../../Server/Commands/NotifyNodeViewed";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import {emptyArray} from "../../../../Frame/Store/ReducerUtils";
+import { emptyArray, emptyArray_forLoading } from "../../../../Frame/Store/ReducerUtils";
 import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";
 
 type Props = {map: Map, node: MapNodeEnhanced, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
@@ -71,7 +71,7 @@ type State = {
 	let nodeView = GetNodeView(map._id, path) || new MapNodeView();
 
 	let nodeChildren = GetNodeChildrenEnhanced(node, path, true);
-	nodeChildren = nodeChildren.Any(a=>a == null) ? emptyArray : nodeChildren; // only pass nodeChildren when all are loaded
+	nodeChildren = nodeChildren.Any(a=>a == null) ? emptyArray_forLoading : nodeChildren; // only pass nodeChildren when all are loaded
 	/*let nodeChildren_finalTypes = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
 		return GetFinalNodeTypeAtPath(child, path + "/" + child._id);
 	});*/
@@ -219,9 +219,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					{!limitBar_above && children}
 				</div>
 
-				{nodeChildren == emptyArray &&
+				{nodeChildren == emptyArray_forLoading &&
 					<div style={{margin: "auto 0 auto 10px"}}>...</div>}
-				{IsRootNode(node) && nodeChildren.length == 0 &&
+				{IsRootNode(node) && nodeChildren != emptyArray_forLoading && nodeChildren.length == 0 &&
 					<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 				{nodeChildren != emptyArray && !expanded && nodeChildren.length != 0 &&
 					<div style={E({

@@ -82,7 +82,7 @@ type Props = {
 	padding?: {left: number, right: number, top: number, bottom: number},
 	subNavBarWidth?: number,
 } & React.HTMLProps<HTMLDivElement>
-	& Partial<{rootNode: MapNodeEnhanced, rootChildren?: MapNode[], focusNode: string, viewOffset: {x: number, y: number}}>;
+	& Partial<{rootNode: MapNodeEnhanced, focusNode: string, viewOffset: {x: number, y: number}}>;
 @Connect((state: RootState, {map, rootNode}: Props)=> {
 	if (rootNode == null && map && map.rootNode) {
 		rootNode = GetNodeEnhanced(GetNode(map.rootNode), map.rootNode+"");
@@ -97,7 +97,6 @@ type Props = {
 
 	return {
 		rootNode,
-		rootChildren: rootNode ? GetNodeChildren(rootNode) : emptyArray,
 		/*focusNode: GetMapView(state, {map}) ? GetMapView(state, {map}).focusNode : null,
 		viewOffset: GetMapView(state, {map}) ? GetMapView(state, {map}).viewOffset : null,*/
 		/*focusNode_available: (GetMapView(state, {map}) && GetMapView(state, {map}).focusNode) != null,
@@ -115,7 +114,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	mapUI: HTMLDivElement;
 	downPos: Vector2i;
 	render() {
-		let {map, rootNode, rootChildren, withinPage, padding, subNavBarWidth, ...rest} = this.props;
+		let {map, rootNode, withinPage, padding, subNavBarWidth, ...rest} = this.props;
 		if (map == null)
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25}}>Loading map...</div>;
 		Assert(map._id, "map._id is null!");
