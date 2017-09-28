@@ -20,9 +20,9 @@ export default class DeleteMap extends Command<{mapID: number}> {
 	async Prepare() {
 		let {mapID} = this.payload;
 		this.oldData = await GetDataAsync({addHelpers: false}, "maps", mapID) as Map;
-		this.userMapInfoSets = await GetDataAsync("userMapInfo") as {[key: string]: UserMapInfoSet};
+		this.userMapInfoSets = (await GetDataAsync("userMapInfo") as {[key: string]: UserMapInfoSet}) || {};
 
-		this.sub_deleteNode = new DeleteNode({mapID, nodeID: this.oldData.rootNode});
+		this.sub_deleteNode = new DeleteNode({mapID, nodeID: this.oldData.rootNode, asPartOfMapDelete: true});
 		this.sub_deleteNode.Validate_Early();
 		await this.sub_deleteNode.Prepare();
 	}

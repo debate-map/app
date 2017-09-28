@@ -137,11 +137,11 @@ export function ForUnlink_GetError(userID: string, map: Map, node: MapNode, asPa
 	if (IsNodeSubnode(node)) return `Cannot unlink a subnode. Try deleting it instead.`;
 	return null;
 }
-export function ForDelete_GetError(userID: string, map: Map, node: MapNode) {
+export function ForDelete_GetError(userID: string, map: Map, node: MapNode, asPartOfMapDelete = false) {
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
 	if (node.metaThesis) return "Cannot delete a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
 	if (GetParentCount(node) > 1) return `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`;
-	if (IsRootNode(node)) return `Cannot delete the root-node of a map.`;
+	if (IsRootNode(node) && !asPartOfMapDelete) return `Cannot delete the root-node of a map.`;
 
 	let nodeChildren = GetNodeChildren(node);
 	if (nodeChildren.Any(a=>a == null)) return "[still loading children...]";

@@ -14,7 +14,7 @@ import {GetMap} from "Store/firebase/maps";
 
 @MapEdit
 @UserEdit
-export default class DeleteNode extends Command<{mapID: number, nodeID: number}> {
+export default class DeleteNode extends Command<{mapID: number, nodeID: number, asPartOfMapDelete?: boolean}> {
 	oldData: MapNode;
 	oldParentChildrenOrders: number[][];
 	metaThesisID: number;
@@ -42,7 +42,7 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number}>
 		if (this.metaThesisID) normalChildCount--;
 		Assert(normalChildCount == 0, "Cannot delete this node until all its (non-meta-thesis) children have been unlinked or deleted.");*/
 		let {mapID} = this.payload;
-		let earlyError = await GetAsync(()=>ForDelete_GetError(this.userInfo.id, GetMap(mapID), this.oldData));
+		let earlyError = await GetAsync(()=>ForDelete_GetError(this.userInfo.id, GetMap(mapID), this.oldData, this.payload.asPartOfMapDelete));
 		Assert(earlyError == null, earlyError);
 	}
 

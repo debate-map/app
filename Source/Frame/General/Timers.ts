@@ -40,6 +40,11 @@ export function Sleep(ms) {
 	while (new Date().getTime() - startTime < ms)
 	{}
 }
+export function SleepAsync(timeMS) {
+	return new Promise((resolve, reject)=> {
+		WaitXThenRun(timeMS, resolve);
+	});
+}
 
 var DoNothingXTimesThenDoY_counters = {};
 export function DoNothingXTimesThenDoY(doNothingCount: number, func: Function, key = "default") {
