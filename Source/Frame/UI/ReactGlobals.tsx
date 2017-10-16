@@ -559,3 +559,19 @@ export type RouteProps = {match};
 export function GetErrorMessagesUnderElement(element) {
 	return $(element).find(":invalid").ToList().map(node=>(node[0] as any).validationMessage || `Invalid value.`);
 }
+
+function HasSealedProps(target: Object) {
+	let oldConstructor = target.constructor;
+	target.constructor = function() {
+		for (let key in target["prototype"]) {
+			let method = target["prototype"][key];
+			if (method.sealed) {
+				Assert(this[key] == method, `Cannot override sealed method "${key}".`);
+			}
+		}
+		return oldConstructor.apply(this, arguments);
+	};
+}
+function Sealed(target: Object, key: string) {
+	target[key].sealed = true;
+}

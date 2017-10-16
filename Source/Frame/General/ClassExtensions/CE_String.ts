@@ -75,7 +75,7 @@ String.prototype._AddFunction_Inline = function IndexOf_X(str: string, indexX: n
 	}
 	return currentPos;
 };
-interface String { IndexOf_X: (str: string, indexFromLastX: number)=>number; }
+interface String { IndexOf_XFromLast: (str: string, indexFromLastX: number)=>number; }
 /** indexFromLastX is 0-based */
 String.prototype._AddFunction_Inline = function IndexOf_XFromLast(str: string, indexFromLastX: number) {
 	var currentPos = (this.length - str.length) + 1; // index just after the last-index-where-match-could-occur

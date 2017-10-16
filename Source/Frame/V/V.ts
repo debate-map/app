@@ -292,13 +292,14 @@ export function DeepSet(obj, pathOrPathNodes: string | (string | number)[], newV
 export function GetStackTraceStr(sourceStackTrace?: boolean);
 //@((()=> { if (g.onclick == null) g.onclick = ()=>console.log(V.GetStackTraceStr()); }) as any)
 export function GetStackTraceStr(...args) {
-		if (IsString(args[0])) var [stackTrace, sourceStackTrace = true] = args;
-		else var [sourceStackTrace = true] = args;
+	var stackTrace: string, sourceStackTrace = true;
+	if (IsString(args[0])) [stackTrace, sourceStackTrace] = args;
+	else [sourceStackTrace] = args;
 
 	//stackTrace = stackTrace || new Error()[sourceStackTrace ? "Stack" : "stack"];
 	//stackTrace = stackTrace || (sourceStackTrace ? StackTrace.get().then(stack=>stackTrace = stack.map(a=>a.toString()).join("\n")) : new Error().stack);
 	stackTrace = stackTrace || new Error().stack;
-	return stackTrace.substr(stackTrace.IndexOf_X(1, "\n")); // remove "Error" line and first stack-frame (that of this method)
+	return stackTrace.substr(stackTrace.IndexOf_X("\n", 1)); // remove "Error" line and first stack-frame (that of this method)
 }
 
 export function PropNameToTitle(propName: string) {

@@ -3,7 +3,7 @@
 [![Join the chat at https://gitter.im/DebateMap/Lobby](https://badges.gitter.im/DebateMap/Lobby.svg)](https://gitter.im/DebateMap/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![See the task list at https://trello.com/b/7ZhagPiN](https://img.shields.io/badge/tasks-on%20trello-blue.svg)](https://trello.com/b/7ZhagPiN)
 
-The [Debate Map](https://debatemap.live) project is an interactive web platform aimed at improving the efficiency of discussion and debate. It's crowd-sourced and open-source, and welcomes reader contributions.
+The [Debate Map](https://debatemap.live) project is a web platform aimed at improving the efficiency of discussion and debate. It's crowd-sourced and open-source, and welcomes reader contributions.
 
 Its primary improvements are (in short):
 * Restructuring dialogue to make use of both dimensions.
@@ -13,7 +13,7 @@ Its primary improvements are (in short):
 The below is a screenshot from one of the debates:
 ![See the task list at https://trello.com/b/7ZhagPiN](/Info/Images/Screenshot2.png)
 
-The tree-like structure assists in traversing the various lines of evidence: at each level, there is a "thesis" (blue) which makes a claim, and a set of simple "arguments" (green and red) which support/oppose it. By keeping the forms of these arguments simple, we're able to match them (in many cases) with the basic forms of logical arguments (modus ponens, etc.), permitting quick evaluation of the logical connections -- this saves time, and lets us focus on the underlying chain of evidence instead of parsing statement meanings.
+The maps are constructed from “theses” (blue) which make claims, and “arguments” (green and red) which support/oppose those claims. This structure cuts down on reading time, and lets us focus on the underlying chains of reasoning instead of parsing statement meanings and connections.
 
 For more information, visit the website at: <https://debatemap.live>
 

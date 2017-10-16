@@ -24,7 +24,7 @@ import { demoMap, demoRootNodeID } from "UI/Home/DemoMap";
 let red = `rgba(255,0,0,.7)`;
 let green = `rgba(0,255,0,.6)`;
 let pageText = `
-The Debate Map project is an interactive web platform aimed at improving the efficiency of discussion and debate.
+The Debate Map project is a web platform aimed at improving the efficiency of discussion and debate.
 It's crowd-sourced and open-source, and welcomes reader contributions.
 
 Its primary improvements are (in short):
@@ -36,10 +36,8 @@ Here is a quick example:
 
 $mapPlaceholder
 
-The tree-like structure assists in traversing the various lines of evidence:
-	at each level, there is a "thesis" (blue) which makes a claim, and a set of simple "arguments" (green and red) which support/oppose it.
-By keeping the forms of these arguments simple, we're able to match them (in many cases) with the basic forms of logical arguments (modus ponens, etc.),
-	permitting quick evaluation of the logical connections -- this saves time, and lets us focus on the underlying chain of evidence instead of parsing statement meanings.
+The maps are constructed from “theses” (blue) which make claims, and “arguments” (green and red) which support/oppose those claims.
+This structure cuts down on reading time, and lets us focus on the underlying chains of reasoning instead of parsing statement meanings and connections.
 
 ## Advantages
 

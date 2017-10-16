@@ -14,6 +14,7 @@ let pageText = `
 * Reddit: [https://www.reddit.com/r/DebateMap](https://www.reddit.com/r/DebateMap)
 * YouTube: [https://www.youtube.com/channel/UC2lP4zM7Mcm9_dO92gjpy_w](https://www.youtube.com/channel/UC2lP4zM7Mcm9_dO92gjpy_w)
 * Google+: [https://plus.google.com/108442736183774686103](https://plus.google.com/108442736183774686103)
+* Medium: [https://medium.com/debate-map](https://medium.com/debate-map)
 
 ### Development
 
@@ -28,7 +29,7 @@ let pageText = `
 ### Collaborative debating 
 
 Hopefully, of course, you'll find this site the best option for debate-mapping -- and that through feedback we can resolve its remaining deficiencies.${""
-	} For those wanting to see other options, however, the below is a listing of the best alternatives we're aware of.
+	} For those wanting to see other options, however, the below is a listing of the best alternatives we're aware of. (most sites don't do this!)
 
 Criteria:
 * Layout format: how efficiently you can parse arguments and premises from the presented data.
@@ -41,8 +42,9 @@ The scores indicate how well each site does on the given factor, relative to the
 
 | Site | Layout format | Contribution efficiency | Features | Momentum | Open source |
 | ---																		| ---	| ---	| ---	| ---	| ---	|
-| [Arguman](http://en.arguman.org)								| 100	| 80	| 75	| 70	| yes	|
-| [Banter](https://banter.wiki)									| 100	| 90	| 70	| 40	| ...	|
+| [Kialo](https://www.kialo.com)									| 100	| 90	| 90	| 90	| no	|
+| [Arguman](http://en.arguman.org)								| 90	| 80	| 75	| 70	| yes	|
+| [Banter](https://banter.wiki)									| 90	| 90	| 70	| 40	| ...	|
 | [Debucate](https://www.debucate.com)							| 80	| 85	| 65	| 45	| ...	|
 | [CreateDebate](http://www.createdebate.com)				| 70	| 85	| 80	| 80	| ...	|
 | [DebateHub](https://debatehub.net)							| 70	| 85	| 80	| 15	| ...	|
