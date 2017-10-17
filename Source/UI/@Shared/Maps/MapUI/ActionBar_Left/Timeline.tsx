@@ -22,6 +22,8 @@ import {GetEntries} from "../../../../../Frame/General/Enums";
 import {RemoveHelpers} from "../../../../../Frame/Database/DatabaseHelpers";
 import DeleteTimelineStep from "Server/Commands/DeleteTimelineStep";
 import DeleteTimeline from "../../../../../Server/Commands/DeleteTimeline";
+import TextInput from "../../../../../Frame/ReactComponents/TextInput";
+import { ShowEditTimelineStepActionDialog } from "UI/@Shared/Timelines/Steps/Actions/StepActionDetailsUI";
 
 type TimelineDropDownProps = {map: Map} & Partial<{timelines: Timeline[], selectedTimeline: Timeline, selectedTimelineSteps: TimelineStep[]}>;
 @Connect((state, {map}: TimelineDropDownProps)=> {
@@ -78,7 +80,7 @@ export class TimelineDropDown extends BaseComponent<TimelineDropDownProps, {}> {
 											</Row>
 										</DropDownContent>
 									</DropDown>
-									<Button ml={5} text="X" enabled={selectedTimeline != null && selectedTimeline.steps == null} onClick={()=> {
+									<Button ml={5} text="X" title="Delete timeline" enabled={selectedTimeline != null && selectedTimeline.steps == null} onClick={()=> {
 										new DeleteTimeline({timelineID: selectedTimeline._id}).Run();
 									}}/>
 									<Button ml={5} text="+" title="Add new timeline" onClick={()=> {
@@ -130,7 +132,7 @@ class StepUI extends BaseComponent<StepUIProps, {}> {
 							new DeleteTimelineStep({stepID: step._id}).Run();
 						}}/>
 						<Button ml={5} text="+" title="Add an action to this step" onClick={()=> {
-							var newActions = [new TimelineStepAction({stepID: step._id})];
+							var newActions = [new TimelineStepAction({})];
 							new UpdateTimelineStep({stepID: step._id, stepUpdates: {actions: newActions}}).Run();
 						}}/>
 					</Row>}
@@ -144,19 +146,25 @@ class StepActionUI extends BaseComponent<{step: TimelineStep, action: TimelineSt
 		let {step, action, index} = this.props;
 		return (
 			<Row>
-				<Select options={GetEntries(TimelineStepActionType)} value={action.type} onChange={val=> {
-					let newActions = RemoveHelpers(Clone(step.actions));
-					newActions[index].type = val;
-					new UpdateTimelineStep({stepID: step._id, stepUpdates: {actions: newActions}}).Run();
+				<Row>{TimelineStepActionType[action.type]}</Row>
+				{action.type == TimelineStepActionType.ShowComment &&
+					<Row ml={5}>{action.showComment_commentAuthor}</Row>}
+				{action.type == TimelineStepActionType.ShowComment &&
+					<Row ml={5}>{action.showComment_commentText}</Row>}
+				{action.type == TimelineStepActionType.ShowNode &&
+					<Row ml={5}>{action.showNode_nodeID}</Row>}
+
+				<Button ml="auto" text="Edit" title="Edit this action" onClick={()=> {
+					ShowEditTimelineStepActionDialog(GetUserID(), step, action);
 				}}/>
-				<Button ml="auto" text="X" title="Delete this action" onClick={()=> {
+				<Button ml={5} text="X" title="Delete this action" onClick={()=> {
 					let newActions = RemoveHelpers(Clone(step.actions));
 					newActions.splice(index, 1);
 					new UpdateTimelineStep({stepID: step._id, stepUpdates: {actions: newActions}}).Run();
 				}}/>
 				<Button ml={5} text="+" title="Add another action to this step" onClick={()=> {
 					let newActions = RemoveHelpers(Clone(step.actions));
-					newActions = newActions.concat(new TimelineStepAction({stepID: step._id}));
+					newActions = newActions.concat(new TimelineStepAction({}));
 					new UpdateTimelineStep({stepID: step._id, stepUpdates: {actions: newActions}}).Run();
 				}}/>
 			</Row>

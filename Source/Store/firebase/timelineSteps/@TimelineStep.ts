@@ -24,12 +24,11 @@ export enum TimelineStepActionType {
 AddSchema({oneOf: GetValues_ForSchema(TimelineStepActionType)}, "TimelineStepActionType");
 
 export class TimelineStepAction {
-	constructor(initialData: {stepID: number} & Partial<TimelineStepAction>) {
+	constructor(initialData: Partial<TimelineStepAction>) {
 		this.Extend(initialData);
 	}
 
 	_id: number;
-	stepID: number;
 	type = TimelineStepActionType.ShowComment;
 
 	// for ShowComment
@@ -41,7 +40,6 @@ export class TimelineStepAction {
 }
 AddSchema({
 	properties: {
-		stepID: {type: "number"},
 		type: {$ref: "TimelineStepActionType"},
 
 		showComment_commentAuthor: {type: "string"},
@@ -49,5 +47,5 @@ AddSchema({
 
 		showNode_nodeID: {type: "number"},
 	},
-	required: ["stepID", "type"],
+	required: ["type"],
 }, "TimelineStepAction");
