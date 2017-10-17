@@ -11,10 +11,35 @@ export function Schema(schema) {
 }
 
 G({AddSchema}); declare global { function AddSchema(schema, name: string); }
+let schemaJSON = {};
 export function AddSchema(schema, name: string) {
 	schema = Schema(schema);
+	schemaJSON[name] = schema;
 	ajv.removeSchema(name); // for hot-reloading
-	return ajv.addSchema(schema, name); 
+	let result = ajv.addSchema(schema, name);
+
+	if (schemaAddListeners[name]) {
+		for (let listener of schemaAddListeners[name]) {
+			listener();
+		}
+		delete schemaAddListeners[name];
+	}
+
+	return result;
+}
+
+export function GetSchemaJSON(name: string) {
+	return schemaJSON[name];
+}
+
+var schemaAddListeners = {};
+export function WaitTillSchemaAddedThenRun(schemaName: string, callback: ()=>void) {
+	// if schema is already added, run right away
+	if (ajv.getSchema(schemaName)) {
+		callback();
+		return;
+	}
+	schemaAddListeners[schemaName] = (schemaAddListeners[schemaName] || []).concat(callback);
 }
 
 type AJV_Extended = AJV.Ajv & {
