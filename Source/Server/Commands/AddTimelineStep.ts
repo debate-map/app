@@ -19,7 +19,6 @@ export default class AddTimelineStep extends Command<{timelineID: number, step: 
 		let lastStepID = await GetDataAsync("general", "lastTimelineStepID") as number;
 		this.stepID = lastStepID + 1;
 		step.timelineID = timelineID;
-		step.actions = [new TimelineStepAction({})];
 
 		this.timeline_oldSteps = await GetDataAsync("timelines", timelineID, "steps") || [];
 	}

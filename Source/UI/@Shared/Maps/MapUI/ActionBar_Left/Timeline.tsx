@@ -89,7 +89,9 @@ export class TimelineDropDown extends BaseComponent<TimelineDropDownProps, {}> {
 									}}/>
 									<Button ml="auto" text="Add step" enabled={selectedTimeline != null} onClick={()=> {
 										if (userID == null) return ShowSignInPopup();
-										let newStep = new TimelineStep({});
+										let newStep = new TimelineStep({
+											actions: [new TimelineStepAction({})],
+										});
 										new AddTimelineStep({timelineID: selectedTimeline._id, step: newStep}).Run();
 									}}/>
 								</Row>
@@ -147,6 +149,8 @@ class StepActionUI extends BaseComponent<{step: TimelineStep, action: TimelineSt
 		return (
 			<Row>
 				<Row>{TimelineStepActionType[action.type]}</Row>
+				{action.type == TimelineStepActionType.ShowMessage &&
+					<Row ml={5}>{action.showMessage_message}</Row>}
 				{action.type == TimelineStepActionType.ShowComment &&
 					<Row ml={5}>{action.showComment_commentAuthor}</Row>}
 				{action.type == TimelineStepActionType.ShowComment &&

@@ -49,6 +49,11 @@ export default class TimelineStepActionDetailsUI extends BaseComponent<Props, {n
 					<Pre>Type: </Pre>
 					<Select options={GetEntries(TimelineStepActionType)} value={newData.type} onChange={val=>Change(newData.type = val)}/>
 				</RowLR>
+				{newData.type == TimelineStepActionType.ShowMessage &&
+					<Column mt={5} style={{width}}>
+						<Pre>Message: </Pre>
+						<TextArea value={newData.showMessage_message} onChange={val=>Change(newData.showMessage_message = val)}/>
+					</Column>}
 				{newData.type == TimelineStepActionType.ShowComment &&
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>
 						<Pre>Author: </Pre>

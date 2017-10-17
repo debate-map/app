@@ -18,8 +18,9 @@ AddSchema({
 }, "TimelineStep");
 
 export enum TimelineStepActionType {
-	ShowComment,
-	ShowNode,
+	ShowMessage = 10,
+	ShowComment = 20,
+	ShowNode = 30,
 }
 AddSchema({oneOf: GetValues_ForSchema(TimelineStepActionType)}, "TimelineStepActionType");
 
@@ -31,6 +32,9 @@ export class TimelineStepAction {
 	_id: number;
 	type = TimelineStepActionType.ShowComment;
 
+	// for ShowMessage
+	showMessage_message: string;
+
 	// for ShowComment
 	showComment_commentAuthor: string;
 	showComment_commentText: string;
@@ -41,6 +45,8 @@ export class TimelineStepAction {
 AddSchema({
 	properties: {
 		type: {$ref: "TimelineStepActionType"},
+
+		showMessage_message: {type: "string"},
 
 		showComment_commentAuthor: {type: "string"},
 		showComment_commentText: {type: "string"},

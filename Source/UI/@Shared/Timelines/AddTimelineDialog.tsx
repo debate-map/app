@@ -12,6 +12,13 @@ import {Layer} from "Store/firebase/layers/@Layer";
 import TimelineDetailsUI from "./TimelineDetailsUI";
 import AddTimeline from "../../../Server/Commands/AddTimeline";
 import {Timeline} from "../../../Store/firebase/timelines/@Timeline";
+import { TimelineStep } from "Store/firebase/timelineSteps/@TimelineStep";
+import {TimelineStepAction, TimelineStepActionType} from "../../../Store/firebase/timelineSteps/@TimelineStep";
+import AddTimelineStep from "Server/Commands/AddTimelineStep";
+
+let defaultIntroMessage = `
+Welcome to Debate Map!
+`.trim();
 
 export function ShowAddTimelineDialog(userID: string, mapID: number) {
 	let newTimeline = new Timeline({
@@ -32,8 +39,17 @@ export function ShowAddTimelineDialog(userID: string, mapID: number) {
 				</Column>
 			);
 		},
-		onOK: ()=> {
-			new AddTimeline({mapID, timeline: newTimeline}).Run();
+		onOK: async ()=> {
+			let timelineID = await new AddTimeline({mapID, timeline: newTimeline}).Run();
+			let step = new TimelineStep({
+				actions: [
+					new TimelineStepAction({
+						type: TimelineStepActionType.ShowMessage,
+						showMessage_message: defaultIntroMessage.trim(),
+					}),
+				],
+			});
+			new AddTimelineStep({timelineID, step}).Run();
 		}
 	});
 }

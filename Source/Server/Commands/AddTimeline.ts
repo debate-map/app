@@ -18,6 +18,8 @@ export default class AddTimeline extends Command<{mapID: number, timeline: Timel
 		this.timelineID = lastTimelineID + 1;
 		timeline.mapID = mapID;
 		timeline.createdAt = Date.now();
+
+		this.returnData = this.timelineID;
 	}
 	async Validate() {
 		let {timeline} = this.payload;

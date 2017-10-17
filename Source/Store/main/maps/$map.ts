@@ -4,10 +4,10 @@ import {MapInfo} from "./@MapInfo";
 import {CombineReducers} from "../../../Frame/Store/ReducerUtils";
 
 export enum SortType {
-	CreatorID,
-	CreationDate,
-	//UpdateDate,
-	//ViewerCount,
+	CreatorID = 10,
+	CreationDate = 20,
+	//UpdateDate = 30,
+	//ViewerCount = 40,
 }
 
 export class ACTMapNodeListSortBySet extends Action<{mapID: number, sortBy: SortType}> {}
