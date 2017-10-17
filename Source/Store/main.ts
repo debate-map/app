@@ -8,7 +8,7 @@ import {URL} from "../Frame/General/URLs";
 import {Global} from "../Frame/General/Globals_Free";
 import {CombineReducers} from "../Frame/Store/ReducerUtils";
 import {ContentReducer, Content} from "./main/content";
-import {DebatesReducer, Debates} from "./main/debates";
+import {DebatesReducer, Debates, ACTDebateMapSelect} from "./main/debates";
 import SubpageReducer from "./main/@Shared/$subpage";
 import { LOCATION_CHANGED } from "redux-little-router";
 import { MapInfo } from "Store/main/maps/@MapInfo";
@@ -18,7 +18,7 @@ import { MapInfoReducer } from "Store/main/maps/$map";
 import {demoMap} from "../UI/Home/DemoMap";
 import { Forum, ForumReducer } from "Store/main/forum";
 import { Personal } from "Store/main/personal";
-import {PersonalReducer} from "./main/personal";
+import {PersonalReducer, ACTPersonalMapSelect} from "./main/personal";
 
 // class is used only for initialization
 export class MainState {
@@ -168,6 +168,9 @@ export function MainReducer(state, action) {
 		maps: (state = {}, action)=> {
 			if (action.Is(ACTSetPage) && action.payload == "global" && state[globalMapID] == null) {
 				return {...state, [globalMapID]: new MapInfo()};
+			}
+			if ((action.Is(ACTPersonalMapSelect) || action.Is(ACTDebateMapSelect)) && state[action.payload.id] == null) {
+				return {...state, [action.payload.id]: new MapInfo()};
 			}
 
 			let newState = {...state};

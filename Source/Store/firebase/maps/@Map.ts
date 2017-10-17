@@ -25,6 +25,7 @@ export class Map {
 	editedAt: number;
 
 	layers: {[key: number]: boolean};
+	timelines: {[key: number]: boolean};
 }
 export const Map_nameFormat = `^[a-zA-Z0-9 ,'"%:.?\\-()]+$`;
 AddSchema({
@@ -42,6 +43,7 @@ AddSchema({
 		editedAt: {type: "number"},
 
 		layers: {patternProperties: {"^[0-9]+$": {type: "boolean"}}},
+		timelines: {patternProperties: {"^[0-9]+$": {type: "boolean"}}},
 	},
 	required: ["name", "type", "rootNode", "creator", "createdAt"],
 }, "Map");

@@ -15,6 +15,7 @@ export class ACTMapNodeListFilterSet extends Action<{mapID: number, filter: stri
 export class ACTMapNodeListPageSet extends Action<{mapID: number, page: number}> {}
 export class ACTSelectedNode_InListSet extends Action<{mapID: number, nodeID: number}> {}
 export class ACTMap_List_SelectedNode_OpenPanelSet extends Action<{mapID: number, panel: string}> {}
+export class ACTMap_SelectedTimelineSet extends Action<{mapID: number, selectedTimeline: number}> {}
 
 /*export function MapInfoReducer(state = null, action: Action<any>, mapID: number): MapInfo {
 	if (action.Is(ACTSelectedNode_InListSet)) return {...state, list_selectedNodeID: action.payload.nodeID};
@@ -41,6 +42,10 @@ export const MapInfoReducer = CombineReducers({
 	},
 	list_selectedNode_openPanel: (state = null, action)=> {
 		if (action.Is(ACTMap_List_SelectedNode_OpenPanelSet)) return action.payload.panel;
+		return state;
+	},
+	selectedTimeline: (state = null, action)=> {
+		if (action.Is(ACTMap_SelectedTimelineSet)) return action.payload.selectedTimeline;
 		return state;
 	},
 });

@@ -11,9 +11,13 @@ AddGlobalStyle(`
     display: none;
     position: absolute;
 }
-.dropdown--active .dropdown__content {
+.dropdown--active > .dropdown__content {
     display: block;
 }
+/*
+.dropdown__content > * { pointer-events: auto; }
+.dropdown__content { pointer-events: none; }
+*/
 `);
 
 export default class DropDown extends BaseComponent<{className?, onShow?, onHide?} & React.HTMLProps<HTMLDivElement>, {active: boolean}> {

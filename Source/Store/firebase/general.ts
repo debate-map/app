@@ -5,4 +5,6 @@ export interface GeneralData {
 	lastNodeID: number;
 	lastTermID: number;
 	lastTermComponentID: number;
+	lastTimelineID: number;
+	lastTimelineStepID: number;
 }

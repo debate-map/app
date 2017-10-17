@@ -31,6 +31,7 @@ import SetMapLayerStateForUser from "../../../../Server/Commands/SetMapLayerStat
 import DeleteLayer from "../../../../Server/Commands/DeleteLayer";
 import {ACTPersonalMapSelect} from "../../../../Store/main/personal";
 import {IsUserMap} from "../../../../Store/firebase/maps";
+import { TimelineDropDown } from "UI/@Shared/Maps/MapUI/ActionBar_Left/Timeline";
 
 type ActionBar_LeftProps = {map: Map, subNavBarWidth: number};
 @Connect((state, {map}: ActionBar_LeftProps)=> ({
@@ -54,6 +55,7 @@ export class ActionBar_Left extends BaseComponent<ActionBar_LeftProps, {}> {
 						}}/>}
 					{IsUserMap(map) && <DetailsDropDown map={map}/>}
 					{IsUserMap(map) && <LayersDropDown map={map}/>}
+					{IsUserMap(map) && <TimelineDropDown map={map}/>}
 				</Row>
 			</nav>
 		);
@@ -127,7 +129,7 @@ class LayersDropDown extends BaseComponent<LayersDropDownProps, {}> {
 				<DropDownTrigger><Button ml={5} text="Layers"/></DropDownTrigger>
 				<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: null}}>
 					<Row style={{alignItems: "flex-start"}}>
-						<Column style={{width: 600, height: 350}}>
+						<Column style={{width: 600, maxHeight: 350}}>
 							<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", /*borderRadius: "10px 10px 0 0"*/}}>
 								<Row style={{height: 40, padding: 10}}>
 									{/*<Row width={200} style={{position: "absolute", left: "calc(50% - 100px)"}}>
@@ -164,7 +166,7 @@ class LayersDropDown extends BaseComponent<LayersDropDownProps, {}> {
 									<span style={{flex: columnWidths[3], marginTop: 15, fontWeight: 500, fontSize: 15}}>User</span>
 								</Row>
 							</Column>
-							<ScrollView style={{flex: 1}} contentStyle={{flex: 1}}>
+							<ScrollView style={{flex: 1}} contentStyle={{flex: 1, position: "relative"}}>
 								{layers.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
 								{layers.map((layer, index)=> {
 									return <LayerUI key={layer._id} index={index} last={index == layers.length - 1} map={map} layer={layer}/>
