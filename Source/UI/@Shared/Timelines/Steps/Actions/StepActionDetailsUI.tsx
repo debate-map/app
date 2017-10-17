@@ -45,6 +45,10 @@ export default class TimelineStepActionDetailsUI extends BaseComponent<Props, {n
 		return (
 			<div> {/* needed so GetInnerComp() works */}
 			<Column style={style}>
+				<RowLR mt={5} splitAt={splitAt} style={{width}}>
+					<Pre>Type: </Pre>
+					<Select options={GetEntries(TimelineStepActionType)} value={newData.type} onChange={val=>Change(newData.type = val)}/>
+				</RowLR>
 				{newData.type == TimelineStepActionType.ShowComment &&
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>
 						<Pre>Author: </Pre>
