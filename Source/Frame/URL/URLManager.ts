@@ -18,9 +18,10 @@ import NotificationMessage from "../../Store/main/@NotificationMessage";
 import { ACTDebateMapSelect } from "../../Store/main/debates";
 import { ACTSet } from "Store";
 import MapUI from "../../UI/@Shared/Maps/MapUI";
-import {MapNode} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, globalMapID} from "../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../Store/firebase/maps/@Map";
 import {ACTPersonalMapSelect} from "../../Store/main/personal";
+import { ACTMap_PlayingTimelineSet, ACTMap_PlayingTimelineStepSet } from "Store/main/maps/$map";
 
 export function GetCrawlerURLStrForMap(mapID: number) {
 	let map = GetMap(mapID);
@@ -185,7 +186,21 @@ export function GetSyncLoadActionsForURL(url: URL, directURLChange: boolean) {
 		}
 	}
 
-	if (url.Normalized().toString({domain: false}).startsWith("/global/map")) {
+	var mapID: number;
+	if (url.pathNodes[0] == "personal") {
+		let urlStr = url.pathNodes[1];
+		let match = urlStr && urlStr.match(/([0-9]+)$/);
+		mapID = match ? match[1].ToInt() : null;
+		result.push(new ACTPersonalMapSelect({id: mapID}).VSet({fromURL: true}));
+	}
+	if (url.pathNodes[0] == "debates") { //&& IsNumberString(url.pathNodes[1])) {
+		let urlStr = url.pathNodes[1];
+		let match = urlStr && urlStr.match(/([0-9]+)$/);
+		mapID = match ? match[1].ToInt() : null;
+		result.push(new ACTDebateMapSelect({id: mapID}).VSet({fromURL: true}));
+	}
+	if (url.pathNodes[0] == "global" && url.pathNodes[0] == "map") {
+		mapID = globalMapID;
 		if (isBot) {
 			// example: /global/map/some-node.123
 			let lastPathNode = url.pathNodes.LastOrX();
@@ -210,18 +225,11 @@ export function GetSyncLoadActionsForURL(url: URL, directURLChange: boolean) {
 		}
 	}
 
-	if (url.pathNodes[0] == "personal") {
-		let urlStr = url.pathNodes[1];
-		let match = urlStr && urlStr.match(/([0-9]+)$/);
-		let mapID = match ? match[1].ToInt() : null;
-		result.push(new ACTPersonalMapSelect({id: mapID}).VSet({fromURL: true}));
+	if (url.GetQueryVar("timeline")) {
+		result.push(new ACTMap_PlayingTimelineSet({mapID, timelineID: parseInt(url.GetQueryVar("timeline"))}));
 	}
-
-	if (url.pathNodes[0] == "debates") { //&& IsNumberString(url.pathNodes[1])) {
-		let urlStr = url.pathNodes[1];
-		let match = urlStr && urlStr.match(/([0-9]+)$/);
-		let mapID = match ? match[1].ToInt() : null;
-		result.push(new ACTDebateMapSelect({id: mapID}).VSet({fromURL: true}));
+	if (url.GetQueryVar("step")) {
+		result.push(new ACTMap_PlayingTimelineStepSet({mapID, step: parseInt(url.GetQueryVar("step"))}));
 	}
 
 	return result;
@@ -304,8 +312,9 @@ export function GetNewURL(includeMapViewStr = true) {
 		}
 	}
 
+	var mapID: number;
 	if (page == "personal") {
-		let mapID = State(a=>a.main.personal.selectedMapID);
+		mapID = State(a=>a.main.personal.selectedMapID);
 		if (mapID) {
 			//newURL.pathNodes.push(mapID+"");
 			let urlStr = GetCrawlerURLStrForMap(mapID);
@@ -313,18 +322,16 @@ export function GetNewURL(includeMapViewStr = true) {
 		}
 	}
 	if (page == "debates") {
-		let mapID = State(a=>a.main.debates.selectedMapID);
+		mapID = State(a=>a.main.debates.selectedMapID);
 		if (mapID) {
 			//newURL.pathNodes.push(mapID+"");
 			let urlStr = GetCrawlerURLStrForMap(mapID);
 			newURL.pathNodes.push(urlStr);
 		}
 	}
-
-	// break point
 	if (page == "global" && subpage == "map") {
 		if (isBot) {
-			let mapID = GetOpenMapID();
+			mapID = GetOpenMapID();
 			let map = GetMap(mapID);
 			let rootNodeID = State("main", "mapViews", mapID, "rootNodeID");
 			let rootNode = GetNode(rootNodeID);
@@ -336,9 +343,19 @@ export function GetNewURL(includeMapViewStr = true) {
 			}
 		} else {
 			if (includeMapViewStr) {
-				let mapID = GetOpenMapID();
-				newURL.queryVars.push(new QueryVar("view", GetMapViewStr(mapID)));
+				mapID = GetOpenMapID();
+				newURL.SetQueryVar("view", GetMapViewStr(mapID));
 			}
+		}
+	}
+
+	let playingTimeline = mapID && State("main", "maps", mapID, "playingTimeline");
+	if (playingTimeline) {
+		newURL.SetQueryVar("timeline", playingTimeline);
+
+		let playingTimeline_step = mapID ? State("main", "maps", mapID, "playingTimeline_step") : null;
+		if (playingTimeline_step != null) {
+			newURL.SetQueryVar("step", playingTimeline_step);
 		}
 	}
 

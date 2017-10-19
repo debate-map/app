@@ -7,4 +7,6 @@ export class MapInfo {
 	list_selectedNodeID: number;
 	list_selectedNode_openPanel: string;
 	selectedTimeline: number;
+	playingTimeline: number;
+	playingTimeline_step: number;
 }

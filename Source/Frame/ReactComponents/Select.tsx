@@ -18,7 +18,7 @@ import {Enum} from "../General/Enums";
 }*/
 
 export default class Select extends BaseComponent
-		<{options: {name: string, value, style?}[] | string[] | (new()=>Enum) | {[s: string]: any},
+		<{options: {name: string, value, style?}[] | {name: string}[] | string[] | any[] | (new()=>Enum) | {[s: string]: any},
 			displayType?: "dropdown" | "button bar",
 			compareBy?: "name" | "value" | "value toString",
 			value, verifyValue?: boolean,
@@ -34,10 +34,12 @@ export default class Select extends BaseComponent
 
 		let result = [] as {name: string, value, style?}[];
 		if (options_raw instanceof Array) {
-			if (options_raw[0] && (options_raw[0] as any).name != null) {
-				result = options_raw as any;
-			} else {
-				result = (options_raw as string[]).Select(a=>({name: a, value: a}));
+			for (let option_raw of options_raw) {
+				if (option_raw && "name" in option_raw && "value" in option_raw) {
+					result.push(option_raw);
+				} else {
+					result.push({name: option_raw["name"] || option_raw.toString(), value: option_raw});
+				}
 			}
 		} else if (IsConstructor(options_raw)) {
 			Assert(options_raw.prototype instanceof Enum, "Class provided must derive from class 'Enum'.");

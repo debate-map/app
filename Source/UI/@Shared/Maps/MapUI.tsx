@@ -49,6 +49,7 @@ import {ActionBar_Right} from "./MapUI/ActionBar_Right";
 import {VMenuStub} from "react-vmenu";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
 import {emptyArray} from "../../../Frame/Store/ReducerUtils";
+import { TimelinePlayerUI, TimelineOverlayUI } from "UI/@Shared/Maps/MapUI/TimelinePlayerUI";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -131,6 +132,10 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth}/>}
 				{!withinPage &&
 					<ActionBar_Right map={map} subNavBarWidth={subNavBarWidth}/>}
+				{!withinPage &&
+					<TimelinePlayerUI map={map}/>}
+				{!withinPage &&
+					<TimelineOverlayUI map={map}/>}
 				<ScrollView {...rest.Excluding("dispatch")} ref={c=>this.scrollView = c}
 						backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.scrollView.content) || a == this.mapUI}
 						style={E({flex: 1}, withinPage && {overflow: "visible"})}

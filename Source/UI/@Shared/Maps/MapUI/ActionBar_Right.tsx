@@ -18,13 +18,13 @@ import DeleteMap from "../../../../Server/Commands/DeleteMap";
 import {colors} from "../../../../Frame/UI/GlobalStyles";
 import Spinner from "../../../../Frame/ReactComponents/Spinner";
 import {ACTSetInitialChildLimit} from "../../../../Store/main";
+import TextInput from "../../../../Frame/ReactComponents/TextInput";
+import { ShareDropDown } from "UI/@Shared/Maps/MapUI/ActionBar_Right/ShareDropDown";
+import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown";
 
-@Connect((state, props)=> ({
-	initialChildLimit: State(a=>a.main.initialChildLimit),
-}))
-export class ActionBar_Right extends BaseComponent<{map: Map, subNavBarWidth: number} & Partial<{initialChildLimit: number}>, {}> {
+export class ActionBar_Right extends BaseComponent<{map: Map, subNavBarWidth: number}, {}> {
 	render() {
-		let {map, subNavBarWidth, initialChildLimit} = this.props;
+		let {map, subNavBarWidth} = this.props;
 		let tabBarWidth = 104;
 		return (
 			<nav style={{
@@ -35,19 +35,8 @@ export class ActionBar_Right extends BaseComponent<{map: Map, subNavBarWidth: nu
 					justifyContent: "flex-end", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
 					width: "100%", height: 30, borderRadius: "0 0 0 10px",
 				}}>
-					<DropDown>
-						<DropDownTrigger>
-							<Button text="Layout"/>
-						</DropDownTrigger>
-						<DropDownContent style={{right: 0}}>
-							<Column>
-								<Row>
-									<Pre>Initial child limit: </Pre>
-									<Spinner min={1} value={initialChildLimit} onChange={val=>store.dispatch(new ACTSetInitialChildLimit({value: val}))}/>
-								</Row>
-							</Column>
-						</DropDownContent>
-					</DropDown>
+					<ShareDropDown map={map}/>
+					<LayoutDropDown/>
 				</Row>
 			</nav>
 		);

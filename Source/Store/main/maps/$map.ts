@@ -2,6 +2,7 @@ import {GetNode} from "../../firebase/nodes";
 import Action from "../../../Frame/General/Action";
 import {MapInfo} from "./@MapInfo";
 import {CombineReducers} from "../../../Frame/Store/ReducerUtils";
+import {GetTimeline} from "../../firebase/timelines";
 
 export enum SortType {
 	CreatorID = 10,
@@ -16,6 +17,8 @@ export class ACTMapNodeListPageSet extends Action<{mapID: number, page: number}>
 export class ACTSelectedNode_InListSet extends Action<{mapID: number, nodeID: number}> {}
 export class ACTMap_List_SelectedNode_OpenPanelSet extends Action<{mapID: number, panel: string}> {}
 export class ACTMap_SelectedTimelineSet extends Action<{mapID: number, selectedTimeline: number}> {}
+export class ACTMap_PlayingTimelineSet extends Action<{mapID: number, timelineID: number}> {}
+export class ACTMap_PlayingTimelineStepSet extends Action<{mapID: number, step: number}> {}
 
 /*export function MapInfoReducer(state = null, action: Action<any>, mapID: number): MapInfo {
 	if (action.Is(ACTSelectedNode_InListSet)) return {...state, list_selectedNodeID: action.payload.nodeID};
@@ -48,6 +51,14 @@ export const MapInfoReducer = CombineReducers({
 		if (action.Is(ACTMap_SelectedTimelineSet)) return action.payload.selectedTimeline;
 		return state;
 	},
+	playingTimeline: (state = null, action)=> {
+		if (action.Is(ACTMap_PlayingTimelineSet)) return action.payload.timelineID;
+		return state;
+	},
+	playingTimeline_step: (state = null, action)=> {
+		if (action.Is(ACTMap_PlayingTimelineStepSet)) return action.payload.step;
+		return state;
+	},
 });
 
 export function GetSelectedNodeID_InList(mapID: number) {
@@ -60,4 +71,14 @@ export function GetSelectedNode_InList(mapID: number) {
 
 export function GetMap_List_SelectedNode_OpenPanel(mapID: number) {
 	return State("main", "maps", mapID, "list_selectedNode_openPanel");
+}
+
+export function GetPlayingTimeline(mapID: number) {
+	if (mapID == null) return null;
+	let timelineID = State("main", "maps", mapID, "playingTimeline");
+	return GetTimeline(timelineID);
+}
+export function GetPlayingTimelineStep(mapID: number) {
+	if (mapID == null) return null;
+	return State("main", "maps", mapID, "playingTimeline_step");
 }

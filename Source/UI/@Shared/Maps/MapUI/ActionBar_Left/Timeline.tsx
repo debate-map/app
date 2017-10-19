@@ -70,7 +70,7 @@ export class TimelineDropDown extends BaseComponent<TimelineDropDownProps, {}> {
 																			this.timelineSelect.hide();
 																		}}>
 																	<Row>
-																		{timeline.name}
+																		{timeline.name} <span style={{fontSize: 11}}>(id: {timeline._id})</span>
 																	</Row>
 																</Column>
 															);
