@@ -29,7 +29,7 @@ The earth is spherical!
 Let's convert this into a set of premises:
 [node id="436"/]
 
-<span>(If you consider this conversion innacurate, you can suggest corrections [here].)</span>
+[text textSize="13"](If you consider this conversion innacurate, you can suggest corrections [here](http://www.google.com).)[/text]
 
 Press the button below (or go to the next step) to connect this argument (set of premises) with the rest of the debate map.
 [connectNodesButton ids="436"/]
