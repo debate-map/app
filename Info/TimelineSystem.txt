@@ -14,20 +14,23 @@ The earth is spherical!
 Let's break down this text to find the main idea, which one side supports and the other opposes. This will be called the "root claim".
 [node id="436"/]
 
-The above is a graphical representation of the "root claim", as understood by the creator of this map [(Stephen Wicklund)]. You can hover your mouse over it to see additional details.
+The above is a graphical representation of the "root claim", as understood by the creator of this map [(Stephen Wicklund)]. You can hover your mouse over it to see additional details, vote on its probability, etc.
 
-Once ready, press the button below (or go to the next step) to connect the "root claim" onto the debate map's tree-structure.
-[connectNodeButton id="436"/]
+Once ready, press the button below (or go to the next step) to connect this "root claim" onto the debate map's tree-structure.
+[connectNodesButton ids="436"/]
 ==========
 After the root claim was introduced, various people added comments arguing for or against it. We're now going to go through each of these comments, and break-down/simplify them, to see what exactly they were claiming, and how those claims connect with the ideas already presented.
 ==========
-At 9:29, October 2nd, John Doe wrote the following:
-[...]
+John Doe wrote the following comment:
+[comment author="Person1" date="Oct 2, 9:20"]
+The earth is spherical!
+[/comment]
 
 Let's convert this into a set of premises:
-[...]
+[node id="436"/]
 
-(If you consider this conversion innacurate, you can suggest corrections and vote on them here: [...])
+<span>(If you consider this conversion innacurate, you can suggest corrections [here].)</span>
 
 Press the button below (or go to the next step) to connect this argument (set of premises) with the rest of the debate map.
+[connectNodesButton ids="436"/]
 ==========

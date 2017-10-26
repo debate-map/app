@@ -86,6 +86,7 @@
 		background: rgba(255,200,200,.7);
 	}
 
+	.onlyTopMargin p { margin-bottom: 0; }
 	p:first-child { margin-top: 0; }
 	p:last-child { margin-bottom: 0; }
 

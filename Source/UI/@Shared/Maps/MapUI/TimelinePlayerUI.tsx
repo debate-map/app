@@ -27,7 +27,7 @@ function GetPropsFromPropsStr(propsStr: string) {
 }
 
 let replacements = {
-	"\\[comment(.+?)\\]\n((.|\n)+?)\n\\[\\/comment\\]": (segment: Segment, index: number)=> {
+	"\\[comment(.*?)\\]((.|\n)*?)\\[\\/comment\\]": (segment: Segment, index: number)=> {
 		let props = GetPropsFromPropsStr(segment.textParts[1]);
 		let text = segment.textParts[2];
 
@@ -43,10 +43,28 @@ let replacements = {
 			</a>
 		);
 	},
-	"\\[node(.+?)\\/\\]": (segment: Segment, index: number, extraInfo)=> {
+	"\\[node(.*?)\\/\\]": (segment: Segment, index: number, extraInfo)=> {
 		let props = GetPropsFromPropsStr(segment.textParts[1]);
 		return (
 			<NodeUI_InMessage map={extraInfo.map} nodeID={props.id}/>
+		);
+	},
+	"\\[connectNodesButton(.*?)\\/\\]": (segment: Segment, index: number, extraInfo)=> {
+		let props = GetPropsFromPropsStr(segment.textParts[1]);
+		let ids = (props.ids || "").replace(/ /g, "").split(",").map(ToInt);
+		return (
+			<Button text={props.text || "Place into debate map"} style={{alignSelf: "center", fontSize: 16, fontWeight: 500, color: "rgba(255,255,255,.7)"}}
+				onClick={e=> {
+					// todo
+				}}/>
+		);
+	},
+	"\\[text(.*?)\\]((.|\n)*?)\\[\\/text\\]": (segment: Segment, index: number, extraInfo)=> {
+		let props = GetPropsFromPropsStr(segment.textParts[1]);
+		return (
+			<span style={E(props.textSize && {fontSize: props.textSize})}>
+				<VReactMarkdown_Remarkable source={segment.textParts[2]}/>
+			</span>
 		);
 	},
 };
@@ -62,7 +80,7 @@ class NodeUI_InMessage extends BaseComponent<NodeUI_InMessageProps, {}> {
 		let nodeEnhanced = node.Extended({finalType: node.type, link: null});
 		return (
 			<NodeUI_Inner ref="innerBox" map={map} node={nodeEnhanced} nodeView={{}} path={path} width={null} widthOverride={null} panelPosition="below"
-				style={{marginTop: 15, filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}/>
+				style={{filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}/>
 		);
 	}
 }
@@ -106,7 +124,8 @@ export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 				</Row>
 				<Row>
 					{showMessageAction != null &&
-						<VReactMarkdown_Remarkable style={{marginTop: 5}} source={showMessageAction.showMessage_message} replacements={replacements} extraInfo={{map}}/>}
+						<VReactMarkdown_Remarkable className="onlyTopMargin" style={{marginTop: 5, display: "flex", flexDirection: "column"}} addMarginsForDanglingNewLines={true}
+							source={showMessageAction.showMessage_message} replacements={replacements} extraInfo={{map}}/>}
 				</Row>
 				{/*<ScrollView style={{maxHeight: 300}}>
 				</ScrollView>*/}
