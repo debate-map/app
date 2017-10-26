@@ -134,8 +134,8 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 					<ActionBar_Right map={map} subNavBarWidth={subNavBarWidth}/>}
 				{!withinPage &&
 					<TimelinePlayerUI map={map}/>}
-				{!withinPage &&
-					<TimelineOverlayUI map={map}/>}
+				{/*!withinPage &&
+					<TimelineOverlayUI map={map}/>*/}
 				<ScrollView {...rest.Excluding("dispatch")} ref={c=>this.scrollView = c}
 						backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.scrollView.content) || a == this.mapUI}
 						style={E({flex: 1}, withinPage && {overflow: "visible"})}

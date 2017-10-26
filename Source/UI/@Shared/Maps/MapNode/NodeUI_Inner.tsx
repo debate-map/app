@@ -60,7 +60,7 @@ import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactM
 
 //export type NodeHoverExtras = {panel?: string, term?: number};
 
-type Props = {map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: string, width: number, widthOverride?: number}
+type Props = {map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: string, width: number, widthOverride?: number, panelPosition?: "left" | "below", style?}
 	& Partial<{finalNodeType: MapNodeType, form: ThesisForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
 //@FirebaseConnect((props: Props)=>((props[`holder`] = props[`holder`] || {}), [
 /*@FirebaseConnect((props: Props)=>[
@@ -75,7 +75,7 @@ type Props = {map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: stri
 }))
 export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, hoverPanel: string, hoverTermID: number}> {
 	render() {
-		let {map, node, nodeView, path, width, widthOverride, finalNodeType, form, ratingsRoot, mainRating_average, userID} = this.props;
+		let {map, node, nodeView, path, width, widthOverride, panelPosition, style, finalNodeType, form, ratingsRoot, mainRating_average, userID} = this.props;
 		let {hovered, hoverPanel, hoverTermID} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[finalNodeType];
 		let barSize = 5;
@@ -99,10 +99,11 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let expanded = nodeView && nodeView.expanded;
 
 		return (
-			<div className={classNames("NodeUI_Inner", pathNodeIDs.length == 0 && " root")} style={{
+			<div className={classNames("NodeUI_Inner", pathNodeIDs.length == 0 && " root")}
+					style={E({
 						display: "flex", position: "relative", borderRadius: 5, cursor: "default",
 						boxShadow: "rgba(0,0,0,1) 0px 0px 2px", width, minWidth: widthOverride,
-					}}
+					}, style)}
 					/*onMouseEnter={()=>$(".scrolling").length == 0 && this.SetState({hovered: true})}
 					onMouseLeave={()=>this.SetState({hovered: false})}*/
 					onClick={e=> {
@@ -112,7 +113,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						}
 					}}>
 				{leftPanelShow &&
-					<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot}}
+					<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot, panelPosition}}
 						onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
 						onPanelButtonClick={panel=> {
 							if (nodeView.openPanel != panel) {
@@ -162,7 +163,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 				</div>
 				{bottomPanelShow &&
 					<div style={{
-						position: "absolute", left: 0, top: "calc(100% + 1px)", width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
+						position: "absolute", left: panelPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
+						width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
 						padding: 5, background: "rgba(0,0,0,.7)", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 					}}>
 						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${nodeTypeInfo.backgroundColor},.7)`}}/>

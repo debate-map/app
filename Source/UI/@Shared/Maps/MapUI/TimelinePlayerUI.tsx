@@ -13,20 +13,27 @@ import {TimelineStep, TimelineStepActionType} from "../../../../Store/firebase/t
 import {GetPlayingTimelineStepIndex} from "../../../../Store/main/maps/$map";
 import {ReplacementFunc} from "../../../../Frame/ReactComponents/VReactMarkdown";
 import {Segment} from "../../../../Frame/General/RegexHelpers";
+import NodeUI_Inner from "../MapNode/NodeUI_Inner";
+import {GetNode} from "Store/firebase/nodes";
+import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
+
+function GetPropsFromPropsStr(propsStr: string) {
+	let propStrMatches = propsStr.Matches(/ (.+?)="(.+?)"/g);
+	let props = {} as any;
+	for (let propStrMatch of propStrMatches) {
+		props[propStrMatch[1]] = propStrMatch[2];
+	}
+	return props;
+}
 
 let replacements = {
 	"\\[comment(.+?)\\]\n((.|\n)+?)\n\\[\\/comment\\]": (segment: Segment, index: number)=> {
-		let propStrMatches = segment.textParts[1].Matches(/ (.+?)="(.+?)"/g);
-		let props = {} as any;
-		for (let propStrMatch of propStrMatches) {
-			props[propStrMatch[1]] = propStrMatch[2];
-		}
-
+		let props = GetPropsFromPropsStr(segment.textParts[1]);
 		let text = segment.textParts[2];
 
 		return (
 			<a href={props.link} target="_blank">
-			<Column mt={5} mb={15} style={{background: "rgb(247,247,247)", color: "rgb(51, 51, 51)", borderRadius: 5, padding: 5}}>
+			<Column style={{background: "rgb(247,247,247)", color: "rgb(51, 51, 51)", borderRadius: 5, padding: 5}}>
 				<Row>
 					<span style={{fontWeight: "bold"}}>{props.author}</span>
 					<Span ml="auto" style={{color: "rgb(153,153,153)", fontSize: 12}}>{props.date}</Span>
@@ -36,7 +43,29 @@ let replacements = {
 			</a>
 		);
 	},
+	"\\[node(.+?)\\/\\]": (segment: Segment, index: number, extraInfo)=> {
+		let props = GetPropsFromPropsStr(segment.textParts[1]);
+		return (
+			<NodeUI_InMessage map={extraInfo.map} nodeID={props.id}/>
+		);
+	},
 };
+
+type NodeUI_InMessageProps = {map: Map, nodeID: number} & Partial<{node: MapNode}>;
+@Connect((state, {nodeID}: NodeUI_InMessageProps)=> ({
+	node: GetNode(nodeID),
+}))
+class NodeUI_InMessage extends BaseComponent<NodeUI_InMessageProps, {}> {
+	render() {
+		let {map, node} = this.props;
+		let path = ""+node._id;
+		let nodeEnhanced = node.Extended({finalType: node.type, link: null});
+		return (
+			<NodeUI_Inner ref="innerBox" map={map} node={nodeEnhanced} nodeView={{}} path={path} width={null} widthOverride={null} panelPosition="below"
+				style={{marginTop: 15, filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}/>
+		);
+	}
+}
 
 type Props = {map: Map} & Partial<{playingTimeline: Timeline, currentStep: TimelineStep}>;
 @Connect((state, {map}: Props)=> ({
@@ -77,7 +106,7 @@ export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 				</Row>
 				<Row>
 					{showMessageAction != null &&
-						<VReactMarkdown_Remarkable style={{marginTop: 5}} source={showMessageAction.showMessage_message} replacements={replacements}/>}
+						<VReactMarkdown_Remarkable style={{marginTop: 5}} source={showMessageAction.showMessage_message} replacements={replacements} extraInfo={{map}}/>}
 				</Row>
 				{/*<ScrollView style={{maxHeight: 300}}>
 				</ScrollView>*/}

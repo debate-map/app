@@ -5,13 +5,13 @@ import {Segment, ParseSegmentsForPatterns} from "../General/RegexHelpers";
 import {URL, GetCurrentURL} from "../General/URLs";
 import Link from "./Link";
 
-export type ReplacementFunc = (segment: Segment, index: number)=>JSX.Element;
+export type ReplacementFunc = (segment: Segment, index: number, extraInfo)=>JSX.Element;
 
 export default class VReactMarkdown extends BaseComponent
-		<{source: string, replacements?: {[key: string]: ReplacementFunc}, style?} & ReactMarkdownProps,
+		<{source: string, replacements?: {[key: string]: ReplacementFunc}, extraInfo?, style?} & ReactMarkdownProps,
 		{}> {
 	render() {
-		let {source, replacements, style, containerProps, renderers, ...rest} = this.props;
+		let {source, replacements, extraInfo, style, containerProps, renderers, ...rest} = this.props;
 
 		let containerProps_final = {...containerProps};
 		containerProps_final.style = E(containerProps_final.style, style);
@@ -34,12 +34,21 @@ export default class VReactMarkdown extends BaseComponent
 					{segments.map((segment, index)=> {
 						if (segment.patternMatched == null) {
 							if (replacements.default) {
-								return replacements.default(segment, index).VAct(a=>a.key = index);
+								return replacements.default(segment, index, extraInfo).VAct(a=>a.key = index);
 							}
-							return <ReactMarkdown {...rest} key={index} source={segment.textParts[0]} renderers={renderers_final}/>;
+							let text = segment.textParts[0].replace(/\r/g, "");
+							return (
+								<ReactMarkdown {...rest} key={index} source={text} renderers={renderers_final}
+									containerProps={{
+										style: E({
+											marginTop: text.startsWith("\n\n") ? 15 : text.startsWith("\n") ? 5 : 0,
+											marginBottom: text.endsWith("\n\n") ? 15 : text.endsWith("\n") ? 5 : 0,
+										}),
+									}}/>
+							);
 						}
-						let renderFuncForReplacement = replacements.VValues()[segment.patternMatched];
-						return renderFuncForReplacement(segment, index).VAct(a=>a.key = index);
+						let renderFuncForReplacement = replacements.VValues()[segment.patternMatched] as ReplacementFunc;
+						return renderFuncForReplacement(segment, index, extraInfo).VAct(a=>a.key = index);
 					})}
 				</div>
 			);

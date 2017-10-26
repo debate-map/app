@@ -23,7 +23,7 @@ import {GetNode} from "Store/firebase/nodes";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
 type Props = {
-	map: Map, path: string, node: MapNodeEnhanced, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
+	map: Map, path: string, node: MapNodeEnhanced, nodeView?: MapNodeView, ratingsRoot: RatingsRoot, panelPosition?: "left" | "below",
 	backgroundColor: string, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
 } & Partial<{form: ThesisForm, parentNode: MapNodeEnhanced}>;
@@ -32,8 +32,13 @@ type Props = {
 	parentNode: GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1)),
 }))
 export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
+	static defaultProps = {panelPosition: "left"};
 	render() {
-		let {map, path, node, nodeView, ratingsRoot, backgroundColor, asHover, inList, onPanelButtonHover, onPanelButtonClick, style, form, parentNode} = this.props;
+		let {
+			map, path, node, nodeView, ratingsRoot, panelPosition,
+			backgroundColor, asHover, inList, onPanelButtonHover, onPanelButtonClick, style,
+			form, parentNode
+		} = this.props;
 		let openPanel = nodeView.openPanel;
 		if (node.metaThesis && parentNode == null) return <div/>; // if meta-thesis, but no parent-node connected, must still be loading
 
@@ -49,7 +54,8 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 		return (
 			<div style={E(
 				{display: "flex", flexDirection: "column", whiteSpace: "nowrap", zIndex: asHover ? 6 : 5},
-				!inList && {position: "absolute", right: "calc(100% + 1px)"},
+				!inList && panelPosition == "left" && {position: "absolute", right: "calc(100% + 1px)"},
+				!inList && panelPosition == "below" && {position: "absolute", top: "calc(100% + 1px)", width: 130},
 				style,
 			)}>
 				<div style={{position: "relative", background: `rgba(0,0,0,.8)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>

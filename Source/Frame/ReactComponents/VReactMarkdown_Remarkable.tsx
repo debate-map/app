@@ -54,14 +54,14 @@ import {ReplacementFunc} from "./VReactMarkdown";
 
 type Props = {
 	source: string, markdownOptions?, rendererOptions?,
-	replacements?: {[key: string]: ReplacementFunc}, containerType?, style?
+	replacements?: {[key: string]: ReplacementFunc}, extraInfo?, containerType?, style?
 } & React.HTMLProps<HTMLDivElement>;
 export default class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> {
 	static defaultProps = {containerType: "div"};
 	
 	markdown: Remarkable;
 	InitMarkdown(props) {
-		let {markdownOptions, rendererOptions} = props;
+		let {extraInfo, markdownOptions, rendererOptions} = props;
 		this.markdown = new Remarkable(markdownOptions);
 
 		let rendererOptions_final = {...rendererOptions};
@@ -96,7 +96,7 @@ export default class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> 
 	}
 
 	render() {
-		let {source, markdownOptions, rendererOptions, replacements, containerType, style, ...rest} = this.props;
+		let {source, extraInfo, markdownOptions, rendererOptions, replacements, containerType, style, ...rest} = this.props;
 		//source = source || this.FlattenedChildren.join("\n\n");
 
 		if (this.markdown == null) {
@@ -109,12 +109,20 @@ export default class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> 
 			let segmentUIs = segments.map((segment, index)=> {
 				if (segment.patternMatched == null) {
 					if (replacements.default) {
-						return replacements.default(segment, index).VAct(a=>a.key = index);
+						return replacements.default(segment, index, extraInfo).VAct(a=>a.key = index);
 					}
-					return <VReactMarkdown_Remarkable key={index} source={segment.textParts[0]} markdownOptions={markdownOptions} rendererOptions={rendererOptions}/>;
+					let text = segment.textParts[0].replace(/\r/g, "");
+					return (
+						<VReactMarkdown_Remarkable key={index} source={text} extraInfo={extraInfo}
+							markdownOptions={markdownOptions} rendererOptions={rendererOptions}
+							style={E({
+								marginTop: text.startsWith("\n\n") ? 15 : text.startsWith("\n") ? 5 : 0,
+								marginBottom: text.endsWith("\n\n") ? 15 : text.endsWith("\n") ? 5 : 0,
+							})}/>
+					);
 				}
-				let renderFuncForReplacement = replacements.VValues()[segment.patternMatched];
-				return renderFuncForReplacement(segment, index).VAct(a=>a.key = index);
+				let renderFuncForReplacement= replacements.VValues()[segment.patternMatched] as ReplacementFunc;
+				return renderFuncForReplacement(segment, index, extraInfo).VAct(a=>a.key = index);
 			});
 			return React.createElement(containerType, {style}, segmentUIs);
 		}

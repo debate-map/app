@@ -35,7 +35,7 @@ export default class Select extends BaseComponent
 		let result = [] as {name: string, value, style?}[];
 		if (options_raw instanceof Array) {
 			for (let option_raw of options_raw) {
-				if (option_raw && "name" in option_raw && "value" in option_raw) {
+				if (option_raw && option_raw instanceof Object && "name" in option_raw && "value" in option_raw) {
 					result.push(option_raw);
 				} else {
 					result.push({name: option_raw["name"] || option_raw.toString(), value: option_raw});

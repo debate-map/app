@@ -12,11 +12,12 @@ The earth is spherical!
 [/comment]
 
 Let's break down this text to find the main idea, which one side supports and the other opposes. This will be called the "root claim".
-[...]
+[node id="436"/]
 
 The above is a graphical representation of the "root claim", as understood by the creator of this map [(Stephen Wicklund)]. You can hover your mouse over it to see additional details.
 
 Once ready, press the button below (or go to the next step) to connect the "root claim" onto the debate map's tree-structure.
+[connectNodeButton id="436"/]
 ==========
 After the root claim was introduced, various people added comments arguing for or against it. We're now going to go through each of these comments, and break-down/simplify them, to see what exactly they were claiming, and how those claims connect with the ideas already presented.
 ==========
