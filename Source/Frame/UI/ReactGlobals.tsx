@@ -168,12 +168,10 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	//get InnerComp() { return FindReact(this.DOM); }
 
 	// make all these optional, so fits Component type definition/shape
-	/*get FlattenedChildren() {
-	    var children = this.props.children;
-	    if (!(children instanceof Array))
-	        children = [children];
+	get FlattenedChildren() {
+	    var children = children instanceof Array ? this.props.children : [this.props.children];
 	    return React.Children.map((children as any).Where(a=>a), a=>a);
-	}*/
+	}
 
 	// helper for debugging
 	private GetPropsChanged_lastProps = {};
@@ -428,8 +426,8 @@ export class Span extends BaseComponent<{pre?} & React.HTMLProps<HTMLSpanElement
 @ApplyBasicStyles
 export class Pre extends BaseComponent<{allowWrap?: boolean} & React.HTMLProps<HTMLSpanElement>, {}> {
 	render() {
-		let {allowWrap, style, children} = this.props;
-		return <span style={E({whiteSpace: allowWrap ? "pre-wrap" : "pre"}, style)}>{children}</span>;
+		let {allowWrap, style, children, ...rest} = this.props;
+		return <span {...rest} style={E({whiteSpace: allowWrap ? "pre-wrap" : "pre"}, style)}>{children}</span>;
 	}
 }
 

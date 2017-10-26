@@ -9,12 +9,12 @@ import VReactMarkdown_Remarkable from "../../Frame/ReactComponents/VReactMarkdow
 let pageText = `
 ### Social
 
+* Blog: [https://medium.com/debate-map](https://medium.com/debate-map)
 * Facebook: [https://www.facebook.com/debatemap](https://www.facebook.com/debatemap)
 * Twitter: [https://twitter.com/debatemaps](https://twitter.com/debatemaps)
 * Reddit: [https://www.reddit.com/r/DebateMap](https://www.reddit.com/r/DebateMap)
 * YouTube: [https://www.youtube.com/channel/UC2lP4zM7Mcm9_dO92gjpy_w](https://www.youtube.com/channel/UC2lP4zM7Mcm9_dO92gjpy_w)
 * Google+: [https://plus.google.com/108442736183774686103](https://plus.google.com/108442736183774686103)
-* Medium: [https://medium.com/debate-map](https://medium.com/debate-map)
 
 ### Development
 

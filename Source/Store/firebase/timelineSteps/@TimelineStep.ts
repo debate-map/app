@@ -7,11 +7,13 @@ export class TimelineStep {
 
 	_id: number;
 	timelineID: number;
+	title: string;
 	actions: TimelineStepAction[];
 }
 AddSchema({
 	properties: {
 		timelineID: {type: "number"},
+		title: {type: "string"},
 		actions: {items: {$ref: "TimelineStepAction"}}
 	},
 	required: ["timelineID"],

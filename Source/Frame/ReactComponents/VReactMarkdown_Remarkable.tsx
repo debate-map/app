@@ -97,6 +97,7 @@ export default class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> 
 
 	render() {
 		let {source, markdownOptions, rendererOptions, replacements, containerType, style, ...rest} = this.props;
+		//source = source || this.FlattenedChildren.join("\n\n");
 
 		if (this.markdown == null) {
 			this.InitMarkdown(this.props);

@@ -1,0 +1,30 @@
+Welcome to the Debate Map platform.
+
+The purpose of this site is to "map" debates and discussions into a tree-based format, where it's easier to analyze the logic behind each argument.
+
+One of these maps has been created for an existing conversation, which took place at: [...]
+
+Press the arrow buttons above to begin displaying the comments made by those involved, and examining their logical connections with each other.
+==========
+The conversation began with the following message:
+[...]
+
+Let's break down this text to find the main idea, which one side is supporting and the other opposing. This will be called the "root claim".
+[...]
+
+The above is a graphical representation of the "root claim", as interpreted by the creator of this map [(Stephen Wicklund)]. You can hover your mouse over it to see additional details.
+
+Once ready, press the right-arrow button to connect the "root claim" onto the debate map's tree-structure.
+==========
+After the root claim was introduced, various people added comments arguing for or against it. We're now going to go through each of these comments, and break-down/simplify them, to see what exactly they were claiming, and how those claims connect with the ideas already presented.
+==========
+At 9:29, October 2nd, John Doe wrote the following:
+[...]
+
+The creator of this map [(Stephen Wicklund)] interpreted this statement as meaning the following:
+[...]
+
+(If you disagree, and believe something else was meant by the statement, you can suggest corrections and vote on it here: [...])
+
+Press the right-arrow button to connect this [statement/argument] with the rest of the debate map.
+==========

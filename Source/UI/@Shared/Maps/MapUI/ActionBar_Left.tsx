@@ -129,8 +129,8 @@ class LayersDropDown extends BaseComponent<LayersDropDownProps, {}> {
 				<DropDownTrigger><Button ml={5} text="Layers"/></DropDownTrigger>
 				<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: null}}>
 					<Row style={{alignItems: "flex-start"}}>
-						<Column style={{width: 600, maxHeight: 350}}>
-							<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", /*borderRadius: "10px 10px 0 0"*/}}>
+						<Column style={{width: 600}}>
+							<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)" /*borderRadius: "10px 10px 0 0"*/, maxHeight: 320}}>
 								<Row style={{height: 40, padding: 10}}>
 									{/*<Row width={200} style={{position: "absolute", left: "calc(50% - 100px)"}}>
 										<Button text={<Icon icon="arrow-left" size={15}/>} title="Previous page"

@@ -2,7 +2,8 @@ import {GetNode} from "../../firebase/nodes";
 import Action from "../../../Frame/General/Action";
 import {MapInfo} from "./@MapInfo";
 import {CombineReducers} from "../../../Frame/Store/ReducerUtils";
-import {GetTimeline} from "../../firebase/timelines";
+import {GetTimeline, GetTimelineStep} from "../../firebase/timelines";
+import {Timeline} from "Store/firebase/timelines/@Timeline";
 
 export enum SortType {
 	CreatorID = 10,
@@ -73,12 +74,19 @@ export function GetMap_List_SelectedNode_OpenPanel(mapID: number) {
 	return State("main", "maps", mapID, "list_selectedNode_openPanel");
 }
 
-export function GetPlayingTimeline(mapID: number) {
+export function GetPlayingTimeline(mapID: number): Timeline {
 	if (mapID == null) return null;
 	let timelineID = State("main", "maps", mapID, "playingTimeline");
 	return GetTimeline(timelineID);
 }
-export function GetPlayingTimelineStep(mapID: number) {
+export function GetPlayingTimelineStepIndex(mapID: number): number {
 	if (mapID == null) return null;
 	return State("main", "maps", mapID, "playingTimeline_step");
+}
+export function GetPlayingTimelineStep(mapID: number) {
+	let playingTimeline = GetPlayingTimeline(mapID);
+	if (playingTimeline == null) return null;
+	let stepIndex = GetPlayingTimelineStepIndex(mapID) || 0;
+	let stepID = playingTimeline.steps[stepIndex];
+	return GetTimelineStep(stepID);
 }
