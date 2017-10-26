@@ -7,7 +7,9 @@ One of these maps has been created for an existing conversation, which took plac
 Continue to the next step to begin displaying the comments made by those involved, and examining their logical connections with each other.
 ==========
 The conversation began with the following message:
-[...]
+[comment author="Person1" date="Oct 2, 9:20"]
+The earth is spherical!
+[/comment]
 
 Let's break down this text to find the main idea, which one side supports and the other opposes. This will be called the "root claim".
 [...]

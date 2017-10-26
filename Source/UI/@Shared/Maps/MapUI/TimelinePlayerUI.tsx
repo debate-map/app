@@ -1,4 +1,4 @@
-import {BaseComponent, Pre} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Pre, Span} from "../../../../Frame/UI/ReactGlobals";
 import Column from "../../../../Frame/ReactComponents/Column";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetOpenMapID} from "../../../../Store/main";
@@ -11,6 +11,32 @@ import { Map } from "Store/firebase/maps/@Map";
 import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
 import {TimelineStep, TimelineStepActionType} from "../../../../Store/firebase/timelineSteps/@TimelineStep";
 import {GetPlayingTimelineStepIndex} from "../../../../Store/main/maps/$map";
+import {ReplacementFunc} from "../../../../Frame/ReactComponents/VReactMarkdown";
+import {Segment} from "../../../../Frame/General/RegexHelpers";
+
+let replacements = {
+	"\\[comment(.+?)\\]\n((.|\n)+?)\n\\[\\/comment\\]": (segment: Segment, index: number)=> {
+		let propStrMatches = segment.textParts[1].Matches(/ (.+?)="(.+?)"/g);
+		let props = {} as any;
+		for (let propStrMatch of propStrMatches) {
+			props[propStrMatch[1]] = propStrMatch[2];
+		}
+
+		let text = segment.textParts[2];
+
+		return (
+			<a href={props.link} target="_blank">
+			<Column mt={5} mb={15} style={{background: "rgb(247,247,247)", color: "rgb(51, 51, 51)", borderRadius: 5, padding: 5}}>
+				<Row>
+					<span style={{fontWeight: "bold"}}>{props.author}</span>
+					<Span ml="auto" style={{color: "rgb(153,153,153)", fontSize: 12}}>{props.date}</Span>
+				</Row>
+				<VReactMarkdown_Remarkable source={text}/>
+			</Column>
+			</a>
+		);
+	},
+};
 
 type Props = {map: Map} & Partial<{playingTimeline: Timeline, currentStep: TimelineStep}>;
 @Connect((state, {map}: Props)=> ({
@@ -51,7 +77,7 @@ export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 				</Row>
 				<Row>
 					{showMessageAction != null &&
-						<VReactMarkdown_Remarkable style={{marginTop: 5}} source={showMessageAction.showMessage_message}/>}
+						<VReactMarkdown_Remarkable style={{marginTop: 5}} source={showMessageAction.showMessage_message} replacements={replacements}/>}
 				</Row>
 				{/*<ScrollView style={{maxHeight: 300}}>
 				</ScrollView>*/}

@@ -116,7 +116,7 @@ export default class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> 
 				let renderFuncForReplacement = replacements.VValues()[segment.patternMatched];
 				return renderFuncForReplacement(segment, index).VAct(a=>a.key = index);
 			});
-			return React.createElement(containerType, null, segmentUIs);
+			return React.createElement(containerType, {style}, segmentUIs);
 		}
 
 		let markdownResult = this.markdown.render(source);
