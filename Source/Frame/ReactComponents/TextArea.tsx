@@ -44,7 +44,7 @@ export class TextArea_AutoSize extends BaseComponent<{enabled?: boolean, style?,
 	render() {
 		var {enabled, style, onChange, ...rest} = this.props;
 		return (
-			<TextAreaAutoSize {...rest} ref="root" disabled={!enabled} style={E({resize: "none"}, style)}
+			<TextAreaAutoSize {...rest} ref="root" disabled={enabled == false} style={E({resize: "none"}, style)}
 				onChange={e=>onChange(this.refs.root.value)}/>
 		);
 	}

@@ -27,7 +27,7 @@ export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 		let showMessageAction = currentStep.actions.FirstOrX(a=>a.type == TimelineStepActionType.ShowMessage);
 
 		return (
-			<Column style={{position: "absolute", zIndex: 2, left: 10, top: 40, width: 400, padding: 10, background: "rgba(0,0,0,.7)", borderRadius: 5}}>
+			<Column style={{position: "absolute", zIndex: 2, left: 10, top: 40, width: 500, padding: 10, background: "rgba(0,0,0,.7)", borderRadius: 5}}>
 				<Row style={{position: "relative"}}>
 					<Pre style={{fontSize: 18, textAlign: "center", width: "100%"}}>Timeline</Pre>
 					<Button text="X" style={{position: "absolute", right: 0, padding: "3px 6px", marginTop: -2, marginRight: -2, fontSize: 13}} onClick={()=> {
@@ -39,8 +39,12 @@ export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 					<Button text="<" enabled={currentStepIndex > 0} onClick={()=> {
 						store.dispatch(new ACTMap_PlayingTimelineStepSet({mapID: map._id, step: currentStepIndex - 1}))
 					}}/>
-					<Pre className="clickThrough" style={{position: "absolute", fontSize: 15, textAlign: "center", width: "100%"}}>{currentStepIndex + 1}: {currentStep.title}</Pre>
+					<Pre className="clickThrough" style={{position: "absolute", fontSize: 15, textAlign: "center", width: "100%"}}>
+						Step {currentStepIndex + 1}{currentStep.title ? ": " + currentStep.title : ""}
+					</Pre>
 					{/*<Button ml={5} text="="/>*/}
+					{/*<Button ml="auto" text="Connect" enabled={} onClick={()=> {
+					}}/>*/}
 					<Button ml="auto" text=">" enabled={playingTimeline.steps && currentStepIndex < playingTimeline.steps.length - 1} onClick={()=> {
 						store.dispatch(new ACTMap_PlayingTimelineStepSet({mapID: map._id, step: currentStepIndex + 1}))
 					}}/>

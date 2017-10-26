@@ -229,7 +229,7 @@ export function GetSyncLoadActionsForURL(url: URL, directURLChange: boolean) {
 		result.push(new ACTMap_PlayingTimelineSet({mapID, timelineID: parseInt(url.GetQueryVar("timeline"))}));
 	}
 	if (url.GetQueryVar("step")) {
-		result.push(new ACTMap_PlayingTimelineStepSet({mapID, step: parseInt(url.GetQueryVar("step"))}));
+		result.push(new ACTMap_PlayingTimelineStepSet({mapID, step: parseInt(url.GetQueryVar("step")) - 1}));
 	}
 
 	return result;
@@ -355,7 +355,7 @@ export function GetNewURL(includeMapViewStr = true) {
 
 		let playingTimeline_step = mapID ? State("main", "maps", mapID, "playingTimeline_step") : null;
 		if (playingTimeline_step != null) {
-			newURL.SetQueryVar("step", playingTimeline_step);
+			newURL.SetQueryVar("step", playingTimeline_step + 1);
 		}
 	}
 

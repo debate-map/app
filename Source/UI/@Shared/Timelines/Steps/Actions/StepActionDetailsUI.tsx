@@ -22,7 +22,7 @@ import {TimelineStepAction, TimelineStep, TimelineStepActionType} from "../../..
 import {UpdateTimelineStep} from "../../../../../Server/Commands/UpdateTimelineStep";
 import {RemoveHelpers} from "../../../../../Frame/Database/DatabaseHelpers";
 import {BoxController, ShowMessageBox} from "../../../../../Frame/UI/VMessageBox";
-import TextArea from "../../../../../Frame/ReactComponents/TextArea";
+import {TextArea_AutoSize} from "../../../../../Frame/ReactComponents/TextArea";
 
 type Props = {baseData: TimelineStepAction, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: TimelineStepAction, ui: TimelineStepActionDetailsUI)=>void};
 export default class TimelineStepActionDetailsUI extends BaseComponent<Props, {newData: TimelineStepAction}> {
@@ -52,7 +52,7 @@ export default class TimelineStepActionDetailsUI extends BaseComponent<Props, {n
 				{newData.type == TimelineStepActionType.ShowMessage &&
 					<Column mt={5} style={{width}}>
 						<Pre>Message: </Pre>
-						<TextArea value={newData.showMessage_message} onChange={val=>Change(newData.showMessage_message = val)}/>
+						<TextArea_AutoSize value={newData.showMessage_message} onChange={val=>Change(newData.showMessage_message = val)}/>
 					</Column>}
 				{newData.type == TimelineStepActionType.ShowComment &&
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>
@@ -62,7 +62,7 @@ export default class TimelineStepActionDetailsUI extends BaseComponent<Props, {n
 				{newData.type == TimelineStepActionType.ShowComment &&
 					<Column mt={5} style={{width}}>
 						<Pre>Text: </Pre>
-						<TextArea value={newData.showComment_commentText} onChange={val=>Change(newData.showComment_commentText = val)}/>
+						<TextArea_AutoSize value={newData.showComment_commentText} onChange={val=>Change(newData.showComment_commentText = val)}/>
 					</Column>}
 				{newData.type == TimelineStepActionType.ShowNode &&
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>
