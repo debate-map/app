@@ -55,7 +55,7 @@ let replacements = {
 		//let ids = (props.ids || "").replace(/ /g, "").split(",").map(ToInt);
 		let currentStep = extraInfo.currentStep as TimelineStep;
 		//let ids = currentStep.actions.filter(a=>a.type == TimelineStepActionType.ShowNode).map(a=>a.showNode_nodeID);
-		let ids = (currentStep.nodesToShowStr || "").replace(/ /g, "").split(",").map(ToInt);
+		//let ids = (currentStep.nodeReveals || []).map(a=>a.nodeID);
 		return (
 			<Button text={props.text || "Place into debate map"} enabled={!extraInfo.stepApplied}
 				style={{alignSelf: "center", fontSize: 16, fontWeight: 500, color: "rgba(255,255,255,.7)"}}
@@ -105,7 +105,7 @@ export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 		
 		let currentStepIndex = playingTimeline.steps.indexOf(currentStep._id);
 
-		let stepApplied = appliedStepIndex >= currentStepIndex || (currentStep.nodesToShowStr || "").trim().length == 0;
+		let stepApplied = appliedStepIndex >= currentStepIndex || (currentStep.nodeReveals || []).length == 0;
 		
 		return (
 			<Column style={{position: "absolute", zIndex: 2, left: 10, top: 40, width: 500, padding: 10, background: "rgba(0,0,0,.7)", borderRadius: 5}}>

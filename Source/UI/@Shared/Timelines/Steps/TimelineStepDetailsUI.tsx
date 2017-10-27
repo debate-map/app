@@ -18,7 +18,7 @@ import {GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import Spinner from "../../../../Frame/ReactComponents/Spinner";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
-import {TimelineStep} from "../../../../Store/firebase/timelineSteps/@TimelineStep";
+import {TimelineStep, NodeReveal} from "../../../../Store/firebase/timelineSteps/@TimelineStep";
 import {UpdateTimelineStep} from "../../../../Server/Commands/UpdateTimelineStep";
 import {RemoveHelpers} from "../../../../Frame/Database/DatabaseHelpers";
 import {BoxController, ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
@@ -38,7 +38,7 @@ export default class TimelineStepDetailsUI extends BaseComponent<Props, {newData
 	render() {
 		let {forNew, enabled, style, onChange} = this.props;
 		let {newData} = this.state;
-		let Change = _=> {
+		let Change = (..._)=> {
 			if (onChange) onChange(this.GetNewData(), this);
 			this.Update();
 		};
@@ -52,13 +52,19 @@ export default class TimelineStepDetailsUI extends BaseComponent<Props, {newData
 					<TextInput value={newData.title} onChange={val=>Change(newData.title = val)}/>
 				</RowLR>
 				<Column mt={5} style={{width}}>
-					<Pre>Message: </Pre>
+					<Pre>Message:</Pre>
 					<TextArea_AutoSize value={newData.message} onChange={val=>Change(newData.message = val)}/>
 				</Column>
-				<RowLR mt={5} splitAt={splitAt} style={{width}}>
-					<Pre>Nodes to show: </Pre>
-					<TextInput value={newData.nodesToShowStr} onChange={val=>Change(newData.nodesToShowStr = val)}/>
-				</RowLR>
+				<Row mt={5}>
+					<Pre>Nodes to show:</Pre>
+					<Button text="Add" ml="auto" onClick={()=> {
+						newData.nodeReveals = (newData.nodeReveals || []).concat(new NodeReveal());
+						Change();
+					}}/>
+				</Row>
+				{newData.nodeReveals && newData.nodeReveals.map((reveal, index)=> {
+					return <NodeRevealUI step={newData} reveal={reveal} Change={Change}/>
+				})}
 			</Column>
 			</div>
 		);
@@ -70,6 +76,24 @@ export default class TimelineStepDetailsUI extends BaseComponent<Props, {newData
 	GetNewData() {
 		let {newData} = this.state;
 		return Clone(newData) as TimelineStep;
+	}
+}
+
+class NodeRevealUI extends BaseComponent<{step: TimelineStep, reveal: NodeReveal, Change: Function}, {}> {
+	render() {
+		let {step, reveal, Change} = this.props;
+		return (
+			<Row>
+				<Pre>ID: </Pre>
+				<Spinner min={1} value={reveal.nodeID} onChange={val=>Change(reveal.nodeID = val)}/>
+				<Pre ml={5}>Reveal depth: </Pre>
+				<Spinner min={0} max={10} value={reveal.revealDepth} onChange={val=>Change(reveal.revealDepth = val)}/>
+				<Button ml={5} text="X" onClick={()=> {
+					step.nodeReveals.Remove(reveal);
+					Change();
+				}}/>
+			</Row>
+		);
 	}
 }
 

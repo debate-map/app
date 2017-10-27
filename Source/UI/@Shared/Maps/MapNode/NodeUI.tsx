@@ -49,8 +49,8 @@ import NotifyNodeViewed from "../../../../Server/Commands/NotifyNodeViewed";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import { emptyArray, emptyArray_forLoading } from "../../../../Frame/Store/ReducerUtils";
 import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";
-import { GetPlayingTimelineAppliedStepShowNodes } from "Store/main/maps/$map";
-import {GetPlayingTimeline, GetPlayingTimelineShowableNodes} from "../../../../Store/main/maps/$map";
+import { GetPlayingTimelineAppliedStepRevealNodes } from "Store/main/maps/$map";
+import {GetPlayingTimeline, GetPlayingTimelineRevealNodes, GetPlayingTimelineStepIndex} from "../../../../Store/main/maps/$map";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
 
 type Props = {map: Map, node: MapNodeEnhanced, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
@@ -62,6 +62,7 @@ type Props = {map: Map, node: MapNodeEnhanced, path?: string, asSubnode?: boolea
 		subnodes: MapNodeEnhanced[],
 		userViewedNodes: ViewedNodeSet,
 		playingTimeline: Timeline,
+		playingTimeline_currentStepIndex: number,
 		playingTimelineShowableNodes: number[],
 		playingTimelineVisibleNodes: number[],
 	}>;
@@ -112,8 +113,9 @@ type State = {
 		subnodes,
 		userViewedNodes: GetUserViewedNodes(GetUserID(), {useUndefinedForInProgress: true}),
 		playingTimeline: GetPlayingTimeline(map._id),
-		playingTimelineShowableNodes: GetPlayingTimelineShowableNodes(map._id),
-		playingTimelineVisibleNodes: GetPlayingTimelineAppliedStepShowNodes(map._id, true),
+		playingTimeline_currentStepIndex: GetPlayingTimelineStepIndex(map._id),
+		playingTimelineShowableNodes: GetPlayingTimelineRevealNodes(map._id),
+		playingTimelineVisibleNodes: GetPlayingTimelineAppliedStepRevealNodes(map._id, true),
 	};
 })
 export default class NodeUI extends BaseComponent<Props, State> {
@@ -129,7 +131,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	render() {
 		let {map, node, path, asSubnode, widthOverride, style,
 			initialChildLimit, form, children, nodeView, nodeChildren, nodeChildren_sortValues, subnodes,
-			playingTimeline, playingTimelineShowableNodes, playingTimelineVisibleNodes} = this.props;
+			playingTimeline, playingTimeline_currentStepIndex, playingTimelineShowableNodes, playingTimelineVisibleNodes} = this.props;
 		let expanded = nodeView && nodeView.expanded;
 		let {childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
 		if (ShouldLog(a=>a.nodeRenders)) {
@@ -151,8 +153,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let separateChildren = node.finalType == MapNodeType.Thesis;
 		type ChildPack = {origIndex: number, node: MapNodeEnhanced};
 		let childPacks: ChildPack[] = nodeChildren.map((child, index)=>({origIndex: index, node: child}));
-		if (playingTimeline) {
-			childPacks = childPacks.filter(pack=>playingTimelineVisibleNodes.Contains(pack.node._id) || !playingTimelineShowableNodes.Contains(pack.node._id));
+		if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
+			childPacks = childPacks.filter(pack=>playingTimelineVisibleNodes.Contains(pack.node._id));
 		}
 		let upChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalType == MapNodeType.SupportingArgument) : [];
 		let downChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalType == MapNodeType.OpposingArgument) : [];

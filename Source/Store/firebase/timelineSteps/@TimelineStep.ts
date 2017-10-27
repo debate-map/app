@@ -9,14 +9,26 @@ export class TimelineStep {
 	timelineID: number;
 	title: string;
 	message: string;
-	nodesToShowStr: string;
+	nodeReveals: NodeReveal[];
 }
 AddSchema({
 	properties: {
 		timelineID: {type: "number"},
 		title: {type: "string"},
 		message: {type: "string"},
-		nodesToShowStr: {type: "string"},
+		nodeReveals: {$ref: "NodeReveal"},
 	},
 	required: ["timelineID"],
 }, "TimelineStep");
+
+export class NodeReveal {
+	nodeID: number;
+	revealDepth: number;
+}
+AddSchema({
+	properties: {
+		nodeID: {type: "number"},
+		revealDepth: {type: "number"},
+	},
+	required: ["nodeID", "revealDepth"],
+}, "NodeReveal");

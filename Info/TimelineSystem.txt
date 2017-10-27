@@ -15,7 +15,7 @@ Let's break down this text to find the main idea, which one side supports and th
 
 [node id="436"/]
 
-The above is a graphical representation of the "root claim", as understood by the creator of this map [(Stephen Wicklund)]. You can hover your mouse over it to see additional details, vote on its probability, etc.
+The above is a graphical representation of the "root claim", as understood by the map author [(Stephen Wicklund)]. You can hover your mouse over it to see additional details, vote on its probability, etc.
 
 Once ready, press the button below (or go to the next step) to connect this "root claim" onto the debate map's tree-structure.
 [connectNodesButton/]
@@ -36,3 +36,10 @@ Let's convert this into a set of premises:
 Press the button below (or go to the next step) to connect this argument (set of premises) with the rest of the debate map.
 [connectNodesButton/]
 ==========
+You've reached the end of the timeline/history for this conversation. Any additional nodes which were not revealed already by the timeline (eg. those added after the original conversation) have been made visible now.
+
+If you see potential improvements to the Debate Map website, or this particular map (for example, if the map creator misinterpreted some comments, or failed to include some important points), feel free to get involved and help make improvements. Some ways you can help: (as permitted by the moderators and map author)
+* Vote on the strengths/probabilities of the map's arguments and claims.
+* Add new arguments and counter-arguments! This is the most substantial way to help, however, it may take some time to learn the contribution workflow. Take it slow, and try to match the contribution format of existing content.
+* Ask questions and engage in discussion on existing nodes. (in a node's "Discussion" panel)
+* Follow the Debate Map community on Facebook, Twitter, etc: [debatemap.live/more](https://debatemap.live/more)

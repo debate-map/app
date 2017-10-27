@@ -1,4 +1,4 @@
-import {GetNode} from "../../firebase/nodes";
+import {GetNode, GetNodeChildren} from "../../firebase/nodes";
 import Action from "../../../Frame/General/Action";
 import {MapInfo} from "./@MapInfo";
 import {CombineReducers, emptyArray} from "../../../Frame/Store/ReducerUtils";
@@ -114,21 +114,12 @@ export function GetPlayingTimelineAppliedSteps(mapID: number, excludeAfterCurren
 	if (steps.Any(a=>a == null)) return emptyArray;
 	return steps;
 }
-export function GetPlayingTimelineAppliedStepShowNodes(mapID: number, excludeAfterCurrentStep = false): number[] {
+export function GetPlayingTimelineAppliedStepRevealNodes(mapID: number, excludeAfterCurrentStep = false): number[] {
 	let map = GetMap(mapID);
 	if (!map) return emptyArray;
 
 	let appliedSteps = GetPlayingTimelineAppliedSteps(mapID, excludeAfterCurrentStep);
-	let result = [];
-	result.push(map.rootNode);
-	for (let step of appliedSteps) {
-		let showNodes = (step.nodesToShowStr || "").replace(/ /g, "").split(",").map(ToInt);
-		for (let nodeID of showNodes) {
-			if (result.Contains(nodeID)) continue;
-			result.push(nodeID);
-		}
-	}
-	return result;
+	return [map.rootNode].concat(GetNodesRevealedInSteps(appliedSteps));
 }
 
 export function GetPlayingTimelineSteps(mapID: number): TimelineStep[] {
@@ -138,20 +129,30 @@ export function GetPlayingTimelineSteps(mapID: number): TimelineStep[] {
 	if (steps.Any(a=>a == null)) return emptyArray;
 	return steps;
 }
-export function GetPlayingTimelineShowableNodes(mapID: number, excludeAfterCurrentStep = false): number[] {
+export function GetNodesRevealedInSteps(steps: TimelineStep[]) {
+	let result = {};
+	for (let step of steps) {
+		for (let reveal of step.nodeReveals || []) {
+			result[reveal.nodeID] = true;
+			let node = GetNode(reveal.nodeID);
+			let currentChildren = GetNodeChildren(node);
+			for (var i = 0; i < reveal.revealDepth; i++) {
+				let nextChildren = [];
+				for (let child of currentChildren) {
+					result[child._id] = true;
+					let childChildren = GetNodeChildren(child);
+					nextChildren.AddRange(childChildren);
+				}
+				currentChildren = nextChildren;
+			}
+		}
+	}
+	return result.VKeys().map(ToInt);
+}
+export function GetPlayingTimelineRevealNodes(mapID: number, excludeAfterCurrentStep = false): number[] {
 	let map = GetMap(mapID);
 	if (!map) return emptyArray;
 
 	let steps = GetPlayingTimelineSteps(mapID);
-	let result = [];
-	result.push(map.rootNode);
-	for (let step of steps) {
-		let showNodes = (step.nodesToShowStr || "").replace(/ /g, "").split(",").map(ToInt);
-		for (let nodeID of showNodes) {
-			if (result.Contains(nodeID)) continue;
-			result.push(nodeID);
-			// MS this also adds children, when option enabled
-		}
-	}
-	return result;
+	return [map.rootNode].concat(GetNodesRevealedInSteps(steps));
 }
