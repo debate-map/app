@@ -22,6 +22,7 @@ import {MapNode, globalMapID} from "../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../Store/firebase/maps/@Map";
 import {ACTPersonalMapSelect} from "../../Store/main/personal";
 import { ACTMap_PlayingTimelineSet, ACTMap_PlayingTimelineStepSet } from "Store/main/maps/$map";
+import {ACTMap_PlayingTimelineAppliedStepSet} from "../../Store/main/maps/$map";
 
 export function GetCrawlerURLStrForMap(mapID: number) {
 	let map = GetMap(mapID);
@@ -231,6 +232,9 @@ export function GetSyncLoadActionsForURL(url: URL, directURLChange: boolean) {
 	if (url.GetQueryVar("step")) {
 		result.push(new ACTMap_PlayingTimelineStepSet({mapID, step: parseInt(url.GetQueryVar("step")) - 1}));
 	}
+	if (url.GetQueryVar("appliedStep")) {
+		result.push(new ACTMap_PlayingTimelineAppliedStepSet({mapID, step: parseInt(url.GetQueryVar("appliedStep")) - 1}));
+	}
 
 	return result;
 }
@@ -356,6 +360,11 @@ export function GetNewURL(includeMapViewStr = true) {
 		let playingTimeline_step = mapID ? State("main", "maps", mapID, "playingTimeline_step") : null;
 		if (playingTimeline_step != null) {
 			newURL.SetQueryVar("step", playingTimeline_step + 1);
+		}
+
+		let playingTimeline_appliedStep = mapID ? State("main", "maps", mapID, "playingTimeline_appliedStep") : null;
+		if (playingTimeline_appliedStep != null) {
+			newURL.SetQueryVar("appliedStep", playingTimeline_appliedStep + 1);
 		}
 	}
 
