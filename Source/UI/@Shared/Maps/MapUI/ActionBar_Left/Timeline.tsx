@@ -24,6 +24,7 @@ import DeleteTimelineStep from "Server/Commands/DeleteTimelineStep";
 import DeleteTimeline from "../../../../../Server/Commands/DeleteTimeline";
 import TextInput from "../../../../../Frame/ReactComponents/TextInput";
 import {ShowEditTimelineStepDialog} from "../../../Timelines/Steps/TimelineStepDetailsUI";
+import {ACTMap_PlayingTimelineAppliedStepSet, ACTMap_PlayingTimelineStepSet, ACTMap_PlayingTimelineSet} from "../../../../../Store/main/maps/$map";
 
 type TimelineDropDownProps = {map: Map} & Partial<{timelines: Timeline[], selectedTimeline: Timeline, selectedTimelineSteps: TimelineStep[]}>;
 @Connect((state, {map}: TimelineDropDownProps)=> {
@@ -87,7 +88,12 @@ export class TimelineDropDown extends BaseComponent<TimelineDropDownProps, {}> {
 										if (userID == null) return ShowSignInPopup();
 										ShowAddTimelineDialog(userID, map._id);
 									}}/>
-									<Button ml="auto" text="Add step" enabled={selectedTimeline != null} onClick={()=> {
+									<Button ml="auto" text="Play" title="Start playing this timeline" style={{flexShrink: 0}} onClick={()=> {
+										store.dispatch(new ACTMap_PlayingTimelineSet({mapID: map._id, timelineID: selectedTimeline._id}));
+										store.dispatch(new ACTMap_PlayingTimelineStepSet({mapID: map._id, step: 0}));
+										store.dispatch(new ACTMap_PlayingTimelineAppliedStepSet({mapID: map._id, step: null}));
+									}}/>
+									<Button ml={5} text="Add step" enabled={selectedTimeline != null} onClick={()=> {
 										if (userID == null) return ShowSignInPopup();
 										let newStep = new TimelineStep({});
 										new AddTimelineStep({timelineID: selectedTimeline._id, step: newStep}).Run();
@@ -126,7 +132,7 @@ class StepUI extends BaseComponent<StepUIProps, {}> {
 				<Row>
 					<Row style={{flexShrink: 0}}>Step {index + 1}:</Row>
 					<Row ml={5}>{step.message}</Row>
-					<Button ml="auto" text="Edit" title="Edit this step" style={{flexShrink: 0}} onClick={()=> {
+					<Button ml={5} text="Edit" title="Edit this step" style={{flexShrink: 0}} onClick={()=> {
 						ShowEditTimelineStepDialog(GetUserID(), step);
 					}}/>
 					<Button ml={5} text="X" onClick={()=> {

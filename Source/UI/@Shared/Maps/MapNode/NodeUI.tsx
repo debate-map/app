@@ -49,6 +49,9 @@ import NotifyNodeViewed from "../../../../Server/Commands/NotifyNodeViewed";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import { emptyArray, emptyArray_forLoading } from "../../../../Frame/Store/ReducerUtils";
 import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";
+import { GetPlayingTimelineAppliedStepShowNodes } from "Store/main/maps/$map";
+import {GetPlayingTimeline, GetPlayingTimelineShowableNodes} from "../../../../Store/main/maps/$map";
+import {Timeline} from "Store/firebase/timelines/@Timeline";
 
 type Props = {map: Map, node: MapNodeEnhanced, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
 	& Partial<{
@@ -58,6 +61,9 @@ type Props = {map: Map, node: MapNodeEnhanced, path?: string, asSubnode?: boolea
 		nodeChildren_sortValues: number[],
 		subnodes: MapNodeEnhanced[],
 		userViewedNodes: ViewedNodeSet,
+		playingTimeline: Timeline,
+		playingTimelineShowableNodes: number[],
+		playingTimelineVisibleNodes: number[],
 	}>;
 type State = {
 	childrenWidthOverride: number, childrenCenterY: number,
@@ -105,6 +111,9 @@ type State = {
 		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", [node._id], nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
 		subnodes,
 		userViewedNodes: GetUserViewedNodes(GetUserID(), {useUndefinedForInProgress: true}),
+		playingTimeline: GetPlayingTimeline(map._id),
+		playingTimelineShowableNodes: GetPlayingTimelineShowableNodes(map._id),
+		playingTimelineVisibleNodes: GetPlayingTimelineAppliedStepShowNodes(map._id, true),
 	};
 })
 export default class NodeUI extends BaseComponent<Props, State> {
@@ -119,7 +128,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	nodeUI: HTMLDivElement;
 	render() {
 		let {map, node, path, asSubnode, widthOverride, style,
-			initialChildLimit, form, children, nodeView, nodeChildren, nodeChildren_sortValues, subnodes} = this.props;
+			initialChildLimit, form, children, nodeView, nodeChildren, nodeChildren_sortValues, subnodes,
+			playingTimeline, playingTimelineShowableNodes, playingTimelineVisibleNodes} = this.props;
 		let expanded = nodeView && nodeView.expanded;
 		let {childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
 		if (ShouldLog(a=>a.nodeRenders)) {
@@ -141,6 +151,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let separateChildren = node.finalType == MapNodeType.Thesis;
 		type ChildPack = {origIndex: number, node: MapNodeEnhanced};
 		let childPacks: ChildPack[] = nodeChildren.map((child, index)=>({origIndex: index, node: child}));
+		if (playingTimeline) {
+			childPacks = childPacks.filter(pack=>playingTimelineVisibleNodes.Contains(pack.node._id) || !playingTimelineShowableNodes.Contains(pack.node._id));
+		}
 		let upChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalType == MapNodeType.SupportingArgument) : [];
 		let downChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalType == MapNodeType.OpposingArgument) : [];
 
@@ -301,7 +314,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			</div>
 		);
 	}
-	childBoxes: {[key: number]: NodeUI};
+	childBoxes: {[key: number]: NodeUI} = {};
 
 	//GetMeasurementInfo(/*props: Props, state: State*/) {
 	measurementInfo_cache;
@@ -433,7 +446,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let innerBoxOffset = ((newState.childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
 		//if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
 		//if (this.refs.childHolder) {
-		if (expanded) {
+		if (expanded && this.refs.childHolder) {
 			let holderOffset = new Vector2i(FindDOM_(this.refs.childHolder).offset());
 			let innerBox = FindDOM_(this.refs.innerBox);
 			//var mainBoxOffset = new Vector2i(innerBox.offset()).Minus(holderOffset);

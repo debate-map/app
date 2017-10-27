@@ -114,6 +114,7 @@ export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 					<Button text="X" style={{position: "absolute", right: 0, padding: "3px 6px", marginTop: -2, marginRight: -2, fontSize: 13}} onClick={()=> {
 						store.dispatch(new ACTMap_PlayingTimelineSet({mapID: map._id, timelineID: null}));
 						store.dispatch(new ACTMap_PlayingTimelineStepSet({mapID: map._id, step: null}));
+						store.dispatch(new ACTMap_PlayingTimelineAppliedStepSet({mapID: map._id, step: null}));
 					}}/>
 				</Row>
 				<Row mt={5} style={{position: "relative"}}>
@@ -122,7 +123,7 @@ export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 					}}/>
 					{stepApplied && currentStepIndex == 0 && appliedStepIndex >= 0 &&
 						<Button ml={5} text="Restart" onClick={()=> {
-							store.dispatch(new ACTMap_PlayingTimelineAppliedStepSet({mapID: map._id, step: -1}));
+							store.dispatch(new ACTMap_PlayingTimelineAppliedStepSet({mapID: map._id, step: null}));
 						}}/>}
 					<Pre className="clickThrough" style={{position: "absolute", fontSize: 15, textAlign: "center", width: "100%"}}>
 						Step {currentStepIndex + 1}{currentStep.title ? ": " + currentStep.title : ""}

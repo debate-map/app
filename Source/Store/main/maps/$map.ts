@@ -1,9 +1,11 @@
 import {GetNode} from "../../firebase/nodes";
 import Action from "../../../Frame/General/Action";
 import {MapInfo} from "./@MapInfo";
-import {CombineReducers} from "../../../Frame/Store/ReducerUtils";
+import {CombineReducers, emptyArray} from "../../../Frame/Store/ReducerUtils";
 import {GetTimeline, GetTimelineStep} from "../../firebase/timelines";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
+import {TimelineStep} from "Store/firebase/timelineSteps/@TimelineStep";
+import {GetMap} from "../../firebase/maps";
 
 export enum SortType {
 	CreatorID = 10,
@@ -98,4 +100,58 @@ export function GetPlayingTimelineStep(mapID: number) {
 export function GetPlayingTimelineAppliedStepIndex(mapID: number): number {
 	if (mapID == null) return null;
 	return State("main", "maps", mapID, "playingTimeline_appliedStep");
+}
+export function GetPlayingTimelineAppliedSteps(mapID: number, excludeAfterCurrentStep = false): TimelineStep[] {
+	let playingTimeline = GetPlayingTimeline(mapID);
+	if (playingTimeline == null) return emptyArray;
+	let stepIndex = GetPlayingTimelineAppliedStepIndex(mapID) || -1;
+	if (excludeAfterCurrentStep) {
+		let currentStep = GetPlayingTimelineStepIndex(mapID);
+		stepIndex = Math.min(currentStep, stepIndex);
+	}
+	let stepIDs = playingTimeline.steps.slice(0, stepIndex + 1)
+	let steps = stepIDs.map(a=>GetTimelineStep(a));
+	if (steps.Any(a=>a == null)) return emptyArray;
+	return steps;
+}
+export function GetPlayingTimelineAppliedStepShowNodes(mapID: number, excludeAfterCurrentStep = false): number[] {
+	let map = GetMap(mapID);
+	if (!map) return emptyArray;
+
+	let appliedSteps = GetPlayingTimelineAppliedSteps(mapID, excludeAfterCurrentStep);
+	let result = [];
+	result.push(map.rootNode);
+	for (let step of appliedSteps) {
+		let showNodes = (step.nodesToShowStr || "").replace(/ /g, "").split(",").map(ToInt);
+		for (let nodeID of showNodes) {
+			if (result.Contains(nodeID)) continue;
+			result.push(nodeID);
+		}
+	}
+	return result;
+}
+
+export function GetPlayingTimelineSteps(mapID: number): TimelineStep[] {
+	let playingTimeline = GetPlayingTimeline(mapID);
+	if (playingTimeline == null) return emptyArray;
+	let steps = playingTimeline.steps.map(a=>GetTimelineStep(a));
+	if (steps.Any(a=>a == null)) return emptyArray;
+	return steps;
+}
+export function GetPlayingTimelineShowableNodes(mapID: number, excludeAfterCurrentStep = false): number[] {
+	let map = GetMap(mapID);
+	if (!map) return emptyArray;
+
+	let steps = GetPlayingTimelineSteps(mapID);
+	let result = [];
+	result.push(map.rootNode);
+	for (let step of steps) {
+		let showNodes = (step.nodesToShowStr || "").replace(/ /g, "").split(",").map(ToInt);
+		for (let nodeID of showNodes) {
+			if (result.Contains(nodeID)) continue;
+			result.push(nodeID);
+			// MS this also adds children, when option enabled
+		}
+	}
+	return result;
 }
