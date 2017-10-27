@@ -135,13 +135,20 @@ export function GetNodesRevealedInSteps(steps: TimelineStep[]) {
 		for (let reveal of step.nodeReveals || []) {
 			result[reveal.nodeID] = true;
 			let node = GetNode(reveal.nodeID);
+			if (node == null) continue;
 			let currentChildren = GetNodeChildren(node);
+			if (currentChildren.Any(a=>a == null)) return emptyArray;
+
 			for (var i = 0; i < reveal.revealDepth; i++) {
 				let nextChildren = [];
 				for (let child of currentChildren) {
 					result[child._id] = true;
-					let childChildren = GetNodeChildren(child);
-					nextChildren.AddRange(childChildren);
+					// if there's another loop/depth after this one
+					if (i < reveal.revealDepth - 1) {
+						let childChildren = GetNodeChildren(child);
+						if (childChildren.Any(a=>a == null)) return emptyArray;
+						nextChildren.AddRange(childChildren);
+					}
 				}
 				currentChildren = nextChildren;
 			}

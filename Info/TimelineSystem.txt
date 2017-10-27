@@ -42,4 +42,5 @@ If you see potential improvements to the Debate Map website, or this particular 
 * Vote on the strengths/probabilities of the map's arguments and claims.
 * Add new arguments and counter-arguments! This is the most substantial way to help, however, it may take some time to learn the contribution workflow. Take it slow, and try to match the contribution format of existing content.
 * Ask questions and engage in discussion on existing nodes. (in a node's "Discussion" panel)
-* Follow the Debate Map community on Facebook, Twitter, etc: [debatemap.live/more](https://debatemap.live/more)
+* Suggest improvements to the website, or even help develop new features! (the project is [open-source](https://github.com/Venryx/DebateMap))
+* Follow the Debate Map community on [Facebook](https://www.facebook.com/debatemap), [Twitter](https://twitter.com/debatemaps), [Reddit](https://www.reddit.com/r/DebateMap), etc. Additional links: [debatemap.live/more](https://debatemap.live/more)
