@@ -13,11 +13,16 @@ import TimelineDetailsUI from "./TimelineDetailsUI";
 import AddTimeline from "../../../Server/Commands/AddTimeline";
 import {Timeline} from "../../../Store/firebase/timelines/@Timeline";
 import { TimelineStep } from "Store/firebase/timelineSteps/@TimelineStep";
-import {TimelineStepAction, TimelineStepActionType} from "../../../Store/firebase/timelineSteps/@TimelineStep";
 import AddTimelineStep from "Server/Commands/AddTimelineStep";
 
 let defaultIntroMessage = `
-Welcome to Debate Map!
+Welcome to the Debate Map platform.
+
+The purpose of this site is to "map" debates and discussions into a tree-based format, where it's easier to analyze the logic behind each argument.
+
+One of these maps has been created for an existing conversation, which took place at: [enter url here]
+
+Continue to the next step to begin displaying the comments made by those involved, and examining their logical connections with each other.
 `.trim();
 
 export function ShowAddTimelineDialog(userID: string, mapID: number) {
@@ -42,12 +47,7 @@ export function ShowAddTimelineDialog(userID: string, mapID: number) {
 		onOK: async ()=> {
 			let timelineID = await new AddTimeline({mapID, timeline: newTimeline}).Run();
 			let step = new TimelineStep({
-				actions: [
-					new TimelineStepAction({
-						type: TimelineStepActionType.ShowMessage,
-						showMessage_message: defaultIntroMessage.trim(),
-					}),
-				],
+				message: defaultIntroMessage.trim(),
 			});
 			new AddTimelineStep({timelineID, step}).Run();
 		}

@@ -15,7 +15,7 @@ WaitTillSchemaAddedThenRun("TimelineStep", ()=> {
 		properties: {
 			stepID: {type: "number"},
 			stepUpdates: Schema({
-				properties: GetSchemaJSON("TimelineStep").properties.Including("title", "actions"),
+				properties: GetSchemaJSON("TimelineStep").properties.Including("title", "message", "nodesToShowStr"),
 			}),
 		},
 		required: ["stepID", "stepUpdates"],

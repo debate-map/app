@@ -7,7 +7,7 @@ import AddNode from "./AddNode";
 import {UserEdit} from "Server/CommandMacros";
 import {Layer} from "Store/firebase/layers/@Layer";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
-import {TimelineStep, TimelineStepAction} from "../../Store/firebase/timelineSteps/@TimelineStep";
+import {TimelineStep} from "../../Store/firebase/timelineSteps/@TimelineStep";
 
 @UserEdit
 export default class AddTimelineStep extends Command<{timelineID: number, step: TimelineStep}> {

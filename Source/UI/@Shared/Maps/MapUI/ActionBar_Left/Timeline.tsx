@@ -10,7 +10,7 @@ import Row from "Frame/ReactComponents/Row";
 import Column from "../../../../../Frame/ReactComponents/Column";
 import ScrollView from "react-vscrollview";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
-import {TimelineStep, TimelineStepAction, TimelineStepActionType} from "../../../../../Store/firebase/timelineSteps/@TimelineStep";
+import {TimelineStep} from "../../../../../Store/firebase/timelineSteps/@TimelineStep";
 import {GetMapTimelines, GetTimeline, GetTimelineSteps} from "../../../../../Store/firebase/timelines";
 import {Timeline} from "../../../../../Store/firebase/timelines/@Timeline";
 import {ShowAddTimelineDialog} from "../../../Timelines/AddTimelineDialog";
@@ -23,7 +23,6 @@ import {RemoveHelpers} from "../../../../../Frame/Database/DatabaseHelpers";
 import DeleteTimelineStep from "Server/Commands/DeleteTimelineStep";
 import DeleteTimeline from "../../../../../Server/Commands/DeleteTimeline";
 import TextInput from "../../../../../Frame/ReactComponents/TextInput";
-import { ShowEditTimelineStepActionDialog } from "UI/@Shared/Timelines/Steps/Actions/StepActionDetailsUI";
 import {ShowEditTimelineStepDialog} from "../../../Timelines/Steps/TimelineStepDetailsUI";
 
 type TimelineDropDownProps = {map: Map} & Partial<{timelines: Timeline[], selectedTimeline: Timeline, selectedTimelineSteps: TimelineStep[]}>;
@@ -55,7 +54,7 @@ export class TimelineDropDown extends BaseComponent<TimelineDropDownProps, {}> {
 										<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: null, zIndex: 1}}>
 											<Row style={{alignItems: "flex-start"}}>
 												<Column style={{width: 600}}>
-													<ScrollView style={{flex: 1}} contentStyle={{flex: .8, position: "relative", maxHeight: 320}}>
+													<ScrollView style={{flex: 1}} contentStyle={{flex: .8, position: "relative", maxHeight: 500}}>
 														{timelines.map((timeline, index)=> {
 															return (
 																<Column p="7px 10px"
@@ -90,14 +89,12 @@ export class TimelineDropDown extends BaseComponent<TimelineDropDownProps, {}> {
 									}}/>
 									<Button ml="auto" text="Add step" enabled={selectedTimeline != null} onClick={()=> {
 										if (userID == null) return ShowSignInPopup();
-										let newStep = new TimelineStep({
-											actions: [new TimelineStepAction({})],
-										});
+										let newStep = new TimelineStep({});
 										new AddTimelineStep({timelineID: selectedTimeline._id, step: newStep}).Run();
 									}}/>
 								</Row>
 							</Column>
-							<ScrollView style={{flex: 1}} contentStyle={{flex: 1, position: "relative", maxHeight: 320}}>
+							<ScrollView style={{flex: 1}} contentStyle={{flex: 1, position: "relative", maxHeight: 500, borderRadius: "0 0 10px 10px"}}>
 								{selectedTimelineSteps && selectedTimelineSteps.map((step, index)=> {
 									return <StepUI index={index} last={index == selectedTimeline.steps.length - 1} map={map} step={step}/>
 								})}
@@ -127,58 +124,16 @@ class StepUI extends BaseComponent<StepUIProps, {}> {
 				last && {borderRadius: "0 0 10px 10px"}
 			)}>
 				<Row>
-					Step {index + 1}:
-					<Button ml="auto" text="Edit" title="Edit this step" onClick={()=> {
+					<Row style={{flexShrink: 0}}>Step {index + 1}:</Row>
+					<Row ml={5}>{step.message}</Row>
+					<Button ml="auto" text="Edit" title="Edit this step" style={{flexShrink: 0}} onClick={()=> {
 						ShowEditTimelineStepDialog(GetUserID(), step);
 					}}/>
 					<Button ml={5} text="X" onClick={()=> {
 						new DeleteTimelineStep({stepID: step._id}).Run();
 					}}/>
-					<Button ml={5} text="+" title="Add an action to this step" onClick={()=> {
-						/*var newActions = [new TimelineStepAction({})];
-						new UpdateTimelineStep({stepID: step._id, stepUpdates: {actions: newActions}}).Run();*/
-						let newActions = RemoveHelpers(Clone(step.actions)) || [];
-						newActions = newActions.concat(new TimelineStepAction({}));
-						new UpdateTimelineStep({stepID: step._id, stepUpdates: {actions: newActions}}).Run();
-					}}/>
 				</Row>
-				{step.actions && step.actions.map((action, index)=> {
-					return <StepActionUI step={step} action={action} index={index}/>;
-				})}
 			</Column>
-		);
-	}
-}
-
-class StepActionUI extends BaseComponent<{step: TimelineStep, action: TimelineStepAction, index: number}, {}> {
-	render() {
-		let {step, action, index} = this.props;
-		return (
-			<Row style={{fontSize: 12}}>
-				<Row ml={10}>Action {index + 1}: {TimelineStepActionType[action.type]}</Row>
-				{action.type == TimelineStepActionType.ShowMessage &&
-					<Row ml={5} style={{maxWidth: "50%"}}>{action.showMessage_message}</Row>}
-				{action.type == TimelineStepActionType.ShowComment &&
-					<Row ml={5}>{action.showComment_commentAuthor}</Row>}
-				{action.type == TimelineStepActionType.ShowComment &&
-					<Row ml={5} style={{maxWidth: "50%"}}>{action.showComment_commentText}</Row>}
-				{action.type == TimelineStepActionType.ShowNode &&
-					<Row ml={5}>{action.showNode_nodeID}</Row>}
-
-				<Button ml="auto" text="Edit" title="Edit this action" onClick={()=> {
-					ShowEditTimelineStepActionDialog(GetUserID(), step, action);
-				}}/>
-				<Button ml={5} text="X" title="Delete this action" onClick={()=> {
-					let newActions = RemoveHelpers(Clone(step.actions));
-					newActions.splice(index, 1);
-					new UpdateTimelineStep({stepID: step._id, stepUpdates: {actions: newActions}}).Run();
-				}}/>
-				<Button ml={5} text="+" title="Add another action to this step" onClick={()=> {
-					let newActions = RemoveHelpers(Clone(step.actions));
-					newActions = newActions.concat(new TimelineStepAction({}));
-					new UpdateTimelineStep({stepID: step._id, stepUpdates: {actions: newActions}}).Run();
-				}}/>
-			</Row>
 		);
 	}
 }

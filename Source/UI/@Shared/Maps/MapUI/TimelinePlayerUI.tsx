@@ -9,7 +9,7 @@ import ScrollView from "react-vscrollview";
 import {ACTMap_PlayingTimelineSet, ACTMap_PlayingTimelineStepSet, GetPlayingTimeline, GetPlayingTimelineStep} from "Store/main/maps/$map";
 import { Map } from "Store/firebase/maps/@Map";
 import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
-import {TimelineStep, TimelineStepActionType} from "../../../../Store/firebase/timelineSteps/@TimelineStep";
+import {TimelineStep} from "../../../../Store/firebase/timelineSteps/@TimelineStep";
 import {GetPlayingTimelineStepIndex, ACTMap_PlayingTimelineAppliedStepSet, GetPlayingTimelineAppliedStepIndex} from "../../../../Store/main/maps/$map";
 import {ReplacementFunc} from "../../../../Frame/ReactComponents/VReactMarkdown";
 import {Segment} from "../../../../Frame/General/RegexHelpers";
@@ -54,7 +54,8 @@ let replacements = {
 		let props = GetPropsFromPropsStr(segment.textParts[1]);
 		//let ids = (props.ids || "").replace(/ /g, "").split(",").map(ToInt);
 		let currentStep = extraInfo.currentStep as TimelineStep;
-		let ids = currentStep.actions.filter(a=>a.type == TimelineStepActionType.ShowNode).map(a=>a.showNode_nodeID);
+		//let ids = currentStep.actions.filter(a=>a.type == TimelineStepActionType.ShowNode).map(a=>a.showNode_nodeID);
+		let ids = (currentStep.nodesToShowStr || "").replace(/ /g, "").split(",").map(ToInt);
 		return (
 			<Button text={props.text || "Place into debate map"} enabled={!extraInfo.stepApplied}
 				style={{alignSelf: "center", fontSize: 16, fontWeight: 500, color: "rgba(255,255,255,.7)"}}
@@ -85,7 +86,7 @@ class NodeUI_InMessage extends BaseComponent<NodeUI_InMessageProps, {}> {
 		let nodeEnhanced = node.Extended({finalType: node.type, link: null});
 		return (
 			<NodeUI_Inner ref="innerBox" map={map} node={nodeEnhanced} nodeView={{}} path={path} width={null} widthOverride={null} panelPosition="below"
-				style={{filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}/>
+				style={{zIndex: 1, filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}/>
 		);
 	}
 }
@@ -103,9 +104,8 @@ export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 		if (!currentStep) return <div/>;
 		
 		let currentStepIndex = playingTimeline.steps.indexOf(currentStep._id);
-		let showMessageAction = currentStep.actions.FirstOrX(a=>a.type == TimelineStepActionType.ShowMessage);
 
-		let stepApplied = appliedStepIndex >= currentStepIndex || !currentStep.actions.Any(a=>a.type == TimelineStepActionType.ShowNode);
+		let stepApplied = appliedStepIndex >= currentStepIndex || (currentStep.nodesToShowStr || "").trim().length == 0;
 		
 		return (
 			<Column style={{position: "absolute", zIndex: 2, left: 10, top: 40, width: 500, padding: 10, background: "rgba(0,0,0,.7)", borderRadius: 5}}>
@@ -139,10 +139,9 @@ export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 							store.dispatch(new ACTMap_PlayingTimelineAppliedStepSet({mapID: map._id, step: currentStepIndex}));
 						}}/>}
 				</Row>
-				<Row>
-					{showMessageAction != null &&
-						<VReactMarkdown_Remarkable className="onlyTopMargin" style={{marginTop: 5, display: "flex", flexDirection: "column"}} addMarginsForDanglingNewLines={true}
-							source={showMessageAction.showMessage_message} replacements={replacements} extraInfo={{map, currentStepIndex, currentStep, stepApplied}}/>}
+				<Row sel>
+					<VReactMarkdown_Remarkable className="onlyTopMargin" style={{marginTop: 5, display: "flex", flexDirection: "column"}} addMarginsForDanglingNewLines={true}
+						source={currentStep.message || ""} replacements={replacements} extraInfo={{map, currentStepIndex, currentStep, stepApplied}}/>
 				</Row>
 				{/*<ScrollView style={{maxHeight: 300}}>
 				</ScrollView>*/}

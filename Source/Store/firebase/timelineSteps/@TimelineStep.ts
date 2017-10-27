@@ -8,52 +8,15 @@ export class TimelineStep {
 	_id: number;
 	timelineID: number;
 	title: string;
-	actions: TimelineStepAction[];
+	message: string;
+	nodesToShowStr: string;
 }
 AddSchema({
 	properties: {
 		timelineID: {type: "number"},
 		title: {type: "string"},
-		actions: {items: {$ref: "TimelineStepAction"}}
+		message: {type: "string"},
+		nodesToShowStr: {type: "string"},
 	},
 	required: ["timelineID"],
 }, "TimelineStep");
-
-export enum TimelineStepActionType {
-	ShowMessage = 10,
-	ShowComment = 20,
-	ShowNode = 30,
-}
-AddSchema({oneOf: GetValues_ForSchema(TimelineStepActionType)}, "TimelineStepActionType");
-
-export class TimelineStepAction {
-	constructor(initialData: Partial<TimelineStepAction>) {
-		this.Extend(initialData);
-	}
-
-	_id: number;
-	type = TimelineStepActionType.ShowComment;
-
-	// for ShowMessage
-	showMessage_message: string;
-
-	// for ShowComment
-	showComment_commentAuthor: string;
-	showComment_commentText: string;
-	
-	// for ShowNode
-	showNode_nodeID: number;
-}
-AddSchema({
-	properties: {
-		type: {$ref: "TimelineStepActionType"},
-
-		showMessage_message: {type: "string"},
-
-		showComment_commentAuthor: {type: "string"},
-		showComment_commentText: {type: "string"},
-
-		showNode_nodeID: {type: "number"},
-	},
-	required: ["type"],
-}, "TimelineStepAction");

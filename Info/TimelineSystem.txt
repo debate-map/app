@@ -12,6 +12,7 @@ The earth is spherical!
 [/comment]
 
 Let's break down this text to find the main idea, which one side supports and the other opposes. This will be called the "root claim".
+
 [node id="436"/]
 
 The above is a graphical representation of the "root claim", as understood by the creator of this map [(Stephen Wicklund)]. You can hover your mouse over it to see additional details, vote on its probability, etc.
@@ -27,6 +28,7 @@ The earth is spherical!
 [/comment]
 
 Let's convert this into a set of premises:
+
 [node id="436"/]
 
 [text textSize="13"](If you consider this conversion innacurate, you can suggest corrections [here](http://www.google.com).)[/text]

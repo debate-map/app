@@ -18,12 +18,13 @@ import {GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import Spinner from "../../../../Frame/ReactComponents/Spinner";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
-import {TimelineStepAction, TimelineStep, TimelineStepActionType} from "../../../../Store/firebase/timelineSteps/@TimelineStep";
+import {TimelineStep} from "../../../../Store/firebase/timelineSteps/@TimelineStep";
 import {UpdateTimelineStep} from "../../../../Server/Commands/UpdateTimelineStep";
 import {RemoveHelpers} from "../../../../Frame/Database/DatabaseHelpers";
 import {BoxController, ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
 import TextArea from "../../../../Frame/ReactComponents/TextArea";
 import {GetUpdates} from "../../../../Frame/General/Others";
+import {TextArea_AutoSize} from "../../../../Frame/ReactComponents/TextArea";
 
 type Props = {baseData: TimelineStep, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: TimelineStep, ui: TimelineStepDetailsUI)=>void};
 export default class TimelineStepDetailsUI extends BaseComponent<Props, {newData: TimelineStep}> {
@@ -49,6 +50,14 @@ export default class TimelineStepDetailsUI extends BaseComponent<Props, {newData
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Title: </Pre>
 					<TextInput value={newData.title} onChange={val=>Change(newData.title = val)}/>
+				</RowLR>
+				<Column mt={5} style={{width}}>
+					<Pre>Message: </Pre>
+					<TextArea_AutoSize value={newData.message} onChange={val=>Change(newData.message = val)}/>
+				</Column>
+				<RowLR mt={5} splitAt={splitAt} style={{width}}>
+					<Pre>Nodes to show: </Pre>
+					<TextInput value={newData.nodesToShowStr} onChange={val=>Change(newData.nodesToShowStr = val)}/>
 				</RowLR>
 			</Column>
 			</div>
