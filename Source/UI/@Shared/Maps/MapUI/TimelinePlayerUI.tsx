@@ -10,12 +10,13 @@ import {ACTMap_PlayingTimelineSet, ACTMap_PlayingTimelineStepSet, GetPlayingTime
 import { Map } from "Store/firebase/maps/@Map";
 import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
 import {TimelineStep, TimelineStepActionType} from "../../../../Store/firebase/timelineSteps/@TimelineStep";
-import {GetPlayingTimelineStepIndex} from "../../../../Store/main/maps/$map";
+import {GetPlayingTimelineStepIndex, ACTMap_PlayingTimelineAppliedStepSet, GetPlayingTimelineAppliedStepIndex} from "../../../../Store/main/maps/$map";
 import {ReplacementFunc} from "../../../../Frame/ReactComponents/VReactMarkdown";
 import {Segment} from "../../../../Frame/General/RegexHelpers";
 import NodeUI_Inner from "../MapNode/NodeUI_Inner";
 import {GetNode} from "Store/firebase/nodes";
 import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
+import {GetDataAsync, GetAsync} from "Frame/Database/DatabaseHelpers";
 
 function GetPropsFromPropsStr(propsStr: string) {
 	let propStrMatches = propsStr.Matches(/ (.+?)="(.+?)"/g);
@@ -51,11 +52,15 @@ let replacements = {
 	},
 	"\\[connectNodesButton(.*?)\\/\\]": (segment: Segment, index: number, extraInfo)=> {
 		let props = GetPropsFromPropsStr(segment.textParts[1]);
-		let ids = (props.ids || "").replace(/ /g, "").split(",").map(ToInt);
+		//let ids = (props.ids || "").replace(/ /g, "").split(",").map(ToInt);
+		let currentStep = extraInfo.currentStep as TimelineStep;
+		let ids = currentStep.actions.filter(a=>a.type == TimelineStepActionType.ShowNode).map(a=>a.showNode_nodeID);
 		return (
-			<Button text={props.text || "Place into debate map"} style={{alignSelf: "center", fontSize: 16, fontWeight: 500, color: "rgba(255,255,255,.7)"}}
+			<Button text={props.text || "Place into debate map"} enabled={!extraInfo.stepApplied}
+				style={{alignSelf: "center", fontSize: 16, fontWeight: 500, color: "rgba(255,255,255,.7)"}}
 				onClick={e=> {
-					// todo
+					//let currentStep = await GetAsync(()=>GetPlayingTimelineStepIndex(extraInfo.map._id));
+					store.dispatch(new ACTMap_PlayingTimelineAppliedStepSet({mapID: extraInfo.map._id, step: extraInfo.currentStepIndex}));
 				}}/>
 		);
 	},
@@ -85,20 +90,23 @@ class NodeUI_InMessage extends BaseComponent<NodeUI_InMessageProps, {}> {
 	}
 }
 
-type Props = {map: Map} & Partial<{playingTimeline: Timeline, currentStep: TimelineStep}>;
+type Props = {map: Map} & Partial<{playingTimeline: Timeline, currentStep: TimelineStep, appliedStepIndex: number}>;
 @Connect((state, {map}: Props)=> ({
 	playingTimeline: GetPlayingTimeline(map._id),
 	currentStep: GetPlayingTimelineStep(map._id),
+	appliedStepIndex: GetPlayingTimelineAppliedStepIndex(map._id),
 }))
 export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 	render() {
-		let {map, playingTimeline, currentStep} = this.props;
+		let {map, playingTimeline, currentStep, appliedStepIndex} = this.props;
 		if (!playingTimeline) return <div/>;
 		if (!currentStep) return <div/>;
 		
 		let currentStepIndex = playingTimeline.steps.indexOf(currentStep._id);
 		let showMessageAction = currentStep.actions.FirstOrX(a=>a.type == TimelineStepActionType.ShowMessage);
 
+		let stepApplied = appliedStepIndex >= currentStepIndex || !currentStep.actions.Any(a=>a.type == TimelineStepActionType.ShowNode);
+		
 		return (
 			<Column style={{position: "absolute", zIndex: 2, left: 10, top: 40, width: 500, padding: 10, background: "rgba(0,0,0,.7)", borderRadius: 5}}>
 				<Row style={{position: "relative"}}>
@@ -112,20 +120,29 @@ export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 					<Button text="<" enabled={currentStepIndex > 0} onClick={()=> {
 						store.dispatch(new ACTMap_PlayingTimelineStepSet({mapID: map._id, step: currentStepIndex - 1}))
 					}}/>
+					{stepApplied && currentStepIndex == 0 && appliedStepIndex >= 0 &&
+						<Button ml={5} text="Restart" onClick={()=> {
+							store.dispatch(new ACTMap_PlayingTimelineAppliedStepSet({mapID: map._id, step: -1}));
+						}}/>}
 					<Pre className="clickThrough" style={{position: "absolute", fontSize: 15, textAlign: "center", width: "100%"}}>
 						Step {currentStepIndex + 1}{currentStep.title ? ": " + currentStep.title : ""}
 					</Pre>
 					{/*<Button ml={5} text="="/>*/}
 					{/*<Button ml="auto" text="Connect" enabled={} onClick={()=> {
 					}}/>*/}
-					<Button ml="auto" text=">" enabled={playingTimeline.steps && currentStepIndex < playingTimeline.steps.length - 1} onClick={()=> {
-						store.dispatch(new ACTMap_PlayingTimelineStepSet({mapID: map._id, step: currentStepIndex + 1}))
-					}}/>
+					{stepApplied &&
+						<Button ml="auto" text=">" enabled={playingTimeline.steps && currentStepIndex < playingTimeline.steps.length - 1} onClick={()=> {
+							store.dispatch(new ACTMap_PlayingTimelineStepSet({mapID: map._id, step: currentStepIndex + 1}))
+						}}/>}
+					{!stepApplied &&
+						<Button ml="auto" text="Place" onClick={()=> {
+							store.dispatch(new ACTMap_PlayingTimelineAppliedStepSet({mapID: map._id, step: currentStepIndex}));
+						}}/>}
 				</Row>
 				<Row>
 					{showMessageAction != null &&
 						<VReactMarkdown_Remarkable className="onlyTopMargin" style={{marginTop: 5, display: "flex", flexDirection: "column"}} addMarginsForDanglingNewLines={true}
-							source={showMessageAction.showMessage_message} replacements={replacements} extraInfo={{map}}/>}
+							source={showMessageAction.showMessage_message} replacements={replacements} extraInfo={{map, currentStepIndex, currentStep, stepApplied}}/>}
 				</Row>
 				{/*<ScrollView style={{maxHeight: 300}}>
 				</ScrollView>*/}

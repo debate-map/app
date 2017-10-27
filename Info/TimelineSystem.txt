@@ -17,7 +17,7 @@ Let's break down this text to find the main idea, which one side supports and th
 The above is a graphical representation of the "root claim", as understood by the creator of this map [(Stephen Wicklund)]. You can hover your mouse over it to see additional details, vote on its probability, etc.
 
 Once ready, press the button below (or go to the next step) to connect this "root claim" onto the debate map's tree-structure.
-[connectNodesButton ids="436"/]
+[connectNodesButton/]
 ==========
 After the root claim was introduced, various people added comments arguing for or against it. We're now going to go through each of these comments, and break-down/simplify them, to see what exactly they were claiming, and how those claims connect with the ideas already presented.
 ==========
@@ -32,5 +32,5 @@ Let's convert this into a set of premises:
 [text textSize="13"](If you consider this conversion innacurate, you can suggest corrections [here](http://www.google.com).)[/text]
 
 Press the button below (or go to the next step) to connect this argument (set of premises) with the rest of the debate map.
-[connectNodesButton ids="436"/]
+[connectNodesButton/]
 ==========

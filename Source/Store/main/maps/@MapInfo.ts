@@ -9,4 +9,5 @@ export class MapInfo {
 	selectedTimeline: number;
 	playingTimeline: number;
 	playingTimeline_step: number;
+	playingTimeline_appliedStep: number;
 }

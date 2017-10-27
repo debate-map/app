@@ -20,6 +20,7 @@ export class ACTMap_List_SelectedNode_OpenPanelSet extends Action<{mapID: number
 export class ACTMap_SelectedTimelineSet extends Action<{mapID: number, selectedTimeline: number}> {}
 export class ACTMap_PlayingTimelineSet extends Action<{mapID: number, timelineID: number}> {}
 export class ACTMap_PlayingTimelineStepSet extends Action<{mapID: number, step: number}> {}
+export class ACTMap_PlayingTimelineAppliedStepSet extends Action<{mapID: number, step: number}> {}
 
 /*export function MapInfoReducer(state = null, action: Action<any>, mapID: number): MapInfo {
 	if (action.Is(ACTSelectedNode_InListSet)) return {...state, list_selectedNodeID: action.payload.nodeID};
@@ -60,6 +61,10 @@ export const MapInfoReducer = CombineReducers({
 		if (action.Is(ACTMap_PlayingTimelineStepSet)) return action.payload.step;
 		return state;
 	},
+	playingTimeline_appliedStep: (state = null, action)=> {
+		if (action.Is(ACTMap_PlayingTimelineAppliedStepSet)) return action.payload.step;
+		return state;
+	},
 });
 
 export function GetSelectedNodeID_InList(mapID: number) {
@@ -89,4 +94,8 @@ export function GetPlayingTimelineStep(mapID: number) {
 	let stepIndex = GetPlayingTimelineStepIndex(mapID) || 0;
 	let stepID = playingTimeline.steps[stepIndex];
 	return GetTimelineStep(stepID);
+}
+export function GetPlayingTimelineAppliedStepIndex(mapID: number): number {
+	if (mapID == null) return null;
+	return State("main", "maps", mapID, "playingTimeline_appliedStep");
 }
