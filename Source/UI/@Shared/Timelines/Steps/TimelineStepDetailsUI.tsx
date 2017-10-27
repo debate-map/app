@@ -84,8 +84,8 @@ class NodeRevealUI extends BaseComponent<{step: TimelineStep, reveal: NodeReveal
 		let {step, reveal, Change} = this.props;
 		return (
 			<Row>
-				<Pre>ID: </Pre>
-				<Spinner min={1} value={reveal.nodeID} onChange={val=>Change(reveal.nodeID = val)}/>
+				<Pre>Path: </Pre>
+				<TextInput value={reveal.path} onChange={val=>Change(reveal.path = val)}/>
 				<Pre ml={5}>Reveal depth: </Pre>
 				<Spinner min={0} max={10} value={reveal.revealDepth} onChange={val=>Change(reveal.revealDepth = val)}/>
 				<Button ml={5} text="X" onClick={()=> {

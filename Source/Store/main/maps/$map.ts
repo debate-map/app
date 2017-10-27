@@ -97,6 +97,12 @@ export function GetPlayingTimelineStep(mapID: number) {
 	let stepID = playingTimeline.steps[stepIndex];
 	return GetTimelineStep(stepID);
 }
+export function GetPlayingTimelineCurrentStepRevealNodes(mapID: number): string[] {
+	let playingTimeline_currentStep = GetPlayingTimelineStep(mapID);
+	if (playingTimeline_currentStep == null) return emptyArray;
+	return GetNodesRevealedInSteps([playingTimeline_currentStep]);
+}
+
 export function GetPlayingTimelineAppliedStepIndex(mapID: number): number {
 	if (mapID == null) return null;
 	return State("main", "maps", mapID, "playingTimeline_appliedStep");
@@ -114,12 +120,12 @@ export function GetPlayingTimelineAppliedSteps(mapID: number, excludeAfterCurren
 	if (steps.Any(a=>a == null)) return emptyArray;
 	return steps;
 }
-export function GetPlayingTimelineAppliedStepRevealNodes(mapID: number, excludeAfterCurrentStep = false): number[] {
+export function GetPlayingTimelineAppliedStepRevealNodes(mapID: number, excludeAfterCurrentStep = false): string[] {
 	let map = GetMap(mapID);
 	if (!map) return emptyArray;
 
 	let appliedSteps = GetPlayingTimelineAppliedSteps(mapID, excludeAfterCurrentStep);
-	return [map.rootNode].concat(GetNodesRevealedInSteps(appliedSteps));
+	return [map.rootNode+""].concat(GetNodesRevealedInSteps(appliedSteps));
 }
 
 export function GetPlayingTimelineSteps(mapID: number): TimelineStep[] {
@@ -129,23 +135,23 @@ export function GetPlayingTimelineSteps(mapID: number): TimelineStep[] {
 	if (steps.Any(a=>a == null)) return emptyArray;
 	return steps;
 }
-export function GetNodesRevealedInSteps(steps: TimelineStep[]) {
+export function GetNodesRevealedInSteps(steps: TimelineStep[]): string[] {
 	let result = {};
 	for (let step of steps) {
 		for (let reveal of step.nodeReveals || []) {
-			result[reveal.nodeID] = true;
-			let node = GetNode(reveal.nodeID);
+			result[reveal.path] = true;
+			let node = GetNode(reveal.path.split("/").Last().ToInt());
 			if (node == null) continue;
-			let currentChildren = GetNodeChildren(node);
-			if (currentChildren.Any(a=>a == null)) return emptyArray;
+			let currentChildren = GetNodeChildren(node).map(child=>({node: child, path: child && `${reveal.path}/${child._id}`}));
+			if (currentChildren.Any(a=>a.node == null)) return emptyArray;
 
 			for (var i = 0; i < reveal.revealDepth; i++) {
 				let nextChildren = [];
 				for (let child of currentChildren) {
-					result[child._id] = true;
+					result[child.path] = true;
 					// if there's another loop/depth after this one
 					if (i < reveal.revealDepth - 1) {
-						let childChildren = GetNodeChildren(child);
+						let childChildren = GetNodeChildren(child.node).map(child2=>({node: child2, path: child2 && `${child.path}/${child2._id}`}));
 						if (childChildren.Any(a=>a == null)) return emptyArray;
 						nextChildren.AddRange(childChildren);
 					}
@@ -154,12 +160,12 @@ export function GetNodesRevealedInSteps(steps: TimelineStep[]) {
 			}
 		}
 	}
-	return result.VKeys().map(ToInt);
+	return result.VKeys();
 }
-export function GetPlayingTimelineRevealNodes(mapID: number, excludeAfterCurrentStep = false): number[] {
+export function GetPlayingTimelineRevealNodes(mapID: number, excludeAfterCurrentStep = false): string[] {
 	let map = GetMap(mapID);
 	if (!map) return emptyArray;
 
 	let steps = GetPlayingTimelineSteps(mapID);
-	return [map.rootNode].concat(GetNodesRevealedInSteps(steps));
+	return [map.rootNode+""].concat(GetNodesRevealedInSteps(steps));
 }

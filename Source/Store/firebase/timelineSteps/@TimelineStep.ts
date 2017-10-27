@@ -22,13 +22,13 @@ AddSchema({
 }, "TimelineStep");
 
 export class NodeReveal {
-	nodeID: number;
+	path: string;
 	revealDepth: number;
 }
 AddSchema({
 	properties: {
-		nodeID: {type: "number"},
+		path: {type: "string"},
 		revealDepth: {type: "number"},
 	},
-	required: ["nodeID", "revealDepth"],
+	required: ["path", "revealDepth"],
 }, "NodeReveal");

@@ -50,7 +50,7 @@ import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import { emptyArray, emptyArray_forLoading } from "../../../../Frame/Store/ReducerUtils";
 import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";
 import { GetPlayingTimelineAppliedStepRevealNodes } from "Store/main/maps/$map";
-import {GetPlayingTimeline, GetPlayingTimelineRevealNodes, GetPlayingTimelineStepIndex} from "../../../../Store/main/maps/$map";
+import {GetPlayingTimeline, GetPlayingTimelineRevealNodes, GetPlayingTimelineStepIndex, GetPlayingTimelineCurrentStepRevealNodes} from "../../../../Store/main/maps/$map";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
 
 type Props = {map: Map, node: MapNodeEnhanced, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
@@ -63,8 +63,9 @@ type Props = {map: Map, node: MapNodeEnhanced, path?: string, asSubnode?: boolea
 		userViewedNodes: ViewedNodeSet,
 		playingTimeline: Timeline,
 		playingTimeline_currentStepIndex: number,
-		playingTimelineShowableNodes: number[],
-		playingTimelineVisibleNodes: number[],
+		playingTimelineShowableNodes: string[],
+		playingTimelineVisibleNodes: string[],
+		playingTimeline_currentStepRevealNodes: string[],
 	}>;
 type State = {
 	childrenWidthOverride: number, childrenCenterY: number,
@@ -116,6 +117,7 @@ type State = {
 		playingTimeline_currentStepIndex: GetPlayingTimelineStepIndex(map._id),
 		playingTimelineShowableNodes: GetPlayingTimelineRevealNodes(map._id),
 		playingTimelineVisibleNodes: GetPlayingTimelineAppliedStepRevealNodes(map._id, true),
+		playingTimeline_currentStepRevealNodes: GetPlayingTimelineCurrentStepRevealNodes(map._id),
 	};
 })
 export default class NodeUI extends BaseComponent<Props, State> {
@@ -131,7 +133,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	render() {
 		let {map, node, path, asSubnode, widthOverride, style,
 			initialChildLimit, form, children, nodeView, nodeChildren, nodeChildren_sortValues, subnodes,
-			playingTimeline, playingTimeline_currentStepIndex, playingTimelineShowableNodes, playingTimelineVisibleNodes} = this.props;
+			playingTimeline, playingTimeline_currentStepIndex, playingTimelineShowableNodes, playingTimelineVisibleNodes, playingTimeline_currentStepRevealNodes} = this.props;
 		let expanded = nodeView && nodeView.expanded;
 		let {childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
 		if (ShouldLog(a=>a.nodeRenders)) {
@@ -154,7 +156,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		type ChildPack = {origIndex: number, node: MapNodeEnhanced};
 		let childPacks: ChildPack[] = nodeChildren.map((child, index)=>({origIndex: index, node: child}));
 		if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
-			childPacks = childPacks.filter(pack=>playingTimelineVisibleNodes.Contains(pack.node._id));
+			childPacks = childPacks.filter(pack=>playingTimelineVisibleNodes.Contains(path + "/" + pack.node._id));
 		}
 		let upChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalType == MapNodeType.SupportingArgument) : [];
 		let downChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalType == MapNodeType.OpposingArgument) : [];
@@ -220,7 +222,10 @@ export default class NodeUI extends BaseComponent<Props, State> {
 							<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 								<span style={{margin: "auto 0"}}>{AccessLevel[node.accessLevel][0].toUpperCase()}</span>
 							</div>}
-						<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}/>
+						<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}
+							style={E(
+								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
+							)}/>
 						{/*<NodeUI_Inner ref="innerBox" {...{map, node: nodeWithFinalType, nodeView, path, width}} widthOverride={widthOverride}/>*/}
 						{/*showBelowMessage &&
 							<Div ct style={{

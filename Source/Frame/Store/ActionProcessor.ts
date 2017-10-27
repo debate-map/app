@@ -21,6 +21,8 @@ import {LOCATION_CHANGED} from "redux-little-router";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import {Map} from "../../Store/firebase/maps/@Map";
 import {ACTPersonalMapSelect, ACTPersonalMapSelect_WithData} from "../../Store/main/personal";
+import {ACTMap_PlayingTimelineStepSet, ACTMap_PlayingTimelineAppliedStepSet, GetPlayingTimelineCurrentStepRevealNodes} from "../../Store/main/maps/$map";
+import {GetAsync} from "Frame/Database/DatabaseHelpers";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -237,6 +239,15 @@ export async function PostDispatchAction(action: Action<any>) {
 		let simpleURL = GetSimpleURLForCurrentMapView();
 		RecordPageView(simpleURL);
 	}*/
+
+	if (action.Is(ACTMap_PlayingTimelineStepSet) || action.Is(ACTMap_PlayingTimelineAppliedStepSet)) {
+		let newlyRevealedNodes = await GetAsync(()=>GetPlayingTimelineCurrentStepRevealNodes(action.payload.mapID));
+		ExpandToAndFocusOnNodes(newlyRevealedNodes);
+	}
+}
+
+function ExpandToAndFocusOnNodes(nodes: string[]) {
+	// todo
 }
 
 function PostInit() {

@@ -196,7 +196,7 @@ export class BaseComponent<P, S> extends Component<P & BaseProps, S> {
 	}
 
 	forceUpdate(_: ()=>"Do not call this. Call Update() instead.") {
-		throw new Error("Do not call this. Call Update() instead.");
+		//throw new Error("Do not call this. Call Update() instead.");
 	}
 	Update(postUpdate?) {
 		//if (!this.Mounted) return;
