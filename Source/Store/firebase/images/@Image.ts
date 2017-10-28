@@ -31,7 +31,7 @@ export class Image {
 	creator: string;
 	createdAt: number;
 }
-export const Image_nameFormat = `^[a-zA-Z0-9 ,'"%\\-()]+$`;
+export const Image_nameFormat = `^[a-zA-Z0-9 ,'"%\\-()\\/]+$`;
 export const Image_urlFormat = `^https?://[^\\s/$.?#]+\\.[^\\s]+\.(jpg|jpeg|gif|png)$`;
 AddSchema({
 	properties: {

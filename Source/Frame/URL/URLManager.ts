@@ -23,6 +23,7 @@ import {Map} from "../../Store/firebase/maps/@Map";
 import {ACTPersonalMapSelect} from "../../Store/main/personal";
 import { ACTMap_PlayingTimelineSet, ACTMap_PlayingTimelineStepSet } from "Store/main/maps/$map";
 import {ACTMap_PlayingTimelineAppliedStepSet} from "../../Store/main/maps/$map";
+import {ACTSubforumSelect, ACTThreadSelect, GetSelectedSubforumID, GetSelectedThreadID} from "../../Store/main/forum";
 
 export function GetCrawlerURLStrForMap(mapID: number) {
 	let map = GetMap(mapID);
@@ -179,6 +180,18 @@ export function GetSyncLoadActionsForURL(url: URL, directURLChange: boolean) {
 		result.push(new ACTSetSubpage({page, subpage}).VSet({fromURL: true}));
 	}
 
+	if (url.pathNodes[0] == "forum") {
+		let subforumStr = url.pathNodes[1];
+		let subforumIDMatch = subforumStr && subforumStr.match(/([0-9]+)$/);
+		let subforumID = subforumIDMatch ? subforumIDMatch[1].ToInt() : null;
+		result.push(new ACTSubforumSelect({id: subforumID}));
+
+		let threadStr = url.pathNodes[2];
+		let threadIDMatch = threadStr && threadStr.match(/([0-9]+)$/);
+		let threadID = threadIDMatch ? threadIDMatch[1].ToInt() : null;
+		result.push(new ACTThreadSelect({id: threadID}));
+	}
+
 	if (page == "content") {
 		if (subpage == "terms" && url.pathNodes[2]) {
 			result.push(new ACTTermSelect({id: url.pathNodes[2].ToInt()}).VSet({fromURL: true}));
@@ -306,6 +319,14 @@ export function GetNewURL(includeMapViewStr = true) {
 	var subpage = (State("main", page, "subpage") as string) || rootPageDefaultChilds[page];
 	if (page in pagesWithSimpleSubpages) {
 		newURL.pathNodes.push(subpage);
+	}
+
+	if (page == "forum") {
+		let subforumID = GetSelectedSubforumID();
+		if (subforumID) newURL.pathNodes.push(subforumID+"");
+
+		let threadID = GetSelectedThreadID();
+		if (threadID) newURL.pathNodes.push(threadID+"");
 	}
 
 	if (page == "content") {

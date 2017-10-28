@@ -8,7 +8,7 @@ export class Subforum {
 	section: number;
 }
 
-export const Subforum_nameFormat = `^[a-zA-Z0-9 ,\\-()]+$`;
+export const Subforum_nameFormat = `^[a-zA-Z0-9 ,\\-()\\/]+$`;
 AddSchema({
 	properties: {
 		name: {type: "string", pattern: Subforum_nameFormat},

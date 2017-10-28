@@ -182,7 +182,7 @@ export class URL {
 		if (!rootPages.Contains(result.pathNodes[0])) {
 			result.pathNodes.Insert(0, "home");
 		}
-		if (result.pathNodes[1] == null) {
+		if (result.pathNodes[1] == null && rootPageDefaultChilds[result.pathNodes[0]]) {
 			result.pathNodes.Insert(1, rootPageDefaultChilds[result.pathNodes[0]]);
 		}
 		return result;

@@ -31,7 +31,7 @@ export class Term {
 }
 //export const termNameFormat = "^[^.#$\\[\\]]+$";
 export const Term_nameFormat = `^[a-zA-Z0-9 ,'"%-]+$`;
-export const Term_disambiguationFormat = `^[a-zA-Z0-9 ,'"%-]+$`;
+export const Term_disambiguationFormat = `^[a-zA-Z0-9 ,'"%-\\/]+$`;
 //export const Term_shortDescriptionFormat = "^[a-zA-Z ()[],;.!?-+*/]+$";
 export const Term_shortDescriptionFormat = `^.+$`;
 AddSchema({

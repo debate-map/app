@@ -274,8 +274,6 @@ async function ExpandToAndFocusOnNodes(mapID: number, paths: string[]) {
 	let nodeBoxPositionAverage = nodeBoxPositionSum.Times(1 / paths.length);
 	//mapUI.ScrollToPosition(new Vector2i((nodeBoxPositionAverage.x - 100).KeepAtLeast(0), nodeBoxPositionAverage.y));
 	mapUI.ScrollToPosition(nodeBoxPositionAverage.Plus(-250, 0));
-	
-	Log(`Node-box position avg: ${nodeBoxPositionAverage}`);
 }
 
 function PostInit() {

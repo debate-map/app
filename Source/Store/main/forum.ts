@@ -28,7 +28,7 @@ export const ForumReducer = CombineReducers({
 	},
 });
 
-export function GetSelectedSubforumID() {
+export function GetSelectedSubforumID(): number {
 	return State(a=>a.main.forum.selectedSubforumID);
 }
 export function GetSelectedSubforum() {
@@ -36,7 +36,7 @@ export function GetSelectedSubforum() {
 	return GetSubforum(selectedID);
 }
 
-export function GetSelectedThreadID() {
+export function GetSelectedThreadID(): number {
 	return State(a=>a.main.forum.selectedThreadID);
 }
 export function GetSelectedThread() {

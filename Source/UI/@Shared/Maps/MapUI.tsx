@@ -281,7 +281,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 			newScroll.y = oldScroll.y;
 		}
 		this.scrollView.SetScroll(newScroll);
-		Log("Scrolling to position: " + newScroll);
+		//Log("Scrolling to position: " + newScroll);
 
 		/*if (nextPathTry == nodePath)
 			this.hasLoadedScroll = true;*/
