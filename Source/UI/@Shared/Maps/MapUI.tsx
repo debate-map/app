@@ -199,51 +199,54 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	}
 
 	async ComponentDidMount() {
+		NodeUI.renderCount = 0;
+		/*NodeUI.lastRenderTime = Date.now();
+		let lastRenderCount = 0;*/
+		
 		for (var i = 0; i < 30 && this.props.map == null; i++) await SleepAsync(100);
 		let {map} = this.props;
 		if (map == null) return;
 
-		let playingTimeline = await GetAsync(()=>GetPlayingTimeline(map._id));
-		if (!playingTimeline) { // only load-scroll if not playing timeline; timeline gets priority, to focus on its latest-revealed nodes
-			NodeUI.renderCount = 0;
-			/*NodeUI.lastRenderTime = Date.now();
-			let lastRenderCount = 0;
-			let timer = new Timer(100, ()=> {
-				if (!this.mounted) return timer.Stop();
+		/*let playingTimeline = await GetAsync(()=>GetPlayingTimeline(map._id));
+		if (!playingTimeline) {*/ // only load-scroll if not playing timeline; timeline gets priority, to focus on its latest-revealed nodes
+			
+		/*
+		let timer = new Timer(100, ()=> {
+			if (!this.mounted) return timer.Stop();
 
-				// if more nodes have been rendered (ie, new nodes have come in)
-				if (NodeUI.renderCount > lastRenderCount) {
-					this.LoadScroll();
-				}
-				lastRenderCount = NodeUI.renderCount;
+			// if more nodes have been rendered (ie, new nodes have come in)
+			if (NodeUI.renderCount > lastRenderCount) {
+				this.LoadScroll();
+			}
+			lastRenderCount = NodeUI.renderCount;
 
-				let timeSinceLastNodeUIRender = Date.now() - NodeUI.lastRenderTime;
-				if (NodeUI.renderCount > 0 && timeSinceLastNodeUIRender >= 1500) {
-					this.OnLoadComplete();
-					timer.Stop();
-				}
-			}).Start();*/
+			let timeSinceLastNodeUIRender = Date.now() - NodeUI.lastRenderTime;
+			if (NodeUI.renderCount > 0 && timeSinceLastNodeUIRender >= 1500) {
+				this.OnLoadComplete();
+				timer.Stop();
+			}
+		}).Start();*/
 
-			let focusNodePath = GetFocusedNodePath(map._id);
+		let focusNodePath = GetFocusedNodePath(map._id);
 
-			let lastFoundPath = "";
-			let timer = new Timer(100, ()=> {
-				if (!this.mounted) return timer.Stop();
+		let lastFoundPath = "";
+		let timer = new Timer(100, ()=> {
+			if (!this.mounted) return timer.Stop();
 
-				// if more nodes have been rendered, along the path to the focus-node
-				let foundBox = this.FindNodeBox(focusNodePath, true);
-				let foundPath = foundBox ? foundBox.props.path : "";
-				if (foundPath.length > lastFoundPath.length) {
-					this.LoadScroll();
-				}
-				lastFoundPath = foundPath;
+			// if more nodes have been rendered, along the path to the focus-node
+			let foundBox = this.FindNodeBox(focusNodePath, true);
+			let foundPath = foundBox ? foundBox.props.path : "";
+			if (foundPath.length > lastFoundPath.length) {
+				this.LoadScroll();
+			}
+			lastFoundPath = foundPath;
 
-				if (foundPath == focusNodePath) {
-					this.OnLoadComplete();
-					timer.Stop();
-				}
-			}).Start();
-		}
+			if (foundPath == focusNodePath && this.scrollView) {
+				this.OnLoadComplete();
+				timer.Stop();
+			}
+		}).Start();
+		//}
 
 		// start scroll at root // (this doesn't actually look as good)
 		/*if (this.scrollView)

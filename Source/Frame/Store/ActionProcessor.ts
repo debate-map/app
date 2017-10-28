@@ -262,7 +262,7 @@ async function ExpandToAndFocusOnNodes(mapID: number, paths: string[]) {
 	if (mapUIEl.length == 0) return;
 	let mapUI = FindReact(mapUIEl[0]) as MapUI;
 	
-	for (var i = 0; i < 10 && paths.map(path=>mapUI.FindNodeBox(path)).Any(a=>a == null); i++) { await SleepAsync(100); }
+	for (var i = 0; i < 30 && paths.map(path=>mapUI.FindNodeBox(path)).Any(a=>a == null); i++) { await SleepAsync(100); }
 	let nodeBoxes = paths.map(path=>mapUI.FindNodeBox(path)).filter(a=>a != null);
 	if (nodeBoxes.length == 0) return;
 

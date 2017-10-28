@@ -16,6 +16,7 @@ import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "./debates";
 import {CachedTransform} from "../../Frame/V/VCache";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import {CreateDemoMapView} from "../../UI/Home/DemoMap";
+import {ACTPersonalMapSelect_WithData} from "./personal";
 
 export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 	/*if (action.Is(ACTOpenMapSet))
@@ -44,7 +45,7 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 			}
 		}
 	}
-	if (action.Is(ACTDebateMapSelect_WithData)) {
+	if (action.Is(ACTPersonalMapSelect_WithData) || action.Is(ACTDebateMapSelect_WithData)) {
 		if (newState[action.payload.id] == null) {
 			//newState[action.payload.id] = new MapView();
 			newState[action.payload.id] = {
