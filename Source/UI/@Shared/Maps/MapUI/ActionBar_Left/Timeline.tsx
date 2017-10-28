@@ -88,7 +88,7 @@ export class TimelineDropDown extends BaseComponent<TimelineDropDownProps, {}> {
 										if (userID == null) return ShowSignInPopup();
 										ShowAddTimelineDialog(userID, map._id);
 									}}/>
-									<Button ml="auto" text="Play" title="Start playing this timeline" style={{flexShrink: 0}} onClick={()=> {
+									<Button ml="auto" text="Play" title="Start playing this timeline" enabled={selectedTimeline != null} style={{flexShrink: 0}} onClick={()=> {
 										store.dispatch(new ACTMap_PlayingTimelineSet({mapID: map._id, timelineID: selectedTimeline._id}));
 										store.dispatch(new ACTMap_PlayingTimelineStepSet({mapID: map._id, step: 0}));
 										store.dispatch(new ACTMap_PlayingTimelineAppliedStepSet({mapID: map._id, step: null}));

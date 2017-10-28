@@ -57,16 +57,16 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 			}}>
 				<div style={{display: "flex"}}>
 					<span style={{position: "absolute", left: 0}}>
-						<NavBarPanelButton text="Stream" panel="stream" corner="top-left"/>
+						{/*<NavBarPanelButton text="Stream" panel="stream" corner="top-left"/>
 						<NavBarPanelButton text="Chat" panel="chat" corner="top-left"/>
 						<NavBarPanelButton text={
 							<Div className="cursorSet" style={{position: "relative", height: 45}}>
 								<Div style={{color: "rgba(255,255,255,1)", justifyContent: "center"}}>Rep: n/a</Div>
 								{/*<Div style={{color: "rgba(255,255,255,1)", justifyContent: "center"}}>Rep: 100</Div>
 								<Div style={{position: "absolute", bottom: 3, width: "100%", textAlign: "center",
-									fontSize: 11, lineHeight: "11px", color: "rgba(0,255,0,.7)"}}>+100</Div>*/}
+									fontSize: 11, lineHeight: "11px", color: "rgba(0,255,0,.7)"}}>+100</Div>*#/}
 							</Div> as any
-						} panel="reputation" corner="top-left"/>
+						} panel="reputation" corner="top-left"/>*/}
 					</span>
 					<div style={{position: "absolute", zIndex: 11, left: 0, top: 45,
 							boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 -150px -150px 0)", display: "table"}}>
@@ -91,8 +91,8 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 					</span>
 
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
-						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
-						<NavBarPanelButton text="Guide" panel="guide" corner="top-right"/>
+						{/*<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
+						<NavBarPanelButton text="Guide" panel="guide" corner="top-right"/>*/}
 						<NavBarPanelButton text={auth ? auth.displayName.match(/(.+?)( |$)/)[1] : `Sign in`} panel="profile" corner="top-right"/>
 					</span>
 					<div style={{position: "absolute", zIndex: 11, right: 0, top: 45,

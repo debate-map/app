@@ -31,7 +31,7 @@ Let's convert this into a set of premises:
 
 [node id="436"/]
 
-[text textSize="13"](If you consider this conversion innacurate, you can suggest corrections [here](http://www.google.com).)[/text]
+[text textSize="13"](If you consider this conversion innacurate, you can suggest corrections [here](https://debatemap.live/forum/12).)[/text]
 
 Press the button below (or go to the next step) to connect this argument (set of premises) with the rest of the debate map.
 [connectNodesButton/]
