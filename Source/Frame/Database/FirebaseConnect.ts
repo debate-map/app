@@ -92,9 +92,6 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		//if (firebase._ && ShallowChanged(requestedPaths, oldRequestedPaths)) {
 		if (ShallowChanged(requestedPaths, oldRequestedPaths)) {
 			setImmediate(()=> {
-				/*for (let path of requestedPaths)
-					Log("Requesting Stage2: " + path);*/
-
 				s._firebaseEvents = getEventsFromInput(requestedPaths);
 				let removedPaths = oldRequestedPaths.Except(...requestedPaths);
 				// todo: find correct way of unwatching events; the way below seems to sometimes unwatch while still needed watched
@@ -103,58 +100,9 @@ export function Connect<T, P>(funcOrFuncGetter) {
 				let addedPaths = requestedPaths.Except(...oldRequestedPaths);
 				watchEvents(firebase, DispatchDBAction, getEventsFromInput(addedPaths));
 				// for debugging, you can check currently-watched-paths using: store.firebase._.watchers
-
-				/*function dispatch(action) {
-					let timeSinceLastDBChangeDispatch = Date.now() - (s.lastDBChangeDispatchTime || 0);
-					/*let innerComp = GetInnerComp(s);
-					if (timeSinceLastDBChangeDispatch < 300 && innerComp && (innerComp.constructor as any).bufferChanges) {*#/
-					if (timeSinceLastDBChangeDispatch < 300 && s.constructor.WrappedComponent.bufferChanges) {
-						// if timer not started, start it now
-						if (s.bufferedActions == null) {
-							setTimeout(()=> {
-								// now that wait is over, apply any buffered event-triggers
-								let combinedAction = {type: "ApplyActionSet", actions: s.bufferedActions} as any;
-								store.dispatch(combinedAction);
-
-								s.lastDBChangeDispatchTime = Date.now();
-								s.bufferedActions = null;
-							}, (s.timeSinceLastDBChangeDispatch + 300) - Date.now());
-						}
-
-						// add action to buffer, to be run when timer ends
-						s.bufferedActions = (s.bufferedActions || []).concat(action);
-					} else {
-						// dispatch action right away
-						store.dispatch(action);
-						s.lastDBChangeDispatchTime = Date.now();
-					}
-			}*/
 			});
 			s.lastRequestedPaths = requestedPaths;
-			//Log("Requesting:" + ToJSON(requestedPaths) + "\n2:" + ToJSON(s._firebaseEvents)); 
 		}
-		/*if (ShallowChanged(requestedPaths, oldRequestedPaths)) {
-			if (s.waitTimer) s.waitTimer.Stop();
-			s.waitTimer = new Timer(100, ()=> {
-				Log("Checking");
-				if (firebase._ == null) return;
-				Log("Timer succeeded.");
-				s._firebaseEvents = getEventsFromInput(requestedPaths);
-				let removedPaths = oldRequestedPaths.Except(...requestedPaths);
-				unWatchEvents(firebase, store.dispatch, getEventsFromInput(removedPaths));
-				let addedPaths = requestedPaths.Except(...oldRequestedPaths);
-				Log("Added paths:" + addedPaths.join(","));
-				watchEvents(firebase, store.dispatch, getEventsFromInput(addedPaths));
-				s.waitTimer.Stop();
-				s.waitTimer = null;
-			}).Start();
-			s.lastRequestedPaths = requestedPaths;
-		}*/
-
-		/*let oldAccessedStorePaths: string[] = s.lastAccessedStorePaths || [];
-		let accessedStorePaths: string[] = GetAccessedPaths();
-		if (ShallowChanged(accessedStorePaths, oldAccessedStorePaths)) {
-		}*/
 
 		let accessedStorePaths: string[] = GetAccessedPaths();
 		//ClearAccessedPaths();

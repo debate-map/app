@@ -246,6 +246,7 @@ export async function PostDispatchAction(action: Action<any>) {
 
 	if (action.Is(ACTMap_PlayingTimelineStepSet) || action.Is(ACTMap_PlayingTimelineAppliedStepSet)) {
 		let newlyRevealedNodes = await GetAsync(()=>GetPlayingTimelineCurrentStepRevealNodes(action.payload.mapID));
+		//stats=>Log("Requested paths:\n==========\n" + stats.requestedPaths.VKeys().join("\n") + "\n\n"));
 		ExpandToAndFocusOnNodes(action.payload.mapID, newlyRevealedNodes);
 	}
 }

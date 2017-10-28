@@ -246,7 +246,7 @@ export async function GetDataAsync(...args) {
  * It re-calls the db-getter func (after the last generation's requested-path-data was all received), and finds that no new paths are requested.
  */
 g.Extend({GetAsync});
-export async function GetAsync<T>(dbGetterFunc: ()=>T): Promise<T> {
+export async function GetAsync<T>(dbGetterFunc: ()=>T, statsLogger?: ({requestedPaths: string})=>void): Promise<T> {
 	Assert(!g.inConnectFunc, "Cannot run GetAsync() from within a Connect() function.");
 	//Assert(!g.inGetAsyncFunc, "Cannot run GetAsync() from within a GetAsync() function.");
 	let firebase = store.firebase;
@@ -256,7 +256,7 @@ export async function GetAsync<T>(dbGetterFunc: ()=>T): Promise<T> {
 	let requestedPathsSoFar = {};
 	let requestedPathsSoFar_last;
 	do {
-		requestedPathsSoFar_last = requestedPathsSoFar;
+		requestedPathsSoFar_last = Clone(requestedPathsSoFar);
 
 		ClearRequestedPaths();
 		result = dbGetterFunc();
@@ -284,6 +284,10 @@ export async function GetAsync<T>(dbGetterFunc: ()=>T): Promise<T> {
 		listener(); // unsubscribe
 	};
 	store.subscribe(listener);*/
+
+	if (statsLogger) {
+		statsLogger({requestedPaths: requestedPathsSoFar});
+	}
 
 	return result;
 }
