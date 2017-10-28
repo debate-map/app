@@ -175,7 +175,9 @@ export function MainReducer(state, action) {
 
 			let newState = {...state};
 			for (let key in newState) {
-				newState[key] = MapInfoReducer(newState[key], action, parseInt(key));
+				//action.VSet("parentKey", parseInt(key), {prop: {}});
+				if (action.payload && action.payload.mapID && key != action.payload.mapID) continue;
+				newState[key] = MapInfoReducer(newState[key], action); //, parseInt(key));
 			}
 			return ShallowChanged(newState, state) ? newState : state;
 		},
