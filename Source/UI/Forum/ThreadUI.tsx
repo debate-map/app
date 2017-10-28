@@ -32,6 +32,7 @@ import UpdateThreadDetails from "../../Server/Commands/UpdateThreadDetails";
 import DeleteThread from "Server/Commands/DeleteThread";
 import PostEditorUI from "./Thread/PostEditorUI";
 import AddPost from "../../Server/Commands/AddPost";
+import Editor from "react-md-editor";
 
 type Props = {thread: Thread, subNavBarWidth?: number} & Partial<{permissions: PermissionGroupSet, posts: Post[]}>;
 @Connect((state, {thread}: Props)=> ({

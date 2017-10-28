@@ -177,6 +177,12 @@
 	.CodeMirror {
 		color: rgba(255,255,255,.7);
 	}
+	.CodeMirror-wrap > .CodeMirror-scroll {
+		/*overflow: initial !important;
+		overflow-y: scroll !important;*/
+		// fix for odd display glitch, where first post's editor would show horizontal-scrollbar (even though "marginBottom: -30" is supposed to already fix it) 
+		will-change: transform;
+	}
 
 	.background {
 		background-image: url(/Images/Backgrounds/Ocean_x1920.jpg);
