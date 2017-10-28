@@ -7,7 +7,7 @@ import {styles} from "../../Frame/UI/GlobalStyles";
 import VReactMarkdown_Remarkable from "../../Frame/ReactComponents/VReactMarkdown_Remarkable";
 
 let pageText = `
-### Social
+### Social media
 
 * Blog: [https://medium.com/debate-map](https://medium.com/debate-map)
 * Facebook: [https://www.facebook.com/debatemap](https://www.facebook.com/debatemap)
