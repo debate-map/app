@@ -25,16 +25,18 @@ import TextInput from "../../../../../Frame/ReactComponents/TextInput";
 import {URL, GetCurrentURL} from "../../../../../Frame/General/URLs";
 import {GetNewURL} from "Frame/URL/URLManager";
 import {RowLR} from "../../../../../Frame/ReactComponents/Row";
+import { CopyText } from "Frame/General/Globals_Free";
+import {WaitXThenRun} from "../../../../../Frame/General/Timers";
 
 type ShareDropDownProps = {map: Map} & Partial<{newURL: URL, timelines: Timeline[]}>;
 @Connect((state, {map}: ShareDropDownProps)=> ({
 	newURL: GetNewURL(),
 	timelines: GetMapTimelines(map),
 }))
-export class ShareDropDown extends BaseComponent<ShareDropDownProps, {timeline: Timeline}> {
+export class ShareDropDown extends BaseComponent<ShareDropDownProps, {timeline: Timeline, justCopied: boolean}> {
 	render() {
 		let {map, newURL, timelines} = this.props;
-		let {timeline} = this.state;
+		let {timeline, justCopied} = this.state;
 
 		newURL.queryVars.Clear();
 		newURL.domain = GetCurrentURL(true).domain;
@@ -42,7 +44,7 @@ export class ShareDropDown extends BaseComponent<ShareDropDownProps, {timeline: 
 			newURL.SetQueryVar("timeline", timeline._id);
 		}
 
-		let splitAt = 150;
+		let splitAt = 130;
 		return (
 			<DropDown>
 				<DropDownTrigger><Button mr={5} text="Share"/></DropDownTrigger>
@@ -50,7 +52,14 @@ export class ShareDropDown extends BaseComponent<ShareDropDownProps, {timeline: 
 					<Column>
 						<RowLR splitAt={splitAt}>
 							<Pre>URL: </Pre>
-							<TextInput value={newURL.toString({domain: true})} readOnly={true}/>
+							<Row style={{width: "100%"}}>
+								<TextInput value={newURL.toString({domain: true})} readOnly={true} style={{flex: .75}}/>
+								<Button text={justCopied ? "Copied!" : "Copy"} ml={5} style={{flex: ".25 0 auto"}} onClick={()=> {
+									CopyText(newURL.toString({domain: true}));
+									this.SetState({justCopied: true});
+									WaitXThenRun(1000, ()=>this.SetState({justCopied: false}));
+								}}/>
+							</Row>
 						</RowLR>
 						<RowLR mt={5} splitAt={splitAt}>
 							<Pre>Show timeline: </Pre>

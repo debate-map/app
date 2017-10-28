@@ -141,3 +141,31 @@ export function IntToEStr(int: number) {
 export function $Simple(queryStr): HTMLElement[] {
 	return [].slice.call(document.querySelectorAll(queryStr));
 }
+
+export function CopyText(text) {
+	/*
+	//var note = $(`<input type="text">`).appendTo("body");
+	var note = document.createElement("textarea");
+	document.body.appendChild(note);
+	note.innerHTML = text;
+
+	note.focus();
+	var range = document.createRange();
+	range.setStart(note, 0);
+	range.setEnd(note, 1);
+	//range.setEnd(note2, 0);
+
+	//range.setEnd(e("notesEnder"), 0); // adds one extra new-line; that's okay, right?
+	var sel = window.getSelection();
+	sel.removeAllRanges();
+	sel.addRange(range);
+
+	document.execCommand("copy");*/
+
+	(document as any).oncopy = function(event) {
+		event.clipboardData.setData("text/plain", text);
+		event.preventDefault();
+		(document as any).oncopy = null;
+	};
+	(document as any).execCommand("copy", false, null);
+}
