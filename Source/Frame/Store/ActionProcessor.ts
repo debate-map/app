@@ -268,7 +268,7 @@ async function ExpandToAndFocusOnNodes(mapID: number, paths: string[]) {
 
 	let nodeBoxPositionSum = new Vector2i(0, 0);
 	for (let box of nodeBoxes) {
-		let boxPos = box.GetScreenRect().Center.Minus(mapUIEl.GetScreenRect().Position);
+		let boxPos = box.DOM_.GetScreenRect().Center.Minus(mapUIEl.GetScreenRect().Position);
 		nodeBoxPositionSum = nodeBoxPositionSum.Plus(boxPos);
 	}
 	let nodeBoxPositionAverage = nodeBoxPositionSum.Times(1 / paths.length);

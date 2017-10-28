@@ -14,7 +14,7 @@ import {GetDistanceBetweenRectAndPoint} from "../../../Frame/General/Geometry";
 import NodeUI_Inner from "./MapNode/NodeUI_Inner";
 //import ReactResizeDetector from "react-resize-detector"; // this one doesn't seem to work reliably -- at least for the map-ui
 import ResizeSensor from "react-resize-sensor";
-import {WaitXThenRun, Timer} from "../../../Frame/General/Timers";
+import {WaitXThenRun, Timer, SleepAsync} from "../../../Frame/General/Timers";
 import {MapNode, ThesisForm, MapNodeEnhanced} from "../../../Store/firebase/nodes/@MapNode";
 import {Map, MapType} from "../../../Store/firebase/maps/@Map";
 import {RootState} from "../../../Store/index";
@@ -199,11 +199,14 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 	}
 
 	async ComponentDidMount() {
+		for (var i = 0; i < 30 && this.props.map == null; i++) await SleepAsync(100);
 		let {map} = this.props;
+		if (map == null) return;
+
 		let playingTimeline = await GetAsync(()=>GetPlayingTimeline(map._id));
 		if (!playingTimeline) { // only load-scroll if not playing timeline; timeline gets priority, to focus on its latest-revealed nodes
 			NodeUI.renderCount = 0;
-			NodeUI.lastRenderTime = Date.now();
+			/*NodeUI.lastRenderTime = Date.now();
 			let lastRenderCount = 0;
 			let timer = new Timer(100, ()=> {
 				if (!this.mounted) return timer.Stop();
@@ -216,6 +219,26 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 
 				let timeSinceLastNodeUIRender = Date.now() - NodeUI.lastRenderTime;
 				if (NodeUI.renderCount > 0 && timeSinceLastNodeUIRender >= 1500) {
+					this.OnLoadComplete();
+					timer.Stop();
+				}
+			}).Start();*/
+
+			let focusNodePath = GetFocusedNodePath(map._id);
+
+			let lastFoundPath = "";
+			let timer = new Timer(100, ()=> {
+				if (!this.mounted) return timer.Stop();
+
+				// if more nodes have been rendered, along the path to the focus-node
+				let foundBox = this.FindNodeBox(focusNodePath, true);
+				let foundPath = foundBox ? foundBox.props.path : "";
+				if (foundPath.length > lastFoundPath.length) {
+					this.LoadScroll();
+				}
+				lastFoundPath = foundPath;
+
+				if (foundPath == focusNodePath) {
 					this.OnLoadComplete();
 					timer.Stop();
 				}
@@ -250,7 +273,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		this.ScrollToNode(focusNode_target);
 	}
 
-	FindNodeBox(nodePath: string, ifMissingFindAncestor = false): JQuery {
+	FindNodeBox(nodePath: string, ifMissingFindAncestor = false) {
 		let focusNodeBox;
 		let nextPathTry = nodePath;
 		while (focusNodeBox == null) {
@@ -258,7 +281,8 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 			if (!ifMissingFindAncestor || !nextPathTry.Contains("/")) break;
 			nextPathTry = nextPathTry.substr(0, nextPathTry.lastIndexOf("/"));
 		}
-		return focusNodeBox;
+		if (focusNodeBox == null) return null;
+		return FindReact(focusNodeBox[0]) as NodeUI_Inner;
 	}
 	ScrollToNode(nodePath: string) {
 		let {map, rootNode, withinPage} = this.props;
@@ -269,7 +293,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		
 		let focusNodeBox = this.FindNodeBox(nodePath, true);
 		if (focusNodeBox == null) return;
-		let focusNodeBoxPos = focusNodeBox.GetScreenRect().Center.Minus($(this.mapUI).GetScreenRect().Position);
+		let focusNodeBoxPos = focusNodeBox.DOM_.GetScreenRect().Center.Minus($(this.mapUI).GetScreenRect().Position);
 		this.ScrollToPosition(focusNodeBoxPos);
 	}
 	ScrollToPosition(posInContainer: Vector2i) {

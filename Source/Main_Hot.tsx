@@ -119,6 +119,12 @@ ReactDOM.render(<RootUIWrapper store={store}/>, mountNode);
 //});
 
 if (devEnv) {
+	SetUpRR();
+} else {
+	G({RR: SetUpRR()})
+}
+
+function SetUpRR() {
 	setTimeout(()=> {
 		ParseModuleData();
 		G({R: Require});
