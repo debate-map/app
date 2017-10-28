@@ -50,6 +50,8 @@ import {VMenuStub} from "react-vmenu";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
 import {emptyArray} from "../../../Frame/Store/ReducerUtils";
 import { TimelinePlayerUI, TimelineOverlayUI } from "UI/@Shared/Maps/MapUI/TimelinePlayerUI";
+import {GetAsync} from "Frame/Database/DatabaseHelpers";
+import {GetPlayingTimeline} from "../../../Store/main/maps/$map";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -196,24 +198,29 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		);
 	}
 
-	ComponentDidMount() {
-		NodeUI.renderCount = 0;
-		NodeUI.lastRenderTime = Date.now();
-		let lastRenderCount = 0;
-		let timer = new Timer(100, ()=> {
-			if (!this.mounted) return timer.Stop();
+	async ComponentDidMount() {
+		let {map} = this.props;
+		let playingTimeline = await GetAsync(()=>GetPlayingTimeline(map._id));
+		if (!playingTimeline) { // only load-scroll if not playing timeline; timeline gets priority, to focus on its latest-revealed nodes
+			NodeUI.renderCount = 0;
+			NodeUI.lastRenderTime = Date.now();
+			let lastRenderCount = 0;
+			let timer = new Timer(100, ()=> {
+				if (!this.mounted) return timer.Stop();
 
-			// if more nodes have been rendered (ie, new nodes have come in)
-			if (NodeUI.renderCount > lastRenderCount)
-				this.LoadScroll();
-			lastRenderCount = NodeUI.renderCount;
+				// if more nodes have been rendered (ie, new nodes have come in)
+				if (NodeUI.renderCount > lastRenderCount) {
+					this.LoadScroll();
+				}
+				lastRenderCount = NodeUI.renderCount;
 
-			let timeSinceLastNodeUIRender = Date.now() - NodeUI.lastRenderTime;
-			if (NodeUI.renderCount > 0 && timeSinceLastNodeUIRender >= 1500) {
-				this.OnLoadComplete();
-				timer.Stop();
-			}
-		}).Start();
+				let timeSinceLastNodeUIRender = Date.now() - NodeUI.lastRenderTime;
+				if (NodeUI.renderCount > 0 && timeSinceLastNodeUIRender >= 1500) {
+					this.OnLoadComplete();
+					timer.Stop();
+				}
+			}).Start();
+		}
 
 		// start scroll at root // (this doesn't actually look as good)
 		/*if (this.scrollView)

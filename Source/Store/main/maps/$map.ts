@@ -160,7 +160,6 @@ export function GetNodesRevealedInSteps(steps: TimelineStep[]): string[] {
 			}
 		}
 	}
-	Log(`Getting nodes revealed: ${result.VKeys()}`);
 	return result.VKeys();
 }
 export function GetPlayingTimelineRevealNodes(mapID: number, excludeAfterCurrentStep = false): string[] {
