@@ -49,7 +49,7 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 			//newState[action.payload.id] = new MapView();
 			newState[action.payload.id] = {
 				rootNodeViews: {
-					[action.payload.rootNodeID]: new MapNodeView().VSet({expanded: true, focused: true, viewOffset: new Vector2i(200, 0)})
+					[action.payload.map.rootNode]: new MapNodeView().VSet({expanded: true, focused: true, viewOffset: new Vector2i(200, 0)})
 				}
 			};
 		}

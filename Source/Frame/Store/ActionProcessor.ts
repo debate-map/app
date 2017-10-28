@@ -174,7 +174,7 @@ export async function PostDispatchAction(action: Action<any>) {
 	if (action.Is(ACTPersonalMapSelect) || action.Is(ACTDebateMapSelect)) {
 		let map = action.payload.id ? await GetDataAsync("maps", action.payload.id) as Map : null;
 		let actionType = action.Is(ACTPersonalMapSelect) ? ACTPersonalMapSelect_WithData : ACTDebateMapSelect_WithData;
-		store.dispatch(new actionType({id: action.payload.id, rootNodeID: map ? map.rootNode : null}));
+		store.dispatch(new actionType({id: action.payload.id, map}));
 
 		if (map) {
 			let pathsToExpand = [""+map.rootNode];

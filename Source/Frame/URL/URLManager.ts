@@ -3,7 +3,7 @@ import {ToInt} from "../General/Types";
 import {Vector2i} from "../General/VectorStructs";
 import {FindReact, ShallowChanged} from "../UI/ReactGlobals";
 import NodeUI_Inner from "../../UI/@Shared/Maps/MapNode/NodeUI_Inner";
-import {GetOpenMapID, ACTSetPage, ACTSetSubpage, ACTNotificationMessageAdd} from "../../Store/main";
+import {GetOpenMapID, ACTSetPage, ACTSetSubpage, ACTNotificationMessageAdd, GetPage, GetSubpage} from "../../Store/main";
 import {GetMap} from "../../Store/firebase/maps";
 import {GetNodeView, GetMapView, GetSelectedNodeID, GetViewOffset, GetFocusedNodeID} from "../../Store/main/mapViews";
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
@@ -313,10 +313,10 @@ export function GetNewURL(includeMapViewStr = true) {
 	let newURL = new URL(oldURL.domain, oldURL.pathNodes);*/
 
 	let newURL = new URL();
-	let page = State(a=>a.main.page) || "home";
+	let page = GetPage();
 	newURL.pathNodes.push(page);
 
-	var subpage = (State("main", page, "subpage") as string) || rootPageDefaultChilds[page];
+	var subpage = GetSubpage();
 	if (page in pagesWithSimpleSubpages) {
 		newURL.pathNodes.push(subpage);
 	}

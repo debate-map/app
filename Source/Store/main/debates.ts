@@ -2,14 +2,14 @@ import {GetImages} from "../firebase/images";
 import {GetTerms} from "../firebase/terms";
 import Action from "../../Frame/General/Action";
 import {CombineReducers} from "../../Frame/Store/ReducerUtils";
-import { MapType } from "../firebase/maps/@Map";
+import {MapType, Map} from "../firebase/maps/@Map";
 import {GetMapsOfType, GetMap} from "Store/firebase/maps";
 import {URL} from "../../Frame/General/URLs";
 import {IsNumber} from "../../Frame/General/Types";
 import SubpageReducer from "./@Shared/$subpage";
 
 export class ACTDebateMapSelect extends Action<{id: number}> {}
-export class ACTDebateMapSelect_WithData extends Action<{id: number, rootNodeID: number}> {}
+export class ACTDebateMapSelect_WithData extends Action<{id: number, map: Map}> {}
 
 export class Debates {
 	//subpage: string;
@@ -20,7 +20,7 @@ export const DebatesReducer = CombineReducers({
 	//subpage: SubpageReducer("debates"),
 	selectedMapID: (state = null, action)=> {
 		//if (action.Is(ACTDebateMapSelect)) return action.payload.id;
-		if (action.Is(ACTDebateMapSelect_WithData)) return action.payload.id;
+		if (action.Is(ACTDebateMapSelect_WithData) && (action.payload.map == null || action.payload.map.type == MapType.Debate)) return action.payload.id;
 		/*if (action.type == LOCATION_CHANGED) {
 			let id = parseInt(URL.FromState(action.payload).pathNodes[1]);
 			if (IsNumber(id)) return id;

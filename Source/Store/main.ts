@@ -4,7 +4,7 @@ import Action from "../Frame/General/Action";
 import {MapViewsReducer} from "./main/mapViews";
 import {RatingUIReducer, RatingUIState} from "./main/ratingUI";
 import NotificationMessage from "./main/@NotificationMessage";
-import {URL} from "../Frame/General/URLs";
+import {URL, rootPageDefaultChilds} from "../Frame/General/URLs";
 import {Global} from "../Frame/General/Globals_Free";
 import {CombineReducers} from "../Frame/Store/ReducerUtils";
 import {ContentReducer, Content} from "./main/content";
@@ -213,4 +213,12 @@ export function GetOpenMapID() {
 	if (page == "debates") return State(a=>a.main.debates.selectedMapID);
 	if (page == "global") return globalMapID;
 	return null;
+}
+
+export function GetPage() {
+	return State(a=>a.main.page) || "home";
+}
+export function GetSubpage() {
+	let page = GetPage();
+	return (State("main", page, "subpage") as string) || rootPageDefaultChilds[page];
 }
