@@ -53,7 +53,7 @@ export class Vector2i {
 	Times(other: Vector2i): Vector2i;
 	Times(other: number): Vector2i;
 	Times(otherX: number, otherY: number): Vector2i;
-    Times(...args) {
+	Times(...args) {
 		var [x, y] = args[0] instanceof Vector2i ? [args[0].x, args[0].y] :
 			args.length == 1 ? [args[0], args[0]] :
 			args;

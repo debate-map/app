@@ -23,6 +23,10 @@ import {Map} from "../../Store/firebase/maps/@Map";
 import {ACTPersonalMapSelect, ACTPersonalMapSelect_WithData} from "../../Store/main/personal";
 import {ACTMap_PlayingTimelineStepSet, ACTMap_PlayingTimelineAppliedStepSet, GetPlayingTimelineCurrentStepRevealNodes} from "../../Store/main/maps/$map";
 import {GetAsync} from "Frame/Database/DatabaseHelpers";
+import {UpdateFocusNodeAndViewOffset} from "../../UI/@Shared/Maps/MapUI";
+import {FindReact} from "../UI/ReactGlobals";
+import MapUI from "../../UI/@Shared/Maps/MapUI";
+import {SleepAsync} from "../General/Timers";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -242,12 +246,35 @@ export async function PostDispatchAction(action: Action<any>) {
 
 	if (action.Is(ACTMap_PlayingTimelineStepSet) || action.Is(ACTMap_PlayingTimelineAppliedStepSet)) {
 		let newlyRevealedNodes = await GetAsync(()=>GetPlayingTimelineCurrentStepRevealNodes(action.payload.mapID));
-		ExpandToAndFocusOnNodes(newlyRevealedNodes);
+		ExpandToAndFocusOnNodes(action.payload.mapID, newlyRevealedNodes);
 	}
 }
 
-function ExpandToAndFocusOnNodes(nodes: string[]) {
-	// todo
+async function ExpandToAndFocusOnNodes(mapID: number, paths: string[]) {
+	for (let path of paths) {
+		let parentPath = path.split("/").slice(0, -1).join("/");
+		store.dispatch(new ACTMapNodeExpandedSet({mapID, path: parentPath, expanded: true, recursive: false}));
+	}
+
+	for (var i = 0; i < 30 && $(".MapUI").length == 0; i++) { await SleepAsync(100); }
+	let mapUIEl = $(".MapUI");
+	if (mapUIEl.length == 0) return;
+	let mapUI = FindReact(mapUIEl[0]) as MapUI;
+	
+	for (var i = 0; i < 10 && paths.map(path=>mapUI.FindNodeBox(path)).Any(a=>a == null); i++) { await SleepAsync(100); }
+	let nodeBoxes = paths.map(path=>mapUI.FindNodeBox(path)).filter(a=>a != null);
+	if (nodeBoxes.length == 0) return;
+
+	let nodeBoxPositionSum = new Vector2i(0, 0);
+	for (let box of nodeBoxes) {
+		let boxPos = box.GetScreenRect().Center.Minus(mapUIEl.GetScreenRect().Position);
+		nodeBoxPositionSum = nodeBoxPositionSum.Plus(boxPos);
+	}
+	let nodeBoxPositionAverage = nodeBoxPositionSum.Times(1 / paths.length);
+	//mapUI.ScrollToPosition(new Vector2i((nodeBoxPositionAverage.x - 100).KeepAtLeast(0), nodeBoxPositionAverage.y));
+	mapUI.ScrollToPosition(nodeBoxPositionAverage.Plus(-250, 0));
+	
+	Log(`Node-box position avg: ${nodeBoxPositionAverage}`);
 }
 
 function PostInit() {

@@ -240,29 +240,43 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		if (this.scrollView.state.scrollOp_bar) return;
 
 		let focusNode_target = GetFocusedNodePath(GetMapView(map._id)); // || map.rootNode.toString();
-		let viewOffset_target = GetViewOffset(GetMapView(map._id)); // || new Vector2i(200, 0);
-		//Log(`LoadingScroll:${focusNode_target};${ToJSON(viewOffset_target)}`);
-		if (focusNode_target == null || viewOffset_target == null) return;
+		this.ScrollToNode(focusNode_target);
+	}
 
+	FindNodeBox(nodePath: string, ifMissingFindAncestor = false): JQuery {
 		let focusNodeBox;
-		let nextPathTry = focusNode_target;
-		while (true) {
+		let nextPathTry = nodePath;
+		while (focusNodeBox == null) {
 			focusNodeBox = $(".NodeUI_Inner").ToList().FirstOrX(nodeBox=>(FindReact(nodeBox[0]) as NodeUI_Inner).props.path == nextPathTry);
-			if (focusNodeBox || !nextPathTry.Contains("/")) break;
+			if (!ifMissingFindAncestor || !nextPathTry.Contains("/")) break;
 			nextPathTry = nextPathTry.substr(0, nextPathTry.lastIndexOf("/"));
 		}
+		return focusNodeBox;
+	}
+	ScrollToNode(nodePath: string) {
+		let {map, rootNode, withinPage} = this.props;
+
+		let viewOffset_target = GetViewOffset(GetMapView(map._id)); // || new Vector2i(200, 0);
+		//Log(`LoadingScroll:${nodePath};${ToJSON(viewOffset_target)}`);
+		if (nodePath == null || viewOffset_target == null) return;
+		
+		let focusNodeBox = this.FindNodeBox(nodePath, true);
 		if (focusNodeBox == null) return;
-
-		let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
-		let viewOffset_current = viewCenter_onScreen.Minus(focusNodeBox.GetScreenRect().Position);
-		let viewOffset_changeNeeded = new Vector2i(viewOffset_target).Minus(viewOffset_current);
+		let focusNodeBoxPos = focusNodeBox.GetScreenRect().Center.Minus($(this.mapUI).GetScreenRect().Position);
+		this.ScrollToPosition(focusNodeBoxPos);
+	}
+	ScrollToPosition(posInContainer: Vector2i) {
+		let {map, rootNode, withinPage} = this.props;
+		
+		let oldScroll = this.scrollView.GetScroll();
+		let newScroll = new Vector2i(posInContainer.x - (window.innerWidth / 2), posInContainer.y - (window.innerHeight / 2));
 		if (withinPage) { // if within a page, don't apply stored vertical-scroll
-			viewOffset_changeNeeded.y = 0;
+			newScroll.y = oldScroll.y;
 		}
-		this.scrollView.ScrollBy(viewOffset_changeNeeded);
-		//Log("Loading scroll: " + Vector2i.prototype.toString.call(viewOffset_target));
+		this.scrollView.SetScroll(newScroll);
+		Log("Scrolling to position: " + newScroll);
 
-		/*if (nextPathTry == focusNode_target)
+		/*if (nextPathTry == nodePath)
 			this.hasLoadedScroll = true;*/
 	}
 }

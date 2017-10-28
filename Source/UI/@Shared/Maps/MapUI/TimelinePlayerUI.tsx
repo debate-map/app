@@ -58,7 +58,7 @@ let replacements = {
 		//let ids = (currentStep.nodeReveals || []).map(a=>a.nodeID);
 		return (
 			<Button text={props.text || "Place into debate map"} enabled={!extraInfo.stepApplied}
-				style={{zIndex: -1, alignSelf: "center", fontSize: 16, fontWeight: 500, color: "rgba(255,255,255,.7)"}}
+				style={{alignSelf: "center", fontSize: 16, fontWeight: 500, color: "rgba(255,255,255,.7)"}}
 				onClick={e=> {
 					//let currentStep = await GetAsync(()=>GetPlayingTimelineStepIndex(extraInfo.map._id));
 					store.dispatch(new ACTMap_PlayingTimelineAppliedStepSet({mapID: extraInfo.map._id, step: extraInfo.currentStepIndex}));
