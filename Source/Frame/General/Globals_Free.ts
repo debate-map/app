@@ -137,3 +137,7 @@ export function IntToEStr(int: number) {
 
 // another way to require at runtime -- with full paths
 //g.RequireTest = (require as any).context("../../", true, /\.tsx?$/);
+
+export function $Simple(queryStr): HTMLElement[] {
+	return [].slice.call(document.querySelectorAll(queryStr));
+}

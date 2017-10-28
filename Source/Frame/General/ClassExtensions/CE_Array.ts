@@ -314,3 +314,11 @@ Array.prototype._AddFunction_Inline = function join(separator = ",") {
 ArrayIterator.prototype._AddFunction_Inline = function ToArray() {
     return Array.from(this);
 };*/
+
+// NodeList
+// ==========
+
+interface NodeList { ToArray(): any[]; }
+NodeList.prototype._AddFunction_Inline = function ToArray() {
+    return Array.from(this);
+};

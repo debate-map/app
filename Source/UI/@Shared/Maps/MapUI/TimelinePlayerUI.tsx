@@ -1,4 +1,4 @@
-import {BaseComponent, Pre, Span} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Pre, Span, FindReact} from "../../../../Frame/UI/ReactGlobals";
 import Column from "../../../../Frame/ReactComponents/Column";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetOpenMapID} from "../../../../Store/main";
@@ -17,6 +17,7 @@ import NodeUI_Inner from "../MapNode/NodeUI_Inner";
 import {GetNode} from "Store/firebase/nodes";
 import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetDataAsync, GetAsync} from "Frame/Database/DatabaseHelpers";
+import NodeUI from "../MapNode/NodeUI";
 
 function GetPropsFromPropsStr(propsStr: string) {
 	let propStrMatches = propsStr.Matches(/ (.+?)="(.+?)"/g);
@@ -47,7 +48,7 @@ let replacements = {
 	"\\[node(.*?)\\/\\]": (segment: Segment, index: number, extraInfo)=> {
 		let props = GetPropsFromPropsStr(segment.textParts[1]);
 		return (
-			<NodeUI_InMessage map={extraInfo.map} nodeID={props.id}/>
+			<NodeUI_InMessage map={extraInfo.map} nodeID={props.id} index={index}/>
 		);
 	},
 	"\\[connectNodesButton(.*?)\\/\\]": (segment: Segment, index: number, extraInfo)=> {
@@ -75,20 +76,24 @@ let replacements = {
 	},
 };
 
-type NodeUI_InMessageProps = {map: Map, nodeID: number} & Partial<{node: MapNode}>;
+type NodeUI_InMessageProps = {map: Map, nodeID: number, index: number} & Partial<{node: MapNode}>;
 @Connect((state, {nodeID}: NodeUI_InMessageProps)=> ({
 	node: GetNode(nodeID),
 }))
 class NodeUI_InMessage extends BaseComponent<NodeUI_InMessageProps, {}> {
 	render() {
-		let {map, node} = this.props;
+		let {map, node, index} = this.props;
 		if (!node) return <div/>;
 		
 		let path = ""+node._id;
 		let nodeEnhanced = node.Extended({finalType: node.type, link: null});
 		return (
-			<NodeUI_Inner ref="innerBox" map={map} node={nodeEnhanced} nodeView={{}} path={path} width={null} widthOverride={null} panelPosition="below"
-				style={{zIndex: 1, filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}/>
+			<NodeUI_Inner ref="innerBox" map={map} node={nodeEnhanced} nodeView={{}} path={path} width={null} widthOverride={null}
+				panelPosition="below" useLocalPanelState={true}
+				style={{
+					//zIndex: 1, filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"
+					//zIndex: 100 - index,
+				}}/>
 		);
 	}
 }
@@ -100,6 +105,7 @@ type Props = {map: Map} & Partial<{playingTimeline: Timeline, currentStep: Timel
 	appliedStepIndex: GetPlayingTimelineAppliedStepIndex(map._id),
 }))
 export class TimelinePlayerUI extends BaseComponent<Props, {}> {
+	root: Column;
 	render() {
 		let {map, playingTimeline, currentStep, appliedStepIndex} = this.props;
 		if (!playingTimeline) return <div/>;
@@ -110,7 +116,14 @@ export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 		let stepApplied = appliedStepIndex >= currentStepIndex || (currentStep.nodeReveals || []).length == 0;
 		
 		return (
-			<Column style={{position: "absolute", zIndex: 2, left: 10, top: 40, width: 500, padding: 10, background: "rgba(0,0,0,.7)", borderRadius: 5}}>
+			<Column ref={c=>this.root = c}
+					style={{position: "absolute", zIndex: 2, left: 10, top: 40, width: 500, padding: 10, background: "rgba(0,0,0,.7)", borderRadius: 5}}
+					onClick={e=> {
+						if ((e.target as HTMLElement).GetSelfAndParents().Any(a=>a.className.includes("NodeUI"))) return;
+						for (let nodeUI of this.root.DOM.$(".NodeUI_Inner").map(a=>FindReact(a) as NodeUI_Inner)) {
+							nodeUI.SetState({local_openPanel: null});
+						}
+					}}>
 				<Row style={{position: "relative"}}>
 					<Pre style={{fontSize: 18, textAlign: "center", width: "100%"}}>Timeline</Pre>
 					<Button text="X" style={{position: "absolute", right: 0, padding: "3px 6px", marginTop: -2, marginRight: -2, fontSize: 13}} onClick={()=> {
@@ -143,7 +156,8 @@ export class TimelinePlayerUI extends BaseComponent<Props, {}> {
 						}}/>}
 				</Row>
 				<Row sel>
-					<VReactMarkdown_Remarkable className="onlyTopMargin" style={{marginTop: 5, display: "flex", flexDirection: "column"}} addMarginsForDanglingNewLines={true}
+					<VReactMarkdown_Remarkable addMarginsForDanglingNewLines={true}
+						className="onlyTopMargin" style={{marginTop: 5, display: "flex", flexDirection: "column", filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}
 						source={currentStep.message || ""} replacements={replacements} extraInfo={{map, currentStepIndex, currentStep, stepApplied}}/>
 				</Row>
 				{/*<ScrollView style={{maxHeight: 300}}>

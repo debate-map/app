@@ -337,6 +337,7 @@ HTMLElement.prototype._AddGetter_Inline = function R() { return g.FindReact(this
 require("./CE_Number");
 require("./CE_String");
 require("./CE_Array");
+require("./CE_Element");
 
 // late-require things from other modules, that are used in the methods
 // ==========

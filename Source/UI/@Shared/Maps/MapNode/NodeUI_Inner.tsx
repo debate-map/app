@@ -60,8 +60,10 @@ import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactM
 
 //export type NodeHoverExtras = {panel?: string, term?: number};
 
-type Props = {map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: string, width: number, widthOverride?: number, panelPosition?: "left" | "below", style?}
-	& Partial<{finalNodeType: MapNodeType, form: ThesisForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
+type Props = {
+	map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: string, width: number, widthOverride?: number,
+	panelPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
+} & Partial<{finalNodeType: MapNodeType, form: ThesisForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
 //@FirebaseConnect((props: Props)=>((props[`holder`] = props[`holder`] || {}), [
 /*@FirebaseConnect((props: Props)=>[
 	...GetPaths_NodeRatingsRoot(props.node._id),
@@ -73,10 +75,12 @@ type Props = {map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: stri
 	mainRating_average: GetRatingAverage(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type),
 	userID: GetUserID(),
 }))
-export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, hoverPanel: string, hoverTermID: number}> {
+export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, hoverPanel: string, hoverTermID: number, /*local_selected: boolean,*/ local_openPanel: string}> {
 	render() {
-		let {map, node, nodeView, path, width, widthOverride, panelPosition, style, finalNodeType, form, ratingsRoot, mainRating_average, userID} = this.props;
-		let {hovered, hoverPanel, hoverTermID} = this.state;
+		let {map, node, nodeView, path, width, widthOverride,
+			panelPosition, useLocalPanelState, style,
+			finalNodeType, form, ratingsRoot, mainRating_average, userID} = this.props;
+		let {hovered, hoverPanel, hoverTermID, /*local_selected,*/ local_openPanel} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[finalNodeType];
 		let barSize = 5;
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
@@ -92,8 +96,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let mainRating_fillPercent = GetFillPercentForRatingAverage(node, mainRating_average, ratingReversed);
 		let mainRating_myFillPercent = mainRating_mine != null ? GetFillPercentForRatingAverage(node, mainRating_mine, ratingReversed) : null;
 
-		let leftPanelShow = (nodeView && nodeView.selected) || hovered;
-		let panelToShow = hoverPanel || (nodeView && nodeView.openPanel);
+		let leftPanelShow = (nodeView && nodeView.selected) || hovered; //|| local_selected;
+		let panelToShow = hoverPanel || local_openPanel || (nodeView && nodeView.openPanel);
 		let subPanelShow = node.type == MapNodeType.Thesis && (node.contentNode || node.image);
 		let bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView && nodeView.expanded;
@@ -108,24 +112,37 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 					onMouseLeave={()=>this.SetState({hovered: false})}*/
 					onClick={e=> {
 						if ((e.nativeEvent as any).ignore) return;
+						/*if (useLocalPanelState) {
+							this.SetState({local_selected: true});
+							return;
+						}*/
+
 						if (nodeView == null || !nodeView.selected) {
 							store.dispatch(new ACTMapNodeSelect({mapID: map._id, path}));
 						}
 					}}>
 				{leftPanelShow &&
-					<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot, panelPosition}}
-						onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
-						onPanelButtonClick={panel=> {
-							if (nodeView.openPanel != panel) {
-								store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel}));
-							} else {
-								store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel: null}));
-								this.SetState({hoverPanel: null});
-							}
-						}}
-						backgroundColor={nodeTypeInfo.backgroundColor} asHover={hovered}/>}
+					<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot, panelPosition, local_openPanel}}
+							onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
+							onPanelButtonClick={panel=> {
+								if (useLocalPanelState) {
+									this.SetState({local_openPanel: panel, hoverPanel: null});
+									return;
+								}
+
+								if (nodeView.openPanel != panel) {
+									store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel}));
+								} else {
+									store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel: null}));
+									this.SetState({hoverPanel: null});
+								}
+							}}
+							backgroundColor={nodeTypeInfo.backgroundColor} asHover={hovered}>
+						{/* fixes click-gap */}
+						{panelPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
+					</MapNodeUI_LeftBox>}
 				{/* fixes click-gap */}
-				{leftPanelShow && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
+				{leftPanelShow && panelPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
 
 				<div style={{display: "flex", width: "100%", background: "rgba(0,0,0,.7)", borderRadius: 5, cursor: "pointer"}}>
 					<Div style={{position: "relative", width: "100%", padding: GetPaddingForNode(node, isSubnode)}}>
@@ -160,7 +177,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 							}}>
 						{expanded ? "-" : "+"}
 					</Button>
-				</div>
+				</div>	
 				{bottomPanelShow &&
 					<div style={{
 						position: "absolute", left: panelPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",

@@ -23,7 +23,8 @@ import {GetNode} from "Store/firebase/nodes";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
 type Props = {
-	map: Map, path: string, node: MapNodeEnhanced, nodeView?: MapNodeView, ratingsRoot: RatingsRoot, panelPosition?: "left" | "below",
+	map: Map, path: string, node: MapNodeEnhanced, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
+	panelPosition?: "left" | "below", local_openPanel?: string,
 	backgroundColor: string, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
 } & Partial<{form: ThesisForm, parentNode: MapNodeEnhanced}>;
@@ -35,11 +36,12 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 	static defaultProps = {panelPosition: "left"};
 	render() {
 		let {
-			map, path, node, nodeView, ratingsRoot, panelPosition,
+			map, path, node, nodeView, ratingsRoot,
+			panelPosition, local_openPanel,
 			backgroundColor, asHover, inList, onPanelButtonHover, onPanelButtonClick, style,
-			form, parentNode
+			form, parentNode, children,
 		} = this.props;
-		let openPanel = nodeView.openPanel;
+		let openPanel = local_openPanel || nodeView.openPanel;
 		if (node.metaThesis && parentNode == null) return <div/>; // if meta-thesis, but no parent-node connected, must still be loading
 
 		let nodeReversed = form == ThesisForm.Negation;
@@ -58,6 +60,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 				!inList && panelPosition == "below" && {position: "absolute", top: "calc(100% + 1px)", width: 130},
 				style,
 			)}>
+				{children}
 				<div style={{position: "relative", background: `rgba(0,0,0,.8)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 					{GetRatingTypesForNode(node).map((ratingInfo, index)=> {
