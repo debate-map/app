@@ -73,7 +73,7 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 			if (sortBy == SortType.CreationDate) return node.createdAt;
 			//if (sortBy == SortType.UpdateDate) return node.;
 			//if (sortBy == SortType.ViewerCount) return node.;
-			Assert(false);
+			//Assert(false);
 		});
 
 		let nodesFiltered = nodesSorted;
