@@ -145,12 +145,12 @@ export function GetNodesRevealedInSteps(steps: TimelineStep[]): string[] {
 			let currentChildren = GetNodeChildren(node).map(child=>({node: child, path: child && `${reveal.path}/${child._id}`}));
 			if (currentChildren.Any(a=>a.node == null)) return emptyArray;
 
-			for (var i = 0; i < reveal.revealDepth; i++) {
+			for (var childrenDepth = 1; childrenDepth <= reveal.revealDepth; childrenDepth++) {
 				let nextChildren = [];
 				for (let child of currentChildren) {
 					result[child.path] = true;
 					// if there's another loop/depth after this one
-					if (i < reveal.revealDepth - 1) {
+					if (childrenDepth < reveal.revealDepth) {
 						let childChildren = GetNodeChildren(child.node).map(child2=>({node: child2, path: child2 && `${child.path}/${child2._id}`}));
 						if (childChildren.Any(a=>a == null)) return emptyArray;
 						nextChildren.AddRange(childChildren);

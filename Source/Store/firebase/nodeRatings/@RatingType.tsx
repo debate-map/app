@@ -29,7 +29,7 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNode, parent:
 		//result.description = "Suppose you were as sure as you are right now (of this thesis being true, in its basic form), 100 different times (on different topics). How many of those times do you expect you'd be correct?";
 		result.description = "Consider how sure you are of this statement being true (in its basic form). If you were this sure 100 times (on a variety of things), how many of those times do you think you'd be correct?";
 	} else if (ratingType == "degree") {
-		result.description = "To what degree do you consider this statement true? (0: completely false, 50: true in its basic form, 100: true in its full form)";
+		result.description = "To what degree do you consider this statement true? (0: completely false, 50: true to a basic extent, 100: true to the highest extent)";
 	} else if (ratingType == "strength") {
 		result.description = "Argument strength is calculated based on the probabilities of its premises, and the probability/adjustment of its meta-thesis.";
 	} else if (ratingType == "adjustment") {
@@ -62,13 +62,13 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNode, parent:
 		if (grandParentRatingType == "adjustment" && parent.type == MapNodeType.OpposingArgument) {
 			result.description = (
 				<span>
-					If {premiseCountStr} of this argument were true/full, how much would it weaken/undo the adjustment factor of the parent thesis?
+					If {premiseCountStr} of this argument were true (to the highest extent), how much would it weaken/undo the adjustment factor of the parent thesis?
 				</span>
 			);
 		} else {
 			result.description = (
 				<span>
-					If {premiseCountStr} of this argument were true/full, to what level should it {shiftType} someone's {grandParentRatingType
+					If {premiseCountStr} of this argument were true (to the highest extent), to what level should it {shiftType} someone's {grandParentRatingType
 						} rating of the parent thesis? (assuming their initial evaluation were 50%)
 				</span>
 			);

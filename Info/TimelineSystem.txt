@@ -22,7 +22,6 @@ Once ready, press the button below (or go to the next step) to connect this "roo
 ==========
 After the root claim was introduced, various people added comments arguing for or against it. We're now going to go through each of these comments, and break-down/simplify them, to see what exactly they were claiming, and how those claims connect with the ideas already presented.
 ==========
-John Doe wrote the following comment:
 [comment author="Person1" date="Oct 2, 9:20"]
 The earth is spherical!
 [/comment]
