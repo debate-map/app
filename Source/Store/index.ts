@@ -18,6 +18,7 @@ import Immutable from "immutable";
 import {ACTDebateMapSelect} from "./main/debates";
 import u from "updeep";
 import {URL} from "../Frame/General/URLs";
+import {HandleError} from "../Frame/General/Errors";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;
@@ -59,10 +60,14 @@ export function MakeRootReducer(extraReducers?) {
 
 		let result = state;
 		for (let action of actions) {
-			result = innerReducer(result, action) as RootState;
-			//if (action.Is(ACTSet)) {
-			if (action.type.startsWith("ACTSet_")) {
-				result = u.updateIn(action.payload.path.replace(/\//g, "."), u.constant(action.payload.value), result);
+			try {
+				result = innerReducer(result, action) as RootState;
+				//if (action.Is(ACTSet)) {
+				if (action.type.startsWith("ACTSet_")) {
+					result = u.updateIn(action.payload.path.replace(/\//g, "."), u.constant(action.payload.value), result);
+				}
+			} catch (ex) {
+				HandleError(ex, true, {action});
 			}
 		}
 		return result;

@@ -45,7 +45,7 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 			}
 		}
 	}
-	if (action.Is(ACTPersonalMapSelect_WithData) || action.Is(ACTDebateMapSelect_WithData)) {
+	if ((action.Is(ACTPersonalMapSelect_WithData) || action.Is(ACTDebateMapSelect_WithData)) && action.payload.map) {
 		if (newState[action.payload.id] == null) {
 			//newState[action.payload.id] = new MapView();
 			newState[action.payload.id] = {

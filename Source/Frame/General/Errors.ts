@@ -11,9 +11,9 @@ if (!hotReloading) {
 	Stack) ${error.stack}`);*/
 		// sentry already picks up errors that make it here; so don't send it to sentry again
 		if (error != null) {
-			HandleError(error, false, false);
+			HandleError(error, false);
 		} else {
-			HandleError({stack: filePath + ":" + line + ":" + column, toString: ()=>message} as any, false, false);
+			HandleError({stack: filePath + ":" + line + ":" + column, toString: ()=>message} as any, false);
 		}
 	});
 	g.addEventListener("unhandledrejection", e=>{
@@ -26,7 +26,7 @@ if (!hotReloading) {
 	});
 }
 
-export function HandleError(error: Error, fatal = false, recordWithSentry = true) {
+export function HandleError(error: Error, recordWithSentry = true, extraInfo = {}) {
 	let message = (error.message || error.toString()).replace(/\r/g, "").TrimStart("\n");
 	/*let stackWithoutMessage = (
 		error.stack && error.message && error.stack.Contains(error.message)
@@ -42,8 +42,6 @@ export function HandleError(error: Error, fatal = false, recordWithSentry = true
 	if (!stack.Contains(message))
 		errorStr += message;
 	errorStr += (errorStr.length ? "\n" : "") + stack;
-	if (fatal)
-		errorStr += "\n[fatal]";
 	LogError(errorStr);
 
 	if (recordWithSentry) {
@@ -52,7 +50,7 @@ export function HandleError(error: Error, fatal = false, recordWithSentry = true
 			if (message.startsWith("KaTeX parse error: ")) return;
 			Raven.captureException(error);
 		})();*/
-		Raven.captureException(error);
+		Raven.captureException(error, {extra: extraInfo});
 	}
 
 	store.dispatch(new ACTNotificationMessageAdd(new NotificationMessage(errorStr)));
