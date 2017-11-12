@@ -18,6 +18,7 @@ export function CanConvertFromThesisTypeXToY(from: ThesisType, to: ThesisType) {
 
 AddSchema({
 	properties: {
+		mapID: {type: "number"},
 		nodeID: {type: "number"},
 		newType: {oneOf: GetValues_ForSchema(ThesisType)},
 	},
