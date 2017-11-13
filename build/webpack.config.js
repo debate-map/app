@@ -237,7 +237,7 @@ if (USE_TSLOADER) {
 
 // We use cssnano with the postcss loader, so we tell css-loader not to duplicate minimization.
 //const BASE_CSS_LOADER = "css-loader?sourceMap&-minimize"
-const BASE_CSS_LOADER = "css-loader?-minimize"
+const BASE_CSS_LOADER = "css-loader?-minimize";
 
 webpackConfig.module.rules.push({
 	test: /\.scss$/,
@@ -418,7 +418,7 @@ if (OUTPUT_STATS) {
 		new CircularDependencyPlugin({exclude: /node_modules/})
 	);*/
 
-	let CyclicDependencyChecker = require("webpack-cyclic-dependency-checker").CyclicDependencyChecker;
+	let CyclicDependencyChecker = require("webpack-dependency-tools").CyclicDependencyChecker;
 	webpackConfig.plugins.push(
 		new CyclicDependencyChecker()
 	);

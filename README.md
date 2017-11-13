@@ -21,9 +21,9 @@ For more information, visit the website at: <https://debatemap.live>
 
 1) Clone the repo to disk: <https://github.com/Venryx/DebateMap.git>
 2) Run `npm install` in the root project folder.
-3) Revert the `node_modules` folder. (it has some git-tracked modifications, which get overwritten during `npm install`)
+3) Using git, revert the `node_modules` folder. (it has some git-tracked modifications, which get overwritten during `npm install`)
 
-Note that I haven't actually verified the project works on a fresh clone, so if it fails for you, I probably just forgot a step or two, so make an issue describing where you're stuck.
+Note that I haven't thoroughly tested the setup process, so if something fails for you, I probably just forgot a step or two, so make an issue describing where you're stuck.
 
 For recommended setup of your code editor and other tools, see: [Editor setup](#editor-setup)
 
