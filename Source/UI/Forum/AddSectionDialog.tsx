@@ -8,7 +8,7 @@ import {Term, TermType} from "../../Store/firebase/terms/@Term";
 import AddTerm from "../../Server/Commands/AddTerm";
 import {Map, MapType} from "../../Store/firebase/maps/@Map";
 import AddMap from "../../Server/Commands/AddMap";
-import ThreadDetailsUI from "./ThreadDetailsUI";
+import ThreadDetailsUI from "./Thread/ThreadDetailsUI";
 import {Thread} from "../../Store/firebase/forum/@Thread";
 import AddThread from "../../Server/Commands/AddThread";
 import {Post} from "Store/firebase/forum/@Post";
