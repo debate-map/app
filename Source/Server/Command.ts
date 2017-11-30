@@ -5,6 +5,20 @@ export class CommandUserInfo {
 	id: string;
 }
 
+let currentCommandRun_listeners = null;
+async function WaitTillCurrentCommandFinishes() {
+	return new Promise((resolve, reject)=> {
+		currentCommandRun_listeners.push({resolve, reject});
+	});
+}
+function OnCurrentCommandFinished() {
+	let currentCommandRun_listeners_copy = currentCommandRun_listeners;
+	currentCommandRun_listeners = null;
+	for (let listener of currentCommandRun_listeners_copy) {
+		listener.resolve();
+	}
+}
+
 export abstract class Command<Payload> {
 	constructor(payload: Payload) {
 		this.userInfo = {id: GetUserID()}; // temp
@@ -32,6 +46,11 @@ export abstract class Command<Payload> {
 
 	/** [async] Validates the data, prepares it, and executes it -- thus applying it into the database. */
 	async Run() {
+		while (currentCommandRun_listeners) {
+			await WaitTillCurrentCommandFinishes();
+		}
+		currentCommandRun_listeners = [];
+		
 		MaybeLog(a=>a.commands, ()=>`Running command. @type:${this.constructor.name} @payload(${ToJSON(this.payload)})`);
 
 		this.Validate_Early();
@@ -41,6 +60,8 @@ export abstract class Command<Payload> {
 		let dbUpdates = this.GetDBUpdates();
 		//FixDBUpdates(dbUpdates);
 		await store.firebase.helpers.DBRef().update(dbUpdates);
+
+		OnCurrentCommandFinished();
 
 		// later on (once set up on server), this will send the data back to the client, rather than return it
 		return this.returnData;

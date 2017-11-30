@@ -24,7 +24,6 @@ export default class AddThread extends Command<{thread: Thread, post: Post}> {
 		thread.createdAt = Date.now();
 		//thread.editedAt = thread.createdAt;
 
-		let newRootNode = new MapNode({type: MapNodeType.Category, creator: thread.creator, titles: {base: "Root"}, votingDisabled: true})
 		this.sub_addPost = new AddPost({threadID: this.threadID, post});
 		this.sub_addPost.Validate_Early();
 		await this.sub_addPost.Prepare();
