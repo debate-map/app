@@ -1,15 +1,16 @@
-import {BaseComponent, Pre, RenderSource, Div, FindDOM, GetErrorMessagesUnderElement} from "../../../../Frame/UI/ReactGlobals";
-import Column from "../../../../Frame/ReactComponents/Column";
-import Row from "../../../../Frame/ReactComponents/Row";
-import TextInput from "../../../../Frame/ReactComponents/TextInput";
+import {BaseComponent, RenderSource, FindDOM} from "react-vextensions";
+import {Pre, Div} from "react-vcomponents";
+import {Column} from "react-vcomponents";
+import {Row} from "react-vcomponents";
+import {TextInput} from "react-vcomponents";
 import Moment from "moment";
 import {GetUser, User, GetUserPermissionGroups} from "../../../../Store/firebase/users";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../../Frame/General/Enums";
-import Select from "../../../../Frame/ReactComponents/Select";
-import CheckBox from "../../../../Frame/ReactComponents/CheckBox";
+import {Select} from "react-vcomponents";
+import {CheckBox} from "react-vcomponents";
 import ScrollView from "react-vscrollview";
-import Button from "../../../../Frame/ReactComponents/Button";
+import {Button} from "react-vcomponents";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, MapNode_id, ThesisType, AccessLevel} from "../../../../Store/firebase/nodes/@MapNode";
 import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
@@ -19,11 +20,12 @@ import {GetParentNode, GetNodeChildren, GetNode, GetMetaThesisChildNode} from ".
 import {GetNodeForm, IsContextReversed, IsArgumentNode, GetNodeDisplayText, IsArgumentType, GetThesisType} from "../../../../Store/firebase/nodes/$node";
 import {ReverseThenType} from "../../../../Store/firebase/nodes/$node/$metaThesis";
 import Icon from "../../../../Frame/ReactComponents/Icon";
-import Spinner from "../../../../Frame/ReactComponents/Spinner";
+import {Spinner} from "react-vcomponents";
 import EquationEditorUI from "./EquationEditorUI";
 import {IsUserAdmin} from "../../../../Store/firebase/userExtras";
 import {GetUserID, GetUserAccessLevel} from "Store/firebase/users";
 import ImageAttachmentEditorUI from "./ImageAttachmentEditorUI";
+import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
 
 type Props = {
 	baseData: MapNodeEnhanced, baseLinkData: ChildEntry, parent: MapNodeEnhanced, forNew: boolean, enabled?: boolean,

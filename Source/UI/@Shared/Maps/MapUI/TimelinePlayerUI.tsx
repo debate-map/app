@@ -1,10 +1,11 @@
-import {BaseComponent, Pre, Span, FindReact} from "../../../../Frame/UI/ReactGlobals";
-import Column from "../../../../Frame/ReactComponents/Column";
+import {BaseComponent, FindReact} from "react-vextensions";
+import {Pre, Span} from "react-vcomponents";
+import {Column} from "react-vcomponents";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetOpenMapID} from "../../../../Store/main";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
-import Row from "Frame/ReactComponents/Row";
-import Button from "Frame/ReactComponents/Button";
+import {Row} from "react-vcomponents";
+import {Button} from "react-vcomponents";
 import ScrollView from "react-vscrollview";
 import {ACTMap_PlayingTimelineSet, ACTMap_PlayingTimelineStepSet, GetPlayingTimeline, GetPlayingTimelineStep} from "Store/main/maps/$map";
 import { Map } from "Store/firebase/maps/@Map";

@@ -1,13 +1,13 @@
-import {BaseComponent, BaseProps} from "../Frame/UI/ReactGlobals";
+import {BaseComponent, BaseProps} from "react-vextensions";
 import {firebaseConnect} from "react-redux-firebase";
 import SubNavBar from "./@Shared/SubNavBar";
 import {SubNavBarButton} from "./@Shared/SubNavBar";
 import GlobalMapUI from "./Global/GlobalMapUI";
 import ScrollView from "react-vscrollview";
 import GlobalListUI from "./Global/GlobalListUI";
-import Column from "../Frame/ReactComponents/Column";
+import {Column} from "react-vcomponents";
 import {Connect} from "../Frame/Database/FirebaseConnect";
-import Switch from "Frame/ReactComponents/Switch";
+import {Switch} from "react-vcomponents";
 
 type Props = {} & Partial<{currentSubpage: string}>;
 @Connect(state=> ({

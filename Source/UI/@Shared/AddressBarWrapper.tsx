@@ -1,4 +1,4 @@
-import {BaseComponent} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
 import { Connect } from "../../Frame/Database/FirebaseConnect";
 import { GetNewURL, loadingURL } from "Frame/URL/URLManager";
 import { push, replace } from "redux-little-router";

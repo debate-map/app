@@ -4,10 +4,10 @@ import {Component, PropTypes} from "react";
 import GoogleButton from "react-google-button";
 import {connect} from "react-redux";
 import {firebaseConnect, helpers} from "react-redux-firebase";
-import {BaseComponent, BaseProps, Div} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, BaseProps} from "react-vextensions";
 import {Debugger, E} from "../../Frame/General/Globals_Free";
-import Button from "../../Frame/ReactComponents/Button";
-import TextInput from "../../Frame/ReactComponents/TextInput";
+import {Button} from "react-vcomponents";
+import {TextInput} from "react-vcomponents";
 import Action from "../../Frame/General/Action";
 import {HandleError} from "../../Frame/General/Errors";
 import UserPanel from "./NavBar/UserPanel";
@@ -20,11 +20,12 @@ import {SubNavBarButton} from "./SubNavBar";
 import Radium from "radium";
 import Link from "../../Frame/ReactComponents/Link";
 import NotificationsUI from "./NavBar/NotificationsUI";
-import Column from "../../Frame/ReactComponents/Column";
-import Row from "../../Frame/ReactComponents/Row";
+import {Column} from "react-vcomponents";
+import {Row} from "react-vcomponents";
 import ReputationPanel from "./NavBar/ReputationPanel";
 import GuidePanel from "./NavBar/GuidePanel";
 import {URL} from "../../Frame/General/URLs";
+import {Div} from "react-vcomponents";
 
 // main
 // ==========

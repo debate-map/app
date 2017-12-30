@@ -1,10 +1,10 @@
-import {BaseComponent, Span, Div, AddGlobalStyle} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, AddGlobalStyle} from "react-vextensions";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import NotificationMessage from "../../../Store/main/@NotificationMessage";
-import Button from "../../../Frame/ReactComponents/Button";
+import {Button, Div} from "react-vcomponents";
 import {ACTNotificationMessageRemove} from "../../../Store/main";
-import Column from "../../../Frame/ReactComponents/Column";
-import Row from "../../../Frame/ReactComponents/Row";
+import {Column} from "react-vcomponents";
+import {Row} from "react-vcomponents";
 import ScrollView from "react-vscrollview";
 
 AddGlobalStyle(`

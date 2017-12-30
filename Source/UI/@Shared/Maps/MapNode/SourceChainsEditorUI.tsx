@@ -1,12 +1,13 @@
 import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
-import {BaseComponent, FindDOM, GetErrorMessagesUnderElement} from "../../../../Frame/UI/ReactGlobals";
-import Button from "Frame/ReactComponents/Button";
-import Column from "../../../../Frame/ReactComponents/Column";
-import Row from "Frame/ReactComponents/Row";
-import TextInput from "../../../../Frame/ReactComponents/TextInput";
+import {BaseComponent, FindDOM} from "react-vextensions";
+import {Button} from "react-vcomponents";
+import {Column} from "react-vcomponents";
+import {Row} from "react-vcomponents";
+import {TextInput} from "react-vcomponents";
 import {GetEntries} from "../../../../Frame/General/Enums";
 import {GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText} from "../../../../Store/firebase/contentNodes/$contentNode";
-import Select from "../../../../Frame/ReactComponents/Select";
+import {Select} from "react-vcomponents";
+import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
 
 type Props = {baseData: SourceChain[], enabled?: boolean, style?, onChange?: (newData: SourceChain[])=>void};
 	//& Partial<{creator: User, variantNumber: number}>;

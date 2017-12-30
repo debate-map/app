@@ -1,4 +1,4 @@
-import {BaseComponent, BaseProps} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, BaseProps} from "react-vextensions";
 import {colors} from "../../Frame/UI/GlobalStyles";
 import {E} from "../../Frame/General/Globals_Free";
 import Radium from "radium";

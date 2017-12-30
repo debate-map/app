@@ -1,12 +1,12 @@
 import {SubNavBarButton} from "./../@Shared/SubNavBar";
 import SubNavBar from "./../@Shared/SubNavBar";
-import {BaseComponent, SimpleShouldUpdate} from "./../../Frame/UI/ReactGlobals";
+import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
 import VReactMarkdown from "./../../Frame/ReactComponents/VReactMarkdown";
 import ScrollView from "react-vscrollview";
 import {styles} from "./../../Frame/UI/GlobalStyles";
 import VReactMarkdown_Remarkable from "./../../Frame/ReactComponents/VReactMarkdown_Remarkable";
-import Column from "./../../Frame/ReactComponents/Column";
-import Row from "Frame/ReactComponents/Row";
+import {Column} from "react-vcomponents";
+import {Row} from "react-vcomponents";
 
 export default class TasksUI extends BaseComponent<{}, {}> {
 	render() {

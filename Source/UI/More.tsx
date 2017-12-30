@@ -1,4 +1,4 @@
-import {BaseComponent, RouteProps, Div} from "../Frame/UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
 import {firebaseConnect} from "react-redux-firebase";
 import AdminUI from "./More/Admin";
 import SubNavBar from "./@Shared/SubNavBar";
@@ -11,10 +11,11 @@ import {connect} from "react-redux";
 import {RootState} from "../Store/index";
 import LinksUI from "./More/Links";
 import ScrollView from "react-vscrollview";
-import Column from "../Frame/ReactComponents/Column";
-import Switch from "Frame/ReactComponents/Switch";
+import {Column} from "react-vcomponents";
+import {Switch} from "react-vcomponents";
 import {Fragment} from "redux-little-router";
 import TasksUI from "./More/Tasks";
+import {Div} from "react-vcomponents";
 
 type Props = {} & Partial<{currentSubpage: string, userCount: number}>;
 @Connect(state=> ({

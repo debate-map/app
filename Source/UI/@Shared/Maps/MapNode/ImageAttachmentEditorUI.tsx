@@ -1,27 +1,27 @@
 import {TransformRatingForContext} from "../../../../Store/firebase/nodeRatings";
 import {Assert} from "../../../../Frame/General/Assert";
-import {BaseComponent, Pre, RenderSource, Div, FindDOM, GetErrorMessagesUnderElement} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, RenderSource, FindDOM} from "react-vextensions";
+import {Pre, RowLR} from "react-vcomponents";
 import {Term, TermType, Term_nameFormat, Term_disambiguationFormat} from "../../../../Store/firebase/terms/@Term";
-import Column from "../../../../Frame/ReactComponents/Column";
-import Row from "../../../../Frame/ReactComponents/Row";
-import TextInput from "../../../../Frame/ReactComponents/TextInput";
+import {Column} from "react-vcomponents";
+import {Row} from "react-vcomponents";
+import {TextInput} from "react-vcomponents";
 import Moment from "moment";
 import {GetUser, User} from "../../../../Store/firebase/users";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../../Frame/General/Enums";
-import Select from "../../../../Frame/ReactComponents/Select";
-import {RowLR} from "../../../../Frame/ReactComponents/Row";
-import CheckBox from "../../../../Frame/ReactComponents/CheckBox";
+import {Select} from "react-vcomponents";
+import {CheckBox} from "react-vcomponents";
 import ScrollView from "react-vscrollview";
-import Button from "../../../../Frame/ReactComponents/Button";
+import {Button} from "react-vcomponents";
 import TermComponent from "../../../../Store/firebase/termComponents/@TermComponent";
 import {GetNiceNameForTermType} from "../../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import {Equation} from "../../../../Store/firebase/nodes/@Equation";
-import {TextArea_AutoSize} from "../../../../Frame/ReactComponents/TextArea";
 import {ImageAttachment} from "../../../../Store/firebase/nodes/@MapNode";
-import Spinner from "../../../../Frame/ReactComponents/Spinner";
+import {Spinner} from "react-vcomponents";
+import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
 
 type Props = {baseData: ImageAttachment, creating: boolean, editing?: boolean, style?, onChange?: (newData: ImageAttachment)=>void};
 export default class ImageAttachmentEditorUI extends BaseComponent<Props, {newData: ImageAttachment}> {

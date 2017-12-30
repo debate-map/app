@@ -1,10 +1,10 @@
-import Column from "../../../Frame/ReactComponents/Column";
-import {BaseComponent, Div, GetInnerComp, Span} from "../../../Frame/UI/ReactGlobals";
+import {Column, Div} from "react-vcomponents";
+import {BaseComponent, GetInnerComp} from "react-vextensions";
 import {Post} from "Store/firebase/forum/@Post";
-import Row from "Frame/ReactComponents/Row";
+import {Row} from "react-vcomponents";
 import {User, GetUser} from "../../../Store/firebase/users";
 import {Connect} from "Frame/Database/FirebaseConnect";
-import Button from "Frame/ReactComponents/Button";
+import {Button, Span} from "react-vcomponents";
 import Moment from "moment";
 import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
 import DeletePost from "Server/Commands/DeletePost";

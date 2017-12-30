@@ -1,15 +1,16 @@
 import {Image} from "../../../../Store/firebase/images/@Image";
 import {GetImage} from "../../../../Store/firebase/images";
 import {connect} from "react-redux";
-import { BaseComponent, Div, AddGlobalStyle, Pre, GetInnerComp, FindDOM_ } from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, AddGlobalStyle, GetInnerComp} from "react-vextensions";
+import {Pre, Div} from "react-vcomponents";
 import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
 import VMenu from "react-vmenu";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
-import TextInput from "../../../../Frame/ReactComponents/TextInput";
+import {TextInput} from "react-vcomponents";
 import {DN, Debugger} from "../../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
-import Button from "../../../../Frame/ReactComponents/Button";
+import {Button} from "react-vcomponents";
 import {CachedTransform} from "../../../../Frame/V/VCache";
 import {WaitXThenRun} from "../../../../Frame/General/Timers";
 import keycode from "keycode";
@@ -26,7 +27,7 @@ import {RatingType_Info, RatingType, ratingTypes} from "../../../../Store/fireba
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {ACTMapNodeSelect, ACTMapNodeExpandedSet, ACTMapNodePanelOpen, ACTMapNodeTermOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import Column from "../../../../Frame/ReactComponents/Column";
+import {Column} from "react-vcomponents";
 import DefinitionsPanel from "./NodeUI/DefinitionsPanel";
 import QuestionsPanel from "./NodeUI/QuestionsPanel";
 import TagsPanel from "./NodeUI/TagsPanel";
@@ -35,7 +36,7 @@ import OthersPanel from "./NodeUI/OthersPanel";
 import SocialPanel from "./NodeUI/SocialPanel";
 import RatingsPanel from "./NodeUI/RatingsPanel";
 import DiscussionPanel from "./NodeUI/DiscussionPanel";
-import Row from "../../../../Frame/ReactComponents/Row";
+import {Row} from "react-vcomponents";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
 import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetNodeForm, GetFinalNodeTypeAtPath, IsContextReversed, GetNodeEnhanced} from "../../../../Store/firebase/nodes/$node";
 import {ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
@@ -53,6 +54,7 @@ import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
 import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import SubPanel from "./NodeUI_Inner/SubPanel";
 import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
+import {FindDOM_} from "Frame/UI/ReactGlobals";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner

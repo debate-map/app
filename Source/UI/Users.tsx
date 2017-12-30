@@ -1,12 +1,12 @@
-import {Div, BaseComponent} from "../Frame/UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
 import {styles} from "../Frame/UI/GlobalStyles";
 import {Connect} from "../Frame/Database/FirebaseConnect";
 import {GetUsers, GetUserExtraInfoMap, UserExtraInfoMap, User} from "../Store/firebase/users";
-import Row from "../Frame/ReactComponents/Row";
+import {Row} from "react-vcomponents";
 import UserExtraInfo from "../Store/firebase/userExtras/@UserExtraInfo";
 import Moment from "moment";
 import ScrollView from "react-vscrollview";
-import Column from "../Frame/ReactComponents/Column";
+import {Column} from "react-vcomponents";
 
 export const columnWidths = [.35, .15, .1, .15, .25];
 

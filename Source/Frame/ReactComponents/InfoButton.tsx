@@ -1,6 +1,5 @@
-import {BaseComponent, Pre} from "../UI/ReactGlobals";
-import {ButtonProps} from "./Button";
-import Button from "./Button";
+import {BaseComponent} from "react-vextensions";
+import {Pre, Button, ButtonProps} from "react-vcomponents";
 //import ReactTooltip from "react-tooltip";
 import Tooltip from "rc-tooltip";
 import {InTooltip} from "./Tooltip";

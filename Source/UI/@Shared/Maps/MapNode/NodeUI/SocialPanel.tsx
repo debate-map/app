@@ -1,5 +1,5 @@
-import Column from "../../../../../Frame/ReactComponents/Column";
-import {Div, BaseComponent} from "../../../../../Frame/UI/ReactGlobals";
+import {Div, Column} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 
 export default class SocialPanel extends BaseComponent<{}, {}> {
 	render() {

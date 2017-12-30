@@ -1,4 +1,4 @@
-import {BaseComponent, FindDOM, SimpleShouldUpdate_Overridable} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, FindDOM, SimpleShouldUpdate_Overridable} from "react-vextensions";
 import NodeUI from "./NodeUI";
 import {Vector2i} from "../../../../Frame/General/VectorStructs";
 import {A} from "../../../../Frame/General/Assert";

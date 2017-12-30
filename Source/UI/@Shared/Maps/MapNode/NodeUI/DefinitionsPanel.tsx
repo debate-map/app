@@ -1,13 +1,13 @@
-import Column from "../../../../../Frame/ReactComponents/Column";
-import {Div, BaseComponent, Pre} from "../../../../../Frame/UI/ReactGlobals";
+import {Pre, Column} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 import {MapNode} from "../../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeDisplayText} from "../../../../../Store/firebase/nodes/$node";
 import {GetTerm, GetTermVariantNumber} from "../../../../../Store/firebase/terms";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {CachedTransform} from "../../../../../Frame/V/VCache";
-import Row from "../../../../../Frame/ReactComponents/Row";
+import {Row} from "react-vcomponents";
 import {Term} from "../../../../../Store/firebase/terms/@Term";
-import Button from "../../../../../Frame/ReactComponents/Button";
+import {Button} from "react-vcomponents";
 import TermDetailsUI from "../../../../Content/Terms/TermDetailsUI";
 import TermComponentsUI from "../../../../Content/Terms/TermComponentsUI";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";

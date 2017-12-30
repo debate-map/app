@@ -1,11 +1,11 @@
 import {onLogFuncs} from "../General/Logging";
 import Action from "../General/Action";
-import {BaseComponent, AddGlobalStyle} from "./ReactGlobals";
+import {BaseComponent, AddGlobalStyle} from "react-vextensions";
 import Modal from "react-modal";
-import Button from "../ReactComponents/Button";
 import {E} from "../General/Globals_Free";
 import {connect} from "react-redux";
 import {RootState} from "../../Store/index";
+import {Button} from "react-vcomponents";
 
 export class MessageBoxOptions {
 	title?: string;

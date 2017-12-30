@@ -1,8 +1,8 @@
-import {Div, BaseComponent} from "../Frame/UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
 import {styles} from "../Frame/UI/GlobalStyles";
-import Button from "Frame/ReactComponents/Button";
-import Row from "Frame/ReactComponents/Row";
-import Column from "../Frame/ReactComponents/Column";
+import {Button} from "react-vcomponents";
+import {Row} from "react-vcomponents";
+import {Column} from "react-vcomponents";
 import {Connect} from "../Frame/Database/FirebaseConnect";
 import {MapType, Map} from "../Store/firebase/maps/@Map";
 import { GetMaps } from "Store/firebase/maps";

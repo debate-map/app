@@ -1,4 +1,4 @@
-import {BaseComponent, SimpleShouldUpdate, Div} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
 
 export default class StreamPanel extends BaseComponent<{auth?}, {}> {
 	render() {

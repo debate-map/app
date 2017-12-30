@@ -1,6 +1,6 @@
 import ReactMarkdown, {ReactMarkdownProps} from "react-markdown";
-import {BaseComponent, ShallowChanged} from "../UI/ReactGlobals";
-//import {Component as BaseComponent} from "react";
+import {BaseComponent, ShallowChanged} from "react-vextensions";
+//import {Component as BaseComponent} from "react-vextensions";
 import {Segment, ParseSegmentsForPatterns} from "../General/RegexHelpers";
 import {URL, GetCurrentURL} from "../General/URLs";
 import Link from "./Link";

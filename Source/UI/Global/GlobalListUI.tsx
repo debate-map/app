@@ -1,7 +1,7 @@
-import {Div, BaseComponent} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
 import {styles} from "../../Frame/UI/GlobalStyles";
 import {MapNode, MapNodeEnhanced, globalMapID} from "../../Store/firebase/nodes/@MapNode";
-import Row from "Frame/ReactComponents/Row";
+import {Row} from "react-vcomponents";
 import NodeUI from "../@Shared/Maps/MapNode/NodeUI";
 import {Map} from "../../Store/firebase/maps/@Map";
 import { Connect } from "../../Frame/Database/FirebaseConnect";

@@ -1,9 +1,9 @@
 import {VMenuLayer} from "react-vmenu";
 // We only need to import the modules necessary for initial render
 import {PropTypes, Component} from "react";
-import {BaseComponent, AddGlobalStyle, ShallowChanged} from "../Frame/UI/ReactGlobals";
+import {BaseComponent, AddGlobalStyle, ShallowChanged} from "react-vextensions";
 import "../Frame/UI/JQueryExtensions";
-//import {Component as BaseComponent} from "react";
+//import {Component as BaseComponent} from "react-vextensions";
 import ScrollView from "react-vscrollview";
 //import "../Frame/Styles/Core.scss";
 import "../../Source/Frame/Styles/Core.scss";
@@ -14,7 +14,7 @@ import MoreUI from "../UI/More";
 import AdminUI from "../UI/More/Admin";
 import HomeUI from "../UI/Home";
 import {MessageBoxOptions, ACTMessageBoxShow, MessageBoxUI} from "../Frame/UI/VMessageBox";
-import Button from "../Frame/ReactComponents/Button";
+import {Button} from "react-vcomponents";
 import NavBar from "../UI/@Shared/NavBar";
 import StreamUI from "./Stream";
 import ChatUI from "./Chat";
@@ -31,13 +31,13 @@ import {persistStore} from "redux-persist";
 import {createBlacklistFilter} from "redux-persist-transform-filter";
 import {URL} from "../Frame/General/URLs";
 import { Connect } from "../Frame/Database/FirebaseConnect";
-import Switch from "Frame/ReactComponents/Switch";
+import {Switch} from "react-vcomponents";
 import {RouterProvider} from 'redux-little-router';
 import Route from "../Frame/ReactComponents/Route";
 import AddressBarWrapper from "UI/@Shared/AddressBarWrapper";
 import GuideUI from "UI/Guide";
 import ReputationUI from "./Reputation";
-import Column from "../Frame/ReactComponents/Column";
+import {Column} from "react-vcomponents";
 
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	ComponentWillMount() {

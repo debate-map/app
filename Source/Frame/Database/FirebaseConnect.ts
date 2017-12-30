@@ -1,7 +1,7 @@
 import {Assert} from "../General/Assert";
 import {RootState} from "../../Store/index";
 import {connect} from "react-redux";
-import {ShallowChanged, GetInnerComp} from "../UI/ReactGlobals";
+import {ShallowChanged, GetInnerComp} from "react-vextensions";
 import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/query";
 import {getEventsFromInput} from "react-redux-firebase/dist/utils";
 import {ToJSON} from "../General/Globals";

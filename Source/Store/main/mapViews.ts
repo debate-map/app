@@ -9,7 +9,7 @@ import {ToInt} from "../../Frame/General/Types";
 import {GetMap, GetRootNodeID} from "../firebase/maps";
 import u from "updeep";
 import {MapViewReducer, ACTMapViewMerge} from "./mapViews/$mapView";
-import {ShallowChanged} from "../../Frame/UI/ReactGlobals";
+import {ShallowChanged} from "react-vextensions";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 import {URL} from "../../Frame/General/URLs";
 import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "./debates";

@@ -2,7 +2,7 @@ import {Connect} from "../../Frame/Database/FirebaseConnect";
 import {DeepGet} from "../../Frame/V/V";
 import {SubNavBarButton} from "../@Shared/SubNavBar";
 import SubNavBar from "../@Shared/SubNavBar";
-import {BaseComponent, SimpleShouldUpdate, GetInnerComp, FindDOM_, ShallowEquals} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, SimpleShouldUpdate, GetInnerComp, ShallowEquals} from "react-vextensions";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import {styles} from "../../Frame/UI/GlobalStyles";
 import ScrollView from "react-vscrollview";
@@ -20,6 +20,7 @@ import ReactMarkdown from "react-markdown";
 import {GetNodeEnhanced} from "../../Store/firebase/nodes/$node";
 import { replace, push } from "redux-little-router";
 import { demoMap, demoRootNodeID } from "UI/Home/DemoMap";
+import {FindDOM_} from "Frame/UI/ReactGlobals";
 
 let red = `rgba(255,0,0,.7)`;
 let green = `rgba(0,255,0,.6)`;

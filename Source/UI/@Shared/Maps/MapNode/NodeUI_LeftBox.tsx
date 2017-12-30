@@ -1,6 +1,6 @@
-import {BaseComponent, Span} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
 import MapNodeUI_Inner from "./NodeUI_Inner";
-import Button from "../../../../Frame/ReactComponents/Button";
+import {Button, Span} from "react-vcomponents";
 import {E} from "../../../../Frame/General/Globals_Free";
 import {connect} from "react-redux";
 import {CachedTransform} from "../../../../Frame/V/VCache";

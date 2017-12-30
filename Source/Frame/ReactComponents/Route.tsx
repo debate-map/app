@@ -1,4 +1,4 @@
-import {BaseComponent} from "../UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
 import {URL} from "../General/URLs";
 import {Fragment} from "redux-little-router";
 

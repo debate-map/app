@@ -1,12 +1,13 @@
 import {GetRatingValue, TransformRatingForContext, ShouldRatingTypeBeReversed} from "../../../../../Store/firebase/nodeRatings";
 import jquery from "jquery";
 import {Log} from "../../../../../Frame/General/Logging";
-import {BaseComponent, FindDOM, Pre, RenderSource, SimpleShouldUpdate, FindDOM_} from "../../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, FindDOM, RenderSource, SimpleShouldUpdate} from "react-vextensions";
+import {Pre} from "react-vcomponents";
 import {Vector2i} from "../../../../../Frame/General/VectorStructs";
 import {Range, DN} from "../../../../../Frame/General/Globals";
-import Spinner from "../../../../../Frame/ReactComponents/Spinner";
+import {Spinner} from "react-vcomponents";
 import {connect} from "react-redux";
-import Select from "../../../../../Frame/ReactComponents/Select";
+import {Select} from "react-vcomponents";
 import {ShowMessageBox_Base, ShowMessageBox} from "../../../../../Frame/UI/VMessageBox";
 import {firebaseConnect} from "react-redux-firebase";
 import {GetData, SlicePath} from "../../../../../Frame/Database/DatabaseHelpers";
@@ -23,6 +24,7 @@ import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {ShowSignInPopup} from "../../../NavBar/UserPanel";
 import {GetNodeForm, GetNodeEnhanced, IsContextReversed} from "../../../../../Store/firebase/nodes/$node";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
+import {FindDOM_} from "Frame/UI/ReactGlobals";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 

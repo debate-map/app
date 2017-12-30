@@ -1,7 +1,8 @@
-import {BaseComponent, Pre, Div} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
+import {Div, Pre} from "react-vcomponents";
 import {Map, MapType} from "../../../Store/firebase/maps/@Map";
-import Column from "../../../Frame/ReactComponents/Column";
-import Row from "Frame/ReactComponents/Row";
+import {Column} from "react-vcomponents";
+import {Row} from "react-vcomponents";
 import {colors} from "../../../Frame/UI/GlobalStyles";
 import Link from "../../../Frame/ReactComponents/Link";
 import {URL} from "../../../Frame/General/URLs";

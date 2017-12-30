@@ -1,7 +1,6 @@
 import {replace, push} from "redux-little-router";
 import {ToInt} from "../General/Types";
 import {Vector2i} from "../General/VectorStructs";
-import {FindReact, ShallowChanged} from "../UI/ReactGlobals";
 import NodeUI_Inner from "../../UI/@Shared/Maps/MapNode/NodeUI_Inner";
 import {GetOpenMapID, ACTSetPage, ACTSetSubpage, ACTNotificationMessageAdd, GetPage, GetSubpage} from "../../Store/main";
 import {GetMap} from "../../Store/firebase/maps";
@@ -24,6 +23,7 @@ import {ACTPersonalMapSelect} from "../../Store/main/personal";
 import { ACTMap_PlayingTimelineSet, ACTMap_PlayingTimelineStepSet } from "Store/main/maps/$map";
 import {ACTMap_PlayingTimelineAppliedStepSet} from "../../Store/main/maps/$map";
 import {ACTSubforumSelect, ACTThreadSelect, GetSelectedSubforumID, GetSelectedThreadID} from "../../Store/main/forum";
+import {FindReact} from "react-vextensions";
 
 export function GetCrawlerURLStrForMap(mapID: number) {
 	let map = GetMap(mapID);

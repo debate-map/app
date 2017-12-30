@@ -1,4 +1,4 @@
-import {AddGlobalStyle} from "./ReactGlobals";
+import {AddGlobalStyle} from "react-vextensions";
 
 export var styles = {
 	page: {

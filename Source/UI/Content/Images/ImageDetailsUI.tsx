@@ -1,22 +1,22 @@
-import Spinner from "../../../Frame/ReactComponents/Spinner";
+import {Spinner} from "react-vcomponents";
 import {Assert} from "../../../Frame/General/Assert";
-import {BaseComponent, Pre, RenderSource, Div, FindDOM, GetErrorMessagesUnderElement} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, FindDOM} from "react-vextensions";
 import {Term, TermType, Term_nameFormat, Term_disambiguationFormat} from "../../../Store/firebase/terms/@Term";
-import Column from "../../../Frame/ReactComponents/Column";
-import Row from "../../../Frame/ReactComponents/Row";
-import TextInput from "../../../Frame/ReactComponents/TextInput";
+import {Column} from "react-vcomponents";
+import {TextInput} from "react-vcomponents";
 import Moment from "moment";
 import {GetUser, User} from "../../../Store/firebase/users";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../Frame/General/Enums";
-import Select from "../../../Frame/ReactComponents/Select";
-import {RowLR} from "../../../Frame/ReactComponents/Row";
-import CheckBox from "../../../Frame/ReactComponents/CheckBox";
+import {Select} from "react-vcomponents";
+import {CheckBox} from "react-vcomponents";
 import ScrollView from "react-vscrollview";
-import Button from "../../../Frame/ReactComponents/Button";
+import {Button} from "react-vcomponents";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 import {Image, Image_nameFormat, Image_urlFormat, ImageType, GetNiceNameForImageType} from "../../../Store/firebase/images/@Image";
 import SourceChainsEditorUI from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
+import {Div, Span, Pre, Row, RowLR} from "react-vcomponents";
+import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
 
 type Props = {baseData: Image, creating: boolean, editing: boolean, style?, onChange?: (newData: Image)=>void}
 	& Partial<{creator: User, variantNumber: number}>;

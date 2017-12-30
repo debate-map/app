@@ -1,13 +1,13 @@
 import {Assert} from "../../Frame/General/Assert";
 import {SubNavBarButton} from "../@Shared/SubNavBar";
 import SubNavBar from "../@Shared/SubNavBar";
-import {BaseComponent, SimpleShouldUpdate, FindDOM, Div, Span, Pre} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, SimpleShouldUpdate, FindDOM} from "react-vextensions";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import ScrollView from "react-vscrollview";
 import {styles} from "../../Frame/UI/GlobalStyles";
-import Column from "../../Frame/ReactComponents/Column";
-import Row from "../../Frame/ReactComponents/Row";
-import Button from "../../Frame/ReactComponents/Button";
+import {Column, Div} from "react-vcomponents";
+import {Span, Pre, Row} from "react-vcomponents";
+import {Button} from "react-vcomponents";
 import {Connect} from "../../Frame/Database/FirebaseConnect";
 import {GetTerms, GetTermVariantNumber, GetFullNameP} from "../../Store/firebase/terms";
 import {Term, TermType} from "../../Store/firebase/terms/@Term";

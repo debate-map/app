@@ -1,30 +1,30 @@
 import {Assert} from "../../../../Frame/General/Assert";
-import {BaseComponent, Pre, RenderSource, Div, FindDOM, GetErrorMessagesUnderElement} from "../../../../Frame/UI/ReactGlobals";
-import Column from "../../../../Frame/ReactComponents/Column";
-import Row from "../../../../Frame/ReactComponents/Row";
-import TextInput from "../../../../Frame/ReactComponents/TextInput";
+import {BaseComponent, FindDOM} from "react-vextensions";
+import {Pre, RowLR} from "react-vcomponents";
+import {Column} from "react-vcomponents";
+import {Row} from "react-vcomponents";
+import {TextInput} from "react-vcomponents";
 import Moment from "moment";
 import {GetUser, User} from "../../../../Store/firebase/users";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../../Frame/General/Enums";
-import Select from "../../../../Frame/ReactComponents/Select";
-import {RowLR} from "../../../../Frame/ReactComponents/Row";
-import CheckBox from "../../../../Frame/ReactComponents/CheckBox";
+import {Select} from "react-vcomponents";
+import {CheckBox} from "react-vcomponents";
 import ScrollView from "react-vscrollview";
-import Button from "../../../../Frame/ReactComponents/Button";
+import {Button} from "react-vcomponents";
 import TermComponent from "../../../../Store/firebase/termComponents/@TermComponent";
 import {GetNiceNameForTermType} from "../../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import Spinner from "../../../../Frame/ReactComponents/Spinner";
+import {Spinner} from "react-vcomponents";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
 import {TimelineStep, NodeReveal} from "../../../../Store/firebase/timelineSteps/@TimelineStep";
 import {UpdateTimelineStep} from "../../../../Server/Commands/UpdateTimelineStep";
 import {RemoveHelpers} from "../../../../Frame/Database/DatabaseHelpers";
 import {BoxController, ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
-import TextArea from "../../../../Frame/ReactComponents/TextArea";
+import {TextArea, TextArea_AutoSize} from "react-vcomponents";
 import {GetUpdates} from "../../../../Frame/General/Others";
-import {TextArea_AutoSize} from "../../../../Frame/ReactComponents/TextArea";
+import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
 
 type Props = {baseData: TimelineStep, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: TimelineStep, ui: TimelineStepDetailsUI)=>void};
 export default class TimelineStepDetailsUI extends BaseComponent<Props, {newData: TimelineStep}> {
@@ -54,7 +54,7 @@ export default class TimelineStepDetailsUI extends BaseComponent<Props, {newData
 				<Column mt={5} style={{width}}>
 					<Pre>Message:</Pre>
 					<TextArea_AutoSize value={newData.message} onChange={val=>Change(newData.message = val)}/>
-				</Column>
+				</Column>e
 				<Row mt={5}>
 					<Pre>Nodes to show:</Pre>
 					<Button text="Add" ml="auto" onClick={()=> {

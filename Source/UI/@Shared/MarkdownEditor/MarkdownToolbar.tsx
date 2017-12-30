@@ -1,7 +1,7 @@
-import {BaseComponent} from "../../../Frame/UI/ReactGlobals";
-import Row from "Frame/ReactComponents/Row";
+import {BaseComponent} from "react-vextensions";
+import {Row} from "react-vcomponents";
 import Icons from "react-md-editor/lib/icons";
-import Button from "Frame/ReactComponents/Button";
+import {Button} from "react-vcomponents";
 import {applyFormat} from "./Formatter";
 
 export class MarkdownToolbar extends BaseComponent<{enabled?: boolean, editor: ()=>any, excludeCommands?: string[]}, {}> {

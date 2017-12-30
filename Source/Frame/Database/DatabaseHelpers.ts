@@ -3,7 +3,7 @@ import {Assert} from "../General/Assert";
 import {helpers, firebaseConnect} from "react-redux-firebase";
 //import {DBPath as DBPath_} from "../../../config/DBVersion";
 import {FirebaseApplication, DataSnapshot} from "firebase";
-import {BaseComponent, ShallowChanged} from "../UI/ReactGlobals";
+import {BaseComponent, ShallowChanged} from "react-vextensions";
 import {GetTreeNodesInObjTree, DeepGet, DeepSet} from "../V/V";
 import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/query";
 import {getEventsFromInput} from "react-redux-firebase/dist/utils";

@@ -13,7 +13,7 @@ import SubpageReducer from "./main/@Shared/$subpage";
 import { LOCATION_CHANGED } from "redux-little-router";
 import { MapInfo } from "Store/main/maps/@MapInfo";
 import {globalMapID} from "./firebase/nodes/@MapNode";
-import { ShallowChanged } from "../Frame/UI/ReactGlobals";
+import { ShallowChanged } from "react-vextensions";
 import { MapInfoReducer } from "Store/main/maps/$map";
 import {demoMap} from "../UI/Home/DemoMap";
 import { Forum, ForumReducer } from "Store/main/forum";

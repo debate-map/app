@@ -1,9 +1,9 @@
 import { ACTMapNodeExpandedSet, ACTMapNodeChildLimitSet } from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
-import {BaseComponent, Div, Span, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, FindDOM_, ShallowEquals} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, ShallowEquals} from "react-vextensions";
 import {connect} from "react-redux";
 import {DBPath, GetData} from "../../../../Frame/Database/DatabaseHelpers";
 import {Debugger, QuickIncrement, E, GetTimeSinceLoad} from "../../../../Frame/General/Globals_Free";
-import Button from "../../../../Frame/ReactComponents/Button";
+import {Button, Div} from "react-vcomponents";
 import {PropTypes, Component} from "react";
 import Action from "../../../../Frame/General/Action";
 import {Log} from "../../../../Frame/General/Logging";
@@ -11,10 +11,10 @@ import {WaitXThenRun} from "../../../../Frame/General/Timers";
 import V from "../../../../Frame/V/V";
 import VMenuTest1 from "react-vmenu";
 import VMenu, {VMenuItem} from "react-vmenu";
-import Select from "../../../../Frame/ReactComponents/Select";
+import {Select} from "react-vcomponents";
 import {GetEntries} from "../../../../Frame/General/Enums";
 import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
-import TextInput from "../../../../Frame/ReactComponents/TextInput";
+import {TextInput} from "react-vcomponents";
 import {DN, ToJSON} from "../../../../Frame/General/Globals";
 import {DataSnapshot} from "firebase";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
@@ -33,10 +33,10 @@ import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
-import Column from "../../../../Frame/ReactComponents/Column";
+import {Column} from "react-vcomponents";
 import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType, IsArgumentNode, IsReversedArgumentNode} from "../../../../Store/firebase/nodes/$node";
 import FastDOM from "fastdom";
-import Row from "Frame/ReactComponents/Row";
+import {Row} from "react-vcomponents";
 import Icon from "../../../../Frame/ReactComponents/Icon";
 import {MetaThesis_IfType} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
 import {GetContentWidth, GetContentHeight} from "../../../../Frame/V/V";
@@ -52,6 +52,7 @@ import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/lay
 import { GetPlayingTimelineAppliedStepRevealNodes } from "Store/main/maps/$map";
 import {GetPlayingTimeline, GetPlayingTimelineRevealNodes, GetPlayingTimelineStepIndex, GetPlayingTimelineCurrentStepRevealNodes} from "../../../../Store/main/maps/$map";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
+import {FindDOM_} from "Frame/UI/ReactGlobals";
 
 type Props = {map: Map, node: MapNodeEnhanced, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
 	& Partial<{

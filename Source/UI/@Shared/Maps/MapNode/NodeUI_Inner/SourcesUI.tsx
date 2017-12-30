@@ -1,7 +1,7 @@
-import {BaseComponent} from "../../../../../Frame/UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
 import {SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
-import Row from "Frame/ReactComponents/Row";
-import Column from "../../../../../Frame/ReactComponents/Column";
+import {Row} from "react-vcomponents";
+import {Column} from "react-vcomponents";
 import {URL} from "../../../../../Frame/General/URLs";
 import Link from "../../../../../Frame/ReactComponents/Link";
 

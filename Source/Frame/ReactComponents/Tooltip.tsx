@@ -1,4 +1,4 @@
-import {BaseComponent} from "../UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
 //import "rc-tooltip/assets/bootstrap.css";
 
 export class InTooltip extends BaseComponent<{}, {}> {

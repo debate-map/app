@@ -1,9 +1,10 @@
 import {GetUser, GetUserID} from "../../Store/firebase/users";
 import {BoxController, ShowMessageBox} from "../../Frame/UI/VMessageBox";
-import Column from "../../Frame/ReactComponents/Column";
-import Row from "../../Frame/ReactComponents/Row";
-import TextInput from "../../Frame/ReactComponents/TextInput";
-import {Pre, GetInnerComp} from "../../Frame/UI/ReactGlobals";
+import {Column} from "react-vcomponents";
+import {Row} from "react-vcomponents";
+import {TextInput} from "react-vcomponents";
+import {GetInnerComp} from "react-vextensions";
+import {Pre} from "react-vcomponents";
 import {Term, TermType} from "../../Store/firebase/terms/@Term";
 import AddTerm from "../../Server/Commands/AddTerm";
 import {Map, MapType} from "../../Store/firebase/maps/@Map";

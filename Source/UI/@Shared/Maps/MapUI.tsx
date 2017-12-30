@@ -1,5 +1,6 @@
 import {GetViewOffset, GetSelectedNodePath, GetNodeView, GetMapView, GetFocusedNodePathNodes, GetFocusedNodePath} from "../../../Store/main/mapViews";
-import {BaseComponent, FindDOM, FindReact, FindDOM_, Pre, GetInnerComp} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, FindDOM, FindReact, GetInnerComp} from "react-vextensions";
+import {Pre} from "react-vcomponents";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
 import {DBPath, GetData} from "../../../Frame/Database/DatabaseHelpers";
@@ -21,9 +22,9 @@ import {RootState} from "../../../Store/index";
 import {GetUserID} from "../../../Store/firebase/users";
 import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
-import Column from "../../../Frame/ReactComponents/Column";
+import {Column} from "react-vcomponents";
 import {GetNode, GetNodeChildren} from "../../../Store/firebase/nodes";
-import Row from "../../../Frame/ReactComponents/Row";
+import {Row} from "react-vcomponents";
 import Link from "../../../Frame/ReactComponents/Link";
 import {URL} from "../../../Frame/General/URLs";
 import NodeUI_ForBots from "./MapNode/NodeUI_ForBots";
@@ -31,10 +32,9 @@ import {IsNumberString} from "../../../Frame/General/Types";
 import {GetNodeEnhanced} from "../../../Store/firebase/nodes/$node";
 import {GetOpenMapID, ACTSetInitialChildLimit} from "../../../Store/main";
 import {colors, styles} from "../../../Frame/UI/GlobalStyles";
-import Button from "Frame/ReactComponents/Button";
-import DropDown from "../../../Frame/ReactComponents/DropDown";
-import {DropDownTrigger, DropDownContent} from "../../../Frame/ReactComponents/DropDown";
-import Spinner from "../../../Frame/ReactComponents/Spinner";
+import {Button} from "react-vcomponents";
+import {DropDown} from "react-vcomponents";
+import {Spinner} from "react-vcomponents";
 import {ACTDebateMapSelect} from "../../../Store/main/debates";
 import MapDetailsUI from "./MapDetailsUI";
 import {GetUpdates} from "../../../Frame/General/Others";
@@ -52,6 +52,7 @@ import {emptyArray} from "../../../Frame/Store/ReducerUtils";
 import { TimelinePlayerUI, TimelineOverlayUI } from "UI/@Shared/Maps/MapUI/TimelinePlayerUI";
 import {GetAsync} from "Frame/Database/DatabaseHelpers";
 import {GetPlayingTimeline} from "../../../Store/main/maps/$map";
+import { FindDOM_ } from "Frame/UI/ReactGlobals";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -106,7 +107,7 @@ type Props = {
 		viewOffset_available: (GetMapView(state, {map}) && GetMapView(state, {map}).viewOffset) != null,*/
 	};
 })
-export default class MapUI extends BaseComponent<Props, {} | void> {
+export default class MapUI extends BaseComponent<Props, {}> {
 	//static defaultProps = {padding: {left: 2000, right: 2000, top: 1000, bottom: 1000}};
 	static defaultProps = {
 		padding: {left: screen.availWidth, right: screen.availWidth, top: screen.availHeight, bottom: screen.availHeight},
@@ -296,7 +297,7 @@ export default class MapUI extends BaseComponent<Props, {} | void> {
 		
 		let focusNodeBox = this.FindNodeBox(nodePath, true);
 		if (focusNodeBox == null) return;
-		let focusNodeBoxPos = focusNodeBox.DOM_.GetScreenRect().Center.Minus($(this.mapUI).GetScreenRect().Position);
+		let focusNodeBoxPos = FindDOM_(focusNodeBox).GetScreenRect().Center.Minus($(this.mapUI).GetScreenRect().Position);
 		this.ScrollToPosition(focusNodeBoxPos);
 	}
 	ScrollToPosition(posInContainer: Vector2i) {

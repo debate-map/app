@@ -154,12 +154,19 @@ Array.prototype._AddFunction_Inline = function ForEach(func) {
 		func.call(this[i], this[i], i); // call, having the item be "this", as well as the first argument
 };
 
-Array.prototype._AddFunction_Inline = function Move(item, newIndex) {
+interface Array<T> { Move(item: any, newIndex: number, shiftInsertPointToPreserveFinalNeighbors?: boolean): number; }
+Array.prototype._AddFunction_Inline = function Move(this: any[], item, newIndex, shiftInsertPointToPreserveFinalNeighbors = false) {
 	var oldIndex = this.indexOf(item);
-	this.RemoveAt(oldIndex);
-	if (oldIndex < newIndex) // new-index is understood to be the position-in-list to move the item to, as seen before the item started being moved--so compensate for remove-from-old-position list modification
-		newIndex--;
+	if (oldIndex != -1) {
+		this.RemoveAt(oldIndex);
+		// New-index is understood to be the position-in-list to move the item to, as seen before the item started being moved.
+		// So compensate for remove-from-old-position list modification.
+		if (shiftInsertPointToPreserveFinalNeighbors && oldIndex < newIndex) {
+			newIndex--;
+		}
+	}
 	this.Insert(newIndex, item);
+	return oldIndex;
 };
 
 Array.prototype._AddFunction_Inline = function ToList(itemType = null) { return [].concat(this); }
@@ -169,11 +176,12 @@ Array.prototype._AddFunction_Inline = function ToList(itemType = null) { return 
 		result.Add(keyFunc(this[i]), valFunc(this[i]));
 	return result;
 }*/
-interface Array<T> { ToMap(keyFunc: (item: T)=>string, valFunc: (item: T)=>any): any; }
-Array.prototype._AddFunction_Inline = function ToMap(keyFunc, valFunc) {
+interface Array<T> { ToMap(keyFunc: (item: T, index: number)=>string, valFunc: (item: T, index: number)=>any): any; }
+Array.prototype._AddFunction_Inline = function ToMap(this: any[], keyFunc, valFunc) {
 	var result = {};
-	for (let item of this)
-		result[keyFunc(item)] = valFunc(item);
+	for (let [index, item] of this.entries()) {
+		result[keyFunc(item, index)] = valFunc(item, index);
+	}
 	return result;
 }
 interface Array<T> { Skip(count: number): T[]; }

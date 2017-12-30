@@ -1,4 +1,4 @@
-import {BaseComponent} from "../../../../../Frame/UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
 import { MapNode, ImageAttachment } from "../../../../../Store/firebase/nodes/@MapNode";
 import {GetFontSizeForNode} from "../../../../../Store/firebase/nodes/$node";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";

@@ -1,23 +1,24 @@
-import {BaseComponent, FindDOM, GetErrorMessagesUnderElement} from "../../../Frame/UI/ReactGlobals";
+import {BaseComponent, FindDOM} from "react-vextensions";
 import {ThesisForm} from "../../../Store/firebase/nodes/@MapNode";
-import Column from "../../../Frame/ReactComponents/Column";
-import Row from "../../../Frame/ReactComponents/Row";
-import {Pre, Div} from "../../../Frame/UI/ReactGlobals";
+import {Column} from "react-vcomponents";
+import {Row} from "react-vcomponents";
+import {Div, Pre} from "react-vcomponents";
 import {MapNodeType} from "../../../Store/firebase/nodes/@MapNodeType";
-import TextInput from "../../../Frame/ReactComponents/TextInput";
+import {TextInput} from "react-vcomponents";
 import Editor from "react-md-editor";
-import Button from "../../../Frame/ReactComponents/Button";
+import {Button} from "react-vcomponents";
 import {Component} from "react";
 import Icons from "react-md-editor/lib/icons";
 import {GetNodeDisplayText} from "../../../Store/firebase/nodes/$node";
 import {GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText} from "../../../Store/firebase/contentNodes/$contentNode";
-import Select from "../../../Frame/ReactComponents/Select";
+import {Select} from "react-vcomponents";
 import {ContentNode} from "../../../Store/firebase/contentNodes/@ContentNode";
 import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
 import {GetEntries} from "../../../Frame/General/Enums";
 import { MarkdownToolbar } from "UI/@Shared/MarkdownEditor/MarkdownToolbar";
 import {Post} from "../../../Store/firebase/forum/@Post";
 import Link from "../../../Frame/ReactComponents/Link";
+import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
 
 export default class PostEditorUI extends BaseComponent
 		<{forNew?: boolean, enabled?: boolean, baseData: Post, options?: any, onChange?: (newData: Post, comp: PostEditorUI)=>void},

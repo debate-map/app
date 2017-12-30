@@ -1,11 +1,11 @@
-import {ApplyBasicStyles, BaseComponent, BasicStyles, Div, SimpleShouldUpdate} from "../../../Frame/UI/ReactGlobals";
+import {ApplyBasicStyles, BaseComponent, BasicStyles, SimpleShouldUpdate} from "react-vextensions";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {HandleError} from "../../../Frame/General/Errors";
-import Button from "../../../Frame/ReactComponents/Button";
+import {Button, Div} from "react-vcomponents";
 import {GetUserID} from "../../../Store/firebase/users";
 import SocialButton from "react-social-button";
-import Column from "../../../Frame/ReactComponents/Column";
+import {Column} from "react-vcomponents";
 import {E} from "../../../Frame/General/Globals_Free";
 import {ShowMessageBox, BoxController} from "../../../Frame/UI/VMessageBox";
 

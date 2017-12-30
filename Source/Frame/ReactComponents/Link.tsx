@@ -1,6 +1,6 @@
 import React from 'react';
 import { PropTypes } from "react";
-import {BaseComponent} from "../UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
 import Radium from "radium";
 import {replace, push} from "redux-little-router";
 import {Connect} from "../Database/FirebaseConnect";

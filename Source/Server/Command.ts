@@ -61,6 +61,7 @@ export abstract class Command<Payload> {
 		//FixDBUpdates(dbUpdates);
 		await store.firebase.helpers.DBRef().update(dbUpdates);
 
+		MaybeLog(a=>a.commands, ()=>`Finishing command. @type:${this.constructor.name} @payload(${ToJSON(this.payload)})`);
 		OnCurrentCommandFinished();
 
 		// later on (once set up on server), this will send the data back to the client, rather than return it

@@ -1,4 +1,4 @@
-import {Div, BaseComponent} from "../Frame/UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
 import {styles} from "../Frame/UI/GlobalStyles";
 import VReactMarkdown_Remarkable from "../Frame/ReactComponents/VReactMarkdown_Remarkable";
 

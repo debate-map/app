@@ -1,18 +1,17 @@
-import {BaseComponent, FindDOM, GetErrorMessagesUnderElement} from "../../../../Frame/UI/ReactGlobals";
+import {BaseComponent, FindDOM} from "react-vextensions";
 import {ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
-import Column from "../../../../Frame/ReactComponents/Column";
-import Row from "../../../../Frame/ReactComponents/Row";
-import {Pre, Div} from "../../../../Frame/UI/ReactGlobals";
+import {Column} from "react-vcomponents";
+import {Row, Pre} from "react-vcomponents";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
-import TextInput from "../../../../Frame/ReactComponents/TextInput";
+import {TextInput} from "react-vcomponents";
 import Editor from "react-md-editor";
-import Button from "../../../../Frame/ReactComponents/Button";
+import {Button} from "react-vcomponents";
 import {applyFormat} from "../../MarkdownEditor/Formatter";
 import {Component} from "react";
 import Icons from "react-md-editor/lib/icons";
 import {GetNodeDisplayText} from "../../../../Store/firebase/nodes/$node";
 import {GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText} from "../../../../Store/firebase/contentNodes/$contentNode";
-import Select from "../../../../Frame/ReactComponents/Select";
+import {Select} from "react-vcomponents";
 import {ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
 import {GetEntries} from "../../../../Frame/General/Enums";
@@ -21,6 +20,7 @@ import {CleanUpdatedSourceChains} from "./SourceChainsEditorUI";
 import SourceChainsEditorUI from "./SourceChainsEditorUI";
 import {SubPanel_Quote} from "./NodeUI_Inner/SubPanel";
 import { MarkdownToolbar } from "UI/@Shared/MarkdownEditor/MarkdownToolbar";
+import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
 
 //@ApplyBasicStyles
 export default class QuoteInfoEditorUI extends BaseComponent

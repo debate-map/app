@@ -2,13 +2,14 @@ import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../..
 import {GetEntries} from "../../../../../Frame/General/Enums";
 import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, ThesisType, ImageAttachment} from "../../../../../Store/firebase/nodes/@MapNode";
 import {ShowMessageBox, BoxController} from "../../../../../Frame/UI/VMessageBox";
-import Select from "../../../../../Frame/ReactComponents/Select";
-import TextInput from "../../../../../Frame/ReactComponents/TextInput";
-import {Div, Pre, BaseComponent, GetInnerComp, FindDOM, GetErrorMessagesUnderElement} from "../../../../../Frame/UI/ReactGlobals";
-import Row from "../../../../../Frame/ReactComponents/Row";
-import Column from "../../../../../Frame/ReactComponents/Column";
+import {Select} from "react-vcomponents";
+import {TextInput} from "react-vcomponents";
+import {BaseComponent, GetInnerComp, FindDOM} from "react-vextensions";
+import {Pre} from "react-vcomponents";
+import {Row} from "react-vcomponents";
+import {Column} from "react-vcomponents";
 import keycode from "keycode";
-import Button from "../../../../../Frame/ReactComponents/Button";
+import {Button} from "react-vcomponents";
 import {E} from "../../../../../Frame/General/Globals_Free";
 import {MetaThesis_ThenType, MetaThesis_IfType, MetaThesis_ThenType_Info, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
 import AddNode from "../../../../../Server/Commands/AddNode";
@@ -16,7 +17,7 @@ import Editor from "react-md-editor";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
 import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";
-import CheckBox from "../../../../../Frame/ReactComponents/CheckBox";
+import {CheckBox} from "react-vcomponents";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import NodeDetailsUI from "../NodeDetailsUI";
 import {ReverseMapNodeType, GetThesisType} from "../../../../../Store/firebase/nodes/$node";
@@ -28,6 +29,7 @@ import {Connect} from "Frame/Database/FirebaseConnect";
 import {GetUserID} from "Store/firebase/users";
 import {Layer} from "Store/firebase/layers/@Layer";
 import AddSubnode from "../../../../../Server/Commands/AddSubnode";
+import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
 
 export function ShowAddSubnodeDialog(mapID: number, anchorNode: MapNodeEnhanced, anchorNodePath: string) {
 	let dialog: AddSubnodeDialog;

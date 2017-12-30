@@ -1,5 +1,5 @@
 import {firebaseConnect, helpers} from "react-redux-firebase";
-import {BaseComponent, SimpleShouldUpdate} from "../../Frame/UI/ReactGlobals";
+import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
 import {DBPath, GetData} from "../../Frame/Database/DatabaseHelpers";
 import {connect} from "react-redux";
 import MapUI from "../@Shared/Maps/MapUI";

@@ -1,6 +1,6 @@
 import { Connect } from "Frame/Database/FirebaseConnect";
 import {GetTerm, GetTermVariantNumber} from "../../../../../Store/firebase/terms";
-import {BaseComponent} from "../../../../../Frame/UI/ReactGlobals";
+import {BaseComponent} from "react-vextensions";
 import {Term} from "../../../../../Store/firebase/terms/@Term";
 
 @Connect((state, {termID}) => {
