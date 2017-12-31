@@ -14,7 +14,7 @@ import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
 import {GetUserID} from "../../../../../Store/firebase/users";
 import {URL, GetCurrentURL} from "../../../../../Frame/General/URLs";
 import {ParseSegmentsForPatterns} from "../../../../../Frame/General/RegexHelpers";
-import {ACTTermSelect} from "../../../../../Store/main/content";
+import {ACTTermSelect} from "../../../../../Store/main/database";
 import {push} from "redux-little-router";
 import Link from "../../../../../Frame/ReactComponents/Link";
 

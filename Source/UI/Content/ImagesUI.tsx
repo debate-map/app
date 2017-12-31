@@ -1,4 +1,4 @@
-import {ACTImageSelect, GetSelectedImage} from "../../Store/main/content";
+import {ACTImageSelect, GetSelectedImage} from "../../Store/main/database";
 import DeleteImage from "../../Server/Commands/DeleteImage";
 import UpdateImageData, { UpdateImageData_allowedPropUpdates } from "../../Server/Commands/UpdateImageData";
 import {Assert} from "../../Frame/General/Assert";

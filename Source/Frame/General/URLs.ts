@@ -2,9 +2,9 @@ import {IsNumberString} from "./Types";
 
 export const rootPages = [
 	"stream", "chat", "reputation",
-	"users", "forum", "social", "more",
+	"database", "feedback", "forum", "more",
 	"home",
-	"content", "personal", "debates", "global",
+	"social", "personal", "debates", "global",
 	"search", "guide", "profile"
 ];
 // a default-child is only used (ie. removed from url) if there are no path-nodes after it

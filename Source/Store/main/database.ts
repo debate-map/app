@@ -8,15 +8,15 @@ import SubpageReducer from "./@Shared/$subpage";
 export class ACTTermSelect extends Action<{id: number}> {}
 export class ACTImageSelect extends Action<{id: number}> {}
 
-export class Content {
+export class Database {
 	subpage: string;
 	selectedTermID: number;
 	//selectedTermComponentID: number;
 	selectedImageID: number;
 }
 
-export const ContentReducer = CombineReducers({
-	subpage: SubpageReducer("content"),
+export const DatabaseReducer = CombineReducers({
+	subpage: SubpageReducer("database"),
 	selectedTermID: (state = null, action)=> {
 		if (action.Is(ACTTermSelect))
 			return action.payload.id;
@@ -35,7 +35,7 @@ export const ContentReducer = CombineReducers({
 });
 
 export function GetSelectedTermID() {
-	return State(a=>a.main.content.selectedTermID);
+	return State(a=>a.main.database.selectedTermID);
 }
 export function GetSelectedTerm() {
 	let selectedID = GetSelectedTermID();
@@ -48,7 +48,7 @@ export function GetSelectedTerm() {
 }*/
 
 export function GetSelectedImageID() {
-	return State(a=>a.main.content.selectedImageID);
+	return State(a=>a.main.database.selectedImageID);
 }
 export function GetSelectedImage() {
 	let selectedID = GetSelectedImageID();

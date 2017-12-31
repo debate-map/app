@@ -79,13 +79,13 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 						<NotificationsUI/>
 					</Div>
 					
-					<span style={{margin: "0 auto", paddingLeft: 45}}>
-						<NavBarButton page="users" text="Users"/>
+					<span style={{margin: "0 auto", paddingRight: 6}}>
+						<NavBarButton page="database" text="Database"/>
+						<NavBarButton page="feedback" text="Feedback"/>
 						<NavBarButton page="forum" text="Forum"/>
-						<NavBarButton page="social" text="Social"/>
 						<NavBarButton page="more" text="More"/>
 						<NavBarButton page="home" text="Debate Map" style={{margin: "0 auto", textAlign: "center", fontSize: 23}}/>
-						<NavBarButton page="content" text="Content"/>
+						<NavBarButton page="social" text="Social"/>
 						<NavBarButton page="personal" text="Personal"/>
 						<NavBarButton page="debates" text="Debates"/>
 						<NavBarButton page="global" text="Global"/>

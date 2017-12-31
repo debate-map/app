@@ -7,7 +7,6 @@ import NotificationMessage from "./main/@NotificationMessage";
 import {URL, rootPageDefaultChilds} from "../Frame/General/URLs";
 import {Global} from "../Frame/General/Globals_Free";
 import {CombineReducers} from "../Frame/Store/ReducerUtils";
-import {ContentReducer, Content} from "./main/content";
 import {DebatesReducer, Debates, ACTDebateMapSelect} from "./main/debates";
 import SubpageReducer from "./main/@Shared/$subpage";
 import { LOCATION_CHANGED } from "redux-little-router";
@@ -19,6 +18,7 @@ import {demoMap} from "../UI/Home/DemoMap";
 import { Forum, ForumReducer } from "Store/main/forum";
 import { Personal } from "Store/main/personal";
 import {PersonalReducer, ACTPersonalMapSelect} from "./main/personal";
+import {Database, DatabaseReducer} from "./main/database";
 
 // class is used only for initialization
 export class MainState {
@@ -39,12 +39,12 @@ export class MainState {
 	chat: {subpage: string};
 	reputation: {subpage: string};
 
-	users: {subpage: string};
+	database: Database;
+	feedback: {feedback: string};
 	forum: Forum;
-	social: {subpage: string};
 	more: {subpage: string};
 	home: {subpage: string};
-	content: Content;
+	social: {subpage: string};
 	personal: Personal;
 	debates: Debates;
 	global: {subpage: string};
@@ -148,12 +148,12 @@ export function MainReducer(state, action) {
 		chat: CombineReducers({subpage: SubpageReducer("chat")}),
 		reputation: CombineReducers({subpage: SubpageReducer("reputation")}),
 
-		users: CombineReducers({subpage: SubpageReducer("users")}),
+		database: DatabaseReducer,
+		feedback: CombineReducers({subpage: SubpageReducer("feedback")}),
 		forum: ForumReducer,
-		social: CombineReducers({subpage: SubpageReducer("social")}),
 		more: CombineReducers({subpage: SubpageReducer("more")}),
 		home: CombineReducers({subpage: SubpageReducer("home")}),
-		content: ContentReducer,
+		social: CombineReducers({subpage: SubpageReducer("social")}),
 		personal: PersonalReducer,
 		debates: DebatesReducer,
 		global: CombineReducers({subpage: SubpageReducer("global")}),

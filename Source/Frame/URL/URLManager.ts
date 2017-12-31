@@ -8,7 +8,7 @@ import {GetNodeView, GetMapView, GetSelectedNodeID, GetViewOffset, GetFocusedNod
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 import {URL, QueryVar, rootPageDefaultChilds} from "../General/URLs";
-import {ACTTermSelect, ACTImageSelect} from "../../Store/main/content";
+import {ACTTermSelect, ACTImageSelect} from "../../Store/main/database";
 import { GetNodeDisplayText } from "../../Store/firebase/nodes/$node";
 import { GetNodeAsync, GetNode } from "Store/firebase/nodes";
 import { GetShortestPathFromRootToNode } from "Frame/Store/PathFinder";
@@ -169,7 +169,7 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 	return [nodeID, nodeView];
 }
 
-const pagesWithSimpleSubpages = ["home", "more", "content", "global"].ToMap(page=>page, ()=>null);
+const pagesWithSimpleSubpages = ["database", "feedback", "home", "more", "global"].ToMap(page=>page, ()=>null);
 export function GetSyncLoadActionsForURL(url: URL, directURLChange: boolean) {
 	let result = [];
 
@@ -192,7 +192,7 @@ export function GetSyncLoadActionsForURL(url: URL, directURLChange: boolean) {
 		result.push(new ACTThreadSelect({id: threadID}));
 	}
 
-	if (page == "content") {
+	if (page == "database") {
 		if (subpage == "terms" && url.pathNodes[2]) {
 			result.push(new ACTTermSelect({id: url.pathNodes[2].ToInt()}).VSet({fromURL: true}));
 		} else if (subpage == "images" && url.pathNodes[2]) {
@@ -329,11 +329,11 @@ export function GetNewURL(includeMapViewStr = true) {
 		if (threadID) newURL.pathNodes.push(threadID+"");
 	}
 
-	if (page == "content") {
-		if (subpage == "terms" && State(a=>a.main.content.selectedTermID)) {
-			newURL.pathNodes.push(State(a=>a.main.content.selectedTermID)+"");
-		} else if (subpage == "images" && State(a=>a.main.content.selectedImageID)) {
-			newURL.pathNodes.push(State(a=>a.main.content.selectedImageID)+"");
+	if (page == "database") {
+		if (subpage == "terms" && State(a=>a.main.database.selectedTermID)) {
+			newURL.pathNodes.push(State(a=>a.main.database.selectedTermID)+"");
+		} else if (subpage == "images" && State(a=>a.main.database.selectedImageID)) {
+			newURL.pathNodes.push(State(a=>a.main.database.selectedImageID)+"");
 		}
 	}
 

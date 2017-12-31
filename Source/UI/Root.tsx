@@ -21,7 +21,6 @@ import ChatUI from "./Chat";
 import UsersUI from "./Users";
 import ForumUI from "./Forum";
 import SocialUI from "./Social";
-import ContentUI from "./Content";
 import PersonalUI from "./Personal";
 import DebatesUI from "./Debates";
 import SearchUI from "./Search";
@@ -38,6 +37,8 @@ import AddressBarWrapper from "UI/@Shared/AddressBarWrapper";
 import GuideUI from "UI/Guide";
 import ReputationUI from "./Reputation";
 import {Column} from "react-vcomponents";
+import {DatabaseUI} from "./Database";
+import {FeedbackUI} from "./Feedback";
 
 export default class RootUIWrapper extends BaseComponent<{store}, {}> {
 	ComponentWillMount() {
@@ -101,12 +102,12 @@ class RootUI extends BaseComponent<Props, {}> {
 					<Route path="/chat"><ChatUI/></Route>
 					<Route path="/reputation"><ReputationUI/></Route>
 
-					<Route path="/users"><UsersUI/></Route>
+					<Route path="/database"><DatabaseUI/></Route>
 					<Route path="/forum"><ForumUI/></Route>
-					<Route path="/social"><SocialUI/></Route>
+					<Route path="/feedback"><FeedbackUI/></Route>
 					<Route path="/more"><MoreUI/></Route>
 					<Route withConditions={url=>URL.FromState(url).Normalized().pathNodes[0] == "home"}><HomeUI/></Route>
-					<Route path="/content"><ContentUI/></Route>
+					<Route path="/social"><SocialUI/></Route>
 					<Route path="/personal"><PersonalUI/></Route>
 					<Route path="/debates"><DebatesUI/></Route>
 					<Route path="/global"><GlobalUI/></Route>

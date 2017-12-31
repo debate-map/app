@@ -16,7 +16,7 @@ import NotificationMessage from "../../Store/main/@NotificationMessage";
 import {GetNodeDisplayText} from "../../Store/firebase/nodes/$node";
 import Raven from "raven-js";
 import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "../../Store/main/debates";
-import {ACTTermSelect, ACTImageSelect} from "../../Store/main/content";
+import {ACTTermSelect, ACTImageSelect} from "../../Store/main/database";
 import {LOCATION_CHANGED} from "redux-little-router";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import {Map} from "../../Store/firebase/maps/@Map";

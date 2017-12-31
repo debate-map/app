@@ -11,24 +11,29 @@ import TermsUI from "./Content/TermsUI";
 import ImagesUI from "./Content/ImagesUI";
 import {Connect} from "../Frame/Database/FirebaseConnect";
 import {Switch} from "react-vcomponents";
+import UsersUI from "./Users";
+
+// todo
 
 type Props = {} & Partial<{currentSubpage: string}>;
 @Connect(state=> ({
-	currentSubpage: State(a=>a.main.content.subpage),
+	currentSubpage: State(a=>a.main.database.subpage),
 }))
-export default class ContentUI extends BaseComponent<Props, {}> {
+export class DatabaseUI extends BaseComponent<Props, {}> {
 	render() {
 		let {currentSubpage} = this.props;
-		let page = "content";
+		let page = "database";
 		return (
 			<div style={{flex: 1, display: "flex", flexDirection: "column"}}>
 				<SubNavBar>
+					<SubNavBarButton {...{page}} subpage="users" text="Users"/>
 					<SubNavBarButton {...{page}} subpage="terms" text="Terms"/>
 					<SubNavBarButton {...{page}} subpage="images" text="Images"/>
 				</SubNavBar>
 				<Switch>
+					<UsersUI/>
+					{currentSubpage == "terms" && <TermsUI/>}
 					{currentSubpage == "images" && <ImagesUI/>}
-					<TermsUI/>
 				</Switch>
 			</div>
 		);
