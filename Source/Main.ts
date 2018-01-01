@@ -3,7 +3,7 @@ import "./Frame/General/Start_0";
 import "babel-polyfill";
 import "webpack-runtime-require";
 //import {Require} from "webpack-runtime-require";
-import "js-vextensions/dist/ClassExtensions";
+//import "js-vextensions/dist/ClassExtensions";
 import "js-vextensions";
 import "./Frame/General/ClassExtensions/CE_General";
 import "./Frame/General/Start_1";
