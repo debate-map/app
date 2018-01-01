@@ -14,7 +14,7 @@ import {GetUpdates} from "../../Frame/General/Others";
 import UpdateSubforumDetails from "Server/Commands/UpdateSubforumDetails";
 import { GetDataAsync, GetAsync } from "Frame/Database/DatabaseHelpers";
 import { GetSubforumThreads } from "Store/firebase/forum";
-import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
+import {ShowMessageBox} from "react-vmessagebox";
 import {Thread} from "../../Store/firebase/forum/@Thread";
 import ScrollView from "react-vscrollview";
 import {Spinner, DropDownTrigger, DropDownContent} from "react-vcomponents";

@@ -38,7 +38,7 @@ import MapDetailsUI from "./MapDetailsUI";
 import {GetUpdates} from "../../../Frame/General/Others";
 import UpdateMapDetails from "../../../Server/Commands/UpdateMapDetails";
 import {IsUserCreatorOrMod} from "../../../Store/firebase/userExtras";
-import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
+import {ShowMessageBox} from "react-vmessagebox";
 import DeleteMap from "../../../Server/Commands/DeleteMap";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 import { GetNodeAsync, GetChildCount } from "Store/firebase/nodes";

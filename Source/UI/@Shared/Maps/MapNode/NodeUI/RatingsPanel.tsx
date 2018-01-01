@@ -8,7 +8,7 @@ import {Range, DN} from "js-vextensions";
 import {Spinner} from "react-vcomponents";
 import {connect} from "react-redux";
 import {Select} from "react-vcomponents";
-import {ShowMessageBox_Base, ShowMessageBox} from "../../../../../Frame/UI/VMessageBox";
+import {ShowMessageBox_Base, ShowMessageBox} from "react-vmessagebox";
 import {firebaseConnect} from "react-redux-firebase";
 import {GetData, SlicePath} from "../../../../../Frame/Database/DatabaseHelpers";
 import {Debugger} from "../../../../../Frame/General/Globals_Free";

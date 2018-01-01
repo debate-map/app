@@ -16,5 +16,5 @@ G({FindDOM_});
 export type RouteProps = {match};
 
 export function GetErrorMessagesUnderElement(element) {
-	return $(element).find(":invalid").ToList().map(node=>(node[0] as any).validationMessage || `Invalid value.`);
+	return Array.from(element.querySelectorAll(":invalid")).map(node=>(node as any).validationMessage || `Invalid value.`);
 }

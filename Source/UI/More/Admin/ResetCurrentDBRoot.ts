@@ -1,6 +1,6 @@
 import {MapNode} from "../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../../Store/firebase/nodes/@MapNodeType";
-import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
+import {ShowMessageBox} from "react-vmessagebox";
 import {MapType, Map} from "../../../Store/firebase/maps/@Map";
 import UserExtraInfo from "../../../Store/firebase/userExtras/@UserExtraInfo";
 import {FirebaseData} from "../../../Store/firebase";

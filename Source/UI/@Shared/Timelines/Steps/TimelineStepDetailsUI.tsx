@@ -21,7 +21,7 @@ import {Timeline} from "Store/firebase/timelines/@Timeline";
 import {TimelineStep, NodeReveal} from "../../../../Store/firebase/timelineSteps/@TimelineStep";
 import {UpdateTimelineStep} from "../../../../Server/Commands/UpdateTimelineStep";
 import {RemoveHelpers} from "../../../../Frame/Database/DatabaseHelpers";
-import {BoxController, ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {TextArea, TextArea_AutoSize} from "react-vcomponents";
 import {GetUpdates} from "../../../../Frame/General/Others";
 import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";

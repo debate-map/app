@@ -17,7 +17,7 @@ import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
 import {RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
 import UpdateNodeDetails from "../../Server/Commands/UpdateNodeDetails";
 import {IsUserCreatorOrMod} from "../../Store/firebase/userExtras";
-import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
+import {ShowMessageBox} from "react-vmessagebox";
 import Moment from "moment";
 import {GetImages} from "../../Store/firebase/images";
 import {Image, ImageType, GetNiceNameForImageType} from "../../Store/firebase/images/@Image";

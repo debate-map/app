@@ -187,6 +187,7 @@
     "react-vcomponents": "0.0.1",
     "react-vextensions": "0.0.1",
     "react-vmenu": "0.0.2",
+    "react-vmessagebox": "0.0.1",
     "react-vscrollview": "^0.0.1",
     "recharts": "^0.21.2",
     "redux": "^3.6.0",

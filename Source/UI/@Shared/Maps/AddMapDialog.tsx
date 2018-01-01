@@ -1,5 +1,5 @@
 import {GetUser, GetUserID} from "../../../Store/firebase/users";
-import {BoxController, ShowMessageBox} from "../../../Frame/UI/VMessageBox";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";

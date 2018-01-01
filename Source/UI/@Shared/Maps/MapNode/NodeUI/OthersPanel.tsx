@@ -9,7 +9,7 @@ import {GetParentNode, GetParentNodeID} from "Store/firebase/nodes";
 import {Pre, Row} from "react-vcomponents";
 import {Button} from "react-vcomponents";
 import UpdateNodeDetails from "Server/Commands/UpdateNodeDetails";
-import {ShowMessageBox} from "../../../../../Frame/UI/VMessageBox";
+import {ShowMessageBox} from "react-vmessagebox";
 import ReverseArgumentPolarity from "../../../../../Server/Commands/ReverseArgumentPolarity";
 import {GetValues, GetEntries} from "../../../../../Frame/General/Enums";
 import {CanConvertFromThesisTypeXToY} from "../../../../../Server/Commands/ChangeThesisType";

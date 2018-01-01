@@ -11,7 +11,7 @@ import {Map} from "../../Store/firebase/maps/@Map";
 import DeleteNode from "Server/Commands/DeleteNode";
 import {UserEdit} from "Server/CommandMacros";
 import {Subforum} from "../../Store/firebase/forum/@Subforum";
-import {ShowMessageBox} from "../../Frame/UI/VMessageBox";
+import {ShowMessageBox} from "react-vmessagebox";
 import {GetAsync} from "Frame/Database/DatabaseHelpers";
 import {GetThreadPosts, GetThread, GetPost} from "../../Store/firebase/forum";
 import {Post} from "Store/firebase/forum/@Post";

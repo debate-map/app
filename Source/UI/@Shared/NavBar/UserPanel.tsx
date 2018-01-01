@@ -7,7 +7,7 @@ import {GetUserID} from "../../../Store/firebase/users";
 import SocialButton from "react-social-button";
 import {Column} from "react-vcomponents";
 import {E} from "../../../Frame/General/Globals_Free";
-import {ShowMessageBox, BoxController} from "../../../Frame/UI/VMessageBox";
+import {ShowMessageBox, BoxController} from "react-vmessagebox";
 
 @Connect(state=>({
 	//authError: pathToJS(state.firebase, "authError"),

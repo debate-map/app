@@ -3,7 +3,7 @@ import {VMenuReducer, VMenuState} from "react-vmenu";
 import {combineReducers} from "redux";
 import {firebaseStateReducer, helpers} from "react-redux-firebase";
 //import {reducer as formReducer} from "redux-form";
-import {ACTMessageBoxShow, MessageBoxOptions, MessageBoxReducer, MessageBoxState} from "../Frame/UI/VMessageBox";
+import {ACTMessageBoxShow, MessageBoxOptions, MessageBoxReducer, MessageBoxState} from "react-vmessagebox";
 import Action from "../Frame/General/Action";
 import {createSelector} from "reselect";
 import {DBPath, GetData} from "../Frame/Database/DatabaseHelpers";

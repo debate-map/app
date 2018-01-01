@@ -12,7 +12,7 @@ import {Column} from "react-vcomponents";
 import {GetUpdates} from "../../../../Frame/General/Others";
 import UpdateMapDetails from "../../../../Server/Commands/UpdateMapDetails";
 import {GetNodeAsync, GetChildCount} from "Store/firebase/nodes";
-import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
+import {ShowMessageBox} from "react-vmessagebox";
 import DeleteMap from "../../../../Server/Commands/DeleteMap";
 import {colors} from "../../../../Frame/UI/GlobalStyles";
 import { GetLayers, GetMapLayerIDs, ForDeleteLayer_GetError } from "../../../../Store/firebase/layers";

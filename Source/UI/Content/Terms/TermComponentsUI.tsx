@@ -21,7 +21,7 @@ import UpdateTermComponentData from "../../../Server/Commands/UpdateTermComponen
 import {RemoveHelpers} from "../../../Frame/Database/DatabaseHelpers";
 import {IsUserCreatorOrMod} from "../../../Store/firebase/userExtras";
 import DeleteTermComponent from "../../../Server/Commands/DeleteTermComponent";
-import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
+import {ShowMessageBox} from "react-vmessagebox";
 
 let componentsPlaceholder = [];
 

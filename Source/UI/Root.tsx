@@ -13,7 +13,7 @@ import GlobalUI from "../UI/Global";
 import MoreUI from "../UI/More";
 import AdminUI from "../UI/More/Admin";
 import HomeUI from "../UI/Home";
-import {MessageBoxOptions, ACTMessageBoxShow, MessageBoxUI} from "../Frame/UI/VMessageBox";
+import {MessageBoxOptions, ACTMessageBoxShow, MessageBoxUI} from "react-vmessagebox";
 import {Button} from "react-vcomponents";
 import NavBar from "../UI/@Shared/NavBar";
 import StreamUI from "./Stream";

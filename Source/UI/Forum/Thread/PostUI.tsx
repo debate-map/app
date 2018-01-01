@@ -6,7 +6,7 @@ import {User, GetUser} from "../../../Store/firebase/users";
 import {Connect} from "Frame/Database/FirebaseConnect";
 import {Button, Span} from "react-vcomponents";
 import Moment from "moment";
-import {ShowMessageBox} from "../../../Frame/UI/VMessageBox";
+import {ShowMessageBox} from "react-vmessagebox";
 import DeletePost from "Server/Commands/DeletePost";
 import {GetUserID} from "Store/firebase/users";
 import PostEditorUI from "./PostEditorUI";

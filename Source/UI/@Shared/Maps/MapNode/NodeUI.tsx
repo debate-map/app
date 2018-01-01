@@ -12,7 +12,7 @@ import VMenuTest1 from "react-vmenu";
 import VMenu, {VMenuItem} from "react-vmenu";
 import {Select} from "react-vcomponents";
 import {GetEntries} from "../../../../Frame/General/Enums";
-import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
+import {ShowMessageBox} from "react-vmessagebox";
 import {TextInput} from "react-vcomponents";
 import {DN} from "js-vextensions";
 import {DataSnapshot} from "firebase";

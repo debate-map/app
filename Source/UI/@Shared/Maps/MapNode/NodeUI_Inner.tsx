@@ -5,7 +5,7 @@ import {BaseComponent, AddGlobalStyle, GetInnerComp} from "react-vextensions";
 import {Pre, Div} from "react-vcomponents";
 import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
 import VMenu from "react-vmenu";
-import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
+import {ShowMessageBox} from "react-vmessagebox";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {TextInput} from "react-vcomponents";
 import {DN} from "js-vextensions";

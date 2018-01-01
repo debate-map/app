@@ -9,7 +9,7 @@ import {RootState} from "../../../../Store";
 import VMenu from "react-vmenu";
 import {BaseComponent} from "react-vextensions";
 import {Div, Pre} from "react-vcomponents";
-import {ShowMessageBox} from "../../../../Frame/UI/VMessageBox";
+import {ShowMessageBox} from "react-vmessagebox";
 import {WaitXThenRun} from "js-vextensions";
 import {TextInput} from "react-vcomponents";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
