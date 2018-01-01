@@ -9,7 +9,10 @@ import {OnAccessPath} from "./Frame/Database/FirebaseConnect";
 
 import "./Store/firebase/nodeRatings/@RatingsRoot";
 import {State_overrides, State_Options} from "./UI/@Shared/StateOverrides";
-import { DeepGet } from "../../../@Modules/js-vextensions/Main/dist/index";
+import {JSVE, DeepGet} from "js-vextensions";
+import "./Frame/General/Logging";
+
+JSVE.logFunc = Log;
 
 // uncomment this if you want to load the source-maps and such ahead of time (making-so the first actual call can get it synchronously)
 //StackTrace.get();
@@ -30,10 +33,10 @@ let createStore = require("./Frame/Store/CreateStore").default;
 
 declare global { var store: Store<RootState> & {firebase: FirebaseApp}; }
 var store = createStore(g.__InitialState__, {}) as Store<RootState>;
-g.Extend({store});
+G({store});
 
 // State() actually also returns the root-state (if no data-getter is supplied), but we don't reveal that in type-info (as its only to be used in console)
-g.Extend({State});
+G({State});
 /*declare global {
 	function State<T>(pathSegment: ((state: RootState)=>T) | string | number, state?: RootState, countAsAccess?: boolean): T;
 	function State<T>(pathSegments: (((state: RootState)=>T) | string | number)[], state?: RootState, countAsAccess?: boolean): any;

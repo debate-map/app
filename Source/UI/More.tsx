@@ -37,9 +37,9 @@ export default class MoreUI extends BaseComponent<Props, {}> {
 				</SubNavBar>
 				<ScrollView style={{flex: 1} /*styles.fillParent_abs*/} scrollVBarStyle={{width: 10}}>
 					<Switch>
+						<LinksUI/>
 						{/*currentSubpage == "tasks" && <TasksUI/>*/}
 						{currentSubpage == "admin" && <AdminUI/>}
-						<LinksUI/>
 					</Switch>
 				</ScrollView>
 			</Column>

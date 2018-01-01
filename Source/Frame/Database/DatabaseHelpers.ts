@@ -208,7 +208,7 @@ export class GetDataAsync_Options {
 	addHelpers? = true;
 }
 
-g.Extend({GetDataAsync});
+G({GetDataAsync});
 //export async function GetDataAsync(path: string, inVersionRoot = true, addHelpers = true, firebase: firebase.DatabaseReference = store.firebase.helpers.ref("")) {
 //export async function GetDataAsync(path: string, inVersionRoot = true, addHelpers = true) {
 /*export async function GetDataAsync(pathSegment1: string | number, pathSegment2: string | number, ...pathSegments: (string | number)[]);
@@ -244,7 +244,7 @@ export async function GetDataAsync(...args) {
  * It basically makes a pretend component -- connecting to firebase, and resolving the promise once:
  * It re-calls the db-getter func (after the last generation's requested-path-data was all received), and finds that no new paths are requested.
  */
-g.Extend({GetAsync});
+G({GetAsync});
 export async function GetAsync<T>(dbGetterFunc: ()=>T, statsLogger?: ({requestedPaths: string})=>void): Promise<T> {
 	Assert(!g.inConnectFunc, "Cannot run GetAsync() from within a Connect() function.");
 	//Assert(!g.inGetAsyncFunc, "Cannot run GetAsync() from within a GetAsync() function.");

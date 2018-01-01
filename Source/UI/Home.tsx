@@ -27,8 +27,8 @@ export default class HomeUI extends BaseComponent<Props, {}> {
 				</SubNavBar>
 				<ScrollView id="HomeScrollView" style={{flex: 1}} scrollVBarStyle={{width: 10}}>
 					<Switch>
-						{currentSubpage == "about" && <AboutUI/>}
 						<HomeUI2/>
+						{currentSubpage == "about" && <AboutUI/>}
 					</Switch>
 				</ScrollView>
 			</Column>

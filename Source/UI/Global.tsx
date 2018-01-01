@@ -24,8 +24,8 @@ export default class GlobalUI extends BaseComponent<Props, {}> {
 					<SubNavBarButton {...{page}} subpage="list" text="List"/>
 				</SubNavBar>
 				<Switch>
-					{currentSubpage == "list" && <GlobalListUI/>}
 					<GlobalMapUI/>
+					{currentSubpage == "list" && <GlobalListUI/>}
 				</Switch>
 			</Column>
 		);

@@ -7,7 +7,7 @@ import "./Start_0"; // fake/empty import, so this module is correctly seen as mo
 declare global { const g; } window["g"] = window;
 
 let isBot = /bot|crawler|spider|robot|crawling|google|bing|duckduckgo|msn|slurp|yandex|baidu|aolbuild|teoma/i.test(navigator.userAgent);
-//declare global { const isBot: string; } g.Extend({isBot});
+//declare global { const isBot: string; } G({isBot});
 declare global { const isBot: string; } g.isBot = isBot;
 
 function ShowBotMessage(message) {
@@ -72,6 +72,6 @@ Stack: ${error && error.stack}`
 /*declare global { function G(...globalHolders); } g.G = G;
 function G(...globalHolders) {
 	for (let globalHolder of globalHolders) {
-		g.Extend(globalHolder);
+		G(globalHolder);
 	}
 }*/

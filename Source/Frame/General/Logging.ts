@@ -64,19 +64,19 @@ g.addEventListener("beforeunload", ()=> {
 	localStorage.setItem("logTypes", JSON.stringify(logTypes));
 });
 
-g.Extend({ShouldLog}); declare global { function ShouldLog(shouldLogFunc: (logTypes: LogTypes)=>boolean); }
+G({ShouldLog}); declare global { function ShouldLog(shouldLogFunc: (logTypes: LogTypes)=>boolean); }
 function ShouldLog(shouldLogFunc: (logTypes: LogTypes)=>boolean) {
 	return shouldLogFunc(g.logTypes || {});
 }
-g.Extend({MaybeLog}); declare global { function MaybeLog(shouldLogFunc: (logTypes: LogTypes)=>boolean, logMessageGetter: ()=>string); }
+G({MaybeLog}); declare global { function MaybeLog(shouldLogFunc: (logTypes: LogTypes)=>boolean, logMessageGetter: ()=>string); }
 function MaybeLog(shouldLogFunc: (logTypes: LogTypes)=>boolean, logMessageGetter: ()=>string) {
 	if (!ShouldLog(shouldLogFunc)) return;
 	Log(logMessageGetter());
 }
 
 export var onLogFuncs = [];
-//declare global { function Log(...args); } g.Extend({Log});
-g.Extend({Log}); declare global { function Log(message, appendStackTrace?: boolean, logLater?: boolean); }
+//declare global { function Log(...args); } G({Log});
+G({Log}); declare global { function Log(message, appendStackTrace?: boolean, logLater?: boolean); }
 export function Log(message, appendStackTrace = false, logLater = false) {
 	// #mms: add-stack-trace-and-current-call-info-to-logs setting exists
 
@@ -96,17 +96,17 @@ export function Log(message, appendStackTrace = false, logLater = false) {
 	return message;
 }
 
-declare global { function LogLater(message, appendStackTrace?); } g.Extend({LogLater});
+declare global { function LogLater(message, appendStackTrace?); } G({LogLater});
 export function LogLater(message, appendStackTrace = false) {
     Log(message, appendStackTrace, true);
 }
-declare global { function LogWarning(message, appendStackTrace?, logLater?); } g.Extend({LogWarning});
+declare global { function LogWarning(message, appendStackTrace?, logLater?); } G({LogWarning});
 export function LogWarning(message, appendStackTrace = false, logLater = false) {
 	console.warn("LogWarning) " + message);
 	return message;
 }
 
-declare global { function LogError(message, appendStackTrace?, logLater?); } g.Extend({LogError});
+declare global { function LogError(message, appendStackTrace?, logLater?); } G({LogError});
 export function LogError(message, appendStackTrace = false, logLater = false) {
 	console.error("LogError) " + message);
 	return message;

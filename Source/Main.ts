@@ -26,7 +26,7 @@ import Raven from "raven-js";
 // startup (non-hot)
 // ==========
 
-//g.Extend({Promise});
+//G({Promise});
 /*function PromiseWrapper(...args) {
 	//let promise = Promise.apply(this, ...args);
 	let promise = new Promise(...args);
@@ -38,12 +38,12 @@ import Raven from "raven-js";
 }
 for (var key in Promise)
 	PromiseWrapper[key] = Promise[key];
-g.Extend({React, Promise: PromiseWrapper});*/
+G({React, Promise: PromiseWrapper});*/
 
-//g.Extend({ReactPerf});
+//G({ReactPerf});
 
 let startURL = GetCurrentURL(true);
-declare global { export var startURL: VURL; } g.Extend({startURL});
+declare global { export var startURL: VURL; } G({startURL});
 
 //let {version, env, devEnv, prodEnv, testEnv} = __DEV__ ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
 let env = __PROD__ ? "production" : "development";
@@ -52,13 +52,13 @@ if (startURL.GetQueryVar("env") && startURL.GetQueryVar("env") != "null") {
 	//alert("Using env: " + env);
 	console.log("Using env: " + env);
 }
-g.Extend({env}); declare global { var env: string; }
+G({env}); declare global { var env: string; }
 
 let env_short = env == "production" ? "prod" : "dev";
 let devEnv = env == "development";
 let prodEnv = env == "production";
 let testEnv = env == "test";
-g.Extend({env_short, devEnv, prodEnv, testEnv}); declare global { var env_short: string, devEnv: boolean, prodEnv: boolean, testEnv: boolean; }
+G({env_short, devEnv, prodEnv, testEnv}); declare global { var env_short: string, devEnv: boolean, prodEnv: boolean, testEnv: boolean; }
 
 //let {version} = require("../../../package.json");
 // Note: Use two BakedConfig files, so that dev-server can continue running, with its own baked-config data, even while prod-deploy occurs.
@@ -70,7 +70,7 @@ if (startURL.GetQueryVar("dbVersion") && startURL.GetQueryVar("dbVersion") != "n
 	dbVersion = parseInt(startURL.GetQueryVar("dbVersion"));
 	console.log("Using dbVersion: " + dbVersion);
 }
-g.Extend({version, dbVersion, firebaseConfig}); declare global { var version: string, dbVersion: number, firebaseConfig; }
+G({version, dbVersion, firebaseConfig}); declare global { var version: string, dbVersion: number, firebaseConfig; }
 
 if (prodEnv && window.location.hostname != "localhost") { // if localhost, never enable Raven (even if env-override is set to production)
 	Raven.config("https://40c1e4f57e8b4bbeb1e5b0cf11abf9e9@sentry.io/155432", {

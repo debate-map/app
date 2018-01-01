@@ -11,7 +11,7 @@ export {ShallowCompare};
 import {BaseComponent, FindDOM, ApplyBasicStyles} from "react-vextensions";
 
 export function FindDOM_(comp) { return $(FindDOM(comp)) as JQuery; };
-g.Extend({FindDOM_});
+G({FindDOM_});
 
 export type RouteProps = {match};
 
