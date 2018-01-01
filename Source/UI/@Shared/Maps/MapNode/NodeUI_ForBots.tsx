@@ -1,15 +1,15 @@
 import {GetNodeView, GetFocusedNodeID} from "../../../../Store/main/mapViews";
-import {Vector2i} from "../../../../Frame/General/VectorStructs";
+import {Vector2i} from "js-vextensions";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {RootState} from "../../../../Store";
 import {GetNodeChildren, GetNodeParents, GetParentNode, GetNode} from "../../../../Store/firebase/nodes";
 import {GetFillPercentForRatingAverage, GetRatingAverage, GetRatings} from "../../../../Store/firebase/nodeRatings";
-import {CachedTransform} from "../../../../Frame/V/VCache";
+import {CachedTransform} from "js-vextensions";
 import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
-import {URL} from "../../../../Frame/General/URLs";
+import {VURL} from "js-vextensions";
 import Link from "../../../../Frame/ReactComponents/Link";
 import {BaseComponent, BaseProps, FindDOM} from "react-vextensions";
 import {Pre} from "react-vcomponents";

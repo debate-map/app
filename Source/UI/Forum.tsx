@@ -10,7 +10,7 @@ import {Column} from "react-vcomponents";
 import {GetSections, GetSubforums, GetSectionSubforums, GetSubforumThreads} from "Store/firebase/forum";
 import {Section} from "../Store/firebase/forum/@Section";
 import {Subforum} from "../Store/firebase/forum/@Subforum";
-import {URL} from "../Frame/General/URLs";
+import {VURL} from "js-vextensions";
 import {ACTSubforumSelect, GetSelectedSubforum, GetSelectedThread} from "../Store/main/forum";
 import {SubforumUI} from "./Forum/SubforumUI";
 import {IsUserMod, IsUserAdmin} from "../Store/firebase/userExtras";
@@ -107,7 +107,7 @@ type SubforumEntryUIProps = {index: number, last: boolean, subforum: Subforum} &
 class SubforumEntryUI extends BaseComponent<SubforumEntryUIProps, {}> {
 	render() {
 		let {index, last, subforum, threads} = this.props;
-		//let toURL = new URL(null, [subforum._id+""]);
+		//let toURL = new VURL(null, [subforum._id+""]);
 		return (
 			<Column p="7px 10px" style={E(
 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},

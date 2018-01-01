@@ -1,13 +1,14 @@
 import {replace, push} from "redux-little-router";
-import {ToInt} from "../General/Types";
-import {Vector2i} from "../General/VectorStructs";
+import {ToInt} from "js-vextensions";
+import {Vector2i} from "js-vextensions";
 import NodeUI_Inner from "../../UI/@Shared/Maps/MapNode/NodeUI_Inner";
 import {GetOpenMapID, ACTSetPage, ACTSetSubpage, ACTNotificationMessageAdd, GetPage, GetSubpage} from "../../Store/main";
 import {GetMap} from "../../Store/firebase/maps";
 import {GetNodeView, GetMapView, GetSelectedNodeID, GetViewOffset, GetFocusedNodeID} from "../../Store/main/mapViews";
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
-import {URL, QueryVar, rootPageDefaultChilds} from "../General/URLs";
+import {rootPageDefaultChilds, NormalizeURL} from "../General/URLs";
+import {VURL} from "js-vextensions";
 import {ACTTermSelect, ACTImageSelect} from "../../Store/main/database";
 import { GetNodeDisplayText } from "../../Store/firebase/nodes/$node";
 import { GetNodeAsync, GetNode } from "Store/firebase/nodes";
@@ -52,16 +53,16 @@ export function GetCurrentURL_SimplifiedForPageViewTracking() {
 	let result = GetNewURL(false);
 
 	let mapID = GetOpenMapID();
-	let onMapPage = result.Normalized().toString({domain: false}).startsWith("/global/map");
+	let onMapPage = NormalizeURL(result).toString({domain: false}).startsWith("/global/map");
 	if (mapID && onMapPage) {
 		let nodeID = GetFocusedNodeID(mapID);
 		let node = nodeID ? GetNode(nodeID) : null;
 		//if (result.pathNodes.length == 1) {
-		/*if (result.Normalized().toString({domain: false}).startsWith("/global/map") && result.pathNodes.length == 1) {
+		/*if (NormalizeURL(result).toString({domain: false}).startsWith("/global/map") && result.pathNodes.length == 1) {
 			result.pathNodes.push("map");
 		}*/
 		if (node) {
-			result = result.Normalized();
+			result = NormalizeURL(result);
 			result.pathNodes.push(GetCrawlerURLStrForNode(node));
 		}
 	}
@@ -170,7 +171,7 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 }
 
 const pagesWithSimpleSubpages = ["database", "feedback", "home", "more", "global"].ToMap(page=>page, ()=>null);
-export function GetSyncLoadActionsForURL(url: URL, directURLChange: boolean) {
+export function GetSyncLoadActionsForURL(url: VURL, directURLChange: boolean) {
 	let result = [];
 
 	let page = url.pathNodes[0];
@@ -259,7 +260,7 @@ export async function LoadURL(urlStr: string) {
 	loadingURL = true;
 
 	//if (!GetPath(GetUrlPath(url)).startsWith("global/map")) return;
-	let url = URL.Parse(urlStr).Normalized();
+	let url = NormalizeURL(VURL.Parse(urlStr));
 
 	let syncActions = GetSyncLoadActionsForURL(url, true);
 	for (let action of syncActions) {
@@ -310,9 +311,9 @@ export async function LoadURL(urlStr: string) {
 export function GetNewURL(includeMapViewStr = true) {
 	//let newURL = URL.Current();
 	/*let oldURL = URL.Current(true);
-	let newURL = new URL(oldURL.domain, oldURL.pathNodes);*/
+	let newURL = new VURL(oldURL.domain, oldURL.pathNodes);*/
 
-	let newURL = new URL();
+	let newURL = new VURL();
 	let page = GetPage();
 	newURL.pathNodes.push(page);
 

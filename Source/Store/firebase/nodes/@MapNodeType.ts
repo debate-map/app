@@ -1,4 +1,4 @@
-import {Assert} from "../../../Frame/General/Assert";
+import {Assert} from "js-vextensions";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MapNode, MapNodeEnhanced, ThesisForm} from "./@MapNode";
 

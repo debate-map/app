@@ -1,4 +1,4 @@
-import {Assert} from "../../Frame/General/Assert";
+import {Assert} from "js-vextensions";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command, MergeDBUpdates} from "../Command";
 import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";

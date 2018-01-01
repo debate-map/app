@@ -1,5 +1,5 @@
 import {MapNode, MapNodeEnhanced} from "../nodes/@MapNode";
-import {Range} from "../../../Frame/General/Globals";
+import {Range} from "js-vextensions";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {MetaThesis_IfType} from "../nodes/@MetaThesisInfo";
 import {GetNodeForm, GetMainRatingType, GetNodeEnhanced} from "../nodes/$node";
@@ -7,7 +7,7 @@ import {GetNode} from "../nodes";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import {SlicePath} from "../../../Frame/Database/DatabaseHelpers";
-import {PropNameToTitle} from "../../../Frame/V/V";
+import { PropNameToTitle } from "Frame/General/Others";
 
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 //export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";

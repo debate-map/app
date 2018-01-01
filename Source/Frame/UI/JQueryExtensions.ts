@@ -1,4 +1,4 @@
-import {VRect} from "../General/VectorStructs";
+import {VRect} from "js-vextensions";
 
 declare global { interface JQuery { ToList(): JQuery[]; }}
 $.fn.ToList = function(this: JQuery) { return this.toArray().map(a=>$(a)); }

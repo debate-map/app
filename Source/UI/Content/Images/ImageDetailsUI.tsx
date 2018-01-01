@@ -1,5 +1,5 @@
 import {Spinner} from "react-vcomponents";
-import {Assert} from "../../../Frame/General/Assert";
+import {Assert} from "js-vextensions";
 import {BaseComponent, FindDOM} from "react-vextensions";
 import {Term, TermType, Term_nameFormat, Term_disambiguationFormat} from "../../../Store/firebase/terms/@Term";
 import {Column} from "react-vcomponents";

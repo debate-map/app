@@ -1,4 +1,4 @@
-import {Assert} from "../../../Frame/General/Assert";
+import {Assert} from "js-vextensions";
 import {BaseComponent, FindDOM, RenderSource} from "react-vextensions";
 import {Pre, Div} from "react-vcomponents";
 import {Term, TermType} from "../../../Store/firebase/terms/@Term";
@@ -15,7 +15,7 @@ import ScrollView from "react-vscrollview";
 import {Button} from "react-vcomponents";
 import TermComponent from "../../../Store/firebase/termComponents/@TermComponent";
 import {GetTermComponents} from "../../../Store/firebase/termComponents";
-import {CachedTransform} from "../../../Frame/V/VCache";
+import {CachedTransform} from "js-vextensions";
 import {RootState} from "../../../Store/index";
 import UpdateTermComponentData from "../../../Server/Commands/UpdateTermComponentData";
 import {RemoveHelpers} from "../../../Frame/Database/DatabaseHelpers";

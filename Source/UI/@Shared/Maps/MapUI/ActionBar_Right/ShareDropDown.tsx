@@ -21,12 +21,13 @@ import {RemoveHelpers} from "../../../../../Frame/Database/DatabaseHelpers";
 import DeleteTimelineStep from "Server/Commands/DeleteTimelineStep";
 import DeleteTimeline from "../../../../../Server/Commands/DeleteTimeline";
 import {TextInput} from "react-vcomponents";
-import {URL, GetCurrentURL} from "../../../../../Frame/General/URLs";
+import {GetCurrentURL} from "../../../../../Frame/General/URLs";
+import {VURL} from "js-vextensions";
 import {GetNewURL} from "Frame/URL/URLManager";
 import { CopyText } from "Frame/General/Globals_Free";
-import {WaitXThenRun} from "../../../../../Frame/General/Timers";
+import {WaitXThenRun} from "js-vextensions";
 
-type ShareDropDownProps = {map: Map} & Partial<{newURL: URL, timelines: Timeline[]}>;
+type ShareDropDownProps = {map: Map} & Partial<{newURL: VURL, timelines: Timeline[]}>;
 @Connect((state, {map}: ShareDropDownProps)=> ({
 	newURL: GetNewURL(),
 	timelines: GetMapTimelines(map),

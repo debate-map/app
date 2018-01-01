@@ -1,4 +1,4 @@
-import {Assert} from "../../Frame/General/Assert";
+import {Assert} from "js-vextensions";
 import {SubNavBarButton} from "../@Shared/SubNavBar";
 import SubNavBar from "../@Shared/SubNavBar";
 import {BaseComponent, SimpleShouldUpdate, FindDOM} from "react-vextensions";

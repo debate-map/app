@@ -1,6 +1,6 @@
 import {GetData} from "../../Frame/Database/DatabaseHelpers";
 import {Map, MapType} from "./maps/@Map";
-import {CachedTransform} from "../../Frame/V/VCache";
+import {CachedTransform} from "js-vextensions";
 
 export function GetMaps(): Map[] {
 	let mapsMap = GetData("maps");

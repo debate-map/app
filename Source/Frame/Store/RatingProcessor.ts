@@ -5,7 +5,7 @@ import {GetRatingAverage, GetRatings} from "../../Store/firebase/nodeRatings";
 import {Rating} from "../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MetaThesis_IfType, MetaThesis_ThenType} from "../../Store/firebase/nodes/@MetaThesisInfo";
 import {GetRatingTypesForNode, GetNodeForm} from "../../Store/firebase/nodes/$node";
-import {CachedTransform} from "../V/VCache";
+import {CachedTransform} from "js-vextensions";
 import {emptyObj} from "./ReducerUtils";
 
 /*export function CalculateArgumentStrength(nodeChildren: MapNode[]) {

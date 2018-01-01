@@ -2,7 +2,7 @@ import {GetImages} from "../firebase/images";
 import {GetTerms} from "../firebase/terms";
 import Action from "../../Frame/General/Action";
 import {CombineReducers} from "../../Frame/Store/ReducerUtils";
-import {Vector2i} from "../../Frame/General/VectorStructs";
+import {Vector2i} from "js-vextensions";
 import SubpageReducer from "./@Shared/$subpage";
 
 export class ACTTermSelect extends Action<{id: number}> {}

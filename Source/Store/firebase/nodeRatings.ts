@@ -1,7 +1,7 @@
 import {GetArgumentStrengthPseudoRating, GetArgumentStrengthPseudoRatingSet} from "../../Frame/Store/RatingProcessor";
 import {RatingType} from "../../Store/firebase/nodeRatings/@RatingType";
 import { GetData, GetData_Options } from "../../Frame/Database/DatabaseHelpers";
-import {CachedTransform} from "../../Frame/V/VCache";
+import {CachedTransform} from "js-vextensions";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {RatingsRoot, Rating} from "./nodeRatings/@RatingsRoot";
 import {GetNodeChildren, GetNode} from "./nodes";

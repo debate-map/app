@@ -4,7 +4,8 @@ import RemarkableReactRenderer from "remarkable-react";
 import {BaseComponent, ShallowChanged} from "react-vextensions";
 //import {Component as BaseComponent} from "react-vextensions";
 import {Segment, ParseSegmentsForPatterns} from "../General/RegexHelpers";
-import {URL, GetCurrentURL} from "../General/URLs";
+import {GetCurrentURL} from "../General/URLs";
+import {VURL} from "js-vextensions";
 import Link from "./Link";
 import {ReplacementFunc} from "./VReactMarkdown";
 
@@ -19,7 +20,7 @@ import {ReplacementFunc} from "./VReactMarkdown";
 			//let oldRules = {...c.md.renderer.rules};
 			comp.md.renderer.rules.link_open = function(tokens, idx, options, env) {
 				//let result = oldRules.link_open(tokens, idx, options, env);
-				let url = URL.Parse(tokens[idx].href);
+				let url = VURL.Parse(tokens[idx].href);
 				let openInNewTab = url.domain != GetCurrentURL().domain;
 
 				var title = tokens[idx].title ? ` title="${encodeURIComponent(tokens[idx].title)}"` : "";
@@ -69,7 +70,7 @@ export default class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> 
 		rendererOptions_final.components = {...rendererOptions_final.components};
 		if (rendererOptions_final.components.a == null) rendererOptions_final.components.a = (props=> {
 			let {href, target, ...rest} = props;
-			let toURL = URL.Parse(href);
+			let toURL = VURL.Parse(href);
 			if (target == null && toURL.domain != GetCurrentURL().domain) {
 				target = "_blank";
 			}

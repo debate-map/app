@@ -32,11 +32,11 @@ import {GetEntries} from "../../../Frame/General/Enums";
 import {Select} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
-import { EnumNameToDisplayName } from "Frame/V/V";
 import Icon from "../../../Frame/ReactComponents/Icon";
 import {Button} from "react-vcomponents";
-import {IsNumberString} from "../../../Frame/General/Types";
+import {IsNumberString} from "js-vextensions";
 import chroma from "chroma-js";
+import { EnumNameToDisplayName } from "Frame/General/Others";
 
 let columnWidths = [.68, .2, .12];
 

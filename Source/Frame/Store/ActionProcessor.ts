@@ -1,15 +1,15 @@
 import {GetNodeAsync} from "../../Store/firebase/nodes";
-import {GetTreeNodesInObjTree} from "../V/V";
 import Action from "../General/Action";
 import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange} from "../../Store/main/mapViews/$mapView/rootNodeViews";
-import { LoadURL, GetSyncLoadActionsForURL, GetCurrentURL_SimplifiedForPageViewTracking } from "../URL/URLManager";
+import {GetCurrentURL_SimplifiedForPageViewTracking, GetSyncLoadActionsForURL, LoadURL} from "../URL/URLManager";
+import {VURL} from "js-vextensions";
 import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 import {DBPath, GetData, GetDataAsync, ProcessDBData} from "../Database/DatabaseHelpers";
 import {GetMapView, GetSelectedNodePath, GetFocusedNodePath, GetNodeView} from "../../Store/main/mapViews";
-import {Vector2i} from "../General/VectorStructs";
+import {Vector2i} from "js-vextensions";
 import {RootState} from "../../Store/index";
 import ReactGA from "react-ga";
-import {URL, GetCurrentURL} from "../General/URLs";
+import {GetCurrentURL} from "../General/URLs";
 import {CreateMapViewForPath, GetShortestPathFromRootToNode} from "./PathFinder";
 import {ACTNotificationMessageAdd, ACTSetPage, ACTSetSubpage} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
@@ -26,7 +26,7 @@ import {GetAsync} from "Frame/Database/DatabaseHelpers";
 import {UpdateFocusNodeAndViewOffset} from "../../UI/@Shared/Maps/MapUI";
 import {FindReact} from "react-vextensions";
 import MapUI from "../../UI/@Shared/Maps/MapUI";
-import {SleepAsync} from "../General/Timers";
+import {SleepAsync} from "js-vextensions";
 import {FindDOM_} from "Frame/UI/ReactGlobals";
 
 // use this to intercept dispatches (for debugging)
@@ -84,7 +84,7 @@ const actionStacks_actionTypeIgnorePatterns = [
 export function MidDispatchAction(action: Action<any>, newState: RootState) {
 }
 
-export function DoesURLChangeCountAsPageChange(oldURL: URL, newURL: URL, directURLChange: boolean) {
+export function DoesURLChangeCountAsPageChange(oldURL: VURL, newURL: VURL, directURLChange: boolean) {
 	if (oldURL == null) return true;
 	if (oldURL.PathStr() != newURL.PathStr()) return true;
 
@@ -104,7 +104,7 @@ export function DoesURLChangeCountAsPageChange(oldURL: URL, newURL: URL, directU
 	}
 	return false;
 }
-export function RecordPageView(url: URL) {
+export function RecordPageView(url: VURL) {
 	//let url = window.location.pathname;
 	ReactGA.set({page: url.toString({domain: false})});
 	ReactGA.pageview(url.toString({domain: false}) || "/");
@@ -112,7 +112,7 @@ export function RecordPageView(url: URL) {
 }
 
 let postInitCalled = false;
-let pageViewTracker_lastURL: URL;
+let pageViewTracker_lastURL: VURL;
 export async function PostDispatchAction(action: Action<any>) {
 	if (!postInitCalled) {
 		PostInit();
@@ -121,7 +121,7 @@ export async function PostDispatchAction(action: Action<any>) {
 
 	let url = GetCurrentURL();
 	//let oldURL = URL.Current();
-	//let url = URL.FromState(action.payload);
+	//let url = VURL.FromState(action.payload);
 	let simpleURL = GetCurrentURL_SimplifiedForPageViewTracking();
 	if (DoesURLChangeCountAsPageChange(pageViewTracker_lastURL, simpleURL, true)) {
 		pageViewTracker_lastURL = simpleURL;
@@ -141,7 +141,7 @@ export async function PostDispatchAction(action: Action<any>) {
 			//ReactGA.initialize("UA-21256330-33", {debug: true});
 			ReactGA.initialize("UA-21256330-33");
 
-			/*let url = URL.FromState(State().router).toString(false);
+			/*let url = VURL.FromState(State().router).toString(false);
 			ReactGA.set({page: url});
 			ReactGA.pageview(url || "/");*/
 		}

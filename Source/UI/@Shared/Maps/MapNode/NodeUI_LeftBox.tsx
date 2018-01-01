@@ -3,7 +3,7 @@ import MapNodeUI_Inner from "./NodeUI_Inner";
 import {Button, Span} from "react-vcomponents";
 import {E} from "../../../../Frame/General/Globals_Free";
 import {connect} from "react-redux";
-import {CachedTransform} from "../../../../Frame/V/VCache";
+import {CachedTransform} from "js-vextensions";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {MapNode, ThesisForm, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";

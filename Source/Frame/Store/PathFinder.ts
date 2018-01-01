@@ -1,9 +1,9 @@
 import {GetNodeAsync, GetNodeParents, GetNodeParentsAsync} from "../../Store/firebase/nodes";
 import {GetDataAsync} from "../Database/DatabaseHelpers";
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
-import {Vector2i} from "../General/VectorStructs";
+import {Vector2i} from "js-vextensions";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
-import {ToInt} from "../General/Types";
+import {ToInt} from "js-vextensions";
 import {GetPathNodes} from "../../Store/main/mapViews";
 
 export async function GetShortestPathFromRootToNode(rootNodeID: number, node: MapNode): Promise<string> {

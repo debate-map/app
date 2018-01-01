@@ -5,7 +5,7 @@ import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
 import {colors} from "../../../Frame/UI/GlobalStyles";
 import Link from "../../../Frame/ReactComponents/Link";
-import {URL} from "../../../Frame/General/URLs";
+import {VURL} from "js-vextensions";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import {GetUser, User} from "../../../Store/firebase/users";
 import {ACTDebateMapSelect} from "../../../Store/main/debates";
@@ -20,7 +20,7 @@ type Props = {index: number, last: boolean, map: Map} & Partial<{creator: User}>
 export default class MapEntryUI extends BaseComponent<Props, {}> {
 	render() {
 		let {index, last, map, creator} = this.props;
-		let toURL = new URL(null, [map.type == MapType.Personal ? "personal" : "debates", map._id+""]);
+		let toURL = new VURL(null, [map.type == MapType.Personal ? "personal" : "debates", map._id+""]);
 		return (
 			<Column p="7px 10px" style={E(
 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},

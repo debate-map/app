@@ -24,7 +24,7 @@ import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
 import ReputationPanel from "./NavBar/ReputationPanel";
 import GuidePanel from "./NavBar/GuidePanel";
-import {URL} from "../../Frame/General/URLs";
+import {VURL} from "js-vextensions";
 import {Div} from "react-vcomponents";
 
 // main

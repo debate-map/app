@@ -1,11 +1,13 @@
 import {BaseComponent} from "react-vextensions";
 import { Connect } from "../../Frame/Database/FirebaseConnect";
-import { GetNewURL, loadingURL } from "Frame/URL/URLManager";
+import {VURL} from "js-vextensions";
 import { push, replace } from "redux-little-router";
 import { DoesURLChangeCountAsPageChange } from "Frame/Store/ActionProcessor";
-import {URL, GetCurrentURL} from "../../Frame/General/URLs";
+import {GetCurrentURL} from "../../Frame/General/URLs";
+import {GetNewURL} from "Frame/URL/URLManager";
+import {loadingURL} from "../../Frame/URL/URLManager";
 
-let lastURL: URL;
+let lastURL: VURL;
 
 type Props = {} & Partial<{newURL: string, lastURL: string, pushURL: boolean}>;
 @Connect((state, {}: Props)=> {

@@ -1,4 +1,4 @@
-import {IsNumber} from "./Types";
+import {IsNumber} from "js-vextensions";
 
 // maybe temp (maybe instead find way to have TypeScript enums work well)
 export class Enum {

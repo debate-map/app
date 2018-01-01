@@ -1,5 +1,5 @@
 import {GetNodeAsync, GetNode, GetNodeChildren} from "../../Store/firebase/nodes";
-import {Assert} from "../../Frame/General/Assert";
+import {Assert} from "js-vextensions";
 import {GetDataAsync, GetAsync, RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
 import { Command, MergeDBUpdates } from "../Command";
 import {MapNode, ThesisForm, ChildEntry} from "../../Store/firebase/nodes/@MapNode";

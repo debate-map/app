@@ -1,5 +1,4 @@
 import {Connect} from "../../Frame/Database/FirebaseConnect";
-import {DeepGet} from "../../Frame/V/V";
 import {SubNavBarButton} from "../@Shared/SubNavBar";
 import SubNavBar from "../@Shared/SubNavBar";
 import {BaseComponent, SimpleShouldUpdate, GetInnerComp, ShallowEquals} from "react-vextensions";
@@ -14,7 +13,7 @@ import {MapNode, MapNodeEnhanced} from "../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {MapView} from "../../Store/main/mapViews/@MapViews";
 import {GetNode} from "../../Store/firebase/nodes";
-import {Vector2i} from "../../Frame/General/VectorStructs";
+import {Vector2i} from "js-vextensions";
 import Editor from "react-md-editor";
 import ReactMarkdown from "react-markdown";
 import {GetNodeEnhanced} from "../../Store/firebase/nodes/$node";

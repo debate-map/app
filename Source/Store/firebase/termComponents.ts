@@ -1,7 +1,6 @@
 import {GetData, GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Term} from "./terms/@Term";
-import {IsNaN} from "../../Frame/General/Types";
-import {CachedTransform} from "../../Frame/V/VCache";
+import {CachedTransform} from "js-vextensions";
 import TermComponent from "./termComponents/@TermComponent";
 
 export function GetTermComponent(id: number) {

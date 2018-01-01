@@ -4,8 +4,8 @@ import Action from "../../Frame/General/Action";
 import {CombineReducers} from "../../Frame/Store/ReducerUtils";
 import { MapType } from "../firebase/maps/@Map";
 import { GetMapsOfType } from "Store/firebase/maps";
-import {URL} from "../../Frame/General/URLs";
-import {IsNumber} from "../../Frame/General/Types";
+import {VURL} from "js-vextensions";
+import {IsNumber} from "js-vextensions";
 import SubpageReducer from "./@Shared/$subpage";
 import {GetSubforum, GetThread} from "../firebase/forum";
 

@@ -1,5 +1,5 @@
 import {Image} from "../../Store/firebase/images/@Image";
-import {Assert} from "../../Frame/General/Assert";
+import {Assert} from "js-vextensions";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command} from "../Command";
 import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";

@@ -22,6 +22,7 @@ import {Term} from "../../Store/firebase/terms/@Term";
 import TermComponent from "../../Store/firebase/termComponents/@TermComponent";
 import {FirebaseData} from "../../Store/firebase";
 import {IsUserAdmin} from "../../Store/firebase/userExtras";
+import {SleepAsync} from "js-vextensions";
 
 // upgrade-funcs
 var upgradeFuncs; // populated by modules below
@@ -83,7 +84,7 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 				<Row><h4>Testing</h4></Row>
 				<Row>
 					<Button text={`Throw async error`} onClick={async ()=> {
-						await Delay(1000);
+						await SleepAsync(1000);
 						throw new Error("Oh no!");
 					}}/>
 				</Row>

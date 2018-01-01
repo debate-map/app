@@ -1,8 +1,8 @@
 import {HasModPermissions, PermissionGroupSet} from "./userExtras/@UserExtraInfo";
-import {IsNaN, IsObjectOf, IsObject, IsNumber} from "../../Frame/General/Types";
+import {IsNaN, IsObjectOf, IsObject, IsNumber} from "js-vextensions";
 import {GetData, GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {MapNode, globalRootNodeID} from "./nodes/@MapNode";
-import {CachedTransform} from "../../Frame/V/VCache";
+import {CachedTransform} from "js-vextensions";
 import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
 import {IsUserCreatorOrMod} from "./userExtras";
 import {GetUserPermissionGroups, GetUserID, GetUserAccessLevel} from "./users";

@@ -3,7 +3,9 @@ import "./Frame/General/Start_0";
 import "babel-polyfill";
 import "webpack-runtime-require";
 //import {Require} from "webpack-runtime-require";
-import "./Frame/General/ClassExtensions/CE";
+import "js-vextensions/dist/ClassExtensions";
+import "js-vextensions";
+import "./Frame/General/ClassExtensions/CE_General";
 import "./Frame/General/Start_1";
 import "./Server/Server";
 import "codemirror";
@@ -16,7 +18,8 @@ import ReactDOM from "react-dom";
 import {Store} from "redux";
 import {RootState} from "./Store/index";
 import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
-import {URL, GetCurrentURL} from "./Frame/General/URLs";
+import {GetCurrentURL} from "./Frame/General/URLs";
+import {VURL} from "js-vextensions";
 import Raven from "raven-js";
 //import Promise from "bluebird";
 
@@ -40,7 +43,7 @@ g.Extend({React, Promise: PromiseWrapper});*/
 //g.Extend({ReactPerf});
 
 let startURL = GetCurrentURL(true);
-declare global { export var startURL: URL; } g.Extend({startURL});
+declare global { export var startURL: VURL; } g.Extend({startURL});
 
 //let {version, env, devEnv, prodEnv, testEnv} = __DEV__ ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
 let env = __PROD__ ? "production" : "development";

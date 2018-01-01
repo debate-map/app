@@ -28,7 +28,7 @@ import ProfileUI from "./Profile";
 import ReactGA from "react-ga";
 import {persistStore} from "redux-persist";
 import {createBlacklistFilter} from "redux-persist-transform-filter";
-import {URL} from "../Frame/General/URLs";
+import {VURL} from "js-vextensions";
 import { Connect } from "../Frame/Database/FirebaseConnect";
 import {Switch} from "react-vcomponents";
 import {RouterProvider} from 'redux-little-router';
@@ -39,8 +39,9 @@ import ReputationUI from "./Reputation";
 import {Column} from "react-vcomponents";
 import {DatabaseUI} from "./Database";
 import {FeedbackUI} from "./Feedback";
+import {NormalizeURL} from "../Frame/General/URLs";
 
-export default class RootUIWrapper extends BaseComponent<{store}, {}> {
+export class RootUIWrapper extends BaseComponent<{store}, {}> {
 	ComponentWillMount() {
 		let startVal = g.storeRehydrated;
 		// wrap storeRehydrated property, so we know when it's set (from CreateStore.ts callback)
@@ -106,7 +107,7 @@ class RootUI extends BaseComponent<Props, {}> {
 					<Route path="/forum"><ForumUI/></Route>
 					<Route path="/feedback"><FeedbackUI/></Route>
 					<Route path="/more"><MoreUI/></Route>
-					<Route withConditions={url=>URL.FromState(url).Normalized().pathNodes[0] == "home"}><HomeUI/></Route>
+					<Route withConditions={url=>NormalizeURL(VURL.FromState(url)).pathNodes[0] == "home"}><HomeUI/></Route>
 					<Route path="/social"><SocialUI/></Route>
 					<Route path="/personal"><PersonalUI/></Route>
 					<Route path="/debates"><DebatesUI/></Route>

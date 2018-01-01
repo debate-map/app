@@ -1,4 +1,4 @@
-import {Assert} from "../../../Frame/General/Assert";
+import {Assert} from "js-vextensions";
 import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
 
 export function GetSourceNamePlaceholderText(sourceType: SourceType) {

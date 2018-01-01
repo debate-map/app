@@ -3,9 +3,10 @@ import {colors} from "../../Frame/UI/GlobalStyles";
 import {E} from "../../Frame/General/Globals_Free";
 import Radium from "radium";
 import Link from "../../Frame/ReactComponents/Link";
-import {URL, rootPageDefaultChilds} from "../../Frame/General/URLs";
+import {VURL} from "js-vextensions";
 import {Connect} from "../../Frame/Database/FirebaseConnect";
 import {ACTSetSubpage} from "../../Store/main";
+import { rootPageDefaultChilds } from "Frame/General/URLs";
 
 export default class SubNavBar extends BaseComponent<{fullWidth?: boolean}, {}> {
 	render() {

@@ -5,11 +5,11 @@ import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
 import ReactDOM from "react-dom";
 import StackTrace from "stacktrace-js";
 import React from "react/lib/ReactWithAddons";
-import {DeepGet} from "./Frame/V/V";
 import {OnAccessPath} from "./Frame/Database/FirebaseConnect";
 
 import "./Store/firebase/nodeRatings/@RatingsRoot";
 import {State_overrides, State_Options} from "./UI/@Shared/StateOverrides";
+import { DeepGet } from "../../../@Modules/js-vextensions/Main/dist/index";
 
 // uncomment this if you want to load the source-maps and such ahead of time (making-so the first actual call can get it synchronously)
 //StackTrace.get();
@@ -114,7 +114,7 @@ function ConvertPathGetterFuncToPropChain(pathGetterFunc: Function) {
 
 //setTimeout(()=> {
 const mountNode = document.getElementById(`root`);
-let RootUIWrapper = require(`./UI/Root`).default;
+let {RootUIWrapper} = require(`./UI/Root`);
 ReactDOM.render(<RootUIWrapper store={store}/>, mountNode);
 //});
 

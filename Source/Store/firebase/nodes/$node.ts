@@ -1,6 +1,4 @@
-import {IsString} from '../../../Frame/General/Types';
 import {GetImage} from '../images';
-import {URL} from '../../../Frame/General/URLs';
 import {MapNode, MapNodeEnhanced, ThesisForm, ChildEntry, ThesisType} from './@MapNode';
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MetaThesis_ThenType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info, MetaThesis_IfType} from "./@MetaThesisInfo";
@@ -8,13 +6,13 @@ import {MapNodeType} from './@MapNodeType';
 import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode} from "../nodes";
 import {GetValues} from '../../../Frame/General/Enums';
 import {PermissionGroupSet} from '../userExtras/@UserExtraInfo';
-import {CachedTransform} from '../../../Frame/V/VCache';
 import {ReverseThenType} from './$node/$metaThesis';
 import {ImageType, GetNiceNameForImageType} from "../images/@Image";
 import katex from "katex";
 import {PreProcessLatex} from "../../../UI/@Shared/Maps/MapNode/NodeMathUI";
 import {SplitStringBySlash_Cached} from "../../../Frame/Database/StringSplitCache";
 import {SlicePath} from "../../../Frame/Database/DatabaseHelpers";
+import {VURL, CachedTransform} from "js-vextensions";
 
 export function GetFontSizeForNode(node: MapNode, isSubnode = false) {
 	if (node.fontSizeOverride) return node.fontSizeOverride;
@@ -175,7 +173,7 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 				+ (node.contentNode.sourceChains[0][0].name ? ` in "${node.contentNode.sourceChains[0][0].name}"` : "")
 				+ (node.contentNode.sourceChains[0][0].author ? ` by ${node.contentNode.sourceChains[0][0].author}` : "")
 				+ (node.contentNode.sourceChains[0][0].link ? ` at "${
-					URL.Parse(node.contentNode.sourceChains[0][0].link, false).toString({domain_protocol: false})}"` : "") // maybe temp
+					VURL.Parse(node.contentNode.sourceChains[0][0].link, false).toString({domain_protocol: false})}"` : "") // maybe temp
 				+ `.`;
 		}
 		if (node.image) {
@@ -186,7 +184,7 @@ export function GetNodeDisplayText(node: MapNode, formOrPath?: ThesisForm | stri
 				+ (image.sourceChains[0][0].name ? ` in "${image.sourceChains[0][0].name}"` : "")
 				+ (image.sourceChains[0][0].author ? ` by ${image.sourceChains[0][0].author}` : "")
 				+ (image.sourceChains[0][0].link ? ` at "${
-					URL.Parse(image.sourceChains[0][0].link, false).toString({domain_protocol: false})}"` : "") // maybe temp
+					VURL.Parse(image.sourceChains[0][0].link, false).toString({domain_protocol: false})}"` : "") // maybe temp
 				+ `.`;
 		}
 

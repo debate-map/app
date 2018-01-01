@@ -1,7 +1,6 @@
 import {BaseComponent, FindDOM, SimpleShouldUpdate_Overridable} from "react-vextensions";
 import NodeUI from "./NodeUI";
-import {Vector2i} from "../../../../Frame/General/VectorStructs";
-import {A} from "../../../../Frame/General/Assert";
+import {Vector2i} from "js-vextensions";
 import ShallowCompare from "react/lib/shallowCompare";
 import {MapNode, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";

@@ -1,4 +1,4 @@
-import {Assert} from "../../../Frame/General/Assert";
+import {Assert} from "js-vextensions";
 import {BaseComponent, FindDOM} from "react-vextensions";
 import {Pre} from "react-vcomponents";
 import {Column} from "react-vcomponents";

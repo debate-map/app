@@ -1,5 +1,5 @@
 import {GetNodeParentsAsync, ForDelete_GetError} from "../../Store/firebase/nodes";
-import {Assert} from "../../Frame/General/Assert";
+import {Assert} from "js-vextensions";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command} from "../Command";
 import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";
@@ -7,7 +7,7 @@ import {E} from "../../Frame/General/Globals_Free";
 import {Term} from "../../Store/firebase/terms/@Term";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {IsArgumentNode} from "../../Store/firebase/nodes/$node";
-import {ToInt} from "../../Frame/General/Types";
+import {ToInt} from "js-vextensions";
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {GetAsync} from "Frame/Database/DatabaseHelpers";
 import {GetMap} from "Store/firebase/maps";

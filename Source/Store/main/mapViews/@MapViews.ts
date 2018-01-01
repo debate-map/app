@@ -1,4 +1,4 @@
-import {Vector2i} from "../../../Frame/General/VectorStructs";
+import {Vector2i} from "js-vextensions";
 
 export class MapViews {
 	[key: number]: MapView;

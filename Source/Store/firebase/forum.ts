@@ -1,7 +1,7 @@
 import { Section } from "Store/firebase/forum/@Section";
 import { Thread } from "Store/firebase/forum/@Thread";
 import { Post } from "Store/firebase/forum/@Post";
-import {CachedTransform} from "../../Frame/V/VCache";
+import {CachedTransform} from "js-vextensions";
 import {GetData} from "../../Frame/Database/DatabaseHelpers";
 import {Subforum} from "./forum/@Subforum";
 import {emptyArray} from "../../Frame/Store/ReducerUtils";

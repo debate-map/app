@@ -1,19 +1,18 @@
-import {Vector2i} from "../../Frame/General/VectorStructs";
+import {Vector2i} from "js-vextensions";
 import Action from "../../Frame/General/Action";
-import {FromJSON, ToJSON} from "../../Frame/General/Globals";
-import {GetTreeNodesInObjTree, GetTreeNodesInPath, VisitTreeNodesInPath, TreeNode} from "../../Frame/V/V";
-import {IsNumberString} from "../../Frame/General/Types";
-import {A, Assert} from "../../Frame/General/Assert";
+import {GetTreeNodesInObjTree, GetTreeNodesInPath, VisitTreeNodesInPath, TreeNode} from "js-vextensions";
+import {IsNumberString} from "js-vextensions";
+import {A, Assert} from "js-vextensions";
 import {MapViews, MapView, MapNodeView} from "./mapViews/@MapViews";
-import {ToInt} from "../../Frame/General/Types";
+import {ToInt} from "js-vextensions";
 import {GetMap, GetRootNodeID} from "../firebase/maps";
 import u from "updeep";
 import {MapViewReducer, ACTMapViewMerge} from "./mapViews/$mapView";
 import {ShallowChanged} from "react-vextensions";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
-import {URL} from "../../Frame/General/URLs";
+import {VURL} from "js-vextensions";
 import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "./debates";
-import {CachedTransform} from "../../Frame/V/VCache";
+import {CachedTransform} from "js-vextensions";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import {CreateDemoMapView} from "../../UI/Home/DemoMap";
 import {ACTPersonalMapSelect_WithData} from "./personal";
@@ -55,7 +54,7 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 			};
 		}
 	}
-	/*if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).pathNodes[0] == "global") {
+	/*if (action.type == LOCATION_CHANGED && VURL.FromState(action.payload).pathNodes[0] == "global") {
 		let mapID = 1, rootNode = 1;
 		// if no map-view exists for it yet, create one (by expanding root-node, and changing focus-node/view-offset)
 		if (newState[mapID] == null) {

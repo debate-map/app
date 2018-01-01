@@ -2,7 +2,8 @@ import ReactMarkdown, {ReactMarkdownProps} from "react-markdown";
 import {BaseComponent, ShallowChanged} from "react-vextensions";
 //import {Component as BaseComponent} from "react-vextensions";
 import {Segment, ParseSegmentsForPatterns} from "../General/RegexHelpers";
-import {URL, GetCurrentURL} from "../General/URLs";
+import {GetCurrentURL} from "../General/URLs";
+import {VURL} from "js-vextensions";
 import Link from "./Link";
 
 export type ReplacementFunc = (segment: Segment, index: number, extraInfo)=>JSX.Element;
@@ -19,7 +20,7 @@ export default class VReactMarkdown extends BaseComponent
 		let renderers_final = {...renderers};
 		renderers_final.Link = renderers_final.Link || (props=> {
 			let {href, target, ...rest} = props;
-			let toURL = URL.Parse(href);
+			let toURL = VURL.Parse(href);
 			if (target == null && toURL.domain != GetCurrentURL().domain) {
 				target = "_blank";
 			}

@@ -1,6 +1,6 @@
 import {Image} from "../../Store/firebase/images/@Image";
 import {Command} from "../Command";
-import {Assert} from "../../Frame/General/Assert";
+import {Assert} from "js-vextensions";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {UserEdit} from "Server/CommandMacros";
 

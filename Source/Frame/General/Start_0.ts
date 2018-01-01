@@ -3,8 +3,8 @@
 import "./Start_0"; // fake/empty import, so this module is correctly seen as module (rather than raw js script)
 
 // special, early, definitely-safe codes
-var g = window as any;
-declare global { const g; } g.g = g;
+//var g = window as any;
+declare global { const g; } window["g"] = window;
 
 let isBot = /bot|crawler|spider|robot|crawling|google|bing|duckduckgo|msn|slurp|yandex|baidu|aolbuild|teoma/i.test(navigator.userAgent);
 //declare global { const isBot: string; } g.Extend({isBot});
@@ -69,9 +69,9 @@ Stack: ${error && error.stack}`
 	};
 }
 
-declare global { function G(...globalHolders); } g.G = G;
+/*declare global { function G(...globalHolders); } g.G = G;
 function G(...globalHolders) {
 	for (let globalHolder of globalHolders) {
 		g.Extend(globalHolder);
 	}
-}
+}*/

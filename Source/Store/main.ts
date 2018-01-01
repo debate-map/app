@@ -4,7 +4,8 @@ import Action from "../Frame/General/Action";
 import {MapViewsReducer} from "./main/mapViews";
 import {RatingUIReducer, RatingUIState} from "./main/ratingUI";
 import NotificationMessage from "./main/@NotificationMessage";
-import {URL, rootPageDefaultChilds} from "../Frame/General/URLs";
+import {rootPageDefaultChilds} from "../Frame/General/URLs";
+import {VURL} from "js-vextensions";
 import {Global} from "../Frame/General/Globals_Free";
 import {CombineReducers} from "../Frame/Store/ReducerUtils";
 import {DebatesReducer, Debates, ACTDebateMapSelect} from "./main/debates";
@@ -92,32 +93,32 @@ export function MainReducer(state, action) {
 		urlExtraStr: (state = null, action)=> {
 			//if ((action.type == "@@INIT" || action.type == "persist/REHYDRATE") && startURL.GetQueryVar("env"))
 			//if ((action.type == "PostRehydrate") && startURL.GetQueryVar("env"))
-			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).GetQueryVar("extra")) {
-				let newVal = URL.FromState(action.payload).GetQueryVar("extra");
+			if (action.type == LOCATION_CHANGED && VURL.FromState(action.payload).GetQueryVar("extra")) {
+				let newVal = VURL.FromState(action.payload).GetQueryVar("extra");
 				if (newVal == "null") newVal = null;
 				return newVal;
 			}
 			return state;
 		},
 		envOverride: (state = null, action)=> {
-			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).GetQueryVar("env")) {
-				let newVal = URL.FromState(action.payload).GetQueryVar("env");
+			if (action.type == LOCATION_CHANGED && VURL.FromState(action.payload).GetQueryVar("env")) {
+				let newVal = VURL.FromState(action.payload).GetQueryVar("env");
 				if (newVal == "null") newVal = null;
 				return newVal;
 			}
 			return state;
 		},
 		dbVersionOverride: (state = null, action)=> {
-			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).GetQueryVar("dbVersion")) {
-				let str = URL.FromState(action.payload).GetQueryVar("dbVersion");
+			if (action.type == LOCATION_CHANGED && VURL.FromState(action.payload).GetQueryVar("dbVersion")) {
+				let str = VURL.FromState(action.payload).GetQueryVar("dbVersion");
 				return str == "null" ? null : parseInt(str);
 			}
 			return state;
 		},
 		analyticsEnabled: (state = true, action)=> {
-			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).GetQueryVar("analytics") == "false")
+			if (action.type == LOCATION_CHANGED && VURL.FromState(action.payload).GetQueryVar("analytics") == "false")
 				return false;
-			if (action.type == LOCATION_CHANGED && URL.FromState(action.payload).GetQueryVar("analytics") == "true")
+			if (action.type == LOCATION_CHANGED && VURL.FromState(action.payload).GetQueryVar("analytics") == "true")
 				return true;
 			return state;
 		},

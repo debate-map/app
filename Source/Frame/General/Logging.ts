@@ -1,6 +1,3 @@
-//import V from "../V/V";
-import {GetStackTraceStr} from "../V/V";  
-import {Global} from "./Globals_Free";
 /*var Debug = true;
 
 var Log = function(msg, type = 'default') { if(!Debug) return;
@@ -21,6 +18,8 @@ console.log = function(message) {
     if (str.Contains("blacklist pattern [")) return; // disable smooth-scroller extension's message
     console.log_orig.apply(this, arguments);
 };*/
+
+import { GetStackTraceStr, Global } from "js-vextensions";
 
 var warn_orig = console.warn;
 console.warn = function(...args) {

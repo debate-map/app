@@ -1,5 +1,5 @@
 import {TransformRatingForContext} from "../../../../Store/firebase/nodeRatings";
-import {Assert} from "../../../../Frame/General/Assert";
+import {Assert} from "js-vextensions";
 import {BaseComponent, RenderSource, FindDOM} from "react-vextensions";
 import {Pre, RowLR} from "react-vcomponents";
 import {Term, TermType, Term_nameFormat, Term_disambiguationFormat} from "../../../../Store/firebase/terms/@Term";

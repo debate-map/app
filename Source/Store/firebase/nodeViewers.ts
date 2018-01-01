@@ -1,7 +1,7 @@
 import {GetData} from "../../Frame/Database/DatabaseHelpers";
 import {ViewedNodeSet} from "./userViewedNodes/@ViewedNodeSet";
 import {ViewerSet} from "./nodeViewers/@ViewerSet";
-import {CachedTransform} from "../../Frame/V/VCache";
+import {CachedTransform} from "js-vextensions";
 
 export function GetNodeViewerSet(nodeID: number) {
 	if (nodeID == null) return null;
