@@ -16,8 +16,7 @@ import {ACTDebateMapSelect} from "./main/debates";
 import u from "updeep";
 import {VURL} from "js-vextensions";
 import {HandleError} from "../Frame/General/Errors";
-import {ForumData} from "firebase-forum";
-import {ForumReducer} from "Store/main/forum";
+import {ForumData, ForumReducer} from "firebase-forum";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;

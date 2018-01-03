@@ -23,7 +23,7 @@ import {Map} from "../../Store/firebase/maps/@Map";
 import {ACTPersonalMapSelect} from "../../Store/main/personal";
 import { ACTMap_PlayingTimelineSet, ACTMap_PlayingTimelineStepSet } from "Store/main/maps/$map";
 import {ACTMap_PlayingTimelineAppliedStepSet} from "../../Store/main/maps/$map";
-import {ACTSubforumSelect, ACTThreadSelect, GetSelectedSubforumID, GetSelectedThreadID} from "../../Store/main/forum";
+import {ACTSubforumSelect, ACTThreadSelect, GetSelectedSubforumID, GetSelectedThreadID} from "firebase-forum";
 import {FindReact} from "react-vextensions";
 
 export function GetCrawlerURLStrForMap(mapID: number) {

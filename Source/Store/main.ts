@@ -16,7 +16,6 @@ import {globalMapID} from "./firebase/nodes/@MapNode";
 import { ShallowChanged } from "react-vextensions";
 import { MapInfoReducer } from "Store/main/maps/$map";
 import {demoMap} from "../UI/Home/DemoMap";
-import { Forum, ForumReducer } from "Store/main/forum";
 import { Personal } from "Store/main/personal";
 import {PersonalReducer, ACTPersonalMapSelect} from "./main/personal";
 import {Database, DatabaseReducer} from "./main/database";
@@ -42,7 +41,7 @@ export class MainState {
 
 	database: Database;
 	feedback: {feedback: string};
-	forum: Forum;
+	//forum: Forum;
 	more: {subpage: string};
 	home: {subpage: string};
 	social: {subpage: string};
@@ -151,7 +150,7 @@ export function MainReducer(state, action) {
 
 		database: DatabaseReducer,
 		feedback: CombineReducers({subpage: SubpageReducer("feedback")}),
-		forum: ForumReducer,
+		//forum: ForumReducer,
 		more: CombineReducers({subpage: SubpageReducer("more")}),
 		home: CombineReducers({subpage: SubpageReducer("home")}),
 		social: CombineReducers({subpage: SubpageReducer("social")}),

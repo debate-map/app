@@ -19,6 +19,7 @@ import {GetUserID, GetUser} from "Store/firebase/users";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {GetDataAsync, GetAsync} from "Frame/Database/DatabaseHelpers";
 import {GetUserPermissionGroups} from "./Store/firebase/users";
+import VReactMarkdown_Remarkable from "./Frame/ReactComponents/VReactMarkdown_Remarkable";
 
 JSVE.logFunc = Log;
 
@@ -27,7 +28,8 @@ JSVE.logFunc = Log;
 //g.FirebaseConnect = Connect;
 Manager.VSet({
 	//store: null, // set below
-	rootStorePath: DBPath("forum"),
+	storePath_mainData: "forum",
+	storePath_dbData: DBPath("forum"),
 	rootReducer: MakeRootReducer(),
 	State_overrides,
 	GetNewURL,
@@ -39,6 +41,7 @@ Manager.VSet({
 	logTypes: g.logTypes,
 
 	//FirebaseConnect: Connect, // must set "window.FirebaseConnect" manually
+	State,
 	GetData: (options, ...pathSegments)=>GetData(E(options, {inVersionRoot: false}), ...pathSegments),
 	GetDataAsync: (options, ...pathSegments)=>GetDataAsync(E(options, {inVersionRoot: false}), ...pathSegments),
 	GetAsync,
@@ -46,6 +49,8 @@ Manager.VSet({
 	GetUserID,
 	GetUser,
 	GetUserPermissionGroups,
+
+	MarkdownRenderer: VReactMarkdown_Remarkable,
 })
 // ==========
 

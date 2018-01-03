@@ -13,7 +13,6 @@ import {Button} from "react-vcomponents";
 import {E} from "../../../../../Frame/General/Globals_Free";
 import {MetaThesis_ThenType, MetaThesis_IfType, MetaThesis_ThenType_Info, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
 import AddNode from "../../../../../Server/Commands/AddNode";
-import Editor from "react-md-editor";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
 import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";
