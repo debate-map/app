@@ -32,6 +32,7 @@ import {GetUserID} from "Store/firebase/users";
 	}
 }*/
 
+G({FirebaseConnect: Connect}); // make global, for firebase-forum
 // if you're sending in a connect-func rather than a connect-func-wrapper, then you need to make it have at least one argument (to mark it as such)
 export function Connect<T, P>(innerMapStateToPropsFunc: (state: RootState, props: P)=>any);
 export function Connect<T, P>(mapStateToProps_inner_getter: ()=>(state: RootState, props: P)=>any);
@@ -164,7 +165,7 @@ function DispatchDBAction(action) {
 let requestedPaths = {} as {[key: string]: boolean};
 /** This only adds paths to a "request list". Connect() is in charge of making the actual db requests. */
 export function RequestPath(path: string) {
-	//Log("Requesting Stage1: " + path);
+	MaybeLog(a=>a.dbRequests, ()=>"Requesting db-path (stage 1): " + path);
 	requestedPaths[path] = true;
 }
 /** This only adds paths to a "request list". Connect() is in charge of making the actual db requests. */

@@ -5,7 +5,7 @@ import {FirebaseApp, DBPath, GetData} from "./Frame/Database/DatabaseHelpers";
 import ReactDOM from "react-dom";
 import StackTrace from "stacktrace-js";
 import React from "react/lib/ReactWithAddons";
-import {OnAccessPath} from "./Frame/Database/FirebaseConnect";
+import {OnAccessPath, Connect} from "./Frame/Database/FirebaseConnect";
 
 import "./Store/firebase/nodeRatings/@RatingsRoot";
 import {State_overrides, State_Options} from "./UI/@Shared/StateOverrides";
@@ -17,13 +17,14 @@ import {GetNewURL} from "./Frame/URL/URLManager";
 import {replace, push} from "redux-little-router";
 import {GetUserID, GetUser} from "Store/firebase/users";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
-import {GetDataAsync} from "Frame/Database/DatabaseHelpers";
+import {GetDataAsync, GetAsync} from "Frame/Database/DatabaseHelpers";
 import {GetUserPermissionGroups} from "./Store/firebase/users";
 
 JSVE.logFunc = Log;
 
 // firebase-forum
 // ==========
+//g.FirebaseConnect = Connect;
 Manager.VSet({
 	//store: null, // set below
 	rootStorePath: DBPath("forum"),
@@ -37,8 +38,10 @@ Manager.VSet({
 	
 	logTypes: g.logTypes,
 
-	GetData,
-	GetDataAsync,
+	//FirebaseConnect: Connect, // must set "window.FirebaseConnect" manually
+	GetData: (options, ...pathSegments)=>GetData(E(options, {inVersionRoot: false}), ...pathSegments),
+	GetDataAsync: (options, ...pathSegments)=>GetDataAsync(E(options, {inVersionRoot: false}), ...pathSegments),
+	GetAsync,
 	ShowSignInPopup,
 	GetUserID,
 	GetUser,

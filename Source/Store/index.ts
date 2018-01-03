@@ -16,6 +16,8 @@ import {ACTDebateMapSelect} from "./main/debates";
 import u from "updeep";
 import {VURL} from "js-vextensions";
 import {HandleError} from "../Frame/General/Errors";
+import {ForumData} from "firebase-forum";
+import {ForumReducer} from "Store/main/forum";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;
@@ -39,6 +41,7 @@ export class RootState {
 	router: RouterState;
 	messageBox: MessageBoxState;
 	vMenu: VMenuState;
+	forum: ForumData;
 }
 export function MakeRootReducer(extraReducers?) {
 	const innerReducer = combineReducers({
@@ -49,6 +52,7 @@ export function MakeRootReducer(extraReducers?) {
 		//router: RouterReducer,
 		messageBox: MessageBoxReducer,
 		vMenu: VMenuReducer,
+		forum: ForumReducer,
 		...extraReducers
 	});
 

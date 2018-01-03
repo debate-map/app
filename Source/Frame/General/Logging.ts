@@ -52,6 +52,7 @@ export class LogTypes {
 	urlLoads = false;
 	cacheUpdates = false;
 	commands = false;
+	dbRequests = false;
 }
 
 declare global { var logTypes: LogTypes; }
