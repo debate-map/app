@@ -6,7 +6,7 @@ import {GetOpenMapID} from "../../../../Store/main";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
 import {Row} from "react-vcomponents";
 import {Button} from "react-vcomponents";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {ACTMap_PlayingTimelineSet, ACTMap_PlayingTimelineStepSet, GetPlayingTimeline, GetPlayingTimelineStep} from "Store/main/maps/$map";
 import { Map } from "Store/firebase/maps/@Map";
 import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";

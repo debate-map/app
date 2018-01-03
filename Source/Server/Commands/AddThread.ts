@@ -8,8 +8,8 @@ import {Map} from "../../Store/firebase/maps/@Map";
 import AddNode from "./AddNode";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {UserEdit} from "Server/CommandMacros";
-import {Thread} from "../../Store/firebase/forum/@Thread";
-import {Post} from "Store/firebase/forum/@Post";
+import {Thread} from "firebase-forum";
+import {Post} from "firebase-forum";
 import AddPost from "./AddPost";
 
 @UserEdit

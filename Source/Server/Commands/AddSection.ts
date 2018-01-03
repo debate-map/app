@@ -6,7 +6,7 @@ import {E} from "../../Frame/General/Globals_Free";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import { UserEdit, MapEdit } from "Server/CommandMacros";
-import {Section} from "Store/firebase/forum/@Section";
+import {Section} from "firebase-forum";
 
 @UserEdit
 export default class AddSection extends Command<{section: Section}> {

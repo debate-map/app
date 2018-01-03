@@ -23,7 +23,7 @@ import DetailsPanel from "./NodeUI/DetailsPanel";
 import OthersPanel from "./NodeUI/OthersPanel";
 import DiscussionPanel from "./NodeUI/DiscussionPanel";
 import RatingsPanel from "./NodeUI/RatingsPanel";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {ACTSet} from "Store";
 import {GetOpenMapID} from "../../../../Store/main";
 import {GetNewURL} from "../../../../Frame/URL/URLManager";

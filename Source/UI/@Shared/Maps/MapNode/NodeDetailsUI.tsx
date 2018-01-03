@@ -9,7 +9,7 @@ import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../../Frame/General/Enums";
 import {Select} from "react-vcomponents";
 import {CheckBox} from "react-vcomponents";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {Button} from "react-vcomponents";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, MapNode_id, ThesisType, AccessLevel} from "../../../../Store/firebase/nodes/@MapNode";
@@ -25,7 +25,7 @@ import EquationEditorUI from "./EquationEditorUI";
 import {IsUserAdmin} from "../../../../Store/firebase/userExtras";
 import {GetUserID, GetUserAccessLevel} from "Store/firebase/users";
 import ImageAttachmentEditorUI from "./ImageAttachmentEditorUI";
-import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
+ import {GetErrorMessagesUnderElement} from "js-vextensions";
 
 type Props = {
 	baseData: MapNodeEnhanced, baseLinkData: ChildEntry, parent: MapNodeEnhanced, forNew: boolean, enabled?: boolean,

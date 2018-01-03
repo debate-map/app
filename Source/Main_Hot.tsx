@@ -1,7 +1,7 @@
 import {ParseModuleData, Require} from "webpack-runtime-require";
 import {Store} from "redux";
-import {RootState} from "./Store/index";
-import {FirebaseApp} from "./Frame/Database/DatabaseHelpers";
+import {RootState, MakeRootReducer} from "./Store/index";
+import {FirebaseApp, DBPath, GetData} from "./Frame/Database/DatabaseHelpers";
 import ReactDOM from "react-dom";
 import StackTrace from "stacktrace-js";
 import React from "react/lib/ReactWithAddons";
@@ -11,8 +11,40 @@ import "./Store/firebase/nodeRatings/@RatingsRoot";
 import {State_overrides, State_Options} from "./UI/@Shared/StateOverrides";
 import {JSVE, DeepGet} from "js-vextensions";
 import "./Frame/General/Logging";
+import {Manager} from "firebase-forum";
+import Moment from "moment";
+import {GetNewURL} from "./Frame/URL/URLManager";
+import {replace, push} from "redux-little-router";
+import {GetUserID, GetUser} from "Store/firebase/users";
+import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
+import {GetDataAsync} from "Frame/Database/DatabaseHelpers";
+import {GetUserPermissionGroups} from "./Store/firebase/users";
 
 JSVE.logFunc = Log;
+
+// firebase-forum
+// ==========
+Manager.VSet({
+	//store: null, // set below
+	rootStorePath: DBPath("forum"),
+	rootReducer: MakeRootReducer(),
+	State_overrides,
+	GetNewURL,
+	FormatTime: (time: number, formatStr: string)=>Moment(time).format(formatStr),
+	
+	router_replace: replace,
+	router_push: push,
+	
+	logTypes: g.logTypes,
+
+	GetData,
+	GetDataAsync,
+	ShowSignInPopup,
+	GetUserID,
+	GetUser,
+	GetUserPermissionGroups,
+})
+// ==========
 
 // uncomment this if you want to load the source-maps and such ahead of time (making-so the first actual call can get it synchronously)
 //StackTrace.get();
@@ -34,6 +66,8 @@ let createStore = require("./Frame/Store/CreateStore").default;
 declare global { var store: Store<RootState> & {firebase: FirebaseApp}; }
 var store = createStore(g.__InitialState__, {}) as Store<RootState>;
 G({store});
+
+Manager.store = store;
 
 // State() actually also returns the root-state (if no data-getter is supplied), but we don't reveal that in type-info (as its only to be used in console)
 G({State});

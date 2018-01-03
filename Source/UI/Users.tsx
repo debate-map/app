@@ -5,7 +5,7 @@ import {GetUsers, GetUserExtraInfoMap, UserExtraInfoMap, User} from "../Store/fi
 import {Row} from "react-vcomponents";
 import UserExtraInfo from "../Store/firebase/userExtras/@UserExtraInfo";
 import Moment from "moment";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {Column} from "react-vcomponents";
 
 export const columnWidths = [.35, .15, .1, .15, .25];

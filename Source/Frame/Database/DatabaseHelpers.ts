@@ -122,6 +122,7 @@ export function ProcessDBData(data, standardizeForm: boolean, addHelpers: boolea
 	}
 	return treeNodes[0].Value; // get possibly-modified wrapper.data
 }
+
 let helperProps = ["_key", "_id"];
 /** Note: this mutates the original object. */
 export function RemoveHelpers(data) {
@@ -131,6 +132,18 @@ export function RemoveHelpers(data) {
 			delete treeNode.obj[treeNode.prop];
 	}
 	return data;
+}
+export function GetUpdates(oldData, newData, useNullInsteadOfUndefined = true) {
+	let result = {};
+	for (let key of oldData.VKeys(true).concat(newData.VKeys(true))) {
+		if (newData[key] !== oldData[key]) {
+			result[key] = newData[key];
+			if (newData[key] === undefined && useNullInsteadOfUndefined) {
+				result[key] = null;
+			}
+		}
+	}
+	return RemoveHelpers(result);
 }
 
 class DBPathInfo {

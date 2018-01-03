@@ -3,7 +3,7 @@ import {firebaseConnect} from "react-redux-firebase";
 import SubNavBar from "./@Shared/SubNavBar";
 import {SubNavBarButton} from "./@Shared/SubNavBar";
 import GlobalMapUI from "./Global/GlobalMapUI";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import GlobalListUI from "./Global/GlobalListUI";
 import {Column} from "react-vcomponents";
 import {Connect} from "../Frame/Database/FirebaseConnect";

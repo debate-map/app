@@ -4,7 +4,7 @@ import {PropTypes, Component} from "react";
 import {BaseComponent, AddGlobalStyle, ShallowChanged} from "react-vextensions";
 import "../Frame/UI/JQueryExtensions";
 //import {Component as BaseComponent} from "react-vextensions";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 //import "../Frame/Styles/Core.scss";
 import "../../Source/Frame/Styles/Core.scss";
 //import "../Frame/Styles/bootstrap/bootstrap.scss";

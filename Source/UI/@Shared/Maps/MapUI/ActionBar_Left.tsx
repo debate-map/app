@@ -9,7 +9,6 @@ import {ACTDebateMapSelect} from "../../../../Store/main/debates";
 import MapDetailsUI from "../MapDetailsUI";
 import {DropDown} from "react-vcomponents";
 import {Column} from "react-vcomponents";
-import {GetUpdates} from "../../../../Frame/General/Others";
 import UpdateMapDetails from "../../../../Server/Commands/UpdateMapDetails";
 import {GetNodeAsync, GetChildCount} from "Store/firebase/nodes";
 import {ShowMessageBox} from "react-vmessagebox";
@@ -19,7 +18,7 @@ import { GetLayers, GetMapLayerIDs, ForDeleteLayer_GetError } from "../../../../
 import {Layer} from "Store/firebase/layers/@Layer";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddLayerDialog} from "../Layers/AddLayerDialog";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {User} from "../../../../Store/firebase/users";
 import {CheckBox} from "react-vcomponents";
 import { GetUserLayerStatesForMap } from "Store/firebase/userMapInfo";
@@ -31,6 +30,7 @@ import DeleteLayer from "../../../../Server/Commands/DeleteLayer";
 import {ACTPersonalMapSelect} from "../../../../Store/main/personal";
 import {IsUserMap} from "../../../../Store/firebase/maps";
 import { TimelineDropDown } from "UI/@Shared/Maps/MapUI/ActionBar_Left/Timeline";
+import { GetUpdates } from "Frame/Database/DatabaseHelpers";
 
 type ActionBar_LeftProps = {map: Map, subNavBarWidth: number};
 @Connect((state, {map}: ActionBar_LeftProps)=> ({

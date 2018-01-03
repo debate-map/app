@@ -7,7 +7,7 @@ import { GetMapsOfType } from "Store/firebase/maps";
 import {VURL} from "js-vextensions";
 import {IsNumber} from "js-vextensions";
 import SubpageReducer from "./@Shared/$subpage";
-import {GetSubforum, GetThread} from "../firebase/forum";
+import {GetSubforum, GetThread} from "firebase-forum";
 
 export class ACTSubforumSelect extends Action<{id: number}> {}
 export class ACTThreadSelect extends Action<{id: number}> {}

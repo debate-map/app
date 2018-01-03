@@ -11,7 +11,7 @@ import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../Frame/General/Enums";
 import {Select} from "react-vcomponents";
 import {CheckBox} from "react-vcomponents";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {Button} from "react-vcomponents";
 import TermComponent from "../../../Store/firebase/termComponents/@TermComponent";
 import {GetTermComponents} from "../../../Store/firebase/termComponents";

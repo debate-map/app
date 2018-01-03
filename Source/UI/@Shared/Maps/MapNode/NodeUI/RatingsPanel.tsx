@@ -24,7 +24,6 @@ import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {ShowSignInPopup} from "../../../NavBar/UserPanel";
 import {GetNodeForm, GetNodeEnhanced, IsContextReversed} from "../../../../../Store/firebase/nodes/$node";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
-import {FindDOM_} from "Frame/UI/ReactGlobals";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -93,7 +92,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 			<div ref="root" style={{position: "relative"/*, minWidth: 496*/}}
 					onClick={e=> {
 						if (ratingType == "strength") return;
-						let target = FindDOM_(e.target);
+						let target = $(FindDOM(e.target));
 						//let chart = (target as any).plusParents().filter(".recharts-cartesian-grid");
 						let chartHolder = (target as any).plusParents().filter("div.recharts-wrapper");
 						if (chartHolder.length == 0) return;

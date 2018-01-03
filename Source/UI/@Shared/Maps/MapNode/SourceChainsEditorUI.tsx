@@ -7,7 +7,7 @@ import {TextInput} from "react-vcomponents";
 import {GetEntries} from "../../../../Frame/General/Enums";
 import {GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText} from "../../../../Store/firebase/contentNodes/$contentNode";
 import {Select} from "react-vcomponents";
-import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
+ import {GetErrorMessagesUnderElement} from "js-vextensions";
 
 type Props = {baseData: SourceChain[], enabled?: boolean, style?, onChange?: (newData: SourceChain[])=>void};
 	//& Partial<{creator: User, variantNumber: number}>;

@@ -9,7 +9,7 @@ import { GetMap } from "Store/firebase/maps";
 import { GetNodes } from "Store/firebase/nodes";
 import {GetNodeEnhanced, GetFinalNodeTypeAtPath, GetNodeDisplayText, GetRatingTypesForNode} from "../../../Store/firebase/nodes/$node";
 import {Column} from "react-vcomponents";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import NodeUI_Menu from "../../@Shared/Maps/MapNode/NodeUI_Menu";
 import {RatingType_Info, RatingType, GetRatingTypeInfo, ratingTypes} from "../../../Store/firebase/nodeRatings/@RatingType";
 import {GetRatings, GetNodeRatingsRoot} from "../../../Store/firebase/nodeRatings";

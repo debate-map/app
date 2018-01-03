@@ -9,7 +9,6 @@ import {ACTDebateMapSelect} from "../../../../Store/main/debates";
 import MapDetailsUI from "../MapDetailsUI";
 import {DropDown} from "react-vcomponents";
 import {Column} from "react-vcomponents";
-import {GetUpdates} from "../../../../Frame/General/Others";
 import UpdateMapDetails from "../../../../Server/Commands/UpdateMapDetails";
 import {GetNodeAsync, GetChildCount} from "Store/firebase/nodes";
 import {ShowMessageBox} from "react-vmessagebox";

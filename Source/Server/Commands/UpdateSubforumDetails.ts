@@ -7,7 +7,7 @@ import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import {Map_nameFormat, Map} from "../../Store/firebase/maps/@Map";
 import {UserEdit} from "../CommandMacros";
 import {MapEdit} from "Server/CommandMacros";
-import {Subforum_nameFormat, Subforum} from "../../Store/firebase/forum/@Subforum";
+import {Subforum, Subforum_nameFormat} from "firebase-forum";
 
 AddSchema({
 	properties: {

@@ -1,10 +1,10 @@
 import {Image} from "../../../../Store/firebase/images/@Image";
 import {GetImage} from "../../../../Store/firebase/images";
 import {connect} from "react-redux";
-import {BaseComponent, AddGlobalStyle, GetInnerComp} from "react-vextensions";
+import {BaseComponent, AddGlobalStyle, GetInnerComp, FindDOM} from "react-vextensions";
 import {Pre, Div} from "react-vcomponents";
 import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
-import VMenu from "react-vmenu";
+import {VMenu} from "react-vmenu";
 import {ShowMessageBox} from "react-vmessagebox";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {TextInput} from "react-vcomponents";
@@ -53,7 +53,6 @@ import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
 import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import SubPanel from "./NodeUI_Inner/SubPanel";
 import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
-import {FindDOM_} from "Frame/UI/ReactGlobals";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -207,7 +206,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 	definitionsPanel: DefinitionsPanel;
 	ComponentDidMount() {
 		// we have to use native/jquery hover/mouseenter+mouseleave, to fix that in-equation term-placeholders would cause "mouseleave" to be triggered
-		let dom = FindDOM_(this);
+		let dom = $(FindDOM(this));
 		//dom.off("mouseenter mouseleave");
 		$(dom).hover(()=> {
 			if ($(".scrolling").length == 0) {

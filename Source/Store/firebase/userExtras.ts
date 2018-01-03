@@ -4,10 +4,7 @@ import {GetUserPermissionGroups} from "./users";
 import {Term} from "./terms/@Term";
 import {Image} from "./images/@Image";
 import {Map} from "./maps/@Map";
-import {Subforum} from "./forum/@Subforum";
-import {Post} from "./forum/@Post";
-import {Thread} from "Store/firebase/forum/@Thread";
-
+import {Subforum, Post, Thread} from "firebase-forum";
 
 // selectors
 // ==========

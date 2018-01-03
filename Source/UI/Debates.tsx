@@ -11,7 +11,7 @@ import {GetUserPermissionGroups, GetUserID} from "Store/firebase/users";
 import {PermissionGroupSet} from "../Store/firebase/userExtras/@UserExtraInfo";
 import {ShowSignInPopup} from "./@Shared/NavBar/UserPanel";
 import {ShowAddMapDialog} from "./@Shared/Maps/AddMapDialog";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {GetSelectedDebateMapID, GetSelectedDebateMap} from "../Store/main/debates";
 import MapUI from "./@Shared/Maps/MapUI";
 

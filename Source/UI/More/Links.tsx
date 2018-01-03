@@ -2,7 +2,7 @@ import {SubNavBarButton} from "../@Shared/SubNavBar";
 import SubNavBar from "../@Shared/SubNavBar";
 import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {styles} from "../../Frame/UI/GlobalStyles";
 import VReactMarkdown_Remarkable from "../../Frame/ReactComponents/VReactMarkdown_Remarkable";
 

@@ -10,7 +10,7 @@ import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../Frame/General/Enums";
 import {Select} from "react-vcomponents";
 import {CheckBox} from "react-vcomponents";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {Button} from "react-vcomponents";
 import TermComponent from "../../../Store/firebase/termComponents/@TermComponent";
 import {GetNiceNameForTermType} from "../../../UI/Content/TermsUI";
@@ -18,7 +18,7 @@ import {GetTermVariantNumber} from "../../../Store/firebase/terms";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 import {Spinner} from "react-vcomponents";
 import {Layer} from "Store/firebase/layers/@Layer";
-import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
+ import {GetErrorMessagesUnderElement} from "js-vextensions";
 
 type Props = {baseData: Layer, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Layer, ui: LayerDetailsUI)=>void}
 	& Partial<{creator: User}>;

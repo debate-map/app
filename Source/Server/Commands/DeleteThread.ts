@@ -10,11 +10,11 @@ import {IsArgumentNode} from "../../Store/firebase/nodes/$node";
 import {Map} from "../../Store/firebase/maps/@Map";
 import DeleteNode from "Server/Commands/DeleteNode";
 import {UserEdit} from "Server/CommandMacros";
-import {Subforum} from "../../Store/firebase/forum/@Subforum";
+import {Subforum} from "firebase-forum";
 import {ShowMessageBox} from "react-vmessagebox";
 import {GetAsync} from "Frame/Database/DatabaseHelpers";
-import {GetThreadPosts, GetThread} from "../../Store/firebase/forum";
-import {Post} from "Store/firebase/forum/@Post";
+import {GetThreadPosts, GetThread} from "firebase-forum";
+import {Post} from "firebase-forum";
 
 @UserEdit
 export default class DeleteThread extends Command<{threadID: number}> {

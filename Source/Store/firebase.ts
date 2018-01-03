@@ -10,7 +10,7 @@ import {ViewerSet} from "./firebase/nodeViewers/@ViewerSet";
 import {Image} from "./firebase/images/@Image";
 import {MapNodeStats} from "Store/firebase/nodeStats/@MapNodeStats";
 import {ViewedNodeSet} from "./firebase/userViewedNodes/@ViewedNodeSet";
-import { ForumData } from "Store/firebase/forum";
+import { ForumData } from "firebase-forum";
 import { Layer } from "Store/firebase/layers/@Layer";
 import {UserMapInfoSet} from "./firebase/userMapInfo/@UserMapInfo";
 

@@ -10,7 +10,7 @@ import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../../Frame/General/Enums";
 import {Select} from "react-vcomponents";
 import {CheckBox} from "react-vcomponents";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {Button} from "react-vcomponents";
 import TermComponent from "../../../../Store/firebase/termComponents/@TermComponent";
 import {GetNiceNameForTermType} from "../../../../UI/Content/TermsUI";
@@ -23,8 +23,8 @@ import {UpdateTimelineStep} from "../../../../Server/Commands/UpdateTimelineStep
 import {RemoveHelpers} from "../../../../Frame/Database/DatabaseHelpers";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {TextArea, TextArea_AutoSize} from "react-vcomponents";
-import {GetUpdates} from "../../../../Frame/General/Others";
-import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
+import {GetErrorMessagesUnderElement} from "js-vextensions";
+import {GetUpdates} from "Frame/Database/DatabaseHelpers";
 
 type Props = {baseData: TimelineStep, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: TimelineStep, ui: TimelineStepDetailsUI)=>void};
 export default class TimelineStepDetailsUI extends BaseComponent<Props, {newData: TimelineStep}> {

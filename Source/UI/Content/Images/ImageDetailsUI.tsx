@@ -10,13 +10,13 @@ import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../Frame/General/Enums";
 import {Select} from "react-vcomponents";
 import {CheckBox} from "react-vcomponents";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {Button} from "react-vcomponents";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 import {Image, Image_nameFormat, Image_urlFormat, ImageType, GetNiceNameForImageType} from "../../../Store/firebase/images/@Image";
 import SourceChainsEditorUI from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
 import {Div, Span, Pre, Row, RowLR} from "react-vcomponents";
-import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
+ import {GetErrorMessagesUnderElement} from "js-vextensions";
 
 type Props = {baseData: Image, creating: boolean, editing: boolean, style?, onChange?: (newData: Image)=>void}
 	& Partial<{creator: User, variantNumber: number}>;

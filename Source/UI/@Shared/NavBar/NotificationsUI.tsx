@@ -5,7 +5,7 @@ import {Button, Div} from "react-vcomponents";
 import {ACTNotificationMessageRemove} from "../../../Store/main";
 import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 
 AddGlobalStyle(`
 .NotificationScrollView > * { pointer-events: auto; }

@@ -6,7 +6,7 @@ import SubNavBar from "./@Shared/SubNavBar";
 import {SubNavBarButton} from "./@Shared/SubNavBar";
 import HomeUI2 from "./Home/Home";
 import AboutUI from "./Home/About";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {Column} from "react-vcomponents";
 import {Switch} from "react-vcomponents";
 import {Connect} from "../Frame/Database/FirebaseConnect";

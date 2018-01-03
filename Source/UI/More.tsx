@@ -10,7 +10,7 @@ import {styles} from "../Frame/UI/GlobalStyles";
 import {connect} from "react-redux";
 import {RootState} from "../Store/index";
 import LinksUI from "./More/Links";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {Column} from "react-vcomponents";
 import {Switch} from "react-vcomponents";
 import {Fragment} from "redux-little-router";

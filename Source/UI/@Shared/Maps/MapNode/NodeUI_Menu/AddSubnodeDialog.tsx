@@ -29,7 +29,7 @@ import {Connect} from "Frame/Database/FirebaseConnect";
 import {GetUserID} from "Store/firebase/users";
 import {Layer} from "Store/firebase/layers/@Layer";
 import AddSubnode from "../../../../../Server/Commands/AddSubnode";
-import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
+ import {GetErrorMessagesUnderElement} from "js-vextensions";
 
 export function ShowAddSubnodeDialog(mapID: number, anchorNode: MapNodeEnhanced, anchorNodePath: string) {
 	let dialog: AddSubnodeDialog;

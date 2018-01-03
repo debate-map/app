@@ -1,8 +1,7 @@
 import {InlineMath} from "react-katex";
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent, FindDOM} from "react-vextensions";
 import ReactDOM from "react-dom";
 import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
-import {FindDOM_} from "Frame/UI/ReactGlobals";
 
 // change InlineMath's generateHtml function to not break on katex parse-errors
 let oldGenerateHtml = InlineMath.prototype.generateHtml;
@@ -37,7 +36,7 @@ export default class NodeMathUI extends BaseComponent<{text: string, onTermHover
 	PostRender() {
 		let {onTermHover, onTermClick} = this.props;
 		
-		let dom = FindDOM_(this);
+		let dom = $(FindDOM(this));
 		let termUIs = dom.find(".text").ToList();
 		for (let termUI of termUIs) {
 			let termTextMatch = termUI.text().match(/^@term\[(.+?),([0-9]+?)\]$/);

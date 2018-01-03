@@ -4,7 +4,7 @@ import SubNavBar from "../@Shared/SubNavBar";
 import {BaseComponent, SimpleShouldUpdate, GetInnerComp, ShallowEquals} from "react-vextensions";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import {styles} from "../../Frame/UI/GlobalStyles";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {E} from "../../Frame/General/Globals_Free";
 import GlobalMapUI from "../Global/GlobalMapUI";
 import MapUI from "../@Shared/Maps/MapUI";
@@ -19,7 +19,6 @@ import ReactMarkdown from "react-markdown";
 import {GetNodeEnhanced} from "../../Store/firebase/nodes/$node";
 import { replace, push } from "redux-little-router";
 import { demoMap, demoRootNodeID } from "UI/Home/DemoMap";
-import {FindDOM_} from "Frame/UI/ReactGlobals";
 
 let red = `rgba(255,0,0,.7)`;
 let green = `rgba(0,255,0,.6)`;
@@ -237,13 +236,14 @@ export default class HomeUI2 extends BaseComponent<Props, {}> {
 }
 
 class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNodeEnhanced, style}, {}> {
+	root: HTMLDivElement;
+	mapUI: MapUI;
 	render() {
 		let {demoRootNode, style} = this.props;
-		let root, mapUI: MapUI, test2;
 		if (isBot) return <div/>;
 
 		return (
-			<div ref={c=>root = FindDOM_(c)} style={{
+			<div ref={c=>this.root = c} style={{
 				//margin: `0 -50px`,
 				/*height: 500,*/ userSelect: "none", position: "relative",
 				/*borderTop: "5px solid rgba(255,255,255,.3)",
@@ -263,15 +263,15 @@ class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNodeEnhanced,
 				.DemoMap > .scrollTrack { display: none; }
 				`}</style>
 				
-				<MapUI ref={c=>mapUI = c ? GetInnerComp(c) as any : null} className="DemoMap"
+				<MapUI ref={c=>this.mapUI = c ? GetInnerComp(c) as any : null} className="DemoMap"
 					map={demoMap} rootNode={demoRootNode} withinPage={true}
 					//padding={{left: 200, right: 500, top: 100, bottom: 100}}
 					padding={{left: (screen.availWidth / 2) - 300, right: screen.availWidth, top: 100, bottom: 100}}
 				/>
 				<div className="in" style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}
-					onMouseEnter={()=>root.removeClass("below")} onTouchStart={()=>root.removeClass("below")}/>
+					onMouseEnter={()=>$(this.root).removeClass("below")} onTouchStart={()=>$(this.root).removeClass("below")}/>
 				<div className="below" style={{position: "absolute", left: 0, right: 0, top: "100%", height: 300}}
-					onMouseEnter={()=>root.addClass("below")} onTouchStart={()=>root.addClass("below")}/>
+					onMouseEnter={()=>$(this.root).addClass("below")} onTouchStart={()=>$(this.root).addClass("below")}/>
 			</div>
 		);
 	}

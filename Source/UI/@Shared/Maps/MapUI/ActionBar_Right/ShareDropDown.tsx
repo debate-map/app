@@ -7,7 +7,7 @@ import {DropDown, RowLR, DropDownTrigger, DropDownContent, Pre} from "react-vcom
 import {Button} from "react-vcomponents";
 import {Row} from "react-vcomponents";
 import {Column} from "react-vcomponents";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {GetMapTimelines, GetTimeline, GetTimelineSteps} from "../../../../../Store/firebase/timelines";
 import {Timeline} from "../../../../../Store/firebase/timelines/@Timeline";

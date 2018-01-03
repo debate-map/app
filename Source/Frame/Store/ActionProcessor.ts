@@ -24,10 +24,9 @@ import {ACTPersonalMapSelect, ACTPersonalMapSelect_WithData} from "../../Store/m
 import {ACTMap_PlayingTimelineStepSet, ACTMap_PlayingTimelineAppliedStepSet, GetPlayingTimelineCurrentStepRevealNodes} from "../../Store/main/maps/$map";
 import {GetAsync} from "Frame/Database/DatabaseHelpers";
 import {UpdateFocusNodeAndViewOffset} from "../../UI/@Shared/Maps/MapUI";
-import {FindReact} from "react-vextensions";
+import {FindReact, FindDOM} from "react-vextensions";
 import MapUI from "../../UI/@Shared/Maps/MapUI";
 import {SleepAsync} from "js-vextensions";
-import {FindDOM_} from "Frame/UI/ReactGlobals";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -269,7 +268,7 @@ async function ExpandToAndFocusOnNodes(mapID: number, paths: string[]) {
 
 	let nodeBoxPositionSum = new Vector2i(0, 0);
 	for (let box of nodeBoxes) {
-		let boxPos = FindDOM_(box).GetScreenRect().Center.Minus(mapUIEl.GetScreenRect().Position);
+		let boxPos = $(FindDOM(box)).GetScreenRect().Center.Minus(mapUIEl.GetScreenRect().Position);
 		nodeBoxPositionSum = nodeBoxPositionSum.Plus(boxPos);
 	}
 	let nodeBoxPositionAverage = nodeBoxPositionSum.Times(1 / paths.length);

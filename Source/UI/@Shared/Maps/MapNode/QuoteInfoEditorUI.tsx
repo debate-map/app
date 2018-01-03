@@ -20,7 +20,7 @@ import {CleanUpdatedSourceChains} from "./SourceChainsEditorUI";
 import SourceChainsEditorUI from "./SourceChainsEditorUI";
 import {SubPanel_Quote} from "./NodeUI_Inner/SubPanel";
 import { MarkdownToolbar } from "UI/@Shared/MarkdownEditor/MarkdownToolbar";
-import {GetErrorMessagesUnderElement} from "Frame/UI/ReactGlobals";
+ import {GetErrorMessagesUnderElement} from "js-vextensions";
 
 //@ApplyBasicStyles
 export default class QuoteInfoEditorUI extends BaseComponent

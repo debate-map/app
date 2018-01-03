@@ -10,7 +10,7 @@ import {IsArgumentNode} from "../../Store/firebase/nodes/$node";
 import {Map} from "../../Store/firebase/maps/@Map";
 import DeleteNode from "Server/Commands/DeleteNode";
 import {UserEdit} from "Server/CommandMacros";
-import {Subforum} from "../../Store/firebase/forum/@Subforum";
+import {Subforum} from "firebase-forum";
 
 @UserEdit
 export default class DeleteSubforum extends Command<{subforumID: number}> {

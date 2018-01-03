@@ -6,8 +6,8 @@ import {E} from "../../Frame/General/Globals_Free";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import { UserEdit, MapEdit } from "Server/CommandMacros";
-import {Section} from "Store/firebase/forum/@Section";
-import {Subforum} from "Store/firebase/forum/@Subforum";
+import {Section} from "firebase-forum";
+import {Subforum} from "firebase-forum";
 
 @UserEdit
 export default class AddSubforum extends Command<{sectionID: number, subforum: Subforum}> {

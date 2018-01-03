@@ -8,7 +8,7 @@ import {Debugger, E, inFirefox} from "../../../Frame/General/Globals_Free";
 import {PropTypes} from "react";
 import {Vector2i, VRect} from "js-vextensions";
 import NodeUI from "./MapNode/NodeUI";
-import ScrollView from "react-vscrollview";
+import {ScrollView} from "react-vscrollview";
 import {GetDistanceBetweenRectAndPoint} from "../../../Frame/General/Geometry";
 import NodeUI_Inner from "./MapNode/NodeUI_Inner";
 //import ReactResizeDetector from "react-resize-detector"; // this one doesn't seem to work reliably -- at least for the map-ui
@@ -35,7 +35,6 @@ import {DropDown} from "react-vcomponents";
 import {Spinner} from "react-vcomponents";
 import {ACTDebateMapSelect} from "../../../Store/main/debates";
 import MapDetailsUI from "./MapDetailsUI";
-import {GetUpdates} from "../../../Frame/General/Others";
 import UpdateMapDetails from "../../../Server/Commands/UpdateMapDetails";
 import {IsUserCreatorOrMod} from "../../../Store/firebase/userExtras";
 import {ShowMessageBox} from "react-vmessagebox";
@@ -50,7 +49,6 @@ import {emptyArray} from "../../../Frame/Store/ReducerUtils";
 import { TimelinePlayerUI, TimelineOverlayUI } from "UI/@Shared/Maps/MapUI/TimelinePlayerUI";
 import {GetAsync} from "Frame/Database/DatabaseHelpers";
 import {GetPlayingTimeline} from "../../../Store/main/maps/$map";
-import { FindDOM_ } from "Frame/UI/ReactGlobals";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -165,10 +163,10 @@ export default class MapUI extends BaseComponent<Props, {}> {
 							onMouseDown={e=>{
 								this.downPos = new Vector2i(e.clientX, e.clientY);
 								if (e.button == 1)
-									FindDOM_(this.mapUI).addClass("scrolling");
+									$(FindDOM(this.mapUI)).addClass("scrolling");
 							}}
 							onMouseUp={e=> {
-								FindDOM_(this.mapUI).removeClass("scrolling");
+								$(FindDOM(this.mapUI)).removeClass("scrolling");
 							}}
 							onClick={e=> {
 								if (e.target != this.mapUI) return;
@@ -295,7 +293,7 @@ export default class MapUI extends BaseComponent<Props, {}> {
 		
 		let focusNodeBox = this.FindNodeBox(nodePath, true);
 		if (focusNodeBox == null) return;
-		let focusNodeBoxPos = FindDOM_(focusNodeBox).GetScreenRect().Center.Minus($(this.mapUI).GetScreenRect().Position);
+		let focusNodeBoxPos = $(FindDOM(focusNodeBox)).GetScreenRect().Center.Minus($(this.mapUI).GetScreenRect().Position);
 		this.ScrollToPosition(focusNodeBoxPos);
 	}
 	ScrollToPosition(posInContainer: Vector2i) {

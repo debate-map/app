@@ -50,7 +50,6 @@ import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/lay
 import { GetPlayingTimelineAppliedStepRevealNodes } from "Store/main/maps/$map";
 import {GetPlayingTimeline, GetPlayingTimelineRevealNodes, GetPlayingTimelineStepIndex, GetPlayingTimelineCurrentStepRevealNodes} from "../../../../Store/main/maps/$map";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
-import {FindDOM_} from "Frame/UI/ReactGlobals";
 
 type Props = {map: Map, node: MapNodeEnhanced, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
 	& Partial<{
@@ -352,7 +351,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	PostRender() {
 		//if (this.lastRender_source == RenderSource.SetState) return;
 
-		let height = FindDOM_(this).outerHeight();
+		let height = $(FindDOM(this)).outerHeight();
 		let pos = this.state.childrenCenterY|0;
 		if (height != this.lastHeight) {
 			this.OnHeightChange();
@@ -453,8 +452,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		//if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
 		//if (this.refs.childHolder) {
 		if (expanded && this.refs.childHolder) {
-			let holderOffset = new Vector2i(FindDOM_(this.refs.childHolder).offset());
-			let innerBox = FindDOM_(this.refs.innerBox);
+			let holderOffset = new Vector2i($(FindDOM(this.refs.childHolder)).offset());
+			let innerBox = $(FindDOM(this.refs.innerBox));
 			//var mainBoxOffset = new Vector2i(innerBox.offset()).Minus(holderOffset);
 			let mainBoxOffset = new Vector2i(0, innerBoxOffset);
 			//mainBoxOffset = mainBoxOffset.Plus(new Vector2i(innerBox.width(), innerBox.outerHeight() / 2));
@@ -467,7 +466,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 
 			let oldChildBoxOffsets = this.childBoxes.Props().Where(pair=>pair.value != null).ToMap(pair=>pair.name, pair=> {
 				//let childBox = FindDOM_(pair.value).find("> div:first-child > div"); // get inner-box of child
-				let childBox = FindDOM_(pair.value).find(".NodeUI_Inner").first(); // get inner-box of child
+				let childBox = $(FindDOM(pair.value)).find(".NodeUI_Inner").first(); // get inner-box of child
 				let childBoxOffset = new Vector2i(childBox.offset()).Minus(holderOffset);
 				childBoxOffset = childBoxOffset.Plus(new Vector2i(0, childBox.outerHeight() / 2));
 				return childBoxOffset;
