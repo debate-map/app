@@ -40,7 +40,7 @@ export class MainState {
 	reputation: {subpage: string};
 
 	database: Database;
-	feedback: {feedback: string};
+	feedback: {subpage: string};
 	//forum: Forum;
 	more: {subpage: string};
 	home: {subpage: string};

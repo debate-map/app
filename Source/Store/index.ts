@@ -17,6 +17,7 @@ import u from "updeep";
 import {VURL} from "js-vextensions";
 import {HandleError} from "../Frame/General/Errors";
 import {ForumData, ForumReducer} from "firebase-forum";
+import {FeedbackData, FeedbackReducer} from "firebase-feedback";
 
 export function InjectReducer(store, {key, reducer}) {
 	store.asyncReducers[key] = reducer;
@@ -41,6 +42,7 @@ export class RootState {
 	messageBox: MessageBoxState;
 	vMenu: VMenuState;
 	forum: ForumData;
+	feedback: FeedbackData;
 }
 export function MakeRootReducer(extraReducers?) {
 	const innerReducer = combineReducers({
@@ -52,6 +54,7 @@ export function MakeRootReducer(extraReducers?) {
 		messageBox: MessageBoxReducer,
 		vMenu: VMenuReducer,
 		forum: ForumReducer,
+		feedback: FeedbackReducer,
 		...extraReducers
 	});
 

@@ -13,8 +13,6 @@ import {Connect} from "../Frame/Database/FirebaseConnect";
 import {Switch} from "react-vcomponents";
 import UsersUI from "./Users";
 
-// todo
-
 type Props = {} & Partial<{currentSubpage: string}>;
 @Connect(state=> ({
 	currentSubpage: State(a=>a.main.database.subpage),

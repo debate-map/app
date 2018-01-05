@@ -11,7 +11,8 @@ import "./Store/firebase/nodeRatings/@RatingsRoot";
 import {State_overrides, State_Options} from "./UI/@Shared/StateOverrides";
 import {JSVE, DeepGet} from "js-vextensions";
 import "./Frame/General/Logging";
-import {Manager} from "firebase-forum";
+import {Manager as Manager_Forum} from "firebase-forum";
+import {Manager as Manager_Feedback} from "firebase-feedback";
 import Moment from "moment";
 import {GetNewURL} from "./Frame/URL/URLManager";
 import {replace, push} from "redux-little-router";
@@ -23,13 +24,9 @@ import VReactMarkdown_Remarkable from "./Frame/ReactComponents/VReactMarkdown_Re
 
 JSVE.logFunc = Log;
 
-// firebase-forum
-// ==========
 //g.FirebaseConnect = Connect;
-Manager.VSet({
+let sharedData = {
 	//store: null, // set below
-	storePath_mainData: "forum",
-	storePath_dbData: DBPath("forum"),
 	rootReducer: MakeRootReducer(),
 	State_overrides,
 	GetNewURL,
@@ -51,8 +48,16 @@ Manager.VSet({
 	GetUserPermissionGroups,
 
 	MarkdownRenderer: VReactMarkdown_Remarkable,
-})
-// ==========
+};
+
+Manager_Forum.VSet(sharedData.Extended({
+	storePath_mainData: "forum",
+	storePath_dbData: DBPath("forum"),
+}));
+Manager_Feedback.VSet(sharedData.Extended({
+	storePath_mainData: "feedback",
+	storePath_dbData: DBPath("feedback"),
+}));
 
 // uncomment this if you want to load the source-maps and such ahead of time (making-so the first actual call can get it synchronously)
 //StackTrace.get();
@@ -75,7 +80,8 @@ declare global { var store: Store<RootState> & {firebase: FirebaseApp}; }
 var store = createStore(g.__InitialState__, {}) as Store<RootState>;
 G({store});
 
-Manager.store = store;
+Manager_Forum.store = store;
+Manager_Feedback.store = store;
 
 // State() actually also returns the root-state (if no data-getter is supplied), but we don't reveal that in type-info (as its only to be used in console)
 G({State});
