@@ -26,8 +26,8 @@ export class FeedbackUI extends BaseComponent<Props, {}> {
 			<div style={{flex: 1, display: "flex", flexDirection: "column"}}>
 				<SubNavBar>
 					<SubNavBarButton {...{page}} subpage="proposals" text="Proposals"/>
-					<SubNavBarButton {...{page}} subpage="roadmap" text="Roadmap"/>
-					<SubNavBarButton {...{page}} subpage="neutrality" text="Neutrality"/>
+					{/*<SubNavBarButton {...{page}} subpage="roadmap" text="Roadmap"/>
+					<SubNavBarButton {...{page}} subpage="neutrality" text="Neutrality"/>*/}
 				</SubNavBar>
 				<Switch>
 					<ProposalsUI/>

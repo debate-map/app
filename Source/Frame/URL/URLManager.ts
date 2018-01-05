@@ -25,6 +25,7 @@ import { ACTMap_PlayingTimelineSet, ACTMap_PlayingTimelineStepSet } from "Store/
 import {ACTMap_PlayingTimelineAppliedStepSet} from "../../Store/main/maps/$map";
 import {ACTSubforumSelect, ACTThreadSelect, GetSelectedSubforumID, GetSelectedThreadID} from "firebase-forum";
 import {FindReact} from "react-vextensions";
+import {ACTProposalSelect, GetSelectedProposalID} from "firebase-feedback";
 
 export function GetCrawlerURLStrForMap(mapID: number) {
 	let map = GetMap(mapID);
@@ -193,6 +194,13 @@ export function GetSyncLoadActionsForURL(url: VURL, directURLChange: boolean) {
 		result.push(new ACTThreadSelect({id: threadID}));
 	}
 
+	if (url.pathNodes[0] == "feedback") {
+		let idStr = url.pathNodes[1];
+		let idStrMatch = idStr && idStr.match(/([0-9]+)$/);
+		let proposalID = idStrMatch ? idStrMatch[1].ToInt() : null;
+		result.push(new ACTProposalSelect({id: proposalID}));
+	}
+
 	if (page == "database") {
 		if (subpage == "terms" && url.pathNodes[2]) {
 			result.push(new ACTTermSelect({id: url.pathNodes[2].ToInt()}).VSet({fromURL: true}));
@@ -328,6 +336,11 @@ export function GetNewURL(includeMapViewStr = true) {
 
 		let threadID = GetSelectedThreadID();
 		if (threadID) newURL.pathNodes.push(threadID+"");
+	}
+
+	if (page == "feedback") {
+		let proposalID = GetSelectedProposalID();
+		if (proposalID) newURL.pathNodes.push(proposalID+"");
 	}
 
 	if (page == "database") {

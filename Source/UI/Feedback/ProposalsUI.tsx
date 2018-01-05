@@ -4,7 +4,7 @@ import {BaseComponent} from "react-vextensions";
 export class ProposalsUI extends BaseComponent<{}, {}> {
 	render() {
 		return (
-			<ProposalsUI_Base/>
+			<ProposalsUI_Base subNavBarWidth={84}/>
 		);
 	}
 }
