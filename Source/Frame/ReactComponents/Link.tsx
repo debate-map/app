@@ -67,7 +67,7 @@ export default class Link extends BaseComponent<Props, {}> {
 			event.preventDefault();
 			actions(store.dispatch); // apply actions
 		} else {
-			let isExternal = VURL.Parse(to, true).domain != GetCurrentURL().domain;
+			let isExternal = to && VURL.Parse(to, true).domain != GetCurrentURL().domain;
 			if (isExternal || target) return; // let browser handle external links, and "target=_blank"
 
 			event.preventDefault();
@@ -78,7 +78,7 @@ export default class Link extends BaseComponent<Props, {}> {
 	render() {
 		let {text, to, target, actions, children, ...rest} = this.props // eslint-disable-line no-unused-vars
 		//const href = this.context.router.history.createHref(typeof to === 'string' ? {pathname: to} : to)
-		let isExternal = VURL.Parse(to, true).domain != GetCurrentURL().domain;
+		let isExternal = to && VURL.Parse(to, true).domain != GetCurrentURL().domain;
 		if (isExternal && target === undefined) {
 			target = "_blank";
 		}

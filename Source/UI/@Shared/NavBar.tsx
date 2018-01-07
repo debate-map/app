@@ -24,7 +24,7 @@ import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
 import ReputationPanel from "./NavBar/ReputationPanel";
 import GuidePanel from "./NavBar/GuidePanel";
-import {VURL} from "js-vextensions";
+import {VURL, DeepGet} from "js-vextensions";
 import {Div} from "react-vcomponents";
 
 // main
@@ -94,7 +94,7 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
 						{/*<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
 						<NavBarPanelButton text="Guide" panel="guide" corner="top-right"/>*/}
-						<NavBarPanelButton text={auth ? auth.displayName.match(/(.+?)( |$)/)[1] : `Sign in`} panel="profile" corner="top-right"/>
+						<NavBarPanelButton text={DeepGet(auth, "displayName") ? auth.displayName.match(/(.+?)( |$)/)[1] : `Sign in`} panel="profile" corner="top-right"/>
 					</span>
 					<div style={{position: "absolute", zIndex: 11, right: 0, top: 45,
 							boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 0 -150px -150px)", display: "table"}}>

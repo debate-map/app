@@ -38,7 +38,15 @@ if (config.env === "development") {
 		noInfo: config.compiler_quiet,
 		lazy: false,
 		stats: config.compiler_stats,
-		progress: true
+		progress: true,
+		/*watchOptions: {
+			// makes-so a typescript-recompile (with multiple changed files) only triggers one webpack-recompile
+			// [not needed anymore, since using tsc-watch]
+			//aggregateTimeout: 2000,
+			//ignored: "^(?!.*TSCompileDone\.marker)", // ignore all files other than special "TSCompileDone.marker" file
+			//ignored: "**#/*",
+			ignored: "!./Source_JS/TSCompileDone.marker",
+		}*/
 	}));
 	app.use(require("webpack-hot-middleware")(compiler));
 

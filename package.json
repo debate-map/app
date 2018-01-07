@@ -32,7 +32,8 @@
     "deploy:prod": "better-npm-run deploy:prod",
     "deploy:prod-quick": "better-npm-run deploy:prod-quick",
     "@build-stats": "node_modules\\.bin\\webpack --config build/webpack.config.js --output-file ForStats/Bundle.js --profile --json > BuildStats.json",
-    "build-stats": "node_modules\\.bin\\webpack --config build/webpack.config.js --output-file ForStats/Bundle.js --profile --json > dist/ForStats/BuildStats.json"
+	 "build-stats": "node_modules\\.bin\\webpack --config build/webpack.config.js --output-file ForStats/Bundle.js --profile --json > dist/ForStats/BuildStats.json",
+	 "tsc-watch": "./node_modules/.bin/tsc-watch.cmd --onSuccess \"node ./build/OnSuccess.js\""
   },
   "betterScripts": {
     "compile": {
@@ -107,7 +108,7 @@
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*",
-        "USE_TSLOADER": "true"
+        "#USE_TSLOADER": "true"
       }
     },
     "dev-with-stats": {
@@ -115,7 +116,7 @@
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*",
-        "USE_TSLOADER": "true",
+        "#USE_TSLOADER": "true",
         "OUTPUT_STATS": "true"
       }
     },
@@ -142,7 +143,7 @@
         "DEBUG": "app:*",
         "QUICK": "true"
       }
-    }
+	 }
   },
   "repository": {
     "type": "git",
@@ -283,6 +284,7 @@
     "ts-loader": "^2.3.2",
     "typescript": "^2.4.2",
     "typescript-eslint-parser": "^2.1.0",
+    "tsc-watch": "^1.0.13",
     "url-loader": "^0.5.6",
     "webpack": "^1.13.3",
     "webpack-bundle-analyzer": "^2.4.0",
