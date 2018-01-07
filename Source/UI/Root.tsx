@@ -28,7 +28,7 @@ import ProfileUI from "./Profile";
 import ReactGA from "react-ga";
 import {persistStore} from "redux-persist";
 import {createBlacklistFilter} from "redux-persist-transform-filter";
-import {VURL} from "js-vextensions";
+import {VURL, Vector2i} from "js-vextensions";
 import { Connect } from "../Frame/Database/FirebaseConnect";
 import {Switch} from "react-vcomponents";
 import {RouterProvider} from 'redux-little-router';
@@ -75,6 +75,13 @@ export class RootUIWrapper extends BaseComponent<{store}, {}> {
 				React.addons.Perf.start();
 			});
 		}
+
+		$(document).on("mousemove", "*", function(event, ui) {
+			if (event["handledGlobally"]) return;
+			event["handledGlobally"] = true;
+
+			g.mousePos = new Vector2i(event.pageX, event.pageY);
+		});
 	}
 }
 
