@@ -9,9 +9,10 @@ export const rootPages = [
 ];
 // a default-child is only used (ie. removed from url) if there are no path-nodes after it
 export const rootPageDefaultChilds = {
+	database: "users",
+	feedback: "proposals",
 	more: "links",
 	home: "home",
-	content: "terms",
 	global: "map",
 }
 
