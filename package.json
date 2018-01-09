@@ -9,7 +9,7 @@
   "scripts": {
     "clean": "rimraf dist",
     "compile": "better-npm-run compile",
-    "lint": "eslint Source Tests Server",
+    "lint": "eslint Source Tests Scripts",
     "lint:fix": "npm run lint -- --fix",
     "start": "better-npm-run start",
     "dev": "better-npm-run dev",
@@ -25,19 +25,19 @@
     "build:prod": "better-npm-run build:prod",
     "build:prod-quick": "better-npm-run build:prod-quick",
     "codecov": "cat coverage/*/lcov.info | codecov",
-    "@just-deploy": "node ./build/deploy",
+    "@just-deploy": "node ./Scripts/Build/Deploy",
     "just-deploy:dev": "firebase deploy -P dev",
     "just-deploy:prod": "firebase deploy -P prod",
     "deploy:dev": "better-npm-run deploy:dev",
     "deploy:prod": "better-npm-run deploy:prod",
     "deploy:prod-quick": "better-npm-run deploy:prod-quick",
-    "@build-stats": "node_modules\\.bin\\webpack --config build/webpack.config.js --output-file ForStats/Bundle.js --profile --json > BuildStats.json",
-	 "build-stats": "node_modules\\.bin\\webpack --config build/webpack.config.js --output-file ForStats/Bundle.js --profile --json > dist/ForStats/BuildStats.json",
-	 "tsc-watch": "./node_modules/.bin/tsc-watch.cmd --onSuccess \"node ./build/OnSuccess.js\""
+    "@build-stats": "node_modules\\.bin\\webpack --config Scripts/Build/WebpackConfig.js --output-file ForStats/Bundle.js --profile --json > BuildStats.json",
+	 "build-stats": "node_modules\\.bin\\webpack --config Scripts/Build/WebpackConfig.js --output-file ForStats/Bundle.js --profile --json > dist/ForStats/BuildStats.json",
+	 "tsc-watch": "./node_modules/.bin/tsc-watch.cmd --onSuccess \"node ./Scripts/Build/OnSuccess.js\""
   },
   "betterScripts": {
     "compile": {
-      "command": "node bin/compile",
+      "command": "node Scripts/Bin/Compile",
       "env": {
         "DEBUG": "app:*"
       }
@@ -71,7 +71,7 @@
       }
     },
     "start": {
-      "command": "node bin/server",
+      "command": "node Scripts/Bin/Server",
       "env": {
         "DEBUG": "app:*"
       }
@@ -84,27 +84,27 @@
       }
     },
     "create-config": {
-      "command": "node build/create-config",
+      "command": "node Scripts/Build/CreateConfig",
       "env": {
         "DEBUG": "app:*"
       }
     },
     "create-vendors": {
-      "command": ".\\node_modules\\.bin\\webpack --config=config/Vendors.webpack.js",
+      "command": ".\\node_modules\\.bin\\webpack --config=Scripts/Config/Vendors.webpack.js",
       "env": {
         "NODE_ENV": "production"
       }
     },
     "create-vendors-quick": {
-      "command": ".\\node_modules\\.bin\\webpack --config=config/Vendors.webpack.js",
+      "command": ".\\node_modules\\.bin\\webpack --config=Scripts/Config/Vendors.webpack.js",
       "env": {
         "NODE_ENV": "production",
         "QUICK": "true"
       }
     },
     "dev": {
-      "@command": "npm run create-config && nodemon bin/server --watch bin --watch build --watch config --watch Server",
-      "command": "npm run create-config && nodemon bin/server --watch bin --watch build --watch config --watch Server --max_old_space_size=4096",
+      "@command": "npm run create-config && nodemon Scripts/Bin/Server --watch bin --watch build --watch config --watch Server",
+      "command": "npm run create-config && nodemon Scripts/Bin/Server --watch bin --watch build --watch config --watch Server --max_old_space_size=4096",
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*",
@@ -112,7 +112,7 @@
       }
     },
     "dev-with-stats": {
-      "command": "npm run create-config && nodemon bin/server --watch bin --watch build --watch config --watch Server --max_old_space_size=4096",
+      "command": "npm run create-config && nodemon Scripts/Bin/Server --watch bin --watch build --watch config --watch Server --max_old_space_size=4096",
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*",

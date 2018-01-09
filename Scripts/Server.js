@@ -1,8 +1,8 @@
 const express = require("express")
 const debug = require("debug")("app:server")
 const webpack = require("webpack")
-const webpackConfig = require("../build/webpack.config")
-const config = require("../config");
+const webpackConfig = require("./Build/WebpackConfig")
+const config = require("./Config");
 
 const app = express();
 const paths = config.utils_paths;
@@ -56,7 +56,7 @@ if (config.env === "development") {
 	// when the application is compiled.
 	//app.use(express.static(paths.client("Resources")));
 	app.use(express.static(paths.base("Resources")));
-	app.use(express.static(paths.base("config/dist/dll")));
+	app.use(express.static(paths.base("Scripts/Config/dist/dll")));
 } else {
 	debug(
 		"Server is being run outside of live development mode, meaning it will " +

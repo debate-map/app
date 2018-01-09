@@ -12,6 +12,8 @@ const paths = config.utils_paths;
 const {__DEV__, __PROD__, __TEST__} = config.globals;
 const {QUICK, USE_TSLOADER, OUTPUT_STATS} = process.env;
 
+let root = path.join(__dirname, "..", "..");
+
 debug("Creating configuration.");
 const webpackConfig = {
 	name: "client",
@@ -138,9 +140,9 @@ webpackConfig.plugins = [
 	}),*/
 
 	new webpack.DllReferencePlugin({
-		context: path.join(__dirname, "Source"),
+		context: path.join(root, "Source"),
 		//context: paths.base(),
-		manifest: require("../config/dll/vendor-manifest.json")
+		manifest: require("../Config/dll/vendor-manifest.json")
 	}),
 
 	/*new BundleAnalyzerPlugin({

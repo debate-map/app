@@ -1,8 +1,8 @@
 const debug = require("debug")("app:build:config");
 const fs = require("fs");
 const path = require("path");
-const pkg = require("../package.json");
-const config = require("../config");
+const pkg = require("../../package.json");
+const config = require("../Config");
 
 // TODO: load config from environments
 /*let env = config.env;
@@ -39,7 +39,7 @@ function createConfigFile(callback, environment) {
 	}).join("\n");
 
 	let pathRel = environment == "development" ? "Source/BakedConfig_Dev.ts" : "Source/BakedConfig_Prod.ts";
-	let outputPath = path.join(__dirname, "..", pathRel);
+	let outputPath = path.join(__dirname, "..", "..", pathRel);
 
 	let oldText = fs.readFileSync(outputPath, {encoding: "utf8"});
 	if (newText != oldText) {

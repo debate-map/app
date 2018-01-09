@@ -1,7 +1,6 @@
 import {RequestPath, Connect, ClearRequestedPaths, GetRequestedPaths} from "./FirebaseConnect";
 import {Assert, GetTreeNodesInObjTree, DeepSet} from "js-vextensions";
 import {helpers, firebaseConnect} from "react-redux-firebase";
-//import {DBPath as DBPath_} from "../../../config/DBVersion";
 import {FirebaseApplication, DataSnapshot} from "firebase";
 import {BaseComponent, ShallowChanged} from "react-vextensions";
 import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/query";

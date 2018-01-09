@@ -1,5 +1,5 @@
 /**
  * WARNING: This file is just to prevent from global .babelrc files!
- * This babel funcitonality is actually controlled within config/index.js
+ * This babel funcitonality is actually controlled within Scripts/Config.js
  **/
 {}

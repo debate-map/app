@@ -30,7 +30,7 @@ For recommended setup of your code editor and other tools, see: [Editor setup](#
 ### Firebase setup + project config
 
 1) Create two Google Firebase projects -- one for development, one for production.
-2) Edit the `.firebaserc` and `config/index.js` files, replacing their paths and data with your own.
+2) Edit the `.firebaserc` and `Scripts/Build/CreateConfig.js` files, replacing their paths and data with your own.
 3) Add at least one form of authentication to your Firebase projects. (Google sign-in is easiest)
 4) Run the project locally. (see "Running locally" section below)
 5) Sign in once (using the panel at the top-right), then check the database and copy your user ID.
@@ -52,7 +52,7 @@ For recommended setup of your code editor and other tools, see: [Editor setup](#
 2) Run `npm run dev` in the root project folder. (or `npm run dev-with-stats`)
 3) Navigate to `localhost:3000`.
 
-Note that if you add/remove/modify any modules required from `config/Vendors.js`, you'll then need to run `npm run create-vendors[-quick]`. (those modules are compiled separately, to speed up the main compile process)
+Note that if you add/remove/modify any modules required from `Scripts/Config/Vendors.js`, you'll then need to run `npm run create-vendors[-quick]`. (those modules are compiled separately, to speed up the main compile process)
 
 ### Deploying to Firebase
 

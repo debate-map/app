@@ -25,11 +25,11 @@ config.env = env;
 Object.assign(config, {
 	// Project Structure
 	// ----------
-	path_base  : path.resolve(__dirname, ".."),
-	dir_client : USE_TSLOADER ? "Source" : "Source_JS",
-	dir_dist   : "dist",
-	dir_server : "Server",
-	dir_test   : "Tests",
+	path_base: path.resolve(__dirname, ".."),
+	dir_client: USE_TSLOADER ? "Source" : "Source_JS",
+	dir_dist: "dist",
+	dir_server: "Scripts/Server",
+	dir_test: "Tests",
 
 	// Server Configuration
 	// ----------
@@ -136,7 +136,7 @@ const pkg = require("../package.json");
 		if (pkg.dependencies[dep]) return true
 
 		debug(`Package "${dep}" was not found as an npm dependency in package.json; it won't be included in the webpack vendor bundle.`
-			+ ` Consider removing it from \`compiler_vendors\` in ~/config/index.js`)
+			+ ` Consider removing it from \`compiler_vendors\` in ~/Scripts/Config.js`)
 	})*/
 
 // Utilities
