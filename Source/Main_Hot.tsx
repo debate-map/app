@@ -30,7 +30,14 @@ let sharedData = {
 	rootReducer: MakeRootReducer(),
 	State_overrides,
 	GetNewURL,
-	FormatTime: (time: number, formatStr: string)=>Moment(time).format(formatStr),
+	FormatTime: (time: number, formatStr: string)=> {
+		if (formatStr == "[calendar]") {
+			let result = Moment(time).calendar();
+			//if (result.includes("/")) return Moment(time).format("YYYY-MM-DD");
+			return result;
+		}
+		return Moment(time).format(formatStr);
+	},
 	
 	router_replace: replace,
 	router_push: push,
