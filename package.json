@@ -103,8 +103,8 @@
       }
     },
     "dev": {
-      "@command": "npm run create-config && nodemon Scripts/Bin/Server --watch bin --watch build --watch config --watch Server",
-      "command": "npm run create-config && nodemon Scripts/Bin/Server --watch bin --watch build --watch config --watch Server --max_old_space_size=4096",
+      "@command": "npm run create-config && nodemon Scripts/Bin/Server --watch Scripts",
+      "command": "npm run create-config && nodemon Scripts/Bin/Server --watch Scripts --max_old_space_size=4096",
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*",
@@ -112,7 +112,7 @@
       }
     },
     "dev-with-stats": {
-      "command": "npm run create-config && nodemon Scripts/Bin/Server --watch bin --watch build --watch config --watch Server --max_old_space_size=4096",
+      "command": "npm run create-config && nodemon Scripts/Bin/Server --watch Scripts --max_old_space_size=4096",
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*",
