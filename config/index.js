@@ -8,10 +8,21 @@ const {NODE_ENV, PORT, USE_TSLOADER, BASENAME} = process.env;
 
 debug("Creating default configuration.")
 
+const config = {};
+
+// Environment
+// ==========
+
+let env = global.env = NODE_ENV;
+let devEnv = global.devEnv = env == "development";
+let prodEnv = global.prodEnv = env == "production";
+let testEnv = global.testEnv = env == "test";
+config.env = env;
+
 // Default Configuration
 // ==========
 
-const config = {
+Object.assign(config, {
 	// Project Structure
 	// ----------
 	path_base  : path.resolve(__dirname, ".."),
@@ -46,7 +57,7 @@ const config = {
 			"babel-plugin-transform-es2015-destructuring",
 			"babel-plugin-transform-es2015-duplicate-keys",
 			//"babel-plugin-transform-es2015-for-of", // ohhh, I hate this thing... (the try-catch wrapping within transpiled for-of's)
-			["babel-plugin-transform-es2015-for-of", {loose: true}], // loose removes the try-catch wrapping
+			prodEnv && ["babel-plugin-transform-es2015-for-of", {loose: true}], // loose removes the try-catch wrapping
 			"babel-plugin-transform-es2015-function-name",
 			"babel-plugin-transform-es2015-literals",
 			"babel-plugin-transform-es2015-modules-commonjs", // uncommented; went back to using interop... (regenerator needs it -_-)
@@ -59,17 +70,17 @@ const config = {
 			"babel-plugin-transform-es2015-template-literals",
 			"babel-plugin-transform-es2015-typeof-symbol",
 			"babel-plugin-transform-es2015-unicode-regex",
-			"babel-plugin-transform-regenerator", // for "async" transpilation; had been disabled, but found still needed for googlebot
+			prodEnv && "babel-plugin-transform-regenerator", // for "async" transpilation; had been disabled, but found still needed for googlebot
 
 			// from stage-0
 			"babel-plugin-transform-object-rest-spread",
 			"babel-plugin-transform-class-properties",
 
-			"babel-plugin-transform-runtime", // for "async" transpilation; had been disabled, but found still needed for googlebot
+			prodEnv && "babel-plugin-transform-runtime", // for "async" transpilation; had been disabled, but found still needed for googlebot
 			//["babel-plugin-transform-runtime", {"regenerator": false}],
 			"babel-plugin-lodash",
 			"babel-plugin-transform-decorators-legacy"
-		],
+		].filter(a=>a),
 	},
 	// list of types: https://webpack.js.org/configuration/devtool
 	// *: All "eval" ones don't work anymore with new tsc setup -- they don't show original files
@@ -95,21 +106,12 @@ const config = {
 		{type : "text-summary"},
 		{type : "lcov", dir : "coverage"}
 	]
-};
+});
 
 // All Internal Configuration Below
 // Edit at Your Own Risk
 // ==========
 // ==========
-
-// Environment
-// ==========
-
-let env = global.env = NODE_ENV;
-let devEnv = global.devEnv = env == "development";
-let prodEnv = global.prodEnv = env == "production";
-let testEnv = global.testEnv = env == "test";
-config.env = env;
 
 // N.B.: globals added here must _also_ be added to .eslintrc
 config.globals = {
