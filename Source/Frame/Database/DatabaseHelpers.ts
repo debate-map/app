@@ -222,6 +222,7 @@ export class GetDataAsync_Options {
 }
 
 G({GetDataAsync});
+// usually you'll want to use "await GetAsync(()=>GetNode(id))" instead
 //export async function GetDataAsync(path: string, inVersionRoot = true, addHelpers = true, firebase: firebase.DatabaseReference = store.firebase.helpers.ref("")) {
 //export async function GetDataAsync(path: string, inVersionRoot = true, addHelpers = true) {
 /*export async function GetDataAsync(pathSegment1: string | number, pathSegment2: string | number, ...pathSegments: (string | number)[]);
@@ -302,6 +303,10 @@ export async function GetAsync<T>(dbGetterFunc: ()=>T, statsLogger?: ({requested
 	}
 
 	return result;
+}
+G({GetAsync});
+export async function GetAsync_Raw<T>(dbGetterFunc: ()=>T, statsLogger?: ({requestedPaths: string})=>void): Promise<T> {
+	return RemoveHelpers(Clone(await GetAsync(dbGetterFunc, statsLogger)));
 }
 export function WaitTillPathDataIsReceived(path: string): Promise<any> {
 	return new Promise((resolve, reject)=> {

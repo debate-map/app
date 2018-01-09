@@ -53,17 +53,20 @@ export abstract class Command<Payload> {
 		
 		MaybeLog(a=>a.commands, ()=>`Running command. @type:${this.constructor.name} @payload(${ToJSON(this.payload)})`);
 
-		this.Validate_Early();
-		await this.Prepare();
-		await this.Validate();
+		try {
+			this.Validate_Early();
+			await this.Prepare();
+			await this.Validate();
 
-		let dbUpdates = this.GetDBUpdates();
-		//FixDBUpdates(dbUpdates);
-		await store.firebase.helpers.DBRef().update(dbUpdates);
+			let dbUpdates = this.GetDBUpdates();
+			//FixDBUpdates(dbUpdates);
+			await store.firebase.helpers.DBRef().update(dbUpdates);
 
-		MaybeLog(a=>a.commands, ()=>`Finishing command. @type:${this.constructor.name} @payload(${ToJSON(this.payload)})`);
-		OnCurrentCommandFinished();
-
+			MaybeLog(a=>a.commands, ()=>`Finishing command. @type:${this.constructor.name} @payload(${ToJSON(this.payload)})`);
+		} finally {
+			OnCurrentCommandFinished();
+		}
+		
 		// later on (once set up on server), this will send the data back to the client, rather than return it
 		return this.returnData;
 	}

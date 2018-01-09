@@ -8,9 +8,14 @@ import {GetThesisType} from "../../Store/firebase/nodes/$node";
 import {Equation} from "../../Store/firebase/nodes/@Equation";
 import {UserEdit} from "../CommandMacros";
 import {MapEdit} from "Server/CommandMacros";
+import {GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
+import {GetNode} from "Store/firebase/nodes";
 
 export const conversionTypes = [
+	// from normal to...	
 	"Normal>Equation",
+	// each type back to normal
+	"Equation>Normal",
 ];
 export function CanConvertFromThesisTypeXToY(from: ThesisType, to: ThesisType) {
 	return conversionTypes.Contains(`${ThesisType[from]}>${ThesisType[to]}`);
@@ -37,7 +42,8 @@ export default class ChangeThesisType extends Command<{mapID?: number, nodeID: n
 	async Prepare() {
 		let {nodeID, newType} = this.payload;
 
-		let oldData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
+		//let oldData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
+		let oldData = await GetAsync_Raw(()=>GetNode(nodeID),);
 		this.oldType = GetThesisType(oldData);
 
 		this.newData = {...oldData};
@@ -45,6 +51,11 @@ export default class ChangeThesisType extends Command<{mapID?: number, nodeID: n
 			if (newType == ThesisType.Equation) {
 				this.newData.equation = new Equation().VSet({text: this.newData.titles.base});
 				delete this.newData.titles;
+			}
+		} else if (this.oldType == ThesisType.Equation) {
+			if (newType == ThesisType.Normal) {
+				this.newData.titles = {base: this.newData.equation.text};
+				delete this.newData.equation;
 			}
 		}
 	}
