@@ -195,10 +195,12 @@ export function GetSyncLoadActionsForURL(url: VURL, directURLChange: boolean) {
 	}
 
 	if (url.pathNodes[0] == "feedback") {
-		let idStr = url.pathNodes[1];
-		let idStrMatch = idStr && idStr.match(/([0-9]+)$/);
-		let proposalID = idStrMatch ? idStrMatch[1].ToInt() : null;
-		result.push(new ACTProposalSelect({id: proposalID}));
+		if (url.pathNodes[1] == "proposals") {
+			let idStr = url.pathNodes[2];
+			let idStrMatch = idStr && idStr.match(/([0-9]+)$/);
+			let proposalID = idStrMatch ? idStrMatch[1].ToInt() : null;
+			result.push(new ACTProposalSelect({id: proposalID}));
+		}
 	}
 
 	if (page == "database") {
@@ -231,9 +233,9 @@ export function GetSyncLoadActionsForURL(url: VURL, directURLChange: boolean) {
 			if (isBot) {
 				if (crawlerURLMatch) {
 					let nodeID = parseInt(crawlerURLMatch[1]);
-					result.push(new ACTSet({path: `main/mapViews/${1}/rootNodeID`, value: nodeID}));
+					result.push(new ACTSet(`main/mapViews/${1}/rootNodeID`, nodeID));
 				} else if (directURLChange) {
-					result.push(new ACTSet({path: `main/mapViews/${1}/rootNodeID`, value: null}));
+					result.push(new ACTSet(`main/mapViews/${1}/rootNodeID`, null));
 				}
 			}
 		} else {

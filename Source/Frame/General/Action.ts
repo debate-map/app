@@ -19,6 +19,7 @@ export default class Action<Payload> {
 }
 Object.prototype._AddFunction("Is", Action.prototype.Is);
 Object.prototype._AddFunction("IsAny", Action.prototype.IsAny);
+//Object.prototype._AddFunction("IsACTSetFor", Action.prototype.IsACTSetFor);
 
 /*export function IsACT<Props>(action, actionType: new(..._)=>Action<Props>): action is Props {
 	return action.type == actionType.name;
@@ -28,3 +29,7 @@ Object.prototype._AddFunction("IsAny", Action.prototype.IsAny);
 	return this.type == actionType.name;
 	//return this instanceof actionType; // alternative
 }*/
+
+export function IsACTSetFor(action: Action<any>, path: any) {
+	return action.type.startsWith("ACTSet_") && action.payload["path"] == path;
+}
