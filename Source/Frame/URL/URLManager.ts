@@ -238,15 +238,17 @@ export function GetSyncLoadActionsForURL(url: VURL, directURLChange: boolean) {
 					result.push(new ACTSet(`main/mapViews/${1}/rootNodeID`, null));
 				}
 			}
-		} else {
-			// example: /global?view=1:3:100:101f(384_111):102:.104:.....
-			let mapViewStr = url.GetQueryVar("view");
-			if (mapViewStr != null && mapViewStr.length) {
-				let mapView = ParseMapView(mapViewStr);
+		}
+	}
 
-				//Log("Loading map-view:" + ToJSON(mapView));
-				result.push(new ACTMapViewMerge({mapID: 1, mapView}).VSet({fromURL: true}));
-			}
+	if (mapID) {
+		// example: /global?view=1:3:100:101f(384_111):102:.104:.....
+		let mapViewStr = url.GetQueryVar("view");
+		if (mapViewStr != null && mapViewStr.length) {
+			let mapView = ParseMapView(mapViewStr);
+
+			//Log("Loading map-view:" + ToJSON(mapView));
+			result.push(new ACTMapViewMerge({mapID, mapView}).VSet({fromURL: true}));
 		}
 	}
 
@@ -371,8 +373,8 @@ export function GetNewURL(includeMapViewStr = true) {
 		}
 	}
 	if (page == "global" && subpage == "map") {
+		mapID = GetOpenMapID();
 		if (isBot) {
-			mapID = GetOpenMapID();
 			let map = GetMap(mapID);
 			let rootNodeID = State("main", "mapViews", mapID, "rootNodeID");
 			let rootNode = GetNode(rootNodeID);
@@ -382,12 +384,11 @@ export function GetNewURL(includeMapViewStr = true) {
 					newURL.pathNodes.push(nodeStr);
 				}
 			}
-		} else {
-			if (includeMapViewStr) {
-				mapID = GetOpenMapID();
-				newURL.SetQueryVar("view", GetMapViewStr(mapID));
-			}
 		}
+	}
+
+	if (mapID && includeMapViewStr) {
+		newURL.SetQueryVar("view", GetMapViewStr(mapID));
 	}
 
 	let playingTimeline = mapID && State("main", "maps", mapID, "playingTimeline");
