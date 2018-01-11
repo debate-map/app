@@ -17,4 +17,5 @@ coverage
 /Tools/Webpack Profiling/Stats_Incremental.json
 /Tools/Webpack Profiling/ModuleTimings_Incremental.json
 /Tools/Webpack Profiling/ModuleTimings.json
+/Tools/Webpack Profiling/ModuleInfo.json
 /Info/Images/@NotTracked
