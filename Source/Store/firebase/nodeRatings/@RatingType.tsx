@@ -1,4 +1,4 @@
-import {MapNode, MapNodeEnhanced} from "../nodes/@MapNode";
+import {MapNode, MapNodeL2} from "../nodes/@MapNode";
 import {Range} from "js-vextensions";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {MetaThesis_IfType} from "../nodes/@MetaThesisInfo";

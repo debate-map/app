@@ -1,5 +1,5 @@
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {MapNode, ThesisForm, MapNodeEnhanced} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
 import {GetRating, GetRatingValue, GetRatingSet} from "../../Store/firebase/nodeRatings";
 import {GetRatingAverage, GetRatings} from "../../Store/firebase/nodeRatings";
 import {Rating} from "../../Store/firebase/nodeRatings/@RatingsRoot";

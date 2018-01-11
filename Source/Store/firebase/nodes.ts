@@ -1,12 +1,12 @@
 import {HasModPermissions, PermissionGroupSet} from "./userExtras/@UserExtraInfo";
 import {IsNaN, IsObjectOf, IsObject, IsNumber} from "js-vextensions";
 import {GetData, GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {MapNode, globalRootNodeID, MapNodeEnhanced, MapNodeL2} from "./nodes/@MapNode";
+import {MapNode, globalRootNodeID, MapNodeL2} from "./nodes/@MapNode";
 import {CachedTransform} from "js-vextensions";
 import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
 import {IsUserCreatorOrMod} from "./userExtras";
 import {GetUserPermissionGroups, GetUserID, GetUserAccessLevel} from "./users";
-import {GetNodeEnhanced, IsArgumentNode} from "./nodes/$node";
+import {IsArgumentNode, GetNodeL2, GetNodeL3} from "./nodes/$node";
 import {Map} from "./maps/@Map";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
@@ -56,8 +56,11 @@ export function GetParentNodeID(path: string) {
 export function GetParentNode(path: string) {
 	return GetNode(GetParentNodeID(path));
 }
-export function GetParentNodeEnhanced(path: string) {
-	return GetNodeEnhanced(GetParentNodeID(path), path);
+export function GetParentNodeL2(path: string) {
+	return GetNodeL2(GetParentNodeID(path));
+}
+export function GetParentNodeL3(path: string) {
+	return GetNodeL3(GetParentNodeID(path), path);
 }
 export function GetNodeID(path: string) {
 	let ownNodeStr = SplitStringBySlash_Cached(path).LastOrX();
@@ -92,9 +95,14 @@ export async function GetNodeChildrenAsync(node: MapNode) {
 	return await Promise.all(node.children.VKeys(true).map(id=>GetDataAsync("nodes", id))) as MapNode[];
 }
 
-export function GetNodeChildrenEnhanced(node: MapNode, path?: string, filterForPath = false) {
+export function GetNodeChildrenL2(node: MapNode, path?: string, filterForPath = false) {
 	let nodeChildren = GetNodeChildren(node);
-	let nodeChildrenEnhanced = nodeChildren.map(child=>child ? GetNodeEnhanced(child, path ? path + "/" + child._id : null) : null);
+	let nodeChildrenL2 = nodeChildren.map(child=>child ? GetNodeL2(child) : null);
+	return CachedTransform("GetNodeChildrenL2", [path], nodeChildrenL2, ()=>nodeChildrenL2);
+}
+export function GetNodeChildrenL3(node: MapNode, path?: string, filterForPath = false) {
+	let nodeChildrenL2 = GetNodeChildrenL2(node);
+	let nodeChildrenEnhanced = nodeChildrenL2.map(child=>child ? GetNodeL3(child, path ? path + "/" + child._id : null) : null);
 	if (filterForPath) {
 		nodeChildrenEnhanced = nodeChildrenEnhanced.filter(child=> {
 			// if null, keep (so receiver knows there's an entry here, but it's still loading)
@@ -110,16 +118,16 @@ export function GetNodeChildrenEnhanced(node: MapNode, path?: string, filterForP
 }
 
 export function GetMetaThesisChildNode(node: MapNodeL2) {
-	let nodeChildren = GetNodeChildrenEnhanced(node);
+	let nodeChildren = GetNodeChildrenL2(node);
 	return CachedTransform("GetMetaThesisChildNode", [node._id], nodeChildren, ()=>nodeChildren.FirstOrX(a=>a && a.current.metaThesis != null));
 }
 
-export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNodeEnhanced) {
+export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNodeL2) {
 	let parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;
 	if (!parentTypeInfo.Contains(child.current.type)) return false;
 	return true;
 }
-export function IsNewLinkValid(parentNode: MapNodeEnhanced, parentPath: string, child: MapNodeEnhanced, permissions: PermissionGroupSet) {
+export function IsNewLinkValid(parentNode: MapNodeL2, parentPath: string, child: MapNodeL2, permissions: PermissionGroupSet) {
 	let parentPathIDs = SplitStringBySlash_Cached(parentPath).map(a=>a.ToInt());
 	//if (map.name == "Global" && parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
 	if (parentNode._id == globalRootNodeID) return false; // if parent is global-root, don't accept new children
@@ -131,7 +139,7 @@ export function IsNewLinkValid(parentNode: MapNodeEnhanced, parentPath: string, 
 	return IsLinkValid(parentNode.current.type, parentPath, child);
 }
 
-export function ForUnlink_GetError(userID: string, map: Map, node: MapNodeEnhanced, asPartOfCut = false) {
+export function ForUnlink_GetError(userID: string, map: Map, node: MapNodeL2, asPartOfCut = false) {
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
 	if (node.current.metaThesis) return "Cannot unlink a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
 	if (!asPartOfCut && (node.parents || {}).VKeys(true).length <= 1)  return `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`;
@@ -139,20 +147,20 @@ export function ForUnlink_GetError(userID: string, map: Map, node: MapNodeEnhanc
 	if (IsNodeSubnode(node)) return `Cannot unlink a subnode. Try deleting it instead.`;
 	return null;
 }
-export function ForDelete_GetError(userID: string, map: Map, node: MapNodeEnhanced, asPartOfMapDelete = false) {
+export function ForDelete_GetError(userID: string, map: Map, node: MapNodeL2, asPartOfMapDelete = false) {
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
 	if (node.current.metaThesis) return "Cannot delete a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
 	if (GetParentCount(node) > 1) return `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`;
 	if (IsRootNode(node) && !asPartOfMapDelete) return `Cannot delete the root-node of a map.`;
 
-	let nodeChildren = GetNodeChildrenEnhanced(node);
+	let nodeChildren = GetNodeChildrenL2(node);
 	if (nodeChildren.Any(a=>a == null)) return "[still loading children...]";
 	//if ((node.children || {}).VKeys().length) return "Cannot delete this node until all its (non-meta-thesis) children have been unlinked or deleted.";
 	if (nodeChildren.filter(a=>!a.current.metaThesis).length) return "Cannot delete this node until all its (non-meta-thesis) children have been unlinked or deleted.";
 	return null;
 }
 
-export function ForCut_GetError(userID: string, map: Map, node: MapNodeEnhanced) {
+export function ForCut_GetError(userID: string, map: Map, node: MapNodeL2) {
 	return ForUnlink_GetError(userID, map, node, true);
 }
 

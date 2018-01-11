@@ -9,7 +9,7 @@ import {E} from "../../Frame/General/Globals_Free";
 import GlobalMapUI from "../Global/GlobalMapUI";
 import MapUI from "../@Shared/Maps/MapUI";
 import {MapType, Map} from "../../Store/firebase/maps/@Map";
-import {MapNode, MapNodeEnhanced} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {MapView} from "../../Store/main/mapViews/@MapViews";
 import {GetNode} from "../../Store/firebase/nodes";
@@ -203,7 +203,7 @@ This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 
 let info = {text: pageText};
 
-type Props = {} & Partial<{demoRootNode: MapNodeEnhanced}>;
+type Props = {} & Partial<{demoRootNode: MapNodeL2}>;
 @Connect(state=> ({
 	demoRootNode: GetNodeEnhanced(GetNode(demoRootNodeID), demoRootNodeID+""),
 }))
@@ -234,7 +234,7 @@ export default class HomeUI2 extends BaseComponent<Props, {}> {
 	}
 }
 
-class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNodeEnhanced, style}, {}> {
+class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNodeL2, style}, {}> {
 	root: HTMLDivElement;
 	mapUI: MapUI;
 	render() {

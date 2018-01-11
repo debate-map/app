@@ -12,7 +12,7 @@ import {CheckBox} from "react-vcomponents";
 import {ScrollView} from "react-vscrollview";
 import {Button} from "react-vcomponents";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, MapNode_id, ThesisType, AccessLevel} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry, MapNodeL2, MapNode_id, ThesisType, AccessLevel} from "../../../../Store/firebase/nodes/@MapNode";
 import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {MetaThesis_IfType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType, MetaThesis_ThenType_Info} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
@@ -32,7 +32,7 @@ type Props = {
 	baseData: MapNode,
 	baseLinkData: ChildEntry,
 	baseRevisionData: MapNodeRevision,
-	parent: MapNodeEnhanced, forNew: boolean, enabled?: boolean,
+	parent: MapNodeL2, forNew: boolean, enabled?: boolean,
 	style?, onChange?: (newData: MapNode, newLinkData: ChildEntry, component: NodeDetailsUI)=>void,
 	//onSetError: (error: string)=>void,
 } & Partial<{creator: User, metaThesisNode: MapNode}>;

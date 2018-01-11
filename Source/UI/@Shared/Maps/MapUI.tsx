@@ -14,7 +14,7 @@ import NodeUI_Inner from "./MapNode/NodeUI_Inner";
 //import ReactResizeDetector from "react-resize-detector"; // this one doesn't seem to work reliably -- at least for the map-ui
 import ResizeSensor from "react-resize-sensor";
 import {WaitXThenRun, Timer, SleepAsync} from "js-vextensions";
-import {MapNode, ThesisForm, MapNodeEnhanced} from "../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeL2} from "../../../Store/firebase/nodes/@MapNode";
 import {Map, MapType} from "../../../Store/firebase/maps/@Map";
 import {RootState} from "../../../Store/index";
 import {GetUserID} from "../../../Store/firebase/users";
@@ -82,7 +82,7 @@ type Props = {
 	padding?: {left: number, right: number, top: number, bottom: number},
 	subNavBarWidth?: number,
 } & React.HTMLProps<HTMLDivElement>
-	& Partial<{rootNode: MapNodeEnhanced, focusNode: string, viewOffset: {x: number, y: number}}>;
+	& Partial<{rootNode: MapNodeL2, focusNode: string, viewOffset: {x: number, y: number}}>;
 @Connect((state: RootState, {map, rootNode}: Props)=> {
 	if (rootNode == null && map && map.rootNode) {
 		rootNode = GetNodeEnhanced(GetNode(map.rootNode), map.rootNode+"");

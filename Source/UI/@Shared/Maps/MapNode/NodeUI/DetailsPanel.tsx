@@ -1,4 +1,4 @@
-import {MapNode, ThesisForm, MapNodeEnhanced} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeL2} from "../../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
@@ -38,7 +38,7 @@ import {Map} from "../../../../../Store/firebase/maps/@Map";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-type DetailsPanel_Props = {map?: Map, node: MapNodeEnhanced, path: string} & Partial<{creator: User}>;
+type DetailsPanel_Props = {map?: Map, node: MapNodeL2, path: string} & Partial<{creator: User}>;
 @Connect((state, {node, path}: DetailsPanel_Props)=>({
 	_: GetUserPermissionGroups(GetUserID()),
 	_link: GetLinkUnderParent(node._id, GetParentNode(path)),

@@ -1,9 +1,9 @@
 import {GetImage} from '../images';
-import {MapNode, MapNodeEnhanced, ThesisForm, ChildEntry, ThesisType, MapNodeL2} from './@MapNode';
+import {MapNode, MapNodeL2, ThesisForm, ChildEntry, ThesisType, MapNodeL3} from "./@MapNode";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MetaThesis_ThenType, GetMetaThesisIfTypeDisplayText, MetaThesis_ThenType_Info, MetaThesis_IfType} from "./@MetaThesisInfo";
 import {MapNodeType} from './@MapNodeType';
-import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetNode, GetParentNodeEnhanced} from "../nodes";
+import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetNode, GetParentNodeL2} from "../nodes";
 import {GetValues} from '../../../Frame/General/Enums';
 import {PermissionGroupSet} from '../userExtras/@UserExtraInfo';
 import {ReverseThenType} from './$node/$metaThesis';
@@ -16,18 +16,18 @@ import {VURL, CachedTransform} from "js-vextensions";
 import {MapNodeRevision} from "./@MapNodeRevision";
 import {GetNodeRevision} from "../nodeRevisions";
 
-export function GetFontSizeForNode(node: MapNodeEnhanced, isSubnode = false) {
+export function GetFontSizeForNode(node: MapNodeL2, isSubnode = false) {
 	if (node.current.fontSizeOverride) return node.current.fontSizeOverride;
 	if (node.current.metaThesis) return 11;
 	if (node.current.equation) return node.current.equation.latex ? 14 : 13;
 	if (isSubnode) return 11;
 	return 14;
 }
-export function GetPaddingForNode(node: MapNodeEnhanced, isSubnode = false) {
+export function GetPaddingForNode(node: MapNodeL2, isSubnode = false) {
 	return (node.current.metaThesis || isSubnode) ? "1px 4px 2px" : "5px 5px 4px";
 }
 export type RatingTypeInfo = {type: RatingType, main: boolean};
-export function GetRatingTypesForNode(node: MapNodeEnhanced): RatingTypeInfo[] {
+export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	if (node.current.type == MapNodeType.Category) {
 		if (node.current.votingDisabled) return [];
 		return [{type: "significance", main: true}];
@@ -49,7 +49,7 @@ export function GetRatingTypesForNode(node: MapNodeEnhanced): RatingTypeInfo[] {
 		} else {
 			result = [{type: "probability", main: true}, {type: "degree", main: true}, {type: "significance", main: true}];
 		}
-		/*if ((node as MapNodeEnhanced).link && (node as MapNodeEnhanced).link.form == ThesisForm.YesNoQuestion) {
+		/*if ((node as MapNodeL2).link && (node as MapNodeL2).link.form == ThesisForm.YesNoQuestion) {
 			result.Remove(result.First(a=>a.type == "significance"));
 			result.Insert(0, {type: "significance", main: true});
 		}*/
@@ -61,17 +61,17 @@ export function GetRatingTypesForNode(node: MapNodeEnhanced): RatingTypeInfo[] {
 		return [{type: "strength", main: true}];
 	Assert(false);
 }
-export function GetMainRatingType(node: MapNodeEnhanced): RatingType {
+export function GetMainRatingType(node: MapNodeL2): RatingType {
 	return GetRatingTypesForNode(node).FirstOrX(null, {}).type;
 }
-export function GetSortByRatingType(node: MapNodeEnhanced): RatingType {
-	if ((node as MapNodeEnhanced).link && (node as MapNodeEnhanced).link.form == ThesisForm.YesNoQuestion) {
+export function GetSortByRatingType(node: MapNodeL3): RatingType {
+	if ((node as MapNodeL3).link && (node as MapNodeL3).link.form == ThesisForm.YesNoQuestion) {
 		return "significance";
 	}
 	return GetMainRatingType(node);
 }
 
-export function IsReversedArgumentNode(node: MapNodeEnhanced) {
+export function IsReversedArgumentNode(node: MapNodeL3) {
 	return node.finalType != node.current.type;
 }
 export function ReverseMapNodeType(nodeType: MapNodeType) {
@@ -80,40 +80,48 @@ export function ReverseMapNodeType(nodeType: MapNodeType) {
 	return nodeType;
 }
 
-export function GetFinalNodeTypeAtPath(node: MapNode, revision: MapNodeRevision, path: string): MapNodeType {
-	let result = revision.type;
-	if (revision.type == MapNodeType.SupportingArgument || revision.type == MapNodeType.OpposingArgument) {
-		let parent = GetParentNode(path);
+export function GetFinalNodeTypeAtPath(node: MapNodeL2, path: string): MapNodeType {
+	let result = node.current.type;
+	if (node.current.type == MapNodeType.SupportingArgument || node.current.type == MapNodeType.OpposingArgument) {
+		let parent = GetParentNodeL2(path);
 		if (parent != null) { // can be null, if for NodeUI_ForBots
 			let parentForm = GetNodeForm(parent, SplitStringBySlash_Cached(path).slice(0, -1).join("/"));
 			if (parentForm == ThesisForm.Negation) {
-				result = ReverseMapNodeType(revision.type);
+				result = ReverseMapNodeType(node.current.type);
 			}
 		}
 	}
 	return result;
 }
-export function GetNodeL2(node: number | MapNode, path?: string) {
-	if (IsNumber(node)) {
-		node = GetNode(node);
-	}
-
+export function IsNodeL1(node): node is MapNode {
+	return !node["current"];
+}
+export function IsNodeL2(node: MapNode): node is MapNodeL2 {
+	return node["current"];
+}
+export function GetNodeL2(nodeID: number | MapNode, path?: string) {
+	if (nodeID == null) return null;
+	if (IsNumber(nodeID)) nodeID = GetNode(nodeID);
+	let node = nodeID as MapNode;
+	
 	// if any of the data in a MapNodeL2 is not loaded yet, just return null (we want it to be all or nothing)
-	if (node == null) return null;
 	let currentRevision = GetNodeRevision(node.currentRevision);
 	if (currentRevision == null) return null;
 
 	let nodeL2 = node.Extended({current: currentRevision}) as MapNodeL2;
 	return CachedTransform("GetNodeL2", [path], nodeL2, ()=>nodeL2);
 }
-export function GetNodeL3(node: number | MapNodeL2, path: string) {
-	if (IsNumber(node)) {
-		node = GetNodeL2(node);
-	}
-
+export function IsNodeL3(node: MapNode): node is MapNodeL2 {
+	return node["finalType"] && node["link"];
+}
+export function GetNodeL3(nodeID: number | MapNode | MapNodeL2, path: string) {
+	if (nodeID == null) return null;
+	if (IsNumber(nodeID)) nodeID = GetNode(nodeID);
+	if (IsNodeL1(nodeID)) nodeID = GetNodeL2(nodeID);
+	let node = nodeID as MapNodeL2;
+	
 	// if any of the data in a MapNodeL3 is not loaded yet, just return null (we want it to be all or nothing)
-	if (node == null) return null;
-	let node_finalType = GetFinalNodeTypeAtPath(node, node.current, path);
+	let node_finalType = GetFinalNodeTypeAtPath(node, path);
 	if (node_finalType == null) return null;
 
 	let isSubnode = IsNodeSubnode(node);
@@ -124,7 +132,7 @@ export function GetNodeL3(node: number | MapNodeL2, path: string) {
 		if (link == null && path.Contains("/")) return null;
 	}
 
-	let nodeEnhanced = node.Extended({finalType: node_finalType, link}) as MapNodeEnhanced;
+	let nodeEnhanced = node.Extended({finalType: node_finalType, link}) as MapNodeL3;
 	return CachedTransform("GetNodeL3", [path], nodeEnhanced, ()=>nodeEnhanced);
 }
 
@@ -137,10 +145,10 @@ export function GetThesisFormUnderParent(node: MapNode, parent: MapNode): Thesis
 	if (link == null) return ThesisForm.Base;
 	return link.form;
 }*/
-export function GetNodeForm(node: MapNode | MapNodeEnhanced, pathOrParent?: string | MapNode) {
-	let parent: MapNode = IsString(pathOrParent) ? GetParentNode(pathOrParent as string) : pathOrParent as MapNode;
-	if ((node as MapNodeEnhanced).link) {
-		return (node as MapNodeEnhanced).link.form;
+export function GetNodeForm(node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2) {
+	let parent: MapNodeL2 = IsString(pathOrParent) ? GetParentNodeL2(pathOrParent as string) : pathOrParent as MapNodeL2;
+	if ((node as MapNodeL3).link) {
+		return (node as MapNodeL3).link.form;
 	}
 	let link = GetLinkUnderParent(node._id, parent);
 	if (link == null) return ThesisForm.Base;
@@ -163,7 +171,7 @@ export function GetNodeDisplayText(node: MapNodeL2, formOrPath?: ThesisForm | st
 	if (node.current.type == MapNodeType.Thesis) {
 		if (node.current.metaThesis) {
 			let thenType_final = node.current.metaThesis.thenType;
-			let parent = IsString(formOrPath) ? GetParentNodeEnhanced(formOrPath as string) : null;
+			let parent = IsString(formOrPath) ? GetParentNodeL2(formOrPath as string) : null;
 			if (parent && GetNodeL3(parent, SlicePath(formOrPath as string, 1)).finalType != parent.current.type)
 				thenType_final = ReverseThenType(thenType_final);
 			return `If ${GetMetaThesisIfTypeDisplayText(node.current.metaThesis.ifType)} premises below are true, they ${
@@ -223,13 +231,13 @@ export function GetValidChildTypes(nodeType: MapNodeType, path: string) {
 	let validChildTypes = nodeTypes.filter(type=>IsLinkValid(nodeType, path, {type} as any));
 	return validChildTypes;
 }
-export function GetValidNewChildTypes(parentNode: MapNodeEnhanced, path: string, permissions: PermissionGroupSet) {
+export function GetValidNewChildTypes(parentNode: MapNodeL2, path: string, permissions: PermissionGroupSet) {
 	let nodeTypes = GetValues<MapNodeType>(MapNodeType);
 	let validChildTypes = nodeTypes.filter(type=>IsNewLinkValid(parentNode, path, {type} as any, permissions));
 	return validChildTypes;
 }
 
-export function IsContextReversed(node: MapNodeEnhanced, parent: MapNodeEnhanced) {
+export function IsContextReversed(node: MapNodeL2, parent: MapNodeL3) {
 	return node.current.metaThesis && parent && IsReversedArgumentNode(parent);
 }
 
@@ -249,7 +257,7 @@ export function IsArgumentType(type: MapNodeType) {
 	return type == MapNodeType.SupportingArgument || type == MapNodeType.OpposingArgument;
 }
 /** [pure] */
-export function IsArgumentNode(node: MapNodeEnhanced) {
+export function IsArgumentNode(node: MapNodeL2) {
 	//return IsArgumentType(node.finalType || node.current.type);
 	return IsArgumentType(node.current.type);
 }

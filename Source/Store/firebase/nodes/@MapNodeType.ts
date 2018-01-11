@@ -1,6 +1,6 @@
 import {Assert} from "js-vextensions";
 import {RatingType} from "../nodeRatings/@RatingType";
-import {MapNode, MapNodeEnhanced, ThesisForm} from "./@MapNode";
+import {MapNode, MapNodeL2, ThesisForm} from "./@MapNode";
 
 export enum MapNodeType {
 	Category = 10,
@@ -57,7 +57,7 @@ export class MapNodeType_Info {
 		this.Extend(info);
 	}
 
-	//displayName: (parentNode: MapNodeEnhanced)=>string;
+	//displayName: (parentNode: MapNodeL2)=>string;
 	childTypes: MapNodeType[];
 	minWidth: number;
 	maxWidth: number;

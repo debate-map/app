@@ -6,6 +6,10 @@ import {ContentNode} from "../contentNodes/@ContentNode";
 import {GetValues_ForSchema} from "../../../Frame/General/Enums";
 
 export class MapNodeRevision {
+	constructor(initialData: {type: MapNodeType} & Partial<MapNodeRevision>) {
+		this.Extend(initialData);
+	}
+
 	type?: MapNodeType;
 	titles: {[key: string]: string};
 	note: string;

@@ -1,6 +1,6 @@
 import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
-import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, ThesisType, ImageAttachment} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry, MapNodeL2, ThesisType, ImageAttachment} from "../../../../../Store/firebase/nodes/@MapNode";
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
 import {Select} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";
@@ -29,8 +29,9 @@ import {GetUserID} from "Store/firebase/users";
 import {Layer} from "Store/firebase/layers/@Layer";
 import AddSubnode from "../../../../../Server/Commands/AddSubnode";
  import {GetErrorMessagesUnderElement} from "js-vextensions";
+import {MapNodeRevision} from "../../../../../Store/firebase/nodes/@MapNodeRevision";
 
-export function ShowAddSubnodeDialog(mapID: number, anchorNode: MapNodeEnhanced, anchorNodePath: string) {
+export function ShowAddSubnodeDialog(mapID: number, anchorNode: MapNodeL2, anchorNodePath: string) {
 	let dialog: AddSubnodeDialog;
 	let boxController: BoxController = ShowMessageBox({
 		title: `Add subnode (to layer)`, cancelButton: true,
@@ -47,10 +48,11 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 	constructor(props) {
 		super(props);
 		let newNode = new MapNode({
-			titles: {},
 			type: MapNodeType.Thesis,
+		});
+		let newRevision = new MapNodeRevision({
+			titles: {},
 			relative: false,
-			//contentNode: new ContentNode(),
 			approved: true,
 		});
 		let newLink = E({_: true}, newNode.type == MapNodeType.Thesis && {form: ThesisForm.Base}) as ChildEntry; // not actually used

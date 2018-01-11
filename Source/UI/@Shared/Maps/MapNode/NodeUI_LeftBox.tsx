@@ -5,7 +5,7 @@ import {E} from "../../../../Frame/General/Globals_Free";
 import {connect} from "react-redux";
 import {CachedTransform} from "js-vextensions";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {MapNode, ThesisForm, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeL2} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -23,11 +23,11 @@ import {GetNode} from "Store/firebase/nodes";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
 type Props = {
-	map: Map, path: string, node: MapNodeEnhanced, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
+	map: Map, path: string, node: MapNodeL2, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
 	panelPosition?: "left" | "below", local_openPanel?: string,
 	backgroundColor: string, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
-} & Partial<{form: ThesisForm, parentNode: MapNodeEnhanced}>;
+} & Partial<{form: ThesisForm, parentNode: MapNodeL2}>;
 @Connect((state: RootState, {node, path}: Props)=>({
 	form: GetNodeForm(node, path),
 	parentNode: GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1)),

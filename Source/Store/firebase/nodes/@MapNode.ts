@@ -34,9 +34,8 @@ export enum ThesisForm {
 }
 
 export class MapNode {
-	constructor(initialData: {type: MapNodeType} & Partial<MapNode>) {
+	constructor(initialData: Partial<MapNode>) {
 		this.Extend(initialData);
-		//this.createdAt = Date.now();
 	}
 
 	_id?: number;
@@ -82,15 +81,15 @@ AddSchema({
 }, "MapNode");
 
 // helpers
-//export type MapNodeEnhanced = MapNode & {finalType: MapNodeType};
+//export type MapNodeL2 = MapNode & {finalType: MapNodeType};
 // similar to a database entry, after having related data from other tables "joined"
-export type MapNodeL2 = MapNode & {
+export interface MapNodeL2 extends MapNode {
 	current: MapNodeRevision;
-};
-export type MapNodeL3 = MapNodeL2 & {
+}
+export interface MapNodeL3 extends MapNodeL2 {
 	finalType: MapNodeType;
 	link: ChildEntry;
-};
+}
 
 // regular parents
 // ==========

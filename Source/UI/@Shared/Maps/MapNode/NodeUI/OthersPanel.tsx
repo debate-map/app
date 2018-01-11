@@ -1,7 +1,7 @@
 import {Column} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
-import {MapNodeEnhanced, ThesisType} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNodeL2, ThesisType} from "../../../../../Store/firebase/nodes/@MapNode";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {GetLinkUnderParent, GetNodeDisplayText, IsArgumentNode, GetThesisType} from "../../../../../Store/firebase/nodes/$node";
 import {GetUserPermissionGroups, GetUserID, GetUser} from "Store/firebase/users";
@@ -21,7 +21,7 @@ import { GetNodeViewers } from "Store/firebase/nodeViewers";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 
-type Props = {map?: Map, node: MapNodeEnhanced, path: string} & Partial<{creator: User, viewers: string[]}>;
+type Props = {map?: Map, node: MapNodeL2, path: string} & Partial<{creator: User, viewers: string[]}>;
 @Connect((state, {node, path}: Props)=>({
 	_: GetUserPermissionGroups(GetUserID()),
 	creator: GetUser(node.creator),

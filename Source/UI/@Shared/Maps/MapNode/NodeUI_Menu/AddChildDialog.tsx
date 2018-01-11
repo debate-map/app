@@ -1,6 +1,6 @@
 import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
-import {MapNode, ThesisForm, ChildEntry, MapNodeEnhanced, ThesisType, ImageAttachment} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, ChildEntry, MapNodeL2, ThesisType, ImageAttachment} from "../../../../../Store/firebase/nodes/@MapNode";
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
 import {Select} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";
@@ -26,7 +26,7 @@ import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
 import { IsUserAdmin, IsUserMod } from "../../../../../Store/firebase/userExtras";
 import AddChildNode from "../../../../../Server/Commands/AddChildNode";
 
-export function ShowAddChildDialog(parentNode: MapNodeEnhanced, parentForm: ThesisForm, childType: MapNodeType, userID: string, mapID: number, path: string) {
+export function ShowAddChildDialog(parentNode: MapNodeL2, parentForm: ThesisForm, childType: MapNodeType, userID: string, mapID: number, path: string) {
 	let childTypeInfo = MapNodeType_Info.for[childType];
 	let displayName = GetMapNodeTypeDisplayName(childType, parentNode, parentForm);
 

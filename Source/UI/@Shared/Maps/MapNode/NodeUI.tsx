@@ -25,7 +25,7 @@ import {Vector2i} from "js-vextensions";
 import {CachedTransform, CombineDynamicPropMaps, GetContentHeight, GetContentWidth} from "js-vextensions";
 import {RootState} from "../../../../Store/index";
 import {GetNodeView} from "../../../../Store/main/mapViews";
-import {MapNode, ThesisForm, MapNodeEnhanced, AccessLevel} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeL2, AccessLevel} from "../../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {GetNodeChildren, GetParentNode, GetNodeChildrenEnhanced, IsRootNode} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
@@ -51,13 +51,13 @@ import { GetPlayingTimelineAppliedStepRevealNodes } from "Store/main/maps/$map";
 import {GetPlayingTimeline, GetPlayingTimelineRevealNodes, GetPlayingTimelineStepIndex, GetPlayingTimelineCurrentStepRevealNodes} from "../../../../Store/main/maps/$map";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
 
-type Props = {map: Map, node: MapNodeEnhanced, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
+type Props = {map: Map, node: MapNodeL2, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
 	& Partial<{
 		initialChildLimit: number, form: ThesisForm, nodeView: MapNodeView,
-		nodeChildren: MapNodeEnhanced[],
+		nodeChildren: MapNodeL2[],
 		//nodeChildren_fillPercents: number[],
 		nodeChildren_sortValues: number[],
-		subnodes: MapNodeEnhanced[],
+		subnodes: MapNodeL2[],
 		userViewedNodes: ViewedNodeSet,
 		playingTimeline: Timeline,
 		playingTimeline_currentStepIndex: number,
@@ -151,7 +151,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		NodeUI.lastRenderTime = Date.now();
 
 		let separateChildren = node.finalType == MapNodeType.Thesis;
-		type ChildPack = {origIndex: number, node: MapNodeEnhanced};
+		type ChildPack = {origIndex: number, node: MapNodeL2};
 		let childPacks: ChildPack[] = nodeChildren.map((child, index)=>({origIndex: index, node: child}));
 		if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
 			childPacks = childPacks.filter(pack=>playingTimelineVisibleNodes.Contains(path + "/" + pack.node._id));
@@ -527,7 +527,7 @@ class ChildLimitBar extends BaseComponent
 	}
 }
 
-function GetMeasurementInfoForNode(node: MapNodeEnhanced, path: string) {
+function GetMeasurementInfoForNode(node: MapNodeL2, path: string) {
 	let nodeTypeInfo = MapNodeType_Info.for[node.current.type];
 
 	let displayText = GetNodeDisplayText(node, path);

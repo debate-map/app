@@ -1,6 +1,6 @@
 import {BaseComponent, GetInnerComp} from "react-vextensions";
 import {styles} from "../../../Frame/UI/GlobalStyles";
-import {MapNode, MapNodeEnhanced, globalMapID} from "../../../Store/firebase/nodes/@MapNode";
+import {MapNode, MapNodeL2, globalMapID} from "../../../Store/firebase/nodes/@MapNode";
 import {Row, Div, Pre} from "react-vcomponents";
 import NodeUI from "../../@Shared/Maps/MapNode/NodeUI";
 import {Map} from "../../../Store/firebase/maps/@Map";
@@ -49,7 +49,7 @@ type Props = {
 	sortBy: SortType,
 	filter: string,
 	page: number,
-	selectedNode: MapNodeEnhanced,
+	selectedNode: MapNodeL2,
 }>;
 @Connect((state, {map}: Props)=> {
 	let selectedNode = GetSelectedNode_InList(map._id);
@@ -179,7 +179,7 @@ class NodeRow extends BaseComponent<NodeRow_Props, {menuOpened: boolean}> {
 		let {map, node, first, creator, selected} = this.props;
 		let {menuOpened} = this.state;
 
-		let nodeEnhanced = {...node, finalType: node.current.type} as MapNodeEnhanced;
+		let nodeEnhanced = {...node, finalType: node.current.type} as MapNodeL2;
 		let nodeTypeInfo = MapNodeType_Info.for[node.current.type];
 
 		let backgroundColor = chroma(`rgba(${nodeTypeInfo.backgroundColor},.8)`).desaturate(.5);
@@ -210,7 +210,7 @@ class NodeRow extends BaseComponent<NodeRow_Props, {menuOpened: boolean}> {
 /*@Connect((state, {map, node}: NodeRow_Props)=> ({
 	nodeEnhanced: GetNodeEnhanced(node._id),
 }))
-class NodeUI_Menu_Helper extends BaseComponent<{map: Map, node: MapNode, nodeEnhanced: MapNodeEnhanced}, {}> {
+class NodeUI_Menu_Helper extends BaseComponent<{map: Map, node: MapNode, nodeEnhanced: MapNodeL2}, {}> {
 	render() {
 		let {map, node} = this.props;
 		return (
@@ -219,7 +219,7 @@ class NodeUI_Menu_Helper extends BaseComponent<{map: Map, node: MapNode, nodeEnh
 	}
 }*/
 
-type NodeColumn_Props = {map: Map, node: MapNodeEnhanced} & Partial<{finalNodeType: MapNodeType, ratingsRoot: RatingsRoot, openPanel: string}>;
+type NodeColumn_Props = {map: Map, node: MapNodeL2} & Partial<{finalNodeType: MapNodeType, ratingsRoot: RatingsRoot, openPanel: string}>;
 @Connect((state, {map, node}: NodeColumn_Props)=> ({
 	finalNodeType: GetFinalNodeTypeAtPath(node, node._id+""),
 	ratingsRoot: GetNodeRatingsRoot(node._id),

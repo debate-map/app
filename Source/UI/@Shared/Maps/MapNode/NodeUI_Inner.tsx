@@ -17,7 +17,7 @@ import keycode from "keycode";
 import NodeUI_Menu from "./NodeUI_Menu";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {ImageAttachment, MapNode, MapNodeEnhanced, ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
+import {ImageAttachment, MapNode, MapNodeL2, ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeRatingsRoot, GetRatings, GetFillPercentForRatingAverage, GetRatingAverage, GetRatingValue, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {GetUserID} from "../../../../Store/firebase/users";
 import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -61,7 +61,7 @@ import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactM
 //export type NodeHoverExtras = {panel?: string, term?: number};
 
 type Props = {
-	map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: string, width: number, widthOverride?: number,
+	map: Map, node: MapNodeL2, nodeView: MapNodeView, path: string, width: number, widthOverride?: number,
 	panelPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 } & Partial<{finalNodeType: MapNodeType, form: ThesisForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
 //@FirebaseConnect((props: Props)=>((props[`holder`] = props[`holder`] || {}), [
@@ -218,7 +218,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 	}
 }
 
-type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: string} & Partial<{equationNumber: number}>;
+type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeL2, nodeView: MapNodeView, path: string} & Partial<{equationNumber: number}>;
 @Connect((state, {node, path}: TitlePanelProps)=> ({
 	$1: node.current.image && GetImage(node.current.image.id),
 	equationNumber: node.current.equation ? GetEquationStepNumber(path) : null,

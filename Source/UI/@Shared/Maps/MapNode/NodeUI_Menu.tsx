@@ -1,6 +1,6 @@
 import DeleteNode from "../../../../Server/Commands/DeleteNode";
 import {GetDataAsync, RemoveHelpers, SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
-import {MapNode, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, MapNodeL2} from "../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {VMenuStub} from "react-vmenu";
 import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -39,8 +39,8 @@ import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import { ShowAddSubnodeDialog } from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSubnodeDialog";
 import { GetPathNodes, GetPathNodeIDs } from "../../../../Store/main/mapViews";
 
-type Props = {map: Map, node: MapNodeEnhanced, path: string, inList?: boolean}
-	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeEnhanced, copiedNode: MapNode, copiedNode_asCut: boolean}>;
+type Props = {map: Map, node: MapNodeL2, path: string, inList?: boolean}
+	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeL2, copiedNode: MapNode, copiedNode_asCut: boolean}>;
 @Connect((_: RootState, {map, node, path}: Props)=> ({
 	_: (ForUnlink_GetError(GetUserID(), map, node), ForDelete_GetError(GetUserID(), map, node)),
 	//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
