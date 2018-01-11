@@ -254,8 +254,8 @@ export async function GetDataAsync(...args) {
 /**
  * Usage: await GetAsync(()=>GetNode(123))
  * It has the same processing as in Connect(), except callable using async/await.
- * It basically makes a pretend component -- connecting to firebase, and resolving the promise once:
- * It re-calls the db-getter func (after the last generation's requested-path-data was all received), and finds that no new paths are requested.
+ * It basically makes a pretend component -- connecting to firebase, and resolving the promise once the condition below is fulfilled:
+ * 	It re-calls the db-getter func (after the last generation's requested-path-data was all received), and finds that no new paths are requested.
  */
 G({GetAsync});
 export async function GetAsync<T>(dbGetterFunc: ()=>T, statsLogger?: ({requestedPaths: string})=>void): Promise<T> {

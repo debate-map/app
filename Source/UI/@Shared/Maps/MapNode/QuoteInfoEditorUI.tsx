@@ -1,5 +1,5 @@
 import {BaseComponent, FindDOM} from "react-vextensions";
-import {ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
+import {ClaimForm} from "../../../../Store/firebase/nodes/@MapNode";
 import {Column} from "react-vcomponents";
 import {Row, Pre} from "react-vcomponents";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -49,7 +49,7 @@ export default class QuoteInfoEditorUI extends BaseComponent
 					<Row key={0} mt={5}>Preview:</Row>,
 					<Column key={1} mt={5}>
 						<Pre style={{padding: 5, background: `rgba(255,255,255,.2)`, borderRadius: 5}}>
-							{GetNodeDisplayText({type: MapNodeType.Thesis, contentNode: CleanUpdatedContentNode(Clone(newData))} as any, ThesisForm.Base)}
+							{GetNodeDisplayText({type: MapNodeType.Claim, contentNode: CleanUpdatedContentNode(Clone(newData))} as any, ClaimForm.Base)}
 							<SubPanel_Quote contentNode={newData} fontSize={15}/>
 						</Pre>
 					</Column>

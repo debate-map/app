@@ -1,6 +1,6 @@
 import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
-import {MapNode, ThesisForm, ChildEntry, MapNodeL2, ThesisType, ImageAttachment} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ClaimForm, ChildEntry, MapNodeL2, ClaimType, ImageAttachment} from "../../../../../Store/firebase/nodes/@MapNode";
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
 import {Select} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";
@@ -11,7 +11,7 @@ import {Column} from "react-vcomponents";
 import keycode from "keycode";
 import {Button} from "react-vcomponents";
 import {E} from "../../../../../Frame/General/Globals_Free";
-import {MetaThesis_ThenType, MetaThesis_IfType, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
+import {ImpactPremise_ThenType, ImpactPremise_IfType, GetImpactPremiseIfTypeDisplayText} from "./../../../../../Store/firebase/nodes/@ImpactPremiseInfo";
 import AddNode from "../../../../../Server/Commands/AddNode";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
@@ -19,7 +19,7 @@ import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";
 import {CheckBox} from "react-vcomponents";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import NodeDetailsUI from "../NodeDetailsUI";
-import {GetThesisType, AsNodeL2} from "../../../../../Store/firebase/nodes/$node";
+import {GetClaimType, AsNodeL2} from "../../../../../Store/firebase/nodes/$node";
 import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
 import { IsUserAdmin, IsUserMod } from "../../../../../Store/firebase/userExtras";
@@ -48,14 +48,14 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 	constructor(props) {
 		super(props);
 		let newNode = new MapNode({
-			type: MapNodeType.Thesis,
+			type: MapNodeType.Claim,
 		});
 		let newRevision = new MapNodeRevision({
 			titles: {},
 			relative: false,
 			approved: true,
 		});
-		let newLink = E({_: true}, newNode.type == MapNodeType.Thesis && {form: ThesisForm.Base}) as ChildEntry; // not actually used
+		let newLink = E({_: true}, newNode.type == MapNodeType.Claim && {form: ClaimForm.Base}) as ChildEntry; // not actually used
 		this.state = {newNode, newLink} as any;
 	}
 	UpdateOKButton() {
@@ -74,10 +74,10 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 		let {boxController, layers} = this.props;
 		let {layer, newNode, newRevision, newLink, validationError} = this.state;
 		
-		let thesisTypes = GetEntries(ThesisType);
-		thesisTypes.Remove(thesisTypes.find(a=>a.value == ThesisType.MetaThesis));
+		let claimTypes = GetEntries(ClaimType);
+		claimTypes.Remove(claimTypes.find(a=>a.value == ClaimType.ImpactPremise));
 		if (!IsUserMod(GetUserID())) {
-			thesisTypes.Remove(thesisTypes.find(a=>a.value == ThesisType.Image));
+			claimTypes.Remove(claimTypes.find(a=>a.value == ClaimType.Image));
 		}
 
 		let layersWeCanAddTo = layers.filter(a=>a.creator == GetUserID());
@@ -90,17 +90,17 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 					<Pre>Layer: </Pre>
 					<Select options={layerOptions} value={layer} onChange={val=>this.SetState({layer: val})}/>
 				</Row>
-				{newNode.type == MapNodeType.Thesis &&
+				{newNode.type == MapNodeType.Claim &&
 					<Row mt={5}>
 						<Pre>Type: </Pre>
-						<Select displayType="button bar" options={thesisTypes} style={{display: "inline-block"}}
-							value={GetThesisType(AsNodeL2(newNode, newRevision))}
+						<Select displayType="button bar" options={claimTypes} style={{display: "inline-block"}}
+							value={GetClaimType(AsNodeL2(newNode, newRevision))}
 							onChange={val=> {
 								newRevision.Extend({equation: null, contentNode: null, image: null});
-								if (val == ThesisType.Normal) {
-								} else if (val == ThesisType.Equation) {
+								if (val == ClaimType.Normal) {
+								} else if (val == ClaimType.Equation) {
 									newRevision.equation = new Equation();
-								} else if (val == ThesisType.Quote) {
+								} else if (val == ClaimType.Quote) {
 									newRevision.contentNode = new ContentNode();
 								} else {
 									newRevision.image = new ImageAttachment();

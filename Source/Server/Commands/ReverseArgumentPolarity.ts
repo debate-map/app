@@ -1,7 +1,7 @@
 import {Assert} from "js-vextensions";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command} from "../Command";
-import {MapNode, ThesisForm, ChildEntry, MapNodeL3} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, ClaimForm, ChildEntry, MapNodeL3} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import {GetNodeL3, ReversePolarity} from "../../Store/firebase/nodes/$node";

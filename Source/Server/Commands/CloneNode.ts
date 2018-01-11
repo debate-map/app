@@ -2,7 +2,7 @@ import {GetNode, GetNodeChildren, GetNodeChildrenL2} from "../../Store/firebase/
 import {Assert} from "js-vextensions";
 import {GetDataAsync, GetAsync, GetAsync_Raw, RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
 import { Command, MergeDBUpdates } from "../Command";
-import {MapNode, ThesisForm, ChildEntry} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, ClaimForm, ChildEntry} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {GetNodeForm, GetNodeL2} from "../../Store/firebase/nodes/$node";
 import AddNode from "./AddNode";
@@ -24,8 +24,8 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 		let baseNode = await GetAsync_Raw(()=>GetNodeL2(baseNodeID));
 		let isArgument = baseNode.type == MapNodeType.Argument;
 		
-		let nodeForm = await GetAsync_Raw(()=>GetNodeForm(baseNode, baseNodePath)) as ThesisForm;
-		let baseMetaThesis = isArgument ? (await GetAsync_Raw(()=>GetNodeChildrenL2(baseNode))).First(a=>a.current.impactPremise != null) : null;
+		let nodeForm = await GetAsync_Raw(()=>GetNodeForm(baseNode, baseNodePath)) as ClaimForm;
+		let baseImpactPremise = isArgument ? (await GetAsync_Raw(()=>GetNodeChildrenL2(baseNode))).First(a=>a.current.impactPremise != null) : null;
 
 		let newChildNode = RemoveHelpers(Clone(baseNode)) as MapNode;
 		newChildNode.parents = {[newParentID]: {_: true}}; // make new node's only parent the one on this path
@@ -35,7 +35,7 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 		let newChildRevision = Clone(baseNode.current);
 
 		if (isArgument) {
-			var impactPremiseNode = RemoveHelpers(Clone(baseMetaThesis)).VSet({parents: null}) as MapNode;
+			var impactPremiseNode = RemoveHelpers(Clone(baseImpactPremise)).VSet({parents: null}) as MapNode;
 		}
 		this.sub_addNode = new AddChildNode({
 			mapID, node: newChildNode, revision: newChildRevision,
@@ -57,7 +57,7 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 		this.sub_linkChildren = [];
 		for (let childID of childrenToLink) {
 			let child = await GetAsync_Raw(()=>GetNodeL2(childID));
-			let childForm = await GetAsync_Raw(()=>GetNodeForm(child, baseNodePath + "/" + childID)) as ThesisForm;
+			let childForm = await GetAsync_Raw(()=>GetNodeForm(child, baseNodePath + "/" + childID)) as ClaimForm;
 			let linkChildSub = new LinkNode({mapID, parentID: this.sub_addNode.sub_addNode.nodeID, childID: childID, childForm});
 			linkChildSub.Validate_Early();
 

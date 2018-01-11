@@ -2,7 +2,7 @@ import {GetNodeParentsAsync} from "../../Store/firebase/nodes";
 import {Assert} from "js-vextensions";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command} from "../Command";
-import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, ClaimForm} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {Term} from "../../Store/firebase/terms/@Term";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
@@ -11,7 +11,7 @@ import {UserEdit} from "../CommandMacros";
 
 @MapEdit
 @UserEdit
-export default class LinkNode extends Command<{mapID: number, parentID: number, childID: number, childForm: ThesisForm}> {
+export default class LinkNode extends Command<{mapID: number, parentID: number, childID: number, childForm: ClaimForm}> {
 	parent_oldChildrenOrder: number[];
 	/*async Prepare(parent_oldChildrenOrder_override?: number[]) {
 		let {parentID, childID, childForm} = this.payload;

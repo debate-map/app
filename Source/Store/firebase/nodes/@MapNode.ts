@@ -4,7 +4,7 @@ import {MapNodeType} from './@MapNodeType';
 import {RatingType} from "../nodeRatings/@RatingType";
 import {GetParentNode, IsLinkValid, IsNewLinkValid} from "../nodes";
 import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
-import {MetaThesisInfo} from './@MetaThesisInfo';
+import {ImpactPremiseInfo} from './@ImpactPremiseInfo';
 import {ContentNode} from '../contentNodes/@ContentNode';
 import {Equation} from './@Equation';
 import {Image} from '../images/@Image';
@@ -20,14 +20,14 @@ export enum AccessLevel {
 	Admin = 40,
 }
 
-export enum ThesisType {
+export enum ClaimType {
 	Normal = 10,
-	MetaThesis = 20,
+	ImpactPremise = 20,
 	Equation = 30,
 	Quote = 40,
 	Image = 50,
 }
-export enum ThesisForm {
+export enum ClaimForm {
 	Base = 10,
 	Negation = 20,
 	YesNoQuestion = 30,
@@ -113,14 +113,14 @@ export type ChildSet = { [key: number]: ChildEntry; };
 AddSchema({patternProperties: {"^[0-9]+$": {$ref: "ChildEntry"}}}, "ChildSet");
 export type ChildEntry = {
 	_: boolean;
-	form?: ThesisForm;
+	form?: ClaimForm;
 	seriesAnchor?: boolean;
 	polarity?: Polarity;
 }
 AddSchema({
 	properties: {
 		_: {type: "boolean"},
-		form: {oneOf: GetValues_ForSchema(ThesisForm)},
+		form: {oneOf: GetValues_ForSchema(ClaimForm)},
 		seriesAnchor: {type: ["null", "boolean"]},
 	},
 	required: ["_"],

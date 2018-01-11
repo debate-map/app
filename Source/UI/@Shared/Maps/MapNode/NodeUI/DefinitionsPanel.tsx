@@ -50,7 +50,7 @@ export default class DefinitionsPanel extends BaseComponent
 		return (
 			<Column style={{position: "relative"}}>
 				{/*<div style={{fontSize: 12, whiteSpace: "initial"}}>
-					Proponents of the thesis can submit and upvote their definitions of the terms. (thus clarifying their meaning)
+					Proponents of the claim can submit and upvote their definitions of the terms. (thus clarifying their meaning)
 				</div>*/}
 				{/*<Div style={{fontSize: 12, color: "rgba(255, 255, 255, 0.5)"}}>Definitions panel is under development.</Div>*/}
 				{/*<Row>

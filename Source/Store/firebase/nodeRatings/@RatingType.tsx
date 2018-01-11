@@ -1,7 +1,7 @@
 import {MapNode, MapNodeL2, MapNodeL3, Polarity} from "../nodes/@MapNode";
 import {Range} from "js-vextensions";
 import {MapNodeType} from "../nodes/@MapNodeType";
-import {MetaThesis_IfType} from "../nodes/@MetaThesisInfo";
+import {ImpactPremise_IfType} from "./../nodes/@ImpactPremiseInfo";
 import {GetNodeForm, GetMainRatingType, GetNodeL2} from "../nodes/$node";
 import {GetNode} from "../nodes";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
@@ -26,7 +26,7 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 	} else if (ratingType == "neutrality") {
 		result.description = `How neutral/impartial is the phrasing of this statement/question? (0: as biased as they come, 100: no bias)`;
 	} else if (ratingType == "probability") {
-		//result.description = "Suppose you were as sure as you are right now (of this thesis being true, in its basic form), 100 different times (on different topics). How many of those times do you expect you'd be correct?";
+		//result.description = "Suppose you were as sure as you are right now (of this claim being true, in its basic form), 100 different times (on different topics). How many of those times do you expect you'd be correct?";
 		result.description = "Consider how sure you are of this statement being true (in its basic form). If you were this sure 100 times (on a variety of things), how many of those times do you think you'd be correct?";
 	} else if (ratingType == "degree") {
 		result.description = "To what degree do you consider this statement true? (0: completely false, 50: true to a basic extent, 100: true to the highest extent)";
@@ -42,7 +42,7 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 
 		let premiseCountrStrMap = {All: `all of the premises`, AnyTwo: `at least two of the premises`, Any: `at least one of the premises.`};
 		//let premiseCountrStrMap = {All: `all of its premises`, AnyTwo: `at least two of its premises`, Any: `at least one of its premises.`};
-		let premiseCountStr = premiseCountrStrMap[MetaThesis_IfType[node.current.impactPremise.ifType]];
+		let premiseCountStr = premiseCountrStrMap[ImpactPremise_IfType[node.current.impactPremise.ifType]];
 		let shiftType = parent.type == MapNodeType.Argument ? "raise" : "lower";
 
 		/*return (
@@ -60,10 +60,10 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 		);*/
 
 		if (grandParentRatingType == "impact" && parent.type == MapNodeType.Argument) {
-			result.description = `If {premiseCountStr} of this argument were true (to the highest extent), how much would it weaken/undo the impact of the parent thesis?`;
+			result.description = `If ${premiseCountStr} of this argument were true (to the highest extent), how much would it weaken/undo the impact of the parent claim?`;
 		} else {
-			result.description = `If {premiseCountStr} of this argument were true (to the highest extent), ${""
-				}how much would it impact your ${grandParentRatingType} rating for the parent thesis? (0: not at all, 50: moderately, 100: game-changer)`;
+			result.description = `If ${premiseCountStr} of this argument were true (to the highest extent), ${""
+				}how much would it impact your ${grandParentRatingType} rating for the parent claim? (0: not at all, 50: moderately, 100: game-changer)`;
 			let supporting = parent.link.polarity == Polarity.Supporting;
 			result.labels = Range(0, 100);
 			//result.values = supporting ? Range(0, 100, 2) : Range(100, 0, 2);

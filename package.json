@@ -147,9 +147,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/venryx/ThesisMap.git"
+    "url": "git+https://github.com/Venryx/DebateMap.git"
   },
-  "author": "venryx (https://github.com/venryx)",
+  "author": "venryx (https://github.com/Venryx)",
   "license": "MIT",
   "dependencies": {
     "ajv": "^5.0.0",

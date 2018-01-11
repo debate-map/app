@@ -1,6 +1,6 @@
 import {MapNodeType} from "./@MapNodeType";
 import {AccessLevel, ImageAttachment} from "./@MapNode";
-import {MetaThesisInfo} from "./@MetaThesisInfo";
+import {ImpactPremiseInfo} from "./@ImpactPremiseInfo";
 import {Equation} from "./@Equation";
 import {ContentNode} from "../contentNodes/@ContentNode";
 import {GetValues_ForSchema} from "../../../Frame/General/Enums";
@@ -29,7 +29,7 @@ export class MapNodeRevision {
 	widthOverride: number;
 
 	// components (for theses)
-	impactPremise: MetaThesisInfo;
+	impactPremise: ImpactPremiseInfo;
 	equation: Equation;
 	contentNode: ContentNode;
 	image: ImageAttachment;
@@ -56,7 +56,7 @@ AddSchema({
 		fontSizeOverride: {type: ["null", "number"]},
 		widthOverride: {type: ["null", "number"]},
 
-		impactPremise: {$ref: "MetaThesisInfo"},
+		impactPremise: {$ref: "ImpactPremiseInfo"},
 		equation: {$ref: "Equation"},
 		contentNode: {$ref: "ContentNode"},
 		image: {$ref: "ImageAttachment"},

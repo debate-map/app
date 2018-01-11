@@ -5,8 +5,8 @@ import {CachedTransform} from "js-vextensions";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {RatingsRoot, Rating} from "./nodeRatings/@RatingsRoot";
 import {GetNodeChildren, GetNode, GetNodeChildrenL2} from "./nodes";
-import {MetaThesis_ThenType} from "./nodes/@MetaThesisInfo";
-import {ThesisForm, MapNodeL3} from "./nodes/@MapNode";
+import {ImpactPremise_ThenType} from "./nodes/@ImpactPremiseInfo";
+import {ClaimForm, MapNodeL3} from "./nodes/@MapNode";
 import {GetNodeL2} from "./nodes/$node";
 
 export function GetNodeRatingsRoot(nodeID: number) {
@@ -69,13 +69,13 @@ export function GetPaths_MainRatingAverage(node: MapNode) {
 /** Returns an int from 0 to 100. */
 /*export function GetMainRatingFillPercent(node: MapNode) {
 	let mainRatingAverage = GetMainRatingAverage(node);
-	if (node.current.impactPremise && (node.current.impactPremise.thenType == MetaThesis_ThenType.StrengthenParent || node.current.impactPremise.thenType == MetaThesis_ThenType.WeakenParent))
+	if (node.current.impactPremise && (node.current.impactPremise.thenType == ImpactPremise_ThenType.StrengthenParent || node.current.impactPremise.thenType == ImpactPremise_ThenType.WeakenParent))
 		return mainRatingAverage != null ? mainRatingAverage.Distance(50) * 2 : 0;
 	return mainRatingAverage || 0;
 }*/
 export function GetFillPercentForRatingAverage(node: MapNode, ratingAverage: number, reverseRating?: boolean) {
 	ratingAverage = TransformRatingForContext(ratingAverage, reverseRating);
-	/*if (node.current.impactPremise && (node.current.impactPremise.thenType == MetaThesis_ThenType.StrengthenParent || node.current.impactPremise.thenType == MetaThesis_ThenType.WeakenParent))
+	/*if (node.current.impactPremise && (node.current.impactPremise.thenType == ImpactPremise_ThenType.StrengthenParent || node.current.impactPremise.thenType == ImpactPremise_ThenType.WeakenParent))
 		return ratingAverage != null ? ratingAverage.Distance(50) * 2 : 0;*/
 	return ratingAverage || 0;
 }

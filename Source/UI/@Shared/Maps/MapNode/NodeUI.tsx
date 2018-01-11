@@ -25,7 +25,7 @@ import {Vector2i} from "js-vextensions";
 import {CachedTransform, CombineDynamicPropMaps, GetContentHeight, GetContentWidth} from "js-vextensions";
 import {RootState} from "../../../../Store/index";
 import {GetNodeView} from "../../../../Store/main/mapViews";
-import {MapNode, ThesisForm, MapNodeL2, AccessLevel, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ClaimForm, MapNodeL2, AccessLevel, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {GetNodeChildren, GetParentNode, IsRootNode, GetNodeChildrenL3, GetParentNodeL2} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
@@ -37,7 +37,7 @@ import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeFo
 import FastDOM from "fastdom";
 import {Row} from "react-vcomponents";
 import Icon from "../../../../Frame/ReactComponents/Icon";
-import {MetaThesis_IfType} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
+import {ImpactPremise_IfType} from "./../../../../Store/firebase/nodes/@ImpactPremiseInfo";
 import {GetUserAccessLevel} from "../../../../Store/firebase/users";
 import {GetUserID} from "Store/firebase/users";
 import {IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
@@ -53,7 +53,7 @@ import {Timeline} from "Store/firebase/timelines/@Timeline";
 
 type Props = {map: Map, node: MapNodeL3, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
 	& Partial<{
-		initialChildLimit: number, form: ThesisForm, nodeView: MapNodeView,
+		initialChildLimit: number, form: ClaimForm, nodeView: MapNodeView,
 		nodeChildren: MapNodeL3[],
 		//nodeChildren_fillPercents: number[],
 		nodeChildren_sortValues: number[],
@@ -84,10 +84,10 @@ type State = {
 
 	let nodeChildren_sortValues = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
 		if (child.current.impactPremise) return Number.MAX_SAFE_INTEGER; // always place the impact-premise first
-		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetSortByRatingType(child)), GetNodeForm(child) == ThesisForm.Negation);
+		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetSortByRatingType(child)), GetNodeForm(child) == ClaimForm.Negation);
 	});
 	let nodeChildren_fillPercents = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
-		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetMainRatingType(child)), GetNodeForm(child) == ThesisForm.Negation);
+		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetMainRatingType(child)), GetNodeForm(child) == ClaimForm.Negation);
 	});
 
 	let subnodes = GetSubnodesInEnabledLayersEnhanced(GetUserID(), map, node._id);
@@ -150,7 +150,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		NodeUI.renderCount++;
 		NodeUI.lastRenderTime = Date.now();
 
-		let separateChildren = node.type == MapNodeType.Thesis;
+		let separateChildren = node.type == MapNodeType.Claim;
 		type ChildPack = {origIndex: number, node: MapNodeL3};
 		let childPacks: ChildPack[] = nodeChildren.map((child, index)=>({origIndex: index, node: child}));
 		if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
@@ -173,7 +173,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			childPacks = childPacks.OrderByDescending(pack=>nodeChildren_sortValues[pack.origIndex]);
 			//if (IsArgumentNode(node)) {
 			let impactPremiseNode = nodeChildren.FirstOrX(a=>a.current.impactPremise != null);
-			let isArgument_any = impactPremiseNode && impactPremiseNode.current.impactPremise.ifType == MetaThesis_IfType.Any;
+			let isArgument_any = impactPremiseNode && impactPremiseNode.current.impactPremise.ifType == ImpactPremise_IfType.Any;
 			if (node.childrenOrder && !isArgument_any) {
 				childPacks = childPacks.OrderBy(pack=>node.childrenOrder.indexOf(pack.node._id).IfN1Then(Number.MAX_SAFE_INTEGER));
 			}

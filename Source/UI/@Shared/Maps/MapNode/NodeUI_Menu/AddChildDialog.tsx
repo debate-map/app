@@ -1,6 +1,6 @@
 import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
-import {MapNode, ThesisForm, ChildEntry, MapNodeL2, ThesisType, ImageAttachment, Polarity, MapNodeL3} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ClaimForm, ChildEntry, MapNodeL2, ClaimType, ImageAttachment, Polarity, MapNodeL3} from "../../../../../Store/firebase/nodes/@MapNode";
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
 import {Select} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";
@@ -11,7 +11,7 @@ import {Column} from "react-vcomponents";
 import keycode from "keycode";
 import {Button} from "react-vcomponents";
 import {E} from "../../../../../Frame/General/Globals_Free";
-import {MetaThesis_ThenType, MetaThesis_IfType, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
+import {ImpactPremise_ThenType, ImpactPremise_IfType, GetImpactPremiseIfTypeDisplayText} from "./../../../../../Store/firebase/nodes/@ImpactPremiseInfo";
 import AddNode from "../../../../../Server/Commands/AddNode";
 import Editor from "react-md-editor";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
@@ -20,19 +20,19 @@ import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";
 import {CheckBox} from "react-vcomponents";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import NodeDetailsUI from "../NodeDetailsUI";
-import {GetThesisType, AsNodeL3, AsNodeL2, GetFinalPolarity} from "../../../../../Store/firebase/nodes/$node";
+import {GetClaimType, AsNodeL3, AsNodeL2, GetFinalPolarity} from "../../../../../Store/firebase/nodes/$node";
 import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
 import { IsUserAdmin, IsUserMod } from "../../../../../Store/firebase/userExtras";
 import AddChildNode from "../../../../../Server/Commands/AddChildNode";
 import {MapNodeRevision} from "../../../../../Store/firebase/nodes/@MapNodeRevision";
 
-export function ShowAddChildDialog(parentNode: MapNodeL3, parentForm: ThesisForm, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: number, path: string) {
+export function ShowAddChildDialog(parentNode: MapNodeL3, parentForm: ClaimForm, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: number, path: string) {
 	let childTypeInfo = MapNodeType_Info.for[childType];
 	let displayName = GetMapNodeTypeDisplayName(childType, parentNode, parentForm, childPolarity);
 
-	let thesisForm = childType == MapNodeType.Thesis
-		? (parentNode.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base)
+	let claimForm = childType == MapNodeType.Claim
+		? (parentNode.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base)
 		: null;
 
 	let newNode = new MapNode({
@@ -47,20 +47,20 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentForm: ThesisForm
 	});
 	let newLink = E(
 		{_: true},
-		childType == MapNodeType.Thesis && {form: thesisForm},
+		childType == MapNodeType.Claim && {form: claimForm},
 		childType == MapNodeType.Argument && {polarity: childPolarity},
 	) as ChildEntry;
-	let newMetaThesis: MapNode;
-	let newMetaThesisRevision: MapNodeRevision;
+	let newImpactPremise: MapNode;
+	let newImpactPremiseRevision: MapNodeRevision;
 	if (childType == MapNodeType.Argument) {
-		newMetaThesis = new MapNode({
-			type: MapNodeType.Thesis, creator: userID,
+		newImpactPremise = new MapNode({
+			type: MapNodeType.Claim, creator: userID,
 		});
-		newMetaThesisRevision = new MapNodeRevision({
+		newImpactPremiseRevision = new MapNodeRevision({
 			approved: true,
 			impactPremise: {
-				ifType: MetaThesis_IfType.All,
-				thenType: MetaThesis_ThenType.Impact,
+				ifType: ImpactPremise_IfType.All,
+				thenType: ImpactPremise_ThenType.Impact,
 			},
 		});
 	}
@@ -75,27 +75,27 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentForm: ThesisForm
 			setTimeout(()=>justShowed = false);
 			boxController.options.okButtonClickable = validationError == null;
 
-			let thesisTypes = GetEntries(ThesisType);
-			thesisTypes.Remove(thesisTypes.find(a=>a.value == ThesisType.MetaThesis));
+			let claimTypes = GetEntries(ClaimType);
+			claimTypes.Remove(claimTypes.find(a=>a.value == ClaimType.ImpactPremise));
 			if (!IsUserMod(userID)) {
-				thesisTypes.Remove(thesisTypes.find(a=>a.value == ThesisType.Image));
+				claimTypes.Remove(claimTypes.find(a=>a.value == ClaimType.Image));
 			}
 
 			let newNodeAsL2 = AsNodeL2(newNode, newRevision);
 
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
-					{childType == MapNodeType.Thesis &&
+					{childType == MapNodeType.Claim &&
 						<Row>
 							<Pre>Type: </Pre>
-							<Select displayType="button bar" options={thesisTypes} style={{display: "inline-block"}}
-								value={GetThesisType(newNodeAsL2)}
+							<Select displayType="button bar" options={claimTypes} style={{display: "inline-block"}}
+								value={GetClaimType(newNodeAsL2)}
 								onChange={val=> {
 									newRevision.Extend({equation: null, contentNode: null, image: null});
-									if (val == ThesisType.Normal) {
-									} else if (val == ThesisType.Equation) {
+									if (val == ClaimType.Normal) {
+									} else if (val == ClaimType.Equation) {
 										newRevision.equation = new Equation();
-									} else if (val == ThesisType.Quote) {
+									} else if (val == ClaimType.Quote) {
 										newRevision.contentNode = new ContentNode();
 									} else {
 										newRevision.image = new ImageAttachment();
@@ -132,7 +132,7 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentForm: ThesisForm
 
 			let newNodeID = await new AddChildNode({
 				mapID: mapID, node: newNode, revision: newRevision, link: newLink,
-				impactPremiseNode: newMetaThesis, impactPremiseNodeRevision: newMetaThesisRevision,
+				impactPremiseNode: newImpactPremise, impactPremiseNodeRevision: newImpactPremiseRevision,
 			}).Run();
 			store.dispatch(new ACTMapNodeExpandedSet({mapID, path: path + "/" + newNodeID, expanded: true, recursive: false}));
 		}

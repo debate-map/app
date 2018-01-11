@@ -129,9 +129,9 @@ export function GetNodeChildrenL3(node: MapNode, path: string, filterForPath = f
 	return CachedTransform("GetNodeChildrenEnhanced", [path], nodeChildrenEnhanced, ()=>nodeChildrenEnhanced);
 }
 
-export function GetMetaThesisChildNode(node: MapNodeL2) {
+export function GetImpactPremiseChildNode(node: MapNodeL2) {
 	let nodeChildren = GetNodeChildrenL2(node);
-	return CachedTransform("GetMetaThesisChildNode", [node._id], nodeChildren, ()=>nodeChildren.FirstOrX(a=>a && a.current.impactPremise != null));
+	return CachedTransform("GetImpactPremiseChildNode", [node._id], nodeChildren, ()=>nodeChildren.FirstOrX(a=>a && a.current.impactPremise != null));
 }
 
 export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNodeL2) {

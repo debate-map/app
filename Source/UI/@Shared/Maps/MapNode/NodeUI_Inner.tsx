@@ -17,7 +17,7 @@ import keycode from "keycode";
 import NodeUI_Menu from "./NodeUI_Menu";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {ImageAttachment, MapNode, MapNodeL2, ThesisForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
+import {ImageAttachment, MapNode, MapNodeL2, ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeRatingsRoot, GetRatings, GetFillPercentForRatingAverage, GetRatingAverage, GetRatingValue, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {GetUserID} from "../../../../Store/firebase/users";
 import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -63,7 +63,7 @@ import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactM
 type Props = {
 	map: Map, node: MapNodeL3, nodeView: MapNodeView, path: string, width: number, widthOverride?: number,
 	panelPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
-} & Partial<{finalNodeType: MapNodeType, form: ThesisForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
+} & Partial<{finalNodeType: MapNodeType, form: ClaimForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
 //@FirebaseConnect((props: Props)=>((props[`holder`] = props[`holder`] || {}), [
 /*@FirebaseConnect((props: Props)=>[
 	...GetPaths_NodeRatingsRoot(props.node._id),
@@ -87,7 +87,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let mainRatingType = GetRatingTypesForNode(node).FirstOrX(null, {}).type;
 
 		let parentNode = GetNodeL3(GetParentNode(path), SlicePath(path, 1));
-		let nodeReversed = form == ThesisForm.Negation;
+		let nodeReversed = form == ClaimForm.Negation;
 		let ratingReversed = ShouldRatingTypeBeReversed(node);
 
 		let mainRating_mine = GetRatingValue(node._id, mainRatingType, userID);
@@ -96,7 +96,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered; //|| local_selected;
 		let panelToShow = hoverPanel || local_openPanel || (nodeView && nodeView.openPanel);
-		let subPanelShow = node.type == MapNodeType.Thesis && (node.current.contentNode || node.current.image);
+		let subPanelShow = node.type == MapNodeType.Claim && (node.current.contentNode || node.current.image);
 		let bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView && nodeView.expanded;
 
@@ -254,7 +254,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 					}}>
 						{node.current.note}
 					</Div>}
-				{node.type == MapNodeType.Thesis && node.current.contentNode &&
+				{node.type == MapNodeType.Claim && node.current.contentNode &&
 					<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
 			</Div>
 		);

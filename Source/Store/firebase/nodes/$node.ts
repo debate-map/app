@@ -1,7 +1,7 @@
 import {GetImage} from '../images';
-import {MapNode, MapNodeL2, ThesisForm, ChildEntry, ThesisType, MapNodeL3, Polarity} from "./@MapNode";
+import {MapNode, MapNodeL2, ClaimForm, ChildEntry, ClaimType, MapNodeL3, Polarity} from "./@MapNode";
 import {RatingType} from "../nodeRatings/@RatingType";
-import {MetaThesis_ThenType, GetMetaThesisIfTypeDisplayText, MetaThesis_IfType, GetMetaThesisThenTypeDisplayText} from "./@MetaThesisInfo";
+import {ImpactPremise_ThenType, GetImpactPremiseIfTypeDisplayText, ImpactPremise_IfType, GetImpactPremiseThenTypeDisplayText} from "./@ImpactPremiseInfo";
 import {MapNodeType} from './@MapNodeType';
 import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetNode, GetParentNodeL2} from "../nodes";
 import {GetValues} from '../../../Frame/General/Enums';
@@ -35,9 +35,9 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 		return [{type: "significance", main: true}];
 	if (node.type == MapNodeType.MultiChoiceQuestion)
 		return [{type: "significance", main: true}];
-	if (node.type == MapNodeType.Thesis) {
+	if (node.type == MapNodeType.Claim) {
 		if (node.current.impactPremise) {
-			if (node.current.impactPremise.thenType == MetaThesis_ThenType.Impact)
+			if (node.current.impactPremise.thenType == ImpactPremise_ThenType.Impact)
 				return [{type: "impact", main: true}];
 			return [{type: "probability", main: true}];
 		}
@@ -48,7 +48,7 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 		} else {
 			result = [{type: "probability", main: true}, {type: "degree", main: true}, {type: "significance", main: true}];
 		}
-		/*if ((node as MapNodeL2).link && (node as MapNodeL2).link.form == ThesisForm.YesNoQuestion) {
+		/*if ((node as MapNodeL2).link && (node as MapNodeL2).link.form == ClaimForm.YesNoQuestion) {
 			result.Remove(result.First(a=>a.type == "significance"));
 			result.Insert(0, {type: "significance", main: true});
 		}*/
@@ -64,7 +64,7 @@ export function GetMainRatingType(node: MapNodeL2): RatingType {
 	return GetRatingTypesForNode(node).FirstOrX(null, {}).type;
 }
 export function GetSortByRatingType(node: MapNodeL3): RatingType {
-	if ((node as MapNodeL3).link && (node as MapNodeL3).link.form == ThesisForm.YesNoQuestion) {
+	if ((node as MapNodeL3).link && (node as MapNodeL3).link.form == ClaimForm.YesNoQuestion) {
 		return "significance";
 	}
 	return GetMainRatingType(node);
@@ -81,9 +81,9 @@ export function GetFinalPolarityAtPath(node: MapNodeL2, path: string): Polarity 
 	let parentForm = GetNodeForm(parent, SplitStringBySlash_Cached(path).slice(0, -1).join("/"));
 	return GetFinalPolarity(link.polarity, parentForm);
 }
-export function GetFinalPolarity(basePolarity: Polarity, parentForm: ThesisForm): Polarity {
+export function GetFinalPolarity(basePolarity: Polarity, parentForm: ClaimForm): Polarity {
 	let result = basePolarity;
-	if (parentForm == ThesisForm.Negation) {
+	if (parentForm == ClaimForm.Negation) {
 		result = ReversePolarity(result);
 	}
 	return result;
@@ -142,13 +142,13 @@ export function GetNodeL3(nodeID: number | MapNode | MapNodeL2, path: string) {
 	return CachedTransform("GetNodeL3", [path], nodeL3, ()=>nodeL3);
 }
 
-/*export function GetNodeForm(node: MapNode, path: string): ThesisForm {
+/*export function GetNodeForm(node: MapNode, path: string): ClaimForm {
 	let parent = GetParentNode(path);
 	return GetNodeForm(node, parent);
 }
-export function GetThesisFormUnderParent(node: MapNode, parent: MapNode): ThesisForm {
+export function GetClaimFormUnderParent(node: MapNode, parent: MapNode): ClaimForm {
 	let link = GetLinkUnderParent(node._id, parent);
-	if (link == null) return ThesisForm.Base;
+	if (link == null) return ClaimForm.Base;
 	return link.form;
 }*/
 export function GetNodeForm(node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2) {
@@ -157,7 +157,7 @@ export function GetNodeForm(node: MapNodeL2 | MapNodeL3, pathOrParent?: string |
 		return (node as MapNodeL3).link.form;
 	}
 	let link = GetLinkUnderParent(node._id, parent);
-	if (link == null) return ThesisForm.Base;
+	if (link == null) return ClaimForm.Base;
 	return link.form;
 }
 export function GetLinkUnderParent(nodeID: number, parent: MapNode): ChildEntry {
@@ -173,8 +173,8 @@ export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
 }
 
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
-export function GetNodeDisplayText(node: MapNodeL2, formOrPath?: ThesisForm | string): string {
-	if (node.type == MapNodeType.Thesis) {
+export function GetNodeDisplayText(node: MapNodeL2, formOrPath?: ClaimForm | string): string {
+	if (node.type == MapNodeType.Claim) {
 		if (node.current.impactPremise) {
 			let thenType = node.current.impactPremise.thenType;
 			if (IsString(formOrPath)) {
@@ -182,7 +182,7 @@ export function GetNodeDisplayText(node: MapNodeL2, formOrPath?: ThesisForm | st
 			} else {
 				var polarity = GetFinalPolarity(Polarity.Supporting, formOrPath);
 			}
-			return `If ${GetMetaThesisIfTypeDisplayText(node.current.impactPremise.ifType)} premises below are true, they ${GetMetaThesisThenTypeDisplayText(thenType, polarity)}.`;
+			return `If ${GetImpactPremiseIfTypeDisplayText(node.current.impactPremise.ifType)} premises below are true, they ${GetImpactPremiseThenTypeDisplayText(thenType, polarity)}.`;
 		}
 		if (node.current.equation) {
 			let result = node.current.equation.text;
@@ -223,9 +223,9 @@ export function GetNodeDisplayText(node: MapNodeL2, formOrPath?: ThesisForm | st
 
 		if (formOrPath) {
 			let form = typeof formOrPath == "string" ? GetNodeForm(node, formOrPath) : formOrPath;
-			if (form == ThesisForm.Negation)
+			if (form == ClaimForm.Negation)
 				return node.current.titles["negation"] || "[negation title not set]";
-			if (form == ThesisForm.YesNoQuestion)
+			if (form == ClaimForm.YesNoQuestion)
 				return node.current.titles["yesNoQuestion"] || "[yes-no-question title not set]";
 			return node.current.titles["base"] || "[base title not set]";
 		}
@@ -248,14 +248,14 @@ export function GetValidNewChildTypes(parentNode: MapNodeL2, path: string, permi
 	return node.current.impactPremise && parent && IsReversedArgumentNode(parent);
 }*/
 
-export function GetThesisType(node: MapNodeL2) {
-	if (node.type != MapNodeType.Thesis) return null;
+export function GetClaimType(node: MapNodeL2) {
+	if (node.type != MapNodeType.Claim) return null;
 	return (
-		node.current.impactPremise ? ThesisType.MetaThesis :
-		node.current.equation ? ThesisType.Equation :
-		node.current.contentNode ? ThesisType.Quote :
-		node.current.image ? ThesisType.Image :
-		ThesisType.Normal
+		node.current.impactPremise ? ClaimType.ImpactPremise :
+		node.current.equation ? ClaimType.Equation :
+		node.current.contentNode ? ClaimType.Quote :
+		node.current.image ? ClaimType.Image :
+		ClaimType.Normal
 	);
 }
 
@@ -265,7 +265,7 @@ export function GetThesisType(node: MapNodeL2) {
 		let impactPremiseNode = nodeChildren.find(a=>a != null && a.impactPremise != null);
 		// if impact-premise not loaded yet, don't show child yet (since might suppossed to be hidden)
 		if (impactPremiseNode == null) return Number.MAX_SAFE_INTEGER;
-		let minChildCount = impactPremiseNode.impactPremise.ifType == MetaThesis_IfType.Any ? 2 : 3;
+		let minChildCount = impactPremiseNode.impactPremise.ifType == ImpactPremise_IfType.Any ? 2 : 3;
 		return minChildCount;
 	}
 	return 0;

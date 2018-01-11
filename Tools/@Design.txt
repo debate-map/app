@@ -1,3 +1,5 @@
+Note: This is now outdated.
+
 {^}
 	users:{^}
 		user123:{^}
@@ -12,13 +14,13 @@
 			rootNode:"node100"
 	nodes:{^}
 		node123:{^}
-			type:0 (thesis)
+			type:0 (claim)
 			title:"Things that reach a length of X [light years] through expansion (in one direction) (from [negligible size]) are at least X years old"
 			impactPremise:false
 			
-			agrees:7			// for thesis nodes, and talk nodes
-			degree:.7			// for some thesis nodes, and talk nodes
-			disagrees:3			// for thesis nodes, and talk nodes
+			agrees:7				// for claim nodes, and talk nodes
+			degree:.7			// for some claim nodes, and talk nodes
+			disagrees:3			// for claim nodes, and talk nodes
 			weight:.5			// for argument nodes
 			creator:"user123"
 			approved:true

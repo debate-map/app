@@ -5,14 +5,14 @@ import {E} from "../../../../Frame/General/Globals_Free";
 import {connect} from "react-redux";
 import {CachedTransform} from "js-vextensions";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {MapNode, ThesisForm, MapNodeL2, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ClaimForm, MapNodeL2, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RatingType_Info, RatingType, GetRatingTypeInfo} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {GetRatingAverage, GetRatings, TransformRatingForContext, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
-import {MetaThesis_ThenType} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
+import {ImpactPremise_ThenType} from "./../../../../Store/firebase/nodes/@ImpactPremiseInfo";
 import {GetRatingTypesForNode, GetNodeForm, GetMainRatingType, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
 import {RootState} from "../../../../Store/index";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
@@ -26,7 +26,7 @@ type Props = {
 	panelPosition?: "left" | "below", local_openPanel?: string,
 	backgroundColor: string, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
-} & Partial<{form: ThesisForm, parentNode: MapNodeL3}>;
+} & Partial<{form: ClaimForm, parentNode: MapNodeL3}>;
 @Connect((state: RootState, {node, path}: Props)=>({
 	form: GetNodeForm(node, path),
 	parentNode: GetParentNodeL3(path),
@@ -43,7 +43,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 		let openPanel = local_openPanel || nodeView.openPanel;
 		if (node.current.impactPremise && parentNode == null) return <div/>; // if impact-premise, but no parent-node connected, must still be loading
 
-		let nodeReversed = form == ThesisForm.Negation;
+		let nodeReversed = form == ClaimForm.Negation;
 		if (node.current.impactPremise) {
 			var thenType = node.current.impactPremise.thenType;
 		}
@@ -68,7 +68,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 						let average = GetRatingAverage(node._id, ratingInfo.type, null, -1);
 						if (average != -1) {
 							average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(node));
-							if (node.current.impactPremise && thenType == MetaThesis_ThenType.Impact) {
+							if (node.current.impactPremise && thenType == ImpactPremise_ThenType.Impact) {
 								let grandParentID = SplitStringBySlash_Cached(path).length >= 3 ? SplitStringBySlash_Cached(path).XFromLast(2).ToInt() : null;
 								let grandParent = grandParentID ? GetNodeL3(GetNode(grandParentID), SlicePath(path, 2)) : null;
 								let grandParentRatingType = grandParent ? GetMainRatingType(grandParent) : "probability";

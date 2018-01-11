@@ -14,7 +14,7 @@ import {GetData, SlicePath} from "../../../../../Frame/Database/DatabaseHelpers"
 import {Debugger} from "../../../../../Frame/General/Globals_Free";
 import {RatingType, RatingType_Info, GetRatingTypeInfo} from "../../../../../Store/firebase/nodeRatings/@RatingType";
 import {Rating} from "../../../../../Store/firebase/nodeRatings/@RatingsRoot";
-import {MapNode, ThesisForm, MapNodeL2, MapNodeL3} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ClaimForm, MapNodeL2, MapNodeL3} from "../../../../../Store/firebase/nodes/@MapNode";
 import {GetUserID} from "../../../../../Store/firebase/users";
 import {RootState} from "../../../../../Store/index";
 import {GetRatingUISmoothing, ACTRatingUISmoothnessSet} from "../../../../../Store/main/ratingUI";
@@ -36,7 +36,7 @@ import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 ];*/
 
 type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: RatingType, ratings: Rating[]}
-	& Partial<{userID: string, /*myRating: number,*/ form: ThesisForm, nodeChildren: MapNode[], smoothing: number}>;
+	& Partial<{userID: string, /*myRating: number,*/ form: ClaimForm, nodeChildren: MapNode[], smoothing: number}>;
 @Connect((state: RootState, {node, path, ratingType}: RatingsPanel_Props)=>({
 	userID: GetUserID(),
 	form: GetNodeForm(node, path),

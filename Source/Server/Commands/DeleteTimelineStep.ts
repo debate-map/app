@@ -2,7 +2,7 @@ import {GetNodeParentsAsync} from "../../Store/firebase/nodes";
 import {Assert} from "js-vextensions";
 import {GetAsync_Raw} from "../../Frame/Database/DatabaseHelpers";
 import {Command, MergeDBUpdates} from "../Command";
-import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, ClaimForm} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {Term} from "../../Store/firebase/terms/@Term";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";

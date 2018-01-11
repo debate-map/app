@@ -154,19 +154,19 @@ This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 			new MapNode({_id: NextID(), type: MapNodeType.Argument, creator: "[demo]",
 				titles: {base: "Shadow during lunar eclipses"},
 				children: [
-					new MapNode({_id: NextID(), type: MapNodeType.Thesis, creator: "[demo]",
+					new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
 						titles: {base: "The earth always casts a spherical shadow on the moon during lunar eclipses"}
 					}),
-					new MapNode({_id: NextID(), type: MapNodeType.Thesis, creator: "[demo]",
+					new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
 						titles: {base: "If the earth were flat, it would sometimes cast an oblong shadow on the moon during lunar eclipses"},
 						children: [
 							new MapNode({_id: NextID(), type: MapNodeType.Argument, creator: "[demo]",
 								titles: {base: "When near horizon"},
 								children: [
-									new MapNode({_id: NextID(), type: MapNodeType.Thesis, creator: "[demo]",
+									new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
 										titles: {base: `Lunar eclipses sometimes happen when the moon is near the horizon`}
 									}),
-									new MapNode({_id: NextID(), type: MapNodeType.Thesis, creator: "[demo]",
+									new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
 										titles: {base: "If the earth were flat, and the moon near the horizon (during a lunar eclipse), the earth would cast an oblong shadow"},
 									}),
 								]
@@ -178,10 +178,10 @@ This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 			new MapNode({_id: NextID(), type: MapNodeType.Argument, creator: "[demo]",
 				titles: {base: "Ships and the horizon"},
 				children: [
-					new MapNode({_id: NextID(), type: MapNodeType.Thesis, creator: "[demo]",
+					new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
 						titles: {base: `As a ship first comes into view, only its top is visible (with the rest appearing as it comes closer)`}
 					}),
-					new MapNode({_id: NextID(), type: MapNodeType.Thesis, creator: "[demo]",
+					new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
 						titles: {base: "If the earth were flat, as a ship first came into view, it would be visible in its entirety (with it simply fading in)"}
 					}),
 				]
@@ -189,10 +189,10 @@ This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 			new MapNode({_id: NextID(), type: MapNodeType.Argument, creator: "[demo]",
 				titles: {base: "Constellations"},
 				children: [
-					new MapNode({_id: NextID(), type: MapNodeType.Thesis, creator: "[demo]",
+					new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
 						titles: {base: `The constellations that are visible change depending on what part of the earth you observe from`}
 					}),
-					new MapNode({_id: NextID(), type: MapNodeType.Thesis, creator: "[demo]",
+					new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
 						titles: {base: "If the earth were flat, the constellations that are visible would remain the same anywhere on earth"}
 					}),
 				]

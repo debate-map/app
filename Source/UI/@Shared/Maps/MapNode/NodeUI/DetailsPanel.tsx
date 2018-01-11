@@ -1,4 +1,4 @@
-import {MapNode, ThesisForm, MapNodeL2, MapNodeL3} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ClaimForm, MapNodeL2, MapNodeL3} from "../../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
@@ -23,7 +23,7 @@ import {GetParentNode, GetParentNodeID, IsNodeSubnode, GetParentNodeL3} from "..
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
 import {Row} from "react-vcomponents";
-import {MetaThesis_ThenType, MetaThesis_IfType, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
+import {ImpactPremise_ThenType, ImpactPremise_IfType, GetImpactPremiseIfTypeDisplayText} from "./../../../../../Store/firebase/nodes/@ImpactPremiseInfo";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import UpdateNodeDetails from "../../../../../Server/Commands/UpdateNodeDetails";
 import {RemoveHelpers, SlicePath, GetUpdates} from "../../../../../Frame/Database/DatabaseHelpers";

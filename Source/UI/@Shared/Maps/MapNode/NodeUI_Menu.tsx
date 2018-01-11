@@ -26,7 +26,7 @@ import {ForDelete_GetError, ForUnlink_GetError, GetNode, GetNodeChildrenAsync, G
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
-import {ThesisForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
+import {ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import { GetNodeChildren, ForCut_GetError, ForCopy_GetError } from "../../../../Store/firebase/nodes";
 import {E} from "../../../../Frame/General/Globals_Free";
@@ -58,7 +58,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
 		let validChildTypes = GetValidNewChildTypes(node, path, permissions);
 		let form = GetNodeForm(node, path);
-		let formForChildren = node.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base;
+		let formForChildren = node.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
 
 		let nodeText = GetNodeDisplayText(node, path);
 
@@ -69,7 +69,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 					//let displayName = GetMapNodeTypeDisplayName(childType, node, form);
 					let polarities = childType == MapNodeType.Argument ? [Polarity.Supporting, Polarity.Opposing] : [null];
 					return polarities.map(polarity=> {
-						let displayName = GetMapNodeTypeDisplayName(childType, node, ThesisForm.Base, polarity);
+						let displayName = GetMapNodeTypeDisplayName(childType, node, ClaimForm.Base, polarity);
 						return (
 							<VMenuItem key={childType + "_" + polarity} text={`Add ${displayName}`} style={styles.vMenuItem} onClick={e=> {
 								if (e.button != 0) return;
@@ -121,7 +121,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 `Are you sure you want to paste this argument as a linked child?
 
 Only do this if you're sure that the impact-premise applies exactly the same to both the old parent and the new parent.${""
-	} (usually it does not, ie. usually it's specific to its original parent thesis)
+	} (usually it does not, ie. usually it's specific to its original parent claim)
 
 If not, paste the argument as a clone instead.`
 								});
