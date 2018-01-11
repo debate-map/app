@@ -3,7 +3,7 @@ import {BaseComponent} from "react-vextensions";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
 import {MapNodeL2, ThesisType} from "../../../../../Store/firebase/nodes/@MapNode";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
-import {GetLinkUnderParent, GetNodeDisplayText, IsArgumentNode, GetThesisType} from "../../../../../Store/firebase/nodes/$node";
+import {GetLinkUnderParent, GetNodeDisplayText, GetThesisType} from "../../../../../Store/firebase/nodes/$node";
 import {GetUserPermissionGroups, GetUserID, GetUser} from "Store/firebase/users";
 import {GetParentNode, GetParentNodeID} from "Store/firebase/nodes";
 import {Pre, Row} from "react-vcomponents";
@@ -43,19 +43,19 @@ export default class OthersPanel extends BaseComponent<Props, {convertToType: Th
 				<Row>Parents: {node.parents == null ? "none" : node.parents.VKeys(true).join(", ")}</Row>
 				<Row>Children: {node.children == null ? "none" : node.children.VKeys(true).join(", ")}</Row>
 				<Row>Viewers: {viewers.length || "..."} <InfoButton text="The number of registered users who have had this node displayed in-map at some point."/></Row>
-				{IsArgumentNode(node) && creatorOrMod &&
+				{node.type == MapNodeType.Argument && creatorOrMod &&
 					<Row>
 						<Button mt={3} text="Reverse argument polarity" onLeftClick={()=> {
 							ShowMessageBox({
 								title: `Reverse argument polarity?`, cancelButton: true,
-								message: `Reverse polarity of argument "${GetNodeDisplayText(node)}"?\n\nAll meta-thesis ratings will be deleted.`,
+								message: `Reverse polarity of argument "${GetNodeDisplayText(node)}"?\n\nAll impact-premise ratings will be deleted.`,
 								onOK: ()=> {
-									new ReverseArgumentPolarity(E(mapID && {mapID}, {nodeID: node._id})).Run();
+									new ReverseArgumentPolarity(E(mapID && {mapID}, {nodeID: node._id, path})).Run();
 								}
 							});
 						}}/>
 					</Row>}
-				{node.current.type == MapNodeType.Thesis && convertToTypes.length > 0 &&
+				{node.type == MapNodeType.Thesis && convertToTypes.length > 0 &&
 					<Row>
 						<Pre>Convert to: </Pre>
 						<Select options={convertToTypes} value={convertToType} onChange={val=>this.SetState({convertToType: val})}/>

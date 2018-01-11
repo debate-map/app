@@ -34,11 +34,12 @@ export enum ThesisForm {
 }
 
 export class MapNode {
-	constructor(initialData: Partial<MapNode>) {
+	constructor(initialData: {type: MapNodeType} & Partial<MapNode>) {
 		this.Extend(initialData);
 	}
 
 	_id?: number;
+	type?: MapNodeType;
 	creator?: string;
 	createdAt: number;
 
@@ -55,6 +56,7 @@ export const MapNode_id = "^[0-9]+$";
 //export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
 AddSchema({
 	properties: {
+		type: {oneOf: GetValues_ForSchema(MapNodeType)},
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 
@@ -65,18 +67,18 @@ AddSchema({
 
 		layerPlusAnchorParents: {$ref: "LayerPlusAnchorParentSet"},
 	},
-	required: ["creator", "createdAt"],
+	required: ["type", "creator", "createdAt"],
 	allOf: [
 		// if an argument, require "childrenOrder" prop
-		/*{
+		{
 			if: {
 				properties: {
-					type: {oneOf: [{const: MapNodeType.SupportingArgument}, {const: MapNodeType.OpposingArgument}]},
+					type: {oneOf: [{const: MapNodeType.Argument}, {const: MapNodeType.Argument}]},
 				}
 			},
 			then: {required: ["childrenOrder"]},
 			else: {prohibited: ["childrenOrder"]}
-		}*/
+		}
 	],
 }, "MapNode");
 
@@ -87,8 +89,13 @@ export interface MapNodeL2 extends MapNode {
 	current: MapNodeRevision;
 }
 export interface MapNodeL3 extends MapNodeL2 {
-	finalType: MapNodeType;
+	finalPolarity: Polarity;
 	link: ChildEntry;
+}
+
+export enum Polarity {
+	Supporting = 10,
+	Opposing = 20,
 }
 
 // regular parents
@@ -108,6 +115,7 @@ export type ChildEntry = {
 	_: boolean;
 	form?: ThesisForm;
 	seriesAnchor?: boolean;
+	polarity?: Polarity;
 }
 AddSchema({
 	properties: {

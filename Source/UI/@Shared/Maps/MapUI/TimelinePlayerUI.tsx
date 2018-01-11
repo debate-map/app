@@ -16,10 +16,13 @@ import {ReplacementFunc} from "../../../../Frame/ReactComponents/VReactMarkdown"
 import {Segment} from "../../../../Frame/General/RegexHelpers";
 import NodeUI_Inner from "../MapNode/NodeUI_Inner";
 import {GetNode} from "Store/firebase/nodes";
-import {MapNode, MapNodeL2} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, MapNodeL2, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetDataAsync, GetAsync} from "Frame/Database/DatabaseHelpers";
 import NodeUI from "../MapNode/NodeUI";
 import { GetNodeL2 } from "Store/firebase/nodes/$node";
+import {GetNodeL3, AsNodeL3} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeID} from "../../../../Store/firebase/nodes";
+import {GetValues, GetEntries} from "../../../../Frame/General/Enums";
 
 function GetPropsFromPropsStr(propsStr: string) {
 	let propStrMatches = propsStr.Matches(/ (.+?)="(.+?)"/g);
@@ -49,8 +52,10 @@ let replacements = {
 	},
 	"\\[node(.*?)\\/\\]": (segment: Segment, index: number, extraInfo)=> {
 		let props = GetPropsFromPropsStr(segment.textParts[1]);
+		let polarityEntry = props.polarity ? GetEntries(Polarity).find(a=>a.name.toLowerCase() == props.polarity) : null;
+		let polarity = polarityEntry ? polarityEntry.value : Polarity.Supporting;
 		return (
-			<NodeUI_InMessage map={extraInfo.map} nodeID={props.id} index={index}/>
+			<NodeUI_InMessage map={extraInfo.map} nodeID={props.id} polarity={polarity} index={index}/>
 		);
 	},
 	"\\[connectNodesButton(.*?)\\/\\]": (segment: Segment, index: number, extraInfo)=> {
@@ -78,19 +83,18 @@ let replacements = {
 	},
 };
 
-type NodeUI_InMessageProps = {map: Map, nodeID: number, index: number} & Partial<{node: MapNodeL2}>;
-@Connect((state, {nodeID}: NodeUI_InMessageProps)=> ({
-	node: GetNodeL2(nodeID, ""+nodeID),
+type NodeUI_InMessageProps = {map: Map, nodeID: number, polarity: Polarity, index: number} & Partial<{node: MapNodeL3}>;
+@Connect((state, {nodeID, polarity}: NodeUI_InMessageProps)=> ({
+	node: AsNodeL3(GetNodeL2(nodeID), polarity, null),
 }))
 class NodeUI_InMessage extends BaseComponent<NodeUI_InMessageProps, {}> {
 	render() {
-		let {map, node, index} = this.props;
+		let {map, nodeID, index, node} = this.props;
 		if (!node) return <div/>;
 		
-		let path = ""+node._id;
-		let nodeL3 = node.Extended({finalType: node.current.type, link: null});
+		let path = ""+nodeID;
 		return (
-			<NodeUI_Inner ref="innerBox" map={map} node={nodeL3} nodeView={{}} path={path} width={null} widthOverride={null}
+			<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={{}} path={path} width={null} widthOverride={null}
 				panelPosition="below" useLocalPanelState={true}
 				style={{
 					//zIndex: 1, filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"

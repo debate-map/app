@@ -1,4 +1,4 @@
-import {ForUnlink_GetError, GetNodeAsync, GetNodeParentsAsync} from "../../Store/firebase/nodes";
+import {ForUnlink_GetError, GetNodeParentsAsync} from "../../Store/firebase/nodes";
 import {Assert} from "js-vextensions";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command} from "../Command";
@@ -9,6 +9,7 @@ import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {GetAsync} from "Frame/Database/DatabaseHelpers";
 import {GetMap} from "Store/firebase/maps";
+import {GetNodeL2} from "../../Store/firebase/nodes/$node";
 
 @MapEdit
 @UserEdit
@@ -24,7 +25,7 @@ export default class UnlinkNode extends Command<{mapID: number, parentID: number
 		let parentNodes = await GetNodeParentsAsync(childNode);
 		Assert(parentNodes.length > 1, "Cannot unlink this child, as doing so would orphan it. Try deleting it instead.");*/
 		let {mapID, childID} = this.payload;
-		let oldData = await GetNodeAsync(childID);
+		let oldData = await GetAsync(()=>GetNodeL2(childID));
 		let earlyError = await GetAsync(()=>ForUnlink_GetError(this.userInfo.id, GetMap(mapID), oldData));
 		Assert(earlyError == null, earlyError);
 	}

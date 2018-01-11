@@ -6,7 +6,7 @@ import {E} from "../../Frame/General/Globals_Free";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import { UserEdit, MapEdit } from "Server/CommandMacros";
 
-AddSchema({
+/*AddSchema({
 	properties: {
 		mapID: {type: "number"},
 		nodeID: {type: "number"},
@@ -28,7 +28,7 @@ AddSchema({
 				fontSizeOverride: {type: ["null", "number"]},
 				widthOverride: {type: ["null", "number"]},
 
-				metaThesis: {$ref: "MetaThesisInfo"},
+				impactPremise: {$ref: "MetaThesisInfo"},
 				equation: {$ref: "Equation"},
 				contentNode: {$ref: "ContentNode"},
 				image: {$ref: "ImageAttachment"},
@@ -62,7 +62,7 @@ export default class UpdateNodeDetails extends Command
 		let allowedLinkPropUpdates = ["form"];
 		Assert(linkUpdates.VKeys().Except(...allowedLinkPropUpdates).length == 0,
 			`Cannot use this command to update link-props other than: ${allowedLinkPropUpdates.join(", ")
-			}\n\nYou provided: ${linkUpdates.VKeys().Except(...allowedLinkPropUpdates).join(", ")}`);*/
+			}\n\nYou provided: ${linkUpdates.VKeys().Except(...allowedLinkPropUpdates).join(", ")}`);*#/
 		
 		AssertValidate("UpdateNodeDetails_payload", this.payload, `Payload invalid`);
 	}
@@ -99,4 +99,4 @@ export default class UpdateNodeDetails extends Command
 		}
 		return updates;
 	}
-}
+}*/

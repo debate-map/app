@@ -2,14 +2,14 @@ import {BaseComponent, FindDOM, SimpleShouldUpdate_Overridable} from "react-vext
 import NodeUI from "./NodeUI";
 import {Vector2i} from "js-vextensions";
 import ShallowCompare from "react/lib/shallowCompare";
-import {MapNode, MapNodeL2} from "../../../../Store/firebase/nodes/@MapNode";
-import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {MapNode, MapNodeL2, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNodeType, MapNodeType_Info, GetNodeBackgroundColor} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {GetNodeForm, GetRatingTypesForNode, GetFinalNodeTypeAtPath} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeForm, GetRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 
 type Props = {
-	node: MapNodeL2, mainBoxOffset: Vector2i, childNodes: MapNodeL2[],
+	node: MapNodeL3, mainBoxOffset: Vector2i, childNodes: MapNodeL2[],
 	//childBoxOffsets: Vector2i[],
 	childBoxOffsets: {[key: number]: Vector2i},
 	shouldUpdate: boolean
@@ -37,9 +37,7 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					let child = childNodes.FirstOrX(a=>a._id == childIDStr.ToInt());
 					if (child == null) return null;
 
-					let backgroundColor = node.finalType == MapNodeType.SupportingArgument || node.finalType == MapNodeType.OpposingArgument
-						? MapNodeType_Info.for[node.finalType].backgroundColor
-						: MapNodeType_Info.for[child.finalType].backgroundColor;
+					let backgroundColor = GetNodeBackgroundColor(node);
 
 					/*var start = mainBoxOffset;
 					var startControl = start.Plus(30, 0);

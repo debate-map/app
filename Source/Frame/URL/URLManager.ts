@@ -11,14 +11,14 @@ import {rootPageDefaultChilds, NormalizeURL} from "../General/URLs";
 import {VURL} from "js-vextensions";
 import {ACTTermSelect, ACTImageSelect} from "../../Store/main/database";
 import { GetNodeDisplayText } from "../../Store/firebase/nodes/$node";
-import { GetNodeAsync, GetNode } from "Store/firebase/nodes";
+import { GetNode } from "Store/firebase/nodes";
 import { GetShortestPathFromRootToNode } from "Frame/Store/PathFinder";
 import {CreateMapViewForPath} from "../Store/PathFinder";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import { ACTDebateMapSelect } from "../../Store/main/debates";
 import { ACTSet } from "Store";
 import MapUI from "../../UI/@Shared/Maps/MapUI";
-import {MapNode, globalMapID} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, globalMapID, MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../Store/firebase/maps/@Map";
 import {ACTPersonalMapSelect} from "../../Store/main/personal";
 import { ACTMap_PlayingTimelineSet, ACTMap_PlayingTimelineStepSet } from "Store/main/maps/$map";
@@ -26,6 +26,8 @@ import {ACTMap_PlayingTimelineAppliedStepSet} from "../../Store/main/maps/$map";
 import {ACTSubforumSelect, ACTThreadSelect, GetSelectedSubforumID, GetSelectedThreadID} from "firebase-forum";
 import {FindReact} from "react-vextensions";
 import {ACTProposalSelect, GetSelectedProposalID} from "firebase-feedback";
+import {GetAsync} from "Frame/Database/DatabaseHelpers";
+import {GetNodeL2} from "Store/firebase/nodes/$node";
 
 export function GetCrawlerURLStrForMap(mapID: number) {
 	let map = GetMap(mapID);
@@ -40,7 +42,7 @@ export function GetCrawlerURLStrForMap(mapID: number) {
 	return result;
 }
 
-export function GetCrawlerURLStrForNode(node: MapNode) {
+export function GetCrawlerURLStrForNode(node: MapNodeL2) {
 	let result = GetNodeDisplayText(node).toLowerCase().replace(/[^a-z]/g, "-");
 	// need to loop, in some cases, since regex doesn't reprocess "---" as two sets of "--".
 	while (result.Contains("--")) {
@@ -57,7 +59,7 @@ export function GetCurrentURL_SimplifiedForPageViewTracking() {
 	let onMapPage = NormalizeURL(result).toString({domain: false}).startsWith("/global/map");
 	if (mapID && onMapPage) {
 		let nodeID = GetFocusedNodeID(mapID);
-		let node = nodeID ? GetNode(nodeID) : null;
+		let node = nodeID ? GetNodeL2(nodeID) : null;
 		//if (result.pathNodes.length == 1) {
 		/*if (NormalizeURL(result).toString({domain: false}).startsWith("/global/map") && result.pathNodes.length == 1) {
 			result.pathNodes.push("map");
@@ -293,7 +295,7 @@ export async function LoadURL(urlStr: string) {
 	let match = url.toString({domain: false}).match(/^\/global\/map\/[a-z-]*\.?([0-9]+)$/);
 	if (match && !isBot) {
 		let nodeID = parseInt(match[1]);
-		let node = await GetNodeAsync(nodeID);
+		let node = await GetAsync(()=>GetNodeL2(nodeID));
 		if (node) {
 			let shortestPathToNode = await GetShortestPathFromRootToNode(1, node);
 			if (shortestPathToNode) {
@@ -377,7 +379,7 @@ export function GetNewURL(includeMapViewStr = true) {
 		if (isBot) {
 			let map = GetMap(mapID);
 			let rootNodeID = State("main", "mapViews", mapID, "rootNodeID");
-			let rootNode = GetNode(rootNodeID);
+			let rootNode = GetNodeL2(rootNodeID);
 			if (rootNode) {
 				let nodeStr = GetCrawlerURLStrForNode(rootNode);
 				if (rootNodeID && rootNodeID != map.rootNode) {

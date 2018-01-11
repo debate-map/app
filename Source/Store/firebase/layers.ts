@@ -4,7 +4,7 @@ import {MapNode} from "./nodes/@MapNode";
 import {CachedTransform} from "js-vextensions";
 import {Layer} from "Store/firebase/layers/@Layer";
 import {GetNode} from "Store/firebase/nodes";
-import {GetNodeEnhanced} from "./nodes/$node";
+import {GetNodeL3} from "./nodes/$node";
 import {GetUserLayerStatesForMap} from "./userMapInfo";
 import {emptyArray} from "../../Frame/Store/ReducerUtils";
 

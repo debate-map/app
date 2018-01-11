@@ -6,13 +6,12 @@ import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {Term} from "../../Store/firebase/terms/@Term";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {IsArgumentNode} from "../../Store/firebase/nodes/$node";
 import {Map} from "../../Store/firebase/maps/@Map";
 import DeleteNode from "Server/Commands/DeleteNode";
 import {UserEdit} from "Server/CommandMacros";
 import {Subforum} from "firebase-forum";
 import {ShowMessageBox} from "react-vmessagebox";
-import {GetAsync} from "Frame/Database/DatabaseHelpers";
+import {GetAsync, GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
 import {GetThreadPosts, GetThread, GetPost} from "firebase-forum";
 import {Post} from "firebase-forum";
 
@@ -24,7 +23,7 @@ export default class DeletePost extends Command<{postID: number}> {
 	async Prepare() {
 		let {postID} = this.payload;
 		this.oldData = await GetAsync(()=>GetPost(postID));
-		let thread = await GetAsync(()=>GetThread(this.oldData.thread));
+		let thread = await GetAsync_Raw(()=>GetThread(this.oldData.thread));
 		this.thread_oldPosts = thread.posts;
 		//this.timeSinceCreation = Date.now() - this.oldData.createdAt;
 	}

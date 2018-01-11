@@ -1,53 +1,46 @@
 import {Assert} from "js-vextensions";
 import {RatingType} from "../nodeRatings/@RatingType";
-import {MapNode, MapNodeL2, ThesisForm} from "./@MapNode";
+import {MapNode, MapNodeL2, ThesisForm, MapNodeL3, Polarity} from "./@MapNode";
 
 export enum MapNodeType {
 	Category = 10,
 	Package = 20,
 	MultiChoiceQuestion = 30,
 	Thesis = 40,
-	SupportingArgument = 50,
-	OpposingArgument = 60,
+	Argument = 50,
 }
 export class MapNodeType_Info {
 	static for = {
 		[MapNodeType.Category]: new MapNodeType_Info({
 			childTypes: [MapNodeType.Category, MapNodeType.Package, MapNodeType.MultiChoiceQuestion, MapNodeType.Thesis],
-			minWidth: 100, maxWidth: 250, backgroundColor: "40,60,80",
+			minWidth: 100, maxWidth: 250,
 			/*mainRatingTypes: ["significance"],
 			otherRatingTypes: [],*/
 		}),
 		[MapNodeType.Package]: new MapNodeType_Info({
 			childTypes: [MapNodeType.Thesis],
-			minWidth: 100, maxWidth: 250, backgroundColor: "30,120,150",
+			minWidth: 100, maxWidth: 250,
 			/*mainRatingTypes: ["significance"],
 			otherRatingTypes: [],*/
 		}),
 		[MapNodeType.MultiChoiceQuestion]: new MapNodeType_Info({
 			childTypes: [MapNodeType.Thesis],
-			minWidth: 100, maxWidth: 250, backgroundColor: "90,50,180",
+			minWidth: 100, maxWidth: 250,
 			//minWidth: 100, maxWidth: 200, backgroundColor: "230,150,50",
 			/*mainRatingTypes: ["significance"],
 			otherRatingTypes: [],*/
 		}),
 		[MapNodeType.Thesis]: new MapNodeType_Info({
-			childTypes: [MapNodeType.SupportingArgument, MapNodeType.OpposingArgument],
-			minWidth: 350, maxWidth: 550, backgroundColor: "0,80,150",
+			childTypes: [MapNodeType.Argument, MapNodeType.Argument],
+			minWidth: 350, maxWidth: 550,
 			//mainRatingTypes: ["probability", "intensity"],
 			//mainRatingTypes: ["probability", "support"],
 			/*mainRatingTypes: ["probability", "degree"],
 			otherRatingTypes: [],*/
 		}),
-		[MapNodeType.SupportingArgument]: new MapNodeType_Info({
+		[MapNodeType.Argument]: new MapNodeType_Info({
 			childTypes: [MapNodeType.Thesis],
-			minWidth: 100, maxWidth: 300, backgroundColor: "30,100,30",
-			/*mainRatingTypes: ["strength"],
-			otherRatingTypes: [],*/
-		}),
-		[MapNodeType.OpposingArgument]: new MapNodeType_Info({
-			childTypes: [MapNodeType.Thesis],
-			minWidth: 100, maxWidth: 300, backgroundColor: "100,30,30",
+			minWidth: 100, maxWidth: 300,
 			/*mainRatingTypes: ["strength"],
 			otherRatingTypes: [],*/
 		}),
@@ -67,8 +60,19 @@ export class MapNodeType_Info {
 	/*mainRatingTypes: RatingType[];
 	otherRatingTypes: RatingType[];*/
 }
+export function GetNodeBackgroundColor(node: MapNodeL3) {
+	if (node.type == MapNodeType.Category) return "40,60,80";
+	if (node.type == MapNodeType.Package) return "30,120,150";
+	if (node.type == MapNodeType.MultiChoiceQuestion) return "90,50,180";
+	if (node.type == MapNodeType.Thesis) return "0,80,150";
+	if (node.type == MapNodeType.Argument) {
+		if (node.finalPolarity == Polarity.Supporting) return "30,100,30";
+		return "100,30,30";
+	}
+	Assert(false, "Invalid node type.");
+}
 
-export function GetMapNodeTypeDisplayName(type: MapNodeType, parentNode: MapNode, parentNodeForm: ThesisForm) {
+export function GetMapNodeTypeDisplayName(type: MapNodeType, parentNode: MapNode, parentNodeForm: ThesisForm, polarity: Polarity) {
 	if (type == MapNodeType.Category) return "category";
 	if (type == MapNodeType.Package) return "package";
 	if (type == MapNodeType.MultiChoiceQuestion) return "multi-choice question";
@@ -77,16 +81,8 @@ export function GetMapNodeTypeDisplayName(type: MapNodeType, parentNode: MapNode
 			return "yes-no question (thesis)";
 		return "thesis";
 	}
-	if (type == MapNodeType.SupportingArgument) {
-		//if (parent.finalType != parent.type) return "opposing argument";
-		if (parentNodeForm == ThesisForm.Negation) return "opposing argument";
-		return "supporting argument";
+	if (type == MapNodeType.Argument) {
+		return polarity == Polarity.Supporting ? "supporting argument" : "opposing argument";
 	}
-	if (type == MapNodeType.OpposingArgument) {
-		//if (parent.finalType != parent.type) return "supporting argument";
-		//if (IsContextReversed( parent.finalType != parent.type) return "supporting argument";
-		if ( parentNodeForm == ThesisForm.Negation) return "supporting argument";
-		return "opposing argument";
-	}
-	Assert(false);
+	Assert(false, "Invalid node type.");
 }

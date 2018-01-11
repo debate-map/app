@@ -1,12 +1,11 @@
 import {GetNodeParentsAsync} from "../../Store/firebase/nodes";
 import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
+import {GetAsync_Raw} from "../../Frame/Database/DatabaseHelpers";
 import {Command, MergeDBUpdates} from "../Command";
 import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {Term} from "../../Store/firebase/terms/@Term";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {IsArgumentNode} from "../../Store/firebase/nodes/$node";
 import {Map} from "../../Store/firebase/maps/@Map";
 import DeleteNode from "Server/Commands/DeleteNode";
 import {UserEdit} from "Server/CommandMacros";
@@ -22,8 +21,8 @@ export default class DeleteTimelineStep extends Command<{stepID: number}> {
 	timeline_oldSteps: number[];
 	async Prepare() {
 		let {stepID} = this.payload;
-		this.oldData = await GetAsync(()=>GetTimelineStep(stepID));
-		let timeline = await GetAsync(()=>GetTimeline(this.oldData.timelineID));
+		this.oldData = await GetAsync_Raw(()=>GetTimelineStep(stepID));
+		let timeline = await GetAsync_Raw(()=>GetTimeline(this.oldData.timelineID));
 		this.timeline_oldSteps = timeline.steps;
 	}
 	async Validate() {}

@@ -1,4 +1,3 @@
-import {GetNodeAsync} from "../../Store/firebase/nodes";
 import Action from "../General/Action";
 import {ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeExpandedSet, ACTViewCenterChange} from "../../Store/main/mapViews/$mapView/rootNodeViews";
 import {GetCurrentURL_SimplifiedForPageViewTracking, GetSyncLoadActionsForURL, LoadURL} from "../URL/URLManager";
@@ -27,6 +26,7 @@ import {UpdateFocusNodeAndViewOffset} from "../../UI/@Shared/Maps/MapUI";
 import {FindReact, FindDOM} from "react-vextensions";
 import MapUI from "../../UI/@Shared/Maps/MapUI";
 import {SleepAsync} from "js-vextensions";
+import {GetNodeL2} from "Store/firebase/nodes/$node";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -181,7 +181,7 @@ export async function PostDispatchAction(action: Action<any>) {
 				let newPathsToExpand = [];
 				for (let path of pathsToExpand) {
 					let nodeID = path.split("/").Last().ToInt();
-					let node = await GetNodeAsync(nodeID);
+					let node = await GetAsync(()=>GetNodeL2(nodeID));
 					if (GetNodeView(map._id, path) == null) {
 						store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path, expanded: true, recursive: false}));
 					}

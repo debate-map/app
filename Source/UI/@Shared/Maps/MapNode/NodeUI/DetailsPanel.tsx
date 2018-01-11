@@ -1,4 +1,4 @@
-import {MapNode, ThesisForm, MapNodeL2} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeL2, MapNodeL3} from "../../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
@@ -19,11 +19,11 @@ import {firebaseConnect} from "react-redux-firebase";
 import {WaitXThenRun} from "js-vextensions";
 import {TextInput} from "react-vcomponents";
 import Moment from "moment";
-import { GetParentNode, GetParentNodeID, IsNodeSubnode } from "../../../../../Store/firebase/nodes";
+import {GetParentNode, GetParentNodeID, IsNodeSubnode, GetParentNodeL3} from "../../../../../Store/firebase/nodes";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
 import {Row} from "react-vcomponents";
-import {MetaThesis_ThenType, MetaThesis_ThenType_Info, MetaThesis_IfType, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
+import {MetaThesis_ThenType, MetaThesis_IfType, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import UpdateNodeDetails from "../../../../../Server/Commands/UpdateNodeDetails";
 import {RemoveHelpers, SlicePath, GetUpdates} from "../../../../../Frame/Database/DatabaseHelpers";
@@ -31,14 +31,16 @@ import {HandleError} from "../../../../../Frame/General/Errors";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
 import {CheckBox} from "react-vcomponents";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
-import {GetNodeForm, GetLinkUnderParent, GetNodeEnhanced} from "../../../../../Store/firebase/nodes/$node";
+import {GetNodeForm, GetLinkUnderParent, GetNodeL3} from "../../../../../Store/firebase/nodes/$node";
 import {Column} from "react-vcomponents";
 import NodeDetailsUI from "../NodeDetailsUI";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
+import AddNodeRevision from "../../../../../Server/Commands/AddNodeRevision";
+import UpdateLink from "../../../../../Server/Commands/UpdateLink";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
-type DetailsPanel_Props = {map?: Map, node: MapNodeL2, path: string} & Partial<{creator: User}>;
+type DetailsPanel_Props = {map?: Map, node: MapNodeL3, path: string} & Partial<{creator: User}>;
 @Connect((state, {node, path}: DetailsPanel_Props)=>({
 	_: GetUserPermissionGroups(GetUserID()),
 	_link: GetLinkUnderParent(node._id, GetParentNode(path)),
@@ -56,7 +58,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 
 		let isSubnode = IsNodeSubnode(node);
 
-		var parentNode = GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1));
+		var parentNode = GetParentNodeL3(path);
 		// if parent-node not loaded yet, don't render yet
 		if (!isSubnode && path.includes("/") && parentNode == null) return null;
 		
@@ -66,7 +68,8 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 
 		return (
 			<Column style={{position: "relative"}}>
-				<NodeDetailsUI ref={c=>this.detailsUI = GetInnerComp(c) as any} baseData={node} baseLinkData={link} parent={parentNode}
+				<NodeDetailsUI ref={c=>this.detailsUI = GetInnerComp(c) as any}
+					baseData={node} baseRevisionData={node.current} baseLinkData={link} parent={parentNode}
 					forNew={false} enabled={creatorOrMod}
 					onChange={(newData, newLinkData)=> {
 						this.SetState({dataError: this.detailsUI.GetValidationError()});
@@ -74,13 +77,14 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 				{creatorOrMod &&
 					<Row>
 						<Button text="Save" enabled={dataError == null} onLeftClick={async ()=> {
-							let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "layerPlusAnchorParents", "finalType", "link");
+							//let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "layerPlusAnchorParents", "finalType", "link");
 							if (link) {
 								let linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
-								await new UpdateNodeDetails(E(mapID && {mapID}, {nodeID: node._id, nodeUpdates, linkParentID: GetParentNodeID(path), linkUpdates})).Run();
-							} else {
-								await new UpdateNodeDetails(E(mapID && {mapID}, {nodeID: node._id, nodeUpdates})).Run();
+								if (linkUpdates.VKeys(true).length) {
+									await new UpdateLink(E(mapID && {mapID}, {linkParentID: GetParentNodeID(path), linkChildID: node._id, linkUpdates})).Run();
+								}
 							}
+							new AddNodeRevision({revision: this.detailsUI.GetNewRevisionData()}).Run();
 						}}/>
 						{/*error && <Pre>{error.message}</Pre>*/}
 					</Row>}

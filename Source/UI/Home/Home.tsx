@@ -9,13 +9,13 @@ import {E} from "../../Frame/General/Globals_Free";
 import GlobalMapUI from "../Global/GlobalMapUI";
 import MapUI from "../@Shared/Maps/MapUI";
 import {MapType, Map} from "../../Store/firebase/maps/@Map";
-import {MapNode, MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, MapNodeL2, MapNodeL3} from "../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {MapView} from "../../Store/main/mapViews/@MapViews";
 import {GetNode} from "../../Store/firebase/nodes";
 import {Vector2i} from "js-vextensions";
 import ReactMarkdown from "react-markdown";
-import {GetNodeEnhanced} from "../../Store/firebase/nodes/$node";
+import {GetNodeL3} from "../../Store/firebase/nodes/$node";
 import { replace, push } from "redux-little-router";
 import { demoMap, demoRootNodeID } from "UI/Home/DemoMap";
 
@@ -151,7 +151,7 @@ This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 	var demoRootNode_override = new MapNode({_id: -101, type: MapNodeType.MultiChoiceQuestion, creator: "[demo]",
 		titles: {base: "Is the earth spherical?"},
 		children: [
-			new MapNode({_id: NextID(), type: MapNodeType.SupportingArgument, creator: "[demo]",
+			new MapNode({_id: NextID(), type: MapNodeType.Argument, creator: "[demo]",
 				titles: {base: "Shadow during lunar eclipses"},
 				children: [
 					new MapNode({_id: NextID(), type: MapNodeType.Thesis, creator: "[demo]",
@@ -160,7 +160,7 @@ This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 					new MapNode({_id: NextID(), type: MapNodeType.Thesis, creator: "[demo]",
 						titles: {base: "If the earth were flat, it would sometimes cast an oblong shadow on the moon during lunar eclipses"},
 						children: [
-							new MapNode({_id: NextID(), type: MapNodeType.SupportingArgument, creator: "[demo]",
+							new MapNode({_id: NextID(), type: MapNodeType.Argument, creator: "[demo]",
 								titles: {base: "When near horizon"},
 								children: [
 									new MapNode({_id: NextID(), type: MapNodeType.Thesis, creator: "[demo]",
@@ -175,7 +175,7 @@ This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 					}),
 				]
 			}),
-			new MapNode({_id: NextID(), type: MapNodeType.SupportingArgument, creator: "[demo]",
+			new MapNode({_id: NextID(), type: MapNodeType.Argument, creator: "[demo]",
 				titles: {base: "Ships and the horizon"},
 				children: [
 					new MapNode({_id: NextID(), type: MapNodeType.Thesis, creator: "[demo]",
@@ -186,7 +186,7 @@ This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 					}),
 				]
 			}),
-			new MapNode({_id: NextID(), type: MapNodeType.SupportingArgument, creator: "[demo]",
+			new MapNode({_id: NextID(), type: MapNodeType.Argument, creator: "[demo]",
 				titles: {base: "Constellations"},
 				children: [
 					new MapNode({_id: NextID(), type: MapNodeType.Thesis, creator: "[demo]",
@@ -203,9 +203,9 @@ This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 
 let info = {text: pageText};
 
-type Props = {} & Partial<{demoRootNode: MapNodeL2}>;
+type Props = {} & Partial<{demoRootNode: MapNodeL3}>;
 @Connect(state=> ({
-	demoRootNode: GetNodeEnhanced(GetNode(demoRootNodeID), demoRootNodeID+""),
+	demoRootNode: GetNodeL3(demoRootNodeID, demoRootNodeID+""),
 }))
 export default class HomeUI2 extends BaseComponent<Props, {}> {
 	/*static contextTypes = {
@@ -234,7 +234,7 @@ export default class HomeUI2 extends BaseComponent<Props, {}> {
 	}
 }
 
-class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNodeL2, style}, {}> {
+class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNodeL3, style}, {}> {
 	root: HTMLDivElement;
 	mapUI: MapUI;
 	render() {

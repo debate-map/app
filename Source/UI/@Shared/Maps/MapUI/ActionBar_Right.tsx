@@ -10,7 +10,6 @@ import MapDetailsUI from "../MapDetailsUI";
 import {DropDown} from "react-vcomponents";
 import {Column} from "react-vcomponents";
 import UpdateMapDetails from "../../../../Server/Commands/UpdateMapDetails";
-import {GetNodeAsync, GetChildCount} from "Store/firebase/nodes";
 import {ShowMessageBox} from "react-vmessagebox";
 import DeleteMap from "../../../../Server/Commands/DeleteMap";
 import {colors} from "../../../../Frame/UI/GlobalStyles";

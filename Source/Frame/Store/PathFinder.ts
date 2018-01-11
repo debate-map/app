@@ -1,10 +1,12 @@
-import {GetNodeAsync, GetNodeParents, GetNodeParentsAsync} from "../../Store/firebase/nodes";
+import {GetNodeParents, GetNodeParentsAsync} from "../../Store/firebase/nodes";
 import {GetDataAsync} from "../Database/DatabaseHelpers";
 import {MapView, MapNodeView} from "../../Store/main/mapViews/@MapViews";
 import {Vector2i} from "js-vextensions";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {ToInt} from "js-vextensions";
 import {GetPathNodes} from "../../Store/main/mapViews";
+import {GetNode} from "Store/firebase/nodes";
+import {GetAsync} from "Frame/Database/DatabaseHelpers";
 
 export async function GetShortestPathFromRootToNode(rootNodeID: number, node: MapNode): Promise<string> {
 	type Head = {id: number, path: string[]};
@@ -19,7 +21,7 @@ export async function GetShortestPathFromRootToNode(rootNodeID: number, node: Ma
 		// else, find new-layer-heads for next search loop
 		let newLayerHeads = [];
 		for (let layerHead of currentLayerHeads) {
-			let node = await GetNodeAsync(layerHead.id);
+			let node = await GetAsync(()=>GetNode(layerHead.id));
 			for (let parentID of (node.parents || {}).VKeys(true).map(id=>parseInt(id)))
 				newLayerHeads.push({id: parentID, path: [parentID.toString()].concat(layerHead.path)})
 		}

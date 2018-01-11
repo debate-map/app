@@ -14,7 +14,7 @@ import NodeUI_Inner from "./MapNode/NodeUI_Inner";
 //import ReactResizeDetector from "react-resize-detector"; // this one doesn't seem to work reliably -- at least for the map-ui
 import ResizeSensor from "react-resize-sensor";
 import {WaitXThenRun, Timer, SleepAsync} from "js-vextensions";
-import {MapNode, ThesisForm, MapNodeL2} from "../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeL2, MapNodeL3} from "../../../Store/firebase/nodes/@MapNode";
 import {Map, MapType} from "../../../Store/firebase/maps/@Map";
 import {RootState} from "../../../Store/index";
 import {GetUserID} from "../../../Store/firebase/users";
@@ -27,7 +27,7 @@ import Link from "../../../Frame/ReactComponents/Link";
 import {VURL} from "js-vextensions";
 import NodeUI_ForBots from "./MapNode/NodeUI_ForBots";
 import {IsNumberString} from "js-vextensions";
-import {GetNodeEnhanced} from "../../../Store/firebase/nodes/$node";
+import {GetNodeL3} from "../../../Store/firebase/nodes/$node";
 import {GetOpenMapID, ACTSetInitialChildLimit} from "../../../Store/main";
 import {colors, styles} from "../../../Frame/UI/GlobalStyles";
 import {Button} from "react-vcomponents";
@@ -40,7 +40,7 @@ import {IsUserCreatorOrMod} from "../../../Store/firebase/userExtras";
 import {ShowMessageBox} from "react-vmessagebox";
 import DeleteMap from "../../../Server/Commands/DeleteMap";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
-import { GetNodeAsync, GetChildCount } from "Store/firebase/nodes";
+import {GetChildCount} from "Store/firebase/nodes";
 import {ActionBar_Left} from "./MapUI/ActionBar_Left";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right";
 import {VMenuStub} from "react-vmenu";
@@ -66,7 +66,7 @@ export function UpdateFocusNodeAndViewOffset(mapID: number) {
 	/*let selectedNodePath = GetSelectedNodePath(mapID);
 	let focusNodeBox = selectedNodePath ? GetNodeBoxForPath(selectedNodePath) : GetNodeBoxClosestToViewCenter();*/
 	let focusNodeBox = GetNodeBoxClosestToViewCenter();
-	if (focusNodeBox == null) return; // can happen if node was just deleted
+	if (focusNodeBox == null) return; // can happen if novde was just deleted
 
 	let focusNodeBoxComp = FindReact(focusNodeBox[0]) as NodeUI_Inner;
 	let focusNodePath = focusNodeBoxComp.props.path;
@@ -78,20 +78,20 @@ export function UpdateFocusNodeAndViewOffset(mapID: number) {
 }
 
 type Props = {
-	map: Map, rootNode?: MapNode, withinPage?: boolean,
+	map: Map, rootNode?: MapNodeL3, withinPage?: boolean,
 	padding?: {left: number, right: number, top: number, bottom: number},
 	subNavBarWidth?: number,
 } & React.HTMLProps<HTMLDivElement>
 	& Partial<{rootNode: MapNodeL2, focusNode: string, viewOffset: {x: number, y: number}}>;
 @Connect((state: RootState, {map, rootNode}: Props)=> {
 	if (rootNode == null && map && map.rootNode) {
-		rootNode = GetNodeEnhanced(GetNode(map.rootNode), map.rootNode+"");
+		rootNode = GetNodeL3(GetNode(map.rootNode), map.rootNode+"");
 	}
 
 	if (map) {
 		let nodeID = State("main", "mapViews", map._id, "rootNodeID");
 		if (isBot && nodeID) {
-			rootNode = GetNodeEnhanced(GetNode(nodeID), nodeID+"");
+			rootNode = GetNodeL3(GetNode(nodeID), nodeID+"");
 		}
 	}
 

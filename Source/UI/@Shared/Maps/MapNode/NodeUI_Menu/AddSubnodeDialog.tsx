@@ -11,7 +11,7 @@ import {Column} from "react-vcomponents";
 import keycode from "keycode";
 import {Button} from "react-vcomponents";
 import {E} from "../../../../../Frame/General/Globals_Free";
-import {MetaThesis_ThenType, MetaThesis_IfType, MetaThesis_ThenType_Info, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
+import {MetaThesis_ThenType, MetaThesis_IfType, GetMetaThesisIfTypeDisplayText} from "../../../../../Store/firebase/nodes/@MetaThesisInfo";
 import AddNode from "../../../../../Server/Commands/AddNode";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
@@ -19,7 +19,7 @@ import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";
 import {CheckBox} from "react-vcomponents";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import NodeDetailsUI from "../NodeDetailsUI";
-import {ReverseMapNodeType, GetThesisType} from "../../../../../Store/firebase/nodes/$node";
+import {GetThesisType, AsNodeL2} from "../../../../../Store/firebase/nodes/$node";
 import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
 import { IsUserAdmin, IsUserMod } from "../../../../../Store/firebase/userExtras";
@@ -44,7 +44,7 @@ type Props = {mapID: number, anchorNode: MapNode, anchorNodePath: string, boxCon
 @Connect((state, {}: Props)=> ({
 	layers: GetLayers(),
 }))
-class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapNode, newLink: ChildEntry, validationError: string}> {
+class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapNode, newRevision: MapNodeRevision, newLink: ChildEntry, validationError: string}> {
 	constructor(props) {
 		super(props);
 		let newNode = new MapNode({
@@ -72,7 +72,7 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 	nodeEditorUI: NodeDetailsUI;
 	render() {
 		let {boxController, layers} = this.props;
-		let {layer, newNode, newLink, validationError} = this.state;
+		let {layer, newNode, newRevision, newLink, validationError} = this.state;
 		
 		let thesisTypes = GetEntries(ThesisType);
 		thesisTypes.Remove(thesisTypes.find(a=>a.value == ThesisType.MetaThesis));
@@ -94,22 +94,22 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 					<Row mt={5}>
 						<Pre>Type: </Pre>
 						<Select displayType="button bar" options={thesisTypes} style={{display: "inline-block"}}
-							value={GetThesisType(newNode)}
+							value={GetThesisType(AsNodeL2(newNode, newRevision))}
 							onChange={val=> {
-								newNode.Extend({equation: null, contentNode: null, image: null});
+								newRevision.Extend({equation: null, contentNode: null, image: null});
 								if (val == ThesisType.Normal) {
 								} else if (val == ThesisType.Equation) {
-									newNode.equation = new Equation();
+									newRevision.equation = new Equation();
 								} else if (val == ThesisType.Quote) {
-									newNode.contentNode = new ContentNode();
+									newRevision.contentNode = new ContentNode();
 								} else {
-									newNode.image = new ImageAttachment();
+									newRevision.image = new ImageAttachment();
 								}
 								this.Update();
 							}}/>
 					</Row>}
 				<NodeDetailsUI ref={c=>this.nodeEditorUI = GetInnerComp(c) as any} parent={null}
-					baseData={newNode.Extended({finalType: newNode.type, link: null})} baseLinkData={this.state.newLink} forNew={true}
+					baseData={newNode.Extended({finalType: newNode.type, link: null})} baseRevisionData={newRevision} baseLinkData={this.state.newLink} forNew={true}
 					onChange={(newNodeData, newLinkData, comp)=> {
 						this.SetState({newNode: newNodeData});
 					}}/>

@@ -1,8 +1,8 @@
-import {MapNode, MapNodeL2} from "../nodes/@MapNode";
+import {MapNode, MapNodeL2, MapNodeL3, Polarity} from "../nodes/@MapNode";
 import {Range} from "js-vextensions";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {MetaThesis_IfType} from "../nodes/@MetaThesisInfo";
-import {GetNodeForm, GetMainRatingType, GetNodeEnhanced} from "../nodes/$node";
+import {GetNodeForm, GetMainRatingType, GetNodeL2} from "../nodes/$node";
 import {GetNode} from "../nodes";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
@@ -11,10 +11,10 @@ import { PropNameToTitle } from "Frame/General/Others";
 
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 //export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
-export const ratingTypes = ["significance", "neutrality", "probability", "degree", "adjustment", "strength"];
-export type RatingType = "significance" | "neutrality" | "probability" | "degree" | "adjustment" | "strength";
+export const ratingTypes = ["significance", "neutrality", "probability", "degree", "impact", "strength"];
+export type RatingType = "significance" | "neutrality" | "probability" | "degree" | "impact" | "strength";
 
-export function GetRatingTypeInfo(ratingType: RatingType, node: MapNode, parent: MapNode, path: string) {
+export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, parent: MapNodeL3, path: string) {
 	let result = new RatingType_Info();
 	result.displayText = PropNameToTitle(ratingType);
 	result.labels = Range(0, 100);
@@ -31,19 +31,19 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNode, parent:
 	} else if (ratingType == "degree") {
 		result.description = "To what degree do you consider this statement true? (0: completely false, 50: true to a basic extent, 100: true to the highest extent)";
 	} else if (ratingType == "strength") {
-		result.description = "Argument strength is calculated based on the probabilities of its premises, and the probability/adjustment of its meta-thesis.";
-	} else if (ratingType == "adjustment") {
+		result.description = "Argument strength is calculated based on the ratings given to its premises and impact-premise.";
+	} else if (ratingType == "impact") {
 		Assert(parent, `Invalid state. Node with rating-type "adjustment" must have a "parent" argument passed alongside. @path:${path}`);
-		Assert(node.current.metaThesis, `Invalid state. Node with rating-type "adjustment" should have a metaThesis property attached. @path:${path}`);
+		Assert(node.current.impactPremise, `Invalid state. Node with rating-type "adjustment" should have a impactPremise property attached. @path:${path}`);
 
 		let grandParentID = SplitStringBySlash_Cached(path).length >= 3 ? SplitStringBySlash_Cached(path).XFromLast(2).ToInt() : null;
-		let grandParent = grandParentID ? GetNodeEnhanced(GetNode(grandParentID), SlicePath(path, 2)) : null;
+		let grandParent = grandParentID ? GetNodeL2(GetNode(grandParentID), SlicePath(path, 2)) : null;
 		let grandParentRatingType = grandParent ? GetMainRatingType(grandParent) : "probability";
 
 		let premiseCountrStrMap = {All: `all of the premises`, AnyTwo: `at least two of the premises`, Any: `at least one of the premises.`};
 		//let premiseCountrStrMap = {All: `all of its premises`, AnyTwo: `at least two of its premises`, Any: `at least one of its premises.`};
-		let premiseCountStr = premiseCountrStrMap[MetaThesis_IfType[node.current.metaThesis.ifType]];
-		let shiftType = parent.type == MapNodeType.SupportingArgument ? "raise" : "lower";
+		let premiseCountStr = premiseCountrStrMap[MetaThesis_IfType[node.current.impactPremise.ifType]];
+		let shiftType = parent.type == MapNodeType.Argument ? "raise" : "lower";
 
 		/*return (
 			<span>
@@ -59,23 +59,15 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNode, parent:
 			</span>
 		);*/
 
-		if (grandParentRatingType == "adjustment" && parent.type == MapNodeType.OpposingArgument) {
-			result.description = (
-				<span>
-					If {premiseCountStr} of this argument were true (to the highest extent), how much would it weaken/undo the adjustment factor of the parent thesis?
-				</span>
-			);
+		if (grandParentRatingType == "impact" && parent.type == MapNodeType.Argument) {
+			result.description = `If {premiseCountStr} of this argument were true (to the highest extent), how much would it weaken/undo the impact of the parent thesis?`;
 		} else {
-			result.description = (
-				<span>
-					If {premiseCountStr} of this argument were true (to the highest extent), to what level should it {shiftType} someone's {grandParentRatingType
-						} rating of the parent thesis? (assuming their initial evaluation were 50%)
-				</span>
-			);
-			let supporting = (parent["finalType"] || parent.type) == MapNodeType.SupportingArgument;
-			result.labels = supporting ? Range(50, 100) : Range(0, 50);
+			result.description = `If {premiseCountStr} of this argument were true (to the highest extent), ${""
+				}how much would it impact your ${grandParentRatingType} rating for the parent thesis? (0: not at all, 50: moderately, 100: game-changer)`;
+			let supporting = parent.link.polarity == Polarity.Supporting;
+			result.labels = Range(0, 100);
 			//result.values = supporting ? Range(0, 100, 2) : Range(100, 0, 2);
-			result.values = supporting ? Range(0, 100, 2) : Range(0, 100, 2).reverse();
+			result.values = Range(0, 100, 2);
 		}
 	} else {
 		Assert(false, `Invalid rating type: ${ratingType}`);

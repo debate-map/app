@@ -1,4 +1,5 @@
 import {GetValues, GetValues_ForSchema} from "../../../Frame/General/Enums";
+import {Polarity} from "./@MapNode";
 
 export class MetaThesisInfo {
 	ifType: MetaThesis_IfType;
@@ -24,20 +25,14 @@ export function GetMetaThesisIfTypeDisplayText(ifType: MetaThesis_IfType) {
 }
 
 export enum MetaThesis_ThenType {
-	StrengthenParent = 10,
-	GuaranteeParentTrue = 20,
-	WeakenParent = 30,
-	GuaranteeParentFalse = 40,
+	Impact = 10,
+	Guarantee = 20,
 }
 AddSchema({oneOf: GetValues_ForSchema(MetaThesis_ThenType)}, "MetaThesis_ThenType");
 
-export class MetaThesis_ThenType_Info {
-	static for = {
-		StrengthenParent: {displayText: "strengthen the parent"},
-		GuaranteeParentTrue: {displayText: "guarantee the parent true"},
-		WeakenParent: {displayText: "weaken the parent"},
-		GuaranteeParentFalse: {displayText: "guarantee the parent false"},
-	} as {[key: string]: MetaThesis_ThenType_Info};
-
-	displayText: string;
+export function GetMetaThesisThenTypeDisplayText(thenType: MetaThesis_ThenType, polarity: Polarity) {
+	if (thenType == MetaThesis_ThenType.Impact) {
+		return polarity == Polarity.Supporting ? "strengthen the parent" : "weaken the parent";
+	}
+	return polarity == Polarity.Supporting ? "guarantee the parent true" : "guarantee the parent false";
 }

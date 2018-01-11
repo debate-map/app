@@ -14,7 +14,7 @@ import {GetData, SlicePath} from "../../../../../Frame/Database/DatabaseHelpers"
 import {Debugger} from "../../../../../Frame/General/Globals_Free";
 import {RatingType, RatingType_Info, GetRatingTypeInfo} from "../../../../../Store/firebase/nodeRatings/@RatingType";
 import {Rating} from "../../../../../Store/firebase/nodeRatings/@RatingsRoot";
-import {MapNode, ThesisForm} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeL2, MapNodeL3} from "../../../../../Store/firebase/nodes/@MapNode";
 import {GetUserID} from "../../../../../Store/firebase/users";
 import {RootState} from "../../../../../Store/index";
 import {GetRatingUISmoothing, ACTRatingUISmoothnessSet} from "../../../../../Store/main/ratingUI";
@@ -22,7 +22,7 @@ import {GetNodeChildren, GetParentNode} from "../../../../../Store/firebase/node
 import {MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
 import {ShowSignInPopup} from "../../../NavBar/UserPanel";
-import {GetNodeForm, GetNodeEnhanced, IsContextReversed} from "../../../../../Store/firebase/nodes/$node";
+import {GetNodeForm, GetNodeL3} from "../../../../../Store/firebase/nodes/$node";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
@@ -35,7 +35,7 @@ import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	{rating: 100, count: 4},
 ];*/
 
-type RatingsPanel_Props = {node: MapNode, path: string, ratingType: RatingType, ratings: Rating[]}
+type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: RatingType, ratings: Rating[]}
 	& Partial<{userID: string, /*myRating: number,*/ form: ThesisForm, nodeChildren: MapNode[], smoothing: number}>;
 @Connect((state: RootState, {node, path, ratingType}: RatingsPanel_Props)=>({
 	userID: GetUserID(),
@@ -49,13 +49,11 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 		let firebase = store.firebase.helpers;
 		let {size} = this.state;
 
-		let parentNode = GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1));
-		if (node.current.metaThesis && parentNode == null) return <div/>; // if meta-thesis, but no parent-node connected, must still be loading
+		let parentNode = GetNodeL3(GetParentNode(path), SlicePath(path, 1));
+		if (node.current.impactPremise && parentNode == null) return <div/>; // if impact-premise, but no parent-node connected, must still be loading
 		
-		let nodeReversed = form == ThesisForm.Negation;
-		let contextReversed = IsContextReversed(node, parentNode);
-		let reverseRatings = ShouldRatingTypeBeReversed(ratingType, nodeReversed, contextReversed);
-		let nodeTypeDisplayName = GetMapNodeTypeDisplayName(node.current.type, node, form);
+		let reverseRatings = ShouldRatingTypeBeReversed(node);
+		let nodeTypeDisplayName = GetMapNodeTypeDisplayName(node.type, node, form, node.finalPolarity);
 
 		let ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
 		let {labels, values} = ratingTypeInfo;
@@ -141,7 +139,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
 					<Pre style={{marginRight: "auto", fontSize: 12, color: "rgba(255,255,255,.5)"}}>
 						{ratingType == "strength"
-							? `Cannot rate this directly. Instead, rate the premises and meta-thesis.` //+ (myRating != null ? ` (yours: ${myRating})` : "")
+							? `Cannot rate this directly. Instead, rate the premises and impact-premise.` //+ (myRating != null ? ` (yours: ${myRating})` : "")
 							: `Click to rate. Right-click to remove rating.` /*+ (myRating != null ? ` (yours: ${myRating})` : "")*/}
 					</Pre>
 					{/*Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>*/}

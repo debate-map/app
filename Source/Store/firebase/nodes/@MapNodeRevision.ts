@@ -6,11 +6,14 @@ import {ContentNode} from "../contentNodes/@ContentNode";
 import {GetValues_ForSchema} from "../../../Frame/General/Enums";
 
 export class MapNodeRevision {
-	constructor(initialData: {type: MapNodeType} & Partial<MapNodeRevision>) {
+	constructor(initialData: Partial<MapNodeRevision>) {
 		this.Extend(initialData);
 	}
 
-	type?: MapNodeType;
+	node: number;
+	creator?: string;
+	createdAt: number;
+
 	titles: {[key: string]: string};
 	note: string;
 
@@ -26,14 +29,17 @@ export class MapNodeRevision {
 	widthOverride: number;
 
 	// components (for theses)
-	metaThesis: MetaThesisInfo;
+	impactPremise: MetaThesisInfo;
 	equation: Equation;
 	contentNode: ContentNode;
 	image: ImageAttachment;
 }
 AddSchema({
 	properties: {
-		type: {oneOf: GetValues_ForSchema(MapNodeType)},
+		node: {type: "number"},
+		creator: {type: "string"},
+		createdAt: {type: "number"},
+		
 		titles: {
 			properties: {
 				base: {type: "string"}, negation: {type: "string"}, yesNoQuestion: {type: "string"},
@@ -50,16 +56,16 @@ AddSchema({
 		fontSizeOverride: {type: ["null", "number"]},
 		widthOverride: {type: ["null", "number"]},
 
-		metaThesis: {$ref: "MetaThesisInfo"},
+		impactPremise: {$ref: "MetaThesisInfo"},
 		equation: {$ref: "Equation"},
 		contentNode: {$ref: "ContentNode"},
 		image: {$ref: "ImageAttachment"},
 	},
-	required: ["type"],
+	required: ["node", "creator", "createdAt"],
 	allOf: [
-		// if not a meta-thesis or contentNode, require "titles" prop
+		// if not a impact-premise or contentNode, require "titles" prop
 		{
-			if: {prohibited: ["metaThesis", "equation", "contentNode", "image"]},
+			if: {prohibited: ["impactPremise", "equation", "contentNode", "image"]},
 			then: {required: ["titles"]},
 		},
 	],

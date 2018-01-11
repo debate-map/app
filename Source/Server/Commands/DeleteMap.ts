@@ -6,11 +6,12 @@ import {MapNode, ThesisForm} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {Term} from "../../Store/firebase/terms/@Term";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {IsArgumentNode} from "../../Store/firebase/nodes/$node";
 import {Map} from "../../Store/firebase/maps/@Map";
 import DeleteNode from "Server/Commands/DeleteNode";
 import {UserEdit} from "Server/CommandMacros";
 import {UserMapInfo, UserMapInfoSet} from "../../Store/firebase/userMapInfo/@UserMapInfo";
+import {GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
+import {GetMap} from "Store/firebase/maps";
 
 @UserEdit
 export default class DeleteMap extends Command<{mapID: number}> {
@@ -19,7 +20,7 @@ export default class DeleteMap extends Command<{mapID: number}> {
 	sub_deleteNode: DeleteNode;
 	async Prepare() {
 		let {mapID} = this.payload;
-		this.oldData = await GetDataAsync({addHelpers: false}, "maps", mapID) as Map;
+		this.oldData = await GetAsync_Raw(()=>GetMap(mapID));
 		this.userMapInfoSets = (await GetDataAsync("userMapInfo") as {[key: string]: UserMapInfoSet}) || {};
 
 		this.sub_deleteNode = new DeleteNode({mapID, nodeID: this.oldData.rootNode, asPartOfMapDelete: true});

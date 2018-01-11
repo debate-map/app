@@ -9,6 +9,7 @@ import AddNode from "./AddNode";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {UserEdit} from "Server/CommandMacros";
 import AddChildNode from "./AddChildNode";
+import {MapNodeRevision} from "../../Store/firebase/nodes/@MapNodeRevision";
 
 @UserEdit
 export default class AddMap extends Command<{map: Map}> {
@@ -22,8 +23,9 @@ export default class AddMap extends Command<{map: Map}> {
 		map.createdAt = Date.now();
 		map.editedAt = map.createdAt;
 
-		let newRootNode = new MapNode({type: MapNodeType.Category, creator: map.creator, titles: {base: "Root"}, votingDisabled: true})
-		this.sub_addNode = new AddChildNode({mapID: this.mapID, node: newRootNode, asMapRoot: true});
+		let newRootNode = new MapNode({type: MapNodeType.Category, creator: map.creator});
+		let newRootNodeRevision = new MapNodeRevision({titles: {base: "Root"}, votingDisabled: true});
+		this.sub_addNode = new AddChildNode({mapID: this.mapID, node: newRootNode, revision: newRootNodeRevision, asMapRoot: true});
 		this.sub_addNode.Validate_Early();
 		await this.sub_addNode.Prepare();
 

@@ -5,7 +5,7 @@ import {E} from "../../../../Frame/General/Globals_Free";
 import {connect} from "react-redux";
 import {CachedTransform} from "js-vextensions";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {MapNode, ThesisForm, MapNodeL2} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeL2, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -13,24 +13,23 @@ import {RatingType_Info, RatingType, GetRatingTypeInfo} from "../../../../Store/
 import {GetRatingAverage, GetRatings, TransformRatingForContext, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {MetaThesis_ThenType} from "../../../../Store/firebase/nodes/@MetaThesisInfo";
-import {GetRatingTypesForNode, GetNodeForm, IsContextReversed, GetNodeEnhanced, GetMainRatingType} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeForm, GetMainRatingType, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
 import {RootState} from "../../../../Store/index";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {GetParentNode} from "../../../../Store/firebase/nodes";
-import {ReverseThenType} from "../../../../Store/firebase/nodes/$node/$metaThesis";
+import {GetParentNode, GetParentNodeL3} from "../../../../Store/firebase/nodes";
 import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import {GetNode} from "Store/firebase/nodes";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 
 type Props = {
-	map: Map, path: string, node: MapNodeL2, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
+	map: Map, path: string, node: MapNodeL3, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
 	panelPosition?: "left" | "below", local_openPanel?: string,
 	backgroundColor: string, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
-} & Partial<{form: ThesisForm, parentNode: MapNodeL2}>;
+} & Partial<{form: ThesisForm, parentNode: MapNodeL3}>;
 @Connect((state: RootState, {node, path}: Props)=>({
 	form: GetNodeForm(node, path),
-	parentNode: GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1)),
+	parentNode: GetParentNodeL3(path),
 }))
 export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 	static defaultProps = {panelPosition: "left"};
@@ -42,16 +41,13 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 			form, parentNode, children,
 		} = this.props;
 		let openPanel = local_openPanel || nodeView.openPanel;
-		if (node.current.metaThesis && parentNode == null) return <div/>; // if meta-thesis, but no parent-node connected, must still be loading
+		if (node.current.impactPremise && parentNode == null) return <div/>; // if impact-premise, but no parent-node connected, must still be loading
 
 		let nodeReversed = form == ThesisForm.Negation;
-		let contextReversed = IsContextReversed(node, parentNode);
-		if (node.current.metaThesis) {
-			var thenType_final = node.current.metaThesis.thenType;
-			if (contextReversed)
-				thenType_final = ReverseThenType(thenType_final);
+		if (node.current.impactPremise) {
+			var thenType = node.current.impactPremise.thenType;
 		}
-		let nodeTypeInfo = MapNodeType_Info.for[node.current.type];
+		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		return (
 			<div style={E(
@@ -71,14 +67,14 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 						let ratings = GetRatings(node._id, ratingInfo.type);
 						let average = GetRatingAverage(node._id, ratingInfo.type, null, -1);
 						if (average != -1) {
-							average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(ratingInfo.type, nodeReversed, contextReversed));
-							if (node.current.metaThesis && (thenType_final == MetaThesis_ThenType.StrengthenParent || thenType_final == MetaThesis_ThenType.WeakenParent)) {
+							average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(node));
+							if (node.current.impactPremise && thenType == MetaThesis_ThenType.Impact) {
 								let grandParentID = SplitStringBySlash_Cached(path).length >= 3 ? SplitStringBySlash_Cached(path).XFromLast(2).ToInt() : null;
-								let grandParent = grandParentID ? GetNodeEnhanced(GetNode(grandParentID), SlicePath(path, 2)) : null;
+								let grandParent = grandParentID ? GetNodeL3(GetNode(grandParentID), SlicePath(path, 2)) : null;
 								let grandParentRatingType = grandParent ? GetMainRatingType(grandParent) : "probability";
-								let specialCase = grandParentRatingType == "adjustment" && parentNode.type == MapNodeType.OpposingArgument;
+								let specialCase = grandParentRatingType == "impact" && parentNode.type == MapNodeType.Argument;
 
-								let signStr = thenType_final == MetaThesis_ThenType.StrengthenParent ? "+" : "-";
+								let signStr = node.finalPolarity == Polarity.Supporting ? "+" : "-";
 								percentStr = signStr + (specialCase ? average : (average / 2)) + "%";
 							}
 							/*else if (ratingInfo.type == "support")

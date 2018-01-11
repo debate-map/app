@@ -25,15 +25,15 @@ import {Vector2i} from "js-vextensions";
 import {CachedTransform, CombineDynamicPropMaps, GetContentHeight, GetContentWidth} from "js-vextensions";
 import {RootState} from "../../../../Store/index";
 import {GetNodeView} from "../../../../Store/main/mapViews";
-import {MapNode, ThesisForm, MapNodeL2, AccessLevel} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, ThesisForm, MapNodeL2, AccessLevel, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {GetNodeChildren, GetParentNode, GetNodeChildrenEnhanced, IsRootNode} from "../../../../Store/firebase/nodes";
+import {GetNodeChildren, GetParentNode, IsRootNode, GetNodeChildrenL3, GetParentNodeL2} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import {Column} from "react-vcomponents";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetFinalNodeTypeAtPath, GetMainRatingType, GetNodeEnhanced, GetSortByRatingType, IsArgumentNode, IsReversedArgumentNode} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType} from "../../../../Store/firebase/nodes/$node";
 import FastDOM from "fastdom";
 import {Row} from "react-vcomponents";
 import Icon from "../../../../Frame/ReactComponents/Icon";
@@ -51,13 +51,13 @@ import { GetPlayingTimelineAppliedStepRevealNodes } from "Store/main/maps/$map";
 import {GetPlayingTimeline, GetPlayingTimelineRevealNodes, GetPlayingTimelineStepIndex, GetPlayingTimelineCurrentStepRevealNodes} from "../../../../Store/main/maps/$map";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
 
-type Props = {map: Map, node: MapNodeL2, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
+type Props = {map: Map, node: MapNodeL3, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
 	& Partial<{
 		initialChildLimit: number, form: ThesisForm, nodeView: MapNodeView,
-		nodeChildren: MapNodeL2[],
+		nodeChildren: MapNodeL3[],
 		//nodeChildren_fillPercents: number[],
 		nodeChildren_sortValues: number[],
-		subnodes: MapNodeL2[],
+		subnodes: MapNodeL3[],
 		userViewedNodes: ViewedNodeSet,
 		playingTimeline: Timeline,
 		playingTimeline_currentStepIndex: number,
@@ -76,14 +76,14 @@ type State = {
 	//Log("Calling NodeUI connect func.");
 	let nodeView = GetNodeView(map._id, path) || new MapNodeView();
 
-	let nodeChildren = GetNodeChildrenEnhanced(node, path, true);
+	let nodeChildren = GetNodeChildrenL3(node, path, true);
 	nodeChildren = nodeChildren.Any(a=>a == null) ? emptyArray_forLoading : nodeChildren; // only pass nodeChildren when all are loaded
 	/*let nodeChildren_finalTypes = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
 		return GetFinalNodeTypeAtPath(child, path + "/" + child._id);
 	});*/
 
 	let nodeChildren_sortValues = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
-		if (child.current.metaThesis) return Number.MAX_SAFE_INTEGER; // always place the meta-thesis first
+		if (child.current.impactPremise) return Number.MAX_SAFE_INTEGER; // always place the impact-premise first
 		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetSortByRatingType(child)), GetNodeForm(child) == ThesisForm.Negation);
 	});
 	let nodeChildren_fillPercents = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
@@ -98,8 +98,8 @@ type State = {
 
 		initialChildLimit: State(a=>a.main.initialChildLimit),
 		//node_finalType: GetFinalNodeTypeAtPath(node, path),
-		//nodeEnhanced: GetNodeEnhanced(node, path),
-		form: GetNodeForm(node, GetParentNode(path)),
+		//nodeEnhanced: GetNodeL3(node, path),
+		form: GetNodeForm(node, GetParentNodeL2(path)),
 		// only pass new nodeView when its local-props are different
 		nodeView: CachedTransform("nodeView_transform1", [map._id, path], nodeView.Excluding("focused", "viewOffset", "children"), ()=>nodeView),
 		/*nodeChildren: CachedTransform("nodeChildren_transform1", {path}, CombineDynamicPropMaps(nodeChildren, nodeChildren_finalTypes),
@@ -150,19 +150,19 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		NodeUI.renderCount++;
 		NodeUI.lastRenderTime = Date.now();
 
-		let separateChildren = node.finalType == MapNodeType.Thesis;
-		type ChildPack = {origIndex: number, node: MapNodeL2};
+		let separateChildren = node.type == MapNodeType.Thesis;
+		type ChildPack = {origIndex: number, node: MapNodeL3};
 		let childPacks: ChildPack[] = nodeChildren.map((child, index)=>({origIndex: index, node: child}));
 		if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
 			childPacks = childPacks.filter(pack=>playingTimelineVisibleNodes.Contains(path + "/" + pack.node._id));
 		}
-		let upChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalType == MapNodeType.SupportingArgument) : [];
-		let downChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalType == MapNodeType.OpposingArgument) : [];
+		let upChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalPolarity == Polarity.Supporting) : [];
+		let downChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalPolarity == Polarity.Opposing) : [];
 
 		let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 		let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 		// if the map's root node, or an argument node, show all children
-		let showAll = node._id == map.rootNode || IsArgumentNode(node);
+		let showAll = node._id == map.rootNode || node.type == MapNodeType.Argument;
 		if (showAll) [childLimit_up, childLimit_down] = [100, 100];
 
 		// apply sorting
@@ -172,8 +172,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		} else {
 			childPacks = childPacks.OrderByDescending(pack=>nodeChildren_sortValues[pack.origIndex]);
 			//if (IsArgumentNode(node)) {
-			let metaThesisNode = nodeChildren.FirstOrX(a=>a.current.metaThesis != null);
-			let isArgument_any = metaThesisNode && metaThesisNode.current.metaThesis.ifType == MetaThesis_IfType.Any;
+			let impactPremiseNode = nodeChildren.FirstOrX(a=>a.current.impactPremise != null);
+			let isArgument_any = impactPremiseNode && impactPremiseNode.current.impactPremise.ifType == MetaThesis_IfType.Any;
 			if (node.childrenOrder && !isArgument_any) {
 				childPacks = childPacks.OrderBy(pack=>node.childrenOrder.indexOf(pack.node._id).IfN1Then(Number.MAX_SAFE_INTEGER));
 			}
@@ -185,8 +185,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		if (!expanded) innerBoxOffset = 0;
 
 		let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
-		let limitBar_above = node.current.type == MapNodeType.SupportingArgument;
-		if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
+		let limitBar_above = node.finalPolarity == Polarity.Supporting;
+		//if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
 		/*let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
 		let showBelowMessage = nodeChildren.length > 0 && nodeChildren.length < minChildCount;*/
 		
@@ -460,8 +460,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			mainBoxOffset = mainBoxOffset.Plus(new Vector2i(-30, innerBox.outerHeight() / 2));
 
 			let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
-			let limitBar_above = node.current.type == MapNodeType.SupportingArgument;
-			if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
+			let limitBar_above = node.finalPolarity == Polarity.Supporting;
+			//if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
 			if (showLimitBar && limitBar_above) mainBoxOffset.y += ChildLimitBar.HEIGHT;
 
 			let oldChildBoxOffsets = this.childBoxes.Props().Where(pair=>pair.value != null).ToMap(pair=>pair.name, pair=> {
@@ -528,7 +528,7 @@ class ChildLimitBar extends BaseComponent
 }
 
 function GetMeasurementInfoForNode(node: MapNodeL2, path: string) {
-	let nodeTypeInfo = MapNodeType_Info.for[node.current.type];
+	let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 	let displayText = GetNodeDisplayText(node, path);
 	let fontSize = GetFontSizeForNode(node);

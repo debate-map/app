@@ -17,7 +17,7 @@ import keycode from "keycode";
 import NodeUI_Menu from "./NodeUI_Menu";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {ImageAttachment, MapNode, MapNodeL2, ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
+import {ImageAttachment, MapNode, MapNodeL2, ThesisForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeRatingsRoot, GetRatings, GetFillPercentForRatingAverage, GetRatingAverage, GetRatingValue, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {GetUserID} from "../../../../Store/firebase/users";
 import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -37,7 +37,7 @@ import RatingsPanel from "./NodeUI/RatingsPanel";
 import DiscussionPanel from "./NodeUI/DiscussionPanel";
 import {Row} from "react-vcomponents";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
-import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetNodeForm, GetFinalNodeTypeAtPath, IsContextReversed, GetNodeEnhanced} from "../../../../Store/firebase/nodes/$node";
+import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetNodeForm, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
 import {ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {VURL} from "js-vextensions";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
@@ -61,7 +61,7 @@ import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactM
 //export type NodeHoverExtras = {panel?: string, term?: number};
 
 type Props = {
-	map: Map, node: MapNodeL2, nodeView: MapNodeView, path: string, width: number, widthOverride?: number,
+	map: Map, node: MapNodeL3, nodeView: MapNodeView, path: string, width: number, widthOverride?: number,
 	panelPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 } & Partial<{finalNodeType: MapNodeType, form: ThesisForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
 //@FirebaseConnect((props: Props)=>((props[`holder`] = props[`holder`] || {}), [
@@ -69,7 +69,6 @@ type Props = {
 	...GetPaths_NodeRatingsRoot(props.node._id),
 ])*/
 @Connect((state: RootState, {node, path, ratingsRoot}: Props)=> ({
-	finalNodeType: GetFinalNodeTypeAtPath(node, path),
 	form: GetNodeForm(node, path),
 	ratingsRoot: GetNodeRatingsRoot(node._id),
 	mainRating_average: GetRatingAverage(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type),
@@ -87,10 +86,9 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let isSubnode = IsNodeSubnode(node);
 		let mainRatingType = GetRatingTypesForNode(node).FirstOrX(null, {}).type;
 
-		let parentNode = GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1));
+		let parentNode = GetNodeL3(GetParentNode(path), SlicePath(path, 1));
 		let nodeReversed = form == ThesisForm.Negation;
-		let contextReversed = IsContextReversed(node, parentNode);
-		let ratingReversed = ShouldRatingTypeBeReversed(mainRatingType, nodeReversed, contextReversed);
+		let ratingReversed = ShouldRatingTypeBeReversed(node);
 
 		let mainRating_mine = GetRatingValue(node._id, mainRatingType, userID);
 		let mainRating_fillPercent = GetFillPercentForRatingAverage(node, mainRating_average, ratingReversed);
@@ -98,7 +96,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered; //|| local_selected;
 		let panelToShow = hoverPanel || local_openPanel || (nodeView && nodeView.openPanel);
-		let subPanelShow = node.current.type == MapNodeType.Thesis && (node.current.contentNode || node.current.image);
+		let subPanelShow = node.type == MapNodeType.Thesis && (node.current.contentNode || node.current.image);
 		let bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView && nodeView.expanded;
 
@@ -236,7 +234,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 					<Pre>{equationNumber}) </Pre>}
 				<span style={E(
 					{position: "relative", fontSize: GetFontSizeForNode(node, isSubnode), whiteSpace: "initial"},
-					(node.current.metaThesis || isSubnode) && {margin: "4px 0 1px 0"},
+					(node.current.impactPremise || isSubnode) && {margin: "4px 0 1px 0"},
 				)}>
 					{latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
 					{!latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
@@ -256,7 +254,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 					}}>
 						{node.current.note}
 					</Div>}
-				{node.current.type == MapNodeType.Thesis && node.current.contentNode &&
+				{node.type == MapNodeType.Thesis && node.current.contentNode &&
 					<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
 			</Div>
 		);

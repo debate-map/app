@@ -1,6 +1,6 @@
 import DeleteNode from "../../../../Server/Commands/DeleteNode";
 import {GetDataAsync, RemoveHelpers, SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
-import {MapNode, MapNodeL2} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, MapNodeL2, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {VMenuStub} from "react-vmenu";
 import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -22,15 +22,15 @@ import {ACTNodeCopy} from "../../../../Store/main";
 import {Select} from "react-vcomponents";
 import {GetEntries, GetValues} from "../../../../Frame/General/Enums";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
-import {ForDelete_GetError, ForUnlink_GetError, GetNode, GetNodeChildrenAsync, GetNodeParentsAsync, GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode} from "../../../../Store/firebase/nodes";
+import {ForDelete_GetError, ForUnlink_GetError, GetNode, GetNodeChildrenAsync, GetNodeParentsAsync, GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetParentNodeL3} from "../../../../Store/firebase/nodes";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
-import {ThesisForm} from "../../../../Store/firebase/nodes/@MapNode";
+import {ThesisForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import { GetNodeChildren, ForCut_GetError, ForCopy_GetError } from "../../../../Store/firebase/nodes";
 import {E} from "../../../../Frame/General/Globals_Free";
-import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, ReverseMapNodeType, IsReversedArgumentNode, GetNodeEnhanced, IsArgumentNode} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import LinkNode from "Server/Commands/LinkNode";
 import UnlinkNode from "Server/Commands/UnlinkNode";
@@ -38,15 +38,16 @@ import CloneNode from "Server/Commands/CloneNode";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import { ShowAddSubnodeDialog } from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSubnodeDialog";
 import { GetPathNodes, GetPathNodeIDs } from "../../../../Store/main/mapViews";
+import {GetNodeL2} from "Store/firebase/nodes/$node";
 
-type Props = {map: Map, node: MapNodeL2, path: string, inList?: boolean}
-	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeL2, copiedNode: MapNode, copiedNode_asCut: boolean}>;
+type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean}
+	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeL2, copiedNode: MapNodeL2, copiedNode_asCut: boolean}>;
 @Connect((_: RootState, {map, node, path}: Props)=> ({
 	_: (ForUnlink_GetError(GetUserID(), map, node), ForDelete_GetError(GetUserID(), map, node)),
 	//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
 	permissions: GetUserPermissionGroups(GetUserID()),
-	parentNode: GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1)),
-	copiedNode: State(a=>a.main.copiedNodePath) ? GetNode(SplitStringBySlash_Cached(State(a=>a.main.copiedNodePath)).Last().ToInt()) : null,
+	parentNode: GetParentNodeL3(path),
+	copiedNode: State(a=>a.main.copiedNodePath) ? GetNodeL2(SplitStringBySlash_Cached(State(a=>a.main.copiedNodePath)).Last().ToInt()) : null,
 	copiedNode_asCut: State(a=>a.main.copiedNodePath_asCut),
 }))
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {
@@ -54,10 +55,10 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 		let {map, node, path, inList, permissions, parentNode, copiedNode, copiedNode_asCut} = this.props;
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
-		//let validChildTypes = MapNodeType_Info.for[node.current.type].childTypes;
+		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
 		let validChildTypes = GetValidNewChildTypes(node, path, permissions);
 		let form = GetNodeForm(node, path);
-		let formForChildren = node.current.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base;
+		let formForChildren = node.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base;
 
 		let nodeText = GetNodeDisplayText(node, path);
 
@@ -66,18 +67,18 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 				{IsUserBasicOrAnon(userID) && !inList && validChildTypes.map(childType=> {
 					let childTypeInfo = MapNodeType_Info.for[childType];
 					//let displayName = GetMapNodeTypeDisplayName(childType, node, form);
-					let displayName = GetMapNodeTypeDisplayName(childType, node, ThesisForm.Base);
-					return (
-						<VMenuItem key={childType} text={`Add ${displayName}`} style={styles.vMenuItem} onClick={e=> {
-							if (e.button != 0) return;
-							if (userID == null) return ShowSignInPopup();
-							
-							let childType_real = childType;
-							if (GetNodeForm(node) == ThesisForm.Negation)
-								childType_real = ReverseMapNodeType(childType_real);
-							ShowAddChildDialog(node, form, childType_real, userID, map._id, path);
-						}}/>
-					);
+					let polarities = childType == MapNodeType.Argument ? [Polarity.Supporting, Polarity.Opposing] : [null];
+					return polarities.map(polarity=> {
+						let displayName = GetMapNodeTypeDisplayName(childType, node, ThesisForm.Base, polarity);
+						return (
+							<VMenuItem key={childType + "_" + polarity} text={`Add ${displayName}`} style={styles.vMenuItem} onClick={e=> {
+								if (e.button != 0) return;
+								if (userID == null) return ShowSignInPopup();
+								
+								ShowAddChildDialog(node, form, childType, polarity, userID, map._id, path);
+							}}/>
+						);
+					});
 				})}
 				{IsUserBasicOrAnon(userID) && !inList && path.includes("/") && !path.includes("L") &&
 					<VMenuItem text="Add subnode (in layer)" style={styles.vMenuItem}
@@ -86,7 +87,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							if (userID == null) return ShowSignInPopup();
 							ShowAddSubnodeDialog(map._id, node, path);
 						}}/>}
-				{IsUserBasicOrAnon(userID) && node.current.metaThesis == null && !inList &&
+				{IsUserBasicOrAnon(userID) && node.current.impactPremise == null && !inList &&
 					<VMenuItem text={copiedNode ? <span>Cut <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Cut`}
 						enabled={ForCut_GetError(userID, map, node) == null} title={ForCut_GetError(userID, map, node)}
 						style={styles.vMenuItem}
@@ -98,7 +99,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 								store.dispatch(new ACTNodeCopy({path: null, asCut: true}));
 							}
 						}}/>}
-				{IsUserBasicOrAnon(userID) && node.current.metaThesis == null &&
+				{IsUserBasicOrAnon(userID) && node.current.impactPremise == null &&
 					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Copy`} style={styles.vMenuItem}
 						enabled={ForCopy_GetError(userID, map, node) == null} title={ForCopy_GetError(userID, map, node)}
 						onClick={e=> {
@@ -115,11 +116,11 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							if (e.button != 0) return;
 							if (userID == null) return ShowSignInPopup();
 
-							if (IsArgumentNode(copiedNode) && !copiedNode_asCut) {
+							if (copiedNode.type == MapNodeType.Argument && !copiedNode_asCut) {
 								return void ShowMessageBox({title: `Argument at two locations?`, cancelButton: true, onOK: proceed, message:
 `Are you sure you want to paste this argument as a linked child?
 
-Only do this if you're sure that the meta-thesis applies exactly the same to both the old parent and the new parent.${""
+Only do this if you're sure that the impact-premise applies exactly the same to both the old parent and the new parent.${""
 	} (usually it does not, ie. usually it's specific to its original parent thesis)
 
 If not, paste the argument as a clone instead.`
@@ -187,15 +188,15 @@ If not, paste the argument as a clone instead.`
 								return void ShowMessageBox({title: `Cannot delete`, message: `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`});
 							}*/
 							//let s_ifParents = parentNodes.length > 1 ? "s" : "";
-							let metaThesisID = node.current.type == MapNodeType.SupportingArgument || node.current.type == MapNodeType.OpposingArgument ? node.children.VKeys()[0] : null;
+							let impactPremiseID = node.type == MapNodeType.Argument ? node.children.VKeys()[0] : null;
 							let contextStr = IsNodeSubnode(node) ? ", and its placement in-layer" : ", and its link with 1 parent";
 
 							ShowMessageBox({
 								title: `Delete "${nodeText}"`, cancelButton: true,
 								/*message: `Delete the node "${nodeText}"`
-									+ `${metaThesisID ? ", its 1 meta-thesis" : ""}`
+									+ `${impactPremiseID ? ", its 1 impact-premise" : ""}`
 									+ `, and its link${s_ifParents} with ${parentNodes.length} parent${s_ifParents}?`,*/
-								message: `Delete the node "${nodeText}"${metaThesisID ? `, its 1 meta-thesis` : ``}${contextStr}?`,
+								message: `Delete the node "${nodeText}"${impactPremiseID ? `, its 1 impact-premise` : ``}${contextStr}?`,
 								onOK: ()=> {
 									new DeleteNode({mapID: map._id, nodeID: node._id}).Run();
 								}

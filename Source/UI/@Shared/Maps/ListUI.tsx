@@ -1,13 +1,13 @@
 import {BaseComponent, GetInnerComp} from "react-vextensions";
 import {styles} from "../../../Frame/UI/GlobalStyles";
-import {MapNode, MapNodeL2, globalMapID} from "../../../Store/firebase/nodes/@MapNode";
+import {MapNode, MapNodeL2, globalMapID, MapNodeL3, Polarity} from "../../../Store/firebase/nodes/@MapNode";
 import {Row, Div, Pre} from "react-vcomponents";
 import NodeUI from "../../@Shared/Maps/MapNode/NodeUI";
 import {Map} from "../../../Store/firebase/maps/@Map";
 import { Connect } from "../../../Frame/Database/FirebaseConnect";
 import { GetMap } from "Store/firebase/maps";
-import { GetNodes } from "Store/firebase/nodes";
-import {GetNodeEnhanced, GetFinalNodeTypeAtPath, GetNodeDisplayText, GetRatingTypesForNode} from "../../../Store/firebase/nodes/$node";
+import { GetNodesL2 } from "Store/firebase/nodes";
+import {GetNodeDisplayText, GetRatingTypesForNode, GetNodeL3, GetFinalPolarityAtPath, AsNodeL3} from "../../../Store/firebase/nodes/$node";
 import {Column} from "react-vcomponents";
 import {ScrollView} from "react-vscrollview";
 import NodeUI_Menu from "../../@Shared/Maps/MapNode/NodeUI_Menu";
@@ -45,7 +45,7 @@ let entriesPerPage = 23;
 type Props = {
 	map: Map,
 } & Partial<{
-	nodes: MapNode[],
+	nodes: MapNodeL2[],
 	sortBy: SortType,
 	filter: string,
 	page: number,
@@ -57,11 +57,11 @@ type Props = {
 	return {
 		// need to filter results, since other requests may have added extra data
 		//nodes: GetNodes({limitToFirst: entriesPerPage * (page + 1)}).Skip(page * entriesPerPage).Take(entriesPerPage),
-		nodes: GetNodes(),
+		nodes: GetNodesL2(),
 		sortBy: State("main", "maps", map._id, "list_sortBy"),
 		filter: State("main", "maps", map._id, "list_filter"),
 		page,
-		selectedNode: selectedNode ? GetNodeEnhanced(selectedNode, selectedNode._id+"") : null,
+		selectedNode: selectedNode ? GetNodeL3(selectedNode, selectedNode._id+"") : null,
 	};
 })
 export default class ListUI extends BaseComponent<Props, {panelToShow?: string}> {
@@ -169,7 +169,7 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 	}
 }
 
-type NodeRow_Props = {map: Map, node: MapNode, first: boolean} & Partial<{creator: User, selected: boolean}>;
+type NodeRow_Props = {map: Map, node: MapNodeL2, first: boolean} & Partial<{creator: User, selected: boolean}>;
 @Connect((state, {map, node}: NodeRow_Props)=> ({
 	creator: GetUser(node.creator),
 	selected: GetSelectedNode_InList(map._id) == node,
@@ -179,8 +179,8 @@ class NodeRow extends BaseComponent<NodeRow_Props, {menuOpened: boolean}> {
 		let {map, node, first, creator, selected} = this.props;
 		let {menuOpened} = this.state;
 
-		let nodeEnhanced = {...node, finalType: node.current.type} as MapNodeL2;
-		let nodeTypeInfo = MapNodeType_Info.for[node.current.type];
+		let nodeEnhanced = {...node, finalPolarity: Polarity.Supporting} as MapNodeL3;
+		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		let backgroundColor = chroma(`rgba(${nodeTypeInfo.backgroundColor},.8)`).desaturate(.5);
 
@@ -208,7 +208,7 @@ class NodeRow extends BaseComponent<NodeRow_Props, {menuOpened: boolean}> {
 }
 
 /*@Connect((state, {map, node}: NodeRow_Props)=> ({
-	nodeEnhanced: GetNodeEnhanced(node._id),
+	nodeEnhanced: GetNodeL3(node._id),
 }))
 class NodeUI_Menu_Helper extends BaseComponent<{map: Map, node: MapNode, nodeEnhanced: MapNodeL2}, {}> {
 	render() {
@@ -219,22 +219,21 @@ class NodeUI_Menu_Helper extends BaseComponent<{map: Map, node: MapNode, nodeEnh
 	}
 }*/
 
-type NodeColumn_Props = {map: Map, node: MapNodeL2} & Partial<{finalNodeType: MapNodeType, ratingsRoot: RatingsRoot, openPanel: string}>;
+type NodeColumn_Props = {map: Map, node: MapNodeL2} & Partial<{ratingsRoot: RatingsRoot, openPanel: string}>;
 @Connect((state, {map, node}: NodeColumn_Props)=> ({
-	finalNodeType: GetFinalNodeTypeAtPath(node, node._id+""),
 	ratingsRoot: GetNodeRatingsRoot(node._id),
 	openPanel: GetMap_List_SelectedNode_OpenPanel(map._id),
 }))
 class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPanel: string}> {
 	render() {
-		let {map, node, finalNodeType, ratingsRoot, openPanel} = this.props;
+		let {map, node, ratingsRoot, openPanel} = this.props;
 		let {width, hoverPanel} = this.state;
 
 		let path = node._id+"";
-		if (node.current.metaThesis) { // if meta-thesis, we only have one parent, so might as well fetch it, for accurate polarity and such
+		if (node.current.impactPremise) { // if impact-premise, we only have one parent, so might as well fetch it, for accurate polarity and such
 			path = node.parents.VKeys(true)[0] + "/" + node._id;
 		}
-		let nodeTypeInfo = MapNodeType_Info.for[finalNodeType];
+		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let nodeView = new MapNodeView();
 		nodeView.openPanel = openPanel;
 
@@ -244,6 +243,8 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 			let mainRatingType = GetRatingTypesForNode(node).find(a=>a.main);
 			panelToShow = mainRatingType ? mainRatingType.type : null;
 		}
+
+		let nodeAsL3 = AsNodeL3(node, Polarity.Supporting, null);
 
 		return (
 			<Row className="clickThrough"
@@ -256,7 +257,7 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 				}} onResize={()=> {
 					if (this.refs.ratingsPanel) GetInnerComp(this.refs.ratingsPanel).Update();
 				}}/>*/}
-				<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot}}
+				<MapNodeUI_LeftBox {...{map, path, node: nodeAsL3, nodeView, ratingsRoot}}
 					onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
 					onPanelButtonClick={panel=>store.dispatch(new ACTMap_List_SelectedNode_OpenPanelSet({mapID: map._id, panel}))}
 					backgroundColor={nodeTypeInfo.backgroundColor} asHover={false} inList={true} style={{marginTop: 25}}/>
@@ -267,7 +268,7 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 								<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${nodeTypeInfo.backgroundColor},.7)`}}/>
 								{ratingTypes.Contains(panelToShow) && (()=> {
 									let ratings = GetRatings(node._id, panelToShow as RatingType);
-									return <RatingsPanel ref="ratingsPanel" node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
+									return <RatingsPanel ref="ratingsPanel" node={nodeAsL3} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 								})()}
 								{panelToShow == "definitions" &&
 									<DefinitionsPanel {...{node, path, hoverTermID: null}} openTermID={null}
@@ -275,7 +276,7 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 								{panelToShow == "discussion" && <DiscussionPanel/>}
 								{panelToShow == "social" && <SocialPanel/>}
 								{panelToShow == "tags" && <TagsPanel/>}
-								{panelToShow == "details" && <DetailsPanel node={node} path={path}/>}
+								{panelToShow == "details" && <DetailsPanel node={nodeAsL3} path={path}/>}
 								{panelToShow == "others" && <OthersPanel node={node} path={path}/>}
 							</div>}
 					</Column>

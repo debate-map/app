@@ -10,7 +10,6 @@ import MapDetailsUI from "../MapDetailsUI";
 import {DropDown} from "react-vcomponents";
 import {Column} from "react-vcomponents";
 import UpdateMapDetails from "../../../../Server/Commands/UpdateMapDetails";
-import {GetNodeAsync, GetChildCount} from "Store/firebase/nodes";
 import {ShowMessageBox} from "react-vmessagebox";
 import DeleteMap from "../../../../Server/Commands/DeleteMap";
 import {colors} from "../../../../Frame/UI/GlobalStyles";
@@ -30,7 +29,9 @@ import DeleteLayer from "../../../../Server/Commands/DeleteLayer";
 import {ACTPersonalMapSelect} from "../../../../Store/main/personal";
 import {IsUserMap} from "../../../../Store/firebase/maps";
 import { TimelineDropDown } from "UI/@Shared/Maps/MapUI/ActionBar_Left/Timeline";
-import { GetUpdates } from "Frame/Database/DatabaseHelpers";
+import {GetUpdates, GetAsync} from "Frame/Database/DatabaseHelpers";
+import {GetNodeL2} from "Store/firebase/nodes/$node";
+import {GetChildCount} from "Store/firebase/nodes";
 
 type ActionBar_LeftProps = {map: Map, subNavBarWidth: number};
 @Connect((state, {map}: ActionBar_LeftProps)=> ({
@@ -88,7 +89,7 @@ class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: string}> {
 							<Row style={{fontWeight: "bold"}}>Advanced:</Row>
 							<Row>
 								<Button mt={5} text="Delete" onLeftClick={async ()=> {
-									let rootNode = await GetNodeAsync(map.rootNode);
+									let rootNode = await GetAsync(()=>GetNodeL2(map.rootNode));
 									if (GetChildCount(rootNode) != 0) {
 										return void ShowMessageBox({title: `Still has children`,
 											message: `Cannot delete this map until all the children of its root-node have been unlinked or deleted.`});

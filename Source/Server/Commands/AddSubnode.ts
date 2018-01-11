@@ -8,7 +8,7 @@ import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import { UserEdit, MapEdit } from "Server/CommandMacros";
 import AddNode from "./AddNode";
 import {Layer} from "Store/firebase/layers/@Layer";
-import {GetAsync} from "Frame/Database/DatabaseHelpers";
+import {GetAsync, GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
 import {GetLayer} from "../../Store/firebase/layers";
 
 @UserEdit
@@ -22,7 +22,7 @@ export default class AddSubnode extends Command<{layerID: number, anchorNodeID: 
 		this.sub_addNode.asSubcommand = true;
 		await this.sub_addNode.Prepare();
 
-		this.layer_oldData = await GetAsync(()=>GetLayer(layerID));
+		this.layer_oldData = await GetAsync_Raw(()=>GetLayer(layerID));
 
 		this.returnData = this.sub_addNode.nodeID;
 	}

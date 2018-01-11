@@ -4,9 +4,10 @@ import { GetData, GetData_Options } from "../../Frame/Database/DatabaseHelpers";
 import {CachedTransform} from "js-vextensions";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {RatingsRoot, Rating} from "./nodeRatings/@RatingsRoot";
-import {GetNodeChildren, GetNode} from "./nodes";
+import {GetNodeChildren, GetNode, GetNodeChildrenL2} from "./nodes";
 import {MetaThesis_ThenType} from "./nodes/@MetaThesisInfo";
-import {ThesisForm} from "./nodes/@MapNode";
+import {ThesisForm, MapNodeL3} from "./nodes/@MapNode";
+import {GetNodeL2} from "./nodes/$node";
 
 export function GetNodeRatingsRoot(nodeID: number) {
 	//RequestPaths(GetPaths_NodeRatingsRoot(nodeID));
@@ -16,8 +17,8 @@ export function GetNodeRatingsRoot(nodeID: number) {
 // path is needed if you want 
 export function GetRatingSet(nodeID: number, ratingType: RatingType, path?: string) {
 	if (ratingType == "strength") {
-		let node = GetNode(nodeID);
-		return GetArgumentStrengthPseudoRatingSet(node, GetNodeChildren(node));
+		let node = GetNodeL2(nodeID);
+		return GetArgumentStrengthPseudoRatingSet(node, GetNodeChildrenL2(node));
 	}
 	let ratingsRoot = GetNodeRatingsRoot(nodeID);
 	return ratingsRoot ? ratingsRoot[ratingType] : null;
@@ -38,7 +39,7 @@ export function GetRatingValue(nodeID: number, ratingType: RatingType, userID: s
 }
 export function GetRatingAverage(nodeID: number, ratingType: RatingType, ratings?: Rating[], resultIfNoData = null): number {
 	// if voting disabled, always show full bar
-	let node = GetNode(nodeID);
+	let node = GetNodeL2(nodeID);
 	if (node && node.current.votingDisabled) return 100;
 
 	ratings = ratings || GetRatings(nodeID, ratingType);
@@ -52,7 +53,7 @@ export function GetRatingAverage(nodeID: number, ratingType: RatingType, ratings
 }
 export function GetPaths_MainRatingAverage(node: MapNode) {
 	let result = GetPaths_MainRatingSet(node);
-	if (node.current.type == MapNodeType.SupportingArgument || node.current.type == MapNodeType.OpposingArgument)
+	if (node.type == MapNodeType.Argument || node.type == MapNodeType.Argument)
 		result.AddRange(GetPaths_CalculateArgumentStrength(node, GetNodeChildren(node)));
 	return result;
 }*/
@@ -68,13 +69,13 @@ export function GetPaths_MainRatingAverage(node: MapNode) {
 /** Returns an int from 0 to 100. */
 /*export function GetMainRatingFillPercent(node: MapNode) {
 	let mainRatingAverage = GetMainRatingAverage(node);
-	if (node.current.metaThesis && (node.current.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.current.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
+	if (node.current.impactPremise && (node.current.impactPremise.thenType == MetaThesis_ThenType.StrengthenParent || node.current.impactPremise.thenType == MetaThesis_ThenType.WeakenParent))
 		return mainRatingAverage != null ? mainRatingAverage.Distance(50) * 2 : 0;
 	return mainRatingAverage || 0;
 }*/
 export function GetFillPercentForRatingAverage(node: MapNode, ratingAverage: number, reverseRating?: boolean) {
 	ratingAverage = TransformRatingForContext(ratingAverage, reverseRating);
-	/*if (node.current.metaThesis && (node.current.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.current.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
+	/*if (node.current.impactPremise && (node.current.impactPremise.thenType == MetaThesis_ThenType.StrengthenParent || node.current.impactPremise.thenType == MetaThesis_ThenType.WeakenParent))
 		return ratingAverage != null ? ratingAverage.Distance(50) * 2 : 0;*/
 	return ratingAverage || 0;
 }
@@ -84,7 +85,10 @@ export function TransformRatingForContext(ratingValue: number, reverseRating: bo
 	return ratingValue;
 }
 
-export function ShouldRatingTypeBeReversed(ratingType: RatingType, nodeReversed: boolean, contextReversed: boolean) {
+/*export function ShouldRatingTypeBeReversed(ratingType: RatingType, nodeReversed: boolean, contextReversed: boolean) {
 	//return nodeReversed || (contextReversed && ratingType == "adjustment");
 	return nodeReversed;
+}*/
+export function ShouldRatingTypeBeReversed(node: MapNodeL3) {
+	return node.finalPolarity != node.link.polarity;
 }

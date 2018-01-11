@@ -4,7 +4,7 @@ import {Map} from "../../../../Store/firebase/maps/@Map";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {RootState} from "../../../../Store";
-import {GetNodeChildren, GetNodeParents, GetParentNode, GetNode} from "../../../../Store/firebase/nodes";
+import {GetNodeChildren, GetNodeParents, GetParentNode, GetNode, GetNodeParentsL2, GetParentNodeL2, GetNodeChildrenL2} from "../../../../Store/firebase/nodes";
 import {GetFillPercentForRatingAverage, GetRatingAverage, GetRatings} from "../../../../Store/firebase/nodeRatings";
 import {CachedTransform} from "js-vextensions";
 import {Column} from "react-vcomponents";
@@ -13,8 +13,8 @@ import {VURL} from "js-vextensions";
 import Link from "../../../../Frame/ReactComponents/Link";
 import {BaseComponent, BaseProps, FindDOM} from "react-vextensions";
 import {Pre} from "react-vcomponents";
-import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
-import {GetNodeDisplayText, GetRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
+import {MapNode, MapNodeL2, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
+import {GetNodeDisplayText, GetRatingTypesForNode, AsNodeL3} from "../../../../Store/firebase/nodes/$node";
 import NodeUI_Inner from "./NodeUI_Inner";
 import DefinitionsPanel from "./NodeUI/DefinitionsPanel";
 import SocialPanel from "./NodeUI/SocialPanel";
@@ -28,11 +28,11 @@ import {ACTSet} from "Store";
 import {GetOpenMapID} from "../../../../Store/main";
 import {GetNewURL} from "../../../../Frame/URL/URLManager";
 
-type Props = {map: Map, node: MapNode}
-	& Partial<{nodeParents: MapNode[], nodeChildren: MapNode[]}>;
+type Props = {map: Map, node: MapNodeL2}
+	& Partial<{nodeParents: MapNodeL2[], nodeChildren: MapNodeL2[]}>;
 @Connect((state: RootState, {node}: Props)=> ({
-	nodeParents: GetNodeParents(node),
-	nodeChildren: GetNodeChildren(node),
+	nodeParents: GetNodeParentsL2(node),
+	nodeChildren: GetNodeChildrenL2(node),
 }))
 export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 	render() {
@@ -41,8 +41,8 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 
 		// just list one of the parents as the "current parent", so code relying on a parent doesn't error
 		let path = `${nodeParents.length ? nodeParents[0]._id + "/" : ""}${node._id}`;
-		let parent = GetParentNode(path);
-		let nodeEnhanced = node.Extended({finalType: node.current.type, link: null});
+		let parent = GetParentNodeL2(path);
+		let nodeL3 = AsNodeL3(node, Polarity.Supporting, null);
 		return (
 			<ScrollView ref="scrollView"
 					//backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.content) || a == this.refs.mapUI}
@@ -75,18 +75,18 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 					{/*<Row>ID: {node._id}</Row>
 					<Row>Title: {GetNodeDisplayText(node)}</Row>*/}
 					Main box:
-					<NodeUI_Inner ref="innerBox" map={map} node={nodeEnhanced} nodeView={{}} path={path} width={null} widthOverride={null}/>
+					<NodeUI_Inner ref="innerBox" map={map} node={nodeL3} nodeView={{}} path={path} width={null} widthOverride={null}/>
 					Panels:
-					{GetRatingTypesForNode(nodeEnhanced).map((ratingInfo, index)=> {
+					{GetRatingTypesForNode(nodeL3).map((ratingInfo, index)=> {
 						let ratings = GetRatings(node._id, ratingInfo.type);
-						return <RatingsPanel key={index} node={node} path={path} ratingType={ratingInfo.type} ratings={ratings}/>;
+						return <RatingsPanel key={index} node={nodeL3} path={path} ratingType={ratingInfo.type} ratings={ratings}/>;
 					})}
 					<DefinitionsPanel node={node} path={path}/>
 					<DiscussionPanel/>
 					<SocialPanel/>
 					<TagsPanel/>
-					<DetailsPanel map={map} node={nodeEnhanced} path={path}/>
-					<OthersPanel map={map} node={nodeEnhanced} path={path}/>
+					<DetailsPanel map={map} node={nodeL3} path={path}/>
+					<OthersPanel map={map} node={nodeL3} path={path}/>
 				</article>
 			</ScrollView>
 		);
