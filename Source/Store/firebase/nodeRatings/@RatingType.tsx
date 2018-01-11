@@ -34,7 +34,7 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNode, parent:
 		result.description = "Argument strength is calculated based on the probabilities of its premises, and the probability/adjustment of its meta-thesis.";
 	} else if (ratingType == "adjustment") {
 		Assert(parent, `Invalid state. Node with rating-type "adjustment" must have a "parent" argument passed alongside. @path:${path}`);
-		Assert(node.metaThesis, `Invalid state. Node with rating-type "adjustment" should have a metaThesis property attached. @path:${path}`);
+		Assert(node.current.metaThesis, `Invalid state. Node with rating-type "adjustment" should have a metaThesis property attached. @path:${path}`);
 
 		let grandParentID = SplitStringBySlash_Cached(path).length >= 3 ? SplitStringBySlash_Cached(path).XFromLast(2).ToInt() : null;
 		let grandParent = grandParentID ? GetNodeEnhanced(GetNode(grandParentID), SlicePath(path, 2)) : null;
@@ -42,7 +42,7 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNode, parent:
 
 		let premiseCountrStrMap = {All: `all of the premises`, AnyTwo: `at least two of the premises`, Any: `at least one of the premises.`};
 		//let premiseCountrStrMap = {All: `all of its premises`, AnyTwo: `at least two of its premises`, Any: `at least one of its premises.`};
-		let premiseCountStr = premiseCountrStrMap[MetaThesis_IfType[node.metaThesis.ifType]];
+		let premiseCountStr = premiseCountrStrMap[MetaThesis_IfType[node.current.metaThesis.ifType]];
 		let shiftType = parent.type == MapNodeType.SupportingArgument ? "raise" : "lower";
 
 		/*return (

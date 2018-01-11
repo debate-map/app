@@ -85,7 +85,7 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 				} catch (ex) {}
 			};
 			nodesFiltered = nodesFiltered.filter(node=> {
-				let titles = node.titles ? node.titles.VValues(true) : [];
+				let titles = node.current.titles ? node.current.titles.VValues(true) : [];
 				if (regExp) {
 					return titles.find(a=>a.match(regExp) != null);
 				}
@@ -179,8 +179,8 @@ class NodeRow extends BaseComponent<NodeRow_Props, {menuOpened: boolean}> {
 		let {map, node, first, creator, selected} = this.props;
 		let {menuOpened} = this.state;
 
-		let nodeEnhanced = {...node, finalType: node.type} as MapNodeEnhanced;
-		let nodeTypeInfo = MapNodeType_Info.for[node.type];
+		let nodeEnhanced = {...node, finalType: node.current.type} as MapNodeEnhanced;
+		let nodeTypeInfo = MapNodeType_Info.for[node.current.type];
 
 		let backgroundColor = chroma(`rgba(${nodeTypeInfo.backgroundColor},.8)`).desaturate(.5);
 
@@ -231,7 +231,7 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 		let {width, hoverPanel} = this.state;
 
 		let path = node._id+"";
-		if (node.metaThesis) { // if meta-thesis, we only have one parent, so might as well fetch it, for accurate polarity and such
+		if (node.current.metaThesis) { // if meta-thesis, we only have one parent, so might as well fetch it, for accurate polarity and such
 			path = node.parents.VKeys(true)[0] + "/" + node._id;
 		}
 		let nodeTypeInfo = MapNodeType_Info.for[finalNodeType];

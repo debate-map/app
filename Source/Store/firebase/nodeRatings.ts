@@ -39,7 +39,7 @@ export function GetRatingValue(nodeID: number, ratingType: RatingType, userID: s
 export function GetRatingAverage(nodeID: number, ratingType: RatingType, ratings?: Rating[], resultIfNoData = null): number {
 	// if voting disabled, always show full bar
 	let node = GetNode(nodeID);
-	if (node && node.votingDisabled) return 100;
+	if (node && node.current.votingDisabled) return 100;
 
 	ratings = ratings || GetRatings(nodeID, ratingType);
 	if (ratings.length == 0) return resultIfNoData as any;
@@ -52,7 +52,7 @@ export function GetRatingAverage(nodeID: number, ratingType: RatingType, ratings
 }
 export function GetPaths_MainRatingAverage(node: MapNode) {
 	let result = GetPaths_MainRatingSet(node);
-	if (node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument)
+	if (node.current.type == MapNodeType.SupportingArgument || node.current.type == MapNodeType.OpposingArgument)
 		result.AddRange(GetPaths_CalculateArgumentStrength(node, GetNodeChildren(node)));
 	return result;
 }*/
@@ -68,13 +68,13 @@ export function GetPaths_MainRatingAverage(node: MapNode) {
 /** Returns an int from 0 to 100. */
 /*export function GetMainRatingFillPercent(node: MapNode) {
 	let mainRatingAverage = GetMainRatingAverage(node);
-	if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
+	if (node.current.metaThesis && (node.current.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.current.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
 		return mainRatingAverage != null ? mainRatingAverage.Distance(50) * 2 : 0;
 	return mainRatingAverage || 0;
 }*/
 export function GetFillPercentForRatingAverage(node: MapNode, ratingAverage: number, reverseRating?: boolean) {
 	ratingAverage = TransformRatingForContext(ratingAverage, reverseRating);
-	/*if (node.metaThesis && (node.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
+	/*if (node.current.metaThesis && (node.current.metaThesis.thenType == MetaThesis_ThenType.StrengthenParent || node.current.metaThesis.thenType == MetaThesis_ThenType.WeakenParent))
 		return ratingAverage != null ? ratingAverage.Distance(50) * 2 : 0;*/
 	return ratingAverage || 0;
 }

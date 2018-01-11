@@ -55,7 +55,7 @@ export default class OthersPanel extends BaseComponent<Props, {convertToType: Th
 							});
 						}}/>
 					</Row>}
-				{node.type == MapNodeType.Thesis && convertToTypes.length > 0 &&
+				{node.current.type == MapNodeType.Thesis && convertToTypes.length > 0 &&
 					<Row>
 						<Pre>Convert to: </Pre>
 						<Select options={convertToTypes} value={convertToType} onChange={val=>this.SetState({convertToType: val})}/>

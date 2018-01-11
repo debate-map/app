@@ -16,9 +16,10 @@ import {ReplacementFunc} from "../../../../Frame/ReactComponents/VReactMarkdown"
 import {Segment} from "../../../../Frame/General/RegexHelpers";
 import NodeUI_Inner from "../MapNode/NodeUI_Inner";
 import {GetNode} from "Store/firebase/nodes";
-import {MapNode} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNode, MapNodeEnhanced} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetDataAsync, GetAsync} from "Frame/Database/DatabaseHelpers";
 import NodeUI from "../MapNode/NodeUI";
+import {GetNodeEnhanced} from "../../../../Store/firebase/nodes/$node";
 
 function GetPropsFromPropsStr(propsStr: string) {
 	let propStrMatches = propsStr.Matches(/ (.+?)="(.+?)"/g);
@@ -77,9 +78,9 @@ let replacements = {
 	},
 };
 
-type NodeUI_InMessageProps = {map: Map, nodeID: number, index: number} & Partial<{node: MapNode}>;
+type NodeUI_InMessageProps = {map: Map, nodeID: number, index: number} & Partial<{node: MapNodeEnhanced}>;
 @Connect((state, {nodeID}: NodeUI_InMessageProps)=> ({
-	node: GetNode(nodeID),
+	node: GetNodeEnhanced(GetNode(nodeID), ""+nodeID),
 }))
 class NodeUI_InMessage extends BaseComponent<NodeUI_InMessageProps, {}> {
 	render() {
@@ -87,7 +88,7 @@ class NodeUI_InMessage extends BaseComponent<NodeUI_InMessageProps, {}> {
 		if (!node) return <div/>;
 		
 		let path = ""+node._id;
-		let nodeEnhanced = node.Extended({finalType: node.type, link: null});
+		let nodeEnhanced = node.Extended({finalType: node.current.type, link: null});
 		return (
 			<NodeUI_Inner ref="innerBox" map={map} node={nodeEnhanced} nodeView={{}} path={path} width={null} widthOverride={null}
 				panelPosition="below" useLocalPanelState={true}

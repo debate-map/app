@@ -54,10 +54,10 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 		let {map, node, path, inList, permissions, parentNode, copiedNode, copiedNode_asCut} = this.props;
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
-		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
+		//let validChildTypes = MapNodeType_Info.for[node.current.type].childTypes;
 		let validChildTypes = GetValidNewChildTypes(node, path, permissions);
 		let form = GetNodeForm(node, path);
-		let formForChildren = node.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base;
+		let formForChildren = node.current.type == MapNodeType.Category ? ThesisForm.YesNoQuestion : ThesisForm.Base;
 
 		let nodeText = GetNodeDisplayText(node, path);
 
@@ -86,7 +86,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							if (userID == null) return ShowSignInPopup();
 							ShowAddSubnodeDialog(map._id, node, path);
 						}}/>}
-				{IsUserBasicOrAnon(userID) && node.metaThesis == null && !inList &&
+				{IsUserBasicOrAnon(userID) && node.current.metaThesis == null && !inList &&
 					<VMenuItem text={copiedNode ? <span>Cut <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Cut`}
 						enabled={ForCut_GetError(userID, map, node) == null} title={ForCut_GetError(userID, map, node)}
 						style={styles.vMenuItem}
@@ -98,7 +98,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 								store.dispatch(new ACTNodeCopy({path: null, asCut: true}));
 							}
 						}}/>}
-				{IsUserBasicOrAnon(userID) && node.metaThesis == null &&
+				{IsUserBasicOrAnon(userID) && node.current.metaThesis == null &&
 					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Copy`} style={styles.vMenuItem}
 						enabled={ForCopy_GetError(userID, map, node) == null} title={ForCopy_GetError(userID, map, node)}
 						onClick={e=> {
@@ -187,7 +187,7 @@ If not, paste the argument as a clone instead.`
 								return void ShowMessageBox({title: `Cannot delete`, message: `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`});
 							}*/
 							//let s_ifParents = parentNodes.length > 1 ? "s" : "";
-							let metaThesisID = node.type == MapNodeType.SupportingArgument || node.type == MapNodeType.OpposingArgument ? node.children.VKeys()[0] : null;
+							let metaThesisID = node.current.type == MapNodeType.SupportingArgument || node.current.type == MapNodeType.OpposingArgument ? node.children.VKeys()[0] : null;
 							let contextStr = IsNodeSubnode(node) ? ", and its placement in-layer" : ", and its link with 1 parent";
 
 							ShowMessageBox({

@@ -98,7 +98,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered; //|| local_selected;
 		let panelToShow = hoverPanel || local_openPanel || (nodeView && nodeView.openPanel);
-		let subPanelShow = node.type == MapNodeType.Thesis && (node.contentNode || node.image);
+		let subPanelShow = node.current.type == MapNodeType.Thesis && (node.current.contentNode || node.current.image);
 		let bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView && nodeView.expanded;
 
@@ -220,13 +220,13 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 
 type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeEnhanced, nodeView: MapNodeView, path: string} & Partial<{equationNumber: number}>;
 @Connect((state, {node, path}: TitlePanelProps)=> ({
-	$1: node.image && GetImage(node.image.id),
-	equationNumber: node.equation ? GetEquationStepNumber(path) : null,
+	$1: node.current.image && GetImage(node.current.image.id),
+	equationNumber: node.current.equation ? GetEquationStepNumber(path) : null,
 }))
 class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 	render() {
 		let {map, node, nodeView, path, equationNumber} = this.props;
-		let latex = node.equation && node.equation.latex;
+		let latex = node.current.equation && node.current.equation.latex;
 		let isSubnode = IsNodeSubnode(node);
 
 		return (
@@ -236,27 +236,27 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 					<Pre>{equationNumber}) </Pre>}
 				<span style={E(
 					{position: "relative", fontSize: GetFontSizeForNode(node, isSubnode), whiteSpace: "initial"},
-					(node.metaThesis || isSubnode) && {margin: "4px 0 1px 0"},
+					(node.current.metaThesis || isSubnode) && {margin: "4px 0 1px 0"},
 				)}>
-					{latex && <NodeMathUI text={node.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
+					{latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
 					{!latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
 				</span>
-				{node.equation && node.equation.explanation &&
+				{node.current.equation && node.current.equation.explanation &&
 					<Pre style={{
 						fontSize: 11, color: "rgba(255,255,255,.5)",
 						//marginLeft: "auto",
 						marginLeft: 15, marginTop: 3, float: "right",
 					}}>
-						{node.equation.explanation}
+						{node.current.equation.explanation}
 					</Pre>}
-				{node.note &&
+				{node.current.note &&
 					<Div style={{
 						fontSize: 11, color: "rgba(255,255,255,.5)",
 						marginLeft: 15, marginTop: 3, float: "right",
 					}}>
-						{node.note}
+						{node.current.note}
 					</Div>}
-				{node.type == MapNodeType.Thesis && node.contentNode &&
+				{node.current.type == MapNodeType.Thesis && node.current.contentNode &&
 					<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
 			</Div>
 		);

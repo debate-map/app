@@ -36,7 +36,7 @@ AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {
 			contentNode.sourceChains[0].FakeArray_Add(newSource);
 		}
 
-		node.contentNode = contentNode;
+		node.current.contentNode = contentNode;
 	}
 
 	return data;

@@ -80,7 +80,7 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 
 		// override the setting of new-node/childrenOrder (otherwise each link-node sub-command tries to set it to: [old-list] + [its-own-child])
 		//updates[`nodes/${this.sub_addNode.nodeID}/childrenOrder`] = this.sub_linkChildren.map(a=>a.payload.childID);
-		if (IsArgumentType(this.sub_addNode.payload.node.type)) {
+		if (IsArgumentType(this.sub_addNode.payload.node.current.type)) {
 			let childrenOrder = [];
 			if (this.sub_addNode.sub_addNode.metaThesisID) {
 				childrenOrder.push(this.sub_addNode.sub_addNode.metaThesisID);

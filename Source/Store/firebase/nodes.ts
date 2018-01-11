@@ -1,7 +1,7 @@
 import {HasModPermissions, PermissionGroupSet} from "./userExtras/@UserExtraInfo";
 import {IsNaN, IsObjectOf, IsObject, IsNumber} from "js-vextensions";
 import {GetData, GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {MapNode, globalRootNodeID} from "./nodes/@MapNode";
+import {MapNode, globalRootNodeID, MapNodeEnhanced, MapNodeL2} from "./nodes/@MapNode";
 import {CachedTransform} from "js-vextensions";
 import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
 import {IsUserCreatorOrMod} from "./userExtras";
@@ -56,6 +56,9 @@ export function GetParentNodeID(path: string) {
 export function GetParentNode(path: string) {
 	return GetNode(GetParentNodeID(path));
 }
+export function GetParentNodeEnhanced(path: string) {
+	return GetNodeEnhanced(GetParentNodeID(path), path);
+}
 export function GetNodeID(path: string) {
 	let ownNodeStr = SplitStringBySlash_Cached(path).LastOrX();
 	return ownNodeStr ? ownNodeStr.replace("L", "").ToInt() : null;
@@ -89,15 +92,15 @@ export async function GetNodeChildrenAsync(node: MapNode) {
 	return await Promise.all(node.children.VKeys(true).map(id=>GetDataAsync("nodes", id))) as MapNode[];
 }
 
-export function GetNodeChildrenEnhanced(node: MapNode, path: string, filterForPath = false) {
+export function GetNodeChildrenEnhanced(node: MapNode, path?: string, filterForPath = false) {
 	let nodeChildren = GetNodeChildren(node);
-	let nodeChildrenEnhanced = nodeChildren.map(child=>child ? GetNodeEnhanced(child, path + "/" + child._id) : null);
+	let nodeChildrenEnhanced = nodeChildren.map(child=>child ? GetNodeEnhanced(child, path ? path + "/" + child._id : null) : null);
 	if (filterForPath) {
 		nodeChildrenEnhanced = nodeChildrenEnhanced.filter(child=> {
 			// if null, keep (so receiver knows there's an entry here, but it's still loading)
 			if (child == null) return true;
 			// filter out any nodes whose access-level is higher than our own
-			if (child.accessLevel > GetUserAccessLevel(GetUserID())) return false;
+			if (child.current.accessLevel > GetUserAccessLevel(GetUserID())) return false;
 			// hide nodes that don't have the required premise-count
 			//if (!IsNodeVisibleToNonModNonCreators(child, GetNodeChildren(child)) && !IsUserCreatorOrMod(GetUserID(), child)) return false;
 			return true;
@@ -106,51 +109,50 @@ export function GetNodeChildrenEnhanced(node: MapNode, path: string, filterForPa
 	return CachedTransform("GetNodeChildrenEnhanced", [path], nodeChildrenEnhanced, ()=>nodeChildrenEnhanced);
 }
 
-export function GetMetaThesisChildNode(node: MapNode) {
-	let nodeChildren = GetNodeChildren(node);
-	return CachedTransform("GetMetaThesisChildNode", [node._id], nodeChildren, ()=>nodeChildren.FirstOrX(a=>a && a.metaThesis != null));
+export function GetMetaThesisChildNode(node: MapNodeL2) {
+	let nodeChildren = GetNodeChildrenEnhanced(node);
+	return CachedTransform("GetMetaThesisChildNode", [node._id], nodeChildren, ()=>nodeChildren.FirstOrX(a=>a && a.current.metaThesis != null));
 }
 
-export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNode) {
+export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNodeEnhanced) {
 	let parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;
-	if (!parentTypeInfo.Contains(child.type)) return false;
+	if (!parentTypeInfo.Contains(child.current.type)) return false;
 	return true;
 }
-export function IsNewLinkValid(parentNode: MapNode, parentPath: string, child: MapNode, permissions: PermissionGroupSet) {
+export function IsNewLinkValid(parentNode: MapNodeEnhanced, parentPath: string, child: MapNodeEnhanced, permissions: PermissionGroupSet) {
 	let parentPathIDs = SplitStringBySlash_Cached(parentPath).map(a=>a.ToInt());
 	//if (map.name == "Global" && parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
 	if (parentNode._id == globalRootNodeID) return false; // if parent is global-root, don't accept new children
-	// if parent is l2, and user is not a mod (and not node creator), don't accept new children
-	if (parentPathIDs.length == 2 && !HasModPermissions(permissions) && parentNode.creator != GetUserID()) return false;
+	// if in global map, parent is l2, and user is not a mod (and not node creator), don't accept new children
+	if (parentPathIDs[0] == globalRootNodeID && parentPathIDs.length == 2 && !HasModPermissions(permissions) && parentNode.creator != GetUserID()) return false;
 	if (parentNode._id == child._id) return false; // cannot link node as its own child
 
-	let parent = GetNode(parentPathIDs.Last());
-	if (parent && (parent.children || {}).VKeys(true).Contains(child._id+"")) return false; // if already a child of this parent, reject
-	return IsLinkValid(parentNode.type, parentPath, child);
+	if (parentNode && (parentNode.children || {}).VKeys(true).Contains(child._id+"")) return false; // if already a child of this parent, reject
+	return IsLinkValid(parentNode.current.type, parentPath, child);
 }
 
-export function ForUnlink_GetError(userID: string, map: Map, node: MapNode, asPartOfCut = false) {
+export function ForUnlink_GetError(userID: string, map: Map, node: MapNodeEnhanced, asPartOfCut = false) {
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
-	if (node.metaThesis) return "Cannot unlink a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
+	if (node.current.metaThesis) return "Cannot unlink a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
 	if (!asPartOfCut && (node.parents || {}).VKeys(true).length <= 1)  return `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`;
 	if (IsRootNode(node)) return `Cannot unlink the root-node of a map.`;
 	if (IsNodeSubnode(node)) return `Cannot unlink a subnode. Try deleting it instead.`;
 	return null;
 }
-export function ForDelete_GetError(userID: string, map: Map, node: MapNode, asPartOfMapDelete = false) {
+export function ForDelete_GetError(userID: string, map: Map, node: MapNodeEnhanced, asPartOfMapDelete = false) {
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
-	if (node.metaThesis) return "Cannot delete a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
+	if (node.current.metaThesis) return "Cannot delete a meta-thesis directly. Instead, delete the parent. (assuming you've deleted the premises already)";
 	if (GetParentCount(node) > 1) return `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`;
 	if (IsRootNode(node) && !asPartOfMapDelete) return `Cannot delete the root-node of a map.`;
 
-	let nodeChildren = GetNodeChildren(node);
+	let nodeChildren = GetNodeChildrenEnhanced(node);
 	if (nodeChildren.Any(a=>a == null)) return "[still loading children...]";
 	//if ((node.children || {}).VKeys().length) return "Cannot delete this node until all its (non-meta-thesis) children have been unlinked or deleted.";
-	if (nodeChildren.filter(a=>!a.metaThesis).length) return "Cannot delete this node until all its (non-meta-thesis) children have been unlinked or deleted.";
+	if (nodeChildren.filter(a=>!a.current.metaThesis).length) return "Cannot delete this node until all its (non-meta-thesis) children have been unlinked or deleted.";
 	return null;
 }
 
-export function ForCut_GetError(userID: string, map: Map, node: MapNode) {
+export function ForCut_GetError(userID: string, map: Map, node: MapNodeEnhanced) {
 	return ForUnlink_GetError(userID, map, node, true);
 }
 

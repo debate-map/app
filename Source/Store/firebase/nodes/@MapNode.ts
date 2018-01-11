@@ -8,6 +8,7 @@ import {MetaThesisInfo} from './@MetaThesisInfo';
 import {ContentNode} from '../contentNodes/@ContentNode';
 import {Equation} from './@Equation';
 import {Image} from '../images/@Image';
+import {MapNodeRevision} from "./@MapNodeRevision";
 
 export const globalMapID = 1;
 export const globalRootNodeID = 1;
@@ -39,28 +40,10 @@ export class MapNode {
 	}
 
 	_id?: number;
-	type?: MapNodeType;
-	titles: {[key: string]: string};
-	note: string;
-
 	creator?: string;
 	createdAt: number;
-	//updatedAt: number;
-	approved = false;
-	votingDisabled: boolean;
-	// only applied client-side; would need to be in protected branch of tree (or use a long, random, and unreferenced node-id) to be "actually" inaccessible
-	accessLevel = AccessLevel.Basic;
-	//voteLevel = AccessLevel.Basic;
 
-	relative: boolean;
-	fontSizeOverride: number;
-	widthOverride: number;
-
-	// components (for theses)
-	metaThesis: MetaThesisInfo;
-	equation: Equation;
-	contentNode: ContentNode;
-	image: ImageAttachment;
+	currentRevision: number;
 	
 	parents: ParentSet;
 	children: ChildSet;
@@ -73,29 +56,8 @@ export const MapNode_id = "^[0-9]+$";
 //export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
 AddSchema({
 	properties: {
-		type: {oneOf: GetValues_ForSchema(MapNodeType)},
-		titles: {
-			properties: {
-				base: {type: "string"}, negation: {type: "string"}, yesNoQuestion: {type: "string"},
-			},
-			//required: ["base", "negation", "yesNoQuestion"],
-		},
-		note: {type: ["null", "string"]}, // add null-type, for later when the payload-validation schema is derived from the main schema
 		creator: {type: "string"},
 		createdAt: {type: "number"},
-		approved: {type: "boolean"},
-		votingDisabled: {type: ["null", "boolean"]},
-		accessLevel: {oneOf: GetValues_ForSchema(AccessLevel).concat({const: null})},
-		voteLevel: {oneOf: GetValues_ForSchema(AccessLevel).concat({const: null})}, // not currently used
-
-		relative: {type: "boolean"},
-		fontSizeOverride: {type: ["null", "number"]},
-		widthOverride: {type: ["null", "number"]},
-
-		metaThesis: {$ref: "MetaThesisInfo"},
-		equation: {$ref: "Equation"},
-		contentNode: {$ref: "ContentNode"},
-		image: {$ref: "ImageAttachment"},
 
 		parents: {$ref: "ParentSet"},
 		children: {$ref: "ChildSet"},
@@ -104,15 +66,10 @@ AddSchema({
 
 		layerPlusAnchorParents: {$ref: "LayerPlusAnchorParentSet"},
 	},
-	required: ["type", "creator", "createdAt"],
+	required: ["creator", "createdAt"],
 	allOf: [
-		// if not a meta-thesis or contentNode, require "titles" prop
-		{
-			if: {prohibited: ["metaThesis", "equation", "contentNode", "image"]},
-			then: {required: ["titles"]},
-		},
 		// if an argument, require "childrenOrder" prop
-		{
+		/*{
 			if: {
 				properties: {
 					type: {oneOf: [{const: MapNodeType.SupportingArgument}, {const: MapNodeType.OpposingArgument}]},
@@ -120,14 +77,20 @@ AddSchema({
 			},
 			then: {required: ["childrenOrder"]},
 			else: {prohibited: ["childrenOrder"]}
-		}
+		}*/
 	],
 }, "MapNode");
 
 // helpers
 //export type MapNodeEnhanced = MapNode & {finalType: MapNodeType};
 // similar to a database entry, after having related data from other tables "joined"
-export type MapNodeEnhanced = MapNode & {finalType: MapNodeType, link: ChildEntry};
+export type MapNodeL2 = MapNode & {
+	current: MapNodeRevision;
+};
+export type MapNodeL3 = MapNodeL2 & {
+	finalType: MapNodeType;
+	link: ChildEntry;
+};
 
 // regular parents
 // ==========

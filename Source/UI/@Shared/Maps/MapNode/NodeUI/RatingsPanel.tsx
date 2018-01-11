@@ -50,12 +50,12 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 		let {size} = this.state;
 
 		let parentNode = GetNodeEnhanced(GetParentNode(path), SlicePath(path, 1));
-		if (node.metaThesis && parentNode == null) return <div/>; // if meta-thesis, but no parent-node connected, must still be loading
+		if (node.current.metaThesis && parentNode == null) return <div/>; // if meta-thesis, but no parent-node connected, must still be loading
 		
 		let nodeReversed = form == ThesisForm.Negation;
 		let contextReversed = IsContextReversed(node, parentNode);
 		let reverseRatings = ShouldRatingTypeBeReversed(ratingType, nodeReversed, contextReversed);
-		let nodeTypeDisplayName = GetMapNodeTypeDisplayName(node.type, node, form);
+		let nodeTypeDisplayName = GetMapNodeTypeDisplayName(node.current.type, node, form);
 
 		let ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
 		let {labels, values} = ratingTypeInfo;

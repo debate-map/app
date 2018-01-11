@@ -83,7 +83,7 @@ type State = {
 	});*/
 
 	let nodeChildren_sortValues = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
-		if (child.metaThesis) return Number.MAX_SAFE_INTEGER; // always place the meta-thesis first
+		if (child.current.metaThesis) return Number.MAX_SAFE_INTEGER; // always place the meta-thesis first
 		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetSortByRatingType(child)), GetNodeForm(child) == ThesisForm.Negation);
 	});
 	let nodeChildren_fillPercents = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
@@ -172,8 +172,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		} else {
 			childPacks = childPacks.OrderByDescending(pack=>nodeChildren_sortValues[pack.origIndex]);
 			//if (IsArgumentNode(node)) {
-			let metaThesisNode = nodeChildren.FirstOrX(a=>a.metaThesis != null);
-			let isArgument_any = metaThesisNode && metaThesisNode.metaThesis.ifType == MetaThesis_IfType.Any;
+			let metaThesisNode = nodeChildren.FirstOrX(a=>a.current.metaThesis != null);
+			let isArgument_any = metaThesisNode && metaThesisNode.current.metaThesis.ifType == MetaThesis_IfType.Any;
 			if (node.childrenOrder && !isArgument_any) {
 				childPacks = childPacks.OrderBy(pack=>node.childrenOrder.indexOf(pack.node._id).IfN1Then(Number.MAX_SAFE_INTEGER));
 			}
@@ -185,7 +185,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		if (!expanded) innerBoxOffset = 0;
 
 		let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
-		let limitBar_above = node.type == MapNodeType.SupportingArgument;
+		let limitBar_above = node.current.type == MapNodeType.SupportingArgument;
 		if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
 		/*let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
 		let showBelowMessage = nodeChildren.length > 0 && nodeChildren.length < minChildCount;*/
@@ -216,9 +216,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						<div style={{position: "absolute", left: 2, right: 2, top: -3, height: 3, borderRadius: "3px 3px 0 0", background: "rgba(255,255,0,.7)"}}/>
 					}
 					<div ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{position: "relative"}}>
-						{node.accessLevel != AccessLevel.Basic &&
+						{node.current.accessLevel != AccessLevel.Basic &&
 							<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
-								<span style={{margin: "auto 0"}}>{AccessLevel[node.accessLevel][0].toUpperCase()}</span>
+								<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 							</div>}
 						<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}
 							style={E(
@@ -460,7 +460,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			mainBoxOffset = mainBoxOffset.Plus(new Vector2i(-30, innerBox.outerHeight() / 2));
 
 			let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
-			let limitBar_above = node.type == MapNodeType.SupportingArgument;
+			let limitBar_above = node.current.type == MapNodeType.SupportingArgument;
 			if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
 			if (showLimitBar && limitBar_above) mainBoxOffset.y += ChildLimitBar.HEIGHT;
 
@@ -527,33 +527,33 @@ class ChildLimitBar extends BaseComponent
 	}
 }
 
-function GetMeasurementInfoForNode(node: MapNode, path: string) {
-	let nodeTypeInfo = MapNodeType_Info.for[node.type];
+function GetMeasurementInfoForNode(node: MapNodeEnhanced, path: string) {
+	let nodeTypeInfo = MapNodeType_Info.for[node.current.type];
 
 	let displayText = GetNodeDisplayText(node, path);
 	let fontSize = GetFontSizeForNode(node);
 	let expectedTextWidth = GetContentWidth($(`<span style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${displayText}</span>`));
 
 	let noteWidth = 0;
-	if (node.note) {
+	if (node.current.note) {
 		noteWidth = Math.max(noteWidth,
-			GetContentWidth($(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.note}</span>`), true));
+			GetContentWidth($(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.current.note}</span>`), true));
 	}
-	if (node.equation && node.equation.explanation) {
+	if (node.current.equation && node.current.equation.explanation) {
 		noteWidth = Math.max(noteWidth,
-			GetContentWidth($(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.equation.explanation}</span>`), true));
+			GetContentWidth($(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.current.equation.explanation}</span>`), true));
 	}
 	expectedTextWidth += noteWidth;
 
 	//let expectedOtherStuffWidth = 26;
 	let expectedOtherStuffWidth = 28;
-	if (node.contentNode)
+	if (node.current.contentNode)
 		expectedOtherStuffWidth += 14;
 	let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
-	if (node.contentNode) // quotes are often long, so just always do full-width
+	if (node.current.contentNode) // quotes are often long, so just always do full-width
 		expectedBoxWidth = nodeTypeInfo.maxWidth;
 
-	let width = node.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
+	let width = node.current.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
 
 	let maxTextWidth = width - expectedOtherStuffWidth;
 	let expectedTextHeight = GetContentHeight($(`<a style='${

@@ -11,10 +11,10 @@ AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {
 
 	for (let node of data.nodes.VValues(true) as any[]) {
 		// from old
-		delete node.metaThesis_ifType;
-		delete node.metaThesis_thenType;
-		if (node.contentNode) {
-			for (let chain of node.contentNode.sourceChains) {
+		delete node.current.metaThesis_ifType;
+		delete node.current.metaThesis_thenType;
+		if (node.current.contentNode) {
+			for (let chain of node.current.contentNode.sourceChains) {
 				for (let source of chain as Source[]) {
 					if (source.link != null && !source.link.startsWith("http")) {
 						source.link = "http://" + source.link;

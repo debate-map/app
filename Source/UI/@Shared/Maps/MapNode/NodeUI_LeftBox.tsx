@@ -42,16 +42,16 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 			form, parentNode, children,
 		} = this.props;
 		let openPanel = local_openPanel || nodeView.openPanel;
-		if (node.metaThesis && parentNode == null) return <div/>; // if meta-thesis, but no parent-node connected, must still be loading
+		if (node.current.metaThesis && parentNode == null) return <div/>; // if meta-thesis, but no parent-node connected, must still be loading
 
 		let nodeReversed = form == ThesisForm.Negation;
 		let contextReversed = IsContextReversed(node, parentNode);
-		if (node.metaThesis) {
-			var thenType_final = node.metaThesis.thenType;
+		if (node.current.metaThesis) {
+			var thenType_final = node.current.metaThesis.thenType;
 			if (contextReversed)
 				thenType_final = ReverseThenType(thenType_final);
 		}
-		let nodeTypeInfo = MapNodeType_Info.for[node.type];
+		let nodeTypeInfo = MapNodeType_Info.for[node.current.type];
 
 		return (
 			<div style={E(
@@ -72,7 +72,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 						let average = GetRatingAverage(node._id, ratingInfo.type, null, -1);
 						if (average != -1) {
 							average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(ratingInfo.type, nodeReversed, contextReversed));
-							if (node.metaThesis && (thenType_final == MetaThesis_ThenType.StrengthenParent || thenType_final == MetaThesis_ThenType.WeakenParent)) {
+							if (node.current.metaThesis && (thenType_final == MetaThesis_ThenType.StrengthenParent || thenType_final == MetaThesis_ThenType.WeakenParent)) {
 								let grandParentID = SplitStringBySlash_Cached(path).length >= 3 ? SplitStringBySlash_Cached(path).XFromLast(2).ToInt() : null;
 								let grandParent = grandParentID ? GetNodeEnhanced(GetNode(grandParentID), SlicePath(path, 2)) : null;
 								let grandParentRatingType = grandParent ? GetMainRatingType(grandParent) : "probability";

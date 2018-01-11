@@ -26,14 +26,18 @@ import {IsUserAdmin} from "../../../../Store/firebase/userExtras";
 import {GetUserID, GetUserAccessLevel} from "Store/firebase/users";
 import ImageAttachmentEditorUI from "./ImageAttachmentEditorUI";
  import {GetErrorMessagesUnderElement} from "js-vextensions";
+import {MapNodeRevision} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 
 type Props = {
-	baseData: MapNodeEnhanced, baseLinkData: ChildEntry, parent: MapNodeEnhanced, forNew: boolean, enabled?: boolean,
+	baseData: MapNode,
+	baseLinkData: ChildEntry,
+	baseRevisionData: MapNodeRevision,
+	parent: MapNodeEnhanced, forNew: boolean, enabled?: boolean,
 	style?, onChange?: (newData: MapNode, newLinkData: ChildEntry, component: NodeDetailsUI)=>void,
 	//onSetError: (error: string)=>void,
 } & Partial<{creator: User, metaThesisNode: MapNode}>;
-type State = {newData: MapNode, newLinkData: ChildEntry};
-@Connect((state, {baseData, forNew}: Props)=>({
+type State = {newData: MapNode, newLinkData: ChildEntry, newRevisionData: MapNodeRevision};
+@Connect((state, {baseData, baseRevisionData, forNew}: Props)=>({
 	creator: !forNew && GetUser(baseData.creator),
 	metaThesisNode: GetMetaThesisChildNode(baseData),
 }))
@@ -42,13 +46,17 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
-			this.SetState({newData: Clone(props.baseData).Excluding("finalType", "link"), newLinkData: Clone(props.baseLinkData)});
+			this.SetState({
+				newData: Clone(props.baseData),
+				newLinkData: Clone(props.baseLinkData),
+				newRevisionData: Clone(props.baseRevisionData),
+			});
 	}
 
 	quoteEditor: QuoteInfoEditorUI;
 	render() {
 		let {baseData, metaThesisNode, parent, forNew, enabled, style, onChange, creator} = this.props;
-		let {newData, newLinkData} = this.state;
+		let {newData, newLinkData, newRevisionData} = this.state;
 		let firebase = store.firebase.helpers;
 		let Change = (..._)=> {
 			if (onChange)
@@ -57,10 +65,10 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 		};
 
 		let propsEnhanced = {...this.props, Change, ...this.state, SetState: this.SetState};
-		let thesisType = GetThesisType(newData);
+		let thesisType = GetThesisType(newRevisionData);
 
 		let splitAt = 170, width = 600;
-		let isArgument_any = metaThesisNode && metaThesisNode.metaThesis.ifType == MetaThesis_IfType.Any;
+		let isArgument_any = metaThesisNode && metaThesisNode.current.metaThesis.ifType == MetaThesis_IfType.Any;
 		return (
 			<div> {/* needed so GetInnerComp() works */}
 			<Column style={E({padding: 5}, style)}>
@@ -195,7 +203,7 @@ The detailed version of the argument will be embodied in its premises/child-thes
 }
 
 function WillNodeUseQuestionTitleHere(node: MapNode, linkData: ChildEntry) {
-	return node.type == MapNodeType.Thesis && !node.contentNode && !node.metaThesis && linkData && linkData.form == ThesisForm.YesNoQuestion;
+	return node.current.type == MapNodeType.Thesis && !node.current.contentNode && !node.current.metaThesis && linkData && linkData.form == ThesisForm.YesNoQuestion;
 }
 
 class OtherTitles extends BaseComponent<Props_Enhanced, {}> {
