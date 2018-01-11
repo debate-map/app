@@ -104,6 +104,20 @@ export default function(initialState = {}, history) {
 		) as StoreEnhancer<any>
 	) as Store<RootState>; //& {extraReducers};
 
+	function Dispatch_WithStack(action) {
+		if (g.actionStacks || (devEnv && !actionStacks_actionTypeIgnorePatterns.Any(a=>action.type.startsWith(a)))) {
+			action["stack"] = new Error().stack.split("\n").slice(1); // add stack, so we can inspect in redux-devtools
+		}
+		this.dispatch_orig(action);
+	}
+	if (store.dispatch != Dispatch_WithStack) {
+		store["dispatch_orig"] = store.dispatch;
+		store.dispatch = Dispatch_WithStack;
+	}
+	const actionStacks_actionTypeIgnorePatterns = [
+		"@@reactReduxFirebase/", // ignore redux actions
+	];
+
 	/*let w = watch(()=>State());
 	store.subscribe(w((newVal, oldVal) => {
 		ProcessAction(g.lastAction, newVal, oldVal);

@@ -93,7 +93,7 @@ class TermDefinitionPanel extends BaseComponent<{term: Term, termVariantNumber: 
 
 		//let creatorOrMod = term != null && IsUserCreatorOrMod(GetUserID(), term);
 		let showDetailsURL = GetCurrentURL(true).Clone();
-		showDetailsURL.pathNodes = ["content", "terms", term._id+""];
+		showDetailsURL.pathNodes = ["database", "terms", term._id+""];
 		showDetailsURL.queryVars = [];
 
 		return (

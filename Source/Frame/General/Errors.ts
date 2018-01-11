@@ -3,7 +3,7 @@ import NotificationMessage from "../../Store/main/@NotificationMessage";
 import {LogError} from "./Logging";
 import Raven from "raven-js";
 
-if (!hotReloading) {
+if (!hasHotReloaded) {
 	//g.onerror = function(message: string, filePath: string, line: number, column: number, error: Error) {
 	g.addEventListener("error", e=> {
 		let {message, filename: filePath, lineno: line, colno: column, error} = e as {message: string, filename: string, lineno: number, colno: number, error: Error};

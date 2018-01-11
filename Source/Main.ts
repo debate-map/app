@@ -99,8 +99,8 @@ if (prodEnv && window.location.hostname != "localhost") { // if localhost, never
 
 /*let hotReloading = false;
 G({hotReloading}); declare global { let hotReloading: boolean; }*/
-g.hotReloading = false;
-declare global { let hotReloading: boolean; }
+g.hasHotReloaded = false;
+declare global { let hasHotReloaded: boolean; }
 
 // this code is excluded from production bundle
 if (__DEV__) {
@@ -109,7 +109,7 @@ if (__DEV__) {
 	if (module.hot) {
 		// setup hot module replacement
 		module.hot.accept("./Main_Hot", () => {
-			hotReloading = true;
+			hasHotReloaded = true;
 			setTimeout(()=> {
 				ReactDOM.unmountComponentAtNode(document.getElementById("root"));
 				LoadHotModules();

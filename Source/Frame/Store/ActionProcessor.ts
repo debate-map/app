@@ -72,14 +72,11 @@ export function PreDispatchAction(action: Action<any>) {
 		}
 	}
 
-	if (g.actionStacks || (devEnv && !actionStacks_actionTypeIgnorePatterns.Any(a=>action.type.startsWith(a)))) {
+	/*if (g.actionStacks || (devEnv && !actionStacks_actionTypeIgnorePatterns.Any(a=>action.type.startsWith(a)))) {
 		action["stack"] = new Error().stack.split("\n").slice(1); // add stack, so we can inspect in redux-devtools
-	}
+	}*/
+	
 }
-const actionStacks_actionTypeIgnorePatterns = [
-	"@@reactReduxFirebase/", // ignore redux actions
-];
-
 export function MidDispatchAction(action: Action<any>, newState: RootState) {
 }
 
@@ -133,7 +130,9 @@ export async function PostDispatchAction(action: Action<any>) {
 		store.dispatch({type: "PostRehydrate"}); // todo: ms this also gets triggered when there is no saved-state (ie, first load)
 	}
 	if (action.type == "PostRehydrate") {
-		LoadURL(startURL.toString());
+		if (!hasHotReloaded) {
+			LoadURL(startURL.toString());
+		}
 		//UpdateURL(false);
 		if (prodEnv && State("main", "analyticsEnabled")) {
 			Log("Initialized Google Analytics.");
