@@ -1,5 +1,11 @@
 import {SortType} from "./$map";
 
+export enum ShowChangesSinceType {
+	None,
+	SinceVisitX,
+	AllUnseenChanges,
+}
+
 export class MapInfo {
 	list_sortBy: SortType;
 	list_filter: string;
@@ -10,4 +16,7 @@ export class MapInfo {
 	playingTimeline: number;
 	playingTimeline_step: number;
 	playingTimeline_appliedStep: number;
+
+	showChangesSince_type: ShowChangesSinceType;
+	showChangesSince_visitOffset: number;
 }

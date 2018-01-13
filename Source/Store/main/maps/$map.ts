@@ -6,6 +6,8 @@ import {GetTimeline, GetTimelineStep} from "../../firebase/timelines";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
 import {TimelineStep} from "Store/firebase/timelineSteps/@TimelineStep";
 import {GetMap} from "../../firebase/maps";
+import {SimpleReducer} from "../../index";
+import {ShowChangesSinceType} from "Store/main/maps/@MapInfo";
 
 export enum SortType {
 	CreatorID = 10,
@@ -67,6 +69,9 @@ export const MapInfoReducer = CombineReducers({
 		if (action.Is(ACTMap_PlayingTimelineAppliedStepSet)) return action.payload.step;
 		return state;
 	},
+
+	showChangesSince_type: SimpleReducer(`main.maps.$any.showChangesSince_type`, ShowChangesSinceType.SinceVisitX),
+	showChangesSince_visitOffset: SimpleReducer(`main.maps.$any.showChangesSince_visitOffset`, 1),
 });
 
 export function GetSelectedNodeID_InList(mapID: number) {

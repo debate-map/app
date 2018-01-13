@@ -263,18 +263,28 @@ export default class MapUI extends BaseComponent<Props, {}> {
 	}
 
 	PostRender() {
-		let {withinPage} = this.props;
-		if (withinPage && this.scrollView)
+		let {map, withinPage} = this.props;
+		if (withinPage && this.scrollView) {
 			this.scrollView.vScrollableDOM =  $("#HomeScrollView").children(".content")[0];
+		}
+
+		let mapsViewedThisSession = g.mapsViewedThisSession || {};
+		if (map && mapsViewedThisSession[map._id] == null) {
+			let lastMapViewTimes = FromJSON(localStorage.getItem("lastMapViewTimes_" + map._id) || "[]") as number[];
+			lastMapViewTimes.Insert(0, Date.now());
+			if (lastMapViewTimes.length > 10) lastMapViewTimes.splice(-1, 1);
+			
+			localStorage.setItem("lastMapViewTimes_" + map._id, ToJSON(lastMapViewTimes));
+			mapsViewedThisSession[map._id] = true;
+			G({mapsViewedThisSession});
+		}
 	}
 
 	// load scroll from store
 	LoadScroll() {
 		let {map, rootNode, withinPage} = this.props;
 		if (this.scrollView == null) return;
-
-		// if user is already scrolling manually, return so we don't interrupt that process
-		if (this.scrollView.state.scrollOp_bar) return;
+		if (this.scrollView.state.scrollOp_bar) return; // if user is already scrolling manually, don't interrupt
 
 		let focusNode_target = GetFocusedNodePath(GetMapView(map._id)); // || map.rootNode.toString();
 		this.ScrollToNode(focusNode_target);

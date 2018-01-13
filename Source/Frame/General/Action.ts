@@ -30,6 +30,19 @@ Object.prototype._AddFunction("IsAny", Action.prototype.IsAny);
 	//return this instanceof actionType; // alternative
 }*/
 
-export function IsACTSetFor(action: Action<any>, path: any) {
-	return action.type.startsWith("ACTSet_") && action.payload["path"] == path;
+export function IsACTSetFor(action: Action<any>, path: string) {
+	if (!action.type.startsWith("ACTSet_")) return false;
+	// exact match
+	if (action.payload["path"] == path) return true;
+	// wildcard match
+	if (path.includes("$any")) {
+		let pathParts = path.split("/");
+		let actionPathParts = action.payload["path"].split("/");
+		for (let [index, pathPart] of pathParts.entries()) {
+			let matches = pathPart == actionPathParts[index] || pathPart == "$any";
+			if (!matches) return false;
+		}
+		return true;
+	}
+	return false;
 }

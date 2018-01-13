@@ -119,9 +119,9 @@ export class ACTSet extends Action<ACTSet_Payload> {
 	}
 }
 export function SimpleReducer(path: string | ((store: RootState)=>any), defaultValue = null) {
-	if (typeof path == "function") path = StorePath(path);
+	if (IsFunction(path)) path = StorePath(path);
 	return (state = defaultValue, action: Action<any>)=> {
-		if (IsACTSetFor(action, path)) return action.payload.value;
+		if (IsACTSetFor(action, path as string)) return action.payload.value;
 		return state;
 	};
 }
