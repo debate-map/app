@@ -32,7 +32,7 @@ type Props = {
 	baseData: MapNode,
 	baseRevisionData: MapNodeRevision,
 	baseLinkData: ChildEntry,
-	parent: MapNodeL3, forNew: boolean, enabled?: boolean,
+	parent: MapNodeL3, forNew: boolean, forOldRevision?: boolean, enabled?: boolean,
 	style?, onChange?: (newData: MapNode, newLinkData: ChildEntry, component: NodeDetailsUI)=>void,
 	//onSetError: (error: string)=>void,
 } & Partial<{creator: User, impactPremiseNode: MapNodeL2}>;
@@ -55,7 +55,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 
 	quoteEditor: QuoteInfoEditorUI;
 	render() {
-		let {baseData, impactPremiseNode, parent, forNew, enabled, style, onChange, creator} = this.props;
+		let {baseData, impactPremiseNode, parent, forNew, forOldRevision, enabled, style, onChange, creator} = this.props;
 		let {newData, newLinkData, newRevisionData} = this.state;
 		let firebase = store.firebase.helpers;
 		let Change = (..._)=> {
@@ -77,7 +77,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 				{/*<Div style={{fontSize: 12}}>ID: {node._id}</Div>
 				<Div mt={3} style={{fontSize: 12}}>Created at: {Moment(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)
 					} (by: {creator ? creator.displayName : `n/a`})</Div>*/}
-				{!forNew &&
+				{!forNew && !forOldRevision &&
 					<InfoTable {...propsEnhanced}/>}
 				{newData.type == MapNodeType.Claim && (claimType == ClaimType.Normal || claimType == ClaimType.Equation) && !newRevisionData.impactPremise &&
 					<RelativeToggle {...propsEnhanced}/>}

@@ -82,7 +82,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 									await new UpdateLink(E(mapID && {mapID}, {linkParentID: GetParentNodeID(path), linkChildID: node._id, linkUpdates})).Run();
 								}
 							}
-							new AddNodeRevision({revision: this.detailsUI.GetNewRevisionData()}).Run();
+							new AddNodeRevision({revision: RemoveHelpers(this.detailsUI.GetNewRevisionData())}).Run();
 						}}/>
 						{/*error && <Pre>{error.message}</Pre>*/}
 					</Row>}

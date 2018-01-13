@@ -56,6 +56,9 @@ export class HistoryPanel extends BaseComponent<HistoryPanel_Props, {}> {
 	render() {
 		let {map, node, path, creator, revisions} = this.props;
 		let mapID = map ? map._id : null;
+
+		// we want the newest ones listed first
+		revisions = revisions.OrderByDescending(a=>a._id);
 		
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
 		return (
@@ -68,7 +71,7 @@ export class HistoryPanel extends BaseComponent<HistoryPanel_Props, {}> {
 						<span style={{flex: columnWidths[3], fontWeight: 500, fontSize: 17}}>Actions</span>
 					</Row>
 				</Column>
-				<ScrollView style={{flex: 1}} contentStyle={{flex: 1, position: "relative"}}>
+				<ScrollView className="selectable" style={{flex: 1}} contentStyle={{flex: 1, position: "relative"}}>
 					{revisions.map((revision, index)=> {
 						return <RevisionEntryUI index={index} last={index == revisions.length - 1} revision={revision} node={node} path={path} map={map}/>
 					})}
@@ -107,8 +110,8 @@ class RevisionEntryUI extends BaseComponent<RevisionEntryUI_Props, {}> {
 								return (
 									<div style={{width: 500}}>
 										<NodeDetailsUI
-											baseData={node} baseRevisionData={node.current} baseLinkData={link} parent={parent}
-											forNew={false} enabled={false}/>
+											baseData={node} baseRevisionData={revision} baseLinkData={link} parent={parent}
+											forNew={false} forOldRevision={true} enabled={false}/>
 									</div>
 								);
 							}

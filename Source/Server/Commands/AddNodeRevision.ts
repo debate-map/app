@@ -36,7 +36,8 @@ export default class AddNodeRevision extends Command<{revision: MapNodeRevision}
 
 		let updates = {};
 		updates["general/lastNodeRevisionID"] = this.revisionID;
-		updates[`nodes/${revision.node}/currentRevision`] = revision;
+		updates[`nodes/${revision.node}/currentRevision`] = this.revisionID;
+		updates[`nodeRevisions/${this.revisionID}`] = revision;
 		return updates;
 	}
 }
