@@ -20,7 +20,7 @@ import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {ImageAttachment, MapNode, MapNodeL2, ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeRatingsRoot, GetRatings, GetFillPercentForRatingAverage, GetRatingAverage, GetRatingValue, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {GetUserID} from "../../../../Store/firebase/users";
-import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {MapNodeType_Info, MapNodeType, GetNodeBackgroundColor} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RootState} from "../../../../Store/index";
 import {RatingType_Info, RatingType, ratingTypes} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {Map} from "../../../../Store/firebase/maps/@Map";
@@ -63,7 +63,7 @@ import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactM
 type Props = {
 	map: Map, node: MapNodeL3, nodeView: MapNodeView, path: string, width: number, widthOverride?: number,
 	panelPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
-} & Partial<{finalNodeType: MapNodeType, form: ClaimForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
+} & Partial<{form: ClaimForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
 //@FirebaseConnect((props: Props)=>((props[`holder`] = props[`holder`] || {}), [
 /*@FirebaseConnect((props: Props)=>[
 	...GetPaths_NodeRatingsRoot(props.node._id),
@@ -78,9 +78,10 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 	render() {
 		let {map, node, nodeView, path, width, widthOverride,
 			panelPosition, useLocalPanelState, style,
-			finalNodeType, form, ratingsRoot, mainRating_average, userID} = this.props;
+			form, ratingsRoot, mainRating_average, userID} = this.props;
 		let {hovered, hoverPanel, hoverTermID, /*local_selected,*/ local_openPanel} = this.state;
-		let nodeTypeInfo = MapNodeType_Info.for[finalNodeType];
+		let nodeTypeInfo = MapNodeType_Info.for[node.type];
+		let backgroundColor = GetNodeBackgroundColor(node);
 		let barSize = 5;
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
 		let isSubnode = IsNodeSubnode(node);
@@ -135,7 +136,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 									this.SetState({hoverPanel: null});
 								}
 							}}
-							backgroundColor={nodeTypeInfo.backgroundColor} asHover={hovered}>
+							backgroundColor={backgroundColor} asHover={hovered}>
 						{/* fixes click-gap */}
 						{panelPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
 					</MapNodeUI_LeftBox>}
@@ -146,7 +147,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 					<Div style={{position: "relative", width: "100%", padding: GetPaddingForNode(node, isSubnode)}}>
 						<div style={{
 							position: "absolute", left: 0, top: 0, bottom: 0,
-							width: mainRating_fillPercent + "%", background: `rgba(${nodeTypeInfo.backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
+							width: mainRating_fillPercent + "%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
 						}}/>
 						{mainRating_mine != null &&
 							<div style={{
@@ -164,9 +165,9 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								padding: 0,
 								fontSize: expanded ? 23 : 17,
 								lineHeight: "1px", // keeps text from making meta-theses too tall
-								backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(`,`).map(a=>(parseInt(a) * .8).RoundTo(1)).join(`,`)},.7)`,
+								backgroundColor: `rgba(${backgroundColor.split(`,`).map(a=>(parseInt(a) * .8).RoundTo(1)).join(`,`)},.7)`,
 								border: "none",
-								":hover": {backgroundColor: `rgba(${nodeTypeInfo.backgroundColor.split(`,`).map(a=>(parseInt(a) * .9).RoundTo(1)).join(`,`)},.7)`},
+								":hover": {backgroundColor: `rgba(${backgroundColor.split(`,`).map(a=>(parseInt(a) * .9).RoundTo(1)).join(`,`)},.7)`},
 							}}
 							onClick={e=> {
 								store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path, expanded: !expanded, recursive: expanded && e.altKey}));
@@ -182,7 +183,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
 						padding: 5, background: "rgba(0,0,0,.7)", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 					}}>
-						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${nodeTypeInfo.backgroundColor},.7)`}}/>
+						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 						{ratingTypes.Contains(panelToShow) && (()=> {
 							let ratings = GetRatings(node._id, panelToShow as RatingType);
 							return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;

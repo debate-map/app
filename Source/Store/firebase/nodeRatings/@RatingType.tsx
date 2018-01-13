@@ -16,7 +16,7 @@ export type RatingType = "significance" | "neutrality" | "probability" | "degree
 
 export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, parent: MapNodeL3, path: string) {
 	let link = GetLinkUnderParent(node._id, parent);
-	let finalPolarity = GetFinalPolarity(link.polarity, GetNodeForm(parent));
+	let finalPolarity = link ? GetFinalPolarity(link.polarity, GetNodeForm(parent)) : Polarity.Supporting;
 	
 	let result = new RatingType_Info();
 	result.displayText = PropNameToTitle(ratingType);

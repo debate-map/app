@@ -65,7 +65,7 @@ G({env_short, devEnv, prodEnv, testEnv}); declare global { var env_short: string
 // Note: Don't reference the BakedConfig files from anywhere but here (in runtime code) -- because we want to be able to override it, below.
 //let {version, dbVersion, firebaseConfig} = devEnv ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
 let {version, firebaseConfig} = devEnv ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
-let dbVersion = 6;
+let dbVersion = 7;
 if (startURL.GetQueryVar("dbVersion") && startURL.GetQueryVar("dbVersion") != "null") {
 	dbVersion = parseInt(startURL.GetQueryVar("dbVersion"));
 	console.log("Using dbVersion: " + dbVersion);

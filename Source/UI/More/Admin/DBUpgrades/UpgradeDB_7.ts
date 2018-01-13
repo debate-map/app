@@ -15,7 +15,7 @@ AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {
 	// ==========
 
 	for (let parentNode of data.nodes.VValues(true)) {
-		for (let {name: childIDStr, value: childLink} of parentNode.children.Props(true)) {
+		for (let {name: childIDStr, value: childLink} of (parentNode.children || {}).Props(true)) {
 			let childNode = data.nodes[childIDStr];
 			childLink.polarity = childNode.type == 60 ? Polarity.Opposing : Polarity.Supporting;
 		}
@@ -42,6 +42,7 @@ AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {
 		let simplePropTransfers = ["titles", "note", "approved", "votingDisabled", "accessLevel", "voteLevel",
 			"relative", "fontSizeOverride", "widthOverride", "equation", "contentNode", "image"];
 		for (let prop of simplePropTransfers) {
+			if (node[prop] == null) continue;
 			revision[prop] = node[prop];
 			delete node[prop];
 		}
@@ -51,8 +52,10 @@ AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {
 			revision[prop] = node[prop];
 		}
 
-		revision.impactPremise = node["metaThesis"];
-		delete node["metaThesis"];
+		if (node["metaThesis"]) {
+			revision.impactPremise = node["metaThesis"];
+			delete node["metaThesis"];
+		}
 
 		data.nodeRevisions[++lastRevisionID] = revision;
 		node.currentRevision = lastRevisionID;

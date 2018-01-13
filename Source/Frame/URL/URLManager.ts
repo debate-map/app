@@ -121,7 +121,7 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 	let ownStr = viewStr.Contains(":") ? viewStr.substr(0, viewStr.indexOf(":")) : viewStr;
 	let childrenStr = viewStr.Contains(":") ? viewStr.slice(viewStr.indexOf(":") + 1, -1) : "";
 
-	let match = ownStr.match(/(L?)(^[0-9]+)/);
+	let match = ownStr.match(/^(L?)([0-9]+)/);
 	let isSubnode = match[1].length != 0;
 	let nodeID = parseInt(match[2]);
 

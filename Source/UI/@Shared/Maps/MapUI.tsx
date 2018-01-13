@@ -27,7 +27,7 @@ import Link from "../../../Frame/ReactComponents/Link";
 import {VURL} from "js-vextensions";
 import NodeUI_ForBots from "./MapNode/NodeUI_ForBots";
 import {IsNumberString} from "js-vextensions";
-import {GetNodeL3} from "../../../Store/firebase/nodes/$node";
+import {GetNodeL3, IsNodeL2, IsNodeL3} from "../../../Store/firebase/nodes/$node";
 import {GetOpenMapID, ACTSetInitialChildLimit} from "../../../Store/main";
 import {colors, styles} from "../../../Frame/UI/GlobalStyles";
 import {Button} from "react-vcomponents";
@@ -82,16 +82,16 @@ type Props = {
 	padding?: {left: number, right: number, top: number, bottom: number},
 	subNavBarWidth?: number,
 } & React.HTMLProps<HTMLDivElement>
-	& Partial<{rootNode: MapNodeL2, focusNode: string, viewOffset: {x: number, y: number}}>;
+	& Partial<{rootNode: MapNodeL3, focusNode: string, viewOffset: {x: number, y: number}}>;
 @Connect((state: RootState, {map, rootNode}: Props)=> {
 	if (rootNode == null && map && map.rootNode) {
-		rootNode = GetNodeL3(GetNode(map.rootNode), map.rootNode+"");
+		rootNode = GetNodeL3(map.rootNode, map.rootNode+"");
 	}
 
 	if (map) {
 		let nodeID = State("main", "mapViews", map._id, "rootNodeID");
 		if (isBot && nodeID) {
-			rootNode = GetNodeL3(GetNode(nodeID), nodeID+"");
+			rootNode = GetNodeL3(nodeID, nodeID+"");
 		}
 	}
 
@@ -109,6 +109,13 @@ export default class MapUI extends BaseComponent<Props, {}> {
 		padding: {left: screen.availWidth, right: screen.availWidth, top: screen.availHeight, bottom: screen.availHeight},
 		subNavBarWidth: 0,
 	};
+	static ValidateProps(props) {
+		let {rootNode} = props;
+		if (rootNode) {
+			Assert(IsNodeL2(rootNode), "Node supplied to MapUI is not level-2!");
+			Assert(IsNodeL3(rootNode), "Node supplied to MapUI is not level-3!");
+		}
+	}
 
 	scrollView: ScrollView;
 	mapUI: HTMLDivElement;

@@ -33,7 +33,7 @@ import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@M
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import {Column} from "react-vcomponents";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2} from "../../../../Store/firebase/nodes/$node";
 import FastDOM from "fastdom";
 import {Row} from "react-vcomponents";
 import Icon from "../../../../Frame/ReactComponents/Icon";
@@ -121,6 +121,11 @@ type State = {
 export default class NodeUI extends BaseComponent<Props, State> {
 	static renderCount = 0;
 	static lastRenderTime = -1;
+	static ValidateProps(props) {
+		let {node} = props;
+		Assert(IsNodeL2(node), "Node supplied to NodeUI is not level-2!");
+		Assert(IsNodeL3(node), "Node supplied to NodeUI is not level-3!");
+	}
 	
 	constructor(props) {
 		super(props);

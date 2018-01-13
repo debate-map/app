@@ -4,7 +4,7 @@ import {MapNode} from "./nodes/@MapNode";
 import {CachedTransform} from "js-vextensions";
 import {Layer} from "Store/firebase/layers/@Layer";
 import {GetNode} from "Store/firebase/nodes";
-import {GetNodeL3} from "./nodes/$node";
+import {GetNodeL3, AsNodeL3, GetNodeL2} from "./nodes/$node";
 import {GetUserLayerStatesForMap} from "./userMapInfo";
 import {emptyArray} from "../../Frame/Store/ReducerUtils";
 
@@ -66,12 +66,12 @@ export function GetSubnodesInEnabledLayersEnhanced(userID: string, map: Map, anc
 	for (let layer of layersEnabled) {
 		subnodeIDs.AddRange(GetSubnodeIDsInLayer(anchorNodeID, layer._id));
 	}
-	let subnodesEnhanced = subnodeIDs.map(id=> {
-		let child = GetNode(id);
+	let subnodesL3 = subnodeIDs.map(id=> {
+		let child = GetNodeL2(id);
 		if (child == null) return null;
-		return {...child, finalType: child.type, link: null};
+		return AsNodeL3(child);
 	});
-	return CachedTransform("GetSubnodesInEnabledLayersEnhanced", [map._id, userID, anchorNodeID], subnodesEnhanced, ()=>subnodesEnhanced);
+	return CachedTransform("GetSubnodesInEnabledLayersEnhanced", [map._id, userID, anchorNodeID], subnodesL3, ()=>subnodesL3);
 }
 
 export function ForDeleteLayer_GetError(userID: string, layer: Layer) {

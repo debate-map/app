@@ -54,7 +54,6 @@ export class MapNodeType_Info {
 	childTypes: MapNodeType[];
 	minWidth: number;
 	maxWidth: number;
-	backgroundColor: string;
 	//fontSize?: number;
 	//get fontSize() { return 14; }
 	/*mainRatingTypes: RatingType[];

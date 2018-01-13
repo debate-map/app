@@ -19,7 +19,7 @@ import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";
 import {CheckBox} from "react-vcomponents";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import NodeDetailsUI from "../NodeDetailsUI";
-import {GetClaimType, AsNodeL2} from "../../../../../Store/firebase/nodes/$node";
+import {GetClaimType, AsNodeL2, AsNodeL3} from "../../../../../Store/firebase/nodes/$node";
 import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
 import { IsUserAdmin, IsUserMod } from "../../../../../Store/firebase/userExtras";
@@ -109,7 +109,7 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 							}}/>
 					</Row>}
 				<NodeDetailsUI ref={c=>this.nodeEditorUI = GetInnerComp(c) as any} parent={null}
-					baseData={newNode.Extended({finalType: newNode.type, link: null})} baseRevisionData={newRevision} baseLinkData={this.state.newLink} forNew={true}
+					baseData={AsNodeL3(AsNodeL2(newNode, newRevision))} baseRevisionData={newRevision} baseLinkData={this.state.newLink} forNew={true}
 					onChange={(newNodeData, newLinkData, comp)=> {
 						this.SetState({newNode: newNodeData});
 					}}/>

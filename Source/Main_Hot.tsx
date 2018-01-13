@@ -124,3 +124,13 @@ function SetUpRR() {
 		G({RR});
 	});
 }
+
+// patch React.createElement to do early prop validation
+// ==========
+let createElement_old = React.createElement;
+React.createElement = function(componentClass, props) {
+	if (componentClass.ValidateProps) {
+		componentClass.ValidateProps(props);
+	}
+	return createElement_old.apply(this, arguments);
+};

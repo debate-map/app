@@ -20,7 +20,7 @@ import SocialPanel from "../../@Shared/Maps/MapNode/NodeUI/SocialPanel";
 import TagsPanel from "../../@Shared/Maps/MapNode/NodeUI/TagsPanel";
 import OthersPanel from "../../@Shared/Maps/MapNode/NodeUI/OthersPanel";
 import DetailsPanel from "../../@Shared/Maps/MapNode/NodeUI/DetailsPanel";
-import {MapNodeType, MapNodeType_Info} from "../../../Store/firebase/nodes/@MapNodeType";
+import {MapNodeType, MapNodeType_Info, GetNodeBackgroundColor} from "../../../Store/firebase/nodes/@MapNodeType";
 import Moment from "moment";
 import {GetSelectedNode_InList, ACTSelectedNode_InListSet, GetMap_List_SelectedNode_OpenPanel, ACTMap_List_SelectedNode_OpenPanelSet, ACTMapNodeListSortBySet, ACTMapNodeListFilterSet, SortType, ACTMapNodeListPageSet} from "../../../Store/main/maps/$map";
 import {GetUser, User} from "../../../Store/firebase/users";
@@ -180,9 +180,10 @@ class NodeRow extends BaseComponent<NodeRow_Props, {menuOpened: boolean}> {
 		let {menuOpened} = this.state;
 
 		let nodeEnhanced = {...node, finalPolarity: Polarity.Supporting} as MapNodeL3;
+		let backgroundColorStr = GetNodeBackgroundColor(AsNodeL3(node));
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
-		let backgroundColor = chroma(`rgba(${nodeTypeInfo.backgroundColor},.8)`).desaturate(.5);
+		let backgroundColor = chroma(`rgba(${backgroundColorStr},.8)`).desaturate(.5);
 
 		return (
 			<Row mt={first ? 0 : 5} className="cursorSet"
@@ -234,6 +235,7 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 			path = node.parents.VKeys(true)[0] + "/" + node._id;
 		}
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
+		let backgroundColor = GetNodeBackgroundColor(AsNodeL3(node));
 		let nodeView = new MapNodeView();
 		nodeView.openPanel = openPanel;
 
@@ -260,12 +262,12 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 				<MapNodeUI_LeftBox {...{map, path, node: nodeAsL3, nodeView, ratingsRoot}}
 					onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
 					onPanelButtonClick={panel=>store.dispatch(new ACTMap_List_SelectedNode_OpenPanelSet({mapID: map._id, panel}))}
-					backgroundColor={nodeTypeInfo.backgroundColor} asHover={false} inList={true} style={{marginTop: 25}}/>
+					backgroundColor={backgroundColor} asHover={false} inList={true} style={{marginTop: 25}}/>
 				<ScrollView style={{flex: 1}} contentStyle={{flex: 1}}>
 					<Column ml={10} style={{flex: 1}}>
 						{panelToShow &&
 							<div style={{position: "relative", padding: 5, background: "rgba(0,0,0,.7)", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
-								<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${nodeTypeInfo.backgroundColor},.7)`}}/>
+								<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 								{ratingTypes.Contains(panelToShow) && (()=> {
 									let ratings = GetRatings(node._id, panelToShow as RatingType);
 									return <RatingsPanel ref="ratingsPanel" node={nodeAsL3} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;

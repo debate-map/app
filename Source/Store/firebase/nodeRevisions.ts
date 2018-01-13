@@ -3,5 +3,5 @@ import {MapNodeRevision} from "./nodes/@MapNodeRevision";
 
 export function GetNodeRevision(id: number) {
 	if (id == null || IsNaN(id)) return null;
-	return GetData("nodesRevisions", id) as MapNodeRevision;
+	return GetData("nodeRevisions", id) as MapNodeRevision;
 }

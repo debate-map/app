@@ -42,7 +42,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 		// just list one of the parents as the "current parent", so code relying on a parent doesn't error
 		let path = `${nodeParents.length ? nodeParents[0]._id + "/" : ""}${node._id}`;
 		let parent = GetParentNodeL2(path);
-		let nodeL3 = AsNodeL3(node, Polarity.Supporting, null);
+		let nodeL3 = AsNodeL3(node);
 		return (
 			<ScrollView ref="scrollView"
 					//backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.content) || a == this.refs.mapUI}

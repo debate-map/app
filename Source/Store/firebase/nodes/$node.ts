@@ -110,14 +110,21 @@ export function GetNodeL2(nodeID: number | MapNode, path?: string) {
 }
 
 export function IsNodeL3(node: MapNode): node is MapNodeL2 {
-	return node["finalType"] && node["link"];
+	return node["finalPolarity"] && node["link"];
 }
-export function AsNodeL3(node: MapNode, finalPolarity: Polarity, link: ChildEntry) {
+export function AsNodeL3(node: MapNodeL2, finalPolarity?: Polarity, link?: ChildEntry) {
+	finalPolarity = finalPolarity || Polarity.Supporting;
+	link = link || {
+		_: true,
+		form: ClaimForm.Base,
+		seriesAnchor: false,
+		polarity: Polarity.Supporting,
+	};
 	return node.Extended({finalPolarity, link}) as MapNodeL3;
 }
 export function GetNodeL3(nodeID: number | MapNode | MapNodeL2, path: string) {
 	if (IsNumber(nodeID)) nodeID = GetNode(nodeID);
-	if (IsNodeL1(nodeID)) nodeID = GetNodeL2(nodeID);
+	if (nodeID && IsNodeL1(nodeID)) nodeID = GetNodeL2(nodeID);
 	if (nodeID == null) return null;
 	let node = nodeID as MapNodeL2;
 	
@@ -176,7 +183,8 @@ export function GetNodeDisplayText(node: MapNodeL2, formOrPath?: ClaimForm | str
 		if (node.current.impactPremise) {
 			let thenType = node.current.impactPremise.thenType;
 			if (IsString(formOrPath)) {
-				var polarity = GetFinalPolarityAtPath(node, formOrPath);
+				let parent = GetParentNodeL2(formOrPath);
+				var polarity = GetFinalPolarityAtPath(parent, SlicePath(formOrPath, 1));
 			} else {
 				var polarity = GetFinalPolarity(Polarity.Supporting, formOrPath);
 			}

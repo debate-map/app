@@ -60,6 +60,8 @@ AddSchema({
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 
+		currentRevision: {type: "number"},
+		
 		parents: {$ref: "ParentSet"},
 		children: {$ref: "ChildSet"},
 		childrenOrder: {items: {type: "number"}},
@@ -67,13 +69,13 @@ AddSchema({
 
 		layerPlusAnchorParents: {$ref: "LayerPlusAnchorParentSet"},
 	},
-	required: ["type", "creator", "createdAt"],
+	required: ["type", "creator", "createdAt", "currentRevision"],
 	allOf: [
 		// if an argument, require "childrenOrder" prop
 		{
 			if: {
 				properties: {
-					type: {oneOf: [{const: MapNodeType.Argument}, {const: MapNodeType.Argument}]},
+					type: {oneOf: [{const: MapNodeType.Argument}]},
 				}
 			},
 			then: {required: ["childrenOrder"]},
@@ -122,6 +124,7 @@ AddSchema({
 		_: {type: "boolean"},
 		form: {oneOf: GetValues_ForSchema(ClaimForm)},
 		seriesAnchor: {type: ["null", "boolean"]},
+		polarity: {oneOf: GetValues_ForSchema(Polarity)},
 	},
 	required: ["_"],
 }, "ChildEntry");
