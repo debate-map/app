@@ -38,7 +38,7 @@ export default class DeleteMap extends Command<{mapID: number}> {
 		newUpdates[`maps/${mapID}`] = null;
 		for (let {name: userID, value: userMapInfoSet} of this.userMapInfoSets.Props(true)) {
 			for (let {name: mapID2, value: userMapInfo} of userMapInfoSet.Props(true)) {
-				if (mapID2 == mapID) {
+				if (parseInt(mapID2) == mapID) {
 					newUpdates[`userMapInfo/${userID}/${mapID}`] = null;
 				}
 			}

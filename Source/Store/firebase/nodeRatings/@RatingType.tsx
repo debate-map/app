@@ -2,7 +2,7 @@ import {MapNode, MapNodeL2, MapNodeL3, Polarity} from "../nodes/@MapNode";
 import {Range} from "js-vextensions";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {ImpactPremise_IfType} from "./../nodes/@ImpactPremiseInfo";
-import {GetNodeForm, GetMainRatingType, GetNodeL2} from "../nodes/$node";
+import {GetNodeForm, GetMainRatingType, GetNodeL2, GetFinalPolarity, GetLinkUnderParent} from "../nodes/$node";
 import {GetNode} from "../nodes";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
@@ -15,6 +15,9 @@ export const ratingTypes = ["significance", "neutrality", "probability", "degree
 export type RatingType = "significance" | "neutrality" | "probability" | "degree" | "impact" | "strength";
 
 export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, parent: MapNodeL3, path: string) {
+	let link = GetLinkUnderParent(node._id, parent);
+	let finalPolarity = GetFinalPolarity(link.polarity, GetNodeForm(parent));
+	
 	let result = new RatingType_Info();
 	result.displayText = PropNameToTitle(ratingType);
 	result.labels = Range(0, 100);
@@ -43,7 +46,7 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 		let premiseCountrStrMap = {All: `all of the premises`, AnyTwo: `at least two of the premises`, Any: `at least one of the premises.`};
 		//let premiseCountrStrMap = {All: `all of its premises`, AnyTwo: `at least two of its premises`, Any: `at least one of its premises.`};
 		let premiseCountStr = premiseCountrStrMap[ImpactPremise_IfType[node.current.impactPremise.ifType]];
-		let shiftType = parent.type == MapNodeType.Argument ? "raise" : "lower";
+		let shiftType = finalPolarity == Polarity.Supporting ? "raise" : "lower";
 
 		/*return (
 			<span>

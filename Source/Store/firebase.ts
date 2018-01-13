@@ -13,6 +13,7 @@ import {ViewedNodeSet} from "./firebase/userViewedNodes/@ViewedNodeSet";
 import { ForumData } from "firebase-forum";
 import { Layer } from "Store/firebase/layers/@Layer";
 import {UserMapInfoSet} from "./firebase/userMapInfo/@UserMapInfo";
+import {MapNodeRevision} from "./firebase/nodes/@MapNodeRevision";
 
 export interface FirebaseData {
 	forum: ForumData;
@@ -23,6 +24,7 @@ export interface FirebaseData {
 	nodes: {[key: number]: MapNode};
 	nodeExtras: {[key: number]: any};
 	nodeRatings: {[key: number]: RatingsRoot}; // $nodeID (key) -> $ratingType -> $userID -> value
+	nodeRevisions: {[key: number]: MapNodeRevision};
 	nodeStats: {[key: number]: MapNodeStats};
 	nodeViewers: {[key: number]: ViewerSet};
 	terms: {[key: number]: Term};

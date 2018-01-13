@@ -3,6 +3,7 @@ export interface GeneralData {
 	lastLayerID: number;
 	lastMapID: number;
 	lastNodeID: number;
+	lastNodeRevisionID: number;
 	lastTermID: number;
 	lastTermComponentID: number;
 	lastTimelineID: number;

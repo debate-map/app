@@ -56,8 +56,6 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	}
 	if (node.type == MapNodeType.Argument)
 		return [{type: "strength", main: true}];
-	if (node.type == MapNodeType.Argument)
-		return [{type: "strength", main: true}];
 	Assert(false);
 }
 export function GetMainRatingType(node: MapNodeL2): RatingType {
@@ -99,8 +97,8 @@ export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision) {
 	return node.Extended({current: currentRevision}) as MapNodeL2;
 }
 export function GetNodeL2(nodeID: number | MapNode, path?: string) {
-	if (nodeID == null) return null;
 	if (IsNumber(nodeID)) nodeID = GetNode(nodeID);
+	if (nodeID == null) return null;
 	let node = nodeID as MapNode;
 	
 	// if any of the data in a MapNodeL2 is not loaded yet, just return null (we want it to be all or nothing)
@@ -118,9 +116,9 @@ export function AsNodeL3(node: MapNode, finalPolarity: Polarity, link: ChildEntr
 	return node.Extended({finalPolarity, link}) as MapNodeL3;
 }
 export function GetNodeL3(nodeID: number | MapNode | MapNodeL2, path: string) {
-	if (nodeID == null) return null;
 	if (IsNumber(nodeID)) nodeID = GetNode(nodeID);
 	if (IsNodeL1(nodeID)) nodeID = GetNodeL2(nodeID);
+	if (nodeID == null) return null;
 	let node = nodeID as MapNodeL2;
 	
 	// if any of the data in a MapNodeL3 is not loaded yet, just return null (we want it to be all or nothing)
