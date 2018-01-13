@@ -9,7 +9,7 @@ import {GetNodeForm, GetRatingTypesForNode} from "../../../../Store/firebase/nod
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 
 type Props = {
-	node: MapNodeL3, mainBoxOffset: Vector2i, childNodes: MapNodeL2[],
+	node: MapNodeL3, mainBoxOffset: Vector2i, childNodes: MapNodeL3[],
 	//childBoxOffsets: Vector2i[],
 	childBoxOffsets: {[key: number]: Vector2i},
 	shouldUpdate: boolean
@@ -37,7 +37,7 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					let child = childNodes.FirstOrX(a=>a._id == childIDStr.ToInt());
 					if (child == null) return null;
 
-					let backgroundColor = GetNodeBackgroundColor(node);
+					let backgroundColor = GetNodeBackgroundColor(child);
 
 					/*var start = mainBoxOffset;
 					var startControl = start.Plus(30, 0);
