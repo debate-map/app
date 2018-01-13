@@ -20,6 +20,8 @@ import {GetParentNode, GetParentNodeL3} from "../../../../Store/firebase/nodes";
 import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import {GetNode} from "Store/firebase/nodes";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
+import { IsUserCreatorOrMod } from "Store/firebase/userExtras";
+import {GetUserID} from "Store/firebase/users";
 
 type Props = {
 	map: Map, path: string, node: MapNodeL3, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
@@ -111,7 +113,9 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="discussion" text="Discussion"/>
 					{/*<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="social" text="Social"/>
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="tags" text="Tags"/>*/}
-					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="details" text="Details"/>
+					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="details"
+						text={"Details" + (IsUserCreatorOrMod(GetUserID(), node) ? " (edit)" : "")}/>
+					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="history" text="History"/>
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="others" text="Others"/>
 					<Button text="..."
 						style={{

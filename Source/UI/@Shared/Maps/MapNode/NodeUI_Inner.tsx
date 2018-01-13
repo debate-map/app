@@ -53,6 +53,7 @@ import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
 import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import SubPanel from "./NodeUI_Inner/SubPanel";
 import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
+import {HistoryPanel} from "./NodeUI/HistoryPanel";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -75,6 +76,7 @@ type Props = {
 	userID: GetUserID(),
 }))
 export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, hoverPanel: string, hoverTermID: number, /*local_selected: boolean,*/ local_openPanel: string}> {
+	static defaultProps = {panelPosition: "left"};
 	render() {
 		let {map, node, nodeView, path, width, widthOverride,
 			panelPosition, useLocalPanelState, style,
@@ -197,6 +199,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						{panelToShow == "social" && <SocialPanel/>}
 						{panelToShow == "tags" && <TagsPanel/>}
 						{panelToShow == "details" && <DetailsPanel map={map} node={node} path={path}/>}
+						{panelToShow == "history" && <HistoryPanel map={map} node={node} path={path}/>}
 						{panelToShow == "others" && <OthersPanel map={map} node={node} path={path}/>}
 					</div>}
 			</div>

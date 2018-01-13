@@ -10,6 +10,7 @@ export class MapNodeRevision {
 		this.Extend(initialData);
 	}
 
+	_id?: number;
 	node: number;
 	creator?: string;
 	createdAt: number;

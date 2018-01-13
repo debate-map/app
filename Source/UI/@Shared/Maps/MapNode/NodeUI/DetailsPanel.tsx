@@ -53,8 +53,6 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 		let {map, node, path, creator} = this.props;
 		let mapID = map ? map._id : null;
 		let {dataError} = this.state;
-		let firebase = store.firebase.helpers;
-		//let {error} = this.state;
 
 		let isSubnode = IsNodeSubnode(node);
 
