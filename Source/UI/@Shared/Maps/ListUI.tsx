@@ -279,7 +279,7 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 								{panelToShow == "social" && <SocialPanel/>}
 								{panelToShow == "tags" && <TagsPanel/>}
 								{panelToShow == "details" && <DetailsPanel node={nodeAsL3} path={path}/>}
-								{panelToShow == "others" && <OthersPanel node={node} path={path}/>}
+								{panelToShow == "others" && <OthersPanel node={nodeAsL3} path={path}/>}
 							</div>}
 					</Column>
 				</ScrollView>

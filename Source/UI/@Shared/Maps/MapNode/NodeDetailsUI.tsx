@@ -77,8 +77,6 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 				{/*<Div style={{fontSize: 12}}>ID: {node._id}</Div>
 				<Div mt={3} style={{fontSize: 12}}>Created at: {Moment(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)
 					} (by: {creator ? creator.displayName : `n/a`})</Div>*/}
-				{!forNew && !forOldRevision &&
-					<InfoTable {...propsEnhanced}/>}
 				{newData.type == MapNodeType.Claim && (claimType == ClaimType.Normal || claimType == ClaimType.Equation) && !newRevisionData.impactPremise &&
 					<RelativeToggle {...propsEnhanced}/>}
 				{(newData.type != MapNodeType.Claim || claimType == ClaimType.Normal) &&
@@ -104,7 +102,6 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 				</Row>
 				{!forNew &&
 					<AdvancedOptions {...propsEnhanced}/>}
-				<AtThisLocation {...propsEnhanced}/>
 				{!forNew && enabled && newDataAsL2.type == MapNodeType.Argument && newData.childrenOrder && !isArgument_any &&
 					<ChildrenOrder {...propsEnhanced}/>}
 			</Column>
@@ -139,26 +136,6 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 }
 
 type Props_Enhanced = Props & State & {newDataAsL2, Change};
-
-class InfoTable extends BaseComponent<Props_Enhanced, {}> {
-	render() {
-		let {newData, creator} = this.props;
-		return (
-			<table className="selectableAC lighterBackground" style={{marginBottom: 5, /*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>
-				<thead>
-					<tr><th>ID</th><th>Creator</th><th>Created at</th></tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td>{newData._id}</td>
-						<td>{creator ? creator.displayName : `n/a`}</td>
-						<td>{Moment(newData.createdAt).format(`YYYY-MM-DD HH:mm:ss`)}</td>
-					</tr>
-				</tbody>
-			</table>
-		);
-	}
-}
 
 class RelativeToggle extends BaseComponent<Props_Enhanced, {}> {
 	render() {
@@ -302,38 +279,6 @@ class AdvancedOptions extends BaseComponent<Props_Enhanced, {}> {
 						value={newRevisionData.accessLevel || AccessLevel.Basic}
 						onChange={val=>Change(val == AccessLevel.Basic ? delete newRevisionData.accessLevel : newRevisionData.accessLevel = val)}/>
 				</Row>
-			</Column>
-		);
-	}
-}
-
-class AtThisLocation extends BaseComponent<Props_Enhanced, {}> {
-	render() {
-		let {newData, newDataAsL2, newRevisionData, forNew, enabled, newLinkData, Change} = this.props;
-		if (newData.type != MapNodeType.Claim) return <div/>;
-		if (newLinkData == null) return <div/>; // if the root of a map, or subnode
-
-		let claimType = GetClaimType(newDataAsL2);
-		let canSetAsNegation = claimType == ClaimType.Normal && !newRevisionData.impactPremise && newLinkData.form != ClaimForm.YesNoQuestion;
-		let canSetAsSeriesAnchor = claimType == ClaimType.Equation && !newRevisionData.equation.isStep; //&& !creating;
-		if (!canSetAsNegation && !canSetAsSeriesAnchor) return <div/>;
-		
-		return (
-			<Column mt={10}>
-				<Row style={{fontWeight: "bold"}}>At this location:</Row>
-				{canSetAsNegation &&
-					<Row style={{display: "flex", alignItems: "center"}}>
-						<Pre>Show as negation: </Pre>
-						<CheckBox enabled={enabled} checked={newLinkData.form == ClaimForm.Negation}
-							onChange={val=>Change(newLinkData.form = val ? ClaimForm.Negation : ClaimForm.Base)}/>
-					</Row>}
-				{canSetAsSeriesAnchor &&
-					<Row style={{display: "flex", alignItems: "center"}}>
-						<Pre>Show as series anchor: </Pre>
-						<CheckBox enabled={enabled} checked={newLinkData.seriesAnchor}
-							//onChange={val=>Change(val ? newLinkData.isStep = true : delete newLinkData.isStep)}/>
-							onChange={val=>Change(newLinkData.seriesAnchor = val || null)}/>
-					</Row>}
 			</Column>
 		);
 	}
