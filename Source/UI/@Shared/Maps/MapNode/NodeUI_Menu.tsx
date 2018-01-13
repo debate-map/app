@@ -111,7 +111,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							}
 						}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node, path, copiedNode, permissions) &&
-					<VMenuItem text={`Paste${copiedNode_asCut ? "" : " as link"}: "${GetNodeDisplayText(copiedNode, formForChildren).KeepAtMost(50)}"`}
+					<VMenuItem text={`Paste${copiedNode_asCut ? "" : " as link"}: "${GetNodeDisplayText(copiedNode, null, formForChildren).KeepAtMost(50)}"`}
 						style={styles.vMenuItem} onClick={e=> {
 							if (e.button != 0) return;
 							if (userID == null) return ShowSignInPopup();
@@ -138,7 +138,7 @@ If not, paste the argument as a clone instead.`
 							}
 						}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node, path, copiedNode.Extended({_id: -1}), permissions) && !copiedNode_asCut &&
-					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, formForChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async e=> {
+					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, null, formForChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 

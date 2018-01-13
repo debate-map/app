@@ -11,7 +11,8 @@ import {GetNode} from "Store/firebase/nodes";
 import {GetAsync} from "Frame/Database/DatabaseHelpers";
 
 export default class AddNodeRevision extends Command<{revision: MapNodeRevision}> {
-	asSubcommand = false; // must be set to true, by a parent command, for this command to validate
+	lastNodeRevisionID_addAmount = 0;
+	
 	Validate_Early() {
 		let {revision} = this.payload;
 	}
@@ -21,7 +22,7 @@ export default class AddNodeRevision extends Command<{revision: MapNodeRevision}
 	async Prepare() {
 		let {revision} = this.payload;
 
-		this.revisionID = (await GetDataAsync("general", "lastNodeRevisionID")) + 1;
+		this.revisionID = (await GetDataAsync("general", "lastNodeRevisionID")) + this.lastNodeRevisionID_addAmount + 1;
 		revision.creator = this.userInfo.id;
 		revision.createdAt = Date.now();
 		this.node_oldData = await GetAsync(()=>GetNode(revision.node));

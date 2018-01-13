@@ -532,7 +532,7 @@ class ChildLimitBar extends BaseComponent
 	}
 }
 
-function GetMeasurementInfoForNode(node: MapNodeL2, path: string) {
+function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 	let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 	let displayText = GetNodeDisplayText(node, path);

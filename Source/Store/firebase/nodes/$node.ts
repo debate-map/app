@@ -167,10 +167,11 @@ export function GetClaimFormUnderParent(node: MapNode, parent: MapNode): ClaimFo
 	return link.form;
 }*/
 export function GetNodeForm(node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2) {
-	let parent: MapNodeL2 = IsString(pathOrParent) ? GetParentNodeL2(pathOrParent as string) : pathOrParent as MapNodeL2;
 	if ((node as MapNodeL3).link) {
 		return (node as MapNodeL3).link.form;
 	}
+	
+	let parent: MapNodeL2 = IsString(pathOrParent) ? GetParentNodeL2(pathOrParent as string) : pathOrParent as MapNodeL2;
 	let link = GetLinkUnderParent(node._id, parent);
 	if (link == null) return ClaimForm.Base;
 	return link.form;
@@ -188,17 +189,16 @@ export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
 }
 
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
-export function GetNodeDisplayText(node: MapNodeL2, formOrPath?: ClaimForm | string): string {
+export function GetNodeDisplayText(node: MapNodeL2, path?: string, form?: ClaimForm): string {
+	form = form || GetNodeForm(node, path);
+
 	if (node.type == MapNodeType.Claim) {
 		if (node.current.impactPremise) {
+			Assert(path, "Path must be supplied if getting display-text for an impact-premise.");
 			let thenType = node.current.impactPremise.thenType;
-			if (IsString(formOrPath)) {
-				let parent = GetParentNodeL2(formOrPath);
-				var polarity = GetFinalPolarityAtPath(parent, SlicePath(formOrPath, 1));
-			} else {
-				var polarity = GetFinalPolarity(Polarity.Supporting, formOrPath);
-			}
-			return `If ${GetImpactPremiseIfTypeDisplayText(node.current.impactPremise.ifType)} premises below are true, they ${GetImpactPremiseThenTypeDisplayText(thenType, polarity)}.`;
+			let argument = GetParentNodeL2(path);
+			var argumentFinalPolarity = GetFinalPolarityAtPath(argument, SlicePath(path, 1));
+			return `If ${GetImpactPremiseIfTypeDisplayText(node.current.impactPremise.ifType)} premises below are true, they ${GetImpactPremiseThenTypeDisplayText(thenType, argumentFinalPolarity)}.`;
 		}
 		if (node.current.equation) {
 			let result = node.current.equation.text;
@@ -237,8 +237,7 @@ export function GetNodeDisplayText(node: MapNodeL2, formOrPath?: ClaimForm | str
 				+ `.`;
 		}
 
-		if (formOrPath) {
-			let form = typeof formOrPath == "string" ? GetNodeForm(node, formOrPath) : formOrPath;
+		if (form) {
 			if (form == ClaimForm.Negation)
 				return node.current.titles["negation"] || "[negation title not set]";
 			if (form == ClaimForm.YesNoQuestion)

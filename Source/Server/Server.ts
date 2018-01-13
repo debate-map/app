@@ -29,7 +29,7 @@ export function AddSchema(schema, name: string) {
 }
 
 export function GetSchemaJSON(name: string) {
-	return schemaJSON[name];
+	return Clone(schemaJSON[name]);
 }
 
 var schemaAddListeners = {};

@@ -116,7 +116,7 @@ function GetDataStrForProp(ownStr: string, propChar: string) {
 	return ownStr.substring(dataStart, ownStr.indexOf(")", dataStart));
 }
 function ParseNodeView(viewStr: string): [number, MapNodeView] {
-	let nodeView = {} as MapNodeView;
+	let nodeView = new MapNodeView();
 
 	let ownStr = viewStr.Contains(":") ? viewStr.substr(0, viewStr.indexOf(":")) : viewStr;
 	let childrenStr = viewStr.Contains(":") ? viewStr.slice(viewStr.indexOf(":") + 1, -1) : "";
@@ -142,7 +142,6 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 		nodeView.expanded = true;
 	else if (childrenStr && childrenStr.length) {
 		nodeView.expanded = true;
-		nodeView.children = {};
 
 		let childStrings = [];
 		let depth = 0;

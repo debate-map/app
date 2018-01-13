@@ -49,7 +49,7 @@ export default class QuoteInfoEditorUI extends BaseComponent
 					<Row key={0} mt={5}>Preview:</Row>,
 					<Column key={1} mt={5}>
 						<Pre style={{padding: 5, background: `rgba(255,255,255,.2)`, borderRadius: 5}}>
-							{GetNodeDisplayText({type: MapNodeType.Claim, contentNode: CleanUpdatedContentNode(Clone(newData))} as any, ClaimForm.Base)}
+							{GetNodeDisplayText({type: MapNodeType.Claim, contentNode: CleanUpdatedContentNode(Clone(newData))} as any, null, ClaimForm.Base)}
 							<SubPanel_Quote contentNode={newData} fontSize={15}/>
 						</Pre>
 					</Column>

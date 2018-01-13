@@ -56,7 +56,7 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 			approved: true,
 		});
 		let newLink = E({_: true}, newNode.type == MapNodeType.Claim && {form: ClaimForm.Base}) as ChildEntry; // not actually used
-		this.state = {newNode, newLink} as any;
+		this.state = {newNode, newRevision, newLink} as any;
 	}
 	UpdateOKButton() {
 		let {boxController} = this.props;
@@ -109,9 +109,9 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 							}}/>
 					</Row>}
 				<NodeDetailsUI ref={c=>this.nodeEditorUI = GetInnerComp(c) as any} parent={null}
-					baseData={AsNodeL3(AsNodeL2(newNode, newRevision))} baseRevisionData={newRevision} baseLinkData={this.state.newLink} forNew={true}
-					onChange={(newNodeData, newLinkData, comp)=> {
-						this.SetState({newNode: newNodeData});
+					baseData={AsNodeL3(AsNodeL2(newNode, newRevision))} baseRevisionData={newRevision} baseLinkData={newLink} forNew={true}
+					onChange={(newNodeData, newRevisionData, newLinkData, comp)=> {
+						this.SetState({newNode: newNodeData, newRevision: newRevisionData, newLink: newLinkData});
 					}}/>
 				{/*validationError && <Row mt={3} style={{color: "rgba(255,200,200,.5)"}}>{FinalizeValidationError(validationError)}</Row>*/}
 			</Column>
@@ -136,13 +136,16 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 
 	async OnOK() {
 		let {mapID, anchorNode, anchorNodePath} = this.props;
-		let {layer, newNode, newLink} = this.state;
+		let {layer, newNode, newRevision, newLink} = this.state;
 
 		/*if (validationError) {
 			return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`}));
 		}*/
 
-		let newNodeID = await new AddSubnode({layerID: layer._id, anchorNodeID: anchorNode._id, subnode: newNode}).Run();
+		let newNodeID = await new AddSubnode({
+			layerID: layer._id, anchorNodeID: anchorNode._id,
+			subnode: newNode, subnodeRevision: newRevision, //link: newLink,
+		}).Run();
 		//store.dispatch(new ACTMapNodeExpandedSet_InLayer({mapID, anchorNodePath, layerID: layer._id, layerPath: newNodeID, expanded: true, recursive: false}));
 	}
 }

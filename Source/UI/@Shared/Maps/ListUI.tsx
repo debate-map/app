@@ -179,7 +179,13 @@ class NodeRow extends BaseComponent<NodeRow_Props, {menuOpened: boolean}> {
 		let {map, node, first, creator, selected} = this.props;
 		let {menuOpened} = this.state;
 
-		let nodeEnhanced = {...node, finalPolarity: Polarity.Supporting} as MapNodeL3;
+		let nodeL3 = AsNodeL3(node, Polarity.Supporting);
+		let path = ""+node._id;
+		// impact-premises require a path for the GetNodeDisplayText() function, so create a short one which includes just the parent argument-node
+		if (node.current.impactPremise) {
+			path = node.parents.VKeys(true)[0] + "/" + path;
+		}
+
 		let backgroundColorStr = GetNodeBackgroundColor(AsNodeL3(node));
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
@@ -198,11 +204,11 @@ class NodeRow extends BaseComponent<NodeRow_Props, {menuOpened: boolean}> {
 						if (e.button != 2) return false;
 						this.SetState({menuOpened: true});
 					}}>
-				<span style={{flex: columnWidths[0]}}>{GetNodeDisplayText(node)}</span>
+				<span style={{flex: columnWidths[0]}}>{GetNodeDisplayText(node, path)}</span>
 				<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
 				<span style={{flex: columnWidths[2]}}>{Moment(node.createdAt).format("YYYY-MM-DD")}</span>
 				{/*<NodeUI_Menu_Helper {...{map, node}}/>*/}
-				{menuOpened && <NodeUI_Menu {...{map, node: nodeEnhanced, path: ""+node._id, inList: true}}/>}
+				{menuOpened && <NodeUI_Menu {...{map, node: nodeL3, path: ""+node._id, inList: true}}/>}
 			</Row>
 		);
 	}

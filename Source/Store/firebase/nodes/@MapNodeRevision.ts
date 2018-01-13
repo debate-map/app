@@ -64,7 +64,7 @@ AddSchema({
 	},
 	required: ["node", "creator", "createdAt"],
 	allOf: [
-		// if not a impact-premise or contentNode, require "titles" prop
+		// if not an impact-premise or contentNode, require "titles" prop
 		{
 			if: {prohibited: ["impactPremise", "equation", "contentNode", "image"]},
 			then: {required: ["titles"]},

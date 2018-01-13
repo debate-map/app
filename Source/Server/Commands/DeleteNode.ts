@@ -16,7 +16,7 @@ import {GetNodeRevisions} from "../../Store/firebase/nodeRevisions";
 
 @MapEdit
 @UserEdit
-export default class DeleteNode extends Command<{mapID: number, nodeID: number, asPartOfMapDelete?: boolean, asSubcommand?: boolean}> {
+export default class DeleteNode extends Command<{mapID: number, nodeID: number, asPartOfMapDelete?: boolean}> {
 	oldData: MapNodeL2;
 	oldRevisions: MapNodeRevision[];
 	oldParentChildrenOrders: number[][];
@@ -25,7 +25,7 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 	viewerIDs_main: number[];
 	viewerIDs_impactPremise: number[];
 	async Prepare() {
-		let {mapID, nodeID, asPartOfMapDelete, asSubcommand} = this.payload;
+		let {mapID, nodeID, asPartOfMapDelete} = this.payload;
 		this.oldData = await GetAsync_Raw(()=>GetNodeL2(nodeID));
 		this.oldRevisions = await GetAsync(()=>GetNodeRevisions(nodeID));
 
@@ -36,7 +36,7 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 		// this works, because we only let you delete a node when it has no non-impact-premise children
 		this.impactPremiseID = this.oldData.type == MapNodeType.Argument ? this.oldData.children.VKeys()[0].ToInt() : null;
 		if (this.impactPremiseID) {
-			this.sub_deleteImpactPremise = new DeleteNode({mapID, nodeID: this.impactPremiseID, asPartOfMapDelete, asSubcommand: true});
+			this.sub_deleteImpactPremise = new DeleteNode({mapID, nodeID: this.impactPremiseID, asPartOfMapDelete}).MarkAsSubcommand();
 			await this.sub_deleteImpactPremise.Prepare();
 		}
 
@@ -50,10 +50,10 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 		let normalChildCount = (this.oldData.children || {}).VKeys(true).length;
 		if (this.impactPremiseID) normalChildCount--;
 		Assert(normalChildCount == 0, "Cannot delete this node until all its (non-impact-premise) children have been unlinked or deleted.");*/
-		let {mapID, asSubcommand} = this.payload;
-		let earlyError = await GetAsync(()=>ForDelete_GetError(this.userInfo.id, GetMap(mapID), this.oldData, this.payload.asPartOfMapDelete));
+		let {mapID} = this.payload;
+		let earlyError = await GetAsync(()=>ForDelete_GetError(this.userInfo.id, GetMap(mapID), this.oldData, this.payload.asPartOfMapDelete, this.asSubcommand));
 		Assert(earlyError == null, earlyError);
-		Assert(this.oldData.current.impactPremise == null || asSubcommand, "Cannot delete an impact-premise directly. Instead, delete the argument node.");
+		//Assert(this.oldData.current.impactPremise == null || this.asSubcommand, "Cannot delete an impact-premise directly. Instead, delete the argument node.");
 		if (this.sub_deleteImpactPremise) {
 			await this.sub_deleteImpactPremise.Validate();
 		}

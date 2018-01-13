@@ -30,9 +30,9 @@ export enum ImpactPremise_ThenType {
 }
 AddSchema({oneOf: GetValues_ForSchema(ImpactPremise_ThenType)}, "ImpactPremise_ThenType");
 
-export function GetImpactPremiseThenTypeDisplayText(thenType: ImpactPremise_ThenType, polarity: Polarity) {
+export function GetImpactPremiseThenTypeDisplayText(thenType: ImpactPremise_ThenType, argumentPolarity: Polarity) {
 	if (thenType == ImpactPremise_ThenType.Impact) {
-		return polarity == Polarity.Supporting ? "strengthen the parent" : "weaken the parent";
+		return argumentPolarity == Polarity.Supporting ? "strengthen the parent" : "weaken the parent";
 	}
-	return polarity == Polarity.Supporting ? "guarantee the parent true" : "guarantee the parent false";
+	return argumentPolarity == Polarity.Supporting ? "guarantee the parent true" : "guarantee the parent false";
 }

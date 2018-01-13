@@ -10,16 +10,16 @@ import AddNode from "./AddNode";
 import {Layer} from "Store/firebase/layers/@Layer";
 import {GetAsync, GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
 import {GetLayer} from "../../Store/firebase/layers";
+import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 
 @UserEdit
-export default class AddSubnode extends Command<{layerID: number, anchorNodeID: number, subnode: MapNode}> {
+export default class AddSubnode extends Command<{layerID: number, anchorNodeID: number, subnode: MapNode, subnodeRevision: MapNodeRevision}> {
 	sub_addNode: AddNode;
 	layer_oldData: Layer;
 	async Prepare() {
-		let {layerID, anchorNodeID, subnode} = this.payload;
+		let {layerID, anchorNodeID, subnode, subnodeRevision} = this.payload;
 
-		this.sub_addNode = new AddNode({node: subnode});
-		this.sub_addNode.asSubcommand = true;
+		this.sub_addNode = new AddNode({node: subnode, revision: subnodeRevision}).MarkAsSubcommand();
 		await this.sub_addNode.Prepare();
 
 		this.layer_oldData = await GetAsync_Raw(()=>GetLayer(layerID));

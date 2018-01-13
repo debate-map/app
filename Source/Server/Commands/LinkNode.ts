@@ -12,6 +12,11 @@ import {UserEdit} from "../CommandMacros";
 @MapEdit
 @UserEdit
 export default class LinkNode extends Command<{mapID: number, parentID: number, childID: number, childForm: ClaimForm}> {
+	Validate_Early() {
+		let {parentID, childID} = this.payload
+		Assert(parentID != childID, "Parent-id and child-id cannot be the same!");
+	}
+	
 	parent_oldChildrenOrder: number[];
 	/*async Prepare(parent_oldChildrenOrder_override?: number[]) {
 		let {parentID, childID, childForm} = this.payload;

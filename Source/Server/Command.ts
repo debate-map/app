@@ -36,14 +36,22 @@ export abstract class Command<Payload> {
 	// these methods are executed on the server (well, will be later)
 	// ==========
 
+	// parent commands should call MarkAsSubcommand() immediately after setting a subcommand's payload
+	asSubcommand = false;
+	MarkAsSubcommand() {
+		this.asSubcommand = true;
+		this.Validate_Early();
+		return this;
+	}
+
 	/** [sync] Validates the payload data. (ie. the validation that doesn't require accessing the database) */
-	Validate_Early() {};
+	Validate_Early() {}
 	/** [async] Transforms the payload data, combines it with database data, and so on, in preparation for the database-updates-map construction. */
-	abstract Prepare(): Promise<void>;
+	abstract Prepare(): Promise<void>
 	/** [async] Validates the prepared data, mostly using ajv shape-validation. */
-	abstract Validate(): Promise<void>;
+	abstract Validate(): Promise<void>
 	/** [sync] Retrieves the actual database updates that are to be made. (so we can do it in one atomic call) */
-	abstract GetDBUpdates(): {};
+	abstract GetDBUpdates(): {}
 
 	/** [async] Validates the data, prepares it, and executes it -- thus applying it into the database. */
 	async Run() {
