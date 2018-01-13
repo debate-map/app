@@ -9,6 +9,7 @@ import { UserEdit, MapEdit } from "Server/CommandMacros";
 import AddNode from "./AddNode";
 import { MapNodeRevision } from "Store/firebase/nodes/@MapNodeRevision";
 import LinkNode from "./LinkNode";
+import AddNodeRevision from "./AddNodeRevision";
 
 @MapEdit
 @UserEdit
@@ -18,23 +19,33 @@ export default class AddChildNode extends Command
 			impactPremiseNode?: MapNode, impactPremiseNodeRevision?: MapNodeRevision, asMapRoot?: boolean,
 		}> {
 	Validate_Early() {
-		let {node, link, impactPremiseNode, asMapRoot} = this.payload;
+		let {node, revision, link, impactPremiseNode, asMapRoot} = this.payload;
 		if (!asMapRoot) {
 			Assert(node.parents && node.parents.VKeys().length == 1, `Node must have exactly one parent`);
 		}
+		Assert(node.currentRevision == null, "Cannot specifiy node's revision-id. It will be generated automatically.");
+		Assert(revision.node == null, "Cannot specifiy revision's node-id. It will be generated automatically.");
 	}
 
 	sub_addNode: AddNode;
+	sub_addRevision: AddNodeRevision;
 	sub_addImpactPremise: AddNode;
 	sub_linkImpactPremise: LinkNode;
 	parentID: number;
 	parent_oldChildrenOrder: number[];
 	async Prepare() {
-		let {mapID, node, link, impactPremiseNode, asMapRoot} = this.payload;
+		let {mapID, node, revision, link, impactPremiseNode, asMapRoot} = this.payload;
 
 		this.sub_addNode = new AddNode({node});
 		this.sub_addNode.asSubcommand = true;
 		await this.sub_addNode.Prepare();
+
+		this.sub_addRevision = new AddNodeRevision({revision});
+		this.sub_addRevision.asSubcommand = true;
+		await this.sub_addRevision.Prepare();
+
+		node.currentRevision = this.sub_addRevision.revisionID;
+		revision.node = this.sub_addNode.nodeID;
 
 		if (impactPremiseNode) {
 			this.sub_addImpactPremise = new AddNode({node: impactPremiseNode});
@@ -56,6 +67,7 @@ export default class AddChildNode extends Command
 	async Validate() {
 		let {node, link, impactPremiseNode, asMapRoot} = this.payload;
 		await this.sub_addNode.Validate();
+		await this.sub_addRevision.Validate();
 		if (impactPremiseNode) {
 			await this.sub_addImpactPremise.Validate();
 			await this.sub_linkImpactPremise.Validate();
@@ -68,6 +80,7 @@ export default class AddChildNode extends Command
 	GetDBUpdates() {
 		let {node, link, impactPremiseNode, asMapRoot} = this.payload;
 		let updates = this.sub_addNode.GetDBUpdates();
+		updates = MergeDBUpdates(updates, this.sub_addRevision.GetDBUpdates());
 		if (impactPremiseNode) {
 			updates = MergeDBUpdates(updates, this.sub_addImpactPremise.GetDBUpdates());
 			updates = MergeDBUpdates(updates, this.sub_linkImpactPremise.GetDBUpdates());

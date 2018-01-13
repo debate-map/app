@@ -68,9 +68,6 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 			result.description = `If ${premiseCountStr} of this argument were true (to the highest extent), ${""
 				}how much would it impact your ${grandParentRatingType} rating for the parent claim? (0: not at all, 50: moderately, 100: game-changer)`;
 			let supporting = parent.link.polarity == Polarity.Supporting;
-			result.labels = Range(0, 100);
-			//result.values = supporting ? Range(0, 100, 2) : Range(100, 0, 2);
-			result.values = Range(0, 100, 2);
 		}
 	} else {
 		Assert(false, `Invalid rating type: ${ratingType}`);

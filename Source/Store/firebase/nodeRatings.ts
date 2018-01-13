@@ -8,6 +8,7 @@ import {GetNodeChildren, GetNode, GetNodeChildrenL2} from "./nodes";
 import {ImpactPremise_ThenType} from "./nodes/@ImpactPremiseInfo";
 import {ClaimForm, MapNodeL3} from "./nodes/@MapNode";
 import {GetNodeL2} from "./nodes/$node";
+import {MapNodeType} from "./nodes/@MapNodeType";
 
 export function GetNodeRatingsRoot(nodeID: number) {
 	//RequestPaths(GetPaths_NodeRatingsRoot(nodeID));
@@ -90,5 +91,6 @@ export function TransformRatingForContext(ratingValue: number, reverseRating: bo
 	return nodeReversed;
 }*/
 export function ShouldRatingTypeBeReversed(node: MapNodeL3) {
-	return node.finalPolarity != node.link.polarity;
+	//return node.type == MapNodeType.Argument && node.finalPolarity != node.link.polarity;
+	return node.link.form == ClaimForm.Negation;
 }

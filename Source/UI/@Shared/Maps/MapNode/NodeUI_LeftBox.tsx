@@ -70,20 +70,18 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 						let average = GetRatingAverage(node._id, ratingInfo.type, null, -1);
 						if (average != -1) {
 							average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(node));
-							if (node.current.impactPremise && thenType == ImpactPremise_ThenType.Impact) {
+							/*if (node.current.impactPremise && thenType == ImpactPremise_ThenType.Impact) {
 								let grandParentID = SplitStringBySlash_Cached(path).length >= 3 ? SplitStringBySlash_Cached(path).XFromLast(2).ToInt() : null;
 								let grandParent = grandParentID ? GetNodeL3(GetNode(grandParentID), SlicePath(path, 2)) : null;
 								let grandParentRatingType = grandParent ? GetMainRatingType(grandParent) : "probability";
-								let specialCase = grandParentRatingType == "impact" && parentNode.type == MapNodeType.Argument;
-
-								let signStr = node.finalPolarity == Polarity.Supporting ? "+" : "-";
-								percentStr = signStr + (specialCase ? average : (average / 2)) + "%";
+								//let specialCase = grandParentRatingType == "impact" && parentNode.type == MapNodeType.Argument;
+								percentStr = average + "%";
 							}
 							/*else if (ratingInfo.type == "support")
 								//percentStr = (average >= 100 ? "+" : "-") + average.Distance(100) + "%";
-								percentStr = (average < 0 ? "-" : average == 0 ? "" : "+") + average.Distance(0);*/
-							else
-								percentStr = average + "%";
+								percentStr = (average < 0 ? "-" : average == 0 ? "" : "+") + average.Distance(0);*#/
+							else*/
+							percentStr = average + "%";
 						}
 						return (
 							<PanelButton key={ratingInfo.type} {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}}

@@ -136,16 +136,9 @@ The old db-root will not be modified.`,
 }
 
 function ValidateDBData(data: FirebaseData) {
-	for (let map of data.maps.VValues(true)) {
-		AssertValidate("Map", map, `Map invalid`);
-	}
-	for (let node of data.nodes.VValues(true)) {
-		AssertValidate("MapNode", node, `Node invalid`);
-	}
-	for (let termComp of data.termComponents.VValues(true)) {
-		AssertValidate("TermComponent", termComp, `Term-component invalid`);
-	}
-	for (let term of data.terms.VValues(true)) {
-		AssertValidate("Term", term, `Term invalid`);
-	}
+	for (let map of data.maps.VValues(true)) { AssertValidate("Map", map, `Map invalid`); }
+	for (let node of data.nodes.VValues(true)) { AssertValidate("MapNode", node, `Node invalid`); }
+	for (let revision of data.nodeRevisions.VValues(true)) { AssertValidate("MapNodeRevision", revision, `Node-revision invalid`); }
+	for (let termComp of data.termComponents.VValues(true)) { AssertValidate("TermComponent", termComp, `Term-component invalid`); }
+	for (let term of data.terms.VValues(true)) { AssertValidate("Term", term, `Term invalid`); }
 }

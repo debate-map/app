@@ -2,7 +2,7 @@ import {GetNode, GetNodeChildren, GetNodeChildrenL2} from "../../Store/firebase/
 import {Assert} from "js-vextensions";
 import {GetDataAsync, GetAsync, GetAsync_Raw, RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
 import { Command, MergeDBUpdates } from "../Command";
-import {MapNode, ClaimForm, ChildEntry} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, ClaimForm, ChildEntry, MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {GetNodeForm, GetNodeL2} from "../../Store/firebase/nodes/$node";
 import AddNode from "./AddNode";
@@ -27,12 +27,15 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 		let nodeForm = await GetAsync_Raw(()=>GetNodeForm(baseNode, baseNodePath)) as ClaimForm;
 		let baseImpactPremise = isArgument ? (await GetAsync_Raw(()=>GetNodeChildrenL2(baseNode))).First(a=>a.current.impactPremise != null) : null;
 
-		let newChildNode = RemoveHelpers(Clone(baseNode)) as MapNode;
+		let newChildNode = RemoveHelpers(Clone(baseNode)) as MapNodeL2;
 		newChildNode.parents = {[newParentID]: {_: true}}; // make new node's only parent the one on this path
 		delete newChildNode.children;
 		delete newChildNode.childrenOrder;
 
 		let newChildRevision = Clone(baseNode.current);
+		delete newChildNode.currentRevision;
+		delete newChildNode.current;
+		delete newChildRevision.node;
 
 		if (isArgument) {
 			var impactPremiseNode = RemoveHelpers(Clone(baseImpactPremise)).VSet({parents: null}) as MapNode;

@@ -11,7 +11,7 @@ import {Subforum, Subforum_nameFormat} from "firebase-forum";
 import {WaitTillSchemaAddedThenRun, GetSchemaJSON} from "../Server";
 import {GetLinkUnderParent} from "../../Store/firebase/nodes/$node";
 import {GetNode} from "Store/firebase/nodes";
-import {GetAsync} from "Frame/Database/DatabaseHelpers";
+import {GetAsync, GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
 
 WaitTillSchemaAddedThenRun("ChildEntry", ()=> {
 	AddSchema({
@@ -33,8 +33,8 @@ export default class UpdateLink extends Command<{linkParentID: number, linkChild
 	newData: ChildEntry;
 	async Prepare() {
 		let {linkParentID, linkChildID, linkUpdates} = this.payload;
-		let parent = await GetAsync(()=>GetNode(linkParentID));
-		let oldData = await GetLinkUnderParent(linkChildID, parent);
+		let parent = await GetAsync_Raw(()=>GetNode(linkParentID));
+		let oldData = GetLinkUnderParent(linkChildID, parent);
 		this.newData = {...oldData, ...linkUpdates};
 	}
 	async Validate() {

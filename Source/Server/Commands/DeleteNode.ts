@@ -1,7 +1,7 @@
 import {GetNodeParentsAsync, ForDelete_GetError} from "../../Store/firebase/nodes";
 import {Assert} from "js-vextensions";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command} from "../Command";
+import {Command, MergeDBUpdates} from "../Command";
 import {MapNode, ClaimForm, MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {Term} from "../../Store/firebase/terms/@Term";
@@ -11,18 +11,23 @@ import {MapEdit, UserEdit} from "../CommandMacros";
 import {GetAsync, GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
 import {GetMap} from "Store/firebase/maps";
 import {GetNodeL2} from "Store/firebase/nodes/$node";
+import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
+import {GetNodeRevisions} from "../../Store/firebase/nodeRevisions";
 
 @MapEdit
 @UserEdit
-export default class DeleteNode extends Command<{mapID: number, nodeID: number, asPartOfMapDelete?: boolean}> {
+export default class DeleteNode extends Command<{mapID: number, nodeID: number, asPartOfMapDelete?: boolean, asSubcommand?: boolean}> {
 	oldData: MapNodeL2;
+	oldRevisions: MapNodeRevision[];
 	oldParentChildrenOrders: number[][];
 	impactPremiseID: number;
+	sub_deleteImpactPremise: DeleteNode;
 	viewerIDs_main: number[];
 	viewerIDs_impactPremise: number[];
 	async Prepare() {
-		let {nodeID} = this.payload;
+		let {mapID, nodeID, asPartOfMapDelete, asSubcommand} = this.payload;
 		this.oldData = await GetAsync_Raw(()=>GetNodeL2(nodeID));
+		this.oldRevisions = await GetAsync(()=>GetNodeRevisions(nodeID));
 
 		this.oldParentChildrenOrders = await Promise.all((this.oldData.parents || {}).VKeys().map(parentID=> {
 			return GetDataAsync("nodes", parentID, "childrenOrder") as Promise<number[]>;
@@ -30,6 +35,10 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 
 		// this works, because we only let you delete a node when it has no non-impact-premise children
 		this.impactPremiseID = this.oldData.type == MapNodeType.Argument ? this.oldData.children.VKeys()[0].ToInt() : null;
+		if (this.impactPremiseID) {
+			this.sub_deleteImpactPremise = new DeleteNode({mapID, nodeID: this.impactPremiseID, asPartOfMapDelete, asSubcommand: true});
+			await this.sub_deleteImpactPremise.Prepare();
+		}
 
 		this.viewerIDs_main = GetDataAsync("nodeViewers", nodeID).VKeys(true).map(ToInt);
 		if (this.impactPremiseID) {
@@ -41,9 +50,13 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 		let normalChildCount = (this.oldData.children || {}).VKeys(true).length;
 		if (this.impactPremiseID) normalChildCount--;
 		Assert(normalChildCount == 0, "Cannot delete this node until all its (non-impact-premise) children have been unlinked or deleted.");*/
-		let {mapID} = this.payload;
+		let {mapID, asSubcommand} = this.payload;
 		let earlyError = await GetAsync(()=>ForDelete_GetError(this.userInfo.id, GetMap(mapID), this.oldData, this.payload.asPartOfMapDelete));
 		Assert(earlyError == null, earlyError);
+		Assert(this.oldData.current.impactPremise == null || asSubcommand, "Cannot delete an impact-premise directly. Instead, delete the argument node.");
+		if (this.sub_deleteImpactPremise) {
+			await this.sub_deleteImpactPremise.Validate();
+		}
 	}
 
 	GetDBUpdates() {
@@ -77,15 +90,14 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 			}
 		}
 
+		// delete revisions
+		for (let revision of this.oldRevisions) {
+			updates[`nodeRevisions/${revision._id}`] = null;
+		}
+
 		// if has impact-premise, delete it also
-		if (this.impactPremiseID) {
-			updates[`nodes/${this.impactPremiseID}`] = null;
-			updates[`nodeExtras/${this.impactPremiseID}`] = null;
-			updates[`nodeRatings/${this.impactPremiseID}`] = null;
-			updates[`nodeViewers/${this.impactPremiseID}`] = null;
-			for (let viewerID of this.viewerIDs_impactPremise) {
-				updates[`userViewedNodes/${viewerID}/${this.impactPremiseID}}`] = null;
-			}
+		if (this.sub_deleteImpactPremise) {
+			updates = MergeDBUpdates(updates, this.sub_deleteImpactPremise.GetDBUpdates());
 		}
 
 		return updates;

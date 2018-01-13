@@ -26,14 +26,14 @@ import {GetUserID, GetUserAccessLevel} from "Store/firebase/users";
 import ImageAttachmentEditorUI from "./ImageAttachmentEditorUI";
 import {GetErrorMessagesUnderElement} from "js-vextensions";
 import {MapNodeRevision} from "../../../../Store/firebase/nodes/@MapNodeRevision";
-import {GetNodeL2, GetFinalPolarity} from "Store/firebase/nodes/$node";
+import {GetNodeL2, GetFinalPolarity, AsNodeL1} from "Store/firebase/nodes/$node";
 
 type Props = {
 	baseData: MapNode,
 	baseRevisionData: MapNodeRevision,
 	baseLinkData: ChildEntry,
 	parent: MapNodeL3, forNew: boolean, forOldRevision?: boolean, enabled?: boolean,
-	style?, onChange?: (newData: MapNode, newLinkData: ChildEntry, component: NodeDetailsUI)=>void,
+	style?, onChange?: (newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: ChildEntry, component: NodeDetailsUI)=>void,
 	//onSetError: (error: string)=>void,
 } & Partial<{creator: User, impactPremiseNode: MapNodeL2}>;
 type State = {newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: ChildEntry};
@@ -47,9 +47,9 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
 			this.SetState({
-				newData: Clone(props.baseData),
-				newLinkData: Clone(props.baseLinkData),
+				newData: AsNodeL1(Clone(props.baseData)),
 				newRevisionData: Clone(props.baseRevisionData),
+				newLinkData: Clone(props.baseLinkData),
 			});
 	}
 
@@ -60,7 +60,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 		let firebase = store.firebase.helpers;
 		let Change = (..._)=> {
 			if (onChange)
-				onChange(this.GetNewData(), this.GetNewLinkData(), this);
+				onChange(this.GetNewData(), this.GetNewRevisionData(), this.GetNewLinkData(), this);
 			this.Update();
 		};
 
@@ -114,7 +114,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 	PostRender(source: RenderSource) {
 		if (source != RenderSource.Mount) return;
 		let {onChange} = this.props;
-		if (onChange) onChange(this.GetNewData(), this.GetNewLinkData(), this); // trigger on-change once, to check for validation-error
+		if (onChange) onChange(this.GetNewData(), this.GetNewRevisionData(), this.GetNewLinkData(), this); // trigger on-change once, to check for validation-error
 	}
 	GetValidationError() {
 		if (this.quoteEditor) {
@@ -256,8 +256,7 @@ class ImpactPremiseInfo extends BaseComponent<Props_Enhanced, {}> {
 						Change(newRevisionData.impactPremise.ifType = val);
 					}}/>
 				<Pre> premises below are true, they </Pre>
-				<Select options={thenTypes_forRender} enabled={enabled} value={GetThenType_ForRender(newRevisionData.impactPremise.thenType)} onChange={val=> {
-					val = GetThenType_ForRender(val);
+				<Select options={thenTypes_forRender} enabled={enabled} value={newRevisionData.impactPremise.thenType} onChange={val=> {
 					//firebase.DBRef(`nodes/${newData._id}/impactPremise`).update({thenType: val});
 					Change(newRevisionData.impactPremise.thenType = val);
 				}}/>

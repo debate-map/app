@@ -116,8 +116,9 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentForm: ClaimForm,
 						baseRevisionData={newRevision}
 						baseLinkData={newLink} forNew={true}
 						parent={parentNode}
-						onChange={(newNodeData, newLinkData, comp)=> {
+						onChange={(newNodeData, newRevisionData, newLinkData, comp)=> {
 							newNode = newNodeData;
+							newRevision = newRevisionData;
 							newLink = newLinkData;
 							validationError = comp.GetValidationError();
 							Change();

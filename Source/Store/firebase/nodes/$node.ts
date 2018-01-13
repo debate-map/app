@@ -89,12 +89,22 @@ export function GetFinalPolarity(basePolarity: Polarity, parentForm: ClaimForm):
 export function IsNodeL1(node): node is MapNode {
 	return !node["current"];
 }
+export function AsNodeL1(node: MapNodeL2 | MapNodeL3) {
+	let result = {...node};
+	delete result.current;
+	delete result["finalPolarity"];
+	delete result["link"];
+	return result as MapNode;
+}
 
 export function IsNodeL2(node: MapNode): node is MapNodeL2 {
 	return node["current"];
 }
 export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision) {
-	return node.Extended({current: currentRevision}) as MapNodeL2;
+	let result = node.Extended({current: currentRevision}) as MapNodeL2;
+	delete result["finalPolarity"];
+	delete result["link"];
+	return result;
 }
 export function GetNodeL2(nodeID: number | MapNode, path?: string) {
 	if (IsNumber(nodeID)) nodeID = GetNode(nodeID);

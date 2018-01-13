@@ -79,7 +79,7 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 							if (link) {
 								let linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
 								if (linkUpdates.VKeys(true).length) {
-									await new UpdateLink(E(mapID && {mapID}, {linkParentID: GetParentNodeID(path), linkChildID: node._id, linkUpdates})).Run();
+									await new UpdateLink(E({linkParentID: GetParentNodeID(path), linkChildID: node._id, linkUpdates})).Run();
 								}
 							}
 							new AddNodeRevision({revision: RemoveHelpers(this.detailsUI.GetNewRevisionData())}).Run();

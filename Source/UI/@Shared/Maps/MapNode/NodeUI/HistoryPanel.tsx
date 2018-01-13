@@ -36,7 +36,6 @@ import {Column} from "react-vcomponents";
 import NodeDetailsUI from "../NodeDetailsUI";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import AddNodeRevision from "../../../../../Server/Commands/AddNodeRevision";
-import UpdateLink from "../../../../../Server/Commands/UpdateLink";
 import {ScrollView} from "react-vscrollview";
 import {MapNodeRevision} from "../../../../../Store/firebase/nodes/@MapNodeRevision";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
@@ -108,7 +107,7 @@ class RevisionEntryUI extends BaseComponent<RevisionEntryUI_Props, {}> {
 							title: "Details for revision #" + revision._id, cancelOnOverlayClick: true,
 							messageUI: ()=> {
 								return (
-									<div style={{width: 500}}>
+									<div style={{minWidth: 500}}>
 										<NodeDetailsUI
 											baseData={node} baseRevisionData={revision} baseLinkData={link} parent={parent}
 											forNew={false} forOldRevision={true} enabled={false}/>

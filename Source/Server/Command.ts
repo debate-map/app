@@ -1,5 +1,6 @@
 import u from "updeep";
 import {GetUserID} from "Store/firebase/users";
+import {RemoveHelpers} from "../Frame/Database/DatabaseHelpers";
 
 export class CommandUserInfo {
 	id: string;
@@ -54,6 +55,8 @@ export abstract class Command<Payload> {
 		MaybeLog(a=>a.commands, ()=>`Running command. @type:${this.constructor.name} @payload(${ToJSON(this.payload)})`);
 
 		try {
+			RemoveHelpers(this.payload); // have this run locally, before sending, to save on bandwidth
+
 			this.Validate_Early();
 			await this.Prepare();
 			await this.Validate();

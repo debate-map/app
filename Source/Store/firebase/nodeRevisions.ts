@@ -9,5 +9,5 @@ export function GetNodeRevision(id: number) {
 // todo: make this use an actual query, to improve performance
 export function GetNodeRevisions(nodeID: number): MapNodeRevision[] {
 	let entryMap = GetData("nodeRevisions");
-	return CachedTransform("GetNodeRevisions", [], entryMap, ()=>entryMap ? entryMap.VValues(true).filter(a=>a.node == nodeID) : []);
+	return CachedTransform("GetNodeRevisions", [nodeID], entryMap, ()=>entryMap ? entryMap.VValues(true).filter(a=>a.node == nodeID) : []);
 }
