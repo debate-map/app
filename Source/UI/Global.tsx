@@ -21,7 +21,7 @@ export default class GlobalUI extends BaseComponent<Props, {}> {
 			<Column style={{flex: 1}}>
 				<SubNavBar>
 					<SubNavBarButton {...{page}} subpage="map" text="Map"/>
-					<SubNavBarButton {...{page}} subpage="list" text="List"/>
+					{/*<SubNavBarButton {...{page}} subpage="list" text="List"/>*/}
 				</SubNavBar>
 				<Switch>
 					<GlobalMapUI/>

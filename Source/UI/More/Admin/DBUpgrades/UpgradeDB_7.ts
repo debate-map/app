@@ -6,6 +6,7 @@ import {FirebaseData} from "../../../../Store/firebase";
 import {MapNodeRevision} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 import {MapNode, ChildEntry, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {GetTreeNodesInObjTree} from "js-vextensions";
 
 let newVersion = 7;
 AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {
@@ -86,6 +87,20 @@ AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {
 	for (let revision of data.nodeRevisions.VValues(true)) {
 		if (revision.impactPremise) {
 			revision.impactPremise.thenType = conversions[revision.impactPremise.thenType];
+		}
+	}
+
+	// cleanup
+	// ==========
+
+	let treeNodes = GetTreeNodesInObjTree(data);
+	for (let node of treeNodes) {
+		if (node.Value == null) continue;
+		if (node.Value.author == "") {
+			delete node.Value.author;
+		}
+		if (node.Value.author && node.Value.name == "") {
+			delete node.Value.name;
 		}
 	}
 

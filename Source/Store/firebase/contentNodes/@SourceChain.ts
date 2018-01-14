@@ -28,8 +28,8 @@ export class Source {
 AddSchema({
 	properties: {
 		type: {$ref: "SourceType"},
-		name: {pattern: "\\S+"},
-		author: {pattern: "\\S+"},
+		name: {pattern: "\\S.*"},
+		author: {pattern: "\\S.*"},
 		link: {format: "uri"},
 	},
 	//required: ["name", "author", "link"],
