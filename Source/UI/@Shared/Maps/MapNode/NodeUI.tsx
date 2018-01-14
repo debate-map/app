@@ -526,7 +526,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			mainBoxOffset = mainBoxOffset.Plus(new Vector2i(-30, innerBox.outerHeight() / 2));
 
 			let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
-			let limitBar_above = node.finalPolarity == Polarity.Supporting;
+			let limitBar_above = node.type == MapNodeType.Argument && node.finalPolarity == Polarity.Supporting;
 			//if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
 			if (showLimitBar && limitBar_above) mainBoxOffset.y += ChildLimitBar.HEIGHT;
 
