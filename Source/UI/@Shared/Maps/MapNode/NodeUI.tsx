@@ -230,7 +230,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		if (!expanded) innerBoxOffset = 0;
 
 		let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
-		let limitBar_above = node.finalPolarity == Polarity.Supporting;
+		let limitBar_above = node.type == MapNodeType.Argument && node.finalPolarity == Polarity.Supporting;
 		//if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
 		/*let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
 		let showBelowMessage = nodeChildren.length > 0 && nodeChildren.length < minChildCount;*/
