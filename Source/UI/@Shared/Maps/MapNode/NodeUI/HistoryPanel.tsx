@@ -54,7 +54,7 @@ export class HistoryPanel extends BaseComponent<HistoryPanel_Props, {}> {
 	detailsUI: NodeDetailsUI;
 	render() {
 		let {map, node, path, creator, revisions} = this.props;
-		let mapID = map ? map._id : null;
+		//let mapID = map ? map._id : null;
 
 		// we want the newest ones listed first
 		revisions = revisions.OrderByDescending(a=>a._id);
@@ -72,7 +72,7 @@ export class HistoryPanel extends BaseComponent<HistoryPanel_Props, {}> {
 				</Column>
 				<ScrollView className="selectable" style={{flex: 1}} contentStyle={{flex: 1, position: "relative"}}>
 					{revisions.map((revision, index)=> {
-						return <RevisionEntryUI index={index} last={index == revisions.length - 1} revision={revision} node={node} path={path} map={map}/>
+						return <RevisionEntryUI index={index} last={index == revisions.length - 1} revision={revision} node={node} path={path}/>
 					})}
 				</ScrollView>
 			</Column>
@@ -80,7 +80,7 @@ export class HistoryPanel extends BaseComponent<HistoryPanel_Props, {}> {
 	}
 }
 
-type RevisionEntryUI_Props = {index: number, last: boolean, revision: MapNodeRevision, node: MapNodeL3, path: string, map: Map}
+type RevisionEntryUI_Props = {index: number, last: boolean, revision: MapNodeRevision, node: MapNodeL3, path: string}
 	& Partial<{creator: User, link: ChildEntry, parent: MapNodeL3}>;
 @Connect((state, {revision, node, path}: RevisionEntryUI_Props)=> {
 	let parent = GetParentNodeL3(path);
@@ -92,7 +92,7 @@ type RevisionEntryUI_Props = {index: number, last: boolean, revision: MapNodeRev
 })
 class RevisionEntryUI extends BaseComponent<RevisionEntryUI_Props, {}> {
 	render() {
-		let {index, last, revision, node, path, map, creator, link, parent} = this.props;
+		let {index, last, revision, node, path, creator, link, parent} = this.props;
 		return (
 			<Row p="4px 7px" style={E(
 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},

@@ -15,7 +15,7 @@ import { MapInfo } from "Store/main/maps/@MapInfo";
 import {globalMapID} from "./firebase/nodes/@MapNode";
 import { ShallowChanged } from "react-vextensions";
 import { MapInfoReducer } from "Store/main/maps/$map";
-import {demoMap} from "../UI/Home/DemoMap";
+import {demoMap, demoRootNodeID} from "../UI/Home/DemoMap";
 import { Personal } from "Store/main/personal";
 import {PersonalReducer, ACTPersonalMapSelect} from "./main/personal";
 import {Database, DatabaseReducer} from "./main/database";
@@ -169,14 +169,16 @@ export function MainReducer(state, action) {
 		// ==========
 
 		maps: (state = {}, action)=> {
-			if (action.Is(ACTSetPage) && action.payload == "global" && state[globalMapID] == null) {
-				return {...state, [globalMapID]: new MapInfo()};
-			}
-			if ((action.Is(ACTPersonalMapSelect) || action.Is(ACTDebateMapSelect)) && state[action.payload.id] == null) {
-				return {...state, [action.payload.id]: new MapInfo()};
+			let newState = {...state};
+			/*if (action.Is(ACTSetPage) && action.payload == "global" && state[globalMapID] == null) {
+				state = {...state, [globalMapID]: new MapInfo()};
+			}*/
+			if (state[demoMap._id] == null) newState[demoMap._id] = new MapInfo();
+			if (state[globalMapID] == null) newState[globalMapID] = new MapInfo();
+			if ((action.Is(ACTPersonalMapSelect) || action.Is(ACTDebateMapSelect)) && newState[action.payload.id] == null) {
+				newState[action.payload.id] = new MapInfo();
 			}
 
-			let newState = {...state};
 			for (let key in newState) {
 				//action.VSet("parentKey", parseInt(key), {prop: {}});
 				if (action.payload && action.payload.mapID && key != action.payload.mapID) continue;
@@ -187,7 +189,7 @@ export function MainReducer(state, action) {
 
 		nodeLastAcknowledgementTimes: (state = {}, action)=> {
 			if (action.Is(ACTSetLastAcknowledgementTime)) {
-				return {...state, [action.payload.nodeID]: action.payload.time};
+				state = {...state, [action.payload.nodeID]: action.payload.time};
 			}
 			return state;
 		},

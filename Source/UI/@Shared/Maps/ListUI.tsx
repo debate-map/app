@@ -37,6 +37,8 @@ import {Button} from "react-vcomponents";
 import {IsNumberString} from "js-vextensions";
 import chroma from "chroma-js";
 import { EnumNameToDisplayName } from "Frame/General/Others";
+import {emptyArray} from "../../../Frame/Store/ReducerUtils";
+import {HistoryPanel} from "./MapNode/NodeUI/HistoryPanel";
 
 let columnWidths = [.68, .2, .12];
 
@@ -54,10 +56,13 @@ type Props = {
 @Connect((state, {map}: Props)=> {
 	let selectedNode = GetSelectedNode_InList(map._id);
 	let page = State("main", "maps", map._id, "list_page");
+	let nodes = GetNodesL2();
+	nodes = nodes.Any(a=>a == null) ? emptyArray : nodes; // only pass nodes when all are loaded
+
 	return {
 		// need to filter results, since other requests may have added extra data
 		//nodes: GetNodes({limitToFirst: entriesPerPage * (page + 1)}).Skip(page * entriesPerPage).Take(entriesPerPage),
-		nodes: GetNodesL2(),
+		nodes,
 		sortBy: State("main", "maps", map._id, "list_sortBy"),
 		filter: State("main", "maps", map._id, "list_filter"),
 		page,
@@ -285,6 +290,7 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 								{panelToShow == "social" && <SocialPanel/>}
 								{panelToShow == "tags" && <TagsPanel/>}
 								{panelToShow == "details" && <DetailsPanel node={nodeAsL3} path={path}/>}
+								{panelToShow == "history" && <HistoryPanel node={nodeAsL3} path={path}/>}
 								{panelToShow == "others" && <OthersPanel node={nodeAsL3} path={path}/>}
 							</div>}
 					</Column>
