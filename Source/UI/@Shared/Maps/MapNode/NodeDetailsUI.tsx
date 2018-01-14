@@ -17,7 +17,7 @@ import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {ImpactPremise_IfType, GetImpactPremiseIfTypeDisplayText, ImpactPremise_ThenType, GetImpactPremiseThenTypeDisplayText} from "./../../../../Store/firebase/nodes/@ImpactPremiseInfo";
 import {GetParentNode, GetNodeChildren, GetNode, GetImpactPremiseChildNode} from "../../../../Store/firebase/nodes";
-import {GetNodeForm, GetNodeDisplayText, GetClaimType, AsNodeL2} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeForm, GetNodeDisplayText, GetClaimType, AsNodeL2, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
 import Icon from "../../../../Frame/ReactComponents/Icon";
 import {Spinner} from "react-vcomponents";
 import EquationEditorUI from "./EquationEditorUI";
@@ -291,8 +291,9 @@ class ChildrenOrder extends BaseComponent<Props_Enhanced, {}> {
 			<Column mt={5}>
 				<Row style={{fontWeight: "bold"}}>Children order:</Row>
 				{newData.childrenOrder.map((childID, index)=> {
-					let child = GetNodeL2(childID);
-					let childTitle = child ? GetNodeDisplayText(child, null, GetNodeForm(child, newDataAsL2)) : "...";
+					let childPath = (newData._id ? newData._id + "/" : "") + childID;
+					let child = GetNodeL3(childID, childPath);
+					let childTitle = child ? GetNodeDisplayText(child, childPath, GetNodeForm(child, newDataAsL2)) : "...";
 					return (
 						<Row key={index} style={{display: "flex", alignItems: "center"}}>
 							<Div mr={7} sel style={{opacity: .5}}>#{childID}</Div>

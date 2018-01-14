@@ -3,7 +3,7 @@ import {Connect} from "Frame/Database/FirebaseConnect";
 import {BaseComponent} from "react-vextensions";
 import {GetUserID} from "Store/firebase/users";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
-import {DropDown, DropDownTrigger, DropDownContent} from "react-vcomponents";
+import {DropDown, DropDownTrigger, DropDownContent, Pre} from "react-vcomponents";
 import {Button} from "react-vcomponents";
 import {Row} from "react-vcomponents";
 import {Column} from "react-vcomponents";
@@ -70,7 +70,7 @@ export class TimelineDropDown extends BaseComponent<TimelineDropDownProps, {}> {
 																			this.timelineSelect.hide();
 																		}}>
 																	<Row>
-																		{timeline.name} <span style={{fontSize: 11}}>(id: {timeline._id})</span>
+																		<Pre>{timeline.name} </Pre><span style={{fontSize: 11}}>(id: {timeline._id})</span>
 																	</Row>
 																</Column>
 															);

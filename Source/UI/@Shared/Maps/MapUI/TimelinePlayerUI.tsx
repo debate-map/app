@@ -55,7 +55,7 @@ let replacements = {
 		let polarityEntry = props.polarity ? GetEntries(Polarity).find(a=>a.name.toLowerCase() == props.polarity) : null;
 		let polarity = polarityEntry ? polarityEntry.value : Polarity.Supporting;
 		return (
-			<NodeUI_InMessage map={extraInfo.map} nodeID={props.id} polarity={polarity} index={index}/>
+			<NodeUI_InMessage map={extraInfo.map} nodeID={props.id.ToInt()} polarity={polarity} index={index}/>
 		);
 	},
 	"\\[connectNodesButton(.*?)\\/\\]": (segment: Segment, index: number, extraInfo)=> {
@@ -85,7 +85,7 @@ let replacements = {
 
 type NodeUI_InMessageProps = {map: Map, nodeID: number, polarity: Polarity, index: number} & Partial<{node: MapNodeL3}>;
 @Connect((state, {nodeID, polarity}: NodeUI_InMessageProps)=> ({
-	node: AsNodeL3(GetNodeL2(nodeID), polarity, null),
+	node: GetNodeL2(nodeID) ? AsNodeL3(GetNodeL2(nodeID), polarity, null) : null,
 }))
 class NodeUI_InMessage extends BaseComponent<NodeUI_InMessageProps, {}> {
 	render() {

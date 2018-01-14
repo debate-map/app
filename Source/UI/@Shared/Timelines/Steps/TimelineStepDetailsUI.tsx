@@ -54,7 +54,7 @@ export default class TimelineStepDetailsUI extends BaseComponent<Props, {newData
 				<Column mt={5} style={{width}}>
 					<Pre>Message:</Pre>
 					<TextArea_AutoSize value={newData.message} onChange={val=>Change(newData.message = val)}/>
-				</Column>e
+				</Column>
 				<Row mt={5}>
 					<Pre>Nodes to show:</Pre>
 					<Button text="Add" ml="auto" onClick={()=> {
