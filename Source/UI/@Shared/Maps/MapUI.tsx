@@ -267,7 +267,9 @@ export default class MapUI extends BaseComponent<Props, {}> {
 		if (withinPage && this.scrollView) {
 			this.scrollView.vScrollableDOM =  $("#HomeScrollView").children(".content")[0];
 		}
-		SetMapVisitTimeForThisSession(map._id, Date.now());
+		if (map) {
+			SetMapVisitTimeForThisSession(map._id, Date.now());
+		}
 	}
 
 	// load scroll from store
@@ -326,7 +328,7 @@ window.addEventListener("beforeunload", ()=> {
 
 function SetMapVisitTimeForThisSession(mapID: number, time: number) {
 	if (mapID == null) return;
-	let lastMapViewTimes = FromJSON(localStorage.getItem("lastMapViewTimes_" + mapID) || "[]") as number[];
+	let lastMapViewTimes = FromJSON(localStorage.getItem("lastMapViewTimes_" + mapID) || `[${Date.now()}]`) as number[];
 
 	let mapsViewedThisSession = g.mapsViewedThisSession || {};
 	if (mapsViewedThisSession[mapID] == null) {

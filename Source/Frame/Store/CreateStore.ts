@@ -133,8 +133,13 @@ export default function(initialState = {}, history) {
 		]
 	}, ()=>g.storeRehydrated = true);
 	if (startURL.GetQueryVar("clearState")) {
-		Log("Clearing redux-store's state...");
+		Log("Clearing redux-store's state and local-storage...");
 		persister.purge();
+		//localStorage.clear();
+		for (let key in localStorage) {
+			if (key.startsWith("firebase:")) continue; // keep auth-info
+			delete localStorage[key];
+		}
 	}
 
 	if (module.hot) {
