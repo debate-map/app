@@ -26,6 +26,7 @@ import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
 import { IsUserAdmin, IsUserMod } from "../../../../../Store/firebase/userExtras";
 import AddChildNode from "../../../../../Server/Commands/AddChildNode";
 import {MapNodeRevision} from "../../../../../Store/firebase/nodes/@MapNodeRevision";
+import {ACTSetLastAcknowledgementTime} from "../../../../../Store/main";
 
 export function ShowAddChildDialog(parentNode: MapNodeL3, parentForm: ClaimForm, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: number, path: string) {
 	let childTypeInfo = MapNodeType_Info.for[childType];
@@ -131,11 +132,14 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentForm: ClaimForm,
 				return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`}));
 			}*/
 
-			let newNodeID = await new AddChildNode({
+			let newNodeIDs = await new AddChildNode({
 				mapID: mapID, node: newNode, revision: newRevision, link: newLink,
 				impactPremiseNode: newImpactPremise, impactPremiseNodeRevision: newImpactPremiseRevision,
 			}).Run();
-			store.dispatch(new ACTMapNodeExpandedSet({mapID, path: path + "/" + newNodeID, expanded: true, recursive: false}));
+			store.dispatch(new ACTMapNodeExpandedSet({mapID, path: path + "/" + newNodeIDs[0], expanded: true, recursive: false}));
+			for (let nodeID of newNodeIDs) {
+				store.dispatch(new ACTSetLastAcknowledgementTime({nodeID, time: Date.now()}));
+			}
 		}
 	});
 }

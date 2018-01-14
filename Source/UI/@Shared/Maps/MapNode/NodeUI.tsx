@@ -27,7 +27,7 @@ import {RootState} from "../../../../Store/index";
 import {GetNodeView} from "../../../../Store/main/mapViews";
 import {MapNode, ClaimForm, MapNodeL2, AccessLevel, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {GetNodeChildren, GetParentNode, IsRootNode, GetNodeChildrenL3, GetParentNodeL2} from "../../../../Store/firebase/nodes";
+import {GetNodeChildren, GetParentNode, IsRootNode, GetNodeChildrenL3, GetParentNodeL2, GetNodeID} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
@@ -48,8 +48,11 @@ import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import { emptyArray, emptyArray_forLoading } from "../../../../Frame/Store/ReducerUtils";
 import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";
 import { GetPlayingTimelineAppliedStepRevealNodes } from "Store/main/maps/$map";
-import {GetPlayingTimeline, GetPlayingTimelineRevealNodes, GetPlayingTimelineStepIndex, GetPlayingTimelineCurrentStepRevealNodes} from "../../../../Store/main/maps/$map";
+import {GetPlayingTimeline, GetPlayingTimelineRevealNodes, GetPlayingTimelineStepIndex, GetPlayingTimelineCurrentStepRevealNodes, GetTimeFromWhichToShowChangedNodes} from "../../../../Store/main/maps/$map";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
+import { ChangeType } from "Store/firebase/mapNodeEditTimes";
+import {GetPathsToNodesChangedSinceX, GetNodeChangeType, GetChangeTypeOutlineColor} from "../../../../Store/firebase/mapNodeEditTimes";
+import {GetNode} from "Store/firebase/nodes";
 
 type Props = {map: Map, node: MapNodeL3, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
 	& Partial<{
@@ -64,6 +67,8 @@ type Props = {map: Map, node: MapNodeL3, path?: string, asSubnode?: boolean, wid
 		playingTimelineShowableNodes: string[],
 		playingTimelineVisibleNodes: string[],
 		playingTimeline_currentStepRevealNodes: string[],
+
+		changeType: ChangeType, addedDescendants: number, editedDescendants: number,
 	}>;
 type State = {
 	childrenWidthOverride: number, childrenCenterY: number,
@@ -93,6 +98,13 @@ type State = {
 	let subnodes = GetSubnodesInEnabledLayersEnhanced(GetUserID(), map, node._id);
 	subnodes = subnodes.Any(a=>a == null) ? emptyArray : subnodes; // only pass subnodes when all are loaded
 
+	let sinceTime = GetTimeFromWhichToShowChangedNodes(map._id);
+	let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
+	let pathsToChangedDescendantNodes = pathsToChangedNodes.filter(a=>a.startsWith(path + "/"));
+	let changeTypesOfChangedDescendantNodes = pathsToChangedDescendantNodes.map(path=>GetNodeChangeType(GetNode(GetNodeID(path)), sinceTime));
+	let addedDescendants = changeTypesOfChangedDescendantNodes.filter(a=>a == ChangeType.Add).length;
+	let editedDescendants = changeTypesOfChangedDescendantNodes.filter(a=>a == ChangeType.Edit).length;
+
 	return {
 		path: path || node._id.toString(),
 
@@ -116,6 +128,8 @@ type State = {
 		playingTimelineShowableNodes: GetPlayingTimelineRevealNodes(map._id),
 		playingTimelineVisibleNodes: GetPlayingTimelineAppliedStepRevealNodes(map._id, true),
 		playingTimeline_currentStepRevealNodes: GetPlayingTimelineCurrentStepRevealNodes(map._id),
+		addedDescendants,
+		editedDescendants,
 	};
 })
 export default class NodeUI extends BaseComponent<Props, State> {
@@ -136,7 +150,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	render() {
 		let {map, node, path, asSubnode, widthOverride, style,
 			initialChildLimit, form, children, nodeView, nodeChildren, nodeChildren_sortValues, subnodes,
-			playingTimeline, playingTimeline_currentStepIndex, playingTimelineShowableNodes, playingTimelineVisibleNodes, playingTimeline_currentStepRevealNodes} = this.props;
+			playingTimeline, playingTimeline_currentStepIndex, playingTimelineShowableNodes, playingTimelineVisibleNodes, playingTimeline_currentStepRevealNodes,
+			addedDescendants, editedDescendants} = this.props;
 		let expanded = nodeView && nodeView.expanded;
 		let {childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
 		if (ShouldLog(a=>a.nodeRenders)) {
@@ -194,6 +209,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		//if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
 		/*let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
 		let showBelowMessage = nodeChildren.length > 0 && nodeChildren.length < minChildCount;*/
+
+		let textOutline = "rgba(10,10,10,1)";
 		
 		this.childBoxes = {};
 		let nodeUIResult_withoutSubnodes = (
@@ -247,15 +264,34 @@ export default class NodeUI extends BaseComponent<Props, State> {
 				{IsRootNode(node) && nodeChildren != emptyArray_forLoading && nodeChildren.length == 0 &&
 					<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 				{nodeChildren != emptyArray && !expanded && nodeChildren.length != 0 &&
-					<div style={E({
-						margin: "auto 0 auto 7px", fontSize: 12, color: "rgba(255,255,255,.5)"},
+					<div style={E(
+						{
+							margin: "auto 0 auto 9px", fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,.8)",
+							//filter: "drop-shadow(0px 0px 5px rgba(0,0,0,1))"
+							textShadow: `-1px 0 ${textOutline}, 0 1px ${textOutline}, 1px 0 ${textOutline}, 0 -1px ${textOutline}`,
+						},
 						/*showLimitBar && {[limitBar_above ? "paddingTop" : "paddingBottom"]: ChildLimitBar.HEIGHT},
 						showBelowMessage && {paddingBottom: 13},*/
 						showLimitBar && limitBar_above && {paddingTop: ChildLimitBar.HEIGHT},
-						{paddingBottom: 0 + /*(showBelowMessage ? 13 : 0) +*/ (showLimitBar && !limitBar_above ? ChildLimitBar.HEIGHT : 0)}
+						{paddingBottom: 0 + /*(showBelowMessage ? 13 : 0) +*/ (showLimitBar && !limitBar_above ? ChildLimitBar.HEIGHT : 0)},
 					)}>
 						{nodeChildren.length}
 					</div>}
+				{!expanded && (addedDescendants > 0 || editedDescendants > 0) &&
+					<Column style={E(
+						{
+							margin: "auto 0 auto 9px", fontSize: 13, fontWeight: 500,
+							//filter: "drop-shadow(0px 0px 5px rgba(0,0,0,1))"
+							textShadow: `-1px 0 ${textOutline}, 0 1px ${textOutline}, 1px 0 ${textOutline}, 0 -1px ${textOutline}`,
+						},
+						showLimitBar && limitBar_above && {paddingTop: ChildLimitBar.HEIGHT},
+						{paddingBottom: 0 + (showLimitBar && !limitBar_above ? ChildLimitBar.HEIGHT : 0)},
+					)}>
+						{addedDescendants > 0 &&
+							<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Add)},.8)`}}>{addedDescendants} new</Row>}
+						{editedDescendants > 0 &&
+							<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Edit)},.8)`}}>{editedDescendants} edited</Row>}
+					</Column>}
 				{expanded &&
 					<div ref="childHolder" className="childHolder clickThrough" style={E(
 						{

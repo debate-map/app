@@ -54,6 +54,10 @@ import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import SubPanel from "./NodeUI_Inner/SubPanel";
 import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
 import {HistoryPanel} from "./NodeUI/HistoryPanel";
+import {GetPathsToNodesChangedSinceX, ChangeType, GetNodeChangeType, GetChangeTypeOutlineColor} from "../../../../Store/firebase/mapNodeEditTimes";
+import { GetTimeFromWhichToShowChangedNodes } from "Store/main/maps/$map";
+import { ACTSetLastAcknowledgementTime } from "Store/main";
+import {GetLastAcknowledgementTime} from "../../../../Store/main";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -64,26 +68,46 @@ import {HistoryPanel} from "./NodeUI/HistoryPanel";
 type Props = {
 	map: Map, node: MapNodeL3, nodeView: MapNodeView, path: string, width: number, widthOverride?: number,
 	panelPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
-} & Partial<{form: ClaimForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string}>;
+} & Partial<{
+	form: ClaimForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string,
+	changeType: ChangeType,
+}>;
 //@FirebaseConnect((props: Props)=>((props[`holder`] = props[`holder`] || {}), [
 /*@FirebaseConnect((props: Props)=>[
 	...GetPaths_NodeRatingsRoot(props.node._id),
 ])*/
-@Connect((state: RootState, {node, path, ratingsRoot}: Props)=> ({
-	form: GetNodeForm(node, path),
-	ratingsRoot: GetNodeRatingsRoot(node._id),
-	mainRating_average: GetRatingAverage(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type),
-	userID: GetUserID(),
-}))
+@Connect((state: RootState, {map, node, path, ratingsRoot}: Props)=> {
+	let sinceTime = GetTimeFromWhichToShowChangedNodes(map._id);
+	/*let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
+	let ownNodeChanged = pathsToChangedNodes.Any(a=>a.split("/").Any(b=>b == node._id));
+	let changeType = ownNodeChanged ? GetNodeChangeType(node, sinceTime) : null;*/
+
+	let lastAcknowledgementTime = GetLastAcknowledgementTime(node._id);
+	sinceTime = sinceTime.KeepAtLeast(lastAcknowledgementTime);
+
+	let changeType =
+		node.createdAt > sinceTime ? ChangeType.Add :
+		node.current.createdAt > sinceTime ? ChangeType.Edit :
+		null;
+
+	return ({
+		form: GetNodeForm(node, path),
+		ratingsRoot: GetNodeRatingsRoot(node._id),
+		mainRating_average: GetRatingAverage(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type),
+		userID: GetUserID(),
+		changeType,
+	});
+})
 export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, hoverPanel: string, hoverTermID: number, /*local_selected: boolean,*/ local_openPanel: string}> {
 	static defaultProps = {panelPosition: "left"};
 	render() {
 		let {map, node, nodeView, path, width, widthOverride,
 			panelPosition, useLocalPanelState, style,
-			form, ratingsRoot, mainRating_average, userID} = this.props;
+			form, ratingsRoot, mainRating_average, userID, changeType} = this.props;
 		let {hovered, hoverPanel, hoverTermID, /*local_selected,*/ local_openPanel} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let backgroundColor = GetNodeBackgroundColor(node);
+		let outlineColor = GetChangeTypeOutlineColor(changeType);
 		let barSize = 5;
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
 		let isSubnode = IsNodeSubnode(node);
@@ -107,7 +131,9 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 			<div className={classNames("NodeUI_Inner", pathNodeIDs.length == 0 && " root")}
 					style={E({
 						display: "flex", position: "relative", borderRadius: 5, cursor: "default",
-						boxShadow: "rgba(0,0,0,1) 0px 0px 2px", width, minWidth: widthOverride,
+						width, minWidth: widthOverride,
+						boxShadow: "rgba(0,0,0,1) 0px 0px 2px" + (outlineColor ? `, rgba(${outlineColor},1) 0px 0px 1px` : "").repeat(6), 
+						//outline: outlineColor ? ,
 					}, style)}
 					/*onMouseEnter={()=>$(".scrolling").length == 0 && this.SetState({hovered: true})}
 					onMouseLeave={()=>this.SetState({hovered: false})}*/
@@ -121,6 +147,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						if (nodeView == null || !nodeView.selected) {
 							store.dispatch(new ACTMapNodeSelect({mapID: map._id, path}));
 						}
+						store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: node._id, time: Date.now()}));
 					}}>
 				{leftPanelShow &&
 					<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot, panelPosition, local_openPanel}}

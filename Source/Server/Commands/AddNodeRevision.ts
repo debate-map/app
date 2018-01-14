@@ -10,7 +10,9 @@ import {MapNodeRevision} from "../../Store/firebase/nodes/@MapNodeRevision";
 import {GetNode} from "Store/firebase/nodes";
 import {GetAsync} from "Frame/Database/DatabaseHelpers";
 
-export default class AddNodeRevision extends Command<{revision: MapNodeRevision}> {
+@MapEdit
+@UserEdit
+export default class AddNodeRevision extends Command<{mapID: number, revision: MapNodeRevision}> {
 	lastNodeRevisionID_addAmount = 0;
 	
 	Validate_Early() {
@@ -33,12 +35,13 @@ export default class AddNodeRevision extends Command<{revision: MapNodeRevision}
 	}
 	
 	GetDBUpdates() {
-		let {revision} = this.payload;
+		let {mapID, revision} = this.payload;
 
 		let updates = {};
 		updates["general/lastNodeRevisionID"] = this.revisionID;
 		updates[`nodes/${revision.node}/currentRevision`] = this.revisionID;
 		updates[`nodeRevisions/${this.revisionID}`] = revision;
+		updates[`mapNodeEditTimes/${mapID}/${revision.node}`] = revision.createdAt;
 		return updates;
 	}
 }

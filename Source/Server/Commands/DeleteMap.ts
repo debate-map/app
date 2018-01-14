@@ -43,6 +43,10 @@ export default class DeleteMap extends Command<{mapID: number}> {
 				}
 			}
 		}
+		
+		// delete mapNodeEditTimes
+		updates[`mapNodeEditTimes/${mapID}`] = null;
+
 		return MergeDBUpdates(updates, newUpdates);
 	}
 }

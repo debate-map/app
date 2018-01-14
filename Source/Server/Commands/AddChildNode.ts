@@ -33,11 +33,11 @@ export default class AddChildNode extends Command
 	async Prepare() {
 		let {mapID, node, revision, link, impactPremiseNode, impactPremiseNodeRevision, asMapRoot} = this.payload;
 
-		this.sub_addNode = new AddNode({node, revision}).MarkAsSubcommand();
+		this.sub_addNode = new AddNode({mapID, node, revision}).MarkAsSubcommand();
 		await this.sub_addNode.Prepare();
 
 		if (impactPremiseNode) {
-			this.sub_addImpactPremise = new AddNode({node: impactPremiseNode, revision: impactPremiseNodeRevision}).MarkAsSubcommand();
+			this.sub_addImpactPremise = new AddNode({mapID, node: impactPremiseNode, revision: impactPremiseNodeRevision}).MarkAsSubcommand();
 			this.sub_addImpactPremise.lastNodeID_addAmount = 1;
 			this.sub_addImpactPremise.lastNodeRevisionID_addAmount = 1;
 			await this.sub_addImpactPremise.Prepare();
@@ -51,7 +51,7 @@ export default class AddChildNode extends Command
 			this.parent_oldChildrenOrder = await GetDataAsync("nodes", this.parentID, "childrenOrder") as number[];
 		}
 
-		this.returnData = this.sub_addNode.nodeID;
+		this.returnData = [this.sub_addNode.nodeID].concat(this.sub_addImpactPremise ? [this.sub_addImpactPremise.nodeID] : []);
 	}
 	async Validate() {
 		let {node, link, impactPremiseNode, asMapRoot} = this.payload;

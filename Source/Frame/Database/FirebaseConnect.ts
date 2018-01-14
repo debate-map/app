@@ -8,6 +8,7 @@ import { TryCall, Timer } from "js-vextensions";
 import { SplitStringBySlash_Cached } from "Frame/Database/StringSplitCache";
 import {GetUser, GetUserPermissionGroups} from "../../Store/firebase/users";
 import {GetUserID} from "Store/firebase/users";
+import { activeStoreAccessCollectors } from "Frame/Database/DatabaseHelpers";
 
 // Place a selector in Connect() whenever it uses data that:
 // 1) might change during the component's lifetime, and:
@@ -170,8 +171,9 @@ export function RequestPath(path: string) {
 }
 /** This only adds paths to a "request list". Connect() is in charge of making the actual db requests. */
 export function RequestPaths(paths: string[]) {
-	for (let path of paths)
+	for (let path of paths) {
 		RequestPath(path);
+	}
 }
 export function ClearRequestedPaths() {
 	requestedPaths = {};
@@ -185,6 +187,11 @@ export function OnAccessPath(path: string) {
 	//Log("Accessing-path Stage1: " + path);
 	//let path = pathSegments.join("/");
 	accessedStorePaths[path] = true;
+	if (activeStoreAccessCollectors) {
+		for (let collector of activeStoreAccessCollectors) {
+			collector.storePathsRequested.push(path);
+		}
+	}
 }
 /*export function OnAccessPaths(paths: string[]) {
 	for (let path of paths)

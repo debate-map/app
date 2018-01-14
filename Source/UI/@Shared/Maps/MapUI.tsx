@@ -267,17 +267,7 @@ export default class MapUI extends BaseComponent<Props, {}> {
 		if (withinPage && this.scrollView) {
 			this.scrollView.vScrollableDOM =  $("#HomeScrollView").children(".content")[0];
 		}
-
-		let mapsViewedThisSession = g.mapsViewedThisSession || {};
-		if (map && mapsViewedThisSession[map._id] == null) {
-			let lastMapViewTimes = FromJSON(localStorage.getItem("lastMapViewTimes_" + map._id) || "[]") as number[];
-			lastMapViewTimes.Insert(0, Date.now());
-			if (lastMapViewTimes.length > 10) lastMapViewTimes.splice(-1, 1);
-			
-			localStorage.setItem("lastMapViewTimes_" + map._id, ToJSON(lastMapViewTimes));
-			mapsViewedThisSession[map._id] = true;
-			G({mapsViewedThisSession});
-		}
+		SetMapVisitTimeForThisSession(map._id, Date.now());
 	}
 
 	// load scroll from store
@@ -327,4 +317,26 @@ export default class MapUI extends BaseComponent<Props, {}> {
 		/*if (nextPathTry == nodePath)
 			this.hasLoadedScroll = true;*/
 	}
+}
+
+window.addEventListener("beforeunload", ()=> {
+	let mapID = GetOpenMapID();
+	SetMapVisitTimeForThisSession(mapID, Date.now());
+});
+
+function SetMapVisitTimeForThisSession(mapID: number, time: number) {
+	if (mapID == null) return;
+	let lastMapViewTimes = FromJSON(localStorage.getItem("lastMapViewTimes_" + mapID) || "[]") as number[];
+
+	let mapsViewedThisSession = g.mapsViewedThisSession || {};
+	if (mapsViewedThisSession[mapID] == null) {
+		lastMapViewTimes.Insert(0, Date.now());
+		if (lastMapViewTimes.length > 10) lastMapViewTimes.splice(-1, 1);
+	} else {
+		lastMapViewTimes[0] = Date.now();
+	}
+	
+	localStorage.setItem("lastMapViewTimes_" + mapID, ToJSON(lastMapViewTimes));
+	mapsViewedThisSession[mapID] = true;
+	G({mapsViewedThisSession});
 }

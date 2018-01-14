@@ -28,7 +28,7 @@ for (let offset = 1; offset <= 5; offset++) {
 	let offsetStr = [null, "", "2nd ", "3rd ", "4th ", "5th "][offset];
 	changesSince_options.push({name: `Your ${offsetStr}last visit`, value: ShowChangesSinceType.SinceVisitX + "_" + offset})
 }
-changesSince_options.push({name: "All unseen changes", value: ShowChangesSinceType.AllUnseenChanges + "_null"});
+changesSince_options.push({name: "All unclicked changes", value: ShowChangesSinceType.AllUnseenChanges + "_null"});
 
 type Props = {map: Map, subNavBarWidth: number} & Partial<{showChangesSince_type: ShowChangesSinceType, showChangesSince_visitOffset: number}>;
 @Connect((state, {map}: Props)=> ({

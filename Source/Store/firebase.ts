@@ -14,6 +14,7 @@ import { ForumData } from "firebase-forum";
 import { Layer } from "Store/firebase/layers/@Layer";
 import {UserMapInfoSet} from "./firebase/userMapInfo/@UserMapInfo";
 import {MapNodeRevision} from "./firebase/nodes/@MapNodeRevision";
+import {NodeEditTimes} from "Store/firebase/mapNodeEditTimes";
 
 export interface FirebaseData {
 	forum: ForumData;
@@ -21,9 +22,10 @@ export interface FirebaseData {
 	images: {[key: string]: Image};
 	layers: {[key: number]: Layer};
 	maps: {[key: number]: Map};
+	mapNodeEditTimes: {[key: number]: NodeEditTimes} // $mapID (key) -> $nodeID -> $nodeEditTime
 	nodes: {[key: number]: MapNode};
 	nodeExtras: {[key: number]: any};
-	nodeRatings: {[key: number]: RatingsRoot}; // $nodeID (key) -> $ratingType -> $userID -> value
+	nodeRatings: {[key: number]: RatingsRoot}; // $nodeID (key) -> $ratingType -> $userID -> value -> $value
 	nodeRevisions: {[key: number]: MapNodeRevision};
 	nodeStats: {[key: number]: MapNodeStats};
 	nodeViewers: {[key: number]: ViewerSet};

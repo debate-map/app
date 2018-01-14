@@ -37,6 +37,7 @@ import NodeDetailsUI from "../NodeDetailsUI";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import AddNodeRevision from "../../../../../Server/Commands/AddNodeRevision";
 import UpdateLink from "../../../../../Server/Commands/UpdateLink";
+import {ACTSetLastAcknowledgementTime} from "Store/main";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 
@@ -82,7 +83,8 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 									await new UpdateLink(E({linkParentID: GetParentNodeID(path), linkChildID: node._id, linkUpdates})).Run();
 								}
 							}
-							new AddNodeRevision({revision: RemoveHelpers(this.detailsUI.GetNewRevisionData())}).Run();
+							await new AddNodeRevision({mapID: map._id, revision: RemoveHelpers(this.detailsUI.GetNewRevisionData())}).Run();
+							store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: node._id, time: Date.now()}));
 						}}/>
 						{/*error && <Pre>{error.message}</Pre>*/}
 					</Row>}

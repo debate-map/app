@@ -1,5 +1,5 @@
 import {RequestPath, Connect, ClearRequestedPaths, GetRequestedPaths} from "./FirebaseConnect";
-import {Assert, GetTreeNodesInObjTree, DeepSet} from "js-vextensions";
+import {Assert, GetTreeNodesInObjTree, DeepSet, CachedTransform, GetStorageForCachedTransform} from "js-vextensions";
 import {helpers, firebaseConnect} from "react-redux-firebase";
 import {FirebaseApplication, DataSnapshot} from "firebase";
 import {BaseComponent, ShallowChanged} from "react-vextensions";
@@ -403,3 +403,48 @@ export function FirebaseConnect<T>(pathsOrGetterFunc?) {
 		return paths;
 	});
 }*/
+
+export let activeStoreAccessCollectors = [];
+class DBRequestCollector {
+	storePathsRequested = [] as string[];
+	Start() {
+		activeStoreAccessCollectors.push(this);
+		return this;
+	}
+	Stop() {
+		activeStoreAccessCollectors.Remove(this);
+	}
+}
+
+/** Same as CachedTransform(), except it also includes all accessed store-data as dynamic-props.
+* This means that you can now "early return cache" for lots of cases, where dynamic-props is *only* the store-data, thus requiring *no recalculation*.
+* So basically, by wrapping code in this function, you're saying:
+*		"Do not re-evaluate the code below unless dynamic-props have changed, or one of the store-paths it accessed last time has changed."
+* 		(with the transformType and staticProps defining what "here" means)
+*/
+export function CachedTransform_WithStore<T, T2, T3>(transformType: string, staticProps: any[], dynamicProps: T2, transformFunc: (staticProps: any[], dynamicProps: T2)=>T3): T3 {
+	let storage = GetStorageForCachedTransform(transformType, staticProps);
+	if (storage.lastDynamicProps) {
+		for (let key in storage.lastDynamicProps) {
+			if (key.startsWith("store_")) {
+				//let oldVal = storage.lastDynamicProps[key];
+				let newVal = State({countAsAccess: false}, ...key.substr("store_".length).split("/"));
+				dynamicProps[key] = newVal;
+			}
+		}
+	}
+
+	let collector = new DBRequestCollector().Start();
+	try {
+		var result = CachedTransform(transformType, staticProps, dynamicProps, transformFunc);
+	} finally {
+		collector.Stop();
+	}
+
+	for (let path of collector.storePathsRequested) {
+		let val = State({countAsAccess: false}, ...path.split("/"));
+		storage.lastDynamicProps["store_" + path] = val;
+	}
+
+	return result;
+}

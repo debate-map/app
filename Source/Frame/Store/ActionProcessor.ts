@@ -9,7 +9,7 @@ import {Vector2i} from "js-vextensions";
 import {RootState} from "../../Store/index";
 import ReactGA from "react-ga";
 import {GetCurrentURL} from "../General/URLs";
-import {CreateMapViewForPath, GetShortestPathFromRootToNode} from "./PathFinder";
+import {CreateMapViewForPath} from "./PathFinder";
 import {ACTNotificationMessageAdd, ACTSetPage, ACTSetSubpage} from "../../Store/main";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import {GetNodeDisplayText} from "../../Store/firebase/nodes/$node";

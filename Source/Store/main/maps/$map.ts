@@ -174,3 +174,16 @@ export function GetPlayingTimelineRevealNodes(mapID: number, excludeAfterCurrent
 	let steps = GetPlayingTimelineSteps(mapID);
 	return [map.rootNode+""].concat(GetNodesRevealedInSteps(steps));
 }
+
+export function GetTimeFromWhichToShowChangedNodes(mapID: number) {
+	let type = State(`main/maps/${mapID}/showChangesSince_type`) as ShowChangesSinceType;
+	if (type == ShowChangesSinceType.None) return Number.MAX_SAFE_INTEGER; // from end of time (nothing)
+	if (type == ShowChangesSinceType.AllUnseenChanges) return 0; // from start of time (everything)
+
+	let visitOffset = State(`main/maps/${mapID}/showChangesSince_visitOffset`) as number;
+	let lastMapViewTimes = FromJSON(localStorage.getItem("lastMapViewTimes_" + mapID) || "[]") as number[];
+	if (lastMapViewTimes.length == 0) return Number.MAX_SAFE_INTEGER; // our first visit, so don't show anything
+
+	let timeOfSpecifiedVisit = lastMapViewTimes[visitOffset.KeepAtMost(lastMapViewTimes.length - 1)];
+	return timeOfSpecifiedVisit;
+}

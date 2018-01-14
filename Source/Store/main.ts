@@ -58,6 +58,8 @@ export class MainState {
 
 	maps: {[key: number]: MapInfo};
 
+	nodeLastAcknowledgementTimes: {[key: number]: number};
+
 	//openMap: number;
 	mapViews: MapViews;
 	copiedNodePath: string;
@@ -75,6 +77,7 @@ export class ACTNotificationMessageRemove extends Action<number> {}
 //export class ACTOpenMapSet extends Action<number> {}
 export class ACTNodeCopy extends Action<{path: string, asCut: boolean}> {}
 export class ACTSetInitialChildLimit extends Action<{value: number}> {}
+export class ACTSetLastAcknowledgementTime extends Action<{nodeID: number, time: number}> {}
 
 let MainReducer_Real;
 export function MainReducer(state, action) {
@@ -182,6 +185,13 @@ export function MainReducer(state, action) {
 			return ShallowChanged(newState, state) ? newState : state;
 		},
 
+		nodeLastAcknowledgementTimes: (state = {}, action)=> {
+			if (action.Is(ACTSetLastAcknowledgementTime)) {
+				return {...state, [action.payload.nodeID]: action.payload.time};
+			}
+			return state;
+		},
+
 		/*openMap: (state = null, action)=> {
 			if (action.Is(ACTSetPage) && action.payload == "global") return globalMapID;
 			//if (action.Is(ACTOpenMapSet)) return action.payload;
@@ -223,4 +233,8 @@ export function GetPage() {
 export function GetSubpage() {
 	let page = GetPage();
 	return (State("main", page, "subpage") as string) || rootPageDefaultChilds[page];
+}
+
+export function GetLastAcknowledgementTime(nodeID: number) {
+	return State("main", "nodeLastAcknowledgementTimes", nodeID) as number || 0;
 }

@@ -13,6 +13,7 @@ import {GetMap} from "Store/firebase/maps";
 import {GetNodeL2} from "Store/firebase/nodes/$node";
 import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 import {GetNodeRevisions} from "../../Store/firebase/nodeRevisions";
+import {GetMaps} from "../../Store/firebase/maps";
 
 @MapEdit
 @UserEdit
@@ -24,6 +25,7 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 	sub_deleteImpactPremise: DeleteNode;
 	viewerIDs_main: number[];
 	viewerIDs_impactPremise: number[];
+	mapIDs: number[];
 	async Prepare() {
 		let {mapID, nodeID, asPartOfMapDelete} = this.payload;
 		this.oldData = await GetAsync_Raw(()=>GetNodeL2(nodeID));
@@ -44,6 +46,8 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 		if (this.impactPremiseID) {
 			this.viewerIDs_impactPremise = GetDataAsync("nodeViewers", this.impactPremiseID).VKeys(true).map(ToInt);
 		}
+
+		this.mapIDs = await GetAsync(()=>GetMaps().map(a=>a._id));
 	}
 	async Validate() {
 		/*Assert((this.oldData.parents || {}).VKeys(true).length <= 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
@@ -95,6 +99,11 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 			updates[`nodeRevisions/${revision._id}`] = null;
 		}
 
+		// delete mapNodeEditTimes
+		for (let mapID of this.mapIDs) {
+			updates[`mapNodeEditTimes/${mapID}/${nodeID}`] = null;
+		}
+		
 		// if has impact-premise, delete it also
 		if (this.sub_deleteImpactPremise) {
 			updates = MergeDBUpdates(updates, this.sub_deleteImpactPremise.GetDBUpdates());

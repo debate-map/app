@@ -10,7 +10,7 @@ import {GetSchemaJSON} from "../Server";
 import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 import AddNodeRevision from "./AddNodeRevision";
 
-export default class AddNode extends Command<{node: MapNode, revision: MapNodeRevision}> {
+export default class AddNode extends Command<{mapID: number, node: MapNode, revision: MapNodeRevision}> {
 	lastNodeID_addAmount = 0;
 	lastNodeRevisionID_addAmount = 0;
 	
@@ -31,13 +31,13 @@ export default class AddNode extends Command<{node: MapNode, revision: MapNodeRe
 	parentID: number;
 	parent_oldChildrenOrder: number[];
 	async Prepare() {
-		let {node, revision} = this.payload;
+		let {mapID, node, revision} = this.payload;
 
 		this.nodeID = (await GetDataAsync("general", "lastNodeID") as number) + this.lastNodeID_addAmount + 1;
 		node.creator = this.userInfo.id;
 		node.createdAt = Date.now();
 
-		this.sub_addRevision = new AddNodeRevision({revision}).MarkAsSubcommand();
+		this.sub_addRevision = new AddNodeRevision({mapID, revision}).MarkAsSubcommand();
 		this.sub_addRevision.lastNodeRevisionID_addAmount = this.lastNodeRevisionID_addAmount;
 		await this.sub_addRevision.Prepare();
 

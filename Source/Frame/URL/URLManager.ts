@@ -296,7 +296,7 @@ export async function LoadURL(urlStr: string) {
 		let nodeID = parseInt(match[1]);
 		let node = await GetAsync(()=>GetNodeL2(nodeID));
 		if (node) {
-			let shortestPathToNode = await GetShortestPathFromRootToNode(1, node);
+			let shortestPathToNode = await GetAsync(()=>GetShortestPathFromRootToNode(1, node));
 			if (shortestPathToNode) {
 				let mapViewForPath = CreateMapViewForPath(shortestPathToNode);
 				//Log(`Found shortest path (${shortestPathToNode}), so merging: ` + ToJSON(mapViewForPath));
