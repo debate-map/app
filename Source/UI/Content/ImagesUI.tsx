@@ -35,7 +35,7 @@ export default class ImagesUI extends BaseComponent
 		{selectedImage_newData: Image, selectedImage_newDataError: string}> {
 	ComponentWillReceiveProps(props) {
 		if (props.selectedImage != this.props.selectedImage) {
-			this.SetState({selectedImage_newData: null});
+			this.SetState({selectedImage_newData: null, selectedImage_newDataError: null});
 		}
 	}
 

@@ -18,26 +18,28 @@ import {GetNiceNameForTermType} from "../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../Store/firebase/terms";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 
-type Props = {baseData: Term, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Term)=>void}
+type Props = {baseData: Term, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Term, error: string)=>void}
 	& Partial<{creator: User, variantNumber: number}>;
 @Connect((state, {baseData, forNew}: Props)=>({
 	creator: !forNew && GetUser(baseData.creator),
 	variantNumber: !forNew && GetTermVariantNumber(baseData),
 }))
-export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, selectedTermComponent: TermComponent}> {
+export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, dataError: string, selectedTermComponent: TermComponent}> {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
+	}
+	OnChange() {
+		let {onChange} = this.props;
+		let error = this.GetValidationError();
+		if (onChange) onChange(this.GetNewData(), error);
+		this.SetState({dataError: error});
 	}
 
 	render() {
 		let {forNew, enabled, style, onChange, creator, variantNumber} = this.props;
 		let {newData, selectedTermComponent} = this.state;
-		let Change = _=> {
-			if (onChange)
-				onChange(this.GetNewData());
-			this.Update();
-		};
+		let Change = _=>this.OnChange();
 
 		let splitAt = 170, width = 600;
 		return (

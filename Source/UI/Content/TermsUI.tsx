@@ -33,10 +33,10 @@ type Props = {} & Partial<{terms: Term[], selectedTerm: Term, permissions: Permi
 	selectedTerm: GetSelectedTerm(),
 	permissions: GetUserPermissionGroups(GetUserID()),
 }))
-export default class TermsUI extends BaseComponent<Props, {selectedTerm_newData: Term}> {
+export default class TermsUI extends BaseComponent<Props, {selectedTerm_newData: Term, selectedTerm_newDataError: string}> {
 	ComponentWillReceiveProps(props) {
 		if (props.selectedTerm != this.props.selectedTerm) {
-			this.SetState({selectedTerm_newData: null});
+			this.SetState({selectedTerm_newData: null, selectedTerm_newDataError: null});
 		}
 	}
 
@@ -44,7 +44,7 @@ export default class TermsUI extends BaseComponent<Props, {selectedTerm_newData:
 		let {terms, selectedTerm, permissions} = this.props;
 		if (terms == null) return <div>Loading terms...</div>;
 		let userID = GetUserID();
-		let {selectedTerm_newData} = this.state;
+		let {selectedTerm_newData, selectedTerm_newDataError} = this.state;
 
 		let creatorOrMod = selectedTerm != null && IsUserCreatorOrMod(userID, selectedTerm);
 		
@@ -88,10 +88,10 @@ export default class TermsUI extends BaseComponent<Props, {selectedTerm_newData:
 								</Div>}
 							<Div p={7} style={{position: "absolute", right: 0}}>
 								{creatorOrMod &&
-									<Button ml="auto" text="Save details" enabled={selectedTerm_newData != null} onClick={async e=> {
+									<Button ml="auto" text="Save details" enabled={selectedTerm_newData != null && selectedTerm_newDataError == null} onClick={async e=> {
 										let updates = RemoveHelpers(selectedTerm_newData.Including("name", "disambiguation", "type", "person", "shortDescription_current"));
 										await new UpdateTermData({termID: selectedTerm._id, updates}).Run();
-										this.SetState({selectedTerm_newData: null});
+										//this.SetState({selectedTerm_newData: null});
 									}}/>}
 								{creatorOrMod &&
 									<Button text="Delete term" ml={10} enabled={selectedTerm != null} onClick={async e=> {
@@ -107,7 +107,7 @@ export default class TermsUI extends BaseComponent<Props, {selectedTerm_newData:
 						</Row>
 						{selectedTerm
 							? <TermDetailsUI baseData={selectedTerm} forNew={false} enabled={creatorOrMod} style={{padding: 10}}
-									onChange={data=>this.SetState({selectedTerm_newData: data})}/>
+									onChange={(data, error)=>this.SetState({selectedTerm_newData: data, selectedTerm_newDataError: error})}/>
 							: <div style={{padding: 10}}>No term selected.</div>}
 					</Column>
 					<Column mt={10} style={{position: "relative", background: "rgba(0,0,0,.5)", borderRadius: 10}}>

@@ -19,26 +19,19 @@ export function ShowAddTermDialog(userID: string) {
 		creator: GetUserID(),
 	});
 	
-	let justShowed = true;
-	let detailsUI: TermDetailsUI;
-	let error = null;
-	let Change = (..._)=>boxController.UpdateUI();
+	let valid = false;
 	let boxController: BoxController = ShowMessageBox({
 		title: `Add term`, cancelButton: true,
 		messageUI: ()=> {
-			//setTimeout(()=>justShowed = false);
-			setTimeout(()=> {
-				if (justShowed) {
-					justShowed = false;
-					Change(error = detailsUI.GetValidationError()); // call this once, for initial validation
-				}
-			});
-			boxController.options.okButtonClickable = error == null;
+			boxController.options.okButtonClickable = valid;
 			return (
 				<Column style={{padding: `10px 0`, width: 600}}>
-					<TermDetailsUI ref={c=>detailsUI = GetInnerComp(c) as any} baseData={newTerm} forNew={true}
-						onChange={val=>Change(newTerm = val, error = detailsUI.GetValidationError())}/>
-					{error && error != "Please fill out this field." && <Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{error}</Row>}
+					<TermDetailsUI baseData={newTerm} forNew={true}
+						onChange={(val, error)=> {
+							newTerm = val;
+							valid = !error;
+							boxController.UpdateUI();
+						}}/>
 				</Column>
 			);
 		},
