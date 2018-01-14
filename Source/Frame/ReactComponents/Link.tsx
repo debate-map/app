@@ -77,20 +77,20 @@ export default class Link extends BaseComponent<Props, {}> {
 
 	render() {
 		let {text, to, target, actions, children, ...rest} = this.props // eslint-disable-line no-unused-vars
+		if (!to) return <a/>;
+		
 		//const href = this.context.router.history.createHref(typeof to === 'string' ? {pathname: to} : to)
 		let isExternal = to && VURL.Parse(to, true).domain != GetCurrentURL().domain;
 		if (isExternal && target === undefined) {
 			target = "_blank";
 		}
 
-		if (to) {
-			return (
-				<a {...rest} onClick={this.handleClick} href={to} target={target}>
-					{text}
-					{children}
-				</a>
-			);
-		}
+		return (
+			<a {...rest} onClick={this.handleClick} href={to} target={target}>
+				{text}
+				{children}
+			</a>
+		);
 	}
 
 	// add proxy, since using Radium

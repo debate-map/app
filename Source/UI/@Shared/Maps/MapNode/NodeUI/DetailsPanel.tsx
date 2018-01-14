@@ -26,7 +26,7 @@ import {Row} from "react-vcomponents";
 import {ImpactPremise_ThenType, ImpactPremise_IfType, GetImpactPremiseIfTypeDisplayText} from "./../../../../../Store/firebase/nodes/@ImpactPremiseInfo";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import UpdateNodeDetails from "../../../../../Server/Commands/UpdateNodeDetails";
-import {RemoveHelpers, SlicePath, GetUpdates} from "../../../../../Frame/Database/DatabaseHelpers";
+import {RemoveHelpers, SlicePath, GetUpdates, WaitTillPathDataIsReceived, DBPath, WaitTillPathDataIsReceiving} from "../../../../../Frame/Database/DatabaseHelpers";
 import {HandleError} from "../../../../../Frame/General/Errors";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
 import {CheckBox} from "react-vcomponents";
@@ -40,6 +40,7 @@ import UpdateLink from "../../../../../Server/Commands/UpdateLink";
 import {ACTSetLastAcknowledgementTime} from "Store/main";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
+import { SetNodeUILocked } from "UI/@Shared/Maps/MapNode/NodeUI";
 
 type DetailsPanel_Props = {map?: Map, node: MapNodeL3, path: string} & Partial<{creator: User}>;
 @Connect((state, {node, path}: DetailsPanel_Props)=>({
@@ -83,8 +84,16 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 									await new UpdateLink(E({linkParentID: GetParentNodeID(path), linkChildID: node._id, linkUpdates})).Run();
 								}
 							}
-							await new AddNodeRevision({mapID: map._id, revision: RemoveHelpers(this.detailsUI.GetNewRevisionData())}).Run();
-							store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: node._id, time: Date.now()}));
+
+							SetNodeUILocked(parentNode._id, true);
+							try {
+								var revisionID = await new AddNodeRevision({mapID: map._id, revision: RemoveHelpers(this.detailsUI.GetNewRevisionData())}).Run();
+								store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: node._id, time: Date.now()}));
+								await WaitTillPathDataIsReceiving(DBPath(`nodeRevisions/${revisionID}`));
+								await WaitTillPathDataIsReceived(DBPath(`nodeRevisions/${revisionID}`));
+							} finally {
+								SetNodeUILocked(parentNode._id, false);
+							}
 						}}/>
 						{/*error && <Pre>{error.message}</Pre>*/}
 					</Row>}

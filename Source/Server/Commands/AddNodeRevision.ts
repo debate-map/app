@@ -28,6 +28,8 @@ export default class AddNodeRevision extends Command<{mapID: number, revision: M
 		revision.creator = this.userInfo.id;
 		revision.createdAt = Date.now();
 		this.node_oldData = await GetAsync(()=>GetNode(revision.node));
+
+		this.returnData = this.revisionID;
 	}
 	async Validate() {
 		let {revision} = this.payload;

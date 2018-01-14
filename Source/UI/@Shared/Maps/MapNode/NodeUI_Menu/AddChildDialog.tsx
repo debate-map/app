@@ -27,6 +27,8 @@ import { IsUserAdmin, IsUserMod } from "../../../../../Store/firebase/userExtras
 import AddChildNode from "../../../../../Server/Commands/AddChildNode";
 import {MapNodeRevision} from "../../../../../Store/firebase/nodes/@MapNodeRevision";
 import {ACTSetLastAcknowledgementTime} from "../../../../../Store/main";
+import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
+import {WaitTillPathDataIsReceiving, WaitTillPathDataIsReceived, DBPath} from "../../../../../Frame/Database/DatabaseHelpers";
 
 export function ShowAddChildDialog(parentNode: MapNodeL3, parentForm: ClaimForm, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: number, path: string) {
 	let childTypeInfo = MapNodeType_Info.for[childType];
@@ -131,14 +133,23 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentForm: ClaimForm,
 			/*if (validationError) {
 				return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`}));
 			}*/
+			SetNodeUILocked(parentNode._id, true);
+			try {
+				let info = await new AddChildNode({
+					mapID: mapID, node: newNode, revision: newRevision, link: newLink,
+					impactPremiseNode: newImpactPremise, impactPremiseNodeRevision: newImpactPremiseRevision,
+				}).Run();
+				store.dispatch(new ACTMapNodeExpandedSet({mapID, path: path + "/" + info.nodeID, expanded: true, recursive: false}));
+				store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.nodeID, time: Date.now()}));
+				if (info.impactPremise_nodeID) {
+					store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.impactPremise_nodeID, time: Date.now()}));
+				}
 
-			let newNodeIDs = await new AddChildNode({
-				mapID: mapID, node: newNode, revision: newRevision, link: newLink,
-				impactPremiseNode: newImpactPremise, impactPremiseNodeRevision: newImpactPremiseRevision,
-			}).Run();
-			store.dispatch(new ACTMapNodeExpandedSet({mapID, path: path + "/" + newNodeIDs[0], expanded: true, recursive: false}));
-			for (let nodeID of newNodeIDs) {
-				store.dispatch(new ACTSetLastAcknowledgementTime({nodeID, time: Date.now()}));
+				let watchPath = DBPath(`nodeRevisions/${info.impactPremise_revisionID || info.revisionID}`);
+				await WaitTillPathDataIsReceiving(watchPath);
+				await WaitTillPathDataIsReceived(watchPath);
+			} finally {
+				SetNodeUILocked(parentNode._id, false);
 			}
 		}
 	});

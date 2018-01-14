@@ -307,13 +307,29 @@ G({GetAsync});
 export async function GetAsync_Raw<T>(dbGetterFunc: ()=>T, statsLogger?: ({requestedPaths: string})=>void): Promise<T> {
 	return RemoveHelpers(Clone(await GetAsync(dbGetterFunc, statsLogger)));
 }
+
+export function WaitTillPathDataIsReceiving(path: string): Promise<any> {
+	return new Promise((resolve, reject)=> {
+		let pathDataReceiving = (State as any)().firebase.requesting[path];
+		// if data already receiving, return right away
+		if (pathDataReceiving) resolve();
+
+		// else, add listener, and wait till store received the data (then return it)
+		let listener = ()=> {
+			pathDataReceiving = (State as any)().firebase.requesting[path];
+			if (pathDataReceiving) {
+				unsubscribe();
+				resolve();
+			}
+		};
+		let unsubscribe = store.subscribe(listener);
+	});
+}
 export function WaitTillPathDataIsReceived(path: string): Promise<any> {
 	return new Promise((resolve, reject)=> {
 		let pathDataReceived = (State as any)().firebase.requested[path];
 		// if data already received, return right away
-		if (pathDataReceived) {
-			resolve();
-		}
+		if (pathDataReceived) resolve();
 
 		// else, add listener, and wait till store received the data (then return it)
 		let listener = ()=> {

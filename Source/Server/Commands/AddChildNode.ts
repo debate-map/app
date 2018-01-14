@@ -51,7 +51,12 @@ export default class AddChildNode extends Command
 			this.parent_oldChildrenOrder = await GetDataAsync("nodes", this.parentID, "childrenOrder") as number[];
 		}
 
-		this.returnData = [this.sub_addNode.nodeID].concat(this.sub_addImpactPremise ? [this.sub_addImpactPremise.nodeID] : []);
+		this.returnData = {
+			nodeID: this.sub_addNode.nodeID,
+			impactPremise_nodeID: this.sub_addImpactPremise ? this.sub_addImpactPremise.nodeID : null,
+			revisionID: this.sub_addNode.sub_addRevision.revisionID,
+			impactPremise_revisionID: this.sub_addImpactPremise ? this.sub_addImpactPremise.sub_addRevision.revisionID : null,
+		}
 	}
 	async Validate() {
 		let {node, link, impactPremiseNode, asMapRoot} = this.payload;

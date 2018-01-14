@@ -1,5 +1,5 @@
 import { ACTMapNodeExpandedSet, ACTMapNodeChildLimitSet } from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
-import {BaseComponent, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, ShallowEquals} from "react-vextensions";
+import {BaseComponent, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, ShallowEquals, ShallowChanged} from "react-vextensions";
 import {connect} from "react-redux";
 import {DBPath, GetData} from "../../../../Frame/Database/DatabaseHelpers";
 import {Debugger, QuickIncrement, E, GetTimeSinceLoad} from "../../../../Frame/General/Globals_Free";
@@ -7,7 +7,7 @@ import {Button, Div} from "react-vcomponents";
 import {PropTypes, Component} from "react";
 import Action from "../../../../Frame/General/Action";
 import {Log} from "../../../../Frame/General/Logging";
-import {WaitXThenRun} from "js-vextensions";
+import {WaitXThenRun, Timer} from "js-vextensions";
 import VMenuTest1 from "react-vmenu";
 import VMenu, {VMenuItem} from "react-vmenu";
 import {Select} from "react-vcomponents";
@@ -54,6 +54,11 @@ import { ChangeType } from "Store/firebase/mapNodeEditTimes";
 import {GetPathsToNodesChangedSinceX, GetNodeChangeType, GetChangeTypeOutlineColor} from "../../../../Store/firebase/mapNodeEditTimes";
 import {GetNode} from "Store/firebase/nodes";
 
+let nodesLocked = {};
+export function SetNodeUILocked(nodeID: number, locked: boolean) {
+	nodesLocked[nodeID] = locked;
+}
+
 type Props = {map: Map, node: MapNodeL3, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
 	& Partial<{
 		initialChildLimit: number, form: ClaimForm, nodeView: MapNodeView,
@@ -83,6 +88,7 @@ type State = {
 
 	let nodeChildren = GetNodeChildrenL3(node, path, true);
 	nodeChildren = nodeChildren.Any(a=>a == null) ? emptyArray_forLoading : nodeChildren; // only pass nodeChildren when all are loaded
+	//nodeChildren = nodeChildren.filter(a=>a);
 	/*let nodeChildren_finalTypes = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
 		return GetFinalNodeTypeAtPath(child, path + "/" + child._id);
 	});*/
@@ -144,6 +150,25 @@ export default class NodeUI extends BaseComponent<Props, State> {
 	constructor(props) {
 		super(props);
 		this.state = {svgInfo: {}} as any;
+	}
+
+	// for SetNodeUILocked() function above
+	waitForUnlockTimer: Timer;
+	shouldComponentUpdate(newProps, newState) {
+		let changed = ShallowChanged(this.props, newProps) || ShallowChanged(this.state, newState);
+		let {node} = this.props;
+		if (!nodesLocked[node._id]) return changed;
+
+		// node-ui is locked, so wait until it gets unlocked, then update the ui
+		if (this.waitForUnlockTimer == null) {
+			this.waitForUnlockTimer = new Timer(100, ()=> {
+				if (nodesLocked[node._id]) return;
+				this.waitForUnlockTimer.Stop();
+				delete this.waitForUnlockTimer;
+				this.Update();
+			}).Start();
+		}
+		return false;
 	}
 
 	nodeUI: HTMLDivElement;
@@ -307,10 +332,10 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						
 						{!separateChildren && childPacks.slice(0, childLimit_down).map((pack, index)=> {
 							return (
-								<NodeUI key={pack.origIndex} ref={c=>this.childBoxes[pack.node._id] = GetInnerComp(c)} map={map} node={pack.node}
+								<NodeUI key={pack.node._id} ref={c=>this.childBoxes[pack.node._id] = GetInnerComp(c)} map={map} node={pack.node}
 										path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
 									{index == childLimit_down - 1 && (childPacks.length > childLimit_down || childLimit_down != initialChildLimit) &&
-										<ChildLimitBar key={index} {...{map, path, childrenWidthOverride, childLimit: childLimit_down}}
+										<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit: childLimit_down}}
 											direction="down" childCount={childPacks.length}/>}
 								</NodeUI>
 							);
@@ -319,10 +344,10 @@ export default class NodeUI extends BaseComponent<Props, State> {
 							<Column ref="upChildHolder" ct className="upChildHolder">
 								{upChildPacks.slice(-childLimit_up).map((pack, index)=> {
 									return (
-										<NodeUI key={pack.origIndex} ref={c=>this.childBoxes[pack.node._id] = GetInnerComp(c)} map={map} node={pack.node}
+										<NodeUI key={pack.node._id} ref={c=>this.childBoxes[pack.node._id] = GetInnerComp(c)} map={map} node={pack.node}
 												path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
 											{index == 0 && !showAll && (upChildPacks.length > childLimit_up || childLimit_up != initialChildLimit) &&
-												<ChildLimitBar key={index} {...{map, path, childrenWidthOverride, childLimit: childLimit_up}}
+												<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit: childLimit_up}}
 													direction="up" childCount={upChildPacks.length}/>}
 										</NodeUI>
 									);
@@ -332,10 +357,10 @@ export default class NodeUI extends BaseComponent<Props, State> {
 							<Column ref="downChildHolder" ct>
 								{downChildPacks.slice(0, childLimit_down).map((pack, index)=> {
 									return (
-										<NodeUI key={pack.origIndex} ref={c=>this.childBoxes[pack.node._id] = GetInnerComp(c)} map={map} node={pack.node}
+										<NodeUI key={pack.node._id} ref={c=>this.childBoxes[pack.node._id] = GetInnerComp(c)} map={map} node={pack.node}
 												path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
 											{index == childLimit_down - 1 && !showAll && (downChildPacks.length > childLimit_down || childLimit_down != initialChildLimit) &&
-												<ChildLimitBar key={index} {...{map, path, childrenWidthOverride, childLimit: childLimit_down}}
+												<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit: childLimit_down}}
 													direction="down" childCount={downChildPacks.length}/>}
 										</NodeUI>
 									);
