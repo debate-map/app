@@ -21,26 +21,19 @@ export function ShowAddImageDialog(userID: string) {
 		creator: GetUserID(),
 	});
 	
-	let justShowed = true;
-	let detailsUI: ImageDetailsUI;
-	let error = null;
-	let Change = (..._)=>boxController.UpdateUI();
+	let valid = false;
 	let boxController: BoxController = ShowMessageBox({
 		title: `Add image`, cancelButton: true,
 		messageUI: ()=> {
-			//setTimeout(()=>justShowed = false);
-			setTimeout(()=> {
-				if (justShowed) {
-					justShowed = false;
-					Change(error = detailsUI.GetValidationError()); // call this once, for initial validation
-				}
-			});
-			boxController.options.okButtonClickable = error == null;
+			boxController.options.okButtonClickable = valid;
 			return (
 				<Column style={{padding: `10px 0`, width: 600}}>
-					<ImageDetailsUI ref={c=>detailsUI = GetInnerComp(c) as any} baseData={newImage} creating={true} editing={false}
-						onChange={val=>Change(newImage = val, error = detailsUI.GetValidationError())}/>
-					{error && error != "Please fill out this field." && <Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{error}</Row>}
+					<ImageDetailsUI baseData={newImage} creating={true} editing={false}
+						onChange={(val, error)=> {
+							newImage = val;
+							valid = !error;
+							boxController.UpdateUI();
+						}}/>
 				</Column>
 			);
 		},

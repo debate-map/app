@@ -17,7 +17,6 @@ type Props = {baseData: SourceChain[], enabled?: boolean, style?, onChange?: (ne
 }))*/
 export default class SourceChainsEditorUI extends BaseComponent<Props, {newData: SourceChain[]}> {
 	static defaultProps = {enabled: true};
-
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
@@ -27,8 +26,7 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 		let {enabled, style, onChange} = this.props;
 		let {newData} = this.state;
 		let Change = _=> {
-			if (onChange)
-				onChange(this.GetNewData());
+			if (onChange) onChange(this.GetNewData());
 			this.Update();
 		};
 
@@ -46,15 +44,16 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 											value={source.type} onChange={val=>Change(source.type = val)}/>
 										{source.type != SourceType.Webpage &&
 											<TextInput enabled={enabled} style={{width: "90%"}} placeholder={GetSourceNamePlaceholderText(source.type)}
-												value={source.name} onChange={val=>Change(source.name = val)}/>}
+												value={source.name} onChange={val=>Change(val ? source.name = val : delete source.name)}/>}
 										{source.type != SourceType.Webpage &&
 											<TextInput enabled={enabled} style={{width: "90%"}} placeholder={GetSourceAuthorPlaceholderText(source.type)}
-												value={source.author} onChange={val=>Change(source.author = val)}/>}
+												value={source.author} onChange={val=>Change(val ? source.author = val : delete source.author)}/>}
 										{source.type == SourceType.Webpage &&
 											<TextInput ref={"url_" + chainIndex + "_" + sourceIndex} enabled={enabled} type="url"
 													//pattern="^(https?|ftp)://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
 													pattern="^https?://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
 													value={source.link} onChange={val=>Change((()=> {
+														if (!val) delete source.link;
 														if (val.endsWith("@bible")) {
 															var reference = val.replace("@bible", "").replace(/:/g, ".").replace(/ /g, "%20");
 															val = `https://biblia.com/bible/nkjv/${reference}`;
@@ -84,7 +83,19 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 		);
 	}
 	GetValidationError() {
-		return GetErrorMessagesUnderElement(FindDOM(this))[0];
+		//return this.GetNewData().map(chain=>Validate("SourceChain", chain)).FirstOrX(a=>a) || GetErrorMessagesUnderElement(FindDOM(this))[0];
+		let error = GetErrorMessagesUnderElement(FindDOM(this))[0];
+		if (!error) {
+			for (let chain of this.GetNewData()) {
+				/*let error2 = Validate("SourceChain", chain);
+				if (error2) return error; // for testing*/
+				if (Validate("SourceChain", chain)) {
+					error = "Source chains are invalid. Please fill in the required entries.";
+					//error = Validate("SourceChain", chain); // for testing
+				}
+			}
+		}
+		return error;
 	}
 
 	GetNewData() {

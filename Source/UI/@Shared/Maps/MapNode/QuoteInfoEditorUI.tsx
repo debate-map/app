@@ -67,40 +67,17 @@ export default class QuoteInfoEditorUI extends BaseComponent
 				</Column>
 				<Row mt={5}>Source chains:</Row>
 				<Row mt={5}>
-					<SourceChainsEditorUI enabled={creating || editing} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
+					<SourceChainsEditorUI ref={c=>this.chainsEditor = c} enabled={creating || editing} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
 				</Row>
 			</Column>
 			</div>
 		);
 	}
-
+	chainsEditor: SourceChainsEditorUI;
 	GetValidationError() {
-		//return (FindDOM(this.refs.url) as HTMLInputElement).validity.valid;
-		//return (FindDOM(this.refs.url) as HTMLInputElement).validationMessage;
-		//for (let i = 0, urlComp; urlComp = this.refs["url_" + i]; i++) {
-		/*for (let key of this.refs.VKeys().filter(a=>a.startsWith("url_"))) {
-			let urlComp = this.refs[key];
-			let urlDOM = FindDOM(urlComp) as HTMLInputElement;
-			if (urlDOM.validationMessage)
-				return urlDOM.validationMessage;
-		}
-		return null;*/
-		let {newData} = this.state;
-		for (let chain of newData.sourceChains) {
-			for (let source of chain) {
-				if (source.type == SourceType.Writing || source.type == SourceType.Speech) {
-					if ((source.name || "").trim().length == 0 && (source.author || "").trim().length == 0) {
-						return "Sources cannot be empty.";
-					}
-				} else if (source.type == SourceType.Webpage) {
-					if ((source.link || "").trim().length == 0) {
-						return "Sources cannot be empty.";
-					}
-				}
-			}
-		}
-		return GetErrorMessagesUnderElement(FindDOM(this))[0];
+		return GetErrorMessagesUnderElement(FindDOM(this))[0] || this.chainsEditor.GetValidationError();
 	}
+
 	GetNewData() {
 		let {newData} = this.state;
 		return CleanUpdatedContentNode(Clone(newData));

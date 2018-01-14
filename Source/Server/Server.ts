@@ -59,12 +59,20 @@ Details: ${ToJSON(this.errors, null, 3)}
 // validation
 // ==========
 
+G({Validate}); declare global { function Validate(schemaName: string, data); }
+function Validate(schemaName: string, data, removeHelpers = true) {
+	if (removeHelpers) {
+		let {RemoveHelpers} = require("../Frame/Database/DatabaseHelpers");
+		data = RemoveHelpers(Clone(data));
+	}
+
+	let passed = ajv.validate(schemaName, data);
+	if (!passed) return ajv.FullErrorsText();
+}
+
 G({AssertValidate}); declare global { function AssertValidate(schemaName: string, data, failureMessage: string, addDataStr?: boolean); }
 function AssertValidate(schemaName: string, data, failureMessageOrGetter: string | ((errorsText: string)=>string), addErrorsText = true, addDataStr = true) {
-	let validationResult = ajv.validate(schemaName, data);
-	if (validationResult == true) return;
-
-	let errorsText = ajv.FullErrorsText();
+	let errorsText = Validate(schemaName, data, false);
 	let failureMessage = IsString(failureMessageOrGetter) ? failureMessageOrGetter : failureMessageOrGetter(errorsText);
 	if (addErrorsText) {
 		failureMessage += `: ${errorsText}`;
@@ -74,5 +82,5 @@ function AssertValidate(schemaName: string, data, failureMessageOrGetter: string
 	}
 	failureMessage += "\n";
 
-	Assert(validationResult, failureMessage);
+	Assert(errorsText == null, failureMessage);
 }

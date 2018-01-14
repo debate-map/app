@@ -18,26 +18,30 @@ import SourceChainsEditorUI from "../../@Shared/Maps/MapNode/SourceChainsEditorU
 import {Div, Span, Pre, Row, RowLR} from "react-vcomponents";
  import {GetErrorMessagesUnderElement} from "js-vextensions";
 
-type Props = {baseData: Image, creating: boolean, editing: boolean, style?, onChange?: (newData: Image)=>void}
+type Props = {baseData: Image, creating: boolean, editing: boolean, style?, onChange?: (newData: Image, error: string)=>void}
 	& Partial<{creator: User, variantNumber: number}>;
 @Connect((state, {baseData, creating}: Props)=>({
 	creator: !creating && GetUser(baseData.creator),
 }))
-export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image}> {
+export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image, dataError: string}> {
 	ComponentWillMountOrReceiveProps(props, forMount) {
-		if (forMount || props.baseData != this.props.baseData) // if base-data changed
+		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
+		}
+	}
+	OnChange() {
+		let {onChange} = this.props;
+		let error = this.GetValidationError();
+		if (onChange) onChange(this.GetNewData(), error);
+		//this.Update();
+		this.SetState({dataError: error});
 	}
 
 	scrollView: ScrollView;
 	render() {
 		let {creating, editing, style, onChange, creator, variantNumber} = this.props;
-		let {newData} = this.state;
-		let Change = _=> {
-			if (onChange)
-				onChange(this.GetNewData());
-			this.Update();
-		};
+		let {newData, dataError} = this.state;
+		let Change = _=>this.OnChange();
 
 		let splitAt = 170, width = 600;
 		return (
@@ -89,7 +93,7 @@ export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image
 				</RowLR>
 				<Row mt={10}>Source chains:</Row>
 				<Row mt={5}>
-					<SourceChainsEditorUI enabled={creating || editing} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
+					<SourceChainsEditorUI ref={c=>this.chainsEditor = c} enabled={creating || editing} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
 				</Row>
 				<Column mt={10}>
 					<Row style={{fontWeight: "bold"}}>Preview:</Row>
@@ -97,12 +101,14 @@ export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image
 						<img src={newData.url} style={{width: newData.previewWidth != null ? `${newData.previewWidth}%` : null, maxWidth: "100%"}}/>
 					</Row>
 				</Column>
+				{dataError && dataError != "Please fill out this field." && <Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{dataError}</Row>}
 			</Column>
 			</div>
 		);
 	}
+	chainsEditor: SourceChainsEditorUI;
 	GetValidationError() {
-		return GetErrorMessagesUnderElement(FindDOM(this))[0];
+		return GetErrorMessagesUnderElement(FindDOM(this))[0] || this.chainsEditor.GetValidationError();
 	}
 
 	GetNewData() {

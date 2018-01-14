@@ -32,7 +32,7 @@ import {Div, Span, Pre, Row} from "react-vcomponents";
 }))
 export default class ImagesUI extends BaseComponent
 		<{} & Partial<{images: Image[], selectedImage: Image, permissions: PermissionGroupSet}>,
-		{selectedImage_newData: Image}> {
+		{selectedImage_newData: Image, selectedImage_newDataError: string}> {
 	ComponentWillReceiveProps(props) {
 		if (props.selectedImage != this.props.selectedImage) {
 			this.SetState({selectedImage_newData: null});
@@ -44,7 +44,7 @@ export default class ImagesUI extends BaseComponent
 		let {images, selectedImage, permissions} = this.props;
 		if (images == null) return <div>Loading images...</div>;
 		let userID = GetUserID();
-		let {selectedImage_newData} = this.state;
+		let {selectedImage_newData, selectedImage_newDataError} = this.state;
 
 		let creatorOrMod = selectedImage != null && IsUserCreatorOrMod(userID, selectedImage);
 		
@@ -88,10 +88,10 @@ export default class ImagesUI extends BaseComponent
 								</Div>}
 							<Div p={7} style={{position: "absolute", right: 0}}>
 								{creatorOrMod &&
-									<Button ml="auto" text="Save details" enabled={selectedImage_newData != null} onClick={async e=> {
+									<Button ml="auto" text="Save details" enabled={selectedImage_newData != null && selectedImage_newDataError == null} onClick={async e=> {
 										let updates = RemoveHelpers(selectedImage_newData.Including(...UpdateImageData_allowedPropUpdates));
 										await new UpdateImageData({id: selectedImage._id, updates}).Run();
-										this.SetState({selectedImage_newData: null});
+										//this.SetState({selectedImage_newData: null});
 									}}/>}
 								{creatorOrMod &&
 									<Button text="Delete image" ml={10} enabled={selectedImage != null} onClick={async e=> {
@@ -107,7 +107,7 @@ export default class ImagesUI extends BaseComponent
 						</Row>
 						{selectedImage
 							? <ImageDetailsUI baseData={selectedImage} creating={false} editing={creatorOrMod} style={{padding: 10}}
-									onChange={data=>this.SetState({selectedImage_newData: data})}/>
+									onChange={(data, error)=>this.SetState({selectedImage_newData: data, selectedImage_newDataError: error})}/>
 							: <div style={{padding: 10}}>No image selected.</div>}
 					</Column>
 				</ScrollView>

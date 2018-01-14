@@ -75,7 +75,7 @@ AddSchema({
 		{
 			if: {
 				properties: {
-					type: {oneOf: [{const: MapNodeType.Argument}]},
+					type: {const: MapNodeType.Argument},
 				}
 			},
 			then: {required: ["childrenOrder"]},
