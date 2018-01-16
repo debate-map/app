@@ -200,7 +200,7 @@ export function GetNodeDisplayText(node: MapNodeL2, path?: string, form?: ClaimF
 			
 			let thenType = node.current.impactPremise.thenType;
 			let argument = GetParentNodeL2(path);
-			var argumentFinalPolarity = GetFinalPolarityAtPath(argument, SlicePath(path, 1));
+			var argumentFinalPolarity = argument ? GetFinalPolarityAtPath(argument, SlicePath(path, 1)) : Polarity.Supporting;
 			return `If ${GetImpactPremiseIfTypeDisplayText(node.current.impactPremise.ifType)} premises below are true, they ${GetImpactPremiseThenTypeDisplayText(thenType, argumentFinalPolarity)}.`;
 		}
 		if (node.current.equation) {
