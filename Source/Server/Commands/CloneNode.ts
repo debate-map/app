@@ -67,7 +67,7 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 		for (let childID of childrenToLink) {
 			let child = await GetAsync_Raw(()=>GetNodeL2(childID));
 			let childForm = await GetAsync_Raw(()=>GetNodeForm(child, baseNodePath + "/" + childID)) as ClaimForm;
-			let linkChildSub = new LinkNode({mapID, parentID: this.sub_addNode.sub_addNode.nodeID, childID: childID, childForm});
+			let linkChildSub = new LinkNode({mapID, parentID: this.sub_addNode.sub_addNode.nodeID, childID: childID, childForm}).MarkAsSubcommand();
 			linkChildSub.Validate_Early();
 
 			//linkChildSub.Prepare([]);

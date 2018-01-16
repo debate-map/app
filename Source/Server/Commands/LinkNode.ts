@@ -30,7 +30,10 @@ export default class LinkNode extends Command<{mapID: number, parentID: number, 
 	}
 	async Validate() {
 		let {parentID, childID} = this.payload;
-		Assert(this.parent_oldData.childrenOrder == null || !this.parent_oldData.childrenOrder.Contains(childID), `Node #${childID} is already a child of node #${parentID}.`);
+		Assert(this.parent_oldData || this.asSubcommand, "Parent does not exist!");
+		if (this.parent_oldData) {
+			Assert(this.parent_oldData.childrenOrder == null || !this.parent_oldData.childrenOrder.Contains(childID), `Node #${childID} is already a child of node #${parentID}.`);
+		}
 	}
 
 	GetDBUpdates() {
@@ -45,7 +48,7 @@ export default class LinkNode extends Command<{mapID: number, parentID: number, 
 			childForm && {form: childForm},
 			childPolarity && {polarity: childPolarity},
 		);
-		if (this.parent_oldData.type == MapNodeType.Argument) {
+		if (this.parent_oldData && this.parent_oldData.type == MapNodeType.Argument) {
 			updates[`nodes/${parentID}/childrenOrder`] = (this.parent_oldData.childrenOrder || []).concat([childID]);
 		}
 		return updates;
