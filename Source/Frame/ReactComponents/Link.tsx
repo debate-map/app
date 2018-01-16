@@ -1,6 +1,6 @@
 import React from 'react';
 import { PropTypes } from "react";
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent, ApplyBasicStyles} from "react-vextensions";
 import Radium from "radium";
 import {replace, push} from "redux-little-router";
 import {Connect} from "../Database/FirebaseConnect";
@@ -54,6 +54,7 @@ type Props = {
 		to,
 	};
 })
+@ApplyBasicStyles
 export default class Link extends BaseComponent<Props, {}> {
 	handleClick(event) {
 		let {onClick, to, target, replace: replaceURL, actions} = this.props;

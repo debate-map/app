@@ -17,6 +17,9 @@ import TermComponent from "../../../Store/firebase/termComponents/@TermComponent
 import {GetNiceNameForTermType} from "../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../Store/firebase/terms";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
+import {GetUserID} from "Store/firebase/users";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import AddTerm from "../../../Server/Commands/AddTerm";
 
 type Props = {baseData: Term, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Term, error: string)=>void}
 	& Partial<{creator: User, variantNumber: number}>;
@@ -112,4 +115,36 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 		let {newData} = this.state;
 		return Clone(newData) as Term;
 	}
+}
+
+export function ShowAddTermDialog(userID: string) {
+	let firebase = store.firebase.helpers;
+
+	let newTerm = new Term({
+		name: "",
+		type: TermType.SpecificEntity,
+		shortDescription_current: "",
+		creator: GetUserID(),
+	});
+	
+	let valid = false;
+	let boxController: BoxController = ShowMessageBox({
+		title: `Add term`, cancelButton: true,
+		messageUI: ()=> {
+			boxController.options.okButtonClickable = valid;
+			return (
+				<Column style={{padding: `10px 0`, width: 600}}>
+					<TermDetailsUI baseData={newTerm} forNew={true}
+						onChange={(val, error)=> {
+							newTerm = val;
+							valid = !error;
+							boxController.UpdateUI();
+						}}/>
+				</Column>
+			);
+		},
+		onOK: ()=> {
+			new AddTerm({term: newTerm}).Run();
+		}
+	});
 }

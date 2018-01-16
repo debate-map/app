@@ -2,12 +2,14 @@ import {ApplyBasicStyles, BaseComponent, BasicStyles, SimpleShouldUpdate} from "
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {HandleError} from "../../../Frame/General/Errors";
-import {Button, Div} from "react-vcomponents";
+import {Button, Div, Row} from "react-vcomponents";
 import {GetUserID} from "../../../Store/firebase/users";
 import SocialButton from "react-social-button";
 import {Column} from "react-vcomponents";
 import {E} from "../../../Frame/General/Globals_Free";
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
+import Link from "../../../Frame/ReactComponents/Link";
+import {ACTSetPage, ACTTopRightOpenPanelSet} from "../../../Store/main";
 
 @Connect(state=>({
 	//authError: pathToJS(state.firebase, "authError"),
@@ -38,9 +40,16 @@ export default class UserPanel extends BaseComponent<{auth?}, {}> {
 					<Row>
 						<CheckBox value={State().main.
 					</Row>*/}
-				<Button text="Sign out" mt={5} style={{alignSelf: "flex-end", width: 100}} onClick={()=> {
-					firebase.logout();
-				}}/>
+				<Row mt={5}>
+					<Link ml="auto" mr={5} actions={d=>d(new ACTSetPage("profile"))} onContextMenu={e=>e.nativeEvent["passThrough"] = true}>
+						<Button text="Edit profile" style={{width: 100}} onClick={()=> {
+							store.dispatch(new ACTTopRightOpenPanelSet(null));
+						}}/>
+					</Link>
+					<Button text="Sign out" style={{width: 100}} onClick={()=> {
+						firebase.logout();
+					}}/>
+				</Row>
 			</Column>
 		);
 	}

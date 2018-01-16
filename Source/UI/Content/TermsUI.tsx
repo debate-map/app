@@ -14,7 +14,6 @@ import {Term, TermType} from "../../Store/firebase/terms/@Term";
 import {PermissionGroupSet} from "../../Store/firebase/userExtras/@UserExtraInfo";
 import {GetUserPermissionGroups, GetUserID} from "../../Store/firebase/users";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
-import {ShowAddTermDialog} from "./Terms/AddTermDialog";
 import {ACTTermSelect, GetSelectedTermID, GetSelectedTerm} from "../../Store/main/database";
 import TermDetailsUI from "./Terms/TermDetailsUI";
 import {RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
@@ -26,6 +25,7 @@ import {ShowMessageBox} from "react-vmessagebox";
 import Moment from "moment";
 import TermComponentsUI from "../../UI/Content/Terms/TermComponentsUI";
 import {ShowAddTermComponentDialog} from "./Terms/AddTermComponentDialog";
+import {ShowAddTermDialog} from "./Terms/TermDetailsUI";
 
 type Props = {} & Partial<{terms: Term[], selectedTerm: Term, permissions: PermissionGroupSet}>;
 @Connect(state=> ({
