@@ -16,8 +16,19 @@ AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {
 	// ==========
 
 	for (let node of data.nodes.VValues(true)) {
+		let revision = data.nodeRevisions[node.currentRevision];
+
 		if (node.type == MapNodeType.Argument && (node.childrenOrder == null || node.childrenOrder.length != node.children.VKeys(true).length)) {
+			let children = node.children.VKeys(true).map(id=>data.nodes[id]) as MapNode[];
+
 			node.childrenOrder = node.children.VKeys(true).map(ToInt);
+			let impactPremise = children.find(a=>data.nodeRevisions[a.currentRevision].impactPremise != null);
+			if (impactPremise) {
+				node.childrenOrder.Remove(impactPremise._id);
+				node.childrenOrder.Insert(0, impactPremise._id);
+			} else {
+				console.log("Couldn't find impactPremise for node #" + node._id + "!");
+			}
 		}
 	}
 
