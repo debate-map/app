@@ -113,7 +113,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let isSubnode = IsNodeSubnode(node);
 		let mainRatingType = GetRatingTypesForNode(node).FirstOrX(null, {}).type;
 
-		let parentNode = GetNodeL3(GetParentNode(path), SlicePath(path, 1));
+		let parentNode = GetNodeL3(SlicePath(path, 1));
 		let nodeReversed = form == ClaimForm.Negation;
 		let ratingReversed = ShouldRatingTypeBeReversed(node);
 

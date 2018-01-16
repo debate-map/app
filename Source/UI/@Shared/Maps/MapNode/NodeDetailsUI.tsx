@@ -293,7 +293,7 @@ class ChildrenOrder extends BaseComponent<Props_Enhanced, {}> {
 				<Row style={{fontWeight: "bold"}}>Children order:</Row>
 				{newData.childrenOrder.map((childID, index)=> {
 					let childPath = (newData._id ? newData._id + "/" : "") + childID;
-					let child = GetNodeL3(childID, childPath);
+					let child = GetNodeL3(childPath);
 					let childTitle = child ? GetNodeDisplayText(child, childPath, GetNodeForm(child, newDataAsL2)) : "...";
 					return (
 						<Row key={index} style={{display: "flex", alignItems: "center"}}>

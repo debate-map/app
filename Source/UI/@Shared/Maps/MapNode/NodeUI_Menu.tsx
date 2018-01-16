@@ -18,7 +18,7 @@ import {DN} from "js-vextensions";
 import keycode from "keycode";
 import {firebaseConnect} from "react-redux-firebase";
 import {connect} from "react-redux";
-import {ACTNodeCopy} from "../../../../Store/main";
+import {ACTNodeCopy, GetCopiedNode} from "../../../../Store/main";
 import {Select} from "react-vcomponents";
 import {GetEntries, GetValues} from "../../../../Frame/General/Enums";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
@@ -41,13 +41,13 @@ import { GetPathNodes, GetPathNodeIDs } from "../../../../Store/main/mapViews";
 import {GetNodeL2} from "Store/firebase/nodes/$node";
 
 type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean}
-	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeL2, copiedNode: MapNodeL2, copiedNode_asCut: boolean}>;
+	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeL2, copiedNode: MapNodeL3, copiedNode_asCut: boolean}>;
 @Connect((_: RootState, {map, node, path}: Props)=> ({
 	_: (ForUnlink_GetError(GetUserID(), map, node), ForDelete_GetError(GetUserID(), map, node)),
 	//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
 	permissions: GetUserPermissionGroups(GetUserID()),
 	parentNode: GetParentNodeL3(path),
-	copiedNode: State(a=>a.main.copiedNodePath) ? GetNodeL2(SplitStringBySlash_Cached(State(a=>a.main.copiedNodePath)).Last().ToInt()) : null,
+	copiedNode: GetCopiedNode(),
 	copiedNode_asCut: State(a=>a.main.copiedNodePath_asCut),
 }))
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {
@@ -58,7 +58,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
 		let validChildTypes = GetValidNewChildTypes(node, path, permissions);
 		let form = GetNodeForm(node, path);
-		let formForChildren = node.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
+		let formForClaimChildren = node.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
 
 		let nodeText = GetNodeDisplayText(node, path);
 
@@ -111,7 +111,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							}
 						}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node, path, copiedNode, permissions) &&
-					<VMenuItem text={`Paste${copiedNode_asCut ? "" : " as link"}: "${GetNodeDisplayText(copiedNode, null, formForChildren).KeepAtMost(50)}"`}
+					<VMenuItem text={`Paste${copiedNode_asCut ? "" : " as link"}: "${GetNodeDisplayText(copiedNode, null, formForClaimChildren).KeepAtMost(50)}"`}
 						style={styles.vMenuItem} onClick={e=> {
 							if (e.button != 0) return;
 							if (userID == null) return ShowSignInPopup();
@@ -129,7 +129,11 @@ If not, paste the argument as a clone instead.`
 							proceed();
 
 							async function proceed() {
-								await new LinkNode({mapID: map._id, parentID: node._id, childID: copiedNode._id, childForm: formForChildren}).Run();
+								await new LinkNode(E(
+									{mapID: map._id, parentID: node._id, childID: copiedNode._id},
+									copiedNode.type == MapNodeType.Claim && {childForm: formForClaimChildren},
+									copiedNode.type == MapNodeType.Argument && {childPolarity: copiedNode.link.polarity},
+								)).Run();
 								if (copiedNode_asCut) {
 									let baseNodePath = State(a=>a.main.copiedNodePath);		
 									let baseNodePath_ids = GetPathNodeIDs(baseNodePath);
@@ -138,7 +142,7 @@ If not, paste the argument as a clone instead.`
 							}
 						}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node, path, copiedNode.Extended({_id: -1}), permissions) && !copiedNode_asCut &&
-					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, null, formForChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async e=> {
+					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, null, formForClaimChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();
 

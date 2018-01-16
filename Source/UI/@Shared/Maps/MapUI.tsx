@@ -85,13 +85,13 @@ type Props = {
 	& Partial<{rootNode: MapNodeL3, focusNode: string, viewOffset: {x: number, y: number}}>;
 @Connect((state: RootState, {map, rootNode}: Props)=> {
 	if (rootNode == null && map && map.rootNode) {
-		rootNode = GetNodeL3(map.rootNode, map.rootNode+"");
+		rootNode = GetNodeL3(map.rootNode+"");
 	}
 
 	if (map) {
 		let nodeID = State("main", "mapViews", map._id, "rootNodeID");
 		if (isBot && nodeID) {
-			rootNode = GetNodeL3(nodeID, nodeID+"");
+			rootNode = GetNodeL3(nodeID+"");
 		}
 	}
 

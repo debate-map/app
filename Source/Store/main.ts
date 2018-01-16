@@ -19,6 +19,7 @@ import {demoMap, demoRootNodeID} from "../UI/Home/DemoMap";
 import { Personal } from "Store/main/personal";
 import {PersonalReducer, ACTPersonalMapSelect} from "./main/personal";
 import {Database, DatabaseReducer} from "./main/database";
+import {GetNodeL3} from "./firebase/nodes/$node";
 
 // class is used only for initialization
 export class MainState {
@@ -239,4 +240,10 @@ export function GetSubpage() {
 
 export function GetLastAcknowledgementTime(nodeID: number) {
 	return State("main", "nodeLastAcknowledgementTimes", nodeID) as number || 0;
+}
+
+export function GetCopiedNode() {
+	let path = State(a=>a.main.copiedNodePath);
+	if (!path) return null;
+	return GetNodeL3(path);
 }

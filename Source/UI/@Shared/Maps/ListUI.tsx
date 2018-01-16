@@ -67,7 +67,7 @@ type Props = {
 		sortBy: State("main", "maps", map._id, "list_sortBy"),
 		filter: State("main", "maps", map._id, "list_filter"),
 		page,
-		selectedNode: selectedNode ? GetNodeL3(selectedNode, selectedNode._id+"") : null,
+		selectedNode: selectedNode ? GetNodeL3(selectedNode._id+"") : null,
 	};
 })
 export default class ListUI extends BaseComponent<Props, {panelToShow?: string}> {

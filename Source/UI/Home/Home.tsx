@@ -205,7 +205,7 @@ let info = {text: pageText};
 
 type Props = {} & Partial<{demoRootNode: MapNodeL3}>;
 @Connect(state=> ({
-	demoRootNode: GetNodeL3(demoRootNodeID, demoRootNodeID+""),
+	demoRootNode: GetNodeL3(demoRootNodeID+""),
 }))
 export default class HomeUI2 extends BaseComponent<Props, {}> {
 	/*static contextTypes = {

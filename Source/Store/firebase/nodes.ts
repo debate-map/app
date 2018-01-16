@@ -64,7 +64,7 @@ export function GetParentNodeL2(childPath: string) {
 	return GetNodeL2(GetParentNodeID(childPath));
 }
 export function GetParentNodeL3(childPath: string) {
-	return GetNodeL3(GetParentNodeID(childPath), childPath.split("/").slice(0, -1).join("/"));
+	return GetNodeL3(childPath.split("/").slice(0, -1).join("/"));
 }
 export function GetNodeID(path: string) {
 	let ownNodeStr = SplitStringBySlash_Cached(path).LastOrX();
@@ -83,7 +83,7 @@ export function GetNodeParentsL2(node: MapNode) {
 	return CachedTransform("GetNodeParentsL2", [], parentsL2, ()=>parentsL2);
 }
 export function GetNodeParentsL3(node: MapNode, path: string) {
-	let parentsL3 = GetNodeParents(node).map(parent=>parent ? GetNodeL3(parent, SlicePath(path, 1)) : null);
+	let parentsL3 = GetNodeParents(node).map(parent=>parent ? GetNodeL3(SlicePath(path, 1)) : null);
 	return CachedTransform("GetNodeParentsL3", [path], parentsL3, ()=>parentsL3);
 }
 
@@ -114,7 +114,7 @@ export function GetNodeChildrenL2(node: MapNode) {
 }
 export function GetNodeChildrenL3(node: MapNode, path: string, filterForPath = false) {
 	let nodeChildrenL2 = GetNodeChildrenL2(node);
-	let nodeChildrenEnhanced = nodeChildrenL2.map(child=>child ? GetNodeL3(child, path + "/" + child._id) : null);
+	let nodeChildrenEnhanced = nodeChildrenL2.map(child=>child ? GetNodeL3(path + "/" + child._id) : null);
 	if (filterForPath) {
 		nodeChildrenEnhanced = nodeChildrenEnhanced.filter(child=> {
 			// if null, keep (so receiver knows there's an entry here, but it's still loading)

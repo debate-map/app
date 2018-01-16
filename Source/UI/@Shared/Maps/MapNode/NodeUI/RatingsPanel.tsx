@@ -49,7 +49,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 		let firebase = store.firebase.helpers;
 		let {size} = this.state;
 
-		let parentNode = GetNodeL3(GetParentNode(path), SlicePath(path, 1));
+		let parentNode = GetNodeL3(SlicePath(path, 1));
 		if (node.current.impactPremise && parentNode == null) return <div/>; // if impact-premise, but no parent-node connected, must still be loading
 		
 		let reverseRatings = ShouldRatingTypeBeReversed(node);

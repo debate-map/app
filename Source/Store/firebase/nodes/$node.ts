@@ -75,7 +75,10 @@ export function GetFinalPolarityAtPath(node: MapNodeL2, path: string): Polarity 
 	Assert(node.type == MapNodeType.Argument, "Only argument nodes have polarity.");
 	let parent = GetParentNodeL2(path);
 	if (!parent) return Polarity.Supporting; // can be null, if for NodeUI_ForBots
+	
 	let link = GetLinkUnderParent(node._id, parent);
+	if (link == null) return Polarity.Supporting; // can be null, if path is invalid (eg. copied-node path)
+
 	let parentForm = GetNodeForm(parent, SplitStringBySlash_Cached(path).slice(0, -1).join("/"));
 	return GetFinalPolarity(link.polarity, parentForm);
 }
@@ -132,11 +135,11 @@ export function AsNodeL3(node: MapNodeL2, finalPolarity?: Polarity, link?: Child
 	};
 	return node.Extended({finalPolarity, link}) as MapNodeL3;
 }
-export function GetNodeL3(nodeID: number | MapNode | MapNodeL2, path: string) {
-	if (IsNumber(nodeID)) nodeID = GetNode(nodeID);
-	if (nodeID && IsNodeL1(nodeID)) nodeID = GetNodeL2(nodeID);
-	if (nodeID == null) return null;
-	let node = nodeID as MapNodeL2;
+export function GetNodeL3(path: string) {
+	if (path == null) return null;
+	let nodeID = SplitStringBySlash_Cached(path).Last().ToInt();
+	let node = GetNodeL2(nodeID);
+	if (node == null) return null;
 	
 	// if any of the data in a MapNodeL3 is not loaded yet, just return null (we want it to be all or nothing)
 	let finalPolarity = null;

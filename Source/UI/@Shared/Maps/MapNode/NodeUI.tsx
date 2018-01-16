@@ -116,7 +116,7 @@ type State = {
 
 		initialChildLimit: State(a=>a.main.initialChildLimit),
 		//node_finalType: GetFinalNodeTypeAtPath(node, path),
-		//nodeEnhanced: GetNodeL3(node, path),
+		//nodeEnhanced: GetNodeL3(path),
 		form: GetNodeForm(node, GetParentNodeL2(path)),
 		// only pass new nodeView when its local-props are different
 		nodeView: CachedTransform("nodeView_transform1", [map._id, path], nodeView.Excluding("focused", "viewOffset", "children"), ()=>nodeView),

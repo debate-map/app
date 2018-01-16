@@ -35,7 +35,7 @@ export default class ReverseArgumentPolarity extends Command<{mapID?: number, no
 	async Prepare() {
 		let {nodeID, path} = this.payload;
 
-		this.oldNodeData = await GetAsync_Raw(()=>GetNodeL3(nodeID, path));
+		this.oldNodeData = await GetAsync_Raw(()=>GetNodeL3(path));
 		this.parentID = GetParentNodeID(path);
 		
 		this.newLinkData = {...this.oldNodeData.link};
