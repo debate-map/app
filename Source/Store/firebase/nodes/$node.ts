@@ -75,7 +75,7 @@ export function GetFinalPolarityAtPath(node: MapNodeL2, path: string): Polarity 
 	Assert(node.type == MapNodeType.Argument, "Only argument nodes have polarity.");
 	let parent = GetParentNodeL2(path);
 	if (!parent) return Polarity.Supporting; // can be null, if for NodeUI_ForBots
-	
+
 	let link = GetLinkUnderParent(node._id, parent);
 	if (link == null) return Polarity.Supporting; // can be null, if path is invalid (eg. copied-node path)
 
@@ -184,6 +184,11 @@ export function GetLinkUnderParent(nodeID: number, parent: MapNode): ChildEntry 
 	if (parent.children == null) return null; // post-delete, parent-data might have updated before child-data
 	let link = parent.children[nodeID];
 	return link;
+}
+export function GetLinkAtPath(path: string) {
+	let nodeID = SplitStringBySlash_Cached(path).Last().ToInt();
+	let parent = GetNode(SplitStringBySlash_Cached(path).XFromLast(1).ToInt());
+	return GetLinkUnderParent(nodeID, parent);
 }
 
 export function IsNodeTitleValid_GetError(node: MapNode, title: string) {

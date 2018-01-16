@@ -37,6 +37,7 @@ export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>F
 //require("./Admin/DBUpgrades/UpgradeDB_5");
 //require("./Admin/DBUpgrades/UpgradeDB_6");
 require("./Admin/DBUpgrades/UpgradeDB_7");
+require("./Admin/DBUpgrades/UpgradeDB_8");
 
 //export default class AdminUI extends BaseComponent<{}, {fb: firebase.FirebaseApplication, env: string}> {
 export default class AdminUI extends BaseComponent<{}, {}> {

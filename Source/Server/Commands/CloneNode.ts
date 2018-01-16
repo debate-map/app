@@ -2,14 +2,15 @@ import {GetNode, GetNodeChildren, GetNodeChildrenL2} from "../../Store/firebase/
 import {Assert} from "js-vextensions";
 import {GetDataAsync, GetAsync, GetAsync_Raw, RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
 import { Command, MergeDBUpdates } from "../Command";
-import {MapNode, ClaimForm, ChildEntry, MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
+import {MapNode, ClaimForm, ChildEntry, MapNodeL2, Polarity} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
-import {GetNodeForm, GetNodeL2} from "../../Store/firebase/nodes/$node";
+import {GetNodeForm, GetNodeL2, GetLinkUnderParent, GetLinkAtPath} from "../../Store/firebase/nodes/$node";
 import AddNode from "./AddNode";
 import LinkNode from "./LinkNode";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import AddChildNode from "./AddChildNode";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
+import {DEL} from "js-vextensions";
 
 export default class CloneNode extends Command<{mapID: number, baseNodePath: string, newParentID: number}> {
 	sub_addNode: AddChildNode;
@@ -20,29 +21,34 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 		// prepare add-node
 		// ==========
 
-		let baseNodeID = SplitStringBySlash_Cached(baseNodePath).map(a=>a.ToInt()).Last();
+		let baseNodeID = SplitStringBySlash_Cached(baseNodePath).Last().ToInt();
 		let baseNode = await GetAsync_Raw(()=>GetNodeL2(baseNodeID));
 		let isArgument = baseNode.type == MapNodeType.Argument;
 		
 		let nodeForm = await GetAsync_Raw(()=>GetNodeForm(baseNode, baseNodePath)) as ClaimForm;
+		let nodePolarity = await GetAsync_Raw(()=>GetLinkAtPath(baseNodePath).polarity) as Polarity;
 		let baseImpactPremise = isArgument ? (await GetAsync_Raw(()=>GetNodeChildrenL2(baseNode))).First(a=>a.current.impactPremise != null) : null;
 
-		let newChildNode = RemoveHelpers(Clone(baseNode)) as MapNodeL2;
+		let newChildNode = RemoveHelpers(Clone(baseNode))
+			.VSet({children: DEL, childrenOrder: DEL, currentRevision: DEL, current: DEL}) as MapNode;
 		newChildNode.parents = {[newParentID]: {_: true}}; // make new node's only parent the one on this path
-		delete newChildNode.children;
-		delete newChildNode.childrenOrder;
 
-		let newChildRevision = Clone(baseNode.current);
-		delete newChildNode.currentRevision;
-		delete newChildNode.current;
-		delete newChildRevision.node;
+		let newChildRevision = Clone(baseNode.current).VSet({node: DEL});
 
 		if (isArgument) {
-			var impactPremiseNode = RemoveHelpers(Clone(baseImpactPremise)).VSet({parents: null}) as MapNode;
+			var newImpactPremiseNode = RemoveHelpers(Clone(baseImpactPremise))
+				.VSet({parents: DEL, children: DEL, childrenOrder: DEL, currentRevision: DEL, current: DEL}) as MapNode;
+			
+			var newImpactPremiseRevision = Clone(baseImpactPremise.current).VSet({node: DEL});
 		}
 		this.sub_addNode = new AddChildNode({
 			mapID, node: newChildNode, revision: newChildRevision,
-			link: E({_: true}, nodeForm && {form: nodeForm}) as any, impactPremiseNode,
+			link: E(
+				{_: true},
+				nodeForm && {form: nodeForm},
+				nodePolarity && {polarity: nodePolarity},
+			) as any,
+			impactPremiseNode: newImpactPremiseNode, impactPremiseNodeRevision: newImpactPremiseRevision,
 		});
 		this.sub_addNode.Validate_Early();
 		await this.sub_addNode.Prepare();
@@ -72,6 +78,8 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 
 			this.sub_linkChildren.push(linkChildSub);
 		}
+
+		this.returnData = this.sub_addNode.returnData;
 	}
 	async Validate() {
 		this.sub_addNode.Validate();

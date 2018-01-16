@@ -8,27 +8,29 @@ import {Term} from "../../Store/firebase/terms/@Term";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {MapEdit} from "Server/CommandMacros";
 import {UserEdit} from "../CommandMacros";
+import {GetNode} from "Store/firebase/nodes";
+import {GetAsync} from "Frame/Database/DatabaseHelpers";
 
 @MapEdit
 @UserEdit
-export default class LinkNode extends Command<{mapID: number, parentID: number, childID: number, childForm: ClaimForm, childPolarity: Polarity}> {
+export default class LinkNode extends Command<{mapID: number, parentID: number, childID: number, childForm?: ClaimForm, childPolarity?: Polarity}> {
 	Validate_Early() {
 		let {parentID, childID} = this.payload
 		Assert(parentID != childID, "Parent-id and child-id cannot be the same!");
 	}
 	
-	parent_oldChildrenOrder: number[];
+	parent_oldData: MapNode;
 	/*async Prepare(parent_oldChildrenOrder_override?: number[]) {
 		let {parentID, childID, childForm} = this.payload;
 		this.parent_oldChildrenOrder = parent_oldChildrenOrder_override || await GetDataAsync(`nodes/${parentID}/childrenOrder`) as number[];
 	}*/
 	async Prepare() {
 		let {parentID, childID} = this.payload;
-		this.parent_oldChildrenOrder = await GetDataAsync("nodes", parentID, "childrenOrder") as number[];
+		this.parent_oldData = await GetAsync(()=>GetNode(parentID));
 	}
 	async Validate() {
 		let {parentID, childID} = this.payload;
-		Assert(this.parent_oldChildrenOrder == null || !this.parent_oldChildrenOrder.Contains(childID), `Node #${childID} is already a child of node #${parentID}.`);
+		Assert(this.parent_oldData.childrenOrder == null || !this.parent_oldData.childrenOrder.Contains(childID), `Node #${childID} is already a child of node #${parentID}.`);
 	}
 
 	GetDBUpdates() {
@@ -43,8 +45,8 @@ export default class LinkNode extends Command<{mapID: number, parentID: number, 
 			childForm && {form: childForm},
 			childPolarity && {polarity: childPolarity},
 		);
-		if (this.parent_oldChildrenOrder) {
-			updates[`nodes/${parentID}/childrenOrder`] = this.parent_oldChildrenOrder.concat([childID]);
+		if (this.parent_oldData.type == MapNodeType.Argument) {
+			updates[`nodes/${parentID}/childrenOrder`] = (this.parent_oldData.childrenOrder || []).concat([childID]);
 		}
 		return updates;
 	}

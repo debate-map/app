@@ -42,8 +42,9 @@ export default class AddChildNode extends Command
 			this.sub_addImpactPremise.lastNodeRevisionID_addAmount = 1;
 			await this.sub_addImpactPremise.Prepare();
 
-			this.sub_linkImpactPremise = new LinkNode({mapID, parentID: this.sub_addNode.nodeID, childID: this.sub_addImpactPremise.nodeID, childForm: null}).MarkAsSubcommand();
+			this.sub_linkImpactPremise = new LinkNode({mapID, parentID: this.sub_addNode.nodeID, childID: this.sub_addImpactPremise.nodeID}).MarkAsSubcommand();
 			await this.sub_linkImpactPremise.Prepare();
+			this.sub_linkImpactPremise.parent_oldData = this.sub_addNode.payload.node;
 		}
 
 		if (!asMapRoot) {
@@ -56,7 +57,7 @@ export default class AddChildNode extends Command
 			impactPremise_nodeID: this.sub_addImpactPremise ? this.sub_addImpactPremise.nodeID : null,
 			revisionID: this.sub_addNode.sub_addRevision.revisionID,
 			impactPremise_revisionID: this.sub_addImpactPremise ? this.sub_addImpactPremise.sub_addRevision.revisionID : null,
-		}
+		};
 	}
 	async Validate() {
 		let {node, link, impactPremiseNode, asMapRoot} = this.payload;

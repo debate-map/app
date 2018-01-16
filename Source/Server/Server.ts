@@ -68,6 +68,19 @@ function Validate(schemaName: string, data, removeHelpers = true) {
 
 	let passed = ajv.validate(schemaName, data);
 	if (!passed) return ajv.FullErrorsText();
+
+	// additional, non-ajv checks
+	if (ajvExtraChecks[schemaName]) {
+		for (let extraCheck of ajvExtraChecks[schemaName]) {
+			let errorMessage = extraCheck(data);
+			if (errorMessage) return errorMessage;
+		}
+	}
+}
+export let ajvExtraChecks = {}; // schemaName -> $index -> $validationFunc
+export function AddAJVExtraCheck(schemaName: string, extraCheckFunc: (item: any)=>string) {
+	ajvExtraChecks[schemaName] = ajvExtraChecks[schemaName] || [];
+	ajvExtraChecks[schemaName].push(extraCheckFunc);
 }
 
 G({AssertValidate}); declare global { function AssertValidate(schemaName: string, data, failureMessage: string, addDataStr?: boolean); }

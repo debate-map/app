@@ -36,11 +36,10 @@ type Props = {
 	parent: MapNodeL3, forNew: boolean, forOldRevision?: boolean, enabled?: boolean,
 	style?, onChange?: (newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: ChildEntry, component: NodeDetailsUI)=>void,
 	//onSetError: (error: string)=>void,
-} & Partial<{creator: User, impactPremiseNode: MapNodeL2}>;
+} & Partial<{creator: User}>;
 type State = {newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: ChildEntry};
 @Connect((state, {baseData, baseRevisionData, forNew}: Props)=>({
 	creator: !forNew && GetUser(baseData.creator),
-	impactPremiseNode: GetImpactPremiseChildNode(baseData.Extended({current: baseRevisionData})),
 }))
 export default class NodeDetailsUI extends BaseComponent<Props, State> {
 	static defaultProps = {enabled: true};
@@ -56,7 +55,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 
 	quoteEditor: QuoteInfoEditorUI;
 	render() {
-		let {baseData, impactPremiseNode, parent, forNew, forOldRevision, enabled, style, onChange, creator} = this.props;
+		let {baseData, parent, forNew, forOldRevision, enabled, style, onChange, creator} = this.props;
 		let {newData, newLinkData, newRevisionData} = this.state;
 		let firebase = store.firebase.helpers;
 		let Change = (..._)=> {
@@ -71,7 +70,6 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 		let claimType = GetClaimType(newDataAsL2);
 
 		let splitAt = 170, width = 600;
-		let isArgument_any = impactPremiseNode && impactPremiseNode.current.impactPremise.ifType == ImpactPremise_IfType.Any;
 		return (
 			<div> {/* needed so GetInnerComp() works */}
 			<Column style={E({padding: 5}, style)}>
@@ -103,8 +101,6 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 				</Row>
 				{!forNew &&
 					<AdvancedOptions {...propsEnhanced}/>}
-				{!forNew && enabled && newDataAsL2.type == MapNodeType.Argument && newData.childrenOrder && !isArgument_any &&
-					<ChildrenOrder {...propsEnhanced}/>}
 			</Column>
 			</div>
 		);
@@ -280,38 +276,6 @@ class AdvancedOptions extends BaseComponent<Props_Enhanced, {}> {
 						value={newRevisionData.accessLevel || AccessLevel.Basic}
 						onChange={val=>Change(val == AccessLevel.Basic ? delete newRevisionData.accessLevel : newRevisionData.accessLevel = val)}/>
 				</Row>
-			</Column>
-		);
-	}
-}
-
-class ChildrenOrder extends BaseComponent<Props_Enhanced, {}> {
-	render() {
-		let {newData, newDataAsL2, Change} = this.props;
-		return (
-			<Column mt={5}>
-				<Row style={{fontWeight: "bold"}}>Children order:</Row>
-				{newData.childrenOrder.map((childID, index)=> {
-					let childPath = (newData._id ? newData._id + "/" : "") + childID;
-					let child = GetNodeL3(childPath);
-					let childTitle = child ? GetNodeDisplayText(child, childPath, GetNodeForm(child, newDataAsL2)) : "...";
-					return (
-						<Row key={index} style={{display: "flex", alignItems: "center"}}>
-							<Div mr={7} sel style={{opacity: .5}}>#{childID}</Div>
-							<Div sel style={{flex: 1, whiteSpace: "normal"}}>{childTitle}</Div>
-							{/*<TextInput enabled={false} style={{flex: 1}} required pattern={MapNode_id}
-								value={`#${childID.toString()}: ${childTitle}`}
-								//onChange={val=>Change(!IsNaN(val.ToInt()) && (newData.childrenOrder[index] = val.ToInt()))}
-							/>*/}
-							{index > 0 &&
-								<Button text={<Icon size={16} icon="arrow-up"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index > 1}
-									onClick={()=>Change(newData.childrenOrder.RemoveAt(index), newData.childrenOrder.Insert(index - 1, childID))}/>}
-							{index > 0 &&
-								<Button text={<Icon size={16} icon="arrow-down"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index < newData.childrenOrder.length - 1}
-									onClick={()=>Change(newData.childrenOrder.RemoveAt(index), newData.childrenOrder.Insert(index + 1, childID))}/>}
-						</Row>
-					);
-				})}
 			</Column>
 		);
 	}

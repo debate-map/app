@@ -1,9 +1,9 @@
-import {Column, CheckBox} from "react-vcomponents";
+import {Column, CheckBox, Div} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
 import {MapNodeL2, ClaimType, ClaimForm, MapNodeL3} from "../../../../../Store/firebase/nodes/@MapNode";
 import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
-import {GetLinkUnderParent, GetNodeDisplayText, GetClaimType} from "../../../../../Store/firebase/nodes/$node";
+import {GetLinkUnderParent, GetNodeDisplayText, GetClaimType, GetNodeL3, GetNodeForm} from "../../../../../Store/firebase/nodes/$node";
 import {GetUserPermissionGroups, GetUserID, GetUser} from "Store/firebase/users";
 import {GetParentNode, GetParentNodeID} from "Store/firebase/nodes";
 import {Pre, Row} from "react-vcomponents";
@@ -22,22 +22,29 @@ import {Map} from "../../../../../Store/firebase/maps/@Map";
 import Moment from "moment";
 import UpdateLink from "../../../../../Server/Commands/UpdateLink";
 import {User} from "../../../../../Store/firebase/users/@User";
+import {GetImpactPremiseChildNode} from "../../../../../Store/firebase/nodes";
+import {ImpactPremise_IfType} from "../../../../../Store/firebase/nodes/@ImpactPremiseInfo";
+import Icon from "Frame/ReactComponents/Icon";
+import UpdateNodeChildrenOrder from "../../../../../Server/Commands/UpdateNodeChildrenOrder";
 
-type Props = {map?: Map, node: MapNodeL3, path: string} & Partial<{creator: User, viewers: string[]}>;
+type Props = {map?: Map, node: MapNodeL3, path: string} & Partial<{creator: User, viewers: string[], impactPremiseNode: MapNodeL2}>;
 @Connect((state, {node, path}: Props)=>({
 	_: GetUserPermissionGroups(GetUserID()),
 	creator: GetUser(node.creator),
 	viewers: GetNodeViewers(node._id),
+	impactPremiseNode: GetImpactPremiseChildNode(node),
 }))
 export default class OthersPanel extends BaseComponent<Props, {convertToType: ClaimType}> {
 	render() {
-		let {map, node, path, creator, viewers} = this.props;
+		let {map, node, path, creator, viewers, impactPremiseNode} = this.props;
 		let mapID = map ? map._id : null;
 		let {convertToType} = this.state;
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
 
 		let convertToTypes = GetEntries(ClaimType).filter(pair=>CanConvertFromClaimTypeXToY(GetClaimType(node), pair.value));
 		convertToType = convertToType || convertToTypes.map(a=>a.value).FirstOrX();
+
+		let isArgument_any = impactPremiseNode && impactPremiseNode.current.impactPremise.ifType == ImpactPremise_IfType.Any;
 
 		return (
 			<Column sel style={{position: "relative"}}>
@@ -65,6 +72,8 @@ export default class OthersPanel extends BaseComponent<Props, {convertToType: Cl
 							new ChangeClaimType(E({mapID}, {nodeID: node._id, newType: convertToType})).Run();
 						}}/>
 					</Row>}
+				{node.type == MapNodeType.Argument && node.childrenOrder && !isArgument_any &&
+					<ChildrenOrder mapID={mapID} node={node}/>}
 				<AtThisLocation node={node} path={path}/>
 			</Column>
 		);
@@ -129,6 +138,48 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 								}).Run();
 							}}/>
 					</Row>}
+			</Column>
+		);
+	}
+}
+
+class ChildrenOrder extends BaseComponent<{mapID: number, node: MapNodeL3}, {}> {
+	render() {
+		let {mapID, node} = this.props;
+		return (
+			<Column mt={5}>
+				<Row style={{fontWeight: "bold"}}>Children order:</Row>
+				{node.childrenOrder.map((childID, index)=> {
+					let childPath = (node._id ? node._id + "/" : "") + childID;
+					let child = GetNodeL3(childPath);
+					let childTitle = child ? GetNodeDisplayText(child, childPath, GetNodeForm(child, node)) : "...";
+					return (
+						<Row key={index} style={{display: "flex", alignItems: "center"}}>
+							<Div mr={7} sel style={{opacity: .5}}>#{childID}</Div>
+							<Div sel style={{flex: 1, whiteSpace: "normal"}}>{childTitle}</Div>
+							{/*<TextInput enabled={false} style={{flex: 1}} required pattern={MapNode_id}
+								value={`#${childID.toString()}: ${childTitle}`}
+								//onChange={val=>Change(!IsNaN(val.ToInt()) && (newData.childrenOrder[index] = val.ToInt()))}
+							/>*/}
+							{index > 0 &&
+								<Button text={<Icon size={16} icon="arrow-up"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index > 1}
+									onClick={()=> {
+										let newOrder = node.childrenOrder.slice(0);
+										newOrder.RemoveAt(index);
+										newOrder.Insert(index - 1, childID);
+										new UpdateNodeChildrenOrder({mapID, nodeID: node._id, childrenOrder: newOrder}).Run();
+									}}/>}
+							{index > 0 &&
+								<Button text={<Icon size={16} icon="arrow-down"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index < node.childrenOrder.length - 1}
+									onClick={()=> {
+										let newOrder = node.childrenOrder.slice(0);
+										newOrder.RemoveAt(index);
+										newOrder.Insert(index + 1, childID);
+										new UpdateNodeChildrenOrder({mapID, nodeID: node._id, childrenOrder: newOrder}).Run();
+									}}/>}
+						</Row>
+					);
+				})}
 			</Column>
 		);
 	}

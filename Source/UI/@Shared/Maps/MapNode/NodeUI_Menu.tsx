@@ -39,6 +39,7 @@ import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import { ShowAddSubnodeDialog } from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSubnodeDialog";
 import { GetPathNodes, GetPathNodeIDs } from "../../../../Store/main/mapViews";
 import {GetNodeL2} from "Store/firebase/nodes/$node";
+import {ACTSetLastAcknowledgementTime} from "Store/main";
 
 type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean}
 	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeL2, copiedNode: MapNodeL3, copiedNode_asCut: boolean}>;
@@ -148,7 +149,13 @@ If not, paste the argument as a clone instead.`
 
 						let baseNodePath = State(a=>a.main.copiedNodePath);
 						let baseNodePath_ids = GetPathNodeIDs(baseNodePath);
-						await new CloneNode({mapID: map._id, baseNodePath, newParentID: node._id}).Run();
+						let info = await new CloneNode({mapID: map._id, baseNodePath, newParentID: node._id}).Run();
+
+						store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.nodeID, time: Date.now()}));
+						if (info.impactPremise_nodeID) {
+							store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.impactPremise_nodeID, time: Date.now()}));
+						}
+						
 						if (copiedNode_asCut) {
 							await new UnlinkNode({mapID: map._id, parentID: baseNodePath_ids.XFromLast(1), childID: baseNodePath_ids.Last()}).Run();
 						}

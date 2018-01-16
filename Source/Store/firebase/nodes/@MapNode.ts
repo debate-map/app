@@ -1,4 +1,4 @@
-import {AddSchema} from '../../../Server/Server';
+import {AddSchema, AddAJVExtraCheck} from '../../../Server/Server';
 import {GetValues_ForSchema} from '../../../Frame/General/Enums';
 import {MapNodeType} from './@MapNodeType';
 import {RatingType} from "../nodeRatings/@RatingType";
@@ -83,6 +83,11 @@ AddSchema({
 		}
 	],
 }, "MapNode");
+AddAJVExtraCheck("MapNode", (node: MapNode)=> {
+	if (node.childrenOrder && node.childrenOrder.length != node.children.VKeys(true).length) {
+		return "Children and childrenOrder lengths differ!";
+	}
+});
 
 // helpers
 //export type MapNodeL2 = MapNode & {finalType: MapNodeType};
