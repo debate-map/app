@@ -43,7 +43,7 @@ export default class ProfileUI extends BaseComponent<Props, {}> {
 						{backgrounds.Props().map(prop=> {
 							let id = prop.name.ToInt();
 							let background = prop.value;
-							let selected = user.backgroundID == id;
+							let selected = (user.backgroundID || 1) == id;
 							return (
 								<Div
 									style={E(

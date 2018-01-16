@@ -194,7 +194,10 @@ export function GetNodeDisplayText(node: MapNodeL2, path?: string, form?: ClaimF
 
 	if (node.type == MapNodeType.Claim) {
 		if (node.current.impactPremise) {
-			Assert(path, "Path must be supplied if getting display-text for an impact-premise.");
+			//Assert(path, "Path must be supplied if getting display-text for an impact-premise.");
+			let parentNodeID = node.parents.VKeys(true)[0];
+			path = path || `${parentNodeID}/${node._id}`;
+			
 			let thenType = node.current.impactPremise.thenType;
 			let argument = GetParentNodeL2(path);
 			var argumentFinalPolarity = GetFinalPolarityAtPath(argument, SlicePath(path, 1));
