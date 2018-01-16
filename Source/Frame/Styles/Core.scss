@@ -184,6 +184,7 @@
 		will-change: transform;
 	}
 
+	// fallback, for if code-based approach fails
 	.background {
 		background-image: url(/Images/Backgrounds/Ocean_x1920.jpg);
 		background-position: center bottom;

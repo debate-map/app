@@ -3,7 +3,8 @@ import {PermissionGroupSet} from "../../../../../Store/firebase/userExtras/@User
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
 import {RootState} from "../../../../../Store";
-import {GetUserID, GetUserPermissionGroups, GetUser, User} from "../../../../../Store/firebase/users";
+import {GetUserID, GetUserPermissionGroups, GetUser} from "../../../../../Store/firebase/users";
+import {User} from "Store/firebase/users/@User";
 import {Button} from "react-vcomponents";
 import jquery from "jquery";
 import {Log} from "../../../../../Frame/General/Logging";

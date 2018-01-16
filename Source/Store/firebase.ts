@@ -1,4 +1,3 @@
-import {User} from "./firebase/users";
 import UserExtraInfo from "./firebase/userExtras/@UserExtraInfo";
 import {MapNode} from "./firebase/nodes/@MapNode";
 import {RatingsSet, RatingsRoot} from "./firebase/nodeRatings/@RatingsRoot";
@@ -15,6 +14,7 @@ import { Layer } from "Store/firebase/layers/@Layer";
 import {UserMapInfoSet} from "./firebase/userMapInfo/@UserMapInfo";
 import {MapNodeRevision} from "./firebase/nodes/@MapNodeRevision";
 import {NodeEditTimes} from "Store/firebase/mapNodeEditTimes";
+import {User} from "Store/firebase/users/@User";
 
 export interface FirebaseData {
 	forum: ForumData;

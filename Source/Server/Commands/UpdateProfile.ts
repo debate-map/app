@@ -6,26 +6,17 @@ import {UserEdit} from "../CommandMacros";
 import {MapEdit} from "Server/CommandMacros";
 import { WaitTillSchemaAddedThenRun } from "Server/Server";
 import {GetSchemaJSON} from "../Server";
-import {User} from "../../Store/firebase/users";
+import {User} from "../../Store/firebase/users/@User";
 
 type MainType = User;
 let MTName = "User";
-
-AddSchema({
-	properties: {
-		avatarUrl: {type: "string"},
-		displayName: {type: "string"},
-		email: {type: "string"},
-		providerData: {type: "array"},
-	}
-}, "User");
 
 WaitTillSchemaAddedThenRun(MTName, ()=> {
 	AddSchema({
 		properties: {
 			id: {type: "string"},
 			updates: Schema({
-				properties: GetSchemaJSON(MTName).properties.Including("displayName"),
+				properties: GetSchemaJSON(MTName).properties.Including("displayName", "backgroundID", "backgroundCustom_enabled", "backgroundCustom_url", "backgroundCustom_position"),
 			}),
 		},
 		required: ["id", "updates"],

@@ -40,6 +40,8 @@ import {Column} from "react-vcomponents";
 import {DatabaseUI} from "./Database";
 import {FeedbackUI} from "./Feedback";
 import {NormalizeURL} from "../Frame/General/URLs";
+import {GetUserBackground} from "../Store/firebase/users";
+import {GetUserID} from "Store/firebase/users";
 
 export class RootUIWrapper extends BaseComponent<{store}, {}> {
 	ComponentWillMount() {
@@ -96,11 +98,24 @@ class RootUI extends BaseComponent<Props, {}> {
 	}
 	render() {
 		let {currentPage} = this.props;
+		let background = GetUserBackground(GetUserID());
 		return (
 			<Column className="background"/*"unselectable"*/ style={{height: "100%"}}>
 				{/*<div className="background" style={{
 					position: "absolute", left: 0, right: 0, top: 0, bottom: 0, opacity: .5,
 				}}/>*/}
+				<style>{`
+				.background {
+					background-image: url(${background.url_1920}); /*, url(/Images/Backgrounds/Ocean_x1920.jpg);*/
+					background-position: ${background.position || "center center"};
+					background-size: cover;
+				}
+				@media (min-width: 1921px) {
+					.background {
+						background-image: url(${background.url_3840}); /*, url(/Images/Backgrounds/Ocean_x3840.jpg);*/
+					}
+				}
+				`}</style>
 				<AddressBarWrapper/>
 				<OverlayUI/>
 				<NavBar/>

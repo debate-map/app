@@ -12,7 +12,7 @@ import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import UserExtraInfo from "../../Store/firebase/userExtras/@UserExtraInfo";
 import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
-import {User, GetUserID} from "../../Store/firebase/users";
+import {GetUserID} from "../../Store/firebase/users";
 import {RatingsSet} from "../../Store/firebase/nodeRatings/@RatingsRoot";
 import Firebase from "firebase";
 //import "./Admin/DBUpgrades/UpgradeDB_2";
@@ -23,6 +23,7 @@ import TermComponent from "../../Store/firebase/termComponents/@TermComponent";
 import {FirebaseData} from "../../Store/firebase";
 import {IsUserAdmin} from "../../Store/firebase/userExtras";
 import {SleepAsync} from "js-vextensions";
+import {User} from "Store/firebase/users/@User";
 
 // upgrade-funcs
 var upgradeFuncs; // populated by modules below

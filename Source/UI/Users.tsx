@@ -1,7 +1,8 @@
 import {BaseComponent} from "react-vextensions";
 import {styles} from "../Frame/UI/GlobalStyles";
 import {Connect} from "../Frame/Database/FirebaseConnect";
-import {GetUsers, GetUserExtraInfoMap, UserExtraInfoMap, User} from "../Store/firebase/users";
+import {GetUsers, GetUserExtraInfoMap, UserExtraInfoMap} from "../Store/firebase/users";
+import {User} from "Store/firebase/users/@User";
 import {Row} from "react-vcomponents";
 import UserExtraInfo from "../Store/firebase/userExtras/@UserExtraInfo";
 import Moment from "moment";

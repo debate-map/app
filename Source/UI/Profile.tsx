@@ -1,12 +1,24 @@
 import {BaseComponent} from "react-vextensions";
 import {styles} from "../Frame/UI/GlobalStyles";
-import {Column, Row, Pre, Button, TextInput} from "react-vcomponents";
+import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select} from "react-vcomponents";
 import {Connect} from "Frame/Database/FirebaseConnect";
 import {GetUser, GetUserID} from "Store/firebase/users";
-import {User} from "../Store/firebase/users";
+import {User} from "Store/firebase/users/@User";
 import { UpdateProfile } from "Server/Commands/UpdateProfile";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {ACTTopRightOpenPanelSet} from "../Store/main";
+
+export let backgrounds = {
+	1: {
+		url_1920: "https://firebasestorage.googleapis.com/v0/b/debate-map-dev.appspot.com/o/Backgrounds%2FOcean_x1920.jpg?alt=media&token=53fc5864-a6de-431b-a724-fe4f9305f336",
+		url_3840: "https://firebasestorage.googleapis.com/v0/b/debate-map-dev.appspot.com/o/Backgrounds%2FOcean_x3840.jpg?alt=media&token=2d1c25f3-a25e-4cb4-8586-06f419e4d63c",
+		position: "center bottom",
+	},
+	2: {
+		url_1920: "https://firebasestorage.googleapis.com/v0/b/debate-map-dev.appspot.com/o/Backgrounds%2FNebula_x1920.jpg?alt=media&token=f2fec09e-7394-4453-a08e-7f8608553e14",
+		url_3840: "https://firebasestorage.googleapis.com/v0/b/debate-map-dev.appspot.com/o/Backgrounds%2FNebula_x2560.jpg?alt=media&token=c4ed8a83-d9ed-410f-9ae1-1d830355349a",
+	},
+};
 
 type Props = {} & Partial<{user: User}>;
 @Connect((state, props: Props)=> ({
@@ -24,6 +36,49 @@ export default class ProfileUI extends BaseComponent<Props, {}> {
 					<Button ml={5} text="Change" onClick={()=> {
 						ShowChangeDisplayNameDialog(user._key, user.displayName);
 					}}/>
+				</Row>
+				<Row>Background image:</Row>
+				<Column style={{background: "rgba(0,0,0,.7)"}}>
+					<Row>
+						{backgrounds.Props().map(prop=> {
+							let id = prop.name.ToInt();
+							let background = prop.value;
+							let selected = user.backgroundID == id;
+							return (
+								<Div
+									style={E(
+										{
+											width: 100, height: 100, border: "1px solid black", cursor: "pointer",
+											background: `url(${background.url_1920})`, backgroundPosition: "center", backgroundSize: "cover",
+										},
+										selected && {border: "1px solid rgba(255,255,255,.3)"},
+									)}
+									onClick={()=> {
+										new UpdateProfile({id: user._key, updates: {backgroundID: id}}).Run();
+									}}>
+								</Div>
+							);
+						})}
+					</Row>
+				</Column>
+				<Row mt={5}>
+					<CheckBox text="Custom background" checked={user.backgroundCustom_enabled} onChange={val=> {
+						new UpdateProfile({id: user._key, updates: {backgroundCustom_enabled: val}}).Run();
+					}}/>
+				</Row>
+				<Row mt={5}>
+					<Pre>URL: </Pre>
+					<TextInput delayChangeTillDefocus={true} style={{flex: 1}}
+						value={user.backgroundCustom_url} onChange={val=> {
+							new UpdateProfile({id: user._key, updates: {backgroundCustom_url: val}}).Run();
+						}}/>
+				</Row>
+				<Row mt={5}>
+					<Pre>Anchor: </Pre>
+					<Select options={[{name: "top", value: "center top"}, {name: "center", value: "center center"}, {name: "bottom", value: "center bottom"}]}
+						value={user.backgroundCustom_position || "center center"} onChange={val=> {
+							new UpdateProfile({id: user._key, updates: {backgroundCustom_position: val}}).Run();
+						}}/>
 				</Row>
 			</Column>
 		);

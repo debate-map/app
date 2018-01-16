@@ -3,7 +3,7 @@ import {PermissionGroupSet} from "../../../../../Store/firebase/userExtras/@User
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {GetEntries} from "../../../../../Frame/General/Enums";
 import {RootState} from "../../../../../Store";
-import {GetUserID, GetUserPermissionGroups, GetUser, User} from "../../../../../Store/firebase/users";
+import {GetUserID, GetUserPermissionGroups, GetUser} from "../../../../../Store/firebase/users";
 import {Button} from "react-vcomponents";
 import jquery from "jquery";
 import {Log} from "../../../../../Frame/General/Logging";
@@ -41,6 +41,7 @@ import {ACTSetLastAcknowledgementTime} from "Store/main";
 import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
 	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
 import { SetNodeUILocked } from "UI/@Shared/Maps/MapNode/NodeUI";
+import {User} from "../../../../../Store/firebase/users/@User";
 
 type DetailsPanel_Props = {map?: Map, node: MapNodeL3, path: string} & Partial<{creator: User}>;
 @Connect((state, {node, path}: DetailsPanel_Props)=>({

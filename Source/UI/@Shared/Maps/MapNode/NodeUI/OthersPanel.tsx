@@ -16,12 +16,12 @@ import {CanConvertFromClaimTypeXToY} from "./../../../../../Server/Commands/Chan
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {Select} from "react-vcomponents";
 import ChangeClaimType from "./../../../../../Server/Commands/ChangeClaimType";
-import { User } from "../../../../../Store/firebase/users";
 import { GetNodeViewers } from "Store/firebase/nodeViewers";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import Moment from "moment";
 import UpdateLink from "../../../../../Server/Commands/UpdateLink";
+import {User} from "../../../../../Store/firebase/users/@User";
 
 type Props = {map?: Map, node: MapNodeL3, path: string} & Partial<{creator: User, viewers: string[]}>;
 @Connect((state, {node, path}: Props)=>({

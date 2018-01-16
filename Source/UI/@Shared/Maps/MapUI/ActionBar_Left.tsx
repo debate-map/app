@@ -18,7 +18,7 @@ import {Layer} from "Store/firebase/layers/@Layer";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddLayerDialog} from "../Layers/AddLayerDialog";
 import {ScrollView} from "react-vscrollview";
-import {User} from "../../../../Store/firebase/users";
+import {User} from "Store/firebase/users/@User";
 import {CheckBox} from "react-vcomponents";
 import { GetUserLayerStatesForMap } from "Store/firebase/userMapInfo";
 import { LayerStatesMap } from "Store/firebase/userMapInfo/@UserMapInfo";
