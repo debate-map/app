@@ -22,7 +22,7 @@ import {ACTNodeCopy, GetCopiedNode} from "../../../../Store/main";
 import {Select} from "react-vcomponents";
 import {GetEntries, GetValues} from "../../../../Frame/General/Enums";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
-import {ForDelete_GetError, ForUnlink_GetError, GetNode, GetNodeChildrenAsync, GetNodeParentsAsync, GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetParentNodeL3} from "../../../../Store/firebase/nodes";
+import {ForDelete_GetError, ForUnlink_GetError, GetNode, GetNodeChildrenAsync, GetNodeParentsAsync, GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetParentNodeL3, GetNodeID} from "../../../../Store/firebase/nodes";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
@@ -40,20 +40,28 @@ import { ShowAddSubnodeDialog } from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSub
 import { GetPathNodes, GetPathNodeIDs } from "../../../../Store/main/mapViews";
 import {GetNodeL2} from "Store/firebase/nodes/$node";
 import {ACTSetLastAcknowledgementTime} from "Store/main";
+import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/$map";
+import {GetPathsToNodesChangedSinceX} from "../../../../Store/firebase/mapNodeEditTimes";
 
 type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean}
-	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeL2, copiedNode: MapNodeL3, copiedNode_asCut: boolean}>;
-@Connect((_: RootState, {map, node, path}: Props)=> ({
-	_: (ForUnlink_GetError(GetUserID(), map, node), ForDelete_GetError(GetUserID(), map, node)),
-	//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
-	permissions: GetUserPermissionGroups(GetUserID()),
-	parentNode: GetParentNodeL3(path),
-	copiedNode: GetCopiedNode(),
-	copiedNode_asCut: State(a=>a.main.copiedNodePath_asCut),
-}))
+	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeL2, copiedNode: MapNodeL3, copiedNode_asCut: boolean, pathsToChangedDescendantNodes: string}>;
+@Connect((_: RootState, {map, node, path}: Props)=> {
+	let sinceTime = GetTimeFromWhichToShowChangedNodes(map._id);
+	let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
+	let pathsToChangedDescendantNodes = pathsToChangedNodes.filter(a=>a.startsWith(path + "/"));
+	return ({
+		_: (ForUnlink_GetError(GetUserID(), map, node), ForDelete_GetError(GetUserID(), map, node)),
+		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
+		permissions: GetUserPermissionGroups(GetUserID()),
+		parentNode: GetParentNodeL3(path),
+		copiedNode: GetCopiedNode(),
+		copiedNode_asCut: State(a=>a.main.copiedNodePath_asCut),
+		pathsToChangedDescendantNodes,
+	});
+})
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {
-		let {map, node, path, inList, permissions, parentNode, copiedNode, copiedNode_asCut} = this.props;
+		let {map, node, path, inList, permissions, parentNode, copiedNode, copiedNode_asCut, pathsToChangedDescendantNodes} = this.props;
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
@@ -87,6 +95,14 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							if (e.button != 0) return;
 							if (userID == null) return ShowSignInPopup();
 							ShowAddSubnodeDialog(map._id, node, path);
+						}}/>}
+				{pathsToChangedDescendantNodes.length > 0 &&
+					<VMenuItem text="Mark subtree as viewed" style={styles.vMenuItem}
+						onClick={e=> {
+							if (e.button != 0) return;
+							for (let path of pathsToChangedDescendantNodes) {
+								store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: GetNodeID(path), time: Date.now()}));
+							}
 						}}/>}
 				{IsUserBasicOrAnon(userID) && node.current.impactPremise == null && !inList &&
 					<VMenuItem text={copiedNode ? <span>Cut <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Cut`}

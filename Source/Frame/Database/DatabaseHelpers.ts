@@ -1,4 +1,4 @@
-import {RequestPath, Connect, ClearRequestedPaths, GetRequestedPaths} from "./FirebaseConnect";
+import {RequestPath, Connect, ClearRequestedPaths, GetRequestedPaths, OnAccessPath} from "./FirebaseConnect";
 import {Assert, GetTreeNodesInObjTree, DeepSet, CachedTransform, GetStorageForCachedTransform} from "js-vextensions";
 import {helpers, firebaseConnect} from "react-redux-firebase";
 import {FirebaseApplication, DataSnapshot} from "firebase";
@@ -443,8 +443,10 @@ export function CachedTransform_WithStore<T, T2, T3>(transformType: string, stat
 	if (storage.lastDynamicProps) {
 		for (let key in storage.lastDynamicProps) {
 			if (key.startsWith("store_")) {
+				let path = key.substr("store_".length);
 				//let oldVal = storage.lastDynamicProps[key];
-				let newVal = State({countAsAccess: false}, ...key.substr("store_".length).split("/"));
+				//let newVal = State({countAsAccess: false}, ...path.split("/"));
+				let newVal = State(...path.split("/")); // count as access, so that Connect() retriggers for changes to these inside-transformer accessed-paths
 				dynamicProps[key] = newVal;
 			}
 		}
