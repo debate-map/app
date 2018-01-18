@@ -185,9 +185,11 @@ export function GetSyncLoadActionsForURL(url: VURL, directURLChange: boolean) {
 
 	if (url.pathNodes[0] == "forum") {
 		let subforumStr = url.pathNodes[1];
-		let subforumIDMatch = subforumStr && subforumStr.match(/([0-9]+)$/);
-		let subforumID = subforumIDMatch ? subforumIDMatch[1].ToInt() : null;
-		result.push(new ACTSubforumSelect({id: subforumID}));
+		if (subforumStr != "*") {
+			let subforumIDMatch = subforumStr && subforumStr.match(/([0-9]+)$/);
+			let subforumID = subforumIDMatch ? subforumIDMatch[1].ToInt() : null;
+			result.push(new ACTSubforumSelect({id: subforumID}));
+		}
 
 		let threadStr = url.pathNodes[2];
 		let threadIDMatch = threadStr && threadStr.match(/([0-9]+)$/);
@@ -337,9 +339,10 @@ export function GetNewURL(includeMapViewStr = true) {
 
 	if (page == "forum") {
 		let subforumID = GetSelectedSubforumID();
-		if (subforumID) newURL.pathNodes.push(subforumID+"");
-
 		let threadID = GetSelectedThreadID();
+		if (subforumID) newURL.pathNodes.push(subforumID+"");
+		else if (threadID) newURL.pathNodes.push("*");
+
 		if (threadID) newURL.pathNodes.push(threadID+"");
 	}
 
