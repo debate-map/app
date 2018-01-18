@@ -37,7 +37,7 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					let child = childNodes.FirstOrX(a=>a._id == childIDStr.ToInt());
 					if (child == null) return null;
 
-					let backgroundColor = GetNodeBackgroundColor(child);
+					let backgroundColor = GetNodeBackgroundColor(node.type == MapNodeType.Argument ? node : child);
 
 					/*var start = mainBoxOffset;
 					var startControl = start.Plus(30, 0);
