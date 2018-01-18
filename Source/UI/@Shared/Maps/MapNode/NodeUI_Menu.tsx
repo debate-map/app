@@ -44,11 +44,11 @@ import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/$map";
 import {GetPathsToNodesChangedSinceX} from "../../../../Store/firebase/mapNodeEditTimes";
 
 type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean}
-	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeL2, copiedNode: MapNodeL3, copiedNode_asCut: boolean, pathsToChangedDescendantNodes: string}>;
+	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeL2, copiedNode: MapNodeL3, copiedNode_asCut: boolean, pathsToChangedInSubtree: string}>;
 @Connect((_: RootState, {map, node, path}: Props)=> {
 	let sinceTime = GetTimeFromWhichToShowChangedNodes(map._id);
 	let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
-	let pathsToChangedDescendantNodes = pathsToChangedNodes.filter(a=>a.startsWith(path + "/"));
+	let pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == path || a.startsWith(path + "/")); // also include self, for this
 	return ({
 		_: (ForUnlink_GetError(GetUserID(), map, node), ForDelete_GetError(GetUserID(), map, node)),
 		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
@@ -56,12 +56,12 @@ type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean}
 		parentNode: GetParentNodeL3(path),
 		copiedNode: GetCopiedNode(),
 		copiedNode_asCut: State(a=>a.main.copiedNodePath_asCut),
-		pathsToChangedDescendantNodes,
+		pathsToChangedInSubtree,
 	});
 })
 export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 	render() {
-		let {map, node, path, inList, permissions, parentNode, copiedNode, copiedNode_asCut, pathsToChangedDescendantNodes} = this.props;
+		let {map, node, path, inList, permissions, parentNode, copiedNode, copiedNode_asCut, pathsToChangedInSubtree} = this.props;
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
@@ -96,11 +96,11 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							if (userID == null) return ShowSignInPopup();
 							ShowAddSubnodeDialog(map._id, node, path);
 						}}/>}
-				{pathsToChangedDescendantNodes.length > 0 &&
+				{pathsToChangedInSubtree.length > 0 &&
 					<VMenuItem text="Mark subtree as viewed" style={styles.vMenuItem}
 						onClick={e=> {
 							if (e.button != 0) return;
-							for (let path of pathsToChangedDescendantNodes) {
+							for (let path of pathsToChangedInSubtree) {
 								store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: GetNodeID(path), time: Date.now()}));
 							}
 						}}/>}
