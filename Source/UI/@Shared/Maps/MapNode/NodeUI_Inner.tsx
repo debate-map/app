@@ -2,7 +2,7 @@ import {Image} from "../../../../Store/firebase/images/@Image";
 import {GetImage} from "../../../../Store/firebase/images";
 import {connect} from "react-redux";
 import {BaseComponent, AddGlobalStyle, GetInnerComp, FindDOM} from "react-vextensions";
-import {Pre, Div} from "react-vcomponents";
+import {Pre, Div, TextArea_AutoSize} from "react-vcomponents";
 import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
 import {VMenu} from "react-vmenu";
 import {ShowMessageBox} from "react-vmessagebox";
@@ -50,7 +50,7 @@ import { GetEquationStepNumber } from "../../../../Store/firebase/nodes/$node/eq
 import NodeMathUI from "UI/@Shared/Maps/MapNode/NodeMathUI";
 import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
 import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
-import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
+import {SlicePath, WaitTillPathDataIsReceiving, WaitTillPathDataIsReceived, DBPath, RemoveHelpers} from "../../../../Frame/Database/DatabaseHelpers";
 import SubPanel from "./NodeUI_Inner/SubPanel";
 import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
 import {HistoryPanel} from "./NodeUI/HistoryPanel";
@@ -58,6 +58,11 @@ import {GetPathsToNodesChangedSinceX, ChangeType, GetNodeChangeType, GetChangeTy
 import { GetTimeFromWhichToShowChangedNodes } from "Store/main/maps/$map";
 import { ACTSetLastAcknowledgementTime } from "Store/main";
 import {GetLastAcknowledgementTime} from "../../../../Store/main";
+import UpdateNodeDetails from "Server/Commands/UpdateNodeDetails";
+import AddNodeRevision from "../../../../Server/Commands/AddNodeRevision";
+import { IsDoubleClick } from "Frame/General/Others";
+import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
+import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -100,6 +105,7 @@ type Props = {
 })
 export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, hoverPanel: string, hoverTermID: number, /*local_selected: boolean,*/ local_openPanel: string}> {
 	static defaultProps = {panelPosition: "left"};
+	titlePanel: TitlePanel;
 	render() {
 		let {map, node, nodeView, path, width, widthOverride,
 			panelPosition, useLocalPanelState, style,
@@ -173,7 +179,8 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 				{leftPanelShow && panelPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
 
 				<div style={{display: "flex", width: "100%", background: "rgba(0,0,0,.7)", borderRadius: 5, cursor: "pointer"}}>
-					<Div style={{position: "relative", width: "100%", padding: GetPaddingForNode(node, isSubnode)}}>
+					<div style={{position: "relative", width: "100%", padding: GetPaddingForNode(node, isSubnode)}}
+							onClick={e=>IsDoubleClick(e) && this.titlePanel && GetInnerComp(this.titlePanel).OnDoubleClick()}>
 						<div style={{
 							position: "absolute", left: 0, top: 0, bottom: 0,
 							width: mainRating_fillPercent + "%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
@@ -183,10 +190,10 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 								position: "absolute", left: mainRating_myFillPercent + "%", top: 0, bottom: 0,
 								width: 2, background: "rgba(0,255,0,.5)",
 							}}/>}
-						<TitlePanel {...{parent: this, map, node, nodeView, path}}/>
+						<TitlePanel ref={c=>this.titlePanel = c} {...{parent: this, map, node, nodeView, path}}/>
 						{subPanelShow && <SubPanel node={node}/>}
 						<NodeUI_Menu {...{map, node, path}}/>
-					</Div>
+					</div>
 					<Button //text={expanded ? "-" : "+"} size={28}
 							style={{
 								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
@@ -252,23 +259,61 @@ type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeL2, nodeVie
 	$1: node.current.image && GetImage(node.current.image.id),
 	equationNumber: node.current.equation ? GetEquationStepNumber(path) : null,
 }))
-class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
+class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTitle: string}> {
+	OnDoubleClick() {
+		let {node} = this.props;
+		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
+		if (creatorOrMod) {
+			this.SetState({editing: true});
+		}
+	}
 	render() {
 		let {map, node, nodeView, path, equationNumber} = this.props;
 		let latex = node.current.equation && node.current.equation.latex;
 		let isSubnode = IsNodeSubnode(node);
+		let {editing, newTitle} = this.state;
+		newTitle = newTitle || GetNodeDisplayText(node, path);
 
 		return (
 			//<Row style={{position: "relative"}}>
-			<Div style={{position: "relative"}}>
+			<div style={{position: "relative"}} onClick={e=>IsDoubleClick(e) && this.OnDoubleClick()}>
 				{equationNumber != null &&
 					<Pre>{equationNumber}) </Pre>}
 				<span style={E(
 					{position: "relative", fontSize: GetFontSizeForNode(node, isSubnode), whiteSpace: "initial"},
 					(node.current.impactPremise || isSubnode) && {margin: "4px 0 1px 0"},
 				)}>
-					{latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
-					{!latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
+					{!editing && latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
+					{!editing && !latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
+					{editing &&
+						<TextArea_AutoSize value={newTitle} style={{width: "100%"}}
+							ref={a=>a && a.DOM.focus()}
+							onKeyDown={async e=> {
+								if (e.keyCode == keycode.codes.esc) {
+									this.SetState({editing: false});
+								} else if (e.keyCode == keycode.codes.enter) {
+									let parentNode = GetParentNode(path);
+									
+									let form = GetNodeForm(node, path);
+									let titleKey = {[ClaimForm.Negation]: "negation", [ClaimForm.YesNoQuestion]: "yesNoQuestion"}[form] || "base";
+									let newRevision = Clone(node.current);
+									if (newRevision.titles[titleKey] != newTitle) {
+										newRevision.titles[titleKey] = newTitle;
+
+										SetNodeUILocked(parentNode._id, true);
+										try {
+											var revisionID = await new AddNodeRevision({mapID: map._id, revision: RemoveHelpers(newRevision)}).Run();
+											store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: node._id, time: Date.now()}));
+											await WaitTillPathDataIsReceiving(DBPath(`nodeRevisions/${revisionID}`));
+											await WaitTillPathDataIsReceived(DBPath(`nodeRevisions/${revisionID}`));
+										} finally {
+											SetNodeUILocked(parentNode._id, false);
+										}
+									}
+									this.SetState({editing: false});
+								}
+							}}
+							onChange={val=>this.SetState({newTitle: val.replace(/[\r\n]/g, "")})}/>}
 				</span>
 				{node.current.equation && node.current.equation.explanation &&
 					<Pre style={{
@@ -287,7 +332,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {}> {
 					</Div>}
 				{node.type == MapNodeType.Claim && node.current.contentNode &&
 					<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
-			</Div>
+			</div>
 		);
 	}
 

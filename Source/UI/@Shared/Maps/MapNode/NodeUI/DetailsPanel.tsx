@@ -66,7 +66,6 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 		let link = GetLinkUnderParent(node._id, parentNode);
 
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
-
 		return (
 			<Column style={{position: "relative"}}>
 				<NodeDetailsUI ref={c=>this.detailsUI = GetInnerComp(c) as any}
