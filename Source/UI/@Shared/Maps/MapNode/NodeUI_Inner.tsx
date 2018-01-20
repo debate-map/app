@@ -264,7 +264,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 	OnDoubleClick() {
 		let {node} = this.props;
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
-		if (creatorOrMod && node.current.equation == null) {
+		if (creatorOrMod && node.current.impactPremise == null && node.current.equation == null) {
 			this.SetState({editing: true});
 		}
 	}
@@ -275,48 +275,50 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 		let {editing, newTitle, applyingEdit} = this.state;
 		newTitle = newTitle != null ? newTitle : GetNodeDisplayText(node, path);
 
+		let noteText = (node.current.equation && node.current.equation.explanation) || node.current.note;
+
 		return (
 			//<Row style={{position: "relative"}}>
 			<div style={{position: "relative"}} onClick={e=>IsDoubleClick(e) && this.OnDoubleClick()}>
 				{equationNumber != null &&
 					<Pre>{equationNumber}) </Pre>}
-				<Row style={E(
-					{position: "relative", fontSize: GetFontSizeForNode(node, isSubnode), whiteSpace: "initial", alignItems: "stretch"},
-					(node.current.impactPremise || isSubnode) && {margin: "4px 0 1px 0"},
-				)}>
-					{!editing && !applyingEdit && latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
-					{!editing && !applyingEdit && !latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
-					{editing && !applyingEdit &&
-						<TextArea_AutoSize required={true} pattern={MapNodeRevision_titlePattern} allowLineBreaks={false} style={{width: "100%"}}
-							ref={a=>a && a.DOM.focus()}
-							onKeyDown={e=> {
-								if (e.keyCode == keycode.codes.esc) {
-									this.SetState({editing: false});
-								} else if (e.keyCode == keycode.codes.enter) {
-									this.ApplyEdit();
-								}
-							}}
-							value={newTitle} onChange={val=>this.SetState({newTitle: val})}/>}
-					{editing && !applyingEdit &&
-						<Button enabled={newTitle.match(MapNodeRevision_titlePattern) != null} text="✔️" p="0 3px" style={{borderRadius: "0 5px 5px 0"}}
-							onClick={()=>this.ApplyEdit()}/>}
-					{applyingEdit && <Row>Applying edit...</Row>}
-				</Row>
-				{node.current.equation && node.current.equation.explanation &&
+				{!editing &&
+					<span style={E(
+						{position: "relative", fontSize: GetFontSizeForNode(node, isSubnode), whiteSpace: "initial"},
+						(node.current.impactPremise || isSubnode) && {margin: "4px 0 1px 0"},
+					)}>
+						{latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
+						{!latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
+					</span>}
+				{editing &&
+					<Row style={E(
+						{position: "relative", fontSize: GetFontSizeForNode(node, isSubnode), whiteSpace: "initial", alignItems: "stretch"},
+						(node.current.impactPremise || isSubnode) && {margin: "4px 0 1px 0"},
+					)}>
+						{!applyingEdit &&
+							<TextArea_AutoSize required={true} pattern={MapNodeRevision_titlePattern} allowLineBreaks={false} style={{flex: 1}}
+								ref={a=>a && a.DOM.focus()}
+								onKeyDown={e=> {
+									if (e.keyCode == keycode.codes.esc) {
+										this.SetState({editing: false});
+									} else if (e.keyCode == keycode.codes.enter) {
+										this.ApplyEdit();
+									}
+								}}
+								value={newTitle} onChange={val=>this.SetState({newTitle: val})}/>}
+						{!applyingEdit &&
+							<Button enabled={newTitle.match(MapNodeRevision_titlePattern) != null} text="✔️" p="0 3px" style={{borderRadius: "0 5px 5px 0"}}
+								onClick={()=>this.ApplyEdit()}/>}
+						{applyingEdit && <Row>Applying edit...</Row>}
+					</Row>}
+				{noteText &&
 					<Pre style={{
 						fontSize: 11, color: "rgba(255,255,255,.5)",
 						//marginLeft: "auto",
 						marginLeft: 15, marginTop: 3, float: "right",
 					}}>
-						{node.current.equation.explanation}
+						{noteText}
 					</Pre>}
-				{node.current.note &&
-					<Div style={{
-						fontSize: 11, color: "rgba(255,255,255,.5)",
-						marginLeft: 15, marginTop: 3, float: "right",
-					}}>
-						{node.current.note}
-					</Div>}
 				{node.type == MapNodeType.Claim && node.current.contentNode &&
 					<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
 			</div>
@@ -327,7 +329,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 		let {map, node, nodeView, path, equationNumber} = this.props;
 		let {editing, newTitle, applyingEdit} = this.state;
 
-		this.SetState({applyingEdit: true, editing: false});
+		this.SetState({applyingEdit: true});
 
 		let parentNode = GetParentNode(path);
 		
@@ -344,7 +346,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 			await WaitTillPathDataIsReceived(DBPath(`nodeRevisions/${revisionID}`));
 			SetNodeUILocked(parentNode._id, false);
 		}
-		this.SetState({applyingEdit: false});
+		this.SetState({applyingEdit: false, editing: false});
 	}
 
 	OnTermHover(termID: number, hovered: boolean) {
