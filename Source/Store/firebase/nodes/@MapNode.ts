@@ -51,6 +51,9 @@ export class MapNode {
 	//talkRoot: number;
 
 	layerPlusAnchorParents: LayerPlusAnchorParentSet;
+
+	// local-only
+	premiseAddHelper?: boolean;
 }
 export const MapNode_id = "^[0-9]+$";
 //export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";

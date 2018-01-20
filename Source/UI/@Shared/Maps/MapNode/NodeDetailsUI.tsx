@@ -173,7 +173,7 @@ Examples:
 * May have used biased sources
 * Quote: Socrates
 
-The detailed version of the argument will be embodied in its premises/child-theses.
+The detailed version of the argument will be embodied in its premises/child-claims.
 						`.trim()}
 						</Pre>
 					</Row>}

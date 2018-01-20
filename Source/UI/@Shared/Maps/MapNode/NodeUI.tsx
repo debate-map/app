@@ -33,7 +33,7 @@ import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@M
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import {Column} from "react-vcomponents";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2, AsNodeL3, AsNodeL2} from "../../../../Store/firebase/nodes/$node";
 import FastDOM from "fastdom";
 import {Row} from "react-vcomponents";
 import Icon from "../../../../Frame/ReactComponents/Icon";
@@ -53,10 +53,15 @@ import {Timeline} from "Store/firebase/timelines/@Timeline";
 import { ChangeType } from "Store/firebase/mapNodeEditTimes";
 import {GetPathsToNodesChangedSinceX, GetNodeChangeType, GetChangeTypeOutlineColor} from "../../../../Store/firebase/mapNodeEditTimes";
 import {GetNode} from "Store/firebase/nodes";
+import {MapNodeRevision} from "../../../../Store/firebase/nodes/@MapNodeRevision";
+import { PremiseAddHelper } from "UI/@Shared/Maps/MapNode/PremiseAddHelper";
 
 let nodesLocked = {};
-export function SetNodeUILocked(nodeID: number, locked: boolean) {
+export function SetNodeUILocked(nodeID: number, locked: boolean, maxWait = 10000) {
 	nodesLocked[nodeID] = locked;
+	if (locked) {
+		setTimeout(()=>SetNodeUILocked(nodeID, false), maxWait);
+	}
 }
 
 type Props = {map: Map, node: MapNodeL3, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
@@ -195,6 +200,12 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		NodeUI.renderCount++;
 		NodeUI.lastRenderTime = Date.now();
 
+		if (node.type == MapNodeType.Argument && nodeChildren.length == 1 && GetUserID() == node.creator) {
+			let fakeChild = AsNodeL3(AsNodeL2(new MapNode({type: MapNodeType.Claim}), new MapNodeRevision({})));
+			fakeChild.premiseAddHelper = true;
+			nodeChildren = [...nodeChildren, fakeChild];
+		}
+
 		let separateChildren = node.type == MapNodeType.Claim;
 		type ChildPack = {origIndex: number, node: MapNodeL3};
 		let childPacks: ChildPack[] = nodeChildren.map((child, index)=>({origIndex: index, node: child}));
@@ -236,6 +247,21 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let showBelowMessage = nodeChildren.length > 0 && nodeChildren.length < minChildCount;*/
 
 		let textOutline = "rgba(10,10,10,1)";
+
+		let RenderChildPack = (pack: ChildPack, index: number, collection, direction = "down" as "up" | "down")=> {
+			if (pack.node.premiseAddHelper) {
+				return <PremiseAddHelper mapID={map._id} parentNode={node} parentPath={path}/>;
+			}
+
+			let childLimit = direction == "down" ? childLimit_down : childLimit_up;
+			return (
+				<NodeUI key={pack.node._id} ref={c=>this.childBoxes[pack.node._id] = GetInnerComp(c)} map={map} node={pack.node}
+						path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
+					{index == (direction == "down" ? childLimit - 1 : 0) && !showAll && (collection.length > childLimit || childLimit != initialChildLimit) &&
+						<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit}} direction={direction} childCount={collection.length}/>}
+				</NodeUI>
+			);
+		}
 		
 		this.childBoxes = {};
 		let nodeUIResult_withoutSubnodes = (
@@ -331,39 +357,18 @@ export default class NodeUI extends BaseComponent<Props, State> {
 								childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
 						
 						{!separateChildren && childPacks.slice(0, childLimit_down).map((pack, index)=> {
-							return (
-								<NodeUI key={pack.node._id} ref={c=>this.childBoxes[pack.node._id] = GetInnerComp(c)} map={map} node={pack.node}
-										path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
-									{index == childLimit_down - 1 && (childPacks.length > childLimit_down || childLimit_down != initialChildLimit) &&
-										<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit: childLimit_down}}
-											direction="down" childCount={childPacks.length}/>}
-								</NodeUI>
-							);
+							return RenderChildPack(pack, index, childPacks);
 						})}
 						{separateChildren &&
 							<Column ref="upChildHolder" ct className="upChildHolder">
 								{upChildPacks.slice(-childLimit_up).map((pack, index)=> {
-									return (
-										<NodeUI key={pack.node._id} ref={c=>this.childBoxes[pack.node._id] = GetInnerComp(c)} map={map} node={pack.node}
-												path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
-											{index == 0 && !showAll && (upChildPacks.length > childLimit_up || childLimit_up != initialChildLimit) &&
-												<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit: childLimit_up}}
-													direction="up" childCount={upChildPacks.length}/>}
-										</NodeUI>
-									);
+									return RenderChildPack(pack, index, upChildPacks, "up");
 								})}
 							</Column>}
 						{separateChildren &&
 							<Column ref="downChildHolder" ct>
 								{downChildPacks.slice(0, childLimit_down).map((pack, index)=> {
-									return (
-										<NodeUI key={pack.node._id} ref={c=>this.childBoxes[pack.node._id] = GetInnerComp(c)} map={map} node={pack.node}
-												path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
-											{index == childLimit_down - 1 && !showAll && (downChildPacks.length > childLimit_down || childLimit_down != initialChildLimit) &&
-												<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit: childLimit_down}}
-													direction="down" childCount={downChildPacks.length}/>}
-										</NodeUI>
-									);
+									return RenderChildPack(pack, index, downChildPacks, "down");
 								})}
 							</Column>}
 					</div>}

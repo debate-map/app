@@ -134,23 +134,20 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentForm: ClaimForm,
 				return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`}));
 			}*/
 			SetNodeUILocked(parentNode._id, true);
-			try {
-				let info = await new AddChildNode({
-					mapID: mapID, node: newNode, revision: newRevision, link: newLink,
-					impactPremiseNode: newImpactPremise, impactPremiseNodeRevision: newImpactPremiseRevision,
-				}).Run();
-				store.dispatch(new ACTMapNodeExpandedSet({mapID, path: path + "/" + info.nodeID, expanded: true, recursive: false}));
-				store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.nodeID, time: Date.now()}));
-				if (info.impactPremise_nodeID) {
-					store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.impactPremise_nodeID, time: Date.now()}));
-				}
-
-				let watchPath = DBPath(`nodeRevisions/${info.impactPremise_revisionID || info.revisionID}`);
-				await WaitTillPathDataIsReceiving(watchPath);
-				await WaitTillPathDataIsReceived(watchPath);
-			} finally {
-				SetNodeUILocked(parentNode._id, false);
+			let info = await new AddChildNode({
+				mapID: mapID, node: newNode, revision: newRevision, link: newLink,
+				impactPremiseNode: newImpactPremise, impactPremiseNodeRevision: newImpactPremiseRevision,
+			}).Run();
+			store.dispatch(new ACTMapNodeExpandedSet({mapID, path: path + "/" + info.nodeID, expanded: true, recursive: false}));
+			store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.nodeID, time: Date.now()}));
+			if (info.impactPremise_nodeID) {
+				store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.impactPremise_nodeID, time: Date.now()}));
 			}
+
+			let watchPath = DBPath(`nodeRevisions/${info.impactPremise_revisionID || info.revisionID}`);
+			await WaitTillPathDataIsReceiving(watchPath);
+			await WaitTillPathDataIsReceived(watchPath);
+			SetNodeUILocked(parentNode._id, false);
 		}
 	});
 }
