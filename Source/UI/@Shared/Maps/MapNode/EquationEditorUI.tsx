@@ -54,11 +54,8 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Text: </Pre>
-					{!newData.latex
-						? <TextInput required enabled={creating || editing} style={{width: "100%"}}
-							value={newData.text} onChange={val=>Change(newData.text = val)}/>
-						: <TextArea_AutoSize required enabled={creating || editing} style={{width: "100%"}}
-							value={newData.text} onChange={val=>Change(newData.text = val)}/>}
+					<TextArea_AutoSize required enabled={creating || editing} allowLineBreaks={newData.latex} style={{width: "100%"}}
+						value={newData.text} onChange={val=>Change(newData.text = val)}/>
 				</RowLR>
 				<Row mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Step in series: </Pre>

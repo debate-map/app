@@ -63,6 +63,7 @@ import AddNodeRevision from "../../../../Server/Commands/AddNodeRevision";
 import { IsDoubleClick } from "Frame/General/Others";
 import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
 import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
+import {MapNodeRevision_titlePattern} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 
 /*AddGlobalStyle(`
 .NodeUI_Inner
@@ -259,11 +260,11 @@ type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeL2, nodeVie
 	$1: node.current.image && GetImage(node.current.image.id),
 	equationNumber: node.current.equation ? GetEquationStepNumber(path) : null,
 }))
-class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTitle: string}> {
+class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTitle: string, applyingEdit: boolean}> {
 	OnDoubleClick() {
 		let {node} = this.props;
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
-		if (creatorOrMod) {
+		if (creatorOrMod && node.current.equation == null) {
 			this.SetState({editing: true});
 		}
 	}
@@ -271,50 +272,36 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 		let {map, node, nodeView, path, equationNumber} = this.props;
 		let latex = node.current.equation && node.current.equation.latex;
 		let isSubnode = IsNodeSubnode(node);
-		let {editing, newTitle} = this.state;
-		newTitle = newTitle || GetNodeDisplayText(node, path);
+		let {editing, newTitle, applyingEdit} = this.state;
+		newTitle = newTitle != null ? newTitle : GetNodeDisplayText(node, path);
 
 		return (
 			//<Row style={{position: "relative"}}>
 			<div style={{position: "relative"}} onClick={e=>IsDoubleClick(e) && this.OnDoubleClick()}>
 				{equationNumber != null &&
 					<Pre>{equationNumber}) </Pre>}
-				<span style={E(
-					{position: "relative", fontSize: GetFontSizeForNode(node, isSubnode), whiteSpace: "initial"},
+				<Row style={E(
+					{position: "relative", fontSize: GetFontSizeForNode(node, isSubnode), whiteSpace: "initial", alignItems: "stretch"},
 					(node.current.impactPremise || isSubnode) && {margin: "4px 0 1px 0"},
 				)}>
-					{!editing && latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
-					{!editing && !latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
-					{editing &&
-						<TextArea_AutoSize allowLineBreaks={false} style={{width: "100%"}}
+					{!editing && !applyingEdit && latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
+					{!editing && !applyingEdit && !latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
+					{editing && !applyingEdit &&
+						<TextArea_AutoSize required={true} pattern={MapNodeRevision_titlePattern} allowLineBreaks={false} style={{width: "100%"}}
 							ref={a=>a && a.DOM.focus()}
-							onKeyDown={async e=> {
+							onKeyDown={e=> {
 								if (e.keyCode == keycode.codes.esc) {
 									this.SetState({editing: false});
 								} else if (e.keyCode == keycode.codes.enter) {
-									let parentNode = GetParentNode(path);
-									
-									let form = GetNodeForm(node, path);
-									let titleKey = {[ClaimForm.Negation]: "negation", [ClaimForm.YesNoQuestion]: "yesNoQuestion"}[form] || "base";
-									let newRevision = Clone(node.current);
-									if (newRevision.titles[titleKey] != newTitle) {
-										newRevision.titles[titleKey] = newTitle;
-
-										SetNodeUILocked(parentNode._id, true);
-										try {
-											var revisionID = await new AddNodeRevision({mapID: map._id, revision: RemoveHelpers(newRevision)}).Run();
-											store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: node._id, time: Date.now()}));
-											await WaitTillPathDataIsReceiving(DBPath(`nodeRevisions/${revisionID}`));
-											await WaitTillPathDataIsReceived(DBPath(`nodeRevisions/${revisionID}`));
-										} finally {
-											SetNodeUILocked(parentNode._id, false);
-										}
-									}
-									this.SetState({editing: false});
+									this.ApplyEdit();
 								}
 							}}
 							value={newTitle} onChange={val=>this.SetState({newTitle: val})}/>}
-				</span>
+					{editing && !applyingEdit &&
+						<Button enabled={newTitle.match(MapNodeRevision_titlePattern) != null} text="✔️" p="0 3px" style={{borderRadius: "0 5px 5px 0"}}
+							onClick={()=>this.ApplyEdit()}/>}
+					{applyingEdit && <Row>Applying edit...</Row>}
+				</Row>
 				{node.current.equation && node.current.equation.explanation &&
 					<Pre style={{
 						fontSize: 11, color: "rgba(255,255,255,.5)",
@@ -334,6 +321,30 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 					<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
 			</div>
 		);
+	}
+
+	async ApplyEdit() {
+		let {map, node, nodeView, path, equationNumber} = this.props;
+		let {editing, newTitle, applyingEdit} = this.state;
+
+		this.SetState({applyingEdit: true, editing: false});
+
+		let parentNode = GetParentNode(path);
+		
+		let form = GetNodeForm(node, path);
+		let titleKey = {[ClaimForm.Negation]: "negation", [ClaimForm.YesNoQuestion]: "yesNoQuestion"}[form] || "base";
+		let newRevision = Clone(node.current);
+		if (newRevision.titles[titleKey] != newTitle) {
+			newRevision.titles[titleKey] = newTitle;
+
+			SetNodeUILocked(parentNode._id, true);
+			var revisionID = await new AddNodeRevision({mapID: map._id, revision: RemoveHelpers(newRevision)}).Run();
+			store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: node._id, time: Date.now()}));
+			await WaitTillPathDataIsReceiving(DBPath(`nodeRevisions/${revisionID}`));
+			await WaitTillPathDataIsReceived(DBPath(`nodeRevisions/${revisionID}`));
+			SetNodeUILocked(parentNode._id, false);
+		}
+		this.SetState({applyingEdit: false});
 	}
 
 	OnTermHover(termID: number, hovered: boolean) {

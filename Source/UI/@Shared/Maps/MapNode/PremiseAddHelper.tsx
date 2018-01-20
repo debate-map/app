@@ -20,22 +20,22 @@ export class PremiseAddHelper extends BaseComponent<{mapID: number, parentNode: 
 		let {mapID, parentNode, parentPath} = this.props;
 		let {premiseTitle, adding} = this.state;
 
-		if (adding) return <Row>Adding...</Row>;
+		if (adding) return <Row>Adding premise...</Row>;
 
 		return (
 			<Row style={{alignItems: "stretch", padding: "5px 0px"}}>
 				{/*<TextInput placeholder="Type the argument's first claim/premise here." style={{flex: 1}}
 					value={premiseTitle} onChange={val=>this.SetState({premiseTitle: val})}/>*/}
-				<TextArea_AutoSize required={true} pattern={MapNodeRevision_titlePattern} allowLineBreaks={false} style={{width: "100%"}}
+				<TextArea_AutoSize className="noValidationColoring" required={true} pattern={MapNodeRevision_titlePattern} allowLineBreaks={false} style={{width: "100%"}}
 					placeholder="Type the argument's first claim/premise here."
 					onKeyDown={async e=> {
 						if (e.keyCode == keycode.codes.enter) {
-							this.SetState({adding: true}, ()=>this.CreatePremise());
+							this.CreatePremise();
 						}
 					}}
 					value={premiseTitle} onChange={val=>this.SetState({premiseTitle: val})}/>
 				<Button enabled={premiseTitle.match(MapNodeRevision_titlePattern) != null} text="✔️" ml={1} p="0 3px"
-					onClick={()=>this.SetState({adding: true}, ()=>this.CreatePremise())}/>
+					onClick={()=>this.CreatePremise()}/>
 			</Row>
 		);
 	}
@@ -46,6 +46,8 @@ export class PremiseAddHelper extends BaseComponent<{mapID: number, parentNode: 
 	async CreatePremise() {
 		let {mapID, parentNode, parentPath} = this.props;
 		let {premiseTitle} = this.state;
+
+		this.SetState({adding: true});
 
 		let newNode = new MapNode({
 			parents: {[parentNode._id]: {_: true}},
