@@ -34,7 +34,7 @@ export class PremiseAddHelper extends BaseComponent<{mapID: number, parentNode: 
 						}
 					}}
 					value={premiseTitle} onChange={val=>this.SetState({premiseTitle: val})}/>
-				<Button enabled={premiseTitle.match(MapNodeRevision_titlePattern) != null} text="✔️" ml={1} p="0 3px"
+				<Button enabled={premiseTitle.match(MapNodeRevision_titlePattern) != null} text="✔️" p="0 3px" style={{borderRadius: "0 5px 5px 0"}}
 					onClick={()=>this.CreatePremise()}/>
 			</Row>
 		);
