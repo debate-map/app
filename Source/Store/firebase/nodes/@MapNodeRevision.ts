@@ -35,6 +35,8 @@ export class MapNodeRevision {
 	contentNode: ContentNode;
 	image: ImageAttachment;
 }
+//export const MapNodeRevision_titlePattern = `(^\\S$)|(^\\S.*\\S$)`; // must start and end with non-whitespace
+export const MapNodeRevision_titlePattern = `^\\S.*$`; // must start with non-whitespace
 AddSchema({
 	properties: {
 		node: {type: "number"},
@@ -43,7 +45,7 @@ AddSchema({
 		
 		titles: {
 			properties: {
-				base: {type: "string"}, negation: {type: "string"}, yesNoQuestion: {type: "string"},
+				base: {pattern: MapNodeRevision_titlePattern}, negation: {pattern: MapNodeRevision_titlePattern}, yesNoQuestion: {pattern: MapNodeRevision_titlePattern},
 			},
 			//required: ["base", "negation", "yesNoQuestion"],
 		},

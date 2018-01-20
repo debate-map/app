@@ -4,7 +4,7 @@ import {Command} from "../Command";
 import {MapNode, ClaimForm, ChildEntry, AccessLevel} from "../../Store/firebase/nodes/@MapNode";
 import {E} from "../../Frame/General/Globals_Free";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
-import {Map_nameFormat, Map} from "../../Store/firebase/maps/@Map";
+import {Map_namePattern, Map} from "../../Store/firebase/maps/@Map";
 import {UserEdit} from "../CommandMacros";
 import {MapEdit} from "Server/CommandMacros";
 import {GetUserMapInfo} from "../../Store/firebase/userMapInfo";

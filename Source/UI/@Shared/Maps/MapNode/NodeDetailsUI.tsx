@@ -26,7 +26,7 @@ import {IsUserAdmin} from "../../../../Store/firebase/userExtras";
 import {GetUserID, GetUserAccessLevel} from "Store/firebase/users";
 import ImageAttachmentEditorUI from "./ImageAttachmentEditorUI";
 import {GetErrorMessagesUnderElement} from "js-vextensions";
-import {MapNodeRevision} from "../../../../Store/firebase/nodes/@MapNodeRevision";
+import {MapNodeRevision, MapNodeRevision_titlePattern} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 import {GetNodeL2, GetFinalPolarity, AsNodeL1} from "Store/firebase/nodes/$node";
 
 type Props = {
@@ -162,7 +162,7 @@ class Title_Base extends BaseComponent<Props_Enhanced, {}> {
 					{/*<TextInput enabled={enabled} style={{flex: 1}} required={!hasOtherTitlesEntered && !willUseYesNoTitleHere}
 						ref={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
 						value={newRevisionData.titles["base"]} onChange={val=>Change(newRevisionData.titles["base"] = val)}/>*/}
-					<TextArea_AutoSize enabled={enabled} required={!hasOtherTitlesEntered && !willUseYesNoTitleHere}
+					<TextArea_AutoSize enabled={enabled} required={!hasOtherTitlesEntered && !willUseYesNoTitleHere} pattern={MapNodeRevision_titlePattern}
 						allowLineBreaks={false} style={{flex: 1}}
 						ref={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
 						value={newRevisionData.titles["base"]} onChange={val=>Change(newRevisionData.titles["base"] = val)}/>
@@ -199,14 +199,14 @@ class OtherTitles extends BaseComponent<Props_Enhanced, {}> {
 				<Row key={0} mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Title (negation): </Pre>
 					{/*<TextInput enabled={enabled} style={{flex: 1}} value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/>*/}
-					<TextArea_AutoSize enabled={enabled} allowLineBreaks={false} style={{flex: 1}}
+					<TextArea_AutoSize enabled={enabled} allowLineBreaks={false} style={{flex: 1}} pattern={MapNodeRevision_titlePattern}
 						value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/>
 				</Row>
 				<Row key={1} mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Title (question): </Pre>
 					{/*<TextInput enabled={enabled} style={{flex: 1}} required={willUseQuestionTitleHere}
 						value={newRevisionData.titles["yesNoQuestion"]} onChange={val=>Change(newRevisionData.titles["yesNoQuestion"] = val)}/>*/}
-					<TextArea_AutoSize enabled={enabled} allowLineBreaks={false} style={{flex: 1}}
+					<TextArea_AutoSize enabled={enabled} allowLineBreaks={false} style={{flex: 1}} pattern={MapNodeRevision_titlePattern}
 						value={newRevisionData.titles["yesNoQuestion"]} onChange={val=>Change(newRevisionData.titles["yesNoQuestion"] = val)}/>
 				</Row>
 				{willUseQuestionTitleHere && forNew &&

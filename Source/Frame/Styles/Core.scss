@@ -80,7 +80,7 @@
 		color: rgba(0,0,0,1);
 	}
 
-	input:invalid {
+	input:invalid, textarea:invalid {
 		//outline: 1px solid rgba(255,0,0,1);
 		outline: none;
 		background: rgba(255,200,200,.7);

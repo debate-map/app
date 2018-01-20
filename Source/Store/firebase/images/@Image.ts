@@ -31,11 +31,11 @@ export class Image {
 	creator: string;
 	createdAt: number;
 }
-export const Image_nameFormat = `^[a-zA-Z0-9 ,'"%\\-()\\/]+$`;
-export const Image_urlFormat = `^https?://[^\\s/$.?#]+\\.[^\\s]+\.(jpg|jpeg|gif|png)$`;
+export const Image_namePattern = `^[a-zA-Z0-9 ,'"%\\-()\\/]+$`;
+export const Image_urlPattern = `^https?://[^\\s/$.?#]+\\.[^\\s]+\.(jpg|jpeg|gif|png)$`;
 AddSchema({
 	properties: {
-		name: {type: "string", pattern: Image_nameFormat},
+		name: {type: "string", pattern: Image_namePattern},
 		type: {$ref: "ImageType"},
 		url: {type: "string"},
 		description: {type: "string"},

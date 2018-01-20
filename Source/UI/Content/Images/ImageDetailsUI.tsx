@@ -14,7 +14,7 @@ import {CheckBox} from "react-vcomponents";
 import {ScrollView} from "react-vscrollview";
 import {Button} from "react-vcomponents";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
-import {Image, Image_nameFormat, Image_urlFormat, ImageType, GetNiceNameForImageType} from "../../../Store/firebase/images/@Image";
+import {Image, Image_namePattern, Image_urlPattern, ImageType, GetNiceNameForImageType} from "../../../Store/firebase/images/@Image";
 import SourceChainsEditorUI from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
 import {Div, Span, Pre, Row, RowLR} from "react-vcomponents";
  import {GetErrorMessagesUnderElement} from "js-vextensions";
@@ -64,7 +64,7 @@ export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Name: </Pre>
 					<TextInput
-						pattern={Image_nameFormat} required
+						pattern={Image_namePattern} required
 						enabled={creating || editing} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
@@ -76,7 +76,7 @@ export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>URL: </Pre>
 					<TextInput
-						pattern={Image_urlFormat} required
+						pattern={Image_urlPattern} required
 						enabled={creating || editing} style={{width: "100%"}}
 						value={newData.url} onChange={val=>Change(newData.url = val)}/>
 				</RowLR>

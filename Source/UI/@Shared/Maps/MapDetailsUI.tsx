@@ -15,7 +15,7 @@ import TermComponent from "../../../Store/firebase/termComponents/@TermComponent
 import {GetNiceNameForTermType} from "../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../Store/firebase/terms";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
-import {Map, Map_nameFormat} from "../../../Store/firebase/maps/@Map";
+import {Map, Map_namePattern} from "../../../Store/firebase/maps/@Map";
 import {Spinner} from "react-vcomponents";
  import {GetErrorMessagesUnderElement} from "js-vextensions";
 
@@ -60,7 +60,7 @@ export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Name: </Pre>
 					<TextInput
-						pattern={Map_nameFormat} required
+						pattern={Map_namePattern} required
 						enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>

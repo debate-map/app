@@ -27,10 +27,10 @@ export class Map {
 	layers: {[key: number]: boolean};
 	timelines: {[key: number]: boolean};
 }
-export const Map_nameFormat = `^[a-zA-Z0-9 ,'"%:.?\\-()\\/]+$`;
+export const Map_namePattern = `^[a-zA-Z0-9 ,'"%:.?\\-()\\/]+$`;
 AddSchema({
 	properties: {
-		name: {type: "string", pattern: Map_nameFormat},
+		name: {type: "string", pattern: Map_namePattern},
 		note: {type: "string"},
 		noteInline: {type: "boolean"},
 		type: {oneOf: GetValues_ForSchema(MapType)},
