@@ -156,6 +156,10 @@
 	.clickThroughChain { pointer-events: none; }
 	.clickThroughChain-break { pointer-events: auto; }
 
+	// code-mirror scroll-view extends past visible area, blocking clicks there -- ignore pointer-events on this wrapper element
+	.CodeMirror-scroll > * { pointer-events: auto; }
+	.CodeMirror-scroll { pointer-events: none; }
+
 	.hideScrollbar::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
 
 	.recharts-cartesian-axis-tick { font-size: 12px; }
