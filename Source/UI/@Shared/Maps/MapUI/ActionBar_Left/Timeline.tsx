@@ -36,13 +36,14 @@ type TimelineDropDownProps = {map: Map} & Partial<{timelines: Timeline[], select
 	};
 })
 export class TimelineDropDown extends BaseComponent<TimelineDropDownProps, {}> {
+	rootDropdown: DropDown;
 	timelineSelect: DropDown;
 	render() {
 		let {map, timelines, selectedTimeline, selectedTimelineSteps} = this.props;
 		let userID = GetUserID();
 		let creatorOrMod = IsUserCreatorOrMod(userID, map);
 		return (
-			<DropDown>
+			<DropDown ref={c=>this.rootDropdown = c}>
 				<DropDownTrigger><Button ml={5} text="Timeline"/></DropDownTrigger>
 				<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: null}}>
 					<Row style={{alignItems: "flex-start"}}>
@@ -88,6 +89,7 @@ export class TimelineDropDown extends BaseComponent<TimelineDropDownProps, {}> {
 										ShowAddTimelineDialog(userID, map._id);
 									}}/>
 									<Button ml="auto" text="Play" title="Start playing this timeline" enabled={selectedTimeline != null} style={{flexShrink: 0}} onClick={()=> {
+										this.rootDropdown.hide();
 										store.dispatch(new ACTMap_PlayingTimelineSet({mapID: map._id, timelineID: selectedTimeline._id}));
 										store.dispatch(new ACTMap_PlayingTimelineStepSet({mapID: map._id, step: 0}));
 										store.dispatch(new ACTMap_PlayingTimelineAppliedStepSet({mapID: map._id, step: null}));
