@@ -21,13 +21,13 @@ export class PremiseAddHelper extends BaseComponent<{mapID: number, parentNode: 
 			<Row style={{alignItems: "stretch", padding: "5px 0px"}}>
 				{/*<TextInput placeholder="Type the argument's first claim/premise here." style={{flex: 1}}
 					value={premiseTitle} onChange={val=>this.SetState({premiseTitle: val})}/>*/}
-				<TextArea_AutoSize placeholder="Type the argument's first claim/premise here." value={premiseTitle} style={{width: "100%"}}
+				<TextArea_AutoSize placeholder="Type the argument's first claim/premise here." allowLineBreaks={false} style={{width: "100%"}}
 					onKeyDown={async e=> {
 						if (e.keyCode == keycode.codes.enter) {
 							this.CreatePremise();
 						}
 					}}
-					onChange={val=>this.SetState({premiseTitle: val.replace(/[\r\n]/g, "")})}/>
+					value={premiseTitle} onChange={val=>this.SetState({premiseTitle: val})}/>
 				<Button text="✔️" ml={1} p="0 3px" onClick={()=>this.CreatePremise()}/>
 			</Row>
 		);

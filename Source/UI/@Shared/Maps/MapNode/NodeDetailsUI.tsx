@@ -1,5 +1,5 @@
 import {BaseComponent, RenderSource, FindDOM} from "react-vextensions";
-import {Pre, Div} from "react-vcomponents";
+import {Pre, Div, TextArea_AutoSize} from "react-vcomponents";
 import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";
@@ -159,7 +159,11 @@ class Title_Base extends BaseComponent<Props_Enhanced, {}> {
 			<div>
 				<Row style={{display: "flex", alignItems: "center"}}>
 					<Pre>Title (base): </Pre>
-					<TextInput enabled={enabled} style={{flex: 1}} required={!hasOtherTitlesEntered && !willUseYesNoTitleHere}
+					{/*<TextInput enabled={enabled} style={{flex: 1}} required={!hasOtherTitlesEntered && !willUseYesNoTitleHere}
+						ref={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
+						value={newRevisionData.titles["base"]} onChange={val=>Change(newRevisionData.titles["base"] = val)}/>*/}
+					<TextArea_AutoSize enabled={enabled} required={!hasOtherTitlesEntered && !willUseYesNoTitleHere}
+						allowLineBreaks={false} style={{flex: 1}}
 						ref={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
 						value={newRevisionData.titles["base"]} onChange={val=>Change(newRevisionData.titles["base"] = val)}/>
 				</Row>
@@ -194,11 +198,15 @@ class OtherTitles extends BaseComponent<Props_Enhanced, {}> {
 			<Div>
 				<Row key={0} mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Title (negation): </Pre>
-					<TextInput enabled={enabled} style={{flex: 1}} value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/>
+					{/*<TextInput enabled={enabled} style={{flex: 1}} value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/>*/}
+					<TextArea_AutoSize enabled={enabled} allowLineBreaks={false} style={{flex: 1}}
+						value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/>
 				</Row>
 				<Row key={1} mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Title (question): </Pre>
-					<TextInput enabled={enabled} style={{flex: 1}} required={willUseQuestionTitleHere}
+					{/*<TextInput enabled={enabled} style={{flex: 1}} required={willUseQuestionTitleHere}
+						value={newRevisionData.titles["yesNoQuestion"]} onChange={val=>Change(newRevisionData.titles["yesNoQuestion"] = val)}/>*/}
+					<TextArea_AutoSize enabled={enabled} allowLineBreaks={false} style={{flex: 1}}
 						value={newRevisionData.titles["yesNoQuestion"]} onChange={val=>Change(newRevisionData.titles["yesNoQuestion"] = val)}/>
 				</Row>
 				{willUseQuestionTitleHere && forNew &&

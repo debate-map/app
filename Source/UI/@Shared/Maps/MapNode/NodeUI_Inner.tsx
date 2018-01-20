@@ -286,7 +286,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 					{!editing && latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
 					{!editing && !latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
 					{editing &&
-						<TextArea_AutoSize value={newTitle} style={{width: "100%"}}
+						<TextArea_AutoSize allowLineBreaks={false} style={{width: "100%"}}
 							ref={a=>a && a.DOM.focus()}
 							onKeyDown={async e=> {
 								if (e.keyCode == keycode.codes.esc) {
@@ -313,7 +313,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 									this.SetState({editing: false});
 								}
 							}}
-							onChange={val=>this.SetState({newTitle: val.replace(/[\r\n]/g, "")})}/>}
+							value={newTitle} onChange={val=>this.SetState({newTitle: val})}/>}
 				</span>
 				{node.current.equation && node.current.equation.explanation &&
 					<Pre style={{
