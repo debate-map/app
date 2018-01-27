@@ -55,6 +55,7 @@ import {GetPathsToNodesChangedSinceX, GetNodeChangeType, GetChangeTypeOutlineCol
 import {GetNode} from "Store/firebase/nodes";
 import {MapNodeRevision} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 import { PremiseAddHelper } from "UI/@Shared/Maps/MapNode/PremiseAddHelper";
+import { ArgumentsControlBar } from "UI/@Shared/Maps/MapNode/ArgumentsControlBar";
 
 let nodesLocked = {};
 export function SetNodeUILocked(nodeID: number, locked: boolean, maxWait = 10000) {
@@ -275,29 +276,17 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					{marginTop: innerBoxOffset},
 				)}>
 					{limitBar_above && children}
-					{/*subnodes.length != 0 &&
-						<div style={{position: "absolute", left: "calc(50% - 5px)", width: 10, top: 26, bottom: 26 + 5, background: "rgba(255,255,0,.7)"}}/>*/}
 					{asSubnode &&
-						/*<div style={{position: "absolute", left: -8, top: "calc(50% - 7px)", width: 7, height: 14,
-							borderRadius: "7px 0 0 7px", background: "rgba(255,255,0,.7)"}}/>*/
-						/*<div style={{position: "absolute", left: "calc(50% - 5px)", top: -11,
-							//width: 14, height: 7, transform: "rotate(45deg)", background: "rgba(255,255,0,.7)"
-							width: 0, height: 0, borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderBottom: "10px solid rgba(255,255,0,.7)",
-						}}/>*/
-						/*<div style={{position: "absolute", left: "calc(50% - 7px)", top: -8, width: 14, height: 7,
-							borderRadius: "7px 7px 0 0", background: "rgba(255,255,0,.7)"}}/>*/
-						<div style={{position: "absolute", left: 2, right: 2, top: -3, height: 3, borderRadius: "3px 3px 0 0", background: "rgba(255,255,0,.7)"}}/>
-					}
+						<div style={{position: "absolute", left: 2, right: 2, top: -3, height: 3, borderRadius: "3px 3px 0 0", background: "rgba(255,255,0,.7)"}}/>}
 					<div ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{position: "relative"}}>
 						{node.current.accessLevel != AccessLevel.Basic &&
 							<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 								<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 							</div>}
-						<NodeUI_Inner ref="innerBox" map={map} node={node} nodeView={nodeView} path={path} width={width} widthOverride={widthOverride}
+						<NodeUI_Inner ref="innerBox" {...{map, node, nodeView, path, width, widthOverride}}
 							style={E(
 								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
 							)}/>
-						{/*<NodeUI_Inner ref="innerBox" {...{map, node: nodeWithFinalType, nodeView, path, width}} widthOverride={widthOverride}/>*/}
 						{/*showBelowMessage &&
 							<Div ct style={{
 								//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
@@ -344,10 +333,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 							<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Edit)},.8)`}}>{editedDescendants} edited</Row>}
 					</Column>}
 				{expanded &&
-					<div ref="childHolder" className="childHolder clickThrough" style={E(
+					<Column ref="childHolder" className="childHolder clickThrough" style={E(
 						{
-							//display: expanded ? "flex" : "none",
-							flexDirection: "column", marginLeft: childPacks.length ? 30 : 0,
+							marginLeft: childPacks.length ? 30 : 0,
 							//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 						},
 						//!expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
@@ -365,13 +353,15 @@ export default class NodeUI extends BaseComponent<Props, State> {
 									return RenderChildPack(pack, index, upChildPacks, "up");
 								})}
 							</Column>}
+						{node.type == MapNodeType.Claim &&
+							<ArgumentsControlBar mapID={map._id} parentNode={node} parentPath={path} node={node}/>}
 						{separateChildren &&
 							<Column ref="downChildHolder" ct>
 								{downChildPacks.slice(0, childLimit_down).map((pack, index)=> {
 									return RenderChildPack(pack, index, downChildPacks, "down");
 								})}
 							</Column>}
-					</div>}
+					</Column>}
 			</div>
 		);
 
@@ -487,6 +477,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let childHolder = $(this.nodeUI).children(".childHolder");
 		let upChildHolder = childHolder.children(".upChildHolder");
 		let downChildHolder = childHolder.children(".downChildHolder");
+		let argumentsControlBar = childHolder.children(".argumentsControlBar");
 		/*let firstChild = (upChildHolder.length ? upChildHolder : childHolder).children().ToList()[0];
 		let lastChild = (downChildHolder.length ? downChildHolder : childHolder).children().ToList().Last();*/
 
@@ -506,9 +497,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			/*{childrenCenterY: upChildHolder
 				? (upChildHolder && upChildHolder.style.display != "none" ? upChildHolder.clientHeight : 0)
 				: (childHolder && childHolder.style.display != "none" ? childHolder.clientHeight / 2 : 0)}*/
-			expanded && {childrenCenterY: upChildHolder.length
+			expanded && {childrenCenterY: argumentsControlBar.length
 				//? (upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0)
-				? (upChildHolder.css("visibility") != "hidden" ? upChildHolder.outerHeight() : 0)
+				? (upChildHolder.css("visibility") != "hidden" ? argumentsControlBar.GetScreenRect().Center.y - childHolder.GetScreenRect().y : 0)
 				//: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)},
 				: (childHolder.css("visibility") != "hidden" ? childHolder.outerHeight() / 2 : 0)},
 			/*{childrenStartY: upChildHolder.length

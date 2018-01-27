@@ -53,6 +53,7 @@ export class MapNode {
 	layerPlusAnchorParents: LayerPlusAnchorParentSet;
 
 	// local-only
+	informalArgumentsHolder?: boolean;
 	premiseAddHelper?: boolean;
 }
 export const MapNode_id = "^[0-9]+$";

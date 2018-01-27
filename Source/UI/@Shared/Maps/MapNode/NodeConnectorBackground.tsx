@@ -3,7 +3,7 @@ import NodeUI from "./NodeUI";
 import {Vector2i} from "js-vextensions";
 import ShallowCompare from "react/lib/shallowCompare";
 import {MapNode, MapNodeL2, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
-import {MapNodeType, MapNodeType_Info, GetNodeBackgroundColor} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {MapNodeType, MapNodeType_Info, GetNodeColor} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetNodeForm, GetRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
@@ -37,7 +37,7 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					let child = childNodes.FirstOrX(a=>a._id == childIDStr.ToInt());
 					if (child == null) return null;
 
-					let backgroundColor = GetNodeBackgroundColor(node.type == MapNodeType.Argument ? node : child);
+					let backgroundColor = GetNodeColor(node.type == MapNodeType.Argument ? node : child, "raw");
 
 					/*var start = mainBoxOffset;
 					var startControl = start.Plus(30, 0);
@@ -61,7 +61,7 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					startControl = startControl.Plus(middleControl).Times(.5); // average with middle-control
 					endControl = endControl.Plus(middleControl).Times(.5); // average with middle-control
 
-					return <path key={"connectorLine_" + child._id} style={{stroke: `rgba(${backgroundColor},1)`, strokeWidth: 3, fill: "none"}}
+					return <path key={"connectorLine_" + child._id} style={{stroke: backgroundColor.css(), strokeWidth: 3, fill: "none"}}
 						d={`M${start.x},${start.y} C${startControl.x},${startControl.y} ${endControl.x},${endControl.y} ${end.x},${end.y}`}/>;
 				})}
 			</svg>

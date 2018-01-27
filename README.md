@@ -48,7 +48,7 @@ For recommended setup of your code editor and other tools, see: [Editor setup](#
 
 ### Running locally
 
-1) Run `npm run tsc-watch` in a console, and keep it running in the background.
+1) Run `tsc` (or `npm run tsc-watch`) in a console, and keep it running in the background.
 2) Run `npm run dev` in the root project folder. (or `npm run dev-with-stats`)
 3) Navigate to `localhost:3000`.
 
@@ -56,7 +56,7 @@ Note that if you add/remove/modify any modules required from `Scripts/Config/Ven
 
 ### Deploying to Firebase
 
-1) Run `npm run tsc-watch` in a console, and keep it running in the background. (this reduces deploy:prod-quick compile times from ~59s to ~32s, by enabling incremental compilation)
+1) Run `tsc` (or `npm run tsc-watch`) in a console, and keep it running in the background. (this reduces deploy:prod-quick compile times from ~59s to ~32s, by enabling incremental compilation)
 2) Run `npm run deploy:[dev/prod/prod-quick]`. Note that `deploy:prod-quick` time is ~32s, vs ~86s for `deploy:prod` (since it doesn't use minification and such).
 
 ### Editor setup

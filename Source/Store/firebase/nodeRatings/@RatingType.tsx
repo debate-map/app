@@ -32,7 +32,7 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 		//result.description = "Suppose you were as sure as you are right now (of this claim being true, in its basic form), 100 different times (on different topics). How many of those times do you expect you'd be correct?";
 		result.description = "Consider how sure you are of this statement being true (in its basic form). If you were this sure 100 times (on a variety of things), how many of those times do you think you'd be correct?";
 	} else if (ratingType == "degree") {
-		result.description = "To what degree do you consider this statement true? (0: completely false, 50: true to a basic extent, 100: true to the highest extent)";
+		result.description = "To what degree do you consider this statement true? (0: completely false, 50: true to a basic extent, 100: true to a high extent)";
 	} else if (ratingType == "strength") {
 		result.description = "Argument strength is calculated based on the ratings given to its premises and impact-premise.";
 	} else if (ratingType == "impact") {
@@ -63,9 +63,9 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 		);*/
 
 		if (grandParentRatingType == "impact" && parent.type == MapNodeType.Argument) {
-			result.description = `If ${premiseCountStr} of this argument were true (to the highest extent), how much would it weaken/undo the impact of the parent claim?`;
+			result.description = `If ${premiseCountStr} of this argument were true (to a high extent), how much would it weaken/undo the impact of the parent claim?`;
 		} else {
-			result.description = `If ${premiseCountStr} of this argument were true (to the highest extent), ${""
+			result.description = `If ${premiseCountStr} of this argument were true (to a high extent), ${""
 				}how much would it impact your ${grandParentRatingType} rating for the parent claim? (0: not at all, 50: moderately, 100: game-changer)`;
 			let supporting = parent.link.polarity == Polarity.Supporting;
 		}

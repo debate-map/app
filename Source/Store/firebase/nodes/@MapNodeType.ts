@@ -1,6 +1,7 @@
 import {Assert} from "js-vextensions";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MapNode, MapNodeL2, ClaimForm, MapNodeL3, Polarity} from "./@MapNode";
+import chroma from "chroma-js";
 
 export enum MapNodeType {
 	Category = 10,
@@ -59,16 +60,23 @@ export class MapNodeType_Info {
 	/*mainRatingTypes: RatingType[];
 	otherRatingTypes: RatingType[];*/
 }
-export function GetNodeBackgroundColor(node: MapNodeL3) {
-	if (node.type == MapNodeType.Category) return "40,60,80";
-	if (node.type == MapNodeType.Package) return "30,120,150";
-	if (node.type == MapNodeType.MultiChoiceQuestion) return "90,50,180";
-	if (node.type == MapNodeType.Claim) return "0,80,150";
-	if (node.type == MapNodeType.Argument) {
-		if (node.finalPolarity == Polarity.Supporting) return "30,100,30";
-		return "100,30,30";
+export function GetNodeColor(node: MapNodeL3, type = "background" as "raw" | "background"): Color {
+	let result;
+	if (node.type == MapNodeType.Category) result = chroma(`rgb(40,60,80)`);
+	else if (node.type == MapNodeType.Package) result = chroma(`rgb(30,120,150)`);
+	else if (node.type == MapNodeType.MultiChoiceQuestion) result = chroma(`rgb(90,50,180)`);
+	else if (node.type == MapNodeType.Claim) result = chroma(`rgb(0,80,150)`);
+	else if (node.type == MapNodeType.Argument) {
+		if (node.finalPolarity == Polarity.Supporting) result = chroma(`rgb(30,100,30)`);
+		else result = chroma(`rgb(100,30,30)`);
 	}
-	Assert(false, "Invalid node type.");
+
+	if (type == "background") {
+		result = chroma.mix(result, "black", 0.3); // mix background-color with black some
+		result = result.alpha(.9);
+	}
+
+	return result;
 }
 
 export function GetMapNodeTypeDisplayName(type: MapNodeType, parentNode: MapNode, parentNodeForm: ClaimForm, polarity: Polarity) {

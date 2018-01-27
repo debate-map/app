@@ -6,8 +6,8 @@ import {GetTimeline, GetTimelineStep} from "../../firebase/timelines";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
 import {TimelineStep} from "Store/firebase/timelineSteps/@TimelineStep";
 import {GetMap} from "../../firebase/maps";
-import {SimpleReducer} from "../../index";
 import {ShowChangesSinceType} from "Store/main/maps/@MapInfo";
+import { SimpleReducer } from "Store";
 
 export enum SortType {
 	CreatorID = 10,

@@ -22,11 +22,12 @@ import {GetNode} from "Store/firebase/nodes";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import { IsUserCreatorOrMod } from "Store/firebase/userExtras";
 import {GetUserID} from "Store/firebase/users";
+import chroma from "chroma-js";
 
 type Props = {
 	map: Map, path: string, node: MapNodeL3, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,
 	panelPosition?: "left" | "below", local_openPanel?: string,
-	backgroundColor: string, asHover: boolean, inList?: boolean, style?,
+	backgroundColor: chroma.Color, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
 } & Partial<{form: ClaimForm, parentNode: MapNodeL3}>;
 @Connect((state: RootState, {node, path}: Props)=>({
@@ -59,8 +60,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 				style,
 			)}>
 				{children}
-				<div style={{position: "relative", background: `rgba(0,0,0,.8)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
-					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
+				<div style={{position: "relative", background: backgroundColor.alpha(.95).css(), borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
 					{GetRatingTypesForNode(node).map((ratingInfo, index)=> {
 						let ratingTypeInfo = GetRatingTypeInfo(ratingInfo.type, node, parentNode, path);
 						//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
@@ -101,11 +101,11 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 							margin: "-1px 0 1px 0", height: 17, lineHeight: "12px", padding: 0,
 							position: "relative", display: "flex", justifyContent: "space-around", //alignItems: "center",
 							background: null, boxShadow: null, border: null, borderRadius: "0 0 5px 5px",
-							":hover": {background: `rgba(${backgroundColor},.5)`},
+							":hover": {background: backgroundColor.alpha(.5).css()},
 						}}/>
 				</div>
 				<div style={{position: "relative", marginTop: 1, background: `rgba(0,0,0,.8)`, borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
-					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
+					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: backgroundColor.alpha(.7).css()}}/>
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="definitions" text="Definitions"
 						style={{marginTop: 0, borderRadius: "5px 5px 0 0"}}/>
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="discussion" text="Discussion"/>
@@ -121,7 +121,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 							position: "relative", display: "flex", justifyContent: "space-around", //alignItems: "center",
 							background: null, boxShadow: null, border: null,
 							borderRadius: "0 0 5px 5px",
-							":hover": {background: `rgba(${backgroundColor},.5)`},
+							":hover": {background: backgroundColor.alpha(.5).css()},
 						}}/>
 				</div>
 			</div>

@@ -6,7 +6,6 @@ import ReactDOM from "react-dom";
 import StackTrace from "stacktrace-js";
 import React from "react/lib/ReactWithAddons";
 import {OnAccessPath, Connect} from "./Frame/Database/FirebaseConnect";
-
 import "./Store/firebase/nodeRatings/@RatingsRoot";
 import {State_overrides, State_Options} from "./UI/@Shared/StateOverrides";
 import {JSVE, DeepGet} from "js-vextensions";

@@ -20,7 +20,7 @@ import SocialPanel from "../../@Shared/Maps/MapNode/NodeUI/SocialPanel";
 import TagsPanel from "../../@Shared/Maps/MapNode/NodeUI/TagsPanel";
 import OthersPanel from "../../@Shared/Maps/MapNode/NodeUI/OthersPanel";
 import DetailsPanel from "../../@Shared/Maps/MapNode/NodeUI/DetailsPanel";
-import {MapNodeType, MapNodeType_Info, GetNodeBackgroundColor} from "../../../Store/firebase/nodes/@MapNodeType";
+import {MapNodeType, MapNodeType_Info, GetNodeColor} from "../../../Store/firebase/nodes/@MapNodeType";
 import Moment from "moment";
 import {GetSelectedNode_InList, ACTSelectedNode_InListSet, GetMap_List_SelectedNode_OpenPanel, ACTMap_List_SelectedNode_OpenPanelSet, ACTMapNodeListSortBySet, ACTMapNodeListFilterSet, SortType, ACTMapNodeListPageSet} from "../../../Store/main/maps/$map";
 import {GetUser} from "../../../Store/firebase/users";
@@ -185,17 +185,15 @@ class NodeRow extends BaseComponent<NodeRow_Props, {menuOpened: boolean}> {
 		let {map, node, first, creator, selected} = this.props;
 		let {menuOpened} = this.state;
 
-		let nodeL3 = AsNodeL3(node, Polarity.Supporting);
+		let nodeL3 = AsNodeL3(node);
 		let path = ""+node._id;
 		// impact-premises require a path for the GetNodeDisplayText() function, so create a short one which includes just the parent argument-node
 		if (node.current.impactPremise) {
 			path = node.parents.VKeys(true)[0] + "/" + path;
 		}
 
-		let backgroundColorStr = GetNodeBackgroundColor(AsNodeL3(node));
+		let backgroundColor = GetNodeColor(nodeL3).desaturate(.5).alpha(.8);
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
-
-		let backgroundColor = chroma(`rgba(${backgroundColorStr},.8)`).desaturate(.5);
 
 		return (
 			<Row mt={first ? 0 : 5} className="cursorSet"
@@ -242,12 +240,13 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 		let {map, node, ratingsRoot, openPanel} = this.props;
 		let {width, hoverPanel} = this.state;
 
+		let nodeL3 = AsNodeL3(node);
 		let path = node._id+"";
 		if (node.current.impactPremise) { // if impact-premise, we only have one parent, so might as well fetch it, for accurate polarity and such
 			path = node.parents.VKeys(true)[0] + "/" + node._id;
 		}
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
-		let backgroundColor = GetNodeBackgroundColor(AsNodeL3(node));
+		let backgroundColor = GetNodeColor(nodeL3);
 		let nodeView = new MapNodeView();
 		nodeView.openPanel = openPanel;
 
@@ -257,8 +256,6 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 			let mainRatingType = GetRatingTypesForNode(node).find(a=>a.main);
 			panelToShow = mainRatingType ? mainRatingType.type : null;
 		}
-
-		let nodeAsL3 = AsNodeL3(node, Polarity.Supporting, null);
 
 		return (
 			<Row className="clickThrough"
@@ -271,18 +268,18 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 				}} onResize={()=> {
 					if (this.refs.ratingsPanel) GetInnerComp(this.refs.ratingsPanel).Update();
 				}}/>*/}
-				<MapNodeUI_LeftBox {...{map, path, node: nodeAsL3, nodeView, ratingsRoot}}
+				<MapNodeUI_LeftBox {...{map, path, node: nodeL3, nodeView, ratingsRoot, backgroundColor}}
 					onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
 					onPanelButtonClick={panel=>store.dispatch(new ACTMap_List_SelectedNode_OpenPanelSet({mapID: map._id, panel}))}
-					backgroundColor={backgroundColor} asHover={false} inList={true} style={{marginTop: 25}}/>
+					asHover={false} inList={true} style={{marginTop: 25}}/>
 				<ScrollView style={{flex: 1}} contentStyle={{flex: 1}}>
 					<Column ml={10} style={{flex: 1}}>
 						{panelToShow &&
 							<div style={{position: "relative", padding: 5, background: "rgba(0,0,0,.7)", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
-								<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
+								<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: backgroundColor.css()}}/>
 								{ratingTypes.Contains(panelToShow) && (()=> {
 									let ratings = GetRatings(node._id, panelToShow as RatingType);
-									return <RatingsPanel ref="ratingsPanel" node={nodeAsL3} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
+									return <RatingsPanel ref="ratingsPanel" node={nodeL3} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 								})()}
 								{panelToShow == "definitions" &&
 									<DefinitionsPanel {...{node, path, hoverTermID: null}} openTermID={null}
@@ -290,9 +287,9 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 								{panelToShow == "discussion" && <DiscussionPanel/>}
 								{panelToShow == "social" && <SocialPanel/>}
 								{panelToShow == "tags" && <TagsPanel/>}
-								{panelToShow == "details" && <DetailsPanel node={nodeAsL3} path={path}/>}
-								{panelToShow == "history" && <HistoryPanel node={nodeAsL3} path={path}/>}
-								{panelToShow == "others" && <OthersPanel node={nodeAsL3} path={path}/>}
+								{panelToShow == "details" && <DetailsPanel node={nodeL3} path={path}/>}
+								{panelToShow == "history" && <HistoryPanel node={nodeL3} path={path}/>}
+								{panelToShow == "others" && <OthersPanel node={nodeL3} path={path}/>}
 							</div>}
 					</Column>
 				</ScrollView>

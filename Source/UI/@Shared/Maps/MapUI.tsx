@@ -66,15 +66,17 @@ export function UpdateFocusNodeAndViewOffset(mapID: number) {
 	/*let selectedNodePath = GetSelectedNodePath(mapID);
 	let focusNodeBox = selectedNodePath ? GetNodeBoxForPath(selectedNodePath) : GetNodeBoxClosestToViewCenter();*/
 	let focusNodeBox = GetNodeBoxClosestToViewCenter();
-	if (focusNodeBox == null) return; // can happen if novde was just deleted
+	if (focusNodeBox == null) return; // can happen if node was just deleted
 
 	let focusNodeBoxComp = FindReact(focusNodeBox[0]) as NodeUI_Inner;
 	let focusNodePath = focusNodeBoxComp.props.path;
+	if (focusNodePath == null) return; // can happen sometimes; not sure what causes
 	let viewOffset = GetViewOffsetForNodeBox(focusNodeBox);
 
 	let oldNodeView = GetNodeView(mapID, focusNodePath);
-	if (oldNodeView == null || !oldNodeView.focused || !viewOffset.Equals(oldNodeView.viewOffset))
+	if (oldNodeView == null || !oldNodeView.focused || !viewOffset.Equals(oldNodeView.viewOffset)) {
 		store.dispatch(new ACTViewCenterChange({mapID, focusNodePath, viewOffset}));
+	}
 }
 
 type Props = {

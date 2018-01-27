@@ -20,7 +20,7 @@ import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {ImageAttachment, MapNode, MapNodeL2, ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeRatingsRoot, GetRatings, GetFillPercentForRatingAverage, GetRatingAverage, GetRatingValue, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {GetUserID} from "../../../../Store/firebase/users";
-import {MapNodeType_Info, MapNodeType, GetNodeBackgroundColor} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {MapNodeType_Info, MapNodeType, GetNodeColor} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RootState} from "../../../../Store/index";
 import {RatingType_Info, RatingType, ratingTypes} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {Map} from "../../../../Store/firebase/maps/@Map";
@@ -65,10 +65,6 @@ import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
 import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
 import {MapNodeRevision_titlePattern} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 
-/*AddGlobalStyle(`
-.NodeUI_Inner
-`);*/
-
 //export type NodeHoverExtras = {panel?: string, term?: number};
 
 type Props = {
@@ -78,10 +74,6 @@ type Props = {
 	form: ClaimForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string,
 	changeType: ChangeType,
 }>;
-//@FirebaseConnect((props: Props)=>((props[`holder`] = props[`holder`] || {}), [
-/*@FirebaseConnect((props: Props)=>[
-	...GetPaths_NodeRatingsRoot(props.node._id),
-])*/
 @Connect((state: RootState, {map, node, path, ratingsRoot}: Props)=> {
 	let sinceTime = GetTimeFromWhichToShowChangedNodes(map._id);
 	/*let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
@@ -113,7 +105,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 			form, ratingsRoot, mainRating_average, userID, changeType} = this.props;
 		let {hovered, hoverPanel, hoverTermID, /*local_selected,*/ local_openPanel} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
-		let backgroundColor = GetNodeBackgroundColor(node);
+		let backgroundColor = GetNodeColor(node);
 		let outlineColor = GetChangeTypeOutlineColor(changeType);
 		let barSize = 5;
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
@@ -135,15 +127,12 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 		let expanded = nodeView && nodeView.expanded;
 
 		return (
-			<div className={classNames("NodeUI_Inner", pathNodeIDs.length == 0 && " root")}
+			<div className={classNames("NodeUI_Inner", {root: pathNodeIDs.length == 0})}
 					style={E({
 						display: "flex", position: "relative", borderRadius: 5, cursor: "default",
 						width, minWidth: widthOverride,
-						boxShadow: "rgba(0,0,0,1) 0px 0px 2px" + (outlineColor ? `, rgba(${outlineColor},1) 0px 0px 1px` : "").repeat(6), 
-						//outline: outlineColor ? ,
+						boxShadow: "rgba(0,0,0,1) 0px 0px 2px" + (outlineColor ? `, rgba(${outlineColor},1) 0px 0px 1px` : "").repeat(6),
 					}, style)}
-					/*onMouseEnter={()=>$(".scrolling").length == 0 && this.SetState({hovered: true})}
-					onMouseLeave={()=>this.SetState({hovered: false})}*/
 					onClick={e=> {
 						if ((e.nativeEvent as any).ignore) return;
 						/*if (useLocalPanelState) {
@@ -157,7 +146,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: node._id, time: Date.now()}));
 					}}>
 				{leftPanelShow &&
-					<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot, panelPosition, local_openPanel}}
+					<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot, panelPosition, local_openPanel, backgroundColor}} asHover={hovered}
 							onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
 							onPanelButtonClick={panel=> {
 								if (useLocalPanelState) {
@@ -171,20 +160,23 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 									store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel: null}));
 									this.SetState({hoverPanel: null});
 								}
-							}}
-							backgroundColor={backgroundColor} asHover={hovered}>
+							}}>
 						{/* fixes click-gap */}
 						{panelPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
 					</MapNodeUI_LeftBox>}
 				{/* fixes click-gap */}
 				{leftPanelShow && panelPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
 
-				<div style={{display: "flex", width: "100%", background: "rgba(0,0,0,.7)", borderRadius: 5, cursor: "pointer"}}>
-					<div style={{position: "relative", width: "100%", padding: GetPaddingForNode(node, isSubnode)}}
+				<Row style={{alignItems: "stretch", width: "100%", borderRadius: 5, cursor: "pointer"}}>
+					<div style={{position: "relative", flex: 1, padding: GetPaddingForNode(node, isSubnode)}}
 							onClick={e=>IsDoubleClick(e) && this.titlePanel && GetInnerComp(this.titlePanel).OnDoubleClick()}>
 						<div style={{
 							position: "absolute", left: 0, top: 0, bottom: 0,
-							width: mainRating_fillPercent + "%", background: `rgba(${backgroundColor},.7)`, borderRadius: "5px 0 0 5px"
+							width: mainRating_fillPercent + "%", background: backgroundColor.css(), borderRadius: "5px 0 0 5px",
+						}}/>
+						<div style={{
+							position: "absolute", right: 0, top: 0, bottom: 0,
+							width: (100 - mainRating_fillPercent) + "%", background: `rgba(0,0,0,.7)`, borderRadius: "5px 0 0 5px",
 						}}/>
 						{mainRating_mine != null &&
 							<div style={{
@@ -195,32 +187,29 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						{subPanelShow && <SubPanel node={node}/>}
 						<NodeUI_Menu {...{map, node, path}}/>
 					</div>
-					<Button //text={expanded ? "-" : "+"} size={28}
+					<Button text={expanded ? "-" : "+"} //size={28}
 							style={{
 								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
-								width: 18, //minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
+								width: 17, //minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
 								padding: 0,
 								fontSize: expanded ? 23 : 17,
 								lineHeight: "1px", // keeps text from making meta-theses too tall
-								backgroundColor: `rgba(${backgroundColor.split(`,`).map(a=>(parseInt(a) * .8).RoundTo(1)).join(`,`)},.7)`,
+								backgroundColor: backgroundColor.Mix("black", .2).alpha(.9).css(),
 								border: "none",
-								":hover": {backgroundColor: `rgba(${backgroundColor.split(`,`).map(a=>(parseInt(a) * .9).RoundTo(1)).join(`,`)},.7)`},
+								":hover": {backgroundColor: backgroundColor.Mix("black", .1).alpha(.9).css()},
 							}}
 							onClick={e=> {
 								store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path, expanded: !expanded, recursive: expanded && e.altKey}));
 								e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
 								//return false;
-							}}>
-						{expanded ? "-" : "+"}
-					</Button>
-				</div>	
+							}}/>
+				</Row>
 				{bottomPanelShow &&
 					<div style={{
 						position: "absolute", left: panelPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
 						width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
-						padding: 5, background: "rgba(0,0,0,.7)", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+						padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 					}}>
-						<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: `rgba(${backgroundColor},.7)`}}/>
 						{ratingTypes.Contains(panelToShow) && (()=> {
 							let ratings = GetRatings(node._id, panelToShow as RatingType);
 							return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
