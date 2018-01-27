@@ -36,6 +36,8 @@ export default class AddChildNode extends Command
 		this.sub_addNode = new AddNode({mapID, node, revision}).MarkAsSubcommand();
 		await this.sub_addNode.Prepare();
 
+		this.payload.link = link || {_: true};
+
 		if (impactPremiseNode) {
 			this.sub_addImpactPremise = new AddNode({mapID, node: impactPremiseNode, revision: impactPremiseNodeRevision}).MarkAsSubcommand();
 			this.sub_addImpactPremise.lastNodeID_addAmount = 1;

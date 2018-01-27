@@ -66,6 +66,8 @@ function Validate(schemaName: string, data, removeHelpers = true) {
 		data = RemoveHelpers(Clone(data));
 	}
 
+	if (data == null) return "Data is null/undefined!";
+
 	let passed = ajv.validate(schemaName, data);
 	if (!passed) return ajv.FullErrorsText();
 

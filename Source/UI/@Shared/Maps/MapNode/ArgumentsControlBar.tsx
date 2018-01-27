@@ -24,7 +24,7 @@ export class ArgumentsControlBar extends BaseComponent<{map: Map, parentNode: Ma
 		let backgroundColor = GetNodeColor({type: MapNodeType.Category} as MapNodeL3);
 
 		return (
-			<Row className="argumentsControlBar">
+			<Row className="argumentsControlBar clickThrough">
 				{/*<Row style={{
 					/*alignSelf: "flex-start",*#/ position: "relative", background: backgroundColor.css(), borderRadius: 5,
 					boxShadow: "rgba(0,0,0,1) 0px 0px 2px", alignSelf: "stretch",
