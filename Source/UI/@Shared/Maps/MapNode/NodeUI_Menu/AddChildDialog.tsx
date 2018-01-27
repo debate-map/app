@@ -20,7 +20,7 @@ import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";
 import {CheckBox} from "react-vcomponents";
 import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
 import NodeDetailsUI from "../NodeDetailsUI";
-import {GetClaimType, AsNodeL3, AsNodeL2, GetFinalPolarity} from "../../../../../Store/firebase/nodes/$node";
+import {GetClaimType, AsNodeL3, AsNodeL2, GetFinalPolarity, GetNodeForm} from "../../../../../Store/firebase/nodes/$node";
 import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
 import { IsUserAdmin, IsUserMod } from "../../../../../Store/firebase/userExtras";
@@ -30,7 +30,8 @@ import {ACTSetLastAcknowledgementTime} from "../../../../../Store/main";
 import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
 import {WaitTillPathDataIsReceiving, WaitTillPathDataIsReceived, DBPath} from "../../../../../Frame/Database/DatabaseHelpers";
 
-export function ShowAddChildDialog(parentNode: MapNodeL3, parentForm: ClaimForm, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: number, path: string) {
+export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: number) {
+	let parentForm = GetNodeForm(parentNode);
 	let childTypeInfo = MapNodeType_Info.for[childType];
 	let displayName = GetMapNodeTypeDisplayName(childType, parentNode, parentForm, childPolarity);
 
@@ -138,7 +139,7 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentForm: ClaimForm,
 				mapID: mapID, node: newNode, revision: newRevision, link: newLink,
 				impactPremiseNode: newImpactPremise, impactPremiseNodeRevision: newImpactPremiseRevision,
 			}).Run();
-			store.dispatch(new ACTMapNodeExpandedSet({mapID, path: path + "/" + info.nodeID, expanded: true, recursive: false}));
+			store.dispatch(new ACTMapNodeExpandedSet({mapID, path: parentPath + "/" + info.nodeID, expanded: true, recursive: false}));
 			store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.nodeID, time: Date.now()}));
 			if (info.impactPremise_nodeID) {
 				store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.impactPremise_nodeID, time: Date.now()}));

@@ -168,7 +168,9 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 				{leftPanelShow && panelPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
 
 				<Row style={{alignItems: "stretch", width: "100%", borderRadius: 5, cursor: "pointer"}}>
-					<div style={{position: "relative", flex: 1, padding: GetPaddingForNode(node, isSubnode)}}
+					<div style={{position: "relative", width: "calc(100% - 17px)", padding: GetPaddingForNode(node, isSubnode),
+								//overflow: "hidden" // let it overflow for now, until we have proper handling for katex-overflowing
+							}}
 							onClick={e=>IsDoubleClick(e) && this.titlePanel && GetInnerComp(this.titlePanel).OnDoubleClick()}>
 						<div style={{
 							position: "absolute", left: 0, top: 0, bottom: 0,

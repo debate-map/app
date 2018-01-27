@@ -237,9 +237,13 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			}
 		}
 
+		let showArgumentsControlBar = node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading;
+		// not using atm; instead, we're just placing these buttons in the argument-control-bar
+		let showAddArgumentButtons = false; //node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading; // && nodeChildren.length > 0;
+
 		//let {width, expectedHeight} = this.GetMeasurementInfo(this.props, this.state);
 		let {width, expectedHeight} = this.GetMeasurementInfo();
-		let innerBoxOffset = ((childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
+		let innerBoxOffset = this.GetInnerBoxOffset(expectedHeight, showAddArgumentButtons, childrenCenterY);
 		if (!expanded) innerBoxOffset = 0;
 
 		let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
@@ -279,17 +283,17 @@ export default class NodeUI extends BaseComponent<Props, State> {
 					{limitBar_above && children}
 					{asSubnode &&
 						<div style={{position: "absolute", left: 2, right: 2, top: -3, height: 3, borderRadius: "3px 3px 0 0", background: "rgba(255,255,0,.7)"}}/>}
-					<div ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{position: "relative"}}>
+					<Column ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{position: "relative"}}>
 						{node.current.accessLevel != AccessLevel.Basic &&
 							<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 								<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 							</div>}
+						{showAddArgumentButtons &&
+							<AddArgumentButton map={map} node={node} path={path} polarity={Polarity.Supporting}/>}
 						<NodeUI_Inner ref="innerBox" {...{map, node, nodeView, path, width, widthOverride}}
 							style={E(
 								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
 							)}/>
-						{node.type == MapNodeType.Claim &&
-							<AddArgumentButton polarity={Polarity.Supporting}/>}
 						{/*showBelowMessage &&
 							<Div ct style={{
 								//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
@@ -298,9 +302,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 							}}>
 								Needs 2 premises to be visible.
 							</Div>*/}
-						{node.type == MapNodeType.Claim &&
-							<AddArgumentButton polarity={Polarity.Opposing}/>}
-					</div>
+						{showAddArgumentButtons &&
+							<AddArgumentButton map={map} node={node} path={path} polarity={Polarity.Opposing}/>}
+					</Column>
 					{!limitBar_above && children}
 				</div>
 
@@ -320,7 +324,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						showLimitBar && limitBar_above && {paddingTop: ChildLimitBar.HEIGHT},
 						{paddingBottom: 0 + /*(showBelowMessage ? 13 : 0) +*/ (showLimitBar && !limitBar_above ? ChildLimitBar.HEIGHT : 0)},
 					)}>
-						{nodeChildren.length}
+						{nodeChildren.filter(a=>!a.premiseAddHelper).length}
 					</div>}
 				{!expanded && (addedDescendants > 0 || editedDescendants > 0) &&
 					<Column style={E(
@@ -340,7 +344,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 				{expanded &&
 					<Column ref="childHolder" className="childHolder clickThrough" style={E(
 						{
-							marginLeft: childPacks.length ? 30 : 0,
+							marginLeft: childPacks.length || showArgumentsControlBar ? 30 : 0,
 							//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 						},
 						//!expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
@@ -358,8 +362,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 									return RenderChildPack(pack, index, upChildPacks, "up");
 								})}
 							</Column>}
-						{node.type == MapNodeType.Claim &&
-							<ArgumentsControlBar mapID={map._id} parentNode={node} parentPath={path} node={node}/>}
+						{showArgumentsControlBar &&
+							<ArgumentsControlBar map={map} parentNode={node} parentPath={path} node={node}/>}
 						{separateChildren &&
 							<Column ref="downChildHolder" ct>
 								{downChildPacks.slice(0, childLimit_down).map((pack, index)=> {
@@ -475,8 +479,19 @@ export default class NodeUI extends BaseComponent<Props, State> {
 
 		if (onHeightOrPosChange) onHeightOrPosChange();
 	}
+	GetInnerBoxOffset(expectedHeight, showAddArgumentButtons, childrenCenterY) {
+		let {map, node, path, children, subnodes, nodeView, nodeChildren} = this.props;
+
+		let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;
+		if (showAddArgumentButtons) {
+			distFromInnerBoxTopToMainBoxCenter += 29;
+		}
+
+		let innerBoxOffset = ((childrenCenterY|0) - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
+		return innerBoxOffset;
+	}
 	UpdateState(forceUpdate = false) {
-		let {map, node, path, children, subnodes, nodeView} = this.props;
+		let {map, node, path, children, subnodes, nodeView, nodeChildren} = this.props;
 		let expanded = nodeView && nodeView.expanded;
 		//let {childHolder, upChildHolder} = this.refs;
 		let childHolder = $(this.nodeUI).children(".childHolder");
@@ -515,7 +530,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		//let {width, expectedHeight} = this.GetMeasurementInfo(this.props, E(this.state, newState) as State);
 		let {expectedBoxWidth, expectedHeight} = this.GetMeasurementInfo();
 
-		let innerBoxOffset = ((newState.childrenCenterY|0) - (expectedHeight / 2)).KeepAtLeast(0);
+		let showAddArgumentButtons = false; //node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading; // && nodeChildren.length > 0;
+		let innerBoxOffset = this.GetInnerBoxOffset(expectedHeight, showAddArgumentButtons, newState.childrenCenterY);
 		//if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
 		//if (this.refs.childHolder) {
 		if (expanded && this.refs.childHolder) {
@@ -525,6 +541,10 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			let mainBoxOffset = new Vector2i(0, innerBoxOffset);
 			//mainBoxOffset = mainBoxOffset.Plus(new Vector2i(innerBox.width(), innerBox.outerHeight() / 2));
 			mainBoxOffset = mainBoxOffset.Plus(new Vector2i(-30, innerBox.outerHeight() / 2));
+
+			if (showAddArgumentButtons) {
+				mainBoxOffset.y += 29;
+			}
 
 			let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
 			let limitBar_above = node.type == MapNodeType.Argument && node.finalPolarity == Polarity.Supporting;

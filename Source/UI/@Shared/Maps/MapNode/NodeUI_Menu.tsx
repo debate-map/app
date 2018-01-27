@@ -66,7 +66,6 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
 		let validChildTypes = GetValidNewChildTypes(node, path, permissions);
-		let form = GetNodeForm(node, path);
 		let formForClaimChildren = node.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
 
 		let nodeText = GetNodeDisplayText(node, path);
@@ -84,7 +83,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 								if (e.button != 0) return;
 								if (userID == null) return ShowSignInPopup();
 								
-								ShowAddChildDialog(node, form, childType, polarity, userID, map._id, path);
+								ShowAddChildDialog(node, path, childType, polarity, userID, map._id);
 							}}/>
 						);
 					});
