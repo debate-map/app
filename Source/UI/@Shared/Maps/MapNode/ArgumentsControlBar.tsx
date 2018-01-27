@@ -1,6 +1,6 @@
 import {Connect} from "Frame/Database/FirebaseConnect";
 import {BaseComponent} from "react-vextensions";
-import {Pre, Row, TextArea_AutoSize, Button} from "react-vcomponents";
+import {Pre, Row, TextArea_AutoSize, Button, Select} from "react-vcomponents";
 import {MapNode, MapNodeL3, ClaimForm, ChildEntry} from "../../../../Store/firebase/nodes/@MapNode";
 import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
 import {WaitTillPathDataIsReceiving, WaitTillPathDataIsReceived} from "../../../../Frame/Database/DatabaseHelpers";
@@ -19,16 +19,17 @@ export class ArgumentsControlBar extends BaseComponent<{mapID: number, parentNod
 	static defaultState = {premiseTitle: ""};
 	render() {
 		let {mapID, parentNode, parentPath, node} = this.props;
-		let backgroundColor = GetNodeColor(node);
+		let backgroundColor = GetNodeColor({type: MapNodeType.Category} as MapNodeL3);
 
 		return (
 			<Row className="argumentsControlBar" style={{
-				alignSelf: "flex-start", position: "relative", alignItems: "stretch", padding: "5px 0px", background: backgroundColor.css(), borderRadius: 5,
+				alignSelf: "flex-start", position: "relative", background: backgroundColor.css(), borderRadius: 5,
 				boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+				// temp
+				height: 0, opacity: 0,
 			}}>
-				<Pre>Show: </Pre>
-				<Button text="Top"/>
-				<Button text="New"/>
+				{/*<Pre ml={5}>Sort by: </Pre>
+				<Select options={["Ratings", "Recent"]} style={{borderRadius: 5, outline: "none"}} value={"Ratings"} onChange={val=>{}}/>*/}
 			</Row>
 		);
 	}

@@ -56,6 +56,7 @@ import {GetNode} from "Store/firebase/nodes";
 import {MapNodeRevision} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 import { PremiseAddHelper } from "UI/@Shared/Maps/MapNode/PremiseAddHelper";
 import { ArgumentsControlBar } from "UI/@Shared/Maps/MapNode/ArgumentsControlBar";
+import { AddArgumentButton } from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton";
 
 let nodesLocked = {};
 export function SetNodeUILocked(nodeID: number, locked: boolean, maxWait = 10000) {
@@ -287,6 +288,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 							style={E(
 								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
 							)}/>
+						{node.type == MapNodeType.Claim &&
+							<AddArgumentButton polarity={Polarity.Supporting}/>}
 						{/*showBelowMessage &&
 							<Div ct style={{
 								//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
@@ -295,6 +298,8 @@ export default class NodeUI extends BaseComponent<Props, State> {
 							}}>
 								Needs 2 premises to be visible.
 							</Div>*/}
+						{node.type == MapNodeType.Claim &&
+							<AddArgumentButton polarity={Polarity.Opposing}/>}
 					</div>
 					{!limitBar_above && children}
 				</div>

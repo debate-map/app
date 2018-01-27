@@ -1,23 +1,23 @@
 import {Pre, Column} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
-import {MapNode} from "../../../../../Store/firebase/nodes/@MapNode";
-import {GetNodeDisplayText} from "../../../../../Store/firebase/nodes/$node";
-import {GetTerm, GetTermVariantNumber} from "../../../../../Store/firebase/terms";
-import {Connect} from "../../../../../Frame/Database/FirebaseConnect";
+import {MapNode} from "../../../../../../Store/firebase/nodes/@MapNode";
+import {GetNodeDisplayText} from "../../../../../../Store/firebase/nodes/$node";
+import {GetTerm, GetTermVariantNumber} from "../../../../../../Store/firebase/terms";
+import {Connect} from "../../../../../../Frame/Database/FirebaseConnect";
 import {CachedTransform} from "js-vextensions";
 import {Row} from "react-vcomponents";
-import {Term} from "../../../../../Store/firebase/terms/@Term";
+import {Term} from "../../../../../../Store/firebase/terms/@Term";
 import {Button} from "react-vcomponents";
-import TermDetailsUI from "../../../../Content/Terms/TermDetailsUI";
-import TermComponentsUI from "../../../../Content/Terms/TermComponentsUI";
-import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
-import {GetUserID} from "../../../../../Store/firebase/users";
-import {GetCurrentURL} from "../../../../../Frame/General/URLs";
+import TermDetailsUI from "../../../../../Content/Terms/TermDetailsUI";
+import TermComponentsUI from "../../../../../Content/Terms/TermComponentsUI";
+import {IsUserCreatorOrMod} from "../../../../../../Store/firebase/userExtras";
+import {GetUserID} from "../../../../../../Store/firebase/users";
+import {GetCurrentURL} from "../../../../../../Frame/General/URLs";
 import {VURL} from "js-vextensions";
-import {ParseSegmentsForPatterns} from "../../../../../Frame/General/RegexHelpers";
-import {ACTTermSelect} from "../../../../../Store/main/database";
+import {ParseSegmentsForPatterns} from "../../../../../../Frame/General/RegexHelpers";
+import {ACTTermSelect} from "../../../../../../Store/main/database";
 import {push} from "redux-little-router";
-import Link from "../../../../../Frame/ReactComponents/Link";
+import Link from "../../../../../../Frame/ReactComponents/Link";
 
 let termsPlaceholder = [];
 
