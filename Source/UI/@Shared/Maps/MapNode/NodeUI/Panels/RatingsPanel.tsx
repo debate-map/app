@@ -10,7 +10,7 @@ import {connect} from "react-redux";
 import {Select} from "react-vcomponents";
 import {ShowMessageBox_Base, ShowMessageBox} from "react-vmessagebox";
 import {firebaseConnect} from "react-redux-firebase";
-import {GetData, SlicePath} from "../../../../../../Frame/Database/DatabaseHelpers";
+import {GetData, SlicePath, DBPath} from "../../../../../../Frame/Database/DatabaseHelpers";
 import {Debugger} from "../../../../../../Frame/General/Globals_Free";
 import {RatingType, RatingType_Info, GetRatingTypeInfo} from "../../../../../../Store/firebase/nodeRatings/@RatingType";
 import {Rating} from "../../../../../../Store/firebase/nodeRatings/@RatingsRoot";
@@ -117,7 +117,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 								// todo: have submitted date be based on local<>Firebase time-offset (retrieved from Firebase) [this prevents fail from security rules]
 								let newRating_value = GetValueForLabel(newRating_label);
 								newRating_value = TransformRatingForContext(newRating_value, reverseRatings);
-								firebase.DBRef(`nodeRatings/${node._id}/${ratingType}/${userID}`).set({updated: Date.now(), value: newRating_value});
+								firebase.ref(DBPath(`nodeRatings/${node._id}/${ratingType}/${userID}`)).set({updated: Date.now(), value: newRating_value});
 							}
 						});
 					}}
@@ -127,7 +127,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 							title: `Delete rating`, cancelButton: true,
 							message: `Delete your "${ratingType}" rating for ${nodeTypeDisplayName}`,
 							onOK: ()=> {
-								firebase.DBRef(`nodeRatings/${node._id}/${ratingType}/${userID}`).set(null);
+								firebase.ref(DBPath(`nodeRatings/${node._id}/${ratingType}/${userID}`)).set(null);
 							}
 						});
 					}}>
@@ -139,8 +139,8 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
 					<Pre style={{marginRight: "auto", fontSize: 12, color: "rgba(255,255,255,.5)"}}>
 						{ratingType == "strength"
-							? `Cannot rate this directly. Instead, rate the premises and impact-premise.` //+ (myRating != null ? ` (yours: ${myRating})` : "")
-							: `Click to rate. Right-click to remove rating.` /*+ (myRating != null ? ` (yours: ${myRating})` : "")*/}
+							? `Cannot rate this directly. Instead, rate the premises and impact-premise.`
+							: `Click to rate. Right-click to remove rating.`}
 					</Pre>
 					{/*Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>*/}
 					<Pre>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>
@@ -191,8 +191,8 @@ class CustomTooltip extends BaseComponent<{active?, payload?, external?, label?}
 
 		const style = {
 			padding: 6,
-			backgroundColor: '#fff',
-			border: '1px solid #ccc',
+			backgroundColor: "#fff",
+			border: "1px solid #ccc",
 			color: "black",
 		};
 

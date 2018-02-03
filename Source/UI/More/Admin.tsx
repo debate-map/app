@@ -124,7 +124,7 @@ The old db-root will not be modified.`,
 						}
 
 						let firebase = store.firebase.helpers;
-						await firebase.DBRef(`${newVersionPath}/`, false).set(newData);
+						await firebase.ref(DBPath(`${newVersionPath}/`, false)).set(newData);
 
 						ShowMessageBox({
 							title: `Upgraded: ${oldVersionPath}   ->   ${newVersionPath}`,

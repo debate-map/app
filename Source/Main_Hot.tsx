@@ -17,11 +17,17 @@ import {GetNewURL} from "./Frame/URL/URLManager";
 import {replace, push} from "redux-little-router";
 import {GetUserID, GetUser} from "Store/firebase/users";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
-import {GetDataAsync, GetAsync} from "Frame/Database/DatabaseHelpers";
+import {GetDataAsync, GetAsync, ApplyDBUpdates} from "Frame/Database/DatabaseHelpers";
 import {GetUserPermissionGroups} from "./Store/firebase/users";
 import VReactMarkdown_Remarkable from "./Frame/ReactComponents/VReactMarkdown_Remarkable";
 
 JSVE.logFunc = Log;
+
+// converts firestore-paths into firebase-paths
+function ToFirebasePath(path: string) {
+	if (!IsString(path)) return path;
+	return path.replace(/\./g, "");
+}
 
 //g.FirebaseConnect = Connect;
 let sharedData = {
@@ -45,13 +51,23 @@ let sharedData = {
 
 	//FirebaseConnect: Connect, // must set "window.FirebaseConnect" manually
 	State,
-	GetData: (options, ...pathSegments)=>GetData(E(options, {inVersionRoot: false}), ...pathSegments),
-	GetDataAsync: (options, ...pathSegments)=>GetDataAsync(E(options, {inVersionRoot: false}), ...pathSegments),
+	GetData: (options, ...pathSegments)=>GetData(E(options, {inVersionRoot: false}), ...pathSegments.map(ToFirebasePath)),
+	GetDataAsync: (options, ...pathSegments)=>GetDataAsync(E(options, {inVersionRoot: false}), ...pathSegments.map(ToFirebasePath)),
 	GetAsync,
 	ShowSignInPopup,
 	GetUserID,
 	GetUser,
 	GetUserPermissionGroups,
+
+	ApplyDBUpdates: (rootPath: string, dbUpdates)=> {
+		/*for (let {name: localPath, value} of dbUpdates.Props()) {
+			//dbUpdates[ToFirebasePath(rootPath + "/" + localPath)] = value;
+			dbUpdates[ToFirebasePath(localPath)] = value;
+			delete dbUpdates[localPath];
+		}
+		ApplyDBUpdates(rootPath, dbUpdates);*/
+		ApplyDBUpdates(rootPath, dbUpdates.Props().ToMap(prop=>ToFirebasePath(prop.name), prop=>prop.value));
+	},
 
 	MarkdownRenderer: VReactMarkdown_Remarkable,
 };

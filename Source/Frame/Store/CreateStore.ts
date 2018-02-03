@@ -71,7 +71,48 @@ export default function(initialState = {}, history) {
 	if (typeof devToolsExtension === "function") {
 		//enhancers.push(devToolsExtension());
 		//extraEnhancers.push(devToolsExtension({maxAge: 100}));
-		extraEnhancers.push(devToolsExtension({maxAge: 70}));
+		extraEnhancers.push(devToolsExtension({
+			maxAge: 70,
+			/*actionSanitizer: action=> {
+				function Sanitize(action) {
+					if (action.type == "@@reactReduxFirebase/SET" && action.path.startsWith(DBPath("nodes"))) {
+						return {...action, data: "<<IGNORED>>"};
+					}
+					return action;
+				}
+
+				if (action.type == "ApplyActionSet") {
+					return {...action, actions: action.actions.map(a=>Sanitize(a))};
+				}
+				return Sanitize(action);
+			},
+			stateSanitizer: action=> {
+				function Sanitize(action) {
+					if (action.type == "@@reactReduxFirebase/SET" && action.path.startsWith(DBPath("nodes"))) {
+						return {...action, data: "<<IGNORED>>"};
+					}
+					return action;
+				}
+
+				if (action.type == "ApplyActionSet") {
+					return {...action, actions: action.actions.map(a=>Sanitize(a))};
+				}
+				return Sanitize(action);
+			},*/
+			/*serialize: {
+				replacer: (key, value)=> {
+					// ignore "nodes" subtree
+					if (value && value.currentRevision) return "<<IGNORED>>";
+					//if (value && value.currentRevision) return {data: "<<IGNORED>>"};
+					return value;
+				},
+				reviver: (key, value)=> {
+					// ignore "nodes" subtree
+					if (value && value.currentRevision) return "<<IGNORED>>";
+					return value;
+				},
+			},*/
+		}));
 	}
 	//}
 

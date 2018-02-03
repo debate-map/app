@@ -1,6 +1,6 @@
 import u from "updeep";
 import {GetUserID} from "Store/firebase/users";
-import {RemoveHelpers} from "../Frame/Database/DatabaseHelpers";
+import {RemoveHelpers, ApplyDBUpdates, DBPath} from "../Frame/Database/DatabaseHelpers";
 
 export class CommandUserInfo {
 	id: string;
@@ -71,7 +71,8 @@ export abstract class Command<Payload> {
 
 			let dbUpdates = this.GetDBUpdates();
 			//FixDBUpdates(dbUpdates);
-			await store.firebase.helpers.DBRef().update(dbUpdates);
+			//await store.firebase.helpers.DBRef().update(dbUpdates);
+			await ApplyDBUpdates(DBPath(), dbUpdates);
 
 			MaybeLog(a=>a.commands, ()=>`Finishing command. @type:${this.constructor.name} @payload(${ToJSON(this.payload)})`);
 		} finally {

@@ -223,7 +223,7 @@ export async function PostDispatchAction(action: Action<any>) {
 		let joinDate = await GetDataAsync("userExtras", userID, "joinDate");
 		if (joinDate == null) {
 			let firebase = store.firebase.helpers;
-			firebase.DBRef(`userExtras/${userID}`).update({
+			firebase.ref(DBPath(`userExtras/${userID}`)).update({
 				permissionGroups: {basic: true, verified: true, mod: false, admin: false},
 				joinDate: Date.now(),
 			});

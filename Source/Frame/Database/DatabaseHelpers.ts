@@ -32,11 +32,6 @@ export function SlicePath(path: string, removeFromEndCount: number, ...itemsToAd
 	return parts.join("/");
 }
 
-Object.prototype._AddFunction_Inline = function DBRef(path = "", inVersionRoot = true) {
-	let finalPath = DBPath(path, inVersionRoot);
-	return this.ref(finalPath);
-}
-
 export type FirebaseApp = FirebaseApplication & {
 	// added by react-redux-firebase
 	_,
@@ -181,10 +176,8 @@ export function GetData(...args) {
 
 	pathSegments = DBPathSegments(pathSegments, options.inVersionRoot);
 
-	/*Assert(!path.endsWith("/"), "Path cannot end with a slash. (This may mean a path parameter is missing)");
-	Assert(!path.Contains("//"), "Path cannot contain a double-slash. (This may mean a path parameter is missing)");*/
-
 	let path = pathSegments.join("/");
+	AssertValidatePath(path);
 	/*if (options.queries && options.queries.VKeys().length) {
 		let queriesStr = "";
 		for (let {name, value, index} of options.queries.Props()) {
@@ -238,7 +231,7 @@ export async function GetDataAsync(...args) {
 	return await new Promise((resolve, reject) => {
 		//firebase.child(DBPath(path, inVersionRoot)).once("value",
 		let path = pathSegments.join("/");
-		firebase.DBRef(path, options.inVersionRoot).once("value",
+		firebase.ref(DBPath(path, options.inVersionRoot)).once("value",
 			(snapshot: DataSnapshot)=> {
 				let result = snapshot.val();
 				if (result)
@@ -303,7 +296,7 @@ export async function GetAsync<T>(dbGetterFunc: ()=>T, statsLogger?: ({requested
 
 	return result;
 }
-G({GetAsync});
+G({GetAsync_Raw});
 export async function GetAsync_Raw<T>(dbGetterFunc: ()=>T, statsLogger?: ({requestedPaths: string})=>void): Promise<T> {
 	return RemoveHelpers(Clone(await GetAsync(dbGetterFunc, statsLogger)));
 }
@@ -465,4 +458,20 @@ export function CachedTransform_WithStore<T, T2, T3>(transformType: string, stat
 	}
 
 	return result;
+}
+
+export function AssertValidatePath(path: string) {
+	Assert(!path.endsWith("/"), "Path cannot end with a slash. (This may mean a path parameter is missing)");
+	Assert(!path.Contains("//"), "Path cannot contain a double-slash. (This may mean a path parameter is missing)");
+}
+
+export async function ApplyDBUpdates(rootPath: string, dbUpdates) {
+	// already done with DBRef()
+	/*dbUpdates = Clone(dbUpdates);
+	for (let {name: path, value} of dbUpdates.Props()) {
+		dbUpdates[rootPath + path] = value;
+		delete dbUpdates[path];
+	}*/
+
+	await store.firebase.helpers.ref(rootPath).update(dbUpdates);
 }

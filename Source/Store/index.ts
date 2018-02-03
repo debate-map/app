@@ -1,4 +1,4 @@
-import {Assert, DeepGet} from "js-vextensions";
+import {Assert, DeepGet, DeepSet} from "js-vextensions";
 import {VMenuReducer, VMenuState} from "react-vmenu";
 import {combineReducers} from "redux";
 import {firebaseStateReducer, helpers} from "react-redux-firebase";
@@ -168,6 +168,18 @@ export function MakeRootReducer(extraReducers?) {
 				HandleError(ex, true, {action});
 			}
 		}
+
+		// make-so certain paths are ignored in redux-devtools-extension's Chart panel
+		let ignorePaths = [
+			`firebase/data/${DBPath("nodes")}`,
+			`firebase/data/${DBPath("nodeRevisions")}`,
+		];
+		for (let path of ignorePaths) {
+			if (DeepGet(result, path) != null && DeepGet(state, path) == null) {
+				DeepSet(result, path + "/toJSON", ()=>"[IGNORED]");
+			}
+		}
+
 		return result;
 	};
 }

@@ -172,7 +172,7 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 	return [nodeID, nodeView];
 }
 
-const pagesWithSimpleSubpages = ["database", "feedback", "home", "more", "global"].ToMap(page=>page, ()=>null);
+const pagesWithSimpleSubpages = ["database", "feedback", "more", "home", "global"].ToMap(page=>page, ()=>null);
 export function GetSyncLoadActionsForURL(url: VURL, directURLChange: boolean) {
 	let result = [];
 
