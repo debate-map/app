@@ -184,7 +184,7 @@ The details of the argument should be described within the argument's premises. 
 				store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info2.nodeID, time: Date.now()}));
 			}
 
-			let watchPath = DBPath(`nodeRevisions/${info2.revisionID || info.impactPremise_revisionID || info.revisionID}`);
+			let watchPath = DBPath(`nodeRevisions/${(info2 && info2.revisionID) || info.impactPremise_revisionID || info.revisionID}`);
 			await WaitTillPathDataIsReceiving(watchPath);
 			await WaitTillPathDataIsReceived(watchPath);
 			SetNodeUILocked(parentNode._id, false);
