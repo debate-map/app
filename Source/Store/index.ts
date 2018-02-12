@@ -64,7 +64,7 @@ function State<T>(pathOrPathSegments, state?: RootState, countAsAccess?: boolean
 // for substantially better perf, we now only accept string-or-number arrays
 declare global {
 	function State<T>(): RootState;
-	function State<T>(pathGetterFunc: (state: RootState)=>T);
+	function State<T>(pathGetterFunc: (state: RootState)=>T): T;
 	function State<T>(...pathSegments: (string | number)[]);
 	function State<T>(options: State_Options, ...pathSegments: (string | number)[]);
 }

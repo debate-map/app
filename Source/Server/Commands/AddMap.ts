@@ -39,11 +39,12 @@ export default class AddMap extends Command<{map: Map}> {
 	
 	GetDBUpdates() {
 		let {map} = this.payload;
-		let updates = {
-			"general/lastMapID": this.mapID,
-			[`maps/${this.mapID}`]: map,
-		} as any;
+		
+		let updates = {};
+		updates["general/lastMapID"] = this.mapID;
+		updates[`maps/${this.mapID}`] = map;
 		updates = MergeDBUpdates(updates, this.sub_addNode.GetDBUpdates());
+
 		return updates;
 	}
 }
