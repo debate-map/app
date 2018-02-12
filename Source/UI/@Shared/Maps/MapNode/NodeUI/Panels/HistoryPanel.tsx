@@ -8,7 +8,7 @@ import {User} from "Store/firebase/users/@User";
 import {Button} from "react-vcomponents";
 import jquery from "jquery";
 import {Log} from "../../../../../../Frame/General/Logging";
-import {BaseComponent, FindDOM, RenderSource, SimpleShouldUpdate, GetInnerComp, BaseComponentWithConnect} from "react-vextensions";
+import {BaseComponent, FindDOM, RenderSource, SimpleShouldUpdate, GetInnerComp, BaseComponentWithConnector} from "react-vextensions";
 import {Pre} from "react-vcomponents";
 import {Vector2i} from "js-vextensions";
 import {Range, DN} from "js-vextensions";
@@ -45,13 +45,13 @@ import { GetNodeRevisions } from "Store/firebase/nodeRevisions";
 
 export const columnWidths = [.15, .3, .35, .2];
 
-let ConnectFunc = (state, {node, path}: {map?: Map, node: MapNodeL3, path: string})=> ({
+let connector = (state, {node, path}: {map?: Map, node: MapNodeL3, path: string})=> ({
 	//_link: GetLinkUnderParent(node._id, GetParentNode(path)),
 	creator: GetUser(node.creator),
 	revisions: GetNodeRevisions(node._id),
 });
-@Connect(ConnectFunc)
-export class HistoryPanel extends BaseComponentWithConnect(ConnectFunc, {}) {
+@Connect(connector)
+export class HistoryPanel extends BaseComponentWithConnector(connector, {}) {
 	detailsUI: NodeDetailsUI;
 	render() {
 		let {map, node, path, creator, revisions} = this.props;
