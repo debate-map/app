@@ -34,6 +34,7 @@ export default class DeleteMap extends Command<{mapID: number}> {
 	GetDBUpdates() {
 		let {mapID} = this.payload;
 		let updates = this.sub_deleteNode.GetDBUpdates();
+
 		let newUpdates = {};
 		newUpdates[`maps/${mapID}`] = null;
 		for (let {name: userID, value: userMapInfoSet} of this.userMapInfoSets.Props(true)) {
@@ -43,10 +44,10 @@ export default class DeleteMap extends Command<{mapID: number}> {
 				}
 			}
 		}
-		
 		// delete mapNodeEditTimes
-		updates[`mapNodeEditTimes/${mapID}`] = null;
+		newUpdates[`mapNodeEditTimes/${mapID}`] = null;
+		updates = MergeDBUpdates(updates, newUpdates);
 
-		return MergeDBUpdates(updates, newUpdates);
+		return updates;
 	}
 }

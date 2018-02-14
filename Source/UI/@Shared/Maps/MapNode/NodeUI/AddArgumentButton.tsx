@@ -13,17 +13,17 @@ export class AddArgumentButton extends BaseComponent<{map: Map, node: MapNodeL3,
 		let backgroundColor = GetNodeColor({type: MapNodeType.Argument, finalPolarity: polarity} as MapNodeL3);
 		
 		return (
-			<Button text="+" title={`Add ${Polarity[polarity].toLowerCase()} argument`}
+			<Button text="Add" title={`Add ${Polarity[polarity].toLowerCase()} argument`}
 				style={E(
 					{
 						alignSelf: "flex-end", backgroundColor: backgroundColor.css(),
 						border: "none", boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-						padding: "2px 12px", fontSize: 18,
+						padding: "2px 12px",
 						":hover": {backgroundColor: backgroundColor.Mix("white", .05).alpha(.9).css()},
 					},
 					/*polarity == Polarity.Supporting && {marginBottom: 5},
 					polarity == Polarity.Opposing && {marginTop: 5},*/
-					{height: 15, fontSize: 15, padding: "0 12px"}, // vertical
+					{height: 15, fontSize: 11, padding: "0 12px"}, // vertical
 					//{fontSize: 18, padding: "0 12px"}, // horizontal
 					style,
 				)}
