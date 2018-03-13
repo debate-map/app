@@ -13,7 +13,7 @@ import {ShowSignInPopup} from "./@Shared/NavBar/UserPanel";
 import {ShowAddMapDialog} from "./@Shared/Maps/AddMapDialog";
 import {ScrollView} from "react-vscrollview";
 import {GetSelectedDebateMapID, GetSelectedDebateMap} from "../Store/main/debates";
-import MapUI from "./@Shared/Maps/MapUI";
+import {MapUI} from "./@Shared/Maps/MapUI";
 import { GetSelectedPersonalMap } from "Store/main/personal";
 import {columnWidths} from "UI/Debates";
 import {Div} from "react-vcomponents";

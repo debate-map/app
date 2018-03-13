@@ -1,5 +1,5 @@
 import {DBPath, FirebaseApp, GetDataAsync, RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
-import ResetCurrentDBRoot from "./Admin/ResetCurrentDBRoot";
+import {ResetCurrentDBRoot} from "./Admin/ResetCurrentDBRoot";
 import {styles} from "../../Frame/UI/GlobalStyles";
 import {BaseComponent, BaseProps} from "react-vextensions";
 import {firebaseConnect} from "react-redux-firebase";

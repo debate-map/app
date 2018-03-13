@@ -4,7 +4,7 @@ import {Component, PropTypes} from "react";
 import GoogleButton from "react-google-button";
 import {connect} from "react-redux";
 import {firebaseConnect, helpers} from "react-redux-firebase";
-import {BaseComponent, BaseProps} from "react-vextensions";
+import {BaseComponent, BaseProps, BaseComponentWithConnector} from "react-vextensions";
 import {Debugger, E} from "../../Frame/General/Globals_Free";
 import {Button} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";
@@ -26,6 +26,9 @@ import ReputationPanel from "./NavBar/ReputationPanel";
 import GuidePanel from "./NavBar/GuidePanel";
 import {VURL, DeepGet} from "js-vextensions";
 import {Div} from "react-vcomponents";
+import { GetData } from "Frame/Database/DatabaseHelpers";
+import {ShowMessageBox} from "react-vmessagebox";
+import {ResetCurrentDBRoot} from "UI/More/Admin/ResetCurrentDBRoot";
 
 // main
 // ==========
@@ -40,15 +43,18 @@ const avatarStyles = {
 	wrapper: {marginTop: 45 - avatarSize}
 };
 
-@Connect(_=>({
+let connector = (state, {}: {})=> ({
 	topLeftOpenPanel: State(a=>a.main.topLeftOpenPanel),
 	topRightOpenPanel: State(a=>a.main.topRightOpenPanel),
 	auth: State(a=>a.firebase.auth),
-}))
-export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpenPanel?, topRightOpenPanel?, auth?: firebase.User}, {}> {
+	_: GetData({useUndefinedForInProgress: true}, "maps"),
+	dbNeedsInit: GetData({useUndefinedForInProgress: true}, "maps") === null,
+});
+@Connect(connector)
+export class NavBar extends BaseComponentWithConnector(connector, {}) {
 	static contextTypes = {store: PropTypes.object.isRequired};
 	render() {
-		let {topLeftOpenPanel, topRightOpenPanel, auth} = this.props;
+		let {topLeftOpenPanel, topRightOpenPanel, auth, dbNeedsInit} = this.props;
 		let {dispatch} = this.context.store;
 		return (
 			<nav style={{
@@ -76,6 +82,18 @@ export default class NavBar extends BaseComponent<{dispatch?, page?, topLeftOpen
 						{topLeftOpenPanel == "reputation" && <ReputationPanel/>}
 					</div>
 					<Div ct style={{position: "fixed", left: 0, width: "30%", top: 45, bottom: 0}}>
+						{dbNeedsInit &&
+							<Row>
+								<Button text="Initialize database" onClick={()=> {
+									let boxController = ShowMessageBox({
+										title: `Initialize database?`, cancelButton: true,
+										message: `Initialize database content under db-root ${dbVersion}?`,
+										onOK: ()=> {
+											ResetCurrentDBRoot();
+										}
+									});
+								}}/>
+							</Row>}
 						<NotificationsUI/>
 					</Div>
 					

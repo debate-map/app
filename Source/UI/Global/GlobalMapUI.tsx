@@ -2,7 +2,7 @@ import {firebaseConnect, helpers} from "react-redux-firebase";
 import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
 import {DBPath, GetData} from "../../Frame/Database/DatabaseHelpers";
 import {connect} from "react-redux";
-import MapUI from "../@Shared/Maps/MapUI";
+import {MapUI} from "../@Shared/Maps/MapUI";
 import {Debugger, Debugger_Wrap} from "../../Frame/General/Globals_Free";
 import {ScrollView} from "react-vscrollview";
 import {RootState} from "../../Store/index";

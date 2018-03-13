@@ -1,5 +1,5 @@
 import {GetViewOffset, GetSelectedNodePath, GetNodeView, GetMapView, GetFocusedNodePathNodes, GetFocusedNodePath} from "../../../Store/main/mapViews";
-import {BaseComponent, FindDOM, FindReact, GetInnerComp} from "react-vextensions";
+import {BaseComponent, FindDOM, FindReact, GetInnerComp, BaseComponentWithConnector} from "react-vextensions";
 import {Pre} from "react-vcomponents";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
@@ -83,9 +83,8 @@ type Props = {
 	map: Map, rootNode?: MapNodeL3, withinPage?: boolean,
 	padding?: {left: number, right: number, top: number, bottom: number},
 	subNavBarWidth?: number,
-} & React.HTMLProps<HTMLDivElement>
-	& Partial<{rootNode: MapNodeL3, focusNode: string, viewOffset: {x: number, y: number}}>;
-@Connect((state: RootState, {map, rootNode}: Props)=> {
+} & React.HTMLProps<HTMLDivElement>;
+let connector = (state: RootState, {map, rootNode}: Props)=> {
 	if (rootNode == null && map && map.rootNode) {
 		rootNode = GetNodeL3(map.rootNode+"");
 	}
@@ -104,8 +103,9 @@ type Props = {
 		/*focusNode_available: (GetMapView(state, {map}) && GetMapView(state, {map}).focusNode) != null,
 		viewOffset_available: (GetMapView(state, {map}) && GetMapView(state, {map}).viewOffset) != null,*/
 	};
-})
-export default class MapUI extends BaseComponent<Props, {}> {
+};
+@Connect(connector)
+export class MapUI extends BaseComponentWithConnector(connector, {}) {
 	//static defaultProps = {padding: {left: 2000, right: 2000, top: 1000, bottom: 1000}};
 	static defaultProps = {
 		padding: {left: screen.availWidth, right: screen.availWidth, top: screen.availHeight, bottom: screen.availHeight},
@@ -124,11 +124,13 @@ export default class MapUI extends BaseComponent<Props, {}> {
 	downPos: Vector2i;
 	render() {
 		let {map, rootNode, withinPage, padding, subNavBarWidth, ...rest} = this.props;
-		if (map == null)
+		if (map == null) {
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25}}>Loading map...</div>;
+		}
 		Assert(map._id, "map._id is null!");
-		if (rootNode == null)
+		if (rootNode == null) {
 			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25}}>Loading root node...</div>;
+		}
 
 		if (isBot) {
 			return <NodeUI_ForBots map={map} node={rootNode}/>;

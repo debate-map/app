@@ -1,7 +1,7 @@
 import {VMenuLayer} from "react-vmenu";
 // We only need to import the modules necessary for initial render
 import {PropTypes, Component} from "react";
-import {BaseComponent, AddGlobalStyle, ShallowChanged} from "react-vextensions";
+import {BaseComponent, AddGlobalStyle, ShallowChanged, BaseComponentWithConnector} from "react-vextensions";
 import "../Frame/UI/JQueryExtensions";
 //import {Component as BaseComponent} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
@@ -15,7 +15,7 @@ import AdminUI from "../UI/More/Admin";
 import HomeUI from "../UI/Home";
 import {MessageBoxOptions, ACTMessageBoxShow, MessageBoxUI} from "react-vmessagebox";
 import {Button} from "react-vcomponents";
-import NavBar from "../UI/@Shared/NavBar";
+import {NavBar} from "../UI/@Shared/NavBar";
 import StreamUI from "./Stream";
 import ChatUI from "./Chat";
 import UsersUI from "./Users";
@@ -42,6 +42,8 @@ import {FeedbackUI} from "./Feedback";
 import {NormalizeURL} from "../Frame/General/URLs";
 import {GetUserBackground} from "../Store/firebase/users";
 import {GetUserID} from "Store/firebase/users";
+import { GetMaps } from "Store/firebase/maps";
+import { GetData } from "Frame/Database/DatabaseHelpers";
 
 export class RootUIWrapper extends BaseComponent<{store}, {}> {
 	ComponentWillMount() {
@@ -88,11 +90,11 @@ export class RootUIWrapper extends BaseComponent<{store}, {}> {
 	}
 }
 
-type Props = {} & Partial<{currentPage: string}>;
-@Connect((state, props)=> ({
+let connector = (state, {}: {})=> ({
 	currentPage: State(a=>a.main.page),
-}))
-class RootUI extends BaseComponent<Props, {}> {
+});
+@Connect(connector)
+class RootUI extends BaseComponentWithConnector(connector, {}) {
 	shouldComponentUpdate(newProps, newState) {
 		// ignore change of "router" prop -- we don't use it
 		return ShallowChanged(newProps.Excluding("router"), this.props.Excluding("router")) || ShallowChanged(newState, this.state);

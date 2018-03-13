@@ -31,8 +31,8 @@ for (let offset = 1; offset <= 5; offset++) {
 changesSince_options.push({name: "All unclicked changes", value: ShowChangesSinceType.AllUnseenChanges + "_null"});
 
 let connector = (state, {map}: {map: Map, subNavBarWidth: number})=> ({
-	showChangesSince_type: State(`main/maps/${map._id}/showChangesSince_type`),
-	showChangesSince_visitOffset: State(`main/maps/${map._id}/showChangesSince_visitOffset`),
+	showChangesSince_type: State(`main/maps/${map._id}/showChangesSince_type`) as ShowChangesSinceType,
+	showChangesSince_visitOffset: State(`main/maps/${map._id}/showChangesSince_visitOffset`) as number,
 	weighting: State(a=>a.main.weighting),
 })
 @Connect(connector)

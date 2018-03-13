@@ -13,7 +13,7 @@ import {ShowSignInPopup} from "./@Shared/NavBar/UserPanel";
 import {ShowAddMapDialog} from "./@Shared/Maps/AddMapDialog";
 import {ScrollView} from "react-vscrollview";
 import {GetSelectedDebateMapID, GetSelectedDebateMap} from "../Store/main/debates";
-import MapUI from "./@Shared/Maps/MapUI";
+import {MapUI} from "./@Shared/Maps/MapUI";
 
 export const columnWidths = [.64, .06, .12, .18];
 

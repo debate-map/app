@@ -24,7 +24,7 @@ import {ACTMap_PlayingTimelineStepSet, ACTMap_PlayingTimelineAppliedStepSet, Get
 import {GetAsync} from "Frame/Database/DatabaseHelpers";
 import {UpdateFocusNodeAndViewOffset} from "../../UI/@Shared/Maps/MapUI";
 import {FindReact, FindDOM} from "react-vextensions";
-import MapUI from "../../UI/@Shared/Maps/MapUI";
+import {MapUI} from "../../UI/@Shared/Maps/MapUI";
 import {SleepAsync} from "js-vextensions";
 import {GetNodeL2} from "Store/firebase/nodes/$node";
 

@@ -17,7 +17,7 @@ import {CreateMapViewForPath} from "../Store/PathFinder";
 import NotificationMessage from "../../Store/main/@NotificationMessage";
 import { ACTDebateMapSelect } from "../../Store/main/debates";
 import { ACTSet } from "Store";
-import MapUI from "../../UI/@Shared/Maps/MapUI";
+import {MapUI} from "../../UI/@Shared/Maps/MapUI";
 import {MapNode, globalMapID, MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../Store/firebase/maps/@Map";
 import {ACTPersonalMapSelect} from "../../Store/main/personal";

@@ -7,7 +7,7 @@ import {styles} from "../../Frame/UI/GlobalStyles";
 import {ScrollView} from "react-vscrollview";
 import {E} from "../../Frame/General/Globals_Free";
 import GlobalMapUI from "../Global/GlobalMapUI";
-import MapUI from "../@Shared/Maps/MapUI";
+import {MapUI} from "../@Shared/Maps/MapUI";
 import {MapType, Map} from "../../Store/firebase/maps/@Map";
 import {MapNode, MapNodeL2, MapNodeL3} from "../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";

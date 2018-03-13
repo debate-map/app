@@ -33,18 +33,8 @@ For recommended setup of your code editor and other tools, see: [Editor setup](#
 2) Edit the `.firebaserc` and `Scripts/Build/CreateConfig.js` files, replacing their paths and data with your own.
 3) Add at least one form of authentication to your Firebase projects. (Google sign-in is easiest)
 4) Run the project locally. (see "Running locally" section below)
-5) Sign in once (using the panel at the top-right), then check the database and copy your user ID.
-6) Go to the "More>Admin" page, and press "Reset database".
-7) Add the following data to the database using Firebase management:
-```
-{
-	userExtras: {
-		[your user id]: {
-			permissionGroups: {basic: true, verified: true, mod: true, admin: true}
-		}
-	}
-}
-```
+5) Sign in, using the panel at the top-right.
+6) Press the "Initialize database" button which will appear at the top-left.
 
 ### Running locally
 
