@@ -78,7 +78,8 @@ export class RootUIWrapper extends BaseComponent<{store}, {}> {
 			});
 		}
 
-		$(document).on("mousemove", "*", function(event, ui) {
+		//$(document).on("mousemove", "*", function(event, ui) {
+		document.addEventListener("mousemove", event=> {
 			if (event["handledGlobally"]) return;
 			event["handledGlobally"] = true;
 

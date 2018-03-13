@@ -2,7 +2,7 @@ import {Map, MapType} from "../../../../Store/firebase/maps/@Map";
 import {Connect} from "Frame/Database/FirebaseConnect";
 import {IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
 import {GetUserID} from "Store/firebase/users";
-import {BaseComponent, GetInnerComp} from "react-vextensions";
+import {BaseComponent, GetInnerComp, BaseComponentWithConnector} from "react-vextensions";
 import {Row, Pre, Select} from "react-vcomponents";
 import {Button} from "react-vcomponents";
 import {ACTDebateMapSelect} from "../../../../Store/main/debates";
@@ -14,7 +14,7 @@ import {ShowMessageBox} from "react-vmessagebox";
 import DeleteMap from "../../../../Server/Commands/DeleteMap";
 import {colors} from "../../../../Frame/UI/GlobalStyles";
 import {Spinner} from "react-vcomponents";
-import {ACTSetInitialChildLimit} from "../../../../Store/main";
+import {ACTSetInitialChildLimit, WeightingType} from "../../../../Store/main";
 import {TextInput} from "react-vcomponents";
 import { ShareDropDown } from "UI/@Shared/Maps/MapUI/ActionBar_Right/ShareDropDown";
 import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown";
@@ -30,14 +30,15 @@ for (let offset = 1; offset <= 5; offset++) {
 }
 changesSince_options.push({name: "All unclicked changes", value: ShowChangesSinceType.AllUnseenChanges + "_null"});
 
-type Props = {map: Map, subNavBarWidth: number} & Partial<{showChangesSince_type: ShowChangesSinceType, showChangesSince_visitOffset: number}>;
-@Connect((state, {map}: Props)=> ({
+let connector = (state, {map}: {map: Map, subNavBarWidth: number})=> ({
 	showChangesSince_type: State(`main/maps/${map._id}/showChangesSince_type`),
 	showChangesSince_visitOffset: State(`main/maps/${map._id}/showChangesSince_visitOffset`),
-}))
-export class ActionBar_Right extends BaseComponent<Props, {}> {
+	weighting: State(a=>a.main.weighting),
+})
+@Connect(connector)
+export class ActionBar_Right extends BaseComponentWithConnector(connector, {}) {
 	render() {
-		let {map, subNavBarWidth, showChangesSince_type, showChangesSince_visitOffset} = this.props;
+		let {map, subNavBarWidth, showChangesSince_type, showChangesSince_visitOffset, weighting} = this.props;
 		let tabBarWidth = 104;
 		return (
 			<nav style={{
@@ -54,6 +55,10 @@ export class ActionBar_Right extends BaseComponent<Props, {}> {
 							let parts = val.split("_");
 							store.dispatch(new ACTSet(`main/maps/${map._id}/showChangesSince_type`, parseInt(parts[0])));
 							store.dispatch(new ACTSet(`main/maps/${map._id}/showChangesSince_visitOffset`, FromJSON(parts[1])));
+						}}/>
+						<Pre ml={5}>Weighting: </Pre>
+						<Select options={GetEntries(WeightingType, name=>({ReasonScore: "Reason score"})[name] || name)} value={weighting} onChange={val=> {
+							store.dispatch(new ACTSet(a=>a.main.weighting, val));
 						}}/>
 					</Row>
 					<ShareDropDown map={map}/>

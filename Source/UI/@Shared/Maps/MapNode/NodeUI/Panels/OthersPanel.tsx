@@ -103,13 +103,13 @@ class InfoTable extends BaseComponent<{node: MapNodeL3, creator: User}, {}> {
 class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> {
 	render() {
 		let {node, path} = this.props;
-		if (node.type != MapNodeType.Claim) return <div/>;
 		if (path.split("/").length == 0) return <div/>; // if the root of a map, or subnode
 
-		let claimType = GetClaimType(node);
-		let canSetAsNegation = claimType == ClaimType.Normal && !node.current.impactPremise && node.link.form != ClaimForm.YesNoQuestion;
-		let canSetAsSeriesAnchor = claimType == ClaimType.Equation && !node.current.equation.isStep; //&& !creating;
-		if (!canSetAsNegation && !canSetAsSeriesAnchor) return <div/>;
+		if (node.type == MapNodeType.Claim) {
+			var claimType = GetClaimType(node);
+			var canSetAsNegation = claimType == ClaimType.Normal && !node.current.impactPremise && node.link.form != ClaimForm.YesNoQuestion;
+			var canSetAsSeriesAnchor = claimType == ClaimType.Equation && !node.current.equation.isStep; //&& !creating;
+		}
 		
 		return (
 			<Column mt={10}>

@@ -178,7 +178,7 @@ export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean
 						}}/>
 						<div style={{
 							position: "absolute", right: 0, top: 0, bottom: 0,
-							width: (100 - mainRating_fillPercent) + "%", background: `rgba(0,0,0,.7)`, borderRadius: "5px 0 0 5px",
+							width: (100 - mainRating_fillPercent) + "%", background: `rgba(0,0,0,.7)`,
 						}}/>
 						{mainRating_mine != null &&
 							<div style={{

@@ -19,7 +19,6 @@ export const rootPageDefaultChilds = {
 export function GetCurrentURL(fromAddressBar = false) {
 	return fromAddressBar ? VURL.Parse(GetCurrentURLString()) : VURL.FromState(State("router"));
 }
-
 export function NormalizeURL(url: VURL) {
 	let result = url.Clone();
 	if (!rootPages.Contains(result.pathNodes[0])) {

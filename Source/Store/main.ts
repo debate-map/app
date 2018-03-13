@@ -20,6 +20,12 @@ import { Personal } from "Store/main/personal";
 import {PersonalReducer, ACTPersonalMapSelect} from "./main/personal";
 import {Database, DatabaseReducer} from "./main/database";
 import {GetNodeL3} from "./firebase/nodes/$node";
+import {SimpleReducer} from "./index";
+
+export enum WeightingType {
+	Votes = 10,
+	ReasonScore = 20,
+}
 
 // class is used only for initialization
 export class MainState {
@@ -67,6 +73,7 @@ export class MainState {
 	copiedNodePath_asCut: boolean;
 
 	initialChildLimit: number;
+	weighting: WeightingType;
 }
 export class ACTSetPage extends Action<string> {}
 export class ACTSetSubpage extends Action<{page: string, subpage: string}> {}
@@ -213,6 +220,7 @@ export function MainReducer(state, action) {
 			if (action.Is(ACTSetInitialChildLimit)) return action.payload.value;
 			return state;
 		},
+		weighting: SimpleReducer(a=>a.main.weighting, WeightingType.Votes),
 	});
 	return MainReducer_Real(state, action);
 }

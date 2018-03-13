@@ -9,5 +9,5 @@ export function Debugger_True() { debugger; return true; }
 G({Debugger_If}); declare global { function Debugger_If(condition); }
 export function Debugger_If(condition) {
     if (condition)
-        debugger;
+		  debugger;
 }
