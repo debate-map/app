@@ -50,7 +50,6 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 		let {size} = this.state;
 
 		let parentNode = GetNodeL3(SlicePath(path, 1));
-		if (node.current.impactPremise && parentNode == null) return <div/>; // if impact-premise, but no parent-node connected, must still be loading
 		
 		let reverseRatings = ShouldRatingTypeBeReversed(node);
 		let nodeTypeDisplayName = GetMapNodeTypeDisplayName(node.type, node, form, node.finalPolarity);

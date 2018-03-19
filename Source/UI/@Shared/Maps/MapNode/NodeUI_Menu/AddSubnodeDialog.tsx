@@ -11,7 +11,6 @@ import {Column} from "react-vcomponents";
 import keycode from "keycode";
 import {Button} from "react-vcomponents";
 import {E} from "../../../../../Frame/General/Globals_Free";
-import {ImpactPremise_ThenType, ImpactPremise_IfType, GetImpactPremiseIfTypeDisplayText} from "./../../../../../Store/firebase/nodes/@ImpactPremiseInfo";
 import AddNode from "../../../../../Server/Commands/AddNode";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
@@ -50,11 +49,7 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 		let newNode = new MapNode({
 			type: MapNodeType.Claim,
 		});
-		let newRevision = new MapNodeRevision({
-			titles: {},
-			relative: false,
-			approved: true,
-		});
+		let newRevision = new MapNodeRevision({titles: {}});
 		let newLink = E({_: true}, newNode.type == MapNodeType.Claim && {form: ClaimForm.Base}) as ChildEntry; // not actually used
 		this.state = {newNode, newRevision, newLink} as any;
 	}
@@ -75,7 +70,6 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 		let {layer, newNode, newRevision, newLink, validationError} = this.state;
 		
 		let claimTypes = GetEntries(ClaimType);
-		claimTypes.Remove(claimTypes.find(a=>a.value == ClaimType.ImpactPremise));
 		if (!IsUserMod(GetUserID())) {
 			claimTypes.Remove(claimTypes.find(a=>a.value == ClaimType.Image));
 		}

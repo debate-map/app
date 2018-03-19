@@ -16,8 +16,7 @@ import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import {MapNode, ClaimForm, ChildEntry, MapNodeL2, MapNode_id, ClaimType, AccessLevel, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
-import {ImpactPremise_IfType, GetImpactPremiseIfTypeDisplayText, ImpactPremise_ThenType, GetImpactPremiseThenTypeDisplayText} from "./../../../../Store/firebase/nodes/@ImpactPremiseInfo";
-import {GetParentNode, GetNodeChildren, GetNode, GetImpactPremiseChildNode} from "../../../../Store/firebase/nodes";
+import {GetParentNode, GetNodeChildren, GetNode} from "../../../../Store/firebase/nodes";
 import {GetNodeForm, GetNodeDisplayText, GetClaimType, AsNodeL2, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
 import Icon from "../../../../Frame/ReactComponents/Icon";
 import {Spinner} from "react-vcomponents";
@@ -26,7 +25,7 @@ import {IsUserAdmin} from "../../../../Store/firebase/userExtras";
 import {GetUserID, GetUserAccessLevel} from "Store/firebase/users";
 import ImageAttachmentEditorUI from "./ImageAttachmentEditorUI";
 import {GetErrorMessagesUnderElement} from "js-vextensions";
-import {MapNodeRevision, MapNodeRevision_titlePattern} from "../../../../Store/firebase/nodes/@MapNodeRevision";
+import {MapNodeRevision, MapNodeRevision_titlePattern, GetArgumentTypeDisplayText, ArgumentType} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 import {GetNodeL2, GetFinalPolarity, AsNodeL1} from "Store/firebase/nodes/$node";
 
 type Props = {
@@ -76,8 +75,6 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 				{/*<Div style={{fontSize: 12}}>ID: {node._id}</Div>
 				<Div mt={3} style={{fontSize: 12}}>Created at: {Moment(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)
 					} (by: {creator ? creator.displayName : `n/a`})</Div>*/}
-				{newData.type == MapNodeType.Claim && (claimType == ClaimType.Normal || claimType == ClaimType.Equation) && !newRevisionData.impactPremise &&
-					<RelativeToggle {...propsEnhanced}/>}
 				{(newData.type != MapNodeType.Claim || claimType == ClaimType.Normal) &&
 					<Title_Base {...propsEnhanced}/>}
 				{newData.type == MapNodeType.Claim && claimType == ClaimType.Normal &&
@@ -92,8 +89,8 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 				{newData.type == MapNodeType.Claim && claimType == ClaimType.Image &&
 					<ImageAttachmentEditorUI key={1} creating={forNew} editing={enabled}
 						baseData={newRevisionData.image} onChange={val=>Change(newRevisionData.image = val)}/>}
-				{newRevisionData.impactPremise &&
-					<ImpactPremiseInfo {...propsEnhanced}/>}
+				{newData.type == MapNodeType.Argument &&
+					<ArgumentInfo {...propsEnhanced}/>}
 				<Row mt={5}>
 					<Pre>Note: </Pre>
 					<TextInput enabled={enabled} style={{width: "100%"}}
@@ -134,20 +131,6 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 
 type Props_Enhanced = Props & State & {newDataAsL2, Change};
 
-class RelativeToggle extends BaseComponent<Props_Enhanced, {}> {
-	render() {
-		let {enabled, newRevisionData, Change} = this.props;
-		return (
-			<Row style={{display: "flex", alignItems: "center"}}>
-				<Pre>Relative: </Pre>
-				<CheckBox enabled={enabled} checked={newRevisionData.relative} onChange={val=>Change(newRevisionData.relative = val)}/>
-				<InfoButton text={`"Relative" means the statement/question is too loosely worded to give a simple yes/no answer,${""
-						} and should instead be evaluated in terms of the degree/intensity to which it is true. Eg. "How dangerous is sky-diving?"`}/>
-			</Row>
-		);
-	}
-}
-
 class Title_Base extends BaseComponent<Props_Enhanced, {}> {
 	render() {
 		let {forNew, enabled, newData, newDataAsL2, newRevisionData, newLinkData, Change} = this.props;
@@ -187,7 +170,7 @@ The detailed version of the argument will be embodied in its premises/child-clai
 }
 
 function WillNodeUseQuestionTitleHere(node: MapNodeL2, linkData: ChildEntry) {
-	return node.type == MapNodeType.Claim && !node.current.contentNode && !node.current.impactPremise && linkData && linkData.form == ClaimForm.YesNoQuestion;
+	return node.type == MapNodeType.Claim && !node.current.contentNode && linkData && linkData.form == ClaimForm.YesNoQuestion;
 }
 
 class OtherTitles extends BaseComponent<Props_Enhanced, {}> {
@@ -218,39 +201,20 @@ class OtherTitles extends BaseComponent<Props_Enhanced, {}> {
 	}
 }
 
-class ImpactPremiseInfo extends BaseComponent<Props_Enhanced, {}> {
+class ArgumentInfo extends BaseComponent<Props_Enhanced, {}> {
 	render() {
 		let {enabled, baseRevisionData, parent, newData, newDataAsL2, newRevisionData, newLinkData, Change} = this.props;
 
-		let polarity = GetFinalPolarity(newLinkData.polarity, parent.link.form);
-		let thenTypes_forRender = [
-			{name: GetImpactPremiseThenTypeDisplayText(ImpactPremise_ThenType.Impact, parent.finalPolarity), value: ImpactPremise_ThenType.Impact},
-			{name: GetImpactPremiseThenTypeDisplayText(ImpactPremise_ThenType.Guarantee, parent.finalPolarity), value: ImpactPremise_ThenType.Guarantee},
-		];
-		let GetThenType_ForRender = thenType=>thenTypes_forRender.find(a=>a.value == thenType);
+		let polarity = GetFinalPolarity(newLinkData.polarity, newLinkData.form);
 
 		return (
 			<Row mt={5}>
 				<Pre>Type: If </Pre>
-				<Select options={GetEntries(ImpactPremise_IfType, name=>GetImpactPremiseIfTypeDisplayText(ImpactPremise_IfType[name]))}
-					enabled={enabled} value={newRevisionData.impactPremise.ifType} onChange={val=> {
-						//firebase.DBRef(`nodes/${newData._id}/impactPremise`).update({ifType: val});
-						Change(newRevisionData.impactPremise.ifType = val);
+				<Select options={GetEntries(ArgumentType, name=>GetArgumentTypeDisplayText(ArgumentType[name]))}
+					enabled={enabled} value={newRevisionData.argumentType} onChange={val=> {
+						Change(newRevisionData.argumentType = val);
 					}}/>
-				<Pre> premises below are true, they </Pre>
-				<Select options={thenTypes_forRender} enabled={enabled} value={newRevisionData.impactPremise.thenType} onChange={val=> {
-					//firebase.DBRef(`nodes/${newData._id}/impactPremise`).update({thenType: val});
-					Change(newRevisionData.impactPremise.thenType = val);
-				}}/>
-				<Pre>.</Pre>
-				{/*newData.impactPremise && creating &&
-					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
-						<Pre allowWrap={true}>{`
-The "type" option above describes the way in which this argument's premises will affect the conclusion (the parent thesis).${""
-} The premises can be added to the map right after adding this argument node.
-						`.trim()}
-						</Pre>
-					</Row>*/}
+				<Pre> premises below are true, they impact the parent.</Pre>
 			</Row>
 		);
 	}

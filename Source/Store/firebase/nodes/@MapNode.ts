@@ -4,7 +4,6 @@ import {MapNodeType} from './@MapNodeType';
 import {RatingType} from "../nodeRatings/@RatingType";
 import {GetParentNode, IsLinkValid, IsNewLinkValid} from "../nodes";
 import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
-import {ImpactPremiseInfo} from './@ImpactPremiseInfo';
 import {ContentNode} from '../contentNodes/@ContentNode';
 import {Equation} from './@Equation';
 import {Image} from '../images/@Image';
@@ -22,7 +21,7 @@ export enum AccessLevel {
 
 export enum ClaimType {
 	Normal = 10,
-	ImpactPremise = 20,
+	//ImpactPremise = 20,
 	Equation = 30,
 	Quote = 40,
 	Image = 50,

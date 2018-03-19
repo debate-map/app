@@ -41,7 +41,7 @@ export async function ResetCurrentDBRoot() {
 	AddMap(data, {name: "Global", type: MapType.Global, rootNode: 1} as Map, 1);
 	AddNode(data,
 		new MapNode({type: MapNodeType.Category}),
-		new MapNodeRevision({titles: {base: "Root"}, creator: userKey, approved: true}),
+		new MapNodeRevision({titles: {base: "Root"}, creator: userKey}),
 		1,
 	);
 

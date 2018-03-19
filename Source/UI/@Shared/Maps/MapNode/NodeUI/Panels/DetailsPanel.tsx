@@ -23,7 +23,6 @@ import {GetParentNode, GetParentNodeID, IsNodeSubnode, GetParentNodeL3} from "..
 import {Connect} from "../../../../../../Frame/Database/FirebaseConnect";
 import {IsUserCreatorOrMod} from "../../../../../../Store/firebase/userExtras";
 import {Row} from "react-vcomponents";
-import {ImpactPremise_ThenType, ImpactPremise_IfType, GetImpactPremiseIfTypeDisplayText} from "../../../../../../Store/firebase/nodes/@ImpactPremiseInfo";
 import QuoteInfoEditorUI from "../../QuoteInfoEditorUI";
 import UpdateNodeDetails from "../../../../../../Server/Commands/UpdateNodeDetails";
 import {RemoveHelpers, SlicePath, GetUpdates, WaitTillPathDataIsReceived, DBPath, WaitTillPathDataIsReceiving} from "../../../../../../Frame/Database/DatabaseHelpers";

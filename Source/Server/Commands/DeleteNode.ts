@@ -21,10 +21,7 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 	oldData: MapNodeL2;
 	oldRevisions: MapNodeRevision[];
 	oldParentChildrenOrders: number[][];
-	impactPremiseID: number;
-	sub_deleteImpactPremise: DeleteNode;
 	viewerIDs_main: number[];
-	viewerIDs_impactPremise: number[];
 	mapIDs: number[];
 	async Prepare() {
 		let {mapID, nodeID, asPartOfMapDelete} = this.payload;
@@ -35,32 +32,17 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 			return GetDataAsync("nodes", parentID, "childrenOrder") as Promise<number[]>;
 		}));
 
-		// this works, because we only let you delete a node when it has no non-impact-premise children
-		this.impactPremiseID = this.oldData.type == MapNodeType.Argument ? this.oldData.children.VKeys()[0].ToInt() : null;
-		if (this.impactPremiseID) {
-			this.sub_deleteImpactPremise = new DeleteNode({mapID, nodeID: this.impactPremiseID, asPartOfMapDelete}).MarkAsSubcommand();
-			await this.sub_deleteImpactPremise.Prepare();
-		}
-
 		this.viewerIDs_main = GetDataAsync("nodeViewers", nodeID).VKeys(true).map(ToInt);
-		if (this.impactPremiseID) {
-			this.viewerIDs_impactPremise = GetDataAsync("nodeViewers", this.impactPremiseID).VKeys(true).map(ToInt);
-		}
 
 		this.mapIDs = await GetAsync(()=>GetMaps().map(a=>a._id));
 	}
 	async Validate() {
 		/*Assert((this.oldData.parents || {}).VKeys(true).length <= 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
 		let normalChildCount = (this.oldData.children || {}).VKeys(true).length;
-		if (this.impactPremiseID) normalChildCount--;
 		Assert(normalChildCount == 0, "Cannot delete this node until all its (non-impact-premise) children have been unlinked or deleted.");*/
 		let {mapID} = this.payload;
 		let earlyError = await GetAsync(()=>ForDelete_GetError(this.userInfo.id, GetMap(mapID), this.oldData, this.payload.asPartOfMapDelete, this.asSubcommand));
 		Assert(earlyError == null, earlyError);
-		//Assert(this.oldData.current.impactPremise == null || this.asSubcommand, "Cannot delete an impact-premise directly. Instead, delete the argument node.");
-		if (this.sub_deleteImpactPremise) {
-			await this.sub_deleteImpactPremise.Validate();
-		}
 	}
 
 	GetDBUpdates() {
@@ -102,11 +84,6 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 		// delete mapNodeEditTimes
 		for (let mapID of this.mapIDs) {
 			updates[`mapNodeEditTimes/${mapID}/${nodeID}`] = null;
-		}
-		
-		// if has impact-premise, delete it also
-		if (this.sub_deleteImpactPremise) {
-			updates = MergeDBUpdates(updates, this.sub_deleteImpactPremise.GetDBUpdates());
 		}
 
 		return updates;

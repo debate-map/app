@@ -12,7 +12,6 @@ import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@M
 import {RatingType_Info, RatingType, GetRatingTypeInfo} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {GetRatingAverage, GetRatings, TransformRatingForContext, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
-import {ImpactPremise_ThenType} from "./../../../../Store/firebase/nodes/@ImpactPremiseInfo";
 import {GetRatingTypesForNode, GetNodeForm, GetMainRatingType, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
 import {RootState} from "../../../../Store/index";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
@@ -44,12 +43,8 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 			form, parentNode, children,
 		} = this.props;
 		let openPanel = local_openPanel || nodeView.openPanel;
-		if (node.current.impactPremise && parentNode == null) return <div/>; // if impact-premise, but no parent-node connected, must still be loading
 
 		let nodeReversed = form == ClaimForm.Negation;
-		if (node.current.impactPremise) {
-			var thenType = node.current.impactPremise.thenType;
-		}
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		return (
@@ -70,17 +65,6 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 						let average = GetRatingAverage(node._id, ratingInfo.type, null, -1);
 						if (average != -1) {
 							average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(node));
-							/*if (node.current.impactPremise && thenType == ImpactPremise_ThenType.Impact) {
-								let grandParentID = SplitStringBySlash_Cached(path).length >= 3 ? SplitStringBySlash_Cached(path).XFromLast(2).ToInt() : null;
-								let grandParent = grandParentID ? GetNodeL3(GetNode(grandParentID), SlicePath(path, 2)) : null;
-								let grandParentRatingType = grandParent ? GetMainRatingType(grandParent) : "probability";
-								//let specialCase = grandParentRatingType == "impact" && parentNode.type == MapNodeType.Argument;
-								percentStr = average + "%";
-							}
-							/*else if (ratingInfo.type == "support")
-								//percentStr = (average >= 100 ? "+" : "-") + average.Distance(100) + "%";
-								percentStr = (average < 0 ? "-" : average == 0 ? "" : "+") + average.Distance(0);*#/
-							else*/
 							percentStr = average + "%";
 						}
 						return (

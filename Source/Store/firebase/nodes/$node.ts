@@ -1,7 +1,6 @@
 import {GetImage} from '../images';
 import {MapNode, MapNodeL2, ClaimForm, ChildEntry, ClaimType, MapNodeL3, Polarity} from "./@MapNode";
 import {RatingType} from "../nodeRatings/@RatingType";
-import {ImpactPremise_ThenType, GetImpactPremiseIfTypeDisplayText, ImpactPremise_IfType, GetImpactPremiseThenTypeDisplayText} from "./@ImpactPremiseInfo";
 import {MapNodeType} from './@MapNodeType';
 import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetNode, GetParentNodeL2} from "../nodes";
 import {GetValues} from '../../../Frame/General/Enums';
@@ -17,13 +16,12 @@ import {GetNodeRevision} from "../nodeRevisions";
 
 export function GetFontSizeForNode(node: MapNodeL2, isSubnode = false) {
 	if (node.current.fontSizeOverride) return node.current.fontSizeOverride;
-	if (node.current.impactPremise) return 11;
 	if (node.current.equation) return node.current.equation.latex ? 14 : 13;
 	if (isSubnode) return 11;
 	return 14;
 }
 export function GetPaddingForNode(node: MapNodeL2, isSubnode = false) {
-	return (node.current.impactPremise || isSubnode) ? "1px 4px 2px" : "5px 5px 4px";
+	return isSubnode ? "1px 4px 2px" : "5px 5px 4px";
 }
 export type RatingTypeInfo = {type: RatingType, main: boolean};
 export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
@@ -36,18 +34,8 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	if (node.type == MapNodeType.MultiChoiceQuestion)
 		return [{type: "significance", main: true}];
 	if (node.type == MapNodeType.Claim) {
-		if (node.current.impactPremise) {
-			if (node.current.impactPremise.thenType == ImpactPremise_ThenType.Impact)
-				return [{type: "impact", main: true}];
-			return [{type: "probability", main: true}];
-		}
-
 		let result: RatingTypeInfo[];
-		if (node.current.relative) {
-			result = [{type: "degree", main: true}, {type: "probability", main: true}, {type: "significance", main: true}];
-		} else {
-			result = [{type: "probability", main: true}, {type: "degree", main: true}, {type: "significance", main: true}];
-		}
+		result = [{type: "degree", main: true}, {type: "significance", main: true}];
 		/*if ((node as MapNodeL2).link && (node as MapNodeL2).link.form == ClaimForm.YesNoQuestion) {
 			result.Remove(result.First(a=>a.type == "significance"));
 			result.Insert(0, {type: "significance", main: true});
@@ -55,7 +43,7 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 		return result;
 	}
 	if (node.type == MapNodeType.Argument)
-		return [{type: "strength", main: true}];
+		return [{type: "strength", main: true}, {type: "impact", main: true}];
 	Assert(false);
 }
 export function GetMainRatingType(node: MapNodeL2): RatingType {
@@ -201,16 +189,6 @@ export function GetNodeDisplayText(node: MapNodeL2, path?: string, form?: ClaimF
 	form = form || GetNodeForm(node, path);
 
 	if (node.type == MapNodeType.Claim) {
-		if (node.current.impactPremise) {
-			//Assert(path, "Path must be supplied if getting display-text for an impact-premise.");
-			let parentNodeID = node.parents.VKeys(true)[0];
-			path = path || `${parentNodeID}/${node._id}`;
-			
-			let thenType = node.current.impactPremise.thenType;
-			let argument = GetParentNodeL2(path);
-			var argumentFinalPolarity = argument ? GetFinalPolarityAtPath(argument, SlicePath(path, 1)) : Polarity.Supporting;
-			return `If ${GetImpactPremiseIfTypeDisplayText(node.current.impactPremise.ifType)} premises below are true, they ${GetImpactPremiseThenTypeDisplayText(thenType, argumentFinalPolarity)}.`;
-		}
 		if (node.current.equation) {
 			let result = node.current.equation.text;
 			if (node.current.equation.latex && !isBot) {
@@ -270,37 +248,12 @@ export function GetValidNewChildTypes(parentNode: MapNodeL2, path: string, permi
 	return validChildTypes;
 }
 
-/*export function IsContextReversed(node: MapNodeL2, parent: MapNodeL3) {
-	return node.current.impactPremise && parent && IsReversedArgumentNode(parent);
-}*/
-
 export function GetClaimType(node: MapNodeL2) {
 	if (node.type != MapNodeType.Claim) return null;
 	return (
-		node.current.impactPremise ? ClaimType.ImpactPremise :
 		node.current.equation ? ClaimType.Equation :
 		node.current.contentNode ? ClaimType.Quote :
 		node.current.image ? ClaimType.Image :
 		ClaimType.Normal
 	);
 }
-
-/** [pure] */
-/*export function GetMinChildCountToBeVisibleToNonModNonCreators(node: MapNode, nodeChildren: MapNode[]) {
-	if (IsArgumentNode(node)) {
-		let impactPremiseNode = nodeChildren.find(a=>a != null && a.impactPremise != null);
-		// if impact-premise not loaded yet, don't show child yet (since might suppossed to be hidden)
-		if (impactPremiseNode == null) return Number.MAX_SAFE_INTEGER;
-		let minChildCount = impactPremiseNode.impactPremise.ifType == ImpactPremise_IfType.Any ? 2 : 3;
-		return minChildCount;
-	}
-	return 0;
-}
-/** [pure] *#/
-export function IsNodeVisibleToNonModNonCreators(node: MapNode, nodeChildren: MapNode[]) {
-	if (IsArgumentNode(node)) {
-		let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
-		if (nodeChildren.length < minChildCount) return false;
-	}
-	return true;
-}*/

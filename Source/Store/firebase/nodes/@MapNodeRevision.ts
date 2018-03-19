@@ -1,6 +1,5 @@
 import {MapNodeType} from "./@MapNodeType";
 import {AccessLevel, ImageAttachment} from "./@MapNode";
-import {ImpactPremiseInfo} from "./@ImpactPremiseInfo";
 import {Equation} from "./@Equation";
 import {ContentNode} from "../contentNodes/@ContentNode";
 import {GetValues_ForSchema} from "../../../Frame/General/Enums";
@@ -19,18 +18,17 @@ export class MapNodeRevision {
 	note: string;
 
 	//updatedAt: number;
-	approved = false;
+	//approved = false;
 	votingDisabled: boolean;
 	// only applied client-side; would need to be in protected branch of tree (or use a long, random, and unreferenced node-id) to be "actually" inaccessible
 	accessLevel = AccessLevel.Basic;
 	//voteLevel = AccessLevel.Basic;
 
-	relative: boolean;
 	fontSizeOverride: number;
 	widthOverride: number;
 
 	// components (for theses)
-	impactPremise: ImpactPremiseInfo;
+	argumentType: ArgumentType;
 	equation: Equation;
 	contentNode: ContentNode;
 	image: ImageAttachment;
@@ -59,17 +57,31 @@ AddSchema({
 		fontSizeOverride: {type: ["null", "number"]},
 		widthOverride: {type: ["null", "number"]},
 
-		impactPremise: {$ref: "ImpactPremiseInfo"},
+		argumentType: {$ref: "ArgumentType"},
 		equation: {$ref: "Equation"},
 		contentNode: {$ref: "ContentNode"},
 		image: {$ref: "ImageAttachment"},
 	},
 	required: ["node", "creator", "createdAt"],
 	allOf: [
-		// if not an impact-premise or contentNode, require "titles" prop
+		// if not an argument or content-node, require "titles" prop
 		{
-			if: {prohibited: ["impactPremise", "equation", "contentNode", "image"]},
+			if: {prohibited: ["argumentType", "equation", "contentNode", "image"]},
 			then: {required: ["titles"]},
 		},
 	],
 }, "MapNodeRevision");
+
+// argument
+// ==========
+
+export enum ArgumentType {
+	Any = 10,
+	AnyTwo = 15,
+	All = 20,
+}
+AddSchema({oneOf: GetValues_ForSchema(ArgumentType)}, "ArgumentType");
+
+export function GetArgumentTypeDisplayText(type: ArgumentType) {
+	return {Any: "any", AnyTwo: "any two", All: "all"}[type];
+}

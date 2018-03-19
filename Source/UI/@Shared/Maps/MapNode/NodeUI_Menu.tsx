@@ -103,7 +103,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 								store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: GetNodeID(path), time: Date.now()}));
 							}
 						}}/>}
-				{IsUserBasicOrAnon(userID) && node.current.impactPremise == null && !inList &&
+				{IsUserBasicOrAnon(userID) && !inList &&
 					<VMenuItem text={copiedNode ? <span>Cut <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Cut`}
 						enabled={ForCut_GetError(userID, map, node) == null} title={ForCut_GetError(userID, map, node)}
 						style={styles.vMenuItem}
@@ -115,7 +115,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 								store.dispatch(new ACTNodeCopy({path: null, asCut: true}));
 							}
 						}}/>}
-				{IsUserBasicOrAnon(userID) && node.current.impactPremise == null &&
+				{IsUserBasicOrAnon(userID) &&
 					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Copy`} style={styles.vMenuItem}
 						enabled={ForCopy_GetError(userID, map, node) == null} title={ForCopy_GetError(userID, map, node)}
 						onClick={e=> {
@@ -167,9 +167,6 @@ If not, paste the argument as a clone instead.`
 						let info = await new CloneNode({mapID: map._id, baseNodePath, newParentID: node._id}).Run();
 
 						store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.nodeID, time: Date.now()}));
-						if (info.impactPremise_nodeID) {
-							store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.impactPremise_nodeID, time: Date.now()}));
-						}
 						
 						if (copiedNode_asCut) {
 							await new UnlinkNode({mapID: map._id, parentID: baseNodePath_ids.XFromLast(1), childID: baseNodePath_ids.Last()}).Run();
@@ -214,15 +211,11 @@ If not, paste the argument as a clone instead.`
 								return void ShowMessageBox({title: `Cannot delete`, message: `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`});
 							}*/
 							//let s_ifParents = parentNodes.length > 1 ? "s" : "";
-							let impactPremiseID = node.type == MapNodeType.Argument ? node.children.VKeys()[0] : null;
 							let contextStr = IsNodeSubnode(node) ? ", and its placement in-layer" : ", and its link with 1 parent";
 
 							ShowMessageBox({
 								title: `Delete "${nodeText}"`, cancelButton: true,
-								/*message: `Delete the node "${nodeText}"`
-									+ `${impactPremiseID ? ", its 1 impact-premise" : ""}`
-									+ `, and its link${s_ifParents} with ${parentNodes.length} parent${s_ifParents}?`,*/
-								message: `Delete the node "${nodeText}"${impactPremiseID ? `, its 1 impact-premise` : ``}${contextStr}?`,
+								message: `Delete the node "${nodeText}"${contextStr}?`,
 								onOK: ()=> {
 									new DeleteNode({mapID: map._id, nodeID: node._id}).Run();
 								}

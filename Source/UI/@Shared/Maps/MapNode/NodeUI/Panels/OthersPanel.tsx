@@ -1,5 +1,5 @@
 import {Column, CheckBox, Div} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
 import {IsUserCreatorOrMod} from "../../../../../../Store/firebase/userExtras";
 import {MapNodeL2, ClaimType, ClaimForm, MapNodeL3} from "../../../../../../Store/firebase/nodes/@MapNode";
 import {Connect} from "../../../../../../Frame/Database/FirebaseConnect";
@@ -22,21 +22,19 @@ import {Map} from "../../../../../../Store/firebase/maps/@Map";
 import Moment from "moment";
 import UpdateLink from "../../../../../../Server/Commands/UpdateLink";
 import {User} from "../../../../../../Store/firebase/users/@User";
-import {GetImpactPremiseChildNode} from "../../../../../../Store/firebase/nodes";
-import {ImpactPremise_IfType} from "../../../../../../Store/firebase/nodes/@ImpactPremiseInfo";
 import Icon from "Frame/ReactComponents/Icon";
 import UpdateNodeChildrenOrder from "../../../../../../Server/Commands/UpdateNodeChildrenOrder";
+import {ArgumentType} from "../../../../../../Store/firebase/nodes/@MapNodeRevision";
 
-type Props = {map?: Map, node: MapNodeL3, path: string} & Partial<{creator: User, viewers: string[], impactPremiseNode: MapNodeL2}>;
-@Connect((state, {node, path}: Props)=>({
+let connector = (state, {node}: {map?: Map, node: MapNodeL3, path: string})=> ({
 	_: GetUserPermissionGroups(GetUserID()),
 	creator: GetUser(node.creator),
 	viewers: GetNodeViewers(node._id),
-	impactPremiseNode: GetImpactPremiseChildNode(node),
-}))
-export default class OthersPanel extends BaseComponent<Props, {convertToType: ClaimType}> {
+});
+@Connect(connector)
+export class OthersPanel extends BaseComponentWithConnector(connector, {convertToType: null as ClaimType}) {
 	render() {
-		let {map, node, path, creator, viewers, impactPremiseNode} = this.props;
+		let {map, node, path, creator, viewers} = this.props;
 		let mapID = map ? map._id : null;
 		let {convertToType} = this.state;
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
@@ -44,7 +42,7 @@ export default class OthersPanel extends BaseComponent<Props, {convertToType: Cl
 		let convertToTypes = GetEntries(ClaimType).filter(pair=>CanConvertFromClaimTypeXToY(GetClaimType(node), pair.value));
 		convertToType = convertToType || convertToTypes.map(a=>a.value).FirstOrX();
 
-		let isArgument_any = impactPremiseNode && impactPremiseNode.current.impactPremise.ifType == ImpactPremise_IfType.Any;
+		let isArgument_any = node.current.argumentType == ArgumentType.Any;
 
 		return (
 			<Column sel style={{position: "relative"}}>
@@ -107,7 +105,7 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 
 		if (node.type == MapNodeType.Claim) {
 			var claimType = GetClaimType(node);
-			var canSetAsNegation = claimType == ClaimType.Normal && !node.current.impactPremise && node.link.form != ClaimForm.YesNoQuestion;
+			var canSetAsNegation = claimType == ClaimType.Normal && node.link.form != ClaimForm.YesNoQuestion;
 			var canSetAsSeriesAnchor = claimType == ClaimType.Equation && !node.current.equation.isStep; //&& !creating;
 		}
 		

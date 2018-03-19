@@ -18,7 +18,7 @@ import DefinitionsPanel from "../../@Shared/Maps/MapNode/NodeUI/Panels/Definitio
 import DiscussionPanel from "../../@Shared/Maps/MapNode/NodeUI/Panels/DiscussionPanel";
 import SocialPanel from "../../@Shared/Maps/MapNode/NodeUI/Panels/SocialPanel";
 import TagsPanel from "../../@Shared/Maps/MapNode/NodeUI/Panels/TagsPanel";
-import OthersPanel from "../../@Shared/Maps/MapNode/NodeUI/Panels/OthersPanel";
+import {OthersPanel} from "../../@Shared/Maps/MapNode/NodeUI/Panels/OthersPanel";
 import DetailsPanel from "../../@Shared/Maps/MapNode/NodeUI/Panels/DetailsPanel";
 import {MapNodeType, MapNodeType_Info, GetNodeColor} from "../../../Store/firebase/nodes/@MapNodeType";
 import Moment from "moment";
@@ -187,10 +187,6 @@ class NodeRow extends BaseComponent<NodeRow_Props, {menuOpened: boolean}> {
 
 		let nodeL3 = AsNodeL3(node);
 		let path = ""+node._id;
-		// impact-premises require a path for the GetNodeDisplayText() function, so create a short one which includes just the parent argument-node
-		if (node.current.impactPremise) {
-			path = node.parents.VKeys(true)[0] + "/" + path;
-		}
 
 		let backgroundColor = GetNodeColor(nodeL3).desaturate(.5).alpha(.8);
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
@@ -242,9 +238,6 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 
 		let nodeL3 = AsNodeL3(node);
 		let path = node._id+"";
-		if (node.current.impactPremise) { // if impact-premise, we only have one parent, so might as well fetch it, for accurate polarity and such
-			path = node.parents.VKeys(true)[0] + "/" + node._id;
-		}
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let backgroundColor = GetNodeColor(nodeL3);
 		let nodeView = new MapNodeView();

@@ -11,7 +11,6 @@ import {Column} from "react-vcomponents";
 import keycode from "keycode";
 import {Button} from "react-vcomponents";
 import {E} from "../../../../../Frame/General/Globals_Free";
-import {ImpactPremise_ThenType, ImpactPremise_IfType, GetImpactPremiseIfTypeDisplayText} from "./../../../../../Store/firebase/nodes/@ImpactPremiseInfo";
 import AddNode from "../../../../../Server/Commands/AddNode";
 import Editor from "react-md-editor";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
@@ -25,7 +24,7 @@ import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView
 import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
 import { IsUserAdmin, IsUserMod } from "../../../../../Store/firebase/userExtras";
 import AddChildNode from "../../../../../Server/Commands/AddChildNode";
-import {MapNodeRevision, MapNodeRevision_titlePattern} from "../../../../../Store/firebase/nodes/@MapNodeRevision";
+import {MapNodeRevision, MapNodeRevision_titlePattern, ArgumentType} from "../../../../../Store/firebase/nodes/@MapNodeRevision";
 import {ACTSetLastAcknowledgementTime} from "../../../../../Store/main";
 import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
 import {WaitTillPathDataIsReceiving, WaitTillPathDataIsReceived, DBPath} from "../../../../../Frame/Database/DatabaseHelpers";
@@ -45,22 +44,16 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, ch
 		parents: {[parentNode._id]: {_: true}},
 		type: childType,
 	});
-	let newRevision = new MapNodeRevision({approved: true, titles: {}});
+	let newRevision = new MapNodeRevision({titles: {}});
 	let newLink = E(
 		{_: true},
 		childType == MapNodeType.Claim && {form: claimForm},
 		childType == MapNodeType.Argument && {polarity: childPolarity},
 	) as ChildEntry;
 	if (childType == MapNodeType.Argument) {
-		var newImpactPremise = new MapNode({type: MapNodeType.Claim, creator: userID});
-		var newImpactPremiseRevision = new MapNodeRevision({approved: true,
-			impactPremise: {
-				ifType: ImpactPremise_IfType.All,
-				thenType: ImpactPremise_ThenType.Impact,
-			},
-		});
+		newRevision.argumentType = ArgumentType.All;
 		var newPremise = new MapNode({type: MapNodeType.Claim, creator: userID});
-		var newPremiseRevision = new MapNodeRevision({approved: true, titles: {}});
+		var newPremiseRevision = new MapNodeRevision({titles: {}});
 	}
 	
 	let root;
@@ -75,7 +68,6 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, ch
 			boxController.options.okButtonClickable = validationError == null;
 
 			let claimTypes = GetEntries(ClaimType);
-			claimTypes.Remove(claimTypes.find(a=>a.value == ClaimType.ImpactPremise));
 			if (!IsUserMod(userID)) {
 				claimTypes.Remove(claimTypes.find(a=>a.value == ClaimType.Image));
 			}
@@ -169,13 +161,9 @@ The details of the argument should be described within the argument's premises. 
 			SetNodeUILocked(parentNode._id, true);
 			let info = await new AddChildNode({
 				mapID: mapID, node: newNode, revision: newRevision, link: newLink,
-				impactPremiseNode: newImpactPremise, impactPremiseNodeRevision: newImpactPremiseRevision,
 			}).Run();
 			store.dispatch(new ACTMapNodeExpandedSet({mapID, path: parentPath + "/" + info.nodeID, expanded: true, recursive: false}));
 			store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.nodeID, time: Date.now()}));
-			if (info.impactPremise_nodeID) {
-				store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.impactPremise_nodeID, time: Date.now()}));
-			}
 
 			if (childType == MapNodeType.Argument) {
 				newPremise.parents = {[info.nodeID]: {_: true}};
@@ -184,7 +172,7 @@ The details of the argument should be described within the argument's premises. 
 				store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info2.nodeID, time: Date.now()}));
 			}
 
-			let watchPath = DBPath(`nodeRevisions/${(info2 && info2.revisionID) || info.impactPremise_revisionID || info.revisionID}`);
+			let watchPath = DBPath(`nodeRevisions/${(info2 && info2.revisionID) || info.revisionID}`);
 			await WaitTillPathDataIsReceiving(watchPath);
 			await WaitTillPathDataIsReceived(watchPath);
 			SetNodeUILocked(parentNode._id, false);

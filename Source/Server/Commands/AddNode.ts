@@ -17,17 +17,11 @@ export default class AddNode extends Command<{mapID: number, node: MapNode, revi
 	sub_addRevision: AddNodeRevision;
 	Validate_Early() {
 		let {node, revision} = this.payload;
-		/*if (impactPremiseNode) {
-			Assert(node.children == null, `Node cannot specify children. (server adds impact-premise automatically)`);
-			Assert(node.childrenOrder == null, `Node cannot specify children-order. (server adds impact-premise automatically)`);
-			Assert(impactPremiseNode.parents == null, `Meta-thesis cannot specify a parent. (server adds it automatically)`);
-		}*/
 		Assert(node.currentRevision == null, "Cannot specifiy node's revision-id. It will be generated automatically.");
 		Assert(revision.node == null, "Cannot specifiy revision's node-id. It will be generated automatically.");
 	}
 
 	nodeID: number;
-	//impactPremiseID: number;
 	parentID: number;
 	parent_oldChildrenOrder: number[];
 	async Prepare() {
@@ -43,15 +37,6 @@ export default class AddNode extends Command<{mapID: number, node: MapNode, revi
 
 		node.currentRevision = this.sub_addRevision.revisionID;
 		revision.node = this.nodeID;
-
-		/*this.impactPremiseID = impactPremiseNode ? ++this.lastNodeID_new : null;
-
-		if (impactPremiseNode) {
-			impactPremiseNode.createdAt = Date.now();
-			node.children = {[this.impactPremiseID]: {_: true}};
-			node.childrenOrder = [this.impactPremiseID];
-			impactPremiseNode.parents = {[this.nodeID]: {_: true}};
-		}*/
 	}
 	async Validate() {
 		let {node} = this.payload;
@@ -64,7 +49,6 @@ export default class AddNode extends Command<{mapID: number, node: MapNode, revi
 		} else {
 			AssertValidate(`MapNode`, node, `Node invalid`);
 		}
-		//AssertValidate(`MapNode`, impactPremiseNode, `Meta-thesis-node invalid`);
 		await this.sub_addRevision.Validate();
 	}
 	
@@ -77,21 +61,11 @@ export default class AddNode extends Command<{mapID: number, node: MapNode, revi
 		updates[`nodes/${this.nodeID}`] = node;
 
 		// add as parent of (pre-existing) children
-		//for (let childID in (node.children || {}).Excluding(this.impactPremiseID && this.impactPremiseID.toString())) {
 		for (let childID in (node.children || {})) {
 			updates[`nodes/${childID}/parents/${this.nodeID}`] = {_: true};
 		}
 
 		updates = MergeDBUpdates(updates, this.sub_addRevision.GetDBUpdates());
-
-		/*if (impactPremiseNode) {
-			// add impact-premise
-			updates[`nodes/${this.impactPremiseID}`] = impactPremiseNode;
-			// add impact-premise as parent of (pre-existing) children
-			for (let childID in impactPremiseNode.children) {
-				updates[`nodes/${childID}/parents/${this.impactPremiseID}`] = {_: true};
-			}
-		}*/
 		
 		return updates;
 	}

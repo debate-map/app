@@ -53,11 +53,7 @@ export class PremiseAddHelper extends BaseComponent<{mapID: number, parentNode: 
 			parents: {[parentNode._id]: {_: true}},
 			type: MapNodeType.Claim,
 		});
-		let newRevision = new MapNodeRevision({
-			titles: {base: premiseTitle},
-			relative: false,
-			approved: true,
-		});
+		let newRevision = new MapNodeRevision({titles: {base: premiseTitle}});
 		let newLink = {_: true, form: ClaimForm.Base} as ChildEntry;
 
 		SetNodeUILocked(parentNode._id, true);

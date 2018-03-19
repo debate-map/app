@@ -129,11 +129,6 @@ export function GetNodeChildrenL3(node: MapNode, path: string, filterForPath = f
 	return CachedTransform("GetNodeChildrenEnhanced", [path], nodeChildrenEnhanced, ()=>nodeChildrenEnhanced);
 }
 
-export function GetImpactPremiseChildNode(node: MapNodeL2) {
-	let nodeChildren = GetNodeChildrenL2(node);
-	return CachedTransform("GetImpactPremiseChildNode", [node._id], nodeChildren, ()=>nodeChildren.FirstOrX(a=>a && a.current.impactPremise != null));
-}
-
 export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNodeL2) {
 	let parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;
 	if (!parentTypeInfo.Contains(child.type)) return false;
@@ -153,7 +148,6 @@ export function IsNewLinkValid(parentNode: MapNodeL2, parentPath: string, child:
 
 export function ForUnlink_GetError(userID: string, map: Map, node: MapNodeL2, asPartOfCut = false) {
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
-	if (node.current.impactPremise) return "Cannot unlink an impact-premise directly. Instead, delete the parent. (assuming you've deleted the premises already)";
 	if (!asPartOfCut && (node.parents || {}).VKeys(true).length <= 1)  return `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`;
 	if (IsRootNode(node)) return `Cannot unlink the root-node of a map.`;
 	if (IsNodeSubnode(node)) return `Cannot unlink a subnode. Try deleting it instead.`;
@@ -161,14 +155,12 @@ export function ForUnlink_GetError(userID: string, map: Map, node: MapNodeL2, as
 }
 export function ForDelete_GetError(userID: string, map: Map, node: MapNodeL2, asPartOfMapDelete = false, asSubcommand = false) {
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
-	if (node.current.impactPremise && !asSubcommand) return "Cannot delete an impact-premise directly. Instead, delete the parent. (assuming you've deleted the premises already)";
 	if (GetParentCount(node) > 1) return `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`;
 	if (IsRootNode(node) && !asPartOfMapDelete) return `Cannot delete the root-node of a map.`;
 
 	let nodeChildren = GetNodeChildrenL2(node);
 	if (nodeChildren.Any(a=>a == null)) return "[still loading children...]";
-	//if ((node.children || {}).VKeys().length) return "Cannot delete this node until all its (non-impact-premise) children have been unlinked or deleted.";
-	if (nodeChildren.filter(a=>!a.current.impactPremise).length) return "Cannot delete this node until all its (non-impact-premise) children have been unlinked or deleted.";
+	if (nodeChildren.length) return "Cannot delete this node until all its children have been unlinked or deleted.";
 	return null;
 }
 

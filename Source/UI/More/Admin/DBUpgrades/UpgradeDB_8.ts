@@ -8,7 +8,7 @@ import {MapNode, ChildEntry, Polarity} from "../../../../Store/firebase/nodes/@M
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {GetTreeNodesInObjTree} from "js-vextensions";
 
-let newVersion = 8;
+/*let newVersion = 8;
 AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {
 	let data = Clone(oldData) as FirebaseData;
 
@@ -33,4 +33,4 @@ AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {
 	}
 
 	return data;
-});
+});*/

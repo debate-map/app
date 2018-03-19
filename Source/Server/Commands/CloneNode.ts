@@ -27,7 +27,6 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 		
 		let nodeForm = await GetAsync_Raw(()=>GetNodeForm(baseNode, baseNodePath)) as ClaimForm;
 		let nodePolarity = await GetAsync_Raw(()=>GetLinkAtPath(baseNodePath).polarity) as Polarity;
-		let baseImpactPremise = isArgument ? (await GetAsync_Raw(()=>GetNodeChildrenL2(baseNode))).First(a=>a.current.impactPremise != null) : null;
 
 		let newChildNode = RemoveHelpers(Clone(baseNode))
 			.VSet({children: DEL, childrenOrder: DEL, currentRevision: DEL, current: DEL}) as MapNode;
@@ -35,12 +34,6 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 
 		let newChildRevision = Clone(baseNode.current).VSet({node: DEL});
 
-		if (isArgument) {
-			var newImpactPremiseNode = RemoveHelpers(Clone(baseImpactPremise))
-				.VSet({parents: DEL, children: DEL, childrenOrder: DEL, currentRevision: DEL, current: DEL}) as MapNode;
-			
-			var newImpactPremiseRevision = Clone(baseImpactPremise.current).VSet({node: DEL});
-		}
 		this.sub_addNode = new AddChildNode({
 			mapID, node: newChildNode, revision: newChildRevision,
 			link: E(
@@ -48,7 +41,6 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 				nodeForm && {form: nodeForm},
 				nodePolarity && {polarity: nodePolarity},
 			) as any,
-			impactPremiseNode: newImpactPremiseNode, impactPremiseNodeRevision: newImpactPremiseRevision,
 		});
 		this.sub_addNode.Validate_Early();
 		await this.sub_addNode.Prepare();
@@ -99,9 +91,6 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 		//updates[`nodes/${this.sub_addNode.nodeID}/childrenOrder`] = this.sub_linkChildren.map(a=>a.payload.childID);
 		if (this.sub_addNode.payload.node.type == MapNodeType.Argument) {
 			let childrenOrder = [];
-			if (this.sub_addNode.sub_addImpactPremise) {
-				childrenOrder.push(this.sub_addNode.sub_addImpactPremise.nodeID);
-			}
 			childrenOrder.push(...this.sub_linkChildren.map(a=>a.payload.childID));
 			updates[`nodes/${this.sub_addNode.sub_addNode.nodeID}`].childrenOrder = childrenOrder;
 		}

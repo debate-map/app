@@ -31,7 +31,7 @@ import DefinitionsPanel from "./NodeUI/Panels/DefinitionsPanel";
 import QuestionsPanel from "./NodeUI/Panels/QuestionsPanel";
 import TagsPanel from "./NodeUI/Panels/TagsPanel";
 import DetailsPanel from "./NodeUI/Panels/DetailsPanel";
-import OthersPanel from "./NodeUI/Panels/OthersPanel";
+import {OthersPanel} from "./NodeUI/Panels/OthersPanel";
 import SocialPanel from "./NodeUI/Panels/SocialPanel";
 import RatingsPanel from "./NodeUI/Panels/RatingsPanel";
 import DiscussionPanel from "./NodeUI/Panels/DiscussionPanel";
@@ -255,7 +255,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 	OnDoubleClick() {
 		let {node} = this.props;
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
-		if (creatorOrMod && node.current.impactPremise == null && node.current.equation == null) {
+		if (creatorOrMod && node.current.equation == null) {
 			this.SetState({editing: true});
 		}
 	}
@@ -276,7 +276,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 				{!editing &&
 					<span style={E(
 						{position: "relative", fontSize: GetFontSizeForNode(node, isSubnode), whiteSpace: "initial"},
-						(node.current.impactPremise || isSubnode) && {margin: "4px 0 1px 0"},
+						isSubnode && {margin: "4px 0 1px 0"},
 					)}>
 						{latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
 						{!latex && this.RenderNodeDisplayText(GetNodeDisplayText(node, path))}
@@ -284,7 +284,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 				{editing &&
 					<Row style={E(
 						{position: "relative", fontSize: GetFontSizeForNode(node, isSubnode), whiteSpace: "initial", alignItems: "stretch"},
-						(node.current.impactPremise || isSubnode) && {margin: "4px 0 1px 0"},
+						isSubnode && {margin: "4px 0 1px 0"},
 					)}>
 						{!applyingEdit &&
 							<TextArea_AutoSize required={true} pattern={MapNodeRevision_titlePattern} allowLineBreaks={false} style={{flex: 1}}

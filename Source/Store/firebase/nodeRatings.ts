@@ -5,7 +5,6 @@ import {CachedTransform} from "js-vextensions";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {RatingsRoot, Rating} from "./nodeRatings/@RatingsRoot";
 import {GetNodeChildren, GetNode, GetNodeChildrenL2} from "./nodes";
-import {ImpactPremise_ThenType} from "./nodes/@ImpactPremiseInfo";
 import {ClaimForm, MapNodeL3} from "./nodes/@MapNode";
 import {GetNodeL2} from "./nodes/$node";
 import {MapNodeType} from "./nodes/@MapNodeType";

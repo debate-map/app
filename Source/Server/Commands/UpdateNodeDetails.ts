@@ -28,7 +28,6 @@ import { UserEdit, MapEdit } from "Server/CommandMacros";
 				fontSizeOverride: {type: ["null", "number"]},
 				widthOverride: {type: ["null", "number"]},
 
-				impactPremise: {$ref: "MetaThesisInfo"},
 				equation: {$ref: "Equation"},
 				contentNode: {$ref: "ContentNode"},
 				image: {$ref: "ImageAttachment"},

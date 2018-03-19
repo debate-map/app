@@ -37,7 +37,6 @@ import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeFo
 import FastDOM from "fastdom";
 import {Row} from "react-vcomponents";
 import Icon from "../../../../Frame/ReactComponents/Icon";
-import {ImpactPremise_IfType} from "./../../../../Store/firebase/nodes/@ImpactPremiseInfo";
 import {GetUserAccessLevel} from "../../../../Store/firebase/users";
 import {GetUserID} from "Store/firebase/users";
 import {IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
@@ -53,7 +52,7 @@ import {Timeline} from "Store/firebase/timelines/@Timeline";
 import { ChangeType } from "Store/firebase/mapNodeEditTimes";
 import {GetPathsToNodesChangedSinceX, GetNodeChangeType, GetChangeTypeOutlineColor} from "../../../../Store/firebase/mapNodeEditTimes";
 import {GetNode} from "Store/firebase/nodes";
-import {MapNodeRevision} from "../../../../Store/firebase/nodes/@MapNodeRevision";
+import {MapNodeRevision, ArgumentType} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 import { PremiseAddHelper } from "UI/@Shared/Maps/MapNode/PremiseAddHelper";
 import { ArgumentsControlBar } from "UI/@Shared/Maps/MapNode/ArgumentsControlBar";
 import { AddArgumentButton } from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton";
@@ -101,7 +100,6 @@ type State = {
 	});*/
 
 	let nodeChildren_sortValues = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
-		if (child.current.impactPremise) return Number.MAX_SAFE_INTEGER; // always place the impact-premise first
 		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetSortByRatingType(child)), GetNodeForm(child) == ClaimForm.Negation);
 	});
 	let nodeChildren_fillPercents = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
@@ -230,8 +228,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		} else {
 			childPacks = childPacks.OrderByDescending(pack=>nodeChildren_sortValues[pack.origIndex]);
 			//if (IsArgumentNode(node)) {
-			let impactPremiseNode = nodeChildren.FirstOrX(a=>a.current.impactPremise != null);
-			let isArgument_any = impactPremiseNode && impactPremiseNode.current.impactPremise.ifType == ImpactPremise_IfType.Any;
+			let isArgument_any = node.type == MapNodeType.Argument && node.current.argumentType == ArgumentType.Any;
 			if (node.childrenOrder && !isArgument_any) {
 				childPacks = childPacks.OrderBy(pack=>node.childrenOrder.indexOf(pack.node._id).IfN1Then(Number.MAX_SAFE_INTEGER));
 			}

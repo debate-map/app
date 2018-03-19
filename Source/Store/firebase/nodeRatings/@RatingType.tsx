@@ -1,13 +1,13 @@
 import {MapNode, MapNodeL2, MapNodeL3, Polarity} from "../nodes/@MapNode";
 import {Range} from "js-vextensions";
 import {MapNodeType} from "../nodes/@MapNodeType";
-import {ImpactPremise_IfType} from "./../nodes/@ImpactPremiseInfo";
 import {GetNodeForm, GetMainRatingType, GetNodeL2, GetFinalPolarity, GetLinkUnderParent} from "../nodes/$node";
 import {GetNode} from "../nodes";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import {SlicePath} from "../../../Frame/Database/DatabaseHelpers";
 import { PropNameToTitle } from "Frame/General/Others";
+import { ArgumentType } from "Store/firebase/nodes/@MapNodeRevision";
 
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 //export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
@@ -37,15 +37,19 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 		result.description = "Argument strength is calculated based on the ratings given to its premises and impact-premise.";
 	} else if (ratingType == "impact") {
 		Assert(parent, `Invalid state. Node with rating-type "adjustment" must have a "parent" argument passed alongside. @path:${path}`);
-		Assert(node.current.impactPremise, `Invalid state. Node with rating-type "adjustment" should have a impactPremise property attached. @path:${path}`);
+		Assert(node.type == MapNodeType.Argument, `Invalid state. Node with rating-type "adjustment" should be an argument. @path:${path}`);
 
 		let grandParentID = SplitStringBySlash_Cached(path).length >= 3 ? SplitStringBySlash_Cached(path).XFromLast(2).ToInt() : null;
 		let grandParent = grandParentID ? GetNodeL2(GetNode(grandParentID), SlicePath(path, 2)) : null;
 		let grandParentRatingType = grandParent ? GetMainRatingType(grandParent) : "probability";
 
-		let premiseCountrStrMap = {All: `all of the premises`, AnyTwo: `at least two of the premises`, Any: `at least one of the premises.`};
+		let premiseCountrStrMap = {
+			[ArgumentType.All]: `all of the premises`,
+			[ArgumentType.AnyTwo]: `at least two of the premises`,
+			[ArgumentType.Any]: `at least one of the premises.`
+		};
 		//let premiseCountrStrMap = {All: `all of its premises`, AnyTwo: `at least two of its premises`, Any: `at least one of its premises.`};
-		let premiseCountStr = premiseCountrStrMap[ImpactPremise_IfType[node.current.impactPremise.ifType]];
+		let premiseCountStr = premiseCountrStrMap[ArgumentType[node.current.argumentType]];
 		let shiftType = finalPolarity == Polarity.Supporting ? "raise" : "lower";
 
 		/*return (
