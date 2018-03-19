@@ -1,4 +1,4 @@
-import {HasModPermissions, PermissionGroupSet} from "./userExtras/@UserExtraInfo";
+import {HasModPermissions, PermissionGroupSet, HasAdminPermissions} from "./userExtras/@UserExtraInfo";
 import {IsNaN, IsObjectOf, IsObject, IsNumber} from "js-vextensions";
 import {GetData, GetDataAsync, SlicePath} from "../../Frame/Database/DatabaseHelpers";
 import {MapNode, globalRootNodeID, MapNodeL2} from "./nodes/@MapNode";
@@ -142,7 +142,7 @@ export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: 
 export function IsNewLinkValid(parentNode: MapNodeL2, parentPath: string, child: MapNodeL2, permissions: PermissionGroupSet) {
 	let parentPathIDs = SplitStringBySlash_Cached(parentPath).map(a=>a.ToInt());
 	//if (map.name == "Global" && parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
-	if (parentNode._id == globalRootNodeID) return false; // if parent is global-root, don't accept new children
+	if (parentNode._id == globalRootNodeID && !HasAdminPermissions(permissions)) return false; // if parent is global-root, don't accept new children (unless admin)
 	// if in global map, parent is l2, and user is not a mod (and not node creator), don't accept new children
 	if (parentPathIDs[0] == globalRootNodeID && parentPathIDs.length == 2 && !HasModPermissions(permissions) && parentNode.creator != GetUserID()) return false;
 	if (parentNode._id == child._id) return false; // cannot link node as its own child
