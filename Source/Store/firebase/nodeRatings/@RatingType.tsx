@@ -11,8 +11,9 @@ import { ArgumentType } from "Store/firebase/nodes/@MapNodeRevision";
 
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 //export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
-export const ratingTypes = ["significance", "neutrality", "probability", "degree", "impact", "strength"];
-export type RatingType = "significance" | "neutrality" | "probability" | "degree" | "impact" | "strength";
+//export const ratingTypes = ["significance", "neutrality", "probability", "truth", "impact", "strength"];
+export const ratingTypes = ["significance", "neutrality", "truth", "relevance", "strength"];
+export type RatingType = "significance" | "neutrality" | "truth" | "relevance" | "strength";
 
 export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, parent: MapNodeL3, path: string) {
 	let link = GetLinkUnderParent(node._id, parent);
@@ -28,20 +29,16 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 		result.description = "How significant/important is this subject? (0: not worth any time discussing, 100: vital to discuss)";
 	} else if (ratingType == "neutrality") {
 		result.description = `How neutral/impartial is the phrasing of this statement/question? (0: as biased as they come, 100: no bias)`;
-	} else if (ratingType == "probability") {
+	} /*else if (ratingType == "probability") {
 		//result.description = "Suppose you were as sure as you are right now (of this claim being true, in its basic form), 100 different times (on different topics). How many of those times do you expect you'd be correct?";
 		result.description = "Consider how sure you are of this statement being true (in its basic form). If you were this sure 100 times (on a variety of things), how many of those times do you think you'd be correct?";
-	} else if (ratingType == "degree") {
-		result.description = "To what degree do you consider this statement true? (0: completely false, 50: true to a basic extent, 100: true to a high extent)";
+	}*/ else if (ratingType == "truth") {
+		//result.description = "To what degree do you consider this statement true? (0: completely false, 50: true to a basic extent, 100: true to a high extent)";
+		result.description = "To what degree do you consider this statement true? (0: completely false, 50: somewhat true, 100: completely true)";
 	} else if (ratingType == "strength") {
 		result.description = "Argument strength is calculated based on the ratings given to its premises and impact-premise.";
-	} else if (ratingType == "impact") {
-		Assert(parent, `Invalid state. Node with rating-type "adjustment" must have a "parent" argument passed alongside. @path:${path}`);
-		Assert(node.type == MapNodeType.Argument, `Invalid state. Node with rating-type "adjustment" should be an argument. @path:${path}`);
-
-		let grandParentID = SplitStringBySlash_Cached(path).length >= 3 ? SplitStringBySlash_Cached(path).XFromLast(2).ToInt() : null;
-		let grandParent = grandParentID ? GetNodeL2(GetNode(grandParentID), SlicePath(path, 2)) : null;
-		let grandParentRatingType = grandParent ? GetMainRatingType(grandParent) : "probability";
+	} else if (ratingType == "relevance") {
+		Assert(node.type == MapNodeType.Argument, `Invalid state. Node with rating-type "relevance" should be an argument. @path:${path}`);
 
 		let premiseCountrStrMap = {
 			[ArgumentType.All]: `all of the premises`,
@@ -66,13 +63,10 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 			</span>
 		);*/
 
-		if (grandParentRatingType == "impact" && parent.type == MapNodeType.Argument) {
-			result.description = `If ${premiseCountStr} of this argument were true (to a high extent), how much would it weaken/undo the impact of the parent claim?`;
-		} else {
-			result.description = `If ${premiseCountStr} of this argument were true (to a high extent), ${""
-				}how much would it impact your ${grandParentRatingType} rating for the parent claim? (0: not at all, 50: moderately, 100: game-changer)`;
-			let supporting = parent.link.polarity == Polarity.Supporting;
-		}
+		/*result.description = `If ${premiseCountStr} of this argument were true (to a high extent), ${""
+			}how much would it impact your ${grandParentRatingType} rating for the parent claim? (0: not at all, 50: moderately, 100: game-changer)`;*/
+		result.description = `How relevant/impactful is this statement toward the parent claim? (0: not at all, 50: moderately, 100: game-changer)`;
+		//let supporting = parent.link.polarity == Polarity.Supporting;
 	} else {
 		Assert(false, `Invalid rating type: ${ratingType}`);
 	}

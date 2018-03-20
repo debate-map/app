@@ -29,9 +29,9 @@ export function GetArgumentStrengthPseudoRating(argument: MapNodeL2, premises: M
 	} else 
 		combinedProbabilityOfPremises = premiseProbabilities.Max(null, true);
 	
-	let impact = GetRatingValue(argument._id, "impact", userID, 0);
+	let relevance = GetRatingValue(argument._id, "relevance", userID, 0);
 	//let strengthForType = adjustment.Distance(50) / 50;
-	let strengthForType = impact / 100;
+	let strengthForType = relevance / 100;
 	var result = combinedProbabilityOfPremises * strengthForType;
 
 	return {

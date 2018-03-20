@@ -212,6 +212,12 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 						padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 					}}>
 						{ratingTypes.Contains(panelToShow) && (()=> {
+							if (panelToShow == "relevance" && node.type == MapNodeType.Claim) {
+								let argumentNode = parentNode;
+								let argumentPath = SlicePath(path, 1);
+								let ratings = GetRatings(argumentNode._id, panelToShow as RatingType);
+								return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as RatingType} ratings={ratings}/>;
+							}
 							let ratings = GetRatings(node._id, panelToShow as RatingType);
 							return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 						})()}

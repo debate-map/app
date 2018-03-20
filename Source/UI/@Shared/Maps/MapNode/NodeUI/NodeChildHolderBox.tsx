@@ -14,6 +14,11 @@ import chroma from "chroma-js";
 import {ChildLimitBar, NodeChildHolder} from "./NodeChildHolder";
 import { emptyArray_forLoading } from "Frame/Store/ReducerUtils";
 import {GetNodeColor} from "../../../../../Store/firebase/nodes/@MapNodeType";
+import { GetRatingTypeInfo, RatingType } from "Store/firebase/nodeRatings/@RatingType";
+import { SlicePath } from "Frame/Database/DatabaseHelpers";
+import { GetParentNodeL3 } from "Store/firebase/nodes";
+import { GetRatings } from "Store/firebase/nodeRatings";
+import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage} from "../../../../../Store/firebase/nodeRatings";
 
 export enum HolderType {
 	Truth,
@@ -31,7 +36,30 @@ export class NodeChildHolderBox extends BaseComponent<Props, {innerBoxOffset: nu
 
 		let text = type == HolderType.Truth ? "True?" : "Relevant?";
 		let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
-		let mainRating_fillPercent = 100;
+
+		//let mainRating_fillPercent = 100;
+		let parentNode = GetParentNodeL3(path);
+		if (type == HolderType.Truth) {
+			var ratingType = "truth" as RatingType;
+			let ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
+			//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
+		} else {
+			var argumentNode = parentNode;
+			var argumentPath = SlicePath(path, 1);
+
+			var ratingType = "relevance" as RatingType;
+			let ratingTypeInfo = GetRatingTypeInfo(ratingType, parentNode, GetParentNodeL3(argumentPath), argumentPath);
+			//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
+		}
+
+		let percentStr = "...";
+		let ratings = GetRatings(argumentNode ? argumentNode._id : node._id, ratingType);
+		let average = GetRatingAverage(argumentNode ? argumentNode._id : node._id, ratingType, null, -1);
+		if (average != -1) {
+			average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(argumentNode || node));
+			percentStr = average + "%";
+		}
+		let mainRating_fillPercent = average;
 
 		let separateChildren = node.type == MapNodeType.Claim;
 		let showArgumentsControlBar = node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading;

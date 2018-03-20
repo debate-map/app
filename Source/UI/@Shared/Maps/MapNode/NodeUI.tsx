@@ -27,13 +27,13 @@ import {RootState} from "../../../../Store/index";
 import {GetNodeView} from "../../../../Store/main/mapViews";
 import {MapNode, ClaimForm, MapNodeL2, AccessLevel, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {GetNodeChildren, GetParentNode, IsRootNode, GetNodeChildrenL3, GetParentNodeL2, GetNodeID} from "../../../../Store/firebase/nodes";
+import {GetNodeChildren, GetParentNode, IsRootNode, GetNodeChildrenL3, GetParentNodeL2, GetNodeID, GetParentNodeL3} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {MapNodeType, MapNodeType_Info, GetNodeColor} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import {Column} from "react-vcomponents";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2, AsNodeL3, AsNodeL2} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2, AsNodeL3, AsNodeL2, ShouldNodeBeCombinedWithParent} from "../../../../Store/firebase/nodes/$node";
 import FastDOM from "fastdom";
 import {Row} from "react-vcomponents";
 import Icon from "../../../../Frame/ReactComponents/Icon";
@@ -210,8 +210,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		}
 
 		// if the premise of a single-premise argument
-		let parent = GetParentNode(path);
-		let combineWithParentArgument = node.type == MapNodeType.Claim && parent.children.VKeys(true).length == 1 && node.link.form != ClaimForm.YesNoQuestion;
+		let parent = GetParentNodeL3(path);
+		let combineWithParentArgument = ShouldNodeBeCombinedWithParent(node, parent);
 		if (combineWithParentArgument) {
 			var relevanceArguments = GetNodeChildrenL3(parent, SlicePath(path, 1)).Except(node);
 		}

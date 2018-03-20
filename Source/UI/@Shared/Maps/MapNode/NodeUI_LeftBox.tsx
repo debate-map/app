@@ -12,7 +12,7 @@ import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@M
 import {RatingType_Info, RatingType, GetRatingTypeInfo} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {GetRatingAverage, GetRatings, TransformRatingForContext, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
 import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
-import {GetRatingTypesForNode, GetNodeForm, GetMainRatingType, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeForm, GetMainRatingType, GetNodeL3, ShouldNodeBeCombinedWithParent} from "../../../../Store/firebase/nodes/$node";
 import {RootState} from "../../../../Store/index";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetParentNode, GetParentNodeL3} from "../../../../Store/firebase/nodes";
@@ -80,6 +80,35 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 							</PanelButton>
 						);
 					})}
+					{ShouldNodeBeCombinedWithParent(node, parentNode) &&
+						(()=> {
+							let argumentNode = parentNode;
+							let argumentPath = SlicePath(path, 1);
+
+							let ratingType = "relevance" as RatingType;
+							let ratingTypeInfo = GetRatingTypeInfo(ratingType, parentNode, GetParentNodeL3(argumentPath), argumentPath);
+							//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
+
+							let percentStr = "...";
+							let ratings = GetRatings(argumentNode._id, ratingType);
+							let average = GetRatingAverage(argumentNode._id, ratingType, null, -1);
+							if (average != -1) {
+								average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(argumentNode));
+								percentStr = average + "%";
+							}
+							return (
+								<PanelButton key={ratingType} {...{onPanelButtonHover, onPanelButtonClick, map, path: argumentPath, openPanel}}
+										panel={ratingType} text={ratingTypeInfo.displayText}>
+									<Span ml={5} style={{float: "right"}}>
+										{percentStr}
+										<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>
+											{/*ratingSet ? ratingSet.VKeys(true).length /*- 1*#/ : 0*/}
+											{ratings.length}
+										</sup>
+									</Span>
+								</PanelButton>
+							);
+						})()}
 					<Button text="..."
 						style={{
 							margin: "-1px 0 1px 0", height: 17, lineHeight: "12px", padding: 0,

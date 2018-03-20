@@ -35,15 +35,18 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 		return [{type: "significance", main: true}];
 	if (node.type == MapNodeType.Claim) {
 		let result: RatingTypeInfo[];
-		result = [{type: "degree", main: true}, {type: "significance", main: true}];
+		//result = [{type: "truth", main: true}]; //, {type: "significance", main: true}];
+		result = [{type: "truth", main: true}]; //, {type: "relevance", main: true}];
 		/*if ((node as MapNodeL2).link && (node as MapNodeL2).link.form == ClaimForm.YesNoQuestion) {
 			result.Remove(result.First(a=>a.type == "significance"));
 			result.Insert(0, {type: "significance", main: true});
 		}*/
 		return result;
 	}
-	if (node.type == MapNodeType.Argument)
-		return [{type: "strength", main: true}, {type: "impact", main: true}];
+	if (node.type == MapNodeType.Argument) {
+		//return [{type: "strength", main: true}, {type: "impact", main: true}];
+		return [{type: "relevance", main: true}, {type: "strength", main: true}];
+	}
 	Assert(false);
 }
 export function GetMainRatingType(node: MapNodeL2): RatingType {
@@ -257,4 +260,8 @@ export function GetClaimType(node: MapNodeL2) {
 		node.current.image ? ClaimType.Image :
 		ClaimType.Normal
 	);
+}
+
+export function ShouldNodeBeCombinedWithParent(node: MapNodeL3, parent: MapNodeL3) {
+	return node.type == MapNodeType.Claim && parent.children.VKeys(true).length == 1 && node.link.form != ClaimForm.YesNoQuestion;
 }

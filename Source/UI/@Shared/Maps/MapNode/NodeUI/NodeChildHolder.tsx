@@ -154,10 +154,12 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	GetChildrenCenterY() {
 		if (this.argumentsControlBar) {
 			//return upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0;
-			return this.upChildHolder.DOM.style.visibility != "hidden" ? $(this.argumentsControlBar.DOM).GetScreenRect().Center.y - $(this.childHolder.DOM).GetScreenRect().y : 0
+			return this.upChildHolder && this.upChildHolder.DOM.style.visibility != "hidden"
+				? $(this.argumentsControlBar.DOM).GetScreenRect().Center.y - $(this.childHolder.DOM).GetScreenRect().y
+				: 0
 		}
 		//return childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0,
-		return this.childHolder.DOM.style.visibility != "hidden" ? $(this.childHolder.DOM).GetScreenRect().height / 2 : 0;
+		return this.childHolder && this.childHolder.DOM.style.visibility != "hidden" ? $(this.childHolder.DOM).GetScreenRect().height / 2 : 0;
 	}
 	ReportChildrenCenterYChange() {
 		let {node, onChildrenCenterYChange} = this.props;
