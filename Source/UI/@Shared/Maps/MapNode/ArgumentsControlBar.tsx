@@ -32,6 +32,10 @@ export class ArgumentsControlBar extends BaseComponent<{map: Map, parentNode: Ma
 					<Pre>Sort by: </Pre>
 					<Select options={["Ratings", "Recent"]} style={{borderRadius: 5, outline: "none"}} value={"Ratings"} onChange={val=>{}}/>
 				</Row>*/}
+				{/*<Column>
+					<Row>Supporting arguments</Row>
+					<Row>Opposing arguments</Row>
+				</Column>*/}
 				<Column ml={0}> {/* vertical */}
 					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.Supporting}/>
 					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.Opposing} style={{marginTop: 1}}/>

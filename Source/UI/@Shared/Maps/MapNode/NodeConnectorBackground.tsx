@@ -9,7 +9,7 @@ import {GetNodeForm, GetRatingTypesForNode} from "../../../../Store/firebase/nod
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 
 type Props = {
-	node: MapNodeL3, mainBoxOffset: Vector2i, childNodes: MapNodeL3[],
+	node: MapNodeL3, linkSpawnPoint: number, childNodes: MapNodeL3[],
 	//childBoxOffsets: Vector2i[],
 	childBoxOffsets: {[key: number]: Vector2i},
 	shouldUpdate: boolean
@@ -24,7 +24,9 @@ type Props = {
 }))*/
 export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 	render() {
-		var {node, mainBoxOffset, childNodes, childBoxOffsets} = this.props;
+		var {node, linkSpawnPoint, childNodes, childBoxOffsets} = this.props;
+
+		let mainBoxOffset = new Vector2i(0, linkSpawnPoint);
 
 		return (
 			<svg className="clickThroughChain" style={{position: "absolute", overflow: "visible", zIndex: -1}}>

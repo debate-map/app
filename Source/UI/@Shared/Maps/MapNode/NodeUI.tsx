@@ -18,7 +18,7 @@ import {DN} from "js-vextensions";
 import {DataSnapshot} from "firebase";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {createSelector} from "reselect";
-import NodeUI_Inner from "./NodeUI_Inner";
+import {NodeUI_Inner} from "./NodeUI_Inner";
 import {createMarkupForStyles} from "react-dom/lib/CSSPropertyOperations";
 import NodeConnectorBackground from "./NodeConnectorBackground";
 import {Vector2i} from "js-vextensions";
@@ -29,7 +29,7 @@ import {MapNode, ClaimForm, MapNodeL2, AccessLevel, MapNodeL3, Polarity} from ".
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {GetNodeChildren, GetParentNode, IsRootNode, GetNodeChildrenL3, GetParentNodeL2, GetNodeID} from "../../../../Store/firebase/nodes";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {MapNodeType, MapNodeType_Info, GetNodeColor} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import {Column} from "react-vcomponents";
@@ -56,6 +56,10 @@ import {MapNodeRevision, ArgumentType} from "../../../../Store/firebase/nodes/@M
 import { PremiseAddHelper } from "UI/@Shared/Maps/MapNode/PremiseAddHelper";
 import { ArgumentsControlBar } from "UI/@Shared/Maps/MapNode/ArgumentsControlBar";
 import { AddArgumentButton } from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton";
+import classNames from "classnames";
+import chroma from "chroma-js";
+import { ChildPack, ChildLimitBar, NodeChildHolder } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
+import { RelevanceHolder, TruthHolder } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
 
 let nodesLocked = {};
 export function SetNodeUILocked(nodeID: number, locked: boolean, maxWait = 10000) {
@@ -122,16 +126,10 @@ let connector = (state, {node, path, map}: Props)=> {
 	};
 };
 
-let initialState = {
-	childrenWidthOverride: null as number, childrenCenterY: null as number,
-	svgInfo: null as {
-		mainBoxOffset: Vector2i,
-		oldChildBoxOffsets: {[key: number]: Vector2i},
-	},
-};
+
 
 @Connect(connector)
-export class NodeUI extends BaseComponentWithConnector(connector, initialState) {
+export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWidth: 0, expectedBoxHeight: 0, innerBoxOffset: 0}) {
 	static renderCount = 0;
 	static lastRenderTime = -1;
 	static ValidateProps(props) {
@@ -140,11 +138,6 @@ export class NodeUI extends BaseComponentWithConnector(connector, initialState) 
 		Assert(IsNodeL3(node), "Node supplied to NodeUI is not level-3!");
 	}
 	
-	constructor(props) {
-		super(props);
-		this.state = {svgInfo: {}} as any;
-	}
-
 	// for SetNodeUILocked() function above
 	waitForUnlockTimer: Timer;
 	shouldComponentUpdate(newProps, newState) {
@@ -170,8 +163,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, initialState) 
 			initialChildLimit, form, children, nodeView, nodeChildren, nodeChildren_sortValues, subnodes,
 			playingTimeline, playingTimeline_currentStepIndex, playingTimelineShowableNodes, playingTimelineVisibleNodes, playingTimeline_currentStepRevealNodes,
 			addedDescendants, editedDescendants} = this.props;
+		let {innerBoxOffset} = this.state;
 		let expanded = nodeView && nodeView.expanded;
-		let {childrenWidthOverride, childrenCenterY, svgInfo} = this.state;
 		if (ShouldLog(a=>a.nodeRenders)) {
 			if (logTypes.nodeRenders_for) {
 				if (logTypes.nodeRenders_for == node._id) {
@@ -195,19 +188,12 @@ export class NodeUI extends BaseComponentWithConnector(connector, initialState) 
 		}*/
 
 		let separateChildren = node.type == MapNodeType.Claim;
-		type ChildPack = {origIndex: number, node: MapNodeL3};
 		let childPacks: ChildPack[] = nodeChildren.map((child, index)=>({origIndex: index, node: child}));
 		if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
 			childPacks = childPacks.filter(pack=>playingTimelineVisibleNodes.Contains(path + "/" + pack.node._id));
 		}
 		let upChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalPolarity == Polarity.Supporting) : [];
 		let downChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalPolarity == Polarity.Opposing) : [];
-
-		let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
-		let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
-		// if the map's root node, or an argument node, show all children
-		let showAll = node._id == map.rootNode || node.type == MapNodeType.Argument;
-		if (showAll) [childLimit_up, childLimit_down] = [100, 100];
 
 		// apply sorting
 		if (separateChildren) {
@@ -223,13 +209,10 @@ export class NodeUI extends BaseComponentWithConnector(connector, initialState) 
 		}
 
 		let showArgumentsControlBar = node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading;
-		// not using atm; instead, we're just placing these buttons in the argument-control-bar
-		let showAddArgumentButtons = false; //node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading; // && nodeChildren.length > 0;
 
-		//let {width, expectedHeight} = this.GetMeasurementInfo(this.props, this.state);
 		let {width, expectedHeight} = this.GetMeasurementInfo();
-		let innerBoxOffset = this.GetInnerBoxOffset(expectedHeight, showAddArgumentButtons, childrenCenterY);
-		if (!expanded) innerBoxOffset = 0;
+		/*let innerBoxOffset = this.GetInnerBoxOffset(expectedHeight, showAddArgumentButtons, childrenCenterY);
+		if (!expanded) innerBoxOffset = 0;*/
 
 		let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
 		let limitBar_above = node.type == MapNodeType.Argument && node.finalPolarity == Polarity.Supporting;
@@ -239,22 +222,29 @@ export class NodeUI extends BaseComponentWithConnector(connector, initialState) 
 
 		let textOutline = "rgba(10,10,10,1)";
 
-		let RenderChildPack = (pack: ChildPack, index: number, collection, direction = "down" as "up" | "down")=> {
-			/*if (pack.node.premiseAddHelper) {
-				return <PremiseAddHelper mapID={map._id} parentNode={node} parentPath={path}/>;
-			}*/
+		// temp
+		if (node.current.titles == null && childPacks.length) {
+			let pack = childPacks[0];
 
+			let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
+			let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
+			let showAll = node._id == map.rootNode || node.type == MapNodeType.Argument;
+			//return <ChildPackUI {...{map, path, childrenWidthOverride, childLimit_up, childLimit_down, showAll}} pack={pack} index={0} collection={childPacks}/>;*/
+
+			let index = 0;
+			let direction = "down" as any;
+			let childrenWidthOverride = null;
+			let collection = childPacks;
 			let childLimit = direction == "down" ? childLimit_down : childLimit_up;
 			return (
-				<NodeUI key={pack.node._id} ref={c=>this.childBoxes[pack.node._id] = GetInnerComp(c)} map={map} node={pack.node}
-						path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
+				<NodeUI key={pack.node._id} map={map} node={pack.node}
+						path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={()=>{}}>
 					{index == (direction == "down" ? childLimit - 1 : 0) && !showAll && (collection.length > childLimit || childLimit != initialChildLimit) &&
 						<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit}} direction={direction} childCount={collection.length}/>}
 				</NodeUI>
 			);
 		}
 		
-		this.childBoxes = {};
 		let nodeUIResult_withoutSubnodes = (
 			<div ref={c=>this.nodeUI = c} className="NodeUI clickThrough"
 					style={E({position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}, style)}>
@@ -273,12 +263,14 @@ export class NodeUI extends BaseComponentWithConnector(connector, initialState) 
 							<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 								<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 							</div>}
-						{showAddArgumentButtons &&
-							<AddArgumentButton map={map} node={node} path={path} polarity={Polarity.Supporting}/>}
+						{node.type == MapNodeType.Claim && expanded && node.link.form != ClaimForm.YesNoQuestion &&
+							<TruthHolder {...{map, node, path, nodeView, nodeChildren, childPacks}}/>}
 						<NodeUI_Inner ref="innerBox" {...{map, node, nodeView, path, width, widthOverride}}
 							style={E(
 								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
 							)}/>
+						{node.type == MapNodeType.Claim && expanded && node.link.form != ClaimForm.YesNoQuestion &&
+							<RelevanceHolder {...{map, node, path, nodeView, nodeChildren, childPacks}}/>}
 						{/*showBelowMessage &&
 							<Div ct style={{
 								//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
@@ -287,8 +279,6 @@ export class NodeUI extends BaseComponentWithConnector(connector, initialState) 
 							}}>
 								Needs 2 premises to be visible.
 							</Div>*/}
-						{showAddArgumentButtons &&
-							<AddArgumentButton map={map} node={node} path={path} polarity={Polarity.Opposing}/>}
 					</Column>
 					{!limitBar_above && children}
 				</div>
@@ -326,36 +316,13 @@ export class NodeUI extends BaseComponentWithConnector(connector, initialState) 
 						{editedDescendants > 0 &&
 							<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Edit)},.8)`}}>{editedDescendants} edited</Row>}
 					</Column>}
-				{expanded &&
-					<Column ref="childHolder" className="childHolder clickThrough" style={E(
-						{
-							marginLeft: childPacks.length || showArgumentsControlBar ? 30 : 0,
-							//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
-						},
-						//!expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
-					)}>
-						{svgInfo.mainBoxOffset &&
-							<NodeConnectorBackground node={node} mainBoxOffset={svgInfo.mainBoxOffset} shouldUpdate={this.lastRender_source == RenderSource.SetState}
-								childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
-						
-						{!separateChildren && childPacks.slice(0, childLimit_down).map((pack, index)=> {
-							return RenderChildPack(pack, index, childPacks);
-						})}
-						{separateChildren &&
-							<Column ref="upChildHolder" ct className="upChildHolder">
-								{upChildPacks.slice(-childLimit_up).map((pack, index)=> {
-									return RenderChildPack(pack, index, upChildPacks, "up");
-								})}
-							</Column>}
-						{showArgumentsControlBar &&
-							<ArgumentsControlBar map={map} parentNode={node} parentPath={path} node={node}/>}
-						{separateChildren &&
-							<Column ref="downChildHolder" ct>
-								{downChildPacks.slice(0, childLimit_down).map((pack, index)=> {
-									return RenderChildPack(pack, index, downChildPacks, "down");
-								})}
-							</Column>}
-					</Column>}
+				<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, childPacks, separateChildren, showArgumentsControlBar}}
+					linkSpawnPoint={innerBoxOffset}
+					onChildrenCenterYChange={childrenCenterY=> {
+						let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;
+						let innerBoxOffset = (childrenCenterY - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
+						this.SetState({innerBoxOffset});
+					}}/>
 			</div>
 		);
 
@@ -368,13 +335,12 @@ export class NodeUI extends BaseComponentWithConnector(connector, initialState) 
 				{subnodes.map((subnode, index)=> {
 					return (
 						<NodeUI key={index} map={map} node={subnode} asSubnode={true} style={E({marginTop: -5})}
-							path={`${path}/L${subnode._id}`} widthOverride={widthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}/>
+							path={`${path}/L${subnode._id}`} widthOverride={widthOverride} onHeightOrPosChange={()=>{}}/>
 					);
 				})}
 			</div>
 		);
 	}
-	childBoxes: {[key: number]: NodeUI} = {};
 
 	//GetMeasurementInfo(/*props: Props, state: State*/) {
 	measurementInfo_cache;
@@ -401,24 +367,6 @@ export class NodeUI extends BaseComponentWithConnector(connector, initialState) 
 		return this.measurementInfo_cache;
 	}
 
-	lastHeight = 0;
-	lastPos = 0;
-	PostRender() {
-		//if (this.lastRender_source == RenderSource.SetState) return;
-
-		let height = $(FindDOM(this)).outerHeight();
-		let pos = this.state.childrenCenterY|0;
-		if (height != this.lastHeight) {
-			this.OnHeightChange();
-		} else if (pos != this.lastPos) {
-			this.OnPosChange();
-		} else {
-			if (this.lastRender_source == RenderSource.SetState) return;
-			this.UpdateState();
-		}
-		this.lastHeight = height;
-		this.lastPos = pos;
-	}
 	ComponentDidMount() {
 		let {node, userViewedNodes} = this.props;
 		if (GetUserID() == null) return;
@@ -427,129 +375,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, initialState) 
 		if (userViewedNodes_doneLoading && !(userViewedNodes || {}).VKeys(true).map(ToInt).Contains(node._id)) {
 			new NotifyNodeViewed({nodeID: node._id}).Run();
 		}
-	}
-	OnChildHeightOrPosChange_updateStateQueued = false;
-	OnChildHeightOrPosChange() {
-		let {node} = this.props;
-		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}\ncenterY:${this.state.childrenCenterY}`)
-
-		//this.OnHeightOrPosChange();
-		// wait one frame, so that if multiple calls to this method occur in the same frame, we only have to call OnHeightOrPosChange() once
-		if (!this.OnChildHeightOrPosChange_updateStateQueued) {
-			this.OnChildHeightOrPosChange_updateStateQueued = true;
-			requestAnimationFrame(()=> {
-				if (!this.mounted) return;
-				this.UpdateState();
-				this.OnChildHeightOrPosChange_updateStateQueued = false;
-			});
-		}
-	}
-
-	OnHeightChange() {
-		let {node, onHeightOrPosChange} = this.props;
-		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
-				}centerY:${this.state.childrenCenterY}`);
-		
-		//this.UpdateState(true);
-		this.UpdateState();
-		if (onHeightOrPosChange) onHeightOrPosChange();
-	}
-	OnPosChange() {
-		let {node, onHeightOrPosChange} = this.props;
-		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
-				}centerY:${this.state.childrenCenterY}`);
-
-		if (onHeightOrPosChange) onHeightOrPosChange();
-	}
-	GetInnerBoxOffset(expectedHeight, showAddArgumentButtons, childrenCenterY) {
-		let {map, node, path, children, subnodes, nodeView, nodeChildren} = this.props;
-
-		let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;
-		if (showAddArgumentButtons) {
-			distFromInnerBoxTopToMainBoxCenter += 29;
-		}
-
-		let innerBoxOffset = ((childrenCenterY|0) - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
-		return innerBoxOffset;
-	}
-	UpdateState(forceUpdate = false) {
-		let {map, node, path, children, subnodes, nodeView, nodeChildren} = this.props;
-		let expanded = nodeView && nodeView.expanded;
-		//let {childHolder, upChildHolder} = this.refs;
-		let childHolder = $(this.nodeUI).children(".childHolder");
-		let upChildHolder = childHolder.children(".upChildHolder");
-		let downChildHolder = childHolder.children(".downChildHolder");
-		let argumentsControlBar = childHolder.children(".argumentsControlBar");
-		/*let firstChild = (upChildHolder.length ? upChildHolder : childHolder).children().ToList()[0];
-		let lastChild = (downChildHolder.length ? downChildHolder : childHolder).children().ToList().Last();*/
-
-		// if children are supposed to show, but are not rendered yet, do not call set-state (yet)
-		/*if (expanded) {
-			if (upChildHolder.length) {
-				if (upChildHolder.css("display") == "none") return;
-			} else {
-				if (childHolder.css("display") == "none") return;
-			}
-		}*/
-
-		let childBoxes = this.childBoxes.VValues().filter(a=>a != null);
-		let newState = E(
-			expanded &&
-				{childrenWidthOverride: childBoxes.map(comp=>comp.GetMeasurementInfo().width).concat(0).Max(null, true)},
-			/*{childrenCenterY: upChildHolder
-				? (upChildHolder && upChildHolder.style.display != "none" ? upChildHolder.clientHeight : 0)
-				: (childHolder && childHolder.style.display != "none" ? childHolder.clientHeight / 2 : 0)}*/
-			expanded && {childrenCenterY: argumentsControlBar.length
-				//? (upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0)
-				? (upChildHolder.css("visibility") != "hidden" ? argumentsControlBar.GetScreenRect().Center.y - childHolder.GetScreenRect().y : 0)
-				//: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)},
-				: (childHolder.css("visibility") != "hidden" ? childHolder.outerHeight() / 2 : 0)},
-			/*{childrenStartY: upChildHolder.length
-				? (upChildHolder.css("display") != "none" ? firstChild.GetScreenRect().y -  : 0)
-				: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)}*/
-		) as any; //as State;
-
-		//let {width, expectedHeight} = this.GetMeasurementInfo(this.props, E(this.state, newState) as State);
-		let {expectedBoxWidth, expectedHeight} = this.GetMeasurementInfo();
-
-		let showAddArgumentButtons = false; //node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading; // && nodeChildren.length > 0;
-		let innerBoxOffset = this.GetInnerBoxOffset(expectedHeight, showAddArgumentButtons, newState.childrenCenterY);
-		//if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
-		//if (this.refs.childHolder) {
-		if (expanded && this.refs.childHolder) {
-			let holderOffset = new Vector2i($(FindDOM(this.refs.childHolder)).offset());
-			let innerBox = $(FindDOM(this.refs.innerBox));
-			//var mainBoxOffset = new Vector2i(innerBox.offset()).Minus(holderOffset);
-			let mainBoxOffset = new Vector2i(0, innerBoxOffset);
-			//mainBoxOffset = mainBoxOffset.Plus(new Vector2i(innerBox.width(), innerBox.outerHeight() / 2));
-			mainBoxOffset = mainBoxOffset.Plus(new Vector2i(-30, innerBox.outerHeight() / 2));
-
-			if (showAddArgumentButtons) {
-				mainBoxOffset.y += 29;
-			}
-
-			let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
-			let limitBar_above = node.type == MapNodeType.Argument && node.finalPolarity == Polarity.Supporting;
-			//if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
-			if (showLimitBar && limitBar_above) mainBoxOffset.y += ChildLimitBar.HEIGHT;
-
-			let oldChildBoxOffsets = this.childBoxes.Props().Where(pair=>pair.value != null).ToMap(pair=>pair.name, pair=> {
-				//let childBox = FindDOM_(pair.value).find("> div:first-child > div"); // get inner-box of child
-				let childBox = $(FindDOM(pair.value)).find(".NodeUI_Inner").first(); // get inner-box of child
-				let childBoxOffset = new Vector2i(childBox.offset()).Minus(holderOffset);
-				childBoxOffset = childBoxOffset.Plus(new Vector2i(0, childBox.outerHeight() / 2));
-				return childBoxOffset;
-			});
-			newState.svgInfo = {mainBoxOffset, oldChildBoxOffsets};
-		}
-		
-		let cancelIfStateSame = !forceUpdate && subnodes.length == 0;
-		var changedState = this.SetState(newState, null, cancelIfStateSame, true);
-		//Log(`Changed state? (${this.props.node._id}): ` + changedState);
-	}
+	}	
 }
 
 /*interface JQuery {
@@ -560,44 +386,6 @@ export class NodeUI extends BaseComponentWithConnector(connector, initialState) 
 	var referenceControlOffset = referenceControl.offset();
 	return {left: offset.left - referenceControlOffset.left, top: offset.top - referenceControlOffset.top};
 });*/
-
-@Connect((state, props)=> ({
-	initialChildLimit: State(a=>a.main.initialChildLimit),
-}))
-class ChildLimitBar extends BaseComponent
-		<{map: Map, path: string, childrenWidthOverride: number, direction: "up" | "down", childCount: number, childLimit: number}
-			& Partial<{initialChildLimit: number}>,
-		{}> {
-	static HEIGHT = 36;
-	render() {
-		let {map, path, childrenWidthOverride, direction, childCount, childLimit, initialChildLimit} = this.props;
-		return (
-			<Row style={{
-				//position: "absolute", marginTop: -30,
-				[direction == "up" ? "marginBottom" : "marginTop"]: 10, width: childrenWidthOverride, cursor: "default",
-			}}>
-				<Button text={
-					<Row>
-						<Icon icon={`arrow-${direction}`} size={15}/>
-						<Div ml={3}>{childCount > childLimit ? childCount - childLimit : null}</Div>
-					</Row>
-				} title="Show more"
-				enabled={childLimit < childCount} style={{flex: 1}} onClick={()=> {
-					store.dispatch(new ACTMapNodeChildLimitSet({mapID: map._id, path, direction, value: (childLimit + 3).KeepAtMost(childCount)}));
-				}}/>
-				<Button ml={5} text={
-					<Row>
-						<Icon icon={`arrow-${direction == "up" ? "down" : "up"}`} size={15}/>
-						{/*<Div ml={3}>{childCount > childLimit ? childCount - childLimit : null}</Div>*/}
-					</Row>
-				} title="Show less"
-				enabled={childLimit > initialChildLimit} style={{flex: 1}} onClick={()=> {
-					store.dispatch(new ACTMapNodeChildLimitSet({mapID: map._id, path, direction, value: (childLimit - 3).KeepAtLeast(initialChildLimit)}));
-				}}/>
-			</Row>
-		);
-	}
-}
 
 function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 	let nodeTypeInfo = MapNodeType_Info.for[node.type];

@@ -15,7 +15,7 @@ import {BaseComponent, BaseProps, FindDOM} from "react-vextensions";
 import {Pre} from "react-vcomponents";
 import {MapNode, MapNodeL2, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeDisplayText, GetRatingTypesForNode, AsNodeL3} from "../../../../Store/firebase/nodes/$node";
-import NodeUI_Inner from "./NodeUI_Inner";
+import {NodeUI_Inner} from "./NodeUI_Inner";
 import DefinitionsPanel from "./NodeUI/Panels/DefinitionsPanel";
 import SocialPanel from "./NodeUI/Panels/SocialPanel";
 import TagsPanel from "./NodeUI/Panels/TagsPanel";

@@ -10,7 +10,7 @@ import {Vector2i, VRect} from "js-vextensions";
 import {NodeUI} from "./MapNode/NodeUI";
 import {ScrollView} from "react-vscrollview";
 import {GetDistanceBetweenRectAndPoint} from "../../../Frame/General/Geometry";
-import NodeUI_Inner from "./MapNode/NodeUI_Inner";
+import {NodeUI_Inner} from "./MapNode/NodeUI_Inner";
 //import ReactResizeDetector from "react-resize-detector"; // this one doesn't seem to work reliably -- at least for the map-ui
 import ResizeSensor from "react-resize-sensor";
 import {WaitXThenRun, Timer, SleepAsync} from "js-vextensions";

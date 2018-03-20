@@ -14,7 +14,7 @@ import {TimelineStep} from "../../../../Store/firebase/timelineSteps/@TimelineSt
 import {GetPlayingTimelineStepIndex, ACTMap_PlayingTimelineAppliedStepSet, GetPlayingTimelineAppliedStepIndex} from "../../../../Store/main/maps/$map";
 import {ReplacementFunc} from "../../../../Frame/ReactComponents/VReactMarkdown";
 import {Segment} from "../../../../Frame/General/RegexHelpers";
-import NodeUI_Inner from "../MapNode/NodeUI_Inner";
+import {NodeUI_Inner} from "../MapNode/NodeUI_Inner";
 import {GetNode} from "Store/firebase/nodes";
 import {MapNode, MapNodeL2, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetDataAsync, GetAsync} from "Frame/Database/DatabaseHelpers";

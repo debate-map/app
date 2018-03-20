@@ -1,7 +1,7 @@
 import {replace, push} from "redux-little-router";
 import {ToInt} from "js-vextensions";
 import {Vector2i} from "js-vextensions";
-import NodeUI_Inner from "../../UI/@Shared/Maps/MapNode/NodeUI_Inner";
+import {NodeUI_Inner} from "../../UI/@Shared/Maps/MapNode/NodeUI_Inner";
 import {GetOpenMapID, ACTSetPage, ACTSetSubpage, ACTNotificationMessageAdd, GetPage, GetSubpage} from "../../Store/main";
 import {GetMap} from "../../Store/firebase/maps";
 import {GetNodeView, GetMapView, GetSelectedNodeID, GetViewOffset, GetFocusedNodeID} from "../../Store/main/mapViews";

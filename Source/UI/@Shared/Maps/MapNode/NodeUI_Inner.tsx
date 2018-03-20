@@ -1,7 +1,7 @@
 import {Image} from "../../../../Store/firebase/images/@Image";
 import {GetImage} from "../../../../Store/firebase/images";
 import {connect} from "react-redux";
-import {BaseComponent, AddGlobalStyle, GetInnerComp, FindDOM} from "react-vextensions";
+import {BaseComponent, AddGlobalStyle, GetInnerComp, FindDOM, BaseComponentWithConnector} from "react-vextensions";
 import {Pre, Div, TextArea_AutoSize} from "react-vcomponents";
 import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
 import {VMenu} from "react-vmenu";
@@ -70,11 +70,8 @@ import {MapNodeRevision_titlePattern} from "../../../../Store/firebase/nodes/@Ma
 type Props = {
 	map: Map, node: MapNodeL3, nodeView: MapNodeView, path: string, width: number, widthOverride?: number,
 	panelPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
-} & Partial<{
-	form: ClaimForm, ratingsRoot: RatingsRoot, mainRating_average: number, userID: string,
-	changeType: ChangeType,
-}>;
-@Connect((state: RootState, {map, node, path, ratingsRoot}: Props)=> {
+};
+let connector = (state, {map, node, path}: Props)=> {
 	let sinceTime = GetTimeFromWhichToShowChangedNodes(map._id);
 	/*let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
 	let ownNodeChanged = pathsToChangedNodes.Any(a=>a.split("/").Any(b=>b == node._id));
@@ -88,15 +85,17 @@ type Props = {
 		node.current.createdAt > sinceTime ? ChangeType.Edit :
 		null;
 
-	return ({
+	return {
 		form: GetNodeForm(node, path),
 		ratingsRoot: GetNodeRatingsRoot(node._id),
 		mainRating_average: GetRatingAverage(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type),
 		userID: GetUserID(),
 		changeType,
-	});
-})
-export default class NodeUI_Inner extends BaseComponent<Props, {hovered: boolean, hoverPanel: string, hoverTermID: number, /*local_selected: boolean,*/ local_openPanel: string}> {
+	};
+};
+@Connect(connector)
+export class NodeUI_Inner extends BaseComponentWithConnector(connector,
+		{hovered: false, hoverPanel: null as string, hoverTermID: null as number, /*local_selected: boolean,*/ local_openPanel: null as string}) {
 	static defaultProps = {panelPosition: "left"};
 	titlePanel: TitlePanel;
 	render() {

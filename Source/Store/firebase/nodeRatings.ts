@@ -8,6 +8,7 @@ import {GetNodeChildren, GetNode, GetNodeChildrenL2} from "./nodes";
 import {ClaimForm, MapNodeL3} from "./nodes/@MapNode";
 import {GetNodeL2} from "./nodes/$node";
 import {MapNodeType} from "./nodes/@MapNodeType";
+import {emptyObj} from "../../Frame/Store/ReducerUtils";
 
 export function GetNodeRatingsRoot(nodeID: number) {
 	//RequestPaths(GetPaths_NodeRatingsRoot(nodeID));
@@ -19,7 +20,10 @@ export function GetRatingSet(nodeID: number, ratingType: RatingType, path?: stri
 	if (ratingType == "strength") {
 		let node = GetNodeL2(nodeID);
 		if (node == null) return null;
-		return GetArgumentStrengthPseudoRatingSet(node, GetNodeChildrenL2(node));
+		let nodeChildren = GetNodeChildrenL2(node);
+		if (nodeChildren.Any(a=>a == null)) return emptyObj;
+		let premises = nodeChildren.filter(a=>a == null || a.type == MapNodeType.Claim);
+		return GetArgumentStrengthPseudoRatingSet(node, premises);
 	}
 	let ratingsRoot = GetNodeRatingsRoot(nodeID);
 	return ratingsRoot ? ratingsRoot[ratingType] : null;
