@@ -88,7 +88,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 		return (
 			<div ref="root" style={{position: "relative"/*, minWidth: 496*/}}
 					onClick={e=> {
-						if (ratingType == "strength") return;
+						if (ratingType == "impact") return;
 						let target = $(FindDOM(e.target));
 						//let chart = (target as any).plusParents().filter(".recharts-cartesian-grid");
 						let chartHolder = (target as any).plusParents().filter("div.recharts-wrapper");
@@ -137,8 +137,8 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 				</div>
 				<div style={{display: "flex", alignItems: "center", justifyContent: "flex-end"}}>
 					<Pre style={{marginRight: "auto", fontSize: 12, color: "rgba(255,255,255,.5)"}}>
-						{ratingType == "strength"
-							? `Cannot rate this directly. Instead, rate the premises and impact-premise.`
+						{ratingType == "impact"
+							? `Cannot rate impact directly. Instead, rate the "truth" and "relevance".`
 							: `Click to rate. Right-click to remove rating.`}
 					</Pre>
 					{/*Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/>*/}

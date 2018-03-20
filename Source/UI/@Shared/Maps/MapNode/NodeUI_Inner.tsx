@@ -37,7 +37,7 @@ import RatingsPanel from "./NodeUI/Panels/RatingsPanel";
 import DiscussionPanel from "./NodeUI/Panels/DiscussionPanel";
 import {Row} from "react-vcomponents";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
-import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetNodeForm, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
+import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetNodeForm, GetNodeL3, ShouldNodeBeCombinedWithParent} from "../../../../Store/firebase/nodes/$node";
 import {ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {VURL} from "js-vextensions";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
@@ -85,11 +85,29 @@ let connector = (state, {map, node, path}: Props)=> {
 		node.current.createdAt > sinceTime ? ChangeType.Edit :
 		null;
 
+	let parent = GetNodeL3(SlicePath(path, 1));
+	let combineWithParentArgument = ShouldNodeBeCombinedWithParent(node, parent);
+	let ratingReversed = ShouldRatingTypeBeReversed(node);
+
+	let mainRatingType = GetRatingTypesForNode(node).FirstOrX(null, {}).type;
+	let ratingNode = node;
+	//let ratingNodePath = path;
+	if (combineWithParentArgument) {
+		mainRatingType = "impact";
+		ratingNode = parent;
+	}
+	let mainRating_average = GetRatingAverage(ratingNode._id, mainRatingType);
+	let mainRating_fillPercent = GetFillPercentForRatingAverage(ratingNode, mainRating_average, ratingReversed);
+	let mainRating_mine = GetRatingValue(ratingNode._id, mainRatingType, GetUserID());
+	let mainRating_myFillPercent = mainRating_mine != null ? GetFillPercentForRatingAverage(ratingNode, mainRating_mine, ratingReversed) : null;
+
 	return {
 		form: GetNodeForm(node, path),
 		ratingsRoot: GetNodeRatingsRoot(node._id),
-		mainRating_average: GetRatingAverage(node._id, GetRatingTypesForNode(node).FirstOrX(null, {}).type),
-		userID: GetUserID(),
+		mainRating_average,
+		mainRating_fillPercent,
+		mainRating_mine,
+		mainRating_myFillPercent,
 		changeType,
 	};
 };
@@ -100,8 +118,9 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 	titlePanel: TitlePanel;
 	render() {
 		let {map, node, nodeView, path, width, widthOverride,
-			panelPosition, useLocalPanelState, style,
-			form, ratingsRoot, mainRating_average, userID, changeType} = this.props;
+			panelPosition, useLocalPanelState, style, form,
+			ratingsRoot, mainRating_average, mainRating_fillPercent, mainRating_mine, mainRating_myFillPercent, 
+			changeType} = this.props;
 		let {hovered, hoverPanel, hoverTermID, /*local_selected,*/ local_openPanel} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let backgroundColor = GetNodeColor(node);
@@ -109,16 +128,11 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 		let barSize = 5;
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
 		let isSubnode = IsNodeSubnode(node);
-		let mainRatingType = GetRatingTypesForNode(node).FirstOrX(null, {}).type;
 
-		let parentNode = GetNodeL3(SlicePath(path, 1));
+		let parent = GetNodeL3(SlicePath(path, 1));
+		let combineWithParentArgument = ShouldNodeBeCombinedWithParent(node, parent);
 		let nodeReversed = form == ClaimForm.Negation;
-		let ratingReversed = ShouldRatingTypeBeReversed(node);
-
-		let mainRating_mine = GetRatingValue(node._id, mainRatingType, userID);
-		let mainRating_fillPercent = GetFillPercentForRatingAverage(node, mainRating_average, ratingReversed);
-		let mainRating_myFillPercent = mainRating_mine != null ? GetFillPercentForRatingAverage(node, mainRating_mine, ratingReversed) : null;
-
+		
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered; //|| local_selected;
 		let panelToShow = hoverPanel || local_openPanel || (nodeView && nodeView.openPanel);
 		let subPanelShow = node.type == MapNodeType.Claim && (node.current.contentNode || node.current.image);
@@ -212,8 +226,8 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 						padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 					}}>
 						{ratingTypes.Contains(panelToShow) && (()=> {
-							if (panelToShow == "relevance" && node.type == MapNodeType.Claim) {
-								let argumentNode = parentNode;
+							if (["impact", "relevance"].Contains(panelToShow) && node.type == MapNodeType.Claim) {
+								let argumentNode = parent;
 								let argumentPath = SlicePath(path, 1);
 								let ratings = GetRatings(argumentNode._id, panelToShow as RatingType);
 								return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as RatingType} ratings={ratings}/>;

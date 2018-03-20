@@ -47,6 +47,17 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 		let nodeReversed = form == ClaimForm.Negation;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
+		let combinedWithParent = ShouldNodeBeCombinedWithParent(node, parentNode);
+		if (combinedWithParent) {
+			var argumentNode = parentNode;
+			var argumentPath = SlicePath(path, 1);
+		}
+
+		let ratingTypes = GetRatingTypesForNode(node);
+		if (argumentNode) {
+			ratingTypes = [{type: "impact" as RatingType, main: true}].concat(ratingTypes).concat([{type: "relevance" as RatingType, main: true}]);
+		}
+
 		return (
 			<div style={E(
 				{display: "flex", flexDirection: "column", whiteSpace: "nowrap", zIndex: asHover ? 6 : 5},
@@ -56,19 +67,23 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 			)}>
 				{children}
 				<div style={{position: "relative", background: backgroundColor.alpha(.95).css(), borderRadius: 5, boxShadow: `rgba(0,0,0,1) 0px 0px 2px`}}>
-					{GetRatingTypesForNode(node).map((ratingInfo, index)=> {
-						let ratingTypeInfo = GetRatingTypeInfo(ratingInfo.type, node, parentNode, path);
+					{ratingTypes.map((ratingInfo, index)=> {
+						let nodeForRatingType = combinedWithParent && ["impact", "relevance"].Contains(ratingInfo.type) ? argumentNode : node; 
+						let pathForRatingType = combinedWithParent && ["impact", "relevance"].Contains(ratingInfo.type) ? argumentPath : path; 
+						let parentNodeForRatingType = GetParentNodeL3(pathForRatingType);
+
+						let ratingTypeInfo = GetRatingTypeInfo(ratingInfo.type, nodeForRatingType, parentNodeForRatingType, pathForRatingType);
 						//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
 
 						let percentStr = "...";
-						let ratings = GetRatings(node._id, ratingInfo.type);
-						let average = GetRatingAverage(node._id, ratingInfo.type, null, -1);
+						let ratings = GetRatings(nodeForRatingType._id, ratingInfo.type);
+						let average = GetRatingAverage(nodeForRatingType._id, ratingInfo.type, null, -1);
 						if (average != -1) {
-							average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(node));
+							average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(nodeForRatingType));
 							percentStr = average + "%";
 						}
 						return (
-							<PanelButton key={ratingInfo.type} {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}}
+							<PanelButton key={ratingInfo.type} {...{onPanelButtonHover, onPanelButtonClick, map, path: pathForRatingType, openPanel}}
 									panel={ratingInfo.type} text={ratingTypeInfo.displayText} style={E(index == 0 && {marginTop: 0, borderRadius: "5px 5px 0 0"})}>
 								<Span ml={5} style={{float: "right"}}>
 									{percentStr}
@@ -80,35 +95,6 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 							</PanelButton>
 						);
 					})}
-					{ShouldNodeBeCombinedWithParent(node, parentNode) &&
-						(()=> {
-							let argumentNode = parentNode;
-							let argumentPath = SlicePath(path, 1);
-
-							let ratingType = "relevance" as RatingType;
-							let ratingTypeInfo = GetRatingTypeInfo(ratingType, parentNode, GetParentNodeL3(argumentPath), argumentPath);
-							//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
-
-							let percentStr = "...";
-							let ratings = GetRatings(argumentNode._id, ratingType);
-							let average = GetRatingAverage(argumentNode._id, ratingType, null, -1);
-							if (average != -1) {
-								average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(argumentNode));
-								percentStr = average + "%";
-							}
-							return (
-								<PanelButton key={ratingType} {...{onPanelButtonHover, onPanelButtonClick, map, path: argumentPath, openPanel}}
-										panel={ratingType} text={ratingTypeInfo.displayText}>
-									<Span ml={5} style={{float: "right"}}>
-										{percentStr}
-										<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>
-											{/*ratingSet ? ratingSet.VKeys(true).length /*- 1*#/ : 0*/}
-											{ratings.length}
-										</sup>
-									</Span>
-								</PanelButton>
-							);
-						})()}
 					<Button text="..."
 						style={{
 							margin: "-1px 0 1px 0", height: 17, lineHeight: "12px", padding: 0,

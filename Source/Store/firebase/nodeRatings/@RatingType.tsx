@@ -12,8 +12,8 @@ import { ArgumentType } from "Store/firebase/nodes/@MapNodeRevision";
 //export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 //export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
 //export const ratingTypes = ["significance", "neutrality", "probability", "truth", "impact", "strength"];
-export const ratingTypes = ["significance", "neutrality", "truth", "relevance", "strength"];
-export type RatingType = "significance" | "neutrality" | "truth" | "relevance" | "strength";
+export const ratingTypes = ["significance", "neutrality", "truth", "relevance", "impact"];
+export type RatingType = "significance" | "neutrality" | "truth" | "relevance" | "impact";
 
 export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, parent: MapNodeL3, path: string) {
 	let link = GetLinkUnderParent(node._id, parent);
@@ -35,8 +35,8 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 	}*/ else if (ratingType == "truth") {
 		//result.description = "To what degree do you consider this statement true? (0: completely false, 50: true to a basic extent, 100: true to a high extent)";
 		result.description = "To what degree do you consider this statement true? (0: completely false, 50: somewhat true, 100: completely true)";
-	} else if (ratingType == "strength") {
-		result.description = "Argument strength is calculated based on the ratings given to its premises and impact-premise.";
+	} else if (ratingType == "impact") {
+		result.description = "Argument impact is calculated by combining (multiplying) the truth and relevance ratings.";
 	} else if (ratingType == "relevance") {
 		Assert(node.type == MapNodeType.Argument, `Invalid state. Node with rating-type "relevance" should be an argument. @path:${path}`);
 
@@ -65,7 +65,7 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 
 		/*result.description = `If ${premiseCountStr} of this argument were true (to a high extent), ${""
 			}how much would it impact your ${grandParentRatingType} rating for the parent claim? (0: not at all, 50: moderately, 100: game-changer)`;*/
-		result.description = `How relevant/impactful is this statement toward the parent claim? (0: not at all, 50: moderately, 100: game-changer)`;
+		result.description = `Assuming it were true, how relevant/impactful would this statement be toward the parent claim? (0: not at all, 50: moderately, 100: game-changer)`;
 		//let supporting = parent.link.polarity == Polarity.Supporting;
 	} else {
 		Assert(false, `Invalid rating type: ${ratingType}`);

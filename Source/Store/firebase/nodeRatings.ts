@@ -1,4 +1,4 @@
-import {GetArgumentStrengthPseudoRating, GetArgumentStrengthPseudoRatingSet} from "../../Frame/Store/RatingProcessor";
+import {GetArgumentImpactPseudoRating, GetArgumentImpactPseudoRatingSet} from "../../Frame/Store/RatingProcessor";
 import {RatingType} from "../../Store/firebase/nodeRatings/@RatingType";
 import { GetData, GetData_Options } from "../../Frame/Database/DatabaseHelpers";
 import {CachedTransform} from "js-vextensions";
@@ -17,13 +17,13 @@ export function GetNodeRatingsRoot(nodeID: number) {
 
 // path is needed if you want 
 export function GetRatingSet(nodeID: number, ratingType: RatingType, path?: string) {
-	if (ratingType == "strength") {
+	if (ratingType == "impact") {
 		let node = GetNodeL2(nodeID);
 		if (node == null) return null;
 		let nodeChildren = GetNodeChildrenL2(node);
 		if (nodeChildren.Any(a=>a == null)) return emptyObj;
 		let premises = nodeChildren.filter(a=>a == null || a.type == MapNodeType.Claim);
-		return GetArgumentStrengthPseudoRatingSet(node, premises);
+		return GetArgumentImpactPseudoRatingSet(node, premises);
 	}
 	let ratingsRoot = GetNodeRatingsRoot(nodeID);
 	return ratingsRoot ? ratingsRoot[ratingType] : null;

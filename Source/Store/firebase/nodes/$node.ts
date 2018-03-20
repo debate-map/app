@@ -45,7 +45,7 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	}
 	if (node.type == MapNodeType.Argument) {
 		//return [{type: "strength", main: true}, {type: "impact", main: true}];
-		return [{type: "relevance", main: true}, {type: "strength", main: true}];
+		return [{type: "impact", main: true}, {type: "relevance", main: true}];
 	}
 	Assert(false);
 }
