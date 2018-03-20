@@ -15,8 +15,6 @@ import chroma from "chroma-js";
 import {Map} from "Store/firebase/maps/@Map";
 import {AddArgumentButton} from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton";
 
-/*@Connect((state, props)=> ({
-}))*/
 export class ArgumentsControlBar extends BaseComponent<{map: Map, parentNode: MapNodeL3, parentPath: string, node: MapNodeL3} & Partial<{}>, {}> {
 	static defaultState = {premiseTitle: ""};
 	render() {
@@ -42,17 +40,6 @@ export class ArgumentsControlBar extends BaseComponent<{map: Map, parentNode: Ma
 					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.Supporting}/>
 					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.Opposing} style={{marginLeft: 3}}/>
 				</Row>*/}
-			</Row>
-		);
-	}
-}
-
-export class AddArgumentsRow extends BaseComponent<{}, {}> {
-	render() {
-		return (
-			<Row style={{alignItems: "stretch", padding: "5px 0px"}}>
-				<Button enabled={true} text="Add supporting argument" p="0 3px" style={{borderRadius: "0 5px 5px 0"}}/>
-				<Button enabled={true} text="Add opposing argument" p="0 3px" style={{borderRadius: "0 5px 5px 0"}}/>
 			</Row>
 		);
 	}

@@ -116,7 +116,7 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, ch
 							}}/>}
 					{childType == MapNodeType.Argument &&
 						<Column style={{padding: 5}}>
-							<Row style={{display: "flex", alignItems: "center"}}>
+							{/*<Row style={{display: "flex", alignItems: "center"}}>
 								<Pre>Title: </Pre>
 								<InfoButton text={`
 An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
@@ -131,12 +131,12 @@ The details of the argument should be described within the argument's premises. 
 								{/*<TextArea_AutoSize required={true} pattern={MapNodeRevision_titlePattern}
 									allowLineBreaks={false} style={{flex: 1}}
 									//ref={a=>a && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
-									value={newRevision.titles["base"]} onChange={val=>Change(newRevision.titles["base"] = val)}/>*/}
+									value={newRevision.titles["base"]} onChange={val=>Change(newRevision.titles["base"] = val)}/>*#/}
 								<TextInput style={{flex: 1}} required={true} pattern={MapNodeRevision_titlePattern}
 									//ref={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
 									value={newRevision.titles["base"]}
 									onChange={val=>Change(newRevision.titles["base"] = val, validationError = GetErrorMessagesUnderElement(root.DOM)[0])}/>
-							</Row>
+							</Row>*/}
 							<Row style={{display: "flex", alignItems: "center"}}>
 								<Pre>First claim/premise: </Pre>
 								<Link to="https://en.wikipedia.org/wiki/Premise" style={{marginLeft: "auto", fontSize: 12, opacity: .7}}>What is a premise?</Link>

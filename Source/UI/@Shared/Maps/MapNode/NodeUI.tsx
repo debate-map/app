@@ -1,5 +1,5 @@
 import { ACTMapNodeExpandedSet, ACTMapNodeChildLimitSet } from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
-import {BaseComponent, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, ShallowEquals, ShallowChanged} from "react-vextensions";
+import {BaseComponent, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, ShallowEquals, ShallowChanged, BaseComponentWithConnector} from "react-vextensions";
 import {connect} from "react-redux";
 import {DBPath, GetData} from "../../../../Frame/Database/DatabaseHelpers";
 import {Debugger, QuickIncrement, E, GetTimeSinceLoad} from "../../../../Frame/General/Globals_Free";
@@ -65,30 +65,8 @@ export function SetNodeUILocked(nodeID: number, locked: boolean, maxWait = 10000
 	}
 }
 
-type Props = {map: Map, node: MapNodeL3, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void}
-	& Partial<{
-		initialChildLimit: number, form: ClaimForm, nodeView: MapNodeView,
-		nodeChildren: MapNodeL3[],
-		//nodeChildren_fillPercents: number[],
-		nodeChildren_sortValues: number[],
-		subnodes: MapNodeL3[],
-		userViewedNodes: ViewedNodeSet,
-		playingTimeline: Timeline,
-		playingTimeline_currentStepIndex: number,
-		playingTimelineShowableNodes: string[],
-		playingTimelineVisibleNodes: string[],
-		playingTimeline_currentStepRevealNodes: string[],
-
-		changeType: ChangeType, addedDescendants: number, editedDescendants: number,
-	}>;
-type State = {
-	childrenWidthOverride: number, childrenCenterY: number,
-	svgInfo: {
-		mainBoxOffset: Vector2i,
-		oldChildBoxOffsets: {[key: number]: Vector2i},
-	},
-};
-@Connect((state: RootState, {node, path, map}: Props, asRecall?)=> {
+type Props = {map: Map, node: MapNodeL3, path?: string, asSubnode?: boolean, widthOverride?: number, style?, onHeightOrPosChange?: ()=>void};
+let connector = (state, {node, path, map}: Props)=> {
 	//Log("Calling NodeUI connect func.");
 	let nodeView = GetNodeView(map._id, path) || new MapNodeView();
 
@@ -142,8 +120,18 @@ type State = {
 		addedDescendants,
 		editedDescendants,
 	};
-})
-export default class NodeUI extends BaseComponent<Props, State> {
+};
+
+let initialState = {
+	childrenWidthOverride: null as number, childrenCenterY: null as number,
+	svgInfo: null as {
+		mainBoxOffset: Vector2i,
+		oldChildBoxOffsets: {[key: number]: Vector2i},
+	},
+};
+
+@Connect(connector)
+export class NodeUI extends BaseComponentWithConnector(connector, initialState) {
 	static renderCount = 0;
 	static lastRenderTime = -1;
 	static ValidateProps(props) {
@@ -200,11 +188,11 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		NodeUI.renderCount++;
 		NodeUI.lastRenderTime = Date.now();
 
-		if (node.type == MapNodeType.Argument && nodeChildren.length == 1 && GetUserID() == node.creator) {
+		/*if (node.type == MapNodeType.Argument && nodeChildren.length == 1 && GetUserID() == node.creator) {
 			let fakeChild = AsNodeL3(AsNodeL2(new MapNode({type: MapNodeType.Claim}), new MapNodeRevision({})));
 			fakeChild.premiseAddHelper = true;
 			nodeChildren = [...nodeChildren, fakeChild];
-		}
+		}*/
 
 		let separateChildren = node.type == MapNodeType.Claim;
 		type ChildPack = {origIndex: number, node: MapNodeL3};
@@ -252,9 +240,9 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		let textOutline = "rgba(10,10,10,1)";
 
 		let RenderChildPack = (pack: ChildPack, index: number, collection, direction = "down" as "up" | "down")=> {
-			if (pack.node.premiseAddHelper) {
+			/*if (pack.node.premiseAddHelper) {
 				return <PremiseAddHelper mapID={map._id} parentNode={node} parentPath={path}/>;
-			}
+			}*/
 
 			let childLimit = direction == "down" ? childLimit_down : childLimit_up;
 			return (
@@ -321,7 +309,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 						showLimitBar && limitBar_above && {paddingTop: ChildLimitBar.HEIGHT},
 						{paddingBottom: 0 + /*(showBelowMessage ? 13 : 0) +*/ (showLimitBar && !limitBar_above ? ChildLimitBar.HEIGHT : 0)},
 					)}>
-						{nodeChildren.filter(a=>!a.premiseAddHelper).length}
+						{nodeChildren} {/*.filter(a=>!a.premiseAddHelper).length}*/}
 					</div>}
 				{!expanded && (addedDescendants > 0 || editedDescendants > 0) &&
 					<Column style={E(
@@ -400,7 +388,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 		//Log("Checking whether should remeasure info for: " + props_used.node._id);
 		if (this.measurementInfo_cache && ShallowEquals(this.measurementInfo_cache_lastUsedProps, props_used)) return this.measurementInfo_cache;
 
-		let {node, path, subnodes} = props_used as Props;
+		let {node, path, subnodes} = props_used as Props & {subnodes: MapNodeL3[]};
 		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode(node, path);
 
 		for (let subnode of subnodes) {
@@ -522,7 +510,7 @@ export default class NodeUI extends BaseComponent<Props, State> {
 			/*{childrenStartY: upChildHolder.length
 				? (upChildHolder.css("display") != "none" ? firstChild.GetScreenRect().y -  : 0)
 				: (childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0)}*/
-		) as State;
+		) as any; //as State;
 
 		//let {width, expectedHeight} = this.GetMeasurementInfo(this.props, E(this.state, newState) as State);
 		let {expectedBoxWidth, expectedHeight} = this.GetMeasurementInfo();

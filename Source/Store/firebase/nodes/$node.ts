@@ -234,7 +234,8 @@ export function GetNodeDisplayText(node: MapNodeL2, path?: string, form?: ClaimF
 			return node.current.titles["base"] || "[base title not set]";
 		}
 	}
-	return node.current.titles["base"] || node.current.titles["yesNoQuestion"] || node.current.titles["negation"] || "";
+	let titles = node.current.titles || {};
+	return titles.base || titles.yesNoQuestion || titles.negation|| "";
 }
 
 export function GetValidChildTypes(nodeType: MapNodeType, path: string) {

@@ -7,7 +7,7 @@ import {DBPath, GetData} from "../../../Frame/Database/DatabaseHelpers";
 import {Debugger, E, inFirefox} from "../../../Frame/General/Globals_Free";
 import {PropTypes} from "react";
 import {Vector2i, VRect} from "js-vextensions";
-import NodeUI from "./MapNode/NodeUI";
+import {NodeUI} from "./MapNode/NodeUI";
 import {ScrollView} from "react-vscrollview";
 import {GetDistanceBetweenRectAndPoint} from "../../../Frame/General/Geometry";
 import NodeUI_Inner from "./MapNode/NodeUI_Inner";
