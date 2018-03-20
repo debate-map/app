@@ -2,7 +2,7 @@ import {GetImage} from '../images';
 import {MapNode, MapNodeL2, ClaimForm, ChildEntry, ClaimType, MapNodeL3, Polarity} from "./@MapNode";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MapNodeType} from './@MapNodeType';
-import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetNode, GetParentNodeL2} from "../nodes";
+import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetNode, GetParentNodeL2, GetNodeChildrenL2} from "../nodes";
 import {GetValues} from '../../../Frame/General/Enums';
 import {PermissionGroupSet} from '../userExtras/@UserExtraInfo';
 import {ImageType, GetNiceNameForImageType} from "../images/@Image";
@@ -263,5 +263,12 @@ export function GetClaimType(node: MapNodeL2) {
 }
 
 export function ShouldNodeBeCombinedWithParent(node: MapNodeL3, parent: MapNodeL3) {
-	return node.type == MapNodeType.Claim && parent.children.VKeys(true).length == 1 && node.link.form != ClaimForm.YesNoQuestion;
+	if (parent == null) return false;
+	let parentChildren = GetNodeChildrenL2(parent);
+	if (parentChildren.Any(a=>a == null)) return false;
+	return node.type == MapNodeType.Claim && parentChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && node.link.form != ClaimForm.YesNoQuestion;
+}
+export function ShouldNodeBeCombinedWithAnyChild(node: MapNodeL3, nodeChildren: MapNodeL3[]) {
+	if (nodeChildren.Any(a=>a == null)) return false;
+	return nodeChildren.Any(child=>ShouldNodeBeCombinedWithParent(child, node));
 }

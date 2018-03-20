@@ -37,7 +37,7 @@ import Icon from "Frame/ReactComponents/Icon";
 }*/
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[],
+	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildrenToShow: MapNodeL3[],
 	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, onChildrenCenterYChange?: (childrenCenterY: number)=>void,
 };
 let initialState = {
@@ -54,11 +54,11 @@ let connector = (state, {}: Props)=> {
 export class NodeChildHolder extends BaseComponentWithConnector(connector, initialState) {
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
-		let {map, node, nodeView, path, nodeChildren, separateChildren, showArgumentsControlBar, linkSpawnPoint, onChildrenCenterYChange, initialChildLimit} = this.props;
+		let {map, node, nodeView, path, nodeChildrenToShow, separateChildren, showArgumentsControlBar, linkSpawnPoint, onChildrenCenterYChange, initialChildLimit} = this.props;
 		let {childrenWidthOverride, oldChildBoxOffsets} = this.state;
 
-		let upChildren = separateChildren ? nodeChildren.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
-		let downChildren = separateChildren ? nodeChildren.filter(a=>a.finalPolarity == Polarity.Opposing) : [];
+		let upChildren = separateChildren ? nodeChildrenToShow.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
+		let downChildren = separateChildren ? nodeChildrenToShow.filter(a=>a.finalPolarity == Polarity.Opposing) : [];
 
 		let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 		let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
@@ -85,17 +85,17 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		return (
 			<Column ref={c=>this.childHolder = c} className="childHolder clickThrough" style={E(
 				{
-					marginLeft: nodeChildren.length || showArgumentsControlBar ? 30 : 0,
+					marginLeft: nodeChildrenToShow.length || showArgumentsControlBar ? 30 : 0,
 					//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 				},
 				//!expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
 			)}>
 				{linkSpawnPoint && oldChildBoxOffsets &&
 					<NodeConnectorBackground node={node} linkSpawnPoint={linkSpawnPoint} shouldUpdate={true} //this.lastRender_source == RenderSource.SetState}
-						nodeChildren={nodeChildren} childBoxOffsets={oldChildBoxOffsets}/>}
+						nodeChildren={nodeChildrenToShow} childBoxOffsets={oldChildBoxOffsets}/>}
 				
-				{!separateChildren && nodeChildren.slice(0, childLimit_down).map((pack, index)=> {
-					return RenderChild(pack, index, nodeChildren);
+				{!separateChildren && nodeChildrenToShow.slice(0, childLimit_down).map((pack, index)=> {
+					return RenderChild(pack, index, nodeChildrenToShow);
 				})}
 				{separateChildren &&
 					<Column ref={c=>this.upChildHolder = c} ct className="upChildHolder">
@@ -129,6 +129,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		} else {
 			if (this.lastRender_source == RenderSource.SetState) return;
 			this.UpdateState();
+			this.ReportChildrenCenterYChange();
 		}
 		this.lastHeight = height;
 	}
@@ -154,8 +155,8 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	GetChildrenCenterY() {
 		if (this.argumentsControlBar) {
 			//return upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0;
-			return this.upChildHolder && this.upChildHolder.DOM.style.visibility != "hidden"
-				? $(this.argumentsControlBar.DOM).GetScreenRect().Center.y - $(this.childHolder.DOM).GetScreenRect().y
+			return this.childHolder && this.childHolder.DOM.style.visibility != "hidden"
+				? $(this.argumentsControlBar.DOM).GetScreenRect().Center.y + 1 - $(this.childHolder.DOM).GetScreenRect().y
 				: 0
 		}
 		//return childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0,
@@ -216,6 +217,9 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 			let oldChildBoxOffsets = this.childBoxes.Props().Where(pair=>pair.value != null).ToMap(pair=>pair.name, pair=> {
 				//let childBox = FindDOM_(pair.value).find("> div:first-child > div"); // get inner-box of child
 				//let childBox = $(FindDOM(pair.value)).find(".NodeUI_Inner").first(); // get inner-box of child
+				// not sure why this is needed... (bad sign!)
+				if (pair.value.innerUI == null) return 0;
+				
 				let childBox = $(pair.value.innerUI.DOM);
 				Assert(childBox.length, "Could not find inner-ui of child-box.");
 				let childBoxOffset = new Vector2i(childBox.offset()).Minus(holderOffset);

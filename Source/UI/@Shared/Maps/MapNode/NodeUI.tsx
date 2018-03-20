@@ -33,7 +33,7 @@ import {MapNodeType, MapNodeType_Info, GetNodeColor} from "../../../../Store/fir
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
 import {Column} from "react-vcomponents";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2, AsNodeL3, AsNodeL2, ShouldNodeBeCombinedWithParent} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2, AsNodeL3, AsNodeL2, ShouldNodeBeCombinedWithParent, ShouldNodeBeCombinedWithAnyChild} from "../../../../Store/firebase/nodes/$node";
 import FastDOM from "fastdom";
 import {Row} from "react-vcomponents";
 import Icon from "../../../../Frame/ReactComponents/Icon";
@@ -161,7 +161,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 	innerUI: NodeUI_Inner;
 	render() {
 		let {map, node, path, asSubnode, widthOverride, style,
-			initialChildLimit, form, children, nodeView, nodeChildren, nodeChildren_sortValues, subnodes,
+			initialChildLimit, form, children, nodeView, nodeChildren: nodeChildren_orig, nodeChildren_sortValues, subnodes,
 			playingTimeline, playingTimeline_currentStepIndex, playingTimelineShowableNodes, playingTimelineVisibleNodes, playingTimeline_currentStepRevealNodes,
 			addedDescendants, editedDescendants} = this.props;
 		let {innerBoxOffset} = this.state;
@@ -182,6 +182,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		NodeUI.renderCount++;
 		NodeUI.lastRenderTime = Date.now();
 
+		let nodeChildrenToShow = nodeChildren_orig;
+
 		/*if (node.type == MapNodeType.Argument && nodeChildren.length == 1 && GetUserID() == node.creator) {
 			let fakeChild = AsNodeL3(AsNodeL2(new MapNode({type: MapNodeType.Claim}), new MapNodeRevision({})));
 			fakeChild.premiseAddHelper = true;
@@ -191,21 +193,21 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		let separateChildren = node.type == MapNodeType.Claim;
 		//let nodeChildren_filtered = nodeChildren;
 		if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
-			nodeChildren = nodeChildren.filter(child=>playingTimelineVisibleNodes.Contains(path + "/" + child._id));
+			nodeChildrenToShow = nodeChildrenToShow.filter(child=>playingTimelineVisibleNodes.Contains(path + "/" + child._id));
 		}
-		let upChildren = separateChildren ? nodeChildren.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
-		let downChildren = separateChildren ? nodeChildren.filter(a=>a.finalPolarity == Polarity.Opposing) : [];
+		let upChildren = separateChildren ? nodeChildrenToShow.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
+		let downChildren = separateChildren ? nodeChildrenToShow.filter(a=>a.finalPolarity == Polarity.Opposing) : [];
 
 		// apply sorting
 		if (separateChildren) {
 			upChildren = upChildren.OrderBy(child=>nodeChildren_sortValues[child._id]);
 			downChildren = downChildren.OrderByDescending(child=>nodeChildren_sortValues[child._id]);
 		} else {
-			nodeChildren = nodeChildren.OrderByDescending(child=>nodeChildren_sortValues[child._id]);
+			nodeChildrenToShow = nodeChildrenToShow.OrderByDescending(child=>nodeChildren_sortValues[child._id]);
 			//if (IsArgumentNode(node)) {
 			let isArgument_any = node.type == MapNodeType.Argument && node.current.argumentType == ArgumentType.Any;
 			if (node.childrenOrder && !isArgument_any) {
-				nodeChildren = nodeChildren.OrderBy(child=>node.childrenOrder.indexOf(child._id).IfN1Then(Number.MAX_SAFE_INTEGER));
+				nodeChildrenToShow = nodeChildrenToShow.OrderBy(child=>node.childrenOrder.indexOf(child._id).IfN1Then(Number.MAX_SAFE_INTEGER));
 			}
 		}
 
@@ -216,7 +218,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			var relevanceArguments = GetNodeChildrenL3(parent, SlicePath(path, 1)).Except(node);
 		}
 
-		let showArgumentsControlBar = node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading;
+		let showArgumentsControlBar = (node.type == MapNodeType.Claim || node.type == MapNodeType.Argument) && expanded && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, expectedHeight} = this.GetMeasurementInfo();
 		/*let innerBoxOffset = this.GetInnerBoxOffset(expectedHeight, showAddArgumentButtons, childrenCenterY);
@@ -231,7 +233,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		let textOutline = "rgba(10,10,10,1)";
 
 		// maybe temp
-		let combineWithChildClaim = node.type == MapNodeType.Argument && nodeChildren.length == 1 && nodeChildren[0].type == MapNodeType.Claim;
+		let combineWithChildClaim = ShouldNodeBeCombinedWithAnyChild(node, nodeChildren_orig);
 		if (combineWithChildClaim) {
 			let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 			let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
@@ -241,8 +243,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			let index = 0;
 			let direction = "down" as any;
 			let childrenWidthOverride = null;
-			let child = nodeChildren[0];
-			let collection = nodeChildren;
+			let child = nodeChildren_orig[0];
+			let collection = nodeChildren_orig;
 			let childLimit = direction == "down" ? childLimit_down : childLimit_up;
 			return (
 				<NodeUI key={child._id} map={map} node={child}
@@ -273,14 +275,14 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 							</div>}
 						{combineWithParentArgument && expanded &&
 							<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Truth} expanded={true}
-								nodeChildren={nodeChildren}/>}
+								nodeChildren={nodeChildren_orig} nodeChildrenToShow={nodeChildrenToShow}/>}
 						<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{map, node, nodeView, path, width, widthOverride}}
 							style={E(
 								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
 							)}/>
 						{combineWithParentArgument && expanded &&
-							<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Relevance} expanded={true}
-								nodeChildren={relevanceArguments}/>}
+							<NodeChildHolderBox {...{map, node: parent, path: SlicePath(path, 1), nodeView}} type={HolderType.Relevance} expanded={true}
+								nodeChildren={GetNodeChildrenL3(parent, SlicePath(path, 1))} nodeChildrenToShow={relevanceArguments}/>}
 						{/*showBelowMessage &&
 							<Div ct style={{
 								//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
@@ -293,11 +295,11 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 					{!limitBar_above && children}
 				</div>
 
-				{nodeChildren == emptyArray_forLoading &&
+				{nodeChildrenToShow == emptyArray_forLoading &&
 					<div style={{margin: "auto 0 auto 10px"}}>...</div>}
-				{IsRootNode(node) && nodeChildren != emptyArray_forLoading && nodeChildren.length == 0 &&
+				{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 &&
 					<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
-				{nodeChildren != emptyArray && !expanded && nodeChildren.length != 0 &&
+				{nodeChildrenToShow != emptyArray && !expanded && nodeChildrenToShow.length != 0 &&
 					<div style={E(
 						{
 							margin: "auto 0 auto 9px", fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,.8)",
@@ -309,7 +311,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 						showLimitBar && limitBar_above && {paddingTop: ChildLimitBar.HEIGHT},
 						{paddingBottom: 0 + /*(showBelowMessage ? 13 : 0) +*/ (showLimitBar && !limitBar_above ? ChildLimitBar.HEIGHT : 0)},
 					)}>
-						{nodeChildren.length}
+						{nodeChildrenToShow.length}
 					</div>}
 				{!expanded && (addedDescendants > 0 || editedDescendants > 0) &&
 					<Column style={E(
@@ -327,7 +329,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 							<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Edit)},.8)`}}>{editedDescendants} edited</Row>}
 					</Column>}
 				{!combineWithParentArgument &&
-					<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, separateChildren, showArgumentsControlBar}}
+					<NodeChildHolder {...{map, node, path, nodeView, nodeChildren: nodeChildren_orig, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
 						linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
 						onChildrenCenterYChange={childrenCenterY=> {
 							let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;

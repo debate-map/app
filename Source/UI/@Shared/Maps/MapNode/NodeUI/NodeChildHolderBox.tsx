@@ -8,7 +8,6 @@ import {Map} from "../../../../../Store/firebase/maps/@Map";
 import { MapNodeView } from "Store/main/mapViews/@MapViews";
 import { MapNodeType } from "Store/firebase/nodes/@MapNodeType";
 import {Vector2i} from "js-vextensions";
-import {ArgumentsControlBar} from "../ArgumentsControlBar";
 import {Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
 import chroma from "chroma-js";
 import {ChildLimitBar, NodeChildHolder} from "./NodeChildHolder";
@@ -19,6 +18,7 @@ import { SlicePath } from "Frame/Database/DatabaseHelpers";
 import { GetParentNodeL3 } from "Store/firebase/nodes";
 import { GetRatings } from "Store/firebase/nodeRatings";
 import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage} from "../../../../../Store/firebase/nodeRatings";
+import { ShouldNodeBeCombinedWithAnyChild } from "Store/firebase/nodes/$node";
 
 export enum HolderType {
 	Truth,
@@ -26,12 +26,22 @@ export enum HolderType {
 }
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[],
+	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
 	type: HolderType, expanded: boolean,
 };
-export class NodeChildHolderBox extends BaseComponent<Props, {innerBoxOffset: number}> {
+let connector = (state, {node, nodeChildren}: Props)=> {
+	return {
+		combineWithChildClaim: ShouldNodeBeCombinedWithAnyChild(node, nodeChildren),
+	};
+};
+@Connect(connector)
+export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {innerBoxOffset: 0}) {
+	static ValidateProps(props) {
+		let {node, nodeChildren} = props;
+		Assert(nodeChildren.All(a=>a.parents[node._id]), "Supplied node is not a parent of all the supplied node-children!");
+	}
 	render() {
-		let {map, node, path, nodeView, nodeChildren,type, expanded} = this.props;
+		let {map, node, path, nodeView, nodeChildrenToShow, type, expanded, combineWithChildClaim} = this.props;
 		let {innerBoxOffset} = this.state;
 
 		let text = type == HolderType.Truth ? "True?" : "Relevant?";
@@ -39,30 +49,20 @@ export class NodeChildHolderBox extends BaseComponent<Props, {innerBoxOffset: nu
 
 		//let mainRating_fillPercent = 100;
 		let parentNode = GetParentNodeL3(path);
-		if (type == HolderType.Truth) {
-			var ratingType = "truth" as RatingType;
-			let ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
-			//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
-		} else {
-			var argumentNode = parentNode;
-			var argumentPath = SlicePath(path, 1);
-
-			var ratingType = "relevance" as RatingType;
-			let ratingTypeInfo = GetRatingTypeInfo(ratingType, parentNode, GetParentNodeL3(argumentPath), argumentPath);
-			//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
-		}
+		var ratingType = {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[type] as RatingType;
+		let ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
 
 		let percentStr = "...";
-		let ratings = GetRatings(argumentNode ? argumentNode._id : node._id, ratingType);
-		let average = GetRatingAverage(argumentNode ? argumentNode._id : node._id, ratingType, null, -1);
+		let ratings = GetRatings(node._id, ratingType);
+		let average = GetRatingAverage(node._id, ratingType, null, -1);
 		if (average != -1) {
-			average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(argumentNode || node));
+			average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(node));
 			percentStr = average + "%";
 		}
 		let mainRating_fillPercent = average;
 
-		let separateChildren = node.type == MapNodeType.Claim;
-		let showArgumentsControlBar = node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading;
+		let separateChildren = node.type == MapNodeType.Claim || combineWithChildClaim;
+		let showArgumentsControlBar = (node.type == MapNodeType.Claim || combineWithChildClaim) && expanded && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, height} = this.GetMeasurementInfo();
 
@@ -115,7 +115,7 @@ export class NodeChildHolderBox extends BaseComponent<Props, {innerBoxOffset: nu
 								}}*//>
 					</Row>
 				</div>
-				<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, separateChildren, showArgumentsControlBar}}
+				<NodeChildHolder {...{map, node, path, nodeView, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
 					linkSpawnPoint={innerBoxOffset + (height / 2)}
 					onChildrenCenterYChange={childrenCenterY=> {
 						/*this.childrenCenterY = childrenCenterY;
