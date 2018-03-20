@@ -5,7 +5,7 @@ import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {RootState} from "../../../../Store";
 import {GetNodeChildren, GetNodeParents, GetParentNode, GetNode, GetNodeParentsL2, GetParentNodeL2, GetNodeChildrenL2} from "../../../../Store/firebase/nodes";
-import {GetFillPercentForRatingAverage, GetRatingAverage, GetRatings} from "../../../../Store/firebase/nodeRatings";
+import {GetRatings} from "../../../../Store/firebase/nodeRatings";
 import {CachedTransform} from "js-vextensions";
 import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";

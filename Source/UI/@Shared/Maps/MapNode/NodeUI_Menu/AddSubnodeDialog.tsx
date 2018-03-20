@@ -49,7 +49,7 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 		let newNode = new MapNode({
 			type: MapNodeType.Claim,
 		});
-		let newRevision = new MapNodeRevision({titles: {}});
+		let newRevision = new MapNodeRevision({});
 		let newLink = E({_: true}, newNode.type == MapNodeType.Claim && {form: ClaimForm.Base}) as ChildEntry; // not actually used
 		this.state = {newNode, newRevision, newLink} as any;
 	}

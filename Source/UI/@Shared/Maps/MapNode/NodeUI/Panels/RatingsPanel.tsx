@@ -51,7 +51,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 
 		let parentNode = GetNodeL3(SlicePath(path, 1));
 		
-		let reverseRatings = ShouldRatingTypeBeReversed(node);
+		let reverseRatings = ShouldRatingTypeBeReversed(node, ratingType);
 		let nodeTypeDisplayName = GetMapNodeTypeDisplayName(node.type, node, form, node.finalPolarity);
 
 		let ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);

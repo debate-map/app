@@ -1,14 +1,15 @@
-import {GetArgumentImpactPseudoRating, GetArgumentImpactPseudoRatingSet} from "../../Frame/Store/RatingProcessor";
 import {RatingType} from "../../Store/firebase/nodeRatings/@RatingType";
 import { GetData, GetData_Options } from "../../Frame/Database/DatabaseHelpers";
 import {CachedTransform} from "js-vextensions";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {RatingsRoot, Rating} from "./nodeRatings/@RatingsRoot";
-import {GetNodeChildren, GetNode, GetNodeChildrenL2} from "./nodes";
-import {ClaimForm, MapNodeL3} from "./nodes/@MapNode";
-import {GetNodeL2} from "./nodes/$node";
+import {GetNodeChildren, GetNode, GetNodeChildrenL2, GetNodeChildrenL3} from "./nodes";
+import {ClaimForm, MapNodeL3, MapNodeL2, Polarity} from "./nodes/@MapNode";
+import {GetNodeL2, AsNodeL3, GetLinkUnderParent} from "./nodes/$node";
 import {MapNodeType} from "./nodes/@MapNodeType";
 import {emptyObj} from "../../Frame/Store/ReducerUtils";
+import {GetArgumentImpactPseudoRatingSet} from "../../Frame/Store/RatingProcessor";
+import {CachedTransform_WithStore} from "Frame/Database/DatabaseHelpers";
 
 export function GetNodeRatingsRoot(nodeID: number) {
 	//RequestPaths(GetPaths_NodeRatingsRoot(nodeID));
@@ -29,9 +30,16 @@ export function GetRatingSet(nodeID: number, ratingType: RatingType, path?: stri
 	return ratingsRoot ? ratingsRoot[ratingType] : null;
 }
 //export function GetRatings(nodeID: number, ratingType: RatingType, thesisForm?: ThesisForm): Rating[] {
-export function GetRatings(nodeID: number, ratingType: RatingType): Rating[] {
-	let ratingSet = GetRatingSet(nodeID, ratingType);
-	return CachedTransform("GetRatings", [nodeID, ratingType], {ratingSet}, ()=>ratingSet ? ratingSet.VValues(true) : []);
+export function GetRatings(nodeID: number, ratingType: RatingType, filter?: RatingFilter): Rating[] {
+	/*let ratingSet = GetRatingSet(nodeID, ratingType, null);
+	return CachedTransform("GetRatings", [nodeID, ratingType].concat((filter || {}).VValues()), {ratingSet},
+		()=>ratingSet ? FilterRatings(ratingSet.VValues(true), filter) : []);*/
+	
+	return CachedTransform_WithStore("GetRatings", [nodeID, ratingType].concat((filter || {}).VValues()), {}, ()=> {
+		let ratingSet = GetRatingSet(nodeID, ratingType, null);
+		if (ratingSet == null) return [];
+		return FilterRatings(ratingSet.VValues(true), filter);
+	});
 }
 export function GetRating(nodeID: number, ratingType: RatingType, userID: string) {
 	let ratingSet = GetRatingSet(nodeID, ratingType);
@@ -42,14 +50,30 @@ export function GetRatingValue(nodeID: number, ratingType: RatingType, userID: s
 	let rating = GetRating(nodeID, ratingType, userID);
 	return rating ? rating.value : resultIfNoData;
 }
-export function GetRatingAverage(nodeID: number, ratingType: RatingType, ratings?: Rating[], resultIfNoData = null): number {
+export function GetRatingAverage(nodeID: number, ratingType: RatingType, filter?: RatingFilter, resultIfNoData = null): number {
 	// if voting disabled, always show full bar
-	let node = GetNodeL2(nodeID);
+	/*let node = GetNodeL2(nodeID);
 	if (node && node.current.votingDisabled) return 100;
 
-	ratings = ratings || GetRatings(nodeID, ratingType);
+	let ratings = GetRatings(nodeID, ratingType, filter);
 	if (ratings.length == 0) return resultIfNoData as any;
-	return CachedTransform("GetRatingAverage", [nodeID, ratingType], {ratings}, ()=>ratings.map(a=>a.value).Average().RoundTo(1));
+	return CachedTransform("GetRatingAverage", [nodeID, ratingType].concat((filter || {}).VValues()), {ratings},
+		()=>ratings.map(a=>a.value).Average().RoundTo(1));*/
+	return CachedTransform_WithStore("GetRatingAverage", [nodeID, ratingType, resultIfNoData].concat((filter || {}).VValues()), {}, ()=> {
+		let node = GetNodeL2(nodeID);
+		if (node && node.current.votingDisabled) return 100;
+
+		let ratings = GetRatings(nodeID, ratingType, filter);
+		if (ratings.length == 0) return resultIfNoData as any;
+		return ratings.map(a=>a.value).Average().RoundTo(1);
+	});
+}
+export function GetRatingAverage_AtPath(node: MapNodeL3, ratingType: RatingType, filter?: RatingFilter, resultIfNoData = null): number {
+	let result = GetRatingAverage(node._id, ratingType, filter, resultIfNoData);
+	if (ShouldRatingTypeBeReversed(node, ratingType)) {
+		result = 100 - result;
+	}
+	return result;
 }
 
 /*export function GetPaths_MainRatingSet(node: MapNode) {
@@ -78,23 +102,58 @@ export function GetPaths_MainRatingAverage(node: MapNode) {
 		return mainRatingAverage != null ? mainRatingAverage.Distance(50) * 2 : 0;
 	return mainRatingAverage || 0;
 }*/
-export function GetFillPercentForRatingAverage(node: MapNode, ratingAverage: number, reverseRating?: boolean) {
+
+/*export function GetFillPercentForRatingAverage(node: MapNode, ratingAverage: number, reverseRating?: boolean) {
 	ratingAverage = TransformRatingForContext(ratingAverage, reverseRating);
 	/*if (node.current.impactPremise && (node.current.impactPremise.thenType == ImpactPremise_ThenType.StrengthenParent || node.current.impactPremise.thenType == ImpactPremise_ThenType.WeakenParent))
-		return ratingAverage != null ? ratingAverage.Distance(50) * 2 : 0;*/
+		return ratingAverage != null ? ratingAverage.Distance(50) * 2 : 0;*#/
 	return ratingAverage || 0;
 }
 export function TransformRatingForContext(ratingValue: number, reverseRating: boolean) {
 	if (ratingValue == null) return null;
 	if (reverseRating) return 100 - ratingValue;
 	return ratingValue;
+}*/
+
+export class RatingFilter {
+	constructor(initialData: Partial<RatingFilter>) {
+		this.Extend(initialData);
+	}
+
+	includeUser = null as string;
 }
+export function FilterRatings(ratings: Rating[], filter: RatingFilter) {
+	return ratings.filter(a=>filter == null || filter.includeUser == a._key);
+}
+
+export function TransformRatingForContext(ratingValue: number, reverseRating: boolean) {
+	if (ratingValue == null) return null;
+	if (reverseRating) return 100 - ratingValue;
+	return ratingValue;
+}
+/*export function GetFillPercentForRatingType(node: MapNodeL3, path: string, ratingType: RatingType, filter?: RatingFilter) {
+	if (ratingType == "impact") {
+		let nodeChildren = GetNodeChildrenL3(node, path);
+		//let nodeChildren = GetNodeChildrenL2(node).map(child=>AsNodeL3(child, Polarity.Supporting, GetLinkUnderParent(child._id, node)));
+		if (nodeChildren.Any(a=>a == null)) return 0;
+		let premises = nodeChildren.filter(a=>a.type == MapNodeType.Claim);
+		let averageTruth = premises.map(premise=>GetRatingAverage_AtPath(premise, "truth", filter, null)).Average();
+		//Log(`Node: ${node._id} @averageTruth: ${averageTruth}`);
+
+		let averageRelevance = GetRatingAverage(node._id, "relevance", filter);
+
+		return ((averageTruth / 100) * (averageRelevance / 100)) * 100;
+	}
+	
+	return GetRatingAverage_AtPath(node, ratingType, filter) || 0;
+}*/
 
 /*export function ShouldRatingTypeBeReversed(ratingType: RatingType, nodeReversed: boolean, contextReversed: boolean) {
 	//return nodeReversed || (contextReversed && ratingType == "adjustment");
 	return nodeReversed;
 }*/
-export function ShouldRatingTypeBeReversed(node: MapNodeL3) {
+export function ShouldRatingTypeBeReversed(node: MapNodeL3, ratingType: RatingType) {
 	//return node.type == MapNodeType.Argument && node.finalPolarity != node.link.polarity;
+	//if (["impact", "relevance"].Contains(ratingType)) return false;
 	return node.link.form == ClaimForm.Negation;
 }

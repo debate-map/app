@@ -431,7 +431,10 @@ class DBRequestCollector {
 *		"Do not re-evaluate the code below unless dynamic-props have changed, or one of the store-paths it accessed last time has changed."
 * 		(with the transformType and staticProps defining what "here" means)
 */
-export function CachedTransform_WithStore<T, T2, T3>(transformType: string, staticProps: any[], dynamicProps: T2, transformFunc: (staticProps: any[], dynamicProps: T2)=>T3): T3 {
+export function CachedTransform_WithStore<T, T2, T3>(
+	transformType: string, staticProps: any[], dynamicProps: T2,
+	transformFunc: (debugInfo: any, staticProps: any[], dynamicProps: T2)=>T3
+): T3 {
 	let storage = GetStorageForCachedTransform(transformType, staticProps);
 	if (storage.lastDynamicProps) {
 		for (let key in storage.lastDynamicProps) {

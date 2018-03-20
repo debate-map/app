@@ -45,7 +45,7 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	}
 	if (node.type == MapNodeType.Argument) {
 		//return [{type: "strength", main: true}, {type: "impact", main: true}];
-		return [{type: "impact", main: true}, {type: "relevance", main: true}];
+		return [{type: "relevance", main: true}, {type: "impact", main: true}];
 	}
 	Assert(false);
 }
@@ -261,13 +261,16 @@ export function GetClaimType(node: MapNodeL2) {
 	);
 }
 
-export function ShouldNodeBeCombinedWithParent(node: MapNodeL3, parent: MapNodeL3) {
+export function IsPremiseOfSinglePremiseArgument(node: MapNodeL3, parent: MapNodeL3) {
 	if (parent == null) return false;
 	let parentChildren = GetNodeChildrenL2(parent);
 	if (parentChildren.Any(a=>a == null)) return false;
 	return node.type == MapNodeType.Claim && parentChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && node.link.form != ClaimForm.YesNoQuestion;
 }
-export function ShouldNodeBeCombinedWithAnyChild(node: MapNodeL3, nodeChildren: MapNodeL3[]) {
+export function IsSinglePremiseArgument(node: MapNodeL3, nodeChildren: MapNodeL3[]) {
 	if (nodeChildren.Any(a=>a == null)) return false;
-	return nodeChildren.Any(child=>ShouldNodeBeCombinedWithParent(child, node));
+	return nodeChildren.Any(child=>IsPremiseOfSinglePremiseArgument(child, node));
+}
+export function IsMultiPremiseArgument(node: MapNodeL3, nodeChildren: MapNodeL3[]) {
+	return node.type == MapNodeType.Argument && !IsSinglePremiseArgument(node, nodeChildren);
 }

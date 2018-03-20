@@ -44,7 +44,7 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, ch
 		parents: {[parentNode._id]: {_: true}},
 		type: childType,
 	});
-	let newRevision = new MapNodeRevision({titles: {}});
+	let newRevision = new MapNodeRevision({});
 	let newLink = E(
 		{_: true},
 		childType == MapNodeType.Claim && {form: claimForm},
@@ -53,7 +53,7 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, ch
 	if (childType == MapNodeType.Argument) {
 		newRevision.argumentType = ArgumentType.All;
 		var newPremise = new MapNode({type: MapNodeType.Claim, creator: userID});
-		var newPremiseRevision = new MapNodeRevision({titles: {}});
+		var newPremiseRevision = new MapNodeRevision({});
 	}
 	
 	let root;

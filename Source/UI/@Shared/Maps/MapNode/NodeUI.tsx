@@ -31,9 +31,9 @@ import {GetNodeChildren, GetParentNode, IsRootNode, GetNodeChildrenL3, GetParent
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {MapNodeType, MapNodeType_Info, GetNodeColor} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
+import {GetRatingAverage, GetRatingAverage_AtPath} from "../../../../Store/firebase/nodeRatings";
 import {Column} from "react-vcomponents";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2, AsNodeL3, AsNodeL2, ShouldNodeBeCombinedWithParent, ShouldNodeBeCombinedWithAnyChild} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2, AsNodeL3, AsNodeL2, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
 import FastDOM from "fastdom";
 import {Row} from "react-vcomponents";
 import Icon from "../../../../Frame/ReactComponents/Icon";
@@ -82,10 +82,10 @@ let connector = (state, {node, path, map}: Props)=> {
 	});*/
 
 	let nodeChildren_sortValues = nodeChildren == emptyArray ? emptyObj : nodeChildren.ToMap(child=>child._id+"", child=> {
-		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetSortByRatingType(child)), GetNodeForm(child) == ClaimForm.Negation);
+		return GetRatingAverage_AtPath(child, GetSortByRatingType(child));
 	});
 	let nodeChildren_fillPercents = nodeChildren == emptyArray ? emptyObj : nodeChildren.ToMap(child=>child._id+"", child=> {
-		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetMainRatingType(child)), GetNodeForm(child) == ClaimForm.Negation);
+		return GetRatingAverage_AtPath(child, GetMainRatingType(child));
 	});
 
 	let subnodes = GetSubnodesInEnabledLayersEnhanced(GetUserID(), map, node._id);
@@ -213,12 +213,13 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 		// if the premise of a single-premise argument
 		let parent = GetParentNodeL3(path);
-		let combineWithParentArgument = ShouldNodeBeCombinedWithParent(node, parent);
+		let combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
 		if (combineWithParentArgument) {
 			var relevanceArguments = GetNodeChildrenL3(parent, SlicePath(path, 1)).Except(node);
 		}
 
-		let showArgumentsControlBar = (node.type == MapNodeType.Claim || node.type == MapNodeType.Argument) && expanded && nodeChildrenToShow != emptyArray_forLoading;
+		let isSinglePremiseArgument = IsSinglePremiseArgument(node, nodeChildren_orig);
+		let showArgumentsControlBar = (node.type == MapNodeType.Claim || isSinglePremiseArgument) && expanded && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, expectedHeight} = this.GetMeasurementInfo();
 		/*let innerBoxOffset = this.GetInnerBoxOffset(expectedHeight, showAddArgumentButtons, childrenCenterY);
@@ -233,7 +234,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		let textOutline = "rgba(10,10,10,1)";
 
 		// maybe temp
-		let combineWithChildClaim = ShouldNodeBeCombinedWithAnyChild(node, nodeChildren_orig);
+		let combineWithChildClaim = IsSinglePremiseArgument(node, nodeChildren_orig);
 		if (combineWithChildClaim) {
 			let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 			let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);

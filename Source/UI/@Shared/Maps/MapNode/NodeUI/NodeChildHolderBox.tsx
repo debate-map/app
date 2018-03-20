@@ -18,7 +18,7 @@ import { SlicePath } from "Frame/Database/DatabaseHelpers";
 import { GetParentNodeL3 } from "Store/firebase/nodes";
 import { GetRatings } from "Store/firebase/nodeRatings";
 import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage} from "../../../../../Store/firebase/nodeRatings";
-import { ShouldNodeBeCombinedWithAnyChild } from "Store/firebase/nodes/$node";
+import { IsSinglePremiseArgument } from "Store/firebase/nodes/$node";
 
 export enum HolderType {
 	Truth,
@@ -31,7 +31,7 @@ type Props = {
 };
 let connector = (state, {node, nodeChildren}: Props)=> {
 	return {
-		combineWithChildClaim: ShouldNodeBeCombinedWithAnyChild(node, nodeChildren),
+		combineWithChildClaim: IsSinglePremiseArgument(node, nodeChildren),
 	};
 };
 @Connect(connector)
@@ -56,7 +56,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		let ratings = GetRatings(node._id, ratingType);
 		let average = GetRatingAverage(node._id, ratingType, null, -1);
 		if (average != -1) {
-			average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(node));
+			average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(node, ratingType));
 			percentStr = average + "%";
 		}
 		let mainRating_fillPercent = average;

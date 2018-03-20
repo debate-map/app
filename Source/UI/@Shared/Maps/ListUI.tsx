@@ -27,7 +27,7 @@ import {GetUser} from "../../../Store/firebase/users";
 import {User} from "Store/firebase/users/@User";
 import {MapNodeView} from "../../../Store/main/mapViews/@MapViews";
 import {RatingsRoot} from "../../../Store/firebase/nodeRatings/@RatingsRoot";
-import MapNodeUI_LeftBox from "./MapNode/NodeUI_LeftBox";
+import {MapNodeUI_LeftBox} from "./MapNode/NodeUI_LeftBox";
 import ResizeSensor from "react-resize-sensor";
 import {GetEntries} from "../../../Frame/General/Enums";
 import {Select} from "react-vcomponents";

@@ -1,4 +1,4 @@
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
 import MapNodeUI_Inner from "./NodeUI_Inner";
 import {Button, Span} from "react-vcomponents";
 import {E} from "../../../../Frame/General/Globals_Free";
@@ -10,9 +10,9 @@ import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RatingType_Info, RatingType, GetRatingTypeInfo} from "../../../../Store/firebase/nodeRatings/@RatingType";
-import {GetRatingAverage, GetRatings, TransformRatingForContext, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
+import {GetRatingAverage, GetRatings, ShouldRatingTypeBeReversed, GetRatingAverage_AtPath} from "../../../../Store/firebase/nodeRatings";
 import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
-import {GetRatingTypesForNode, GetNodeForm, GetMainRatingType, GetNodeL3, ShouldNodeBeCombinedWithParent} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeForm, GetMainRatingType, GetNodeL3, IsPremiseOfSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
 import {RootState} from "../../../../Store/index";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetParentNode, GetParentNodeL3} from "../../../../Store/firebase/nodes";
@@ -28,12 +28,34 @@ type Props = {
 	panelPosition?: "left" | "below", local_openPanel?: string,
 	backgroundColor: chroma.Color, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
-} & Partial<{form: ClaimForm, parentNode: MapNodeL3}>;
-@Connect((state: RootState, {node, path}: Props)=>({
-	form: GetNodeForm(node, path),
-	parentNode: GetParentNodeL3(path),
-}))
-export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
+};
+let connector = (state, {node, path}: Props)=> {
+	let parentNode = GetParentNodeL3(path);
+	
+	// probably temp; used to solve impact-rating-not-updating-in-ui issue
+	// ==========
+	/*let parent = GetNodeL3(SlicePath(path, 1));
+	let combineWithParentArgument = ShouldNodeBeCombinedWithParent(node, parent);
+	//let ratingReversed = ShouldRatingTypeBeReversed(node);
+
+	if (combineWithParentArgument) {
+		let ratingNode = parent;
+		let ratingNodePath = SlicePath(path, 1);
+		var impactRating_average = GetRatingAverage_AtPath(ratingNode, "impact");
+		var impactRating_fillPercent = GetFillPercentForRatingType(ratingNode, ratingNodePath, "impact");
+		//Log(`Node: ${node} Avg: ${impactRating_average} FillPercent: ${impactRating_fillPercent}`);
+	}*/
+	// ==========
+	
+	return {
+		form: GetNodeForm(node, path),
+		parentNode,
+		/*impactRating_average,
+		impactRating_fillPercent,*/
+	};
+};
+@Connect(connector)
+export class MapNodeUI_LeftBox extends BaseComponentWithConnector(connector, {}) {
 	static defaultProps = {panelPosition: "left"};
 	render() {
 		let {
@@ -47,7 +69,7 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 		let nodeReversed = form == ClaimForm.Negation;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 
-		let combinedWithParent = ShouldNodeBeCombinedWithParent(node, parentNode);
+		let combinedWithParent = IsPremiseOfSinglePremiseArgument(node, parentNode);
 		if (combinedWithParent) {
 			var argumentNode = parentNode;
 			var argumentPath = SlicePath(path, 1);
@@ -55,7 +77,8 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 
 		let ratingTypes = GetRatingTypesForNode(node);
 		if (argumentNode) {
-			ratingTypes = [{type: "impact" as RatingType, main: true}].concat(ratingTypes).concat([{type: "relevance" as RatingType, main: true}]);
+			//ratingTypes = [{type: "impact" as RatingType, main: true}].concat(ratingTypes).concat([{type: "relevance" as RatingType, main: true}]);
+			ratingTypes = ratingTypes.concat([{type: "relevance" as RatingType, main: true}, {type: "impact" as RatingType, main: true}]);
 		}
 
 		return (
@@ -77,9 +100,8 @@ export default class MapNodeUI_LeftBox extends BaseComponent<Props, {}> {
 
 						let percentStr = "...";
 						let ratings = GetRatings(nodeForRatingType._id, ratingInfo.type);
-						let average = GetRatingAverage(nodeForRatingType._id, ratingInfo.type, null, -1);
+						let average = GetRatingAverage_AtPath(nodeForRatingType, ratingInfo.type, null, -1);
 						if (average != -1) {
-							average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(nodeForRatingType));
 							percentStr = average + "%";
 						}
 						return (

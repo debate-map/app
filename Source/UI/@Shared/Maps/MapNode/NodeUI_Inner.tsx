@@ -3,7 +3,7 @@ import {GetImage} from "../../../../Store/firebase/images";
 import {connect} from "react-redux";
 import {BaseComponent, AddGlobalStyle, GetInnerComp, FindDOM, BaseComponentWithConnector} from "react-vextensions";
 import {Pre, Div, TextArea_AutoSize} from "react-vcomponents";
-import MapNodeUI_LeftBox from "./NodeUI_LeftBox";
+import {MapNodeUI_LeftBox} from "./NodeUI_LeftBox";
 import {VMenu} from "react-vmenu";
 import {ShowMessageBox} from "react-vmessagebox";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
@@ -18,7 +18,7 @@ import NodeUI_Menu from "./NodeUI_Menu";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {ImageAttachment, MapNode, MapNodeL2, ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
-import {GetNodeRatingsRoot, GetRatings, GetFillPercentForRatingAverage, GetRatingAverage, GetRatingValue, ShouldRatingTypeBeReversed} from "../../../../Store/firebase/nodeRatings";
+import {GetNodeRatingsRoot, GetRatings, GetRatingAverage, GetRatingValue, ShouldRatingTypeBeReversed, RatingFilter, GetRatingAverage_AtPath} from "../../../../Store/firebase/nodeRatings";
 import {GetUserID} from "../../../../Store/firebase/users";
 import {MapNodeType_Info, MapNodeType, GetNodeColor} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {RootState} from "../../../../Store/index";
@@ -37,7 +37,7 @@ import RatingsPanel from "./NodeUI/Panels/RatingsPanel";
 import DiscussionPanel from "./NodeUI/Panels/DiscussionPanel";
 import {Row} from "react-vcomponents";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
-import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetNodeForm, GetNodeL3, ShouldNodeBeCombinedWithParent} from "../../../../Store/firebase/nodes/$node";
+import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetNodeForm, GetNodeL3, IsPremiseOfSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
 import {ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {VURL} from "js-vextensions";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
@@ -86,8 +86,8 @@ let connector = (state, {map, node, path}: Props)=> {
 		null;
 
 	let parent = GetNodeL3(SlicePath(path, 1));
-	let combineWithParentArgument = ShouldNodeBeCombinedWithParent(node, parent);
-	let ratingReversed = ShouldRatingTypeBeReversed(node);
+	let combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
+	//let ratingReversed = ShouldRatingTypeBeReversed(node);
 
 	let mainRatingType = GetRatingTypesForNode(node).FirstOrX(null, {}).type;
 	let ratingNode = node;
@@ -95,11 +95,12 @@ let connector = (state, {map, node, path}: Props)=> {
 	if (combineWithParentArgument) {
 		mainRatingType = "impact";
 		ratingNode = parent;
+		//ratingNodePath = SlicePath(path, 1);
 	}
-	let mainRating_average = GetRatingAverage(ratingNode._id, mainRatingType);
-	let mainRating_fillPercent = GetFillPercentForRatingAverage(ratingNode, mainRating_average, ratingReversed);
+	let mainRating_average = GetRatingAverage_AtPath(ratingNode, mainRatingType);
+	let mainRating_fillPercent = GetRatingAverage_AtPath(ratingNode, mainRatingType);
 	let mainRating_mine = GetRatingValue(ratingNode._id, mainRatingType, GetUserID());
-	let mainRating_myFillPercent = mainRating_mine != null ? GetFillPercentForRatingAverage(ratingNode, mainRating_mine, ratingReversed) : null;
+	let mainRating_myFillPercent = mainRating_mine != null ? GetRatingAverage_AtPath(ratingNode, mainRatingType, new RatingFilter({includeUser: GetUserID()})) : null;
 
 	return {
 		form: GetNodeForm(node, path),
@@ -130,7 +131,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 		let isSubnode = IsNodeSubnode(node);
 
 		let parent = GetNodeL3(SlicePath(path, 1));
-		let combineWithParentArgument = ShouldNodeBeCombinedWithParent(node, parent);
+		let combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
 		let nodeReversed = form == ClaimForm.Negation;
 		
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered; //|| local_selected;

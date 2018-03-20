@@ -2,27 +2,28 @@ import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {MapNode, ClaimForm, MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
 import {GetRating, GetRatingValue, GetRatingSet} from "../../Store/firebase/nodeRatings";
 import {GetRatingAverage, GetRatings} from "../../Store/firebase/nodeRatings";
-import {Rating} from "../../Store/firebase/nodeRatings/@RatingsRoot";
+import {Rating, RatingsSet} from "../../Store/firebase/nodeRatings/@RatingsRoot";
 import {GetRatingTypesForNode, GetNodeForm} from "../../Store/firebase/nodes/$node";
 import {CachedTransform} from "js-vextensions";
 import {emptyObj} from "./ReducerUtils";
 import { ArgumentType } from "Store/firebase/nodes/@MapNodeRevision";
+import { CachedTransform_WithStore } from "Frame/Database/DatabaseHelpers";
 
 export function GetArgumentImpactPseudoRating(argument: MapNodeL2, premises: MapNodeL2[], userID: string): Rating {
 	if (premises.Any(a=>a == null)) return null; // must still be loading
 	if (premises.length == 0) return null;
 
-	let premiseProbabilities = premises.map(child=> {
-		let ratingType = GetRatingTypesForNode(child)[0].type;
-		let ratingValue = GetRatingValue(child._id, ratingType, userID, 0) / 100;
-		let form = GetNodeForm(child, argument);
+	let premiseProbabilities = premises.map(premise=> {
+		let ratingType = GetRatingTypesForNode(premise)[0].type;
+		let ratingValue = GetRatingValue(premise._id, ratingType, userID, 0) / 100;
+		let form = GetNodeForm(premise, argument);
 		let probability = form == ClaimForm.Negation ? 1 - ratingValue : ratingValue;
 		return probability;
 	});
 	let combinedTruthOfPremises;
-	if (argument.current.argumentType == ArgumentType.All)
+	if (argument.current.argumentType == ArgumentType.All) {
 		combinedTruthOfPremises = premiseProbabilities.reduce((total, current)=>total * current, 1);
-	else if (argument.current.argumentType == ArgumentType.AnyTwo) {
+	} else if (argument.current.argumentType == ArgumentType.AnyTwo) {
 		let strongest = premiseProbabilities.Max(null, true);
 		let secondStrongest = premiseProbabilities.length > 1 ? premiseProbabilities.Except(strongest).Max(null, true) : 0;
 		combinedTruthOfPremises = strongest * secondStrongest;
@@ -51,34 +52,45 @@ export function GetArgumentImpactPseudoRating(argument: MapNodeL2, premises: Map
 	let result = usersWhoRated.map(userID=>GetArgumentStrengthPseudoRating(nodeChildren, userID));
 	return result;
 }*/
-export function GetArgumentImpactPseudoRatingSet(argument: MapNodeL2, premises: MapNodeL2[]): {[key: string]: Rating} {
+
+//export function GetArgumentImpactPseudoRatingSet(argument: MapNodeL2, premises: MapNodeL2[]): {[key: string]: Rating} {
+export function GetArgumentImpactPseudoRatingSet(argument: MapNodeL2, premises: MapNodeL2[]): RatingsSet {
 	if (premises.Any(a=>a == null)) return emptyObj; // must still be loading
 	if (premises.length == 0) return emptyObj;
 
-	let childRatingSets = premises.map(child=> {
-		return GetRatingSet(child._id, GetRatingTypesForNode(child).FirstOrX(null, {}).type) || emptyObj;
+	let childForms_map = premises.ToMap((child, index)=>`childForm_${index}`, child=> {
+		return GetNodeForm(child, argument);
 	});
-	let dataUsedInCalculation = {...childRatingSets};
+	//let dataUsedInCalculation = {...childRatingSets, ...childForms_map};
+	let dataUsedInCalculation = {...childForms_map};
 
-	let result = CachedTransform("GetArgumentImpactPseudoRatingSet", [argument._id], dataUsedInCalculation, ()=> {
+	//let result = CachedTransform("GetArgumentImpactPseudoRatingSet", [argument._id], dataUsedInCalculation, ()=> {
+	let result = CachedTransform_WithStore("GetArgumentImpactPseudoRatingSet", [argument._id], dataUsedInCalculation, ()=> {
+		let childRatingSets = premises.map(child=> {
+			return GetRatingSet(child._id, GetRatingTypesForNode(child).FirstOrX(null, {}).type) || emptyObj;
+		});
+
 		let usersWhoRatedAllChildren = null;
 		for (let [index, child] of premises.entries()) {
 			let childRatingSet = childRatingSets[index];
 			if (usersWhoRatedAllChildren == null) {
 				usersWhoRatedAllChildren = {};
-				for (let userID of childRatingSet.VKeys(true))
+				for (let userID of childRatingSet.VKeys(true)) {
 					usersWhoRatedAllChildren[userID] = true;
+				}
 			} else {
 				for (let userID in usersWhoRatedAllChildren) {
-					if (childRatingSet[userID] == null)
+					if (childRatingSet[userID] == null) {
 						delete usersWhoRatedAllChildren[userID];
+					}
 				}
 			}
 		}
 
-		let result = {};
-		for (let userID in usersWhoRatedAllChildren)
+		let result = {} as RatingsSet;
+		for (let userID in usersWhoRatedAllChildren) {
 			result[userID] = GetArgumentImpactPseudoRating(argument, premises, userID);
+		}
 		return result;
 	});
 	return result;
