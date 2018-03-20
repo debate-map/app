@@ -37,7 +37,7 @@ import RatingsPanel from "./NodeUI/Panels/RatingsPanel";
 import DiscussionPanel from "./NodeUI/Panels/DiscussionPanel";
 import {Row} from "react-vcomponents";
 import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
-import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetNodeForm, GetNodeL3, IsPremiseOfSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
+import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetNodeForm, GetNodeL3, IsPremiseOfSinglePremiseArgument, GetMainRatingType} from "../../../../Store/firebase/nodes/$node";
 import {ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {VURL} from "js-vextensions";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
@@ -89,7 +89,7 @@ let connector = (state, {map, node, path}: Props)=> {
 	let combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
 	//let ratingReversed = ShouldRatingTypeBeReversed(node);
 
-	let mainRatingType = GetRatingTypesForNode(node).FirstOrX(null, {}).type;
+	let mainRatingType = GetMainRatingType(node);
 	let ratingNode = node;
 	//let ratingNodePath = path;
 	if (combineWithParentArgument) {

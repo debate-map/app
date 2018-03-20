@@ -78,7 +78,7 @@ export class MapNodeUI_LeftBox extends BaseComponentWithConnector(connector, {})
 		let ratingTypes = GetRatingTypesForNode(node);
 		if (argumentNode) {
 			//ratingTypes = [{type: "impact" as RatingType, main: true}].concat(ratingTypes).concat([{type: "relevance" as RatingType, main: true}]);
-			ratingTypes = ratingTypes.concat([{type: "relevance" as RatingType, main: true}, {type: "impact" as RatingType, main: true}]);
+			ratingTypes = ratingTypes.concat([{type: "relevance" as RatingType}, {type: "impact" as RatingType, main: true}]);
 		}
 
 		return (

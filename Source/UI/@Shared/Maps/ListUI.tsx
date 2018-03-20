@@ -7,7 +7,7 @@ import {Map} from "../../../Store/firebase/maps/@Map";
 import { Connect } from "../../../Frame/Database/FirebaseConnect";
 import { GetMap } from "Store/firebase/maps";
 import { GetNodesL2 } from "Store/firebase/nodes";
-import {GetNodeDisplayText, GetRatingTypesForNode, GetNodeL3, GetFinalPolarityAtPath, AsNodeL3} from "../../../Store/firebase/nodes/$node";
+import {GetNodeDisplayText, GetRatingTypesForNode, GetNodeL3, GetFinalPolarityAtPath, AsNodeL3, GetMainRatingType} from "../../../Store/firebase/nodes/$node";
 import {Column} from "react-vcomponents";
 import {ScrollView} from "react-vscrollview";
 import NodeUI_Menu from "../../@Shared/Maps/MapNode/NodeUI_Menu";
@@ -246,8 +246,7 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 		let panelToShow = hoverPanel || openPanel;
 		// if we're supposed to show a rating panel, but its rating-type is not applicable for this node-type, fall back to main rating-type
 		if (ratingTypes.Contains(panelToShow) && !GetRatingTypesForNode(node).Any(a=>a.type == panelToShow)) {
-			let mainRatingType = GetRatingTypesForNode(node).find(a=>a.main);
-			panelToShow = mainRatingType ? mainRatingType.type : null;
+			panelToShow = GetMainRatingType(node);
 		}
 
 		return (

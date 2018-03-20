@@ -23,16 +23,18 @@ export function GetFontSizeForNode(node: MapNodeL2, isSubnode = false) {
 export function GetPaddingForNode(node: MapNodeL2, isSubnode = false) {
 	return isSubnode ? "1px 4px 2px" : "5px 5px 4px";
 }
-export type RatingTypeInfo = {type: RatingType, main: boolean};
+export type RatingTypeInfo = {type: RatingType, main?: boolean, collapsed?: boolean};
 export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	if (node.type == MapNodeType.Category) {
 		if (node.current.votingDisabled) return [];
 		return [{type: "significance", main: true}];
 	}
-	if (node.type == MapNodeType.Package)
+	if (node.type == MapNodeType.Package) {
 		return [{type: "significance", main: true}];
-	if (node.type == MapNodeType.MultiChoiceQuestion)
+	}
+	if (node.type == MapNodeType.MultiChoiceQuestion) {
 		return [{type: "significance", main: true}];
+	}
 	if (node.type == MapNodeType.Claim) {
 		let result: RatingTypeInfo[];
 		//result = [{type: "truth", main: true}]; //, {type: "significance", main: true}];
@@ -45,12 +47,12 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	}
 	if (node.type == MapNodeType.Argument) {
 		//return [{type: "strength", main: true}, {type: "impact", main: true}];
-		return [{type: "relevance", main: true}, {type: "impact", main: true}];
+		return [{type: "relevance"}, {type: "impact", main: true}];
 	}
 	Assert(false);
 }
 export function GetMainRatingType(node: MapNodeL2): RatingType {
-	return GetRatingTypesForNode(node).FirstOrX(null, {}).type;
+	return GetRatingTypesForNode(node).FirstOrX(a=>a.main, {}).type;
 }
 export function GetSortByRatingType(node: MapNodeL3): RatingType {
 	if ((node as MapNodeL3).link && (node as MapNodeL3).link.form == ClaimForm.YesNoQuestion) {
