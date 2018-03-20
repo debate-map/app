@@ -231,14 +231,13 @@ export function GetNodeDisplayText(node: MapNodeL2, path?: string, form?: ClaimF
 
 		if (form) {
 			if (form == ClaimForm.Negation)
-				return node.current.titles["negation"] || "[negation title not set]";
+				return node.current.titles.negation || "[negation title not set]";
 			if (form == ClaimForm.YesNoQuestion)
-				return node.current.titles["yesNoQuestion"] || "[yes-no-question title not set]";
-			return node.current.titles["base"] || "[base title not set]";
+				return node.current.titles.yesNoQuestion || "[yes-no-question title not set]";
+			return node.current.titles.base || "[base title not set]";
 		}
 	}
-	let titles = node.current.titles || {};
-	return titles.base || titles.yesNoQuestion || titles.negation|| "";
+	return node.current.titles.base || node.current.titles.yesNoQuestion || node.current.titles.negation || "";
 }
 
 export function GetValidChildTypes(nodeType: MapNodeType, path: string) {

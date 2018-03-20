@@ -138,7 +138,7 @@ The details of the argument should be described within the argument's premises. 
 									onChange={val=>Change(newRevision.titles["base"] = val, validationError = GetErrorMessagesUnderElement(root.DOM)[0])}/>
 							</Row>*/}
 							<Row style={{display: "flex", alignItems: "center"}}>
-								<Pre>First claim/premise: </Pre>
+								<Pre>Main claim (ie. premise) that your argument will be based on: </Pre>
 								<Link to="https://en.wikipedia.org/wiki/Premise" style={{marginLeft: "auto", fontSize: 12, opacity: .7}}>What is a premise?</Link>
 								{/*<InfoButton text={`
 								`.trim()}/>*/}
@@ -149,7 +149,7 @@ The details of the argument should be described within the argument's premises. 
 									value={newPremiseRevision.titles["base"]}
 									onChange={val=>Change(newPremiseRevision.titles["base"] = val, validationError = GetErrorMessagesUnderElement(root.DOM)[0])}/>
 							</Row>
-							<Row mt={5} style={{fontSize: 12}}>To add a second premise, right click on your new argument and press "Add claim". (once you're finished here)</Row>
+							<Row mt={5} style={{fontSize: 12}}>To add a second premise later, right click on your new argument and press "Convert to multi-premise".</Row>
 						</Column>}
 				</Column>
 			);

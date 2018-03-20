@@ -1,6 +1,6 @@
 import DeleteNode from "../../../../Server/Commands/DeleteNode";
-import {GetDataAsync, RemoveHelpers, SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
-import {MapNode, MapNodeL2, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
+import {GetDataAsync, RemoveHelpers, SlicePath, WaitTillPathDataIsReceiving, WaitTillPathDataIsReceived} from "../../../../Frame/Database/DatabaseHelpers";
+import {MapNode, MapNodeL2, Polarity, ChildEntry} from "../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {VMenuStub} from "react-vmenu";
 import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -42,6 +42,10 @@ import {GetNodeL2} from "Store/firebase/nodes/$node";
 import {ACTSetLastAcknowledgementTime} from "Store/main";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/$map";
 import {GetPathsToNodesChangedSinceX} from "../../../../Store/firebase/mapNodeEditTimes";
+import { MapNodeRevision } from "Store/firebase/nodes/@MapNodeRevision";
+import {SetNodeUILocked} from "./NodeUI";
+import AddChildNode from "../../../../Server/Commands/AddChildNode";
+import { ACTMapNodeExpandedSet } from "Store/main/mapViews/$mapView/rootNodeViews";
 
 type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean}
 	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeL2, copiedNode: MapNodeL3, copiedNode_asCut: boolean, pathsToChangedInSubtree: string}>;
@@ -94,6 +98,27 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							if (e.button != 0) return;
 							if (userID == null) return ShowSignInPopup();
 							ShowAddSubnodeDialog(map._id, node, path);
+						}}/>}
+				{IsUserBasicOrAnon(userID) &&
+					<VMenuItem text="Convert to multi-premise" style={styles.vMenuItem}
+						onClick={async e=> {
+							if (e.button != 0) return;
+
+							let newNode = new MapNode({
+								parents: {[parentNode._id]: {_: true}},
+								type: MapNodeType.Claim,
+							});
+							let newRevision = new MapNodeRevision({titles: {base: "Second premise (click to edit)"}});
+							let newLink = {_: true, form: ClaimForm.Base} as ChildEntry;
+
+							SetNodeUILocked(parentNode._id, true);
+							let info = await new AddChildNode({mapID: map._id, node: newNode, revision: newRevision, link: newLink}).Run();
+							store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path: path + "/" + info.nodeID, expanded: true, recursive: false}));
+							store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.nodeID, time: Date.now()}));
+
+							await WaitTillPathDataIsReceiving(`nodeRevisions/${info.revisionID}`);
+							await WaitTillPathDataIsReceived(`nodeRevisions/${info.revisionID}`);
+							SetNodeUILocked(parentNode._id, false);
 						}}/>}
 				{pathsToChangedInSubtree.length > 0 &&
 					<VMenuItem text="Mark subtree as viewed" style={styles.vMenuItem}

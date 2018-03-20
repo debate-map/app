@@ -136,7 +136,7 @@ class Title_Base extends BaseComponent<Props_Enhanced, {}> {
 		let {forNew, enabled, newData, newDataAsL2, newRevisionData, newLinkData, Change} = this.props;
 		let claimType = GetClaimType(newDataAsL2);
 		let hasOtherTitles = newData.type == MapNodeType.Claim && claimType == ClaimType.Normal;
-		let hasOtherTitlesEntered = newRevisionData.titles["negation"] || newRevisionData.titles["yesNoQuestion"];
+		let hasOtherTitlesEntered = newRevisionData.titles.negation || newRevisionData.titles.yesNoQuestion;
 		let willUseYesNoTitleHere = WillNodeUseQuestionTitleHere(newDataAsL2, newLinkData);
 		return (
 			<div>

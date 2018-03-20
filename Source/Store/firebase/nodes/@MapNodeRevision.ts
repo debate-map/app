@@ -14,7 +14,7 @@ export class MapNodeRevision {
 	creator?: string;
 	createdAt: number;
 
-	titles: {[key: string]: string};
+	titles = {base: ""} as {[key: string]: string};
 	note: string;
 
 	//updatedAt: number;
@@ -83,5 +83,5 @@ export enum ArgumentType {
 AddSchema({oneOf: GetValues_ForSchema(ArgumentType)}, "ArgumentType");
 
 export function GetArgumentTypeDisplayText(type: ArgumentType) {
-	return {Any: "any", AnyTwo: "any two", All: "all"}[type];
+	return {Any: "any", AnyTwo: "any two", All: "all"}[ArgumentType[type]];
 }

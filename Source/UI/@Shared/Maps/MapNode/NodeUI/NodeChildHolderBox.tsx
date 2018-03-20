@@ -69,7 +69,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		let lineColor = GetNodeColor(node, "raw");
 		
 		return (
-			<Row style={{position: "relative", alignItems: "flex-start", marginLeft: `calc(100% - ${width}px)`}}>
+			<Row style={{position: "relative", alignItems: "flex-start", /*marginLeft: `calc(100% - ${width}px)`,*/ alignSelf: "flex-end", width}}>
 				{type == HolderType.Truth && 
 					//<div style={{position: "absolute", right: width - 2, top: innerBoxOffset + (height / 2), bottom: 0, width: 3, backgroundColor: lineColor.css()}}/>}
 					<div style={{position: "absolute", left: 0, width: "100%", top: innerBoxOffset + (height / 2), bottom: 0, backgroundColor: `rgba(0,0,0,.5)`}}/>}

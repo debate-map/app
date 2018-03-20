@@ -263,12 +263,12 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 					/*useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
 					!useAutoOffset && {paddingTop: innerBoxOffset},*/
 					//{paddingTop: innerBoxOffset},
-					{marginTop: innerBoxOffset},
+					{marginTop: expanded ? innerBoxOffset : 0},
 				)}>
 					{limitBar_above && children}
 					{asSubnode &&
 						<div style={{position: "absolute", left: 2, right: 2, top: -3, height: 3, borderRadius: "3px 3px 0 0", background: "rgba(255,255,0,.7)"}}/>}
-					<Column ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{position: "relative", width}}>
+					<Column ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{position: "relative"}}>
 						{node.current.accessLevel != AccessLevel.Basic &&
 							<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 								<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
@@ -328,7 +328,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 						{editedDescendants > 0 &&
 							<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Edit)},.8)`}}>{editedDescendants} edited</Row>}
 					</Column>}
-				{!combineWithParentArgument &&
+				{!combineWithParentArgument && expanded &&
 					<NodeChildHolder {...{map, node, path, nodeView, nodeChildren: nodeChildren_orig, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
 						linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
 						onChildrenCenterYChange={childrenCenterY=> {
@@ -401,7 +401,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 		let height = $(FindDOM(this)).outerHeight();
 		if (height != this.lastHeight) {
-			this.OnHeightChange();
+			this.OnHeightChange(height);
 		} /*else {
 			if (this.lastRender_source == RenderSource.SetState) return;
 			this.UpdateState();
@@ -409,10 +409,11 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		}*/
 		this.lastHeight = height;
 	}
-	OnHeightChange() {
+	OnHeightChange(height: number) {
 		let {node, onHeightOrPosChange} = this.props;
 		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}`);
+			()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+				}NewHeight:${height}`);
 		
 		//this.UpdateState(true);
 		//this.UpdateState();
