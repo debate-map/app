@@ -39,14 +39,12 @@ export type ChildPack = {origIndex: number, node: MapNodeL3};
 }*/
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[], childPacks: ChildPack[],
+	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, childPacks: ChildPack[],
 	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, onChildrenCenterYChange?: (childrenCenterY: number)=>void,
 };
 let initialState = {
 	childrenWidthOverride: null as number,
-	svgInfo: null as {
-		oldChildBoxOffsets: {[key: number]: Vector2i},
-	},
+	oldChildBoxOffsets: null as {[key: number]: Vector2i},
 };
 
 let connector = (state, {}: Props)=> {
@@ -58,8 +56,8 @@ let connector = (state, {}: Props)=> {
 export class NodeChildHolder extends BaseComponentWithConnector(connector, initialState) {
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
-		let {map, node, nodeView, path, nodeChildren, childPacks, separateChildren, showArgumentsControlBar, linkSpawnPoint, onChildrenCenterYChange, initialChildLimit} = this.props;
-		let {childrenWidthOverride, svgInfo} = this.state;
+		let {map, node, nodeView, path, childPacks, separateChildren, showArgumentsControlBar, linkSpawnPoint, onChildrenCenterYChange, initialChildLimit} = this.props;
+		let {childrenWidthOverride, oldChildBoxOffsets} = this.state;
 
 		let upChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalPolarity == Polarity.Supporting) : [];
 		let downChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalPolarity == Polarity.Opposing) : [];
@@ -94,9 +92,9 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 				},
 				//!expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
 			)}>
-				{linkSpawnPoint &&
-					<NodeConnectorBackground node={node} linkSpawnPoint={linkSpawnPoint} shouldUpdate={this.lastRender_source == RenderSource.SetState}
-						childNodes={nodeChildren} childBoxOffsets={svgInfo.oldChildBoxOffsets}/>}
+				{linkSpawnPoint && oldChildBoxOffsets &&
+					<NodeConnectorBackground node={node} linkSpawnPoint={linkSpawnPoint} shouldUpdate={true} //this.lastRender_source == RenderSource.SetState}
+						childPacks={childPacks} childBoxOffsets={oldChildBoxOffsets}/>}
 				
 				{!separateChildren && childPacks.slice(0, childLimit_down).map((pack, index)=> {
 					return RenderChildPack(pack, index, childPacks);
@@ -108,7 +106,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 						})}
 					</Column>}
 				{showArgumentsControlBar &&
-					<ArgumentsControlBar map={map} parentNode={node} parentPath={path} node={node}/>}
+					<ArgumentsControlBar ref={c=>this.argumentsControlBar = c} map={map} parentNode={node} parentPath={path} node={node}/>}
 				{separateChildren &&
 					<Column ref={c=>this.downChildHolder = c} ct>
 						{downChildPacks.slice(0, childLimit_down).map((pack, index)=> {
@@ -123,6 +121,20 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	downChildHolder: Column;
 	argumentsControlBar: ArgumentsControlBar;
 
+	lastHeight = 0;
+	PostRender() {
+		//if (this.lastRender_source == RenderSource.SetState) return;
+
+		let height = $(FindDOM(this)).outerHeight();
+		if (height != this.lastHeight) {
+			this.OnHeightChange();
+		} else {
+			if (this.lastRender_source == RenderSource.SetState) return;
+			this.UpdateState();
+		}
+		this.lastHeight = height;
+	}
+	
 	OnChildHeightOrPosChange_updateStateQueued = false;
 	OnChildHeightOrPosChange() {
 		let {node} = this.props;
@@ -157,7 +169,8 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		if (onChildrenCenterYChange) onChildrenCenterYChange(childrenCenterY);
 
 		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnChildrenCenterYChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}`);
+			()=>`OnChildrenCenterYChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+				}centerY:${this.GetChildrenCenterY()}`);
 	}
 
 	OnHeightChange() {
@@ -170,18 +183,9 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		this.UpdateState();
 		this.ReportChildrenCenterYChange();
 	}
-	OnPosChange() {
-		let {node} = this.props;
-		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
-				}centerY:${this.GetChildrenCenterY()}`);
-
-		this.ReportChildrenCenterYChange();
-	}
 	UpdateState(forceUpdate = false) {
-		let {map, node, path, children, nodeView, nodeChildren, linkSpawnPoint} = this.props;
+		let {map, node, path, children, nodeView, linkSpawnPoint} = this.props;
 		let expanded = nodeView && nodeView.expanded;
-		//let {childHolder, upChildHolder} = this.refs;
 		let childHolder = $(this);
 		let upChildHolder = childHolder.children(".upChildHolder");
 		let downChildHolder = childHolder.children(".downChildHolder");
@@ -206,19 +210,20 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 
 		let showAddArgumentButtons = false; //node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading; // && nodeChildren.length > 0;
 		//if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
-		//if (this.refs.childHolder) {
-		if (expanded && this.refs.childHolder) {
-			let holderOffset = new Vector2i($(FindDOM(this.refs.childHolder)).offset());
-			let innerBox = $(FindDOM(this.refs.innerBox));
+		if (expanded && this.childHolder) {
+			let holderOffset = new Vector2i($(FindDOM(this.childHolder)).offset());
 
 			let oldChildBoxOffsets = this.childBoxes.Props().Where(pair=>pair.value != null).ToMap(pair=>pair.name, pair=> {
 				//let childBox = FindDOM_(pair.value).find("> div:first-child > div"); // get inner-box of child
-				let childBox = $(FindDOM(pair.value)).find(".NodeUI_Inner").first(); // get inner-box of child
+				//let childBox = $(FindDOM(pair.value)).find(".NodeUI_Inner").first(); // get inner-box of child
+				let childBox = $(pair.value.innerUI.DOM);
+				Assert(childBox.length, "Could not find inner-ui of child-box.");
 				let childBoxOffset = new Vector2i(childBox.offset()).Minus(holderOffset);
+				Assert(childBoxOffset.x < 100, "Something is wrong. X-offset should never be more than 100.");
 				childBoxOffset = childBoxOffset.Plus(new Vector2i(0, childBox.outerHeight() / 2));
 				return childBoxOffset;
 			});
-			newState.svgInfo = {oldChildBoxOffsets};
+			newState.oldChildBoxOffsets = oldChildBoxOffsets;
 		}
 		
 		let cancelIfStateSame = !forceUpdate;

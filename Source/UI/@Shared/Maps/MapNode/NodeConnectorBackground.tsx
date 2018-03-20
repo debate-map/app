@@ -7,26 +7,20 @@ import {MapNodeType, MapNodeType_Info, GetNodeColor} from "../../../../Store/fir
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetNodeForm, GetRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
+import {ChildPack} from "./NodeUI/NodeChildHolder";
 
 type Props = {
-	node: MapNodeL3, linkSpawnPoint: number, childNodes: MapNodeL3[],
+	node: MapNodeL3, linkSpawnPoint: number, childPacks: ChildPack[],
 	//childBoxOffsets: Vector2i[],
 	childBoxOffsets: {[key: number]: Vector2i},
 	shouldUpdate: boolean
 };
-	//& Partial<{nodeChildren_finalNodeTypes: MapNodeType[]}>;
 @SimpleShouldUpdate_Overridable
-/*@Connect((state, {path, childNodes}: Props)=> ({
-	node_finalType: GetFinalNodeTypeAtPath(child, path + "/" + child._id),
-	nodeChildren_fillPercents: childNodes.map(child=> {
-		return GetFinalNodeTypeAtPath(child, path + "/" + child._id);
-	})
-}))*/
 export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 	render() {
-		var {node, linkSpawnPoint, childNodes, childBoxOffsets} = this.props;
+		var {node, linkSpawnPoint, childPacks, childBoxOffsets} = this.props;
 
-		let mainBoxOffset = new Vector2i(0, linkSpawnPoint);
+		let mainBoxOffset = new Vector2i(-30, linkSpawnPoint);
 
 		return (
 			<svg className="clickThroughChain" style={{position: "absolute", overflow: "visible", zIndex: -1}}>
@@ -36,10 +30,10 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 
 					//let child = A.NonNull = childNodes.First(a=>a._id == childIDStr.ToInt());
 					// maybe temp; see if causes problems ignoring not-found error
-					let child = childNodes.FirstOrX(a=>a._id == childIDStr.ToInt());
-					if (child == null) return null;
+					let childPack = childPacks.FirstOrX(a=>a.node._id == childIDStr.ToInt());
+					if (childPack == null) return null;
 
-					let backgroundColor = GetNodeColor(node.type == MapNodeType.Argument ? node : child, "raw");
+					let backgroundColor = GetNodeColor(node.type == MapNodeType.Argument ? node : childPack.node, "raw");
 
 					/*var start = mainBoxOffset;
 					var startControl = start.Plus(30, 0);
@@ -63,7 +57,7 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					startControl = startControl.Plus(middleControl).Times(.5); // average with middle-control
 					endControl = endControl.Plus(middleControl).Times(.5); // average with middle-control
 
-					return <path key={"connectorLine_" + child._id} style={{stroke: backgroundColor.css(), strokeWidth: 3, fill: "none"}}
+					return <path key={"connectorLine_" + childPack.node._id} style={{stroke: backgroundColor.css(), strokeWidth: 3, fill: "none"}}
 						d={`M${start.x},${start.y} C${startControl.x},${startControl.y} ${endControl.x},${endControl.y} ${end.x},${end.y}`}/>;
 				})}
 			</svg>

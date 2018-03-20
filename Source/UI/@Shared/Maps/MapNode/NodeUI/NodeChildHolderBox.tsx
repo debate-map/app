@@ -13,117 +13,127 @@ import {Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
 import chroma from "chroma-js";
 import {ChildLimitBar, NodeChildHolder, ChildPack} from "./NodeChildHolder";
 import { emptyArray_forLoading } from "Frame/Store/ReducerUtils";
+import {GetNodeColor} from "../../../../../Store/firebase/nodes/@MapNodeType";
+
+export enum HolderType {
+	Truth,
+	Relevance,
+}
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[], childPacks: ChildPack[],
-	text: string, backgroundColor: Color, colorFillPercent: number, expanded: boolean
+	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, childPacks: ChildPack[],
+	type: HolderType, expanded: boolean,
 };
-class HolderTemplate extends BaseComponent<Props, {innerBoxOffset: number}> {
+export class NodeChildHolderBox extends BaseComponent<Props, {innerBoxOffset: number}> {
 	render() {
-		let {map, node, path, nodeView, nodeChildren, childPacks,
-			text, backgroundColor, colorFillPercent, expanded} = this.props;
+		let {map, node, path, nodeView, childPacks,
+			type, expanded} = this.props;
 		let {innerBoxOffset} = this.state;
 
-		let separateChildren = node.type == MapNodeType.Claim;
-		let showArgumentsControlBar = node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading;
+		let text = type == HolderType.Truth ? "True?" : "Relevant?";
+		let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
+		let mainRating_fillPercent = 100;
 
-		let {expectedBoxWidth, boxWidth, expectedHeight} = this.GetMeasurementInfo();
+		let separateChildren = node.type == MapNodeType.Claim;
+		let showArgumentsControlBar = node.type == MapNodeType.Claim && expanded && childPacks != emptyArray_forLoading;
+
+		let {width, height} = this.GetMeasurementInfo();
+
+		let lineColor = GetNodeColor(node, "raw");
 		
 		return (
-			<div style={E({
-				display: "flex", alignSelf: "flex-end", position: "relative", borderRadius: 5, cursor: "default",
-				boxShadow: "rgba(0,0,0,1) 0px 0px 2px", width: 175,
-			})}>
-				<Row style={{alignItems: "stretch", width: "100%", borderRadius: 5, cursor: "pointer"}}>
-					<div style={{position: "relative", width: "calc(100% - 17px)", padding: "5px 5px 4px"}}>
-						<div style={{
-							position: "absolute", left: 0, top: 0, bottom: 0,
-							width: colorFillPercent + "%", background: backgroundColor.css(), borderRadius: "5px 0 0 5px",
-						}}/>
-						<div style={{
-							position: "absolute", right: 0, top: 0, bottom: 0,
-							width: (100 - colorFillPercent) + "%", background: `rgba(0,0,0,.7)`,
-						}}/>
-						{/*mainRating_mine != null &&
+			<Row style={{position: "relative", alignItems: "flex-start", marginLeft: `calc(100% - ${width}px)`}}>
+				{type == HolderType.Truth && 
+					//<div style={{position: "absolute", right: width - 2, top: innerBoxOffset + (height / 2), bottom: 0, width: 3, backgroundColor: lineColor.css()}}/>}
+					<div style={{position: "absolute", left: 0, width: "100%", top: innerBoxOffset + (height / 2), bottom: 0, backgroundColor: `rgba(0,0,0,.5)`}}/>}
+				{type == HolderType.Relevance && 
+					//<div style={{position: "absolute", right: width - 2, top: 0, width: 3, height: innerBoxOffset + (height / 2), backgroundColor: lineColor.css()}}/>}
+					<div style={{position: "absolute", left: 0, width: "100%", top: 0, height: innerBoxOffset + (height / 2), backgroundColor: `rgba(0,0,0,.5)`}}/>}
+				<div style={E({
+					display: "flex", position: "relative", borderRadius: 5, cursor: "default",
+					boxShadow: "rgba(0,0,0,1) 0px 0px 2px", width: width, marginTop: innerBoxOffset,
+				})}>
+					<Row style={{alignItems: "stretch", width: width, borderRadius: 5, cursor: "pointer"}}>
+						<div style={{position: "relative", width: "calc(100% - 17px)", padding: "3px 5px 2px"}}>
 							<div style={{
-								position: "absolute", left: mainRating_myFillPercent + "%", top: 0, bottom: 0,
-								width: 2, background: "rgba(0,255,0,.5)",
-							}}/>*/}
-						<span style={{position: "relative"}}>{text}</span>
-					</div>
-					<Button text={expanded ? "-" : "+"} //size={28}
-							style={{
-								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
-								width: 17, //minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
-								padding: 0,
-								fontSize: expanded ? 23 : 17,
-								lineHeight: "1px", // keeps text from making meta-theses too tall
-								backgroundColor: backgroundColor.Mix("black", .2).alpha(.9).css(),
-								border: "none",
-								":hover": {backgroundColor: backgroundColor.Mix("black", .1).alpha(.9).css()},
-							}}
-							/*onClick={e=> {
-								store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path, expanded: !expanded, recursive: expanded && e.altKey}));
-								e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
-								//return false;
-							}}*//>
-				</Row>
-				<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, childPacks, separateChildren, showArgumentsControlBar}}
-					linkSpawnPoint={innerBoxOffset}
+								position: "absolute", left: 0, top: 0, bottom: 0,
+								width: mainRating_fillPercent + "%", background: backgroundColor.css(), borderRadius: "5px 0 0 5px",
+							}}/>
+							<div style={{
+								position: "absolute", right: 0, top: 0, bottom: 0,
+								width: (100 - mainRating_fillPercent) + "%", background: `rgba(0,0,0,.7)`,
+							}}/>
+							{/*mainRating_mine != null &&
+								<div style={{
+									position: "absolute", left: mainRating_myFillPercent + "%", top: 0, bottom: 0,
+									width: 2, background: "rgba(0,255,0,.5)",
+								}}/>*/}
+							<span style={{position: "relative", fontSize: 13}}>{text}</span>
+						</div>
+						<Button text={expanded ? "-" : "+"} //size={28}
+								style={{
+									display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
+									width: 17, //minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
+									padding: 0,
+									fontSize: expanded ? 23 : 17,
+									lineHeight: "1px", // keeps text from making meta-theses too tall
+									backgroundColor: backgroundColor.Mix("black", .2).alpha(.9).css(),
+									border: "none",
+									":hover": {backgroundColor: backgroundColor.Mix("black", .1).alpha(.9).css()},
+								}}
+								/*onClick={e=> {
+									store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path, expanded: !expanded, recursive: expanded && e.altKey}));
+									e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
+									//return false;
+								}}*//>
+					</Row>
+				</div>
+				<NodeChildHolder {...{map, node, path, nodeView, childPacks, separateChildren, showArgumentsControlBar}}
+					linkSpawnPoint={innerBoxOffset + (height / 2)}
 					onChildrenCenterYChange={childrenCenterY=> {
-						let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;
+						/*this.childrenCenterY = childrenCenterY;
+						this.UpdateLines();*/
+
+						let distFromInnerBoxTopToMainBoxCenter = height / 2;
 						let innerBoxOffset = (childrenCenterY - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
 						this.SetState({innerBoxOffset});
 					}}/>
-			</div>
+			</Row>
 		);
 	}
+	//childrenCenterY: number;
 	
 	GetMeasurementInfo() {
-		return {expectedBoxWidth: 175, boxWidth: 175, expectedHeight: 26};
+		return {width: 90, height: 26};
 	}
 
-	/*lastHeight = 0;
-	lastPos = 0;
+	/*UpdateLines() {
+		let {width, height} = this.GetMeasurementInfo();
+
+		let distFromInnerBoxTopToMainBoxCenter = height / 2;
+		let innerBoxOffset = (this.childrenCenterY - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
+		this.SetState({innerBoxOffset});
+	}*/
+
+	/*lastPos = 0;
 	PostRender() {
 		//if (this.lastRender_source == RenderSource.SetState) return;
 
 		let height = $(FindDOM(this)).outerHeight();
 		let pos = this.state.childrenCenterY|0;
-		if (height != this.lastHeight) {
-			this.OnHeightChange();
-		} else if (pos != this.lastPos) {
+		if (pos != this.lastPos) {
 			this.OnPosChange();
 		} else {
 			if (this.lastRender_source == RenderSource.SetState) return;
-			this.UpdateState();
+			this.UpdateLines();
 		}
-		this.lastHeight = height;
 		this.lastPos = pos;
-	}*/
-}
+	}
+	OnPosChange() {
+		let {node} = this.props;
+		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
+			()=>`OnPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}`);
 
-export class TruthHolder extends BaseComponent
-		<{map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[], childPacks: ChildPack[]}, {}> {
-	render() {
-		let {map, node, path, nodeView, nodeChildren, childPacks} = this.props;
-		let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
-		let mainRating_fillPercent = 100;
-		return (
-			<HolderTemplate {...{map, node, path, nodeView, nodeChildren, childPacks}}
-				text="Is this claim true?" expanded={true} backgroundColor={backgroundColor} colorFillPercent={mainRating_fillPercent}/>
-		);
-	}
-}
-export class RelevanceHolder extends BaseComponent
-		<{map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[], childPacks: ChildPack[]}, {}> {
-	render() {
-		let {map, node, path, nodeView, nodeChildren, childPacks} = this.props;
-		let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
-		let mainRating_fillPercent = 100;
-		return (
-			<HolderTemplate {...{map, node, path, nodeView, nodeChildren, childPacks}}
-				text="Is this claim relevant?" expanded={true} backgroundColor={backgroundColor} colorFillPercent={mainRating_fillPercent}/>
-		);
-	}
+		this.UpdateLines();
+	}*/
 }

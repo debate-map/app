@@ -11,7 +11,7 @@ import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
 import {VURL} from "js-vextensions";
 import Link from "../../../../Frame/ReactComponents/Link";
-import {BaseComponent, BaseProps, FindDOM} from "react-vextensions";
+import {BaseComponent, BaseProps, FindDOM, GetInnerComp} from "react-vextensions";
 import {Pre} from "react-vcomponents";
 import {MapNode, MapNodeL2, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeDisplayText, GetRatingTypesForNode, AsNodeL3} from "../../../../Store/firebase/nodes/$node";
@@ -35,6 +35,7 @@ type Props = {map: Map, node: MapNodeL2}
 	nodeChildren: GetNodeChildrenL2(node),
 }))
 export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
+	innerUI: NodeUI_Inner;
 	render() {
 		let {map, node, nodeParents, nodeChildren} = this.props;
 		if (nodeParents.Any(a=>a == null) || nodeChildren.Any(a=>a == null)) return <div/>;
@@ -75,7 +76,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 					{/*<Row>ID: {node._id}</Row>
 					<Row>Title: {GetNodeDisplayText(node)}</Row>*/}
 					Main box:
-					<NodeUI_Inner ref="innerBox" map={map} node={nodeL3} nodeView={{}} path={path} width={null} widthOverride={null}/>
+					<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} map={map} node={nodeL3} nodeView={{}} path={path} width={null} widthOverride={null}/>
 					Panels:
 					{GetRatingTypesForNode(nodeL3).map((ratingInfo, index)=> {
 						let ratings = GetRatings(node._id, ratingInfo.type);

@@ -59,7 +59,7 @@ import { AddArgumentButton } from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentBut
 import classNames from "classnames";
 import chroma from "chroma-js";
 import { ChildPack, ChildLimitBar, NodeChildHolder } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
-import { RelevanceHolder, TruthHolder } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
+import { NodeChildHolderBox, HolderType } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
 
 let nodesLocked = {};
 export function SetNodeUILocked(nodeID: number, locked: boolean, maxWait = 10000) {
@@ -158,6 +158,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 	}
 
 	nodeUI: HTMLDivElement;
+	innerUI: NodeUI_Inner;
 	render() {
 		let {map, node, path, asSubnode, widthOverride, style,
 			initialChildLimit, form, children, nodeView, nodeChildren, nodeChildren_sortValues, subnodes,
@@ -208,6 +209,9 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			}
 		}
 
+		let childPacks_claim = childPacks;
+		let childPacks_argument = childPacks;
+
 		let showArgumentsControlBar = node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading;
 
 		let {width, expectedHeight} = this.GetMeasurementInfo();
@@ -244,6 +248,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 				</NodeUI>
 			);
 		}
+
+		let showTruthAndRelevanceHolders = node.type == MapNodeType.Claim && node.link.form != ClaimForm.YesNoQuestion;
 		
 		let nodeUIResult_withoutSubnodes = (
 			<div ref={c=>this.nodeUI = c} className="NodeUI clickThrough"
@@ -258,19 +264,21 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 					{limitBar_above && children}
 					{asSubnode &&
 						<div style={{position: "absolute", left: 2, right: 2, top: -3, height: 3, borderRadius: "3px 3px 0 0", background: "rgba(255,255,0,.7)"}}/>}
-					<Column ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{position: "relative"}}>
+					<Column ref="innerBoxHolder" className="innerBoxHolder clickThrough" style={{position: "relative", width}}>
 						{node.current.accessLevel != AccessLevel.Basic &&
 							<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 								<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 							</div>}
-						{node.type == MapNodeType.Claim && expanded && node.link.form != ClaimForm.YesNoQuestion &&
-							<TruthHolder {...{map, node, path, nodeView, nodeChildren, childPacks}}/>}
-						<NodeUI_Inner ref="innerBox" {...{map, node, nodeView, path, width, widthOverride}}
+						{showTruthAndRelevanceHolders && expanded &&
+							<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Truth} expanded={true}
+								childPacks={childPacks_claim}/>}
+						<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{map, node, nodeView, path, width, widthOverride}}
 							style={E(
 								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
 							)}/>
-						{node.type == MapNodeType.Claim && expanded && node.link.form != ClaimForm.YesNoQuestion &&
-							<RelevanceHolder {...{map, node, path, nodeView, nodeChildren, childPacks}}/>}
+						{showTruthAndRelevanceHolders && expanded &&
+							<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Relevance} expanded={true}
+								childPacks={childPacks_argument}/>}
 						{/*showBelowMessage &&
 							<Div ct style={{
 								//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
@@ -299,7 +307,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 						showLimitBar && limitBar_above && {paddingTop: ChildLimitBar.HEIGHT},
 						{paddingBottom: 0 + /*(showBelowMessage ? 13 : 0) +*/ (showLimitBar && !limitBar_above ? ChildLimitBar.HEIGHT : 0)},
 					)}>
-						{nodeChildren} {/*.filter(a=>!a.premiseAddHelper).length}*/}
+						{nodeChildren.length}
 					</div>}
 				{!expanded && (addedDescendants > 0 || editedDescendants > 0) &&
 					<Column style={E(
@@ -316,13 +324,14 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 						{editedDescendants > 0 &&
 							<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Edit)},.8)`}}>{editedDescendants} edited</Row>}
 					</Column>}
-				<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, childPacks, separateChildren, showArgumentsControlBar}}
-					linkSpawnPoint={innerBoxOffset}
-					onChildrenCenterYChange={childrenCenterY=> {
-						let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;
-						let innerBoxOffset = (childrenCenterY - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
-						this.SetState({innerBoxOffset});
-					}}/>
+				{!showTruthAndRelevanceHolders &&
+					<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, childPacks, separateChildren, showArgumentsControlBar}}
+						linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
+						onChildrenCenterYChange={childrenCenterY=> {
+							let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;
+							let innerBoxOffset = (childrenCenterY - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
+							this.SetState({innerBoxOffset});
+						}}/>}
 			</div>
 		);
 
