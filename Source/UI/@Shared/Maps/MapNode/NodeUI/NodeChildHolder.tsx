@@ -100,9 +100,9 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 						shouldUpdate={true} //this.lastRender_source == RenderSource.SetState}
 						nodeChildren={nodeChildrenToShow} childBoxOffsets={oldChildBoxOffsets}/>}
 				
-				{/*IsMultiPremiseArgument(node, nodeChildrenToShow) &&
-					<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Relevance} expanded={false}
-				nodeChildren={GetNodeChildrenL3(node, path)} nodeChildrenToShow={GetNodeChildrenL3(node, path).filter(a=>a && a.type == MapNodeType.Argument)}/>*/}
+				{IsMultiPremiseArgument(node, nodeChildrenToShow) &&
+					<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Relevance} expanded={false} widthOverride={childrenWidthOverride}
+						nodeChildren={GetNodeChildrenL3(node, path)} nodeChildrenToShow={GetNodeChildrenL3(node, path).filter(a=>a && a.type == MapNodeType.Argument)}/>}
 				{!separateChildren && nodeChildrenToShow.slice(0, childLimit_down).map((pack, index)=> {
 					return RenderChild(pack, index, nodeChildrenToShow);
 				})}

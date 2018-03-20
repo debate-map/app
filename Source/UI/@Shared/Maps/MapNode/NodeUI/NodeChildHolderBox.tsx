@@ -20,6 +20,7 @@ import { GetRatings } from "Store/firebase/nodeRatings";
 import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage} from "../../../../../Store/firebase/nodeRatings";
 import { IsSinglePremiseArgument } from "Store/firebase/nodes/$node";
 import { QuickIncrement } from "Frame/General/Globals_Free";
+import {IsMultiPremiseArgument} from "../../../../../Store/firebase/nodes/$node";
 
 export enum HolderType {
 	Truth,
@@ -28,7 +29,7 @@ export enum HolderType {
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
-	type: HolderType, expanded: boolean,
+	type: HolderType, expanded: boolean, widthOverride?: number,
 };
 let connector = (state, {node, nodeChildren}: Props)=> {
 	return {
@@ -42,10 +43,14 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		Assert(nodeChildren.All(a=>a == null || a.parents[node._id]), "Supplied node is not a parent of all the supplied node-children!");
 	}
 	render() {
-		let {map, node, path, nodeView, nodeChildrenToShow, type, expanded, combineWithChildClaim} = this.props;
+		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, expanded, widthOverride, combineWithChildClaim} = this.props;
 		let {innerBoxOffset} = this.state;
 
+		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildren);
 		let text = type == HolderType.Truth ? "True?" : "Relevant?";
+		if (isMultiPremiseArgument) {
+			text = "When taken together, are these claims relevant?";
+		}
 		let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
 
 		//let mainRating_fillPercent = 100;
@@ -66,17 +71,26 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		let showArgumentsControlBar = (node.type == MapNodeType.Claim || combineWithChildClaim) && expanded && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, height} = this.GetMeasurementInfo();
+		if (widthOverride) {
+			width = widthOverride;
+		}
 
 		let lineColor = GetNodeColor(node, "raw");
 
 		return (
-			<Row style={{position: "relative", alignItems: "flex-start", /*marginLeft: `calc(100% - ${width}px)`,*/ alignSelf: "flex-end", width}}>
+			<Row style={E(
+				{position: "relative", alignItems: "flex-start", /*marginLeft: `calc(100% - ${width}px)`,*/ width},
+				!isMultiPremiseArgument && {alignSelf: "flex-end"},
+				isMultiPremiseArgument && {marginTop: 10},
+			)}>
 				{type == HolderType.Truth && 
 					//<div style={{position: "absolute", right: width - 2, top: innerBoxOffset + (height / 2), bottom: 0, width: 3, backgroundColor: lineColor.css()}}/>}
 					<div style={{position: "absolute", left: 0, width: "100%", top: innerBoxOffset + (height / 2), bottom: 0, backgroundColor: `rgba(0,0,0,.5)`}}/>}
-				{type == HolderType.Relevance && 
+				{type == HolderType.Relevance && !isMultiPremiseArgument &&
 					//<div style={{position: "absolute", right: width - 2, top: 0, width: 3, height: innerBoxOffset + (height / 2), backgroundColor: lineColor.css()}}/>}
 					<div style={{position: "absolute", left: 0, width: "100%", top: 0, height: innerBoxOffset + (height / 2), backgroundColor: `rgba(0,0,0,.5)`}}/>}
+				{type == HolderType.Relevance && isMultiPremiseArgument &&
+					<div style={{position: "absolute", right: "100%", width: 10, top: "50%", height: 3, backgroundColor: backgroundColor.css()}}/>}
 				<div style={E({
 					display: "flex", position: "relative", borderRadius: 5, cursor: "default",
 					boxShadow: "rgba(0,0,0,1) 0px 0px 2px", width: width, marginTop: innerBoxOffset,
