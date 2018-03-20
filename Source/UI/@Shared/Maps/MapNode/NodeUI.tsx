@@ -160,7 +160,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 	nodeUI: HTMLDivElement;
 	innerUI: NodeUI_Inner;
 	render() {
-		let {map, node, path, asSubnode, widthOverride, style,
+		let {map, node, path, asSubnode, widthOverride, style, onHeightOrPosChange,
 			initialChildLimit, form, children, nodeView, nodeChildren: nodeChildren_orig, nodeChildren_sortValues, subnodes,
 			playingTimeline, playingTimeline_currentStepIndex, playingTimelineShowableNodes, playingTimelineVisibleNodes, playingTimeline_currentStepRevealNodes,
 			addedDescendants, editedDescendants} = this.props;
@@ -247,8 +247,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			let collection = nodeChildren_orig;
 			let childLimit = direction == "down" ? childLimit_down : childLimit_up;
 			return (
-				<NodeUI key={child._id} map={map} node={child}
-						path={path + "/" + child._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={()=>{}}>
+				<NodeUI ref={c=>this.proxyDisplayedNodeUI = c} key={child._id} map={map} node={child}
+						path={path + "/" + child._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={onHeightOrPosChange}>
 					{index == (direction == "down" ? childLimit - 1 : 0) && !showAll && (collection.length > childLimit || childLimit != initialChildLimit) &&
 						<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit}} direction={direction} childCount={collection.length}/>}
 				</NodeUI>
@@ -335,6 +335,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 							let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;
 							let innerBoxOffset = (childrenCenterY - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
 							this.SetState({innerBoxOffset});
+							if (onHeightOrPosChange) onHeightOrPosChange();
 						}}/>}
 			</div>
 		);
@@ -348,11 +349,15 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 				{subnodes.map((subnode, index)=> {
 					return (
 						<NodeUI key={index} map={map} node={subnode} asSubnode={true} style={E({marginTop: -5})}
-							path={`${path}/L${subnode._id}`} widthOverride={widthOverride} onHeightOrPosChange={()=>{}}/>
+							path={`${path}/L${subnode._id}`} widthOverride={widthOverride} onHeightOrPosChange={onHeightOrPosChange}/>
 					);
 				})}
 			</div>
 		);
+	}
+	proxyDisplayedNodeUI: NodeUI;
+	get NodeUIForDisplayedNode() {
+		return this.proxyDisplayedNodeUI || this;
 	}
 
 	//GetMeasurementInfo(/*props: Props, state: State*/) {
@@ -388,7 +393,31 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		if (userViewedNodes_doneLoading && !(userViewedNodes || {}).VKeys(true).map(ToInt).Contains(node._id)) {
 			new NotifyNodeViewed({nodeID: node._id}).Run();
 		}
-	}	
+	}
+
+	lastHeight = 0;
+	PostRender() {
+		//if (this.lastRender_source == RenderSource.SetState) return;
+
+		let height = $(FindDOM(this)).outerHeight();
+		if (height != this.lastHeight) {
+			this.OnHeightChange();
+		} /*else {
+			if (this.lastRender_source == RenderSource.SetState) return;
+			this.UpdateState();
+			this.ReportChildrenCenterYChange();
+		}*/
+		this.lastHeight = height;
+	}
+	OnHeightChange() {
+		let {node, onHeightOrPosChange} = this.props;
+		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
+			()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}`);
+		
+		//this.UpdateState(true);
+		//this.UpdateState();
+		if (onHeightOrPosChange) onHeightOrPosChange();
+	}
 }
 
 /*interface JQuery {

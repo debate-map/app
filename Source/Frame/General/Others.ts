@@ -128,4 +128,4 @@ export function GetDOMPath_JQuery(el) {
 	}
 	stack.splice(0,1); // removes the html element
 	return stack.join(" > ");
- }
+}

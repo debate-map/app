@@ -170,14 +170,14 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		if (onChildrenCenterYChange) onChildrenCenterYChange(childrenCenterY);
 
 		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnChildrenCenterYChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+			()=>`OnChildrenCenterYChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
 				}centerY:${this.GetChildrenCenterY()}`);
 	}
 
 	OnHeightChange() {
 		let {node} = this.props;
 		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+			()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
 				}centerY:${this.GetChildrenCenterY()}`);
 		
 		//this.UpdateState(true);
@@ -218,9 +218,9 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 				//let childBox = FindDOM_(pair.value).find("> div:first-child > div"); // get inner-box of child
 				//let childBox = $(FindDOM(pair.value)).find(".NodeUI_Inner").first(); // get inner-box of child
 				// not sure why this is needed... (bad sign!)
-				if (pair.value.innerUI == null) return 0;
+				if (pair.value.NodeUIForDisplayedNode.innerUI == null) return new Vector2i(0, 0);
 				
-				let childBox = $(pair.value.innerUI.DOM);
+				let childBox = $(pair.value.NodeUIForDisplayedNode.innerUI.DOM);
 				Assert(childBox.length, "Could not find inner-ui of child-box.");
 				let childBoxOffset = new Vector2i(childBox.offset()).Minus(holderOffset);
 				Assert(childBoxOffset.x < 100, "Something is wrong. X-offset should never be more than 100.");

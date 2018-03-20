@@ -10,6 +10,7 @@ import "./Store/firebase/nodeRatings/@RatingsRoot";
 import {State_overrides, State_Options} from "./UI/@Shared/StateOverrides";
 import {JSVE, DeepGet} from "js-vextensions";
 import "./Frame/General/Logging";
+import "./Frame/General/Testing";
 import {Manager as Manager_Forum} from "firebase-forum";
 import {Manager as Manager_Feedback} from "firebase-feedback";
 import Moment from "moment";
