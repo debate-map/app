@@ -1,4 +1,5 @@
 import {RemoveHelpers} from "../Database/DatabaseHelpers";
+import {Vector2i} from "js-vextensions";
 
 let _hScrollBarHeight;
 export function GetHScrollBarHeight() {
@@ -129,3 +130,11 @@ export function GetDOMPath_JQuery(el) {
 	stack.splice(0,1); // removes the html element
 	return stack.join(" > ");
 }
+
+/*export class Vector2iCache {
+	static cache = {};
+	static Get(x: number, y: number) {
+		let key = `${x}|${y}`;
+		return Vector2iCache.cache[key] || (Vector2iCache.cache[key] = new Vector2i(x, y));
+	}
+}*/

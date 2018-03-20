@@ -38,7 +38,7 @@ import Icon from "Frame/ReactComponents/Icon";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildrenToShow: MapNodeL3[],
-	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, onChildrenCenterYChange?: (childrenCenterY: number)=>void,
+	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, vertical?: boolean, onChildrenCenterYChange?: (childrenCenterY: number)=>void,
 };
 let initialState = {
 	childrenWidthOverride: null as number,
@@ -54,7 +54,7 @@ let connector = (state, {}: Props)=> {
 export class NodeChildHolder extends BaseComponentWithConnector(connector, initialState) {
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
-		let {map, node, nodeView, path, nodeChildrenToShow, separateChildren, showArgumentsControlBar, linkSpawnPoint, onChildrenCenterYChange, initialChildLimit} = this.props;
+		let {map, node, nodeView, path, nodeChildrenToShow, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, onChildrenCenterYChange, initialChildLimit} = this.props;
 		let {childrenWidthOverride, oldChildBoxOffsets} = this.state;
 
 		let upChildren = separateChildren ? nodeChildrenToShow.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
@@ -91,7 +91,9 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 				//!expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
 			)}>
 				{linkSpawnPoint && oldChildBoxOffsets &&
-					<NodeConnectorBackground node={node} linkSpawnPoint={linkSpawnPoint} shouldUpdate={true} //this.lastRender_source == RenderSource.SetState}
+					//<NodeConnectorBackground node={node} linkSpawnPoint={vertical ? Vector2iCache.Get(0, linkSpawnPoint) : Vector2iCache.Get(-30, linkSpawnPoint)}
+					<NodeConnectorBackground node={node} linkSpawnPoint={vertical ? new Vector2i(-10, 0) : new Vector2i(-30, linkSpawnPoint)} straightLines={vertical}
+						shouldUpdate={true} //this.lastRender_source == RenderSource.SetState}
 						nodeChildren={nodeChildrenToShow} childBoxOffsets={oldChildBoxOffsets}/>}
 				
 				{!separateChildren && nodeChildrenToShow.slice(0, childLimit_down).map((pack, index)=> {

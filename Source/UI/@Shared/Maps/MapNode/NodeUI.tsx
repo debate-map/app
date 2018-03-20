@@ -33,7 +33,7 @@ import {MapNodeType, MapNodeType_Info, GetNodeColor} from "../../../../Store/fir
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetRatingAverage, GetRatingAverage_AtPath} from "../../../../Store/firebase/nodeRatings";
 import {Column} from "react-vcomponents";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2, AsNodeL3, AsNodeL2, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2, AsNodeL3, AsNodeL2, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, IsMultiPremiseArgument} from "../../../../Store/firebase/nodes/$node";
 import FastDOM from "fastdom";
 import {Row} from "react-vcomponents";
 import Icon from "../../../../Frame/ReactComponents/Icon";
@@ -213,12 +213,13 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 		// if the premise of a single-premise argument
 		let parent = GetParentNodeL3(path);
-		let combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
-		if (combineWithParentArgument) {
+		let isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
+		if (isPremiseOfSinglePremiseArg) {
 			var relevanceArguments = GetNodeChildrenL3(parent, SlicePath(path, 1)).Except(node);
 		}
 
 		let isSinglePremiseArgument = IsSinglePremiseArgument(node, nodeChildren_orig);
+		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildren_orig);
 		let showArgumentsControlBar = (node.type == MapNodeType.Claim || isSinglePremiseArgument) && expanded && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, expectedHeight} = this.GetMeasurementInfo();
@@ -258,7 +259,11 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 		let nodeUIResult_withoutSubnodes = (
 			<div ref={c=>this.nodeUI = c} className="NodeUI clickThrough"
-					style={E({position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}, style)}>
+					style={E(
+						{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0},
+						isMultiPremiseArgument && {flexDirection: "column"},
+						style,
+					)}>
 				<div ref="innerBoxAndSuchHolder" className="innerBoxAndSuchHolder clickThrough" style={E(
 					{position: "relative"},
 					/*useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
@@ -274,14 +279,14 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 							<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 								<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 							</div>}
-						{combineWithParentArgument && expanded &&
+						{isPremiseOfSinglePremiseArg && expanded &&
 							<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Truth} expanded={true}
 								nodeChildren={nodeChildren_orig} nodeChildrenToShow={nodeChildrenToShow}/>}
 						<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{map, node, nodeView, path, width, widthOverride}}
 							style={E(
 								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
 							)}/>
-						{combineWithParentArgument && expanded &&
+						{isPremiseOfSinglePremiseArg && expanded &&
 							<NodeChildHolderBox {...{map, node: parent, path: SlicePath(path, 1), nodeView}} type={HolderType.Relevance} expanded={true}
 								nodeChildren={GetNodeChildrenL3(parent, SlicePath(path, 1))} nodeChildrenToShow={relevanceArguments}/>}
 						{/*showBelowMessage &&
@@ -329,9 +334,10 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 						{editedDescendants > 0 &&
 							<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Edit)},.8)`}}>{editedDescendants} edited</Row>}
 					</Column>}
-				{!combineWithParentArgument && expanded &&
+				{!isPremiseOfSinglePremiseArg && expanded &&
 					<NodeChildHolder {...{map, node, path, nodeView, nodeChildren: nodeChildren_orig, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
 						linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
+						vertical={isMultiPremiseArgument}
 						onChildrenCenterYChange={childrenCenterY=> {
 							let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;
 							let innerBoxOffset = (childrenCenterY - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
@@ -369,6 +375,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 	}*/
 	//GetMeasurementInfo(useCached: boolean) {
 	GetMeasurementInfo() {
+		let {nodeChildren} = this.props;
 		let props_used = this.props.Including("node", "path", "subnodes") as any;
 		//Log("Checking whether should remeasure info for: " + props_used.node._id);
 		if (this.measurementInfo_cache && ShallowEquals(this.measurementInfo_cache_lastUsedProps, props_used)) return this.measurementInfo_cache;
@@ -379,6 +386,14 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		for (let subnode of subnodes) {
 			let subnodeMeasurementInfo = GetMeasurementInfoForNode(subnode, ""+subnode._id);
 			expectedBoxWidth = Math.max(expectedBoxWidth, subnodeMeasurementInfo.expectedBoxWidth);
+		}
+
+		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildren);
+		if (isMultiPremiseArgument) {
+			expectedBoxWidth = expectedBoxWidth.KeepAtLeast(350);
+			width = width.KeepAtLeast(350);
+			expectedBoxWidth += 30;
+			width += 30;
 		}
 
 		this.measurementInfo_cache = {expectedBoxWidth, width, expectedHeight};

@@ -8,7 +8,7 @@ import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetNodeForm, GetRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
 
 type Props = {
-	node: MapNodeL3, linkSpawnPoint: number, nodeChildren: MapNodeL3[],
+	node: MapNodeL3, linkSpawnPoint: Vector2i, straightLines?: boolean, nodeChildren: MapNodeL3[],
 	//childBoxOffsets: Vector2i[],
 	childBoxOffsets: {[key: number]: Vector2i},
 	shouldUpdate: boolean
@@ -16,9 +16,7 @@ type Props = {
 @SimpleShouldUpdate_Overridable
 export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 	render() {
-		var {node, linkSpawnPoint, nodeChildren, childBoxOffsets} = this.props;
-
-		let mainBoxOffset = new Vector2i(-30, linkSpawnPoint);
+		var {node, linkSpawnPoint, straightLines, nodeChildren, childBoxOffsets} = this.props;
 
 		return (
 			<svg className="clickThroughChain" style={{position: "absolute", overflow: "visible", zIndex: -1}}>
@@ -46,7 +44,18 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					let middleControl = start.Plus(end).Times(.5);
 					return <path key={"connectorLine_" + index} style={{stroke: `rgba(${backgroundColor},1)`, strokeWidth: 3, fill: "none"}}
 						d={`M${start.x},${start.y} Q${startControl.x},${startControl.y} ${middleControl.x},${middleControl.y} T${end.x},${end.y}`}/>;*/
-					var start = mainBoxOffset;
+
+					if (straightLines) {
+						let start = linkSpawnPoint;
+						let mid = childOffset.Minus(10, 0);
+						let end = childOffset;
+						//return <line x1={start.x} y1={start.y} x2={mid.x} y2={mid.y} x3={end.x} y3={end.y}/>;
+						//return <polyline stroke="orange" fill="transparent" stroke-width="5"points={`${start.x} ${start.y} ${mid.x} ${mid.y} ${end.x} ${end.y}`}/>;
+						return <path key={"connectorLine_" + child._id} style={{stroke: backgroundColor.css(), strokeWidth: 3, fill: "none"}}
+							d={`M${start.x},${start.y} L${mid.x},${mid.y} L${end.x},${end.y}`}/>;
+					}
+
+					var start = linkSpawnPoint;
 					var startControl = start.Plus(30, 0);
 					let end = childOffset;
 					let endControl = childOffset.Plus(-30, 0);
