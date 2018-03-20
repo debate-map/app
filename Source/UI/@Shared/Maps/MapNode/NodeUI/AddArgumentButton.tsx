@@ -13,14 +13,14 @@ export class AddArgumentButton extends BaseComponent<{map: Map, node: MapNodeL3,
 		let backgroundColor = GetNodeColor({type: MapNodeType.Argument, finalPolarity: polarity} as MapNodeL3);
 		
 		return (
-			<Button text="Add argument" title={`Add ${Polarity[polarity].toLowerCase()} argument`}
+			<Button text={`Add ${polarity == Polarity.Supporting ? "pro" : "con"}`} title={`Add ${Polarity[polarity].toLowerCase()} argument`}
 				//text={`Add ${Polarity[polarity].toLowerCase()} argument`}
 				style={E(
 					{
 						alignSelf: "flex-end", backgroundColor: backgroundColor.css(),
 						border: "none", boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 						//width: 150, padding: "2px 12px",
-						width: 90, padding: "2px 12px",
+						width: 60, padding: "2px 12px",
 						":hover": {backgroundColor: backgroundColor.Mix("white", .05).alpha(.9).css()},
 					},
 					/*polarity == Polarity.Supporting && {marginBottom: 5},
