@@ -13,8 +13,6 @@ import {Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
 import { ACTMapNodeChildLimitSet } from "Store/main/mapViews/$mapView/rootNodeViews";
 import Icon from "Frame/ReactComponents/Icon";
 
-export type ChildPack = {origIndex: number, node: MapNodeL3};
-
 /*export class ChildPackUI extends BaseComponent
 		<{
 			map: Map, path: string, childrenWidthOverride: number, showAll: boolean, childLimit_up: number, childLimit_down: number,
@@ -39,7 +37,7 @@ export type ChildPack = {origIndex: number, node: MapNodeL3};
 }*/
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, childPacks: ChildPack[],
+	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[],
 	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, onChildrenCenterYChange?: (childrenCenterY: number)=>void,
 };
 let initialState = {
@@ -56,11 +54,11 @@ let connector = (state, {}: Props)=> {
 export class NodeChildHolder extends BaseComponentWithConnector(connector, initialState) {
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
-		let {map, node, nodeView, path, childPacks, separateChildren, showArgumentsControlBar, linkSpawnPoint, onChildrenCenterYChange, initialChildLimit} = this.props;
+		let {map, node, nodeView, path, nodeChildren, separateChildren, showArgumentsControlBar, linkSpawnPoint, onChildrenCenterYChange, initialChildLimit} = this.props;
 		let {childrenWidthOverride, oldChildBoxOffsets} = this.state;
 
-		let upChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalPolarity == Polarity.Supporting) : [];
-		let downChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalPolarity == Polarity.Opposing) : [];
+		let upChildren = separateChildren ? nodeChildren.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
+		let downChildren = separateChildren ? nodeChildren.filter(a=>a.finalPolarity == Polarity.Opposing) : [];
 
 		let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 		let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
@@ -68,15 +66,15 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		let showAll = node._id == map.rootNode || node.type == MapNodeType.Argument;
 		if (showAll) [childLimit_up, childLimit_down] = [100, 100];
 
-		let RenderChildPack = (pack: ChildPack, index: number, collection, direction = "down" as "up" | "down")=> {
+		let RenderChild = (child: MapNodeL3, index: number, collection, direction = "down" as "up" | "down")=> {
 			/*if (pack.node.premiseAddHelper) {
 				return <PremiseAddHelper mapID={map._id} parentNode={node} parentPath={path}/>;
 			}*/
 
 			let childLimit = direction == "down" ? childLimit_down : childLimit_up;
 			return (
-				<NodeUI key={pack.node._id} ref={c=>this.childBoxes[pack.node._id] = GetInnerComp(c)} map={map} node={pack.node}
-						path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
+				<NodeUI key={child._id} ref={c=>this.childBoxes[child._id] = GetInnerComp(c)} map={map} node={child}
+						path={path + "/" + child._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
 					{index == (direction == "down" ? childLimit - 1 : 0) && !showAll && (collection.length > childLimit || childLimit != initialChildLimit) &&
 						<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit}} direction={direction} childCount={collection.length}/>}
 				</NodeUI>
@@ -87,30 +85,30 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		return (
 			<Column ref={c=>this.childHolder = c} className="childHolder clickThrough" style={E(
 				{
-					marginLeft: childPacks.length || showArgumentsControlBar ? 30 : 0,
+					marginLeft: nodeChildren.length || showArgumentsControlBar ? 30 : 0,
 					//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 				},
 				//!expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
 			)}>
 				{linkSpawnPoint && oldChildBoxOffsets &&
 					<NodeConnectorBackground node={node} linkSpawnPoint={linkSpawnPoint} shouldUpdate={true} //this.lastRender_source == RenderSource.SetState}
-						childPacks={childPacks} childBoxOffsets={oldChildBoxOffsets}/>}
+						nodeChildren={nodeChildren} childBoxOffsets={oldChildBoxOffsets}/>}
 				
-				{!separateChildren && childPacks.slice(0, childLimit_down).map((pack, index)=> {
-					return RenderChildPack(pack, index, childPacks);
+				{!separateChildren && nodeChildren.slice(0, childLimit_down).map((pack, index)=> {
+					return RenderChild(pack, index, nodeChildren);
 				})}
 				{separateChildren &&
 					<Column ref={c=>this.upChildHolder = c} ct className="upChildHolder">
-						{upChildPacks.slice(-childLimit_up).map((pack, index)=> {
-							return RenderChildPack(pack, index, upChildPacks, "up");
+						{upChildren.slice(-childLimit_up).map((child, index)=> {
+							return RenderChild(child, index, upChildren, "up");
 						})}
 					</Column>}
 				{showArgumentsControlBar &&
 					<ArgumentsControlBar ref={c=>this.argumentsControlBar = c} map={map} parentNode={node} parentPath={path} node={node}/>}
 				{separateChildren &&
 					<Column ref={c=>this.downChildHolder = c} ct>
-						{downChildPacks.slice(0, childLimit_down).map((pack, index)=> {
-							return RenderChildPack(pack, index, downChildPacks, "down");
+						{downChildren.slice(0, childLimit_down).map((child, index)=> {
+							return RenderChild(child, index, downChildren, "down");
 						})}
 					</Column>}
 			</Column>

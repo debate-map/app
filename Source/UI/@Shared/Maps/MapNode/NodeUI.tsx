@@ -1,7 +1,7 @@
 import { ACTMapNodeExpandedSet, ACTMapNodeChildLimitSet } from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import {BaseComponent, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, ShallowEquals, ShallowChanged, BaseComponentWithConnector} from "react-vextensions";
 import {connect} from "react-redux";
-import {DBPath, GetData} from "../../../../Frame/Database/DatabaseHelpers";
+import {DBPath, GetData, SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import {Debugger, QuickIncrement, E, GetTimeSinceLoad} from "../../../../Frame/General/Globals_Free";
 import {Button, Div} from "react-vcomponents";
 import {PropTypes, Component} from "react";
@@ -22,7 +22,7 @@ import {NodeUI_Inner} from "./NodeUI_Inner";
 import {createMarkupForStyles} from "react-dom/lib/CSSPropertyOperations";
 import NodeConnectorBackground from "./NodeConnectorBackground";
 import {Vector2i} from "js-vextensions";
-import {CachedTransform, CombineDynamicPropMaps, GetContentHeight, GetContentWidth} from "js-vextensions";
+import {CachedTransform, CombineDynamicPropMaps, GetContentHeight, GetContentWidth, A} from "js-vextensions";
 import {RootState} from "../../../../Store/index";
 import {GetNodeView} from "../../../../Store/main/mapViews";
 import {MapNode, ClaimForm, MapNodeL2, AccessLevel, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
@@ -44,7 +44,7 @@ import {ViewedNodeSet} from "../../../../Store/firebase/userViewedNodes/@ViewedN
 import {GetUserViewedNodes} from "../../../../Store/firebase/userViewedNodes";
 import NotifyNodeViewed from "../../../../Server/Commands/NotifyNodeViewed";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import { emptyArray, emptyArray_forLoading } from "../../../../Frame/Store/ReducerUtils";
+import {emptyArray, emptyArray_forLoading, emptyObj} from "../../../../Frame/Store/ReducerUtils";
 import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";
 import { GetPlayingTimelineAppliedStepRevealNodes } from "Store/main/maps/$map";
 import {GetPlayingTimeline, GetPlayingTimelineRevealNodes, GetPlayingTimelineStepIndex, GetPlayingTimelineCurrentStepRevealNodes, GetTimeFromWhichToShowChangedNodes} from "../../../../Store/main/maps/$map";
@@ -58,7 +58,7 @@ import { ArgumentsControlBar } from "UI/@Shared/Maps/MapNode/ArgumentsControlBar
 import { AddArgumentButton } from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton";
 import classNames from "classnames";
 import chroma from "chroma-js";
-import { ChildPack, ChildLimitBar, NodeChildHolder } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
+import { ChildLimitBar, NodeChildHolder } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
 import { NodeChildHolderBox, HolderType } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
 
 let nodesLocked = {};
@@ -81,10 +81,10 @@ let connector = (state, {node, path, map}: Props)=> {
 		return GetFinalNodeTypeAtPath(child, path + "/" + child._id);
 	});*/
 
-	let nodeChildren_sortValues = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
+	let nodeChildren_sortValues = nodeChildren == emptyArray ? emptyObj : nodeChildren.ToMap(child=>child._id+"", child=> {
 		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetSortByRatingType(child)), GetNodeForm(child) == ClaimForm.Negation);
 	});
-	let nodeChildren_fillPercents = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
+	let nodeChildren_fillPercents = nodeChildren == emptyArray ? emptyObj : nodeChildren.ToMap(child=>child._id+"", child=> {
 		return GetFillPercentForRatingAverage(child, GetRatingAverage(child._id, GetMainRatingType(child)), GetNodeForm(child) == ClaimForm.Negation);
 	});
 
@@ -189,28 +189,32 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		}*/
 
 		let separateChildren = node.type == MapNodeType.Claim;
-		let childPacks: ChildPack[] = nodeChildren.map((child, index)=>({origIndex: index, node: child}));
+		//let nodeChildren_filtered = nodeChildren;
 		if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
-			childPacks = childPacks.filter(pack=>playingTimelineVisibleNodes.Contains(path + "/" + pack.node._id));
+			nodeChildren = nodeChildren.filter(child=>playingTimelineVisibleNodes.Contains(path + "/" + child._id));
 		}
-		let upChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalPolarity == Polarity.Supporting) : [];
-		let downChildPacks = separateChildren ? childPacks.filter(a=>a.node.finalPolarity == Polarity.Opposing) : [];
+		let upChildren = separateChildren ? nodeChildren.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
+		let downChildren = separateChildren ? nodeChildren.filter(a=>a.finalPolarity == Polarity.Opposing) : [];
 
 		// apply sorting
 		if (separateChildren) {
-			upChildPacks = upChildPacks.OrderBy(pack=>nodeChildren_sortValues[pack.origIndex]);
-			downChildPacks = downChildPacks.OrderByDescending(pack=>nodeChildren_sortValues[pack.origIndex]);
+			upChildren = upChildren.OrderBy(child=>nodeChildren_sortValues[child._id]);
+			downChildren = downChildren.OrderByDescending(child=>nodeChildren_sortValues[child._id]);
 		} else {
-			childPacks = childPacks.OrderByDescending(pack=>nodeChildren_sortValues[pack.origIndex]);
+			nodeChildren = nodeChildren.OrderByDescending(child=>nodeChildren_sortValues[child._id]);
 			//if (IsArgumentNode(node)) {
 			let isArgument_any = node.type == MapNodeType.Argument && node.current.argumentType == ArgumentType.Any;
 			if (node.childrenOrder && !isArgument_any) {
-				childPacks = childPacks.OrderBy(pack=>node.childrenOrder.indexOf(pack.node._id).IfN1Then(Number.MAX_SAFE_INTEGER));
+				nodeChildren = nodeChildren.OrderBy(child=>node.childrenOrder.indexOf(child._id).IfN1Then(Number.MAX_SAFE_INTEGER));
 			}
 		}
 
-		let childPacks_claim = childPacks;
-		let childPacks_argument = childPacks;
+		// if the premise of a single-premise argument
+		let parent = GetParentNode(path);
+		let combineWithParentArgument = node.type == MapNodeType.Claim && parent.children.VKeys(true).length == 1 && node.link.form != ClaimForm.YesNoQuestion;
+		if (combineWithParentArgument) {
+			var relevanceArguments = GetNodeChildrenL3(parent, SlicePath(path, 1)).Except(node);
+		}
 
 		let showArgumentsControlBar = node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading;
 
@@ -226,31 +230,29 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 		let textOutline = "rgba(10,10,10,1)";
 
-		// temp
-		if (node.current.titles == null && childPacks.length) {
-			let pack = childPacks[0];
-
+		// maybe temp
+		let combineWithChildClaim = node.type == MapNodeType.Argument && nodeChildren.length == 1 && nodeChildren[0].type == MapNodeType.Claim;
+		if (combineWithChildClaim) {
 			let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 			let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 			let showAll = node._id == map.rootNode || node.type == MapNodeType.Argument;
-			//return <ChildPackUI {...{map, path, childrenWidthOverride, childLimit_up, childLimit_down, showAll}} pack={pack} index={0} collection={childPacks}/>;*/
+			//return <ChildPackUI {...{map, path, childrenWidthOverride, childLimit_up, childLimit_down, showAll}} pack={pack} index={0} collection={childPacks}/>;*#/
 
 			let index = 0;
 			let direction = "down" as any;
 			let childrenWidthOverride = null;
-			let collection = childPacks;
+			let child = nodeChildren[0];
+			let collection = nodeChildren;
 			let childLimit = direction == "down" ? childLimit_down : childLimit_up;
 			return (
-				<NodeUI key={pack.node._id} map={map} node={pack.node}
-						path={path + "/" + pack.node._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={()=>{}}>
+				<NodeUI key={child._id} map={map} node={child}
+						path={path + "/" + child._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={()=>{}}>
 					{index == (direction == "down" ? childLimit - 1 : 0) && !showAll && (collection.length > childLimit || childLimit != initialChildLimit) &&
 						<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit}} direction={direction} childCount={collection.length}/>}
 				</NodeUI>
 			);
 		}
 
-		let showTruthAndRelevanceHolders = node.type == MapNodeType.Claim && node.link.form != ClaimForm.YesNoQuestion;
-		
 		let nodeUIResult_withoutSubnodes = (
 			<div ref={c=>this.nodeUI = c} className="NodeUI clickThrough"
 					style={E({position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0}, style)}>
@@ -269,16 +271,16 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 							<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 								<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 							</div>}
-						{showTruthAndRelevanceHolders && expanded &&
+						{combineWithParentArgument && expanded &&
 							<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Truth} expanded={true}
-								childPacks={childPacks_claim}/>}
+								nodeChildren={nodeChildren}/>}
 						<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{map, node, nodeView, path, width, widthOverride}}
 							style={E(
 								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
 							)}/>
-						{showTruthAndRelevanceHolders && expanded &&
+						{combineWithParentArgument && expanded &&
 							<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Relevance} expanded={true}
-								childPacks={childPacks_argument}/>}
+								nodeChildren={relevanceArguments}/>}
 						{/*showBelowMessage &&
 							<Div ct style={{
 								//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
@@ -324,8 +326,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 						{editedDescendants > 0 &&
 							<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Edit)},.8)`}}>{editedDescendants} edited</Row>}
 					</Column>}
-				{!showTruthAndRelevanceHolders &&
-					<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, childPacks, separateChildren, showArgumentsControlBar}}
+				{!combineWithParentArgument &&
+					<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, separateChildren, showArgumentsControlBar}}
 						linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
 						onChildrenCenterYChange={childrenCenterY=> {
 							let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;

@@ -11,7 +11,7 @@ import {Vector2i} from "js-vextensions";
 import {ArgumentsControlBar} from "../ArgumentsControlBar";
 import {Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
 import chroma from "chroma-js";
-import {ChildLimitBar, NodeChildHolder, ChildPack} from "./NodeChildHolder";
+import {ChildLimitBar, NodeChildHolder} from "./NodeChildHolder";
 import { emptyArray_forLoading } from "Frame/Store/ReducerUtils";
 import {GetNodeColor} from "../../../../../Store/firebase/nodes/@MapNodeType";
 
@@ -21,13 +21,12 @@ export enum HolderType {
 }
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, childPacks: ChildPack[],
+	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[],
 	type: HolderType, expanded: boolean,
 };
 export class NodeChildHolderBox extends BaseComponent<Props, {innerBoxOffset: number}> {
 	render() {
-		let {map, node, path, nodeView, childPacks,
-			type, expanded} = this.props;
+		let {map, node, path, nodeView, nodeChildren,type, expanded} = this.props;
 		let {innerBoxOffset} = this.state;
 
 		let text = type == HolderType.Truth ? "True?" : "Relevant?";
@@ -35,7 +34,7 @@ export class NodeChildHolderBox extends BaseComponent<Props, {innerBoxOffset: nu
 		let mainRating_fillPercent = 100;
 
 		let separateChildren = node.type == MapNodeType.Claim;
-		let showArgumentsControlBar = node.type == MapNodeType.Claim && expanded && childPacks != emptyArray_forLoading;
+		let showArgumentsControlBar = node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading;
 
 		let {width, height} = this.GetMeasurementInfo();
 
@@ -88,7 +87,7 @@ export class NodeChildHolderBox extends BaseComponent<Props, {innerBoxOffset: nu
 								}}*//>
 					</Row>
 				</div>
-				<NodeChildHolder {...{map, node, path, nodeView, childPacks, separateChildren, showArgumentsControlBar}}
+				<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, separateChildren, showArgumentsControlBar}}
 					linkSpawnPoint={innerBoxOffset + (height / 2)}
 					onChildrenCenterYChange={childrenCenterY=> {
 						/*this.childrenCenterY = childrenCenterY;

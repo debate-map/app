@@ -7,10 +7,9 @@ import {MapNodeType, MapNodeType_Info, GetNodeColor} from "../../../../Store/fir
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetNodeForm, GetRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
 import {GetFillPercentForRatingAverage, GetRatingAverage} from "../../../../Store/firebase/nodeRatings";
-import {ChildPack} from "./NodeUI/NodeChildHolder";
 
 type Props = {
-	node: MapNodeL3, linkSpawnPoint: number, childPacks: ChildPack[],
+	node: MapNodeL3, linkSpawnPoint: number, nodeChildren: MapNodeL3[],
 	//childBoxOffsets: Vector2i[],
 	childBoxOffsets: {[key: number]: Vector2i},
 	shouldUpdate: boolean
@@ -18,7 +17,7 @@ type Props = {
 @SimpleShouldUpdate_Overridable
 export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 	render() {
-		var {node, linkSpawnPoint, childPacks, childBoxOffsets} = this.props;
+		var {node, linkSpawnPoint, nodeChildren, childBoxOffsets} = this.props;
 
 		let mainBoxOffset = new Vector2i(-30, linkSpawnPoint);
 
@@ -30,10 +29,10 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 
 					//let child = A.NonNull = childNodes.First(a=>a._id == childIDStr.ToInt());
 					// maybe temp; see if causes problems ignoring not-found error
-					let childPack = childPacks.FirstOrX(a=>a.node._id == childIDStr.ToInt());
-					if (childPack == null) return null;
+					let child = nodeChildren.FirstOrX(a=>a._id == childIDStr.ToInt());
+					if (child == null) return null;
 
-					let backgroundColor = GetNodeColor(node.type == MapNodeType.Argument ? node : childPack.node, "raw");
+					let backgroundColor = GetNodeColor(node.type == MapNodeType.Argument ? node : child, "raw");
 
 					/*var start = mainBoxOffset;
 					var startControl = start.Plus(30, 0);
@@ -57,7 +56,7 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					startControl = startControl.Plus(middleControl).Times(.5); // average with middle-control
 					endControl = endControl.Plus(middleControl).Times(.5); // average with middle-control
 
-					return <path key={"connectorLine_" + childPack.node._id} style={{stroke: backgroundColor.css(), strokeWidth: 3, fill: "none"}}
+					return <path key={"connectorLine_" + child._id} style={{stroke: backgroundColor.css(), strokeWidth: 3, fill: "none"}}
 						d={`M${start.x},${start.y} C${startControl.x},${startControl.y} ${endControl.x},${endControl.y} ${end.x},${end.y}`}/>;
 				})}
 			</svg>
