@@ -27,3 +27,6 @@ export function CombineReducers(...args) {
 export const emptyObj = {};
 export const emptyArray = [];
 export const emptyArray_forLoading = []; // this one causes the "..." to show for node-children which are loading
+export function IsSpecialEmptyArray<T>(array: Array<T>) {
+	return array == emptyArray || array == emptyArray_forLoading;
+}

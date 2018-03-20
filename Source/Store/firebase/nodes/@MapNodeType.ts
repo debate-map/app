@@ -32,7 +32,7 @@ export class MapNodeType_Info {
 			otherRatingTypes: [],*/
 		}),
 		[MapNodeType.Claim]: new MapNodeType_Info({
-			childTypes: [MapNodeType.Argument, MapNodeType.Argument],
+			childTypes: [MapNodeType.Argument],
 			minWidth: 350, maxWidth: 550,
 			//mainRatingTypes: ["probability", "intensity"],
 			//mainRatingTypes: ["probability", "support"],
@@ -40,7 +40,7 @@ export class MapNodeType_Info {
 			otherRatingTypes: [],*/
 		}),
 		[MapNodeType.Argument]: new MapNodeType_Info({
-			childTypes: [MapNodeType.Claim],
+			childTypes: [MapNodeType.Claim, MapNodeType.Argument],
 			minWidth: 100, maxWidth: 300,
 			/*mainRatingTypes: ["strength"],
 			otherRatingTypes: [],*/

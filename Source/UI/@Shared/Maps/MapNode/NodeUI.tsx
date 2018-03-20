@@ -33,7 +33,7 @@ import {MapNodeType, MapNodeType_Info, GetNodeColor} from "../../../../Store/fir
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetRatingAverage, GetRatingAverage_AtPath} from "../../../../Store/firebase/nodeRatings";
 import {Column} from "react-vcomponents";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2, AsNodeL3, AsNodeL2, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, IsMultiPremiseArgument} from "../../../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2, AsNodeL3, AsNodeL2, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, IsMultiPremiseArgument, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
 import FastDOM from "fastdom";
 import {Row} from "react-vcomponents";
 import Icon from "../../../../Frame/ReactComponents/Icon";
@@ -44,7 +44,7 @@ import {ViewedNodeSet} from "../../../../Store/firebase/userViewedNodes/@ViewedN
 import {GetUserViewedNodes} from "../../../../Store/firebase/userViewedNodes";
 import NotifyNodeViewed from "../../../../Server/Commands/NotifyNodeViewed";
 import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import {emptyArray, emptyArray_forLoading, emptyObj} from "../../../../Frame/Store/ReducerUtils";
+import {emptyArray, emptyArray_forLoading, emptyObj, IsSpecialEmptyArray} from "../../../../Frame/Store/ReducerUtils";
 import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";
 import { GetPlayingTimelineAppliedStepRevealNodes } from "Store/main/maps/$map";
 import {GetPlayingTimeline, GetPlayingTimelineRevealNodes, GetPlayingTimelineStepIndex, GetPlayingTimelineCurrentStepRevealNodes, GetTimeFromWhichToShowChangedNodes} from "../../../../Store/main/maps/$map";
@@ -75,16 +75,16 @@ let connector = (state, {node, path, map}: Props)=> {
 	let nodeView = GetNodeView(map._id, path) || new MapNodeView();
 
 	let nodeChildren = GetNodeChildrenL3(node, path, true);
-	nodeChildren = nodeChildren.Any(a=>a == null) ? emptyArray_forLoading : nodeChildren; // only pass nodeChildren when all are loaded
+	let nodeChildrenToShow = nodeChildren.Any(a=>a == null) ? emptyArray_forLoading : nodeChildren; // only pass nodeChildren when all are loaded
 	//nodeChildren = nodeChildren.filter(a=>a);
 	/*let nodeChildren_finalTypes = nodeChildren == emptyArray ? emptyArray : nodeChildren.map(child=> {
 		return GetFinalNodeTypeAtPath(child, path + "/" + child._id);
 	});*/
 
-	let nodeChildren_sortValues = nodeChildren == emptyArray ? emptyObj : nodeChildren.ToMap(child=>child._id+"", child=> {
+	let nodeChildren_sortValues = IsSpecialEmptyArray(nodeChildren) ? emptyObj : nodeChildren.filter(a=>a).ToMap(child=>child._id+"", child=> {
 		return GetRatingAverage_AtPath(child, GetSortByRatingType(child));
 	});
-	let nodeChildren_fillPercents = nodeChildren == emptyArray ? emptyObj : nodeChildren.ToMap(child=>child._id+"", child=> {
+	let nodeChildren_fillPercents = IsSpecialEmptyArray(nodeChildren) ? emptyObj : nodeChildren.filter(a=>a).ToMap(child=>child._id+"", child=> {
 		return GetRatingAverage_AtPath(child, GetMainRatingType(child));
 	});
 
@@ -112,6 +112,7 @@ let connector = (state, {node, path, map}: Props)=> {
 				return child.Extended({finalType: nodeChildren_finalTypes[index]});
 			})),*/
 		nodeChildren,
+		nodeChildrenToShow,
 		nodeChildren_sortValues: CachedTransform("nodeChildren_sortValues_transform1", [node._id], nodeChildren_sortValues, ()=>nodeChildren_sortValues),
 		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", [node._id], nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
 		subnodes,
@@ -161,7 +162,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 	innerUI: NodeUI_Inner;
 	render() {
 		let {map, node, path, asSubnode, widthOverride, style, onHeightOrPosChange,
-			initialChildLimit, form, children, nodeView, nodeChildren: nodeChildren_orig, nodeChildren_sortValues, subnodes,
+			initialChildLimit, form, children, nodeView, nodeChildren, nodeChildrenToShow, nodeChildren_sortValues, subnodes,
 			playingTimeline, playingTimeline_currentStepIndex, playingTimelineShowableNodes, playingTimelineVisibleNodes, playingTimeline_currentStepRevealNodes,
 			addedDescendants, editedDescendants} = this.props;
 		let {innerBoxOffset} = this.state;
@@ -181,8 +182,6 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		}
 		NodeUI.renderCount++;
 		NodeUI.lastRenderTime = Date.now();
-
-		let nodeChildrenToShow = nodeChildren_orig;
 
 		/*if (node.type == MapNodeType.Argument && nodeChildren.length == 1 && GetUserID() == node.creator) {
 			let fakeChild = AsNodeL3(AsNodeL2(new MapNode({type: MapNodeType.Claim}), new MapNodeRevision({})));
@@ -218,8 +217,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			var relevanceArguments = GetNodeChildrenL3(parent, SlicePath(path, 1)).Except(node);
 		}
 
-		let isSinglePremiseArgument = IsSinglePremiseArgument(node, nodeChildren_orig);
-		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildren_orig);
+		let isSinglePremiseArgument = IsSinglePremiseArgument(node, nodeChildrenToShow);
+		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildrenToShow);
 		let showArgumentsControlBar = (node.type == MapNodeType.Claim || isSinglePremiseArgument) && expanded && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, expectedHeight} = this.GetMeasurementInfo();
@@ -235,8 +234,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		let textOutline = "rgba(10,10,10,1)";
 
 		// maybe temp
-		let combineWithChildClaim = IsSinglePremiseArgument(node, nodeChildren_orig);
-		if (combineWithChildClaim) {
+		let combineWithChildClaim = IsSinglePremiseArgument(node, nodeChildrenToShow);
+		if (combineWithChildClaim && !IsSpecialEmptyArray(nodeChildrenToShow)) {
 			let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 			let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 			let showAll = node._id == map.rootNode || node.type == MapNodeType.Argument;
@@ -244,24 +243,37 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 			let index = 0;
 			let direction = "down" as any;
-			let childrenWidthOverride = null;
-			let child = nodeChildren_orig[0];
-			let collection = nodeChildren_orig;
+			let child = nodeChildren[0];
+			//if (child == null) return <div/>; // child data not loaded yet
+			//let collection = nodeChildren;
 			let childLimit = direction == "down" ? childLimit_down : childLimit_up;
+
+			let firstChild = this.FlattenedChildren[0] as any;
+			if (firstChild && firstChild.props.path == path) {
+				firstChild.props.path = firstChild.props.path + "/" + child._id;
+			}
 			return (
-				<NodeUI ref={c=>this.proxyDisplayedNodeUI = c} key={child._id} map={map} node={child}
-						path={path + "/" + child._id} widthOverride={childrenWidthOverride} onHeightOrPosChange={onHeightOrPosChange}>
-					{index == (direction == "down" ? childLimit - 1 : 0) && !showAll && (collection.length > childLimit || childLimit != initialChildLimit) &&
-						<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit}} direction={direction} childCount={collection.length}/>}
+				<NodeUI ref={c=>this.proxyDisplayedNodeUI = c} {...this.props} key={child._id} map={map} node={child} path={path + "/" + child._id}>
+					{children}
 				</NodeUI>
 			);
 		}
+
+		let nodeChildHolder = !isPremiseOfSinglePremiseArg && expanded &&
+			<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
+				linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
+				vertical={isMultiPremiseArgument}
+				onChildrenCenterYChange={childrenCenterY=> {
+					let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;
+					let innerBoxOffset = (childrenCenterY - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
+					this.SetState({innerBoxOffset});
+					if (onHeightOrPosChange) onHeightOrPosChange();
+				}}/>;
 
 		let nodeUIResult_withoutSubnodes = (
 			<div ref={c=>this.nodeUI = c} className="NodeUI clickThrough"
 					style={E(
 						{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0},
-						isMultiPremiseArgument && {flexDirection: "column"},
 						style,
 					)}>
 				<div ref="innerBoxAndSuchHolder" className="innerBoxAndSuchHolder clickThrough" style={E(
@@ -281,7 +293,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 							</div>}
 						{isPremiseOfSinglePremiseArg && expanded &&
 							<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Truth} expanded={true}
-								nodeChildren={nodeChildren_orig} nodeChildrenToShow={nodeChildrenToShow}/>}
+								nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}/>}
 						<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{map, node, nodeView, path, width, widthOverride}}
 							style={E(
 								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
@@ -334,20 +346,12 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 						{editedDescendants > 0 &&
 							<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Edit)},.8)`}}>{editedDescendants} edited</Row>}
 					</Column>}
-				{!isPremiseOfSinglePremiseArg && expanded &&
-					<NodeChildHolder {...{map, node, path, nodeView, nodeChildren: nodeChildren_orig, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
-						linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
-						vertical={isMultiPremiseArgument}
-						onChildrenCenterYChange={childrenCenterY=> {
-							let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;
-							let innerBoxOffset = (childrenCenterY - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
-							this.SetState({innerBoxOffset});
-							if (onHeightOrPosChange) onHeightOrPosChange();
-						}}/>}
+				{!isMultiPremiseArgument &&
+					nodeChildHolder}
 			</div>
 		);
 
-		if (subnodes.length == 0) {
+		if (subnodes.length == 0 && !isMultiPremiseArgument) {
 			return nodeUIResult_withoutSubnodes;
 		}
 		return (
@@ -359,6 +363,10 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 							path={`${path}/L${subnode._id}`} widthOverride={widthOverride} onHeightOrPosChange={onHeightOrPosChange}/>
 					);
 				})}
+				<div style={E({marginTop: -5})}>
+					{isMultiPremiseArgument &&
+						nodeChildHolder}
+				</div>
 			</div>
 		);
 	}
@@ -375,12 +383,11 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 	}*/
 	//GetMeasurementInfo(useCached: boolean) {
 	GetMeasurementInfo() {
-		let {nodeChildren} = this.props;
-		let props_used = this.props.Including("node", "path", "subnodes") as any;
+		let props_used = this.props.Including("node", "path", "subnodes", "nodeChildren") as any;
 		//Log("Checking whether should remeasure info for: " + props_used.node._id);
 		if (this.measurementInfo_cache && ShallowEquals(this.measurementInfo_cache_lastUsedProps, props_used)) return this.measurementInfo_cache;
 
-		let {node, path, subnodes} = props_used as Props & {subnodes: MapNodeL3[]};
+		let {node, path, subnodes, nodeChildren} = props_used as Props & {subnodes: MapNodeL3[], nodeChildren: MapNodeL3[]};
 		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode(node, path);
 
 		for (let subnode of subnodes) {
@@ -390,10 +397,11 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildren);
 		if (isMultiPremiseArgument) {
-			expectedBoxWidth = expectedBoxWidth.KeepAtLeast(350);
+			//expectedBoxWidth = expectedBoxWidth.KeepAtLeast(350);
 			width = width.KeepAtLeast(350);
-			expectedBoxWidth += 30;
-			width += 30;
+			//expectedBoxWidth += 20;
+			width += 20; // give extra space for left-margin
+			Log("Increasing width for:" + path);
 		}
 
 		this.measurementInfo_cache = {expectedBoxWidth, width, expectedHeight};
@@ -466,11 +474,13 @@ function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 
 	//let expectedOtherStuffWidth = 26;
 	let expectedOtherStuffWidth = 28;
-	if (node.current.contentNode)
+	if (node.current.contentNode) {
 		expectedOtherStuffWidth += 14;
+	}
 	let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
-	if (node.current.contentNode) // quotes are often long, so just always do full-width
+	if (node.current.contentNode) { // quotes are often long, so just always do full-width
 		expectedBoxWidth = nodeTypeInfo.maxWidth;
+	}
 
 	let width = node.current.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
 

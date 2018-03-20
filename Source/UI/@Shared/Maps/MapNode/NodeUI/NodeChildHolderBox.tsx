@@ -19,6 +19,7 @@ import { GetParentNodeL3 } from "Store/firebase/nodes";
 import { GetRatings } from "Store/firebase/nodeRatings";
 import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage} from "../../../../../Store/firebase/nodeRatings";
 import { IsSinglePremiseArgument } from "Store/firebase/nodes/$node";
+import { QuickIncrement } from "Frame/General/Globals_Free";
 
 export enum HolderType {
 	Truth,
@@ -31,14 +32,14 @@ type Props = {
 };
 let connector = (state, {node, nodeChildren}: Props)=> {
 	return {
-		combineWithChildClaim: IsSinglePremiseArgument(node, nodeChildren),
+		combineWithChildClaim: IsSinglePremiseArgument(node),
 	};
 };
 @Connect(connector)
 export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {innerBoxOffset: 0}) {
 	static ValidateProps(props) {
 		let {node, nodeChildren} = props;
-		Assert(nodeChildren.All(a=>a.parents[node._id]), "Supplied node is not a parent of all the supplied node-children!");
+		Assert(nodeChildren.All(a=>a == null || a.parents[node._id]), "Supplied node is not a parent of all the supplied node-children!");
 	}
 	render() {
 		let {map, node, path, nodeView, nodeChildrenToShow, type, expanded, combineWithChildClaim} = this.props;
@@ -67,7 +68,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		let {width, height} = this.GetMeasurementInfo();
 
 		let lineColor = GetNodeColor(node, "raw");
-		
+
 		return (
 			<Row style={{position: "relative", alignItems: "flex-start", /*marginLeft: `calc(100% - ${width}px)`,*/ alignSelf: "flex-end", width}}>
 				{type == HolderType.Truth && 

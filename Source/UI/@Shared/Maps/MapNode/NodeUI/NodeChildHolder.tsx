@@ -12,6 +12,10 @@ import {ArgumentsControlBar} from "../ArgumentsControlBar";
 import {Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
 import { ACTMapNodeChildLimitSet } from "Store/main/mapViews/$mapView/rootNodeViews";
 import Icon from "Frame/ReactComponents/Icon";
+import {IsMultiPremiseArgument} from "../../../../../Store/firebase/nodes/$node";
+import {NodeChildHolderBox, HolderType} from "./NodeChildHolderBox";
+import { GetNodeChildrenL3 } from "Store/firebase/nodes";
+import {QuickIncrement} from "../../../../../Frame/General/Globals_Free";
 
 /*export class ChildPackUI extends BaseComponent
 		<{
@@ -80,12 +84,12 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 				</NodeUI>
 			);
 		}
-
+		
 		this.childBoxes = {};
 		return (
 			<Column ref={c=>this.childHolder = c} className="childHolder clickThrough" style={E(
 				{
-					marginLeft: nodeChildrenToShow.length || showArgumentsControlBar ? 30 : 0,
+					marginLeft: vertical ? 20 : (nodeChildrenToShow.length || showArgumentsControlBar) ? 30 : 0,
 					//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 				},
 				//!expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
@@ -96,6 +100,9 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 						shouldUpdate={true} //this.lastRender_source == RenderSource.SetState}
 						nodeChildren={nodeChildrenToShow} childBoxOffsets={oldChildBoxOffsets}/>}
 				
+				{/*IsMultiPremiseArgument(node, nodeChildrenToShow) &&
+					<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Relevance} expanded={false}
+				nodeChildren={GetNodeChildrenL3(node, path)} nodeChildrenToShow={GetNodeChildrenL3(node, path).filter(a=>a && a.type == MapNodeType.Argument)}/>*/}
 				{!separateChildren && nodeChildrenToShow.slice(0, childLimit_down).map((pack, index)=> {
 					return RenderChild(pack, index, nodeChildrenToShow);
 				})}

@@ -2,7 +2,7 @@ import {GetImage} from '../images';
 import {MapNode, MapNodeL2, ClaimForm, ChildEntry, ClaimType, MapNodeL3, Polarity} from "./@MapNode";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MapNodeType} from './@MapNodeType';
-import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetNode, GetParentNodeL2, GetNodeChildrenL2} from "../nodes";
+import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetNode, GetParentNodeL2, GetNodeChildrenL2, GetNodeChildren} from "../nodes";
 import {GetValues} from '../../../Frame/General/Enums';
 import {PermissionGroupSet} from '../userExtras/@UserExtraInfo';
 import {ImageType, GetNiceNameForImageType} from "../images/@Image";
@@ -261,16 +261,28 @@ export function GetClaimType(node: MapNodeL2) {
 	);
 }
 
-export function IsPremiseOfSinglePremiseArgument(node: MapNodeL3, parent: MapNodeL3) {
-	if (parent == null) return false;
-	let parentChildren = GetNodeChildrenL2(parent);
-	if (parentChildren.Any(a=>a == null)) return false;
-	return node.type == MapNodeType.Claim && parentChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && node.link.form != ClaimForm.YesNoQuestion;
+export function IsSinglePremiseArgument(node: MapNode, nodeChildren?: MapNode[]) {
+	nodeChildren = nodeChildren || GetNodeChildren(node);
+	if (nodeChildren.Any(a=>a == null)) return null;
+	//return nodeChildren.Any(child=>IsPremiseOfSinglePremiseArgument(child, node));
+	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length == 1;
 }
-export function IsSinglePremiseArgument(node: MapNodeL3, nodeChildren: MapNodeL3[]) {
-	if (nodeChildren.Any(a=>a == null)) return false;
-	return nodeChildren.Any(child=>IsPremiseOfSinglePremiseArgument(child, node));
+export function IsMultiPremiseArgument(node: MapNode, nodeChildren?: MapNode[]) {
+	nodeChildren = nodeChildren || GetNodeChildren(node);
+	if (nodeChildren.Any(a=>a == null)) return null;
+	//return node.type == MapNodeType.Argument && !IsSinglePremiseArgument(node, nodeChildren);
+	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length > 1;
 }
-export function IsMultiPremiseArgument(node: MapNodeL3, nodeChildren: MapNodeL3[]) {
-	return node.type == MapNodeType.Argument && !IsSinglePremiseArgument(node, nodeChildren);
+
+export function IsPremiseOfSinglePremiseArgument(node: MapNode, parent: MapNode) {
+	if (parent == null) return null;
+	//let parentChildren = GetNodeChildrenL2(parent);
+	/*if (parentChildren.Any(a=>a == null)) return false;
+	return node.type == MapNodeType.Claim && parentChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && node.link.form != ClaimForm.YesNoQuestion;*/
+	return node.type == MapNodeType.Claim && IsSinglePremiseArgument(parent);
+}
+export function IsPremiseOfMultiPremiseArgument(node: MapNode, parent: MapNode) {
+	if (parent == null) return null;
+	//let parentChildren = GetNodeChildrenL2(parent);
+	return node.type == MapNodeType.Claim && IsMultiPremiseArgument(parent);
 }
