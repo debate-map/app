@@ -127,8 +127,6 @@ let connector = (state, {node, path, map}: Props)=> {
 	};
 };
 
-
-
 @Connect(connector)
 export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWidth: 0, expectedBoxHeight: 0, innerBoxOffset: 0}) {
 	static renderCount = 0;
@@ -401,7 +399,6 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			width = width.KeepAtLeast(350);
 			//expectedBoxWidth += 20;
 			width += 20; // give extra space for left-margin
-			Log("Increasing width for:" + path);
 		}
 
 		this.measurementInfo_cache = {expectedBoxWidth, width, expectedHeight};

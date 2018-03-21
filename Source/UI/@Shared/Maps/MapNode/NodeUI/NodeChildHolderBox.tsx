@@ -118,7 +118,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 							}}/>
 							<div style={{
 								position: "absolute", right: 0, top: 0, bottom: 0,
-								width: (100 - mainRating_fillPercent) + "%", background: `rgba(0,0,0,.7)`,
+								width: (100 - mainRating_fillPercent) + "%", background: `rgba(0,0,0,.7)`, borderRadius: mainRating_fillPercent <= 0 ? "5px 0 0 5px" : 0,
 							}}/>
 							{/*mainRating_mine != null &&
 								<div style={{
