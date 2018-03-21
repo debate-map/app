@@ -8,7 +8,7 @@ import {Map} from "../../../../../Store/firebase/maps/@Map";
 import { MapNodeView } from "Store/main/mapViews/@MapViews";
 import { MapNodeType } from "Store/firebase/nodes/@MapNodeType";
 import {Vector2i} from "js-vextensions";
-import {Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
+import {Polarity, MapNode} from "../../../../../Store/firebase/nodes/@MapNode";
 import chroma from "chroma-js";
 import {ChildLimitBar, NodeChildHolder} from "./NodeChildHolder";
 import { emptyArray_forLoading } from "Frame/Store/ReducerUtils";
@@ -21,6 +21,7 @@ import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage}
 import { IsSinglePremiseArgument } from "Store/firebase/nodes/$node";
 import { QuickIncrement } from "Frame/General/Globals_Free";
 import {IsMultiPremiseArgument} from "../../../../../Store/firebase/nodes/$node";
+import {Squiggle} from "../NodeConnectorBackground";
 
 export enum HolderType {
 	Truth,
@@ -37,14 +38,15 @@ let connector = (state, {node, nodeChildren}: Props)=> {
 	};
 };
 @Connect(connector)
-export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {innerBoxOffset: 0}) {
+export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {innerBoxOffset: 0, lineHolderHeight: 0}) {
 	static ValidateProps(props) {
 		let {node, nodeChildren} = props;
 		Assert(nodeChildren.All(a=>a == null || a.parents[node._id]), "Supplied node is not a parent of all the supplied node-children!");
 	}
+	lineHolder: HTMLDivElement;
 	render() {
 		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, expanded, widthOverride, combineWithChildClaim} = this.props;
-		let {innerBoxOffset} = this.state;
+		let {innerBoxOffset, lineHolderHeight} = this.state;
 
 		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildren);
 		let text = type == HolderType.Truth ? "True?" : "Relevant?";
@@ -75,22 +77,35 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 			width = widthOverride;
 		}
 
-		let lineColor = GetNodeColor(node, "raw");
+		//let lineColor = GetNodeColor(node, "raw");
+		let lineColor = GetNodeColor({type: MapNodeType.Category} as any as MapNodeL3, "raw");
+		let lineOffset = 30..KeepAtMost(innerBoxOffset);
 
 		return (
-			<Row style={E(
+			<Row className="clickThrough" style={E(
 				{position: "relative", alignItems: "flex-start", /*marginLeft: `calc(100% - ${width}px)`,*/ width},
 				!isMultiPremiseArgument && {alignSelf: "flex-end"},
 				isMultiPremiseArgument && {marginTop: 10},
 			)}>
-				{type == HolderType.Truth && 
-					//<div style={{position: "absolute", right: width - 2, top: innerBoxOffset + (height / 2), bottom: 0, width: 3, backgroundColor: lineColor.css()}}/>}
-					<div style={{position: "absolute", left: 0, width: "100%", top: innerBoxOffset + (height / 2), bottom: 0, backgroundColor: `rgba(0,0,0,.5)`}}/>}
-				{type == HolderType.Relevance && !isMultiPremiseArgument &&
-					//<div style={{position: "absolute", right: width - 2, top: 0, width: 3, height: innerBoxOffset + (height / 2), backgroundColor: lineColor.css()}}/>}
-					<div style={{position: "absolute", left: 0, width: "100%", top: 0, height: innerBoxOffset + (height / 2), backgroundColor: `rgba(0,0,0,.5)`}}/>}
-				{type == HolderType.Relevance && isMultiPremiseArgument &&
-					<div style={{position: "absolute", right: "100%", width: 10, top: "50%", height: 3, backgroundColor: backgroundColor.css()}}/>}
+				<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{position: "absolute", width: "100%", height: "100%"}}>
+					{type == HolderType.Truth && 
+						//<div style={{position: "absolute", right: (width / 2) + 1, top: innerBoxOffset + (height / 2), bottom: 0, width: 3, backgroundColor: lineColor.css()}}/>
+						//<div style={{position: "absolute", left: 0, width: "100%", top: innerBoxOffset + (height / 2), bottom: 0, backgroundColor: `rgba(0,0,0,.5)`}}/>
+						/*<Squiggle start={[0, 100]} startControl_offset={[0, -30]} end={[50, 0]} endControl_offset={[0, 30]} color={lineColor}
+							usePercents={true} style={{width, height: "100%"}}/>*/
+						<Squiggle start={[0, lineHolderHeight + 2]} startControl_offset={[0, -lineOffset]}
+							end={[(width / 2) - 2, lineHolderHeight - innerBoxOffset - 2]} endControl_offset={[0, lineOffset]} color={lineColor}/>
+					}
+					{type == HolderType.Relevance && !isMultiPremiseArgument &&
+						//<div style={{position: "absolute", right: (width / 2) + 1, top: 0, width: 3, height: innerBoxOffset + (height / 2), backgroundColor: lineColor.css()}}/>
+						//<div style={{position: "absolute", left: 0, width: "100%", top: 0, height: innerBoxOffset + (height / 2), backgroundColor: `rgba(0,0,0,.5)`}}/>
+						/*<Squiggle start={[0, 0]} startControl_offset={[0, 30]} end={[50, 100]} endControl_offset={[0, -30]} color={lineColor}
+							usePercents={true} style={{width, height: "100%"}}/>*/
+						<Squiggle start={[0, -2]} startControl_offset={[0, lineOffset]} end={[(width / 2) - 2, innerBoxOffset + 2]} endControl_offset={[0, -lineOffset]} color={lineColor}/>
+					}
+					{type == HolderType.Relevance && isMultiPremiseArgument &&
+						<div style={{position: "absolute", right: "100%", width: 10, top: "50%", height: 3, backgroundColor: backgroundColor.css()}}/>}
+				</div>
 				<div style={E({
 					display: "flex", position: "relative", borderRadius: 5, cursor: "default",
 					boxShadow: "rgba(0,0,0,1) 0px 0px 2px", width: width, marginTop: innerBoxOffset,
@@ -144,6 +159,14 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		);
 	}
 	//childrenCenterY: number;
+
+	lastLineHolderHeight = 0;
+	PostRender() {
+		let lineHolderHeight = $(FindDOM(this.lineHolder)).outerHeight();
+		if (lineHolderHeight != this.lastLineHolderHeight) {
+			this.SetState({lineHolderHeight});
+		}
+	}
 	
 	GetMeasurementInfo() {
 		return {width: 90, height: 26};

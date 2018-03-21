@@ -71,3 +71,27 @@ export default class NodeConnectorBackground extends BaseComponent<Props, {}> {
 		);
 	}
 }
+
+type Position = [number, number];
+export class Squiggle extends BaseComponent
+		<{start: Position, startControl_offset: Position, end: Position, endControl_offset: Position, color: Color, usePercents?: boolean, style?}, {}> {
+	render() {
+		let {start, startControl_offset, end, endControl_offset, color, usePercents, style} = this.props;
+
+		let startPos = new Vector2i(start[0], start[1]);
+		let startControl = startPos.Plus(startControl_offset[0], startControl_offset[1]);
+		let endPos = new Vector2i(end[0], end[1]);
+		let endControl = endPos.Plus(endControl_offset[0], endControl_offset[1]);
+
+		let middleControl = startPos.Plus(endPos).Times(.5); // average start-and-end to get middle-control
+		startControl = startControl.Plus(middleControl).Times(.5); // average with middle-control
+		endControl = endControl.Plus(middleControl).Times(.5); // average with middle-control
+
+		return (
+			<svg viewBox={usePercents ? "0 0 100 100" : null} preserveAspectRatio="none" style={E({position: "absolute", overflow: "visible", zIndex: -1}, style)}>
+				<path style={E({stroke: color.css(), strokeWidth: 3, fill: "none"}, usePercents && {vectorEffect: "non-scaling-stroke"})}
+					d={`M${startPos.x},${startPos.y} C${startControl.x},${startControl.y} ${endControl.x},${endControl.y} ${endPos.x},${endPos.y}`}/>
+			</svg>
+		);
+	}
+}
