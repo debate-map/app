@@ -166,6 +166,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		if (lineHolderHeight != this.lastLineHolderHeight) {
 			this.SetState({lineHolderHeight});
 		}
+		this.lastLineHolderHeight = lineHolderHeight;
 	}
 	
 	GetMeasurementInfo() {

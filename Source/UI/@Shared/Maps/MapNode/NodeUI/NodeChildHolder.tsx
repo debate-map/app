@@ -135,11 +135,11 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		let height = $(FindDOM(this)).outerHeight();
 		if (height != this.lastHeight) {
 			this.OnHeightChange();
-		} else {
+		} /*else {
 			if (this.lastRender_source == RenderSource.SetState) return;
 			this.UpdateState();
 			this.ReportChildrenCenterYChange();
-		}
+		}*/
 		this.lastHeight = height;
 	}
 	
