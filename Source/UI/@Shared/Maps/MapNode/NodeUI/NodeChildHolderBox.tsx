@@ -58,7 +58,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 
 		//let lineColor = GetNodeColor(node, "raw");
 		let lineColor = GetNodeColor({type: MapNodeType.Category} as any as MapNodeL3, "raw");
-		let lineOffset = 30..KeepAtMost(innerBoxOffset);
+		let lineOffset = 50..KeepAtMost(innerBoxOffset);
 		//let expandKey = type == HolderType.Truth ? "expanded_truth" : "expanded_relevance";
 		let expandKey = `expanded_${HolderType[type].toLowerCase()}`;
 
@@ -97,7 +97,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 						/*<Squiggle start={[0, 100]} startControl_offset={[0, -30]} end={[50, 0]} endControl_offset={[0, 30]} color={lineColor}
 							usePercents={true} style={{width, height: "100%"}}/>*/
 						<Squiggle start={[0, lineHolderHeight + 2]} startControl_offset={[0, -lineOffset]}
-							end={[(width / 2) - 2, lineHolderHeight - innerBoxOffset - 2]} endControl_offset={[0, lineOffset]} color={lineColor}/>
+							end={[(width / 2) - 2, innerBoxOffset + height - 2]} endControl_offset={[0, lineOffset]} color={lineColor}/>
 					}
 					{type == HolderType.Relevance && !isMultiPremiseArgument &&
 						//<div style={{position: "absolute", right: (width / 2) + 1, top: 0, width: 3, height: innerBoxOffset + (height / 2), backgroundColor: lineColor.css()}}/>
@@ -177,7 +177,8 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 	}
 	
 	GetMeasurementInfo() {
-		return {width: 90, height: 26};
+		//return {width: 90, height: 26};
+		return {width: 90, height: 22};
 	}
 
 	OnDividePointChange() {
