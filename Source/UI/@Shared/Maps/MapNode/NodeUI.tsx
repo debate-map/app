@@ -266,6 +266,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 				linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
 				vertical={isMultiPremiseArgument}
 				onHeightOrDividePointChange={dividePoint=> {
+					if (isMultiPremiseArgument) return; // if multi-premise argument, divide-point is always 0
 					this.dividePoint = dividePoint;
 					this.OnDividePointChange();
 				}}/>;

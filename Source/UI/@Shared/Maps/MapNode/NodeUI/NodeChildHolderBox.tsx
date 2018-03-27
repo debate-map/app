@@ -56,6 +56,12 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		}
 		let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
 
+		//let lineColor = GetNodeColor(node, "raw");
+		let lineColor = GetNodeColor({type: MapNodeType.Category} as any as MapNodeL3, "raw");
+		let lineOffset = 30..KeepAtMost(innerBoxOffset);
+		//let expandKey = type == HolderType.Truth ? "expanded_truth" : "expanded_relevance";
+		let expandKey = `expanded_${HolderType[type].toLowerCase()}`;
+
 		//let mainRating_fillPercent = 100;
 		let parentNode = GetParentNodeL3(path);
 		var ratingType = {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[type] as RatingType;
@@ -71,18 +77,12 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		let mainRating_fillPercent = average;
 
 		let separateChildren = node.type == MapNodeType.Claim || combineWithChildClaim;
-		let showArgumentsControlBar = (node.type == MapNodeType.Claim || combineWithChildClaim) && nodeView.expanded && nodeChildrenToShow != emptyArray_forLoading;
+		let showArgumentsControlBar = (node.type == MapNodeType.Claim || combineWithChildClaim) && nodeView[expandKey] && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, height} = this.GetMeasurementInfo();
 		if (widthOverride) {
 			width = widthOverride;
 		}
-
-		//let lineColor = GetNodeColor(node, "raw");
-		let lineColor = GetNodeColor({type: MapNodeType.Category} as any as MapNodeL3, "raw");
-		let lineOffset = 30..KeepAtMost(innerBoxOffset);
-		//let expandKey = type == HolderType.Truth ? "expanded_truth" : "expanded_relevance";
-		let expandKey = `expanded_${HolderType[type].toLowerCase()}`;
 
 		return (
 			<Row className="clickThrough" style={E(
