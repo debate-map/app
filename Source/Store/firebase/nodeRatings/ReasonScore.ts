@@ -11,26 +11,32 @@ export function RS_CalculateTruthScore(node: MapNodeL3) {
 	let childArguments = GetChildArguments(node);
 	if (childArguments == null || childArguments.length == 0) return 1;
 
-	let childScores_forAveraging = [];
+	if (node._id == 128 && g.test1) debugger;
+
+	let runningAverage;
+	let weightTotalSoFar = 0;
 	for (let childArgument of childArguments) {
 		let childClaim = GetNodeChildrenL3(childArgument).filter(a=>a.type == MapNodeType.Claim)[0];
 		if (childClaim == null) continue;
 
 		let childTruthScore = RS_CalculateTruthScore(childClaim);
-		let childTruthScore_distanceFromHalf = childTruthScore.Distance(.5);
-
 		let childWeight = RS_CalculateWeight(childClaim, childArgument);
-		let childTruthScore_distanceFromHalf_weighted = childTruthScore_distanceFromHalf * childWeight;
 
-		let childScore_forAveraging =
-			childArgument.finalPolarity == Polarity.Supporting
-				? .5 + childTruthScore_distanceFromHalf_weighted
-				: .5 - childTruthScore_distanceFromHalf_weighted;
+		if (childArgument.finalPolarity == Polarity.Opposing) {
+			childTruthScore = 1 - childTruthScore;
+		}
 
-		childScores_forAveraging.push(childScore_forAveraging);
+		if (runningAverage == null) {
+			weightTotalSoFar = childWeight;
+			runningAverage = childTruthScore;
+		} else {
+			weightTotalSoFar += childWeight; // increase weight first
+			let deviationFromAverage = childTruthScore - runningAverage;
+			let weightRelativeToTotal = childWeight / weightTotalSoFar;
+			runningAverage += deviationFromAverage * weightRelativeToTotal;
+		}
 	}
-
-	return childScores_forAveraging.Average();
+	return runningAverage;
 }
 
 export function RS_CalculateWeightMultiplier(node: MapNodeL3) {

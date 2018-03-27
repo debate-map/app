@@ -143,6 +143,13 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
 		let isSubnode = IsNodeSubnode(node);
 
+		let backgroundFillPercent = mainRating_average;
+		let markerPercent = mainRating_mine;
+		if (State(a=>a.main.weighting) == WeightingType.ReasonScore && node.type == MapNodeType.Claim) {
+			backgroundFillPercent = rs_truthScore * 100;
+			markerPercent = null;
+		}
+
 		let parent = GetNodeL3(SlicePath(path, 1));
 		let combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
 		let nodeReversed = form == ClaimForm.Negation;
@@ -201,15 +208,15 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 							onClick={e=>IsDoubleClick(e) && this.titlePanel && GetInnerComp(this.titlePanel).OnDoubleClick()}>
 						<div style={{
 							position: "absolute", left: 0, top: 0, bottom: 0,
-							width: mainRating_average + "%", background: backgroundColor.css(), borderRadius: "5px 0 0 5px",
+							width: backgroundFillPercent + "%", background: backgroundColor.css(), borderRadius: "5px 0 0 5px",
 						}}/>
 						<div style={{
 							position: "absolute", right: 0, top: 0, bottom: 0,
-							width: (100 - mainRating_average) + "%", background: `rgba(0,0,0,.7)`, borderRadius: mainRating_average <= 0 ? "5px 0 0 5px" : 0,
+							width: (100 - backgroundFillPercent) + "%", background: `rgba(0,0,0,.7)`, borderRadius: backgroundFillPercent <= 0 ? "5px 0 0 5px" : 0,
 						}}/>
-						{mainRating_mine != null &&
+						{markerPercent != null &&
 							<div style={{
-								position: "absolute", left: mainRating_average + "%", top: 0, bottom: 0,
+								position: "absolute", left: markerPercent + "%", top: 0, bottom: 0,
 								width: 2, background: "rgba(0,255,0,.5)",
 							}}/>}
 						<TitlePanel ref={c=>this.titlePanel = c} {...{parent: this, map, node, nodeView, path}}/>
