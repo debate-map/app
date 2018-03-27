@@ -109,7 +109,7 @@ let connector = (state, {map, node, path}: Props)=> {
 		if (combineWithParentArgument) {
 			var rs_baseWeight = RS_CalculateBaseWeight(node);
 			var rs_weightMultiplier = RS_CalculateWeightMultiplier(parent);
-			var rs_weight = RS_CalculateWeight(node, parent);
+			var rs_weight = RS_CalculateWeight(parent, [node]);
 		}
 	}
 

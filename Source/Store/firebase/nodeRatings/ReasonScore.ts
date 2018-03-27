@@ -5,6 +5,7 @@ import {IsSpecialEmptyArray, emptyArray_forLoading} from "../../../Frame/Store/R
 import {GetFinalPolarity} from "../nodes/$node";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import { Lerp } from "js-vextensions";
+import { ArgumentType } from "Store/firebase/nodes/@MapNodeRevision";
 
 export function RS_CalculateTruthScore(node: MapNodeL3) {
 	Assert(node.type == MapNodeType.Claim, "RS truth-score can only be calculated for a claim.");
@@ -14,24 +15,25 @@ export function RS_CalculateTruthScore(node: MapNodeL3) {
 
 	let runningAverage;
 	let weightTotalSoFar = 0;
-	for (let childArgument of childArguments) {
-		let childClaim = GetNodeChildrenL3(childArgument).filter(a=>a.type == MapNodeType.Claim)[0];
-		if (childClaim == null) continue;
+	for (let argument of childArguments) {
+		let premises = GetNodeChildrenL3(argument).filter(a=>a.type == MapNodeType.Claim);
+		if (premises.length == 0) continue;
 
-		let childTruthScore = RS_CalculateTruthScore(childClaim);
-		let childWeight = RS_CalculateWeight(childClaim, childArgument);
+		Assert(argument.current.argumentType == ArgumentType.All, `ReasonScore currently only supports multi-premise arguments of the "all" type.`);
+		let truthScoresProduct = premises.map(premise=>RS_CalculateTruthScore(premise)).reduce((prev, cur)=>prev * cur);
+		let weight = RS_CalculateWeight(argument, premises);
 
-		if (childArgument.finalPolarity == Polarity.Opposing) {
-			childTruthScore = 1 - childTruthScore;
+		if (argument.finalPolarity == Polarity.Opposing) {
+			truthScoresProduct = 1 - truthScoresProduct;
 		}
 
 		if (runningAverage == null) {
-			weightTotalSoFar = childWeight;
-			runningAverage = childTruthScore;
+			weightTotalSoFar = weight;
+			runningAverage = truthScoresProduct;
 		} else {
-			weightTotalSoFar += childWeight; // increase weight first
-			let deviationFromAverage = childTruthScore - runningAverage;
-			let weightRelativeToTotal = childWeight / weightTotalSoFar;
+			weightTotalSoFar += weight; // increase weight first
+			let deviationFromAverage = truthScoresProduct - runningAverage;
+			let weightRelativeToTotal = weight / weightTotalSoFar;
 			runningAverage += deviationFromAverage * weightRelativeToTotal;
 		}
 	}
@@ -54,26 +56,26 @@ export function RS_CalculateWeightMultiplier(node: MapNodeL3) {
 
 	let runningMultiplier = 1;
 	let runningDivisor = 1;
-	for (let childArgument of childArguments) {
-		let childClaim = GetNodeChildrenL3(childArgument).filter(a=>a.type == MapNodeType.Claim)[0];
-		if (childClaim == null) continue;
+	for (let argument of childArguments) {
+		let premises = GetNodeChildrenL3(argument).filter(a=>a.type == MapNodeType.Claim);
+		if (premises.length == 0) continue;
 
-		let childTruthScore = RS_CalculateTruthScore(childClaim);
-		let childWeight = RS_CalculateWeight(childClaim, childArgument);
+		Assert(argument.current.argumentType == ArgumentType.All, `ReasonScore currently only supports multi-premise arguments of the "all" type.`);
+		let truthScoresProduct = premises.map(premise=>RS_CalculateTruthScore(premise)).reduce((prev, cur)=>prev * cur);
+		let weight = RS_CalculateWeight(argument, premises);
 
-		if (childArgument.finalPolarity == Polarity.Supporting) {
-			runningMultiplier += childTruthScore * childWeight;
+		if (argument.finalPolarity == Polarity.Supporting) {
+			runningMultiplier += truthScoresProduct * weight;
 		} else {
-			runningDivisor += childTruthScore * childWeight;
+			runningDivisor += truthScoresProduct * weight;
 		}
 	}
 	return runningMultiplier / runningDivisor;
 }
-export function RS_CalculateWeight(claim: MapNodeL3, argument: MapNodeL3) {
-	let weight = RS_CalculateBaseWeight(claim);
+export function RS_CalculateWeight(argument: MapNodeL3, premises: MapNodeL3[]) {
+	let baseWeightsProduct = premises.map(premise=>RS_CalculateBaseWeight(premise)).reduce((prev, cur)=>prev * cur);
 	let weightMultiplier = RS_CalculateWeightMultiplier(argument);
-	weight *= weightMultiplier;
-	return weight;
+	return baseWeightsProduct * weightMultiplier;
 }
 
 function GetChildArguments(node: MapNodeL3): MapNodeL3[] {
