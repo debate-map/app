@@ -145,9 +145,14 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 
 		let backgroundFillPercent = mainRating_average;
 		let markerPercent = mainRating_mine;
-		if (State(a=>a.main.weighting) == WeightingType.ReasonScore && node.type == MapNodeType.Claim) {
-			backgroundFillPercent = rs_truthScore * 100;
-			markerPercent = null;
+		if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
+			if (node.type == MapNodeType.Claim) {
+				backgroundFillPercent = rs_truthScore * 100;
+				markerPercent = null;
+			} else if (node.type == MapNodeType.Argument) {
+				backgroundFillPercent = 0;
+				markerPercent = null;
+			}
 		}
 
 		let parent = GetNodeL3(SlicePath(path, 1));
@@ -284,7 +289,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 						return (
 							<div style={{position: "absolute", top: "100%", width: "100%", zIndex: 100, textAlign: "center", fontSize: 14}}>
 								Truth score: {ToPercentStr(rs_truthScore)}
-								{combineWithParentArgument && ` Weight: ${rs_baseWeight.RoundTo_Str(.1)}x${rs_weightMultiplier.RoundTo_Str(.1)} = ${rs_weight.RoundTo_Str(.1)}`}
+								{combineWithParentArgument && ` Weight: ${rs_baseWeight.RoundTo_Str(.01)}x${rs_weightMultiplier.RoundTo_Str(.01)} = ${rs_weight.RoundTo_Str(.01)}`}
 							</div>
 						);
 					}
