@@ -1,6 +1,6 @@
 import {BaseComponent, BaseProps} from "react-vextensions";
 import {colors} from "../../Frame/UI/GlobalStyles";
-import {E} from "../../Frame/General/Globals_Free";
+import {E} from "../../Frame/General/Others";
 import Radium from "radium";
 import Link from "../../Frame/ReactComponents/Link";
 import {VURL} from "js-vextensions";

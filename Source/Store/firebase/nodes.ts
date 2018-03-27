@@ -9,6 +9,7 @@ import {GetUserPermissionGroups, GetUserID, GetUserAccessLevel} from "./users";
 import {GetNodeL2, GetNodeL3} from "./nodes/$node";
 import {Map} from "./maps/@Map";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
+import { emptyArray } from "Frame/Store/ReducerUtils";
 
 export type NodeMap = {[key: string]: MapNode};
 export function GetNodeMap(queries?): NodeMap {
@@ -112,11 +113,14 @@ export function GetNodeChildrenL2(node: MapNode) {
 	let nodeChildrenL2 = nodeChildren.map(child=>child ? GetNodeL2(child) : null);
 	return CachedTransform("GetNodeChildrenL2", [], nodeChildrenL2, ()=>nodeChildrenL2);
 }
-export function GetNodeChildrenL3(node: MapNode, path: string, filterForPath = false) {
+export function GetNodeChildrenL3(node: MapNode, path?: string, filterForPath = false) {
+	if (node == null) return emptyArray;
+	path = path || node._id+"";
+	
 	let nodeChildrenL2 = GetNodeChildrenL2(node);
-	let nodeChildrenEnhanced = nodeChildrenL2.map(child=>child ? GetNodeL3(path + "/" + child._id) : null);
+	let nodeChildrenL3 = nodeChildrenL2.map(child=>child ? GetNodeL3(path + "/" + child._id) : null);
 	if (filterForPath) {
-		nodeChildrenEnhanced = nodeChildrenEnhanced.filter(child=> {
+		nodeChildrenL3 = nodeChildrenL3.filter(child=> {
 			// if null, keep (so receiver knows there's an entry here, but it's still loading)
 			if (child == null) return true;
 			// filter out any nodes whose access-level is higher than our own
@@ -126,7 +130,7 @@ export function GetNodeChildrenL3(node: MapNode, path: string, filterForPath = f
 			return true;
 		});
 	}
-	return CachedTransform("GetNodeChildrenEnhanced", [path], nodeChildrenEnhanced, ()=>nodeChildrenEnhanced);
+	return CachedTransform("GetNodeChildrenL3", [path], nodeChildrenL3, ()=>nodeChildrenL3);
 }
 
 export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNodeL2) {

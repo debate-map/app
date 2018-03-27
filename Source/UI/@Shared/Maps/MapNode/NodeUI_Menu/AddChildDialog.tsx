@@ -10,7 +10,7 @@ import {Row} from "react-vcomponents";
 import {Column} from "react-vcomponents";
 import keycode from "keycode";
 import {Button} from "react-vcomponents";
-import {E} from "../../../../../Frame/General/Globals_Free";
+import {E} from "../../../../../Frame/General/Others";
 import AddNode from "../../../../../Server/Commands/AddNode";
 import Editor from "react-md-editor";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";

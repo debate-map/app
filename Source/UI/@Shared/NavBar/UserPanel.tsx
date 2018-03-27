@@ -6,7 +6,7 @@ import {Button, Div, Row} from "react-vcomponents";
 import {GetUserID} from "../../../Store/firebase/users";
 import SocialButton from "react-social-button";
 import {Column} from "react-vcomponents";
-import {E} from "../../../Frame/General/Globals_Free";
+import {E} from "../../../Frame/General/Others";
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
 import Link from "../../../Frame/ReactComponents/Link";
 import {ACTSetPage, ACTTopRightOpenPanelSet} from "../../../Store/main";

@@ -11,7 +11,7 @@ import {Select} from "react-vcomponents";
 import {ShowMessageBox_Base, ShowMessageBox} from "react-vmessagebox";
 import {firebaseConnect} from "react-redux-firebase";
 import {GetData, SlicePath, DBPath} from "../../../../../../Frame/Database/DatabaseHelpers";
-import {Debugger} from "../../../../../../Frame/General/Globals_Free";
+import {Debugger} from "../../../../../../Frame/General/Others";
 import {RatingType, RatingType_Info, GetRatingTypeInfo} from "../../../../../../Store/firebase/nodeRatings/@RatingType";
 import {Rating} from "../../../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNode, ClaimForm, MapNodeL2, MapNodeL3} from "../../../../../../Store/firebase/nodes/@MapNode";

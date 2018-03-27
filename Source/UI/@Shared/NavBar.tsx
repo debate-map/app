@@ -5,7 +5,7 @@ import GoogleButton from "react-google-button";
 import {connect} from "react-redux";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {BaseComponent, BaseProps, BaseComponentWithConnector} from "react-vextensions";
-import {Debugger, E} from "../../Frame/General/Globals_Free";
+import {Debugger, E} from "../../Frame/General/Others";
 import {Button} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";
 import Action from "../../Frame/General/Action";

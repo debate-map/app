@@ -2,7 +2,7 @@ import {Assert} from "js-vextensions";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command, MergeDBUpdates} from "../Command";
 import {MapNode, ClaimForm} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "../../Frame/General/Globals_Free";
+import {E} from "../../Frame/General/Others";
 import {Term} from "../../Store/firebase/terms/@Term";
 import {Map} from "../../Store/firebase/maps/@Map";
 import AddNode from "./AddNode";

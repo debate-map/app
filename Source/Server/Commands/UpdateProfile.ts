@@ -1,6 +1,6 @@
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command} from "../Command";
-import {E} from "../../Frame/General/Globals_Free";
+import {E} from "../../Frame/General/Others";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import {UserEdit} from "../CommandMacros";
 import {MapEdit} from "Server/CommandMacros";

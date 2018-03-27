@@ -1,6 +1,6 @@
 import {BaseComponent, BaseProps, AddGlobalStyle, basePropFullKeys, ApplyBasicStyles} from "react-vextensions";
 import Radium from "radium";
-import {E} from "../General/Globals_Free";
+import {E} from "../General/Others";
 import {createMarkupForStyles} from "react-dom/lib/CSSPropertyOperations";
 import {Log} from "../General/Logging";
 

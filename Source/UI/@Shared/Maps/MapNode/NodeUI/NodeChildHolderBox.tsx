@@ -19,10 +19,11 @@ import { GetParentNodeL3 } from "Store/firebase/nodes";
 import { GetRatings } from "Store/firebase/nodeRatings";
 import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage} from "../../../../../Store/firebase/nodeRatings";
 import { IsSinglePremiseArgument } from "Store/firebase/nodes/$node";
-import { QuickIncrement } from "Frame/General/Globals_Free";
+import { QuickIncrement } from "Frame/General/Others";
 import {IsMultiPremiseArgument} from "../../../../../Store/firebase/nodes/$node";
 import {Squiggle} from "../NodeConnectorBackground";
 import { ACTMapNodeExpandedSet } from "Store/main/mapViews/$mapView/rootNodeViews";
+import { WeightingType } from "Store/main";
 
 export enum HolderType {
 	Truth,
@@ -67,14 +68,18 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		var ratingType = {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[type] as RatingType;
 		let ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
 
-		let percentStr = "...";
 		let ratings = GetRatings(node._id, ratingType);
-		let average = GetRatingAverage(node._id, ratingType, null, -1);
-		if (average != -1) {
-			average = TransformRatingForContext(average, ShouldRatingTypeBeReversed(node, ratingType));
-			percentStr = average + "%";
+		let mainRating_average = GetRatingAverage(node._id, ratingType, null, -1);
+		if (mainRating_average != -1) {
+			mainRating_average = TransformRatingForContext(mainRating_average, ShouldRatingTypeBeReversed(node, ratingType));
 		}
-		let mainRating_fillPercent = average;
+		//let mainRating_fillPercent = average;
+
+		// temp
+		let weightingType = State(a=>a.main.weighting);
+		if (weightingType == WeightingType.ReasonScore) {
+			mainRating_average = 0;
+		}
 
 		let separateChildren = node.type == MapNodeType.Claim || combineWithChildClaim;
 		let showArgumentsControlBar = (node.type == MapNodeType.Claim || combineWithChildClaim) && nodeView[expandKey] && nodeChildrenToShow != emptyArray_forLoading;
@@ -117,11 +122,11 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 						<div style={{position: "relative", width: "calc(100% - 17px)", padding: "3px 5px 2px"}}>
 							<div style={{
 								position: "absolute", left: 0, top: 0, bottom: 0,
-								width: mainRating_fillPercent + "%", background: backgroundColor.css(), borderRadius: "5px 0 0 5px",
+								width: mainRating_average + "%", background: backgroundColor.css(), borderRadius: "5px 0 0 5px",
 							}}/>
 							<div style={{
 								position: "absolute", right: 0, top: 0, bottom: 0,
-								width: (100 - mainRating_fillPercent) + "%", background: `rgba(0,0,0,.7)`, borderRadius: mainRating_fillPercent <= 0 ? "5px 0 0 5px" : 0,
+								width: (100 - mainRating_average) + "%", background: `rgba(0,0,0,.7)`, borderRadius: mainRating_average <= 0 ? "5px 0 0 5px" : 0,
 							}}/>
 							{/*mainRating_mine != null &&
 								<div style={{

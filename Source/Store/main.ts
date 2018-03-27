@@ -6,7 +6,7 @@ import {RatingUIReducer, RatingUIState} from "./main/ratingUI";
 import NotificationMessage from "./main/@NotificationMessage";
 import {rootPageDefaultChilds} from "../Frame/General/URLs";
 import {VURL} from "js-vextensions";
-import {Global} from "../Frame/General/Globals_Free";
+import {Global} from "../Frame/General/Others";
 import {CombineReducers} from "../Frame/Store/ReducerUtils";
 import {DebatesReducer, Debates, ACTDebateMapSelect} from "./main/debates";
 import SubpageReducer from "./main/@Shared/$subpage";

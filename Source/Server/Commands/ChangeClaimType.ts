@@ -2,7 +2,7 @@ import {Assert} from "js-vextensions";
 import {GetDataAsync} from "./../../Frame/Database/DatabaseHelpers";
 import {Command} from "./../Command";
 import {MapNode, ClaimForm, ChildEntry, ClaimType, MapNodeL2} from "./../../Store/firebase/nodes/@MapNode";
-import {E} from "./../../Frame/General/Globals_Free";
+import {E} from "./../../Frame/General/Others";
 import {GetValues_ForSchema} from "./../../Frame/General/Enums";
 import {GetClaimType, GetNodeL2} from "./../../Store/firebase/nodes/$node";
 import {Equation} from "./../../Store/firebase/nodes/@Equation";

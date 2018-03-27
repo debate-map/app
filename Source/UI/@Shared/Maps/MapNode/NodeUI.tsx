@@ -2,7 +2,7 @@ import { ACTMapNodeExpandedSet, ACTMapNodeChildLimitSet } from "../../../../Stor
 import {BaseComponent, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, ShallowEquals, ShallowChanged, BaseComponentWithConnector} from "react-vextensions";
 import {connect} from "react-redux";
 import {DBPath, GetData, SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
-import {Debugger, QuickIncrement, E, GetTimeSinceLoad} from "../../../../Frame/General/Globals_Free";
+import {Debugger, QuickIncrement, E, GetTimeSinceLoad} from "../../../../Frame/General/Others";
 import {Button, Div} from "react-vcomponents";
 import {PropTypes, Component} from "react";
 import Action from "../../../../Frame/General/Action";
@@ -215,7 +215,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		let parent = GetParentNodeL3(path);
 		let isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		if (isPremiseOfSinglePremiseArg) {
-			var relevanceArguments = GetNodeChildrenL3(parent, SlicePath(path, 1)).Except(node);
+			var relevanceArguments = GetNodeChildrenL3(parent, SlicePath(path, 1)).Except(node).filter(a=>a);
 		}
 
 		let isSinglePremiseArgument = IsSinglePremiseArgument(node, nodeChildrenToShow);

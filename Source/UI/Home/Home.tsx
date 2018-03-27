@@ -5,7 +5,7 @@ import {BaseComponent, SimpleShouldUpdate, GetInnerComp, ShallowEquals} from "re
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import {styles} from "../../Frame/UI/GlobalStyles";
 import {ScrollView} from "react-vscrollview";
-import {E} from "../../Frame/General/Globals_Free";
+import {E} from "../../Frame/General/Others";
 import GlobalMapUI from "../Global/GlobalMapUI";
 import {MapUI} from "../@Shared/Maps/MapUI";
 import {MapType, Map} from "../../Store/firebase/maps/@Map";

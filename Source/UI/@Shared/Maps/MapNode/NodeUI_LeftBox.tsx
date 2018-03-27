@@ -1,7 +1,7 @@
 import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
 import MapNodeUI_Inner from "./NodeUI_Inner";
 import {Button, Span} from "react-vcomponents";
-import {E} from "../../../../Frame/General/Globals_Free";
+import {E} from "../../../../Frame/General/Others";
 import {connect} from "react-redux";
 import {CachedTransform} from "js-vextensions";
 import {Map} from "../../../../Store/firebase/maps/@Map";

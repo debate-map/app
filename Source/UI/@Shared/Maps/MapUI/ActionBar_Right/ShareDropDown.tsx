@@ -24,7 +24,7 @@ import {TextInput} from "react-vcomponents";
 import {GetCurrentURL} from "../../../../../Frame/General/URLs";
 import {VURL} from "js-vextensions";
 import {GetNewURL} from "Frame/URL/URLManager";
-import { CopyText } from "Frame/General/Globals_Free";
+import { CopyText } from "Frame/General/Others";
 import {WaitXThenRun} from "js-vextensions";
 
 type ShareDropDownProps = {map: Map} & Partial<{newURL: VURL, timelines: Timeline[]}>;

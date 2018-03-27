@@ -5,7 +5,7 @@ import {ContentNode} from "../contentNodes/@ContentNode";
 import {GetValues_ForSchema} from "../../../Frame/General/Enums";
 
 export class MapNodeRevision {
-	constructor(initialData: Partial<MapNodeRevision>) {
+	 constructor(initialData: Partial<MapNodeRevision>) {
 		this.Extend(initialData);
 	}
 
@@ -43,7 +43,8 @@ AddSchema({
 		
 		titles: {
 			properties: {
-				base: {pattern: MapNodeRevision_titlePattern}, negation: {pattern: MapNodeRevision_titlePattern}, yesNoQuestion: {pattern: MapNodeRevision_titlePattern},
+				//base: {pattern: MapNodeRevision_titlePattern}, negation: {pattern: MapNodeRevision_titlePattern}, yesNoQuestion: {pattern: MapNodeRevision_titlePattern},
+				base: {type: "string"}, negation: {type: "string"}, yesNoQuestion: {type: "string"},
 			},
 			//required: ["base", "negation", "yesNoQuestion"],
 		},

@@ -1,4 +1,4 @@
-import {Global} from "../../Frame/General/Globals_Free";
+import {Global} from "../../Frame/General/Others";
 
 @Global
 export default class NotificationMessage {

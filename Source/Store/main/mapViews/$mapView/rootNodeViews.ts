@@ -50,8 +50,10 @@ export function RootNodeViewsReducer(state = new RootNodeViews(), action: Action
 	if (action.IsAny(ACTMapNodeSelect, ACTMapNodePanelOpen, ACTMapNodeTermOpen, ACTMapNodeExpandedSet,
 			ACTMapNodeChildLimitSet, ACTViewCenterChange) && action.payload.mapID == mapID) {
 		let targetPath = GetTargetPath(action);
-		let rootNodeID = SplitStringBySlash_Cached(targetPath)[0];
-		state = {...state, [rootNodeID]: MapNodeViewReducer(state[rootNodeID], action, rootNodeID+"")};
+		if (targetPath) {
+			let rootNodeID = SplitStringBySlash_Cached(targetPath)[0];
+			state = {...state, [rootNodeID]: MapNodeViewReducer(state[rootNodeID], action, rootNodeID+"")};
+		}
 	}
 
 	return state;

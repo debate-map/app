@@ -4,7 +4,7 @@ import {Pre} from "react-vcomponents";
 import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
 import {DBPath, GetData} from "../../../Frame/Database/DatabaseHelpers";
-import {Debugger, E, inFirefox} from "../../../Frame/General/Globals_Free";
+import {Debugger, E, inFirefox} from "../../../Frame/General/Others";
 import {PropTypes} from "react";
 import {Vector2i, VRect} from "js-vextensions";
 import {NodeUI} from "./MapNode/NodeUI";

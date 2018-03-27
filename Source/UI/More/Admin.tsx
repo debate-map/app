@@ -5,7 +5,7 @@ import {BaseComponent, BaseProps} from "react-vextensions";
 import {firebaseConnect} from "react-redux-firebase";
 import {Button} from "react-vcomponents";
 import {ShowMessageBox} from "react-vmessagebox";
-import {E} from "../../Frame/General/Globals_Free";
+import {E} from "../../Frame/General/Others";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {Map, MapType} from "../../Store/firebase/maps/@Map";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";

@@ -1,3 +1,4 @@
+import "./Frame/General/Globals";
 import {ParseModuleData, Require} from "webpack-runtime-require";
 import {Store} from "redux";
 import {RootState, MakeRootReducer} from "./Store/index";

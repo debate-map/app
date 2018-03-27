@@ -57,13 +57,15 @@ import {HistoryPanel} from "./NodeUI/Panels/HistoryPanel";
 import {GetPathsToNodesChangedSinceX, ChangeType, GetNodeChangeType, GetChangeTypeOutlineColor} from "../../../../Store/firebase/mapNodeEditTimes";
 import { GetTimeFromWhichToShowChangedNodes } from "Store/main/maps/$map";
 import { ACTSetLastAcknowledgementTime } from "Store/main";
-import {GetLastAcknowledgementTime} from "../../../../Store/main";
+import {GetLastAcknowledgementTime, WeightingType} from "../../../../Store/main";
 import UpdateNodeDetails from "Server/Commands/UpdateNodeDetails";
 import AddNodeRevision from "../../../../Server/Commands/AddNodeRevision";
 import { IsDoubleClick } from "Frame/General/Others";
 import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
 import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
 import {MapNodeRevision_titlePattern} from "../../../../Store/firebase/nodes/@MapNodeRevision";
+import { RS_CalculateTruthScore } from "Store/firebase/nodeRatings/ReasonScore";
+import {RS_CalculateWeightMultiplier, RS_CalculateBaseWeight, RS_CalculateWeight} from "../../../../Store/firebase/nodeRatings/ReasonScore";
 
 //export type NodeHoverExtras = {panel?: string, term?: number};
 
@@ -98,17 +100,28 @@ let connector = (state, {map, node, path}: Props)=> {
 		//ratingNodePath = SlicePath(path, 1);
 	}
 	let mainRating_average = GetRatingAverage_AtPath(ratingNode, mainRatingType);
-	let mainRating_fillPercent = GetRatingAverage_AtPath(ratingNode, mainRatingType);
-	let mainRating_mine = GetRatingValue(ratingNode._id, mainRatingType, GetUserID());
-	let mainRating_myFillPercent = mainRating_mine != null ? GetRatingAverage_AtPath(ratingNode, mainRatingType, new RatingFilter({includeUser: GetUserID()})) : null;
+	//let mainRating_mine = GetRatingValue(ratingNode._id, mainRatingType, GetUserID());
+	let mainRating_mine = GetRatingAverage_AtPath(ratingNode, mainRatingType, new RatingFilter({includeUser: GetUserID()}));
+
+	let weightingType = State(a=>a.main.weighting);
+	if (weightingType == WeightingType.ReasonScore && node.type == MapNodeType.Claim) {
+		var rs_truthScore = RS_CalculateTruthScore(node);
+		if (combineWithParentArgument) {
+			var rs_baseWeight = RS_CalculateBaseWeight(node);
+			var rs_weightMultiplier = RS_CalculateWeightMultiplier(parent);
+			var rs_weight = RS_CalculateWeight(node, parent);
+		}
+	}
 
 	return {
 		form: GetNodeForm(node, path),
 		ratingsRoot: GetNodeRatingsRoot(node._id),
 		mainRating_average,
-		mainRating_fillPercent,
 		mainRating_mine,
-		mainRating_myFillPercent,
+		rs_truthScore,
+		rs_baseWeight,
+		rs_weightMultiplier,
+		rs_weight,
 		changeType,
 	};
 };
@@ -120,7 +133,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 	render() {
 		let {map, node, nodeView, path, width, widthOverride,
 			panelPosition, useLocalPanelState, style, form,
-			ratingsRoot, mainRating_average, mainRating_fillPercent, mainRating_mine, mainRating_myFillPercent, 
+			ratingsRoot, mainRating_average, mainRating_mine, rs_truthScore, rs_baseWeight, rs_weightMultiplier, rs_weight,
 			changeType} = this.props;
 		let {hovered, hoverPanel, hoverTermID, /*local_selected,*/ local_openPanel} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
@@ -139,7 +152,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 		let subPanelShow = node.type == MapNodeType.Claim && (node.current.contentNode || node.current.image);
 		let bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView && nodeView.expanded;
-
+		
 		return (
 			<div className={classNames("NodeUI_Inner", {root: pathNodeIDs.length == 0})}
 					style={E({
@@ -188,15 +201,15 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 							onClick={e=>IsDoubleClick(e) && this.titlePanel && GetInnerComp(this.titlePanel).OnDoubleClick()}>
 						<div style={{
 							position: "absolute", left: 0, top: 0, bottom: 0,
-							width: mainRating_fillPercent + "%", background: backgroundColor.css(), borderRadius: "5px 0 0 5px",
+							width: mainRating_average + "%", background: backgroundColor.css(), borderRadius: "5px 0 0 5px",
 						}}/>
 						<div style={{
 							position: "absolute", right: 0, top: 0, bottom: 0,
-							width: (100 - mainRating_fillPercent) + "%", background: `rgba(0,0,0,.7)`, borderRadius: mainRating_fillPercent <= 0 ? "5px 0 0 5px" : 0,
+							width: (100 - mainRating_average) + "%", background: `rgba(0,0,0,.7)`, borderRadius: mainRating_average <= 0 ? "5px 0 0 5px" : 0,
 						}}/>
 						{mainRating_mine != null &&
 							<div style={{
-								position: "absolute", left: mainRating_myFillPercent + "%", top: 0, bottom: 0,
+								position: "absolute", left: mainRating_average + "%", top: 0, bottom: 0,
 								width: 2, background: "rgba(0,255,0,.5)",
 							}}/>}
 						<TitlePanel ref={c=>this.titlePanel = c} {...{parent: this, map, node, nodeView, path}}/>
@@ -248,6 +261,27 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 						{panelToShow == "history" && <HistoryPanel map={map} node={node} path={path}/>}
 						{panelToShow == "others" && <OthersPanel map={map} node={node} path={path}/>}
 					</div>}
+				{(()=> {
+					let weightingType = State(a=>a.main.weighting);
+					if (weightingType != WeightingType.ReasonScore || node.type == MapNodeType.Category) return;
+					
+					let debugText;
+					if (node.type == MapNodeType.Claim) {
+						let truthScore = RS_CalculateTruthScore(node) * 100;
+						debugText = ``;
+
+						if (combineWithParentArgument) {
+							var weightMultiplier = RS_CalculateWeightMultiplier(parent);
+						}
+
+						return (
+							<div style={{position: "absolute", top: "100%", width: "100%", zIndex: 100, textAlign: "center", fontSize: 14}}>
+								Truth score: {ToPercentStr(rs_truthScore)}
+								{combineWithParentArgument && ` Weight: ${rs_baseWeight.RoundTo_Str(.1)}x${rs_weightMultiplier.RoundTo_Str(.1)} = ${rs_weight.RoundTo_Str(.1)}`}
+							</div>
+						);
+					}
+				})()}
 			</div>
 		);
 	}
