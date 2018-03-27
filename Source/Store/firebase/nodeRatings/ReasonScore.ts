@@ -19,20 +19,20 @@ export function RS_CalculateTruthScore(node: MapNodeL3) {
 		let premises = GetNodeChildrenL3(argument).filter(a=>a.type == MapNodeType.Claim);
 		if (premises.length == 0) continue;
 
-		Assert(argument.current.argumentType == ArgumentType.All, `ReasonScore currently only supports multi-premise arguments of the "all" type.`);
-		let truthScoresProduct = premises.map(premise=>RS_CalculateTruthScore(premise)).reduce((prev, cur)=>prev * cur);
+		let truthScores = premises.map(premise=>RS_CalculateTruthScore(premise));
+		let truthScoresCombined = CombinePremiseTruthScores(truthScores, argument.current.argumentType);
 		let weight = RS_CalculateWeight(argument, premises);
 
 		if (argument.finalPolarity == Polarity.Opposing) {
-			truthScoresProduct = 1 - truthScoresProduct;
+			truthScoresCombined = 1 - truthScoresCombined;
 		}
 
 		if (runningAverage == null) {
 			weightTotalSoFar = weight;
-			runningAverage = truthScoresProduct;
+			runningAverage = truthScoresCombined;
 		} else {
 			weightTotalSoFar += weight; // increase weight first
-			let deviationFromAverage = truthScoresProduct - runningAverage;
+			let deviationFromAverage = truthScoresCombined - runningAverage;
 			let weightRelativeToTotal = weight / weightTotalSoFar;
 			runningAverage += deviationFromAverage * weightRelativeToTotal;
 		}
@@ -60,14 +60,14 @@ export function RS_CalculateWeightMultiplier(node: MapNodeL3) {
 		let premises = GetNodeChildrenL3(argument).filter(a=>a.type == MapNodeType.Claim);
 		if (premises.length == 0) continue;
 
-		Assert(argument.current.argumentType == ArgumentType.All, `ReasonScore currently only supports multi-premise arguments of the "all" type.`);
-		let truthScoresProduct = premises.map(premise=>RS_CalculateTruthScore(premise)).reduce((prev, cur)=>prev * cur);
+		let truthScores = premises.map(premise=>RS_CalculateTruthScore(premise));
+		let truthScoresCombined = CombinePremiseTruthScores(truthScores, argument.current.argumentType);
 		let weight = RS_CalculateWeight(argument, premises);
 
 		if (argument.finalPolarity == Polarity.Supporting) {
-			runningMultiplier += truthScoresProduct * weight;
+			runningMultiplier += truthScoresCombined * weight;
 		} else {
-			runningDivisor += truthScoresProduct * weight;
+			runningDivisor += truthScoresCombined * weight;
 		}
 	}
 	return runningMultiplier / runningDivisor;
@@ -76,6 +76,17 @@ export function RS_CalculateWeight(argument: MapNodeL3, premises: MapNodeL3[]) {
 	let baseWeightsProduct = premises.map(premise=>RS_CalculateBaseWeight(premise)).reduce((prev, cur)=>prev * cur);
 	let weightMultiplier = RS_CalculateWeightMultiplier(argument);
 	return baseWeightsProduct * weightMultiplier;
+}
+
+function CombinePremiseTruthScores(truthScores: number[], argumentType: ArgumentType) {
+	if (argumentType == ArgumentType.All) {
+		return truthScores.reduce((prev, cur)=>prev * cur);
+	}
+	if (argumentType == ArgumentType.AnyTwo) {
+		if (truthScores.length < 2) return 0; 
+		return truthScores.Max() * truthScores.Except(truthScores.Max()).Max();
+	}
+	return truthScores.Max(); // ArgumentType.Any
 }
 
 function GetChildArguments(node: MapNodeL3): MapNodeL3[] {
