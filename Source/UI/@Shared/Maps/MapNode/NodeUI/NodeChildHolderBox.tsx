@@ -88,7 +88,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 			<Row className="clickThrough" style={E(
 				{position: "relative", alignItems: "flex-start", /*marginLeft: `calc(100% - ${width}px)`,*/ width},
 				!isMultiPremiseArgument && {alignSelf: "flex-end"},
-				isMultiPremiseArgument && {marginTop: 10},
+				isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
 			)}>
 				<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{position: "absolute", width: "100%", height: "100%"}}>
 					{type == HolderType.Truth && 
