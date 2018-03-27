@@ -125,7 +125,7 @@
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "app:*",
-        "USE_TSLOADER": "true",
+        "#USE_TSLOADER": "true",
         "#": "maybe temp; fix for that source-maps weren't working perfectly"
       }
     },
