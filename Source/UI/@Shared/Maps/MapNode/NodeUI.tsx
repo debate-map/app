@@ -98,6 +98,8 @@ let connector = (state, {node, path, map}: Props)=> {
 	let addedDescendants = changeTypesOfChangedDescendantNodes.filter(a=>a == ChangeType.Add).length;
 	let editedDescendants = changeTypesOfChangedDescendantNodes.filter(a=>a == ChangeType.Edit).length;
 
+	let parentNodeView = (GetParentNodeL3(path) && GetNodeView(map._id, SlicePath(path, 1))) || new MapNodeView();
+
 	return {
 		path: path || node._id.toString(),
 
@@ -116,6 +118,8 @@ let connector = (state, {node, path, map}: Props)=> {
 		nodeChildren_sortValues: CachedTransform("nodeChildren_sortValues_transform1", [node._id], nodeChildren_sortValues, ()=>nodeChildren_sortValues),
 		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", [node._id], nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
 		subnodes,
+		parentNodeView,
+
 		userViewedNodes: GetUserViewedNodes(GetUserID(), {useUndefinedForInProgress: true}),
 		playingTimeline: GetPlayingTimeline(map._id),
 		playingTimeline_currentStepIndex: GetPlayingTimelineStepIndex(map._id),
@@ -160,11 +164,10 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 	innerUI: NodeUI_Inner;
 	render() {
 		let {map, node, path, asSubnode, widthOverride, style, onHeightOrPosChange,
-			initialChildLimit, form, children, nodeView, nodeChildren, nodeChildrenToShow, nodeChildren_sortValues, subnodes,
+			initialChildLimit, form, children, nodeView, parentNodeView, nodeChildren, nodeChildrenToShow, nodeChildren_sortValues, subnodes,
 			playingTimeline, playingTimeline_currentStepIndex, playingTimelineShowableNodes, playingTimelineVisibleNodes, playingTimeline_currentStepRevealNodes,
 			addedDescendants, editedDescendants} = this.props;
 		let {innerBoxOffset} = this.state;
-		let expanded = nodeView && nodeView.expanded;
 		if (ShouldLog(a=>a.nodeRenders)) {
 			if (logTypes.nodeRenders_for) {
 				if (logTypes.nodeRenders_for == node._id) {
@@ -217,7 +220,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 		let isSinglePremiseArgument = IsSinglePremiseArgument(node, nodeChildrenToShow);
 		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildrenToShow);
-		let showArgumentsControlBar = (node.type == MapNodeType.Claim || isSinglePremiseArgument) && expanded && nodeChildrenToShow != emptyArray_forLoading;
+		let showArgumentsControlBar = (node.type == MapNodeType.Claim || isSinglePremiseArgument) && nodeView.expanded && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, expectedHeight} = this.GetMeasurementInfo();
 		/*let innerBoxOffset = this.GetInnerBoxOffset(expectedHeight, showAddArgumentButtons, childrenCenterY);
@@ -257,15 +260,14 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			);
 		}
 
-		let nodeChildHolder = !isPremiseOfSinglePremiseArg && expanded &&
+		let nodeChildHolder = !isPremiseOfSinglePremiseArg && nodeView.expanded &&
 			<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
+				type={HolderType.Truth}
 				linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
 				vertical={isMultiPremiseArgument}
-				onChildrenCenterYChange={childrenCenterY=> {
-					let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;
-					let innerBoxOffset = (childrenCenterY - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
-					this.SetState({innerBoxOffset});
-					if (onHeightOrPosChange) onHeightOrPosChange();
+				onHeightOrDividePointChange={dividePoint=> {
+					this.dividePoint = dividePoint;
+					this.OnDividePointChange();
 				}}/>;
 
 		let nodeUIResult_withoutSubnodes = (
@@ -279,7 +281,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 					/*useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
 					!useAutoOffset && {paddingTop: innerBoxOffset},*/
 					//{paddingTop: innerBoxOffset},
-					{marginTop: expanded ? innerBoxOffset : 0},
+					{marginTop: nodeView.expanded ? innerBoxOffset : 0},
 				)}>
 					{limitBar_above && children}
 					{asSubnode &&
@@ -289,15 +291,15 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 							<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 								<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 							</div>}
-						{isPremiseOfSinglePremiseArg && expanded &&
-							<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Truth} expanded={true}
+						{isPremiseOfSinglePremiseArg && nodeView.expanded &&
+							<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Truth}
 								nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}/>}
 						<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{map, node, nodeView, path, width, widthOverride}}
 							style={E(
 								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
 							)}/>
-						{isPremiseOfSinglePremiseArg && expanded &&
-							<NodeChildHolderBox {...{map, node: parent, path: SlicePath(path, 1), nodeView}} type={HolderType.Relevance} expanded={true}
+						{isPremiseOfSinglePremiseArg && nodeView.expanded &&
+							<NodeChildHolderBox {...{map, node: parent, path: SlicePath(path, 1), nodeView: parentNodeView}} type={HolderType.Relevance}
 								nodeChildren={GetNodeChildrenL3(parent, SlicePath(path, 1))} nodeChildrenToShow={relevanceArguments}/>}
 						{/*showBelowMessage &&
 							<Div ct style={{
@@ -315,7 +317,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 					<div style={{margin: "auto 0 auto 10px"}}>...</div>}
 				{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 &&
 					<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
-				{nodeChildrenToShow != emptyArray && !expanded && nodeChildrenToShow.length != 0 &&
+				{nodeChildrenToShow != emptyArray && !nodeView.expanded && nodeChildrenToShow.length != 0 &&
 					<div style={E(
 						{
 							margin: "auto 0 auto 9px", fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,.8)",
@@ -329,7 +331,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 					)}>
 						{nodeChildrenToShow.length}
 					</div>}
-				{!expanded && (addedDescendants > 0 || editedDescendants > 0) &&
+				{!nodeView.expanded && (addedDescendants > 0 || editedDescendants > 0) &&
 					<Column style={E(
 						{
 							margin: "auto 0 auto 9px", fontSize: 13, fontWeight: 500,
@@ -373,6 +375,31 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		return this.proxyDisplayedNodeUI || this;
 	}
 
+	ComponentDidMount() {
+		let {node, userViewedNodes} = this.props;
+		if (GetUserID() == null) return;
+
+		let userViewedNodes_doneLoading = userViewedNodes !== undefined;
+		if (userViewedNodes_doneLoading && !(userViewedNodes || {}).VKeys(true).map(ToInt).Contains(node._id)) {
+			new NotifyNodeViewed({nodeID: node._id}).Run();
+		}
+	}
+
+	lastHeight = 0;
+	PostRender() {
+		//if (this.lastRender_source == RenderSource.SetState) return;
+
+		let height = $(FindDOM(this)).outerHeight();
+		if (height != this.lastHeight) {
+			this.OnHeightChange(height);
+		} /*else {
+			if (this.lastRender_source == RenderSource.SetState) return;
+			this.UpdateState();
+			this.ReportChildrenCenterYChange();
+		}*/
+		this.lastHeight = height;
+	}
+
 	//GetMeasurementInfo(/*props: Props, state: State*/) {
 	measurementInfo_cache;
 	measurementInfo_cache_lastUsedProps;
@@ -406,30 +433,6 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		return this.measurementInfo_cache;
 	}
 
-	ComponentDidMount() {
-		let {node, userViewedNodes} = this.props;
-		if (GetUserID() == null) return;
-
-		let userViewedNodes_doneLoading = userViewedNodes !== undefined;
-		if (userViewedNodes_doneLoading && !(userViewedNodes || {}).VKeys(true).map(ToInt).Contains(node._id)) {
-			new NotifyNodeViewed({nodeID: node._id}).Run();
-		}
-	}
-
-	lastHeight = 0;
-	PostRender() {
-		//if (this.lastRender_source == RenderSource.SetState) return;
-
-		let height = $(FindDOM(this)).outerHeight();
-		if (height != this.lastHeight) {
-			this.OnHeightChange(height);
-		} /*else {
-			if (this.lastRender_source == RenderSource.SetState) return;
-			this.UpdateState();
-			this.ReportChildrenCenterYChange();
-		}*/
-		this.lastHeight = height;
-	}
 	OnHeightChange(height: number) {
 		let {node, onHeightOrPosChange} = this.props;
 		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
@@ -438,6 +441,17 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		
 		//this.UpdateState(true);
 		//this.UpdateState();
+		if (onHeightOrPosChange) onHeightOrPosChange();
+	}
+	dividePoint: number;
+	OnDividePointChange() {
+		let {node, onHeightOrPosChange} = this.props;
+
+		let {expectedHeight} = this.GetMeasurementInfo();
+
+		let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;
+		let innerBoxOffset = (this.dividePoint - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
+		this.SetState({innerBoxOffset});
 		if (onHeightOrPosChange) onHeightOrPosChange();
 	}
 }

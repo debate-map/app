@@ -22,6 +22,7 @@ import { IsSinglePremiseArgument } from "Store/firebase/nodes/$node";
 import { QuickIncrement } from "Frame/General/Globals_Free";
 import {IsMultiPremiseArgument} from "../../../../../Store/firebase/nodes/$node";
 import {Squiggle} from "../NodeConnectorBackground";
+import { ACTMapNodeExpandedSet } from "Store/main/mapViews/$mapView/rootNodeViews";
 
 export enum HolderType {
 	Truth,
@@ -30,7 +31,7 @@ export enum HolderType {
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
-	type: HolderType, expanded: boolean, widthOverride?: number,
+	type: HolderType, widthOverride?: number, onHeightOrDividePointChange?: (dividePoint: number)=>void,
 };
 let connector = (state, {node, nodeChildren}: Props)=> {
 	return {
@@ -45,7 +46,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 	}
 	lineHolder: HTMLDivElement;
 	render() {
-		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, expanded, widthOverride, combineWithChildClaim} = this.props;
+		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, widthOverride, combineWithChildClaim} = this.props;
 		let {innerBoxOffset, lineHolderHeight} = this.state;
 
 		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildren);
@@ -70,7 +71,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		let mainRating_fillPercent = average;
 
 		let separateChildren = node.type == MapNodeType.Claim || combineWithChildClaim;
-		let showArgumentsControlBar = (node.type == MapNodeType.Claim || combineWithChildClaim) && expanded && nodeChildrenToShow != emptyArray_forLoading;
+		let showArgumentsControlBar = (node.type == MapNodeType.Claim || combineWithChildClaim) && nodeView.expanded && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, height} = this.GetMeasurementInfo();
 		if (widthOverride) {
@@ -80,6 +81,8 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		//let lineColor = GetNodeColor(node, "raw");
 		let lineColor = GetNodeColor({type: MapNodeType.Category} as any as MapNodeL3, "raw");
 		let lineOffset = 30..KeepAtMost(innerBoxOffset);
+		//let expandKey = type == HolderType.Truth ? "expanded_truth" : "expanded_relevance";
+		let expandKey = `expanded_${HolderType[type].toLowerCase()}`;
 
 		return (
 			<Row className="clickThrough" style={E(
@@ -127,38 +130,42 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 								}}/>*/}
 							<span style={{position: "relative", fontSize: 13}}>{text}</span>
 						</div>
-						<Button text={expanded ? "-" : "+"} //size={28}
+						<Button text={nodeView[expandKey] ? "-" : "+"} //size={28}
 								style={{
 									display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
 									width: 17, //minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
 									padding: 0,
-									fontSize: expanded ? 23 : 17,
+									fontSize: nodeView[expandKey] ? 23 : 17,
 									lineHeight: "1px", // keeps text from making meta-theses too tall
 									backgroundColor: backgroundColor.Mix("black", .2).alpha(.9).css(),
 									border: "none",
 									":hover": {backgroundColor: backgroundColor.Mix("black", .1).alpha(.9).css()},
 								}}
-								/*onClick={e=> {
-									store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path, expanded: !expanded, recursive: expanded && e.altKey}));
+								onClick={e=> {
+									store.dispatch(new ACTMapNodeExpandedSet({
+										mapID: map._id, path, recursive: nodeView[expandKey] && e.altKey,
+										[expandKey]: !nodeView[expandKey],
+									}));
 									e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
 									//return false;
-								}}*//>
+									if (nodeView[expandKey]) {
+										this.dividePoint = 0;
+										this.OnDividePointChange();
+									}
+								}}/>
 					</Row>
 				</div>
-				<NodeChildHolder {...{map, node, path, nodeView, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
-					linkSpawnPoint={innerBoxOffset + (height / 2)}
-					onChildrenCenterYChange={childrenCenterY=> {
-						/*this.childrenCenterY = childrenCenterY;
-						this.UpdateLines();*/
-
-						let distFromInnerBoxTopToMainBoxCenter = height / 2;
-						let innerBoxOffset = (childrenCenterY - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
-						this.SetState({innerBoxOffset});
-					}}/>
+				{nodeView[expandKey] &&
+					<NodeChildHolder {...{map, node, path, nodeView, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar}}
+						linkSpawnPoint={innerBoxOffset + (height / 2)}
+						onHeightOrDividePointChange={dividePoint=> {
+							this.dividePoint = dividePoint;
+							this.OnDividePointChange();
+						}}/>}
 			</Row>
 		);
 	}
-	//childrenCenterY: number;
+	dividePoint: number;
 
 	lastLineHolderHeight = 0;
 	PostRender() {
@@ -171,6 +178,20 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 	
 	GetMeasurementInfo() {
 		return {width: 90, height: 26};
+	}
+
+	OnDividePointChange() {
+		/*this.childrenCenterY = childrenCenterY;
+		this.UpdateLines();*/
+
+		let {onHeightOrDividePointChange} = this.props;
+		let {height} = this.GetMeasurementInfo();
+
+		let distFromInnerBoxTopToMainBoxCenter = height / 2;
+		let innerBoxOffset = (this.dividePoint - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
+		this.SetState({innerBoxOffset});
+
+		if (onHeightOrDividePointChange) onHeightOrDividePointChange(this.dividePoint);
 	}
 
 	/*UpdateLines() {

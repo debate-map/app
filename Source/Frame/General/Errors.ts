@@ -53,5 +53,8 @@ export function HandleError(error: Error, recordWithSentry = true, extraInfo = {
 		Raven.captureException(error, {extra: extraInfo});
 	}
 
-	store.dispatch(new ACTNotificationMessageAdd(new NotificationMessage(errorStr)));
+	// wait a bit, in case we're in a reducer function (calling dispatch from within a reducer errors)
+	setTimeout(()=> {
+		store.dispatch(new ACTNotificationMessageAdd(new NotificationMessage(errorStr)));
+	});
 }

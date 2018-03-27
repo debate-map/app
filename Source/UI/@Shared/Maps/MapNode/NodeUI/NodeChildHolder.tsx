@@ -41,8 +41,8 @@ import {QuickIncrement} from "../../../../../Frame/General/Globals_Free";
 }*/
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildrenToShow: MapNodeL3[],
-	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, vertical?: boolean, onChildrenCenterYChange?: (childrenCenterY: number)=>void,
+	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildrenToShow: MapNodeL3[], type: HolderType,
+	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, vertical?: boolean, onHeightOrDividePointChange?: (dividePoint: number)=>void,
 };
 let initialState = {
 	childrenWidthOverride: null as number,
@@ -58,7 +58,7 @@ let connector = (state, {}: Props)=> {
 export class NodeChildHolder extends BaseComponentWithConnector(connector, initialState) {
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
-		let {map, node, nodeView, path, nodeChildrenToShow, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, onChildrenCenterYChange, initialChildLimit} = this.props;
+		let {map, node, nodeView, path, nodeChildrenToShow, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, onHeightOrDividePointChange, initialChildLimit} = this.props;
 		let {childrenWidthOverride, oldChildBoxOffsets} = this.state;
 
 		let upChildren = separateChildren ? nodeChildrenToShow.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
@@ -101,7 +101,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 						nodeChildren={nodeChildrenToShow} childBoxOffsets={oldChildBoxOffsets}/>}
 				
 				{IsMultiPremiseArgument(node, nodeChildrenToShow) &&
-					<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Relevance} expanded={false} widthOverride={childrenWidthOverride}
+					<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Relevance} widthOverride={childrenWidthOverride}
 						nodeChildren={GetNodeChildrenL3(node, path)} nodeChildrenToShow={GetNodeChildrenL3(node, path).filter(a=>a && a.type == MapNodeType.Argument)}/>}
 				{!separateChildren && nodeChildrenToShow.slice(0, childLimit_down).map((pack, index)=> {
 					return RenderChild(pack, index, nodeChildrenToShow);
@@ -128,6 +128,12 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	downChildHolder: Column;
 	argumentsControlBar: ArgumentsControlBar;
 
+	get Expanded() {
+		let {type, nodeView} = this.props;
+		let expandKey = `expanded_${HolderType[type].toLowerCase()}`;
+		return nodeView[expandKey];
+	}
+
 	lastHeight = 0;
 	PostRender() {
 		//if (this.lastRender_source == RenderSource.SetState) return;
@@ -147,7 +153,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	OnChildHeightOrPosChange() {
 		let {node} = this.props;
 		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}\ncenterY:${this.GetChildrenCenterY()}`)
+			()=>`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}\ncenterY:${this.GetDividePoint()}`)
 
 		//this.OnHeightOrPosChange();
 		// wait one frame, so that if multiple calls to this method occur in the same frame, we only have to call OnHeightOrPosChange() once
@@ -155,13 +161,25 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 			this.OnChildHeightOrPosChange_updateStateQueued = true;
 			requestAnimationFrame(()=> {
 				if (!this.mounted) return;
-				this.UpdateState();
+				this.UpdateChildrenWidthOverride();
+				this.UpdateChildBoxOffsets();
 				this.OnChildHeightOrPosChange_updateStateQueued = false;
 			});
 		}
 	}
+	OnHeightChange() {
+		let {node} = this.props;
+		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
+			()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+				}centerY:${this.GetDividePoint()}`);
+		
+		//this.UpdateState(true);
+		this.UpdateChildrenWidthOverride();
+		this.UpdateChildBoxOffsets();
+		this.ReportDividePointChange();
+	}
 
-	GetChildrenCenterY() {
+	GetDividePoint() {
 		if (this.argumentsControlBar) {
 			//return upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0;
 			return this.childHolder && this.childHolder.DOM.style.visibility != "hidden"
@@ -171,56 +189,43 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		//return childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0,
 		return this.childHolder && this.childHolder.DOM.style.visibility != "hidden" ? $(this.childHolder.DOM).GetScreenRect().height / 2 : 0;
 	}
-	ReportChildrenCenterYChange() {
-		let {node, onChildrenCenterYChange} = this.props;
+	ReportDividePointChange() {
+		let {node, onHeightOrDividePointChange} = this.props;
 
-		let childrenCenterY = this.GetChildrenCenterY();
+		let dividePoint = this.GetDividePoint();
 
-		if (onChildrenCenterYChange) onChildrenCenterYChange(childrenCenterY);
+		if (onHeightOrDividePointChange) onHeightOrDividePointChange(dividePoint);
 
 		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
 			()=>`OnChildrenCenterYChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
-				}centerY:${this.GetChildrenCenterY()}`);
+				}centerY:${this.GetDividePoint()}`);
 	}
 
-	OnHeightChange() {
-		let {node} = this.props;
-		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
-				}centerY:${this.GetChildrenCenterY()}`);
-		
-		//this.UpdateState(true);
-		this.UpdateState();
-		this.ReportChildrenCenterYChange();
-	}
-	UpdateState(forceUpdate = false) {
+	UpdateChildrenWidthOverride(forceUpdate = false) {
 		let {map, node, path, children, nodeView, linkSpawnPoint} = this.props;
-		let expanded = nodeView && nodeView.expanded;
+		if (!this.Expanded) return;
+		
+		let childBoxes = this.childBoxes.VValues().filter(a=>a != null);
+		
+		let cancelIfStateSame = !forceUpdate;
+		var changedState = this.SetState({
+			childrenWidthOverride: childBoxes.map(comp=>comp.GetMeasurementInfo().width).concat(0).Max(null, true)
+		}, null, cancelIfStateSame, true);
+		//Log(`Changed state? (${this.props.node._id}): ` + changedState);
+	}
+	UpdateChildBoxOffsets(forceUpdate = false) {
+		let {map, node, path, children, nodeView, linkSpawnPoint} = this.props;
 		let childHolder = $(this);
 		let upChildHolder = childHolder.children(".upChildHolder");
 		let downChildHolder = childHolder.children(".downChildHolder");
 		let argumentsControlBar = childHolder.children(".argumentsControlBar");
-		/*let firstChild = (upChildHolder.length ? upChildHolder : childHolder).children().ToList()[0];
-		let lastChild = (downChildHolder.length ? downChildHolder : childHolder).children().ToList().Last();*/
-
-		// if children are supposed to show, but are not rendered yet, do not call set-state (yet)
-		/*if (expanded) {
-			if (upChildHolder.length) {
-				if (upChildHolder.css("display") == "none") return;
-			} else {
-				if (childHolder.css("display") == "none") return;
-			}
-		}*/
 
 		let childBoxes = this.childBoxes.VValues().filter(a=>a != null);
-		let newState = E(
-			expanded &&
-				{childrenWidthOverride: childBoxes.map(comp=>comp.GetMeasurementInfo().width).concat(0).Max(null, true)},
-		) as any; //as State;
+		let newState = {} as any;
 
 		let showAddArgumentButtons = false; //node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading; // && nodeChildren.length > 0;
 		//if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
-		if (expanded && this.childHolder) {
+		if (this.Expanded && this.childHolder) {
 			let holderOffset = new Vector2i($(FindDOM(this.childHolder)).offset());
 
 			let oldChildBoxOffsets = this.childBoxes.Props().Where(pair=>pair.value != null).ToMap(pair=>pair.name, pair=> {

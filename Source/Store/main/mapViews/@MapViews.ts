@@ -20,6 +20,10 @@ export class MapNodeView {
 	}*/
 
 	expanded?: boolean;
+	/*expanded_truth?: boolean;
+	expanded_relevance?: boolean;*/
+	expanded_truth? = true;
+	expanded_relevance? = true;
 	selected?: boolean;
 	focused?: boolean;
 	/** Offset of view-center from self (since we're the focus-node). */
