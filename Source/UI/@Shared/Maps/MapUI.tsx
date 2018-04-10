@@ -137,7 +137,7 @@ export class MapUI extends BaseComponentWithConnector(connector, {}) {
 		}
 
 		return (
-			<Column style={{flex: 1}}>
+			<Column style={{flex: 1, maxHeight: "100%" /* for ff */ }}>
 				{!withinPage &&
 					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth}/>}
 				{!withinPage &&
