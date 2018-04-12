@@ -22,6 +22,7 @@ import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {GetDataAsync, GetAsync, ApplyDBUpdates} from "Frame/Database/DatabaseHelpers";
 import {GetUserPermissionGroups} from "./Store/firebase/users";
 import VReactMarkdown_Remarkable from "./Frame/ReactComponents/VReactMarkdown_Remarkable";
+import {Persister} from "redux-persist/src/types";
 
 JSVE.logFunc = Log;
 
@@ -100,9 +101,9 @@ require("redux-little-router").push = function() {
 
 let createStore = require("./Frame/Store/CreateStore").default;
 
-declare global { var store: Store<RootState> & {firebase: FirebaseApp}; }
-var store = createStore(g.__InitialState__, {}) as Store<RootState>;
-G({store});
+var {store, persister} = createStore(g.__InitialState__, {});
+G({store}); declare global { var store: Store<RootState> & {firebase: FirebaseApp}; }
+G({persister}); declare global { var persister: Persister; }
 
 Manager_Forum.store = store;
 Manager_Feedback.store = store;

@@ -44,9 +44,11 @@ import {GetUserBackground} from "../Store/firebase/users";
 import {GetUserID} from "Store/firebase/users";
 import { GetMaps } from "Store/firebase/maps";
 import { GetData } from "Frame/Database/DatabaseHelpers";
+import {PersistGate as PersistGate_} from "redux-persist/integration/react";
+let PersistGate = PersistGate_ as any;
 
 export class RootUIWrapper extends BaseComponent<{store}, {}> {
-	ComponentWillMount() {
+	/*ComponentWillMount() {
 		let startVal = g.storeRehydrated;
 		// wrap storeRehydrated property, so we know when it's set (from CreateStore.ts callback)
 		(g as Object)._AddGetterSetter("storeRehydrated",
@@ -57,17 +59,19 @@ export class RootUIWrapper extends BaseComponent<{store}, {}> {
 			});
 		// trigger setter right now (in case value is already true)
 		g.storeRehydrated = startVal;
-	}
+	}*/
 
 	render() {
 		let {store} = this.props;
-		if (!g.storeRehydrated) return <div/>;
+		//if (!g.storeRehydrated) return <div/>;
 
 		return (
 			<Provider store={store}>
-				<RouterProvider store={store}>
-					<RootUI/>
-				</RouterProvider>
+				<PersistGate loading={null} persistor={persister}>
+					<RouterProvider store={store}>
+						<RootUI/>
+					</RouterProvider>
+				</PersistGate>
 			</Provider>
 		);
 	}

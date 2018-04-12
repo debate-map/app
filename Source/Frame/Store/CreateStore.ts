@@ -2,7 +2,8 @@ import {applyMiddleware, compose, createStore, StoreEnhancer, Store} from "redux
 import thunk from "redux-thunk";
 import {reduxFirebase, getFirebase} from "react-redux-firebase";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
-import {persistStore, autoRehydrate} from "redux-persist";
+import {persistStore, persistReducer} from "redux-persist";
+import storage from "redux-persist/lib/storage"; // defaults to localStorage for web and AsyncStorage for react-native
 import {createFilter, createBlacklistFilter} from "redux-persist-transform-filter";
 import {MakeRootReducer, RootState} from "../../Store/index";
 import watch from "redux-watch";
@@ -12,7 +13,7 @@ import {PreDispatchAction, MidDispatchAction, PostDispatchAction} from "./Action
 //import {batchedUpdatesMiddleware} from "redux-batched-updates";
 import {batchedSubscribe} from "redux-batched-subscribe";
 import {unstable_batchedUpdates} from "react-dom";
-import {routerForBrowser} from 'redux-little-router';
+import {routerForBrowser} from "redux-little-router";
 
 let routes = {
 	"/": {},
@@ -130,13 +131,16 @@ export default function(initialState = {}, history) {
 	let extraReducers = {
 		router: routerReducer,
 	};
+	let rootReducer = MakeRootReducer(extraReducers);
+	rootReducer = persistReducer({storage, key: "root"}, rootReducer);
+
 	const store = createStore(
-		MakeRootReducer(extraReducers),
+		rootReducer,
 		initialState,
 		// Note: Compose applies functions from right to left: compose(f, g, h) = (...args)=>f(g(h(...args))).
 		// You can think of the earlier ones as "wrapping" and being able to "monitor" the ones after it, but (usually) telling them "you apply first, then I will".
 		compose(
-			autoRehydrate({log: true}),
+			//autoRehydrate({log: true}),
 			routerEnhancer,
 			applyMiddleware(...middleware),
 			reduxFirebase(firebaseConfig, reduxFirebaseConfig),
@@ -168,12 +172,8 @@ export default function(initialState = {}, history) {
 	// begin periodically persisting the store
 	//let persister = persistStore(store, {whitelist: ["main"]});
 	// you want to remove some keys before you save
-	let persister = persistStore(store, {
-		whitelist: ["main"],
-		transforms: [
-			createBlacklistFilter("main", ["notificationMessages"])
-		]
-	}, ()=>g.storeRehydrated = true);
+	//let persister = persistStore(store, null, ()=>g.storeRehydrated = true);
+	let persister = persistStore(store);
 	if (startURL.GetQueryVar("clearState")) {
 		Log("Clearing redux-store's state and local-storage...");
 		persister.purge();
@@ -191,5 +191,5 @@ export default function(initialState = {}, history) {
 		});
 	}
 
-	return store;
+	return {store, persister};
 }

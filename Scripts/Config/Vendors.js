@@ -25,6 +25,6 @@ require("recharts");
 
 require("updeep");
 require("core-js");
-require("ajv");
+//require("ajv");
 require("codemirror");
 require("react-md-editor");
