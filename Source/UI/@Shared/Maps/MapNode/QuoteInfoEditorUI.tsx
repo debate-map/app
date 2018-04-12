@@ -6,7 +6,6 @@ import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {TextInput} from "react-vcomponents";
 import Editor from "react-md-editor";
 import {Button} from "react-vcomponents";
-import {applyFormat} from "../../MarkdownEditor/Formatter";
 import {Component} from "react";
 import Icons from "react-md-editor/lib/icons";
 import {GetNodeDisplayText} from "../../../../Store/firebase/nodes/$node";
@@ -19,7 +18,7 @@ import {GetEntries} from "../../../../Frame/General/Enums";
 import {CleanUpdatedSourceChains} from "./SourceChainsEditorUI";
 import SourceChainsEditorUI from "./SourceChainsEditorUI";
 import {SubPanel_Quote} from "./NodeUI_Inner/SubPanel";
-import { MarkdownToolbar } from "UI/@Shared/MarkdownEditor/MarkdownToolbar";
+import { MarkdownToolbar, MarkdownEditor } from "react-vmarkdown";
  import {GetErrorMessagesUnderElement} from "js-vextensions";
 
 //@ApplyBasicStyles
@@ -59,7 +58,7 @@ export default class QuoteInfoEditorUI extends BaseComponent
 					{/*<TextInput style={{flex: 1}}
 						value={info.text} onChange={val=>Change(info.text = val)}/>*/}
 					{(creating || editing) && <MarkdownToolbar editor={()=>this.refs.editor} excludeCommands={["h1", "h2", "h3", "h4", "italic", "quote"]}/>}
-					<Editor ref="editor" value={newData.content} onChange={val=>Change(newData.content = val)} options={{
+					<MarkdownEditor ref="editor" value={newData.content} onChange={val=>Change(newData.content = val)} options={{
 						scrollbarStyle: `overlay`,
 						lineWrapping: true,
 						readOnly: !(creating || editing),

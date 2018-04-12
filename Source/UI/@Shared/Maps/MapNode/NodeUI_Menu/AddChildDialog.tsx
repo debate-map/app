@@ -12,7 +12,6 @@ import keycode from "keycode";
 import {Button} from "react-vcomponents";
 import {E} from "../../../../../Frame/General/Others";
 import AddNode from "../../../../../Server/Commands/AddNode";
-import Editor from "react-md-editor";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
 import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";

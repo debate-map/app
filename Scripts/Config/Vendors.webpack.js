@@ -8,8 +8,8 @@ let root = path.join(__dirname, "..", "..");
 
 module.exports = {
 	mode: "development",
-	//optimization: {namedModules: false},
-	optimization: {namedModules: true},
+	optimization: {namedModules: false},
+	//optimization: {namedModules: true},
 	//mode: "production", // needed so that main bundle knows to reference vendor-bundle modules using id instead of path
 	entry: {
 		vendor: [path.join(__dirname, "Vendors.js")]

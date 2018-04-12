@@ -1,6 +1,5 @@
 import {VMenuLayer} from "react-vmenu";
 // We only need to import the modules necessary for initial render
-import {PropTypes, Component} from "react";
 import {BaseComponent, AddGlobalStyle, ShallowChanged, BaseComponentWithConnector} from "react-vextensions";
 import "../Frame/UI/JQueryExtensions";
 //import {Component as BaseComponent} from "react-vextensions";

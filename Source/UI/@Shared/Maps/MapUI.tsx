@@ -5,7 +5,6 @@ import {firebaseConnect, helpers} from "react-redux-firebase";
 import {connect} from "react-redux";
 import {DBPath, GetData} from "../../../Frame/Database/DatabaseHelpers";
 import {Debugger, E, inFirefox} from "../../../Frame/General/Others";
-import {PropTypes} from "react";
 import {Vector2i, VRect} from "js-vextensions";
 import {NodeUI} from "./MapNode/NodeUI";
 import {ScrollView} from "react-vscrollview";
@@ -49,6 +48,7 @@ import {emptyArray} from "../../../Frame/Store/ReducerUtils";
 import { TimelinePlayerUI, TimelineOverlayUI } from "UI/@Shared/Maps/MapUI/TimelinePlayerUI";
 import {GetAsync} from "Frame/Database/DatabaseHelpers";
 import {GetPlayingTimeline} from "../../../Store/main/maps/$map";
+import { StandardCompProps } from "Frame/UI/General";
 
 export function GetNodeBoxForPath(path: string) {
 	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
@@ -146,7 +146,7 @@ export class MapUI extends BaseComponentWithConnector(connector, {}) {
 					<TimelinePlayerUI map={map}/>}
 				{/*!withinPage &&
 					<TimelineOverlayUI map={map}/>*/}
-				<ScrollView {...rest.Excluding("dispatch")} ref={c=>this.scrollView = c}
+				<ScrollView {...rest.Excluding(...StandardCompProps())} ref={c=>this.scrollView = c}
 						backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.scrollView.content) || a == this.mapUI}
 						style={E({flex: 1}, withinPage && {overflow: "visible"})}
 						scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}

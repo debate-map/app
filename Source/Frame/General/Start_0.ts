@@ -6,6 +6,9 @@ import "./Start_0"; // fake/empty import, so this module is correctly seen as mo
 //var g = window as any;
 declare global { const g; } window["g"] = window;
 
+declare var __webpack_require__;
+g.webpackData = __webpack_require__;
+
 let isBot = /bot|crawler|spider|robot|crawling|google|bing|duckduckgo|msn|slurp|yandex|baidu|aolbuild|teoma/i.test(navigator.userAgent);
 //declare global { const isBot: string; } G({isBot});
 declare global { const isBot: string; } g.isBot = isBot;

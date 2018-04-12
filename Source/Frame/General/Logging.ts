@@ -26,6 +26,7 @@ console.warn = function(...args) {
 	//var str = message + "";
 	if (args[2] && args[2].Contains("do not mix longhand and shorthand properties in the same style object")) return;
 	if (args[0] && args[0].Contains("a promise was created in a handler but was not returned from it, see http://goo.gl/rRqMUw")) return;
+
 	warn_orig.apply(this, args);
 };
 
@@ -33,7 +34,10 @@ var error_orig = console.error;
 console.error = function(exception) {
     var str = exception + "";
     if (str.Contains('Warning: A component is `contentEditable`')) return;
-    //if (str.Contains("Warning: Unknown prop `")) return;
+	 //if (str.Contains("Warning: Unknown prop `")) return;
+	 // I mostly resolved this, but some 3rd party libs still use old way, and I don't want to mess with them. (eg. react-social-button)
+	if (str.Contains("Accessing PropTypes via the main React package is deprecated. Use the prop-types package from npm instead.")) return;
+
     error_orig.apply(this, arguments);
 
     //LogSourceStackTraceFrom(new Error());

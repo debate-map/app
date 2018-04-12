@@ -182,10 +182,10 @@ export function MainReducer(state, action) {
 			/*if (action.Is(ACTSetPage) && action.payload == "global" && state[globalMapID] == null) {
 				state = {...state, [globalMapID]: new MapInfo()};
 			}*/
-			if (state[demoMap._id] == null) newState[demoMap._id] = new MapInfo();
-			if (state[globalMapID] == null) newState[globalMapID] = new MapInfo();
+			if (state[demoMap._id] == null) newState[demoMap._id] = new MapInfo().Strip();
+			if (state[globalMapID] == null) newState[globalMapID] = new MapInfo().Strip();
 			if ((action.Is(ACTPersonalMapSelect) || action.Is(ACTDebateMapSelect)) && newState[action.payload.id] == null) {
-				newState[action.payload.id] = new MapInfo();
+				newState[action.payload.id] = new MapInfo().Strip();
 			}
 
 			for (let key in newState) {

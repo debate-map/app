@@ -1,5 +1,4 @@
 import React from 'react';
-import { PropTypes } from "react";
 import {BaseComponent, ApplyBasicStyles} from "react-vextensions";
 import Radium from "radium";
 import {replace, push} from "redux-little-router";
@@ -9,6 +8,7 @@ import { GetNewURL } from "../URL/URLManager";
 import {State_overrides} from "../../UI/@Shared/StateOverrides";
 import {GetCurrentURL} from "../General/URLs";
 import {VURL} from "js-vextensions";
+import { StandardCompProps } from "Frame/UI/General";
 
 /*@Radium
 export default class Link extends BaseComponent<{to, target?: string, replace?: boolean, style?, onClick?}, {}> {
@@ -87,7 +87,7 @@ export default class Link extends BaseComponent<Props, {}> {
 		}
 
 		return (
-			<a {...rest} onClick={this.handleClick} href={to} target={target}>
+			<a {...rest.Excluding(...StandardCompProps())} onClick={this.handleClick} href={to} target={target}>
 				{text}
 				{children}
 			</a>

@@ -1,6 +1,6 @@
 import {styles, colors} from "../../Frame/UI/GlobalStyles";
 import {Dispatch} from "redux";
-import {Component, PropTypes} from "react";
+import {Component} from "react";
 import GoogleButton from "react-google-button";
 import {connect} from "react-redux";
 import {firebaseConnect, helpers} from "react-redux-firebase";
@@ -52,7 +52,7 @@ let connector = (state, {}: {})=> ({
 });
 @Connect(connector)
 export class NavBar extends BaseComponentWithConnector(connector, {}) {
-	static contextTypes = {store: PropTypes.object.isRequired};
+	static contextTypes = {store: ()=>null}; //PropTypes.object.isRequired};
 	render() {
 		let {topLeftOpenPanel, topRightOpenPanel, auth, dbNeedsInit} = this.props;
 		let {dispatch} = this.context.store;

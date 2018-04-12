@@ -18,8 +18,8 @@ debug("Creating configuration.");
 const webpackConfig = {
 	name: "client",
 	mode: "development",
-	//optimization: {namedModules: false}, // we have path-info anyway (and causes problems when inconsistent between bundles)
-	optimization: {namedModules: true},
+	optimization: {namedModules: false}, // we have path-info anyway (and causes problems when inconsistent between bundles)
+	//optimization: {namedModules: true},
 	target: "web",
 	devtool: config.compiler_devtool,
 	resolve: {

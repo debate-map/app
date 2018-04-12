@@ -4,7 +4,7 @@ import {connect} from "react-redux";
 import {DBPath, GetData, SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import {Debugger, QuickIncrement, E, GetTimeSinceLoad} from "../../../../Frame/General/Others";
 import {Button, Div} from "react-vcomponents";
-import {PropTypes, Component} from "react";
+import {Component} from "react";
 import Action from "../../../../Frame/General/Action";
 import {Log} from "../../../../Frame/General/Logging";
 import {WaitXThenRun, Timer} from "js-vextensions";
