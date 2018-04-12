@@ -48,6 +48,7 @@ console.error = function(exception) {
 
 @Global
 export class LogTypes {
+	actions = false;
 	nodeRenders = false;
 	nodeRenders_for = null as number;
 	nodeRenderDetails = false;

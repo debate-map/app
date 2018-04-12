@@ -64,59 +64,6 @@ export default function(initialState = {}, history) {
 		},
 	];
 
-	// Store Enhancers
-	// ==========
-	const extraEnhancers = [];
-	//if (devEnv) {
-	const devToolsExtension = g.devToolsExtension;
-	if (typeof devToolsExtension === "function") {
-		//enhancers.push(devToolsExtension());
-		//extraEnhancers.push(devToolsExtension({maxAge: 100}));
-		extraEnhancers.push(devToolsExtension({
-			maxAge: 70,
-			/*actionSanitizer: action=> {
-				function Sanitize(action) {
-					if (action.type == "@@reactReduxFirebase/SET" && action.path.startsWith(DBPath("nodes"))) {
-						return {...action, data: "<<IGNORED>>"};
-					}
-					return action;
-				}
-
-				if (action.type == "ApplyActionSet") {
-					return {...action, actions: action.actions.map(a=>Sanitize(a))};
-				}
-				return Sanitize(action);
-			},
-			stateSanitizer: action=> {
-				function Sanitize(action) {
-					if (action.type == "@@reactReduxFirebase/SET" && action.path.startsWith(DBPath("nodes"))) {
-						return {...action, data: "<<IGNORED>>"};
-					}
-					return action;
-				}
-
-				if (action.type == "ApplyActionSet") {
-					return {...action, actions: action.actions.map(a=>Sanitize(a))};
-				}
-				return Sanitize(action);
-			},*/
-			/*serialize: {
-				replacer: (key, value)=> {
-					// ignore "nodes" subtree
-					if (value && value.currentRevision) return "<<IGNORED>>";
-					//if (value && value.currentRevision) return {data: "<<IGNORED>>"};
-					return value;
-				},
-				reviver: (key, value)=> {
-					// ignore "nodes" subtree
-					if (value && value.currentRevision) return "<<IGNORED>>";
-					return value;
-				},
-			},*/
-		}));
-	}
-	//}
-
 	// Store Instantiation and HMR Setup
 	// ==========
 
@@ -132,22 +79,22 @@ export default function(initialState = {}, history) {
 		router: routerReducer,
 	};
 	let rootReducer = MakeRootReducer(extraReducers);
-	rootReducer = persistReducer({storage, key: "root"}, rootReducer);
+	rootReducer = persistReducer({storage, key: "root", whitelist: ["main"]}, rootReducer);
 
 	const store = createStore(
 		rootReducer,
 		initialState,
 		// Note: Compose applies functions from right to left: compose(f, g, h) = (...args)=>f(g(h(...args))).
 		// You can think of the earlier ones as "wrapping" and being able to "monitor" the ones after it, but (usually) telling them "you apply first, then I will".
-		compose(
+		compose(...[
 			//autoRehydrate({log: true}),
 			routerEnhancer,
 			applyMiddleware(...middleware),
 			reduxFirebase(firebaseConfig, reduxFirebaseConfig),
 			batchedSubscribe(unstable_batchedUpdates),
 			applyMiddleware(...lateMiddleware), // place late-middleware after reduxFirebase, so it can intercept all its dispatched events
-			...extraEnhancers,
-		) as StoreEnhancer<any>
+			g.devToolsExtension && g.devToolsExtension({maxAge: 70}),
+		].filter(a=>a)) as StoreEnhancer<any>
 	) as Store<RootState>; //& {extraReducers};
 
 	function Dispatch_WithStack(action) {

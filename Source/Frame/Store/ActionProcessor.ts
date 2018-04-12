@@ -40,6 +40,8 @@ let lastPath = "";
 //export function ProcessAction(action: Action<any>, newState: RootState, oldState: RootState) {
 // only use this if you actually need to change the action-data before it gets dispatched/applied (otherwise use [Mid/Post]DispatchAction)
 export function PreDispatchAction(action: Action<any>) {
+	MaybeLog(a=>a.actions, ()=>`Dispatching: ${action.type} JSON:${ToJSON(action)}`);
+
 	if (action.type == "@@reactReduxFirebase/SET") {
 		if (action["data"]) {
 			action["data"] = ProcessDBData(action["data"], true, true, SplitStringBySlash_Cached(action["path"]).Last());

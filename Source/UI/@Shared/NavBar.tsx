@@ -52,10 +52,8 @@ let connector = (state, {}: {})=> ({
 });
 @Connect(connector)
 export class NavBar extends BaseComponentWithConnector(connector, {}) {
-	static contextTypes = {store: ()=>null}; //PropTypes.object.isRequired};
 	render() {
 		let {topLeftOpenPanel, topRightOpenPanel, auth, dbNeedsInit} = this.props;
-		let {dispatch} = this.context.store;
 		return (
 			<nav style={{
 				position: "relative", zIndex: 11, padding: "0 10px", boxShadow: colors.navBarBoxShadow,

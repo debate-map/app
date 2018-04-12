@@ -20,8 +20,8 @@ type Props = {} & Partial<{newURL: string, lastURL: string, pushURL: boolean}>;
 	return result;
 })
 export default class AddressBarWrapper extends BaseComponent<Props, {}> {
-	render() {
-		let {newURL, lastURL, pushURL} = this.props;
+	ComponentWillMountOrReceiveProps(props) {
+		let {newURL, lastURL, pushURL} = props;
 		
 		if (lastURL) {
 			var action = pushURL ? push(newURL) : replace(newURL);
@@ -32,11 +32,13 @@ export default class AddressBarWrapper extends BaseComponent<Props, {}> {
 			var action = replace(startURL);
 			MaybeLog(a=>a.urlLoads, ()=>`Dispatching start-url: ${GetCurrentURL(true)} @type:${action.type}`);
 		}
-		
+
 		//action.byUser = false;
 		//g.justChangedURLFromCode = true;
 		action.payload.byCode = true;
 		store.dispatch(action);
+	}
+	render() {
 		return <div/>;
 	}
 }
