@@ -17,6 +17,9 @@ let root = path.join(__dirname, "..", "..");
 debug("Creating configuration.");
 const webpackConfig = {
 	name: "client",
+	mode: "development",
+	//optimization: {namedModules: false}, // we have path-info anyway (and causes problems when inconsistent between bundles)
+	optimization: {namedModules: true},
 	target: "web",
 	devtool: config.compiler_devtool,
 	resolve: {
@@ -113,7 +116,7 @@ webpackConfig.plugins = [
 	}),
 	function() {
 		this.plugin("compilation", function(compilation) {
-			compilation.plugin("html-webpack-plugin-after-html-processing", function(htmlPluginData, callback) {
+			compilation.plugin("html-webpack-plugin-after-html-processing", function(htmlPluginData) {
 				// this couldn't find the "manifest.json" asset
 				/*var chunk0_filename = compilation.assets["manifest.json"][0];
 				var hash = chunk0_filename.match(/?(.+)$/)[1];*/
@@ -124,7 +127,8 @@ webpackConfig.plugins = [
 				// this gets the build's hash like we want
 				var hash = htmlPluginData.html.match(/\.js\?([0-9a-f]+)["']/)[1];
 				htmlPluginData.html = htmlPluginData.html.replace("/dll.vendor.js?[hash]", "/dll.vendor.js?" + hash);
-				callback(null, htmlPluginData);
+				//callback(null, htmlPluginData);
+				return htmlPluginData;
 			});
 		});
 	},
@@ -139,11 +143,12 @@ webpackConfig.plugins = [
 		loaders: ["babel"],
 	}),*/
 
-	new webpack.DllReferencePlugin({
+	// temp removed
+	/*new webpack.DllReferencePlugin({
 		context: path.join(root, "Source"),
 		//context: paths.base(),
 		manifest: require("../Config/dll/vendor-manifest.json")
-	}),
+	}),*/
 
 	/*new BundleAnalyzerPlugin({
 		// Can be `server`, `static` or `disabled`.
@@ -180,6 +185,7 @@ if (__DEV__) {
 	webpackConfig.plugins.push(
 		new webpack.HotModuleReplacementPlugin(),
 		new webpack.NoEmitOnErrorsPlugin()
+		//new webpack.NamedModulesPlugin()
 	);
 } else if (__PROD__ && !QUICK) {
 	debug("Enable plugins for production (OccurenceOrder, Dedupe & UglifyJS).")
@@ -201,14 +207,15 @@ if (__DEV__) {
 	)
 }
 
-// Don't split bundles during testing, since we only want import one bundle
+// Don't split bundles during testing, since we only want to import one bundle
 if (!__TEST__) {
-	webpackConfig.plugins.push(
+	/*webpackConfig.plugins.push(
 		// maybe temp; the only reason we keep this for now, is because it makes the webpackJsonp function available (used in webpack-runtime-require)
 		new webpack.optimize.CommonsChunkPlugin({
 			names: ["vendor"]
 		})
-	)
+	)*/
+	//config.optimization.splitChunks = true;
 }
 
 // Loaders
@@ -226,7 +233,10 @@ webpackConfig.module.rules = [
 	},
 	{
 		test: /\.json$/,
-		loader: "json-loader"
+		loader: "json-loader",
+		include: [
+			"./node_modules/ajv/lib/refs",
+		]
 	},
 ];
 if (USE_TSLOADER) {
@@ -324,7 +334,9 @@ webpackConfig.module.rules.filter(loader=>
 
 webpackConfig.plugins.push(
 	//new ExtractTextPlugin("[name].[contenthash].css", {allChunks: true}),
-	new ExtractTextPlugin({filename: "[name].css?[contenthash]", allChunks: true})
+	//new ExtractTextPlugin({filename: "[name].css?[contenthash]", allChunks: true})
+	new ExtractTextPlugin({filename: "[name].css?[md5:contenthash:hex:20]", allChunks: true}) // replace with mini-css-extract-plugin once it supports HMR
+	//new ExtractTextPlugin({filename: "[name].css", allChunks: true})
 );
 
 const SpriteLoaderPlugin = require("svg-sprite-loader/plugin");

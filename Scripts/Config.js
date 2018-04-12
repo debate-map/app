@@ -40,7 +40,7 @@ Object.assign(config, {
 	// ----------
 	// remember that if you change the compiler settings, you'll need to clear the happypack cache
 	compiler_babel: {
-		cacheDirectory: true,
+		//cacheDirectory: true,
 		presets: [
 			//"babel-preset-es2015",
 			"babel-preset-react",

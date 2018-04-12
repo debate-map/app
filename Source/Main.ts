@@ -23,6 +23,9 @@ import {VURL} from "js-vextensions";
 import Raven from "raven-js";
 //import Promise from "bluebird";
 
+/*declare var __webpack_require__;
+g.webpackData = __webpack_require__;*/
+
 // startup (non-hot)
 // ==========
 
