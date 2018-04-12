@@ -73,6 +73,7 @@ export class MainState {
 	copiedNodePath_asCut: boolean;
 
 	initialChildLimit: number;
+	showReasonScoreValues: boolean;
 	weighting: WeightingType;
 }
 export class ACTSetPage extends Action<string> {}
@@ -216,10 +217,8 @@ export function MainReducer(state, action) {
 			if (action.Is(ACTNodeCopy)) return action.payload.asCut;
 			return state;
 		},
-		initialChildLimit: (state = 5, action)=> {
-			if (action.Is(ACTSetInitialChildLimit)) return action.payload.value;
-			return state;
-		},
+		initialChildLimit: SimpleReducer(a=>a.main.initialChildLimit, 5),
+		showReasonScoreValues: SimpleReducer(a=>a.main.showReasonScoreValues, false),
 		weighting: SimpleReducer(a=>a.main.weighting, WeightingType.Votes),
 	});
 	return MainReducer_Real(state, action);

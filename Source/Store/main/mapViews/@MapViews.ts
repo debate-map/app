@@ -10,7 +10,7 @@ export class MapView {
 	rootNodeViews = {} as {[key: number]: MapNodeView};
 
 	// if bot
-	rootNodeID?: number;
+	bot_currentNodeID?: number;
 }
 export class MapNodeView {
 	//constructor(childLimit?: number) {

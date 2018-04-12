@@ -236,9 +236,9 @@ export function GetSyncLoadActionsForURL(url: VURL, directURLChange: boolean) {
 			if (isBot) {
 				if (crawlerURLMatch) {
 					let nodeID = parseInt(crawlerURLMatch[1]);
-					result.push(new ACTSet(`main/mapViews/${1}/rootNodeID`, nodeID));
+					result.push(new ACTSet(`main/mapViews/${1}/bot_currentNodeID`, nodeID));
 				} else if (directURLChange) {
-					result.push(new ACTSet(`main/mapViews/${1}/rootNodeID`, null));
+					result.push(new ACTSet(`main/mapViews/${1}/bot_currentNodeID`, null));
 				}
 			}
 		}

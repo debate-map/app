@@ -159,10 +159,15 @@ export function MakeRootReducer(extraReducers?) {
 		let result = state;
 		for (let action of actions) {
 			try {
+				let oldResult = result;
 				result = innerReducer(result, action) as RootState;
 				//if (action.Is(ACTSet)) {
-				if (action.type.startsWith("ACTSet_")) {
+				/*if (action.type.startsWith("ACTSet_")) {
 					result = u.updateIn(action.payload.path.replace(/\//g, "."), u.constant(action.payload.value), result);
+				}*/
+
+				if (action.type.startsWith("ACTSet_") && result == oldResult) {
+					LogWarning(`An ${action.type} action was dispatched, but did not cause any change to the store contents! Did you forget to add a reducer entry?`);
 				}
 			} catch (ex) {
 				HandleError(ex, true, {action});

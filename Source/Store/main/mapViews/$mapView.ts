@@ -4,8 +4,9 @@ import {MapView} from "./@MapViews";
 import u from "updeep";
 import {DBPath} from "../../../Frame/Database/DatabaseHelpers";
 import {GetFocusedNodePath} from "../mapViews";
-import {ShallowEquals} from "react-vextensions";
+import {ShallowEquals, ShallowChanged} from "react-vextensions";
 import {GetTreeNodesInObjTree} from "js-vextensions";
+import {SimpleReducer} from "Store";
 
 /*export let MapViewReducer = CombineReducers(()=>({rootNodeViews: {}}), {
 	rootNodeViews: RootNodeViewsReducer,
@@ -42,9 +43,12 @@ export function MapViewReducer(state = {rootNodeViews: {}}, action: Action<any>,
 		return newState;
 	}
 
-	let newState = {...state, rootNodeViews: RootNodeViewsReducer(state.rootNodeViews, action, mapID)};
-	if (!ShallowEquals(state, newState))
-		return newState;
+	let newState = {...state,
+		rootNodeViews: RootNodeViewsReducer(state.rootNodeViews, action, mapID),
+		bot_currentNodeID: SimpleReducer(`main/mapViews/${mapID}/bot_currentNodeID`),
+	};
+	if (ShallowChanged(state, newState)) return newState;
+	
 	return state;
 }
 

@@ -123,6 +123,7 @@ let connector = (state, {map, node, path}: Props)=> {
 		rs_weightMultiplier,
 		rs_weight,
 		changeType,
+		showReasonScoreValues: State(a=>a.main.showReasonScoreValues),
 	};
 };
 @Connect(connector)
@@ -134,7 +135,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 		let {map, node, nodeView, path, width, widthOverride,
 			panelPosition, useLocalPanelState, style, form,
 			ratingsRoot, mainRating_average, mainRating_mine, rs_truthScore, rs_baseWeight, rs_weightMultiplier, rs_weight,
-			changeType} = this.props;
+			changeType, showReasonScoreValues} = this.props;
 		let {hovered, hoverPanel, hoverTermID, /*local_selected,*/ local_openPanel} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let backgroundColor = GetNodeColor(node);
@@ -274,6 +275,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 						{panelToShow == "others" && <OthersPanel map={map} node={node} path={path}/>}
 					</div>}
 				{(()=> {
+					if (!showReasonScoreValues) return;
 					let weightingType = State(a=>a.main.weighting);
 					if (weightingType != WeightingType.ReasonScore || node.type == MapNodeType.Category) return;
 					
@@ -287,7 +289,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 						}
 
 						return (
-							<div style={{position: "absolute", top: "100%", width: "100%", zIndex: 100, textAlign: "center", fontSize: 14}}>
+							<div className="clickThrough" style={{position: "absolute", top: "100%", width: "100%", zIndex: 1, textAlign: "center", fontSize: 14}}>
 								Truth score: {ToPercentStr(rs_truthScore)}
 								{combineWithParentArgument && ` Weight: ${rs_baseWeight.RoundTo_Str(.01)}x${rs_weightMultiplier.RoundTo_Str(.01)} = ${rs_weight.RoundTo_Str(.01)}`}
 							</div>

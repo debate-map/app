@@ -133,15 +133,16 @@ export default function(initialState = {}, history) {
 	const store = createStore(
 		MakeRootReducer(extraReducers),
 		initialState,
-		// note: compose applies functions from right to left
+		// Note: Compose applies functions from right to left: compose(f, g, h) = (...args)=>f(g(h(...args))).
+		// You can think of the earlier ones as "wrapping" and being able to "monitor" the ones after it, but (usually) telling them "you apply first, then I will".
 		compose(
+			autoRehydrate({log: true}),
 			routerEnhancer,
 			applyMiddleware(...middleware),
 			reduxFirebase(firebaseConfig, reduxFirebaseConfig),
-			autoRehydrate(),
 			batchedSubscribe(unstable_batchedUpdates),
 			applyMiddleware(...lateMiddleware), // place late-middleware after reduxFirebase, so it can intercept all its dispatched events
-			...extraEnhancers
+			...extraEnhancers,
 		) as StoreEnhancer<any>
 	) as Store<RootState>; //& {extraReducers};
 

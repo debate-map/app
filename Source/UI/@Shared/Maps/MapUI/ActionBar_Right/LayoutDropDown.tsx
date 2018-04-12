@@ -1,6 +1,6 @@
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import {Connect} from "Frame/Database/FirebaseConnect";
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
 import {GetUserID} from "Store/firebase/users";
 import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
 import {DropDown, RowLR, DropDownTrigger, DropDownContent, Pre} from "react-vcomponents";
@@ -25,23 +25,30 @@ import {GetCurrentURL} from "../../../../../Frame/General/URLs";
 import {VURL} from "js-vextensions";
 import {GetNewURL} from "Frame/URL/URLManager";
 import {ACTSetInitialChildLimit} from "../../../../../Store/main";
-import {Spinner} from "react-vcomponents";
+import {Spinner, CheckBox} from "react-vcomponents";
+import {ACTSet} from "../../../../../Store/index";
 
-type Props = {} & Partial<{initialChildLimit: number}>;
-@Connect((state, props)=> ({
+let connector = (state, {}: {})=> ({
 	initialChildLimit: State(a=>a.main.initialChildLimit),
-}))
-export class LayoutDropDown extends BaseComponent<Props, {}> {
+	showReasonScoreValues: State(a=>a.main.showReasonScoreValues)
+});
+@Connect(connector)
+export class LayoutDropDown extends BaseComponentWithConnector(connector, {}) {
 	render() {
-		let {initialChildLimit} = this.props;
-		let splitAt = 120;
+		let {initialChildLimit, showReasonScoreValues} = this.props;
+		let splitAt = 230;
 		return (
 			<DropDown>
 				<DropDownTrigger><Button text="Layout"/></DropDownTrigger>
-				<DropDownContent style={{right: 0, width: 300}}><Column>
+				<DropDownContent style={{right: 0, width: 320}}><Column>
 					<RowLR splitAt={splitAt}>
 						<Pre>Initial child limit: </Pre>
-						<Spinner min={1} value={initialChildLimit} onChange={val=>store.dispatch(new ACTSetInitialChildLimit({value: val}))}/>
+						<Spinner min={1} style={{width: "100%"}}
+							value={initialChildLimit} onChange={val=>store.dispatch(new ACTSetInitialChildLimit({value: val}))}/>
+					</RowLR>
+					<RowLR splitAt={splitAt}>
+						<Pre>Show Reason Score values: </Pre>
+						<CheckBox checked={showReasonScoreValues} onChange={val=>store.dispatch(new ACTSet(a=>a.main.showReasonScoreValues, val))}/>
 					</RowLR>
 				</Column></DropDownContent>
 			</DropDown>

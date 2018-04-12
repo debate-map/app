@@ -53,7 +53,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 						return (
 							<span key={index}>
 								{index > 0 ? ", " : ""}
-								<Link actions={d=>d(new ACTSet(`main/mapViews/${1}/rootNodeID`, parent._id))}>
+								<Link actions={d=>d(new ACTSet(`main/mapViews/${1}/bot_currentNodeID`, parent._id))}>
 									{GetNodeDisplayText(parent)} ({parent._id})
 								</Link>
 							</span>
@@ -65,7 +65,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 						return (
 							<span key={index}>
 								{index > 0 ? ", " : ""}
-								<Link actions={d=>d(new ACTSet(`main/mapViews/${1}/rootNodeID`, child._id))}>
+								<Link actions={d=>d(new ACTSet(`main/mapViews/${1}/bot_currentNodeID`, child._id))}>
 									{GetNodeDisplayText(child)} ({child._id})
 								</Link>
 							</span>

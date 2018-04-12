@@ -90,7 +90,7 @@ let connector = (state: RootState, {map, rootNode}: Props)=> {
 	}
 
 	if (map) {
-		let nodeID = State("main", "mapViews", map._id, "rootNodeID");
+		let nodeID = State("main", "mapViews", map._id, "bot_currentNodeID");
 		if (isBot && nodeID) {
 			rootNode = GetNodeL3(nodeID+"");
 		}

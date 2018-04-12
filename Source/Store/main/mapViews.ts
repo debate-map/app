@@ -95,7 +95,7 @@ export function GetSelectedNodePathNodes(mapViewOrMapID: number | MapView): stri
 	let mapView = IsNumber(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
 	if (mapView == null) return [];
 
-	return CachedTransform("GetSelectedNodePathNodes", [mapView.rootNodeID], {rootNodeViews: mapView.rootNodeViews}, ()=> {
+	return CachedTransform("GetSelectedNodePathNodes", [], {rootNodeViews: mapView.rootNodeViews}, ()=> {
 		let selectedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "selected" && a.Value);
 		if (selectedTreeNode == null) return [];
 
@@ -129,7 +129,7 @@ export function GetFocusedNodePathNodes(mapViewOrMapID: number | MapView): strin
 	let mapView = IsNumber(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
 	if (mapView == null) return [];
 	
-	return CachedTransform("GetFocusedNodePathNodes", [mapView.rootNodeID], {rootNodeViews: mapView.rootNodeViews}, ()=> {
+	return CachedTransform("GetFocusedNodePathNodes", [], {rootNodeViews: mapView.rootNodeViews}, ()=> {
 		let focusedTreeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "focused" && a.Value);
 		if (focusedTreeNode == null) return [];
 
