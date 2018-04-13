@@ -3,7 +3,6 @@ import thunk from "redux-thunk";
 import {reduxFirebase, getFirebase} from "react-redux-firebase";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 import {persistStore, persistReducer} from "redux-persist";
-import storage from "redux-persist/lib/storage"; // defaults to localStorage for web and AsyncStorage for react-native
 import {createFilter, createBlacklistFilter} from "redux-persist-transform-filter";
 import {MakeRootReducer, RootState} from "../../Store/index";
 import watch from "redux-watch";
@@ -78,11 +77,8 @@ export default function(initialState = {}, history) {
 	let extraReducers = {
 		router: routerReducer,
 	};
-	let rootReducer = MakeRootReducer(extraReducers);
-	rootReducer = persistReducer({storage, key: "root", whitelist: ["main"]}, rootReducer);
-
 	const store = createStore(
-		rootReducer,
+		MakeRootReducer(extraReducers),
 		initialState,
 		// Note: Compose applies functions from right to left: compose(f, g, h) = (...args)=>f(g(h(...args))).
 		// You can think of the earlier ones as "wrapping" and being able to "monitor" the ones after it, but (usually) telling them "you apply first, then I will".
@@ -120,7 +116,7 @@ export default function(initialState = {}, history) {
 	//let persister = persistStore(store, {whitelist: ["main"]});
 	// you want to remove some keys before you save
 	//let persister = persistStore(store, null, ()=>g.storeRehydrated = true);
-	let persister = null; //persistStore(store); // temp removed; not working right
+	let persister = persistStore(store);
 	if (startURL.GetQueryVar("clearState")) {
 		Log("Clearing redux-store's state and local-storage...");
 		persister.purge();

@@ -22,6 +22,8 @@ import {FeedbackData, FeedbackReducer} from "firebase-feedback";
 import {OnAccessPath} from "../Frame/Database/FirebaseConnect";
 import { State_Options } from "UI/@Shared/StateOverrides";
 import {State_overrides} from "../UI/@Shared/StateOverrides";
+import {persistStore, persistReducer} from "redux-persist";
+import storage from "redux-persist/lib/storage"; // defaults to localStorage for web and AsyncStorage for react-native
 
 // State() actually also returns the root-state (if no data-getter is supplied), but we don't reveal that in type-info (as its only to be used in console)
 G({State});
@@ -154,7 +156,7 @@ export function MakeRootReducer(extraReducers?) {
 		...extraReducers
 	});
 
-	return (state: RootState, rootAction)=> {
+	let rootReducer = (state: RootState, rootAction)=> {
 		let actions = rootAction.type == "ApplyActionSet" ? rootAction.actions : [rootAction];
 
 		let result = state;
@@ -188,6 +190,10 @@ export function MakeRootReducer(extraReducers?) {
 
 		return result;
 	};
+
+	rootReducer = persistReducer({storage, key: "root", whitelist: ["main"], debug: true}, rootReducer);
+
+	return rootReducer;
 }
 
 /*function RouterReducer(state = {location: null}, action) {

@@ -66,11 +66,11 @@ export class RootUIWrapper extends BaseComponent<{store}, {}> {
 
 		return (
 			<Provider store={store}>
-				{/*<PersistGate loading={null} persistor={persister}>*/}
+				<PersistGate loading={null} persistor={persister}>
 					<RouterProvider store={store}>
 						<RootUI/>
 					</RouterProvider>
-				{/*</PersistGate>*/}
+				</PersistGate>
 			</Provider>
 		);
 	}

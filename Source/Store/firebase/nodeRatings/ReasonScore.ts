@@ -8,7 +8,7 @@ import { Lerp } from "js-vextensions";
 import { ArgumentType } from "Store/firebase/nodes/@MapNodeRevision";
 
 export function RS_CalculateTruthScore(node: MapNodeL3) {
-	Assert(node.type == MapNodeType.Claim, "RS truth-score can only be calculated for a claim.");
+	Assert(node && node.type == MapNodeType.Claim, "RS truth-score can only be calculated for a claim.");
 
 	let childArguments = GetChildArguments(node);
 	if (childArguments == null || childArguments.length == 0) return 1;
@@ -16,7 +16,7 @@ export function RS_CalculateTruthScore(node: MapNodeL3) {
 	let runningAverage;
 	let weightTotalSoFar = 0;
 	for (let argument of childArguments) {
-		let premises = GetNodeChildrenL3(argument).filter(a=>a.type == MapNodeType.Claim);
+		let premises = GetNodeChildrenL3(argument).filter(a=>a && a.type == MapNodeType.Claim);
 		if (premises.length == 0) continue;
 
 		let truthScores = premises.map(premise=>RS_CalculateTruthScore(premise));
@@ -49,7 +49,7 @@ export function RS_CalculateBaseWeight(claim: MapNodeL3) {
 	return weight;
 }
 export function RS_CalculateWeightMultiplier(node: MapNodeL3) {
-	Assert(node.type == MapNodeType.Argument, "RS weight-multiplier can only be calculated for an argument<>claim combo -- which is specified by providing its argument node.");
+	Assert(node && node.type == MapNodeType.Argument, "RS weight-multiplier can only be calculated for an argument<>claim combo -- which is specified by providing its argument node.");
 
 	let childArguments = GetChildArguments(node);
 	if (childArguments == null || childArguments.length == 0) return 1;
@@ -57,7 +57,7 @@ export function RS_CalculateWeightMultiplier(node: MapNodeL3) {
 	let runningMultiplier = 1;
 	let runningDivisor = 1;
 	for (let argument of childArguments) {
-		let premises = GetNodeChildrenL3(argument).filter(a=>a.type == MapNodeType.Claim);
+		let premises = GetNodeChildrenL3(argument).filter(a=>a && a.type == MapNodeType.Claim);
 		if (premises.length == 0) continue;
 
 		let truthScores = premises.map(premise=>RS_CalculateTruthScore(premise));

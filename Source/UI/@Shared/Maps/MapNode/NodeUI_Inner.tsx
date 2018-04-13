@@ -106,7 +106,7 @@ let connector = (state, {map, node, path}: Props)=> {
 	let weightingType = State(a=>a.main.weighting);
 	if (weightingType == WeightingType.ReasonScore && (node.type == MapNodeType.Argument || node.type == MapNodeType.Claim)) {
 		let argument = node.type == MapNodeType.Argument ? node : parent.type == MapNodeType.Argument ? parent : null;
-		let claim = node.type == MapNodeType.Argument ? GetNodeChildrenL3(argument, path)[0] : node;
+		let premises = node.type == MapNodeType.Argument ? GetNodeChildrenL3(argument, path).filter(a=>a && a.type == MapNodeType.Claim) : [node];
 
 		if (node.type == MapNodeType.Claim) {
 			var rs_claimTruthScore = RS_CalculateTruthScore(node);
@@ -114,7 +114,7 @@ let connector = (state, {map, node, path}: Props)=> {
 		}
 		if (argument) { // (node could instead be a claim under category)
 			var rs_argWeightMultiplier = RS_CalculateWeightMultiplier(argument);
-			var rs_argWeight = RS_CalculateWeight(argument, [claim]);
+			var rs_argWeight = RS_CalculateWeight(argument, premises);
 		}
 	}
 
