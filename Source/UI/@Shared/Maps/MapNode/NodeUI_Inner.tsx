@@ -8,7 +8,7 @@ import {VMenu} from "react-vmenu";
 import {ShowMessageBox} from "react-vmessagebox";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {TextInput} from "react-vcomponents";
-import {DN} from "js-vextensions";
+import {DN, GetPercentFromXToY, Lerp} from "js-vextensions";
 import {DataSnapshot} from "firebase";
 import {Button} from "react-vcomponents";
 import {CachedTransform} from "js-vextensions";
@@ -44,7 +44,7 @@ import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import {GetTerm, GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import {Term} from "../../../../Store/firebase/terms/@Term";
 import {ParseSegmentsForPatterns} from "../../../../Frame/General/RegexHelpers";
-import {GetParentNode, IsNodeSubnode} from "../../../../Store/firebase/nodes";
+import {GetParentNode, IsNodeSubnode, GetNodeChildrenL3} from "../../../../Store/firebase/nodes";
 import classNames from "classnames";
 import { GetEquationStepNumber } from "../../../../Store/firebase/nodes/$node/equation";
 import NodeMathUI from "UI/@Shared/Maps/MapNode/NodeMathUI";
@@ -104,12 +104,17 @@ let connector = (state, {map, node, path}: Props)=> {
 	let mainRating_mine = GetRatingAverage_AtPath(ratingNode, mainRatingType, new RatingFilter({includeUser: GetUserID()}));
 
 	let weightingType = State(a=>a.main.weighting);
-	if (weightingType == WeightingType.ReasonScore && node.type == MapNodeType.Claim) {
-		var rs_truthScore = RS_CalculateTruthScore(node);
-		if (combineWithParentArgument) {
-			var rs_baseWeight = RS_CalculateBaseWeight(node);
-			var rs_weightMultiplier = RS_CalculateWeightMultiplier(parent);
-			var rs_weight = RS_CalculateWeight(parent, [node]);
+	if (weightingType == WeightingType.ReasonScore && (node.type == MapNodeType.Argument || node.type == MapNodeType.Claim)) {
+		let argument = node.type == MapNodeType.Argument ? node : parent.type == MapNodeType.Argument ? parent : null;
+		let claim = node.type == MapNodeType.Argument ? GetNodeChildrenL3(argument, path)[0] : node;
+
+		if (node.type == MapNodeType.Claim) {
+			var rs_claimTruthScore = RS_CalculateTruthScore(node);
+			var rs_claimBaseWeight = RS_CalculateBaseWeight(node);
+		}
+		if (argument) { // (node could instead be a claim under category)
+			var rs_argWeightMultiplier = RS_CalculateWeightMultiplier(argument);
+			var rs_argWeight = RS_CalculateWeight(argument, [claim]);
 		}
 	}
 
@@ -118,10 +123,10 @@ let connector = (state, {map, node, path}: Props)=> {
 		ratingsRoot: GetNodeRatingsRoot(node._id),
 		mainRating_average,
 		mainRating_mine,
-		rs_truthScore,
-		rs_baseWeight,
-		rs_weightMultiplier,
-		rs_weight,
+		rs_claimTruthScore,
+		rs_claimBaseWeight,
+		rs_argWeightMultiplier,
+		rs_argWeight,
 		changeType,
 		showReasonScoreValues: State(a=>a.main.showReasonScoreValues),
 	};
@@ -134,7 +139,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 	render() {
 		let {map, node, nodeView, path, width, widthOverride,
 			panelPosition, useLocalPanelState, style, form,
-			ratingsRoot, mainRating_average, mainRating_mine, rs_truthScore, rs_baseWeight, rs_weightMultiplier, rs_weight,
+			ratingsRoot, mainRating_average, mainRating_mine, rs_claimTruthScore, rs_claimBaseWeight, rs_argWeightMultiplier, rs_argWeight,
 			changeType, showReasonScoreValues} = this.props;
 		let {hovered, hoverPanel, hoverTermID, /*local_selected,*/ local_openPanel} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
@@ -148,10 +153,10 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 		let markerPercent = mainRating_mine;
 		if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
 			if (node.type == MapNodeType.Claim) {
-				backgroundFillPercent = rs_truthScore * 100;
+				backgroundFillPercent = rs_claimTruthScore * 100;
 				markerPercent = null;
 			} else if (node.type == MapNodeType.Argument) {
-				backgroundFillPercent = 0;
+				backgroundFillPercent = Lerp(0, 100, GetPercentFromXToY(0, 2, rs_argWeightMultiplier));
 				markerPercent = null;
 			}
 		}
@@ -290,8 +295,9 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 
 						return (
 							<div className="clickThrough" style={{position: "absolute", top: "100%", width: "100%", zIndex: 1, textAlign: "center", fontSize: 14}}>
-								Truth score: {ToPercentStr(rs_truthScore)}
-								{combineWithParentArgument && ` Weight: ${rs_baseWeight.RoundTo_Str(.01)}x${rs_weightMultiplier.RoundTo_Str(.01)} = ${rs_weight.RoundTo_Str(.01)}`}
+								Truth score: {ToPercentStr(rs_claimTruthScore)}
+								{combineWithParentArgument && ` Weight: ${rs_claimBaseWeight.RoundTo_Str(.01)}x${rs_argWeightMultiplier.RoundTo_Str(.01)
+									} = ${rs_argWeight.RoundTo_Str(.01)}`}
 							</div>
 						);
 					}

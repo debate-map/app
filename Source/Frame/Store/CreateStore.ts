@@ -120,7 +120,7 @@ export default function(initialState = {}, history) {
 	//let persister = persistStore(store, {whitelist: ["main"]});
 	// you want to remove some keys before you save
 	//let persister = persistStore(store, null, ()=>g.storeRehydrated = true);
-	let persister = persistStore(store);
+	let persister = null; //persistStore(store); // temp removed; not working right
 	if (startURL.GetQueryVar("clearState")) {
 		Log("Clearing redux-store's state and local-storage...");
 		persister.purge();

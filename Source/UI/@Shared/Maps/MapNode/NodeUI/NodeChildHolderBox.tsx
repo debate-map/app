@@ -7,7 +7,7 @@ import { NodeUI } from "UI/@Shared/Maps/MapNode/NodeUI";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import { MapNodeView } from "Store/main/mapViews/@MapViews";
 import { MapNodeType } from "Store/firebase/nodes/@MapNodeType";
-import {Vector2i} from "js-vextensions";
+import {Vector2i, GetPercentFromXToY, Lerp} from "js-vextensions";
 import {Polarity, MapNode} from "../../../../../Store/firebase/nodes/@MapNode";
 import chroma from "chroma-js";
 import {ChildLimitBar, NodeChildHolder} from "./NodeChildHolder";
@@ -15,15 +15,16 @@ import { emptyArray_forLoading } from "Frame/Store/ReducerUtils";
 import {GetNodeColor} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import { GetRatingTypeInfo, RatingType } from "Store/firebase/nodeRatings/@RatingType";
 import { SlicePath } from "Frame/Database/DatabaseHelpers";
-import { GetParentNodeL3 } from "Store/firebase/nodes";
+import { GetParentNodeL3, GetNodeChildrenL3 } from "Store/firebase/nodes";
 import { GetRatings } from "Store/firebase/nodeRatings";
-import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage} from "../../../../../Store/firebase/nodeRatings";
+import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage, RatingFilter, GetRatingAverage_AtPath} from "../../../../../Store/firebase/nodeRatings";
 import { IsSinglePremiseArgument } from "Store/firebase/nodes/$node";
 import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
 import {Squiggle} from "../NodeConnectorBackground";
 import { ACTMapNodeExpandedSet } from "Store/main/mapViews/$mapView/rootNodeViews";
 import { WeightingType } from "Store/main";
 import { RS_CalculateTruthScore, RS_CalculateBaseWeight, RS_CalculateWeightMultiplier, RS_CalculateWeight } from "Store/firebase/nodeRatings/ReasonScore";
+import { GetUserID } from "Store/firebase/users";
 
 export enum HolderType {
 	Truth,
@@ -34,9 +35,45 @@ type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
 	type: HolderType, widthOverride?: number, onHeightOrDividePointChange?: (dividePoint: number)=>void,
 };
-let connector = (state, {node, nodeChildren}: Props)=> {
+let connector = (state, {node, path, type, nodeChildren}: Props)=> {
+	//let mainRating_fillPercent = 100;
+	let parent = GetParentNodeL3(path);
+	let combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
+	//let ratingReversed = ShouldRatingTypeBeReversed(node);
+
+	var ratingType = {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[type] as RatingType;
+	let ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parent, path);
+
+	let ratings = GetRatings(node._id, ratingType);
+	let mainRating_average = GetRatingAverage(node._id, ratingType, null, -1);
+	if (mainRating_average != -1) {
+		mainRating_average = TransformRatingForContext(mainRating_average, ShouldRatingTypeBeReversed(node, ratingType));
+	}
+	let mainRating_mine = GetRatingAverage_AtPath(node, ratingType, new RatingFilter({includeUser: GetUserID()}));
+	//let mainRating_fillPercent = average;
+
+	let weightingType = State(a=>a.main.weighting);
+	if (weightingType == WeightingType.ReasonScore) {
+		let argument = node.type == MapNodeType.Argument ? node : parent;
+		let claim = node.type == MapNodeType.Argument ? GetNodeChildrenL3(argument, path)[0] : node;
+
+		if (node.type == MapNodeType.Claim) {
+			var rs_claimTruthScore = RS_CalculateTruthScore(node);
+			var rs_claimBaseWeight = RS_CalculateBaseWeight(node);
+		}
+		var rs_argWeightMultiplier = RS_CalculateWeightMultiplier(argument);
+		var rs_argWeight = RS_CalculateWeight(argument, [claim]);
+	}
+
 	return {
 		combineWithChildClaim: IsSinglePremiseArgument(node),
+		mainRating_average,
+		mainRating_mine,
+		rs_claimTruthScore,
+		rs_claimBaseWeight,
+		rs_argWeightMultiplier,
+		rs_argWeight,
+		weightingType,
 	};
 };
 @Connect(connector)
@@ -47,7 +84,8 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 	}
 	lineHolder: HTMLDivElement;
 	render() {
-		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, widthOverride, combineWithChildClaim} = this.props;
+		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, widthOverride, combineWithChildClaim,
+			mainRating_average, mainRating_mine, rs_claimTruthScore, rs_argWeightMultiplier} = this.props;
 		let {innerBoxOffset, lineHolderHeight} = this.state;
 
 		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildren);
@@ -57,36 +95,23 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		}
 		let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
 
+		let backgroundFillPercent = mainRating_average || 0;
+		let markerPercent = mainRating_mine;
+		if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
+			if (node.type == MapNodeType.Claim) {
+				backgroundFillPercent = rs_claimTruthScore * 100;
+				markerPercent = null;
+			} else if (node.type == MapNodeType.Argument) {
+				backgroundFillPercent = Lerp(0, 100, GetPercentFromXToY(0, 2, rs_argWeightMultiplier));
+				markerPercent = null;
+			}
+		}
+
 		//let lineColor = GetNodeColor(node, "raw");
 		let lineColor = GetNodeColor({type: MapNodeType.Category} as any as MapNodeL3, "raw");
 		let lineOffset = 50..KeepAtMost(innerBoxOffset);
 		//let expandKey = type == HolderType.Truth ? "expanded_truth" : "expanded_relevance";
 		let expandKey = `expanded_${HolderType[type].toLowerCase()}`;
-
-		//let mainRating_fillPercent = 100;
-		let parentNode = GetParentNodeL3(path);
-		let combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parentNode);
-		//let ratingReversed = ShouldRatingTypeBeReversed(node);
-
-		var ratingType = {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[type] as RatingType;
-		let ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
-
-		let ratings = GetRatings(node._id, ratingType);
-		let mainRating_average = GetRatingAverage(node._id, ratingType, null, -1);
-		if (mainRating_average != -1) {
-			mainRating_average = TransformRatingForContext(mainRating_average, ShouldRatingTypeBeReversed(node, ratingType));
-		}
-		//let mainRating_fillPercent = average;
-
-		let weightingType = State(a=>a.main.weighting);
-		if (weightingType == WeightingType.ReasonScore && node.type == MapNodeType.Claim) {
-			var rs_truthScore = RS_CalculateTruthScore(node);
-			if (combineWithParentArgument) {
-				var rs_baseWeight = RS_CalculateBaseWeight(node);
-				var rs_weightMultiplier = RS_CalculateWeightMultiplier(parentNode);
-				var rs_weight = RS_CalculateWeight(parentNode, [node]);
-			}
-		}
 
 		let separateChildren = node.type == MapNodeType.Claim || combineWithChildClaim;
 		let showArgumentsControlBar = (node.type == MapNodeType.Claim || combineWithChildClaim) && nodeView[expandKey] && nodeChildrenToShow != emptyArray_forLoading;
@@ -129,17 +154,17 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 						<div style={{position: "relative", width: "calc(100% - 17px)", padding: "3px 5px 2px"}}>
 							<div style={{
 								position: "absolute", left: 0, top: 0, bottom: 0,
-								width: mainRating_average + "%", background: backgroundColor.css(), borderRadius: "5px 0 0 5px",
+								width: backgroundFillPercent + "%", background: backgroundColor.css(), borderRadius: "5px 0 0 5px",
 							}}/>
 							<div style={{
 								position: "absolute", right: 0, top: 0, bottom: 0,
-								width: (100 - mainRating_average) + "%", background: `rgba(0,0,0,.7)`, borderRadius: mainRating_average <= 0 ? "5px 0 0 5px" : 0,
+								width: (100 - backgroundFillPercent) + "%", background: `rgba(0,0,0,.7)`, borderRadius: backgroundFillPercent <= 0 ? "5px 0 0 5px" : 0,
 							}}/>
-							{/*mainRating_mine != null &&
+							{markerPercent != null &&
 								<div style={{
-									position: "absolute", left: mainRating_myFillPercent + "%", top: 0, bottom: 0,
+									position: "absolute", left: markerPercent + "%", top: 0, bottom: 0,
 									width: 2, background: "rgba(0,255,0,.5)",
-								}}/>*/}
+								}}/>}
 							<span style={{position: "relative", fontSize: 13}}>{text}</span>
 						</div>
 						<Button text={nodeView[expandKey] ? "-" : "+"} //size={28}

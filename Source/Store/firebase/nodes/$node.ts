@@ -97,6 +97,7 @@ export function IsNodeL2(node: MapNode): node is MapNodeL2 {
 	return node["current"];
 }
 export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision) {
+	Assert(currentRevision.titles, "A MapNodeRevision object must have a titles property!");
 	let result = node.Extended({current: currentRevision}) as MapNodeL2;
 	delete result["finalPolarity"];
 	delete result["link"];
