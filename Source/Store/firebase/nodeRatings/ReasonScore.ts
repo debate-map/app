@@ -73,6 +73,7 @@ export function RS_CalculateWeightMultiplier(node: MapNodeL3) {
 	return runningMultiplier / runningDivisor;
 }
 export function RS_CalculateWeight(argument: MapNodeL3, premises: MapNodeL3[]) {
+	if (premises.length == 0) return 0;
 	let baseWeightsProduct = premises.map(premise=>RS_CalculateBaseWeight(premise)).reduce((prev, cur)=>prev * cur);
 	let weightMultiplier = RS_CalculateWeightMultiplier(argument);
 	return baseWeightsProduct * weightMultiplier;

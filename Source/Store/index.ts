@@ -178,7 +178,8 @@ export function MakeRootReducer(extraReducers?) {
 		}
 
 		// make-so certain paths are ignored in redux-devtools-extension's Chart panel
-		let ignorePaths = [
+		// temp removed; caused issues with new redux-persist
+		/*let ignorePaths = [
 			`firebase/data/${DBPath("nodes")}`,
 			`firebase/data/${DBPath("nodeRevisions")}`,
 		];
@@ -186,7 +187,7 @@ export function MakeRootReducer(extraReducers?) {
 			if (DeepGet(result, path) != null && DeepGet(state, path) == null) {
 				DeepSet(result, path + "/toJSON", ()=>"[IGNORED]");
 			}
-		}
+		}*/
 
 		return result;
 	};
