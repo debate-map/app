@@ -31,7 +31,7 @@ export class ACTMap_PlayingTimelineAppliedStepSet extends Action<{mapID: number,
 	return state;
 }*/
 
-export const MapInfoReducer = CombineReducers({
+export const MapInfoReducer = mapID=>CombineReducers({
 	list_sortBy: (state = SortType.CreationDate, action)=> {
 		if (action.Is(ACTMapNodeListSortBySet)) return action.payload.sortBy;
 		return state;
@@ -70,8 +70,8 @@ export const MapInfoReducer = CombineReducers({
 		return state;
 	},
 
-	showChangesSince_type: SimpleReducer(`main.maps.$any.showChangesSince_type`, ShowChangesSinceType.SinceVisitX),
-	showChangesSince_visitOffset: SimpleReducer(`main.maps.$any.showChangesSince_visitOffset`, 1),
+	showChangesSince_type: SimpleReducer(`main/maps/${mapID}/showChangesSince_type`, ShowChangesSinceType.SinceVisitX),
+	showChangesSince_visitOffset: SimpleReducer(`main/maps/${mapID}/showChangesSince_visitOffset`, 1),
 });
 
 export function GetSelectedNodeID_InList(mapID: number) {
