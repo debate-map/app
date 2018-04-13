@@ -7,10 +7,11 @@ let QUICK = process.env.QUICK;
 let root = path.join(__dirname, "..", "..");
 
 module.exports = {
+	//name: "vendor_package",
 	mode: "development",
+	//mode: "production", // needed so that main bundle knows to reference vendor-bundle modules using id instead of path
 	optimization: {namedModules: false},
 	//optimization: {namedModules: true},
-	//mode: "production", // needed so that main bundle knows to reference vendor-bundle modules using id instead of path
 	entry: {
 		vendor: [path.join(__dirname, "Vendors.js")]
 	},
@@ -27,7 +28,8 @@ module.exports = {
 		new webpack.DllPlugin({
 			path: path.join(__dirname, "dll", "[name]-manifest.json"),
 			name: "[name]",
-			context: path.resolve(root, "Source")
+			context: path.resolve(root, "Source"),
+			//context: root,
 		}),
 		//new webpack.optimize.OccurenceOrderPlugin(),
 		//new webpack.optimize.DedupePlugin(),

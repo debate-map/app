@@ -18,8 +18,9 @@ debug("Creating configuration.");
 const webpackConfig = {
 	name: "client",
 	mode: "development",
-	optimization: {namedModules: false}, // we have path-info anyway (and causes problems when inconsistent between bundles)
-	//optimization: {namedModules: true},
+	//mode: "production",
+	optimization: {namedModules: false},
+	//optimization: {namedModules: true}, // we have path-info anyway (and causes problems when inconsistent between bundles)
 	target: "web",
 	devtool: config.compiler_devtool,
 	resolve: {
@@ -143,11 +144,12 @@ webpackConfig.plugins = [
 		loaders: ["babel"],
 	}),*/
 
-	// temp removed
 	/*new webpack.DllReferencePlugin({
 		context: path.join(root, "Source"),
 		//context: paths.base(),
-		manifest: require("../Config/dll/vendor-manifest.json")
+		//context: root,
+		//manifest: require("../Config/dll/vendor-manifest.json")
+		manifest: "Scripts/Config/dll/vendor-manifest.json",
 	}),*/
 
 	/*new BundleAnalyzerPlugin({
