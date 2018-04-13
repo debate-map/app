@@ -138,9 +138,21 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 		nodeView.openPanel = GetDataStrForProp(ownStr, "p");
 	}
 
-	if (ownStr_withoutParentheses.Contains("e"))
+	let fullyExpanded = ownStr_withoutParentheses.Contains("e") || (childrenStr && childrenStr.length);
+
+	if (fullyExpanded) {
 		nodeView.expanded = true;
-	else if (childrenStr && childrenStr.length) {
+		nodeView.expanded_truth = true;
+		nodeView.expanded_relevance = true;
+	} else if (ownStr_withoutParentheses.Contains("t")) {
+		nodeView.expanded = true;
+		nodeView.expanded_truth = true;
+	} else if (ownStr_withoutParentheses.Contains("r")) {
+		nodeView.expanded = true;
+		nodeView.expanded_relevance = true;
+	}
+
+	if (childrenStr && childrenStr.length) {
 		nodeView.expanded = true;
 
 		let childStrings = [];
@@ -440,7 +452,7 @@ function GetMapViewStr(mapID: number) {
 	//rootNodeViewStr += "_"; // add "_", so that Facebook doesn't cut off end special-chars
 	return rootNodeViewStr;
 }
-function GetNodeViewStr(mapID: number, path: string) {
+export function GetNodeViewStr(mapID: number, path: string) {
 	let nodeView = GetNodeView(mapID, path);
 	if (nodeView == null) return "";
 
@@ -489,10 +501,22 @@ function GetNodeViewStr(mapID: number, path: string) {
 
 	let result = ownStr;
 	if (nodeView.expanded) {
-		if (childrenStr.length)
+		let prefix = "";
+		if (nodeView.expanded_truth && !nodeView.expanded_relevance) {
+			prefix = "t";
+		} else if (nodeView.expanded_relevance && !nodeView.expanded_truth) {
+			prefix = "r";
+		} else {
+			// only include e if children-str is empty (if has child-str, then e is implied/not-needed)
+			if (childrenStr.length == 0) {
+				prefix = "e";
+			}
+		}
+
+		result += prefix;
+		if (childrenStr.length) {
 			result += `:${childrenStr}.`;
-		else
-			result += "e";
+		}
 	}
 	return result;
 }

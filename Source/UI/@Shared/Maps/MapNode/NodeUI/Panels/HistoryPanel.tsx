@@ -72,7 +72,7 @@ export class HistoryPanel extends BaseComponentWithConnector(connector, {}) {
 				</Column>
 				<ScrollView className="selectable" style={{flex: 1}} contentStyle={{flex: 1, position: "relative"}}>
 					{revisions.map((revision, index)=> {
-						return <RevisionEntryUI index={index} last={index == revisions.length - 1} revision={revision} node={node} path={path}/>
+						return <RevisionEntryUI key={revision._id} index={index} last={index == revisions.length - 1} revision={revision} node={node} path={path}/>
 					})}
 				</ScrollView>
 			</Column>

@@ -74,7 +74,7 @@ export default class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> 
 			if (target == null && toURL.domain != GetCurrentURL().domain) {
 				target = "_blank";
 			}
-			return <Link {...rest} to={href} target={target}/>;
+			return <Link {...rest.Excluding("options", "level")} to={href} target={target}/>;
 		});
 		/*if (rendererOptions_final.components.htmlblock == null) rendererOptions_final.components.htmlblock = (props=> {
 			let {content} = props;

@@ -3,9 +3,12 @@ import Action from "../../../../Frame/General/Action";
 import u from "updeep";
 import {RootNodeViews} from "./rootNodeViews/@RootNodeViews";
 import {GetViewOffsetForNodeBox, GetNodeBoxForPath} from "../../../../UI/@Shared/Maps/MapUI";
-import {Vector2i, GetTreeNodesInObjTree} from "js-vextensions";
+import {Vector2i, GetTreeNodesInObjTree, DeepGet} from "js-vextensions";
 import { GetPathNodes, GetNodeViewDataPath } from "../../mapViews";
 import {SplitStringBySlash_Cached} from "../../../../Frame/Database/StringSplitCache";
+import { GetNodeL2 } from "Store/firebase/nodes/$node";
+import {GetNodeChildrenL3} from "Store/firebase/nodes";
+import { MapNodeType } from "Store/firebase/nodes/@MapNodeType";
 
 export class ACTMapNodeSelect extends Action<{mapID: number, path: string}> {}
 export class ACTMapNodePanelOpen extends Action<{mapID: number, path: string, panel: string}> {}
@@ -63,15 +66,19 @@ function GetTargetPath(action: Action<any>) {
 	return action.Is(ACTViewCenterChange) ? action.payload.focusNodePath : action.payload.path;
 }
 
-function MapNodeViewReducer(state = new MapNodeView(), action: Action<any>, pathSoFar: string) {
+function MapNodeViewReducer(state = new MapNodeView(), action: Action<any>, pathSoFar: string, autoExpand = false) {
 	let targetPath = GetTargetPath(action);
 	let atTargetNode = targetPath == pathSoFar;
 	let pastTargetNode = pathSoFar.length > targetPath.length;
 
 	if (!atTargetNode && !pastTargetNode) {
 		let nextNodeIDInPath = SplitStringBySlash_Cached(targetPath.substr(pathSoFar.length + 1))[0];
-		//return u.updateIn(`children.${nextNodeIDInPath}`, MapNodeViewReducer(state.children[nextNodeIDInPath], action, `${pathSoFar}/${nextNodeIDInPath}`), state);
-		return {...state, children: {...state.children, [nextNodeIDInPath]: MapNodeViewReducer(state.children[nextNodeIDInPath], action, `${pathSoFar}/${nextNodeIDInPath}`)}};
+		//return {...state, children: {...state.children, [nextNodeIDInPath]: MapNodeViewReducer(state.children[nextNodeIDInPath], action, `${pathSoFar}/${nextNodeIDInPath}`)}};
+		return u.updateIn(`children.${nextNodeIDInPath}`, MapNodeViewReducer((state.children || {})[nextNodeIDInPath], action, `${pathSoFar}/${nextNodeIDInPath}`), state);
+	}
+
+	if (autoExpand) {
+		state = {...state, expanded: true};
 	}
 
 	if (action.Is(ACTMapNodeSelect)) {
@@ -84,6 +91,20 @@ function MapNodeViewReducer(state = new MapNodeView(), action: Action<any>, path
 		let expandKey = ["expanded", "expanded_truth", "expanded_relevance"].find(key=>action.payload[key] != null);
 		if (atTargetNode) {
 			state = {...state, [expandKey]: action.payload[expandKey]};
+
+			// if we're expanding the current node, and it's a claim, then auto-expand any argument children it has (assuming no expand state set yet)
+			/*let currentNode = GetNodeL2(SplitStringBySlash_Cached(pathSoFar).Last().ToInt());
+			if (action.payload[expandKey] && currentNode && currentNode.type == MapNodeType.Claim) {
+				//for (let child of GetNodeChildrenL3(currentNode)) {
+				state.children = {...state.children};
+				for (let childID of currentNode.children.VKeys(true)) {
+					//if (child && child.type == MapNodeType.Argument && DeepGet(state, `children.${child._id}.expanded`) == null) {
+					if (DeepGet(state, `children.${childID}.expanded`) == null) {
+						//state = u.updateIn(`children.${childID}.expanded`, u.constant(true), state);
+						state.children[childID] = MapNodeViewReducer(state.children[childID], action, `${pathSoFar}/${childID}`, true);
+					}
+				}
+			}*/
 		} else { // if past target-node
 			state = {...state, expanded: false, expanded_truth: false, expanded_relevance: false};
 		}

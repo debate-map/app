@@ -9,6 +9,7 @@ import { SplitStringBySlash_Cached } from "Frame/Database/StringSplitCache";
 import {GetUser, GetUserPermissionGroups} from "../../Store/firebase/users";
 import {GetUserID} from "Store/firebase/users";
 import { activeStoreAccessCollectors } from "Frame/Database/DatabaseHelpers";
+import Action from "../General/Action";
 
 // Place a selector in Connect() whenever it uses data that:
 // 1) might change during the component's lifetime, and:
@@ -134,6 +135,10 @@ let actionTypeBufferInfos = {
 let actionTypeLastDispatchTimes = {};
 let actionTypeBufferedActions = {};
 
+export function CreateActionSet(actions: Action<any>[]): Action<any> {
+	return {type: "ApplyActionSet", actions} as any as Action<any>;
+}
+
 function DispatchDBAction(action) {
 	let timeSinceLastDispatch = Date.now() - (actionTypeLastDispatchTimes[action.type] || 0);
 	let bufferInfo = actionTypeBufferInfos[action.type];
@@ -150,8 +155,7 @@ function DispatchDBAction(action) {
 		if (actionTypeBufferedActions[action.type] == null) {
 			setTimeout(()=> {
 				// now that wait is over, apply any buffered event-triggers
-				let combinedAction = {type: "ApplyActionSet", actions: actionTypeBufferedActions[action.type]} as any;
-				store.dispatch(combinedAction);
+				store.dispatch(CreateActionSet(actionTypeBufferedActions[action.type]));
 
 				actionTypeLastDispatchTimes[action.type] = Date.now();
 				actionTypeBufferedActions[action.type] = null;

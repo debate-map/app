@@ -27,6 +27,10 @@ import {FindReact, FindDOM} from "react-vextensions";
 import {MapUI} from "../../UI/@Shared/Maps/MapUI";
 import {SleepAsync} from "js-vextensions";
 import {GetNodeL2} from "Store/firebase/nodes/$node";
+import { MapNodeType } from "Store/firebase/nodes/@MapNodeType";
+import { GetNodeChildrenL2 } from "Store/firebase/nodes";
+import { GetNodeChildrenL3 } from "Store/firebase/nodes";
+import { CreateActionSet } from "Frame/Database/FirebaseConnect";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -194,6 +198,30 @@ export async function PostDispatchAction(action: Action<any>) {
 				pathsToExpand = newPathsToExpand;
 			}
 		}
+	}
+	if (action.Is(ACTMapNodeExpandedSet) ) {
+		let path = action.payload.path;
+		let nodeID = SplitStringBySlash_Cached(path).Last().ToInt();
+		let node = await GetAsync(()=>GetNodeL2(nodeID));
+		let expandKey = ["expanded", "expanded_truth", "expanded_relevance"].find(key=>action.payload[key] != null);
+		
+		// if we're expanding a claim-node, make sure any untouched truth-arguments start expanded
+		if (node.type == MapNodeType.Claim && action.payload[expandKey]) {
+			let children = await GetAsync(()=>GetNodeChildrenL2(node));
+			let actions = [];
+			for (let child of children) {
+				let childPath = `${action.payload.path}/${child._id}`;
+				let childNodeView = (await GetAsync(()=>GetNodeView(action.payload.mapID, childPath))) || {};
+				if (child && child.type == MapNodeType.Argument && childNodeView.expanded == null) {
+					actions.push(new ACTMapNodeExpandedSet({mapID: action.payload.mapID, path: childPath, expanded: true, recursive: false}));
+				}
+			}
+			store.dispatch(CreateActionSet(actions));
+		}
+		// if we're expanding an argument-node, make sure any untouched relevance-arguments start expanded 
+		/*else if (node.type == MapNodeType.Argument) {
+			
+		}*/
 	}
 
 	/*let movingToGlobals = false;
