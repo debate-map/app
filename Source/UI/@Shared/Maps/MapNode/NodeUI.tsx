@@ -2,7 +2,8 @@ import { ACTMapNodeExpandedSet, ACTMapNodeChildLimitSet } from "../../../../Stor
 import {BaseComponent, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, ShallowEquals, ShallowChanged, BaseComponentWithConnector} from "react-vextensions";
 import {connect} from "react-redux";
 import {DBPath, GetData, SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
-import {Debugger, QuickIncrement, E, GetTimeSinceLoad} from "../../../../Frame/General/Others";
+import {Debugger, GetTimeSinceLoad} from "../../../../Frame/General/Others";
+import {E} from "js-vextensions";
 import {Button, Div} from "react-vcomponents";
 import {Component} from "react";
 import Action from "../../../../Frame/General/Action";

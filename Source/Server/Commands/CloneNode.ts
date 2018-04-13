@@ -3,7 +3,7 @@ import {Assert} from "js-vextensions";
 import {GetDataAsync, GetAsync, GetAsync_Raw, RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
 import { Command, MergeDBUpdates } from "../Command";
 import {MapNode, ClaimForm, ChildEntry, MapNodeL2, Polarity} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "../../Frame/General/Others";
+import {E} from "js-vextensions";
 import {GetNodeForm, GetNodeL2, GetLinkUnderParent, GetLinkAtPath} from "../../Store/firebase/nodes/$node";
 import AddNode from "./AddNode";
 import LinkNode from "./LinkNode";

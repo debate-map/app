@@ -15,7 +15,6 @@ import Icon from "Frame/ReactComponents/Icon";
 import {IsMultiPremiseArgument} from "../../../../../Store/firebase/nodes/$node";
 import {NodeChildHolderBox, HolderType} from "./NodeChildHolderBox";
 import { GetNodeChildrenL3 } from "Store/firebase/nodes";
-import {QuickIncrement} from "../../../../../Frame/General/Others";
 
 /*export class ChildPackUI extends BaseComponent
 		<{

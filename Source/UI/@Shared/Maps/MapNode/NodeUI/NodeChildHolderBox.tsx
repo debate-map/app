@@ -19,7 +19,6 @@ import { GetParentNodeL3 } from "Store/firebase/nodes";
 import { GetRatings } from "Store/firebase/nodeRatings";
 import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage} from "../../../../../Store/firebase/nodeRatings";
 import { IsSinglePremiseArgument } from "Store/firebase/nodes/$node";
-import { QuickIncrement } from "Frame/General/Others";
 import {IsMultiPremiseArgument} from "../../../../../Store/firebase/nodes/$node";
 import {Squiggle} from "../NodeConnectorBackground";
 import { ACTMapNodeExpandedSet } from "Store/main/mapViews/$mapView/rootNodeViews";

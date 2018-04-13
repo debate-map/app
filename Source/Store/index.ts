@@ -7,7 +7,8 @@ import {ACTMessageBoxShow, MessageBoxOptions, MessageBoxReducer, MessageBoxState
 import Action, { IsACTSetFor } from "../Frame/General/Action";
 import {createSelector} from "reselect";
 import {DBPath, GetData} from "../Frame/Database/DatabaseHelpers";
-import {QuickIncrement, Debugger} from "../Frame/General/Others";
+import {Debugger} from "../Frame/General/Others";
+import {E} from "js-vextensions";
 import {Set} from "immutable";
 import {MainState, MainReducer} from "./main";
 import {LocationDescriptorObject} from "history";

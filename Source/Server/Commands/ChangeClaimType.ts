@@ -2,7 +2,7 @@ import {Assert} from "js-vextensions";
 import {GetDataAsync} from "./../../Frame/Database/DatabaseHelpers";
 import {Command} from "./../Command";
 import {MapNode, ClaimForm, ChildEntry, ClaimType, MapNodeL2} from "./../../Store/firebase/nodes/@MapNode";
-import {E} from "./../../Frame/General/Others";
+import {E} from "js-vextensions";
 import {GetValues_ForSchema} from "./../../Frame/General/Enums";
 import {GetClaimType, GetNodeL2} from "./../../Store/firebase/nodes/$node";
 import {Equation} from "./../../Store/firebase/nodes/@Equation";
@@ -44,8 +44,8 @@ export default class ChangeClaimType extends Command<{mapID?: number, nodeID: nu
 	newRevision: MapNodeRevision;
 	newRevisionID: number;
 	async Prepare() {
+		
 		let {nodeID, newType} = this.payload;
-
 		//let oldData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
 		let oldData = await GetAsync_Raw(()=>GetNodeL2(nodeID),);
 		this.oldType = GetClaimType(oldData);

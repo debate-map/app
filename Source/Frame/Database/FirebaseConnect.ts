@@ -1,4 +1,4 @@
-import {Assert} from "js-vextensions";
+import {Assert, GetPropsChanged_WithValues} from "js-vextensions";
 import {RootState} from "../../Store/index";
 import {connect} from "react-redux";
 import {ShallowChanged, GetInnerComp} from "react-vextensions";
@@ -10,6 +10,7 @@ import {GetUser, GetUserPermissionGroups} from "../../Store/firebase/users";
 import {GetUserID} from "Store/firebase/users";
 import { activeStoreAccessCollectors } from "Frame/Database/DatabaseHelpers";
 import Action from "../General/Action";
+import Moment from "moment";
 
 // Place a selector in Connect() whenever it uses data that:
 // 1) might change during the component's lifetime, and:
@@ -78,6 +79,22 @@ export function Connect<T, P>(funcOrFuncGetter) {
 			g.inConnectFunc = false;
 			return s.lastResult;
 		}
+
+		s.extraInfo = s.extraInfo || {};
+		let CreateRenderTriggerArray = ()=>[].VAct(a=>Object.defineProperty(a, "$Clear", {get: ()=>s.extraInfo.recentRenderTriggers = CreateRenderTriggerArray()}));
+		let recentRenderTriggers = s.extraInfo.recentRenderTriggers as any[] || CreateRenderTriggerArray();
+		let renderTrigger = {
+			propChanges: GetPropsChanged_WithValues(s.lastProps, props),
+			storeChanges: GetPropsChanged_WithValues(s.lastAccessedStorePaths_withData, (s.lastAccessedStorePaths_withData || {}).VKeys().ToMap(key=>key, key=>State(key))),
+			time: Moment().format("HH:mm:ss"),
+		};
+		// add new entries to start, and trim old ones from end
+		recentRenderTriggers.splice(0, 0, renderTrigger);
+		if (recentRenderTriggers.length > 100) {
+			recentRenderTriggers.splice(-1, 1);
+		}
+		s.extraInfo.recentRenderTriggers = recentRenderTriggers;
+
 		//let result = mapStateToProps_inner.call(s, state, props);
 		// for debugging in profiler
 		//let debugText = ToJSON(props).replace(/[^a-zA-Z0-9]/g, "_");
@@ -88,6 +105,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		// also access some other paths here, so that when they change, they trigger ui updates for everything
 		result._user = GetUser(GetUserID());
 		result._permissions = GetUserPermissionGroups(GetUserID());
+		result._extraInfo = s.extraInfo;
 
 		let oldRequestedPaths: string[] = s.lastRequestedPaths || [];
 		let requestedPaths: string[] = GetRequestedPaths();

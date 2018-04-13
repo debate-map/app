@@ -1,5 +1,6 @@
 import {combineReducers} from "redux";
 import Action from "../General/Action";
+import {emptyEntities} from "js-vextensions";
 
 export function CombineReducers(reducerMap: {[key: string]: (state, action: Action<any>)=>any});
 export function CombineReducers(getInitialState: ()=>any, reducerMap: {[key: string]: (state, action: Action<any>)=>any});
@@ -30,3 +31,5 @@ export const emptyArray_forLoading = []; // this one causes the "..." to show fo
 export function IsSpecialEmptyArray<T>(array: Array<T>) {
 	return array == emptyArray || array == emptyArray_forLoading;
 }
+// use the same empty-entities in js-vextensions
+emptyEntities.VSet({emptyObj, emptyArray, emptyArray_forLoading});

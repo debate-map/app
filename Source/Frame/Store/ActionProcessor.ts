@@ -202,7 +202,7 @@ export async function PostDispatchAction(action: Action<any>) {
 	if (action.Is(ACTMapNodeExpandedSet) ) {
 		let path = action.payload.path;
 		let nodeID = SplitStringBySlash_Cached(path).Last().ToInt();
-		let node = await GetAsync(()=>GetNodeL2(nodeID));
+		let node = GetNodeL2(nodeID) || await GetAsync(()=>GetNodeL2(nodeID));
 		let expandKey = ["expanded", "expanded_truth", "expanded_relevance"].find(key=>action.payload[key] != null);
 		
 		// if we're expanding a claim-node, make sure any untouched truth-arguments start expanded
@@ -211,7 +211,7 @@ export async function PostDispatchAction(action: Action<any>) {
 			let actions = [];
 			for (let child of children) {
 				let childPath = `${action.payload.path}/${child._id}`;
-				let childNodeView = (await GetAsync(()=>GetNodeView(action.payload.mapID, childPath))) || {};
+				let childNodeView = (GetNodeView(action.payload.mapID, childPath) || await GetAsync(()=>GetNodeView(action.payload.mapID, childPath))) || {};
 				if (child && child.type == MapNodeType.Argument && childNodeView.expanded == null) {
 					actions.push(new ACTMapNodeExpandedSet({mapID: action.payload.mapID, path: childPath, expanded: true, recursive: false}));
 				}
@@ -220,7 +220,6 @@ export async function PostDispatchAction(action: Action<any>) {
 		}
 		// if we're expanding an argument-node, make sure any untouched relevance-arguments start expanded 
 		/*else if (node.type == MapNodeType.Argument) {
-			
 		}*/
 	}
 

@@ -3,7 +3,7 @@ import {Assert} from "js-vextensions";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command} from "../Command";
 import {MapNode, ClaimForm, Polarity} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "../../Frame/General/Others";
+import {E} from "js-vextensions";
 import {Term} from "../../Store/firebase/terms/@Term";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {MapEdit} from "Server/CommandMacros";

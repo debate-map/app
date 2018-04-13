@@ -29,7 +29,7 @@ import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/
 import {ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import { GetNodeChildren, ForCut_GetError, ForCopy_GetError } from "../../../../Store/firebase/nodes";
-import {E} from "../../../../Frame/General/Others";
+import {E} from "js-vextensions";
 import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import LinkNode from "Server/Commands/LinkNode";

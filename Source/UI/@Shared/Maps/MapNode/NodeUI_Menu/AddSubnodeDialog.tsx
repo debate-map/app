@@ -10,7 +10,7 @@ import {Row} from "react-vcomponents";
 import {Column} from "react-vcomponents";
 import keycode from "keycode";
 import {Button} from "react-vcomponents";
-import {E} from "../../../../../Frame/General/Others";
+import {E} from "js-vextensions";
 import AddNode from "../../../../../Server/Commands/AddNode";
 import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
