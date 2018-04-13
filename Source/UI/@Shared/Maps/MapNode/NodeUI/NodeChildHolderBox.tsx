@@ -19,10 +19,11 @@ import { GetParentNodeL3 } from "Store/firebase/nodes";
 import { GetRatings } from "Store/firebase/nodeRatings";
 import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage} from "../../../../../Store/firebase/nodeRatings";
 import { IsSinglePremiseArgument } from "Store/firebase/nodes/$node";
-import {IsMultiPremiseArgument} from "../../../../../Store/firebase/nodes/$node";
+import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
 import {Squiggle} from "../NodeConnectorBackground";
 import { ACTMapNodeExpandedSet } from "Store/main/mapViews/$mapView/rootNodeViews";
 import { WeightingType } from "Store/main";
+import { RS_CalculateTruthScore, RS_CalculateBaseWeight, RS_CalculateWeightMultiplier, RS_CalculateWeight } from "Store/firebase/nodeRatings/ReasonScore";
 
 export enum HolderType {
 	Truth,
@@ -64,6 +65,9 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 
 		//let mainRating_fillPercent = 100;
 		let parentNode = GetParentNodeL3(path);
+		let combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parentNode);
+		//let ratingReversed = ShouldRatingTypeBeReversed(node);
+
 		var ratingType = {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[type] as RatingType;
 		let ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
 
@@ -74,10 +78,14 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		}
 		//let mainRating_fillPercent = average;
 
-		// temp
 		let weightingType = State(a=>a.main.weighting);
-		if (weightingType == WeightingType.ReasonScore) {
-			mainRating_average = 0;
+		if (weightingType == WeightingType.ReasonScore && node.type == MapNodeType.Claim) {
+			var rs_truthScore = RS_CalculateTruthScore(node);
+			if (combineWithParentArgument) {
+				var rs_baseWeight = RS_CalculateBaseWeight(node);
+				var rs_weightMultiplier = RS_CalculateWeightMultiplier(parentNode);
+				var rs_weight = RS_CalculateWeight(parentNode, [node]);
+			}
 		}
 
 		let separateChildren = node.type == MapNodeType.Claim || combineWithChildClaim;

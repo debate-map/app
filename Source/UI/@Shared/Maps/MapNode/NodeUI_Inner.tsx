@@ -144,7 +144,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
 		let isSubnode = IsNodeSubnode(node);
 
-		let backgroundFillPercent = mainRating_average;
+		let backgroundFillPercent = mainRating_average || 0;
 		let markerPercent = mainRating_mine;
 		if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
 			if (node.type == MapNodeType.Claim) {
