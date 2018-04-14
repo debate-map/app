@@ -29,7 +29,7 @@ import {ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import { GetNodeChildren, ForCut_GetError, ForCopy_GetError } from "../../../../Store/firebase/nodes";
 import {E} from "js-vextensions";
-import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, GetNodeL3, IsPremiseOfSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import LinkNode from "Server/Commands/LinkNode";
 import UnlinkNode from "Server/Commands/UnlinkNode";
@@ -237,11 +237,16 @@ If not, paste the argument as a clone instead.`
 							//let s_ifParents = parentNodes.length > 1 ? "s" : "";
 							let contextStr = IsNodeSubnode(node) ? ", and its placement in-layer" : ", and its link with 1 parent";
 
+							let combinedWithParent = IsPremiseOfSinglePremiseArgument(node, parentNode);
+
 							ShowMessageBox({
 								title: `Delete "${nodeText}"`, cancelButton: true,
-								message: `Delete the node "${nodeText}"${contextStr}?`,
-								onOK: ()=> {
-									new DeleteNode({mapID: map._id, nodeID: node._id}).Run();
+								message: `Delete the node "${nodeText}"${contextStr}${combinedWithParent ? ", and its (hidden) container argument?" : ""}?`,
+								onOK: async ()=> {
+									await new DeleteNode({mapID: map._id, nodeID: node._id}).Run();
+									if (combinedWithParent) {
+										new DeleteNode({mapID: map._id, nodeID: parentNode._id}).Run();
+									}
 								}
 							});
 						}}/>}
