@@ -230,7 +230,6 @@ If not, paste the argument as a clone instead.`
 								return void ShowMessageBox({title: `Cannot delete`, message: error});
 							}*/
 
-							//let parentNodes = await GetNodeParentsAsync(node);
 							/*if (node.parents.VKeys(true).length > 1) {
 								return void ShowMessageBox({title: `Cannot delete`, message: `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`});
 							}*/
