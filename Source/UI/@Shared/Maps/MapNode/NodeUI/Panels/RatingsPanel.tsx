@@ -205,10 +205,11 @@ class CustomTooltip extends BaseComponent<{active?, payload?, external?, label?}
 	}
 }
 
-interface JQuery {
+/*interface JQuery {
 	plusParents(topDown?: boolean): JQuery;
 }
-$.fn.plusParents = function(topDown = false) {
+$.fn.plusParents = function(topDown = false) {*/
+($.fn as any).plusParents = function(topDown = false) {
 	var parentsAndSelf = this.parents().addBack().toArray(); // addBack concats lists, and orders it top-down
 	if (!topDown)
 		parentsAndSelf.reverse();

@@ -9,10 +9,8 @@ import {createSelector} from "reselect";
 import {DBPath, GetData} from "../Frame/Database/DatabaseHelpers";
 import {Debugger} from "../Frame/General/Others";
 import {E} from "js-vextensions";
-import {Set} from "immutable";
 import {MainState, MainReducer} from "./main";
 import {LocationDescriptorObject} from "history";
-import Immutable from "immutable";
 import {ACTDebateMapSelect} from "./main/debates";
 import u from "updeep";
 import {VURL} from "js-vextensions";
@@ -133,7 +131,6 @@ export function SimpleReducer(path: string | ((store: RootState)=>any), defaultV
 export class RootState {
 	main: MainState;
 	//firebase: FirebaseDatabase;
-	//firebase: Immutable.Map<any, any>;
 	firebase: any;
 	//form: any;
 	router: RouterState;

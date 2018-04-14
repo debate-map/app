@@ -16,7 +16,6 @@ import {GetEntries} from "../../../../Frame/General/Enums";
 import {ShowMessageBox} from "react-vmessagebox";
 import {TextInput} from "react-vcomponents";
 import {DN} from "js-vextensions";
-import {DataSnapshot} from "firebase";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {createSelector} from "reselect";
 import {NodeUI_Inner} from "./NodeUI_Inner";

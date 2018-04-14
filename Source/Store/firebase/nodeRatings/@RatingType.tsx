@@ -130,7 +130,7 @@ export class RatingType_Info {
 	}
 
 	displayText: string;
-	description: string | JSX.Element;
+	description: string | ((..._)=>JSX.Element);
 	labels: number[];
 	values: number[];
 	tickInterval: number;

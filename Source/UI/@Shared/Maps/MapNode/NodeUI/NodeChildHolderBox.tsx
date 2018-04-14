@@ -151,7 +151,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 				<div style={E({
 					display: "flex", position: "relative", borderRadius: 5, cursor: "default",
 					boxShadow: "rgba(0,0,0,1) 0px 0px 2px", width: width, marginTop: innerBoxOffset,
-				})}>
+				}) as any}>
 					<Row style={{alignItems: "stretch", width: width, borderRadius: 5, cursor: "pointer"}}>
 						<div style={{position: "relative", width: "calc(100% - 17px)", padding: "3px 5px 2px"}}>
 							<div style={{

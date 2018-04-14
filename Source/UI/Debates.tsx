@@ -20,7 +20,7 @@ export const columnWidths = [.64, .06, .12, .18];
 type Props = {} & Partial<{permissions: PermissionGroupSet, maps: Map[], selectedMap: Map}>;
 @Connect((state, props)=> ({
 	permissions: GetUserPermissionGroups(GetUserID()),
-	maps: GetMaps().filter(a=>a.type == MapType.Debate),
+	maps: GetMaps().filter(a=>a && a.type == MapType.Debate),
 	selectedMap: GetSelectedDebateMap(),
 }))
 export default class DebatesUI extends BaseComponent<Props, {}> {

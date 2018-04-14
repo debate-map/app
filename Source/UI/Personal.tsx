@@ -21,7 +21,7 @@ import {Div} from "react-vcomponents";
 type Props = {} & Partial<{permissions: PermissionGroupSet, maps: Map[], selectedMap: Map}>;
 @Connect((state, props)=> ({
 	permissions: GetUserPermissionGroups(GetUserID()),
-	maps: GetMaps().filter(a=>a.type == MapType.Personal),
+	maps: GetMaps().filter(a=>a && a.type == MapType.Personal),
 	selectedMap: GetSelectedPersonalMap(),
 }))
 export default class PersonalUI extends BaseComponent<Props, {}> {

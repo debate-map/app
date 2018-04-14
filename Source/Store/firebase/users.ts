@@ -2,7 +2,6 @@ import {GetData} from "../../Frame/Database/DatabaseHelpers";
 import {PermissionGroupSet} from "./userExtras/@UserExtraInfo";
 import UserExtraInfo from "./userExtras/@UserExtraInfo";
 import {CachedTransform} from "js-vextensions";
-import {UserInfo} from "firebase";
 import {AccessLevel} from "./nodes/@MapNode";
 import {backgrounds} from "../../UI/Profile";
 import {User} from "Store/firebase/users/@User";

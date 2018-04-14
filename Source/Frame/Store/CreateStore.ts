@@ -1,6 +1,5 @@
 import {applyMiddleware, compose, createStore, StoreEnhancer, Store} from "redux";
 import thunk from "redux-thunk";
-import {reduxFirebase, getFirebase} from "react-redux-firebase";
 import {DBPath} from "../../Frame/Database/DatabaseHelpers";
 import {persistStore, persistReducer} from "redux-persist";
 import {createFilter, createBlacklistFilter} from "redux-persist-transform-filter";
@@ -13,6 +12,13 @@ import {PreDispatchAction, MidDispatchAction, PostDispatchAction} from "./Action
 import {batchedSubscribe} from "redux-batched-subscribe";
 import {unstable_batchedUpdates} from "react-dom";
 import {routerForBrowser} from "redux-little-router";
+
+import firebase_ from "firebase";
+import { reactReduxFirebase, firebaseReducer } from "react-redux-firebase";
+//import { reduxFirestore, firestoreReducer } from "redux-firestore";
+//import "firebase/firestore";
+
+let firebase = firebase_ as any;
 
 let routes = {
 	"/": {},
@@ -37,7 +43,7 @@ export default function(initialState = {}, history) {
 	// Middleware Configuration
 	// ==========
 	const middleware = [
-		thunk.withExtraArgument(getFirebase),
+		//thunk.withExtraArgument(getFirebase),
 		// for some reason, this breaks stuff if we have it the last one
 		/*store=>next=>action=> {
 			Log("What!" + action.type);
@@ -70,9 +76,14 @@ export default function(initialState = {}, history) {
 	let reduxFirebaseConfig = {
 		userProfile: DBPath("users"), // root that user profiles are written to
 		enableLogging: false, // enable/disable Firebase Database Logging
-		updateProfileOnLogin: false // enable/disable updating of profile on login
+		updateProfileOnLogin: false, // enable/disable updating of profile on login
 		// profileDecorator: (userData) => ({ email: userData.email }) // customize format of user profile
+		useFirestoreForProfile: true,
 	};
+	if (firebase.apps.length == 0) {
+		firebase.initializeApp(firebaseConfig);
+	}
+	//g.firestoreDB = firebase.firestore(); // can also use store.firebase.firestore()
 
 	let extraReducers = {
 		router: routerReducer,
@@ -86,7 +97,7 @@ export default function(initialState = {}, history) {
 			//autoRehydrate({log: true}),
 			routerEnhancer,
 			applyMiddleware(...middleware),
-			reduxFirebase(firebaseConfig, reduxFirebaseConfig),
+			reactReduxFirebase(firebase, reduxFirebaseConfig),
 			batchedSubscribe(unstable_batchedUpdates),
 			applyMiddleware(...lateMiddleware), // place late-middleware after reduxFirebase, so it can intercept all its dispatched events
 			g.devToolsExtension && g.devToolsExtension({maxAge: 70}),

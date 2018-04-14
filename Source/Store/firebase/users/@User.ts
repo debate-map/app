@@ -1,4 +1,7 @@
-import {UserInfo} from "firebase";
+// temp replaced
+//import {UserInfo} from "firebase";
+type UserInfo = any;
+
 export const User_id = "^[a-zA-Z0-9]+$";
 export type User = {
 	_key?: string;

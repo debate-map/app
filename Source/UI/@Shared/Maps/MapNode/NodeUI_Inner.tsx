@@ -9,7 +9,6 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import {TextInput} from "react-vcomponents";
 import {DN, GetPercentFromXToY, Lerp} from "js-vextensions";
-import {DataSnapshot} from "firebase";
 import {Button} from "react-vcomponents";
 import {CachedTransform} from "js-vextensions";
 import {WaitXThenRun} from "js-vextensions";
@@ -58,7 +57,6 @@ import {GetPathsToNodesChangedSinceX, ChangeType, GetNodeChangeType, GetChangeTy
 import { GetTimeFromWhichToShowChangedNodes } from "Store/main/maps/$map";
 import { ACTSetLastAcknowledgementTime } from "Store/main";
 import {GetLastAcknowledgementTime, WeightingType} from "../../../../Store/main";
-import UpdateNodeDetails from "Server/Commands/UpdateNodeDetails";
 import AddNodeRevision from "../../../../Server/Commands/AddNodeRevision";
 import { IsDoubleClick } from "Frame/General/Others";
 import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";

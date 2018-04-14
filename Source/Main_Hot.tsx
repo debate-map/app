@@ -87,18 +87,6 @@ Manager_Feedback.VSet(sharedData.Extended({
 // uncomment this if you want to load the source-maps and such ahead of time (making-so the first actual call can get it synchronously)
 //StackTrace.get();
 
-// temp
-/*let oldReplace = require("redux-little-router").replace;
-require("redux-little-router").replace = function() {
-	Log("Test:" + arguments[0], true);
-	return oldReplace.apply(this, arguments);
-}
-let oldPush = require("redux-little-router").push;
-require("redux-little-router").push = function() {
-	Log("Test2:" + arguments[0], true);
-	return oldPush.apply(this, arguments);
-}*/
-
 let createStore = require("./Frame/Store/CreateStore").default;
 
 var {store, persister} = createStore(g.__InitialState__, {});
