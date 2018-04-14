@@ -21,6 +21,8 @@ import {PersonalReducer, ACTPersonalMapSelect} from "./main/personal";
 import {Database, DatabaseReducer} from "./main/database";
 import {GetNodeL3} from "./firebase/nodes/$node";
 import {SimpleReducer} from "./index";
+import { persistReducer } from "redux-persist";
+import storage from "redux-persist/lib/storage";
 
 export enum WeightingType {
 	Votes = 10,
@@ -90,7 +92,7 @@ export class ACTSetLastAcknowledgementTime extends Action<{nodeID: number, time:
 
 let MainReducer_Real;
 export function MainReducer(state, action) {
-	MainReducer_Real = MainReducer_Real || CombineReducers({
+	MainReducer_Real = MainReducer_Real || persistReducer({key: "main_key", storage, blacklist: ["notificationMessages"]}, CombineReducers({
 		page: (state = null, action)=> {
 			if (action.Is(ACTSetPage)) return action.payload;
 			return state;
@@ -220,7 +222,7 @@ export function MainReducer(state, action) {
 		initialChildLimit: SimpleReducer(a=>a.main.initialChildLimit, 5),
 		showReasonScoreValues: SimpleReducer(a=>a.main.showReasonScoreValues, false),
 		weighting: SimpleReducer(a=>a.main.weighting, WeightingType.Votes),
-	});
+	}));
 	return MainReducer_Real(state, action);
 }
 

@@ -189,7 +189,8 @@ export function MakeRootReducer(extraReducers?) {
 		return result;
 	};
 
-	rootReducer = persistReducer({storage, key: "root", whitelist: ["main"], debug: true}, rootReducer);
+	// removed for now, since we only want "main" -- and we're already persisting "main" with its own persistReducer call (since it needs local persist customization)
+	//rootReducer = persistReducer({storage, key: "root_key", whitelist: ["main"], debug: true}, rootReducer);
 
 	return rootReducer;
 }

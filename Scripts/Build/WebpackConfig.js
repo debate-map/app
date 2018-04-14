@@ -1,7 +1,6 @@
 const webpack = require("webpack");
 const cssnano = require("cssnano");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-//const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const config = require("../config");
 const debug = require("debug")("app:webpack:config");
@@ -259,44 +258,6 @@ const BASE_CSS_LOADER = "css-loader?-minimize";
 
 webpackConfig.module.rules.push({
 	test: /\.scss$/,
-	/*use: ExtractTextPlugin.extract({
-		fallback: "style-loader",
-		use: [
-			BASE_CSS_LOADER,
-			{
-				loader: "postcss-loader",
-				options: cssnano({
-					autoprefixer: {
-						add: true,
-						remove: true,
-						browsers: ["last 2 versions"]
-					},
-					discardComments: {
-						removeAll: true
-					},
-					discardUnused: false,
-					mergeIdents: false,
-					reduceIdents: false,
-					safe: true,
-					//sourcemap: true
-				})
-			},
-			{
-				//loader: "sass-loader?sourceMap",
-				loader: "sass-loader",
-				options: {
-					includePaths: [paths.client("styles")],
-				}
-			}
-			/*{
-				loader: "fast-sass-loader",
-				options: {
-					includePaths: [paths.client("styles")],
-				}
-			}*#/
-		],
-		allChunks: true, // makes it slightly faster, I think?
-	}),*/
 	use: [
 		MiniCssExtractPlugin.loader,
 		BASE_CSS_LOADER,
@@ -325,22 +286,10 @@ webpackConfig.module.rules.push({
 				includePaths: [paths.client("styles")],
 			}
 		}
-		/*{
-			loader: "fast-sass-loader",
-			options: {
-				includePaths: [paths.client("styles")],
-			}
-		}*/
 	]
 });
 webpackConfig.module.rules.push({
 	test: /\.css$/,
-	//exclude: excludeCSSModules,
-	/*use: ExtractTextPlugin.extract({
-		fallback: "style-loader",
-		use: [BASE_CSS_LOADER, "postcss-loader"],
-		allChunks: true, // makes it slightly faster, I think?
-	}),*/
 	use: [
 		MiniCssExtractPlugin.loader,
 		"css-loader",
@@ -383,13 +332,6 @@ webpackConfig.module.rules.filter(loader=>
 	loader.loader = ExtractTextPlugin.extract({fallback: first, use: rest.join("!")});
 	delete loader.loaders;
 });*/
-
-/*webpackConfig.plugins.push(
-	//new ExtractTextPlugin("[name].[contenthash].css", {allChunks: true}),
-	//new ExtractTextPlugin({filename: "[name].css?[contenthash]", allChunks: true})
-	new ExtractTextPlugin({filename: "[name].css?[md5:contenthash:hex:20]", allChunks: true}) // replace with mini-css-extract-plugin once it supports HMR
-	//new ExtractTextPlugin({filename: "[name].css", allChunks: true})
-);*/
 
 const SpriteLoaderPlugin = require("svg-sprite-loader/plugin");
 webpackConfig.plugins.push(

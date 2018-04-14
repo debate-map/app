@@ -25,9 +25,8 @@ import {SleepAsync} from "js-vextensions";
 import {User} from "Store/firebase/users/@User";
 
 // upgrade-funcs
-var upgradeFuncs; // populated by modules below
+var upgradeFuncs = {} as any; // populated by modules below
 export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>FirebaseData) {
-	upgradeFuncs = upgradeFuncs || {};
 	upgradeFuncs[version] = func;
 }
 //require("./Admin/DBUpgrades/UpgradeDB_2");
