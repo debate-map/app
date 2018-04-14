@@ -2,8 +2,8 @@ import {Assert, GetPropsChanged_WithValues} from "js-vextensions";
 import {RootState} from "../../Store/index";
 import {connect} from "react-redux";
 import {ShallowChanged, GetInnerComp} from "react-vextensions";
-import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/query";
-import {getEventsFromInput} from "react-redux-firebase/dist/utils";
+//import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/query"; // temp removed
+//import {getEventsFromInput} from "react-redux-firebase/dist/utils"; // temp removed
 import { TryCall, Timer } from "js-vextensions";
 import { SplitStringBySlash_Cached } from "Frame/Database/StringSplitCache";
 import {GetUser, GetUserPermissionGroups} from "../../Store/firebase/users";
@@ -111,7 +111,8 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		let requestedPaths: string[] = GetRequestedPaths();
 		//if (firebase._ && ShallowChanged(requestedPaths, oldRequestedPaths)) {
 		if (ShallowChanged(requestedPaths, oldRequestedPaths)) {
-			setImmediate(()=> {
+			// temp removed
+			/*setImmediate(()=> {
 				s._firebaseEvents = getEventsFromInput(requestedPaths);
 				let removedPaths = oldRequestedPaths.Except(...requestedPaths);
 				// todo: find correct way of unwatching events; the way below seems to sometimes unwatch while still needed watched
@@ -120,7 +121,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 				let addedPaths = requestedPaths.Except(...oldRequestedPaths);
 				watchEvents(firebase, DispatchDBAction, getEventsFromInput(addedPaths));
 				// for debugging, you can check currently-watched-paths using: store.firebase._.watchers
-			});
+			});*/
 			s.lastRequestedPaths = requestedPaths;
 		}
 

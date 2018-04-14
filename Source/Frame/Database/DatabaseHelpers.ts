@@ -1,10 +1,10 @@
 import {RequestPath, Connect, ClearRequestedPaths, GetRequestedPaths, OnAccessPath} from "./FirebaseConnect";
 import {Assert, GetTreeNodesInObjTree, DeepSet, CachedTransform, GetStorageForCachedTransform} from "js-vextensions";
 import {helpers, firebaseConnect} from "react-redux-firebase";
-import {FirebaseApplication, DataSnapshot} from "firebase";
+//import {FirebaseApplication, DataSnapshot} from "firebase"; // temp removed
 import {BaseComponent, ShallowChanged} from "react-vextensions";
-import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/query";
-import {getEventsFromInput} from "react-redux-firebase/dist/utils";
+//import {watchEvents, unWatchEvents} from "react-redux-firebase/dist/actions/query"; // temp removed
+//import {getEventsFromInput} from "react-redux-firebase/dist/utils"; // temp removed
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import { NodeUI } from "UI/@Shared/Maps/MapNode/NodeUI";
 //export {DBPath};
@@ -33,7 +33,9 @@ export function SlicePath(path: string, removeFromEndCount: number, ...itemsToAd
 	return parts.join("/");
 }
 
-export type FirebaseApp = FirebaseApplication & {
+export type FirebaseApp = any;
+// temp removed
+/*FirebaseApplication & {
 	// added by react-redux-firebase
 	_,
 	helpers: {
@@ -57,7 +59,10 @@ export type FirebaseApp = FirebaseApplication & {
 		// custom
 		DBRef(path?: string, inVersionRoot?: boolean): firebase.DatabaseReference,
 	},
-};
+};*/
+
+// temp
+type DataSnapshot = any;
 
 export function ProcessDBData(data, standardizeForm: boolean, addHelpers: boolean, rootKey: string) {
 	var treeNodes = GetTreeNodesInObjTree(data, true);
@@ -268,11 +273,12 @@ export async function GetAsync<T>(dbGetterFunc: ()=>T, statsLogger?: ({requested
 		result = dbGetterFunc();
 		let newRequestedPaths = GetRequestedPaths().Except(requestedPathsSoFar.VKeys());
 
+		// temp removed
 		//let oldNodeRenderCount = NodeUI.renderCount;
-		unWatchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths)); // do this just to trigger re-get
+		/*unWatchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths)); // do this just to trigger re-get
 		// start watching paths (causes paths to be requested)
 		watchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths));
-		//Assert(NodeUI.renderCount == oldNodeRenderCount, "NodeUIs rendered during unwatch/watch event!");
+		//Assert(NodeUI.renderCount == oldNodeRenderCount, "NodeUIs rendered during unwatch/watch event!");*/
 
 		for (let path of newRequestedPaths) {
 			requestedPathsSoFar[path] = true;

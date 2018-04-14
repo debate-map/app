@@ -7,6 +7,7 @@ const config = require("../config");
 const debug = require("debug")("app:webpack:config");
 const path = require("path");
 const fs = require("fs");
+var HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 
 const paths = config.utils_paths;
 const {__DEV__, __PROD__, __TEST__} = config.globals;
@@ -151,6 +152,8 @@ webpackConfig.plugins = [
 		//manifest: require("../Config/dll/vendor-manifest.json")
 		manifest: "Scripts/Config/dll/vendor-manifest.json",
 	}),*/
+
+	new HardSourceWebpackPlugin(),
 
 	/*new BundleAnalyzerPlugin({
 		// Can be `server`, `static` or `disabled`.
