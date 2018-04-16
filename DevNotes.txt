@@ -3,3 +3,4 @@ This document will contain random notes that have a chance of being useful somet
 * Newer versions of Webpack apparently need webpack-cli installed locally.
 * If you update Webpack, remember to update both WebpackConfig.js *and* Vendors.webpack.js.
 * If you have issues with some json files not loading in new Webpack, try adding the path to json-loader's "include" array.
+* If you get a ".js?[hash]" error, most likely it's just a cache issue. Try removing/renaming "node_modules/.cache".

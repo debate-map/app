@@ -471,16 +471,16 @@ function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 
 	let displayText = GetNodeDisplayText(node, path);
 	let fontSize = GetFontSizeForNode(node);
-	let expectedTextWidth = GetContentWidth($(`<span style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${displayText}</span>`));
+	let expectedTextWidth = GetContentWidth(`<span style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${displayText}</span>`);
 
 	let noteWidth = 0;
 	if (node.current.note) {
 		noteWidth = Math.max(noteWidth,
-			GetContentWidth($(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.current.note}</span>`), true));
+			GetContentWidth(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.current.note}</span>`, true));
 	}
 	if (node.current.equation && node.current.equation.explanation) {
 		noteWidth = Math.max(noteWidth,
-			GetContentWidth($(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.current.equation.explanation}</span>`), true));
+			GetContentWidth(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.current.equation.explanation}</span>`, true));
 	}
 	expectedTextWidth += noteWidth;
 
@@ -497,9 +497,9 @@ function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 	let width = node.current.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
 
 	let maxTextWidth = width - expectedOtherStuffWidth;
-	let expectedTextHeight = GetContentHeight($(`<a style='${
+	let expectedTextHeight = GetContentHeight(`<a style='${
 		createMarkupForStyles({fontSize, whiteSpace: "initial", display: "inline-block", width: maxTextWidth})
-	}'>${displayText}</a>`));
+	}'>${displayText}</a>`);
 	let expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
 	//this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
 

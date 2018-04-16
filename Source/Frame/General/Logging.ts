@@ -58,6 +58,9 @@ export class LogTypes {
 	cacheUpdates = false;
 	commands = false;
 	dbRequests = false;
+
+	// doesn't actually log; rather, causes data to be stored in component.props.extraInfo.renderTriggers
+	renderTriggers = false;
 }
 
 declare global { var logTypes: LogTypes; }

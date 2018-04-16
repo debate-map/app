@@ -80,20 +80,22 @@ export function Connect<T, P>(funcOrFuncGetter) {
 			return s.lastResult;
 		}
 
-		s.extraInfo = s.extraInfo || {};
-		let CreateRenderTriggerArray = ()=>[].VAct(a=>Object.defineProperty(a, "$Clear", {get: ()=>s.extraInfo.recentRenderTriggers = CreateRenderTriggerArray()}));
-		let recentRenderTriggers = s.extraInfo.recentRenderTriggers as any[] || CreateRenderTriggerArray();
-		let renderTrigger = {
-			propChanges: GetPropsChanged_WithValues(s.lastProps, props),
-			storeChanges: GetPropsChanged_WithValues(s.lastAccessedStorePaths_withData, (s.lastAccessedStorePaths_withData || {}).VKeys().ToMap(key=>key, key=>State(key))),
-			time: Moment().format("HH:mm:ss"),
-		};
-		// add new entries to start, and trim old ones from end
-		recentRenderTriggers.splice(0, 0, renderTrigger);
-		if (recentRenderTriggers.length > 100) {
-			recentRenderTriggers.splice(-1, 1);
+		if (logTypes.renderTriggers) {
+			s.extraInfo = s.extraInfo || {};
+			let CreateRenderTriggerArray = ()=>[].VAct(a=>Object.defineProperty(a, "$Clear", {get: ()=>s.extraInfo.recentRenderTriggers = CreateRenderTriggerArray()}));
+			let recentRenderTriggers = s.extraInfo.recentRenderTriggers as any[] || CreateRenderTriggerArray();
+			let renderTrigger = {
+				propChanges: GetPropsChanged_WithValues(s.lastProps, props),
+				storeChanges: GetPropsChanged_WithValues(s.lastAccessedStorePaths_withData, (s.lastAccessedStorePaths_withData || {}).VKeys().ToMap(key=>key, key=>State(key))),
+				time: Moment().format("HH:mm:ss"),
+			};
+			// add new entries to start, and trim old ones from end
+			recentRenderTriggers.splice(0, 0, renderTrigger);
+			if (recentRenderTriggers.length > 100) {
+				recentRenderTriggers.splice(-1, 1);
+			}
+			s.extraInfo.recentRenderTriggers = recentRenderTriggers;
 		}
-		s.extraInfo.recentRenderTriggers = recentRenderTriggers;
 
 		//let result = mapStateToProps_inner.call(s, state, props);
 		// for debugging in profiler
