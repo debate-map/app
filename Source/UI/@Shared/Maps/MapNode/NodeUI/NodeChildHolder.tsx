@@ -12,9 +12,13 @@ import {ArgumentsControlBar} from "../ArgumentsControlBar";
 import {Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
 import { ACTMapNodeChildLimitSet } from "Store/main/mapViews/$mapView/rootNodeViews";
 import Icon from "Frame/ReactComponents/Icon";
-import {IsMultiPremiseArgument} from "../../../../../Store/firebase/nodes/$node";
+import {IsMultiPremiseArgument, GetSortByRatingType, GetMainRatingType} from "../../../../../Store/firebase/nodes/$node";
 import {NodeChildHolderBox, HolderType} from "./NodeChildHolderBox";
 import { GetNodeChildrenL3 } from "Store/firebase/nodes";
+import { IsSpecialEmptyArray, emptyObj } from "Frame/Store/ReducerUtils";
+import { GetRatingAverage_AtPath } from "Store/firebase/nodeRatings";
+import { CachedTransform } from "js-vextensions";
+import { ArgumentType } from "Store/firebase/nodes/@MapNodeRevision";
 
 /*export class ChildPackUI extends BaseComponent
 		<{
@@ -48,20 +52,43 @@ let initialState = {
 	oldChildBoxOffsets: null as {[key: number]: Vector2i},
 };
 
-let connector = (state, {}: Props)=> {
+let connector = (state, {node, nodeChildrenToShow}: Props)=> {
+	let nodeChildren_sortValues = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMap(child=>child._id+"", child=> {
+		return GetRatingAverage_AtPath(child, GetSortByRatingType(child));
+	});
+	let nodeChildren_fillPercents = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMap(child=>child._id+"", child=> {
+		return GetRatingAverage_AtPath(child, GetMainRatingType(child));
+	});
+
 	return {
 		initialChildLimit: State(a=>a.main.initialChildLimit),
+		nodeChildren_sortValues: CachedTransform("nodeChildren_sortValues_transform1", [node._id], nodeChildren_sortValues, ()=>nodeChildren_sortValues),
+		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", [node._id], nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
 	};
 };
 @Connect(connector)
 export class NodeChildHolder extends BaseComponentWithConnector(connector, initialState) {
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
-		let {map, node, nodeView, path, nodeChildrenToShow, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, onHeightOrDividePointChange, initialChildLimit} = this.props;
+		let {map, node, nodeView, path, nodeChildrenToShow, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, onHeightOrDividePointChange,
+			initialChildLimit, nodeChildren_sortValues} = this.props;
 		let {childrenWidthOverride, oldChildBoxOffsets} = this.state;
 
 		let upChildren = separateChildren ? nodeChildrenToShow.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
 		let downChildren = separateChildren ? nodeChildrenToShow.filter(a=>a.finalPolarity == Polarity.Opposing) : [];
+		
+		// apply sorting
+		if (separateChildren) {
+			upChildren = upChildren.OrderBy(child=>nodeChildren_sortValues[child._id]);
+			downChildren = downChildren.OrderByDescending(child=>nodeChildren_sortValues[child._id]);
+		} else {
+			nodeChildrenToShow = nodeChildrenToShow.OrderByDescending(child=>nodeChildren_sortValues[child._id]);
+			//if (IsArgumentNode(node)) {
+			let isArgument_any = node.type == MapNodeType.Argument && node.current.argumentType == ArgumentType.Any;
+			if (node.childrenOrder && !isArgument_any) {
+				nodeChildrenToShow = nodeChildrenToShow.OrderBy(child=>node.childrenOrder.indexOf(child._id).IfN1Then(Number.MAX_SAFE_INTEGER));
+			}
+		}
 
 		let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 		let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);

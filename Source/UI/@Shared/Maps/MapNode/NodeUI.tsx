@@ -81,13 +81,6 @@ let connector = (state, {node, path, map}: Props)=> {
 		return GetFinalNodeTypeAtPath(child, path + "/" + child._id);
 	});*/
 
-	let nodeChildren_sortValues = IsSpecialEmptyArray(nodeChildren) ? emptyObj : nodeChildren.filter(a=>a).ToMap(child=>child._id+"", child=> {
-		return GetRatingAverage_AtPath(child, GetSortByRatingType(child));
-	});
-	let nodeChildren_fillPercents = IsSpecialEmptyArray(nodeChildren) ? emptyObj : nodeChildren.filter(a=>a).ToMap(child=>child._id+"", child=> {
-		return GetRatingAverage_AtPath(child, GetMainRatingType(child));
-	});
-
 	let subnodes = GetSubnodesInEnabledLayersEnhanced(GetUserID(), map, node._id);
 	subnodes = subnodes.Any(a=>a == null) ? emptyArray : subnodes; // only pass subnodes when all are loaded
 
@@ -115,8 +108,6 @@ let connector = (state, {node, path, map}: Props)=> {
 			})),*/
 		nodeChildren,
 		nodeChildrenToShow,
-		nodeChildren_sortValues: CachedTransform("nodeChildren_sortValues_transform1", [node._id], nodeChildren_sortValues, ()=>nodeChildren_sortValues),
-		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", [node._id], nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
 		subnodes,
 		parentNodeView,
 
@@ -164,7 +155,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 	innerUI: NodeUI_Inner;
 	render() {
 		let {map, node, path, asSubnode, widthOverride, style, onHeightOrPosChange,
-			initialChildLimit, form, children, nodeView, parentNodeView, nodeChildren, nodeChildrenToShow, nodeChildren_sortValues, subnodes,
+			initialChildLimit, form, children, nodeView, parentNodeView, nodeChildren, nodeChildrenToShow, subnodes,
 			playingTimeline, playingTimeline_currentStepIndex, playingTimelineShowableNodes, playingTimelineVisibleNodes, playingTimeline_currentStepRevealNodes,
 			addedDescendants, editedDescendants} = this.props;
 		let {innerBoxOffset} = this.state;
@@ -194,21 +185,6 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		//let nodeChildren_filtered = nodeChildren;
 		if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
 			nodeChildrenToShow = nodeChildrenToShow.filter(child=>playingTimelineVisibleNodes.Contains(path + "/" + child._id));
-		}
-		let upChildren = separateChildren ? nodeChildrenToShow.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
-		let downChildren = separateChildren ? nodeChildrenToShow.filter(a=>a.finalPolarity == Polarity.Opposing) : [];
-
-		// apply sorting
-		if (separateChildren) {
-			upChildren = upChildren.OrderBy(child=>nodeChildren_sortValues[child._id]);
-			downChildren = downChildren.OrderByDescending(child=>nodeChildren_sortValues[child._id]);
-		} else {
-			nodeChildrenToShow = nodeChildrenToShow.OrderByDescending(child=>nodeChildren_sortValues[child._id]);
-			//if (IsArgumentNode(node)) {
-			let isArgument_any = node.type == MapNodeType.Argument && node.current.argumentType == ArgumentType.Any;
-			if (node.childrenOrder && !isArgument_any) {
-				nodeChildrenToShow = nodeChildrenToShow.OrderBy(child=>node.childrenOrder.indexOf(child._id).IfN1Then(Number.MAX_SAFE_INTEGER));
-			}
 		}
 
 		// if the premise of a single-premise argument
