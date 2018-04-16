@@ -25,6 +25,7 @@ import { ACTMapNodeExpandedSet } from "Store/main/mapViews/$mapView/rootNodeView
 import { WeightingType } from "Store/main";
 import { RS_CalculateTruthScore, RS_CalculateBaseWeight, RS_CalculateWeightMultiplier, RS_CalculateWeight } from "Store/firebase/nodeRatings/ReasonScore";
 import { GetUserID } from "Store/firebase/users";
+import RatingsPanel from "./Panels/RatingsPanel";
 
 export enum HolderType {
 	Truth,
@@ -79,7 +80,7 @@ let connector = (state, {node, path, type, nodeChildren}: Props)=> {
 	};
 };
 @Connect(connector)
-export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {innerBoxOffset: 0, lineHolderHeight: 0}) {
+export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {innerBoxOffset: 0, lineHolderHeight: 0, hovered: false}) {
 	static ValidateProps(props) {
 		let {node, nodeChildren} = props;
 		Assert(nodeChildren.All(a=>a == null || a.parents[node._id]), "Supplied node is not a parent of all the supplied node-children!");
@@ -88,7 +89,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 	render() {
 		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, widthOverride, combineWithChildClaim,
 			mainRating_average, mainRating_mine, rs_claimTruthScore, rs_argWeightMultiplier} = this.props;
-		let {innerBoxOffset, lineHolderHeight} = this.state;
+		let {innerBoxOffset, lineHolderHeight, hovered} = this.state;
 
 		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildren);
 		let text = type == HolderType.Truth ? "True?" : "Relevant?";
@@ -113,7 +114,8 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		let lineColor = GetNodeColor({type: MapNodeType.Category} as any as MapNodeL3, "raw");
 		let lineOffset = 50..KeepAtMost(innerBoxOffset);
 		//let expandKey = type == HolderType.Truth ? "expanded_truth" : "expanded_relevance";
-		let expandKey = `expanded_${HolderType[type].toLowerCase()}`;
+		let holderTypeStr = HolderType[type].toLowerCase();
+		let expandKey = `expanded_${holderTypeStr}`;
 
 		let separateChildren = node.type == MapNodeType.Claim || combineWithChildClaim;
 		let showArgumentsControlBar = (node.type == MapNodeType.Claim || combineWithChildClaim) && nodeView[expandKey] && nodeChildrenToShow != emptyArray_forLoading;
@@ -122,6 +124,8 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		if (widthOverride) {
 			width = widthOverride;
 		}
+
+		let ratingPanelShow = (nodeView && nodeView[`selected_${holderTypeStr}`]) || hovered; //|| local_selected;
 
 		return (
 			<Row className="clickThrough" style={E(
@@ -150,7 +154,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 					{type == HolderType.Relevance && isMultiPremiseArgument &&
 						<div style={{position: "absolute", right: "100%", width: 10, top: "50%", height: 3, backgroundColor: backgroundColor.css()}}/>}
 				</div>
-				<div style={E({
+				<div ref={c=>this.innerUI = c} style={E({
 					display: "flex", position: "relative", borderRadius: 5, cursor: "default",
 					boxShadow: "rgba(0,0,0,1) 0px 0px 2px", width: width, marginTop: innerBoxOffset,
 				}) as any}>
@@ -195,6 +199,17 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 									}
 								}}/>
 					</Row>
+					{ratingPanelShow &&
+						<div style={{
+							position: "absolute", left: 0, top: "calc(100% + 1px)",
+							width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
+							padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+						}}>
+							{(()=> {
+								let ratings = GetRatings(node._id, holderTypeStr as RatingType);
+								return <RatingsPanel node={node} path={path} ratingType={holderTypeStr as RatingType} ratings={ratings}/>;
+							})()}
+						</div>}
 				</div>
 				{nodeView[expandKey] &&
 					<NodeChildHolder {...{map, node, path, nodeView, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar}}
@@ -206,7 +221,22 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 			</Row>
 		);
 	}
+	innerUI: HTMLDivElement;
 	dividePoint: number;
+
+	ratingPanel: RatingsPanel;
+	ComponentDidMount() {
+		// we have to use native/jquery hover/mouseenter+mouseleave, to fix that in-equation term-placeholders would cause "mouseleave" to be triggered
+		//let dom = $(FindDOM(this));
+		//dom.off("mouseenter mouseleave");
+		$(this.innerUI).hover(()=> {
+			if ($(".scrolling").length == 0) {
+				this.SetState({hovered: true});
+			}
+		}, ()=> {
+			this.SetState({hovered: false})
+		});
+	}
 
 	lastLineHolderHeight = 0;
 	PostRender() {
