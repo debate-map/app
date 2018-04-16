@@ -14,7 +14,7 @@ import {SimpleReducer} from "Store";
 
 export class ACTMapViewMerge extends Action<{mapID: number, mapView: MapView}> {}
 
-export function MapViewReducer(state = {rootNodeViews: {}}, action: Action<any>, mapID: number) {
+export function MapViewReducer(state = new MapView(), action: Action<any>, mapID: number) {
 	if (action.Is(ACTMapViewMerge) && action.payload.mapID == mapID) {
 		let newState = state;
 
@@ -45,7 +45,7 @@ export function MapViewReducer(state = {rootNodeViews: {}}, action: Action<any>,
 
 	let newState = {...state,
 		rootNodeViews: RootNodeViewsReducer(state.rootNodeViews, action, mapID),
-		bot_currentNodeID: SimpleReducer(`main/mapViews/${mapID}/bot_currentNodeID`),
+		bot_currentNodeID: SimpleReducer(`main/mapViews/${mapID}/bot_currentNodeID`)(state.bot_currentNodeID, action),
 	};
 	if (ShallowChanged(state, newState)) return newState;
 	

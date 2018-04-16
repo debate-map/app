@@ -1,4 +1,4 @@
-import {Assert, GetPropsChanged_WithValues} from "js-vextensions";
+import {Assert, GetPropsChanged_WithValues, GetPropsChanged} from "js-vextensions";
 import {RootState} from "../../Store/index";
 import {connect} from "react-redux";
 import {ShallowChanged, GetInnerComp} from "react-vextensions";
@@ -57,7 +57,6 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		let firebase = store.firebase;
 
 		let changedPath = null;
-
 		let storeDataChanged = false;
 		if (s.lastAccessedStorePaths_withData == null) {
 			storeDataChanged = true;
@@ -67,15 +66,18 @@ export function Connect<T, P>(funcOrFuncGetter) {
 					//store.dispatch({type: "Data changed!" + path});
 					storeDataChanged = true;
 					changedPath = path;
+					if (changedPath.includes("bot_currentNodeID")) debugger;
 					break;
 				}
 			}
 		}
+
 		//let propsChanged = ShallowChanged(props, s.lastProps || {});
-		let propsChanged = ShallowChanged(props, s.lastProps || {}, "children");
+		//let propsChanged = ShallowChanged(props, s.lastProps || {}, "children");
+		let changedProps = GetPropsChanged(s.lastProps, props, false);
 
 		//let result = storeDataChanged ? mapStateToProps_inner(state, props) : s.lastResult;
-		if (!storeDataChanged && !propsChanged) {
+		if (!storeDataChanged && changedProps.length == 0) {
 			g.inConnectFunc = false;
 			return s.lastResult;
 		}
@@ -100,7 +102,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		//let result = mapStateToProps_inner.call(s, state, props);
 		// for debugging in profiler
 		//let debugText = ToJSON(props).replace(/[^a-zA-Z0-9]/g, "_");
-		let debugText = (props["node"] ? " @ID:" + props["node"]._id : "") + " @changedPath: " + changedPath;
+		let debugText = `${props["node"] ? " @ID:" + props["node"]._id : ""} @changedPath: ${changedPath} @changedProps: ${changedProps.join(", ")}`;
 		let wrapperFunc = eval(`(function ${debugText.replace(/[^a-zA-Z0-9]/g, "_")}() { return mapStateToProps_inner.apply(s, arguments); })`);
 		let result = wrapperFunc.call(s, state, props);
 
