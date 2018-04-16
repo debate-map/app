@@ -16,7 +16,7 @@ import {IsMultiPremiseArgument, GetSortByRatingType, GetMainRatingType} from "..
 import {NodeChildHolderBox, HolderType} from "./NodeChildHolderBox";
 import { GetNodeChildrenL3 } from "Store/firebase/nodes";
 import { IsSpecialEmptyArray, emptyObj } from "Frame/Store/ReducerUtils";
-import { GetRatingAverage_AtPath } from "Store/firebase/nodeRatings";
+import { GetRatingAverage_AtPath, GetFillPercent_AtPath } from "Store/firebase/nodeRatings";
 import { CachedTransform } from "js-vextensions";
 import { ArgumentType } from "Store/firebase/nodes/@MapNodeRevision";
 
@@ -52,17 +52,17 @@ let initialState = {
 	oldChildBoxOffsets: null as {[key: number]: Vector2i},
 };
 
-let connector = (state, {node, nodeChildrenToShow}: Props)=> {
-	let nodeChildren_sortValues = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMap(child=>child._id+"", child=> {
+let connector = (state, {node, path, nodeChildrenToShow}: Props)=> {
+	/*let nodeChildren_sortValues = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMap(child=>child._id+"", child=> {
 		return GetRatingAverage_AtPath(child, GetSortByRatingType(child));
-	});
+	});*/
 	let nodeChildren_fillPercents = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMap(child=>child._id+"", child=> {
-		return GetRatingAverage_AtPath(child, GetMainRatingType(child));
+		return GetFillPercent_AtPath(child, `${path}/${child._id}`);
 	});
 
 	return {
 		initialChildLimit: State(a=>a.main.initialChildLimit),
-		nodeChildren_sortValues: CachedTransform("nodeChildren_sortValues_transform1", [node._id], nodeChildren_sortValues, ()=>nodeChildren_sortValues),
+		//nodeChildren_sortValues: CachedTransform("nodeChildren_sortValues_transform1", [node._id], nodeChildren_sortValues, ()=>nodeChildren_sortValues),
 		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", [node._id], nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
 	};
 };
@@ -71,7 +71,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
 		let {map, node, nodeView, path, nodeChildrenToShow, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, onHeightOrDividePointChange,
-			initialChildLimit, nodeChildren_sortValues} = this.props;
+			initialChildLimit, nodeChildren_fillPercents} = this.props;
 		let {childrenWidthOverride, oldChildBoxOffsets} = this.state;
 
 		let upChildren = separateChildren ? nodeChildrenToShow.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
@@ -79,10 +79,10 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		
 		// apply sorting
 		if (separateChildren) {
-			upChildren = upChildren.OrderBy(child=>nodeChildren_sortValues[child._id]);
-			downChildren = downChildren.OrderByDescending(child=>nodeChildren_sortValues[child._id]);
+			upChildren = upChildren.OrderBy(child=>nodeChildren_fillPercents[child._id]);
+			downChildren = downChildren.OrderByDescending(child=>nodeChildren_fillPercents[child._id]);
 		} else {
-			nodeChildrenToShow = nodeChildrenToShow.OrderByDescending(child=>nodeChildren_sortValues[child._id]);
+			nodeChildrenToShow = nodeChildrenToShow.OrderByDescending(child=>nodeChildren_fillPercents[child._id]);
 			//if (IsArgumentNode(node)) {
 			let isArgument_any = node.type == MapNodeType.Argument && node.current.argumentType == ArgumentType.Any;
 			if (node.childrenOrder && !isArgument_any) {
@@ -163,8 +163,8 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	}
 
 	get ChildOrderStr() {
-		let {nodeChildrenToShow, nodeChildren_sortValues} = this.props;
-		return nodeChildrenToShow.OrderBy(a=>nodeChildren_sortValues[a._id]).map(a=>a._id).join(",");
+		let {nodeChildrenToShow, nodeChildren_fillPercents} = this.props;
+		return nodeChildrenToShow.OrderBy(a=>nodeChildren_fillPercents[a._id]).map(a=>a._id).join(",");
 	}
 
 	lastHeight = 0;

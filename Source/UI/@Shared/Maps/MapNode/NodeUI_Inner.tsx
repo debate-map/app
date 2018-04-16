@@ -62,7 +62,7 @@ import { IsDoubleClick } from "Frame/General/Others";
 import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
 import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
 import {MapNodeRevision_titlePattern} from "../../../../Store/firebase/nodes/@MapNodeRevision";
-import { RS_CalculateTruthScore } from "Store/firebase/nodeRatings/ReasonScore";
+import { RS_CalculateTruthScore, RS_GetAllValues, ReasonScoreValues_RSPrefix, RS_CalculateTruthScoreComposite } from "Store/firebase/nodeRatings/ReasonScore";
 import {RS_CalculateWeightMultiplier, RS_CalculateBaseWeight, RS_CalculateWeight} from "../../../../Store/firebase/nodeRatings/ReasonScore";
 
 //export type NodeHoverExtras = {panel?: string, term?: number};
@@ -101,19 +101,9 @@ let connector = (state, {map, node, path}: Props)=> {
 	//let mainRating_mine = GetRatingValue(ratingNode._id, mainRatingType, GetUserID());
 	let mainRating_mine = GetRatingAverage_AtPath(ratingNode, mainRatingType, new RatingFilter({includeUser: GetUserID()}));
 
-	let weightingType = State(a=>a.main.weighting);
-	if (weightingType == WeightingType.ReasonScore && (node.type == MapNodeType.Argument || node.type == MapNodeType.Claim)) {
-		let argument = node.type == MapNodeType.Argument ? node : parent.type == MapNodeType.Argument ? parent : null;
-		let premises = node.type == MapNodeType.Argument ? GetNodeChildrenL3(argument, path).filter(a=>a && a.type == MapNodeType.Claim) : [node];
-
-		if (node.type == MapNodeType.Claim) {
-			var rs_claimTruthScore = RS_CalculateTruthScore(node);
-			var rs_claimBaseWeight = RS_CalculateBaseWeight(node);
-		}
-		if (argument) { // (node could instead be a claim under category)
-			var rs_argWeightMultiplier = RS_CalculateWeightMultiplier(argument);
-			var rs_argWeight = RS_CalculateWeight(argument, premises);
-		}
+	let showReasonScoreValuesForThisNode = State(a=>a.main.weighting) == WeightingType.ReasonScore && (node.type == MapNodeType.Argument || node.type == MapNodeType.Claim);
+	if (showReasonScoreValuesForThisNode) {
+		var reasonScoreValues = RS_GetAllValues(node, path, true) as ReasonScoreValues_RSPrefix;
 	}
 
 	return {
@@ -121,12 +111,9 @@ let connector = (state, {map, node, path}: Props)=> {
 		ratingsRoot: GetNodeRatingsRoot(node._id),
 		mainRating_average,
 		mainRating_mine,
-		rs_claimTruthScore,
-		rs_claimBaseWeight,
-		rs_argWeightMultiplier,
-		rs_argWeight,
-		changeType,
+		reasonScoreValues,
 		showReasonScoreValues: State(a=>a.main.showReasonScoreValues),
+		changeType,
 	};
 };
 @Connect(connector)
@@ -137,7 +124,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 	render() {
 		let {map, node, nodeView, path, width, widthOverride,
 			panelPosition, useLocalPanelState, style, form,
-			ratingsRoot, mainRating_average, mainRating_mine, rs_claimTruthScore, rs_claimBaseWeight, rs_argWeightMultiplier, rs_argWeight,
+			ratingsRoot, mainRating_average, mainRating_mine, reasonScoreValues,
 			changeType, showReasonScoreValues} = this.props;
 		let {hovered, hoverPanel, hoverTermID, /*local_selected,*/ local_openPanel} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
@@ -156,12 +143,16 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 
 		let backgroundFillPercent = mainRating_average || 0;
 		let markerPercent = mainRating_mine;
-		if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
+		let showReasonScoreValuesForThisNode = State(a=>a.main.weighting) == WeightingType.ReasonScore && (node.type == MapNodeType.Argument || node.type == MapNodeType.Claim);
+		if (showReasonScoreValuesForThisNode) {
+			var {rs_argTruthScoreComposite, rs_argWeightMultiplier, rs_argWeight, rs_claimTruthScore, rs_claimBaseWeight} = reasonScoreValues;
 			if (node.type == MapNodeType.Claim) {
 				backgroundFillPercent = rs_claimTruthScore * 100;
 				markerPercent = null;
 			} else if (node.type == MapNodeType.Argument) {
-				backgroundFillPercent = Lerp(0, 100, GetPercentFromXToY(0, 2, rs_argWeightMultiplier));
+				//backgroundFillPercent = Lerp(0, 100, GetPercentFromXToY(0, 2, rs_argWeightMultiplier));
+				//backgroundFillPercent = Lerp(0, 100, GetPercentFromXToY(0, 2, rs_argWeight));
+				backgroundFillPercent = rs_argTruthScoreComposite * 100;
 				markerPercent = null;
 			}
 		}
@@ -283,27 +274,24 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 						{panelToShow == "others" && <OthersPanel map={map} node={node} path={path}/>}
 					</div>}
 				{(()=> {
-					if (!showReasonScoreValues) return;
-					let weightingType = State(a=>a.main.weighting);
-					if (weightingType != WeightingType.ReasonScore || node.type == MapNodeType.Category) return;
+					if (!showReasonScoreValuesForThisNode) return;
 					
-					let debugText;
-					if (node.type == MapNodeType.Claim) {
-						let truthScore = RS_CalculateTruthScore(node) * 100;
-						debugText = ``;
+					//if (node.type == MapNodeType.Claim) {
+					let mainScore = node.type == MapNodeType.Argument ? RS_CalculateTruthScoreComposite(node) : RS_CalculateTruthScore(node);
 
-						if (combinedWithParentArgument) {
-							var weightMultiplier = RS_CalculateWeightMultiplier(parent);
-						}
-
-						return (
-							<div className="clickThrough" style={{position: "absolute", top: "100%", width: "100%", zIndex: 1, textAlign: "center", fontSize: 14}}>
-								Truth score: {ToPercentStr(rs_claimTruthScore)}
-								{combinedWithParentArgument && ` Weight: ${rs_claimBaseWeight.RoundTo_Str(.01)}x${rs_argWeightMultiplier.RoundTo_Str(.01)
-									} = ${rs_argWeight.RoundTo_Str(.01)}`}
-							</div>
-						);
-					}
+					return (
+						<div className="clickThrough" style={{position: "absolute", top: "100%", width: "100%", zIndex: 1, textAlign: "center", fontSize: 14}}>
+							{node.type == MapNodeType.Argument && `Truth score: ${ToPercentStr(mainScore)}${
+								` Weight: [...]x${rs_argWeightMultiplier.RoundTo_Str(.01)} = ${rs_argWeight.RoundTo_Str(.01)}`
+							}`}
+							{node.type == MapNodeType.Claim && `Truth score: ${ToPercentStr(mainScore)}${
+								combinedWithParentArgument
+									? ` Weight: ${rs_claimBaseWeight.RoundTo_Str(.01)}x${rs_argWeightMultiplier.RoundTo_Str(.01)} = ${rs_argWeight.RoundTo_Str(.01)}`
+									: ""
+							}`}
+						</div>
+					);
+					//}
 				})()}
 			</div>
 		);

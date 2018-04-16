@@ -1,15 +1,18 @@
 import {RatingType} from "../../Store/firebase/nodeRatings/@RatingType";
 import { GetData, GetData_Options } from "../../Frame/Database/DatabaseHelpers";
-import {CachedTransform} from "js-vextensions";
+import {CachedTransform, Lerp, GetPercentFromXToY} from "js-vextensions";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {RatingsRoot, Rating} from "./nodeRatings/@RatingsRoot";
 import {GetNodeChildren, GetNode, GetNodeChildrenL2, GetNodeChildrenL3} from "./nodes";
 import {ClaimForm, MapNodeL3, MapNodeL2, Polarity} from "./nodes/@MapNode";
-import {GetNodeL2, AsNodeL3, GetLinkUnderParent} from "./nodes/$node";
+import {GetNodeL2, AsNodeL3, GetLinkUnderParent, GetMainRatingType} from "./nodes/$node";
 import {MapNodeType} from "./nodes/@MapNodeType";
 import {emptyObj} from "../../Frame/Store/ReducerUtils";
 import {GetArgumentImpactPseudoRatingSet} from "../../Frame/Store/RatingProcessor";
 import {CachedTransform_WithStore} from "Frame/Database/DatabaseHelpers";
+import { WeightingType } from "../main";
+import { RS_GetAllValues } from "./nodeRatings/ReasonScore";
+import { GetUserID } from "./users";
 
 export function GetNodeRatingsRoot(nodeID: number) {
 	//RequestPaths(GetPaths_NodeRatingsRoot(nodeID));
@@ -74,6 +77,30 @@ export function GetRatingAverage_AtPath(node: MapNodeL3, ratingType: RatingType,
 		result = 100 - result;
 	}
 	return result;
+}
+
+export function GetFillPercent_AtPath(node: MapNodeL3, path: string, relevanceBox = false, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null): number {
+	if (State(a=>a.main.weighting) == WeightingType.Votes) {
+		return GetRatingAverage_AtPath(node, ratingType || GetMainRatingType(node), filter, resultIfNoData);
+	}
+
+	let {argTruthScoreComposite, argWeightMultiplier, claimTruthScore} = RS_GetAllValues(node, path);
+	
+	//if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
+	if (node.type == MapNodeType.Claim) {
+		return claimTruthScore * 100;
+	} else if (node.type == MapNodeType.Argument) {
+		if (relevanceBox) {
+			//return Lerp(0, 100, GetPercentFromXToY(0, 2, argWeightMultiplier));
+			return Lerp(0, 100, argWeightMultiplier);
+		}
+		return argTruthScoreComposite * 100;
+	}
+}
+export function GetMarkerPercent_AtPath(node: MapNodeL3, path: string, ratingType?: RatingType) {
+	if (State(a=>a.main.weighting) == WeightingType.Votes) {
+		return GetRatingAverage_AtPath(node, ratingType || GetMainRatingType(node), new RatingFilter({includeUser: GetUserID()}));
+	}
 }
 
 /*export function GetPaths_MainRatingSet(node: MapNode) {

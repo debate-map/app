@@ -16,14 +16,14 @@ import {GetNodeColor} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import { GetRatingTypeInfo, RatingType } from "Store/firebase/nodeRatings/@RatingType";
 import { SlicePath } from "Frame/Database/DatabaseHelpers";
 import { GetParentNodeL3, GetNodeChildrenL3 } from "Store/firebase/nodes";
-import { GetRatings } from "Store/firebase/nodeRatings";
-import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage, RatingFilter, GetRatingAverage_AtPath} from "../../../../../Store/firebase/nodeRatings";
+import { GetRatings, GetMarkerPercent_AtPath } from "Store/firebase/nodeRatings";
+import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage, RatingFilter, GetRatingAverage_AtPath, GetFillPercent_AtPath} from "../../../../../Store/firebase/nodeRatings";
 import { IsSinglePremiseArgument } from "Store/firebase/nodes/$node";
 import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
 import {Squiggle} from "../NodeConnectorBackground";
 import { ACTMapNodeExpandedSet } from "Store/main/mapViews/$mapView/rootNodeViews";
 import { WeightingType } from "Store/main";
-import { RS_CalculateTruthScore, RS_CalculateBaseWeight, RS_CalculateWeightMultiplier, RS_CalculateWeight } from "Store/firebase/nodeRatings/ReasonScore";
+import { RS_CalculateTruthScore, RS_CalculateBaseWeight, RS_CalculateWeightMultiplier, RS_CalculateWeight, RS_GetAllValues, ReasonScoreValues_RSPrefix } from "Store/firebase/nodeRatings/ReasonScore";
 import { GetUserID } from "Store/firebase/users";
 import RatingsPanel from "./Panels/RatingsPanel";
 
@@ -42,7 +42,7 @@ let connector = (state, {node, path, type, nodeChildren}: Props)=> {
 	let combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
 	//let ratingReversed = ShouldRatingTypeBeReversed(node);
 
-	var ratingType = {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[type] as RatingType;
+	/*var ratingType = {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[type] as RatingType;
 	let ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parent, path);
 
 	let ratings = GetRatings(node._id, ratingType);
@@ -54,29 +54,18 @@ let connector = (state, {node, path, type, nodeChildren}: Props)=> {
 	//let mainRating_fillPercent = average;
 
 	let weightingType = State(a=>a.main.weighting);
-	if (weightingType == WeightingType.ReasonScore) {
-		let argument = node.type == MapNodeType.Argument ? node : parent.type == MapNodeType.Argument ? parent : null;
-		let premises = node.type == MapNodeType.Argument ? GetNodeChildrenL3(argument, path).filter(a=>a && a.type == MapNodeType.Claim) : [node];
+	let showReasonScoreValuesForThisNode = State(a=>a.main.weighting) == WeightingType.ReasonScore; //&& (node.type == MapNodeType.Argument || node.type == MapNodeType.Claim);
+	if (showReasonScoreValuesForThisNode) {
+		var reasonScoreValues = RS_GetAllValues(node, path, true) as ReasonScoreValues_RSPrefix;
+	}*/
 
-		if (node.type == MapNodeType.Claim) {
-			var rs_claimTruthScore = RS_CalculateTruthScore(node);
-			var rs_claimBaseWeight = RS_CalculateBaseWeight(node);
-		}
-		if (argument) { // (node could instead be a claim under category)
-			var rs_argWeightMultiplier = RS_CalculateWeightMultiplier(argument);
-			var rs_argWeight = RS_CalculateWeight(argument, premises);
-		}
-	}
+	let backgroundFillPercent = GetFillPercent_AtPath(node, path, true);
+	let markerPercent = GetMarkerPercent_AtPath(node, path);
 
 	return {
 		combineWithChildClaim: IsSinglePremiseArgument(node),
-		mainRating_average,
-		mainRating_mine,
-		rs_claimTruthScore,
-		rs_claimBaseWeight,
-		rs_argWeightMultiplier,
-		rs_argWeight,
-		weightingType,
+		backgroundFillPercent,
+		markerPercent,
 	};
 };
 @Connect(connector)
@@ -87,8 +76,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 	}
 	lineHolder: HTMLDivElement;
 	render() {
-		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, widthOverride, combineWithChildClaim,
-			mainRating_average, mainRating_mine, rs_claimTruthScore, rs_argWeightMultiplier} = this.props;
+		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, widthOverride, combineWithChildClaim, backgroundFillPercent, markerPercent} = this.props;
 		let {innerBoxOffset, lineHolderHeight, hovered} = this.state;
 
 		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildren);
@@ -100,18 +88,6 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		let backgroundColor = GetNodeColor({type: MapNodeType.Claim} as any as MapNodeL3);
 		//let lineColor = GetNodeColor(node, "raw");
 		let lineColor = GetNodeColor({type: MapNodeType.Claim} as any as MapNodeL3, "raw");
-
-		let backgroundFillPercent = mainRating_average || 0;
-		let markerPercent = mainRating_mine;
-		if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
-			if (node.type == MapNodeType.Claim) {
-				backgroundFillPercent = rs_claimTruthScore * 100;
-				markerPercent = null;
-			} else if (node.type == MapNodeType.Argument) {
-				backgroundFillPercent = Lerp(0, 100, GetPercentFromXToY(0, 2, rs_argWeightMultiplier));
-				markerPercent = null;
-			}
-		}
 
 		let lineOffset = 50..KeepAtMost(innerBoxOffset);
 		//let expandKey = type == HolderType.Truth ? "expanded_truth" : "expanded_relevance";
