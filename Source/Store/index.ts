@@ -140,8 +140,9 @@ export function StartBufferingActions() {
 	bufferedActions = [];
 }
 export function StopBufferingActions() {
-	store.dispatch(new ApplyActionSet(bufferedActions));
+	let oldBufferedActions = bufferedActions;
 	bufferedActions = null;
+	store.dispatch(new ApplyActionSet(oldBufferedActions));
 }
 
 // class is used only for initialization
