@@ -69,6 +69,52 @@ export default function(initialState = {}, history) {
 		},
 	];
 
+	// redux-dev-tools config
+	// ==========
+
+	let reduxDevToolsConfig = {
+		maxAge: 70,
+		/*actionSanitizer: action=> {
+			function Sanitize(action) {
+				if (action.type == "@@reactReduxFirebase/SET" && action.path.startsWith(DBPath("nodes"))) {
+					return {...action, data: "<<IGNORED>>"};
+				}
+				return action;
+			}
+			if (action.type == "ApplyActionSet") {
+				return {...action, actions: action.actions.map(a=>Sanitize(a))};
+			}
+			return Sanitize(action);
+		},
+		stateSanitizer: action=> {
+			function Sanitize(action) {
+				if (action.type == "@@reactReduxFirebase/SET" && action.path.startsWith(DBPath("nodes"))) {
+					return {...action, data: "<<IGNORED>>"};
+				}
+				return action;
+			}
+			if (action.type == "ApplyActionSet") {
+				return {...action, actions: action.actions.map(a=>Sanitize(a))};
+			}
+			return Sanitize(action);
+		},*/
+		/*serialize: {
+			replacer: (key, value)=> {
+				// ignore "nodes" subtree
+				if (value && value.currentRevision) return "<<IGNORED>>";
+				//if (value && value.currentRevision) return {data: "<<IGNORED>>"};
+				return value;
+			},
+			reviver: (key, value)=> {
+				// ignore "nodes" subtree
+				if (value && value.currentRevision) return "<<IGNORED>>";
+				return value;
+			},
+		},*/
+		/*actionsFilter: (action) => (action.places ? Object.assign(action, { places: [] }) : action),
+ 		statesFilter: (state) => (state.places ? Object.assign(state, {places: [] }) : state)*/
+	};
+
 	// Store Instantiation and HMR Setup
 	// ==========
 
@@ -100,7 +146,7 @@ export default function(initialState = {}, history) {
 			reactReduxFirebase(firebase, reduxFirebaseConfig),
 			batchedSubscribe(unstable_batchedUpdates),
 			applyMiddleware(...lateMiddleware), // place late-middleware after reduxFirebase, so it can intercept all its dispatched events
-			g.devToolsExtension && g.devToolsExtension({maxAge: 70}),
+			g.devToolsExtension && g.devToolsExtension(reduxDevToolsConfig),
 		].filter(a=>a)) as StoreEnhancer<any>
 	) as Store<RootState>; //& {extraReducers};
 

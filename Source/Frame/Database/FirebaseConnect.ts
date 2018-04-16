@@ -140,8 +140,9 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		return result;
 	};
 
-	if (mapStateToProps_inner)
+	if (mapStateToProps_inner) {
 		return connect(mapStateToProps_wrapper);
+	}
 	return connect(()=> {
 		mapStateToProps_inner = mapStateToProps_inner_getter();
 		return mapStateToProps_wrapper;

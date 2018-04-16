@@ -10,6 +10,8 @@ import {GetNodeL2, GetNodeL3} from "./nodes/$node";
 import {Map} from "./maps/@Map";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import { emptyArray } from "Frame/Store/ReducerUtils";
+import {CachedTransform_WithStore} from "Frame/Database/DatabaseHelpers";
+import {MapNodeL3} from "Store/firebase/nodes/@MapNode";
 
 export type NodeMap = {[key: string]: MapNode};
 export function GetNodeMap(queries?): NodeMap {
@@ -113,24 +115,26 @@ export function GetNodeChildrenL2(node: MapNode) {
 	let nodeChildrenL2 = nodeChildren.map(child=>child ? GetNodeL2(child) : null);
 	return CachedTransform("GetNodeChildrenL2", [], nodeChildrenL2, ()=>nodeChildrenL2);
 }
-export function GetNodeChildrenL3(node: MapNode, path?: string, filterForPath = false) {
+export function GetNodeChildrenL3(node: MapNode, path?: string, filterForPath = false): MapNodeL3[] {
 	if (node == null) return emptyArray;
-	path = path || node._id+"";
-	
-	let nodeChildrenL2 = GetNodeChildrenL2(node);
-	let nodeChildrenL3 = nodeChildrenL2.map(child=>child ? GetNodeL3(path + "/" + child._id) : null);
-	if (filterForPath) {
-		nodeChildrenL3 = nodeChildrenL3.filter(child=> {
-			// if null, keep (so receiver knows there's an entry here, but it's still loading)
-			if (child == null) return true;
-			// filter out any nodes whose access-level is higher than our own
-			if (child.current.accessLevel > GetUserAccessLevel(GetUserID())) return false;
-			// hide nodes that don't have the required premise-count
-			//if (!IsNodeVisibleToNonModNonCreators(child, GetNodeChildren(child)) && !IsUserCreatorOrMod(GetUserID(), child)) return false;
-			return true;
-		});
-	}
-	return CachedTransform("GetNodeChildrenL3", [path], nodeChildrenL3, ()=>nodeChildrenL3);
+	return CachedTransform_WithStore("GetNodeChildrenL3", [node._id, path, filterForPath], node.children, ()=> {
+		path = path || node._id+"";
+		
+		let nodeChildrenL2 = GetNodeChildrenL2(node);
+		let nodeChildrenL3 = nodeChildrenL2.map(child=>child ? GetNodeL3(path + "/" + child._id) : null);
+		if (filterForPath) {
+			nodeChildrenL3 = nodeChildrenL3.filter(child=> {
+				// if null, keep (so receiver knows there's an entry here, but it's still loading)
+				if (child == null) return true;
+				// filter out any nodes whose access-level is higher than our own
+				if (child.current.accessLevel > GetUserAccessLevel(GetUserID())) return false;
+				// hide nodes that don't have the required premise-count
+				//if (!IsNodeVisibleToNonModNonCreators(child, GetNodeChildren(child)) && !IsUserCreatorOrMod(GetUserID(), child)) return false;
+				return true;
+			});
+		}
+		return nodeChildrenL3;
+	});
 }
 
 export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNodeL2) {

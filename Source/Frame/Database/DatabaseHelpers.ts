@@ -442,6 +442,7 @@ export function CachedTransform_WithStore<T, T2, T3>(
 	transformFunc: (debugInfo: any, staticProps: any[], dynamicProps: T2)=>T3
 ): T3 {
 	let storage = GetStorageForCachedTransform(transformType, staticProps);
+	let dynamicProps_withStoreData = {...dynamicProps as any};
 	if (storage.lastDynamicProps) {
 		for (let key in storage.lastDynamicProps) {
 			if (key.startsWith("store_")) {
@@ -449,18 +450,19 @@ export function CachedTransform_WithStore<T, T2, T3>(
 				//let oldVal = storage.lastDynamicProps[key];
 				//let newVal = State({countAsAccess: false}, ...path.split("/"));
 				let newVal = State(...path.split("/")); // count as access, so that Connect() retriggers for changes to these inside-transformer accessed-paths
-				dynamicProps[key] = newVal;
+				dynamicProps_withStoreData[key] = newVal;
 			}
 		}
 	}
 
 	let collector = new DBRequestCollector().Start();
 	try {
-		var result = CachedTransform(transformType, staticProps, dynamicProps, transformFunc);
+		var result = CachedTransform(transformType, staticProps, dynamicProps_withStoreData, transformFunc);
 	} finally {
 		collector.Stop();
 	}
 
+	// for each accessed store entry, add it to VCache's "last dynamic props" for this transform
 	for (let path of collector.storePathsRequested) {
 		let val = State({countAsAccess: false}, ...path.split("/"));
 		storage.lastDynamicProps["store_" + path] = val;

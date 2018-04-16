@@ -114,18 +114,17 @@ function SetUpRR() {
 		G({R: Require});
 		let RR = {};
 		for (let {name: moduleName, value: moduleExports} of (Require as any).Props()) {
-			try {
-				for (let key in moduleExports) {
-					let finalKey = key;
-					while (finalKey in RR) finalKey += `_`;
-					RR[finalKey] = moduleExports[key];
-				}
-				if (moduleExports.default) {
-					let finalKey = moduleName;
-					while (finalKey in RR) finalKey += `_`;
-					RR[finalKey] = moduleExports.default;
-				}
-			} catch (ex) {}
+			if (moduleExports == null) continue;
+			for (let key in moduleExports) {
+				let finalKey = key;
+				while (finalKey in RR) finalKey += `_`;
+				RR[finalKey] = moduleExports[key];
+			}
+			if (moduleExports.default) {
+				let finalKey = moduleName;
+				while (finalKey in RR) finalKey += `_`;
+				RR[finalKey] = moduleExports.default;
+			}
 		}
 		G({RR});
 	});
