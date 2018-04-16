@@ -162,11 +162,19 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		return nodeView[expandKey];
 	}
 
+	get ChildOrderStr() {
+		let {nodeChildrenToShow, nodeChildren_sortValues} = this.props;
+		return nodeChildrenToShow.OrderBy(a=>nodeChildren_sortValues[a._id]).map(a=>a._id).join(",");
+	}
+
 	lastHeight = 0;
+	lastOrderStr = null;
 	PostRender() {
 		//if (this.lastRender_source == RenderSource.SetState) return;
 
 		let height = $(FindDOM(this)).outerHeight();
+		let orderStr = this.ChildOrderStr;
+		
 		if (height != this.lastHeight) {
 			this.OnHeightChange();
 		} /*else {
@@ -174,7 +182,16 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 			this.UpdateState();
 			this.ReportChildrenCenterYChange();
 		}*/
+
+		if (orderStr != this.lastOrderStr) {
+			//this.OnChildHeightOrPosOrOrderChange();
+			//this.UpdateChildrenWidthOverride();
+			this.UpdateChildBoxOffsets();
+			//this.ReportDividePointChange();
+		}
+		
 		this.lastHeight = height;
+		this.lastOrderStr = orderStr;
 	}
 
 	OnChildHeightOrPosChange_updateStateQueued = false;
