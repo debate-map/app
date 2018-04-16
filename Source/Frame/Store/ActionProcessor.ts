@@ -198,7 +198,7 @@ export async function PostDispatchAction(action: Action<any>) {
 			}
 		}
 	}
-	if (action.Is(ACTMapNodeExpandedSet) ) {
+	if (action.Is(ACTMapNodeExpandedSet)) {
 		let path = action.payload.path;
 		let nodeID = SplitStringBySlash_Cached(path).Last().ToInt();
 		let node = GetNodeL2(nodeID) || await GetAsync(()=>GetNodeL2(nodeID));

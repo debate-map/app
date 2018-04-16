@@ -92,6 +92,8 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 					//display: "flex", flexDirection: "column", marginLeft: 10, maxHeight: expanded ? 500 : 0, transition: "max-height 1s", overflow: "hidden",
 				},
 				//!expanded && {visibility: "hidden", height: 0}, // maybe temp; fix for lines-sticking-to-top issue
+				// if we don't know our child offsets yet, render still (so we can measure ourself), but make self invisible
+				oldChildBoxOffsets == null && {opacity: 0, pointerEvents: "none"},
 			)}>
 				{linkSpawnPoint && oldChildBoxOffsets &&
 					//<NodeConnectorBackground node={node} linkSpawnPoint={vertical ? Vector2iCache.Get(0, linkSpawnPoint) : Vector2iCache.Get(-30, linkSpawnPoint)}
@@ -147,7 +149,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		}*/
 		this.lastHeight = height;
 	}
-	
+
 	OnChildHeightOrPosChange_updateStateQueued = false;
 	OnChildHeightOrPosChange() {
 		let {node} = this.props;

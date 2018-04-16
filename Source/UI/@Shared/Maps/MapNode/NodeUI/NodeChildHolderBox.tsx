@@ -128,6 +128,8 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 				{position: "relative", alignItems: "flex-start", /*marginLeft: `calc(100% - ${width}px)`,*/ width},
 				!isMultiPremiseArgument && {alignSelf: "flex-end"},
 				isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
+				// if we don't know our inner-box-offset yet, render still (so we can measure ourself), but make self invisible
+				nodeView[expandKey] && innerBoxOffset == 0 && {opacity: 0, pointerEvents: "none"},
 			)}>
 				<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{position: "absolute", width: "100%", height: "100%"}}>
 					{type == HolderType.Truth && 
