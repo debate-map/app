@@ -6,7 +6,7 @@ import {ACTMapViewMerge} from "../../Store/main/mapViews/$mapView";
 import {DBPath, GetData, GetDataAsync, ProcessDBData} from "../Database/DatabaseHelpers";
 import {GetMapView, GetSelectedNodePath, GetFocusedNodePath, GetNodeView} from "../../Store/main/mapViews";
 import {Vector2i} from "js-vextensions";
-import {RootState} from "../../Store/index";
+import {RootState, ApplyActionSet} from "../../Store/index";
 import ReactGA from "react-ga";
 import {GetCurrentURL} from "../General/URLs";
 import {CreateMapViewForPath} from "./PathFinder";
@@ -30,7 +30,6 @@ import {GetNodeL2} from "Store/firebase/nodes/$node";
 import { MapNodeType } from "Store/firebase/nodes/@MapNodeType";
 import { GetNodeChildrenL2 } from "Store/firebase/nodes";
 import { GetNodeChildrenL3 } from "Store/firebase/nodes";
-import { CreateActionSet } from "Frame/Database/FirebaseConnect";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -216,7 +215,7 @@ export async function PostDispatchAction(action: Action<any>) {
 					actions.push(new ACTMapNodeExpandedSet({mapID: action.payload.mapID, path: childPath, expanded: true, recursive: false}));
 				}
 			}
-			store.dispatch(CreateActionSet(actions));
+			store.dispatch(new ApplyActionSet(actions));
 		}
 		// if we're expanding an argument-node, make sure any untouched relevance-arguments start expanded 
 		/*else if (node.type == MapNodeType.Argument) {
@@ -309,7 +308,7 @@ function PostInit() {
 	let lastAuth;
 	//Log("Subscribed");
 	store.subscribe(()=> {
-		let auth = State().firebase.auth;
+		let auth = State().firebase && State().firebase.auth;
 		if (auth && auth != lastAuth) {
 			//Log("Setting user-context: " + auth);
 			//Raven.setUserContext(auth);

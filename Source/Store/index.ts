@@ -127,6 +127,23 @@ export function SimpleReducer(path: string | ((store: RootState)=>any), defaultV
 	};
 }
 
+export class ApplyActionSet extends Action<Action<any>[]> {
+	constructor(payload) {
+		super(payload);
+		this.actions = payload; // copy to this.actions as well (shorter lines in CreateStore.ts)
+	}
+	actions: Action<any>;
+};
+
+let bufferedActions: Action<any>[];
+export function StartBufferingActions() {
+	bufferedActions = [];
+}
+export function StopBufferingActions() {
+	store.dispatch(new ApplyActionSet(bufferedActions));
+	bufferedActions = null;
+}
+
 // class is used only for initialization
 export class RootState {
 	main: MainState;
@@ -154,10 +171,20 @@ export function MakeRootReducer(extraReducers?) {
 	});
 
 	let rootReducer = (state: RootState, rootAction)=> {
+		if (bufferedActions) {
+			bufferedActions.push(rootAction);
+			return state;
+		}
+
 		let actions = rootAction.type == "ApplyActionSet" ? rootAction.actions : [rootAction];
 
 		let result = state;
 		for (let action of actions) {
+			if (action.type == "ApplyActionSet") {
+				result = rootReducer(result, action);
+				continue;
+			}
+			
 			try {
 				let oldResult = result;
 				result = innerReducer(result, action) as RootState;

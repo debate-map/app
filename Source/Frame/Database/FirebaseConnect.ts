@@ -1,5 +1,5 @@
 import {Assert, GetPropsChanged_WithValues, GetPropsChanged} from "js-vextensions";
-import {RootState} from "../../Store/index";
+import {RootState, ApplyActionSet} from "../../Store/index";
 import {connect} from "react-redux";
 import {ShallowChanged, GetInnerComp} from "react-vextensions";
 import {watchEvents, unWatchEvents} from "react-redux-firebase/lib/actions/query";
@@ -158,10 +158,6 @@ let actionTypeBufferInfos = {
 let actionTypeLastDispatchTimes = {};
 let actionTypeBufferedActions = {};
 
-export function CreateActionSet(actions: Action<any>[]): Action<any> {
-	return {type: "ApplyActionSet", actions} as any as Action<any>;
-}
-
 function DispatchDBAction(action) {
 	let timeSinceLastDispatch = Date.now() - (actionTypeLastDispatchTimes[action.type] || 0);
 	let bufferInfo = actionTypeBufferInfos[action.type];
@@ -178,7 +174,7 @@ function DispatchDBAction(action) {
 		if (actionTypeBufferedActions[action.type] == null) {
 			setTimeout(()=> {
 				// now that wait is over, apply any buffered event-triggers
-				store.dispatch(CreateActionSet(actionTypeBufferedActions[action.type]));
+				store.dispatch(new ApplyActionSet(actionTypeBufferedActions[action.type]));
 
 				actionTypeLastDispatchTimes[action.type] = Date.now();
 				actionTypeBufferedActions[action.type] = null;

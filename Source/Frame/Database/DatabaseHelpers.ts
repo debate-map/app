@@ -6,6 +6,7 @@ import {watchEvents, unWatchEvents} from "react-redux-firebase/lib/actions/query
 import {getEventsFromInput} from "react-redux-firebase/lib/utils";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import { NodeUI } from "UI/@Shared/Maps/MapNode/NodeUI";
+import { StartBufferingActions, StopBufferingActions } from "Store";
 //export {DBPath};
 
 export function DBPath(path = "", inVersionRoot = true) {
@@ -271,11 +272,13 @@ export async function GetAsync<T>(dbGetterFunc: ()=>T, statsLogger?: ({requested
 		result = dbGetterFunc();
 		let newRequestedPaths = GetRequestedPaths().Except(requestedPathsSoFar.VKeys());
 
+		StartBufferingActions();
 		//let oldNodeRenderCount = NodeUI.renderCount;
 		unWatchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths)); // do this just to trigger re-get
 		// start watching paths (causes paths to be requested)
 		watchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths));
 		//Assert(NodeUI.renderCount == oldNodeRenderCount, "NodeUIs rendered during unwatch/watch event!");
+		StopBufferingActions();
 
 		for (let path of newRequestedPaths) {
 			requestedPathsSoFar[path] = true;
