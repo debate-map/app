@@ -1,7 +1,7 @@
 import {MapNode, MapNodeL2, MapNodeL3, Polarity} from "../nodes/@MapNode";
 import {Range} from "js-vextensions";
 import {MapNodeType} from "../nodes/@MapNodeType";
-import {GetNodeForm, GetMainRatingType, GetNodeL2, GetFinalPolarity, GetLinkUnderParent} from "../nodes/$node";
+import {GetNodeForm, GetMainRatingType, GetNodeL2, GetFinalPolarity, GetLinkUnderParent, IsMultiPremiseArgument} from "../nodes/$node";
 import {GetNode} from "../nodes";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
@@ -18,6 +18,7 @@ export type RatingType = "significance" | "neutrality" | "truth" | "relevance" |
 export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, parent: MapNodeL3, path: string) {
 	let link = GetLinkUnderParent(node._id, parent);
 	let finalPolarity = link ? GetFinalPolarity(link.polarity, GetNodeForm(parent)) : Polarity.Supporting;
+	let isMultiPremiseArgument = IsMultiPremiseArgument(node);
 	
 	let result = new RatingType_Info();
 	result.displayText = PropNameToTitle(ratingType);
@@ -65,7 +66,9 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 
 		/*result.description = `If ${premiseCountStr} of this argument were true (to a high extent), ${""
 			}how much would it impact your ${grandParentRatingType} rating for the parent claim? (0: not at all, 50: moderately, 100: game-changer)`;*/
-		result.description = `Assuming it were true, how relevant/impactful would this statement be toward the parent claim? (0: not at all, 50: moderately, 100: game-changer)`;
+		result.description = isMultiPremiseArgument
+			? `Assuming they were true, how relevant/impactful would the statements (premises) below this be toward the parent claim? (0: not at all, 50: moderately, 100: game-changing)`
+			: `Assuming it were true, how relevant/impactful would this statement be toward the parent claim? (0: not at all, 50: moderately, 100: game-changing)`;
 		//let supporting = parent.link.polarity == Polarity.Supporting;
 	} else {
 		Assert(false, `Invalid rating type: ${ratingType}`);
