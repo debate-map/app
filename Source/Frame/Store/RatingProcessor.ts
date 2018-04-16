@@ -63,6 +63,7 @@ export function GetArgumentImpactPseudoRatingSet(argument: MapNodeL2, premises: 
 	});
 	//let dataUsedInCalculation = {...childRatingSets, ...childForms_map};
 	let dataUsedInCalculation = {...childForms_map};
+	dataUsedInCalculation.argumentType = argument.current.argumentType;
 
 	//let result = CachedTransform("GetArgumentImpactPseudoRatingSet", [argument._id], dataUsedInCalculation, ()=> {
 	let result = CachedTransform_WithStore("GetArgumentImpactPseudoRatingSet", [argument._id], dataUsedInCalculation, ()=> {

@@ -42,34 +42,16 @@ export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, paren
 		Assert(node.type == MapNodeType.Argument, `Invalid state. Node with rating-type "relevance" should be an argument. @path:${path}`);
 
 		let premiseCountrStrMap = {
-			[ArgumentType.All]: `all of the premises`,
-			[ArgumentType.AnyTwo]: `at least two of the premises`,
-			[ArgumentType.Any]: `at least one of the premises.`
+			//[ArgumentType.All]: `all of the premises`,
+			[ArgumentType.All]: `they`,
+			[ArgumentType.AnyTwo]: `at least two of them`,
+			[ArgumentType.Any]: `at least one of them`
 		};
-		//let premiseCountrStrMap = {All: `all of its premises`, AnyTwo: `at least two of its premises`, Any: `at least one of its premises.`};
-		let premiseCountStr = premiseCountrStrMap[ArgumentType[node.current.argumentType]];
-		let shiftType = finalPolarity == Polarity.Supporting ? "raise" : "lower";
-
-		/*return (
-			<span>
-				Suppose this were the only argument (ie. line of support or opposition) specifically on this subject.
-				<br/>Suppose also that {premiseCountStr} are 100% true/full.
-				<br/>If so, how much should it {shiftType} the {grandParentRatingType} rating of someone whose initial evaluation was 50%?
-			</span>
-		);*/
-		/*return (
-			<span>
-				Suppose that {premiseCountStr} of this argument were 100% true/full.
-				<br/>If so, how much should it {shiftType} the {grandParentRatingType} rating of someone whose initial evaluation was 50%?
-			</span>
-		);*/
-
-		/*result.description = `If ${premiseCountStr} of this argument were true (to a high extent), ${""
-			}how much would it impact your ${grandParentRatingType} rating for the parent claim? (0: not at all, 50: moderately, 100: game-changer)`;*/
+		let premiseCountStr = premiseCountrStrMap[node.current.argumentType];
+		
 		result.description = isMultiPremiseArgument
-			? `Assuming they were true, how relevant/impactful would the statements (premises) below this be toward the parent claim? (0: not at all, 50: moderately, 100: game-changing)`
+			? `Assuming ${premiseCountStr} were true, how relevant/impactful would the statements (premises) below this be toward the parent claim? (0: not at all, 50: moderately, 100: game-changing)`
 			: `Assuming it were true, how relevant/impactful would this statement be toward the parent claim? (0: not at all, 50: moderately, 100: game-changing)`;
-		//let supporting = parent.link.polarity == Polarity.Supporting;
 	} else {
 		Assert(false, `Invalid rating type: ${ratingType}`);
 	}
