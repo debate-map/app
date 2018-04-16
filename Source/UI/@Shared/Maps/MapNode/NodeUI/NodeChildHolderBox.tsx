@@ -96,7 +96,10 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		if (isMultiPremiseArgument) {
 			text = "When taken together, are these claims relevant?";
 		}
-		let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
+		//let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
+		let backgroundColor = GetNodeColor({type: MapNodeType.Claim} as any as MapNodeL3);
+		//let lineColor = GetNodeColor(node, "raw");
+		let lineColor = GetNodeColor({type: MapNodeType.Claim} as any as MapNodeL3, "raw");
 
 		let backgroundFillPercent = mainRating_average || 0;
 		let markerPercent = mainRating_mine;
@@ -110,8 +113,6 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 			}
 		}
 
-		//let lineColor = GetNodeColor(node, "raw");
-		let lineColor = GetNodeColor({type: MapNodeType.Category} as any as MapNodeL3, "raw");
 		let lineOffset = 50..KeepAtMost(innerBoxOffset);
 		//let expandKey = type == HolderType.Truth ? "expanded_truth" : "expanded_relevance";
 		let holderTypeStr = HolderType[type].toLowerCase();
@@ -133,7 +134,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 				!isMultiPremiseArgument && {alignSelf: "flex-end"},
 				isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
 				// if we don't know our inner-box-offset yet, render still (so we can measure ourself), but make self invisible
-				nodeView[expandKey] && innerBoxOffset == 0 && {opacity: 0, pointerEvents: "none"},
+				nodeView[expandKey] && nodeChildren.length && innerBoxOffset == 0 && {opacity: 0, pointerEvents: "none"},
 			)}>
 				<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{position: "absolute", width: "100%", height: "100%"}}>
 					{type == HolderType.Truth && 
@@ -152,7 +153,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 						<Squiggle start={[0, -2]} startControl_offset={[0, lineOffset]} end={[(width / 2) - 2, innerBoxOffset + 2]} endControl_offset={[0, -lineOffset]} color={lineColor}/>
 					}
 					{type == HolderType.Relevance && isMultiPremiseArgument &&
-						<div style={{position: "absolute", right: "100%", width: 10, top: "50%", height: 3, backgroundColor: backgroundColor.css()}}/>}
+						<div style={{position: "absolute", right: "100%", width: 10, top: "50%", height: 3, backgroundColor: lineColor.css()}}/>}
 				</div>
 				<div ref={c=>this.innerUI = c} style={E({
 					display: "flex", position: "relative", borderRadius: 5, cursor: "default",

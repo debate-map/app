@@ -2,6 +2,8 @@ import {Assert} from "js-vextensions";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MapNode, MapNodeL2, ClaimForm, MapNodeL3, Polarity} from "./@MapNode";
 import chroma from "chroma-js";
+import {IsPremiseOfSinglePremiseArgument} from "./$node";
+import {GetParentNodeL2} from "../nodes";
 
 export enum MapNodeType {
 	Category = 10,

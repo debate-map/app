@@ -43,7 +43,7 @@ import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
 import {GetTerm, GetTermVariantNumber} from "../../../../Store/firebase/terms";
 import {Term} from "../../../../Store/firebase/terms/@Term";
 import {ParseSegmentsForPatterns} from "../../../../Frame/General/RegexHelpers";
-import {GetParentNode, IsNodeSubnode, GetNodeChildrenL3} from "../../../../Store/firebase/nodes";
+import {GetParentNode, IsNodeSubnode, GetNodeChildrenL3, GetParentNodeL3} from "../../../../Store/firebase/nodes";
 import classNames from "classnames";
 import { GetEquationStepNumber } from "../../../../Store/firebase/nodes/$node/equation";
 import NodeMathUI from "UI/@Shared/Maps/MapNode/NodeMathUI";
@@ -142,6 +142,13 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 		let {hovered, hoverPanel, hoverTermID, /*local_selected,*/ local_openPanel} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let backgroundColor = GetNodeColor(node);
+
+		let parent = GetParentNodeL3(path);
+		let combinedWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
+		if (combinedWithParentArgument) {
+			backgroundColor = GetNodeColor(parent);
+		}
+	
 		let outlineColor = GetChangeTypeOutlineColor(changeType);
 		let barSize = 5;
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
@@ -159,8 +166,6 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 			}
 		}
 
-		let parent = GetNodeL3(SlicePath(path, 1));
-		let combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
 		let nodeReversed = form == ClaimForm.Negation;
 		
 		let leftPanelShow = (nodeView && nodeView.selected) || hovered; //|| local_selected;
@@ -287,14 +292,14 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 						let truthScore = RS_CalculateTruthScore(node) * 100;
 						debugText = ``;
 
-						if (combineWithParentArgument) {
+						if (combinedWithParentArgument) {
 							var weightMultiplier = RS_CalculateWeightMultiplier(parent);
 						}
 
 						return (
 							<div className="clickThrough" style={{position: "absolute", top: "100%", width: "100%", zIndex: 1, textAlign: "center", fontSize: 14}}>
 								Truth score: {ToPercentStr(rs_claimTruthScore)}
-								{combineWithParentArgument && ` Weight: ${rs_claimBaseWeight.RoundTo_Str(.01)}x${rs_argWeightMultiplier.RoundTo_Str(.01)
+								{combinedWithParentArgument && ` Weight: ${rs_claimBaseWeight.RoundTo_Str(.01)}x${rs_argWeightMultiplier.RoundTo_Str(.01)
 									} = ${rs_argWeight.RoundTo_Str(.01)}`}
 							</div>
 						);
