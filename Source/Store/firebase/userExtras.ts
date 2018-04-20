@@ -17,7 +17,6 @@ export function IsUserBasicOrAnon(userID: string) {
 	return permissionGroups == null || permissionGroups.basic;
 }
 export function IsUserCreatorOrMod(userID: string, entity: Term | Image | Map | MapNode | Post | Thread) {
-	if (1) return true; // temp
 	let permissionGroups = GetUserPermissionGroups(userID);
 	if (permissionGroups == null) return false;
 	return (entity && entity.creator == userID && permissionGroups.basic) || permissionGroups.mod;

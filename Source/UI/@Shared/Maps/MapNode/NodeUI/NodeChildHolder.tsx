@@ -76,7 +76,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
-		let {map, node, nodeView, path, nodeChildrenToShow, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, onHeightOrDividePointChange,
+		let {map, node, nodeView, path, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, onHeightOrDividePointChange,
 			initialChildLimit, nodeChildren_fillPercents} = this.props;
 		let {childrenWidthOverride, oldChildBoxOffsets} = this.state;
 
@@ -134,7 +134,8 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 						shouldUpdate={true} //this.lastRender_source == RenderSource.SetState}
 						nodeChildren={nodeChildrenToShow} childBoxOffsets={oldChildBoxOffsets}/>}
 				
-				{IsMultiPremiseArgument(node) &&
+				{/* if we're for multi-premise arg, and this comp is not already showing relevance-args, show them in a "Taken together, are these claims relevant?" box */}
+				{IsMultiPremiseArgument(node) && type != HolderType.Relevance &&
 					<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Relevance} widthOverride={childrenWidthOverride}
 						nodeChildren={GetNodeChildrenL3(node, path)} nodeChildrenToShow={GetNodeChildrenL3(node, path).filter(a=>a && a.type == MapNodeType.Argument)}/>}
 				{!separateChildren && nodeChildrenToShow.slice(0, childLimit_down).map((pack, index)=> {
