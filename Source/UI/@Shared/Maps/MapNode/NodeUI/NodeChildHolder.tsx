@@ -19,6 +19,7 @@ import { IsSpecialEmptyArray, emptyObj } from "Frame/Store/ReducerUtils";
 import { GetRatingAverage_AtPath, GetFillPercent_AtPath } from "Store/firebase/nodeRatings";
 import { CachedTransform } from "js-vextensions";
 import { ArgumentType } from "Store/firebase/nodes/@MapNodeRevision";
+import {SplitStringBySlash_Cached} from "../../../../../Frame/Database/StringSplitCache";
 
 /*export class ChildPackUI extends BaseComponent
 		<{
@@ -68,6 +69,11 @@ let connector = (state, {node, path, nodeChildrenToShow}: Props)=> {
 };
 @Connect(connector)
 export class NodeChildHolder extends BaseComponentWithConnector(connector, initialState) {
+	static ValidateProps(props) {
+		let {node, path} = props;
+		Assert(SplitStringBySlash_Cached(path).Distinct().length == SplitStringBySlash_Cached(path).length, `Node path contains a circular link! (${path})`);
+	}
+	
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
 		let {map, node, nodeView, path, nodeChildrenToShow, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, onHeightOrDividePointChange,
@@ -128,7 +134,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 						shouldUpdate={true} //this.lastRender_source == RenderSource.SetState}
 						nodeChildren={nodeChildrenToShow} childBoxOffsets={oldChildBoxOffsets}/>}
 				
-				{IsMultiPremiseArgument(node, nodeChildrenToShow) &&
+				{IsMultiPremiseArgument(node) &&
 					<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Relevance} widthOverride={childrenWidthOverride}
 						nodeChildren={GetNodeChildrenL3(node, path)} nodeChildrenToShow={GetNodeChildrenL3(node, path).filter(a=>a && a.type == MapNodeType.Argument)}/>}
 				{!separateChildren && nodeChildrenToShow.slice(0, childLimit_down).map((pack, index)=> {

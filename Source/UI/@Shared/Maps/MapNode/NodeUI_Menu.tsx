@@ -29,7 +29,7 @@ import {ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import { GetNodeChildren, ForCut_GetError, ForCopy_GetError } from "../../../../Store/firebase/nodes";
 import {E} from "js-vextensions";
-import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument, AsNodeL3, AsNodeL2} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument, AsNodeL3, AsNodeL2, IsSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import LinkNode from "Server/Commands/LinkNode";
 import UnlinkNode from "Server/Commands/UnlinkNode";
@@ -46,9 +46,12 @@ import {SetNodeUILocked} from "./NodeUI";
 import AddChildNode from "../../../../Server/Commands/AddChildNode";
 import { ACTMapNodeExpandedSet } from "Store/main/mapViews/$mapView/rootNodeViews";
 import {HolderType} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
+import SetNodeIsMultiPremiseArgument from "Server/Commands/SetNodeIsMultiPremiseArgument";
 
 type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean, holderType?: HolderType};
 let connector = (_: RootState, {map, node, path}: Props)=> {
+	if (1) return {} as any;
+	
 	let sinceTime = GetTimeFromWhichToShowChangedNodes(map._id);
 	let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
 	let pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == path || a.startsWith(path + "/")); // also include self, for this
@@ -58,18 +61,21 @@ let connector = (_: RootState, {map, node, path}: Props)=> {
 		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
 		permissions: GetUserPermissionGroups(GetUserID()),
 		parent,
+		//nodeChildren: GetNodeChildrenL3(node, path),
+		nodeChildren: GetNodeChildrenL3(node, path),
 		combinedWithParentArg: IsPremiseOfSinglePremiseArgument(node, parent),
 		copiedNode: GetCopiedNode(),
 		copiedNode_asCut: State(a=>a.main.copiedNodePath_asCut),
 		pathsToChangedInSubtree,
-		isMultiPremiseArg: IsMultiPremiseArgument(node),
 	};
 }
 @Connect(connector)
 export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 	render() {
+		if (1) return <div/>;
+
 		let {map, node, path, inList, holderType,
-			permissions, parent, combinedWithParentArg, copiedNode, copiedNode_asCut, pathsToChangedInSubtree, isMultiPremiseArg} = this.props;
+			permissions, parent, nodeChildren, combinedWithParentArg, copiedNode, copiedNode_asCut, pathsToChangedInSubtree} = this.props;
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
@@ -110,12 +116,12 @@ export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 							if (userID == null) return ShowSignInPopup();
 							ShowAddSubnodeDialog(map._id, node, path);
 						}}/>}
-				{IsUserCreatorOrMod(userID, node) && node.type == MapNodeType.Argument && !isMultiPremiseArg && !componentBox &&
+				{IsUserCreatorOrMod(userID, parent) && IsSinglePremiseArgument(parent) && !componentBox &&
 					<VMenuItem text="Convert to multi-premise" style={styles.vMenuItem}
 						onClick={async e=> {
 							if (e.button != 0) return;
 
-							let newNode = new MapNode({
+							/*let newNode = new MapNode({
 								parents: {[parent._id]: {_: true}},
 								type: MapNodeType.Claim,
 							});
@@ -129,29 +135,18 @@ export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 
 							await WaitTillPathDataIsReceiving(`nodeRevisions/${info.revisionID}`);
 							await WaitTillPathDataIsReceived(`nodeRevisions/${info.revisionID}`);
-							SetNodeUILocked(parent._id, false);
+							SetNodeUILocked(parent._id, false);*/
+
+							await new SetNodeIsMultiPremiseArgument({nodeID: parent._id, multiPremiseArgument: true}).Run();
 						}}/>}
-				{/*IsUserCreatorOrMod(userID, node) && node.type == MapNodeType.Argument && isMultiPremiseArg && !componentBox &&
+				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)
+						&& nodeChildren.All(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && !componentBox &&
 					<VMenuItem text="Convert to single-premise" style={styles.vMenuItem}
 						onClick={async e=> {
 							if (e.button != 0) return;
 
-							let newNode = new MapNode({
-								parents: {[parent._id]: {_: true}},
-								type: MapNodeType.Claim,
-							});
-							let newRevision = new MapNodeRevision({titles: {base: "Second premise (click to edit)"}});
-							let newLink = {_: true, form: ClaimForm.Base} as ChildEntry;
-
-							SetNodeUILocked(parent._id, true);
-							let info = await new AddChildNode({mapID: map._id, node: newNode, revision: newRevision, link: newLink}).Run();
-							store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path: path + "/" + info.nodeID, expanded: true, recursive: false}));
-							store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.nodeID, time: Date.now()}));
-
-							await WaitTillPathDataIsReceiving(`nodeRevisions/${info.revisionID}`);
-							await WaitTillPathDataIsReceived(`nodeRevisions/${info.revisionID}`);
-							SetNodeUILocked(parent._id, false);
-						}}/>*/}
+							await new SetNodeIsMultiPremiseArgument({nodeID: node._id, multiPremiseArgument: false}).Run();
+						}}/>}
 				{pathsToChangedInSubtree.length > 0 && !componentBox &&
 					<VMenuItem text="Mark subtree as viewed" style={styles.vMenuItem}
 						onClick={e=> {
@@ -231,7 +226,7 @@ If not, paste the argument as a clone instead.`
 								}
 
 								// if we're copying a (single-premise) argument into a place where it's supposed to be a claim, we have to paste just that inner claim
-								if (node.type == MapNodeType.Argument && isMultiPremiseArg && holderType == null && copiedNode.type == MapNodeType.Argument) {
+								if (IsMultiPremiseArgument(node) && holderType == null && copiedNode.type == MapNodeType.Argument) {
 									copiedNode = GetNodeChildrenL3(copiedNode)[0];
 									// todo: ms old wrapper is also deleted (probably)
 								}
@@ -309,10 +304,7 @@ If not, paste the argument as a clone instead.`
 								title: `Delete "${nodeText}"`, cancelButton: true,
 								message: `Delete the node "${nodeText}"${contextStr}${combinedWithParent ? ", and its (hidden) container argument?" : ""}?`,
 								onOK: async ()=> {
-									await new DeleteNode({mapID: map._id, nodeID: node._id}).Run();
-									if (combinedWithParent) {
-										new DeleteNode({mapID: map._id, nodeID: parent._id}).Run();
-									}
+									await new DeleteNode(E({mapID: map._id, nodeID: node._id}, combinedWithParent && {deleteContainerArgument: true})).Run();
 								}
 							});
 						}}/>}

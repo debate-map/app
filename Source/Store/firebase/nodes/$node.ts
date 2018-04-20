@@ -264,17 +264,19 @@ export function GetClaimType(node: MapNodeL2) {
 	);
 }
 
-export function IsSinglePremiseArgument(node: MapNode, nodeChildren?: MapNode[]) {
-	nodeChildren = nodeChildren || GetNodeChildren(node);
+export function IsSinglePremiseArgument(node: MapNode) {
+	/*nodeChildren = nodeChildren || GetNodeChildren(node);
 	if (nodeChildren.Any(a=>a == null)) return null;
 	//return nodeChildren.Any(child=>IsPremiseOfSinglePremiseArgument(child, node));
-	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length == 1;
+	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length == 1;*/
+	return node && node.type == MapNodeType.Argument && !node.multiPremiseArgument;
 }
-export function IsMultiPremiseArgument(node: MapNode, nodeChildren?: MapNode[]) {
-	nodeChildren = nodeChildren || GetNodeChildren(node);
+export function IsMultiPremiseArgument(node: MapNode) {
+	/*nodeChildren = nodeChildren || GetNodeChildren(node);
 	if (nodeChildren.Any(a=>a == null)) return null;
 	//return node.type == MapNodeType.Argument && !IsSinglePremiseArgument(node, nodeChildren);
-	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length > 1;
+	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length > 1;*/
+	return node && node.type == MapNodeType.Argument && node.multiPremiseArgument;
 }
 
 export function IsPremiseOfSinglePremiseArgument(node: MapNode, parent: MapNode) {

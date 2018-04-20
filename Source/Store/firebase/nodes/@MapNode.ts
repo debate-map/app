@@ -48,6 +48,7 @@ export class MapNode {
 	children: ChildSet;
 	childrenOrder: number[];
 	//talkRoot: number;
+	multiPremiseArgument?: boolean;
 
 	layerPlusAnchorParents: LayerPlusAnchorParentSet;
 
@@ -69,11 +70,12 @@ AddSchema({
 		children: {$ref: "ChildSet"},
 		childrenOrder: {items: {type: "number"}},
 		//talkRoot: {type: "number"},
+		multiPremiseArgument: {type: "boolean"},
 
 		layerPlusAnchorParents: {$ref: "LayerPlusAnchorParentSet"},
 	},
 	required: ["type", "creator", "createdAt", "currentRevision"],
-	allOf: [
+	/*allOf: [
 		// if an argument, require "childrenOrder" prop
 		{
 			if: {
@@ -84,7 +86,7 @@ AddSchema({
 			then: {required: ["childrenOrder"]},
 			else: {prohibited: ["childrenOrder"]}
 		}
-	],
+	],*/
 }, "MapNode");
 AddAJVExtraCheck("MapNode", (node: MapNode)=> {
 	if (node.childrenOrder && node.childrenOrder.length != node.children.VKeys(true).length) {

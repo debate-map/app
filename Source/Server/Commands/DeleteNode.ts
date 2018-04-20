@@ -17,14 +17,16 @@ import {GetMaps} from "../../Store/firebase/maps";
 
 @MapEdit
 @UserEdit
-export default class DeleteNode extends Command<{mapID: number, nodeID: number, asPartOfMapDelete?: boolean}> {
+export default class DeleteNode extends Command<{mapID: number, nodeID: number, withContainerArgument?: number, asPartOfMapDelete?: boolean}> {
+	sub_deleteContainerArgument: DeleteNode;
+	
 	oldData: MapNodeL2;
 	oldRevisions: MapNodeRevision[];
 	oldParentChildrenOrders: number[][];
 	viewerIDs_main: number[];
 	mapIDs: number[];
 	async Prepare() {
-		let {mapID, nodeID, asPartOfMapDelete} = this.payload;
+		let {mapID, nodeID, withContainerArgument, asPartOfMapDelete} = this.payload;
 		this.oldData = await GetAsync_Raw(()=>GetNodeL2(nodeID));
 		this.oldRevisions = await GetAsync(()=>GetNodeRevisions(nodeID));
 
@@ -35,6 +37,12 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 		this.viewerIDs_main = GetDataAsync("nodeViewers", nodeID).VKeys(true).map(ToInt);
 
 		this.mapIDs = await GetAsync(()=>GetMaps().map(a=>a._id));
+
+		if (withContainerArgument) {
+			this.sub_deleteContainerArgument = new DeleteNode({mapID: mapID, nodeID: withContainerArgument});
+			this.sub_deleteContainerArgument.Validate_Early();
+			await this.sub_deleteContainerArgument.Prepare();
+		}
 	}
 	async Validate() {
 		/*Assert((this.oldData.parents || {}).VKeys(true).length <= 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
@@ -43,6 +51,7 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 		let {mapID} = this.payload;
 		let earlyError = await GetAsync(()=>ForDelete_GetError(this.userInfo.id, GetMap(mapID), this.oldData, this.payload.asPartOfMapDelete, this.asSubcommand));
 		Assert(earlyError == null, earlyError);
+		if (this.sub_deleteContainerArgument) await this.sub_deleteContainerArgument.Validate();
 	}
 
 	GetDBUpdates() {
@@ -84,6 +93,10 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 		// delete mapNodeEditTimes
 		for (let mapID of this.mapIDs) {
 			updates[`mapNodeEditTimes/${mapID}/${nodeID}`] = null;
+		}
+
+		if (this.sub_deleteContainerArgument) {
+			updates = MergeDBUpdates(updates, this.sub_deleteContainerArgument.GetDBUpdates());
 		}
 
 		return updates;

@@ -194,8 +194,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			var relevanceArguments = GetNodeChildrenL3(parent, SlicePath(path, 1)).Except(node).filter(a=>a);
 		}
 
-		let isSinglePremiseArgument = IsSinglePremiseArgument(node, nodeChildrenToShow);
-		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildrenToShow);
+		let isSinglePremiseArgument = IsSinglePremiseArgument(node);
+		let isMultiPremiseArgument = IsMultiPremiseArgument(node);
 		let showArgumentsControlBar = (node.type == MapNodeType.Claim || isSinglePremiseArgument) && nodeView.expanded && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, expectedHeight} = this.GetMeasurementInfo();
@@ -211,8 +211,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		let textOutline = "rgba(10,10,10,1)";
 
 		// maybe temp
-		let combineWithChildClaim = IsSinglePremiseArgument(node, nodeChildrenToShow);
-		if (combineWithChildClaim && !IsSpecialEmptyArray(nodeChildrenToShow)) {
+		let combineWithChildClaim = IsSinglePremiseArgument(node);
+		if (combineWithChildClaim && !IsSpecialEmptyArray(nodeChildrenToShow) && nodeChildrenToShow.length) {
 			let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 			let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 			let showAll = node._id == map.rootNode || node.type == MapNodeType.Argument;
@@ -397,7 +397,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			expectedBoxWidth = Math.max(expectedBoxWidth, subnodeMeasurementInfo.expectedBoxWidth);
 		}
 
-		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildren);
+		let isMultiPremiseArgument = IsMultiPremiseArgument(node);
 		if (isMultiPremiseArgument) {
 			//expectedBoxWidth = expectedBoxWidth.KeepAtLeast(350);
 			width = width.KeepAtLeast(350);

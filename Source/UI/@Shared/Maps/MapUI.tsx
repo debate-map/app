@@ -291,7 +291,12 @@ export class MapUI extends BaseComponentWithConnector(connector, {}) {
 		let focusNodeBox;
 		let nextPathTry = nodePath;
 		while (focusNodeBox == null) {
-			focusNodeBox = $(".NodeUI_Inner").ToList().FirstOrX(nodeBox=>(FindReact(nodeBox[0]) as NodeUI_Inner).props.path == nextPathTry);
+			focusNodeBox = $(".NodeUI_Inner").ToList().FirstOrX(nodeBox=> {
+				let comp = FindReact(nodeBox[0]) as NodeUI_Inner;
+				// if comp is null, just ignore (an error must have occured, but we don't want to handle it here)
+				if (comp == null) return false;
+				return comp.props.path == nextPathTry;
+			});
 			if (!ifMissingFindAncestor || !nextPathTry.Contains("/")) break;
 			nextPathTry = nextPathTry.substr(0, nextPathTry.lastIndexOf("/"));
 		}

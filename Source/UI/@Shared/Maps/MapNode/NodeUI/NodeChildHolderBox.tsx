@@ -64,7 +64,6 @@ let connector = (state, {node, path, type, nodeChildren}: Props)=> {
 	let markerPercent = GetMarkerPercent_AtPath(node, path);
 
 	return {
-		combineWithChildClaim: IsSinglePremiseArgument(node),
 		backgroundFillPercent,
 		markerPercent,
 	};
@@ -77,10 +76,10 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 	}
 	lineHolder: HTMLDivElement;
 	render() {
-		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, widthOverride, combineWithChildClaim, backgroundFillPercent, markerPercent} = this.props;
+		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, widthOverride, backgroundFillPercent, markerPercent} = this.props;
 		let {innerBoxOffset, lineHolderHeight, hovered} = this.state;
 
-		let isMultiPremiseArgument = IsMultiPremiseArgument(node, nodeChildren);
+		let isMultiPremiseArgument = IsMultiPremiseArgument(node);
 		let text = type == HolderType.Truth ? "True?" : "Relevant?";
 		if (isMultiPremiseArgument) {
 			text = "When taken together, are these claims relevant?";
@@ -95,7 +94,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		let holderTypeStr = HolderType[type].toLowerCase();
 		let expandKey = `expanded_${holderTypeStr}`;
 
-		let separateChildren = node.type == MapNodeType.Claim || combineWithChildClaim;
+		let separateChildren = node.type == MapNodeType.Claim || IsSinglePremiseArgument(node);
 		let showArgumentsControlBar = /*(node.type == MapNodeType.Claim || combineWithChildClaim) &&*/ nodeView[expandKey] && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, height} = this.GetMeasurementInfo();

@@ -1,6 +1,8 @@
 import u from "updeep";
 import {GetUserID} from "Store/firebase/users";
-import {RemoveHelpers, ApplyDBUpdates, DBPath} from "../Frame/Database/DatabaseHelpers";
+import {RemoveHelpers, ApplyDBUpdates, DBPath, GetAsync} from "../Frame/Database/DatabaseHelpers";
+import {GetDataAsync, GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
+import { GetNode } from "Store/firebase/nodes";
 
 export class CommandUserInfo {
 	id: string;
@@ -70,6 +72,7 @@ export abstract class Command<Payload> {
 			await this.Validate();
 
 			let dbUpdates = this.GetDBUpdates();
+			await this.Validate_LateHeavy(dbUpdates);
 			//FixDBUpdates(dbUpdates);
 			//await store.firebase.helpers.DBRef().update(dbUpdates);
 			await ApplyDBUpdates(DBPath(), dbUpdates);
@@ -81,6 +84,25 @@ export abstract class Command<Payload> {
 		
 		// later on (once set up on server), this will send the data back to the client, rather than return it
 		return this.returnData;
+	}
+
+	// standard validation of common paths/object-types; perhaps disable in production
+	async Validate_LateHeavy(dbUpdates: any) {
+		// validate "nodes/X"
+		let nodesBeingUpdated = (dbUpdates.VKeys() as string[]).map(a=> {
+			let match = a.match(/^nodes\/([0-9]+).*/);
+			return match ? match[1].ToInt() : null;
+		}).filter(a=>a).Distinct();
+		for (let nodeID of nodesBeingUpdated) {
+			let oldNodeData = await GetAsync_Raw(()=>GetNode(nodeID));
+			let updatesForNode = dbUpdates.Props().filter(a=>a.name.match(`^nodes/${nodeID}($|/)`));
+
+			let newNodeData = oldNodeData;
+			for (let update of updatesForNode) {
+				newNodeData = u.updateIn(update.name.replace(new RegExp(`^nodes/${nodeID}($|/)`), "").replace(/\//g, "."), u.constant(update.value), newNodeData);
+			}
+			AssertValidate("MapNode", newNodeData, `New node-data is invalid.`);
+		}
 	}
 }
 
