@@ -12,6 +12,7 @@ import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import { emptyArray } from "Frame/Store/ReducerUtils";
 import {CachedTransform_WithStore} from "Frame/Database/DatabaseHelpers";
 import {MapNodeL3} from "Store/firebase/nodes/@MapNode";
+import { HolderType } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
 
 export type NodeMap = {[key: string]: MapNode};
 export function GetNodeMap(queries?): NodeMap {
@@ -137,12 +138,18 @@ export function GetNodeChildrenL3(node: MapNode, path?: string, filterForPath = 
 	});
 }
 
+/*export function GetHolderType(node: MapNodeL3, path: string) {
+	let parent = GetParentNodeL3(path);
+	if (parent == null) return null;
+	if comb
+}*/
+
 export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNodeL2) {
 	let parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;
 	if (!parentTypeInfo.Contains(child.type)) return false;
 	return true;
 }
-export function IsNewLinkValid(parentNode: MapNodeL2, parentPath: string, child: MapNodeL2, permissions: PermissionGroupSet) {
+export function IsNewLinkValid(parentNode: MapNodeL2, parentPath: string, /*parentHolderType: HolderType,*/ child: MapNodeL2, permissions: PermissionGroupSet) {
 	let parentPathIDs = SplitStringBySlash_Cached(parentPath).map(a=>a.ToInt());
 	//if (map.name == "Global" && parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
 	if (parentNode._id == globalRootNodeID && !HasAdminPermissions(permissions)) return false; // if parent is global-root, don't accept new children (unless admin)
@@ -150,7 +157,8 @@ export function IsNewLinkValid(parentNode: MapNodeL2, parentPath: string, child:
 	if (parentPathIDs[0] == globalRootNodeID && parentPathIDs.length == 2 && !HasModPermissions(permissions) && parentNode.creator != GetUserID()) return false;
 	if (parentNode._id == child._id) return false; // cannot link node as its own child
 
-	if (parentNode && (parentNode.children || {}).VKeys(true).Contains(child._id+"")) return false; // if already a child of this parent, reject
+	/*let isAlreadyChild = (parentNode.children || {}).VKeys(true).Contains(child._id+"");
+	if (isAlreadyChild && child.type != MapNodeType.Claim) return false; // if already a child of this parent, reject (unless it's a claim, in which case allow, as can be)*/
 	return IsLinkValid(parentNode.type, parentPath, child);
 }
 

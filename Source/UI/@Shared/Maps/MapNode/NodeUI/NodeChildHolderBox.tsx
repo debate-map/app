@@ -26,10 +26,11 @@ import { WeightingType } from "Store/main";
 import { RS_CalculateTruthScore, RS_CalculateBaseWeight, RS_CalculateWeightMultiplier, RS_CalculateWeight, RS_GetAllValues, ReasonScoreValues_RSPrefix } from "Store/firebase/nodeRatings/ReasonScore";
 import { GetUserID } from "Store/firebase/users";
 import RatingsPanel from "./Panels/RatingsPanel";
+import {NodeUI_Menu} from "../NodeUI_Menu";
 
 export enum HolderType {
-	Truth,
-	Relevance,
+	Truth = 10,
+	Relevance = 20,
 }
 
 type Props = {
@@ -187,6 +188,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 								return <RatingsPanel node={node} path={path} ratingType={holderTypeStr as RatingType} ratings={ratings}/>;
 							})()}
 						</div>}
+					<NodeUI_Menu {...{map, node, path}} holderType={type}/>
 				</div>
 				{nodeView[expandKey] &&
 					<NodeChildHolder {...{map, node, path, nodeView, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar}}

@@ -1,5 +1,5 @@
 import DeleteNode from "../../../../Server/Commands/DeleteNode";
-import {GetDataAsync, RemoveHelpers, SlicePath, WaitTillPathDataIsReceiving, WaitTillPathDataIsReceived} from "../../../../Frame/Database/DatabaseHelpers";
+import {GetDataAsync, RemoveHelpers, SlicePath, WaitTillPathDataIsReceiving, WaitTillPathDataIsReceived, GetAsync} from "../../../../Frame/Database/DatabaseHelpers";
 import {MapNode, MapNodeL2, Polarity, ChildEntry} from "../../../../Store/firebase/nodes/@MapNode";
 import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
 import {VMenuStub} from "react-vmenu";
@@ -21,7 +21,7 @@ import {ACTNodeCopy, GetCopiedNode} from "../../../../Store/main";
 import {Select} from "react-vcomponents";
 import {GetEntries, GetValues} from "../../../../Frame/General/Enums";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
-import {ForDelete_GetError, ForUnlink_GetError, GetNode, GetNodeChildrenAsync, GetNodeParentsAsync, GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetParentNodeL3, GetNodeID} from "../../../../Store/firebase/nodes";
+import {ForDelete_GetError, ForUnlink_GetError, GetNode, GetNodeChildrenAsync, GetNodeParentsAsync, GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetParentNodeL3, GetNodeID, GetNodeChildrenL3} from "../../../../Store/firebase/nodes";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
 import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
@@ -29,7 +29,7 @@ import {ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import { GetNodeChildren, ForCut_GetError, ForCopy_GetError } from "../../../../Store/firebase/nodes";
 import {E} from "js-vextensions";
-import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument, AsNodeL3, AsNodeL2} from "../../../../Store/firebase/nodes/$node";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import LinkNode from "Server/Commands/LinkNode";
 import UnlinkNode from "Server/Commands/UnlinkNode";
@@ -45,17 +45,20 @@ import { MapNodeRevision } from "Store/firebase/nodes/@MapNodeRevision";
 import {SetNodeUILocked} from "./NodeUI";
 import AddChildNode from "../../../../Server/Commands/AddChildNode";
 import { ACTMapNodeExpandedSet } from "Store/main/mapViews/$mapView/rootNodeViews";
+import {HolderType} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
 
-type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean};
+type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean, holderType?: HolderType};
 let connector = (_: RootState, {map, node, path}: Props)=> {
 	let sinceTime = GetTimeFromWhichToShowChangedNodes(map._id);
 	let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
 	let pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == path || a.startsWith(path + "/")); // also include self, for this
+	let parent = GetParentNodeL3(path);
 	return {
 		_: (ForUnlink_GetError(GetUserID(), map, node), ForDelete_GetError(GetUserID(), map, node)),
 		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
 		permissions: GetUserPermissionGroups(GetUserID()),
-		parentNode: GetParentNodeL3(path),
+		parent,
+		combinedWithParentArg: IsPremiseOfSinglePremiseArgument(node, parent),
 		copiedNode: GetCopiedNode(),
 		copiedNode_asCut: State(a=>a.main.copiedNodePath_asCut),
 		pathsToChangedInSubtree,
@@ -65,11 +68,19 @@ let connector = (_: RootState, {map, node, path}: Props)=> {
 @Connect(connector)
 export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 	render() {
-		let {map, node, path, inList, permissions, parentNode, copiedNode, copiedNode_asCut, pathsToChangedInSubtree, isMultiPremiseArg} = this.props;
+		let {map, node, path, inList, holderType,
+			permissions, parent, combinedWithParentArg, copiedNode, copiedNode_asCut, pathsToChangedInSubtree, isMultiPremiseArg} = this.props;
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
 		let validChildTypes = GetValidNewChildTypes(node, path, permissions);
+		let componentBox = holderType != null;
+		if (holderType) {
+			validChildTypes = validChildTypes.Except(MapNodeType.Claim);
+		} else {
+			validChildTypes = validChildTypes.Except(MapNodeType.Argument);
+		}
+
 		let formForClaimChildren = node.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
 
 		let nodeText = GetNodeDisplayText(node, path);
@@ -92,35 +103,56 @@ export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 						);
 					});
 				})}
-				{IsUserBasicOrAnon(userID) && !inList && path.includes("/") && !path.includes("L") &&
+				{IsUserBasicOrAnon(userID) && !inList && path.includes("/") && !path.includes("L") && !componentBox &&
 					<VMenuItem text="Add subnode (in layer)" style={styles.vMenuItem}
 						onClick={e=> {
 							if (e.button != 0) return;
 							if (userID == null) return ShowSignInPopup();
 							ShowAddSubnodeDialog(map._id, node, path);
 						}}/>}
-				{IsUserBasicOrAnon(userID) && !isMultiPremiseArg &&
+				{IsUserCreatorOrMod(userID, node) && node.type == MapNodeType.Argument && !isMultiPremiseArg && !componentBox &&
 					<VMenuItem text="Convert to multi-premise" style={styles.vMenuItem}
 						onClick={async e=> {
 							if (e.button != 0) return;
 
 							let newNode = new MapNode({
-								parents: {[parentNode._id]: {_: true}},
+								parents: {[parent._id]: {_: true}},
 								type: MapNodeType.Claim,
 							});
 							let newRevision = new MapNodeRevision({titles: {base: "Second premise (click to edit)"}});
 							let newLink = {_: true, form: ClaimForm.Base} as ChildEntry;
 
-							SetNodeUILocked(parentNode._id, true);
+							SetNodeUILocked(parent._id, true);
 							let info = await new AddChildNode({mapID: map._id, node: newNode, revision: newRevision, link: newLink}).Run();
 							store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path: path + "/" + info.nodeID, expanded: true, recursive: false}));
 							store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.nodeID, time: Date.now()}));
 
 							await WaitTillPathDataIsReceiving(`nodeRevisions/${info.revisionID}`);
 							await WaitTillPathDataIsReceived(`nodeRevisions/${info.revisionID}`);
-							SetNodeUILocked(parentNode._id, false);
+							SetNodeUILocked(parent._id, false);
 						}}/>}
-				{pathsToChangedInSubtree.length > 0 &&
+				{/*IsUserCreatorOrMod(userID, node) && node.type == MapNodeType.Argument && isMultiPremiseArg && !componentBox &&
+					<VMenuItem text="Convert to single-premise" style={styles.vMenuItem}
+						onClick={async e=> {
+							if (e.button != 0) return;
+
+							let newNode = new MapNode({
+								parents: {[parent._id]: {_: true}},
+								type: MapNodeType.Claim,
+							});
+							let newRevision = new MapNodeRevision({titles: {base: "Second premise (click to edit)"}});
+							let newLink = {_: true, form: ClaimForm.Base} as ChildEntry;
+
+							SetNodeUILocked(parent._id, true);
+							let info = await new AddChildNode({mapID: map._id, node: newNode, revision: newRevision, link: newLink}).Run();
+							store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path: path + "/" + info.nodeID, expanded: true, recursive: false}));
+							store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.nodeID, time: Date.now()}));
+
+							await WaitTillPathDataIsReceiving(`nodeRevisions/${info.revisionID}`);
+							await WaitTillPathDataIsReceived(`nodeRevisions/${info.revisionID}`);
+							SetNodeUILocked(parent._id, false);
+						}}/>*/}
+				{pathsToChangedInSubtree.length > 0 && !componentBox &&
 					<VMenuItem text="Mark subtree as viewed" style={styles.vMenuItem}
 						onClick={e=> {
 							if (e.button != 0) return;
@@ -128,31 +160,42 @@ export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 								store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: GetNodeID(path), time: Date.now()}));
 							}
 						}}/>}
-				{IsUserBasicOrAnon(userID) && !inList &&
+				{IsUserBasicOrAnon(userID) && !inList && !componentBox &&
 					<VMenuItem text={copiedNode ? <span>Cut <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Cut`}
 						enabled={ForCut_GetError(userID, map, node) == null} title={ForCut_GetError(userID, map, node)}
 						style={styles.vMenuItem}
 						onClick={e=> {
 							e.persist();
-							if (e.button == 0) {
-								store.dispatch(new ACTNodeCopy({path, asCut: true}));
-							} else {
-								store.dispatch(new ACTNodeCopy({path: null, asCut: true}));
+							if (e.button == 1) {
+								return void store.dispatch(new ACTNodeCopy({path: null, asCut: true}));
 							}
+
+							let pathToCut = path;
+							if (node.type == MapNodeType.Claim && combinedWithParentArg) {
+								pathToCut = SlicePath(path, 1);
+							}
+
+							store.dispatch(new ACTNodeCopy({path: pathToCut, asCut: true}));
 						}}/>}
-				{IsUserBasicOrAnon(userID) &&
+				{IsUserBasicOrAnon(userID) && !componentBox &&
 					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Copy`} style={styles.vMenuItem}
 						enabled={ForCopy_GetError(userID, map, node) == null} title={ForCopy_GetError(userID, map, node)}
 						onClick={e=> {
 							e.persist();
-							if (e.button == 0) {
-								store.dispatch(new ACTNodeCopy({path, asCut: false}));
-							} else {
-								store.dispatch(new ACTNodeCopy({path: null, asCut: false}));
+							if (e.button == 1) {
+								return void store.dispatch(new ACTNodeCopy({path: null, asCut: false}));
 							}
+
+							let pathToCopy = path;
+							if (node.type == MapNodeType.Claim && combinedWithParentArg) {
+								pathToCopy = SlicePath(path, 1);
+							}
+							
+							store.dispatch(new ACTNodeCopy({path: pathToCopy, asCut: false}));
 						}}/>}
 				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node, path, copiedNode, permissions) &&
 					<VMenuItem text={`Paste${copiedNode_asCut ? "" : " as link"}: "${GetNodeDisplayText(copiedNode, null, formForClaimChildren).KeepAtMost(50)}"`}
+						//enabled={ForPaste_GetError(userID, map, node) == null} title={ForCut_GetError(userID, map, node)}
 						style={styles.vMenuItem} onClick={e=> {
 							if (e.button != 0) return;
 							if (userID == null) return ShowSignInPopup();
@@ -170,8 +213,31 @@ If not, paste the argument as a clone instead.`
 							proceed();
 
 							async function proceed() {
+								// if we're copying a claim into a place where it's supposed to be an argument, we have to create an argument node first
+								let pastedNodeHolder = node;
+								if (holderType == HolderType.Relevance && copiedNode.type == MapNodeType.Claim) {
+									let argumentWrapper = new MapNode({
+										type: MapNodeType.Argument,
+										parents: {[node._id]: {_: true}}
+									});
+									let argumentWrapperRevision = new MapNodeRevision({});
+									var addArgumentWrapper = new AddChildNode({
+										mapID: map._id, node: argumentWrapper, revision: argumentWrapperRevision,
+										link: E({_: true, polarity: Polarity.Supporting}) as any,
+									});
+									let {nodeID} = await addArgumentWrapper.Run();
+									//pastedNodeHolder = AsNodeL3(AsNodeL2(argumentWrapper, argumentWrapperRevision), Polarity.Supporting);
+									pastedNodeHolder = await GetAsync(()=>GetNodeL3(`${path}/${nodeID}`));
+								}
+
+								// if we're copying a (single-premise) argument into a place where it's supposed to be a claim, we have to paste just that inner claim
+								if (node.type == MapNodeType.Argument && isMultiPremiseArg && holderType == null && copiedNode.type == MapNodeType.Argument) {
+									copiedNode = GetNodeChildrenL3(copiedNode)[0];
+									// todo: ms old wrapper is also deleted (probably)
+								}
+
 								await new LinkNode(E(
-									{mapID: map._id, parentID: node._id, childID: copiedNode._id},
+									{mapID: map._id, parentID: pastedNodeHolder._id, childID: copiedNode._id},
 									copiedNode.type == MapNodeType.Claim && {childForm: formForClaimChildren},
 									copiedNode.type == MapNodeType.Argument && {childPolarity: copiedNode.link.polarity},
 								)).Run();
@@ -197,7 +263,7 @@ If not, paste the argument as a clone instead.`
 							await new UnlinkNode({mapID: map._id, parentID: baseNodePath_ids.XFromLast(1), childID: baseNodePath_ids.Last()}).Run();
 						}
 					}}/>}
-				{IsUserCreatorOrMod(userID, node) && !inList &&
+				{IsUserCreatorOrMod(userID, node) && !inList && !componentBox &&
 					<VMenuItem text="Unlink" enabled={ForUnlink_GetError(userID, map, node) == null} title={ForUnlink_GetError(userID, map, node)}
 						style={styles.vMenuItem} onClick={async e=> {
 							if (e.button != 0) return;
@@ -213,16 +279,16 @@ If not, paste the argument as a clone instead.`
 							}*/
 
 							//let parent = parentNodes[0];
-							let parentText = GetNodeDisplayText(parentNode, path.substr(0, path.lastIndexOf(`/`)));
+							let parentText = GetNodeDisplayText(parent, path.substr(0, path.lastIndexOf(`/`)));
 							ShowMessageBox({
 								title: `Unlink child "${nodeText}"`, cancelButton: true,
 								message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,
 								onOK: ()=> {
-									new UnlinkNode({mapID: map._id, parentID: parentNode._id, childID: node._id}).Run();
+									new UnlinkNode({mapID: map._id, parentID: parent._id, childID: node._id}).Run();
 								}
 							});
 						}}/>}
-				{IsUserCreatorOrMod(userID, node) &&
+				{IsUserCreatorOrMod(userID, node) && !componentBox &&
 					<VMenuItem text="Delete" enabled={ForDelete_GetError(userID, map, node) == null} title={ForDelete_GetError(userID, map, node)}
 						style={styles.vMenuItem} onClick={e=> {
 							if (e.button != 0) return;
@@ -237,7 +303,7 @@ If not, paste the argument as a clone instead.`
 							//let s_ifParents = parentNodes.length > 1 ? "s" : "";
 							let contextStr = IsNodeSubnode(node) ? ", and its placement in-layer" : ", and its link with 1 parent";
 
-							let combinedWithParent = IsPremiseOfSinglePremiseArgument(node, parentNode);
+							let combinedWithParent = IsPremiseOfSinglePremiseArgument(node, parent);
 
 							ShowMessageBox({
 								title: `Delete "${nodeText}"`, cancelButton: true,
@@ -245,7 +311,7 @@ If not, paste the argument as a clone instead.`
 								onOK: async ()=> {
 									await new DeleteNode({mapID: map._id, nodeID: node._id}).Run();
 									if (combinedWithParent) {
-										new DeleteNode({mapID: map._id, nodeID: parentNode._id}).Run();
+										new DeleteNode({mapID: map._id, nodeID: parent._id}).Run();
 									}
 								}
 							});
