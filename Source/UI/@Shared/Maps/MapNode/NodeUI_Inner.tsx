@@ -13,7 +13,7 @@ import {Button} from "react-vcomponents";
 import {CachedTransform} from "js-vextensions";
 import {WaitXThenRun} from "js-vextensions";
 import keycode from "keycode";
-import NodeUI_Menu from "./NodeUI_Menu";
+import {NodeUI_Menu} from "./NodeUI_Menu";
 import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {ImageAttachment, MapNode, MapNodeL2, ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";

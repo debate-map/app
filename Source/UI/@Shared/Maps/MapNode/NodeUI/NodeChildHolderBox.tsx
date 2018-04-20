@@ -95,7 +95,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		let expandKey = `expanded_${holderTypeStr}`;
 
 		let separateChildren = node.type == MapNodeType.Claim || combineWithChildClaim;
-		let showArgumentsControlBar = (node.type == MapNodeType.Claim || combineWithChildClaim) && nodeView[expandKey] && nodeChildrenToShow != emptyArray_forLoading;
+		let showArgumentsControlBar = /*(node.type == MapNodeType.Claim || combineWithChildClaim) &&*/ nodeView[expandKey] && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, height} = this.GetMeasurementInfo();
 		if (widthOverride) {

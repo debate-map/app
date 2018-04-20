@@ -7,7 +7,7 @@ import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../..
 import {GetUserID, GetUserPermissionGroups} from "../../../../Store/firebase/users";
 import {RootState} from "../../../../Store";
 import {VMenu} from "react-vmenu";
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
 import {Div, Pre} from "react-vcomponents";
 import {ShowMessageBox} from "react-vmessagebox";
 import {WaitXThenRun} from "js-vextensions";
@@ -29,7 +29,7 @@ import {ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import { GetNodeChildren, ForCut_GetError, ForCopy_GetError } from "../../../../Store/firebase/nodes";
 import {E} from "js-vextensions";
-import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, GetNodeL3, IsPremiseOfSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
+import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "../../../../Store/firebase/nodes/$node";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import LinkNode from "Server/Commands/LinkNode";
 import UnlinkNode from "Server/Commands/UnlinkNode";
@@ -46,13 +46,12 @@ import {SetNodeUILocked} from "./NodeUI";
 import AddChildNode from "../../../../Server/Commands/AddChildNode";
 import { ACTMapNodeExpandedSet } from "Store/main/mapViews/$mapView/rootNodeViews";
 
-type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean}
-	& Partial<{permissions: PermissionGroupSet, parentNode: MapNodeL2, copiedNode: MapNodeL3, copiedNode_asCut: boolean, pathsToChangedInSubtree: string}>;
-@Connect((_: RootState, {map, node, path}: Props)=> {
+type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean};
+let connector = (_: RootState, {map, node, path}: Props)=> {
 	let sinceTime = GetTimeFromWhichToShowChangedNodes(map._id);
 	let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
 	let pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == path || a.startsWith(path + "/")); // also include self, for this
-	return ({
+	return {
 		_: (ForUnlink_GetError(GetUserID(), map, node), ForDelete_GetError(GetUserID(), map, node)),
 		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
 		permissions: GetUserPermissionGroups(GetUserID()),
@@ -60,11 +59,13 @@ type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean}
 		copiedNode: GetCopiedNode(),
 		copiedNode_asCut: State(a=>a.main.copiedNodePath_asCut),
 		pathsToChangedInSubtree,
-	});
-})
-export default class NodeUI_Menu extends BaseComponent<Props, {}> {
+		isMultiPremiseArg: IsMultiPremiseArgument(node),
+	};
+}
+@Connect(connector)
+export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 	render() {
-		let {map, node, path, inList, permissions, parentNode, copiedNode, copiedNode_asCut, pathsToChangedInSubtree} = this.props;
+		let {map, node, path, inList, permissions, parentNode, copiedNode, copiedNode_asCut, pathsToChangedInSubtree, isMultiPremiseArg} = this.props;
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
@@ -98,7 +99,7 @@ export default class NodeUI_Menu extends BaseComponent<Props, {}> {
 							if (userID == null) return ShowSignInPopup();
 							ShowAddSubnodeDialog(map._id, node, path);
 						}}/>}
-				{IsUserBasicOrAnon(userID) &&
+				{IsUserBasicOrAnon(userID) && !isMultiPremiseArg &&
 					<VMenuItem text="Convert to multi-premise" style={styles.vMenuItem}
 						onClick={async e=> {
 							if (e.button != 0) return;
