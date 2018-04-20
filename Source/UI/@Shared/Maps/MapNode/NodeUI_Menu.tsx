@@ -50,8 +50,6 @@ import SetNodeIsMultiPremiseArgument from "Server/Commands/SetNodeIsMultiPremise
 
 type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean, holderType?: HolderType};
 let connector = (_: RootState, {map, node, path}: Props)=> {
-	if (1) return {} as any;
-	
 	let sinceTime = GetTimeFromWhichToShowChangedNodes(map._id);
 	let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
 	let pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == path || a.startsWith(path + "/")); // also include self, for this
@@ -72,8 +70,6 @@ let connector = (_: RootState, {map, node, path}: Props)=> {
 @Connect(connector)
 export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 	render() {
-		if (1) return <div/>;
-
 		let {map, node, path, inList, holderType,
 			permissions, parent, nodeChildren, combinedWithParentArg, copiedNode, copiedNode_asCut, pathsToChangedInSubtree} = this.props;
 		let userID = GetUserID();

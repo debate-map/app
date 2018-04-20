@@ -80,19 +80,26 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 			initialChildLimit, nodeChildren_fillPercents} = this.props;
 		let {childrenWidthOverride, oldChildBoxOffsets} = this.state;
 
-		let upChildren = separateChildren ? nodeChildrenToShow.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
-		let downChildren = separateChildren ? nodeChildrenToShow.filter(a=>a.finalPolarity == Polarity.Opposing) : [];
+		let nodeChildrenToShowHere = nodeChildrenToShow;
+		let nodeChildrenToShowInRelevanceBox;
+		if (IsMultiPremiseArgument(node) && type != HolderType.Relevance) {
+			nodeChildrenToShowHere = nodeChildrenToShow.filter(a=>a && a.type != MapNodeType.Argument);
+			nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == MapNodeType.Argument);
+		}
+
+		let upChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
+		let downChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.finalPolarity == Polarity.Opposing) : [];
 		
 		// apply sorting
 		if (separateChildren) {
 			upChildren = upChildren.OrderBy(child=>nodeChildren_fillPercents[child._id]);
 			downChildren = downChildren.OrderByDescending(child=>nodeChildren_fillPercents[child._id]);
 		} else {
-			nodeChildrenToShow = nodeChildrenToShow.OrderByDescending(child=>nodeChildren_fillPercents[child._id]);
+			nodeChildrenToShowHere = nodeChildrenToShowHere.OrderByDescending(child=>nodeChildren_fillPercents[child._id]);
 			//if (IsArgumentNode(node)) {
 			let isArgument_any = node.type == MapNodeType.Argument && node.current.argumentType == ArgumentType.Any;
 			if (node.childrenOrder && !isArgument_any) {
-				nodeChildrenToShow = nodeChildrenToShow.OrderBy(child=>node.childrenOrder.indexOf(child._id).IfN1Then(Number.MAX_SAFE_INTEGER));
+				nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(child=>node.childrenOrder.indexOf(child._id).IfN1Then(Number.MAX_SAFE_INTEGER));
 			}
 		}
 
@@ -132,14 +139,14 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 					//<NodeConnectorBackground node={node} linkSpawnPoint={vertical ? Vector2iCache.Get(0, linkSpawnPoint) : Vector2iCache.Get(-30, linkSpawnPoint)}
 					<NodeConnectorBackground node={node} linkSpawnPoint={vertical ? new Vector2i(-10, 0) : new Vector2i(-30, linkSpawnPoint)} straightLines={vertical}
 						shouldUpdate={true} //this.lastRender_source == RenderSource.SetState}
-						nodeChildren={nodeChildrenToShow} childBoxOffsets={oldChildBoxOffsets}/>}
+						nodeChildren={nodeChildrenToShowHere} childBoxOffsets={oldChildBoxOffsets}/>}
 				
 				{/* if we're for multi-premise arg, and this comp is not already showing relevance-args, show them in a "Taken together, are these claims relevant?" box */}
 				{IsMultiPremiseArgument(node) && type != HolderType.Relevance &&
 					<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Relevance} widthOverride={childrenWidthOverride}
-						nodeChildren={GetNodeChildrenL3(node, path)} nodeChildrenToShow={GetNodeChildrenL3(node, path).filter(a=>a && a.type == MapNodeType.Argument)}/>}
-				{!separateChildren && nodeChildrenToShow.slice(0, childLimit_down).map((pack, index)=> {
-					return RenderChild(pack, index, nodeChildrenToShow);
+						nodeChildren={GetNodeChildrenL3(node, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}/>}
+				{!separateChildren && nodeChildrenToShowHere.slice(0, childLimit_down).map((pack, index)=> {
+					return RenderChild(pack, index, nodeChildrenToShowHere);
 				})}
 				{separateChildren &&
 					<Column ref={c=>this.upChildHolder = c} ct className="upChildHolder">
