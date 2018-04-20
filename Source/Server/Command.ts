@@ -101,7 +101,9 @@ export abstract class Command<Payload> {
 			for (let update of updatesForNode) {
 				newNodeData = u.updateIn(update.name.replace(new RegExp(`^nodes/${nodeID}($|/)`), "").replace(/\//g, "."), u.constant(update.value), newNodeData);
 			}
-			AssertValidate("MapNode", newNodeData, `New node-data is invalid.`);
+			if (newNodeData != null) { // (if null, means we're deleting it, which is fine)
+				AssertValidate("MapNode", newNodeData, `New node-data is invalid.`);
+			}
 		}
 	}
 }

@@ -89,9 +89,10 @@ AddSchema({
 	],*/
 }, "MapNode");
 AddAJVExtraCheck("MapNode", (node: MapNode)=> {
-	if (node.childrenOrder && node.childrenOrder.length != node.children.VKeys(true).length) {
+	/*if (node.childrenOrder && node.childrenOrder.length != node.children.VKeys(true).length) {
 		return "Children and childrenOrder lengths differ!";
-	}
+	}*/
+	return null;
 });
 
 // helpers

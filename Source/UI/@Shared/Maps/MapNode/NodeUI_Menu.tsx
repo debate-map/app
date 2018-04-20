@@ -112,7 +112,7 @@ export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 							if (userID == null) return ShowSignInPopup();
 							ShowAddSubnodeDialog(map._id, node, path);
 						}}/>}
-				{IsUserCreatorOrMod(userID, parent) && IsSinglePremiseArgument(parent) && !componentBox &&
+				{IsUserCreatorOrMod(userID, parent) && node.type == MapNodeType.Claim && IsSinglePremiseArgument(parent) && !componentBox &&
 					<VMenuItem text="Convert to multi-premise" style={styles.vMenuItem}
 						onClick={async e=> {
 							if (e.button != 0) return;
