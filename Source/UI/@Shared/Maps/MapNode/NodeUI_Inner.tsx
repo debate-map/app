@@ -43,6 +43,7 @@ import SubPanel from "./NodeUI_Inner/SubPanel";
 import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
 import {MapNodeUI_LeftBox} from "./NodeUI_LeftBox";
 import {NodeUI_Menu} from "./NodeUI_Menu";
+import {ReasonScoreValues} from "../../../../Store/firebase/nodeRatings/ReasonScore";
 
 //export type NodeHoverExtras = {panel?: string, term?: number};
 
@@ -161,39 +162,35 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 					}
 					store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: node._id, time: Date.now()}));
 				}}
-				beforeChildren={
-					[
-						leftPanelShow &&
-							<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot, panelPosition, local_openPanel, backgroundColor}} asHover={hovered}
-									onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
-									onPanelButtonClick={panel=> {
-										if (useLocalPanelState) {
-											this.SetState({local_openPanel: panel, hoverPanel: null});
-											return;
-										}
-		
-										if (nodeView.openPanel != panel) {
-											store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel}));
-										} else {
-											store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel: null}));
-											this.SetState({hoverPanel: null});
-										}
-									}}>
-								{/* fixes click-gap */}
-								{panelPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
-							</MapNodeUI_LeftBox>,
-						// fixes click-gap
-						leftPanelShow && panelPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>,
-					]
-				}
+				beforeChildren={[
+					leftPanelShow &&
+						<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot, panelPosition, local_openPanel, backgroundColor}} asHover={hovered}
+								onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
+								onPanelButtonClick={panel=> {
+									if (useLocalPanelState) {
+										this.SetState({local_openPanel: panel, hoverPanel: null});
+										return;
+									}
+	
+									if (nodeView.openPanel != panel) {
+										store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel}));
+									} else {
+										store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel: null}));
+										this.SetState({hoverPanel: null});
+									}
+								}}>
+							{/* fixes click-gap */}
+							{panelPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
+						</MapNodeUI_LeftBox>,
+					// fixes click-gap
+					leftPanelShow && panelPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>,
+				]}
 				onTextHolderClick={e=>IsDoubleClick(e) && this.titlePanel && GetInnerComp(this.titlePanel).OnDoubleClick()}
-				text={
-					[
-						<TitlePanel ref={c=>this.titlePanel = c} {...{parent: this, map, node, nodeView, path}}/>,
-						subPanelShow && <SubPanel node={node}/>,
-						<NodeUI_Menu {...{map, node, path}}/>
-					]
-				}
+				text={[
+					<TitlePanel ref={c=>this.titlePanel = c} {...{parent: this, map, node, nodeView, path}}/>,
+					subPanelShow && <SubPanel node={node}/>,
+					<NodeUI_Menu {...{map, node, path}}/>
+				]}
 				{...{backgroundFillPercent, backgroundColor, markerPercent}}
 				toggleExpanded={e=> {
 					store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path, expanded: !expanded, recursive: expanded && e.altKey}));
@@ -202,53 +199,10 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 				}}
 				afterChildren={[
 					bottomPanelShow &&
-						<div style={{
-							position: "absolute", left: panelPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
-							width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
-							padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-						}}>
-							{ratingTypes.Contains(panelToShow) && (()=> {
-								if (["impact", "relevance"].Contains(panelToShow) && node.type == MapNodeType.Claim) {
-									let argumentNode = parent;
-									let argumentPath = SlicePath(path, 1);
-									let ratings = GetRatings(argumentNode._id, panelToShow as RatingType);
-									return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as RatingType} ratings={ratings}/>;
-								}
-								let ratings = GetRatings(node._id, panelToShow as RatingType);
-								return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
-							})()}
-							{panelToShow == "definitions" &&
-								<DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{node, path, hoverTermID}}
-									openTermID={nodeView.openTermID}
-									onHoverTerm={termID=>this.SetState({hoverTermID: termID})}
-									onClickTerm={termID=>store.dispatch(new ACTMapNodeTermOpen({mapID: map._id, path, termID: termID}))}/>}
-							{panelToShow == "discussion" && <DiscussionPanel/>}
-							{panelToShow == "social" && <SocialPanel/>}
-							{panelToShow == "tags" && <TagsPanel/>}
-							{panelToShow == "details" && <DetailsPanel map={map} node={node} path={path}/>}
-							{panelToShow == "history" && <HistoryPanel map={map} node={node} path={path}/>}
-							{panelToShow == "others" && <OthersPanel map={map} node={node} path={path}/>}
-						</div>,
-					(()=> {
-						if (!showReasonScoreValuesForThisNode) return;
-						
-						//if (node.type == MapNodeType.Claim) {
-						let mainScore = node.type == MapNodeType.Argument ? RS_CalculateTruthScoreComposite(node) : RS_CalculateTruthScore(node);
-	
-						return (
-							<div className="clickThrough" style={{position: "absolute", top: "100%", width: "100%", zIndex: 1, textAlign: "center", fontSize: 14}}>
-								{node.type == MapNodeType.Argument && `Truth score: ${ToPercentStr(mainScore)}${
-									` Weight: [...]x${rs_argWeightMultiplier.RoundTo_Str(.01)} = ${rs_argWeight.RoundTo_Str(.01)}`
-								}`}
-								{node.type == MapNodeType.Claim && `Truth score: ${ToPercentStr(mainScore)}${
-									combinedWithParentArgument
-										? ` Weight: ${rs_claimBaseWeight.RoundTo_Str(.01)}x${rs_argWeightMultiplier.RoundTo_Str(.01)} = ${rs_argWeight.RoundTo_Str(.01)}`
-										: ""
-								}`}
-							</div>
-						);
-						//}
-					})(),
+						<NodeUI_BottomPanel {...{map, node, nodeView, path, parent, width, widthOverride, panelPosition, panelToShow, hovered, backgroundColor}}
+							hoverTermID={hoverTermID} onTermHover={termID=>this.SetState({hoverTermID: termID})}/>,
+					showReasonScoreValuesForThisNode &&
+						<ReasonScoreValueMarkers {...{node, combinedWithParentArgument, reasonScoreValues}}/>,
 				]}
 			/>
 		);
@@ -265,6 +219,71 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 		}, ()=> {
 			this.SetState({hovered: false})
 		});
+	}
+}
+
+class NodeUI_BottomPanel extends BaseComponent
+		<{
+			map: Map, node: MapNodeL3, nodeView: MapNodeView, path: string, parent: MapNodeL3,
+			width: number, widthOverride: number, panelPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermID: number, onTermHover: (id: number)=>void,
+			backgroundColor: Color,
+		}, {hoverTermID: number}> {
+	render() {
+		let {
+			map, node, nodeView, path, parent,
+			width, widthOverride, panelPosition, panelToShow, hovered, hoverTermID, onTermHover,
+			backgroundColor,
+		} = this.props;
+		return (
+			<div style={{
+				position: "absolute", left: panelPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
+				width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
+				padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+			}}>
+				{ratingTypes.Contains(panelToShow) && (()=> {
+					if (["impact", "relevance"].Contains(panelToShow) && node.type == MapNodeType.Claim) {
+						let argumentNode = parent;
+						let argumentPath = SlicePath(path, 1);
+						let ratings = GetRatings(argumentNode._id, panelToShow as RatingType);
+						return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as RatingType} ratings={ratings}/>;
+					}
+					let ratings = GetRatings(node._id, panelToShow as RatingType);
+					return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
+				})()}
+				{panelToShow == "definitions" &&
+					<DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{node, path, hoverTermID}}
+						openTermID={nodeView.openTermID}
+						onHoverTerm={termID=>onTermHover(termID)}
+						onClickTerm={termID=>store.dispatch(new ACTMapNodeTermOpen({mapID: map._id, path, termID: termID}))}/>}
+				{panelToShow == "discussion" && <DiscussionPanel/>}
+				{panelToShow == "social" && <SocialPanel/>}
+				{panelToShow == "tags" && <TagsPanel/>}
+				{panelToShow == "details" && <DetailsPanel map={map} node={node} path={path}/>}
+				{panelToShow == "history" && <HistoryPanel map={map} node={node} path={path}/>}
+				{panelToShow == "others" && <OthersPanel map={map} node={node} path={path}/>}
+			</div>
+		);
+	}
+	definitionsPanel: DefinitionsPanel;
+}
+
+class ReasonScoreValueMarkers extends BaseComponent<{node: MapNodeL3, reasonScoreValues: ReasonScoreValues_RSPrefix, combinedWithParentArgument: boolean}, {}> {
+	render() {
+		let {node, reasonScoreValues, combinedWithParentArgument} = this.props;
+		let mainScore = node.type == MapNodeType.Argument ? RS_CalculateTruthScoreComposite(node) : RS_CalculateTruthScore(node);
+		var {rs_argTruthScoreComposite, rs_argWeightMultiplier, rs_argWeight, rs_claimTruthScore, rs_claimBaseWeight} = reasonScoreValues;
+		return (
+			<div className="clickThrough" style={{position: "absolute", top: "100%", width: "100%", zIndex: 1, textAlign: "center", fontSize: 14}}>
+				{node.type == MapNodeType.Argument && `Truth score: ${ToPercentStr(mainScore)}${
+					` Weight: [...]x${rs_argWeightMultiplier.RoundTo_Str(.01)} = ${rs_argWeight.RoundTo_Str(.01)}`
+				}`}
+				{node.type == MapNodeType.Claim && `Truth score: ${ToPercentStr(mainScore)}${
+					combinedWithParentArgument
+						? ` Weight: ${rs_claimBaseWeight.RoundTo_Str(.01)}x${rs_argWeightMultiplier.RoundTo_Str(.01)} = ${rs_argWeight.RoundTo_Str(.01)}`
+						: ""
+				}`}
+			</div>
+		);
 	}
 }
 

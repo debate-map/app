@@ -1,17 +1,16 @@
-import {RatingType} from "../../Store/firebase/nodeRatings/@RatingType";
-import { GetData, GetData_Options } from "../../Frame/Database/DatabaseHelpers";
-import {CachedTransform, Lerp, GetPercentFromXToY} from "js-vextensions";
-import {MapNode} from "../../Store/firebase/nodes/@MapNode";
-import {RatingsRoot, Rating} from "./nodeRatings/@RatingsRoot";
-import {GetNodeChildren, GetNode, GetNodeChildrenL2, GetNodeChildrenL3} from "./nodes";
-import {ClaimForm, MapNodeL3, MapNodeL2, Polarity} from "./nodes/@MapNode";
-import {GetNodeL2, AsNodeL3, GetLinkUnderParent, GetMainRatingType} from "./nodes/$node";
-import {MapNodeType} from "./nodes/@MapNodeType";
-import {emptyObj} from "../../Frame/Store/ReducerUtils";
-import {GetArgumentImpactPseudoRatingSet} from "../../Frame/Store/RatingProcessor";
-import {CachedTransform_WithStore} from "Frame/Database/DatabaseHelpers";
+import { CachedTransform_WithStore } from "Frame/Database/DatabaseHelpers";
+import { Lerp } from "js-vextensions";
+import { GetData } from "../../Frame/Database/DatabaseHelpers";
+import { GetArgumentImpactPseudoRatingSet } from "../../Frame/Store/RatingProcessor";
+import { emptyObj } from "../../Frame/Store/ReducerUtils";
+import { RatingType } from "../../Store/firebase/nodeRatings/@RatingType";
 import { WeightingType } from "../main";
+import { Rating, RatingsRoot } from "./nodeRatings/@RatingsRoot";
 import { RS_GetAllValues } from "./nodeRatings/ReasonScore";
+import { GetNodeChildrenL2 } from "./nodes";
+import { GetMainRatingType, GetNodeL2 } from "./nodes/$node";
+import { ClaimForm, MapNodeL3 } from "./nodes/@MapNode";
+import { MapNodeType } from "./nodes/@MapNodeType";
 import { GetUserID } from "./users";
 
 export function GetNodeRatingsRoot(nodeID: number) {

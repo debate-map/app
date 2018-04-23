@@ -8,18 +8,17 @@ import {MapNodeL3} from "Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
 import {ACTMapNodeExpandedSet} from "Store/main/mapViews/$mapView/rootNodeViews";
 import {MapNodeView} from "Store/main/mapViews/@MapViews";
-import {Button, Row} from "react-vcomponents";
-import {BaseComponentWithConnector, FindDOM, GetInnerComp} from "react-vextensions";
+import {Row} from "react-vcomponents";
+import {BaseComponentWithConnector, FindDOM} from "react-vextensions";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import {GetFillPercent_AtPath} from "../../../../../Store/firebase/nodeRatings";
 import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
 import {GetNodeColor} from "../../../../../Store/firebase/nodes/@MapNodeType";
+import {ExpandableBox} from "../ExpandableBox";
 import {Squiggle} from "../NodeConnectorBackground";
 import {NodeUI_Menu} from "../NodeUI_Menu";
 import {NodeChildHolder} from "./NodeChildHolder";
 import RatingsPanel from "./Panels/RatingsPanel";
-import {ExpandableBox} from "../ExpandableBox";
-import {IsDoubleClick} from "Frame/General/Others";
 
 export enum HolderType {
 	Truth = 10,

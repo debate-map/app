@@ -1,15 +1,19 @@
+import {Button, Row} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
-import {Row, Button} from "react-vcomponents";
-import classNames from "classnames";
 
-export class ExpandableBox extends BaseComponent
-		<{
-			parent?,
-			className?: string, width: number, widthOverride: number, innerWidth?: number, outlineColor?: string, padding: number | string, style, onClick?,
-			backgroundFillPercent: number, backgroundColor: Color, markerPercent: number,
-			text, onTextHolderClick?, beforeChildren?, afterChildren?,
-			expanded: boolean, toggleExpanded: Function,
-		}, {}> {
+type Props = {
+	parent?,
+	className?: string, width: number, widthOverride: number, innerWidth?: number, outlineColor?: string, padding: number | string, style, onClick?,
+	backgroundFillPercent: number, backgroundColor: Color, markerPercent: number,
+	text, onTextHolderClick?, beforeChildren?, afterChildren?,
+	expanded: boolean, toggleExpanded: Function,
+};
+export class ExpandableBox extends BaseComponent<Props, {}> {
+	static ValidateProps(props: Props) {
+		let {backgroundFillPercent} = props;
+		Assert(backgroundFillPercent >= 0 && backgroundFillPercent <= 100, "Background fill-percent must be between 0 and 100.");
+	}
+	
 	parent;
 	render() {
 		let {parent,
