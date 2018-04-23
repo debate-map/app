@@ -64,6 +64,7 @@ import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
 import {MapNodeRevision_titlePattern} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 import { RS_CalculateTruthScore, RS_GetAllValues, ReasonScoreValues_RSPrefix, RS_CalculateTruthScoreComposite } from "Store/firebase/nodeRatings/ReasonScore";
 import {RS_CalculateWeightMultiplier, RS_CalculateBaseWeight, RS_CalculateWeight} from "../../../../Store/firebase/nodeRatings/ReasonScore";
+import {ExpandableBox} from "./ExpandableBox";
 
 //export type NodeHoverExtras = {panel?: string, term?: number};
 
@@ -166,134 +167,116 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 		let expanded = nodeView && nodeView.expanded;
 		
 		return (
-			<div className={classNames("NodeUI_Inner", {root: pathNodeIDs.length == 0})}
-					style={E({
-						display: "flex", position: "relative", borderRadius: 5, cursor: "default",
-						width, minWidth: widthOverride,
-						boxShadow: "rgba(0,0,0,1) 0px 0px 2px" + (outlineColor ? `, rgba(${outlineColor},1) 0px 0px 1px` : "").repeat(6),
-					}, style)}
-					onClick={e=> {
-						if ((e.nativeEvent as any).ignore) return;
-						/*if (useLocalPanelState) {
-							this.SetState({local_selected: true});
-							return;
-						}*/
+			<ExpandableBox {...{width, widthOverride, outlineColor, expanded}} parent={this}
+				className={classNames("NodeUI_Inner", {root: pathNodeIDs.length == 0})}
+				padding={GetPaddingForNode(node, isSubnode)}
+				style={E({
+					display: "flex", position: "relative", borderRadius: 5, cursor: "default",
+					width, minWidth: widthOverride,
+					boxShadow: "rgba(0,0,0,1) 0px 0px 2px" + (outlineColor ? `, rgba(${outlineColor},1) 0px 0px 1px` : "").repeat(6),
+				}, style)}
+				onClick={e=> {
+					if ((e.nativeEvent as any).ignore) return;
+					/*if (useLocalPanelState) {
+						this.SetState({local_selected: true});
+						return;
+					}*/
 
-						if (nodeView == null || !nodeView.selected) {
-							store.dispatch(new ACTMapNodeSelect({mapID: map._id, path}));
-						}
-						store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: node._id, time: Date.now()}));
-					}}>
-				{leftPanelShow &&
-					<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot, panelPosition, local_openPanel, backgroundColor}} asHover={hovered}
-							onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
-							onPanelButtonClick={panel=> {
-								if (useLocalPanelState) {
-									this.SetState({local_openPanel: panel, hoverPanel: null});
-									return;
-								}
-
-								if (nodeView.openPanel != panel) {
-									store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel}));
-								} else {
-									store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel: null}));
-									this.SetState({hoverPanel: null});
-								}
-							}}>
-						{/* fixes click-gap */}
-						{panelPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
-					</MapNodeUI_LeftBox>}
-				{/* fixes click-gap */}
-				{leftPanelShow && panelPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
-
-				<Row style={{alignItems: "stretch", width: "100%", borderRadius: 5, cursor: "pointer"}}>
-					<div style={{position: "relative", width: "calc(100% - 17px)", padding: GetPaddingForNode(node, isSubnode),
-								//overflow: "hidden" // let it overflow for now, until we have proper handling for katex-overflowing
-							}}
-							onClick={e=>IsDoubleClick(e) && this.titlePanel && GetInnerComp(this.titlePanel).OnDoubleClick()}>
-						<div style={{
-							position: "absolute", left: 0, top: 0, bottom: 0,
-							width: backgroundFillPercent + "%", background: backgroundColor.css(), borderRadius: "5px 0 0 5px",
-						}}/>
-						<div style={{
-							position: "absolute", right: 0, top: 0, bottom: 0,
-							width: (100 - backgroundFillPercent) + "%", background: `rgba(0,0,0,.7)`, borderRadius: backgroundFillPercent <= 0 ? "5px 0 0 5px" : 0,
-						}}/>
-						{markerPercent != null &&
-							<div style={{
-								position: "absolute", left: markerPercent + "%", top: 0, bottom: 0,
-								width: 2, background: "rgba(0,255,0,.5)",
-							}}/>}
-						<TitlePanel ref={c=>this.titlePanel = c} {...{parent: this, map, node, nodeView, path}}/>
-						{subPanelShow && <SubPanel node={node}/>}
+					if (nodeView == null || !nodeView.selected) {
+						store.dispatch(new ACTMapNodeSelect({mapID: map._id, path}));
+					}
+					store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: node._id, time: Date.now()}));
+				}}
+				beforeChildren={
+					[
+						leftPanelShow &&
+							<MapNodeUI_LeftBox {...{map, path, node, nodeView, ratingsRoot, panelPosition, local_openPanel, backgroundColor}} asHover={hovered}
+									onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
+									onPanelButtonClick={panel=> {
+										if (useLocalPanelState) {
+											this.SetState({local_openPanel: panel, hoverPanel: null});
+											return;
+										}
+		
+										if (nodeView.openPanel != panel) {
+											store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel}));
+										} else {
+											store.dispatch(new ACTMapNodePanelOpen({mapID: map._id, path, panel: null}));
+											this.SetState({hoverPanel: null});
+										}
+									}}>
+								{/* fixes click-gap */}
+								{panelPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
+							</MapNodeUI_LeftBox>,
+						// fixes click-gap
+						leftPanelShow && panelPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>,
+					]
+				}
+				onTextHolderClick={e=>IsDoubleClick(e) && this.titlePanel && GetInnerComp(this.titlePanel).OnDoubleClick()}
+				text={
+					[
+						<TitlePanel ref={c=>this.titlePanel = c} {...{parent: this, map, node, nodeView, path}}/>,
+						subPanelShow && <SubPanel node={node}/>,
 						<NodeUI_Menu {...{map, node, path}}/>
-					</div>
-					<Button text={expanded ? "-" : "+"} //size={28}
-							style={{
-								display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
-								width: 17, //minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
-								padding: 0,
-								fontSize: expanded ? 23 : 17,
-								lineHeight: "1px", // keeps text from making meta-theses too tall
-								backgroundColor: backgroundColor.Mix("black", .2).alpha(.9).css(),
-								border: "none",
-								":hover": {backgroundColor: backgroundColor.Mix("black", .1).alpha(.9).css()},
-							}}
-							onClick={e=> {
-								store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path, expanded: !expanded, recursive: expanded && e.altKey}));
-								e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
-								//return false;
-							}}/>
-				</Row>
-				{bottomPanelShow &&
-					<div style={{
-						position: "absolute", left: panelPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
-						width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
-						padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-					}}>
-						{ratingTypes.Contains(panelToShow) && (()=> {
-							if (["impact", "relevance"].Contains(panelToShow) && node.type == MapNodeType.Claim) {
-								let argumentNode = parent;
-								let argumentPath = SlicePath(path, 1);
-								let ratings = GetRatings(argumentNode._id, panelToShow as RatingType);
-								return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as RatingType} ratings={ratings}/>;
-							}
-							let ratings = GetRatings(node._id, panelToShow as RatingType);
-							return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
-						})()}
-						{panelToShow == "definitions" &&
-							<DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{node, path, hoverTermID}}
-								openTermID={nodeView.openTermID}
-								onHoverTerm={termID=>this.SetState({hoverTermID: termID})}
-								onClickTerm={termID=>store.dispatch(new ACTMapNodeTermOpen({mapID: map._id, path, termID: termID}))}/>}
-						{panelToShow == "discussion" && <DiscussionPanel/>}
-						{panelToShow == "social" && <SocialPanel/>}
-						{panelToShow == "tags" && <TagsPanel/>}
-						{panelToShow == "details" && <DetailsPanel map={map} node={node} path={path}/>}
-						{panelToShow == "history" && <HistoryPanel map={map} node={node} path={path}/>}
-						{panelToShow == "others" && <OthersPanel map={map} node={node} path={path}/>}
-					</div>}
-				{(()=> {
-					if (!showReasonScoreValuesForThisNode) return;
-					
-					//if (node.type == MapNodeType.Claim) {
-					let mainScore = node.type == MapNodeType.Argument ? RS_CalculateTruthScoreComposite(node) : RS_CalculateTruthScore(node);
-
-					return (
-						<div className="clickThrough" style={{position: "absolute", top: "100%", width: "100%", zIndex: 1, textAlign: "center", fontSize: 14}}>
-							{node.type == MapNodeType.Argument && `Truth score: ${ToPercentStr(mainScore)}${
-								` Weight: [...]x${rs_argWeightMultiplier.RoundTo_Str(.01)} = ${rs_argWeight.RoundTo_Str(.01)}`
-							}`}
-							{node.type == MapNodeType.Claim && `Truth score: ${ToPercentStr(mainScore)}${
-								combinedWithParentArgument
-									? ` Weight: ${rs_claimBaseWeight.RoundTo_Str(.01)}x${rs_argWeightMultiplier.RoundTo_Str(.01)} = ${rs_argWeight.RoundTo_Str(.01)}`
-									: ""
-							}`}
-						</div>
-					);
-					//}
-				})()}
-			</div>
+					]
+				}
+				{...{backgroundFillPercent, backgroundColor, markerPercent}}
+				toggleExpanded={e=> {
+					store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path, expanded: !expanded, recursive: expanded && e.altKey}));
+					e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
+					//return false;
+				}}
+				afterChildren={[
+					bottomPanelShow &&
+						<div style={{
+							position: "absolute", left: panelPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
+							width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
+							padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+						}}>
+							{ratingTypes.Contains(panelToShow) && (()=> {
+								if (["impact", "relevance"].Contains(panelToShow) && node.type == MapNodeType.Claim) {
+									let argumentNode = parent;
+									let argumentPath = SlicePath(path, 1);
+									let ratings = GetRatings(argumentNode._id, panelToShow as RatingType);
+									return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as RatingType} ratings={ratings}/>;
+								}
+								let ratings = GetRatings(node._id, panelToShow as RatingType);
+								return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
+							})()}
+							{panelToShow == "definitions" &&
+								<DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{node, path, hoverTermID}}
+									openTermID={nodeView.openTermID}
+									onHoverTerm={termID=>this.SetState({hoverTermID: termID})}
+									onClickTerm={termID=>store.dispatch(new ACTMapNodeTermOpen({mapID: map._id, path, termID: termID}))}/>}
+							{panelToShow == "discussion" && <DiscussionPanel/>}
+							{panelToShow == "social" && <SocialPanel/>}
+							{panelToShow == "tags" && <TagsPanel/>}
+							{panelToShow == "details" && <DetailsPanel map={map} node={node} path={path}/>}
+							{panelToShow == "history" && <HistoryPanel map={map} node={node} path={path}/>}
+							{panelToShow == "others" && <OthersPanel map={map} node={node} path={path}/>}
+						</div>,
+					(()=> {
+						if (!showReasonScoreValuesForThisNode) return;
+						
+						//if (node.type == MapNodeType.Claim) {
+						let mainScore = node.type == MapNodeType.Argument ? RS_CalculateTruthScoreComposite(node) : RS_CalculateTruthScore(node);
+	
+						return (
+							<div className="clickThrough" style={{position: "absolute", top: "100%", width: "100%", zIndex: 1, textAlign: "center", fontSize: 14}}>
+								{node.type == MapNodeType.Argument && `Truth score: ${ToPercentStr(mainScore)}${
+									` Weight: [...]x${rs_argWeightMultiplier.RoundTo_Str(.01)} = ${rs_argWeight.RoundTo_Str(.01)}`
+								}`}
+								{node.type == MapNodeType.Claim && `Truth score: ${ToPercentStr(mainScore)}${
+									combinedWithParentArgument
+										? ` Weight: ${rs_claimBaseWeight.RoundTo_Str(.01)}x${rs_argWeightMultiplier.RoundTo_Str(.01)} = ${rs_argWeight.RoundTo_Str(.01)}`
+										: ""
+								}`}
+							</div>
+						);
+						//}
+					})(),
+				]}
+			/>
 		);
 	}
 	definitionsPanel: DefinitionsPanel;

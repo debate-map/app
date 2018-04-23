@@ -292,7 +292,8 @@ export class MapUI extends BaseComponentWithConnector(connector, {}) {
 		let nextPathTry = nodePath;
 		while (focusNodeBox == null) {
 			focusNodeBox = $(".NodeUI_Inner").ToList().FirstOrX(nodeBox=> {
-				let comp = FindReact(nodeBox[0]) as NodeUI_Inner;
+				//let comp = FindReact(nodeBox[0]) as NodeUI_Inner;
+				let comp = FindReact(nodeBox[0]).props.parent as NodeUI_Inner;
 				// if comp is null, just ignore (an error must have occured, but we don't want to handle it here)
 				if (comp == null) return false;
 				return comp.props.path == nextPathTry;
@@ -301,7 +302,7 @@ export class MapUI extends BaseComponentWithConnector(connector, {}) {
 			nextPathTry = nextPathTry.substr(0, nextPathTry.lastIndexOf("/"));
 		}
 		if (focusNodeBox == null) return null;
-		return FindReact(focusNodeBox[0]) as NodeUI_Inner;
+		return FindReact(focusNodeBox[0]).props.parent as NodeUI_Inner;
 	}
 	ScrollToNode(nodePath: string) {
 		let {map, rootNode, withinPage} = this.props;
