@@ -1,5 +1,5 @@
 import {Connect} from "Frame/Database/FirebaseConnect";
-import {emptyArray_forLoading} from "Frame/Store/ReducerUtils";
+import {emptyArray_forLoading, emptyArray} from "Frame/Store/ReducerUtils";
 import {GetMarkerPercent_AtPath, GetRatings} from "Store/firebase/nodeRatings";
 import {RatingType} from "Store/firebase/nodeRatings/@RatingType";
 import {GetParentNodeL3} from "Store/firebase/nodes";
@@ -19,6 +19,7 @@ import {Squiggle} from "../NodeConnectorBackground";
 import {NodeUI_Menu} from "../NodeUI_Menu";
 import {NodeChildHolder} from "./NodeChildHolder";
 import RatingsPanel from "./Panels/RatingsPanel";
+import {NodeChildCountMarker} from "./NodeChildCountMarker";
 
 export enum HolderType {
 	Truth = 10,
@@ -85,9 +86,10 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		//let expandKey = type == HolderType.Truth ? "expanded_truth" : "expanded_relevance";
 		let holderTypeStr = HolderType[type].toLowerCase();
 		let expandKey = `expanded_${holderTypeStr}`;
+		let expanded = nodeView[expandKey];
 
 		let separateChildren = node.type == MapNodeType.Claim || IsSinglePremiseArgument(node);
-		let showArgumentsControlBar = /*(node.type == MapNodeType.Claim || combineWithChildClaim) &&*/ nodeView[expandKey] && nodeChildrenToShow != emptyArray_forLoading;
+		let showArgumentsControlBar = /*(node.type == MapNodeType.Claim || combineWithChildClaim) &&*/ expanded && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, height} = this.GetMeasurementInfo();
 		if (widthOverride) {
@@ -102,7 +104,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 				!isMultiPremiseArgument && {alignSelf: "flex-end"},
 				isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
 				// if we don't know our inner-box-offset yet, render still (so we can measure ourself), but make self invisible
-				nodeView[expandKey] && nodeChildrenToShow.length && innerBoxOffset == 0 && {opacity: 0, pointerEvents: "none"},
+				expanded && nodeChildrenToShow.length && innerBoxOffset == 0 && {opacity: 0, pointerEvents: "none"},
 			)}>
 				<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{position: "absolute", width: "100%", height: "100%"}}>
 					{type == HolderType.Truth && 
@@ -114,7 +116,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 					{type == HolderType.Relevance && isMultiPremiseArgument &&
 						<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
 				</div>
-				<ExpandableBox {...{width, widthOverride}} innerWidth={width} expanded={nodeView[expandKey]}
+				<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
 					ref={c=>this.innerUI = c}
 					style={{marginTop: innerBoxOffset}}
 					padding="3px 5px 2px"
@@ -147,6 +149,10 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 						<NodeUI_Menu {...{map, node, path}} holderType={type}/>
 					]}
 				/>
+				{nodeChildrenToShow != emptyArray && !expanded && nodeChildrenToShow.length != 0 &&
+					<NodeChildCountMarker childCount={nodeChildrenToShow.length}/>}
+				{/*!nodeView.expanded && (addedDescendants > 0 || editedDescendants > 0) &&
+					<NodeChangesMarker {...{addedDescendants, editedDescendants, textOutline, limitBarPos}}/>*/}
 				{nodeView[expandKey] &&
 					<NodeChildHolder {...{map, node, path, nodeView, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar}}
 						linkSpawnPoint={innerBoxOffset + (height / 2)}

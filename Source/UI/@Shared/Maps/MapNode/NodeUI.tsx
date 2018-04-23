@@ -176,8 +176,6 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		/*let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
 		let showBelowMessage = nodeChildren.length > 0 && nodeChildren.length < minChildCount;*/
 
-		let textOutline = "rgba(10,10,10,1)";
-
 		// maybe temp
 		let combineWithChildClaim = IsSinglePremiseArgument(node);
 		if (combineWithChildClaim && !IsSpecialEmptyArray(nodeChildrenToShow) && nodeChildrenToShow.length) {
@@ -263,9 +261,9 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 				{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 &&
 					<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 				{nodeChildrenToShow != emptyArray && !nodeView.expanded && nodeChildrenToShow.length != 0 &&
-					<NodeChildCountMarker {...{textOutline, limitBarPos}} childCount={nodeChildrenToShow.length}/>}
+					<NodeChildCountMarker {...{limitBarPos}} childCount={nodeChildrenToShow.length}/>}
 				{!nodeView.expanded && (addedDescendants > 0 || editedDescendants > 0) &&
-					<NodeChangesMarker {...{addedDescendants, editedDescendants, textOutline, limitBarPos}}/>}
+					<NodeChangesMarker {...{addedDescendants, editedDescendants, limitBarPos}}/>}
 				{!isMultiPremiseArgument &&
 					nodeChildHolder}
 			</div>

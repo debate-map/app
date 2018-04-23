@@ -4,7 +4,8 @@ import {Column, Row} from "react-vcomponents";
 import {GetChangeTypeOutlineColor, ChangeType} from "Store/firebase/mapNodeEditTimes";
 import {ChildLimitBar} from "./NodeChildHolder";
 
-export class NodeChangesMarker extends BaseComponent<{addedDescendants: number, editedDescendants: number, textOutline: string, limitBarPos?: LimitBarPos}, {}> {
+export class NodeChangesMarker extends BaseComponent<{addedDescendants: number, editedDescendants: number, textOutline?: string, limitBarPos?: LimitBarPos}, {}> {
+	static defaultProps = {textOutline: "rgba(10,10,10,1)"};
 	render() {
 		let {addedDescendants, editedDescendants, textOutline, limitBarPos} = this.props;
 		return (

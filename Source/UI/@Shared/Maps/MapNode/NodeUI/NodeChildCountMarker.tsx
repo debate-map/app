@@ -2,7 +2,8 @@ import {BaseComponent} from "react-vextensions";
 import {LimitBarPos} from "UI/@Shared/Maps/MapNode/NodeUI";
 import {ChildLimitBar} from "./NodeChildHolder";
 
-export class NodeChildCountMarker extends BaseComponent<{childCount: number, textOutline: string, limitBarPos?: LimitBarPos}, {}> {
+export class NodeChildCountMarker extends BaseComponent<{childCount: number, textOutline?: string, limitBarPos?: LimitBarPos}, {}> {
+	static defaultProps = {textOutline: "rgba(10,10,10,1)"};
 	render() {
 		let {childCount, textOutline, limitBarPos} = this.props;
 		return (
