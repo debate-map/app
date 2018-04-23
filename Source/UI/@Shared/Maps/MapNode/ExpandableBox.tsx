@@ -4,16 +4,16 @@ import classNames from "classnames";
 
 export class ExpandableBox extends BaseComponent
 		<{
-			parent,
-			className?: string, width: number, widthOverride: number, outlineColor: string, padding: number | string, style, onClick,
+			parent?,
+			className?: string, width: number, widthOverride: number, innerWidth?: number, outlineColor?: string, padding: number | string, style, onClick?,
 			backgroundFillPercent: number, backgroundColor: Color, markerPercent: number,
-			text, onTextHolderClick, beforeChildren, afterChildren,
+			text, onTextHolderClick?, beforeChildren?, afterChildren?,
 			expanded: boolean, toggleExpanded: Function,
 		}, {}> {
 	parent;
 	render() {
 		let {parent,
-			className, width, widthOverride, outlineColor, padding, style, onClick,
+			className, width, widthOverride, innerWidth, outlineColor, padding, style, onClick,
 			backgroundFillPercent, backgroundColor, markerPercent,
 			text, onTextHolderClick, beforeChildren, afterChildren,
 			expanded, toggleExpanded} = this.props;
@@ -28,7 +28,7 @@ export class ExpandableBox extends BaseComponent
 					}, style)}
 					onClick={onClick}>
 				{beforeChildren}
-				<Row style={{alignItems: "stretch", width: "100%", borderRadius: 5, cursor: "pointer"}}>
+				<Row style={{alignItems: "stretch", width: innerWidth || "100%", borderRadius: 5, cursor: "pointer"}}>
 					<div style={{position: "relative", width: "calc(100% - 17px)", padding,
 								//overflow: "hidden" // let it overflow for now, until we have proper handling for katex-overflowing
 					}} onClick={onTextHolderClick}>

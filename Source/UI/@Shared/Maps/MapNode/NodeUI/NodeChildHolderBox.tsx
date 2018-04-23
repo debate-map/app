@@ -9,7 +9,7 @@ import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
 import {ACTMapNodeExpandedSet} from "Store/main/mapViews/$mapView/rootNodeViews";
 import {MapNodeView} from "Store/main/mapViews/@MapViews";
 import {Button, Row} from "react-vcomponents";
-import {BaseComponentWithConnector, FindDOM} from "react-vextensions";
+import {BaseComponentWithConnector, FindDOM, GetInnerComp} from "react-vextensions";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import {GetFillPercent_AtPath} from "../../../../../Store/firebase/nodeRatings";
 import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
@@ -18,6 +18,8 @@ import {Squiggle} from "../NodeConnectorBackground";
 import {NodeUI_Menu} from "../NodeUI_Menu";
 import {NodeChildHolder} from "./NodeChildHolder";
 import RatingsPanel from "./Panels/RatingsPanel";
+import {ExpandableBox} from "../ExpandableBox";
+import {IsDoubleClick} from "Frame/General/Others";
 
 export enum HolderType {
 	Truth = 10,
@@ -113,64 +115,39 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 					{type == HolderType.Relevance && isMultiPremiseArgument &&
 						<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
 				</div>
-				<div ref={c=>this.innerUI = c} style={E({
-					display: "flex", position: "relative", borderRadius: 5, cursor: "default",
-					boxShadow: "rgba(0,0,0,1) 0px 0px 2px", width: width, marginTop: innerBoxOffset,
-				}) as any}>
-					<Row style={{alignItems: "stretch", width: width, borderRadius: 5, cursor: "pointer"}}>
-						<div style={{position: "relative", width: "calc(100% - 17px)", padding: "3px 5px 2px"}}>
+				<ExpandableBox {...{width, widthOverride}} innerWidth={width} expanded={nodeView[expandKey]}
+					ref={c=>this.innerUI = c}
+					style={{marginTop: innerBoxOffset}}
+					padding="3px 5px 2px"
+					text={<span style={{position: "relative", fontSize: 13}}>{text}</span>}
+					{...{backgroundFillPercent, backgroundColor, markerPercent}}
+					toggleExpanded={e=> {
+						store.dispatch(new ACTMapNodeExpandedSet({
+							mapID: map._id, path, recursive: nodeView[expandKey] && e.altKey,
+							[expandKey]: !nodeView[expandKey],
+						}));
+						e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
+						//return false;
+						if (nodeView[expandKey]) {
+							this.dividePoint = 0;
+							this.OnDividePointChange();
+						}
+					}}
+					afterChildren={[
+						ratingPanelShow &&
 							<div style={{
-								position: "absolute", left: 0, top: 0, bottom: 0,
-								width: backgroundFillPercent + "%", background: backgroundColor.css(), borderRadius: "5px 0 0 5px",
-							}}/>
-							<div style={{
-								position: "absolute", right: 0, top: 0, bottom: 0,
-								width: (100 - backgroundFillPercent) + "%", background: `rgba(0,0,0,.7)`, borderRadius: backgroundFillPercent <= 0 ? "5px 0 0 5px" : 0,
-							}}/>
-							{markerPercent != null &&
-								<div style={{
-									position: "absolute", left: markerPercent + "%", top: 0, bottom: 0,
-									width: 2, background: "rgba(0,255,0,.5)",
-								}}/>}
-							<span style={{position: "relative", fontSize: 13}}>{text}</span>
-						</div>
-						<Button text={nodeView[expandKey] ? "-" : "+"} //size={28}
-								style={{
-									display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
-									width: 17, //minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue
-									padding: 0,
-									fontSize: nodeView[expandKey] ? 23 : 17,
-									lineHeight: "1px", // keeps text from making meta-theses too tall
-									backgroundColor: backgroundColor.Mix("black", .2).alpha(.9).css(),
-									border: "none",
-									":hover": {backgroundColor: backgroundColor.Mix("black", .1).alpha(.9).css()},
-								}}
-								onClick={e=> {
-									store.dispatch(new ACTMapNodeExpandedSet({
-										mapID: map._id, path, recursive: nodeView[expandKey] && e.altKey,
-										[expandKey]: !nodeView[expandKey],
-									}));
-									e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
-									//return false;
-									if (nodeView[expandKey]) {
-										this.dividePoint = 0;
-										this.OnDividePointChange();
-									}
-								}}/>
-					</Row>
-					{ratingPanelShow &&
-						<div style={{
-							position: "absolute", left: 0, top: "calc(100% + 1px)",
-							width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
-							padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-						}}>
-							{(()=> {
-								let ratings = GetRatings(node._id, holderTypeStr as RatingType);
-								return <RatingsPanel node={node} path={path} ratingType={holderTypeStr as RatingType} ratings={ratings}/>;
-							})()}
-						</div>}
-					<NodeUI_Menu {...{map, node, path}} holderType={type}/>
-				</div>
+								position: "absolute", left: 0, top: "calc(100% + 1px)",
+								width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
+								padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+							}}>
+								{(()=> {
+									let ratings = GetRatings(node._id, holderTypeStr as RatingType);
+									return <RatingsPanel node={node} path={path} ratingType={holderTypeStr as RatingType} ratings={ratings}/>;
+								})()}
+							</div>,
+						<NodeUI_Menu {...{map, node, path}} holderType={type}/>
+					]}
+				/>
 				{nodeView[expandKey] &&
 					<NodeChildHolder {...{map, node, path, nodeView, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar}}
 						linkSpawnPoint={innerBoxOffset + (height / 2)}
@@ -181,7 +158,8 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 			</Row>
 		);
 	}
-	innerUI: HTMLDivElement;
+
+	innerUI: ExpandableBox;
 	dividePoint: number;
 
 	ratingPanel: RatingsPanel;
@@ -189,7 +167,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		// we have to use native/jquery hover/mouseenter+mouseleave, to fix that in-equation term-placeholders would cause "mouseleave" to be triggered
 		//let dom = $(FindDOM(this));
 		//dom.off("mouseenter mouseleave");
-		$(this.innerUI).hover(()=> {
+		$(this.innerUI.DOM).hover(()=> {
 			if ($(".scrolling").length == 0) {
 				this.SetState({hovered: true});
 			}

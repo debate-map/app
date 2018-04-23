@@ -1,70 +1,48 @@
-import {Image} from "../../../../Store/firebase/images/@Image";
-import {GetImage} from "../../../../Store/firebase/images";
-import {connect} from "react-redux";
-import {BaseComponent, AddGlobalStyle, GetInnerComp, FindDOM, BaseComponentWithConnector} from "react-vextensions";
-import {Pre, Div, TextArea_AutoSize} from "react-vcomponents";
-import {MapNodeUI_LeftBox} from "./NodeUI_LeftBox";
-import {VMenu} from "react-vmenu";
-import {ShowMessageBox} from "react-vmessagebox";
-import {styles} from "../../../../Frame/UI/GlobalStyles";
-import {TextInput} from "react-vcomponents";
-import {DN, GetPercentFromXToY, Lerp} from "js-vextensions";
-import {Button} from "react-vcomponents";
-import {CachedTransform} from "js-vextensions";
-import {WaitXThenRun} from "js-vextensions";
-import keycode from "keycode";
-import {NodeUI_Menu} from "./NodeUI_Menu";
-import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
-import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {ImageAttachment, MapNode, MapNodeL2, ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
-import {GetNodeRatingsRoot, GetRatings, GetRatingAverage, GetRatingValue, ShouldRatingTypeBeReversed, RatingFilter, GetRatingAverage_AtPath} from "../../../../Store/firebase/nodeRatings";
-import {GetUserID} from "../../../../Store/firebase/users";
-import {MapNodeType_Info, MapNodeType, GetNodeColor} from "../../../../Store/firebase/nodes/@MapNodeType";
-import {RootState} from "../../../../Store/index";
-import {RatingType_Info, RatingType, ratingTypes} from "../../../../Store/firebase/nodeRatings/@RatingType";
-import {Map} from "../../../../Store/firebase/maps/@Map";
-import {ACTMapNodeSelect, ACTMapNodeExpandedSet, ACTMapNodePanelOpen, ACTMapNodeTermOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
-import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {Column} from "react-vcomponents";
-import DefinitionsPanel from "./NodeUI/Panels/DefinitionsPanel";
-import QuestionsPanel from "./NodeUI/Panels/QuestionsPanel";
-import TagsPanel from "./NodeUI/Panels/TagsPanel";
-import DetailsPanel from "./NodeUI/Panels/DetailsPanel";
-import {OthersPanel} from "./NodeUI/Panels/OthersPanel";
-import SocialPanel from "./NodeUI/Panels/SocialPanel";
-import RatingsPanel from "./NodeUI/Panels/RatingsPanel";
-import DiscussionPanel from "./NodeUI/Panels/DiscussionPanel";
-import {Row} from "react-vcomponents";
-import VReactMarkdown from "../../../../Frame/ReactComponents/VReactMarkdown";
-import {GetFontSizeForNode, GetPaddingForNode, GetNodeDisplayText, GetRatingTypesForNode, GetNodeForm, GetNodeL3, IsPremiseOfSinglePremiseArgument, GetMainRatingType} from "../../../../Store/firebase/nodes/$node";
-import {ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
-import {VURL} from "js-vextensions";
-import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import {GetTerm, GetTermVariantNumber} from "../../../../Store/firebase/terms";
-import {Term} from "../../../../Store/firebase/terms/@Term";
-import {ParseSegmentsForPatterns} from "../../../../Frame/General/RegexHelpers";
-import {GetParentNode, IsNodeSubnode, GetNodeChildrenL3, GetParentNodeL3} from "../../../../Store/firebase/nodes";
-import classNames from "classnames";
-import { GetEquationStepNumber } from "../../../../Store/firebase/nodes/$node/equation";
-import NodeMathUI from "UI/@Shared/Maps/MapNode/NodeMathUI";
-import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
-import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
-import {SlicePath, WaitTillPathDataIsReceiving, WaitTillPathDataIsReceived, DBPath, RemoveHelpers} from "../../../../Frame/Database/DatabaseHelpers";
-import SubPanel from "./NodeUI_Inner/SubPanel";
-import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
-import {HistoryPanel} from "./NodeUI/Panels/HistoryPanel";
-import {GetPathsToNodesChangedSinceX, ChangeType, GetNodeChangeType, GetChangeTypeOutlineColor} from "../../../../Store/firebase/mapNodeEditTimes";
-import { GetTimeFromWhichToShowChangedNodes } from "Store/main/maps/$map";
-import { ACTSetLastAcknowledgementTime } from "Store/main";
-import {GetLastAcknowledgementTime, WeightingType} from "../../../../Store/main";
-import AddNodeRevision from "../../../../Server/Commands/AddNodeRevision";
-import { IsDoubleClick } from "Frame/General/Others";
-import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
+import {IsDoubleClick} from "Frame/General/Others";
+import {RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, ReasonScoreValues_RSPrefix} from "Store/firebase/nodeRatings/ReasonScore";
 import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
+import {ACTSetLastAcknowledgementTime} from "Store/main";
+import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/$map";
+import NodeMathUI from "UI/@Shared/Maps/MapNode/NodeMathUI";
+import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
+import classNames from "classnames";
+import keycode from "keycode";
+import {Button, Pre, Row, TextArea_AutoSize} from "react-vcomponents";
+import {BaseComponent, BaseComponentWithConnector, FindDOM, GetInnerComp} from "react-vextensions";
+import {DBPath, RemoveHelpers, SlicePath, WaitTillPathDataIsReceived, WaitTillPathDataIsReceiving} from "../../../../Frame/Database/DatabaseHelpers";
+import {Connect} from "../../../../Frame/Database/FirebaseConnect";
+import {ParseSegmentsForPatterns} from "../../../../Frame/General/RegexHelpers";
+import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
+import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
+import AddNodeRevision from "../../../../Server/Commands/AddNodeRevision";
+import {GetImage} from "../../../../Store/firebase/images";
+import {ChangeType, GetChangeTypeOutlineColor} from "../../../../Store/firebase/mapNodeEditTimes";
+import {Map} from "../../../../Store/firebase/maps/@Map";
+import {GetNodeRatingsRoot, GetRatingAverage_AtPath, GetRatings, RatingFilter} from "../../../../Store/firebase/nodeRatings";
+import {RatingType, ratingTypes} from "../../../../Store/firebase/nodeRatings/@RatingType";
+import {GetParentNode, GetParentNodeL3, IsNodeSubnode} from "../../../../Store/firebase/nodes";
+import {GetFontSizeForNode, GetMainRatingType, GetNodeDisplayText, GetNodeForm, GetNodeL3, GetPaddingForNode, IsPremiseOfSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
+import {GetEquationStepNumber} from "../../../../Store/firebase/nodes/$node/equation";
+import {ClaimForm, MapNodeL2, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeRevision_titlePattern} from "../../../../Store/firebase/nodes/@MapNodeRevision";
-import { RS_CalculateTruthScore, RS_GetAllValues, ReasonScoreValues_RSPrefix, RS_CalculateTruthScoreComposite } from "Store/firebase/nodeRatings/ReasonScore";
-import {RS_CalculateWeightMultiplier, RS_CalculateBaseWeight, RS_CalculateWeight} from "../../../../Store/firebase/nodeRatings/ReasonScore";
+import {GetNodeColor, MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {GetUserID} from "../../../../Store/firebase/users";
+import {GetLastAcknowledgementTime, WeightingType} from "../../../../Store/main";
+import {ACTMapNodeExpandedSet, ACTMapNodePanelOpen, ACTMapNodeSelect, ACTMapNodeTermOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
+import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 import {ExpandableBox} from "./ExpandableBox";
+import DefinitionsPanel from "./NodeUI/Panels/DefinitionsPanel";
+import DetailsPanel from "./NodeUI/Panels/DetailsPanel";
+import DiscussionPanel from "./NodeUI/Panels/DiscussionPanel";
+import {HistoryPanel} from "./NodeUI/Panels/HistoryPanel";
+import {OthersPanel} from "./NodeUI/Panels/OthersPanel";
+import RatingsPanel from "./NodeUI/Panels/RatingsPanel";
+import SocialPanel from "./NodeUI/Panels/SocialPanel";
+import TagsPanel from "./NodeUI/Panels/TagsPanel";
+import SubPanel from "./NodeUI_Inner/SubPanel";
+import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
+import {MapNodeUI_LeftBox} from "./NodeUI_LeftBox";
+import {NodeUI_Menu} from "./NodeUI_Menu";
 
 //export type NodeHoverExtras = {panel?: string, term?: number};
 
@@ -169,12 +147,8 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 		return (
 			<ExpandableBox {...{width, widthOverride, outlineColor, expanded}} parent={this}
 				className={classNames("NodeUI_Inner", {root: pathNodeIDs.length == 0})}
+				style={E(style)}
 				padding={GetPaddingForNode(node, isSubnode)}
-				style={E({
-					display: "flex", position: "relative", borderRadius: 5, cursor: "default",
-					width, minWidth: widthOverride,
-					boxShadow: "rgba(0,0,0,1) 0px 0px 2px" + (outlineColor ? `, rgba(${outlineColor},1) 0px 0px 1px` : "").repeat(6),
-				}, style)}
 				onClick={e=> {
 					if ((e.nativeEvent as any).ignore) return;
 					/*if (useLocalPanelState) {
