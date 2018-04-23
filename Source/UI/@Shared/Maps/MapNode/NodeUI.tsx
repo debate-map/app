@@ -1,65 +1,32 @@
-import { ACTMapNodeExpandedSet, ACTMapNodeChildLimitSet } from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
-import {BaseComponent, Instant, FindDOM, SimpleShouldUpdate, BaseProps, GetInnerComp, ShallowCompare, RenderSource, ShallowEquals, ShallowChanged, BaseComponentWithConnector} from "react-vextensions";
-import {connect} from "react-redux";
-import {DBPath, GetData, SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
-import {Debugger, GetTimeSinceLoad} from "../../../../Frame/General/Others";
-import {E} from "js-vextensions";
-import {Button, Div} from "react-vcomponents";
-import {Component} from "react";
-import Action from "../../../../Frame/General/Action";
-import {Log} from "../../../../Frame/General/Logging";
-import {WaitXThenRun, Timer} from "js-vextensions";
-import VMenuTest1 from "react-vmenu";
-import VMenu, {VMenuItem} from "react-vmenu";
-import {Select} from "react-vcomponents";
-import {GetEntries} from "../../../../Frame/General/Enums";
-import {ShowMessageBox} from "react-vmessagebox";
-import {TextInput} from "react-vcomponents";
-import {DN} from "js-vextensions";
-import {styles} from "../../../../Frame/UI/GlobalStyles";
-import {createSelector} from "reselect";
-import {NodeUI_Inner} from "./NodeUI_Inner";
-import {createMarkupForStyles} from "react-dom/lib/CSSPropertyOperations";
-import NodeConnectorBackground from "./NodeConnectorBackground";
-import {Vector2i} from "js-vextensions";
-import {CachedTransform, CombineDynamicPropMaps, GetContentHeight, GetContentWidth, A} from "js-vextensions";
-import {RootState} from "../../../../Store/index";
-import {GetNodeView} from "../../../../Store/main/mapViews";
-import {MapNode, ClaimForm, MapNodeL2, AccessLevel, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
-import {Map} from "../../../../Store/firebase/maps/@Map";
-import {GetNodeChildren, GetParentNode, IsRootNode, GetNodeChildrenL3, GetParentNodeL2, GetNodeID, GetParentNodeL3} from "../../../../Store/firebase/nodes";
-import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {MapNodeType, MapNodeType_Info, GetNodeColor} from "../../../../Store/firebase/nodes/@MapNodeType";
-import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {GetRatingAverage, GetRatingAverage_AtPath} from "../../../../Store/firebase/nodeRatings";
-import {Column} from "react-vcomponents";
-import {GetRatingTypesForNode, GetNodeDisplayText, GetFontSizeForNode, GetNodeForm, GetMainRatingType, GetSortByRatingType, IsNodeL3, IsNodeL2, AsNodeL3, AsNodeL2, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, IsMultiPremiseArgument, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
-import FastDOM from "fastdom";
-import {Row} from "react-vcomponents";
-import Icon from "../../../../Frame/ReactComponents/Icon";
-import {GetUserAccessLevel} from "../../../../Store/firebase/users";
-import {GetUserID} from "Store/firebase/users";
-import {IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
-import {ViewedNodeSet} from "../../../../Store/firebase/userViewedNodes/@ViewedNodeSet";
-import {GetUserViewedNodes} from "../../../../Store/firebase/userViewedNodes";
-import NotifyNodeViewed from "../../../../Server/Commands/NotifyNodeViewed";
-import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import {emptyArray, emptyArray_forLoading, emptyObj, IsSpecialEmptyArray} from "../../../../Frame/Store/ReducerUtils";
-import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";
-import { GetPlayingTimelineAppliedStepRevealNodes } from "Store/main/maps/$map";
-import {GetPlayingTimeline, GetPlayingTimelineRevealNodes, GetPlayingTimelineStepIndex, GetPlayingTimelineCurrentStepRevealNodes, GetTimeFromWhichToShowChangedNodes} from "../../../../Store/main/maps/$map";
-import {Timeline} from "Store/firebase/timelines/@Timeline";
-import { ChangeType } from "Store/firebase/mapNodeEditTimes";
-import {GetPathsToNodesChangedSinceX, GetNodeChangeType, GetChangeTypeOutlineColor} from "../../../../Store/firebase/mapNodeEditTimes";
+import {ChangeType} from "Store/firebase/mapNodeEditTimes";
 import {GetNode} from "Store/firebase/nodes";
-import {MapNodeRevision, ArgumentType} from "../../../../Store/firebase/nodes/@MapNodeRevision";
-import { PremiseAddHelper } from "UI/@Shared/Maps/MapNode/PremiseAddHelper";
-import { ArgumentsControlBar } from "UI/@Shared/Maps/MapNode/ArgumentsControlBar";
-import { AddArgumentButton } from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton";
-import classNames from "classnames";
-import chroma from "chroma-js";
-import { ChildLimitBar, NodeChildHolder } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
-import { NodeChildHolderBox, HolderType } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
+import {GetUserID} from "Store/firebase/users";
+import {GetPlayingTimelineAppliedStepRevealNodes} from "Store/main/maps/$map";
+import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
+import {HolderType, NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
+import {CachedTransform, E, Timer} from "js-vextensions";
+import {Column} from "react-vcomponents";
+import {BaseComponentWithConnector, FindDOM, GetInnerComp, RenderSource, ShallowChanged, ShallowEquals} from "react-vextensions";
+import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
+import {Connect} from "../../../../Frame/Database/FirebaseConnect";
+import {Log} from "../../../../Frame/General/Logging";
+import {IsSpecialEmptyArray, emptyArray, emptyArray_forLoading} from "../../../../Frame/Store/ReducerUtils";
+import NotifyNodeViewed from "../../../../Server/Commands/NotifyNodeViewed";
+import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";
+import {GetNodeChangeType, GetPathsToNodesChangedSinceX} from "../../../../Store/firebase/mapNodeEditTimes";
+import {Map} from "../../../../Store/firebase/maps/@Map";
+import {GetNodeChildrenL3, GetNodeID, GetParentNodeL2, GetParentNodeL3, IsRootNode} from "../../../../Store/firebase/nodes";
+import {GetNodeForm, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
+import {AccessLevel, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {GetUserViewedNodes} from "../../../../Store/firebase/userViewedNodes";
+import {GetNodeView} from "../../../../Store/main/mapViews";
+import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
+import {GetPlayingTimeline, GetPlayingTimelineCurrentStepRevealNodes, GetPlayingTimelineRevealNodes, GetPlayingTimelineStepIndex, GetTimeFromWhichToShowChangedNodes} from "../../../../Store/main/maps/$map";
+import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker";
+import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker";
+import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer";
+import {NodeUI_Inner} from "./NodeUI_Inner";
 
 let nodesLocked = {};
 export function SetNodeUILocked(nodeID: number, locked: boolean, maxWait = 10000) {
@@ -204,6 +171,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 		let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
 		let limitBar_above = node.type == MapNodeType.Argument && node.finalPolarity == Polarity.Supporting;
+		let limitBarPos = showLimitBar ? (limitBar_above ? LimitBarPos.Above : LimitBarPos.Below) : LimitBarPos.None;
 		//if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
 		/*let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
 		let showBelowMessage = nodeChildren.length > 0 && nodeChildren.length < minChildCount;*/
@@ -295,34 +263,9 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 				{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 &&
 					<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 				{nodeChildrenToShow != emptyArray && !nodeView.expanded && nodeChildrenToShow.length != 0 &&
-					<div style={E(
-						{
-							margin: "auto 0 auto 9px", fontSize: 12, fontWeight: 500, color: "rgba(255,255,255,.8)",
-							//filter: "drop-shadow(0px 0px 5px rgba(0,0,0,1))"
-							textShadow: `-1px 0 ${textOutline}, 0 1px ${textOutline}, 1px 0 ${textOutline}, 0 -1px ${textOutline}`,
-						},
-						/*showLimitBar && {[limitBar_above ? "paddingTop" : "paddingBottom"]: ChildLimitBar.HEIGHT},
-						showBelowMessage && {paddingBottom: 13},*/
-						showLimitBar && limitBar_above && {paddingTop: ChildLimitBar.HEIGHT},
-						{paddingBottom: 0 + /*(showBelowMessage ? 13 : 0) +*/ (showLimitBar && !limitBar_above ? ChildLimitBar.HEIGHT : 0)},
-					)}>
-						{nodeChildrenToShow.length}
-					</div>}
+					<NodeChildCountMarker {...{textOutline, limitBarPos}} childCount={nodeChildrenToShow.length}/>}
 				{!nodeView.expanded && (addedDescendants > 0 || editedDescendants > 0) &&
-					<Column style={E(
-						{
-							margin: "auto 0 auto 9px", fontSize: 13, fontWeight: 500,
-							//filter: "drop-shadow(0px 0px 5px rgba(0,0,0,1))"
-							textShadow: `-1px 0 ${textOutline}, 0 1px ${textOutline}, 1px 0 ${textOutline}, 0 -1px ${textOutline}`,
-						},
-						showLimitBar && limitBar_above && {paddingTop: ChildLimitBar.HEIGHT},
-						{paddingBottom: 0 + (showLimitBar && !limitBar_above ? ChildLimitBar.HEIGHT : 0)},
-					)}>
-						{addedDescendants > 0 &&
-							<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Add)},.8)`}}>{addedDescendants} new</Row>}
-						{editedDescendants > 0 &&
-							<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Edit)},.8)`}}>{editedDescendants} edited</Row>}
-					</Column>}
+					<NodeChangesMarker {...{addedDescendants, editedDescendants, textOutline, limitBarPos}}/>}
 				{!isMultiPremiseArgument &&
 					nodeChildHolder}
 			</div>
@@ -433,51 +376,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 	}
 }
 
-/*interface JQuery {
-	positionFrom(referenceControl): void;
-}*/
-/*setTimeout(()=>$.fn.positionFrom = function(referenceControl) {
-	var offset = $(this).offset();
-	var referenceControlOffset = referenceControl.offset();
-	return {left: offset.left - referenceControlOffset.left, top: offset.top - referenceControlOffset.top};
-});*/
-
-function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
-	let nodeTypeInfo = MapNodeType_Info.for[node.type];
-
-	let displayText = GetNodeDisplayText(node, path);
-	let fontSize = GetFontSizeForNode(node);
-	let expectedTextWidth = GetContentWidth(`<span style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${displayText}</span>`);
-
-	let noteWidth = 0;
-	if (node.current.note) {
-		noteWidth = Math.max(noteWidth,
-			GetContentWidth(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.current.note}</span>`, true));
-	}
-	if (node.current.equation && node.current.equation.explanation) {
-		noteWidth = Math.max(noteWidth,
-			GetContentWidth(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.current.equation.explanation}</span>`, true));
-	}
-	expectedTextWidth += noteWidth;
-
-	//let expectedOtherStuffWidth = 26;
-	let expectedOtherStuffWidth = 28;
-	if (node.current.contentNode) {
-		expectedOtherStuffWidth += 14;
-	}
-	let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
-	if (node.current.contentNode) { // quotes are often long, so just always do full-width
-		expectedBoxWidth = nodeTypeInfo.maxWidth;
-	}
-
-	let width = node.current.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
-
-	let maxTextWidth = width - expectedOtherStuffWidth;
-	let expectedTextHeight = GetContentHeight(`<a style='${
-		createMarkupForStyles({fontSize, whiteSpace: "initial", display: "inline-block", width: maxTextWidth})
-	}'>${displayText}</a>`);
-	let expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
-	//this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
-
-	return {expectedBoxWidth, width, expectedHeight};
+export enum LimitBarPos {
+	Above,
+	Below,
+	None,
 }

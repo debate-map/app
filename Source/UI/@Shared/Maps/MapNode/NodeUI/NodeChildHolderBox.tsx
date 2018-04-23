@@ -1,32 +1,23 @@
-import {BaseComponentWithConnector, BaseComponent, GetInnerComp, RenderSource, FindDOM, ShallowEquals} from "react-vextensions";
-import { Connect } from "Frame/Database/FirebaseConnect";
-import {Column, Row, Button} from "react-vcomponents";
-import { MapNodeL3 } from "Store/firebase/nodes/@MapNode";
-import NodeConnectorBackground from "UI/@Shared/Maps/MapNode/NodeConnectorBackground";
-import { NodeUI } from "UI/@Shared/Maps/MapNode/NodeUI";
+import {Connect} from "Frame/Database/FirebaseConnect";
+import {emptyArray_forLoading} from "Frame/Store/ReducerUtils";
+import {GetMarkerPercent_AtPath, GetRatings} from "Store/firebase/nodeRatings";
+import {RatingType} from "Store/firebase/nodeRatings/@RatingType";
+import {GetParentNodeL3} from "Store/firebase/nodes";
+import {IsSinglePremiseArgument} from "Store/firebase/nodes/$node";
+import {MapNodeL3} from "Store/firebase/nodes/@MapNode";
+import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
+import {ACTMapNodeExpandedSet} from "Store/main/mapViews/$mapView/rootNodeViews";
+import {MapNodeView} from "Store/main/mapViews/@MapViews";
+import {Button, Row} from "react-vcomponents";
+import {BaseComponentWithConnector, FindDOM} from "react-vextensions";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
-import { MapNodeView } from "Store/main/mapViews/@MapViews";
-import { MapNodeType } from "Store/firebase/nodes/@MapNodeType";
-import {Vector2i, GetPercentFromXToY, Lerp} from "js-vextensions";
-import {Polarity, MapNode} from "../../../../../Store/firebase/nodes/@MapNode";
-import chroma from "chroma-js";
-import {ChildLimitBar, NodeChildHolder} from "./NodeChildHolder";
-import { emptyArray_forLoading } from "Frame/Store/ReducerUtils";
-import {GetNodeColor} from "../../../../../Store/firebase/nodes/@MapNodeType";
-import { GetRatingTypeInfo, RatingType } from "Store/firebase/nodeRatings/@RatingType";
-import { SlicePath } from "Frame/Database/DatabaseHelpers";
-import { GetParentNodeL3, GetNodeChildrenL3 } from "Store/firebase/nodes";
-import { GetRatings, GetMarkerPercent_AtPath } from "Store/firebase/nodeRatings";
-import {TransformRatingForContext, ShouldRatingTypeBeReversed, GetRatingAverage, RatingFilter, GetRatingAverage_AtPath, GetFillPercent_AtPath} from "../../../../../Store/firebase/nodeRatings";
-import { IsSinglePremiseArgument } from "Store/firebase/nodes/$node";
+import {GetFillPercent_AtPath} from "../../../../../Store/firebase/nodeRatings";
 import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
+import {GetNodeColor} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {Squiggle} from "../NodeConnectorBackground";
-import { ACTMapNodeExpandedSet } from "Store/main/mapViews/$mapView/rootNodeViews";
-import { WeightingType } from "Store/main";
-import { RS_CalculateTruthScore, RS_CalculateBaseWeight, RS_CalculateWeightMultiplier, RS_CalculateWeight, RS_GetAllValues, ReasonScoreValues_RSPrefix } from "Store/firebase/nodeRatings/ReasonScore";
-import { GetUserID } from "Store/firebase/users";
-import RatingsPanel from "./Panels/RatingsPanel";
 import {NodeUI_Menu} from "../NodeUI_Menu";
+import {NodeChildHolder} from "./NodeChildHolder";
+import RatingsPanel from "./Panels/RatingsPanel";
 
 export enum HolderType {
 	Truth = 10,
