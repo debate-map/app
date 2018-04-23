@@ -62,3 +62,7 @@ VSCode extensions:
 <!--
 * [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint): Shows warnings when code does not match the project's coding style.
 -->
+
+### Troubleshooting
+
+* If you get an odd compile error when recompiling from hard-source-webpack-plugin, try deleting the cache at "node_modules/.cache/hard-source".

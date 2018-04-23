@@ -8,15 +8,25 @@ let root = path.join(__dirname, "..", "..");
 
 module.exports = {
 	//name: "vendor_package",
-	mode: "development",
+	mode: "none",
+	//mode: "development",
 	//mode: "production", // needed so that main bundle knows to reference vendor-bundle modules using id instead of path
-	optimization: {namedModules: false},
-	//optimization: {namedModules: true},
+	//optimization: {namedModules: false},
+	optimization: {
+		namedModules: true,
+		noEmitOnErrors: true, // NoEmitOnErrorsPlugin
+		//concatenateModules: true //ModuleConcatenationPlugin
+		/*splitChunks: { // CommonsChunkPlugin()
+			name: 'vendor',
+			minChunks: 2
+		},*/
+	},
 	entry: {
 		vendor: [path.join(__dirname, "Vendors.js")]
 	},
 	output: {
-		path: path.join(root, "dist", "dll"),
+		//path: path.join(root, "dist", "dll"),
+		path: path.join(root, "dist"),
 		//filename: "dll.[name].js?[chunkhash]",
 		//filename: "dll.[name].js?[hash]",
 		filename: "dll.[name].js",

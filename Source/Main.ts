@@ -103,9 +103,9 @@ g.hasHotReloaded = false;
 declare global { let hasHotReloaded: boolean; }
 
 // this code is excluded from production bundle
-if (__DEV__) {
+/*if (__DEV__) {
 	/*if (window.devToolsExtension)
-		window.devToolsExtension.open();*/
+		window.devToolsExtension.open();*#/
 	if (module.hot) {
 		// setup hot module replacement
 		module.hot.accept("./Main_Hot", () => {
@@ -116,7 +116,7 @@ if (__DEV__) {
 			});
 		});
 	}
-}
+}*/
 
 function LoadHotModules() {
 	//Log("Reloading hot modules...");

@@ -1,15 +1,14 @@
-const express = require("express")
-const debug = require("debug")("app:server")
-const webpack = require("webpack")
-const webpackConfig = require("./Build/WebpackConfig")
+const express = require("express");
+const debug = require("debug")("app:server");
+const webpack = require("webpack");
+const webpackConfig = require("./Build/WebpackConfig");
 const config = require("./Config");
 
 const app = express();
 const paths = config.utils_paths;
 
-// This rewrites all routes requests to the root /index.html file
-// (ignoring file requests). If you want to implement universal
-// rendering, you'll want to remove this middleware.
+// This rewrites all routes requests to the root /index.html file (ignoring file requests).
+// If you want to implement universal rendering, you'll want to remove this middleware.
 app.use(require("connect-history-api-fallback")({
 	rewrites: [
 		{
@@ -48,15 +47,15 @@ if (config.env === "development") {
 			ignored: "!./Source_JS/TSCompileDone.marker",
 		}*/
 	}));
-	app.use(require("webpack-hot-middleware")(compiler));
+	//app.use(require("webpack-hot-middleware")(compiler));
 
-	// Serve static assets from ~/Source/Resources since Webpack is unaware of
-	// these files. This middleware doesn't need to be enabled outside
-	// of development since this directory will be copied into ~/dist
-	// when the application is compiled.
+	// Serve static assets from ~/Source/Resources since Webpack is unaware of these files.
+	// This middleware doesn't need to be enabled outside of development since this directory will be copied into ~/dist when the application is compiled.
 	//app.use(express.static(paths.client("Resources")));
 	app.use(express.static(paths.base("Resources")));
-	app.use(express.static(paths.base("Scripts/Config/dist/dll")));
+	//app.use(express.static(paths.base("Scripts/Config/dist/dll")));
+	//app.use(express.static(paths.base("dist"))); // enable static loading of files in dist
+	app.use(express.static(paths.dist())); // enable static loading of files in dist, for dll.vendor.js
 } else {
 	debug(
 		"Server is being run outside of live development mode, meaning it will " +
@@ -66,10 +65,12 @@ if (config.env === "development") {
 		"section in the README for more information on deployment strategies."
 	);
 
-	// Serving ~/dist by default. Ideally these files should be served by
-	// the web server and not the app server, but this helps to demo the
-	// server in production.
+	// Serving ~/dist by default. Ideally these files should be served by the web server and not the app server, but this helps to demo the server in production.
 	app.use(express.static(paths.dist()));
 }
 
-module.exports = app;
+//module.exports = app;
+
+const port = config.server_port;
+app.listen(port);
+debug(`Server is now running at http://localhost:${port}.`);

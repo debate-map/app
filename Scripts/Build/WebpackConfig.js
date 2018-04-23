@@ -18,10 +18,19 @@ let root = path.join(__dirname, "..", "..");
 debug("Creating configuration.");
 const webpackConfig = {
 	name: "client",
-	mode: "development",
+	mode: "none",
+	//mode: "development",
 	//mode: "production",
-	optimization: {namedModules: false},
-	//optimization: {namedModules: true}, // we have path-info anyway (and causes problems when inconsistent between bundles)
+	//optimization: {namedModules: false},
+	optimization: {
+		namedModules: true, // we have path-info anyway (and causes problems when inconsistent between bundles)
+		noEmitOnErrors: true, // NoEmitOnErrorsPlugin
+		//concatenateModules: true //ModuleConcatenationPlugin
+		/*splitChunks: { // CommonsChunkPlugin()
+			name: 'vendor',
+			minChunks: 2
+		},*/
+	},
 	target: "web",
 	devtool: config.compiler_devtool,
 	resolve: {
@@ -61,9 +70,10 @@ const webpackConfig = {
 const APP_ENTRY = paths.client(USE_TSLOADER ? "Main.ts" : "Main.js");
 
 webpackConfig.entry = {
-	app: __DEV__
+	/*app: __DEV__
 		? [APP_ENTRY].concat(`webpack-hot-middleware/client?path=${config.compiler_public_path}__webpack_hmr`)
-		: [APP_ENTRY],
+		: [APP_ENTRY],*/
+	app: [APP_ENTRY],
 	//vendor: config.compiler_vendors
 };
 
@@ -89,18 +99,18 @@ webpackConfig.output = {
 webpackConfig.plugins = [
 	// Plugin to show any webpack warnings and prevent tests from running
 	function() {
-		let errors = []
+		let errors = [];
 		this.plugin("done", function (stats) {
 			if (stats.compilation.errors.length) {
 				// Log each of the warnings
 				stats.compilation.errors.forEach(function (error) {
-					errors.push(error.message || error)
-				})
+					errors.push(error.message || error);
+				});
 
 				// Pretend no assets were generated. This prevents the tests from running, making it clear that there were warnings.
 				//throw new Error(errors)
 			}
-		})
+		});
 	},
 	new webpack.DefinePlugin(config.globals),
 	new HtmlWebpackPlugin({
@@ -112,9 +122,10 @@ webpackConfig.plugins = [
 		// favicon: paths.client("Resources/favicon.ico"), // for including single favicon
 		filename: "index.html",
 		inject: "body",
-		minify: {
+		/*minify: {
 			collapseWhitespace: true
-		}
+		}*/
+		minify: false,
 	}),
 	function() {
 		this.plugin("compilation", function(compilation) {
@@ -129,6 +140,7 @@ webpackConfig.plugins = [
 				// this gets the build's hash like we want
 				var hash = htmlPluginData.html.match(/\.js\?([0-9a-f]+)["']/)[1];
 				htmlPluginData.html = htmlPluginData.html.replace("/dll.vendor.js?[hash]", "/dll.vendor.js?" + hash);
+				if (!htmlPluginData.html.includes("/dll.vendor.js?" + hash)) throw new Error("Failed to insert vendor hash.");
 				//callback(null, htmlPluginData);
 				return htmlPluginData;
 			});
@@ -145,13 +157,13 @@ webpackConfig.plugins = [
 		loaders: ["babel"],
 	}),*/
 
-	/*new webpack.DllReferencePlugin({
-		context: path.join(root, "Source"),
+	new webpack.DllReferencePlugin({
+		context: path.resolve(root, "Source"),
 		//context: paths.base(),
 		//context: root,
 		//manifest: require("../Config/dll/vendor-manifest.json")
 		manifest: "Scripts/Config/dll/vendor-manifest.json",
-	}),*/
+	}),
 
 	new HardSourceWebpackPlugin(),
 
@@ -188,7 +200,7 @@ webpackConfig.plugins = [
 if (__DEV__) {
 	debug("Enable plugins for live development (HMR, NoErrors).")
 	webpackConfig.plugins.push(
-		new webpack.HotModuleReplacementPlugin(),
+		//new webpack.HotModuleReplacementPlugin(),
 		new webpack.NoEmitOnErrorsPlugin()
 		//new webpack.NamedModulesPlugin()
 	);

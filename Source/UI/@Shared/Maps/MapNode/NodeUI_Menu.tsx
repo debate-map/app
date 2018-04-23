@@ -24,7 +24,7 @@ import {VMenuItem} from "react-vmenu/dist/VMenu";
 import {ForDelete_GetError, ForUnlink_GetError, GetNode, GetNodeChildrenAsync, GetNodeParentsAsync, GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetParentNodeL3, GetNodeID, GetNodeChildrenL3} from "../../../../Store/firebase/nodes";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
-import {IsUserBasicOrAnon, IsUserCreatorOrMod} from "../../../../Store/firebase/userExtras";
+import {IsUserBasicOrAnon, IsUserCreatorOrMod, IsUserMod} from "../../../../Store/firebase/userExtras";
 import {ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 import { GetNodeChildren, ForCut_GetError, ForCopy_GetError } from "../../../../Store/firebase/nodes";
@@ -105,7 +105,9 @@ export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 						);
 					});
 				})}
-				{IsUserBasicOrAnon(userID) && !inList && path.includes("/") && !path.includes("L") && !componentBox &&
+				{//IsUserBasicOrAnon(userID) && !inList && path.includes("/") && !path.includes("L") && !componentBox &&
+				// for now, only let mods add layer-subnodes (confusing otherwise)
+				IsUserMod(userID) && !inList && path.includes("/") && !path.includes("L") && !componentBox &&
 					<VMenuItem text="Add subnode (in layer)" style={styles.vMenuItem}
 						onClick={e=> {
 							if (e.button != 0) return;
