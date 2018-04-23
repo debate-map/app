@@ -114,22 +114,13 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 			)}>
 				<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{position: "absolute", width: "100%", height: "100%"}}>
 					{type == HolderType.Truth && 
-						//<div style={{position: "absolute", right: (width / 2) + 1, top: innerBoxOffset + (height / 2), bottom: 0, width: 3, backgroundColor: lineColor.css()}}/>
-						//<div style={{position: "absolute", left: 0, width: "100%", top: innerBoxOffset + (height / 2), bottom: 0, backgroundColor: `rgba(0,0,0,.5)`}}/>
-						/*<Squiggle start={[0, 100]} startControl_offset={[0, -30]} end={[50, 0]} endControl_offset={[0, 30]} color={lineColor}
-							usePercents={true} style={{width, height: "100%"}}/>*/
 						<Squiggle start={[0, lineHolderHeight + 2]} startControl_offset={[0, -lineOffset]}
-							end={[(width / 2) - 2, innerBoxOffset + height - 2]} endControl_offset={[0, lineOffset]} color={lineColor}/>
-					}
+							end={[(width / 2) - 2, innerBoxOffset + height - 2]} endControl_offset={[0, lineOffset]} color={lineColor}/>}
 					{type == HolderType.Relevance && !isMultiPremiseArgument &&
-						//<div style={{position: "absolute", right: (width / 2) + 1, top: 0, width: 3, height: innerBoxOffset + (height / 2), backgroundColor: lineColor.css()}}/>
-						//<div style={{position: "absolute", left: 0, width: "100%", top: 0, height: innerBoxOffset + (height / 2), backgroundColor: `rgba(0,0,0,.5)`}}/>
-						/*<Squiggle start={[0, 0]} startControl_offset={[0, 30]} end={[50, 100]} endControl_offset={[0, -30]} color={lineColor}
-							usePercents={true} style={{width, height: "100%"}}/>*/
-						<Squiggle start={[0, -2]} startControl_offset={[0, lineOffset]} end={[(width / 2) - 2, innerBoxOffset + 2]} endControl_offset={[0, -lineOffset]} color={lineColor}/>
-					}
+						<Squiggle start={[0, -2]} startControl_offset={[0, lineOffset]}
+							end={[(width / 2) - 2, innerBoxOffset + 2]} endControl_offset={[0, -lineOffset]} color={lineColor}/>}
 					{type == HolderType.Relevance && isMultiPremiseArgument &&
-						<div style={{position: "absolute", right: "100%", width: 10, top: "50%", height: 3, backgroundColor: lineColor.css()}}/>}
+						<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
 				</div>
 				<div ref={c=>this.innerUI = c} style={E({
 					display: "flex", position: "relative", borderRadius: 5, cursor: "default",

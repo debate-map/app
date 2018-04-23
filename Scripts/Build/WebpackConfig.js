@@ -24,6 +24,7 @@ const webpackConfig = {
 	//optimization: {namedModules: false},
 	optimization: {
 		namedModules: true, // we have path-info anyway (and causes problems when inconsistent between bundles)
+		//namedModules: false, // causes issues with min-css-extract-plugin when namedModules is true
 		noEmitOnErrors: true, // NoEmitOnErrorsPlugin
 		//concatenateModules: true //ModuleConcatenationPlugin
 		/*splitChunks: { // CommonsChunkPlugin()
