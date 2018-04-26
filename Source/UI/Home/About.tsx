@@ -1,9 +1,6 @@
-import {SubNavBarButton} from "../@Shared/SubNavBar";
-import SubNavBar from "../@Shared/SubNavBar";
-import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
+import { BaseComponent, SimpleShouldUpdate } from "react-vextensions";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
-import {ScrollView} from "react-vscrollview";
-import {styles} from "../../Frame/UI/GlobalStyles";
+import { styles } from "../../Frame/UI/GlobalStyles";
 
 let pageText = `
 This project started as a personal goal of mine (Stephen Wicklund, aka "Venryx") around 2013. The main thing prompting it was frustration with how difficult

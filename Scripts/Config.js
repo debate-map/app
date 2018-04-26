@@ -126,19 +126,6 @@ config.globals = {
 	"__BASENAME__": JSON.stringify(BASENAME || "")
 }
 
-// Validate Vendor Dependencies
-// ==========
-
-const pkg = require("../package.json");
-
-/*config.compiler_vendors = config.compiler_vendors
-	.filter(dep=> {
-		if (pkg.dependencies[dep]) return true
-
-		debug(`Package "${dep}" was not found as an npm dependency in package.json; it won't be included in the webpack vendor bundle.`
-			+ ` Consider removing it from \`compiler_vendors\` in ~/Scripts/Config.js`)
-	})*/
-
 // Utilities
 // ==========
 
@@ -148,9 +135,9 @@ function base() {
 }
 
 config.utils_paths = {
-	base   : base,
-	client : base.bind(null, config.dir_client),
-	dist   : base.bind(null, config.dir_dist)
+	base: base,
+	client: base.bind(null, config.dir_client),
+	dist: base.bind(null, config.dir_dist)
 };
 
 // Environment Configuration
@@ -166,9 +153,8 @@ if (overrides) {
 }*/
 
 config.compiler_public_path = devEnv
-	// NOTE: In development, we use an explicit public path when the assets
-	// are served webpack by to fix this issue:
-	// http://stackoverflow.com/questions/34133808/webpack-ots-parsing-error-loading-fonts/34133809#34133809
+	// NOTE: In development, we use an explicit public path when the assets are served webpack by to fix this issue:
+	// 	http://stackoverflow.com/questions/34133808/webpack-ots-parsing-error-loading-fonts/34133809#34133809
 	//? "http://${config.server_host}:${config.server_port}/",
 	? "/"
 	: "/";
@@ -185,5 +171,8 @@ if (prodEnv) {
 		colors: true
 	};
 }
+
+// disabled for now; I've found I like the control of being able to skip reloads during change sets
+config.useHotReloading = false;
 
 module.exports = config;

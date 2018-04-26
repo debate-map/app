@@ -1,15 +1,10 @@
-import {Component} from "react" // eslint-disable-line
-import {BaseComponent, BaseProps} from "react-vextensions";
-//import {Component as BaseComponent} from "react-vextensions";
-import VReactMarkdown from "../Frame/ReactComponents/VReactMarkdown";
-import SubNavBar from "./@Shared/SubNavBar";
-import {SubNavBarButton} from "./@Shared/SubNavBar";
-import HomeUI2 from "./Home/Home";
+import { Column, Switch } from "react-vcomponents";
+import { BaseComponent } from "react-vextensions";
+import { ScrollView } from "react-vscrollview";
+import { Connect } from "../Frame/Database/FirebaseConnect";
+import SubNavBar, { SubNavBarButton } from "./@Shared/SubNavBar";
 import AboutUI from "./Home/About";
-import {ScrollView} from "react-vscrollview";
-import {Column} from "react-vcomponents";
-import {Switch} from "react-vcomponents";
-import {Connect} from "../Frame/Database/FirebaseConnect";
+import HomeUI2 from "./Home/Home";
 
 type Props = {} & Partial<{currentSubpage: string}>;
 @Connect(state=> ({

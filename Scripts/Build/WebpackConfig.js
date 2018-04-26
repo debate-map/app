@@ -19,8 +19,8 @@ let root = path.join(__dirname, "..", "..");
 debug("Creating configuration.");
 const webpackConfig = {
 	name: "client",
-	mode: "none",
-	//mode: "development",
+	//mode: "none",
+	mode: "development",
 	//mode: "production",
 	//optimization: {namedModules: false},
 	optimization: {
@@ -72,10 +72,10 @@ const webpackConfig = {
 const APP_ENTRY = paths.client(USE_TSLOADER ? "Main.ts" : "Main.js");
 
 webpackConfig.entry = {
-	/*app: __DEV__
+	app: __DEV__ && config.useHotReloading
 		? [APP_ENTRY].concat(`webpack-hot-middleware/client?path=${config.compiler_public_path}__webpack_hmr`)
-		: [APP_ENTRY],*/
-	app: [APP_ENTRY],
+		: [APP_ENTRY],
+	//app: [APP_ENTRY],
 	//vendor: config.compiler_vendors
 };
 
@@ -205,7 +205,7 @@ webpackConfig.plugins = [
 if (__DEV__) {
 	debug("Enable plugins for live development (HMR, NoErrors).")
 	webpackConfig.plugins.push(
-		//new webpack.HotModuleReplacementPlugin(),
+		new webpack.HotModuleReplacementPlugin(),
 		new webpack.NoEmitOnErrorsPlugin()
 		//new webpack.NamedModulesPlugin()
 	);

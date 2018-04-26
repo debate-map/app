@@ -97,15 +97,15 @@ if (prodEnv && window.location.hostname != "localhost") { // if localhost, never
 // hot-reloading
 // ==========
 
+/*declare global { let useHotReloading: boolean; }
+g.useHotReloading = false;*/
 /*let hotReloading = false;
 G({hotReloading}); declare global { let hotReloading: boolean; }*/
-g.hasHotReloaded = false;
 declare global { let hasHotReloaded: boolean; }
+g.hasHotReloaded = false;
 
 // this code is excluded from production bundle
-/*if (__DEV__) {
-	/*if (window.devToolsExtension)
-		window.devToolsExtension.open();*#/
+if (__DEV__) {
 	if (module.hot) {
 		// setup hot module replacement
 		module.hot.accept("./Main_Hot", () => {
@@ -116,7 +116,7 @@ declare global { let hasHotReloaded: boolean; }
 			});
 		});
 	}
-}*/
+}
 
 function LoadHotModules() {
 	//Log("Reloading hot modules...");

@@ -184,12 +184,14 @@ export default function(initialState = {}, history) {
 		}
 	}
 
-	if (module.hot) {
-		module.hot.accept("../../Store", () => {
-			let {MakeRootReducer} = require("../../Store");
-			(store as any).reducer = MakeRootReducer(extraReducers);
-			store.replaceReducer((store as any).reducer);
-		});
+	if (__DEV__) {
+		if (module.hot) {
+			module.hot.accept("../../Store", () => {
+				let {MakeRootReducer} = require("../../Store");
+				(store as any).reducer = MakeRootReducer(extraReducers);
+				store.replaceReducer((store as any).reducer);
+			});
+		}
 	}
 
 	return {store, persister};

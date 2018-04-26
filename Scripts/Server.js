@@ -32,7 +32,7 @@ if (config.env === "development") {
 	app.use(require("webpack-dev-middleware")(compiler, {
 		publicPath: webpackConfig.output.publicPath,
 		contentBase: paths.client(),
-		//hot: true,
+		hot: config.useHotReloading,
 		quiet: config.compiler_quiet,
 		noInfo: config.compiler_quiet,
 		lazy: false,
@@ -47,7 +47,9 @@ if (config.env === "development") {
 			ignored: "!./Source_JS/TSCompileDone.marker",
 		}*/
 	}));
-	//app.use(require("webpack-hot-middleware")(compiler));
+	if (config.useHotReloading) {
+		app.use(require("webpack-hot-middleware")(compiler));
+	}
 
 	// Serve static assets from ~/Source/Resources since Webpack is unaware of these files.
 	// This middleware doesn't need to be enabled outside of development since this directory will be copied into ~/dist when the application is compiled.
