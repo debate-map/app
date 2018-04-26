@@ -1,29 +1,20 @@
-import {ACTImageSelect, GetSelectedImage} from "../../Store/main/database";
+import { Button, Column, Div, Pre, Row, Span } from "react-vcomponents";
+import { BaseComponent } from "react-vextensions";
+import { ShowMessageBox } from "react-vmessagebox";
+import { ScrollView } from "react-vscrollview";
+import { RemoveHelpers } from "../../Frame/Database/DatabaseHelpers";
+import { Connect } from "../../Frame/Database/FirebaseConnect";
 import DeleteImage from "../../Server/Commands/DeleteImage";
 import UpdateImageData, { UpdateImageData_allowedPropUpdates } from "../../Server/Commands/UpdateImageData";
-import {Assert} from "js-vextensions";
-import {SubNavBarButton} from "../@Shared/SubNavBar";
-import SubNavBar from "../@Shared/SubNavBar";
-import {BaseComponent, SimpleShouldUpdate, FindDOM} from "react-vextensions";
-import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
-import {ScrollView} from "react-vscrollview";
-import {styles} from "../../Frame/UI/GlobalStyles";
-import {Column} from "react-vcomponents";
-import {Button} from "react-vcomponents";
-import {Connect} from "../../Frame/Database/FirebaseConnect";
-import {PermissionGroupSet} from "../../Store/firebase/userExtras/@UserExtraInfo";
-import {GetUserPermissionGroups, GetUserID} from "../../Store/firebase/users";
-import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
-import {RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
-import UpdateNodeDetails from "../../Server/Commands/UpdateNodeDetails";
-import {IsUserCreatorOrMod} from "../../Store/firebase/userExtras";
-import {ShowMessageBox} from "react-vmessagebox";
-import Moment from "moment";
-import {GetImages} from "../../Store/firebase/images";
-import {Image, ImageType, GetNiceNameForImageType} from "../../Store/firebase/images/@Image";
+import { GetImages } from "../../Store/firebase/images";
+import { GetNiceNameForImageType, Image } from "../../Store/firebase/images/@Image";
+import { IsUserCreatorOrMod } from "../../Store/firebase/userExtras";
+import { PermissionGroupSet } from "../../Store/firebase/userExtras/@UserExtraInfo";
+import { GetUserID, GetUserPermissionGroups } from "../../Store/firebase/users";
+import { ACTImageSelect, GetSelectedImage } from "../../Store/main/database";
+import { ShowSignInPopup } from "../@Shared/NavBar/UserPanel";
+import { ShowAddImageDialog } from "./Images/AddImageDialog";
 import ImageDetailsUI from "./Images/ImageDetailsUI";
-import {ShowAddImageDialog} from "./Images/AddImageDialog";
-import {Div, Span, Pre, Row} from "react-vcomponents";
 
 @Connect(state=> ({
 	images: GetImages(),

@@ -1,5 +1,5 @@
 import {InlineMath} from "react-katex";
-import {BaseComponent, FindDOM} from "react-vextensions";
+import {BaseComponent} from "react-vextensions";
 import ReactDOM from "react-dom";
 import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
 
@@ -36,7 +36,7 @@ export default class NodeMathUI extends BaseComponent<{text: string, onTermHover
 	PostRender() {
 		let {onTermHover, onTermClick} = this.props;
 		
-		let dom = $(FindDOM(this));
+		let dom = $(GetDOM(this));
 		let termUIs = dom.find(".text").ToList();
 		for (let termUI of termUIs) {
 			let termTextMatch = termUI.text().match(/^@term\[(.+?),([0-9]+?)\]$/);

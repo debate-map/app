@@ -1,4 +1,4 @@
-import {BaseComponent, FindDOM} from "react-vextensions";
+import {BaseComponent} from "react-vextensions";
 import {ClaimForm} from "../../../../Store/firebase/nodes/@MapNode";
 import {Column} from "react-vcomponents";
 import {Row, Pre} from "react-vcomponents";
@@ -74,7 +74,7 @@ export default class QuoteInfoEditorUI extends BaseComponent
 	}
 	chainsEditor: SourceChainsEditorUI;
 	GetValidationError() {
-		return GetErrorMessagesUnderElement(FindDOM(this))[0] || this.chainsEditor.GetValidationError();
+		return GetErrorMessagesUnderElement(GetDOM(this))[0] || this.chainsEditor.GetValidationError();
 	}
 
 	GetNewData() {

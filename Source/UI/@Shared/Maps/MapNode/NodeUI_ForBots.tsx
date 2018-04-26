@@ -11,7 +11,7 @@ import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
 import {VURL} from "js-vextensions";
 import Link from "../../../../Frame/ReactComponents/Link";
-import {BaseComponent, BaseProps, FindDOM, GetInnerComp} from "react-vextensions";
+import {BaseComponent, BaseProps, GetInnerComp} from "react-vextensions";
 import {Pre} from "react-vcomponents";
 import {MapNode, MapNodeL2, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeDisplayText, GetRatingTypesForNode, AsNodeL3} from "../../../../Store/firebase/nodes/$node";
@@ -46,7 +46,7 @@ export default class NodeUI_ForBots extends BaseComponent<Props, {}> {
 		let nodeL3 = AsNodeL3(node);
 		return (
 			<ScrollView ref="scrollView"
-					//backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.refs.scrollView.content) || a == this.refs.mapUI}
+					//backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.refs.scrollView.content) || a == this.refs.mapUI}
 					scrollVBarStyle={{width: 10}} /*contentStyle={{willChange: "transform"}}*/>
 				<Row>
 					<Pre>Parents: </Pre>{nodeParents.map((parent, index)=> {

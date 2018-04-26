@@ -1,5 +1,5 @@
 import {Connect} from "Frame/Database/FirebaseConnect";
-import {emptyArray_forLoading, emptyArray} from "Frame/Store/ReducerUtils";
+import {emptyArray, emptyArray_forLoading} from "Frame/Store/ReducerUtils";
 import {GetMarkerPercent_AtPath, GetRatings} from "Store/firebase/nodeRatings";
 import {RatingType} from "Store/firebase/nodeRatings/@RatingType";
 import {GetParentNodeL3} from "Store/firebase/nodes";
@@ -9,7 +9,7 @@ import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
 import {ACTMapNodeExpandedSet} from "Store/main/mapViews/$mapView/rootNodeViews";
 import {MapNodeView} from "Store/main/mapViews/@MapViews";
 import {Row} from "react-vcomponents";
-import {BaseComponentWithConnector, FindDOM} from "react-vextensions";
+import {BaseComponentWithConnector} from "react-vextensions";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import {GetFillPercent_AtPath} from "../../../../../Store/firebase/nodeRatings";
 import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
@@ -17,9 +17,9 @@ import {GetNodeColor} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {ExpandableBox} from "../ExpandableBox";
 import {Squiggle} from "../NodeConnectorBackground";
 import {NodeUI_Menu} from "../NodeUI_Menu";
+import {NodeChildCountMarker} from "./NodeChildCountMarker";
 import {NodeChildHolder} from "./NodeChildHolder";
 import RatingsPanel from "./Panels/RatingsPanel";
-import {NodeChildCountMarker} from "./NodeChildCountMarker";
 
 export enum HolderType {
 	Truth = 10,
@@ -170,7 +170,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 	ratingPanel: RatingsPanel;
 	ComponentDidMount() {
 		// we have to use native/jquery hover/mouseenter+mouseleave, to fix that in-equation term-placeholders would cause "mouseleave" to be triggered
-		//let dom = $(FindDOM(this));
+		//let dom = $(GetDOM(this));
 		//dom.off("mouseenter mouseleave");
 		$(this.innerUI.DOM).hover(()=> {
 			if ($(".scrolling").length == 0) {
@@ -183,7 +183,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 
 	lastLineHolderHeight = 0;
 	PostRender() {
-		let lineHolderHeight = $(FindDOM(this.lineHolder)).outerHeight();
+		let lineHolderHeight = $(this.lineHolder).outerHeight();
 		if (lineHolderHeight != this.lastLineHolderHeight) {
 			this.SetState({lineHolderHeight});
 		}
@@ -221,7 +221,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 	PostRender() {
 		//if (this.lastRender_source == RenderSource.SetState) return;
 
-		let height = $(FindDOM(this)).outerHeight();
+		let height = $(GetDOM(this)).outerHeight();
 		let pos = this.state.childrenCenterY|0;
 		if (pos != this.lastPos) {
 			this.OnPosChange();

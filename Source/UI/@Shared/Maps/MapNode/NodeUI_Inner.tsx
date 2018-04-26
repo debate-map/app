@@ -8,7 +8,7 @@ import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
 import classNames from "classnames";
 import keycode from "keycode";
 import {Button, Pre, Row, TextArea_AutoSize} from "react-vcomponents";
-import {BaseComponent, BaseComponentWithConnector, FindDOM, GetInnerComp} from "react-vextensions";
+import {BaseComponent, BaseComponentWithConnector, GetInnerComp} from "react-vextensions";
 import {DBPath, RemoveHelpers, SlicePath, WaitTillPathDataIsReceived, WaitTillPathDataIsReceiving} from "../../../../Frame/Database/DatabaseHelpers";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {ParseSegmentsForPatterns} from "../../../../Frame/General/RegexHelpers";
@@ -210,7 +210,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 	definitionsPanel: DefinitionsPanel;
 	ComponentDidMount() {
 		// we have to use native/jquery hover/mouseenter+mouseleave, to fix that in-equation term-placeholders would cause "mouseleave" to be triggered
-		let dom = $(FindDOM(this));
+		let dom = $(GetDOM(this));
 		//dom.off("mouseenter mouseleave");
 		$(dom).hover(()=> {
 			if ($(".scrolling").length == 0) {

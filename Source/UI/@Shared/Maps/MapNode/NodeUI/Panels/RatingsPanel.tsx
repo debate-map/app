@@ -1,31 +1,21 @@
-import {GetRatingValue, TransformRatingForContext, ShouldRatingTypeBeReversed} from "../../../../../../Store/firebase/nodeRatings";
-import jquery from "jquery";
-import {Log} from "../../../../../../Frame/General/Logging";
-import {BaseComponent, FindDOM, RenderSource, SimpleShouldUpdate} from "react-vextensions";
-import {Pre} from "react-vcomponents";
-import {Vector2i} from "js-vextensions";
-import {Range, DN} from "js-vextensions";
-import {Spinner} from "react-vcomponents";
-import {connect} from "react-redux";
-import {Select} from "react-vcomponents";
-import {ShowMessageBox_Base, ShowMessageBox} from "react-vmessagebox";
-import {firebaseConnect} from "react-redux-firebase";
-import {GetData, SlicePath, DBPath} from "../../../../../../Frame/Database/DatabaseHelpers";
-import {Debugger} from "../../../../../../Frame/General/Others";
-import {RatingType, RatingType_Info, GetRatingTypeInfo} from "../../../../../../Store/firebase/nodeRatings/@RatingType";
-import {Rating} from "../../../../../../Store/firebase/nodeRatings/@RatingsRoot";
-import {MapNode, ClaimForm, MapNodeL2, MapNodeL3} from "../../../../../../Store/firebase/nodes/@MapNode";
-import {GetUserID} from "../../../../../../Store/firebase/users";
-import {RootState} from "../../../../../../Store/index";
-import {GetRatingUISmoothing, ACTRatingUISmoothnessSet} from "../../../../../../Store/main/ratingUI";
-import {GetNodeChildren, GetParentNode} from "../../../../../../Store/firebase/nodes";
-import {MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../../Store/firebase/nodes/@MapNodeType";
-import {Connect} from "../../../../../../Frame/Database/FirebaseConnect";
-import {ShowSignInPopup} from "../../../../NavBar/UserPanel";
-import {GetNodeForm, GetNodeL3} from "../../../../../../Store/firebase/nodes/$node";
-import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
-import {AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, Brush, Legend,
-	ReferenceArea, ReferenceLine, ReferenceDot, ResponsiveContainer, CartesianAxis} from "recharts";
+import { DN, Range, Vector2i } from "js-vextensions";
+import { Pre, Select, Spinner } from "react-vcomponents";
+import { BaseComponent, RenderSource } from "react-vextensions";
+import { ShowMessageBox } from "react-vmessagebox";
+import { Area, AreaChart, CartesianGrid, ReferenceLine, Tooltip, XAxis, YAxis } from "recharts";
+import { DBPath, SlicePath } from "../../../../../../Frame/Database/DatabaseHelpers";
+import { Connect } from "../../../../../../Frame/Database/FirebaseConnect";
+import { ShouldRatingTypeBeReversed, TransformRatingForContext } from "../../../../../../Store/firebase/nodeRatings";
+import { GetRatingTypeInfo, RatingType } from "../../../../../../Store/firebase/nodeRatings/@RatingType";
+import { Rating } from "../../../../../../Store/firebase/nodeRatings/@RatingsRoot";
+import { GetNodeChildren } from "../../../../../../Store/firebase/nodes";
+import { GetNodeForm, GetNodeL3 } from "../../../../../../Store/firebase/nodes/$node";
+import { ClaimForm, MapNode, MapNodeL3 } from "../../../../../../Store/firebase/nodes/@MapNode";
+import { GetMapNodeTypeDisplayName } from "../../../../../../Store/firebase/nodes/@MapNodeType";
+import { GetUserID } from "../../../../../../Store/firebase/users";
+import { RootState } from "../../../../../../Store/index";
+import { ACTRatingUISmoothnessSet, GetRatingUISmoothing } from "../../../../../../Store/main/ratingUI";
+import { ShowSignInPopup } from "../../../../NavBar/UserPanel";
 
 /*let sampleData = [
 	{rating: 0, count: 0},
@@ -89,7 +79,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 			<div ref="root" style={{position: "relative"/*, minWidth: 496*/}}
 					onClick={e=> {
 						if (ratingType == "impact") return;
-						let target = $(FindDOM(e.target));
+						let target = $(e.target);
 						//let chart = (target as any).plusParents().filter(".recharts-cartesian-grid");
 						let chartHolder = (target as any).plusParents().filter("div.recharts-wrapper");
 						if (chartHolder.length == 0) return;

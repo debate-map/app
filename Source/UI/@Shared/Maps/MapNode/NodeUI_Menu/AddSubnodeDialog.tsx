@@ -4,7 +4,7 @@ import {MapNode, ClaimForm, ChildEntry, MapNodeL2, ClaimType, ImageAttachment} f
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
 import {Select} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";
-import {BaseComponent, GetInnerComp, FindDOM} from "react-vextensions";
+import {BaseComponent, GetInnerComp} from "react-vextensions";
 import {Pre} from "react-vcomponents";
 import {Row} from "react-vcomponents";
 import {Column} from "react-vcomponents";
@@ -125,7 +125,7 @@ class AddSubnodeDialog extends BaseComponent<Props, {layer: Layer, newNode: MapN
 		if (this.nodeEditorUI && this.nodeEditorUI.GetValidationError()) return this.nodeEditorUI.GetValidationError();
 		let {layer} = this.state;
 		if (layer == null) return "A layer must be selected.";
-		return GetErrorMessagesUnderElement(FindDOM(this))[0];
+		return GetErrorMessagesUnderElement(GetDOM(this))[0];
 	}
 
 	async OnOK() {

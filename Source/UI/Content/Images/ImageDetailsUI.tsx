@@ -1,6 +1,6 @@
 import {Spinner} from "react-vcomponents";
 import {Assert} from "js-vextensions";
-import {BaseComponent, FindDOM} from "react-vextensions";
+import {BaseComponent} from "react-vextensions";
 import {Term, TermType, Term_nameFormat, Term_disambiguationFormat} from "../../../Store/firebase/terms/@Term";
 import {Column} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";
@@ -109,7 +109,7 @@ export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image
 	}
 	chainsEditor: SourceChainsEditorUI;
 	GetValidationError() {
-		return GetErrorMessagesUnderElement(FindDOM(this))[0] || this.chainsEditor.GetValidationError();
+		return GetErrorMessagesUnderElement(GetDOM(this))[0] || this.chainsEditor.GetValidationError();
 	}
 
 	GetNewData() {

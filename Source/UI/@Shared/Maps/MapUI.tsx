@@ -1,66 +1,39 @@
-import {GetViewOffset, GetSelectedNodePath, GetNodeView, GetMapView, GetFocusedNodePathNodes, GetFocusedNodePath} from "../../../Store/main/mapViews";
-import {BaseComponent, FindDOM, FindReact, GetInnerComp, BaseComponentWithConnector} from "react-vextensions";
-import {Pre} from "react-vcomponents";
-import {firebaseConnect, helpers} from "react-redux-firebase";
-import {connect} from "react-redux";
-import {DBPath, GetData} from "../../../Frame/Database/DatabaseHelpers";
-import {Debugger, inFirefox} from "../../../Frame/General/Others";
-import {E} from "js-vextensions";
-import {Vector2i, VRect} from "js-vextensions";
-import {NodeUI} from "./MapNode/NodeUI";
-import {ScrollView} from "react-vscrollview";
-import {GetDistanceBetweenRectAndPoint} from "../../../Frame/General/Geometry";
-import {NodeUI_Inner} from "./MapNode/NodeUI_Inner";
-//import ReactResizeDetector from "react-resize-detector"; // this one doesn't seem to work reliably -- at least for the map-ui
-import ResizeSensor from "react-resize-sensor";
-import {WaitXThenRun, Timer, SleepAsync} from "js-vextensions";
-import {MapNode, ClaimForm, MapNodeL2, MapNodeL3} from "../../../Store/firebase/nodes/@MapNode";
-import {Map, MapType} from "../../../Store/firebase/maps/@Map";
-import {RootState} from "../../../Store/index";
-import {GetUserID} from "../../../Store/firebase/users";
-import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../Store/main/mapViews/$mapView/rootNodeViews";
-import {Connect} from "../../../Frame/Database/FirebaseConnect";
+import {StandardCompProps} from "Frame/UI/General";
+import {TimelinePlayerUI} from "UI/@Shared/Maps/MapUI/TimelinePlayerUI";
+import {DeepGet, E, SleepAsync, Timer, Vector2i} from "js-vextensions";
 import {Column} from "react-vcomponents";
-import {GetNode, GetNodeChildren} from "../../../Store/firebase/nodes";
-import {Row} from "react-vcomponents";
-import Link from "../../../Frame/ReactComponents/Link";
-import {VURL} from "js-vextensions";
-import NodeUI_ForBots from "./MapNode/NodeUI_ForBots";
-import {IsNumberString} from "js-vextensions";
-import {GetNodeL3, IsNodeL2, IsNodeL3} from "../../../Store/firebase/nodes/$node";
-import {GetOpenMapID, ACTSetInitialChildLimit} from "../../../Store/main";
-import {colors, styles} from "../../../Frame/UI/GlobalStyles";
-import {Button} from "react-vcomponents";
-import {DropDown} from "react-vcomponents";
-import {Spinner} from "react-vcomponents";
-import {ACTDebateMapSelect} from "../../../Store/main/debates";
-import MapDetailsUI from "./MapDetailsUI";
-import UpdateMapDetails from "../../../Server/Commands/UpdateMapDetails";
-import {IsUserCreatorOrMod} from "../../../Store/firebase/userExtras";
-import {ShowMessageBox} from "react-vmessagebox";
-import DeleteMap from "../../../Server/Commands/DeleteMap";
-import InfoButton from "../../../Frame/ReactComponents/InfoButton";
-import {GetChildCount} from "Store/firebase/nodes";
-import {ActionBar_Left} from "./MapUI/ActionBar_Left";
-import {ActionBar_Right} from "./MapUI/ActionBar_Right";
+import {BaseComponentWithConnector, FindReact} from "react-vextensions";
 import {VMenuStub} from "react-vmenu";
 import {VMenuItem} from "react-vmenu/dist/VMenu";
-import {emptyArray} from "../../../Frame/Store/ReducerUtils";
-import { TimelinePlayerUI, TimelineOverlayUI } from "UI/@Shared/Maps/MapUI/TimelinePlayerUI";
-import {GetAsync} from "Frame/Database/DatabaseHelpers";
-import {GetPlayingTimeline} from "../../../Store/main/maps/$map";
-import { StandardCompProps } from "Frame/UI/General";
+import {ScrollView} from "react-vscrollview";
+import {Connect} from "../../../Frame/Database/FirebaseConnect";
+import {GetDistanceBetweenRectAndPoint} from "../../../Frame/General/Geometry";
+import {inFirefox} from "../../../Frame/General/Others";
+import {styles} from "../../../Frame/UI/GlobalStyles";
+import {Map} from "../../../Store/firebase/maps/@Map";
+import {GetNodeL3, IsNodeL2, IsNodeL3} from "../../../Store/firebase/nodes/$node";
+import {MapNodeL3} from "../../../Store/firebase/nodes/@MapNode";
+import {RootState} from "../../../Store/index";
+import {GetOpenMapID} from "../../../Store/main";
+import {GetFocusedNodePath, GetMapView, GetNodeView, GetSelectedNodePath, GetViewOffset} from "../../../Store/main/mapViews";
+import {ACTMapNodeSelect, ACTViewCenterChange} from "../../../Store/main/mapViews/$mapView/rootNodeViews";
+import {NodeUI} from "./MapNode/NodeUI";
+import NodeUI_ForBots from "./MapNode/NodeUI_ForBots";
+import {NodeUI_Inner} from "./MapNode/NodeUI_Inner";
+import {ActionBar_Left} from "./MapUI/ActionBar_Left";
+import {ActionBar_Right} from "./MapUI/ActionBar_Right";
 
 export function GetNodeBoxForPath(path: string) {
-	return $(".NodeUI_Inner").ToList().FirstOrX(a=>FindReact(a[0]).props.path == path);
+	let nodeInnerBoxes = FindDOMAll(".NodeUI_Inner").map(a=>DeepGet(FindReact(a), "props/parent") as NodeUI_Inner);
+	return nodeInnerBoxes.FirstOrX(a=>a.props.path == path);
 }
 export function GetNodeBoxClosestToViewCenter() {
 	let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
-	return $(".NodeUI_Inner").ToList().Min(nodeBox=>GetDistanceBetweenRectAndPoint(nodeBox.GetScreenRect(), viewCenter_onScreen));
+	return FindDOMAll(".NodeUI_Inner").Min(nodeBox=>GetDistanceBetweenRectAndPoint($(nodeBox).GetScreenRect(), viewCenter_onScreen));
 }
-export function GetViewOffsetForNodeBox(nodeBox: JQuery) {
+export function GetViewOffsetForNodeBox(nodeBox: Element) {
 	let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
-	return viewCenter_onScreen.Minus(nodeBox.GetScreenRect().Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
+	return viewCenter_onScreen.Minus($(nodeBox).GetScreenRect().Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
 }
 
 export function UpdateFocusNodeAndViewOffset(mapID: number) {
@@ -69,7 +42,7 @@ export function UpdateFocusNodeAndViewOffset(mapID: number) {
 	let focusNodeBox = GetNodeBoxClosestToViewCenter();
 	if (focusNodeBox == null) return; // can happen if node was just deleted
 
-	let focusNodeBoxComp = FindReact(focusNodeBox[0]) as NodeUI_Inner;
+	let focusNodeBoxComp = FindReact(focusNodeBox).props.parent as NodeUI_Inner;
 	let focusNodePath = focusNodeBoxComp.props.path;
 	if (focusNodePath == null) return; // can happen sometimes; not sure what causes
 	let viewOffset = GetViewOffsetForNodeBox(focusNodeBox);
@@ -148,7 +121,7 @@ export class MapUI extends BaseComponentWithConnector(connector, {}) {
 				{/*!withinPage &&
 					<TimelineOverlayUI map={map}/>*/}
 				<ScrollView {...rest.Excluding(...StandardCompProps())} ref={c=>this.scrollView = c}
-						backgroundDrag={true} backgroundDragMatchFunc={a=>a == FindDOM(this.scrollView.content) || a == this.mapUI}
+						backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView.content) || a == this.mapUI}
 						style={E({flex: 1}, withinPage && {overflow: "visible"})}
 						scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
 						contentStyle={E(
@@ -175,10 +148,10 @@ export class MapUI extends BaseComponentWithConnector(connector, {}) {
 							onMouseDown={e=>{
 								this.downPos = new Vector2i(e.clientX, e.clientY);
 								if (e.button == 1)
-									$(FindDOM(this.mapUI)).addClass("scrolling");
+									$(this.mapUI).addClass("scrolling");
 							}}
 							onMouseUp={e=> {
-								$(FindDOM(this.mapUI)).removeClass("scrolling");
+								$(this.mapUI).removeClass("scrolling");
 							}}
 							onClick={e=> {
 								if (e.target != this.mapUI) return;
@@ -313,7 +286,7 @@ export class MapUI extends BaseComponentWithConnector(connector, {}) {
 		
 		let focusNodeBox = this.FindNodeBox(nodePath, true);
 		if (focusNodeBox == null) return;
-		let focusNodeBoxPos = $(FindDOM(focusNodeBox)).GetScreenRect().Center.Minus($(this.mapUI).GetScreenRect().Position);
+		let focusNodeBoxPos = $(GetDOM(focusNodeBox)).GetScreenRect().Center.Minus($(this.mapUI).GetScreenRect().Position);
 		this.ScrollToPosition(focusNodeBoxPos);
 	}
 	ScrollToPosition(posInContainer: Vector2i) {

@@ -1,4 +1,4 @@
-import {BaseComponentWithConnector, BaseComponent, GetInnerComp, RenderSource, FindDOM} from "react-vextensions";
+import {BaseComponentWithConnector, BaseComponent, GetInnerComp, RenderSource} from "react-vextensions";
 import { Connect } from "Frame/Database/FirebaseConnect";
 import {Column, Row, Button, Div} from "react-vcomponents";
 import { MapNodeL3 } from "Store/firebase/nodes/@MapNode";
@@ -186,7 +186,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	PostRender() {
 		//if (this.lastRender_source == RenderSource.SetState) return;
 
-		let height = $(FindDOM(this)).outerHeight();
+		let height = $(GetDOM(this)).outerHeight();
 		let orderStr = this.ChildOrderStr;
 		
 		if (height != this.lastHeight) {
@@ -241,12 +241,12 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	GetDividePoint() {
 		if (this.argumentsControlBar) {
 			//return upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0;
-			return this.childHolder && this.childHolder.DOM.style.visibility != "hidden"
+			return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden"
 				? $(this.argumentsControlBar.DOM).GetScreenRect().Center.y + 1 - $(this.childHolder.DOM).GetScreenRect().y
 				: 0
 		}
 		//return childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0,
-		return this.childHolder && this.childHolder.DOM.style.visibility != "hidden" ? $(this.childHolder.DOM).GetScreenRect().height / 2 : 0;
+		return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden" ? $(this.childHolder.DOM).GetScreenRect().height / 2 : 0;
 	}
 	ReportDividePointChange() {
 		let {node, onHeightOrDividePointChange} = this.props;
@@ -285,11 +285,11 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		let showAddArgumentButtons = false; //node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading; // && nodeChildren.length > 0;
 		//if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
 		if (this.Expanded && this.childHolder) {
-			let holderOffset = new Vector2i($(FindDOM(this.childHolder)).offset());
+			let holderOffset = new Vector2i($(GetDOM(this.childHolder)).offset());
 
 			let oldChildBoxOffsets = this.childBoxes.Props().Where(pair=>pair.value != null).ToMap(pair=>pair.name, pair=> {
 				//let childBox = FindDOM_(pair.value).find("> div:first-child > div"); // get inner-box of child
-				//let childBox = $(FindDOM(pair.value)).find(".NodeUI_Inner").first(); // get inner-box of child
+				//let childBox = $(GetDOM(pair.value)).find(".NodeUI_Inner").first(); // get inner-box of child
 				// not sure why this is needed... (bad sign!)
 				if (pair.value.NodeUIForDisplayedNode.innerUI == null) return new Vector2i(0, 0);
 				

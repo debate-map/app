@@ -50,7 +50,7 @@ export function EnumNameToDisplayName(enumName: string) {
 	return result;
 }
 
-/*export function FindDOM_(comp) { return $(FindDOM(comp)) as JQuery; };
+/*export function FindDOM_(comp) { return $(GetDOM(comp)) as JQuery; };
 G({FindDOM_});*/
 
 let click_lastInfoForElement = {};

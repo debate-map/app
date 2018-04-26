@@ -1,26 +1,19 @@
-import {Assert, GetErrorMessagesUnderElement} from "js-vextensions";
-import {BaseComponent, FindDOM} from "react-vextensions";
-import {Pre, RowLR} from "react-vcomponents";
-import {Term, TermType, Term_nameFormat, Term_disambiguationFormat} from "../../../Store/firebase/terms/@Term";
-import {Column} from "react-vcomponents";
-import {Row} from "react-vcomponents";
-import {TextInput} from "react-vcomponents";
-import Moment from "moment";
-import {GetUser} from "../../../Store/firebase/users";
+import {GetUserID} from "Store/firebase/users";
 import {User} from "Store/firebase/users/@User";
+import {GetErrorMessagesUnderElement} from "js-vextensions";
+import Moment from "moment";
+import {CheckBox, Column, Pre, Row, RowLR, Select, TextInput} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../Frame/General/Enums";
-import {Select} from "react-vcomponents";
-import {CheckBox} from "react-vcomponents";
-import {ScrollView} from "react-vscrollview";
-import {Button} from "react-vcomponents";
-import TermComponent from "../../../Store/firebase/termComponents/@TermComponent";
-import {GetNiceNameForTermType} from "../../../UI/Content/TermsUI";
-import {GetTermVariantNumber} from "../../../Store/firebase/terms";
 import InfoButton from "../../../Frame/ReactComponents/InfoButton";
-import {GetUserID} from "Store/firebase/users";
-import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import AddTerm from "../../../Server/Commands/AddTerm";
+import TermComponent from "../../../Store/firebase/termComponents/@TermComponent";
+import {GetTermVariantNumber} from "../../../Store/firebase/terms";
+import {Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "../../../Store/firebase/terms/@Term";
+import {GetUser} from "../../../Store/firebase/users";
+import {GetNiceNameForTermType} from "../../../UI/Content/TermsUI";
 
 type Props = {baseData: Term, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Term, error: string)=>void}
 	& Partial<{creator: User, variantNumber: number}>;
@@ -109,7 +102,7 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 		);
 	}
 	GetValidationError() {
-		return GetErrorMessagesUnderElement(FindDOM(this))[0];
+		return GetErrorMessagesUnderElement(GetDOM(this))[0];
 	}
 
 	GetNewData() {

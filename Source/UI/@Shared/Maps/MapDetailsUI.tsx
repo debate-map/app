@@ -1,5 +1,5 @@
 import {Assert} from "js-vextensions";
-import {BaseComponent, RenderSource, FindDOM} from "react-vextensions";
+import {BaseComponent, RenderSource} from "react-vextensions";
 import {Pre, Row, Column, RowLR} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";
 import Moment from "moment";
@@ -90,7 +90,7 @@ export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
 		);
 	}
 	GetValidationError() {
-		return GetErrorMessagesUnderElement(FindDOM(this))[0];
+		return GetErrorMessagesUnderElement(GetDOM(this))[0];
 	}
 
 	GetNewData() {

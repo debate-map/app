@@ -1,5 +1,5 @@
 import {Assert, GetErrorMessagesUnderElement} from "js-vextensions";
-import {BaseComponent, FindDOM} from "react-vextensions";
+import {BaseComponent} from "react-vextensions";
 import {Pre, RowLR} from "react-vcomponents";
 import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
@@ -68,7 +68,7 @@ export default class TimelineDetailsUI extends BaseComponent<Props, {newData: Ti
 		);
 	}
 	GetValidationError() {
-		return GetErrorMessagesUnderElement(FindDOM(this))[0];
+		return GetErrorMessagesUnderElement(GetDOM(this))[0];
 	}
 
 	GetNewData() {

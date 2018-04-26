@@ -1,4 +1,4 @@
-import {BaseComponent, RenderSource, FindDOM} from "react-vextensions";
+import {BaseComponent, RenderSource} from "react-vextensions";
 import {Pre, Div, TextArea_AutoSize} from "react-vcomponents";
 import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
@@ -112,7 +112,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 			let quoteError = this.quoteEditor.GetValidationError();
 			if (quoteError) return quoteError;
 		}
-		return GetErrorMessagesUnderElement(FindDOM(this))[0];
+		return GetErrorMessagesUnderElement(GetDOM(this))[0];
 	}
 
 	GetNewData() {

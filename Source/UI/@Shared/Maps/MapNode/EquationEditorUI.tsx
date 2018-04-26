@@ -1,6 +1,6 @@
 import {TransformRatingForContext} from "../../../../Store/firebase/nodeRatings";
 import {Assert} from "js-vextensions";
-import {BaseComponent, RenderSource, FindDOM} from "react-vextensions";
+import {BaseComponent, RenderSource} from "react-vextensions";
 import {Pre, RowLR, TextArea_AutoSize} from "react-vcomponents";
 import {Term, TermType, Term_nameFormat, Term_disambiguationFormat} from "../../../../Store/firebase/terms/@Term";
 import {Column} from "react-vcomponents";
@@ -74,7 +74,7 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 		);
 	}
 	GetValidationError() {
-		return GetErrorMessagesUnderElement(FindDOM(this))[0];
+		return GetErrorMessagesUnderElement(GetDOM(this))[0];
 	}
 
 	GetNewData() {

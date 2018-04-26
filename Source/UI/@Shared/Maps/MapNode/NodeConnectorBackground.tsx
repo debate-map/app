@@ -1,4 +1,4 @@
-import {BaseComponent, FindDOM, SimpleShouldUpdate_Overridable} from "react-vextensions";
+import {BaseComponent, SimpleShouldUpdate_Overridable} from "react-vextensions";
 import NodeUI from "./NodeUI";
 import {Vector2i} from "js-vextensions";
 import ShallowCompare from "react/lib/shallowCompare";

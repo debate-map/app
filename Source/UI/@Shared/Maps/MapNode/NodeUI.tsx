@@ -6,7 +6,7 @@ import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
 import {HolderType, NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
 import {CachedTransform, E, Timer, GetStackTraceStr} from "js-vextensions";
 import {Column} from "react-vcomponents";
-import {BaseComponentWithConnector, FindDOM, GetInnerComp, RenderSource, ShallowChanged, ShallowEquals} from "react-vextensions";
+import {BaseComponentWithConnector, GetInnerComp, RenderSource, ShallowChanged, ShallowEquals} from "react-vextensions";
 import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {Log} from "../../../../Frame/General/Logging";
@@ -312,18 +312,18 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 	PostRender() {
 		//if (this.lastRender_source == RenderSource.SetState) return;
 
-		let height = $(FindDOM(this)).outerHeight();
+		let height = $(GetDOM(this)).outerHeight();
 		if (height != this.lastHeight) {
 			this.OnHeightChange(height);
 		}
 		this.lastHeight = height;
 
-		let selfHeight = $(FindDOM(this.innerUI)).outerHeight();
+		let selfHeight = $(GetDOM(this.innerUI)).outerHeight();
 		if (selfHeight != this.lastSelfHeight) {
 			this.OnSelfHeightChange(selfHeight);
 		}
 		this.lastSelfHeight = selfHeight;
-		
+
 		/*else {
 			if (this.lastRender_source == RenderSource.SetState) return;
 			this.UpdateState();

@@ -1,4 +1,4 @@
-import {Assert} from "js-vextensions";
+/*import {Assert} from "js-vextensions";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {Command} from "../Command";
 import {MapNode, ClaimForm, ChildEntry, AccessLevel} from "../../Store/firebase/nodes/@MapNode";
@@ -6,7 +6,7 @@ import {E} from "js-vextensions";
 import {GetValues_ForSchema} from "../../Frame/General/Enums";
 import { UserEdit, MapEdit } from "Server/CommandMacros";
 
-/*AddSchema({
+AddSchema({
 	properties: {
 		mapID: {type: "number"},
 		nodeID: {type: "number"},

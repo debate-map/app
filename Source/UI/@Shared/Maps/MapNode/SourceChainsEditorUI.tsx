@@ -1,5 +1,5 @@
 import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
-import {BaseComponent, FindDOM} from "react-vextensions";
+import {BaseComponent} from "react-vextensions";
 import {Button} from "react-vcomponents";
 import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
@@ -83,8 +83,8 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 		);
 	}
 	GetValidationError() {
-		//return this.GetNewData().map(chain=>Validate("SourceChain", chain)).FirstOrX(a=>a) || GetErrorMessagesUnderElement(FindDOM(this))[0];
-		let error = GetErrorMessagesUnderElement(FindDOM(this))[0];
+		//return this.GetNewData().map(chain=>Validate("SourceChain", chain)).FirstOrX(a=>a) || GetErrorMessagesUnderElement(GetDOM(this))[0];
+		let error = GetErrorMessagesUnderElement(GetDOM(this))[0];
 		if (!error) {
 			for (let chain of this.GetNewData()) {
 				/*let error2 = Validate("SourceChain", chain);
