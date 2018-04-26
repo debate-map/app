@@ -1,18 +1,15 @@
-import {HasModPermissions, PermissionGroupSet, HasAdminPermissions} from "./userExtras/@UserExtraInfo";
-import {IsNaN, IsObjectOf, IsObject, IsNumber} from "js-vextensions";
-import {GetData, GetDataAsync, SlicePath} from "../../Frame/Database/DatabaseHelpers";
-import {MapNode, globalRootNodeID, MapNodeL2} from "./nodes/@MapNode";
-import {CachedTransform} from "js-vextensions";
-import {MapNodeType_Info, MapNodeType} from "./nodes/@MapNodeType";
-import {IsUserCreatorOrMod} from "./userExtras";
-import {GetUserPermissionGroups, GetUserID, GetUserAccessLevel} from "./users";
-import {GetNodeL2, GetNodeL3} from "./nodes/$node";
-import {Map} from "./maps/@Map";
-import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
-import { emptyArray } from "Frame/Store/ReducerUtils";
 import {CachedTransform_WithStore} from "Frame/Database/DatabaseHelpers";
+import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
+import {emptyArray} from "Frame/Store/ReducerUtils";
 import {MapNodeL3} from "Store/firebase/nodes/@MapNode";
-import { HolderType } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
+import {CachedTransform, IsNaN} from "js-vextensions";
+import {GetData, GetDataAsync, SlicePath} from "../../Frame/Database/DatabaseHelpers";
+import {GetNodeL2, GetNodeL3} from "./nodes/$node";
+import {MapNode, MapNodeL2, globalRootNodeID} from "./nodes/@MapNode";
+import {MapNodeType, MapNodeType_Info} from "./nodes/@MapNodeType";
+import {IsUserCreatorOrMod} from "./userExtras";
+import {HasAdminPermissions, HasModPermissions, PermissionGroupSet} from "./userExtras/@UserExtraInfo";
+import {GetUserAccessLevel, GetUserID} from "./users";
 
 export type NodeMap = {[key: string]: MapNode};
 export function GetNodeMap(queries?): NodeMap {
@@ -162,14 +159,14 @@ export function IsNewLinkValid(parentNode: MapNodeL2, parentPath: string, /*pare
 	return IsLinkValid(parentNode.type, parentPath, child);
 }
 
-export function ForUnlink_GetError(userID: string, map: Map, node: MapNodeL2, asPartOfCut = false) {
+export function ForUnlink_GetError(userID: string, node: MapNodeL2, asPartOfCut = false) {
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
 	if (!asPartOfCut && (node.parents || {}).VKeys(true).length <= 1)  return `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`;
 	if (IsRootNode(node)) return `Cannot unlink the root-node of a map.`;
 	if (IsNodeSubnode(node)) return `Cannot unlink a subnode. Try deleting it instead.`;
 	return null;
 }
-export function ForDelete_GetError(userID: string, map: Map, node: MapNodeL2, asPartOfMapDelete = false, asSubcommand = false) {
+export function ForDelete_GetError(userID: string, node: MapNodeL2, asPartOfMapDelete = false, asSubcommand = false) {
 	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
 	if (GetParentCount(node) > 1) return `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`;
 	if (IsRootNode(node) && !asPartOfMapDelete) return `Cannot delete the root-node of a map.`;
@@ -180,11 +177,11 @@ export function ForDelete_GetError(userID: string, map: Map, node: MapNodeL2, as
 	return null;
 }
 
-export function ForCut_GetError(userID: string, map: Map, node: MapNodeL2) {
-	return ForUnlink_GetError(userID, map, node, true);
+export function ForCut_GetError(userID: string, node: MapNodeL2) {
+	return ForUnlink_GetError(userID, node, true);
 }
 
-export function ForCopy_GetError(userID: string, map: Map, node: MapNode) {
+export function ForCopy_GetError(userID: string, node: MapNode) {
 	if (IsRootNode(node)) return `Cannot copy the root-node of a map.`;
 	if (IsNodeSubnode(node)) return `Cannot copy a subnode.`;
 	return null;

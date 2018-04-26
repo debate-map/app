@@ -28,7 +28,7 @@ import {MapUI} from "../../UI/@Shared/Maps/MapUI";
 import {SleepAsync} from "js-vextensions";
 import {GetNodeL2} from "Store/firebase/nodes/$node";
 import { MapNodeType } from "Store/firebase/nodes/@MapNodeType";
-import { GetNodeChildrenL2 } from "Store/firebase/nodes";
+import { GetNodeChildrenL2, GetNodeID } from "Store/firebase/nodes";
 import { GetNodeChildrenL3 } from "Store/firebase/nodes";
 
 // use this to intercept dispatches (for debugging)
@@ -200,7 +200,7 @@ export async function PostDispatchAction(action: Action<any>) {
 	}
 	if (action.Is(ACTMapNodeExpandedSet)) {
 		let path = action.payload.path;
-		let nodeID = SplitStringBySlash_Cached(path).Last().ToInt();
+		let nodeID = GetNodeID(path);
 		let node = GetNodeL2(nodeID) || await GetAsync(()=>GetNodeL2(nodeID));
 		let expandKey = ["expanded", "expanded_truth", "expanded_relevance"].find(key=>action.payload[key] != null);
 		

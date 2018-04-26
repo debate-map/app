@@ -1,9 +1,7 @@
-import u from "updeep";
-import {GetUserID} from "Store/firebase/users";
-import {RemoveHelpers, ApplyDBUpdates, DBPath, GetAsync} from "../Frame/Database/DatabaseHelpers";
-import {GetDataAsync, GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
-import { GetNode } from "Store/firebase/nodes";
 import {FirebaseData} from "Store/firebase";
+import {GetUserID} from "Store/firebase/users";
+import u from "updeep";
+import {ApplyDBUpdates, ApplyDBUpdates_Local, DBPath, RemoveHelpers} from "../Frame/Database/DatabaseHelpers";
 
 export class CommandUserInfo {
 	id: string;
@@ -56,6 +54,12 @@ export abstract class Command<Payload> {
 	/** [sync] Retrieves the actual database updates that are to be made. (so we can do it in one atomic call) */
 	abstract GetDBUpdates(): {}
 
+	async PreRun() {
+		RemoveHelpers(this.payload); // have this run locally, before sending, to save on bandwidth
+		this.Validate_Early();
+		await this.Prepare();
+		await this.Validate();
+	}
 	/** [async] Validates the data, prepares it, and executes it -- thus applying it into the database. */
 	async Run() {
 		while (currentCommandRun_listeners) {
@@ -66,11 +70,7 @@ export abstract class Command<Payload> {
 		MaybeLog(a=>a.commands, ()=>`Running command. @type:${this.constructor.name} @payload(${ToJSON(this.payload)})`);
 
 		try {
-			RemoveHelpers(this.payload); // have this run locally, before sending, to save on bandwidth
-
-			this.Validate_Early();
-			await this.Prepare();
-			await this.Validate();
+			await this.PreRun();
 
 			let dbUpdates = this.GetDBUpdates();
 			await this.Validate_LateHeavy(dbUpdates);
@@ -109,9 +109,7 @@ export abstract class Command<Payload> {
 
 		// locally-apply db-updates, then validate the result (for now, only works for already-loaded data paths)
 		let newData = State(a=>a.firebase.data);
-		for (let {name: path, value} of dbUpdates.Props()) {
-			newData = u.updateIn(path.replace(/\//g, "."), u.constant(value), newData);
-		}
+		newData = ApplyDBUpdates_Local(newData, dbUpdates);
 		ValidateDBData(newData);
 	}
 }
@@ -185,21 +183,3 @@ export function MergeDBUpdates(baseUpdatesMap, updatesToMergeMap) {
 	let finalUpdatesMap = finalUpdates.reduce((result, current)=>result.VSet(current.path, current.data), {});
 	return finalUpdatesMap;
 }
-
-// template
-// ==========
-/*
-	Validate_Early() {
-	}
-
-	async Prepare() {
-	}
-	async Validate() {
-	}
-
-	GetDBUpdates() {
-		let updates = {
-		};
-		return updates;
-	}
-*/

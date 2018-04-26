@@ -285,7 +285,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 							path={`${path}/L${subnode._id}`} widthOverride={widthOverride} onHeightOrPosChange={onHeightOrPosChange}/>
 					);
 				})}
-				<div style={E({marginTop: -5})}>
+				<div className="clickThrough" style={E({marginTop: -5})}>
 					{isMultiPremiseArgument &&
 						nodeChildHolder}
 				</div>

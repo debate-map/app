@@ -5,10 +5,11 @@ import {replace, push} from "redux-little-router";
 import {Connect} from "../Database/FirebaseConnect";
 import {MakeRootReducer} from "../../Store/index";
 import { GetNewURL } from "../URL/URLManager";
-import {State_overrides} from "../../UI/@Shared/StateOverrides";
 import {GetCurrentURL} from "../General/URLs";
 import {VURL} from "js-vextensions";
 import { StandardCompProps } from "Frame/UI/General";
+import {State_overrideCountAsAccess_value, StopStateCountAsAccessOverride, StartStateCountAsAccessOverride} from 'UI/@Shared/StateOverrides';
+import {StartStateDataOverride, StopStateDataOverride} from "../../UI/@Shared/StateOverrides";
 
 /*@Radium
 export default class Link extends BaseComponent<{to, target?: string, replace?: boolean, style?, onClick?}, {}> {
@@ -41,11 +42,11 @@ type Props = {
 		for (let action of actionsToDispatch) {
 			newState = rootReducer(newState, action);
 		}
-		State_overrides.state = newState;
-		State_overrides.countAsAccess = false;
+		StartStateDataOverride("", newState);
+		StartStateCountAsAccessOverride(false);
 		let newURL = GetNewURL();
-		State_overrides.countAsAccess = null;
-		State_overrides.state = null;
+		StopStateCountAsAccessOverride();
+		StopStateDataOverride();
 
 		to = newURL.toString();
 	}

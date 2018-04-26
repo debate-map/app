@@ -8,7 +8,6 @@ import StackTrace from "stacktrace-js";
 import React from "react/lib/ReactWithAddons";
 import {OnAccessPath, Connect} from "./Frame/Database/FirebaseConnect";
 import "./Store/firebase/nodeRatings/@RatingsRoot";
-import {State_overrides, State_Options} from "./UI/@Shared/StateOverrides";
 import {JSVE, DeepGet} from "js-vextensions";
 import "./Frame/General/Logging";
 import "./Frame/General/Testing";
@@ -23,6 +22,9 @@ import {GetDataAsync, GetAsync, ApplyDBUpdates} from "Frame/Database/DatabaseHel
 import {GetUserPermissionGroups} from "./Store/firebase/users";
 import VReactMarkdown_Remarkable from "./Frame/ReactComponents/VReactMarkdown_Remarkable";
 import {Persister} from "redux-persist/src/types";
+import Action from "Frame/General/Action";
+import {StartStateDataOverride, StopStateCountAsAccessOverride, StopStateDataOverride} from "UI/@Shared/StateOverrides";
+import {StartStateCountAsAccessOverride} from "./UI/@Shared/StateOverrides";
 
 JSVE.logFunc = Log;
 
@@ -35,9 +37,18 @@ function ToFirebasePath(path: string) {
 //g.FirebaseConnect = Connect;
 let sharedData = {
 	//store: null, // set below
-	rootReducer: MakeRootReducer(),
-	State_overrides,
-	GetNewURL,
+	GetNewURL: (actionsToDispatch: Action<any>[])=> {
+		let newState = State();
+		for (let action of actionsToDispatch) {
+			newState = (store as any).reducer(newState, action);
+		}
+		StartStateDataOverride("", newState);
+		StartStateCountAsAccessOverride(false);
+		let newURL = GetNewURL();
+		StopStateCountAsAccessOverride();
+		StopStateDataOverride();
+		return newURL;
+	},
 	FormatTime: (time: number, formatStr: string)=> {
 		if (formatStr == "[calendar]") {
 			let result = Moment(time).calendar();
@@ -97,8 +108,8 @@ Manager_Forum.store = store;
 Manager_Feedback.store = store;
 
 //setTimeout(()=> {
-const mountNode = document.getElementById(`root`);
-let {RootUIWrapper} = require(`./UI/Root`);
+const mountNode = document.getElementById("root");
+let {RootUIWrapper} = require("./UI/Root");
 ReactDOM.render(<RootUIWrapper store={store}/>, mountNode);
 //});
 

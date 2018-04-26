@@ -18,10 +18,9 @@ import {HandleError} from "../Frame/General/Errors";
 import {ForumData, ForumReducer} from "firebase-forum";
 import {FeedbackData, FeedbackReducer} from "firebase-feedback";
 import {OnAccessPath} from "../Frame/Database/FirebaseConnect";
-import { State_Options } from "UI/@Shared/StateOverrides";
-import {State_overrides} from "../UI/@Shared/StateOverrides";
-import {persistStore, persistReducer} from "redux-persist";
+import {persistStore, persistReducer, getStoredState} from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web and AsyncStorage for react-native
+import {State_overrideData_path, State_overrideData_value, State_overrideCountAsAccess_value} from "../UI/@Shared/StateOverrides";
 
 // State() actually also returns the root-state (if no data-getter is supplied), but we don't reveal that in type-info (as its only to be used in console)
 G({State});
@@ -62,6 +61,10 @@ function State<T>(pathOrPathSegments, state?: RootState, countAsAccess?: boolean
 	return selectedData;
 }*/
 
+export class State_Options {
+	countAsAccess?: boolean;
+}
+
 // for substantially better perf, we now only accept string-or-number arrays
 declare global {
 	function State<T>(): RootState;
@@ -70,8 +73,12 @@ declare global {
 	function State<T>(options: State_Options, ...pathSegments: (string | number)[]);
 }
 function State<T>(...args) {
+	let state = State_overrideData_path != null
+		? u.updateIn(State_overrideData_path.replace(/\//g, "."), u.constant(State_overrideData_value), store.getState())
+		: store.getState();
+
 	let pathSegments: (string | number)[], options = new State_Options();
-	if (args.length == 0) return State_overrides.state || store.getState();
+	if (args.length == 0) return state;
 	else if (typeof args[0] == "function") pathSegments = ConvertPathGetterFuncToPropChain(args[0]);
 	else if (typeof args[0] == "string") pathSegments = args.length == 1 ? args[0].split("/") : args; // if only one string provided, assume it's the full path
 	else [options, ...pathSegments] = args;
@@ -82,12 +89,11 @@ function State<T>(...args) {
 			`Each string path-segment must be a plain prop-name. (ie. contain no "/" separators) @segments(${pathSegments})`);
 	}
 
-	options.state = options.state || State_overrides.state || store.getState();
-	options.countAsAccess = options.countAsAccess != null ? options.countAsAccess : (State_overrides.countAsAccess != null ? State_overrides.countAsAccess : true);
+	let countAsAccess = options.countAsAccess != null ? options.countAsAccess : (State_overrideCountAsAccess_value != null ? State_overrideCountAsAccess_value : true);
 
-	let selectedData = DeepGet(options.state, pathSegments);
-	//if (options.countAsAccess && pathSegments.length) {
-	if (options.countAsAccess) {
+	let selectedData = DeepGet(state, pathSegments);
+	//if (countAsAccess && pathSegments.length) {
+	if (countAsAccess) {
 		let path = pathSegments.join("/");
 		//Assert(g.inConnectFunc, "State(), with countAsAccess:true, must be called from within a Connect() func.");
 		OnAccessPath(path);

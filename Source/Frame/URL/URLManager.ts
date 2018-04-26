@@ -174,7 +174,7 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 			let [childID, childNodeView] = ParseNodeView(childStr);
 			Assert(IsNumber(childID), "childID must be a number.");
 			if (isSubnode) {
-				nodeView.subnodes[childID] = childNodeView;
+				nodeView.children[`L${childID}`] = childNodeView;
 			} else {
 				nodeView.children[childID] = childNodeView;
 			}
@@ -459,12 +459,6 @@ export function GetNodeViewStr(mapID: number, path: string) {
 	let childrenStr = "";
 	for (let childID of (nodeView.children || {}).VKeys(true)) {
 		let childNodeViewStr = GetNodeViewStr(mapID, `${path}/${childID}`);
-		if (childNodeViewStr.length) {
-			childrenStr += (childrenStr.length ? "," : "") + childNodeViewStr;
-		}
-	}
-	for (let childID of (nodeView.subnodes || {}).VKeys(true)) {
-		let childNodeViewStr = GetNodeViewStr(mapID, `${path}/L${childID}`);
 		if (childNodeViewStr.length) {
 			childrenStr += (childrenStr.length ? "," : "") + childNodeViewStr;
 		}

@@ -1,52 +1,35 @@
-import DeleteNode from "../../../../Server/Commands/DeleteNode";
-import {GetDataAsync, RemoveHelpers, SlicePath, WaitTillPathDataIsReceiving, WaitTillPathDataIsReceived, GetAsync} from "../../../../Frame/Database/DatabaseHelpers";
-import {MapNode, MapNodeL2, Polarity, ChildEntry} from "../../../../Store/firebase/nodes/@MapNode";
-import {PermissionGroupSet} from "../../../../Store/firebase/userExtras/@UserExtraInfo";
-import {VMenuStub} from "react-vmenu";
-import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../Store/firebase/nodes/@MapNodeType";
-import {GetUserID, GetUserPermissionGroups} from "../../../../Store/firebase/users";
-import {RootState} from "../../../../Store";
-import {VMenu} from "react-vmenu";
-import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
-import {Div, Pre} from "react-vcomponents";
-import {ShowMessageBox} from "react-vmessagebox";
-import {WaitXThenRun} from "js-vextensions";
-import {TextInput} from "react-vcomponents";
-import {styles} from "../../../../Frame/UI/GlobalStyles";
-import {DN} from "js-vextensions";
-import keycode from "keycode";
-import {firebaseConnect} from "react-redux-firebase";
-import {connect} from "react-redux";
-import {ACTNodeCopy, GetCopiedNode} from "../../../../Store/main";
-import {Select} from "react-vcomponents";
-import {GetEntries, GetValues} from "../../../../Frame/General/Enums";
-import {VMenuItem} from "react-vmenu/dist/VMenu";
-import {ForDelete_GetError, ForUnlink_GetError, GetNode, GetNodeChildrenAsync, GetNodeParentsAsync, GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetParentNodeL3, GetNodeID, GetNodeChildrenL3} from "../../../../Store/firebase/nodes";
-import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {SignInPanel, ShowSignInPopup} from "../../NavBar/UserPanel";
-import {IsUserBasicOrAnon, IsUserCreatorOrMod, IsUserMod} from "../../../../Store/firebase/userExtras";
-import {ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
-import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
-import { GetNodeChildren, ForCut_GetError, ForCopy_GetError } from "../../../../Store/firebase/nodes";
-import {E} from "js-vextensions";
-import {GetNodeDisplayText, GetValidNewChildTypes, GetNodeForm, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument, AsNodeL3, AsNodeL2, IsSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
-import {Map} from "../../../../Store/firebase/maps/@Map";
-import LinkNode from "Server/Commands/LinkNode";
-import UnlinkNode from "Server/Commands/UnlinkNode";
 import CloneNode from "Server/Commands/CloneNode";
-import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
-import { ShowAddSubnodeDialog } from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSubnodeDialog";
-import { GetPathNodes, GetPathNodeIDs } from "../../../../Store/main/mapViews";
-import {GetNodeL2} from "Store/firebase/nodes/$node";
+import LinkNode from "Server/Commands/LinkNode";
+import SetNodeIsMultiPremiseArgument from "Server/Commands/SetNodeIsMultiPremiseArgument";
+import UnlinkNode from "Server/Commands/UnlinkNode";
+import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 import {ACTSetLastAcknowledgementTime} from "Store/main";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/$map";
-import {GetPathsToNodesChangedSinceX} from "../../../../Store/firebase/mapNodeEditTimes";
-import { MapNodeRevision } from "Store/firebase/nodes/@MapNodeRevision";
-import {SetNodeUILocked} from "./NodeUI";
-import AddChildNode from "../../../../Server/Commands/AddChildNode";
-import { ACTMapNodeExpandedSet } from "Store/main/mapViews/$mapView/rootNodeViews";
 import {HolderType} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
-import SetNodeIsMultiPremiseArgument from "Server/Commands/SetNodeIsMultiPremiseArgument";
+import {ShowAddSubnodeDialog} from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSubnodeDialog";
+import {E} from "js-vextensions";
+import {BaseComponentWithConnector} from "react-vextensions";
+import {VMenuStub} from "react-vmenu";
+import {VMenuItem} from "react-vmenu/dist/VMenu";
+import {ShowMessageBox} from "react-vmessagebox";
+import {GetAsync, SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
+import {Connect} from "../../../../Frame/Database/FirebaseConnect";
+import {styles} from "../../../../Frame/UI/GlobalStyles";
+import AddChildNode from "../../../../Server/Commands/AddChildNode";
+import DeleteNode from "../../../../Server/Commands/DeleteNode";
+import {RootState} from "../../../../Store";
+import {GetPathsToNodesChangedSinceX} from "../../../../Store/firebase/mapNodeEditTimes";
+import {Map} from "../../../../Store/firebase/maps/@Map";
+import {ForCopy_GetError, ForCut_GetError, ForDelete_GetError, ForUnlink_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, IsNewLinkValid, IsNodeSubnode} from "../../../../Store/firebase/nodes";
+import {GetNodeDisplayText, GetNodeL3, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
+import {ClaimForm, MapNode, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
+import {GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {IsUserBasicOrAnon, IsUserCreatorOrMod, IsUserMod} from "../../../../Store/firebase/userExtras";
+import {GetUserID, GetUserPermissionGroups} from "../../../../Store/firebase/users";
+import {ACTNodeCopy, GetCopiedNode} from "../../../../Store/main";
+import {GetPathNodeIDs} from "../../../../Store/main/mapViews";
+import {ShowSignInPopup} from "../../NavBar/UserPanel";
+import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 
 type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean, holderType?: HolderType};
 let connector = (_: RootState, {map, node, path}: Props)=> {
@@ -55,7 +38,7 @@ let connector = (_: RootState, {map, node, path}: Props)=> {
 	let pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == path || a.startsWith(path + "/")); // also include self, for this
 	let parent = GetParentNodeL3(path);
 	return {
-		_: (ForUnlink_GetError(GetUserID(), map, node), ForDelete_GetError(GetUserID(), map, node)),
+		_: (ForUnlink_GetError(GetUserID(), node), ForDelete_GetError(GetUserID(), node)),
 		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
 		permissions: GetUserPermissionGroups(GetUserID()),
 		parent,
@@ -155,7 +138,7 @@ export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 						}}/>}
 				{IsUserBasicOrAnon(userID) && !inList && !componentBox &&
 					<VMenuItem text={copiedNode ? <span>Cut <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Cut`}
-						enabled={ForCut_GetError(userID, map, node) == null} title={ForCut_GetError(userID, map, node)}
+						enabled={ForCut_GetError(userID, node) == null} title={ForCut_GetError(userID, node)}
 						style={styles.vMenuItem}
 						onClick={e=> {
 							e.persist();
@@ -172,7 +155,7 @@ export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 						}}/>}
 				{IsUserBasicOrAnon(userID) && !componentBox &&
 					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: .7}}>(right-click to clear)</span></span> as any : `Copy`} style={styles.vMenuItem}
-						enabled={ForCopy_GetError(userID, map, node) == null} title={ForCopy_GetError(userID, map, node)}
+						enabled={ForCopy_GetError(userID, node) == null} title={ForCopy_GetError(userID, node)}
 						onClick={e=> {
 							e.persist();
 							if (e.button == 1) {
@@ -257,7 +240,7 @@ If not, paste the argument as a clone instead.`
 						}
 					}}/>}
 				{IsUserCreatorOrMod(userID, node) && !inList && !componentBox &&
-					<VMenuItem text="Unlink" enabled={ForUnlink_GetError(userID, map, node) == null} title={ForUnlink_GetError(userID, map, node)}
+					<VMenuItem text="Unlink" enabled={ForUnlink_GetError(userID, node) == null} title={ForUnlink_GetError(userID, node)}
 						style={styles.vMenuItem} onClick={async e=> {
 							if (e.button != 0) return;
 							/*let error = ForUnlink_GetError(userID, node);
@@ -282,7 +265,7 @@ If not, paste the argument as a clone instead.`
 							});
 						}}/>}
 				{IsUserCreatorOrMod(userID, node) && !componentBox &&
-					<VMenuItem text="Delete" enabled={ForDelete_GetError(userID, map, node) == null} title={ForDelete_GetError(userID, map, node)}
+					<VMenuItem text="Delete" enabled={ForDelete_GetError(userID, node) == null} title={ForDelete_GetError(userID, node)}
 						style={styles.vMenuItem} onClick={e=> {
 							if (e.button != 0) return;
 							/*let error = ForDelete_GetError(userID, node);

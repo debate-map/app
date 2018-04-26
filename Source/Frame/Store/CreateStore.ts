@@ -187,7 +187,8 @@ export default function(initialState = {}, history) {
 	if (module.hot) {
 		module.hot.accept("../../Store", () => {
 			let {MakeRootReducer} = require("../../Store");
-			store.replaceReducer(MakeRootReducer(extraReducers));
+			(store as any).reducer = MakeRootReducer(extraReducers);
+			store.replaceReducer((store as any).reducer);
 		});
 	}
 

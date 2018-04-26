@@ -2,7 +2,7 @@ import {GetImage} from '../images';
 import {MapNode, MapNodeL2, ClaimForm, ChildEntry, ClaimType, MapNodeL3, Polarity} from "./@MapNode";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MapNodeType} from './@MapNodeType';
-import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetNode, GetParentNodeL2, GetNodeChildrenL2, GetNodeChildren} from "../nodes";
+import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetNode, GetParentNodeL2, GetNodeChildrenL2, GetNodeChildren, GetNodeID} from "../nodes";
 import {GetValues} from '../../../Frame/General/Enums';
 import {PermissionGroupSet} from '../userExtras/@UserExtraInfo';
 import {ImageType, GetNiceNameForImageType} from "../images/@Image";
@@ -97,7 +97,7 @@ export function IsNodeL2(node: MapNode): node is MapNodeL2 {
 	return node["current"];
 }
 export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision) {
-	Assert(currentRevision.titles, "A MapNodeRevision object must have a titles property!");
+	//Assert(currentRevision.titles, "A MapNodeRevision object must have a titles property!"); // temp removed (for db-upgrade)
 	let result = node.Extended({current: currentRevision}) as MapNodeL2;
 	delete result["finalPolarity"];
 	delete result["link"];
@@ -131,7 +131,7 @@ export function AsNodeL3(node: MapNodeL2, finalPolarity?: Polarity, link?: Child
 }
 export function GetNodeL3(path: string) {
 	if (path == null) return null;
-	let nodeID = SplitStringBySlash_Cached(path).Last().ToInt();
+	let nodeID = GetNodeID(path);
 	let node = GetNodeL2(nodeID);
 	if (node == null) return null;
 	
@@ -180,8 +180,8 @@ export function GetLinkUnderParent(nodeID: number, parent: MapNode): ChildEntry 
 	return link;
 }
 export function GetLinkAtPath(path: string) {
-	let nodeID = SplitStringBySlash_Cached(path).Last().ToInt();
-	let parent = GetNode(SplitStringBySlash_Cached(path).XFromLast(1).ToInt());
+	let nodeID = GetNodeID(path);
+	let parent = GetNode(GetNodeID(SlicePath(path, 1)));
 	return GetLinkUnderParent(nodeID, parent);
 }
 

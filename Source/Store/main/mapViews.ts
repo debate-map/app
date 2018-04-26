@@ -118,8 +118,6 @@ export function GetPathFromDataPath(dataPathUnderRootNodeViews: string[]): strin
 			result.push(prop);
 		} else if (prop == "children") {
 			result.push(dataPathUnderRootNodeViews[index + 1]);
-		} else if (prop == "subnodes") {
-			result.push("L" + dataPathUnderRootNodeViews[index + 1]);
 		}
 	}
 	return result;
@@ -153,10 +151,7 @@ export function GetNodeViewDataPath(mapID: number, path: string): string[] {
 	let pathNodes = GetPathNodes(path);
 	// this has better perf than the simpler approaches
 	//let childPath = pathNodeIDs.map(childID=>`${childID}/children`).join("/").slice(0, -"/children".length);
-	let childPathNodes = pathNodes.SelectMany(nodeStr=> {
-		if (nodeStr[0] == "L") return ["subnodes", nodeStr.slice(1)];
-		return ["children", nodeStr];
-	}).slice(1);
+	let childPathNodes = pathNodes.SelectMany(nodeStr=>["children", nodeStr]).slice(1);
 	return ["main", "mapViews", mapID+"", "rootNodeViews", ...childPathNodes];
 }
 export function GetNodeView(mapID: number, path: string): MapNodeView {

@@ -1,24 +1,34 @@
-import {GetDataAsync} from "../../../../Frame/Database/DatabaseHelpers";
-import {AddUpgradeFunc} from "../../Admin";
-import {ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
-import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
+import DeleteNode from "Server/Commands/DeleteNode";
+import {ApplyDBUpdates_Local} from "../../../../Frame/Database/DatabaseHelpers";
 import {FirebaseData} from "../../../../Store/firebase";
-import {MapNodeRevision} from "../../../../Store/firebase/nodes/@MapNodeRevision";
-import {MapNode, ChildEntry, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
-import {GetTreeNodesInObjTree} from "js-vextensions";
+import {AddUpgradeFunc} from "../../Admin";
+import {StopStateDataOverride, UpdateStateDataOverride} from "UI/@Shared/StateOverrides";
+import {State_overrideData_value} from "../../../@Shared/StateOverrides";
 
 let newVersion = 9;
-AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {
+AddUpgradeFunc(newVersion, async (oldData: FirebaseData)=> {
 	let data = Clone(oldData) as FirebaseData;
 
-	// remove impactPremise prop
+	// remove impact-premise nodes
 	// ==========
 
-	for (let revision of data.nodeRevisions.VValues(true)) {
+	for (let node of data.nodes.VValues(true)) {
+		let revision = data.nodeRevisions[node.currentRevision];
 		if (revision["impactPremise"]) {
-			revision.argumentType = revision["impactPremise"].ifType;
-			delete revision["impactPremise"];
+			// move impact-premise children to children of argument (as relevance arguments now)
+			let parent = data.nodes[node.parents.VKeys(true)[0]];
+			for (let childID in node.children) {
+				parent.children[childID] = node.children[childID];
+			}
+			delete node.children;
+
+			UpdateStateDataOverride({[`nodes/${node._id}/children`]: null});
+
+			// delete impact-premise node
+			let deleteNode = new DeleteNode({nodeID: node._id});
+			await deleteNode.PreRun();
+			data = ApplyDBUpdates_Local(data, deleteNode.GetDBUpdates());
 		}
 	}
 

@@ -1,4 +1,4 @@
-import {GetDataAsync} from "../../../../Frame/Database/DatabaseHelpers";
+/*import {GetDataAsync} from "../../../../Frame/Database/DatabaseHelpers";
 import {AddUpgradeFunc} from "../../Admin";
 import {ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
 import {SourceType, SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
@@ -18,4 +18,4 @@ AddUpgradeFunc(newVersion, (oldData: FirebaseData)=> {
 	}
 
 	return data;
-});
+});*/

@@ -1,29 +1,25 @@
-import {GetNodeParentsAsync, ForDelete_GetError} from "../../Store/firebase/nodes";
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command, MergeDBUpdates} from "../Command";
-import {MapNode, ClaimForm, MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {Term} from "../../Store/firebase/terms/@Term";
-import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {ToInt} from "js-vextensions";
-import {MapEdit, UserEdit} from "../CommandMacros";
 import {GetAsync, GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
-import {GetMap} from "Store/firebase/maps";
 import {GetNodeL2} from "Store/firebase/nodes/$node";
 import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
-import {GetNodeRevisions} from "../../Store/firebase/nodeRevisions";
+import {Assert, ToInt} from "js-vextensions";
+import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {GetMaps} from "../../Store/firebase/maps";
+import {GetNodeRevisions} from "../../Store/firebase/nodeRevisions";
+import {ForDelete_GetError} from "../../Store/firebase/nodes";
+import {MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
+import {Command, MergeDBUpdates} from "../Command";
+import {MapEdit, UserEdit} from "../CommandMacros";
+import {GetNodeViewers} from "../../Store/firebase/nodeViewers";
 
 @MapEdit
 @UserEdit
-export default class DeleteNode extends Command<{mapID: number, nodeID: number, withContainerArgument?: number, asPartOfMapDelete?: boolean}> {
+export default class DeleteNode extends Command<{mapID?: number, nodeID: number, withContainerArgument?: number, asPartOfMapDelete?: boolean}> {
 	sub_deleteContainerArgument: DeleteNode;
 	
 	oldData: MapNodeL2;
 	oldRevisions: MapNodeRevision[];
 	oldParentChildrenOrders: number[][];
-	viewerIDs_main: number[];
+	viewerIDs_main: string[];
 	mapIDs: number[];
 	async Prepare() {
 		let {mapID, nodeID, withContainerArgument, asPartOfMapDelete} = this.payload;
@@ -34,12 +30,12 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 			return GetDataAsync("nodes", parentID, "childrenOrder") as Promise<number[]>;
 		}));
 
-		this.viewerIDs_main = GetDataAsync("nodeViewers", nodeID).VKeys(true).map(ToInt);
+		this.viewerIDs_main = await GetAsync(()=>GetNodeViewers(nodeID));
 
 		this.mapIDs = await GetAsync(()=>GetMaps().map(a=>a._id));
 
 		if (withContainerArgument) {
-			this.sub_deleteContainerArgument = new DeleteNode({mapID: mapID, nodeID: withContainerArgument});
+			this.sub_deleteContainerArgument = new DeleteNode({mapID, nodeID: withContainerArgument});
 			this.sub_deleteContainerArgument.Validate_Early();
 			await this.sub_deleteContainerArgument.Prepare();
 		}
@@ -48,8 +44,7 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 		/*Assert((this.oldData.parents || {}).VKeys(true).length <= 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
 		let normalChildCount = (this.oldData.children || {}).VKeys(true).length;
 		Assert(normalChildCount == 0, "Cannot delete this node until all its (non-impact-premise) children have been unlinked or deleted.");*/
-		let {mapID} = this.payload;
-		let earlyError = await GetAsync(()=>ForDelete_GetError(this.userInfo.id, GetMap(mapID), this.oldData, this.payload.asPartOfMapDelete, this.asSubcommand));
+		let earlyError = await GetAsync(()=>ForDelete_GetError(this.userInfo.id, this.oldData, this.payload.asPartOfMapDelete, this.asSubcommand));
 		Assert(earlyError == null, earlyError);
 		if (this.sub_deleteContainerArgument) await this.sub_deleteContainerArgument.Validate();
 	}
@@ -90,7 +85,7 @@ export default class DeleteNode extends Command<{mapID: number, nodeID: number, 
 			updates[`nodeRevisions/${revision._id}`] = null;
 		}
 
-		// delete mapNodeEditTimes
+		// delete edit-time entry within each map (if it exists)
 		for (let mapID of this.mapIDs) {
 			updates[`mapNodeEditTimes/${mapID}/${nodeID}`] = null;
 		}

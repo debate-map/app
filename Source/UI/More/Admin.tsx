@@ -1,32 +1,19 @@
-import {DBPath, FirebaseApp, GetDataAsync, RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
-import {ResetCurrentDBRoot} from "./Admin/ResetCurrentDBRoot";
-import {styles} from "../../Frame/UI/GlobalStyles";
-import {BaseComponent, BaseProps} from "react-vextensions";
-import {firebaseConnect} from "react-redux-firebase";
-import {Button} from "react-vcomponents";
+import {ValidateDBData} from "Server/Command";
+import {E, SleepAsync} from "js-vextensions";
+import {Button, Column, Row} from "react-vcomponents";
+import {BaseComponent} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
-import {E} from "js-vextensions";
-import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {Map, MapType} from "../../Store/firebase/maps/@Map";
-import {MapNode} from "../../Store/firebase/nodes/@MapNode";
-import UserExtraInfo from "../../Store/firebase/userExtras/@UserExtraInfo";
-import {Column} from "react-vcomponents";
-import {Row} from "react-vcomponents";
-import {GetUserID} from "../../Store/firebase/users";
-import {RatingsSet} from "../../Store/firebase/nodeRatings/@RatingsRoot";
-import Firebase from "firebase";
-import {Select} from "react-vcomponents";
-import {Term} from "../../Store/firebase/terms/@Term";
-import TermComponent from "../../Store/firebase/termComponents/@TermComponent";
+import {DBPath, GetDataAsync, RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
+import {styles} from "../../Frame/UI/GlobalStyles";
 import {FirebaseData} from "../../Store/firebase";
 import {IsUserAdmin} from "../../Store/firebase/userExtras";
-import {SleepAsync} from "js-vextensions";
-import {User} from "Store/firebase/users/@User";
-import {ValidateDBData} from "Server/Command";
+import {GetUserID} from "../../Store/firebase/users";
+import {ResetCurrentDBRoot} from "./Admin/ResetCurrentDBRoot";
+import {StartStateDataOverride, StopStateDataOverride} from "UI/@Shared/StateOverrides";
 
 // upgrade-funcs
 var upgradeFuncs = {} as any; // populated by modules below
-export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>FirebaseData) {
+export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>Promise<any>) {
 	upgradeFuncs[version] = func;
 }
 //require("./Admin/DBUpgrades/UpgradeDB_2");
@@ -115,7 +102,9 @@ The old db-root will not be modified.`,
 					cancelButton: true,
 					onOK: async ()=> {
 						let oldData = await GetDataAsync({inVersionRoot: false}, ...oldVersionPath.split("/")) as FirebaseData;
-						let newData = upgradeFunc(oldData);
+						StartStateDataOverride(`firebase/data/${DBPath()}`, oldData);
+						let newData = await upgradeFunc(oldData);
+						StopStateDataOverride();
 						RemoveHelpers(newData); // remove "_key" and such
 
 						if (newVersion >= dbVersion) {

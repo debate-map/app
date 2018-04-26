@@ -1,21 +1,21 @@
-import {RequestPath, Connect, ClearRequestedPaths, GetRequestedPaths, OnAccessPath} from "./FirebaseConnect";
-import {Assert, GetTreeNodesInObjTree, DeepSet, CachedTransform, GetStorageForCachedTransform} from "js-vextensions";
-import {helpers, firebaseConnect} from "react-redux-firebase";
-import {BaseComponent, ShallowChanged} from "react-vextensions";
-import {watchEvents, unWatchEvents} from "react-redux-firebase/lib/actions/query";
-import {getEventsFromInput} from "react-redux-firebase/lib/utils";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
-import { NodeUI } from "UI/@Shared/Maps/MapNode/NodeUI";
-import { StartBufferingActions, StopBufferingActions } from "Store";
-//export {DBPath};
+import {StartBufferingActions, StopBufferingActions} from "Store";
+import {FirebaseData} from "Store/firebase";
+import {Assert, CachedTransform, DeepSet, GetStorageForCachedTransform, GetTreeNodesInObjTree} from "js-vextensions";
+import {unWatchEvents, watchEvents} from "react-redux-firebase/lib/actions/query";
+import {getEventsFromInput} from "react-redux-firebase/lib/utils";
+import {ShallowChanged} from "react-vextensions";
+import u from "updeep";
+import {ClearRequestedPaths, GetRequestedPaths, RequestPath} from "./FirebaseConnect";
 
 export function DBPath(path = "", inVersionRoot = true) {
 	Assert(path != null, "Path cannot be null.");
 	Assert(IsString(path), "Path must be a string.");
 	/*let versionPrefix = path.match(/^v[0-9]+/);
 	if (versionPrefix == null) // if no version prefix already, add one (referencing the current version)*/
-	if (inVersionRoot)
-		path = `v${dbVersion}-${env_short}/${path}`;
+	if (inVersionRoot) {
+		path = `v${dbVersion}-${env_short}` + (path ? `/${path}` : "");
+	}
 	return path;
 }
 export function DBPathSegments(pathSegments: (string | number)[], inVersionRoot = true) {
@@ -35,6 +35,8 @@ export function SlicePath(path: string, removeFromEndCount: number, ...itemsToAd
 
 // temp replaced
 /*import {FirebaseApplication, DataSnapshot} from "firebase";
+import {RootState} from "../../Store/index";
+import u from "updeep";
 export type FirebaseApp = FirebaseApplication & {
 	// added by react-redux-firebase
 	_,
@@ -488,4 +490,15 @@ export async function ApplyDBUpdates(rootPath: string, dbUpdates) {
 	}*/
 
 	await store.firebase.helpers.ref(rootPath).update(dbUpdates);
+}
+export function ApplyDBUpdates_Local(dbData: FirebaseData, dbUpdates: Object) {
+	let result = dbData;
+	for (let {name: path, value} of dbUpdates.Props()) {
+		if (value != null) {
+			result = u.updateIn(path.replace(/\//g, "."), u.constant(value), result);
+		} else {
+			result = u.updateIn(path.split("/").slice(0, -1).join("."), u.omit(path.split("/").slice(-1)), result);
+		}
+	}
+	return result;
 }
