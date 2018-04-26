@@ -1,11 +1,7 @@
-import {GetNodeParentsAsync} from "../../Store/firebase/nodes";
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command} from "../Command";
-import {MapNode, ClaimForm} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {Term} from "../../Store/firebase/terms/@Term";
-import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
+import { Assert } from "js-vextensions";
+import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
+import { MapNode } from "../../Store/firebase/nodes/@MapNode";
+import { Command } from "../Command";
 
 export default class NotifyNodeViewed extends Command<{nodeID: number}> {
 	async Prepare() {}

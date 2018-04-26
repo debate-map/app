@@ -1,18 +1,11 @@
-import {GetNodeParentsAsync} from "../../Store/firebase/nodes";
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command, MergeDBUpdates} from "../Command";
-import {MapNode, ClaimForm} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {Term} from "../../Store/firebase/terms/@Term";
-import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {Map} from "../../Store/firebase/maps/@Map";
-import DeleteNode from "Server/Commands/DeleteNode";
-import {UserEdit} from "Server/CommandMacros";
-import {ForDeleteLayer_GetError, GetLayer} from "../../Store/firebase/layers";
-import {GetAsync} from "Frame/Database/DatabaseHelpers";
-import {Layer} from "../../Store/firebase/layers/@Layer";
-import {UserMapInfoSet} from "../../Store/firebase/userMapInfo/@UserMapInfo";
+import { GetAsync } from "Frame/Database/DatabaseHelpers";
+import { UserEdit } from "Server/CommandMacros";
+import { Assert } from "js-vextensions";
+import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
+import { ForDeleteLayer_GetError } from "../../Store/firebase/layers";
+import { Layer } from "../../Store/firebase/layers/@Layer";
+import { UserMapInfoSet } from "../../Store/firebase/userMapInfo/@UserMapInfo";
+import { Command } from "../Command";
 
 @UserEdit
 export default class DeleteLayer extends Command<{layerID: number}> {

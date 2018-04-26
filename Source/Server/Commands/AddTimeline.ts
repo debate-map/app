@@ -1,12 +1,7 @@
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command, MergeDBUpdates} from "../Command";
-import {E} from "js-vextensions";
-import {Term} from "../../Store/firebase/terms/@Term";
-import AddNode from "./AddNode";
-import {UserEdit} from "Server/CommandMacros";
-import {Layer} from "Store/firebase/layers/@Layer";
-import {Timeline} from "Store/firebase/timelines/@Timeline";
+import { UserEdit } from "Server/CommandMacros";
+import { Timeline } from "Store/firebase/timelines/@Timeline";
+import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
+import { Command } from "../Command";
 
 @UserEdit
 export default class AddTimeline extends Command<{mapID: number, timeline: Timeline}> {

@@ -32,7 +32,7 @@ if (config.env === "development") {
 	app.use(require("webpack-dev-middleware")(compiler, {
 		publicPath: webpackConfig.output.publicPath,
 		contentBase: paths.client(),
-		hot: true,
+		//hot: true,
 		quiet: config.compiler_quiet,
 		noInfo: config.compiler_quiet,
 		lazy: false,

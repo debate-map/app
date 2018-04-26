@@ -1,15 +1,11 @@
-import {GetNodeParentsAsync} from "../../Store/firebase/nodes";
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command} from "../Command";
-import {MapNode, ClaimForm, Polarity} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {Term} from "../../Store/firebase/terms/@Term";
-import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {MapEdit} from "Server/CommandMacros";
-import {UserEdit} from "../CommandMacros";
-import {GetNode} from "Store/firebase/nodes";
-import {GetAsync} from "Frame/Database/DatabaseHelpers";
+import { GetAsync } from "Frame/Database/DatabaseHelpers";
+import { MapEdit } from "Server/CommandMacros";
+import { GetNode } from "Store/firebase/nodes";
+import { Assert, E } from "js-vextensions";
+import { ClaimForm, MapNode, Polarity } from "../../Store/firebase/nodes/@MapNode";
+import { MapNodeType } from "../../Store/firebase/nodes/@MapNodeType";
+import { Command } from "../Command";
+import { UserEdit } from "../CommandMacros";
 
 @MapEdit
 @UserEdit

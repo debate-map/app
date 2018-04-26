@@ -108,18 +108,18 @@ export abstract class Command<Payload> {
 		}*/
 
 		// locally-apply db-updates, then validate the result (for now, only works for already-loaded data paths)
-		let newData = State(a=>a.firebase.data);
+		let newData = RemoveHelpers(Clone(State(`firebase/data/${DBPath()}`)));
 		newData = ApplyDBUpdates_Local(newData, dbUpdates);
 		ValidateDBData(newData);
 	}
 }
 
 export function ValidateDBData(data: FirebaseData) {
-	for (let map of data.maps.VValues(true)) AssertValidate("Map", map, `Map invalid`);
-	for (let node of data.nodes.VValues(true)) AssertValidate("MapNode", node, `Node invalid`);
-	for (let revision of data.nodeRevisions.VValues(true)) AssertValidate("MapNodeRevision", revision, `Node-revision invalid`);
-	for (let termComp of data.termComponents.VValues(true)) AssertValidate("TermComponent", termComp, `Term-component invalid`);
-	for (let term of data.terms.VValues(true)) AssertValidate("Term", term, `Term invalid`);
+	for (let map of (data.maps || {}).VValues(true)) AssertValidate("Map", map, `Map invalid`);
+	for (let node of (data.nodes || {}).VValues(true)) AssertValidate("MapNode", node, `Node invalid`);
+	for (let revision of (data.nodeRevisions || {}).VValues(true)) AssertValidate("MapNodeRevision", revision, `Node-revision invalid`);
+	for (let termComp of (data.termComponents || {}).VValues(true)) AssertValidate("TermComponent", termComp, `Term-component invalid`);
+	for (let term of (data.terms || {}).VValues(true)) AssertValidate("Term", term, `Term invalid`);
 }
 
 /*type Update = {path: string, data: any};

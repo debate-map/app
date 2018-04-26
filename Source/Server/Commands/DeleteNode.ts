@@ -5,11 +5,11 @@ import {Assert, ToInt} from "js-vextensions";
 import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
 import {GetMaps} from "../../Store/firebase/maps";
 import {GetNodeRevisions} from "../../Store/firebase/nodeRevisions";
+import {GetNodeViewers} from "../../Store/firebase/nodeViewers";
 import {ForDelete_GetError} from "../../Store/firebase/nodes";
 import {MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
 import {Command, MergeDBUpdates} from "../Command";
 import {MapEdit, UserEdit} from "../CommandMacros";
-import {GetNodeViewers} from "../../Store/firebase/nodeViewers";
 
 @MapEdit
 @UserEdit

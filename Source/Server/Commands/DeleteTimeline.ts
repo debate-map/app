@@ -1,20 +1,8 @@
-import {GetNodeParentsAsync} from "../../Store/firebase/nodes";
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command, MergeDBUpdates} from "../Command";
-import {MapNode, ClaimForm} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {Term} from "../../Store/firebase/terms/@Term";
-import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {Map} from "../../Store/firebase/maps/@Map";
-import DeleteNode from "Server/Commands/DeleteNode";
-import {UserEdit} from "Server/CommandMacros";
-import {Subforum} from "firebase-forum";
-import {ShowMessageBox} from "react-vmessagebox";
-import {GetAsync} from "Frame/Database/DatabaseHelpers";
-import {Post} from "firebase-forum";
-import {GetTimeline} from "../../Store/firebase/timelines";
-import {Timeline} from "Store/firebase/timelines/@Timeline";
+import { GetAsync } from "Frame/Database/DatabaseHelpers";
+import { UserEdit } from "Server/CommandMacros";
+import { Timeline } from "Store/firebase/timelines/@Timeline";
+import { GetTimeline } from "../../Store/firebase/timelines";
+import { Command } from "../Command";
 
 @UserEdit
 export default class DeleteTimeline extends Command<{timelineID: number}> {

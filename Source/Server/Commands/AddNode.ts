@@ -1,13 +1,9 @@
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command, MergeDBUpdates} from "../Command";
-import {MapNode, ClaimForm, ChildEntry, AccessLevel} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {GetValues_ForSchema} from "../../Frame/General/Enums";
-import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import { UserEdit, MapEdit } from "Server/CommandMacros";
-import {GetSchemaJSON} from "../Server";
-import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
+import { MapNodeRevision } from "Store/firebase/nodes/@MapNodeRevision";
+import { Assert } from "js-vextensions";
+import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
+import { MapNode } from "../../Store/firebase/nodes/@MapNode";
+import { Command, MergeDBUpdates } from "../Command";
+import { GetSchemaJSON } from "../Server";
 import AddNodeRevision from "./AddNodeRevision";
 
 export default class AddNode extends Command<{mapID: number, node: MapNode, revision: MapNodeRevision}> {

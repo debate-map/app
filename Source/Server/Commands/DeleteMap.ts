@@ -1,17 +1,11 @@
-import {GetNodeParentsAsync} from "../../Store/firebase/nodes";
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command, MergeDBUpdates} from "../Command";
-import {MapNode, ClaimForm} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {Term} from "../../Store/firebase/terms/@Term";
-import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {Map} from "../../Store/firebase/maps/@Map";
+import { GetAsync_Raw } from "Frame/Database/DatabaseHelpers";
+import { UserEdit } from "Server/CommandMacros";
 import DeleteNode from "Server/Commands/DeleteNode";
-import {UserEdit} from "Server/CommandMacros";
-import {UserMapInfo, UserMapInfoSet} from "../../Store/firebase/userMapInfo/@UserMapInfo";
-import {GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
-import {GetMap} from "Store/firebase/maps";
+import { GetMap } from "Store/firebase/maps";
+import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
+import { Map } from "../../Store/firebase/maps/@Map";
+import { UserMapInfoSet } from "../../Store/firebase/userMapInfo/@UserMapInfo";
+import { Command, MergeDBUpdates } from "../Command";
 
 @UserEdit
 export default class DeleteMap extends Command<{mapID: number}> {

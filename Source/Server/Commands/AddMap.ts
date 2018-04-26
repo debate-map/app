@@ -1,15 +1,11 @@
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command, MergeDBUpdates} from "../Command";
-import {MapNode, ClaimForm} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {Term} from "../../Store/firebase/terms/@Term";
-import {Map} from "../../Store/firebase/maps/@Map";
-import AddNode from "./AddNode";
-import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {UserEdit} from "Server/CommandMacros";
+import { UserEdit } from "Server/CommandMacros";
+import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
+import { Map } from "../../Store/firebase/maps/@Map";
+import { MapNode } from "../../Store/firebase/nodes/@MapNode";
+import { MapNodeRevision } from "../../Store/firebase/nodes/@MapNodeRevision";
+import { MapNodeType } from "../../Store/firebase/nodes/@MapNodeType";
+import { Command, MergeDBUpdates } from "../Command";
 import AddChildNode from "./AddChildNode";
-import {MapNodeRevision} from "../../Store/firebase/nodes/@MapNodeRevision";
 
 @UserEdit
 export default class AddMap extends Command<{map: Map}> {

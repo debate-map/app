@@ -1,17 +1,12 @@
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command} from "../Command";
-import {MapNode, ClaimForm, ChildEntry, MapNodeL3} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {GetValues_ForSchema} from "../../Frame/General/Enums";
-import {GetNodeL3, ReversePolarity} from "../../Store/firebase/nodes/$node";
-import {RatingsSet} from "../../Store/firebase/nodeRatings/@RatingsRoot";
-import {UserEdit} from "../CommandMacros";
-import {MapEdit} from "Server/CommandMacros";
-import {GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
-import {GetNodeL2} from "Store/firebase/nodes/$node";
-import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {GetParentNodeID} from "../../Store/firebase/nodes";
+import { GetAsync_Raw } from "Frame/Database/DatabaseHelpers";
+import { MapEdit } from "Server/CommandMacros";
+import { Assert } from "js-vextensions";
+import { GetParentNodeID } from "../../Store/firebase/nodes";
+import { GetNodeL3, ReversePolarity } from "../../Store/firebase/nodes/$node";
+import { ChildEntry, MapNodeL3 } from "../../Store/firebase/nodes/@MapNode";
+import { MapNodeType } from "../../Store/firebase/nodes/@MapNodeType";
+import { Command } from "../Command";
+import { UserEdit } from "../CommandMacros";
 
 AddSchema({
 	properties: {

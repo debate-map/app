@@ -1,13 +1,9 @@
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command} from "../Command";
-import {MapNode, ClaimForm, ChildEntry, AccessLevel} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {GetValues_ForSchema} from "../../Frame/General/Enums";
-import {Map_namePattern, Map} from "../../Store/firebase/maps/@Map";
-import {UserEdit} from "../CommandMacros";
-import {MapEdit} from "Server/CommandMacros";
-import {GetUserMapInfo} from "../../Store/firebase/userMapInfo";
+import { MapEdit } from "Server/CommandMacros";
+import { Assert } from "js-vextensions";
+import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
+import { Map } from "../../Store/firebase/maps/@Map";
+import { Command } from "../Command";
+import { UserEdit } from "../CommandMacros";
 
 AddSchema({
 	properties: {

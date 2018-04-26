@@ -1,16 +1,12 @@
-import {GetNode, GetNodeChildren, GetNodeChildrenL2} from "../../Store/firebase/nodes";
-import {Assert} from "js-vextensions";
-import {GetDataAsync, GetAsync, GetAsync_Raw, RemoveHelpers} from "../../Frame/Database/DatabaseHelpers";
+import { SplitStringBySlash_Cached } from "Frame/Database/StringSplitCache";
+import { DEL, E } from "js-vextensions";
+import { GetAsync_Raw, RemoveHelpers } from "../../Frame/Database/DatabaseHelpers";
+import { GetLinkAtPath, GetNodeForm, GetNodeL2 } from "../../Store/firebase/nodes/$node";
+import { ClaimForm, MapNode, Polarity } from "../../Store/firebase/nodes/@MapNode";
+import { MapNodeType } from "../../Store/firebase/nodes/@MapNodeType";
 import { Command, MergeDBUpdates } from "../Command";
-import {MapNode, ClaimForm, ChildEntry, MapNodeL2, Polarity} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {GetNodeForm, GetNodeL2, GetLinkUnderParent, GetLinkAtPath} from "../../Store/firebase/nodes/$node";
-import AddNode from "./AddNode";
-import LinkNode from "./LinkNode";
-import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import AddChildNode from "./AddChildNode";
-import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {DEL} from "js-vextensions";
+import LinkNode from "./LinkNode";
 
 export default class CloneNode extends Command<{mapID: number, baseNodePath: string, newParentID: number}> {
 	sub_addNode: AddChildNode;

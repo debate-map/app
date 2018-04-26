@@ -1,11 +1,7 @@
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command} from "../Command";
-import {MapNode, ClaimForm} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {Term} from "../../Store/firebase/terms/@Term";
-import {Image} from "../../Store/firebase/images/@Image";
-import {UserEdit} from "Server/CommandMacros";
+import { UserEdit } from "Server/CommandMacros";
+import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
+import { Image } from "../../Store/firebase/images/@Image";
+import { Command } from "../Command";
 
 @UserEdit
 export default class AddImage extends Command<{image: Image}> {

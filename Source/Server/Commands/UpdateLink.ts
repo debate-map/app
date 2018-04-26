@@ -1,17 +1,10 @@
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command} from "../Command";
-import {MapNode, ClaimForm, ChildEntry, AccessLevel} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {GetValues_ForSchema} from "../../Frame/General/Enums";
-import {Map_namePattern, Map} from "../../Store/firebase/maps/@Map";
-import {UserEdit} from "../CommandMacros";
-import {MapEdit} from "Server/CommandMacros";
-import {Subforum, Subforum_nameFormat} from "firebase-forum";
-import {WaitTillSchemaAddedThenRun, GetSchemaJSON} from "../Server";
-import {GetLinkUnderParent} from "../../Store/firebase/nodes/$node";
-import {GetNode} from "Store/firebase/nodes";
-import {GetAsync, GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
+import { GetAsync_Raw } from "Frame/Database/DatabaseHelpers";
+import { GetNode } from "Store/firebase/nodes";
+import { GetLinkUnderParent } from "../../Store/firebase/nodes/$node";
+import { ChildEntry } from "../../Store/firebase/nodes/@MapNode";
+import { Command } from "../Command";
+import { UserEdit } from "../CommandMacros";
+import { GetSchemaJSON, WaitTillSchemaAddedThenRun } from "../Server";
 
 WaitTillSchemaAddedThenRun("ChildEntry", ()=> {
 	AddSchema({

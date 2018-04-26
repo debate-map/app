@@ -1,8 +1,8 @@
-import {Image} from "../../Store/firebase/images/@Image";
-import {Command} from "../Command";
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {UserEdit} from "Server/CommandMacros";
+import { UserEdit } from "Server/CommandMacros";
+import { Assert } from "js-vextensions";
+import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
+import { Image } from "../../Store/firebase/images/@Image";
+import { Command } from "../Command";
 
 export const UpdateImageData_allowedPropUpdates = ["name", "type", "url", "description", "previewWidth", "sourceChains"];
 @UserEdit

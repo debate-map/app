@@ -1,16 +1,11 @@
-import {Assert} from "js-vextensions";
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command, MergeDBUpdates} from "../Command";
-import {MapNode, ClaimForm, ChildEntry, AccessLevel} from "../../Store/firebase/nodes/@MapNode";
-import {E} from "js-vextensions";
-import {GetValues_ForSchema} from "../../Frame/General/Enums";
-import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import { UserEdit, MapEdit } from "Server/CommandMacros";
+import { GetAsync_Raw } from "Frame/Database/DatabaseHelpers";
+import { UserEdit } from "Server/CommandMacros";
+import { Layer } from "Store/firebase/layers/@Layer";
+import { MapNodeRevision } from "Store/firebase/nodes/@MapNodeRevision";
+import { GetLayer } from "../../Store/firebase/layers";
+import { MapNode } from "../../Store/firebase/nodes/@MapNode";
+import { Command, MergeDBUpdates } from "../Command";
 import AddNode from "./AddNode";
-import {Layer} from "Store/firebase/layers/@Layer";
-import {GetAsync, GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
-import {GetLayer} from "../../Store/firebase/layers";
-import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 
 @UserEdit
 export default class AddSubnode extends Command<{mapID: number, layerID: number, anchorNodeID: number, subnode: MapNode, subnodeRevision: MapNodeRevision}> {

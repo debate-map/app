@@ -1,12 +1,8 @@
-import {GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
-import {Command} from "../Command";
-import {E} from "js-vextensions";
-import {GetValues_ForSchema} from "../../Frame/General/Enums";
-import {UserEdit} from "../CommandMacros";
-import {MapEdit} from "Server/CommandMacros";
 import { WaitTillSchemaAddedThenRun } from "Server/Server";
-import {GetSchemaJSON} from "../Server";
-import {User} from "../../Store/firebase/users/@User";
+import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
+import { User } from "../../Store/firebase/users/@User";
+import { Command } from "../Command";
+import { GetSchemaJSON } from "../Server";
 
 type MainType = User;
 let MTName = "User";
