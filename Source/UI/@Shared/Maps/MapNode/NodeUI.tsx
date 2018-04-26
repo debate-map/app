@@ -90,7 +90,7 @@ let connector = (state, {node, path, map}: Props)=> {
 };
 
 @Connect(connector)
-export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWidth: 0, expectedBoxHeight: 0, innerBoxOffset: 0}) {
+export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWidth: 0, expectedBoxHeight: 0, dividePoint: 0, selfHeight: 0}) {
 	static renderCount = 0;
 	static lastRenderTime = -1;
 	static ValidateProps(props) {
@@ -125,7 +125,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			initialChildLimit, form, children, nodeView, parentNodeView, nodeChildren, nodeChildrenToShow, subnodes,
 			playingTimeline, playingTimeline_currentStepIndex, playingTimelineShowableNodes, playingTimelineVisibleNodes, playingTimeline_currentStepRevealNodes,
 			addedDescendants, editedDescendants} = this.props;
-		let {innerBoxOffset} = this.state;
+		let {dividePoint, selfHeight} = this.state;
 		if (ShouldLog(a=>a.nodeRenders)) {
 			if (logTypes.nodeRenders_for) {
 				if (logTypes.nodeRenders_for == node._id) {
@@ -209,12 +209,12 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		let nodeChildHolder = !isPremiseOfSinglePremiseArg && nodeView.expanded &&
 			<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
 				type={HolderType.Truth}
-				linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
+				//linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
+				linkSpawnPoint={dividePoint || null}
 				vertical={isMultiPremiseArgument}
 				onHeightOrDividePointChange={dividePoint=> {
-					if (isMultiPremiseArgument) return; // if multi-premise argument, divide-point is always 0
-					this.dividePoint = dividePoint;
-					this.OnDividePointChange();
+					//if (isMultiPremiseArgument) return; // if multi-premise argument, divide-point is always 0
+					this.OnDividePointChange(dividePoint);
 				}}/>;
 
 		let nodeUIResult_withoutSubnodes = (
@@ -228,7 +228,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 					/*useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
 					!useAutoOffset && {paddingTop: innerBoxOffset},*/
 					//{paddingTop: innerBoxOffset},
-					{marginTop: nodeView.expanded ? innerBoxOffset : 0},
+					{marginTop: nodeView.expanded ? dividePoint - (selfHeight / 2) : 0},
 				)}>
 					{limitBar_above && children}
 					{asSubnode &&
@@ -308,18 +308,27 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 	}
 
 	lastHeight = 0;
+	lastSelfHeight = 0;
 	PostRender() {
 		//if (this.lastRender_source == RenderSource.SetState) return;
 
 		let height = $(FindDOM(this)).outerHeight();
 		if (height != this.lastHeight) {
 			this.OnHeightChange(height);
-		} /*else {
+		}
+		this.lastHeight = height;
+
+		let selfHeight = $(FindDOM(this.innerUI)).outerHeight();
+		if (selfHeight != this.lastSelfHeight) {
+			this.OnSelfHeightChange(selfHeight);
+		}
+		this.lastSelfHeight = selfHeight;
+		
+		/*else {
 			if (this.lastRender_source == RenderSource.SetState) return;
 			this.UpdateState();
 			this.ReportChildrenCenterYChange();
 		}*/
-		this.lastHeight = height;
 	}
 
 	//GetMeasurementInfo(/*props: Props, state: State*/) {
@@ -350,7 +359,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			width += 20; // give extra space for left-margin
 		}
 
-		this.measurementInfo_cache = {expectedBoxWidth, width, expectedHeight};
+		this.measurementInfo_cache = {expectedBoxWidth, width/*, expectedHeight*/};
 		this.measurementInfo_cache_lastUsedProps = props_used;
 		return this.measurementInfo_cache;
 	}
@@ -365,15 +374,21 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		//this.UpdateState();
 		if (onHeightOrPosChange) onHeightOrPosChange();
 	}
-	dividePoint: number;
-	OnDividePointChange() {
+	OnSelfHeightChange(selfHeight: number) {
+		let {node, onHeightOrPosChange} = this.props;
+		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
+			()=>`OnSelfHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+				}NewSelfHeight:${selfHeight}`);
+		
+		//this.UpdateState(true);
+		//this.UpdateState();
+		this.SetState({selfHeight});
+		if (onHeightOrPosChange) onHeightOrPosChange();
+	}
+	OnDividePointChange(dividePoint: number) {
 		let {node, onHeightOrPosChange} = this.props;
 
-		let {expectedHeight} = this.GetMeasurementInfo();
-
-		let distFromInnerBoxTopToMainBoxCenter = expectedHeight / 2;
-		let innerBoxOffset = (this.dividePoint - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
-		this.SetState({innerBoxOffset});
+		this.SetState({dividePoint});
 		if (onHeightOrPosChange) onHeightOrPosChange();
 	}
 }

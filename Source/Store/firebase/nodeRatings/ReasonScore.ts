@@ -93,7 +93,7 @@ export type ReasonScoreValues = {argument, premises, argTruthScoreComposite, arg
 export type ReasonScoreValues_RSPrefix = {argument, premises, rs_argTruthScoreComposite, rs_argWeightMultiplier, rs_argWeight, rs_claimTruthScore, rs_claimBaseWeight};
 export function RS_GetAllValues(node: MapNodeL3, path: string, useRSPrefix = false): ReasonScoreValues & ReasonScoreValues_RSPrefix {
 	let parent = GetParentNodeL3(path);
-	let argument = node.type == MapNodeType.Argument ? node : parent.type == MapNodeType.Argument ? parent : null;
+	let argument = node.type == MapNodeType.Argument ? node : parent && parent.type == MapNodeType.Argument ? parent : null;
 	let premises = node.type == MapNodeType.Argument ? GetNodeChildrenL3(argument, path).filter(a=>a && a.type == MapNodeType.Claim) : [node];
 
 	if (node.type == MapNodeType.Claim) {
