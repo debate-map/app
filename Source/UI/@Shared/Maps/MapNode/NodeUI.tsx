@@ -4,7 +4,7 @@ import {GetUserID} from "Store/firebase/users";
 import {GetPlayingTimelineAppliedStepRevealNodes} from "Store/main/maps/$map";
 import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
 import {HolderType, NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
-import {CachedTransform, E, Timer} from "js-vextensions";
+import {CachedTransform, E, Timer, GetStackTraceStr} from "js-vextensions";
 import {Column} from "react-vcomponents";
 import {BaseComponentWithConnector, FindDOM, GetInnerComp, RenderSource, ShallowChanged, ShallowEquals} from "react-vextensions";
 import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
@@ -156,9 +156,11 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 		// if the premise of a single-premise argument
 		let parent = GetParentNodeL3(path);
+		let parentPath = SlicePath(path, 1);
 		let isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		if (isPremiseOfSinglePremiseArg) {
 			var relevanceArguments = GetNodeChildrenL3(parent, SlicePath(path, 1)).Except(node).filter(a=>a);
+			Assert(!relevanceArguments.Any(a=>a.type == MapNodeType.Claim), "Single-premise argument has more than one premise!");
 		}
 
 		let isSinglePremiseArgument = IsSinglePremiseArgument(node);
@@ -191,10 +193,12 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			//let collection = nodeChildren;
 			let childLimit = direction == "down" ? childLimit_down : childLimit_up;
 
+			// if has child-limit bar, correct its path
 			let firstChild = this.FlattenedChildren[0] as any;
 			if (firstChild && firstChild.props.path == path) {
 				firstChild.props.path = firstChild.props.path + "/" + child._id;
 			}
+
 			return (
 				<NodeUI ref={c=>this.proxyDisplayedNodeUI = c} {...this.props} key={child._id} map={map} node={child} path={path + "/" + child._id}>
 					{children}
@@ -242,8 +246,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
 							)}/>
 						{isPremiseOfSinglePremiseArg && nodeView.expanded &&
-							<NodeChildHolderBox {...{map, node: parent, path: SlicePath(path, 1), nodeView: parentNodeView}} type={HolderType.Relevance}
-								nodeChildren={GetNodeChildrenL3(parent, SlicePath(path, 1))} nodeChildrenToShow={relevanceArguments}/>}
+							<NodeChildHolderBox {...{map, node: parent, path: parentPath, nodeView: parentNodeView}} type={HolderType.Relevance}
+								nodeChildren={GetNodeChildrenL3(parent, parentPath)} nodeChildrenToShow={relevanceArguments}/>}
 						{/*showBelowMessage &&
 							<Div ct style={{
 								//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12

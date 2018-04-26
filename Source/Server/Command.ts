@@ -3,6 +3,7 @@ import {GetUserID} from "Store/firebase/users";
 import {RemoveHelpers, ApplyDBUpdates, DBPath, GetAsync} from "../Frame/Database/DatabaseHelpers";
 import {GetDataAsync, GetAsync_Raw} from "Frame/Database/DatabaseHelpers";
 import { GetNode } from "Store/firebase/nodes";
+import {FirebaseData} from "Store/firebase";
 
 export class CommandUserInfo {
 	id: string;
@@ -89,8 +90,8 @@ export abstract class Command<Payload> {
 	// standard validation of common paths/object-types; perhaps disable in production
 	async Validate_LateHeavy(dbUpdates: any) {
 		// validate "nodes/X"
-		let nodesBeingUpdated = (dbUpdates.VKeys() as string[]).map(a=> {
-			let match = a.match(/^nodes\/([0-9]+).*/);
+		/*let nodesBeingUpdated = (dbUpdates.VKeys() as string[]).map(a=> {
+			let match = a.match(/^nodes\/([0-9]+).*#/);
 			return match ? match[1].ToInt() : null;
 		}).filter(a=>a).Distinct();
 		for (let nodeID of nodesBeingUpdated) {
@@ -104,8 +105,23 @@ export abstract class Command<Payload> {
 			if (newNodeData != null) { // (if null, means we're deleting it, which is fine)
 				AssertValidate("MapNode", newNodeData, `New node-data is invalid.`);
 			}
+		}*/
+
+		// locally-apply db-updates, then validate the result (for now, only works for already-loaded data paths)
+		let newData = State(a=>a.firebase.data);
+		for (let {name: path, value} of dbUpdates.Props()) {
+			newData = u.updateIn(path.replace(/\//g, "."), u.constant(value), newData);
 		}
+		ValidateDBData(newData);
 	}
+}
+
+export function ValidateDBData(data: FirebaseData) {
+	for (let map of data.maps.VValues(true)) AssertValidate("Map", map, `Map invalid`);
+	for (let node of data.nodes.VValues(true)) AssertValidate("MapNode", node, `Node invalid`);
+	for (let revision of data.nodeRevisions.VValues(true)) AssertValidate("MapNodeRevision", revision, `Node-revision invalid`);
+	for (let termComp of data.termComponents.VValues(true)) AssertValidate("TermComponent", termComp, `Term-component invalid`);
+	for (let term of data.terms.VValues(true)) AssertValidate("Term", term, `Term invalid`);
 }
 
 /*type Update = {path: string, data: any};

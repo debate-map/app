@@ -15,7 +15,6 @@ import {Row} from "react-vcomponents";
 import {GetUserID} from "../../Store/firebase/users";
 import {RatingsSet} from "../../Store/firebase/nodeRatings/@RatingsRoot";
 import Firebase from "firebase";
-//import "./Admin/DBUpgrades/UpgradeDB_2";
 import {Select} from "react-vcomponents";
 import {Term} from "../../Store/firebase/terms/@Term";
 import TermComponent from "../../Store/firebase/termComponents/@TermComponent";
@@ -23,6 +22,7 @@ import {FirebaseData} from "../../Store/firebase";
 import {IsUserAdmin} from "../../Store/firebase/userExtras";
 import {SleepAsync} from "js-vextensions";
 import {User} from "Store/firebase/users/@User";
+import {ValidateDBData} from "Server/Command";
 
 // upgrade-funcs
 var upgradeFuncs = {} as any; // populated by modules below
@@ -34,8 +34,9 @@ export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>F
 //require("./Admin/DBUpgrades/UpgradeDB_4");
 //require("./Admin/DBUpgrades/UpgradeDB_5");
 //require("./Admin/DBUpgrades/UpgradeDB_6");
-require("./Admin/DBUpgrades/UpgradeDB_7");
-require("./Admin/DBUpgrades/UpgradeDB_8");
+//require("./Admin/DBUpgrades/UpgradeDB_7");
+//require("./Admin/DBUpgrades/UpgradeDB_8");
+require("./Admin/DBUpgrades/UpgradeDB_9");
 
 //export default class AdminUI extends BaseComponent<{}, {fb: firebase.FirebaseApplication, env: string}> {
 export default class AdminUI extends BaseComponent<{}, {}> {
@@ -133,12 +134,4 @@ The old db-root will not be modified.`,
 			}}/>
 		);
 	}
-}
-
-function ValidateDBData(data: FirebaseData) {
-	for (let map of data.maps.VValues(true)) { AssertValidate("Map", map, `Map invalid`); }
-	for (let node of data.nodes.VValues(true)) { AssertValidate("MapNode", node, `Node invalid`); }
-	for (let revision of data.nodeRevisions.VValues(true)) { AssertValidate("MapNodeRevision", revision, `Node-revision invalid`); }
-	for (let termComp of data.termComponents.VValues(true)) { AssertValidate("TermComponent", termComp, `Term-component invalid`); }
-	for (let term of data.terms.VValues(true)) { AssertValidate("Term", term, `Term invalid`); }
 }

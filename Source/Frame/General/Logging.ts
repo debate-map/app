@@ -92,7 +92,7 @@ export function Log(message, appendStackTrace = false, logLater = false) {
 	var finalMessage = message;
 	if (appendStackTrace) {
 		/*if (inUnity)
-			finalMessage += "\n\nStackTrace) " + new Error().Stack;
+			finalMessage += "\n\nStackTrace) " + new Error().stack;
 		else*/
 		finalMessage += "\n@" + GetStackTraceStr();
 	}

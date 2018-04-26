@@ -1,4 +1,4 @@
-import {Assert, GetPropsChanged_WithValues, GetPropsChanged} from "js-vextensions";
+import {Assert, GetPropsChanged_WithValues, GetPropsChanged, GetStackTraceStr} from "js-vextensions";
 import {RootState, ApplyActionSet} from "../../Store/index";
 import {connect} from "react-redux";
 import {ShallowChanged, GetInnerComp} from "react-vextensions";
@@ -48,6 +48,12 @@ export function Connect<T, P>(funcOrFuncGetter) {
 	let mapStateToProps_wrapper = function(state: RootState, props: P) {
 		let s = this;
 		g.inConnectFunc = true;
+
+		if (devEnv) {
+			let callStackDepth = GetStackTraceStr().split("\n").length;
+			// if we're at a call-stack-depth of X, we know something's wrong, so break
+			Assert(callStackDepth < 300, `Call-stack-depth too deep (${callStackDepth})! Something must be wrong with the UI code.`);
+		}
 		
 		ClearRequestedPaths();
 		ClearAccessedPaths();
