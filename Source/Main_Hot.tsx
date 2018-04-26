@@ -108,9 +108,9 @@ if (devEnv) {
 	G({RR: SetUpRR()})
 }
 
-function SetUpRR() {
+export function SetUpRR() {
 	setTimeout(()=> {
-		ParseModuleData();
+		ParseModuleData(true);
 		G({R: Require});
 		let RR = {};
 		for (let {name: moduleName, value: moduleExports} of (Require as any).Props()) {
@@ -127,7 +127,7 @@ function SetUpRR() {
 			}
 		}
 		G({RR});
-	});
+	}, 500); // wait a bit, since otherwise some modules are missed/empty during ParseModuleData it seems
 }
 
 // patch React.createElement to do early prop validation

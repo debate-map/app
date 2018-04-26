@@ -1,6 +1,7 @@
+const StringReplacePlugin = require("string-replace-webpack-plugin");
 var path = require("path");
 var webpack = require("webpack");
-const config = require("../config");
+const config = require("../Config");
 
 let QUICK = process.env.QUICK;
 
@@ -55,7 +56,8 @@ module.exports = {
 				keep_fnames: true,
 			},
 			sourceMap: true,
-		})
+		}),
+		new StringReplacePlugin(),
 	],
 	resolve: {
 		modules: [
@@ -72,6 +74,32 @@ module.exports = {
 					"./node_modules/entities/maps",
 				],
 			},
+
+			// module text-replacements (a better alternative than directly modifying files in node_modules, as that conflicts with npm's installations/control)
+			// ==========
+
+			{
+				test: /ReactDebugTool.js/,
+				loader: StringReplacePlugin.replace({replacements: [
+					{
+						pattern: /module.exports = /g,
+						replacement: function(match, offset, string) {
+							return Clip(`
+ReactDebugTool.getTreeSnapshot = getTreeSnapshot;
+
+module.exports = 
+							`);
+						}
+					},
+				]})
+			}
 		]
 	}
 };
+
+function Clip(str) {
+	let lines = str.split("\n");
+	lines.splice(0, 1); // remove first line
+	lines.splice(-1, 1); // remove last line
+	return lines.join("\n");
+}

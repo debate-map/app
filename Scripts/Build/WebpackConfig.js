@@ -2,12 +2,13 @@ const webpack = require("webpack");
 const cssnano = require("cssnano");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
-const config = require("../config");
+const config = require("../Config");
 const debug = require("debug")("app:webpack:config");
 const path = require("path");
 const fs = require("fs");
 var HardSourceWebpackPlugin = require("hard-source-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const StringReplacePlugin = require("string-replace-webpack-plugin");
 
 const paths = config.utils_paths;
 const {__DEV__, __PROD__, __TEST__} = config.globals;
@@ -196,6 +197,8 @@ webpackConfig.plugins = [
 		// Log level. Can be 'info', 'warn', 'error' or 'silent'.
 		logLevel: 'info'
 	})*/
+
+	new StringReplacePlugin(),
 ]
 
 if (__DEV__) {
@@ -261,6 +264,21 @@ if (USE_TSLOADER) {
 	//webpackConfig.module.rules.push({test: /\.tsx?$/, use: "awesome-typescript-loader"});
 	webpackConfig.module.rules.push({test: /\.tsx?$/, loader: "ts-loader", options: {include: [paths.client()]}});
 }
+
+// module text-replacements (a better alternative than directly modifying files in node_modules, as that conflicts with npm's installations/control)
+// ==========
+
+/*webpackConfig.module.rules.push({
+	test: /ReactCompositeComponent.js/,
+	loader: StringReplacePlugin.replace({replacements: [
+		{
+			pattern: /this/g,
+			replacement: function(match, offset, string) {
+				return `debugger;`;
+			}
+		},
+	]})
+});*/
 
 // css loaders
 // ==========
