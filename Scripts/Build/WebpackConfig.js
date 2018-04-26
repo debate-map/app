@@ -89,7 +89,7 @@ webpackConfig.output = {
 	path: paths.dist(),
 	//path: path.resolve(__dirname, "dist"),
 	publicPath: config.compiler_public_path,
-	pathinfo: true, // include comments next to require-funcs saying path // (this seems to break webpack-runtime-require)
+	pathinfo: true, // include comments next to require-funcs saying path
 }
 
 // Plugins
@@ -167,7 +167,8 @@ webpackConfig.plugins = [
 		manifest: "Scripts/Config/dll/vendor-manifest.json",
 	}),
 
-	new HardSourceWebpackPlugin(),
+	// speeds up (non-incremental) builds by quite a lot // disabled atm, since it causes the website css to not be loaded on 2nd compile
+	//new HardSourceWebpackPlugin(),
 
 	/*new BundleAnalyzerPlugin({
 		// Can be `server`, `static` or `disabled`.

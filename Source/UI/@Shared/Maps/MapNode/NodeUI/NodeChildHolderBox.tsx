@@ -147,7 +147,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 								})()}
 							</div>,
 						<NodeUI_Menu {...{map, node, path}} holderType={type}/>
-					]}
+					].AutoKey()}
 				/>
 				{nodeChildrenToShow != emptyArray && !expanded && nodeChildrenToShow.length != 0 &&
 					<NodeChildCountMarker childCount={nodeChildrenToShow.length}/>}

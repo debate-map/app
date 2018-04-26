@@ -184,13 +184,13 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 						</MapNodeUI_LeftBox>,
 					// fixes click-gap
 					leftPanelShow && panelPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>,
-				]}
+				].AutoKey()}
 				onTextHolderClick={e=>IsDoubleClick(e) && this.titlePanel && GetInnerComp(this.titlePanel).OnDoubleClick()}
 				text={[
 					<TitlePanel ref={c=>this.titlePanel = c} {...{parent: this, map, node, nodeView, path}}/>,
 					subPanelShow && <SubPanel node={node}/>,
 					<NodeUI_Menu {...{map, node, path}}/>
-				]}
+				].AutoKey()}
 				{...{backgroundFillPercent, backgroundColor, markerPercent}}
 				toggleExpanded={e=> {
 					store.dispatch(new ACTMapNodeExpandedSet({mapID: map._id, path, expanded: !expanded, recursive: expanded && e.altKey}));
@@ -203,7 +203,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 							hoverTermID={hoverTermID} onTermHover={termID=>this.SetState({hoverTermID: termID})}/>,
 					showReasonScoreValuesForThisNode &&
 						<ReasonScoreValueMarkers {...{node, combinedWithParentArgument, reasonScoreValues}}/>,
-				]}
+				].AutoKey()}
 			/>
 		);
 	}

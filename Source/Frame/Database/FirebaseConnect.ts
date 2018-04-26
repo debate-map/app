@@ -52,7 +52,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		if (devEnv) {
 			let callStackDepth = GetStackTraceStr().split("\n").length;
 			// if we're at a call-stack-depth of X, we know something's wrong, so break
-			Assert(callStackDepth < 300, `Call-stack-depth too deep (${callStackDepth})! Something must be wrong with the UI code.`);
+			Assert(callStackDepth < 500, `Call-stack-depth too deep (${callStackDepth})! Something must be wrong with the UI code.`);
 		}
 		
 		ClearRequestedPaths();

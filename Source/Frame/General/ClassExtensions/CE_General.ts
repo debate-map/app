@@ -7,15 +7,35 @@ import chroma from "chroma-js";
 // groups
 // ==========
 
+//require("./CE_Object");
 import "./CE_Object";
 
 // Node
 // ==========
 
-interface HTMLElement {
-	R: any;
+declare global {
+	interface HTMLElement {
+		R: any;
+	}
 }
 HTMLElement.prototype._AddGetter_Inline = function R() { return FindReact(this); };
+
+// Array
+// ==========
+
+declare global {
+	interface Array<T> {
+		AutoKey();
+	}
+}
+Array.prototype._AddFunction_Inline = function AutoKey(this: any[]) {
+	for (let [index, item] of this.entries()) {
+		if (item && item.props) {
+			item.key = item.key || index;
+		}
+	}
+	return this;
+};
 
 // ChromaJS color
 // ==========
