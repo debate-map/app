@@ -32,7 +32,7 @@ export default class DeleteNode extends Command<{mapID?: number, nodeID: number,
 
 		this.viewerIDs_main = await GetAsync(()=>GetNodeViewers(nodeID));
 
-		this.mapIDs = await GetAsync(()=>GetMaps().map(a=>a._id));
+		this.mapIDs = (await GetAsync(()=>GetMaps())).map(a=>a._id);
 
 		if (withContainerArgument) {
 			this.sub_deleteContainerArgument = new DeleteNode({mapID, nodeID: withContainerArgument});
