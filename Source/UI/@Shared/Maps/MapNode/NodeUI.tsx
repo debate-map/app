@@ -98,6 +98,10 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		Assert(IsNodeL2(node), "Node supplied to NodeUI is not level-2!");
 		Assert(IsNodeL3(node), "Node supplied to NodeUI is not level-3!");
 	}
+	static ValidateState(state) {
+		let {dividePoint, selfHeight} = state;
+		Assert(!IsNaN(dividePoint) && !IsNaN(selfHeight));
+	}
 	
 	// for SetNodeUILocked() function above
 	waitForUnlockTimer: Timer;
