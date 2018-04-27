@@ -7,6 +7,7 @@ import {getEventsFromInput} from "react-redux-firebase/lib/utils";
 import {ShallowChanged} from "react-vextensions";
 import u from "updeep";
 import {ClearRequestedPaths, GetRequestedPaths, RequestPath} from "./FirebaseConnect";
+import {State_overrideData_path} from "UI/@Shared/StateOverrides";
 
 export function DBPath(path = "", inVersionRoot = true) {
 	Assert(path != null, "Path cannot be null.");
@@ -284,8 +285,10 @@ export async function GetAsync<T>(dbGetterFunc: ()=>T, statsLogger?: ({requested
 
 		for (let path of newRequestedPaths) {
 			requestedPathsSoFar[path] = true;
-			// wait till data is received
-			await WaitTillPathDataIsReceived(path);
+			// wait till data is received (assuming we don't have a state-override that's just locking the content of firebase.data anyway)
+			if (State_overrideData_path != `firebase/data/${DBPath()}`) {
+				await WaitTillPathDataIsReceived(path);
+			}
 		}
 
 		// stop watching paths (since we already got their data)
