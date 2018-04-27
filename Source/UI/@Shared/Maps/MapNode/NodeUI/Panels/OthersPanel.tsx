@@ -154,22 +154,20 @@ class ChildrenOrder extends BaseComponent<{mapID: number, node: MapNodeL3}, {}> 
 								value={`#${childID.toString()}: ${childTitle}`}
 								//onChange={val=>Change(!IsNaN(val.ToInt()) && (newData.childrenOrder[index] = val.ToInt()))}
 							/>*/}
-							{index > 0 &&
-								<Button text={<Icon size={16} icon="arrow-up"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index > 1}
-									onClick={()=> {
-										let newOrder = node.childrenOrder.slice(0);
-										newOrder.RemoveAt(index);
-										newOrder.Insert(index - 1, childID);
-										new UpdateNodeChildrenOrder({mapID, nodeID: node._id, childrenOrder: newOrder}).Run();
-									}}/>}
-							{index > 0 &&
-								<Button text={<Icon size={16} icon="arrow-down"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index < node.childrenOrder.length - 1}
-									onClick={()=> {
-										let newOrder = node.childrenOrder.slice(0);
-										newOrder.RemoveAt(index);
-										newOrder.Insert(index + 1, childID);
-										new UpdateNodeChildrenOrder({mapID, nodeID: node._id, childrenOrder: newOrder}).Run();
-									}}/>}
+							<Button text={<Icon size={16} icon="arrow-up"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index > 0}
+								onClick={()=> {
+									let newOrder = node.childrenOrder.slice(0);
+									newOrder.RemoveAt(index);
+									newOrder.Insert(index - 1, childID);
+									new UpdateNodeChildrenOrder({mapID, nodeID: node._id, childrenOrder: newOrder}).Run();
+								}}/>
+							<Button text={<Icon size={16} icon="arrow-down"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index < node.childrenOrder.length - 1}
+								onClick={()=> {
+									let newOrder = node.childrenOrder.slice(0);
+									newOrder.RemoveAt(index);
+									newOrder.Insert(index + 1, childID);
+									new UpdateNodeChildrenOrder({mapID, nodeID: node._id, childrenOrder: newOrder}).Run();
+								}}/>
 						</Row>
 					);
 				})}
