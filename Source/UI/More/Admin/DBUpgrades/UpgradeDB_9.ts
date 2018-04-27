@@ -20,10 +20,13 @@ AddUpgradeFunc(newVersion, async (oldData, markProgress)=> {
 		if (revision["impactPremise"]) {
 			// move impact-premise children to children of argument (as relevance arguments now)
 			let parent = data.nodes[node.parents.VKeys(true)[0]];
-			for (let childID in node.children) {
+			for (let childID of (node.children || {}).VKeys(true)) {
+				let child = data.nodes[childID];
 				parent.children[childID] = node.children[childID];
+				delete node.children[childID];
+				child.parents[parent._id] = {_: true};
+				delete child.parents[node._id];
 			}
-			delete node.children;
 
 			UpdateStateDataOverride({[`nodes/${node._id}/children`]: null});
 

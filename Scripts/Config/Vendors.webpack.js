@@ -82,14 +82,28 @@ module.exports = {
 				test: /ReactDebugTool.js/,
 				loader: StringReplacePlugin.replace({replacements: [
 					{
+						// expose ReactDebugTool.getTreeSnapshot
 						pattern: /module.exports = /g,
-						replacement: function(match, offset, string) {
+						replacement: (match, offset, string)=> {
 							return Clip(`
 ReactDebugTool.getTreeSnapshot = getTreeSnapshot;
 
 module.exports = 
 							`);
 						}
+					},
+				]})
+			},
+			{
+				test: /connectAdvanced.js/,
+				loader: StringReplacePlugin.replace({replacements: [
+					// remove try-catch blocks
+					{pattern: /try {/g, replacement: ()=>`//try {`},
+					{
+						pattern: /} catch(.+?){/g,
+						replacement: (match, p1)=>
+							`//} catch${p1}{
+							if (0) {`
 					},
 				]})
 			}

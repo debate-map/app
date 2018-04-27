@@ -79,7 +79,7 @@ export function GetRatingAverage_AtPath(node: MapNodeL3, ratingType: RatingType,
 	return result;
 }
 
-export function GetFillPercent_AtPath(node: MapNodeL3, path: string, boxType: HolderType, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null): number {
+export function GetFillPercent_AtPath(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null): number {
 	ratingType = ratingType || {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
 	if (State(a=>a.main.weighting) == WeightingType.Votes) {
 		return GetRatingAverage_AtPath(node, ratingType, filter, resultIfNoData);
@@ -98,7 +98,7 @@ export function GetFillPercent_AtPath(node: MapNodeL3, path: string, boxType: Ho
 		return argTruthScoreComposite * 100;
 	}
 }
-export function GetMarkerPercent_AtPath(node: MapNodeL3, path: string, boxType: HolderType, ratingType?: RatingType) {
+export function GetMarkerPercent_AtPath(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType) {
 	ratingType = ratingType || {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
 	if (State(a=>a.main.weighting) == WeightingType.Votes) {
 		return GetRatingAverage_AtPath(node, ratingType, new RatingFilter({includeUser: GetUserID()}));

@@ -180,7 +180,7 @@
     "react-katex": "^2.0.2",
     "react-markdown": "^2.4.5",
     "react-modal": "^1.7.2",
-    "react-redux": "^5.0.7",
+    "react-redux": "5.0.7",
     "react-redux-firebase": "^2.0.6",
     "react-remarkable": "^1.1.1",
     "react-resize-detector": "^0.3.3",

@@ -8,7 +8,7 @@ import { GetNewURL } from "../URL/URLManager";
 import {GetCurrentURL} from "../General/URLs";
 import {VURL} from "js-vextensions";
 import { StandardCompProps } from "Frame/UI/General";
-import {State_overrideCountAsAccess_value, StopStateCountAsAccessOverride, StartStateCountAsAccessOverride} from 'UI/@Shared/StateOverrides';
+import {State_overrideCountAsAccess_value, StopStateCountAsAccessOverride, StartStateCountAsAccessOverride, State_overrideData_path} from "UI/@Shared/StateOverrides";
 import {StartStateDataOverride, StopStateDataOverride} from "../../UI/@Shared/StateOverrides";
 import Action from "Frame/General/Action";
 
@@ -30,8 +30,11 @@ type Props = {
 	actions?: (dispatch: (...actions: Action<any>[])=>void)=>void, //updateURLOnActions?: boolean, // action-based
 } & React.HTMLProps<HTMLAnchorElement>;
 //@Connect((state, {to, actions, updateURLOnActions}: Props)=> {
-let connector = (state, {to, actions}: Props)=> {
+let connector = function(state, {to, actions}: Props) {
 	if (actions) {
+		// if state-data-override is active from something else, just return our last result
+		if (State_overrideData_path) return this.lastResult;
+		
 		let actionsToDispatch = [];
 		function dispatch(...actions: Action<any>[]) {
 			actionsToDispatch.push(...actions);
