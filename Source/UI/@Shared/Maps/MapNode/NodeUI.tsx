@@ -217,6 +217,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 					this.OnDividePointChange(dividePoint);
 				}}/>;
 
+		let hasExtraWrapper = subnodes.length || isMultiPremiseArgument;
+
 		let nodeUIResult_withoutSubnodes = (
 			<div ref={c=>this.nodeUI = c} className="NodeUI clickThrough"
 					style={E(
@@ -257,7 +259,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 								Needs 2 premises to be visible.
 							</Div>*/}
 					</Column>
-					{!limitBar_above && children}
+					{!limitBar_above && !hasExtraWrapper && children}
 				</div>
 
 				{nodeChildrenToShow == emptyArray_forLoading &&
@@ -273,7 +275,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			</div>
 		);
 
-		if (subnodes.length == 0 && !isMultiPremiseArgument) {
+		if (!hasExtraWrapper) {
 			return nodeUIResult_withoutSubnodes;
 		}
 		return (
@@ -289,6 +291,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 					{isMultiPremiseArgument &&
 						nodeChildHolder}
 				</div>
+				{!limitBar_above && children}
 			</div>
 		);
 	}

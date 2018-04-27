@@ -405,21 +405,22 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 			if (segment.patternMatched == null) {
 				let segmentText = segment.textParts[0];
 				let edgeWhiteSpaceMatch = segmentText.match(/^( *).+?( *)$/);
-				if (edgeWhiteSpaceMatch[1]) elements.push(<span>{edgeWhiteSpaceMatch[1]}</span>);
+				if (edgeWhiteSpaceMatch[1]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[1]}</span>);
 				elements.push(
-					<VReactMarkdown_Remarkable key={index} containerType="span" source={segmentText}
+					<VReactMarkdown_Remarkable key={elements.length} containerType="span" source={segmentText}
 						rendererOptions={{
 							components: {
 								p: props=><span>{props.children}</span>
 							},
 						}}/>
 				);
-				if (edgeWhiteSpaceMatch[2]) elements.push(<span>{edgeWhiteSpaceMatch[2]}</span>);
+				if (edgeWhiteSpaceMatch[2]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[2]}</span>);
 			} else if (segment.patternMatched == "term") {
 				let refText = segment.textParts[1];
 				let termID = segment.textParts[2].ToInt();
 				elements.push(
-					<TermPlaceholder key={index} refText={refText} termID={termID} onHover={hovered=>this.OnTermHover(termID, hovered)} onClick={()=>this.OnTermClick(termID)}/>
+					<TermPlaceholder key={elements.length} refText={refText} termID={termID}
+						onHover={hovered=>this.OnTermHover(termID, hovered)} onClick={()=>this.OnTermClick(termID)}/>
 				);
 			} else {
 				Assert(false);
