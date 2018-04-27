@@ -3,7 +3,7 @@ import { Lerp } from "js-vextensions";
 import { GetData } from "../../Frame/Database/DatabaseHelpers";
 import { GetArgumentImpactPseudoRatingSet } from "../../Frame/Store/RatingProcessor";
 import { emptyObj } from "../../Frame/Store/ReducerUtils";
-import { RatingType } from "../../Store/firebase/nodeRatings/@RatingType";
+import { RatingType, ratingTypes } from "../../Store/firebase/nodeRatings/@RatingType";
 import { WeightingType } from "../main";
 import { Rating, RatingsRoot } from "./nodeRatings/@RatingsRoot";
 import { RS_GetAllValues } from "./nodeRatings/ReasonScore";
@@ -12,6 +12,7 @@ import { GetMainRatingType, GetNodeL2 } from "./nodes/$node";
 import { ClaimForm, MapNodeL3 } from "./nodes/@MapNode";
 import { MapNodeType } from "./nodes/@MapNodeType";
 import { GetUserID } from "./users";
+import {HolderType} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
 
 export function GetNodeRatingsRoot(nodeID: number) {
 	//RequestPaths(GetPaths_NodeRatingsRoot(nodeID));
@@ -78,9 +79,10 @@ export function GetRatingAverage_AtPath(node: MapNodeL3, ratingType: RatingType,
 	return result;
 }
 
-export function GetFillPercent_AtPath(node: MapNodeL3, path: string, relevanceBox = false, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null): number {
+export function GetFillPercent_AtPath(node: MapNodeL3, path: string, boxType: HolderType, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null): number {
+	ratingType = ratingType || {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
 	if (State(a=>a.main.weighting) == WeightingType.Votes) {
-		return GetRatingAverage_AtPath(node, ratingType || GetMainRatingType(node), filter, resultIfNoData);
+		return GetRatingAverage_AtPath(node, ratingType, filter, resultIfNoData);
 	}
 
 	let {argTruthScoreComposite, argWeightMultiplier, claimTruthScore} = RS_GetAllValues(node, path);
@@ -89,16 +91,17 @@ export function GetFillPercent_AtPath(node: MapNodeL3, path: string, relevanceBo
 	if (node.type == MapNodeType.Claim) {
 		return claimTruthScore * 100;
 	} else if (node.type == MapNodeType.Argument) {
-		if (relevanceBox) {
+		if (boxType == HolderType.Relevance) {
 			//return Lerp(0, 100, GetPercentFromXToY(0, 2, argWeightMultiplier));
 			return Lerp(0, 100, argWeightMultiplier);
 		}
 		return argTruthScoreComposite * 100;
 	}
 }
-export function GetMarkerPercent_AtPath(node: MapNodeL3, path: string, ratingType?: RatingType) {
+export function GetMarkerPercent_AtPath(node: MapNodeL3, path: string, boxType: HolderType, ratingType?: RatingType) {
+	ratingType = ratingType || {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
 	if (State(a=>a.main.weighting) == WeightingType.Votes) {
-		return GetRatingAverage_AtPath(node, ratingType || GetMainRatingType(node), new RatingFilter({includeUser: GetUserID()}));
+		return GetRatingAverage_AtPath(node, ratingType, new RatingFilter({includeUser: GetUserID()}));
 	}
 }
 

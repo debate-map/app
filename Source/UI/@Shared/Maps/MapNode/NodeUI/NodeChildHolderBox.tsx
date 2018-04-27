@@ -53,8 +53,8 @@ let connector = (state, {node, path, type, nodeChildren}: Props)=> {
 		var reasonScoreValues = RS_GetAllValues(node, path, true) as ReasonScoreValues_RSPrefix;
 	}*/
 
-	let backgroundFillPercent = GetFillPercent_AtPath(node, path, true);
-	let markerPercent = GetMarkerPercent_AtPath(node, path);
+	let backgroundFillPercent = GetFillPercent_AtPath(node, path, type);
+	let markerPercent = GetMarkerPercent_AtPath(node, path, type);
 
 	return {
 		backgroundFillPercent,
