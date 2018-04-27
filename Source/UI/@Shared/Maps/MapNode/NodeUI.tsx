@@ -172,7 +172,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		if (!expanded) innerBoxOffset = 0;*/
 
 		let showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
-		let limitBar_above = node.type == MapNodeType.Argument && node.finalPolarity == Polarity.Supporting;
+		let argumentNode = node.type == MapNodeType.Argument ? node : isPremiseOfSinglePremiseArg ? parent : null;
+		let limitBar_above = argumentNode && argumentNode.finalPolarity == Polarity.Supporting;
 		let limitBarPos = showLimitBar ? (limitBar_above ? LimitBarPos.Above : LimitBarPos.Below) : LimitBarPos.None;
 		//if (IsReversedArgumentNode(node)) limitBar_above = !limitBar_above;
 		/*let minChildCount = GetMinChildCountToBeVisibleToNonModNonCreators(node, nodeChildren);
