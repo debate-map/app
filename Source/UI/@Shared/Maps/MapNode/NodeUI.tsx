@@ -163,8 +163,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		let parentPath = SlicePath(path, 1);
 		let isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		if (isPremiseOfSinglePremiseArg) {
-			var relevanceArguments = GetNodeChildrenL3(parent, SlicePath(path, 1)).Except(node).filter(a=>a);
-			Assert(!relevanceArguments.Any(a=>a.type == MapNodeType.Claim), "Single-premise argument has more than one premise!");
+			var relevanceArguments = GetNodeChildrenL3(parent, SlicePath(path, 1)).filter(a=>a && a.type == MapNodeType.Argument);
+			//Assert(!relevanceArguments.Any(a=>a.type == MapNodeType.Claim), "Single-premise argument has more than one premise!");
 		}
 
 		let isSinglePremiseArgument = IsSinglePremiseArgument(node);
@@ -217,6 +217,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 				//linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
 				linkSpawnPoint={dividePoint || null}
 				vertical={isMultiPremiseArgument}
+				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
 				onHeightOrDividePointChange={dividePoint=> {
 					//if (isMultiPremiseArgument) return; // if multi-premise argument, divide-point is always 0
 					this.OnDividePointChange(dividePoint);

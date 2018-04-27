@@ -46,7 +46,8 @@ import {SplitStringBySlash_Cached} from "../../../../../Frame/Database/StringSpl
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildrenToShow: MapNodeL3[], type: HolderType,
-	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, vertical?: boolean, onHeightOrDividePointChange?: (dividePoint: number)=>void,
+	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, vertical?: boolean, minWidth?: number,
+	onHeightOrDividePointChange?: (dividePoint: number)=>void,
 };
 let initialState = {
 	childrenWidthOverride: null as number,
@@ -69,6 +70,7 @@ let connector = (state, {node, path, nodeChildrenToShow}: Props)=> {
 };
 @Connect(connector)
 export class NodeChildHolder extends BaseComponentWithConnector(connector, initialState) {
+	static defaultProps = {minWidth: 0};
 	static ValidateProps(props) {
 		let {node, path} = props;
 		Assert(SplitStringBySlash_Cached(path).Distinct().length == SplitStringBySlash_Cached(path).length, `Node path contains a circular link! (${path})`);
@@ -76,9 +78,10 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
-		let {map, node, nodeView, path, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, onHeightOrDividePointChange,
+		let {map, node, nodeView, path, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, minWidth, onHeightOrDividePointChange,
 			initialChildLimit, nodeChildren_fillPercents} = this.props;
 		let {childrenWidthOverride, oldChildBoxOffsets} = this.state;
+		childrenWidthOverride = (childrenWidthOverride|0).KeepAtLeast(minWidth);
 
 		let nodeChildrenToShowHere = nodeChildrenToShow;
 		let nodeChildrenToShowInRelevanceBox;
