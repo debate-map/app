@@ -11,9 +11,12 @@ import {IsUserAdmin} from "../../Store/firebase/userExtras";
 import {GetUserID} from "../../Store/firebase/users";
 import {ResetCurrentDBRoot} from "./Admin/ResetCurrentDBRoot";
 
+type UpgradeFunc = (oldData: FirebaseData, markProgress: MarkProgressFunc)=>Promise<FirebaseData>;
+type MarkProgressFunc = (depth: number, entryIndex: number, entryCount?: number)=>void;
+
 // upgrade-funcs
 var upgradeFuncs = {} as any; // populated by modules below
-export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>Promise<any>) {
+export function AddUpgradeFunc(version: number, func: UpgradeFunc) {
 	upgradeFuncs[version] = func;
 }
 //require("./Admin/DBUpgrades/UpgradeDB_2");
@@ -26,7 +29,8 @@ export function AddUpgradeFunc(version: number, func: (oldData: FirebaseData)=>P
 require("./Admin/DBUpgrades/UpgradeDB_9");
 
 //export default class AdminUI extends BaseComponent<{}, {fb: firebase.FirebaseApplication, env: string}> {
-export default class AdminUI extends BaseComponent<{}, {}> {
+export default class AdminUI extends BaseComponent<{}, {dbUpgrade_entryIndexes: number[], dbUpgrade_entryCounts: number[]}> {
+	static defaultState = {dbUpgrade_entryIndexes: [], dbUpgrade_entryCounts: []};
 	/*constructor(props) {
 		super(props);
 		//this.state = {env: envSuffix};
@@ -45,6 +49,8 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 	render() {
 		let admin = IsUserAdmin(GetUserID());
 		if (!admin) return <Column style={E(styles.page)}>Please sign in.</Column>;
+
+		let {dbUpgrade_entryIndexes, dbUpgrade_entryCounts} = this.state;
 
 		return (
 			<Column style={E(styles.page)}>
@@ -67,9 +73,16 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 				<Row mt={5}><h4>Upgrader</h4></Row>
 				<Column style={{alignItems: "flex-start"}}>
 					{upgradeFuncs.Props().map(pair=> {
-						return <UpgradeButton key={pair.name} newVersion={parseInt(pair.name)} upgradeFunc={pair.value}/>
+						return <UpgradeButton key={pair.name} newVersion={parseInt(pair.name)} upgradeFunc={pair.value} markProgress={this.MarkProgress.bind(this)}/>
 					})}
 				</Column>
+				{dbUpgrade_entryIndexes.length > 0 &&
+					<Row>
+						<span>Progress: </span>
+						{dbUpgrade_entryIndexes.map((entryIndex, depth)=> {
+							return <span key={depth}>{depth > 0 ? " -> " : ""}{entryIndex + 1}/{dbUpgrade_entryCounts[depth]}</span>;
+						})}
+					</Row>}
 				<Row><h4>Testing</h4></Row>
 				<Row>
 					<Button text={`Throw async error`} onClick={async ()=> {
@@ -80,13 +93,24 @@ export default class AdminUI extends BaseComponent<{}, {}> {
 			</Column>
 		);
 	}
+
+	MarkProgress(depth: number, entryIndex: number, entryCount?: number) {
+		let {dbUpgrade_entryIndexes, dbUpgrade_entryCounts} = this.state;
+		[dbUpgrade_entryIndexes, dbUpgrade_entryCounts] = [dbUpgrade_entryIndexes.slice(), dbUpgrade_entryCounts.slice()]; // use copies of arrays
+
+		dbUpgrade_entryIndexes[depth] = entryIndex;
+		if (entryCount != null) {
+			dbUpgrade_entryCounts[depth] = entryCount;
+		}
+		this.SetState({dbUpgrade_entryIndexes, dbUpgrade_entryCounts});
+	}
 }
 
 // Note that, when you change the dbRootVersion, you'll lose admin privileges.
 // So to use the Upgrade button, you'll first need to manually set yourself as admin, in the new db-root (using the Firebase Database page).
-export class UpgradeButton extends BaseComponent<{newVersion: number, upgradeFunc: (oldData: FirebaseData)=>FirebaseData}, {}> {
+export class UpgradeButton extends BaseComponent<{newVersion: number, upgradeFunc: UpgradeFunc, markProgress: MarkProgressFunc}, {}> {
 	render() {
-		let {newVersion, upgradeFunc} = this.props;
+		let {newVersion, upgradeFunc, markProgress} = this.props;
 
 		let oldVersionPath = `v${newVersion - 1}-${env_short}`;
 		let newVersionPath = `v${newVersion}-${env_short}`;
@@ -103,7 +127,7 @@ The old db-root will not be modified.`,
 					onOK: async ()=> {
 						let oldData = await GetDataAsync({inVersionRoot: false}, ...oldVersionPath.split("/")) as FirebaseData;
 						StartStateDataOverride(`firebase/data/${DBPath()}`, oldData);
-						let newData = await upgradeFunc(oldData);
+						let newData = await upgradeFunc(oldData, markProgress);
 						StopStateDataOverride();
 						RemoveHelpers(newData); // remove "_key" and such
 

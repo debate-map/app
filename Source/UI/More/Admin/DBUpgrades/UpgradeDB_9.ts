@@ -7,13 +7,15 @@ import {StopStateDataOverride, UpdateStateDataOverride} from "UI/@Shared/StateOv
 import {State_overrideData_value} from "../../../@Shared/StateOverrides";
 
 let newVersion = 9;
-AddUpgradeFunc(newVersion, async (oldData: FirebaseData)=> {
+AddUpgradeFunc(newVersion, async (oldData, markProgress)=> {
 	let data = Clone(oldData) as FirebaseData;
 
 	// remove impact-premise nodes
 	// ==========
 
-	for (let node of data.nodes.VValues(true)) {
+	markProgress(0, 0, 3);
+	for (let {index, value: node} of data.nodes.Props(true)) {
+		markProgress(1, index, oldData.nodes.Props(true).length);
 		let revision = data.nodeRevisions[node.currentRevision];
 		if (revision["impactPremise"]) {
 			// move impact-premise children to children of argument (as relevance arguments now)
@@ -35,7 +37,9 @@ AddUpgradeFunc(newVersion, async (oldData: FirebaseData)=> {
 	// add empty revision.titles if missing
 	// ==========
 
-	for (let revision of data.nodeRevisions.VValues(true)) {
+	markProgress(0, 1);
+	for (let {index, value: revision} of data.nodeRevisions.Props(true)) {
+		markProgress(1, index, oldData.nodeRevisions.Props(true).length);
 		if (revision.titles == null) {
 			revision.titles = {base: ""};
 		}
@@ -44,7 +48,9 @@ AddUpgradeFunc(newVersion, async (oldData: FirebaseData)=> {
 	// find arguments with more than one premise, and mark them as multi-premise arguments
 	// ==========
 
-	for (let node of data.nodes.VValues(true)) {
+	markProgress(0, 2);
+	for (let {index, value: node} of data.nodes.Props(true)) {
+		markProgress(1, index, oldData.nodes.Props(true).length);
 		if (node.type == MapNodeType.Argument) {
 			let children = node.children.VKeys(true).map(id=>data.nodes[id]);
 			let childClaims = children.filter(a=>a.type == MapNodeType.Claim);
