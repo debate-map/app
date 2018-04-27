@@ -236,7 +236,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 					/*useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
 					!useAutoOffset && {paddingTop: innerBoxOffset},*/
 					//{paddingTop: innerBoxOffset},
-					{marginTop: nodeView.expanded ? dividePoint - (selfHeight / 2) : 0},
+					{marginTop: nodeView.expanded ? (dividePoint - (selfHeight / 2)).KeepAtLeast(0) : 0},
 				)}>
 					{limitBar_above && children}
 					{asSubnode &&
