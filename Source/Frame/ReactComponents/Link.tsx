@@ -1,5 +1,5 @@
 import React from 'react';
-import {BaseComponent, ApplyBasicStyles} from "react-vextensions";
+import {BaseComponent, ApplyBasicStyles, BaseComponentWithConnector} from "react-vextensions";
 import Radium from "radium";
 import {replace, push} from "redux-little-router";
 import {Connect} from "../Database/FirebaseConnect";
@@ -10,6 +10,7 @@ import {VURL} from "js-vextensions";
 import { StandardCompProps } from "Frame/UI/General";
 import {State_overrideCountAsAccess_value, StopStateCountAsAccessOverride, StartStateCountAsAccessOverride} from 'UI/@Shared/StateOverrides';
 import {StartStateDataOverride, StopStateDataOverride} from "../../UI/@Shared/StateOverrides";
+import Action from "Frame/General/Action";
 
 /*@Radium
 export default class Link extends BaseComponent<{to, target?: string, replace?: boolean, style?, onClick?}, {}> {
@@ -26,19 +27,20 @@ function isModifiedEvent(event) {
 type Props = {
 	onClick?, style?,
 	text?: string, to?: string, target?: string, replace?: boolean, // url-based
-	actions?: (dispatch: Function)=>void, //updateURLOnActions?: boolean, // action-based
+	actions?: (dispatch: (...actions: Action<any>[])=>void)=>void, //updateURLOnActions?: boolean, // action-based
 } & React.HTMLProps<HTMLAnchorElement>;
 //@Connect((state, {to, actions, updateURLOnActions}: Props)=> {
-@Connect((state, {to, actions}: Props)=> {
+let connector = (state, {to, actions}: Props)=> {
 	if (actions) {
 		let actionsToDispatch = [];
-		function dispatch(action) {
-			actionsToDispatch.push(action);
+		function dispatch(...actions: Action<any>[]) {
+			actionsToDispatch.push(...actions);
 		}
 		actions(dispatch);
 
 		let newState = State();
-		let rootReducer = MakeRootReducer();
+		//let rootReducer = MakeRootReducer();
+		let rootReducer = store.reducer;
 		for (let action of actionsToDispatch) {
 			newState = rootReducer(newState, action);
 		}
@@ -54,9 +56,10 @@ type Props = {
 		//oldLocation: updateURLOnActions ? State(a=>a.router.location) : null,
 		to,
 	};
-})
+};
+@Connect(connector)
 @ApplyBasicStyles
-export default class Link extends BaseComponent<Props, {}> {
+export class Link extends BaseComponentWithConnector(connector, {}) {
 	handleClick(event) {
 		let {onClick, to, target, replace: replaceURL, actions} = this.props;
 		if (onClick) onClick(event);
@@ -67,7 +70,12 @@ export default class Link extends BaseComponent<Props, {}> {
 
 		if (actions) {
 			event.preventDefault();
-			actions(store.dispatch); // apply actions
+			function dispatch(...actions: Action<any>[]) {
+				for (let action of actions) {
+					store.dispatch(action);
+				}
+			}
+			actions(dispatch); // apply actions
 		} else {
 			let isExternal = to && VURL.Parse(to, true).domain != GetCurrentURL().domain;
 			if (isExternal || target) return; // let browser handle external links, and "target=_blank"

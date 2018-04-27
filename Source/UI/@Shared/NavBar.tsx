@@ -13,13 +13,13 @@ import Action from "../../Frame/General/Action";
 import {HandleError} from "../../Frame/General/Errors";
 import UserPanel from "./NavBar/UserPanel";
 import {Connect} from "../../Frame/Database/FirebaseConnect";
-import {ACTTopRightOpenPanelSet, ACTTopLeftOpenPanelSet, ACTSetPage} from "../../Store/main";
+import {ACTTopRightOpenPanelSet, ACTTopLeftOpenPanelSet, ACTSetPage, ACTSetSubpage} from "../../Store/main";
 import ChatPanel from "./NavBar/ChatPanel";
 import StreamPanel from "./NavBar/StreamPanel";
 import SearchPanel from "./NavBar/SearchPanel";
 import {SubNavBarButton} from "./SubNavBar";
 import Radium from "radium";
-import Link from "../../Frame/ReactComponents/Link";
+import {Link} from "../../Frame/ReactComponents/Link";
 import NotificationsUI from "./NavBar/NotificationsUI";
 import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
@@ -30,6 +30,8 @@ import {Div} from "react-vcomponents";
 import { GetData } from "Frame/Database/DatabaseHelpers";
 import {ShowMessageBox} from "react-vmessagebox";
 import {ResetCurrentDBRoot} from "UI/More/Admin/ResetCurrentDBRoot";
+import {ACTPersonalMapSelect} from "../../Store/main/personal";
+import {ACTDebateMapSelect} from "Store/main/debates";
 
 // main
 // ==========
@@ -130,7 +132,7 @@ export class NavBar extends BaseComponentWithConnector(connector, {}) {
 	currentPage: State(a=>a.main.page),
 }))
 export class NavBarButton extends BaseComponent
-		<{page: string, text: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void} & Partial<{currentPage: string}>,
+		<{page?: string, text: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void} & Partial<{currentPage: string}>,
 		{hovered: boolean}> {
 	render() {
 		var {page, text, panel, active, style, onClick, currentPage} = this.props;
@@ -143,30 +145,30 @@ export class NavBarButton extends BaseComponent
 			{
 				position: "relative", display: "inline-block", cursor: "pointer", verticalAlign: "middle",
 				lineHeight: "45px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9,
-				//":hover": {color: "rgba(100,255,100,1)"}
-				//":hover": {color: "rgba(100,150,255,1)"}
-				//":hover": {}
 			},
-			/*panel && {":hover": {color: "rgba(100,255,100,1)"}},
-			panel && active && {color: "rgba(100,255,100,1)"},*/
 			style,
 		);
 
-		//let hoverOrActive = radiumState[":hover"] || active;
-		//let hoverOrActive = _radiumStyleState && _radiumStyleState.main && _radiumStyleState.main[":hover"] || active;
+		let actions = [] as Action<any>[];
+		if (page) {
+			if (page != currentPage) {
+				actions = [new ACTSetPage(page)];
+			} else {
+				if (page == "personal") {
+					actions = [new ACTPersonalMapSelect({id: null})];
+				} else if (page == "debates") {
+					actions = [new ACTDebateMapSelect({id: null})];
+				} else {
+					actions = [new ACTSetSubpage({page, subpage: null})];
+				}
+			}
+		}
+		
 		let hoverOrActive = hovered || active;
 		return (
-			<Link to={`/${page}`} style={finalStyle} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})} onClick={e=> {
-				e.preventDefault();
-				if (!panel) {
-					store.dispatch(new ACTSetPage(page));
-				}
-				if (onClick) {
-					onClick(e);
-				}
-			}}>
+			<Link actions={d=>d(...actions)} style={finalStyle} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})} onClick={onClick}>
 				{text}
-				{/*!panel &&*/ hoverOrActive &&
+				{hoverOrActive &&
 					<div style={{position: "absolute", left: 0, right: 0, bottom: 0, height: 2, background: `rgba(100,255,100,1)`}}/>}
 			</Link>
 		);

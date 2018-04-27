@@ -2,7 +2,7 @@ import {BaseComponent, BaseProps} from "react-vextensions";
 import {colors} from "../../Frame/UI/GlobalStyles";
 import {E} from "js-vextensions";
 import Radium from "radium";
-import Link from "../../Frame/ReactComponents/Link";
+import {Link} from "../../Frame/ReactComponents/Link";
 import {VURL} from "js-vextensions";
 import {Connect} from "../../Frame/Database/FirebaseConnect";
 import {ACTSetSubpage} from "../../Store/main";

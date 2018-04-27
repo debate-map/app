@@ -4,7 +4,7 @@ import {Map, MapType} from "../../../Store/firebase/maps/@Map";
 import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
 import {colors} from "../../../Frame/UI/GlobalStyles";
-import Link from "../../../Frame/ReactComponents/Link";
+import {Link} from "../../../Frame/ReactComponents/Link";
 import {VURL} from "js-vextensions";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import {GetUser} from "../../../Store/firebase/users";

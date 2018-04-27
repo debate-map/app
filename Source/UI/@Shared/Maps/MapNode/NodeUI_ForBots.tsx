@@ -10,7 +10,7 @@ import {CachedTransform} from "js-vextensions";
 import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
 import {VURL} from "js-vextensions";
-import Link from "../../../../Frame/ReactComponents/Link";
+import {Link} from "../../../../Frame/ReactComponents/Link";
 import {BaseComponent, BaseProps, GetInnerComp} from "react-vextensions";
 import {Pre} from "react-vcomponents";
 import {MapNode, MapNodeL2, Polarity} from "../../../../Store/firebase/nodes/@MapNode";

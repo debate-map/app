@@ -25,6 +25,7 @@ import {Persister} from "redux-persist/src/types";
 import Action from "Frame/General/Action";
 import {StartStateDataOverride, StopStateCountAsAccessOverride, StopStateDataOverride} from "UI/@Shared/StateOverrides";
 import {StartStateCountAsAccessOverride} from "./UI/@Shared/StateOverrides";
+import {Link} from "Frame/ReactComponents/Link";
 
 JSVE.logFunc = Log;
 
@@ -37,10 +38,10 @@ function ToFirebasePath(path: string) {
 //g.FirebaseConnect = Connect;
 let sharedData = {
 	//store: null, // set below
-	GetNewURL: (actionsToDispatch: Action<any>[])=> {
+	/*GetNewURL: (actionsToDispatch: Action<any>[])=> {
 		let newState = State();
 		for (let action of actionsToDispatch) {
-			newState = (store as any).reducer(newState, action);
+			newState = store.reducer(newState, action);
 		}
 		StartStateDataOverride("", newState);
 		StartStateCountAsAccessOverride(false);
@@ -48,7 +49,8 @@ let sharedData = {
 		StopStateCountAsAccessOverride();
 		StopStateDataOverride();
 		return newURL;
-	},
+	},*/
+	Link,
 	FormatTime: (time: number, formatStr: string)=> {
 		if (formatStr == "[calendar]") {
 			let result = Moment(time).calendar();
@@ -101,8 +103,11 @@ Manager_Feedback.VSet(sharedData.Extended({
 let createStore = require("./Frame/Store/CreateStore").default;
 
 var {store, persister} = createStore(g.__InitialState__, {});
-G({store}); declare global { var store: Store<RootState> & {firebase: FirebaseApp}; }
-G({persister}); declare global { var persister: Persister; }
+declare global {
+	type ProjectStore = Store<RootState> & {firebase: FirebaseApp, reducer: (state: RootState, action: Action<any>)=>RootState};
+	var store: ProjectStore;
+} G({store});
+declare global { var persister: Persister; } G({persister});
 
 Manager_Forum.store = store;
 Manager_Feedback.store = store;

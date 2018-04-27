@@ -6,7 +6,7 @@ import {BaseComponent, ShallowChanged} from "react-vextensions";
 import {Segment, ParseSegmentsForPatterns} from "../General/RegexHelpers";
 import {GetCurrentURL} from "../General/URLs";
 import {VURL} from "js-vextensions";
-import Link from "./Link";
+import {Link} from "./Link";
 import {ReplacementFunc} from "./VReactMarkdown";
 
 /*export default class VReactMarkdown_Remarkable extends BaseComponent

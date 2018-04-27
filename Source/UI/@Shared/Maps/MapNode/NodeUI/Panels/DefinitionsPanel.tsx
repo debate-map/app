@@ -17,7 +17,7 @@ import {VURL} from "js-vextensions";
 import {ParseSegmentsForPatterns} from "../../../../../../Frame/General/RegexHelpers";
 import {ACTTermSelect} from "../../../../../../Store/main/database";
 import {push} from "redux-little-router";
-import Link from "../../../../../../Frame/ReactComponents/Link";
+import {Link} from "../../../../../../Frame/ReactComponents/Link";
 
 let termsPlaceholder = [];
 

@@ -134,8 +134,9 @@ export default function(initialState = {}, history) {
 	let extraReducers = {
 		router: routerReducer,
 	};
+	let rootReducer = MakeRootReducer(extraReducers);
 	const store = createStore(
-		MakeRootReducer(extraReducers),
+		rootReducer,
 		initialState,
 		// Note: Compose applies functions from right to left: compose(f, g, h) = (...args)=>f(g(h(...args))).
 		// You can think of the earlier ones as "wrapping" and being able to "monitor" the ones after it, but (usually) telling them "you apply first, then I will".
@@ -148,7 +149,8 @@ export default function(initialState = {}, history) {
 			applyMiddleware(...lateMiddleware), // place late-middleware after reduxFirebase, so it can intercept all its dispatched events
 			g.devToolsExtension && g.devToolsExtension(reduxDevToolsConfig),
 		].filter(a=>a)) as StoreEnhancer<any>
-	) as Store<RootState>; //& {extraReducers};
+	) as ProjectStore;
+	store.reducer = rootReducer;
 
 	function Dispatch_WithStack(action) {
 		if (g.actionStacks || (devEnv && !actionStacks_actionTypeIgnorePatterns.Any(a=>action.type.startsWith(a)))) {
@@ -188,8 +190,8 @@ export default function(initialState = {}, history) {
 		if (module.hot) {
 			module.hot.accept("../../Store", () => {
 				let {MakeRootReducer} = require("../../Store");
-				(store as any).reducer = MakeRootReducer(extraReducers);
-				store.replaceReducer((store as any).reducer);
+				store.reducer = MakeRootReducer(extraReducers);
+				store.replaceReducer(store.reducer);
 			});
 		}
 	}

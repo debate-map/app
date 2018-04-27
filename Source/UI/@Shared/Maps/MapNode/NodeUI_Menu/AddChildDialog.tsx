@@ -28,7 +28,7 @@ import {ACTSetLastAcknowledgementTime} from "../../../../../Store/main";
 import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
 import {WaitTillPathDataIsReceiving, WaitTillPathDataIsReceived, DBPath} from "../../../../../Frame/Database/DatabaseHelpers";
 import {GetErrorMessagesUnderElement} from "js-vextensions";
-import Link from "../../../../../Frame/ReactComponents/Link";
+import {Link} from "../../../../../Frame/ReactComponents/Link";
 
 export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: number) {
 	let parentForm = GetNodeForm(parentNode);

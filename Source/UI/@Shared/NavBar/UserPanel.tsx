@@ -8,7 +8,7 @@ import SocialButton from "react-social-button";
 import {Column} from "react-vcomponents";
 import {E} from "js-vextensions";
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
-import Link from "../../../Frame/ReactComponents/Link";
+import {Link} from "../../../Frame/ReactComponents/Link";
 import {ACTSetPage, ACTTopRightOpenPanelSet} from "../../../Store/main";
 
 @Connect(state=>({

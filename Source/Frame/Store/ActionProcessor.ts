@@ -89,7 +89,7 @@ export function DoesURLChangeCountAsPageChange(oldURL: VURL, newURL: VURL, direc
 	if (oldURL == null) return true;
 	if (oldURL.PathStr() != newURL.PathStr()) return true;
 
-	let oldSyncLoadActions = GetSyncLoadActionsForURL(oldURL, directURLChange);
+	/*let oldSyncLoadActions = GetSyncLoadActionsForURL(oldURL, directURLChange);
 	let oldMapViewMergeAction = oldSyncLoadActions.find(a=>a.Is(ACTMapViewMerge));
 	
 	let newSyncLoadActions = GetSyncLoadActionsForURL(newURL, directURLChange);
@@ -102,7 +102,8 @@ export function DoesURLChangeCountAsPageChange(oldURL: VURL, newURL: VURL, direc
 		let oldFocused = oldMapViewMergeAction ? GetFocusedNodePath(oldMapViewMergeAction.payload.mapView) : null;
 		let newFocused = newMapViewMergeAction ? GetFocusedNodePath(newMapViewMergeAction.payload.mapView) : null;
 		if (newFocused != oldFocused) return true;
-	}
+	}*/
+	
 	return false;
 }
 export function RecordPageView(url: VURL) {
