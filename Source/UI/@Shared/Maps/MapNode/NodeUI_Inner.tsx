@@ -403,7 +403,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 		for (let [index, segment] of segments.entries()) {
 			if (segment.patternMatched == null) {
 				let segmentText = segment.textParts[0];
-				let edgeWhiteSpaceMatch = segmentText.match(/^( *).+?( *)$/);
+				let edgeWhiteSpaceMatch = segmentText.match(/^( *).*?( *)$/);
 				if (edgeWhiteSpaceMatch[1]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[1]}</span>);
 				elements.push(
 					<VReactMarkdown_Remarkable key={elements.length} containerType="span" source={segmentText}

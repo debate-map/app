@@ -90,7 +90,7 @@ let connector = (state, {node, path, map}: Props)=> {
 };
 
 @Connect(connector)
-export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWidth: 0, expectedBoxHeight: 0, dividePoint: 0, selfHeight: 0}) {
+export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWidth: 0, expectedBoxHeight: 0, dividePoint: null as number, selfHeight: 0}) {
 	static renderCount = 0;
 	static lastRenderTime = -1;
 	static ValidateProps(props) {
@@ -215,11 +215,15 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
 				type={node.type == MapNodeType.Claim ? HolderType.Truth : null}
 				//linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
-				linkSpawnPoint={dividePoint || null}
+				linkSpawnPoint={dividePoint || (selfHeight / 2)}
 				vertical={isMultiPremiseArgument}
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
 				onHeightOrDividePointChange={dividePoint=> {
-					//if (isMultiPremiseArgument) return; // if multi-premise argument, divide-point is always 0
+					// if multi-premise argument, divide-point is always at the top (just far enough down that the self-ui can center to the point, so self-height / 2)
+					if (isMultiPremiseArgument) {
+						//this.SetState({dividePoint: selfHeight / 2});
+						return;
+					}
 					this.SetState({dividePoint});
 				}}/>;
 		let nodeChildHolderBox_truth = isPremiseOfSinglePremiseArg && nodeView.expanded &&
@@ -246,7 +250,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 					/*useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
 					!useAutoOffset && {paddingTop: innerBoxOffset},*/
 					//{paddingTop: innerBoxOffset},
-					{marginTop: nodeView.expanded ? (dividePoint - (selfHeight / 2)).NaNTo(0).KeepAtLeast(0) : 0},
+					{marginTop: nodeView.expanded && !isMultiPremiseArgument ? (dividePoint - (selfHeight / 2)).KeepAtLeast(0) : 0},
 				)}>
 					{limitBar_above && children}
 					{asSubnode &&
