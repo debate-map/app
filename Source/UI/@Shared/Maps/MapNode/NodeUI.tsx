@@ -214,7 +214,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 		let nodeChildHolder_direct = !isPremiseOfSinglePremiseArg && nodeView.expanded &&
 			<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
-				type={node.type == MapNodeType.Claim && node._id != demoRootNodeID ? HolderType.Truth : null}
+				//type={node.type == MapNodeType.Claim && node._id != demoRootNodeID ? HolderType.Truth : null}
+				type={null}
 				//linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
 				linkSpawnPoint={dividePoint || (selfHeight / 2)}
 				vertical={isMultiPremiseArgument}
