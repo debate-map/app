@@ -27,6 +27,7 @@ import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker";
 import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker";
 import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer";
 import {NodeUI_Inner} from "./NodeUI_Inner";
+import {demoRootNodeID} from "../../../Home/DemoMap";
 
 let nodesLocked = {};
 export function SetNodeUILocked(nodeID: number, locked: boolean, maxWait = 10000) {
@@ -213,7 +214,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 		let nodeChildHolder_direct = !isPremiseOfSinglePremiseArg && nodeView.expanded &&
 			<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
-				type={node.type == MapNodeType.Claim ? HolderType.Truth : null}
+				type={node.type == MapNodeType.Claim && node._id != demoRootNodeID ? HolderType.Truth : null}
 				//linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
 				linkSpawnPoint={dividePoint || (selfHeight / 2)}
 				vertical={isMultiPremiseArgument}
