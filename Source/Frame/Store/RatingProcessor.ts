@@ -1,9 +1,8 @@
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
 import {MapNode, ClaimForm, MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
-import {GetRating, GetRatingValue, GetRatingSet} from "../../Store/firebase/nodeRatings";
-import {GetRatingAverage, GetRatings} from "../../Store/firebase/nodeRatings";
+import {GetRating, GetRatings, GetRatingValue, GetRatingSet, GetRatingAverage} from "../../Store/firebase/nodeRatings";
 import {Rating, RatingsSet} from "../../Store/firebase/nodeRatings/@RatingsRoot";
-import {GetRatingTypesForNode, GetNodeForm} from "../../Store/firebase/nodes/$node";
+import {GetRatingTypesForNode, GetNodeForm, GetMainRatingType} from "../../Store/firebase/nodes/$node";
 import {CachedTransform} from "js-vextensions";
 import {emptyObj} from "./ReducerUtils";
 import { ArgumentType } from "Store/firebase/nodes/@MapNodeRevision";
@@ -15,9 +14,14 @@ export function GetArgumentImpactPseudoRating(argument: MapNodeL2, premises: Map
 
 	let premiseProbabilities = premises.map(premise=> {
 		let ratingType = GetRatingTypesForNode(premise)[0].type;
-		let ratingValue = GetRatingValue(premise._id, ratingType, userID, 0) / 100;
+		let ratingValue = GetRatingValue(premise._id, ratingType, userID, null);
+		// if user didn't rate this premise, just use the average rating
+		if (ratingValue == null) {
+			ratingValue = GetRatingAverage(premise._id, ratingType, null, 0);
+		}
+		
 		let form = GetNodeForm(premise, argument);
-		let probability = form == ClaimForm.Negation ? 1 - ratingValue : ratingValue;
+		let probability = form == ClaimForm.Negation ? 1 - (ratingValue / 100) : (ratingValue / 100);
 		return probability;
 	});
 	let combinedTruthOfPremises;
@@ -31,7 +35,11 @@ export function GetArgumentImpactPseudoRating(argument: MapNodeL2, premises: Map
 		combinedTruthOfPremises = premiseProbabilities.Max(null, true);
 	}
 	
-	let relevance = GetRatingValue(argument._id, "relevance", userID, 0);
+	let relevance = GetRatingValue(argument._id, "relevance", userID, null);
+	// if user didn't rate the relevance, just use the average rating
+	if (relevance == null) {
+		relevance = GetRatingAverage(argument._id, "relevance", null, 0);
+	}
 	//let strengthForType = adjustment.Distance(50) / 50;
 	var result = combinedTruthOfPremises * (relevance / 100);
 
@@ -67,29 +75,24 @@ export function GetArgumentImpactPseudoRatingSet(argument: MapNodeL2, premises: 
 
 	//let result = CachedTransform("GetArgumentImpactPseudoRatingSet", [argument._id], dataUsedInCalculation, ()=> {
 	let result = CachedTransform_WithStore("GetArgumentImpactPseudoRatingSet", [argument._id], dataUsedInCalculation, ()=> {
-		let childRatingSets = premises.map(child=> {
-			return GetRatingSet(child._id, GetRatingTypesForNode(child).FirstOrX(null, {}).type) || emptyObj;
+		let argRatingSet = GetRatingSet(argument._id, GetMainRatingType(argument)) || emptyObj;
+		let premiseRatingSets = premises.map(child=> {
+			return GetRatingSet(child._id, GetMainRatingType(child)) || emptyObj;
 		});
 
-		let usersWhoRatedAllChildren = null;
+		let usersWhoRatedArgOrPremise = {};
+		for (let userID of argRatingSet.VKeys(true)) {
+			usersWhoRatedArgOrPremise[userID] = true;
+		}
 		for (let [index, child] of premises.entries()) {
-			let childRatingSet = childRatingSets[index];
-			if (usersWhoRatedAllChildren == null) {
-				usersWhoRatedAllChildren = {};
-				for (let userID of childRatingSet.VKeys(true)) {
-					usersWhoRatedAllChildren[userID] = true;
-				}
-			} else {
-				for (let userID in usersWhoRatedAllChildren) {
-					if (childRatingSet[userID] == null) {
-						delete usersWhoRatedAllChildren[userID];
-					}
-				}
+			let childRatingSet = premiseRatingSets[index];
+			for (let userID of childRatingSet.VKeys(true)) {
+				usersWhoRatedArgOrPremise[userID] = true;
 			}
 		}
 
 		let result = {} as RatingsSet;
-		for (let userID in usersWhoRatedAllChildren) {
+		for (let userID in usersWhoRatedArgOrPremise) {
 			result[userID] = GetArgumentImpactPseudoRating(argument, premises, userID);
 		}
 		return result;
