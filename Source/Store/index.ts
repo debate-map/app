@@ -84,9 +84,9 @@ function State<T>(...args) {
 	else [options, ...pathSegments] = args;
 
 	if (__DEV__) {
-		Assert(pathSegments.All(segment=>segment != null), `Path-segment cannot be null. @segments(${pathSegments})`);
+		Assert(pathSegments.All(segment=>segment != null), ()=>`Path-segment cannot be null. @segments(${pathSegments})`);
 		Assert(pathSegments.All(segment=>typeof segment == "number" || !segment.Contains("/")),
-			`Each string path-segment must be a plain prop-name. (ie. contain no "/" separators) @segments(${pathSegments})`);
+			()=>`Each string path-segment must be a plain prop-name. (ie. contain no "/" separators) @segments(${pathSegments})`);
 	}
 
 	let countAsAccess = options.countAsAccess != null ? options.countAsAccess : (State_overrideCountAsAccess_value != null ? State_overrideCountAsAccess_value : true);
@@ -94,7 +94,7 @@ function State<T>(...args) {
 	let selectedData = DeepGet(state, pathSegments);
 	//if (countAsAccess && pathSegments.length) {
 	if (countAsAccess) {
-		let path = pathSegments.join("/");
+		let path = typeof args[0] == "string" && args.length == 1 ? args[0] : pathSegments.join("/");
 		//Assert(g.inConnectFunc, "State(), with countAsAccess:true, must be called from within a Connect() func.");
 		OnAccessPath(path);
 	}

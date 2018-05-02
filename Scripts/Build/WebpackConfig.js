@@ -266,20 +266,28 @@ if (USE_TSLOADER) {
 	webpackConfig.module.rules.push({test: /\.tsx?$/, loader: "ts-loader", options: {include: [paths.client()]}});
 }
 
-// module text-replacements (a better alternative than directly modifying files in node_modules, as that conflicts with npm's installations/control)
+// file text-replacements
 // ==========
 
-/*webpackConfig.module.rules.push({
-	test: /ReactCompositeComponent.js/,
+webpackConfig.module.rules.push({
+	test: /\.jsx?$/,
 	loader: StringReplacePlugin.replace({replacements: [
+		// optimization; replace `State(a=>a.some.thing)` with `State("some/thing")`
 		{
-			pattern: /this/g,
-			replacement: function(match, offset, string) {
-				return `debugger;`;
+			pattern: /State\(a ?=> ?a\.([a-zA-Z_.]+)\)/g,
+			replacement: function(match, sub1, offset, string) {
+				return `State("${sub1.replace(/\./g, "/")}")`;
 			}
 		},
+		/*{
+			pattern: /State\(function \(a\) {\s+return a.([a-zA-Z_.]+);\s+}\)/g,
+			replacement: function(match, sub1, offset, string) {
+				Log("Replacing...");
+				return `State("${sub1.replace(/\./g, "/")}")`;
+			}
+		},*/
 	]})
-});*/
+});
 
 // css loaders
 // ==========

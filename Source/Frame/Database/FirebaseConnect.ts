@@ -49,11 +49,12 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		let s = this;
 		g.inConnectFunc = true;
 
-		if (devEnv) {
+		//if (ShouldLog(a=>a.check_callStackDepths)) {
+		/*if (devEnv) {
 			let callStackDepth = GetStackTraceStr().split("\n").length;
 			// if we're at a call-stack-depth of X, we know something's wrong, so break
 			Assert(callStackDepth < 1000, `Call-stack-depth too deep (${callStackDepth})! Something must be wrong with the UI code.`);
-		}
+		}*/
 		
 		ClearRequestedPaths();
 		ClearAccessedPaths();
@@ -105,12 +106,15 @@ export function Connect<T, P>(funcOrFuncGetter) {
 			s.extraInfo.recentRenderTriggers = recentRenderTriggers;
 		}
 
-		//let result = mapStateToProps_inner.call(s, state, props);
 		// for debugging in profiler
-		//let debugText = ToJSON(props).replace(/[^a-zA-Z0-9]/g, "_");
-		let debugText = `${props["node"] ? " @ID:" + props["node"]._id : ""} @changedPath: ${changedPath} @changedProps: ${changedProps.join(", ")}`;
-		let wrapperFunc = eval(`(function ${debugText.replace(/[^a-zA-Z0-9]/g, "_")}() { return mapStateToProps_inner.apply(s, arguments); })`);
-		let result = wrapperFunc.call(s, state, props);
+		/*if (__DEV__) {
+			//let debugText = ToJSON(props).replace(/[^a-zA-Z0-9]/g, "_");
+			let debugText = `${props["node"] ? " @ID:" + props["node"]._id : ""} @changedPath: ${changedPath} @changedProps: ${changedProps.join(", ")}`;
+			let wrapperFunc = eval(`(function ${debugText.replace(/[^a-zA-Z0-9]/g, "_")}() { return mapStateToProps_inner.apply(s, arguments); })`);
+			var result = wrapperFunc.call(s, state, props);
+		} else*/ {
+			var result = mapStateToProps_inner.call(s, state, props);
+		}
 
 		// also access some other paths here, so that when they change, they trigger ui updates for everything
 		result._user = GetUser(GetUserID());

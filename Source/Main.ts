@@ -54,6 +54,7 @@ if (startURL.GetQueryVar("env") && startURL.GetQueryVar("env") != "null") {
 }
 G({env}); declare global { var env: string; }
 
+// todo: maybe remove these, and just use __DEV__, __PROD__, etc.
 let env_short = env == "production" ? "prod" : "dev";
 let devEnv = env == "development";
 let prodEnv = env == "production";
