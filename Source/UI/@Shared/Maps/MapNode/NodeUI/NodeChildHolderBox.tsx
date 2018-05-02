@@ -9,7 +9,7 @@ import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
 import {ACTMapNodeExpandedSet} from "Store/main/mapViews/$mapView/rootNodeViews";
 import {MapNodeView} from "Store/main/mapViews/@MapViews";
 import {Row} from "react-vcomponents";
-import {BaseComponentWithConnector} from "react-vextensions";
+import {BaseComponentWithConnector, GetInnerComp} from "react-vextensions";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import {GetFillPercent_AtPath} from "../../../../../Store/firebase/nodeRatings";
 import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
@@ -89,7 +89,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		//let expandKey = type == HolderType.Truth ? "expanded_truth" : "expanded_relevance";
 		let holderTypeStr = HolderType[type].toLowerCase();
 		let expandKey = `expanded_${holderTypeStr}`;
-		let expanded = nodeView[expandKey];
+		let expanded = nodeView[expandKey]; //this.Expanded
 
 		let separateChildren = node.type == MapNodeType.Claim || IsSinglePremiseArgument(node);
 		let showArgumentsControlBar = /*(node.type == MapNodeType.Claim || combineWithChildClaim) &&*/ expanded && nodeChildrenToShow != emptyArray_forLoading;
@@ -138,7 +138,6 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 							e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
 							//return false;
 							if (nodeView[expandKey]) {
-								this.dividePoint = 0;
 								this.CheckForChanges();
 							}
 						}}
@@ -163,20 +162,24 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 						<NodeChangesMarker {...{addedDescendants, editedDescendants, textOutline, limitBarPos}}/>*/}
 				</Row>
 				{nodeView[expandKey] &&
-					<NodeChildHolder {...{map, node, path, nodeView, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar}}
+					<NodeChildHolder ref={c=>this.childHolder = c}
+						{...{map, node, path, nodeView, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar}}
 						linkSpawnPoint={innerBoxOffset + (height / 2)}
-						onHeightOrDividePointChange={dividePoint=> {
-							Assert(!IsNaN(dividePoint));
-							this.dividePoint = dividePoint;
-							this.CheckForChanges();
-						}}/>}
+						onHeightOrDividePointChange={()=>this.CheckForChanges()}/>}
 			</Row>
 		);
+	}
+
+	get Expanded() {
+		let {type, nodeView} = this.props;
+		let expandKey = `expanded_${HolderType[type].toLowerCase()}`;
+		return nodeView[expandKey];
 	}
 
 	expandableBox: ExpandableBox;
 	ratingPanelHolder: HTMLDivElement;
 	ratingPanel: RatingsPanel;
+	childHolder: NodeChildHolder;
 
 	ComponentDidMount() {
 		$(this.expandableBox.DOM).hover(()=>$(".scrolling").length == 0 && this.SetState({hovered: true}), ()=>this.SetState({hovered: false}));
@@ -187,13 +190,11 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		this.CheckForChanges();
 	}
 
-	dividePoint: number;
-
 	lastLineHolderHeight = 0;
 	lastHeight = 0;
 	lastDividePoint = 0;
 	CheckForChanges() {
-		let {onHeightOrDividePointChange} = this.props;
+		let {nodeView, onHeightOrDividePointChange} = this.props;
 		
 		let lineHolderHeight = $(this.lineHolder).outerHeight();
 		if (lineHolderHeight != this.lastLineHolderHeight) {
@@ -202,21 +203,22 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		this.lastLineHolderHeight = lineHolderHeight;
 
 		let height = $(GetDOM(this)).outerHeight();
-		if (height != this.lastHeight || this.dividePoint != this.lastDividePoint) {
+		let dividePoint = this.childHolder && this.Expanded ? (this.childHolder as any).getWrappedInstance().GetDividePoint() : 0;
+		if (height != this.lastHeight || dividePoint != this.lastDividePoint) {
 			/*if (height != this.lastHeight) {
 				this.OnHeightChange();
 			}*/
-			//if (this.dividePoint != this.lastDividePoint) {
+			if (dividePoint != this.lastDividePoint) {
 				let {height} = this.GetMeasurementInfo();
 				let distFromInnerBoxTopToMainBoxCenter = height / 2;
-				let innerBoxOffset = (this.dividePoint - distFromInnerBoxTopToMainBoxCenter).NaNTo(0).KeepAtLeast(0);
+				let innerBoxOffset = (dividePoint - distFromInnerBoxTopToMainBoxCenter).NaNTo(0).KeepAtLeast(0);
 				this.SetState({innerBoxOffset});
-			//}
+			}
 
-			if (onHeightOrDividePointChange) onHeightOrDividePointChange(this.dividePoint);
+			if (onHeightOrDividePointChange) onHeightOrDividePointChange(dividePoint);
 		}
 		this.lastHeight = height;
-		this.lastDividePoint = this.dividePoint;
+		this.lastDividePoint = dividePoint;
 	}
 	
 	GetMeasurementInfo() {

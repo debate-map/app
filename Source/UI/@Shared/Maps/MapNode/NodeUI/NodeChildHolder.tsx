@@ -71,10 +71,10 @@ let connector = (state, {node, path, nodeChildrenToShow}: Props)=> {
 @Connect(connector)
 export class NodeChildHolder extends BaseComponentWithConnector(connector, initialState) {
 	static defaultProps = {minWidth: 0};
-	static ValidateProps(props) {
+	/*static ValidateProps(props) {
 		let {node, path} = props;
-		Assert(SplitStringBySlash_Cached(path).Distinct().length == SplitStringBySlash_Cached(path).length, `Node path contains a circular link! (${path})`);
-	}
+		//Assert(SplitStringBySlash_Cached(path).Distinct().length == SplitStringBySlash_Cached(path).length, `Node path contains a circular link! (${path})`);
+	}*/
 	
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
@@ -177,7 +177,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 
 	get Expanded() {
 		let {type, nodeView} = this.props;
-		let expandKey = `expanded_${HolderType[type].toLowerCase()}`;
+		let expandKey = type ? `expanded_${HolderType[type].toLowerCase()}` : "expanded";
 		return nodeView[expandKey];
 	}
 
@@ -191,23 +191,26 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	}
 
 	lastHeight = 0;
+	lastDividePoint = 0;
 	lastOrderStr = null;
 	CheckForChanges() {
 		//if (this.lastRender_source == RenderSource.SetState) return;
 		let {node, onHeightOrDividePointChange} = this.props;
 
 		let height = $(GetDOM(this)).outerHeight();
-		if (height != this.lastHeight) {
+		let dividePoint = this.GetDividePoint();
+		if (height != this.lastHeight || dividePoint != this.lastDividePoint) {
 			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
 				()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
-					}centerY:${this.GetDividePoint()}`);
+					}dividePoint:${dividePoint}`);
 			
 			//this.UpdateState(true);
 			this.UpdateChildrenWidthOverride();
 			this.UpdateChildBoxOffsets();
-			if (onHeightOrDividePointChange) onHeightOrDividePointChange(this.GetDividePoint());
+			if (onHeightOrDividePointChange) onHeightOrDividePointChange(dividePoint);
 		}
 		this.lastHeight = height;
+		this.lastDividePoint = dividePoint;
 
 		let orderStr = this.ChildOrderStr;
 		if (orderStr != this.lastOrderStr) {
@@ -230,14 +233,13 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		if (!this.OnChildHeightOrPosChange_updateStateQueued) {
 			this.OnChildHeightOrPosChange_updateStateQueued = true;
 			requestAnimationFrame(()=> {
-				if (!this.mounted) return;
-				this.UpdateChildrenWidthOverride();
-				this.UpdateChildBoxOffsets();
 				this.OnChildHeightOrPosChange_updateStateQueued = false;
+				if (!this.mounted) return;
+				/*this.UpdateChildrenWidthOverride();
+				this.UpdateChildBoxOffsets();*/
+				this.CheckForChanges();
 			});
 		}
-
-		this.CheckForChanges();
 	}
 
 	GetDividePoint() {

@@ -211,9 +211,9 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			);
 		}
 
-		let nodeChildHolder = !isPremiseOfSinglePremiseArg && nodeView.expanded &&
+		let nodeChildHolder_direct = !isPremiseOfSinglePremiseArg && nodeView.expanded &&
 			<NodeChildHolder {...{map, node, path, nodeView, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
-				type={HolderType.Truth}
+				type={node.type == MapNodeType.Claim ? HolderType.Truth : null}
 				//linkSpawnPoint={innerBoxOffset + expectedHeight / 2}
 				linkSpawnPoint={dividePoint || null}
 				vertical={isMultiPremiseArgument}
@@ -222,6 +222,16 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 					//if (isMultiPremiseArgument) return; // if multi-premise argument, divide-point is always 0
 					this.SetState({dividePoint});
 				}}/>;
+		let nodeChildHolderBox_truth = isPremiseOfSinglePremiseArg && nodeView.expanded &&
+			<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Truth}
+				widthOfNode={widthOverride || width}
+				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
+				onHeightOrDividePointChange={dividePoint=>this.CheckForChanges()}/>;
+		let nodeChildHolderBox_relevance = isPremiseOfSinglePremiseArg && nodeView.expanded &&
+			<NodeChildHolderBox {...{map, node: parent, path: parentPath, nodeView: parentNodeView}} type={HolderType.Relevance}
+				widthOfNode={widthOverride || width}
+				nodeChildren={GetNodeChildrenL3(parent, parentPath)} nodeChildrenToShow={relevanceArguments}
+				onHeightOrDividePointChange={dividePoint=>this.CheckForChanges()}/>;
 
 		let hasExtraWrapper = subnodes.length || isMultiPremiseArgument;
 
@@ -246,20 +256,12 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 							<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 								<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 							</div>}
-						{isPremiseOfSinglePremiseArg && nodeView.expanded &&
-							<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Truth}
-								widthOfNode={widthOverride || width}
-								nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
-								onHeightOrDividePointChange={dividePoint=>this.SetState({dividePoint})}/>}
+						{nodeChildHolderBox_truth}
 						<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{map, node, nodeView, path, width, widthOverride}}
 							style={E(
 								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
 							)}/>
-						{isPremiseOfSinglePremiseArg && nodeView.expanded &&
-							<NodeChildHolderBox {...{map, node: parent, path: parentPath, nodeView: parentNodeView}} type={HolderType.Relevance}
-								widthOfNode={widthOverride || width}
-								nodeChildren={GetNodeChildrenL3(parent, parentPath)} nodeChildrenToShow={relevanceArguments}
-								onHeightOrDividePointChange={dividePoint=>this.SetState({dividePoint})}/>}
+						{nodeChildHolderBox_relevance}
 						{/*showBelowMessage &&
 							<Div ct style={{
 								//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
@@ -281,7 +283,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 				{!nodeView.expanded && (addedDescendants > 0 || editedDescendants > 0) &&
 					<NodeChangesMarker {...{addedDescendants, editedDescendants, limitBarPos}}/>}
 				{!isMultiPremiseArgument &&
-					nodeChildHolder}
+					nodeChildHolder_direct}
 			</div>
 		);
 
@@ -299,7 +301,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 				})}
 				<div className="clickThrough" style={E({marginTop: -5})}>
 					{isMultiPremiseArgument &&
-						nodeChildHolder}
+						nodeChildHolder_direct}
 				</div>
 				{!limitBar_above && children}
 			</div>

@@ -153,12 +153,12 @@ export function Connect<T, P>(funcOrFuncGetter) {
 	};
 
 	if (mapStateToProps_inner) {
-		return connect(mapStateToProps_wrapper);
+		return connect(mapStateToProps_wrapper, null, null, {withRef: true}); // {withRef: true} lets you do wrapperComp.getWrappedInstance() 
 	}
 	return connect(()=> {
 		mapStateToProps_inner = mapStateToProps_inner_getter();
 		return mapStateToProps_wrapper;
-	});
+	}, null, null, {withRef: true});
 }
 
 let actionTypeBufferInfos = {

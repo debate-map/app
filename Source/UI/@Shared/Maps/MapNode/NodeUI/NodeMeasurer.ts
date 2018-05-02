@@ -26,12 +26,12 @@ export function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 	if (node.current.note) {
 		let noteWidth_tester = GetAutoElement(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>`) as HTMLElement;
 		noteWidth_tester.innerHTML = node.current.note;
-		noteWidth = Math.max(noteWidth, noteWidth_tester.offsetWidth);
+		noteWidth = Math.max(noteWidth, GetContentWidth(noteWidth_tester));
 	}
 	if (node.current.equation && node.current.equation.explanation) {
 		let noteWidth_tester = GetAutoElement(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>`) as HTMLElement;
 		noteWidth_tester.innerHTML = node.current.equation.explanation;
-		noteWidth = Math.max(noteWidth, noteWidth_tester.offsetWidth);
+		noteWidth = Math.max(noteWidth, GetContentWidth(noteWidth_tester));
 	}
 	expectedTextWidth += noteWidth;
 
@@ -52,7 +52,7 @@ export function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 	expectedTextHeight_tester.style.fontSize = `${fontSize}px`;
 	expectedTextHeight_tester.style.width = `${maxTextWidth}px`;
 	expectedTextHeight_tester.innerHTML = displayText;
-	let expectedTextHeight = expectedTextHeight_tester.offsetHeight;
+	let expectedTextHeight = GetContentHeight(expectedTextHeight_tester);
 	let expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
 	//this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
 
