@@ -290,7 +290,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		if (this.Expanded && this.childHolder) {
 			let holderOffset = new Vector2i($(GetDOM(this.childHolder)).offset());
 
-			let oldChildBoxOffsets = this.childBoxes.Props().Where(pair=>pair.value != null).ToMap(pair=>pair.name, pair=> {
+			let oldChildBoxOffsets = this.childBoxes.Props().filter(pair=>pair.value != null).ToMap(pair=>pair.name, pair=> {
 				//let childBox = FindDOM_(pair.value).find("> div:first-child > div"); // get inner-box of child
 				//let childBox = $(GetDOM(pair.value)).find(".NodeUI_Inner").first(); // get inner-box of child
 				// not sure why this is needed... (bad sign!)

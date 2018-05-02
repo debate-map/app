@@ -21,6 +21,7 @@ import {OnAccessPath} from "../Frame/Database/FirebaseConnect";
 import {persistStore, persistReducer, getStoredState} from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web and AsyncStorage for react-native
 import {State_overrideData_path, State_overrideData_value, State_overrideCountAsAccess_value} from "../UI/@Shared/StateOverrides";
+import {SplitStringBySlash_Cached} from "../Frame/Database/StringSplitCache";
 
 // State() actually also returns the root-state (if no data-getter is supplied), but we don't reveal that in type-info (as its only to be used in console)
 G({State});
@@ -77,15 +78,24 @@ function State<T>(...args) {
 		? u.updateIn(State_overrideData_path.replace(/\//g, "."), u.constant(State_overrideData_value), store.getState())
 		: store.getState();
 
-	let pathSegments: (string | number)[], options = new State_Options();
 	if (args.length == 0) return state;
-	else if (typeof args[0] == "function") pathSegments = ConvertPathGetterFuncToPropChain(args[0]);
-	else if (typeof args[0] == "string") pathSegments = args.length == 1 ? args[0].split("/") : args; // if only one string provided, assume it's the full path
-	else [options, ...pathSegments] = args;
+
+	let pathSegments: (string | number)[], options = new State_Options();
+	if (typeof args[0] == "object") {
+		[options, ...pathSegments] = args;
+	} else {
+		pathSegments = args;
+	}
+
+	if (typeof pathSegments[0] == "function") {
+		pathSegments = ConvertPathGetterFuncToPropChain(args[0]);
+	} else { //if (typeof pathSegments[0] == "string") {
+		if (pathSegments.length == 1) pathSegments = SplitStringBySlash_Cached(pathSegments[0] as string); // if only one string provided, assume it's the full path
+	}
 
 	if (__DEV__) {
-		Assert(pathSegments.All(segment=>segment != null), ()=>`Path-segment cannot be null. @segments(${pathSegments})`);
-		Assert(pathSegments.All(segment=>typeof segment == "number" || !segment.Contains("/")),
+		Assert(pathSegments.every(segment=>segment != null), ()=>`Path-segment cannot be null. @segments(${pathSegments})`);
+		Assert(pathSegments.every(segment=>typeof segment == "number" || !segment.Contains("/")),
 			()=>`Each string path-segment must be a plain prop-name. (ie. contain no "/" separators) @segments(${pathSegments})`);
 	}
 
@@ -94,7 +104,7 @@ function State<T>(...args) {
 	let selectedData = DeepGet(state, pathSegments);
 	//if (countAsAccess && pathSegments.length) {
 	if (countAsAccess) {
-		let path = typeof args[0] == "string" && args.length == 1 ? args[0] : pathSegments.join("/");
+		let path = typeof pathSegments[0] == "string" && pathSegments.length == 1 ? pathSegments[0] as string : pathSegments.join("/");
 		//Assert(g.inConnectFunc, "State(), with countAsAccess:true, must be called from within a Connect() func.");
 		OnAccessPath(path);
 	}

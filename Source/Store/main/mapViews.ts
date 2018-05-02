@@ -82,7 +82,7 @@ export function MapViewsReducer(state = new MapViews(), action: Action<any>) {
 
 export function GetPathNodes(path: string) {
 	let pathSegments = SplitStringBySlash_Cached(path);
-	Assert(pathSegments.All(a=>IsNumberString(a) || a[0] == "L"), `Path contains non-number, non-L-prefixed segments: ${path}`);
+	Assert(pathSegments.every(a=>IsNumberString(a) || a[0] == "L"), `Path contains non-number, non-L-prefixed segments: ${path}`);
 	//return pathSegments.map(ToInt);
 	return pathSegments;
 }
@@ -100,7 +100,7 @@ export function GetSelectedNodePathNodes(mapViewOrMapID: number | MapView): stri
 		if (selectedTreeNode == null) return [];
 
 		let selectedNodeView = selectedTreeNode.ancestorNodes.Last();
-		//return selectedNodeView.PathNodes.Where(a=>a != "children").map(ToInt);
+		//return selectedNodeView.PathNodes.filter(a=>a != "children").map(ToInt);
 		return GetPathFromDataPath(selectedNodeView.PathNodes);
 	});
 }
@@ -132,7 +132,7 @@ export function GetFocusedNodePathNodes(mapViewOrMapID: number | MapView): strin
 		if (focusedTreeNode == null) return [];
 
 		let focusedNodeView = focusedTreeNode.ancestorNodes.Last();
-		//return focusedNodeView.PathNodes.Where(a=>a != "children").map(ToInt);
+		//return focusedNodeView.PathNodes.filter(a=>a != "children").map(ToInt);
 		return GetPathFromDataPath(focusedNodeView.PathNodes);
 	});
 }

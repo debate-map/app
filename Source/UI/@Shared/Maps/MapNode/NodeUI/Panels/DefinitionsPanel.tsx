@@ -31,7 +31,7 @@ let termsPlaceholder = [];
 	let terms_variantNumbers = terms.map(a=>a ? GetTermVariantNumber(a) : 1);
 	return {
 		// only pass terms when all are loaded
-		terms: CachedTransform("terms_transform1", [path], terms, ()=>terms.All(a=>a != null) ? terms : termsPlaceholder),
+		terms: CachedTransform("terms_transform1", [path], terms, ()=>terms.every(a=>a != null) ? terms : termsPlaceholder),
 		terms_variantNumbers: CachedTransform("terms_variantNumbers_transform1", [path], terms_variantNumbers, ()=>terms_variantNumbers),
 		hoverTerm: hoverTermID ? GetTerm(hoverTermID) : null,
 		clickTerm: openTermID ? GetTerm(openTermID) : null,

@@ -96,7 +96,7 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 					return titles.find(a=>a.match(regExp) != null);
 				}
 				let terms = filter.toLowerCase().split(" ");
-				return titles.find(a=>terms.All(term=>a.toLowerCase().includes(term)));
+				return titles.find(a=>terms.every(term=>a.toLowerCase().includes(term)));
 			});
 		}
 

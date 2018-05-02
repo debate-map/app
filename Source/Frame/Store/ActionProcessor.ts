@@ -207,7 +207,7 @@ export async function PostDispatchAction(action: Action<any>) {
 		
 		// if we're expanding a claim-node, make sure any untouched truth-arguments start expanded
 		if (node.type == MapNodeType.Claim && action.payload[expandKey]) {
-			let children = GetNodeChildrenL2(node).All(a=>a != null) ? GetNodeChildrenL2(node) : await GetAsync(()=>GetNodeChildrenL2(node));
+			let children = GetNodeChildrenL2(node).every(a=>a != null) ? GetNodeChildrenL2(node) : await GetAsync(()=>GetNodeChildrenL2(node));
 			let actions = [];
 			for (let child of children) {
 				let childPath = `${action.payload.path}/${child._id}`;

@@ -178,7 +178,7 @@ export function GetData(...args) {
 	options = E(new GetData_Options(), options);
 
 	if (__DEV__) {
-		Assert(pathSegments.All(segment=>typeof segment == "number" || !segment.Contains("/")),
+		Assert(pathSegments.every(segment=>typeof segment == "number" || !segment.Contains("/")),
 			`Each string path-segment must be a plain prop-name. (ie. contain no "/" separators) @segments(${pathSegments})`);
 	}
 
@@ -472,7 +472,7 @@ export function CachedTransform_WithStore<T, T2, T3>(
 
 	// for each accessed store entry, add it to VCache's "last dynamic props" for this transform
 	for (let path of collector.storePathsRequested) {
-		let val = State({countAsAccess: false}, ...path.split("/"));
+		let val = State({countAsAccess: false}, path);
 		storage.lastDynamicProps["store_" + path] = val;
 	}
 

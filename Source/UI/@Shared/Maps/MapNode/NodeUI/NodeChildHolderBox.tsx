@@ -65,7 +65,7 @@ let connector = (state, {node, path, type, nodeChildren}: Props)=> {
 export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {innerBoxOffset: 0, lineHolderHeight: 0, hovered: false}) {
 	static ValidateProps(props) {
 		let {node, nodeChildren} = props;
-		Assert(nodeChildren.All(a=>a == null || a.parents[node._id]), "Supplied node is not a parent of all the supplied node-children!");
+		Assert(nodeChildren.every(a=>a == null || a.parents[node._id]), "Supplied node is not a parent of all the supplied node-children!");
 	}
 	lineHolder: HTMLDivElement;
 	render() {

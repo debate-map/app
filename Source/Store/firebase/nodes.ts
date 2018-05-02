@@ -189,6 +189,6 @@ export function ForCopy_GetError(userID: string, node: MapNode) {
 
 /*export function GetUnlinkErrorMessage(parent: MapNode, child: MapNode) {
 	//let childNodes = node.children.Select(a=>nodes[a]);
-	let parentNodes = nodes.Where(a=>a.children && a.children[node._id]);
+	let parentNodes = nodes.filter(a=>a.children && a.children[node._id]);
 	if (parentNodes.length <= 1)
 }*/

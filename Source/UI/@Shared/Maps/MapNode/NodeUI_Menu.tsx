@@ -121,7 +121,7 @@ export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 							await new SetNodeIsMultiPremiseArgument({nodeID: parent._id, multiPremiseArgument: true}).Run();
 						}}/>}
 				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)
-						&& nodeChildren.All(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && !componentBox &&
+						&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && !componentBox &&
 					<VMenuItem text="Convert to single-premise" style={styles.vMenuItem}
 						onClick={async e=> {
 							if (e.button != 0) return;

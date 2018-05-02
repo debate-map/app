@@ -69,7 +69,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 			storeDataChanged = true;
 		} else {
 			for (let path in s.lastAccessedStorePaths_withData) {
-				if (State({countAsAccess: false}, ...SplitStringBySlash_Cached(path)) !== s.lastAccessedStorePaths_withData[path]) {
+				if (State({countAsAccess: false}, path) !== s.lastAccessedStorePaths_withData[path]) {
 					//store.dispatch({type: "Data changed!" + path});
 					storeDataChanged = true;
 					changedPath = path;
@@ -142,7 +142,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		//ClearAccessedPaths();
 		s.lastAccessedStorePaths_withData = {};
 		for (let path of accessedStorePaths) {
-			s.lastAccessedStorePaths_withData[path] = State({countAsAccess: false}, ...SplitStringBySlash_Cached(path));
+			s.lastAccessedStorePaths_withData[path] = State({countAsAccess: false}, path);
 		}
 		s.lastProps = props;
 		s.lastResult = result;
