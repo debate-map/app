@@ -103,7 +103,7 @@ class TermDefinitionPanel extends BaseComponent<{term: Term, termVariantNumber: 
 				{term.components && term.components.VKeys(true).length && [
 					<Row mt={5}>Components:</Row>,
 					<TermComponentsUI term={term} editing={false} inMap={true} style={{padding: "5px 0"}}/>
-				]}
+				].AutoKey()}
 				{/*<Row>Details:</Row>
 				<TermDetailsUI baseData={term} creating={false} enabled={/*creatorOrMod*#/ false} style={{padding: 10}}
 					onChange={data=>this.SetState({selectedTerm_newData: data})}/>*/}
