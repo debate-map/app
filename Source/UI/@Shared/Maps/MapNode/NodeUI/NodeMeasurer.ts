@@ -1,7 +1,7 @@
 import {MapNodeL3} from "Store/firebase/nodes/@MapNode";
 import {MapNodeType_Info} from "Store/firebase/nodes/@MapNodeType";
 import {GetNodeDisplayText, GetFontSizeForNode} from "Store/firebase/nodes/$node";
-import {GetContentWidth, GetContentHeight} from "js-vextensions";
+import {GetContentWidth, GetContentHeight, GetAutoElement} from "js-vextensions";
 import {createMarkupForStyles} from "react-dom/lib/CSSPropertyOperations";
 
 /*interface JQuery {
@@ -18,16 +18,20 @@ export function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 
 	let displayText = GetNodeDisplayText(node, path);
 	let fontSize = GetFontSizeForNode(node);
-	let expectedTextWidth = GetContentWidth(`<span style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>${displayText}</span>`);
+	let expectedTextWidth_tester = GetAutoElement(`<span style='${createMarkupForStyles({fontSize, whiteSpace: "nowrap"})}'>`) as HTMLElement;
+	expectedTextWidth_tester.innerHTML = displayText;
+	let expectedTextWidth = expectedTextWidth_tester.offsetWidth;
 
 	let noteWidth = 0;
 	if (node.current.note) {
-		noteWidth = Math.max(noteWidth,
-			GetContentWidth(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.current.note}</span>`, true));
+		let noteWidth_tester = GetAutoElement(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>`) as HTMLElement;
+		noteWidth_tester.innerHTML = node.current.note;
+		noteWidth = Math.max(noteWidth, noteWidth_tester.offsetWidth);
 	}
 	if (node.current.equation && node.current.equation.explanation) {
-		noteWidth = Math.max(noteWidth,
-			GetContentWidth(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>${node.current.equation.explanation}</span>`, true));
+		let noteWidth_tester = GetAutoElement(`<span style='${createMarkupForStyles({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>`) as HTMLElement;
+		noteWidth_tester.innerHTML = node.current.equation.explanation;
+		noteWidth = Math.max(noteWidth, noteWidth_tester.offsetWidth);
 	}
 	expectedTextWidth += noteWidth;
 
@@ -44,9 +48,11 @@ export function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 	let width = node.current.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
 
 	let maxTextWidth = width - expectedOtherStuffWidth;
-	let expectedTextHeight = GetContentHeight(`<a style='${
-		createMarkupForStyles({fontSize, whiteSpace: "initial", display: "inline-block", width: maxTextWidth})
-	}'>${displayText}</a>`);
+	let expectedTextHeight_tester = GetAutoElement(`<a id="nodeHeightTester" style='${createMarkupForStyles({whiteSpace: "initial", display: "inline-block"})}'>`) as HTMLElement;
+	expectedTextHeight_tester.style.fontSize = `${fontSize}px`;
+	expectedTextHeight_tester.style.width = `${maxTextWidth}px`;
+	expectedTextHeight_tester.innerHTML = displayText;
+	let expectedTextHeight = expectedTextHeight_tester.offsetHeight;
 	let expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
 	//this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
 

@@ -15,6 +15,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 	}
 	
 	parent;
+	textHolder: HTMLDivElement;
 	render() {
 		let {parent,
 			className, width, widthOverride, innerWidth, outlineColor, padding, style, onClick,
@@ -33,7 +34,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 					onClick={onClick}>
 				{beforeChildren}
 				<Row style={{alignItems: "stretch", width: innerWidth || "100%", borderRadius: 5, cursor: "pointer"}}>
-					<div style={{position: "relative", width: "calc(100% - 17px)", padding,
+					<div ref={c=>this.textHolder = c} style={{position: "relative", width: "calc(100% - 17px)", padding,
 								//overflow: "hidden" // let it overflow for now, until we have proper handling for katex-overflowing
 					}} onClick={onTextHolderClick}>
 						<div style={{

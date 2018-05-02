@@ -172,7 +172,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		// we have to use native/jquery hover/mouseenter+mouseleave, to fix that in-equation term-placeholders would cause "mouseleave" to be triggered
 		//let dom = $(GetDOM(this));
 		//dom.off("mouseenter mouseleave");
-		$(this.innerUI.DOM).hover(()=> {
+		$(this.innerUI.textHolder).hover(()=> {
 			if ($(".scrolling").length == 0) {
 				this.SetState({hovered: true});
 			}
