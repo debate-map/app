@@ -37,10 +37,12 @@ export function HandleError(error: Error, recordWithSentry = true, extraInfo = {
 
 	//alert("An error occurred: " + error);
 	let errorStr = "";
-	if (!message.startsWith("Assert failed) "))
+	if (!message.startsWith("Assert failed) ")) {
 		errorStr += `An error has occurred: `;
-	if (!stack.Contains(message))
+	}
+	if (!stack.Contains(message)) {
 		errorStr += message;
+	}
 	errorStr += (errorStr.length ? "\n" : "") + stack;
 	LogError(errorStr);
 
