@@ -16,6 +16,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 	
 	parent;
 	textHolder: HTMLDivElement;
+	expandButton: Button;
 	render() {
 		let {parent,
 			className, width, widthOverride, innerWidth, outlineColor, padding, style, onClick,
@@ -35,7 +36,7 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 				{beforeChildren}
 				<Row style={{alignItems: "stretch", width: innerWidth || "100%", borderRadius: 5, cursor: "pointer"}}>
 					<div ref={c=>this.textHolder = c} style={{position: "relative", width: "calc(100% - 17px)", padding,
-								//overflow: "hidden" // let it overflow for now, until we have proper handling for katex-overflowing
+						//overflow: "hidden" // let it overflow for now, until we have proper handling for katex-overflowing
 					}} onClick={onTextHolderClick}>
 						<div style={{
 							position: "absolute", left: 0, top: 0, bottom: 0,
@@ -52,7 +53,8 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 							}}/>}
 						{text}
 					</div>
-					<Button text={expanded ? "-" : "+"} //size={28}
+					<Button ref={c=>this.expandButton = c}
+						text={expanded ? "-" : "+"} //size={28}
 						style={{
 							display: "flex", justifyContent: "center", alignItems: "center", borderRadius: "0 5px 5px 0",
 							width: 17, //minWidth: 18, // for some reason, we need min-width as well to fix width-sometimes-ignored issue

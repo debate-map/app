@@ -62,7 +62,7 @@ let connector = (state, {node, path, type, nodeChildren}: Props)=> {
 	};
 };
 @Connect(connector)
-export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {innerBoxOffset: 0, lineHolderHeight: 0, hovered: false}) {
+export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {innerBoxOffset: 0, lineHolderHeight: 0, hovered: false, hovered_button: false}) {
 	static ValidateProps(props) {
 		let {node, nodeChildren} = props;
 		Assert(nodeChildren.every(a=>a == null || a.parents[node._id]), "Supplied node is not a parent of all the supplied node-children!");
@@ -70,7 +70,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 	lineHolder: HTMLDivElement;
 	render() {
 		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, widthOverride, backgroundFillPercent, markerPercent} = this.props;
-		let {innerBoxOffset, lineHolderHeight, hovered} = this.state;
+		let {innerBoxOffset, lineHolderHeight, hovered, hovered_button} = this.state;
 
 		let isMultiPremiseArgument = IsMultiPremiseArgument(node);
 		let text = type == HolderType.Truth ? "True?" : "Relevant?";
@@ -96,7 +96,8 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 			width = widthOverride;
 		}
 
-		let ratingPanelShow = (nodeView && nodeView[`selected_${holderTypeStr}`]) || hovered; //|| local_selected;
+		let hovered_main = hovered && !hovered_button;
+		let ratingPanelShow = (nodeView && nodeView[`selected_${holderTypeStr}`]) || hovered_main; //|| local_selected;
 
 		return (
 			<Row className="clickThrough" style={E(
@@ -117,7 +118,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 						<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
 				</div>
 				<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
-					ref={c=>this.innerUI = c}
+					ref={c=>this.expandableBox = c}
 					style={{marginTop: innerBoxOffset}}
 					padding="3px 5px 2px"
 					text={<span style={{position: "relative", fontSize: 13}}>{text}</span>}
@@ -136,9 +137,9 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 					}}
 					afterChildren={[
 						ratingPanelShow &&
-							<div style={{
+							<div ref={c=>this.ratingPanelHolder = c} style={{
 								position: "absolute", left: 0, top: "calc(100% + 1px)",
-								width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
+								width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered_main ? 6 : 5,
 								padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 							}}>
 								{(()=> {
@@ -164,21 +165,14 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		);
 	}
 
-	innerUI: ExpandableBox;
+	expandableBox: ExpandableBox;
+	ratingPanelHolder: HTMLDivElement;
+	ratingPanel: RatingsPanel;
 	dividePoint: number;
 
-	ratingPanel: RatingsPanel;
 	ComponentDidMount() {
-		// we have to use native/jquery hover/mouseenter+mouseleave, to fix that in-equation term-placeholders would cause "mouseleave" to be triggered
-		//let dom = $(GetDOM(this));
-		//dom.off("mouseenter mouseleave");
-		$(this.innerUI.textHolder).hover(()=> {
-			if ($(".scrolling").length == 0) {
-				this.SetState({hovered: true});
-			}
-		}, ()=> {
-			this.SetState({hovered: false})
-		});
+		$(this.expandableBox.DOM).hover(()=>$(".scrolling").length == 0 && this.SetState({hovered: true}), ()=>this.SetState({hovered: false}));
+		$(this.expandableBox.expandButton.DOM).hover(()=>$(".scrolling").length == 0 && this.SetState({hovered_button: true}), ()=>this.SetState({hovered_button: false}));
 	}
 
 	lastLineHolderHeight = 0;
