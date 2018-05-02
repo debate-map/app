@@ -13,6 +13,7 @@ import {SlicePath} from "../../../Frame/Database/DatabaseHelpers";
 import {VURL, CachedTransform} from "js-vextensions";
 import {MapNodeRevision} from "./@MapNodeRevision";
 import {GetNodeRevision} from "../nodeRevisions";
+import {HolderType} from 'UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox';
 
 export function GetFontSizeForNode(node: MapNodeL2, isSubnode = false) {
 	if (node.current.fontSizeOverride) return node.current.fontSizeOverride;
@@ -248,9 +249,9 @@ export function GetValidChildTypes(nodeType: MapNodeType, path: string) {
 	let validChildTypes = nodeTypes.filter(type=>IsLinkValid(nodeType, path, {type} as any));
 	return validChildTypes;
 }
-export function GetValidNewChildTypes(parentNode: MapNodeL2, path: string, permissions: PermissionGroupSet) {
+export function GetValidNewChildTypes(parent: MapNodeL2, parentPath: string, holderType: HolderType, permissions: PermissionGroupSet) {
 	let nodeTypes = GetValues<MapNodeType>(MapNodeType);
-	let validChildTypes = nodeTypes.filter(type=>IsNewLinkValid(parentNode, path, {type} as any, permissions));
+	let validChildTypes = nodeTypes.filter(type=>IsNewLinkValid(parentPath, holderType, {type} as any, permissions));
 	return validChildTypes;
 }
 

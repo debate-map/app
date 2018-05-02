@@ -1,15 +1,15 @@
 import {CachedTransform_WithStore} from "Frame/Database/DatabaseHelpers";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import {emptyArray} from "Frame/Store/ReducerUtils";
-import {MapNodeL3} from "Store/firebase/nodes/@MapNode";
 import {CachedTransform, IsNaN} from "js-vextensions";
 import {GetData, GetDataAsync, SlicePath} from "../../Frame/Database/DatabaseHelpers";
 import {GetNodeL2, GetNodeL3} from "./nodes/$node";
-import {MapNode, MapNodeL2, globalRootNodeID} from "./nodes/@MapNode";
+import {MapNode, MapNodeL2, MapNodeL3, globalRootNodeID} from "./nodes/@MapNode";
 import {MapNodeType, MapNodeType_Info} from "./nodes/@MapNodeType";
 import {IsUserCreatorOrMod} from "./userExtras";
 import {HasAdminPermissions, HasModPermissions, PermissionGroupSet} from "./userExtras/@UserExtraInfo";
 import {GetUserAccessLevel, GetUserID} from "./users";
+import {HolderType} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
 
 export type NodeMap = {[key: string]: MapNode};
 export function GetNodeMap(queries?): NodeMap {
@@ -135,28 +135,31 @@ export function GetNodeChildrenL3(node: MapNode, path?: string, filterForPath = 
 	});
 }
 
-/*export function GetHolderType(node: MapNodeL3, path: string) {
-	let parent = GetParentNodeL3(path);
-	if (parent == null) return null;
-	if comb
-}*/
+export function GetHolderType(child: MapNode, parent: MapNode) {
+	if (child && child.type == MapNodeType.Argument) {
+		return parent.type == MapNodeType.Argument ? HolderType.Relevance : HolderType.Truth;
+	}
+	return null;
+}
 
 export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNodeL2) {
 	let parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;
 	if (!parentTypeInfo.Contains(child.type)) return false;
 	return true;
 }
-export function IsNewLinkValid(parentNode: MapNodeL2, parentPath: string, /*parentHolderType: HolderType,*/ child: MapNodeL2, permissions: PermissionGroupSet) {
+export function IsNewLinkValid(parentPath: string, newHolderType: HolderType, newChild: MapNodeL2, permissions: PermissionGroupSet) {
+	let parent = GetNodeL3(parentPath);
 	let parentPathIDs = SplitStringBySlash_Cached(parentPath).map(a=>a.ToInt());
 	//if (map.name == "Global" && parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
-	if (parentNode._id == globalRootNodeID && !HasAdminPermissions(permissions)) return false; // if parent is global-root, don't accept new children (unless admin)
+	if (parent._id == globalRootNodeID && !HasAdminPermissions(permissions)) return false; // if parent is global-root, don't accept new children (unless admin)
 	// if in global map, parent is l2, and user is not a mod (and not node creator), don't accept new children
-	if (parentPathIDs[0] == globalRootNodeID && parentPathIDs.length == 2 && !HasModPermissions(permissions) && parentNode.creator != GetUserID()) return false;
-	if (parentNode._id == child._id) return false; // cannot link node as its own child
+	if (parentPathIDs[0] == globalRootNodeID && parentPathIDs.length == 2 && !HasModPermissions(permissions) && parent.creator != GetUserID()) return false;
+	if (parent._id == newChild._id) return false; // cannot link node as its own child
 
-	/*let isAlreadyChild = (parentNode.children || {}).VKeys(true).Contains(child._id+"");
-	if (isAlreadyChild && child.type != MapNodeType.Claim) return false; // if already a child of this parent, reject (unless it's a claim, in which case allow, as can be)*/
-	return IsLinkValid(parentNode.type, parentPath, child);
+	let isAlreadyChild = (parent.children || {}).VKeys(true).Contains(newChild._id+"");
+	let currentHolderType = GetHolderType(newChild, parent);
+	if (isAlreadyChild && currentHolderType == newHolderType) return false; // if already a child of this parent, reject (unless it's a claim, in which case allow, as can be)
+	return IsLinkValid(parent.type, parentPath, newChild);
 }
 
 export function ForUnlink_GetError(userID: string, node: MapNodeL2, asPartOfCut = false) {

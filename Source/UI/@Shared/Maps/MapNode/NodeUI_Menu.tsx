@@ -2,34 +2,34 @@ import CloneNode from "Server/Commands/CloneNode";
 import LinkNode from "Server/Commands/LinkNode";
 import SetNodeIsMultiPremiseArgument from "Server/Commands/SetNodeIsMultiPremiseArgument";
 import UnlinkNode from "Server/Commands/UnlinkNode";
-import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
-import {ACTSetLastAcknowledgementTime} from "Store/main";
-import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/$map";
-import {HolderType} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
-import {ShowAddSubnodeDialog} from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSubnodeDialog";
-import {E} from "js-vextensions";
-import {BaseComponentWithConnector} from "react-vextensions";
-import {VMenuStub} from "react-vmenu";
-import {VMenuItem} from "react-vmenu/dist/VMenu";
-import {ShowMessageBox} from "react-vmessagebox";
-import {GetAsync, SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
-import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {styles} from "../../../../Frame/UI/GlobalStyles";
+import { MapNodeRevision } from "Store/firebase/nodes/@MapNodeRevision";
+import { ACTSetLastAcknowledgementTime } from "Store/main";
+import { GetTimeFromWhichToShowChangedNodes } from "Store/main/maps/$map";
+import { HolderType } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
+import { ShowAddSubnodeDialog } from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSubnodeDialog";
+import { E } from "js-vextensions";
+import { BaseComponentWithConnector } from "react-vextensions";
+import { VMenuStub } from "react-vmenu";
+import { VMenuItem } from "react-vmenu/dist/VMenu";
+import { ShowMessageBox } from "react-vmessagebox";
+import { GetAsync, SlicePath } from "../../../../Frame/Database/DatabaseHelpers";
+import { Connect } from "../../../../Frame/Database/FirebaseConnect";
+import { styles } from "../../../../Frame/UI/GlobalStyles";
 import AddChildNode from "../../../../Server/Commands/AddChildNode";
 import DeleteNode from "../../../../Server/Commands/DeleteNode";
-import {RootState} from "../../../../Store";
-import {GetPathsToNodesChangedSinceX} from "../../../../Store/firebase/mapNodeEditTimes";
-import {Map} from "../../../../Store/firebase/maps/@Map";
-import {ForCopy_GetError, ForCut_GetError, ForDelete_GetError, ForUnlink_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, IsNewLinkValid, IsNodeSubnode} from "../../../../Store/firebase/nodes";
-import {GetNodeDisplayText, GetNodeL3, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
-import {ClaimForm, MapNode, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
-import {GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
-import {IsUserBasicOrAnon, IsUserCreatorOrMod, IsUserMod} from "../../../../Store/firebase/userExtras";
-import {GetUserID, GetUserPermissionGroups} from "../../../../Store/firebase/users";
-import {ACTNodeCopy, GetCopiedNode} from "../../../../Store/main";
-import {GetPathNodeIDs} from "../../../../Store/main/mapViews";
-import {ShowSignInPopup} from "../../NavBar/UserPanel";
-import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
+import { RootState } from "../../../../Store";
+import { GetPathsToNodesChangedSinceX } from "../../../../Store/firebase/mapNodeEditTimes";
+import { Map } from "../../../../Store/firebase/maps/@Map";
+import { ForCopy_GetError, ForCut_GetError, ForDelete_GetError, ForUnlink_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, IsNewLinkValid, IsNodeSubnode } from "../../../../Store/firebase/nodes";
+import { GetNodeDisplayText, GetNodeL3, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument } from "../../../../Store/firebase/nodes/$node";
+import { ClaimForm, MapNode, MapNodeL3, Polarity } from "../../../../Store/firebase/nodes/@MapNode";
+import { GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info } from "../../../../Store/firebase/nodes/@MapNodeType";
+import { IsUserBasicOrAnon, IsUserCreatorOrMod, IsUserMod } from "../../../../Store/firebase/userExtras";
+import { GetUserID, GetUserPermissionGroups } from "../../../../Store/firebase/users";
+import { ACTNodeCopy, GetCopiedNode } from "../../../../Store/main";
+import { GetPathNodeIDs } from "../../../../Store/main/mapViews";
+import { ShowSignInPopup } from "../../NavBar/UserPanel";
+import { ShowAddChildDialog } from "./NodeUI_Menu/AddChildDialog";
 
 type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean, holderType?: HolderType};
 let connector = (_: RootState, {map, node, path}: Props)=> {
@@ -58,7 +58,7 @@ export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
-		let validChildTypes = GetValidNewChildTypes(node, path, permissions);
+		let validChildTypes = GetValidNewChildTypes(node, path, holderType, permissions);
 		let componentBox = holderType != null;
 		if (holderType) {
 			validChildTypes = validChildTypes.Except(MapNodeType.Claim);
@@ -169,7 +169,7 @@ export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 							
 							store.dispatch(new ACTNodeCopy({path: pathToCopy, asCut: false}));
 						}}/>}
-				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node, path, copiedNode, permissions) &&
+				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(path, holderType, copiedNode, permissions) &&
 					<VMenuItem text={`Paste${copiedNode_asCut ? "" : " as link"}: "${GetNodeDisplayText(copiedNode, null, formForClaimChildren).KeepAtMost(50)}"`}
 						//enabled={ForPaste_GetError(userID, map, node) == null} title={ForCut_GetError(userID, map, node)}
 						style={styles.vMenuItem} onClick={e=> {
@@ -224,7 +224,7 @@ If not, paste the argument as a clone instead.`
 								}
 							}
 						}}/>}
-				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(node, path, copiedNode.Extended({_id: -1}), permissions) && !copiedNode_asCut &&
+				{IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(path, holderType, copiedNode.Extended({_id: -1}), permissions) && !copiedNode_asCut &&
 					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, null, formForClaimChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async e=> {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();

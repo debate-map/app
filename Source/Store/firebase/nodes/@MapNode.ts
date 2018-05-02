@@ -1,13 +1,7 @@
-import {AddSchema, AddAJVExtraCheck} from '../../../Server/Server';
-import {GetValues_ForSchema} from '../../../Frame/General/Enums';
-import {MapNodeType} from './@MapNodeType';
-import {RatingType} from "../nodeRatings/@RatingType";
-import {GetParentNode, IsLinkValid, IsNewLinkValid} from "../nodes";
-import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
-import {ContentNode} from '../contentNodes/@ContentNode';
-import {Equation} from './@Equation';
-import {Image} from '../images/@Image';
-import {MapNodeRevision} from "./@MapNodeRevision";
+import { GetValues_ForSchema } from '../../../Frame/General/Enums';
+import { AddAJVExtraCheck, AddSchema } from '../../../Server/Server';
+import { MapNodeRevision } from "./@MapNodeRevision";
+import { MapNodeType } from './@MapNodeType';
 
 export const globalMapID = 1;
 export const globalRootNodeID = 1;
