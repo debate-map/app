@@ -1,12 +1,10 @@
+import { GetNodeChildrenL3 } from "Store/firebase/nodes";
 import { MapNodeL3 } from "Store/firebase/nodes/@MapNode";
-import { GetNodeChildrenL2, GetNodeChildrenL3 } from "Store/firebase/nodes";
-import {MapNodeL2, Polarity, LayerPlusAnchorParentSet} from "../nodes/@MapNode";
-import {IsSpecialEmptyArray, emptyArray_forLoading} from "../../../Frame/Store/ReducerUtils";
-import {GetFinalPolarity} from "../nodes/$node";
-import {MapNodeType} from "../nodes/@MapNodeType";
-import { Lerp } from "js-vextensions";
 import { ArgumentType } from "Store/firebase/nodes/@MapNodeRevision";
-import {GetParentNodeL3} from "../nodes";
+import { emptyArray_forLoading } from "../../../Frame/Store/ReducerUtils";
+import { GetParentNodeL3 } from "../nodes";
+import { Polarity } from "../nodes/@MapNode";
+import { MapNodeType } from "../nodes/@MapNodeType";
 
 export function RS_CalculateTruthScore(claim: MapNodeL3) {
 	Assert(claim && claim.type == MapNodeType.Claim, "RS truth-score can only be calculated for a claim.");
