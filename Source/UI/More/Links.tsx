@@ -22,6 +22,12 @@ let pageText = `
 * Trello (task list): [https://trello.com/b/7ZhagPiN](https://trello.com/b/7ZhagPiN)
 * Github (source code): [https://github.com/Venryx/DebateMap](https://github.com/Venryx/DebateMap)
 
+### Canonical Debate Lab
+
+The Debate Map project is being developed with the feedback of the Canonical Debate Lab group.
+
+You're welcome to join our [Slack channel](https://join.slack.com/t/canonicaldebatelab/shared_invite/enQtMzEzOTU3NzYyMDY3LTI4YzUxM2I0MjFjZDNlMzQxZDM4YTgwNDNlMTY3YWQwNjJhYjk0ODE1MGU5NzQ2MTAyNTFhZWRhMGNjMjAxNmE) as we develop the model further. We share news and project updates, conduct weekly Hangouts calls, and have frequent discussions on how to improve the debate-software model.
+
 &nbsp;
 
 ## Other websites
@@ -38,24 +44,24 @@ Criteria:
 * Momentum: how large/healthy the community is, and how much the project continues to be improved/developed.
 * Open source: whether the source code is provided. (which allows for wider usage, and community-based improvement)
 
-The scores indicate how well each site does on the given factor, relative to the others.
+The numbers indicate how well the sites rank on each factor, segmented into levels/tiles. (lower is better)
 
 | Site | Layout format | Contribution efficiency | Features | Momentum | Open source |
 | ---																		| ---	| ---	| ---	| ---	| ---	|
-| [Kialo](https://www.kialo.com)									| 100	| 90	| 90	| 90	| no	|
-| [Arguman](http://en.arguman.org)								| 90	| 80	| 75	| 70	| yes	|
-| [Banter](https://banter.wiki)									| 90	| 90	| 70	| 40	| ...	|
-| [Debucate](https://www.debucate.com)							| 80	| 85	| 65	| 45	| ...	|
-| [CreateDebate](http://www.createdebate.com)				| 70	| 85	| 80	| 80	| ...	|
-| [DebateHub](https://debatehub.net)							| 70	| 85	| 80	| 15	| ...	|
-| [Netivist](https://netivist.org)								| 40	| 90	| 85	| 75	| ...	|
-| [Quibl](http://www.quibl.com)									| 35	| 75	| 65	| 75	| ...	|
-| [Debate.org](http://www.debate.org)							| 50	| 65	| 70	| 100	| ...	|
-| [DebateGraph](http://debategraph.org)						| 55	| 40	| 75	| 75	| no	|
-| [LettuceDebate](http://www.lettucedebate.com)				| 30	| 30	| 65	| 20	| ...	|
-| [ConvinceMe](http://www.convinceme.net)						| 70	| 80	| 45	| 15	| ...	|
-| [TruthMapping](https://www.truthmapping.com)				| 80	| 60	| 45	| 10	| no	|
-| [YourView](http://yourview-production.herokuapp.com)	| 60	| 70	| 75	| 15	| ...	|
+| [Kialo](https://www.kialo.com)									| 1	| 2	| 2	| 2	| no	|
+| [Arguman](http://en.arguman.org)								| 2	| 3	| 4	| 4	| yes	|
+| [Banter](https://banter.wiki)									| 2	| 2	| 4	| 7	| ...	|
+| [Debucate](https://www.debucate.com)							| 3	| 3	| 5	| 7	| ...	|
+| [CreateDebate](http://www.createdebate.com)				| 4	| 3	| 3	| 3	| ...	|
+| [DebateHub](https://debatehub.net)							| 4	| 3	| 3	| 9	| ...	|
+| [Netivist](https://netivist.org)								| 7	| 2	| 3	| 4	| ...	|
+| [Quibl](http://www.quibl.com)									| 8	| 4	| 5	| 4	| ...	|
+| [Debate.org](http://www.debate.org)							| 6	| 5	| 4	| 1	| ...	|
+| [DebateGraph](http://debategraph.org)						| 6	| 7	| 4	| 4	| no	|
+| [LettuceDebate](http://www.lettucedebate.com)				| 8	| 8	| 5	| 9	| ...	|
+| [ConvinceMe](http://www.convinceme.net)						| 4	| 3	| 7	| 9	| ...	|
+| [TruthMapping](https://www.truthmapping.com)				| 3	| 5	| 7	| 9	| no	|
+| [YourView](http://yourview-production.herokuapp.com)	| 5	| 4	| 4	| 9	| ...	|
 
 ### Others
 
@@ -64,7 +70,7 @@ The websites below don't really match the "collaborative debating" concept, but 
 * [DebateWise](http://debatewise.org): About the same as the above, except with voting on the article and comments, but slightly lower quality.
 * [Snopes](http://www.snopes.com): Fact-checking website, on a wide range of topics.
 * [PolitiFact](http://www.politifact.com): Fact-checking website, focused mainly on politics.
-* [FactCheck](http://factcheck.org): Yes, also a fact-checking website. Does not seem as full-fledged as the previous two.
+* [FactCheck](http://factcheck.org): Also a fact-checking website. Does not seem as full-fledged as the previous two.
 `;
 
 @SimpleShouldUpdate

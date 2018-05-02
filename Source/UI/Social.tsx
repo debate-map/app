@@ -21,6 +21,12 @@ In the meantime, here are links to our social media and development pages:
 * Gitter (project chat): [https://gitter.im/DebateMap/Lobby](https://gitter.im/DebateMap/Lobby)
 * Trello (task list): [https://trello.com/b/7ZhagPiN](https://trello.com/b/7ZhagPiN)
 * Github (source code): [https://github.com/Venryx/DebateMap](https://github.com/Venryx/DebateMap)
+
+### Canonical Debate Lab
+
+The Debate Map project is being developed with the feedback of the Canonical Debate Lab group.
+
+You're welcome to join our [Slack channel](https://join.slack.com/t/canonicaldebatelab/shared_invite/enQtMzEzOTU3NzYyMDY3LTI4YzUxM2I0MjFjZDNlMzQxZDM4YTgwNDNlMTY3YWQwNjJhYjk0ODE1MGU5NzQ2MTAyNTFhZWRhMGNjMjAxNmE) as we develop the model further. We share news and project updates, conduct weekly Hangouts calls, and have frequent discussions on how to improve the debate-software model.
 `;
 
 export default class SocialUI extends BaseComponent<{}, {}> {
