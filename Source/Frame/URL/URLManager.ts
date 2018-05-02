@@ -138,17 +138,14 @@ function ParseNodeView(viewStr: string): [number, MapNodeView] {
 		nodeView.openPanel = GetDataStrForProp(ownStr, "p");
 	}
 
-	let fullyExpanded = ownStr_withoutParentheses.Contains("e") || (childrenStr && childrenStr.length);
-
-	if (fullyExpanded) {
-		nodeView.expanded = true;
-		nodeView.expanded_truth = true;
-		nodeView.expanded_relevance = true;
-	} else if (ownStr_withoutParentheses.Contains("t")) {
-		nodeView.expanded = true;
+	nodeView.VSet({expanded: false, expanded_truth: false, expanded_relevance: false});
+	if (ownStr_withoutParentheses.Contains("t")) {
 		nodeView.expanded_truth = true;
 	} else if (ownStr_withoutParentheses.Contains("r")) {
+		nodeView.expanded_relevance = true;
+	} else if (ownStr_withoutParentheses.Contains("e") || (childrenStr && childrenStr.length)) {
 		nodeView.expanded = true;
+		nodeView.expanded_truth = true;
 		nodeView.expanded_relevance = true;
 	}
 
