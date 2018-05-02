@@ -7,7 +7,7 @@ import {MakeRootReducer, RootState} from "../../Store/index";
 import watch from "redux-watch";
 import {PreDispatchAction, MidDispatchAction, PostDispatchAction} from "./ActionProcessor";
 //import {version, firebaseConfig} from "../../BakedConfig";
-//var {version, firebaseConfig} = require(prodEnv ? "../../BakedConfig_Prod" : "../../BakedConfig_Dev");
+//var {version, firebaseConfig} = require(PROD ? "../../BakedConfig_Prod" : "../../BakedConfig_Dev");
 //import {batchedUpdatesMiddleware} from "redux-batched-updates";
 import {batchedSubscribe} from "redux-batched-subscribe";
 import {unstable_batchedUpdates} from "react-dom";
@@ -153,7 +153,7 @@ export default function(initialState = {}, history) {
 	store.reducer = rootReducer;
 
 	function Dispatch_WithStack(action) {
-		if (g.actionStacks || (devEnv && !actionStacks_actionTypeIgnorePatterns.Any(a=>action.type.startsWith(a)))) {
+		if (g.actionStacks || (DEV && !actionStacks_actionTypeIgnorePatterns.Any(a=>action.type.startsWith(a)))) {
 			action["stack"] = new Error().stack.split("\n").slice(1); // add stack, so we can inspect in redux-devtools
 		}
 		store["dispatch_orig"](action);
@@ -186,7 +186,7 @@ export default function(initialState = {}, history) {
 		}
 	}
 
-	if (__DEV__) {
+	if (DEV) {
 		if (module.hot) {
 			module.hot.accept("../../Store", () => {
 				let {MakeRootReducer} = require("../../Store");

@@ -7,12 +7,11 @@ import { RatingType, ratingTypes } from "../../Store/firebase/nodeRatings/@Ratin
 import { WeightingType } from "../main";
 import { Rating, RatingsRoot } from "./nodeRatings/@RatingsRoot";
 import { RS_GetAllValues } from "./nodeRatings/ReasonScore";
-import { GetNodeChildrenL2 } from "./nodes";
+import { GetNodeChildrenL2, HolderType } from "./nodes";
 import { GetMainRatingType, GetNodeL2 } from "./nodes/$node";
 import { ClaimForm, MapNodeL3 } from "./nodes/@MapNode";
 import { MapNodeType } from "./nodes/@MapNodeType";
 import { GetUserID } from "./users";
-import {HolderType} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
 
 export function GetNodeRatingsRoot(nodeID: number) {
 	//RequestPaths(GetPaths_NodeRatingsRoot(nodeID));

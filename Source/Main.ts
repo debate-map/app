@@ -42,30 +42,35 @@ G({React, Promise: PromiseWrapper});*/
 
 //G({ReactPerf});
 
-let startURL = GetCurrentURL(true);
-declare global { export var startURL: VURL; } G({startURL});
+declare global { export var startURL: VURL; }
+g.startURL = GetCurrentURL(true);
 
-//let {version, env, devEnv, prodEnv, testEnv} = __DEV__ ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
-let env = __PROD__ ? "production" : "development";
-if (startURL.GetQueryVar("env") && startURL.GetQueryVar("env") != "null") {
-	env = startURL.GetQueryVar("env");
-	//alert("Using env: " + env);
-	console.log("Using env: " + env);
+// always compile-time
+declare global { var ENV_COMPILE_TIME: string; }
+// only compile-time if compiled for production (otherwise, can be overriden)
+declare global { var ENV_SHORT: string, ENV: string, DEV: boolean, PROD: boolean, TEST: boolean; }
+
+//let {version, ENV, ENV_SHORT, DEV, PROD, TEST} = DEV ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
+// if environment at compile time was not "production" (ie. if these globals weren't set/locked), then set them here at runtime
+if (ENV_COMPILE_TIME != "production") {
+	g.ENV = ENV_COMPILE_TIME;
+	if (startURL.GetQueryVar("env") && startURL.GetQueryVar("env") != "null") {
+		g.ENV = startURL.GetQueryVar("env");
+		//alert("Using env: " + g.ENV);
+		console.log("Using env: " + ENV);
+	}
+
+	g.ENV_SHORT = {development: "dev", production: "prod"}[ENV] || ENV;
+	g.DEV = ENV == "development";
+	g.PROD = ENV == "production";
+	g.TEST = ENV == "test";
 }
-G({env}); declare global { var env: string; }
-
-// todo: maybe remove these, and just use __DEV__, __PROD__, etc.
-let env_short = env == "production" ? "prod" : "dev";
-let devEnv = env == "development";
-let prodEnv = env == "production";
-let testEnv = env == "test";
-G({env_short, devEnv, prodEnv, testEnv}); declare global { var env_short: string, devEnv: boolean, prodEnv: boolean, testEnv: boolean; }
 
 //let {version} = require("../../../package.json");
 // Note: Use two BakedConfig files, so that dev-server can continue running, with its own baked-config data, even while prod-deploy occurs.
 // Note: Don't reference the BakedConfig files from anywhere but here (in runtime code) -- because we want to be able to override it, below.
-//let {version, dbVersion, firebaseConfig} = devEnv ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
-let {version, firebaseConfig} = devEnv ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
+//let {version, dbVersion, firebaseConfig} = DEV ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
+let {version, firebaseConfig} = DEV ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
 let dbVersion = 10;
 if (startURL.GetQueryVar("dbVersion") && startURL.GetQueryVar("dbVersion") != "null") {
 	dbVersion = parseInt(startURL.GetQueryVar("dbVersion"));
@@ -73,10 +78,10 @@ if (startURL.GetQueryVar("dbVersion") && startURL.GetQueryVar("dbVersion") != "n
 }
 G({version, dbVersion, firebaseConfig}); declare global { var version: string, dbVersion: number, firebaseConfig; }
 
-if (prodEnv && window.location.hostname != "localhost") { // if localhost, never enable Raven (even if env-override is set to production)
+if (PROD && window.location.hostname != "localhost") { // if localhost, never enable Raven (even if env-override is set to production)
 	Raven.config("https://40c1e4f57e8b4bbeb1e5b0cf11abf9e9@sentry.io/155432", {
 		release: version,
-		environment: env,
+		environment: ENV,
 	}).install();
 }
 
@@ -105,8 +110,7 @@ G({hotReloading}); declare global { let hotReloading: boolean; }*/
 declare global { let hasHotReloaded: boolean; }
 g.hasHotReloaded = false;
 
-// this code is excluded from production bundle
-if (__DEV__) {
+if (DEV) {
 	if (module.hot) {
 		// setup hot module replacement
 		module.hot.accept("./Main_Hot", () => {

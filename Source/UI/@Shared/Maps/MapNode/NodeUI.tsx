@@ -1,9 +1,9 @@
 import {ChangeType} from "Store/firebase/mapNodeEditTimes";
-import {GetNode} from "Store/firebase/nodes";
+import {GetNode, HolderType} from "Store/firebase/nodes";
 import {GetUserID} from "Store/firebase/users";
 import {GetPlayingTimelineAppliedStepRevealNodes} from "Store/main/maps/$map";
 import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
-import {HolderType, NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
+import {NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
 import {CachedTransform, E, Timer, GetStackTraceStr} from "js-vextensions";
 import {Column} from "react-vcomponents";
 import {BaseComponentWithConnector, GetInnerComp, RenderSource, ShallowChanged, ShallowEquals} from "react-vextensions";

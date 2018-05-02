@@ -1,13 +1,13 @@
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import {StartBufferingActions, StopBufferingActions} from "Store";
 import {FirebaseData} from "Store/firebase";
+import {State_overrideData_path} from "UI/@Shared/StateOverrides";
 import {Assert, CachedTransform, DeepSet, GetStorageForCachedTransform, GetTreeNodesInObjTree} from "js-vextensions";
 import {unWatchEvents, watchEvents} from "react-redux-firebase/lib/actions/query";
 import {getEventsFromInput} from "react-redux-firebase/lib/utils";
 import {ShallowChanged} from "react-vextensions";
 import u from "updeep";
 import {ClearRequestedPaths, GetRequestedPaths, RequestPath} from "./FirebaseConnect";
-import {State_overrideData_path} from "UI/@Shared/StateOverrides";
 
 export function DBPath(path = "", inVersionRoot = true) {
 	Assert(path != null, "Path cannot be null.");
@@ -15,14 +15,14 @@ export function DBPath(path = "", inVersionRoot = true) {
 	/*let versionPrefix = path.match(/^v[0-9]+/);
 	if (versionPrefix == null) // if no version prefix already, add one (referencing the current version)*/
 	if (inVersionRoot) {
-		path = `v${dbVersion}-${env_short}` + (path ? `/${path}` : "");
+		path = `v${dbVersion}-${ENV_SHORT}` + (path ? `/${path}` : "");
 	}
 	return path;
 }
 export function DBPathSegments(pathSegments: (string | number)[], inVersionRoot = true) {
 	let result = pathSegments;
 	if (inVersionRoot) {
-		result = ([`v${dbVersion}-${env_short}`] as any).concat(result);
+		result = ([`v${dbVersion}-${ENV_SHORT}`] as any).concat(result);
 	}
 	return result;
 }
@@ -177,7 +177,7 @@ export function GetData(...args) {
 	else [options, ...pathSegments] = args;
 	options = E(new GetData_Options(), options);
 
-	if (__DEV__) {
+	if (DEV) {
 		Assert(pathSegments.every(segment=>typeof segment == "number" || !segment.Contains("/")),
 			`Each string path-segment must be a plain prop-name. (ie. contain no "/" separators) @segments(${pathSegments})`);
 	}

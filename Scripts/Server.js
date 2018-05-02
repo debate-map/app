@@ -23,7 +23,7 @@ app.use(require("connect-history-api-fallback")({
 // Apply Webpack HMR Middleware
 // ----------
 
-if (config.env === "development") {
+if (DEV) {
 	const compiler = webpack(webpackConfig);
 
 	compiler.apply(new webpack.ProgressPlugin({profile: true}));

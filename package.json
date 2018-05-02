@@ -76,13 +76,6 @@
         "DEBUG": "app:*"
       }
     },
-    "test": {
-      "command": "node ./node_modules/karma/bin/karma start build/karma.conf",
-      "env": {
-        "NODE_ENV": "test",
-        "DEBUG": "app:*"
-      }
-    },
     "create-config": {
       "command": "node Scripts/Build/CreateConfig",
       "env": {
@@ -262,12 +255,6 @@
     "imports-loader": "^0.6.5",
     "ip": "^1.1.2",
     "json-loader": "^0.5.4",
-    "karma": "^1.0.0",
-    "karma-coverage": "^1.0.0",
-    "karma-mocha": "^1.0.1",
-    "karma-mocha-reporter": "^2.0.0",
-    "karma-phantomjs-launcher": "^1.0.2",
-    "karma-webpack-with-fast-source-maps": "^1.9.2",
     "mini-css-extract-plugin": "^0.4.0",
     "mocha": "^3.2.0",
     "node-sass": "^4.5.3",

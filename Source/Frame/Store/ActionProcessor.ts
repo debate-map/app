@@ -77,7 +77,7 @@ export function PreDispatchAction(action: Action<any>) {
 		}
 	}
 
-	/*if (g.actionStacks || (devEnv && !actionStacks_actionTypeIgnorePatterns.Any(a=>action.type.startsWith(a)))) {
+	/*if (g.actionStacks || (DEV && !actionStacks_actionTypeIgnorePatterns.Any(a=>action.type.startsWith(a)))) {
 		action["stack"] = new Error().stack.split("\n").slice(1); // add stack, so we can inspect in redux-devtools
 	}*/
 	
@@ -140,7 +140,7 @@ export async function PostDispatchAction(action: Action<any>) {
 			LoadURL(startURL.toString());
 		}
 		//UpdateURL(false);
-		if (prodEnv && State("main", "analyticsEnabled")) {
+		if (PROD && State("main", "analyticsEnabled")) {
 			Log("Initialized Google Analytics.");
 			//ReactGA.initialize("UA-21256330-33", {debug: true});
 			ReactGA.initialize("UA-21256330-33");

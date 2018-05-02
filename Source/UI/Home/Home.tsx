@@ -144,7 +144,7 @@ More info on open-source projects: <https://opensource.com/resources/what-open-s
 This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
 `;
 
-/*if (devEnv) {
+/*if (DEV) {
 	demoMap = {_id: -100, name: "Demo", type: MapType.Personal, rootNode: -101} as Map;
 	let lastNodeID = -100;
 	let NextID = ()=>--lastNodeID;

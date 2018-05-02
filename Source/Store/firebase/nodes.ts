@@ -1,15 +1,19 @@
-import {CachedTransform_WithStore} from "Frame/Database/DatabaseHelpers";
-import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
-import {emptyArray} from "Frame/Store/ReducerUtils";
-import {CachedTransform, IsNaN} from "js-vextensions";
-import {GetData, GetDataAsync, SlicePath} from "../../Frame/Database/DatabaseHelpers";
-import {GetNodeL2, GetNodeL3} from "./nodes/$node";
-import {MapNode, MapNodeL2, MapNodeL3, globalRootNodeID} from "./nodes/@MapNode";
-import {MapNodeType, MapNodeType_Info} from "./nodes/@MapNodeType";
-import {IsUserCreatorOrMod} from "./userExtras";
-import {HasAdminPermissions, HasModPermissions, PermissionGroupSet} from "./userExtras/@UserExtraInfo";
-import {GetUserAccessLevel, GetUserID} from "./users";
-import {HolderType} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
+import { CachedTransform_WithStore } from "Frame/Database/DatabaseHelpers";
+import { SplitStringBySlash_Cached } from "Frame/Database/StringSplitCache";
+import { emptyArray } from "Frame/Store/ReducerUtils";
+import { CachedTransform, IsNaN } from "js-vextensions";
+import { GetData, GetDataAsync, SlicePath } from "../../Frame/Database/DatabaseHelpers";
+import { GetNodeL2, GetNodeL3 } from "./nodes/$node";
+import { MapNode, MapNodeL2, MapNodeL3, globalRootNodeID } from "./nodes/@MapNode";
+import { MapNodeType, MapNodeType_Info } from "./nodes/@MapNodeType";
+import { IsUserCreatorOrMod } from "./userExtras";
+import { HasAdminPermissions, HasModPermissions, PermissionGroupSet } from "./userExtras/@UserExtraInfo";
+import { GetUserAccessLevel, GetUserID } from "./users";
+
+export enum HolderType {
+	Truth = 10,
+	Relevance = 20,
+}
 
 export type NodeMap = {[key: string]: MapNode};
 export function GetNodeMap(queries?): NodeMap {

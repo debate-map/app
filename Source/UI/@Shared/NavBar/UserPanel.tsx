@@ -36,7 +36,7 @@ export default class UserPanel extends BaseComponent<{auth?}, {}> {
 					<div>Name: {auth.displayName}</div>
 					<div>ID: {GetUserID()}</div>
 				</Column>
-				{/*devEnv &&
+				{/*DEV &&
 					<Row>
 						<CheckBox value={State().main.
 					</Row>*/}

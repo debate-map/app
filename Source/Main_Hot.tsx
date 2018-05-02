@@ -118,7 +118,7 @@ let {RootUIWrapper} = require("./UI/Root");
 ReactDOM.render(<RootUIWrapper store={store}/>, mountNode);
 //});
 
-if (devEnv) {
+if (DEV) {
 	SetUpRR();
 } else {
 	G({RR: SetUpRR()})

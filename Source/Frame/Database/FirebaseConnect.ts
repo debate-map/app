@@ -50,7 +50,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		g.inConnectFunc = true;
 
 		//if (ShouldLog(a=>a.check_callStackDepths)) {
-		/*if (devEnv) {
+		/*if (DEV) {
 			let callStackDepth = GetStackTraceStr().split("\n").length;
 			// if we're at a call-stack-depth of X, we know something's wrong, so break
 			Assert(callStackDepth < 1000, `Call-stack-depth too deep (${callStackDepth})! Something must be wrong with the UI code.`);
@@ -107,7 +107,7 @@ export function Connect<T, P>(funcOrFuncGetter) {
 		}
 
 		// for debugging in profiler
-		/*if (__DEV__) {
+		/*if (DEV) {
 			//let debugText = ToJSON(props).replace(/[^a-zA-Z0-9]/g, "_");
 			let debugText = `${props["node"] ? " @ID:" + props["node"]._id : ""} @changedPath: ${changedPath} @changedProps: ${changedProps.join(", ")}`;
 			let wrapperFunc = eval(`(function ${debugText.replace(/[^a-zA-Z0-9]/g, "_")}() { return mapStateToProps_inner.apply(s, arguments); })`);

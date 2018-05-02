@@ -2,7 +2,7 @@ import {GetImage} from '../images';
 import {MapNode, MapNodeL2, ClaimForm, ChildEntry, ClaimType, MapNodeL3, Polarity} from "./@MapNode";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {MapNodeType} from './@MapNodeType';
-import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetNode, GetParentNodeL2, GetNodeChildrenL2, GetNodeChildren, GetNodeID} from "../nodes";
+import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetNode, GetParentNodeL2, GetNodeChildrenL2, GetNodeChildren, GetNodeID, HolderType} from "../nodes";
 import {GetValues} from '../../../Frame/General/Enums';
 import {PermissionGroupSet} from '../userExtras/@UserExtraInfo';
 import {ImageType, GetNiceNameForImageType} from "../images/@Image";
@@ -13,7 +13,6 @@ import {SlicePath} from "../../../Frame/Database/DatabaseHelpers";
 import {VURL, CachedTransform} from "js-vextensions";
 import {MapNodeRevision} from "./@MapNodeRevision";
 import {GetNodeRevision} from "../nodeRevisions";
-import {HolderType} from 'UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox';
 
 export function GetFontSizeForNode(node: MapNodeL2, isSubnode = false) {
 	if (node.current.fontSizeOverride) return node.current.fontSizeOverride;

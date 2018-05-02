@@ -5,7 +5,6 @@ import UnlinkNode from "Server/Commands/UnlinkNode";
 import { MapNodeRevision } from "Store/firebase/nodes/@MapNodeRevision";
 import { ACTSetLastAcknowledgementTime, GetCopiedNodePath } from "Store/main";
 import { GetTimeFromWhichToShowChangedNodes } from "Store/main/maps/$map";
-import { HolderType } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
 import { ShowAddSubnodeDialog } from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSubnodeDialog";
 import { E } from "js-vextensions";
 import { BaseComponentWithConnector } from "react-vextensions";
@@ -30,6 +29,7 @@ import { ACTNodeCopy, GetCopiedNode } from "../../../../Store/main";
 import { GetPathNodeIDs } from "../../../../Store/main/mapViews";
 import { ShowSignInPopup } from "../../NavBar/UserPanel";
 import { ShowAddChildDialog } from "./NodeUI_Menu/AddChildDialog";
+import {HolderType} from "Store/firebase/nodes";
 
 type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean, holderType?: HolderType};
 let connector = (_: RootState, {map, node, path, holderType}: Props)=> {

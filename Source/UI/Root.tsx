@@ -76,7 +76,7 @@ export class RootUIWrapper extends BaseComponent<{store}, {}> {
 	}
 
 	ComponentDidMount() {
-		if (devEnv) {
+		if (DEV) {
 			WaitXThenRun(100, ()=> {
 				G({Perf: React.addons.Perf});
 				React.addons.Perf.start();

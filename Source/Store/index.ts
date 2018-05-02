@@ -93,7 +93,7 @@ function State<T>(...args) {
 		if (pathSegments.length == 1) pathSegments = SplitStringBySlash_Cached(pathSegments[0] as string); // if only one string provided, assume it's the full path
 	}
 
-	if (__DEV__) {
+	if (DEV) {
 		Assert(pathSegments.every(segment=>segment != null), ()=>`Path-segment cannot be null. @segments(${pathSegments})`);
 		Assert(pathSegments.every(segment=>typeof segment == "number" || !segment.Contains("/")),
 			()=>`Each string path-segment must be a plain prop-name. (ie. contain no "/" separators) @segments(${pathSegments})`);

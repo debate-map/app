@@ -5,8 +5,7 @@ const pkg = require("../../package.json");
 const config = require("../Config");
 
 // TODO: load config from environments
-/*let env = config.env;
-if (process.env.TRAVIS_PULL_REQUEST === false) {
+/*if (process.env.TRAVIS_PULL_REQUEST === false) {
 	if (process.env.TRAVIS_BRANCH === "prod")
 		env = "production";
 }*/
@@ -28,10 +27,6 @@ function createConfigFile(callback, environment) {
 				databaseURL: "https://debate-map-prod.firebaseio.com",
 				storageBucket: "debate-map-prod.appspot.com"
 			},
-		/*env: config.env,
-		devEnv: config.globals.__DEV__,
-		prodEnv: config.globals.__PROD__,
-		testEnv: config.globals.__TEST__,*/
 	};
 
 	let newText = Object.keys(configObj).map(key=> {
@@ -57,8 +52,8 @@ function createConfigFile(callback, environment) {
 (()=> {
 	createConfigFile(()=> {
 		debug("Config file (dev) successfully written.");
-	}, "development")
+	}, "development");
 	createConfigFile(()=> {
 		debug("Config file (prod) successfully written.");
-	}, "production")
+	}, "production");
 })();

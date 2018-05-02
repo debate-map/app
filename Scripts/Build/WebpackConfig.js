@@ -6,12 +6,11 @@ const config = require("../Config");
 const debug = require("debug")("app:webpack:config");
 const path = require("path");
 const fs = require("fs");
-var HardSourceWebpackPlugin = require("hard-source-webpack-plugin");
+const HardSourceWebpackPlugin = require("hard-source-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const StringReplacePlugin = require("string-replace-webpack-plugin");
 
 const paths = config.utils_paths;
-const {__DEV__, __PROD__, __TEST__} = config.globals;
 const {QUICK, USE_TSLOADER, OUTPUT_STATS} = process.env;
 
 let root = path.join(__dirname, "..", "..");
@@ -60,26 +59,20 @@ const webpackConfig = {
 	}
 };
 
-/*if (__PROD__) {
-	webpackConfig.module.preLoaders = [
-		{test: /\.jsx?$/, use: "source-map-loader", exclude: /react-hot-loader/}
-	];
-}*/
-
-// Entry Points
+// entry points
 // ==========
 
 const APP_ENTRY = paths.client(USE_TSLOADER ? "Main.ts" : "Main.js");
 
 webpackConfig.entry = {
-	app: __DEV__ && config.useHotReloading
+	app: DEV && config.useHotReloading
 		? [APP_ENTRY].concat(`webpack-hot-middleware/client?path=${config.compiler_public_path}__webpack_hmr`)
 		: [APP_ENTRY],
 	//app: [APP_ENTRY],
 	//vendor: config.compiler_vendors
 };
 
-// Bundle Output
+// bundle output
 // ==========
 
 webpackConfig.output = {
@@ -92,7 +85,7 @@ webpackConfig.output = {
 	pathinfo: true, // include comments next to require-funcs saying path
 }
 
-// Plugins
+// plugins
 // ==========
 
 //let ExposeRequirePlugin = require("webpack-expose-require-plugin");\
@@ -102,10 +95,10 @@ webpackConfig.plugins = [
 	// Plugin to show any webpack warnings and prevent tests from running
 	function() {
 		let errors = [];
-		this.plugin("done", function (stats) {
+		this.plugin("done", function(stats) {
 			if (stats.compilation.errors.length) {
 				// Log each of the warnings
-				stats.compilation.errors.forEach(function (error) {
+				stats.compilation.errors.forEach(function(error) {
 					errors.push(error.message || error);
 				});
 
@@ -202,14 +195,14 @@ webpackConfig.plugins = [
 	new StringReplacePlugin(),
 ]
 
-if (__DEV__) {
+if (DEV) {
 	debug("Enable plugins for live development (HMR, NoErrors).")
 	webpackConfig.plugins.push(
 		new webpack.HotModuleReplacementPlugin(),
 		new webpack.NoEmitOnErrorsPlugin()
 		//new webpack.NamedModulesPlugin()
 	);
-} else if (__PROD__ && !QUICK) {
+} else if (PROD && !QUICK) {
 	debug("Enable plugins for production (OccurenceOrder, Dedupe & UglifyJS).")
 	webpackConfig.plugins.push(
 		//new webpack.optimize.OccurrenceOrderPlugin(),
@@ -229,18 +222,7 @@ if (__DEV__) {
 	)
 }
 
-// Don't split bundles during testing, since we only want to import one bundle
-if (!__TEST__) {
-	/*webpackConfig.plugins.push(
-		// maybe temp; the only reason we keep this for now, is because it makes the webpackJsonp function available (used in webpack-runtime-require)
-		new webpack.optimize.CommonsChunkPlugin({
-			names: ["vendor"]
-		})
-	)*/
-	//config.optimization.splitChunks = true;
-}
-
-// Loaders
+// loaders
 // ==========
 
 // JavaScript / JSON
@@ -362,7 +344,7 @@ webpackConfig.module.rules.push(
 // when we don't know the public path (we know it only when HMR is enabled [in development]) we
 // need to use the extractTextPlugin to fix this issue:
 // http://stackoverflow.com/questions/34133808/webpack-ots-parsing-error-loading-fonts/34133809#34133809
-//if (!__DEV__ && !__TEST__) {
+//if (!DEV && !TEST) {
 /*debug("Apply ExtractTextPlugin to CSS loaders.");
 webpackConfig.module.rules.filter(loader=>
 	loader.loaders && loader.loaders.find(name=>/css/.test(name.split("?")[0]))
@@ -477,10 +459,10 @@ if (OUTPUT_STATS) {
 
 function SortArray(array, valFunc = (item, index)=>item) {
     return StableSort(array, (a, b, aIndex, bIndex)=>Compare(valFunc(a, aIndex), valFunc(b, bIndex)));
-};
+}
 function SortArrayDescending(array, valFunc = (item, index)=>item) {
 	return SortArray(array, (item, index)=>-valFunc(item, index));
-};
+}
 function StableSort(array, compareFunc) { // needed for Chrome
 	var array2 = array.map((item, index)=>({index, item}));
 	array2.sort((a, b)=> {

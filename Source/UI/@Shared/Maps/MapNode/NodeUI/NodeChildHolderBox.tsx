@@ -2,14 +2,14 @@ import {Connect} from "Frame/Database/FirebaseConnect";
 import {emptyArray, emptyArray_forLoading} from "Frame/Store/ReducerUtils";
 import {GetMarkerPercent_AtPath, GetRatings} from "Store/firebase/nodeRatings";
 import {RatingType} from "Store/firebase/nodeRatings/@RatingType";
-import {GetParentNodeL3} from "Store/firebase/nodes";
+import {GetParentNodeL3, HolderType} from "Store/firebase/nodes";
 import {IsSinglePremiseArgument} from "Store/firebase/nodes/$node";
 import {MapNodeL3} from "Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
 import {ACTMapNodeExpandedSet} from "Store/main/mapViews/$mapView/rootNodeViews";
 import {MapNodeView} from "Store/main/mapViews/@MapViews";
 import {Row} from "react-vcomponents";
-import {BaseComponentWithConnector, GetInnerComp} from "react-vextensions";
+import {BaseComponentWithConnector} from "react-vextensions";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import {GetFillPercent_AtPath} from "../../../../../Store/firebase/nodeRatings";
 import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
@@ -20,11 +20,6 @@ import {NodeUI_Menu} from "../NodeUI_Menu";
 import {NodeChildCountMarker} from "./NodeChildCountMarker";
 import {NodeChildHolder} from "./NodeChildHolder";
 import RatingsPanel from "./Panels/RatingsPanel";
-
-export enum HolderType {
-	Truth = 10,
-	Relevance = 20,
-}
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
@@ -66,7 +61,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 	static ValidateProps(props) {
 		let {node, nodeChildren} = props;
 		// ms only asserts in dev for now; causes error sometimes when cut+pasting otherwise (firebase doesn't send DB updates atomically?)
-		if (devEnv) {
+		if (DEV) {
 			Assert(nodeChildren.every(a=>a == null || a.parents[node._id]), "Supplied node is not a parent of all the supplied node-children!");
 		}
 	}
