@@ -312,13 +312,11 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	}
 }
 
-@Connect((state, props)=> ({
+let ChildLimitBar_connector = (state, props: {map: Map, path: string, childrenWidthOverride: number, direction: "up" | "down", childCount: number, childLimit: number})=> ({
 	initialChildLimit: State(a=>a.main.initialChildLimit),
-}))
-export class ChildLimitBar extends BaseComponent
-		<{map: Map, path: string, childrenWidthOverride: number, direction: "up" | "down", childCount: number, childLimit: number}
-			& Partial<{initialChildLimit: number}>,
-		{}> {
+});
+@Connect(ChildLimitBar_connector)
+export class ChildLimitBar extends BaseComponentWithConnector(ChildLimitBar_connector, {}) {
 	static HEIGHT = 36;
 	render() {
 		let {map, path, childrenWidthOverride, direction, childCount, childLimit, initialChildLimit} = this.props;

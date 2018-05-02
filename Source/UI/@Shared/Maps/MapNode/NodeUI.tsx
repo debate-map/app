@@ -205,7 +205,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			}
 
 			return (
-				<NodeUI ref={c=>this.proxyDisplayedNodeUI = c} {...this.props} key={child._id} map={map} node={child} path={path + "/" + child._id}>
+				<NodeUI ref={c=>this.proxyDisplayedNodeUI = GetInnerComp(c)} {...this.props} key={child._id} map={map} node={child} path={path + "/" + child._id}>
 					{children}
 				</NodeUI>
 			);
@@ -348,6 +348,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 	}*/
 	//GetMeasurementInfo(useCached: boolean) {
 	GetMeasurementInfo() {
+		if (this.proxyDisplayedNodeUI) return this.proxyDisplayedNodeUI.GetMeasurementInfo();
+
 		let props_used = this.props.Including("node", "path", "subnodes", "nodeChildren") as any;
 		//Log("Checking whether should remeasure info for: " + props_used.node._id);
 		if (this.measurementInfo_cache && ShallowEquals(this.measurementInfo_cache_lastUsedProps, props_used)) return this.measurementInfo_cache;
