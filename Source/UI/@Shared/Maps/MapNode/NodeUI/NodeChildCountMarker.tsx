@@ -6,6 +6,8 @@ export class NodeChildCountMarker extends BaseComponent<{childCount: number, tex
 	static defaultProps = {textOutline: "rgba(10,10,10,1)"};
 	render() {
 		let {childCount, textOutline, limitBarPos} = this.props;
+		if (childCount == 0) return <div/>;
+
 		return (
 			<div style={E(
 				{

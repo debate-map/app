@@ -111,7 +111,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 				// if we don't know our inner-box-offset yet, render still (so we can measure ourself), but make self invisible
 				expanded && nodeChildrenToShow.length && innerBoxOffset == 0 && {opacity: 0, pointerEvents: "none"},
 			)}>
-				<Row style={E(
+				<Row className="clickThrough" style={E(
 					{/*position: "relative", /* removal fixes */ alignItems: "flex-start", /*marginLeft: `calc(100% - ${width}px)`,*/ width},
 				)}>
 					<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{position: "absolute", width: "100%", height: "100%"}}>

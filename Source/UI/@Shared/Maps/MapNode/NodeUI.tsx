@@ -274,8 +274,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 					<div style={{margin: "auto 0 auto 10px"}}>...</div>}
 				{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 &&
 					<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
-				{nodeChildrenToShow != emptyArray && !nodeView.expanded && nodeChildrenToShow.length != 0 &&
-					<NodeChildCountMarker {...{limitBarPos}} childCount={nodeChildrenToShow.length}/>}
+				{!nodeView.expanded &&
+					<NodeChildCountMarker {...{limitBarPos}} childCount={nodeChildrenToShow.length + (relevanceArguments ? relevanceArguments.length : 0)}/>}
 				{!nodeView.expanded && (addedDescendants > 0 || editedDescendants > 0) &&
 					<NodeChangesMarker {...{addedDescendants, editedDescendants, limitBarPos}}/>}
 				{!isMultiPremiseArgument &&
