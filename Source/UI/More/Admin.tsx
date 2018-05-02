@@ -26,7 +26,8 @@ export function AddUpgradeFunc(version: number, func: UpgradeFunc) {
 //require("./Admin/DBUpgrades/UpgradeDB_6");
 //require("./Admin/DBUpgrades/UpgradeDB_7");
 //require("./Admin/DBUpgrades/UpgradeDB_8");
-require("./Admin/DBUpgrades/UpgradeDB_9");
+//require("./Admin/DBUpgrades/UpgradeDB_9");
+require("./Admin/DBUpgrades/UpgradeDB_10");
 
 //export default class AdminUI extends BaseComponent<{}, {fb: firebase.FirebaseApplication, env: string}> {
 export default class AdminUI extends BaseComponent<{}, {dbUpgrade_entryIndexes: number[], dbUpgrade_entryCounts: number[]}> {
@@ -132,8 +133,11 @@ The old db-root will not be modified.`,
 					onOK: async ()=> {
 						let oldData = await GetDataAsync({inVersionRoot: false}, ...oldVersionPath.split("/")) as FirebaseData;
 						StartStateDataOverride(`firebase/data/${DBPath()}`, oldData);
-						let newData = await upgradeFunc(oldData, markProgress);
-						StopStateDataOverride();
+						try {
+							var newData = await upgradeFunc(oldData, markProgress);
+						} finally {
+							StopStateDataOverride();
+						}
 						RemoveHelpers(newData); // remove "_key" and such
 
 						if (newVersion >= dbVersion) {
