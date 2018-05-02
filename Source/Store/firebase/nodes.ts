@@ -148,7 +148,7 @@ export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: 
 	return true;
 }
 export function IsNewLinkValid(parentPath: string, newHolderType: HolderType, newChild: MapNodeL2, permissions: PermissionGroupSet) {
-	let parent = GetNodeL3(parentPath);
+	let parent = GetNode(GetNodeID(parentPath));
 	let parentPathIDs = SplitStringBySlash_Cached(parentPath).map(a=>a.ToInt());
 	//if (map.name == "Global" && parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
 	if (parent._id == globalRootNodeID && !HasAdminPermissions(permissions)) return false; // if parent is global-root, don't accept new children (unless admin)

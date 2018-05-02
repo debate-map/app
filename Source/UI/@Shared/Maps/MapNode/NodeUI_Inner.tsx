@@ -81,8 +81,8 @@ let connector = (state, {map, node, path}: Props)=> {
 	//let mainRating_mine = GetRatingValue(ratingNode._id, mainRatingType, GetUserID());
 	let mainRating_mine = GetRatingAverage_AtPath(ratingNode, mainRatingType, new RatingFilter({includeUser: GetUserID()}));
 
-	let showReasonScoreValuesForThisNode = State(a=>a.main.weighting) == WeightingType.ReasonScore && (node.type == MapNodeType.Argument || node.type == MapNodeType.Claim);
-	if (showReasonScoreValuesForThisNode) {
+	let useReasonScoreValuesForThisNode = State(a=>a.main.weighting) == WeightingType.ReasonScore && (node.type == MapNodeType.Argument || node.type == MapNodeType.Claim);
+	if (useReasonScoreValuesForThisNode) {
 		var reasonScoreValues = RS_GetAllValues(node, path, true) as ReasonScoreValues_RSPrefix;
 	}
 
@@ -123,8 +123,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 
 		let backgroundFillPercent = mainRating_average || 0;
 		let markerPercent = mainRating_mine;
-		let showReasonScoreValuesForThisNode = State(a=>a.main.weighting) == WeightingType.ReasonScore && (node.type == MapNodeType.Argument || node.type == MapNodeType.Claim);
-		if (showReasonScoreValuesForThisNode) {
+		if (reasonScoreValues) {
 			var {rs_argTruthScoreComposite, rs_argWeightMultiplier, rs_argWeight, rs_claimTruthScore, rs_claimBaseWeight} = reasonScoreValues;
 			if (node.type == MapNodeType.Claim) {
 				backgroundFillPercent = rs_claimTruthScore * 100;
@@ -201,7 +200,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 					bottomPanelShow &&
 						<NodeUI_BottomPanel {...{map, node, nodeView, path, parent, width, widthOverride, panelPosition, panelToShow, hovered, backgroundColor}}
 							hoverTermID={hoverTermID} onTermHover={termID=>this.SetState({hoverTermID: termID})}/>,
-					showReasonScoreValuesForThisNode &&
+					reasonScoreValues && showReasonScoreValues &&
 						<ReasonScoreValueMarkers {...{node, combinedWithParentArgument, reasonScoreValues}}/>,
 				].AutoKey()}
 			/>
