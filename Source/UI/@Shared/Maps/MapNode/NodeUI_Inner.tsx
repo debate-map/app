@@ -3,7 +3,7 @@ import {RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues
 import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
 import {ACTSetLastAcknowledgementTime} from "Store/main";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/$map";
-import NodeMathUI from "UI/@Shared/Maps/MapNode/NodeMathUI";
+import {NodeMathUI} from "UI/@Shared/Maps/MapNode/NodeMathUI";
 import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
 import classNames from "classnames";
 import keycode from "keycode";

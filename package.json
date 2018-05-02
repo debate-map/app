@@ -157,7 +157,7 @@
     "firebase-feedback": "0.0.1",
     "firebase-forum": "0.0.1",
     "js-vextensions": "0.0.1",
-    "katex": "^0.7.1",
+    "katex": "^0.9.0",
     "keycode": "^2.1.8",
     "lodash": "^4.17.2",
     "moment": "^2.17.1",

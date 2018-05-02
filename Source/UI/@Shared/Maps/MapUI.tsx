@@ -22,6 +22,7 @@ import NodeUI_ForBots from "./MapNode/NodeUI_ForBots";
 import {NodeUI_Inner} from "./MapNode/NodeUI_Inner";
 import {ActionBar_Left} from "./MapUI/ActionBar_Left";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right";
+import {InlineMath} from "react-katex";
 
 export function GetNodeBoxForPath(path: string) {
 	let nodeInnerBoxes = FindDOMAll(".NodeUI_Inner").map(a=>DeepGet(FindReact(a), "props/parent") as NodeUI_Inner);

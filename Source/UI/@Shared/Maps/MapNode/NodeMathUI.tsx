@@ -24,7 +24,7 @@ export function PreProcessLatex(text: string) {
 	return text;
 }
 
-export default class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termID: number, hovered: boolean)=>void, onTermClick: (termID: number)=>void}, {}> {
+export class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termID: number, hovered: boolean)=>void, onTermClick: (termID: number)=>void}, {}> {
 	render() {
 		let {text} = this.props;
 		text = PreProcessLatex(text);
