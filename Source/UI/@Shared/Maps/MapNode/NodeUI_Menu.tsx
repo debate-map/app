@@ -3,7 +3,7 @@ import LinkNode from "Server/Commands/LinkNode";
 import SetNodeIsMultiPremiseArgument from "Server/Commands/SetNodeIsMultiPremiseArgument";
 import UnlinkNode from "Server/Commands/UnlinkNode";
 import { MapNodeRevision } from "Store/firebase/nodes/@MapNodeRevision";
-import { ACTSetLastAcknowledgementTime } from "Store/main";
+import { ACTSetLastAcknowledgementTime, GetCopiedNodePath } from "Store/main";
 import { GetTimeFromWhichToShowChangedNodes } from "Store/main/maps/$map";
 import { HolderType } from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
 import { ShowAddSubnodeDialog } from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSubnodeDialog";
@@ -32,11 +32,21 @@ import { ShowSignInPopup } from "../../NavBar/UserPanel";
 import { ShowAddChildDialog } from "./NodeUI_Menu/AddChildDialog";
 
 type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean, holderType?: HolderType};
-let connector = (_: RootState, {map, node, path}: Props)=> {
+let connector = (_: RootState, {map, node, path, holderType}: Props)=> {
 	let sinceTime = GetTimeFromWhichToShowChangedNodes(map._id);
 	let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
 	let pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == path || a.startsWith(path + "/")); // also include self, for this
 	let parent = GetParentNodeL3(path);
+
+	let copiedNode = GetCopiedNode();
+	let copiedNodePath = GetCopiedNodePath();
+	// if we're copying a (single-premise) argument into a place where it's supposed to be a claim, we have to paste just that inner claim
+	if (copiedNode && copiedNode.type == MapNodeType.Argument && IsMultiPremiseArgument(node) && holderType == null) {
+		copiedNode = GetNodeChildrenL3(copiedNode)[0];
+		copiedNodePath = copiedNode ? `${copiedNodePath}/${copiedNode._id}` : null;
+		// todo: ms old wrapper is also deleted (probably)
+	}
+
 	return {
 		_: (ForUnlink_GetError(GetUserID(), node), ForDelete_GetError(GetUserID(), node)),
 		//userID: GetUserID(), // not needed in Connect(), since permissions already watches its data
@@ -45,7 +55,7 @@ let connector = (_: RootState, {map, node, path}: Props)=> {
 		//nodeChildren: GetNodeChildrenL3(node, path),
 		nodeChildren: GetNodeChildrenL3(node, path),
 		combinedWithParentArg: IsPremiseOfSinglePremiseArgument(node, parent),
-		copiedNode: GetCopiedNode(),
+		copiedNode, copiedNodePath,
 		copiedNode_asCut: State(a=>a.main.copiedNodePath_asCut),
 		pathsToChangedInSubtree,
 	};
@@ -54,7 +64,7 @@ let connector = (_: RootState, {map, node, path}: Props)=> {
 export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 	render() {
 		let {map, node, path, inList, holderType,
-			permissions, parent, nodeChildren, combinedWithParentArg, copiedNode, copiedNode_asCut, pathsToChangedInSubtree} = this.props;
+			permissions, parent, nodeChildren, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut, pathsToChangedInSubtree} = this.props;
 		let userID = GetUserID();
 		let firebase = store.firebase.helpers;
 		//let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
@@ -204,12 +214,7 @@ If not, paste the argument as a clone instead.`
 									let {nodeID} = await addArgumentWrapper.Run();
 									//pastedNodeHolder = AsNodeL3(AsNodeL2(argumentWrapper, argumentWrapperRevision), Polarity.Supporting);
 									pastedNodeHolder = await GetAsync(()=>GetNodeL3(`${path}/${nodeID}`));
-								}
-
-								// if we're copying a (single-premise) argument into a place where it's supposed to be a claim, we have to paste just that inner claim
-								if (IsMultiPremiseArgument(node) && holderType == null && copiedNode.type == MapNodeType.Argument) {
-									copiedNode = GetNodeChildrenL3(copiedNode)[0];
-									// todo: ms old wrapper is also deleted (probably)
+									store.dispatch(new ACTSetLastAcknowledgementTime({nodeID, time: Date.now()}));
 								}
 
 								await new LinkNode(E(
@@ -218,9 +223,8 @@ If not, paste the argument as a clone instead.`
 									copiedNode.type == MapNodeType.Argument && {childPolarity: copiedNode.link.polarity},
 								)).Run();
 								if (copiedNode_asCut) {
-									let baseNodePath = State(a=>a.main.copiedNodePath);		
-									let baseNodePath_ids = GetPathNodeIDs(baseNodePath);
-									await new UnlinkNode({mapID: map._id, parentID: baseNodePath_ids.XFromLast(1), childID: baseNodePath_ids.Last()}).Run();
+									let copiedNodePath_ids = GetPathNodeIDs(copiedNodePath);
+									await new UnlinkNode({mapID: map._id, parentID: copiedNodePath_ids.XFromLast(1), childID: copiedNodePath_ids.Last()}).Run();
 								}
 							}
 						}}/>}

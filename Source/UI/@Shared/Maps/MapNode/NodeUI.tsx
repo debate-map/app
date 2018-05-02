@@ -199,9 +199,9 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			let childLimit = direction == "down" ? childLimit_down : childLimit_up;
 
 			// if has child-limit bar, correct its path
-			let firstChild = this.FlattenedChildren[0] as any;
-			if (firstChild && firstChild.props.path == path) {
-				firstChild.props.path = firstChild.props.path + "/" + child._id;
+			let firstChildComp = this.FlattenedChildren[0] as any;
+			if (firstChildComp && firstChildComp.props.path == path) {
+				firstChildComp.props.path = firstChildComp.props.path + "/" + child._id;
 			}
 
 			return (

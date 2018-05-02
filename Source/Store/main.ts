@@ -251,8 +251,11 @@ export function GetLastAcknowledgementTime(nodeID: number) {
 	return State("main", "nodeLastAcknowledgementTimes", nodeID) as number || 0;
 }
 
+export function GetCopiedNodePath() {
+	return State(a=>a.main.copiedNodePath);
+}
 export function GetCopiedNode() {
-	let path = State(a=>a.main.copiedNodePath);
+	let path = GetCopiedNodePath();
 	if (!path) return null;
 	return GetNodeL3(path);
 }
