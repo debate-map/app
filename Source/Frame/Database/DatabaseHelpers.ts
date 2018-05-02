@@ -263,6 +263,7 @@ export async function GetAsync<T>(dbGetterFunc: ()=>T, statsLogger?: ({requested
 	Assert(!g.inConnectFunc, "Cannot run GetAsync() from within a Connect() function.");
 	//Assert(!g.inGetAsyncFunc, "Cannot run GetAsync() from within a GetAsync() function.");
 	let firebase = store.firebase;
+	let dbDataLocked = State_overrideData_path == `firebase/data/${DBPath()}`;
 
 	let result;
 
@@ -275,18 +276,20 @@ export async function GetAsync<T>(dbGetterFunc: ()=>T, statsLogger?: ({requested
 		result = dbGetterFunc();
 		let newRequestedPaths = GetRequestedPaths().Except(requestedPathsSoFar.VKeys());
 
-		StartBufferingActions();
-		//let oldNodeRenderCount = NodeUI.renderCount;
-		unWatchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths)); // do this just to trigger re-get
-		// start watching paths (causes paths to be requested)
-		watchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths));
-		//Assert(NodeUI.renderCount == oldNodeRenderCount, "NodeUIs rendered during unwatch/watch event!");
-		StopBufferingActions();
+		if (!dbDataLocked) {
+			StartBufferingActions();
+			//let oldNodeRenderCount = NodeUI.renderCount;
+			unWatchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths)); // do this just to trigger re-get
+			// start watching paths (causes paths to be requested)
+			watchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths));
+			//Assert(NodeUI.renderCount == oldNodeRenderCount, "NodeUIs rendered during unwatch/watch event!");
+			StopBufferingActions();
+		}
 
 		for (let path of newRequestedPaths) {
 			requestedPathsSoFar[path] = true;
 			// wait till data is received (assuming we don't have a state-override that's just locking the content of firebase.data anyway)
-			if (State_overrideData_path != `firebase/data/${DBPath()}`) {
+			if (!dbDataLocked) {
 				await WaitTillPathDataIsReceived(path);
 			}
 		}
@@ -295,7 +298,7 @@ export async function GetAsync<T>(dbGetterFunc: ()=>T, statsLogger?: ({requested
 		// todo: find correct way of unwatching events; the way below seems to sometimes unwatch while still needed watched
 		// for now, we just never unwatch
 		//unWatchEvents(firebase, store.dispatch, getEventsFromInput(newRequestedPaths));
-	} while (ShallowChanged(requestedPathsSoFar, requestedPathsSoFar_last))
+	} while (ShallowChanged(requestedPathsSoFar, requestedPathsSoFar_last) && !dbDataLocked)
 
 	/*let paths_final = requestedPathsSoFar.VKeys();
 	let paths_data = await Promise.all(paths_final.map(path=>GetDataAsync(path)));

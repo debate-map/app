@@ -46,7 +46,7 @@ export function GetChildCount(node: MapNode) {
 
 export function IsRootNode(node: MapNode) {
 	if (IsNodeSubnode(node)) return false;
-	return GetParentCount(node) == 0;
+	return node.type == MapNodeType.Category && GetParentCount(node) == 0;
 }
 export function IsNodeSubnode(node: MapNode) {
 	return node.layerPlusAnchorParents != null;

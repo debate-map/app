@@ -94,7 +94,7 @@ export default class AdminUI extends BaseComponent<{}, {dbUpgrade_entryIndexes: 
 		);
 	}
 
-	MarkProgress(depth: number, entryIndex: number, entryCount?: number) {
+	async MarkProgress(depth: number, entryIndex: number, entryCount?: number) {
 		let {dbUpgrade_entryIndexes, dbUpgrade_entryCounts} = this.state;
 		[dbUpgrade_entryIndexes, dbUpgrade_entryCounts] = [dbUpgrade_entryIndexes.slice(), dbUpgrade_entryCounts.slice()]; // use copies of arrays
 
@@ -103,6 +103,11 @@ export default class AdminUI extends BaseComponent<{}, {dbUpgrade_entryIndexes: 
 			dbUpgrade_entryCounts[depth] = entryCount;
 		}
 		this.SetState({dbUpgrade_entryIndexes, dbUpgrade_entryCounts});
+
+		// every 100 entries, wait a bit, so UI can update
+		if (entryIndex % 100 == 0) {
+			await SleepAsync(10);
+		}
 	}
 }
 

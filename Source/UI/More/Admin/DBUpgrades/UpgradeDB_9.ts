@@ -10,12 +10,28 @@ let newVersion = 9;
 AddUpgradeFunc(newVersion, async (oldData, markProgress)=> {
 	let data = Clone(oldData) as FirebaseData;
 
+	// [clean up some invalid data in prod db]
+	// ==========
+
+	markProgress(0, -1, 3);
+	for (let {index, value: node} of data.nodes.Props(true)) {
+		await markProgress(1, index, oldData.nodes.Props(true).length);
+		let revision = data.nodeRevisions[node.currentRevision];
+
+		if (node.type != MapNodeType.Category && node.parents == null && node.children == null) {
+			// delete node
+			let deleteNode = new DeleteNode({nodeID: node._id});
+			await deleteNode.PreRun();
+			data = ApplyDBUpdates_Local(data, deleteNode.GetDBUpdates());
+		}
+	}
+
 	// remove impact-premise nodes
 	// ==========
 
 	markProgress(0, 0, 3);
 	for (let {index, value: node} of data.nodes.Props(true)) {
-		markProgress(1, index, oldData.nodes.Props(true).length);
+		await markProgress(1, index, oldData.nodes.Props(true).length);
 		let revision = data.nodeRevisions[node.currentRevision];
 		if (revision["impactPremise"]) {
 			// move impact-premise children to children of argument (as relevance arguments now)
@@ -46,7 +62,7 @@ AddUpgradeFunc(newVersion, async (oldData, markProgress)=> {
 
 	markProgress(0, 1);
 	for (let {index, value: revision} of data.nodeRevisions.Props(true)) {
-		markProgress(1, index, oldData.nodeRevisions.Props(true).length);
+		await markProgress(1, index, oldData.nodeRevisions.Props(true).length);
 		if (revision.titles == null) {
 			revision.titles = {base: ""};
 		}
@@ -57,9 +73,9 @@ AddUpgradeFunc(newVersion, async (oldData, markProgress)=> {
 
 	markProgress(0, 2);
 	for (let {index, value: node} of data.nodes.Props(true)) {
-		markProgress(1, index, oldData.nodes.Props(true).length);
+		await markProgress(1, index, oldData.nodes.Props(true).length);
 		if (node.type == MapNodeType.Argument) {
-			let children = node.children.VKeys(true).map(id=>data.nodes[id]);
+			let children = (node.children || {}).VKeys(true).map(id=>data.nodes[id]);
 			let childClaims = children.filter(a=>a.type == MapNodeType.Claim);
 			if (childClaims.length > 1) {
 				node.multiPremiseArgument = true;
