@@ -139,7 +139,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 							//return false;
 							if (nodeView[expandKey]) {
 								this.dividePoint = 0;
-								this.OnDividePointChange();
+								this.CheckForChanges();
 							}
 						}}
 						afterChildren={[
@@ -166,8 +166,9 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 					<NodeChildHolder {...{map, node, path, nodeView, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar}}
 						linkSpawnPoint={innerBoxOffset + (height / 2)}
 						onHeightOrDividePointChange={dividePoint=> {
+							Assert(!IsNaN(dividePoint));
 							this.dividePoint = dividePoint;
-							this.OnDividePointChange();
+							this.CheckForChanges();
 						}}/>}
 			</Row>
 		);
@@ -176,68 +177,50 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 	expandableBox: ExpandableBox;
 	ratingPanelHolder: HTMLDivElement;
 	ratingPanel: RatingsPanel;
-	dividePoint: number;
 
 	ComponentDidMount() {
 		$(this.expandableBox.DOM).hover(()=>$(".scrolling").length == 0 && this.SetState({hovered: true}), ()=>this.SetState({hovered: false}));
 		$(this.expandableBox.expandButton.DOM).hover(()=>$(".scrolling").length == 0 && this.SetState({hovered_button: true}), ()=>this.SetState({hovered_button: false}));
 	}
 
-	lastLineHolderHeight = 0;
 	PostRender() {
+		this.CheckForChanges();
+	}
+
+	dividePoint: number;
+
+	lastLineHolderHeight = 0;
+	lastHeight = 0;
+	lastDividePoint = 0;
+	CheckForChanges() {
+		let {onHeightOrDividePointChange} = this.props;
+		
 		let lineHolderHeight = $(this.lineHolder).outerHeight();
 		if (lineHolderHeight != this.lastLineHolderHeight) {
 			this.SetState({lineHolderHeight});
 		}
 		this.lastLineHolderHeight = lineHolderHeight;
+
+		let height = $(GetDOM(this)).outerHeight();
+		if (height != this.lastHeight || this.dividePoint != this.lastDividePoint) {
+			/*if (height != this.lastHeight) {
+				this.OnHeightChange();
+			}*/
+			//if (this.dividePoint != this.lastDividePoint) {
+				let {height} = this.GetMeasurementInfo();
+				let distFromInnerBoxTopToMainBoxCenter = height / 2;
+				let innerBoxOffset = (this.dividePoint - distFromInnerBoxTopToMainBoxCenter).NaNTo(0).KeepAtLeast(0);
+				this.SetState({innerBoxOffset});
+			//}
+
+			if (onHeightOrDividePointChange) onHeightOrDividePointChange(this.dividePoint);
+		}
+		this.lastHeight = height;
+		this.lastDividePoint = this.dividePoint;
 	}
 	
 	GetMeasurementInfo() {
 		//return {width: 90, height: 26};
 		return {width: 90, height: 22};
 	}
-
-	OnDividePointChange() {
-		/*this.childrenCenterY = childrenCenterY;
-		this.UpdateLines();*/
-
-		let {onHeightOrDividePointChange} = this.props;
-		let {height} = this.GetMeasurementInfo();
-
-		let distFromInnerBoxTopToMainBoxCenter = height / 2;
-		let innerBoxOffset = (this.dividePoint - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
-		this.SetState({innerBoxOffset});
-
-		if (onHeightOrDividePointChange) onHeightOrDividePointChange(this.dividePoint);
-	}
-
-	/*UpdateLines() {
-		let {width, height} = this.GetMeasurementInfo();
-
-		let distFromInnerBoxTopToMainBoxCenter = height / 2;
-		let innerBoxOffset = (this.childrenCenterY - distFromInnerBoxTopToMainBoxCenter).KeepAtLeast(0);
-		this.SetState({innerBoxOffset});
-	}*/
-
-	/*lastPos = 0;
-	PostRender() {
-		//if (this.lastRender_source == RenderSource.SetState) return;
-
-		let height = $(GetDOM(this)).outerHeight();
-		let pos = this.state.childrenCenterY|0;
-		if (pos != this.lastPos) {
-			this.OnPosChange();
-		} else {
-			if (this.lastRender_source == RenderSource.SetState) return;
-			this.UpdateLines();
-		}
-		this.lastPos = pos;
-	}
-	OnPosChange() {
-		let {node} = this.props;
-		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}`);
-
-		this.UpdateLines();
-	}*/
 }

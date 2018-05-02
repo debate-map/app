@@ -148,7 +148,8 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 				{IsMultiPremiseArgument(node) && type != HolderType.Relevance &&
 					<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Relevance} widthOverride={childrenWidthOverride}
 						widthOfNode={childrenWidthOverride}
-						nodeChildren={GetNodeChildrenL3(node, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}/>}
+						nodeChildren={GetNodeChildrenL3(node, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}
+						onHeightOrDividePointChange={dividePoint=>this.CheckForChanges()}/>}
 				{!separateChildren && nodeChildrenToShowHere.slice(0, childLimit_down).map((pack, index)=> {
 					return RenderChild(pack, index, nodeChildrenToShowHere);
 				})}
@@ -185,30 +186,36 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		return nodeChildrenToShow.OrderBy(a=>nodeChildren_fillPercents[a._id]).map(a=>a._id).join(",");
 	}
 
+	PostRender() {
+		this.CheckForChanges();
+	}
+
 	lastHeight = 0;
 	lastOrderStr = null;
-	PostRender() {
+	CheckForChanges() {
 		//if (this.lastRender_source == RenderSource.SetState) return;
+		let {node, onHeightOrDividePointChange} = this.props;
 
 		let height = $(GetDOM(this)).outerHeight();
-		let orderStr = this.ChildOrderStr;
-		
 		if (height != this.lastHeight) {
-			this.OnHeightChange();
-		} /*else {
-			if (this.lastRender_source == RenderSource.SetState) return;
-			this.UpdateState();
-			this.ReportChildrenCenterYChange();
-		}*/
+			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
+				()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+					}centerY:${this.GetDividePoint()}`);
+			
+			//this.UpdateState(true);
+			this.UpdateChildrenWidthOverride();
+			this.UpdateChildBoxOffsets();
+			if (onHeightOrDividePointChange) onHeightOrDividePointChange(this.GetDividePoint());
+		}
+		this.lastHeight = height;
 
+		let orderStr = this.ChildOrderStr;
 		if (orderStr != this.lastOrderStr) {
 			//this.OnChildHeightOrPosOrOrderChange();
 			//this.UpdateChildrenWidthOverride();
 			this.UpdateChildBoxOffsets();
 			//this.ReportDividePointChange();
 		}
-		
-		this.lastHeight = height;
 		this.lastOrderStr = orderStr;
 	}
 
@@ -229,17 +236,8 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 				this.OnChildHeightOrPosChange_updateStateQueued = false;
 			});
 		}
-	}
-	OnHeightChange() {
-		let {node} = this.props;
-		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
-				}centerY:${this.GetDividePoint()}`);
-		
-		//this.UpdateState(true);
-		this.UpdateChildrenWidthOverride();
-		this.UpdateChildBoxOffsets();
-		this.ReportDividePointChange();
+
+		this.CheckForChanges();
 	}
 
 	GetDividePoint() {
@@ -251,17 +249,6 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 		}
 		//return childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0,
 		return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden" ? $(this.childHolder.DOM).GetScreenRect().height / 2 : 0;
-	}
-	ReportDividePointChange() {
-		let {node, onHeightOrDividePointChange} = this.props;
-
-		let dividePoint = this.GetDividePoint();
-
-		if (onHeightOrDividePointChange) onHeightOrDividePointChange(dividePoint);
-
-		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnChildrenCenterYChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
-				}centerY:${this.GetDividePoint()}`);
 	}
 
 	UpdateChildrenWidthOverride(forceUpdate = false) {

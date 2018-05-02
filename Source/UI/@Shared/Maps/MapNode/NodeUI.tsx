@@ -220,7 +220,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
 				onHeightOrDividePointChange={dividePoint=> {
 					//if (isMultiPremiseArgument) return; // if multi-premise argument, divide-point is always 0
-					this.OnDividePointChange(dividePoint);
+					this.SetState({dividePoint});
 				}}/>;
 
 		let hasExtraWrapper = subnodes.length || isMultiPremiseArgument;
@@ -249,7 +249,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 						{isPremiseOfSinglePremiseArg && nodeView.expanded &&
 							<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Truth}
 								widthOfNode={widthOverride || width}
-								nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}/>}
+								nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
+								onHeightOrDividePointChange={dividePoint=>this.SetState({dividePoint})}/>}
 						<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{map, node, nodeView, path, width, widthOverride}}
 							style={E(
 								playingTimeline_currentStepRevealNodes.Contains(path) && {boxShadow: "rgba(255,255,0,1) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px"},
@@ -257,7 +258,8 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 						{isPremiseOfSinglePremiseArg && nodeView.expanded &&
 							<NodeChildHolderBox {...{map, node: parent, path: parentPath, nodeView: parentNodeView}} type={HolderType.Relevance}
 								widthOfNode={widthOverride || width}
-								nodeChildren={GetNodeChildrenL3(parent, parentPath)} nodeChildrenToShow={relevanceArguments}/>}
+								nodeChildren={GetNodeChildrenL3(parent, parentPath)} nodeChildrenToShow={relevanceArguments}
+								onHeightOrDividePointChange={dividePoint=>this.SetState({dividePoint})}/>}
 						{/*showBelowMessage &&
 							<Div ct style={{
 								//whiteSpace: "normal", position: "absolute", left: 0, right: 0, top: "100%", fontSize: 12
@@ -318,22 +320,46 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		}
 	}
 
+	PostRender() {
+		this.CheckForChanges();
+	}
+
 	lastHeight = 0;
 	lastSelfHeight = 0;
-	PostRender() {
+	lastDividePoint = 0;
+	CheckForChanges() {
 		//if (this.lastRender_source == RenderSource.SetState) return;
+		let {node, onHeightOrPosChange} = this.props;
+		let {dividePoint} = this.state;
 
 		let height = $(GetDOM(this)).outerHeight();
 		if (height != this.lastHeight) {
-			this.OnHeightChange(height);
+			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
+				()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+					}NewHeight:${height}`);
+			
+			//this.UpdateState(true);
+			//this.UpdateState();
+			if (onHeightOrPosChange) onHeightOrPosChange();
 		}
 		this.lastHeight = height;
 
 		let selfHeight = $(GetDOM(this.innerUI)).outerHeight();
 		if (selfHeight != this.lastSelfHeight) {
-			this.OnSelfHeightChange(selfHeight);
+			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
+				()=>`OnSelfHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
+					}NewSelfHeight:${selfHeight}`);
+			
+			//this.UpdateState(true);
+			//this.UpdateState();
+			this.SetState({selfHeight});
+			//if (onHeightOrPosChange) onHeightOrPosChange();
 		}
 		this.lastSelfHeight = selfHeight;
+
+		if (dividePoint != this.lastDividePoint) {
+			if (onHeightOrPosChange) onHeightOrPosChange();
+		}
 
 		/*else {
 			if (this.lastRender_source == RenderSource.SetState) return;
@@ -375,34 +401,6 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 		this.measurementInfo_cache = {expectedBoxWidth, width/*, expectedHeight*/};
 		this.measurementInfo_cache_lastUsedProps = props_used;
 		return this.measurementInfo_cache;
-	}
-
-	OnHeightChange(height: number) {
-		let {node, onHeightOrPosChange} = this.props;
-		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
-				}NewHeight:${height}`);
-		
-		//this.UpdateState(true);
-		//this.UpdateState();
-		if (onHeightOrPosChange) onHeightOrPosChange();
-	}
-	OnSelfHeightChange(selfHeight: number) {
-		let {node, onHeightOrPosChange} = this.props;
-		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._id),
-			()=>`OnSelfHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._id}${nl
-				}NewSelfHeight:${selfHeight}`);
-		
-		//this.UpdateState(true);
-		//this.UpdateState();
-		this.SetState({selfHeight});
-		if (onHeightOrPosChange) onHeightOrPosChange();
-	}
-	OnDividePointChange(dividePoint: number) {
-		let {node, onHeightOrPosChange} = this.props;
-
-		this.SetState({dividePoint});
-		if (onHeightOrPosChange) onHeightOrPosChange();
 	}
 }
 
