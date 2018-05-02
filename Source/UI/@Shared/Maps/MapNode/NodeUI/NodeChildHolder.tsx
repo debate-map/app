@@ -147,6 +147,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 				{/* if we're for multi-premise arg, and this comp is not already showing relevance-args, show them in a "Taken together, are these claims relevant?" box */}
 				{IsMultiPremiseArgument(node) && type != HolderType.Relevance &&
 					<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Relevance} widthOverride={childrenWidthOverride}
+						widthOfNode={childrenWidthOverride}
 						nodeChildren={GetNodeChildrenL3(node, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}/>}
 				{!separateChildren && nodeChildrenToShowHere.slice(0, childLimit_down).map((pack, index)=> {
 					return RenderChild(pack, index, nodeChildrenToShowHere);

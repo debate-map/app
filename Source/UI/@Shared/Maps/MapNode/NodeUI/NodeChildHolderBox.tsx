@@ -28,7 +28,7 @@ export enum HolderType {
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeView: MapNodeView, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
-	type: HolderType, widthOverride?: number, onHeightOrDividePointChange?: (dividePoint: number)=>void,
+	type: HolderType, widthOfNode: number, widthOverride?: number, onHeightOrDividePointChange?: (dividePoint: number)=>void,
 };
 let connector = (state, {node, path, type, nodeChildren}: Props)=> {
 	//let mainRating_fillPercent = 100;
@@ -69,7 +69,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 	}
 	lineHolder: HTMLDivElement;
 	render() {
-		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, widthOverride, backgroundFillPercent, markerPercent} = this.props;
+		let {map, node, path, nodeView, nodeChildren, nodeChildrenToShow, type, widthOfNode, widthOverride, backgroundFillPercent, markerPercent} = this.props;
 		let {innerBoxOffset, lineHolderHeight, hovered, hovered_button} = this.state;
 
 		let isMultiPremiseArgument = IsMultiPremiseArgument(node);
@@ -101,59 +101,64 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 
 		return (
 			<Row className="clickThrough" style={E(
-				{position: "relative", alignItems: "flex-start", /*marginLeft: `calc(100% - ${width}px)`,*/ width},
-				!isMultiPremiseArgument && {alignSelf: "flex-end"},
+				{position: "relative", alignItems: "flex-start"},
+				//!isMultiPremiseArgument && {alignSelf: "flex-end"},
+				!isMultiPremiseArgument && {left: `calc(${widthOfNode}px - ${width}px)`},
 				isMultiPremiseArgument && {marginTop: 10, marginBottom: 5},
 				// if we don't know our inner-box-offset yet, render still (so we can measure ourself), but make self invisible
 				expanded && nodeChildrenToShow.length && innerBoxOffset == 0 && {opacity: 0, pointerEvents: "none"},
 			)}>
-				<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{position: "absolute", width: "100%", height: "100%"}}>
-					{type == HolderType.Truth && 
-						<Squiggle start={[0, lineHolderHeight + 2]} startControl_offset={[0, -lineOffset]}
-							end={[(width / 2) - 2, innerBoxOffset + height - 2]} endControl_offset={[0, lineOffset]} color={lineColor}/>}
-					{type == HolderType.Relevance && !isMultiPremiseArgument &&
-						<Squiggle start={[0, -2]} startControl_offset={[0, lineOffset]}
-							end={[(width / 2) - 2, innerBoxOffset + 2]} endControl_offset={[0, -lineOffset]} color={lineColor}/>}
-					{type == HolderType.Relevance && isMultiPremiseArgument &&
-						<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
-				</div>
-				<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
-					ref={c=>this.expandableBox = c}
-					style={{marginTop: innerBoxOffset}}
-					padding="3px 5px 2px"
-					text={<span style={{position: "relative", fontSize: 13}}>{text}</span>}
-					{...{backgroundFillPercent, backgroundColor, markerPercent}}
-					toggleExpanded={e=> {
-						store.dispatch(new ACTMapNodeExpandedSet({
-							mapID: map._id, path, recursive: nodeView[expandKey] && e.altKey,
-							[expandKey]: !nodeView[expandKey],
-						}));
-						e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
-						//return false;
-						if (nodeView[expandKey]) {
-							this.dividePoint = 0;
-							this.OnDividePointChange();
-						}
-					}}
-					afterChildren={[
-						ratingPanelShow &&
-							<div ref={c=>this.ratingPanelHolder = c} style={{
-								position: "absolute", left: 0, top: "calc(100% + 1px)",
-								width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered_main ? 6 : 5,
-								padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-							}}>
-								{(()=> {
-									let ratings = GetRatings(node._id, holderTypeStr as RatingType);
-									return <RatingsPanel node={node} path={path} ratingType={holderTypeStr as RatingType} ratings={ratings}/>;
-								})()}
-							</div>,
-						<NodeUI_Menu {...{map, node, path}} holderType={type}/>
-					].AutoKey()}
-				/>
-				{nodeChildrenToShow != emptyArray && !expanded && nodeChildrenToShow.length != 0 &&
-					<NodeChildCountMarker childCount={nodeChildrenToShow.length}/>}
-				{/*!nodeView.expanded && (addedDescendants > 0 || editedDescendants > 0) &&
-					<NodeChangesMarker {...{addedDescendants, editedDescendants, textOutline, limitBarPos}}/>*/}
+				<Row style={E(
+					{/*position: "relative", /* removal fixes */ alignItems: "flex-start", /*marginLeft: `calc(100% - ${width}px)`,*/ width},
+				)}>
+					<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{position: "absolute", width: "100%", height: "100%"}}>
+						{type == HolderType.Truth && 
+							<Squiggle start={[0, lineHolderHeight + 2]} startControl_offset={[0, -lineOffset]}
+								end={[(width / 2) - 2, innerBoxOffset + height - 2]} endControl_offset={[0, lineOffset]} color={lineColor}/>}
+						{type == HolderType.Relevance && !isMultiPremiseArgument &&
+							<Squiggle start={[0, -2]} startControl_offset={[0, lineOffset]}
+								end={[(width / 2) - 2, innerBoxOffset + 2]} endControl_offset={[0, -lineOffset]} color={lineColor}/>}
+						{type == HolderType.Relevance && isMultiPremiseArgument &&
+							<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
+					</div>
+					<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
+						ref={c=>this.expandableBox = c}
+						style={{marginTop: innerBoxOffset}}
+						padding="3px 5px 2px"
+						text={<span style={{position: "relative", fontSize: 13}}>{text}</span>}
+						{...{backgroundFillPercent, backgroundColor, markerPercent}}
+						toggleExpanded={e=> {
+							store.dispatch(new ACTMapNodeExpandedSet({
+								mapID: map._id, path, recursive: nodeView[expandKey] && e.altKey,
+								[expandKey]: !nodeView[expandKey],
+							}));
+							e.nativeEvent.ignore = true; // for some reason, "return false" isn't working
+							//return false;
+							if (nodeView[expandKey]) {
+								this.dividePoint = 0;
+								this.OnDividePointChange();
+							}
+						}}
+						afterChildren={[
+							ratingPanelShow &&
+								<div ref={c=>this.ratingPanelHolder = c} style={{
+									position: "absolute", left: 0, top: "calc(100% + 1px)",
+									width: width, minWidth: (widthOverride|0).KeepAtLeast(550), zIndex: hovered_main ? 6 : 5,
+									padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
+								}}>
+									{(()=> {
+										let ratings = GetRatings(node._id, holderTypeStr as RatingType);
+										return <RatingsPanel node={node} path={path} ratingType={holderTypeStr as RatingType} ratings={ratings}/>;
+									})()}
+								</div>,
+							<NodeUI_Menu {...{map, node, path}} holderType={type}/>
+						].AutoKey()}
+					/>
+					{nodeChildrenToShow != emptyArray && !expanded && nodeChildrenToShow.length != 0 &&
+						<NodeChildCountMarker childCount={nodeChildrenToShow.length}/>}
+					{/*!nodeView.expanded && (addedDescendants > 0 || editedDescendants > 0) &&
+						<NodeChangesMarker {...{addedDescendants, editedDescendants, textOutline, limitBarPos}}/>*/}
+				</Row>
 				{nodeView[expandKey] &&
 					<NodeChildHolder {...{map, node, path, nodeView, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar}}
 						linkSpawnPoint={innerBoxOffset + (height / 2)}

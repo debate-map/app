@@ -248,6 +248,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 							</div>}
 						{isPremiseOfSinglePremiseArg && nodeView.expanded &&
 							<NodeChildHolderBox {...{map, node, path, nodeView}} type={HolderType.Truth}
+								widthOfNode={widthOverride || width}
 								nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}/>}
 						<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{map, node, nodeView, path, width, widthOverride}}
 							style={E(
@@ -255,6 +256,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 							)}/>
 						{isPremiseOfSinglePremiseArg && nodeView.expanded &&
 							<NodeChildHolderBox {...{map, node: parent, path: parentPath, nodeView: parentNodeView}} type={HolderType.Relevance}
+								widthOfNode={widthOverride || width}
 								nodeChildren={GetNodeChildrenL3(parent, parentPath)} nodeChildrenToShow={relevanceArguments}/>}
 						{/*showBelowMessage &&
 							<Div ct style={{
