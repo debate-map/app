@@ -186,7 +186,10 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 		// maybe temp
 		let combineWithChildClaim = IsSinglePremiseArgument(node);
-		if (combineWithChildClaim && !IsSpecialEmptyArray(nodeChildrenToShow) && nodeChildrenToShow.length) {
+		let premises = nodeChildrenToShow.filter(a=>a.type == MapNodeType.Claim);
+		if (combineWithChildClaim && premises.length == 1) {
+			//Assert(premises.length == 1, `Single-premise argument #${node._id} has more than one premise! (${premises.map(a=>a._id).join(",")})`);
+
 			let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 			let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 			let showAll = node._id == map.rootNode || node.type == MapNodeType.Argument;
@@ -194,7 +197,7 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 
 			let index = 0;
 			let direction = "down" as any;
-			let child = nodeChildren[0];
+			let premise = premises[0];
 			//if (child == null) return <div/>; // child data not loaded yet
 			//let collection = nodeChildren;
 			let childLimit = direction == "down" ? childLimit_down : childLimit_up;
@@ -202,11 +205,11 @@ export class NodeUI extends BaseComponentWithConnector(connector, {expectedBoxWi
 			// if has child-limit bar, correct its path
 			let firstChildComp = this.FlattenedChildren[0] as any;
 			if (firstChildComp && firstChildComp.props.path == path) {
-				firstChildComp.props.path = firstChildComp.props.path + "/" + child._id;
+				firstChildComp.props.path = firstChildComp.props.path + "/" + premise._id;
 			}
 
 			return (
-				<NodeUI ref={c=>this.proxyDisplayedNodeUI = GetInnerComp(c)} {...this.props} key={child._id} map={map} node={child} path={path + "/" + child._id}>
+				<NodeUI ref={c=>this.proxyDisplayedNodeUI = GetInnerComp(c)} {...this.props} key={premise._id} map={map} node={premise} path={path + "/" + premise._id}>
 					{children}
 				</NodeUI>
 			);
