@@ -37,3 +37,10 @@ export interface FirebaseData {
 	userMapInfo: {[key: string]: UserMapInfoSet}; // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
 	userViewedNodes: {[key: string]: ViewedNodeSet};
 }
+
+export function GetAuth() {
+	return State("firebase", "auth");
+}
+export function IsAuthValid(auth) {
+	return auth && !auth.isEmpty;
+}

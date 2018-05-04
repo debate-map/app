@@ -10,6 +10,7 @@ import {E} from "js-vextensions";
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
 import {Link} from "../../../Frame/ReactComponents/Link";
 import {ACTSetPage, ACTTopRightOpenPanelSet} from "../../../Store/main";
+import {IsAuthValid} from "Store/firebase";
 
 @Connect(state=>({
 	//authError: pathToJS(state.firebase, "authError"),
@@ -21,7 +22,7 @@ export default class UserPanel extends BaseComponent<{auth?}, {}> {
 	render() {
 		let {auth} = this.props;
 		let firebase = store.firebase.helpers;
-		if (!auth) {
+		if (!IsAuthValid(auth)) {
 			return (
 				<Column style={{padding: 10, background: "rgba(0,0,0,.7)", borderRadius: "0 0 0 5px"}}>
 					<Div mt={-3} mb={5}>Takes under 30 seconds.</Div>

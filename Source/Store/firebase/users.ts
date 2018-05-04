@@ -5,6 +5,7 @@ import {CachedTransform} from "js-vextensions";
 import {AccessLevel} from "./nodes/@MapNode";
 import {backgrounds} from "../../UI/Profile";
 import {User} from "Store/firebase/users/@User";
+import {GetAuth, IsAuthValid} from "../firebase";
 
 /*export function GetAuth(state: RootState) { 
 	return state.firebase.auth;
@@ -16,7 +17,8 @@ export function GetUserID(): string {
 	return result;*/
 	/*let firebaseSet = State().firebase as Set<any>;
 	return firebaseSet.toJS().auth.uid;*/
-	return State(a=>a.firebase.auth) ? State(a=>a.firebase.auth.uid) : null;
+	//return State(a=>a.firebase.auth) ? State(a=>a.firebase.auth.uid) : null;
+	return IsAuthValid(GetAuth()) ? GetAuth().uid : null;
 }
 
 export function GetUser(userID: string): User {

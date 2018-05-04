@@ -30,6 +30,7 @@ import {GetNodeL2} from "Store/firebase/nodes/$node";
 import { MapNodeType } from "Store/firebase/nodes/@MapNodeType";
 import { GetNodeChildrenL2, GetNodeID } from "Store/firebase/nodes";
 import { GetNodeChildrenL3 } from "Store/firebase/nodes";
+import {IsAuthValid, GetAuth} from "Store/firebase";
 
 // use this to intercept dispatches (for debugging)
 /*let oldDispatch = store.dispatch;
@@ -309,8 +310,8 @@ function PostInit() {
 	let lastAuth;
 	//Log("Subscribed");
 	store.subscribe(()=> {
-		let auth = State().firebase && State().firebase.auth;
-		if (auth && auth != lastAuth) {
+		let auth = GetAuth();
+		if (IsAuthValid(auth) && auth != lastAuth) {
 			//Log("Setting user-context: " + auth);
 			//Raven.setUserContext(auth);
 			Raven.setUserContext(auth.Including("uid", "displayName", "email", "photoURL"));
