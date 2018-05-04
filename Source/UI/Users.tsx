@@ -24,7 +24,7 @@ export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], 
 		users = users.OrderByDescending(a=>userExtraInfoMap[a._key] ? (userExtraInfoMap[a._key].edits|0) : Number.MIN_SAFE_INTEGER);
 
 		return (
-			<Column style={{width: 960, margin: "50px auto 20px auto", flex: 1, filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
+			<Column style={{width: 960, maxHeight: "calc(100% - 70px)" /*ff*/, margin: "50px auto 20px auto", flex: 1, filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
 				<Column className="clickThrough" style={{height: 40, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 					{/*<Row style={{height: 40, padding: 10}}>
 						<Row width={200} style={{position: "absolute", left: "calc(50% - 100px)"}}>
