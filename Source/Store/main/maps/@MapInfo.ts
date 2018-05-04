@@ -1,9 +1,9 @@
 import {SortType} from "./$map";
 
 export enum ShowChangesSinceType {
-	None,
-	SinceVisitX,
-	AllUnseenChanges,
+	None = 10,
+	SinceVisitX = 20,
+	AllUnseenChanges = 30,
 }
 
 export class MapInfo {

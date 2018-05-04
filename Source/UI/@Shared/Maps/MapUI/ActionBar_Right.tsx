@@ -21,6 +21,7 @@ import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown";
 import { ShowChangesSinceType } from "Store/main/maps/@MapInfo";
 import {GetEntries} from "../../../../Frame/General/Enums";
 import {ACTSet} from "Store";
+import {ApplyActionSet} from "../../../../Store/index";
 
 let changesSince_options = [];
 changesSince_options.push({name: "None", value: ShowChangesSinceType.None + "_null"});
@@ -53,8 +54,10 @@ export class ActionBar_Right extends BaseComponentWithConnector(connector, {}) {
 						<Pre>Show changes since: </Pre>
 						<Select options={changesSince_options} value={showChangesSince_type + "_" + showChangesSince_visitOffset} onChange={val=> {
 							let parts = val.split("_");
-							store.dispatch(new ACTSet(`main/maps/${map._id}/showChangesSince_type`, parseInt(parts[0])));
-							store.dispatch(new ACTSet(`main/maps/${map._id}/showChangesSince_visitOffset`, FromJSON(parts[1])));
+							store.dispatch(new ApplyActionSet([
+								new ACTSet(`main/maps/${map._id}/showChangesSince_type`, parseInt(parts[0])),
+								new ACTSet(`main/maps/${map._id}/showChangesSince_visitOffset`, FromJSON(parts[1])),
+							]));
 						}}/>
 						<Pre ml={5}>Weighting: </Pre>
 						<Select options={GetEntries(WeightingType, name=>({ReasonScore: "Reason score"})[name] || name)} value={weighting} onChange={val=> {

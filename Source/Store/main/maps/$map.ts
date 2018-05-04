@@ -8,6 +8,7 @@ import {TimelineStep} from "Store/firebase/timelineSteps/@TimelineStep";
 import {GetMap} from "../../firebase/maps";
 import {ShowChangesSinceType} from "Store/main/maps/@MapInfo";
 import { SimpleReducer } from "Store";
+import {GetValues} from "Frame/General/Enums";
 
 export enum SortType {
 	CreatorID = 10,
@@ -179,6 +180,7 @@ export function GetTimeFromWhichToShowChangedNodes(mapID: number) {
 	let type = State(`main/maps/${mapID}/showChangesSince_type`) as ShowChangesSinceType;
 	if (type == ShowChangesSinceType.None) return Number.MAX_SAFE_INTEGER; // from end of time (nothing)
 	if (type == ShowChangesSinceType.AllUnseenChanges) return 0; // from start of time (everything)
+	if (PROD && !GetValues(ShowChangesSinceType).Contains(type)) return Number.MAX_SAFE_INTEGER; // defensive
 
 	let visitOffset = State(`main/maps/${mapID}/showChangesSince_visitOffset`) as number;
 	let lastMapViewTimes = FromJSON(localStorage.getItem("lastMapViewTimes_" + mapID) || "[]") as number[];

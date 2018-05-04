@@ -97,7 +97,7 @@ Some of the things this won't clear:
 This is usually only done if an error is occuring because of outdated or invalid data.`,
 							onOK: ()=> {
 								let {ClearLocalData} = require("Frame/Store/CreateStore");
-								ClearLocalData();
+								ClearLocalData(persister);
 								window.location.reload();
 							}
 						});

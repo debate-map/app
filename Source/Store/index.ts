@@ -146,6 +146,7 @@ export function SimpleReducer(path: string | ((store: RootState)=>any), defaultV
 export class ApplyActionSet extends Action<Action<any>[]> {
 	constructor(payload) {
 		super(payload);
+		Assert(payload.actions == null, `Your code should be "new ApplyActionSet(actions)", not "new ApplyActionSet({actions})".`)
 		this.actions = payload; // copy to this.actions as well (shorter lines in CreateStore.ts)
 	}
 	actions: Action<any>;

@@ -178,7 +178,7 @@ export function CreateStore(initialState = {}, history) {
 	let persister = persistStore(store);
 	if (startURL.GetQueryVar("clearState")) {
 		Log("Clearing redux-store's state and local-storage...");
-		ClearLocalData();
+		ClearLocalData(persister);
 	}
 
 	if (DEV) {
@@ -194,7 +194,7 @@ export function CreateStore(initialState = {}, history) {
 	return {store, persister};
 }
 
-export function ClearLocalData() {
+export function ClearLocalData(persister) {
 	persister.purge();
 	//localStorage.clear();
 	for (let key in localStorage) {
