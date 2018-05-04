@@ -34,7 +34,8 @@ For recommended setup of your code editor and other tools, see: [Editor setup](#
 3) Add at least one form of authentication to your Firebase projects. (Google sign-in is easiest)
 4) Run the project locally. (see "Running locally" section below)
 5) Sign in, using the panel at the top-right.
-6) Press the "Initialize database" button which will appear at the top-left.
+6) Add "?init=true" to the address-bar url, and reload the page.
+7) Press the "Initialize database" button which will appear at the top-left.
 
 ### Running locally
 

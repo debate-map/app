@@ -124,7 +124,8 @@ export function CreateStore(initialState = {}, history) {
 		enableLogging: false, // enable/disable Firebase Database Logging
 		updateProfileOnLogin: false, // enable/disable updating of profile on login
 		// profileDecorator: (userData) => ({ email: userData.email }) // customize format of user profile
-		useFirestoreForProfile: true,
+		//useFirestoreForProfile: true, // for now, use firebase
+		preserveOnLogout: [DBPath()],
 	};
 	if (firebase.apps.length == 0) {
 		firebase.initializeApp(firebaseConfig);

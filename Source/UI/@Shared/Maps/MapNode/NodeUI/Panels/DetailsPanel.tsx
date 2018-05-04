@@ -57,14 +57,14 @@ export default class DetailsPanel extends BaseComponent<DetailsPanel_Props, {dat
 								}
 							}
 
-							SetNodeUILocked(parentNode._id, true);
+							if (parentNode) SetNodeUILocked(parentNode._id, true);
 							try {
 								var revisionID = await new AddNodeRevision({mapID: map._id, revision: RemoveHelpers(this.detailsUI.GetNewRevisionData())}).Run();
 								store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: node._id, time: Date.now()}));
 								await WaitTillPathDataIsReceiving(DBPath(`nodeRevisions/${revisionID}`));
 								await WaitTillPathDataIsReceived(DBPath(`nodeRevisions/${revisionID}`));
 							} finally {
-								SetNodeUILocked(parentNode._id, false);
+								if (parentNode) SetNodeUILocked(parentNode._id, false);
 							}
 						}}/>
 						{/*error && <Pre>{error.message}</Pre>*/}
