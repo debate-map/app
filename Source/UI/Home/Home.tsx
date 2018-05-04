@@ -34,7 +34,7 @@ Here is a quick example:
 
 $mapPlaceholder
 
-The maps are constructed from “theses” (blue) which make claims, and “arguments” (green and red) which support/oppose those claims.
+The maps are constructed from "claims" (blue), and "arguments" (green and red) which support/oppose those claims.
 This structure cuts down on reading time, and lets us focus on the underlying chains of reasoning instead of parsing statement meanings and connections.
 
 ## Advantages
