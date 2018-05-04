@@ -55,8 +55,7 @@ if (DEV) {
 	// This middleware doesn't need to be enabled outside of development since this directory will be copied into ~/dist when the application is compiled.
 	//app.use(express.static(paths.client("Resources")));
 	app.use(express.static(paths.base("Resources")));
-	//app.use(express.static(paths.base("Scripts/Config/dist/dll")));
-	//app.use(express.static(paths.base("dist"))); // enable static loading of files in dist
+	app.use(express.static(paths.base("Scripts/Config/dll"))); // enable static-loading of dll.vendor.js
 	app.use(express.static(paths.dist())); // enable static loading of files in dist, for dll.vendor.js
 } else {
 	debug(

@@ -19,3 +19,4 @@ coverage
 /Tools/Webpack Profiling/ModuleTimings.json
 /Tools/Webpack Profiling/ModuleInfo.json
 /Info/Images/@NotTracked
+/Scripts/Config/dll
