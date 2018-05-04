@@ -24,7 +24,7 @@ type Props = {} & Partial<{permissions: PermissionGroupSet, maps: Map[], selecte
 	maps: GetMaps().filter(a=>a && a.type == MapType.Personal),
 	selectedMap: GetSelectedPersonalMap(),
 }))
-export default class PersonalUI extends BaseComponent<Props, {}> {
+export class PersonalUI extends BaseComponent<Props, {}> {
 	render() {
 		let {permissions, maps, selectedMap} = this.props;
 		let userID = GetUserID();
@@ -36,7 +36,7 @@ export default class PersonalUI extends BaseComponent<Props, {}> {
 		maps = maps.OrderByDescending(a=>a.edits);
 
 		return (
-			<Column style={{width: 960, maxHeight: "calc(100% - 40px)" /*ff*/, margin: "20px auto 20px auto", flex: 1, filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
+			<Column style={ES({width: 960, flex: 1, margin: "20px auto 20px auto", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"})}>
 				<Column className="clickThrough" style={{height: 80, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 					<Row style={{height: 40, padding: 10}}>
 						<Button text="Add map" ml="auto" onClick={()=> {
@@ -51,7 +51,7 @@ export default class PersonalUI extends BaseComponent<Props, {}> {
 						<span style={{flex: columnWidths[3], fontWeight: 500, fontSize: 17}}>Creator</span>
 					</Row>
 				</Column>
-				<ScrollView style={{flex: 1}} contentStyle={{flex: 1}}>
+				<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1})}>
 					{maps.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
 					{maps.map((map, index)=> {
 						return <MapEntryUI key={index} index={index} last={index == maps.length - 1} map={map}/>;

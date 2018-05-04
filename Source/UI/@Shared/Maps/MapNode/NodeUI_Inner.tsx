@@ -327,7 +327,7 @@ class TitlePanel extends BaseComponent<TitlePanelProps, {editing: boolean, newTi
 						isSubnode && {margin: "4px 0 1px 0"},
 					)}>
 						{!applyingEdit &&
-							<TextArea_AutoSize required={true} pattern={MapNodeRevision_titlePattern} allowLineBreaks={false} style={{flex: 1}}
+							<TextArea_AutoSize required={true} pattern={MapNodeRevision_titlePattern} allowLineBreaks={false} style={ES({flex: 1})}
 								ref={a=>a && a.DOM.focus()}
 								onKeyDown={e=> {
 									if (e.keyCode == keycode.codes.esc) {

@@ -128,10 +128,10 @@ Examples:
 The details of the argument should be described within the argument's premises. (the first premise can be typed in below)
 								`.trim()}/><Pre> </Pre>
 								{/*<TextArea_AutoSize required={true} pattern={MapNodeRevision_titlePattern}
-									allowLineBreaks={false} style={{flex: 1}}
+									allowLineBreaks={false} style={ES({flex: 1})}
 									//ref={a=>a && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
 									value={newRevision.titles["base"]} onChange={val=>Change(newRevision.titles["base"] = val)}/>*#/}
-								<TextInput style={{flex: 1}} required={true} pattern={MapNodeRevision_titlePattern}
+								<TextInput style={ES({flex: 1})} required={true} pattern={MapNodeRevision_titlePattern}
 									//ref={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
 									value={newRevision.titles["base"]}
 									onChange={val=>Change(newRevision.titles["base"] = val, validationError = GetErrorMessagesUnderElement(root.DOM)[0])}/>
@@ -144,7 +144,7 @@ The details of the argument should be described within the argument's premises. 
 							</Row>
 							<Row style={{display: "flex", alignItems: "center"}}>
 								<TextArea_AutoSize required={true} pattern={MapNodeRevision_titlePattern}
-									allowLineBreaks={false} style={{flex: 1}}
+									allowLineBreaks={false} style={ES({flex: 1})}
 									value={newPremiseRevision.titles["base"]}
 									onChange={val=>Change(newPremiseRevision.titles["base"] = val, validationError = GetErrorMessagesUnderElement(root.DOM)[0])}/>
 							</Row>

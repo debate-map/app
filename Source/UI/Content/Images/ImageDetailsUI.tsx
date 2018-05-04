@@ -70,7 +70,7 @@ export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Type: </Pre>
-					<Select options={GetEntries(ImageType, name=>GetNiceNameForImageType(ImageType[name]))} enabled={creating || editing} style={{flex: 1}}
+					<Select options={GetEntries(ImageType, name=>GetNiceNameForImageType(ImageType[name]))} enabled={creating || editing} style={ES({flex: 1})}
 						value={newData.type} onChange={val=>Change(newData.type = val)}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
@@ -82,7 +82,7 @@ export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Description: </Pre>
-					<TextInput enabled={creating || editing} style={{flex: 1}}
+					<TextInput enabled={creating || editing} style={ES({flex: 1})}
 						value={newData.description} onChange={val=>Change(newData.description = val)}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt}style={{display: "flex", alignItems: "center"}}>

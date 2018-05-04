@@ -57,7 +57,7 @@ export default class TermsUI extends BaseComponent<Props, {selectedTerm_newData:
 							Terms
 						</Div>
 					</Row>
-					<ScrollView style={{flex: 1}} contentStyle={{flex: 1, padding: 10}} onClick={e=> {
+					<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1, padding: 10})} onClick={e=> {
 						if (e.target != e.currentTarget) return;
 						store.dispatch(new ACTTermSelect({id: null}));
 					}}>
@@ -70,7 +70,7 @@ export default class TermsUI extends BaseComponent<Props, {selectedTerm_newData:
 					//marginLeft: 10,
 					//flex: .6,
 					position: "absolute", left: "60%", right: 0, height: "100%", // fix for safari
-				}} contentStyle={{flex: 1, padding: 10}}>
+				}} contentStyle={ES({flex: 1, padding: 10})}>
 					<Column style={{position: "relative", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
 						<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 							{selectedTerm &&

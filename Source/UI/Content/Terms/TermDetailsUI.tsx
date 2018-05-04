@@ -78,7 +78,7 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Type: </Pre>
-					<Select options={GetEntries(TermType, name=>GetNiceNameForTermType(TermType[name]))} enabled={enabled} style={{flex: 1}}
+					<Select options={GetEntries(TermType, name=>GetNiceNameForTermType(TermType[name]))} enabled={enabled} style={ES({flex: 1})}
 						value={newData.type} onChange={val=>Change(newData.type = val)}/>
 				</RowLR>
 				{(newData.type == TermType.SpecificEntity || newData.type == TermType.EntityType) &&
@@ -94,7 +94,7 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 					</RowLR>*/}
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Short description: </Pre>
-					<TextInput enabled={enabled} style={{flex: 1}} required
+					<TextInput enabled={enabled} style={ES({flex: 1})} required
 						value={newData.shortDescription_current} onChange={val=>Change(newData.shortDescription_current = val)}/>
 				</RowLR>
 			</Column>

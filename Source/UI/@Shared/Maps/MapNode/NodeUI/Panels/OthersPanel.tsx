@@ -147,10 +147,10 @@ class ChildrenOrder extends BaseComponent<{mapID: number, node: MapNodeL3}, {}> 
 					let child = GetNodeL3(childPath);
 					let childTitle = child ? GetNodeDisplayText(child, childPath, GetNodeForm(child, node)) : "...";
 					return (
-						<Row key={index} style={{display: "flex", alignItems: "center"}}>
+						<Row key={index} style={{alignItems: "center"}}>
 							<Div mr={7} sel style={{opacity: .5}}>#{childID}</Div>
-							<Div sel style={{flex: 1, whiteSpace: "normal"}}>{childTitle}</Div>
-							{/*<TextInput enabled={false} style={{flex: 1}} required pattern={MapNode_id}
+							<Div sel style={ES({flex: 1, whiteSpace: "normal"})}>{childTitle}</Div>
+							{/*<TextInput enabled={false} style={ES({flex: 1})} required pattern={MapNode_id}
 								value={`#${childID.toString()}: ${childTitle}`}
 								//onChange={val=>Change(!IsNaN(val.ToInt()) && (newData.childrenOrder[index] = val.ToInt()))}
 							/>*/}

@@ -55,7 +55,7 @@ export class TimelineDropDown extends BaseComponent<TimelineDropDownProps, {}> {
 										<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: null, zIndex: 1}}>
 											<Row style={{alignItems: "flex-start"}}>
 												<Column style={{width: 600}}>
-													<ScrollView style={{flex: 1}} contentStyle={{flex: .8, position: "relative", maxHeight: 500}}>
+													<ScrollView style={ES({flex: 1})} contentStyle={{flex: .8, position: "relative", maxHeight: 500}}>
 														{timelines.map((timeline, index)=> {
 															return (
 																<Column key={index} p="7px 10px"
@@ -101,7 +101,7 @@ export class TimelineDropDown extends BaseComponent<TimelineDropDownProps, {}> {
 									}}/>
 								</Row>
 							</Column>
-							<ScrollView style={{flex: 1}} contentStyle={{flex: 1, position: "relative", maxHeight: 500, borderRadius: "0 0 10px 10px"}}>
+							<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1, position: "relative", maxHeight: 500, borderRadius: "0 0 10px 10px"})}>
 								{selectedTimelineSteps && selectedTimelineSteps.map((step, index)=> {
 									return <StepUI key={index} index={index} last={index == selectedTimeline.steps.length - 1} map={map} step={step}/>
 								})}

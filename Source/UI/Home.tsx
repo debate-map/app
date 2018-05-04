@@ -15,12 +15,12 @@ export default class HomeUI extends BaseComponent<Props, {}> {
 		let {currentSubpage} = this.props;
 		let page = "home";
 		return (
-			<Column style={{flex: 1}}>
+			<Column style={ES({flex: 1})}>
 				<SubNavBar>
 					<SubNavBarButton {...{page}} subpage="home" text="Home"/>
 					<SubNavBarButton {...{page}} subpage="about" text="About"/>
 				</SubNavBar>
-				<ScrollView id="HomeScrollView" style={{flex: 1}} scrollVBarStyle={{width: 10}}>
+				<ScrollView id="HomeScrollView" style={ES({flex: 1})} scrollVBarStyle={{width: 10}}>
 					<Switch>
 						<HomeUI2/>
 						{currentSubpage == "about" && <AboutUI/>}

@@ -33,7 +33,7 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 		let splitAt = 100; //, width = 600;
 		return (
 			<div> {/* needed so GetInnerComp() works */}
-			<Column style={{flex: 1}}>
+			<Column style={ES({flex: 1})}>
 				{newData.map((chain, chainIndex)=> {
 					return (
 						<Column key={chainIndex} mt={chainIndex == 0 ? 0 : 10} pt={chainIndex == 0 ? 0 : 10} style={E(chainIndex != 0 && {borderTop: "1px solid rgba(0,0,0,.7)"})}>
@@ -50,8 +50,8 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 												value={source.author} onChange={val=>Change(val ? source.author = val : delete source.author)}/>}
 										{source.type == SourceType.Webpage &&
 											<TextInput ref={"url_" + chainIndex + "_" + sourceIndex} enabled={enabled} type="url"
-													//pattern="^(https?|ftp)://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
-													pattern="^https?://[^\\s/$.?#]+\\.[^\\s]+$" required style={{flex: 1}}
+													//pattern="^(https?|ftp)://[^\\s/$.?#]+\\.[^\\s]+$" required style={ES({flex: 1})}
+													pattern="^https?://[^\\s/$.?#]+\\.[^\\s]+$" required style={ES({flex: 1})}
 													value={source.link} onChange={val=>Change((()=> {
 														if (!val) delete source.link;
 														if (val.endsWith("@bible")) {

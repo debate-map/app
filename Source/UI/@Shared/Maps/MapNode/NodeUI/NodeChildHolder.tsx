@@ -321,7 +321,7 @@ export class ChildLimitBar extends BaseComponentWithConnector(ChildLimitBar_conn
 						<Div ml={3}>{childCount > childLimit ? childCount - childLimit : null}</Div>
 					</Row>
 				} title="Show more"
-				enabled={childLimit < childCount} style={{flex: 1}} onClick={()=> {
+				enabled={childLimit < childCount} style={ES({flex: 1})} onClick={()=> {
 					store.dispatch(new ACTMapNodeChildLimitSet({mapID: map._id, path, direction, value: (childLimit + 3).KeepAtMost(childCount)}));
 				}}/>
 				<Button ml={5} text={
@@ -330,7 +330,7 @@ export class ChildLimitBar extends BaseComponentWithConnector(ChildLimitBar_conn
 						{/*<Div ml={3}>{childCount > childLimit ? childCount - childLimit : null}</Div>*/}
 					</Row>
 				} title="Show less"
-				enabled={childLimit > initialChildLimit} style={{flex: 1}} onClick={()=> {
+				enabled={childLimit > initialChildLimit} style={ES({flex: 1})} onClick={()=> {
 					store.dispatch(new ACTMapNodeChildLimitSet({mapID: map._id, path, direction, value: (childLimit - 3).KeepAtLeast(initialChildLimit)}));
 				}}/>
 			</Row>

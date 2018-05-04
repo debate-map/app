@@ -43,7 +43,7 @@ export class HistoryPanel extends BaseComponentWithConnector(connector, {}) {
 						<span style={{flex: columnWidths[3], fontWeight: 500, fontSize: 17}}>Actions</span>
 					</Row>
 				</Column>
-				<ScrollView className="selectable" style={{flex: 1}} contentStyle={{flex: 1, position: "relative"}}>
+				<ScrollView className="selectable" style={ES({flex: 1})} contentStyle={ES({flex: 1, position: "relative"})}>
 					{revisions.map((revision, index)=> {
 						return <RevisionEntryUI key={revision._id} index={index} last={index == revisions.length - 1} revision={revision} node={node} path={path}/>
 					})}

@@ -166,7 +166,7 @@ class LayersDropDown extends BaseComponent<LayersDropDownProps, {}> {
 									<span style={{flex: columnWidths[3], marginTop: 15, fontWeight: 500, fontSize: 15}}>User</span>
 								</Row>
 							</Column>
-							<ScrollView style={{flex: 1}} contentStyle={{flex: 1, position: "relative"}}>
+							<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1, position: "relative"})}>
 								{layers.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
 								{layers.map((layer, index)=> {
 									return <LayerUI key={layer._id} index={index} last={index == layers.length - 1} map={map} layer={layer}/>

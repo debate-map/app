@@ -13,7 +13,7 @@ export class FeedbackUI extends BaseComponent<Props, {}> {
 		let {currentSubpage} = this.props;
 		let page = "feedback";
 		return (
-			<div style={{flex: 1, display: "flex", flexDirection: "column"}}>
+			<div style={ES({flex: 1, display: "flex", flexDirection: "column"})}>
 				<SubNavBar>
 					<SubNavBarButton {...{page}} subpage="proposals" text="Proposals"/>
 					{/*<SubNavBarButton {...{page}} subpage="roadmap" text="Roadmap"/>

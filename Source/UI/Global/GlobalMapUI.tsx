@@ -14,7 +14,7 @@ type Props = {} & Partial<{map: Map}>;
 @Connect(state=> ({
 	map: GetMap(1),
 }))
-export default class GlobalMapUI extends BaseComponent<Props, {}> {
+export class GlobalMapUI extends BaseComponent<Props, {}> {
 	render() {
 		let {map} = this.props;
 		return (

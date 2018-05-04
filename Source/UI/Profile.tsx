@@ -68,7 +68,7 @@ export default class ProfileUI extends BaseComponent<Props, {}> {
 				</Row>
 				<Row mt={5}>
 					<Pre>URL: </Pre>
-					<TextInput delayChangeTillDefocus={true} style={{flex: 1}}
+					<TextInput delayChangeTillDefocus={true} style={ES({flex: 1})}
 						value={user.backgroundCustom_url} onChange={val=> {
 							new UpdateProfile({id: user._key, updates: {backgroundCustom_url: val}}).Run();
 						}}/>

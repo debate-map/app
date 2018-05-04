@@ -15,7 +15,7 @@ export class DatabaseUI extends BaseComponent<Props, {}> {
 		let {currentSubpage} = this.props;
 		let page = "database";
 		return (
-			<div style={{flex: 1, display: "flex", flexDirection: "column"}}>
+			<div style={ES({flex: 1, display: "flex", flexDirection: "column"})}>
 				<SubNavBar>
 					<SubNavBarButton {...{page}} subpage="users" text="Users"/>
 					<SubNavBarButton {...{page}} subpage="terms" text="Terms"/>

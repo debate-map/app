@@ -24,7 +24,7 @@ export class PremiseAddHelper extends BaseComponent<{mapID: number, parentNode: 
 
 		return (
 			<Row style={{alignItems: "stretch", padding: "5px 0px"}}>
-				{/*<TextInput placeholder="Type the argument's first claim/premise here." style={{flex: 1}}
+				{/*<TextInput placeholder="Type the argument's first claim/premise here." style={ES({flex: 1})}
 					value={premiseTitle} onChange={val=>this.SetState({premiseTitle: val})}/>*/}
 				<TextArea_AutoSize className="noValidationColoring" required={true} pattern={MapNodeRevision_titlePattern} allowLineBreaks={false} style={{width: "100%"}}
 					placeholder="Type the argument's first claim/premise here."

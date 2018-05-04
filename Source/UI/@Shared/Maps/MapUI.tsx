@@ -100,11 +100,11 @@ export class MapUI extends BaseComponentWithConnector(connector, {}) {
 	render() {
 		let {map, rootNode, withinPage, padding, subNavBarWidth, ...rest} = this.props;
 		if (map == null) {
-			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25}}>Loading map...</div>;
+			return <div style={ES({display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25})}>Loading map...</div>;
 		}
 		Assert(map._id, "map._id is null!");
 		if (rootNode == null) {
-			return <div style={{display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25}}>Loading root node...</div>;
+			return <div style={ES({display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25})}>Loading root node...</div>;
 		}
 
 		if (isBot) {
@@ -112,7 +112,7 @@ export class MapUI extends BaseComponentWithConnector(connector, {}) {
 		}
 
 		return (
-			<Column style={{flex: 1, maxHeight: "100%" /* for ff */ }}>
+			<Column style={ES({flex: 1})}>
 				{!withinPage &&
 					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth}/>}
 				{!withinPage &&
@@ -123,7 +123,7 @@ export class MapUI extends BaseComponentWithConnector(connector, {}) {
 					<TimelineOverlayUI map={map}/>*/}
 				<ScrollView {...rest.Excluding(...StandardCompProps())} ref={c=>this.scrollView = c}
 						backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView.content) || a == this.mapUI}
-						style={E({flex: 1}, withinPage && {overflow: "visible"})}
+						style={ES({flex: 1}, withinPage && {overflow: "visible"})}
 						scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
 						contentStyle={E(
 							{willChange: "transform"},

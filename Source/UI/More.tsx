@@ -29,13 +29,13 @@ export default class MoreUI extends BaseComponent<Props, {}> {
 		let page = "more";
 		let admin = IsUserAdmin(GetUserID());
 		return (
-			<Column style={{flex: 1}}>
+			<Column style={ES({flex: 1})}>
 				<SubNavBar>
 					<SubNavBarButton {...{page}} subpage="links" text="Links"/>
 					{/*<SubNavBarButton {...{page}} subpage="tasks" text="Tasks"/>*/}
 					{admin && <SubNavBarButton {...{page}} subpage="admin" text="Admin"/>}
 				</SubNavBar>
-				<ScrollView style={{flex: 1} /*styles.fillParent_abs*/} scrollVBarStyle={{width: 10}}>
+				<ScrollView style={ES({flex: 1} /*styles.fillParent_abs*/)} scrollVBarStyle={{width: 10}}>
 					<Switch>
 						<LinksUI/>
 						{/*currentSubpage == "tasks" && <TasksUI/>*/}

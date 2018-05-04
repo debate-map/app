@@ -133,6 +133,7 @@ export default class VReactMarkdown_Remarkable extends BaseComponent<Props, {}> 
 		}
 
 		let markdownResult = this.markdown.render(source);
+		//return React.createElement(containerType, {...rest, style: ES({maxHeight: "100%"}, style)}, markdownResult);
 		return React.createElement(containerType, {...rest, style}, markdownResult);
 	}
 }

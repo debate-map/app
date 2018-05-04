@@ -55,7 +55,7 @@ export default class QuoteInfoEditorUI extends BaseComponent
 				]}
 				<Column mt={5}>
 					<Pre>Quote text: </Pre>
-					{/*<TextInput style={{flex: 1}}
+					{/*<TextInput style={ES({flex: 1})}
 						value={info.text} onChange={val=>Change(info.text = val)}/>*/}
 					{(creating || editing) && <MarkdownToolbar editor={()=>this.refs.editor} excludeCommands={["h1", "h2", "h3", "h4", "italic", "quote"]}/>}
 					<MarkdownEditor ref="editor" value={newData.content} onChange={val=>Change(newData.content = val)} options={{

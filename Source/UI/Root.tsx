@@ -8,7 +8,7 @@ import {ScrollView} from "react-vscrollview";
 import "../../Source/Frame/Styles/Core.scss";
 //import "../Frame/Styles/bootstrap/bootstrap.scss";
 import {Provider, connect} from "react-redux";
-import GlobalUI from "../UI/Global";
+import {GlobalUI} from "../UI/Global";
 import MoreUI from "../UI/More";
 import AdminUI from "../UI/More/Admin";
 import HomeUI from "../UI/Home";
@@ -20,8 +20,8 @@ import ChatUI from "./Chat";
 import UsersUI from "./Users";
 import ForumUI from "./Forum";
 import SocialUI from "./Social";
-import PersonalUI from "./Personal";
-import DebatesUI from "./Debates";
+import {PersonalUI} from "./Personal";
+import {DebatesUI} from "./Debates";
 import SearchUI from "./Search";
 import ProfileUI from "./Profile";
 import ReactGA from "react-ga";
@@ -126,7 +126,7 @@ class RootUI extends BaseComponentWithConnector(connector, {}) {
 				<OverlayUI/>
 				<NavBar/>
 				{/*<InfoButton_TooltipWrapper/>*/}
-				<main style={{position: "relative", flex: 1, overflow: "hidden", display: "flex", flexDirection: "column"}}>
+				<main style={ES({position: "relative", flex: 1, overflow: "hidden", display: "flex", flexDirection: "column"})}>
 					<Route path="/stream"><StreamUI/></Route>
 					<Route path="/chat"><ChatUI/></Route>
 					<Route path="/reputation"><ReputationUI/></Route>

@@ -24,7 +24,7 @@ export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], 
 		users = users.OrderByDescending(a=>userExtraInfoMap[a._key] ? (userExtraInfoMap[a._key].edits|0) : Number.MIN_SAFE_INTEGER);
 
 		return (
-			<Column style={{width: 960, maxHeight: "calc(100% - 70px)" /*ff*/, margin: "50px auto 20px auto", flex: 1, filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"}}>
+			<Column style={ES({width: 960, flex: 1, margin: "50px auto 20px auto", filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"})}>
 				<Column className="clickThrough" style={{height: 40, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 					{/*<Row style={{height: 40, padding: 10}}>
 						<Row width={200} style={{position: "absolute", left: "calc(50% - 100px)"}}>
@@ -57,7 +57,7 @@ export default class UsersUI extends BaseComponent<{} & Partial<{users: User[], 
 						<span style={{flex: columnWidths[4], fontWeight: 500, fontSize: 17}}>Permissions</span>
 					</Row>
 				</Column>
-				<ScrollView style={{flex: 1}} contentStyle={{flex: 1}}>
+				<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1})}>
 					{users.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
 					{users.map((user, index)=> {
 						let userExtraInfo = userExtraInfoMap[user._key];

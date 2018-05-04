@@ -70,7 +70,7 @@ type Props = {
 		selectedNode: selectedNode ? GetNodeL3(selectedNode._id+"") : null,
 	};
 })
-export default class ListUI extends BaseComponent<Props, {panelToShow?: string}> {
+export class ListUI extends BaseComponent<Props, {panelToShow?: string}> {
 	render() {
 		let {map, nodes, sortBy, filter, page, selectedNode} = this.props;
 
@@ -106,7 +106,7 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 		let nodesForPage = nodesFiltered.Skip(page * entriesPerPage).Take(entriesPerPage);
 
 		return (
-			<Row style={{flex: 1, alignItems: "flex-start"}} onClick={e=> {
+			<Row style={ES({flex: 1, alignItems: "flex-start"})} onClick={e=> {
 				if (e.target != e.currentTarget) return;
 				store.dispatch(new ACTSelectedNode_InListSet({mapID: map._id, nodeID: null}));
 			}}>
@@ -149,7 +149,7 @@ export default class ListUI extends BaseComponent<Props, {panelToShow?: string}>
 							<span style={{flex: columnWidths[2], fontWeight: 500, fontSize: 17}}>Creation date</span>
 						</Row>
 					</Column>
-					<ScrollView style={{flex: 1}} contentStyle={{paddingTop: 10}} onClick={e=> {
+					<ScrollView style={ES({flex: 1})} contentStyle={{paddingTop: 10}} onClick={e=> {
 						if (e.target != e.currentTarget) return;
 						store.dispatch(new ACTSelectedNode_InListSet({mapID: map._id, nodeID: null}));
 					}}
@@ -264,8 +264,8 @@ class NodeColumn extends BaseComponent<NodeColumn_Props, {width: number, hoverPa
 					onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
 					onPanelButtonClick={panel=>store.dispatch(new ACTMap_List_SelectedNode_OpenPanelSet({mapID: map._id, panel}))}
 					asHover={false} inList={true} style={{marginTop: 25}}/>
-				<ScrollView style={{flex: 1}} contentStyle={{flex: 1}}>
-					<Column ml={10} style={{flex: 1}}>
+				<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1})}>
+					<Column ml={10} style={ES({flex: 1})}>
 						{panelToShow &&
 							<div style={{position: "relative", padding: 5, background: "rgba(0,0,0,.7)", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
 								<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: backgroundColor.css()}}/>
