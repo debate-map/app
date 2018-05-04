@@ -26,6 +26,7 @@ import Action from "Frame/General/Action";
 import {StartStateDataOverride, StopStateCountAsAccessOverride, StopStateDataOverride} from "UI/@Shared/StateOverrides";
 import {StartStateCountAsAccessOverride} from "./UI/@Shared/StateOverrides";
 import {Link} from "Frame/ReactComponents/Link";
+import {CreateStore} from "./Frame/Store/CreateStore"; 
 
 JSVE.logFunc = Log;
 
@@ -100,9 +101,9 @@ Manager_Feedback.VSet(sharedData.Extended({
 // uncomment this if you want to load the source-maps and such ahead of time (making-so the first actual call can get it synchronously)
 //StackTrace.get();
 
-let createStore = require("./Frame/Store/CreateStore").default;
+//let {CreateStore} = require("./Frame/Store/CreateStore"); // late-require it, since CreateStore imports "needy" modules
 
-var {store, persister} = createStore(g.__InitialState__, {});
+var {store, persister} = CreateStore(g.__InitialState__, {});
 declare global {
 	type ProjectStore = Store<RootState> & {firebase: FirebaseApp, reducer: (state: RootState, action: Action<any>)=>RootState};
 	var store: ProjectStore;

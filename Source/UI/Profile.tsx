@@ -45,7 +45,7 @@ export default class ProfileUI extends BaseComponent<Props, {}> {
 							let background = prop.value;
 							let selected = (user.backgroundID || 1) == id;
 							return (
-								<Div
+								<Div key={prop.index}
 									style={E(
 										{
 											width: 100, height: 100, border: "1px solid black", cursor: "pointer",
@@ -79,6 +79,29 @@ export default class ProfileUI extends BaseComponent<Props, {}> {
 						value={user.backgroundCustom_position || "center center"} onChange={val=> {
 							new UpdateProfile({id: user._key, updates: {backgroundCustom_position: val}}).Run();
 						}}/>
+				</Row>
+				<Row mt={5}><h4>Tools</h4></Row>
+				<Row>
+					<Button text="Clear local data" onClick={()=> {
+						ShowMessageBox({title: `Clear local data?`, cancelButton: true, message:
+`Are you sure you want to clear local data?
+
+Some of the things this will clear: (not exhaustive)
+* The expansion-states of maps.
+* Display settings.
+
+Some of the things this won't clear:
+* The content you've added to maps.
+* Your posts and comments.
+
+This is usually only done if an error is occuring because of outdated or invalid data.`,
+							onOK: ()=> {
+								let {ClearLocalData} = require("Frame/Store/CreateStore");
+								ClearLocalData();
+								window.location.reload();
+							}
+						});
+					}}/>
 				</Row>
 			</Column>
 		);

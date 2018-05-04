@@ -35,7 +35,7 @@ const {reducer: routerReducer, middleware: routerMiddleware, enhancer: routerEnh
 //export const browserHistory = createBrowserHistory();
 //import {browserHistory} from "react-router";
 
-export default function(initialState = {}, history) {
+export function CreateStore(initialState = {}, history) {
 	// Window Vars Config
 	// ==========
 	g.version = version;
@@ -178,12 +178,7 @@ export default function(initialState = {}, history) {
 	let persister = persistStore(store);
 	if (startURL.GetQueryVar("clearState")) {
 		Log("Clearing redux-store's state and local-storage...");
-		persister.purge();
-		//localStorage.clear();
-		for (let key in localStorage) {
-			if (key.startsWith("firebase:")) continue; // keep auth-info
-			delete localStorage[key];
-		}
+		ClearLocalData();
 	}
 
 	if (DEV) {
@@ -197,4 +192,13 @@ export default function(initialState = {}, history) {
 	}
 
 	return {store, persister};
+}
+
+export function ClearLocalData() {
+	persister.purge();
+	//localStorage.clear();
+	for (let key in localStorage) {
+		if (key.startsWith("firebase:")) continue; // keep auth-info
+		delete localStorage[key];
+	}
 }
