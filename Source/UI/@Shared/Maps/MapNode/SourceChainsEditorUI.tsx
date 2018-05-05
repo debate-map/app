@@ -32,7 +32,6 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 
 		let splitAt = 100; //, width = 600;
 		return (
-			<div> {/* needed so GetInnerComp() works */}
 			<Column style={ES({flex: 1})}>
 				{newData.map((chain, chainIndex)=> {
 					return (
@@ -79,7 +78,6 @@ export default class SourceChainsEditorUI extends BaseComponent<Props, {newData:
 				})}
 				{enabled && <Button text="Add source chain" mt={10} style={{alignSelf: "flex-start"}} onClick={()=>Change(newData.push([new Source()]))}/>}
 			</Column>
-			</div>
 		);
 	}
 	GetValidationError() {

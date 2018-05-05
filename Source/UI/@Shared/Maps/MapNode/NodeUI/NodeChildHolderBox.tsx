@@ -9,7 +9,7 @@ import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
 import {ACTMapNodeExpandedSet} from "Store/main/mapViews/$mapView/rootNodeViews";
 import {MapNodeView} from "Store/main/mapViews/@MapViews";
 import {Row} from "react-vcomponents";
-import {BaseComponentWithConnector} from "react-vextensions";
+import {BaseComponentWithConnector, GetInnerComp} from "react-vextensions";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import {GetFillPercent_AtPath} from "../../../../../Store/firebase/nodeRatings";
 import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
@@ -198,7 +198,7 @@ export class NodeChildHolderBox extends BaseComponentWithConnector(connector, {i
 		this.lastLineHolderHeight = lineHolderHeight;
 
 		let height = $(GetDOM(this)).outerHeight();
-		let dividePoint = this.childHolder && this.Expanded ? (this.childHolder as any).getWrappedInstance().GetDividePoint() : 0;
+		let dividePoint = this.childHolder && this.Expanded ? GetInnerComp(this.childHolder).GetDividePoint() : 0;
 		if (height != this.lastHeight || dividePoint != this.lastDividePoint) {
 			/*if (height != this.lastHeight) {
 				this.OnHeightChange();

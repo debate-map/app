@@ -42,7 +42,6 @@ export default class QuoteInfoEditorUI extends BaseComponent
 		};
 
 		return (
-			<div> {/* needed so GetInnerComp() works */}
 			<Column>
 				{showPreview && [
 					<Row key={0} mt={5}>Preview:</Row>,
@@ -69,7 +68,6 @@ export default class QuoteInfoEditorUI extends BaseComponent
 					<SourceChainsEditorUI ref={c=>this.chainsEditor = c} enabled={creating || editing} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
 				</Row>
 			</Column>
-			</div>
 		);
 	}
 	chainsEditor: SourceChainsEditorUI;

@@ -1,11 +1,11 @@
-import {Polarity, MapNodeL3} from "../../../../../Store/firebase/nodes/@MapNode";
-import {BaseComponent} from "react-vextensions";
-import {Button} from "react-vcomponents";
-import {GetNodeColor, MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
-import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
-import {GetUserID} from "Store/firebase/users";
-import {Map} from "../../../../../Store/firebase/maps/@Map";
-import {ShowAddChildDialog} from "../NodeUI_Menu/AddChildDialog";
+import { GetUserID } from "Store/firebase/users";
+import { ShowSignInPopup } from "UI/@Shared/NavBar/UserPanel";
+import { Button } from "react-vcomponents";
+import { BaseComponent } from "react-vextensions";
+import { Map } from "../../../../../Store/firebase/maps/@Map";
+import { MapNodeL3, Polarity } from "../../../../../Store/firebase/nodes/@MapNode";
+import { GetNodeColor, MapNodeType } from "../../../../../Store/firebase/nodes/@MapNodeType";
+import { ShowAddChildDialog } from "../NodeUI_Menu/AddChildDialog";
 
 export class AddArgumentButton extends BaseComponent<{map: Map, node: MapNodeL3, path: string, polarity: Polarity, style?}, {}> {
 	render() {

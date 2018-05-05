@@ -45,7 +45,6 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 
 		let splitAt = 100; //, width = 600;
 		return (
-			<div> {/* needed so GetInnerComp() works */}
 			<Column style={style}>
 				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>LaTeX: </Pre>
@@ -70,7 +69,6 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 							value={newData.explanation} onChange={val=>Change(newData.explanation = val)}/>
 					</RowLR>}
 			</Column>
-			</div>
 		);
 	}
 	GetValidationError() {

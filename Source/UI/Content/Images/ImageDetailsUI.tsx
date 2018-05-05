@@ -46,7 +46,6 @@ export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image
 
 		let splitAt = 170, width = 600;
 		return (
-			<div> {/* needed so GetInnerComp() works */}
 			<Column style={style}>
 				{!creating &&
 					<table className="selectableAC" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>
@@ -104,7 +103,6 @@ export default class ImageDetailsUI extends BaseComponent<Props, {newData: Image
 				</Column>
 				{dataError && dataError != "Please fill out this field." && <Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{dataError}</Row>}
 			</Column>
-			</div>
 		);
 	}
 	chainsEditor: SourceChainsEditorUI;

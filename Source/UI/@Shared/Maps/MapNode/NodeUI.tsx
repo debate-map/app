@@ -4,13 +4,13 @@ import {GetUserID} from "Store/firebase/users";
 import {GetPlayingTimelineAppliedStepRevealNodes} from "Store/main/maps/$map";
 import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
 import {NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
-import {CachedTransform, E, Timer, GetStackTraceStr} from "js-vextensions";
+import {CachedTransform, E, Timer} from "js-vextensions";
 import {Column} from "react-vcomponents";
 import {BaseComponentWithConnector, GetInnerComp, RenderSource, ShallowChanged, ShallowEquals} from "react-vextensions";
 import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {Log} from "../../../../Frame/General/Logging";
-import {IsSpecialEmptyArray, emptyArray, emptyArray_forLoading} from "../../../../Frame/Store/ReducerUtils";
+import {emptyArray, emptyArray_forLoading} from "../../../../Frame/Store/ReducerUtils";
 import NotifyNodeViewed from "../../../../Server/Commands/NotifyNodeViewed";
 import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";
 import {GetNodeChangeType, GetPathsToNodesChangedSinceX} from "../../../../Store/firebase/mapNodeEditTimes";
@@ -27,7 +27,6 @@ import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker";
 import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker";
 import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer";
 import {NodeUI_Inner} from "./NodeUI_Inner";
-import {demoRootNodeID} from "../../../Home/DemoMap";
 
 let nodesLocked = {};
 export function SetNodeUILocked(nodeID: number, locked: boolean, maxWait = 10000) {

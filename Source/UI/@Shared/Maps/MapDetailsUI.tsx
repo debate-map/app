@@ -42,7 +42,6 @@ export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
 
 		let splitAt = 170, width = 600;
 		return (
-			<div> {/* needed so GetInnerComp() works */}
 			<Column style={style}>
 				{!forNew &&
 					<table className="selectableAC" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>
@@ -86,7 +85,6 @@ export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
 							value={newData.rootNode} onChange={val=>Change(newData.rootNode = val)}/>
 					</RowLR>*/}
 			</Column>
-			</div>
 		);
 	}
 	GetValidationError() {

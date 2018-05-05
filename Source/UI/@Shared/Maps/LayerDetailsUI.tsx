@@ -44,7 +44,6 @@ export default class LayerDetailsUI extends BaseComponent<Props, {newData: Layer
 
 		let splitAt = 170, width = 600;
 		return (
-			<div> {/* needed so GetInnerComp() works */}
 			<Column style={style}>
 				{!forNew &&
 					<table className="selectableAC" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>
@@ -65,7 +64,6 @@ export default class LayerDetailsUI extends BaseComponent<Props, {newData: Layer
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
 			</Column>
-			</div>
 		);
 	}
 	GetValidationError() {

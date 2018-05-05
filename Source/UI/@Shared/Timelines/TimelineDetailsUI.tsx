@@ -43,7 +43,6 @@ export default class TimelineDetailsUI extends BaseComponent<Props, {newData: Ti
 
 		let splitAt = 170, width = 600;
 		return (
-			<div> {/* needed so GetInnerComp() works */}
 			<Column style={style}>
 				{!forNew &&
 					<table className="selectableAC" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>
@@ -64,7 +63,6 @@ export default class TimelineDetailsUI extends BaseComponent<Props, {newData: Ti
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
 			</Column>
-			</div>
 		);
 	}
 	GetValidationError() {

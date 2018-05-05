@@ -1,32 +1,20 @@
-import {BaseComponent, RenderSource} from "react-vextensions";
-import {Pre, Div, TextArea_AutoSize} from "react-vcomponents";
-import {Column} from "react-vcomponents";
-import {Row} from "react-vcomponents";
-import {TextInput} from "react-vcomponents";
-import Moment from "moment";
-import {GetUser, GetUserPermissionGroups} from "../../../../Store/firebase/users";
+import {AsNodeL1, GetFinalPolarity} from "Store/firebase/nodes/$node";
+import {GetUserAccessLevel, GetUserID} from "Store/firebase/users";
 import {User} from "Store/firebase/users/@User";
+import {GetErrorMessagesUnderElement} from "js-vextensions";
+import {CheckBox, Column, Div, Pre, Row, Select, Spinner, TextArea_AutoSize, TextInput} from "react-vcomponents";
+import {BaseComponent, RenderSource} from "react-vextensions";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../../Frame/General/Enums";
-import {Select} from "react-vcomponents";
-import {CheckBox} from "react-vcomponents";
-import {ScrollView} from "react-vscrollview";
-import {Button} from "react-vcomponents";
-import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
-import {MapNode, ClaimForm, ChildEntry, MapNodeL2, MapNode_id, ClaimType, AccessLevel, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
-import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
+import {AsNodeL2, GetClaimType} from "../../../../Store/firebase/nodes/$node";
+import {AccessLevel, ChildEntry, ClaimForm, ClaimType, MapNode, MapNodeL2, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
+import {ArgumentType, GetArgumentTypeDisplayText, MapNodeRevision, MapNodeRevision_titlePattern} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
-import {GetParentNode, GetNodeChildren, GetNode} from "../../../../Store/firebase/nodes";
-import {GetNodeForm, GetNodeDisplayText, GetClaimType, AsNodeL2, GetNodeL3} from "../../../../Store/firebase/nodes/$node";
-import Icon from "../../../../Frame/ReactComponents/Icon";
-import {Spinner} from "react-vcomponents";
-import EquationEditorUI from "./EquationEditorUI";
 import {IsUserAdmin} from "../../../../Store/firebase/userExtras";
-import {GetUserID, GetUserAccessLevel} from "Store/firebase/users";
+import {GetUser} from "../../../../Store/firebase/users";
+import EquationEditorUI from "./EquationEditorUI";
 import ImageAttachmentEditorUI from "./ImageAttachmentEditorUI";
-import {GetErrorMessagesUnderElement} from "js-vextensions";
-import {MapNodeRevision, MapNodeRevision_titlePattern, GetArgumentTypeDisplayText, ArgumentType} from "../../../../Store/firebase/nodes/@MapNodeRevision";
-import {GetNodeL2, GetFinalPolarity, AsNodeL1} from "Store/firebase/nodes/$node";
+import QuoteInfoEditorUI from "./QuoteInfoEditorUI";
 
 type Props = {
 	baseData: MapNode,
@@ -70,7 +58,6 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 
 		let splitAt = 170, width = 600;
 		return (
-			<div> {/* needed so GetInnerComp() works */}
 			<Column style={E({padding: 5}, style)}>
 				{/*<Div style={{fontSize: 12}}>ID: {node._id}</Div>
 				<Div mt={3} style={{fontSize: 12}}>Created at: {Moment(node.createdAt).format(`YYYY-MM-DD HH:mm:ss`)
@@ -99,7 +86,6 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 				{!forNew &&
 					<AdvancedOptions {...propsEnhanced}/>}
 			</Column>
-			</div>
 		);
 	}
 	PostRender(source: RenderSource) {

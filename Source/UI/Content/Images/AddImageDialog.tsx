@@ -24,7 +24,7 @@ export function ShowAddImageDialog(userID: string) {
 	let valid = false;
 	let boxController: BoxController = ShowMessageBox({
 		title: `Add image`, cancelButton: true,
-		messageUI: ()=> {
+		message: ()=> {
 			boxController.options.okButtonClickable = valid;
 			return (
 				<Column style={{padding: `10px 0`, width: 600}}>

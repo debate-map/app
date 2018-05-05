@@ -19,7 +19,7 @@ export function ShowAddTermComponentDialog(userID: string, termID: number) {
 	let Change = _=>boxController.UpdateUI();
 	let boxController: BoxController = ShowMessageBox({
 		title: `Add term component`, cancelButton: true,
-		messageUI: ()=> {
+		message: ()=> {
 			setTimeout(()=>justShowed = false);
 			return (
 				<Column style={{padding: `10px 0`, width: 600}}>

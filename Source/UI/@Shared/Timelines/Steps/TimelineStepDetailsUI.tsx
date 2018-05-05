@@ -46,7 +46,6 @@ export default class TimelineStepDetailsUI extends BaseComponent<Props, {newData
 
 		let splitAt = 170, width = 600;
 		return (
-			<div> {/* needed so GetInnerComp() works */}
 			<Column style={style}>
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Title: </Pre>
@@ -67,7 +66,6 @@ export default class TimelineStepDetailsUI extends BaseComponent<Props, {newData
 					return <NodeRevealUI step={newData} reveal={reveal} Change={Change}/>
 				})}
 			</Column>
-			</div>
 		);
 	}
 	GetValidationError() {
@@ -105,7 +103,7 @@ export function ShowEditTimelineStepDialog(userID: string, step: TimelineStep) {
 	let Change = (..._)=>boxController.UpdateUI();
 	let boxController = ShowMessageBox({
 		title: `Edit step`, cancelButton: true,
-		messageUI: ()=> {
+		message: ()=> {
 			boxController.options.okButtonClickable = error == null;
 			return (
 				<Column style={{padding: `10px 0`, width: 600}}>

@@ -96,7 +96,7 @@ export default class RatingsPanel extends BaseComponent<RatingsPanel_Props, {siz
 						//let finalRating = GetRatingForForm(rating, form);
 						let boxController = ShowMessageBox({
 							title: `Rate ${ratingType} of ${nodeTypeDisplayName}`, cancelButton: true,
-							messageUI: ()=>(
+							message: ()=>(
 								<div style={{padding: "10px 0"}}>
 									Rating: <Spinner min={minLabel} max={maxLabel} style={{width: 60}}
 										value={newRating_label} onChange={val=>DN(newRating_label = val, boxController.UpdateUI())}/>

@@ -2,34 +2,34 @@ import CloneNode from "Server/Commands/CloneNode";
 import LinkNode from "Server/Commands/LinkNode";
 import SetNodeIsMultiPremiseArgument from "Server/Commands/SetNodeIsMultiPremiseArgument";
 import UnlinkNode from "Server/Commands/UnlinkNode";
-import { MapNodeRevision } from "Store/firebase/nodes/@MapNodeRevision";
-import { ACTSetLastAcknowledgementTime, GetCopiedNodePath } from "Store/main";
-import { GetTimeFromWhichToShowChangedNodes } from "Store/main/maps/$map";
-import { ShowAddSubnodeDialog } from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSubnodeDialog";
-import { E } from "js-vextensions";
-import { BaseComponentWithConnector } from "react-vextensions";
-import { VMenuStub } from "react-vmenu";
-import { VMenuItem } from "react-vmenu/dist/VMenu";
-import { ShowMessageBox } from "react-vmessagebox";
-import { GetAsync, SlicePath } from "../../../../Frame/Database/DatabaseHelpers";
-import { Connect } from "../../../../Frame/Database/FirebaseConnect";
-import { styles } from "../../../../Frame/UI/GlobalStyles";
+import {HolderType} from "Store/firebase/nodes";
+import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
+import {ACTSetLastAcknowledgementTime, GetCopiedNodePath} from "Store/main";
+import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/$map";
+import {ShowAddSubnodeDialog} from "UI/@Shared/Maps/MapNode/NodeUI_Menu/AddSubnodeDialog";
+import {E} from "js-vextensions";
+import {BaseComponentWithConnector} from "react-vextensions";
+import {VMenuStub} from "react-vmenu";
+import {VMenuItem} from "react-vmenu/dist/VMenu";
+import {ShowMessageBox} from "react-vmessagebox";
+import {GetAsync, SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
+import {Connect} from "../../../../Frame/Database/FirebaseConnect";
+import {styles} from "../../../../Frame/UI/GlobalStyles";
 import AddChildNode from "../../../../Server/Commands/AddChildNode";
 import DeleteNode from "../../../../Server/Commands/DeleteNode";
-import { RootState } from "../../../../Store";
-import { GetPathsToNodesChangedSinceX } from "../../../../Store/firebase/mapNodeEditTimes";
-import { Map } from "../../../../Store/firebase/maps/@Map";
-import { ForCopy_GetError, ForCut_GetError, ForDelete_GetError, ForUnlink_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, IsNewLinkValid, IsNodeSubnode } from "../../../../Store/firebase/nodes";
-import { GetNodeDisplayText, GetNodeL3, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument } from "../../../../Store/firebase/nodes/$node";
-import { ClaimForm, MapNode, MapNodeL3, Polarity } from "../../../../Store/firebase/nodes/@MapNode";
-import { GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info } from "../../../../Store/firebase/nodes/@MapNodeType";
-import { IsUserBasicOrAnon, IsUserCreatorOrMod, IsUserMod } from "../../../../Store/firebase/userExtras";
-import { GetUserID, GetUserPermissionGroups } from "../../../../Store/firebase/users";
-import { ACTNodeCopy, GetCopiedNode } from "../../../../Store/main";
-import { GetPathNodeIDs } from "../../../../Store/main/mapViews";
-import { ShowSignInPopup } from "../../NavBar/UserPanel";
-import { ShowAddChildDialog } from "./NodeUI_Menu/AddChildDialog";
-import {HolderType} from "Store/firebase/nodes";
+import {RootState} from "../../../../Store";
+import {GetPathsToNodesChangedSinceX} from "../../../../Store/firebase/mapNodeEditTimes";
+import {Map} from "../../../../Store/firebase/maps/@Map";
+import {ForCopy_GetError, ForCut_GetError, ForDelete_GetError, ForUnlink_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, IsNewLinkValid, IsNodeSubnode} from "../../../../Store/firebase/nodes";
+import {GetNodeDisplayText, GetNodeL3, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
+import {ClaimForm, MapNode, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
+import {GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {IsUserBasicOrAnon, IsUserCreatorOrMod, IsUserMod} from "../../../../Store/firebase/userExtras";
+import {GetUserID, GetUserPermissionGroups} from "../../../../Store/firebase/users";
+import {ACTNodeCopy, GetCopiedNode} from "../../../../Store/main";
+import {GetPathNodeIDs} from "../../../../Store/main/mapViews";
+import {ShowSignInPopup} from "../../NavBar/UserPanel";
+import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
 
 type Props = {map: Map, node: MapNodeL3, path: string, inList?: boolean, holderType?: HolderType};
 let connector = (_: RootState, {map, node, path, holderType}: Props)=> {
@@ -287,7 +287,7 @@ If not, paste the argument as a clone instead.`
 
 							ShowMessageBox({
 								title: `Delete "${nodeText}"`, cancelButton: true,
-								message: `Delete the node "${nodeText}"${contextStr}${combinedWithParent ? ", and its (hidden) container argument?" : ""}?`,
+								message: `Delete the node "${nodeText}"${contextStr}${combinedWithParent ? ", and its (hidden) container argument" : ""}?`,
 								onOK: async ()=> {
 									await new DeleteNode(E({mapID: map._id, nodeID: node._id}, combinedWithParent && {deleteContainerArgument: true})).Run();
 								}

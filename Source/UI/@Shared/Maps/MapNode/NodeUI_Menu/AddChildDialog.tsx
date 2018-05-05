@@ -1,34 +1,22 @@
-import {MapNodeType, MapNodeType_Info, GetMapNodeTypeDisplayName} from "../../../../../Store/firebase/nodes/@MapNodeType";
-import {GetEntries} from "../../../../../Frame/General/Enums";
-import {MapNode, ClaimForm, ChildEntry, MapNodeL2, ClaimType, ImageAttachment, Polarity, MapNodeL3} from "../../../../../Store/firebase/nodes/@MapNode";
-import {ShowMessageBox, BoxController} from "react-vmessagebox";
-import {Select, TextArea_AutoSize} from "react-vcomponents";
-import {TextInput} from "react-vcomponents";
-import {BaseComponent, GetInnerComp, RenderSource} from "react-vextensions";
-import {Pre} from "react-vcomponents";
-import {Row} from "react-vcomponents";
-import {Column} from "react-vcomponents";
-import keycode from "keycode";
-import {Button} from "react-vcomponents";
-import {E} from "js-vextensions";
-import AddNode from "../../../../../Server/Commands/AddNode";
-import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
-import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
-import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";
-import {CheckBox} from "react-vcomponents";
-import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
-import NodeDetailsUI from "../NodeDetailsUI";
-import {GetClaimType, AsNodeL3, AsNodeL2, GetFinalPolarity, GetNodeForm} from "../../../../../Store/firebase/nodes/$node";
-import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";
-import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
-import { IsUserAdmin, IsUserMod } from "../../../../../Store/firebase/userExtras";
-import AddChildNode from "../../../../../Server/Commands/AddChildNode";
-import {MapNodeRevision, MapNodeRevision_titlePattern, ArgumentType} from "../../../../../Store/firebase/nodes/@MapNodeRevision";
-import {ACTSetLastAcknowledgementTime} from "../../../../../Store/main";
 import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
-import {WaitTillPathDataIsReceiving, WaitTillPathDataIsReceived, DBPath} from "../../../../../Frame/Database/DatabaseHelpers";
-import {GetErrorMessagesUnderElement} from "js-vextensions";
+import {E, GetErrorMessagesUnderElement} from "js-vextensions";
+import {Column, Pre, Row, Select, TextArea_AutoSize} from "react-vcomponents";
+import {GetInnerComp} from "react-vextensions";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {DBPath, WaitTillPathDataIsReceived, WaitTillPathDataIsReceiving} from "../../../../../Frame/Database/DatabaseHelpers";
+import {GetEntries} from "../../../../../Frame/General/Enums";
 import {Link} from "../../../../../Frame/ReactComponents/Link";
+import AddChildNode from "../../../../../Server/Commands/AddChildNode";
+import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
+import {AsNodeL2, AsNodeL3, GetClaimType, GetNodeForm} from "../../../../../Store/firebase/nodes/$node";
+import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
+import {ChildEntry, ClaimForm, ClaimType, ImageAttachment, MapNode, MapNodeL3, Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
+import {ArgumentType, MapNodeRevision, MapNodeRevision_titlePattern} from "../../../../../Store/firebase/nodes/@MapNodeRevision";
+import {GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info} from "../../../../../Store/firebase/nodes/@MapNodeType";
+import {IsUserMod} from "../../../../../Store/firebase/userExtras";
+import {ACTSetLastAcknowledgementTime} from "../../../../../Store/main";
+import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";
+import NodeDetailsUI from "../NodeDetailsUI";
 
 export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: number) {
 	let parentForm = GetNodeForm(parentNode);
@@ -62,7 +50,7 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, ch
 	let Change = (..._)=>boxController.UpdateUI();
 	let boxController: BoxController = ShowMessageBox({
 		title: `Add ${displayName}`, cancelButton: true,
-		messageUI: ()=> {
+		message: ()=> {
 			setTimeout(()=>justShowed = false);
 			boxController.options.okButtonClickable = validationError == null;
 
@@ -73,7 +61,7 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, ch
 
 			let newNodeAsL2 = AsNodeL2(newNode, newRevision);
 			return (
-				<Column ref={c=>root = c} style={{padding: "10px 0", width: 600}}>
+				<Column ref={c=>root = c} style={{width: 600}}>
 					{childType == MapNodeType.Claim &&
 						<Row>
 							<Pre>Type: </Pre>
@@ -101,7 +89,7 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, ch
 								}}/>
 						</Row>}
 					{childType != MapNodeType.Argument &&
-						<NodeDetailsUI ref={c=>nodeEditorUI = GetInnerComp(c) as any}
+						<NodeDetailsUI ref={c=>nodeEditorUI = GetInnerComp(c) as any} style={{padding: 0}}
 							baseData={AsNodeL3(newNodeAsL2, Polarity.Supporting, null)}
 							baseRevisionData={newRevision}
 							baseLinkData={newLink} forNew={true}
@@ -114,7 +102,7 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, ch
 								Change();
 							}}/>}
 					{childType == MapNodeType.Argument &&
-						<Column style={{padding: 5}}>
+						<Column style={{padding: "5px 0"}}>
 							{/*<Row style={{display: "flex", alignItems: "center"}}>
 								<Pre>Title: </Pre>
 								<InfoButton text={`

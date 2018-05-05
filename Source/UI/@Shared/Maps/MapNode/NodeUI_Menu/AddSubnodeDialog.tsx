@@ -34,7 +34,7 @@ export function ShowAddSubnodeDialog(mapID: number, anchorNode: MapNodeL2, ancho
 	let dialog: AddSubnodeDialog;
 	let boxController: BoxController = ShowMessageBox({
 		title: `Add subnode (to layer)`, cancelButton: true,
-		messageUI: ()=><AddSubnodeDialog ref={c=>dialog = GetInnerComp(c)} {...{mapID, anchorNode, anchorNodePath, boxController}}/>,
+		message: ()=><AddSubnodeDialog ref={c=>dialog = GetInnerComp(c)} {...{mapID, anchorNode, anchorNodePath, boxController}}/>,
 		onOK: ()=>dialog.OnOK(),
 	});
 }

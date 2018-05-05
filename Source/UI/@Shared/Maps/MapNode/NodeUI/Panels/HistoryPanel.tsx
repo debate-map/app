@@ -78,7 +78,7 @@ class RevisionEntryUI extends BaseComponent<RevisionEntryUI_Props, {}> {
 					<Button text="V" title="View details" style={{margin: "-2px 0", padding: "1px 3px"}} onClick={()=> {
 						let boxController: BoxController = ShowMessageBox({
 							title: "Details for revision #" + revision._id, cancelOnOverlayClick: true,
-							messageUI: ()=> {
+							message: ()=> {
 								return (
 									<div style={{minWidth: 500}}>
 										<NodeDetailsUI

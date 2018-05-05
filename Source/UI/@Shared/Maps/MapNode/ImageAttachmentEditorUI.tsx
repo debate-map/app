@@ -43,7 +43,6 @@ export default class ImageAttachmentEditorUI extends BaseComponent<Props, {newDa
 
 		let splitAt = 100;
 		return (
-			<div> {/* needed so GetInnerComp() works */}
 			<Column style={style}>
 				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Image ID: </Pre>
@@ -51,7 +50,6 @@ export default class ImageAttachmentEditorUI extends BaseComponent<Props, {newDa
 						value={newData.id} onChange={val=>Change(newData.id = val)}/>
 				</RowLR>
 			</Column>
-			</div>
 		);
 	}
 	GetValidationError() {

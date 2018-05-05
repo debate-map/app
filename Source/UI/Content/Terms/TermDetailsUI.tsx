@@ -40,7 +40,6 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 
 		let splitAt = 170, width = 600;
 		return (
-			<div> {/* needed so GetInnerComp() works */}
 			<Column style={style}>
 				{!forNew &&
 					<table className="selectableAC" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>
@@ -98,7 +97,6 @@ export default class TermDetailsUI extends BaseComponent<Props, {newData: Term, 
 						value={newData.shortDescription_current} onChange={val=>Change(newData.shortDescription_current = val)}/>
 				</RowLR>
 			</Column>
-			</div>
 		);
 	}
 	GetValidationError() {
@@ -124,7 +122,7 @@ export function ShowAddTermDialog(userID: string) {
 	let valid = false;
 	let boxController: BoxController = ShowMessageBox({
 		title: `Add term`, cancelButton: true,
-		messageUI: ()=> {
+		message: ()=> {
 			boxController.options.okButtonClickable = valid;
 			return (
 				<Column style={{padding: `10px 0`, width: 600}}>
