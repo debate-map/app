@@ -146,12 +146,12 @@ export function GetHolderType(child: MapNode, parent: MapNode) {
 	return null;
 }
 
-export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNodeL2) {
+export function IsLinkValid(parentType: MapNodeType, parentPath: string, child: MapNode) {
 	let parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;
 	if (!parentTypeInfo.Contains(child.type)) return false;
 	return true;
 }
-export function IsNewLinkValid(parentPath: string, newHolderType: HolderType, newChild: MapNodeL2, permissions: PermissionGroupSet) {
+export function IsNewLinkValid(parentPath: string, newHolderType: HolderType, newChild: MapNode, permissions: PermissionGroupSet) {
 	let parent = GetNode(GetNodeID(parentPath));
 	let parentPathIDs = SplitStringBySlash_Cached(parentPath).map(a=>a.ToInt());
 	//if (map.name == "Global" && parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
@@ -167,21 +167,23 @@ export function IsNewLinkValid(parentPath: string, newHolderType: HolderType, ne
 }
 
 export function ForUnlink_GetError(userID: string, node: MapNodeL2, asPartOfCut = false) {
-	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
-	if (!asPartOfCut && (node.parents || {}).VKeys(true).length <= 1)  return `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`;
-	if (IsRootNode(node)) return `Cannot unlink the root-node of a map.`;
-	if (IsNodeSubnode(node)) return `Cannot unlink a subnode. Try deleting it instead.`;
+	let baseText = `Cannot unlink node #${node._id}, since `;
+	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not its owner. (or a mod)`;
+	if (!asPartOfCut && (node.parents || {}).VKeys(true).length <= 1)  return `${baseText}doing so would orphan it. Try deleting it instead.`;
+	if (IsRootNode(node)) return `${baseText}it's the root-node of a map.`;
+	if (IsNodeSubnode(node)) return `${baseText}it's a subnode. Try deleting it instead.`;
 	return null;
 }
-export function ForDelete_GetError(userID: string, node: MapNodeL2, subcommandInfo?: {asPartOfMapDelete: boolean, childrenBeingDeleted: number[]}) {
-	if (!IsUserCreatorOrMod(userID, node)) return "You are not the owner of this node. (or a mod)";
-	if (GetParentCount(node) > 1) return `Cannot delete this child, as it has more than one parent. Try unlinking it instead.`;
-	if (IsRootNode(node) && !AsObj(subcommandInfo).asPartOfMapDelete) return `Cannot delete the root-node of a map.`;
+export function ForDelete_GetError(userID: string, node: MapNodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, childrenBeingDeleted?: number[]}) {
+	let baseText = `Cannot delete node #${node._id}, since `;
+	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
+	if (GetParentCount(node) > 1) return `${baseText}it has more than one parent. Try unlinking it instead.`;
+	if (IsRootNode(node) && !AsObj(subcommandInfo).asPartOfMapDelete) return `${baseText}it's the root-node of a map.`;
 
 	let nodeChildren = GetNodeChildrenL2(node);
 	if (nodeChildren.Any(a=>a == null)) return "[still loading children...]";
 	if (nodeChildren.map(a=>a._id).Except(AsObj(subcommandInfo).childrenBeingDeleted || []).length) {
-		return "Cannot delete this node until all its children have been unlinked or deleted.";
+		return `Cannot delete this node (#${node._id}) until all its children have been unlinked or deleted.`;
 	}
 	return null;
 }

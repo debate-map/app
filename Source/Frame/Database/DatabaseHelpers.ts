@@ -315,7 +315,9 @@ export async function GetAsync<T>(dbGetterFunc: ()=>T, statsLogger?: ({requested
 }
 G({GetAsync_Raw});
 export async function GetAsync_Raw<T>(dbGetterFunc: ()=>T, statsLogger?: ({requestedPaths: string})=>void): Promise<T> {
-	return RemoveHelpers(Clone(await GetAsync(dbGetterFunc, statsLogger)));
+	let value = await GetAsync(dbGetterFunc, statsLogger);
+	if (value == null) return value;
+	return RemoveHelpers(Clone(value));
 }
 
 export function WaitTillPathDataIsReceiving(path: string): Promise<any> {
