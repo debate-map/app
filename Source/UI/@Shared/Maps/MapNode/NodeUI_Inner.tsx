@@ -159,6 +159,9 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 					if (nodeView == null || !nodeView.selected) {
 						store.dispatch(new ACTMapNodeSelect({mapID: map._id, path}));
 					}
+					if (combinedWithParentArgument) {
+						store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: parent._id, time: Date.now()}));
+					}
 					store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: node._id, time: Date.now()}));
 				}}
 				beforeChildren={[
