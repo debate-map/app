@@ -1,6 +1,6 @@
 import {BaseComponent, AddGlobalStyle} from "react-vextensions";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
-import NotificationMessage from "../../../Store/main/@NotificationMessage";
+import {NotificationMessage} from "../../../Store/main/@NotificationMessage";
 import {Button, Div} from "react-vcomponents";
 import {ACTNotificationMessageRemove} from "../../../Store/main";
 import {Column} from "react-vcomponents";
@@ -17,7 +17,7 @@ AddGlobalStyle(`
 @Connect(state=> ({
 	messages: State(a=>a.main.notificationMessages),
 }))
-export default class NotificationsUI extends BaseComponent<{} & Partial<{messages: NotificationMessage[]}>, {}> {
+export class NotificationsUI extends BaseComponent<{} & Partial<{messages: NotificationMessage[]}>, {}> {
 	scrollView: ScrollView;
 	render() {
 		let {messages} = this.props;

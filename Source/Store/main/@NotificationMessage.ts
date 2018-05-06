@@ -1,7 +1,7 @@
 import {Global} from "../../Frame/General/Others";
 
 @Global
-export default class NotificationMessage {
+export class NotificationMessage {
 	static lastID = -1;
 	
 	/*constructor(error: Error) {

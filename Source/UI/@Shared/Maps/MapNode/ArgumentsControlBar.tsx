@@ -15,10 +15,16 @@ import chroma from "chroma-js";
 import {Map} from "Store/firebase/maps/@Map";
 import {AddArgumentButton} from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton";
 
-export class ArgumentsControlBar extends BaseComponent<{map: Map, parentNode: MapNodeL3, parentPath: string, node: MapNodeL3} & Partial<{}>, {}> {
+/*let connector = (state, props)=> {
+	return {
+		currentNodeBeingAdded_path: State(a=>a.main.currentNodeBeingAdded_path),
+	};
+};
+@Connect(connector)*/
+export class ArgumentsControlBar extends BaseComponent<{map: Map, node: MapNodeL3, path: string, childBeingAdded: boolean}, {}> {
 	static defaultState = {premiseTitle: ""};
 	render() {
-		let {map, parentNode, parentPath, node} = this.props;
+		let {map, node, path, childBeingAdded} = this.props;
 		let backgroundColor = GetNodeColor({type: MapNodeType.Category} as MapNodeL3);
 
 		return (
@@ -37,13 +43,17 @@ export class ArgumentsControlBar extends BaseComponent<{map: Map, parentNode: Ma
 					<Row>Opposing arguments</Row>
 				</Column>*/}
 				<Column ml={0}> {/* vertical */}
-					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.Supporting}/>
-					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.Opposing} style={{marginTop: 1}}/>
+					<AddArgumentButton map={map} node={node} path={path} polarity={Polarity.Supporting}/>
+					<AddArgumentButton map={map} node={node} path={path} polarity={Polarity.Opposing} style={{marginTop: 1}}/>
 				</Column>
 				{/*<Row ml={0}> // horizontal
 					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.Supporting}/>
 					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.Opposing} style={{marginLeft: 3}}/>
 				</Row>*/}
+				{childBeingAdded &&
+					<div style={{marginLeft: 15}}>
+						Adding new entry...
+					</div>}
 			</Row>
 		);
 	}

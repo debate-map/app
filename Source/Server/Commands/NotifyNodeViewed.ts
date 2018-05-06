@@ -3,7 +3,7 @@ import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
 import { MapNode } from "../../Store/firebase/nodes/@MapNode";
 import { Command } from "../Command";
 
-export default class NotifyNodeViewed extends Command<{nodeID: number}> {
+export class NotifyNodeViewed extends Command<{nodeID: number}> {
 	async Prepare() {}
 	async Validate() {
 		let {nodeID} = this.payload;

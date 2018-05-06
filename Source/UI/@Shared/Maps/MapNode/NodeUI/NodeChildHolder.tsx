@@ -66,6 +66,7 @@ let connector = (state, {node, path, nodeChildrenToShow}: Props)=> {
 		initialChildLimit: State(a=>a.main.initialChildLimit),
 		//nodeChildren_sortValues: CachedTransform("nodeChildren_sortValues_transform1", [node._id], nodeChildren_sortValues, ()=>nodeChildren_sortValues),
 		nodeChildren_fillPercents: CachedTransform("nodeChildren_fillPercents_transform1", [node._id], nodeChildren_fillPercents, ()=>nodeChildren_fillPercents),
+		currentNodeBeingAdded_path: State(a=>a.main.currentNodeBeingAdded_path),
 	};
 };
 @Connect(connector)
@@ -79,7 +80,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
 		let {map, node, nodeView, path, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, minWidth, onHeightOrDividePointChange,
-			initialChildLimit, nodeChildren_fillPercents} = this.props;
+			initialChildLimit, nodeChildren_fillPercents, currentNodeBeingAdded_path} = this.props;
 		let {childrenWidthOverride, oldChildBoxOffsets} = this.state;
 		childrenWidthOverride = (childrenWidthOverride|0).KeepAtLeast(minWidth);
 
@@ -160,7 +161,7 @@ export class NodeChildHolder extends BaseComponentWithConnector(connector, initi
 						})}
 					</Column>}
 				{showArgumentsControlBar &&
-					<ArgumentsControlBar ref={c=>this.argumentsControlBar = c} map={map} parentNode={node} parentPath={path} node={node}/>}
+					<ArgumentsControlBar ref={c=>this.argumentsControlBar = c} map={map} node={node} path={path} childBeingAdded={currentNodeBeingAdded_path == path + "/?"}/>}
 				{separateChildren &&
 					<Column ref={c=>this.downChildHolder = c} ct>
 						{downChildren.slice(0, childLimit_down).map((child, index)=> {

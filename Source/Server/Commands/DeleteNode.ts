@@ -16,14 +16,13 @@ AddSchema({
 		mapID: {type: "number"},
 		nodeID: {type: "number"},
 		withContainerArgument: {type: "number"},
-		asPartOfMapDelete: {type: "boolean"},
 	},
 	required: ["nodeID"],
 }, "DeleteNode_payload");
 
 @MapEdit
 @UserEdit
-export default class DeleteNode extends Command<{mapID?: number, nodeID: number, withContainerArgument?: number, asPartOfMapDelete?: boolean}> {
+export default class DeleteNode extends Command<{mapID?: number, nodeID: number, withContainerArgument?: number}> {
 	Validate_Early() {
 		AssertValidate("DeleteNode_payload", this.payload, `Payload invalid`);
 	}
@@ -40,7 +39,7 @@ export default class DeleteNode extends Command<{mapID?: number, nodeID: number,
 	viewerIDs_main: string[];
 	mapIDs: number[];
 	async Prepare() {
-		let {mapID, nodeID, withContainerArgument, asPartOfMapDelete} = this.payload;
+		let {mapID, nodeID, withContainerArgument} = this.payload;
 		this.oldData = await GetAsync_Raw(()=>GetNodeL2(nodeID));
 		this.oldRevisions = await GetAsync(()=>GetNodeRevisions(nodeID));
 

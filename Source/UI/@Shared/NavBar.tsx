@@ -20,7 +20,7 @@ import SearchPanel from "./NavBar/SearchPanel";
 import {SubNavBarButton} from "./SubNavBar";
 import Radium from "radium";
 import {Link} from "../../Frame/ReactComponents/Link";
-import NotificationsUI from "./NavBar/NotificationsUI";
+import {NotificationsUI} from "./NavBar/NotificationsUI";
 import {Column} from "react-vcomponents";
 import {Row} from "react-vcomponents";
 import ReputationPanel from "./NavBar/ReputationPanel";

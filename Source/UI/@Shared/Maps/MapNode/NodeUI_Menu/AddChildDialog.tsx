@@ -17,6 +17,7 @@ import {IsUserMod} from "../../../../../Store/firebase/userExtras";
 import {ACTSetLastAcknowledgementTime} from "../../../../../Store/main";
 import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";
 import NodeDetailsUI from "../NodeDetailsUI";
+import {ACTSet} from "Store";
 
 export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: number) {
 	let parentForm = GetNodeForm(parentNode);
@@ -145,10 +146,13 @@ The details of the argument should be described within the argument's premises. 
 			/*if (validationError) {
 				return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`}));
 			}*/
-			SetNodeUILocked(parentNode._id, true);
+			//SetNodeUILocked(parentNode._id, true);
+			store.dispatch(new ACTSet(a=>a.main.currentNodeBeingAdded_path, parentPath + "/?"));
 			let info = await new AddChildNode({
 				mapID: mapID, node: newNode, revision: newRevision, link: newLink,
 			}).Run();
+			//store.dispatch(new ACTSetCurrentNodeBeingAdded({path: parentPath + "/" + info.nodeID}));
+			//store.dispatch(new ACTSet(a=>a.main.currentNodeBeingAdded_path, parentPath + "/" + info.nodeID));
 			store.dispatch(new ACTMapNodeExpandedSet({mapID, path: parentPath + "/" + info.nodeID, expanded: true, recursive: false}));
 			store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.nodeID, time: Date.now()}));
 
@@ -162,7 +166,8 @@ The details of the argument should be described within the argument's premises. 
 			let watchPath = DBPath(`nodeRevisions/${(info2 && info2.revisionID) || info.revisionID}`);
 			await WaitTillPathDataIsReceiving(watchPath);
 			await WaitTillPathDataIsReceived(watchPath);
-			SetNodeUILocked(parentNode._id, false);
+			store.dispatch(new ACTSet(a=>a.main.currentNodeBeingAdded_path, null));
+			//SetNodeUILocked(parentNode._id, false);
 		}
 	});
 }

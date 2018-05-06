@@ -1,5 +1,5 @@
 import {ACTNotificationMessageAdd} from "../../Store/main";
-import NotificationMessage from "../../Store/main/@NotificationMessage";
+import {NotificationMessage} from "../../Store/main/@NotificationMessage";
 import {LogError} from "./Logging";
 import Raven from "raven-js";
 

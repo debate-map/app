@@ -10,7 +10,7 @@ import {BaseComponentWithConnector, GetInnerComp, RenderSource, ShallowChanged, 
 import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {emptyArray, emptyArray_forLoading} from "../../../../Frame/Store/ReducerUtils";
-import NotifyNodeViewed from "../../../../Server/Commands/NotifyNodeViewed";
+import {NotifyNodeViewed} from "../../../../Server/Commands/NotifyNodeViewed";
 import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";
 import {GetNodeChangeType, GetPathsToNodesChangedSinceX} from "../../../../Store/firebase/mapNodeEditTimes";
 import {Map} from "../../../../Store/firebase/maps/@Map";

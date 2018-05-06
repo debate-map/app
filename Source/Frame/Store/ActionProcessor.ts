@@ -11,7 +11,7 @@ import ReactGA from "react-ga";
 import {GetCurrentURL} from "../General/URLs";
 import {CreateMapViewForPath} from "./PathFinder";
 import {ACTNotificationMessageAdd, ACTSetPage, ACTSetSubpage} from "../../Store/main";
-import NotificationMessage from "../../Store/main/@NotificationMessage";
+import {NotificationMessage} from "../../Store/main/@NotificationMessage";
 import {GetNodeDisplayText} from "../../Store/firebase/nodes/$node";
 import Raven from "raven-js";
 import {ACTDebateMapSelect, ACTDebateMapSelect_WithData} from "../../Store/main/debates";

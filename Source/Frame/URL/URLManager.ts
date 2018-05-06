@@ -14,7 +14,7 @@ import { GetNodeDisplayText } from "../../Store/firebase/nodes/$node";
 import { GetNode } from "Store/firebase/nodes";
 import { GetShortestPathFromRootToNode } from "Frame/Store/PathFinder";
 import {CreateMapViewForPath} from "../Store/PathFinder";
-import NotificationMessage from "../../Store/main/@NotificationMessage";
+import {NotificationMessage} from "../../Store/main/@NotificationMessage";
 import { ACTDebateMapSelect } from "../../Store/main/debates";
 import { ACTSet } from "Store";
 import {MapUI} from "../../UI/@Shared/Maps/MapUI";

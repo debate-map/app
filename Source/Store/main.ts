@@ -3,7 +3,7 @@ import {combineReducers} from "redux";
 import Action from "../Frame/General/Action";
 import {MapViewsReducer} from "./main/mapViews";
 import {RatingUIReducer, RatingUIState} from "./main/ratingUI";
-import NotificationMessage from "./main/@NotificationMessage";
+import {NotificationMessage} from "./main/@NotificationMessage";
 import {rootPageDefaultChilds} from "../Frame/General/URLs";
 import {VURL} from "js-vextensions";
 import {Global} from "../Frame/General/Others";
@@ -68,6 +68,7 @@ export class MainState {
 	maps: {[key: number]: MapInfo};
 
 	nodeLastAcknowledgementTimes: {[key: number]: number};
+	currentNodeBeingAdded_path: string;
 
 	//openMap: number;
 	mapViews: MapViews;
@@ -89,6 +90,7 @@ export class ACTNotificationMessageRemove extends Action<number> {}
 export class ACTNodeCopy extends Action<{path: string, asCut: boolean}> {}
 export class ACTSetInitialChildLimit extends Action<{value: number}> {}
 export class ACTSetLastAcknowledgementTime extends Action<{nodeID: number, time: number}> {}
+//export class ACTSetCurrentNodeBeingAdded extends Action<{path: string}> {}
 
 let MainReducer_Real;
 export function MainReducer(state, action) {
@@ -204,6 +206,7 @@ export function MainReducer(state, action) {
 			}
 			return state;
 		},
+		currentNodeBeingAdded_path: SimpleReducer(a=>a.main.currentNodeBeingAdded_path),
 
 		/*openMap: (state = null, action)=> {
 			if (action.Is(ACTSetPage) && action.payload == "global") return globalMapID;
