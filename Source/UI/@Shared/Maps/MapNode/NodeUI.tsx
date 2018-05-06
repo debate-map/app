@@ -9,7 +9,6 @@ import {Column} from "react-vcomponents";
 import {BaseComponentWithConnector, GetInnerComp, RenderSource, ShallowChanged, ShallowEquals} from "react-vextensions";
 import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {Log} from "../../../../Frame/General/Logging";
 import {emptyArray, emptyArray_forLoading} from "../../../../Frame/Store/ReducerUtils";
 import NotifyNodeViewed from "../../../../Server/Commands/NotifyNodeViewed";
 import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";

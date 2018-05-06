@@ -17,7 +17,8 @@ export default class DeleteMap extends Command<{mapID: number}> {
 		this.oldData = await GetAsync_Raw(()=>GetMap(mapID));
 		this.userMapInfoSets = (await GetDataAsync("userMapInfo") as {[key: string]: UserMapInfoSet}) || {};
 
-		this.sub_deleteNode = new DeleteNode({mapID, nodeID: this.oldData.rootNode, asPartOfMapDelete: true});
+		this.sub_deleteNode = new DeleteNode({mapID, nodeID: this.oldData.rootNode});
+		this.sub_deleteNode.asPartOfMapDelete = true;
 		this.sub_deleteNode.Validate_Early();
 		await this.sub_deleteNode.Prepare();
 	}

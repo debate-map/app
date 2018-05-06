@@ -77,32 +77,45 @@ G({ShouldLog}); declare global { function ShouldLog(shouldLogFunc: (logTypes: Lo
 function ShouldLog(shouldLogFunc: (logTypes: LogTypes)=>boolean) {
 	return shouldLogFunc(g.logTypes || {});
 }
-G({MaybeLog}); declare global { function MaybeLog(shouldLogFunc: (logTypes: LogTypes)=>boolean, logMessageGetter: ()=>string); }
-function MaybeLog(shouldLogFunc: (logTypes: LogTypes)=>boolean, logMessageGetter: ()=>string) {
+G({MaybeLog}); declare global { function MaybeLog(shouldLogFunc: (logTypes: LogTypes)=>boolean, loggerFunc: (()=>string) | ((Log: LogFunc_Min)=>any)); }
+function MaybeLog(shouldLogFunc: (logTypes: LogTypes)=>boolean, loggerFunc: any) {
 	if (!ShouldLog(shouldLogFunc)) return;
-	Log(logMessageGetter());
+	//let loggerFuncReturnsString = loggerFunc.arguments.length == 0;
+	let loggerFuncIsSimpleGetter = loggerFunc.toString().replace(/ /g, "").includes("function()");
+	if (loggerFuncIsSimpleGetter) Log(loggerFunc());
+	else loggerFunc(Log);
 }
 
-export var onLogFuncs = [];
-//declare global { function Log(...args); } G({Log});
-G({Log}); declare global { function Log(message, appendStackTrace?: boolean, logLater?: boolean); }
-export function Log(message, appendStackTrace = false, logLater = false) {
+//export type LogFunc = LogFunc_Full | LogFunc_Min;
+export type LogFunc_Full = (options: LogOptions, ...messageSegments: any[])=>any;
+export type LogFunc_Min = (...messageSegments: any[])=>any;
+export var onLogFuncs = [] as LogFunc_Full[];
+
+type LogOptions = {appendStackTrace?: boolean, logLater?: boolean};
+declare global {
+	function Log(options: LogOptions, ...messageSegments: any[]);
+	function Log(...messageSegments: any[]);
+} G({Log});
+function Log(...args) {
+	let options: LogOptions = {}, messageSegments: any[];
+	if (typeof args[0] == "object") [options, ...messageSegments] = args;
+	else messageSegments = args;
 	// #mms: add-stack-trace-and-current-call-info-to-logs setting exists
 
-	var finalMessage = message;
-	if (appendStackTrace) {
+	if (options.appendStackTrace) {
 		/*if (inUnity)
 			finalMessage += "\n\nStackTrace) " + new Error().stack;
 		else*/
-		finalMessage += "\n@" + GetStackTraceStr();
+		messageSegments.push("\n@" + GetStackTraceStr());
 	}
 
-	console.log(finalMessage);
+	console.log(...messageSegments);
 
-	for (let onLogFunc of onLogFuncs)
-		onLogFunc(message, appendStackTrace, logLater);
+	for (let onLogFunc of onLogFuncs) {
+		onLogFunc(options, messageSegments);
+	}
 
-	return message;
+	return messageSegments.length == 1 ? messageSegments[0] : messageSegments;
 }
 
 declare global { function LogLater(message, appendStackTrace?); } G({LogLater});

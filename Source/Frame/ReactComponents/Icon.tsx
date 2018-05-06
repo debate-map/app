@@ -2,7 +2,6 @@ import {BaseComponent, BaseProps, AddGlobalStyle, basePropFullKeys, ApplyBasicSt
 import Radium from "radium";
 import {E} from "js-vextensions";
 import {createMarkupForStyles} from "react-dom/lib/CSSPropertyOperations";
-import {Log} from "../General/Logging";
 
 //import iconData from "../../../Source/Frame/UI/IconData.json";
 /*var iconData_raw = {} as any; //require("../../../Source/Frame/UI/IconData.json");

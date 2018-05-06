@@ -289,7 +289,7 @@ If not, paste the argument as a clone instead.`
 								title: `Delete "${nodeText}"`, cancelButton: true,
 								message: `Delete the node "${nodeText}"${contextStr}${combinedWithParent ? ", and its (hidden) container argument" : ""}?`,
 								onOK: async ()=> {
-									await new DeleteNode(E({mapID: map._id, nodeID: node._id}, combinedWithParent && {deleteContainerArgument: true})).Run();
+									await new DeleteNode(E({mapID: map._id, nodeID: node._id}, combinedWithParent && {withContainerArgument: parent._id})).Run();
 								}
 							});
 						}}/>}

@@ -11,9 +11,27 @@ import {MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
 import {Command, MergeDBUpdates} from "../Command";
 import {MapEdit, UserEdit} from "../CommandMacros";
 
+AddSchema({
+	properties: {
+		mapID: {type: "number"},
+		nodeID: {type: "number"},
+		withContainerArgument: {type: "number"},
+		asPartOfMapDelete: {type: "boolean"},
+	},
+	required: ["nodeID"],
+}, "DeleteNode_payload");
+
 @MapEdit
 @UserEdit
 export default class DeleteNode extends Command<{mapID?: number, nodeID: number, withContainerArgument?: number, asPartOfMapDelete?: boolean}> {
+	Validate_Early() {
+		AssertValidate("DeleteNode_payload", this.payload, `Payload invalid`);
+	}
+
+	// as subcommand
+	asPartOfMapDelete = false;
+	childrenBeingDeleted = [] as number[];
+	
 	sub_deleteContainerArgument: DeleteNode;
 	
 	oldData: MapNodeL2;
@@ -35,16 +53,18 @@ export default class DeleteNode extends Command<{mapID?: number, nodeID: number,
 		this.mapIDs = (await GetAsync(()=>GetMaps())).map(a=>a._id);
 
 		if (withContainerArgument) {
-			this.sub_deleteContainerArgument = new DeleteNode({mapID, nodeID: withContainerArgument});
+			this.sub_deleteContainerArgument = new DeleteNode({mapID, nodeID: withContainerArgument}).MarkAsSubcommand();
+			this.sub_deleteContainerArgument.childrenBeingDeleted = [nodeID];
 			this.sub_deleteContainerArgument.Validate_Early();
 			await this.sub_deleteContainerArgument.Prepare();
 		}
 	}
 	async Validate() {
+		let {asPartOfMapDelete, childrenBeingDeleted} = this;
 		/*Assert((this.oldData.parents || {}).VKeys(true).length <= 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
 		let normalChildCount = (this.oldData.children || {}).VKeys(true).length;
 		Assert(normalChildCount == 0, "Cannot delete this node until all its (non-impact-premise) children have been unlinked or deleted.");*/
-		let earlyError = await GetAsync(()=>ForDelete_GetError(this.userInfo.id, this.oldData, this.payload.asPartOfMapDelete, this.asSubcommand));
+		let earlyError = await GetAsync(()=>ForDelete_GetError(this.userInfo.id, this.oldData, this.asSubcommand && {asPartOfMapDelete, childrenBeingDeleted}));
 		Assert(earlyError == null, earlyError);
 		if (this.sub_deleteContainerArgument) await this.sub_deleteContainerArgument.Validate();
 	}

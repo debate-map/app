@@ -78,7 +78,8 @@ export abstract class Command<Payload> {
 			//await store.firebase.helpers.DBRef().update(dbUpdates);
 			await ApplyDBUpdates(DBPath(), dbUpdates);
 
-			MaybeLog(a=>a.commands, ()=>`Finishing command. @type:${this.constructor.name} @payload(${ToJSON(this.payload)})`);
+			//MaybeLog(a=>a.commands, ()=>`Finishing command. @type:${this.constructor.name} @payload(${ToJSON(this.payload)}) @dbUpdates(${ToJSON(dbUpdates)})`);
+			MaybeLog(a=>a.commands, l=>l(`Finishing command. @type:${this.constructor.name} @payload(`, this.payload, `) @dbUpdates(`, dbUpdates, `)`));
 		} finally {
 			OnCurrentCommandFinished();
 		}
