@@ -146,8 +146,8 @@ The details of the argument should be described within the argument's premises. 
 			/*if (validationError) {
 				return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`}));
 			}*/
-			//SetNodeUILocked(parentNode._id, true);
 			store.dispatch(new ACTSet(a=>a.main.currentNodeBeingAdded_path, parentPath + "/?"));
+			SetNodeUILocked(parentNode._id, true);
 			let info = await new AddChildNode({
 				mapID: mapID, node: newNode, revision: newRevision, link: newLink,
 			}).Run();
@@ -167,7 +167,7 @@ The details of the argument should be described within the argument's premises. 
 			await WaitTillPathDataIsReceiving(watchPath);
 			await WaitTillPathDataIsReceived(watchPath);
 			store.dispatch(new ACTSet(a=>a.main.currentNodeBeingAdded_path, null));
-			//SetNodeUILocked(parentNode._id, false);
+			SetNodeUILocked(parentNode._id, false);
 		}
 	});
 }

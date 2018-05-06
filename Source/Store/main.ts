@@ -94,7 +94,7 @@ export class ACTSetLastAcknowledgementTime extends Action<{nodeID: number, time:
 
 let MainReducer_Real;
 export function MainReducer(state, action) {
-	MainReducer_Real = MainReducer_Real || persistReducer({key: "main_key", storage, blacklist: ["notificationMessages"]}, CombineReducers({
+	MainReducer_Real = MainReducer_Real || persistReducer({key: "main_key", storage, blacklist: ["notificationMessages", "currentNodeBeingAdded_path"]}, CombineReducers({
 		page: (state = null, action)=> {
 			if (action.Is(ACTSetPage)) return action.payload;
 			return state;
