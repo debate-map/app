@@ -147,7 +147,6 @@ The details of the argument should be described within the argument's premises. 
 				return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`}));
 			}*/
 			store.dispatch(new ACTSet(a=>a.main.currentNodeBeingAdded_path, parentPath + "/?"));
-			SetNodeUILocked(parentNode._id, true);
 			let info = await new AddChildNode({
 				mapID: mapID, node: newNode, revision: newRevision, link: newLink,
 			}).Run();
@@ -163,11 +162,7 @@ The details of the argument should be described within the argument's premises. 
 				store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info2.nodeID, time: Date.now()}));
 			}
 
-			let watchPath = DBPath(`nodeRevisions/${(info2 && info2.revisionID) || info.revisionID}`);
-			await WaitTillPathDataIsReceiving(watchPath);
-			await WaitTillPathDataIsReceived(watchPath);
 			store.dispatch(new ACTSet(a=>a.main.currentNodeBeingAdded_path, null));
-			SetNodeUILocked(parentNode._id, false);
 		}
 	});
 }
