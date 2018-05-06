@@ -46,7 +46,7 @@ export default class EquationEditorUI extends BaseComponent<Props, {newData: Equ
 		let splitAt = 100; //, width = 600;
 		return (
 			<Column style={style}>
-				<RowLR mt={5} splitAt={splitAt}>
+				<RowLR splitAt={splitAt}>
 					<Pre>LaTeX: </Pre>
 					<CheckBox enabled={creating || editing} style={{width: "100%"}}
 						checked={newData.latex} onChange={val=>Change(val ? newData.latex = true : delete newData.latex)}/>

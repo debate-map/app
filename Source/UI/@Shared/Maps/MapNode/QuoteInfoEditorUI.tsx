@@ -44,7 +44,7 @@ export default class QuoteInfoEditorUI extends BaseComponent
 		return (
 			<Column>
 				{showPreview && [
-					<Row key={0} mt={5}>Preview:</Row>,
+					<Row key={0}>Preview:</Row>,
 					<Column key={1} mt={5}>
 						<Pre style={{padding: 5, background: `rgba(255,255,255,.2)`, borderRadius: 5}}>
 							{GetNodeDisplayText({type: MapNodeType.Claim, contentNode: CleanUpdatedContentNode(Clone(newData))} as any, null, ClaimForm.Base)}
@@ -52,12 +52,12 @@ export default class QuoteInfoEditorUI extends BaseComponent
 						</Pre>
 					</Column>
 				]}
-				<Column mt={5}>
+				<Column mt={showPreview ? 5 : 0}>
 					<Pre>Quote text: </Pre>
 					{/*<TextInput style={ES({flex: 1})}
 						value={info.text} onChange={val=>Change(info.text = val)}/>*/}
 					{(creating || editing) && <MarkdownToolbar editor={()=>this.refs.editor} excludeCommands={["h1", "h2", "h3", "h4", "italic", "quote"]}/>}
-					<MarkdownEditor ref="editor" value={newData.content} onChange={val=>Change(newData.content = val)} options={{
+					<MarkdownEditor ref="editor" toolbar={false} value={newData.content} onChange={val=>Change(newData.content = val)} options={{
 						scrollbarStyle: `overlay`,
 						lineWrapping: true,
 						readOnly: !(creating || editing),

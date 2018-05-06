@@ -87,7 +87,7 @@ export function GetMapNodeTypeDisplayName(type: MapNodeType, parentNode: MapNode
 	if (type == MapNodeType.MultiChoiceQuestion) return "multi-choice question";
 	if (type == MapNodeType.Claim) {
 		if (parentNode && parentNode.type == MapNodeType.Category)
-			return "yes-no question (claim)";
+			return "claim (in question form)";
 		return "claim";
 	}
 	if (type == MapNodeType.Argument) {

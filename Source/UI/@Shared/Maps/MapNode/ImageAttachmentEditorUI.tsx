@@ -44,7 +44,7 @@ export default class ImageAttachmentEditorUI extends BaseComponent<Props, {newDa
 		let splitAt = 100;
 		return (
 			<Column style={style}>
-				<RowLR mt={5} splitAt={splitAt}>
+				<RowLR splitAt={splitAt}>
 					<Pre>Image ID: </Pre>
 					<Spinner min={1} enabled={creating || editing} style={{width: "100%"}}
 						value={newData.id} onChange={val=>Change(newData.id = val)}/>

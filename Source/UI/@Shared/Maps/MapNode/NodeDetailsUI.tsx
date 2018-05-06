@@ -194,7 +194,7 @@ class ArgumentInfo extends BaseComponent<Props_Enhanced, {}> {
 		let polarity = GetFinalPolarity(newLinkData.polarity, newLinkData.form);
 
 		return (
-			<Row mt={5}>
+			<Row>
 				<Pre>Type: If </Pre>
 				<Select options={GetEntries(ArgumentType, name=>GetArgumentTypeDisplayText(ArgumentType[name]))}
 					enabled={enabled} value={newRevisionData.argumentType} onChange={val=> {

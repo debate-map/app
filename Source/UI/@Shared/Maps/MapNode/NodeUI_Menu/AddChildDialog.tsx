@@ -90,7 +90,7 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, ch
 								}}/>
 						</Row>}
 					{childType != MapNodeType.Argument &&
-						<NodeDetailsUI ref={c=>nodeEditorUI = GetInnerComp(c) as any} style={{padding: 0}}
+						<NodeDetailsUI ref={c=>nodeEditorUI = GetInnerComp(c) as any} style={{padding: childType == MapNodeType.Claim ? "5px 0 0 0" : 0}}
 							baseData={AsNodeL3(newNodeAsL2, Polarity.Supporting, null)}
 							baseRevisionData={newRevision}
 							baseLinkData={newLink} forNew={true}
@@ -103,7 +103,7 @@ export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, ch
 								Change();
 							}}/>}
 					{childType == MapNodeType.Argument &&
-						<Column style={{padding: "5px 0"}}>
+						<Column>
 							{/*<Row style={{display: "flex", alignItems: "center"}}>
 								<Pre>Title: </Pre>
 								<InfoButton text={`
