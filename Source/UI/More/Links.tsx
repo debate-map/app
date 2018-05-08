@@ -19,7 +19,6 @@ let pageText = `
 ### Development
 
 * Gitter (project chat): [https://gitter.im/DebateMap/Lobby](https://gitter.im/DebateMap/Lobby)
-* Trello (task list): [https://trello.com/b/7ZhagPiN](https://trello.com/b/7ZhagPiN)
 * Github (source code): [https://github.com/Venryx/DebateMap](https://github.com/Venryx/DebateMap)
 
 ### Canonical Debate Lab
