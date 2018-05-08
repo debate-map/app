@@ -78,28 +78,38 @@ export function GetRatingAverage_AtPath(node: MapNodeL3, ratingType: RatingType,
 	return result;
 }
 
+let rsCompatibleNodeTypes = [MapNodeType.Argument, MapNodeType.Claim];
 export function GetFillPercent_AtPath(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null): number {
 	ratingType = ratingType || {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
-	if (State(a=>a.main.weighting) == WeightingType.Votes) {
+	if (State(a=>a.main.weighting) == WeightingType.Votes || !rsCompatibleNodeTypes.Contains(node.type)) {
 		return GetRatingAverage_AtPath(node, ratingType, filter, resultIfNoData);
 	}
 
 	let {argTruthScoreComposite, argWeightMultiplier, claimTruthScore} = RS_GetAllValues(node, path);
 	
 	//if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
+	let result: number;
 	if (node.type == MapNodeType.Claim) {
-		return claimTruthScore * 100;
+		result = claimTruthScore * 100;
 	} else if (node.type == MapNodeType.Argument) {
 		if (boxType == HolderType.Relevance) {
 			//return Lerp(0, 100, GetPercentFromXToY(0, 2, argWeightMultiplier));
-			return Lerp(0, 100, argWeightMultiplier);
+			result = Lerp(0, 100, argWeightMultiplier);
+		} else {
+			result = argTruthScoreComposite * 100;
 		}
-		return argTruthScoreComposite * 100;
 	}
+
+	// if result not in-range, the data must still be loading, so just return 0
+	/*if (!(result >= 0 && result <= 100)) {
+		result = 0;
+	}*/
+
+	return result;
 }
 export function GetMarkerPercent_AtPath(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType) {
 	ratingType = ratingType || {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
-	if (State(a=>a.main.weighting) == WeightingType.Votes) {
+	if (State(a=>a.main.weighting) == WeightingType.Votes || !rsCompatibleNodeTypes.Contains(node.type)) {
 		return GetRatingAverage_AtPath(node, ratingType, new RatingFilter({includeUser: GetUserID()}));
 	}
 }

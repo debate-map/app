@@ -20,6 +20,7 @@ export function RS_CalculateTruthScore(claim: MapNodeL3) {
 
 		let truthScoreComposite = RS_CalculateTruthScoreComposite(argument);
 		let weight = RS_CalculateWeight(argument, premises);
+		if (weight == 0) continue; // if 0 weight, this argument won't change the result at all, so skip it
 
 		if (argument.finalPolarity == Polarity.Opposing) {
 			truthScoreComposite = 1 - truthScoreComposite;
@@ -34,8 +35,9 @@ export function RS_CalculateTruthScore(claim: MapNodeL3) {
 			let weightRelativeToTotal = weight / weightTotalSoFar;
 			runningAverage += deviationFromAverage * weightRelativeToTotal;
 		}
+		Assert(!IsNaN(runningAverage), "Got an NaN in truth-score calculation function.");
 	}
-	return runningAverage;
+	return runningAverage || 0;
 }
 export function RS_CalculateTruthScoreComposite(argument: MapNodeL3) {
 	Assert(argument && argument.type == MapNodeType.Argument, "RS truth-score-composite can only be calculated for an argument.");

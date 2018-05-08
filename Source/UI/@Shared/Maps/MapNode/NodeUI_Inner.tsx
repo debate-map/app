@@ -18,7 +18,7 @@ import AddNodeRevision from "../../../../Server/Commands/AddNodeRevision";
 import {GetImage} from "../../../../Store/firebase/images";
 import {ChangeType, GetChangeTypeOutlineColor} from "../../../../Store/firebase/mapNodeEditTimes";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {GetNodeRatingsRoot, GetRatingAverage_AtPath, GetRatings, RatingFilter} from "../../../../Store/firebase/nodeRatings";
+import {GetNodeRatingsRoot, GetRatingAverage_AtPath, GetRatings, RatingFilter, GetFillPercent_AtPath, GetMarkerPercent_AtPath} from "../../../../Store/firebase/nodeRatings";
 import {RatingType, ratingTypes} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {GetParentNode, GetParentNodeL3, IsNodeSubnode} from "../../../../Store/firebase/nodes";
 import {GetFontSizeForNode, GetMainRatingType, GetNodeDisplayText, GetNodeForm, GetNodeL3, GetPaddingForNode, IsPremiseOfSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
@@ -86,6 +86,9 @@ let connector = (state, {map, node, path}: Props)=> {
 		var reasonScoreValues = RS_GetAllValues(node, path, true) as ReasonScoreValues_RSPrefix;
 	}
 
+	let backgroundFillPercent = GetFillPercent_AtPath(node, path, null);
+	let markerPercent = GetMarkerPercent_AtPath(node, path, null);
+
 	return {
 		form: GetNodeForm(node, path),
 		ratingsRoot: GetNodeRatingsRoot(node._id),
@@ -94,6 +97,8 @@ let connector = (state, {map, node, path}: Props)=> {
 		reasonScoreValues,
 		showReasonScoreValues: State(a=>a.main.showReasonScoreValues),
 		changeType,
+		backgroundFillPercent,
+		markerPercent,
 	};
 };
 @Connect(connector)
@@ -105,7 +110,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 		let {map, node, nodeView, path, width, widthOverride,
 			panelPosition, useLocalPanelState, style, form,
 			ratingsRoot, mainRating_average, mainRating_mine, reasonScoreValues,
-			changeType, showReasonScoreValues} = this.props;
+			showReasonScoreValues, changeType, backgroundFillPercent, markerPercent} = this.props;
 		let {hovered, hoverPanel, hoverTermID, /*local_selected,*/ local_openPanel} = this.state;
 		let nodeTypeInfo = MapNodeType_Info.for[node.type];
 		let backgroundColor = GetNodeColor(node);
@@ -121,7 +126,7 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 		let pathNodeIDs = path.split(`/`).Select(a=>parseInt(a));
 		let isSubnode = IsNodeSubnode(node);
 
-		let backgroundFillPercent = mainRating_average || 0;
+		/*let backgroundFillPercent = mainRating_average || 0;
 		let markerPercent = mainRating_mine;
 		if (reasonScoreValues) {
 			var {rs_argTruthScoreComposite, rs_argWeightMultiplier, rs_argWeight, rs_claimTruthScore, rs_claimBaseWeight} = reasonScoreValues;
@@ -134,7 +139,12 @@ export class NodeUI_Inner extends BaseComponentWithConnector(connector,
 				backgroundFillPercent = rs_argTruthScoreComposite * 100;
 				markerPercent = null;
 			}
-		}
+
+			// if background-fill-percent is 0, the data must still be loading
+			if (IsNaN(backgroundFillPercent)) {
+				backgroundFillPercent = 0;
+			}
+		}*/
 
 		let nodeReversed = form == ClaimForm.Negation;
 		
