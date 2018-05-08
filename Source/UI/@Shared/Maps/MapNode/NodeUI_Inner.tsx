@@ -71,11 +71,11 @@ let connector = (state, {map, node, path}: Props)=> {
 
 	let mainRatingType = GetMainRatingType(node);
 	let ratingNode = node;
-	//let ratingNodePath = path;
+	let ratingNodePath = path;
 	if (combineWithParentArgument) {
 		mainRatingType = "impact";
 		ratingNode = parent;
-		//ratingNodePath = SlicePath(path, 1);
+		ratingNodePath = SlicePath(path, 1);
 	}
 	let mainRating_average = GetRatingAverage_AtPath(ratingNode, mainRatingType);
 	//let mainRating_mine = GetRatingValue(ratingNode._id, mainRatingType, GetUserID());
@@ -86,8 +86,8 @@ let connector = (state, {map, node, path}: Props)=> {
 		var reasonScoreValues = RS_GetAllValues(node, path, true) as ReasonScoreValues_RSPrefix;
 	}
 
-	let backgroundFillPercent = GetFillPercent_AtPath(node, path, null);
-	let markerPercent = GetMarkerPercent_AtPath(node, path, null);
+	let backgroundFillPercent = GetFillPercent_AtPath(ratingNode, ratingNodePath, null);
+	let markerPercent = GetMarkerPercent_AtPath(ratingNode, ratingNodePath, null);
 
 	return {
 		form: GetNodeForm(node, path),
