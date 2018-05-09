@@ -1,6 +1,6 @@
 import Icon from "Frame/ReactComponents/Icon";
 import { GetNodeViewers } from "Store/firebase/nodeViewers";
-import { GetParentNodeID } from "Store/firebase/nodes";
+import { GetParentNodeID, GetParentNodeL3 } from "Store/firebase/nodes";
 import { GetUser, GetUserID, GetUserPermissionGroups } from "Store/firebase/users";
 import Moment from "moment";
 import { Button, CheckBox, Column, Div, Pre, Row, Select } from "react-vcomponents";
@@ -10,7 +10,7 @@ import { Connect } from "../../../../../../Frame/Database/FirebaseConnect";
 import { GetEntries } from "../../../../../../Frame/General/Enums";
 import InfoButton from "../../../../../../Frame/ReactComponents/InfoButton";
 import ChangeClaimType, { CanConvertFromClaimTypeXToY } from "../../../../../../Server/Commands/ChangeClaimType";
-import ReverseArgumentPolarity from "../../../../../../Server/Commands/ReverseArgumentPolarity";
+import {ReverseArgumentPolarity} from "../../../../../../Server/Commands/ReverseArgumentPolarity";
 import UpdateLink from "../../../../../../Server/Commands/UpdateLink";
 import UpdateNodeChildrenOrder from "../../../../../../Server/Commands/UpdateNodeChildrenOrder";
 import { Map } from "../../../../../../Store/firebase/maps/@Map";
@@ -20,6 +20,7 @@ import { ArgumentType } from "../../../../../../Store/firebase/nodes/@MapNodeRev
 import { MapNodeType } from "../../../../../../Store/firebase/nodes/@MapNodeType";
 import { IsUserCreatorOrMod } from "../../../../../../Store/firebase/userExtras";
 import { User } from "../../../../../../Store/firebase/users/@User";
+import {SlicePath} from "Frame/Database/DatabaseHelpers";
 
 let connector = (state, {node}: {map?: Map, node: MapNodeL3, path: string})=> ({
 	_: GetUserPermissionGroups(GetUserID()),
@@ -34,6 +35,14 @@ export class OthersPanel extends BaseComponentWithConnector(connector, {convertT
 		let {convertToType} = this.state;
 		let creatorOrMod = IsUserCreatorOrMod(GetUserID(), node);
 
+		let parent = GetParentNodeL3(path);
+		let parentPath = SlicePath(path, 1);
+		let parentCreatorOrMod = IsUserCreatorOrMod(GetUserID(), parent);
+
+		let nodeArgOrParentSPArg_controlled = (node.type == MapNodeType.Argument && creatorOrMod ? node : null)
+			|| (parent && parent.type == MapNodeType.Argument && parentCreatorOrMod ? parent : null);
+		let nodeArgOrParentSPArg_controlled_path = nodeArgOrParentSPArg_controlled && (nodeArgOrParentSPArg_controlled == node ? path : parentPath);
+
 		let convertToTypes = GetEntries(ClaimType).filter(pair=>CanConvertFromClaimTypeXToY(GetClaimType(node), pair.value));
 		convertToType = convertToType || convertToTypes.map(a=>a.value).FirstOrX();
 
@@ -45,14 +54,15 @@ export class OthersPanel extends BaseComponentWithConnector(connector, {convertT
 				<Row>Parents: {node.parents == null ? "none" : node.parents.VKeys(true).join(", ")}</Row>
 				<Row>Children: {node.children == null ? "none" : node.children.VKeys(true).join(", ")}</Row>
 				<Row>Viewers: {viewers.length || "..."} <InfoButton text="The number of registered users who have had this node displayed in-map at some point."/></Row>
-				{node.type == MapNodeType.Argument && creatorOrMod &&
+				{nodeArgOrParentSPArg_controlled &&
 					<Row>
 						<Button mt={3} text="Reverse argument polarity" onLeftClick={()=> {
 							ShowMessageBox({
 								title: `Reverse argument polarity?`, cancelButton: true,
-								message: `Reverse polarity of argument "${GetNodeDisplayText(node)}"?\n\nAll impact-premise ratings will be deleted.`,
+								//message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_controlled)}"?\n\nAll relevance ratings will be deleted.`,
+								message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_controlled)}"?`,
 								onOK: ()=> {
-									new ReverseArgumentPolarity(E(mapID && {mapID}, {nodeID: node._id, path})).Run();
+									new ReverseArgumentPolarity(E(mapID && {mapID}, {nodeID: nodeArgOrParentSPArg_controlled._id, path: nodeArgOrParentSPArg_controlled_path})).Run();
 								}
 							});
 						}}/>

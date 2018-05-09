@@ -19,7 +19,7 @@ AddSchema({
 
 @MapEdit
 @UserEdit
-export default class ReverseArgumentPolarity extends Command<{mapID?: number, nodeID: number, path: string}> {
+export class ReverseArgumentPolarity extends Command<{mapID?: number, nodeID: number, path: string}> {
 	Validate_Early() {
 		AssertValidate("ReverseArgumentPolarity_payload", this.payload, `Payload invalid`);
 	}
