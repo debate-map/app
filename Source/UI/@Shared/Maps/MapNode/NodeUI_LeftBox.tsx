@@ -1,27 +1,20 @@
-import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
-import MapNodeUI_Inner from "./NodeUI_Inner";
-import {Button, Span} from "react-vcomponents";
-import {E} from "js-vextensions";
-import {connect} from "react-redux";
-import {CachedTransform} from "js-vextensions";
-import {Map} from "../../../../Store/firebase/maps/@Map";
-import {MapNode, ClaimForm, MapNodeL2, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
-import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
-import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
-import {MapNodeType_Info, MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
-import {RatingType_Info, RatingType, GetRatingTypeInfo} from "../../../../Store/firebase/nodeRatings/@RatingType";
-import {GetRatingAverage, GetRatings, ShouldRatingTypeBeReversed, GetRatingAverage_AtPath} from "../../../../Store/firebase/nodeRatings";
-import {ACTMapNodePanelOpen} from "../../../../Store/main/mapViews/$mapView/rootNodeViews";
-import {GetRatingTypesForNode, GetNodeForm, GetMainRatingType, GetNodeL3, IsPremiseOfSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
-import {RootState} from "../../../../Store/index";
-import {Connect} from "../../../../Frame/Database/FirebaseConnect";
-import {GetParentNode, GetParentNodeL3} from "../../../../Store/firebase/nodes";
-import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
-import {GetNode} from "Store/firebase/nodes";
-import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
-import { IsUserCreatorOrMod } from "Store/firebase/userExtras";
+import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
 import {GetUserID} from "Store/firebase/users";
 import chroma from "chroma-js";
+import {E} from "js-vextensions";
+import {Button, Span} from "react-vcomponents";
+import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
+import {SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
+import {Connect} from "../../../../Frame/Database/FirebaseConnect";
+import {Map} from "../../../../Store/firebase/maps/@Map";
+import {GetRatingAverage_AtPath, GetRatings} from "../../../../Store/firebase/nodeRatings";
+import {GetRatingTypeInfo, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
+import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
+import {GetParentNodeL3} from "../../../../Store/firebase/nodes";
+import {GetNodeForm, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
+import {ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
+import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {MapNodeView} from "../../../../Store/main/mapViews/@MapViews";
 
 type Props = {
 	map: Map, path: string, node: MapNodeL3, nodeView?: MapNodeView, ratingsRoot: RatingsRoot,

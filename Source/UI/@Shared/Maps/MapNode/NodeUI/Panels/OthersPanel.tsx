@@ -15,7 +15,7 @@ import UpdateLink from "../../../../../../Server/Commands/UpdateLink";
 import UpdateNodeChildrenOrder from "../../../../../../Server/Commands/UpdateNodeChildrenOrder";
 import { Map } from "../../../../../../Store/firebase/maps/@Map";
 import { GetClaimType, GetNodeDisplayText, GetNodeForm, GetNodeL3 } from "../../../../../../Store/firebase/nodes/$node";
-import { ClaimForm, ClaimType, MapNodeL3 } from "../../../../../../Store/firebase/nodes/@MapNode";
+import {ClaimForm, ClaimType, MapNodeL3} from "../../../../../../Store/firebase/nodes/@MapNode";
 import { ArgumentType } from "../../../../../../Store/firebase/nodes/@MapNodeRevision";
 import { MapNodeType } from "../../../../../../Store/firebase/nodes/@MapNodeType";
 import { IsUserCreatorOrMod } from "../../../../../../Store/firebase/userExtras";
@@ -110,7 +110,6 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 
 		if (node.type == MapNodeType.Claim) {
 			var claimType = GetClaimType(node);
-			var canSetAsNegation = claimType == ClaimType.Normal && node.link.form != ClaimForm.YesNoQuestion;
 			var canSetAsSeriesAnchor = claimType == ClaimType.Equation && !node.current.equation.isStep; //&& !creating;
 		}
 		
@@ -118,16 +117,15 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 			<Column mt={10}>
 				<Row style={{fontWeight: "bold"}}>At this location:</Row>
 				<Row>Path: {path}</Row>
-				{canSetAsNegation &&
+				{node.type == MapNodeType.Claim &&
 					<Row style={{display: "flex", alignItems: "center"}}>
-						<Pre>Show as negation: </Pre>
-						<CheckBox checked={node.link.form == ClaimForm.Negation}
-							onChange={val=> {
-								new UpdateLink({
-									linkParentID: GetParentNodeID(path), linkChildID: node._id,
-									linkUpdates: {form: val ? ClaimForm.Negation : ClaimForm.Base}
-								}).Run();
-							}}/>
+						<Pre>Show as: </Pre>
+						<Select options={GetEntries(ClaimForm)} value={node.link.form} onChange={val=> {
+							new UpdateLink({
+								linkParentID: GetParentNodeID(path), linkChildID: node._id,
+								linkUpdates: {form: val}
+							}).Run();
+						}}/>
 					</Row>}
 				{canSetAsSeriesAnchor &&
 					<Row style={{display: "flex", alignItems: "center"}}>

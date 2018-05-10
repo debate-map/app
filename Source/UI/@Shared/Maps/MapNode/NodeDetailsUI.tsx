@@ -178,6 +178,11 @@ class OtherTitles extends BaseComponent<Props_Enhanced, {}> {
 					<TextArea_AutoSize enabled={enabled} allowLineBreaks={false} style={ES({flex: 1})} pattern={MapNodeRevision_titlePattern}
 						value={newRevisionData.titles["yesNoQuestion"]} onChange={val=>Change(newRevisionData.titles["yesNoQuestion"] = val)}/>
 				</Row>
+				<Row key={1} mt={5} style={{display: "flex", alignItems: "center"}}>
+					<Pre>Title (opposite): </Pre>
+					<TextArea_AutoSize enabled={enabled} allowLineBreaks={false} style={ES({flex: 1})} pattern={MapNodeRevision_titlePattern}
+						value={newRevisionData.titles["opposite"]} onChange={val=>Change(newRevisionData.titles["opposite"] = val)}/>
+				</Row>
 				{willUseQuestionTitleHere && forNew &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 						<Pre allowWrap={true}>At this location (under a category node), the node will be displayed with the (yes or no) question title.</Pre>
