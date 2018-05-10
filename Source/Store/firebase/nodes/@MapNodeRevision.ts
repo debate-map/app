@@ -45,7 +45,6 @@ AddSchema({
 			properties: {
 				//base: {pattern: MapNodeRevision_titlePattern}, negation: {pattern: MapNodeRevision_titlePattern}, yesNoQuestion: {pattern: MapNodeRevision_titlePattern},
 				base: {type: "string"}, negation: {type: "string"}, yesNoQuestion: {type: "string"},
-				neutralization: {type: "string"}, opposite: {type: "string"}
 			},
 			//required: ["base", "negation", "yesNoQuestion"],
 		},

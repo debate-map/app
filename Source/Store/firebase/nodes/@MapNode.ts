@@ -24,19 +24,6 @@ export enum ClaimForm {
 	Base = 10,
 	Negation = 20,
 	YesNoQuestion = 30,
-	Opposite = 40,
-}
-
-/*Here's what I'm now thinking: for any CON argument, there is a flag, called "This argument is a CON by means of its supporting/establishing..." and then the options are:
-1) The parent-claim's mere negation. (eg. "it does not increase")
-2) The parent-claim's neutralization. (eg. "it does not increase or decrease")
-3) The parent-claim's opposite. (eg. "it decreases")
-
-If the parent-claim has no opposite text, then the flag is auto-set to #1 since #2 and #3 can't apply.*/
-export enum ConArgumentType {
-	Negation = 10,
-	Neutralization = 20,
-	Opposite = 30,
 }
 
 export class MapNode {
@@ -56,7 +43,6 @@ export class MapNode {
 	childrenOrder: number[];
 	//talkRoot: number;
 	multiPremiseArgument?: boolean;
-	conArgumentType?: ConArgumentType;
 
 	layerPlusAnchorParents: LayerPlusAnchorParentSet;
 
@@ -79,22 +65,11 @@ AddSchema({
 		childrenOrder: {items: {type: "number"}},
 		//talkRoot: {type: "number"},
 		multiPremiseArgument: {type: "boolean"},
-		conArgumentType: {$ref: "ConArgumentType"},
 
 		layerPlusAnchorParents: {$ref: "LayerPlusAnchorParentSet"},
 	},
 	required: ["type", "creator", "createdAt", "currentRevision"],
-	allOf: [
-		// if an argument, require "childrenOrder" prop
-		/*{
-			if: {
-				properties: {
-					type: {const: MapNodeType.Argument},
-				}
-			},
-			then: {required: ["childrenOrder"]},
-			else: {prohibited: ["childrenOrder"]}
-		}*/
+	/*allOf: [
 		// if an argument, require "childrenOrder" prop
 		{
 			if: {
@@ -105,7 +80,7 @@ AddSchema({
 			then: {required: ["childrenOrder"]},
 			else: {prohibited: ["childrenOrder"]}
 		}
-	],
+	],*/
 }, "MapNode");
 AddAJVExtraCheck("MapNode", (node: MapNode)=> {
 	/*if (node.childrenOrder && node.childrenOrder.length != node.children.VKeys(true).length) {
@@ -145,10 +120,8 @@ export type ChildSet = { [key: number]: ChildEntry; };
 AddSchema({patternProperties: {"^[0-9]+$": {$ref: "ChildEntry"}}}, "ChildSet");
 export type ChildEntry = {
 	_: boolean;
-	// claim
 	form?: ClaimForm;
 	seriesAnchor?: boolean;
-	// argument
 	polarity?: Polarity;
 }
 AddSchema({
