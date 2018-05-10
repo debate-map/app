@@ -36,7 +36,7 @@ function createConfigFile(callback, environment) {
 	let pathRel = environment == "development" ? "Source/BakedConfig_Dev.ts" : "Source/BakedConfig_Prod.ts";
 	let outputPath = path.join(__dirname, "..", "..", pathRel);
 
-	let oldText = fs.readFileSync(outputPath, {encoding: "utf8"});
+	let oldText = fs.existsSync(path) ? fs.readFileSync(outputPath, {encoding: "utf8"}) : null;
 	if (newText != oldText) {
 		fs.writeFile(outputPath, newText, "utf8", (err) => {
 			if (err) {
