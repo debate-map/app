@@ -9,7 +9,7 @@ import {Term, TermType} from "../../../../Store/firebase/terms/@Term";
 import AddTerm from "../../../../Server/Commands/AddTerm";
 import {Map, MapType} from "../../../../Store/firebase/maps/@Map";
 import AddMap from "../../../../Server/Commands/AddMap";
-import MapDetailsUI from "./../MapDetailsUI";
+import {MapDetailsUI} from "./../MapDetailsUI";
 import {Layer} from "Store/firebase/layers/@Layer";
 import LayerDetailsUI from "../LayerDetailsUI";
 import AddLayer from "../../../../Server/Commands/AddLayer";

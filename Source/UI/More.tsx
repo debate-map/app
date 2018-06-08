@@ -1,4 +1,4 @@
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
 import {firebaseConnect} from "react-redux-firebase";
 import AdminUI from "./More/Admin";
 import SubNavBar from "./@Shared/SubNavBar";
@@ -17,13 +17,13 @@ import {Fragment} from "redux-little-router";
 import TasksUI from "./More/Tasks";
 import {Div} from "react-vcomponents";
 
-type Props = {} & Partial<{currentSubpage: string, userCount: number}>;
-@Connect(state=> ({
-	currentSubpage: State(a=>a.main.more.subpage),
+let connector = state=> ({
 	_: GetUserPermissionGroups(GetUserID()), // just to make sure we've retrieved this data (and re-render when it changes)
 	userCount: (GetUsers() || []).length,
-}))
-export default class MoreUI extends BaseComponent<Props, {}> {
+	currentSubpage: State(a=>a.main.more.subpage),
+});
+@Connect(connector)
+export class MoreUI extends BaseComponentWithConnector(connector, {}) {
 	render() {
 		let {userCount, currentSubpage, children} = this.props;
 		let page = "more";

@@ -30,7 +30,7 @@ export function AddUpgradeFunc(version: number, func: UpgradeFunc) {
 require("./Admin/DBUpgrades/UpgradeDB_10");
 
 //export default class AdminUI extends BaseComponent<{}, {fb: firebase.FirebaseApplication, env: string}> {
-export default class AdminUI extends BaseComponent<{}, {dbUpgrade_entryIndexes: number[], dbUpgrade_entryCounts: number[]}> {
+export class AdminUI extends BaseComponent<{}, {dbUpgrade_entryIndexes: number[], dbUpgrade_entryCounts: number[]}> {
 	static defaultState = {dbUpgrade_entryIndexes: [], dbUpgrade_entryCounts: []};
 	/*constructor(props) {
 		super(props);

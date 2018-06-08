@@ -1,4 +1,4 @@
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
 import {styles} from "../Frame/UI/GlobalStyles";
 import {Button} from "react-vcomponents";
 import {Row} from "react-vcomponents";
@@ -6,7 +6,7 @@ import {Column} from "react-vcomponents";
 import {Connect} from "../Frame/Database/FirebaseConnect";
 import {MapType, Map} from "../Store/firebase/maps/@Map";
 import { GetMaps } from "Store/firebase/maps";
-import MapEntryUI from "./@Shared/Maps/MapEntryUI";
+import {MapEntryUI} from "./@Shared/Maps/MapEntryUI";
 import {GetUserPermissionGroups, GetUserID} from "Store/firebase/users";
 import {PermissionGroupSet} from "../Store/firebase/userExtras/@UserExtraInfo";
 import {ShowSignInPopup} from "./@Shared/NavBar/UserPanel";
@@ -19,12 +19,14 @@ import {columnWidths} from "UI/Debates";
 import {Div} from "react-vcomponents";
 
 type Props = {} & Partial<{permissions: PermissionGroupSet, maps: Map[], selectedMap: Map}>;
-@Connect((state, props)=> ({
+
+let connector = (state, {}: {})=> ({
 	permissions: GetUserPermissionGroups(GetUserID()),
 	maps: GetMaps().filter(a=>a && a.type == MapType.Personal),
 	selectedMap: GetSelectedPersonalMap(),
-}))
-export class PersonalUI extends BaseComponent<Props, {}> {
+});
+@Connect(connector)
+export class PersonalUI extends BaseComponentWithConnector(connector, {}) {
 	render() {
 		let {permissions, maps, selectedMap} = this.props;
 		let userID = GetUserID();

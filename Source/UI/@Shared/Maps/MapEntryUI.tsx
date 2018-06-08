@@ -1,4 +1,4 @@
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
 import {Div, Pre} from "react-vcomponents";
 import {Map, MapType} from "../../../Store/firebase/maps/@Map";
 import {Column} from "react-vcomponents";
@@ -14,11 +14,11 @@ import { columnWidths } from "UI/Debates";
 import Moment from "moment";
 import {ACTPersonalMapSelect} from "../../../Store/main/personal";
 
-type Props = {index: number, last: boolean, map: Map} & Partial<{creator: User}>;
-@Connect((state, {map}: Props)=> ({
+let connector = (state, {map}: {index: number, last: boolean, map: Map})=> ({
 	creator: map && GetUser(map.creator),
-}))
-export default class MapEntryUI extends BaseComponent<Props, {}> {
+});
+@Connect(connector)
+export class MapEntryUI extends BaseComponentWithConnector(connector, {}) {
 	render() {
 		let {index, last, map, creator} = this.props;
 		let toURL = new VURL(null, [map.type == MapType.Personal ? "personal" : "debates", map._id+""]);

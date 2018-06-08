@@ -3,7 +3,7 @@ import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import AddMap from "../../../Server/Commands/AddMap";
 import {Map, MapType} from "../../../Store/firebase/maps/@Map";
 import {GetUserID} from "../../../Store/firebase/users";
-import MapDetailsUI from "./MapDetailsUI";
+import {MapDetailsUI} from "./MapDetailsUI";
 
 export function ShowAddMapDialog(userID: string, type: MapType) {
 	let newMap = new Map({

@@ -6,7 +6,7 @@ import {BaseComponent, GetInnerComp} from "react-vextensions";
 import {Row, DropDownTrigger, DropDownContent} from "react-vcomponents";
 import {Button} from "react-vcomponents";
 import {ACTDebateMapSelect} from "../../../../Store/main/debates";
-import MapDetailsUI from "../MapDetailsUI";
+import {MapDetailsUI} from "../MapDetailsUI";
 import {DropDown} from "react-vcomponents";
 import {Column} from "react-vcomponents";
 import UpdateMapDetails from "../../../../Server/Commands/UpdateMapDetails";

@@ -18,7 +18,7 @@ import {HandleError} from "../Frame/General/Errors";
 import {ForumData, ForumReducer} from "firebase-forum";
 import {FeedbackData, FeedbackReducer} from "firebase-feedback";
 import {OnAccessPath} from "../Frame/Database/FirebaseConnect";
-import {persistStore, persistReducer, getStoredState} from "redux-persist";
+import {persistReducer, getStoredState} from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web and AsyncStorage for react-native
 import {State_overrideData_path, State_overrideData_value, State_overrideCountAsAccess_value} from "../UI/@Shared/StateOverrides";
 import {SplitStringBySlash_Cached} from "../Frame/Database/StringSplitCache";
@@ -150,7 +150,7 @@ export class ApplyActionSet extends Action<Action<any>[]> {
 		this.actions = payload; // copy to this.actions as well (shorter lines in CreateStore.ts)
 	}
 	actions: Action<any>;
-};
+}
 
 let bufferedActions: Action<any>[];
 export function StartBufferingActions() {

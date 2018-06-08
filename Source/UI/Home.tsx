@@ -10,7 +10,7 @@ type Props = {} & Partial<{currentSubpage: string}>;
 @Connect(state=> ({
 	currentSubpage: State(a=>a.main.home.subpage),
 }))
-export default class HomeUI extends BaseComponent<Props, {}> {
+export class HomeUI extends BaseComponent<Props, {}> {
 	render() {
 		let {currentSubpage} = this.props;
 		let page = "home";

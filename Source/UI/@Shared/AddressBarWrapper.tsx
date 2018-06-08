@@ -19,7 +19,7 @@ type Props = {} & Partial<{newURL: string, lastURL: string, pushURL: boolean}>;
 	lastURL = newURL;
 	return result;
 })
-export default class AddressBarWrapper extends BaseComponent<Props, {}> {
+export class AddressBarWrapper extends BaseComponent<Props, {}> {
 	ComponentWillMountOrReceiveProps(props) {
 		let {newURL, lastURL, pushURL} = props;
 		

@@ -1,5 +1,5 @@
 import {Assert} from "js-vextensions";
-import {BaseComponent, RenderSource} from "react-vextensions";
+import {BaseComponent, RenderSource, BaseComponentWithConnector} from "react-vextensions";
 import {Pre, Row, Column, RowLR} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";
 import Moment from "moment";
@@ -19,12 +19,12 @@ import {Map, Map_namePattern} from "../../../Store/firebase/maps/@Map";
 import {Spinner} from "react-vcomponents";
  import {GetErrorMessagesUnderElement} from "js-vextensions";
 
-type Props = {baseData: Map, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Map, ui: MapDetailsUI)=>void}
-	& Partial<{creator: User}>;
-@Connect((state, {baseData, forNew}: Props)=>({
+type Props = {baseData: Map, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Map, ui: MapDetailsUI)=>void};
+let connector = (state, {baseData, forNew}: Props)=> ({
 	creator: !forNew && GetUser(baseData.creator),
-}))
-export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
+});
+@Connect(connector)
+export class MapDetailsUI extends BaseComponentWithConnector(connector, {newData: null as Map}) {
 	static defaultProps = {enabled: true};
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
@@ -88,7 +88,7 @@ export default class MapDetailsUI extends BaseComponent<Props, {newData: Map}> {
 		);
 	}
 	GetValidationError() {
-		return GetErrorMessagesUnderElement(GetDOM(this))[0];
+		return GetErrorMessagesUnderElement(this.DOM)[0];
 	}
 
 	GetNewData() {
