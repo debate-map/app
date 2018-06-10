@@ -7,7 +7,7 @@ import {BaseComponent} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {Connect} from "../../../Frame/Database/FirebaseConnect";
 import {GetEntries} from "../../../Frame/General/Enums";
-import InfoButton from "../../../Frame/ReactComponents/InfoButton";
+import {InfoButton} from "../../../Frame/ReactComponents/InfoButton";
 import AddTerm from "../../../Server/Commands/AddTerm";
 import TermComponent from "../../../Store/firebase/termComponents/@TermComponent";
 import {GetTermVariantNumber} from "../../../Store/firebase/terms";

@@ -14,7 +14,7 @@ import {Button} from "react-vcomponents";
 import TermComponent from "../../../Store/firebase/termComponents/@TermComponent";
 import {GetNiceNameForTermType} from "../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../Store/firebase/terms";
-import InfoButton from "../../../Frame/ReactComponents/InfoButton";
+import {InfoButton} from "../../../Frame/ReactComponents/InfoButton";
 import {Map, Map_namePattern} from "../../../Store/firebase/maps/@Map";
 import {Spinner} from "react-vcomponents";
  import {GetErrorMessagesUnderElement} from "js-vextensions";

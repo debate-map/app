@@ -16,7 +16,7 @@ import QuoteInfoEditorUI from "../QuoteInfoEditorUI";
 import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
 import {CleanUpdatedContentNode} from "../QuoteInfoEditorUI";
 import {CheckBox} from "react-vcomponents";
-import InfoButton from "../../../../../Frame/ReactComponents/InfoButton";
+import {InfoButton} from "../../../../../Frame/ReactComponents/InfoButton";
 import NodeDetailsUI from "../NodeDetailsUI";
 import {GetClaimType, AsNodeL2, AsNodeL3} from "../../../../../Store/firebase/nodes/$node";
 import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";

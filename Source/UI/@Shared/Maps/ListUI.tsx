@@ -32,7 +32,7 @@ import ResizeSensor from "react-resize-sensor";
 import {GetEntries} from "../../../Frame/General/Enums";
 import {Select} from "react-vcomponents";
 import {TextInput} from "react-vcomponents";
-import InfoButton from "../../../Frame/ReactComponents/InfoButton";
+import {InfoButton} from "../../../Frame/ReactComponents/InfoButton";
 import Icon from "../../../Frame/ReactComponents/Icon";
 import {Button} from "react-vcomponents";
 import {IsNumberString} from "js-vextensions";

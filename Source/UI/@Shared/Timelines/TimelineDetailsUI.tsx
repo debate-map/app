@@ -16,7 +16,7 @@ import {Button} from "react-vcomponents";
 import TermComponent from "../../../Store/firebase/termComponents/@TermComponent";
 import {GetNiceNameForTermType} from "../../../UI/Content/TermsUI";
 import {GetTermVariantNumber} from "../../../Store/firebase/terms";
-import InfoButton from "../../../Frame/ReactComponents/InfoButton";
+import {InfoButton} from "../../../Frame/ReactComponents/InfoButton";
 import {Spinner} from "react-vcomponents";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
 

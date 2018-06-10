@@ -13,7 +13,7 @@ import {Select} from "react-vcomponents";
 import {CheckBox} from "react-vcomponents";
 import {ScrollView} from "react-vscrollview";
 import {Button} from "react-vcomponents";
-import InfoButton from "../../../Frame/ReactComponents/InfoButton";
+import {InfoButton} from "../../../Frame/ReactComponents/InfoButton";
 import {Image, Image_namePattern, Image_urlPattern, ImageType, GetNiceNameForImageType} from "../../../Store/firebase/images/@Image";
 import SourceChainsEditorUI from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
 import {Div, Span, Pre, Row, RowLR} from "react-vcomponents";

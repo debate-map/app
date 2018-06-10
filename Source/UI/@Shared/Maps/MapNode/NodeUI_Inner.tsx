@@ -12,7 +12,7 @@ import {BaseComponent, BaseComponentWithConnector, GetInnerComp} from "react-vex
 import {DBPath, RemoveHelpers, SlicePath, WaitTillPathDataIsReceived, WaitTillPathDataIsReceiving} from "../../../../Frame/Database/DatabaseHelpers";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {ParseSegmentsForPatterns} from "../../../../Frame/General/RegexHelpers";
-import InfoButton from "../../../../Frame/ReactComponents/InfoButton";
+import {InfoButton} from "../../../../Frame/ReactComponents/InfoButton";
 import VReactMarkdown_Remarkable from "../../../../Frame/ReactComponents/VReactMarkdown_Remarkable";
 import AddNodeRevision from "../../../../Server/Commands/AddNodeRevision";
 import {GetImage} from "../../../../Store/firebase/images";

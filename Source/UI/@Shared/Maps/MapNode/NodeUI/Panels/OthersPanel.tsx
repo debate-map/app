@@ -8,7 +8,7 @@ import { BaseComponent, BaseComponentWithConnector } from "react-vextensions";
 import { ShowMessageBox } from "react-vmessagebox";
 import { Connect } from "../../../../../../Frame/Database/FirebaseConnect";
 import { GetEntries } from "../../../../../../Frame/General/Enums";
-import InfoButton from "../../../../../../Frame/ReactComponents/InfoButton";
+import {InfoButton} from "../../../../../../Frame/ReactComponents/InfoButton";
 import ChangeClaimType, { CanConvertFromClaimTypeXToY } from "../../../../../../Server/Commands/ChangeClaimType";
 import {ReverseArgumentPolarity} from "../../../../../../Server/Commands/ReverseArgumentPolarity";
 import UpdateLink from "../../../../../../Server/Commands/UpdateLink";

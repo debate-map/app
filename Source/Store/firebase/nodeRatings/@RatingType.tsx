@@ -3,7 +3,7 @@ import {Range} from "js-vextensions";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {GetNodeForm, GetMainRatingType, GetNodeL2, GetFinalPolarity, GetLinkUnderParent, IsMultiPremiseArgument} from "../nodes/$node";
 import {GetNode} from "../nodes";
-import InfoButton from "../../../Frame/ReactComponents/InfoButton";
+import {InfoButton} from "../../../Frame/ReactComponents/InfoButton";
 import {SplitStringBySlash_Cached} from "Frame/Database/StringSplitCache";
 import {SlicePath} from "../../../Frame/Database/DatabaseHelpers";
 import { PropNameToTitle } from "Frame/General/Others";
