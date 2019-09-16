@@ -16,7 +16,7 @@ import {GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info} from "../../..
 import {IsUserMod} from "../../../../../Store/firebase/userExtras";
 import {ACTSetLastAcknowledgementTime} from "../../../../../Store/main";
 import {ACTMapNodeExpandedSet} from "../../../../../Store/main/mapViews/$mapView/rootNodeViews";
-import NodeDetailsUI from "../NodeDetailsUI";
+import {NodeDetailsUI} from "../NodeDetailsUI";
 import {ACTSet} from "Store";
 
 export function ShowAddChildDialog(parentNode: MapNodeL3, parentPath: string, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: number) {

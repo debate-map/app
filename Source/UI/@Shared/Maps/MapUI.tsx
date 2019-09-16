@@ -148,7 +148,7 @@ export class MapUI extends BaseComponentWithConnector(connector, {}) {
 							}}
 							onMouseDown={e=>{
 								this.downPos = new Vector2i(e.clientX, e.clientY);
-								if (e.button == 1)
+								if (e.button == 2)
 									$(this.mapUI).addClass("scrolling");
 							}}
 							onMouseUp={e=> {

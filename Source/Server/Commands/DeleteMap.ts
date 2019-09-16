@@ -1,6 +1,6 @@
 import { GetAsync_Raw } from "Frame/Database/DatabaseHelpers";
 import { UserEdit } from "Server/CommandMacros";
-import DeleteNode from "Server/Commands/DeleteNode";
+import {DeleteNode} from "Server/Commands/DeleteNode";
 import { GetMap } from "Store/firebase/maps";
 import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
 import { Map } from "../../Store/firebase/maps/@Map";

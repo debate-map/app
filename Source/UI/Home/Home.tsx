@@ -1,27 +1,21 @@
+import {E} from "js-vextensions";
+import {BaseComponent, GetInnerComp} from "react-vextensions";
+import {demoMap, demoRootNodeID} from "UI/Home/DemoMap";
 import {Connect} from "../../Frame/Database/FirebaseConnect";
-import {SubNavBarButton} from "../@Shared/SubNavBar";
-import SubNavBar from "../@Shared/SubNavBar";
-import {BaseComponent, SimpleShouldUpdate, GetInnerComp, ShallowEquals} from "react-vextensions";
 import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
 import {styles} from "../../Frame/UI/GlobalStyles";
-import {ScrollView} from "react-vscrollview";
-import {E} from "js-vextensions";
-import GlobalMapUI from "../Global/GlobalMapUI";
-import {MapUI} from "../@Shared/Maps/MapUI";
-import {MapType, Map} from "../../Store/firebase/maps/@Map";
-import {MapNode, MapNodeL2, MapNodeL3} from "../../Store/firebase/nodes/@MapNode";
-import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {MapView} from "../../Store/main/mapViews/@MapViews";
-import {GetNode} from "../../Store/firebase/nodes";
-import {Vector2i} from "js-vextensions";
-import ReactMarkdown from "react-markdown";
 import {GetNodeL3} from "../../Store/firebase/nodes/$node";
-import { replace, push } from "redux-little-router";
-import { demoMap, demoRootNodeID } from "UI/Home/DemoMap";
+import {MapNodeL3} from "../../Store/firebase/nodes/@MapNode";
+import {MapUI} from "../@Shared/Maps/MapUI";
 
 let red = `rgba(255,0,0,.7)`;
+let orange = `rgba(255,128,0,.7)`;
 let green = `rgba(0,255,0,.6)`;
 let pageText = `
+> Important note: This project is now superseded by: [canonicaldebate.com](https://canonicaldebate.com) ([GitHub repo](https://github.com/canonical-debate-lab/client))
+>
+> This domain is kept online for now, since it still has content that needs to be transferred over, and there are various posts which need updating to match the new domain.
+
 The Debate Map project is a web platform aimed at improving the efficiency of discussion and debate.
 It's crowd-sourced and open-source, and welcomes reader contributions.
 

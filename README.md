@@ -1,3 +1,7 @@
+> Important note: This project is now superseded by the [Canonical Debate](https://github.com/canonical-debate-lab/client)  project. ([canonicaldebate.com](https://canonicaldebate.com))
+>
+> The Debate Map repository/domain is kept online for now, since it still has content that needs to be transferred over, and there are various posts which need updating to match the new domain.
+
 # Debate Map
 
 [![Join the chat at https://gitter.im/DebateMap/Lobby](https://badges.gitter.im/DebateMap/Lobby.svg)](https://gitter.im/DebateMap/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)

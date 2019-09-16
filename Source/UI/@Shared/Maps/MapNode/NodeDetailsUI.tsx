@@ -24,11 +24,13 @@ type Props = {
 	style?, onChange?: (newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: ChildEntry, component: NodeDetailsUI)=>void,
 	//onSetError: (error: string)=>void,
 } & Partial<{creator: User}>;
+type Props_Enhanced = Props & State & {newDataAsL2, Change};
 type State = {newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: ChildEntry};
+
 @Connect((state, {baseData, baseRevisionData, forNew}: Props)=>({
 	creator: !forNew && GetUser(baseData.creator),
 }))
-export default class NodeDetailsUI extends BaseComponent<Props, State> {
+export class NodeDetailsUI extends BaseComponent<Props, State> {
 	static defaultProps = {enabled: true};
 
 	ComponentWillMountOrReceiveProps(props, forMount) {
@@ -56,7 +58,7 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 		let propsEnhanced = {...this.props, Change, newDataAsL2, ...this.state, SetState: this.SetState};
 		let claimType = GetClaimType(newDataAsL2);
 
-		let splitAt = 170, width = 600;
+		let splitAt = 170;
 		return (
 			<Column style={E({padding: 5}, style)}>
 				{/*<Div style={{fontSize: 12}}>ID: {node._id}</Div>
@@ -114,8 +116,6 @@ export default class NodeDetailsUI extends BaseComponent<Props, State> {
 		return Clone(newLinkData) as ChildEntry;
 	}
 }
-
-type Props_Enhanced = Props & State & {newDataAsL2, Change};
 
 class Title_Base extends BaseComponent<Props_Enhanced, {}> {
 	render() {

@@ -22,7 +22,7 @@ AddSchema({
 
 @MapEdit
 @UserEdit
-export default class DeleteNode extends Command<{mapID?: number, nodeID: number, withContainerArgument?: number}> {
+export class DeleteNode extends Command<{mapID?: number, nodeID: number, withContainerArgument?: number}> {
 	Validate_Early() {
 		AssertValidate("DeleteNode_payload", this.payload, `Payload invalid`);
 	}

@@ -1,4 +1,4 @@
-import DeleteNode from "Server/Commands/DeleteNode";
+import {DeleteNode} from "Server/Commands/DeleteNode";
 import {ApplyDBUpdates_Local} from "../../../../Frame/Database/DatabaseHelpers";
 import {FirebaseData} from "../../../../Store/firebase";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";

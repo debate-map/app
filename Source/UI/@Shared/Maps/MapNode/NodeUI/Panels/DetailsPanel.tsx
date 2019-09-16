@@ -13,7 +13,7 @@ import { MapNodeL3 } from "../../../../../../Store/firebase/nodes/@MapNode";
 import { IsUserCreatorOrMod } from "../../../../../../Store/firebase/userExtras";
 import { GetUser, GetUserID, GetUserPermissionGroups } from "../../../../../../Store/firebase/users";
 import { User } from "../../../../../../Store/firebase/users/@User";
-import NodeDetailsUI from "../../NodeDetailsUI";
+import {NodeDetailsUI} from "../../NodeDetailsUI";
 
 type DetailsPanel_Props = {map?: Map, node: MapNodeL3, path: string} & Partial<{creator: User}>;
 @Connect((state, {node, path}: DetailsPanel_Props)=>({

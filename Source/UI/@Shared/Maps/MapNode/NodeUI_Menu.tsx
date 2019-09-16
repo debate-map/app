@@ -16,7 +16,7 @@ import {GetAsync, SlicePath} from "../../../../Frame/Database/DatabaseHelpers";
 import {Connect} from "../../../../Frame/Database/FirebaseConnect";
 import {styles} from "../../../../Frame/UI/GlobalStyles";
 import AddChildNode from "../../../../Server/Commands/AddChildNode";
-import DeleteNode from "../../../../Server/Commands/DeleteNode";
+import {DeleteNode} from "../../../../Server/Commands/DeleteNode";
 import {RootState} from "../../../../Store";
 import {GetPathsToNodesChangedSinceX} from "../../../../Store/firebase/mapNodeEditTimes";
 import {Map} from "../../../../Store/firebase/maps/@Map";
@@ -162,7 +162,7 @@ export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 						style={styles.vMenuItem}
 						onClick={e=> {
 							e.persist();
-							if (e.button == 1) {
+							if (e.button == 2) {
 								return void store.dispatch(new ACTNodeCopy({path: null, asCut: true}));
 							}
 
@@ -178,7 +178,7 @@ export class NodeUI_Menu extends BaseComponentWithConnector(connector, {}) {
 						enabled={ForCopy_GetError(userID, node) == null} title={ForCopy_GetError(userID, node)}
 						onClick={e=> {
 							e.persist();
-							if (e.button == 1) {
+							if (e.button == 2) {
 								return void store.dispatch(new ACTNodeCopy({path: null, asCut: false}));
 							}
 

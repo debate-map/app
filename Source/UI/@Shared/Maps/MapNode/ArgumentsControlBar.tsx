@@ -1,6 +1,6 @@
 import {Connect} from "Frame/Database/FirebaseConnect";
 import {BaseComponent} from "react-vextensions";
-import {Pre, Row, TextArea_AutoSize, Button, Select, Column} from "react-vcomponents";
+import {Pre, Row, Button, Select, Column} from "react-vcomponents";
 import {MapNode, MapNodeL3, ClaimForm, ChildEntry, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {SetNodeUILocked} from "UI/@Shared/Maps/MapNode/NodeUI";
 import {WaitTillPathDataIsReceiving, WaitTillPathDataIsReceived} from "../../../../Frame/Database/DatabaseHelpers";

@@ -13,7 +13,7 @@ import {ChildEntry, MapNodeL3} from "../../../../../../Store/firebase/nodes/@Map
 import {MapNodeRevision} from "../../../../../../Store/firebase/nodes/@MapNodeRevision";
 import {IsUserCreatorOrMod} from "../../../../../../Store/firebase/userExtras";
 import {GetUser, GetUserID} from "../../../../../../Store/firebase/users";
-import NodeDetailsUI from "../../NodeDetailsUI";
+import {NodeDetailsUI} from "../../NodeDetailsUI";
 
 export const columnWidths = [.15, .3, .35, .2];
 

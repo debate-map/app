@@ -20,3 +20,4 @@ coverage
 /Tools/Webpack Profiling/ModuleInfo.json
 /Info/Images/@NotTracked
 /Scripts/Config/dll
+/.firebase

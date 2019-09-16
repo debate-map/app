@@ -5,7 +5,7 @@ import { MapNodeRevision } from "Store/firebase/nodes/@MapNodeRevision";
 import { GetLayer } from "../../Store/firebase/layers";
 import { MapNode } from "../../Store/firebase/nodes/@MapNode";
 import { Command, MergeDBUpdates } from "../Command";
-import AddNode from "./AddNode";
+import {AddNode} from "./AddNode";
 
 @UserEdit
 export default class AddSubnode extends Command<{mapID: number, layerID: number, anchorNodeID: number, subnode: MapNode, subnodeRevision: MapNodeRevision}> {

@@ -1,11 +1,29 @@
 {
-	// See https://go.microsoft.com/fwlink/?LinkId=733558
-	// for the documentation about the tasks.json format
-	"version": "0.1.0",
-	"command": "npm",
-	"isShellCommand": true,
-	"args": ["run", "dev"],
-	//"showOutput": "silent",
-	"isBackground": true
-	//"problemMatcher": "$tsc-watch"
+	// See https://go.microsoft.com/fwlink/?LinkId=733558 for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "#1 tsc",
+			"type": "shell",
+			"command": "./node_modules/.bin/tsc",
+			"args": ["--watch", "--project", "."],
+			"problemMatcher": "$tsc-watch",
+			"isBackground": true,
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "#2 webpack",
+			"type": "npm",
+			"script": "dev",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+		},
+	]
 }

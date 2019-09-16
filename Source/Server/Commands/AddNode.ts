@@ -6,7 +6,7 @@ import { Command, MergeDBUpdates } from "../Command";
 import { GetSchemaJSON } from "../Server";
 import AddNodeRevision from "./AddNodeRevision";
 
-export default class AddNode extends Command<{mapID: number, node: MapNode, revision: MapNodeRevision}> {
+export class AddNode extends Command<{mapID: number, node: MapNode, revision: MapNodeRevision}> {
 	lastNodeID_addAmount = 0;
 	lastNodeRevisionID_addAmount = 0;
 	
