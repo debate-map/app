@@ -1,7 +1,7 @@
 {
 	"projects": {
-		"default": "debate-map-dev",
-		"dev": "debate-map-dev",
-		"prod": "debate-map-prod"
+		"default": "n/a",
+		"dev": "n/a",
+		"prod": "debate-map-prod-old"
 	}
 }
