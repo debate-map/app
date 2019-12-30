@@ -44,7 +44,9 @@
 	"include": [
 		"../Typings/**/*.d.ts",
 		"../Scripts/**/*.ts",
-		"../Scripts/**/*.tsx", "Config.ts", "Build/WebpackConfig.ts"
+		"../Scripts/**/*.tsx",
+		"Config.ts",
+		"Build/WebpackConfig.ts"
 	],
 	"compileOnSave": true
 }
