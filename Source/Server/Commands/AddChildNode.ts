@@ -22,7 +22,7 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 	Validate() {
 		AssertValidate({
 			properties: {
-				mapID: {type: "string"}, parentID: {type: "string"}, node: {$ref: "MapNode_Partial"}, revision: {$ref: "MapNodeRevision_Partial"}, link: {$ref: "ChildEntry"}, asMapRoot: {type: "boolean"},
+				mapID: {type: "string"}, parentID: {type: ["null", "string"]}, node: {$ref: "MapNode_Partial"}, revision: {$ref: "MapNodeRevision_Partial"}, link: {$ref: "ChildEntry"}, asMapRoot: {type: "boolean"},
 			},
 			required: ["mapID", "parentID", "node", "revision"],
 		}, this.payload, "Payload invalid");

@@ -21,7 +21,7 @@ Since then, I've been continuing to develop my implementation, while conversing 
 
 On a personal level, I've become very passionate about the project, and I plan to spend thousands of hours on it over the years, as I believe it could have a substantial impact on the way we do discourse.
 
-There are *many* features and outreach ideas that I have planned; a small number of these can be seen on the [/feedback](feedback page).
+There are *many* features and outreach ideas that I have planned; a small number of these can be seen on the [feedback page](/feedback).
 
 Anyway, I hope all of you reading this are interested in it as well! It will need a healthy community to expand and become relevant/useful to the general public;
 I'm confident that it will someday become an invaluable tool for bringing clarity and efficiency to online discussions, so I'll do my best to faithfully work on it until then. 

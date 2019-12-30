@@ -15,9 +15,8 @@ Its primary improvements are (in short):
 * Breaking down lines of reasoning into single-sentence "nodes".
 * Providing rich tools that operate on those nodes -- such as rating, tagging, statistical analysis, and belief-tree sharing and comparison.
 
-Here is a quick example:
-
-$mapPlaceholder
+Here are some demo maps:
+* [What shape is the earth?](/private/what-shape-is-the-earth-demo.1xSIqiEQR7u4Xn88Q9_t_g)
 
 The maps are constructed from "claims" (blue), and "arguments" (green and red) which support/oppose those claims.
 This structure cuts down on reading time, and lets us focus on the underlying chains of reasoning instead of parsing statement meanings and connections.
@@ -134,7 +133,7 @@ export class HomeUI2 extends BaseComponent<{}, {}> {
 		return (
 			<PageContainer scrollable={true}>
 				<article>
-					<VReactMarkdown source={pageText} className='selectable'/>
+					<VReactMarkdown source={pageText} className='selectable' escapeHtml={false}/>
 				</article>
 			</PageContainer>
 		);
