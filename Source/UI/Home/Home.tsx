@@ -1,21 +1,12 @@
 import {E} from "js-vextensions";
-import {BaseComponent, GetInnerComp} from "react-vextensions";
-import {demoMap, demoRootNodeID} from "UI/Home/DemoMap";
-import {Connect} from "../../Frame/Database/FirebaseConnect";
-import VReactMarkdown from "../../Frame/ReactComponents/VReactMarkdown";
-import {styles} from "../../Frame/UI/GlobalStyles";
-import {GetNodeL3} from "../../Store/firebase/nodes/$node";
-import {MapNodeL3} from "../../Store/firebase/nodes/@MapNode";
-import {MapUI} from "../@Shared/Maps/MapUI";
+import {BaseComponent} from "react-vextensions";
+import {VReactMarkdown, PageContainer} from "vwebapp-framework";
+import {styles} from "../../Utils/UI/GlobalStyles";
 
-let red = `rgba(255,0,0,.7)`;
-let orange = `rgba(255,128,0,.7)`;
-let green = `rgba(0,255,0,.6)`;
-let pageText = `
-> Important note: This project is now superseded by: [canonicaldebate.com](https://canonicaldebate.com) ([GitHub repo](https://github.com/canonical-debate-lab/client))
->
-> This domain is kept online for now, since it still has content that needs to be transferred over, and there are various posts which need updating to match the new domain.
-
+const red = "rgba(255,0,0,.7)";
+const orange = "rgba(255,128,0,.7)";
+const green = "rgba(0,255,0,.6)";
+const pageText = `
 The Debate Map project is a web platform aimed at improving the efficiency of discussion and debate.
 It's crowd-sourced and open-source, and welcomes reader contributions.
 
@@ -135,137 +126,17 @@ One can then proceed to look more closely at those areas, examining the pool of 
 	and referencing statistics on how the rest of the population considers each piece along the way.
 
 More info on open-source projects: <https://opensource.com/resources/what-open-source>  
-This project's GitHub repo (source code): <https://github.com/Venryx/DebateMap>
+This project's GitHub repo (source code): <https://github.com/debate-map/client>
 `;
 
-/*if (DEV) {
-	demoMap = {_id: -100, name: "Demo", type: MapType.Personal, rootNode: -101} as Map;
-	let lastNodeID = -100;
-	let NextID = ()=>--lastNodeID;
-	var demoRootNode_override = new MapNode({_id: -101, type: MapNodeType.MultiChoiceQuestion, creator: "[demo]",
-		titles: {base: "Is the earth spherical?"},
-		children: [
-			new MapNode({_id: NextID(), type: MapNodeType.Argument, creator: "[demo]",
-				titles: {base: "Shadow during lunar eclipses"},
-				children: [
-					new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
-						titles: {base: "The earth always casts a spherical shadow on the moon during lunar eclipses"}
-					}),
-					new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
-						titles: {base: "If the earth were flat, it would sometimes cast an oblong shadow on the moon during lunar eclipses"},
-						children: [
-							new MapNode({_id: NextID(), type: MapNodeType.Argument, creator: "[demo]",
-								titles: {base: "When near horizon"},
-								children: [
-									new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
-										titles: {base: `Lunar eclipses sometimes happen when the moon is near the horizon`}
-									}),
-									new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
-										titles: {base: "If the earth were flat, and the moon near the horizon (during a lunar eclipse), the earth would cast an oblong shadow"},
-									}),
-								]
-							}),
-						]
-					}),
-				]
-			}),
-			new MapNode({_id: NextID(), type: MapNodeType.Argument, creator: "[demo]",
-				titles: {base: "Ships and the horizon"},
-				children: [
-					new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
-						titles: {base: `As a ship first comes into view, only its top is visible (with the rest appearing as it comes closer)`}
-					}),
-					new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
-						titles: {base: "If the earth were flat, as a ship first came into view, it would be visible in its entirety (with it simply fading in)"}
-					}),
-				]
-			}),
-			new MapNode({_id: NextID(), type: MapNodeType.Argument, creator: "[demo]",
-				titles: {base: "Constellations"},
-				children: [
-					new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
-						titles: {base: `The constellations that are visible change depending on what part of the earth you observe from`}
-					}),
-					new MapNode({_id: NextID(), type: MapNodeType.Claim, creator: "[demo]",
-						titles: {base: "If the earth were flat, the constellations that are visible would remain the same anywhere on earth"}
-					}),
-				]
-			}),
-		]
-	});
-}*/
-
-let info = {text: pageText};
-
-type Props = {} & Partial<{demoRootNode: MapNodeL3}>;
-@Connect(state=> ({
-	demoRootNode: GetNodeL3(demoRootNodeID+""),
-}))
-export default class HomeUI2 extends BaseComponent<Props, {}> {
-	/*static contextTypes = {
-		router: PropTypes.shape({
-			history: PropTypes.shape({
-				push: PropTypes.func.isRequired,
-				replace: PropTypes.func.isRequired,
-				createHref: PropTypes.func.isRequired
-			}).isRequired
-		}).isRequired
-	};*/
-	//static contextTypes = {router: ()=>{}};
+export class HomeUI2 extends BaseComponent<{}, {}> {
 	render() {
-		let {demoRootNode} = this.props;
-		/*if (demoRootNode_override) // for dev
-			demoRootNode = demoRootNode_override;*/
-		//let {router} = this.context;
-		
 		return (
-			<article>
-				<VReactMarkdown source={pageText.split("$mapPlaceholder")[0]} className="selectable" style={E(styles.page, {marginBottom: 0})}/>
-				<GlobalMapPlaceholder demoRootNode={demoRootNode} style={{}}/>
-				<VReactMarkdown source={pageText.split("$mapPlaceholder")[1]} className="selectable" style={E(styles.page, {marginTop: 0})}/>
-			</article>
-		);
-	}
-}
-
-class GlobalMapPlaceholder extends BaseComponent<{demoRootNode: MapNodeL3, style}, {}> {
-	root: HTMLDivElement;
-	mapUI: MapUI;
-	render() {
-		let {demoRootNode, style} = this.props;
-		if (isBot) return <div/>;
-
-		return (
-			<div ref={c=>this.root = c} style={{
-				//margin: `0 -50px`,
-				/*height: 500,*/ userSelect: "none", position: "relative",
-				/*borderTop: "5px solid rgba(255,255,255,.3)",
-				borderBottom: "5px solid rgba(255,255,255,.3)",*/
-			}}>
-				<style>{`
-				/* since it has less padding to avoid drag-from-unselect-area-to-select-area situation, just disable selection completely */
-				.DemoMap * { user-select: none; }
-
-				.DemoMap.draggable > .content { cursor: default !important; /*pointer-events: none;*/ }
-				:not(.below) > .in { display: none; }
-				.below > .below { display: none; }
-				.below .content { pointer-events: none; }
-				.DemoMap.draggable .MapUI { pointer-events: initial; cursor: grab; cursor: -webkit-grab; cursor: -moz-grab; }
-				.DemoMap.draggable.scrollActive .MapUI { cursor: grabbing !important; cursor: -webkit-grabbing !important; cursor: -moz-grabbing !important; }
-
-				.DemoMap > .scrollTrack { display: none; }
-				`}</style>
-				
-				<MapUI ref={c=>this.mapUI = c ? GetInnerComp(c) as any : null} className="DemoMap"
-					map={demoMap} rootNode={demoRootNode} withinPage={true}
-					//padding={{left: 200, right: 500, top: 100, bottom: 100}}
-					padding={{left: (screen.availWidth / 2) - 300, right: screen.availWidth, top: 100, bottom: 100}}
-				/>
-				<div className="in" style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0}}
-					onMouseEnter={()=>$(this.root).removeClass("below")} onTouchStart={()=>$(this.root).removeClass("below")}/>
-				<div className="below" style={{position: "absolute", left: 0, right: 0, top: "100%", height: 300}}
-					onMouseEnter={()=>$(this.root).addClass("below")} onTouchStart={()=>$(this.root).addClass("below")}/>
-			</div>
+			<PageContainer scrollable={true}>
+				<article>
+					<VReactMarkdown source={pageText} className='selectable'/>
+				</article>
+			</PageContainer>
 		);
 	}
 }

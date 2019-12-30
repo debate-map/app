@@ -1,7 +1,7 @@
 import {Div, Column} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 
-export default class TagsPanel extends BaseComponent<{}, {}> {
+export class TagsPanel extends BaseComponent<{}, {}> {
 	render() {
 		return (
 			<Column style={{position: "relative"}}>

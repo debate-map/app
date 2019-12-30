@@ -1,30 +1,39 @@
-import { UserEdit } from "Server/CommandMacros";
-import { Assert } from "js-vextensions";
-import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
-import TermComponent from "../../Store/firebase/termComponents/@TermComponent";
-import { Command } from "../Command";
+import {UserEdit} from "Server/CommandMacros";
+import {Assert} from "js-vextensions";
+import {AssertValidate, AddSchema, Schema, GetSchemaJSON} from "vwebapp-framework";
+import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
+import {GetTermComponent} from "Store/firebase/termComponents";
+import {TermComponent} from "../../Store/firebase/termComponents/@TermComponent";
+
+type MainType = TermComponent;
+const MTName = "TermComponent";
+
+AddSchema(`Update${MTName}_payload`, [MTName], ()=>({
+	properties: {
+		id: {type: "string"},
+		updates: Schema({
+			properties: GetSchemaJSON(MTName)["properties"].Including("text"),
+		}),
+	},
+	required: ["id", "updates"],
+}));
 
 @UserEdit
-export default class UpdateTermComponentData extends Command<{termComponentID: number, updates: Partial<TermComponent>}> {
-	Validate_Early() {
-		let {termComponentID, updates} = this.payload;
-		let allowedPropUpdates = ["text"];
-		Assert(updates.VKeys().Except(...allowedPropUpdates).length == 0, `Cannot use this command to update props other than: ${allowedPropUpdates.join(", ")}`);
+export class UpdateTermComponentData extends Command<{termComponentID: string, updates: Partial<TermComponent>}, {}> {
+	newData: TermComponent;
+	Validate() {
+		AssertValidate(`Update${MTName}_payload`, this.payload, "Payload invalid");
+
+		const {termComponentID, updates} = this.payload;
+		const oldData = GetTermComponent(termComponentID);
+		AssertV(oldData, "oldData is null.");
+		this.newData = {...oldData, ...updates};
+		AssertValidate("TermComponent", this.newData, "New-data invalid");
 	}
 
-	newData: TermComponent;
-	async Prepare() {
-		let {termComponentID, updates} = this.payload;
-		let oldData = await GetDataAsync({addHelpers: false}, "termComponents", termComponentID) as TermComponent;
-		this.newData = {...oldData, ...updates};
-	}
-	async Validate() {
-		AssertValidate("TermComponent", this.newData, `New-data invalid`);
-	}
-	
 	GetDBUpdates() {
-		let {termComponentID} = this.payload;
-		let updates = {
+		const {termComponentID} = this.payload;
+		const updates = {
 			[`termComponents/${termComponentID}`]: this.newData,
 		};
 		return updates;

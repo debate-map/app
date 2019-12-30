@@ -1,45 +1,43 @@
-import { GetAsync_Raw } from "Frame/Database/DatabaseHelpers";
-import { UserEdit } from "Server/CommandMacros";
+import {UserEdit} from "Server/CommandMacros";
 import {DeleteNode} from "Server/Commands/DeleteNode";
-import { GetMap } from "Store/firebase/maps";
-import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
-import { Map } from "../../Store/firebase/maps/@Map";
-import { UserMapInfoSet } from "../../Store/firebase/userMapInfo/@UserMapInfo";
-import { Command, MergeDBUpdates } from "../Command";
+import {GetMap} from "Store/firebase/maps";
+import {Command_Old, MergeDBUpdates, GetAsync, GetDocs, AssertV, Command} from "mobx-firelink";
+import {MapNode} from "Store/firebase/nodes/@MapNode";
+import {Map} from "../../Store/firebase/maps/@Map";
+import {UserMapInfoSet} from "../../Store/firebase/userMapInfo/@UserMapInfo";
 
 @UserEdit
-export default class DeleteMap extends Command<{mapID: number}> {
+export class DeleteMap extends Command<{mapID: string}, {}> {
 	oldData: Map;
-	userMapInfoSets: {[key: string]: UserMapInfoSet};
+	userMapInfoSets: UserMapInfoSet[];
 	sub_deleteNode: DeleteNode;
-	async Prepare() {
-		let {mapID} = this.payload;
-		this.oldData = await GetAsync_Raw(()=>GetMap(mapID));
-		this.userMapInfoSets = (await GetDataAsync("userMapInfo") as {[key: string]: UserMapInfoSet}) || {};
+	Validate() {
+		const {mapID} = this.payload;
+		this.oldData = GetMap(mapID);
+		AssertV(this.oldData, "oldData is null.");
+		this.userMapInfoSets = GetDocs({}, a=>a.userMapInfo) || [];
 
-		this.sub_deleteNode = new DeleteNode({mapID, nodeID: this.oldData.rootNode});
+		this.sub_deleteNode = this.sub_deleteNode ?? new DeleteNode({mapID, nodeID: this.oldData.rootNode}).MarkAsSubcommand(this);
 		this.sub_deleteNode.asPartOfMapDelete = true;
-		this.sub_deleteNode.Validate_Early();
-		await this.sub_deleteNode.Prepare();
-	}
-	async Validate() {
-		await this.sub_deleteNode.Validate();
+		this.sub_deleteNode.Validate();
+		// todo: use parents recursion on l2 nodes to make sure they're all connected to at least one other map root
 	}
 
 	GetDBUpdates() {
-		let {mapID} = this.payload;
+		const {mapID} = this.payload;
 		let updates = this.sub_deleteNode.GetDBUpdates();
 
-		let newUpdates = {};
+		const newUpdates = {};
 		newUpdates[`maps/${mapID}`] = null;
-		for (let {name: userID, value: userMapInfoSet} of this.userMapInfoSets.Props(true)) {
-			for (let {name: mapID2, value: userMapInfo} of userMapInfoSet.Props(true)) {
-				if (parseInt(mapID2) == mapID) {
-					newUpdates[`userMapInfo/${userID}/${mapID}`] = null;
+		for (const userMapInfoSet of this.userMapInfoSets) {
+			const userID = userMapInfoSet._key;
+			for (const {key: mapID2, value: userMapInfo} of userMapInfoSet.maps.Pairs(true)) {
+				if (mapID2 == mapID) {
+					newUpdates[`userMapInfo/${userID}/.${mapID}`] = null;
 				}
 			}
 		}
-		// delete mapNodeEditTimes
+		// delete entry in mapNodeEditTimes
 		newUpdates[`mapNodeEditTimes/${mapID}`] = null;
 		updates = MergeDBUpdates(updates, newUpdates);
 

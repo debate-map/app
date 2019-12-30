@@ -1,34 +1,49 @@
-import {GetValues_ForSchema} from "../../../Frame/General/Enums";
+import {AddSchema} from "vwebapp-framework";
 
 export class TimelineStep {
 	constructor(initialData: Partial<TimelineStep>) {
-		this.Extend(initialData);
+		this.VSet(initialData);
 	}
 
-	_id: number;
-	timelineID: number;
+	_key: string;
+	timelineID: string;
 	title: string;
+	groupID: number;
+	// if timeline has video
+	videoTime: number;
+
 	message: string;
+
 	nodeReveals: NodeReveal[];
 }
-AddSchema({
+AddSchema("TimelineStep", {
 	properties: {
-		timelineID: {type: "number"},
+		timelineID: {type: "string"},
 		title: {type: "string"},
+		groupID: {type: ["number", "null"]},
+		videoTime: {type: ["number", "null"]},
+
 		message: {type: "string"},
+
 		nodeReveals: {$ref: "NodeReveal"},
 	},
 	required: ["timelineID"],
-}, "TimelineStep");
+});
 
 export class NodeReveal {
 	path: string;
-	revealDepth: number;
+
+	show: boolean;
+	show_revealDepth: number;
+	hide: boolean;
 }
-AddSchema({
+AddSchema("NodeReveal", {
 	properties: {
 		path: {type: "string"},
-		revealDepth: {type: "number"},
+
+		show: {type: "boolean"},
+		show_revealDepth: {type: "number"},
+		hide: {type: "boolean"},
 	},
-	required: ["path", "revealDepth"],
-}, "NodeReveal");
+	required: ["path"],
+});

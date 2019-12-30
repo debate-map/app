@@ -1,32 +1,13 @@
-import {Assert, GetErrorMessagesUnderElement} from "js-vextensions";
-import {BaseComponent} from "react-vextensions";
-import {Pre, RowLR} from "react-vcomponents";
-import {Column} from "react-vcomponents";
-import {Row} from "react-vcomponents";
-import {TextInput} from "react-vcomponents";
-import Moment from "moment";
-import {GetUser} from "../../../Store/firebase/users";
-import {User} from "Store/firebase/users/@User";
-import {Connect} from "../../../Frame/Database/FirebaseConnect";
-import {GetEntries} from "../../../Frame/General/Enums";
-import {Select} from "react-vcomponents";
-import {CheckBox} from "react-vcomponents";
-import {ScrollView} from "react-vscrollview";
-import {Button} from "react-vcomponents";
-import TermComponent from "../../../Store/firebase/termComponents/@TermComponent";
-import {GetNiceNameForTermType} from "../../../UI/Content/TermsUI";
-import {GetTermVariantNumber} from "../../../Store/firebase/terms";
-import {InfoButton} from "../../../Frame/ReactComponents/InfoButton";
-import {Spinner} from "react-vcomponents";
+import {Clone, GetErrorMessagesUnderElement} from "js-vextensions";
+import {Button, Column, Pre, Row, RowLR, TextInput} from "react-vcomponents";
+import {BaseComponentPlus, GetDOM} from "react-vextensions";
+import {UpdateTimeline} from "Server/Commands/UpdateTimeline";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
+import {GetUpdates} from "vwebapp-framework";
+import {GetUser} from "../../../Store/firebase/users";
+import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
 
-type Props = {baseData: Timeline, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Timeline, ui: TimelineDetailsUI)=>void}
-	& Partial<{creator: User}>;
-@Connect((state, {baseData, forNew}: Props)=>({
-	creator: !forNew && GetUser(baseData.creator),
-}))
-export default class TimelineDetailsUI extends BaseComponent<Props, {newData: Timeline}> {
-	static defaultProps = {enabled: true};
+export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {baseData: Timeline, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Timeline, ui: TimelineDetailsUI)=>void}, {} as { newData: Timeline }) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
@@ -34,29 +15,21 @@ export default class TimelineDetailsUI extends BaseComponent<Props, {newData: Ti
 	}
 
 	render() {
-		let {forNew, enabled, style, onChange, creator} = this.props;
-		let {newData} = this.state;
-		let Change = _=> {
+		const {baseData, forNew, enabled, style, onChange} = this.props;
+		const {newData} = this.state;
+		const creator = !forNew && GetUser(baseData.creator);
+
+		const Change = _=>{
 			if (onChange) onChange(this.GetNewData(), this);
 			this.Update();
 		};
 
-		let splitAt = 170, width = 600;
+		const splitAt = 170;
+		const width = 600;
 		return (
 			<Column style={style}>
 				{!forNew &&
-					<table className="selectableAC" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>
-						<thead>
-							<tr><th>ID</th><th>Creator</th><th>Created at</th></tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td>{newData._id}</td>
-								<td>{creator ? creator.displayName : `n/a`}</td>
-								<td>{Moment(newData.createdAt).format(`YYYY-MM-DD HH:mm:ss`)}</td>
-							</tr>
-						</tbody>
-					</table>}
+					<IDAndCreationInfoUI id={baseData._key} creator={creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Name: </Pre>
 					<TextInput required enabled={enabled} style={{width: "100%"}}
@@ -70,7 +43,38 @@ export default class TimelineDetailsUI extends BaseComponent<Props, {newData: Ti
 	}
 
 	GetNewData() {
-		let {newData} = this.state;
+		const {newData} = this.state;
 		return Clone(newData) as Timeline;
+	}
+}
+
+export class TimelineDetailsEditor extends BaseComponentPlus({} as {timeline: Timeline, editing: boolean}, {dataError: null as string}) {
+	/* ComponentWillMountOrReceiveProps(props, forMount) {
+		if (forMount || props.timeline != this.props.timeline) { // if base-data changed
+			this.SetState({ newData: Clone(props.baseData) });
+		}
+	} */
+	detailsUI: TimelineDetailsUI;
+	render() {
+		const {timeline, editing} = this.props;
+		// const { newData, dataError } = this.state;
+		const {dataError} = this.state;
+		return (
+			<>
+				<TimelineDetailsUI ref={c=>this.detailsUI = c} baseData={timeline} forNew={false} enabled={editing}
+					onChange={(newData, ui)=>{
+						// this.SetState({ newData, dataError: ui.GetValidationError() });
+						this.SetState({dataError: ui.GetValidationError()});
+					}}/>
+				{editing &&
+				<Row>
+					<Button text="Save" enabled={dataError == null} onLeftClick={async()=>{
+						const updates = GetUpdates(timeline, this.detailsUI.GetNewData()).Excluding("steps");
+						new UpdateTimeline({id: timeline._key, updates}).Run();
+					}}/>
+					{/* error && <Pre>{error.message}</Pre> */}
+				</Row>}
+			</>
+		);
 	}
 }

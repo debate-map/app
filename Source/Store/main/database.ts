@@ -1,57 +1,43 @@
-import {GetImages} from "../firebase/images";
-import {GetTerms} from "../firebase/terms";
-import Action from "../../Frame/General/Action";
-import {CombineReducers} from "../../Frame/Store/ReducerUtils";
-import {Vector2i} from "js-vextensions";
-import SubpageReducer from "./@Shared/$subpage";
+import {GetUsers} from "Store/firebase/users";
+import {O} from "vwebapp-framework";
+import {StoreAccessor} from "mobx-firelink";
+import {GetImages} from "../../Store/firebase/images";
+import {GetTerms} from "../../Store/firebase/terms";
 
-export class ACTTermSelect extends Action<{id: number}> {}
-export class ACTImageSelect extends Action<{id: number}> {}
-
-export class Database {
-	subpage: string;
-	selectedTermID: number;
-	//selectedTermComponentID: number;
-	selectedImageID: number;
+export class DatabaseState {
+	@O subpage: string;
+	@O selectedUserID: string;
+	@O selectedTermID: string;
+	// @O selectedTermComponentID: string;
+	@O selectedImageID: string;
 }
 
-export const DatabaseReducer = CombineReducers({
-	subpage: SubpageReducer("database"),
-	selectedTermID: (state = null, action)=> {
-		if (action.Is(ACTTermSelect))
-			return action.payload.id;
-		return state;
-	},
-	/*selectedTermComponent: (state = null, action)=> {
-		if (action.Is(ACTTermSelect))
-			return action.payload.id;
-		return state;
-	},*/
-	selectedImageID: (state = null, action)=> {
-		if (action.Is(ACTImageSelect))
-			return action.payload.id;
-		return state;
-	},
+export const GetSelectedUserID = StoreAccessor(s=>()=>{
+	return s.main.database.selectedUserID;
+});
+export const GetSelectedUser = StoreAccessor(s=>()=>{
+	const selectedID = GetSelectedUserID();
+	return (GetUsers() || []).find(a=>a && a._key == selectedID);
 });
 
-export function GetSelectedTermID() {
-	return State(a=>a.main.database.selectedTermID);
-}
-export function GetSelectedTerm() {
-	let selectedID = GetSelectedTermID();
-	//return GetData(`terms/${selectedID}`);
-	return (GetTerms() || []).find(a=>a._id == selectedID);
-}
-/*export function GetSelectedTermComponent() {
+export const GetSelectedTermID = StoreAccessor(s=>()=>{
+	return s.main.database.selectedTermID;
+});
+export const GetSelectedTerm = StoreAccessor(s=>()=>{
+	const selectedID = GetSelectedTermID();
+	// return GetData(`terms/${selectedID}`);
+	return (GetTerms() || []).find(a=>a && a._key == selectedID);
+});
+/* export function GetSelectedTermComponent() {
 	let selectedID = State().main.selectedTermComponent;
 	return GetTermComponent(selectedID);
-}*/
+} */
 
-export function GetSelectedImageID() {
-	return State(a=>a.main.database.selectedImageID);
-}
-export function GetSelectedImage() {
-	let selectedID = GetSelectedImageID();
-	//return GetData(`terms/${selectedID}`);
-	return (GetImages() || []).find(a=>a._id == selectedID);
-}
+export const GetSelectedImageID = StoreAccessor(s=>()=>{
+	return s.main.database.selectedImageID;
+});
+export const GetSelectedImage = StoreAccessor(s=>()=>{
+	const selectedID = GetSelectedImageID();
+	// return GetData(`terms/${selectedID}`);
+	return (GetImages() || []).find(a=>a && a._key == selectedID);
+});

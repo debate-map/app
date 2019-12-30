@@ -1,21 +1,19 @@
-import { UserEdit } from "Server/CommandMacros";
-import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
-import { Image } from "../../Store/firebase/images/@Image";
-import { Command } from "../Command";
+import {UserEdit} from "Server/CommandMacros";
+import {Command_Old, GetAsync, Command} from "mobx-firelink";
+import {GetImage} from "Store/firebase/images";
+import {Image} from "../../Store/firebase/images/@Image";
 
 @UserEdit
-export default class DeleteImage extends Command<{id: number}> {
+export class DeleteImage extends Command<{id: string}, {}> {
 	oldData: Image;
-	async Prepare() {
-		let {id} = this.payload;
-		this.oldData = await GetDataAsync({addHelpers: false}, "images", id) as Image;
+	Validate() {
+		const {id} = this.payload;
+		this.oldData = GetImage(id);
 	}
-	async Validate() {
-	}
-	
+
 	GetDBUpdates() {
-		let {id} = this.payload;
-		let updates = {
+		const {id} = this.payload;
+		const updates = {
 			[`images/${id}`]: null,
 		};
 		return updates;

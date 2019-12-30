@@ -1,29 +1,27 @@
-import {GetData, GetDataAsync} from "../../Frame/Database/DatabaseHelpers";
+import {CachedTransform, IsNaN} from "js-vextensions";
+import {GetDoc, GetDocs, StoreAccessor} from "mobx-firelink";
 import {Term} from "./terms/@Term";
-import {CachedTransform} from "js-vextensions";
 
-export function GetTerm(id: number) {
+export const GetTerm = StoreAccessor(s=>(id: string)=>{
 	if (id == null || IsNaN(id)) return null;
-	return GetData("terms", id) as Term;
-}
-export async function GetTermAsync(id: number) {
-	return await GetDataAsync("terms", id) as Term;
-}
+	return GetDoc({}, a=>a.terms.get(id));
+});
+/* export async function GetTermAsync(id: string) {
+	return await GetDoc_Async((a) => a.terms.get(id));
+} */
 
-export function GetTerms(): Term[] {
-	let termsMap = GetData("terms");
-	return CachedTransform("GetTerms", [], termsMap, ()=>termsMap ? termsMap.VValues(true) : []);
-	//return CachedTransform("GetTerms", {}, termsMap, ()=>termsMap ? termsMap.VKeys(true).map(id=>GetTerm(parseInt(id))) : []);
-}
+export const GetTerms = StoreAccessor(s=>(): Term[]=>{
+	return GetDocs({}, a=>a.terms);
+});
 
 // "P" stands for "pure" (though really means something like "pure + synchronous")
 export function GetFullNameP(term: Term) {
 	return term.name + (term.disambiguation ? ` (${term.disambiguation})` : "");
 }
 
-export function GetTermVariantNumber(term: Term): number {
-	let termsWithSameName_map = GetData("termNames", term.name);
+export const GetTermVariantNumber = StoreAccessor(s=>(term: Term): number=>{
+	const termsWithSameName_map = GetDoc({}, a=>a.termNames.get(term.name));
 	if (termsWithSameName_map == null) return 1;
-	let termsWithSameNameAndLowerIDs = termsWithSameName_map.VKeys(true).map(a=>a.ToInt()).filter(a=>a < term._id);
+	const termsWithSameNameAndLowerIDs = termsWithSameName_map.VKeys(true).map(a=>a).filter(a=>a < term._key);
 	return 1 + termsWithSameNameAndLowerIDs.length;
-}
+});

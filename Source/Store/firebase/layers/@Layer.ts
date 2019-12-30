@@ -1,27 +1,31 @@
+import {AddSchema} from "vwebapp-framework";
+import {UUID_regex} from "Utils/General/KeyGenerator";
+import {ObservableMap} from "mobx";
+
 export class Layer {
 	constructor(initialData: {name: string, creator: string} & Partial<Layer>) {
-		this.Extend(initialData);
+		this.VSet(initialData);
 	}
 
-	_id: number;
+	_key: string;
 	name: string;
 	creator: string;
 	createdAt: number;
 
-	mapsWhereEnabled: {[key: number]: boolean};
-	nodeSubnodes: {[key: number]: LayerNodeSubnodes}; // key: node-id
+	mapsWhereEnabled: ObservableMap<string, boolean>;
+	nodeSubnodes: ObservableMap<string, LayerNodeSubnodes>; // key: node-id
 }
-AddSchema({
+AddSchema("Layer", {
 	properties: {
 		name: {type: "string"},
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 
-		mapsWhereEnabled: {patternProperties: {"^[0-9]+$": {type: "boolean"}}},
-		nodeSubnodes: {patternProperties: {"^[0-9]+$": {$ref: "LayerNodeSubnodes"}}},
+		mapsWhereEnabled: {patternProperties: {[UUID_regex]: {type: "boolean"}}},
+		nodeSubnodes: {patternProperties: {[UUID_regex]: {$ref: "LayerNodeSubnodes"}}},
 	},
 	required: ["name", "creator", "createdAt"],
-}, "Layer");
+});
 
-export type LayerNodeSubnodes = {[key: number]: boolean}; // key: subnode-id
-AddSchema({patternProperties: {"^[0-9]+$": {type: "boolean"}}}, "LayerNodeSubnodes");
+export type LayerNodeSubnodes = ObservableMap<string, boolean>; // key: subnode-id
+AddSchema("LayerNodeSubnodes", {patternProperties: {[UUID_regex]: {type: "boolean"}}});

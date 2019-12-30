@@ -1,27 +1,23 @@
-import { UserEdit } from "Server/CommandMacros";
-import { Layer } from "Store/firebase/layers/@Layer";
-import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
-import { Command } from "../Command";
+import {UserEdit} from "Server/CommandMacros";
+import {Layer} from "Store/firebase/layers/@Layer";
+import {GenerateUUID} from "Utils/General/KeyGenerator";
+import {Command_Old, Command} from "mobx-firelink";
+import {AssertValidate} from "vwebapp-framework";
 
 @UserEdit
-export default class AddLayer extends Command<{layer: Layer}> {
-	layerID: number;
-	async Prepare() {
-		let {layer} = this.payload;
-
-		let lastLayerID = await GetDataAsync("general", "lastLayerID") as number;
-		this.layerID = lastLayerID + 1;
+export class AddLayer extends Command<{layer: Layer}, {}> {
+	layerID: string;
+	Validate() {
+		const {layer} = this.payload;
+		this.layerID = this.layerID ?? GenerateUUID();
 		layer.createdAt = Date.now();
+		AssertValidate("Layer", layer, "Layer invalid");
 	}
-	async Validate() {
-		let {layer} = this.payload;
-		AssertValidate("Layer", layer, `Layer invalid`);
-	}
-	
+
 	GetDBUpdates() {
-		let {layer} = this.payload;
-		let updates = {
-			"general/lastLayerID": this.layerID,
+		const {layer} = this.payload;
+		const updates = {
+			// 'general/data/.lastLayerID': this.layerID,
 			[`layers/${this.layerID}`]: layer,
 		} as any;
 		return updates;

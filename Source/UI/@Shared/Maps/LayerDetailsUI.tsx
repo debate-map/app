@@ -1,33 +1,14 @@
-import {Assert} from "js-vextensions";
-import {BaseComponent, RenderSource} from "react-vextensions";
-import {Pre, RowLR} from "react-vcomponents";
-import {Column} from "react-vcomponents";
-import {Row} from "react-vcomponents";
-import {TextInput} from "react-vcomponents";
+import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
 import Moment from "moment";
-import {GetUser} from "../../../Store/firebase/users";
-import {User} from "Store/firebase/users/@User";
-import {Connect} from "../../../Frame/Database/FirebaseConnect";
-import {GetEntries} from "../../../Frame/General/Enums";
-import {Select} from "react-vcomponents";
-import {CheckBox} from "react-vcomponents";
-import {ScrollView} from "react-vscrollview";
-import {Button} from "react-vcomponents";
-import TermComponent from "../../../Store/firebase/termComponents/@TermComponent";
-import {GetNiceNameForTermType} from "../../../UI/Content/TermsUI";
-import {GetTermVariantNumber} from "../../../Store/firebase/terms";
-import {InfoButton} from "../../../Frame/ReactComponents/InfoButton";
-import {Spinner} from "react-vcomponents";
+import {Column, Pre, RowLR, TextInput, Text} from "react-vcomponents";
+import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
 import {Layer} from "Store/firebase/layers/@Layer";
- import {GetErrorMessagesUnderElement} from "js-vextensions";
+import {User} from "Store/firebase/users/@User";
+import {GetUser} from "Store/firebase/users";
+import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
 
-type Props = {baseData: Layer, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Layer, ui: LayerDetailsUI)=>void}
-	& Partial<{creator: User}>;
-@Connect((state, {baseData, forNew}: Props)=>({
-	creator: !forNew && GetUser(baseData.creator),
-}))
-export default class LayerDetailsUI extends BaseComponent<Props, {newData: Layer}> {
-	static defaultProps = {enabled: true};
+type Props = {baseData: Layer, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Layer, ui: LayerDetailsUI)=>void};
+export class LayerDetailsUI extends BaseComponentPlus({enabled: true} as Props, {newData: null as Layer}) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
@@ -35,31 +16,22 @@ export default class LayerDetailsUI extends BaseComponent<Props, {newData: Layer
 	}
 
 	render() {
-		let {forNew, enabled, style, onChange, creator} = this.props;
-		let {newData} = this.state;
-		let Change = _=> {
+		const {baseData, forNew, enabled, style, onChange} = this.props;
+		const {newData} = this.state;
+		const creator = !forNew && GetUser(baseData.creator);
+		const Change = _=>{
 			if (onChange) onChange(this.GetNewData(), this);
 			this.Update();
 		};
 
-		let splitAt = 170, width = 600;
+		const splitAt = 170;
+		const width = 600;
 		return (
 			<Column style={style}>
 				{!forNew &&
-					<table className="selectableAC" style={{/*borderCollapse: "separate", borderSpacing: "10px 0"*/}}>
-						<thead>
-							<tr><th>ID</th><th>Creator</th><th>Created at</th></tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td>{newData._id}</td>
-								<td>{creator ? creator.displayName : `n/a`}</td>
-								<td>{Moment(newData.createdAt).format(`YYYY-MM-DD HH:mm:ss`)}</td>
-							</tr>
-						</tbody>
-					</table>}
+					<IDAndCreationInfoUI id={baseData._key} creator={creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
-					<Pre>Name: </Pre>
+					<Text>Name: </Text>
 					<TextInput required enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
@@ -71,7 +43,7 @@ export default class LayerDetailsUI extends BaseComponent<Props, {newData: Layer
 	}
 
 	GetNewData() {
-		let {newData} = this.state;
+		const {newData} = this.state;
 		return Clone(newData) as Layer;
 	}
 }

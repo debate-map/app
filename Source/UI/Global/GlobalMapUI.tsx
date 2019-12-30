@@ -1,24 +1,18 @@
-import {firebaseConnect, helpers} from "react-redux-firebase";
-import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
-import {DBPath, GetData} from "../../Frame/Database/DatabaseHelpers";
-import {connect} from "react-redux";
-import {MapUI} from "../@Shared/Maps/MapUI";
-import {Debugger, Debugger_Wrap} from "../../Frame/General/Others";
-import {ScrollView} from "react-vscrollview";
-import {RootState} from "../../Store/index";
-import {Map} from "../../Store/firebase/maps/@Map";
-import {Connect} from "../../Frame/Database/FirebaseConnect";
+import {BaseComponentPlus} from "react-vextensions";
+import {globalMapID} from "Store/firebase/nodes/@MapNode";
+import {PageContainer, Observer} from "vwebapp-framework";
 import {GetMap} from "../../Store/firebase/maps";
+import {MapUI} from "../@Shared/Maps/MapUI";
 
-type Props = {} & Partial<{map: Map}>;
-@Connect(state=> ({
-	map: GetMap(1),
-}))
-export class GlobalMapUI extends BaseComponent<Props, {}> {
+@Observer
+export class GlobalMapUI extends BaseComponentPlus({} as {}, {}) {
 	render() {
-		let {map} = this.props;
+		const map = GetMap(globalMapID);
+		if (map == null) return null;
 		return (
-			<MapUI map={map} subNavBarWidth={/*104*/ 54}/>
+			<PageContainer fullWidth={true} fullHeight={true} style={{margin: 0, padding: 0, background: null, filter: null}}>
+				<MapUI map={map} subNavBarWidth={/* 104 */ 54}/>
+			</PageContainer>
 		);
 	}
 }

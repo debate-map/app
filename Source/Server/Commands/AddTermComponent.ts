@@ -1,34 +1,28 @@
-import { UserEdit } from "Server/CommandMacros";
-import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
-import TermComponent from "../../Store/firebase/termComponents/@TermComponent";
-import { Command } from "../Command";
+import {UserEdit} from "Server/CommandMacros";
+import {GenerateUUID} from "Utils/General/KeyGenerator";
+import {Command_Old, Command} from "mobx-firelink";
+import {AssertValidate} from "vwebapp-framework";
+import {TermComponent} from "../../Store/firebase/termComponents/@TermComponent";
 
 @UserEdit
-export default class AddTermComponent extends Command<{termID: number, termComponent: TermComponent}> {
-	/*Validate_Early() {
+export class AddTermComponent extends Command<{termID: string, termComponent: TermComponent}, {}> {
+	/* Validate_Early() {
 		//Assert(termComponent.termParents && termComponent.termParents.VKeys().length == 1, `Term-component must have exactly one term-parent`);
-	}*/
+	} */
 
-	termComponentID: number;
-	async Prepare() {
-		let {termID, termComponent} = this.payload;
-		let firebase = store.firebase.helpers;
-
-		let lastTermComponentID = await GetDataAsync("general", "lastTermComponentID") as number;
-		this.termComponentID = lastTermComponentID + 1;
-
+	termComponentID: string;
+	Validate() {
+		const {termID, termComponent} = this.payload;
+		this.termComponentID = this.termComponentID ?? GenerateUUID();
 		termComponent.parentTerms = {[termID]: true};
+		AssertValidate("TermComponent", termComponent, "Term-component invalid");
 	}
-	async Validate() {
-		let {termID, termComponent} = this.payload;
-		AssertValidate("TermComponent", termComponent, `Term-component invalid`);
-	}
-	
+
 	GetDBUpdates() {
-		let {termID, termComponent} = this.payload;
-		let updates = {
-			"general/lastTermComponentID": this.termComponentID,
-			[`terms/${termID}/components/${this.termComponentID}`]: true,
+		const {termID, termComponent} = this.payload;
+		const updates = {
+			// 'general/data/.lastTermComponentID': this.termComponentID,
+			[`terms/${termID}/.components/.${this.termComponentID}`]: true,
 			[`termComponents/${this.termComponentID}`]: termComponent,
 		};
 		return updates;

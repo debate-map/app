@@ -1,24 +1,34 @@
+import {AddSchema} from "vwebapp-framework";
+
 export class Timeline {
 	constructor(initialData: {name: string, creator: string} & Partial<Timeline>) {
-		this.Extend(initialData);
+		this.VSet(initialData);
 	}
 
-	_id: number;
-	mapID: number;
+	_key: string;
+	mapID: string;
 	name: string;
-	creator: string;
+	creator: string; // probably todo: rename to creatorID
 	createdAt: number;
 
-	steps: number[];
+	videoID: string;
+	videoStartTime: number;
+	videoHeightVSWidthPercent: number;
+
+	steps: string[];
 }
-AddSchema({
+AddSchema("Timeline", {
 	properties: {
-		mapID: {type: "number"},
+		mapID: {type: "string"},
 		name: {type: "string"},
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 
-		steps: {items: {type: "number"}},
+		videoID: {type: ["string", "null"]},
+		videoStartTime: {type: ["number", "null"]},
+		videoHeightVSWidthPercent: {type: "number"},
+
+		steps: {items: {type: "string"}},
 	},
 	required: ["mapID", "name", "creator", "createdAt"],
-}, "Timeline");
+});

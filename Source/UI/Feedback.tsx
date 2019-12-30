@@ -1,30 +1,36 @@
-import { ProposalsUI } from "UI/Feedback/ProposalsUI";
-import { Switch } from "react-vcomponents";
-import { BaseComponent } from "react-vextensions";
-import { Connect } from "../Frame/Database/FirebaseConnect";
-import SubNavBar, { SubNavBarButton } from "./@Shared/SubNavBar";
+import {Column, Switch} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+import {ProposalsUI} from "UI/Feedback/ProposalsUI";
+import {store} from "Store";
+import {PageContainer, VReactMarkdown} from "vwebapp-framework/Source";
+import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
 
-type Props = {} & Partial<{currentSubpage: string}>;
-@Connect(state=> ({
-	currentSubpage: State(a=>a.main.feedback.subpage),
-}))
-export class FeedbackUI extends BaseComponent<Props, {}> {
+export class FeedbackUI extends BaseComponentPlus({} as {}, {}) {
 	render() {
-		let {currentSubpage} = this.props;
-		let page = "feedback";
+		/* if (true) {
+			return (
+				<PageContainer scrollable={true}>
+					<article>
+						<VReactMarkdown source={'Feedback page is temporarily disabled for maintenance.'} className='selectable'/>
+					</article>
+				</PageContainer>
+			);
+		} */
+		const currentSubpage = store.main.feedback.subpage;
+		const page = "feedback";
 		return (
-			<div style={ES({flex: 1, display: "flex", flexDirection: "column"})}>
+			<>
 				<SubNavBar>
-					<SubNavBarButton {...{page}} subpage="proposals" text="Proposals"/>
-					{/*<SubNavBarButton {...{page}} subpage="roadmap" text="Roadmap"/>
-					<SubNavBarButton {...{page}} subpage="neutrality" text="Neutrality"/>*/}
+					<SubNavBarButton page={page} subpage="proposals" text="Proposals" actionFuncIfAlreadyActive={s=>s.feedback.main.proposals.selectedProposalID = null}/>
+					{/* <SubNavBarButton page={page} subpage="roadmap" text="Roadmap"/>
+					<SubNavBarButton page={page} subpage="neutrality" text="Neutrality"/> */}
 				</SubNavBar>
 				<Switch>
 					<ProposalsUI/>
-					{/*currentSubpage == "roadmap" && <RoadmapUI/>}
-					{currentSubpage == "neutrality" && <NeutralityUI/>*/}
+					{/* currentSubpage == "roadmap" && <RoadmapUI/>}
+					{currentSubpage == "neutrality" && <NeutralityUI/> */}
 				</Switch>
-			</div>
+			</>
 		);
 	}
 }

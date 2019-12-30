@@ -1,40 +1,91 @@
-import { GetDataAsync } from "Frame/Database/DatabaseHelpers";
-import {MergeDBUpdates} from "./Command";
+import {MergeDBUpdates, GetAsync, GetDoc, Command, Command_Old} from "mobx-firelink";
+import {GetMap} from "Store/firebase/maps";
+import {GetUserExtraInfo} from "Store/firebase/users";
+import {IsString, IsFunction} from "js-vextensions";
 
-export function MapEdit(target: Function) {
-	let oldPrepare = target.prototype.Prepare;
-	target.prototype.Prepare = async function() {
-		await oldPrepare.apply(this);
-		if (this.payload.mapID && this.payload.mapID > 0) {
-			this.map_oldEditCount = await GetDataAsync({addHelpers: false}, "maps", this.payload.mapID, "edits") as number || 0;
-		}
-	};
+export function MapEdit(targetClass: Function);
+export function MapEdit(mapIDKey: string);
+export function MapEdit(...args) {
+	let mapIDKey = "mapID";
+	if (IsFunction(args[0])) {
+		ApplyToClass(args[0]);
+	} else {
+		mapIDKey = args[0];
+		return ApplyToClass;
+	}
 
-	let oldGetDBUpdates = target.prototype.GetDBUpdates;
-	target.prototype.GetDBUpdates = function() {
-		let updates = oldGetDBUpdates.apply(this);
-		let newUpdates = {};
-		if (this.payload.mapID && this.payload.mapID > 0) {
-			newUpdates[`maps/${this.payload.mapID}/edits`] = this.map_oldEditCount + 1;
-			newUpdates[`maps/${this.payload.mapID}/editedAt`] = Date.now();
+	function ApplyToClass(targetClass: Function) {
+		/* if (targetClass.prototype instanceof Command_Old) {
+			const oldPrepare = targetClass.prototype.Prepare;
+			targetClass.prototype.Prepare = async function () {
+				await oldPrepare.apply(this);
+				const mapID = this.payload[mapIDKey];
+				if (mapID) {
+					this.map_oldEditCount = (await GetAsync(() => GetMap(mapID)))?.edits ?? 0;
+				}
+			};
+		} */
+
+		if (targetClass.prototype instanceof Command) {
+			const oldValidate = targetClass.prototype.Validate;
+			targetClass.prototype.Validate = function() {
+				const result = oldValidate.apply(this);
+				const mapID = this.payload[mapIDKey];
+				if (mapID) {
+					const map = GetMap(mapID);
+					if (map != null) {
+						this.map_oldEditCount = map.edits ?? 0;
+					}
+				}
+				return result;
+			};
 		}
-		return MergeDBUpdates(updates, newUpdates);
+
+		const oldGetDBUpdates = targetClass.prototype.GetDBUpdates;
+		targetClass.prototype.GetDBUpdates = function() {
+			const updates = oldGetDBUpdates.apply(this);
+			const newUpdates = {};
+			if (this.map_oldEditCount != null) {
+				const mapID = this.payload[mapIDKey];
+				if (mapID) {
+					newUpdates[`maps/${mapID}/.edits`] = this.map_oldEditCount + 1;
+					newUpdates[`maps/${mapID}/.editedAt`] = Date.now();
+				}
+			}
+			return MergeDBUpdates(updates, newUpdates);
+		};
 	}
 }
 
-export function UserEdit(target: Function) {
-	let oldPrepare = target.prototype.Prepare;
-	target.prototype.Prepare = async function() {
-		await oldPrepare.apply(this);
-		this.user_oldEditCount = await GetDataAsync({addHelpers: false}, "userExtras", this.userInfo.id, "edits") as number || 0;
-	};
+export function UserEdit(targetClass: Function) {
+	/* if (targetClass.prototype instanceof Command_Old) {
+		const oldPrepare = targetClass.prototype.Prepare;
+		targetClass.prototype.Prepare = async function () {
+			await oldPrepare.apply(this);
+			this.user_oldEditCount = (await GetAsync(() => GetUserExtraInfo(this.userInfo.id)))?.edits ?? 0;
+		};
+	} */
 
-	let oldGetDBUpdates = target.prototype.GetDBUpdates;
-	target.prototype.GetDBUpdates = function() {
-		let updates = oldGetDBUpdates.apply(this);
-		let newUpdates = {};
-		newUpdates[`userExtras/${this.userInfo.id}/edits`] = this.user_oldEditCount + 1;
-		newUpdates[`userExtras/${this.userInfo.id}/lastEditAt`] = Date.now();
-		return MergeDBUpdates(updates, newUpdates);
+	if (targetClass.prototype instanceof Command) {
+		const oldValidate = targetClass.prototype.Validate;
+		targetClass.prototype.Validate = function() {
+			const result = oldValidate.apply(this);
+			const userExtraInfo = GetUserExtraInfo(this.userInfo.id);
+			if (userExtraInfo) {
+				this.user_oldEditCount = userExtraInfo.edits ?? 0;
+			}
+			return result;
+		};
 	}
+
+	const oldGetDBUpdates = targetClass.prototype.GetDBUpdates;
+	targetClass.prototype.GetDBUpdates = function() {
+		const updates = oldGetDBUpdates.apply(this);
+		const newUpdates = {};
+		if (this.user_oldEditCount != null) {
+			newUpdates[`userExtras/${this.userInfo.id}/.edits`] = this.user_oldEditCount + 1;
+			newUpdates[`userExtras/${this.userInfo.id}/.lastEditAt`] = Date.now();
+		}
+		return MergeDBUpdates(updates, newUpdates);
+	};
 }

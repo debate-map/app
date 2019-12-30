@@ -1,45 +1,46 @@
-import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
-import {Div, Pre} from "react-vcomponents";
-import {Map, MapType} from "../../../Store/firebase/maps/@Map";
-import {Column} from "react-vcomponents";
-import {Row} from "react-vcomponents";
-import {colors} from "../../../Frame/UI/GlobalStyles";
-import {Link} from "../../../Frame/ReactComponents/Link";
-import {VURL} from "js-vextensions";
-import {Connect} from "../../../Frame/Database/FirebaseConnect";
-import {GetUser} from "../../../Store/firebase/users";
-import {User} from "Store/firebase/users/@User";
-import {ACTDebateMapSelect} from "../../../Store/main/debates";
-import { columnWidths } from "UI/Debates";
+import {VURL, E} from "js-vextensions";
 import Moment from "moment";
-import {ACTPersonalMapSelect} from "../../../Store/main/personal";
+import {Column, Div, Row} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
+import {GADDemo} from "UI/@GAD/GAD";
+import {HSLA, Link, Observer} from "vwebapp-framework";
+import {store} from "Store";
+import {runInAction} from "mobx";
+import {Map, MapType} from "../../../Store/firebase/maps/@Map";
+import {GetUser} from "../../../Store/firebase/users";
+import {columnWidths} from "./MapListUI";
 
-let connector = (state, {map}: {index: number, last: boolean, map: Map})=> ({
-	creator: map && GetUser(map.creator),
-});
-@Connect(connector)
-export class MapEntryUI extends BaseComponentWithConnector(connector, {}) {
+@Observer
+export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: boolean, map: Map}, {}) {
 	render() {
-		let {index, last, map, creator} = this.props;
-		let toURL = new VURL(null, [map.type == MapType.Personal ? "personal" : "debates", map._id+""]);
+		const {index, last, map} = this.props;
+		const creator = map && GetUser(map.creator);
+
+		const toURL = new VURL(null, [map.type == MapType.Private ? "private" : "public", `${map._key}`]);
 		return (
 			<Column p="7px 10px" style={E(
 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
-				last && {borderRadius: "0 0 10px 10px"}
+				GADDemo && {
+					background: index % 2 == 0 ? "rgba(255,255,255,1)" : "rgba(222,222,222,1)", color: HSLA(222, 0.33, 0.5, 0.8),
+					fontFamily: "'Cinzel', serif", fontVariant: "small-caps", fontSize: 17, fontWeight: "bold",
+				},
+				last && {borderRadius: "0 0 10px 10px"},
 			)}>
 				<Row>
-					{/*<Link text={map.name} actions={d=>d(new ACTDebateMapSelect({id: map._id}))} style={{fontSize: 17, flex: columnWidths[0]}}/>*/}
-					{/*<Column style={{flex: columnWidths[0]}}>
+					{/* <Link text={map.name} actions={d=>d(new ACTDebateMapSelect({id: map._id}))} style={{fontSize: 17, flex: columnWidths[0]}}/> */}
+					{/* <Column style={{flex: columnWidths[0]}}>
 						<Link text={map.name} to={toURL.toString({domain: false})} style={{fontSize: 17}} onClick={e=> {
 							e.preventDefault();
 							store.dispatch(new (map.type == MapType.Personal ? ACTPersonalMapSelect : ACTDebateMapSelect)({id: map._id}));
 						}}/>
 						<Row style={{fontSize: 13}}>{map.note}</Row>
-					</Column>*/}
+					</Column> */}
 					<Div style={{position: "relative", flex: columnWidths[0]}}>
-						<Link text={map.name} to={toURL.toString({domain: false})} style={{fontSize: 17}} onClick={e=> {
+						<Link text={map.name} to={toURL.toString({domain: false})} style={E({fontSize: 17}, GADDemo && {color: HSLA(222, 0.33, 0.5, 0.8)})} onClick={e=>{
 							e.preventDefault();
-							store.dispatch(new (map.type == MapType.Personal ? ACTPersonalMapSelect : ACTDebateMapSelect)({id: map._id}));
+							runInAction("MapEntryUI.onClick", ()=>{
+								store.main[map.type == MapType.Private ? "private" : "public"].selectedMapID = map._key;
+							});
 						}}/>
 						{map.note &&
 							<Div style={E(
@@ -49,7 +50,7 @@ export class MapEntryUI extends BaseComponentWithConnector(connector, {}) {
 								{map.note}
 							</Div>}
 					</Div>
-					<span style={{flex: columnWidths[1]}}>{map.edits || 0}</span>
+					{!GADDemo && <span style={{flex: columnWidths[1]}}>{map.edits || 0}</span>}
 					<span style={{flex: columnWidths[2]}}>{Moment(map.editedAt).format("YYYY-MM-DD")}</span>
 					<span style={{flex: columnWidths[3]}}>{creator ? creator.displayName : "..."}</span>
 				</Row>

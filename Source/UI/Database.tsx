@@ -1,32 +1,30 @@
-import { Switch } from "react-vcomponents";
-import { BaseComponent } from "react-vextensions";
-import { Connect } from "../Frame/Database/FirebaseConnect";
-import SubNavBar, { SubNavBarButton } from "./@Shared/SubNavBar";
-import ImagesUI from "./Content/ImagesUI";
-import TermsUI from "./Content/TermsUI";
-import UsersUI from "./Users";
+import {Switch} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
+import {store} from "Store";
+import {Observer} from "vwebapp-framework";
+import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
+import {ImagesUI} from "./Database/ImagesUI";
+import {TermsUI} from "./Database/TermsUI";
+import {UsersUI} from "./Database/Users";
 
-type Props = {} & Partial<{currentSubpage: string}>;
-@Connect(state=> ({
-	currentSubpage: State(a=>a.main.database.subpage),
-}))
-export class DatabaseUI extends BaseComponent<Props, {}> {
+@Observer
+export class DatabaseUI extends BaseComponentPlus({} as {}, {}) {
 	render() {
-		let {currentSubpage} = this.props;
-		let page = "database";
+		const currentSubpage = store.main.database.subpage;
+		const page = "database";
 		return (
-			<div style={ES({flex: 1, display: "flex", flexDirection: "column"})}>
+			<>
 				<SubNavBar>
-					<SubNavBarButton {...{page}} subpage="users" text="Users"/>
-					<SubNavBarButton {...{page}} subpage="terms" text="Terms"/>
-					<SubNavBarButton {...{page}} subpage="images" text="Images"/>
+					<SubNavBarButton page={page} subpage="users" text="Users" actionFuncIfAlreadyActive={s=>s.main.database.selectedUserID = null}/>
+					<SubNavBarButton page={page} subpage="terms" text="Terms" /* actionIfAlreadyActive={() => new ACTTermSelect({ id: null })} *//>
+					<SubNavBarButton page={page} subpage="images" text="Images" /* actionIfAlreadyActive={() => new ACTImageSelect({ id: null })} *//>
 				</SubNavBar>
 				<Switch>
 					<UsersUI/>
 					{currentSubpage == "terms" && <TermsUI/>}
 					{currentSubpage == "images" && <ImagesUI/>}
 				</Switch>
-			</div>
+			</>
 		);
 	}
 }

@@ -1,32 +1,34 @@
+import {OMIT} from "js-vextensions";
 import {Column, Row} from "react-vcomponents";
-import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import AddMap from "../../../Server/Commands/AddMap";
+import {ShowMessageBox} from "react-vmessagebox";
+import {AddMap} from "../../../Server/Commands/AddMap";
 import {Map, MapType} from "../../../Store/firebase/maps/@Map";
-import {GetUserID} from "../../../Store/firebase/users";
+import {MeID} from "../../../Store/firebase/users";
 import {MapDetailsUI} from "./MapDetailsUI";
 
 export function ShowAddMapDialog(userID: string, type: MapType) {
 	let newMap = new Map({
 		name: "",
 		type,
-		creator: GetUserID(),
+		creator: MeID(),
+		editorIDs: type == MapType.Private ? [MeID()] : OMIT as any,
 	});
-	
+
 	let error = null;
-	let Change = (..._)=>boxController.UpdateUI();
-	let boxController: BoxController = ShowMessageBox({
-		title: `Add map`, cancelButton: true,
-		message: ()=> {
+	const Change = (..._)=>boxController.UpdateUI();
+	let boxController = ShowMessageBox({
+		title: "Add map", cancelButton: true,
+		message: ()=>{
 			boxController.options.okButtonClickable = error == null;
 			return (
-				<Column style={{padding: `10px 0`, width: 600}}>
+				<Column style={{padding: "10px 0", width: 600}}>
 					<MapDetailsUI baseData={newMap} forNew={true} onChange={(val, ui)=>Change(newMap = val, error = ui.GetValidationError())}/>
 					{error && error != "Please fill out this field." && <Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{error}</Row>}
 				</Column>
 			);
 		},
-		onOK: ()=> {
+		onOK: ()=>{
 			new AddMap({map: newMap}).Run();
-		}
+		},
 	});
 }

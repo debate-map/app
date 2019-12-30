@@ -1,19 +1,10 @@
-import Action from "../../Frame/General/Action";
-import {RootState} from "../index";
+import {StoreAccessor} from "mobx-firelink";
+import {O} from "vwebapp-framework";
 
 export class RatingUIState {
-	smoothing = 5;
-}
-export class ACTRatingUISmoothnessSet extends Action<number> {}
-export function RatingUIReducer(state = new RatingUIState(), action: Action<any>): RatingUIState {
-	if (action.Is(ACTRatingUISmoothnessSet))
-		return {...state, smoothing: action.payload};
-	return state;
+	@O smoothing = 5;
 }
 
-// selectors
-// ==========
-
-export function GetRatingUISmoothing() { 
-	return State(a=>a.main.ratingUI.smoothing);
-}
+export const GetRatingUISmoothing = StoreAccessor(s=>()=>{
+	return s.main.ratingUI.smoothing;
+});

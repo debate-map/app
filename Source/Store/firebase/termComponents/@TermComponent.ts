@@ -1,25 +1,29 @@
-export default class TermComponent {
+import {AddSchema} from "vwebapp-framework";
+import {UUID_regex} from "Utils/General/KeyGenerator";
+import {ObservableMap} from "mobx";
+
+export class TermComponent {
 	constructor(initialData: {text: string} & Partial<TermComponent>) {
-		this.Extend(initialData);
-		//this.createdAt = Date.now();
+		this.VSet(initialData);
+		// this.createdAt = Date.now();
 	}
 
-	_id?: number;
+	_key?: string;
 	text: string;
 
 	parentTerms: ParentTermSet;
 }
-AddSchema({
+AddSchema("TermComponent", {
 	properties: {
 		text: {type: "string"},
 		parentTerms: {$ref: "ParentTermSet"},
 	},
 	required: ["text", "parentTerms"],
-}, "TermComponent");
+});
 
-/*export type ParentTermSet = {[key: number]: ParentTerm};
-AddSchema({patternProperties: {"^[0-9]+$": {$ref: "ParentTerm"}}}, "ParentTermSet");
+/* export type ParentTermSet = ObservableMap<number, ParentTerm>;
+AddSchema({patternProperties: {"^[A-Za-z0-9_-]+$": {$ref: "ParentTerm"}}}, "ParentTermSet");
 export type ParentTerm = boolean;
-AddSchema({type: "boolean"}, "ParentTerm");*/
-export type ParentTermSet = {[key: number]: boolean};
-AddSchema({patternProperties: {"^[0-9]+$": {type: "boolean"}}}, "ParentTermSet");
+AddSchema({type: "boolean"}, "ParentTerm"); */
+export type ParentTermSet = {[key: string]: boolean};
+AddSchema("ParentTermSet", {patternProperties: {[UUID_regex]: {type: "boolean"}}});

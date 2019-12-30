@@ -1,37 +1,23 @@
-import {styles, colors} from "../../Frame/UI/GlobalStyles";
-import {Dispatch} from "redux";
-import {Component} from "react";
-import GoogleButton from "react-google-button";
-import {connect} from "react-redux";
-import {firebaseConnect, helpers} from "react-redux-firebase";
-import {BaseComponent, BaseProps, BaseComponentWithConnector} from "react-vextensions";
-import {Debugger} from "../../Frame/General/Others";
-import {E} from "js-vextensions";
-import {Button} from "react-vcomponents";
-import {TextInput} from "react-vcomponents";
-import Action from "../../Frame/General/Action";
-import {HandleError} from "../../Frame/General/Errors";
-import UserPanel from "./NavBar/UserPanel";
-import {Connect} from "../../Frame/Database/FirebaseConnect";
-import {ACTTopRightOpenPanelSet, ACTTopLeftOpenPanelSet, ACTSetPage, ACTSetSubpage} from "../../Store/main";
-import ChatPanel from "./NavBar/ChatPanel";
-import StreamPanel from "./NavBar/StreamPanel";
-import SearchPanel from "./NavBar/SearchPanel";
-import {SubNavBarButton} from "./SubNavBar";
-import Radium from "radium";
-import {Link} from "../../Frame/ReactComponents/Link";
-import {NotificationsUI} from "./NavBar/NotificationsUI";
-import {Column} from "react-vcomponents";
-import {Row} from "react-vcomponents";
-import ReputationPanel from "./NavBar/ReputationPanel";
-import GuidePanel from "./NavBar/GuidePanel";
-import {VURL, DeepGet} from "js-vextensions";
-import {Div} from "react-vcomponents";
-import { GetData } from "Frame/Database/DatabaseHelpers";
+import {DeepGet, E} from "js-vextensions";
+import {Button, Div, Row} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {ResetCurrentDBRoot} from "UI/More/Admin/ResetCurrentDBRoot";
-import {ACTPersonalMapSelect} from "../../Store/main/personal";
-import {ACTDebateMapSelect} from "Store/main/debates";
+import {dbVersion} from "Main";
+import {Link, Observer} from "vwebapp-framework";
+import {useMemo, useCallback} from "react";
+import {store, RootState} from "Store";
+import {runInAction} from "mobx";
+import {GetDocs} from "mobx-firelink";
+import {fire} from "Utils/LibIntegrations/MobXFirelink";
+import {colors} from "../../Utils/UI/GlobalStyles";
+import {ChatPanel} from "./NavBar/ChatPanel";
+import {GuidePanel} from "./NavBar/GuidePanel";
+import {NotificationsUI} from "./NavBar/NotificationsUI";
+import {ReputationPanel} from "./NavBar/ReputationPanel";
+import {SearchPanel} from "./NavBar/SearchPanel";
+import {StreamPanel} from "./NavBar/StreamPanel";
+import {UserPanel} from "./NavBar/UserPanel";
 
 // main
 // ==========
@@ -43,29 +29,26 @@ const avatarSize = 50;
 const avatarStyles = {
 	icon: {width: avatarSize, height: avatarSize},
 	button: {marginRight: "1.5rem", width: avatarSize, height: avatarSize},
-	wrapper: {marginTop: 45 - avatarSize}
+	wrapper: {marginTop: 45 - avatarSize},
 };
 
-let connector = (state, {}: {})=> ({
-	topLeftOpenPanel: State(a=>a.main.topLeftOpenPanel),
-	topRightOpenPanel: State(a=>a.main.topRightOpenPanel),
-	auth: State(a=>a.firebase.auth),
-	_: GetData({useUndefinedForInProgress: true}, "maps"),
-	dbNeedsInit: GetData({useUndefinedForInProgress: true}, "maps") === null,
-});
-@Connect(connector)
-export class NavBar extends BaseComponentWithConnector(connector, {}) {
+// @Observer({ classHooks: false })
+@Observer
+export class NavBar extends BaseComponentPlus({} as {}, {}) {
 	render() {
-		let {topLeftOpenPanel, topRightOpenPanel, auth, dbNeedsInit} = this.props;
+		// const topLeftOpenPanel = State((a) => a.main.topLeftOpenPanel);
+		// const topRightOpenPanel = State(a => a.main.topRightOpenPanel);
+		const {topLeftOpenPanel, topRightOpenPanel} = store.main;
+		const dbNeedsInit = GetDocs({undefinedForLoading: true}, a=>a.maps) === null; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
 		return (
 			<nav style={{
 				position: "relative", zIndex: 11, padding: "0 10px", boxShadow: colors.navBarBoxShadow,
-				//background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
+				// background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
 				background: "rgba(0,0,0,1)",
 			}}>
 				<div style={{display: "flex"}}>
 					<span style={{position: "absolute", left: 0}}>
-						{/*<NavBarPanelButton text="Stream" panel="stream" corner="top-left"/>
+						{/* <NavBarPanelButton text="Stream" panel="stream" corner="top-left"/>
 						<NavBarPanelButton text="Chat" panel="chat" corner="top-left"/>
 						<NavBarPanelButton text={
 							<Div className="cursorSet" style={{position: "relative", height: 45}}>
@@ -74,10 +57,12 @@ export class NavBar extends BaseComponentWithConnector(connector, {}) {
 								<Div style={{position: "absolute", bottom: 3, width: "100%", textAlign: "center",
 									fontSize: 11, lineHeight: "11px", color: "rgba(0,255,0,.7)"}}>+100</Div>*#/}
 							</Div> as any
-						} panel="reputation" corner="top-left"/>*/}
+						} panel="reputation" corner="top-left"/> */}
 					</span>
-					<div style={{position: "absolute", zIndex: 11, left: 0, top: 45,
-							boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 -150px -150px 0)", display: "table"}}>
+					<div style={{
+						position: "fixed", display: "flex", zIndex: 11, left: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",
+						boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 -150px -150px 0)", // display: 'table'
+					}}>
 						{topLeftOpenPanel == "stream" && <StreamPanel/>}
 						{topLeftOpenPanel == "chat" && <ChatPanel/>}
 						{topLeftOpenPanel == "reputation" && <ReputationPanel/>}
@@ -85,38 +70,39 @@ export class NavBar extends BaseComponentWithConnector(connector, {}) {
 					<Div ct style={{position: "fixed", left: 0, width: "30%", top: 45, bottom: 0}}>
 						{dbNeedsInit && startURL.GetQueryVar("init") &&
 							<Row>
-								<Button text="Initialize database" onClick={()=> {
-									let boxController = ShowMessageBox({
-										title: `Initialize database?`, cancelButton: true,
+								<Button text="Initialize database" onClick={()=>{
+									const boxController = ShowMessageBox({
+										title: "Initialize database?", cancelButton: true,
 										message: `Initialize database content under db-root ${dbVersion}?`,
-										onOK: ()=> {
+										onOK: ()=>{
 											ResetCurrentDBRoot();
-										}
+										},
 									});
 								}}/>
 							</Row>}
 						<NotificationsUI/>
 					</Div>
-					
-					<span style={{margin: "0 auto", paddingRight: 6}}>
-						<NavBarButton page="database" text="Database"/>
-						<NavBarButton page="feedback" text="Feedback"/>
-						<NavBarButton page="forum" text="Forum"/>
-						<NavBarButton page="more" text="More"/>
-						<NavBarButton page="home" text="Debate Map" style={{margin: "0 auto", textAlign: "center", fontSize: 23}}/>
-						<NavBarButton page="social" text="Social"/>
-						<NavBarButton page="personal" text="Personal"/>
-						<NavBarButton page="debates" text="Debates"/>
-						<NavBarButton page="global" text="Global"/>
+
+					<span style={{margin: "0 auto", paddingRight: 17}}>
+						<NavBarPageButton page="database" text="Database"/>
+						<NavBarPageButton page="feedback" text="Feedback"/>
+						{/* <NavBarButton page="forum" text="Forum"/> */}
+						<NavBarPageButton page="more" text="More"/>
+						<NavBarPageButton page="home" text="Debate Map" style={{margin: "0 auto", textAlign: "center", fontSize: 23}}/>
+						<NavBarPageButton page="private" text="Private"/>
+						<NavBarPageButton page="public" text="Public"/>
+						<NavBarPageButton page="global" text="Global"/>
 					</span>
 
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
-						{/*<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
-						<NavBarPanelButton text="Guide" panel="guide" corner="top-right"/>*/}
-						<NavBarPanelButton text={DeepGet(auth, "displayName") ? auth.displayName.match(/(.+?)( |$)/)[1] : `Sign in`} panel="profile" corner="top-right"/>
+						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
+						{/* <NavBarPanelButton text="Guide" panel="guide" corner="top-right"/> */}
+						<NavBarPanelButton text={fire.userInfo?.displayName ? fire.userInfo.displayName.match(/(.+?)( |$)/)[1] : "Sign in"} panel="profile" corner="top-right"/>
 					</span>
-					<div style={{position: "absolute", zIndex: 11, right: 0, top: 45,
-							boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 0 -150px -150px)", display: "table"}}>
+					<div style={{
+						position: "fixed", display: "flex", zIndex: 11, right: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",
+						boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 0 -150px -150px)", // display: 'table',
+					}}>
 						{topRightOpenPanel == "search" && <SearchPanel/>}
 						{topRightOpenPanel == "guide" && <GuidePanel/>}
 						{topRightOpenPanel == "profile" && <UserPanel/>}
@@ -127,71 +113,83 @@ export class NavBar extends BaseComponentWithConnector(connector, {}) {
 	}
 }
 
-//@Radium
-@Connect(state=> ({
-	currentPage: State(a=>a.main.page),
-}))
-export class NavBarButton extends BaseComponent
-		<{page?: string, text: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void} & Partial<{currentPage: string}>,
-		{hovered: boolean}> {
+@Observer
+export class NavBarPageButton extends BaseComponentPlus(
+	{} as {page?: string, text: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void},
+	{hovered: false},
+) {
 	render() {
-		var {page, text, panel, active, style, onClick, currentPage} = this.props;
-		//let {_radiumStyleState: {main: radiumState = {}} = {}} = this.state as any;
-		//let {_radiumStyleState} = this.state as any;
-		let {hovered} = this.state;
+		let {page, text, panel, active, style, onClick} = this.props;
+		// let {_radiumStyleState: {main: radiumState = {}} = {}} = this.state as any;
+		// let {_radiumStyleState} = this.state as any;
+		const {hovered} = this.state;
+
+		const currentPage = store.main.page;
 		active = active != null ? active : page == currentPage;
 
-		let finalStyle = E(
+		const finalStyle = E(
 			{
 				position: "relative", display: "inline-block", cursor: "pointer", verticalAlign: "middle",
-				lineHeight: "45px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: .9,
+				lineHeight: "45px", color: "#FFF", padding: "0 15px", fontSize: 12, textDecoration: "none", opacity: 0.9,
 			},
 			style,
 		);
 
-		let actions = [] as Action<any>[];
-		if (page) {
-			if (page != currentPage) {
-				actions = [new ACTSetPage(page)];
-			} else {
-				if (page == "personal") {
-					actions = [new ACTPersonalMapSelect({id: null})];
-				} else if (page == "debates") {
-					actions = [new ACTDebateMapSelect({id: null})];
+		const actionFunc = (s: RootState)=>{
+			if (page) {
+				if (page != currentPage) {
+					s.main.page = page;
 				} else {
-					actions = [new ACTSetSubpage({page, subpage: null})];
+					// go to the page root-contents, if clicking on page in nav-bar we're already on
+					s.main[currentPage].subpage = null;
+					if (page == "database") {
+						// if our default subpage is already active, then perform that subpage's action-if-already-active
+						if ([null, "users"].Contains(store.main.database.subpage)) {
+							s.main.database.selectedUserID = null;
+						}
+					} else if (page == "feedback") {
+						s.feedback.main.proposals.selectedProposalID = null;
+					} else if (page == "private") {
+						s.main.private.selectedMapID = null;
+					} else if (page == "public") {
+						s.main.public.selectedMapID = null;
+					}
 				}
 			}
-		}
-		
-		let hoverOrActive = hovered || active;
+		};
+
+		const hoverOrActive = hovered || active;
 		return (
-			<Link actions={d=>d(...actions)} style={finalStyle} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})} onClick={onClick}>
+			<Link actionFunc={actionFunc} style={finalStyle} onMouseEnter={useCallback(()=>this.SetState({hovered: true}), [])} onMouseLeave={useCallback(()=>this.SetState({hovered: false}), [])} onClick={onClick}>
 				{text}
 				{hoverOrActive &&
-					<div style={{position: "absolute", left: 0, right: 0, bottom: 0, height: 2, background: `rgba(100,255,100,1)`}}/>}
+					<div style={{position: "absolute", left: 0, right: 0, bottom: 0, height: 2, background: "rgba(100,255,100,1)"}}/>}
 			</Link>
 		);
 	}
 }
 
-type NavBarPanelButton_Props = {text: string, panel: string, corner: "top-left" | "top-right"} & Partial<{topLeftOpenPanel, topRightOpenPanel}>;
-@Connect(_=> ({
-	topLeftOpenPanel: State(a=>a.main.topLeftOpenPanel),
-	topRightOpenPanel: State(a=>a.main.topRightOpenPanel),
-}))
-export class NavBarPanelButton extends BaseComponent<NavBarPanelButton_Props, {}> {
+@Observer
+export class NavBarPanelButton extends BaseComponentPlus({} as {text: string, panel: string, corner: "top-left" | "top-right"}, {}, {active: false}) {
 	render() {
-		let {text, panel, corner, topLeftOpenPanel, topRightOpenPanel} = this.props;
-		let active = (corner == "top-left" ? topLeftOpenPanel : topRightOpenPanel) == panel;
+		const {text, panel, corner} = this.props;
+		const {topLeftOpenPanel, topRightOpenPanel} = store.main;
+		const active = (corner == "top-left" ? topLeftOpenPanel : topRightOpenPanel) == panel;
+
+		this.Stash({active});
 		return (
-			<NavBarButton page={panel} text={text} panel={true} active={active} onClick={e=> {
-				e.preventDefault();
-				if (corner == "top-left")
-					store.dispatch(new ACTTopLeftOpenPanelSet(active ? null : panel));
-				else
-					store.dispatch(new ACTTopRightOpenPanelSet(active ? null : panel));
-			}}/>
+			<NavBarPageButton page={panel} text={text} panel={true} active={active} onClick={this.OnClick}/>
 		);
 	}
+	OnClick = (e: MouseEvent)=>{
+		e.preventDefault();
+		const {corner, panel, active} = this.PropsStateStash;
+		runInAction("NavBarPanelButton_OnClick", ()=>{
+			if (corner == "top-left") {
+				store.main.topLeftOpenPanel = active ? null : panel;
+			} else {
+				store.main.topRightOpenPanel = active ? null : panel;
+			}
+		});
+	};
 }

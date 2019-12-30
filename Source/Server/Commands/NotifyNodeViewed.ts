@@ -1,22 +1,22 @@
-import { Assert } from "js-vextensions";
-import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
-import { MapNode } from "../../Store/firebase/nodes/@MapNode";
-import { Command } from "../Command";
+/* import { Assert } from 'js-vextensions';
+import { GetNode } from 'Store/firebase/nodes';
+import {GetAsync} from 'vwebapp-framework';
+import {Command} from 'vwebapp-framework';
 
-export class NotifyNodeViewed extends Command<{nodeID: number}> {
-	async Prepare() {}
-	async Validate() {
-		let {nodeID} = this.payload;
-		let nodeData = await GetDataAsync("nodes", nodeID) as MapNode;
-		Assert(nodeData, "Node must exist for you to view it!");
+export class NotifyNodeViewed extends Command<{nodeID: string}, {}> {
+	Validate() {
+		const { nodeID } = this.payload;
+		// const nodeData = await GetDataAsync('nodes', nodeID) as MapNode;
+		const nodeData = GetNode(nodeID);
+		AssertV(nodeData, `Node #${nodeID} must exist for you to view it!`);
 	}
-	
-	GetDBUpdates() {
-		let {nodeID} = this.payload;
 
-		let updates = {};
-		updates[`nodeViewers/${nodeID}/${this.userInfo.id}`] = true;
-		updates[`userViewedNodes/${this.userInfo.id}/${nodeID}`] = true;
+	GetDBUpdates() {
+		const { nodeID } = this.payload;
+
+		const updates = {};
+		updates[`nodeViewers/${nodeID}/.${this.userInfo.id}`] = true;
+		updates[`userViewedNodes/${this.userInfo.id}/.${nodeID}`] = true;
 		return updates;
 	}
-}
+} */

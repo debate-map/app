@@ -10,7 +10,7 @@ coverage
 
 /Source/BakedConfig_Dev.ts
 /Source/BakedConfig_Prod.ts
-/dist
+/Dist
 /Source_JS
 /.happypack
 /Tools/Webpack Profiling/Stats.json

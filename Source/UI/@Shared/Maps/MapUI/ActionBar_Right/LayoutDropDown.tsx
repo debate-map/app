@@ -1,55 +1,46 @@
-import {Map} from "../../../../../Store/firebase/maps/@Map";
-import {Connect} from "Frame/Database/FirebaseConnect";
-import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
-import {GetUserID} from "Store/firebase/users";
-import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
-import {DropDown, RowLR, DropDownTrigger, DropDownContent, Pre} from "react-vcomponents";
-import {Button} from "react-vcomponents";
-import {Row} from "react-vcomponents";
-import {Column} from "react-vcomponents";
-import {ScrollView} from "react-vscrollview";
-import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
-import {GetMapTimelines, GetTimeline, GetTimelineSteps} from "../../../../../Store/firebase/timelines";
-import {Timeline} from "../../../../../Store/firebase/timelines/@Timeline";
-import {ShowAddTimelineDialog} from "../../../Timelines/AddTimelineDialog";
-import { ACTMap_SelectedTimelineSet } from "Store/main/maps/$map";
-import AddTimelineStep from "Server/Commands/AddTimelineStep";
-import {Select} from "react-vcomponents";
-import {UpdateTimelineStep} from "../../../../../Server/Commands/UpdateTimelineStep";
-import {GetEntries} from "../../../../../Frame/General/Enums";
-import {RemoveHelpers} from "../../../../../Frame/Database/DatabaseHelpers";
-import DeleteTimelineStep from "Server/Commands/DeleteTimelineStep";
-import DeleteTimeline from "../../../../../Server/Commands/DeleteTimeline";
-import {TextInput} from "react-vcomponents";
-import {GetCurrentURL} from "../../../../../Frame/General/URLs";
-import {VURL} from "js-vextensions";
-import {GetNewURL} from "Frame/URL/URLManager";
-import {ACTSetInitialChildLimit} from "../../../../../Store/main";
-import {Spinner, CheckBox} from "react-vcomponents";
-import {ACTSet} from "../../../../../Store/index";
+import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, RowLR, Spinner} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
+import {Map} from "Store/firebase/maps/@Map";
+import {GADDemo} from "UI/@GAD/GAD";
+import {Button_GAD} from "UI/@GAD/GADButton";
+import {store} from "Store";
+import {runInAction} from "mobx";
+import {Observer} from "vwebapp-framework";
+import {ACTEnsureMapStateInit} from "Store/main/maps";
 
-let connector = (state, {}: {})=> ({
-	initialChildLimit: State(a=>a.main.initialChildLimit),
-	showReasonScoreValues: State(a=>a.main.showReasonScoreValues)
-});
-@Connect(connector)
-export class LayoutDropDown extends BaseComponentWithConnector(connector, {}) {
+@Observer
+export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 	render() {
-		let {initialChildLimit, showReasonScoreValues} = this.props;
-		let splitAt = 230;
+		const {map} = this.props;
+		const {initialChildLimit} = store.main.maps;
+		const {showReasonScoreValues} = store.main.maps;
+
+		const Button_Final = GADDemo ? Button_GAD : Button;
+		const splitAt = 230;
 		return (
 			<DropDown>
-				<DropDownTrigger><Button text="Layout"/></DropDownTrigger>
-				<DropDownContent style={{right: 0, width: 320}}><Column>
+				<DropDownTrigger><Button_Final text="Layout" style={{height: "100%"}}/></DropDownTrigger>
+				<DropDownContent style={{right: 0, width: 320, borderRadius: "0 0 0 5px"}}><Column>
 					<RowLR splitAt={splitAt}>
 						<Pre>Initial child limit: </Pre>
-						<Spinner min={1} style={{width: "100%"}}
-							value={initialChildLimit} onChange={val=>store.dispatch(new ACTSetInitialChildLimit({value: val}))}/>
+						<Spinner min={1} style={{width: "100%"}} value={initialChildLimit} onChange={val=>{
+							runInAction("LayoutDropDown.initialChildLimit.onChange", ()=>store.main.maps.initialChildLimit = val);
+						}}/>
 					</RowLR>
 					<RowLR splitAt={splitAt}>
 						<Pre>Show Reason Score values: </Pre>
-						<CheckBox checked={showReasonScoreValues} onChange={val=>store.dispatch(new ACTSet(a=>a.main.showReasonScoreValues, val))}/>
+						<CheckBox checked={showReasonScoreValues} onChange={val=>{
+							runInAction("LayoutDropDown.showReasonScoreValues.onChange", ()=>store.main.maps.showReasonScoreValues = val);
+						}}/>
 					</RowLR>
+					<Row mt={5}>
+						<Button text="Clear map-view state" onClick={()=>{
+							runInAction("LayoutDropDown.clearMapViewState.onClick", ()=>{
+								store.main.maps.mapViews.delete(map._key);
+								ACTEnsureMapStateInit(map._key);
+							});
+						}}/>
+					</Row>
 				</Column></DropDownContent>
 			</DropDown>
 		);

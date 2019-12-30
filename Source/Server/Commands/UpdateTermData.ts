@@ -1,37 +1,44 @@
-import { UserEdit } from "Server/CommandMacros";
-import { Assert } from "js-vextensions";
-import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
-import { Term } from "../../Store/firebase/terms/@Term";
-import { Command } from "../Command";
+import {Assert} from "js-vextensions";
+import {UserEdit} from "Server/CommandMacros";
+import {AssertValidate, AddSchema, GetSchemaJSON, Schema} from "vwebapp-framework";
+import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
+import {GetTerm} from "Store/firebase/terms";
+import {Term} from "../../Store/firebase/terms/@Term";
+
+type MainType = Term;
+const MTName = "Term";
+
+AddSchema(`Update${MTName}_payload`, [MTName], ()=>({
+	properties: {
+		id: {type: "string"},
+		updates: Schema({
+			properties: GetSchemaJSON(MTName)["properties"].Including("name", "disambiguation", "type", "person", "shortDescription_current"),
+		}),
+	},
+	required: ["id", "updates"],
+}));
 
 @UserEdit
-export default class UpdateTermData extends Command<{termID: number, updates: Partial<Term>}> {
-	Validate_Early() {
-		let {termID, updates} = this.payload;
-		let allowedPropUpdates = ["name", "disambiguation", "type", "person", "shortDescription_current"];
-		Assert(updates.VKeys().Except(...allowedPropUpdates).length == 0, `Cannot use this command to update props other than: ${allowedPropUpdates.join(", ")}`);
-	}
-
+export class UpdateTermData extends Command<{termID: string, updates: Partial<Term>}, {}> {
 	oldData: Term;
 	newData: Term;
-	async Prepare() {
-		let {termID, updates} = this.payload;
-		this.oldData = await GetDataAsync({addHelpers: false}, "terms", termID) as Term;
+	Validate() {
+		const {termID, updates} = this.payload;
+		this.oldData = GetTerm(termID);
+		AssertV(this.oldData, "oldData is null.");
 		this.newData = {...this.oldData, ...updates};
+		AssertValidate("Term", this.newData, "New-data invalid");
 	}
-	async Validate() {
-		AssertValidate("Term", this.newData, `New-data invalid`);
-	}
-	
+
 	GetDBUpdates() {
-		let {termID} = this.payload;
-		
-		let updates = {
+		const {termID} = this.payload;
+
+		const updates = {
 			[`terms/${termID}`]: this.newData,
 		} as any;
 		if (this.newData.name != this.oldData.name) {
-			updates[`termNames/${this.oldData.name.toLowerCase()}/${termID}`] = null; 
-			updates[`termNames/${this.newData.name.toLowerCase()}/${termID}`] = true; 
+			updates[`termNames/${this.oldData.name.toLowerCase()}/.${termID}`] = null;
+			updates[`termNames/${this.newData.name.toLowerCase()}/.${termID}`] = true;
 		}
 		return updates;
 	}

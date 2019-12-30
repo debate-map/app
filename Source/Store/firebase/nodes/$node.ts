@@ -1,18 +1,23 @@
-import {GetImage} from '../images';
-import {MapNode, MapNodeL2, ClaimForm, ChildEntry, ClaimType, MapNodeL3, Polarity} from "./@MapNode";
-import {RatingType} from "../nodeRatings/@RatingType";
-import {MapNodeType} from './@MapNodeType';
-import {GetParentNode, IsLinkValid, IsNewLinkValid, IsNodeSubnode, GetNode, GetParentNodeL2, GetNodeChildrenL2, GetNodeChildren, GetNodeID, HolderType} from "../nodes";
-import {GetValues} from '../../../Frame/General/Enums';
-import {PermissionGroupSet} from '../userExtras/@UserExtraInfo';
-import {ImageType, GetNiceNameForImageType} from "../images/@Image";
+import {Assert, CachedTransform, GetValues, IsString, VURL, E} from "js-vextensions";
 import katex from "katex";
-import {PreProcessLatex} from "../../../UI/@Shared/Maps/MapNode/NodeMathUI";
-import {SplitStringBySlash_Cached} from "../../../Frame/Database/StringSplitCache";
-import {SlicePath} from "../../../Frame/Database/DatabaseHelpers";
-import {VURL, CachedTransform} from "js-vextensions";
-import {MapNodeRevision} from "./@MapNodeRevision";
+import {SplitStringBySlash_Cached, SlicePath, StoreAccessor} from "mobx-firelink";
+import {GetImage} from "../images";
+import {GetNiceNameForImageType} from "../images/@Image";
+import {RatingType} from "../nodeRatings/@RatingType";
 import {GetNodeRevision} from "../nodeRevisions";
+import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, HolderType, IsNodeSubnode} from "../nodes";
+import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
+import {ChildEntry, ClaimForm, ClaimType, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode";
+import {MapNodeRevision, TitlesMap, TitlesMap_baseKeys} from "./@MapNodeRevision";
+import {MapNodeType} from "./@MapNodeType";
+
+export function PreProcessLatex(text: string) {
+	// text = text.replace(/\\term{/g, "\\text{");
+	// "\term{some-term}{123}" -> "\text{@term[some-term,123]}
+	text = text.replace(/\\term{(.+?)}{([A-Za-z0-9_-]+?)}/g, (m, g1, g2)=>`\\text{@term[${g1},${g2}]}`);
+	text = text.replace(/\\term/g, ()=>"[syntax wrong]"); // for user syntax mistakes, keep from causing error
+	return text;
+}
 
 export function GetFontSizeForNode(node: MapNodeL2, isSubnode = false) {
 	if (node.current.fontSizeOverride) return node.current.fontSizeOverride;
@@ -37,23 +42,23 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	}
 	if (node.type == MapNodeType.Claim) {
 		let result: RatingTypeInfo[];
-		//result = [{type: "truth", main: true}]; //, {type: "significance", main: true}];
-		result = [{type: "truth", main: true}]; //, {type: "relevance", main: true}];
-		/*if ((node as MapNodeL2).link && (node as MapNodeL2).link.form == ClaimForm.YesNoQuestion) {
+		// result = [{type: "truth", main: true}]; //, {type: "significance", main: true}];
+		result = [{type: "truth", main: true}]; // , {type: "relevance", main: true}];
+		/* if ((node as MapNodeL2).link && (node as MapNodeL2).link.form == ClaimForm.YesNoQuestion) {
 			result.Remove(result.First(a=>a.type == "significance"));
 			result.Insert(0, {type: "significance", main: true});
-		}*/
+		} */
 		return result;
 	}
 	if (node.type == MapNodeType.Argument) {
-		//return [{type: "strength", main: true}, {type: "impact", main: true}];
+		// return [{type: "strength", main: true}, {type: "impact", main: true}];
 		return [{type: "relevance"}, {type: "impact", main: true}];
 	}
 	Assert(false);
 }
-export function GetMainRatingType(node: MapNodeL2): RatingType {
+export const GetMainRatingType = StoreAccessor(s=>(node: MapNodeL2)=>{
 	return GetRatingTypesForNode(node).FirstOrX(a=>a.main, {}).type;
-}
+});
 export function GetSortByRatingType(node: MapNodeL3): RatingType {
 	if ((node as MapNodeL3).link && (node as MapNodeL3).link.form == ClaimForm.YesNoQuestion) {
 		return "significance";
@@ -64,17 +69,18 @@ export function GetSortByRatingType(node: MapNodeL3): RatingType {
 export function ReversePolarity(polarity: Polarity) {
 	return polarity == Polarity.Supporting ? Polarity.Opposing : Polarity.Supporting;
 }
-export function GetFinalPolarityAtPath(node: MapNodeL2, path: string): Polarity {
+export const GetFinalPolarityAtPath = StoreAccessor(s=>(node: MapNodeL2, path: string): Polarity=>{
 	Assert(node.type == MapNodeType.Argument, "Only argument nodes have polarity.");
-	let parent = GetParentNodeL2(path);
+	const parent = GetParentNodeL2(path);
 	if (!parent) return Polarity.Supporting; // can be null, if for NodeUI_ForBots
 
-	let link = GetLinkUnderParent(node._id, parent);
+	const link = GetLinkUnderParent(node._key, parent);
 	if (link == null) return Polarity.Supporting; // can be null, if path is invalid (eg. copied-node path)
+	Assert(link.polarity != null, `The link for the argument #${node._key} must specify the polarity.`);
 
-	let parentForm = GetNodeForm(parent, SplitStringBySlash_Cached(path).slice(0, -1).join("/"));
+	const parentForm = GetNodeForm(parent, SplitStringBySlash_Cached(path).slice(0, -1).join("/"));
 	return GetFinalPolarity(link.polarity, parentForm);
-}
+});
 export function GetFinalPolarity(basePolarity: Polarity, parentForm: ClaimForm): Polarity {
 	let result = basePolarity;
 	if (parentForm == ClaimForm.Negation) {
@@ -86,7 +92,7 @@ export function IsNodeL1(node): node is MapNode {
 	return !node["current"];
 }
 export function AsNodeL1(node: MapNodeL2 | MapNodeL3) {
-	let result = {...node};
+	const result = {...node};
 	delete result.current;
 	delete result["finalPolarity"];
 	delete result["link"];
@@ -97,24 +103,24 @@ export function IsNodeL2(node: MapNode): node is MapNodeL2 {
 	return node["current"];
 }
 export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision) {
-	//Assert(currentRevision.titles, "A MapNodeRevision object must have a titles property!"); // temp removed (for db-upgrade)
-	let result = node.Extended({current: currentRevision}) as MapNodeL2;
+	// Assert(currentRevision.titles, "A MapNodeRevision object must have a titles property!"); // temp removed (for db-upgrade)
+	const result = E(node, {current: currentRevision}) as MapNodeL2;
 	delete result["finalPolarity"];
 	delete result["link"];
 	return result;
 }
-export function GetNodeL2(nodeID: number | MapNode, path?: string) {
-	if (IsNumber(nodeID)) nodeID = GetNode(nodeID);
+export const GetNodeL2 = StoreAccessor(s=>(nodeID: string | MapNode, path?: string)=>{
+	if (IsString(nodeID)) nodeID = GetNode(nodeID);
 	if (nodeID == null) return null;
-	let node = nodeID as MapNode;
-	
+	const node = nodeID as MapNode;
+
 	// if any of the data in a MapNodeL2 is not loaded yet, just return null (we want it to be all or nothing)
-	let currentRevision = GetNodeRevision(node.currentRevision);
+	const currentRevision = GetNodeRevision(node.currentRevision);
 	if (currentRevision == null) return null;
 
-	let nodeL2 = AsNodeL2(node, currentRevision);
+	const nodeL2 = AsNodeL2(node, currentRevision);
 	return CachedTransform("GetNodeL2", [path], nodeL2, ()=>nodeL2);
-}
+});
 
 export function IsNodeL3(node: MapNode): node is MapNodeL2 {
 	return node["finalPolarity"] && node["link"];
@@ -127,14 +133,14 @@ export function AsNodeL3(node: MapNodeL2, finalPolarity?: Polarity, link?: Child
 		seriesAnchor: false,
 		polarity: Polarity.Supporting,
 	};
-	return node.Extended({finalPolarity, link}) as MapNodeL3;
+	return E(node, {finalPolarity, link}) as MapNodeL3;
 }
-export function GetNodeL3(path: string) {
+export const GetNodeL3 = StoreAccessor(s=>(path: string)=>{
 	if (path == null) return null;
-	let nodeID = GetNodeID(path);
-	let node = GetNodeL2(nodeID);
+	const nodeID = GetNodeID(path);
+	const node = GetNodeL2(nodeID);
 	if (node == null) return null;
-	
+
 	// if any of the data in a MapNodeL3 is not loaded yet, just return null (we want it to be all or nothing)
 	let finalPolarity = null;
 	if (node.type == MapNodeType.Argument) {
@@ -142,19 +148,20 @@ export function GetNodeL3(path: string) {
 		if (finalPolarity == null) return null;
 	}
 
-	let isSubnode = IsNodeSubnode(node);
+	const isSubnode = IsNodeSubnode(node);
 	if (!isSubnode) {
-		let parent = GetParentNode(path);
+		const parent = GetParentNode(path);
 		if (parent == null && path.Contains("/")) return null;
-		var link = GetLinkUnderParent(node._id, parent);
+		var link = GetLinkUnderParent(node._key, parent);
 		if (link == null && path.Contains("/")) return null;
 	}
 
-	let nodeL3 = AsNodeL3(node, finalPolarity, link);
-	return CachedTransform("GetNodeL3", [path], nodeL3, ()=>nodeL3);
-}
+	const nodeL3 = AsNodeL3(node, finalPolarity, link);
+	// return CachedTransform('GetNodeL3', [path], nodeL3, () => nodeL3);
+	return nodeL3;
+});
 
-/*export function GetNodeForm(node: MapNode, path: string): ClaimForm {
+/* export function GetNodeForm(node: MapNode, path: string): ClaimForm {
 	let parent = GetParentNode(path);
 	return GetNodeForm(node, parent);
 }
@@ -162,26 +169,26 @@ export function GetClaimFormUnderParent(node: MapNode, parent: MapNode): ClaimFo
 	let link = GetLinkUnderParent(node._id, parent);
 	if (link == null) return ClaimForm.Base;
 	return link.form;
-}*/
-export function GetNodeForm(node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2) {
+} */
+export const GetNodeForm = StoreAccessor(s=>(node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2): ClaimForm=>{
 	if ((node as MapNodeL3).link) {
 		return (node as MapNodeL3).link.form;
 	}
-	
-	let parent: MapNodeL2 = IsString(pathOrParent) ? GetParentNodeL2(pathOrParent as string) : pathOrParent as MapNodeL2;
-	let link = GetLinkUnderParent(node._id, parent);
+
+	const parent: MapNodeL2 = IsString(pathOrParent) ? GetParentNodeL2(pathOrParent as string) : pathOrParent as MapNodeL2;
+	const link = GetLinkUnderParent(node._key, parent);
 	if (link == null) return ClaimForm.Base;
 	return link.form;
-}
-export function GetLinkUnderParent(nodeID: number, parent: MapNode): ChildEntry {
+});
+export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapNode): ChildEntry=>{
 	if (parent == null) return null;
 	if (parent.children == null) return null; // post-delete, parent-data might have updated before child-data
-	let link = parent.children[nodeID];
+	const link = parent.children[nodeID];
 	return link;
-}
+});
 export function GetLinkAtPath(path: string) {
-	let nodeID = GetNodeID(path);
-	let parent = GetNode(GetNodeID(SlicePath(path, 1)));
+	const nodeID = GetNodeID(path);
+	const parent = GetNode(GetNodeID(SlicePath(path, 1)));
 	return GetLinkUnderParent(nodeID, parent);
 }
 
@@ -190,19 +197,33 @@ export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
 	return null;
 }
 
-/** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
-export function GetNodeDisplayText(node: MapNodeL2, path?: string, form?: ClaimForm): string {
-	form = form || GetNodeForm(node, path);
+export function GetAllNodeRevisionTitles(nodeRevision: MapNodeRevision): string[] {
+	if (nodeRevision == null || nodeRevision.titles == null) return [];
+	return TitlesMap_baseKeys.map(key=>nodeRevision.titles[key]).filter(a=>a != null);
+}
 
+/** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
+export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: string, form?: ClaimForm): string=>{
+	form = form || GetNodeForm(node, path);
+	const titles = node.current.titles || {} as TitlesMap;
+
+	// if (path && path.split('/').length > 3) throw new Error('Test1'); // for testing node error-boundaries
+
+	if (node.type == MapNodeType.Argument && !node.multiPremiseArgument && !titles.base) {
+		// const baseClaim = GetNodeL2(node.children && node.children.VKeys(true).length ? node.children.VKeys(true)[0] : null);
+		// const baseClaim = GetArgumentPremises(node)[0];
+		const baseClaim = GetNodeChildrenL2(node).filter(a=>a && a.type == MapNodeType.Claim)[0];
+		if (baseClaim) return GetNodeDisplayText(baseClaim);
+	}
 	if (node.type == MapNodeType.Claim) {
 		if (node.current.equation) {
 			let result = node.current.equation.text;
 			if (node.current.equation.latex && !isBot) {
-				//result = result.replace(/\\[^{]+/g, "").replace(/[{}]/g, "");
-				let latex = PreProcessLatex(result);
+				// result = result.replace(/\\[^{]+/g, "").replace(/[{}]/g, "");
+				const latex = PreProcessLatex(result);
 				try {
-					let html = katex.renderToString(latex);
-					let dom = $(html).children(".katex-html");
+					const html = katex.renderToString(latex);
+					const dom = $(html).children(".katex-html");
 					result = dom.text();
 				} catch (ex) {
 					if (ex.message.startsWith("KaTeX parse error: ")) {
@@ -213,81 +234,82 @@ export function GetNodeDisplayText(node: MapNodeL2, path?: string, form?: ClaimF
 			return result;
 		}
 		if (node.current.contentNode) {
-			return `The statement below was made` //(as shown)`
-				+ (node.current.contentNode.sourceChains[0][0].name ? ` in "${node.current.contentNode.sourceChains[0][0].name}"` : "")
-				+ (node.current.contentNode.sourceChains[0][0].author ? ` by ${node.current.contentNode.sourceChains[0][0].author}` : "")
-				+ (node.current.contentNode.sourceChains[0][0].link ? ` at "${
-					VURL.Parse(node.current.contentNode.sourceChains[0][0].link, false).toString({domain_protocol: false})}"` : "") // maybe temp
-				+ `.`;
+			const firstSource = node.current.contentNode.sourceChains[0].sources[0];
+			// if (PROD && firstSource == null) return '(first source is null)'; // defensive
+			return `The statement below was made${ // (as shown)
+				firstSource.name ? ` in "${firstSource.name}"` : ""}${
+					firstSource.author ? ` by ${firstSource.author}` : ""}${
+						firstSource.link ? ` at "${VURL.Parse(firstSource.link, false).toString({domain_protocol: false})}"` : "" // maybe temp
+			}.`;
 		}
 		if (node.current.image) {
-			let image = GetImage(node.current.image.id);
-			if (image == null) return `...`;
-			//if (image.sourceChains == null) return `The ${GetNiceNameForImageType(image.type)} below is unmodified.`; // temp
-			return `The ${GetNiceNameForImageType(image.type)} below was published` //(as shown)`
-				+ (image.sourceChains[0][0].name ? ` in "${image.sourceChains[0][0].name}"` : "")
-				+ (image.sourceChains[0][0].author ? ` by ${image.sourceChains[0][0].author}` : "")
-				+ (image.sourceChains[0][0].link ? ` at "${
-					VURL.Parse(image.sourceChains[0][0].link, false).toString({domain_protocol: false})}"` : "") // maybe temp
-				+ `.`;
+			const image = GetImage(node.current.image.id);
+			if (image == null) return "...";
+			// if (image.sourceChains == null) return `The ${GetNiceNameForImageType(image.type)} below is unmodified.`; // temp
+			const firstSource = node.current.contentNode.sourceChains[0].sources[0];
+			return `The ${GetNiceNameForImageType(image.type)} below was published${ // (as shown)`
+				firstSource.name ? ` in "${firstSource.name}"` : ""}${
+					firstSource.author ? ` by ${firstSource.author}` : ""}${
+						firstSource.link ? ` at "${VURL.Parse(firstSource.link, false).toString({domain_protocol: false})}"` : "" // maybe temp
+			}.`;
 		}
 
 		if (form) {
-			if (form == ClaimForm.Negation)
-				return node.current.titles.negation || "[negation title not set]";
-			if (form == ClaimForm.YesNoQuestion)
-				return node.current.titles.yesNoQuestion || "[yes-no-question title not set]";
-			return node.current.titles.base || "[base title not set]";
+			if (form == ClaimForm.Negation) return titles.negation || missingTitleStrings[1];
+			if (form == ClaimForm.YesNoQuestion) return titles.yesNoQuestion || missingTitleStrings[2];
 		}
 	}
-	return node.current.titles.base || node.current.titles.yesNoQuestion || node.current.titles.negation || "";
-}
+	return titles.base || missingTitleStrings[0];
+});
+export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(yes-no-question title not set)"];
 
 export function GetValidChildTypes(nodeType: MapNodeType, path: string) {
-	let nodeTypes = GetValues<MapNodeType>(MapNodeType);
-	let validChildTypes = nodeTypes.filter(type=>IsLinkValid(nodeType, path, {type} as any));
+	const nodeTypes = GetValues<MapNodeType>(MapNodeType);
+	const validChildTypes = nodeTypes.filter(type=>ForLink_GetError(nodeType, type) == null);
 	return validChildTypes;
 }
-export function GetValidNewChildTypes(parent: MapNodeL2, parentPath: string, holderType: HolderType, permissions: PermissionGroupSet) {
-	let nodeTypes = GetValues<MapNodeType>(MapNodeType);
-	let validChildTypes = nodeTypes.filter(type=>IsNewLinkValid(parentPath, holderType, {type} as any, permissions));
+export function GetValidNewChildTypes(parent: MapNodeL2, holderType: HolderType, permissions: PermissionGroupSet) {
+	const nodeTypes = GetValues<MapNodeType>(MapNodeType);
+	const validChildTypes = nodeTypes.filter(type=>ForNewLink_GetError(parent._key, {type} as any, permissions, holderType) == null);
 	return validChildTypes;
 }
 
 export function GetClaimType(node: MapNodeL2) {
 	if (node.type != MapNodeType.Claim) return null;
 	return (
-		node.current.equation ? ClaimType.Equation :
-		node.current.contentNode ? ClaimType.Quote :
-		node.current.image ? ClaimType.Image :
-		ClaimType.Normal
+		node.current.equation ? ClaimType.Equation
+		: node.current.contentNode ? ClaimType.Quote
+		: node.current.image ? ClaimType.Image
+		: ClaimType.Normal
 	);
 }
 
-export function IsSinglePremiseArgument(node: MapNode) {
-	/*nodeChildren = nodeChildren || GetNodeChildren(node);
+/** Returns whether the node provided is an argument, and marked as single-premise. */
+export const IsSinglePremiseArgument = StoreAccessor(s=>(node: MapNode)=>{
+	/* nodeChildren = nodeChildren || GetNodeChildren(node);
 	if (nodeChildren.Any(a=>a == null)) return null;
 	//return nodeChildren.Any(child=>IsPremiseOfSinglePremiseArgument(child, node));
-	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length == 1;*/
+	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length == 1; */
 	return node && node.type == MapNodeType.Argument && !node.multiPremiseArgument;
-}
-export function IsMultiPremiseArgument(node: MapNode) {
-	/*nodeChildren = nodeChildren || GetNodeChildren(node);
+});
+/** Returns whether the node provided is an argument, and marked as multi-premise. */
+export const IsMultiPremiseArgument = StoreAccessor(s=>(node: MapNode)=>{
+	/* nodeChildren = nodeChildren || GetNodeChildren(node);
 	if (nodeChildren.Any(a=>a == null)) return null;
 	//return node.type == MapNodeType.Argument && !IsSinglePremiseArgument(node, nodeChildren);
-	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length > 1;*/
+	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length > 1; */
 	return node && node.type == MapNodeType.Argument && node.multiPremiseArgument;
-}
+});
 
-export function IsPremiseOfSinglePremiseArgument(node: MapNode, parent: MapNode) {
+export const IsPremiseOfSinglePremiseArgument = StoreAccessor(s=>(node: MapNode, parent: MapNode)=>{
 	if (parent == null) return null;
-	//let parentChildren = GetNodeChildrenL2(parent);
-	/*if (parentChildren.Any(a=>a == null)) return false;
-	return node.type == MapNodeType.Claim && parentChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && node.link.form != ClaimForm.YesNoQuestion;*/
+	// let parentChildren = GetNodeChildrenL2(parent);
+	/* if (parentChildren.Any(a=>a == null)) return false;
+	return node.type == MapNodeType.Claim && parentChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && node.link.form != ClaimForm.YesNoQuestion; */
 	return node.type == MapNodeType.Claim && IsSinglePremiseArgument(parent);
-}
+});
 export function IsPremiseOfMultiPremiseArgument(node: MapNode, parent: MapNode) {
 	if (parent == null) return null;
-	//let parentChildren = GetNodeChildrenL2(parent);
+	// let parentChildren = GetNodeChildrenL2(parent);
 	return node.type == MapNodeType.Claim && IsMultiPremiseArgument(parent);
 }

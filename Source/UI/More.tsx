@@ -1,48 +1,33 @@
-import {BaseComponent, BaseComponentWithConnector} from "react-vextensions";
-import {firebaseConnect} from "react-redux-firebase";
-import AdminUI from "./More/Admin";
-import SubNavBar from "./@Shared/SubNavBar";
-import {SubNavBarButton} from "./@Shared/SubNavBar";
-import {IsUserAdmin} from "../Store/firebase/userExtras";
-import {Connect} from "../Frame/Database/FirebaseConnect";
-import {GetUserID, GetUserPermissionGroups, GetUsers} from "../Store/firebase/users";
-import {styles} from "../Frame/UI/GlobalStyles";
-import {connect} from "react-redux";
-import {RootState} from "../Store/index";
-import LinksUI from "./More/Links";
-import {ScrollView} from "react-vscrollview";
-import {Column} from "react-vcomponents";
 import {Switch} from "react-vcomponents";
-import {Fragment} from "redux-little-router";
-import TasksUI from "./More/Tasks";
-import {Div} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
+import {HasAdminPermissions} from "Store/firebase/userExtras";
+import {store} from "Store";
+import {Observer} from "vwebapp-framework";
+import {GetUsers, MeID} from "../Store/firebase/users";
+import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
+import {AdminUI} from "./More/Admin";
+import {LinksUI} from "./More/Links";
 
-let connector = state=> ({
-	_: GetUserPermissionGroups(GetUserID()), // just to make sure we've retrieved this data (and re-render when it changes)
-	userCount: (GetUsers() || []).length,
-	currentSubpage: State(a=>a.main.more.subpage),
-});
-@Connect(connector)
-export class MoreUI extends BaseComponentWithConnector(connector, {}) {
+@Observer
+export class MoreUI extends BaseComponentPlus({} as {}, {}) {
 	render() {
-		let {userCount, currentSubpage, children} = this.props;
-		let page = "more";
-		let admin = IsUserAdmin(GetUserID());
+		const admin = HasAdminPermissions(MeID());
+		const userCount = (GetUsers() || []).length;
+		const currentSubpage = store.main.more.subpage;
+		const page = "more";
 		return (
-			<Column style={ES({flex: 1})}>
+			<>
 				<SubNavBar>
-					<SubNavBarButton {...{page}} subpage="links" text="Links"/>
-					{/*<SubNavBarButton {...{page}} subpage="tasks" text="Tasks"/>*/}
-					{admin && <SubNavBarButton {...{page}} subpage="admin" text="Admin"/>}
+					<SubNavBarButton page={page} subpage="links" text="Links"/>
+					{/* <SubNavBarButton page={page} subpage="tasks" text="Tasks"/> */}
+					{admin && <SubNavBarButton page={page} subpage="admin" text="Admin"/>}
 				</SubNavBar>
-				<ScrollView style={ES({flex: 1} /*styles.fillParent_abs*/)} scrollVBarStyle={{width: 10}}>
-					<Switch>
-						<LinksUI/>
-						{/*currentSubpage == "tasks" && <TasksUI/>*/}
-						{currentSubpage == "admin" && <AdminUI/>}
-					</Switch>
-				</ScrollView>
-			</Column>
+				<Switch>
+					<LinksUI/>
+					{/* currentSubpage == "tasks" && <TasksUI/> */}
+					{currentSubpage == "admin" && <AdminUI/>}
+				</Switch>
+			</>
 		);
 	}
 }

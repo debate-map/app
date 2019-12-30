@@ -1,40 +1,39 @@
-import { MapEdit } from "Server/CommandMacros";
-import { Assert } from "js-vextensions";
-import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
-import { Map } from "../../Store/firebase/maps/@Map";
-import { Command } from "../Command";
-import { UserEdit } from "../CommandMacros";
+import {Assert} from "js-vextensions";
+import {MapEdit} from "Server/CommandMacros";
+import {AddSchema, AssertValidate} from "vwebapp-framework";
+import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
+import {GetMap} from "Store/firebase/maps";
+import {Map} from "../../Store/firebase/maps/@Map";
+import {UserEdit} from "../CommandMacros";
 
-AddSchema({
+AddSchema("SetLayerAttachedToMap_payload", {
 	properties: {
-		mapID: {type: "number"},
-		layerID: {type: "number"},
+		mapID: {type: "string"},
+		layerID: {type: "string"},
 		attached: {type: "boolean"},
 	},
 	required: ["mapID", "layerID", "attached"],
-}, "SetLayerAttachedToMap_payload");
+});
 
 @MapEdit
 @UserEdit
-export default class SetLayerAttachedToMap extends Command<{mapID: number, layerID: number, attached: boolean}> {
+export class SetLayerAttachedToMap extends Command<{mapID: string, layerID: string, attached: boolean}, {}> {
 	Validate_Early() {
-		AssertValidate("SetLayerAttachedToMap_payload", this.payload, `Payload invalid`);
+		AssertValidate("SetLayerAttachedToMap_payload", this.payload, "Payload invalid");
 	}
 
 	oldData: Map;
-	async Prepare() {
-		let {mapID} = this.payload;
-		this.oldData = await GetDataAsync({addHelpers: false}, "maps", mapID) as Map;
+	Validate() {
+		const {mapID} = this.payload;
+		this.oldData = GetMap(mapID);
+		AssertV(this.oldData, "Map does not exist!");
 	}
-	async Validate() {
-		Assert(this.oldData, "Map does not exist!");
-	}
-	
+
 	GetDBUpdates() {
-		let {mapID, layerID, attached} = this.payload;
-		let updates = {};
-		updates[`maps/${mapID}/layers/${layerID}`] = attached || null;
-		updates[`layers/${layerID}/mapsWhereEnabled/${mapID}`] = attached || null;
+		const {mapID, layerID, attached} = this.payload;
+		const updates = {};
+		updates[`maps/${mapID}/.layers/.${layerID}`] = attached || null;
+		updates[`layers/${layerID}/.mapsWhereEnabled/.${mapID}`] = attached || null;
 		return updates;
 	}
 }

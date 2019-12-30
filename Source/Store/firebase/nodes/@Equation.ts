@@ -1,4 +1,4 @@
-import {GetValues, GetValues_ForSchema} from "../../../Frame/General/Enums";
+import {AddSchema} from "vwebapp-framework";
 
 export class Equation {
 	latex: boolean;
@@ -6,7 +6,7 @@ export class Equation {
 	isStep? = true;
 	explanation = null as string;
 }
-AddSchema({
+AddSchema("Equation", {
 	properties: {
 		latex: {type: "boolean"},
 		text: {type: "string"},
@@ -14,4 +14,4 @@ AddSchema({
 		explanation: {type: ["null", "string"]},
 	},
 	required: ["text"],
-}, "Equation");
+});

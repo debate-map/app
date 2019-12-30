@@ -1,0 +1,34 @@
+@import "~vwebapp-framework/Source/Utils/Styles/Main.scss";
+
+.CodeMirror {
+	color: rgba(255,255,255,.7);
+}
+.CodeMirror-wrap > .CodeMirror-scroll {
+	/*overflow: initial !important;
+	overflow-y: scroll !important;*/
+	// fix for odd display glitch, where first post's editor would show horizontal-scrollbar (even though "marginBottom: -30" is supposed to already fix it) 
+	will-change: transform;
+
+	// fix for odd issue, of bottom of codemirror text-area blocking mouse events of part of buttons just beneath it
+	pointer-events: none;
+	.CodeMirror-sizer {
+		pointer-events: auto;
+	}
+}
+
+.ReactModal__Overlay {
+	z-index: 12 !important;
+}
+
+// fallback, for if code-based approach fails
+.background {
+	//background-image: url(/Images/Backgrounds/Ocean_x1920.jpg);
+	background-color: #E5E8EC;
+	background-position: center bottom;
+	background-size: cover;
+}
+/*@media (min-width: 1921px) {
+	.background {
+		background-image: url(/Images/Backgrounds/Ocean_x3840.jpg);
+	}
+}*/

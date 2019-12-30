@@ -1,25 +1,23 @@
-import { UserEdit } from "Server/CommandMacros";
-import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
-import { Image } from "../../Store/firebase/images/@Image";
-import { Command } from "../Command";
+import {UserEdit} from "Server/CommandMacros";
+import {GenerateUUID} from "Utils/General/KeyGenerator";
+import {Command_Old, Command} from "mobx-firelink";
+import {AssertValidate} from "vwebapp-framework";
+import {Image} from "../../Store/firebase/images/@Image";
 
 @UserEdit
-export default class AddImage extends Command<{image: Image}> {
-	imageID: number;
-	async Prepare() {
-		let lastImageID = await GetDataAsync("general", "lastImageID") as number;
-		this.imageID = lastImageID + 1;
-		this.payload.image.createdAt = Date.now();
+export class AddImage extends Command<{image: Image}, {}> {
+	imageID: string;
+	Validate() {
+		const {image} = this.payload;
+		this.imageID = this.imageID ?? GenerateUUID();
+		image.createdAt = Date.now();
+		AssertValidate("Image", image, "Image invalid");
 	}
-	async Validate() {
-		let {image} = this.payload;
-		AssertValidate("Image", image, `Image invalid`);
-	}
-	
+
 	GetDBUpdates() {
-		let {image} = this.payload;
-		let updates = {
-			"general/lastImageID": this.imageID,
+		const {image} = this.payload;
+		const updates = {
+			// 'general/data/.lastImageID': this.imageID,
 			[`images/${this.imageID}`]: image,
 		};
 		return updates;

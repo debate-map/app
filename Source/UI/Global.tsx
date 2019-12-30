@@ -1,33 +1,22 @@
-import {BaseComponent, BaseProps} from "react-vextensions";
-import {firebaseConnect} from "react-redux-firebase";
-import SubNavBar from "./@Shared/SubNavBar";
-import {SubNavBarButton} from "./@Shared/SubNavBar";
-import {GlobalMapUI} from "./Global/GlobalMapUI";
-import {ScrollView} from "react-vscrollview";
-import {GlobalListUI} from "./Global/GlobalListUI";
-import {Column} from "react-vcomponents";
-import {Connect} from "../Frame/Database/FirebaseConnect";
 import {Switch} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
+import {store} from "Store";
+import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
+import {GlobalMapUI} from "./Global/GlobalMapUI";
 
-type Props = {} & Partial<{currentSubpage: string}>;
-@Connect(state=> ({
-	currentSubpage: State(a=>a.main.global.subpage),
-}))
-export class GlobalUI extends BaseComponent<Props, {}> {
+export class GlobalUI extends BaseComponentPlus({} as {}, {}) {
 	render() {
-		let {currentSubpage} = this.props;
-		let page = "global";
+		const currentSubpage = store.main.global.subpage;
+		const page = "global";
 		return (
-			<Column style={ES({flex: 1})}>
+			<>
 				<SubNavBar>
-					<SubNavBarButton {...{page}} subpage="map" text="Map"/>
-					{/*<SubNavBarButton {...{page}} subpage="list" text="List"/>*/}
+					<SubNavBarButton page={page} subpage="map" text="Map"/>
 				</SubNavBar>
 				<Switch>
 					<GlobalMapUI/>
-					{currentSubpage == "list" && <GlobalListUI/>}
 				</Switch>
-			</Column>
+			</>
 		);
 	}
 }

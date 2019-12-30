@@ -1,50 +1,48 @@
-import { SplitStringBySlash_Cached } from "Frame/Database/StringSplitCache";
-import { DEL, E } from "js-vextensions";
-import { GetAsync_Raw, RemoveHelpers } from "../../Frame/Database/DatabaseHelpers";
-import { GetLinkAtPath, GetNodeForm, GetNodeL2 } from "../../Store/firebase/nodes/$node";
-import { ClaimForm, MapNode, Polarity } from "../../Store/firebase/nodes/@MapNode";
-import { MapNodeType } from "../../Store/firebase/nodes/@MapNodeType";
-import { Command, MergeDBUpdates } from "../Command";
-import AddChildNode from "./AddChildNode";
-import LinkNode from "./LinkNode";
+import {DEL, E, Clone} from "js-vextensions";
+import {Command_Old, MergeDBUpdates, SplitStringBySlash_Cached, GetAsync, Command, AssertV} from "mobx-firelink";
+import {GetLinkAtPath, GetNodeForm, GetNodeL2} from "../../Store/firebase/nodes/$node";
+import {ClaimForm, MapNode, Polarity} from "../../Store/firebase/nodes/@MapNode";
+import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
+import {AddChildNode} from "./AddChildNode";
+import {LinkNode} from "./LinkNode";
 
-export default class CloneNode extends Command<{mapID: number, baseNodePath: string, newParentID: number}> {
+export class CloneNode extends Command<{mapID: string, baseNodePath: string, newParentID: string}, {nodeID: string, revisionID: string}> {
 	sub_addNode: AddChildNode;
 	sub_linkChildren: LinkNode[];
-	async Prepare() {
-		let {mapID, baseNodePath, newParentID} = this.payload;
+	Validate() {
+		const {mapID, baseNodePath, newParentID} = this.payload;
 
 		// prepare add-node
 		// ==========
 
-		let baseNodeID = SplitStringBySlash_Cached(baseNodePath).Last().ToInt();
-		let baseNode = await GetAsync_Raw(()=>GetNodeL2(baseNodeID));
-		let isArgument = baseNode.type == MapNodeType.Argument;
-		
-		let nodeForm = await GetAsync_Raw(()=>GetNodeForm(baseNode, baseNodePath)) as ClaimForm;
-		let nodePolarity = await GetAsync_Raw(()=>GetLinkAtPath(baseNodePath).polarity) as Polarity;
+		const baseNodeID = SplitStringBySlash_Cached(baseNodePath).Last();
+		const baseNode = GetNodeL2(baseNodeID);
+		AssertV(baseNode, "baseNode is null.");
+		const isArgument = baseNode.type == MapNodeType.Argument;
 
-		let newChildNode = RemoveHelpers(Clone(baseNode))
-			.VSet({children: DEL, childrenOrder: DEL, currentRevision: DEL, current: DEL}) as MapNode;
-		newChildNode.parents = {[newParentID]: {_: true}}; // make new node's only parent the one on this path
+		const nodeForm = GetNodeForm(baseNode, baseNodePath);
+		AssertV(nodeForm, "nodeForm is null.");
+		const nodePolarity = GetLinkAtPath(baseNodePath).polarity;
+		AssertV(nodePolarity, "nodePolarity is null.");
 
-		let newChildRevision = Clone(baseNode.current).VSet({node: DEL});
+		const newChildNode = Clone(baseNode).VSet({children: DEL, childrenOrder: DEL, currentRevision: DEL, current: DEL, parents: DEL}) as MapNode;
 
-		this.sub_addNode = new AddChildNode({
-			mapID, node: newChildNode, revision: newChildRevision,
+		const newChildRevision = Clone(baseNode.current).VSet({node: DEL});
+
+		this.sub_addNode = this.sub_addNode ?? new AddChildNode({
+			mapID, parentID: newParentID, node: newChildNode, revision: newChildRevision,
 			link: E(
 				{_: true},
 				nodeForm && {form: nodeForm},
 				nodePolarity && {polarity: nodePolarity},
 			) as any,
-		});
-		this.sub_addNode.Validate_Early();
-		await this.sub_addNode.Prepare();
+		}).MarkAsSubcommand(this);
+		this.sub_addNode.Validate();
 
 		// prepare link-children
 		// ==========
 
-		let childrenToLink = (baseNode.children || {}).VKeys(true).map(a=>a.ToInt());
+		let childrenToLink = (baseNode.children || {}).VKeys(true);
 		if (isArgument) {
 			// if argument, use childrenOrder instead, since it's sorted
 			childrenToLink = (baseNode.childrenOrder || []).slice();
@@ -52,41 +50,40 @@ export default class CloneNode extends Command<{mapID: number, baseNodePath: str
 		}
 
 		this.sub_linkChildren = [];
-		for (let childID of childrenToLink) {
-			let child = await GetAsync_Raw(()=>GetNodeL2(childID));
-			let childForm = await GetAsync_Raw(()=>GetNodeForm(child, baseNodePath + "/" + childID)) as ClaimForm;
-			let linkChildSub = new LinkNode({mapID, parentID: this.sub_addNode.sub_addNode.nodeID, childID: childID, childForm}).MarkAsSubcommand();
-			linkChildSub.Validate_Early();
+		for (const childID of childrenToLink) {
+			const child = GetNodeL2(childID);
+			AssertV(child, `child (for id ${childID}) is null.`);
+			const childForm = GetNodeForm(child, `${baseNodePath}/${childID}`);
+			AssertV(child, `childForm (for id ${childID}) is null.`);
+			const linkChildSub = new LinkNode({mapID, parentID: this.sub_addNode.sub_addNode.nodeID, childID, childForm}).MarkAsSubcommand(this);
 
-			//linkChildSub.Prepare([]);
-			/*let dbUpdates = this.GetDBUpdates();
+			// linkChildSub.Prepare([]);
+			/* let dbUpdates = this.GetDBUpdates();
 			let node_childrenOrder = dbUpdates[`nodes/${this.sub_addNode.nodeID}/childrenOrder`];
-			linkChildSub.Prepare(node_childrenOrder);*/
-			await linkChildSub.Prepare();
+			linkChildSub.Prepare(node_childrenOrder); */
 
 			this.sub_linkChildren.push(linkChildSub);
 		}
 
 		this.returnData = this.sub_addNode.returnData;
-	}
-	async Validate() {
+
 		this.sub_addNode.Validate();
-		for (let sub of this.sub_linkChildren) {
+		for (const sub of this.sub_linkChildren) {
 			sub.Validate();
 		}
 	}
-	
+
 	GetDBUpdates() {
 		let updates = this.sub_addNode.GetDBUpdates();
-		for (let sub of this.sub_linkChildren) {
-			//updates.Extend(sub.GetDBUpdates());
+		for (const sub of this.sub_linkChildren) {
+			// updates.Extend(sub.GetDBUpdates());
 			updates = MergeDBUpdates(updates, sub.GetDBUpdates());
 		}
 
 		// override the setting of new-node/childrenOrder (otherwise each link-node sub-command tries to set it to: [old-list] + [its-own-child])
-		//updates[`nodes/${this.sub_addNode.nodeID}/childrenOrder`] = this.sub_linkChildren.map(a=>a.payload.childID);
+		// updates[`nodes/${this.sub_addNode.nodeID}/childrenOrder`] = this.sub_linkChildren.map(a=>a.payload.childID);
 		if (this.sub_addNode.payload.node.type == MapNodeType.Argument) {
-			let childrenOrder = [];
+			const childrenOrder = [];
 			childrenOrder.push(...this.sub_linkChildren.map(a=>a.payload.childID));
 			updates[`nodes/${this.sub_addNode.sub_addNode.nodeID}`].childrenOrder = childrenOrder;
 		}

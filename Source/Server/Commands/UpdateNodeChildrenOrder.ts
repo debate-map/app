@@ -1,38 +1,34 @@
-import { MapEdit, UserEdit } from "Server/CommandMacros";
-import { GetDataAsync } from "../../Frame/Database/DatabaseHelpers";
-import { MapNode } from "../../Store/firebase/nodes/@MapNode";
-import { Command } from "../Command";
-
-AddSchema({
-	properties: {
-		mapID: {type: "number"},
-		nodeID: {type: "number"},
-		childrenOrder: {items: {type: "number"}},
-	},
-	required: ["nodeID", "childrenOrder"],
-}, "UpdateNodeChildrenOrder_payload");
+import {MapEdit, UserEdit} from "Server/CommandMacros";
+import {AddSchema, AssertValidate} from "vwebapp-framework";
+import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
+import {GetNode} from "Store/firebase/nodes";
+import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 
 @MapEdit
 @UserEdit
-export default class UpdateNodeChildrenOrder extends Command<{mapID?: number, nodeID: number, childrenOrder: number[]}> {
-	Validate_Early() {
-		AssertValidate("UpdateNodeChildrenOrder_payload", this.payload, `Payload invalid`);
-	}
-
+export class UpdateNodeChildrenOrder extends Command<{mapID?: string, nodeID: string, childrenOrder: string[]}, {}> {
 	oldNodeData: MapNode;
 	newNodeData: MapNode;
-	async Prepare() {
-		let {mapID, nodeID, childrenOrder} = this.payload;
-		this.oldNodeData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
+	Validate() {
+		AssertValidate({
+			properties: {
+				mapID: {type: "string"},
+				nodeID: {type: "string"},
+				childrenOrder: {items: {type: "string"}},
+			},
+			required: ["nodeID", "childrenOrder"],
+		}, this.payload, "Payload invalid");
+
+		const {mapID, nodeID, childrenOrder} = this.payload;
+		this.oldNodeData = GetNode(nodeID);
+		AssertV(this.oldNodeData, "oldNodeData is null.");
 		this.newNodeData = {...this.oldNodeData, ...{childrenOrder}};
+		AssertValidate("MapNode", this.newNodeData, "New node-data invalid");
 	}
-	async Validate() {
-		AssertValidate("MapNode", this.newNodeData, `New node-data invalid`);
-	}
-	
+
 	GetDBUpdates() {
-		let {nodeID} = this.payload;
-		let updates = {};
+		const {nodeID} = this.payload;
+		const updates = {};
 		updates[`nodes/${nodeID}`] = this.newNodeData;
 		return updates;
 	}
