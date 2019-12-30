@@ -101,7 +101,7 @@
     "react-addons-perf": "^15.4.2",
     "react-addons-test-utils": "15.3.2",
     "sass-loader": "8.0.0",
-    "sharp": "0.21.3",
+    "sharp": "^0.23.4",
     "shx": "0.3.2",
     "source-map-loader": "0.2.4",
     "style-loader": "1.0.0",
