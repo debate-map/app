@@ -1,3 +1,5 @@
+// For usage instructions, see here: https://stackoverflow.com/a/59535579/2441655
+
 let admin = require("firebase-admin");
 
 // config
