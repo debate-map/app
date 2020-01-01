@@ -50,7 +50,7 @@ export class MainState {
 	@O analyticsEnabled = true;
 	// topLeftOpenPanel: string;
 	// topRightOpenPanel: string;
-	@O @ignore notificationMessages: NotificationMessage[];
+	@O @ignore notificationMessages = [] as NotificationMessage[];
 
 	// pages (and nav-bar panels)
 	// ==========

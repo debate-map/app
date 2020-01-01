@@ -1,15 +1,14 @@
 import {GetSelectedProposalID} from "firebase-feedback";
 import {Assert, VURL} from "js-vextensions";
-import {RootState} from "Store";
-import {GetNodeL2} from "Store/firebase/nodes/$node";
-import {MaybeLog} from "vwebapp-framework";
-import {GetSelectedUserID, GetSelectedTermID, GetSelectedImageID} from "Store/main/database";
-import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";
-import ReactGA from "react-ga";
 import {StoreAccessor} from "mobx-firelink";
+import ReactGA from "react-ga";
+import {RootState} from "Store";
+import {GetNodeL2, GetNodeDisplayText} from "Store/firebase/nodes/$node";
+import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";
+import {GetSelectedImageID, GetSelectedTermID, GetSelectedUserID} from "Store/main/database";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
+import {MaybeLog} from "vwebapp-framework";
 import {GetMap} from "../../Store/firebase/maps";
-import {GetNodeDisplayText} from "../../Store/firebase/nodes/$node";
 import {MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
 
 export const rootPages = [
@@ -91,111 +90,6 @@ export function GetCurrentURL_SimplifiedForPageViewTracking() {
 // loading
 // ==========
 
-/* function ParseMapView(viewStr: string) {
-	const downChars = viewStr.Matches(':').length;
-	const upChars = viewStr.Matches('.').length;
-	viewStr += '.'.repeat(downChars - upChars); // add .'s that were trimmed
-
-	// let [rootNodeIDStr] = viewStr.match(/^[0-9]+/)[0];
-	/* let rootNodeOwnStr = viewData.VKeys()[0];
-	let rootNodeID = parseInt(rootNodeOwnStr.match(/^[0-9]+/)[0]);
-	let rootNodeView = ParseNodeView(rootNodeOwnStr, viewData[rootNodeOwnStr]); *#/
-
-	const [rootNodeID, rootNodeView] = ParseNodeView(viewStr);
-
-	const result = {} as MapView;
-	result.rootNodeViews = { [rootNodeID]: rootNodeView };
-	return result;
-}
-/* function ParseNodeView_Old(viewStr: string) {
-	let result = {} as MapNodeView;
-
-	let ownStr = viewStr.Contains(",") ? viewStr.substr(0, viewStr.indexOf(",")) : viewStr;
-	if (ownStr.Contains("s"))
-		result.selected = true;
-	if (ownStr.Contains("f") || ownStr.Contains("s"))
-		result.focused = true;
-
-	let childrenStr = viewStr.Contains(",") ? viewStr.slice(viewStr.indexOf(",") + 1, -1) : "";
-	if (childrenStr.length) {
-		result.children = {};
-
-		let childrenStrAsJSON = `["`
-			+ childrenStr.replace(/,/g, `":["`).replace(/./g, `"]`)
-			+ `"]`;
-	}
-
-	return result;
-} *#/
-function GetDataStrForProp(ownStr: string, propChar: string) {
-	const dataStart = ownStr.indexOf(`${propChar}(`) + 2;
-	return ownStr.substring(dataStart, ownStr.indexOf(')', dataStart));
-}
-function ParseNodeView(viewStr: string): [number, MapNodeView] {
-	const nodeView = new MapNodeView();
-
-	const ownStr = viewStr.Contains(':') ? viewStr.substr(0, viewStr.indexOf(':')) : viewStr;
-	const childrenStr = viewStr.Contains(':') ? viewStr.slice(viewStr.indexOf(':') + 1, -1) : '';
-
-	const match = ownStr.match(/^(L?)([0-9]+)/);
-	const isSubnode = match[1].length != 0;
-	const nodeID = parseInt(match[2]);
-
-	const ownStr_withoutParentheses = ownStr.replace(/\(.+?\)/g, '');
-	if (ownStr_withoutParentheses.Contains('s')) { nodeView.selected = true; }
-	if (ownStr_withoutParentheses.Contains('f')) {
-		nodeView.focused = true;
-		const viewOffsetStr = GetDataStrForProp(ownStr, 'f');
-		const viewOffsetParts = viewOffsetStr.split('_').map(ToInt);
-		nodeView.viewOffset = new Vector2i(viewOffsetParts[0], viewOffsetParts[1]);
-	}
-	if (ownStr_withoutParentheses.Contains('p')) {
-		nodeView.openPanel = GetDataStrForProp(ownStr, 'p');
-	}
-
-	nodeView.VSet({ expanded: false, expanded_truth: false, expanded_relevance: false });
-	if (ownStr_withoutParentheses.Contains('t')) {
-		nodeView.expanded_truth = true;
-	} else if (ownStr_withoutParentheses.Contains('r')) {
-		nodeView.expanded_relevance = true;
-	} else if (ownStr_withoutParentheses.Contains('e') || (childrenStr && childrenStr.length)) {
-		nodeView.expanded = true;
-		nodeView.expanded_truth = true;
-		nodeView.expanded_relevance = true;
-	}
-
-	if (childrenStr && childrenStr.length) {
-		nodeView.expanded = true;
-
-		const childStrings = [];
-		let depth = 0;
-		let currentChildStr = '';
-		for (const ch of childrenStr) {
-			if (ch == ':') depth++;
-			if (ch == '.') depth--;
-			if (depth == 0 && ch == ',') {
-				childStrings.push(currentChildStr);
-				currentChildStr = '';
-			} else {
-				currentChildStr += ch;
-			}
-		}
-		childStrings.push(currentChildStr);
-
-		for (const childStr of childStrings) {
-			const [childID, childNodeView] = ParseNodeView(childStr);
-			Assert(IsNumber(childID), 'childID must be a number.');
-			if (isSubnode) {
-				nodeView.children[`L${childID}`] = childNodeView;
-			} else {
-				nodeView.children[childID] = childNodeView;
-			}
-		}
-	}
-
-	return [nodeID, nodeView];
-} */
-
 const pagesWithSimpleSubpages = ["database", "feedback", "more", "home", "global"].ToMap(page=>page, ()=>null);
 export function GetLoadActionFuncForURL(url: VURL) {
 	return (store: RootState)=>{
@@ -276,17 +170,6 @@ export function GetLoadActionFuncForURL(url: VURL) {
 				}
 			} */
 		}
-
-		/* if (mapID) {
-			// example: /global?view=1:3:100:101f(384_111):102:.104:.....
-			const mapViewStr = url.GetQueryVar('view');
-			if (mapViewStr != null && mapViewStr.length) {
-				const mapView = ParseMapView(mapViewStr);
-
-				// Log("Loading map-view:" + ToJSON(mapView));
-				result.push(new ACTMapViewMerge({ mapID, mapView }));
-			}
-		} */
 
 		/* if (url.GetQueryVar('timeline')) {
 			result.push(new ACTMap_PlayingTimelineSet({ mapID, timelineID: url.GetQueryVar('timeline') }));
@@ -455,98 +338,9 @@ export const GetNewURL = StoreAccessor(s=>(includeMapViewStr = true)=>{
 	return newURL;
 });
 
-// disabled for now, since the urls it generated would be too long with new UUIDs (instead, will implement "saved views" as json in db, which are then referenced by their own uuid, or maybe sequential id)
-/* function GetMapViewStr(mapID: string) {
-	const map = GetMap(mapID);
-	if (map == null) return '';
-
-	const rootNodeID = map.rootNode;
-	let rootNodeViewStr = GetNodeViewStr(mapID, rootNodeID.toString());
-	rootNodeViewStr = rootNodeViewStr.TrimEnd('.'); // remove .'s to keep shorter and cleaner
-	// rootNodeViewStr += "_"; // add "_", so that Facebook doesn't cut off end special-chars
-	return rootNodeViewStr;
-}
-export function GetNodeViewStr(mapID: string, path: string) {
-	const nodeView = GetNodeView(mapID, path);
-	if (nodeView == null) return '';
-
-	let childrenStr = '';
-	for (const childID of (nodeView.children || {}).VKeys(true)) {
-		const childNodeViewStr = GetNodeViewStr(mapID, `${path}/${childID}`);
-		if (childNodeViewStr.length) {
-			childrenStr += (childrenStr.length ? ',' : '') + childNodeViewStr;
-		}
-	}
-
-	const ownIDStr = path.substr(path.lastIndexOf('/') + 1);
-	let ownStr = ownIDStr;
-	// if (nodeView.expanded && !childrenStr.length) ownStr += "e";
-	// let mapView = GetMapView(mapID);
-	if (nodeView.selected) {
-		ownStr += 's';
-
-		/* let viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
-		let nodeBox = $(".NodeUI_Inner").ToList().FirstOrX(a=>(FindReact(a[0]) as NodeUI_Inner).props.path == path);
-		let nodeBoxComp = FindReact(nodeBox[0]) as NodeUI_Inner;
-		let viewOffset = viewCenter_onScreen.Minus(nodeBox.GetScreenRect().Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
-		let offsetStr = viewOffset.toString().replace(" ", "_");
-		ownStr += `(${offsetStr})`; *#/
-	}
-	if (nodeView.focused) { // && GetSelectedNodeID(mapID) == null) {
-		Assert(nodeView.viewOffset != null);
-		const offsetStr = Vector2i.prototype.toString.call(nodeView.viewOffset).replace(' ', '_');
-		ownStr += `f(${offsetStr})`;
-	}
-	if (nodeView.openPanel) {
-		ownStr += `p(${nodeView.openPanel})`;
-	}
-
-	/* let hasData = false;
-	if (childrenStr.length) hasData = true;
-	else if (nodeView.expanded) hasData = true; *#/
-	const hasData = ownStr.length > ownIDStr.length || nodeView.expanded;
-	if (!hasData) return '';
-
-	let result = ownStr;
-	if (nodeView.expanded) {
-		let prefix = '';
-		if (nodeView.expanded_truth && !nodeView.expanded_relevance) {
-			prefix = 't';
-		} else if (nodeView.expanded_relevance && !nodeView.expanded_truth) {
-			prefix = 'r';
-		} else {
-			// only include e if children-str is empty (if has child-str, then e is implied/not-needed)
-			if (childrenStr.length == 0) {
-				prefix = 'e';
-			}
-		}
-
-		result += prefix;
-		if (childrenStr.length) {
-			result += `:${childrenStr}.`;
-		}
-	}
-	return result;
-} */
-
 export function DoesURLChangeCountAsPageChange(oldURL: VURL, newURL: VURL) {
 	if (oldURL == null) return true;
 	if (oldURL.PathStr() != newURL.PathStr()) return true;
-
-	/* let oldSyncLoadActions = GetSyncLoadActionsForURL(oldURL, directURLChange);
-	let oldMapViewMergeAction = oldSyncLoadActions.find(a=>a.Is(ACTMapViewMerge));
-
-	let newSyncLoadActions = GetSyncLoadActionsForURL(newURL, directURLChange);
-	let newMapViewMergeAction = newSyncLoadActions.find(a=>a.Is(ACTMapViewMerge));
-
-	let oldViewStr = oldURL.GetQueryVar("view");
-	let oldURLWasTemp = oldViewStr == "";
-	if (newMapViewMergeAction != oldMapViewMergeAction && !oldURLWasTemp) {
-		//let oldFocused = GetFocusedNodePath(GetMapView(mapViewMergeAction.payload.mapID));
-		let oldFocused = oldMapViewMergeAction ? GetFocusedNodePath(oldMapViewMergeAction.payload.mapView) : null;
-		let newFocused = newMapViewMergeAction ? GetFocusedNodePath(newMapViewMergeAction.payload.mapView) : null;
-		if (newFocused != oldFocused) return true;
-	} */
 
 	return false;
 }

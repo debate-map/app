@@ -8,5 +8,5 @@ export function GetNodeViewerSet(nodeID: string) {
 }
 export function GetNodeViewers(nodeID: string) {
 	const viewerSet = GetNodeViewerSet(nodeID);
-	return CachedTransform('GetNodeViewers', [nodeID], { viewerSet }, () => (viewerSet ? viewerSet.VKeys(true) : []));
+	return CachedTransform('GetNodeViewers', [nodeID], { viewerSet }, () => (viewerSet ? viewerSet.VKeys() : []));
 } */

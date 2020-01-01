@@ -48,10 +48,10 @@ export const GetNode = StoreAccessor(s=>(id: string)=>{
 } */
 
 export function GetParentCount(node: MapNode) {
-	return (node.parents || {}).VKeys(true).length;
+	return (node.parents || {}).VKeys().length;
 }
 export function GetChildCount(node: MapNode) {
-	return (node.children || {}).VKeys(true).length;
+	return (node.children || {}).VKeys().length;
 }
 
 export function IsRootNode(node: MapNode) {
@@ -89,11 +89,11 @@ export const GetNodeID = StoreAccessor(s=>(path: string)=>{
 });
 
 export const GetNodeParents = StoreAccessor(s=>(node: MapNode)=>{
-	const parents = (node.parents || {}).VKeys(true).map(id=>GetNode(id));
+	const parents = (node.parents || {}).VKeys().map(id=>GetNode(id));
 	return parents;
 });
 /* export async function GetNodeParentsAsync(node: MapNode) {
-	return await Promise.all(node.parents.VKeys(true).map((parentID) => GetDoc_Async(a=>a.nodes.get(parentID))) as MapNode[];
+	return await Promise.all(node.parents.VKeys().map((parentID) => GetDoc_Async(a=>a.nodes.get(parentID))) as MapNode[];
 } */
 export const GetNodeParentsL2 = StoreAccessor(s=>(node: MapNode)=>{
 	const parentsL2 = GetNodeParents(node).map(parent=>(parent ? GetNodeL2(parent) : null));
@@ -108,7 +108,7 @@ export const GetNodeParentsL3 = StoreAccessor(s=>(node: MapNode, path: string)=>
 	let node = GetNode(nodeID);
 	// any time the childIDs changes, we know the node object changes as well; so just cache childIDs on node
 	if (node["@childIDs"] == null)
-		node.VSet("@childIDs", (node.children || {}).VKeys(true).map(id=>parseInt(id)), {prop: {}});
+		node.VSet("@childIDs", (node.children || {}).VKeys().map(id=>parseInt(id)), {prop: {}});
 	return node["@childIDs"];
 } */
 export const GetNodeChildren = StoreAccessor(s=>(node: MapNode)=>{
@@ -117,12 +117,12 @@ export const GetNodeChildren = StoreAccessor(s=>(node: MapNode)=>{
 		return node.children as any as MapNode[];
 	}
 
-	const children = (node.children || {}).VKeys(true).map(id=>GetNode(id));
+	const children = (node.children || {}).VKeys().map(id=>GetNode(id));
 	// return CachedTransform('GetNodeChildren', [node._key], children, () => children);
 	return children;
 });
 /* export async function GetNodeChildrenAsync(node: MapNode) {
-	return await Promise.all(node.children.VKeys(true).map((id) => GetDataAsync('nodes', id))) as MapNode[];
+	return await Promise.all(node.children.VKeys().map((id) => GetDataAsync('nodes', id))) as MapNode[];
 } */
 
 export const GetNodeChildrenL2 = StoreAccessor(s=>(node: MapNode)=>{
@@ -203,7 +203,7 @@ export const ForNewLink_GetError = StoreAccessor(s=>(parentID: string, newChild:
 	// if (parentPathIDs[0] == globalRootNodeID && parentPathIDs.length == 2 && !HasModPermissions(permissions) && parent.creator != MeID()) return false;
 	if (parent._key == newChild._key) return "Cannot link node as its own child.";
 
-	const isAlreadyChild = (parent.children || {}).VKeys(true).Contains(`${newChild._key}`);
+	const isAlreadyChild = (parent.children || {}).VKeys().Contains(`${newChild._key}`);
 	// if new-holder-type is not specified, consider "any" and so don't check
 	if (newHolderType !== undefined) {
 		const currentHolderType = GetHolderType(newChild.type, parent.type);
@@ -215,7 +215,7 @@ export const ForNewLink_GetError = StoreAccessor(s=>(parentID: string, newChild:
 export const ForUnlink_GetError = StoreAccessor(s=>(userID: string, node: MapNodeL2, asPartOfCut = false)=>{
 	const baseText = `Cannot unlink node #${node._key}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not its owner. (or a mod)`;
-	if (!asPartOfCut && (node.parents || {}).VKeys(true).length <= 1) return `${baseText}doing so would orphan it. Try deleting it instead.`;
+	if (!asPartOfCut && (node.parents || {}).VKeys().length <= 1) return `${baseText}doing so would orphan it. Try deleting it instead.`;
 	if (IsRootNode(node)) return `${baseText}it's the root-node of a map.`;
 	if (IsNodeSubnode(node)) return `${baseText}it's a subnode. Try deleting it instead.`;
 	return null;

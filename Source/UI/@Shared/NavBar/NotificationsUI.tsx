@@ -2,18 +2,15 @@ import {Button, Column, Div} from "react-vcomponents";
 import {AddGlobalStyle, BaseComponent} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
 import {NotificationMessage} from "Store/main";
+import {store} from "Store";
+import {Observer} from "vwebapp-framework";
+import {runInAction} from "mobx";
 
-const notificationMessages = [];
+// helper, for use from Start_0.ts
+function AddNotificationMessage(message: string) {
+	store.main.notificationMessages.push(new NotificationMessage(message));
+}
 G({AddNotificationMessage});
-export function AddNotificationMessage(message: NotificationMessage) {
-	notificationMessages.push(message);
-	if (NotificationsUI.main) NotificationsUI.main.Update();
-}
-G({RemoveNotificationMessage});
-export function RemoveNotificationMessage(message: NotificationMessage) {
-	notificationMessages.Remove(message);
-	if (NotificationsUI.main) NotificationsUI.main.Update();
-}
 
 AddGlobalStyle(`
 .NotificationScrollView > * { pointer-events: auto; }
@@ -22,16 +19,17 @@ AddGlobalStyle(`
 .NotificationScrollView > .content { pointer-events: none; }
 `);
 
+@Observer
 export class NotificationsUI extends BaseComponent<{}, {}> {
-	static main: NotificationsUI;
+	//static main: NotificationsUI;
 
 	scrollView: ScrollView;
 	render() {
-		const {} = this.props;
+		const messages = store.main.notificationMessages;
 		return (
 			<ScrollView ref={c=>this.scrollView = c} className="NotificationScrollView" scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}>
 				<Column ct style={{maxWidth: "calc(100% - 10px)", alignItems: "flex-start", filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}>
-					{notificationMessages.map((message, index)=>{
+					{messages.map((message, index)=>{
 						return <MessageUI key={index} message={message}/>;
 					})}
 				</Column>
@@ -40,13 +38,6 @@ export class NotificationsUI extends BaseComponent<{}, {}> {
 	}
 	PostRender() {
 		this.scrollView.UpdateSize();
-	}
-
-	ComponentDidMount() {
-		NotificationsUI.main = this;
-	}
-	ComponentWillUnmount() {
-		NotificationsUI.main = null;
 	}
 }
 
@@ -89,7 +80,7 @@ export class MessageUI extends BaseComponent<{message: NotificationMessage}, {}>
 							":hover": {backgroundColor: `rgba(${backgroundColor.split(",").map(a=>(parseInt(a) * 0.9).RoundTo(1)).join(",")},.7)`},
 						}}
 						onClick={e=>{
-							RemoveNotificationMessage(message);
+							runInAction("MessageUI.RemoveMessage.onClick", ()=>store.main.notificationMessages.Remove(message));
 						}}>
 						X
 					</Button>

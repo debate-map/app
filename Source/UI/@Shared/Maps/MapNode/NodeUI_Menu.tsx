@@ -253,7 +253,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 
 							/* let parentNodes = await GetNodeParentsAsync(node);
 							if (parentNodes.length <= 1) { */
-							/* if (node.parents.VKeys(true).length <= 1) {
+							/* if (node.parents.VKeys().length <= 1) {
 								return void ShowMessageBox({title: `Cannot unlink`, message: `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`});
 							} */
 
@@ -389,7 +389,7 @@ class DeleteContainerArgument_MenuItem extends BaseComponent<SharedProps, {}> {
 		const error = command.Validate_Safe(); */
 
 		const canDeleteBaseClaim = IsUserCreatorOrMod(MeID(), node);
-		const baseClaimCommand = node.parents.VKeys(true).length > 1 || !canDeleteBaseClaim
+		const baseClaimCommand = node.parents.VKeys().length > 1 || !canDeleteBaseClaim
 			? new UnlinkNode({mapID, parentID: argument._key, childID: node._key})
 			: new DeleteNode({mapID, nodeID: node._key});
 

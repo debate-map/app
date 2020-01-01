@@ -30,7 +30,7 @@ export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {phrasing: M
 					<Row mt={5}>
 						<Button text="Save" enabled={dataError == null} onLeftClick={async()=>{
 							const phrasingUpdates = GetUpdates(phrasing, this.detailsUI.GetNewData());
-							if (phrasingUpdates.VKeys(true).length) {
+							if (phrasingUpdates.VKeys().length) {
 								await new UpdatePhrasing(E({id: phrasing._key, updates: phrasingUpdates})).Run();
 							}
 						}}/>

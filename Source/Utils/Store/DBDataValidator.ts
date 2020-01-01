@@ -3,7 +3,7 @@ import {FirebaseDBShape} from "Store/firebase";
 
 export function ValidateDBData(data: FirebaseDBShape) {
 	function ValidateCollection(collection, itemType: string) {
-		(collection || {}).VValues(1).forEach(entry=>{
+		(collection || {}).VValues().forEach(entry=>{
 			AssertValidate(itemType, entry, `${itemType} invalid`);
 		});
 	}

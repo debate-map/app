@@ -1,11 +1,7 @@
+import {ModifyString} from "js-vextensions";
 
 export function PropNameToTitle(propName: string) {
-	// demo string: somePropName
-	return propName
-		// somePropName -> some prop name
-		.replace(/[A-Z]/g, a=>` ${a.toLowerCase()}`)
-		// some prop name -> Some prop name
-		.replace(/^./, a=>a.toUpperCase());
+	return ModifyString(propName, {lowerUpper_to_lowerSpaceLower: true, firstLower_to_upper: true});
 }
 
 export function EnumNameToDisplayName(enumName: string) {

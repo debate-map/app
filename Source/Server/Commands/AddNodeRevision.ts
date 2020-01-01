@@ -34,7 +34,7 @@ export class AddNodeRevision extends Command<{mapID: string, revision: MapNodeRe
 		revision.creator = this.userInfo.id;
 		revision.createdAt = Date.now();
 
-		const titles_joined = (revision.titles || {}).VValues(true).join(" ");
+		const titles_joined = (revision.titles || {}).VValues().join(" ");
 		revision.titles.allTerms = GetSearchTerms(titles_joined).ToMap(a=>a, ()=>true);
 
 		if (this.parentCommand == null) {

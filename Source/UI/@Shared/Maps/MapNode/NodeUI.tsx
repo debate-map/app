@@ -323,7 +323,7 @@ export class NodeUI extends BaseComponentPlus(
 		if (MeID() == null) return;
 
 		const userViewedNodes_doneLoading = userViewedNodes !== undefined;
-		if (userViewedNodes_doneLoading && !(userViewedNodes || {}).VKeys(true).Contains(node._key)) {
+		if (userViewedNodes_doneLoading && !(userViewedNodes || {}).VKeys().Contains(node._key)) {
 			new NotifyNodeViewed({ nodeID: node._key }).Run();
 		}
 	} */

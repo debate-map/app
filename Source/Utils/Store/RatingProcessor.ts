@@ -79,27 +79,27 @@ export const GetArgumentImpactPseudoRatingSet = StoreAccessor(s=>(argument: MapN
 
 	const usersWhoRatedArgOrPremise = {};
 	/* const argRatingSet = GetRatingSet(argument._key, GetMainRatingType(argument)) || emptyObj;
-	for (const userID of argRatingSet.VKeys(true)) {
+	for (const userID of argRatingSet.VKeys()) {
 		usersWhoRatedArgOrPremise[userID] = true;
 	} */
-	for (const userID of (GetRatingSet(argument._key, "relevance") || emptyObj).VKeys(true)) {
+	for (const userID of (GetRatingSet(argument._key, "relevance") || emptyObj).VKeys()) {
 		usersWhoRatedArgOrPremise[userID] = true;
 	}
 	for (const premise of premises) {
-		for (const userID of (GetRatingSet(premise._key, "truth") || emptyObj).VKeys(true)) {
+		for (const userID of (GetRatingSet(premise._key, "truth") || emptyObj).VKeys()) {
 			usersWhoRatedArgOrPremise[userID] = true;
 		}
 	}
 
 	for (const [index, child] of premises.entries()) {
 		const childRatingSet = premiseRatingSets[index];
-		for (const userID of childRatingSet.VKeys(true)) {
+		for (const userID of childRatingSet.VKeys()) {
 			usersWhoRatedArgOrPremise[userID] = true;
 		}
 	}
 
 	const result = {} as RatingsSet;
-	for (const userID of usersWhoRatedArgOrPremise.VKeys(true)) {
+	for (const userID of usersWhoRatedArgOrPremise.VKeys()) {
 		result[userID] = GetArgumentImpactPseudoRating(argument, premises, userID);
 	}
 	return result;

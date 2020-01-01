@@ -49,7 +49,7 @@ AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
 	}
 
 	conversions.VKeys().forEach(collectionKey=>{
-		data[collectionKey].VValues(1).forEach(entry=>conversions[collectionKey].push({oldKey: entry._key, newKey: GenerateUUID()}));
+		data[collectionKey].VValues().forEach(entry=>conversions[collectionKey].push({oldKey: entry._key, newKey: GenerateUUID()}));
 	});
 	// manually set newKey for global-map and global-root-node
 	conversions.maps.find(a=>a.oldKey == "1").newKey = globalMapID;
@@ -65,7 +65,7 @@ AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
 		mapObj[newKey] = value;
 	}
 	function ReplacePairKeys(mapObj: Object, collectionKeyForOldKey: CollectionKey) {
-		(mapObj || {}).Pairs(1).forEach(pair=>ReplacePairKey(mapObj, pair.key as string, collectionKeyForOldKey));
+		(mapObj || {}).Pairs().forEach(pair=>ReplacePairKey(mapObj, pair.key as string, collectionKeyForOldKey));
 	}
 
 	/* conversions.VKeys().forEach((collectionKey) => {
@@ -79,7 +79,7 @@ AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
 	ReplacePairKeys(data.images, "images");
 
 	ReplacePairKeys(data.layers, "layers");
-	data.layers.VValues(1).forEach(entry=>{
+	data.layers.VValues().forEach(entry=>{
 		ReplacePairKeys(entry.mapsWhereEnabled, "maps");
 		ReplacePairKeys(entry.nodeSubnodes, "nodes");
 		(entry.nodeSubnodes || {}).VValues().forEach(subnodesMap=>{
@@ -88,18 +88,18 @@ AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
 	});
 
 	ReplacePairKeys(data.maps, "maps");
-	data.maps.VValues(1).forEach(entry=>{
+	data.maps.VValues().forEach(entry=>{
 		ReplacePairKeys(entry.layers, "layers");
 		if (entry.rootNode) entry.rootNode = GetNewKey("nodes", entry.rootNode);
 		ReplacePairKeys(entry.timelines, "timelines");
 	});
 	ReplacePairKeys(data.mapNodeEditTimes, "maps");
-	data.mapNodeEditTimes.VValues(1).forEach(entry=>{
+	data.mapNodeEditTimes.VValues().forEach(entry=>{
 		ReplacePairKeys(entry, "nodes");
 	});
 
 	ReplacePairKeys(data.nodes, "nodes");
-	data.nodes.VValues(true).forEach(entry=>{
+	data.nodes.VValues().forEach(entry=>{
 	// Array.from(data.nodes.values()).forEach((entry) => {
 		const oldRevisionID = entry.currentRevision;
 
@@ -119,7 +119,7 @@ AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
 	});
 	ReplacePairKeys(data.nodeRatings, "nodes");
 	ReplacePairKeys(data.nodeRevisions, "nodeRevisions");
-	data.nodeRevisions.VValues(1).forEach(entry=>{
+	data.nodeRevisions.VValues().forEach(entry=>{
 		if (entry.image) entry.image.id = GetNewKey("images", entry.image.id);
 		// try {
 		entry.node = GetNewKey("nodes", entry.node);
@@ -132,17 +132,17 @@ AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
 	});
 	// ReplacePairKeys(data.nodeViewers, 'nodes'); // skip nodeViewers, since removing it (privacy concerns)
 	// ReplacePairKeys(data.nodePhrasings, 'nodePhrasings');
-	data.nodePhrasings.VValues(1).forEach(entry=>{
+	data.nodePhrasings.VValues().forEach(entry=>{
 		entry.node = GetNewKey("nodes", entry.node);
 	});
 
 	// skip terms, termComponents, and termNames, since no entries
 	/* ReplacePairKeys(data.terms, 'terms');
-	data.terms.VValues(1).forEach(... */
+	data.terms.VValues().forEach(... */
 
 	// skip timelines and timelineSteps, since no entries
 	/* ReplacePairKeys(data.timelineSteps, "timelineSteps");
-	data.timelineSteps.VValues(1).forEach(... */
+	data.timelineSteps.VValues().forEach(... */
 
 	// skip userMapInfo, since no entries
 	// ...

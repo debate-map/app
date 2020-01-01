@@ -18,7 +18,7 @@ export class NodeConnectorBackground extends BaseComponent<Props, {}> {
 
 		return (
 			<svg className="clickThroughChain" style={{position: "absolute", overflow: "visible", zIndex: -1}}>
-				{childBoxOffsets.Pairs(true).OrderBy(a=>a.key).map(({key: childID, value: childOffset})=>{
+				{childBoxOffsets.Pairs().OrderBy(a=>a.key).map(({key: childID, value: childOffset})=>{
 					if (childOffset == null) return null;
 
 					/* result.push(<line key={"inputLine" + result.length} x1={inputPos.x} y1={inputPos.y}

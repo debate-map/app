@@ -210,7 +210,7 @@ export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: stri
 	// if (path && path.split('/').length > 3) throw new Error('Test1'); // for testing node error-boundaries
 
 	if (node.type == MapNodeType.Argument && !node.multiPremiseArgument && !titles.base) {
-		// const baseClaim = GetNodeL2(node.children && node.children.VKeys(true).length ? node.children.VKeys(true)[0] : null);
+		// const baseClaim = GetNodeL2(node.children && node.children.VKeys().length ? node.children.VKeys()[0] : null);
 		// const baseClaim = GetArgumentPremises(node)[0];
 		const baseClaim = GetNodeChildrenL2(node).filter(a=>a && a.type == MapNodeType.Claim)[0];
 		if (baseClaim) return GetNodeDisplayText(baseClaim);

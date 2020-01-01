@@ -42,7 +42,7 @@ export class CloneNode extends Command<{mapID: string, baseNodePath: string, new
 		// prepare link-children
 		// ==========
 
-		let childrenToLink = (baseNode.children || {}).VKeys(true);
+		let childrenToLink = (baseNode.children || {}).VKeys();
 		if (isArgument) {
 			// if argument, use childrenOrder instead, since it's sorted
 			childrenToLink = (baseNode.childrenOrder || []).slice();

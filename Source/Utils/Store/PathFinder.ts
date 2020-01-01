@@ -7,7 +7,7 @@ export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc
 	if (startNode == null) return null;
 
 	type Head = {id: string, path: string[]};
-	// let currentLayerHeads: Head[] = (startNode.parents || {}).VKeys(true).map((id) => ({ id, path: [id, startNodeID] }));
+	// let currentLayerHeads: Head[] = (startNode.parents || {}).VKeys().map((id) => ({ id, path: [id, startNodeID] }));
 	let currentLayerHeads: Head[] = [{id: startNode._key, path: [startNode._key]}];
 	while (currentLayerHeads.length) {
 		// first, check if any current-layer-head nodes are the root-node (if so, return right away, as we found a shortest path)
@@ -22,7 +22,7 @@ export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc
 		for (const layerHead of currentLayerHeads) {
 			const node = GetNode(layerHead.id);
 			if (node == null) return null;
-			for (const parentID of (node.parents || {}).VKeys(true)) {
+			for (const parentID of (node.parents || {}).VKeys()) {
 				if (layerHead.path.Contains(parentID)) continue; // parent-id is already part of path; ignore, so we don't cause infinite-loop
 				if (nodeIDsToIgnore?.Contains(parentID)) continue;
 				newLayerHeads.push({id: parentID, path: [parentID].concat(layerHead.path)});

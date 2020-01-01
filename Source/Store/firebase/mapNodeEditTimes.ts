@@ -46,7 +46,7 @@ export const GetNodeIDsChangedSinceX = StoreAccessor(s=>(mapID: string, sinceTim
 	if (nodeEditTimes == null) return emptyArray;
 
 	const result = [] as string[];
-	for (const {key: nodeID, value: editTime} of nodeEditTimes.Pairs(true)) {
+	for (const {key: nodeID, value: editTime} of nodeEditTimes.Pairs()) {
 		const lastAcknowledgementTime = includeAcknowledgement ? GetLastAcknowledgementTime(nodeID) : 0;
 		const sinceTimeForNode = sinceTime.KeepAtLeast(lastAcknowledgementTime);
 		if (editTime > sinceTimeForNode) {

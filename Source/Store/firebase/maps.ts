@@ -7,7 +7,7 @@ export const GetMaps = StoreAccessor(s=>(orderByEdits = false): Map[]=>{
 	return CachedTransform('GetMaps', [], mapsMap, () => (mapsMap ? mapsMap.VValues(true) : [])); */
 	const mapsMap = GetDocs({}, a=>a.maps);
 	if (!mapsMap) return emptyArray_forLoading;
-	let result = mapsMap.VValues(true);
+	let result = mapsMap.VValues();
 	if (orderByEdits) result = result.OrderByDescending(a=>ToNumber(a && a.edits, 0));
 	return result;
 });

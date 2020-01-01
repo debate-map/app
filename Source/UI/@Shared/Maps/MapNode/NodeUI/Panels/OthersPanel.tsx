@@ -68,7 +68,7 @@ export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNo
 				<IDAndCreationInfoUI id={node._key} creator={creator} createdAt={node.createdAt}/>
 				<Row style={{whiteSpace: "normal"}}>
 					<Text>Parents: </Text>
-					{node.parents == null ? "none" : node.parents.VKeys(true).map((parentID, index)=>{
+					{node.parents == null ? "none" : node.parents.VKeys().map((parentID, index)=>{
 						return <Fragment key={index}>
 							{index != 0 && <Text>, </Text>}
 							<UUIDStub id={parentID}/>
@@ -77,7 +77,7 @@ export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNo
 				</Row>
 				<Row style={{whiteSpace: "normal"}}>
 					<Text>Children: </Text>
-					{node.children == null ? "none" : node.children.VKeys(true).map((childID, index)=>{
+					{node.children == null ? "none" : node.children.VKeys().map((childID, index)=>{
 						return <Fragment key={index}>
 							{index != 0 && <Text>, </Text>}
 							<UUIDStub id={childID}/>
@@ -173,7 +173,7 @@ class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> 
 	render() {
 		const {mapID, node} = this.props;
 		const oldChildrenOrder = node.childrenOrder || [];
-		const oldChildrenOrderValid = oldChildrenOrder.length == node.children.VKeys(true).length && oldChildrenOrder.every(id=>node.children[id] != null);
+		const oldChildrenOrderValid = oldChildrenOrder.length == node.children.VKeys().length && oldChildrenOrder.every(id=>node.children[id] != null);
 		return (
 			<Column mt={5}>
 				<Row style={{fontWeight: "bold"}}>Children order:</Row>
@@ -212,7 +212,7 @@ class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> 
 				{!oldChildrenOrderValid &&
 					<Button mr="auto" text="Fix children-order" onClick={()=>{
 						const existingValidIDs = oldChildrenOrder.filter(id=>node.children[id] != null);
-						const missingChildIDs = node.children.Pairs(true).filter(pair=>!oldChildrenOrder.Contains(pair.key)).map(pair=>pair.key);
+						const missingChildIDs = node.children.Pairs().filter(pair=>!oldChildrenOrder.Contains(pair.key)).map(pair=>pair.key);
 						new UpdateNodeChildrenOrder({mapID, nodeID: node._key, childrenOrder: existingValidIDs.concat(missingChildIDs)}).Run();
 					}}/>}
 			</Column>

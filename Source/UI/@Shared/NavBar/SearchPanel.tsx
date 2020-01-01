@@ -175,7 +175,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 					// continue; // commented; node may be a map-root, and still have parents
 				}
 
-				for (const parentID of (node.parents || {}).Pairs(true).map(a=>a.key)) {
+				for (const parentID of (node.parents || {}).Pairs().map(a=>a.key)) {
 					const newUpPath = `${parentID}/${upPath}`;
 					newUpPathAttempts.push(newUpPath);
 				}

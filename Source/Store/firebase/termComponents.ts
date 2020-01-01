@@ -12,9 +12,9 @@ export function GetTermComponent(id: string) {
 } */
 
 export function GetTermComponents(term: Term) {
-	const components = (term.components || {}).VKeys(true).map(id=>GetTermComponent(id));
+	const components = (term.components || {}).VKeys().map(id=>GetTermComponent(id));
 	return CachedTransform("GetTermComponents", [term._key], components, ()=>components);
 }
 /* export async function GetTermComponentsAsync(term: Term) {
-	return await Promise.all(term.components.VKeys(true).map((id) => GetDataAsync('termComponents', id))) as TermComponent[];
+	return await Promise.all(term.components.VKeys().map((id) => GetDataAsync('termComponents', id))) as TermComponent[];
 } */

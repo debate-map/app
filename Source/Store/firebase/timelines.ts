@@ -14,7 +14,7 @@ export const GetTimeline = StoreAccessor(s=>(id: string): Timeline=>{
 });
 
 export function GetMapTimelineIDs(map: Map) {
-	return (map.timelines || {}).VKeys(true);
+	return (map.timelines || {}).VKeys();
 }
 export const GetMapTimelines = StoreAccessor(s=>(map: Map)=>{
 	const timelines = GetMapTimelineIDs(map).map(id=>GetTimeline(id));

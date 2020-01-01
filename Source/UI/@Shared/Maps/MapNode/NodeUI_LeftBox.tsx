@@ -81,7 +81,7 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 								<Span ml={5} style={{float: "right"}}>
 									{percentStr}
 									<sup style={{whiteSpace: "pre", top: -5, marginRight: -3, marginLeft: 1, fontSize: 10}}>
-										{/* ratingSet ? ratingSet.VKeys(true).length /*- 1*#/ : 0 */}
+										{/* ratingSet ? ratingSet.VKeys().length /*- 1*#/ : 0 */}
 										{ratings.length}
 									</sup>
 								</Span>

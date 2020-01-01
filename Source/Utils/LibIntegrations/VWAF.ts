@@ -3,7 +3,6 @@ import {RootState, store} from "Store";
 import {GetAuth} from "Store/firebase";
 import {GetUserPermissionGroups, Me, MeID} from "Store/firebase/users";
 import {NotificationMessage} from "Store/main";
-import {AddNotificationMessage} from "UI/@Shared/NavBar/NotificationsUI";
 import {logTypes, LogTypes_New} from "Utils/General/Logging";
 import {ValidateDBData} from "Utils/Store/DBDataValidator";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL} from "Utils/URL/URLs";
@@ -12,6 +11,7 @@ import "./VWAF/Overrides";
 import produce from "immer";
 import {Feedback_store} from "firebase-feedback";
 import {WithStore} from "mobx-firelink";
+import {runInAction} from "mobx";
 
 const context = (require as any).context("../../../Resources/SVGs/", true, /\.svg$/);
 const iconInfo = {};
@@ -56,7 +56,18 @@ export function InitVWAF() {
 		PostHandleError: (error, errorStr)=>{
 			// wait a bit, in case we're in a reducer function (calling dispatch from within a reducer errors)
 			setTimeout(()=>{
-				AddNotificationMessage(new NotificationMessage(errorStr));
+				runInAction("VWAF.PostHandleError", ()=>{
+					try {
+						store.main.notificationMessages.push(new NotificationMessage(errorStr));
+					} catch (ex) {
+						g.alertCount_notifications = (g.alertCount_notifications | 0) + 1;
+						if (g.alertCount_notifications <= 2) {
+							alert(errorStr);
+						} else {
+							console.error(errorStr);
+						}
+					}
+				});
 			});
 		},
 

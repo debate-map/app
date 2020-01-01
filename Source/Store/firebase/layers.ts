@@ -18,14 +18,14 @@ export const GetLayer = StoreAccessor(s=>(id: string): Layer=>{
 export function GetMapLayerIDs(mapID: string) {
 	const map = GetMap(mapID);
 	if (map == null) return null;
-	return map.layers?.VKeys(true) ?? emptyArray;
+	return map.layers?.VKeys() ?? emptyArray;
 }
 export const GetMapLayers = StoreAccessor(s=>(mapID: string)=>{
 	return GetMapLayerIDs(mapID).map(id=>GetLayer(id));
 });
 
 export const GetSubnodeIDsInLayer = StoreAccessor(s=>(anchorNodeID: string, layerID: string)=>{
-	return (GetDoc({}, a=>a.layers.get(layerID).nodeSubnodes.get(anchorNodeID)) || {}).VKeys(true);
+	return (GetDoc({}, a=>a.layers.get(layerID).nodeSubnodes.get(anchorNodeID)) || {}).VKeys();
 });
 export const GetSubnodesInLayer = StoreAccessor(s=>(anchorNodeID: string, layerID: string)=>{
 	const subnodeIDs = GetSubnodeIDsInLayer(anchorNodeID, layerID);
@@ -48,7 +48,7 @@ export const GetSubnodesInEnabledLayersEnhanced = StoreAccessor(s=>(userID: stri
 	// const userLayerStates = GetUserLayerStatesForMap(userID, map._key) || {};
 	const userLayerStates = GetUserLayerStatesForMap(userID, mapID);
 	if (userLayerStates != null) {
-		for (const {key: layerID, value: state} of userLayerStates.Pairs(true)) {
+		for (const {key: layerID, value: state} of userLayerStates.Pairs()) {
 			const existingEntry = layersEnabled.find(a=>a._key == layerID);
 			if (state == true) {
 				if (existingEntry == null) {
@@ -73,5 +73,5 @@ export const GetSubnodesInEnabledLayersEnhanced = StoreAccessor(s=>(userID: stri
 });
 
 export const ForDeleteLayer_GetError = StoreAccessor(s=>(userID: string, layer: Layer)=>{
-	if ((layer.nodeSubnodes || {}).VKeys(true).length) return "Cannot delete layer until all the subnodes within it are deleted.";
+	if ((layer.nodeSubnodes || {}).VKeys().length) return "Cannot delete layer until all the subnodes within it are deleted.";
 });

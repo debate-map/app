@@ -81,7 +81,7 @@ class TermDefinitionPanel extends BaseComponent<{term: Term, termVariantNumber: 
 			<Column sel mt={5} style={{whiteSpace: "normal"}}>
 				<Row>Term: {term.name}{term.disambiguation ? ` (${term.disambiguation})` : ""} (variant #{termVariantNumber}) (id: {term._key})</Row>
 				<Row mt={5}>Short description: {term.shortDescription_current}</Row>
-				{term.components && term.components.VKeys(true).length > 0 &&
+				{term.components && term.components.VKeys().length > 0 &&
 					<Fragment>
 						<Row mt={5}>Components:</Row>
 						<TermComponentsUI term={term} editing={false} inMap={true} style={{padding: "5px 0"}}/>

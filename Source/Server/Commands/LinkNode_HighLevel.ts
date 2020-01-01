@@ -71,7 +71,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 		AssertV(CanContributeToNode(MeID(), newParentID), "Cannot paste under a node with contributions disabled.");
 
-		// if (command.payload.unlinkFromOldParent && node.parents.VKeys(true).length == 1 && newParentPath.startsWith(draggedNodePath)) {
+		// if (command.payload.unlinkFromOldParent && node.parents.VKeys().length == 1 && newParentPath.startsWith(draggedNodePath)) {
 		/* if (unlinkFromOldParent && newParentPath.startsWith(draggedNodePath)) {
 			return "Cannot move a node to a path underneath itself. (the move could orphan it and its descendants, if the new-parent's only anchoring was through the dragged-node)";
 		} */
@@ -115,7 +115,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			this.sub_unlinkFromOldParent.Validate();
 
 			// if the old parent was an argument, and the moved node was its only child, also delete the old parent
-			if (deleteOrphanedArgumentWrapper && oldParent_data.type === MapNodeType.Argument && oldParent_data.children.VKeys(true).length === 1) {
+			if (deleteOrphanedArgumentWrapper && oldParent_data.type === MapNodeType.Argument && oldParent_data.children.VKeys().length === 1) {
 				this.sub_deleteOldParent = this.sub_deleteOldParent ?? new DeleteNode({mapID, nodeID: oldParentID}).MarkAsSubcommand(this);
 				this.sub_deleteOldParent.childrenToIgnore = [nodeID]; // let DeleteNode sub that it doesn't need to wait for nodeID to be deleted (since we're moving it out from old-parent simultaneously with old-parent's deletion)
 				this.sub_deleteOldParent.Validate();

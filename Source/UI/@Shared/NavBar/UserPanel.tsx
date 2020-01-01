@@ -12,7 +12,7 @@ import {fire} from "Utils/LibIntegrations/MobXFirelink";
 import {MeID} from "../../../Store/firebase/users";
 
 @Observer
-export class UserPanel extends BaseComponentPlus({} as {auth?}, {}) {
+export class UserPanel extends BaseComponentPlus({}, {}) {
 	render() {
 		// authError: pathToJS(state.firebase, "authError"),
 		// auth: helpers.pathToJS(state.firebase, "auth"),

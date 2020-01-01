@@ -1,7 +1,7 @@
 import {LogTypes} from "vwebapp-framework";
 
 export class LogTypes_New {
-	actions = false;
+	//actions = false;
 	nodeRenders = false;
 	nodeRenders_for = null as string;
 	nodeRenderDetails = false;

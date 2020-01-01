@@ -14,9 +14,9 @@ AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
 
 	// for (const revision of tree.Get(a=>a.nodeRevisions).VValues()) {
 	// for (const revision of tree.subs.get('nodeRevisions').subs.VValues()) {
-	for (const revision of data.nodeRevisions.VValues(true) as MapNodeRevision[]) {
+	for (const revision of data.nodeRevisions.VValues() as MapNodeRevision[]) {
 		if (revision.titles == null) continue;
-		const titles_joined = revision.titles.VValues(true).join(" ");
+		const titles_joined = revision.titles.VValues().join(" ");
 		revision.titles.allTerms = GetSearchTerms(titles_joined).ToMap(a=>a, ()=>true);
 	}
 

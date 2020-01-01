@@ -58,8 +58,8 @@ export class DeleteNode extends Command<{mapID?: string, nodeID: string, withCon
 		AssertV(this.mapIDs && this.mapIDs.All(a=>a != null), "mapIDs is null, or has null entries.");
 
 		// probably todo: integrate this into the command Validate functions themselves
-		/* Assert((this.oldData.parents || {}).VKeys(true).length <= 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
-		let normalChildCount = (this.oldData.children || {}).VKeys(true).length;
+		/* Assert((this.oldData.parents || {}).VKeys().length <= 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
+		let normalChildCount = (this.oldData.children || {}).VKeys().length;
 		Assert(normalChildCount == 0, "Cannot delete this node until all its (non-impact-premise) children have been unlinked or deleted."); */
 		const earlyError = ForDelete_GetError(this.userInfo.id, this.oldData, this.parentCommand && {asPartOfMapDelete, childrenToIgnore});
 		AssertV(earlyError == null, earlyError);

@@ -51,7 +51,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {map?: Map, node: MapN
 							// let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "layerPlusAnchorParents", "finalType", "link");
 							if (link) {
 								const linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
-								if (linkUpdates.VKeys(true).length) {
+								if (linkUpdates.VKeys().length) {
 									await new UpdateLink(E({linkParentID: GetParentNodeID(path), linkChildID: node._key, linkUpdates})).Run();
 								}
 							}

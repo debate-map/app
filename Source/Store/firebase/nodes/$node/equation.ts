@@ -7,7 +7,7 @@ export function GetEquationStepNumber(path: string) {
 	const parent = GetParentNode(path);
 	if (parent == null) return 0;
 
-	// let equationStepNodeIDs = parent.children.VKeys(true).map(a=>a.ToInt());
+	// let equationStepNodeIDs = parent.children.VKeys().map(a=>a.ToInt());
 	let equationStepNodes = GetNodeChildrenL2(parent).filter(a=>{
 		return a && a.current.equation && (GetLinkUnderParent(a._key, parent).seriesAnchor || a.current.equation.isStep);
 	});

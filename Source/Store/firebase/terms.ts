@@ -22,6 +22,6 @@ export function GetFullNameP(term: Term) {
 export const GetTermVariantNumber = StoreAccessor(s=>(term: Term): number=>{
 	const termsWithSameName_map = GetDoc({}, a=>a.termNames.get(term.name));
 	if (termsWithSameName_map == null) return 1;
-	const termsWithSameNameAndLowerIDs = termsWithSameName_map.VKeys(true).map(a=>a).filter(a=>a < term._key);
+	const termsWithSameNameAndLowerIDs = termsWithSameName_map.VKeys().map(a=>a).filter(a=>a < term._key);
 	return 1 + termsWithSameNameAndLowerIDs.length;
 });

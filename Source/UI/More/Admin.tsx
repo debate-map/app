@@ -7,7 +7,7 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {FirebaseDBShape} from "Store/firebase";
 import {HasAdminPermissions} from "Store/firebase/userExtras";
 import {ValidateDBData} from "Utils/Store/DBDataValidator";
-import {PageContainer} from "vwebapp-framework";
+import {PageContainer, Observer} from "vwebapp-framework";
 import {MeID} from "../../Store/firebase/users";
 import {ResetCurrentDBRoot} from "./Admin/ResetCurrentDBRoot";
 
@@ -31,6 +31,7 @@ export function AddUpgradeFunc(version: number, func: UpgradeFunc) {
 // require('./Admin/DBUpgrades/UpgradeDB_11');
 require("./Admin/DBUpgrades/UpgradeDB_12");
 
+@Observer
 export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes: [] as number[], dbUpgrade_entryCounts: [] as number[]}) {
 	/* constructor(props) {
 		super(props);
@@ -264,7 +265,7 @@ export async function ImportCollectionsData(versionRootPath: string, collections
 	}; */
 
 	const allDBUpdates = {}; // relative to root-path
-	for (const key of collectionsDataToImport.VKeys(true)) {
+	for (const key of collectionsDataToImport.VKeys()) {
 		const dbUpdates = ConvertDataToValidDBUpdates(versionRootPath, {[key]: collectionsDataToImport[key]});
 		allDBUpdates.Extend(dbUpdates);
 	}

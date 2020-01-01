@@ -53,7 +53,7 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 				ACTMapNodeExpandedSet({mapID: map._key, path, expanded: true, resetSubtree: false});
 			}
 			if (node.children) {
-				newPathsToExpand.push(...node.children.VKeys(true).map(childID=>`${path}/${childID}`));
+				newPathsToExpand.push(...node.children.VKeys().map(childID=>`${path}/${childID}`));
 			}
 		}
 		pathsToExpand = newPathsToExpand;
