@@ -46,7 +46,8 @@
 		"../Scripts/**/*.ts",
 		"../Scripts/**/*.tsx",
 		"Config.ts",
-		"Build/WebpackConfig.ts"
+		"Build/WebpackConfig.ts",
+		//"../node_modules/js-vextensions/**/*.ts",
 	],
 	"compileOnSave": true
 }

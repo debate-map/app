@@ -16,16 +16,6 @@ For more information, visit the website at: <https://debatemap.app>
 1) Clone the repo to disk: <https://github.com/debate-map/client.git>
 2) Run `npm install` in the project's root folder.
 
-At the moment, you also need to perform these steps (fix for ts-node not working with es2015 modules, unless symlinked):
-3) [temp] Clone the js-vextensions repo to disk: <https://github.com/Venryx/js-vextensions.git>
-4) [temp] Run `npm link` in the js-vextensions repo folder.
-5) [temp] Run `npm link js-vextensions` in the Debate Map repo folder.
-
-At the moment, this also (fix for mobx-utils):
-6) [temp] Clone the mobx-utils repo to disk: <https://github.com/Venryx/mobx-utils.git>
-7) [temp] Run `npm link` in the mobx-utils repo folder.
-8) [temp] Run `npm link mobx-utils` in the Debate Map repo folder.
-
 For recommended setup of your code editor and other tools, see: [Editor setup](#editor-setup)
 
 ### Running locally

@@ -8,7 +8,7 @@ import fs from "fs";
 import HardSourceWebpackPlugin from "hard-source-webpack-plugin";
 import SpriteLoaderPlugin from "svg-sprite-loader/plugin";
 import {WebpackStringReplacer} from "webpack-string-replacer";
-// import { CE } from 'js-vextensions';
+//import {CE} from "js-vextensions";
 import {CE} from "js-vextensions/Source"; // temp; require source, thus ts-node compiles to commonjs (fix for that ts-node doesn't support es2015-modules)
 // import resolverFactory from 'enhanced-resolve/lib/ResolverFactory';
 import SymlinkPlugin from "enhanced-resolve/lib/SymlinkPlugin";
