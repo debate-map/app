@@ -1,7 +1,7 @@
 {
 	"typescript.tsdk": "./node_modules/typescript/lib",
-	"javascript.preferences.quoteStyle": "single",
-	"typescript.preferences.quoteStyle": "single",
+	"javascript.preferences.quoteStyle": "double",
+	"typescript.preferences.quoteStyle": "double",
 	"eslint.autoFixOnSave": true,
 	"eslint.validate": [
 		"javascript",

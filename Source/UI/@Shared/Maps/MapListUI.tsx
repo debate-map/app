@@ -35,7 +35,7 @@ export class MapListUI extends BaseComponentPlus({} as {type: MapType}, {}) {
 		const selectedMap = type == MapType.Private ? GetSelectedPrivateMap() : GetSelectedPublicMap();
 		if (selectedMap) {
 			return (
-				<PageContainer fullWidth={true} fullHeight={true} style={{margin: 0, padding: 0, background: null, filter: null}}>
+				<PageContainer preset="full" style={{margin: 0}}>
 					<MapUI map={selectedMap}/>
 				</PageContainer>
 			);

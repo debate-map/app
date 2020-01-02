@@ -32,9 +32,9 @@ export const GetNodesL2 = StoreAccessor((s) => (): MapNodeL2[] => {
 	let nodeMap = GetNodeMap();
 	return CachedTransform("GetNodes_Enhanced", [], nodeMap, ()=>nodeMap ? nodeMap.VValues(true) : []);
 } */
-export const GetNodesByIDs = StoreAccessor(s=>(ids: string[], allowStillLoading = false): MapNode[]=>{
+export const GetNodesByIDs = StoreAccessor(s=>(ids: string[], emptyForLoading = true): MapNode[]=>{
 	const nodes = ids.map(id=>GetNode(id));
-	if (!allowStillLoading && nodes.Any(a=>a == null)) return emptyArray;
+	if (emptyForLoading && nodes.Any(a=>a == null)) return emptyArray;
 	return nodes;
 });
 

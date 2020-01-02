@@ -10,7 +10,7 @@ export class GlobalMapUI extends BaseComponentPlus({} as {}, {}) {
 		const map = GetMap(globalMapID);
 		if (map == null) return null;
 		return (
-			<PageContainer fullWidth={true} fullHeight={true} style={{margin: 0, padding: 0, background: null, filter: null}}>
+			<PageContainer preset="full" style={{margin: 0}}>
 				<MapUI map={map} subNavBarWidth={/* 104 */ 54}/>
 			</PageContainer>
 		);

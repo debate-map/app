@@ -38,7 +38,7 @@ AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
 		timelineSteps: [] as KeyConversion[],
 	};
 
-	function GetNewKey(collectionKey: string, oldEntryKey: string) {
+	function GetNewKey(collectionKey: CollectionKey, oldEntryKey: string) {
 		const conversionEntry = conversions[collectionKey].find(a=>a.oldKey == oldEntryKey);
 		if (conversionEntry == null) {
 			const placeholderKey = _.padEnd(oldEntryKey.toString().slice(0, 22), 22, "_MISSING");
@@ -58,14 +58,17 @@ AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
 	// convert heirarchal keys (ie. the primary key for each object, as present in the path)
 	// ==========
 
-	function ReplacePairKey(mapObj: Object, oldKey: string, collectionKeyForOldKey: CollectionKey) {
-		const newKey = GetNewKey(collectionKeyForOldKey, oldKey);
-		const value = mapObj[oldKey];
-		delete mapObj[oldKey];
-		mapObj[newKey] = value;
+	function ReplacePairKey(pairsObj: Object, oldKey: string, collectionReffedByKey: CollectionKey) {
+		const newKey = GetNewKey(collectionReffedByKey, oldKey);
+		const value = pairsObj[oldKey];
+		delete pairsObj[oldKey];
+		pairsObj[newKey] = value;
 	}
-	function ReplacePairKeys(mapObj: Object, collectionKeyForOldKey: CollectionKey) {
-		(mapObj || {}).Pairs().forEach(pair=>ReplacePairKey(mapObj, pair.key as string, collectionKeyForOldKey));
+	function ReplacePairKeys(pairsObj: Object, collectionReffedByKey: CollectionKey) {
+		(pairsObj || {}).Pairs().forEach(pair=>ReplacePairKey(pairsObj, pair.key as string, collectionReffedByKey));
+	}
+	function ReplacePairValues(pairsObj: Object, collectionReffedByValue: CollectionKey) {
+		(pairsObj || {}).Pairs().forEach(pair=>pairsObj[pair.key] = GetNewKey(collectionReffedByValue, pair.value));
 	}
 
 	/* conversions.VKeys().forEach((collectionKey) => {
