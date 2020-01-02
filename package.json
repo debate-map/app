@@ -21,7 +21,7 @@
     "@@dev-part2": "cross-env NODE_OPTIONS=\"--experimental-modules\" ts-node --project Scripts/tsconfig.json Scripts/Server.ts",
     "dev-part2": "cross-env ts-node-dev --project Scripts/tsconfig.json --ignore none Scripts/Server.ts",
     "@dev-with-stats": "cross-env-shell NODE_ENV=development DEBUG='app:*' _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS=\"--max-old-space-size=4096 --experimental-modules\" \"npm run create-config && ts-node-dev --project Scripts/tsconfig.json Scripts/Server\"",
-    "dev-with-stats": "cross-env-shell NODE_ENV=development DEBUG='app:*' _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS=\"--max-old-space-size=4096\" \"npm run create-config && ts-node-dev --project Scripts/tsconfig.json Scripts/Server\"",
+    "dev-with-stats": "cross-env-shell NODE_ENV=development DEBUG='app:*' _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS=\"--max-old-space-size=4096\" \"npm run create-config && ts-node-dev --project Scripts/tsconfig.json --ignore none Scripts/Server\"",
     "dev:no-debug": "npm run dev -- --no_debug",
     "@create-config": "cross-env DEBUG='app:*' NODE_OPTIONS=\"--experimental-modules\" ts-node Scripts/Build/CreateConfig.ts",
     "create-config": "cross-env DEBUG='app:*' ts-node --project Scripts/tsconfig.json Scripts/Build/CreateConfig.ts",
