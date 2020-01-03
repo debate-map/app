@@ -68,18 +68,13 @@ export class DefinitionsPanel extends BaseComponentPlus(
 	}
 }
 
-class TermDefinitionPanel extends BaseComponent<{term: Term, termVariantNumber: number}, {}> {
+export class TermDefinitionPanel extends BaseComponentPlus({showID: true} as {term: Term, termVariantNumber: number, showID?: boolean}, {}) {
 	render() {
-		const {term, termVariantNumber} = this.props;
-
-		// let creatorOrMod = term != null && IsUserCreatorOrMod(MeID(), term);
-		const showDetailsURL = GetCurrentURL().Clone();
-		showDetailsURL.pathNodes = ["database", "terms", `${term._key}`];
-		showDetailsURL.queryVars = [];
+		const {term, termVariantNumber, showID} = this.props;
 
 		return (
 			<Column sel mt={5} style={{whiteSpace: "normal"}}>
-				<Row>Term: {term.name}{term.disambiguation ? ` (${term.disambiguation})` : ""} (variant #{termVariantNumber}) (id: {term._key})</Row>
+				<Row>Term: {term.name}{term.disambiguation ? ` (${term.disambiguation})` : ""} (variant #{termVariantNumber}){showID && ` (id: ${term._key})`}</Row>
 				<Row mt={5}>Short description: {term.shortDescription_current}</Row>
 				{term.components && term.components.VKeys().length > 0 &&
 					<Fragment>
@@ -89,11 +84,12 @@ class TermDefinitionPanel extends BaseComponent<{term: Term, termVariantNumber: 
 				{/* <Row>Details:</Row>
 				<TermDetailsUI baseData={term} creating={false} enabled={/*creatorOrMod*#/ false} style={{padding: 10}}
 					onChange={data=>this.SetState({selectedTerm_newData: data})}/> */}
-				<Link to={showDetailsURL.toString({domain: false})} onContextMenu={e=>e.nativeEvent["passThrough"] = true}>
-					<Button mt={5} text="Show details" /* onClick={e=> {
-						store.dispatch(push());
-						//store.dispatch(new ACTTermSelect({id: term._id}));
-					}} *//>
+				<Link style={{marginTop: 5, alignSelf: "flex-start"}} onContextMenu={e=>e.nativeEvent["passThrough"] = true} actionFunc={s=>{
+					s.main.page = "database";
+					s.main.database.subpage = "terms";
+					s.main.database.selectedTermID = term._key;
+				}}>
+					<Button text="Show details"/>
 				</Link>
 			</Column>
 		);

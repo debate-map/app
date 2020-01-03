@@ -1,5 +1,5 @@
 import {GetEntries, WaitXThenRun} from "js-vextensions";
-import {Div, Pre, Row, Select, TextArea, TextInput, Text, Button} from "react-vcomponents";
+import {Div, Pre, Row, Select, TextArea, TextInput, Text, Button, DropDown, DropDownTrigger, DropDownContent, Column} from "react-vcomponents";
 import {BaseComponent, RenderSource} from "react-vextensions";
 import {AttachmentType, GetAttachmentType} from "Store/firebase/nodeRevisions/@AttachmentType";
 import {GetFinalPolarity} from "Store/firebase/nodes/$node";
@@ -9,8 +9,9 @@ import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
 import {ES} from "Utils/UI/GlobalStyles";
 import {TermAttachment} from "Store/firebase/nodeRevisions/@TermAttachment";
 import {Observer, Validate} from "vwebapp-framework";
-import {GetTerm} from "Store/firebase/terms";
+import {GetTerm, GetTermVariantNumber} from "Store/firebase/terms";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
+import {TermDefinitionPanel} from "../NodeUI/Panels/DefinitionsPanel";
 
 export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 	render() {
@@ -150,10 +151,24 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 					const term = terms[index];
 					return (
 						<Row key={index}>
-							{/*<TextInput placeholder="Enter term ID or name..." value={termAttachment.id} onChange={val=>termAttachment.id = val}/>*/}
-							<TextInput placeholder="Enter term ID" style={{flex: 50}} value={termAttachment.id} onChange={val=>Change(termAttachment.id = val)}/>
-							{!term && <Text ml={5} style={{flex: 50}}>Term not found.</Text>}
-							{term && <Text ml={5} style={{flex: 50}}>Term: {term.name}{term.disambiguation && ` (${term.disambiguation})`}</Text>}
+							<TextInput placeholder="Enter term ID or name" style={{flex: 50}} value={termAttachment.id} onChange={val=>Change(termAttachment.id = val)}/>
+							<Row ml={5} style={{position: "relative", flex: 50}}>
+								<DropDown style={{flex: 1}}>
+									<DropDownTrigger>
+										<Button style={{flex: 1, display: "flex"}}
+											text={term
+												? `Term: ${term.name}${term.disambiguation ? ` (${term.disambiguation})` : ""}`
+												: `(click to search/create)`}/>
+									</DropDownTrigger>
+									<DropDownContent style={{left: 0, zIndex: 1, borderRadius: "0 0 5px 5px"}}><Column>
+										{term && <TermDefinitionPanel term={term} termVariantNumber={GetTermVariantNumber(term)} showID={false}/>}
+										{!term &&
+										<Column>
+											TODO
+										</Column>}
+									</Column></DropDownContent>
+								</DropDown>
+							</Row>
 						</Row>
 					);
 				})}
