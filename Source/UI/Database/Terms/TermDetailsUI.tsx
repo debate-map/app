@@ -1,4 +1,4 @@
-import {MeID} from "Store/firebase/users";
+import {MeID,GetUser} from "Store/firebase/users";
 import {User} from "Store/firebase/users/@User";
 import {GetErrorMessagesUnderElement, GetEntries, Clone, DEL} from "js-vextensions";
 import Moment from "moment";
@@ -12,7 +12,7 @@ import {AddTerm} from "../../../Server/Commands/AddTerm";
 import {TermComponent} from "../../../Store/firebase/termComponents/@TermComponent";
 import {GetTermVariantNumber} from "../../../Store/firebase/terms";
 import {Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "../../../Store/firebase/terms/@Term";
-import {GetUser} from "../../../Store/firebase/users";
+
 import {GetNiceNameForTermType} from "../../Database/TermsUI";
 
 @Observer
@@ -72,7 +72,7 @@ export class TermDetailsUI extends BaseComponentPlus(
 					<Select options={GetEntries(TermType, name=>GetNiceNameForTermType(TermType[name]))} enabled={enabled} style={ES({flex: 1})}
 						value={newData.type} onChange={val=>Change(newData.type = val)}/>
 				</RowLR>
-				{(newData.type == TermType.SpecificEntity || newData.type == TermType.EntityType) &&
+				{(newData.type == TermType.ProperNoun || newData.type == TermType.CommonNoun) &&
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>
 						<Pre>Person: </Pre>
 						<CheckBox enabled={enabled} checked={newData.person} onChange={val=>Change(newData.person = val)}/>
@@ -104,7 +104,7 @@ export class TermDetailsUI extends BaseComponentPlus(
 export function ShowAddTermDialog() {
 	let newTerm = new Term({
 		name: "",
-		type: TermType.SpecificEntity,
+		type: TermType.ProperNoun,
 		shortDescription_current: "",
 	});
 

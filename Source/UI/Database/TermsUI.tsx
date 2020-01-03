@@ -126,13 +126,13 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 
 function GetHelperTextForTermType(term: Term) {
 	const fullName = GetFullNameP(term);
-	if (term.type == TermType.SpecificEntity) return `"${fullName}" (consistent with the description above) is ${term.person ? "someone who" : "something which"}...`;
-	if (term.type == TermType.EntityType) {
+	if (term.type == TermType.ProperNoun) return `"${fullName}" (consistent with the description above) is ${term.person ? "someone who" : "something which"}...`;
+	if (term.type == TermType.CommonNoun) {
 		return `A${fullName.toLowerCase().StartsWithAny(..."aeiou".split("")) ? "n" : ""} "${fullName
 		}" (consistent with the description above) is ${term.person ? "someone who" : "something which"}...`;
 	}
 	if (term.type == TermType.Adjective) return `If something is "${fullName}" (consistent with the description above), it is...`;
-	if (term.type == TermType.Action) return `To "${fullName}" (consistent with the description above) is to...`;
+	if (term.type == TermType.Verb) return `To "${fullName}" (consistent with the description above) is to...`;
 	if (term.type == TermType.Adverb) return `If an action is performed "${fullName}" (consistent with the description above), it is done...`;
 	Assert(false);
 }
@@ -162,6 +162,6 @@ export class TermUI extends BaseComponentPlus({} as {term: Term, first: boolean,
 }
 
 export function GetNiceNameForTermType(type: TermType) {
-	if (type == TermType.Action) return "action/process";
+	//if (type == TermType.Verb) return "action/process";
 	return TermType[type].replace(/.([A-Z])/g, m=>`${m[0]} ${m[1]}`).toLowerCase();
 }

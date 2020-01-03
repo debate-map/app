@@ -59,10 +59,10 @@ AddSchema("Term", {
 });
 
 export enum TermType {
-	SpecificEntity = 10,
-	EntityType = 20,
+	ProperNoun = 10,
+	CommonNoun = 20,
 	Adjective = 30,
-	Action = 40,
+	Verb = 40,
 	Adverb = 50,
 }
 AddSchema("TermType", {oneOf: GetValues_ForSchema(TermType)});
