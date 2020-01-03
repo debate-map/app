@@ -164,7 +164,7 @@ export class TitlePanel extends BaseComponentPlus(
 						{noteText}
 					</Pre>}
 				{node.type == MapNodeType.Claim && node.current.quote &&
-					<InfoButton text="Allowed exceptions are: bold and [...] (collapsed segments)"/>}
+					<InfoButton ml={5} text="Allowed modifications: bold, [...] (collapsed segments)"/>}
 			</div>
 		);
 	}

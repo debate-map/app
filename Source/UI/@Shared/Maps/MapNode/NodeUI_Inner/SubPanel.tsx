@@ -1,5 +1,5 @@
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {VReactMarkdown_Remarkable} from "vwebapp-framework";
+import {VReactMarkdown_Remarkable, Observer} from "vwebapp-framework";
 import {ImageAttachment} from "Store/firebase/nodeRevisions/@ImageAttachment";
 import {MapNode, MapNodeL2} from "../../../../../Store/firebase/nodes/@MapNode";
 import {GetFontSizeForNode} from "../../../../../Store/firebase/nodes/$node";
@@ -17,20 +17,22 @@ export class SubPanel extends BaseComponent<{node: MapNodeL2}, {}> {
 				background: "rgba(0,0,0,.5)", borderRadius: "0 0 0 5px",
 			}}>
 				{node.current.quote &&
-					<SubPanel_Quote contentNode={node.current.quote} fontSize={GetFontSizeForNode(node)}/>}
+					<SubPanel_Quote quoteAttachment={node.current.quote} fontSize={GetFontSizeForNode(node)}/>}
 				{node.current.image &&
 					<SubPanel_Image imageAttachment={node.current.image}/>}
 			</div>
 		);
 	}
 }
-export class SubPanel_Quote extends BaseComponent<{contentNode: QuoteAttachment, fontSize: number}, {}> {
+
+@Observer
+export class SubPanel_Quote extends BaseComponent<{quoteAttachment: QuoteAttachment, fontSize: number}, {}> {
 	render() {
-		const {contentNode, fontSize} = this.props;
+		const {quoteAttachment, fontSize} = this.props;
 		return (
 			<div style={{position: "relative", fontSize, whiteSpace: "initial"}}>
 				{/* <div>{`"${node.quote.text}"`}</div> */}
-				{/* <VReactMarkdown className="selectable Markdown" source={`"${contentNode.content}"`}
+				{/* <VReactMarkdown className="selectable Markdown" source={`"${quoteAttachment.content}"`}
 					containerProps={{style: E()}}
 					renderers={{
 						Text: props=> {
@@ -42,14 +44,15 @@ export class SubPanel_Quote extends BaseComponent<{contentNode: QuoteAttachment,
 						Link: props=><span/>,
 					}}
 				/> */}
-				<VReactMarkdown_Remarkable source={contentNode.content}/>
+				<VReactMarkdown_Remarkable source={quoteAttachment.content}/>
 				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
-				<SourcesUI sourceChains={contentNode.sourceChains}/>
+				<SourcesUI sourceChains={quoteAttachment.sourceChains}/>
 			</div>
 		);
 	}
 }
 
+@Observer
 export class SubPanel_Image extends BaseComponentPlus({} as {imageAttachment: ImageAttachment}, {}) {
 	render() {
 		const {imageAttachment} = this.props;

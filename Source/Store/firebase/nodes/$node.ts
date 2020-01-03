@@ -246,7 +246,7 @@ export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: stri
 			const image = GetImage(node.current.image.id);
 			if (image == null) return "...";
 			// if (image.sourceChains == null) return `The ${GetNiceNameForImageType(image.type)} below is unmodified.`; // temp
-			const firstSource = node.current.quote.sourceChains[0].sources[0];
+			const firstSource = image.sourceChains[0].sources[0];
 			return `The ${GetNiceNameForImageType(image.type)} below was published${ // (as shown)`
 				firstSource.name ? ` in "${firstSource.name}"` : ""}${
 					firstSource.author ? ` by ${firstSource.author}` : ""}${

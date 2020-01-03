@@ -1,5 +1,5 @@
 import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
-import {Column, Pre, RowLR, Spinner} from "react-vcomponents";
+import {Column, Pre, RowLR, Spinner, TextInput} from "react-vcomponents";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
 import {ImageAttachment} from "Store/firebase/nodeRevisions/@ImageAttachment";
@@ -25,8 +25,7 @@ export class ImageAttachmentEditorUI extends BaseComponent<Props, {newData: Imag
 			<Column style={style}>
 				<RowLR splitAt={splitAt}>
 					<Pre>Image ID: </Pre>
-					<Spinner min={1} enabled={creating || editing} style={{width: "100%"}}
-						value={newData.id} onChange={val=>Change(newData.id = val)}/>
+					<TextInput enabled={creating || editing} style={{width: "100%"}} value={newData.id} onChange={val=>Change(newData.id = val)}/>
 				</RowLR>
 			</Column>
 		);
