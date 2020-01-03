@@ -38,7 +38,7 @@ export class MapsState {
 	@O detailsPanel = new DetailsPanelState();
 }
 export class DetailsPanelState {
-	@O subpanel = DetailsPanel_Subpanel.Content;
+	@O subpanel = DetailsPanel_Subpanel.Text;
 }
 
 export const GetLastAcknowledgementTime = StoreAccessor(s=>(nodeID: string)=>{

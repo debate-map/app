@@ -11,19 +11,20 @@ import {Icon, Observer, InfoButton, IsSpecialEmptyArray} from "vwebapp-framework
 import {ES} from "Utils/UI/GlobalStyles";
 import {SlicePath} from "mobx-firelink";
 import {ChangeNodeOwnerMap} from "Server/Commands/ChangeNodeOwnerMap";
+import {AttachmentType, GetAttachmentType} from "Store/firebase/nodeRevisions/@AttachmentType";
 import {CanConvertFromClaimTypeXToY, ChangeClaimType} from "../../../../../../Server/Commands/ChangeClaimType";
 import {ReverseArgumentPolarity} from "../../../../../../Server/Commands/ReverseArgumentPolarity";
 import {UpdateLink} from "../../../../../../Server/Commands/UpdateLink";
 import {UpdateNodeChildrenOrder} from "../../../../../../Server/Commands/UpdateNodeChildrenOrder";
 import {Map, MapType} from "../../../../../../Store/firebase/maps/@Map";
-import {GetClaimType, GetNodeDisplayText, GetNodeForm, GetNodeL3, IsSinglePremiseArgument} from "../../../../../../Store/firebase/nodes/$node";
-import {ClaimForm, ClaimType, MapNodeL3} from "../../../../../../Store/firebase/nodes/@MapNode";
+import {GetNodeDisplayText, GetNodeForm, GetNodeL3, IsSinglePremiseArgument} from "../../../../../../Store/firebase/nodes/$node";
+import {ClaimForm, MapNodeL3} from "../../../../../../Store/firebase/nodes/@MapNode";
 import {ArgumentType} from "../../../../../../Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType} from "../../../../../../Store/firebase/nodes/@MapNodeType";
 import {IsUserCreatorOrMod} from "../../../../../../Store/firebase/userExtras";
 
 @Observer
-export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {convertToType: null as ClaimType}) {
+export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType}) {
 	render() {
 		const {map, node, path} = this.props;
 		let {convertToType} = this.state;
@@ -43,7 +44,7 @@ export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNo
 			|| (parent && parent.type === MapNodeType.Argument && parentCreatorOrMod ? parent : null);
 		const nodeArgOrParentSPArg_controlled_path = nodeArgOrParentSPArg_controlled && (nodeArgOrParentSPArg_controlled === node ? path : parentPath);
 
-		const convertToTypes = GetEntries(ClaimType).filter(pair=>CanConvertFromClaimTypeXToY(GetClaimType(node), pair.value));
+		const convertToTypes = GetEntries(AttachmentType).filter(pair=>CanConvertFromClaimTypeXToY(GetAttachmentType(node), pair.value));
 		convertToType = convertToType || convertToTypes.map(a=>a.value).FirstOrX();
 
 		const isArgument_any = node.current.argumentType === ArgumentType.Any;
@@ -129,9 +130,9 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 		let canSetAsNegation;
 		let canSetAsSeriesAnchor;
 		if (node.type == MapNodeType.Claim) {
-			const claimType = GetClaimType(node);
-			canSetAsNegation = claimType === ClaimType.Normal && node.link.form !== ClaimForm.YesNoQuestion;
-			canSetAsSeriesAnchor = claimType === ClaimType.Equation && !node.current.equation.isStep; // && !creating;
+			const claimType = GetAttachmentType(node);
+			canSetAsNegation = claimType === AttachmentType.None && node.link.form !== ClaimForm.YesNoQuestion;
+			canSetAsSeriesAnchor = claimType === AttachmentType.Equation && !node.current.equation.isStep; // && !creating;
 		}
 
 		return (

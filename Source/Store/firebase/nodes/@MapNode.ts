@@ -15,13 +15,6 @@ export enum AccessLevel {
 	Admin = 40,
 }
 
-export enum ClaimType {
-	Normal = 10,
-	// ImpactPremise = 20,
-	Equation = 30,
-	Quote = 40,
-	Image = 50,
-}
 export enum ClaimForm {
 	Base = 10,
 	Negation = 20,
@@ -157,16 +150,3 @@ AddSchema("ChildEntry", {
 
 export type LayerPlusAnchorParentSet = { [key: string]: boolean; };
 AddSchema("LayerPlusAnchorParentSet", {patternProperties: {[`${UUID_regex_partial}\\+${UUID_regex_partial}`]: {type: "boolean"}}});
-
-// others
-// ==========
-
-export class ImageAttachment {
-	id: string;
-}
-AddSchema("ImageAttachment", {
-	properties: {
-		id: {type: "string"},
-	},
-	required: ["id"],
-});

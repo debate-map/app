@@ -1,8 +1,9 @@
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {VReactMarkdown_Remarkable} from "vwebapp-framework";
-import {MapNode, ImageAttachment, MapNodeL2} from "../../../../../Store/firebase/nodes/@MapNode";
+import {ImageAttachment} from "Store/firebase/nodeRevisions/@ImageAttachment";
+import {MapNode, MapNodeL2} from "../../../../../Store/firebase/nodes/@MapNode";
 import {GetFontSizeForNode} from "../../../../../Store/firebase/nodes/$node";
-import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
+import {QuoteAttachment} from "../../../../../Store/firebase/nodeRevisions/@QuoteAttachment";
 import {GetImage} from "../../../../../Store/firebase/images";
 import {Image} from "../../../../../Store/firebase/images/@Image";
 import {SourcesUI} from "./SourcesUI";
@@ -15,15 +16,15 @@ export class SubPanel extends BaseComponent<{node: MapNodeL2}, {}> {
 				// border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
 				background: "rgba(0,0,0,.5)", borderRadius: "0 0 0 5px",
 			}}>
-				{node.current.contentNode &&
-					<SubPanel_Quote contentNode={node.current.contentNode} fontSize={GetFontSizeForNode(node)}/>}
+				{node.current.quote &&
+					<SubPanel_Quote contentNode={node.current.quote} fontSize={GetFontSizeForNode(node)}/>}
 				{node.current.image &&
 					<SubPanel_Image imageAttachment={node.current.image}/>}
 			</div>
 		);
 	}
 }
-export class SubPanel_Quote extends BaseComponent<{contentNode: ContentNode, fontSize: number}, {}> {
+export class SubPanel_Quote extends BaseComponent<{contentNode: QuoteAttachment, fontSize: number}, {}> {
 	render() {
 		const {contentNode, fontSize} = this.props;
 		return (

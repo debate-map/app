@@ -7,7 +7,7 @@ import {RatingType} from "../nodeRatings/@RatingType";
 import {GetNodeRevision} from "../nodeRevisions";
 import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, HolderType, IsNodeSubnode} from "../nodes";
 import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
-import {ChildEntry, ClaimForm, ClaimType, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode";
+import {ChildEntry, ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode";
 import {MapNodeRevision, TitlesMap, TitlesMap_baseKeys} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
 
@@ -233,8 +233,8 @@ export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: stri
 			}
 			return result;
 		}
-		if (node.current.contentNode) {
-			const firstSource = node.current.contentNode.sourceChains[0].sources[0];
+		if (node.current.quote) {
+			const firstSource = node.current.quote.sourceChains[0].sources[0];
 			// if (PROD && firstSource == null) return '(first source is null)'; // defensive
 			return `The statement below was made${ // (as shown)
 				firstSource.name ? ` in "${firstSource.name}"` : ""}${
@@ -246,7 +246,7 @@ export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: stri
 			const image = GetImage(node.current.image.id);
 			if (image == null) return "...";
 			// if (image.sourceChains == null) return `The ${GetNiceNameForImageType(image.type)} below is unmodified.`; // temp
-			const firstSource = node.current.contentNode.sourceChains[0].sources[0];
+			const firstSource = node.current.quote.sourceChains[0].sources[0];
 			return `The ${GetNiceNameForImageType(image.type)} below was published${ // (as shown)`
 				firstSource.name ? ` in "${firstSource.name}"` : ""}${
 					firstSource.author ? ` by ${firstSource.author}` : ""}${
@@ -272,16 +272,6 @@ export function GetValidNewChildTypes(parent: MapNodeL2, holderType: HolderType,
 	const nodeTypes = GetValues<MapNodeType>(MapNodeType);
 	const validChildTypes = nodeTypes.filter(type=>ForNewLink_GetError(parent._key, {type} as any, permissions, holderType) == null);
 	return validChildTypes;
-}
-
-export function GetClaimType(node: MapNodeL2) {
-	if (node.type != MapNodeType.Claim) return null;
-	return (
-		node.current.equation ? ClaimType.Equation
-		: node.current.contentNode ? ClaimType.Quote
-		: node.current.image ? ClaimType.Image
-		: ClaimType.Normal
-	);
 }
 
 /** Returns whether the node provided is an argument, and marked as single-premise. */

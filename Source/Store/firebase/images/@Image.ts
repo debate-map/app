@@ -1,4 +1,4 @@
-import {SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
+import {SourceChain, Source} from "Store/firebase/nodeRevisions/@SourceChain";
 import {GetValues_ForSchema} from "js-vextensions";
 import {AddSchema} from "vwebapp-framework";
 

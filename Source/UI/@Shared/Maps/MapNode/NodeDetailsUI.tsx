@@ -1,4 +1,4 @@
-import {AsNodeL1, GetFinalPolarity, AsNodeL2, GetClaimType} from "Store/firebase/nodes/$node";
+import {AsNodeL1, GetFinalPolarity, AsNodeL2} from "Store/firebase/nodes/$node";
 import {GetUserAccessLevel, MeID, GetUser} from "Store/firebase/users";
 import {User} from "Store/firebase/users/@User";
 import {GetErrorMessagesUnderElement, Clone, WaitXThenRun, ToNumber, GetEntries, E} from "js-vextensions";
@@ -11,7 +11,8 @@ import {GetOpenMapID} from "Store/main";
 
 import {store} from "Store";
 import {runInAction} from "mobx";
-import {AccessLevel, ChildEntry, ClaimForm, ClaimType, MapNode, MapNodeL2, MapNodeL3, globalMapID} from "../../../../Store/firebase/nodes/@MapNode";
+import {GetAttachmentType, AttachmentType, ResetNodeRevisionAttachment} from "Store/firebase/nodeRevisions/@AttachmentType";
+import {AccessLevel, ChildEntry, ClaimForm, MapNode, MapNodeL2, MapNodeL3, globalMapID} from "../../../../Store/firebase/nodes/@MapNode";
 import {ArgumentType, GetArgumentTypeDisplayText, MapNodeRevision, MapNodeRevision_titlePattern, PermissionInfo, PermissionInfoType, MapNodeRevision_Defaultable} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 
@@ -56,7 +57,7 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 		const newDataAsL2 = AsNodeL2(newData, newRevisionData);
 
 		const sharedProps: SharedProps = {...this.props, Change, newDataAsL2, ...this.state, SetState: this.SetState};
-		const claimType = GetClaimType(newDataAsL2);
+		const attachmentType = GetAttachmentType(newDataAsL2);
 
 		const splitAt = 170;
 		const subpanel = store.main.maps.detailsPanel.subpanel;
@@ -67,22 +68,12 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 						runInAction("NodeDetailsUI.subpanel.onChange", ()=>store.main.maps.detailsPanel.subpanel = val);
 					}}/>
 				</Row>
-				{subpanel == DetailsPanel_Subpanel.Content &&
+				{subpanel == DetailsPanel_Subpanel.Text &&
 				<>
-					{(newData.type != MapNodeType.Claim || claimType == ClaimType.Normal) &&
+					{(newData.type != MapNodeType.Claim || attachmentType == AttachmentType.None) &&
 						<Title_Base {...sharedProps}/>}
-					{newData.type == MapNodeType.Claim && claimType == ClaimType.Normal &&
+					{newData.type == MapNodeType.Claim && attachmentType == AttachmentType.None &&
 						<OtherTitles {...sharedProps}/>}
-					{newData.type == MapNodeType.Claim && claimType == ClaimType.Equation &&
-						<EquationEditorUI key={0} creating={forNew} editing={enabled}
-							baseData={newRevisionData.equation} onChange={val=>Change(newRevisionData.equation = val)}/>}
-					{newData.type == MapNodeType.Claim && claimType == ClaimType.Quote &&
-						<QuoteInfoEditorUI ref={c=>this.quoteEditor = c} key={1} creating={forNew} editing={enabled}
-							baseData={newRevisionData.contentNode} onChange={val=>Change(newRevisionData.contentNode = val)}
-							showPreview={false} justShowed={false}/>}
-					{newData.type == MapNodeType.Claim && claimType == ClaimType.Image &&
-						<ImageAttachmentEditorUI key={1} creating={forNew} editing={enabled}
-							baseData={newRevisionData.image} onChange={val=>Change(newRevisionData.image = val)}/>}
 					{newData.type == MapNodeType.Argument &&
 						<ArgumentInfo {...sharedProps}/>}
 					<Row mt={5}>
@@ -90,6 +81,31 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 						<TextInput enabled={enabled} style={{width: "100%"}}
 							value={newRevisionData.note} onChange={val=>Change(newRevisionData.note = val)}/>
 					</Row>
+				</>}
+				{subpanel == DetailsPanel_Subpanel.Attachment &&
+				<>
+					{newData.type != MapNodeType.Claim &&
+						<Text>Only claim nodes can have attachments.</Text>}
+					{newData.type == MapNodeType.Claim &&
+					<>
+						<Row mb={attachmentType == AttachmentType.None ? 0 : 5}>
+							<Text>Type:</Text>
+							<Select ml={5} options={GetEntries(AttachmentType)} value={attachmentType} onChange={val=>{
+								ResetNodeRevisionAttachment(newRevisionData, val);
+								Change();
+							}}/>
+						</Row>
+						{attachmentType == AttachmentType.Equation &&
+							<EquationEditorUI key={0} creating={forNew} editing={enabled}
+								baseData={newRevisionData.equation} onChange={val=>Change(newRevisionData.equation = val)}/>}
+						{attachmentType == AttachmentType.Quote &&
+							<QuoteInfoEditorUI ref={c=>this.quoteEditor = c} key={1} creating={forNew} editing={enabled}
+								baseData={newRevisionData.quote} onChange={val=>Change(newRevisionData.quote = val)}
+								showPreview={false} justShowed={false}/>}
+						{attachmentType == AttachmentType.Image &&
+							<ImageAttachmentEditorUI key={1} creating={forNew} editing={enabled}
+								baseData={newRevisionData.image} onChange={val=>Change(newRevisionData.image = val)}/>}
+					</>}
 				</>}
 				{subpanel == DetailsPanel_Subpanel.Permissions &&
 					<PermissionsOptions {...sharedProps}/>}
@@ -128,8 +144,8 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 class Title_Base extends BaseComponent<SharedProps, {}> {
 	render() {
 		const {forNew, enabled, newData, newDataAsL2, newRevisionData, newLinkData, Change} = this.props;
-		const claimType = GetClaimType(newDataAsL2);
-		const hasOtherTitles = newData.type == MapNodeType.Claim && claimType == ClaimType.Normal;
+		const claimType = GetAttachmentType(newDataAsL2);
+		const hasOtherTitles = newData.type == MapNodeType.Claim && claimType == AttachmentType.None;
 		const hasOtherTitlesEntered = newRevisionData.titles.negation || newRevisionData.titles.yesNoQuestion;
 		const willUseYesNoTitleHere = WillNodeUseQuestionTitleHere(newDataAsL2, newLinkData);
 
@@ -165,7 +181,7 @@ The detailed version of the argument will be embodied in its premises/child-clai
 }
 
 function WillNodeUseQuestionTitleHere(node: MapNodeL2, linkData: ChildEntry) {
-	return node.type == MapNodeType.Claim && !node.current.contentNode && linkData && linkData.form == ClaimForm.YesNoQuestion;
+	return node.type == MapNodeType.Claim && !node.current.quote && linkData && linkData.form == ClaimForm.YesNoQuestion;
 }
 
 class OtherTitles extends BaseComponent<SharedProps, {}> {

@@ -2,7 +2,7 @@ import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
 import {Column, Pre, Row} from "react-vcomponents";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
-import {ContentNode} from "../../../../Store/firebase/contentNodes/@ContentNode";
+import {QuoteAttachment} from "../../../../Store/firebase/nodeRevisions/@QuoteAttachment";
 import {GetNodeDisplayText} from "../../../../Store/firebase/nodes/$node";
 import {ClaimForm} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -12,9 +12,9 @@ import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "./SourceChainsEdit
 // @ApplyBasicStyles
 export class QuoteInfoEditorUI extends BaseComponent
 		<{
-			creating?: boolean, editing?: boolean, baseData: ContentNode, showPreview: boolean, justShowed: boolean, onChange?: (newData: ContentNode)=>void,
+			creating?: boolean, editing?: boolean, baseData: QuoteAttachment, showPreview: boolean, justShowed: boolean, onChange?: (newData: QuoteAttachment)=>void,
 		},
-		{newData: ContentNode}> {
+		{newData: QuoteAttachment}> {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
 		{ this.SetState({newData: Clone(props.baseData)}); }
@@ -68,7 +68,7 @@ export class QuoteInfoEditorUI extends BaseComponent
 	}
 }
 
-export function CleanUpdatedContentNode(contentNode: ContentNode) {
+export function CleanUpdatedContentNode(contentNode: QuoteAttachment) {
 	CleanUpdatedSourceChains(contentNode.sourceChains);
 	return contentNode;
 }

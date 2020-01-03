@@ -10,11 +10,12 @@ import {Link} from "vwebapp-framework";
 import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
 import {GetMap} from "Store/firebase/maps";
+import {ImageAttachment} from "Store/firebase/nodeRevisions/@ImageAttachment";
+import {AttachmentType, GetAttachmentType, ResetNodeRevisionAttachment} from "Store/firebase/nodeRevisions/@AttachmentType";
 import {AddChildNode} from "../../../../../Server/Commands/AddChildNode";
-import {ContentNode} from "../../../../../Store/firebase/contentNodes/@ContentNode";
-import {AsNodeL2, AsNodeL3, GetClaimType, GetNodeForm, GetNodeL3} from "../../../../../Store/firebase/nodes/$node";
-import {Equation} from "../../../../../Store/firebase/nodes/@Equation";
-import {ChildEntry, ClaimForm, ClaimType, ImageAttachment, MapNode, Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
+import {QuoteAttachment} from "../../../../../Store/firebase/nodeRevisions/@QuoteAttachment";
+import {AsNodeL2, AsNodeL3, GetNodeForm, GetNodeL3} from "../../../../../Store/firebase/nodes/$node";
+import {ChildEntry, ClaimForm, MapNode, Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
 import {ArgumentType, MapNodeRevision, MapNodeRevision_titlePattern, PermissionInfoType} from "../../../../../Store/firebase/nodes/@MapNodeRevision";
 import {GetMapNodeTypeDisplayName, MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {NodeDetailsUI} from "../NodeDetailsUI";
@@ -123,9 +124,9 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 			setTimeout(()=>justShowed = false);
 			boxController.options.okButtonClickable = validationError == null;
 
-			const claimTypes = GetEntries(ClaimType);
+			const claimTypes = GetEntries(AttachmentType);
 			if (!HasModPermissions(userID)) {
-				claimTypes.Remove(claimTypes.find(a=>a.value == ClaimType.Image));
+				claimTypes.Remove(claimTypes.find(a=>a.value == AttachmentType.Image));
 			}
 
 			const newNodeAsL2 = AsNodeL2(helper.node, helper.node_revision);
@@ -135,17 +136,9 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 						<Row>
 							<Pre>Type: </Pre>
 							<Select displayType="button bar" options={claimTypes} style={{display: "inline-block"}}
-								value={GetClaimType(newNodeAsL2)}
+								value={GetAttachmentType(newNodeAsL2)}
 								onChange={val=>{
-									helper.node_revision.Extend({equation: null, contentNode: null, image: null});
-									if (val == ClaimType.Normal) {
-									} else if (val == ClaimType.Equation) {
-										helper.node_revision.equation = new Equation();
-									} else if (val == ClaimType.Quote) {
-										helper.node_revision.contentNode = new ContentNode();
-									} else {
-										helper.node_revision.image = new ImageAttachment();
-									}
+									ResetNodeRevisionAttachment(helper.node_revision, val);
 									Change();
 
 									const oldError = validationError;
@@ -208,7 +201,7 @@ The details of the argument should be described within the argument's premises. 
 									value={helper.subNode_revision.titles["base"]}
 									onChange={val=>Change(helper.subNode_revision.titles["base"] = val, validationError = GetErrorMessagesUnderElement(root.DOM)[0])}/>
 							</Row>
-							<Row mt={5} style={{fontSize: 12}}>To add a second premise later, right click on your new argument and press "Convert to multi-premise".</Row>
+							<Row mt={5} style={{fontSize: 12}}>{`To add a second premise later, right click on your new argument and press "Convert to multi-premise".`}</Row>
 						</Column>}
 				</Column>
 			);

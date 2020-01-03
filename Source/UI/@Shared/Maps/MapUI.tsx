@@ -218,7 +218,7 @@ export class MapUI extends BaseComponentPlus({
 							{/* <ResizeSensor ref="resizeSensor" onResize={()=> {
 								this.LoadScroll();
 							}}/> */}
-							<VMenuStub preOpen={e=>e.passThrough != true}>
+							<VMenuStub delayEventHandler={true} preOpen={e=>e.passThrough != true}>
 								<VMenuItem text="(To add a node, right click on an existing node.)" style={styles.vMenuItem}/>
 							</VMenuStub>
 						</div>

@@ -1,4 +1,4 @@
-import {SourceType, SourceChain, Source, Source_linkURLPattern} from "Store/firebase/contentNodes/@SourceChain";
+import {SourceType, SourceChain, Source, Source_linkURLPattern, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText} from "Store/firebase/nodeRevisions/@SourceChain";
 import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
 import {Button, Column, Row, TextInput, Select} from "react-vcomponents";
 
@@ -7,7 +7,6 @@ import {GetErrorMessagesUnderElement, GetEntries, Clone, E} from "js-vextensions
 import {Validate} from "vwebapp-framework";
 import {ES} from "Utils/UI/GlobalStyles";
 import {Image_urlPattern} from "Store/firebase/images/@Image";
-import {GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText} from "../../../../Store/firebase/contentNodes/$contentNode";
 
 export class SourceChainsEditorUI extends BaseComponentPlus(
 	{enabled: true} as {baseData: SourceChain[], enabled?: boolean, style?, onChange?: (newData: SourceChain[])=>void},
@@ -55,11 +54,11 @@ export class SourceChainsEditorUI extends BaseComponentPlus(
 												value={source.link} onChange={val=>Change((()=>{
 													if (!val) delete source.link;
 													if (val.endsWith("@bible")) {
-														var reference = val.replace("@bible", "").replace(/:/g, ".").replace(/ /g, "%20");
+														const reference = val.replace("@bible", "").replace(/:/g, ".").replace(/ /g, "%20");
 														val = `https://biblia.com/bible/nkjv/${reference}`;
 														setTimeout(Change);
 													} else if (val.endsWith("@quran")) {
-														var reference = val.replace("Quran ", "").replace("@quran", "").replace(/:/g, "/").replace(/ /g, "%20");
+														const reference = val.replace("Quran ", "").replace("@quran", "").replace(/:/g, "/").replace(/ /g, "%20");
 														val = `http://www.quran.com/${reference}`;
 														setTimeout(Change);
 													}

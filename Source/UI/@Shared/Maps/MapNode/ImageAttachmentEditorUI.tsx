@@ -2,7 +2,7 @@ import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
 import {Column, Pre, RowLR, Spinner} from "react-vcomponents";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
-import {ImageAttachment} from "../../../../Store/firebase/nodes/@MapNode";
+import {ImageAttachment} from "Store/firebase/nodeRevisions/@ImageAttachment";
 
 type Props = {baseData: ImageAttachment, creating: boolean, editing?: boolean, style?, onChange?: (newData: ImageAttachment)=>void};
 export class ImageAttachmentEditorUI extends BaseComponent<Props, {newData: ImageAttachment}> {

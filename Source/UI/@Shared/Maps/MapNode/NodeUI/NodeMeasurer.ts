@@ -37,11 +37,11 @@ export function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 
 	// let expectedOtherStuffWidth = 26;
 	let expectedOtherStuffWidth = 28;
-	if (node.current.contentNode) {
+	if (node.current.quote) {
 		expectedOtherStuffWidth += 14;
 	}
 	let expectedBoxWidth = expectedTextWidth + expectedOtherStuffWidth;
-	if (node.current.contentNode) { // quotes are often long, so just always do full-width
+	if (node.current.quote) { // quotes are often long, so just always do full-width
 		expectedBoxWidth = nodeTypeInfo.maxWidth;
 	}
 

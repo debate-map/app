@@ -1,15 +1,15 @@
 import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
 import {CheckBox, Column, Pre, Row, RowLR, TextArea, TextInput} from "react-vcomponents";
 import {BaseComponent, GetDOM} from "react-vextensions";
-import {Equation} from "../../../../Store/firebase/nodes/@Equation";
+import {EquationAttachment} from "Store/firebase/nodeRevisions/@EquationAttachment";
 
-type Props = {baseData: Equation, creating: boolean, editing?: boolean, style?, onChange?: (newData: Equation)=>void};
+type Props = {baseData: EquationAttachment, creating: boolean, editing?: boolean, style?, onChange?: (newData: EquationAttachment)=>void};
 // & Partial<{creator: User, variantNumber: number}>;
 /* @Connect((state, {baseData, creating}: Props)=>({
 	creator: !creating && GetUser(baseData.creator),
 	variantNumber: !creating && GetTermVariantNumber(baseData),
 })) */
-export class EquationEditorUI extends BaseComponent<Props, {newData: Equation}> {
+export class EquationEditorUI extends BaseComponent<Props, {newData: EquationAttachment}> {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
@@ -58,7 +58,7 @@ export class EquationEditorUI extends BaseComponent<Props, {newData: Equation}> 
 
 	GetNewData() {
 		const {newData} = this.state;
-		const result = Clone(newData) as Equation;
+		const result = Clone(newData) as EquationAttachment;
 		if (!result.isStep) {
 			delete result.explanation;
 		}

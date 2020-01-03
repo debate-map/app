@@ -1,12 +1,12 @@
 import {AddSchema} from "vwebapp-framework";
 
-export class Equation {
+export class EquationAttachment {
 	latex: boolean;
 	text = "";
 	isStep? = true;
 	explanation = null as string;
 }
-AddSchema("Equation", {
+AddSchema("EquationAttachment", {
 	properties: {
 		latex: {type: "boolean"},
 		text: {type: "string"},

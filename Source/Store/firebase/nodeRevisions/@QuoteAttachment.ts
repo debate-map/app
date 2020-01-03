@@ -1,9 +1,7 @@
-import {Source} from "Store/firebase/contentNodes/@SourceChain";
+import {Source, SourceChain} from "Store/firebase/nodeRevisions/@SourceChain";
 import {AddSchema} from "vwebapp-framework";
-import {SourceChain} from "./@SourceChain";
 
-// todo: probably rename to "Quote"
-export class ContentNode {
+export class QuoteAttachment {
 	constructor() {
 		this.sourceChains = [
 			{sources: [new Source()]},
@@ -12,7 +10,7 @@ export class ContentNode {
 	content = "";
 	sourceChains: SourceChain[];
 }
-AddSchema("ContentNode", {
+AddSchema("QuoteAttachment", {
 	properties: {
 		content: {type: "string"},
 		sourceChains: {items: {$ref: "SourceChain"}},

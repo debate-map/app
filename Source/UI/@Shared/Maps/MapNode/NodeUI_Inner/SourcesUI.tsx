@@ -1,5 +1,5 @@
 import {BaseComponent} from "react-vextensions";
-import {SourceChain, Source} from "Store/firebase/contentNodes/@SourceChain";
+import {SourceChain, Source} from "Store/firebase/nodeRevisions/@SourceChain";
 import {Row, Text, Column} from "react-vcomponents";
 
 import {VURL} from "js-vextensions";

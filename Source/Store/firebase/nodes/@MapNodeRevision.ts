@@ -1,10 +1,10 @@
 import {GetValues_ForSchema} from "js-vextensions";
 import {AddSchema, GetSchemaJSON} from "vwebapp-framework";
-import {ObservableMap} from "mobx";
-import {AccessLevel, ImageAttachment} from "./@MapNode";
-import {Equation} from "./@Equation";
-import {ContentNode} from "../contentNodes/@ContentNode";
+import {QuoteAttachment} from "../nodeRevisions/@QuoteAttachment";
 import {MapType} from "../maps/@Map";
+import {ImageAttachment} from "../nodeRevisions/@ImageAttachment";
+import {AccessLevel} from "./@MapNode";
+import {EquationAttachment} from "../nodeRevisions/@EquationAttachment";
 
 export const TitlesMap_baseKeys = ["base", "negation", "yesNoQuestion"];
 export class TitlesMap {
@@ -66,12 +66,18 @@ export class MapNodeRevision {
 	node: string; // probably todo: rename to nodeID
 	creator?: string; // probably todo: rename to creatorID
 	createdAt: number;
-
-	titles = {base: ""} as TitlesMap;
-	note: string;
-
 	// updatedAt: number;
 	// approved = false;
+
+	// text
+	titles = {base: ""} as TitlesMap;
+	note: string;
+	argumentType: ArgumentType;
+
+	// attachment
+	equation: EquationAttachment;
+	quote: QuoteAttachment;
+	image: ImageAttachment;
 
 	// permissions
 	// only applied client-side; would need to be in protected branch of tree (or use a long, random, and unreferenced node-id) to be "actually" inaccessible
@@ -81,14 +87,9 @@ export class MapNodeRevision {
 	permission_edit = new PermissionInfo({type: PermissionInfoType.Creator});
 	permission_contribute = new PermissionInfo({type: PermissionInfoType.Anyone});
 
+	// others
 	fontSizeOverride: number;
 	widthOverride: number;
-
-	// components (for theses)
-	argumentType: ArgumentType;
-	equation: Equation;
-	contentNode: ContentNode;
-	image: ImageAttachment;
 }
 // export const MapNodeRevision_titlePattern = `(^\\S$)|(^\\S.*\\S$)`; // must start and end with non-whitespace
 export const MapNodeRevision_titlePattern = "^\\S.*$"; // must start with non-whitespace
@@ -97,7 +98,9 @@ AddSchema("MapNodeRevision", {
 		node: {type: "string"},
 		creator: {type: "string"},
 		createdAt: {type: "number"},
+		//approved: {type: "boolean"},
 
+		// text
 		titles: {
 			properties: {
 				// base: {pattern: MapNodeRevision_titlePattern}, negation: {pattern: MapNodeRevision_titlePattern}, yesNoQuestion: {pattern: MapNodeRevision_titlePattern},
@@ -106,28 +109,29 @@ AddSchema("MapNodeRevision", {
 			// required: ["base", "negation", "yesNoQuestion"],
 		},
 		note: {type: ["null", "string"]}, // add null-type, for later when the payload-validation schema is derived from the main schema
-		approved: {type: "boolean"},
+		argumentType: {$ref: "ArgumentType"},
 
+		// attachment
+		equation: {$ref: "EquationAttachment"},
+		quote: {$ref: "QuoteAttachment"},
+		image: {$ref: "ImageAttachment"},
+
+		// permissions
 		accessLevel: {oneOf: GetValues_ForSchema(AccessLevel).concat({const: null})},
 		votingDisabled: {type: ["null", "boolean"]},
 		// voteLevel: { oneOf: GetValues_ForSchema(AccessLevel).concat({ const: null }) }, // not currently used
 		permission_edit: {$ref: "PermissionInfo"},
 		permission_contribute: {$ref: "PermissionInfo"},
 
-		relative: {type: "boolean"},
+		// others
 		fontSizeOverride: {type: ["number", "null"]},
 		widthOverride: {type: ["number", "null"]},
-
-		argumentType: {$ref: "ArgumentType"},
-		equation: {$ref: "Equation"},
-		contentNode: {$ref: "ContentNode"},
-		image: {$ref: "ImageAttachment"},
 	},
 	required: ["node", "creator", "createdAt"],
 	allOf: [
 		// if not an argument or content-node, require "titles" prop
 		{
-			if: {prohibited: ["argumentType", "equation", "contentNode", "image"]},
+			if: {prohibited: ["argumentType", "equation", "quote", "image"]},
 			then: {required: ["titles"]},
 		},
 	],
