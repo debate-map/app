@@ -7,7 +7,7 @@ import {PermissionInfoType, MapNodeRevision, MapNodeRevision_Defaultable_props, 
 import {Map, Map_namePattern, MapType} from "../../../Store/firebase/maps/@Map";
 import {GetUser} from "../../../Store/firebase/users";
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
-import {PermissionsOptions} from "./MapNode/NodeDetailsUI";
+import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel";
 
 type Props = {baseData: Map, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Map, ui: MapDetailsUI)=>void};
 export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {newData: null as Map}) {
@@ -93,7 +93,7 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 					}}/>
 					{newData.nodeDefaults != null &&
 					<Column ml={20}>
-						<PermissionsOptions newRevisionData={newData.nodeDefaults} enabled={enabled} forDefaultsInMap={true} Change={()=>{
+						<PermissionsPanel newRevisionData={newData.nodeDefaults} enabled={enabled} forDefaultsInMap={true} Change={()=>{
 							if (newData.nodeDefaults.permission_edit.type == PermissionInfoType.Creator && newData.requireMapEditorsCanEdit) {
 								newData.nodeDefaults.permission_edit.type = PermissionInfoType.MapEditors;
 							}
