@@ -150,12 +150,14 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 				{(newRevisionData.termAttachments || []).map((termAttachment, index)=>{
 					const term = terms[index];
 					return (
-						<Row key={index}>
-							<TextInput placeholder="Enter term ID or name" style={{flex: 50}} value={termAttachment.id} onChange={val=>Change(termAttachment.id = val)}/>
-							<Row ml={5} style={{position: "relative", flex: 50}}>
+						<Row key={index} mt={2}>
+							<Row style={{flex: 45}}>
+								<TextInput placeholder="Enter term ID or name" style={{flex: 1, borderRadius: "5px 0 0 5px"}} value={termAttachment.id} onChange={val=>Change(termAttachment.id = val)}/>
+							</Row>
+							<Row style={{position: "relative", flex: 55}}>
 								<DropDown style={{flex: 1}}>
 									<DropDownTrigger>
-										<Button style={{flex: 1, display: "flex"}}
+										<Button style={{flex: 1, borderRadius: null, display: "flex"}}
 											text={term
 												? `Term: ${term.name}${term.disambiguation ? ` (${term.disambiguation})` : ""}`
 												: `(click to search/create)`}/>
@@ -169,6 +171,10 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 									</Column></DropDownContent>
 								</DropDown>
 							</Row>
+							<Button text="X" style={{padding: "3px 5px", borderRadius: "0 5px 5px 0"}} onClick={()=>{
+								newRevisionData.termAttachments.Remove(termAttachment);
+								Change();
+							}}/>
 						</Row>
 					);
 				})}
