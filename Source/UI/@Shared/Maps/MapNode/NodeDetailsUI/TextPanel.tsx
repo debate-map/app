@@ -1,5 +1,5 @@
 import {GetEntries, WaitXThenRun} from "js-vextensions";
-import {Div, Pre, Row, Select, TextArea, TextInput, Text} from "react-vcomponents";
+import {Div, Pre, Row, Select, TextArea, TextInput, Text, Button} from "react-vcomponents";
 import {BaseComponent, RenderSource} from "react-vextensions";
 import {AttachmentType, GetAttachmentType} from "Store/firebase/nodeRevisions/@AttachmentType";
 import {GetFinalPolarity} from "Store/firebase/nodes/$node";
@@ -7,6 +7,9 @@ import {ChildEntry, ClaimForm, MapNodeL2} from "Store/firebase/nodes/@MapNode";
 import {ArgumentType, GetArgumentTypeDisplayText, MapNodeRevision_titlePattern} from "Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
 import {ES} from "Utils/UI/GlobalStyles";
+import {TermAttachment} from "Store/firebase/nodeRevisions/@TermAttachment";
+import {Observer, Validate} from "vwebapp-framework";
+import {GetTerm} from "Store/firebase/terms";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 
 export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
@@ -17,17 +20,21 @@ export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 		const sharedProps = this.props;
 		return (
 			<>
-				{(newData.type != MapNodeType.Claim || attachmentType == AttachmentType.None) &&
-					<Title_Base {...sharedProps}/>}
-				{newData.type == MapNodeType.Claim && attachmentType == AttachmentType.None &&
-					<OtherTitles {...sharedProps}/>}
-				{newData.type == MapNodeType.Argument &&
-					<ArgumentInfo {...sharedProps}/>}
+				{attachmentType == AttachmentType.None &&
+				<>
+					<Title_Base {...sharedProps}/>
+					{newData.type == MapNodeType.Claim &&
+						<OtherTitles {...sharedProps}/>}
+					{newData.type == MapNodeType.Argument &&
+						<ArgumentInfo {...sharedProps}/>}
+				</>}
 				<Row mt={5}>
 					<Text>Note: </Text>
 					<TextInput enabled={enabled} style={{width: "100%"}}
 						value={newRevisionData.note} onChange={val=>Change(newRevisionData.note = val)}/>
 				</Row>
+				{attachmentType == AttachmentType.None &&
+					<NodeTermsUI {...sharedProps}/>}
 			</>
 		);
 	}
@@ -119,6 +126,38 @@ class ArgumentInfo extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 					}}/>
 				<Pre> premises below are true, they impact the parent.</Pre>
 			</Row>
+		);
+	}
+}
+
+@Observer
+class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
+	render() {
+		const {enabled, baseRevisionData, parent, newData, newDataAsL2, newRevisionData, newLinkData, Change} = this.props;
+		const terms = (newRevisionData.termAttachments || []).map(a=>(Validate("UUID", a.id) == null ? GetTerm(a.id) : null));
+
+		return (
+			<>
+				<Row mt={5}>
+					<Text style={{fontWeight: "bold"}}>Terms:</Text>
+					<Button ml={5} p="3px 7px" text="+" onClick={()=>{
+						if (newRevisionData.termAttachments == null) newRevisionData.termAttachments = [];
+						newRevisionData.termAttachments.push(new TermAttachment({id: ""}));
+						Change();
+					}}/>
+				</Row>
+				{(newRevisionData.termAttachments || []).map((termAttachment, index)=>{
+					const term = terms[index];
+					return (
+						<Row key={index}>
+							{/*<TextInput placeholder="Enter term ID or name..." value={termAttachment.id} onChange={val=>termAttachment.id = val}/>*/}
+							<TextInput placeholder="Enter term ID" style={{flex: 50}} value={termAttachment.id} onChange={val=>Change(termAttachment.id = val)}/>
+							{!term && <Text ml={5} style={{flex: 50}}>Term not found.</Text>}
+							{term && <Text ml={5} style={{flex: 50}}>Term: {term.name}{term.disambiguation && ` (${term.disambiguation})`}</Text>}
+						</Row>
+					);
+				})}
+			</>
 		);
 	}
 }

@@ -5,6 +5,7 @@ import {MapType} from "../maps/@Map";
 import {ImageAttachment} from "../nodeRevisions/@ImageAttachment";
 import {AccessLevel} from "./@MapNode";
 import {EquationAttachment} from "../nodeRevisions/@EquationAttachment";
+import {TermAttachment} from "../nodeRevisions/@TermAttachment";
 
 export const TitlesMap_baseKeys = ["base", "negation", "yesNoQuestion"];
 export class TitlesMap {
@@ -72,6 +73,7 @@ export class MapNodeRevision {
 	// text
 	titles = {base: ""} as TitlesMap;
 	note: string;
+	termAttachments: TermAttachment[];
 	argumentType: ArgumentType;
 
 	// attachment
@@ -109,6 +111,7 @@ AddSchema("MapNodeRevision", {
 			// required: ["base", "negation", "yesNoQuestion"],
 		},
 		note: {type: ["null", "string"]}, // add null-type, for later when the payload-validation schema is derived from the main schema
+		termAttachments: {items: {$ref: "TermAttachment"}},
 		argumentType: {$ref: "ArgumentType"},
 
 		// attachment
