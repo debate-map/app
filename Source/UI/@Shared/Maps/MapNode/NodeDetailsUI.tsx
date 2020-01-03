@@ -1,5 +1,5 @@
-import {AsNodeL1, GetFinalPolarity} from "Store/firebase/nodes/$node";
-import {GetUserAccessLevel, MeID} from "Store/firebase/users";
+import {AsNodeL1, GetFinalPolarity, AsNodeL2, GetClaimType} from "Store/firebase/nodes/$node";
+import {GetUserAccessLevel, MeID, GetUser} from "Store/firebase/users";
 import {User} from "Store/firebase/users/@User";
 import {GetErrorMessagesUnderElement, Clone, WaitXThenRun, ToNumber, GetEntries, E} from "js-vextensions";
 import {CheckBox, Column, Div, Pre, Row, Select, Spinner, TextArea, TextInput, Text, RowLR} from "react-vcomponents";
@@ -8,14 +8,17 @@ import {HasAdminPermissions, HasModPermissions} from "Store/firebase/userExtras"
 import {ES} from "Utils/UI/GlobalStyles";
 import {InfoButton, Observer} from "vwebapp-framework";
 import {GetOpenMapID} from "Store/main";
-import {AsNodeL2, GetClaimType} from "../../../../Store/firebase/nodes/$node";
+
+import {store} from "Store";
+import {runInAction} from "mobx";
 import {AccessLevel, ChildEntry, ClaimForm, ClaimType, MapNode, MapNodeL2, MapNodeL3, globalMapID} from "../../../../Store/firebase/nodes/@MapNode";
 import {ArgumentType, GetArgumentTypeDisplayText, MapNodeRevision, MapNodeRevision_titlePattern, PermissionInfo, PermissionInfoType, MapNodeRevision_Defaultable} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
-import {GetUser} from "../../../../Store/firebase/users";
+
 import {EquationEditorUI} from "./EquationEditorUI";
 import {ImageAttachmentEditorUI} from "./ImageAttachmentEditorUI";
 import {QuoteInfoEditorUI} from "./QuoteInfoEditorUI";
+import {DetailsPanel_Subpanel} from "./NodeUI/Panels/DetailsPanel";
 
 type Props = {
 	baseData: MapNode,
@@ -29,10 +32,10 @@ type Props = {
 type State = {newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: ChildEntry};
 type SharedProps = Props & State & {newDataAsL2, Change, SetState};
 
+@Observer
 export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {} as State) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
-		if (forMount || props.baseData != this.props.baseData) // if base-data changed
-		{
+		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
 			this.SetState({
 				newData: AsNodeL1(Clone(props.baseData)),
 				newRevisionData: Clone(props.baseRevisionData),
@@ -45,7 +48,6 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 	render() {
 		const {baseData, parent, forNew, forOldRevision, enabled, style, onChange} = this.props;
 		const {newData, newLinkData, newRevisionData} = this.state;
-		const creator = !forNew && GetUser(baseData.creator);
 		const Change = (..._)=>{
 			if (onChange) { onChange(this.GetNewData(), this.GetNewRevisionData(), this.GetNewLinkData(), this); }
 			this.Update();
@@ -57,32 +59,41 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 		const claimType = GetClaimType(newDataAsL2);
 
 		const splitAt = 170;
+		const subpanel = store.main.maps.detailsPanel.subpanel;
 		return (
 			<Column style={E({padding: 5}, style)}>
-				{(newData.type != MapNodeType.Claim || claimType == ClaimType.Normal) &&
-					<Title_Base {...sharedProps}/>}
-				{newData.type == MapNodeType.Claim && claimType == ClaimType.Normal &&
-					<OtherTitles {...sharedProps}/>}
-				{newData.type == MapNodeType.Claim && claimType == ClaimType.Equation &&
-					<EquationEditorUI key={0} creating={forNew} editing={enabled}
-						baseData={newRevisionData.equation} onChange={val=>Change(newRevisionData.equation = val)}/>}
-				{newData.type == MapNodeType.Claim && claimType == ClaimType.Quote &&
-					<QuoteInfoEditorUI ref={c=>this.quoteEditor = c} key={1} creating={forNew} editing={enabled}
-						baseData={newRevisionData.contentNode} onChange={val=>Change(newRevisionData.contentNode = val)}
-						showPreview={false} justShowed={false}/>}
-				{newData.type == MapNodeType.Claim && claimType == ClaimType.Image &&
-					<ImageAttachmentEditorUI key={1} creating={forNew} editing={enabled}
-						baseData={newRevisionData.image} onChange={val=>Change(newRevisionData.image = val)}/>}
-				{newData.type == MapNodeType.Argument &&
-					<ArgumentInfo {...sharedProps}/>}
-				<Row mt={5}>
-					<Text>Note: </Text>
-					<TextInput enabled={enabled} style={{width: "100%"}}
-						value={newRevisionData.note} onChange={val=>Change(newRevisionData.note = val)}/>
+				<Row mb={5}>
+					<Select displayType="button bar" options={GetEntries(DetailsPanel_Subpanel)} value={subpanel} onChange={val=>{
+						runInAction("NodeDetailsUI.subpanel.onChange", ()=>store.main.maps.detailsPanel.subpanel = val);
+					}}/>
 				</Row>
-				{!forNew &&
+				{subpanel == DetailsPanel_Subpanel.Content &&
+				<>
+					{(newData.type != MapNodeType.Claim || claimType == ClaimType.Normal) &&
+						<Title_Base {...sharedProps}/>}
+					{newData.type == MapNodeType.Claim && claimType == ClaimType.Normal &&
+						<OtherTitles {...sharedProps}/>}
+					{newData.type == MapNodeType.Claim && claimType == ClaimType.Equation &&
+						<EquationEditorUI key={0} creating={forNew} editing={enabled}
+							baseData={newRevisionData.equation} onChange={val=>Change(newRevisionData.equation = val)}/>}
+					{newData.type == MapNodeType.Claim && claimType == ClaimType.Quote &&
+						<QuoteInfoEditorUI ref={c=>this.quoteEditor = c} key={1} creating={forNew} editing={enabled}
+							baseData={newRevisionData.contentNode} onChange={val=>Change(newRevisionData.contentNode = val)}
+							showPreview={false} justShowed={false}/>}
+					{newData.type == MapNodeType.Claim && claimType == ClaimType.Image &&
+						<ImageAttachmentEditorUI key={1} creating={forNew} editing={enabled}
+							baseData={newRevisionData.image} onChange={val=>Change(newRevisionData.image = val)}/>}
+					{newData.type == MapNodeType.Argument &&
+						<ArgumentInfo {...sharedProps}/>}
+					<Row mt={5}>
+						<Text>Note: </Text>
+						<TextInput enabled={enabled} style={{width: "100%"}}
+							value={newRevisionData.note} onChange={val=>Change(newRevisionData.note = val)}/>
+					</Row>
+				</>}
+				{subpanel == DetailsPanel_Subpanel.Permissions &&
 					<PermissionsOptions {...sharedProps}/>}
-				{!forNew &&
+				{subpanel == DetailsPanel_Subpanel.Others &&
 					<OthersOptions {...sharedProps}/>}
 			</Column>
 		);
@@ -221,11 +232,10 @@ export class PermissionsOptions extends BaseComponent<Pick<SharedProps, "enabled
 
 		const splitAt = 80;
 		return (
-			<Column mt={forDefaultsInMap ? 0 : 10}>
+			<>
 				{!forDefaultsInMap &&
-				<Row center style={{fontWeight: "bold"}}>
-					<Text>Permissions:</Text>
-					<InfoButton ml={5} text="In addition to the groups explicitly allowed below, moderators and admins also have full permissions."/>
+				<Row center style={{fontSize: 13, opacity: .5}}>
+					<Text>Note: In addition to the groups listed below, mods and admins always have full permissions.</Text>
 				</Row>}
 				{HasModPermissions(MeID()) &&
 				<RowLR mt={5} splitAt={splitAt} style={{display: "flex", alignItems: "center"}}>
@@ -270,7 +280,7 @@ export class PermissionsOptions extends BaseComponent<Pick<SharedProps, "enabled
 					{/* newRevisionData.permission_contribute.type == PermissionInfoType.MapEditors &&
 						<Text ml={5} sel style={{ opacity: 0.5 }}>(of map: {newData.ownerMapID})</Text> */}
 				</RowLR>
-			</Column>
+			</>
 		);
 	}
 }
@@ -279,8 +289,8 @@ class OthersOptions extends BaseComponent<SharedProps, {}> {
 	render() {
 		const {newData, newRevisionData, forNew, enabled, Change} = this.props;
 		return (
-			<Column mt={10}>
-				<Row style={{fontWeight: "bold"}}>Others:</Row>
+			<>
+				{/*<Row style={{fontWeight: "bold"}}>Others:</Row>*/}
 				{HasAdminPermissions(MeID()) &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Font-size override: </Pre>
@@ -292,7 +302,7 @@ class OthersOptions extends BaseComponent<SharedProps, {}> {
 					<Spinner step={10} max={1000} enabled={enabled} value={ToNumber(newRevisionData.widthOverride, 0)} onChange={val=>Change(newRevisionData.widthOverride = val != 0 ? val : null)}/>
 					<Pre> px (0 for auto)</Pre>
 				</Row>
-			</Column>
+			</>
 		);
 	}
 }

@@ -17,6 +17,12 @@ import {IsUserCreatorOrMod} from "../../../../../../Store/firebase/userExtras";
 import {GetUser, MeID, CanEditNode} from "../../../../../../Store/firebase/users";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
 
+export enum DetailsPanel_Subpanel {
+	Content = 10,
+	Permissions = 20,
+	Others = 30,
+}
+
 export class DetailsPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {dataError: null as string}) {
 	detailsUI: NodeDetailsUI;
 	render() {
