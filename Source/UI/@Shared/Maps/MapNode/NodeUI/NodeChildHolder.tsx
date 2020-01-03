@@ -5,7 +5,7 @@ import {Button, Column, Div, Row} from "react-vcomponents";
 import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, WarnOfTransientObjectProps} from "react-vextensions";
 import {GetFillPercent_AtPath} from "Store/firebase/nodeRatings";
 import {GetNodeChildrenL3, HolderType} from "Store/firebase/nodes";
-import {MapNodeL3} from "Store/firebase/nodes/@MapNode";
+import {MapNodeL3,Polarity} from "Store/firebase/nodes/@MapNode";
 import {ArgumentType} from "Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType, MapNodeType_Info} from "Store/firebase/nodes/@MapNodeType";
 import {NodeConnectorBackground} from "UI/@Shared/Maps/MapNode/NodeConnectorBackground";
@@ -18,7 +18,7 @@ import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import {IsMultiPremiseArgument} from "../../../../../Store/firebase/nodes/$node";
-import {Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
+
 import {ArgumentsControlBar} from "../ArgumentsControlBar";
 import {NodeChildHolderBox} from "./NodeChildHolderBox";
 
@@ -91,8 +91,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			} */
 
 			const childLimit = direction == "down" ? childLimit_down : childLimit_up;
-			// const isFarthestChildFromDivider = index == (direction == 'down' ? childLimit - 1 : 0);
-			const isFarthestChildFromDivider = index == childLimit - 1;
+			const isFarthestChildFromDivider = index == (direction == "down" ? childLimit - 1 : 0);
+			// const isFarthestChildFromDivider = index == childLimit - 1;
 			return (
 				// <ErrorBoundary errorUI={props=>props.defaultUI(E(props, {style: {width: 500, height: 300}}))}>
 				// <ErrorBoundary key={child._key} errorUIStyle={{ width: 500, height: 300 }}>
