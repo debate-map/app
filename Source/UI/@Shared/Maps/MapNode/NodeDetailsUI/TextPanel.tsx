@@ -194,6 +194,7 @@ class TermSearchOrCreateUI extends BaseComponentPlus({} as {name: string, enable
 		const termsByName = GetTermsByName(name);
 		return (
 			<>
+				{termsByName.length == 0 && <Row style={{padding: 5}}>No terms found with the name "{name}".</Row>}
 				{termsByName.map((term, index)=>{
 					return <FoundTermUI key={term._key} term={term} index={index} enabled={enabled} onSelect={()=>onSelect(term._key)}/>;
 				})}
