@@ -7,8 +7,7 @@ import {Link, PageContainer, Observer} from "vwebapp-framework";
 import {ES} from "Utils/UI/GlobalStyles";
 import {GetSelectedUser} from "Store/main/database";
 import {ToNumber, E} from "js-vextensions";
-import {UserExtraInfo} from "../../Store/firebase/userExtras/@UserExtraInfo";
-import {GetUsers, GetUserJoinDate, GetUserExtraInfo} from "../../Store/firebase/users";
+import {GetUser, GetUsers} from "Store/firebase/users";
 import {UserProfileUI} from "./Users/UserProfile";
 
 export const columnWidths = [0.35, 0.15, 0.1, 0.15, 0.25];
@@ -28,8 +27,8 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 		users = users.filter(a=>a);
 		/* users = users.OrderBy((a) => (userExtraInfoMap[a._key] ? userExtraInfoMap[a._key].joinDate : Number.MAX_SAFE_INTEGER));
 		users = users.OrderByDescending((a) => (userExtraInfoMap[a._key] ? (userExtraInfoMap[a._key].edits | 0) : Number.MIN_SAFE_INTEGER)); */
-		users = users.OrderBy(a=>ToNumber(GetUserJoinDate(a._key), Number.MAX_SAFE_INTEGER));
-		users = users.OrderByDescending(a=>ToNumber(GetUserExtraInfo(a._key)?.edits, 0));
+		users = users.OrderBy(a=>ToNumber(GetUser(a._key)?.joinDate, Number.MAX_SAFE_INTEGER));
+		users = users.OrderByDescending(a=>ToNumber(GetUser(a._key)?.edits, 0));
 		return (
 			<PageContainer style={{padding: 0, background: null}}>
 				<Column className="clickThrough" style={{height: 40, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
@@ -67,9 +66,7 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 				<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1})}>
 					{users.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
 					{users.map((user, index)=>{
-						// const userExtraInfo = userExtraInfoMap[user._key];
-						const userExtraInfo = GetUserExtraInfo(user._key);
-						return <UserRow key={user._key} index={index} last={index == users.length - 1} user={user} userExtraInfo={userExtraInfo}/>;
+						return <UserRow key={user._key} index={index} last={index == users.length - 1} user={user}/>;
 					})}
 				</ScrollView>
 			</PageContainer>
@@ -78,10 +75,9 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 }
 
 @Observer
-class UserRow extends BaseComponent<{index: number, last: boolean, user: User, userExtraInfo: UserExtraInfo}, {}> {
+class UserRow extends BaseComponent<{index: number, last: boolean, user: User}, {}> {
 	render() {
-		const {index, last, user, userExtraInfo} = this.props;
-		if (userExtraInfo == null) return <div/>;
+		const {index, last, user} = this.props;
 
 		let {displayName} = user;
 		if (displayName.includes("@")) displayName = displayName.split("@")[0];
@@ -90,18 +86,16 @@ class UserRow extends BaseComponent<{index: number, last: boolean, user: User, u
 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
 				last && {borderRadius: "0 0 10px 10px"},
 			)}>
-				{userExtraInfo == null && <div style={{textAlign: "center"}}>Loading...</div>}
-				{userExtraInfo
-					&& <Row>
-						<Link text={displayName} actionFunc={s=>s.main.database.selectedUserID = user._key} style={{flex: columnWidths[0], fontSize: 17}}/>
-						{/* <span style={{ flex: columnWidths[0] }}>{displayName}</span> */}
-						<span style={{flex: columnWidths[1]}}>{Moment(userExtraInfo.joinDate).format("YYYY-MM-DD")}</span>
-						<span style={{flex: columnWidths[2]}}>{userExtraInfo.edits || 0}</span>
-						<span style={{flex: columnWidths[3]}}>{userExtraInfo.lastEditAt ? Moment(userExtraInfo.lastEditAt).format("YYYY-MM-DD") : "n/a"}</span>
-						<span style={{flex: columnWidths[4]}}>
-							{["basic", "verified", "mod", "admin"].filter(a=>(userExtraInfo.permissionGroups || {})[a]).map(a=>a.replace(/^./, a=>a.toUpperCase())).join(", ")}
-						</span>
-					</Row>}
+				<Row>
+					<Link text={displayName} actionFunc={s=>s.main.database.selectedUserID = user._key} style={{flex: columnWidths[0], fontSize: 17}}/>
+					{/* <span style={{ flex: columnWidths[0] }}>{displayName}</span> */}
+					<span style={{flex: columnWidths[1]}}>{Moment(user.joinDate).format("YYYY-MM-DD")}</span>
+					<span style={{flex: columnWidths[2]}}>{user.edits || 0}</span>
+					<span style={{flex: columnWidths[3]}}>{user.lastEditAt ? Moment(user.lastEditAt).format("YYYY-MM-DD") : "n/a"}</span>
+					<span style={{flex: columnWidths[4]}}>
+						{["basic", "verified", "mod", "admin"].filter(a=>(user.permissionGroups || {})[a]).map(a=>a.replace(/^./, a=>a.toUpperCase())).join(", ")}
+					</span>
+				</Row>
 			</Column>
 		);
 	}

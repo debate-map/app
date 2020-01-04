@@ -4,7 +4,7 @@ import {Button, CheckBox, Column, Div, Pre, Row, Select, Text} from "react-vcomp
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {GetParentNodeID, GetParentNodeL3, GetNodesByIDs} from "Store/firebase/nodes";
-import {GetUser, GetUserPermissionGroups, MeID} from "Store/firebase/users";
+import {GetUser, MeID} from "Store/firebase/users";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub";
 import {Icon, Observer, InfoButton, IsSpecialEmptyArray} from "vwebapp-framework";
@@ -12,6 +12,7 @@ import {ES} from "Utils/UI/GlobalStyles";
 import {SlicePath} from "mobx-firelink";
 import {ChangeNodeOwnerMap} from "Server/Commands/ChangeNodeOwnerMap";
 import {AttachmentType, GetAttachmentType} from "Store/firebase/nodeRevisions/@AttachmentType";
+import {GetUserPermissionGroups, IsUserCreatorOrMod} from "Store/firebase/users/$user";
 import {CanConvertFromClaimTypeXToY, ChangeClaimType} from "../../../../../../Server/Commands/ChangeClaimType";
 import {ReverseArgumentPolarity} from "../../../../../../Server/Commands/ReverseArgumentPolarity";
 import {UpdateLink} from "../../../../../../Server/Commands/UpdateLink";
@@ -21,7 +22,6 @@ import {GetNodeDisplayText, GetNodeForm, GetNodeL3, IsSinglePremiseArgument} fro
 import {ClaimForm, MapNodeL3} from "../../../../../../Store/firebase/nodes/@MapNode";
 import {ArgumentType} from "../../../../../../Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType} from "../../../../../../Store/firebase/nodes/@MapNodeType";
-import {IsUserCreatorOrMod} from "../../../../../../Store/firebase/userExtras";
 
 @Observer
 export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType}) {

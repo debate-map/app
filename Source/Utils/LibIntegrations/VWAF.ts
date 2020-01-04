@@ -1,7 +1,6 @@
 import {dbVersion, hasHotReloaded} from "Main";
 import {RootState, store} from "Store";
 import {GetAuth} from "Store/firebase";
-import {GetUserPermissionGroups, Me, MeID} from "Store/firebase/users";
 import {NotificationMessage} from "Store/main";
 import {logTypes, LogTypes_New} from "Utils/General/Logging";
 import {ValidateDBData} from "Utils/Store/DBDataValidator";
@@ -12,6 +11,8 @@ import produce from "immer";
 import {Feedback_store} from "firebase-feedback";
 import {WithStore} from "mobx-firelink";
 import {runInAction} from "mobx";
+import {Me, MeID} from "Store/firebase/users";
+import {GetUserPermissionGroups} from "Store/firebase/users/$user";
 
 const context = (require as any).context("../../../Resources/SVGs/", true, /\.svg$/);
 const iconInfo = {};

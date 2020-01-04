@@ -7,14 +7,14 @@ import {E, ToJSON, Clone} from "js-vextensions";
 import {GetAsync} from "mobx-firelink";
 import _ from "lodash";
 import {PermissionInfoType} from "Store/firebase/nodes/@MapNodeRevision";
+import {CanEditNode, IsUserCreatorOrMod} from "Store/firebase/users/$user";
 import {AddNodeRevision} from "../../../../../../Server/Commands/AddNodeRevision";
 import {UpdateLink} from "../../../../../../Server/Commands/UpdateLink";
 import {Map} from "../../../../../../Store/firebase/maps/@Map";
 import {GetParentNodeID, GetParentNodeL3, IsNodeSubnode} from "../../../../../../Store/firebase/nodes";
 import {GetLinkUnderParent, IsPremiseOfSinglePremiseArgument} from "../../../../../../Store/firebase/nodes/$node";
 import {MapNodeL3} from "../../../../../../Store/firebase/nodes/@MapNode";
-import {IsUserCreatorOrMod} from "../../../../../../Store/firebase/userExtras";
-import {GetUser, MeID, CanEditNode} from "../../../../../../Store/firebase/users";
+import {GetUser, MeID} from "../../../../../../Store/firebase/users";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
 
 export class DetailsPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {dataError: null as string}) {

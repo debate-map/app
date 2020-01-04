@@ -1,8 +1,8 @@
 import {ToNumber} from "js-vextensions";
 import {Pre, Row, Spinner} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
-import {HasAdminPermissions} from "Store/firebase/userExtras";
 import {MeID} from "Store/firebase/users";
+import {HasAdminPermissions} from "Store/firebase/users/$user";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 
 export class OthersPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {

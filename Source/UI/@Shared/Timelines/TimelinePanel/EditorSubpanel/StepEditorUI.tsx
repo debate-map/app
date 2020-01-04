@@ -12,7 +12,6 @@ import {GetNodeColor, MapNodeType} from "Store/firebase/nodes/@MapNodeType";
 import {GetTimelineStep} from "Store/firebase/timelineSteps";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
 import {NodeReveal, TimelineStep} from "Store/firebase/timelineSteps/@TimelineStep";
-import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
 import {MeID} from "Store/firebase/users";
 import {DragInfo, MakeDraggable, Observer} from "vwebapp-framework";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures";
@@ -23,6 +22,7 @@ import {SearchUpFromNodeForNodeMatchingX} from "Utils/Store/PathFinder";
 import {VMenuStub, VMenuItem} from "react-vmenu";
 import {styles} from "Utils/UI/GlobalStyles";
 import {AddTimelineStep} from "Server/Commands/AddTimelineStep";
+import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
 
 export enum PositionOptionsEnum {
 	Full = null,

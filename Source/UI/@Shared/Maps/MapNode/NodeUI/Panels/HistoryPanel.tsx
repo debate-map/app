@@ -14,7 +14,6 @@ import {GetParentNodeL3} from "../../../../../../Store/firebase/nodes";
 import {GetLinkUnderParent} from "../../../../../../Store/firebase/nodes/$node";
 import {ChildEntry, MapNodeL3} from "../../../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeRevision} from "../../../../../../Store/firebase/nodes/@MapNodeRevision";
-import {IsUserCreatorOrMod} from "../../../../../../Store/firebase/userExtras";
 import {GetUser, MeID} from "../../../../../../Store/firebase/users";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
 

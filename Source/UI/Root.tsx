@@ -22,7 +22,7 @@ import {GetNodeDisplayText, GetNodeL3, IsPremiseOfSinglePremiseArgument} from "S
 import {Polarity} from "Store/firebase/nodes/@MapNode";
 import {GetTimelineStep} from "Store/firebase/timelineSteps";
 import {NodeReveal} from "Store/firebase/timelineSteps/@TimelineStep";
-import {Me, MeID, GetUserBackground} from "Store/firebase/users";
+import {Me, MeID} from "Store/firebase/users";
 import {GetPathNodeIDs} from "Store/main/maps/mapViews/$mapView";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures";
 import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer} from "vwebapp-framework";
@@ -42,6 +42,7 @@ import {ForumUI} from "./Forum";
 import {PrivateUI} from "./Private";
 import {PublicUI} from "./Public";
 import {SocialUI} from "./Social";
+import {GetUserBackground} from "Store/firebase/users/$user";
 
 ColorPickerBox.Init(ReactColor, chroma);
 

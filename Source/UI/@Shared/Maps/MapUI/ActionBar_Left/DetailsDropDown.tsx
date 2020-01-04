@@ -5,7 +5,7 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {store} from "Store";
 import {GetChildCount} from "Store/firebase/nodes";
 import {GetNodeL2} from "Store/firebase/nodes/$node";
-import {MeID, CanEditNode} from "Store/firebase/users";
+import {MeID} from "Store/firebase/users";
 import {GADDemo} from "UI/@GAD/GAD";
 import {Button_GAD} from "UI/@GAD/GADButton";
 import {GetUpdates, InfoButton, Observer} from "vwebapp-framework";
@@ -13,10 +13,10 @@ import {MapNodeRevision_Defaultable} from "Store/firebase/nodes/@MapNodeRevision
 import {AddNodeRevision} from "Server/Commands/AddNodeRevision";
 import {Clone, ToJSON, FromJSON, E} from "js-vextensions";
 import {SetMapFeatured} from "Server/Commands/SetMapFeatured";
+import {CanEditNode, IsUserCreatorOrMod} from "Store/firebase/users/$user";
 import {DeleteMap} from "../../../../../Server/Commands/DeleteMap";
 import {UpdateMapDetails} from "../../../../../Server/Commands/UpdateMapDetails";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
-import {IsUserCreatorOrMod, HasModPermissions} from "../../../../../Store/firebase/userExtras";
 import {MapDetailsUI} from "../../MapDetailsUI";
 
 export async function ApplyNodeDefaults(nodeID: string, nodeDefaults: MapNodeRevision_Defaultable, recursive: boolean, mapID: string, runInfo = {revisionsUpdated: new Set<string>()}) {

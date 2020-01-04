@@ -1,22 +1,20 @@
-import {GetNode, GetHolderType, ForNewLink_GetError, GetParentNodeL3, GetParentNodeID} from "Store/firebase/nodes";
-import {Assert, E, OmitIfFalsy} from "js-vextensions";
+import {E, OmitIfFalsy} from "js-vextensions";
+import {AssertV, Command, MergeDBUpdates} from "mobx-firelink";
+import {GetMap} from "Store/firebase/maps";
+import {Map} from "Store/firebase/maps/@Map";
+import {GetHolderType, GetNode, GetParentNodeID, GetParentNodeL3} from "Store/firebase/nodes";
 import {GetNodeL2, GetNodeL3} from "Store/firebase/nodes/$node";
 import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
-import {GetUserPermissionGroups, MeID, CanContributeToNode} from "Store/firebase/users";
-
-import {Map} from "Store/firebase/maps/@Map";
+import {MeID} from "Store/firebase/users";
+import {CanContributeToNode} from "Store/firebase/users/$user";
 import {UUID} from "Utils/General/KeyGenerator";
-import {Command_Old, MergeDBUpdates, GetAsync, Command, AssertV} from "mobx-firelink";
-import {GetMap} from "Store/firebase/maps";
 import {SearchUpFromNodeForNodeMatchingX} from "Utils/Store/PathFinder";
-import {ClaimForm, MapNode, Polarity, MapNodeL3} from "../../Store/firebase/nodes/@MapNode";
+import {ClaimForm, MapNode, Polarity} from "../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {UserEdit} from "./../CommandMacros";
-import {LinkNode} from "./LinkNode";
-import {UnlinkNode} from "./UnlinkNode";
-import {AddNode} from "./AddNode";
 import {AddChildNode} from "./AddChildNode";
 import {DeleteNode} from "./DeleteNode";
+import {LinkNode} from "./LinkNode";
+import {UnlinkNode} from "./UnlinkNode";
 
 type Payload = {
 	mapID: string, oldParentID: string, newParentID: string, nodeID: string,

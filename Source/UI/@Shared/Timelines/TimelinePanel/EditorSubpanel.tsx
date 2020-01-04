@@ -21,7 +21,7 @@ import {GetOpenMapID} from "Store/main";
 import {GetTimelinePanelOpen, GetTimelineOpenSubpanel, GetSelectedTimeline, GetShowTimelineDetails, GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {runInAction} from "mobx";
 import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState";
-import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
+import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
 import {StepEditorUI} from "./EditorSubpanel/StepEditorUI";
 
 // for use by react-beautiful-dnd (using text replacement)

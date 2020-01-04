@@ -1,36 +1,43 @@
 import {AddSchema} from "vwebapp-framework";
 
-// temp replaced
-// import {UserInfo} from "firebase";
-type UserInfo = any;
-
 export const User_id = "^[a-zA-Z0-9]+$";
-export type User = {
+export class User {
 	_key?: string;
-	avatarUrl: string;
 	displayName: string;
-	email: string;
-	providerData: UserInfo[];
+	photoURL: string;
 
 	// custom
-	backgroundID?: string;
-	backgroundCustom_enabled?: boolean;
-	backgroundCustom_color?: string;
-	backgroundCustom_url?: string;
-	backgroundCustom_position?: string;
-};
+	// ==========
+
+	joinDate: number;
+	permissionGroups: PermissionGroupSet;
+
+	edits: number;
+	lastEditAt: number;
+}
 AddSchema("User", {
 	properties: {
-		avatarUrl: {type: "string"},
 		displayName: {type: "string"},
-		email: {type: "string"},
-		providerData: {type: "array"},
+		photoURL: {type: "string"},
 
-		// custom
-		backgroundID: {type: "string"},
-		backgroundCustom_enabled: {type: "boolean"},
-		backgroundCustom_color: {type: ["null", "string"]},
-		backgroundCustom_url: {type: "string"},
-		backgroundCustom_position: {type: "string"},
+		joinDate: {type: "number"},
+		permissionGroups: {$ref: "PermissionGroupSet"},
+		edits: {type: "number"},
+		lastEditAt: {type: "number"},
+	},
+});
+
+export class PermissionGroupSet {
+	basic: boolean;
+	verified: boolean; // todo: probably remove
+	mod: boolean;
+	admin: boolean;
+}
+AddSchema("PermissionGroupSet", {
+	properties: {
+		basic: {type: "boolean"},
+		verified: {type: "boolean"},
+		mod: {type: "boolean"},
+		admin: {type: "boolean"},
 	},
 });

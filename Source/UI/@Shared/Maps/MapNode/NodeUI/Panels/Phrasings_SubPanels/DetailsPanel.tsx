@@ -4,11 +4,11 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {DeletePhrasing} from "Server/Commands/DeletePhrasing";
 import {UpdatePhrasing} from "Server/Commands/UpdatePhrasing";
 import {MapNodePhrasing} from "Store/firebase/nodePhrasings/@MapNodePhrasing";
-import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
 import {GetUser, MeID} from "Store/firebase/users";
 import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI";
 import {GetUpdates, Observer} from "vwebapp-framework";
 import {E} from "js-vextensions";
+import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
 
 @Observer
 export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {phrasing: MapNodePhrasing}, {dataError: null as string}) {

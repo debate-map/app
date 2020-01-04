@@ -1,12 +1,12 @@
 import {GetEntries} from "js-vextensions";
 import {CheckBox, Row, RowLR, Select, Text} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
-import {HasAdminPermissions, HasModPermissions} from "Store/firebase/userExtras";
-import {GetUserAccessLevel, MeID} from "Store/firebase/users";
+import {MeID} from "Store/firebase/users";
 import {GetOpenMapID} from "Store/main";
 import {InfoButton} from "vwebapp-framework";
 import {MapNodeRevision_Defaultable, PermissionInfoType} from "Store/firebase/nodes/@MapNodeRevision";
 import {AccessLevel, globalMapID} from "Store/firebase/nodes/@MapNode";
+import {HasAdminPermissions, HasModPermissions, GetUserAccessLevel} from "Store/firebase/users/$user";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 
 // @Observer

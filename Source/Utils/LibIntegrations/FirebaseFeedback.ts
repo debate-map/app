@@ -1,18 +1,16 @@
-import {Feedback_store, manager as manager_feedback} from "firebase-feedback";
-import {DBPath, WithStore} from "mobx-firelink";
+import {feedback_manager, Feedback_store} from "firebase-feedback";
+import {DBPath} from "mobx-firelink";
 import Moment from "moment";
-import {store, RootState} from "Store";
-import {GetUser, GetUserPermissionGroups, MeID} from "Store/firebase/users";
+import {store} from "Store";
+import {GetUser, MeID} from "Store/firebase/users";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {logTypes} from "Utils/General/Logging";
-import {PushHistoryEntry, GetNewURL} from "Utils/URL/URLs";
-import {Link, VReactMarkdown_Remarkable} from "vwebapp-framework";
-import produce from "immer";
-import {action} from "mobx";
+import {VReactMarkdown_Remarkable} from "vwebapp-framework";
+import {GetUserPermissionGroups} from "Store/firebase/users/$user";
 import {GetNewURLForStoreChanges} from "./VWAF";
 
 export function InitFeedback() {
-	manager_feedback.Populate({
+	feedback_manager.Populate({
 		GetStore: ()=>store,
 		/* GetNewURL: (actionsToDispatch: Action<any>[])=> {
 			let newState = State();

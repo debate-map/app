@@ -1,7 +1,7 @@
 import {MergeDBUpdates, GetAsync, GetDoc, Command, Command_Old} from "mobx-firelink";
 import {GetMap} from "Store/firebase/maps";
-import {GetUserExtraInfo} from "Store/firebase/users";
 import {IsString, IsFunction} from "js-vextensions";
+import {GetUser} from "Store/firebase/users";
 
 export function MapEdit(targetClass: Function);
 export function MapEdit(mapIDKey: string);
@@ -70,9 +70,9 @@ export function UserEdit(targetClass: Function) {
 		const oldValidate = targetClass.prototype.Validate;
 		targetClass.prototype.Validate = function() {
 			const result = oldValidate.apply(this);
-			const userExtraInfo = GetUserExtraInfo(this.userInfo.id);
-			if (userExtraInfo) {
-				this.user_oldEditCount = userExtraInfo.edits ?? 0;
+			const user = GetUser(this.userInfo.id);
+			if (user) {
+				this.user_oldEditCount = user.edits ?? 0;
 			}
 			return result;
 		};
@@ -83,8 +83,8 @@ export function UserEdit(targetClass: Function) {
 		const updates = oldGetDBUpdates.apply(this);
 		const newUpdates = {};
 		if (this.user_oldEditCount != null) {
-			newUpdates[`userExtras/${this.userInfo.id}/.edits`] = this.user_oldEditCount + 1;
-			newUpdates[`userExtras/${this.userInfo.id}/.lastEditAt`] = Date.now();
+			newUpdates[`users/${this.userInfo.id}/.edits`] = this.user_oldEditCount + 1;
+			newUpdates[`users/${this.userInfo.id}/.lastEditAt`] = Date.now();
 		}
 		return MergeDBUpdates(updates, newUpdates);
 	};

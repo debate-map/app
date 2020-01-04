@@ -1,19 +1,3 @@
-import {E, GetEntries, GetErrorMessagesUnderElement} from "js-vextensions";
-import {Column, Pre, Row, Select} from "react-vcomponents";
-import {BaseComponentPlus, GetDOM} from "react-vextensions";
-import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {Layer} from "Store/firebase/layers/@Layer";
-import {HasModPermissions} from "Store/firebase/userExtras";
-import {MeID} from "Store/firebase/users";
-import {AddSubnode} from "../../../../../Server/Commands/AddSubnode";
-import {QuoteAttachment} from "../../../../../Store/firebase/nodeRevisions/@QuoteAttachment";
-import {GetLayers} from "../../../../../Store/firebase/layers";
-import {AsNodeL2, AsNodeL3} from "../../../../../Store/firebase/nodes/$node";
-import {ChildEntry, ClaimForm, MapNode, MapNodeL2} from "../../../../../Store/firebase/nodes/@MapNode";
-import {MapNodeRevision} from "../../../../../Store/firebase/nodes/@MapNodeRevision";
-import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
-import {NodeDetailsUI} from "../NodeDetailsUI";
-
 /* export function ShowAddSubnodeDialog(mapID: string, anchorNode: MapNodeL2, anchorNodePath: string) {
 	let dialog: AddSubnodeDialog;
 	const boxController = ShowMessageBox({

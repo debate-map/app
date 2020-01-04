@@ -2,12 +2,12 @@ import {Command_Old, GetAsync, Command, AssertV, MergeDBUpdates} from "mobx-fire
 import {GetNode, GetNodesByIDs, GetNodeChildren} from "Store/firebase/nodes";
 import {AddSchema, AssertValidate, IsSpecialEmptyArray} from "vwebapp-framework";
 import {E, OMIT, DEL} from "js-vextensions";
-import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
 import {GetMap} from "Store/firebase/maps";
 import {MapType} from "Store/firebase/maps/@Map";
 import {IsPremiseOfSinglePremiseArgument, GetNodeL2} from "Store/firebase/nodes/$node";
 import {PermissionInfoType} from "Store/firebase/nodes/@MapNodeRevision";
 import {GetNodeRevision} from "Store/firebase/nodeRevisions";
+import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
 import {UserEdit} from "../CommandMacros";
 import {MapNodeL2, MapNode} from "../../Store/firebase/nodes/@MapNode";
 

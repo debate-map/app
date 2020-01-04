@@ -6,10 +6,10 @@ import {GetNiceNameForImageType} from "../images/@Image";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {GetNodeRevision} from "../nodeRevisions";
 import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, HolderType, IsNodeSubnode} from "../nodes";
-import {PermissionGroupSet} from "../userExtras/@UserExtraInfo";
 import {ChildEntry, ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode";
 import {MapNodeRevision, TitlesMap, TitlesMap_baseKeys} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
+import {PermissionGroupSet} from "../users/@User";
 
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");

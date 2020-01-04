@@ -8,10 +8,10 @@ import {TimelineStep} from "Store/firebase/timelineSteps/@TimelineStep";
 import {E} from "js-vextensions";
 import {VMenuItem, VMenuStub} from "react-vmenu";
 import {styles} from "Utils/UI/GlobalStyles";
-import {IsUserCreatorOrMod} from "Store/firebase/userExtras";
 import {MeID} from "Store/firebase/users";
 import {runInAction} from "mobx";
 import {store} from "Store";
+import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
 import {PositionOptionsEnum, NodeRevealUI, StepEditorUI} from "../EditorSubpanel/StepEditorUI";
 
 @Observer

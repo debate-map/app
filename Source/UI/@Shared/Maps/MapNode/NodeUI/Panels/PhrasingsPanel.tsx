@@ -4,11 +4,11 @@ import {GetNodePhrasings} from "Store/firebase/nodePhrasings";
 import {MapNodePhrasing, MapNodePhrasingType} from "Store/firebase/nodePhrasings/@MapNodePhrasing";
 import {GetNodeDisplayText} from "Store/firebase/nodes/$node";
 import {GetNodeColor, MapNodeType} from "Store/firebase/nodes/@MapNodeType";
-import {CanGetBasicPermissions} from "Store/firebase/userExtras";
 import {MeID} from "Store/firebase/users";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddPhrasingDialog} from "UI/Database/Phrasings/PhrasingDetailsUI";
 import {InfoButton, Observer} from "vwebapp-framework";
+import {CanGetBasicPermissions} from "Store/firebase/users/$user";
 import {MapNodeL2} from "../../../../../../Store/firebase/nodes/@MapNode";
 import {DetailsPanel_Phrasings} from "./Phrasings_SubPanels/DetailsPanel";
 

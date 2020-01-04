@@ -4,12 +4,12 @@ import {BaseComponent, RenderSource, BaseComponentPlus} from "react-vextensions"
 import {ShowMessageBox} from "react-vmessagebox";
 import {ES} from "Utils/UI/GlobalStyles";
 import {Observer} from "vwebapp-framework";
+import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
 import {DeleteTermComponent} from "../../../Server/Commands/DeleteTermComponent";
 import {UpdateTermComponentData} from "../../../Server/Commands/UpdateTermComponentData";
 import {GetTermComponents} from "../../../Store/firebase/termComponents";
 import {TermComponent} from "../../../Store/firebase/termComponents/@TermComponent";
 import {Term} from "../../../Store/firebase/terms/@Term";
-import {IsUserCreatorOrMod} from "../../../Store/firebase/userExtras";
 import {MeID} from "../../../Store/firebase/users";
 
 const componentsPlaceholder = [];

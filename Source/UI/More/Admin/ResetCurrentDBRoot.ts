@@ -7,10 +7,10 @@ import {observable} from "mobx";
 import {ConvertDataToValidDBUpdates, ApplyDBUpdates, DBPath} from "mobx-firelink";
 import {FirebaseDBShape} from "Store/firebase";
 import {E} from "js-vextensions";
+import {User} from "Store/firebase/users/@User";
 import {Map, MapType} from "../../../Store/firebase/maps/@Map";
 import {MapNode, globalRootNodeID, globalMapID} from "../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../../Store/firebase/nodes/@MapNodeType";
-import {UserExtraInfo} from "../../../Store/firebase/userExtras/@UserExtraInfo";
 
 // Note: This is currently not used, and probably doesn`t even work atm.
 
@@ -37,11 +37,11 @@ export async function ResetCurrentDBRoot() {
 	data.maps = observable.map();
 	data.nodes = observable.map();
 	data.nodeRevisions = observable.map();
-	data.userExtras = observable.map();
+	data.users = observable.map();
 
 	sharedData.creatorInfo = {creator: userKey, createdAt: Date.now()};
 
-	AddUserExtras(data, userKey, new UserExtraInfo({
+	AddUser(data, userKey, new User().VSet({
 		joinDate: Date.now(),
 		permissionGroups: {basic: true, verified: true, mod: true, admin: true},
 	}));
@@ -59,8 +59,8 @@ export async function ResetCurrentDBRoot() {
 	ShowMessageBox({message: "Done!"});
 }
 
-function AddUserExtras(data: FirebaseDBShape, userID: string, extraInfo: UserExtraInfo) {
-	data.userExtras[userID] = extraInfo;
+function AddUser(data: FirebaseDBShape, userID: string, extraInfo: User) {
+	data.users[userID] = extraInfo;
 }
 function AddMap(data: FirebaseDBShape, entry: Map, id: string) {
 	entry = E(sharedData.creatorInfo, entry);

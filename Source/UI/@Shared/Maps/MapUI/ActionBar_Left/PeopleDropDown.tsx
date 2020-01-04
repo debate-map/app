@@ -6,10 +6,10 @@ import {MeID} from "Store/firebase/users";
 import {GADDemo} from "UI/@GAD/GAD";
 import {Button_GAD} from "UI/@GAD/GADButton";
 import {InfoButton} from "vwebapp-framework";
+import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
 import {UpdateMapDetails} from "../../../../../Server/Commands/UpdateMapDetails";
 import {GetMapEditorIDs, GetMapEditors} from "../../../../../Store/firebase/maps/$map";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
-import {IsUserCreatorOrMod} from "../../../../../Store/firebase/userExtras";
 
 export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 	render() {

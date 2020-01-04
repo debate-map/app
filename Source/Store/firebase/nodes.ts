@@ -1,14 +1,13 @@
-import {CachedTransform, IsNaN, emptyArray, ToJSON, emptyArray_forLoading} from "js-vextensions";
+import {emptyArray, emptyArray_forLoading, IsNaN} from "js-vextensions";
+import {GetDoc, SlicePath, SplitStringBySlash_Cached, StoreAccessor} from "mobx-firelink";
+import {GetPlayingTimeline, GetPlayingTimelineRevealNodes_UpToAppliedStep, GetPlayingTimelineStepIndex} from "Store/main/maps/mapStates/$mapState";
 import {PathSegmentToNodeID} from "Store/main/maps/mapViews/$mapView";
-import {GetPlayingTimeline, GetPlayingTimelineStepIndex, GetPlayingTimelineRevealNodes_UpToAppliedStep} from "Store/main/maps/mapStates/$mapState";
-import {ObservableMap} from "mobx";
-import {SplitStringBySlash_Cached, SlicePath, GetDoc, GetDocs, StoreAccessor} from "mobx-firelink";
 import {GetNodeL2, GetNodeL3} from "./nodes/$node";
-import {MapNode, MapNodeL2, MapNodeL3, globalRootNodeID} from "./nodes/@MapNode";
+import {globalRootNodeID, MapNode, MapNodeL2, MapNodeL3} from "./nodes/@MapNode";
 import {MapNodeType, MapNodeType_Info} from "./nodes/@MapNodeType";
-import {IsUserCreatorOrMod, CanGetBasicPermissions, HasAdminPermissions} from "./userExtras";
-import {PermissionGroupSet} from "./userExtras/@UserExtraInfo";
-import {GetUserAccessLevel, MeID} from "./users";
+import {MeID} from "./users";
+import {CanGetBasicPermissions, GetUserAccessLevel, HasAdminPermissions, IsUserCreatorOrMod} from "./users/$user";
+import {PermissionGroupSet} from "./users/@User";
 
 export enum HolderType {
 	Truth = 10,

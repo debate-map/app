@@ -1,11 +1,11 @@
 import {Button} from "react-vcomponents";
-import {CanGetBasicPermissions} from "Store/firebase/userExtras";
-import {MeID, CanContributeToNode} from "Store/firebase/users";
+import {MeID} from "Store/firebase/users";
 import {GADDemo} from "UI/@GAD/GAD";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {HSLA, Observer} from "vwebapp-framework";
 import {UseCallback, BaseComponent} from "react-vextensions";
 import {E} from "js-vextensions";
+import {CanContributeToNode} from "Store/firebase/users/$user";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import {MapNodeL3, Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeColor, MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";

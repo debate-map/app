@@ -5,9 +5,9 @@ import {Button, Column, Row} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {FirebaseDBShape} from "Store/firebase";
-import {HasAdminPermissions} from "Store/firebase/userExtras";
 import {ValidateDBData} from "Utils/Store/DBDataValidator";
 import {PageContainer, Observer} from "vwebapp-framework";
+import {HasAdminPermissions} from "Store/firebase/users/$user";
 import {MeID} from "../../Store/firebase/users";
 import {ResetCurrentDBRoot} from "./Admin/ResetCurrentDBRoot";
 
@@ -53,7 +53,7 @@ export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes
 		let isAdmin = HasAdminPermissions(MeID());
 		// also check previous version for admin-rights (so we can increment db-version without losing our rights to complete the db-upgrade!)
 		if (!isAdmin && MeID() != null) {
-			isAdmin = GetDoc({inLinkRoot: false}, (a: any)=>(a.versions.get(`v${dbVersion - 1}-${DB_SHORT}`) as FirebaseDBShape).userExtras.get(MeID())?.permissionGroups.admin) ?? false;
+			isAdmin = GetDoc({inLinkRoot: false}, (a: any)=>(a.versions.get(`v${dbVersion - 1}-${DB_SHORT}`) as FirebaseDBShape).users.get(MeID())?.permissionGroups.admin) ?? false;
 		}
 
 		if (!isAdmin) return <PageContainer>Please sign in.</PageContainer>;
@@ -198,7 +198,7 @@ Usage: (in console)
 data = await RR.GetCollectionsDataAsync(`versions/v${RR.dbVersion}-${RR.DB_SHORT}`)
 RR.StartDownload(new Blob([JSON.stringify(data)]), "Backup.json")
 */
-export async function GetCollectionsDataAsync(versionRootPath: string) {
+export async function GetCollectionsDataAsync(versionRootPath: string, privateCollections = false) {
 	AssertVersionRootPath(versionRootPath);
 
 	async function getDocs(...collectionSubpath: string[]) {
@@ -219,37 +219,41 @@ export async function GetCollectionsDataAsync(versionRootPath: string) {
 
 	let versionCollectionsData: FirebaseDBShape;
 	// we put the db-updates into this variable, so that we know we're importing data for every key (if not, Typescript throws error about value not matching FirebaseData's shape)
-	versionCollectionsData = await AwaitTree({
-		// modules
-		/* 'modules/feedback/general': await getDocs('modules', 'feedback', 'general'),
-		'modules/feedback/proposals': await getDocs('modules', 'feedback', 'proposals'),
-		'modules/feedback/userData': await getDocs('modules', 'feedback', 'userData'), */
-		modules: {
-			feedback: await getDoc("modules", "feedback"),
-		},
+	versionCollectionsData = await AwaitTree(E(
+		{
+			// modules
+			/* 'modules/feedback/general': await getDocs('modules', 'feedback', 'general'),
+			'modules/feedback/proposals': await getDocs('modules', 'feedback', 'proposals'),
+			'modules/feedback/userData': await getDocs('modules', 'feedback', 'userData'), */
+			modules: {
+				feedback: await getDoc("modules", "feedback"),
+			},
 
-		general: getDocs("general"),
-		images: getDocs("images"),
-		layers: getDocs("layers"),
-		maps: getDocs("maps"),
-		mapNodeEditTimes: getDocs("mapNodeEditTimes"),
-		nodes: getDocs("nodes"),
-		// nodeExtras: await getDocs('nodeExtras'),
-		nodePhrasings: getDocs("nodePhrasings"),
-		nodeRatings: getDocs("nodeRatings"),
-		nodeRevisions: getDocs("nodeRevisions"),
-		// nodeStats: await getDocs('nodeStats'),
-		// nodeViewers: await getDocs('nodeViewers'),
-		terms: getDocs("terms"),
-		termComponents: getDocs("termComponents"),
-		termNames: getDocs("termNames"),
-		timelines: getDocs("timelines"),
-		timelineSteps: getDocs("timelineSteps"),
-		users: getDocs("users"),
-		userExtras: getDocs("userExtras"),
-		userMapInfo: getDocs("userMapInfo"),
-		// userViewedNodes: await getDocs('userViewedNodes'),
-	});
+			general: getDocs("general"),
+			images: getDocs("images"),
+			layers: getDocs("layers"),
+			maps: getDocs("maps"),
+			mapNodeEditTimes: getDocs("mapNodeEditTimes"),
+			nodes: getDocs("nodes"),
+			// nodeExtras: await getDocs('nodeExtras'),
+			nodePhrasings: getDocs("nodePhrasings"),
+			nodeRatings: getDocs("nodeRatings"),
+			nodeRevisions: getDocs("nodeRevisions"),
+			// nodeStats: await getDocs('nodeStats'),
+			// nodeViewers: await getDocs('nodeViewers'),
+			terms: getDocs("terms"),
+			termComponents: getDocs("termComponents"),
+			termNames: getDocs("termNames"),
+			timelines: getDocs("timelines"),
+			timelineSteps: getDocs("timelineSteps"),
+			users: getDocs("users"),
+			userMapInfo: getDocs("userMapInfo"),
+			// userViewedNodes: await getDocs('userViewedNodes'),
+		},
+		privateCollections && {
+			users_private: getDocs("users_private"),
+		},
+	));
 
 	return versionCollectionsData;
 }

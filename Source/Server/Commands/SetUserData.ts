@@ -6,24 +6,22 @@ import {User} from "../../Store/firebase/users/@User";
 type MainType = User;
 const MTName = "User";
 
-AddSchema(`Update${MTName}_payload`, [MTName], ()=>({
-	properties: {
-		id: {type: "string"},
-		updates: Schema({
-			properties: GetSchemaJSON(MTName)["properties"].Including(
-				"displayName", "backgroundID",
-				"backgroundCustom_enabled", "backgroundCustom_color", "backgroundCustom_url", "backgroundCustom_position",
-			),
-		}),
-	},
-	required: ["id", "updates"],
-}));
-
-export class UpdateProfile extends Command<{id: string, updates: Partial<MainType>}, {}> {
+export class SetUserData extends Command<{id: string, updates: Partial<MainType>}, {}> {
 	oldData: MainType;
 	newData: MainType;
 	Validate() {
-		AssertValidate(`Update${MTName}_payload`, this.payload, "Payload invalid");
+		AssertValidate({
+			properties: {
+				id: {type: "string"},
+				updates: Schema({
+					properties: GetSchemaJSON(MTName)["properties"].Including(
+						"displayName",
+						"joinDate", "permissionGroups",
+					),
+				}),
+			},
+			required: ["id", "updates"],
+		}, this.payload, "Payload invalid");
 
 		const {id, updates} = this.payload;
 		this.oldData = GetUser(id);
