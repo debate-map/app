@@ -1,24 +1,23 @@
 import {Assert, E} from "js-vextensions";
+import {runInAction} from "mobx";
 import {Button, Column, Div, Pre, Row, Span, Text} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus, UseEffect} from "react-vextensions";
+import {BaseComponentPlus, UseEffect} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {ScrollView} from "react-vscrollview";
-import {ES} from "Utils/UI/GlobalStyles";
-import {GetSelectedTerm} from "Store/main/database";
 import {store} from "Store";
-import {Observer, GetUpdates} from "vwebapp-framework";
-import {runInAction} from "mobx";
+import {GetSelectedTerm} from "Store/main/database";
+import {ES} from "Utils/UI/GlobalStyles";
+import {GetUpdates, Observer} from "vwebapp-framework";
 import {DeleteTerm} from "../../Server/Commands/DeleteTerm";
 import {UpdateTermData} from "../../Server/Commands/UpdateTermData";
-import {GetFullNameP, GetTermVariantNumber, GetTerms} from "../../Store/firebase/terms";
+import {GetFullNameP, GetTerms, GetTermVariantNumber} from "../../Store/firebase/terms";
 import {Term, TermType} from "../../Store/firebase/terms/@Term";
-import {IsUserCreatorOrMod, CanGetBasicPermissions} from "../../Store/firebase/userExtras";
-import {PermissionGroupSet} from "../../Store/firebase/userExtras/@UserExtraInfo";
-import {MeID, GetUserPermissionGroups} from "../../Store/firebase/users";
+import {CanGetBasicPermissions, IsUserCreatorOrMod} from "../../Store/firebase/userExtras";
+import {GetUserPermissionGroups, MeID} from "../../Store/firebase/users";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
-import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI";
 import {ShowAddTermComponentDialog} from "./Terms/AddTermComponentDialog";
 import {TermComponentsUI} from "./Terms/TermComponentsUI";
+import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI";
 
 @Observer
 export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_newData: Term, selectedTerm_newDataError: string}) {

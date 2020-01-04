@@ -1,18 +1,15 @@
-import {MeID,GetUser} from "Store/firebase/users";
-import {User} from "Store/firebase/users/@User";
-import {GetErrorMessagesUnderElement, GetEntries, Clone, DEL} from "js-vextensions";
-import Moment from "moment";
+import {Clone, DEL, GetEntries, GetErrorMessagesUnderElement, E} from "js-vextensions";
 import {CheckBox, Column, Pre, Row, RowLR, Select, TextInput} from "react-vcomponents";
-import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
+import {BaseComponentPlus, GetDOM} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {InfoButton, Observer} from "vwebapp-framework";
-import {ES} from "Utils/UI/GlobalStyles";
+import {GetUser} from "Store/firebase/users";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
+import {ES} from "Utils/UI/GlobalStyles";
+import {InfoButton, Observer} from "vwebapp-framework";
 import {AddTerm} from "../../../Server/Commands/AddTerm";
 import {TermComponent} from "../../../Store/firebase/termComponents/@TermComponent";
 import {GetTermVariantNumber} from "../../../Store/firebase/terms";
 import {Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "../../../Store/firebase/terms/@Term";
-
 import {GetNiceNameForTermType} from "../../Database/TermsUI";
 
 @Observer
@@ -101,12 +98,12 @@ export class TermDetailsUI extends BaseComponentPlus(
 	}
 }
 
-export function ShowAddTermDialog() {
-	let newTerm = new Term({
+export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: string)=>void) {
+	let newTerm = new Term(E({
 		name: "",
 		type: TermType.ProperNoun,
 		shortDescription_current: "",
-	});
+	}, initialData));
 
 	let valid = false;
 	const boxController: BoxController = ShowMessageBox({
@@ -124,8 +121,9 @@ export function ShowAddTermDialog() {
 				</Column>
 			);
 		},
-		onOK: ()=>{
-			new AddTerm({term: newTerm}).Run();
+		onOK: async()=>{
+			const id = await new AddTerm({term: newTerm}).Run();
+			if (postAdd) postAdd(id);
 		},
 	});
 }

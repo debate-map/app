@@ -5,13 +5,15 @@ import {Command_Old, Command} from "mobx-firelink";
 import {Term} from "../../Store/firebase/terms/@Term";
 
 @UserEdit
-export class AddTerm extends Command<{term: Term}, {}> {
+export class AddTerm extends Command<{term: Term}, string> {
 	termID: string;
 	Validate() {
 		const {term} = this.payload;
 		this.termID = this.termID ?? GenerateUUID();
 		term.creator = this.userInfo.id;
 		term.createdAt = Date.now();
+
+		this.returnData = this.termID;
 		AssertValidate("Term", term, "Term invalid");
 	}
 

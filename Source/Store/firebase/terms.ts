@@ -1,5 +1,5 @@
 import {CachedTransform, IsNaN} from "js-vextensions";
-import {GetDoc, GetDocs, StoreAccessor} from "mobx-firelink";
+import {GetDoc, GetDocs, StoreAccessor, WhereFilter} from "mobx-firelink";
 import {Term} from "./terms/@Term";
 
 export const GetTerm = StoreAccessor(s=>(id: string)=>{
@@ -12,6 +12,11 @@ export const GetTerm = StoreAccessor(s=>(id: string)=>{
 
 export const GetTerms = StoreAccessor(s=>(): Term[]=>{
 	return GetDocs({}, a=>a.terms);
+});
+export const GetTermsByName = StoreAccessor(s=>(name: string): Term[]=>{
+	return GetDocs({
+		filters: [new WhereFilter("name", "==", name)],
+	}, a=>a.terms);
 });
 
 // "P" stands for "pure" (though really means something like "pure + synchronous")

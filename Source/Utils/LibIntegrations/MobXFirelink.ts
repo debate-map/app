@@ -4,7 +4,6 @@ import {dbVersion} from "Main";
 import {FirebaseDBShape} from "Store/firebase";
 import {store, RootState} from "Store";
 import {OnPopulated} from "vwebapp-framework";
-import {Clone} from "js-vextensions";
 
 declare module "mobx-firelink/Dist/UserTypes" {
 	interface RootStoreShape extends RootState {}

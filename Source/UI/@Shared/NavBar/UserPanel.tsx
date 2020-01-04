@@ -1,14 +1,10 @@
-import {ApplyBasicStyles, BaseComponent, BasicStyles, SimpleShouldUpdate, BaseComponentPlus} from "react-vextensions";
-import {Button, Div, Row} from "react-vcomponents";
-// import SocialButton from 'react-social-button';
-import {Column} from "react-vcomponents";
 import {E} from "js-vextensions";
-import {ShowMessageBox, BoxController} from "react-vmessagebox";
-import {Link, HandleError, Observer} from "vwebapp-framework";
-import {store} from "Store";
-import {runInAction} from "mobx";
 import {IsAuthValid} from "mobx-firelink";
+import {Button, Column, Div, Row} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "react-vextensions";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {fire} from "Utils/LibIntegrations/MobXFirelink";
+import {HandleError, Link, Observer} from "vwebapp-framework";
 import {MeID} from "../../../Store/firebase/users";
 
 @Observer
@@ -97,6 +93,7 @@ class SignInButton extends BaseComponent<{provider: "google" | "facebook" | "twi
 				this.SetState({loading: true});
 				try {
 					const account = await fire.LogIn({provider, type: "popup"});
+					//const account = await store.firelink.LogIn({provider, type: "popup"});
 					if (this.mounted == false) return;
 					this.SetState({loading: false});
 					if (onSignIn) onSignIn();

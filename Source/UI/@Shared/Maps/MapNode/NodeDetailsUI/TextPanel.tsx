@@ -1,15 +1,18 @@
-import {GetEntries, WaitXThenRun} from "js-vextensions";
-import {Div, Pre, Row, Select, TextArea, TextInput, Text, Button, DropDown, DropDownTrigger, DropDownContent, Column} from "react-vcomponents";
-import {BaseComponent, RenderSource} from "react-vextensions";
+import {E, GetEntries, WaitXThenRun} from "js-vextensions";
+import {Button, Column, Div, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Select, Text, TextArea, TextInput} from "react-vcomponents";
+import {BaseComponent, BaseComponentPlus, RenderSource} from "react-vextensions";
 import {AttachmentType, GetAttachmentType} from "Store/firebase/nodeRevisions/@AttachmentType";
+import {TermAttachment} from "Store/firebase/nodeRevisions/@TermAttachment";
 import {GetFinalPolarity} from "Store/firebase/nodes/$node";
 import {ChildEntry, ClaimForm, MapNodeL2} from "Store/firebase/nodes/@MapNode";
 import {ArgumentType, GetArgumentTypeDisplayText, MapNodeRevision_titlePattern} from "Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
+import {GetTerm, GetTermsByName, GetTermVariantNumber} from "Store/firebase/terms";
+import {Term} from "Store/firebase/terms/@Term";
+import {GetUser} from "Store/firebase/users";
+import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI";
 import {ES} from "Utils/UI/GlobalStyles";
-import {TermAttachment} from "Store/firebase/nodeRevisions/@TermAttachment";
-import {Observer, Validate} from "vwebapp-framework";
-import {GetTerm, GetTermVariantNumber} from "Store/firebase/terms";
+import {Link, Observer, Validate} from "vwebapp-framework";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 import {TermDefinitionPanel} from "../NodeUI/Panels/DefinitionsPanel";
 
@@ -140,7 +143,7 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 		return (
 			<>
 				<Row mt={5}>
-					<Text style={{fontWeight: "bold"}}>Terms:</Text>
+					<Text style={{fontWeight: "bold"}}>Context (terms):</Text>
 					<Button ml={5} p="3px 7px" text="+" onClick={()=>{
 						if (newRevisionData.termAttachments == null) newRevisionData.termAttachments = [];
 						newRevisionData.termAttachments.push(new TermAttachment({id: ""}));
@@ -151,22 +154,23 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 					const term = terms[index];
 					return (
 						<Row key={index} mt={2}>
-							<Row style={{flex: 45}}>
-								<TextInput placeholder="Enter term ID or name" style={{flex: 1, borderRadius: "5px 0 0 5px"}} value={termAttachment.id} onChange={val=>Change(termAttachment.id = val)}/>
+							<Text>{index + 1}:</Text>
+							<Row ml={5} style={{width: 120}}>
+								<TextInput placeholder="Term ID or name..." style={{width: "100%", fontSize: 13, borderRadius: "5px 0 0 5px"}} value={termAttachment.id} onChange={val=>Change(termAttachment.id = val)}/>
 							</Row>
-							<Row style={{position: "relative", flex: 55}}>
+							<Row style={{position: "relative", flex: 1}}>
 								<DropDown style={{flex: 1}}>
 									<DropDownTrigger>
-										<Button style={{flex: 1, borderRadius: null, display: "flex"}}
+										<Button style={{height: "100%", borderRadius: null, display: "flex", whiteSpace: "normal", padding: 0, fontSize: 13}}
 											text={term
-												? `Term: ${term.name}${term.disambiguation ? ` (${term.disambiguation})` : ""}`
+												? `${term.name}${term.disambiguation ? ` (${term.disambiguation})` : ""}: ${term.shortDescription_current}`
 												: `(click to search/create)`}/>
 									</DropDownTrigger>
-									<DropDownContent style={{left: 0, zIndex: 1, borderRadius: "0 0 5px 5px"}}><Column>
+									<DropDownContent style={{left: 0, width: 600, zIndex: 1, borderRadius: "0 5px 5px 5px", padding: term ? 10 : 0}}><Column>
 										{term && <TermDefinitionPanel term={term} termVariantNumber={GetTermVariantNumber(term)} showID={false}/>}
 										{!term &&
 										<Column>
-											TODO
+											<TermSearchOrCreateUI name={termAttachment.id} enabled={enabled} onSelect={id=>Change(termAttachment.id = id)}/>
 										</Column>}
 									</Column></DropDownContent>
 								</DropDown>
@@ -179,6 +183,62 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 					);
 				})}
 			</>
+		);
+	}
+}
+
+@Observer
+class TermSearchOrCreateUI extends BaseComponentPlus({} as {name: string, enabled: boolean, onSelect: (id: string)=>void}, {}) {
+	render() {
+		const {name, enabled, onSelect} = this.props;
+		const termsByName = GetTermsByName(name);
+		return (
+			<>
+				{termsByName.map((term, index)=>{
+					return <FoundTermUI key={term._key} term={term} index={index} enabled={enabled} onSelect={()=>onSelect(term._key)}/>;
+				})}
+				<Row mt={5} style={{
+					//borderTop: `1px solid ${HSLA(0, 0, 1, .5)}`,
+					background: termsByName.length % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)",
+					padding: 5,
+					borderRadius: "0 0 5px 5px",
+				}}>
+					<Button text="Create new term" enabled={enabled} onClick={e=>{
+						ShowAddTermDialog({name}, onSelect);
+					}}/>
+				</Row>
+			</>
+		);
+	}
+}
+export class FoundTermUI extends BaseComponentPlus({} as {term: Term, index: number, enabled: boolean, onSelect: ()=>void}, {}) {
+	render() {
+		const {term, index, enabled, onSelect} = this.props;
+		const creator = GetUser(term.creator);
+		return (
+			<Row /*mt={index == 0 ? 0 : 5}*/ center
+				style={E(
+					{
+						whiteSpace: "normal", //cursor: "pointer",
+						background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)",
+						padding: 5,
+					},
+					index == 0 && {borderRadius: "5px 5px 0 0"},
+					//index > 0 && {borderTop: `1px solid ${HSLA(0, 0, 1, .5)}`},
+				)}
+				/*onClick={()=>{
+				}}*/
+			>
+				<Link text={`${term._key}\n(by ${creator?.displayName ?? "n/a"})`} style={{fontSize: 13, whiteSpace: "pre"}}
+					onContextMenu={e=>e.nativeEvent["passThrough"] = true}
+					actionFunc={s=>{
+						s.main.page = "database";
+						s.main.database.subpage = "terms";
+						s.main.database.selectedTermID = term._key;
+					}}/>
+				<Text ml={5} sel style={{fontSize: 13}}>{term.shortDescription_current}</Text>
+				<Button ml="auto" text="Select" enabled={enabled} style={{flexShrink: 0}} onClick={onSelect}/>
+			</Row>
 		);
 	}
 }

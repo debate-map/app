@@ -5,7 +5,6 @@ import {O, StoreAction} from "vwebapp-framework";
 import {store} from "Store";
 import {StoreAccessor} from "mobx-firelink";
 import {GetNodeL3} from "Store/firebase/nodes/$node";
-import {DetailsPanel_Subpanel} from "UI/@Shared/Maps/MapNode/NodeUI/Panels/DetailsPanel";
 import {MapView, GetMapView} from "./maps/mapViews/$mapView";
 import {MapState} from "./maps/mapStates/@MapState";
 
@@ -36,6 +35,13 @@ export class MapsState {
 
 	// node panels
 	@O detailsPanel = new DetailsPanelState();
+}
+
+export enum DetailsPanel_Subpanel {
+	Text = 10,
+	Attachment = 20,
+	Permissions = 30,
+	Others = 40,
 }
 export class DetailsPanelState {
 	@O subpanel = DetailsPanel_Subpanel.Text;

@@ -6,13 +6,13 @@ import {store} from "Store";
 import {GetAttachmentType} from "Store/firebase/nodeRevisions/@AttachmentType";
 import {AsNodeL1, AsNodeL2} from "Store/firebase/nodes/$node";
 import {Observer} from "vwebapp-framework";
+import {DetailsPanel_Subpanel} from "Store/main/maps";
 import {ChildEntry, MapNode, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeRevision} from "../../../../Store/firebase/nodes/@MapNodeRevision";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel";
 import {TextPanel} from "./NodeDetailsUI/TextPanel";
-import {DetailsPanel_Subpanel} from "./NodeUI/Panels/DetailsPanel";
 import {QuoteInfoEditorUI} from "./QuoteInfoEditorUI";
 
 type Props = {
