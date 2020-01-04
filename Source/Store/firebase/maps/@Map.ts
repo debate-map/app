@@ -13,6 +13,9 @@ export class Map {
 	constructor(initialData: {name: string, type: MapType, creator: string} & Partial<Map>) {
 		this.VSet(initialData);
 		// this.createdAt = Date.now();
+		if (!("requireMapEditorsCanEdit" in initialData)) {
+			this.requireMapEditorsCanEdit = this.type == MapType.Private;
+		}
 		if (!("nodeDefaults" in initialData)) {
 			this.nodeDefaults = MapNodeRevision_Defaultable_DefaultsForMap(this.type);
 		}
@@ -26,7 +29,7 @@ export class Map {
 	rootNode: string;
 	defaultExpandDepth = 2;
 	defaultTimelineID: string;
-	requireMapEditorsCanEdit = true;
+	requireMapEditorsCanEdit: boolean;
 	// allowPublicNodes = true; // todo
 	nodeDefaults: MapNodeRevision_Defaultable;
 	featured: boolean;

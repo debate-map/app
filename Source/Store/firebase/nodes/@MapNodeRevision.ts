@@ -53,7 +53,7 @@ export function MapNodeRevision_Defaultable_DefaultsForMap(mapType: MapType): Ma
 	return {
 		accessLevel: AccessLevel.Basic,
 		votingDisabled: false,
-		permission_edit: new PermissionInfo({type: PermissionInfoType.MapEditors}),
+		permission_edit: new PermissionInfo({type: mapType == MapType.Private ? PermissionInfoType.MapEditors : PermissionInfoType.Creator}),
 		permission_contribute: new PermissionInfo({type: mapType == MapType.Private ? PermissionInfoType.MapEditors : PermissionInfoType.Anyone}),
 	};
 }
