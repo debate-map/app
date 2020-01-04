@@ -20,15 +20,12 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, 
 	render() {
 		const {profileUser} = this.props;
 		if (profileUser == null) return <PageContainer>User does not exist.</PageContainer>;
-		const profileUser_p = GetUser_Private(profileUser._key);
+		const profileUser_p = profileUser._key == MeID() ? GetUser_Private(profileUser._key) : null;
 		//if (profileUser_p == null) return <PageContainer>Loading...</PageContainer>;
 
 		const userID = MeID();
 		const profileUserPermissionGroups = GetUserPermissionGroups(profileUser ? profileUser._key : null);
 		const currentUser = GetUser(userID);
-		// if (currentUser == null) return <PageContainer>Must be signed-in to access.</PageContainer>;
-		/*const currentUser_p = GetUser_Private(userID);
-		if (currentUser_p == null) return <PageContainer>Loading...</PageContainer>;*/
 
 		return (
 			<PageContainer>

@@ -1,11 +1,12 @@
 import {AddSchema, AssertValidate, GetSchemaJSON, Schema} from "vwebapp-framework";
-import {Command_Old, GetAsync, Command} from "mobx-firelink";
+import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
 import {GetUser} from "Store/firebase/users";
 import {User} from "../../Store/firebase/users/@User";
 
 type MainType = User;
 const MTName = "User";
 
+//export class SetUserData extends Command<{id: string, updates: Partial<MainType>, allowPrevious?: boolean}, {}> {
 export class SetUserData extends Command<{id: string, updates: Partial<MainType>}, {}> {
 	oldData: MainType;
 	newData: MainType;
@@ -25,6 +26,15 @@ export class SetUserData extends Command<{id: string, updates: Partial<MainType>
 
 		const {id, updates} = this.payload;
 		this.oldData = GetUser(id);
+		/*if (!allowPrevious) {
+			AssertV(this.oldData == null, "oldData must be null, since allowPrevious is false.");
+		}*/
+
+		// if joinDate is already set, don't allow it to be set again (defensive programming, for if UserSignUpHelper just fails to load existing data fsr)
+		if (this.oldData?.joinDate != null) {
+			AssertV(!("joinDate" in updates), "joinDate cannot be set after its initial set!");
+		}
+
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}
