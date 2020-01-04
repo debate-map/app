@@ -63,7 +63,7 @@ export class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termI
 			} */
 
 			ReactDOM.render((
-				<TermPlaceholder {...{store} as any} refText={refText} termID={termID} showVariantNumber={false}
+				<TermPlaceholder {...{store} as any} refText={refText} termID={termID} showKeyStart={false}
 					onHover={hovered=>onTermHover(termID, hovered)} onClick={()=>onTermClick(termID)}/>
 			), termUI[0]);
 		}

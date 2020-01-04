@@ -7,7 +7,7 @@ import {GetFinalPolarity} from "Store/firebase/nodes/$node";
 import {ChildEntry, ClaimForm, MapNodeL2} from "Store/firebase/nodes/@MapNode";
 import {ArgumentType, GetArgumentTypeDisplayText, MapNodeRevision_titlePattern} from "Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
-import {GetTerm, GetTermsByName, GetTermVariantNumber} from "Store/firebase/terms";
+import {GetTerm, GetTermsByName} from "Store/firebase/terms";
 import {Term} from "Store/firebase/terms/@Term";
 import {GetUser} from "Store/firebase/users";
 import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI";
@@ -167,7 +167,7 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 												: `(click to search/create)`}/>
 									</DropDownTrigger>
 									<DropDownContent style={{left: 0, width: 600, zIndex: 1, borderRadius: "0 5px 5px 5px", padding: term ? 10 : 0}}><Column>
-										{term && <TermDefinitionPanel term={term} termVariantNumber={GetTermVariantNumber(term)} showID={false}/>}
+										{term && <TermDefinitionPanel term={term} showID={false}/>}
 										{!term &&
 										<Column>
 											<TermSearchOrCreateUI name={termAttachment.id} enabled={enabled} onSelect={id=>Change(termAttachment.id = id)}/>

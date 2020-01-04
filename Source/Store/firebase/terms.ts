@@ -24,9 +24,9 @@ export function GetFullNameP(term: Term) {
 	return term.name + (term.disambiguation ? ` (${term.disambiguation})` : "");
 }
 
-export const GetTermVariantNumber = StoreAccessor(s=>(term: Term): number=>{
+/*export const GetTermVariantNumber = StoreAccessor(s=>(term: Term): number=>{
 	const termsWithSameName_map = GetDoc({}, a=>a.termNames.get(term.name));
 	if (termsWithSameName_map == null) return 1;
 	const termsWithSameNameAndLowerIDs = termsWithSameName_map.VKeys().map(a=>a).filter(a=>a < term._key);
 	return 1 + termsWithSameNameAndLowerIDs.length;
-});
+});*/

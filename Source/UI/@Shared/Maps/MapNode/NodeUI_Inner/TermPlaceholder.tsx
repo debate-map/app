@@ -1,11 +1,12 @@
 import {BaseComponentPlus} from "react-vextensions";
-import {GetTerm, GetTermVariantNumber} from "../../../../../Store/firebase/terms";
+import {GetTerm} from "../../../../../Store/firebase/terms";
 
-export class TermPlaceholder extends BaseComponentPlus({showVariantNumber: true} as {refText: string, termID: string, showVariantNumber?: boolean, onHover: (hovered: boolean)=>void, onClick: ()=>void}, {}) {
+export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {refText: string, termID: string, showKeyStart?: boolean, onHover: (hovered: boolean)=>void, onClick: ()=>void}, {}) {
 	render() {
-		const {refText, termID, showVariantNumber, onHover, onClick} = this.props;
+		const {refText, termID, showKeyStart: showVariantNumber, onHover, onClick} = this.props;
 		const term = GetTerm(termID);
-		const termVariantNumber = term ? GetTermVariantNumber(term) : null;
+		//const termVariantNumber = term ? GetTermVariantNumber(term) : null;
+		const termKeyStart = term ? term._key.substr(0, 2) : null;
 
 		// if (term == null) return <a>...</a>;
 		// if (term == null) return <a>{refText}</a>;
@@ -22,7 +23,7 @@ export class TermPlaceholder extends BaseComponentPlus({showVariantNumber: true}
 				{/* term.name */}
 				{refText}
 				{showVariantNumber &&
-					<sup>{termVariantNumber || "?"}</sup>}
+					<sup>{termKeyStart || "?"}</sup>}
 				{/* <sub>{termVariantNumber}</sub>} */}
 			</a>
 		);

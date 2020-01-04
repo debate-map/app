@@ -8,7 +8,6 @@ import {ES} from "Utils/UI/GlobalStyles";
 import {InfoButton, Observer} from "vwebapp-framework";
 import {AddTerm} from "../../../Server/Commands/AddTerm";
 import {TermComponent} from "../../../Store/firebase/termComponents/@TermComponent";
-import {GetTermVariantNumber} from "../../../Store/firebase/terms";
 import {Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "../../../Store/firebase/terms/@Term";
 import {GetNiceNameForTermType} from "../../Database/TermsUI";
 
@@ -34,7 +33,6 @@ export class TermDetailsUI extends BaseComponentPlus(
 		const {baseData, forNew, enabled, style, onChange} = this.props;
 		const {newData, selectedTermComponent} = this.state;
 		const creator = !forNew && GetUser(baseData.creator);
-		const variantNumber = !forNew && GetTermVariantNumber(baseData);
 
 		const Change = _=>this.OnChange();
 
@@ -50,11 +48,6 @@ export class TermDetailsUI extends BaseComponentPlus(
 						enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
-				{!forNew &&
-					<RowLR mt={5} splitAt={splitAt} style={{width}}>
-						<Pre>Variant #: </Pre>
-						<Pre>{variantNumber}</Pre>
-					</RowLR>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Row>
 						<Pre>Disambiguation: </Pre>

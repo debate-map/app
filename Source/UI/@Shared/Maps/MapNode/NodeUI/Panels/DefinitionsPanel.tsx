@@ -7,7 +7,7 @@ import {Fragment} from "react";
 import {ParseSegmentsForPatterns} from "../../../../../../Utils/General/RegexHelpers";
 import {GetNodeDisplayText} from "../../../../../../Store/firebase/nodes/$node";
 import {MapNode, MapNodeL2} from "../../../../../../Store/firebase/nodes/@MapNode";
-import {GetTerm, GetTermVariantNumber} from "../../../../../../Store/firebase/terms";
+import {GetTerm} from "../../../../../../Store/firebase/terms";
 import {Term} from "../../../../../../Store/firebase/terms/@Term";
 
 const termsPlaceholder = [];
@@ -29,7 +29,6 @@ export class DefinitionsPanel extends BaseComponentPlus(
 		// only pass terms when all are loaded
 		terms = terms.every(a=>a != null) ? terms : termsPlaceholder;
 
-		const terms_variantNumbers = terms.map(a=>(a ? GetTermVariantNumber(a) : 1));
 		const hoverTerm = hoverTermID ? GetTerm(hoverTermID) : null;
 		const clickTerm = openTermID ? GetTerm(openTermID) : null;
 
@@ -58,7 +57,7 @@ export class DefinitionsPanel extends BaseComponentPlus(
 						);
 					})}
 				</Row> */}
-				{term && <TermDefinitionPanel term={term} termVariantNumber={terms_variantNumbers[terms.indexOf(term)]}/>}
+				{term && <TermDefinitionPanel term={term}/>}
 				{!term && terms.length > 0 &&
 					<div style={{fontSize: 12, whiteSpace: "initial"}}>Select a highlighted term above to see the definition for it here.</div>}
 				{!term && terms.length == 0 &&
@@ -68,13 +67,13 @@ export class DefinitionsPanel extends BaseComponentPlus(
 	}
 }
 
-export class TermDefinitionPanel extends BaseComponentPlus({showID: true} as {term: Term, termVariantNumber: number, showID?: boolean}, {}) {
+export class TermDefinitionPanel extends BaseComponentPlus({showID: true} as {term: Term, showID?: boolean}, {}) {
 	render() {
-		const {term, termVariantNumber, showID} = this.props;
+		const {term, showID} = this.props;
 
 		return (
 			<Column sel mt={5} style={{whiteSpace: "normal"}}>
-				<Row>Term: {term.name}{term.disambiguation ? ` (${term.disambiguation})` : ""} (variant #{termVariantNumber}){showID && ` (id: ${term._key})`}</Row>
+				<Row>Term: {term.name}{term.disambiguation ? ` (${term.disambiguation})` : ""}{showID && ` (id: ${term._key})`}</Row>
 				<Row mt={5}>Short description: {term.shortDescription_current}</Row>
 				{term.components && term.components.VKeys().length > 0 &&
 					<Fragment>

@@ -10,7 +10,7 @@ import {ES} from "Utils/UI/GlobalStyles";
 import {GetUpdates, Observer} from "vwebapp-framework";
 import {DeleteTerm} from "../../Server/Commands/DeleteTerm";
 import {UpdateTermData} from "../../Server/Commands/UpdateTermData";
-import {GetFullNameP, GetTerms, GetTermVariantNumber} from "../../Store/firebase/terms";
+import {GetFullNameP, GetTerms} from "../../Store/firebase/terms";
 import {Term, TermType} from "../../Store/firebase/terms/@Term";
 import {CanGetBasicPermissions, IsUserCreatorOrMod} from "../../Store/firebase/userExtras";
 import {GetUserPermissionGroups, MeID} from "../../Store/firebase/users";
@@ -139,7 +139,6 @@ function GetHelperTextForTermType(term: Term) {
 export class TermUI extends BaseComponentPlus({} as {term: Term, first: boolean, selected: boolean}, {}) {
 	render() {
 		const {term, first, selected} = this.props;
-		const variantNumber = GetTermVariantNumber(term);
 		return (
 			<Row mt={first ? 0 : 5} className="cursorSet"
 				style={E(
@@ -149,7 +148,7 @@ export class TermUI extends BaseComponentPlus({} as {term: Term, first: boolean,
 				onClick={e=>{
 					runInAction("TermUI.onClick", ()=>store.main.database.selectedTermID = term._key);
 				}}>
-				<Pre>{GetFullNameP(term)}<sup>{variantNumber}</sup>: </Pre>
+				<Pre>{GetFullNameP(term)}<sup>{term._key.substr(0, 2)}</sup>: </Pre>
 				<Text>{term.shortDescription_current}</Text>
 				<Span ml="auto">
 					<Pre style={{opacity: 0.7}}>({GetNiceNameForTermType(term.type)}) </Pre>
