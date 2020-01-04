@@ -144,7 +144,7 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 			<>
 				<Row mt={5}>
 					<Text style={{fontWeight: "bold"}}>Context (terms):</Text>
-					<Button ml={5} p="3px 7px" text="+" onClick={()=>{
+					<Button ml={5} p="3px 7px" text="+" enabled={enabled} onClick={()=>{
 						if (newRevisionData.termAttachments == null) newRevisionData.termAttachments = [];
 						newRevisionData.termAttachments.push(new TermAttachment({id: ""}));
 						Change();
@@ -156,7 +156,7 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 						<Row key={index} mt={2}>
 							<Text>{index + 1}:</Text>
 							<Row ml={5} style={{width: 120}}>
-								<TextInput placeholder="Term ID or name..." style={{width: "100%", fontSize: 13, borderRadius: "5px 0 0 5px"}} value={termAttachment.id} onChange={val=>Change(termAttachment.id = val)}/>
+								<TextInput placeholder="Term ID or name..." enabled={enabled} style={{width: "100%", fontSize: 13, borderRadius: "5px 0 0 5px"}} value={termAttachment.id} onChange={val=>Change(termAttachment.id = val)}/>
 							</Row>
 							<Row style={{position: "relative", flex: 1}}>
 								<DropDown style={{flex: 1}}>
@@ -175,7 +175,7 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 									</Column></DropDownContent>
 								</DropDown>
 							</Row>
-							<Button text="X" style={{padding: "3px 5px", borderRadius: "0 5px 5px 0"}} onClick={()=>{
+							<Button text="X" enabled={enabled} style={{padding: "3px 5px", borderRadius: "0 5px 5px 0"}} onClick={()=>{
 								newRevisionData.termAttachments.Remove(termAttachment);
 								Change();
 							}}/>

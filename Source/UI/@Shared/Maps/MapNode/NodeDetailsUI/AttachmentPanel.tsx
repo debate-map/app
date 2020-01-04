@@ -35,7 +35,7 @@ export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {
 				<>
 					<Row mb={attachmentType == AttachmentType.None ? 0 : 5}>
 						<Text>Type:</Text>
-						<Select ml={5} options={GetEntries(AttachmentType)} value={attachmentType} onChange={val=>{
+						<Select ml={5} options={GetEntries(AttachmentType)} enabled={enabled} value={attachmentType} onChange={val=>{
 							ResetNodeRevisionAttachment(newRevisionData, val);
 							Change();
 						}}/>
