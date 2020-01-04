@@ -1,7 +1,4 @@
 {
-	"database": {
-		"rules": "Firebase/DatabaseRules.json"
-	},
 	"hosting": {
 		"public": "Dist",
 		"ignore": [
