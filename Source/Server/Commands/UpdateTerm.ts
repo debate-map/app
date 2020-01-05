@@ -12,14 +12,14 @@ AddSchema(`Update${MTName}_payload`, [MTName], ()=>({
 	properties: {
 		id: {type: "string"},
 		updates: Schema({
-			properties: GetSchemaJSON(MTName)["properties"].Including("name", "disambiguation", "type", "person", "shortDescription_current"),
+			properties: GetSchemaJSON(MTName)["properties"].Including("name", "disambiguation", "type", "person", "definition", "note"),
 		}),
 	},
 	required: ["id", "updates"],
 }));
 
 @UserEdit
-export class UpdateTermData extends Command<{termID: string, updates: Partial<Term>}, {}> {
+export class UpdateTerm extends Command<{termID: string, updates: Partial<Term>}, {}> {
 	oldData: Term;
 	newData: Term;
 	Validate() {

@@ -2,7 +2,6 @@ import {CachedTransform} from "js-vextensions";
 import {Button, Column, Row} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {GetCurrentURL, Link, Observer} from "vwebapp-framework";
-import {TermComponentsUI} from "UI/Database/Terms/TermComponentsUI";
 import {Fragment} from "react";
 import {ParseSegmentsForPatterns} from "../../../../../../Utils/General/RegexHelpers";
 import {GetNodeDisplayText} from "../../../../../../Store/firebase/nodes/$node";
@@ -74,12 +73,7 @@ export class TermDefinitionPanel extends BaseComponentPlus({showID: true} as {te
 		return (
 			<Column sel mt={5} style={{whiteSpace: "normal"}}>
 				<Row>Term: {term.name}{term.disambiguation ? ` (${term.disambiguation})` : ""}{showID && ` (id: ${term._key})`}</Row>
-				<Row mt={5}>Short description: {term.shortDescription_current}</Row>
-				{term.components && term.components.VKeys().length > 0 &&
-					<Fragment>
-						<Row mt={5}>Components:</Row>
-						<TermComponentsUI term={term} editing={false} inMap={true} style={{padding: "5px 0"}}/>
-					</Fragment>}
+				<Row mt={5}>Definition: {term.definition}</Row>
 				{/* <Row>Details:</Row>
 				<TermDetailsUI baseData={term} creating={false} enabled={/*creatorOrMod*#/ false} style={{padding: 10}}
 					onChange={data=>this.SetState({selectedTerm_newData: data})}/> */}

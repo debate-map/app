@@ -163,7 +163,7 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 									<DropDownTrigger>
 										<Button style={{height: "100%", borderRadius: null, display: "flex", whiteSpace: "normal", padding: 0, fontSize: 13}}
 											text={term
-												? `${term.name}${term.disambiguation ? ` (${term.disambiguation})` : ""}: ${term.shortDescription_current}`
+												? `${term.name}${term.disambiguation ? ` (${term.disambiguation})` : ""}: ${term.definition}`
 												: `(click to search/create)`}/>
 									</DropDownTrigger>
 									<DropDownContent style={{left: 0, width: 600, zIndex: 1, borderRadius: "0 5px 5px 5px", padding: term ? 10 : 0}}><Column>
@@ -237,7 +237,7 @@ export class FoundTermUI extends BaseComponentPlus({} as {term: Term, index: num
 						s.main.database.subpage = "terms";
 						s.main.database.selectedTermID = term._key;
 					}}/>
-				<Text ml={5} sel style={{fontSize: 13}}>{term.shortDescription_current}</Text>
+				<Text ml={5} sel style={{fontSize: 13}}>{term.definition}</Text>
 				<Button ml="auto" text="Select" enabled={enabled} style={{flexShrink: 0}} onClick={onSelect}/>
 			</Row>
 		);

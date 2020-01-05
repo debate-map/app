@@ -1,5 +1,5 @@
 import {Clone, DEL, GetEntries, GetErrorMessagesUnderElement, E} from "js-vextensions";
-import {CheckBox, Column, Pre, Row, RowLR, Select, TextInput} from "react-vcomponents";
+import {CheckBox, Column, Pre, Row, RowLR, Select, TextInput, TextArea} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {GetUser} from "Store/firebase/users";
@@ -7,14 +7,13 @@ import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI"
 import {ES} from "Utils/UI/GlobalStyles";
 import {InfoButton, Observer} from "vwebapp-framework";
 import {AddTerm} from "../../../Server/Commands/AddTerm";
-import {TermComponent} from "../../../Store/firebase/termComponents/@TermComponent";
 import {Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "../../../Store/firebase/terms/@Term";
 import {GetNiceNameForTermType} from "../../Database/TermsUI";
 
 @Observer
 export class TermDetailsUI extends BaseComponentPlus(
 	{} as {baseData: Term, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Term, error: string)=>void},
-	{} as {newData: Term, dataError: string, selectedTermComponent: TermComponent},
+	{} as {newData: Term, dataError: string},
 ) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
@@ -31,12 +30,12 @@ export class TermDetailsUI extends BaseComponentPlus(
 
 	render() {
 		const {baseData, forNew, enabled, style, onChange} = this.props;
-		const {newData, selectedTermComponent} = this.state;
+		const {newData} = this.state;
 		const creator = !forNew && GetUser(baseData.creator);
 
 		const Change = _=>this.OnChange();
 
-		const splitAt = 170; const width = 600;
+		const splitAt = 140; const width = 600;
 		return (
 			<Column style={style}>
 				{!forNew &&
@@ -49,7 +48,7 @@ export class TermDetailsUI extends BaseComponentPlus(
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
-					<Row>
+					<Row center>
 						<Pre>Disambiguation: </Pre>
 						<InfoButton text={"This is only needed if the word has multiple meanings, and you want to specify which one you're defining."
 							+ '\n\nExample: "element", "planet", and "mythology" would be suitable "disambiguation" texts for the different terms of "Mercury".'}/>
@@ -74,9 +73,14 @@ export class TermDetailsUI extends BaseComponentPlus(
 							value={newData.name_gerund} onChange={val=>Change(newData.name_gerund = val)}/>
 					</RowLR> */}
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
-					<Pre>Short description: </Pre>
-					<TextInput enabled={enabled} style={ES({flex: 1})} required
-						value={newData.shortDescription_current} onChange={val=>Change(newData.shortDescription_current = val)}/>
+					<Pre>Definition: </Pre>
+					<TextArea autoSize={true} enabled={enabled} style={ES({flex: 1})} required
+						value={newData.definition} onChange={val=>Change(newData.definition = val)}/>
+				</RowLR>
+				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+					<Pre>Note: </Pre>
+					<TextArea autoSize={true} enabled={enabled} style={ES({flex: 1})}
+						value={newData.note} onChange={val=>Change(newData.note = val)}/>
 				</RowLR>
 			</Column>
 		);
@@ -95,7 +99,7 @@ export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: st
 	let newTerm = new Term(E({
 		name: "",
 		type: TermType.ProperNoun,
-		shortDescription_current: "",
+		definition: "",
 	}, initialData));
 
 	let valid = false;

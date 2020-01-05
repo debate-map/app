@@ -10,13 +10,11 @@ import {ES} from "Utils/UI/GlobalStyles";
 import {GetUpdates, Observer} from "vwebapp-framework";
 import {GetUserPermissionGroups, IsUserCreatorOrMod, CanGetBasicPermissions} from "Store/firebase/users/$user";
 import {DeleteTerm} from "../../Server/Commands/DeleteTerm";
-import {UpdateTermData} from "../../Server/Commands/UpdateTermData";
+import {UpdateTerm} from "../../Server/Commands/UpdateTerm";
 import {GetFullNameP, GetTerms} from "../../Store/firebase/terms";
 import {Term, TermType} from "../../Store/firebase/terms/@Term";
 import {MeID} from "../../Store/firebase/users";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
-import {ShowAddTermComponentDialog} from "./Terms/AddTermComponentDialog";
-import {TermComponentsUI} from "./Terms/TermComponentsUI";
 import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI";
 
 @Observer
@@ -76,9 +74,8 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 								{creatorOrMod &&
 									<Button ml="auto" text="Save details" enabled={selectedTerm_newData != null && selectedTerm_newDataError == null}
 										onClick={async e=>{
-											// const updates = selectedTerm_newData.Including('name', 'disambiguation', 'type', 'person', 'shortDescription_current');
 											const updates = GetUpdates(selectedTerm, selectedTerm_newData);
-											await new UpdateTermData({termID: selectedTerm._key, updates}).Run();
+											await new UpdateTerm({termID: selectedTerm._key, updates}).Run();
 											// this.SetState({selectedTerm_newData: null});
 										}}/>}
 								{creatorOrMod &&
@@ -98,24 +95,6 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 							? <TermDetailsUI baseData={selectedTerm} forNew={false} enabled={creatorOrMod} style={{padding: 10}}
 								onChange={(data, error)=>this.SetState({selectedTerm_newData: data, selectedTerm_newDataError: error})}/>
 							: <div style={{padding: 10}}>No term selected.</div>}
-					</Column>
-					<Column mt={10} style={{position: "relative", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
-						<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
-							<Text style={{/* fontSize: 17, */ fontWeight: 500}}>
-								{/* Components */}
-								{selectedTerm ? GetHelperTextForTermType(selectedTerm) : null}
-							</Text>
-							<Div p={7} style={{position: "absolute", right: 0}}>
-								{creatorOrMod
-									&& <Button ml="auto" text="Add component" enabled={selectedTerm != null && CanGetBasicPermissions(MeID())} onClick={async e=>{
-										// if (userID == null) return ShowSignInPopup();
-										ShowAddTermComponentDialog(userID, selectedTerm._key);
-									}}/>}
-							</Div>
-						</Row>
-						{/* <Pre style={{textAlign: "center"}}>{GetHelperTextForTermType(selectedTerm)}</Pre> */}
-						{selectedTerm == null && <div style={{padding: 10}}>No term selected.</div>}
-						{selectedTerm && <TermComponentsUI term={selectedTerm} editing={true} style={{marginTop: 10, padding: 10}}/>}
 					</Column>
 				</ScrollView>
 			</Row>
@@ -149,7 +128,7 @@ export class TermUI extends BaseComponentPlus({} as {term: Term, first: boolean,
 					runInAction("TermUI.onClick", ()=>store.main.database.selectedTermID = term._key);
 				}}>
 				<Pre>{GetFullNameP(term)}<sup>{term._key.substr(0, 2)}</sup>: </Pre>
-				<Text>{term.shortDescription_current}</Text>
+				<Text>{term.definition}</Text>
 				<Span ml="auto">
 					<Pre style={{opacity: 0.7}}>({GetNiceNameForTermType(term.type)}) </Pre>
 					<Pre>#{term._key}</Pre>

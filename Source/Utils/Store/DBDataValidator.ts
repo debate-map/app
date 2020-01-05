@@ -15,7 +15,6 @@ export function ValidateDBData(data: FirebaseDBShape) {
 	ValidateCollection(data.nodePhrasings, "MapNodePhrasing");
 	ValidateCollection(data.nodeRevisions, "MapNodeRevision");
 	ValidateCollection(data.terms, "Term");
-	ValidateCollection(data.termComponents, "TermComponent");
 	ValidateCollection(data.timelines, "Timeline");
 	ValidateCollection(data.timelineSteps, "TimelineStep");
 }

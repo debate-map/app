@@ -9,7 +9,6 @@ import {MapNodePhrasing} from "./firebase/nodePhrasings/@MapNodePhrasing";
 import {RatingsRoot} from "./firebase/nodeRatings/@RatingsRoot";
 import {MapNode} from "./firebase/nodes/@MapNode";
 import {MapNodeRevision} from "./firebase/nodes/@MapNodeRevision";
-import {TermComponent} from "./firebase/termComponents/@TermComponent";
 import {Term} from "./firebase/terms/@Term";
 import {Timeline} from "./firebase/timelines/@Timeline";
 import {TimelineStep} from "./firebase/timelineSteps/@TimelineStep";
@@ -38,7 +37,6 @@ export interface FirebaseDBShape {
 	// nodeViewers: Collection<ViewerSet>; // removed due to privacy concerns
 	nodePhrasings: Collection<MapNodePhrasing>;
 	terms: Collection<Term>;
-	termComponents: Collection<TermComponent>;
 	termNames: Collection<any>;
 	timelines: Collection<Timeline>;
 	timelineSteps: Collection<TimelineStep>;
