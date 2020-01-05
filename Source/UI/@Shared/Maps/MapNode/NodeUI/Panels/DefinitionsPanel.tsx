@@ -70,9 +70,12 @@ export class TermDefinitionPanel extends BaseComponentPlus({showID: true} as {te
 	render() {
 		const {term, showID} = this.props;
 
+		const formsStr = term.forms.length > 1 ? ` (${term.forms.slice(1).join(", ")})` : "";
+		const disambiguationStr = term.disambiguation ? ` [${term.disambiguation}]` : "";
+		const idStr = showID ? ` (id: ${term._key})` : "";
 		return (
 			<Column sel mt={5} style={{whiteSpace: "normal"}}>
-				<Row>Term: {term.name}{term.disambiguation ? ` (${term.disambiguation})` : ""}{showID && ` (id: ${term._key})`}</Row>
+				<Row>Term: {term.name}{formsStr}{disambiguationStr}{idStr}</Row>
 				<Row mt={5}>Definition: {term.definition}</Row>
 				{/* <Row>Details:</Row>
 				<TermDetailsUI baseData={term} creating={false} enabled={/*creatorOrMod*#/ false} style={{padding: 10}}

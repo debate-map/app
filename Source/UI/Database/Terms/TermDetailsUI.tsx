@@ -110,6 +110,7 @@ export class TermDetailsUI extends BaseComponentPlus(
 export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: string)=>void) {
 	let newTerm = new Term(E({
 		name: "",
+		forms: [""],
 		type: TermType.ProperNoun,
 		definition: "",
 	}, initialData));
