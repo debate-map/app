@@ -1,5 +1,5 @@
 import {Clone, DEL, GetEntries, GetErrorMessagesUnderElement, E} from "js-vextensions";
-import {CheckBox, Column, Pre, Row, RowLR, Select, TextInput, TextArea} from "react-vcomponents";
+import {CheckBox, Column, Pre, Row, RowLR, Select, TextInput, TextArea, Text} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {GetUser} from "Store/firebase/users";
@@ -33,24 +33,41 @@ export class TermDetailsUI extends BaseComponentPlus(
 		const {newData} = this.state;
 		const creator = !forNew && GetUser(baseData.creator);
 
-		const Change = _=>this.OnChange();
+		const Change = (..._)=>this.OnChange();
 
-		const splitAt = 140; const width = 600;
+		const splitAt = 140; const width = 400;
 		return (
 			<Column style={style}>
 				{!forNew &&
 					<IDAndCreationInfoUI id={baseData._key} creator={creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
-					<Pre>Name: </Pre>
-					<TextInput
-						pattern={Term_nameFormat} required
+					<Text>Name:</Text>
+					<TextInput pattern={Term_nameFormat} required delayChangeTillDefocus={true}
 						enabled={enabled} style={{width: "100%"}}
-						value={newData.name} onChange={val=>Change(newData.name = val)}/>
+						value={newData.name} onChange={val=>{
+							const lastName = newData.name;
+							newData.name = val;
+							newData.forms = [newData.name].concat(newData.forms.Except(lastName, newData.name));
+							Change();
+						}}/>
+				</RowLR>
+				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+					<Row center>
+						<Text>Forms:</Text>
+						<InfoButton ml={5} text="Various forms of the term (as noun, adjective, etc). Used to add hover-based definition popups (for any forms found) to nodes that use this term as context."/>
+					</Row>
+					<Text>{newData.forms[0]}, </Text>
+					<TextInput enabled={enabled} delayChangeTillDefocus={true} style={{width: "100%"}}
+						value={newData.forms.slice(1).join(", ")} onChange={val=>{
+							const otherForms = val.split(",").map(a=>a.trim());
+							newData.forms = [newData.name].concat(otherForms);
+							Change();
+						}}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Row center>
-						<Pre>Disambiguation: </Pre>
-						<InfoButton text={"This is only needed if the word has multiple meanings, and you want to specify which one you're defining."
+						<Pre>Disambiguation:</Pre>
+						<InfoButton ml={5} text={"This is only needed if the word has multiple meanings, and you want to specify which one you're defining."
 							+ '\n\nExample: "element", "planet", and "mythology" would be suitable "disambiguation" texts for the different terms of "Mercury".'}/>
 					</Row>
 					<TextInput enabled={enabled} style={{width: "100%"}} pattern={Term_disambiguationFormat}
@@ -61,11 +78,6 @@ export class TermDetailsUI extends BaseComponentPlus(
 					<Select options={GetEntries(TermType, name=>GetNiceNameForTermType(TermType[name]))} enabled={enabled} style={ES({flex: 1})}
 						value={newData.type} onChange={val=>Change(newData.type = val)}/>
 				</RowLR>
-				{(newData.type == TermType.ProperNoun || newData.type == TermType.CommonNoun) &&
-					<RowLR mt={5} splitAt={splitAt} style={{width}}>
-						<Pre>Person: </Pre>
-						<CheckBox enabled={enabled} checked={newData.person} onChange={val=>Change(newData.person = val)}/>
-					</RowLR>}
 				{/* newData.type == TermType.Action &&
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>
 						<Pre>As gerund (noun): </Pre>

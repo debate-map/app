@@ -11,18 +11,12 @@ export class Term {
 
 	_key?: string;
 	name: string;
+	forms: string[];
 	disambiguation: string;
 	type: TermType;
-	person?: boolean;
-	// name_gerund: string;
-	// otherForms: string[];
 
 	definition: string;
 	note: string;
-
-	// openAccess: boolean;
-	// components: TermComponent[];
-	//components: TermComponentSet;
 
 	creator: string;
 	createdAt: number;
@@ -38,20 +32,15 @@ AddSchema("Term", {
 		name: {type: "string", pattern: Term_nameFormat},
 		disambiguation: {type: "string", pattern: Term_disambiguationFormat},
 		type: {$ref: "TermType"},
-		person: {type: "boolean"},
-		// name_gerund: {type: "string"},
-		// otherForms: {items: {type: "string"}},
+		forms: {items: {type: "string"}, minItems: 1, uniqueItems: true},
 
 		definition: {type: "string", pattern: Term_definitionFormat},
 		note: {type: "string"},
 
-		// components: {items: {$ref: "TermComponent"}},
-		//components: {$ref: "TermComponentSet"},
-
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 	},
-	required: ["name", "type", "definition", /* "components", */ "creator", "createdAt"],
+	required: ["name", "forms", "type", "definition", /* "components", */ "creator", "createdAt"],
 });
 
 export enum TermType {

@@ -102,19 +102,6 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 	}
 }
 
-function GetHelperTextForTermType(term: Term) {
-	const fullName = GetFullNameP(term);
-	if (term.type == TermType.ProperNoun) return `"${fullName}" (consistent with the description above) is ${term.person ? "someone who" : "something which"}...`;
-	if (term.type == TermType.CommonNoun) {
-		return `A${fullName.toLowerCase().StartsWithAny(..."aeiou".split("")) ? "n" : ""} "${fullName
-		}" (consistent with the description above) is ${term.person ? "someone who" : "something which"}...`;
-	}
-	if (term.type == TermType.Adjective) return `If something is "${fullName}" (consistent with the description above), it is...`;
-	if (term.type == TermType.Verb) return `To "${fullName}" (consistent with the description above) is to...`;
-	if (term.type == TermType.Adverb) return `If an action is performed "${fullName}" (consistent with the description above), it is done...`;
-	Assert(false);
-}
-
 export class TermUI extends BaseComponentPlus({} as {term: Term, first: boolean, selected: boolean}, {}) {
 	render() {
 		const {term, first, selected} = this.props;

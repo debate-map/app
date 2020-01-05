@@ -12,7 +12,7 @@ AddSchema(`Update${MTName}_payload`, [MTName], ()=>({
 	properties: {
 		id: {type: "string"},
 		updates: Schema({
-			properties: GetSchemaJSON(MTName)["properties"].Including("name", "disambiguation", "type", "person", "definition", "note"),
+			properties: GetSchemaJSON(MTName)["properties"].Including("name", "forms", "disambiguation", "type", "definition", "note"),
 		}),
 	},
 	required: ["id", "updates"],
