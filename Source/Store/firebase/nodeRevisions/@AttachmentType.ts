@@ -14,7 +14,6 @@ export enum AttachmentType {
 }
 
 export function GetAttachmentType(node: MapNodeL2) {
-	if (node.type != MapNodeType.Claim) return null;
 	return GetAttachmentType_Revision(node.current);
 }
 export function GetAttachmentType_Revision(revision: MapNodeRevision) {
