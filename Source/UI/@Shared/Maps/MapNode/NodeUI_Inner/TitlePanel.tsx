@@ -54,7 +54,7 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 	//const termForm_termIDs = termsToSearchFor.SelectMany(term=>term.forms.map(a=>term._key));
 	let patterns = [];
 	if (termsToSearchFor.length) {
-		const termForm_strings = termsToSearchFor.map(term=>term.forms.map(form=>_.escapeRegExp(form)));
+		const termForm_strings = termsToSearchFor.SelectMany(term=>term.forms.map(form=>_.escapeRegExp(form)));
 		const regex = new RegExp(`(^|\\W)(${termForm_strings.join("|")})(\\W|$)`, "i");
 		//const patterns = [{name: "termForm", termForm_termIDs, regex}];
 		patterns = [{name: "termForm", regex}];
