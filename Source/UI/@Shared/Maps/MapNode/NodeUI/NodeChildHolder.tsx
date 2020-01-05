@@ -5,7 +5,7 @@ import {Button, Column, Div, Row} from "react-vcomponents";
 import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, WarnOfTransientObjectProps} from "react-vextensions";
 import {GetFillPercent_AtPath} from "Store/firebase/nodeRatings";
 import {GetNodeChildrenL3, HolderType} from "Store/firebase/nodes";
-import {MapNodeL3,Polarity} from "Store/firebase/nodes/@MapNode";
+import {MapNodeL3, Polarity} from "Store/firebase/nodes/@MapNode";
 import {ArgumentType} from "Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType, MapNodeType_Info} from "Store/firebase/nodes/@MapNodeType";
 import {NodeConnectorBackground} from "UI/@Shared/Maps/MapNode/NodeConnectorBackground";
@@ -85,7 +85,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const showAll = node._key == map.rootNode || node.type == MapNodeType.Argument;
 		if (showAll) [childLimit_up, childLimit_down] = [100, 100];
 
-		const RenderChild = (child: MapNodeL3, index: number, collection, direction = "down" as "up" | "down")=>{
+		const RenderChild = (child: MapNodeL3, index: number, collection_untrimmed: MapNodeL3[], direction = "down" as "up" | "down")=>{
 			/* if (pack.node.premiseAddHelper) {
 				return <PremiseAddHelper mapID={map._id} parentNode={node} parentPath={path}/>;
 			} */
@@ -98,8 +98,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				// <ErrorBoundary key={child._key} errorUIStyle={{ width: 500, height: 300 }}>
 				<NodeUI key={child._key} ref={c=>this.childBoxes[child._key] = c} indexInNodeList={index} map={map} node={child}
 					path={`${path}/${child._key}`} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
-					{isFarthestChildFromDivider && !showAll && (collection.length > childLimit || childLimit != initialChildLimit) &&
-						<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit}} direction={direction} childCount={collection.length}/>}
+					{isFarthestChildFromDivider && !showAll && (collection_untrimmed.length > childLimit || childLimit != initialChildLimit) &&
+						<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit}} direction={direction} childCount={collection_untrimmed.length}/>}
 				</NodeUI>
 			);
 		};
@@ -108,11 +108,14 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			const direction = group == "up" ? "up" : "down";
 			const refName = `${group}ChildHolder`;
 			const childLimit = group == "up" ? childLimit_up : childLimit_down; // "all" and "down" share a child-limit
-			const childrenHere = group == "all" ? nodeChildrenToShowHere : group == "up" ? upChildren : downChildren;
+
+			const childrenHere_untrimmed = group == "all" ? nodeChildrenToShowHere : group == "up" ? upChildren : downChildren;
+			const childrenHere = childrenHere_untrimmed.slice(0, childLimit); // trim to the X most significant children (ie. strongest arguments)
 			// if direction is up, we need to have the first-in-children-array/highest-fill-percent entries show at the *bottom*, so reverse the children-here array
 			if (direction == "up") childrenHere.reverse();
-			const childrenHereUIs = childrenHere.slice(0, childLimit).map((pack, index)=>{
-				return RenderChild(pack, index, childrenHere, direction);
+
+			const childrenHereUIs = childrenHere.map((pack, index)=>{
+				return RenderChild(pack, index, childrenHere_untrimmed, direction);
 			});
 			// if direction is up, we need to have the first-in-children-array/highest-fill-percent entries show at the *bottom*, so reverse the children-uis array
 			// if (direction == 'up') childrenHereUIs.reverse();
