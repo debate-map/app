@@ -59,8 +59,8 @@ export class TermDetailsUI extends BaseComponentPlus(
 					<Text>{newData.forms[0]}, </Text>
 					<TextInput enabled={enabled} delayChangeTillDefocus={true} style={{width: "100%"}}
 						value={newData.forms.slice(1).join(", ")} onChange={val=>{
-							const otherForms = val.split(",").map(a=>a.trim());
-							newData.forms = [newData.name].concat(otherForms);
+							const otherForms = val.split(",").map(a=>a.trim()).filter(a=>a.length);
+							newData.forms = [newData.name].concat(otherForms.Except(newData.name));
 							Change();
 						}}/>
 				</RowLR>
