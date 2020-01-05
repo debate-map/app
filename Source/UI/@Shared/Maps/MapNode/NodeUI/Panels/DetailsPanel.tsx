@@ -47,7 +47,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {map?: Map, node: MapN
 					}}/>
 				{canEdit &&
 					<Row>
-						<Button text="Save" enabled={dataError == null} onLeftClick={async()=>{
+						<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
 							// let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "layerPlusAnchorParents", "finalType", "link");
 							if (link) {
 								const linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());

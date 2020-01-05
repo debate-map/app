@@ -68,7 +68,7 @@ export class TimelineDetailsEditor extends BaseComponentPlus({} as {timeline: Ti
 					}}/>
 				{editing &&
 				<Row>
-					<Button text="Save" enabled={dataError == null} onLeftClick={async()=>{
+					<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
 						const updates = GetUpdates(timeline, this.detailsUI.GetNewData()).Excluding("steps");
 						new UpdateTimeline({id: timeline._key, updates}).Run();
 					}}/>

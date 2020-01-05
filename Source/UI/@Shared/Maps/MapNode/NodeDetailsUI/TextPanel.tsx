@@ -1,4 +1,4 @@
-import {E, GetEntries, WaitXThenRun} from "js-vextensions";
+import {E, GetEntries, WaitXThenRun, DelIfFalsy} from "js-vextensions";
 import {Button, Column, Div, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Select, Text, TextArea, TextInput} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus, RenderSource} from "react-vextensions";
 import {AttachmentType, GetAttachmentType} from "Store/firebase/nodeRevisions/@AttachmentType";
@@ -62,7 +62,7 @@ class Title_Base extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 					<TextArea enabled={enabled} required={!hasOtherTitlesEntered && !willUseYesNoTitleHere} pattern={MapNodeRevision_titlePattern} autoSize={true}
 						allowLineBreaks={false} style={ES({flex: 1})}
 						ref={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM && a.DOM_HTML.focus())}
-						value={newRevisionData.titles["base"]} onChange={val=>Change(newRevisionData.titles["base"] = val)}/>
+						value={newRevisionData.titles["base"]} onChange={val=>Change(newRevisionData.titles.VSet("base", DelIfFalsy(val)))}/>
 				</Row>
 				{forNew && newData.type == MapNodeType.Argument &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
@@ -97,14 +97,14 @@ class OtherTitles extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 					<Pre>Title (negation): </Pre>
 					{/* <TextInput enabled={enabled} style={ES({flex: 1})} value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/> */}
 					<TextArea enabled={enabled} allowLineBreaks={false} style={ES({flex: 1})} pattern={MapNodeRevision_titlePattern} autoSize={true}
-						value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/>
+						value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles.VSet("negation", DelIfFalsy(val)))}/>
 				</Row>
 				<Row key={1} mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Title (question): </Pre>
 					{/* <TextInput enabled={enabled} style={ES({flex: 1})} required={willUseQuestionTitleHere}
 						value={newRevisionData.titles["yesNoQuestion"]} onChange={val=>Change(newRevisionData.titles["yesNoQuestion"] = val)}/> */}
 					<TextArea enabled={enabled} allowLineBreaks={false} style={ES({flex: 1})} pattern={MapNodeRevision_titlePattern} autoSize={true}
-						value={newRevisionData.titles["yesNoQuestion"]} onChange={val=>Change(newRevisionData.titles["yesNoQuestion"] = val)}/>
+						value={newRevisionData.titles["yesNoQuestion"]} onChange={val=>Change(newRevisionData.titles.VSet("yesNoQuestion", DelIfFalsy(val)))}/>
 				</Row>
 				{willUseQuestionTitleHere && forNew &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
@@ -205,7 +205,7 @@ class TermSearchOrCreateUI extends BaseComponentPlus({} as {name: string, enable
 					borderRadius: "0 0 5px 5px",
 				}}>
 					<Button text="Create new term" enabled={enabled} onClick={e=>{
-						ShowAddTermDialog({name}, onSelect);
+						ShowAddTermDialog({name, forms: [name]}, onSelect);
 					}}/>
 				</Row>
 			</>

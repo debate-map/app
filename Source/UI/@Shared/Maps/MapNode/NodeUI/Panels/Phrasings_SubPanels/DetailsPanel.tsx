@@ -28,7 +28,7 @@ export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {phrasing: M
 					}}/>
 				{creatorOrMod &&
 					<Row mt={5}>
-						<Button text="Save" enabled={dataError == null} onLeftClick={async()=>{
+						<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
 							const phrasingUpdates = GetUpdates(phrasing, this.detailsUI.GetNewData());
 							if (phrasingUpdates.VKeys().length) {
 								await new UpdatePhrasing(E({id: phrasing._key, updates: phrasingUpdates})).Run();
