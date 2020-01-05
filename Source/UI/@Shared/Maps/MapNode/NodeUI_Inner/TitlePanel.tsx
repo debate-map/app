@@ -44,11 +44,21 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 	/*const segments = ParseSegmentsForPatterns(text, [
 		{name: "term", regex: /{(.+?)\}\[(.+?)\]/},
 	]);*/
-	const patterns = termsToSearchFor.SelectMany(term=>{
+	/*const patterns = termsToSearchFor.SelectMany(term=>{
 		return term.forms.map(form=>{
 			return {name: `termForm`, termID: term._key, regex: new RegExp(`(^|\\W)(${_.escapeRegExp(form)})(\\W|$)`)};
 		});
 	});
+	return ParseSegmentsForPatterns(text, patterns);*/
+
+	//const termForm_termIDs = termsToSearchFor.SelectMany(term=>term.forms.map(a=>term._key));
+	let patterns = [];
+	if (termsToSearchFor.length) {
+		const termForm_strings = termsToSearchFor.map(term=>term.forms.map(form=>_.escapeRegExp(form)));
+		const regex = new RegExp(`(^|\\W)(${termForm_strings.join("|")})(\\W|$)`, "i");
+		//const patterns = [{name: "termForm", termForm_termIDs, regex}];
+		patterns = [{name: "termForm", regex}];
+	}
 	return ParseSegmentsForPatterns(text, patterns);
 }
 
@@ -125,12 +135,13 @@ export class TitlePanel extends BaseComponentPlus(
 				} else if (segment.patternMatched.name == "termForm") {
 					/*const refText = segment.textParts[1];
 					const termID = segment.textParts[2];*/
-					const refText = segment.textParts[2];
-					const termID = segment.patternMatched["termID"] as string;
+					const termStr = segment.textParts[2];
+					//const termID = segment.patternMatched["termID"] as string;
+					const term = termsToSearchFor.find(a=>a.forms.map(a=>a.toLowerCase()).Contains(termStr.toLowerCase()));
 					elements.push(
 						segment.textParts[1],
-						<TermPlaceholder key={elements.length} refText={refText} termID={termID}
-							onHover={hovered=>this.OnTermHover(termID, hovered)} onClick={()=>this.OnTermClick(termID)}/>,
+						<TermPlaceholder key={elements.length} refText={termStr} termID={term._key}
+							onHover={hovered=>this.OnTermHover(term._key, hovered)} onClick={()=>this.OnTermClick(term._key)}/>,
 						segment.textParts[3],
 					);
 				} else {

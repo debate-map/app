@@ -1,4 +1,5 @@
 import {BaseComponentPlus} from "react-vextensions";
+import {HSLA} from "vwebapp-framework";
 import {GetTerm} from "../../../../../Store/firebase/terms";
 
 export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {refText: string, termID: string, showKeyStart?: boolean, onHover: (hovered: boolean)=>void, onClick: ()=>void}, {}) {
@@ -12,6 +13,14 @@ export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {
 		// if (term == null) return <a>{refText}</a>;
 		return (
 			<a
+				style={{
+					//color: HSLA(120, 1, .7, 1),
+					//color: HSLA(120, .5, .7, 1),
+					color: "rgba(255, 255, 255, 0.7)",
+					//fontWeight: 500,
+					//textDecoration: "underline rgba(255,255,255,.3) solid !important",
+					//textDecoration: "underline rgba(255,255,255,.3) solid",
+				}}
 				onMouseEnter={e=>onHover(true)}
 				onMouseLeave={e=>onHover(false)}
 				onClick={e=>{
@@ -19,11 +28,14 @@ export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {
 						GetInnerComp(this.definitionsPanel).SetState({termFromLocalClick: GetTerm(termID)}); */
 					// this.SetState({clickTermID: termID});
 					onClick();
-				}}>
+				}}
+			>
 				{/* term.name */}
-				{refText}
+				<span style={{textDecoration: "underline rgba(255,255,255,.5) solid"}}>
+					{refText}
+				</span>
 				{showVariantNumber &&
-					<sup>{termKeyStart || "?"}</sup>}
+					<sup style={{fontSize: 10, opacity: .7}}>{termKeyStart || "?"}</sup>}
 				{/* <sub>{termVariantNumber}</sub>} */}
 			</a>
 		);
