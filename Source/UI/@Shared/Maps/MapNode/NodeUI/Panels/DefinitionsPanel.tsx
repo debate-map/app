@@ -1,13 +1,11 @@
-import {CachedTransform} from "js-vextensions";
 import {Button, Column, Row} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {GetCurrentURL, Link, Observer} from "vwebapp-framework";
-import {Fragment} from "react";
-import {ParseSegmentsForPatterns} from "../../../../../../Utils/General/RegexHelpers";
+import {BaseComponentPlus} from "react-vextensions";
+import {Link, Observer, ParseSegmentsForPatterns} from "vwebapp-framework";
 import {GetNodeDisplayText} from "../../../../../../Store/firebase/nodes/$node";
-import {MapNode, MapNodeL2} from "../../../../../../Store/firebase/nodes/@MapNode";
-import {GetTerm} from "../../../../../../Store/firebase/terms";
+import {MapNodeL2} from "../../../../../../Store/firebase/nodes/@MapNode";
+import {GetTerm, GetTermsAttached} from "../../../../../../Store/firebase/terms";
 import {Term} from "../../../../../../Store/firebase/terms/@Term";
+import {GetSegmentsForTerms} from "../../NodeUI_Inner/TitlePanel";
 
 const termsPlaceholder = [];
 
@@ -20,11 +18,16 @@ export class DefinitionsPanel extends BaseComponentPlus(
 		const {node, path, hoverTermID, openTermID, onHoverTerm, onClickTerm} = this.props;
 
 		const displayText = GetNodeDisplayText(node, path);
+
 		// let segments = ParseSegmentsFromNodeDisplayText(displayText);
-		const segments = ParseSegmentsForPatterns(displayText, [
+		/*const segments = ParseSegmentsForPatterns(displayText, [
 			{name: "term", regex: /{(.+?)\}\[(.+?)\]/},
-		]);
-		let terms = segments.filter(a=>a.patternMatched == "term").map(a=>GetTerm(a.textParts[2]));
+		]);*/
+		const termsToSearchFor = GetTermsAttached(node.currentRevision).filter(a=>a);
+		const segments = GetSegmentsForTerms(displayText, termsToSearchFor);
+
+		//let terms = segments.filter(a=>a.patternMatched?.name == "term").map(a=>GetTerm(a.textParts[2]));
+		let terms = segments.filter(a=>a.patternMatched).map(segment=>GetTerm(segment["termID"]));
 		// only pass terms when all are loaded
 		terms = terms.every(a=>a != null) ? terms : termsPlaceholder;
 
@@ -70,11 +73,11 @@ export class TermDefinitionPanel extends BaseComponentPlus({showID: true} as {te
 	render() {
 		const {term, showID} = this.props;
 
-		const formsStr = term.forms.length > 1 ? ` (${term.forms.slice(1).join(", ")})` : "";
-		const disambiguationStr = term.disambiguation ? ` [${term.disambiguation}]` : "";
+		const formsStr = term.forms.length > 1 ? ` [${term.forms.slice(1).join(", ")}]` : "";
+		const disambiguationStr = term.disambiguation ? ` (${term.disambiguation})` : "";
 		const idStr = showID ? ` (id: ${term._key})` : "";
 		return (
-			<Column sel mt={5} style={{whiteSpace: "normal"}}>
+			<Column sel style={{whiteSpace: "normal"}}>
 				<Row>Term: {term.name}{formsStr}{disambiguationStr}{idStr}</Row>
 				<Row mt={5}>Definition: {term.definition}</Row>
 				{/* <Row>Details:</Row>

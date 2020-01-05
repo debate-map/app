@@ -1,4 +1,4 @@
-import {emptyArray, FromJSON, GetValues, ToNumber} from "js-vextensions";
+import {emptyArray, FromJSON, GetValues, ToNumber, emptyArray_forLoading} from "js-vextensions";
 import {GetMap} from "Store/firebase/maps";
 import {GetNode, GetNodeChildren} from "Store/firebase/nodes";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
@@ -97,7 +97,7 @@ export const GetPlayingTimelineAppliedSteps = StoreAccessor(s=>(mapID: string, e
 	}
 	const stepIDs = playingTimeline.steps.slice(0, stepIndex + 1);
 	const steps = stepIDs.map(a=>GetTimelineStep(a));
-	if (steps.Any(a=>a == null)) return emptyArray;
+	if (steps.Any(a=>a == null)) return emptyArray_forLoading;
 	return steps;
 });
 export const GetPlayingTimelineRevealNodes_UpToAppliedStep = StoreAccessor(s=>(mapID: string, excludeAfterCurrentStep = false): string[]=>{

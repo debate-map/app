@@ -111,7 +111,7 @@ export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: st
 	let newTerm = new Term(E({
 		name: "",
 		forms: [""],
-		type: TermType.ProperNoun,
+		type: TermType.CommonNoun,
 		definition: "",
 	}, initialData));
 

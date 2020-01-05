@@ -18,6 +18,9 @@ import {store} from "Store";
 import {MapNodeView, GetNodeViewsAlongPath, GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
 import {CanEditNode} from "Store/firebase/users/$user";
+import {GetTermsAttached} from "Store/firebase/terms";
+import _ from "lodash";
+import {Term} from "Store/firebase/terms/@Term";
 import {NodeMathUI} from "../NodeMathUI";
 import {NodeUI_Inner} from "../NodeUI_Inner";
 import {TermPlaceholder} from "./TermPlaceholder";
@@ -35,6 +38,19 @@ const TitlePanel_connector = (state, { node, path }: TitlePanelProps) => ({
 export function TitlePanel(props: VProps<TitlePanelInternals, {
 	parent: NodeUI_Inner, map: Map, node: MapNodeL2, nodeView: MapNodeView, path: string, indexInNodeList: number, style,
 }>) { */
+
+export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
+	// let segments = ParseSegmentsFromNodeDisplayText(text);
+	/*const segments = ParseSegmentsForPatterns(text, [
+		{name: "term", regex: /{(.+?)\}\[(.+?)\]/},
+	]);*/
+	const patterns = termsToSearchFor.SelectMany(term=>{
+		return term.forms.map(form=>{
+			return {name: `termForm`, termID: term._key, regex: new RegExp(`(^|\\W)(${_.escapeRegExp(form)})(\\W|$)`)};
+		});
+	});
+	return ParseSegmentsForPatterns(text, patterns);
+}
 
 @WarnOfTransientObjectProps
 @Observer
@@ -85,11 +101,11 @@ export class TitlePanel extends BaseComponentPlus(
 
 		const noteText = (node.current.equation && node.current.equation.explanation) || node.current.note;
 
+		const termsToSearchFor = GetTermsAttached(node.currentRevision).filter(a=>a);
+
 		const RenderNodeDisplayText = (text: string)=>{
-			// let segments = ParseSegmentsFromNodeDisplayText(text);
-			const segments = ParseSegmentsForPatterns(text, [
-				{name: "term", regex: /{(.+?)\}\[(.+?)\]/},
-			]);
+			const segments = GetSegmentsForTerms(text, termsToSearchFor);
+			this.Stash({segments}); // for debugging
 
 			const elements = [];
 			for (const [index, segment] of segments.entries()) {
@@ -106,12 +122,16 @@ export class TitlePanel extends BaseComponentPlus(
 							}}/>,
 					);
 					if (edgeWhiteSpaceMatch[2]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[2]}</span>);
-				} else if (segment.patternMatched == "term") {
-					const refText = segment.textParts[1];
-					const termID = segment.textParts[2];
+				} else if (segment.patternMatched.name == "termForm") {
+					/*const refText = segment.textParts[1];
+					const termID = segment.textParts[2];*/
+					const refText = segment.textParts[2];
+					const termID = segment.patternMatched["termID"] as string;
 					elements.push(
+						segment.textParts[1],
 						<TermPlaceholder key={elements.length} refText={refText} termID={termID}
 							onHover={hovered=>this.OnTermHover(termID, hovered)} onClick={()=>this.OnTermClick(termID)}/>,
+						segment.textParts[3],
 					);
 				} else {
 					Assert(false);

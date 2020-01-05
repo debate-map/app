@@ -44,8 +44,8 @@ AddSchema("Term", {
 });
 
 export enum TermType {
-	ProperNoun = 10,
-	CommonNoun = 20,
+	CommonNoun = 10,
+	ProperNoun = 20,
 	Adjective = 30,
 	Verb = 40,
 	Adverb = 50,

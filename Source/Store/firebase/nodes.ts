@@ -33,7 +33,7 @@ export const GetNodesL2 = StoreAccessor((s) => (): MapNodeL2[] => {
 } */
 export const GetNodesByIDs = StoreAccessor(s=>(ids: string[], emptyForLoading = true): MapNode[]=>{
 	const nodes = ids.map(id=>GetNode(id));
-	if (emptyForLoading && nodes.Any(a=>a == null)) return emptyArray;
+	if (emptyForLoading && nodes.Any(a=>a == null)) return emptyArray_forLoading;
 	return nodes;
 });
 

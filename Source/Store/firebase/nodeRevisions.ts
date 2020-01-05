@@ -2,10 +2,10 @@ import {IsNaN} from "js-vextensions";
 import {WhereFilter, GetDoc, GetDocs, StoreAccessor} from "mobx-firelink";
 import {MapNodeRevision} from "./nodes/@MapNodeRevision";
 
-export function GetNodeRevision(id: string) {
+export const GetNodeRevision = StoreAccessor(s=>(id: string): MapNodeRevision=>{
 	if (id == null || IsNaN(id)) return null;
 	return GetDoc({}, a=>a.nodeRevisions.get(id));
-}
+});
 
 // todo: make this use an actual query, to improve performance
 // todo2 (nvm, canceled): actually, maybe instead just use approach used for map-node-phrasings (having separate db-path for each node's phrasing-collection) -- assuming it has no unforeseen issues

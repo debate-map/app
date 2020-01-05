@@ -1,4 +1,4 @@
-import {CachedTransform, emptyArray, ToInt} from "js-vextensions";
+import {CachedTransform, emptyArray, ToInt, emptyArray_forLoading} from "js-vextensions";
 import {Layer} from "Store/firebase/layers/@Layer";
 import {GetNode} from "Store/firebase/nodes";
 import {GetDoc, GetDocs, StoreAccessor} from "mobx-firelink";
@@ -43,7 +43,7 @@ export const GetSubnodesInLayer = StoreAccessor(s=>(anchorNodeID: string, layerI
 export const GetSubnodesInEnabledLayersEnhanced = StoreAccessor(s=>(userID: string, mapID: string, anchorNodeID: string): MapNodeL3[]=>{
 	const layersEnabled = GetMapLayers(mapID);
 	// if some layers aren't loaded yet, return nothing
-	if (layersEnabled.Any(a=>a == null)) return emptyArray;
+	if (layersEnabled.Any(a=>a == null)) return emptyArray_forLoading;
 
 	// const userLayerStates = GetUserLayerStatesForMap(userID, map._key) || {};
 	const userLayerStates = GetUserLayerStatesForMap(userID, mapID);

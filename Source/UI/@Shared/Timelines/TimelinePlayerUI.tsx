@@ -1,14 +1,13 @@
 import {Button, Column, Pre, Row, Span} from "react-vcomponents";
 import {BaseComponent, FindReact, BaseComponentPlus} from "react-vextensions";
 import {Map} from "Store/firebase/maps/@Map";
-import {GetNodeL2} from "Store/firebase/nodes/$node";
+import {GetNodeL2,AsNodeL3} from "Store/firebase/nodes/$node";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
 import {GetEntries, E} from "js-vextensions";
-import {VReactMarkdown_Remarkable} from "vwebapp-framework";
+import {VReactMarkdown_Remarkable, Segment} from "vwebapp-framework";
 import {store} from "Store";
 import {GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStep, GetPlayingTimeline, GetPlayingTimelineStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {Segment} from "../../../Utils/General/RegexHelpers";
-import {AsNodeL3} from "../../../Store/firebase/nodes/$node";
+
 import {MapNodeL3, Polarity} from "../../../Store/firebase/nodes/@MapNode";
 import {TimelineStep} from "../../../Store/firebase/timelineSteps/@TimelineStep";
 import {NodeUI_Inner} from "../Maps/MapNode/NodeUI_Inner";

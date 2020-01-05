@@ -1,4 +1,4 @@
-import {CachedTransform, emptyArray, ToInt} from "js-vextensions";
+import {CachedTransform, emptyArray, ToInt, emptyArray_forLoading} from "js-vextensions";
 import {GetDoc, StoreAccessor} from "mobx-firelink";
 import {Map} from "./maps/@Map";
 import {Timeline} from "./timelines/@Timeline";
@@ -18,6 +18,6 @@ export function GetMapTimelineIDs(map: Map) {
 }
 export const GetMapTimelines = StoreAccessor(s=>(map: Map)=>{
 	const timelines = GetMapTimelineIDs(map).map(id=>GetTimeline(id));
-	if (timelines.Any(a=>a == null)) return emptyArray;
+	if (timelines.Any(a=>a == null)) return emptyArray_forLoading;
 	return timelines;
 });

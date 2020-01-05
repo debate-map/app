@@ -58,8 +58,8 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		let targetStepIndex: number;
 		let targetTime_yInMessageArea: number;
 		if (timeline) {
-			// const steps = timeline ? GetTimelineSteps(timeline, true) : null;
-			const steps = GetTimelineSteps(timeline, true);
+			// const steps = timeline ? GetTimelineSteps(timeline, false) : null;
+			const steps = GetTimelineSteps(timeline, false);
 			const targetStep = steps.Skip(1).LastOrX(a=>a && a.videoTime <= this.targetTime, firstNormalStep);
 			if (targetStep) {
 				targetStepIndex = timeline.steps.indexOf(targetStep._key);
@@ -172,7 +172,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 		const firstStep = GetTimelineStep(timeline ? timeline.steps[0] : null);
 		if (timeline && this.targetTime != null) {
 			// const steps = timeline ? GetTimelineSteps(timeline, true) : null;
-			const steps = GetTimelineSteps(timeline, true);
+			const steps = GetTimelineSteps(timeline, false);
 			const targetStep = steps.LastOrX(a=>a && a.videoTime <= this.targetTime, firstStep);
 			if (targetStep) {
 				const newTargetStepIndex = timeline.steps.indexOf(targetStep._key);

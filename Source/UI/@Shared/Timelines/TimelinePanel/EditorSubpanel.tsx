@@ -37,7 +37,7 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 		const {map} = this.props;
 		const timeline = GetSelectedTimeline(map && map._key);
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), timeline);
-		// timelineSteps: timeline && GetTimelineSteps(timeline, true),
+		// timelineSteps: timeline && GetTimelineSteps(timeline, false),
 		const showTimelineDetails = GetShowTimelineDetails(map && map._key);
 		const {lockMapScrolling} = store.main.maps;
 		const droppableInfo = new DroppableInfo({type: "TimelineStepList", timelineID: timeline ? timeline._key : null});

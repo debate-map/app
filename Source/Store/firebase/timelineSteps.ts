@@ -1,4 +1,4 @@
-import {emptyArray, ToNumber} from "js-vextensions";
+import {emptyArray, ToNumber, emptyArray_forLoading} from "js-vextensions";
 import {GetDoc, StoreAccessor} from "mobx-firelink";
 import {Timeline} from "./timelines/@Timeline";
 import {TimelineStep} from "./timelineSteps/@TimelineStep";
@@ -8,9 +8,9 @@ export const GetTimelineStep = StoreAccessor(s=>(id: string): TimelineStep=>{
 	if (id == null) return null;
 	return GetDoc({}, a=>a.timelineSteps.get(id));
 });
-export const GetTimelineSteps = StoreAccessor(s=>(timeline: Timeline, allowStillLoading = false): TimelineStep[]=>{
+export const GetTimelineSteps = StoreAccessor(s=>(timeline: Timeline, emptyForLoading = true): TimelineStep[]=>{
 	const steps = (timeline.steps || []).map(id=>GetTimelineStep(id));
-	if (!allowStillLoading && steps.Any(a=>a == null)) return emptyArray;
+	if (!emptyForLoading && steps.Any(a=>a == null)) return emptyArray_forLoading;
 	return steps;
 });
 
@@ -34,7 +34,7 @@ export const GetNodeRevealTimesInSteps = StoreAccessor(s=>(steps: TimelineStep[]
 					let currentChildren = GetNodeChildren(node).map(child=>({node: child, path: child && `${reveal.path}/${child._key}`}));
 					if (currentChildren.Any(a=>a.node == null)) {
 						// if (steps.length == 1 && steps[0]._key == 'clDjK76mSsGXicwd7emriw') debugger;
-						return emptyArray;
+						return emptyArray_forLoading;
 					}
 
 					for (let childrenDepth = 1; childrenDepth <= revealDepth; childrenDepth++) {
@@ -50,7 +50,7 @@ export const GetNodeRevealTimesInSteps = StoreAccessor(s=>(steps: TimelineStep[]
 								const childChildren = GetNodeChildren(child.node).map(child2=>({node: child2, path: child2 && `${child.path}/${child2._key}`}));
 								if (childChildren.Any(a=>a == null)) {
 									// if (steps.length == 1 && steps[0]._key == 'clDjK76mSsGXicwd7emriw') debugger;
-									return emptyArray;
+									return emptyArray_forLoading;
 								}
 								nextChildren.AddRange(childChildren);
 							}
