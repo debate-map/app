@@ -122,13 +122,13 @@ class ArgumentInfo extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 		const polarity = GetFinalPolarity(newLinkData.polarity, newLinkData.form);
 
 		return (
-			<Row>
+			<Row mt={5}>
 				<Pre>Type: If </Pre>
 				<Select options={GetEntries(ArgumentType, name=>GetArgumentTypeDisplayText(ArgumentType[name]))}
 					enabled={enabled} value={newRevisionData.argumentType} onChange={val=>{
 						Change(newRevisionData.argumentType = val);
 					}}/>
-				<Pre> premises below are true, they impact the parent.</Pre>
+				<Pre> premises are true, they impact the parent.</Pre>
 			</Row>
 		);
 	}

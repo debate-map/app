@@ -35,6 +35,7 @@ export class MapsState {
 
 	// node panels
 	@O detailsPanel = new DetailsPanelState();
+	@O addChildDialog = new AddChildDialogState();
 }
 
 export enum DetailsPanel_Subpanel {
@@ -45,6 +46,10 @@ export enum DetailsPanel_Subpanel {
 }
 export class DetailsPanelState {
 	@O subpanel = DetailsPanel_Subpanel.Text;
+}
+
+export class AddChildDialogState {
+	@O advanced = false;
 }
 
 export const GetLastAcknowledgementTime = StoreAccessor(s=>(nodeID: string)=>{

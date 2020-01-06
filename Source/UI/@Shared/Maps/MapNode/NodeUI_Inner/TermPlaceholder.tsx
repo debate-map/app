@@ -4,7 +4,7 @@ import {GetTerm} from "../../../../../Store/firebase/terms";
 
 export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {refText: string, termID: string, showKeyStart?: boolean, onHover: (hovered: boolean)=>void, onClick: ()=>void}, {}) {
 	render() {
-		const {refText, termID, showKeyStart: showVariantNumber, onHover, onClick} = this.props;
+		const {refText, termID, showKeyStart, onHover, onClick} = this.props;
 		const term = GetTerm(termID);
 		//const termVariantNumber = term ? GetTermVariantNumber(term) : null;
 		const termKeyStart = term ? term._key.substr(0, 2) : null;
@@ -34,7 +34,7 @@ export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {
 				<span style={{textDecoration: "underline rgba(255,255,255,.5) solid"}}>
 					{refText}
 				</span>
-				{showVariantNumber &&
+				{showKeyStart &&
 					<sup style={{fontSize: 10, opacity: .7}}>{termKeyStart || "?"}</sup>}
 				{/* <sub>{termVariantNumber}</sub>} */}
 			</a>
