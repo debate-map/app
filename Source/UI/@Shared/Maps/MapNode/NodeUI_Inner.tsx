@@ -16,6 +16,7 @@ import {runInAction} from "mobx";
 import {SlicePath} from "mobx-firelink";
 import {GetLastAcknowledgementTime} from "Store/main/maps";
 import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
+import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General";
 import {ChangeType, GetChangeTypeOutlineColor} from "../../../../Store/firebase/mapNodeEditTimes";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetNodeRatingsRoot, GetRatings} from "../../../../Store/firebase/nodeRatings";
@@ -216,11 +217,13 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			expanded = parentNodeView?.expanded ?? false;
 		}
 
-		const onMouseEnter = UseCallback(()=>{
+		const onMouseEnter = UseCallback(e=>{
+			if (!IsMouseEnterReal(e, this.DOM_HTML)) return;
 			this.SetState({hovered: true});
 			this.checkStillHoveredTimer.Start();
 		}, []);
-		const onMouseLeave = UseCallback(()=>{
+		const onMouseLeave = UseCallback(e=>{
+			if (!IsMouseLeaveReal(e, this.DOM_HTML)) return;
 			this.SetState({hovered: false});
 			this.checkStillHoveredTimer.Stop();
 		}, []);

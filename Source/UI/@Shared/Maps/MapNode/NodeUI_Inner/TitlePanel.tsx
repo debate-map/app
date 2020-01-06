@@ -137,7 +137,7 @@ export class TitlePanel extends BaseComponentPlus(
 					const termID = segment.textParts[2];*/
 					const termStr = segment.textParts[2];
 					//const termID = segment.patternMatched["termID"] as string;
-					const term = termsToSearchFor.find(a=>a.forms.map(a=>a.toLowerCase()).Contains(termStr.toLowerCase()));
+					const term = termsToSearchFor.find(a=>a.forms.map(form=>form.toLowerCase()).Contains(termStr.toLowerCase()));
 					elements.push(
 						segment.textParts[1],
 						<TermPlaceholder key={elements.length} refText={termStr} termID={term._key}
@@ -162,7 +162,7 @@ export class TitlePanel extends BaseComponentPlus(
 						isSubnode && {margin: "4px 0 1px 0"},
 						missingTitleStrings.Contains(newTitle) && {color: "rgba(255,255,255,.3)"},
 					)}>
-						{latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick}/>}
+						{latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick} termsToSearchFor={termsToSearchFor}/>}
 						{!latex && RenderNodeDisplayText(newTitle)}
 					</span>}
 				{editing &&

@@ -27,7 +27,11 @@ export class DefinitionsPanel extends BaseComponentPlus(
 		const segments = GetSegmentsForTerms(displayText, termsToSearchFor);
 
 		//let terms = segments.filter(a=>a.patternMatched?.name == "term").map(a=>GetTerm(a.textParts[2]));
-		let terms = segments.filter(a=>a.patternMatched).map(segment=>GetTerm(segment["termID"]));
+		//let terms = segments.filter(a=>a.patternMatched).map(segment=>GetTerm(segment["termID"]));
+		let terms = segments.filter(a=>a.patternMatched).map(segment=>{
+			const termStr = segment.textParts[2];
+			return termsToSearchFor.find(a=>a.forms.map(form=>form.toLowerCase()).Contains(termStr.toLowerCase()));
+		});
 		// only pass terms when all are loaded
 		terms = terms.every(a=>a != null) ? terms : termsPlaceholder;
 

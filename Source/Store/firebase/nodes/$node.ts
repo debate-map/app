@@ -14,7 +14,11 @@ import {PermissionGroupSet} from "../users/@User";
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");
 	// "\term{some-term}{123}" -> "\text{@term[some-term,123]}
-	text = text.replace(/\\term{(.+?)}{([A-Za-z0-9_-]+?)}/g, (m, g1, g2)=>`\\text{@term[${g1},${g2}]}`);
+	//text = text.replace(/\\term{(.+?)}{([A-Za-z0-9_-]+?)}/g, (m, g1, g2)=>`\\text{@term[${g1},${g2}]}`);
+
+	// "\term{some-term}" -> "\text{@term[some-term]}
+	text = text.replace(/\\term{(.+?)}/g, (m, g1, g2)=>`\\text{@term[${g1}]}`);
+
 	text = text.replace(/\\term/g, ()=>"[syntax wrong]"); // for user syntax mistakes, keep from causing error
 	return text;
 }

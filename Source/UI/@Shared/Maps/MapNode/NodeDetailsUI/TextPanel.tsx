@@ -37,7 +37,7 @@ export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 					<TextInput enabled={enabled} style={{width: "100%"}}
 						value={newRevisionData.note} onChange={val=>Change(newRevisionData.note = val)}/>
 				</Row>
-				{attachmentType == AttachmentType.None &&
+				{(attachmentType == AttachmentType.None || attachmentType == AttachmentType.Equation) &&
 					<NodeTermsUI {...sharedProps}/>}
 			</>
 		);

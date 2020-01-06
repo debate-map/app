@@ -4,6 +4,7 @@ import ReactDOM from "react-dom";
 import {PreProcessLatex} from "Store/firebase/nodes/$node";
 import {IsNaN} from "js-vextensions";
 import {store} from "Store";
+import {Term} from "Store/firebase/terms/@Term";
 import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
 
 // change InlineMath's generateHtml function to not break on katex parse-errors
@@ -19,7 +20,7 @@ InlineMath.prototype.generateHtml = function() {
 	}
 };
 
-export class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termID: string, hovered: boolean)=>void, onTermClick: (termID: string)=>void}, {}> {
+export class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termID: string, hovered: boolean)=>void, onTermClick: (termID: string)=>void, termsToSearchFor: Term[]}, {}> {
 	render() {
 		let {text} = this.props;
 		text = PreProcessLatex(text);
@@ -29,17 +30,18 @@ export class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termI
 	}
 
 	PostRender() {
-		const {onTermHover, onTermClick} = this.props;
+		const {onTermHover, onTermClick, termsToSearchFor} = this.props;
 
 		const dom = $(GetDOM(this));
 		const termUIs = dom.find(".text").ToList();
 		for (const termUI of termUIs) {
-			const termTextMatch = termUI.text().match(/^@term\[(.+?),([A-Za-z0-9_-]+?)\]$/);
+			//const termTextMatch = termUI.text().match(/^@term\[(.+?),([A-Za-z0-9_-]+?)\]$/);
+			const termTextMatch = termUI.text().match(/^@term\[(.+?)\]$/);
 			if (!termTextMatch) continue; // if doesn't have marker, ignore
 			// if (!termUI.next().is(".mopen")) continue; // if no term-id specified, ignore
 			// if (!termUI.next().is(".mord.scriptstyle.uncramped.mtight")) continue; // if no term-id specified, ignore
 
-			const refText = termTextMatch[1];
+			const termStr = termTextMatch[1];
 
 			// let siblingsForID = termUI.nextUntil(".mclose").add(termUI.nextAll(".mclose").first());
 			/* let siblingsForID = termUI.next();
@@ -52,8 +54,10 @@ export class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termI
 			/*let siblingsForID = termUI.nextUntil(".mclose").ToList();
 			let termIDStr = siblingsForID.filter(a=>a.is(".mathrm")).map(a=>a.text()).join();*#/
 			let termID = termIDStr.ToInt(); */
-			const termID = termTextMatch[2];
-			if (IsNaN(termID)) continue;
+			/*const termID = termTextMatch[2];
+			if (IsNaN(termID)) continue;*/
+			const term = termsToSearchFor.find(a=>a.forms.map(form=>form.toLowerCase()).Contains(termStr.toLowerCase()));
+			if (term == null) continue;
 
 			// let oldText = termUI.text();
 			// termUI.text(`${oldText}[term: ${termID}]`);
@@ -63,8 +67,8 @@ export class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termI
 			} */
 
 			ReactDOM.render((
-				<TermPlaceholder {...{store} as any} refText={refText} termID={termID} showKeyStart={false}
-					onHover={hovered=>onTermHover(termID, hovered)} onClick={()=>onTermClick(termID)}/>
+				<TermPlaceholder {...{store} as any} refText={termStr} termID={term._key} showKeyStart={false}
+					onHover={hovered=>onTermHover(term._key, hovered)} onClick={()=>onTermClick(term._key)}/>
 			), termUI[0]);
 		}
 	}
