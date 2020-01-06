@@ -19,7 +19,7 @@ import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General";
 import {ChangeType, GetChangeTypeOutlineColor} from "../../../../Store/firebase/mapNodeEditTimes";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetNodeRatingsRoot, GetRatings} from "../../../../Store/firebase/nodeRatings";
+import {GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings} from "../../../../Store/firebase/nodeRatings";
 import {RatingType, ratingTypes} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {IsNodeSubnode, GetNodeID, GetNode} from "../../../../Store/firebase/nodes";
 import {GetMainRatingType, GetNodeForm, GetNodeL3, GetPaddingForNode, IsPremiseOfSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
@@ -150,7 +150,6 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const markerPercent = GetMarkerPercent_AtPath(ratingNode, ratingNodePath, null);
 
 		const form = GetNodeForm(node, path);
-		const ratingsRoot = GetNodeRatingsRoot(node._key);
 		const {showReasonScoreValues} = store.main.maps;
 
 		/* const playingTimeline_currentStepRevealNodes = GetPlayingTimelineCurrentStepRevealNodes(map._key);
@@ -288,7 +287,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					onDirectClick={onDirectClick}
 					beforeChildren={<>
 						{leftPanelShow &&
-						<MapNodeUI_LeftBox {...{map, path, node, ratingsRoot, panelPosition, local_openPanel, backgroundColor}} asHover={hovered}
+						<MapNodeUI_LeftBox {...{map, path, node, panelPosition, local_openPanel, backgroundColor}} asHover={hovered}
 							onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
 							onPanelButtonClick={panel=>{
 								if (useLocalPanelState) {

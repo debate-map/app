@@ -74,7 +74,7 @@ export const GetArgumentImpactPseudoRatingSet = StoreAccessor(s=>(argument: MapN
 	// let result = CachedTransform("GetArgumentImpactPseudoRatingSet", [argument._id], dataUsedInCalculation, ()=> {
 	// const result = CachedTransform_WithStore('GetArgumentImpactPseudoRatingSet', [argument._key], dataUsedInCalculation, () => {
 	const premiseRatingSets = premises.map(child=>{
-		return GetRatingSet(child._key, GetMainRatingType(child)) || emptyObj;
+		return GetRatingSet(child._key, GetMainRatingType(child)) || emptyObj as RatingsSet;
 	});
 
 	const usersWhoRatedArgOrPremise = {};
@@ -93,6 +93,7 @@ export const GetArgumentImpactPseudoRatingSet = StoreAccessor(s=>(argument: MapN
 
 	for (const [index, child] of premises.entries()) {
 		const childRatingSet = premiseRatingSets[index];
+		//for (const userID of childRatingSet.VKeys()) {
 		for (const userID of childRatingSet.VKeys()) {
 			usersWhoRatedArgOrPremise[userID] = true;
 		}

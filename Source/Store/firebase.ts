@@ -6,7 +6,7 @@ import {Layer} from "./firebase/layers/@Layer";
 import {NodeEditTimes} from "./firebase/mapNodeEditTimes";
 import {Map} from "./firebase/maps/@Map";
 import {MapNodePhrasing} from "./firebase/nodePhrasings/@MapNodePhrasing";
-import {RatingsRoot} from "./firebase/nodeRatings/@RatingsRoot";
+import {RatingsRoot_ForDBTree} from "./firebase/nodeRatings/@RatingsRoot";
 import {MapNode} from "./firebase/nodes/@MapNode";
 import {MapNodeRevision} from "./firebase/nodes/@MapNodeRevision";
 import {Term} from "./firebase/terms/@Term";
@@ -31,7 +31,14 @@ export interface FirebaseDBShape {
 	mapNodeEditTimes: Collection<NodeEditTimes>;
 	nodes: Collection<MapNode>;
 	// nodeExtras: Collection<any>;
-	nodeRatings: Collection<RatingsRoot>; // $nodeID (key) -> $ratingType -> $userID -> value -> $value
+	nodeRatings: Collection<RatingsRoot_ForDBTree>; // $nodeID (key) -> $ratingType -> $userID -> value -> $value
+	/*nodeRatings: Collection_Closed<{
+		significance: Collection<RatingsRoot>,
+		neutrality: Collection<RatingsRoot>,
+		truth: Collection<RatingsRoot>,
+		relevance: Collection<RatingsRoot>,
+		impact: Collection<RatingsRoot>,
+	}>;*/
 	nodeRevisions: Collection<MapNodeRevision>;
 	// nodeStats: Collection<MapNodeStats>;
 	// nodeViewers: Collection<ViewerSet>; // removed due to privacy concerns

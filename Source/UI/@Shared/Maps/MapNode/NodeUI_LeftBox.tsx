@@ -9,7 +9,6 @@ import {Observer} from "vwebapp-framework";
 import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {GetRatingAverage_AtPath, GetRatings} from "../../../../Store/firebase/nodeRatings";
-import {RatingsRoot} from "../../../../Store/firebase/nodeRatings/@RatingsRoot";
 import {GetRatingTypeInfo, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
 import {GetParentNodeL3} from "../../../../Store/firebase/nodes";
 import {GetNodeForm, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
@@ -17,7 +16,7 @@ import {ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 
 type Props = {
-	map: Map, path: string, node: MapNodeL3, ratingsRoot: RatingsRoot,
+	map: Map, path: string, node: MapNodeL3,
 	panelPosition?: "left" | "below", local_openPanel?: string,
 	backgroundColor: chroma.Color, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
@@ -26,7 +25,7 @@ type Props = {
 export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"} as Props, {}) {
 	render() {
 		const {
-			map, path, node, ratingsRoot,
+			map, path, node,
 			panelPosition, local_openPanel,
 			backgroundColor, asHover, inList, onPanelButtonHover, onPanelButtonClick, style,
 			children,

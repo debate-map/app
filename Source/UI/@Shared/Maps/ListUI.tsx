@@ -1,33 +1,3 @@
-import {emptyArray, GetEntries, IsNumberString, E} from "js-vextensions";
-import Moment from "moment";
-import {Button, Column, Div, Pre, Row, Select, TextInput} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {ScrollView} from "react-vscrollview";
-import {store} from "Store";
-import {GetNode} from "Store/firebase/nodes";
-import {Icon, InfoButton} from "vwebapp-framework";
-import {EnumNameToDisplayName} from "Utils/General/Others";
-import {ES} from "Utils/UI/GlobalStyles";
-import {SortType} from "Store/main/maps/mapStates/@MapState";
-import {MapNodeView} from "Store/main/maps/mapViews/$mapView";
-import {Map} from "../../../Store/firebase/maps/@Map";
-import {GetNodeRatingsRoot, GetRatings} from "../../../Store/firebase/nodeRatings";
-import {RatingType, ratingTypes} from "../../../Store/firebase/nodeRatings/@RatingType";
-import {AsNodeL3, GetMainRatingType, GetNodeDisplayText, GetNodeL3, GetRatingTypesForNode} from "../../../Store/firebase/nodes/$node";
-import {MapNodeL2} from "../../../Store/firebase/nodes/@MapNode";
-import {GetNodeColor, MapNodeType_Info} from "../../../Store/firebase/nodes/@MapNodeType";
-import {GetUser} from "../../../Store/firebase/users";
-import {DefinitionsPanel} from "../../@Shared/Maps/MapNode/NodeUI/Panels/DefinitionsPanel";
-import {DetailsPanel} from "../../@Shared/Maps/MapNode/NodeUI/Panels/DetailsPanel";
-import {DiscussionPanel} from "../../@Shared/Maps/MapNode/NodeUI/Panels/DiscussionPanel";
-import {OthersPanel} from "../../@Shared/Maps/MapNode/NodeUI/Panels/OthersPanel";
-import {RatingsPanel} from "../../@Shared/Maps/MapNode/NodeUI/Panels/RatingsPanel";
-import {SocialPanel} from "../../@Shared/Maps/MapNode/NodeUI/Panels/SocialPanel";
-import {TagsPanel} from "../../@Shared/Maps/MapNode/NodeUI/Panels/TagsPanel";
-import {NodeUI_Menu} from "../../@Shared/Maps/MapNode/NodeUI_Menu";
-import {HistoryPanel} from "./MapNode/NodeUI/Panels/HistoryPanel";
-import {MapNodeUI_LeftBox} from "./MapNode/NodeUI_LeftBox";
-
 // This file is very old, and left here for now for reference purposes. Will need review if restored in the future.
 
 /* const columnWidths = [0.68, 0.2, 0.12];

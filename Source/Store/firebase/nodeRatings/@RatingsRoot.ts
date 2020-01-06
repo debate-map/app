@@ -1,10 +1,13 @@
 import {AddSchema} from "vwebapp-framework";
 import {ObservableMap} from "mobx";
-import {User_id} from "../users/@User";
 
-export type RatingsRoot = ObservableMap<string, RatingsSet>; // rating-type (key) -> user-id -> rating -> value
-export type RatingsSet = ObservableMap<string, Rating>; // user-id (key) -> rating -> value
-AddSchema("RatingsSet", {patternProperties: {[User_id]: {$ref: "Rating"}}});
+export type RatingsRoot_ForDBTree = ObservableMap<string, RatingsSet_ForDBTree>; // rating-type (key) -> user-id -> rating -> value
+export type RatingsSet_ForDBTree = ObservableMap<string, Rating>; // user-id (key) -> rating -> value
+
+// RatingsRoot instances are constructed dynamically, so keep them as basic map
+//export type RatingsRoot = {[key: string]: RatingsSet}; // rating-type (key) -> user-id -> rating -> value
+export type RatingsSet = {[key: string]: Rating}; // user-id (key) -> rating -> value
+//AddSchema("RatingsSet", {patternProperties: {[User_id]: {$ref: "Rating"}}});
 
 export class Rating {
 	constructor(value: number) {
