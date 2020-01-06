@@ -1,4 +1,4 @@
-import {CachedTransform, IsNaN, emptyArray, emptyArray_forLoading} from "js-vextensions";
+import {CachedTransform, IsNaN, emptyArray, emptyArray_forLoading, Assert} from "js-vextensions";
 import {GetDoc, GetDocs, StoreAccessor, WhereFilter} from "mobx-firelink";
 import {Term} from "./terms/@Term";
 import {GetNodeRevision} from "./nodeRevisions";
@@ -17,6 +17,12 @@ export const GetTerms = StoreAccessor(s=>(): Term[]=>{
 export const GetTermsByName = StoreAccessor(s=>(name: string): Term[]=>{
 	return GetDocs({
 		filters: [new WhereFilter("name", "==", name)],
+	}, a=>a.terms);
+});
+export const GetTermsByForm = StoreAccessor(s=>(form: string): Term[]=>{
+	Assert(form.toLowerCase() == form, "Form cannot have uppercase characters.");
+	return GetDocs({
+		filters: [new WhereFilter("forms", "array-contains", form)],
 	}, a=>a.terms);
 });
 export const GetTermsAttached = StoreAccessor(s=>(nodeRevisionID: string, emptyForLoading = true): Term[]=>{

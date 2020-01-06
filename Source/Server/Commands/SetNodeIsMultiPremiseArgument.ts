@@ -1,43 +1,62 @@
 import {MapEdit, UserEdit} from "Server/CommandMacros";
 import {AddSchema, AssertValidate} from "vwebapp-framework";
-import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
+import {Command_Old, GetAsync, Command, AssertV, MergeDBUpdates} from "mobx-firelink";
 import {GetNode} from "Store/firebase/nodes";
-import {MapNode} from "../../Store/firebase/nodes/@MapNode";
-
-AddSchema("SetNodeIsMultiPremiseArgument_payload", {
-	properties: {
-		mapID: {type: "string"},
-		nodeID: {type: "string"},
-		multiPremiseArgument: {type: "boolean"},
-	},
-	required: ["nodeID", "multiPremiseArgument"],
-});
+import {GetNodeL2, AsNodeL1, GetNodeDisplayText, GetNodeL3, GetNodeForm} from "Store/firebase/nodes/$node";
+import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
+import {Clone} from "js-vextensions";
+import {AddNodeRevision} from "./AddNodeRevision";
+import {MapNode, MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
 
 @MapEdit
 @UserEdit
-export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: number, nodeID: string, multiPremiseArgument: boolean}, {}> {
-	oldNodeData: MapNode;
+export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, nodeID: string, multiPremiseArgument: boolean}, {}> {
+	oldNodeData: MapNodeL2;
 	newNodeData: MapNode;
+	sub_addRevision: AddNodeRevision;
 	Validate() {
+		AssertValidate({
+			properties: {
+				mapID: {type: "string"},
+				nodeID: {type: "string"},
+				multiPremiseArgument: {type: "boolean"},
+			},
+			required: ["nodeID", "multiPremiseArgument"],
+		}, this.payload, "Payload invalid");
+
 		const {mapID, nodeID, multiPremiseArgument} = this.payload;
-		this.oldNodeData = GetNode(nodeID);
+		this.oldNodeData = GetNodeL2(nodeID);
 		AssertV(this.oldNodeData, "oldNodeData is null.");
 
-		this.newNodeData = {...this.oldNodeData, ...{multiPremiseArgument}};
+		this.newNodeData = {...AsNodeL1(this.oldNodeData), ...{multiPremiseArgument}};
 		if (multiPremiseArgument) {
 			this.newNodeData.childrenOrder = this.oldNodeData.children.VKeys();
+
+			if (this.oldNodeData.current.titles.base.length == 0) {
+				const newRevision = Clone(this.oldNodeData.current);
+
+				const oldChildNode_partialPath = `${nodeID}/${this.oldNodeData.children.VKeys()[0]}`;
+				const oldChildNode = GetNodeL3(oldChildNode_partialPath);
+				AssertV(oldChildNode, "oldChildNode is null.");
+				newRevision.titles.base = GetNodeDisplayText(oldChildNode, oldChildNode_partialPath, GetNodeForm(oldChildNode));
+
+				this.sub_addRevision = new AddNodeRevision({mapID, revision: newRevision});
+				this.sub_addRevision.Validate();
+			}
 		} else {
 			this.newNodeData.childrenOrder = null;
 		}
 
-		AssertValidate("SetNodeIsMultiPremiseArgument_payload", this.payload, "Payload invalid");
 		AssertValidate("MapNode", this.newNodeData, "New node-data invalid");
 	}
 
 	GetDBUpdates() {
 		const {nodeID} = this.payload;
-		const updates = {};
+		let updates = {};
 		updates[`nodes/${nodeID}`] = this.newNodeData;
+		if (this.sub_addRevision) {
+			updates = MergeDBUpdates(updates, this.sub_addRevision.GetDBUpdates());
+		}
 		return updates;
 	}
 }

@@ -7,7 +7,7 @@ import {GetFinalPolarity} from "Store/firebase/nodes/$node";
 import {ChildEntry, ClaimForm, MapNodeL2} from "Store/firebase/nodes/@MapNode";
 import {ArgumentType, GetArgumentTypeDisplayText, MapNodeRevision_titlePattern} from "Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
-import {GetTerm, GetTermsByName} from "Store/firebase/terms";
+import {GetTerm, GetTermsByName, GetTermsByForm} from "Store/firebase/terms";
 import {Term} from "Store/firebase/terms/@Term";
 import {GetUser} from "Store/firebase/users";
 import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI";
@@ -191,16 +191,16 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 class TermSearchOrCreateUI extends BaseComponentPlus({} as {name: string, enabled: boolean, onSelect: (id: string)=>void}, {}) {
 	render() {
 		const {name, enabled, onSelect} = this.props;
-		const termsByName = GetTermsByName(name);
+		const termsWithMatchingForm = GetTermsByForm(name.toLowerCase());
 		return (
 			<>
-				{termsByName.length == 0 && <Row style={{padding: 5}}>No terms found with the name "{name}".</Row>}
-				{termsByName.map((term, index)=>{
+				{termsWithMatchingForm.length == 0 && <Row style={{padding: 5}}>No terms found with the name/form "{name}".</Row>}
+				{termsWithMatchingForm.map((term, index)=>{
 					return <FoundTermUI key={term._key} term={term} index={index} enabled={enabled} onSelect={()=>onSelect(term._key)}/>;
 				})}
 				<Row mt={5} style={{
 					//borderTop: `1px solid ${HSLA(0, 0, 1, .5)}`,
-					background: termsByName.length % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)",
+					background: termsWithMatchingForm.length % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)",
 					padding: 5,
 					borderRadius: "0 0 5px 5px",
 				}}>

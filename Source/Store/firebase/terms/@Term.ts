@@ -1,7 +1,5 @@
 import {GetValues_ForSchema} from "js-vextensions";
 import {AddSchema} from "vwebapp-framework";
-import {UUID_regex} from "Utils/General/KeyGenerator";
-import {ObservableMap} from "mobx";
 
 export class Term {
 	constructor(initialData: {name: string, type: TermType} & Partial<Term>) {
@@ -23,6 +21,7 @@ export class Term {
 }
 // export const termNameFormat = "^[^.#$\\[\\]]+$";
 export const Term_nameFormat = '^[a-zA-Z0-9 ,\'"%-]+$';
+export const Term_formsEntryFormat = "^[^A-Z]+$";
 export const Term_disambiguationFormat = '^[a-zA-Z0-9 ,\'"%-\\/]+$';
 // export const Term_shortDescriptionFormat = "^[a-zA-Z ()[],;.!?-+*/]+$";
 //export const Term_definitionFormat = "^.+$";
@@ -32,7 +31,7 @@ AddSchema("Term", {
 		name: {type: "string", pattern: Term_nameFormat},
 		disambiguation: {type: "string", pattern: Term_disambiguationFormat},
 		type: {$ref: "TermType"},
-		forms: {items: {type: "string"}, minItems: 1, uniqueItems: true},
+		forms: {items: {type: "string", pattern: Term_formsEntryFormat}, minItems: 1, uniqueItems: true},
 
 		definition: {type: "string", pattern: Term_definitionFormat},
 		note: {type: "string"},

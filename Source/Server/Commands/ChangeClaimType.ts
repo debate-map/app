@@ -4,9 +4,9 @@ import {MapEdit, UserEdit} from "Server/CommandMacros";
 import {AttachmentType, GetAttachmentType} from "Store/firebase/nodeRevisions/@AttachmentType";
 import {GenerateUUID} from "Utils/General/KeyGenerator";
 import {AddSchema, AssertValidate} from "vwebapp-framework";
-import {GetNodeL2} from "../../Store/firebase/nodes/$node";
+import {GetNodeL2, AsNodeL1} from "../../Store/firebase/nodes/$node";
 import {EquationAttachment} from "../../Store/firebase/nodeRevisions/@EquationAttachment";
-import {MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
+import {MapNodeL2, MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {MapNodeRevision} from "../../Store/firebase/nodes/@MapNodeRevision";
 
 export const conversionTypes = [
@@ -32,7 +32,7 @@ AddSchema("ChangeClaimType_payload", {
 @UserEdit
 export class ChangeClaimType extends Command<{mapID?: string, nodeID: string, newType: AttachmentType}, {}> {
 	oldType: AttachmentType;
-	newData: MapNodeL2;
+	newData: MapNode;
 	newRevision: MapNodeRevision;
 	newRevisionID: string;
 	Validate() {
@@ -43,7 +43,7 @@ export class ChangeClaimType extends Command<{mapID?: string, nodeID: string, ne
 		AssertV(oldData, "oldData is null.");
 		this.oldType = GetAttachmentType(oldData);
 
-		this.newData = {...oldData.Excluding("current") as any};
+		this.newData = {...AsNodeL1(oldData)};
 		// this.newRevisionID = (await GetDataAsync('general', 'data', '.lastNodeRevisionID')) + 1;
 		this.newRevisionID = this.newRevisionID ?? GenerateUUID();
 		this.newRevision = {...oldData.current};
