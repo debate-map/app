@@ -132,24 +132,22 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 			const newNodeAsL2 = AsNodeL2(helper.node, helper.node_revision);
 			return (
 				<Column ref={c=>root = c} style={{width: 600}}>
-					{childType == MapNodeType.Claim &&
-						<Row>
-							<Pre>Type: </Pre>
-							<Select displayType="button bar" options={claimTypes} style={{display: "inline-block"}}
-								value={GetAttachmentType(newNodeAsL2)}
-								onChange={val=>{
-									ResetNodeRevisionAttachment(helper.node_revision, val);
-									Change();
-
-									const oldError = validationError;
-									setTimeout(()=>{
-										validationError = nodeEditorUI.GetValidationError();
-										if (validationError != oldError) {
-											Change();
-										}
-									});
-								}}/>
-						</Row>}
+					{childType == MapNodeType.Argument &&
+						<Column>
+							<Row style={{display: "flex", alignItems: "center"}}>
+								<Pre>Main claim (ie. premise) that your argument will be based on: </Pre>
+								<Link to="https://en.wikipedia.org/wiki/Premise" style={{marginLeft: "auto", fontSize: 12, opacity: 0.7}}>What is a premise?</Link>
+								{/* <InfoButton text={`
+								`.trim()}/> */}
+							</Row>
+							<Row style={{display: "flex", alignItems: "center"}}>
+								<TextArea required={true} pattern={MapNodeRevision_titlePattern}
+									allowLineBreaks={false} autoSize={true} style={ES({flex: 1})}
+									value={helper.subNode_revision.titles["base"]}
+									onChange={val=>Change(helper.subNode_revision.titles["base"] = val, validationError = GetErrorMessagesUnderElement(root.DOM)[0])}/>
+							</Row>
+							<Row mt={5} style={{fontSize: 12}}>{`To add a second premise later, right click on your new argument and press "Convert to multi-premise".`}</Row>
+						</Column>}
 					{childType != MapNodeType.Argument &&
 						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: childType == MapNodeType.Claim ? "5px 0 0 0" : 0}}
 							baseData={AsNodeL3(newNodeAsL2, Polarity.Supporting, null)}
@@ -166,43 +164,6 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 								validationError = comp.GetValidationError();
 								Change();
 							}}/>}
-					{childType == MapNodeType.Argument &&
-						<Column>
-							{/* <Row style={{display: "flex", alignItems: "center"}}>
-								<Pre>Title: </Pre>
-								<InfoButton text={`
-An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
-
-Examples:
-* Shadow during lunar eclipses
-* May have used biased sources
-* Quote: Socrates
-
-The details of the argument should be described within the argument's premises. (the first premise can be typed in below)
-								`.trim()}/><Pre> </Pre>
-								{/*<TextArea_AutoSize required={true} pattern={MapNodeRevision_titlePattern}
-									allowLineBreaks={false} style={ES({flex: 1})}
-									//ref={a=>a && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
-									value={newRevision.titles["base"]} onChange={val=>Change(newRevision.titles["base"] = val)}/>*#/}
-								<TextInput style={ES({flex: 1})} required={true} pattern={MapNodeRevision_titlePattern}
-									//ref={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
-									value={newRevision.titles["base"]}
-									onChange={val=>Change(newRevision.titles["base"] = val, validationError = GetErrorMessagesUnderElement(root.DOM)[0])}/>
-							</Row> */}
-							<Row style={{display: "flex", alignItems: "center"}}>
-								<Pre>Main claim (ie. premise) that your argument will be based on: </Pre>
-								<Link to="https://en.wikipedia.org/wiki/Premise" style={{marginLeft: "auto", fontSize: 12, opacity: 0.7}}>What is a premise?</Link>
-								{/* <InfoButton text={`
-								`.trim()}/> */}
-							</Row>
-							<Row style={{display: "flex", alignItems: "center"}}>
-								<TextArea required={true} pattern={MapNodeRevision_titlePattern}
-									allowLineBreaks={false} autoSize={true} style={ES({flex: 1})}
-									value={helper.subNode_revision.titles["base"]}
-									onChange={val=>Change(helper.subNode_revision.titles["base"] = val, validationError = GetErrorMessagesUnderElement(root.DOM)[0])}/>
-							</Row>
-							<Row mt={5} style={{fontSize: 12}}>{`To add a second premise later, right click on your new argument and press "Convert to multi-premise".`}</Row>
-						</Column>}
 				</Column>
 			);
 		},
