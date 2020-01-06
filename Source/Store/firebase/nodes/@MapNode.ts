@@ -37,7 +37,7 @@ export class MapNode {
 
 	parents: ParentSet;
 	children: ChildSet;
-	childrenOrder: UUID[];
+	childrenOrder: UUID[]; // only set when type:argument
 	// talkRoot: number;
 	multiPremiseArgument?: boolean;
 

@@ -112,22 +112,6 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						onClick={async e=>{
 							if (e.button != 0) return;
 
-							/* let newNode = new MapNode({
-								parents: {[parent._id]: {_: true}},
-								type: MapNodeType.Claim,
-							});
-							let newRevision = new MapNodeRevision({titles: {base: "Second premise (click to edit)"}});
-							let newLink = {_: true, form: ClaimForm.Base} as ChildEntry;
-
-							SetNodeUILocked(parent._id, true);
-							let info = await new AddChildNode({mapID: mapID, node: newNode, revision: newRevision, link: newLink}).Run();
-							store.dispatch(new ACTMapNodeExpandedSet({mapID: mapID, path: path + "/" + info.nodeID, expanded: true, recursive: false}));
-							store.dispatch(new ACTSetLastAcknowledgementTime({nodeID: info.nodeID, time: Date.now()}));
-
-							await WaitTillPathDataIsReceiving(`nodeRevisions/${info.revisionID}`);
-							await WaitTillPathDataIsReceived(`nodeRevisions/${info.revisionID}`);
-							SetNodeUILocked(parent._id, false); */
-
 							await new SetNodeIsMultiPremiseArgument({nodeID: parent._key, multiPremiseArgument: true}).Run();
 						}}/>}
 				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)

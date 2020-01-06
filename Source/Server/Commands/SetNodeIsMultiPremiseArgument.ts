@@ -22,7 +22,14 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: number, node
 		const {mapID, nodeID, multiPremiseArgument} = this.payload;
 		this.oldNodeData = GetNode(nodeID);
 		AssertV(this.oldNodeData, "oldNodeData is null.");
+
 		this.newNodeData = {...this.oldNodeData, ...{multiPremiseArgument}};
+		if (multiPremiseArgument) {
+			this.newNodeData.childrenOrder = this.oldNodeData.children.VKeys();
+		} else {
+			this.newNodeData.childrenOrder = null;
+		}
+
 		AssertValidate("SetNodeIsMultiPremiseArgument_payload", this.payload, "Payload invalid");
 		AssertValidate("MapNode", this.newNodeData, "New node-data invalid");
 	}
