@@ -33,7 +33,7 @@ AddSchema("SourceType", {oneOf: GetValues_ForSchema(SourceType)});
 
 export const Source_linkURLPattern = "^https?://[^\\s/$.?#]+\\.[^\\s]+$";
 export class Source {
-	type = SourceType.Writing;
+	type = SourceType.Webpage;
 	name: string;
 	author: string;
 	link: string; // only the "Webpage" SourceType uses this (and this is all it uses atm)
