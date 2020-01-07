@@ -51,7 +51,6 @@ export class QuoteInfoEditorUI extends BaseComponent
 						readOnly: !(creating || editing),
 					}}/>
 				</Column>
-				<Row mt={5}>Source chains:</Row>
 				<Row mt={5}>
 					<SourceChainsEditorUI ref={c=>this.chainsEditor = c} enabled={creating || editing} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
 				</Row>

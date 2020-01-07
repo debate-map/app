@@ -339,7 +339,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const newState = {} as any;
 
 		const showAddArgumentButtons = false; // node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading; // && nodeChildren.length > 0;
-		// if (this.lastRender_source == RenderSource.SetState && this.refs.childHolder) {
+		// if (this.lastRender_source == RenderSource.SetState && this.childHolder) {
 		if (this.Expanded && this.childHolder) {
 			const holderRect = VRect.FromLTWH(this.childHolder.DOM.getBoundingClientRect());
 

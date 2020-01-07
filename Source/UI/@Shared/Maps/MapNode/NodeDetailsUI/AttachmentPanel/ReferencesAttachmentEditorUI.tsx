@@ -37,7 +37,6 @@ export class ReferencesAttachmentEditorUI extends BaseComponent<
 						</Pre>
 					</Column>,
 				]}
-				<Row mt={showPreview ? 5 : 0}>Source chains:</Row>
 				<Row mt={5}>
 					<SourceChainsEditorUI ref={c=>this.chainsEditor = c} enabled={creating || editing} baseData={newData.sourceChains} onChange={val=>Change(newData.sourceChains = val)}/>
 				</Row>
