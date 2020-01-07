@@ -29,7 +29,7 @@ export function GetAttachmentType_Revision(revision: MapNodeRevision) {
 }
 
 export function ResetNodeRevisionAttachment(revision: MapNodeRevision, attachmentType: AttachmentType) {
-	revision.Extend({equation: null, quote: null, image: null});
+	revision.Extend({equation: null, references: null, quote: null, image: null});
 	if (attachmentType == AttachmentType.None) {
 	} else if (attachmentType == AttachmentType.Equation) {
 		revision.equation = new EquationAttachment();
