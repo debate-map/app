@@ -1,6 +1,7 @@
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {VReactMarkdown_Remarkable, Observer} from "vwebapp-framework";
 import {ImageAttachment} from "Store/firebase/nodeRevisions/@ImageAttachment";
+import {ReferencesAttachment} from "Store/firebase/nodeRevisions/@ReferencesAttachment";
 import {MapNode, MapNodeL2} from "../../../../../Store/firebase/nodes/@MapNode";
 import {GetFontSizeForNode} from "../../../../../Store/firebase/nodes/$node";
 import {QuoteAttachment} from "../../../../../Store/firebase/nodeRevisions/@QuoteAttachment";
@@ -12,12 +13,14 @@ export class SubPanel extends BaseComponent<{node: MapNodeL2}, {}> {
 	render() {
 		const {node} = this.props;
 		return (
-			<div style={{position: "relative", margin: "5px -5px -5px -5px", padding: "6px 5px 5px 5px",
+			<div style={{position: "relative", margin: "5px -5px -5px -5px", padding: `${node.current.references ? 0 : 6}px 5px 5px 5px`,
 				// border: "solid rgba(0,0,0,.5)", borderWidth: "1px 0 0 0"
 				background: "rgba(0,0,0,.5)", borderRadius: "0 0 0 5px",
 			}}>
+				{node.current.references &&
+					<SubPanel_References attachment={node.current.references} fontSize={GetFontSizeForNode(node)}/>}
 				{node.current.quote &&
-					<SubPanel_Quote quoteAttachment={node.current.quote} fontSize={GetFontSizeForNode(node)}/>}
+					<SubPanel_Quote attachment={node.current.quote} fontSize={GetFontSizeForNode(node)}/>}
 				{node.current.image &&
 					<SubPanel_Image imageAttachment={node.current.image}/>}
 			</div>
@@ -26,9 +29,22 @@ export class SubPanel extends BaseComponent<{node: MapNodeL2}, {}> {
 }
 
 @Observer
-export class SubPanel_Quote extends BaseComponent<{quoteAttachment: QuoteAttachment, fontSize: number}, {}> {
+export class SubPanel_References extends BaseComponent<{attachment: ReferencesAttachment, fontSize: number}, {}> {
 	render() {
-		const {quoteAttachment, fontSize} = this.props;
+		const {attachment, fontSize} = this.props;
+		return (
+			<div style={{position: "relative", fontSize, whiteSpace: "initial"}}>
+				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
+				<SourcesUI sourceChains={attachment.sourceChains} headerText="References"/>
+			</div>
+		);
+	}
+}
+
+@Observer
+export class SubPanel_Quote extends BaseComponent<{attachment: QuoteAttachment, fontSize: number}, {}> {
+	render() {
+		const {attachment, fontSize} = this.props;
 		return (
 			<div style={{position: "relative", fontSize, whiteSpace: "initial"}}>
 				{/* <div>{`"${node.quote.text}"`}</div> */}
@@ -44,9 +60,9 @@ export class SubPanel_Quote extends BaseComponent<{quoteAttachment: QuoteAttachm
 						Link: props=><span/>,
 					}}
 				/> */}
-				<VReactMarkdown_Remarkable source={quoteAttachment.content}/>
+				<VReactMarkdown_Remarkable source={attachment.content}/>
 				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
-				<SourcesUI sourceChains={quoteAttachment.sourceChains}/>
+				<SourcesUI sourceChains={attachment.sourceChains}/>
 			</div>
 		);
 	}

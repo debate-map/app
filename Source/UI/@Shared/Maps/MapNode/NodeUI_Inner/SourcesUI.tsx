@@ -1,20 +1,20 @@
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {SourceChain, Source} from "Store/firebase/nodeRevisions/@SourceChain";
 import {Row, Text, Column} from "react-vcomponents";
 
 import {VURL} from "js-vextensions";
 import {Link} from "vwebapp-framework";
 
-export class SourcesUI extends BaseComponent<{sourceChains: SourceChain[]}, {}> {
+export class SourcesUI extends BaseComponentPlus({headerText: "Sources"} as {sourceChains: SourceChain[], headerText?: string}, {}) {
 	render() {
-		const {sourceChains} = this.props;
+		const {sourceChains, headerText} = this.props;
 		return (
 			<Column mt={3} style={{whiteSpace: "normal"}}>
 				{sourceChains.Any(chain=>chain.sources.Any((source: Source)=>source.link && source.link.startsWith("https://biblia.com/bible/nkjv/"))) &&
 					<Row style={{marginBottom: 3, opacity: 0.5, fontSize: 10}}>
 						Scripture taken from the NKJV®. Copyright © 1982 by Thomas Nelson. Used by permission. All rights reserved.
 					</Row>}
-				<Row style={{color: "rgba(255,255,255,.5)"}}>Sources:</Row>
+				<Row style={{color: "rgba(255,255,255,.5)"}}>{headerText}:</Row>
 				{sourceChains.map((chain: SourceChain, index)=>{
 					const linkTitle = chain.sources.map((source, index)=>{
 						if (source.link) {

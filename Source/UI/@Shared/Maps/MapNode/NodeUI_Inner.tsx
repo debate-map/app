@@ -83,6 +83,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 	root: ExpandableBox;
 	titlePanel: TitlePanel;
 
+	// todo: replace this system by just using the new IsMouseEnterReal and IsMouseLeaveReal functions
 	checkStillHoveredTimer = new Timer(100, ()=>{
 		const dom = GetDOM(this.root);
 		if (dom == null) {
@@ -204,7 +205,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 		const leftPanelShow = nodeView?.selected || hovered; // || local_selected;
 		const panelToShow = hoverPanel || local_openPanel || nodeView?.openPanel;
-		const subPanelShow = node.type == MapNodeType.Claim && (node.current.quote || node.current.image);
+		const subPanelShow = node.type == MapNodeType.Claim && (node.current.references || node.current.quote || node.current.image);
 		const bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView?.expanded ?? false;
 

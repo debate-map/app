@@ -2,12 +2,12 @@ import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
 import {Column, Pre, Row} from "react-vcomponents";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
-import {QuoteAttachment} from "../../../../Store/firebase/nodeRevisions/@QuoteAttachment";
-import {GetNodeDisplayText} from "../../../../Store/firebase/nodes/$node";
-import {ClaimForm} from "../../../../Store/firebase/nodes/@MapNode";
-import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
-import {SubPanel_Quote} from "./NodeUI_Inner/SubPanel";
-import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "./SourceChainsEditorUI";
+import {QuoteAttachment} from "../../../../../../Store/firebase/nodeRevisions/@QuoteAttachment";
+import {GetNodeDisplayText} from "../../../../../../Store/firebase/nodes/$node";
+import {ClaimForm} from "../../../../../../Store/firebase/nodes/@MapNode";
+import {MapNodeType} from "../../../../../../Store/firebase/nodes/@MapNodeType";
+import {SubPanel_Quote} from "../../NodeUI_Inner/SubPanel";
+import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI";
 
 // @ApplyBasicStyles
 export class QuoteInfoEditorUI extends BaseComponent
@@ -30,15 +30,16 @@ export class QuoteInfoEditorUI extends BaseComponent
 
 		return (
 			<Column>
-				{showPreview && [
+				{showPreview &&
+				<>
 					<Row key={0}>Preview:</Row>,
 					<Column key={1} mt={5}>
 						<Pre style={{padding: 5, background: "rgba(255,255,255,.2)", borderRadius: 5}}>
-							{GetNodeDisplayText({type: MapNodeType.Claim, contentNode: CleanUpdatedContentNode(Clone(newData))} as any, null, ClaimForm.Base)}
-							<SubPanel_Quote quoteAttachment={newData} fontSize={15}/>
+							{GetNodeDisplayText({type: MapNodeType.Claim, contentNode: CleanUpdatedQuoteAttachment(Clone(newData))} as any, null, ClaimForm.Base)}
+							<SubPanel_Quote attachment={newData} fontSize={15}/>
 						</Pre>
-					</Column>,
-				]}
+					</Column>
+				</>}
 				<Column mt={showPreview ? 5 : 0}>
 					<Pre>Quote text: </Pre>
 					{/* <TextInput style={ES({flex: 1})}
@@ -64,11 +65,11 @@ export class QuoteInfoEditorUI extends BaseComponent
 
 	GetNewData() {
 		const {newData} = this.state;
-		return CleanUpdatedContentNode(Clone(newData));
+		return CleanUpdatedQuoteAttachment(Clone(newData));
 	}
 }
 
-export function CleanUpdatedContentNode(contentNode: QuoteAttachment) {
-	CleanUpdatedSourceChains(contentNode.sourceChains);
-	return contentNode;
+export function CleanUpdatedQuoteAttachment(attachment: QuoteAttachment) {
+	CleanUpdatedSourceChains(attachment.sourceChains);
+	return attachment;
 }

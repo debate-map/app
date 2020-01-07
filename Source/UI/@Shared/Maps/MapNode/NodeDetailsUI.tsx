@@ -13,7 +13,7 @@ import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel";
 import {TextPanel} from "./NodeDetailsUI/TextPanel";
-import {QuoteInfoEditorUI} from "./QuoteInfoEditorUI";
+import {QuoteInfoEditorUI} from "./NodeDetailsUI/AttachmentPanel/QuoteInfoEditorUI";
 
 type Props = {
 	baseData: MapNode,

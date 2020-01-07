@@ -5,10 +5,11 @@ import {AttachmentType, ResetNodeRevisionAttachment, GetAttachmentType} from "St
 import {GetOpenMapID} from "Store/main";
 import {MapNodeRevision_Defaultable, PermissionInfoType} from "../../../../../Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
-import {EquationEditorUI} from "../EquationEditorUI";
-import {ImageAttachmentEditorUI} from "../ImageAttachmentEditorUI";
-import {QuoteInfoEditorUI} from "../QuoteInfoEditorUI";
+import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI";
+import {ImageAttachmentEditorUI} from "./AttachmentPanel/ImageAttachmentEditorUI";
+import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
+import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI";
 
 // @Observer
 // export class PermissionsOptions extends BaseComponent<Pick<SharedProps, 'newData' | 'newRevisionData' | 'enabled' | 'Change'> & {forDefaultsInMap?: boolean}, {}> {
@@ -41,14 +42,18 @@ export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {
 						}}/>
 					</Row>
 					{attachmentType == AttachmentType.Equation &&
-						<EquationEditorUI key={0} creating={forNew} editing={enabled}
+						<EquationEditorUI creating={forNew} editing={enabled}
 							baseData={newRevisionData.equation} onChange={val=>Change(newRevisionData.equation = val)}/>}
 					{attachmentType == AttachmentType.Quote &&
-						<QuoteInfoEditorUI /*ref={c=>this.quoteEditor = c}*/ key={1} creating={forNew} editing={enabled}
+						<QuoteInfoEditorUI /*ref={c=>this.quoteEditor = c}*/ creating={forNew} editing={enabled}
 							baseData={newRevisionData.quote} onChange={val=>Change(newRevisionData.quote = val)}
 							showPreview={false} justShowed={false}/>}
+					{attachmentType == AttachmentType.References &&
+						<ReferencesAttachmentEditorUI creating={forNew} editing={enabled}
+							baseData={newRevisionData.references} onChange={val=>Change(newRevisionData.references = val)}
+							showPreview={false} justShowed={false}/>}
 					{attachmentType == AttachmentType.Image &&
-						<ImageAttachmentEditorUI key={1} creating={forNew} editing={enabled}
+						<ImageAttachmentEditorUI creating={forNew} editing={enabled}
 							baseData={newRevisionData.image} onChange={val=>Change(newRevisionData.image = val)}/>}
 				</>}
 			</>

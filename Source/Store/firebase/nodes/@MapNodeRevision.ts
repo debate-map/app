@@ -6,6 +6,7 @@ import {ImageAttachment} from "../nodeRevisions/@ImageAttachment";
 import {AccessLevel} from "./@MapNode";
 import {EquationAttachment} from "../nodeRevisions/@EquationAttachment";
 import {TermAttachment} from "../nodeRevisions/@TermAttachment";
+import {ReferencesAttachment} from "../nodeRevisions/@ReferencesAttachment";
 
 export const TitlesMap_baseKeys = ["base", "negation", "yesNoQuestion"];
 export class TitlesMap {
@@ -78,6 +79,7 @@ export class MapNodeRevision {
 
 	// attachment
 	equation: EquationAttachment;
+	references: ReferencesAttachment;
 	quote: QuoteAttachment;
 	image: ImageAttachment;
 
@@ -116,6 +118,7 @@ AddSchema("MapNodeRevision", {
 
 		// attachment
 		equation: {$ref: "EquationAttachment"},
+		references: {$ref: "ReferencesAttachment"},
 		quote: {$ref: "QuoteAttachment"},
 		image: {$ref: "ImageAttachment"},
 
