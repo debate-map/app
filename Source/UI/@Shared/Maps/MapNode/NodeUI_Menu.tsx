@@ -37,7 +37,7 @@ export class NodeUI_Menu_Stub extends BaseComponent<Props, {}> {
 }
 
 type Props = {map?: Map, node: MapNodeL3, path: string, inList?: boolean, holderType?: HolderType};
-type SharedProps = Props & {combinedWithParentArg: boolean, copiedNode: MapNodeL3, copiedNodePath: string, copiedNode_asCut: boolean};
+type SharedProps = Props & {mapID: string, combinedWithParentArg: boolean, copiedNode: MapNodeL3, copiedNodePath: string, copiedNode_asCut: boolean};
 
 @WarnOfTransientObjectProps
 @Observer
@@ -75,7 +75,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 
 		const formForClaimChildren = node.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
 
-		const sharedProps: SharedProps = E(this.props, {combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
+		const sharedProps: SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
 		return (
 			<div>
 				{CanContributeToNode(userID, node._key) && !inList && validChildTypes.map(childType=>{
@@ -293,20 +293,20 @@ class PasteAsLink_MenuItem extends BaseComponent<SharedProps, {}> {
 @Observer
 class UnlinkContainerArgument_MenuItem extends BaseComponentPlus({} as SharedProps, {}) {
 	render() {
-		const {map, node, path, holderType, combinedWithParentArg} = this.props;
-		if (!combinedWithParentArg) return <div/>;
+		const {map, mapID, node, path, holderType, combinedWithParentArg} = this.props;
+		if (!combinedWithParentArg) return null;
 		const componentBox = holderType != null;
-		if (componentBox) return <div/>;
+		if (componentBox) return null;
 
 		const argumentPath = SlicePath(path, 1);
 		const argument = GetNodeL3(argumentPath);
 		const argumentText = GetNodeDisplayText(argument, argumentPath);
-		if (!IsUserCreatorOrMod(MeID(), argument)) return <div/>;
+		if (!IsUserCreatorOrMod(MeID(), argument)) return null;
 
 		const argumentParentPath = SlicePath(argumentPath, 1);
 		const argumentParent = GetNodeL3(argumentParentPath);
 
-		const command = new UnlinkNode({mapID: map ? map._key : null, parentID: argumentParent._key, childID: argument._key});
+		const command = new UnlinkNode({mapID, parentID: argumentParent._key, childID: argument._key});
 		return (
 			<VMenuItem text="Unlink argument"
 				enabled={command.Validate_Safe() == null} title={command.validateError}
@@ -327,15 +327,16 @@ class UnlinkContainerArgument_MenuItem extends BaseComponentPlus({} as SharedPro
 @Observer
 class UnlinkNode_MenuItem extends BaseComponentPlus({} as SharedProps, {}) {
 	render() {
-		const {map, node, path, holderType, combinedWithParentArg, inList} = this.props;
+		const {map, mapID, node, path, holderType, combinedWithParentArg, inList} = this.props;
 		if (!IsUserCreatorOrMod(MeID(), node)) return null;
 		if (inList) return null;
 		const componentBox = holderType != null;
-		if (componentBox) return <div/>;
+		if (componentBox) return null;
 		const parent = GetParentNodeL3(path);
+		if (parent == null) return null;
 		const nodeText = GetNodeDisplayText(node, path);
 
-		const command = new UnlinkNode({mapID: map._key, parentID: parent._key, childID: node._key});
+		const command = new UnlinkNode({mapID, parentID: parent._key, childID: node._key});
 		return (
 			<VMenuItem text={`Unlink${combinedWithParentArg ? " claim" : ""}`}
 				enabled={command.Validate_Safe() == null} title={command.validateError}
@@ -357,8 +358,7 @@ class UnlinkNode_MenuItem extends BaseComponentPlus({} as SharedProps, {}) {
 @Observer
 class DeleteContainerArgument_MenuItem extends BaseComponent<SharedProps, {}> {
 	render() {
-		const {map, node, path, holderType, combinedWithParentArg} = this.props;
-		const mapID = map ? map._key : null;
+		const {map, mapID, node, path, holderType, combinedWithParentArg} = this.props;
 		if (!combinedWithParentArg) return <div/>;
 		const componentBox = holderType != null;
 		if (componentBox) return <div/>;
