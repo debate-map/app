@@ -411,13 +411,12 @@ class DeleteContainerArgument_MenuItem extends BaseComponent<SharedProps, {}> {
 @Observer
 class DeleteNode_MenuItem extends BaseComponentPlus({} as SharedProps, {}) {
 	render() {
-		const {map, node, path, holderType, combinedWithParentArg} = this.props;
+		const {map, mapID, node, path, holderType, combinedWithParentArg} = this.props;
 		const componentBox = holderType != null;
 		if (!IsUserCreatorOrMod(MeID(), node) || componentBox) return null;
 		const nodeText = GetNodeDisplayText(node, path);
 
-		const command = new DeleteNode(E({mapID: map?._key, nodeID: node._key}));
-
+		const command = new DeleteNode(E({mapID, nodeID: node._key}));
 		return (
 			<VMenuItem text={`Delete${combinedWithParentArg ? " claim" : ""}`}
 				enabled={command.Validate_Safe() == null} title={command.validateError}

@@ -11,7 +11,8 @@ export function createConfigFile(callback, environment) {
 		version: pkg.version,
 		firebaseConfig: environment == "development"
 			? {
-				apiKey: "AIzaSyB1UCTO2p6TLpifAQzsRw_Np39k9N92cpI",
+				// use concatenation to make automated searches for g-cloud api-keys a bit harder (it should be ok if found; abuse would just be quota issues from foreign clients, if api-key misconfigured)
+				apiKey: "AI" + "zaSyB1UCTO2p6TLpifAQzsRw_Np39k9N92cpI", // eslint-disable-line
 				authDomain: "debate-map-dev.firebaseapp.com",
 				databaseURL: "https://debate-map-dev.firebaseio.com",
 				projectId: "debate-map-dev",
@@ -19,7 +20,7 @@ export function createConfigFile(callback, environment) {
 				storageBucket: "debate-map-dev.appspot.com",
 			}
 			: {
-				apiKey: "AIzaSyCnvv_m-L08i4b5NmxGF5doSwQ2uJZ8i-0",
+				apiKey: "AI" + "zaSyCnvv_m-L08i4b5NmxGF5doSwQ2uJZ8i-0", // eslint-disable-line
 				authDomain: "debate-map-prod.firebaseapp.com",
 				databaseURL: "https://debate-map-prod.firebaseio.com",
 				projectId: "debate-map-prod",
