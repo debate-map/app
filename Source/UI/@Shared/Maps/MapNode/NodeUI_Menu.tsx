@@ -7,7 +7,7 @@ import {LinkNode_HighLevel} from "Server/Commands/LinkNode_HighLevel";
 import {SetNodeIsMultiPremiseArgument} from "Server/Commands/SetNodeIsMultiPremiseArgument";
 import {UnlinkNode} from "Server/Commands/UnlinkNode";
 import {store} from "Store";
-import {GetParentNodeID, HolderType, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, ForUnlink_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, IsNodeSubnode} from "Store/firebase/nodes";
+import {GetParentNodeID, HolderType, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, IsNodeSubnode} from "Store/firebase/nodes";
 import {GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState";
 import {Observer} from "vwebapp-framework";
@@ -55,7 +55,6 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const copiedNode = GetCopiedNode();
 		const copiedNodePath = GetCopiedNodePath();
 
-		ForUnlink_GetError(MeID(), node); // watch
 		ForDelete_GetError(MeID(), node); // watch
 		const userID = MeID();
 		const permissions = GetUserPermissionGroups(userID);
@@ -75,8 +74,6 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		}
 
 		const formForClaimChildren = node.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
-
-		const nodeText = GetNodeDisplayText(node, path);
 
 		const sharedProps: SharedProps = E(this.props, {combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
 		return (
@@ -224,32 +221,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						}
 					}}/> */}
 				<UnlinkContainerArgument_MenuItem {...sharedProps}/>
-				{IsUserCreatorOrMod(userID, node) && !inList && !componentBox &&
-					<VMenuItem text={`Unlink${combinedWithParentArg ? " claim" : ""}`}
-						enabled={ForUnlink_GetError(userID, node) == null} title={ForUnlink_GetError(userID, node)}
-						style={styles.vMenuItem} onClick={async e=>{
-							if (e.button != 0) return;
-							/* let error = ForUnlink_GetError(userID, node);
-							if (error) {
-								return void ShowMessageBox({title: `Cannot unlink`, message: error});
-							} */
-
-							/* let parentNodes = await GetNodeParentsAsync(node);
-							if (parentNodes.length <= 1) { */
-							/* if (node.parents.VKeys().length <= 1) {
-								return void ShowMessageBox({title: `Cannot unlink`, message: `Cannot unlink this child, as doing so would orphan it. Try deleting it instead.`});
-							} */
-
-							// let parent = parentNodes[0];
-							const parentText = GetNodeDisplayText(parent, path.substr(0, path.lastIndexOf("/")));
-							ShowMessageBox({
-								title: `Unlink child "${nodeText}"`, cancelButton: true,
-								message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,
-								onOK: ()=>{
-									new UnlinkNode({mapID, parentID: parent._key, childID: node._key}).Run();
-								},
-							});
-						}}/>}
+				<UnlinkNode_MenuItem {...sharedProps}/>
 				<DeleteContainerArgument_MenuItem {...sharedProps}/>
 				<DeleteNode_MenuItem {...sharedProps}/>
 			</div>
@@ -329,22 +301,52 @@ class UnlinkContainerArgument_MenuItem extends BaseComponentPlus({} as SharedPro
 		const argumentPath = SlicePath(path, 1);
 		const argument = GetNodeL3(argumentPath);
 		const argumentText = GetNodeDisplayText(argument, argumentPath);
-		const forUnlink_error = ForUnlink_GetError(MeID(), argument);
 		if (!IsUserCreatorOrMod(MeID(), argument)) return <div/>;
 
 		const argumentParentPath = SlicePath(argumentPath, 1);
 		const argumentParent = GetNodeL3(argumentParentPath);
 
+		const command = new UnlinkNode({mapID: map ? map._key : null, parentID: argumentParent._key, childID: argument._key});
 		return (
-			<VMenuItem text="Unlink argument" enabled={forUnlink_error == null} title={forUnlink_error}
+			<VMenuItem text="Unlink argument"
+				enabled={command.Validate_Safe() == null} title={command.validateError}
 				style={styles.vMenuItem} onClick={e=>{
 					if (e.button != 0) return;
-
 					ShowMessageBox({
 						title: `Unlink "${argumentText}"`, cancelButton: true,
 						message: `Unlink the argument "${argumentText}"?`,
 						onOK: async()=>{
-							new UnlinkNode({mapID: map ? map._key : null, parentID: argumentParent._key, childID: argument._key}).Run();
+							command.Run();
+						},
+					});
+				}}/>
+		);
+	}
+}
+
+@Observer
+class UnlinkNode_MenuItem extends BaseComponentPlus({} as SharedProps, {}) {
+	render() {
+		const {map, node, path, holderType, combinedWithParentArg, inList} = this.props;
+		if (!IsUserCreatorOrMod(MeID(), node)) return null;
+		if (inList) return null;
+		const componentBox = holderType != null;
+		if (componentBox) return <div/>;
+		const parent = GetParentNodeL3(path);
+		const nodeText = GetNodeDisplayText(node, path);
+
+		const command = new UnlinkNode({mapID: map._key, parentID: parent._key, childID: node._key});
+		return (
+			<VMenuItem text={`Unlink${combinedWithParentArg ? " claim" : ""}`}
+				enabled={command.Validate_Safe() == null} title={command.validateError}
+				style={styles.vMenuItem} onClick={async e=>{
+					if (e.button != 0) return;
+					const parentText = GetNodeDisplayText(parent, path.substr(0, path.lastIndexOf("/")));
+					ShowMessageBox({
+						title: `Unlink child "${nodeText}"`, cancelButton: true,
+						message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,
+						onOK: ()=>{
+							command.Run();
 						},
 					});
 				}}/>

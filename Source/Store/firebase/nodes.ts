@@ -211,14 +211,6 @@ export const ForNewLink_GetError = StoreAccessor(s=>(parentID: string, newChild:
 	return ForLink_GetError(parent.type, newChild.type);
 });
 
-export const ForUnlink_GetError = StoreAccessor(s=>(userID: string, node: MapNodeL2, asPartOfCut = false)=>{
-	const baseText = `Cannot unlink node #${node._key}, since `;
-	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not its owner. (or a mod)`;
-	if (!asPartOfCut && (node.parents || {}).VKeys().length <= 1) return `${baseText}doing so would orphan it. Try deleting it instead.`;
-	if (IsRootNode(node)) return `${baseText}it's the root-node of a map.`;
-	if (IsNodeSubnode(node)) return `${baseText}it's a subnode. Try deleting it instead.`;
-	return null;
-});
 export const ForDelete_GetError = StoreAccessor(s=>(userID: string, node: MapNodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, childrenToIgnore?: string[]})=>{
 	const baseText = `Cannot delete node #${node._key}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
@@ -234,7 +226,12 @@ export const ForDelete_GetError = StoreAccessor(s=>(userID: string, node: MapNod
 });
 
 export const ForCut_GetError = StoreAccessor(s=>(userID: string, node: MapNodeL2)=>{
-	return ForUnlink_GetError(userID, node, true);
+	const baseText = `Cannot unlink node #${node._key}, since `;
+	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not its owner. (or a mod)`;
+	//if (!asPartOfCut && (node.parents || {}).VKeys().length <= 1) return `${baseText}doing so would orphan it. Try deleting it instead.`;
+	if (IsRootNode(node)) return `${baseText}it's the root-node of a map.`;
+	if (IsNodeSubnode(node)) return `${baseText}it's a subnode. Try deleting it instead.`;
+	return null;
 });
 
 export const ForCopy_GetError = StoreAccessor(s=>(userID: string, node: MapNode)=>{

@@ -127,7 +127,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 	let root;
 	let nodeEditorUI: NodeDetailsUI;
 	let validationError = "No data entered yet.";
-	const Change = (..._?)=>boxController.UpdateUI();
+	const Change = (..._)=>boxController.UpdateUI();
 
 	let tab = AddChildDialogTab.Claim;
 	let boxController = ShowMessageBox({

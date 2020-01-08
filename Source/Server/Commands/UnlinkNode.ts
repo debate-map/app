@@ -1,5 +1,6 @@
 import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
-import {ForUnlink_GetError, GetNode} from "../../Store/firebase/nodes";
+import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
+import {GetNode, IsRootNode, IsNodeSubnode} from "../../Store/firebase/nodes";
 import {GetNodeL2} from "../../Store/firebase/nodes/$node";
 import {MapEdit, UserEdit} from "../CommandMacros";
 
@@ -21,8 +22,12 @@ export class UnlinkNode extends Command<{mapID: string, parentID: string, childI
 		Assert(parentNodes.length > 1, "Cannot unlink this child, as doing so would orphan it. Try deleting it instead."); */
 		const oldData = GetNodeL2(childID);
 		AssertV(oldData, "oldData was null.");
-		const earlyError = ForUnlink_GetError(this.userInfo.id, oldData, this.allowOrphaning);
-		AssertV(earlyError == null, earlyError);
+
+		const baseText = `Cannot unlink node #${oldData._key}, since `;
+		AssertV(IsUserCreatorOrMod(this.userInfo.id, oldData), `${baseText}you are not its owner. (or a mod)`);
+		AssertV(this.allowOrphaning || (oldData.parents || {}).VKeys().length > 1, `${baseText}doing so would orphan it. Try deleting it instead.`);
+		AssertV(!IsRootNode(oldData), `${baseText}it's the root-node of a map.`);
+		AssertV(!IsNodeSubnode(oldData), `${baseText}it's a subnode. Try deleting it instead.`);
 	}
 
 	GetDBUpdates() {
