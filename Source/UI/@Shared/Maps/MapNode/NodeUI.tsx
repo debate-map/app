@@ -128,8 +128,11 @@ export class NodeUI extends BaseComponentPlus(
 				);
 			}
 
-			//return <div title={`Loading premise "${node.children.VKeys()[0]}"...`}>...</div>; // child data not loaded yet
-			//return <div/>; // child data not loaded yet
+			// if there are not-yet-loaded children that *might* be the premise, wait for them to finish loading before showing the "no premise" message
+			if (nodeChildren.Any(a=>a == null)) {
+				//return <div title={`Loading premise "${node.children.VKeys()[0]}"...`}>...</div>;
+				return <div/>;
+			}
 
 			// placeholder, so user can add the base-claim
 			// const backgroundColor = GetNodeColor(node).desaturate(0.5).alpha(0.8);
