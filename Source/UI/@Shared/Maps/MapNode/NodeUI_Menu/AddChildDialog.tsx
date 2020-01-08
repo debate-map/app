@@ -127,7 +127,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 	let root;
 	let nodeEditorUI: NodeDetailsUI;
 	let validationError = "No data entered yet.";
-	const Change = (..._)=>boxController.UpdateUI();
+	const Change = (..._?)=>boxController.UpdateUI();
 
 	let tab = AddChildDialogTab.Claim;
 	let boxController = ShowMessageBox({
@@ -154,7 +154,11 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 								Use the tabs to control which part you're setting the data for.
 							`.AsMultiline(0)}/>
 						</>}
-						<CheckBox text="Advanced" checked={advanced} onChange={val=>Change(runInAction("AddChildDialog.advanced.onChange", ()=>store.main.maps.addChildDialog.advanced = val))}/>
+						<CheckBox text="Advanced" checked={advanced} onChange={val=>{
+							runInAction("AddChildDialog.advanced.onChange", ()=>store.main.maps.addChildDialog.advanced = val);
+							if (!val) tab = AddChildDialogTab.Claim;
+							Change();
+						}}/>
 					</Row>}
 					{tab == AddChildDialogTab.Argument &&
 					<>
