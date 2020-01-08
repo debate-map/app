@@ -143,7 +143,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 				<Column ref={c=>root = c} style={{width: 600}}>
 					{childType == MapNodeType.Argument && // right now, the "advanced" UI is only different when adding an argument, so only let user see/set it in that case
 					<Row center mb={5}>
-						{childType == MapNodeType.Argument &&
+						{childType == MapNodeType.Argument && advanced &&
 						<>
 							<Text>Data:</Text>
 							<Select ml={5} displayType="button bar" options={GetEntries(AddChildDialogTab)} style={{display: "inline-block"}}
