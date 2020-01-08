@@ -2,7 +2,7 @@ import chroma from "chroma-js";
 import {AssertWarn, emptyArray, emptyArray_forLoading, E} from "js-vextensions";
 import {Row} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM, UseCallback, WarnOfTransientObjectProps} from "react-vextensions";
-import {GetMarkerPercent_AtPath, GetRatings} from "Store/firebase/nodeRatings";
+import {GetMarkerPercent_AtPath, GetRatings,GetFillPercent_AtPath} from "Store/firebase/nodeRatings";
 import {RatingType} from "Store/firebase/nodeRatings/@RatingType";
 import {GetParentNodeL3, HolderType} from "Store/firebase/nodes";
 import {IsSinglePremiseArgument} from "Store/firebase/nodes/$node";
@@ -13,7 +13,7 @@ import {HSLA, Observer} from "vwebapp-framework";
 import {ACTMapNodeExpandedSet, GetNodeView, MapNodeView} from "Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
-import {GetFillPercent_AtPath} from "../../../../../Store/firebase/nodeRatings";
+
 import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
 import {GetNodeColor} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {ExpandableBox} from "../ExpandableBox";
@@ -68,7 +68,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		const expandKey = `expanded_${holderTypeStr}`;
 		const expanded = nodeView[expandKey]; // this.Expanded
 
-		const separateChildren = node.type == MapNodeType.Claim || IsSinglePremiseArgument(node);
+		const separateChildren = node.type == MapNodeType.Claim || node.type == MapNodeType.Argument;
 		const showArgumentsControlBar = /* (node.type == MapNodeType.Claim || combineWithChildClaim) && */ expanded && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, height} = this.GetMeasurementInfo();
