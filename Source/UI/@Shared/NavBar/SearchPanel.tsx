@@ -11,7 +11,7 @@ import {GetNodeRevision} from "Store/firebase/nodeRevisions";
 import {AsNodeL3, GetAllNodeRevisionTitles, GetNodeDisplayText, GetNodeL2} from "Store/firebase/nodes/$node";
 import {GetNodeColor, MapNodeType_Info} from "Store/firebase/nodes/@MapNodeType";
 import {GetUser} from "Store/firebase/users";
-import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O} from "vwebapp-framework";
+import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O, Validate} from "vwebapp-framework";
 import {UUID} from "Utils/General/KeyGenerator";
 import {ES} from "Utils/UI/GlobalStyles";
 import {store} from "Store";
@@ -41,8 +41,25 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 		// first clear the old results
 		runInAction("SearchPanel.PerformSearch_part1", ()=>{
 			store.main.search.searchResults_partialTerms = [];
-			store.main.search.searchResults_nodeIDs = null;
+			store.main.search.searchResults_nodeRevisionIDs = null;
 		});
+
+		if (Validate("UUID", queryStr) == null) {
+			const nodeRevisionMatch = await GetAsync(()=>GetNodeRevision(queryStr));
+			if (nodeRevisionMatch) {
+				runInAction("SearchPanel.PerformSearch_part2_nodeRevisionID", ()=>{
+					store.main.search.searchResults_nodeRevisionIDs = [nodeRevisionMatch._key];
+				});
+				return;
+			}
+			const node = await GetAsync(()=>GetNode(queryStr));
+			if (node) {
+				runInAction("SearchPanel.PerformSearch_part2_nodeID", ()=>{
+					store.main.search.searchResults_nodeRevisionIDs = [node.currentRevision];
+				});
+				return;
+			}
+		}
 
 		const searchTerms = GetSearchTerms_Advanced(queryStr);
 		if (searchTerms.wholeTerms.length == 0 && !unrestricted) return;
@@ -56,13 +73,13 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 		const docIDs = docs.map(a=>a.id);
 		runInAction("SearchPanel.PerformSearch_part2", ()=>{
 			store.main.search.searchResults_partialTerms = searchTerms.partialTerms;
-			store.main.search.searchResults_nodeIDs = docIDs;
+			store.main.search.searchResults_nodeRevisionIDs = docIDs;
 		});
 	}
 
 	render() {
 		const {searchResults_partialTerms} = store.main.search;
-		const searchResultIDs = store.main.search.searchResults_nodeIDs;
+		const searchResultIDs = store.main.search.searchResults_nodeRevisionIDs;
 
 		let results_nodeRevisions = searchResultIDs == null ? null : searchResultIDs.map(revisionID=>GetNodeRevision(revisionID));
 		// after finding node-revisions matching the whole-terms, filter to those that match the partial-terms as well
@@ -91,7 +108,11 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 								this.PerformSearch();
 							}
 						}}/>
-					<InfoButton ml={5} text="Wildcards can be used, but there must be at least one non-wildcard term. Example: climate chang*"/>
+					<InfoButton ml={5} text={`
+						Wildcards can be used, but there must be at least one non-wildcard term. Example: climate chang*
+
+						(You can also enter the exact ID of a node or node-revision, to see the single matching node.)
+					`.AsMultiline(0)}/>
 					<Button ml={5} text="Search" onClick={()=>this.PerformSearch()}/>
 				</Row>
 				{/* <Row style={{ fontSize: 18 }}>Search results ({results_nodeIDs.length})</Row> */}

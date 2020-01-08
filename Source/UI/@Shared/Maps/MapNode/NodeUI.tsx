@@ -1,9 +1,9 @@
-import {Assert, CachedTransform, E, emptyArray, emptyArray_forLoading, IsNaN, nl} from "js-vextensions";
+import {Assert, CachedTransform, E, emptyArray, emptyArray_forLoading, IsNaN, nl, AssertWarn} from "js-vextensions";
 import React from "react";
 import {Column, Row} from "react-vcomponents";
 import {BaseComponentPlus, GetInnerComp, RenderSource, ShallowEquals, UseCallback, WarnOfTransientObjectProps} from "react-vextensions";
 import {ChangeType, GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/firebase/mapNodeEditTimes";
-import {GetParentPath, HolderType, GetNodeChildrenL3_Advanced} from "Store/firebase/nodes";
+import {GetParentPath, HolderType, GetNodeChildrenL3_Advanced, GetNodeChildrenL3, GetParentNodeL2, GetParentNodeL3, IsRootNode} from "Store/firebase/nodes";
 import {MeID} from "Store/firebase/users";
 import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
 import {NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
@@ -14,7 +14,7 @@ import {SlicePath} from "mobx-firelink";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {GetNodeChildrenL3, GetParentNodeL2, GetParentNodeL3, IsRootNode} from "../../../../Store/firebase/nodes";
+
 import {GetNodeForm, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, GetNodeDisplayText} from "../../../../Store/firebase/nodes/$node";
 import {AccessLevel, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType, GetNodeColor} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -110,11 +110,10 @@ export class NodeUI extends BaseComponentPlus(
 
 		// if single-premise arg, combine arg and premise into one box, by rendering premise box directly (it will add-in this argument's child relevance-arguments)
 		if (isSinglePremiseArgument) {
-			if (node.children.VKeys().length) {
-				// Assert(premises.length == 1, `Single-premise argument #${node._id} has more than one premise! (${premises.map(a=>a._id).join(",")})`);
-				const premises = nodeChildren.filter(a=>a && a.type == MapNodeType.Claim);
+			const premises = nodeChildren.filter(a=>a && a.type == MapNodeType.Claim);
+			if (premises.length) {
+				AssertWarn(premises.length == 1, `Single-premise argument #${node._key} has more than one premise! (${premises.map(a=>a._key).join(",")})`);
 				const premise = premises[0];
-				if (premise == null) return <div/>; // child data not loaded yet
 
 				// if has child-limit bar, correct its path
 				const firstChildComp = this.FlattenedChildren[0] as any;
@@ -128,6 +127,9 @@ export class NodeUI extends BaseComponentPlus(
 					</NodeUI>
 				);
 			}
+
+			//return <div title={`Loading premise "${node.children.VKeys()[0]}"...`}>...</div>; // child data not loaded yet
+			//return <div/>; // child data not loaded yet
 
 			// placeholder, so user can add the base-claim
 			// const backgroundColor = GetNodeColor(node).desaturate(0.5).alpha(0.8);
