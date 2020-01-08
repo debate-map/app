@@ -156,7 +156,8 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 						<Row key={index} mt={2}>
 							<Text>{index + 1}:</Text>
 							<Row ml={5} style={{width: 120}}>
-								<TextInput placeholder="Term ID or name..." enabled={enabled} style={{width: "100%", fontSize: 13, borderRadius: "5px 0 0 5px"}} value={termAttachment.id} onChange={val=>Change(termAttachment.id = val)}/>
+								<TextInput placeholder="Term ID or name..." enabled={enabled} delayChangeTillDefocus={true} style={{width: "100%", fontSize: 13, borderRadius: "5px 0 0 5px"}}
+									value={termAttachment.id} onChange={val=>Change(termAttachment.id = val)}/>
 							</Row>
 							<Row style={{position: "relative", flex: 1}}>
 								<DropDown style={{flex: 1}}>
