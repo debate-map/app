@@ -67,7 +67,7 @@ export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNo
 		return (
 			<Column sel style={{position: "relative"}}>
 				<IDAndCreationInfoUI id={node._key} creator={creator} createdAt={node.createdAt}/>
-				<Row style={{whiteSpace: "normal"}}>
+				<Row style={{flexWrap: "wrap"}}>
 					<Text>Parents: </Text>
 					{node.parents == null ? "none" : node.parents.VKeys().map((parentID, index)=>{
 						return <Fragment key={index}>
@@ -76,7 +76,7 @@ export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNo
 						</Fragment>;
 					})}
 				</Row>
-				<Row style={{whiteSpace: "normal"}}>
+				<Row style={{flexWrap: "wrap"}}>
 					<Text>Children: </Text>
 					{node.children == null ? "none" : node.children.VKeys().map((childID, index)=>{
 						return <Fragment key={index}>
@@ -85,7 +85,7 @@ export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNo
 						</Fragment>;
 					})}
 				</Row>
-				<Row center style={{whiteSpace: "normal"}}>
+				<Row center>
 					<Text>Control type:</Text>
 					<Select ml={5} options={["Private", "Public"]} value={changeControlType_currentType} enabled={changeControlTypeCommand.Validate_Safe() == null} title={changeControlTypeCommand.validateError} onChange={val=>{
 						changeControlTypeCommand.Run();
