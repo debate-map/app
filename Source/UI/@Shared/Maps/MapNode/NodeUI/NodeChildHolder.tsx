@@ -63,8 +63,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == MapNodeType.Argument);
 		}
 
-		let upChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.finalPolarity == Polarity.Supporting) : [];
-		let downChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.finalPolarity == Polarity.Opposing) : [];
+		let upChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.Supporting) : [];
+		let downChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.Opposing) : [];
 
 		// apply sorting (regardless of direction, both are ordered by score/priority; "up" reordering is applied on the *child-ui list*, not the child-node list)
 		if (separateChildren) {

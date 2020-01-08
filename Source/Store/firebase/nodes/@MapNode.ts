@@ -102,13 +102,17 @@ AddSchema("MapNode_Partial", (()=>{
 
 // helpers
 // export type MapNodeL2 = MapNode & {finalType: MapNodeType};
-// similar to a database entry, after having related data from other tables "joined"
+/** MapNode, except with the current-revision data attached. */
 export interface MapNodeL2 extends MapNode {
 	current: MapNodeRevision;
 }
+/** MapNodeL2, except with positional data (and derivations, eg. display-polarity) attached. */
 export interface MapNodeL3 extends MapNodeL2 {
-	finalPolarity: Polarity;
+	/** For this node (with the given ancestors): How the node would be displayed -- "supporting" being green, "opposing" being red. */
+	displayPolarity: Polarity;
 	link: ChildEntry;
+	//linkToParent: ChildEntry;
+	//parentLinkToGrandParent: ChildEntry;
 }
 
 export enum Polarity {

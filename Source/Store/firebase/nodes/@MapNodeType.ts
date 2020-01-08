@@ -71,7 +71,7 @@ export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "back
 	else if (node.type == MapNodeType.MultiChoiceQuestion) result = chroma("rgb(90,50,180)");
 	else if (node.type == MapNodeType.Claim) result = chroma("rgb(0,80,150)");
 	else if (node.type == MapNodeType.Argument) {
-		if (node.finalPolarity == Polarity.Supporting) result = chroma("rgb(30,100,30)");
+		if (node.displayPolarity == Polarity.Supporting) result = chroma("rgb(30,100,30)");
 		else result = chroma("rgb(100,30,30)");
 	}
 

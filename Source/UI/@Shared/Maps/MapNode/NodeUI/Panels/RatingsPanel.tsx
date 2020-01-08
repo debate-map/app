@@ -42,7 +42,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 		const parentNode = GetNodeL3(SlicePath(path, 1));
 
 		const reverseRatings = ShouldRatingTypeBeReversed(node, ratingType);
-		const nodeTypeDisplayName = GetMapNodeTypeDisplayName(node.type, node, form, node.finalPolarity);
+		const nodeTypeDisplayName = GetMapNodeTypeDisplayName(node.type, node, form, node.displayPolarity);
 
 		const ratingTypeInfo = GetRatingTypeInfo(ratingType, node, parentNode, path);
 		const {labels, values} = ratingTypeInfo;

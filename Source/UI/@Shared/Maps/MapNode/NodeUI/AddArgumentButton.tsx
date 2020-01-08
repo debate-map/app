@@ -6,8 +6,10 @@ import {HSLA, Observer} from "vwebapp-framework";
 import {UseCallback, BaseComponent} from "react-vextensions";
 import {E} from "js-vextensions";
 import {CanContributeToNode} from "Store/firebase/users/$user";
+import {GetDisplayPolarity, GetDisplayPolarityAtPath, ReversePolarity} from "Store/firebase/nodes/$node";
+import {GetParentNodeL3} from "Store/firebase/nodes";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
-import {MapNodeL3, Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
+import {MapNodeL3, Polarity, ClaimForm} from "../../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeColor, MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {ShowAddChildDialog} from "../NodeUI_Menu/AddChildDialog";
 
@@ -65,7 +67,8 @@ type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style
 export class AddArgumentButton extends BaseComponent<Props> {
 	render() {
 		const {map, node, path, polarity, style} = this.props;
-		const backgroundColor = GetNodeColor({type: MapNodeType.Argument, finalPolarity: polarity} as MapNodeL3);
+		const backgroundColor = GetNodeColor({type: MapNodeType.Argument, displayPolarity: polarity} as MapNodeL3);
+		const parent = GetParentNodeL3(path);
 
 		return (
 			<Button
@@ -92,7 +95,17 @@ export class AddArgumentButton extends BaseComponent<Props> {
 					if (e.button != 0) return;
 					if (MeID() == null) return ShowSignInPopup();
 
-					ShowAddChildDialog(path, MapNodeType.Argument, polarity, MeID(), map._key);
+					let newChildPolarity = polarity;
+					//GetFinalPolarity(polarity, parent.link.form);
+					// if display polarity is different then base polarity, we need to reverse the new-child polarity
+					/*if (node.link.polarity && node.displayPolarity != node.link.polarity) {
+						newChildPolarity = ReversePolarity(newChildPolarity);
+					}*/
+					// if parent is a claim "shown as negation", we need to reverse the new-child polarity
+					if (node.link.form == ClaimForm.Negation) {
+						newChildPolarity = ReversePolarity(newChildPolarity);
+					}
+					ShowAddChildDialog(path, MapNodeType.Argument, newChildPolarity, MeID(), map._key);
 				}, [map._key, path, polarity])}/>
 		);
 	}

@@ -172,7 +172,7 @@ export class NodeUI extends BaseComponentPlus(
 		const {width, expectedHeight} = this.GetMeasurementInfo();
 
 		const showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
-		const limitBar_above = argumentNode && argumentNode.finalPolarity == Polarity.Supporting;
+		const limitBar_above = argumentNode && argumentNode.displayPolarity == Polarity.Supporting;
 		const limitBarPos = showLimitBar ? (limitBar_above ? LimitBarPos.Above : LimitBarPos.Below) : LimitBarPos.None;
 
 		let nodeChildHolder_direct: JSX.Element;

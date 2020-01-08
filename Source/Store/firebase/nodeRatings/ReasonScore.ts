@@ -1,9 +1,9 @@
-import {GetNodeChildrenL3} from "Store/firebase/nodes";
+import {GetNodeChildrenL3,GetParentNodeL3} from "Store/firebase/nodes";
 import {MapNodeL3, MapNodeL2} from "Store/firebase/nodes/@MapNode";
 import {ArgumentType} from "Store/firebase/nodes/@MapNodeRevision";
 import {emptyArray_forLoading, Assert, IsNaN} from "js-vextensions";
 import {StoreAccessor} from "mobx-firelink";
-import {GetParentNodeL3} from "../nodes";
+
 import {Polarity} from "../nodes/@MapNode";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {GetNodeL3, GetNodeL2} from "../nodes/$node";
@@ -28,7 +28,7 @@ export const RS_CalculateTruthScore = StoreAccessor(s=>(claimID: string, calcula
 		const weight = RS_CalculateWeight(argument._key, premises.map(a=>a._key), calculationPath.concat(argument._key));
 		if (weight == 0) continue; // if 0 weight, this argument won't change the result at all, so skip it
 
-		if (argument.finalPolarity == Polarity.Opposing) {
+		if (argument.displayPolarity == Polarity.Opposing) {
 			truthScoreComposite = 1 - truthScoreComposite;
 		}
 
@@ -82,7 +82,7 @@ export const RS_CalculateWeightMultiplier = StoreAccessor(s=>(nodeID: string, ca
 		const truthScoresCombined = CombinePremiseTruthScores(truthScores, argument.current.argumentType);
 		const weight = RS_CalculateWeight(argument._key, premises.map(a=>a._key), calculationPath.concat(argument._key));
 
-		if (argument.finalPolarity == Polarity.Supporting) {
+		if (argument.displayPolarity == Polarity.Supporting) {
 			runningMultiplier += truthScoresCombined * weight;
 		} else {
 			runningDivisor += truthScoresCombined * weight;

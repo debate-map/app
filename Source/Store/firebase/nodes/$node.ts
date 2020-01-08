@@ -64,7 +64,7 @@ export const GetMainRatingType = StoreAccessor(s=>(node: MapNodeL2)=>{
 	return GetRatingTypesForNode(node).FirstOrX(a=>a.main, {}).type;
 });
 export function GetSortByRatingType(node: MapNodeL3): RatingType {
-	if ((node as MapNodeL3).link && (node as MapNodeL3).link.form == ClaimForm.YesNoQuestion) {
+	if (node.link && node.link.form == ClaimForm.YesNoQuestion) {
 		return "significance";
 	}
 	return GetMainRatingType(node);
@@ -73,7 +73,7 @@ export function GetSortByRatingType(node: MapNodeL3): RatingType {
 export function ReversePolarity(polarity: Polarity) {
 	return polarity == Polarity.Supporting ? Polarity.Opposing : Polarity.Supporting;
 }
-export const GetFinalPolarityAtPath = StoreAccessor(s=>(node: MapNodeL2, path: string): Polarity=>{
+export const GetDisplayPolarityAtPath = StoreAccessor(s=>(node: MapNodeL2, path: string): Polarity=>{
 	Assert(node.type == MapNodeType.Argument, "Only argument nodes have polarity.");
 	const parent = GetParentNodeL2(path);
 	if (!parent) return Polarity.Supporting; // can be null, if for NodeUI_ForBots
@@ -83,9 +83,9 @@ export const GetFinalPolarityAtPath = StoreAccessor(s=>(node: MapNodeL2, path: s
 	Assert(link.polarity != null, `The link for the argument #${node._key} must specify the polarity.`);
 
 	const parentForm = GetNodeForm(parent, SplitStringBySlash_Cached(path).slice(0, -1).join("/"));
-	return GetFinalPolarity(link.polarity, parentForm);
+	return GetDisplayPolarity(link.polarity, parentForm);
 });
-export function GetFinalPolarity(basePolarity: Polarity, parentForm: ClaimForm): Polarity {
+export function GetDisplayPolarity(basePolarity: Polarity, parentForm: ClaimForm): Polarity {
 	let result = basePolarity;
 	if (parentForm == ClaimForm.Negation) {
 		result = ReversePolarity(result);
@@ -126,18 +126,18 @@ export const GetNodeL2 = StoreAccessor(s=>(nodeID: string | MapNode, path?: stri
 	return CachedTransform("GetNodeL2", [path], nodeL2, ()=>nodeL2);
 });
 
-export function IsNodeL3(node: MapNode): node is MapNodeL2 {
-	return node["finalPolarity"] && node["link"];
+export function IsNodeL3(node: MapNode): node is MapNodeL3 {
+	return node["displayPolarity"] && node["link"];
 }
-export function AsNodeL3(node: MapNodeL2, finalPolarity?: Polarity, link?: ChildEntry) {
-	finalPolarity = finalPolarity || Polarity.Supporting;
+export function AsNodeL3(node: MapNodeL2, displayPolarity?: Polarity, link?: ChildEntry) {
+	displayPolarity = displayPolarity || Polarity.Supporting;
 	link = link || {
 		_: true,
 		form: ClaimForm.Base,
 		seriesAnchor: false,
 		polarity: Polarity.Supporting,
 	};
-	return E(node, {finalPolarity, link}) as MapNodeL3;
+	return E(node, {displayPolarity, link}) as MapNodeL3;
 }
 export const GetNodeL3 = StoreAccessor(s=>(path: string)=>{
 	if (path == null) return null;
@@ -146,10 +146,10 @@ export const GetNodeL3 = StoreAccessor(s=>(path: string)=>{
 	if (node == null) return null;
 
 	// if any of the data in a MapNodeL3 is not loaded yet, just return null (we want it to be all or nothing)
-	let finalPolarity = null;
+	let displayPolarity = null;
 	if (node.type == MapNodeType.Argument) {
-		finalPolarity = GetFinalPolarityAtPath(node, path);
-		if (finalPolarity == null) return null;
+		displayPolarity = GetDisplayPolarityAtPath(node, path);
+		if (displayPolarity == null) return null;
 	}
 
 	const isSubnode = IsNodeSubnode(node);
@@ -160,7 +160,7 @@ export const GetNodeL3 = StoreAccessor(s=>(path: string)=>{
 		if (link == null && path.Contains("/")) return null;
 	}
 
-	const nodeL3 = AsNodeL3(node, finalPolarity, link);
+	const nodeL3 = AsNodeL3(node, displayPolarity, link);
 	// return CachedTransform('GetNodeL3', [path], nodeL3, () => nodeL3);
 	return nodeL3;
 });
@@ -175,8 +175,8 @@ export function GetClaimFormUnderParent(node: MapNode, parent: MapNode): ClaimFo
 	return link.form;
 } */
 export const GetNodeForm = StoreAccessor(s=>(node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2): ClaimForm=>{
-	if ((node as MapNodeL3).link) {
-		return (node as MapNodeL3).link.form;
+	if (IsNodeL3(node)) {
+		return node.link.form;
 	}
 
 	const parent: MapNodeL2 = IsString(pathOrParent) ? GetParentNodeL2(pathOrParent as string) : pathOrParent as MapNodeL2;

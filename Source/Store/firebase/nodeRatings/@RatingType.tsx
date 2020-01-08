@@ -2,7 +2,7 @@ import {Range, Assert} from "js-vextensions";
 import {ArgumentType} from "Store/firebase/nodes/@MapNodeRevision";
 import {PropNameToTitle} from "Utils/General/Others";
 import {AddSchema} from "vwebapp-framework";
-import {GetFinalPolarity, GetLinkUnderParent, GetNodeForm, IsMultiPremiseArgument} from "../nodes/$node";
+import {GetDisplayPolarity, GetLinkUnderParent, GetNodeForm, IsMultiPremiseArgument} from "../nodes/$node";
 import {MapNodeL2, MapNodeL3, Polarity} from "../nodes/@MapNode";
 import {MapNodeType} from "../nodes/@MapNodeType";
 
@@ -17,7 +17,7 @@ AddSchema("RatingType", {
 
 export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, parent: MapNodeL3, path: string) {
 	const link = GetLinkUnderParent(node._key, parent);
-	const finalPolarity = link ? GetFinalPolarity(link.polarity, GetNodeForm(parent)) : Polarity.Supporting;
+	const finalPolarity = link ? GetDisplayPolarity(link.polarity, GetNodeForm(parent)) : Polarity.Supporting;
 	const isMultiPremiseArgument = IsMultiPremiseArgument(node);
 
 	const result = new RatingType_Info();

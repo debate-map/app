@@ -3,7 +3,7 @@ import {Button, Column, Div, DropDown, DropDownContent, DropDownTrigger, Pre, Ro
 import {BaseComponent, BaseComponentPlus, RenderSource} from "react-vextensions";
 import {AttachmentType, GetAttachmentType} from "Store/firebase/nodeRevisions/@AttachmentType";
 import {TermAttachment} from "Store/firebase/nodeRevisions/@TermAttachment";
-import {GetFinalPolarity} from "Store/firebase/nodes/$node";
+import {GetDisplayPolarity} from "Store/firebase/nodes/$node";
 import {ChildEntry, ClaimForm, MapNodeL2} from "Store/firebase/nodes/@MapNode";
 import {ArgumentType, GetArgumentTypeDisplayText, MapNodeRevision_titlePattern} from "Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
@@ -119,7 +119,7 @@ class ArgumentInfo extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 	render() {
 		const {enabled, baseRevisionData, parent, newData, newDataAsL2, newRevisionData, newLinkData, Change} = this.props;
 
-		const polarity = GetFinalPolarity(newLinkData.polarity, newLinkData.form);
+		const polarity = GetDisplayPolarity(newLinkData.polarity, newLinkData.form);
 
 		return (
 			<Row mt={5}>
