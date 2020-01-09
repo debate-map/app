@@ -98,7 +98,7 @@ export function IsNodeL1(node): node is MapNode {
 export function AsNodeL1(node: MapNodeL2 | MapNodeL3) {
 	const result = {...node};
 	delete result.current;
-	delete result["finalPolarity"];
+	delete result["displayPolarity"];
 	delete result["link"];
 	return result as MapNode;
 }
@@ -109,7 +109,7 @@ export function IsNodeL2(node: MapNode): node is MapNodeL2 {
 export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision) {
 	// Assert(currentRevision.titles, "A MapNodeRevision object must have a titles property!"); // temp removed (for db-upgrade)
 	const result = E(node, {current: currentRevision}) as MapNodeL2;
-	delete result["finalPolarity"];
+	delete result["displayPolarity"];
 	delete result["link"];
 	return result;
 }
@@ -123,7 +123,8 @@ export const GetNodeL2 = StoreAccessor(s=>(nodeID: string | MapNode, path?: stri
 	if (currentRevision == null) return null;
 
 	const nodeL2 = AsNodeL2(node, currentRevision);
-	return CachedTransform("GetNodeL2", [path], nodeL2, ()=>nodeL2);
+	//return CachedTransform("GetNodeL2", [path], nodeL2, ()=>nodeL2);
+	return nodeL2;
 });
 
 export function IsNodeL3(node: MapNode): node is MapNodeL3 {
