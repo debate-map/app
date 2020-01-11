@@ -47,7 +47,7 @@ export class ImagesUI extends BaseComponentPlus({} as {}, {} as { selectedImage_
 						<Div p={7} style={{position: "absolute", left: 0}}>
 							<Button text="Add image" enabled={HasModPermissions(MeID())} title={HasModPermissions(MeID()) ? null : "Only moderators can add images currently. (till review/approval system is implemented)"}onClick={e=>{
 								if (userID == null) return ShowSignInPopup();
-								ShowAddImageDialog(userID);
+								ShowAddImageDialog({});
 							}}/>
 						</Div>
 						<Div style={{fontSize: 17, fontWeight: 500}}>

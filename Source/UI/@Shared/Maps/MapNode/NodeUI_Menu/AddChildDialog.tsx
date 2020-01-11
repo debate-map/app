@@ -164,7 +164,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 							<Select ml={5} displayType="button bar" options={GetEntries(AddChildDialogTab)} style={{display: "inline-block"}}
 								value={tab} onChange={val=>Change(tab = val)}/>
 							<InfoButton ml={5} mr={5} text={`
-								An "argument" consists of two parts: 1) the argument node itself, 2) the argument's premise/claim nodes
+								An "argument" consists of two parts: 1) the argument node itself, 2) the argument's premise/claim node(s)
 
 								Use the tabs to control which part you're setting the data for.
 							`.AsMultiline(0)}/>

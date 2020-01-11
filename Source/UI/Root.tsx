@@ -12,7 +12,7 @@ import ReactGA from "react-ga";
 import {Button, ColorPickerBox, Column} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {VMenuLayer} from "react-vmenu";
-import {MessageBoxUI, ShowMessageBox} from "react-vmessagebox";
+import {MessageBoxLayer, ShowMessageBox} from "react-vmessagebox";
 import {CreateLinkCommand} from "Server/Commands/LinkNode_HighLevel";
 import {UpdateTimelineStep} from "Server/Commands/UpdateTimelineStep";
 import {UpdateTimelineStepOrder} from "Server/Commands/UpdateTimelineStepOrder";
@@ -327,7 +327,7 @@ class OverlayUI extends BaseComponent<{}, {}> {
 	render() {
 		return (
 			<div style={{position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: "hidden"}}>
-				<MessageBoxUI/>
+				<MessageBoxLayer/>
 				<VMenuLayer/>
 			</div>
 		);

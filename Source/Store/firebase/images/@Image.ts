@@ -13,7 +13,7 @@ export function GetNiceNameForImageType(type: ImageType) {
 }
 
 export class Image {
-	constructor(initialData: {name: string, type: ImageType, creator: string} & Partial<Image>) {
+	constructor(initialData: {name: string, type: ImageType} & Partial<Image>) {
 		this.sourceChains = [
 			{sources: [new Source()]},
 		];

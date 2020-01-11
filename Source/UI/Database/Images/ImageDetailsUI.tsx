@@ -6,11 +6,16 @@ import {ScrollView} from "react-vscrollview";
 import {User} from "Store/firebase/users/@User";
 import {ES} from "Utils/UI/GlobalStyles";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
+import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {GetNiceNameForImageType, Image, ImageType, Image_namePattern, Image_urlPattern} from "../../../Store/firebase/images/@Image";
-import {GetUser} from "../../../Store/firebase/users";
+import {GetUser, MeID} from "../../../Store/firebase/users";
 import {SourceChainsEditorUI} from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
+import {AddImage} from "Server/Commands/AddImage";
 
-export class ImageDetailsUI extends BaseComponentPlus({} as {baseData: Image, creating: boolean, editing: boolean, style?, onChange?: (newData: Image, error: string)=>void}, {} as {newData: Image, dataError: string}) {
+export class ImageDetailsUI extends BaseComponentPlus(
+	{} as {baseData: Image, creating: boolean, editing: boolean, style?, onChange?: (newData: Image, error: string)=>void},
+	{} as {newData: Image, dataError: string},
+) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
@@ -61,7 +66,7 @@ export class ImageDetailsUI extends BaseComponentPlus({} as {baseData: Image, cr
 					<TextInput enabled={creating || editing} style={ES({flex: 1})}
 						value={newData.description} onChange={val=>Change(newData.description = val)}/>
 				</RowLR>
-				<RowLR mt={5} splitAt={splitAt}style={{display: "flex", alignItems: "center"}}>
+				<RowLR mt={5} splitAt={splitAt} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Preview width: </Pre>
 					<Div>
 						<Spinner max={100} enabled={creating || editing}

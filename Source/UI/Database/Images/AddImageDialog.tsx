@@ -1,18 +1,16 @@
+import {E} from "js-vextensions";
 import {Column} from "react-vcomponents";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {store} from "Store";
 import {AddImage} from "../../../Server/Commands/AddImage";
 import {Image, ImageType} from "../../../Store/firebase/images/@Image";
-import {MeID} from "../../../Store/firebase/users";
 import {ImageDetailsUI} from "./ImageDetailsUI";
 
-export function ShowAddImageDialog(userID: string) {
-	let newImage = new Image({
+export function ShowAddImageDialog(initialData?: Partial<Image>, postAdd?: (id: string)=>void) {
+	let newImage = new Image(E({
 		name: "",
 		type: ImageType.Photo,
 		description: "",
-		creator: MeID(),
-	});
+	}, initialData));
 
 	let valid = false;
 	const boxController: BoxController = ShowMessageBox({
@@ -30,8 +28,9 @@ export function ShowAddImageDialog(userID: string) {
 				</Column>
 			);
 		},
-		onOK: ()=>{
-			new AddImage({image: newImage}).Run();
+		onOK: async()=>{
+			const id = await new AddImage({image: newImage}).Run();
+			if (postAdd) postAdd(id);
 		},
 	});
 }
