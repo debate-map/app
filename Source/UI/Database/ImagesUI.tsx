@@ -8,7 +8,7 @@ import {GetSelectedImage} from "Store/main/database";
 import {Observer, GetUpdates} from "vwebapp-framework";
 import {runInAction} from "mobx";
 import {E} from "js-vextensions";
-import {GetUserPermissionGroups, IsUserCreatorOrMod, CanGetBasicPermissions} from "Store/firebase/users/$user";
+import {GetUserPermissionGroups, IsUserCreatorOrMod, CanGetBasicPermissions, HasModPermissions} from "Store/firebase/users/$user";
 import {DeleteImage} from "../../Server/Commands/DeleteImage";
 import {UpdateImageData} from "../../Server/Commands/UpdateImageData";
 import {GetImages} from "../../Store/firebase/images";
@@ -45,7 +45,7 @@ export class ImagesUI extends BaseComponentPlus({} as {}, {} as { selectedImage_
 				}}>
 					<Row center style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 						<Div p={7} style={{position: "absolute", left: 0}}>
-							<Button text="Add image" enabled={CanGetBasicPermissions(MeID())} onClick={e=>{
+							<Button text="Add image" enabled={HasModPermissions(MeID())} title={HasModPermissions(MeID()) ? null : "Only moderators can add images currently. (till review/approval system is implemented)"}onClick={e=>{
 								if (userID == null) return ShowSignInPopup();
 								ShowAddImageDialog(userID);
 							}}/>
