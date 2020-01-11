@@ -19,8 +19,8 @@ export class AddNode extends Command<{mapID: string, node: MapNode, revision: Ma
 	parent_oldChildrenOrder: number[];
 	Validate() {
 		const {mapID, node, revision} = this.payload;
-		AssertV(node.currentRevision == null || node.currentRevision == this.sub_addRevision.revisionID, "Cannot specifiy node's revision-id. It will be generated automatically.");
-		AssertV(revision.node == null || revision.node == this.nodeID, "Cannot specifiy revision's node-id. It will be generated automatically.");
+		AssertV(node.currentRevision == null || node.currentRevision == this.sub_addRevision.revisionID, "Cannot specify node's revision-id. It will be generated automatically.");
+		AssertV(revision.node == null || revision.node == this.nodeID, "Cannot specify revision's node-id. It will be generated automatically.");
 
 		// this.nodeID = (await GetDataAsync('general', 'data', '.lastNodeID') as number) + this.lastNodeID_addAmount + 1;
 		this.nodeID = this.nodeID ?? GenerateUUID();

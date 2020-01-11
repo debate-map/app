@@ -66,6 +66,21 @@ export class AddChildHelper {
 	subNode_revision?: MapNodeRevision;
 	subNode_link: ChildEntry;
 
+	GetCommand(): AddArgumentAndClaim | AddChildNode {
+		let result;
+		if (this.node.type == MapNodeType.Argument) {
+			result = new AddArgumentAndClaim({
+				mapID: this.mapID,
+				argumentParentID: this.Node_ParentID, argumentNode: this.node.Excluding("parents") as MapNode, argumentRevision: this.node_revision, argumentLink: this.node_link,
+				claimNode: this.subNode, claimRevision: this.subNode_revision, claimLink: this.subNode_link,
+			});
+		} else {
+			result = new AddChildNode({
+				mapID: this.mapID, parentID: this.Node_ParentID, node: this.node.Excluding("parents") as MapNode, revision: this.node_revision, link: this.node_link,
+			});
+		}
+		return result;
+	}
 	async Apply(opt?: {expandSelf?: boolean, expandTruthAndRelevance?: boolean}) {
 		opt = E({expandSelf: true, expandTruthAndRelevance: true}, opt);
 		/* if (validationError) {
@@ -77,38 +92,35 @@ export class AddChildHelper {
 			this.node.multiPremiseArgument = true;
 		}*/
 
-		let info;
+		const command = this.GetCommand();
+		let runResult_copy;
 		if (this.node.type == MapNodeType.Argument) {
-			info = await new AddArgumentAndClaim({
-				mapID: this.mapID,
-				argumentParentID: this.Node_ParentID, argumentNode: this.node.Excluding("parents") as MapNode, argumentRevision: this.node_revision, argumentLink: this.node_link,
-				claimNode: this.subNode, claimRevision: this.subNode_revision, claimLink: this.subNode_link,
-			}).Run();
+			if (!(command instanceof AddArgumentAndClaim)) throw new Error("Expected AddArgumentAndClaim command.");
+			const runResult = runResult_copy = await command.Run();
 
 			if (opt.expandSelf) {
-				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${info.argumentNodeID}`, expanded: true, resetSubtree: false});
-				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${info.argumentNodeID}/${info.claimNodeID}`, expanded: true,
+				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.argumentNodeID}`, expanded: true, resetSubtree: false});
+				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.argumentNodeID}/${runResult.claimNodeID}`, expanded: true,
 					expanded_truth: opt.expandTruthAndRelevance, expanded_relevance: opt.expandTruthAndRelevance, resetSubtree: false});
 				runInAction("AddChildDialog.Apply_mid", ()=>{
-					store.main.maps.nodeLastAcknowledgementTimes.set(info.argumentNodeID, Date.now());
-					store.main.maps.nodeLastAcknowledgementTimes.set(info.claimNodeID, Date.now());
+					store.main.maps.nodeLastAcknowledgementTimes.set(runResult.argumentNodeID, Date.now());
+					store.main.maps.nodeLastAcknowledgementTimes.set(runResult.claimNodeID, Date.now());
 				});
 			}
 		} else {
-			info = await new AddChildNode({
-				mapID: this.mapID, parentID: this.Node_ParentID, node: this.node.Excluding("parents") as MapNode, revision: this.node_revision, link: this.node_link,
-			}).Run();
+			if (!(command instanceof AddChildNode)) throw new Error("Expected AddChildNode command.");
+			const runResult = runResult_copy = await command.Run();
 
 			if (opt.expandSelf) {
-				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${info.nodeID}`, expanded: true,
+				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.nodeID}`, expanded: true,
 					expanded_truth: opt.expandTruthAndRelevance, expanded_relevance: opt.expandTruthAndRelevance, resetSubtree: false});
-				runInAction("AddChildDialog.Apply_mid", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(info.nodeID, Date.now()));
+				runInAction("AddChildDialog.Apply_mid", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(runResult.nodeID, Date.now()));
 			}
 		}
 
 		runInAction("AddChildDialog.Apply_end", ()=>store.main.maps.currentNodeBeingAdded_path = null);
 
-		return info;
+		return runResult_copy;
 	}
 }
 
@@ -126,14 +138,17 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 
 	let root;
 	let nodeEditorUI: NodeDetailsUI;
-	let validationError = "No data entered yet.";
 	const Change = (..._)=>boxController.UpdateUI();
 
 	let tab = AddChildDialogTab.Claim;
 	let boxController = ShowMessageBox({
 		title: `Add ${displayName}`, cancelButton: true,
 		message: ()=>{
-			boxController.options.okButtonClickable = validationError == null;
+			let tempCommand = helper.GetCommand();
+			boxController.options.okButtonProps = {
+				enabled: tempCommand.Validate_Safe() == null,
+				title: tempCommand.validateError,
+			};
 
 			const newNodeAsL2 = AsNodeL2(helper.node, helper.node_revision);
 			const newNodeAsL3 = AsNodeL3(newNodeAsL2, childPolarity, helper.node_link);
@@ -169,7 +184,6 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 									comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.MapEditors};
 								}
 								helper.VSet({node: newNodeData, node_revision: newRevisionData, node_link: newLinkData});
-								validationError = comp.GetValidationError();
 								Change();
 							}}/>
 					</>}
@@ -189,7 +203,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 									<TextArea required={true} pattern={MapNodeRevision_titlePattern}
 										allowLineBreaks={false} autoSize={true} style={ES({flex: 1})}
 										value={helper.subNode_revision.titles["base"]}
-										onChange={val=>Change(helper.subNode_revision.titles["base"] = val, validationError = GetErrorMessagesUnderElement(root.DOM)[0])}/>
+										onChange={val=>Change(helper.subNode_revision.titles["base"] = val)}/>
 								</Row>
 								<Row mt={5} style={{fontSize: 12}}>{`To add a second premise later, right click on your new argument and press "Convert to multi-premise".`}</Row>
 							</Column>}
@@ -201,7 +215,6 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 										comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.MapEditors};
 									}
 									helper.VSet({subNode: newNodeData, subNode_revision: newRevisionData, subNode_link: newLinkData});
-									validationError = comp.GetValidationError();
 									Change();
 								}}/>}
 						</>}
@@ -213,7 +226,6 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 									comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.MapEditors};
 								}
 								helper.VSet({node: newNodeData, node_revision: newRevisionData, node_link: newLinkData});
-								validationError = comp.GetValidationError();
 								Change();
 							}}/>}
 					</>}
