@@ -18,7 +18,7 @@ export function ShowAddImageDialog(userID: string) {
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add image", cancelButton: true,
 		message: ()=>{
-			boxController.options.okButtonClickable = valid;
+			boxController.options.okButtonProps = {enabled: valid};
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
 					<ImageDetailsUI baseData={newImage} creating={true} editing={false}

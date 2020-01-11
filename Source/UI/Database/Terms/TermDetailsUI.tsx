@@ -119,7 +119,7 @@ export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: st
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add term", cancelButton: true,
 		message: ()=>{
-			boxController.options.okButtonClickable = valid;
+			boxController.options.okButtonProps = {enabled: valid};
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
 					<TermDetailsUI baseData={newTerm} forNew={true}

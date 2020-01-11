@@ -76,7 +76,7 @@ export function ShowAddPhrasingDialog(nodeID: string, type: MapNodePhrasingType)
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add phrasing", cancelButton: true,
 		message: ()=>{
-			boxController.options.okButtonClickable = valid;
+			boxController.options.okButtonProps = {enabled: valid};
 			return (
 				<Column style={{padding: "10px 0", width: 800}}>
 					<PhrasingDetailsUI baseData={newEntry} forNew={true}

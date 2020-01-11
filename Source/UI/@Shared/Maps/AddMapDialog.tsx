@@ -19,7 +19,7 @@ export function ShowAddMapDialog(userID: string, type: MapType) {
 	let boxController = ShowMessageBox({
 		title: "Add map", cancelButton: true,
 		message: ()=>{
-			boxController.options.okButtonClickable = error == null;
+			boxController.options.okButtonProps = {enabled: error == null};
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
 					<MapDetailsUI baseData={newMap} forNew={true} onChange={(val, ui)=>Change(newMap = val, error = ui.GetValidationError())}/>

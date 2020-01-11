@@ -16,7 +16,7 @@ export function ShowAddLayerDialog(userID: string) {
 	let boxController = ShowMessageBox({
 		title: "Add layer", cancelButton: true,
 		message: ()=>{
-			boxController.options.okButtonClickable = error == null;
+			boxController.options.okButtonProps = {enabled: error == null};
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
 					<LayerDetailsUI baseData={newLayer} forNew={true} onChange={(val, ui)=>Change(newLayer = val, error = ui.GetValidationError())}/>

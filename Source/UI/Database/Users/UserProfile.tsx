@@ -146,7 +146,7 @@ export function ShowChangeDisplayNameDialog(userID: string, oldDisplayName: stri
 	const boxController: BoxController = ShowMessageBox({
 		title: "Change display name", cancelButton: true,
 		message: ()=>{
-			boxController.options.okButtonClickable = valid;
+			boxController.options.okButtonProps = {enabled: valid};
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
 					<Row>

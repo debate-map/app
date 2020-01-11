@@ -28,7 +28,7 @@ export function ShowAddTimelineDialog(userID: string, mapID: string) {
 	let boxController: BoxController = ShowMessageBox({
 		title: "Add timeline", cancelButton: true,
 		message: ()=>{
-			boxController.options.okButtonClickable = error == null;
+			boxController.options.okButtonProps = {enabled: error == null};
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
 					<TimelineDetailsUI baseData={newTimeline} forNew={true} onChange={(val, ui)=>Change(newTimeline = val, error = ui.GetValidationError())}/>

@@ -37,7 +37,7 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 
 		this.payload.link = link || {_: true};
 
-		if (!asMapRoot) {
+		if (!asMapRoot && this.parentCommand == null) {
 			// this.parent_oldChildrenOrder = await GetDataAsync('nodes', parentID, '.childrenOrder') as number[];
 			this.parent_oldData = GetNode(parentID);
 		}
