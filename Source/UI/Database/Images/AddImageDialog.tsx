@@ -11,25 +11,29 @@ export function ShowAddImageDialog(initialData?: Partial<Image>, postAdd?: (id: 
 		type: ImageType.Photo,
 		description: "",
 	}, initialData));
+	const getCommand = ()=>new AddImage({image: newImage});
 
-	let valid = false;
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add image", cancelButton: true,
 		message: ()=>{
-			boxController.options.okButtonProps = {enabled: valid};
+			const tempCommand = getCommand();
+			boxController.options.okButtonProps = {
+				enabled: tempCommand.Validate_Safe() == null,
+				title: tempCommand.validateError,
+			};
+
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
 					<ImageDetailsUI baseData={newImage} creating={true} editing={false}
 						onChange={(val, error)=>{
 							newImage = val;
-							valid = !error;
 							boxController.UpdateUI();
 						}}/>
 				</Column>
 			);
 		},
 		onOK: async()=>{
-			const id = await new AddImage({image: newImage}).Run();
+			const id = await getCommand().Run();
 			if (postAdd) postAdd(id);
 		},
 	});

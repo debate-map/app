@@ -114,25 +114,29 @@ export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: st
 		type: TermType.CommonNoun,
 		definition: "",
 	}, initialData));
+	const getCommand = ()=>new AddTerm({term: newTerm});
 
-	let valid = false;
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add term", cancelButton: true,
 		message: ()=>{
-			boxController.options.okButtonProps = {enabled: valid};
+			const tempCommand = getCommand();
+			boxController.options.okButtonProps = {
+				enabled: tempCommand.Validate_Safe() == null,
+				title: tempCommand.validateError,
+			};
+
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
 					<TermDetailsUI baseData={newTerm} forNew={true}
 						onChange={(val, error)=>{
 							newTerm = val;
-							valid = !error;
 							boxController.UpdateUI();
 						}}/>
 				</Column>
 			);
 		},
 		onOK: async()=>{
-			const id = await new AddTerm({term: newTerm}).Run();
+			const id = await getCommand().Run();
 			if (postAdd) postAdd(id);
 		},
 	});
