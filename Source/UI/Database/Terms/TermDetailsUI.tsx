@@ -47,7 +47,7 @@ export class TermDetailsUI extends BaseComponentPlus(
 						value={newData.name} onChange={val=>{
 							const lastName = newData.name;
 							newData.name = val;
-							newData.forms = [newData.name].concat(newData.forms.Except(lastName, newData.name));
+							newData.forms = [newData.name.toLowerCase()].concat(newData.forms.Except(lastName, newData.name));
 							Change();
 						}}/>
 				</RowLR>
@@ -59,8 +59,8 @@ export class TermDetailsUI extends BaseComponentPlus(
 					<Text>{newData.forms[0]}, </Text>
 					<TextInput enabled={enabled} delayChangeTillDefocus={true} style={{width: "100%"}}
 						value={newData.forms.slice(1).join(", ")} onChange={val=>{
-							const otherForms = val.split(",").map(a=>a.trim()).filter(a=>a.length);
-							newData.forms = [newData.name].concat(otherForms.Except(newData.name));
+							const otherForms = val.toLowerCase().split(",").map(a=>a.trim()).filter(a=>a.length);
+							newData.forms = [newData.name.toLowerCase()].concat(otherForms.Except(newData.name));
 							Change();
 						}}/>
 				</RowLR>

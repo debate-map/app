@@ -242,7 +242,7 @@ class TermSearchOrCreateUI extends BaseComponentPlus({} as {name: string, enable
 					borderRadius: "0 0 5px 5px",
 				}}>
 					<Button text="Create new term" enabled={enabled} onClick={e=>{
-						ShowAddTermDialog({name, forms: [name]}, onSelect);
+						ShowAddTermDialog({name, forms: [name.toLowerCase()]}, onSelect);
 					}}/>
 				</Row>
 			</>
