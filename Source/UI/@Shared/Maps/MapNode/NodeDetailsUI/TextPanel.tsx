@@ -12,7 +12,7 @@ import {Term} from "Store/firebase/terms/@Term";
 import {GetUser} from "Store/firebase/users";
 import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI";
 import {ES} from "Utils/UI/GlobalStyles";
-import {Link, Observer, Validate} from "vwebapp-framework";
+import {Link, Observer, Validate, InfoButton} from "vwebapp-framework";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 import {TermDefinitionPanel} from "../NodeUI/Panels/DefinitionsPanel";
 
@@ -48,21 +48,12 @@ class Title_Base extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 	render() {
 		const {forNew, enabled, newData, newDataAsL2, newRevisionData, newLinkData, Change} = this.props;
 		const claimType = GetAttachmentType(newDataAsL2);
-		const hasOtherTitles = newData.type == MapNodeType.Claim && claimType == AttachmentType.None;
-		const hasOtherTitlesEntered = newRevisionData.titles.negation || newRevisionData.titles.yesNoQuestion;
-		const willUseYesNoTitleHere = WillNodeUseQuestionTitleHere(newDataAsL2, newLinkData);
 
 		return (
 			<div>
 				<Row center>
 					<Text>Title (base): </Text>
-					{/* <TextInput enabled={enabled} style={ES({flex: 1})} required={!hasOtherTitlesEntered && !willUseYesNoTitleHere}
-						ref={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM.focus())}
-						value={newRevisionData.titles["base"]} onChange={val=>Change(newRevisionData.titles["base"] = val)}/> */}
-					<TextArea enabled={enabled} required={!hasOtherTitlesEntered && !willUseYesNoTitleHere} pattern={MapNodeRevision_titlePattern} autoSize={true}
-						allowLineBreaks={false} style={ES({flex: 1})}
-						ref={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM && a.DOM_HTML.focus())}
-						value={newRevisionData.titles["base"]} onChange={val=>Change(newRevisionData.titles.VSet("base", DelIfFalsy(val)))}/>
+					<TitleInput {...this.props} titleKey="base" innerRef={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM && a.DOM_HTML.focus())}/>
 				</Row>
 				{forNew && newData.type == MapNodeType.Argument &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
@@ -95,22 +86,60 @@ class OtherTitles extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 			<Div>
 				<Row key={0} mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Title (negation): </Pre>
-					{/* <TextInput enabled={enabled} style={ES({flex: 1})} value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/> */}
-					<TextArea enabled={enabled} allowLineBreaks={false} style={ES({flex: 1})} pattern={MapNodeRevision_titlePattern} autoSize={true}
-						value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles.VSet("negation", DelIfFalsy(val)))}/>
+					<TitleInput {...this.props} titleKey="negation"/>
 				</Row>
 				<Row key={1} mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Title (question): </Pre>
 					{/* <TextInput enabled={enabled} style={ES({flex: 1})} required={willUseQuestionTitleHere}
 						value={newRevisionData.titles["yesNoQuestion"]} onChange={val=>Change(newRevisionData.titles["yesNoQuestion"] = val)}/> */}
-					<TextArea enabled={enabled} allowLineBreaks={false} style={ES({flex: 1})} pattern={MapNodeRevision_titlePattern} autoSize={true}
-						value={newRevisionData.titles["yesNoQuestion"]} onChange={val=>Change(newRevisionData.titles.VSet("yesNoQuestion", DelIfFalsy(val)))}/>
+					<TitleInput {...this.props} titleKey="yesNoQuestion"/>
 				</Row>
 				{willUseQuestionTitleHere && forNew &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 						<Pre allowWrap={true}>At this location (under a category node), the node will be displayed with the (yes or no) question title.</Pre>
 					</Row>}
 			</Div>
+		);
+	}
+}
+
+class TitleInput extends BaseComponentPlus({} as {titleKey: string, innerRef?: any} & NodeDetailsUI_SharedProps & React.Props<TextArea>, {}) {
+	render() {
+		let {titleKey, newDataAsL2, newRevisionData, forNew, enabled, newLinkData, Change} = this.props;
+		let extraProps = {};
+		if (titleKey == "base") {
+			//const hasOtherTitles = newDataAsL2.type == MapNodeType.Claim && newDataAsL2 == AttachmentType.None;
+			const hasOtherTitlesEntered = newRevisionData.titles.negation || newRevisionData.titles.yesNoQuestion;
+			const willUseYesNoTitleHere = WillNodeUseQuestionTitleHere(newDataAsL2, newLinkData);
+			extraProps = {
+				required: !hasOtherTitlesEntered && !willUseYesNoTitleHere,
+				ref: this.props.innerRef, // if supplied
+			};
+		}
+		return (
+			//<TextInput enabled={enabled} style={ES({flex: 1})} value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/>
+			<TextArea
+				enabled={enabled} allowLineBreaks={false} style={ES({flex: 1})} pattern={MapNodeRevision_titlePattern} autoSize={true}
+				value={newRevisionData.titles[titleKey]} onChange={val=> {
+					//let matches = val.Matches(/\{(.+?)\}(\[[0-9]+?\])?/);
+					//let termNames = [];
+					let cleanedVal = val ? val.replace(/\{(.+?)\}(\[[0-9]+?\])?/g, (m, g1, g2)=> {
+						//termNames.push(g1);
+						let termName = g1;
+						if (newRevisionData.termAttachments == null) {
+							newRevisionData.termAttachments = [];
+						}
+						if (!newRevisionData.termAttachments.Any(a=>a.id == termName)) {
+							newRevisionData.termAttachments.push(new TermAttachment({id: termName}));
+						}
+						return g1;
+					}) : null;
+					newRevisionData.titles.VSet(titleKey, DelIfFalsy(cleanedVal));
+					Change();
+				}}
+				// for "base" title-key
+				{...extraProps}
+			/>
 		);
 	}
 }
@@ -142,8 +171,15 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 
 		return (
 			<>
-				<Row mt={5}>
+				<Row center mt={5}>
 					<Text style={{fontWeight: "bold"}}>Context (terms):</Text>
+					<InfoButton ml={5} text={`
+						Context elements are basically term definitions; matching text become hoverable, showing the definition and some other details.
+
+						To add an entry, press "+", type the term you want to define, then find a matching definition or create a new one.
+						
+						(An alternative is to type curly-brackets around the term in the title-input, creating a new context/term slot with the given name.)
+					`.AsMultiline(0)}/>
 					<Button ml={5} p="3px 7px" text="+" enabled={enabled} onClick={()=>{
 						if (newRevisionData.termAttachments == null) newRevisionData.termAttachments = [];
 						newRevisionData.termAttachments.push(new TermAttachment({id: ""}));
