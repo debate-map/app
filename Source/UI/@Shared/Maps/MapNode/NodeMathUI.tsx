@@ -32,16 +32,17 @@ export class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termI
 	PostRender() {
 		const {onTermHover, onTermClick, termsToSearchFor} = this.props;
 
-		const dom = $(GetDOM(this));
-		const termUIs = dom.find(".text").ToList();
+		const dom = GetDOM(this);
+		const termUIs = Array.from(dom.querySelectorAll(".text")) as HTMLSpanElement[];
 		for (const termUI of termUIs) {
 			//const termTextMatch = termUI.text().match(/^@term\[(.+?),([A-Za-z0-9_-]+?)\]$/);
-			const termTextMatch = termUI.text().match(/^@term\[(.+?)\]$/);
+			const termTextMatch = termUI.innerText.match(/^@term\[(.+?)\]$/);
 			if (!termTextMatch) continue; // if doesn't have marker, ignore
 			// if (!termUI.next().is(".mopen")) continue; // if no term-id specified, ignore
 			// if (!termUI.next().is(".mord.scriptstyle.uncramped.mtight")) continue; // if no term-id specified, ignore
 
-			const termStr = termTextMatch[1];
+			// the only white-space allowed in term-forms is a space, so convert any other white-space character in UI, into a space (latex renderer sometimes renders a no-break space)
+			const termStr = termTextMatch[1].toLowerCase().replace(/\s/g, " ");
 
 			// let siblingsForID = termUI.nextUntil(".mclose").add(termUI.nextAll(".mclose").first());
 			/* let siblingsForID = termUI.next();
@@ -56,7 +57,7 @@ export class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termI
 			let termID = termIDStr.ToInt(); */
 			/*const termID = termTextMatch[2];
 			if (IsNaN(termID)) continue;*/
-			const term = termsToSearchFor.find(a=>a.forms.map(form=>form.toLowerCase()).Contains(termStr.toLowerCase()));
+			const term = termsToSearchFor.find(a=>a.forms.Contains(termStr));
 			if (term == null) continue;
 
 			// let oldText = termUI.text();
@@ -69,7 +70,7 @@ export class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termI
 			ReactDOM.render((
 				<TermPlaceholder {...{store} as any} refText={termStr} termID={term._key} showKeyStart={false}
 					onHover={hovered=>onTermHover(term._key, hovered)} onClick={()=>onTermClick(term._key)}/>
-			), termUI[0]);
+			), termUI);
 		}
 	}
 }
