@@ -103,7 +103,6 @@ export class SourceChainsEditorUI extends BaseComponentPlus(
 					{enabled &&
 						<Row>
 							<Button text="Add source to this chain" mt={5} onClick={()=>Change(selectedChain.sources.push(new Source()))}/>
-							{selectedChainIndex > 0 && <Button text="Remove this source chain" ml={5} mt={5} onClick={()=>Change(newData.RemoveAt(selectedChainIndex))}/>}
 						</Row>}
 				</Column>
 			</Column>
