@@ -42,7 +42,8 @@ export class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termI
 			// if (!termUI.next().is(".mord.scriptstyle.uncramped.mtight")) continue; // if no term-id specified, ignore
 
 			// the only white-space allowed in term-forms is a space, so convert any other white-space character in UI, into a space (latex renderer sometimes renders a no-break space)
-			const termStr = termTextMatch[1].toLowerCase().replace(/\s/g, " ");
+			const termStr = termTextMatch[1];
+			const termStr_asForm = termStr.toLowerCase().replace(/\s/g, " ");
 
 			// let siblingsForID = termUI.nextUntil(".mclose").add(termUI.nextAll(".mclose").first());
 			/* let siblingsForID = termUI.next();
@@ -57,7 +58,7 @@ export class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termI
 			let termID = termIDStr.ToInt(); */
 			/*const termID = termTextMatch[2];
 			if (IsNaN(termID)) continue;*/
-			const term = termsToSearchFor.find(a=>a.forms.Contains(termStr));
+			const term = termsToSearchFor.find(a=>a.forms.Contains(termStr_asForm));
 			if (term == null) continue;
 
 			// let oldText = termUI.text();
