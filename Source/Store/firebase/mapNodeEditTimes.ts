@@ -1,7 +1,6 @@
 import {GetNode, GetNodeID} from "Store/firebase/nodes";
 import {emptyArray} from "js-vextensions";
-import {AddSchema} from "vwebapp-framework";
-import {UUID_regex} from "Utils/General/KeyGenerator";
+import {AddSchema, UUID_regex} from "vwebapp-framework";
 import {GetDoc, StoreAccessor} from "mobx-firelink";
 import {SearchUpFromNodeForNodeMatchingX} from "Utils/Store/PathFinder";
 import {GetLastAcknowledgementTime} from "Store/main/maps";

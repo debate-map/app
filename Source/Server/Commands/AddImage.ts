@@ -1,7 +1,6 @@
 import {UserEdit} from "Server/CommandMacros";
-import {GenerateUUID} from "Utils/General/KeyGenerator";
 import {Command_Old, Command, AssertV} from "mobx-firelink";
-import {AssertValidate} from "vwebapp-framework";
+import {AssertValidate, GenerateUUID} from "vwebapp-framework";
 import {HasModPermissions} from "Store/firebase/users/$user";
 import {Image} from "../../Store/firebase/images/@Image";
 

@@ -1,6 +1,5 @@
 import {GetValues_ForSchema} from "js-vextensions";
-import {AddSchema, GetSchemaJSON, Schema} from "vwebapp-framework";
-import {UUID_regex} from "Utils/General/KeyGenerator";
+import {AddSchema, GetSchemaJSON, Schema, UUID_regex} from "vwebapp-framework";
 import {ObservableMap} from "mobx";
 import {MapNodeRevision_Defaultable, MapNodeRevision_Defaultable_props, MapNodeRevision_Defaultable_DefaultsForMap} from "../nodes/@MapNodeRevision";
 

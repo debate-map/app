@@ -1,6 +1,5 @@
 import {UserEdit} from "Server/CommandMacros";
-import {AssertValidate} from "vwebapp-framework";
-import {GenerateUUID} from "Utils/General/KeyGenerator";
+import {AssertValidate, GenerateUUID} from "vwebapp-framework";
 import {Command_Old, Command} from "mobx-firelink";
 import {Term} from "../../Store/firebase/terms/@Term";
 

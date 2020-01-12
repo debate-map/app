@@ -1,5 +1,4 @@
-import {AddSchema} from "vwebapp-framework";
-import {UUID_regex} from "Utils/General/KeyGenerator";
+import {AddSchema, UUID_regex} from "vwebapp-framework";
 import {ObservableMap} from "mobx";
 
 export class Layer {

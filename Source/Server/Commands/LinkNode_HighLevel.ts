@@ -7,7 +7,6 @@ import {GetNodeL2, GetNodeL3} from "Store/firebase/nodes/$node";
 import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 import {MeID} from "Store/firebase/users";
 import {CanContributeToNode} from "Store/firebase/users/$user";
-import {UUID} from "Utils/General/KeyGenerator";
 import {SearchUpFromNodeForNodeMatchingX} from "Utils/Store/PathFinder";
 import {ClaimForm, MapNode, Polarity} from "../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
@@ -15,6 +14,7 @@ import {AddChildNode} from "./AddChildNode";
 import {DeleteNode} from "./DeleteNode";
 import {LinkNode} from "./LinkNode";
 import {UnlinkNode} from "./UnlinkNode";
+import {UUID} from "vwebapp-framework";
 
 type Payload = {
 	mapID: string, oldParentID: string, newParentID: string, nodeID: string,

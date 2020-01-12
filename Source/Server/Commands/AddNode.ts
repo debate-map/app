@@ -1,7 +1,6 @@
 import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 import {Assert} from "js-vextensions";
-import {GetSchemaJSON, AssertValidate, AssertValidate_Full} from "vwebapp-framework";
-import {GenerateUUID} from "Utils/General/KeyGenerator";
+import {GetSchemaJSON, AssertValidate, AssertValidate_Full, GenerateUUID} from "vwebapp-framework";
 import {Command_Old, MergeDBUpdates, Command, AssertV} from "mobx-firelink";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {AddNodeRevision} from "./AddNodeRevision";

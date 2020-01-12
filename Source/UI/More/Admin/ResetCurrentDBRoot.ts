@@ -2,7 +2,6 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 import {MeID} from "Store/firebase/users";
 import {ValidateDBData} from "Utils/Store/DBDataValidator";
-import {GenerateUUID} from "Utils/General/KeyGenerator";
 import {observable} from "mobx";
 import {ConvertDataToValidDBUpdates, ApplyDBUpdates, DBPath} from "mobx-firelink";
 import {FirebaseDBShape} from "Store/firebase";
@@ -11,6 +10,7 @@ import {User} from "Store/firebase/users/@User";
 import {Map, MapType} from "../../../Store/firebase/maps/@Map";
 import {MapNode, globalRootNodeID, globalMapID} from "../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../../Store/firebase/nodes/@MapNodeType";
+import {GenerateUUID} from "vwebapp-framework";
 
 // Note: This is currently not used, and probably doesn`t even work atm.
 

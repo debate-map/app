@@ -1,8 +1,7 @@
 import {Command_Old, MergeDBUpdates, Command, AssertV} from "mobx-firelink";
-import {AssertValidate} from "vwebapp-framework";
+import {AssertValidate, UUID, GenerateUUID} from "vwebapp-framework";
 import {OmitIfFalsy, Assert} from "js-vextensions";
 import {UserEdit} from "../../Server/CommandMacros";
-import {GenerateUUID, UUID} from "../../Utils/General/KeyGenerator";
 import {Map, MapType} from "../../Store/firebase/maps/@Map";
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {MapNodeRevision} from "../../Store/firebase/nodes/@MapNodeRevision";

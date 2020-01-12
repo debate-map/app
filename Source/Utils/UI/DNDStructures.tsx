@@ -1,4 +1,4 @@
-import {UUID} from "Utils/General/KeyGenerator";
+import {UUID} from "vwebapp-framework";
 
 export class DroppableInfo {
 	constructor(data: Partial<DroppableInfo>) {

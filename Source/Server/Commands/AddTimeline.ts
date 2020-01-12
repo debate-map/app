@@ -1,10 +1,7 @@
 import {UserEdit} from "Server/CommandMacros";
 import {Timeline} from "Store/firebase/timelines/@Timeline";
-
-
-import {GenerateUUID} from "Utils/General/KeyGenerator";
 import {Command_Old, Command} from "mobx-firelink";
-import {AssertValidate} from "vwebapp-framework";
+import {AssertValidate, GenerateUUID} from "vwebapp-framework";
 
 @UserEdit
 export class AddTimeline extends Command<{mapID: string, timeline: Timeline}, string> {

@@ -1,7 +1,6 @@
 import {UserEdit} from "Server/CommandMacros";
 import {MapNodePhrasing} from "Store/firebase/nodePhrasings/@MapNodePhrasing";
-import {AddSchema, AssertValidate} from "vwebapp-framework";
-import {GenerateUUID} from "Utils/General/KeyGenerator";
+import {AddSchema, AssertValidate, GenerateUUID} from "vwebapp-framework";
 import {GetNode} from "Store/firebase/nodes";
 import {Assert} from "js-vextensions";
 import {Command_Old, GetAsync, Command} from "mobx-firelink";
