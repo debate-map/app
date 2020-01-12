@@ -13,8 +13,8 @@ export function GetSearchTerms(str: string) {
 /** Returned terms are all lowercase. */
 export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard = true) {
 	const terms = str.toLowerCase().replace(/[^a-zA-Z0-9*]/g, ' ').replace(/ +/g, ' ').trim().split(' ').filter(a=>a != ""); // eslint-disable-line
-	const wholeTerms = terms.filter(a=>(separateTermsWithWildcard ? !a.includes("*") : true)).map(a=>a.replace(/\*/g, "")).Distinct();
-	const partialTerms = terms.filter(a=>(separateTermsWithWildcard ? a.includes("*") : false)).map(a=>a.replace(/\*/g, "")).Distinct();
+	const wholeTerms = terms.filter(a=>(separateTermsWithWildcard ? !a.includes("*") : true)).map(a=>a.replace(/\*/g, "")).Distinct().filter(a=>a != "");
+	const partialTerms = terms.filter(a=>(separateTermsWithWildcard ? a.includes("*") : false)).map(a=>a.replace(/\*/g, "")).Distinct().filter(a=>a != "");
 	return {wholeTerms, partialTerms};
 }
 
