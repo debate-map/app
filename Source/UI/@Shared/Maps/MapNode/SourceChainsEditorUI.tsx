@@ -8,6 +8,7 @@ import {Validate} from "vwebapp-framework";
 import {ES} from "Utils/UI/GlobalStyles";
 import {Image_urlPattern} from "Store/firebase/images/@Image";
 import {Fragment} from "react";
+import {ShowMessageBox} from "react-vmessagebox";
 
 export class SourceChainsEditorUI extends BaseComponentPlus(
 	{enabled: true} as {baseData: SourceChain[], enabled?: boolean, style?, onChange?: (newData: SourceChain[])=>void},
@@ -54,14 +55,20 @@ export class SourceChainsEditorUI extends BaseComponentPlus(
 									selectedChainIndex == chainIndex && {backgroundColor: "rgba(90, 100, 110, 0.9)"},
 								)}
 								onClick={()=>{
-									// if last chain, and we're also selected, update selection to be valid, then proceed with deletion
-									if (chainIndex == newData.length - 1 && selectedChainIndex == chainIndex) {
-										this.SetState({selectedChainIndex: chainIndex - 1}, ()=>{
-											Change(newData.RemoveAt(chainIndex));
-										});
-									} else {
-										Change(newData.RemoveAt(chainIndex));
-									}
+									ShowMessageBox({
+										title: `Remove source chain #${chainIndex + 1}`, cancelButton: true,
+										message: `Remove source chain #${chainIndex + 1}`,
+										onOK: ()=>{
+											// if last chain, and we're also selected, update selection to be valid, then proceed with deletion
+											if (chainIndex == newData.length - 1 && selectedChainIndex == chainIndex) {
+												this.SetState({selectedChainIndex: chainIndex - 1}, ()=>{
+													Change(newData.RemoveAt(chainIndex));
+												});
+											} else {
+												Change(newData.RemoveAt(chainIndex));
+											}
+										},
+									});
 								}}/>}
 						</Fragment>;
 					})}
@@ -96,7 +103,7 @@ export class SourceChainsEditorUI extends BaseComponentPlus(
 											}
 											source.link = val;
 										})())}/>}
-								{sourceIndex != 0 && enabled && <Button text="X" ml={5} onClick={()=>Change(selectedChain.sources.RemoveAt(sourceIndex))}/>}
+								{selectedChain.sources.length > 1 && enabled && <Button text="X" ml={5} onClick={()=>Change(selectedChain.sources.RemoveAt(sourceIndex))}/>}
 							</Row>
 						);
 					})}
