@@ -12,6 +12,7 @@ import {GetParentNodeID, GetNodeID, GetNodesByTitle} from "Store/firebase/nodes"
 import {MI_SharedProps} from "../NodeUI_Menu";
 import {SubtreeExportData_Old} from "./MI_ExportSubtree";
 import {AddChildNode} from "Server/Commands/AddChildNode";
+import {ApplyDBUpdates} from "mobx-firelink";
 
 @Observer
 export class MI_ImportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {
@@ -104,7 +105,15 @@ class ImportSubtreeUI extends BaseComponentPlus(
 						const dbUpdates = this.importCommand.GetDBUpdates();
 						this.SetState({error: null, dbUpdates});
 					}}/>
-					<Button ml={5} text="ApplyDBUpdates" enabled={dbUpdates?.VKeys().length > 0} onClick={async ()=>{
+					<Button ml={5} text="ApplyDBUpdates (direct; safer)" enabled={dbUpdates?.VKeys().length > 0} onClick={async ()=>{
+						let result = await ApplyDBUpdates({}, dbUpdates);
+						let nodesAdded = this.importCommand.subs.filter(a=>a instanceof AddChildNode).length;
+						ShowMessageBox({
+							title: "Subtree imported",
+							message: `Completed import of subtree. Nodes added: ${nodesAdded}`,
+						});
+					}}/>
+					<Button ml={5} text="ApplyDBUpdates (standard)" enabled={dbUpdates?.VKeys().length > 0} onClick={async ()=>{
 						let result = await this.importCommand.Run();
 						let nodesAdded = this.importCommand.subs.filter(a=>a instanceof AddChildNode).length;
 						ShowMessageBox({
