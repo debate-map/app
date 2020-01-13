@@ -6,6 +6,7 @@ import {FromJSON, GetTreeNodesInObjTree, Clone, CE, DEL} from "js-vextensions";
 import {MapNode} from "Store/firebase/nodes/@MapNode";
 import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 import {AsNodeL1} from "Store/firebase/nodes/$node";
+import {SourceChain, Source} from "Store/firebase/nodeRevisions/@SourceChain";
 import {AddChildNode} from "./AddChildNode";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel";
 import {LinkNode} from "./LinkNode";
@@ -43,7 +44,14 @@ export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: st
 		const node = AsNodeL1(WithoutHelpers(subtreeData).Excluding("childrenData" as any, "finalPolarity", "currentRevision", "parents", "children", "childrenOrder"));
 		const revision = WithoutHelpers(subtreeData.current).Excluding("node", "approved", "relative") as MapNodeRevision;
 		if (revision.image) revision.image.id = `${revision.image.id}`;
-		if (revision["contentNode"]) revision.VSet({quote: revision["contentNode"], contentNode: DEL});
+		if (revision["contentNode"]) {
+			revision.VSet({quote: revision["contentNode"], contentNode: DEL});
+			if (revision.quote.sourceChains.length) {
+				revision.quote.sourceChains = (revision.quote.sourceChains as any as Source[][]).map(sourceChainSources=>{
+					return {sources: sourceChainSources};
+				});
+			}
+		}
 
 		const oldID = subtreeData["_id"];
 		if (this.oldID_newID[oldID]) {
