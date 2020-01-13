@@ -158,7 +158,9 @@ class SubtreeTreeView extends BaseComponentPlus({} as {node: SubtreeExportData_O
 	render() {
 		let {node, path, nodesToLink, setNodesToLink} = this.props;
 		let title = node.current.titles.base || "(empty title)";
-		let nodeMatches = GetNodesByTitle(title, "base");
+		let title_noTermBrackets = title ? title.replace(/\{(.+?)\}(\[[0-9]+?\])?/g, (m, g1, g2)=>g1) : null;
+		let nodeMatches = GetNodesByTitle(title_noTermBrackets, "base");
+		
 		return (
 			<TreeView title={
 				<Row style={{whiteSpace: "normal"}}>
