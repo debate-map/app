@@ -2,7 +2,7 @@ import {AssertV, Command, MergeDBUpdates} from "mobx-firelink";
 import {HasAdminPermissions} from "Store/firebase/users/$user";
 import {AssertValidate} from "vwebapp-framework";
 import {SubtreeExportData_Old} from "UI/@Shared/Maps/MapNode/NodeUI_Menu/MI_ExportSubtree";
-import {FromJSON, GetTreeNodesInObjTree, Clone, CE} from "js-vextensions";
+import {FromJSON, GetTreeNodesInObjTree, Clone, CE, DEL} from "js-vextensions";
 import {MapNode} from "Store/firebase/nodes/@MapNode";
 import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 import {AsNodeL1} from "Store/firebase/nodes/$node";
@@ -28,7 +28,11 @@ export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: st
 
 		const {subtreeJSON, parentNodeID} = this.payload;
 		this.rootSubtreeData = FromJSON(subtreeJSON);
-		this.subs = []; // clear each run, since validate gets called more than once
+
+		// clear each run, since validate gets called more than once
+		this.subs = [];
+		this.oldID_newID = {};
+
 		this.ProcessSubtree(this.rootSubtreeData, parentNodeID);
 	}
 
@@ -39,6 +43,7 @@ export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: st
 		const node = AsNodeL1(WithoutHelpers(subtreeData).Excluding("childrenData" as any, "finalPolarity", "currentRevision", "parents", "children", "childrenOrder"));
 		const revision = WithoutHelpers(subtreeData.current).Excluding("node", "approved", "relative") as MapNodeRevision;
 		if (revision.image) revision.image.id = `${revision.image.id}`;
+		if (revision["contentNode"]) revision.VSet({quote: revision["contentNode"], contentNode: DEL});
 
 		const oldID = subtreeData["_id"];
 		if (this.oldID_newID[oldID]) {
