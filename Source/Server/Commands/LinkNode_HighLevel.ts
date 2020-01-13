@@ -19,7 +19,8 @@ import {UUID} from "vwebapp-framework";
 type Payload = {
 	mapID: string, oldParentID: string, newParentID: string, nodeID: string,
 	newForm?: ClaimForm, newPolarity?: Polarity, allowCreateWrapperArg?: boolean,
-	unlinkFromOldParent?: boolean, deleteOrphanedArgumentWrapper?: boolean };
+	unlinkFromOldParent?: boolean, deleteOrphanedArgumentWrapper?: boolean
+};
 
 export function CreateLinkCommand(mapID: UUID, draggedNodePath: string, dropOnNodePath: string, polarity: Polarity, asCopy: boolean) {
 	const draggedNode = GetNodeL3(draggedNodePath);

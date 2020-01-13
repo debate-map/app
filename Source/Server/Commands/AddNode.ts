@@ -33,11 +33,9 @@ export class AddNode extends Command<{mapID: string, node: MapNode, revision: Ma
 
 		node.currentRevision = this.sub_addRevision.revisionID;
 
+		// if sub of AddChildNode for new argument, ignore the "childrenOrder" prop requirement (gets added by later link-impact-node subcommand)
 		if (this.parentCommand) {
-			const mapNodeSchema = GetSchemaJSON("MapNode");
-			// if as subcommand, we might be called by AddChildNode for new argument; in that case, ignore the "childrenOrder" prop requirement (gets added by later link-impact-node subcommand)
-			delete mapNodeSchema["allOf"];
-
+			const mapNodeSchema = GetSchemaJSON("MapNode").Excluding("allOf");
 			AssertValidate_Full(mapNodeSchema, "MapNode", node, "Node invalid");
 		} else {
 			AssertValidate("MapNode", node, "Node invalid");

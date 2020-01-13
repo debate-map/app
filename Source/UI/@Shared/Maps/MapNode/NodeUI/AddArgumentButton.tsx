@@ -1,17 +1,17 @@
+import {E} from "js-vextensions";
 import {Button} from "react-vcomponents";
+import {BaseComponent, UseCallback} from "react-vextensions";
+import {GetParentNodeL3} from "Store/firebase/nodes";
+import {ReversePolarity} from "Store/firebase/nodes/$node";
 import {MeID} from "Store/firebase/users";
+import {CanContributeToNode} from "Store/firebase/users/$user";
 import {GADDemo} from "UI/@GAD/GAD";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {HSLA, Observer} from "vwebapp-framework";
-import {UseCallback, BaseComponent} from "react-vextensions";
-import {E} from "js-vextensions";
-import {CanContributeToNode} from "Store/firebase/users/$user";
-import {GetDisplayPolarity, GetDisplayPolarityAtPath, ReversePolarity} from "Store/firebase/nodes/$node";
-import {GetParentNodeL3} from "Store/firebase/nodes";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
-import {MapNodeL3, Polarity, ClaimForm} from "../../../../../Store/firebase/nodes/@MapNode";
+import {ClaimForm, MapNodeL3, Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeColor, MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
-import {ShowAddChildDialog} from "../NodeUI_Menu/AddChildDialog";
+import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog";
 
 type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style?};
 /* const dropTargetDecorator = DropTarget('node',

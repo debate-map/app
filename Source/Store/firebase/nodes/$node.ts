@@ -80,7 +80,7 @@ export const GetDisplayPolarityAtPath = StoreAccessor(s=>(node: MapNodeL2, path:
 
 	const link = GetLinkUnderParent(node._key, parent);
 	if (link == null) return Polarity.Supporting; // can be null, if path is invalid (eg. copied-node path)
-	Assert(link.polarity != null, `The link for the argument #${node._key} must specify the polarity.`);
+	Assert(link.polarity != null, `The link for the argument #${node._key} (from parent #${parent._key}) must specify the polarity.`);
 
 	const parentForm = GetNodeForm(parent, SplitStringBySlash_Cached(path).slice(0, -1).join("/"));
 	return GetDisplayPolarity(link.polarity, parentForm);
@@ -266,7 +266,7 @@ export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: stri
 	}
 	return titles.base || missingTitleStrings[0];
 });
-export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(yes-no-question title not set)"];
+export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(question title not set)"];
 
 export function GetValidChildTypes(nodeType: MapNodeType, path: string) {
 	const nodeTypes = GetValues<MapNodeType>(MapNodeType);

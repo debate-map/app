@@ -5,7 +5,7 @@ import {MapEdit, UserEdit} from "../../Server/CommandMacros";
 import {GetNode} from "../../Store/firebase/nodes";
 import {MapNodeRevision} from "../../Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
-import {ChildEntry, MapNode} from "../../Store/firebase/nodes/@MapNode";
+import {ChildEntry, MapNode, Polarity} from "../../Store/firebase/nodes/@MapNode";
 import {AddNode} from "./AddNode";
 
 type Payload = {mapID: string, parentID: string, node: MapNode, revision: MapNodeRevision, link?: ChildEntry, asMapRoot?: boolean};
@@ -35,7 +35,10 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 		// this.sub_addNode.VSet({ lastNodeID_addAmount: this.lastNodeID_addAmount, lastNodeRevisionID_addAmount: this.lastNodeRevisionID_addAmount });
 		this.sub_addNode.Validate();
 
-		this.payload.link = link || {_: true};
+		this.payload.link = link ?? E({_: true}, node.type == MapNodeType.Argument && {polarity: Polarity.Supporting});
+		if (node.type == MapNodeType.Argument) {
+			AssertV(this.payload.link.polarity != null, "An argument node must have its polarity specified in its parent-link.")
+		}
 
 		if (!asMapRoot && this.parentCommand == null) {
 			// this.parent_oldChildrenOrder = await GetDataAsync('nodes', parentID, '.childrenOrder') as number[];

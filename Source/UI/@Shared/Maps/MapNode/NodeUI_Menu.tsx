@@ -1,29 +1,31 @@
 import {E} from "js-vextensions";
-import {SlicePath} from "mobx-firelink";
+import {runInAction} from "mobx";
 import {BaseComponent, BaseComponentPlus, WarnOfTransientObjectProps} from "react-vextensions";
 import {VMenuItem, VMenuStub} from "react-vmenu";
-import {ShowMessageBox} from "react-vmessagebox";
-import {LinkNode_HighLevel} from "Server/Commands/LinkNode_HighLevel";
 import {SetNodeIsMultiPremiseArgument} from "Server/Commands/SetNodeIsMultiPremiseArgument";
-import {UnlinkNode} from "Server/Commands/UnlinkNode";
 import {store} from "Store";
-import {GetParentNodeID, HolderType, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, IsNodeSubnode} from "Store/firebase/nodes";
+import {ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, HolderType} from "Store/firebase/nodes";
+import {CanContributeToNode, GetUserPermissionGroups, IsUserCreatorOrMod} from "Store/firebase/users/$user";
+import {GetOpenMapID} from "Store/main";
 import {GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState";
 import {Observer} from "vwebapp-framework";
-import {runInAction} from "mobx";
-import {GetOpenMapID} from "Store/main";
-import {GetUserPermissionGroups, CanContributeToNode, IsUserCreatorOrMod, CanGetBasicPermissions} from "Store/firebase/users/$user";
-import {DeleteNode} from "../../../../Server/Commands/DeleteNode";
 import {GetPathsToNodesChangedSinceX} from "../../../../Store/firebase/mapNodeEditTimes";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-import {GetNodeDisplayText, GetNodeL3, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
+import {GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
 import {ClaimForm, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
 import {MeID} from "../../../../Store/firebase/users";
 import {styles} from "../../../../Utils/UI/GlobalStyles";
 import {ShowSignInPopup} from "../../NavBar/UserPanel";
-import {ShowAddChildDialog} from "./NodeUI_Menu/AddChildDialog";
+import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog";
+import {MI_DeleteContainerArgument} from "./NodeUI_Menu/MI_DeleteContainerArgument";
+import {MI_DeleteNode} from "./NodeUI_Menu/MI_DeleteNode";
+import {MI_PasteAsLink} from "./NodeUI_Menu/MI_PasteAsLink";
+import {MI_UnlinkContainerArgument} from "./NodeUI_Menu/MI_UnlinkContainerArgument";
+import {MI_UnlinkNode} from "./NodeUI_Menu/MI_UnlinkNode";
+import {MI_ImportSubtree} from "./NodeUI_Menu/MI_ImportSubtree";
+import {MI_ExportSubtree} from "./NodeUI_Menu/MI_ExportSubtree";
 
 export class NodeUI_Menu_Stub extends BaseComponent<Props, {}> {
 	render() {
@@ -37,7 +39,7 @@ export class NodeUI_Menu_Stub extends BaseComponent<Props, {}> {
 }
 
 type Props = {map?: Map, node: MapNodeL3, path: string, inList?: boolean, holderType?: HolderType};
-type SharedProps = Props & {mapID: string, combinedWithParentArg: boolean, copiedNode: MapNodeL3, copiedNodePath: string, copiedNode_asCut: boolean};
+export type MI_SharedProps = Props & {mapID: string, combinedWithParentArg: boolean, copiedNode: MapNodeL3, copiedNodePath: string, copiedNode_asCut: boolean};
 
 @WarnOfTransientObjectProps
 @Observer
@@ -75,7 +77,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 
 		const formForClaimChildren = node.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
 
-		const sharedProps: SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
+		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
 		return (
 			<div>
 				{CanContributeToNode(userID, node._key) && !inList && validChildTypes.map(childType=>{
@@ -127,26 +129,6 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 								runInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path), Date.now()));
 							}
 						}}/>}
-				{/* inList &&
-					<VMenuItem text="Find containing maps" style={styles.vMenuItem}
-						onClick={(e) => {
-							runInAction('NodeUIMenu.FindContainingMaps', () => {
-								store.main.search.findNode_state = 'activating';
-								store.main.search.findNode_node = node._key;
-								store.main.search.findNode_type = 'FindContainingMaps';
-								store.main.search.findNode_resultPaths = [];
-							});
-						}}/>}
-				{inList && GetOpenMapID() != null &&
-					<VMenuItem text="Find in current map" style={styles.vMenuItem}
-						onClick={(e) => {
-							runInAction('NodeUIMenu.FindInCurrentMap', () => {
-								store.main.search.findNode_state = 'activating';
-								store.main.search.findNode_node = node._key;
-								store.main.search.findNode_type = 'FindInCurrentMap';
-								store.main.search.findNode_resultPaths = [];
-							});
-						}}/> */}
 				{inList && GetOpenMapID() != null &&
 					<VMenuItem text="Find in maps" style={styles.vMenuItem}
 						onClick={e=>{
@@ -203,7 +185,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 								store.main.maps.copiedNodePath_asCut = false;
 							});
 						}}/>}
-				<PasteAsLink_MenuItem {...sharedProps}/>
+				<MI_PasteAsLink {...sharedProps}/>
 				{/* // disabled for now, since I need to create a new command to wrap the logic. One route: create a CloneNode_HighLevel command, modeled after LinkNode_HighLevel (or containing it as a sub)
 					IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(GetParentNodeID(path), copiedNode.Extended({ _key: -1 }), permissions, holderType) && !copiedNode_asCut &&
 					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, null, formForClaimChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async (e) => {
@@ -220,219 +202,13 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							await new UnlinkNode({ mapID: mapID, parentID: baseNodePath_ids.XFromLast(1), childID: baseNodePath_ids.Last() }).Run();
 						}
 					}}/> */}
-				<UnlinkContainerArgument_MenuItem {...sharedProps}/>
-				<UnlinkNode_MenuItem {...sharedProps}/>
-				<DeleteContainerArgument_MenuItem {...sharedProps}/>
-				<DeleteNode_MenuItem {...sharedProps}/>
+				<MI_ExportSubtree {...sharedProps}/>
+				<MI_ImportSubtree {...sharedProps}/>
+				<MI_UnlinkContainerArgument {...sharedProps}/>
+				<MI_UnlinkNode {...sharedProps}/>
+				<MI_DeleteContainerArgument {...sharedProps}/>
+				<MI_DeleteNode {...sharedProps}/>
 			</div>
-		);
-	}
-}
-
-/* let PasteAsLink_MenuItem_connector = (state, {}: SharedProps)=> {
-	let moveOpPayload = {};
-	let valid = IsUserBasicOrAnon(MeID()) && copiedNode != null && IsMoveNodeOpValid(moveOpPayload);
-	return {valid};
-};
-@Connect(connector)
-class PasteAsLink_MenuItem extends BaseComponentWithConnector(PasteAsLink_MenuItem_connector, {}) { */
-@Observer
-class PasteAsLink_MenuItem extends BaseComponent<SharedProps, {}> {
-	render() {
-		const {map, node, path, holderType, copiedNode, copiedNodePath, copiedNode_asCut, combinedWithParentArg, inList} = this.props;
-		if (!CanGetBasicPermissions(MeID())) return <div/>;
-		if (copiedNode == null) return <div/>;
-		if (inList) return <div/>;
-		const copiedNode_parent = GetParentNodeL3(copiedNodePath);
-
-		const formForClaimChildren = node.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
-		const linkCommand = new LinkNode_HighLevel({
-			mapID: map._key, oldParentID: GetParentNodeID(copiedNodePath), newParentID: node._key, nodeID: copiedNode._key,
-			newForm: copiedNode.type == MapNodeType.Claim ? formForClaimChildren : null,
-			newPolarity:
-				(copiedNode.type == MapNodeType.Argument ? copiedNode.link.polarity : null) // if node itself has polarity, use it
-				|| (copiedNode_parent && copiedNode_parent.type == MapNodeType.Argument ? copiedNode_parent.link.polarity : null), // else if our parent has a polarity, use that
-			allowCreateWrapperArg: holderType != null || !node.multiPremiseArgument,
-			unlinkFromOldParent: copiedNode_asCut, deleteOrphanedArgumentWrapper: true,
-		});
-		const error = linkCommand.Validate_Safe();
-
-		return (
-			<VMenuItem text={`Paste${copiedNode_asCut ? "" : " as link"}: "${GetNodeDisplayText(copiedNode, null, formForClaimChildren).KeepAtMost(50)}"`}
-				enabled={error == null} title={error}
-				style={styles.vMenuItem} onClick={e=>{
-					if (e.button != 0) return;
-					if (MeID() == null) return ShowSignInPopup();
-
-					if (copiedNode.type == MapNodeType.Argument && !copiedNode_asCut) {
-						// eslint-disable-next-line
-						return void ShowMessageBox({
-							title: "Argument at two locations?", cancelButton: true, onOK: proceed,
-							message: `
-								Are you sure you want to paste this argument as a linked child?
-
-								Only do this if you're sure that the impact-premise applies exactly the same to both the old parent and the new parent. (usually it does not, ie. usually it's specific to its original parent claim)
-
-								If not, paste the argument as a clone instead.
-							`.AsMultiline(0),
-						});
-					}
-					proceed();
-
-					async function proceed() {
-						const {argumentWrapperID} = await linkCommand.Run();
-						if (argumentWrapperID) {
-							runInAction("PasteAsLink_MenuItem.proceed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
-						}
-					}
-				}}/>
-		);
-	}
-}
-
-@Observer
-class UnlinkContainerArgument_MenuItem extends BaseComponentPlus({} as SharedProps, {}) {
-	render() {
-		const {map, mapID, node, path, holderType, combinedWithParentArg} = this.props;
-		if (!combinedWithParentArg) return null;
-		const componentBox = holderType != null;
-		if (componentBox) return null;
-
-		const argumentPath = SlicePath(path, 1);
-		const argument = GetNodeL3(argumentPath);
-		const argumentText = GetNodeDisplayText(argument, argumentPath);
-		if (!IsUserCreatorOrMod(MeID(), argument)) return null;
-
-		const argumentParentPath = SlicePath(argumentPath, 1);
-		const argumentParent = GetNodeL3(argumentParentPath);
-
-		const command = new UnlinkNode({mapID, parentID: argumentParent._key, childID: argument._key});
-		return (
-			<VMenuItem text="Unlink argument"
-				enabled={command.Validate_Safe() == null} title={command.validateError}
-				style={styles.vMenuItem} onClick={e=>{
-					if (e.button != 0) return;
-					ShowMessageBox({
-						title: `Unlink "${argumentText}"`, cancelButton: true,
-						message: `Unlink the argument "${argumentText}"?`,
-						onOK: async()=>{
-							command.Run();
-						},
-					});
-				}}/>
-		);
-	}
-}
-
-@Observer
-class UnlinkNode_MenuItem extends BaseComponentPlus({} as SharedProps, {}) {
-	render() {
-		const {map, mapID, node, path, holderType, combinedWithParentArg, inList} = this.props;
-		if (!IsUserCreatorOrMod(MeID(), node)) return null;
-		if (inList) return null;
-		const componentBox = holderType != null;
-		if (componentBox) return null;
-		const parent = GetParentNodeL3(path);
-		if (parent == null) return null;
-		const nodeText = GetNodeDisplayText(node, path);
-
-		const command = new UnlinkNode({mapID, parentID: parent._key, childID: node._key});
-		return (
-			<VMenuItem text={`Unlink${combinedWithParentArg ? " claim" : ""}`}
-				enabled={command.Validate_Safe() == null} title={command.validateError}
-				style={styles.vMenuItem} onClick={async e=>{
-					if (e.button != 0) return;
-					const parentText = GetNodeDisplayText(parent, path.substr(0, path.lastIndexOf("/")));
-					ShowMessageBox({
-						title: `Unlink child "${nodeText}"`, cancelButton: true,
-						message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,
-						onOK: ()=>{
-							command.Run();
-						},
-					});
-				}}/>
-		);
-	}
-}
-
-@Observer
-class DeleteContainerArgument_MenuItem extends BaseComponent<SharedProps, {}> {
-	render() {
-		const {map, mapID, node, path, holderType, combinedWithParentArg} = this.props;
-		if (!combinedWithParentArg) return <div/>;
-		const componentBox = holderType != null;
-		if (componentBox) return <div/>;
-
-		const argumentPath = SlicePath(path, 1);
-		const argument = GetNodeL3(argumentPath);
-		if (argument == null) return null; // wait till loaded
-		const argumentText = GetNodeDisplayText(argument, argumentPath);
-		// const forDelete_error = ForDelete_GetError(MeID(), argument, { childrenToIgnore: [node._key] });
-		if (!IsUserCreatorOrMod(MeID(), argument)) return null;
-
-		/* const command = new DeleteNode({ mapID, nodeID: node._key, withContainerArgument: argument._key });
-		const error = command.Validate_Safe(); */
-
-		const canDeleteBaseClaim = IsUserCreatorOrMod(MeID(), node);
-		const baseClaimCommand = node.parents.VKeys().length > 1 || !canDeleteBaseClaim
-			? new UnlinkNode({mapID, parentID: argument._key, childID: node._key})
-			: new DeleteNode({mapID, nodeID: node._key});
-
-		const argumentCommand = new DeleteNode(E({mapID, nodeID: argument._key}));
-		if (baseClaimCommand) {
-			// temp; client isn't supposed to be able to set asSubcommand (we do it for now, since we don't have a dedicated DeleteArgument command created yet)
-			argumentCommand.parentCommand = {} as any;
-			argumentCommand.childrenToIgnore = [node._key];
-		}
-		const error = argumentCommand.Validate_Safe() ?? baseClaimCommand?.Validate_Safe();
-
-		return (
-			<VMenuItem text="Delete argument" enabled={error == null} title={error}
-				style={styles.vMenuItem} onClick={e=>{
-					if (e.button != 0) return;
-
-					ShowMessageBox({
-						title: `Delete "${argumentText}"`, cancelButton: true,
-						message: `Delete the argument "${argumentText}", and ${baseClaimCommand instanceof UnlinkNode ? "unlink" : "delete"} its base-claim?`,
-						onOK: async()=>{
-							// await command.Run();
-							// if deleting single-premise argument, first delete or unlink the base-claim
-							if (baseClaimCommand) {
-								await baseClaimCommand.Run();
-							}
-							await argumentCommand.Run();
-						},
-					});
-				}}/>
-		);
-	}
-}
-
-@Observer
-class DeleteNode_MenuItem extends BaseComponentPlus({} as SharedProps, {}) {
-	render() {
-		const {map, mapID, node, path, holderType, combinedWithParentArg} = this.props;
-		const componentBox = holderType != null;
-		if (!IsUserCreatorOrMod(MeID(), node) || componentBox) return null;
-		const nodeText = GetNodeDisplayText(node, path);
-
-		const command = new DeleteNode(E({mapID, nodeID: node._key}));
-		return (
-			<VMenuItem text={`Delete${combinedWithParentArg ? " claim" : ""}`}
-				enabled={command.Validate_Safe() == null} title={command.validateError}
-				style={styles.vMenuItem} onClick={e=>{
-					if (e.button != 0) return;
-
-					const contextStr = IsNodeSubnode(node) ? ", and its placement in-layer" : ", and its link with 1 parent";
-
-					ShowMessageBox({
-						title: `Delete "${nodeText}"`, cancelButton: true,
-						message: `Delete the node "${nodeText}"${contextStr}?`,
-						onOK: async()=>{
-							await command.Run();
-						},
-					});
-				}}/>
 		);
 	}
 }

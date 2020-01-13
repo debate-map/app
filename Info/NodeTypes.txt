@@ -10,9 +10,9 @@ Claim
 Forms:
 * base: Tabs are better than spaces for indentation.
 * negation: Spaces are better than tabs for indentation.
-* yes-no question [between variants (eg. "Are tabs better than spaces for indentation?" and its reverse), we choose the variant with the most support]
+* question [between variants (eg. "Are tabs better than spaces for indentation?" and its reverse), we choose the variant with the most support]
 
-A top-level claim (ie, hosted on a category) must either be an answer to a multi-choice question, or shown in yes-no-question form. (making them more neutral)
+A top-level claim (ie, hosted on a category) must either be an answer to a multi-choice question, or shown in question form. (making them more neutral)
 
 Content types:
 * term [sort of a content-type; in any case, it's shown on the content page]
