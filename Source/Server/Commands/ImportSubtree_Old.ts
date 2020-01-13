@@ -12,7 +12,7 @@ import {LinkNode_HighLevel} from "./LinkNode_HighLevel";
 import {LinkNode} from "./LinkNode";
 
 // for export from old site (see commented code in MI_ExportSubtree.tsx)
-export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: string, subtreeJSON: string}> {
+export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: string, subtreeJSON: string, nodesToLink?: {[key: string]: string}}> {
 	rootSubtreeData: SubtreeExportData_Old;
 
 	subs = [] as Command<any, any>[];
@@ -23,16 +23,17 @@ export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: st
 				mapID: {type: "string"},
 				parentNodeID: {type: "string"},
 				subtreeJSON: {type: "string"},
+				nodesToLink: {patternProperties: {"[0-9]+": {type: "string"}}},
 			},
 			required: ["subtreeJSON"],
 		}, this.payload, "Payload invalid");
 
-		const {subtreeJSON, parentNodeID} = this.payload;
+		const {subtreeJSON, parentNodeID, nodesToLink} = this.payload;
 		this.rootSubtreeData = FromJSON(subtreeJSON);
 
 		// clear each run, since validate gets called more than once
 		this.subs = [];
-		this.oldID_newID = {};
+		this.oldID_newID = nodesToLink ?? {};
 
 		this.ProcessSubtree(this.rootSubtreeData, parentNodeID);
 	}

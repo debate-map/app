@@ -7,7 +7,7 @@ import {RatingType} from "../nodeRatings/@RatingType";
 import {GetNodeRevision} from "../nodeRevisions";
 import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, HolderType, IsNodeSubnode} from "../nodes";
 import {ChildEntry, ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode";
-import {MapNodeRevision, TitlesMap, TitlesMap_baseKeys} from "./@MapNodeRevision";
+import {MapNodeRevision, TitlesMap, TitleKey_values} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
 import {PermissionGroupSet} from "../users/@User";
 
@@ -204,7 +204,7 @@ export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
 
 export function GetAllNodeRevisionTitles(nodeRevision: MapNodeRevision): string[] {
 	if (nodeRevision == null || nodeRevision.titles == null) return [];
-	return TitlesMap_baseKeys.map(key=>nodeRevision.titles[key]).filter(a=>a != null);
+	return TitleKey_values.map(key=>nodeRevision.titles[key]).filter(a=>a != null);
 }
 
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */

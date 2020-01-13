@@ -8,7 +8,8 @@ import {EquationAttachment} from "../nodeRevisions/@EquationAttachment";
 import {TermAttachment} from "../nodeRevisions/@TermAttachment";
 import {ReferencesAttachment} from "../nodeRevisions/@ReferencesAttachment";
 
-export const TitlesMap_baseKeys = ["base", "negation", "yesNoQuestion"];
+export type TitleKey = "base" | "negation" | "yesNoQuestion";
+export const TitleKey_values = ["base", "negation", "yesNoQuestion"];
 export class TitlesMap {
 	base?: string;
 	negation?: string;

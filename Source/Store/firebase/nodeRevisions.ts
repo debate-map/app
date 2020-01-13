@@ -1,6 +1,6 @@
 import {IsNaN} from "js-vextensions";
 import {WhereFilter, GetDoc, GetDocs, StoreAccessor} from "mobx-firelink";
-import {MapNodeRevision} from "./nodes/@MapNodeRevision";
+import {MapNodeRevision, TitleKey} from "./nodes/@MapNodeRevision";
 
 export const GetNodeRevision = StoreAccessor(s=>(id: string): MapNodeRevision=>{
 	if (id == null || IsNaN(id)) return null;
@@ -37,5 +37,10 @@ export const GetNodeRevisions = StoreAccessor(s=>(nodeID: string): MapNodeRevisi
 	// return entryMap ? entryMap.VValues(true).filter(a => a && a.node == nodeID) : [];
 	return GetDocs({
 		filters: [new WhereFilter("node", "==", nodeID)],
+	}, a=>a.nodeRevisions);
+});
+export const GetNodeRevisionsByTitle = StoreAccessor(s=>(title: string, titleKey: TitleKey): MapNodeRevision[]=>{
+	return GetDocs({
+		filters: [new WhereFilter(`titles.${titleKey}`, "==", title)],
 	}, a=>a.nodeRevisions);
 });

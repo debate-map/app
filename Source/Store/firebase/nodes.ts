@@ -1,5 +1,5 @@
 import {emptyArray, emptyArray_forLoading, IsNaN} from "js-vextensions";
-import {GetDoc, SlicePath, SplitStringBySlash_Cached, StoreAccessor} from "mobx-firelink";
+import {GetDoc, SlicePath, SplitStringBySlash_Cached, StoreAccessor, GetDocs, WhereFilter} from "mobx-firelink";
 import {GetPlayingTimeline, GetPlayingTimelineRevealNodes_UpToAppliedStep, GetPlayingTimelineStepIndex} from "Store/main/maps/mapStates/$mapState";
 import {PathSegmentToNodeID} from "Store/main/maps/mapViews/$mapView";
 import {GetNodeL2, GetNodeL3} from "./nodes/$node";
@@ -8,6 +8,8 @@ import {MapNodeType, MapNodeType_Info} from "./nodes/@MapNodeType";
 import {MeID} from "./users";
 import {CanGetBasicPermissions, GetUserAccessLevel, HasAdminPermissions, IsUserCreatorOrMod} from "./users/$user";
 import {PermissionGroupSet} from "./users/@User";
+import {TitleKey} from "./nodes/@MapNodeRevision";
+import {GetNodeRevisionsByTitle} from "./nodeRevisions";
 
 export enum HolderType {
 	Truth = 10,
@@ -35,6 +37,10 @@ export const GetNodesByIDs = StoreAccessor(s=>(ids: string[], emptyForLoading = 
 	const nodes = ids.map(id=>GetNode(id));
 	if (emptyForLoading && nodes.Any(a=>a == null)) return emptyArray_forLoading;
 	return nodes;
+});
+export const GetNodesByTitle = StoreAccessor(s=>(title: string, titleKey: TitleKey): MapNode[]=>{
+	let nodeRevisions = GetNodeRevisionsByTitle(title, titleKey);
+	return nodeRevisions.map(a=>GetNode(a.node));
 });
 
 export const GetNode = StoreAccessor(s=>(id: string)=>{
