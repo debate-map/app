@@ -94,12 +94,23 @@ class ImportSubtreeUI extends BaseComponentPlus({} as {controller: BoxController
 }
 
 function GetNodeTitlesInSubtree(subtreeData: SubtreeExportData_Old) {
-	let result = [];
+	/*let result = [];
 	let nodeTitle = subtreeData.current.titles.Excluding("_key" as any).VValues().FirstOrX(a=>a as any, "(empty title)");
 	if (nodeTitle) result.push(nodeTitle);
 	
 	for (const pair of CE(subtreeData.childrenData).Pairs()) {
 		result.push(...GetNodeTitlesInSubtree(pair.value));
+	}
+	return result;*/
+	let nodes = GetNodesInSubtree(subtreeData);
+	nodes = nodes.filter((node, index)=>!nodes.slice(0, index).Any(a=>a._key == node._key)); // remove duplicate nodes
+	return nodes.map(node=>node.current.titles.Excluding("_key" as any).VValues().FirstOrX(a=>a as any, "(empty title)"));
+}
+function GetNodesInSubtree(subtreeData: SubtreeExportData_Old) {
+	let result = [] as SubtreeExportData_Old[];
+	result.push(subtreeData.Excluding("childrenData") as SubtreeExportData_Old);
+	for (const pair of CE(subtreeData.childrenData).Pairs()) {
+		result.push(...GetNodesInSubtree(pair.value));
 	}
 	return result;
 }

@@ -7,6 +7,8 @@ import {MapNode} from "Store/firebase/nodes/@MapNode";
 import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 import {AsNodeL1} from "Store/firebase/nodes/$node";
 import {AddChildNode} from "./AddChildNode";
+import {LinkNode_HighLevel} from "./LinkNode_HighLevel";
+import {LinkNode} from "./LinkNode";
 
 // for export from old site (see commented code in MI_ExportSubtree.tsx)
 export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: string, subtreeJSON: string}> {
@@ -38,23 +40,32 @@ export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: st
 		const revision = WithoutHelpers(subtreeData.current).Excluding("node", "approved", "relative") as MapNodeRevision;
 		if (revision.image) revision.image.id = `${revision.image.id}`;
 
-		const addNodeCommand = new AddChildNode({mapID, parentID, node, revision}).MarkAsSubcommand(this);
-		addNodeCommand.Validate();
-		this.oldID_newID[subtreeData["_id"]] = addNodeCommand.sub_addNode.nodeID;
-		this.subs.push(addNodeCommand);
+		const oldID = subtreeData["_id"];
+		if (this.oldID_newID[oldID]) {
+			const newID = this.oldID_newID[oldID];
+			//const linkNodeCommand = new LinkNode_HighLevel({mapID, parentID, node, revision}).MarkAsSubcommand(this);
+			const linkNodeCommand = new LinkNode({mapID, parentID, childID: newID, childForm: subtreeData.link.form, childPolarity: subtreeData.link.polarity}).MarkAsSubcommand(this);
+			linkNodeCommand.Validate();
+			this.subs.push(linkNodeCommand);
+		} else {
+			const addNodeCommand = new AddChildNode({mapID, parentID, node, revision}).MarkAsSubcommand(this);
+			addNodeCommand.Validate();
+			this.oldID_newID[oldID] = addNodeCommand.sub_addNode.nodeID;
+			this.subs.push(addNodeCommand);
 
-		for (const pair of CE(subtreeData.childrenData).Pairs()) {
-			this.ProcessSubtree(pair.value, addNodeCommand.sub_addNode.nodeID);
-		}
+			for (const pair of CE(subtreeData.childrenData).Pairs()) {
+				this.ProcessSubtree(pair.value, addNodeCommand.sub_addNode.nodeID);
+			}
 
-		if (subtreeData.childrenOrder) {
-			//node.childrenOrder = subtreeData.childrenOrder.map(oldID=>{
-			addNodeCommand.sub_addNode.payload.node.childrenOrder = subtreeData.childrenOrder.SelectMany(oldID=>{
-				//AssertV(this.oldID_newID[oldID], `Cannot find newID for oldID: ${oldID}`);
-				// data from old site has childrenOrder's with deleted node-ids -- so just leave out the missing ones
-				if (this.oldID_newID[oldID] == null) return [];
-				return [this.oldID_newID[oldID]];
-			});
+			if (subtreeData.childrenOrder) {
+				//node.childrenOrder = subtreeData.childrenOrder.map(oldID=>{
+				addNodeCommand.sub_addNode.payload.node.childrenOrder = subtreeData.childrenOrder.SelectMany(oldChildID=>{
+					//AssertV(this.oldID_newID[oldID], `Cannot find newID for oldID: ${oldID}`);
+					// data from old site has childrenOrder's with deleted node-ids -- so just leave out the missing ones
+					if (this.oldID_newID[oldChildID] == null) return [];
+					return [this.oldID_newID[oldChildID]];
+				});
+			}
 		}
 	}
 
