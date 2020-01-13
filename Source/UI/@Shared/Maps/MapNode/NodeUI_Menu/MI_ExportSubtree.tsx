@@ -19,21 +19,26 @@ export type SubtreeExportData_Old = MapNodeL3 & {childrenData: {[key: string]: S
 
 /*
 ==========
-state = store.getState();
-selectedPath = RR.GetSelectedNodePath(state.main[state.main.page].selectedMapID);
 function GetSubtree(path) {
 	let pathSegments = path.split("/");
 	let nodeL3 = RR.GetNodeL3(path);
 	let result = RR.Clone(nodeL3);
 	result.childrenData = {};
 	for (let child of RR.GetNodeChildrenL3(nodeL3, path)) {
+		if (child == null) continue; // not yet loaded
 		if (pathSegments.Contains(child._id)) continue; // avoid loops
 		result.childrenData[child._id] = GetSubtree(`${path}/${child._id}`);
 	}
 	return result;
 }
+async function LogSelectedSubtree() {
+	let state = store.getState();
+	let selectedPath = RR.GetSelectedNodePath(state.main[state.main.page].selectedMapID);
+	let subtree = await GetAsync(()=>GetSubtree(selectedPath));
+	console.log(ToJSON(subtree));
+}
 
-subtree = GetSubtree(selectedPath);
-console.log(ToJSON(subtree));
+// usage
+LogSelectedSubtree();
 ==========
 */

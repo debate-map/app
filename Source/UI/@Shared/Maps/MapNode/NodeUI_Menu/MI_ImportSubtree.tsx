@@ -1,12 +1,12 @@
 import {BaseComponentPlus} from "react-vextensions";
 import {Observer} from "vwebapp-framework";
 import {VMenuItem} from "react-vmenu";
-import {HasModPermissions} from "Store/firebase/users/$user";
+import {HasModPermissions, HasAdminPermissions} from "Store/firebase/users/$user";
 import {MeID} from "Store/firebase/users";
 import {styles} from "Utils/UI/GlobalStyles";
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
 import {Column, Row, TextArea, Button} from "react-vcomponents";
-import {FromJSON, ToJSON} from "js-vextensions";
+import {FromJSON, ToJSON, CE} from "js-vextensions";
 import {ImportSubtree_Old} from "Server/Commands/ImportSubtree_Old";
 import {GetParentNodeID, GetNodeID} from "Store/firebase/nodes";
 import {MI_SharedProps} from "../NodeUI_Menu";
@@ -19,7 +19,7 @@ export class MI_ImportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}
 		const sharedProps = this.props as MI_SharedProps;
 		if (!HasModPermissions(MeID())) return null;
 		return (
-			<VMenuItem text="Import subtree" enabled={HasModPermissions(MeID())} style={styles.vMenuItem} onClick={async e=>{
+			<VMenuItem text="Import subtree" enabled={HasAdminPermissions(MeID())} style={styles.vMenuItem} onClick={async e=>{
 				if (e.button != 0) return;
 				let ui: ImportSubtreeUI;
 				let controller = ShowMessageBox({
@@ -37,8 +37,10 @@ class ImportSubtreeUI extends BaseComponentPlus({} as {controller: BoxController
 	render() {
 		const {mapID, node, path, controller} = this.props;
 		const {subtreeJSON, error, dbUpdates} = this.state;
+
+		let newNodeTitles = dbUpdates ? GetNodeTitlesInSubtree(FromJSON(subtreeJSON) as SubtreeExportData_Old) : [];
 		return (
-			<Column style={{width: 1000}}>
+			<Column style={{width: 1500}}>
 				<Row>
 					<Column style={{width: 500}}>
 						<Row>Subtree JSON:</Row>
@@ -47,6 +49,10 @@ class ImportSubtreeUI extends BaseComponentPlus({} as {controller: BoxController
 					<Column style={{width: 500}}>
 						<Row>DBUpdates:</Row>
 						<TextArea value={error ?? ToJSON(dbUpdates, null, 2)} rows={30} editable={false}/>
+					</Column>
+					<Column style={{width: 500}}>
+						<Row>New node titles{newNodeTitles.length ? ` (${newNodeTitles.length})` : ""}:</Row>
+						<TextArea value={newNodeTitles.join("\n")} rows={30} editable={false}/>
 					</Column>
 				</Row>
 				<Row mt={5}>
@@ -63,7 +69,7 @@ class ImportSubtreeUI extends BaseComponentPlus({} as {controller: BoxController
 						// todo: remove need for this workaround
 						let error = this.importCommand.Validate_Safe();
 						if (error) {
-							this.SetState({error});
+							this.SetState({error, dbUpdates: null});
 							return;
 						}
 
@@ -85,4 +91,15 @@ class ImportSubtreeUI extends BaseComponentPlus({} as {controller: BoxController
 			</Column>
 		);
 	}
+}
+
+function GetNodeTitlesInSubtree(subtreeData: SubtreeExportData_Old) {
+	let result = [];
+	let nodeTitle = subtreeData.current.titles.Excluding("_key" as any).VValues().FirstOrX(a=>a as any, "(empty title)");
+	if (nodeTitle) result.push(nodeTitle);
+	
+	for (const pair of CE(subtreeData.childrenData).Pairs()) {
+		result.push(...GetNodeTitlesInSubtree(pair.value));
+	}
+	return result;
 }

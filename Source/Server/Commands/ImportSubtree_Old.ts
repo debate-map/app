@@ -33,8 +33,9 @@ export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: st
 	ProcessSubtree(subtreeData: SubtreeExportData_Old, parentID: string) {
 		const {mapID} = this.payload;
 
-		const node = AsNodeL1(WithoutHelpers(subtreeData).Excluding("childrenData" as any, "finalPolarity", "currentRevision", "parents", "children"));
-		const revision = WithoutHelpers(subtreeData.current).Excluding("node") as MapNodeRevision;
+		const node = AsNodeL1(WithoutHelpers(subtreeData).Excluding("childrenData" as any, "finalPolarity", "currentRevision", "parents", "children", "childrenOrder"));
+		const revision = WithoutHelpers(subtreeData.current).Excluding("node", "approved", "relative") as MapNodeRevision;
+		if (revision.image) revision.image.id = `${revision.image.id}`;
 
 		const addNodeCommand = new AddChildNode({mapID, parentID, node, revision}).MarkAsSubcommand(this);
 		addNodeCommand.Validate();
