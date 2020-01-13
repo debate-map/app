@@ -113,14 +113,17 @@ class ImportSubtreeUI extends BaseComponentPlus(
 							message: `Completed import of subtree. Nodes added: ${nodesAdded}`,
 						});
 					}}/>
-					<Button ml={5} text="ApplyDBUpdates (standard)" enabled={dbUpdates?.VKeys().length > 0} onClick={async ()=>{
-						let result = await this.importCommand.Run();
-						let nodesAdded = this.importCommand.subs.filter(a=>a instanceof AddChildNode).length;
-						ShowMessageBox({
-							title: "Subtree imported",
-							message: `Completed import of subtree. Nodes added: ${nodesAdded}`,
-						});
-					}}/>
+					<Button ml={5} text="ApplyDBUpdates (standard; recommended)"
+						title="It's recommended to use the standard option, since it's what we'll need to use when we don't have unrestricted, direct client-access."
+						enabled={dbUpdates?.VKeys().length > 0}
+						onClick={async ()=>{
+							let result = await this.importCommand.Run();
+							let nodesAdded = this.importCommand.subs.filter(a=>a instanceof AddChildNode).length;
+							ShowMessageBox({
+								title: "Subtree imported",
+								message: `Completed import of subtree. Nodes added: ${nodesAdded}`,
+							});
+						}}/>
 					<Button ml="auto" text="Close" onClick={()=> {
 						controller.Close();
 					}}/>

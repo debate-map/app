@@ -45,7 +45,7 @@ export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: st
 		const {mapID} = this.payload;
 
 		const node = AsNodeL1(WithoutHelpers(subtreeData).Excluding("childrenData" as any, "finalPolarity", "currentRevision", "parents", "children", "childrenOrder"));
-		const revision = WithoutHelpers(subtreeData.current).Excluding("node", "approved", "relative") as MapNodeRevision;
+		const revision = WithoutHelpers(subtreeData.current).Excluding("node", "approved", "relative", "voteLevel") as MapNodeRevision;
 		if (revision.image) revision.image.id = `${revision.image.id}`;
 		if (revision["contentNode"]) {
 			revision.VSet({quote: revision["contentNode"], contentNode: DEL});
