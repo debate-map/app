@@ -30,6 +30,7 @@ export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: st
 		this.ProcessSubtree(this.rootSubtreeData, parentNodeID);
 	}
 
+	oldID_newID = {} as {[key: number]: string};
 	ProcessSubtree(subtreeData: SubtreeExportData_Old, parentID: string) {
 		const {mapID} = this.payload;
 
@@ -39,10 +40,21 @@ export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: st
 
 		const addNodeCommand = new AddChildNode({mapID, parentID, node, revision}).MarkAsSubcommand(this);
 		addNodeCommand.Validate();
+		this.oldID_newID[subtreeData["_id"]] = addNodeCommand.sub_addNode.nodeID;
 		this.subs.push(addNodeCommand);
 
 		for (const pair of CE(subtreeData.childrenData).Pairs()) {
 			this.ProcessSubtree(pair.value, addNodeCommand.sub_addNode.nodeID);
+		}
+
+		if (subtreeData.childrenOrder) {
+			//node.childrenOrder = subtreeData.childrenOrder.map(oldID=>{
+			addNodeCommand.sub_addNode.payload.node.childrenOrder = subtreeData.childrenOrder.SelectMany(oldID=>{
+				//AssertV(this.oldID_newID[oldID], `Cannot find newID for oldID: ${oldID}`);
+				// data from old site has childrenOrder's with deleted node-ids -- so just leave out the missing ones
+				if (this.oldID_newID[oldID] == null) return [];
+				return [this.oldID_newID[oldID]];
+			});
 		}
 	}
 
