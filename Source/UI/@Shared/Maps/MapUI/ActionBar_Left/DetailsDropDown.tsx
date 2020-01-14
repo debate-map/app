@@ -14,6 +14,7 @@ import {AddNodeRevision} from "Server/Commands/AddNodeRevision";
 import {Clone, ToJSON, FromJSON, E} from "js-vextensions";
 import {SetMapFeatured} from "Server/Commands/SetMapFeatured";
 import {CanEditNode, IsUserCreatorOrMod} from "Store/firebase/users/$user";
+import {runInAction} from "mobx";
 import {DeleteMap} from "../../../../../Server/Commands/DeleteMap";
 import {UpdateMapDetails} from "../../../../../Server/Commands/UpdateMapDetails";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
@@ -117,7 +118,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 										message: `Delete the map "${map.name}"?`,
 										onOK: async()=>{
 											await new DeleteMap({mapID: map._key}).Run();
-											store.main.public.selectedMapID = null;
+											runInAction("DeleteMap.onDone", ()=>store.main.public.selectedMapID = null);
 										},
 									});
 								}}/>
