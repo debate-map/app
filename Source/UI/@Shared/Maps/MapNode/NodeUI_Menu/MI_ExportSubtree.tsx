@@ -34,7 +34,15 @@ function GetSubtree(path) {
 async function LogSelectedSubtree() {
 	let state = store.getState();
 	let selectedPath = RR.GetSelectedNodePath(state.main[state.main.page].selectedMapID);
-	let subtree = await GetAsync(()=>GetSubtree(selectedPath));
+	let subtree = await GetAsync(()=>{
+		let selectedNode = RR.GetNodeL3(selectedPath);
+		let selectedNode_parent = RR.GetParentNodeL3(selectedPath);
+		let selectedPath_final = selectedPath;
+		if (RR.IsPremiseOfSinglePremiseArgument(selectedNode, selectedNode_parent)) {
+			selectedPath_final = RR.SlicePath(selectedPath, 1);
+		}
+		return GetSubtree(selectedPath_final);
+	});
 	console.log(ToJSON(subtree));
 }
 

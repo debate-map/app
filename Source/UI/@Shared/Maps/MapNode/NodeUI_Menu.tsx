@@ -10,6 +10,7 @@ import {GetOpenMapID} from "Store/main";
 import {GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState";
 import {Observer} from "vwebapp-framework";
+import {SlicePath} from "mobx-firelink";
 import {GetPathsToNodesChangedSinceX} from "../../../../Store/firebase/mapNodeEditTimes";
 import {Map} from "../../../../Store/firebase/maps/@Map";
 import {GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
@@ -53,6 +54,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 			var pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == path || a.startsWith(`${path}/`)); // also include self, for this
 		}
 		const parent = GetParentNodeL3(path);
+		//const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
 
 		const copiedNode = GetCopiedNode();
 		const copiedNodePath = GetCopiedNodePath();
@@ -159,6 +161,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 
 							runInAction("NodeUIMenu.Cut", ()=>{
 								store.main.maps.copiedNodePath = path;
+								//store.main.maps.copiedNodePath = outerPath;
 								store.main.maps.copiedNodePath_asCut = true;
 							});
 						}}/>}
@@ -182,6 +185,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 
 							runInAction("NodeUIMenu.Copy", ()=>{
 								store.main.maps.copiedNodePath = path;
+								//store.main.maps.copiedNodePath = outerPath;
 								store.main.maps.copiedNodePath_asCut = false;
 							});
 						}}/>}

@@ -3,7 +3,7 @@ import {AssertV, Command, MergeDBUpdates} from "mobx-firelink";
 import {GetMap} from "Store/firebase/maps";
 import {Map} from "Store/firebase/maps/@Map";
 import {GetHolderType, GetNode, GetParentNodeID, GetParentNodeL3} from "Store/firebase/nodes";
-import {GetNodeL2, GetNodeL3} from "Store/firebase/nodes/$node";
+import {GetNodeL2, GetNodeL3, IsPremiseOfMultiPremiseArgument} from "Store/firebase/nodes/$node";
 import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 import {MeID} from "Store/firebase/users";
 import {CanContributeToNode} from "Store/firebase/users/$user";
@@ -18,7 +18,9 @@ import {UUID} from "vwebapp-framework";
 
 type Payload = {
 	mapID: string, oldParentID: string, newParentID: string, nodeID: string,
-	newForm?: ClaimForm, newPolarity?: Polarity, allowCreateWrapperArg?: boolean,
+	newForm?: ClaimForm, newPolarity?: Polarity,
+	allowCreateWrapperArg?: boolean,
+	//linkAsArgument?: boolean,
 	unlinkFromOldParent?: boolean, deleteOrphanedArgumentWrapper?: boolean
 };
 
@@ -55,7 +57,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		let {mapID, oldParentID, newParentID, nodeID, newForm, allowCreateWrapperArg, unlinkFromOldParent, deleteOrphanedArgumentWrapper, newPolarity} = this.payload;
 		AssertV(oldParentID !== nodeID, "Old parent-id and child-id cannot be the same!");
 		AssertV(newParentID !== nodeID, "New parent-id and child-id cannot be the same!");
-		AssertV(oldParentID !== newParentID, "Old-parent-id and new-parent-id cannot be the same!");
+		//AssertV(oldParentID !== newParentID, "Old-parent-id and new-parent-id cannot be the same!");
 
 		this.returnData = {};
 
@@ -68,6 +70,8 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		this.newParent_data = GetNodeL2(newParentID);
 		AssertV(this.newParent_data, "newParent_data is null.");
 
+		let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && allowCreateWrapperArg;
+		AssertV(oldParentID !== newParentID || pastingPremiseAsRelevanceArg, "Old-parent-id and new-parent-id cannot be the same! (unless changing between truth-arg and relevance-arg)");
 		AssertV(CanContributeToNode(MeID(), newParentID), "Cannot paste under a node with contributions disabled.");
 
 		// if (command.payload.unlinkFromOldParent && node.parents.VKeys().length == 1 && newParentPath.startsWith(draggedNodePath)) {
