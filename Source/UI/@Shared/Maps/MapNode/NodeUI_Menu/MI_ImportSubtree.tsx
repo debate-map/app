@@ -3,7 +3,7 @@ import {Observer, TreeView} from "vwebapp-framework";
 import {VMenuItem} from "react-vmenu";
 import {HasModPermissions, HasAdminPermissions} from "Store/firebase/users/$user";
 import {MeID} from "Store/firebase/users";
-import {styles} from "Utils/UI/GlobalStyles";
+import {styles, ES} from "Utils/UI/GlobalStyles";
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
 import {Column, Row, TextArea, Button, CheckBox} from "react-vcomponents";
 import {FromJSON, ToJSON, CE, Clone} from "js-vextensions";
@@ -13,6 +13,7 @@ import {MI_SharedProps} from "../NodeUI_Menu";
 import {SubtreeExportData_Old} from "./MI_ExportSubtree";
 import {AddChildNode} from "Server/Commands/AddChildNode";
 import {ApplyDBUpdates} from "mobx-firelink";
+import {ScrollView} from "react-vscrollview";
 
 @Observer
 export class MI_ImportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {
@@ -54,11 +55,11 @@ class ImportSubtreeUI extends BaseComponentPlus(
 			newNodes = GetNodesInSubtree(subtreeData);
 		} catch {}
 		return (
-			<Column style={{width: 1500}}>
-				<Row>
+			<Column style={{width: 1500, height: 700}}>
+				<Row style={{flex: 1, minHeight: 0}}>
 					<Column style={{width: 500}}>
 						<Row>Subtree JSON:</Row>
-						<TextArea value={subtreeJSON} rows={30} onChange={val=>this.SetState({subtreeJSON: val})}/>
+						<TextArea value={subtreeJSON} style={{flex: 1}} onChange={val=>this.SetState({subtreeJSON: val})}/>
 					</Column>
 					<Column style={{width: 500}}>
 						<Row>New nodes{newNodes.length ? ` (${newNodes.length})` : ""}: (checked: link existing, instead of creating new)</Row>
@@ -76,12 +77,14 @@ class ImportSubtreeUI extends BaseComponentPlus(
 								</Row>
 							)
 						})*/}
-						{subtreeData &&
-							<SubtreeTreeView node={subtreeData} path={[subtreeData._key]} nodesToLink={nodesToLink} setNodesToLink={val=>this.SetState({nodesToLink: val})}/>}
+						<ScrollView style={ES({flex: 1})}>
+							{subtreeData &&
+								<SubtreeTreeView node={subtreeData} path={[subtreeData._key]} nodesToLink={nodesToLink} setNodesToLink={val=>this.SetState({nodesToLink: val})}/>}
+						</ScrollView>
 					</Column>
 					<Column style={{width: 500}}>
 						<Row>DBUpdates:</Row>
-						<TextArea value={error ?? ToJSON(dbUpdates, null, 2)} rows={30} editable={false}/>
+						<TextArea value={error ?? ToJSON(dbUpdates, null, 2)} style={{flex: 1}} editable={false}/>
 					</Column>
 				</Row>
 				<Row mt={5}>
