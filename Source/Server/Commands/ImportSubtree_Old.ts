@@ -64,7 +64,7 @@ export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: st
 			linkNodeCommand.Validate();
 			this.subs.push(linkNodeCommand);
 		} else {
-			const addNodeCommand = (this.subs_last[this.subs.length] as AddChildNode) ?? new AddChildNode({mapID, parentID, node, revision, link: subtreeData.link}).MarkAsSubcommand(this);
+			const addNodeCommand = (this.subs_last[this.subs.length] as AddChildNode) ?? new AddChildNode({mapID, parentID, node, revision, link: WithoutHelpers(subtreeData.link)}).MarkAsSubcommand(this);
 			addNodeCommand.Validate();
 			this.oldID_newID[oldID] = addNodeCommand.sub_addNode.nodeID;
 			this.subs.push(addNodeCommand);
