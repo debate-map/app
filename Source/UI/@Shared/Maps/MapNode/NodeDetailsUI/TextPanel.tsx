@@ -174,7 +174,7 @@ class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 				<Row center mt={5}>
 					<Text style={{fontWeight: "bold"}}>Context (terms):</Text>
 					<InfoButton ml={5} text={`
-						Context elements are basically term definitions; matching text become hoverable, showing the definition and some other details.
+						Context elements are basically term definitions; matching text becomes hoverable, showing the definition and some other details.
 
 						To add an entry, press "+", type the term you want to define, then find a matching definition or create a new one.
 						
