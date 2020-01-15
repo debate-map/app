@@ -48,13 +48,13 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 	render() {
 		const {map, node, path, inList, holderType} = this.props;
 
+		const parent = GetParentNodeL3(path);
+		const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
 		if (map) {
 			const sinceTime = GetTimeFromWhichToShowChangedNodes(map._key);
 			const pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._key, sinceTime);
-			var pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == path || a.startsWith(`${path}/`)); // also include self, for this
+			var pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == outerPath || a.startsWith(`${outerPath}/`)); // also include self, for this
 		}
-		const parent = GetParentNodeL3(path);
-		const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
 
 		const copiedNode = GetCopiedNode();
 		const copiedNodePath = GetCopiedNodePath();
