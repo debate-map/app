@@ -54,7 +54,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 			var pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == path || a.startsWith(`${path}/`)); // also include self, for this
 		}
 		const parent = GetParentNodeL3(path);
-		//const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
+		const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
 
 		const copiedNode = GetCopiedNode();
 		const copiedNodePath = GetCopiedNodePath();
@@ -128,7 +128,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						onClick={e=>{
 							if (e.button != 0) return;
 							for (const path of pathsToChangedInSubtree) {
-								runInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path), Date.now()));
+								runInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(outerPath), Date.now()));
 							}
 						}}/>}
 				{inList && GetOpenMapID() != null &&
