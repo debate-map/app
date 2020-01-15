@@ -11,6 +11,7 @@ import {store} from "Store";
 import {GetScreenRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, YoutubePlayer, YoutubePlayerState, YoutubePlayerUI, ClassHooks, PosChangeSource} from "vwebapp-framework";
 import {ES} from "Utils/UI/GlobalStyles";
 import {GetSelectedTimeline, GetPlayingTimelineStepIndex, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState";
+import {zIndexes} from "Utils/UI/ZIndexes";
 import {StepUI} from "./PlayingSubpanel/StepUI";
 
 /* export class PlayingSubpanel extends BaseComponentPlus(
@@ -374,7 +375,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 					<Row ml="auto" style={{position: "relative"}}>
 						<DropDown>
 							<DropDownTrigger><Button text="Options" style={{height: "100%"}}/></DropDownTrigger>
-							<DropDownContent style={{right: 0, width: 300, zIndex: 11}}><Column>
+							<DropDownContent style={{right: 0, width: 300, zIndex: zIndexes.subNavBar}}><Column>
 								<Row>
 									<Text>Node-reveal highlight time:</Text>
 									<Spinner ml={5} min={0} value={nodeRevealHighlightTime} onChange={val=>runInAction("PlayingSubpanel.nodeRevealHighlightTime.onChange", ()=>store.main.timelines.nodeRevealHighlightTime = val)}/>

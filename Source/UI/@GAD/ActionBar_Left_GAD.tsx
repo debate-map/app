@@ -12,6 +12,7 @@ import {runInAction} from "mobx";
 import {E} from "js-vextensions";
 import {DetailsDropDown} from "UI/@Shared/Maps/MapUI/ActionBar_Left/DetailsDropDown";
 import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
+import {zIndexes} from "Utils/UI/ZIndexes";
 import {Button_GAD} from "./GADButton";
 
 @Observer
@@ -24,7 +25,7 @@ export class ActionBar_Left_GAD extends BaseComponentPlus({} as {map: Map, subNa
 
 		return (
 			<nav style={{
-				position: "absolute", zIndex: 1, left: 0, width: `calc(50% - ${subNavBarWidth / 2}px)`, top: 0, textAlign: "center",
+				position: "absolute", zIndex: zIndexes.actionBar, left: 0, width: `calc(50% - ${subNavBarWidth / 2}px)`, top: 0, textAlign: "center",
 				// background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
 			}}>
 				<Row center style={E(

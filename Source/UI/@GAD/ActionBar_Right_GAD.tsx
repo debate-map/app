@@ -5,6 +5,7 @@ import {LayoutDropDown} from "UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDo
 import {Map} from "Store/firebase/maps/@Map";
 import {HSLA} from "vwebapp-framework";
 import {E} from "js-vextensions";
+import {zIndexes} from "Utils/UI/ZIndexes";
 
 export class ActionBar_Right_GAD extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number}, {}) {
 	render() {
@@ -12,7 +13,7 @@ export class ActionBar_Right_GAD extends BaseComponentPlus({} as {map: Map, subN
 		const tabBarWidth = 104;
 		return (
 			<nav style={{
-				position: "absolute", zIndex: 1, left: `calc(50% + ${subNavBarWidth / 2}px)`, right: 0, top: 0, textAlign: "center",
+				position: "absolute", zIndex: zIndexes.actionBar, left: `calc(50% + ${subNavBarWidth / 2}px)`, right: 0, top: 0, textAlign: "center",
 				// background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
 			}}>
 				<Row center style={E(

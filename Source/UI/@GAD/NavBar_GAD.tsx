@@ -12,6 +12,7 @@ import {UserPanel} from "UI/@Shared/NavBar/UserPanel";
 import {ResetCurrentDBRoot} from "UI/More/Admin/ResetCurrentDBRoot";
 import {Observer, Link, HSL} from "vwebapp-framework";
 import {GetDocs} from "mobx-firelink";
+import {zIndexes} from "Utils/UI/ZIndexes";
 import {colors} from "../../Utils/UI/GlobalStyles";
 
 // main
@@ -25,7 +26,7 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 		const dbNeedsInit = GetDocs({undefinedForLoading: true}, a=>a.maps) === null; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
 		return (
 			<nav style={{
-				position: "relative", zIndex: 11, height: 150, boxShadow: colors.navBarBoxShadow,
+				position: "relative", zIndex: zIndexes.navBar, height: 150, boxShadow: colors.navBarBoxShadow,
 				// background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
 				// background: 'rgba(0,0,0,1)',
 			}}>
@@ -69,7 +70,7 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 						<NavBarPanelButton text={DeepGet(auth, "displayName") ? auth.displayName.match(/(.+?)( |$)/)[1] : "Login"} panel="profile" corner="top-right"/>
 					</span>
 					<div style={{
-						position: "fixed", display: "flex", zIndex: 11, right: 0, top: 150, maxHeight: "calc(100% - 150px - 30px)",
+						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: 150, maxHeight: "calc(100% - 150px - 30px)",
 						boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 0 -150px -150px)", // display: 'table',
 					}}>
 						{topRightOpenPanel == "search" && <SearchPanel/>}

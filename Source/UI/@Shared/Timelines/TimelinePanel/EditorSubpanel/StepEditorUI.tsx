@@ -23,6 +23,7 @@ import {VMenuStub, VMenuItem} from "react-vmenu";
 import {styles} from "Utils/UI/GlobalStyles";
 import {AddTimelineStep} from "Server/Commands/AddTimelineStep";
 import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
+import {zIndexes} from "Utils/UI/ZIndexes";
 
 export enum PositionOptionsEnum {
 	Full = null,
@@ -89,7 +90,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 					style={E(
 						{background: "rgba(0,0,0,.7)", borderRadius: 10, border: "1px solid rgba(255,255,255,.15)"},
 						dragInfo && dragInfo.provided.draggableProps.style,
-						asDragPreview && {zIndex: 10},
+						asDragPreview && {zIndex: zIndexes.draggable},
 					)}>
 					<Row center p="7px 10px" {...(dragInfo && dragInfo.provided.dragHandleProps)}>
 						<Pre>Step {index + 1}</Pre>

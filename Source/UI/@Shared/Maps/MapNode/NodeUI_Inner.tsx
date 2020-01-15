@@ -40,6 +40,7 @@ import {SubPanel} from "./NodeUI_Inner/SubPanel";
 import {TitlePanel} from "./NodeUI_Inner/TitlePanel";
 import {MapNodeUI_LeftBox} from "./NodeUI_LeftBox";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu";
+import {zIndexes} from "Utils/UI/ZIndexes";
 
 // drag and drop
 // ==========
@@ -281,7 +282,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							{boxShadow: `rgba(255,255,0,${1 - (timeSinceRevealedByTimeline / nodeRevealHighlightTime)}) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px`},
 						style,
 						dragInfo && dragInfo.provided.draggableProps.style,
-						asDragPreview && {zIndex: 10},
+						asDragPreview && {zIndex: zIndexes.draggable},
 					)}
 					padding={GetPaddingForNode(node, isSubnode)}
 					onClick={onClick}

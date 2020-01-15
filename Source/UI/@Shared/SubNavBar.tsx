@@ -3,6 +3,7 @@ import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {rootPageDefaultChilds} from "Utils/URL/URLs";
 import {ActionFunc, Link, Observer} from "vwebapp-framework";
 import {store, RootState} from "Store";
+import {zIndexes} from "Utils/UI/ZIndexes";
 import {colors} from "../../Utils/UI/GlobalStyles";
 
 // @Observer
@@ -11,7 +12,7 @@ export class SubNavBar extends BaseComponent<{fullWidth?: boolean}, {}> {
 		const {fullWidth, children} = this.props;
 		return (
 			<nav className="clickThrough" style={{
-				position: "absolute", zIndex: 11, top: 0, width: "100%", textAlign: "center",
+				position: "absolute", zIndex: zIndexes.subNavBar, top: 0, width: "100%", textAlign: "center",
 				// background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
 				// background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
 			}}>

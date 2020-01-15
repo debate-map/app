@@ -18,6 +18,7 @@ import {ReputationPanel} from "./NavBar/ReputationPanel";
 import {SearchPanel} from "./NavBar/SearchPanel";
 import {StreamPanel} from "./NavBar/StreamPanel";
 import {UserPanel} from "./NavBar/UserPanel";
+import {zIndexes} from "Utils/UI/ZIndexes";
 
 // main
 // ==========
@@ -42,7 +43,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 		const dbNeedsInit = GetDocs({undefinedForLoading: true}, a=>a.maps) === null; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
 		return (
 			<nav style={{
-				position: "relative", zIndex: 11, padding: "0 10px", boxShadow: colors.navBarBoxShadow,
+				position: "relative", zIndex: zIndexes.navBar, padding: "0 10px", boxShadow: colors.navBarBoxShadow,
 				// background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
 				background: "rgba(0,0,0,1)",
 			}}>
@@ -60,7 +61,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 						} panel="reputation" corner="top-left"/> */}
 					</span>
 					<div style={{
-						position: "fixed", display: "flex", zIndex: 11, left: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",
+						position: "fixed", display: "flex", zIndex: zIndexes.navBar, left: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",
 						boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 -150px -150px 0)", // display: 'table'
 					}}>
 						{topLeftOpenPanel == "stream" && <StreamPanel/>}
@@ -100,7 +101,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 						<NavBarPanelButton text={fire.userInfo?.displayName ? fire.userInfo.displayName.match(/(.+?)( |$)/)[1] : "Sign in"} panel="profile" corner="top-right"/>
 					</span>
 					<div style={{
-						position: "fixed", display: "flex", zIndex: 11, right: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",
+						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",
 						boxShadow: colors.navBarBoxShadow, clipPath: "inset(0 0 -150px -150px)", // display: 'table',
 					}}>
 						{topRightOpenPanel == "search" && <SearchPanel/>}
