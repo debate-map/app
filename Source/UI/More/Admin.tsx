@@ -1,6 +1,6 @@
 import {Assert, AwaitTree, SleepAsync, E, IsObject} from "js-vextensions";
 import {dbVersion} from "Main";
-import {ApplyDBUpdates_InChunks, ConvertDataToValidDBUpdates, DBPath, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached} from "mobx-firelink";
+import {ConvertDataToValidDBUpdates, DBPath, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached, ApplyDBUpdates} from "mobx-firelink";
 import {Button, Column, Row} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
@@ -275,5 +275,5 @@ export async function ImportCollectionsData(versionRootPath: string, collections
 	}
 
 	Log("Importing db-data into path. Path: ", versionRootPath, " DBData: ", collectionsDataToImport, " DBUpdates: ", allDBUpdates);
-	await ApplyDBUpdates_InChunks({}, allDBUpdates, versionRootPath);
+	await ApplyDBUpdates({}, allDBUpdates, versionRootPath);
 }

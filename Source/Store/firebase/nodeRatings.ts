@@ -1,4 +1,4 @@
-import {Lerp, emptyObj, ToJSON, Assert} from "js-vextensions";
+import {Lerp, emptyObj, ToJSON, Assert, IsNumber} from "js-vextensions";
 import {WeightingType} from "Store/main";
 import {GetDoc, StoreAccessor, GetDocs} from "mobx-firelink";
 import {observable} from "mobx";
@@ -78,7 +78,7 @@ export const GetRatingAverage = StoreAccessor(s=>(nodeID: string, ratingType: Ra
 	const ratings = GetRatings(nodeID, ratingType, filter);
 	if (ratings.length == 0) return null;
 	const result = ratings.map(a=>a.value).Average().RoundTo(1);
-	Assert(result >= 0 && result <= 100, `Rating-average (${result}) not in range.`);
+	Assert(result >= 0 && result <= 100, `Rating-average (${result}) not in range. Invalid ratings: ${ToJSON(ratings.map(a=>a.value).filter(a=>!IsNumber(a)))}`);
 	return result;
 });
 export const GetRatingAverage_AtPath = StoreAccessor(s=>(node: MapNodeL3, ratingType: RatingType, filter?: RatingFilter, resultIfNoData = null): number=>{

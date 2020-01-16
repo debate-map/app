@@ -1,5 +1,5 @@
 import {ArgumentType} from "Store/firebase/nodes/@MapNodeRevision";
-import {emptyObj} from "js-vextensions";
+import {emptyObj, IsNumber, Assert} from "js-vextensions";
 import {StoreAccessor} from "mobx-firelink";
 import {GetRatingAverage, GetRatingSet, GetRatingValue} from "../../Store/firebase/nodeRatings";
 import {Rating, RatingsSet} from "../../Store/firebase/nodeRatings/@RatingsRoot";
@@ -27,7 +27,7 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 		combinedTruthOfPremises = premiseProbabilities.reduce((total, current)=>total * current, 1);
 	} else if (argument.current.argumentType == ArgumentType.AnyTwo) {
 		const strongest = premiseProbabilities.Max(null, true);
-		const secondStrongest = premiseProbabilities.length > 1 ? premiseProbabilities.Except(strongest).Max(null, true) : 0;
+		const secondStrongest = premiseProbabilities.length > 1 ? premiseProbabilities.Except({excludeEachOnlyOnce: true}, strongest).Max(null, true) : 0;
 		combinedTruthOfPremises = strongest * secondStrongest;
 	} else {
 		combinedTruthOfPremises = premiseProbabilities.Max(null, true);
@@ -40,6 +40,7 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 	}
 	// let strengthForType = adjustment.Distance(50) / 50;
 	const result = combinedTruthOfPremises * (relevance / 100);
+	Assert(IsNumber(result), `Impact pseudo-rating is null. @combinedTruthOfPremises:${combinedTruthOfPremises} @relevance:${relevance}`);
 
 	return {
 		_key: userID,
