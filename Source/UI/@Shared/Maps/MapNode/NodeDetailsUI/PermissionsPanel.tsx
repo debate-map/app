@@ -8,6 +8,8 @@ import {MapNodeRevision_Defaultable, PermissionInfoType} from "Store/firebase/no
 import {AccessLevel, globalMapID} from "Store/firebase/nodes/@MapNode";
 import {HasAdminPermissions, HasModPermissions, GetUserAccessLevel} from "Store/firebase/users/$user";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
+import {GetMap} from "Store/firebase/maps";
+import {MapType} from "Store/firebase/maps/@Map";
 
 // @Observer
 // export class PermissionsOptions extends BaseComponent<Pick<SharedProps, 'newData' | 'newRevisionData' | 'enabled' | 'Change'> & {forDefaultsInMap?: boolean}, {}> {
@@ -15,6 +17,7 @@ export class PermissionsPanel extends BaseComponent<Pick<NodeDetailsUI_SharedPro
 	render() {
 		const {newRevisionData, enabled, Change, forDefaultsInMap} = this.props;
 		const openMapID = GetOpenMapID();
+		const openMap = GetMap(openMapID);
 
 		// probably temp
 		if (newRevisionData.permission_edit == null) {
@@ -61,7 +64,7 @@ export class PermissionsPanel extends BaseComponent<Pick<NodeDetailsUI_SharedPro
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{display: "flex", alignItems: "center"}}>
 					<Text>Contribute:</Text>
-					<Select options={GetEntries(PermissionInfoType).filter(a=>(openMapID == globalMapID ? a.value == PermissionInfoType.Anyone : true))} enabled={enabled}
+					<Select options={GetEntries(PermissionInfoType).filter(a=>(openMap?.type != MapType.Private && !HasModPermissions(MeID()) ? a.value == PermissionInfoType.Anyone : true))} enabled={enabled}
 						value={newRevisionData.permission_contribute.type}
 						// onChange={val => Change(val == AccessLevel.Basic ? delete newRevisionData.accessLevel : newRevisionData.accessLevel = val)}/>
 						onChange={val=>Change(newRevisionData.permission_contribute.type = val)}/>
