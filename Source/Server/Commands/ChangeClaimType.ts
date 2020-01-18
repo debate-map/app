@@ -1,11 +1,11 @@
 import {GetValues_ForSchema} from "js-vextensions";
-import {AssertV, Command} from "mobx-firelink";
+import {AssertV, AV, Command} from "mobx-firelink";
 import {MapEdit, UserEdit} from "Server/CommandMacros";
 import {AttachmentType, GetAttachmentType} from "Store/firebase/nodeRevisions/@AttachmentType";
 import {AddSchema, AssertValidate, GenerateUUID} from "vwebapp-framework";
-import {GetNodeL2, AsNodeL1} from "../../Store/firebase/nodes/$node";
 import {EquationAttachment} from "../../Store/firebase/nodeRevisions/@EquationAttachment";
-import {MapNodeL2, MapNode} from "../../Store/firebase/nodes/@MapNode";
+import {AsNodeL1, GetNodeL2} from "../../Store/firebase/nodes/$node";
+import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {MapNodeRevision} from "../../Store/firebase/nodes/@MapNodeRevision";
 
 export const conversionTypes = [
@@ -38,8 +38,7 @@ export class ChangeClaimType extends Command<{mapID?: string, nodeID: string, ne
 		AssertValidate("ChangeClaimType_payload", this.payload, "Payload invalid");
 		const {nodeID, newType} = this.payload;
 		// let oldData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
-		const oldData = GetNodeL2(nodeID);
-		AssertV(oldData, "oldData is null.");
+		const oldData = AV.NonNull = GetNodeL2(nodeID);
 		this.oldType = GetAttachmentType(oldData);
 
 		this.newData = {...AsNodeL1(oldData)};

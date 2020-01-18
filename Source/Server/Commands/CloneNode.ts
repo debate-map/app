@@ -1,5 +1,5 @@
 import {DEL, E, Clone} from "js-vextensions";
-import {Command_Old, MergeDBUpdates, SplitStringBySlash_Cached, GetAsync, Command, AssertV} from "mobx-firelink";
+import {Command_Old, MergeDBUpdates, SplitStringBySlash_Cached, GetAsync, Command, AssertV, AV} from "mobx-firelink";
 import {GetLinkAtPath, GetNodeForm, GetNodeL2} from "../../Store/firebase/nodes/$node";
 import {ClaimForm, MapNode, Polarity} from "../../Store/firebase/nodes/@MapNode";
 import {MapNodeType} from "../../Store/firebase/nodes/@MapNodeType";
@@ -16,14 +16,11 @@ export class CloneNode extends Command<{mapID: string, baseNodePath: string, new
 		// ==========
 
 		const baseNodeID = SplitStringBySlash_Cached(baseNodePath).Last();
-		const baseNode = GetNodeL2(baseNodeID);
-		AssertV(baseNode, "baseNode is null.");
+		const baseNode = AV.NonNull = GetNodeL2(baseNodeID);
 		const isArgument = baseNode.type == MapNodeType.Argument;
 
-		const nodeForm = GetNodeForm(baseNode, baseNodePath);
-		AssertV(nodeForm, "nodeForm is null.");
-		const nodePolarity = GetLinkAtPath(baseNodePath).polarity;
-		AssertV(nodePolarity, "nodePolarity is null.");
+		const nodeForm = AV.NonNull = GetNodeForm(baseNode, baseNodePath);
+		const nodePolarity = AV.NonNull = GetLinkAtPath(baseNodePath).polarity;
 
 		const newChildNode = Clone(baseNode).VSet({children: DEL, childrenOrder: DEL, currentRevision: DEL, current: DEL, parents: DEL}) as MapNode;
 

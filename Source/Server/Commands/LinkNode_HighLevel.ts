@@ -1,5 +1,5 @@
 import {E, OmitIfFalsy} from "js-vextensions";
-import {AssertV, Command, MergeDBUpdates} from "mobx-firelink";
+import {AssertV, Command, MergeDBUpdates, AV} from "mobx-firelink";
 import {GetMap} from "Store/firebase/maps";
 import {Map} from "Store/firebase/maps/@Map";
 import {GetHolderType, GetNode, GetParentNodeID, GetParentNodeL3} from "Store/firebase/nodes";
@@ -61,14 +61,11 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 		this.returnData = {};
 
-		this.map_data = GetMap(mapID);
-		AssertV(this.map_data, "map_data is null.");
-		this.node_data = GetNodeL2(nodeID);
-		AssertV(this.node_data, "node_data is null.");
+		this.map_data = AV.NonNull = GetMap(mapID);
+		this.node_data = AV.NonNull = GetNodeL2(nodeID);
 		const oldParent_data = GetNodeL2(oldParentID);
 		//AssertV(oldParent_data, "oldParent_data is null."); // commented: allow linking orphaned nodes
-		this.newParent_data = GetNodeL2(newParentID);
-		AssertV(this.newParent_data, "newParent_data is null.");
+		this.newParent_data = AV.NonNull = GetNodeL2(newParentID);
 
 		let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && allowCreateWrapperArg;
 		AssertV(oldParentID !== newParentID || pastingPremiseAsRelevanceArg, "Old-parent-id and new-parent-id cannot be the same! (unless changing between truth-arg and relevance-arg)");
