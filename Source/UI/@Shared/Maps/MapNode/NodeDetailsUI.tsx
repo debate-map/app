@@ -14,6 +14,7 @@ import {OthersPanel} from "./NodeDetailsUI/OthersPanel";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel";
 import {TextPanel} from "./NodeDetailsUI/TextPanel";
 import {QuoteInfoEditorUI} from "./NodeDetailsUI/AttachmentPanel/QuoteInfoEditorUI";
+import {TagsPanel} from "./NodeUI/Panels/TagsPanel";
 
 type Props = {
 	baseData: MapNode,

@@ -77,7 +77,7 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 					<DefinitionsPanel node={node} path={path}/>
 					<DiscussionPanel/>
 					<SocialPanel/>
-					<TagsPanel/>
+					<TagsPanel map={map} node={nodeL3} path={path}/>
 					<DetailsPanel map={map} node={nodeL3} path={path}/>
 					<OthersPanel map={map} node={nodeL3} path={path}/>
 				</article>

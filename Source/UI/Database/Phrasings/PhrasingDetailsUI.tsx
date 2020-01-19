@@ -31,7 +31,7 @@ export class PhrasingDetailsUI extends BaseComponentPlus(
 		const {newData} = this.state;
 		const creator = !forNew && GetUser(baseData.creator);
 
-		const Change = _=>this.OnChange();
+		const Change = (..._)=>this.OnChange();
 
 		const splitAt = 100;
 		return (

@@ -15,6 +15,7 @@ import {TimelineStep} from "./firebase/timelineSteps/@TimelineStep";
 import {UserMapInfoSet} from "./firebase/userMapInfo/@UserMapInfo";
 import {User} from "./firebase/users/@User";
 import {User_Private} from "./firebase/users_private/@User_Private";
+import {MapNodeTag} from "./firebase/nodeTags/@MapNodeTag";
 
 // manually import these, since otherwise they're never runtime-imported
 require("./firebase/users_private/@User_Private");
@@ -43,6 +44,7 @@ export interface FirebaseDBShape {
 	// nodeStats: Collection<MapNodeStats>;
 	// nodeViewers: Collection<ViewerSet>; // removed due to privacy concerns
 	nodePhrasings: Collection<MapNodePhrasing>;
+	nodeTags: Collection<MapNodeTag>;
 	terms: Collection<Term>;
 	termNames: Collection<any>;
 	timelines: Collection<Timeline>;

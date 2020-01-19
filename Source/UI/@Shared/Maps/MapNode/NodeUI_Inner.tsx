@@ -428,7 +428,7 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 				{panelToShow == "phrasings" && <PhrasingsPanel node={node} path={path}/>}
 				{panelToShow == "discussion" && <DiscussionPanel/>}
 				{panelToShow == "social" && <SocialPanel/>}
-				{panelToShow == "tags" && <TagsPanel/>}
+				{panelToShow == "tags" && <TagsPanel map={map} node={node} path={path}/>}
 				{panelToShow == "details" && <DetailsPanel map={map} node={node} path={path}/>}
 				{panelToShow == "history" && <HistoryPanel map={map} node={node} path={path}/>}
 				{panelToShow == "others" && <OthersPanel map={map} node={node} path={path}/>}

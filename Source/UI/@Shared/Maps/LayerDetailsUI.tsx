@@ -19,7 +19,7 @@ export class LayerDetailsUI extends BaseComponentPlus({enabled: true} as Props, 
 		const {baseData, forNew, enabled, style, onChange} = this.props;
 		const {newData} = this.state;
 		const creator = !forNew && GetUser(baseData.creator);
-		const Change = _=>{
+		const Change = (..._)=>{
 			if (onChange) onChange(this.GetNewData(), this);
 			this.Update();
 		};

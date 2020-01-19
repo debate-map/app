@@ -5,19 +5,8 @@ import {GetNode} from "Store/firebase/nodes";
 import {Assert} from "js-vextensions";
 import {Command_Old, GetAsync, Command} from "mobx-firelink";
 
-/* AddSchema({
-	properties: {
-		phrasing: { $ref: 'MapNodePhrasing' },
-	},
-	required: ['phrasing'],
-}, 'AddPhrasing_payload'); */
-
 @UserEdit
-export class AddPhrasing extends Command<{phrasing: MapNodePhrasing}, {}> {
-	/* Validate_Early() {
-		AssertValidate('AddPhrasing_payload', this.payload, 'Payload invalid');
-	} */
-
+export class AddPhrasing extends Command<{phrasing: MapNodePhrasing}, string> {
 	id: string;
 	Validate() {
 		const {phrasing} = this.payload;
@@ -29,6 +18,9 @@ export class AddPhrasing extends Command<{phrasing: MapNodePhrasing}, {}> {
 
 		const node = GetNode(phrasing.node);
 		Assert(node, `Node with id ${phrasing.node} does not exist.`);
+
+		this.returnData = this.id;
+
 	}
 
 	GetDBUpdates() {

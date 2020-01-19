@@ -15,6 +15,7 @@ import {ChildEntry, ClaimForm, MapNode, Polarity} from "../../../../../../Store/
 import {ArgumentType, MapNodeRevision, MapNodeRevision_titlePattern, PermissionInfoType} from "../../../../../../Store/firebase/nodes/@MapNodeRevision";
 import {GetMapNodeTypeDisplayName, MapNodeType} from "../../../../../../Store/firebase/nodes/@MapNodeType";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
+import {observer} from "mobx-react";
 
 export class AddChildHelper {
 	constructor(parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string) {
@@ -139,7 +140,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 	let tab = AddChildDialogTab.Claim;
 	let boxController = ShowMessageBox({
 		title: `Add ${displayName}`, cancelButton: true,
-		message: ()=>{
+		message: observer(()=>{
 			let tempCommand = helper.GetCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
@@ -227,7 +228,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 					</>}
 				</Column>
 			);
-		},
+		}),
 		onOK: ()=>{
 			helper.Apply();
 		},

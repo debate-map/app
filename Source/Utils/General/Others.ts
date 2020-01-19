@@ -1,11 +1,12 @@
 import {ModifyString} from "js-vextensions";
 
 export function PropNameToTitle(propName: string) {
-	return ModifyString(propName, {lowerUpper_to_lowerSpaceLower: true, firstLower_to_upper: true});
+	return ModifyString(propName, m=>[m.lowerUpper_to_lowerSpaceLower, m.startLower_to_upper]);
 }
 
-export function EnumNameToDisplayName(enumName: string) {
-	let result = enumName;
+/*export function EnumNameToDisplayName(enumName: string) {
+	return ModifyString(enumName, m=>[m.lowerUpper_to_lowerSpaceLower, m.startLower_to_upper]);
+	/*let result = enumName;
 	result = result.replace(/[a-z][A-Z]+/g, match=>{
 		let result = `${match[0]} `;
 		if (match.length == 2) {
@@ -15,8 +16,8 @@ export function EnumNameToDisplayName(enumName: string) {
 		}
 		return result;
 	});
-	return result;
-}
+	return result;*#/
+}*/
 
 // todo: get this working (normally we'll use migrations, but there still will sometimes be a use for this)
 /* export function ClearBranchOfStore(path?: string) {

@@ -11,23 +11,11 @@ import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI";
 
-// @Observer
-// export class PermissionsOptions extends BaseComponent<Pick<SharedProps, 'newData' | 'newRevisionData' | 'enabled' | 'Change'> & {forDefaultsInMap?: boolean}, {}> {
-export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {forDefaultsInMap?: boolean}, {}> {
+export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {}, {}> {
 	render() {
-		const {newData, newDataAsL2, newRevisionData, forNew, enabled, Change, forDefaultsInMap} = this.props;
-		const openMapID = GetOpenMapID();
-
-		// probably temp
-		if (newRevisionData.permission_edit == null) {
-			newRevisionData.permission_edit = {type: PermissionInfoType.Creator};
-		}
-		if (newRevisionData.permission_contribute == null) {
-			newRevisionData.permission_contribute = {type: PermissionInfoType.Anyone};
-		}
+		const {newData, newDataAsL2, newRevisionData, forNew, enabled, Change} = this.props;
 		const attachmentType = GetAttachmentType(newDataAsL2);
 
-		const splitAt = 80;
 		return (
 			<>
 				{newData.type != MapNodeType.Claim &&

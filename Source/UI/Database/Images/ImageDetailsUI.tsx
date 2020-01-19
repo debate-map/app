@@ -35,7 +35,7 @@ export class ImageDetailsUI extends BaseComponentPlus(
 		const {newData, dataError} = this.state;
 		const creator = !creating && GetUser(baseData.creator);
 
-		const Change = _=>this.OnChange();
+		const Change = (..._)=>this.OnChange();
 
 		const splitAt = 170; const width = 600;
 		return (

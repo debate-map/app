@@ -23,7 +23,7 @@ export class QuoteInfoEditorUI extends BaseComponent
 	render() {
 		const {creating, editing, showPreview, justShowed, onChange} = this.props;
 		const {newData} = this.state;
-		const Change = _=>{
+		const Change = (..._)=>{
 			if (onChange) { onChange(this.GetNewData()); }
 			this.Update();
 		};

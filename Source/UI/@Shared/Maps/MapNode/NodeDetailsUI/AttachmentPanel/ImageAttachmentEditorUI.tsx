@@ -6,7 +6,6 @@ import {ImageAttachment} from "Store/firebase/nodeRevisions/@ImageAttachment";
 import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";
 import {ShowAddImageDialog} from "UI/Database/Images/AddImageDialog";
 import {GetTermsByForm} from "Store/firebase/terms";
-import {FoundTermUI} from "../TextPanel";
 import {HasModPermissions} from "Store/firebase/users/$user";
 import {MeID, GetUser} from "Store/firebase/users";
 import {Term} from "Store/firebase/terms/@Term";
@@ -25,7 +24,7 @@ export class ImageAttachmentEditorUI extends BaseComponent<Props, {newData: Imag
 	render() {
 		const {creating, editing, style, onChange} = this.props;
 		const {newData} = this.state;
-		const Change = _=>{
+		const Change = (..._)=>{
 			if (onChange) { onChange(this.GetNewData()); }
 			this.Update();
 		};

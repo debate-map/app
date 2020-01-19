@@ -19,7 +19,7 @@ export class EquationEditorUI extends BaseComponent<Props, {newData: EquationAtt
 	render() {
 		const {creating, editing, style, onChange} = this.props;
 		const {newData} = this.state;
-		const Change = _=>{
+		const Change = (..._)=>{
 			if (onChange) { onChange(this.GetNewData()); }
 			this.Update();
 		};

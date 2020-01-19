@@ -58,7 +58,8 @@ export const HasAdminPermissions = StoreAccessor(s=>(userIDOrPermissions: string
 	return permissions ? permissions.admin : false;
 });
 /** If user is the creator, also requires that they (still) have basic permissions. */
-export const IsUserCreatorOrMod = StoreAccessor(s=>(userID: string, entity: Term | Image | Map | MapNode | MapNodePhrasing | Timeline /* | Post | Thread */)=>{
+//export const IsUserCreatorOrMod = StoreAccessor(s=>(userID: string, entity: Term | Image | Map | MapNode | MapNodePhrasing | Timeline /* | Post | Thread */)=>{
+export const IsUserCreatorOrMod = StoreAccessor(s=>(userID: string, entity: {creator?: string})=>{
 	return (entity && entity.creator === userID && HasBasicPermissions(userID)) || HasModPermissions(userID);
 });
 

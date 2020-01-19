@@ -6,6 +6,7 @@ import {GetUser} from "Store/firebase/users";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {ES} from "Utils/UI/GlobalStyles";
 import {InfoButton, Observer} from "vwebapp-framework";
+import {observer} from "mobx-react";
 import {AddTerm} from "../../../Server/Commands/AddTerm";
 import {Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "../../../Store/firebase/terms/@Term";
 import {GetNiceNameForTermType} from "../../Database/TermsUI";
@@ -118,7 +119,7 @@ export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: st
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add term", cancelButton: true,
-		message: ()=>{
+		message: observer(()=>{
 			const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
@@ -134,7 +135,7 @@ export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: st
 						}}/>
 				</Column>
 			);
-		},
+		}),
 		onOK: async()=>{
 			const id = await getCommand().Run();
 			if (postAdd) postAdd(id);
