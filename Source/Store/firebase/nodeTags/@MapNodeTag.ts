@@ -1,5 +1,6 @@
 import {AddSchema, UUID_regex, GetSchemaJSON} from "vwebapp-framework";
 import {GetValues_ForSchema, ModifyString} from "js-vextensions";
+import {Polarity} from "../nodes/@MapNode";
 
 export class MapNodeTag {
 	constructor(initialData: Partial<MapNodeTag>) {
@@ -40,6 +41,24 @@ export abstract class TagComp {
 	static description: string;
 	static nodeKeys: string[]; // fields whose values should be added to MapNodeTag.nodes array
 }
+
+/*export class TagComp_ExampleBasedClaim extends TagComp {
+	//static key = "exampleBasedClaim";
+	static displayName = "example-based claim";
+	static description = "Makes-so only arguments of a given polarity can be added; used for claims which default to true/false, in the absense of arguments to the contrary.";
+	static nodeKeys = ["nodeX"];
+
+	constructor(initialData?: Partial<TagComp_ExampleBasedClaim>) { super(); this.VSet(initialData); }
+
+	nodeX: string;
+	polarityAllowed: Polarity;
+}
+AddSchema("TagComp_ExampleBasedClaim", {
+	properties: {
+		nodeX: {$ref: "UUID"},
+		polarityAllowed: {$ref: "Polarity"},
+	},
+});*/
 
 export class TagComp_MirrorChildrenFromXToY extends TagComp {
 	//static key = "mirrorChildrenFromXToY";
