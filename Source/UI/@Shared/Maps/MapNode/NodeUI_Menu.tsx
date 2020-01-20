@@ -7,7 +7,7 @@ import {store} from "Store";
 import {ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, HolderType} from "Store/firebase/nodes";
 import {CanContributeToNode, GetUserPermissionGroups, IsUserCreatorOrMod} from "Store/firebase/users/$user";
 import {GetOpenMapID} from "Store/main";
-import {GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
+import {GetCopiedNode, GetCopiedNodePath, ACTCopyNode} from "Store/main/maps";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState";
 import {Observer} from "vwebapp-framework";
 import {SlicePath} from "mobx-firelink";
@@ -147,10 +147,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						onClick={e=>{
 							e.persist();
 							if (e.button == 2) {
-								runInAction("NodeUIMenu.Cut_clear", ()=>{
-									store.main.maps.copiedNodePath = null;
-									store.main.maps.copiedNodePath_asCut = true;
-								});
+								ACTCopyNode(null, true);
 								return;
 							}
 
@@ -158,12 +155,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							if (node.type == MapNodeType.Claim && combinedWithParentArg) {
 								pathToCut = SlicePath(path, 1);
 							} */
-
-							runInAction("NodeUIMenu.Cut", ()=>{
-								store.main.maps.copiedNodePath = path;
-								//store.main.maps.copiedNodePath = outerPath;
-								store.main.maps.copiedNodePath_asCut = true;
-							});
+							ACTCopyNode(path, true);
 						}}/>}
 				{!componentBox &&
 					<VMenuItem text={copiedNode ? <span>Copy <span style={{fontSize: 10, opacity: 0.7}}>(right-click to clear)</span></span> as any : "Copy"} style={styles.vMenuItem}
@@ -171,10 +163,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						onClick={e=>{
 							e.persist();
 							if (e.button == 2) {
-								runInAction("NodeUIMenu.Copy_clear", ()=>{
-									store.main.maps.copiedNodePath = null;
-									store.main.maps.copiedNodePath_asCut = false;
-								});
+								ACTCopyNode(null, false);
 								return;
 							}
 
@@ -182,12 +171,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							if (node.type == MapNodeType.Claim && combinedWithParentArg) {
 								pathToCopy = SlicePath(path, 1);
 							} */
-
-							runInAction("NodeUIMenu.Copy", ()=>{
-								store.main.maps.copiedNodePath = path;
-								//store.main.maps.copiedNodePath = outerPath;
-								store.main.maps.copiedNodePath_asCut = false;
-							});
+							ACTCopyNode(path, false);
 						}}/>}
 				<MI_PasteAsLink {...sharedProps}/>
 				{/* // disabled for now, since I need to create a new command to wrap the logic. One route: create a CloneNode_HighLevel command, modeled after LinkNode_HighLevel (or containing it as a sub)
