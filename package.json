@@ -131,7 +131,7 @@
     "firebase": "^7.6.1",
     "firebase-feedback": "^1.0.8",
     "immer": "5.0.0",
-    "js-vextensions": "^1.0.24",
+    "js-vextensions": "^1.0.25",
     "katex": "^0.9.0",
     "keycode": "^2.1.8",
     "lodash": "^4.17.2",

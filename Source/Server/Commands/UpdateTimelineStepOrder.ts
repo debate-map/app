@@ -12,7 +12,7 @@ export class UpdateTimelineStepOrder extends Command<{timelineID: string, stepID
 		AssertV(timeline, "timeline is null.");
 		this.timeline_oldSteps = timeline.steps ?? [];
 		this.timeline_newSteps = this.timeline_oldSteps.slice();
-		this.timeline_newSteps.Move(stepID, newIndex, true);
+		this.timeline_newSteps.Move(stepID, newIndex, false); // dnd system applies index-fixing itself, so don't apply here
 	}
 
 	GetDBUpdates() {
