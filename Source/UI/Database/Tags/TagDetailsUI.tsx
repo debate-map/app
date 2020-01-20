@@ -46,7 +46,7 @@ export class TagDetailsUI extends BaseComponentPlus({} as Props, {} as State) {
 					<IDAndCreationInfoUI id={baseData._key} creator={creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Type: </Pre>
-					<Select options={TagComp_classes.map(a=>({name: a.displayName, value: a}))} enabled={false} style={ES({flex: 1})} value={compClass} onChange={(newCompClass: TagComp_Class)=> {
+					<Select options={TagComp_classes.map(a=>({name: a.displayName, value: a}))} enabled={enabled} style={ES({flex: 1})} value={compClass} onChange={(newCompClass: TagComp_Class)=> {
 						delete newData[compClass.key];
 						newData[newCompClass.key] = new newCompClass();
 						Change();
@@ -70,16 +70,16 @@ export class TagDetailsUI extends BaseComponentPlus({} as Props, {} as State) {
 
 class MirrorChildrenFromXToY_UI extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
 	render() {
-		let {newData, splitAt, Change} = this.props;
+		let {newData, enabled, splitAt, Change} = this.props;
 		let comp = newData.mirrorChildrenFromXToY;
 		return (
 			<>
 				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X"/>
 				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeY" label="Node Y"/>
-				<CheckBox mt={5} text="Mirror X's supporting arguments" checked={comp.mirrorSupporting} onChange={val=>Change(comp.mirrorSupporting = val)}/>
-				<CheckBox mt={5} text="Mirror X's opposing arguments" checked={comp.mirrorOpposing} onChange={val=>Change(comp.mirrorOpposing = val)}/>
-				<CheckBox mt={5} text="Reverse argument polarities" checked={comp.reversePolarities} onChange={val=>Change(comp.reversePolarities = val)}/>
-				<CheckBox mt={5} text="Disable direct children" checked={comp.disableDirectChildren} onChange={val=>Change(comp.disableDirectChildren = val)}/>
+				<CheckBox mt={5} text="Mirror X's supporting arguments" checked={comp.mirrorSupporting} enabled={enabled} onChange={val=>Change(comp.mirrorSupporting = val)}/>
+				<CheckBox mt={5} text="Mirror X's opposing arguments" checked={comp.mirrorOpposing} enabled={enabled} onChange={val=>Change(comp.mirrorOpposing = val)}/>
+				<CheckBox mt={5} text="Reverse argument polarities" checked={comp.reversePolarities} enabled={enabled} onChange={val=>Change(comp.reversePolarities = val)}/>
+				<CheckBox mt={5} text="Disable direct children" checked={comp.disableDirectChildren} enabled={enabled} onChange={val=>Change(comp.disableDirectChildren = val)}/>
 			</>
 		);
 	}
@@ -87,11 +87,11 @@ class MirrorChildrenFromXToY_UI extends BaseComponentPlus({} as TagDetailsUI_Sha
 
 class NodeSlotRow extends BaseComponentPlus({canBeEmpty: true} as TagDetailsUI_SharedProps & {comp: TagComp, nodeKey: string, label: string, canBeEmpty?: boolean}, {}) {
 	render() {
-		let {newData, compClass, splitAt, Change, comp, nodeKey, label} = this.props;
+		let {newData, enabled, compClass, splitAt, Change, comp, nodeKey, label} = this.props;
 		return (
 			<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 				<Text>{label}:</Text>
-				<TextInput value={comp[nodeKey]} style={{flex: 1}} onChange={val=> {
+				<TextInput value={comp[nodeKey]} enabled={enabled} style={{flex: 1}} onChange={val=> {
 					comp.VSet(nodeKey, DelIfFalsy(val));
 					newData.nodes = compClass.nodeKeys.map(key=>comp[key]).filter(nodeID=>Validate("UUID", nodeID) == null);
 					Change();
