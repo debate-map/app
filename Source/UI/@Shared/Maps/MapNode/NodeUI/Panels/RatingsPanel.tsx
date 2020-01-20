@@ -36,7 +36,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 
 		const userID = MeID();
 		const form = GetNodeForm(node, path);
-		const nodeChildren = GetNodeChildren(node);
+		const nodeChildren = GetNodeChildren(node._key);
 		let smoothing = GetRatingUISmoothing();
 
 		const parentNode = GetNodeL3(SlicePath(path, 1));

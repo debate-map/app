@@ -1,5 +1,4 @@
-import {GetParentNode} from "Store/firebase/nodes";
-import {GetNodeChildren, GetNodeID, GetNode, GetNodeChildrenL2} from "../../nodes";
+import {GetParentNode, GetNodeChildren, GetNodeID, GetNode, GetNodeChildrenL2} from "Store/firebase/nodes";
 import {GetLinkUnderParent} from "../$node";
 
 export function GetEquationStepNumber(path: string) {
@@ -8,7 +7,7 @@ export function GetEquationStepNumber(path: string) {
 	if (parent == null) return 0;
 
 	// let equationStepNodeIDs = parent.children.VKeys().map(a=>a.ToInt());
-	let equationStepNodes = GetNodeChildrenL2(parent).filter(a=>{
+	let equationStepNodes = GetNodeChildrenL2(parent._key).filter(a=>{
 		return a && a.current.equation && (GetLinkUnderParent(a._key, parent).seriesAnchor || a.current.equation.isStep);
 	});
 	// if node is not included "as a step" in this chain (ie. the series under this parent), return null

@@ -1,15 +1,16 @@
-import {Assert, CachedTransform, GetValues, IsString, VURL, E} from "js-vextensions";
+import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone} from "js-vextensions";
 import katex from "katex";
 import {SplitStringBySlash_Cached, SlicePath, StoreAccessor} from "mobx-firelink";
 import {GetImage} from "../images";
 import {GetNiceNameForImageType} from "../images/@Image";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {GetNodeRevision} from "../nodeRevisions";
-import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, HolderType, IsNodeSubnode} from "../nodes";
+import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, HolderType, IsNodeSubnode, GetNodeChildrenL3} from "../nodes";
 import {ChildEntry, ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode";
 import {MapNodeRevision, TitlesMap, TitleKey_values} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
 import {PermissionGroupSet} from "../users/@User";
+import {GetNodeTags} from "../nodeTags";
 
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");
@@ -96,7 +97,7 @@ export function IsNodeL1(node): node is MapNode {
 	return !node["current"];
 }
 export function AsNodeL1(node: MapNodeL2 | MapNodeL3) {
-	const result = {...node};
+	const result = E(node);
 	delete result.current;
 	delete result["displayPolarity"];
 	delete result["link"];
@@ -185,10 +186,29 @@ export const GetNodeForm = StoreAccessor(s=>(node: MapNodeL2 | MapNodeL3, pathOr
 	if (link == null) return ClaimForm.Base;
 	return link.form;
 });
-export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapNode): ChildEntry=>{
+export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapNode, includeMirrorLinks = true): ChildEntry=>{
 	if (parent == null) return null;
-	if (parent.children == null) return null; // post-delete, parent-data might have updated before child-data
-	const link = parent.children[nodeID];
+	let link = parent.children?.[nodeID]; // null-check, since after child-delete, parent-data might have updated before child-data removed
+	if (includeMirrorLinks && link == null) {
+		let tags = GetNodeTags(parent._key);
+		for (let tag of tags) {
+			if (tag.mirrorChildrenFromXToY && tag.mirrorChildrenFromXToY.nodeY == parent._key) {
+				let comp = tag.mirrorChildrenFromXToY;
+				// for now, don't include node-x's own mirror-children (lazy, temp way to avoid infinite loops)
+				let mirrorChildren = GetNodeChildrenL3(comp.nodeX, undefined, false);
+				mirrorChildren = mirrorChildren.filter(child=> {
+					return child && ((child.link.polarity == Polarity.Supporting && comp.mirrorSupporting) || (child.link.polarity == Polarity.Opposing && comp.mirrorOpposing));
+				});
+				let nodeL3ForNodeAsMirrorChildInThisTag = mirrorChildren.find(a=>a._key == nodeID);
+				if (nodeL3ForNodeAsMirrorChildInThisTag) {
+					link = Clone(nodeL3ForNodeAsMirrorChildInThisTag.link);
+					if (comp.reversePolarities) {
+						link.polarity = ReversePolarity(link.polarity);
+					}
+				}
+			}
+		}
+	}
 	return link;
 });
 export function GetLinkAtPath(path: string) {
@@ -217,7 +237,7 @@ export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: stri
 	if (node.type == MapNodeType.Argument && !node.multiPremiseArgument && !titles.base) {
 		// const baseClaim = GetNodeL2(node.children && node.children.VKeys().length ? node.children.VKeys()[0] : null);
 		// const baseClaim = GetArgumentPremises(node)[0];
-		const baseClaim = GetNodeChildrenL2(node).filter(a=>a && a.type == MapNodeType.Claim)[0];
+		const baseClaim = GetNodeChildrenL2(node._key).filter(a=>a && a.type == MapNodeType.Claim)[0];
 		if (baseClaim) return GetNodeDisplayText(baseClaim);
 	}
 	if (node.type == MapNodeType.Claim) {

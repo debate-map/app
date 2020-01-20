@@ -51,6 +51,7 @@ export class TagComp_MirrorChildrenFromXToY extends TagComp {
 	mirrorSupporting = true;
 	mirrorOpposing = true;
 	reversePolarities = false;
+	//recursive = false;
 }
 AddSchema("TagComp_MirrorChildrenFromXToY", {
 	properties: {

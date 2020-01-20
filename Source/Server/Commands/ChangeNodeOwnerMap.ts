@@ -59,7 +59,7 @@ export class ChangeNodeOwnerMap extends Command<{nodeID: string, newOwnerMapID: 
 
 			const permittedPrivateChildrenIDs = this.parentCommand instanceof ChangeNodeOwnerMap ? [this.parentCommand.payload.nodeID] : [];
 
-			const children = GetNodeChildren(oldData);
+			const children = GetNodeChildren(oldData._key);
 			AssertV(!IsSpecialEmptyArray(children), "children still loading.");
 			AssertV(children.All(a=>a.ownerMapID == null || permittedPrivateChildrenIDs.Contains(a._key)), "To make node public, it must not have any private children.");
 		}

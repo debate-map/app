@@ -3,7 +3,7 @@ import {Fragment} from "react";
 import {Button, CheckBox, Column, Div, Pre, Row, Select, Text} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
-import {GetParentNodeID, GetParentNodeL3, GetNodesByIDs} from "Store/firebase/nodes";
+import {GetParentNodeID, GetParentNodeL3, GetNodesByIDs, GetNodeMirrorChildren} from "Store/firebase/nodes";
 import {GetUser, MeID} from "Store/firebase/users";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub";
@@ -64,6 +64,7 @@ export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNo
 		// const changeControlType_newType = changeControlType_currentType == 'Private' ? 'Public' : 'Private';
 		const changeControlTypeCommand = new ChangeNodeOwnerMap(E({nodeID: node._key, newOwnerMapID: node.ownerMapID != null ? null : mapID, argumentNodeID: OmitIfFalsy(argumentWrapper?._key)}));
 
+		let mirrorChildren = GetNodeMirrorChildren(node._key);
 		return (
 			<Column sel style={{position: "relative"}}>
 				<IDAndCreationInfoUI id={node._key} creator={creator} createdAt={node.createdAt}/>
@@ -79,6 +80,15 @@ export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNo
 				<Row style={{flexWrap: "wrap"}}>
 					<Text>Children: </Text>
 					{node.children == null ? "none" : node.children.VKeys().map((childID, index)=>{
+						return <Fragment key={index}>
+							{index != 0 && <Text>, </Text>}
+							<UUIDStub id={childID}/>
+						</Fragment>;
+					})}
+				</Row>
+				<Row style={{flexWrap: "wrap"}}>
+					<Text>Mirror children: </Text>
+					{mirrorChildren.length == 0 ? "none" : mirrorChildren.map(a=>a._key).map((childID, index)=>{
 						return <Fragment key={index}>
 							{index != 0 && <Text>, </Text>}
 							<UUIDStub id={childID}/>

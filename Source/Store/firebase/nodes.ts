@@ -1,15 +1,16 @@
-import {emptyArray, emptyArray_forLoading, IsNaN} from "js-vextensions";
+import {emptyArray, emptyArray_forLoading, IsNaN, Clone} from "js-vextensions";
 import {GetDoc, SlicePath, SplitStringBySlash_Cached, StoreAccessor, GetDocs, WhereFilter} from "mobx-firelink";
 import {GetPlayingTimeline, GetPlayingTimelineRevealNodes_UpToAppliedStep, GetPlayingTimelineStepIndex} from "Store/main/maps/mapStates/$mapState";
 import {PathSegmentToNodeID} from "Store/main/maps/mapViews/$mapView";
-import {GetNodeL2, GetNodeL3} from "./nodes/$node";
-import {globalRootNodeID, MapNode, MapNodeL2, MapNodeL3} from "./nodes/@MapNode";
+import {GetNodeL2, GetNodeL3, ReversePolarity, AsNodeL1} from "./nodes/$node";
+import {globalRootNodeID, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./nodes/@MapNode";
 import {MapNodeType, MapNodeType_Info} from "./nodes/@MapNodeType";
 import {MeID} from "./users";
 import {CanGetBasicPermissions, GetUserAccessLevel, HasAdminPermissions, IsUserCreatorOrMod} from "./users/$user";
 import {PermissionGroupSet} from "./users/@User";
 import {TitleKey} from "./nodes/@MapNodeRevision";
 import {GetNodeRevisionsByTitle} from "./nodeRevisions";
+import {GetNodeTags} from "./nodeTags";
 
 export enum HolderType {
 	Truth = 10,
@@ -93,65 +94,73 @@ export const GetNodeID = StoreAccessor(s=>(path: string)=>{
 	return ownNodeStr ? PathSegmentToNodeID(ownNodeStr) : null;
 });
 
-export const GetNodeParents = StoreAccessor(s=>(node: MapNode)=>{
-	const parents = (node.parents || {}).VKeys().map(id=>GetNode(id));
-	return parents;
+export const GetNodeParents = StoreAccessor(s=>(nodeID: string)=>{
+	let node = GetNode(nodeID);
+	return (node.parents || {}).VKeys().map(id=>GetNode(id));
 });
-/* export async function GetNodeParentsAsync(node: MapNode) {
-	return await Promise.all(node.parents.VKeys().map((parentID) => GetDoc_Async(a=>a.nodes.get(parentID))) as MapNode[];
-} */
-export const GetNodeParentsL2 = StoreAccessor(s=>(node: MapNode)=>{
-	const parentsL2 = GetNodeParents(node).map(parent=>(parent ? GetNodeL2(parent) : null));
-	return parentsL2;
+export const GetNodeParentsL2 = StoreAccessor(s=>(nodeID: string)=>{
+	return GetNodeParents(nodeID).map(parent=>(parent ? GetNodeL2(parent) : null));
 });
-export const GetNodeParentsL3 = StoreAccessor(s=>(node: MapNode, path: string)=>{
-	const parentsL3 = GetNodeParents(node).map(parent=>(parent ? GetNodeL3(SlicePath(path, 1)) : null));
-	return parentsL3;
+export const GetNodeParentsL3 = StoreAccessor(s=>(nodeID: string, path: string)=>{
+	return GetNodeParents(nodeID).map(parent=>(parent ? GetNodeL3(SlicePath(path, 1)) : null));
 });
 
-/* export function GetNodeChildIDs(nodeID: string) {
+export const GetNodeChildren = StoreAccessor(s=>(nodeID: string, includeMirrorChildren = true)=>{
 	let node = GetNode(nodeID);
-	// any time the childIDs changes, we know the node object changes as well; so just cache childIDs on node
-	if (node["@childIDs"] == null)
-		node.VSet("@childIDs", (node.children || {}).VKeys().map(id=>parseInt(id)), {prop: {}});
-	return node["@childIDs"];
-} */
-export const GetNodeChildren = StoreAccessor(s=>(node: MapNode)=>{
+	if (node == null) return emptyArray;
 	// special case, for demo map
 	if (node.children && node.children[0] instanceof MapNode) {
 		return node.children as any as MapNode[];
 	}
 
-	const children = (node.children || {}).VKeys().map(id=>GetNode(id));
-	// return CachedTransform('GetNodeChildren', [node._key], children, () => children);
-	return children;
+	let result = (node.children || {}).VKeys().map(id=>GetNode(id));
+	if (includeMirrorChildren) {
+		result.push(...GetNodeMirrorChildren(nodeID));
+	}
+	return result;
 });
-/* export async function GetNodeChildrenAsync(node: MapNode) {
-	return await Promise.all(node.children.VKeys().map((id) => GetDataAsync('nodes', id))) as MapNode[];
-} */
-
-export const GetNodeChildrenL2 = StoreAccessor(s=>(node: MapNode)=>{
-	const nodeChildren = GetNodeChildren(node);
-	const nodeChildrenL2 = nodeChildren.map(child=>(child ? GetNodeL2(child) : null));
-	// return CachedTransform('GetNodeChildrenL2', [], nodeChildrenL2, () => nodeChildrenL2);
-	return nodeChildrenL2;
+export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string)=> {
+	let tags = GetNodeTags(nodeID);
+	let result = [] as MapNode[];
+	for (let tag of tags) {
+		if (tag.mirrorChildrenFromXToY && tag.mirrorChildrenFromXToY.nodeY == nodeID) {
+			let comp = tag.mirrorChildrenFromXToY;
+			// for now, don't include node-x's own mirror-children (lazy, temp way to avoid infinite loops)
+			let mirrorChildrenL3 = GetNodeChildrenL3(comp.nodeX, undefined, false);
+			mirrorChildrenL3 = mirrorChildrenL3.filter(child=> {
+				return child && ((child.link.polarity == Polarity.Supporting && comp.mirrorSupporting) || (child.link.polarity == Polarity.Opposing && comp.mirrorOpposing));
+			});
+			/*if (comp.reversePolarities) {
+				mirrorChildren = mirrorChildren.map(child=> {
+					let newChild = child;
+					if (child.link.polarity) {
+						newChild = Clone(child).VSet({_key: child._key}) as MapNodeL3;
+						newChild.link.polarity = ReversePolarity(newChild.link.polarity);
+					}
+					return newChild;
+				});
+			}*/
+			let mirrorChildrenL1 = mirrorChildrenL3.map(childL3=>AsNodeL1(childL3));
+			result.push(...mirrorChildrenL1);
+		}
+	}
+	return result;
 });
-export const GetNodeChildrenL3 = StoreAccessor(s=>(node: MapNode, path?: string): MapNodeL3[]=>{
-	if (node == null) return emptyArray;
-	// return CachedTransform_WithStore('GetNodeChildrenL3', [node._key, path, filterForPath], node.children, () => {
-	path = path || `${node._key}`;
 
-	const nodeChildrenL2 = GetNodeChildrenL2(node);
-	const nodeChildrenL3 = nodeChildrenL2.map(child=>(child ? GetNodeL3(`${path}/${child._key}`) : null));
-	return nodeChildrenL3;
-	// return CachedTransform('GetNodeChildrenL3', [node, path, filterForPath], [], () => nodeChildrenL3);
+export const GetNodeChildrenL2 = StoreAccessor(s=>(nodeID: string, includeMirrorChildren = true)=>{
+	const nodeChildren = GetNodeChildren(nodeID, includeMirrorChildren);
+	return nodeChildren.map(child=>(child ? GetNodeL2(child) : null));
 });
-export const GetNodeChildrenL3_Advanced = StoreAccessor(s=>(node: MapNode, path: string, mapID: string, applyAccessLevels = false, applyTimeline = false, requireFullyLoaded = false): MapNodeL3[]=>{
-	if (node == null) return emptyArray;
-	// return CachedTransform_WithStore('GetNodeChildrenL3', [node._key, path, filterForPath], node.children, () => {
-	path = path || `${node._key}`;
+export const GetNodeChildrenL3 = StoreAccessor(s=>(nodeID: string, path?: string, includeMirrorChildren = true): MapNodeL3[]=>{
+	path = path || nodeID;
 
-	const nodeChildrenL2 = GetNodeChildrenL2(node);
+	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren);
+	return nodeChildrenL2.map(child=>(child ? GetNodeL3(`${path}/${child._key}`) : null));
+});
+export const GetNodeChildrenL3_Advanced = StoreAccessor(s=>(nodeID: string, path: string, mapID: string, includeMirrorChildren = true, applyAccessLevels = false, applyTimeline = false, emptyForLoading = false): MapNodeL3[]=>{
+	path = path || nodeID;
+
+	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren);
 	let nodeChildrenL3 = nodeChildrenL2.map(child=>(child ? GetNodeL3(`${path}/${child._key}`) : null));
 	if (applyAccessLevels) {
 		nodeChildrenL3 = nodeChildrenL3.filter(child=>{
@@ -177,11 +186,10 @@ export const GetNodeChildrenL3_Advanced = StoreAccessor(s=>(node: MapNode, path:
 			nodeChildrenL3 = nodeChildrenL3.filter(child=>child != null && playingTimelineVisibleNodes.Any(a=>a.startsWith(`${path}/${child._key}`)));
 		}
 	}
-	if (requireFullyLoaded) {
+	if (emptyForLoading) {
 		nodeChildrenL3 = nodeChildrenL3.Any(a=>a == null) ? emptyArray_forLoading : nodeChildrenL3; // only pass nodeChildren when all are loaded
 	}
 	return nodeChildrenL3;
-	// return CachedTransform('GetNodeChildrenL3', [node, path, filterForPath], [], () => nodeChildrenL3);
 });
 
 export function GetHolderType(childType: MapNodeType, parentType: MapNodeType) {
@@ -223,7 +231,7 @@ export const ForDelete_GetError = StoreAccessor(s=>(userID: string, node: MapNod
 	if (GetParentCount(node) > 1) return `${baseText}it has more than one parent. Try unlinking it instead.`;
 	if (IsRootNode(node) && !subcommandInfo?.asPartOfMapDelete) return `${baseText}it's the root-node of a map.`;
 
-	const nodeChildren = GetNodeChildrenL2(node);
+	const nodeChildren = GetNodeChildrenL2(node._key);
 	if (nodeChildren.Any(a=>a == null)) return "[still loading children...]";
 	if (nodeChildren.map(a=>a._key).Except(...(subcommandInfo?.childrenToIgnore ?? [])).length) {
 		return `Cannot delete this node (#${node._key}) until all its children have been unlinked or deleted.`;

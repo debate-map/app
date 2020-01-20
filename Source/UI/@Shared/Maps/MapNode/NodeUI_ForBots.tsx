@@ -24,8 +24,8 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 	innerUI: NodeUI_Inner;
 	render() {
 		const {map, node} = this.props;
-		const nodeParents = GetNodeParentsL2(node);
-		const nodeChildren = GetNodeChildrenL2(node);
+		const nodeParents = GetNodeParentsL2(node._key);
+		const nodeChildren = GetNodeChildrenL2(node._key);
 		if (nodeParents.Any(a=>a == null) || nodeChildren.Any(a=>a == null)) return <div/>;
 
 		// just list one of the parents as the "current parent", so code relying on a parent doesn't error

@@ -153,7 +153,15 @@ export class TitlePanel extends BaseComponentPlus(
 
 		return (
 			// <Row style={{position: "relative"}}>
-			<div {...FilterOutUnrecognizedProps(rest, "div")} style={E({position: "relative", cursor: "pointer", fontSize: GetFontSizeForNode(node, isSubnode)}, style)} onClick={e=>IsDoubleClick(e) && this.OnDoubleClick()}>
+			<div {...FilterOutUnrecognizedProps(rest, "div")} style={E(
+				{
+					position: "relative", cursor: "pointer", fontSize: GetFontSizeForNode(node, isSubnode),
+					marginTop: !latex && GetSegmentsForTerms(newTitle, termsToSearchFor).length > 1 ? -2 : 0, // if has terms in text, bump up a bit (to offset bump-down from <sup> elements)
+				},
+				style,
+			)}
+			onClick={e=>IsDoubleClick(e) && this.OnDoubleClick()}
+		>
 				{equationNumber != null &&
 					<Pre>{equationNumber}) </Pre>}
 				{!editing &&
@@ -190,9 +198,11 @@ export class TitlePanel extends BaseComponentPlus(
 					<Pre style={{
 						fontSize: 11, color: "rgba(255,255,255,.5)",
 						// marginLeft: "auto",
-						marginLeft: 15, marginTop: 3, float: "right",
+						marginLeft: 15,
+						marginTop: GetSegmentsForTerms(noteText, termsToSearchFor).length > 1 ? -1 : 3, float: "right", // if has terms in note, bump up a bit (to offset bump-down from <sup> elements)
 					}}>
-						{noteText}
+						{/*noteText*/}
+						{RenderNodeDisplayText(noteText)}
 					</Pre>}
 				{node.type == MapNodeType.Claim && node.current.quote &&
 					<InfoButton ml={5} text="Allowed modifications: bold, [...] (collapsed segments)"/>}

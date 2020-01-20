@@ -14,7 +14,6 @@ import {SlicePath} from "mobx-firelink";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {GetSubnodesInEnabledLayersEnhanced} from "../../../../Store/firebase/layers";
 import {Map} from "../../../../Store/firebase/maps/@Map";
-
 import {GetNodeForm, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, GetNodeDisplayText} from "../../../../Store/firebase/nodes/$node";
 import {AccessLevel, MapNodeL3, Polarity} from "../../../../Store/firebase/nodes/@MapNode";
 import {MapNodeType, GetNodeColor} from "../../../../Store/firebase/nodes/@MapNodeType";
@@ -57,9 +56,9 @@ export class NodeUI extends BaseComponentPlus(
 		performance.mark("NodeUI_1");
 		path = path || node._key.toString();
 
-		const nodeChildren = GetNodeChildrenL3(node, path);
+		const nodeChildren = GetNodeChildrenL3(node._key, path);
 		// let nodeChildrenToShow: MapNodeL3[] = nodeChildren.Any(a => a == null) ? emptyArray_forLoading : nodeChildren; // only pass nodeChildren when all are loaded
-		const nodeChildrenToShow = GetNodeChildrenL3_Advanced(node, path, map._key, true, true, true);
+		const nodeChildrenToShow = GetNodeChildrenL3_Advanced(node._key, path, map._key, true, true, true, true);
 
 		/* let subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map, node._key);
 		subnodes = subnodes.Any(a => a == null) ? emptyArray : subnodes; // only pass subnodes when all are loaded */
@@ -156,7 +155,7 @@ export class NodeUI extends BaseComponentPlus(
 
 		const separateChildren = node.type == MapNodeType.Claim;
 
-		const parentChildren = GetNodeChildrenL3(parent, parentPath);
+		const parentChildren = GetNodeChildrenL3(parent?._key, parentPath);
 		if (isPremiseOfSinglePremiseArg) {
 			const argument = parent;
 			const argumentPath = SlicePath(path, 1);
@@ -201,7 +200,7 @@ export class NodeUI extends BaseComponentPlus(
 		const nodeChildHolderBox_relevance = isPremiseOfSinglePremiseArg && boxExpanded &&
 			<NodeChildHolderBox {...{map, node: parent, path: parentPath}} type={HolderType.Relevance}
 				widthOfNode={widthOverride || width}
-				nodeChildren={GetNodeChildrenL3(parent, parentPath)} nodeChildrenToShow={relevanceArguments}
+				nodeChildren={GetNodeChildrenL3(parent._key, parentPath)} nodeChildrenToShow={relevanceArguments}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
 
 		// const hasExtraWrapper = subnodes.length || isMultiPremiseArgument;

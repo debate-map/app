@@ -1,10 +1,10 @@
-import {GetNodeChildrenL3,GetParentNodeL3} from "Store/firebase/nodes";
-import {MapNodeL3, MapNodeL2} from "Store/firebase/nodes/@MapNode";
+import {GetNodeChildrenL3, GetParentNodeL3} from "Store/firebase/nodes";
+import {MapNodeL3, MapNodeL2, Polarity} from "Store/firebase/nodes/@MapNode";
 import {ArgumentType} from "Store/firebase/nodes/@MapNodeRevision";
 import {emptyArray_forLoading, Assert, IsNaN} from "js-vextensions";
 import {StoreAccessor} from "mobx-firelink";
 
-import {Polarity} from "../nodes/@MapNode";
+
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {GetNodeL3, GetNodeL2} from "../nodes/$node";
 
@@ -15,13 +15,13 @@ export const RS_CalculateTruthScore = StoreAccessor(s=>(claimID: string, calcula
 	// if we've hit a cycle back to a claim we've already started calculating for (the root claim), consider the truth-score at this lower-location to be 100%
 	if (calculationPath.length && calculationPath.indexOf(calculationPath.Last()) < calculationPath.length - 1) return 1;
 
-	const childArguments = GetChildArguments(claim);
+	const childArguments = GetChildArguments(claim._key);
 	if (childArguments == null || childArguments.length == 0) return 1;
 
 	let runningAverage;
 	let weightTotalSoFar = 0;
 	for (const argument of childArguments) {
-		const premises = GetNodeChildrenL3(argument).filter(a=>a && a.type == MapNodeType.Claim);
+		const premises = GetNodeChildrenL3(argument._key).filter(a=>a && a.type == MapNodeType.Claim);
 		if (premises.length == 0) continue;
 
 		let truthScoreComposite = RS_CalculateTruthScoreComposite(argument._key, calculationPath.concat(argument._key));
@@ -49,7 +49,7 @@ export const RS_CalculateTruthScoreComposite = StoreAccessor(s=>(argumentID: str
 	const argument = GetNodeL2(argumentID);
 	Assert(argument && argument.type == MapNodeType.Argument, "RS truth-score-composite can only be calculated for an argument.");
 
-	const premises = GetNodeChildrenL3(argument).filter(a=>a && a.type == MapNodeType.Claim);
+	const premises = GetNodeChildrenL3(argument._key).filter(a=>a && a.type == MapNodeType.Claim);
 	if (premises.length == 0) return 0;
 
 	const truthScores = premises.map(premise=>RS_CalculateTruthScore(premise._key, calculationPath.concat(premise._key)));
@@ -69,13 +69,13 @@ export const RS_CalculateWeightMultiplier = StoreAccessor(s=>(nodeID: string, ca
 	const node = GetNodeL2(nodeID);
 	Assert(node && node.type == MapNodeType.Argument, "RS weight-multiplier can only be calculated for an argument<>claim combo -- which is specified by providing its argument node.");
 
-	const childArguments = GetChildArguments(node);
+	const childArguments = GetChildArguments(node._key);
 	if (childArguments == null || childArguments.length == 0) return 1;
 
 	let runningMultiplier = 1;
 	let runningDivisor = 1;
 	for (const argument of childArguments) {
-		const premises = GetNodeChildrenL3(argument).filter(a=>a && a.type == MapNodeType.Claim);
+		const premises = GetNodeChildrenL3(argument._key).filter(a=>a && a.type == MapNodeType.Claim);
 		if (premises.length == 0) continue;
 
 		const truthScores = premises.map(premise=>RS_CalculateTruthScore(premise._key, calculationPath.concat(premise._key)));
@@ -105,7 +105,7 @@ export const RS_GetAllValues = StoreAccessor(s=>(nodeID: string, path: string, u
 	const node = GetNodeL2(nodeID);
 	const parent = GetParentNodeL3(path);
 	const argument = node.type == MapNodeType.Argument ? node : parent && parent.type == MapNodeType.Argument ? parent : null;
-	const premises = node.type == MapNodeType.Argument ? GetNodeChildrenL3(argument, path).filter(a=>a && a.type == MapNodeType.Claim) : [node];
+	const premises = node.type == MapNodeType.Argument ? GetNodeChildrenL3(argument._key, path).filter(a=>a && a.type == MapNodeType.Claim) : [node];
 
 	if (node.type == MapNodeType.Claim) {
 		var claimTruthScore = RS_CalculateTruthScore(node._key, calculationPath);
@@ -138,12 +138,12 @@ function CombinePremiseTruthScores(truthScores: number[], argumentType: Argument
 	return truthScores.Max(); // ArgumentType.Any
 }
 
-const GetChildArguments = StoreAccessor(s=>(node: MapNodeL2): MapNodeL3[]=>{
-	const children = GetNodeChildrenL3(node);
+const GetChildArguments = StoreAccessor(s=>(nodeID: string): MapNodeL3[]=>{
+	const children = GetNodeChildrenL3(nodeID);
 	if (children == emptyArray_forLoading || children.Any(a=>a == null)) return null; // null means still loading
 	const childArguments = children.filter(a=>a.type == MapNodeType.Argument);
 	for (const child of childArguments) {
-		const childChildren = GetNodeChildrenL3(child);
+		const childChildren = GetNodeChildrenL3(nodeID);
 		if (childChildren == emptyArray_forLoading || childChildren.Any(a=>a == null)) return null; // null means still loading
 	}
 

@@ -31,7 +31,7 @@ export const GetNodeRevealTimesInSteps = StoreAccessor(s=>(steps: TimelineStep[]
 					const node = GetNode(reveal.path.split("/").Last());
 					if (node == null) continue;
 					// todo: fix that a child being null, apparently breaks the GetAsync() call in ActionProcessor.ts (for scrolling to just-revealed nodes)
-					let currentChildren = GetNodeChildren(node).map(child=>({node: child, path: child && `${reveal.path}/${child._key}`}));
+					let currentChildren = GetNodeChildren(node._key).map(child=>({node: child, path: child && `${reveal.path}/${child._key}`}));
 					if (currentChildren.Any(a=>a.node == null)) {
 						// if (steps.length == 1 && steps[0]._key == 'clDjK76mSsGXicwd7emriw') debugger;
 						return emptyArray_forLoading;

@@ -63,7 +63,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const userID = MeID();
 		const permissions = GetUserPermissionGroups(userID);
 		// nodeChildren: GetNodeChildrenL3(node, path),
-		const nodeChildren = GetNodeChildrenL3(node, path);
+		const nodeChildren = GetNodeChildrenL3(node._key, path);
 		const combinedWithParentArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		const copiedNode_asCut = store.main.maps.copiedNodePath_asCut;
 

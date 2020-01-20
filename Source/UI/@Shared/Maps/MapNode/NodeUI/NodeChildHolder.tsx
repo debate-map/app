@@ -180,7 +180,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				{IsMultiPremiseArgument(node) && type != HolderType.Relevance &&
 					<NodeChildHolderBox {...{map, node, path}} type={HolderType.Relevance} widthOverride={childrenWidthOverride}
 						widthOfNode={childrenWidthOverride}
-						nodeChildren={GetNodeChildrenL3(node, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}
+						nodeChildren={GetNodeChildrenL3(node._key, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}
 						onHeightOrDividePointChange={dividePoint=>this.CheckForLocalChanges()}/>}
 				{!separateChildren &&
 					RenderGroup("all")}

@@ -32,7 +32,7 @@ export const GetRatingSet = StoreAccessor(s=>(nodeID: string, ratingType: Rating
 	if (ratingType == "impact") {
 		const node = GetNodeL2(nodeID);
 		if (node == null) return null;
-		const nodeChildren = GetNodeChildrenL2(node);
+		const nodeChildren = GetNodeChildrenL2(nodeID);
 		if (nodeChildren.Any(a=>a == null)) return emptyObj;
 		//if (nodeChildren.Any(a=>a == null)) return observable.map(emptyObj);
 		const premises = nodeChildren.filter(a=>a == null || a.type == MapNodeType.Claim);
