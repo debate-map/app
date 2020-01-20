@@ -2,6 +2,7 @@ import {E} from "js-vextensions";
 import {Column} from "react-vcomponents";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {observer} from "mobx-react";
+import {observer_simple} from "vwebapp-framework";
 import {AddImage} from "../../../Server/Commands/AddImage";
 import {Image, ImageType} from "../../../Store/firebase/images/@Image";
 import {ImageDetailsUI} from "./ImageDetailsUI";
@@ -16,7 +17,7 @@ export function ShowAddImageDialog(initialData?: Partial<Image>, postAdd?: (id: 
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add image", cancelButton: true,
-		message: observer(()=>{
+		message: observer_simple(()=>{
 			const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,

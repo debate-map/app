@@ -4,7 +4,7 @@ import {Droppable, DroppableProvided, DroppableStateSnapshot} from "react-beauti
 import {Button, Column, Div, Row} from "react-vcomponents";
 import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, WarnOfTransientObjectProps} from "react-vextensions";
 import {GetFillPercent_AtPath} from "Store/firebase/nodeRatings";
-import {GetNodeChildrenL3, HolderType} from "Store/firebase/nodes";
+import {GetNodeChildrenL3, HolderType, GetParentNodeL3} from "Store/firebase/nodes";
 import {MapNodeL3, Polarity} from "Store/firebase/nodes/@MapNode";
 import {ArgumentType} from "Store/firebase/nodes/@MapNodeRevision";
 import {MapNodeType, MapNodeType_Info} from "Store/firebase/nodes/@MapNodeType";
@@ -17,7 +17,7 @@ import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
-import {IsMultiPremiseArgument} from "../../../../../Store/firebase/nodes/$node";
+import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
 
 import {ArgumentsControlBar} from "../ArgumentsControlBar";
 import {NodeChildHolderBox} from "./NodeChildHolderBox";
@@ -172,7 +172,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			)}>
 				{linkSpawnPoint > 0 && oldChildBoxOffsets &&
 					// <NodeConnectorBackground node={node} linkSpawnPoint={vertical ? Vector2iCache.Get(0, linkSpawnPoint) : Vector2iCache.Get(-30, linkSpawnPoint)}
-					<NodeConnectorBackground node={node} linkSpawnPoint={vertical ? new Vector2i(-10, 0) : new Vector2i(-30, linkSpawnPoint)} straightLines={vertical}
+					<NodeConnectorBackground node={node} path={path} linkSpawnPoint={vertical ? new Vector2i(-10, 0) : new Vector2i(-30, linkSpawnPoint)} straightLines={vertical}
 						shouldUpdate={true} // this.lastRender_source == RenderSource.SetState}
 						nodeChildren={nodeChildrenToShowHere} childBoxOffsets={oldChildBoxOffsets}/>}
 

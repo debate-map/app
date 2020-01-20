@@ -4,11 +4,14 @@ import {UserEdit} from "Server/CommandMacros";
 import {GetNode} from "Store/firebase/nodes";
 import {MapNodeTag} from "Store/firebase/nodeTags/@MapNodeTag";
 import {AssertValidate, GenerateUUID} from "vwebapp-framework";
+import {HasModPermissions} from "Store/firebase/users/$user";
 
 @UserEdit
 export class AddNodeTag extends Command<{tag: MapNodeTag}, string> {
 	id: string;
 	Validate() {
+		AssertV(HasModPermissions(this.userInfo.id), "Only moderators can add tags currently.");
+		
 		const {tag} = this.payload;
 
 		this.id = this.id ?? GenerateUUID();

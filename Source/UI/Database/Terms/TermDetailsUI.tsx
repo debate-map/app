@@ -5,7 +5,7 @@ import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {GetUser} from "Store/firebase/users";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {ES} from "Utils/UI/GlobalStyles";
-import {InfoButton, Observer} from "vwebapp-framework";
+import {InfoButton, Observer, observer_simple} from "vwebapp-framework";
 import {observer} from "mobx-react";
 import {AddTerm} from "../../../Server/Commands/AddTerm";
 import {Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "../../../Store/firebase/terms/@Term";
@@ -119,7 +119,7 @@ export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: st
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add term", cancelButton: true,
-		message: observer(()=>{
+		message: observer_simple(()=>{
 			const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,

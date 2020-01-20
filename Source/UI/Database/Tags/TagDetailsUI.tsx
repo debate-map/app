@@ -7,7 +7,7 @@ import {MapNodeTag, TagComp_names, GetTagCompClassByTag, CalculateTagCompKey, Ge
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {ES} from "Utils/UI/GlobalStyles";
 import {GetUser} from "../../../Store/firebase/users";
-import {Validate} from "vwebapp-framework";
+import {Validate, InfoButton, observer_simple} from "vwebapp-framework";
 import {observer} from "mobx-react";
 
 type Props = {baseData: MapNodeTag, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: MapNodeTag)=>void};
@@ -51,6 +51,7 @@ export class TagDetailsUI extends BaseComponentPlus({} as Props, {} as State) {
 						newData[newCompClass.key] = new newCompClass();
 						Change();
 					}}/>
+					<InfoButton ml={5} text={compClass.description}/>
 				</RowLR>
 				{compClass == TagComp_MirrorChildrenFromXToY &&
 					<MirrorChildrenFromXToY_UI {...sharedProps}/>}
@@ -78,6 +79,7 @@ class MirrorChildrenFromXToY_UI extends BaseComponentPlus({} as TagDetailsUI_Sha
 				<CheckBox mt={5} text="Mirror X's supporting arguments" checked={comp.mirrorSupporting} onChange={val=>Change(comp.mirrorSupporting = val)}/>
 				<CheckBox mt={5} text="Mirror X's opposing arguments" checked={comp.mirrorOpposing} onChange={val=>Change(comp.mirrorOpposing = val)}/>
 				<CheckBox mt={5} text="Reverse argument polarities" checked={comp.reversePolarities} onChange={val=>Change(comp.reversePolarities = val)}/>
+				<CheckBox mt={5} text="Disable direct children" checked={comp.disableDirectChildren} onChange={val=>Change(comp.disableDirectChildren = val)}/>
 			</>
 		);
 	}
@@ -105,7 +107,7 @@ export function ShowAddTagDialog(initialData: Partial<MapNodeTag>, postAdd?: (id
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add tag", cancelButton: true,
-		message: observer(()=>{
+		message: observer_simple(()=>{
 			const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
@@ -121,7 +123,7 @@ export function ShowAddTagDialog(initialData: Partial<MapNodeTag>, postAdd?: (id
 						}}/>
 				</Column>
 			);
-		})["type"],
+		}),
 		onOK: async()=>{
 			const id = await getCommand().Run();
 			if (postAdd) postAdd(id);

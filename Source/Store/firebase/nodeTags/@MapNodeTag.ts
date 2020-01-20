@@ -37,13 +37,16 @@ AddSchema("MapNodeTag", {
 export abstract class TagComp {
 	static key: string;
 	static displayName: string;
+	static description: string;
 	static nodeKeys: string[]; // fields whose values should be added to MapNodeTag.nodes array
 }
 
 export class TagComp_MirrorChildrenFromXToY extends TagComp {
 	//static key = "mirrorChildrenFromXToY";
 	static displayName = "mirror children from X to Y";
+	static description = "Makes-so any children of node-x (matching the parameters) are shown as children of node-y. (only usable for claims currently)";
 	static nodeKeys = ["nodeX", "nodeY"];
+
 	constructor(initialData?: Partial<TagComp_MirrorChildrenFromXToY>) { super(); this.VSet(initialData); }
 
 	nodeX: string;
@@ -51,6 +54,8 @@ export class TagComp_MirrorChildrenFromXToY extends TagComp {
 	mirrorSupporting = true;
 	mirrorOpposing = true;
 	reversePolarities = false;
+	disableDirectChildren = false;
+	//overrideDirectChildren = false;
 	//recursive = false;
 }
 AddSchema("TagComp_MirrorChildrenFromXToY", {
@@ -60,6 +65,7 @@ AddSchema("TagComp_MirrorChildrenFromXToY", {
 		mirrorSupporting: {type: "boolean"},
 		mirrorOpposing: {type: "boolean"},
 		reversePolarities: {type: "boolean"},
+		disableDirectChildren: {type: "boolean"},
 	},
 });
 

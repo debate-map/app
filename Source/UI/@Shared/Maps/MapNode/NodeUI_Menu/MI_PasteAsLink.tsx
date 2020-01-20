@@ -1,7 +1,7 @@
 import {BaseComponent} from "react-vextensions";
 import {VMenuItem} from "react-vmenu";
 import {ShowMessageBox} from "react-vmessagebox";
-import {GetNodeDisplayText} from "Store/firebase/nodes/$node";
+import {GetNodeDisplayText, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, GetPolarityShortStr, ReversePolarity} from "Store/firebase/nodes/$node";
 import {MeID} from "Store/firebase/users";
 import {styles} from "Utils/UI/GlobalStyles";
 import {Observer} from "vwebapp-framework";
@@ -15,29 +15,30 @@ import {runInAction} from "mobx";
 import {store} from "Store";
 import {MI_SharedProps} from "../NodeUI_Menu";
 
-/* let PasteAsLink_MenuItem_connector = (state, {}: SharedProps)=> {
-	let moveOpPayload = {};
-	let valid = IsUserBasicOrAnon(MeID()) && copiedNode != null && IsMoveNodeOpValid(moveOpPayload);
-	return {valid};
-};
-@Connect(connector)
-class PasteAsLink_MenuItem extends BaseComponentWithConnector(PasteAsLink_MenuItem_connector, {}) { */
 @Observer
 export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 	render() {
 		const {map, node, path, holderType, copiedNode, copiedNodePath, copiedNode_asCut, combinedWithParentArg, inList} = this.props;
-		if (!CanGetBasicPermissions(MeID())) return <div/>;
-		if (copiedNode == null) return <div/>;
-		if (inList) return <div/>;
+		if (copiedNode == null) return null;
+		if (inList) return null;
 		const copiedNode_parent = GetParentNodeL3(copiedNodePath);
-
 		const formForClaimChildren = node.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
+		let newPolarity =
+			(copiedNode.type == MapNodeType.Argument ? copiedNode.link.polarity : null) // if node itself has polarity, use it
+			|| (copiedNode_parent && copiedNode_parent.type == MapNodeType.Argument ? copiedNode_parent.link.polarity : null); // else if our parent has a polarity, use that
+
+		const contributeInfo = GetNodeContributionInfo(node._key, MeID());
+		let contributeInfo_polarity = contributeInfo[`${GetPolarityShortStr(newPolarity)}Args`] as NodeContributionInfo_ForPolarity;
+		// if can't add with source polarity, try adding with reversed polarity
+		if (!contributeInfo_polarity.canAdd) {
+			newPolarity = ReversePolarity(newPolarity);
+			contributeInfo_polarity = contributeInfo[`${GetPolarityShortStr(newPolarity)}Args`] as NodeContributionInfo_ForPolarity;
+		}
+
 		const linkCommand = new LinkNode_HighLevel({
-			mapID: map._key, oldParentID: GetParentNodeID(copiedNodePath), newParentID: node._key, nodeID: copiedNode._key,
+			mapID: map._key, oldParentID: GetParentNodeID(copiedNodePath), newParentID: contributeInfo_polarity.hostNodeID, nodeID: copiedNode._key,
 			newForm: copiedNode.type == MapNodeType.Claim ? formForClaimChildren : null,
-			newPolarity:
-				(copiedNode.type == MapNodeType.Argument ? copiedNode.link.polarity : null) // if node itself has polarity, use it
-				|| (copiedNode_parent && copiedNode_parent.type == MapNodeType.Argument ? copiedNode_parent.link.polarity : null), // else if our parent has a polarity, use that
+			newPolarity: contributeInfo_polarity.reversePolarities ? ReversePolarity(newPolarity) : newPolarity,
 			allowCreateWrapperArg: holderType != null || !node.multiPremiseArgument,
 			unlinkFromOldParent: copiedNode_asCut, deleteOrphanedArgumentWrapper: true,
 		});

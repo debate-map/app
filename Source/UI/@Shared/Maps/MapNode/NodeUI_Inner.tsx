@@ -132,6 +132,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);
 		const combinedWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
+		//const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
+		//const outerNode = IsPremiseOfSinglePremiseArgument(node, parent) ? parent : node;
 
 		let mainRatingType = GetMainRatingType(node);
 		let ratingNode = node;
@@ -283,6 +285,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						style,
 						dragInfo && dragInfo.provided.draggableProps.style,
 						asDragPreview && {zIndex: zIndexes.draggable},
+						//outerNode.link._mirrorLink && {border: `solid ${HSLA(0, 0, 1, .3)}`, borderWidth: "0 0 0 1px"}, // if mirror-child, show white border at left
 					)}
 					padding={GetPaddingForNode(node, isSubnode)}
 					onClick={onClick}

@@ -8,14 +8,13 @@ import {GetMap} from "Store/firebase/maps";
 import {GetNode} from "Store/firebase/nodes";
 import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView";
 import {ES} from "Utils/UI/GlobalStyles";
-import {InfoButton, Link} from "vwebapp-framework";
+import {InfoButton, Link, observer_simple} from "vwebapp-framework";
 import {AddChildNode} from "../../../../../../Server/Commands/AddChildNode";
 import {AsNodeL2, AsNodeL3, GetNodeForm, GetNodeL3} from "../../../../../../Store/firebase/nodes/$node";
 import {ChildEntry, ClaimForm, MapNode, Polarity} from "../../../../../../Store/firebase/nodes/@MapNode";
 import {ArgumentType, MapNodeRevision, MapNodeRevision_titlePattern, PermissionInfoType} from "../../../../../../Store/firebase/nodes/@MapNodeRevision";
 import {GetMapNodeTypeDisplayName, MapNodeType} from "../../../../../../Store/firebase/nodes/@MapNodeType";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
-import {observer} from "mobx-react";
 
 export class AddChildHelper {
 	constructor(parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string) {
@@ -140,7 +139,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 	let tab = AddChildDialogTab.Claim;
 	let boxController = ShowMessageBox({
 		title: `Add ${displayName}`, cancelButton: true,
-		message: observer(()=>{
+		message: observer_simple(()=>{
 			let tempCommand = helper.GetCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,

@@ -1,10 +1,14 @@
 import {Vector2i, E} from "js-vextensions";
 import {BaseComponent, SimpleShouldUpdate, WarnOfTransientObjectProps} from "react-vextensions";
+import {GetParentNodeL3} from "Store/firebase/nodes";
+import {IsPremiseOfSinglePremiseArgument} from "Store/firebase/nodes/$node";
+import {HSLA} from "vwebapp-framework";
+import {Fragment} from "react";
 import {MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeColor} from "../../../../Store/firebase/nodes/@MapNodeType";
 
 type Props = {
-	node: MapNodeL3, linkSpawnPoint: Vector2i, straightLines?: boolean, nodeChildren: MapNodeL3[],
+	node: MapNodeL3, path: string, linkSpawnPoint: Vector2i, straightLines?: boolean, nodeChildren: MapNodeL3[],
 	// childBoxOffsets: Vector2i[],
 	childBoxOffsets: {[key: number]: Vector2i},
 	shouldUpdate: boolean
@@ -14,7 +18,11 @@ type Props = {
 @SimpleShouldUpdate({useShouldUpdateProp: true})
 export class NodeConnectorBackground extends BaseComponent<Props, {}> {
 	render() {
-		const {node, linkSpawnPoint, straightLines, nodeChildren, childBoxOffsets} = this.props;
+		const {node, path, linkSpawnPoint, straightLines, nodeChildren, childBoxOffsets} = this.props;
+
+		/*const parent = GetParentNodeL3(path);
+		//const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
+		const outerNode = IsPremiseOfSinglePremiseArgument(node, parent) ? parent : node;*/
 
 		return (
 			<svg className="clickThroughChain" style={{position: "absolute", overflow: "visible", zIndex: -1}}>
@@ -51,8 +59,12 @@ export class NodeConnectorBackground extends BaseComponent<Props, {}> {
 						const end = childOffset;
 						// return <line x1={start.x} y1={start.y} x2={mid.x} y2={mid.y} x3={end.x} y3={end.y}/>;
 						// return <polyline stroke="orange" fill="transparent" stroke-width="5"points={`${start.x} ${start.y} ${mid.x} ${mid.y} ${end.x} ${end.y}`}/>;
-						return <path key={`connectorLine_${child._key}`} style={{stroke: backgroundColor.css(), strokeWidth: 3, fill: "none"}}
+						return <path key={`connectorLine_${child._key}`} style={E({stroke: backgroundColor.css(), strokeWidth: 3, fill: "none"})}
 							d={`M${start.x},${start.y} L${mid.x},${mid.y} L${end.x},${end.y}`}/>;
+						/*return <Fragment key={`connectorLine_${child._key}`}>
+							{straightLine(child.link._mirrorLink && {strokeDasharray: "10 5"})}
+							{child.link._mirrorLink && straightLine({strokeDasharray: "5 10", strokeDashoffset: 5, stroke: HSLA(0, 0, 1, .1)})}
+						</Fragment>;*/
 					}
 
 					const start = linkSpawnPoint;
@@ -64,8 +76,19 @@ export class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					startControl = startControl.Plus(middleControl).Times(0.5); // average with middle-control
 					endControl = endControl.Plus(middleControl).Times(0.5); // average with middle-control
 
-					return <path key={`connectorLine_${child._key}`} style={{stroke: backgroundColor.css(), strokeWidth: 3, fill: "none"}}
-						d={`M${start.x},${start.y} C${startControl.x},${startControl.y} ${endControl.x},${endControl.y} ${end.x},${end.y}`}/>;
+					const curvedLine = style=>{
+						return <path //key={`connectorLine_${child._key}`}
+							style={E(
+								{stroke: backgroundColor.css(), strokeWidth: 3, fill: "none"},
+								style,
+							)}
+							d={`M${start.x},${start.y} C${startControl.x},${startControl.y} ${endControl.x},${endControl.y} ${end.x},${end.y}`}/>;
+					};
+
+					return <Fragment key={`connectorLine_${child._key}`}>
+						{curvedLine(child.link._mirrorLink && {strokeDasharray: "10 5"})}
+						{child.link._mirrorLink && curvedLine({strokeDasharray: "5 10", strokeDashoffset: 5, stroke: HSLA(0, 0, 1, .1)})}
+					</Fragment>;
 				})}
 			</svg>
 		);

@@ -4,6 +4,7 @@ import {GetNodePhrasing} from "Store/firebase/nodePhrasings";
 import {MapNodeTag, TagComp_keys} from "Store/firebase/nodeTags/@MapNodeTag";
 import {AddSchema, AssertValidate, GetSchemaJSON, Schema} from "vwebapp-framework";
 import {GetNodeTag} from "Store/firebase/nodeTags";
+import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
 
 type MainType = MapNodeTag;
 const MTName = "MapNodeTag";
@@ -28,6 +29,8 @@ export class UpdateNodeTag extends Command<{id: string, updates: Partial<MainTyp
 
 		const {id, updates} = this.payload;
 		this.oldData = AV.NonNull = GetNodeTag(id);
+		AssertV(IsUserCreatorOrMod(this.userInfo.id, this.oldData), "User is not the tag's creator, or a moderator.");
+
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}

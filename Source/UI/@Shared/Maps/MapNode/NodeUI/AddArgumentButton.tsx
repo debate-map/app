@@ -2,12 +2,13 @@ import {E} from "js-vextensions";
 import {Button} from "react-vcomponents";
 import {BaseComponent, UseCallback} from "react-vextensions";
 import {GetParentNodeL3} from "Store/firebase/nodes";
-import {ReversePolarity} from "Store/firebase/nodes/$node";
+import {ReversePolarity, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, GetPolarityShortStr} from "Store/firebase/nodes/$node";
 import {MeID} from "Store/firebase/users";
 import {CanContributeToNode} from "Store/firebase/users/$user";
 import {GADDemo} from "UI/@GAD/GAD";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {HSLA, Observer} from "vwebapp-framework";
+import {useCallback, useMemo, useEffect} from "react";
 import {Map} from "../../../../../Store/firebase/maps/@Map";
 import {ClaimForm, MapNodeL3, Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
 import {GetNodeColor, MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
@@ -70,10 +71,14 @@ export class AddArgumentButton extends BaseComponent<Props> {
 		const backgroundColor = GetNodeColor({type: MapNodeType.Argument, displayPolarity: polarity} as MapNodeL3);
 		const parent = GetParentNodeL3(path);
 
+		const polarity_short = GetPolarityShortStr(polarity);
+		const contributeInfo = GetNodeContributionInfo(node._key, MeID());
+		const contributeInfo_polarity = contributeInfo[`${polarity_short}Args`] as NodeContributionInfo_ForPolarity;
+
 		return (
 			<Button
-				text={`Add ${polarity == Polarity.Supporting ? "pro" : "con"}`} title={`Add ${Polarity[polarity].toLowerCase()} argument`}
-				enabled={CanContributeToNode(MeID(), node._key)}
+				text={`Add ${polarity_short}`} title={`Add ${Polarity[polarity].toLowerCase()} argument`}
+				enabled={contributeInfo_polarity.canAdd}
 				// text={`Add ${Polarity[polarity].toLowerCase()} argument`}
 				style={E(
 					{
@@ -95,18 +100,26 @@ export class AddArgumentButton extends BaseComponent<Props> {
 					if (e.button != 0) return;
 					if (MeID() == null) return ShowSignInPopup();
 
-					let newChildPolarity = polarity;
-					//GetFinalPolarity(polarity, parent.link.form);
-					// if display polarity is different then base polarity, we need to reverse the new-child polarity
-					/*if (node.link.polarity && node.displayPolarity != node.link.polarity) {
-						newChildPolarity = ReversePolarity(newChildPolarity);
-					}*/
-					// if parent is a claim "shown as negation", we need to reverse the new-child polarity
-					if (node.link.form == ClaimForm.Negation) {
-						newChildPolarity = ReversePolarity(newChildPolarity);
+					if (contributeInfo_polarity.hostNodeID == node._key) {
+						let newChildPolarity = polarity;
+						//GetFinalPolarity(polarity, parent.link.form);
+						// if display polarity is different then base polarity, we need to reverse the new-child polarity
+						/*if (node.link.polarity && node.displayPolarity != node.link.polarity) {
+							newChildPolarity = ReversePolarity(newChildPolarity);
+						}*/
+						// if parent is a claim "shown as negation", we need to reverse the new-child polarity
+						if (node.link.form == ClaimForm.Negation) {
+							newChildPolarity = ReversePolarity(newChildPolarity);
+						}
+						ShowAddChildDialog(path, MapNodeType.Argument, newChildPolarity, MeID(), map._key);
+					} else {
+						let newChildPolarity = polarity;
+						if (contributeInfo_polarity.reversePolarities) {
+							newChildPolarity = ReversePolarity(newChildPolarity);
+						}
+						ShowAddChildDialog(contributeInfo_polarity.hostNodeID, MapNodeType.Argument, newChildPolarity, MeID(), map._key);
 					}
-					ShowAddChildDialog(path, MapNodeType.Argument, newChildPolarity, MeID(), map._key);
-				}, [map._key, path, polarity])}/>
+				}, [contributeInfo_polarity.hostNodeID, contributeInfo_polarity.reversePolarities, map._key, node._key, node.link.form, path, polarity])}/>
 		);
 	}
 }

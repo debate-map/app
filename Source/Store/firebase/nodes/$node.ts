@@ -11,6 +11,7 @@ import {MapNodeRevision, TitlesMap, TitleKey_values} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
 import {PermissionGroupSet} from "../users/@User";
 import {GetNodeTags} from "../nodeTags";
+import {CanContributeToNode} from "../users/$user";
 
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");
@@ -202,6 +203,7 @@ export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapN
 				let nodeL3ForNodeAsMirrorChildInThisTag = mirrorChildren.find(a=>a._key == nodeID);
 				if (nodeL3ForNodeAsMirrorChildInThisTag) {
 					link = Clone(nodeL3ForNodeAsMirrorChildInThisTag.link);
+					Object.defineProperty(link, "_mirrorLink", {value: true});
 					if (comp.reversePolarities) {
 						link.polarity = ReversePolarity(link.polarity);
 					}
@@ -216,6 +218,52 @@ export function GetLinkAtPath(path: string) {
 	const parent = GetNode(GetNodeID(SlicePath(path, 1)));
 	return GetLinkUnderParent(nodeID, parent);
 }
+
+export class NodeContributionInfo {
+	constructor(nodeID: string) {
+		this.proArgs = new NodeContributionInfo_ForPolarity(nodeID);
+		this.conArgs = new NodeContributionInfo_ForPolarity(nodeID);
+	}
+	proArgs: NodeContributionInfo_ForPolarity;
+	conArgs: NodeContributionInfo_ForPolarity;
+}
+export class NodeContributionInfo_ForPolarity {
+	constructor(nodeID: string) {
+		this.hostNodeID = nodeID;
+	}
+	canAdd = true;
+	hostNodeID: string;
+	reversePolarities = false;
+}
+export function GetPolarityShortStr(polarity: Polarity) {
+	return polarity == Polarity.Supporting ? "pro" : "con";
+}
+
+export const GetNodeContributionInfo = StoreAccessor(s=>(nodeID: string, userID: string)=> {
+	let result = new NodeContributionInfo(nodeID);
+	let tags = GetNodeTags(nodeID);
+	let directChildrenDisabled = tags.Any(a=>a.mirrorChildrenFromXToY?.nodeY == nodeID && a.mirrorChildrenFromXToY?.disableDirectChildren);
+	if (directChildrenDisabled) {
+		result.proArgs.canAdd = false;
+		result.conArgs.canAdd = false;
+	}
+	for (let tag of tags) {
+		if (tag.mirrorChildrenFromXToY && tag.mirrorChildrenFromXToY.nodeY == nodeID) {
+			let comp = tag.mirrorChildrenFromXToY;
+			let addForPolarities_short = [] as ("pro" | "con")[];
+			if (comp.mirrorSupporting) addForPolarities_short.push(comp.reversePolarities ? "con" : "pro");
+			if (comp.mirrorOpposing) addForPolarities_short.push(comp.reversePolarities ? "pro" : "con");
+			for (let polarity_short of addForPolarities_short) {
+				result[`${polarity_short}Args`].canAdd = true;
+				result[`${polarity_short}Args`].hostNodeID = comp.nodeX;
+				result[`${polarity_short}Args`].reversePolarities = comp.reversePolarities;
+			}
+		}
+	}
+	if (!CanContributeToNode(userID, result.proArgs.hostNodeID)) result.proArgs.canAdd = false;
+	if (!CanContributeToNode(userID, result.conArgs.hostNodeID)) result.conArgs.canAdd = false;
+	return result;
+});
 
 export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
 	if (title.trim().length == 0) return "Title cannot be empty.";

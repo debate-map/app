@@ -137,6 +137,9 @@ export type ChildEntry = {
 	form?: ClaimForm;
 	seriesAnchor?: boolean;
 	polarity?: Polarity;
+
+	// runtime only
+	_mirrorLink?: boolean;
 };
 AddSchema("ChildEntry", {
 	properties: {

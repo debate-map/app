@@ -1,4 +1,4 @@
-import {Command_Old, GetAsync, Command, AssertV, MergeDBUpdates} from "mobx-firelink";
+import {Command_Old, GetAsync, Command, AssertV, MergeDBUpdates, AV} from "mobx-firelink";
 import {GetNode, GetNodesByIDs, GetNodeChildren} from "Store/firebase/nodes";
 import {AddSchema, AssertValidate, IsSpecialEmptyArray} from "vwebapp-framework";
 import {E, OMIT, DEL} from "js-vextensions";
@@ -32,8 +32,7 @@ export class ChangeNodeOwnerMap extends Command<{nodeID: string, newOwnerMapID: 
 	Validate() {
 		AssertValidate("ChangeNodeOwnerMap_payload", this.payload, "Payload invalid");
 		const {nodeID, newOwnerMapID, argumentNodeID} = this.payload;
-		const oldData = GetNode(nodeID);
-		AssertV(oldData, "oldData is null");
+		const oldData = AV.NonNull = GetNode(nodeID);
 
 		AssertV(IsUserCreatorOrMod(this.userInfo.id, oldData), "User is not the node's creator, or a moderator.");
 		// if making private
