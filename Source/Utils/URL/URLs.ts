@@ -254,20 +254,6 @@ export const GetNewURL = StoreAccessor(s=>(includeMapViewStr = true)=>{
 		newURL.SetQueryVar('view', GetMapViewStr(mapID));
 	} */
 
-	/* if (page == 'forum') {
-		const subforumID = GetSelectedSubforumID();
-		const threadID = GetSelectedThreadID();
-		if (subforumID) newURL.pathNodes.push(`${subforumID}`);
-		else if (threadID) newURL.pathNodes.push('*');
-
-		if (threadID) newURL.pathNodes.push(`${threadID}`);
-	} */
-
-	if (page == "feedback") {
-		const proposalID = GetSelectedProposalID();
-		if (proposalID) newURL.pathNodes.push(`${proposalID}`);
-	}
-
 	if (page == "database") {
 		if (subpage == "users" && GetSelectedUserID()) {
 			newURL.pathNodes.push(`${GetSelectedUserID()}`);
@@ -277,6 +263,20 @@ export const GetNewURL = StoreAccessor(s=>(includeMapViewStr = true)=>{
 			newURL.pathNodes.push(`${GetSelectedImageID()}`);
 		}
 	}
+
+	if (page == "feedback") {
+		const proposalID = GetSelectedProposalID();
+		if (proposalID) newURL.pathNodes.push(`${proposalID}`);
+	}
+	
+	/* if (page == 'forum') {
+		const subforumID = GetSelectedSubforumID();
+		const threadID = GetSelectedThreadID();
+		if (subforumID) newURL.pathNodes.push(`${subforumID}`);
+		else if (threadID) newURL.pathNodes.push('*');
+
+		if (threadID) newURL.pathNodes.push(`${threadID}`);
+	} */
 
 	let mapID: string|n;
 	if (page == "private") {

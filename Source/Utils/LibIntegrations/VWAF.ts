@@ -5,7 +5,7 @@ import {NotificationMessage} from "Store/main";
 import {logTypes, LogTypes_New} from "Utils/General/Logging";
 import {ValidateDBData} from "Utils/Store/DBDataValidator";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL} from "Utils/URL/URLs";
-import {manager as manager_framework, ActionFunc, RootStore} from "vwebapp-framework";
+import {manager as manager_framework, ActionFunc, GetMirrorOfMobXTree} from "vwebapp-framework";
 import "./VWAF/Overrides";
 import produce from "immer";
 import {Feedback_store} from "firebase-feedback";
@@ -82,7 +82,9 @@ export function InitVWAF() {
 }
 
 export function GetNewURLForStoreChanges<T = RootState>(actionFunc: ActionFunc<T>, getSubOperatedOnByActionFunc: (root: RootState)=>T = (root=>root as any)) {
-	const newState = produce(store, (draft: RootState)=>{
+	const store_mirror = GetMirrorOfMobXTree(store);
+	//const newState = produce(store, (draft: RootState)=>{
+	const newState = produce(store_mirror, (draft: RootState)=>{
 		actionFunc(getSubOperatedOnByActionFunc(draft));
 	});
 	// have new-state used for our store-accessors (ie. GetNewURL)
