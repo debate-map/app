@@ -23,7 +23,7 @@ declare const { MapNodeType }: typeof import('../../../Source/Store/firebase/nod
 declare const { MapNodeRevision }: typeof import('../../../Source/Store/firebase/nodes/@MapNodeRevision');
 declare const { ClaimForm }: typeof import('../../../Source/Store/firebase/nodes/@MapNode');
 declare const { Polarity }: typeof import('../../../Source/Store/firebase/nodes/@MapNode');
-declare const { AddChildHelper }: typeof import('../../../Source/UI/@Shared/Maps/MapNode/NodeUI_Menu/AddChildDialog');
+declare const { AddChildHelper }: typeof import('../../../Source/UI/@Shared/Maps/MapNode/NodeUI_Menu/Dialogs/AddChildDialog');
 
 // declare const global;
 /* declare global {
@@ -128,7 +128,7 @@ async function SeedDB(firebase) {
 	async function WaitForNodeInStore(nodeID: string) { return RR.GetAsync(() => RR.GetNode(nodeID)); }
 	async function AddNode(parentPath: string, type: number, title: string, polarityIfArg?: number, expand = true) {
 		const helper = new AddChildHelper(parentPath, type, title, polarityIfArg, fullAuth.auth.uid, mapInfo.mapID);
-		const results = await helper.Apply(expand, expand);
+		const results = await helper.Apply({expandSelf: expand, expandTruthAndRelevance: expand});
 		const nodeID: string = results.nodeID || results.argumentNodeID;
 		await WaitForNodeInStore(nodeID);
 		return nodeID;

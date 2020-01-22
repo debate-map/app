@@ -1,4 +1,0 @@
-{
-	"@type": "Load the js files in this folder as es2015 modules, rather than commonjs.",
-	"type": "module"
-}
