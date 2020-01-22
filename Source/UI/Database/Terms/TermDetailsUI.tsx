@@ -11,7 +11,6 @@ import {AddTerm} from "../../../Server/Commands/AddTerm";
 import {Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "../../../Store/firebase/terms/@Term";
 import {GetNiceNameForTermType} from "../../Database/TermsUI";
 
-@Observer
 export class TermDetailsUI extends BaseComponentPlus(
 	{} as {baseData: Term, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Term, error: string)=>void},
 	{} as {newData: Term, dataError: string},
@@ -32,7 +31,6 @@ export class TermDetailsUI extends BaseComponentPlus(
 	render() {
 		const {baseData, forNew, enabled, style, onChange} = this.props;
 		const {newData} = this.state;
-		const creator = !forNew && GetUser(baseData.creator);
 
 		const Change = (..._)=>this.OnChange();
 
@@ -40,7 +38,7 @@ export class TermDetailsUI extends BaseComponentPlus(
 		return (
 			<Column style={style}>
 				{!forNew &&
-					<IDAndCreationInfoUI id={baseData._key} creator={creator} createdAt={newData.createdAt}/>}
+					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Text>Name:</Text>
 					<TextInput pattern={Term_nameFormat} required delayChangeTillDefocus={true}

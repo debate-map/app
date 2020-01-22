@@ -20,7 +20,6 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 	render() {
 		const {baseData, forNew, enabled, style, onChange} = this.props;
 		const {newData} = this.state;
-		const creator = !forNew && GetUser(baseData.creator);
 		const Change = (..._)=>{
 			if (onChange) onChange(this.GetNewData(), this);
 			this.Update();
@@ -31,7 +30,7 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 		return (
 			<Column style={style}>
 				{!forNew &&
-					<IDAndCreationInfoUI id={baseData._key} creator={creator} createdAt={newData.createdAt}/>}
+					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={100} style={{width}}>
 					<Pre>Name:</Pre>
 					<TextInput

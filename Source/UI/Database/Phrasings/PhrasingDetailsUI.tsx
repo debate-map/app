@@ -29,7 +29,6 @@ export class PhrasingDetailsUI extends BaseComponentPlus(
 	render() {
 		const {baseData, forNew, enabled, style} = this.props;
 		const {newData} = this.state;
-		const creator = !forNew && GetUser(baseData.creator);
 
 		const Change = (..._)=>this.OnChange();
 
@@ -37,7 +36,7 @@ export class PhrasingDetailsUI extends BaseComponentPlus(
 		return (
 			<Column style={style}>
 				{!forNew &&
-					<IDAndCreationInfoUI id={baseData._key} creator={creator} createdAt={newData.createdAt}/>}
+					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Type: </Pre>
 					<Select options={GetEntries(MapNodePhrasingType)} enabled={false} style={ES({flex: 1})}

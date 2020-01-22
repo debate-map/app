@@ -250,6 +250,9 @@ export const GetNewURL = StoreAccessor(s=>(includeMapViewStr = true)=>{
 	if (s.main.envOverride) newURL.SetQueryVar("env", s.main.envOverride);
 	if (s.main.dbOverride) newURL.SetQueryVar("db", s.main.dbOverride);
 	if (s.main.dbVersionOverride) newURL.SetQueryVar("dbVersion", s.main.dbVersionOverride);
+	/* if (mapID && includeMapViewStr) {
+		newURL.SetQueryVar('view', GetMapViewStr(mapID));
+	} */
 
 	/* if (page == 'forum') {
 		const subforumID = GetSelectedSubforumID();
@@ -307,10 +310,6 @@ export const GetNewURL = StoreAccessor(s=>(includeMapViewStr = true)=>{
 			}
 		}
 	}
-
-	/* if (mapID && includeMapViewStr) {
-		newURL.SetQueryVar('view', GetMapViewStr(mapID));
-	} */
 
 	const mapState = GetMapState(mapID);
 	// const playingTimeline = mapInfo && mapInfo.playingTimeline;

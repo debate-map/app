@@ -3,10 +3,13 @@ import {Column, Pre, Row, Text} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import {Link, Observer} from "vwebapp-framework";
 import {User} from "Store/firebase/users/@User";
+import {GetUser} from "Store/firebase/users";
 
-export class IDAndCreationInfoUI extends BaseComponent<{id: string | number, creator: User, createdAt: number}, {}> {
+@Observer
+export class IDAndCreationInfoUI extends BaseComponent<{id: string | number, creatorID: string, createdAt: number}, {}> {
 	render() {
-		const {id, creator, createdAt} = this.props;
+		const {id, creatorID, createdAt} = this.props;
+		const creator = GetUser(creatorID);
 		return (
 			<Column sel>
 				<Row>ID: {id}</Row>
@@ -17,7 +20,7 @@ export class IDAndCreationInfoUI extends BaseComponent<{id: string | number, cre
 							if (creator != null) {
 								s.main.page = "database";
 								s.main.database.subpage = "users";
-								s.main.database.selectedUserID = creator._key;
+								s.main.database.selectedUserID = creatorID;
 							}
 						}} />
 					<Text>)</Text>

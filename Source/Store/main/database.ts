@@ -1,6 +1,6 @@
 import {GetUsers} from "Store/firebase/users";
 import {O} from "vwebapp-framework";
-import {StoreAccessor} from "mobx-firelink";
+import {StoreAccessor, GetDoc} from "mobx-firelink";
 import {GetImages} from "../../Store/firebase/images";
 import {GetTerms} from "../../Store/firebase/terms";
 
@@ -17,7 +17,7 @@ export const GetSelectedUserID = StoreAccessor(s=>()=>{
 });
 export const GetSelectedUser = StoreAccessor(s=>()=>{
 	const selectedID = GetSelectedUserID();
-	return (GetUsers() || []).find(a=>a && a._key == selectedID);
+	return GetDoc({}, a=>a.users.get(selectedID));
 });
 
 export const GetSelectedTermID = StoreAccessor(s=>()=>{

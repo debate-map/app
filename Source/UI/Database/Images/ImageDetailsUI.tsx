@@ -7,10 +7,10 @@ import {User} from "Store/firebase/users/@User";
 import {ES} from "Utils/UI/GlobalStyles";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {AddImage} from "Server/Commands/AddImage";
 import {GetNiceNameForImageType, Image, ImageType, Image_namePattern, Image_urlPattern} from "../../../Store/firebase/images/@Image";
 import {GetUser, MeID} from "../../../Store/firebase/users";
 import {SourceChainsEditorUI} from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
-import {AddImage} from "Server/Commands/AddImage";
 
 export class ImageDetailsUI extends BaseComponentPlus(
 	{} as {baseData: Image, creating: boolean, editing: boolean, style?, onChange?: (newData: Image, error: string)=>void},
@@ -33,7 +33,6 @@ export class ImageDetailsUI extends BaseComponentPlus(
 	render() {
 		const {baseData, creating, editing, style, onChange} = this.props;
 		const {newData, dataError} = this.state;
-		const creator = !creating && GetUser(baseData.creator);
 
 		const Change = (..._)=>this.OnChange();
 
@@ -41,7 +40,7 @@ export class ImageDetailsUI extends BaseComponentPlus(
 		return (
 			<Column style={style}>
 				{!creating &&
-					<IDAndCreationInfoUI id={baseData._key} creator={creator} createdAt={newData.createdAt}/>}
+					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Name: </Pre>
 					<TextInput

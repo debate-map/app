@@ -256,10 +256,6 @@ G({ctrlDown: false, shiftDown: false, altDown: false});
 
 @Observer
 class RootUI extends BaseComponentPlus({} as {}, {}) {
-	/* shouldComponentUpdate(newProps, newState) {
-		// ignore change of 'router' prop -- we don't use it
-		return ShallowChanged(newProps.Excluding('router'), this.props.Excluding('router')) || ShallowChanged(newState, this.state);
-	} */
 	render() {
 		// const currentPage = State(a => a.main.page);
 		const {page} = store.main;

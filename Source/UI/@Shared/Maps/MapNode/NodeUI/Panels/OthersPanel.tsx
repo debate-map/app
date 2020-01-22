@@ -32,7 +32,7 @@ export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNo
 		const mapID = map ? map._key : null;
 		const userID = MeID();
 		const _ = GetUserPermissionGroups(userID);
-		const creator = GetUser(node.creator);
+		//const creator = GetUser(node.creator);
 		// viewers: GetNodeViewers(node._key),
 		const creatorOrMod = IsUserCreatorOrMod(userID, node);
 
@@ -67,7 +67,7 @@ export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNo
 		let mirrorChildren = GetNodeMirrorChildren(node._key);
 		return (
 			<Column sel style={{position: "relative"}}>
-				<IDAndCreationInfoUI id={node._key} creator={creator} createdAt={node.createdAt}/>
+				<IDAndCreationInfoUI id={node._key} creatorID={node.creator} createdAt={node.createdAt}/>
 				<Row style={{flexWrap: "wrap"}}>
 					<Text>Parents: </Text>
 					{node.parents == null ? "none" : node.parents.VKeys().map((parentID, index)=>{

@@ -33,7 +33,6 @@ export class TagDetailsUI extends BaseComponentPlus({} as Props, {} as State) {
 	render() {
 		const {baseData, forNew, enabled, style} = this.props;
 		const {newData} = this.state;
-		const creator = !forNew && GetUser(baseData.creator);
 		const compClass = GetTagCompClassByTag(newData);
 
 		const Change = (..._)=>this.OnChange();
@@ -43,7 +42,7 @@ export class TagDetailsUI extends BaseComponentPlus({} as Props, {} as State) {
 		return (
 			<Column style={style}>
 				{!forNew &&
-					<IDAndCreationInfoUI id={baseData._key} creator={creator} createdAt={newData.createdAt}/>}
+					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Type: </Pre>
 					<Select options={TagComp_classes.map(a=>({name: a.displayName, value: a}))} enabled={enabled} style={ES({flex: 1})} value={compClass} onChange={(newCompClass: TagComp_Class)=> {

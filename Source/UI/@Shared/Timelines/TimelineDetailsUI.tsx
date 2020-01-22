@@ -17,7 +17,6 @@ export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {bas
 	render() {
 		const {baseData, forNew, enabled, style, onChange} = this.props;
 		const {newData} = this.state;
-		const creator = !forNew && GetUser(baseData.creator);
 
 		const Change = (..._)=>{
 			if (onChange) onChange(this.GetNewData(), this);
@@ -29,7 +28,7 @@ export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {bas
 		return (
 			<Column style={style}>
 				{!forNew &&
-					<IDAndCreationInfoUI id={baseData._key} creator={creator} createdAt={newData.createdAt}/>}
+					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Name: </Pre>
 					<TextInput required enabled={enabled} style={{width: "100%"}}

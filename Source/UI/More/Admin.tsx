@@ -221,7 +221,7 @@ export async function GetCollectionsDataAsync(versionRootPath: string, privateCo
 	// we put the db-updates into this variable, so that we know we're importing data for every key (if not, Typescript throws error about value not matching FirebaseData's shape)
 	versionCollectionsData = await AwaitTree(E(
 		{
-			// modules
+			general: getDocs("general"),
 			/* 'modules/feedback/general': await getDocs('modules', 'feedback', 'general'),
 			'modules/feedback/proposals': await getDocs('modules', 'feedback', 'proposals'),
 			'modules/feedback/userData': await getDocs('modules', 'feedback', 'userData'), */
@@ -229,7 +229,6 @@ export async function GetCollectionsDataAsync(versionRootPath: string, privateCo
 				feedback: await getDoc("modules", "feedback"),
 			},
 
-			general: getDocs("general"),
 			images: getDocs("images"),
 			layers: getDocs("layers"),
 			maps: getDocs("maps"),

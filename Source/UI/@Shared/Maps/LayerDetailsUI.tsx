@@ -18,7 +18,6 @@ export class LayerDetailsUI extends BaseComponentPlus({enabled: true} as Props, 
 	render() {
 		const {baseData, forNew, enabled, style, onChange} = this.props;
 		const {newData} = this.state;
-		const creator = !forNew && GetUser(baseData.creator);
 		const Change = (..._)=>{
 			if (onChange) onChange(this.GetNewData(), this);
 			this.Update();
@@ -29,7 +28,7 @@ export class LayerDetailsUI extends BaseComponentPlus({enabled: true} as Props, 
 		return (
 			<Column style={style}>
 				{!forNew &&
-					<IDAndCreationInfoUI id={baseData._key} creator={creator} createdAt={newData.createdAt}/>}
+					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Text>Name: </Text>
 					<TextInput required enabled={enabled} style={{width: "100%"}}

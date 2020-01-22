@@ -21,11 +21,11 @@ import {MapNodeTag} from "./firebase/nodeTags/@MapNodeTag";
 require("./firebase/users_private/@User_Private");
 
 export interface FirebaseDBShape {
+	general: Collection_Closed<{data: GeneralData}>;
 	modules: Collection_Closed<{
 		// feedback: FeedbackDBShape;
 	}>;
 
-	general: Collection_Closed<{data: GeneralData}>;
 	images: Collection<Image>;
 	layers: Collection<Layer>;
 	maps: Collection<Map>;
