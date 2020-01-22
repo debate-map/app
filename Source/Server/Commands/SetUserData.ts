@@ -16,7 +16,7 @@ export class SetUserData extends Command<{id: string, updates: Partial<MainType>
 				id: {type: "string"},
 				updates: Schema({
 					properties: GetSchemaJSON(MTName)["properties"].Including(
-						"displayName",
+						"displayName", "photoURL",
 						"joinDate", "permissionGroups",
 					),
 				}),
