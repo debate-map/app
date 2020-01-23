@@ -1,6 +1,8 @@
 import {BaseComponentPlus} from "react-vextensions";
 import {Observer} from "vwebapp-framework";
 import {MapNodeL3} from "Store/firebase/nodes/@MapNode";
+import {RatingType} from "Store/firebase/nodeRatings/@RatingType";
+import {Rating} from "Store/firebase/nodeRatings/@RatingsRoot";
 import {MI_SharedProps} from "../NodeUI_Menu";
 
 @Observer
@@ -15,7 +17,13 @@ export class MI_ExportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}
 // ==========
 
 // not perfect match for old-site, data, but better than nothing
-export type SubtreeExportData_Old = MapNodeL3 & {childrenData: {[key: string]: SubtreeExportData_Old}};
+export type SubtreeExportData_Old = MapNodeL3 & {
+	// key1: rating-type string, key2: userID
+	ratings: {
+		[key: string]: {[key: string]: Rating},
+	},
+	childrenData: {[key: string]: SubtreeExportData_Old},
+};
 
 /*
 ==========
@@ -23,6 +31,8 @@ function GetSubtree(path) {
 	let pathSegments = path.split("/");
 	let nodeL3 = RR.GetNodeL3(path);
 	let result = RR.Clone(nodeL3);
+	result.ratings = RR.GetNodeRatingsRoot(nodeL3._id);
+	if (result.ratings == null) delete result.ratings;
 	result.childrenData = {};
 	for (let child of RR.GetNodeChildrenL3(nodeL3, path)) {
 		if (child == null) continue; // not yet loaded

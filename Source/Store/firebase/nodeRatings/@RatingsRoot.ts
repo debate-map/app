@@ -14,7 +14,7 @@ export class Rating {
 		this.updated = Date.now();
 		this.value = value;
 	}
-	_key: string;
+	_key?: string;
 	updated: number;
 	value: number;
 }

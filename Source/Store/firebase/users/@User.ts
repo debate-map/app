@@ -1,6 +1,8 @@
 import {AddSchema} from "vwebapp-framework";
 
+// todo: make this have a length constraint as well
 export const User_id = "^[a-zA-Z0-9]+$";
+AddSchema("UserID", {pattern: "^[a-zA-Z0-9]+$"});
 export class User {
 	_key?: string;
 	displayName: string;

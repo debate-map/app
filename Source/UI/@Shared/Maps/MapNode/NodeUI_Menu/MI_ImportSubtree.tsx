@@ -5,8 +5,8 @@ import {HasModPermissions, HasAdminPermissions} from "Store/firebase/users/$user
 import {MeID} from "Store/firebase/users";
 import {styles, ES} from "Utils/UI/GlobalStyles";
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
-import {Column, Row, TextArea, Button, CheckBox} from "react-vcomponents";
-import {FromJSON, ToJSON, CE, Clone} from "js-vextensions";
+import {Column, Row, TextArea, Button, CheckBox, Select, Text, TextInput} from "react-vcomponents";
+import {FromJSON, ToJSON, CE, Clone, GetEntries} from "js-vextensions";
 import {ImportSubtree_Old} from "Server/Commands/ImportSubtree_Old";
 import {GetParentNodeID, GetNodeID, GetNodesByTitle} from "Store/firebase/nodes";
 import {MI_SharedProps} from "../NodeUI_Menu";
@@ -34,18 +34,26 @@ export class MI_ImportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}
 	}
 }
 
+enum ImportSubtreeUI_MidTab {
+	Nodes = 10,
+	Others = 20,
+}
+
 class ImportSubtreeUI extends BaseComponentPlus(
 	{} as {controller: BoxController} & MI_SharedProps,
 	{
 		subtreeJSON: "",
+		tab: ImportSubtreeUI_MidTab.Nodes,
 		nodesToLink: {} as {[key: string]: string},
+		importRatings: false,
+		importRatings_userIDsStr: "",
 		error: null as string, dbUpdates: null,
 	},
 ) {
 	importCommand: ImportSubtree_Old;
 	render() {
 		const {mapID, node, path, controller} = this.props;
-		const {subtreeJSON, nodesToLink, error, dbUpdates} = this.state;
+		const {subtreeJSON, tab, nodesToLink, importRatings, importRatings_userIDsStr, error, dbUpdates} = this.state;
 
 		let subtreeData;
 		let newNodes = [] as SubtreeExportData_Old[];
@@ -61,26 +69,39 @@ class ImportSubtreeUI extends BaseComponentPlus(
 						<Row>Subtree JSON:</Row>
 						<TextArea value={subtreeJSON} style={{flex: 1}} onChange={val=>this.SetState({subtreeJSON: val})}/>
 					</Column>
-					<Column style={{width: 500}}>
-						<Row>New nodes{newNodes.length ? ` (${newNodes.length})` : ""}: (checked: link existing, instead of creating new)</Row>
-						{/*newNodes.map((node, index)=> {
-							let title = node.current.titles.base || "(empty title)";
-							return (
-								<Row key={index} style={{whiteSpace: "normal"}}>
-									<CheckBox text={title} checked={nodesToLink.includes(node._key)} enabled={GetNodesByTitle(title, "base").length > 0} onChange={val=> {
-										if (val) {
-											this.SetState({nodesToLink: nodesToLink.concat(node._key)})
-										} else {
-											this.SetState({nodesToLink: nodesToLink.Except(node._key)})
-										}
-									}}/>
-								</Row>
-							)
-						})*/}
-						<ScrollView style={ES({flex: 1})}>
-							{subtreeData &&
-								<SubtreeTreeView node={subtreeData} path={[subtreeData._key]} nodesToLink={nodesToLink} setNodesToLink={val=>this.SetState({nodesToLink: val})}/>}
-						</ScrollView>
+					<Column style={{width: 500, padding: "0 5px"}}>
+						<Row>
+							<Select displayType="button bar" options={GetEntries(ImportSubtreeUI_MidTab)} value={tab} onChange={val=>this.SetState({tab: val})}/>
+						</Row>
+						{tab == ImportSubtreeUI_MidTab.Nodes &&
+						<>
+							<Row mt={5}>New nodes{newNodes.length ? ` (${newNodes.length})` : ""}: (checked: link existing, instead of creating new)</Row>
+							{/*newNodes.map((node, index)=> {
+								let title = node.current.titles.base || "(empty title)";
+								return (
+									<Row key={index} style={{whiteSpace: "normal"}}>
+										<CheckBox text={title} checked={nodesToLink.includes(node._key)} enabled={GetNodesByTitle(title, "base").length > 0} onChange={val=> {
+											if (val) {
+												this.SetState({nodesToLink: nodesToLink.concat(node._key)})
+											} else {
+												this.SetState({nodesToLink: nodesToLink.Except(node._key)})
+											}
+										}}/>
+									</Row>
+								)
+							})*/}
+							<ScrollView style={ES({flex: 1})}>
+								{subtreeData &&
+									<SubtreeTreeView node={subtreeData} path={[subtreeData._key]} nodesToLink={nodesToLink} setNodesToLink={val=>this.SetState({nodesToLink: val})}/>}
+							</ScrollView>
+						</>}
+						{tab == ImportSubtreeUI_MidTab.Others &&
+						<>
+							<Row>
+								<CheckBox text="Import ratings, from users:" checked={importRatings} onChange={val=>this.SetState({importRatings: val})}/>
+								<TextInput ml={5} placeholder="Leave empty for all users..." style={{flex: 1}} value={importRatings_userIDsStr} onChange={val=>this.SetState({importRatings_userIDsStr: val})}/>
+							</Row>
+						</>}
 					</Column>
 					<Column style={{width: 500}}>
 						<Row>DBUpdates:</Row>
@@ -89,7 +110,11 @@ class ImportSubtreeUI extends BaseComponentPlus(
 				</Row>
 				<Row mt={5}>
 					<Button text="GetDBUpdates" onClick={async()=>{
-						this.importCommand = new ImportSubtree_Old({mapID, parentNodeID: GetNodeID(path), subtreeJSON, nodesToLink});
+						let importRatings_userIDs = null;
+						if (importRatings_userIDsStr.trim().length) {
+							importRatings_userIDs = importRatings_userIDsStr.split(",").map(a=>a.trim());
+						}
+						this.importCommand = new ImportSubtree_Old({mapID, parentNodeID: GetNodeID(path), subtreeJSON, nodesToLink, importRatings, importRatings_userIDs});
 						/*try {
 							await this.importCommand.Validate_Async();
 						} catch (ex) {

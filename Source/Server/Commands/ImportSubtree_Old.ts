@@ -1,6 +1,6 @@
 import {AssertV, Command, MergeDBUpdates} from "mobx-firelink";
 import {HasAdminPermissions} from "Store/firebase/users/$user";
-import {AssertValidate} from "vwebapp-framework";
+import {AssertValidate, Validate} from "vwebapp-framework";
 import {SubtreeExportData_Old} from "UI/@Shared/Maps/MapNode/NodeUI_Menu/MI_ExportSubtree";
 import {FromJSON, GetTreeNodesInObjTree, Clone, CE, DEL} from "js-vextensions";
 import {MapNode} from "Store/firebase/nodes/@MapNode";
@@ -10,9 +10,16 @@ import {SourceChain, Source} from "Store/firebase/nodeRevisions/@SourceChain";
 import {AddChildNode} from "./AddChildNode";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel";
 import {LinkNode} from "./LinkNode";
+import {SetNodeRating} from "./SetNodeRating";
+import {RatingType} from "Store/firebase/nodeRatings/@RatingType";
+import {Rating} from "Store/firebase/nodeRatings/@RatingsRoot";
 
 // for export from old site (see commented code in MI_ExportSubtree.tsx)
-export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: string, subtreeJSON: string, nodesToLink?: {[key: string]: string}}> {
+export class ImportSubtree_Old extends Command<{
+	mapID?: string, parentNodeID: string, subtreeJSON: string,
+	nodesToLink?: {[key: string]: string},
+	importRatings: boolean, importRatings_userIDs?: string[],
+}> {
 	rootSubtreeData: SubtreeExportData_Old;
 
 	subs = [] as Command<any, any>[];
@@ -25,6 +32,8 @@ export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: st
 				parentNodeID: {type: "string"},
 				subtreeJSON: {type: "string"},
 				nodesToLink: {patternProperties: {"[0-9]+": {type: "string"}}},
+				importRatings: {type: "boolean"},
+				importRatings_userIDs: {items: {type: "string"}},
 			},
 			required: ["subtreeJSON"],
 		}, this.payload, "Payload invalid");
@@ -36,15 +45,16 @@ export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: st
 		this.subs_last = this.subs;
 		this.subs = [];
 		this.oldID_newID = Clone(nodesToLink) ?? {};
+		this.nodeRatingsToAdd = [];
 
 		this.ProcessSubtree(this.rootSubtreeData, parentNodeID);
 	}
 
 	oldID_newID = {} as {[key: number]: string};
 	ProcessSubtree(subtreeData: SubtreeExportData_Old, parentID: string) {
-		const {mapID} = this.payload;
+		const {mapID, importRatings, importRatings_userIDs} = this.payload;
 
-		const node = AsNodeL1(WithoutHelpers(subtreeData).Excluding("childrenData" as any, "finalPolarity", "currentRevision", "parents", "children", "childrenOrder"));
+		const node = AsNodeL1(WithoutHelpers(subtreeData).Excluding("ratings", "childrenData", "finalPolarity", "currentRevision", "parents", "children", "childrenOrder"));
 		const revision = WithoutHelpers(subtreeData.current).Excluding("node", "approved", "relative", "voteLevel") as MapNodeRevision;
 		if (revision.image) revision.image.id = `${revision.image.id}`;
 		if (revision["contentNode"]) {
@@ -83,12 +93,29 @@ export class ImportSubtree_Old extends Command<{mapID?: string, parentNodeID: st
 				});
 			}
 		}
+
+		if (importRatings && subtreeData.ratings) {
+			for (let {key: ratingType, value: ratingsByUser} of subtreeData.ratings.Pairs()) {
+				if (Validate("RatingType", ratingType) != null) continue;
+				for (let {key: userID, value: rating} of ratingsByUser.Pairs()) {
+					if (Validate("UserID", userID) != null) continue;
+					if (importRatings_userIDs != null && !importRatings_userIDs.Contains(userID)) continue;
+					let newNodeID = this.oldID_newID[oldID];
+					//let addRatingCommand = new SetNodeRating({nodeID: newNodeID, ratingType: ratingType as RatingType, value: rating.value, userID}).MarkAsSubcommand(this);
+					this.nodeRatingsToAdd.push({ratingType: ratingType as RatingType, userID, nodeID: newNodeID, updated: rating.updated, value: rating.value});
+				}
+			}
+		}
 	}
+	nodeRatingsToAdd = [] as (Rating & {nodeID: string, ratingType: RatingType, userID: string})[];
 
 	GetDBUpdates() {
 		let updates = {};
 		for (const sub of this.subs) {
 			updates = MergeDBUpdates(updates, sub.GetDBUpdates());
+		}
+		for (let ratingEnhanced of this.nodeRatingsToAdd) {
+			updates[`nodeRatings/${ratingEnhanced.nodeID}/${ratingEnhanced.ratingType}/${ratingEnhanced.userID}`] = ratingEnhanced.Excluding("nodeID", "ratingType", "userID");
 		}
 		return updates;
 	}
