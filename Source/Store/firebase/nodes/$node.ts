@@ -10,8 +10,9 @@ import {ChildEntry, ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./
 import {MapNodeRevision, TitlesMap, TitleKey_values} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
 import {PermissionGroupSet} from "../users/@User";
-import {GetNodeTags} from "../nodeTags";
+import {GetNodeTags, GetNodeTagComps} from "../nodeTags";
 import {CanContributeToNode} from "../users/$user";
+import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@MapNodeTag";
 
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");
@@ -191,10 +192,10 @@ export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapN
 	if (parent == null) return null;
 	let link = parent.children?.[nodeID]; // null-check, since after child-delete, parent-data might have updated before child-data removed
 	if (includeMirrorLinks && link == null) {
-		let tags = GetNodeTags(parent._key);
-		for (let tag of tags) {
-			if (tag.mirrorChildrenFromXToY && tag.mirrorChildrenFromXToY.nodeY == parent._key) {
-				let comp = tag.mirrorChildrenFromXToY;
+		//let tags = GetNodeTags(parent._key);
+		let tagComps = GetNodeTagComps(parent._key);
+		for (const comp of tagComps) {
+			if (comp instanceof TagComp_MirrorChildrenFromXToY) {
 				// for now, don't include node-x's own mirror-children (lazy, temp way to avoid infinite loops)
 				let mirrorChildren = GetNodeChildrenL3(comp.nodeX, undefined, false);
 				mirrorChildren = mirrorChildren.filter(child=> {

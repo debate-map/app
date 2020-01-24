@@ -1,4 +1,4 @@
-import {AddSchema, UUID_regex, GetSchemaJSON} from "vwebapp-framework";
+import {AddSchema, UUID_regex, GetSchemaJSON, Validate} from "vwebapp-framework";
 import {GetValues_ForSchema, ModifyString} from "js-vextensions";
 import {Polarity} from "../nodes/@MapNode";
 
@@ -17,6 +17,7 @@ export class MapNodeTag {
 
 	// type-specific fields (ie. tag comps)
 	mirrorChildrenFromXToY: TagComp_MirrorChildrenFromXToY;
+	mutuallyExclusiveGroup: TagComp_MutuallyExclusiveGroup;
 }
 AddSchema("MapNodeTag", {
 	properties: {
@@ -28,6 +29,7 @@ AddSchema("MapNodeTag", {
 		nodes: {items: {$ref: "UUID"}},
 
 		mirrorChildrenFromXToY: {$ref: "TagComp_MirrorChildrenFromXToY"},
+		mutuallyExclusiveGroup: {$ref: "TagComp_MutuallyExclusiveGroup"},
 	},
 	required: ["creator", "createdAt", "nodes"],
 });
@@ -39,7 +41,14 @@ export abstract class TagComp {
 	static key: string;
 	static displayName: string;
 	static description: string;
-	static nodeKeys: string[]; // fields whose values should be added to MapNodeTag.nodes array
+	static nodeKeys: string[]; // fields whose values should be added to MapNodeTag.nodes array (field-value can be a node-id string, or an array of such strings)
+
+	/** Has side-effect: Casts data to its original class/type. */
+	GetFinalTagComps(): TagComp[] {
+		let compClass = GetTagCompClassByKey(this["_key"]);
+		if (compClass) return [this.As(compClass as any)];
+		return [this];
+	}
 }
 
 /*export class TagComp_ExampleBasedClaim extends TagComp {
@@ -88,11 +97,50 @@ AddSchema("TagComp_MirrorChildrenFromXToY", {
 	},
 });
 
+export class TagComp_MutuallyExclusiveGroup extends TagComp {
+	static displayName = "mutually exclusive group (composite)";
+	static description = `
+		Marks a set of nodes as being mutually exclusive with each other.
+		(common use: having each one's pro-args be mirrored as con-args of the others)
+	`.AsMultiline(0);
+	static nodeKeys = ["nodes"];
+
+	constructor(initialData?: Partial<TagComp_MutuallyExclusiveGroup>) { super(); this.VSet(initialData); }
+
+	nodes = [] as string[];
+	mirrorXProsAsYCons = true;
+
+	GetFinalTagComps() {
+		let result = super.GetFinalTagComps();
+		if (this.mirrorXProsAsYCons) {
+			for (let nodeX of this.nodes) {
+				for (let nodeY of this.nodes.Except(nodeX)) {
+					let mirrorComp = new TagComp_MirrorChildrenFromXToY({
+						nodeX, nodeY,
+						mirrorSupporting: true,
+						mirrorOpposing: false,
+						reversePolarities: true,
+					});
+					result.push(mirrorComp);
+				}
+			}
+		}
+		return result;
+	}
+}
+AddSchema("TagComp_MutuallyExclusiveGroup", {
+	properties: {
+		nodes: {items: {$ref: "UUID"}},
+		mirrorXProsAsYCons: {type: "boolean"},
+	},
+});
+
 // tag comp meta
 // ==========
 
 export const TagComp_classes = [
 	TagComp_MirrorChildrenFromXToY,
+	TagComp_MutuallyExclusiveGroup,
 ] as const;
 export type TagComp_Class = typeof TagComp_classes[number];
 CalculateTagCompClassStatics();
@@ -131,6 +179,10 @@ export function GetTagCompClassByDisplayName(displayName: string) {
 export function GetTagCompClassByTag(tag: MapNodeTag) {
 	return TagComp_classes.find(a=>a.key in tag);
 }
+export function GetTagCompOfTag(tag: MapNodeTag): TagComp {
+	let compClass = GetTagCompClassByTag(tag);
+	return tag[compClass.key];
+}
 
 /*export type MapNodeTagType = typeof TagComp_classes[number];
 export const MapNodeTagType_values = ["mirror children from X to Y"] as const; //, "example-based claim", "X extends Y"];
@@ -146,3 +198,14 @@ export function GetNodeTagType(tag: MapNodeTag) {
 	const compKeyIndex = MapNodeTagType_keys.findIndex(key=>key in tag);
 	return MapNodeTagType_values[compKeyIndex];
 }*/
+
+export function CalculateNodeIDsForTagComp(tagComp: TagComp, compClass: TagComp_Class) {
+	/*let compClass = GetTagCompClassByTag(tag);
+	let comp = GetTagCompOfTag(tag);*/
+	//let compClass = GetTagCompClassByKey(tagComp["_key"]);
+	return compClass.nodeKeys.SelectMany(key=> {
+		let nodeKeyValue = tagComp[key];
+		let nodeIDsForKey = Array.isArray(nodeKeyValue) ? nodeKeyValue : [nodeKeyValue];
+		return nodeIDsForKey.filter(nodeID=>Validate("UUID", nodeID) == null);
+	});
+}

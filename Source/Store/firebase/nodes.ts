@@ -10,7 +10,8 @@ import {CanGetBasicPermissions, GetUserAccessLevel, HasAdminPermissions, IsUserC
 import {PermissionGroupSet} from "./users/@User";
 import {TitleKey} from "./nodes/@MapNodeRevision";
 import {GetNodeRevisionsByTitle} from "./nodeRevisions";
-import {GetNodeTags} from "./nodeTags";
+import {GetNodeTags, GetNodeTagComps} from "./nodeTags";
+import {TagComp_MirrorChildrenFromXToY} from "./nodeTags/@MapNodeTag";
 
 export enum HolderType {
 	Truth = 10,
@@ -115,9 +116,10 @@ export const GetNodeChildren = StoreAccessor(s=>(nodeID: string, includeMirrorCh
 
 	let result = (node.children || {}).VKeys().map(id=>GetNode(id));
 	if (includeMirrorChildren) {
-		let tags = GetNodeTags(nodeID);
+		//let tags = GetNodeTags(nodeID);
+		let tagComps = GetNodeTagComps(nodeID);
 		// maybe todo: have disable-direct-children merely stop you from adding new direct children, not hide existing ones
-		if (tags.Any(a=>a.mirrorChildrenFromXToY?.nodeY == nodeID && a.mirrorChildrenFromXToY?.disableDirectChildren)) {
+		if (tagComps.Any(a=>a instanceof TagComp_MirrorChildrenFromXToY && a.nodeY == nodeID && a.disableDirectChildren)) {
 			result = [];
 		}
 		result.push(...GetNodeMirrorChildren(nodeID));
@@ -125,15 +127,16 @@ export const GetNodeChildren = StoreAccessor(s=>(nodeID: string, includeMirrorCh
 	return result;
 });
 export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string)=> {
-	let tags = GetNodeTags(nodeID);
+	//let tags = GetNodeTags(nodeID);
+	let tagComps = GetNodeTagComps(nodeID);
 	let result = [] as MapNode[];
-	for (let tag of tags) {
-		if (tag.mirrorChildrenFromXToY && tag.mirrorChildrenFromXToY.nodeY == nodeID) {
-			let comp = tag.mirrorChildrenFromXToY;
+	for (const tagComp of tagComps) {
+		if (tagComp instanceof TagComp_MirrorChildrenFromXToY && tagComp.nodeY == nodeID) {
+			//let comp = tag.mirrorChildrenFromXToY;
 			// for now, don't include node-x's own mirror-children (lazy, temp way to avoid infinite loops)
-			let mirrorChildrenL3 = GetNodeChildrenL3(comp.nodeX, undefined, false);
+			let mirrorChildrenL3 = GetNodeChildrenL3(tagComp.nodeX, undefined, false);
 			mirrorChildrenL3 = mirrorChildrenL3.filter(child=> {
-				return child && ((child.link.polarity == Polarity.Supporting && comp.mirrorSupporting) || (child.link.polarity == Polarity.Opposing && comp.mirrorOpposing));
+				return child && ((child.link.polarity == Polarity.Supporting && tagComp.mirrorSupporting) || (child.link.polarity == Polarity.Opposing && tagComp.mirrorOpposing));
 			});
 			/*if (comp.reversePolarities) {
 				mirrorChildren = mirrorChildren.map(child=> {

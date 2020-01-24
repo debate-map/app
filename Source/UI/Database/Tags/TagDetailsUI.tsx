@@ -1,9 +1,9 @@
 import {Clone, E, DelIfFalsy} from "js-vextensions";
-import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox} from "react-vcomponents";
+import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox, Button} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {AddNodeTag} from "Server/Commands/AddNodeTag";
-import {MapNodeTag, TagComp_names, GetTagCompClassByTag, CalculateTagCompKey, GetTagCompClassByDisplayName, TagComp_classes, TagComp, TagComp_Class, TagComp_MirrorChildrenFromXToY} from "Store/firebase/nodeTags/@MapNodeTag";
+import {MapNodeTag, TagComp_names, GetTagCompClassByTag, CalculateTagCompKey, GetTagCompClassByDisplayName, TagComp_classes, TagComp, TagComp_Class, TagComp_MirrorChildrenFromXToY, TagComp_MutuallyExclusiveGroup, CalculateNodeIDsForTagComp} from "Store/firebase/nodeTags/@MapNodeTag";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {ES} from "Utils/UI/GlobalStyles";
 import {GetUser} from "../../../Store/firebase/users";
@@ -43,7 +43,7 @@ export class TagDetailsUI extends BaseComponentPlus({} as Props, {} as State) {
 			<Column style={style}>
 				{!forNew &&
 					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
-				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+				<RowLR mt={5} mb={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Type: </Pre>
 					<Select options={TagComp_classes.map(a=>({name: a.displayName, value: a}))} enabled={enabled} style={ES({flex: 1})} value={compClass} onChange={(newCompClass: TagComp_Class)=> {
 						delete newData[compClass.key];
@@ -54,6 +54,8 @@ export class TagDetailsUI extends BaseComponentPlus({} as Props, {} as State) {
 				</RowLR>
 				{compClass == TagComp_MirrorChildrenFromXToY &&
 					<MirrorChildrenFromXToY_UI {...sharedProps}/>}
+				{compClass == TagComp_MutuallyExclusiveGroup &&
+					<MutuallyExclusiveGroup_UI {...sharedProps}/>}
 			</Column>
 		);
 	}
@@ -78,21 +80,66 @@ class MirrorChildrenFromXToY_UI extends BaseComponentPlus({} as TagDetailsUI_Sha
 				<CheckBox mt={5} text="Mirror X's supporting arguments" checked={comp.mirrorSupporting} enabled={enabled} onChange={val=>Change(comp.mirrorSupporting = val)}/>
 				<CheckBox mt={5} text="Mirror X's opposing arguments" checked={comp.mirrorOpposing} enabled={enabled} onChange={val=>Change(comp.mirrorOpposing = val)}/>
 				<CheckBox mt={5} text="Reverse argument polarities" checked={comp.reversePolarities} enabled={enabled} onChange={val=>Change(comp.reversePolarities = val)}/>
-				<CheckBox mt={5} text="Disable direct children" checked={comp.disableDirectChildren} enabled={enabled} onChange={val=>Change(comp.disableDirectChildren = val)}/>
+				<CheckBox mt={5} text="Disable Y direct children" checked={comp.disableDirectChildren} enabled={enabled} onChange={val=>Change(comp.disableDirectChildren = val)}/>
 			</>
 		);
 	}
 }
 
-class NodeSlotRow extends BaseComponentPlus({canBeEmpty: true} as TagDetailsUI_SharedProps & {comp: TagComp, nodeKey: string, label: string, canBeEmpty?: boolean}, {}) {
+class MutuallyExclusiveGroup_UI extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
 	render() {
-		let {newData, enabled, compClass, splitAt, Change, comp, nodeKey, label} = this.props;
+		let {newData, enabled, splitAt, Change} = this.props;
+		let comp = newData.mutuallyExclusiveGroup;
 		return (
-			<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
+			<>
+				<Row>
+					<Text>Nodes in group:</Text>
+					<Button ml={5} p="3px 7px" text="+" enabled={enabled} onClick={()=>{
+						comp.nodes.push("");
+						Change();
+					}}/>
+				</Row>
+				{comp.nodes.map((nodeID, index)=> {
+					return <NodeInArrayRow key={index} {...this.props} comp={comp} nodeArrayKey="nodes" nodeEntry={nodeID} nodeEntryIndex={index}/>;
+				})}
+				<Row center mt={5}>
+					<CheckBox text="Mirror X pros as Y cons" checked={comp.mirrorXProsAsYCons} enabled={enabled} onChange={val=>Change(comp.mirrorXProsAsYCons = val)}/>
+					<InfoButton ml={5} text="Makes-so each node's pro-args are mirrored as con-args of the others."/>
+				</Row>
+			</>
+		);
+	}
+}
+
+class NodeSlotRow extends BaseComponentPlus({mt: 5} as TagDetailsUI_SharedProps & {comp: TagComp, nodeKey: string, label: string, mt?: number | string}, {}) {
+	render() {
+		let {newData, enabled, compClass, splitAt, Change, comp, nodeKey, label, mt} = this.props;
+		return (
+			<RowLR mt={mt} splitAt={splitAt} style={{width: "100%"}}>
 				<Text>{label}:</Text>
 				<TextInput value={comp[nodeKey]} enabled={enabled} style={{flex: 1}} onChange={val=> {
 					comp.VSet(nodeKey, DelIfFalsy(val));
-					newData.nodes = compClass.nodeKeys.map(key=>comp[key]).filter(nodeID=>Validate("UUID", nodeID) == null);
+					newData.nodes = CalculateNodeIDsForTagComp(comp, compClass);
+					Change();
+				}}/>
+			</RowLR>
+		);
+	}
+}
+
+class NodeInArrayRow extends BaseComponentPlus({} as TagDetailsUI_SharedProps & {comp: TagComp, nodeArrayKey: string, nodeEntry: string, nodeEntryIndex: number}, {}) {
+	render() {
+		let {newData, enabled, compClass, splitAt, Change, comp, nodeArrayKey, nodeEntry, nodeEntryIndex} = this.props;
+		return (
+			<RowLR mt={5} splitAt={30} style={{width: "100%"}}>
+				<Text>#{nodeEntryIndex + 1}:</Text>
+				<TextInput value={nodeEntry} enabled={enabled} style={{flex: 1, borderRadius: "5px 0 0 5px"}} onChange={val=> {
+					comp[nodeArrayKey][nodeEntryIndex] = val;
+					newData.nodes = CalculateNodeIDsForTagComp(comp, compClass);
+					Change();
+				}}/>
+				<Button text="X" enabled={enabled} style={{padding: "3px 5px", borderRadius: "0 5px 5px 0"}} onClick={()=>{
+					comp[nodeArrayKey].RemoveAt(nodeEntryIndex);
 					Change();
 				}}/>
 			</RowLR>
