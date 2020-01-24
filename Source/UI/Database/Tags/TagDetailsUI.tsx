@@ -75,7 +75,7 @@ class MirrorChildrenFromXToY_UI extends BaseComponentPlus({} as TagDetailsUI_Sha
 		let comp = newData.mirrorChildrenFromXToY;
 		return (
 			<>
-				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X"/>
+				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X" mt={0}/>
 				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeY" label="Node Y"/>
 				<CheckBox mt={5} text="Mirror X's supporting arguments" checked={comp.mirrorSupporting} enabled={enabled} onChange={val=>Change(comp.mirrorSupporting = val)}/>
 				<CheckBox mt={5} text="Mirror X's opposing arguments" checked={comp.mirrorOpposing} enabled={enabled} onChange={val=>Change(comp.mirrorOpposing = val)}/>

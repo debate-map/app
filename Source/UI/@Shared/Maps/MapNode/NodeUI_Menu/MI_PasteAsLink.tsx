@@ -40,7 +40,7 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 			newForm: copiedNode.type == MapNodeType.Claim ? formForClaimChildren : null,
 			newPolarity: contributeInfo_polarity.reversePolarities ? ReversePolarity(newPolarity) : newPolarity,
 			allowCreateWrapperArg: holderType != null || !node.multiPremiseArgument,
-			unlinkFromOldParent: copiedNode_asCut, deleteOrphanedArgumentWrapper: true,
+			unlinkFromOldParent: copiedNode_asCut, deleteEmptyArgumentWrapper: true,
 		});
 		const error = linkCommand.Validate_Safe();
 

@@ -3,7 +3,7 @@ import {AssertV, Command, MergeDBUpdates, AV} from "mobx-firelink";
 import {GetMap} from "Store/firebase/maps";
 import {Map} from "Store/firebase/maps/@Map";
 import {GetHolderType, GetNode, GetParentNodeID, GetParentNodeL3} from "Store/firebase/nodes";
-import {GetNodeL2, GetNodeL3, IsPremiseOfMultiPremiseArgument} from "Store/firebase/nodes/$node";
+import {GetNodeL2, GetNodeL3, IsPremiseOfMultiPremiseArgument, IsSinglePremiseArgument} from "Store/firebase/nodes/$node";
 import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 import {MeID} from "Store/firebase/users";
 import {CanContributeToNode} from "Store/firebase/users/$user";
@@ -21,7 +21,7 @@ type Payload = {
 	newForm?: ClaimForm, newPolarity?: Polarity,
 	allowCreateWrapperArg?: boolean,
 	//linkAsArgument?: boolean,
-	unlinkFromOldParent?: boolean, deleteOrphanedArgumentWrapper?: boolean
+	unlinkFromOldParent?: boolean, deleteEmptyArgumentWrapper?: boolean
 };
 
 export function CreateLinkCommand(mapID: UUID, draggedNodePath: string, dropOnNodePath: string, polarity: Polarity, asCopy: boolean) {
@@ -38,7 +38,7 @@ export function CreateLinkCommand(mapID: UUID, draggedNodePath: string, dropOnNo
 		newForm: draggedNode.type == MapNodeType.Claim ? formForClaimChildren : null,
 		newPolarity: polarity,
 		allowCreateWrapperArg: holderType != null || !dropOnNode.multiPremiseArgument,
-		unlinkFromOldParent: !asCopy, deleteOrphanedArgumentWrapper: true,
+		unlinkFromOldParent: !asCopy, deleteEmptyArgumentWrapper: true,
 	});
 }
 
@@ -54,7 +54,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 	sub_unlinkFromOldParent: UnlinkNode;
 	sub_deleteOldParent: DeleteNode;
 	Validate() {
-		let {mapID, oldParentID, newParentID, nodeID, newForm, allowCreateWrapperArg, unlinkFromOldParent, deleteOrphanedArgumentWrapper, newPolarity} = this.payload;
+		let {mapID, oldParentID, newParentID, nodeID, newForm, allowCreateWrapperArg, unlinkFromOldParent, deleteEmptyArgumentWrapper, newPolarity} = this.payload;
 		AssertV(oldParentID !== nodeID, "Old parent-id and child-id cannot be the same!");
 		AssertV(newParentID !== nodeID, "New parent-id and child-id cannot be the same!");
 		//AssertV(oldParentID !== newParentID, "Old-parent-id and new-parent-id cannot be the same!");
@@ -114,8 +114,8 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			this.sub_unlinkFromOldParent.allowOrphaning = true; // allow "orphaning" of nodeID, since we're going to reparent it simultaneously -- using the sub_linkToNewParent subcommand
 			this.sub_unlinkFromOldParent.Validate();
 
-			// if the old parent was an argument, and the moved node was its only child, also delete the old parent
-			if (deleteOrphanedArgumentWrapper && oldParent_data && oldParent_data.type === MapNodeType.Argument && oldParent_data.children.VKeys().length === 1) {
+			// if the old parent was a single-premise argument, and the moved node was its only child, also delete the old parent
+			if (deleteEmptyArgumentWrapper && IsSinglePremiseArgument(oldParent_data) && oldParent_data.children.VKeys().length === 1) {
 				this.sub_deleteOldParent = this.sub_deleteOldParent ?? new DeleteNode({mapID, nodeID: oldParentID}).MarkAsSubcommand(this);
 				this.sub_deleteOldParent.childrenToIgnore = [nodeID]; // let DeleteNode sub that it doesn't need to wait for nodeID to be deleted (since we're moving it out from old-parent simultaneously with old-parent's deletion)
 				this.sub_deleteOldParent.Validate();
