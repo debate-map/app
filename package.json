@@ -135,7 +135,7 @@
     "keycode": "^2.1.8",
     "lodash": "^4.17.2",
     "mobx": "5.15.0",
-    "mobx-firelink": "^1.0.38",
+    "mobx-firelink": "^1.0.39",
     "mobx-react": "6.1.4",
     "mobx-sync": "2.1.2",
     "mobx-utils": "github:Venryx/mobx-utils#5.5.2_VPatch2",

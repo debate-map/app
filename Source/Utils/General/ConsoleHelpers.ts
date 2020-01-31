@@ -49,7 +49,6 @@ export async function GetDBUpdatesFor_MakeNodesPrivate_Recursive(mapID: string, 
 	return dbUpdates;
 }
 
-// note: you may have to call "await RR.GetDBUpdatesFor_DeleteNodeSubtree(...)" multiple times, since the node-load count might be greater than the MobX limit per call (50)
 export async function GetDBUpdatesFor_DeleteNodeSubtree(nodeID: string, maxDeletes: number, maxIterations?: number) {
 	maxIterations = maxIterations ?? maxDeletes * 10; // there shouldn't be more than about 10 mobx-loops per node-delete
 
