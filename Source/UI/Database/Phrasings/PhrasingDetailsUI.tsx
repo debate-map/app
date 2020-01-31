@@ -10,7 +10,7 @@ import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI"
 import {GetUser} from "../../../Store/firebase/users";
 
 export class PhrasingDetailsUI extends BaseComponentPlus(
-	{} as {baseData: MapNodePhrasing, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: MapNodePhrasing, error: string)=>void},
+	{enabled: true} as {baseData: MapNodePhrasing, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: MapNodePhrasing, error: string)=>void},
 	{newData: null as MapNodePhrasing, dataError: null as string},
 ) {
 	ComponentWillMountOrReceiveProps(props, forMount) {

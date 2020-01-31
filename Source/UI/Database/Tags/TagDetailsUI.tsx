@@ -3,7 +3,7 @@ import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox, Button} from
 import {BaseComponentPlus} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {AddNodeTag} from "Server/Commands/AddNodeTag";
-import {MapNodeTag, TagComp_names, GetTagCompClassByTag, CalculateTagCompKey, GetTagCompClassByDisplayName, TagComp_classes, TagComp, TagComp_Class, TagComp_MirrorChildrenFromXToY, TagComp_MutuallyExclusiveGroup, CalculateNodeIDsForTagComp} from "Store/firebase/nodeTags/@MapNodeTag";
+import {MapNodeTag, TagComp_names, GetTagCompClassByTag, CalculateTagCompKey, GetTagCompClassByDisplayName, TagComp_classes, TagComp, TagComp_Class, TagComp_MirrorChildrenFromXToY, TagComp_MutuallyExclusiveGroup, CalculateNodeIDsForTagComp, TagComp_XIsExtendedByY, TagComp_RestrictMirroringOfX} from "Store/firebase/nodeTags/@MapNodeTag";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {ES} from "Utils/UI/GlobalStyles";
 import {GetUser} from "../../../Store/firebase/users";
@@ -14,7 +14,7 @@ type Props = {baseData: MapNodeTag, forNew: boolean, enabled?: boolean, style?, 
 type State = {newData: MapNodeTag};
 export type TagDetailsUI_SharedProps = Props & State & {compClass: TagComp_Class, splitAt, Change};
 
-export class TagDetailsUI extends BaseComponentPlus({} as Props, {} as State) {
+export class TagDetailsUI extends BaseComponentPlus({enabled: true} as Props, {} as State) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
 			this.SetState({newData: Clone(props.baseData)});
@@ -37,7 +37,7 @@ export class TagDetailsUI extends BaseComponentPlus({} as Props, {} as State) {
 
 		const Change = (..._)=>this.OnChange();
 
-		const splitAt = 70;
+		const splitAt = compClass == TagComp_XIsExtendedByY ? 140 : 70;
 		let sharedProps = E(this.props, this.state, {compClass, splitAt, Change});
 		return (
 			<Column style={style}>
@@ -53,9 +53,13 @@ export class TagDetailsUI extends BaseComponentPlus({} as Props, {} as State) {
 					<InfoButton ml={5} text={compClass.description}/>
 				</RowLR>
 				{compClass == TagComp_MirrorChildrenFromXToY &&
-					<MirrorChildrenFromXToY_UI {...sharedProps}/>}
+					<TagCompUI_MirrorChildrenFromXToY {...sharedProps}/>}
+				{compClass == TagComp_XIsExtendedByY &&
+					<TagCompUI_XIsExtendedByY {...sharedProps}/>}
 				{compClass == TagComp_MutuallyExclusiveGroup &&
-					<MutuallyExclusiveGroup_UI {...sharedProps}/>}
+					<TagCompUI_MutuallyExclusiveGroup {...sharedProps}/>}
+				{compClass == TagComp_RestrictMirroringOfX &&
+					<TagCompUI_RestrictMirroringOfX {...sharedProps}/>}
 			</Column>
 		);
 	}
@@ -69,7 +73,7 @@ export class TagDetailsUI extends BaseComponentPlus({} as Props, {} as State) {
 	}
 }
 
-class MirrorChildrenFromXToY_UI extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
+class TagCompUI_MirrorChildrenFromXToY extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
 	render() {
 		let {newData, enabled, splitAt, Change} = this.props;
 		let comp = newData.mirrorChildrenFromXToY;
@@ -86,7 +90,20 @@ class MirrorChildrenFromXToY_UI extends BaseComponentPlus({} as TagDetailsUI_Sha
 	}
 }
 
-class MutuallyExclusiveGroup_UI extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
+class TagCompUI_XIsExtendedByY extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
+	render() {
+		let {newData, enabled, splitAt, Change} = this.props;
+		let comp = newData.xIsExtendedByY;
+		return (
+			<>
+				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X (base)" mt={0}/>
+				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeY" label="Node Y (extension)"/>
+			</>
+		);
+	}
+}
+
+class TagCompUI_MutuallyExclusiveGroup extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
 	render() {
 		let {newData, enabled, splitAt, Change} = this.props;
 		let comp = newData.mutuallyExclusiveGroup;
@@ -106,6 +123,29 @@ class MutuallyExclusiveGroup_UI extends BaseComponentPlus({} as TagDetailsUI_Sha
 					<CheckBox text="Mirror X pros as Y cons" checked={comp.mirrorXProsAsYCons} enabled={enabled} onChange={val=>Change(comp.mirrorXProsAsYCons = val)}/>
 					<InfoButton ml={5} text="Makes-so each node's pro-args are mirrored as con-args of the others."/>
 				</Row>
+			</>
+		);
+	}
+}
+
+class TagCompUI_RestrictMirroringOfX extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
+	render() {
+		let {newData, enabled, splitAt, Change} = this.props;
+		let comp = newData.restrictMirroringOfX;
+		return (
+			<>
+				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X" mt={0}/>
+				<CheckBox mt={5} text="Blacklist all mirror-parents" checked={comp.blacklistAllMirrorParents} enabled={enabled} onChange={val=>Change(comp.blacklistAllMirrorParents = val)}/>
+				<Row mt={5}>
+					<Text>Blacklisted mirror-parents:</Text>
+					<Button ml={5} p="3px 7px" text="+" enabled={enabled && !comp.blacklistAllMirrorParents} onClick={()=>{
+						comp.blacklistedMirrorParents.push("");
+						Change();
+					}}/>
+				</Row>
+				{comp.blacklistedMirrorParents.map((nodeID, index)=> {
+					return <NodeInArrayRow key={index} {...this.props} enabled={enabled && !comp.blacklistAllMirrorParents} comp={comp} nodeArrayKey="blacklistedMirrorParents" nodeEntry={nodeID} nodeEntryIndex={index}/>;
+				})}
 			</>
 		);
 	}

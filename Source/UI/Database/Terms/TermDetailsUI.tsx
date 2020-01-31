@@ -1,18 +1,16 @@
-import {Clone, DEL, GetEntries, GetErrorMessagesUnderElement, E} from "js-vextensions";
-import {CheckBox, Column, Pre, Row, RowLR, Select, TextInput, TextArea, Text} from "react-vcomponents";
+import {Clone, DEL, E, GetEntries, GetErrorMessagesUnderElement} from "js-vextensions";
+import {Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {GetUser} from "Store/firebase/users";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {ES} from "Utils/UI/GlobalStyles";
-import {InfoButton, Observer, observer_simple} from "vwebapp-framework";
-import {observer} from "mobx-react";
+import {InfoButton, observer_simple} from "vwebapp-framework";
 import {AddTerm} from "../../../Server/Commands/AddTerm";
 import {Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "../../../Store/firebase/terms/@Term";
 import {GetNiceNameForTermType} from "../../Database/TermsUI";
 
 export class TermDetailsUI extends BaseComponentPlus(
-	{} as {baseData: Term, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Term, error: string)=>void},
+	{enabled: true} as {baseData: Term, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Term, error: string)=>void},
 	{} as {newData: Term, dataError: string},
 ) {
 	ComponentWillMountOrReceiveProps(props, forMount) {

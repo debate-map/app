@@ -1,4 +1,4 @@
-import {DeepGet, E} from "js-vextensions";
+import {DeepGet, E, emptyArray} from "js-vextensions";
 import {dbVersion} from "Main";
 import {runInAction} from "mobx";
 import {Button, Div, Row} from "react-vcomponents";
@@ -23,7 +23,7 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 	render() {
 		const {topRightOpenPanel} = store.main;
 		const auth = GetAuth();
-		const dbNeedsInit = GetDocs({undefinedForLoading: true}, a=>a.maps) === null; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
+		const dbNeedsInit = GetDocs({}, a=>a.maps) === emptyArray; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
 		return (
 			<nav style={{
 				position: "relative", zIndex: zIndexes.navBar, height: 150, boxShadow: colors.navBarBoxShadow,

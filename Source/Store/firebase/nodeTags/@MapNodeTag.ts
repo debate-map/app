@@ -17,7 +17,9 @@ export class MapNodeTag {
 
 	// type-specific fields (ie. tag comps)
 	mirrorChildrenFromXToY: TagComp_MirrorChildrenFromXToY;
+	xIsExtendedByY: TagComp_XIsExtendedByY;
 	mutuallyExclusiveGroup: TagComp_MutuallyExclusiveGroup;
+	restrictMirroringOfX: TagComp_RestrictMirroringOfX;
 }
 AddSchema("MapNodeTag", {
 	properties: {
@@ -29,7 +31,9 @@ AddSchema("MapNodeTag", {
 		nodes: {items: {$ref: "UUID"}},
 
 		mirrorChildrenFromXToY: {$ref: "TagComp_MirrorChildrenFromXToY"},
+		xIsExtendedByY: {$ref: "TagComp_XIsExtendedByY"},
 		mutuallyExclusiveGroup: {$ref: "TagComp_MutuallyExclusiveGroup"},
+		restrictMirroringOfX: {$ref: "TagComp_RestrictMirroringOfX"},
 	},
 	required: ["creator", "createdAt", "nodes"],
 });
@@ -97,6 +101,51 @@ AddSchema("TagComp_MirrorChildrenFromXToY", {
 	},
 });
 
+export class TagComp_XIsExtendedByY extends TagComp {
+	static displayName = "X is extended by Y (composite)";
+	static description = `
+		Meaning: claim Y is the same as claim X, except it "takes it further", along a consistent axis/criteria of a series.
+		Example: X (we should charge at least $50) is extended by Y (we should charge at least $100).
+		Effect: Makes-so any con-args of X (base) are mirrored as con-args of Y (extension), and any pro-args of Y (extension) are mirrored as pro-args of X (base).
+	`.AsMultiline(0);
+	static nodeKeys = ["nodeX", "nodeY"];
+
+	constructor(initialData?: Partial<TagComp_XIsExtendedByY>) { super(); this.VSet(initialData); }
+
+	nodeX: string;
+	nodeY: string;
+
+	GetFinalTagComps() {
+		let result = super.GetFinalTagComps();
+
+		let mirrorComp_xConsToY = new TagComp_MirrorChildrenFromXToY({
+			nodeX: this.nodeX,
+			nodeY: this.nodeY,
+			mirrorSupporting: false,
+			mirrorOpposing: true,
+			reversePolarities: true,
+		});
+		result.push(mirrorComp_xConsToY);
+
+		let mirrorComp_yProsToX = new TagComp_MirrorChildrenFromXToY({
+			nodeX: this.nodeY,
+			nodeY: this.nodeX,
+			mirrorSupporting: true,
+			mirrorOpposing: false,
+			reversePolarities: false,
+		});
+		result.push(mirrorComp_yProsToX);
+
+		return result;
+	}
+}
+AddSchema("TagComp_XIsExtendedByY", {
+	properties: {
+		nodeX: {$ref: "UUID"},
+		nodeY: {$ref: "UUID"},
+	},
+});
+
 export class TagComp_MutuallyExclusiveGroup extends TagComp {
 	static displayName = "mutually exclusive group (composite)";
 	static description = `
@@ -135,12 +184,33 @@ AddSchema("TagComp_MutuallyExclusiveGroup", {
 	},
 });
 
+export class TagComp_RestrictMirroringOfX extends TagComp {
+	static displayName = "restrict mirroring of X";
+	static description = "Restricts mirroring of node X, by blacklisting certain mirror-parents, or mirror-parents in general.";
+	static nodeKeys = ["nodeX", "blacklistedMirrorParents"];
+
+	constructor(initialData?: Partial<TagComp_RestrictMirroringOfX>) { super(); this.VSet(initialData); }
+
+	nodeX: string;
+	blacklistAllMirrorParents = true;
+	blacklistedMirrorParents = [] as string[];
+}
+AddSchema("TagComp_RestrictMirroringOfX", {
+	properties: {
+		nodeX: {$ref: "UUID"},
+		blacklistAllMirrorParents: {type: "boolean"},
+		blacklistedMirrorParents: {items: {$ref: "UUID"}},
+	},
+});
+
 // tag comp meta
 // ==========
 
 export const TagComp_classes = [
 	TagComp_MirrorChildrenFromXToY,
+	TagComp_XIsExtendedByY,
 	TagComp_MutuallyExclusiveGroup,
+	TagComp_RestrictMirroringOfX,
 ] as const;
 export type TagComp_Class = typeof TagComp_classes[number];
 CalculateTagCompClassStatics();

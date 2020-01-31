@@ -1,4 +1,5 @@
 import {WhereFilter, GetDoc, GetDocs, StoreAccessor} from "mobx-firelink";
+import {emptyArray_forLoading} from "js-vextensions";
 import {MapNodePhrasing} from "./nodePhrasings/@MapNodePhrasing";
 import {MapNodeTag, TagComp, GetTagCompClassByTag, GetTagCompOfTag} from "./nodeTags/@MapNodeTag";
 
@@ -15,6 +16,7 @@ export const GetNodeTag = StoreAccessor(s=>(tagID: string): MapNodeTag=>{
 
 export const GetNodeTagComps = StoreAccessor(s=>(nodeID: string, unwrapCompositeTags = true): TagComp[]=>{
 	const tags = GetNodeTags(nodeID);
+	if (tags == emptyArray_forLoading) return emptyArray_forLoading;
 	return tags.SelectMany(tag=>{
 		const baseComp = GetTagCompOfTag(tag);
 		return unwrapCompositeTags ? GetFinalTagCompsForTag(tag) : [baseComp];

@@ -11,7 +11,7 @@ import {PermissionGroupSet} from "./users/@User";
 import {TitleKey} from "./nodes/@MapNodeRevision";
 import {GetNodeRevisionsByTitle} from "./nodeRevisions";
 import {GetNodeTags, GetNodeTagComps} from "./nodeTags";
-import {TagComp_MirrorChildrenFromXToY} from "./nodeTags/@MapNodeTag";
+import {TagComp_MirrorChildrenFromXToY, TagComp_RestrictMirroringOfX} from "./nodeTags/@MapNodeTag";
 
 export enum HolderType {
 	Truth = 10,
@@ -136,7 +136,15 @@ export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string)=> {
 			// for now, don't include node-x's own mirror-children (lazy, temp way to avoid infinite loops)
 			let mirrorChildrenL3 = GetNodeChildrenL3(tagComp.nodeX, undefined, false);
 			mirrorChildrenL3 = mirrorChildrenL3.filter(child=> {
-				return child && ((child.link.polarity == Polarity.Supporting && tagComp.mirrorSupporting) || (child.link.polarity == Polarity.Opposing && tagComp.mirrorOpposing));
+				if (child == null) return false;
+				let childTagComps = GetNodeTagComps(child._key, true);
+				if (childTagComps == emptyArray_forLoading) return false; // don't include child until we're sure it's allowed to be mirrored
+				const mirroringBlacklisted = childTagComps.Any(a=> {
+					if (!(a instanceof TagComp_RestrictMirroringOfX)) return false;
+					return a.blacklistAllMirrorParents || a.blacklistedMirrorParents.Contains(nodeID);
+				});
+				if (mirroringBlacklisted) return false;
+				return (child.link.polarity == Polarity.Supporting && tagComp.mirrorSupporting) || (child.link.polarity == Polarity.Opposing && tagComp.mirrorOpposing);
 			});
 			/*if (comp.reversePolarities) {
 				mirrorChildren = mirrorChildren.map(child=> {

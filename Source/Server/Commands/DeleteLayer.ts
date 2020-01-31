@@ -12,7 +12,7 @@ export class DeleteLayer extends Command<{layerID: string}, {}> {
 		const {layerID} = this.payload;
 		// this.oldData = await GetDoc_Async({}, (a) => a.layers.get(layerID));
 		this.oldData = AV.NonNull = GetLayer(layerID);
-		this.userMapInfoSets = AV.NonNull = GetDocs({undefinedForLoading: true}, a=>a.userMapInfo);
+		this.userMapInfoSets = AV.NonNull = GetDocs({resultForLoading: undefined}, a=>a.userMapInfo);
 
 		const earlyError = ForDeleteLayer_GetError(this.userInfo.id, this.oldData);
 		AssertV(earlyError == null, earlyError);

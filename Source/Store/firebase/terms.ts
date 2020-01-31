@@ -29,7 +29,7 @@ export const GetTermsAttached = StoreAccessor(s=>(nodeRevisionID: string, emptyF
 	const revision = GetNodeRevision(nodeRevisionID);
 	if (revision == null) return emptyArray;
 	//const terms = revision.termAttachments?.map(a=>GetTerm(a.id)) ?? emptyArray;
-	const terms = revision.termAttachments?.map(attachment=>GetDoc({undefinedForLoading: true}, a=>a.terms.get(attachment.id))) ?? emptyArray;
+	const terms = revision.termAttachments?.map(attachment=>GetDoc({}, a=>a.terms.get(attachment.id))) ?? emptyArray;
 	if (emptyForLoading && terms.Any(a=>a === undefined)) return emptyArray_forLoading;
 	return terms;
 });
