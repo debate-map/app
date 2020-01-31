@@ -117,7 +117,7 @@ export class DeleteNode extends Command<{mapID?: string, nodeID: string, withCon
 			updates = MergeDBUpdates(updates, this.sub_deleteContainerArgument.GetDBUpdates());
 		}
 
-		// todo: we also need to delete ourselves from our children's "parents" prop!
+		// todo: we also need to delete ourselves from our children's "parents" prop! (for when you can delete nodes with children)
 
 		return updates;
 	}

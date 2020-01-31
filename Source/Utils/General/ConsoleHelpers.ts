@@ -5,6 +5,7 @@ import {GetAsync, MergeDBUpdates} from "mobx-firelink";
 import {Clone, ToNumber} from "js-vextensions";
 import {NodeReveal} from "Store/firebase/timelineSteps/@TimelineStep";
 import {GetNodeL2} from "Store/firebase/nodes/$node";
+import {DeleteNodeSubtree} from "Server/Commands/ConsoleOnly/DeleteNodeSubtree";
 
 // temp (for in-console db-upgrades and such)
 // ==========
@@ -46,4 +47,13 @@ export async function GetDBUpdatesFor_MakeNodesPrivate_Recursive(mapID: string, 
 		}
 	}
 	return dbUpdates;
+}
+
+// note: you may have to call "await RR.GetDBUpdatesFor_DeleteNodeSubtree(...)" multiple times, since the node-load count might be greater than the MobX limit per call (50)
+export async function GetDBUpdatesFor_DeleteNodeSubtree(nodeID: string, maxDeletes: number, maxIterations?: number) {
+	maxIterations = maxIterations ?? maxDeletes * 10; // there shouldn't be more than about 10 mobx-loops per node-delete
+
+	const command = new DeleteNodeSubtree({nodeID, maxDeletes});
+	await command.Validate_Async({maxIterations});
+	return command.GetDBUpdates();
 }
