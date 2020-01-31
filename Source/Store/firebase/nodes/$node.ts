@@ -370,10 +370,12 @@ export const IsPremiseOfSinglePremiseArgument = StoreAccessor(s=>(node: MapNode,
 	// let parentChildren = GetNodeChildrenL2(parent);
 	/* if (parentChildren.Any(a=>a == null)) return false;
 	return node.type == MapNodeType.Claim && parentChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && node.link.form != ClaimForm.YesNoQuestion; */
+	//let node = GetNode(nodeID);
 	return node.type == MapNodeType.Claim && IsSinglePremiseArgument(parent);
 });
 export function IsPremiseOfMultiPremiseArgument(node: MapNode, parent: MapNode) {
 	if (parent == null) return null;
 	// let parentChildren = GetNodeChildrenL2(parent);
+	//let node = GetNode(nodeID);
 	return node.type == MapNodeType.Claim && IsMultiPremiseArgument(parent);
 }

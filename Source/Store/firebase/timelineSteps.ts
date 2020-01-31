@@ -47,7 +47,7 @@ export const GetNodeRevealTimesInSteps = StoreAccessor(s=>(steps: TimelineStep[]
 							}
 							// if there's another loop/depth after this one
 							if (childrenDepth < revealDepth) {
-								const childChildren = GetNodeChildren(child.node).map(child2=>({node: child2, path: child2 && `${child.path}/${child2._key}`}));
+								const childChildren = GetNodeChildren(child.node._key).map(child2=>({node: child2, path: child2 && `${child.path}/${child2._key}`}));
 								if (childChildren.Any(a=>a == null)) {
 									// if (steps.length == 1 && steps[0]._key == 'clDjK76mSsGXicwd7emriw') debugger;
 									return emptyArray_forLoading;

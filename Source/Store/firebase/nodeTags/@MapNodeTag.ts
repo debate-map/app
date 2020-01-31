@@ -104,7 +104,7 @@ AddSchema("TagComp_MirrorChildrenFromXToY", {
 export class TagComp_XIsExtendedByY extends TagComp {
 	static displayName = "X is extended by Y (composite)";
 	static description = `
-		Meaning: claim Y is the same as claim X, except it "takes it further", along a consistent axis/criteria of a series.
+		Meaning: claim Y is the same as claim X, except it is wider-scoped (and thus weaker) than X -- along some consistent axis/criteria of a series.
 		Example: X (we should charge at least $50) is extended by Y (we should charge at least $100).
 		Effect: Makes-so any con-args of X (base) are mirrored as con-args of Y (extension), and any pro-args of Y (extension) are mirrored as pro-args of X (base).
 	`.AsMultiline(0);
@@ -123,7 +123,6 @@ export class TagComp_XIsExtendedByY extends TagComp {
 			nodeY: this.nodeY,
 			mirrorSupporting: false,
 			mirrorOpposing: true,
-			reversePolarities: true,
 		});
 		result.push(mirrorComp_xConsToY);
 
@@ -132,7 +131,6 @@ export class TagComp_XIsExtendedByY extends TagComp {
 			nodeY: this.nodeX,
 			mirrorSupporting: true,
 			mirrorOpposing: false,
-			reversePolarities: false,
 		});
 		result.push(mirrorComp_yProsToX);
 
