@@ -9,6 +9,10 @@ import {ES} from "Utils/UI/GlobalStyles";
 import {GetUser} from "../../../Store/firebase/users";
 import {Validate, InfoButton, observer_simple} from "vwebapp-framework";
 import {observer} from "mobx-react";
+import {GetNodeDisplayText, GetNodeL2, AsNodeL3} from "Store/firebase/nodes/$node";
+import {GetNodeID, GetNode} from "Store/firebase/nodes";
+import {GetNodeColor, MapNodeType} from "Store/firebase/nodes/@MapNodeType";
+import {UpdateTimelineStep} from "Server/Commands/UpdateTimelineStep";
 
 type Props = {baseData: MapNodeTag, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: MapNodeTag)=>void};
 type State = {newData: MapNodeTag};
@@ -37,12 +41,13 @@ export class TagDetailsUI extends BaseComponentPlus({enabled: true} as Props, {}
 
 		const Change = (..._)=>this.OnChange();
 
-		const splitAt = compClass == TagComp_XIsExtendedByY ? 140 : 70;
+		//const splitAt = compClass == TagComp_XIsExtendedByY ? 140 : 70;
+		const splitAt = 70;
 		let sharedProps = E(this.props, this.state, {compClass, splitAt, Change});
 		return (
 			<Column style={style}>
 				{!forNew &&
-					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
+					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt} singleLine={true}/>}
 				<RowLR mt={5} mb={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Type: </Pre>
 					<Select options={TagComp_classes.map(a=>({name: a.displayName, value: a}))} enabled={enabled} style={ES({flex: 1})} value={compClass} onChange={(newCompClass: TagComp_Class)=> {
@@ -81,8 +86,11 @@ class TagCompUI_MirrorChildrenFromXToY extends BaseComponentPlus({} as TagDetail
 			<>
 				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X" mt={0}/>
 				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeY" label="Node Y"/>
-				<CheckBox mt={5} text="Mirror X's supporting arguments" checked={comp.mirrorSupporting} enabled={enabled} onChange={val=>Change(comp.mirrorSupporting = val)}/>
-				<CheckBox mt={5} text="Mirror X's opposing arguments" checked={comp.mirrorOpposing} enabled={enabled} onChange={val=>Change(comp.mirrorOpposing = val)}/>
+				<Row mt={5}>
+					<Text>Mirror from X:</Text>
+					<CheckBox ml={10} text="Supporting arguments" checked={comp.mirrorSupporting} enabled={enabled} onChange={val=>Change(comp.mirrorSupporting = val)}/>
+					<CheckBox ml={10} text="Opposing arguments" checked={comp.mirrorOpposing} enabled={enabled} onChange={val=>Change(comp.mirrorOpposing = val)}/>
+				</Row>
 				<CheckBox mt={5} text="Reverse argument polarities" checked={comp.reversePolarities} enabled={enabled} onChange={val=>Change(comp.reversePolarities = val)}/>
 				<CheckBox mt={5} text="Disable Y direct children" checked={comp.disableDirectChildren} enabled={enabled} onChange={val=>Change(comp.disableDirectChildren = val)}/>
 			</>
@@ -96,8 +104,8 @@ class TagCompUI_XIsExtendedByY extends BaseComponentPlus({} as TagDetailsUI_Shar
 		let comp = newData.xIsExtendedByY;
 		return (
 			<>
-				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X (base)" mt={0}/>
-				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeY" label="Node Y (extension)"/>
+				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X" mt={0}/>
+				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeY" label="Node Y"/>
 			</>
 		);
 	}
@@ -154,14 +162,36 @@ class TagCompUI_RestrictMirroringOfX extends BaseComponentPlus({} as TagDetailsU
 class NodeSlotRow extends BaseComponentPlus({mt: 5} as TagDetailsUI_SharedProps & {comp: TagComp, nodeKey: string, label: string, mt?: number | string}, {}) {
 	render() {
 		let {newData, enabled, compClass, splitAt, Change, comp, nodeKey, label, mt} = this.props;
+
+		let nodeID = comp[nodeKey];
+		let nodeL2 = Validate("UUID", nodeID) == null ? GetNodeL2(nodeID) : null;
+		let displayText = `(Node not found for ID: ${nodeID})`;
+		let backgroundColor = GetNodeColor({type: MapNodeType.Category} as any).desaturate(0.5).alpha(0.8);
+		if (nodeL2) {
+			const path = nodeL2._key;
+			const nodeL3 = AsNodeL3(nodeL2);
+			displayText = GetNodeDisplayText(nodeL2, path);
+			backgroundColor = GetNodeColor(nodeL3).desaturate(0.5).alpha(0.8);
+		}
+
 		return (
 			<RowLR mt={mt} splitAt={splitAt} style={{width: "100%"}}>
 				<Text>{label}:</Text>
-				<TextInput value={comp[nodeKey]} enabled={enabled} style={{flex: 1}} onChange={val=> {
+				<TextInput value={nodeID} enabled={enabled} style={{flex: 25, minWidth: 0}} onChange={val=> {
 					comp.VSet(nodeKey, DelIfFalsy(val));
 					newData.nodes = CalculateNodeIDsForTagComp(comp, compClass);
 					Change();
 				}}/>
+				<Row sel
+					style={{flex: 75, minWidth: 0, whiteSpace: "normal", padding: 5, fontSize: 12, background: backgroundColor.css(), borderRadius: 5, /*cursor: "pointer",*/ border: "1px solid rgba(0,0,0,.5)"}}
+					onMouseDown={e=>{
+						if (e.button !== 2) return false;
+						// this.SetState({ menuOpened: true });
+					}}
+					//onClick={()=>this.SetState({detailsOpen: !detailsOpen})}
+				>
+					<span>{displayText}</span>
+				</Row>
 			</RowLR>
 		);
 	}
