@@ -10,7 +10,7 @@ import {ChildEntry, ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./
 import {MapNodeRevision, TitlesMap, TitleKey_values} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
 import {PermissionGroupSet} from "../users/@User";
-import {GetNodeTags, GetNodeTagComps} from "../nodeTags";
+import {GetNodeTags, GetNodeTagComps, GetFinalTagCompsForTag} from "../nodeTags";
 import {CanContributeToNode} from "../users/$user";
 import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@MapNodeTag";
 
@@ -76,12 +76,12 @@ export function GetSortByRatingType(node: MapNodeL3): RatingType {
 export function ReversePolarity(polarity: Polarity) {
 	return polarity == Polarity.Supporting ? Polarity.Opposing : Polarity.Supporting;
 }
-export const GetDisplayPolarityAtPath = StoreAccessor(s=>(node: MapNodeL2, path: string): Polarity=>{
+export const GetDisplayPolarityAtPath = StoreAccessor(s=>(node: MapNodeL2, path: string, tagsToIgnore?: string[]): Polarity=>{
 	Assert(node.type == MapNodeType.Argument, "Only argument nodes have polarity.");
 	const parent = GetParentNodeL2(path);
 	if (!parent) return Polarity.Supporting; // can be null, if for NodeUI_ForBots
 
-	const link = GetLinkUnderParent(node._key, parent);
+	const link = GetLinkUnderParent(node._key, parent, true, tagsToIgnore);
 	if (link == null) return Polarity.Supporting; // can be null, if path is invalid (eg. copied-node path)
 	Assert(link.polarity != null, `The link for the argument #${node._key} (from parent #${parent._key}) must specify the polarity.`);
 
@@ -143,7 +143,7 @@ export function AsNodeL3(node: MapNodeL2, displayPolarity?: Polarity, link?: Chi
 	};
 	return E(node, {displayPolarity, link}) as MapNodeL3;
 }
-export const GetNodeL3 = StoreAccessor(s=>(path: string)=>{
+export const GetNodeL3 = StoreAccessor(s=>(path: string, tagsToIgnore?: string[])=>{
 	if (path == null) return null;
 	const nodeID = GetNodeID(path);
 	const node = GetNodeL2(nodeID);
@@ -152,7 +152,7 @@ export const GetNodeL3 = StoreAccessor(s=>(path: string)=>{
 	// if any of the data in a MapNodeL3 is not loaded yet, just return null (we want it to be all or nothing)
 	let displayPolarity = null;
 	if (node.type == MapNodeType.Argument) {
-		displayPolarity = GetDisplayPolarityAtPath(node, path);
+		displayPolarity = GetDisplayPolarityAtPath(node, path, tagsToIgnore);
 		if (displayPolarity == null) return null;
 	}
 
@@ -160,7 +160,7 @@ export const GetNodeL3 = StoreAccessor(s=>(path: string)=>{
 	if (!isSubnode) {
 		const parent = GetParentNode(path);
 		if (parent == null && path.Contains("/")) return null;
-		var link = GetLinkUnderParent(node._key, parent);
+		var link = GetLinkUnderParent(node._key, parent, true, tagsToIgnore);
 		if (link == null && path.Contains("/")) return null;
 	}
 
@@ -188,25 +188,28 @@ export const GetNodeForm = StoreAccessor(s=>(node: MapNodeL2 | MapNodeL3, pathOr
 	if (link == null) return ClaimForm.Base;
 	return link.form;
 });
-export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapNode, includeMirrorLinks = true): ChildEntry=>{
+export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapNode, includeMirrorLinks = true, tagsToIgnore?: string[]): ChildEntry=>{
 	if (parent == null) return null;
 	let link = parent.children?.[nodeID]; // null-check, since after child-delete, parent-data might have updated before child-data removed
 	if (includeMirrorLinks && link == null) {
-		//let tags = GetNodeTags(parent._key);
-		let tagComps = GetNodeTagComps(parent._key);
-		for (const comp of tagComps) {
-			if (comp instanceof TagComp_MirrorChildrenFromXToY) {
-				// for now, don't include node-x's own mirror-children (lazy, temp way to avoid infinite loops)
-				let mirrorChildren = GetNodeChildrenL3(comp.nodeX, undefined, false);
-				mirrorChildren = mirrorChildren.filter(child=> {
-					return child && ((child.link.polarity == Polarity.Supporting && comp.mirrorSupporting) || (child.link.polarity == Polarity.Opposing && comp.mirrorOpposing));
-				});
-				let nodeL3ForNodeAsMirrorChildInThisTag = mirrorChildren.find(a=>a._key == nodeID);
-				if (nodeL3ForNodeAsMirrorChildInThisTag) {
-					link = Clone(nodeL3ForNodeAsMirrorChildInThisTag.link);
-					Object.defineProperty(link, "_mirrorLink", {value: true});
-					if (comp.reversePolarities) {
-						link.polarity = ReversePolarity(link.polarity);
+		let tags = GetNodeTags(parent._key).filter(tag=>tag && !tagsToIgnore?.Contains(tag._key));
+		for (const tag of tags) {
+			//let tagComps = GetNodeTagComps(parent._key);
+			const tagComps = GetFinalTagCompsForTag(tag);
+			for (const comp of tagComps) {
+				if (comp instanceof TagComp_MirrorChildrenFromXToY && comp.nodeY == parent._key) {
+					let mirrorChildren = GetNodeChildrenL3(comp.nodeX, undefined, undefined, (tagsToIgnore ?? []).concat(tag._key));
+					mirrorChildren = mirrorChildren.filter(child=> {
+						return child && ((child.link.polarity == Polarity.Supporting && comp.mirrorSupporting) || (child.link.polarity == Polarity.Opposing && comp.mirrorOpposing));
+					});
+					let nodeL3ForNodeAsMirrorChildInThisTag = mirrorChildren.find(a=>a._key == nodeID);
+					//const nodeL3ForNodeAsMirrorChildInThisTag = GetNodeL3(`${comp.nodeX}/${nodeID}`);
+					if (nodeL3ForNodeAsMirrorChildInThisTag) {
+						link = Clone(nodeL3ForNodeAsMirrorChildInThisTag.link);
+						Object.defineProperty(link, "_mirrorLink", {value: true});
+						if (comp.reversePolarities) {
+							link.polarity = ReversePolarity(link.polarity);
+						}
 					}
 				}
 			}

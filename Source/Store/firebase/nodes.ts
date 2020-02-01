@@ -10,7 +10,7 @@ import {CanGetBasicPermissions, GetUserAccessLevel, HasAdminPermissions, IsUserC
 import {PermissionGroupSet} from "./users/@User";
 import {TitleKey} from "./nodes/@MapNodeRevision";
 import {GetNodeRevisionsByTitle} from "./nodeRevisions";
-import {GetNodeTags, GetNodeTagComps} from "./nodeTags";
+import {GetNodeTags, GetNodeTagComps, GetFinalTagCompsForTag} from "./nodeTags";
 import {TagComp_MirrorChildrenFromXToY, TagComp_RestrictMirroringOfX, TagComp_XIsExtendedByY} from "./nodeTags/@MapNodeTag";
 
 export enum HolderType {
@@ -106,7 +106,7 @@ export const GetNodeParentsL3 = StoreAccessor(s=>(nodeID: string, path: string)=
 	return GetNodeParents(nodeID).map(parent=>(parent ? GetNodeL3(SlicePath(path, 1)) : null));
 });
 
-export const GetNodeChildren = StoreAccessor(s=>(nodeID: string, includeMirrorChildren = true): MapNode[]=>{
+export const GetNodeChildren = StoreAccessor(s=>(nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[]): MapNode[]=>{
 	let node = GetNode(nodeID);
 	if (node == null) return emptyArray;
 	// special case, for demo map
@@ -117,54 +117,60 @@ export const GetNodeChildren = StoreAccessor(s=>(nodeID: string, includeMirrorCh
 	let result = (node.children || {}).VKeys().map(id=>GetNode(id));
 	if (includeMirrorChildren) {
 		//let tags = GetNodeTags(nodeID);
-		let tagComps = GetNodeTagComps(nodeID);
+		let tagComps = GetNodeTagComps(nodeID, tagsToIgnore);
 		// maybe todo: have disable-direct-children merely stop you from adding new direct children, not hide existing ones
 		if (tagComps.Any(a=>a instanceof TagComp_MirrorChildrenFromXToY && a.nodeY == nodeID && a.disableDirectChildren)) {
 			result = [];
 		}
-		result.push(...GetNodeMirrorChildren(nodeID));
+		let mirrorChildren = GetNodeMirrorChildren(nodeID, tagsToIgnore);
+		// filter out duplicate children
+		mirrorChildren = mirrorChildren.filter(mirrorChild=>!result.Any(directChild=>directChild._key == mirrorChild._key));
+		result.push(...mirrorChildren);
 	}
 	return result;
 });
-export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string)=> {
-	//let tags = GetNodeTags(nodeID);
-	let tagComps = GetNodeTagComps(nodeID);
-	let result = [] as MapNode[];
-	for (const tagComp of tagComps) {
-		if (tagComp instanceof TagComp_MirrorChildrenFromXToY && tagComp.nodeY == nodeID) {
-			//let comp = tag.mirrorChildrenFromXToY;
-			// for now, don't include node-x's own mirror-children (lazy, temp way to avoid infinite loops)
-			let mirrorChildrenL3 = GetNodeChildrenL3(tagComp.nodeX, undefined, false);
-			mirrorChildrenL3 = mirrorChildrenL3.filter(child=> {
-				if (child == null) return false;
-				let childTagComps = GetNodeTagComps(child._key, true);
-				if (childTagComps == emptyArray_forLoading) return false; // don't include child until we're sure it's allowed to be mirrored
-				const mirroringBlacklisted = childTagComps.Any(comp=> {
-					if (!(comp instanceof TagComp_RestrictMirroringOfX)) return false;
-					return comp.blacklistAllMirrorParents || comp.blacklistedMirrorParents.Contains(nodeID);
-				});
-				if (mirroringBlacklisted) return false;
-				return (child.link.polarity == Polarity.Supporting && tagComp.mirrorSupporting) || (child.link.polarity == Polarity.Opposing && tagComp.mirrorOpposing);
-			});
+export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string, tagsToIgnore?: string[])=> {
+	let tags = GetNodeTags(nodeID).filter(tag=>tag && !tagsToIgnore?.Contains(tag._key));
+	//let tagComps = GetNodeTagComps(nodeID, true, tagsToIgnore);
 
-			/*if (comp.reversePolarities) {
-				mirrorChildren = mirrorChildren.map(child=> {
-					let newChild = child;
-					if (child.link.polarity) {
-						newChild = Clone(child).VSet({_key: child._key}) as MapNodeL3;
-						newChild.link.polarity = ReversePolarity(newChild.link.polarity);
-					}
-					return newChild;
+	let result = [] as MapNode[];
+	for (const tag of tags) {
+		const tagComps = GetFinalTagCompsForTag(tag);
+		for (const tagComp of tagComps) {
+			if (tagComp instanceof TagComp_MirrorChildrenFromXToY && tagComp.nodeY == nodeID) {
+				//let comp = tag.mirrorChildrenFromXToY;
+				let mirrorChildrenL3 = GetNodeChildrenL3(tagComp.nodeX, undefined, undefined, (tagsToIgnore ?? []).concat(tag._key));
+				mirrorChildrenL3 = mirrorChildrenL3.filter(child=> {
+					if (child == null) return false;
+					let childTagComps = GetNodeTagComps(child._key, true, (tagsToIgnore ?? []).concat(tag._key));
+					if (childTagComps == emptyArray_forLoading) return false; // don't include child until we're sure it's allowed to be mirrored
+					const mirroringBlacklisted = childTagComps.Any(comp=> {
+						if (!(comp instanceof TagComp_RestrictMirroringOfX)) return false;
+						return comp.blacklistAllMirrorParents || comp.blacklistedMirrorParents.Contains(nodeID);
+					});
+					if (mirroringBlacklisted) return false;
+					return (child.link.polarity == Polarity.Supporting && tagComp.mirrorSupporting) || (child.link.polarity == Polarity.Opposing && tagComp.mirrorOpposing);
 				});
-			}*/
-			let mirrorChildrenL1 = mirrorChildrenL3.map(childL3=>AsNodeL1(childL3));
-			result.push(...mirrorChildrenL1);
+
+				/*if (comp.reversePolarities) {
+					mirrorChildren = mirrorChildren.map(child=> {
+						let newChild = child;
+						if (child.link.polarity) {
+							newChild = Clone(child).VSet({_key: child._key}) as MapNodeL3;
+							newChild.link.polarity = ReversePolarity(newChild.link.polarity);
+						}
+						return newChild;
+					});
+				}*/
+				let mirrorChildrenL1 = mirrorChildrenL3.map(childL3=>AsNodeL1(childL3));
+				result.push(...mirrorChildrenL1);
+			}
 		}
 	}
 
 	// exclude any mirror-child which is an extension of (ie. wider/weaker than) another child (that is, if it's the Y of an "X is extended by Y" tag, between children) 
 	result = result.filter(child=> {
-		let childTagComps = GetNodeTagComps(child._key, true);
+		let childTagComps = GetNodeTagComps(child._key, true, tagsToIgnore);
 		const extensionOfAnotherMirrorChild = childTagComps.Any(comp=> {
 			if (!(comp instanceof TagComp_XIsExtendedByY)) return false;
 			let childIsNodeY = comp.nodeY == child._key;
@@ -179,7 +185,7 @@ export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string)=> {
 		if (IsSinglePremiseArgument(child)) {
 			let childPremise = GetPremiseOfSinglePremiseArgument(child._key);
 			if (childPremise) {
-				let childPremiseTagComps = GetNodeTagComps(childPremise._key, true);
+				let childPremiseTagComps = GetNodeTagComps(childPremise._key, true, tagsToIgnore);
 				const premiseIsExtensionOfAnotherMirrorChildPremise = childPremiseTagComps.Any(comp=> {
 					if (!(comp instanceof TagComp_XIsExtendedByY)) return false;
 					let childPremiseIsNodeY = comp.nodeY == childPremise._key;
@@ -198,23 +204,29 @@ export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string)=> {
 		return true;
 	});
 
+	// filter out duplicate children
+	result = result.filter((node, index)=> {
+		let earlierNodes = result.slice(0, index);
+		return !earlierNodes.Any(a=>a._key == node._key);
+	});
+
 	return result;
 });
 
-export const GetNodeChildrenL2 = StoreAccessor(s=>(nodeID: string, includeMirrorChildren = true)=>{
-	const nodeChildren = GetNodeChildren(nodeID, includeMirrorChildren);
+export const GetNodeChildrenL2 = StoreAccessor(s=>(nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[])=>{
+	const nodeChildren = GetNodeChildren(nodeID, includeMirrorChildren, tagsToIgnore);
 	return nodeChildren.map(child=>(child ? GetNodeL2(child) : null));
 });
-export const GetNodeChildrenL3 = StoreAccessor(s=>(nodeID: string, path?: string, includeMirrorChildren = true): MapNodeL3[]=>{
+export const GetNodeChildrenL3 = StoreAccessor(s=>(nodeID: string, path?: string, includeMirrorChildren = true, tagsToIgnore?: string[]): MapNodeL3[]=>{
 	path = path || nodeID;
 
-	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren);
-	return nodeChildrenL2.map(child=>(child ? GetNodeL3(`${path}/${child._key}`) : null));
+	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
+	return nodeChildrenL2.map(child=>(child ? GetNodeL3(`${path}/${child._key}`, tagsToIgnore) : null));
 });
-export const GetNodeChildrenL3_Advanced = StoreAccessor(s=>(nodeID: string, path: string, mapID: string, includeMirrorChildren = true, applyAccessLevels = false, applyTimeline = false, emptyForLoading = false): MapNodeL3[]=>{
+export const GetNodeChildrenL3_Advanced = StoreAccessor(s=>(nodeID: string, path: string, mapID: string, includeMirrorChildren = true, tagsToIgnore?: string[], applyAccessLevels = false, applyTimeline = false, emptyForLoading = false): MapNodeL3[]=>{
 	path = path || nodeID;
 
-	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren);
+	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
 	let nodeChildrenL3 = nodeChildrenL2.map(child=>(child ? GetNodeL3(`${path}/${child._key}`) : null));
 	if (applyAccessLevels) {
 		nodeChildrenL3 = nodeChildrenL3.filter(child=>{

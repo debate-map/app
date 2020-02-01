@@ -58,7 +58,7 @@ export class NodeUI extends BaseComponentPlus(
 
 		const nodeChildren = GetNodeChildrenL3(node._key, path);
 		// let nodeChildrenToShow: MapNodeL3[] = nodeChildren.Any(a => a == null) ? emptyArray_forLoading : nodeChildren; // only pass nodeChildren when all are loaded
-		const nodeChildrenToShow = GetNodeChildrenL3_Advanced(node._key, path, map._key, true, true, true, true);
+		const nodeChildrenToShow = GetNodeChildrenL3_Advanced(node._key, path, map._key, true, null, true, true, true);
 
 		/* let subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map, node._key);
 		subnodes = subnodes.Any(a => a == null) ? emptyArray : subnodes; // only pass subnodes when all are loaded */
