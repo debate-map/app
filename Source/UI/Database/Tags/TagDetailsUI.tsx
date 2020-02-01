@@ -200,18 +200,35 @@ class NodeSlotRow extends BaseComponentPlus({mt: 5} as TagDetailsUI_SharedProps 
 class NodeInArrayRow extends BaseComponentPlus({} as TagDetailsUI_SharedProps & {comp: TagComp, nodeArrayKey: string, nodeEntry: string, nodeEntryIndex: number}, {}) {
 	render() {
 		let {newData, enabled, compClass, splitAt, Change, comp, nodeArrayKey, nodeEntry, nodeEntryIndex} = this.props;
+
+		let nodeID = nodeEntry;
+		let nodeL2 = Validate("UUID", nodeID) == null ? GetNodeL2(nodeID) : null;
+		let displayText = `(Node not found for ID: ${nodeID})`;
+		let backgroundColor = GetNodeColor({type: MapNodeType.Category} as any).desaturate(0.5).alpha(0.8);
+		if (nodeL2) {
+			const path = nodeL2._key;
+			const nodeL3 = AsNodeL3(nodeL2);
+			displayText = GetNodeDisplayText(nodeL2, path);
+			backgroundColor = GetNodeColor(nodeL3).desaturate(0.5).alpha(0.8);
+		}
+
 		return (
 			<RowLR mt={5} splitAt={30} style={{width: "100%"}}>
 				<Text>#{nodeEntryIndex + 1}:</Text>
-				<TextInput value={nodeEntry} enabled={enabled} style={{flex: 1, borderRadius: "5px 0 0 5px"}} onChange={val=> {
-					comp[nodeArrayKey][nodeEntryIndex] = val;
-					newData.nodes = CalculateNodeIDsForTagComp(comp, compClass);
-					Change();
-				}}/>
-				<Button text="X" enabled={enabled} style={{padding: "3px 5px", borderRadius: "0 5px 5px 0"}} onClick={()=>{
-					comp[nodeArrayKey].RemoveAt(nodeEntryIndex);
-					Change();
-				}}/>
+				<Row style={{flex: 1, alignItems: "stretch"}}>
+					<TextInput value={nodeEntry} enabled={enabled} style={{flex: 25, minWidth: 0, borderRadius: "5px 0 0 5px"}} onChange={val=> {
+						comp[nodeArrayKey][nodeEntryIndex] = val;
+						newData.nodes = CalculateNodeIDsForTagComp(comp, compClass);
+						Change();
+					}}/>
+					<Row sel style={{flex: 75, minWidth: 0, whiteSpace: "normal", padding: 5, fontSize: 12, background: backgroundColor.css(), /*cursor: "pointer",*/ border: "1px solid rgba(0,0,0,.5)"}}>
+						<span>{displayText}</span>
+					</Row>
+					<Button text="X" enabled={enabled} style={{padding: "3px 5px", borderRadius: "0 5px 5px 0"}} onClick={()=>{
+						comp[nodeArrayKey].RemoveAt(nodeEntryIndex);
+						Change();
+					}}/>
+				</Row>
 			</RowLR>
 		);
 	}
