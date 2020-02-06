@@ -22,6 +22,7 @@ import {NodeUI_Menu_Stub} from "../NodeUI_Menu";
 import {NodeChildCountMarker} from "./NodeChildCountMarker";
 import {NodeChildHolder} from "./NodeChildHolder";
 import {RatingsPanel} from "./Panels/RatingsPanel";
+import {ArgumentType} from "Store/firebase/nodes/@MapNodeRevision";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
@@ -55,7 +56,10 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
 		let text = type == HolderType.Truth ? "True?" : "Relevant?";
 		if (isMultiPremiseArgument) {
-			text = "When taken together, are these claims relevant?";
+			//text = "When taken together, are these claims relevant?";
+			if (node.current.argumentType == ArgumentType.All) text = "If all these claims were true, would they be relevant?";
+			else if (node.current.argumentType == ArgumentType.Any) text = "If 1 (or more) of these claims were true, would they be relevant?";
+			else if (node.current.argumentType == ArgumentType.AnyTwo) text = "If 2 (or more) of these claims were true, would they be relevant?";
 		}
 		// let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
 		const backgroundColor = GetNodeColor({type: MapNodeType.Claim} as any as MapNodeL3);

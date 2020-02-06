@@ -43,7 +43,7 @@ function GetSubtree(path) {
 }
 async function LogSelectedSubtree() {
 	let state = store.getState();
-	let selectedPath = RR.GetSelectedNodePath(state.main[state.main.page].selectedMapID);
+	let selectedPath = RR.GetSelectedNodePath(state.main.page == "global" ? RR.globalMapID : state.main[state.main.page].selectedMapID);
 	let subtree = await GetAsync(()=>{
 		let selectedNode = RR.GetNodeL3(selectedPath);
 		let selectedNode_parent = RR.GetParentNodeL3(selectedPath);

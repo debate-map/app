@@ -4,6 +4,17 @@ import {AssertValidate} from "vwebapp-framework";
 import {GetNode} from "Store/firebase/nodes";
 import {DeleteNode} from "../DeleteNode";
 
+/*
+==========
+temp1 = await RR.GetDBUpdatesFor_DeleteNodeSubtree(NODE_ID, 200);
+
+// optional
+//temp2 = temp1.Pairs().filter(a=>!a.key.includes("mapNodeEditTimes")).length
+
+await RR.ApplyDBUpdates({}, temp1)
+==========
+*/
+
 export function GetNodesInSubtree(rootNodeID: string, runInfo = {nodesVisited: new Set<string>()}) {
 	if (runInfo.nodesVisited.has(rootNodeID)) return [];
 	runInfo.nodesVisited.add(rootNodeID);
@@ -46,6 +57,7 @@ export class DeleteNodeSubtree extends Command<{nodeID: string, maxDeletes: numb
 
 		this.subs_deleteNodes = this.nodesInSubtree.map(node=>{
 			const deleteNodeCommand = new DeleteNode({nodeID: node._key}).MarkAsSubcommand(this);
+			deleteNodeCommand.parentsToIgnore = this.nodesInSubtree.map(a=>a._key);
 			deleteNodeCommand.childrenToIgnore = this.nodesInSubtree.map(a=>a._key);
 			deleteNodeCommand.Validate();
 			return deleteNodeCommand;

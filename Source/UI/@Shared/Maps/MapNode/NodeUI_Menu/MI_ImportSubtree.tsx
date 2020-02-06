@@ -14,6 +14,8 @@ import {SubtreeExportData_Old} from "./MI_ExportSubtree";
 import {AddChildNode} from "Server/Commands/AddChildNode";
 import {ApplyDBUpdates} from "mobx-firelink";
 import {ScrollView} from "react-vscrollview";
+import {store} from "Store";
+import {runInAction} from "mobx";
 
 @Observer
 export class MI_ImportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {
@@ -39,21 +41,21 @@ enum ImportSubtreeUI_MidTab {
 	Others = 20,
 }
 
+@Observer
 class ImportSubtreeUI extends BaseComponentPlus(
 	{} as {controller: BoxController} & MI_SharedProps,
 	{
 		subtreeJSON: "",
 		tab: ImportSubtreeUI_MidTab.Nodes,
 		nodesToLink: {} as {[key: string]: string},
-		importRatings: false,
-		importRatings_userIDsStr: "",
 		error: null as string, dbUpdates: null,
 	},
 ) {
 	importCommand: ImportSubtree_Old;
 	render() {
 		const {mapID, node, path, controller} = this.props;
-		const {subtreeJSON, tab, nodesToLink, importRatings, importRatings_userIDsStr, error, dbUpdates} = this.state;
+		const {subtreeJSON, tab, nodesToLink, error, dbUpdates} = this.state;
+		let dialogState = store.main.maps.importSubtreeDialog;
 
 		let subtreeData;
 		let newNodes = [] as SubtreeExportData_Old[];
@@ -98,8 +100,10 @@ class ImportSubtreeUI extends BaseComponentPlus(
 						{tab == ImportSubtreeUI_MidTab.Others &&
 						<>
 							<Row>
-								<CheckBox text="Import ratings, from users:" checked={importRatings} onChange={val=>this.SetState({importRatings: val})}/>
-								<TextInput ml={5} placeholder="Leave empty for all users..." style={{flex: 1}} value={importRatings_userIDsStr} onChange={val=>this.SetState({importRatings_userIDsStr: val})}/>
+								<CheckBox text="Import ratings, from users:" checked={dialogState.importRatings}
+									onChange={val=>runInAction("MI_ImportSubtree.importRatings.onChange", ()=>dialogState.importRatings = val)}/>
+								<TextInput ml={5} placeholder="Leave empty for all users..." style={{flex: 1}} value={dialogState.importRatings_userIDsStr}
+									onChange={val=>runInAction("MI_ImportSubtree.importRatings_userIDsStr.onChange", ()=>dialogState.importRatings_userIDsStr = val)}/>
 							</Row>
 						</>}
 					</Column>
@@ -111,10 +115,10 @@ class ImportSubtreeUI extends BaseComponentPlus(
 				<Row mt={5}>
 					<Button text="GetDBUpdates" onClick={async()=>{
 						let importRatings_userIDs = null;
-						if (importRatings_userIDsStr.trim().length) {
-							importRatings_userIDs = importRatings_userIDsStr.split(",").map(a=>a.trim());
+						if (dialogState.importRatings_userIDsStr.trim().length) {
+							importRatings_userIDs = dialogState.importRatings_userIDsStr.split(",").map(a=>a.trim());
 						}
-						this.importCommand = new ImportSubtree_Old({mapID, parentNodeID: GetNodeID(path), subtreeJSON, nodesToLink, importRatings, importRatings_userIDs});
+						this.importCommand = new ImportSubtree_Old({mapID, parentNodeID: GetNodeID(path), subtreeJSON, nodesToLink, importRatings: dialogState.importRatings, importRatings_userIDs});
 						/*try {
 							await this.importCommand.Validate_Async();
 						} catch (ex) {
