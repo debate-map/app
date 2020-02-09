@@ -1,7 +1,7 @@
 import {autorun} from "mobx";
 import {store} from "Store";
 import {DBPath, GetAsync, GetDoc} from "mobx-firelink";
-import {fire} from "Utils/LibIntegrations/MobXFirelink";
+import {fire} from "Utils/LibIntegrations/ServerLink";
 import {GetUser} from "Store/firebase/users";
 import {SetUserData} from "Server/Commands/SetUserData";
 import {SetUserData_Private} from "Server/Commands/SetUserData_Private";

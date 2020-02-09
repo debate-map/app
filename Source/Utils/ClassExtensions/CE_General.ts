@@ -62,8 +62,8 @@ Array.prototype._AddFunction_Inline = function AutoKey(this: any[]) {
 // ChromaJS color
 // ==========
 
-declare global {
-	type Color = chroma.Color & {
+declare module "chroma-js" {
+	interface Color {
 		Mix(otherColor: any, otherColorRatio?: number, colorSpace?: any): chroma.Color;
 	}
 }

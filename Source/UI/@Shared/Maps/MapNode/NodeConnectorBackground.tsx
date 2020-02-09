@@ -96,7 +96,7 @@ export class NodeConnectorBackground extends BaseComponent<Props, {}> {
 }
 
 type Position = [number, number];
-export class Squiggle extends BaseComponent<{start: Position, startControl_offset: Position, end: Position, endControl_offset: Position, color: Color, usePercents?: boolean, style?}, {}> {
+export class Squiggle extends BaseComponent<{start: Position, startControl_offset: Position, end: Position, endControl_offset: Position, color: chroma.Color, usePercents?: boolean, style?}, {}> {
 	render() {
 		const {start, startControl_offset, end, endControl_offset, color, usePercents, style} = this.props;
 

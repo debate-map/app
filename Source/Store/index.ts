@@ -5,7 +5,6 @@ import {Firelink} from "mobx-firelink";
 import {immerable, setUseProxies, setAutoFreeze} from "immer";
 import {Feedback_RootState} from "firebase-feedback";
 import {MainState} from "./main";
-import {FirebaseDBShape} from "./firebase";
 
 // configure({ enforceActions: 'always' });
 configure({enforceActions: "observed"});

@@ -3,7 +3,7 @@ import {IsAuthValid} from "mobx-firelink";
 import {Button, Column, Div, Row} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {fire} from "Utils/LibIntegrations/MobXFirelink";
+import {fire} from "Utils/LibIntegrations/ServerLink";
 import {HandleError, Link, Observer} from "vwebapp-framework";
 import {MeID} from "../../../Store/firebase/users";
 

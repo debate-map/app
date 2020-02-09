@@ -1,6 +1,6 @@
 {
   "name": "@debate-map/client",
-  "description": "TODO",
+  "description": "Tree-based mapping of beliefs, arguments, and evidence. (client)",
   "version": "0.0.1",
   "license": "MIT",
   "repository": {
@@ -130,12 +130,12 @@
     "firebase": "^7.6.1",
     "firebase-feedback": "^1.0.8",
     "immer": "5.0.0",
-    "js-vextensions": "^1.0.25",
+    "js-vextensions": "^1.0.28",
     "katex": "^0.9.0",
     "keycode": "^2.1.8",
     "lodash": "^4.17.2",
     "mobx": "5.15.0",
-    "mobx-firelink": "^1.0.40",
+    "mobx-firelink": "^1.0.43",
     "mobx-react": "6.1.4",
     "mobx-sync": "2.1.2",
     "mobx-utils": "github:Venryx/mobx-utils#5.5.2_VPatch2",

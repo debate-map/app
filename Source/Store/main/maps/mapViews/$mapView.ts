@@ -56,11 +56,6 @@ export function GetPathNodes(path: string) {
 export function ToPathNodes(pathOrPathNodes: string | string[]) {
 	return IsString(pathOrPathNodes) ? GetPathNodes(pathOrPathNodes) : pathOrPathNodes;
 }
-export function PathSegmentToNodeID(segment: string): UUID {
-	if (segment.length == 22) return segment;
-	if (segment.length == 23) return segment.slice(1);
-	Assert(false, "Segment text is invalid.");
-}
 export function GetPathNodeIDs(path: string): UUID[] {
 	const nodes = GetPathNodes(path);
 	return nodes.map(a=>PathSegmentToNodeID(a));

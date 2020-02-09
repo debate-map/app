@@ -392,7 +392,7 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 	{} as {
 		map: Map, node: MapNodeL3, path: string, parent: MapNodeL3,
 		width: number, widthOverride: number, panelPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermID: string, onTermHover: (id: string)=>void,
-		backgroundColor: Color,
+		backgroundColor: chroma.Color,
 	},
 	{hoverTermID: null as string},
 	) {

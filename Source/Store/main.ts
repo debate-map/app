@@ -18,11 +18,6 @@ import {SearchState} from "./main/search";
 import {MapsState} from "./main/maps";
 import {TimelinesState} from "./main/timelines";
 
-export enum WeightingType {
-	Votes = 10,
-	ReasonScore = 20,
-}
-
 @Global
 export class NotificationMessage {
 	static lastID = -1;

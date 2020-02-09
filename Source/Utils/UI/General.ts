@@ -1,4 +1,8 @@
 import {MouseEventHandler, MouseEvent} from "react";
+import katex from "katex";
+
+// expose katex on window, for use by $node.ts (in dm-server shared-code, when running on client)
+G({katex});
 
 // todo: probably remove, since outdated
 export function StandardCompProps() {

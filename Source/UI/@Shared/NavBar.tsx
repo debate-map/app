@@ -9,7 +9,7 @@ import {useMemo, useCallback} from "react";
 import {store, RootState} from "Store";
 import {runInAction} from "mobx";
 import {GetDocs} from "mobx-firelink";
-import {fire} from "Utils/LibIntegrations/MobXFirelink";
+import {fire} from "Utils/LibIntegrations/ServerLink";
 import {colors} from "../../Utils/UI/GlobalStyles";
 import {ChatPanel} from "./NavBar/ChatPanel";
 import {GuidePanel} from "./NavBar/GuidePanel";

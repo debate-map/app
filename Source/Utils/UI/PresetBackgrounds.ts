@@ -1,19 +1,6 @@
 // To test out backgrounds, run this in console: S = a=>document.querySelector(".background").style.backgroundImage = `url(${a.split("?")[0]})`;
 // Then run: S("IMAGE_URL")
 
-export class BackgroundConfig {
-	color?: string;
-
-	extension?: string; // used to infer the urls (default: jpg)
-	url_max?: string;
-	url_256?: string;
-	url_1920?: string;
-	url_3840?: string;
-
-	position?: string;
-	size?: string;
-}
-
 export const defaultPresetBackground = "3dUKlcMOSN6ENstC_YIN8g";
 export const presetBackgrounds = {
 	n60KYTsHSZqUuyEQxSnmew: {

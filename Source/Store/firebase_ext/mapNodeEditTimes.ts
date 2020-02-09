@@ -1,53 +1,15 @@
-import {GetNode, GetNodeID} from "Store/firebase/nodes";
-import {emptyArray} from "js-vextensions";
-import {AddSchema, UUID_regex} from "vwebapp-framework";
-import {GetDoc, StoreAccessor} from "mobx-firelink";
-import {SearchUpFromNodeForNodeMatchingX} from "Utils/Store/PathFinder";
-import {GetLastAcknowledgementTime} from "Store/main/maps";
-import {MapNode} from "./nodes/@MapNode";
-import {GetRootNodeID} from "./maps/$map";
-
-export class NodeEditTimes {
-	// [key: number]: ChangeInfo;
-	[key: string]: number;
-}
-AddSchema("NodeEditTimes", {
-	patternProperties: {[UUID_regex]: {type: "number"}},
-});
-
-export enum ChangeType {
-	Add = 10,
-	Edit = 20,
-	Remove = 30,
-}
-/* export class ChangeInfo {
-	type: ChangeType;
-	time: number;
-} */
-
-const colorMap = {
-	[ChangeType.Add]: "0,255,0",
-	// [ChangeType.Edit]: "255,255,0",
-	[ChangeType.Edit]: "255,255,0",
-	[ChangeType.Remove]: "255,0,0",
-};
-export function GetChangeTypeOutlineColor(changeType: ChangeType) {
-	if (changeType == null) return null;
-	return colorMap[changeType];
-}
-
-export const GetMapNodeEditTimes = StoreAccessor(s=>(mapID: string)=>{
-	return GetDoc({}, a=>a.mapNodeEditTimes.get(mapID)) as NodeEditTimes;
-});
+import {StoreAccessor} from "mobx-firelink";
+import {emptyArray, CE} from "js-vextensions";
+import {GetLastAcknowledgementTime} from "../main/maps";
 
 export const GetNodeIDsChangedSinceX = StoreAccessor(s=>(mapID: string, sinceTime: number, includeAcknowledgement = true): string[]=>{
 	const nodeEditTimes = GetMapNodeEditTimes(mapID);
 	if (nodeEditTimes == null) return emptyArray;
 
 	const result = [] as string[];
-	for (const {key: nodeID, value: editTime} of nodeEditTimes.Pairs()) {
+	for (const {key: nodeID, value: editTime} of CE(nodeEditTimes).Pairs()) {
 		const lastAcknowledgementTime = includeAcknowledgement ? GetLastAcknowledgementTime(nodeID) : 0;
-		const sinceTimeForNode = sinceTime.KeepAtLeast(lastAcknowledgementTime);
+		const sinceTimeForNode = CE(sinceTime).KeepAtLeast(lastAcknowledgementTime);
 		if (editTime > sinceTimeForNode) {
 			result.push(nodeID);
 		}
@@ -100,7 +62,7 @@ export const GetPathsToChangedDescendantNodes_WithChangeTypes = StoreAccessor(s=
 
 export const GetNodeChangeType = StoreAccessor(s=>(node: MapNode, sinceTime: number, includeAcknowledgement = true)=>{
 	const lastAcknowledgementTime = includeAcknowledgement ? GetLastAcknowledgementTime(node._key) : 0;
-	const sinceTimeForNode = sinceTime.KeepAtLeast(lastAcknowledgementTime);
+	const sinceTimeForNode = CE(sinceTime).KeepAtLeast(lastAcknowledgementTime);
 	if (node.createdAt >= sinceTimeForNode) return ChangeType.Add;
 	return ChangeType.Edit;
 });
