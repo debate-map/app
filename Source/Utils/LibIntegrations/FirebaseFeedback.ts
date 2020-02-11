@@ -1,12 +1,12 @@
 import {feedback_manager, Feedback_store} from "firebase-feedback";
 import {DBPath} from "mobx-firelink";
 import Moment from "moment";
-import {store} from "Store";
-import {GetUser, MeID} from "Store/firebase/users";
-import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
-import {logTypes} from "Utils/General/Logging";
+import {store} from "Source/Store";
+import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
+import {logTypes} from "Source/Utils/General/Logging";
 import {VReactMarkdown_Remarkable} from "vwebapp-framework";
-import {GetUserPermissionGroups} from "Store/firebase/users/$user";
+import {MeID, GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {GetUserPermissionGroups} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
 import {GetNewURLForStoreChanges} from "./VWAF";
 
 export function InitFeedback() {

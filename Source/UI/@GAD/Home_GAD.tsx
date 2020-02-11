@@ -1,6 +1,6 @@
 import {Switch} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {store} from "Store";
+import {store} from "Source/Store";
 import {SubNavBarButton_GAD, SubNavBar_GAD} from "./SubNavBar_GAD";
 import {HomeUI2_GAD} from "./Home2_GAD";
 

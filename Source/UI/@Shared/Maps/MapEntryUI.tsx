@@ -2,12 +2,12 @@ import {VURL, E} from "js-vextensions";
 import Moment from "moment";
 import {Column, Div, Row} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
-import {GADDemo} from "UI/@GAD/GAD";
+import {GADDemo} from "Source/UI/@GAD/GAD";
 import {HSLA, Link, Observer} from "vwebapp-framework";
-import {store} from "Store";
+import {store} from "Source/Store";
 import {runInAction} from "mobx";
-import {Map, MapType} from "../../../Store/firebase/maps/@Map";
-import {GetUser} from "../../../Store/firebase/users";
+import {GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {MapType, Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 import {columnWidths} from "./MapListUI";
 
 @Observer

@@ -1,14 +1,10 @@
 import keycode from "keycode";
 import {Button, Row, TextArea} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {store} from "Store";
-import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView";
+import {store} from "Source/Store";
+import {ACTMapNodeExpandedSet} from "Source/Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
 import {OmitIfFalsy} from "js-vextensions";
-import {AddChildNode} from "../../../../Server/Commands/AddChildNode";
-import {ChildEntry, ClaimForm, MapNode, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
-import {MapNodeRevision, MapNodeRevision_titlePattern} from "../../../../Store/firebase/nodes/@MapNodeRevision";
-import {MapNodeType} from "../../../../Store/firebase/nodes/@MapNodeType";
 
 /* export class PremiseAddHelper extends BaseComponentPlus({} as {mapID: string, parentNode: MapNodeL3, parentPath: string}, { premiseTitle: '', adding: false }) {
 	render() {

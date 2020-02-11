@@ -2,16 +2,15 @@ import {GetErrorMessagesUnderElement, Clone, E} from "js-vextensions";
 import {Column, Pre, RowLR, Spinner, TextInput, Row, DropDown, DropDownTrigger, Button, DropDownContent, Text} from "react-vcomponents";
 import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
-import {ImageAttachment} from "Store/firebase/nodeRevisions/@ImageAttachment";
 import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";
-import {ShowAddImageDialog} from "UI/Database/Images/AddImageDialog";
-import {GetTermsByForm} from "Store/firebase/terms";
-import {HasModPermissions} from "Store/firebase/users/$user";
-import {MeID, GetUser} from "Store/firebase/users";
-import {Term} from "Store/firebase/terms/@Term";
-import {Link, Observer, Validate} from "vwebapp-framework";
-import {GetImage, GetImagesByURL} from "Store/firebase/images";
-import {Image} from "Store/firebase/images/@Image";
+import {ShowAddImageDialog} from "Source/UI/Database/Images/AddImageDialog";
+import {ImageAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@ImageAttachment";
+import {Validate} from "mobx-firelink";
+import {GetImage, GetImagesByURL} from "Subrepos/Server/Source/@Shared/Store/firebase/images";
+import {Link, Observer} from "vwebapp-framework";
+import {HasModPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MeID, GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {Image} from "Subrepos/Server/Source/@Shared/Store/firebase/images/@Image";
 
 type Props = {baseData: ImageAttachment, creating: boolean, editing?: boolean, style?, onChange?: (newData: ImageAttachment)=>void};
 export class ImageAttachmentEditorUI extends BaseComponent<Props, {newData: ImageAttachment}> {

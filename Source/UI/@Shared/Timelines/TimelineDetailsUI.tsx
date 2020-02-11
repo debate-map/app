@@ -1,11 +1,10 @@
 import {Clone, GetErrorMessagesUnderElement} from "js-vextensions";
 import {Button, Column, Pre, Row, RowLR, TextInput} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM} from "react-vextensions";
-import {UpdateTimeline} from "Server/Commands/UpdateTimeline";
-import {Timeline} from "Store/firebase/timelines/@Timeline";
 import {GetUpdates} from "vwebapp-framework";
-import {GetUser} from "../../../Store/firebase/users";
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
+import {Timeline} from "Subrepos/Server/Source/@Shared/Store/firebase/timelines/@Timeline";
+import {UpdateTimeline} from "Subrepos/Server/Source/@Shared/Commands/UpdateTimeline";
 
 export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {baseData: Timeline, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Timeline, ui: TimelineDetailsUI)=>void}, {} as { newData: Timeline }) {
 	ComponentWillMountOrReceiveProps(props, forMount) {

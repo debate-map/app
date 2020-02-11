@@ -4,18 +4,18 @@ import {Button, Column, Div, Pre, Row, Span, Text} from "react-vcomponents";
 import {BaseComponentPlus, UseEffect} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {ScrollView} from "react-vscrollview";
-import {store} from "Store";
-import {GetSelectedTerm} from "Store/main/database";
-import {ES} from "Utils/UI/GlobalStyles";
+import {store} from "Source/Store";
+import {GetSelectedTerm} from "Source/Store/main/database";
+import {ES} from "Source/Utils/UI/GlobalStyles";
 import {GetUpdates, Observer} from "vwebapp-framework";
-import {GetUserPermissionGroups, IsUserCreatorOrMod, CanGetBasicPermissions} from "Store/firebase/users/$user";
-import {DeleteTerm} from "../../Server/Commands/DeleteTerm";
-import {UpdateTerm} from "../../Server/Commands/UpdateTerm";
-import {GetFullNameP, GetTerms} from "../../Store/firebase/terms";
-import {Term, TermType} from "../../Store/firebase/terms/@Term";
-import {MeID} from "../../Store/firebase/users";
-import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
 import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI";
+import {Term, TermType} from "Subrepos/Server/Source/@Shared/Store/firebase/terms/@Term";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {GetTerms, GetFullNameP} from "Subrepos/Server/Source/@Shared/Store/firebase/terms";
+import {GetUserPermissionGroups, IsUserCreatorOrMod, CanGetBasicPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {UpdateTerm} from "Subrepos/Server/Source/@Shared/Commands/UpdateTerm";
+import {DeleteTerm} from "Subrepos/Server/Source/@Shared/Commands/DeleteTerm";
+import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
 
 @Observer
 export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_newData: Term, selectedTerm_newDataError: string}) {

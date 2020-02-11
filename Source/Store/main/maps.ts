@@ -1,12 +1,12 @@
 import {observable} from "mobx";
 import {ignore} from "mobx-sync";
-import {WeightingType} from "Store/main";
 import {O, StoreAction} from "vwebapp-framework";
-import {store} from "Store";
+import {store} from "Source/Store";
 import {StoreAccessor} from "mobx-firelink";
-import {GetNodeL3} from "Store/firebase/nodes/$node";
 import {MapView, GetMapView} from "./maps/mapViews/$mapView";
 import {MapState} from "./maps/mapStates/@MapState";
+import {WeightingType} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings";
+import {GetNodeL3} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
 
 export class MapsState {
 	// @Oervable maps = observable.map<string, MapState>();

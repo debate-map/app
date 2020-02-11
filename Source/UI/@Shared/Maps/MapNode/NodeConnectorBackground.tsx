@@ -1,11 +1,9 @@
 import {Vector2i, E} from "js-vextensions";
 import {BaseComponent, SimpleShouldUpdate, WarnOfTransientObjectProps} from "react-vextensions";
-import {GetParentNodeL3} from "Store/firebase/nodes";
-import {IsPremiseOfSinglePremiseArgument} from "Store/firebase/nodes/$node";
 import {HSLA} from "vwebapp-framework";
 import {Fragment} from "react";
-import {MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
-import {GetNodeColor} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {MapNodeL3} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {GetNodeColor} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
 
 type Props = {
 	node: MapNodeL3, path: string, linkSpawnPoint: Vector2i, straightLines?: boolean, nodeChildren: MapNodeL3[],

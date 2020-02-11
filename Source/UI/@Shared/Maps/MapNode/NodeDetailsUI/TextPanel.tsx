@@ -1,21 +1,17 @@
 import {E, GetEntries, WaitXThenRun, DelIfFalsy} from "js-vextensions";
 import {Button, Column, Div, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Select, Text, TextArea, TextInput} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus, RenderSource} from "react-vextensions";
-import {AttachmentType, GetAttachmentType} from "Store/firebase/nodeRevisions/@AttachmentType";
-import {TermAttachment} from "Store/firebase/nodeRevisions/@TermAttachment";
-import {GetDisplayPolarity} from "Store/firebase/nodes/$node";
-import {ChildEntry, ClaimForm, MapNodeL2} from "Store/firebase/nodes/@MapNode";
-import {ArgumentType, GetArgumentTypeDisplayText, MapNodeRevision_titlePattern} from "Store/firebase/nodes/@MapNodeRevision";
-import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
-import {GetTerm, GetTermsByName, GetTermsByForm} from "Store/firebase/terms";
-import {Term} from "Store/firebase/terms/@Term";
-import {GetUser} from "Store/firebase/users";
-import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI";
-import {ES} from "Utils/UI/GlobalStyles";
-import {Link, Observer, Validate, InfoButton} from "vwebapp-framework";
-import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
+import {ShowAddTermDialog} from "Source/UI/Database/Terms/TermDetailsUI";
+import {ES} from "Source/Utils/UI/GlobalStyles";
 import {TermDefinitionPanel} from "../NodeUI/Panels/DefinitionsPanel";
 import {NodeTermsUI} from "./TextPanel/NodeTermsUI";
+import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
+import {GetAttachmentType, AttachmentType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@AttachmentType";
+import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {MapNodeL2, ChildEntry, ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {MapNodeRevision_titlePattern, ArgumentType, GetArgumentTypeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
+import {TermAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@TermAttachment";
+import {GetDisplayPolarity} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
 
 export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 	render() {

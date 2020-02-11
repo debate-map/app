@@ -1,14 +1,14 @@
 import {Button, Column, Row} from "react-vcomponents";
 import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
-import {DeletePhrasing} from "Server/Commands/DeletePhrasing";
-import {UpdatePhrasing} from "Server/Commands/UpdatePhrasing";
-import {MapNodePhrasing} from "Store/firebase/nodePhrasings/@MapNodePhrasing";
-import {GetUser, MeID} from "Store/firebase/users";
-import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI";
+import {PhrasingDetailsUI} from "Source/UI/Database/Phrasings/PhrasingDetailsUI";
 import {GetUpdates, Observer} from "vwebapp-framework";
 import {E} from "js-vextensions";
-import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
+import {MapNodePhrasing} from "Subrepos/Server/Source/@Shared/Store/firebase/nodePhrasings/@MapNodePhrasing";
+import {GetUser, MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {UpdatePhrasing} from "Subrepos/Server/Source/@Shared/Commands/UpdatePhrasing";
+import {DeletePhrasing} from "Subrepos/Server/Source/@Shared/Commands/DeletePhrasing";
 
 @Observer
 export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {phrasing: MapNodePhrasing}, {dataError: null as string}) {

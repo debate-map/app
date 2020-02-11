@@ -2,11 +2,11 @@ import {Clone, DEL, E, GetEntries, GetErrorMessagesUnderElement} from "js-vexten
 import {Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
-import {ES} from "Utils/UI/GlobalStyles";
+import {IDAndCreationInfoUI} from "Source/UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
+import {ES} from "Source/Utils/UI/GlobalStyles";
 import {InfoButton, observer_simple} from "vwebapp-framework";
-import {AddTerm} from "../../../Server/Commands/AddTerm";
-import {Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "../../../Store/firebase/terms/@Term";
+import {Term, Term_nameFormat, Term_disambiguationFormat, TermType} from "Subrepos/Server/Source/@Shared/Store/firebase/terms/@Term";
+import {AddTerm} from "Subrepos/Server/Source/@Shared/Commands/AddTerm";
 import {GetNiceNameForTermType} from "../../Database/TermsUI";
 
 export class TermDetailsUI extends BaseComponentPlus(

@@ -1,19 +1,19 @@
 import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select, ColorPickerBox, Text} from "react-vcomponents";
-import {GetUser, MeID} from "Store/firebase/users";
-import {User} from "Store/firebase/users/@User";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds";
+import {presetBackgrounds, defaultPresetBackground} from "Source/Utils/UI/PresetBackgrounds";
 import {PageContainer, Observer} from "vwebapp-framework";
-import {styles, ES} from "Utils/UI/GlobalStyles";
+import {styles, ES} from "Source/Utils/UI/GlobalStyles";
 import {Fragment} from "react";
-import {PropNameToTitle} from "Utils/General/Others";
+import {PropNameToTitle} from "Source/Utils/General/Others";
 import {ScrollView} from "react-vscrollview";
 import {E} from "js-vextensions";
-import {GetUser_Private} from "Store/firebase/users_private";
-import {SetUserData_Private} from "Server/Commands/SetUserData_Private";
-import {SetUserData} from "Server/Commands/SetUserData";
-import {GetUserPermissionGroups} from "Store/firebase/users/$user";
+import {MeID, GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {GetUser_Private} from "Subrepos/Server/Source/@Shared/Store/firebase/users_private";
+import {GetUserPermissionGroups} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {SetUserData} from "Subrepos/Server/Source/@Shared/Commands/SetUserData";
+import {SetUserData_Private} from "Subrepos/Server/Source/@Shared/Commands/SetUserData_Private";
+import {User} from "Subrepos/Server/Source/@Shared/Store/firebase/users/@User";
 
 @Observer
 export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, {}) {

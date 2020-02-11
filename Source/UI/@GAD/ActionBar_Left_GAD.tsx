@@ -1,18 +1,18 @@
 import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {Row, Button} from "react-vcomponents";
-import {colors} from "Utils/UI/GlobalStyles";
-import {LayoutDropDown} from "UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown";
-import {Map, MapType} from "Store/firebase/maps/@Map";
-import {MeID} from "Store/firebase/users";
-import {IsUserMap} from "Store/firebase/maps/$map";
-import {GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState";
+import {colors} from "Source/Utils/UI/GlobalStyles";
+import {LayoutDropDown} from "Source/UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown";
+import {GetTimelinePanelOpen} from "Source/Store/main/maps/mapStates/$mapState";
 import {HSLA, Observer} from "vwebapp-framework";
-import {store} from "Store";
+import {store} from "Source/Store";
 import {runInAction} from "mobx";
 import {E} from "js-vextensions";
-import {DetailsDropDown} from "UI/@Shared/Maps/MapUI/ActionBar_Left/DetailsDropDown";
-import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
-import {zIndexes} from "Utils/UI/ZIndexes";
+import {DetailsDropDown} from "Source/UI/@Shared/Maps/MapUI/ActionBar_Left/DetailsDropDown";
+import {zIndexes} from "Source/Utils/UI/ZIndexes";
+import {Map, MapType} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {IsUserMap} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/$map";
 import {Button_GAD} from "./GADButton";
 
 @Observer

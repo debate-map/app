@@ -3,11 +3,9 @@ import {Global} from "js-vextensions";
 import {observable} from "mobx";
 import {ignore} from "mobx-sync";
 import {O, StoreAction} from "vwebapp-framework";
-import {rootPageDefaultChilds} from "Utils/URL/URLs";
+import {rootPageDefaultChilds} from "Source/Utils/URL/URLs";
 import {StoreAccessor} from "mobx-firelink";
-import {store} from "Store";
-import {GetNodeL3} from "./firebase/nodes/$node";
-import {globalMapID} from "./firebase/nodes/@MapNode";
+import {store} from "Source/Store";
 import {DatabaseState} from "./main/database";
 import {PublicPageState} from "./main/public";
 import {MapState} from "./main/maps/mapStates/@MapState";
@@ -17,6 +15,7 @@ import {RatingUIState} from "./main/ratingUI";
 import {SearchState} from "./main/search";
 import {MapsState} from "./main/maps";
 import {TimelinesState} from "./main/timelines";
+import {globalMapID} from "../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
 
 @Global
 export class NotificationMessage {

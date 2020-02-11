@@ -1,11 +1,11 @@
 import {autorun} from "mobx";
-import {store} from "Store";
+import {store} from "Source/Store";
 import {DBPath, GetAsync, GetDoc} from "mobx-firelink";
-import {fire} from "Utils/LibIntegrations/ServerLink";
-import {GetUser} from "Store/firebase/users";
-import {SetUserData} from "Server/Commands/SetUserData";
-import {SetUserData_Private} from "Server/Commands/SetUserData_Private";
-import {GetUser_Private} from "Store/firebase/users_private";
+import {fire} from "../../../Subrepos/Server/Source/@Shared/MobXFirelink";
+import {GetUser} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {GetUser_Private} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/users_private";
+import {SetUserData} from "../../../Subrepos/Server/Source/@Shared/Commands/SetUserData";
+import {SetUserData_Private} from "../../../Subrepos/Server/Source/@Shared/Commands/SetUserData_Private";
 
 let lastUserInfo;
 autorun(()=>{

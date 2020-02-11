@@ -1,4 +1,4 @@
-import {UUID} from "vwebapp-framework";
+import {UUID} from "mobx-firelink";
 
 export class DroppableInfo {
 	constructor(data: Partial<DroppableInfo>) {

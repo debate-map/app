@@ -2,9 +2,8 @@ import Moment from "moment";
 import {Column, Pre, Row, Text} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {Link, Observer} from "vwebapp-framework";
-import {User} from "Store/firebase/users/@User";
-import {GetUser} from "Store/firebase/users";
 import {E} from "js-vextensions";
+import {GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
 
 @Observer
 export class IDAndCreationInfoUI extends BaseComponentPlus({singleLine: false} as {id: string | number, creatorID: string, createdAt: number, singleLine?: boolean}, {}) {

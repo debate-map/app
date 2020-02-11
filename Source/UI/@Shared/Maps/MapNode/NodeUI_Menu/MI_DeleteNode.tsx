@@ -1,14 +1,14 @@
 import {BaseComponentPlus} from "react-vextensions";
 import {VMenuItem} from "react-vmenu";
 import {ShowMessageBox} from "react-vmessagebox";
-import {DeleteNode} from "Server/Commands/DeleteNode";
-import {IsNodeSubnode} from "Store/firebase/nodes";
-import {GetNodeDisplayText} from "Store/firebase/nodes/$node";
-import {MeID} from "Store/firebase/users";
-import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
-import {styles} from "Utils/UI/GlobalStyles";
+import {styles} from "Source/Utils/UI/GlobalStyles";
 import {Observer} from "vwebapp-framework";
 import {E} from "js-vextensions";
+import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {DeleteNode} from "Subrepos/Server/Source/@Shared/Commands/DeleteNode";
+import {IsNodeSubnode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
 import {MI_SharedProps} from "../NodeUI_Menu";
 
 @Observer

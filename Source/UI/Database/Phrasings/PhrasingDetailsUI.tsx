@@ -3,11 +3,10 @@ import Moment from "moment";
 import {Column, Pre, RowLR, Select, TextArea, TextInput, Row} from "react-vcomponents";
 import {BaseComponentWithConnector, GetDOM, BaseComponentPlus} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {AddPhrasing} from "Server/Commands/AddPhrasing";
-import {MapNodePhrasing, MapNodePhrasingType} from "Store/firebase/nodePhrasings/@MapNodePhrasing";
-import {ES} from "Utils/UI/GlobalStyles";
-import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
-import {GetUser} from "../../../Store/firebase/users";
+import {ES} from "Source/Utils/UI/GlobalStyles";
+import {IDAndCreationInfoUI} from "Source/UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
+import {MapNodePhrasing, MapNodePhrasingType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodePhrasings/@MapNodePhrasing";
+import {AddPhrasing} from "Subrepos/Server/Source/@Shared/Commands/AddPhrasing";
 
 export class PhrasingDetailsUI extends BaseComponentPlus(
 	{enabled: true} as {baseData: MapNodePhrasing, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: MapNodePhrasing, error: string)=>void},

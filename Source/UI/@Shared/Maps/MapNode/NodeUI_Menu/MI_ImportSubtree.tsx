@@ -1,21 +1,20 @@
 import {BaseComponentPlus} from "react-vextensions";
 import {Observer, TreeView} from "vwebapp-framework";
 import {VMenuItem} from "react-vmenu";
-import {HasModPermissions, HasAdminPermissions} from "Store/firebase/users/$user";
-import {MeID} from "Store/firebase/users";
-import {styles, ES} from "Utils/UI/GlobalStyles";
+import {styles, ES} from "Source/Utils/UI/GlobalStyles";
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
 import {Column, Row, TextArea, Button, CheckBox, Select, Text, TextInput} from "react-vcomponents";
 import {FromJSON, ToJSON, CE, Clone, GetEntries} from "js-vextensions";
-import {ImportSubtree_Old} from "Server/Commands/ImportSubtree_Old";
-import {GetParentNodeID, GetNodeID, GetNodesByTitle} from "Store/firebase/nodes";
 import {MI_SharedProps} from "../NodeUI_Menu";
 import {SubtreeExportData_Old} from "./MI_ExportSubtree";
-import {AddChildNode} from "Server/Commands/AddChildNode";
 import {ApplyDBUpdates} from "mobx-firelink";
 import {ScrollView} from "react-vscrollview";
-import {store} from "Store";
+import {store} from "Source/Store";
 import {runInAction} from "mobx";
+import {HasModPermissions, HasAdminPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {GetNodeID, GetNodesByTitle} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {AddChildNode} from "Subrepos/Server/Source/@Shared/Commands/AddChildNode";
 
 @Observer
 export class MI_ImportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {
@@ -51,7 +50,7 @@ class ImportSubtreeUI extends BaseComponentPlus(
 		error: null as string, dbUpdates: null,
 	},
 ) {
-	importCommand: ImportSubtree_Old;
+	importCommand: ImportSubtree;
 	render() {
 		const {mapID, node, path, controller} = this.props;
 		const {subtreeJSON, tab, nodesToLink, error, dbUpdates} = this.state;
@@ -118,7 +117,7 @@ class ImportSubtreeUI extends BaseComponentPlus(
 						if (dialogState.importRatings_userIDsStr.trim().length) {
 							importRatings_userIDs = dialogState.importRatings_userIDsStr.split(",").map(a=>a.trim());
 						}
-						this.importCommand = new ImportSubtree_Old({mapID, parentNodeID: GetNodeID(path), subtreeJSON, nodesToLink, importRatings: dialogState.importRatings, importRatings_userIDs});
+						this.importCommand = new ImportSubtree({mapID, parentNodeID: GetNodeID(path), subtreeJSON, nodesToLink, importRatings: dialogState.importRatings, importRatings_userIDs});
 						/*try {
 							await this.importCommand.Validate_Async();
 						} catch (ex) {

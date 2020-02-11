@@ -1,5 +1,5 @@
 import {BaseComponentPlus} from "react-vextensions";
-import {LimitBarPos} from "UI/@Shared/Maps/MapNode/NodeUI";
+import {LimitBarPos} from "Source/UI/@Shared/Maps/MapNode/NodeUI";
 import {E} from "js-vextensions";
 import {ChildLimitBar} from "./NodeChildHolder";
 

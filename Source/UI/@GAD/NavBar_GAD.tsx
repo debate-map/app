@@ -1,18 +1,18 @@
 import {DeepGet, E, emptyArray} from "js-vextensions";
-import {dbVersion} from "Main";
+import {dbVersion} from "Source/Main";
 import {runInAction} from "mobx";
 import {Button, Div, Row} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
-import {RootState, store} from "Store";
-import {GetAuth} from "Store/firebase";
-import {NotificationsUI} from "UI/@Shared/NavBar/NotificationsUI";
-import {SearchPanel} from "UI/@Shared/NavBar/SearchPanel";
-import {UserPanel} from "UI/@Shared/NavBar/UserPanel";
-import {ResetCurrentDBRoot} from "UI/More/Admin/ResetCurrentDBRoot";
+import {RootState, store} from "Source/Store";
+import {NotificationsUI} from "Source/UI/@Shared/NavBar/NotificationsUI";
+import {SearchPanel} from "Source/UI/@Shared/NavBar/SearchPanel";
+import {UserPanel} from "Source/UI/@Shared/NavBar/UserPanel";
+import {ResetCurrentDBRoot} from "Source/UI/More/Admin/ResetCurrentDBRoot";
 import {Observer, Link, HSL} from "vwebapp-framework";
 import {GetDocs} from "mobx-firelink";
-import {zIndexes} from "Utils/UI/ZIndexes";
+import {zIndexes} from "Source/Utils/UI/ZIndexes";
+import {GetAuth} from "Subrepos/Server/Source/@Shared/Store/firebase";
 import {colors} from "../../Utils/UI/GlobalStyles";
 
 // main

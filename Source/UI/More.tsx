@@ -1,12 +1,12 @@
 import {Switch} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
-import {store} from "Store";
+import {store} from "Source/Store";
 import {Observer} from "vwebapp-framework";
-import {HasAdminPermissions} from "Store/firebase/users/$user";
-import {GetUsers, MeID} from "../Store/firebase/users";
 import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
 import {AdminUI} from "./More/Admin";
 import {LinksUI} from "./More/Links";
+import {HasAdminPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MeID, GetUsers} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
 
 @Observer
 export class MoreUI extends BaseComponentPlus({} as {}, {}) {

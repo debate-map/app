@@ -1,26 +1,25 @@
-import {Assert, emptyObj, nl, ToJSON, Vector2i, VRect, WaitXThenRun, E} from "js-vextensions";
+import {Assert, emptyObj, nl, ToJSON, Vector2i, VRect, WaitXThenRun, E, IsSpecialEmptyArray} from "js-vextensions";
 import * as React from "react";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "react-beautiful-dnd";
 import {Button, Column, Div, Row} from "react-vcomponents";
 import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, WarnOfTransientObjectProps} from "react-vextensions";
-import {GetFillPercent_AtPath} from "Store/firebase/nodeRatings";
-import {GetNodeChildrenL3, HolderType, GetParentNodeL3} from "Store/firebase/nodes";
-import {MapNodeL3, Polarity} from "Store/firebase/nodes/@MapNode";
-import {ArgumentType} from "Store/firebase/nodes/@MapNodeRevision";
-import {MapNodeType, MapNodeType_Info} from "Store/firebase/nodes/@MapNodeType";
-import {NodeConnectorBackground} from "UI/@Shared/Maps/MapNode/NodeConnectorBackground";
-import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI";
-import {Icon, IsSpecialEmptyArray, MaybeLog, Observer} from "vwebapp-framework";
-import {DroppableInfo} from "Utils/UI/DNDStructures";
-import {ES} from "Utils/UI/GlobalStyles";
-import {store} from "Store";
-import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
+import {NodeConnectorBackground} from "Source/UI/@Shared/Maps/MapNode/NodeConnectorBackground";
+import {NodeUI} from "Source/UI/@Shared/Maps/MapNode/NodeUI";
+import {Icon, MaybeLog, Observer} from "vwebapp-framework";
+import {DroppableInfo} from "Source/Utils/UI/DNDStructures";
+import {ES} from "Source/Utils/UI/GlobalStyles";
+import {store} from "Source/Store";
+import {GetNodeView} from "Source/Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
-import {Map} from "../../../../../Store/firebase/maps/@Map";
-import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
-
-import {ArgumentsControlBar} from "../ArgumentsControlBar";
 import {NodeChildHolderBox} from "./NodeChildHolderBox";
+import {MapNodeL3, Polarity} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {HolderType, GetNodeChildrenL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {GetFillPercent_AtPath} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings";
+import {IsMultiPremiseArgument} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {MapNodeType, MapNodeType_Info} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {ArgumentType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {ArgumentsControlBar} from "../ArgumentsControlBar";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], type: HolderType,

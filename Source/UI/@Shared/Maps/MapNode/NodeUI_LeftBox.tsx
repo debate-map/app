@@ -2,18 +2,18 @@ import chroma from "chroma-js";
 import {E} from "js-vextensions";
 import {Button, Span} from "react-vcomponents";
 import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
-import {MeID} from "Store/firebase/users";
-import {MapNodeView, GetNodeView} from "Store/main/maps/mapViews/$mapView";
+import {MapNodeView, GetNodeView} from "Source/Store/main/maps/mapViews/$mapView";
 import {SlicePath} from "mobx-firelink";
 import {Observer} from "vwebapp-framework";
-import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
-import {Map} from "../../../../Store/firebase/maps/@Map";
-import {GetRatingAverage_AtPath, GetRatings} from "../../../../Store/firebase/nodeRatings";
-import {GetRatingTypeInfo, RatingType} from "../../../../Store/firebase/nodeRatings/@RatingType";
-import {GetParentNodeL3} from "../../../../Store/firebase/nodes";
-import {GetNodeForm, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument} from "../../../../Store/firebase/nodes/$node";
-import {ClaimForm, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
-import {MapNodeType_Info} from "../../../../Store/firebase/nodes/@MapNodeType";
+import {MapNodeL3, ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {GetNodeForm, IsPremiseOfSinglePremiseArgument, GetRatingTypesForNode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {GetParentNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {MapNodeType_Info} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {RatingType, GetRatingTypeInfo} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings/@RatingType";
+import {GetRatings, GetRatingAverage_AtPath} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings";
+import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 
 type Props = {
 	map: Map, path: string, node: MapNodeL3,

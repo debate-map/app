@@ -1,8 +1,8 @@
 import {Button, Column, Div} from "react-vcomponents";
 import {AddGlobalStyle, BaseComponent} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
-import {NotificationMessage} from "Store/main";
-import {store} from "Store";
+import {NotificationMessage} from "Source/Store/main";
+import {store} from "Source/Store";
 import {Observer} from "vwebapp-framework";
 import {runInAction} from "mobx";
 

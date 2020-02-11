@@ -12,7 +12,8 @@ module.exports = {
 			"node": {
 				"paths": [
 					//"Source",
-					path.resolve("Source"),
+					//path.resolve("Source"),
+					path.resolve(),
 				],
 				"extensions": [
 				  ".js",

@@ -1,18 +1,17 @@
 import {BaseComponent} from "react-vextensions";
 import {VMenuItem} from "react-vmenu";
 import {ShowMessageBox} from "react-vmessagebox";
-import {GetNodeDisplayText, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, GetPolarityShortStr, ReversePolarity} from "Store/firebase/nodes/$node";
-import {MeID} from "Store/firebase/users";
-import {styles} from "Utils/UI/GlobalStyles";
+import {styles} from "Source/Utils/UI/GlobalStyles";
 import {Observer} from "vwebapp-framework";
-import {CanGetBasicPermissions} from "Store/firebase/users/$user";
-import {GetParentNodeL3, GetParentNodeID} from "Store/firebase/nodes";
-import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
-import {ClaimForm} from "Store/firebase/nodes/@MapNode";
-import {LinkNode_HighLevel} from "Server/Commands/LinkNode_HighLevel";
-import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
+import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
 import {runInAction} from "mobx";
-import {store} from "Store";
+import {store} from "Source/Store";
+import {GetParentNodeL3, GetParentNodeID} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {LinkNode_HighLevel} from "Subrepos/Server/Source/@Shared/Commands/LinkNode_HighLevel";
 import {MI_SharedProps} from "../NodeUI_Menu";
 
 @Observer

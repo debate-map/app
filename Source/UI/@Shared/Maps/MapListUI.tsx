@@ -3,20 +3,20 @@ import {runInAction} from "mobx";
 import {Button, Column, Row, Select} from "react-vcomponents";
 import {BaseComponentPlus, UseCallback} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
-import {store} from "Store";
-import {GetMaps_Private, GetMaps_Public} from "Store/firebase/maps";
-import {MapType} from "Store/firebase/maps/@Map";
-import {MeID} from "Store/firebase/users";
-import {GetSelectedPrivateMap} from "Store/main/private";
-import {GetSelectedPublicMap} from "Store/main/public";
-import {ES} from "Utils/UI/GlobalStyles";
+import {store} from "Source/Store";
+import {GetSelectedPrivateMap} from "Source/Store/main/private";
+import {GetSelectedPublicMap} from "Source/Store/main/public";
+import {ES} from "Source/Utils/UI/GlobalStyles";
 import {HSLA, Observer, PageContainer} from "vwebapp-framework";
-import {GetUserPermissionGroups, CanGetBasicPermissions} from "Store/firebase/users/$user";
+import {MapType} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 import {GADDemo} from "../../@GAD/GAD";
 import {ShowAddMapDialog} from "../../@Shared/Maps/AddMapDialog";
 import {MapEntryUI} from "../../@Shared/Maps/MapEntryUI";
 import {MapUI} from "../../@Shared/Maps/MapUI";
 import {ShowSignInPopup} from "../../@Shared/NavBar/UserPanel";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {GetUserPermissionGroups, CanGetBasicPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {GetMaps_Private, GetMaps_Public} from "Subrepos/Server/Source/@Shared/Store/firebase/maps";
 
 export const columnWidths = [0.64, 0.06, 0.12, 0.18];
 
@@ -58,7 +58,7 @@ export class MapListUI extends BaseComponentPlus({} as {type: MapType}, {}) {
 						<Button text="Add map" ml="auto" enabled={CanGetBasicPermissions(MeID())} onClick={UseCallback(()=>{
 							if (userID == null) return void ShowSignInPopup();
 							ShowAddMapDialog(userID, type);
-						}, [userID])}/>
+						}, [type, userID])}/>
 					</Row>
 					<Row style={{height: 40, padding: 10}}>
 						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>Title</span>

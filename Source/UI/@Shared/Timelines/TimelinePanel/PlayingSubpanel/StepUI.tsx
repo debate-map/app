@@ -1,17 +1,16 @@
 import {Column, Div, Row} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
-import {Map} from "Store/firebase/maps/@Map";
-import {GetTimelineStep} from "Store/firebase/timelineSteps";
-import {Timeline} from "Store/firebase/timelines/@Timeline";
 import {VReactMarkdown_Remarkable, YoutubePlayer, YoutubePlayerState, Observer} from "vwebapp-framework";
-import {TimelineStep} from "Store/firebase/timelineSteps/@TimelineStep";
 import {E} from "js-vextensions";
 import {VMenuItem, VMenuStub} from "react-vmenu";
-import {styles} from "Utils/UI/GlobalStyles";
-import {MeID} from "Store/firebase/users";
+import {styles} from "Source/Utils/UI/GlobalStyles";
 import {runInAction} from "mobx";
-import {store} from "Store";
-import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
+import {store} from "Source/Store";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {Timeline} from "Subrepos/Server/Source/@Shared/Store/firebase/timelines/@Timeline";
+import {GetTimelineStep} from "Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps";
+import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
 import {PositionOptionsEnum, NodeRevealUI, StepEditorUI} from "../EditorSubpanel/StepEditorUI";
 
 @Observer

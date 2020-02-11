@@ -1,7 +1,7 @@
 import {O} from "vwebapp-framework";
-import {store} from "Store";
-import {GetMap} from "Store/firebase/maps";
+import {store} from "Source/Store";
 import {StoreAccessor} from "mobx-firelink";
+import {GetMap} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/maps";
 
 export class PrivatePageState {
 	@O listType = "featured" as "featured" | "all";

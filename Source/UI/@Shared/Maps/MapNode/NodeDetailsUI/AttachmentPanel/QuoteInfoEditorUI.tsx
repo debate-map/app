@@ -2,12 +2,12 @@ import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
 import {Column, Pre, Row} from "react-vcomponents";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
-import {QuoteAttachment} from "../../../../../../Store/firebase/nodeRevisions/@QuoteAttachment";
-import {GetNodeDisplayText} from "../../../../../../Store/firebase/nodes/$node";
-import {ClaimForm} from "../../../../../../Store/firebase/nodes/@MapNode";
-import {MapNodeType} from "../../../../../../Store/firebase/nodes/@MapNodeType";
 import {SubPanel_Quote} from "../../NodeUI_Inner/SubPanel";
 import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI";
+import {QuoteAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@QuoteAttachment";
+import {GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
 
 // @ApplyBasicStyles
 export class QuoteInfoEditorUI extends BaseComponent

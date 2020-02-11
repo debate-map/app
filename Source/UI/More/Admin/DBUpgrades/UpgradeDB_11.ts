@@ -1,8 +1,8 @@
-import {GetSearchTerms} from "Server/Commands/AddNodeRevision";
-import {MapNodeRevision} from "Store/firebase/nodes/@MapNodeRevision";
 import {Clone} from "js-vextensions";
-import {FirebaseDBShape} from "Store/firebase";
 import {TreeNode} from "mobx-firelink";
+import {FirebaseDBShape} from "Subrepos/Server/Source/@Shared/Store/firebase";
+import {MapNodeRevision} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
+import {GetSearchTerms} from "Subrepos/Server/Source/@Shared/Commands/AddNodeRevision";
 import {AddUpgradeFunc} from "../../Admin";
 
 const newVersion = 11;

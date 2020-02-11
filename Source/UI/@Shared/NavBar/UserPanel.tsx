@@ -3,9 +3,9 @@ import {IsAuthValid} from "mobx-firelink";
 import {Button, Column, Div, Row} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {fire} from "Utils/LibIntegrations/ServerLink";
 import {HandleError, Link, Observer} from "vwebapp-framework";
-import {MeID} from "../../../Store/firebase/users";
+import {fire} from "../../../../Subrepos/Server/Source/@Shared/MobXFirelink";
+import {MeID} from "../../../../Subrepos/Server/Source/@Shared/Store/firebase/users";
 
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {

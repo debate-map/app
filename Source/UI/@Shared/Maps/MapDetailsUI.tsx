@@ -3,11 +3,10 @@ import Moment from "moment";
 import {CheckBox, Column, Pre, RowLR, Spinner, TextInput, Row} from "react-vcomponents";
 import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {InfoButton} from "vwebapp-framework";
-import {PermissionInfoType, MapNodeRevision, MapNodeRevision_Defaultable_props, PermissionInfo, MapNodeRevision_Defaultable_DefaultsForMap} from "Store/firebase/nodes/@MapNodeRevision";
-import {Map, Map_namePattern, MapType} from "../../../Store/firebase/maps/@Map";
-import {GetUser} from "../../../Store/firebase/users";
+import {Map_namePattern, MapType, Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
 import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel";
+import {MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
 
 type Props = {baseData: Map, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Map, ui: MapDetailsUI)=>void};
 export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {newData: null as Map}) {

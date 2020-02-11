@@ -1,9 +1,9 @@
 import {OMIT} from "js-vextensions";
 import {Column, Row} from "react-vcomponents";
 import {ShowMessageBox} from "react-vmessagebox";
-import {AddMap} from "../../../Server/Commands/AddMap";
-import {Map, MapType} from "../../../Store/firebase/maps/@Map";
-import {MeID} from "../../../Store/firebase/users";
+import {MapType, Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {AddMap} from "Subrepos/Server/Source/@Shared/Commands/AddMap";
 import {MapDetailsUI} from "./MapDetailsUI";
 
 export function ShowAddMapDialog(userID: string, type: MapType) {

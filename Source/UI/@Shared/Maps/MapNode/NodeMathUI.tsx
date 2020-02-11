@@ -1,10 +1,10 @@
 import {InlineMath} from "react-katex";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import ReactDOM from "react-dom";
-import {PreProcessLatex} from "Store/firebase/nodes/$node";
 import {IsNaN} from "js-vextensions";
-import {store} from "Store";
-import {Term} from "Store/firebase/terms/@Term";
+import {store} from "Source/Store";
+import {Term} from "Subrepos/Server/Source/@Shared/Store/firebase/terms/@Term";
+import {PreProcessLatex} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
 import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
 
 // change InlineMath's generateHtml function to not break on katex parse-errors

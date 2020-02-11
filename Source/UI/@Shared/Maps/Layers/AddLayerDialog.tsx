@@ -1,8 +1,8 @@
 import {Column, Row} from "react-vcomponents";
 import {ShowMessageBox} from "react-vmessagebox";
-import {Layer} from "Store/firebase/layers/@Layer";
-import {AddLayer} from "../../../../Server/Commands/AddLayer";
-import {MeID} from "../../../../Store/firebase/users";
+import {Layer} from "Subrepos/Server/Source/@Shared/Store/firebase/layers/@Layer";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {AddLayer} from "Subrepos/Server/Source/@Shared/Commands/AddLayer";
 import {LayerDetailsUI} from "../LayerDetailsUI";
 
 export function ShowAddLayerDialog(userID: string) {

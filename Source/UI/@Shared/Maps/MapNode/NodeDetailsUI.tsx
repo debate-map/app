@@ -2,19 +2,19 @@ import {Clone, E, GetEntries, GetErrorMessagesUnderElement} from "js-vextensions
 import {runInAction} from "mobx";
 import {Column, Row, Select} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM, RenderSource} from "react-vextensions";
-import {store} from "Store";
-import {GetAttachmentType} from "Store/firebase/nodeRevisions/@AttachmentType";
-import {AsNodeL1, AsNodeL2} from "Store/firebase/nodes/$node";
+import {store} from "Source/Store";
 import {Observer} from "vwebapp-framework";
-import {DetailsPanel_Subpanel} from "Store/main/maps";
-import {ChildEntry, MapNode, MapNodeL3} from "../../../../Store/firebase/nodes/@MapNode";
-import {MapNodeRevision} from "../../../../Store/firebase/nodes/@MapNodeRevision";
+import {DetailsPanel_Subpanel} from "Source/Store/main/maps";
+import {MapNode, ChildEntry, MapNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel";
 import {TextPanel} from "./NodeDetailsUI/TextPanel";
 import {QuoteInfoEditorUI} from "./NodeDetailsUI/AttachmentPanel/QuoteInfoEditorUI";
 import {TagsPanel} from "./NodeUI/Panels/TagsPanel";
+import {MapNodeRevision} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
+import {AsNodeL1, AsNodeL2} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {GetAttachmentType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@AttachmentType";
 
 type Props = {
 	baseData: MapNode,

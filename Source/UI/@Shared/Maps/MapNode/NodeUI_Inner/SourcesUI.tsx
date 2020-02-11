@@ -1,9 +1,8 @@
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {SourceChain, Source} from "Store/firebase/nodeRevisions/@SourceChain";
 import {Row, Text, Column} from "react-vcomponents";
-
 import {VURL} from "js-vextensions";
 import {Link} from "vwebapp-framework";
+import {SourceChain, Source} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@SourceChain";
 
 export class SourcesUI extends BaseComponentPlus({headerText: "Sources"} as {sourceChains: SourceChain[], headerText?: string}, {}) {
 	render() {

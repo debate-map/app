@@ -3,14 +3,14 @@ import {BaseComponent} from "react-vextensions";
 import {E} from "js-vextensions";
 import {VMenuItem} from "react-vmenu";
 import {ShowMessageBox} from "react-vmessagebox";
-import {DeleteNode} from "Server/Commands/DeleteNode";
-import {UnlinkNode} from "Server/Commands/UnlinkNode";
-import {GetNodeDisplayText, GetNodeL3} from "Store/firebase/nodes/$node";
-import {MeID} from "Store/firebase/users";
-import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
-import {styles} from "Utils/UI/GlobalStyles";
+import {styles} from "Source/Utils/UI/GlobalStyles";
 import {MI_SharedProps} from "../NodeUI_Menu";
 import {Observer} from "vwebapp-framework";
+import {GetNodeL3, GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {UnlinkNode} from "Subrepos/Server/Source/@Shared/Commands/UnlinkNode";
+import {DeleteNode} from "Subrepos/Server/Source/@Shared/Commands/DeleteNode";
 
 @Observer
 export class MI_DeleteContainerArgument extends BaseComponent<MI_SharedProps, {}> {

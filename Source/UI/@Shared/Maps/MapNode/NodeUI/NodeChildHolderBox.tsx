@@ -2,27 +2,24 @@ import chroma from "chroma-js";
 import {AssertWarn, emptyArray, emptyArray_forLoading, E} from "js-vextensions";
 import {Row} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM, UseCallback, WarnOfTransientObjectProps} from "react-vextensions";
-import {GetMarkerPercent_AtPath, GetRatings,GetFillPercent_AtPath} from "Store/firebase/nodeRatings";
-import {RatingType} from "Store/firebase/nodeRatings/@RatingType";
-import {GetParentNodeL3, HolderType} from "Store/firebase/nodes";
-import {IsSinglePremiseArgument} from "Store/firebase/nodes/$node";
-import {MapNodeL3} from "Store/firebase/nodes/@MapNode";
-import {MapNodeType} from "Store/firebase/nodes/@MapNodeType";
-import {GADDemo} from "UI/@GAD/GAD";
+import {GADDemo} from "Source/UI/@GAD/GAD";
 import {HSLA, Observer} from "vwebapp-framework";
-import {ACTMapNodeExpandedSet, GetNodeView, MapNodeView} from "Store/main/maps/mapViews/$mapView";
+import {ACTMapNodeExpandedSet, GetNodeView, MapNodeView} from "Source/Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
-import {Map} from "../../../../../Store/firebase/maps/@Map";
-
-import {IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument} from "../../../../../Store/firebase/nodes/$node";
-import {GetNodeColor} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {ExpandableBox} from "../ExpandableBox";
 import {Squiggle} from "../NodeConnectorBackground";
 import {NodeUI_Menu_Stub} from "../NodeUI_Menu";
 import {NodeChildCountMarker} from "./NodeChildCountMarker";
 import {NodeChildHolder} from "./NodeChildHolder";
 import {RatingsPanel} from "./Panels/RatingsPanel";
-import {ArgumentType} from "Store/firebase/nodes/@MapNodeRevision";
+import {MapNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {HolderType, GetParentNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings";
+import {ArgumentType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
+import {GetNodeColor, MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {RatingType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings/@RatingType";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
@@ -115,7 +112,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 						)}>{text}</span>}
 						{...E(
 							{backgroundFillPercent, backgroundColor, markerPercent},
-							GADDemo && {backgroundFillPercent: 100, backgroundColor: chroma(HSLA(0, 0, 1)) as Color},
+							GADDemo && {backgroundFillPercent: 100, backgroundColor: chroma(HSLA(0, 0, 1)) as chroma.Color},
 						)}
 						toggleExpanded={UseCallback(e=>{
 							const newExpanded = !nodeView[expandKey];

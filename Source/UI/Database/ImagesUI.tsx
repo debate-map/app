@@ -2,21 +2,21 @@ import {Button, Column, Div, Pre, Row, Span, Text} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus, UseEffect} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {ScrollView} from "react-vscrollview";
-import {ES} from "Utils/UI/GlobalStyles";
-import {store} from "Store";
-import {GetSelectedImage} from "Store/main/database";
+import {ES} from "Source/Utils/UI/GlobalStyles";
+import {store} from "Source/Store";
+import {GetSelectedImage} from "Source/Store/main/database";
 import {Observer, GetUpdates} from "vwebapp-framework";
 import {runInAction} from "mobx";
 import {E} from "js-vextensions";
-import {GetUserPermissionGroups, IsUserCreatorOrMod, CanGetBasicPermissions, HasModPermissions} from "Store/firebase/users/$user";
-import {DeleteImage} from "../../Server/Commands/DeleteImage";
-import {UpdateImageData} from "../../Server/Commands/UpdateImageData";
-import {GetImages} from "../../Store/firebase/images";
-import {GetNiceNameForImageType, Image} from "../../Store/firebase/images/@Image";
-import {MeID} from "../../Store/firebase/users";
-import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
 import {ShowAddImageDialog} from "./Images/AddImageDialog";
 import {ImageDetailsUI} from "./Images/ImageDetailsUI";
+import {Image, GetNiceNameForImageType} from "Subrepos/Server/Source/@Shared/Store/firebase/images/@Image";
+import {GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {GetImages} from "Subrepos/Server/Source/@Shared/Store/firebase/images";
+import {UpdateImageData} from "Subrepos/Server/Source/@Shared/Commands/UpdateImageData";
+import {DeleteImage} from "Subrepos/Server/Source/@Shared/Commands/DeleteImage";
+import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
 
 @Observer
 export class ImagesUI extends BaseComponentPlus({} as {}, {} as { selectedImage_newData: Image, selectedImage_newDataError: string }) {

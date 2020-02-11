@@ -10,15 +10,16 @@
 		"module": "ES2015", // leave the imports/exports alone (webpack will convert them to "require")
 		//"module": "commonjs", // needed, since this config file is used for "ts-node Scripts/Server" as well
 		"moduleResolution": "node",
-		//"rootDir": ".",
-		"rootDir": "Source",
+		"rootDir": ".",
+		//"rootDir": "Source",
 		/*"rootDirs": [
 			"Source",
 			"../node_modules/vwebapp-framework",
 			"../node_modules/js-vextensions/....",
 		],*/
-		"baseUrl": "Source",
+		//"baseUrl": "Source",
 		//"baseUrl": ".", // we need it at root so we can apply path-overrides, even when requester is outside of Source folder
+		"baseUrl": ".",
 		"paths": { // ("paths" is relative to "baseUrl")
 			"*": [
 				// prefer "/node_modules/@types" over "/node_modules/[something]/node_modules/@types" (eg. for when using npm link)
@@ -76,7 +77,9 @@
 		"Typings/**/*.d.ts",
 		//"Typings/globals/**/*.d.ts",
 		"Source/**/*.ts",
-		"Source/**/*.tsx"
+		"Source/**/*.tsx",
+		"Subrepos/Server/Source/**/*.ts",
+		"Subrepos/Server/Source/**/*.tsx"
 		//"Source/**/*.js",
 		//"Source/**/*.jsx"
 	],

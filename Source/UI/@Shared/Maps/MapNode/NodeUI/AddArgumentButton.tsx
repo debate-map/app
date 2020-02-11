@@ -1,17 +1,16 @@
 import {E} from "js-vextensions";
 import {Button} from "react-vcomponents";
 import {BaseComponent, UseCallback} from "react-vextensions";
-import {GetParentNodeL3} from "Store/firebase/nodes";
-import {ReversePolarity, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, GetPolarityShortStr} from "Store/firebase/nodes/$node";
-import {MeID} from "Store/firebase/users";
-import {CanContributeToNode} from "Store/firebase/users/$user";
-import {GADDemo} from "UI/@GAD/GAD";
-import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
+import {GADDemo} from "Source/UI/@GAD/GAD";
+import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
 import {HSLA, Observer} from "vwebapp-framework";
 import {useCallback, useMemo, useEffect} from "react";
-import {Map} from "../../../../../Store/firebase/maps/@Map";
-import {ClaimForm, MapNodeL3, Polarity} from "../../../../../Store/firebase/nodes/@MapNode";
-import {GetNodeColor, MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
+import {MapNodeL3, Polarity, ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {GetNodeColor, MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {GetParentNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog";
 
 type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style?};

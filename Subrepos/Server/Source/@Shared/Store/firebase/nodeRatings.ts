@@ -40,7 +40,7 @@ export const GetRatingSet = StoreAccessor(s=>(nodeID: string, ratingType: Rating
 	/*const ratingsRoot = GetNodeRatingsRoot(nodeID);
 	if (ratingsRoot == null) return null;
 	return ratingsRoot[ratingType];*/
-	const ratings = GetDocs({}, a=>a.nodeRatings.get(nodeID).get(ratingType));
+	const ratings = GetDocs({}, a=>a.nodeRatings.get(nodeID).get(ratingType) as any) as Rating[];
 	const ratingsAsMap = CE(ratings).ToMap(a=>a._key, a=>a);
 	Assert(CE(ratingsAsMap).VKeys().every(a=>a.length > 10));
 	return ratingsAsMap;

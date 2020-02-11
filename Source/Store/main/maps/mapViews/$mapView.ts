@@ -1,9 +1,9 @@
 import {Vector2i, Assert, IsString, GetTreeNodesInObjTree, DeepGet, IsPrimitive, DeepSet} from "js-vextensions";
 import {observable} from "mobx";
-import {O, Validate, StoreAction, UUID} from "vwebapp-framework";
-import {store} from "Store";
-import {SplitStringBySlash_Cached, StoreAccessor, PathOrPathGetterToPathSegments} from "mobx-firelink";
-import {GetMap} from "Store/firebase/maps";
+import {O, StoreAction} from "vwebapp-framework";
+import {store} from "Source/Store";
+import {SplitStringBySlash_Cached, StoreAccessor, Validate, UUID} from "mobx-firelink";
+import {PathSegmentToNodeID} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes";
 
 export class MapView {
 	// rootNodeView = new MapNodeView();
@@ -269,7 +269,7 @@ export const ACTMapViewMerge = StoreAction((mapID: string, toMergeMapView: MapVi
 
 	// maybe temp (maybe find another way)
 	// const mapUI = FindReact($('.MapUI')[0]) as MapUI;
-	const MapUI = require("UI/@Shared/Maps/MapUI").MapUI as typeof import("UI/@Shared/Maps/MapUI").MapUI; // late-import, to not violate "no importing UI files from other files" rule
+	const MapUI = require("UI/@Shared/Maps/MapUI").MapUI as typeof import("Source/UI/@Shared/Maps/MapUI").MapUI; // late-import, to not violate "no importing UI files from other files" rule
 	const mapUI = MapUI.CurrentMapUI;
 	if (mapUI) {
 		mapUI.LoadStoredScroll();

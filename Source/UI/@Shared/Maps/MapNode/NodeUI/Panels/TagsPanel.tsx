@@ -1,18 +1,17 @@
 import {Div, Column, Row, Button, TextInput, DropDown, DropDownTrigger, DropDownContent, Text} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {InfoButton, Observer, GetUpdates, HSLA} from "vwebapp-framework";
-import {TermAttachment} from "Store/firebase/nodeRevisions/@TermAttachment";
-import {Map} from "Store/firebase/maps/@Map";
-import {MapNodeL3} from "Store/firebase/nodes/@MapNode";
-import {HasModPermissions, IsUserCreatorOrMod} from "Store/firebase/users/$user";
-import {MeID} from "Store/firebase/users";
-import {GetNodeTags} from "Store/firebase/nodeTags";
-import {ShowAddTagDialog, TagDetailsUI} from "UI/Database/Tags/TagDetailsUI";
-import {GetTagCompClassByTag, MapNodeTag, TagComp_MirrorChildrenFromXToY} from "Store/firebase/nodeTags/@MapNodeTag";
-import {UpdateNodeTag} from "Server/Commands/UpdateNodeTag";
-import {ShowMessageBox} from "react-vmessagebox";
-import {DeleteNodeTag} from "Server/Commands/DeleteNodeTag";
 import {TermDefinitionPanel} from "./DefinitionsPanel";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MapNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {GetNodeTags} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeTags";
+import {HasModPermissions, IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {ShowAddTagDialog, TagDetailsUI} from "Source/UI/Database/Tags/TagDetailsUI";
+import {TagComp_MirrorChildrenFromXToY, MapNodeTag, GetTagCompClassByTag} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeTags/@MapNodeTag";
+import {UpdateNodeTag} from "Subrepos/Server/Source/@Shared/Commands/UpdateNodeTag";
+import {ShowMessageBox} from "react-vmessagebox";
+import {DeleteNodeTag} from "Subrepos/Server/Source/@Shared/Commands/DeleteNodeTag";
 
 @Observer
 export class TagsPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {}) {

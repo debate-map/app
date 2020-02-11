@@ -1,12 +1,12 @@
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, RowLR, Spinner} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
-import {Map} from "Store/firebase/maps/@Map";
-import {GADDemo} from "UI/@GAD/GAD";
-import {Button_GAD} from "UI/@GAD/GADButton";
-import {store} from "Store";
+import {GADDemo} from "Source/UI/@GAD/GAD";
+import {Button_GAD} from "Source/UI/@GAD/GADButton";
+import {store} from "Source/Store";
 import {runInAction} from "mobx";
 import {Observer} from "vwebapp-framework";
-import {ACTEnsureMapStateInit} from "Store/main/maps";
+import {ACTEnsureMapStateInit} from "Source/Store/main/maps";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 
 @Observer
 export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {

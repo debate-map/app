@@ -1,11 +1,11 @@
 import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {Row} from "react-vcomponents";
-import {colors} from "Utils/UI/GlobalStyles";
-import {LayoutDropDown} from "UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown";
-import {Map} from "Store/firebase/maps/@Map";
+import {colors} from "Source/Utils/UI/GlobalStyles";
+import {LayoutDropDown} from "Source/UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown";
 import {HSLA} from "vwebapp-framework";
 import {E} from "js-vextensions";
-import {zIndexes} from "Utils/UI/ZIndexes";
+import {zIndexes} from "Source/Utils/UI/ZIndexes";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 
 export class ActionBar_Right_GAD extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number}, {}) {
 	render() {

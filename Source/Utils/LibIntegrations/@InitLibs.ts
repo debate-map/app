@@ -1,5 +1,5 @@
 import firebase from "firebase/app";
-import {firebaseConfig} from "Main";
+import {firebaseConfig} from "Source/Main";
 import {ExposeModuleExports, Log} from "vwebapp-framework";
 import {InitVWAF} from "./VWAF";
 import {InitFeedback} from "./FirebaseFeedback";

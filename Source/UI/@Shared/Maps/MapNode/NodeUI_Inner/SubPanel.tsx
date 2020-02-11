@@ -1,12 +1,11 @@
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {VReactMarkdown_Remarkable, Observer} from "vwebapp-framework";
-import {ImageAttachment} from "Store/firebase/nodeRevisions/@ImageAttachment";
-import {ReferencesAttachment} from "Store/firebase/nodeRevisions/@ReferencesAttachment";
-import {MapNode, MapNodeL2} from "../../../../../Store/firebase/nodes/@MapNode";
-import {GetFontSizeForNode} from "../../../../../Store/firebase/nodes/$node";
-import {QuoteAttachment} from "../../../../../Store/firebase/nodeRevisions/@QuoteAttachment";
-import {GetImage} from "../../../../../Store/firebase/images";
-import {Image} from "../../../../../Store/firebase/images/@Image";
+import {MapNodeL2} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {GetFontSizeForNode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {ReferencesAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@ReferencesAttachment";
+import {QuoteAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@QuoteAttachment";
+import {ImageAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@ImageAttachment";
+import {GetImage} from "Subrepos/Server/Source/@Shared/Store/firebase/images";
 import {SourcesUI} from "./SourcesUI";
 
 export class SubPanel extends BaseComponent<{node: MapNodeL2}, {}> {

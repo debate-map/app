@@ -2,19 +2,19 @@ import {Assert, E, GetEntries, OmitIfFalsy} from "js-vextensions";
 import {runInAction} from "mobx";
 import {CheckBox, Column, Pre, Row, Select, Text, TextArea} from "react-vcomponents";
 import {ShowMessageBox} from "react-vmessagebox";
-import {AddArgumentAndClaim} from "Server/Commands/AddArgumentAndClaim";
-import {store} from "Store";
-import {GetMap} from "Store/firebase/maps";
-import {GetNode} from "Store/firebase/nodes";
-import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView";
-import {ES} from "Utils/UI/GlobalStyles";
+import {store} from "Source/Store";
+import {ACTMapNodeExpandedSet} from "Source/Store/main/maps/mapViews/$mapView";
+import {ES} from "Source/Utils/UI/GlobalStyles";
 import {InfoButton, Link, observer_simple} from "vwebapp-framework";
-import {AddChildNode} from "../../../../../../Server/Commands/AddChildNode";
-import {AsNodeL2, AsNodeL3, GetNodeForm, GetNodeL3} from "../../../../../../Store/firebase/nodes/$node";
-import {ChildEntry, ClaimForm, MapNode, Polarity} from "../../../../../../Store/firebase/nodes/@MapNode";
-import {ArgumentType, MapNodeRevision, MapNodeRevision_titlePattern, PermissionInfoType} from "../../../../../../Store/firebase/nodes/@MapNodeRevision";
-import {GetMapNodeTypeDisplayName, MapNodeType} from "../../../../../../Store/firebase/nodes/@MapNodeType";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
+import {MapNodeType, GetMapNodeTypeDisplayName} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {Polarity, MapNode, ClaimForm, ChildEntry} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {GetMap} from "Subrepos/Server/Source/@Shared/Store/firebase/maps";
+import {GetNode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
+import {AddArgumentAndClaim} from "Subrepos/Server/Source/@Shared/Commands/AddArgumentAndClaim";
+import {AddChildNode} from "Subrepos/Server/Source/@Shared/Commands/AddChildNode";
+import {GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
 
 export class AddChildHelper {
 	constructor(parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string) {

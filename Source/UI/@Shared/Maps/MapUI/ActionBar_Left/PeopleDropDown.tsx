@@ -2,14 +2,14 @@ import {CloneWithPrototypes} from "js-vextensions";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
-import {MeID} from "Store/firebase/users";
-import {GADDemo} from "UI/@GAD/GAD";
-import {Button_GAD} from "UI/@GAD/GADButton";
+import {GADDemo} from "Source/UI/@GAD/GAD";
+import {Button_GAD} from "Source/UI/@GAD/GADButton";
 import {InfoButton} from "vwebapp-framework";
-import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
-import {UpdateMapDetails} from "../../../../../Server/Commands/UpdateMapDetails";
-import {GetMapEditorIDs, GetMapEditors} from "../../../../../Store/firebase/maps/$map";
-import {Map} from "../../../../../Store/firebase/maps/@Map";
+import {GetMapEditorIDs, GetMapEditors} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/$map";
+import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {UpdateMapDetails} from "Subrepos/Server/Source/@Shared/Commands/UpdateMapDetails";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 
 export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 	render() {

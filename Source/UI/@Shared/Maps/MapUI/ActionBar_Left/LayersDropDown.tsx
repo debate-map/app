@@ -3,18 +3,18 @@ import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Ro
 import {BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {ScrollView} from "react-vscrollview";
-import {Layer} from "Store/firebase/layers/@Layer";
-import {GetUser, MeID} from "Store/firebase/users";
-import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
-import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
-import {DeleteLayer} from "../../../../../Server/Commands/DeleteLayer";
-import {SetLayerAttachedToMap} from "../../../../../Server/Commands/SetLayerAttachedToMap";
-import {SetMapLayerStateForUser} from "../../../../../Server/Commands/SetMapLayerStateForUser";
-import {ForDeleteLayer_GetError, GetLayers, GetMapLayerIDs} from "../../../../../Store/firebase/layers";
-import {Map} from "../../../../../Store/firebase/maps/@Map";
-import {GetUserLayerStateForMap} from "../../../../../Store/firebase/userMapInfo";
-import {ES} from "../../../../../Utils/UI/GlobalStyles";
 import {ShowAddLayerDialog} from "../../Layers/AddLayerDialog";
+import {MeID, GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {GetLayers, ForDeleteLayer_GetError, GetMapLayerIDs} from "Subrepos/Server/Source/@Shared/Store/firebase/layers";
+import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
+import {Layer} from "Subrepos/Server/Source/@Shared/Store/firebase/layers/@Layer";
+import {GetUserLayerStateForMap} from "Subrepos/Server/Source/@Shared/Store/firebase/userMapInfo";
+import {DeleteLayer} from "Subrepos/Server/Source/@Shared/Commands/DeleteLayer";
+import {SetLayerAttachedToMap} from "Subrepos/Server/Source/@Shared/Commands/SetLayerAttachedToMap";
+import {SetMapLayerStateForUser} from "Subrepos/Server/Source/@Shared/Commands/SetMapLayerStateForUser";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {ES} from "../../../../../Utils/UI/GlobalStyles";
 
 export const columnWidths = [0.5, 0.3, 0.1, 0.1];
 

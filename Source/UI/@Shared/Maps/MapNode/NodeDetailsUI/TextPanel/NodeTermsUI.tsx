@@ -1,14 +1,15 @@
 import {E} from "js-vextensions";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {TermAttachment} from "Store/firebase/nodeRevisions/@TermAttachment";
-import {GetTerm, GetTermsByForm} from "Store/firebase/terms";
-import {Term} from "Store/firebase/terms/@Term";
-import {GetUser} from "Store/firebase/users";
-import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI";
-import {InfoButton, Link, Observer, Validate} from "vwebapp-framework";
+import {ShowAddTermDialog} from "Source/UI/Database/Terms/TermDetailsUI";
+import {InfoButton, Link, Observer} from "vwebapp-framework";
 import {NodeDetailsUI_SharedProps} from "../../NodeDetailsUI";
 import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";
+import {Validate} from "mobx-firelink";
+import {GetTerm, GetTermsByForm} from "Subrepos/Server/Source/@Shared/Store/firebase/terms";
+import {TermAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@TermAttachment";
+import {Term} from "Subrepos/Server/Source/@Shared/Store/firebase/terms/@Term";
+import {GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
 
 @Observer
 export class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {

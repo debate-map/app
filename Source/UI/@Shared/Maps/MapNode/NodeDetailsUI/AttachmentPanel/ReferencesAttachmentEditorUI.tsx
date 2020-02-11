@@ -2,12 +2,12 @@ import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
 import {Column, Pre, Row} from "react-vcomponents";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
-import {ReferencesAttachment} from "Store/firebase/nodeRevisions/@ReferencesAttachment";
-import {GetNodeDisplayText} from "../../../../../../Store/firebase/nodes/$node";
-import {ClaimForm} from "../../../../../../Store/firebase/nodes/@MapNode";
-import {MapNodeType} from "../../../../../../Store/firebase/nodes/@MapNodeType";
-import {SubPanel_Quote, SubPanel_References} from "../../NodeUI_Inner/SubPanel";
 import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI";
+import {ReferencesAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@ReferencesAttachment";
+import {GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {SubPanel_Quote, SubPanel_References} from "../../NodeUI_Inner/SubPanel";
 
 export class ReferencesAttachmentEditorUI extends BaseComponent<
 	{creating?: boolean, editing?: boolean, baseData: ReferencesAttachment, showPreview: boolean, justShowed: boolean, onChange?: (newData: ReferencesAttachment)=>void},

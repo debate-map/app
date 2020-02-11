@@ -1,8 +1,7 @@
-import {GetUsers} from "Store/firebase/users";
 import {O} from "vwebapp-framework";
 import {StoreAccessor, GetDoc} from "mobx-firelink";
-import {GetImages} from "../../Store/firebase/images";
-import {GetTerms} from "../../Store/firebase/terms";
+import {GetTerms} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/terms";
+import {GetImages} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/images";
 
 export class DatabaseState {
 	@O subpage: string;

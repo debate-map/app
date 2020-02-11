@@ -1,9 +1,8 @@
 import {BaseComponentPlus} from "react-vextensions";
 import {Observer} from "vwebapp-framework";
-import {MapNodeL3} from "Store/firebase/nodes/@MapNode";
-import {RatingType} from "Store/firebase/nodeRatings/@RatingType";
-import {Rating} from "Store/firebase/nodeRatings/@RatingsRoot";
 import {MI_SharedProps} from "../NodeUI_Menu";
+import {MapNodeL3} from "../../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {Rating} from "../../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings/@RatingsRoot";
 
 @Observer
 export class MI_ExportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {

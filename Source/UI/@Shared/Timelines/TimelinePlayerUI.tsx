@@ -1,15 +1,13 @@
 import {Button, Column, Pre, Row, Span} from "react-vcomponents";
 import {BaseComponent, FindReact, BaseComponentPlus} from "react-vextensions";
-import {Map} from "Store/firebase/maps/@Map";
-import {GetNodeL2,AsNodeL3} from "Store/firebase/nodes/$node";
-import {Timeline} from "Store/firebase/timelines/@Timeline";
 import {GetEntries, E} from "js-vextensions";
 import {VReactMarkdown_Remarkable, Segment} from "vwebapp-framework";
-import {store} from "Store";
-import {GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStep, GetPlayingTimeline, GetPlayingTimelineStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState";
-
-import {MapNodeL3, Polarity} from "../../../Store/firebase/nodes/@MapNode";
-import {TimelineStep} from "../../../Store/firebase/timelineSteps/@TimelineStep";
+import {store} from "Source/Store";
+import {GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStep, GetPlayingTimeline, GetPlayingTimelineStepIndex, GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
+import {Polarity} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {TimelineStep} from "Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps/@TimelineStep";
+import {GetNodeL2, AsNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 import {NodeUI_Inner} from "../Maps/MapNode/NodeUI_Inner";
 
 function GetPropsFromPropsStr(propsStr: string) {

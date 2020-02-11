@@ -3,27 +3,27 @@ import {Droppable, DroppableProvided, DroppableStateSnapshot} from "react-beauti
 import {Button, CheckBox, Column, Pre, Row, Select, Text, TextArea, TimeSpanInput, Spinner} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM, ShallowChanged} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
-import {DeleteTimelineStep} from "Server/Commands/DeleteTimelineStep";
-import {UpdateTimelineStep} from "Server/Commands/UpdateTimelineStep";
-import {Map} from "Store/firebase/maps/@Map";
-import {GetNodeID, GetNode} from "Store/firebase/nodes";
-import {GetNodeDisplayText, GetNodeL2, GetNodeL3} from "Store/firebase/nodes/$node";
-import {GetNodeColor, MapNodeType} from "Store/firebase/nodes/@MapNodeType";
-import {GetTimelineStep} from "Store/firebase/timelineSteps";
-import {Timeline} from "Store/firebase/timelines/@Timeline";
-import {NodeReveal, TimelineStep} from "Store/firebase/timelineSteps/@TimelineStep";
-import {MeID} from "Store/firebase/users";
 import {DragInfo, MakeDraggable, Observer} from "vwebapp-framework";
-import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures";
-import {UUIDPathStub} from "UI/@Shared/UUIDStub";
-import {GetPathNodes} from "Store/main/maps/mapViews/$mapView";
+import {DraggableInfo, DroppableInfo} from "Source/Utils/UI/DNDStructures";
+import {UUIDPathStub} from "Source/UI/@Shared/UUIDStub";
+import {GetPathNodes} from "Source/Store/main/maps/mapViews/$mapView";
 import {GetAsync} from "mobx-firelink";
-import {SearchUpFromNodeForNodeMatchingX} from "Utils/Store/PathFinder";
 import {VMenuStub, VMenuItem} from "react-vmenu";
-import {styles} from "Utils/UI/GlobalStyles";
-import {AddTimelineStep} from "Server/Commands/AddTimelineStep";
-import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
-import {zIndexes} from "Utils/UI/ZIndexes";
+import {styles} from "Source/Utils/UI/GlobalStyles";
+import {zIndexes} from "Source/Utils/UI/ZIndexes";
+import {Timeline} from "Subrepos/Server/Source/@Shared/Store/firebase/timelines/@Timeline";
+import {GetTimelineStep} from "Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps";
+import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {UpdateTimelineStep} from "Subrepos/Server/Source/@Shared/Commands/UpdateTimelineStep";
+import {DeleteTimelineStep} from "Subrepos/Server/Source/@Shared/Commands/DeleteTimelineStep";
+import {AddTimelineStep} from "Subrepos/Server/Source/@Shared/Commands/AddTimelineStep";
+import {TimelineStep, NodeReveal} from "Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps/@TimelineStep";
+import {GetNodeID, GetNode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {GetNodeL2, GetNodeL3, GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {GetNodeColor, MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {SearchUpFromNodeForNodeMatchingX} from "Subrepos/Server/Source/@Shared/Utils/Store/PathFinder";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 
 export enum PositionOptionsEnum {
 	Full = null,

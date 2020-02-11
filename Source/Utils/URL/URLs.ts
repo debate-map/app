@@ -2,14 +2,14 @@ import {GetSelectedProposalID} from "firebase-feedback";
 import {Assert, VURL} from "js-vextensions";
 import {StoreAccessor} from "mobx-firelink";
 import ReactGA from "react-ga";
-import {RootState} from "Store";
-import {GetNodeL2, GetNodeDisplayText} from "Store/firebase/nodes/$node";
-import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";
-import {GetSelectedImageID, GetSelectedTermID, GetSelectedUserID} from "Store/main/database";
-import {GetMapState} from "Store/main/maps/mapStates/$mapState";
+import {RootState} from "Source/Store";
+import {GetOpenMapID, GetPage, GetSubpage} from "Source/Store/main";
+import {GetSelectedImageID, GetSelectedTermID, GetSelectedUserID} from "Source/Store/main/database";
+import {GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
 import {MaybeLog} from "vwebapp-framework";
-import {GetMap} from "../../Store/firebase/maps";
-import {MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
+import {GetMap} from "Subrepos/Server/Source/@Shared/Store/firebase/maps";
+import {MapNodeL2} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {GetNodeDisplayText, GetNodeL2} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
 
 export const rootPages = [
 	"stream", "chat", "reputation",

@@ -1,12 +1,11 @@
 import {Button, Column, Row} from "react-vcomponents";
 import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
-import {MeID} from "Store/firebase/users";
-import {store} from "Store";
-import {GetSelectedTimeline, GetTimelineOpenSubpanel, GetMapState} from "Store/main/maps/mapStates/$mapState";
+import {store} from "Source/Store";
+import {GetSelectedTimeline, GetTimelineOpenSubpanel, GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
 import {runInAction} from "mobx";
 import {Observer} from "vwebapp-framework";
-import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState";
-import {Map} from "../../../Store/firebase/maps/@Map";
+import {TimelineSubpanel} from "Source/Store/main/maps/mapStates/@MapState";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 import {CollectionSubpanel} from "./TimelinePanel/CollectionSubpanel";
 import {EditorSubpanel} from "./TimelinePanel/EditorSubpanel";
 import {PlayingSubpanel} from "./TimelinePanel/PlayingSubpanel";

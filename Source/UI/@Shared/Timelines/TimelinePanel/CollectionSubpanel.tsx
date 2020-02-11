@@ -1,19 +1,18 @@
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "react-vcomponents";
 import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
-import {DeleteTimeline} from "Server/Commands/DeleteTimeline";
-import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
-import {ShowAddTimelineDialog} from "UI/@Shared/Timelines/AddTimelineDialog";
-import {ES} from "Utils/UI/GlobalStyles";
-import {Map} from "Store/firebase/maps/@Map";
-import {GetTimelineSteps} from "Store/firebase/timelineSteps";
-import {MeID} from "Store/firebase/users";
-import {GetSelectedTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {store} from "Store";
+import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
+import {ShowAddTimelineDialog} from "Source/UI/@Shared/Timelines/AddTimelineDialog";
+import {GetSelectedTimeline, GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
+import {store} from "Source/Store";
 import {Observer} from "vwebapp-framework";
 import {runInAction} from "mobx";
-import {GetMapTimelines} from "Store/firebase/timelines";
 import {E} from "js-vextensions";
+import {GetMapTimelines} from "Subrepos/Server/Source/@Shared/Store/firebase/timelines";
+import {ES} from "Source/Utils/UI/GlobalStyles";
+import {DeleteTimeline} from "Subrepos/Server/Source/@Shared/Commands/DeleteTimeline";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 
 @Observer
 export class CollectionSubpanel extends BaseComponentPlus({} as {map: Map}, {}) {

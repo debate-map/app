@@ -1,14 +1,14 @@
 import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
-import {User} from "Store/firebase/users/@User";
 import {Row, Column} from "react-vcomponents";
 import Moment from "moment";
 import {ScrollView} from "react-vscrollview";
 import {Link, PageContainer, Observer} from "vwebapp-framework";
-import {ES} from "Utils/UI/GlobalStyles";
-import {GetSelectedUser} from "Store/main/database";
+import {ES} from "Source/Utils/UI/GlobalStyles";
+import {GetSelectedUser} from "Source/Store/main/database";
 import {ToNumber, E} from "js-vextensions";
-import {GetUser, GetUsers} from "Store/firebase/users";
 import {UserProfileUI} from "./Users/UserProfile";
+import {GetUsers, GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {User} from "Subrepos/Server/Source/@Shared/Store/firebase/users/@User";
 
 export const columnWidths = [0.35, 0.15, 0.1, 0.15, 0.25];
 

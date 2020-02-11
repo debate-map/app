@@ -1,23 +1,23 @@
 import {Pre, Row} from "react-vcomponents";
-import {BaseComponent, GetInnerComp, BaseComponentPlus} from "react-vextensions";
+import {BaseComponentPlus, GetInnerComp} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
+import {GetOpenMapID} from "Source/Store/main";
+import {GetMapView} from "Source/Store/main/maps/mapViews/$mapView";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {GetRatings} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings";
+import {GetNodeChildrenL2, GetNodeParentsL2, GetParentNodeL2} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {AsNodeL3, GetNodeDisplayText, GetRatingTypesForNode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {MapNodeL2} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
 import {Link} from "vwebapp-framework";
-import {GetOpenMapID} from "Store/main";
-import {GetMapView} from "Store/main/maps/mapViews/$mapView";
-import {Map} from "../../../../Store/firebase/maps/@Map";
-import {GetRatings} from "../../../../Store/firebase/nodeRatings";
-import {GetNodeChildrenL2, GetNodeParentsL2, GetParentNodeL2} from "../../../../Store/firebase/nodes";
-import {AsNodeL3, GetNodeDisplayText, GetRatingTypesForNode} from "../../../../Store/firebase/nodes/$node";
-import {MapNodeL2} from "../../../../Store/firebase/nodes/@MapNode";
 import {DefinitionsPanel} from "./NodeUI/Panels/DefinitionsPanel";
 import {DetailsPanel} from "./NodeUI/Panels/DetailsPanel";
 import {DiscussionPanel} from "./NodeUI/Panels/DiscussionPanel";
 import {OthersPanel} from "./NodeUI/Panels/OthersPanel";
+import {PhrasingsPanel} from "./NodeUI/Panels/PhrasingsPanel";
 import {RatingsPanel} from "./NodeUI/Panels/RatingsPanel";
 import {SocialPanel} from "./NodeUI/Panels/SocialPanel";
 import {TagsPanel} from "./NodeUI/Panels/TagsPanel";
 import {NodeUI_Inner} from "./NodeUI_Inner";
-import {PhrasingsPanel} from "./NodeUI/Panels/PhrasingsPanel";
 
 type Props = {map: Map, node: MapNodeL2};
 export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {

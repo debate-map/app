@@ -1,7 +1,7 @@
 import chroma from "chroma-js";
 import {Clone, FromJSON, Vector2i} from "js-vextensions";
 import keycode from "keycode";
-import {hasHotReloaded} from "Main";
+import {hasHotReloaded} from "Source/Main";
 import {observable, runInAction} from "mobx";
 import {AsyncTrunk} from "mobx-sync";
 import React from "react";
@@ -13,18 +13,8 @@ import {Button, ColorPickerBox, Column} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {VMenuLayer} from "react-vmenu";
 import {MessageBoxLayer, ShowMessageBox} from "react-vmessagebox";
-import {CreateLinkCommand} from "Server/Commands/LinkNode_HighLevel";
-import {UpdateTimelineStep} from "Server/Commands/UpdateTimelineStep";
-import {UpdateTimelineStepOrder} from "Server/Commands/UpdateTimelineStepOrder";
-import {store} from "Store";
-import {GetNode, GetNodeID, GetParentNode, GetParentPath} from "Store/firebase/nodes";
-import {GetNodeDisplayText, GetNodeL3, IsPremiseOfSinglePremiseArgument} from "Store/firebase/nodes/$node";
-import {Polarity} from "Store/firebase/nodes/@MapNode";
-import {GetTimelineStep} from "Store/firebase/timelineSteps";
-import {NodeReveal} from "Store/firebase/timelineSteps/@TimelineStep";
-import {Me, MeID} from "Store/firebase/users";
-import {GetPathNodeIDs} from "Store/main/maps/mapViews/$mapView";
-import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures";
+import {GetPathNodeIDs} from "Source/Store/main/maps/mapViews/$mapView";
+import {DraggableInfo, DroppableInfo} from "Source/Utils/UI/DNDStructures";
 import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer} from "vwebapp-framework";
 import "../../Source/Utils/Styles/Main.scss"; // keep absolute-ish, since scss file not copied to Source_JS folder
 import {NavBar} from "../UI/@Shared/NavBar";
@@ -42,7 +32,17 @@ import {ForumUI} from "./Forum";
 import {PrivateUI} from "./Private";
 import {PublicUI} from "./Public";
 import {SocialUI} from "./Social";
-import {GetUserBackground} from "Store/firebase/users/$user";
+import {GetNodeL3, GetNodeDisplayText, IsPremiseOfSinglePremiseArgument} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {Polarity} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {CreateLinkCommand} from "Subrepos/Server/Source/@Shared/Commands/LinkNode_HighLevel";
+import {UpdateTimelineStepOrder} from "Subrepos/Server/Source/@Shared/Commands/UpdateTimelineStepOrder";
+import {GetNode, GetNodeID, GetParentNode, GetParentPath} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {GetTimelineStep} from "Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps";
+import {NodeReveal} from "Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps/@TimelineStep";
+import {UpdateTimelineStep} from "Subrepos/Server/Source/@Shared/Commands/UpdateTimelineStep";
+import {GetUserBackground} from "Source/Store/firebase_ext/users/$user";
+import {MeID, Me} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {store} from "Source/Store";
 
 ColorPickerBox.Init(ReactColor, chroma);
 

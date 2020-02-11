@@ -1,21 +1,21 @@
 import {Button, Column, Row} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {GetUpdates} from "vwebapp-framework";
-import {store} from "Store";
+import {store} from "Source/Store";
 import {runInAction} from "mobx";
 import {E, ToJSON, Clone} from "js-vextensions";
 import {GetAsync} from "mobx-firelink";
 import _ from "lodash";
-import {PermissionInfoType} from "Store/firebase/nodes/@MapNodeRevision";
-import {CanEditNode, IsUserCreatorOrMod} from "Store/firebase/users/$user";
-import {AddNodeRevision} from "../../../../../../Server/Commands/AddNodeRevision";
-import {UpdateLink} from "../../../../../../Server/Commands/UpdateLink";
-import {Map} from "../../../../../../Store/firebase/maps/@Map";
-import {GetParentNodeID, GetParentNodeL3, IsNodeSubnode} from "../../../../../../Store/firebase/nodes";
-import {GetLinkUnderParent, IsPremiseOfSinglePremiseArgument} from "../../../../../../Store/firebase/nodes/$node";
-import {MapNodeL3} from "../../../../../../Store/firebase/nodes/@MapNode";
-import {GetUser, MeID} from "../../../../../../Store/firebase/users";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
+import {MapNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {GetParentNodeL3, IsNodeSubnode, GetParentNodeID} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {GetLinkUnderParent, IsPremiseOfSinglePremiseArgument} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {GetUser, MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {CanEditNode, IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {PermissionInfoType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
+import {UpdateLink} from "Subrepos/Server/Source/@Shared/Commands/UpdateLink";
+import {AddNodeRevision} from "Subrepos/Server/Source/@Shared/Commands/AddNodeRevision";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 
 export class DetailsPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {dataError: null as string}) {
 	detailsUI: NodeDetailsUI;

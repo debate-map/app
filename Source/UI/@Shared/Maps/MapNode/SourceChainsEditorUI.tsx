@@ -1,14 +1,11 @@
-import {SourceType, SourceChain, Source, Source_linkURLPattern, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText} from "Store/firebase/nodeRevisions/@SourceChain";
 import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
 import {Button, Column, Row, TextInput, Select, Text} from "react-vcomponents";
-
-
 import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range} from "js-vextensions";
-import {Validate} from "vwebapp-framework";
-import {ES} from "Utils/UI/GlobalStyles";
-import {Image_urlPattern} from "Store/firebase/images/@Image";
+import {ES} from "Source/Utils/UI/GlobalStyles";
 import {Fragment} from "react";
 import {ShowMessageBox} from "react-vmessagebox";
+import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@SourceChain";
+import {Validate} from "mobx-firelink";
 
 export class SourceChainsEditorUI extends BaseComponentPlus(
 	{enabled: true} as {baseData: SourceChain[], enabled?: boolean, style?, onChange?: (newData: SourceChain[])=>void},

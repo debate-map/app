@@ -2,17 +2,17 @@ import {E} from "js-vextensions";
 import {runInAction} from "mobx";
 import {Button, Row} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
-import {store} from "Store";
-import {MeID} from "Store/firebase/users";
-import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {GADDemo} from "UI/@GAD/GAD";
+import {store} from "Source/Store";
+import {GetTimelinePanelOpen, GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
+import {GADDemo} from "Source/UI/@GAD/GAD";
 import {HSLA, Observer} from "vwebapp-framework";
-import {IsUserCreatorOrMod} from "Store/firebase/users/$user";
-import {IsUserMap} from "../../../../Store/firebase/maps/$map";
-import {Map, MapType} from "../../../../Store/firebase/maps/@Map";
-import {colors} from "../../../../Utils/UI/GlobalStyles";
 import {DetailsDropDown} from "./ActionBar_Left/DetailsDropDown";
 import {PeopleDropDown} from "./ActionBar_Left/PeopleDropDown";
+import {Map, MapType} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {IsUserMap} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/$map";
+import {colors} from "../../../../Utils/UI/GlobalStyles";
 
 @Observer
 export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number}, {}) {

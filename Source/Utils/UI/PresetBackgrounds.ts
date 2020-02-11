@@ -1,3 +1,5 @@
+import {BackgroundConfig} from "Source/Store/firebase_ext/users/$user";
+
 // To test out backgrounds, run this in console: S = a=>document.querySelector(".background").style.backgroundImage = `url(${a.split("?")[0]})`;
 // Then run: S("IMAGE_URL")
 

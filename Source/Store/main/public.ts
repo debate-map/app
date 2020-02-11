@@ -1,6 +1,6 @@
 import {O} from "vwebapp-framework";
-import {GetMap} from "Store/firebase/maps";
 import {StoreAccessor} from "mobx-firelink";
+import {GetMap} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/maps";
 
 export class PublicPageState {
 	@O listType = "featured" as "featured" | "all";

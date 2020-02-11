@@ -3,13 +3,10 @@ import Moment from "moment";
 import {Column, Div, Pre, Row, RowLR, Select, Spinner, TextInput} from "react-vcomponents";
 import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
-import {User} from "Store/firebase/users/@User";
-import {ES} from "Utils/UI/GlobalStyles";
-import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
+import {ES} from "Source/Utils/UI/GlobalStyles";
+import {IDAndCreationInfoUI} from "Source/UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {AddImage} from "Server/Commands/AddImage";
-import {GetNiceNameForImageType, Image, ImageType, Image_namePattern, Image_urlPattern} from "../../../Store/firebase/images/@Image";
-import {GetUser, MeID} from "../../../Store/firebase/users";
+import {Image, Image_namePattern, ImageType, GetNiceNameForImageType, Image_urlPattern} from "Subrepos/Server/Source/@Shared/Store/firebase/images/@Image";
 import {SourceChainsEditorUI} from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
 
 export class ImageDetailsUI extends BaseComponentPlus(

@@ -1,32 +1,32 @@
-import {StandardCompProps} from "Utils/UI/General";
+import {StandardCompProps} from "Source/Utils/UI/General";
 import {DeepGet, E, SleepAsync, Timer, Vector2i, FindDOMAll, Assert, FromJSON, ToJSON, VRect, GetTreeNodesInObjTree} from "js-vextensions";
 import {Column, Row} from "react-vcomponents";
 import {BaseComponentWithConnector, FindReact, GetDOM, BaseComponentPlus, BaseComponent} from "react-vextensions";
 import {VMenuStub, VMenuItem} from "react-vmenu";
 
 import {ScrollView} from "react-vscrollview";
-import {TimelinePlayerUI} from "UI/@Shared/Timelines/TimelinePlayerUI";
+import {TimelinePlayerUI} from "Source/UI/@Shared/Timelines/TimelinePlayerUI";
 import {GetDistanceBetweenRectAndPoint, inFirefox, GetScreenRect, StoreAction, Observer} from "vwebapp-framework";
-import {GADDemo} from "UI/@GAD/GAD";
-import {ActionBar_Left_GAD} from "UI/@GAD/ActionBar_Left_GAD";
-import {ActionBar_Right_GAD} from "UI/@GAD/ActionBar_Right_GAD";
-import {GetParentNodeL3, GetParentPath} from "Store/firebase/nodes";
-import {store} from "Store";
-import {GetNodeView, GetMapView, GetSelectedNodePath, GetViewOffset, GetFocusedNodePath, GetNodeViewsAlongPath, ACTMapNodeSelect} from "Store/main/maps/mapViews/$mapView";
-import {GetTimelinePanelOpen, GetPlayingTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {GetOpenMapID} from "Store/main";
-import {TimelinePanel} from "UI/@Shared/Timelines/TimelinePanel";
-import {TimelineIntroBox} from "UI/@Shared/Timelines/TimelineIntroBox";
+import {GADDemo} from "Source/UI/@GAD/GAD";
+import {ActionBar_Left_GAD} from "Source/UI/@GAD/ActionBar_Left_GAD";
+import {ActionBar_Right_GAD} from "Source/UI/@GAD/ActionBar_Right_GAD";
+import {store} from "Source/Store";
+import {GetNodeView, GetMapView, GetSelectedNodePath, GetViewOffset, GetFocusedNodePath, GetNodeViewsAlongPath, ACTMapNodeSelect} from "Source/Store/main/maps/mapViews/$mapView";
+import {GetTimelinePanelOpen, GetPlayingTimeline, GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
+import {GetOpenMapID} from "Source/Store/main";
+import {TimelinePanel} from "Source/UI/@Shared/Timelines/TimelinePanel";
+import {TimelineIntroBox} from "Source/UI/@Shared/Timelines/TimelineIntroBox";
 import {styles, ES} from "../../../Utils/UI/GlobalStyles";
-import {Map} from "../../../Store/firebase/maps/@Map";
-import {GetNodeL3, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument} from "../../../Store/firebase/nodes/$node";
-import {MapNodeL3} from "../../../Store/firebase/nodes/@MapNode";
 import {NodeUI} from "./MapNode/NodeUI";
 import {NodeUI_ForBots} from "./MapNode/NodeUI_ForBots";
 import {NodeUI_Inner} from "./MapNode/NodeUI_Inner";
 import {ActionBar_Left} from "./MapUI/ActionBar_Left";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right";
 import {ExpandableBox} from "./MapNode/ExpandableBox";
+import {MapNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {IsNodeL2, IsNodeL3, GetNodeL3, IsPremiseOfSinglePremiseArgument} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {GetParentPath, GetParentNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 
 
 export function GetNodeBoxForPath(path: string) {

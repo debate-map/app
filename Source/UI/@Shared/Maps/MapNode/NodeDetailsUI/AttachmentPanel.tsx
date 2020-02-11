@@ -1,15 +1,13 @@
 import {GetEntries} from "js-vextensions";
 import {Row, Select, Text} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
-import {AttachmentType, ResetNodeRevisionAttachment, GetAttachmentType} from "Store/firebase/nodeRevisions/@AttachmentType";
-import {GetOpenMapID} from "Store/main";
-import {MapNodeRevision_Defaultable, PermissionInfoType} from "../../../../../Store/firebase/nodes/@MapNodeRevision";
-import {MapNodeType} from "../../../../../Store/firebase/nodes/@MapNodeType";
 import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI";
 import {ImageAttachmentEditorUI} from "./AttachmentPanel/ImageAttachmentEditorUI";
 import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI";
+import {GetAttachmentType, AttachmentType, ResetNodeRevisionAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@AttachmentType";
+import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
 
 export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {}, {}> {
 	render() {

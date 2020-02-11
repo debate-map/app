@@ -1,10 +1,10 @@
 import {Button, Column, Row} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {Link, Observer, ParseSegmentsForPatterns} from "vwebapp-framework";
-import {GetNodeDisplayText} from "../../../../../../Store/firebase/nodes/$node";
-import {MapNodeL2} from "../../../../../../Store/firebase/nodes/@MapNode";
-import {GetTerm, GetTermsAttached} from "../../../../../../Store/firebase/terms";
-import {Term} from "../../../../../../Store/firebase/terms/@Term";
+import {MapNodeL2} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {GetTermsAttached, GetTerm} from "Subrepos/Server/Source/@Shared/Store/firebase/terms";
+import {Term} from "Subrepos/Server/Source/@Shared/Store/firebase/terms/@Term";
 import {GetSegmentsForTerms} from "../../NodeUI_Inner/TitlePanel";
 
 const termsPlaceholder = [];

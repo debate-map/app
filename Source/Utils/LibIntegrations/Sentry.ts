@@ -1,5 +1,5 @@
 import Raven from "raven-js";
-import {version} from "Main";
+import {version} from "Source/Main";
 
 export function InitSentry() {
 	if (PROD && window.location.hostname != "localhost") { // if localhost, never enable Raven (even if env-override is set to production)
