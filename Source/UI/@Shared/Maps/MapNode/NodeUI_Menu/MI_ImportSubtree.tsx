@@ -15,10 +15,14 @@ import {HasModPermissions, HasAdminPermissions} from "Subrepos/Server/Source/@Sh
 import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
 import {GetNodeID, GetNodesByTitle} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
 import {AddChildNode} from "Subrepos/Server/Source/@Shared/Commands/AddChildNode";
+import {ImportSubtree} from "Subrepos/Server/Source/@Shared/Commands/ImportSubtree";
 
 @Observer
 export class MI_ImportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {
 	render() {
+		// temp; till export-subtree and import-subtree systems get rewritten
+		if (true) return null;
+		
 		const sharedProps = this.props as MI_SharedProps;
 		if (!HasModPermissions(MeID())) return null;
 		return (
