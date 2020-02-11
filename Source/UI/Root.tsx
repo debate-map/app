@@ -16,7 +16,7 @@ import {MessageBoxLayer, ShowMessageBox} from "react-vmessagebox";
 import {GetPathNodeIDs} from "Source/Store/main/maps/mapViews/$mapView";
 import {DraggableInfo, DroppableInfo} from "Source/Utils/UI/DNDStructures";
 import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer} from "vwebapp-framework";
-import "../../Source/Utils/Styles/Main.scss"; // keep absolute-ish, since scss file not copied to Source_JS folder
+import "Source/Utils/Styles/Main.scss"; // keep absolute-ish, since scss file not copied to Source_JS folder
 import {NavBar} from "../UI/@Shared/NavBar";
 import {GlobalUI} from "../UI/Global";
 import {HomeUI} from "../UI/Home";
@@ -83,6 +83,9 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 
 		await trunk.init();
 		Log("Loaded state:", Clone(store));
+
+		// start auto-runs, now that store+firelink are created (and store has initialized -- not necessary, but nice)
+		//require("../Utils/AutoRuns");
 
 		if (!hasHotReloaded) {
 			LoadURL(startURL);

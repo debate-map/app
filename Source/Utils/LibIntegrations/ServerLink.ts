@@ -8,9 +8,9 @@ import {fire, InitFirelink} from "../../../Subrepos/Server/Source/@Shared/MobXFi
 store.firelink = fire;
 
 const linkRootPath = `versions/v${dbVersion}-${DB_SHORT}`;
-OnPopulated(()=>{
+export function InitServerLink() {
 	InitFirelink(linkRootPath, store);
-});
+}
 
 // additional mobx-firelink initialization
 // ==========

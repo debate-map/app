@@ -1,6 +1,6 @@
 import "mobx"; // import mobx before we declare the module below, otherwise vscode auto-importer gets confused at path to mobx
 import {Firelink, GetDoc, SetDefaultFireOptions, StoreAccessorOptions} from "mobx-firelink";
-import {RootStoreShape} from "mobx-firelink/Dist/UserTypes"
+import {RootStoreShape} from "mobx-firelink/Dist/UserTypes";
 import {FirebaseDBShape} from "./Store/firebase";
 
 declare module "mobx-firelink/Dist/UserTypes" {
@@ -23,7 +23,7 @@ export function InitFirelink(rootPathInDB: string, rootStore: any) {
 // StoreAccessorOptions.default.cache_keepAlive = true;
 
 // start auto-runs after store+firelink are created
-require("Utils/AutoRuns");
+//require("./Utils/AutoRuns");
 
 // mobx debug helper
 // ==========

@@ -14,7 +14,7 @@ import {GetUserPermissionGroups} from "Subrepos/Server/Source/@Shared/Store/fire
 import {GetAuth} from "Subrepos/Server/Source/@Shared/Store/firebase";
 import {ValidateDBData} from "Subrepos/Server/Source/@Shared/Utils/Store/DBDataValidator";
 
-const context = (require as any).context("../../../Resources/SVGs/", true, /\.svg$/);
+const context = (require as any).context("../../../../Resources/SVGs/", true, /\.svg$/);
 const iconInfo = {};
 context.keys().forEach(filename=>{
 	iconInfo[filename] = context(filename).default;

@@ -6,6 +6,7 @@ import {InitFeedback} from "./FirebaseFeedback";
 import {InitReactJS} from "./ReactJS";
 import {InitSentry} from "./Sentry";
 import {InitReactVComponents} from "./ReactVComponents";
+import {InitServerLink} from "./ServerLink";
 
 // helpers for exposing things (making them easier to access in console/dev-tools)
 function ExposeGlobals() {
@@ -26,11 +27,16 @@ function ExposeModuleExports_Final() {
 export function InitLibs() {
 	InitFirebase();
 	InitVWAF();
+	InitServerLink(); // init this early, so we can use mobx-firelink's DBPath() for the later modules (eg. firebase-feedback)
 	InitFeedback();
 	// InitForum();
 	InitSentry();
 	InitReactJS();
 	InitReactVComponents();
+
+	// start auto-runs, now that store+firelink are initialized (store has not yet loaded data from disk, in RootUIWrapper.ComponentWillMount, but that's fine)
+	require("../AutoRuns");
+
 	ExposeGlobals();
 	ExposeModuleExports_Final();
 }
