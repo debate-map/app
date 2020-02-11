@@ -6,7 +6,7 @@
 [subrepo]
 	remote = https://github.com/debate-map/server.git
 	branch = master
-	commit = 91cd9a7f8ca11a6d723f866faea1b51f7c109c49
-	parent = db714c09c8e2f0ececabbb72d3bab3943ed61c60
+	commit = 47b4dab521bea993b2f97b15ad005e9f1a0c8376
+	parent = 8b77a2032d4597b386bf4376bd2a3fd7d8d79297
 	method = merge
 	cmdver = 0.4.1
