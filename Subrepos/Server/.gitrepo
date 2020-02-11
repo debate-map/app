@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/debate-map/server.git
+	branch = master
+	commit = 8c1fb63240488c63880b62a92099c3c43e112d04
+	parent = db714c09c8e2f0ececabbb72d3bab3943ed61c60
+	method = merge
+	cmdver = 0.4.1

@@ -1,0 +1,36 @@
+{
+  "name": "@debate-map/server-link",
+  "description": "Tree-based mapping of beliefs, arguments, and evidence. (server link, used by clients)",
+  "version": "1.0.0",
+  "main": "Dist/Link/index.js",
+  "type": "module",
+  "typings": "Dist/Link/index.d.ts",
+  "license": "MIT",
+  "author": {
+    "name": "Venryx",
+    "email": "venryx@gmail.com",
+    "url": "https://venryx.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/debate-map/server.git"
+  },
+  "scripts": {
+    "dev": "tsc --watch",
+    "dist": "tsc"
+  },
+  "peerDependencies": {
+    "firebase": "^7.5.0",
+    "mobx": "^5.0.0"
+  },
+  "devDependencies": {
+    "firebase": "^7.6.1",
+    "mobx": "^5.15.1",
+    "typescript": "^3.7.4"
+  },
+  "dependencies": {
+    "chroma-js": "^2.1.0",
+    "js-vextensions": "^1.0.28",
+    "mobx-firelink": "^1.0.43"
+  }
+}
