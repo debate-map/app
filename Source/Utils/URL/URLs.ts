@@ -329,8 +329,10 @@ export const GetNewURL = StoreAccessor(s=>(includeMapViewStr = true)=>{
 	}
 
 	// a default-child is only used (ie. removed from url) if there are no path-nodes after it
-	if (subpage && subpage == rootPageDefaultChilds[page] && newURL.pathNodes.length == 2) newURL.pathNodes.length = 1;
-	if (page == "home" && newURL.pathNodes.length == 1) newURL.pathNodes.length = 0;
+	/*if (subpage && subpage == rootPageDefaultChilds[page] && newURL.pathNodes.length == 2) newURL.pathNodes.length = 1;
+	if (page == "home" && newURL.pathNodes.length == 1) newURL.pathNodes.length = 0;*/
+	// nowadays, we only remove the page and subpage for the /home/home path (it's not worth making urls more brittle just for slightly shorter urls) 
+	if (page == "home" && subpage == "home") newURL.pathNodes.length = 0;
 
 	Assert(!newURL.pathNodes.Any(a=>a == "/"), `A path-node cannot be just "/". @url(${newURL})`);
 
