@@ -1,68 +1,49 @@
-import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE} from "js-vextensions";
-import {GetDoc, StoreAccessor, GetDocs} from "mobx-firelink";
+import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading} from "js-vextensions";
+import {GetDoc, StoreAccessor, GetDocs, WhereFilter} from "mobx-firelink";
 import {observable} from "mobx";
 import {Validate} from "mobx-firelink";
 import {RatingType, ratingTypes} from "./nodeRatings/@RatingType";
-import {Rating, RatingsSet} from "./nodeRatings/@RatingsRoot";
+import {Rating} from "./nodeRatings/@Rating";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore";
 import {GetNodeChildrenL2, HolderType} from "./nodes";
 import {GetMainRatingType, GetNodeL2} from "./nodes/$node";
 import {ClaimForm, MapNodeL3} from "./nodes/@MapNode";
 import {MapNodeType} from "./nodes/@MapNodeType";
 import {MeID} from "./users";
-import {GetArgumentImpactPseudoRatingSet} from "../../Utils/Store/RatingProcessor";
+import {GetArgumentImpactPseudoRatings} from "../../Utils/Store/RatingProcessor";
 
-/*export const GetNodeRatingsRoot = StoreAccessor(s=>(nodeID: string)=>{
-	// RequestPaths(GetPaths_NodeRatingsRoot(nodeID));
-	// return GetDoc({}, (a) => a.nodeRatings.get(nodeID));
-	// maybe-temp workaround for GetData() not retrieving list of subcollections for doc-path
-	const result = {} as RatingsRoot;
-	for (const ratingType of ratingTypes) {
-		const data = GetDocs({}, a=>a.nodeRatings.get(nodeID).get(ratingType));
-		if (data) {
-			result[ratingType] = data;
-		}
-	}
-	return result;
-});*/
-
-// path is needed if you want
-export const GetRatingSet = StoreAccessor(s=>(nodeID: string, ratingType: RatingType): RatingsSet=>{
+export const GetRatings = StoreAccessor(s=>(nodeID: string, ratingType: RatingType, userID?: string): Rating[]=>{
 	if (ratingType == "impact") {
 		const node = GetNodeL2(nodeID);
 		if (node == null) return null;
 		const nodeChildren = GetNodeChildrenL2(nodeID);
-		if (CE(nodeChildren).Any(a=>a == null)) return emptyObj;
+		if (CE(nodeChildren).Any(a=>a == null)) return emptyArray_forLoading;
 		//if (nodeChildren.Any(a=>a == null)) return observable.map(emptyObj);
 		const premises = nodeChildren.filter(a=>a == null || a.type == MapNodeType.Claim);
-		return GetArgumentImpactPseudoRatingSet(node, premises);
+		return GetArgumentImpactPseudoRatings(node, premises);
 	}
-	/*const ratingsRoot = GetNodeRatingsRoot(nodeID);
-	if (ratingsRoot == null) return null;
-	return ratingsRoot[ratingType];*/
-	const ratings = GetDocs({}, a=>a.nodeRatings.get(nodeID).get(ratingType) as any) as Rating[];
-	const ratingsAsMap = CE(ratings).ToMap(a=>a._key, a=>a);
-	Assert(CE(ratingsAsMap).VKeys().every(a=>a.length > 10));
-	return ratingsAsMap;
-	//return observable.map(ratingsAsMap);
-});
-// export function GetRatings(nodeID: string, ratingType: RatingType, thesisForm?: ThesisForm): Rating[] {
-export const GetRatings = StoreAccessor(s=>(nodeID: string, ratingType: RatingType, filter?: RatingFilter): Rating[]=>{
-	const ratingSet = GetRatingSet(nodeID, ratingType);
+	
+	/*const ratings = GetRatings(nodeID, ratingType);
 	if (ratingSet == null) return [];
 	return FilterRatings(CE(ratingSet).VValues(), filter);
-	//return FilterRatings(Array.from(ratingSet.values()), filter);
+	//return FilterRatings(Array.from(ratingSet.values()), filter);*/
+
+	return GetDocs({
+		filters: [
+			new WhereFilter("node", "==", nodeID),
+			new WhereFilter("type", "==", ratingType),
+			userID && new WhereFilter("user", "==", userID),
+		].filter(a=>a),
+	}, a=>a.nodeRatings);
 });
 export const GetRating = StoreAccessor(s=>(nodeID: string, ratingType: RatingType, userID: string)=>{
-	const ratingSet = GetRatingSet(nodeID, ratingType);
-	if (ratingSet == null) return null;
-	return ratingSet[userID];
+	return GetRatings(nodeID, ratingType, userID)[0];
 });
 export const GetRatingValue = StoreAccessor(s=>(nodeID: string, ratingType: RatingType, userID: string, resultIfNoData = null): number=>{
 	const rating = GetRating(nodeID, ratingType, userID);
 	return rating ? rating.value : resultIfNoData;
 });
-export const GetRatingAverage = StoreAccessor(s=>(nodeID: string, ratingType: RatingType, filter?: RatingFilter): number=>{
+export const GetRatingAverage = StoreAccessor(s=>(nodeID: string, ratingType: RatingType, userID?: string): number=>{
 	// return CachedTransform_WithStore('GetRatingAverage', [nodeID, ratingType, resultIfNoData].concat((filter || {}).VValues()), {}, () => {
 	// if voting disabled, always show full bar
 	/* let node = GetNodeL2(nodeID);
@@ -74,14 +55,14 @@ export const GetRatingAverage = StoreAccessor(s=>(nodeID: string, ratingType: Ra
 	const node = GetNodeL2(nodeID);
 	if (node && node.current.votingDisabled) return 100;
 
-	const ratings = GetRatings(nodeID, ratingType, filter);
+	const ratings = GetRatings(nodeID, ratingType, userID);
 	if (ratings.length == 0) return null;
 	const result = CE(CE(ratings.map(a=>a.value)).Average()).RoundTo(1);
 	Assert(result >= 0 && result <= 100, `Rating-average (${result}) not in range. Invalid ratings: ${ToJSON(ratings.map(a=>a.value).filter(a=>!IsNumber(a)))}`);
 	return result;
 });
-export const GetRatingAverage_AtPath = StoreAccessor(s=>(node: MapNodeL3, ratingType: RatingType, filter?: RatingFilter, resultIfNoData = null): number=>{
-	let result = GetRatingAverage(node._key, ratingType, filter);
+export const GetRatingAverage_AtPath = StoreAccessor(s=>(node: MapNodeL3, ratingType: RatingType, userID?: string, resultIfNoData = null): number=>{
+	let result = GetRatingAverage(node._key, ratingType, userID);
 	if (result == null) return resultIfNoData;
 	if (ShouldRatingTypeBeReversed(node, ratingType)) {
 		result = 100 - result;
@@ -96,10 +77,10 @@ export enum WeightingType {
 
 const rsCompatibleNodeTypes = [MapNodeType.Argument, MapNodeType.Claim];
 // export const GetFillPercent_AtPath = StoreAccessor('GetFillPercent_AtPath', (node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null) => {
-export const GetFillPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, weighting = WeightingType.Votes, filter?: RatingFilter, resultIfNoData = null)=>{
+export const GetFillPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, weighting = WeightingType.Votes, userID?: string, resultIfNoData = null)=>{
 	ratingType = ratingType || {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
 	if (weighting == WeightingType.Votes || !rsCompatibleNodeTypes?.includes(node.type)) {
-		const result = GetRatingAverage_AtPath(node, ratingType, filter, resultIfNoData);
+		const result = GetRatingAverage_AtPath(node, ratingType, userID, resultIfNoData);
 		Assert(result >= 0 && result <= 100, `Fill-percent (${result}) not in range.`);
 		return result;
 	}
@@ -126,7 +107,7 @@ export const GetFillPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: st
 export const GetMarkerPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, weighting = WeightingType.Votes)=>{
 	ratingType = ratingType || {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
 	if (weighting == WeightingType.Votes || !rsCompatibleNodeTypes.includes(node.type)) {
-		return GetRatingAverage_AtPath(node, ratingType, new RatingFilter({includeUser: MeID()}));
+		return GetRatingAverage_AtPath(node, ratingType, MeID());
 	}
 });
 
@@ -169,7 +150,7 @@ export function TransformRatingForContext(ratingValue: number, reverseRating: bo
 	return ratingValue;
 } */
 
-export class RatingFilter {
+/*export class RatingFilter {
 	constructor(initialData: Partial<RatingFilter>) {
 		CE(this).VSet(initialData);
 	}
@@ -178,7 +159,7 @@ export class RatingFilter {
 }
 export function FilterRatings(ratings: Rating[], filter: RatingFilter) {
 	return ratings.filter(a=>filter == null || filter.includeUser == a._key);
-}
+}*/
 
 export function TransformRatingForContext(ratingValue: number, reverseRating: boolean) {
 	if (ratingValue == null) return null;

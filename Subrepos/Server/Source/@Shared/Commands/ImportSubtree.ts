@@ -1,4 +1,4 @@
-import {AssertV, Command, MergeDBUpdates} from "mobx-firelink";
+import {AssertV, Command, MergeDBUpdates, GenerateUUID} from "mobx-firelink";
 import {AssertValidate, Validate} from "mobx-firelink";
 import {FromJSON, GetTreeNodesInObjTree, Clone, CE, DEL} from "js-vextensions";
 import {AddChildNode} from "./AddChildNode";
@@ -10,7 +10,7 @@ import {AsNodeL1} from "../Store/firebase/nodes/$node";
 import {MapNodeRevision} from "../Store/firebase/nodes/@MapNodeRevision";
 import {Source} from "../Store/firebase/nodeRevisions/@SourceChain";
 import {RatingType} from "../Store/firebase/nodeRatings/@RatingType";
-import {Rating} from "../Store/firebase/nodeRatings/@RatingsRoot";
+import {Rating} from "../Store/firebase/nodeRatings/@Rating";
 import {WithoutHelpers} from "./ImportSubtree_Old";
 
 // todo: replace with new structure, when actually used again
@@ -104,20 +104,20 @@ export class ImportSubtree extends Command<{
 					if (importRatings_userIDs != null && !importRatings_userIDs.includes(userID)) continue;
 					let newNodeID = this.oldID_newID[oldID];
 					//let addRatingCommand = new SetNodeRating({nodeID: newNodeID, ratingType: ratingType as RatingType, value: rating.value, userID}).MarkAsSubcommand(this);
-					this.nodeRatingsToAdd.push({ratingType: ratingType as RatingType, userID, nodeID: newNodeID, updated: rating.updated, value: rating.value});
+					this.nodeRatingsToAdd.push({node: newNodeID, type: ratingType as RatingType, user: userID, updated: rating.updated, value: rating.value});
 				}
 			}
 		}
 	}
-	nodeRatingsToAdd = [] as (Rating & {nodeID: string, ratingType: RatingType, userID: string})[];
+	nodeRatingsToAdd = [] as Rating[];
 
 	GetDBUpdates() {
 		let updates = {};
 		for (const sub of this.subs) {
 			updates = MergeDBUpdates(updates, sub.GetDBUpdates());
 		}
-		for (let ratingEnhanced of this.nodeRatingsToAdd) {
-			updates[`nodeRatings/${ratingEnhanced.nodeID}/${ratingEnhanced.ratingType}/${ratingEnhanced.userID}`] = CE(ratingEnhanced).Excluding("nodeID", "ratingType", "userID");
+		for (let rating of this.nodeRatingsToAdd) {
+			updates[`nodeRatings/${GenerateUUID()}`] = rating;
 		}
 		return updates;
 	}

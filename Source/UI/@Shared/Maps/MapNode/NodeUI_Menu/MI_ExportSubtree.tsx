@@ -2,7 +2,7 @@ import {BaseComponentPlus} from "react-vextensions";
 import {Observer} from "vwebapp-framework";
 import {MI_SharedProps} from "../NodeUI_Menu";
 import {MapNodeL3} from "../../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {Rating} from "../../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings/@RatingsRoot";
+import {Rating} from "../../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings/@Rating";
 
 @Observer
 export class MI_ExportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {

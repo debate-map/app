@@ -9,7 +9,7 @@ import {SlicePath} from "mobx-firelink";
 import {Observer} from "vwebapp-framework";
 import {MapNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
 import {RatingType, GetRatingTypeInfo} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings/@RatingType";
-import {Rating} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings/@RatingsRoot";
+import {Rating} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings/@Rating";
 import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
 import {GetNodeForm, GetNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
 import {GetNodeChildren} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
