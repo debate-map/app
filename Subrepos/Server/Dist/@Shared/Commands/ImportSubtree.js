@@ -1,4 +1,4 @@
-import { AssertV, Command, MergeDBUpdates } from "mobx-firelink";
+import { AssertV, Command, MergeDBUpdates, GenerateUUID } from "mobx-firelink";
 import { AssertValidate, Validate } from "mobx-firelink";
 import { FromJSON, Clone, CE, DEL } from "js-vextensions";
 import { AddChildNode } from "./AddChildNode";
@@ -90,7 +90,7 @@ export class ImportSubtree extends Command {
                         continue;
                     let newNodeID = this.oldID_newID[oldID];
                     //let addRatingCommand = new SetNodeRating({nodeID: newNodeID, ratingType: ratingType as RatingType, value: rating.value, userID}).MarkAsSubcommand(this);
-                    this.nodeRatingsToAdd.push({ ratingType: ratingType, userID, nodeID: newNodeID, updated: rating.updated, value: rating.value });
+                    this.nodeRatingsToAdd.push({ node: newNodeID, type: ratingType, user: userID, updated: rating.updated, value: rating.value });
                 }
             }
         }
@@ -100,8 +100,8 @@ export class ImportSubtree extends Command {
         for (const sub of this.subs) {
             updates = MergeDBUpdates(updates, sub.GetDBUpdates());
         }
-        for (let ratingEnhanced of this.nodeRatingsToAdd) {
-            updates[`nodeRatings/${ratingEnhanced.nodeID}/${ratingEnhanced.ratingType}/${ratingEnhanced.userID}`] = CE(ratingEnhanced).Excluding("nodeID", "ratingType", "userID");
+        for (let rating of this.nodeRatingsToAdd) {
+            updates[`nodeRatings/${GenerateUUID()}`] = rating;
         }
         return updates;
     }

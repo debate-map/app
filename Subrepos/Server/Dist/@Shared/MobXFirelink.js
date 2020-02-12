@@ -12,7 +12,7 @@ export function InitFirelink(rootPathInDB, rootStore) {
 // modify some default options
 // StoreAccessorOptions.default.cache_keepAlive = true;
 // start auto-runs after store+firelink are created
-require("Utils/AutoRuns");
+//require("./Utils/AutoRuns");
 // mobx debug helper
 // ==========
 /* window['mobxDevtools_processChange'] = (change) => {

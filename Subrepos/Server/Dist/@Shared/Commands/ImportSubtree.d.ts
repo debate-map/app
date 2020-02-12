@@ -1,6 +1,5 @@
 import { Command } from "mobx-firelink";
-import { RatingType } from "../Store/firebase/nodeRatings/@RatingType";
-import { Rating } from "../Store/firebase/nodeRatings/@RatingsRoot";
+import { Rating } from "../Store/firebase/nodeRatings/@Rating";
 declare type SubtreeExportData_Old = any;
 export declare class ImportSubtree extends Command<{
     mapID?: string;
@@ -20,11 +19,7 @@ export declare class ImportSubtree extends Command<{
         [key: number]: string;
     };
     ProcessSubtree(subtreeData: SubtreeExportData_Old, parentID: string): void;
-    nodeRatingsToAdd: (Rating & {
-        nodeID: string;
-        ratingType: RatingType;
-        userID: string;
-    })[];
+    nodeRatingsToAdd: Rating[];
     GetDBUpdates(): {};
 }
 export {};
