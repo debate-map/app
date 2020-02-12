@@ -144,7 +144,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 					</Row>
 				</Column>
 				<ScrollView style={ES({flex: 1})} contentStyle={{paddingTop: 10}} onContextMenu={e=>{
-					if (e.nativeEvent["passThrough"]) return true;
+					if (e.nativeEvent["handled"]) return true;
 					e.preventDefault();
 				}}>
 					{results_nodeIDs == null && "Search in progress..."}

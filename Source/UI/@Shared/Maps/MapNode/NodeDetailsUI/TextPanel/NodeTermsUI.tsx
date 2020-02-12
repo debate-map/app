@@ -116,7 +116,7 @@ export class FoundTermUI extends BaseComponentPlus({} as {term: Term, index: num
 				}}*/
 			>
 				<Link text={`${term._key}\n(by ${creator?.displayName ?? "n/a"})`} style={{fontSize: 13, whiteSpace: "pre"}}
-					onContextMenu={e=>e.nativeEvent["passThrough"] = true}
+					onContextMenu={e=>e.nativeEvent["handled"] = true}
 					actionFunc={s=>{
 						s.main.page = "database";
 						s.main.database.subpage = "terms";

@@ -89,7 +89,7 @@ export class StepUI extends BaseComponentPlus(
 						</Column>}
 					</Column>}
 					{IsUserCreatorOrMod(MeID(), timeline) &&
-					<VMenuStub /* preOpen={(e) => e.passThrough != true} */>
+					<VMenuStub /*preOpen={e=>!e.handled}*/>
 						<VMenuItem text={editorOpen ? "Close editor" : "Edit"} style={styles.vMenuItem}
 							onClick={e=>{
 								if (e.button != 0) return;

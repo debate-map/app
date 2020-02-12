@@ -47,7 +47,7 @@ export class ImageAttachmentEditorUI extends BaseComponent<Props, {newData: Imag
 						<DropDownContent style={{left: 0, width: 600, zIndex: 1, borderRadius: "0 5px 5px 5px", padding: image ? 10 : 0}}><Column>
 							{image &&
 							<Row>
-								<Link style={{marginTop: 5, alignSelf: "flex-start"}} onContextMenu={e=>e.nativeEvent["passThrough"] = true} actionFunc={s=>{
+								<Link style={{marginTop: 5, alignSelf: "flex-start"}} onContextMenu={e=>e.nativeEvent["handled"] = true} actionFunc={s=>{
 									s.main.page = "database";
 									s.main.database.subpage = "images";
 									s.main.database.selectedImageID = image._key;
@@ -118,7 +118,7 @@ export class FoundImageUI extends BaseComponentPlus({} as {image: Image, index: 
 				)}
 			>
 				<Link text={`${image._key}\n(by ${creator?.displayName ?? "n/a"})`} style={{fontSize: 13, whiteSpace: "pre"}}
-					onContextMenu={e=>e.nativeEvent["passThrough"] = true}
+					onContextMenu={e=>e.nativeEvent["handled"] = true}
 					actionFunc={s=>{
 						s.main.page = "database";
 						s.main.database.subpage = "images";

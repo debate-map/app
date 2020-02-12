@@ -9,6 +9,17 @@ export function StandardCompProps() {
 	return ["dispatch", "_user", "_permissions", "_extraInfo"] as const;
 }
 
+export function MarkHandled(event: React.SyntheticEvent) {
+	event.preventDefault();
+	event.nativeEvent["handled"] = true;
+}
+export function IsHandled(event: React.SyntheticEvent | Event) {
+	if (event["nativeEvent"]) {
+		return !!event["nativeEvent"].handled;
+	}
+	return !!event["handled"];
+}
+
 export function IsMouseEnterReal(event: React.MouseEvent<MouseEvent>, dom: HTMLElement) {
 	const {fromElement, toElement} = event.nativeEvent as any;
 	if (fromElement == null || toElement == null) return true; // just assume true

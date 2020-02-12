@@ -17,6 +17,7 @@ import {ShouldRatingTypeBeReversed, TransformRatingForContext} from "Subrepos/Se
 import {GetMapNodeTypeDisplayName} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
 import {SetNodeRating} from "Subrepos/Server/Source/@Shared/Commands/SetNodeRating";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel";
+import {MarkHandled} from "Source/Utils/UI/General";
 
 /* let sampleData = [
 	{rating: 0, count: 0},
@@ -48,7 +49,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 		const {labels, values} = ratingTypeInfo;
 		function GetValueForLabel(label) { return values[labels.indexOf(label)]; }
 		function GetLabelForValue(value) { return labels[values.indexOf(value)]; }
-		const myRating = TransformRatingForContext((ratings.find(a=>a._key == userID) || {} as any).value, reverseRatings);
+		const myRating = TransformRatingForContext(ratings.find(a=>a.user == userID)?.value, reverseRatings);
 
 		const smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100]; // .concat(labels.Max(null, true) == 200 ? [200] : []);
 		const minLabel = labels.Min(null, true); const maxLabel = labels.Max(null, true); const
@@ -113,6 +114,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 				}}
 				onContextMenu={e=>{
 					if (myRating == null || ratingType === "impact") return;
+					MarkHandled(e);
 					const boxController = ShowMessageBox({
 						title: "Delete rating", cancelButton: true,
 						message: `Delete your "${ratingType}" rating for ${nodeTypeDisplayName}`,

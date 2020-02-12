@@ -87,7 +87,7 @@ export class TermDefinitionPanel extends BaseComponentPlus({showID: true} as {te
 				{/* <Row>Details:</Row>
 				<TermDetailsUI baseData={term} creating={false} enabled={/*creatorOrMod*#/ false} style={{padding: 10}}
 					onChange={data=>this.SetState({selectedTerm_newData: data})}/> */}
-				<Link style={{marginTop: 5, alignSelf: "flex-start"}} onContextMenu={e=>e.nativeEvent["passThrough"] = true} actionFunc={s=>{
+				<Link style={{marginTop: 5, alignSelf: "flex-start"}} onContextMenu={e=>e.nativeEvent["handled"] = true} actionFunc={s=>{
 					s.main.page = "database";
 					s.main.database.subpage = "terms";
 					s.main.database.selectedTermID = term._key;

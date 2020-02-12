@@ -207,7 +207,7 @@ export class MapUI extends BaseComponentPlus({
 								}
 							}}
 							onContextMenu={e=>{
-								if (e.nativeEvent["passThrough"]) return true;
+								if (e.nativeEvent["handled"]) return true;
 								e.preventDefault();
 							}}
 						>
@@ -218,7 +218,7 @@ export class MapUI extends BaseComponentPlus({
 							{/* <ResizeSensor ref="resizeSensor" onResize={()=> {
 								this.LoadScroll();
 							}}/> */}
-							<VMenuStub delayEventHandler={true} preOpen={e=>e.passThrough != true}>
+							<VMenuStub delayEventHandler={true} preOpen={e=>!e.handled}>
 								<VMenuItem text="(To add a node, right click on an existing node.)" style={styles.vMenuItem}/>
 							</VMenuStub>
 						</div>

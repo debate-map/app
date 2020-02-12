@@ -33,7 +33,7 @@ export class SourcesUI extends BaseComponentPlus({headerText: "Sources"} as {sou
 					return (
 						<Row key={index}>
 							{link &&
-							<Link text={linkTitle} to={link} style={{wordBreak: "break-word"}} onContextMenu={e=>e.nativeEvent["passThrough"] = true}/>}
+							<Link text={linkTitle} to={link} style={{wordBreak: "break-word"}} onContextMenu={e=>e.nativeEvent["handled"] = true}/>}
 							{!link &&
 							<Text style={{wordBreak: "break-word"}}>{linkTitle}</Text>}
 						</Row>

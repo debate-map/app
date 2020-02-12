@@ -35,7 +35,7 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 						<CheckBox value={State().main.
 					</Row> */}
 				<Row mt={5}>
-					<Link ml="auto" mr={5} onContextMenu={e=>e.nativeEvent["passThrough"] = true} actionFunc={s=>{
+					<Link ml="auto" mr={5} onContextMenu={e=>e.nativeEvent["handled"] = true} actionFunc={s=>{
 						s.main.page = "profile";
 						s.main.topRightOpenPanel = null;
 					}}>

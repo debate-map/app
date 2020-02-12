@@ -99,7 +99,7 @@ export class ListUI extends BaseComponent<Props, {panelToShow?: string}> {
 						mapInfo.list_selectedNodeID = null;
 					}}
 					onContextMenu={(e) => {
-						if (e.nativeEvent['passThrough']) return true;
+						if (e.nativeEvent['handled']) return true;
 						e.preventDefault();
 					}}>
 						{nodes.length == 0 && <div style={{ textAlign: 'center', fontSize: 18 }}>Loading...</div>}

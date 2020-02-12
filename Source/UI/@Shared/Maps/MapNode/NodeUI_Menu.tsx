@@ -32,7 +32,7 @@ export class NodeUI_Menu_Stub extends BaseComponent<Props, {}> {
 	render() {
 		const {...rest} = this.props;
 		return (
-			<VMenuStub delayEventHandler={true} preOpen={e=>e.passThrough != true}>
+			<VMenuStub delayEventHandler={true} preOpen={e=>!e.handled}>
 				<NodeUI_Menu {...rest}/>
 			</VMenuStub>
 		);
