@@ -10,6 +10,7 @@ import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@
 import {MapNodeRevision} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
 import {ValidateDBData} from "Subrepos/Server/Source/@Shared/Utils/Store/DBDataValidator";
 import {FirebaseDBShape} from "Subrepos/Server/Source/@Shared/Store/firebase";
+import {GeneralData} from "Subrepos/Server/Source/@Shared/Store/firebase/general";
 
 // Note: This is currently not used, and probably doesn`t even work atm.
 
@@ -20,19 +21,7 @@ export async function ResetCurrentDBRoot() {
 
 	const data = {} as FirebaseDBShape;
 	data.general = {} as any;
-	data.general.data = {
-		lastTermID: 0,
-		lastTermComponentID: 0,
-		lastImageID: 0,
-		lastLayerID: 0,
-		lastNodeRevisionID: 0,
-		lastTimelineID: 0,
-		lastTimelineStepID: 0,
-
-		// these start at 100, since 1-100 are reserved
-		lastMapID: 99,
-		lastNodeID: 99,
-	};
+	data.general.data = {} as GeneralData;
 	data.maps = observable.map();
 	data.nodes = observable.map();
 	data.nodeRevisions = observable.map();
@@ -63,8 +52,6 @@ function AddUser(data: FirebaseDBShape, userID: string, extraInfo: User) {
 }
 function AddMap(data: FirebaseDBShape, entry: Map, id: string) {
 	entry = E(sharedData.creatorInfo, entry);
-
-	// data.maps[id || ++data.general.data.lastMapID] = entry as any;
 	data.maps[id ?? GenerateUUID()] = entry as any;
 }
 function AddNode(data: FirebaseDBShape, node: MapNode, revision: MapNodeRevision, nodeID?: string) {

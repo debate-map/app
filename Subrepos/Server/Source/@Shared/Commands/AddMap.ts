@@ -36,7 +36,6 @@ export class AddMap extends Command<{map: Map}, UUID> {
 		const {map} = this.payload;
 
 		let updates = {};
-		updates["general/data/.lastMapID"] = this.mapID;
 		updates[`maps/${this.mapID}`] = map;
 		updates = MergeDBUpdates(updates, this.sub_addNode.GetDBUpdates());
 		return updates;
