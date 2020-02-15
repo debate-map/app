@@ -1,11 +1,32 @@
-import {StoreAccessor} from "mobx-firelink";
-import {GetPlayingTimeline, GetPlayingTimelineStepIndex, GetPlayingTimelineRevealNodes_UpToAppliedStep} from "Source/Store/main/maps/mapStates/$mapState";
+import chroma from "chroma-js";
 import {emptyArray_forLoading} from "js-vextensions";
+import {StoreAccessor} from "mobx-firelink";
+import {GetPlayingTimeline, GetPlayingTimelineRevealNodes_UpToAppliedStep, GetPlayingTimelineStepIndex} from "Source/Store/main/maps/mapStates/$mapState";
+import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
 import {GetNodeChildrenL2} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {MapNodeL3} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
 import {GetNodeL3} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {GetUserAccessLevel} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MapNodeL3, Polarity} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
 import {MeID} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {GetUserAccessLevel} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+
+export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "background"): chroma.Color {
+	let result;
+	if (node.type == MapNodeType.Category) result = chroma("rgb(40,60,80)");
+	else if (node.type == MapNodeType.Package) result = chroma("rgb(30,120,150)");
+	else if (node.type == MapNodeType.MultiChoiceQuestion) result = chroma("rgb(90,50,180)");
+	else if (node.type == MapNodeType.Claim) result = chroma("rgb(0,80,150)");
+	else if (node.type == MapNodeType.Argument) {
+		if (node.displayPolarity == Polarity.Supporting) result = chroma("rgb(30,100,30)");
+		else result = chroma("rgb(100,30,30)");
+	}
+
+	if (type == "background") {
+		result = chroma.mix(result, "black", 0.3); // mix background-color with black some
+		result = result.alpha(0.9);
+	}
+
+	return result;
+}
 
 export const GetNodeChildrenL3_Advanced = StoreAccessor(s=>(nodeID: string, path: string, mapID: string, includeMirrorChildren = true, tagsToIgnore?: string[], applyAccessLevels = false, applyTimeline = false, emptyForLoading = false): MapNodeL3[]=>{
 	path = path || nodeID;
