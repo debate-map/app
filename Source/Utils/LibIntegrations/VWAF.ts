@@ -91,7 +91,7 @@ export function GetNewURLForStoreChanges<T = RootState>(actionFunc: ActionFunc<T
 	const newURL = WithStore({}, newState, ()=>{
 		// and have new-state used for firebase-feedback's store-accessors (ie. GetSelectedProposalID, as called by our GetNewURL)
 		// [this part's probably not actually needed, since project-level Link.actionFunc's are unlikely to modify firebase-feedback's internal state; we do this for completeness, though]
-		return WithStore({fire: Feedback_store.firelink}, newState.feedback, ()=>{
+		return WithStore({fire: Feedback_store.firelink as any}, newState.feedback, ()=>{
 			return GetNewURL();
 		});
 	});
