@@ -6,12 +6,13 @@ import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
 import {HSLA, Observer} from "vwebapp-framework";
 import {useCallback, useMemo, useEffect} from "react";
 import {MapNodeL3, Polarity, ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {GetNodeColor, MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
 import {GetParentNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
 import {GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
 import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
 import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog";
+import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
 
 type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style?};
 /* const dropTargetDecorator = DropTarget('node',

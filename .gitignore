@@ -8,11 +8,13 @@
 node_modules
 coverage
 
+/.happypack
+/.firebase
+/.git-rewrite
 /Source/BakedConfig_Dev.ts
 /Source/BakedConfig_Prod.ts
 /Dist
 /Source_JS
-/.happypack
 /Tools/Webpack Profiling/Stats.json
 /Tools/Webpack Profiling/Stats_Incremental.json
 /Tools/Webpack Profiling/ModuleTimings_Incremental.json
@@ -20,4 +22,3 @@ coverage
 /Tools/Webpack Profiling/ModuleInfo.json
 /Info/Images/@NotTracked
 /Scripts/Config/dll
-/.firebase

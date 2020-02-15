@@ -20,10 +20,11 @@ import {fire} from "../../../../Subrepos/Server/Source/@Shared/MobXFirelink";
 import {GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText} from "../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
 import {GetUser} from "../../../../Subrepos/Server/Source/@Shared/Store/firebase/users";
 import {GetRootNodeID} from "../../../../Subrepos/Server/Source/@Shared/Store/firebase/maps/$map";
-import {GetNodeColor, MapNodeType_Info} from "../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {MapNodeType_Info} from "../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
 import {GetMap} from "../../../../Subrepos/Server/Source/@Shared/Store/firebase/maps";
 import {MapType} from "../../../../Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 import {GetSearchTerms_Advanced} from "../../../../Subrepos/Server/Source/@Shared/Commands/AddNodeRevision";
+import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
 
 const columnWidths = [0.68, 0.2, 0.12];
 

@@ -9,8 +9,9 @@ import {MapNodePhrasing, MapNodePhrasingType} from "Subrepos/Server/Source/@Shar
 import {GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
 import {CanGetBasicPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
 import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetNodeColor, MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
 import {DetailsPanel_Phrasings} from "./Phrasings_SubPanels/DetailsPanel";
+import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
 
 const Phrasing_FakeID = "FAKE";
 

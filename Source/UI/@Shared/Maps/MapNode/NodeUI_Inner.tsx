@@ -32,7 +32,7 @@ import {MapNodeL3, ClaimForm} from "../../../../../Subrepos/Server/Source/@Share
 import {ChangeType, GetChangeTypeOutlineColor} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/mapNodeEditTimes";
 import {GetNodeL3, IsPremiseOfSinglePremiseArgument, GetMainRatingType, GetNodeForm, GetPaddingForNode} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
 import {WeightingType, GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings";
-import {MapNodeType, MapNodeType_Info, GetNodeColor} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {MapNodeType, MapNodeType_Info} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
 import {RS_GetAllValues, ReasonScoreValues_RSPrefix, RS_CalculateTruthScoreComposite, RS_CalculateTruthScore} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings/ReasonScore";
 import {IsNodeSubnode} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Source/Utils/UI/General";
@@ -40,6 +40,7 @@ import {IsUserCreatorOrMod} from "../../../../../Subrepos/Server/Source/@Shared/
 import {MeID} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/users";
 import {ratingTypes, RatingType} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings/@RatingType";
 import {Map} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
 
 // drag and drop
 // ==========

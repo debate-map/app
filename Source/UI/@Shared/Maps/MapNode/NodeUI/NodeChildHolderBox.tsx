@@ -17,9 +17,10 @@ import {HolderType, GetParentNodeL3} from "Subrepos/Server/Source/@Shared/Store/
 import {IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
 import {GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings";
 import {ArgumentType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
-import {GetNodeColor, MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
 import {RatingType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings/@RatingType";
 import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],

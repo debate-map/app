@@ -21,9 +21,10 @@ import {AddTimelineStep} from "Subrepos/Server/Source/@Shared/Commands/AddTimeli
 import {TimelineStep, NodeReveal} from "Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps/@TimelineStep";
 import {GetNodeID, GetNode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
 import {GetNodeL2, GetNodeL3, GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {GetNodeColor, MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
 import {SearchUpFromNodeForNodeMatchingX} from "Subrepos/Server/Source/@Shared/Utils/Store/PathFinder";
 import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
 
 export enum PositionOptionsEnum {
 	Full = null,
