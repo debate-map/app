@@ -29,7 +29,6 @@
     "typescript": "^3.7.4"
   },
   "dependencies": {
-    "chroma-js": "^2.1.0",
     "js-vextensions": "^1.0.28",
     "mobx-firelink": "^1.0.43"
   }
