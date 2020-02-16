@@ -17,13 +17,13 @@ SetDefaultFireOptions({fire});
 export function InitFirelink(rootPathInDB: string, rootStore: any) {
 	//const linkRootPath = `versions/v${dbVersion}-${DB_SHORT}`;
 	fire.Initialize({rootPathInDB, rootStore});
+
+	// start auto-runs after store+firelink are created
+	//require("./Utils/AutoRuns");
 }
 
 // modify some default options
 // StoreAccessorOptions.default.cache_keepAlive = true;
-
-// start auto-runs after store+firelink are created
-//require("./Utils/AutoRuns");
 
 // mobx debug helper
 // ==========

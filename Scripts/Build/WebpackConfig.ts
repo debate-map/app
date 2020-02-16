@@ -8,6 +8,11 @@ import {npmPatch_replacerConfig} from "./NPMPatches";
 };*/
 
 // modify the imported config-base, then return it (that's fine/intended)
-export const webpackConfig = CreateWebpackConfig(config, npmPatch_replacerConfig, {
-	name: "client",
+export const webpackConfig = CreateWebpackConfig({
+	config,
+	npmPatch_replacerConfig,
+	ext: {
+		name: "client",
+	},
+	sourcesFromRoot: true,
 });
