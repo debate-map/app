@@ -1,6 +1,5 @@
 import {dbVersion, hasHotReloaded} from "Source/Main";
 import {RootState, store} from "Source/Store";
-import {NotificationMessage} from "Source/Store/main";
 import {logTypes, LogTypes_New} from "Source/Utils/General/Logging";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL} from "Source/Utils/URL/URLs";
 import {manager as manager_framework, ActionFunc, GetMirrorOfMobXTree} from "vwebapp-framework";
@@ -13,6 +12,7 @@ import {Me, MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
 import {GetUserPermissionGroups} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
 import {GetAuth} from "Subrepos/Server/Source/@Shared/Store/firebase";
 import {ValidateDBData} from "Subrepos/Server/Source/@Shared/Utils/Store/DBDataValidator";
+import {AddNotificationMessage} from "Source/Store/main/@NotificationMessage";
 
 const context = (require as any).context("../../../../Resources/SVGs/", true, /\.svg$/);
 const iconInfo = {};
@@ -57,18 +57,7 @@ export function InitVWAF() {
 		PostHandleError: (error, errorStr)=>{
 			// wait a bit, in case we're in a reducer function (calling dispatch from within a reducer errors)
 			setTimeout(()=>{
-				runInAction("VWAF.PostHandleError", ()=>{
-					try {
-						store.main.notificationMessages.push(new NotificationMessage(errorStr));
-					} catch (ex) {
-						g.alertCount_notifications = (g.alertCount_notifications | 0) + 1;
-						if (g.alertCount_notifications <= 2) {
-							alert(errorStr);
-						} else {
-							console.error(errorStr);
-						}
-					}
-				});
+				runInAction("VWAF.PostHandleError", ()=>AddNotificationMessage(errorStr));
 			});
 		},
 

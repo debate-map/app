@@ -1,16 +1,10 @@
 import {Button, Column, Div} from "react-vcomponents";
 import {AddGlobalStyle, BaseComponent} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
-import {NotificationMessage} from "Source/Store/main";
 import {store} from "Source/Store";
 import {Observer} from "vwebapp-framework";
 import {runInAction} from "mobx";
-
-// helper, for use from Start_0.ts
-function AddNotificationMessage(message: string) {
-	store.main.notificationMessages.push(new NotificationMessage(message));
-}
-G({AddNotificationMessage});
+import {NotificationMessage} from "Source/Store/main/@NotificationMessage";
 
 AddGlobalStyle(`
 .NotificationScrollView > * { pointer-events: auto; }

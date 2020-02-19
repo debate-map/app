@@ -26,6 +26,7 @@ export const rootPageDefaultChilds = {
 	home: "home",
 	global: "map",
 };
+const pagesWithSimpleSubpages = ["database", "feedback", "more", "home", "global"].ToMap(page=>page, ()=>null);
 
 export function PushHistoryEntry() {
 	// history.pushState({}, document.title, GetNewURL());
@@ -90,7 +91,6 @@ export function GetCurrentURL_SimplifiedForPageViewTracking() {
 // loading
 // ==========
 
-const pagesWithSimpleSubpages = ["database", "feedback", "more", "home", "global"].ToMap(page=>page, ()=>null);
 export function GetLoadActionFuncForURL(url: VURL) {
 	return (store: RootState)=>{
 		url = NormalizeURL(url);
@@ -197,10 +197,10 @@ export function GetLoadActionFuncForURL(url: VURL) {
 					// Log(`Found shortest path (${shortestPathToNode}), so merging: ` + ToJSON(mapViewForPath));
 					store.dispatch(new ACTMapViewMerge({ mapID: 1, mapView: mapViewForPath }));
 				} else {
-					AddNotificationMessage(new NotificationMessage(`Could not find a path to the node specified in the url (#${nodeID}, title: "${GetNodeDisplayText(node)}").`));
+					AddNotificationMessage(`Could not find a path to the node specified in the url (#${nodeID}, title: "${GetNodeDisplayText(node)}").`);
 				}
 			} else {
-				AddNotificationMessage(new NotificationMessage(`The node specified in the url (#${nodeID}) was not found.`));
+				AddNotificationMessage(`The node specified in the url (#${nodeID}) was not found.`);
 			}
 
 			/* let newURL = url.Clone();

@@ -49,7 +49,7 @@ if (supportedBrowsers.indexOf(browser) == -1 && !isBot) {
 	let message = 'Sorry! Your browser (' + browser + ') is not supported. Please use a supported browser such as Chrome, Firefox, or Safari.';
 	setTimeout(() => {
 		try {
-			g.AddNotificationMessage(new g.NotificationMessage(message));
+			g.AddNotificationMessage(message);
 		} catch (ex) {
 			alert(message);
 		}

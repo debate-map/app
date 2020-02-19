@@ -1,6 +1,6 @@
 import {immerable} from "immer";
 import {Global} from "js-vextensions";
-import {observable} from "mobx";
+import {observable, runInAction} from "mobx";
 import {ignore} from "mobx-sync";
 import {O, StoreAction} from "vwebapp-framework";
 import {rootPageDefaultChilds} from "Source/Utils/URL/URLs";
@@ -16,19 +16,7 @@ import {SearchState} from "./main/search";
 import {MapsState} from "./main/maps";
 import {TimelinesState} from "./main/timelines";
 import {globalMapID} from "../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-
-@Global
-export class NotificationMessage {
-	static lastID = -1;
-
-	constructor(text: string) {
-		this.id = ++NotificationMessage.lastID;
-		this.text = text;
-	}
-
-	id: number;
-	text: string;
-}
+import {NotificationMessage} from "./main/@NotificationMessage";
 
 export class MainState {
 	// [immerable] = true;
