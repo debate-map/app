@@ -1,4 +1,4 @@
-import {emptyObj, IsNumber, Assert, CE} from "js-vextensions";
+import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from "js-vextensions";
 import {StoreAccessor} from "mobx-firelink";
 import {GetRatingAverage, GetRatingValue, GetRatings} from "../../Store/firebase/nodeRatings";
 import {Rating} from "../../Store/firebase/nodeRatings/@Rating";
@@ -65,8 +65,8 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 
 // export function GetArgumentImpactPseudoRatingSet(argument: MapNodeL2, premises: MapNodeL2[]): {[key: string]: Rating} {
 export const GetArgumentImpactPseudoRatings = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[]): Rating[]=>{
-	if (CE(premises).Any(a=>a == null)) return emptyObj as any; // must still be loading
-	if (premises.length == 0) return emptyObj as any;
+	if (CE(premises).Any(a=>a == null)) return emptyArray_forLoading as any; // must still be loading
+	if (premises.length == 0) return emptyArray as any;
 
 	const childForms_map = CE(premises).ToMap((child, index)=>`childForm_${index}`, child=>{
 		return GetNodeForm(child, argument);

@@ -1,4 +1,5 @@
 import {presetBackgrounds, defaultPresetBackground} from "Source/Utils/UI/PresetBackgrounds";
+import {GADDemo} from "Source/UI/@GAD/GAD";
 import {GetUser_Private} from "../../../../Subrepos/Server/Source/@Shared/Store/firebase/users_private";
 
 // backgrounds
@@ -18,7 +19,7 @@ export class BackgroundConfig {
 }
 
 export function GetUserBackground(userID: string): BackgroundConfig {
-	//if (GADDemo) return {color: "#ffffff"};
+	if (GADDemo) return {color: "#ffffff"};
 
 	const user_p = GetUser_Private(userID);
 	if (!user_p) return presetBackgrounds[defaultPresetBackground];
