@@ -2,11 +2,11 @@ import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
 import {Column, Pre, Row} from "react-vcomponents";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
-import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI";
 import {ReferencesAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@ReferencesAttachment";
 import {GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
 import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
 import {ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI";
 import {SubPanel_Quote, SubPanel_References} from "../../NodeUI_Inner/SubPanel";
 
 export class ReferencesAttachmentEditorUI extends BaseComponent<
@@ -32,7 +32,7 @@ export class ReferencesAttachmentEditorUI extends BaseComponent<
 					<Row key={0}>Preview:</Row>,
 					<Column key={1} mt={5}>
 						<Pre style={{padding: 5, background: "rgba(255,255,255,.2)", borderRadius: 5}}>
-							{GetNodeDisplayText({type: MapNodeType.Claim, contentNode: CleanUpdatedReferencesAttachment(Clone(newData))} as any, null, ClaimForm.Base)}
+							{GetNodeDisplayText({type: MapNodeType.Claim, current: {references: CleanUpdatedReferencesAttachment(Clone(newData))}} as any, null, ClaimForm.Base)}
 							<SubPanel_References attachment={newData} fontSize={15}/>
 						</Pre>
 					</Column>,

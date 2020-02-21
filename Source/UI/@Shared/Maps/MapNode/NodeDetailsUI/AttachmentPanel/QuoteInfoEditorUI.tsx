@@ -8,6 +8,7 @@ import {QuoteAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nod
 import {GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
 import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
 import {ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {MapNodeRevision} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
 
 // @ApplyBasicStyles
 export class QuoteInfoEditorUI extends BaseComponent
@@ -35,7 +36,7 @@ export class QuoteInfoEditorUI extends BaseComponent
 					<Row key={0}>Preview:</Row>,
 					<Column key={1} mt={5}>
 						<Pre style={{padding: 5, background: "rgba(255,255,255,.2)", borderRadius: 5}}>
-							{GetNodeDisplayText({type: MapNodeType.Claim, contentNode: CleanUpdatedQuoteAttachment(Clone(newData))} as any, null, ClaimForm.Base)}
+							{GetNodeDisplayText({type: MapNodeType.Claim, current: {quote: CleanUpdatedQuoteAttachment(Clone(newData))}} as any, null, ClaimForm.Base)}
 							<SubPanel_Quote attachment={newData} fontSize={15}/>
 						</Pre>
 					</Column>

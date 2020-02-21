@@ -20,6 +20,7 @@ import {FromJSON, ToJSON, E} from "js-vextensions";
 import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
 import {MapDetailsUI} from "../../MapDetailsUI";
 
+// todo: probably ms this runs in two steps: 1) gets db-updates, 2) user looks over and approves, 3) user presses continue (to apply using ApplyDBUpdates, or a composite command)
 export async function ApplyNodeDefaults(nodeID: string, nodeDefaults: MapNodeRevision_Defaultable, recursive: boolean, mapID: string, runInfo = {revisionsUpdated: new Set<string>()}) {
 	if (!CanEditNode(MeID(), nodeID)) return;
 	const node = await GetAsync(()=>GetNodeL2(nodeID));
@@ -38,6 +39,8 @@ export async function ApplyNodeDefaults(nodeID: string, nodeDefaults: MapNodeRev
 		for (const childID of node.children.VKeys()) {
 			await	ApplyNodeDefaults(childID, nodeDefaults, true, mapID, runInfo);
 		}
+		// apply for all children paths in parallel (to be used in future)
+		//await	Promise.all(node.children.VKeys().map(childID=>ApplyNodeDefaults(childID, nodeDefaults, true, mapID, runInfo)));
 	}
 
 	return runInfo;
