@@ -15,7 +15,7 @@ import {GetArgumentImpactPseudoRatings} from "../../Utils/Store/RatingProcessor"
 export const GetRatings = StoreAccessor(s=>(nodeID: string, ratingType: RatingType, userID?: string): Rating[]=>{
 	if (ratingType == "impact") {
 		const node = GetNodeL2(nodeID);
-		if (node == null) return null;
+		if (node === undefined) return emptyArray_forLoading;
 		const nodeChildren = GetNodeChildrenL2(nodeID);
 		if (CE(nodeChildren).Any(a=>a == null)) return emptyArray_forLoading;
 		//if (nodeChildren.Any(a=>a == null)) return observable.map(emptyObj);
