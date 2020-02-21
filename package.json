@@ -40,6 +40,7 @@
     "deploy-db-backup-app": "gcloud app deploy Tools/DBBackupApp/app.yaml Tools/DBBackupApp/cron.yaml",
     "@build-stats": "webpack --config Scripts/Build/WebpackConfig.ts --output-file ForStats/Bundle.js --profile --json > BuildStats.json",
     "build-stats": "webpack --config Scripts/Build/WebpackConfig.ts --output-file ForStats/Bundle.js --profile --json > Dist/ForStats/BuildStats.json",
+    "clean-subs": "git subrepo clean Subrepos/Server",
     "pull-subs": "git subrepo pull Subrepos/Server",
     "push-subs": "git subrepo push Subrepos/Server"
   },
