@@ -36,6 +36,7 @@ export class MapsState {
 	// node panels
 	@O detailsPanel = new DetailsPanelState();
 	@O addChildDialog = new AddChildDialogState();
+	@O exportSubtreeDialog = new ExportSubtreeDialogState();
 	@O importSubtreeDialog = new ImportSubtreeDialogState();
 }
 
@@ -53,6 +54,15 @@ export class AddChildDialogState {
 	@O advanced = false;
 }
 
+export enum DataExchangeFormat {
+	//DebateMap_JSON = 10,
+	//CD_JSON = 20,
+	GAD_CSV = 30,
+}
+export class ExportSubtreeDialogState {
+	@O targetFormat = DataExchangeFormat.GAD_CSV;
+	@O baseExportDepth = 5;
+}
 export class ImportSubtreeDialogState {
 	@O importRatings = false;
 	@O importRatings_userIDsStr = "";

@@ -6,7 +6,6 @@ import {ShowMessageBox, BoxController} from "react-vmessagebox";
 import {Column, Row, TextArea, Button, CheckBox, Select, Text, TextInput} from "react-vcomponents";
 import {FromJSON, ToJSON, CE, Clone, GetEntries} from "js-vextensions";
 import {MI_SharedProps} from "../NodeUI_Menu";
-import {SubtreeExportData_Old} from "./MI_ExportSubtree";
 import {ApplyDBUpdates} from "mobx-firelink";
 import {ScrollView} from "react-vscrollview";
 import {store} from "Source/Store";
@@ -24,9 +23,9 @@ export class MI_ImportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}
 		if (true) return null;
 		
 		const sharedProps = this.props as MI_SharedProps;
-		if (!HasModPermissions(MeID())) return null;
+		if (!HasAdminPermissions(MeID())) return null;
 		return (
-			<VMenuItem text="Import subtree" enabled={HasAdminPermissions(MeID())} style={styles.vMenuItem} onClick={async e=>{
+			<VMenuItem text="Import subtree" style={styles.vMenuItem} onClick={async e=>{
 				if (e.button != 0) return;
 				let ui: ImportSubtreeUI;
 				let controller = ShowMessageBox({
@@ -38,6 +37,8 @@ export class MI_ImportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}
 		);
 	}
 }
+
+type SubtreeExportData_Old = any;
 
 enum ImportSubtreeUI_MidTab {
 	Nodes = 10,
