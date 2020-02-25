@@ -137,7 +137,7 @@ export class NavBarPageButton extends BaseComponentPlus(
 		);
 
 		const actionFunc = (s: RootState)=>{
-			if (page) {
+			if (page && !panel) {
 				if (page != currentPage) {
 					s.main.page = page;
 				} else {
