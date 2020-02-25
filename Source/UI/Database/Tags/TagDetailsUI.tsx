@@ -86,11 +86,11 @@ class TagCompUI_MirrorChildrenFromXToY extends BaseComponentPlus({} as TagDetail
 				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeY" label="Node Y"/>
 				<Row mt={5}>
 					<Text>Mirror from X:</Text>
-					<CheckBox ml={10} text="Supporting arguments" checked={comp.mirrorSupporting} enabled={enabled} onChange={val=>Change(comp.mirrorSupporting = val)}/>
-					<CheckBox ml={10} text="Opposing arguments" checked={comp.mirrorOpposing} enabled={enabled} onChange={val=>Change(comp.mirrorOpposing = val)}/>
+					<CheckBox ml={10} text="Supporting arguments" value={comp.mirrorSupporting} enabled={enabled} onChange={val=>Change(comp.mirrorSupporting = val)}/>
+					<CheckBox ml={10} text="Opposing arguments" value={comp.mirrorOpposing} enabled={enabled} onChange={val=>Change(comp.mirrorOpposing = val)}/>
 				</Row>
-				<CheckBox mt={5} text="Reverse argument polarities" checked={comp.reversePolarities} enabled={enabled} onChange={val=>Change(comp.reversePolarities = val)}/>
-				<CheckBox mt={5} text="Disable Y direct children" checked={comp.disableDirectChildren} enabled={enabled} onChange={val=>Change(comp.disableDirectChildren = val)}/>
+				<CheckBox mt={5} text="Reverse argument polarities" value={comp.reversePolarities} enabled={enabled} onChange={val=>Change(comp.reversePolarities = val)}/>
+				<CheckBox mt={5} text="Disable Y direct children" value={comp.disableDirectChildren} enabled={enabled} onChange={val=>Change(comp.disableDirectChildren = val)}/>
 			</>
 		);
 	}
@@ -126,7 +126,7 @@ class TagCompUI_MutuallyExclusiveGroup extends BaseComponentPlus({} as TagDetail
 					return <NodeInArrayRow key={index} {...this.props} comp={comp} nodeArrayKey="nodes" nodeEntry={nodeID} nodeEntryIndex={index}/>;
 				})}
 				<Row center mt={5}>
-					<CheckBox text="Mirror X pros as Y cons" checked={comp.mirrorXProsAsYCons} enabled={enabled} onChange={val=>Change(comp.mirrorXProsAsYCons = val)}/>
+					<CheckBox text="Mirror X pros as Y cons" value={comp.mirrorXProsAsYCons} enabled={enabled} onChange={val=>Change(comp.mirrorXProsAsYCons = val)}/>
 					<InfoButton ml={5} text="Makes-so each node's pro-args are mirrored as con-args of the others."/>
 				</Row>
 			</>
@@ -141,7 +141,7 @@ class TagCompUI_RestrictMirroringOfX extends BaseComponentPlus({} as TagDetailsU
 		return (
 			<>
 				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X" mt={0}/>
-				<CheckBox mt={5} text="Blacklist all mirror-parents" checked={comp.blacklistAllMirrorParents} enabled={enabled} onChange={val=>Change(comp.blacklistAllMirrorParents = val)}/>
+				<CheckBox mt={5} text="Blacklist all mirror-parents" value={comp.blacklistAllMirrorParents} enabled={enabled} onChange={val=>Change(comp.blacklistAllMirrorParents = val)}/>
 				<Row mt={5}>
 					<Text>Blacklisted mirror-parents:</Text>
 					<Button ml={5} p="3px 7px" text="+" enabled={enabled && !comp.blacklistAllMirrorParents} onClick={()=>{

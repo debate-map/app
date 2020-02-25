@@ -62,10 +62,10 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 							new AddTimelineStep({timelineID: timeline._key, step: newStep, stepIndex: newStepIndex}).Run();
 						}}/>
 					</>}
-					<CheckBox ml={5} text="Details" checked={showTimelineDetails} onChange={val=>{
+					<CheckBox ml={5} text="Details" value={showTimelineDetails} onChange={val=>{
 						runInAction("EditorSubpanel.Details.onChange", ()=>GetMapState(map._key).showTimelineDetails = val);
 					}}/>
-					<CheckBox ml="auto" text="Lock map scrolling" title="Lock map edge-scrolling. (for dragging onto timeline steps)" checked={lockMapScrolling} onChange={val=>{
+					<CheckBox ml="auto" text="Lock map scrolling" title="Lock map edge-scrolling. (for dragging onto timeline steps)" value={lockMapScrolling} onChange={val=>{
 						runInAction("EditorSubpanel.lockMapScrolling.onChange", ()=>store.main.maps.lockMapScrolling = val);
 					}}/>
 				</Row>
@@ -81,7 +81,7 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 						<TextInput value={timeline.videoID} delayChangeTillDefocus={true} enabled={creatorOrMod} onChange={val=>{
 							new UpdateTimeline({id: timeline._key, updates: {videoID: val}}).Run();
 						}}/>
-						<CheckBox ml={5} text="Start: " checked={timeline.videoStartTime != null} enabled={creatorOrMod} onChange={val=>{
+						<CheckBox ml={5} text="Start: " value={timeline.videoStartTime != null} enabled={creatorOrMod} onChange={val=>{
 							if (val) {
 								new UpdateTimeline({id: timeline._key, updates: {videoStartTime: 0}}).Run();
 							} else {

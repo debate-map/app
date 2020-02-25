@@ -29,7 +29,7 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 					</RowLR>
 					<RowLR splitAt={splitAt}>
 						<Pre>Show Reason Score values: </Pre>
-						<CheckBox checked={showReasonScoreValues} onChange={val=>{
+						<CheckBox value={showReasonScoreValues} onChange={val=>{
 							runInAction("LayoutDropDown.showReasonScoreValues.onChange", ()=>store.main.maps.showReasonScoreValues = val);
 						}}/>
 					</RowLR>

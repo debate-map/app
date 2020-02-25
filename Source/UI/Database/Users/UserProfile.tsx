@@ -42,7 +42,7 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, 
 						const admin = userID && GetUserPermissionGroups(MeID()).admin;
 						const changingOwnAdminState = currentUser && profileUser._key == currentUser._key && group == "admin";
 						return (
-							<CheckBox key={index} mr={index < 3 ? 5 : 0} text={PropNameToTitle(group)} checked={(profileUserPermissionGroups || {})[group]} enabled={admin && !changingOwnAdminState} onChange={val=>{
+							<CheckBox key={index} mr={index < 3 ? 5 : 0} text={PropNameToTitle(group)} value={(profileUserPermissionGroups || {})[group]} enabled={admin && !changingOwnAdminState} onChange={val=>{
 								const newPermissionGroups = E(profileUserPermissionGroups, {[group]: val});
 								new SetUserData({id: profileUser._key, updates: {permissionGroups: newPermissionGroups}}).Run();
 							}}/>
@@ -79,7 +79,7 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, 
 							</Row>
 						</ScrollView>
 						<Row mt={5}>
-							<CheckBox text="Custom background" checked={profileUser_p.backgroundCustom_enabled} onChange={val=>{
+							<CheckBox text="Custom background" value={profileUser_p.backgroundCustom_enabled} onChange={val=>{
 								new SetUserData_Private({id: profileUser._key, updates: {backgroundCustom_enabled: val}}).Run();
 							}}/>
 						</Row>

@@ -4,9 +4,9 @@ import {CheckBox, Column, Pre, RowLR, Spinner, TextInput, Row} from "react-vcomp
 import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {InfoButton} from "vwebapp-framework";
 import {Map_namePattern, MapType, Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
 import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel";
-import {MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
 
 type Props = {baseData: Map, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Map, ui: MapDetailsUI)=>void};
 export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {newData: null as Map}) {
@@ -45,7 +45,7 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 				<RowLR mt={5} splitAt={100} style={{width}}>
 					<Pre>Inline note:</Pre>
 					<CheckBox enabled={enabled} style={{width: "100%"}}
-						checked={newData.noteInline} onChange={val=>Change(newData.noteInline = val)}/>
+						value={newData.noteInline} onChange={val=>Change(newData.noteInline = val)}/>
 				</RowLR>
 				{!forNew &&
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
@@ -67,14 +67,14 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 							(Note: Doesn't apply to already-contributed nodes; those can be unlinked, then cloned as private nodes.)
 						`.AsMultiline(0)}/>
 					</Row>
-					<CheckBox enabled={enabled} checked={newData.requireMapEditorsCanEdit} onChange={val=>Change(newData.requireMapEditorsCanEdit = val)}/>
+					<CheckBox enabled={enabled} value={newData.requireMapEditorsCanEdit} onChange={val=>Change(newData.requireMapEditorsCanEdit = val)}/>
 				</RowLR>}
 				{/* <RowLR mt={5} splitAt={splitAt} style={{ width }}>
 					<Row center>
 						<Pre>Allow public nodes:</Pre>
 						<InfoButton ml={5} text=""/>
 					</Row>
-					<CheckBox enabled={enabled} checked={newData.allowPublicNodes} onChange={(val) => Change(newData.allowPublicNodes = val)}/>
+					<CheckBox enabled={enabled} value={newData.allowPublicNodes} onChange={(val) => Change(newData.allowPublicNodes = val)}/>
 				</RowLR> */}
 				{/*! forNew &&
 					<RowLR mt={5} splitAt={splitAt} style={{width}}>
@@ -84,7 +84,7 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 					</RowLR> */}
 				{!forNew && // we don't want to overwhelm new users trying to create their own map...
 				<Column mt={10}>
-					<CheckBox text="Node defaults:" checked={newData.nodeDefaults != null} onChange={val=>{
+					<CheckBox text="Node defaults:" value={newData.nodeDefaults != null} onChange={val=>{
 						const defaultNodeDefaults = MapNodeRevision_Defaultable_DefaultsForMap(newData.type);
 						newData.VSet("nodeDefaults", val ? defaultNodeDefaults : DEL);
 						this.Update();

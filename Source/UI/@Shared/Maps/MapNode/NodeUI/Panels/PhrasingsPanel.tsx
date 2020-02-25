@@ -77,7 +77,7 @@ export class PhrasingRow extends BaseComponentPlus({} as {phrasing: MapNodePhras
 				// event.preventDefault();
 				// return false;
 			}}>
-				{/* <CheckBox checked={true} onChange={(val) => {
+				{/* <CheckBox value={true} onChange={(val) => {
 					// todo: have this change which phrasing is selected to be used (in your client), for viewing/setting ratings in the ratings panels // nvm, having shared ratings -- for now at least
 				}}/> */}
 				<div style={{width: "100%", whiteSpace: "normal"}}>{phrasing.text}</div>

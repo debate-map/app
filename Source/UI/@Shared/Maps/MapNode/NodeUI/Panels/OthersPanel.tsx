@@ -155,7 +155,7 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 				{canSetAsNegation &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Show as negation: </Pre>
-						<CheckBox checked={node.link.form == ClaimForm.Negation}
+						<CheckBox value={node.link.form == ClaimForm.Negation}
 							onChange={val=>{
 								new UpdateLink({
 									linkParentID: GetParentNodeID(path), linkChildID: node._key,
@@ -166,7 +166,7 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 				{canSetAsSeriesAnchor &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Show as series anchor: </Pre>
-						<CheckBox checked={node.link.seriesAnchor}
+						<CheckBox value={node.link.seriesAnchor}
 							// onChange={val=>Change(val ? newLinkData.isStep = true : delete newLinkData.isStep)}/>
 							onChange={val=>{
 								new UpdateLink({

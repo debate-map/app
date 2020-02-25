@@ -101,7 +101,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 						<Row center ml="auto">
 							{timeline.videoID != null &&
 								<>
-									<CheckBox text="Video time: " checked={step.videoTime != null} enabled={creatorOrMod} onChange={val=>{
+									<CheckBox text="Video time: " value={step.videoTime != null} enabled={creatorOrMod} onChange={val=>{
 										if (val) {
 											new UpdateTimelineStep({stepID: step._key, stepUpdates: {videoTime: 0}}).Run();
 										} else {
@@ -297,7 +297,7 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 					</Row>
 					{editing &&
 					<Row>
-						<CheckBox ml={5} text="Show" checked={nodeReveal.show} onChange={val=>{
+						<CheckBox ml={5} text="Show" value={nodeReveal.show} onChange={val=>{
 							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 							newNodeReveals[index].show = val;
 							if (val) newNodeReveals[index].hide = false;
@@ -315,7 +315,7 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 					</Row>}
 					{editing &&
 					<Row>
-						<CheckBox ml={5} text="Hide" checked={nodeReveal.hide} onChange={val=>{
+						<CheckBox ml={5} text="Hide" value={nodeReveal.hide} onChange={val=>{
 							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 							newNodeReveals[index].hide = val;
 							if (val) newNodeReveals[index].show = false;

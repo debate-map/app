@@ -86,7 +86,7 @@ class ImportSubtreeUI extends BaseComponentPlus(
 								let title = node.current.titles.base || "(empty title)";
 								return (
 									<Row key={index} style={{whiteSpace: "normal"}}>
-										<CheckBox text={title} checked={nodesToLink.includes(node._key)} enabled={GetNodesByTitle(title, "base").length > 0} onChange={val=> {
+										<CheckBox text={title} value={nodesToLink.includes(node._key)} enabled={GetNodesByTitle(title, "base").length > 0} onChange={val=> {
 											if (val) {
 												this.SetState({nodesToLink: nodesToLink.concat(node._key)})
 											} else {
@@ -104,7 +104,7 @@ class ImportSubtreeUI extends BaseComponentPlus(
 						{tab == ImportSubtreeUI_MidTab.Others &&
 						<>
 							<Row>
-								<CheckBox text="Import ratings, from users:" checked={dialogState.importRatings}
+								<CheckBox text="Import ratings, from users:" value={dialogState.importRatings}
 									onChange={val=>runInAction("MI_ImportSubtree.importRatings.onChange", ()=>dialogState.importRatings = val)}/>
 								<TextInput ml={5} placeholder="Leave empty for all users..." style={{flex: 1}} value={dialogState.importRatings_userIDsStr}
 									onChange={val=>runInAction("MI_ImportSubtree.importRatings_userIDsStr.onChange", ()=>dialogState.importRatings_userIDsStr = val)}/>
@@ -203,7 +203,7 @@ class SubtreeTreeView extends BaseComponentPlus({} as {node: SubtreeExportData_O
 		return (
 			<TreeView title={
 				<Row style={{whiteSpace: "normal"}}>
-					<CheckBox text={title} checked={nodesToLink[node._key] != null} enabled={nodeMatches.length > 0} onChange={val=> {
+					<CheckBox text={title} value={nodesToLink[node._key] != null} enabled={nodeMatches.length > 0} onChange={val=> {
 						let newNodesToLink = Clone(nodesToLink);
 						if (val) {
 							newNodesToLink[node._key] = nodeMatches[0]._key;

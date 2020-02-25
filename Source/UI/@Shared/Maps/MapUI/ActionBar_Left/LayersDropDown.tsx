@@ -3,7 +3,6 @@ import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Ro
 import {BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {ScrollView} from "react-vscrollview";
-import {ShowAddLayerDialog} from "../../Layers/AddLayerDialog";
 import {MeID, GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
 import {GetLayers, ForDeleteLayer_GetError, GetMapLayerIDs} from "Subrepos/Server/Source/@Shared/Store/firebase/layers";
 import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
@@ -14,6 +13,7 @@ import {DeleteLayer} from "Subrepos/Server/Source/@Shared/Commands/DeleteLayer";
 import {SetLayerAttachedToMap} from "Subrepos/Server/Source/@Shared/Commands/SetLayerAttachedToMap";
 import {SetMapLayerStateForUser} from "Subrepos/Server/Source/@Shared/Commands/SetMapLayerStateForUser";
 import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {ShowAddLayerDialog} from "../../Layers/AddLayerDialog";
 import {ES} from "../../../../../Utils/UI/GlobalStyles";
 
 export const columnWidths = [0.5, 0.3, 0.1, 0.1];
@@ -113,12 +113,12 @@ class LayerUI extends BaseComponentPlus({} as {index: number, last: boolean, map
 					</span>
 					<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
 					<span style={{flex: columnWidths[2]}}>
-						<CheckBox enabled={creatorOrMod} checked={GetMapLayerIDs(map._key).Contains(layer._key)} onChange={val=>{
+						<CheckBox enabled={creatorOrMod} value={GetMapLayerIDs(map._key).Contains(layer._key)} onChange={val=>{
 							new SetLayerAttachedToMap({mapID: map._key, layerID: layer._key, attached: val}).Run();
 						}}/>
 					</span>
 					<span style={{flex: columnWidths[3]}}>
-						<CheckBox checked={userLayerState} indeterminate={userLayerState == null} onChange={val=>{
+						<CheckBox value={userLayerState} indeterminate={userLayerState == null} onChange={val=>{
 							if (MeID() == null) return ShowSignInPopup();
 							const newState =								userLayerState == null ? true
 								: userLayerState == true ? false

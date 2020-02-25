@@ -165,7 +165,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 								Use the tabs to control which part you're setting the data for.
 							`.AsMultiline(0)}/>
 						</>}
-						<CheckBox text="Advanced" checked={advanced} onChange={val=>{
+						<CheckBox text="Advanced" value={advanced} onChange={val=>{
 							runInAction("AddChildDialog.advanced.onChange", ()=>store.main.maps.addChildDialog.advanced = val);
 							if (!val) tab = AddChildDialogTab.Claim;
 							Change();

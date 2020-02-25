@@ -46,7 +46,7 @@ export class PermissionsPanel extends BaseComponent<Pick<NodeDetailsUI_SharedPro
 				{HasAdminPermissions(MeID()) &&
 				<RowLR mt={5} splitAt={splitAt} style={{display: "flex", alignItems: "center"}}>
 					<Text>Rate:</Text>
-					<CheckBox enabled={enabled} checked={!newRevisionData.votingDisabled} onChange={val=>Change(newRevisionData.votingDisabled = val ? null : true)}/>
+					<CheckBox enabled={enabled} value={!newRevisionData.votingDisabled} onChange={val=>Change(newRevisionData.votingDisabled = val ? null : true)}/>
 				</RowLR>}
 				<RowLR mt={5} splitAt={splitAt} style={{display: "flex", alignItems: "center"}}>
 					<Text>Edit:</Text>
