@@ -13,10 +13,6 @@ type Payload = {mapID: string, parentID: string, node: MapNode, revision: MapNod
 @MapEdit
 @UserEdit
 export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: string}> {
-	// set these from parent command if the parent command has earlier subs that increment last-node-id, etc.
-	/* lastNodeID_addAmount = 0;
-	lastNodeRevisionID_addAmount = 0; */
-
 	sub_addNode: AddNode;
 	parent_oldData: MapNode;
 	Validate() {
@@ -32,7 +28,6 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 
 		const node_withParents = E(node, parentID ? {parents: {[parentID]: {_: true}}} : {});
 		this.sub_addNode = this.sub_addNode ?? new AddNode({mapID, node: node_withParents, revision}).MarkAsSubcommand(this);
-		// this.sub_addNode.VSet({ lastNodeID_addAmount: this.lastNodeID_addAmount, lastNodeRevisionID_addAmount: this.lastNodeRevisionID_addAmount });
 		this.sub_addNode.Validate();
 
 		this.payload.link = link ?? E({_: true}, node.type == MapNodeType.Argument && {polarity: Polarity.Supporting});

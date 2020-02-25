@@ -46,8 +46,8 @@ export class MapNode {
 	layerAnchorNode: UUID; */
 
 	// local-only
-	informalArgumentsHolder?: boolean;
-	premiseAddHelper?: boolean;
+	//informalArgumentsHolder?: boolean;
+	//premiseAddHelper?: boolean;
 }
 // export const MapNode_id = UUID_regex;
 // export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
