@@ -1,5 +1,5 @@
 import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading} from "js-vextensions";
-import {GetDoc, StoreAccessor, GetDocs, WhereFilter} from "mobx-firelink";
+import {GetDoc, StoreAccessor, GetDocs, WhereOp} from "mobx-firelink";
 import {observable} from "mobx";
 import {Validate} from "mobx-firelink";
 import {RatingType, ratingTypes} from "./nodeRatings/@RatingType";
@@ -29,10 +29,10 @@ export const GetRatings = StoreAccessor(s=>(nodeID: string, ratingType: RatingTy
 	//return FilterRatings(Array.from(ratingSet.values()), filter);*/
 
 	return GetDocs({
-		filters: [
-			new WhereFilter("node", "==", nodeID),
-			new WhereFilter("type", "==", ratingType),
-			userID && new WhereFilter("user", "==", userID),
+		queryOps: [
+			new WhereOp("node", "==", nodeID),
+			new WhereOp("type", "==", ratingType),
+			userID && new WhereOp("user", "==", userID),
 		].filter(a=>a),
 	}, a=>a.nodeRatings);
 });

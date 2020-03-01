@@ -1,5 +1,5 @@
 import {CachedTransform, IsNaN} from "js-vextensions";
-import {GetDoc, GetDocs, StoreAccessor, WhereFilter} from "mobx-firelink";
+import {GetDoc, GetDocs, StoreAccessor, WhereOp} from "mobx-firelink";
 import {Image} from "./images/@Image";
 
 export const GetImage = StoreAccessor(s=>(id: string)=>{
@@ -15,6 +15,6 @@ export const GetImages = StoreAccessor(s=>(): Image[]=>{
 });
 export const GetImagesByURL = StoreAccessor(s=>(url: string): Image[]=>{
 	return GetDocs({
-		filters: [new WhereFilter("url", "==", url)],
+		queryOps: [new WhereOp("url", "==", url)],
 	}, a=>a.images);
 });

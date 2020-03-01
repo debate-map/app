@@ -1,5 +1,5 @@
 import {IsNaN} from "js-vextensions";
-import {WhereFilter, GetDoc, GetDocs, StoreAccessor} from "mobx-firelink";
+import {WhereOp, GetDoc, GetDocs, StoreAccessor} from "mobx-firelink";
 import {MapNodeRevision, TitleKey} from "./nodes/@MapNodeRevision";
 
 export const GetNodeRevision = StoreAccessor(s=>(id: string): MapNodeRevision=>{
@@ -28,7 +28,7 @@ export const GetNodeRevisions = StoreAccessor(s=>(nodeID: string): MapNodeRevisi
 	/* const entryMap = GetData_Query(
 		{
 			// key: `GetNodeRevisions_${nodeID}`,
-			whereFilters: [new WhereFilter('node', '==', nodeID)],
+			whereFilters: [new WhereOp('node', '==', nodeID)],
 			collection: true,
 		},
 		'nodeRevisions',
@@ -36,11 +36,11 @@ export const GetNodeRevisions = StoreAccessor(s=>(nodeID: string): MapNodeRevisi
 	return entryMap ? entryMap.VValues(true).filter((a) => a && a.node == nodeID) : []; */
 	// return entryMap ? entryMap.VValues(true).filter(a => a && a.node == nodeID) : [];
 	return GetDocs({
-		filters: [new WhereFilter("node", "==", nodeID)],
+		queryOps: [new WhereOp("node", "==", nodeID)],
 	}, a=>a.nodeRevisions);
 });
 export const GetNodeRevisionsByTitle = StoreAccessor(s=>(title: string, titleKey: TitleKey): MapNodeRevision[]=>{
 	return GetDocs({
-		filters: [new WhereFilter(`titles.${titleKey}`, "==", title)],
+		queryOps: [new WhereOp(`titles.${titleKey}`, "==", title)],
 	}, a=>a.nodeRevisions);
 });

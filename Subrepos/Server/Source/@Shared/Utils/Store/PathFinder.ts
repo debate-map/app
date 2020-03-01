@@ -3,7 +3,6 @@ import {GetNode} from "../../Store/firebase/nodes";
 import {CE} from "js-vextensions";
 
 export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc: (nodeID: string)=>boolean, nodeIDsToIgnore?: string[]): string {
-	// return CachedTransform_WithStore('GetShortestPathFromRootToNode', [rootNodeID, node._key], {}, () => {
 	const startNode = GetNode(startNodeID); // call this so cache system knows to recalculate when node-data changes
 	if (startNode == null) return null;
 
@@ -32,7 +31,6 @@ export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc
 		currentLayerHeads = newLayerHeads;
 	}
 	return null;
-	// });
 }
 
 /* export function CreateMapViewForPath(path: string): MapView {

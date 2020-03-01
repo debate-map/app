@@ -1,4 +1,4 @@
-import {WhereFilter, GetDoc, GetDocs, StoreAccessor} from "mobx-firelink";
+import {WhereOp, GetDoc, GetDocs, StoreAccessor} from "mobx-firelink";
 import {MapNodePhrasing} from "./nodePhrasings/@MapNodePhrasing";
 
 export const GetNodePhrasings = StoreAccessor(s=>(nodeID: string): MapNodePhrasing[]=>{
@@ -6,7 +6,7 @@ export const GetNodePhrasings = StoreAccessor(s=>(nodeID: string): MapNodePhrasi
 	return entryMap ? entryMap.VValues(true).filter((a) => a && a.node == nodeID) : []; */
 	// store.fire.db.nodePhrasings.Get();
 	return GetDocs({
-		filters: [new WhereFilter("node", "==", nodeID)],
+		queryOps: [new WhereOp("node", "==", nodeID)],
 	}, a=>a.nodePhrasings);
 });
 
