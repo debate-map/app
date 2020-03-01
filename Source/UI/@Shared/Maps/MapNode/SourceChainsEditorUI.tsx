@@ -4,7 +4,7 @@ import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range} from "js-vext
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {Fragment} from "react";
 import {ShowMessageBox} from "react-vmessagebox";
-import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@SourceChain";
+import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern} from "@debate-map/server-link/Source/Link";
 import {Validate} from "mobx-firelink";
 
 export class SourceChainsEditorUI extends BaseComponentPlus(

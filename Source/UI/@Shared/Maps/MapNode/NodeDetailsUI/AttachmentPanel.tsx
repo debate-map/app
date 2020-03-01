@@ -6,8 +6,8 @@ import {ImageAttachmentEditorUI} from "./AttachmentPanel/ImageAttachmentEditorUI
 import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI";
-import {GetAttachmentType, AttachmentType, ResetNodeRevisionAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@AttachmentType";
-import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
+import {GetAttachmentType, AttachmentType, ResetNodeRevisionAttachment} from "@debate-map/server-link/Source/Link";
+import {MapNodeType} from "@debate-map/server-link/Source/Link";
 
 export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {}, {}> {
 	render() {

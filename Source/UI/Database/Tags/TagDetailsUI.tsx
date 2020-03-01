@@ -6,10 +6,10 @@ import {IDAndCreationInfoUI} from "Source/UI/@Shared/CommonPropUIs/IDAndCreation
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {InfoButton, observer_simple} from "vwebapp-framework";
 import {Validate} from "mobx-firelink";
-import {GetNodeL2, AsNodeL3, GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {AddNodeTag} from "Subrepos/Server/Source/@Shared/Commands/AddNodeTag";
-import {MapNodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeTags/@MapNodeTag";
+import {GetNodeL2, AsNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
+import {MapNodeType} from "@debate-map/server-link/Source/Link";
+import {AddNodeTag} from "@debate-map/server-link/Source/Link";
+import {MapNodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp} from "@debate-map/server-link/Source/Link";
 import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
 
 type Props = {baseData: MapNodeTag, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: MapNodeTag)=>void};

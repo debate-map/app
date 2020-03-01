@@ -3,7 +3,7 @@ import {observable} from "mobx";
 import {O, StoreAction} from "vwebapp-framework";
 import {store} from "Source/Store";
 import {SplitStringBySlash_Cached, StoreAccessor, Validate, UUID} from "mobx-firelink";
-import {PathSegmentToNodeID} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {PathSegmentToNodeID} from "@debate-map/server-link/Source/Link";
 
 export class MapView {
 	// rootNodeView = new MapNodeView();

@@ -4,13 +4,13 @@ import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
 import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";
 import {ShowAddImageDialog} from "Source/UI/Database/Images/AddImageDialog";
-import {ImageAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@ImageAttachment";
+import {ImageAttachment} from "@debate-map/server-link/Source/Link";
 import {Validate} from "mobx-firelink";
-import {GetImage, GetImagesByURL} from "Subrepos/Server/Source/@Shared/Store/firebase/images";
+import {GetImage, GetImagesByURL} from "@debate-map/server-link/Source/Link";
 import {Link, Observer} from "vwebapp-framework";
-import {HasModPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID, GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {Image} from "Subrepos/Server/Source/@Shared/Store/firebase/images/@Image";
+import {HasModPermissions} from "@debate-map/server-link/Source/Link";
+import {MeID, GetUser} from "@debate-map/server-link/Source/Link";
+import {Image} from "@debate-map/server-link/Source/Link";
 
 type Props = {baseData: ImageAttachment, creating: boolean, editing?: boolean, style?, onChange?: (newData: ImageAttachment)=>void};
 export class ImageAttachmentEditorUI extends BaseComponent<Props, {newData: ImageAttachment}> {

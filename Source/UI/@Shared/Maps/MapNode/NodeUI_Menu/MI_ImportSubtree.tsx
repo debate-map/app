@@ -10,11 +10,11 @@ import {ApplyDBUpdates} from "mobx-firelink";
 import {ScrollView} from "react-vscrollview";
 import {store} from "Source/Store";
 import {runInAction} from "mobx";
-import {HasModPermissions, HasAdminPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetNodeID, GetNodesByTitle} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {AddChildNode} from "Subrepos/Server/Source/@Shared/Commands/AddChildNode";
-import {ImportSubtree} from "Subrepos/Server/Source/@Shared/Commands/ImportSubtree";
+import {HasModPermissions, HasAdminPermissions} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {GetNodeID, GetNodesByTitle} from "@debate-map/server-link/Source/Link";
+import {AddChildNode} from "@debate-map/server-link/Source/Link";
+import {ImportSubtree} from "@debate-map/server-link/Source/Link";
 
 @Observer
 export class MI_ImportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {

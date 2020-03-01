@@ -11,19 +11,19 @@ import {GetAsync} from "mobx-firelink";
 import {VMenuStub, VMenuItem} from "react-vmenu";
 import {styles} from "Source/Utils/UI/GlobalStyles";
 import {zIndexes} from "Source/Utils/UI/ZIndexes";
-import {Timeline} from "Subrepos/Server/Source/@Shared/Store/firebase/timelines/@Timeline";
-import {GetTimelineStep} from "Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps";
-import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {UpdateTimelineStep} from "Subrepos/Server/Source/@Shared/Commands/UpdateTimelineStep";
-import {DeleteTimelineStep} from "Subrepos/Server/Source/@Shared/Commands/DeleteTimelineStep";
-import {AddTimelineStep} from "Subrepos/Server/Source/@Shared/Commands/AddTimelineStep";
-import {TimelineStep, NodeReveal} from "Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps/@TimelineStep";
-import {GetNodeID, GetNode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {GetNodeL2, GetNodeL3, GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {SearchUpFromNodeForNodeMatchingX} from "Subrepos/Server/Source/@Shared/Utils/Store/PathFinder";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {Timeline} from "@debate-map/server-link/Source/Link";
+import {GetTimelineStep} from "@debate-map/server-link/Source/Link";
+import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {UpdateTimelineStep} from "@debate-map/server-link/Source/Link";
+import {DeleteTimelineStep} from "@debate-map/server-link/Source/Link";
+import {AddTimelineStep} from "@debate-map/server-link/Source/Link";
+import {TimelineStep, NodeReveal} from "@debate-map/server-link/Source/Link";
+import {GetNodeID, GetNode} from "@debate-map/server-link/Source/Link";
+import {GetNodeL2, GetNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
+import {MapNodeType} from "@debate-map/server-link/Source/Link";
+import {SearchUpFromNodeForNodeMatchingX} from "@debate-map/server-link/Source/Link";
+import {Map} from "@debate-map/server-link/Source/Link";
 import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
 
 export enum PositionOptionsEnum {
@@ -108,8 +108,9 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 											new UpdateTimelineStep({stepID: step._key, stepUpdates: {videoTime: null}}).Run();
 										}
 									}}/>
-									<TimeSpanInput mr={5} style={{width: 60}} enabled={creatorOrMod && step.videoTime != null} delayChangeTillDefocus={true} value={step.videoTime}
-										onChange={val=>new UpdateTimelineStep({stepID: step._key, stepUpdates: {videoTime: val}}).Run()}/>
+									<TimeSpanInput mr={5} largeUnit="minute" smallUnit="second" style={{width: 60}}
+										enabled={creatorOrMod && step.videoTime != null} delayChangeTillDefocus={true}
+										value={step.videoTime} onChange={val=>new UpdateTimelineStep({stepID: step._key, stepUpdates: {videoTime: val}}).Run()}/>
 								</>}
 							{/* <Pre>Speaker: </Pre>
 							<Select value={} onChange={val=> {}}/> */}

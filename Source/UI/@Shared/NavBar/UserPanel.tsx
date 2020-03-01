@@ -4,8 +4,8 @@ import {Button, Column, Div, Row} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {HandleError, Link, Observer} from "vwebapp-framework";
-import {fire} from "../../../../Subrepos/Server/Source/@Shared/MobXFirelink";
-import {MeID} from "../../../../Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {fire} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
 
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {

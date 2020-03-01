@@ -6,10 +6,10 @@ import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {PageContainer, Observer} from "vwebapp-framework";
 import {ResetCurrentDBRoot} from "./Admin/ResetCurrentDBRoot";
-import {HasAdminPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {ValidateDBData} from "Subrepos/Server/Source/@Shared/Utils/Store/DBDataValidator";
-import {FirebaseDBShape} from "Subrepos/Server/Source/@Shared/Store/firebase";
+import {HasAdminPermissions} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {ValidateDBData} from "@debate-map/server-link/Source/Link";
+import {FirebaseDBShape} from "@debate-map/server-link/Source/Link";
 
 type UpgradeFunc = (oldData: FirebaseDBShape, markProgress: MarkProgressFunc)=>Promise<FirebaseDBShape>;
 type MarkProgressFunc = (depth: number, entryIndex: number, entryCount?: number)=>void;

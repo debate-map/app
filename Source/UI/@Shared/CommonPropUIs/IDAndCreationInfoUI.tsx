@@ -3,7 +3,7 @@ import {Column, Pre, Row, Text} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {Link, Observer} from "vwebapp-framework";
 import {E} from "js-vextensions";
-import {GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {GetUser} from "@debate-map/server-link/Source/Link";
 
 @Observer
 export class IDAndCreationInfoUI extends BaseComponentPlus({singleLine: false} as {id: string | number, creatorID: string, createdAt: number, singleLine?: boolean}, {}) {

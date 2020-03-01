@@ -3,7 +3,7 @@ import {GetOpenMapID} from "Source/Store/main";
 import {GetMapView} from "Source/Store/main/maps/mapViews/$mapView";
 import {Clone} from "js-vextensions";
 import Raven from "raven-js";
-import {GetAuth_Raw} from "Subrepos/Server/Source/@Shared/Store/firebase";
+import {GetAuth_Raw} from "@debate-map/server-link/Source/Link";
 
 autorun(()=>{
 	let lastAuth;

@@ -1,12 +1,11 @@
+import {GetNodeL3, WeightingType} from "@debate-map/server-link/Source/Link";
 import {observable} from "mobx";
-import {ignore} from "mobx-sync";
-import {O, StoreAction} from "vwebapp-framework";
-import {store} from "Source/Store";
 import {StoreAccessor} from "mobx-firelink";
-import {MapView, GetMapView} from "./maps/mapViews/$mapView";
+import {ignore} from "mobx-sync";
+import {store} from "Source/Store";
+import {O, StoreAction} from "vwebapp-framework";
 import {MapState} from "./maps/mapStates/@MapState";
-import {WeightingType} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings";
-import {GetNodeL3} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {GetMapView, MapView} from "./maps/mapViews/$mapView";
 
 export class MapsState {
 	// @Oervable maps = observable.map<string, MapState>();

@@ -7,15 +7,15 @@ import {E, ToJSON, Clone} from "js-vextensions";
 import {GetAsync} from "mobx-firelink";
 import _ from "lodash";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
-import {MapNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {GetParentNodeL3, IsNodeSubnode, GetParentNodeID} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {GetLinkUnderParent, IsPremiseOfSinglePremiseArgument} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {GetUser, MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {CanEditNode, IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {PermissionInfoType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
-import {UpdateLink} from "Subrepos/Server/Source/@Shared/Commands/UpdateLink";
-import {AddNodeRevision} from "Subrepos/Server/Source/@Shared/Commands/AddNodeRevision";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MapNodeL3} from "@debate-map/server-link/Source/Link";
+import {GetParentNodeL3, IsNodeSubnode, GetParentNodeID} from "@debate-map/server-link/Source/Link";
+import {GetLinkUnderParent, IsPremiseOfSinglePremiseArgument} from "@debate-map/server-link/Source/Link";
+import {GetUser, MeID} from "@debate-map/server-link/Source/Link";
+import {CanEditNode, IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {PermissionInfoType} from "@debate-map/server-link/Source/Link";
+import {UpdateLink} from "@debate-map/server-link/Source/Link";
+import {AddNodeRevision} from "@debate-map/server-link/Source/Link";
+import {Map} from "@debate-map/server-link/Source/Link";
 
 export class DetailsPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {dataError: null as string}) {
 	detailsUI: NodeDetailsUI;

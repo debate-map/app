@@ -4,11 +4,11 @@ import {BaseComponent, GetDOM} from "react-vextensions";
 import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
 import {SubPanel_Quote} from "../../NodeUI_Inner/SubPanel";
 import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI";
-import {QuoteAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@QuoteAttachment";
-import {GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {MapNodeRevision} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
+import {QuoteAttachment} from "@debate-map/server-link/Source/Link";
+import {GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
+import {MapNodeType} from "@debate-map/server-link/Source/Link";
+import {ClaimForm} from "@debate-map/server-link/Source/Link";
+import {MapNodeRevision} from "@debate-map/server-link/Source/Link";
 
 // @ApplyBasicStyles
 export class QuoteInfoEditorUI extends BaseComponent

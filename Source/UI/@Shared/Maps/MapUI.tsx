@@ -23,10 +23,10 @@ import {NodeUI_Inner} from "./MapNode/NodeUI_Inner";
 import {ActionBar_Left} from "./MapUI/ActionBar_Left";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right";
 import {ExpandableBox} from "./MapNode/ExpandableBox";
-import {MapNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {IsNodeL2, IsNodeL3, GetNodeL3, IsPremiseOfSinglePremiseArgument} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {GetParentPath, GetParentNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MapNodeL3} from "@debate-map/server-link/Source/Link";
+import {IsNodeL2, IsNodeL3, GetNodeL3, IsPremiseOfSinglePremiseArgument} from "@debate-map/server-link/Source/Link";
+import {GetParentPath, GetParentNodeL3} from "@debate-map/server-link/Source/Link";
+import {Map} from "@debate-map/server-link/Source/Link";
 
 
 export function GetNodeBoxForPath(path: string) {

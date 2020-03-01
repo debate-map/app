@@ -10,12 +10,12 @@ import {runInAction} from "mobx";
 import {E} from "js-vextensions";
 import {ShowAddImageDialog} from "./Images/AddImageDialog";
 import {ImageDetailsUI} from "./Images/ImageDetailsUI";
-import {Image, GetNiceNameForImageType} from "Subrepos/Server/Source/@Shared/Store/firebase/images/@Image";
-import {GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetImages} from "Subrepos/Server/Source/@Shared/Store/firebase/images";
-import {UpdateImageData} from "Subrepos/Server/Source/@Shared/Commands/UpdateImageData";
-import {DeleteImage} from "Subrepos/Server/Source/@Shared/Commands/DeleteImage";
+import {Image, GetNiceNameForImageType} from "@debate-map/server-link/Source/Link";
+import {GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {GetImages} from "@debate-map/server-link/Source/Link";
+import {UpdateImageData} from "@debate-map/server-link/Source/Link";
+import {DeleteImage} from "@debate-map/server-link/Source/Link";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
 
 @Observer

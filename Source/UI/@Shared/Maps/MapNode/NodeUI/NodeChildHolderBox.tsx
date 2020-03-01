@@ -12,14 +12,14 @@ import {NodeUI_Menu_Stub} from "../NodeUI_Menu";
 import {NodeChildCountMarker} from "./NodeChildCountMarker";
 import {NodeChildHolder} from "./NodeChildHolder";
 import {RatingsPanel} from "./Panels/RatingsPanel";
-import {MapNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {HolderType, GetParentNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings";
-import {ArgumentType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
-import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {RatingType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings/@RatingType";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MapNodeL3} from "@debate-map/server-link/Source/Link";
+import {HolderType, GetParentNodeL3} from "@debate-map/server-link/Source/Link";
+import {IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "@debate-map/server-link/Source/Link";
+import {GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings} from "@debate-map/server-link/Source/Link";
+import {ArgumentType} from "@debate-map/server-link/Source/Link";
+import {MapNodeType} from "@debate-map/server-link/Source/Link";
+import {RatingType} from "@debate-map/server-link/Source/Link";
+import {Map} from "@debate-map/server-link/Source/Link";
 import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
 
 type Props = {

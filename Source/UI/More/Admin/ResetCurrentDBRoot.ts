@@ -2,15 +2,15 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {observable} from "mobx";
 import {ConvertDataToValidDBUpdates, ApplyDBUpdates, DBPath, GenerateUUID} from "mobx-firelink";
 import {E} from "js-vextensions";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {User} from "Subrepos/Server/Source/@Shared/Store/firebase/users/@User";
-import {MapType, Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
-import {globalRootNodeID, globalMapID, MapNode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {MapNodeRevision} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
-import {ValidateDBData} from "Subrepos/Server/Source/@Shared/Utils/Store/DBDataValidator";
-import {FirebaseDBShape} from "Subrepos/Server/Source/@Shared/Store/firebase";
-import {GeneralData} from "Subrepos/Server/Source/@Shared/Store/firebase/general";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {User} from "@debate-map/server-link/Source/Link";
+import {MapType, Map} from "@debate-map/server-link/Source/Link";
+import {globalRootNodeID, globalMapID, MapNode} from "@debate-map/server-link/Source/Link";
+import {MapNodeType} from "@debate-map/server-link/Source/Link";
+import {MapNodeRevision} from "@debate-map/server-link/Source/Link";
+import {ValidateDBData} from "@debate-map/server-link/Source/Link";
+import {FirebaseDBShape} from "@debate-map/server-link/Source/Link";
+import {GeneralData} from "@debate-map/server-link/Source/Link";
 
 // Note: This is currently not used, and probably doesn`t even work atm.
 

@@ -6,7 +6,7 @@ import {ScrollView} from "react-vscrollview";
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {IDAndCreationInfoUI} from "Source/UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {Image, Image_namePattern, ImageType, GetNiceNameForImageType, Image_urlPattern} from "Subrepos/Server/Source/@Shared/Store/firebase/images/@Image";
+import {Image, Image_namePattern, ImageType, GetNiceNameForImageType, Image_urlPattern} from "@debate-map/server-link/Source/Link";
 import {SourceChainsEditorUI} from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
 
 export class ImageDetailsUI extends BaseComponentPlus(

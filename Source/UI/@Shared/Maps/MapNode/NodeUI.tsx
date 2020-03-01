@@ -14,16 +14,16 @@ import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker";
 import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer";
 import {NodeUI_Inner} from "./NodeUI_Inner";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
-import {MapNodeL3, Polarity, AccessLevel} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {IsNodeL2, IsNodeL3, IsSinglePremiseArgument, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsRootNode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {Map} from "@debate-map/server-link/Source/Link";
+import {MapNodeL3, Polarity, AccessLevel} from "@debate-map/server-link/Source/Link";
+import {IsNodeL2, IsNodeL3, IsSinglePremiseArgument, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "@debate-map/server-link/Source/Link";
+import {GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsRootNode} from "@debate-map/server-link/Source/Link";
 import {GetNodeChildrenL3_Advanced} from "Source/Store/firebase_ext/nodes";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Source/Store/firebase_ext/mapNodeEditTimes";
-import {ChangeType} from "Subrepos/Server/Source/@Shared/Store/firebase/mapNodeEditTimes";
-import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {GetSubnodesInEnabledLayersEnhanced} from "Subrepos/Server/Source/@Shared/Store/firebase/layers";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {ChangeType} from "@debate-map/server-link/Source/Link";
+import {MapNodeType} from "@debate-map/server-link/Source/Link";
+import {GetSubnodesInEnabledLayersEnhanced} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
 
 // @ExpensiveComponent
 @WarnOfTransientObjectProps

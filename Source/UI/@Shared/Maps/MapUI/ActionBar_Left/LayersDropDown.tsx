@@ -3,16 +3,16 @@ import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Ro
 import {BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {ScrollView} from "react-vscrollview";
-import {MeID, GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetLayers, ForDeleteLayer_GetError, GetMapLayerIDs} from "Subrepos/Server/Source/@Shared/Store/firebase/layers";
-import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MeID, GetUser} from "@debate-map/server-link/Source/Link";
+import {GetLayers, ForDeleteLayer_GetError, GetMapLayerIDs} from "@debate-map/server-link/Source/Link";
+import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
 import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
-import {Layer} from "Subrepos/Server/Source/@Shared/Store/firebase/layers/@Layer";
-import {GetUserLayerStateForMap} from "Subrepos/Server/Source/@Shared/Store/firebase/userMapInfo";
-import {DeleteLayer} from "Subrepos/Server/Source/@Shared/Commands/DeleteLayer";
-import {SetLayerAttachedToMap} from "Subrepos/Server/Source/@Shared/Commands/SetLayerAttachedToMap";
-import {SetMapLayerStateForUser} from "Subrepos/Server/Source/@Shared/Commands/SetMapLayerStateForUser";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {Layer} from "@debate-map/server-link/Source/Link";
+import {GetUserLayerStateForMap} from "@debate-map/server-link/Source/Link";
+import {DeleteLayer} from "@debate-map/server-link/Source/Link";
+import {SetLayerAttachedToMap} from "@debate-map/server-link/Source/Link";
+import {SetMapLayerStateForUser} from "@debate-map/server-link/Source/Link";
+import {Map} from "@debate-map/server-link/Source/Link";
 import {ShowAddLayerDialog} from "../../Layers/AddLayerDialog";
 import {ES} from "../../../../../Utils/UI/GlobalStyles";
 

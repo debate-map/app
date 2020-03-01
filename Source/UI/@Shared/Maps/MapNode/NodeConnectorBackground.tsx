@@ -2,7 +2,7 @@ import {Vector2i, E} from "js-vextensions";
 import {BaseComponent, SimpleShouldUpdate, WarnOfTransientObjectProps} from "react-vextensions";
 import {HSLA} from "vwebapp-framework";
 import {Fragment} from "react";
-import {MapNodeL3} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {MapNodeL3} from "@debate-map/server-link/Source/Link";
 import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
 
 type Props = {

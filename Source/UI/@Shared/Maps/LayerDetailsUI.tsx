@@ -2,7 +2,7 @@ import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
 import Moment from "moment";
 import {Column, Pre, RowLR, TextInput, Text} from "react-vcomponents";
 import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
-import {Layer} from "Subrepos/Server/Source/@Shared/Store/firebase/layers/@Layer";
+import {Layer} from "@debate-map/server-link/Source/Link";
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
 
 type Props = {baseData: Layer, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Layer, ui: LayerDetailsUI)=>void};

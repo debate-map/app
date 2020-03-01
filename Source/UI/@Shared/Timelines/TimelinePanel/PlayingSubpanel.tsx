@@ -10,8 +10,8 @@ import {GetScreenRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, Y
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {GetSelectedTimeline, GetPlayingTimelineStepIndex, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
 import {zIndexes} from "Source/Utils/UI/ZIndexes";
-import {GetTimelineStep, GetTimelineSteps} from "Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {GetTimelineStep, GetTimelineSteps} from "@debate-map/server-link/Source/Link";
+import {Map} from "@debate-map/server-link/Source/Link";
 import {StepUI} from "./PlayingSubpanel/StepUI";
 
 /* export class PlayingSubpanel extends BaseComponentPlus(

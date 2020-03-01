@@ -7,9 +7,9 @@ import {GetOpenMapID, GetPage, GetSubpage} from "Source/Store/main";
 import {GetSelectedImageID, GetSelectedTermID, GetSelectedUserID} from "Source/Store/main/database";
 import {GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
 import {MaybeLog} from "vwebapp-framework";
-import {GetMap} from "Subrepos/Server/Source/@Shared/Store/firebase/maps";
-import {MapNodeL2} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {GetNodeDisplayText, GetNodeL2} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {GetMap} from "@debate-map/server-link/Source/Link";
+import {MapNodeL2} from "@debate-map/server-link/Source/Link";
+import {GetNodeDisplayText, GetNodeL2} from "@debate-map/server-link/Source/Link";
 
 export const rootPages = [
 	"stream", "chat", "reputation",

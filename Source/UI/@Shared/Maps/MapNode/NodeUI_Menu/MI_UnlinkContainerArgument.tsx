@@ -4,10 +4,10 @@ import {VMenuItem} from "react-vmenu";
 import {ShowMessageBox} from "react-vmessagebox";
 import {styles} from "Source/Utils/UI/GlobalStyles";
 import {Observer} from "vwebapp-framework";
-import {GetNodeL3, GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {UnlinkNode} from "Subrepos/Server/Source/@Shared/Commands/UnlinkNode";
+import {GetNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
+import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {UnlinkNode} from "@debate-map/server-link/Source/Link";
 import {MI_SharedProps} from "../NodeUI_Menu";
 
 @Observer

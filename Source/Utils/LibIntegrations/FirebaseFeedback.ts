@@ -5,8 +5,8 @@ import {store} from "Source/Store";
 import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
 import {logTypes} from "Source/Utils/General/Logging";
 import {VReactMarkdown_Remarkable} from "vwebapp-framework";
-import {MeID, GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetUserPermissionGroups} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MeID, GetUser} from "@debate-map/server-link/Source/Link";
+import {GetUserPermissionGroups} from "@debate-map/server-link/Source/Link";
 import {GetNewURLForStoreChanges} from "./VWAF";
 
 export function InitFeedback() {

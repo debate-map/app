@@ -8,10 +8,10 @@ import {GADDemo} from "Source/UI/@GAD/GAD";
 import {HSLA, Observer} from "vwebapp-framework";
 import {DetailsDropDown} from "./ActionBar_Left/DetailsDropDown";
 import {PeopleDropDown} from "./ActionBar_Left/PeopleDropDown";
-import {Map, MapType} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {IsUserMap} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/$map";
+import {Map, MapType} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {IsUserMap} from "@debate-map/server-link/Source/Link";
 import {colors} from "../../../../Utils/UI/GlobalStyles";
 
 @Observer

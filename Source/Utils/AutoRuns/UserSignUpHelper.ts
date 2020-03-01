@@ -1,11 +1,11 @@
 import {autorun} from "mobx";
 import {store} from "Source/Store";
 import {DBPath, GetAsync, GetDoc} from "mobx-firelink";
-import {fire} from "../../../Subrepos/Server/Source/@Shared/MobXFirelink";
-import {GetUser} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetUser_Private} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/users_private";
-import {SetUserData} from "../../../Subrepos/Server/Source/@Shared/Commands/SetUserData";
-import {SetUserData_Private} from "../../../Subrepos/Server/Source/@Shared/Commands/SetUserData_Private";
+import {fire} from "@debate-map/server-link/Source/Link";
+import {GetUser} from "@debate-map/server-link/Source/Link";
+import {GetUser_Private} from "@debate-map/server-link/Source/Link";
+import {SetUserData} from "@debate-map/server-link/Source/Link";
+import {SetUserData_Private} from "@debate-map/server-link/Source/Link";
 
 let lastUserInfo;
 autorun(()=>{

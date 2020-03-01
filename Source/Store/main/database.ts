@@ -1,7 +1,6 @@
 import {O} from "vwebapp-framework";
 import {StoreAccessor, GetDoc} from "mobx-firelink";
-import {GetTerms} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/terms";
-import {GetImages} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/images";
+import {GetTerms, GetImages, FirebaseDBShape} from "@debate-map/server-link/Source/Link";
 
 export class DatabaseState {
 	@O subpage: string;

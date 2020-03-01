@@ -6,11 +6,11 @@ import {VMenuItem, VMenuStub} from "react-vmenu";
 import {styles} from "Source/Utils/UI/GlobalStyles";
 import {runInAction} from "mobx";
 import {store} from "Source/Store";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
-import {Timeline} from "Subrepos/Server/Source/@Shared/Store/firebase/timelines/@Timeline";
-import {GetTimelineStep} from "Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps";
-import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {Map} from "@debate-map/server-link/Source/Link";
+import {Timeline} from "@debate-map/server-link/Source/Link";
+import {GetTimelineStep} from "@debate-map/server-link/Source/Link";
+import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
 import {PositionOptionsEnum, NodeRevealUI, StepEditorUI} from "../EditorSubpanel/StepEditorUI";
 
 @Observer

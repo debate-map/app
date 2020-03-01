@@ -12,13 +12,13 @@ import {store} from "Source/Store";
 import {GetNodeView} from "Source/Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
 import {NodeChildHolderBox} from "./NodeChildHolderBox";
-import {MapNodeL3, Polarity} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {HolderType, GetNodeChildrenL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {GetFillPercent_AtPath} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings";
-import {IsMultiPremiseArgument} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {MapNodeType, MapNodeType_Info} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {ArgumentType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MapNodeL3, Polarity} from "@debate-map/server-link/Source/Link";
+import {HolderType, GetNodeChildrenL3} from "@debate-map/server-link/Source/Link";
+import {GetFillPercent_AtPath} from "@debate-map/server-link/Source/Link";
+import {IsMultiPremiseArgument} from "@debate-map/server-link/Source/Link";
+import {MapNodeType, MapNodeType_Info} from "@debate-map/server-link/Source/Link";
+import {ArgumentType} from "@debate-map/server-link/Source/Link";
+import {Map} from "@debate-map/server-link/Source/Link";
 import {ArgumentsControlBar} from "../ArgumentsControlBar";
 
 type Props = {

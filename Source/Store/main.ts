@@ -6,6 +6,7 @@ import {O, StoreAction} from "vwebapp-framework";
 import {rootPageDefaultChilds} from "Source/Utils/URL/URLs";
 import {StoreAccessor} from "mobx-firelink";
 import {store} from "Source/Store";
+import {globalMapID} from "@debate-map/server-link/Source/Link";
 import {DatabaseState} from "./main/database";
 import {PublicPageState} from "./main/public";
 import {MapState} from "./main/maps/mapStates/@MapState";
@@ -15,7 +16,6 @@ import {RatingUIState} from "./main/ratingUI";
 import {SearchState} from "./main/search";
 import {MapsState} from "./main/maps";
 import {TimelinesState} from "./main/timelines";
-import {globalMapID} from "../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
 import {NotificationMessage} from "./main/@NotificationMessage";
 
 export class MainState {

@@ -1,8 +1,8 @@
 import _ from "lodash";
 import {ObservableMap} from "mobx";
 import {Clone} from "js-vextensions";
-import {FirebaseDBShape} from "Subrepos/Server/Source/@Shared/Store/firebase";
-import {globalMapID, globalRootNodeID} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {FirebaseDBShape} from "@debate-map/server-link/Source/Link";
+import {globalMapID, globalRootNodeID} from "@debate-map/server-link/Source/Link";
 import {GenerateUUID} from "mobx-firelink";
 import {AddUpgradeFunc} from "../../Admin";
 

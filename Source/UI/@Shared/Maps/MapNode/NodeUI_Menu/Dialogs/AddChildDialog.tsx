@@ -7,14 +7,14 @@ import {ACTMapNodeExpandedSet} from "Source/Store/main/maps/mapViews/$mapView";
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {InfoButton, Link, observer_simple} from "vwebapp-framework";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
-import {MapNodeType, GetMapNodeTypeDisplayName} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {Polarity, MapNode, ClaimForm, ChildEntry} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {GetMap} from "Subrepos/Server/Source/@Shared/Store/firebase/maps";
-import {GetNode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
-import {AddArgumentAndClaim} from "Subrepos/Server/Source/@Shared/Commands/AddArgumentAndClaim";
-import {AddChildNode} from "Subrepos/Server/Source/@Shared/Commands/AddChildNode";
-import {GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {MapNodeType, GetMapNodeTypeDisplayName} from "@debate-map/server-link/Source/Link";
+import {Polarity, MapNode, ClaimForm, ChildEntry} from "@debate-map/server-link/Source/Link";
+import {GetMap} from "@debate-map/server-link/Source/Link";
+import {GetNode} from "@debate-map/server-link/Source/Link";
+import {MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern} from "@debate-map/server-link/Source/Link";
+import {AddArgumentAndClaim} from "@debate-map/server-link/Source/Link";
+import {AddChildNode} from "@debate-map/server-link/Source/Link";
+import {GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3} from "@debate-map/server-link/Source/Link";
 
 export class AddChildHelper {
 	constructor(parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string) {

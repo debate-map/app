@@ -4,12 +4,7 @@ import {BaseComponent} from "react-vextensions";
 import {GetOpenMapID} from "Source/Store/main";
 import {InfoButton} from "vwebapp-framework";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
-import {MapNodeRevision_Defaultable, PermissionInfoType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
-import {GetMap} from "Subrepos/Server/Source/@Shared/Store/firebase/maps";
-import {HasModPermissions, GetUserAccessLevel, HasAdminPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {AccessLevel} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {MapType} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MapNodeRevision_Defaultable, GetMap, PermissionInfoType, HasModPermissions, MeID, AccessLevel, GetUserAccessLevel, HasAdminPermissions, MapType} from "@debate-map/server-link/Source/Link";
 
 // @Observer
 // export class PermissionsOptions extends BaseComponent<Pick<SharedProps, 'newData' | 'newRevisionData' | 'enabled' | 'Change'> & {forDefaultsInMap?: boolean}, {}> {

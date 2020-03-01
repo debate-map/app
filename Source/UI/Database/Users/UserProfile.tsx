@@ -8,12 +8,12 @@ import {Fragment} from "react";
 import {PropNameToTitle} from "Source/Utils/General/Others";
 import {ScrollView} from "react-vscrollview";
 import {E} from "js-vextensions";
-import {MeID, GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetUser_Private} from "Subrepos/Server/Source/@Shared/Store/firebase/users_private";
-import {GetUserPermissionGroups} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {SetUserData} from "Subrepos/Server/Source/@Shared/Commands/SetUserData";
-import {SetUserData_Private} from "Subrepos/Server/Source/@Shared/Commands/SetUserData_Private";
-import {User} from "Subrepos/Server/Source/@Shared/Store/firebase/users/@User";
+import {MeID, GetUser} from "@debate-map/server-link/Source/Link";
+import {GetUser_Private} from "@debate-map/server-link/Source/Link";
+import {GetUserPermissionGroups} from "@debate-map/server-link/Source/Link";
+import {SetUserData} from "@debate-map/server-link/Source/Link";
+import {SetUserData_Private} from "@debate-map/server-link/Source/Link";
+import {User} from "@debate-map/server-link/Source/Link";
 
 @Observer
 export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, {}) {

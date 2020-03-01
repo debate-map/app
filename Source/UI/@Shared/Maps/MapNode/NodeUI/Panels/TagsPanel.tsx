@@ -2,16 +2,16 @@ import {Div, Column, Row, Button, TextInput, DropDown, DropDownTrigger, DropDown
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {InfoButton, Observer, GetUpdates, HSLA} from "vwebapp-framework";
 import {TermDefinitionPanel} from "./DefinitionsPanel";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
-import {MapNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {GetNodeTags} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeTags";
-import {HasModPermissions, IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {Map} from "@debate-map/server-link/Source/Link";
+import {MapNodeL3} from "@debate-map/server-link/Source/Link";
+import {GetNodeTags} from "@debate-map/server-link/Source/Link";
+import {HasModPermissions, IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
 import {ShowAddTagDialog, TagDetailsUI} from "Source/UI/Database/Tags/TagDetailsUI";
-import {TagComp_MirrorChildrenFromXToY, MapNodeTag, GetTagCompClassByTag} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeTags/@MapNodeTag";
-import {UpdateNodeTag} from "Subrepos/Server/Source/@Shared/Commands/UpdateNodeTag";
+import {TagComp_MirrorChildrenFromXToY, MapNodeTag, GetTagCompClassByTag} from "@debate-map/server-link/Source/Link";
+import {UpdateNodeTag} from "@debate-map/server-link/Source/Link";
 import {ShowMessageBox} from "react-vmessagebox";
-import {DeleteNodeTag} from "Subrepos/Server/Source/@Shared/Commands/DeleteNodeTag";
+import {DeleteNodeTag} from "@debate-map/server-link/Source/Link";
 
 @Observer
 export class TagsPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {}) {

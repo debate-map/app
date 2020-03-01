@@ -5,11 +5,11 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {GADDemo} from "Source/UI/@GAD/GAD";
 import {Button_GAD} from "Source/UI/@GAD/GADButton";
 import {InfoButton} from "vwebapp-framework";
-import {GetMapEditorIDs, GetMapEditors} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/$map";
-import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {UpdateMapDetails} from "Subrepos/Server/Source/@Shared/Commands/UpdateMapDetails";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {GetMapEditorIDs, GetMapEditors} from "@debate-map/server-link/Source/Link";
+import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {UpdateMapDetails} from "@debate-map/server-link/Source/Link";
+import {Map} from "@debate-map/server-link/Source/Link";
 
 export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 	render() {

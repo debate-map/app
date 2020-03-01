@@ -6,8 +6,8 @@ import {GADDemo} from "Source/UI/@GAD/GAD";
 import {HSLA, Link, Observer} from "vwebapp-framework";
 import {store} from "Source/Store";
 import {runInAction} from "mobx";
-import {GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {MapType, Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {GetUser} from "@debate-map/server-link/Source/Link";
+import {MapType, Map} from "@debate-map/server-link/Source/Link";
 import {columnWidths} from "./MapListUI";
 
 @Observer

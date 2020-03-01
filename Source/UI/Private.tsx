@@ -1,5 +1,5 @@
 import {BaseComponentPlus} from "react-vextensions";
-import {MapType} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MapType} from "@debate-map/server-link/Source/Link";
 import {MapListUI} from "./@Shared/Maps/MapListUI";
 
 export class PrivateUI extends BaseComponentPlus({} as {}, {}) {

@@ -1,6 +1,6 @@
 import {presetBackgrounds, defaultPresetBackground} from "Source/Utils/UI/PresetBackgrounds";
 import {GADDemo} from "Source/UI/@GAD/GAD";
-import {GetUser_Private} from "../../../../Subrepos/Server/Source/@Shared/Store/firebase/users_private";
+import {GetUser_Private} from "@debate-map/server-link/Source/Link";
 
 // backgrounds
 // ==========

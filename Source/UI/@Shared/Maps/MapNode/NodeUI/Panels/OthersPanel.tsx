@@ -7,21 +7,21 @@ import {IDAndCreationInfoUI} from "Source/UI/@Shared/CommonPropUIs/IDAndCreation
 import {UUIDPathStub, UUIDStub} from "Source/UI/@Shared/UUIDStub";
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {SlicePath} from "mobx-firelink";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {Map} from "@debate-map/server-link/Source/Link";
 import {Observer, InfoButton, Icon} from "vwebapp-framework";
-import {MapNodeL3, ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {AttachmentType, GetAttachmentType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@AttachmentType";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetUserPermissionGroups, IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {GetParentNodeL3, GetNodeMirrorChildren, GetParentNodeID} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {CanConvertFromClaimTypeXToY, ChangeClaimType} from "Subrepos/Server/Source/@Shared/Commands/ChangeClaimType";
-import {ArgumentType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
-import {IsSinglePremiseArgument, GetNodeDisplayText, GetNodeL3, GetNodeForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {ChangeNodeOwnerMap} from "Subrepos/Server/Source/@Shared/Commands/ChangeNodeOwnerMap";
-import {ReverseArgumentPolarity} from "Subrepos/Server/Source/@Shared/Commands/ReverseArgumentPolarity";
-import {UpdateLink} from "Subrepos/Server/Source/@Shared/Commands/UpdateLink";
-import {UpdateNodeChildrenOrder} from "Subrepos/Server/Source/@Shared/Commands/UpdateNodeChildrenOrder";
+import {MapNodeL3, ClaimForm} from "@debate-map/server-link/Source/Link";
+import {AttachmentType, GetAttachmentType} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {GetUserPermissionGroups, IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {GetParentNodeL3, GetNodeMirrorChildren, GetParentNodeID} from "@debate-map/server-link/Source/Link";
+import {MapNodeType} from "@debate-map/server-link/Source/Link";
+import {CanConvertFromClaimTypeXToY, ChangeClaimType} from "@debate-map/server-link/Source/Link";
+import {ArgumentType} from "@debate-map/server-link/Source/Link";
+import {IsSinglePremiseArgument, GetNodeDisplayText, GetNodeL3, GetNodeForm} from "@debate-map/server-link/Source/Link";
+import {ChangeNodeOwnerMap} from "@debate-map/server-link/Source/Link";
+import {ReverseArgumentPolarity} from "@debate-map/server-link/Source/Link";
+import {UpdateLink} from "@debate-map/server-link/Source/Link";
+import {UpdateNodeChildrenOrder} from "@debate-map/server-link/Source/Link";
 
 @Observer
 export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType}) {

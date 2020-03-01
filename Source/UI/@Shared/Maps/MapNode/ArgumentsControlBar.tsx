@@ -1,8 +1,8 @@
 import {Column, Row} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {AddArgumentButton} from "Source/UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton";
-import {MapNodeL3, Polarity} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MapNodeL3, Polarity} from "@debate-map/server-link/Source/Link";
+import {Map} from "@debate-map/server-link/Source/Link";
 
 export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node: MapNodeL3, path: string, childBeingAdded: boolean}, {premiseTitle: ""}) {
 	render() {

@@ -14,5 +14,6 @@ export const webpackConfig = CreateWebpackConfig({
 	ext: {
 		name: "client",
 	},
+	// todo: comment this out, since not needed anymore (requires change in tsconfig.json as well)
 	sourcesFromRoot: true,
 });

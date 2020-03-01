@@ -6,12 +6,12 @@ import {ES} from "Source/Utils/UI/GlobalStyles";
 import {TermDefinitionPanel} from "../NodeUI/Panels/DefinitionsPanel";
 import {NodeTermsUI} from "./TextPanel/NodeTermsUI";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
-import {GetAttachmentType, AttachmentType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@AttachmentType";
-import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {MapNodeL2, ChildEntry, ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {MapNodeRevision_titlePattern, ArgumentType, GetArgumentTypeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
-import {TermAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@TermAttachment";
-import {GetDisplayPolarity} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {GetAttachmentType, AttachmentType} from "@debate-map/server-link/Source/Link";
+import {MapNodeType} from "@debate-map/server-link/Source/Link";
+import {MapNodeL2, ChildEntry, ClaimForm} from "@debate-map/server-link/Source/Link";
+import {MapNodeRevision_titlePattern, ArgumentType, GetArgumentTypeDisplayText} from "@debate-map/server-link/Source/Link";
+import {TermAttachment} from "@debate-map/server-link/Source/Link";
+import {GetDisplayPolarity} from "@debate-map/server-link/Source/Link";
 
 export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 	render() {

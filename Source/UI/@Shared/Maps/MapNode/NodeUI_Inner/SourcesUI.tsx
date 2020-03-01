@@ -2,7 +2,7 @@ import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {Row, Text, Column} from "react-vcomponents";
 import {VURL} from "js-vextensions";
 import {Link} from "vwebapp-framework";
-import {SourceChain, Source} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@SourceChain";
+import {SourceChain, Source} from "@debate-map/server-link/Source/Link";
 
 export class SourcesUI extends BaseComponentPlus({headerText: "Sources"} as {sourceChains: SourceChain[], headerText?: string}, {}) {
 	render() {

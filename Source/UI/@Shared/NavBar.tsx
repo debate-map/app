@@ -18,7 +18,7 @@ import {SearchPanel} from "./NavBar/SearchPanel";
 import {StreamPanel} from "./NavBar/StreamPanel";
 import {UserPanel} from "./NavBar/UserPanel";
 import {zIndexes} from "Source/Utils/UI/ZIndexes";
-import {fire} from "../../../Subrepos/Server/Source/@Shared/MobXFirelink";
+import {fire} from "@debate-map/server-link/Source/Link";
 
 // main
 // ==========

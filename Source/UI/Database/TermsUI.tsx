@@ -9,12 +9,12 @@ import {GetSelectedTerm} from "Source/Store/main/database";
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {GetUpdates, Observer} from "vwebapp-framework";
 import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI";
-import {Term, TermType} from "Subrepos/Server/Source/@Shared/Store/firebase/terms/@Term";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetTerms, GetFullNameP} from "Subrepos/Server/Source/@Shared/Store/firebase/terms";
-import {GetUserPermissionGroups, IsUserCreatorOrMod, CanGetBasicPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {UpdateTerm} from "Subrepos/Server/Source/@Shared/Commands/UpdateTerm";
-import {DeleteTerm} from "Subrepos/Server/Source/@Shared/Commands/DeleteTerm";
+import {Term, TermType} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {GetTerms, GetFullNameP} from "@debate-map/server-link/Source/Link";
+import {GetUserPermissionGroups, IsUserCreatorOrMod, CanGetBasicPermissions} from "@debate-map/server-link/Source/Link";
+import {UpdateTerm} from "@debate-map/server-link/Source/Link";
+import {DeleteTerm} from "@debate-map/server-link/Source/Link";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
 
 @Observer

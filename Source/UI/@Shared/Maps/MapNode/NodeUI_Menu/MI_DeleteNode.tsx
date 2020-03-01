@@ -4,11 +4,11 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {styles} from "Source/Utils/UI/GlobalStyles";
 import {Observer} from "vwebapp-framework";
 import {E} from "js-vextensions";
-import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {DeleteNode} from "Subrepos/Server/Source/@Shared/Commands/DeleteNode";
-import {IsNodeSubnode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
+import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
+import {DeleteNode} from "@debate-map/server-link/Source/Link";
+import {IsNodeSubnode} from "@debate-map/server-link/Source/Link";
 import {MI_SharedProps} from "../NodeUI_Menu";
 
 @Observer

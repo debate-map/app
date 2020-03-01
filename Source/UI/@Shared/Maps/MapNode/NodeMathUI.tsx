@@ -3,8 +3,8 @@ import {BaseComponent, GetDOM} from "react-vextensions";
 import ReactDOM from "react-dom";
 import {IsNaN} from "js-vextensions";
 import {store} from "Source/Store";
-import {Term} from "Subrepos/Server/Source/@Shared/Store/firebase/terms/@Term";
-import {PreProcessLatex} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {Term} from "@debate-map/server-link/Source/Link";
+import {PreProcessLatex} from "@debate-map/server-link/Source/Link";
 import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
 
 // change InlineMath's generateHtml function to not break on katex parse-errors

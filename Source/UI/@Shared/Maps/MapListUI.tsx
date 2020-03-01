@@ -8,15 +8,15 @@ import {GetSelectedPrivateMap} from "Source/Store/main/private";
 import {GetSelectedPublicMap} from "Source/Store/main/public";
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {HSLA, Observer, PageContainer} from "vwebapp-framework";
-import {MapType} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MapType} from "@debate-map/server-link/Source/Link";
 import {GADDemo} from "../../@GAD/GAD";
 import {ShowAddMapDialog} from "../../@Shared/Maps/AddMapDialog";
 import {MapEntryUI} from "../../@Shared/Maps/MapEntryUI";
 import {MapUI} from "../../@Shared/Maps/MapUI";
 import {ShowSignInPopup} from "../../@Shared/NavBar/UserPanel";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetUserPermissionGroups, CanGetBasicPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {GetMaps_Private, GetMaps_Public} from "Subrepos/Server/Source/@Shared/Store/firebase/maps";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {GetUserPermissionGroups, CanGetBasicPermissions} from "@debate-map/server-link/Source/Link";
+import {GetMaps_Private, GetMaps_Public} from "@debate-map/server-link/Source/Link";
 
 export const columnWidths = [0.64, 0.06, 0.12, 0.18];
 

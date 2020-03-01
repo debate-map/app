@@ -1,13 +1,8 @@
 import {emptyArray, FromJSON, GetValues, ToNumber, emptyArray_forLoading} from "js-vextensions";
 import {O} from "vwebapp-framework";
 import {StoreAccessor} from "mobx-firelink";
+import {GetNode, Timeline, GetTimeline, GetTimelineStep, GetNodesRevealedInSteps, GetMap, GetTimelineSteps, TimelineStep, GetNodeRevealTimesInSteps} from "@debate-map/server-link/Source/Link";
 import {TimelineSubpanel, ShowChangesSinceType} from "./@MapState";
-import {GetNode} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {Timeline} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/timelines/@Timeline";
-import {GetMap} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/maps";
-import {TimelineStep} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps/@TimelineStep";
-import {GetTimeline} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/timelines";
-import {GetTimelineStep, GetNodesRevealedInSteps, GetTimelineSteps, GetNodeRevealTimesInSteps} from "../../../../../Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps";
 
 export const GetMapState = StoreAccessor(s=>(mapID: string)=>{
 	return s.main.maps.mapStates.get(mapID);

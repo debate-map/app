@@ -2,10 +2,10 @@ import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
 import {Column, Pre, Row} from "react-vcomponents";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
-import {ReferencesAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@ReferencesAttachment";
-import {GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {ReferencesAttachment} from "@debate-map/server-link/Source/Link";
+import {GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
+import {MapNodeType} from "@debate-map/server-link/Source/Link";
+import {ClaimForm} from "@debate-map/server-link/Source/Link";
 import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI";
 import {SubPanel_Quote, SubPanel_References} from "../../NodeUI_Inner/SubPanel";
 

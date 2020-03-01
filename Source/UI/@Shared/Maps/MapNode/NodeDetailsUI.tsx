@@ -5,16 +5,16 @@ import {BaseComponentPlus, GetDOM, RenderSource} from "react-vextensions";
 import {store} from "Source/Store";
 import {Observer} from "vwebapp-framework";
 import {DetailsPanel_Subpanel} from "Source/Store/main/maps";
-import {MapNode, ChildEntry, MapNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {MapNode, ChildEntry, MapNodeL3} from "@debate-map/server-link/Source/Link";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel";
 import {TextPanel} from "./NodeDetailsUI/TextPanel";
 import {QuoteInfoEditorUI} from "./NodeDetailsUI/AttachmentPanel/QuoteInfoEditorUI";
 import {TagsPanel} from "./NodeUI/Panels/TagsPanel";
-import {MapNodeRevision} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
-import {AsNodeL1, AsNodeL2} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {GetAttachmentType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@AttachmentType";
+import {MapNodeRevision} from "@debate-map/server-link/Source/Link";
+import {AsNodeL1, AsNodeL2} from "@debate-map/server-link/Source/Link";
+import {GetAttachmentType} from "@debate-map/server-link/Source/Link";
 
 type Props = {
 	baseData: MapNode,

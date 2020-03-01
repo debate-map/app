@@ -3,8 +3,8 @@ import Moment from "moment";
 import {CheckBox, Column, Pre, RowLR, Spinner, TextInput, Row} from "react-vcomponents";
 import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {InfoButton} from "vwebapp-framework";
-import {Map_namePattern, MapType, Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
-import {MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
+import {Map_namePattern, MapType, Map} from "@debate-map/server-link/Source/Link";
+import {MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType} from "@debate-map/server-link/Source/Link";
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
 import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel";
 

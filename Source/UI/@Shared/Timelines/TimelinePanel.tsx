@@ -5,7 +5,7 @@ import {GetSelectedTimeline, GetTimelineOpenSubpanel, GetMapState} from "Source/
 import {runInAction} from "mobx";
 import {Observer} from "vwebapp-framework";
 import {TimelineSubpanel} from "Source/Store/main/maps/mapStates/@MapState";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {Map} from "@debate-map/server-link/Source/Link";
 import {CollectionSubpanel} from "./TimelinePanel/CollectionSubpanel";
 import {EditorSubpanel} from "./TimelinePanel/EditorSubpanel";
 import {PlayingSubpanel} from "./TimelinePanel/PlayingSubpanel";

@@ -8,8 +8,8 @@ import {MapState, TimelineSubpanel} from "Source/Store/main/maps/mapStates/@MapS
 import {MapUI, ACTUpdateFocusNodeAndViewOffset, ACTSetFocusNodeAndViewOffset} from "Source/UI/@Shared/Maps/MapUI";
 import {GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
 import {ACTEnsureMapStateInit} from "Source/Store/main/maps";
-import {GetMap} from "Subrepos/Server/Source/@Shared/Store/firebase/maps";
-import {GetNodeL2} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {GetMap} from "@debate-map/server-link/Source/Link";
+import {GetNodeL2} from "@debate-map/server-link/Source/Link";
 
 let lastMapID;
 autorun(()=>{

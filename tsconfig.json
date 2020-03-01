@@ -78,8 +78,6 @@
 		//"Typings/globals/**/*.d.ts",
 		"Source/**/*.ts",
 		"Source/**/*.tsx",
-		"Subrepos/Server/Source/**/*.ts",
-		"Subrepos/Server/Source/**/*.tsx"
 		//"Source/**/*.js",
 		//"Source/**/*.jsx"
 	],
@@ -94,4 +92,7 @@
 		"Typings/browser.d.ts",*#/
 	],*/
 	"compileOnSave": true
+	/*"references": [
+		{"path": "node_modules/@debate-map/server-link"}
+	]*/
 }

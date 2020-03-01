@@ -6,7 +6,7 @@ import {store} from "Source/Store";
 import {runInAction} from "mobx";
 import {Observer} from "vwebapp-framework";
 import {ACTEnsureMapStateInit} from "Source/Store/main/maps";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {Map} from "@debate-map/server-link/Source/Link";
 
 @Observer
 export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {

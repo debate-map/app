@@ -1,8 +1,8 @@
 import {GetContentWidth, GetContentHeight, GetAutoElement} from "js-vextensions";
 import {ConvertStyleObjectToCSSString} from "react-vextensions";
-import {MapNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {MapNodeType_Info} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {GetNodeDisplayText, GetFontSizeForNode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
+import {MapNodeL3} from "@debate-map/server-link/Source/Link";
+import {MapNodeType_Info} from "@debate-map/server-link/Source/Link";
+import {GetNodeDisplayText, GetFontSizeForNode} from "@debate-map/server-link/Source/Link";
 
 /* interface JQuery {
 	positionFrom(referenceControl): void;

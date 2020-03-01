@@ -8,11 +8,11 @@ import {store} from "Source/Store";
 import {Observer} from "vwebapp-framework";
 import {runInAction} from "mobx";
 import {E} from "js-vextensions";
-import {GetMapTimelines} from "Subrepos/Server/Source/@Shared/Store/firebase/timelines";
+import {GetMapTimelines} from "@debate-map/server-link/Source/Link";
 import {ES} from "Source/Utils/UI/GlobalStyles";
-import {DeleteTimeline} from "Subrepos/Server/Source/@Shared/Commands/DeleteTimeline";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {DeleteTimeline} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {Map} from "@debate-map/server-link/Source/Link";
 
 @Observer
 export class CollectionSubpanel extends BaseComponentPlus({} as {map: Map}, {}) {

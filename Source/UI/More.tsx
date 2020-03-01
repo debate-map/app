@@ -5,8 +5,8 @@ import {Observer} from "vwebapp-framework";
 import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
 import {AdminUI} from "./More/Admin";
 import {LinksUI} from "./More/Links";
-import {HasAdminPermissions} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID, GetUsers} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {HasAdminPermissions} from "@debate-map/server-link/Source/Link";
+import {MeID, GetUsers} from "@debate-map/server-link/Source/Link";
 
 @Observer
 export class MoreUI extends BaseComponentPlus({} as {}, {}) {

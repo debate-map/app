@@ -2,12 +2,7 @@ import chroma from "chroma-js";
 import {emptyArray_forLoading} from "js-vextensions";
 import {StoreAccessor} from "mobx-firelink";
 import {GetPlayingTimeline, GetPlayingTimelineRevealNodes_UpToAppliedStep, GetPlayingTimelineStepIndex} from "Source/Store/main/maps/mapStates/$mapState";
-import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {GetNodeChildrenL2} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {GetNodeL3} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {MapNodeL3, Polarity} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {MeID} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetUserAccessLevel} from "../../../Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
+import {MapNodeL3, MapNodeType, Polarity, GetNodeChildrenL2, GetNodeL3, GetUserAccessLevel, MeID} from "@debate-map/server-link/Source/Link";
 
 export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "background"): chroma.Color {
 	let result;

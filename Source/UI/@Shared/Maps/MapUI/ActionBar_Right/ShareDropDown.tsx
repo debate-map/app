@@ -3,9 +3,9 @@ import {VURL, WaitXThenRun, CopyText} from "js-vextensions";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, RowLR, Select, TextInput} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {GetCurrentURL} from "vwebapp-framework";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
-import {Timeline} from "Subrepos/Server/Source/@Shared/Store/firebase/timelines/@Timeline";
-import {GetMapTimelines} from "Subrepos/Server/Source/@Shared/Store/firebase/timelines";
+import {Map} from "@debate-map/server-link/Source/Link";
+import {Timeline} from "@debate-map/server-link/Source/Link";
+import {GetMapTimelines} from "@debate-map/server-link/Source/Link";
 
 export class ShareDropDown extends BaseComponentPlus({} as {map: Map}, {timeline: null as Timeline, justCopied: false}) {
 	render() {

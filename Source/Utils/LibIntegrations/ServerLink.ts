@@ -2,10 +2,10 @@ import "mobx"; // import mobx before we declare the module below, otherwise vsco
 import {dbVersion} from "Source/Main";
 import {OnPopulated} from "vwebapp-framework";
 import {RootState, store} from "Source/Store";
-import {fire, InitFirelink} from "../../../Subrepos/Server/Source/@Shared/MobXFirelink";
+import {fire, InitFirelink, FirebaseDBShape} from "@debate-map/server-link/Source/Link";
 //import {InitFirelink} from "@debate-map/server-link";
 
-store.firelink = fire;
+store.firelink = fire as any; // "as any" needed fsr
 
 const linkRootPath = `versions/v${dbVersion}-${DB_SHORT}`;
 export function InitServerLink() {
@@ -17,5 +17,5 @@ export function InitServerLink() {
 
 declare module "mobx-firelink/Dist/UserTypes" {
 	interface RootStoreShape extends RootState {}
-	//interface DBShape extends FirebaseDBShape {}
+	interface DBShape extends FirebaseDBShape {}
 }

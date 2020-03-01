@@ -5,8 +5,8 @@ import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {IDAndCreationInfoUI} from "Source/UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {InfoButton, observer_simple} from "vwebapp-framework";
-import {Term, Term_nameFormat, Term_disambiguationFormat, TermType} from "Subrepos/Server/Source/@Shared/Store/firebase/terms/@Term";
-import {AddTerm} from "Subrepos/Server/Source/@Shared/Commands/AddTerm";
+import {Term, Term_nameFormat, Term_disambiguationFormat, TermType} from "@debate-map/server-link/Source/Link";
+import {AddTerm} from "@debate-map/server-link/Source/Link";
 import {GetNiceNameForTermType} from "../../Database/TermsUI";
 
 export class TermDetailsUI extends BaseComponentPlus(

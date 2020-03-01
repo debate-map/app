@@ -5,15 +5,15 @@ import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "reac
 import {MapNodeView, GetNodeView} from "Source/Store/main/maps/mapViews/$mapView";
 import {SlicePath} from "mobx-firelink";
 import {Observer} from "vwebapp-framework";
-import {MapNodeL3, ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {GetNodeForm, IsPremiseOfSinglePremiseArgument, GetRatingTypesForNode} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {GetParentNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {MapNodeType_Info} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {RatingType, GetRatingTypeInfo} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings/@RatingType";
-import {GetRatings, GetRatingAverage_AtPath} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings";
-import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MapNodeL3, ClaimForm} from "@debate-map/server-link/Source/Link";
+import {GetNodeForm, IsPremiseOfSinglePremiseArgument, GetRatingTypesForNode} from "@debate-map/server-link/Source/Link";
+import {GetParentNodeL3} from "@debate-map/server-link/Source/Link";
+import {MapNodeType_Info} from "@debate-map/server-link/Source/Link";
+import {RatingType, GetRatingTypeInfo} from "@debate-map/server-link/Source/Link";
+import {GetRatings, GetRatingAverage_AtPath} from "@debate-map/server-link/Source/Link";
+import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {Map} from "@debate-map/server-link/Source/Link";
 
 type Props = {
 	map: Map, path: string, node: MapNodeL3,

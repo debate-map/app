@@ -4,8 +4,8 @@ import {ignore} from "mobx-sync";
 import {Firelink} from "mobx-firelink";
 import {immerable, setUseProxies, setAutoFreeze} from "immer";
 import {Feedback_RootState} from "firebase-feedback";
+import {FirebaseDBShape} from "@debate-map/server-link/Source/Link";
 import {MainState} from "./main";
-import {FirebaseDBShape} from "../../Subrepos/Server/Source/@Shared/Store/firebase";
 
 // configure({ enforceActions: 'always' });
 configure({enforceActions: "observed"});

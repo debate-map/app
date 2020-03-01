@@ -2,7 +2,7 @@ import {BaseComponent} from "react-vextensions";
 import {LimitBarPos} from "Source/UI/@Shared/Maps/MapNode/NodeUI";
 import {Column, Row} from "react-vcomponents";
 import {E} from "js-vextensions";
-import {GetChangeTypeOutlineColor, ChangeType} from "Subrepos/Server/Source/@Shared/Store/firebase/mapNodeEditTimes";
+import {GetChangeTypeOutlineColor, ChangeType} from "@debate-map/server-link/Source/Link";
 import {ChildLimitBar} from "./NodeChildHolder";
 
 export class NodeChangesMarker extends BaseComponent<{addedDescendants: number, editedDescendants: number, textOutline?: string, limitBarPos?: LimitBarPos}, {}> {

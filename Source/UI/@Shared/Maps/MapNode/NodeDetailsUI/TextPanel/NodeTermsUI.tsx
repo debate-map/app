@@ -6,10 +6,10 @@ import {InfoButton, Link, Observer} from "vwebapp-framework";
 import {NodeDetailsUI_SharedProps} from "../../NodeDetailsUI";
 import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";
 import {Validate} from "mobx-firelink";
-import {GetTerm, GetTermsByForm} from "Subrepos/Server/Source/@Shared/Store/firebase/terms";
-import {TermAttachment} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRevisions/@TermAttachment";
-import {Term} from "Subrepos/Server/Source/@Shared/Store/firebase/terms/@Term";
-import {GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
+import {GetTerm, GetTermsByForm} from "@debate-map/server-link/Source/Link";
+import {TermAttachment} from "@debate-map/server-link/Source/Link";
+import {Term} from "@debate-map/server-link/Source/Link";
+import {GetUser} from "@debate-map/server-link/Source/Link";
 
 @Observer
 export class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {

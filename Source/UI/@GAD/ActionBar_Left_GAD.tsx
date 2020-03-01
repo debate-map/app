@@ -9,10 +9,10 @@ import {runInAction} from "mobx";
 import {E} from "js-vextensions";
 import {DetailsDropDown} from "Source/UI/@Shared/Maps/MapUI/ActionBar_Left/DetailsDropDown";
 import {zIndexes} from "Source/Utils/UI/ZIndexes";
-import {Map, MapType} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {IsUserMap} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/$map";
+import {Map, MapType} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {IsUserMap} from "@debate-map/server-link/Source/Link";
 import {Button_GAD} from "./GADButton";
 
 @Observer

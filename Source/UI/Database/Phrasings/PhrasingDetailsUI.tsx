@@ -5,8 +5,8 @@ import {BaseComponentWithConnector, GetDOM, BaseComponentPlus} from "react-vexte
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {IDAndCreationInfoUI} from "Source/UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
-import {MapNodePhrasing, MapNodePhrasingType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodePhrasings/@MapNodePhrasing";
-import {AddPhrasing} from "Subrepos/Server/Source/@Shared/Commands/AddPhrasing";
+import {MapNodePhrasing, MapNodePhrasingType} from "@debate-map/server-link/Source/Link";
+import {AddPhrasing} from "@debate-map/server-link/Source/Link";
 
 export class PhrasingDetailsUI extends BaseComponentPlus(
 	{enabled: true} as {baseData: MapNodePhrasing, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: MapNodePhrasing, error: string)=>void},

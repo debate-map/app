@@ -6,10 +6,10 @@ import {ShowChangesSinceType} from "Source/Store/main/maps/mapStates/@MapState";
 import {runInAction} from "mobx";
 import {Observer} from "vwebapp-framework";
 import {GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {Map} from "@debate-map/server-link/Source/Link";
 import {colors} from "../../../../Utils/UI/GlobalStyles";
 import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown";
-import {WeightingType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodeRatings";
+import {WeightingType} from "@debate-map/server-link/Source/Link";
 
 const changesSince_options = [];
 changesSince_options.push({name: "None", value: `${ShowChangesSinceType.None}_null`});

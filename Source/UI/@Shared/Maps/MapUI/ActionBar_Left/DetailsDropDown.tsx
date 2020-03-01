@@ -3,21 +3,21 @@ import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBo
 import {BaseComponent} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {store} from "Source/Store";
-import {MapNodeRevision_Defaultable} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeRevision";
-import {CanEditNode, IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetNodeL2} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {AddNodeRevision} from "Subrepos/Server/Source/@Shared/Commands/AddNodeRevision";
+import {MapNodeRevision_Defaultable} from "@debate-map/server-link/Source/Link";
+import {CanEditNode, IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {GetNodeL2} from "@debate-map/server-link/Source/Link";
+import {AddNodeRevision} from "@debate-map/server-link/Source/Link";
 import {Observer, GetUpdates, InfoButton} from "vwebapp-framework";
 import {GADDemo} from "Source/UI/@GAD/GAD";
 import {Button_GAD} from "Source/UI/@GAD/GADButton";
-import {SetMapFeatured} from "Subrepos/Server/Source/@Shared/Commands/SetMapFeatured";
-import {UpdateMapDetails} from "Subrepos/Server/Source/@Shared/Commands/UpdateMapDetails";
-import {GetChildCount} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {DeleteMap} from "Subrepos/Server/Source/@Shared/Commands/DeleteMap";
+import {SetMapFeatured} from "@debate-map/server-link/Source/Link";
+import {UpdateMapDetails} from "@debate-map/server-link/Source/Link";
+import {GetChildCount} from "@debate-map/server-link/Source/Link";
+import {DeleteMap} from "@debate-map/server-link/Source/Link";
 import {runInAction} from "mobx";
 import {FromJSON, ToJSON, E} from "js-vextensions";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {Map} from "@debate-map/server-link/Source/Link";
 import {MapDetailsUI} from "../../MapDetailsUI";
 
 // todo: probably ms this runs in two steps: 1) gets db-updates, 2) user looks over and approves, 3) user presses continue (to apply using ApplyDBUpdates, or a composite command)

@@ -1,6 +1,6 @@
 import {BaseComponentPlus} from "react-vextensions";
 import {HSLA} from "vwebapp-framework";
-import {GetTerm} from "Subrepos/Server/Source/@Shared/Store/firebase/terms";
+import {GetTerm} from "@debate-map/server-link/Source/Link";
 
 export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {refText: string, termID: string, showKeyStart?: boolean, onHover: (hovered: boolean)=>void, onClick: ()=>void}, {}) {
 	render() {

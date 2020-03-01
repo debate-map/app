@@ -8,10 +8,10 @@ import produce from "immer";
 import {Feedback_store} from "firebase-feedback";
 import {WithStore} from "mobx-firelink";
 import {runInAction} from "mobx";
-import {Me, MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {GetUserPermissionGroups} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {GetAuth} from "Subrepos/Server/Source/@Shared/Store/firebase";
-import {ValidateDBData} from "Subrepos/Server/Source/@Shared/Utils/Store/DBDataValidator";
+import {Me, MeID} from "@debate-map/server-link/Source/Link";
+import {GetUserPermissionGroups} from "@debate-map/server-link/Source/Link";
+import {GetAuth} from "@debate-map/server-link/Source/Link";
+import {ValidateDBData} from "@debate-map/server-link/Source/Link";
 import {AddNotificationMessage} from "Source/Store/main/@NotificationMessage";
 
 const context = (require as any).context("../../../../Resources/SVGs/", true, /\.svg$/);

@@ -1,7 +1,7 @@
 import {BaseComponentPlus} from "react-vextensions";
 import {PageContainer, Observer} from "vwebapp-framework";
-import {GetMap} from "Subrepos/Server/Source/@Shared/Store/firebase/maps";
-import {globalMapID} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
+import {GetMap} from "@debate-map/server-link/Source/Link";
+import {globalMapID} from "@debate-map/server-link/Source/Link";
 import {MapUI} from "../@Shared/Maps/MapUI";
 
 @Observer

@@ -5,7 +5,7 @@ import {LayoutDropDown} from "Source/UI/@Shared/Maps/MapUI/ActionBar_Right/Layou
 import {HSLA} from "vwebapp-framework";
 import {E} from "js-vextensions";
 import {zIndexes} from "Source/Utils/UI/ZIndexes";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {Map} from "@debate-map/server-link/Source/Link";
 
 export class ActionBar_Right_GAD extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number}, {}) {
 	render() {

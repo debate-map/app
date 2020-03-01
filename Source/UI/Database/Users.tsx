@@ -7,8 +7,8 @@ import {ES} from "Source/Utils/UI/GlobalStyles";
 import {GetSelectedUser} from "Source/Store/main/database";
 import {ToNumber, E} from "js-vextensions";
 import {UserProfileUI} from "./Users/UserProfile";
-import {GetUsers, GetUser} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {User} from "Subrepos/Server/Source/@Shared/Store/firebase/users/@User";
+import {GetUsers, GetUser} from "@debate-map/server-link/Source/Link";
+import {User} from "@debate-map/server-link/Source/Link";
 
 export const columnWidths = [0.35, 0.15, 0.1, 0.15, 0.25];
 

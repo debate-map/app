@@ -12,7 +12,7 @@ import {ResetCurrentDBRoot} from "Source/UI/More/Admin/ResetCurrentDBRoot";
 import {Observer, Link, HSL} from "vwebapp-framework";
 import {GetDocs} from "mobx-firelink";
 import {zIndexes} from "Source/Utils/UI/ZIndexes";
-import {GetAuth} from "Subrepos/Server/Source/@Shared/Store/firebase";
+import {GetAuth} from "@debate-map/server-link/Source/Link";
 import {colors} from "../../Utils/UI/GlobalStyles";
 
 // main

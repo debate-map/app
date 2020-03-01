@@ -16,13 +16,13 @@ import {GetTimelinePanelOpen, GetTimelineOpenSubpanel, GetSelectedTimeline, GetS
 import {runInAction} from "mobx";
 import {TimelineSubpanel} from "Source/Store/main/maps/mapStates/@MapState";
 import {StepEditorUI} from "./EditorSubpanel/StepEditorUI";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
-import {Timeline} from "Subrepos/Server/Source/@Shared/Store/firebase/timelines/@Timeline";
-import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {UpdateTimeline} from "Subrepos/Server/Source/@Shared/Commands/UpdateTimeline";
-import {TimelineStep} from "Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps/@TimelineStep";
-import {AddTimelineStep} from "Subrepos/Server/Source/@Shared/Commands/AddTimelineStep";
+import {Map} from "@debate-map/server-link/Source/Link";
+import {Timeline} from "@debate-map/server-link/Source/Link";
+import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {UpdateTimeline} from "@debate-map/server-link/Source/Link";
+import {TimelineStep} from "@debate-map/server-link/Source/Link";
+import {AddTimelineStep} from "@debate-map/server-link/Source/Link";
 
 // for use by react-beautiful-dnd (using text replacement)
 G({LockMapEdgeScrolling});
@@ -88,7 +88,8 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 								new UpdateTimeline({id: timeline._key, updates: {videoStartTime: null}}).Run();
 							}
 						}}/>
-						<TimeSpanInput mr={5} style={{width: 60}} enabled={creatorOrMod && timeline.videoStartTime != null} delayChangeTillDefocus={true} value={timeline.videoStartTime}
+						<TimeSpanInput mr={5} largeUnit="minute" smallUnit="second" style={{width: 60}}
+							enabled={creatorOrMod && timeline.videoStartTime != null} delayChangeTillDefocus={true} value={timeline.videoStartTime}
 							onChange={val=>new UpdateTimeline({id: timeline._key, updates: {videoStartTime: val}}).Run()}/>
 						<Row center>
 							<Text>Height</Text>

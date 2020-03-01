@@ -5,12 +5,12 @@ import {GADDemo} from "Source/UI/@GAD/GAD";
 import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
 import {HSLA, Observer} from "vwebapp-framework";
 import {useCallback, useMemo, useEffect} from "react";
-import {MapNodeL3, Polarity, ClaimForm} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {MapNodeType} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNodeType";
-import {GetParentNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes";
-import {GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {MapNodeL3, Polarity, ClaimForm} from "@debate-map/server-link/Source/Link";
+import {MapNodeType} from "@debate-map/server-link/Source/Link";
+import {GetParentNodeL3} from "@debate-map/server-link/Source/Link";
+import {GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {Map} from "@debate-map/server-link/Source/Link";
 import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog";
 import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
 

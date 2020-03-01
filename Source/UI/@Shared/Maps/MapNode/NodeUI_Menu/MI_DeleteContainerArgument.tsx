@@ -6,11 +6,11 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {styles} from "Source/Utils/UI/GlobalStyles";
 import {MI_SharedProps} from "../NodeUI_Menu";
 import {Observer} from "vwebapp-framework";
-import {GetNodeL3, GetNodeDisplayText} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {IsUserCreatorOrMod} from "Subrepos/Server/Source/@Shared/Store/firebase/users/$user";
-import {MeID} from "Subrepos/Server/Source/@Shared/Store/firebase/users";
-import {UnlinkNode} from "Subrepos/Server/Source/@Shared/Commands/UnlinkNode";
-import {DeleteNode} from "Subrepos/Server/Source/@Shared/Commands/DeleteNode";
+import {GetNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
+import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {MeID} from "@debate-map/server-link/Source/Link";
+import {UnlinkNode} from "@debate-map/server-link/Source/Link";
+import {DeleteNode} from "@debate-map/server-link/Source/Link";
 
 @Observer
 export class MI_DeleteContainerArgument extends BaseComponent<MI_SharedProps, {}> {

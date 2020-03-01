@@ -4,10 +4,10 @@ import {GetEntries, E} from "js-vextensions";
 import {VReactMarkdown_Remarkable, Segment} from "vwebapp-framework";
 import {store} from "Source/Store";
 import {GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStep, GetPlayingTimeline, GetPlayingTimelineStepIndex, GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
-import {Polarity} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/@MapNode";
-import {TimelineStep} from "Subrepos/Server/Source/@Shared/Store/firebase/timelineSteps/@TimelineStep";
-import {GetNodeL2, AsNodeL3} from "Subrepos/Server/Source/@Shared/Store/firebase/nodes/$node";
-import {Map} from "Subrepos/Server/Source/@Shared/Store/firebase/maps/@Map";
+import {Polarity} from "@debate-map/server-link/Source/Link";
+import {TimelineStep} from "@debate-map/server-link/Source/Link";
+import {GetNodeL2, AsNodeL3} from "@debate-map/server-link/Source/Link";
+import {Map} from "@debate-map/server-link/Source/Link";
 import {NodeUI_Inner} from "../Maps/MapNode/NodeUI_Inner";
 
 function GetPropsFromPropsStr(propsStr: string) {
