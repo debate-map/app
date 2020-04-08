@@ -19,6 +19,7 @@ import {StreamPanel} from "./NavBar/StreamPanel";
 import {UserPanel} from "./NavBar/UserPanel";
 import {zIndexes} from "Source/Utils/UI/ZIndexes";
 import {fire} from "@debate-map/server-link/Source/Link";
+import {rootPageDefaultChilds} from "Source/Utils/URL/URLs";
 
 // main
 // ==========
@@ -142,7 +143,9 @@ export class NavBarPageButton extends BaseComponentPlus(
 					s.main.page = page;
 				} else {
 					// go to the page root-contents, if clicking on page in nav-bar we're already on
-					s.main[currentPage].subpage = null;
+					//s.main[currentPage].subpage = null;
+					s.main[currentPage].subpage = rootPageDefaultChilds[currentPage];
+					
 					if (page == "database") {
 						// if our default subpage is already active, then perform that subpage's action-if-already-active
 						if ([null, "users"].Contains(store.main.database.subpage)) {

@@ -13,6 +13,7 @@ import {Observer, Link, HSL} from "vwebapp-framework";
 import {GetDocs} from "mobx-firelink";
 import {zIndexes} from "Source/Utils/UI/ZIndexes";
 import {GetAuth} from "@debate-map/server-link/Source/Link";
+import {rootPageDefaultChilds} from "Source/Utils/URL/URLs";
 import {colors} from "../../Utils/UI/GlobalStyles";
 
 // main
@@ -128,17 +129,19 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 			}
 		}
 
-		const actionFunc = (root: RootState)=>{
+		const actionFunc = (s: RootState)=>{
 			if (page) {
 				if (page != currentPage) {
-					root.main.page = page;
+					s.main.page = page;
 				} else {
 					// go to the page root-contents, if clicking on page in nav-bar we're already on
-					root.main[currentPage].subpage = null;
+					//root.main[currentPage].subpage = null;
+					s.main[currentPage].subpage = rootPageDefaultChilds[currentPage];
+
 					if (page == "private") {
-						root.main.private.selectedMapID = null;
+						s.main.private.selectedMapID = null;
 					} else if (page == "public") {
-						root.main.public.selectedMapID = null;
+						s.main.public.selectedMapID = null;
 					}
 				}
 			}
