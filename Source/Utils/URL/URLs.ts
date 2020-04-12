@@ -4,7 +4,7 @@ import {StoreAccessor} from "mobx-firelink";
 import ReactGA from "react-ga";
 import {RootState} from "Source/Store";
 import {GetOpenMapID, GetPage, GetSubpage} from "Source/Store/main";
-import {GetSelectedImageID, GetSelectedTermID, GetSelectedUserID} from "Source/Store/main/database";
+import {GetSelectedMediaID, GetSelectedTermID, GetSelectedUserID} from "Source/Store/main/database";
 import {GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
 import {MaybeLog} from "vwebapp-framework";
 import {GetMap} from "@debate-map/server-link/Source/Link";
@@ -140,7 +140,7 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			} else if (subpage == "terms" && subpageInURL) {
 				store.main.database.selectedTermID = entryID!;
 			} else if (subpage == "images" && subpageInURL) {
-				store.main.database.selectedImageID = entryID!;
+				store.main.database.selectedMediaID = entryID!;
 			}
 		} else if (page == "private" || page == "public") {
 			const urlStr = url.pathNodes[1];
@@ -259,8 +259,8 @@ export const GetNewURL = StoreAccessor(s=>(includeMapViewStr = true)=>{
 			newURL.pathNodes.push(`${GetSelectedUserID()}`);
 		} else if (subpage == "terms" && GetSelectedTermID()) {
 			newURL.pathNodes.push(`${GetSelectedTermID()}`);
-		} else if (subpage == "images" && GetSelectedImageID()) {
-			newURL.pathNodes.push(`${GetSelectedImageID()}`);
+		} else if (subpage == "images" && GetSelectedMediaID()) {
+			newURL.pathNodes.push(`${GetSelectedMediaID()}`);
 		}
 	}
 

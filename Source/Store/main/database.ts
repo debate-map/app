@@ -1,13 +1,13 @@
 import {O} from "vwebapp-framework";
 import {StoreAccessor, GetDoc} from "mobx-firelink";
-import {GetTerms, GetImages, FirebaseDBShape} from "@debate-map/server-link/Source/Link";
+import {GetTerms, GetMedias, FirebaseDBShape} from "@debate-map/server-link/Source/Link";
 
 export class DatabaseState {
 	@O subpage: string;
 	@O selectedUserID: string;
 	@O selectedTermID: string;
 	// @O selectedTermComponentID: string;
-	@O selectedImageID: string;
+	@O selectedMediaID: string;
 }
 
 export const GetSelectedUserID = StoreAccessor(s=>()=>{
@@ -31,11 +31,11 @@ export const GetSelectedTerm = StoreAccessor(s=>()=>{
 	return GetTermComponent(selectedID);
 } */
 
-export const GetSelectedImageID = StoreAccessor(s=>()=>{
-	return s.main.database.selectedImageID;
+export const GetSelectedMediaID = StoreAccessor(s=>()=>{
+	return s.main.database.selectedMediaID;
 });
-export const GetSelectedImage = StoreAccessor(s=>()=>{
-	const selectedID = GetSelectedImageID();
+export const GetSelectedMedia = StoreAccessor(s=>()=>{
+	const selectedID = GetSelectedMediaID();
 	// return GetData(`terms/${selectedID}`);
-	return (GetImages() || []).find(a=>a && a._key == selectedID);
+	return (GetMedias() || []).find(a=>a && a._key == selectedID);
 });

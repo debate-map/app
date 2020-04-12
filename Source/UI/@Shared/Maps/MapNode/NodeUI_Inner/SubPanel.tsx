@@ -1,11 +1,8 @@
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {VReactMarkdown_Remarkable, Observer} from "vwebapp-framework";
-import {MapNodeL2} from "@debate-map/server-link/Source/Link";
-import {GetFontSizeForNode} from "@debate-map/server-link/Source/Link";
-import {ReferencesAttachment} from "@debate-map/server-link/Source/Link";
-import {QuoteAttachment} from "@debate-map/server-link/Source/Link";
-import {ImageAttachment} from "@debate-map/server-link/Source/Link";
-import {GetImage} from "@debate-map/server-link/Source/Link";
+import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI} from "vwebapp-framework";
+import {MapNodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType} from "@debate-map/server-link/Source/Link";
+
+
 import {SourcesUI} from "./SourcesUI";
 
 export class SubPanel extends BaseComponent<{node: MapNodeL2}, {}> {
@@ -20,8 +17,8 @@ export class SubPanel extends BaseComponent<{node: MapNodeL2}, {}> {
 					<SubPanel_References attachment={node.current.references} fontSize={GetFontSizeForNode(node)}/>}
 				{node.current.quote &&
 					<SubPanel_Quote attachment={node.current.quote} fontSize={GetFontSizeForNode(node)}/>}
-				{node.current.image &&
-					<SubPanel_Image imageAttachment={node.current.image}/>}
+				{node.current.media &&
+					<SubPanel_Media mediaAttachment={node.current.media}/>}
 			</div>
 		);
 	}
@@ -68,16 +65,23 @@ export class SubPanel_Quote extends BaseComponent<{attachment: QuoteAttachment, 
 }
 
 @Observer
-export class SubPanel_Image extends BaseComponentPlus({} as {imageAttachment: ImageAttachment}, {}) {
+export class SubPanel_Media extends BaseComponentPlus({} as {mediaAttachment: MediaAttachment}, {}) {
 	render() {
-		const {imageAttachment} = this.props;
-		const image = GetImage(imageAttachment.id);
-		if (image == null) return <div/>;
+		const {mediaAttachment} = this.props;
+		const media = GetMedia(mediaAttachment.id);
+		if (media == null) return <div/>;
 		return (
 			<div style={{position: "relative"}}>
-				<img src={image.url} style={{width: image.previewWidth != null ? `${image.previewWidth}%` : null, maxWidth: "100%"}}/>
+				{/*<Row mt={5} style={{display: "flex", alignItems: "center"}}>*/}
+				{media.type == MediaType.Image &&
+					<img src={media.url} style={{width: mediaAttachment.previewWidth != null ? `${mediaAttachment.previewWidth}%` : null, maxWidth: "100%"}}/>}
+				{media.type == MediaType.Video &&
+					<YoutubePlayerUI videoID={media.url.match(/v=([a-zA-Z0-9]+)/)?.[1]} /*startTime={0}*/ heightVSWidthPercent={.5625}
+						onPlayerInitialized={player=> {
+							player.GetPlayerUI().style.position = "absolute";
+						}}/>}
 				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
-				<SourcesUI sourceChains={image.sourceChains}/>
+				<SourcesUI sourceChains={mediaAttachment.sourceChains}/>
 			</div>
 		);
 	}

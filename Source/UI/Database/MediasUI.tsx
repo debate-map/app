@@ -4,38 +4,33 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {ScrollView} from "react-vscrollview";
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {store} from "Source/Store";
-import {GetSelectedImage} from "Source/Store/main/database";
+import {GetSelectedMedia} from "Source/Store/main/database";
 import {Observer, GetUpdates} from "vwebapp-framework";
 import {runInAction} from "mobx";
 import {E} from "js-vextensions";
-import {ShowAddImageDialog} from "./Images/AddImageDialog";
-import {ImageDetailsUI} from "./Images/ImageDetailsUI";
-import {Image, GetNiceNameForImageType} from "@debate-map/server-link/Source/Link";
-import {GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {GetImages} from "@debate-map/server-link/Source/Link";
-import {UpdateImageData} from "@debate-map/server-link/Source/Link";
-import {DeleteImage} from "@debate-map/server-link/Source/Link";
+import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMediaData, DeleteMedia} from "@debate-map/server-link/Source/Link";
+import {MediaDetailsUI} from "./Medias/MediaDetailsUI";
+import {ShowAddMediaDialog} from "./Medias/AddMediaDialog";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
 
 @Observer
-export class ImagesUI extends BaseComponentPlus({} as {}, {} as { selectedImage_newData: Image, selectedImage_newDataError: string }) {
+export class MediasUI extends BaseComponentPlus({} as {}, {} as { selectedMedia_newData: Media, selectedMedia_newDataError: string }) {
 	scrollView: ScrollView;
 	render() {
-		const {selectedImage_newData, selectedImage_newDataError} = this.state;
+		const {selectedMedia_newData, selectedMedia_newDataError} = this.state;
 
 		const userID = MeID();
-		const images = GetImages();
-		const selectedImage = GetSelectedImage();
+		const medias = GetMedias();
+		const selectedMedia = GetSelectedMedia();
 		const permissions = GetUserPermissionGroups(userID);
-		const creatorOrMod = selectedImage != null && IsUserCreatorOrMod(userID, selectedImage);
+		const creatorOrMod = selectedMedia != null && IsUserCreatorOrMod(userID, selectedMedia);
 
-		// whenever selectedImage changes, reset the derivative states (there's probably a better way to do this, but I don't know how yet)
+		// whenever selectedMedia changes, reset the derivative states (there's probably a better way to do this, but I don't know how yet)
 		UseEffect(()=>{
-			this.SetState({selectedImage_newData: null, selectedImage_newDataError: null});
-		}, [selectedImage]);
+			this.SetState({selectedMedia_newData: null, selectedMedia_newDataError: null});
+		}, [selectedMedia]);
 
-		if (images == null) return <div>Loading images...</div>;
+		if (medias == null) return <div>Loading medias...</div>;
 		return (
 			<Row plr={7} style={{height: "100%", alignItems: "flex-start"}}>
 				<Column mtb={10} style={{
@@ -45,20 +40,20 @@ export class ImagesUI extends BaseComponentPlus({} as {}, {} as { selectedImage_
 				}}>
 					<Row center style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 						<Div p={7} style={{position: "absolute", left: 0}}>
-							<Button text="Add image" enabled={HasModPermissions(MeID())} title={HasModPermissions(MeID()) ? null : "Only moderators can add images currently. (till review/approval system is implemented)"}onClick={e=>{
+							<Button text="Add media" enabled={HasModPermissions(MeID())} title={HasModPermissions(MeID()) ? null : "Only moderators can add images currently. (till review/approval system is implemented)"}onClick={e=>{
 								if (userID == null) return ShowSignInPopup();
-								ShowAddImageDialog({});
+								ShowAddMediaDialog({});
 							}}/>
 						</Div>
 						<Div style={{fontSize: 17, fontWeight: 500}}>
-							Images
+							Medias
 						</Div>
 					</Row>
 					<ScrollView ref={c=>this.scrollView = c} style={ES({flex: 1})} contentStyle={ES({flex: 1, padding: 10})} onClick={e=>{
 						if (e.target != e.currentTarget) return;
-						runInAction("ImagesUI.ScrollView.onClick", ()=>store.main.database.selectedImageID = null);
+						runInAction("MediasUI.ScrollView.onClick", ()=>store.main.database.selectedMediaID = null);
 					}}>
-						{images.map((image, index)=><ImageUI key={index} first={index == 0} image={image} selected={selectedImage == image}/>)}
+						{medias.map((media, index)=><MediaUI key={index} first={index == 0} image={media} selected={selectedMedia == media}/>)}
 					</ScrollView>
 				</Column>
 				<ScrollView ref={c=>this.scrollView = c} style={{
@@ -68,33 +63,33 @@ export class ImagesUI extends BaseComponentPlus({} as {}, {} as { selectedImage_
 				}} contentStyle={ES({flex: 1, padding: 10})}>
 					<Column style={{position: "relative", background: "rgba(0,0,0,.5)", borderRadius: 10}}>
 						<Row style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
-							{selectedImage
+							{selectedMedia
 								&& <Text style={{fontSize: 17, fontWeight: 500}}>
-									{selectedImage.name}
+									{selectedMedia.name}
 								</Text>}
 							<Div p={7} style={{position: "absolute", right: 0}}>
 								{creatorOrMod &&
-									<Button ml="auto" text="Save details" enabled={selectedImage_newData != null && selectedImage_newDataError == null}
+									<Button ml="auto" text="Save details" enabled={selectedMedia_newData != null && selectedMedia_newDataError == null}
 										onClick={async e=>{
-											const updates = GetUpdates(selectedImage, selectedImage_newData);
-											await new UpdateImageData({id: selectedImage._key, updates}).Run();
+											const updates = GetUpdates(selectedMedia, selectedMedia_newData);
+											await new UpdateMediaData({id: selectedMedia._key, updates}).Run();
 											// this.SetState({selectedImage_newData: null});
 										}}/>}
 								{creatorOrMod &&
-									<Button text="Delete image" ml={10} enabled={selectedImage != null} onClick={async e=>{
+									<Button text="Delete media" ml={10} enabled={selectedMedia != null} onClick={async e=>{
 										ShowMessageBox({
-											title: `Delete "${selectedImage.name}"`, cancelButton: true,
-											message: `Delete the image "${selectedImage.name}"?`,
+											title: `Delete "${selectedMedia.name}"`, cancelButton: true,
+											message: `Delete the media "${selectedMedia.name}"?`,
 											onOK: async()=>{
-												await new DeleteImage({id: selectedImage._key}).Run();
+												await new DeleteMedia({id: selectedMedia._key}).Run();
 											},
 										});
 									}}/>}
 							</Div>
 						</Row>
-						{selectedImage
-							? <ImageDetailsUI baseData={selectedImage} creating={false} editing={creatorOrMod} style={{padding: 10}}
-								onChange={(data, error)=>this.SetState({selectedImage_newData: data, selectedImage_newDataError: error})}/>
+						{selectedMedia
+							? <MediaDetailsUI baseData={selectedMedia} creating={false} editing={creatorOrMod} style={{padding: 10}}
+								onChange={(data, error)=>this.SetState({selectedMedia_newData: data, selectedMedia_newDataError: error})}/>
 							: <div style={{padding: 10}}>No image selected.</div>}
 					</Column>
 				</ScrollView>
@@ -103,8 +98,8 @@ export class ImagesUI extends BaseComponentPlus({} as {}, {} as { selectedImage_
 	}
 }
 
-type ImageUI_Props = {image: Image, first: boolean, selected: boolean};
-export class ImageUI extends BaseComponent<ImageUI_Props, {}> {
+type MediaUI_Props = {image: Media, first: boolean, selected: boolean};
+export class MediaUI extends BaseComponent<MediaUI_Props, {}> {
 	render() {
 		const {image, first, selected} = this.props;
 		return (
@@ -114,12 +109,12 @@ export class ImageUI extends BaseComponent<ImageUI_Props, {}> {
 					selected && {background: "rgba(100,100,100,.7)"},
 				)}
 				onClick={e=>{
-					runInAction("ImageUI.onClick", ()=>store.main.database.selectedImageID = image._key);
+					runInAction("MediaUI.onClick", ()=>store.main.database.selectedMediaID = image._key);
 				}}>
 				<Pre>{image.name}: </Pre>
 				{image.description.KeepAtMost(100)}
 				<Span ml="auto">
-					<Pre style={{opacity: 0.7}}>({GetNiceNameForImageType(image.type)}) </Pre>
+					<Pre style={{opacity: 0.7}}>({GetNiceNameForMediaType(image.type)}) </Pre>
 					<Pre>#{image._key}</Pre>
 				</Span>
 			</Row>

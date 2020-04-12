@@ -8,15 +8,8 @@ import {GetPathsToNodesChangedSinceX} from "Source/Store/firebase_ext/mapNodeEdi
 import {GetOpenMapID} from "Source/Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Source/Store/main/maps";
 import {GetTimeFromWhichToShowChangedNodes} from "Source/Store/main/maps/mapStates/$mapState";
-import {SetNodeIsMultiPremiseArgument} from "@debate-map/server-link/Source/Link";
-import {ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, HolderType} from "@debate-map/server-link/Source/Link";
-import {GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "@debate-map/server-link/Source/Link";
-import {ClaimForm, MapNodeL3, Polarity} from "@debate-map/server-link/Source/Link";
-import {GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {CanContributeToNode, GetUserPermissionGroups, IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, HolderType, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, CanContributeToNode, GetUserPermissionGroups, IsUserCreatorOrMod, Map} from "@debate-map/server-link/Source/Link";
 import {Observer} from "vwebapp-framework";
-import {Map} from "@debate-map/server-link/Source/Link";
 import {styles} from "../../../../Utils/UI/GlobalStyles";
 import {ShowSignInPopup} from "../../NavBar/UserPanel";
 import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog";
@@ -131,7 +124,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 								runInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path), Date.now()));
 							}
 						}}/>}
-				{inList && GetOpenMapID() != null &&
+				{inList &&
 					<VMenuItem text="Find in maps" style={styles.vMenuItem}
 						onClick={e=>{
 							runInAction("NodeUIMenu.FindInCurrentMap", ()=>{

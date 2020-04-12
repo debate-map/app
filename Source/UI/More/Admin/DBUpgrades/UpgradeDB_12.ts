@@ -1,8 +1,8 @@
 import _ from "lodash";
 import {ObservableMap} from "mobx";
 import {Clone} from "js-vextensions";
-import {FirebaseDBShape} from "@debate-map/server-link/Source/Link";
-import {globalMapID, globalRootNodeID} from "@debate-map/server-link/Source/Link";
+import {FirebaseDBShape, globalMapID, globalRootNodeID} from "@debate-map/server-link/Source/Link";
+
 import {GenerateUUID} from "mobx-firelink";
 import {AddUpgradeFunc} from "../../Admin";
 
@@ -20,10 +20,10 @@ AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
 	// collect ids to be converted into UUIDs, and generate new UUIDs for them
 	// ==========
 
-	type CollectionKey = "images" | "layers" | "maps" | "nodes" | "nodeRevisions" | "terms" | "termComponents" | "timelines" | "timelineSteps";
+	type CollectionKey = "medias" | "layers" | "maps" | "nodes" | "nodeRevisions" | "terms" | "termComponents" | "timelines" | "timelineSteps";
 	type KeyConversion = {oldKey: string, newKey: string};
 	const conversions = {
-		images: [] as KeyConversion[],
+		medias: [] as KeyConversion[],
 		layers: [] as KeyConversion[],
 		maps: [] as KeyConversion[],
 		nodes: [] as KeyConversion[],
@@ -76,7 +76,7 @@ AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
 	// ==========
 
 	// ReplacePairKeys(data.layers, "images"); // no need, since already handled by earlier section "convert heirarchal keys"
-	ReplacePairKeys(data.images, "images");
+	ReplacePairKeys(data.medias, "medias");
 
 	ReplacePairKeys(data.layers, "layers");
 	data.layers.VValues().forEach(entry=>{
@@ -120,7 +120,7 @@ AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
 	ReplacePairKeys(data.nodeRatings, "nodes");
 	ReplacePairKeys(data.nodeRevisions, "nodeRevisions");
 	data.nodeRevisions.VValues().forEach(entry=>{
-		if (entry.image) entry.image.id = GetNewKey("images", entry.image.id);
+		if (entry.media) entry.media.id = GetNewKey("medias", entry.media.id);
 		// try {
 		entry.node = GetNewKey("nodes", entry.node);
 		/* } catch (ex) {

@@ -229,7 +229,7 @@ export async function GetCollectionsDataAsync(versionRootPath: string, privateCo
 				feedback: await getDoc("modules", "feedback"),
 			},
 
-			images: getDocs("images"),
+			medias: getDocs("medias"),
 			layers: getDocs("layers"),
 			maps: getDocs("maps"),
 			mapNodeEditTimes: getDocs("mapNodeEditTimes"),

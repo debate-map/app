@@ -208,7 +208,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 		const leftPanelShow = nodeView?.selected || hovered; // || local_selected;
 		const panelToShow = hoverPanel || local_openPanel || nodeView?.openPanel;
-		const subPanelShow = node.type == MapNodeType.Claim && (node.current.references || node.current.quote || node.current.image);
+		const subPanelShow = node.type == MapNodeType.Claim && (node.current.references || node.current.quote || node.current.media);
 		const bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView?.expanded ?? false;
 

@@ -64,7 +64,7 @@ class AddSubnodeDialog extends BaseComponentPlus({} as Props, {} as {layer: Laye
 								} else if (val == ClaimType.Quote) {
 									newRevision.contentNode = new ContentNode();
 								} else {
-									newRevision.image = new ImageAttachment();
+									newRevision.image = new MediaAttachment();
 								}
 								this.Update();
 							}}/>

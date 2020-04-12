@@ -3,7 +3,7 @@ import {BaseComponentPlus} from "react-vextensions";
 import {store} from "Source/Store";
 import {Observer} from "vwebapp-framework";
 import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
-import {ImagesUI} from "./Database/ImagesUI";
+import {MediasUI} from "./Database/MediasUI";
 import {TermsUI} from "./Database/TermsUI";
 import {UsersUI} from "./Database/Users";
 
@@ -17,12 +17,12 @@ export class DatabaseUI extends BaseComponentPlus({} as {}, {}) {
 				<SubNavBar>
 					<SubNavBarButton page={page} subpage="users" text="Users" actionFuncIfAlreadyActive={s=>s.main.database.selectedUserID = null}/>
 					<SubNavBarButton page={page} subpage="terms" text="Terms" /* actionIfAlreadyActive={() => new ACTTermSelect({ id: null })} *//>
-					<SubNavBarButton page={page} subpage="images" text="Images" /* actionIfAlreadyActive={() => new ACTImageSelect({ id: null })} *//>
+					<SubNavBarButton page={page} subpage="medias" text="Medias" /* actionIfAlreadyActive={() => new ACTImageSelect({ id: null })} *//>
 				</SubNavBar>
 				<Switch>
 					<UsersUI/>
 					{currentSubpage == "terms" && <TermsUI/>}
-					{currentSubpage == "images" && <ImagesUI/>}
+					{currentSubpage == "medias" && <MediasUI/>}
 				</Switch>
 			</>
 		);

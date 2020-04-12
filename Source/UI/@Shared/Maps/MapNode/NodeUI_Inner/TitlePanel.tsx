@@ -27,7 +27,7 @@ import {TermPlaceholder} from "./TermPlaceholder";
 /* type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeL2, nodeView: MapNodeView, path: string, indexInNodeList: number, style};
 const TitlePanel_connector = (state, { node, path }: TitlePanelProps) => ({
 	displayText: GetNodeDisplayText(node, path),
-	$1: node.current.image && GetImage(node.current.image.id),
+	$1: node.current.image && GetMedia(node.current.image.id),
 	equationNumber: node.current.equation ? GetEquationStepNumber(path) : null,
 });
 @Connect(TitlePanel_connector)

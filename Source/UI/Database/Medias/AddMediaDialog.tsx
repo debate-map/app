@@ -3,20 +3,19 @@ import {Column} from "react-vcomponents";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {observer} from "mobx-react";
 import {observer_simple} from "vwebapp-framework";
-import {AddImage} from "@debate-map/server-link/Source/Link";
-import {ImageType, Image} from "@debate-map/server-link/Source/Link";
-import {ImageDetailsUI} from "./ImageDetailsUI";
+import {AddMedia, MediaType, Media} from "@debate-map/server-link/Source/Link";
+import {MediaDetailsUI} from "./MediaDetailsUI";
 
-export function ShowAddImageDialog(initialData?: Partial<Image>, postAdd?: (id: string)=>void) {
-	let newImage = new Image(E({
+export function ShowAddMediaDialog(initialData?: Partial<Media>, postAdd?: (id: string)=>void) {
+	let newMedia = new Media(E({
 		name: "",
-		type: ImageType.Photo,
+		type: MediaType.Image,
 		description: "",
 	}, initialData));
-	const getCommand = ()=>new AddImage({image: newImage});
+	const getCommand = ()=>new AddMedia({media: newMedia});
 
 	const boxController: BoxController = ShowMessageBox({
-		title: "Add image", cancelButton: true,
+		title: "Add media", cancelButton: true,
 		message: observer_simple(()=>{
 			const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
@@ -26,9 +25,9 @@ export function ShowAddImageDialog(initialData?: Partial<Image>, postAdd?: (id: 
 
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
-					<ImageDetailsUI baseData={newImage} creating={true} editing={false}
+					<MediaDetailsUI baseData={newMedia} creating={true} editing={false}
 						onChange={(val, error)=>{
-							newImage = val;
+							newMedia = val;
 							boxController.UpdateUI();
 						}}/>
 				</Column>

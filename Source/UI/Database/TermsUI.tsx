@@ -8,13 +8,13 @@ import {store} from "Source/Store";
 import {GetSelectedTerm} from "Source/Store/main/database";
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {GetUpdates, Observer} from "vwebapp-framework";
-import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI";
 import {Term, TermType} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";
 import {GetTerms, GetFullNameP} from "@debate-map/server-link/Source/Link";
 import {GetUserPermissionGroups, IsUserCreatorOrMod, CanGetBasicPermissions} from "@debate-map/server-link/Source/Link";
 import {UpdateTerm} from "@debate-map/server-link/Source/Link";
 import {DeleteTerm} from "@debate-map/server-link/Source/Link";
+import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
 
 @Observer
@@ -54,7 +54,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 					</Row>
 					<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1, padding: 10})} onClick={e=>{
 						if (e.target != e.currentTarget) return;
-						runInAction("ImagesUI.ScrollView.onClick", ()=>store.main.database.selectedTermID = null);
+						runInAction("TermsUI.ScrollView.onClick", ()=>store.main.database.selectedTermID = null);
 					}}>
 						{terms.map((term, index)=><TermUI key={index} first={index == 0} term={term} selected={selectedTerm == term}/>)}
 					</ScrollView>

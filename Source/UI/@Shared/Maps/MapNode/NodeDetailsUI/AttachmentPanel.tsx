@@ -2,7 +2,7 @@ import {GetEntries} from "js-vextensions";
 import {Row, Select, Text} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI";
-import {ImageAttachmentEditorUI} from "./AttachmentPanel/ImageAttachmentEditorUI";
+import {MediaAttachmentEditorUI as MediaAttachmentEditorUI} from "./AttachmentPanel/MediaAttachmentEditorUI";
 import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI";
@@ -38,9 +38,9 @@ export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {
 						<ReferencesAttachmentEditorUI creating={forNew} editing={enabled}
 							baseData={newRevisionData.references} onChange={val=>Change(newRevisionData.references = val)}
 							showPreview={false} justShowed={false}/>}
-					{attachmentType == AttachmentType.Image &&
-						<ImageAttachmentEditorUI creating={forNew} editing={enabled}
-							baseData={newRevisionData.image} onChange={val=>Change(newRevisionData.image = val)}/>}
+					{attachmentType == AttachmentType.Media &&
+						<MediaAttachmentEditorUI creating={forNew} editing={enabled}
+							baseData={newRevisionData.media} onChange={val=>Change(newRevisionData.media = val)}/>}
 				</>}
 			</>
 		);
