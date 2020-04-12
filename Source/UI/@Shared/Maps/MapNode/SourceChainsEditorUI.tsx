@@ -124,7 +124,7 @@ class SourceEditorUI extends BaseComponentPlus({} as {chain: SourceChain, source
 		const timeMinUI = ()=> {
 			return <>
 				<Pre>Time (min): </Pre>
-				<VDateTime dateFormat="YYYY-MM-DD" timeFormat="HH:mm" value={source.time_min ? Moment(source.time_min) : null} delayChangeTillDefocus={true} max={source.time_min ? Moment(source.time_min) : null}
+				<VDateTime dateFormat="YYYY-MM-DD" timeFormat="HH:mm" value={source.time_min ? Moment(source.time_min) : null} delayChangeTillDefocus={true} max={source.time_max ? Moment(source.time_max) : null}
 					inputProps={{style: {width: 120}}}
 					onChange={val=>{
 						Change(source.VSet("time_min", val ? Moment(val).valueOf() : DEL));
@@ -134,7 +134,7 @@ class SourceEditorUI extends BaseComponentPlus({} as {chain: SourceChain, source
 		const timeMaxUI = ()=> {
 			return <>
 				<Pre>Time (max): </Pre>
-				<VDateTime dateFormat="YYYY-MM-DD" timeFormat="HH:mm" value={source.time_max ? Moment(source.time_max) : null} delayChangeTillDefocus={true} max={source.time_max ? Moment(source.time_max) : null}
+				<VDateTime dateFormat="YYYY-MM-DD" timeFormat="HH:mm" value={source.time_max ? Moment(source.time_max) : null} delayChangeTillDefocus={true} min={source.time_min ? Moment(source.time_min) : null}
 					inputProps={{style: {width: 120}}}
 					onChange={val=>{
 						Change(source.VSet("time_max", val ? Moment(val).valueOf() : DEL));
