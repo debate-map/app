@@ -3,7 +3,7 @@ import {StoreAccessor, GetDoc} from "mobx-firelink";
 import {GetTerms, GetMedias, FirebaseDBShape} from "@debate-map/server-link/Source/Link";
 
 export class DatabaseState {
-	@O subpage: string;
+	@O subpage: "users" | "terms" | "media";
 	@O selectedUserID: string;
 	@O selectedTermID: string;
 	// @O selectedTermComponentID: string;

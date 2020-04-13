@@ -8,11 +8,9 @@ import produce from "immer";
 import {Feedback_store} from "firebase-feedback";
 import {WithStore} from "mobx-firelink";
 import {runInAction} from "mobx";
-import {Me, MeID} from "@debate-map/server-link/Source/Link";
-import {GetUserPermissionGroups} from "@debate-map/server-link/Source/Link";
-import {GetAuth} from "@debate-map/server-link/Source/Link";
-import {ValidateDBData} from "@debate-map/server-link/Source/Link";
+import {Me, MeID, GetUserPermissionGroups, GetAuth, ValidateDBData} from "@debate-map/server-link/Source/Link";
 import {AddNotificationMessage} from "Source/Store/main/@NotificationMessage";
+import {Assert} from "js-vextensions";
 
 const context = (require as any).context("../../../../Resources/SVGs/", true, /\.svg$/);
 const iconInfo = {};
@@ -72,10 +70,22 @@ export function InitVWAF() {
 
 export function GetNewURLForStoreChanges<T = RootState>(actionFunc: ActionFunc<T>, getSubOperatedOnByActionFunc: (root: RootState)=>T = (root=>root as any)) {
 	const store_mirror = GetMirrorOfMobXTree(store);
+
+	// for detecting mutation
+	/*const store_oldJSON = JSON.stringify(store);
+	const store_mirror_oldJSON = JSON.stringify(store_mirror);
+	function CheckMutate() {
+		Assert(JSON.stringify(store) == store_oldJSON, "GetNewURLForStoreChanges changed the store!");
+		Assert(JSON.stringify(store_mirror) == store_mirror_oldJSON, "GetNewURLForStoreChanges changed the store_mirror!");
+		Assert(JSON.stringify(store) == JSON.stringify(store_mirror), ()=>console.log("Store and store_mirror give different JSONs!", JSON.stringify(store), JSON.stringify(store_mirror)));
+	}*/
+
 	//const newState = produce(store, (draft: RootState)=>{
 	const newState = produce(store_mirror, (draft: RootState)=>{
 		actionFunc(getSubOperatedOnByActionFunc(draft));
 	});
+	//CheckMutate();
+
 	// have new-state used for our store-accessors (ie. GetNewURL)
 	const newURL = WithStore({}, newState, ()=>{
 		// and have new-state used for firebase-feedback's store-accessors (ie. GetSelectedProposalID, as called by our GetNewURL)
@@ -84,5 +94,7 @@ export function GetNewURLForStoreChanges<T = RootState>(actionFunc: ActionFunc<T
 			return GetNewURL();
 		});
 	});
+	//CheckMutate();
+
 	return newURL.toString();
 }

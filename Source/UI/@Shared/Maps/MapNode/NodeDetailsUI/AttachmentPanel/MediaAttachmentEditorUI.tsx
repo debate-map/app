@@ -50,7 +50,7 @@ export class MediaAttachmentEditorUI extends BaseComponent<Props, {newData: Medi
 							<Row>
 								<Link style={{marginTop: 5, alignSelf: "flex-start"}} onContextMenu={e=>e.nativeEvent["handled"] = true} actionFunc={s=>{
 									s.main.page = "database";
-									s.main.database.subpage = "images";
+									s.main.database.subpage = "media";
 									s.main.database.selectedMediaID = image._key;
 								}}>
 									<Button text="Show details"/>
@@ -97,7 +97,7 @@ class MediaSearchOrCreateUI extends BaseComponentPlus({} as {url: string, enable
 		const mediasWithMatchingURL = GetMediasByURL(url);
 		return (
 			<>
-				{mediasWithMatchingURL.length == 0 && <Row style={{padding: 5}}>No images found with the url "{url}".</Row>}
+				{mediasWithMatchingURL.length == 0 && <Row style={{padding: 5}}>No media found with the url "{url}".</Row>}
 				{mediasWithMatchingURL.map((media, index)=>{
 					return <FoundMediaUI key={media._key} media={media} index={index} enabled={enabled} onSelect={()=>onSelect(media._key)}/>;
 				})}
@@ -108,7 +108,7 @@ class MediaSearchOrCreateUI extends BaseComponentPlus({} as {url: string, enable
 					borderRadius: "0 0 5px 5px",
 				}}>
 					<Button text="Create new image" enabled={enabled && HasModPermissions(MeID())}
-						title={HasModPermissions(MeID()) ? null : "Only moderators can add images currently. (till review/approval system is implemented)"}
+						title={HasModPermissions(MeID()) ? null : "Only moderators can add media currently. (till review/approval system is implemented)"}
 						onClick={e=>{
 							ShowAddMediaDialog({url}, onSelect);
 						}}/>
@@ -136,7 +136,7 @@ export class FoundMediaUI extends BaseComponentPlus({} as {media: Media, index: 
 					onContextMenu={e=>e.nativeEvent["handled"] = true}
 					actionFunc={s=>{
 						s.main.page = "database";
-						s.main.database.subpage = "images";
+						s.main.database.subpage = "media";
 						s.main.database.selectedMediaID = media._key;
 					}}/>
 				<Text ml={5} sel style={{fontSize: 13}}>{media.name}</Text>

@@ -17,12 +17,12 @@ export class DatabaseUI extends BaseComponentPlus({} as {}, {}) {
 				<SubNavBar>
 					<SubNavBarButton page={page} subpage="users" text="Users" actionFuncIfAlreadyActive={s=>s.main.database.selectedUserID = null}/>
 					<SubNavBarButton page={page} subpage="terms" text="Terms" /* actionIfAlreadyActive={() => new ACTTermSelect({ id: null })} *//>
-					<SubNavBarButton page={page} subpage="medias" text="Medias" /* actionIfAlreadyActive={() => new ACTImageSelect({ id: null })} *//>
+					<SubNavBarButton page={page} subpage="media" text="Media" /* actionIfAlreadyActive={() => new ACTImageSelect({ id: null })} *//>
 				</SubNavBar>
 				<Switch>
 					<UsersUI/>
 					{currentSubpage == "terms" && <TermsUI/>}
-					{currentSubpage == "medias" && <MediasUI/>}
+					{currentSubpage == "media" && <MediasUI/>}
 				</Switch>
 			</>
 		);

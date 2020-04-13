@@ -139,7 +139,7 @@ export function GetLoadActionFuncForURL(url: VURL) {
 				store.main.database.selectedUserID = entryID!;
 			} else if (subpage == "terms" && subpageInURL) {
 				store.main.database.selectedTermID = entryID!;
-			} else if (subpage == "images" && subpageInURL) {
+			} else if (subpage == "media" && subpageInURL) {
 				store.main.database.selectedMediaID = entryID!;
 			}
 		} else if (page == "private" || page == "public") {
@@ -259,7 +259,7 @@ export const GetNewURL = StoreAccessor(s=>(includeMapViewStr = true)=>{
 			newURL.pathNodes.push(`${GetSelectedUserID()}`);
 		} else if (subpage == "terms" && GetSelectedTermID()) {
 			newURL.pathNodes.push(`${GetSelectedTermID()}`);
-		} else if (subpage == "images" && GetSelectedMediaID()) {
+		} else if (subpage == "media" && GetSelectedMediaID()) {
 			newURL.pathNodes.push(`${GetSelectedMediaID()}`);
 		}
 	}

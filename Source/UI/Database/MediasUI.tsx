@@ -30,7 +30,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as { selectedMedia_
 			this.SetState({selectedMedia_newData: null, selectedMedia_newDataError: null});
 		}, [selectedMedia]);
 
-		if (medias == null) return <div>Loading medias...</div>;
+		if (medias == null) return <div>Loading media...</div>;
 		return (
 			<Row plr={7} style={{height: "100%", alignItems: "flex-start"}}>
 				<Column mtb={10} style={{
@@ -40,7 +40,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as { selectedMedia_
 				}}>
 					<Row center style={{height: 40, justifyContent: "center", background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 						<Div p={7} style={{position: "absolute", left: 0}}>
-							<Button text="Add media" enabled={HasModPermissions(MeID())} title={HasModPermissions(MeID()) ? null : "Only moderators can add images currently. (till review/approval system is implemented)"}onClick={e=>{
+							<Button text="Add media" enabled={HasModPermissions(MeID())} title={HasModPermissions(MeID()) ? null : "Only moderators can add media currently. (till review/approval system is implemented)"}onClick={e=>{
 								if (userID == null) return ShowSignInPopup();
 								ShowAddMediaDialog({});
 							}}/>

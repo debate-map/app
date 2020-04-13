@@ -1,5 +1,5 @@
 import {configure, onReactionError} from "mobx";
-import {O, HandleError} from "vwebapp-framework";
+import {O, HandleError, ConfigureMobX} from "vwebapp-framework";
 import {ignore} from "mobx-sync";
 import {Firelink} from "mobx-firelink";
 import {immerable, setUseProxies, setAutoFreeze} from "immer";
