@@ -1,9 +1,14 @@
 import {GetPlayingTimeline, GetSelectedTimeline} from "Source/Store/main/maps/mapStates/$mapState";
 import {GetOpenMapID} from "Source/Store/main";
-import {GetAsync, MergeDBUpdates} from "mobx-firelink";
-import {Clone, ToNumber} from "js-vextensions";
+import {GetAsync, MergeDBUpdates, GetDocs, WhereOp, MergeDBUpdates_Multi} from "mobx-firelink";
+import {Clone, ToNumber, DEL, E, OmitIfNull, OMIT} from "js-vextensions";
 import {GetNodeL2} from "@debate-map/server-link/Source/Link";
 import {DeleteNodeSubtree} from "@debate-map/server-link/Source/Link";
+
+export function StoreTempData(data: Object) {
+	g.tempData = g.tempData || [];
+	g.tempData.push(E({_time: Date.now()}, data));
+}
 
 // temp (for in-console db-upgrades and such)
 // ==========
@@ -53,4 +58,38 @@ export async function GetDBUpdatesFor_DeleteNodeSubtree(nodeID: string, maxDelet
 	const command = new DeleteNodeSubtree({nodeID, maxDeletes});
 	await command.Validate_Async({maxIterations});
 	return command.GetDBUpdates();
+}
+
+export async function GetDBUpdatesFor_MediaRefactor() {
+	const revsWithImg = await GetAsync(()=>GetDocs({
+		queryOps: [new WhereOp("image.id", ">", "")],
+	}, a=>a.nodeRevisions));
+
+	const images = await GetAsync(()=>GetDocs({}, (a: any)=>a.images));
+
+	const dbUpdates_revs = MergeDBUpdates_Multi(...revsWithImg.map(rev=> {
+		const img = images.find(a=>a._key == rev["image"].id);
+		return {
+			[`nodeRevisions/${rev._key}`]: E(rev, {
+				image: DEL,
+				media: E(rev["image"], {previewWidth: img ? OmitIfNull(img.previewWidth) : OMIT, sourceChains: img ? img.sourceChains : OMIT, captured: img && img.type == 20 ? true : OMIT}),
+			}),
+		};
+	}));
+
+	const dbUpdates_images = MergeDBUpdates_Multi(...images.map(img=> {
+		return {
+			[`images/${img._key}`]: null,
+			[`medias/${img._key}`]: E(img, {
+				previewWidth: DEL,
+				sourceChains: DEL,
+				type: 10,
+			}),
+		};
+	}));
+
+	const dbUpdates = MergeDBUpdates_Multi(dbUpdates_revs, dbUpdates_images);
+
+	StoreTempData({revsWithImg, images, dbUpdates_revs, dbUpdates_images, dbUpdates});
+	return dbUpdates;
 }

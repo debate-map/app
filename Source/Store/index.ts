@@ -1,5 +1,5 @@
-import {configure} from "mobx";
-import {O} from "vwebapp-framework";
+import {configure, onReactionError} from "mobx";
+import {O, HandleError} from "vwebapp-framework";
 import {ignore} from "mobx-sync";
 import {Firelink} from "mobx-firelink";
 import {immerable, setUseProxies, setAutoFreeze} from "immer";
@@ -7,11 +7,7 @@ import {Feedback_RootState} from "firebase-feedback";
 import {FirebaseDBShape} from "@debate-map/server-link/Source/Link";
 import {MainState} from "./main";
 
-// configure({ enforceActions: 'always' });
-configure({enforceActions: "observed"});
-// fixes various issues when Immer is sent mobx objects (see NPMPatches.ts for old fix attempts)
-setUseProxies(false);
-setAutoFreeze(false);
+//ConfigureMobX();
 
 export class RootState {
 	// [immerable] = true; // makes the store able to be used in immer's "produce" function
