@@ -3,21 +3,17 @@ import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBo
 import {BaseComponent} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {store} from "Source/Store";
-import {MapNodeRevision_Defaultable} from "@debate-map/server-link/Source/Link";
-import {CanEditNode, IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {GetNodeL2} from "@debate-map/server-link/Source/Link";
-import {AddNodeRevision} from "@debate-map/server-link/Source/Link";
+import {MapNodeRevision_Defaultable, CanEditNode, IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, GetChildCount, DeleteMap, Map} from "@debate-map/server-link/Source/Link";
+
+
 import {Observer, GetUpdates, InfoButton} from "vwebapp-framework";
 import {GADDemo} from "Source/UI/@GAD/GAD";
 import {Button_GAD} from "Source/UI/@GAD/GADButton";
-import {SetMapFeatured} from "@debate-map/server-link/Source/Link";
-import {UpdateMapDetails} from "@debate-map/server-link/Source/Link";
-import {GetChildCount} from "@debate-map/server-link/Source/Link";
-import {DeleteMap} from "@debate-map/server-link/Source/Link";
+
+
 import {runInAction} from "mobx";
 import {FromJSON, ToJSON, E} from "js-vextensions";
-import {Map} from "@debate-map/server-link/Source/Link";
+
 import {MapDetailsUI} from "../../MapDetailsUI";
 
 // todo: probably ms this runs in two steps: 1) gets db-updates, 2) user looks over and approves, 3) user presses continue (to apply using ApplyDBUpdates, or a composite command)
@@ -92,8 +88,9 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 											Recursively apply node-defaults, for nodes within the map "${map.name}"?
 
 											Notes:
-											* Recurses down from the root node, modifying nodes to match the node-defaults; ignores paths where we lack the edit permission.
+											* Recurses down from the root node, modifying non-matching nodes to match the node-defaults; ignores paths where we lack the edit permission.
 											* The process may take quite a while (depending on the map size). A message will display on completion.
+											* There is no user-interface yet to stop the operation; closing the browser tab will accomplish this, though.
 											* You cannot directly undo the operation. (though if the previous node settings were all the same, you could rerun this tool)
 										`.AsMultiline(0),
 										onOK: async()=>{
@@ -106,7 +103,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 										},
 									});
 								}}/>
-								<InfoButton ml={5} text="Recurses down from the root node, modifying nodes to match the node-defaults; ignores paths where we lack the edit permission."/>
+								<InfoButton ml={5} text="Recurses down from the root node, modifying non-matching nodes to match the node-defaults; ignores paths where we lack the edit permission."/>
 								<Button ml={5} text="Delete" onLeftClick={async()=>{
 									const rootNode = await GetAsync(()=>GetNodeL2(map.rootNode));
 									if (GetChildCount(rootNode) != 0) {
