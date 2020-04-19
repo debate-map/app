@@ -11,14 +11,14 @@ import {ES} from "Source/Utils/UI/GlobalStyles";
 import {store} from "Source/Store";
 import {GetNodeView} from "Source/Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
+import {MapNodeL3, Polarity,HolderType, GetNodeChildrenL3,GetFillPercent_AtPath,IsMultiPremiseArgument,MapNodeType, MapNodeType_Info,ArgumentType,Map} from "@debate-map/server-link/Source/Link";
+
+
+
+
+
+
 import {NodeChildHolderBox} from "./NodeChildHolderBox";
-import {MapNodeL3, Polarity} from "@debate-map/server-link/Source/Link";
-import {HolderType, GetNodeChildrenL3} from "@debate-map/server-link/Source/Link";
-import {GetFillPercent_AtPath} from "@debate-map/server-link/Source/Link";
-import {IsMultiPremiseArgument} from "@debate-map/server-link/Source/Link";
-import {MapNodeType, MapNodeType_Info} from "@debate-map/server-link/Source/Link";
-import {ArgumentType} from "@debate-map/server-link/Source/Link";
-import {Map} from "@debate-map/server-link/Source/Link";
 import {ArgumentsControlBar} from "../ArgumentsControlBar";
 
 type Props = {
@@ -69,11 +69,16 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		if (separateChildren) {
 			upChildren = upChildren.OrderByDescending(child=>nodeChildren_fillPercents[child._key]);
 			downChildren = downChildren.OrderByDescending(child=>nodeChildren_fillPercents[child._key]);
+			// this is really not recommended, but I guess there could be use-cases (only admins are allowed to manually order this type anyway)
+			if (node.childrenOrder) {
+				upChildren = upChildren.OrderByDescending(child=>node.childrenOrder.indexOf(child._key).IfN1Then(Number.MAX_SAFE_INTEGER)); // descending, since index0 of upChildren group shows at bottom
+				downChildren = downChildren.OrderBy(child=>node.childrenOrder.indexOf(child._key).IfN1Then(Number.MAX_SAFE_INTEGER));
+			}
 		} else {
 			nodeChildrenToShowHere = nodeChildrenToShowHere.OrderByDescending(child=>nodeChildren_fillPercents[child._key]);
 			// if (IsArgumentNode(node)) {
-			const isArgument_any = node.type == MapNodeType.Argument && node.current.argumentType == ArgumentType.Any;
-			if (node.childrenOrder && !isArgument_any) {
+			//const isArgument_any = node.type == MapNodeType.Argument && node.current.argumentType == ArgumentType.Any;
+			if (node.childrenOrder) {
 				nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(child=>node.childrenOrder.indexOf(child._key).IfN1Then(Number.MAX_SAFE_INTEGER));
 			}
 		}

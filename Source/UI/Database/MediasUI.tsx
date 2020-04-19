@@ -46,7 +46,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as { selectedMedia_
 							}}/>
 						</Div>
 						<Div style={{fontSize: 17, fontWeight: 500}}>
-							Medias
+							Media
 						</Div>
 					</Row>
 					<ScrollView ref={c=>this.scrollView = c} style={ES({flex: 1})} contentStyle={ES({flex: 1, padding: 10})} onClick={e=>{

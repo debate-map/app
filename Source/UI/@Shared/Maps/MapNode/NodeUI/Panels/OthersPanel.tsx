@@ -7,7 +7,7 @@ import {IDAndCreationInfoUI} from "Source/UI/@Shared/CommonPropUIs/IDAndCreation
 import {UUIDPathStub, UUIDStub} from "Source/UI/@Shared/UUIDStub";
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {SlicePath} from "mobx-firelink";
-import {Map} from "@debate-map/server-link/Source/Link";
+import {Map, HasAdminPermissions, ChildOrderType} from "@debate-map/server-link/Source/Link";
 import {Observer, InfoButton, Icon} from "vwebapp-framework";
 import {MapNodeL3, ClaimForm} from "@debate-map/server-link/Source/Link";
 import {AttachmentType, GetAttachmentType} from "@debate-map/server-link/Source/Link";
@@ -63,8 +63,12 @@ export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNo
 		const changeControlType_currentType = node.ownerMapID != null ? "Private" : "Public";
 		// const changeControlType_newType = changeControlType_currentType == 'Private' ? 'Public' : 'Private';
 		const changeControlTypeCommand = new ChangeNodeOwnerMap(E({nodeID: node._key, newOwnerMapID: node.ownerMapID != null ? null : mapID, argumentNodeID: OmitIfFalsy(argumentWrapper?._key)}));
+		//const changeChildOrderTypeCommand = new ChangeNodeChildOrderType(E({nodeID: node._key, newOrderType: node.childrenOrderType == ChildOrderType.Manual ? ChildOrderType.ByRating : ChildOrderType.Manual}));
 
-		let mirrorChildren = GetNodeMirrorChildren(node._key);
+		const mirrorChildren = GetNodeMirrorChildren(node._key);
+		/*const childOrderTypeChangeable = node.ownerMapID != null // if private node
+			|| HasAdminPermissions(MeID()) // or has admin permissions
+			|| (node.type === MapNodeType.Argument && node.multiPremiseArgument); // or it's a multi-premise argument (these start as manual)*/
 		return (
 			<Column sel style={{position: "relative"}}>
 				<IDAndCreationInfoUI id={node._key} creatorID={node.creator} createdAt={node.createdAt}/>
@@ -124,8 +128,17 @@ export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNo
 							new ChangeClaimType(E({mapID, nodeID: node._key, newType: convertToType})).Run();
 						}}/>
 					</Row>}
-				{node.type === MapNodeType.Argument && node.multiPremiseArgument && !isArgument_any &&
-					<ChildrenOrder mapID={mapID} node={node}/>}
+				{/*childOrderTypeChangeable &&
+					<Row center>
+						<Text>Children order type:</Text>
+						<Select ml={5} options={GetEntries(ChildOrderType)} value={node.childrenOrderType} enabled={changeControlTypeCommand.Validate_Safe() == null} title={changeControlTypeCommand.validateError} onChange={val=>{
+							changeControlTypeCommand.Run();
+						}}/>
+						<InfoButton ml={5} text="Private nodes are locked to a given map, but allow more permission controls to the node-creator and map-editors."/>
+					</Row>*/}
+				{/*node.childrenOrderType == ChildOrderType.Manual &&
+					<ChildrenOrder mapID={mapID} node={node}/>*/}
+				<ChildrenOrder mapID={mapID} node={node}/>
 				<AtThisLocation node={node} path={path}/>
 			</Column>
 		);
@@ -180,15 +193,31 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 	}
 }
 
+@Observer
 class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> {
 	render() {
 		const {mapID, node} = this.props;
 		const oldChildrenOrder = node.childrenOrder || [];
-		const oldChildrenOrderValid = oldChildrenOrder.length == node.children.VKeys().length && oldChildrenOrder.every(id=>node.children[id] != null);
+		//const oldChildrenOrderValid = oldChildrenOrder.length == node.children.VKeys().length && oldChildrenOrder.every(id=>node.children[id] != null);
+
+		const childOrderType = node.childrenOrder ? ChildOrderType.Manual : ChildOrderType.ByRating;
+		const updateChildrenOrderCommand = new UpdateNodeChildrenOrder({mapID, nodeID: node._key, childrenOrder: null});
 		return (
 			<Column mt={5}>
-				<Row style={{fontWeight: "bold"}}>Children order:</Row>
-				{oldChildrenOrder.map((childID, index)=>{
+				<Row style={E(childOrderType == ChildOrderType.Manual && {fontWeight: "bold"})}>
+					<Text>Children order:</Text>
+					<Select ml={5} options={GetEntries(ChildOrderType)} value={childOrderType} enabled={updateChildrenOrderCommand.Validate_Safe() == null} title={updateChildrenOrderCommand.validateError} onChange={val=>{
+						if (val == ChildOrderType.Manual) {
+							const existingValidIDs = oldChildrenOrder.filter(id=>node.children[id] != null);
+							const missingChildIDs = (node.children || {}).Pairs().filter(pair=>!oldChildrenOrder.Contains(pair.key)).map(pair=>pair.key);
+							updateChildrenOrderCommand.payload.childrenOrder = existingValidIDs.concat(missingChildIDs);
+							updateChildrenOrderCommand.Run();
+						} else {
+							updateChildrenOrderCommand.Run();
+						}
+					}}/>
+				</Row>
+				{node.childrenOrder && oldChildrenOrder.map((childID, index)=>{
 					const childPath = (node._key ? `${node._key}/` : "") + childID;
 					const child = GetNodeL3(childPath);
 					const childTitle = child ? GetNodeDisplayText(child, childPath, GetNodeForm(child, node)) : "...";
@@ -220,12 +249,10 @@ class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> 
 						</Row>
 					);
 				})}
-				{!oldChildrenOrderValid &&
+				{/*node.childrenOrder && !oldChildrenOrderValid && updateChildrenOrderCommand.Validate_Safe() == null &&
 					<Button mr="auto" text="Fix children-order" onClick={()=>{
-						const existingValidIDs = oldChildrenOrder.filter(id=>node.children[id] != null);
-						const missingChildIDs = node.children.Pairs().filter(pair=>!oldChildrenOrder.Contains(pair.key)).map(pair=>pair.key);
-						new UpdateNodeChildrenOrder({mapID, nodeID: node._key, childrenOrder: existingValidIDs.concat(missingChildIDs)}).Run();
-					}}/>}
+						InitializeChildrenOrder();
+					}}/>*/}
 			</Column>
 		);
 	}
