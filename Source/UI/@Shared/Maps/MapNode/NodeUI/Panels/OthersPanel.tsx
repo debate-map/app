@@ -7,7 +7,7 @@ import {IDAndCreationInfoUI} from "Source/UI/@Shared/CommonPropUIs/IDAndCreation
 import {UUIDPathStub, UUIDStub} from "Source/UI/@Shared/UUIDStub";
 import {ES} from "Source/Utils/UI/GlobalStyles";
 import {SlicePath} from "mobx-firelink";
-import {Map, HasAdminPermissions, ChildOrderType} from "@debate-map/server-link/Source/Link";
+import {Map, ChildOrderType} from "@debate-map/server-link/Source/Link";
 import {Observer, InfoButton, Icon} from "vwebapp-framework";
 import {MapNodeL3, ClaimForm} from "@debate-map/server-link/Source/Link";
 import {AttachmentType, GetAttachmentType} from "@debate-map/server-link/Source/Link";
