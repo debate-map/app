@@ -1,6 +1,8 @@
 import {BaseComponentPlus} from "react-vextensions";
 import {HSLA} from "vwebapp-framework";
 import {GetTerm} from "@debate-map/server-link/Source/Link";
+import {GADDemo} from "Source/UI/@GAD/GAD";
+import {E} from "js-vextensions";
 
 export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {refText: string, termID: string, showKeyStart?: boolean, onHover: (hovered: boolean)=>void, onClick: ()=>void}, {}) {
 	render() {
@@ -13,14 +15,17 @@ export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {
 		// if (term == null) return <a>{refText}</a>;
 		return (
 			<a
-				style={{
-					//color: HSLA(120, 1, .7, 1),
-					//color: HSLA(120, .5, .7, 1),
-					color: "rgba(255, 255, 255, 0.7)",
-					//fontWeight: 500,
-					//textDecoration: "underline rgba(255,255,255,.3) solid !important",
-					//textDecoration: "underline rgba(255,255,255,.3) solid",
-				}}
+				style={E(
+					{
+						//color: HSLA(120, 1, .7, 1),
+						//color: HSLA(120, .5, .7, 1),
+						color: "rgba(255,255,255,.7)",
+						//fontWeight: 500,
+						//textDecoration: "underline rgba(255,255,255,.3) solid !important",
+						//textDecoration: "underline rgba(255,255,255,.3) solid",
+					},
+					GADDemo && {color: "black"},
+				)}
 				onMouseEnter={e=>onHover(true)}
 				onMouseLeave={e=>onHover(false)}
 				onClick={e=>{
@@ -31,7 +36,10 @@ export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {
 				}}
 			>
 				{/* term.name */}
-				<span style={{textDecoration: "underline rgba(255,255,255,.5) solid"}}>
+				<span style={E(
+					{textDecoration: "underline rgba(255,255,255,.5) solid"},
+					GADDemo && {textDecoration: "underline solid rgba(0,0,0,.5)"},
+				)}>
 					{refText}
 				</span>
 				{showKeyStart &&
