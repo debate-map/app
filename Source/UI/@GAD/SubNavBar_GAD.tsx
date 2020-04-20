@@ -5,6 +5,7 @@ import {store, RootState} from "Source/Store";
 import {ActionFunc, Link, Observer} from "vwebapp-framework";
 import {zIndexes} from "Source/Utils/UI/ZIndexes";
 import {colors} from "../../Utils/UI/GlobalStyles";
+import {GADHeaderFont} from "./GAD";
 
 // @Observer
 export class SubNavBar_GAD extends BaseComponent<{fullWidth?: boolean}, {}> {
@@ -43,8 +44,7 @@ export class SubNavBarButton_GAD extends BaseComponent<{page: string, subpage: s
 		const style = {
 			display: "inline-block", cursor: "pointer", verticalAlign: "middle",
 			lineHeight: "30px", color: "#000", padding: "0 15px", textDecoration: "none", opacity: 0.9,
-			// fontFamily: 'Bebas Neue', // computer should have this font
-			fontFamily: "Cinzel",
+			fontFamily: GADHeaderFont,
 			fontSize: 16, textTransform: "uppercase", fontWeight: "normal",
 		};
 

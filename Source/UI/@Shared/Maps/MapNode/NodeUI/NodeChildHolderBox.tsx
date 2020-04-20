@@ -2,7 +2,7 @@ import chroma from "chroma-js";
 import {AssertWarn, emptyArray, emptyArray_forLoading, E} from "js-vextensions";
 import {Row} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM, UseCallback, WarnOfTransientObjectProps} from "react-vextensions";
-import {GADDemo} from "Source/UI/@GAD/GAD";
+import {GADDemo, GADMainFont} from "Source/UI/@GAD/GAD";
 import {HSLA, Observer} from "vwebapp-framework";
 import {ACTMapNodeExpandedSet, GetNodeView, MapNodeView} from "Source/Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
@@ -109,7 +109,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 						padding="3px 5px 2px"
 						text={<span style={E(
 							{position: "relative", fontSize: 13},
-							GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: "TypoPRO Bebas Neue", fontSize: 15, letterSpacing: 1},
+							GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont, fontSize: 15, letterSpacing: 1},
 						)}>{text}</span>}
 						{...E(
 							{backgroundFillPercent, backgroundColor, markerPercent},

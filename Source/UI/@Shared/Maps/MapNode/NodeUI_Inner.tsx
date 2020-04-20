@@ -4,7 +4,7 @@ import {DoNothing, Timer, ToJSON, Vector2i, VRect, WaitXThenRun, ToNumber, E} fr
 import {Draggable} from "react-beautiful-dnd";
 import ReactDOM from "react-dom";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "react-vextensions";
-import {GADDemo} from "Source/UI/@GAD/GAD";
+import {GADDemo, GADMainFont} from "Source/UI/@GAD/GAD";
 import {DragInfo, EB_ShowError, EB_StoreError, HSLA, IsDoubleClick, Observer} from "vwebapp-framework";
 import {DraggableInfo} from "Source/Utils/UI/DNDStructures";
 import {GetTimeFromWhichToShowChangedNodes, GetNodeRevealHighlightTime, GetTimeSinceNodeRevealedByPlayingTimeline} from "Source/Store/main/maps/mapStates/$mapState";
@@ -321,7 +321,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					text={<>
 						<TitlePanel {...{indexInNodeList, parent: this, map, node, path}} {...(dragInfo && dragInfo.provided.dragHandleProps)}
 							ref={c=>this.titlePanel = c}
-							style={E(GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: "TypoPRO Bebas Neue", fontSize: 15, letterSpacing: 1})}/>
+							style={E(GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont, fontSize: 15, letterSpacing: 1})}/>
 						{subPanelShow && <SubPanel node={node}/>}
 						<NodeUI_Menu_Stub {...{map, node, path}}/>
 					</>}

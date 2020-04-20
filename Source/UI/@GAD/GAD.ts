@@ -1,6 +1,9 @@
 import {Timer} from "js-vextensions";
 
 export const GADDemo = startURL.domain == "demo.greatamericandebate.org" || startURL.GetQueryVar("extra") == "gad";
+export const GADHeaderFont = "Cinzel";
+//export const GADMainFont = "TypoPRO Bebas Neue";
+export const GADMainFont = "'Quicksand', sans-serif";
 
 if (GADDemo) {
 	/* document.addEventListener('load', () => {

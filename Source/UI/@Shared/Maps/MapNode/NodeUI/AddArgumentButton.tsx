@@ -1,18 +1,15 @@
 import {E} from "js-vextensions";
 import {Button} from "react-vcomponents";
 import {BaseComponent, UseCallback} from "react-vextensions";
-import {GADDemo} from "Source/UI/@GAD/GAD";
+import {GADDemo, GADMainFont} from "Source/UI/@GAD/GAD";
 import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
 import {HSLA, Observer} from "vwebapp-framework";
 import {useCallback, useMemo, useEffect} from "react";
-import {MapNodeL3, Polarity, ClaimForm} from "@debate-map/server-link/Source/Link";
-import {MapNodeType} from "@debate-map/server-link/Source/Link";
-import {GetParentNodeL3} from "@debate-map/server-link/Source/Link";
-import {GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {Map} from "@debate-map/server-link/Source/Link";
-import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog";
+import {MapNodeL3, Polarity, ClaimForm, MapNodeType, GetParentNodeL3, GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity, MeID, Map} from "@debate-map/server-link/Source/Link";
+
+
 import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
+import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog";
 
 type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style?};
 /* const dropTargetDecorator = DropTarget('node',
@@ -93,7 +90,7 @@ export class AddArgumentButton extends BaseComponent<Props> {
 					{height: 17, fontSize: 11, padding: "0 12px"}, // vertical
 					// {fontSize: 18, padding: "0 12px"}, // horizontal
 					// canDrop && { outline: `1px solid ${isOver ? 'yellow' : 'white'}` },
-					GADDemo && {color: HSLA(222, 0.1, 0.8, 1), fontFamily: "TypoPRO Bebas Neue", fontSize: 13, letterSpacing: 1},
+					GADDemo && {color: HSLA(222, 0.1, 0.8, 1), fontFamily: GADMainFont, fontSize: 12, letterSpacing: 1},
 					style,
 				)}
 				onClick={UseCallback(e=>{

@@ -15,6 +15,7 @@ import {zIndexes} from "Source/Utils/UI/ZIndexes";
 import {GetAuth} from "@debate-map/server-link/Source/Link";
 import {rootPageDefaultChilds} from "Source/Utils/URL/URLs";
 import {colors} from "../../Utils/UI/GlobalStyles";
+import {GADHeaderFont} from "./GAD";
 
 // main
 // ==========
@@ -97,9 +98,7 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 		let finalStyle = E(
 			{
 				position: "relative", display: "inline-block", cursor: "pointer", verticalAlign: "middle",
-				// fontFamily: 'TypoPRO Bebas Neue',
-				// fontFamily: 'Bebas Neue', // computer should have this font
-				fontFamily: "Cinzel",
+				fontFamily: GADHeaderFont,
 				fontSize: sideButton ? 16 : 18, textTransform: sideButton ? "uppercase" : null, fontWeight: "normal",
 				lineHeight: "150px", color: "#000", padding: "0 15px", textDecoration: "none", opacity: 0.9,
 			},
