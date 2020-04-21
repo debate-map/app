@@ -97,8 +97,8 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 				</div>
 				<div style={{position: "relative", marginTop: 1, background: "rgba(0,0,0,.8)", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: backgroundColor.alpha(0.7).css()}}/>
-					{/* <PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="phrasings" text="Phrasings"
-						style={{marginTop: 0, borderRadius: "5px 5px 0 0"}}/> // commented for now, till it's full-featured enough to be worth including, eg. with rating of phrasings, and system to change the selected phrasing */}
+					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="phrasings" text="Phrasings"
+						style={{marginTop: 0, borderRadius: "5px 5px 0 0"}}/>
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="definitions" text="Definitions"/>
 					{/* <PanelButton {...{ onPanelButtonHover, onPanelButtonClick, map, path, openPanel }} panel="discussion" text="Discussion"/>
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="social" text="Social"/> */}
