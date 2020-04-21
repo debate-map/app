@@ -1,7 +1,7 @@
 import {Button, Column, Pre, Row} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
-import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
-import {ShowAddPhrasingDialog} from "Source/UI/Database/Phrasings/PhrasingDetailsUI";
+import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
+import {ShowAddPhrasingDialog} from "UI/Database/Phrasings/PhrasingDetailsUI";
 import {InfoButton, Observer} from "vwebapp-framework";
 import {MapNodeL2} from "@debate-map/server-link/Source/Link";
 import {GetNodePhrasings} from "@debate-map/server-link/Source/Link";
@@ -11,7 +11,7 @@ import {CanGetBasicPermissions} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";
 import {MapNodeType} from "@debate-map/server-link/Source/Link";
 import {DetailsPanel_Phrasings} from "./Phrasings_SubPanels/DetailsPanel";
-import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
+import {GetNodeColor} from "Store/firebase_ext/nodes";
 
 const Phrasing_FakeID = "FAKE";
 

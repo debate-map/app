@@ -1,4 +1,4 @@
-import {GetNewURL} from "Source/Utils/URL/URLs";
+import {GetNewURL} from "Utils/URL/URLs";
 import {VURL, WaitXThenRun, CopyText} from "js-vextensions";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, RowLR, Select, TextInput} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";

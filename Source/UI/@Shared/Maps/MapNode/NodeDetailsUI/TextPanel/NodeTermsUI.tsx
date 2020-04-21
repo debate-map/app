@@ -1,7 +1,7 @@
 import {E} from "js-vextensions";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {ShowAddTermDialog} from "Source/UI/Database/Terms/TermDetailsUI";
+import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI";
 import {InfoButton, Link, Observer} from "vwebapp-framework";
 import {NodeDetailsUI_SharedProps} from "../../NodeDetailsUI";
 import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";

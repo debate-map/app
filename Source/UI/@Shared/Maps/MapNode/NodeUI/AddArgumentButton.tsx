@@ -1,14 +1,14 @@
 import {E} from "js-vextensions";
 import {Button} from "react-vcomponents";
 import {BaseComponent, UseCallback} from "react-vextensions";
-import {GADDemo, GADMainFont} from "Source/UI/@GAD/GAD";
-import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
+import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
+import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {HSLA, Observer} from "vwebapp-framework";
 import {useCallback, useMemo, useEffect} from "react";
 import {MapNodeL3, Polarity, ClaimForm, MapNodeType, GetParentNodeL3, GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity, MeID, Map} from "@debate-map/server-link/Source/Link";
 
 
-import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
+import {GetNodeColor} from "Store/firebase_ext/nodes";
 import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog";
 
 type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style?};

@@ -1,7 +1,7 @@
 import {Button, Column, Row} from "react-vcomponents";
 import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
-import {PhrasingDetailsUI} from "Source/UI/Database/Phrasings/PhrasingDetailsUI";
+import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI";
 import {GetUpdates, Observer} from "vwebapp-framework";
 import {E} from "js-vextensions";
 import {MapNodePhrasing} from "@debate-map/server-link/Source/Link";

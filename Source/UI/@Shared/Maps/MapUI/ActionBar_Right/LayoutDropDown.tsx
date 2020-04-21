@@ -1,11 +1,11 @@
 import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, RowLR, Spinner} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
-import {GADDemo} from "Source/UI/@GAD/GAD";
-import {Button_GAD} from "Source/UI/@GAD/GADButton";
-import {store} from "Source/Store";
+import {GADDemo} from "UI/@GAD/GAD";
+import {Button_GAD} from "UI/@GAD/GADButton";
+import {store} from "Store";
 import {runInAction} from "mobx";
 import {Observer} from "vwebapp-framework";
-import {ACTEnsureMapStateInit} from "Source/Store/main/maps";
+import {ACTEnsureMapStateInit} from "Store/main/maps";
 import {Map} from "@debate-map/server-link/Source/Link";
 
 @Observer

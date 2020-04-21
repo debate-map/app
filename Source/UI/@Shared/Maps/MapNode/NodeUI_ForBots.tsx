@@ -1,8 +1,8 @@
 import {Pre, Row} from "react-vcomponents";
 import {BaseComponentPlus, GetInnerComp} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
-import {GetOpenMapID} from "Source/Store/main";
-import {GetMapView} from "Source/Store/main/maps/mapViews/$mapView";
+import {GetOpenMapID} from "Store/main";
+import {GetMapView} from "Store/main/maps/mapViews/$mapView";
 import {Map} from "@debate-map/server-link/Source/Link";
 import {GetRatings} from "@debate-map/server-link/Source/Link";
 import {GetNodeChildrenL2, GetNodeParentsL2, GetParentNodeL2} from "@debate-map/server-link/Source/Link";

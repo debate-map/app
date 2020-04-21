@@ -1,11 +1,11 @@
 import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select, ColorPickerBox, Text} from "react-vcomponents";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {presetBackgrounds, defaultPresetBackground} from "Source/Utils/UI/PresetBackgrounds";
+import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds";
 import {PageContainer, Observer} from "vwebapp-framework";
-import {styles, ES} from "Source/Utils/UI/GlobalStyles";
+import {styles, ES} from "Utils/UI/GlobalStyles";
 import {Fragment} from "react";
-import {PropNameToTitle} from "Source/Utils/General/Others";
+import {PropNameToTitle} from "Utils/General/Others";
 import {ScrollView} from "react-vscrollview";
 import {E} from "js-vextensions";
 import {MeID, GetUser} from "@debate-map/server-link/Source/Link";

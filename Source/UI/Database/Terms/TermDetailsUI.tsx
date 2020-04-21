@@ -2,8 +2,8 @@ import {Clone, DEL, E, GetEntries, GetErrorMessagesUnderElement} from "js-vexten
 import {Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {IDAndCreationInfoUI} from "Source/UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
-import {ES} from "Source/Utils/UI/GlobalStyles";
+import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
+import {ES} from "Utils/UI/GlobalStyles";
 import {InfoButton, observer_simple} from "vwebapp-framework";
 import {Term, Term_nameFormat, Term_disambiguationFormat, TermType} from "@debate-map/server-link/Source/Link";
 import {AddTerm} from "@debate-map/server-link/Source/Link";

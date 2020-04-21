@@ -1,5 +1,5 @@
 import {Assert, AwaitTree, SleepAsync, E, IsObject} from "js-vextensions";
-import {dbVersion} from "Source/Main";
+import {dbVersion} from "Main";
 import {ConvertDataToValidDBUpdates, DBPath, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached, ApplyDBUpdates} from "mobx-firelink";
 import {Button, Column, Row} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";

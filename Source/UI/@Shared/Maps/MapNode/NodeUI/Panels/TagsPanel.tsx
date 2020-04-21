@@ -7,7 +7,7 @@ import {MapNodeL3} from "@debate-map/server-link/Source/Link";
 import {GetNodeTags} from "@debate-map/server-link/Source/Link";
 import {HasModPermissions, IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";
-import {ShowAddTagDialog, TagDetailsUI} from "Source/UI/Database/Tags/TagDetailsUI";
+import {ShowAddTagDialog, TagDetailsUI} from "UI/Database/Tags/TagDetailsUI";
 import {TagComp_MirrorChildrenFromXToY, MapNodeTag, GetTagCompClassByTag} from "@debate-map/server-link/Source/Link";
 import {UpdateNodeTag} from "@debate-map/server-link/Source/Link";
 import {ShowMessageBox} from "react-vmessagebox";

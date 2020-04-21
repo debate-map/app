@@ -6,7 +6,7 @@ import {ScrollView} from "react-vscrollview";
 import {MeID, GetUser} from "@debate-map/server-link/Source/Link";
 import {GetLayers, ForDeleteLayer_GetError, GetMapLayerIDs} from "@debate-map/server-link/Source/Link";
 import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
+import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {Layer} from "@debate-map/server-link/Source/Link";
 import {GetUserLayerStateForMap} from "@debate-map/server-link/Source/Link";
 import {DeleteLayer} from "@debate-map/server-link/Source/Link";

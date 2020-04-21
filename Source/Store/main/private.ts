@@ -1,5 +1,5 @@
 import {O} from "vwebapp-framework";
-import {store} from "Source/Store";
+import {store} from "Store";
 import {StoreAccessor} from "mobx-firelink";
 import {GetMap} from "@debate-map/server-link/Source/Link";
 

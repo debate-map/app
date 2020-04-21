@@ -3,7 +3,7 @@ import {Column, Pre, RowLR, Spinner, TextInput, Row, DropDown, DropDownTrigger, 
 import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
 import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";
-import {ShowAddMediaDialog} from "Source/UI/Database/Medias/AddMediaDialog";
+import {ShowAddMediaDialog} from "UI/Database/Medias/AddMediaDialog";
 import {MediaAttachment} from "@debate-map/server-link/Source/Link";
 import {Validate} from "mobx-firelink";
 import {GetMedia, GetMediasByURL} from "@debate-map/server-link/Source/Link";

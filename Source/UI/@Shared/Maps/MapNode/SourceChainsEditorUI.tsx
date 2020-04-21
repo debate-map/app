@@ -1,7 +1,7 @@
 import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
 import {Button, Column, Row, TextInput, Select, Text, Pre} from "react-vcomponents";
 import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL} from "js-vextensions";
-import {ES} from "Source/Utils/UI/GlobalStyles";
+import {ES} from "Utils/UI/GlobalStyles";
 import {Fragment} from "react";
 import {ShowMessageBox} from "react-vmessagebox";
 import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern} from "@debate-map/server-link/Source/Link";

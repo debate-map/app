@@ -1,10 +1,10 @@
 import {Button, Column, Div} from "react-vcomponents";
 import {AddGlobalStyle, BaseComponent} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
-import {store} from "Source/Store";
+import {store} from "Store";
 import {Observer} from "vwebapp-framework";
 import {runInAction} from "mobx";
-import {NotificationMessage} from "Source/Store/main/@NotificationMessage";
+import {NotificationMessage} from "Store/main/@NotificationMessage";
 
 AddGlobalStyle(`
 .NotificationScrollView > * { pointer-events: auto; }

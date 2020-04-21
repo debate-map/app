@@ -2,13 +2,13 @@ import {GetAsync} from "mobx-firelink";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBox, Text} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
-import {store} from "Source/Store";
+import {store} from "Store";
 import {MapNodeRevision_Defaultable, CanEditNode, IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, GetChildCount, DeleteMap, Map} from "@debate-map/server-link/Source/Link";
 
 
 import {Observer, GetUpdates, InfoButton} from "vwebapp-framework";
-import {GADDemo} from "Source/UI/@GAD/GAD";
-import {Button_GAD} from "Source/UI/@GAD/GADButton";
+import {GADDemo} from "UI/@GAD/GAD";
+import {Button_GAD} from "UI/@GAD/GADButton";
 
 
 import {runInAction} from "mobx";

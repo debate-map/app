@@ -1,10 +1,10 @@
 import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {Row} from "react-vcomponents";
-import {colors} from "Source/Utils/UI/GlobalStyles";
-import {LayoutDropDown} from "Source/UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown";
+import {colors} from "Utils/UI/GlobalStyles";
+import {LayoutDropDown} from "UI/@Shared/Maps/MapUI/ActionBar_Right/LayoutDropDown";
 import {HSLA} from "vwebapp-framework";
 import {E} from "js-vextensions";
-import {zIndexes} from "Source/Utils/UI/ZIndexes";
+import {zIndexes} from "Utils/UI/ZIndexes";
 import {Map} from "@debate-map/server-link/Source/Link";
 
 export class ActionBar_Right_GAD extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number}, {}) {

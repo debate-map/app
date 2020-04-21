@@ -4,15 +4,15 @@ import {DoNothing, Timer, ToJSON, Vector2i, VRect, WaitXThenRun, ToNumber, E} fr
 import {Draggable} from "react-beautiful-dnd";
 import ReactDOM from "react-dom";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "react-vextensions";
-import {GADDemo, GADMainFont} from "Source/UI/@GAD/GAD";
+import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
 import {DragInfo, EB_ShowError, EB_StoreError, HSLA, IsDoubleClick, Observer} from "vwebapp-framework";
-import {DraggableInfo} from "Source/Utils/UI/DNDStructures";
-import {GetTimeFromWhichToShowChangedNodes, GetNodeRevealHighlightTime, GetTimeSinceNodeRevealedByPlayingTimeline} from "Source/Store/main/maps/mapStates/$mapState";
-import {GetPathNodeIDs, MapNodeView, ACTMapNodeSelect, ACTMapNodeExpandedSet, GetNodeView, GetNodeViewsAlongPath} from "Source/Store/main/maps/mapViews/$mapView";
-import {store} from "Source/Store";
+import {DraggableInfo} from "Utils/UI/DNDStructures";
+import {GetTimeFromWhichToShowChangedNodes, GetNodeRevealHighlightTime, GetTimeSinceNodeRevealedByPlayingTimeline} from "Store/main/maps/mapStates/$mapState";
+import {GetPathNodeIDs, MapNodeView, ACTMapNodeSelect, ACTMapNodeExpandedSet, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView";
+import {store} from "Store";
 import {runInAction} from "mobx";
 import {SlicePath} from "mobx-firelink";
-import {GetLastAcknowledgementTime} from "Source/Store/main/maps";
+import {GetLastAcknowledgementTime} from "Store/main/maps";
 import {ExpandableBox} from "./ExpandableBox";
 import {DefinitionsPanel} from "./NodeUI/Panels/DefinitionsPanel";
 import {DetailsPanel} from "./NodeUI/Panels/DetailsPanel";
@@ -27,7 +27,7 @@ import {SubPanel} from "./NodeUI_Inner/SubPanel";
 import {TitlePanel} from "./NodeUI_Inner/TitlePanel";
 import {MapNodeUI_LeftBox} from "./NodeUI_LeftBox";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu";
-import {zIndexes} from "Source/Utils/UI/ZIndexes";
+import {zIndexes} from "Utils/UI/ZIndexes";
 import {MapNodeL3, ClaimForm} from "@debate-map/server-link/Source/Link";
 import {ChangeType, GetChangeTypeOutlineColor} from "@debate-map/server-link/Source/Link";
 import {GetNodeL3, IsPremiseOfSinglePremiseArgument, GetMainRatingType, GetNodeForm, GetPaddingForNode} from "@debate-map/server-link/Source/Link";
@@ -35,12 +35,12 @@ import {WeightingType, GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRating
 import {MapNodeType, MapNodeType_Info} from "@debate-map/server-link/Source/Link";
 import {RS_GetAllValues, ReasonScoreValues_RSPrefix, RS_CalculateTruthScoreComposite, RS_CalculateTruthScore} from "@debate-map/server-link/Source/Link";
 import {IsNodeSubnode} from "@debate-map/server-link/Source/Link";
-import {IsMouseEnterReal, IsMouseLeaveReal} from "Source/Utils/UI/General";
+import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General";
 import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";
 import {ratingTypes, RatingType} from "@debate-map/server-link/Source/Link";
 import {Map} from "@debate-map/server-link/Source/Link";
-import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
+import {GetNodeColor} from "Store/firebase_ext/nodes";
 
 // drag and drop
 // ==========

@@ -1,9 +1,9 @@
 import {E} from "js-vextensions";
 import {BaseComponent} from "react-vextensions";
-import {rootPageDefaultChilds} from "Source/Utils/URL/URLs";
-import {store, RootState} from "Source/Store";
+import {rootPageDefaultChilds} from "Utils/URL/URLs";
+import {store, RootState} from "Store";
 import {ActionFunc, Link, Observer} from "vwebapp-framework";
-import {zIndexes} from "Source/Utils/UI/ZIndexes";
+import {zIndexes} from "Utils/UI/ZIndexes";
 import {colors} from "../../Utils/UI/GlobalStyles";
 import {GADHeaderFont} from "./GAD";
 

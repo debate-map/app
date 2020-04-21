@@ -5,15 +5,15 @@ import {Column, Row, Select, TextArea, Button, Text, Spinner, CheckBox} from "re
 import {BaseComponentPlus} from "react-vextensions";
 import {VMenuItem} from "react-vmenu";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {ES, styles} from "Source/Utils/UI/GlobalStyles";
+import {ES, styles} from "Utils/UI/GlobalStyles";
 import {AddChildNode} from "@debate-map/server-link/Source/Link";
 import {ImportSubtree} from "@debate-map/server-link/Source/Link";
 import {GetNodeID, GetNodesByTitle, GetNodeChildrenL3} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";
 import {HasModPermissions} from "@debate-map/server-link/Source/Link";
 import {Observer, TreeView, RunInAction_Set} from "vwebapp-framework";
-import {store} from "Source/Store";
-import {DataExchangeFormat} from "Source/Store/main/maps";
+import {store} from "Store";
+import {DataExchangeFormat} from "Store/main/maps";
 import {GetNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
 import {MapNodeL3} from "@debate-map/server-link/Source/Link";
 import {GetNodesInSubtree} from "@debate-map/server-link/Source/Link";

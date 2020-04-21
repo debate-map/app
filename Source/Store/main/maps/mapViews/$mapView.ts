@@ -1,7 +1,7 @@
-import {Vector2i, Assert, IsString, GetTreeNodesInObjTree, DeepGet, IsPrimitive, DeepSet} from "js-vextensions";
+import {Vector2i, Assert, IsString, GetTreeNodesInObjTree, DeepGet, IsPrimitive, DeepSet, Timer} from "js-vextensions";
 import {observable} from "mobx";
-import {O, StoreAction} from "vwebapp-framework";
-import {store} from "Source/Store";
+import {O, StoreAction, LogWarning} from "vwebapp-framework";
+import {store} from "Store";
 import {SplitStringBySlash_Cached, StoreAccessor, Validate, UUID} from "mobx-firelink";
 import {PathSegmentToNodeID} from "@debate-map/server-link/Source/Link";
 
@@ -21,9 +21,12 @@ export class MapView {
 export class MapNodeView {
 	// constructor(childLimit?: number) {
 	// constructor(childLimit: number) {
-	/* constructor() {
-		this.childLimit = State(a=>a.main.initialChildLimit);
-	} */
+	/*constructor() {
+		//this.childLimit = State(a=>a.main.initialChildLimit);
+		// try to catch cause of odd "MapNodeView.children is undefined" issue hit sometimes
+		Assert(this.children != null);
+		new Timer(100, ()=>Assert(this.children != null), 1).Start();
+	}*/
 
 	@O expanded?: boolean;
 	/* expanded_truth?: boolean;
@@ -38,7 +41,7 @@ export class MapNodeView {
 	@O openTermID?: string;
 
 	// @O children? = observable.map<string, MapNodeView>();
-	@O children? = {} as {[key: string]: MapNodeView};
+	@O children = {} as {[key: string]: MapNodeView};
 	@O childLimit_up?: number;
 	@O childLimit_down?: number;
 }
@@ -180,9 +183,18 @@ export function GetNodeViewsAlongPath(mapID: string, pathOrPathNodes: string | s
 			nodeViews.push(null);
 			continue;
 		}
-		const childGroup = nodeViews.length ? nodeViews.Last().children : rootNodeViews;
-		if (childGroup[pathNode] == null && createNodeViewsIfMissing) {
-			childGroup[pathNode] = new MapNodeView();
+		let childGroup = nodeViews.length ? nodeViews.Last().children : rootNodeViews;
+		if (createNodeViewsIfMissing) {
+			// temp safeguard against sometimes-occuring bug (which shouldn't ever occur but somehow has/had been)
+			if (childGroup == null) {
+				LogWarning("MapNodeView.children is null; this shouldn't occur. (devs: find root cause)");
+				//debugger;
+				childGroup = nodeViews.Last().children = {};
+			}
+			
+			if (childGroup[pathNode] == null) {
+				childGroup[pathNode] = new MapNodeView();
+			}
 		}
 		// return childGroup[pathNode];
 		nodeViews.push(childGroup[pathNode]);
@@ -269,7 +281,7 @@ export const ACTMapViewMerge = StoreAction((mapID: string, toMergeMapView: MapVi
 
 	// maybe temp (maybe find another way)
 	// const mapUI = FindReact($('.MapUI')[0]) as MapUI;
-	const MapUI = require("Source/UI/@Shared/Maps/MapUI").MapUI as typeof import("Source/UI/@Shared/Maps/MapUI").MapUI; // late-import, to not violate "no importing UI files from other files" rule
+	const MapUI = require("UI/@Shared/Maps/MapUI").MapUI as typeof import("UI/@Shared/Maps/MapUI").MapUI; // late-import, to not violate "no importing UI files from other files" rule
 	const mapUI = MapUI.CurrentMapUI;
 	if (mapUI) {
 		mapUI.LoadStoredScroll();

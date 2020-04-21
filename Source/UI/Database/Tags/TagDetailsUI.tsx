@@ -2,15 +2,15 @@ import {Clone, E, DelIfFalsy} from "js-vextensions";
 import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox, Button} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {IDAndCreationInfoUI} from "Source/UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
-import {ES} from "Source/Utils/UI/GlobalStyles";
+import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
+import {ES} from "Utils/UI/GlobalStyles";
 import {InfoButton, observer_simple} from "vwebapp-framework";
 import {Validate} from "mobx-firelink";
 import {GetNodeL2, AsNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
 import {MapNodeType} from "@debate-map/server-link/Source/Link";
 import {AddNodeTag} from "@debate-map/server-link/Source/Link";
 import {MapNodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp} from "@debate-map/server-link/Source/Link";
-import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
+import {GetNodeColor} from "Store/firebase_ext/nodes";
 
 type Props = {baseData: MapNodeTag, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: MapNodeTag)=>void};
 type State = {newData: MapNodeTag};

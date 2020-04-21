@@ -1,11 +1,11 @@
 import {autorun, action} from "mobx";
-import {GetPlayingTimeline, GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
-import {GetOpenMapID} from "Source/Store/main";
-import {ACTMapNodeExpandedSet} from "Source/Store/main/maps/mapViews/$mapView";
-import {store} from "Source/Store";
-import {MapUI, ACTUpdateFocusNodeAndViewOffset} from "Source/UI/@Shared/Maps/MapUI";
+import {GetPlayingTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState";
+import {GetOpenMapID} from "Store/main";
+import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView";
+import {store} from "Store";
+import {MapUI, ACTUpdateFocusNodeAndViewOffset} from "UI/@Shared/Maps/MapUI";
 import {SleepAsync, VRect} from "js-vextensions";
-import {NodeUI_Inner} from "Source/UI/@Shared/Maps/MapNode/NodeUI_Inner";
+import {NodeUI_Inner} from "UI/@Shared/Maps/MapNode/NodeUI_Inner";
 import {GetDOM} from "react-vextensions";
 import {GetScreenRect} from "vwebapp-framework";
 import {SlicePath, GetAsync} from "mobx-firelink";

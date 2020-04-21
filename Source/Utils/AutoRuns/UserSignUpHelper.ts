@@ -1,5 +1,5 @@
 import {autorun} from "mobx";
-import {store} from "Source/Store";
+import {store} from "Store";
 import {DBPath, GetAsync, GetDoc} from "mobx-firelink";
 import {fire} from "@debate-map/server-link/Source/Link";
 import {GetUser} from "@debate-map/server-link/Source/Link";

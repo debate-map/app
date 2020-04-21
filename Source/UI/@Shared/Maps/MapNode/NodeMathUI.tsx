@@ -2,7 +2,7 @@ import {InlineMath} from "react-katex";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import ReactDOM from "react-dom";
 import {IsNaN} from "js-vextensions";
-import {store} from "Source/Store";
+import {store} from "Store";
 import {Term} from "@debate-map/server-link/Source/Link";
 import {PreProcessLatex} from "@debate-map/server-link/Source/Link";
 import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";

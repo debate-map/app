@@ -1,11 +1,11 @@
 import {FromJSON, GetEntries, ToNumber} from "js-vextensions";
 import {Pre, Row, Select} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
-import {store} from "Source/Store";
-import {ShowChangesSinceType} from "Source/Store/main/maps/mapStates/@MapState";
+import {store} from "Store";
+import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState";
 import {runInAction} from "mobx";
 import {Observer} from "vwebapp-framework";
-import {GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {Map} from "@debate-map/server-link/Source/Link";
 import {colors} from "../../../../Utils/UI/GlobalStyles";
 import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown";

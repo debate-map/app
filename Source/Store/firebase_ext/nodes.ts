@@ -1,7 +1,7 @@
 import chroma from "chroma-js";
 import {emptyArray_forLoading} from "js-vextensions";
 import {StoreAccessor} from "mobx-firelink";
-import {GetPlayingTimeline, GetPlayingTimelineRevealNodes_UpToAppliedStep, GetPlayingTimelineStepIndex} from "Source/Store/main/maps/mapStates/$mapState";
+import {GetPlayingTimeline, GetPlayingTimelineRevealNodes_UpToAppliedStep, GetPlayingTimelineStepIndex} from "Store/main/maps/mapStates/$mapState";
 import {MapNodeL3, MapNodeType, Polarity, GetNodeChildrenL2, GetNodeL3, GetUserAccessLevel, MeID} from "@debate-map/server-link/Source/Link";
 
 export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "background"): chroma.Color {

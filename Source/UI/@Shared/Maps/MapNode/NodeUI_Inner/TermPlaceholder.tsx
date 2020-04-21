@@ -1,7 +1,7 @@
 import {BaseComponentPlus} from "react-vextensions";
 import {HSLA} from "vwebapp-framework";
 import {GetTerm} from "@debate-map/server-link/Source/Link";
-import {GADDemo} from "Source/UI/@GAD/GAD";
+import {GADDemo} from "UI/@GAD/GAD";
 import {E} from "js-vextensions";
 
 export class TermPlaceholder extends BaseComponentPlus({showKeyStart: true} as {refText: string, termID: string, showKeyStart?: boolean, onHover: (hovered: boolean)=>void, onClick: ()=>void}, {}) {

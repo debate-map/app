@@ -4,13 +4,13 @@ import {Button, CheckBox, Column, Pre, Row, Select, Text, TextArea, TimeSpanInpu
 import {BaseComponentPlus, GetDOM, ShallowChanged} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {DragInfo, MakeDraggable, Observer} from "vwebapp-framework";
-import {DraggableInfo, DroppableInfo} from "Source/Utils/UI/DNDStructures";
-import {UUIDPathStub} from "Source/UI/@Shared/UUIDStub";
-import {GetPathNodes} from "Source/Store/main/maps/mapViews/$mapView";
+import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures";
+import {UUIDPathStub} from "UI/@Shared/UUIDStub";
+import {GetPathNodes} from "Store/main/maps/mapViews/$mapView";
 import {GetAsync} from "mobx-firelink";
 import {VMenuStub, VMenuItem} from "react-vmenu";
-import {styles} from "Source/Utils/UI/GlobalStyles";
-import {zIndexes} from "Source/Utils/UI/ZIndexes";
+import {styles} from "Utils/UI/GlobalStyles";
+import {zIndexes} from "Utils/UI/ZIndexes";
 import {Timeline} from "@debate-map/server-link/Source/Link";
 import {GetTimelineStep} from "@debate-map/server-link/Source/Link";
 import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
@@ -24,7 +24,7 @@ import {GetNodeL2, GetNodeL3, GetNodeDisplayText} from "@debate-map/server-link/
 import {MapNodeType} from "@debate-map/server-link/Source/Link";
 import {SearchUpFromNodeForNodeMatchingX} from "@debate-map/server-link/Source/Link";
 import {Map} from "@debate-map/server-link/Source/Link";
-import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
+import {GetNodeColor} from "Store/firebase_ext/nodes";
 
 export enum PositionOptionsEnum {
 	Full = null,

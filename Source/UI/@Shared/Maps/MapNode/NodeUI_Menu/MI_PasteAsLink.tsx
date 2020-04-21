@@ -1,11 +1,11 @@
 import {BaseComponent} from "react-vextensions";
 import {VMenuItem} from "react-vmenu";
 import {ShowMessageBox} from "react-vmessagebox";
-import {styles} from "Source/Utils/UI/GlobalStyles";
+import {styles} from "Utils/UI/GlobalStyles";
 import {Observer} from "vwebapp-framework";
-import {ShowSignInPopup} from "Source/UI/@Shared/NavBar/UserPanel";
+import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {runInAction} from "mobx";
-import {store} from "Source/Store";
+import {store} from "Store";
 import {GetParentNodeL3, GetParentNodeID} from "@debate-map/server-link/Source/Link";
 import {MapNodeType} from "@debate-map/server-link/Source/Link";
 import {ClaimForm} from "@debate-map/server-link/Source/Link";

@@ -121,7 +121,7 @@
     "yargs": "14.2.0"
   },
   "dependencies": {
-    "@debate-map/server-link": "1.0.8",
+    "@debate-map/server-link": "1.0.9",
     "ajv": "^5.0.0",
     "ajv-keywords": "^2.0.0",
     "bluebird": "^3.5.0",

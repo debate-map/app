@@ -1,7 +1,7 @@
 import {GetEntries} from "js-vextensions";
 import {CheckBox, Row, RowLR, Select, Text} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
-import {GetOpenMapID} from "Source/Store/main";
+import {GetOpenMapID} from "Store/main";
 import {InfoButton} from "vwebapp-framework";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 import {MapNodeRevision_Defaultable, GetMap, PermissionInfoType, HasModPermissions, MeID, AccessLevel, GetUserAccessLevel, HasAdminPermissions, MapType} from "@debate-map/server-link/Source/Link";

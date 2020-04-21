@@ -1,5 +1,5 @@
-import {GetPlayingTimeline, GetSelectedTimeline} from "Source/Store/main/maps/mapStates/$mapState";
-import {GetOpenMapID} from "Source/Store/main";
+import {GetPlayingTimeline, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState";
+import {GetOpenMapID} from "Store/main";
 import {GetAsync, MergeDBUpdates, GetDocs, WhereOp, MergeDBUpdates_Multi} from "mobx-firelink";
 import {Clone, ToNumber, DEL, E, OmitIfNull, OMIT} from "js-vextensions";
 import {GetNodeL2} from "@debate-map/server-link/Source/Link";

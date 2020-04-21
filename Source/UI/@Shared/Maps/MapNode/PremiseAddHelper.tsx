@@ -1,8 +1,8 @@
 import keycode from "keycode";
 import {Button, Row, TextArea} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {store} from "Source/Store";
-import {ACTMapNodeExpandedSet} from "Source/Store/main/maps/mapViews/$mapView";
+import {store} from "Store";
+import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
 import {OmitIfFalsy} from "js-vextensions";
 

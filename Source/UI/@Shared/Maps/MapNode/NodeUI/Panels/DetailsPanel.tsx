@@ -1,7 +1,7 @@
 import {Button, Column, Row} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {GetUpdates} from "vwebapp-framework";
-import {store} from "Source/Store";
+import {store} from "Store";
 import {runInAction} from "mobx";
 import {E, ToJSON, Clone} from "js-vextensions";
 import {GetAsync} from "mobx-firelink";

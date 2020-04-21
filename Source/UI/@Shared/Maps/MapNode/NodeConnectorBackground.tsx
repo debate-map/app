@@ -3,7 +3,7 @@ import {BaseComponent, SimpleShouldUpdate, WarnOfTransientObjectProps} from "rea
 import {HSLA} from "vwebapp-framework";
 import {Fragment} from "react";
 import {MapNodeL3} from "@debate-map/server-link/Source/Link";
-import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
+import {GetNodeColor} from "Store/firebase_ext/nodes";
 
 type Props = {
 	node: MapNodeL3, path: string, linkSpawnPoint: Vector2i, straightLines?: boolean, nodeChildren: MapNodeL3[],

@@ -2,7 +2,7 @@ import {GetNodeL3, WeightingType} from "@debate-map/server-link/Source/Link";
 import {observable} from "mobx";
 import {StoreAccessor} from "mobx-firelink";
 import {ignore} from "mobx-sync";
-import {store} from "Source/Store";
+import {store} from "Store";
 import {O, StoreAction} from "vwebapp-framework";
 import {MapState} from "./maps/mapStates/@MapState";
 import {GetMapView, MapView} from "./maps/mapViews/$mapView";

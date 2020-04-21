@@ -2,9 +2,9 @@ import {Clone, E, GetEntries, GetErrorMessagesUnderElement} from "js-vextensions
 import {runInAction} from "mobx";
 import {Column, Row, Select} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM, RenderSource} from "react-vextensions";
-import {store} from "Source/Store";
+import {store} from "Store";
 import {Observer} from "vwebapp-framework";
-import {DetailsPanel_Subpanel} from "Source/Store/main/maps";
+import {DetailsPanel_Subpanel} from "Store/main/maps";
 import {MapNode, ChildEntry, MapNodeL3} from "@debate-map/server-link/Source/Link";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel";

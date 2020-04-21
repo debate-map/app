@@ -3,8 +3,8 @@ import {Pre, Select, Spinner} from "react-vcomponents";
 import {BaseComponent, RenderSource, BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {Area, AreaChart, CartesianGrid, ReferenceLine, Tooltip, XAxis, YAxis} from "recharts";
-import {store} from "Source/Store";
-import {GetRatingUISmoothing} from "Source/Store/main/ratingUI";
+import {store} from "Store";
+import {GetRatingUISmoothing} from "Store/main/ratingUI";
 import {SlicePath} from "mobx-firelink";
 import {Observer} from "vwebapp-framework";
 import {MapNodeL3} from "@debate-map/server-link/Source/Link";
@@ -17,7 +17,7 @@ import {ShouldRatingTypeBeReversed, TransformRatingForContext} from "@debate-map
 import {GetMapNodeTypeDisplayName} from "@debate-map/server-link/Source/Link";
 import {SetNodeRating} from "@debate-map/server-link/Source/Link";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel";
-import {MarkHandled} from "Source/Utils/UI/General";
+import {MarkHandled} from "Utils/UI/General";
 
 /* let sampleData = [
 	{rating: 0, count: 0},

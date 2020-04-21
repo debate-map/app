@@ -1,14 +1,14 @@
 import {BaseComponentPlus} from "react-vextensions";
 import {Observer, TreeView} from "vwebapp-framework";
 import {VMenuItem} from "react-vmenu";
-import {styles, ES} from "Source/Utils/UI/GlobalStyles";
+import {styles, ES} from "Utils/UI/GlobalStyles";
 import {ShowMessageBox, BoxController} from "react-vmessagebox";
 import {Column, Row, TextArea, Button, CheckBox, Select, Text, TextInput} from "react-vcomponents";
 import {FromJSON, ToJSON, CE, Clone, GetEntries} from "js-vextensions";
 import {MI_SharedProps} from "../NodeUI_Menu";
 import {ApplyDBUpdates} from "mobx-firelink";
 import {ScrollView} from "react-vscrollview";
-import {store} from "Source/Store";
+import {store} from "Store";
 import {runInAction} from "mobx";
 import {HasModPermissions, HasAdminPermissions} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";

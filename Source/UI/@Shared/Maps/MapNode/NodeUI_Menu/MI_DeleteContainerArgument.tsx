@@ -3,7 +3,7 @@ import {BaseComponent} from "react-vextensions";
 import {E} from "js-vextensions";
 import {VMenuItem} from "react-vmenu";
 import {ShowMessageBox} from "react-vmessagebox";
-import {styles} from "Source/Utils/UI/GlobalStyles";
+import {styles} from "Utils/UI/GlobalStyles";
 import {MI_SharedProps} from "../NodeUI_Menu";
 import {Observer} from "vwebapp-framework";
 import {GetNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";

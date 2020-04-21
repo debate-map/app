@@ -2,9 +2,9 @@ import chroma from "chroma-js";
 import {AssertWarn, emptyArray, emptyArray_forLoading, E} from "js-vextensions";
 import {Row} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM, UseCallback, WarnOfTransientObjectProps} from "react-vextensions";
-import {GADDemo, GADMainFont} from "Source/UI/@GAD/GAD";
+import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
 import {HSLA, Observer} from "vwebapp-framework";
-import {ACTMapNodeExpandedSet, GetNodeView, MapNodeView} from "Source/Store/main/maps/mapViews/$mapView";
+import {ACTMapNodeExpandedSet, GetNodeView, MapNodeView} from "Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
 import {ExpandableBox} from "../ExpandableBox";
 import {Squiggle} from "../NodeConnectorBackground";
@@ -20,7 +20,7 @@ import {ArgumentType} from "@debate-map/server-link/Source/Link";
 import {MapNodeType} from "@debate-map/server-link/Source/Link";
 import {RatingType} from "@debate-map/server-link/Source/Link";
 import {Map} from "@debate-map/server-link/Source/Link";
-import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
+import {GetNodeColor} from "Store/firebase_ext/nodes";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],

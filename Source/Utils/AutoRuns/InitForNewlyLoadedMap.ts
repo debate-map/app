@@ -1,13 +1,13 @@
 import {autorun, runInAction} from "mobx";
-import {GetOpenMapID} from "Source/Store/main";
-import {GetNodeView, ACTMapNodeExpandedSet, MapView, MapNodeView} from "Source/Store/main/maps/mapViews/$mapView";
-import {store} from "Source/Store";
+import {GetOpenMapID} from "Store/main";
+import {GetNodeView, ACTMapNodeExpandedSet, MapView, MapNodeView} from "Store/main/maps/mapViews/$mapView";
+import {store} from "Store";
 import {GetAsync} from "mobx-firelink";
 import {Assert, Vector2i} from "js-vextensions";
-import {MapState, TimelineSubpanel} from "Source/Store/main/maps/mapStates/@MapState";
-import {MapUI, ACTUpdateFocusNodeAndViewOffset, ACTSetFocusNodeAndViewOffset} from "Source/UI/@Shared/Maps/MapUI";
-import {GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
-import {ACTEnsureMapStateInit} from "Source/Store/main/maps";
+import {MapState, TimelineSubpanel} from "Store/main/maps/mapStates/@MapState";
+import {MapUI, ACTUpdateFocusNodeAndViewOffset, ACTSetFocusNodeAndViewOffset} from "UI/@Shared/Maps/MapUI";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState";
+import {ACTEnsureMapStateInit} from "Store/main/maps";
 import {GetMap} from "@debate-map/server-link/Source/Link";
 import {GetNodeL2} from "@debate-map/server-link/Source/Link";
 

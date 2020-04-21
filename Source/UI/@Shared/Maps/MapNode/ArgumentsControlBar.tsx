@@ -1,6 +1,6 @@
 import {Column, Row} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
-import {AddArgumentButton} from "Source/UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton";
+import {AddArgumentButton} from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton";
 import {MapNodeL3, Polarity} from "@debate-map/server-link/Source/Link";
 import {Map} from "@debate-map/server-link/Source/Link";
 

@@ -2,7 +2,7 @@ import chroma from "chroma-js";
 import {E} from "js-vextensions";
 import {Button, Span} from "react-vcomponents";
 import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
-import {MapNodeView, GetNodeView} from "Source/Store/main/maps/mapViews/$mapView";
+import {MapNodeView, GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {SlicePath} from "mobx-firelink";
 import {Observer} from "vwebapp-framework";
 import {MapNodeL3, ClaimForm} from "@debate-map/server-link/Source/Link";

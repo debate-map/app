@@ -1,7 +1,7 @@
 import chroma from "chroma-js";
 import {Clone, FromJSON, Vector2i} from "js-vextensions";
 import keycode from "keycode";
-import {hasHotReloaded} from "Source/Main";
+import {hasHotReloaded} from "Main";
 import {observable, runInAction} from "mobx";
 import {AsyncTrunk} from "mobx-sync";
 import React from "react";
@@ -13,10 +13,10 @@ import {Button, ColorPickerBox, Column} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {VMenuLayer} from "react-vmenu";
 import {MessageBoxLayer, ShowMessageBox} from "react-vmessagebox";
-import {GetPathNodeIDs} from "Source/Store/main/maps/mapViews/$mapView";
-import {DraggableInfo, DroppableInfo} from "Source/Utils/UI/DNDStructures";
+import {GetPathNodeIDs} from "Store/main/maps/mapViews/$mapView";
+import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures";
 import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer} from "vwebapp-framework";
-import "Source/Utils/Styles/Main.scss"; // keep absolute-ish, since scss file not copied to Source_JS folder
+import "../../Source/Utils/Styles/Main.scss"; // keep absolute-ish, since scss file not copied to Source_JS folder
 import {NavBar} from "../UI/@Shared/NavBar";
 import {GlobalUI} from "../UI/Global";
 import {HomeUI} from "../UI/Home";
@@ -40,9 +40,9 @@ import {GetNode, GetNodeID, GetParentNode, GetParentPath} from "@debate-map/serv
 import {GetTimelineStep} from "@debate-map/server-link/Source/Link";
 import {NodeReveal} from "@debate-map/server-link/Source/Link";
 import {UpdateTimelineStep} from "@debate-map/server-link/Source/Link";
-import {GetUserBackground} from "Source/Store/firebase_ext/users/$user";
+import {GetUserBackground} from "Store/firebase_ext/users/$user";
 import {MeID, Me} from "@debate-map/server-link/Source/Link";
-import {store} from "Source/Store";
+import {store} from "Store";
 
 ColorPickerBox.Init(ReactColor, chroma);
 

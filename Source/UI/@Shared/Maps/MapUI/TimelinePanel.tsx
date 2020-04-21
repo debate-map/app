@@ -1,10 +1,10 @@
 import {Button, Column, Row} from "react-vcomponents";
 import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
-import {store} from "Source/Store";
-import {GetSelectedTimeline, GetTimelineOpenSubpanel, GetMapState} from "Source/Store/main/maps/mapStates/$mapState";
+import {store} from "Store";
+import {GetSelectedTimeline, GetTimelineOpenSubpanel, GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {runInAction} from "mobx";
 import {Observer} from "vwebapp-framework";
-import {TimelineSubpanel} from "Source/Store/main/maps/mapStates/@MapState";
+import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState";
 import {Map} from "@debate-map/server-link/Source/Link";
 import {CollectionSubpanel} from "../../Timelines/TimelinePanel/CollectionSubpanel";
 import {EditorSubpanel} from "../../Timelines/TimelinePanel/EditorSubpanel";

@@ -2,11 +2,11 @@ import {DeepGet, E} from "js-vextensions";
 import {Button, Div, Row} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
-import {ResetCurrentDBRoot} from "Source/UI/More/Admin/ResetCurrentDBRoot";
-import {dbVersion} from "Source/Main";
+import {ResetCurrentDBRoot} from "UI/More/Admin/ResetCurrentDBRoot";
+import {dbVersion} from "Main";
 import {Link, Observer} from "vwebapp-framework";
 import {useMemo, useCallback} from "react";
-import {store, RootState} from "Source/Store";
+import {store, RootState} from "Store";
 import {runInAction} from "mobx";
 import {GetDocs} from "mobx-firelink";
 import {colors} from "../../Utils/UI/GlobalStyles";
@@ -17,9 +17,9 @@ import {ReputationPanel} from "./NavBar/ReputationPanel";
 import {SearchPanel} from "./NavBar/SearchPanel";
 import {StreamPanel} from "./NavBar/StreamPanel";
 import {UserPanel} from "./NavBar/UserPanel";
-import {zIndexes} from "Source/Utils/UI/ZIndexes";
+import {zIndexes} from "Utils/UI/ZIndexes";
 import {fire} from "@debate-map/server-link/Source/Link";
-import {rootPageDefaultChilds} from "Source/Utils/URL/URLs";
+import {rootPageDefaultChilds} from "Utils/URL/URLs";
 
 // main
 // ==========

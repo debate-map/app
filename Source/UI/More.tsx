@@ -1,6 +1,6 @@
 import {Switch} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
-import {store} from "Source/Store";
+import {store} from "Store";
 import {Observer} from "vwebapp-framework";
 import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
 import {AdminUI} from "./More/Admin";

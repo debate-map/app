@@ -1,7 +1,7 @@
 import {Column, Switch} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {ProposalsUI} from "Source/UI/Feedback/ProposalsUI";
-import {store} from "Source/Store";
+import {ProposalsUI} from "UI/Feedback/ProposalsUI";
+import {store} from "Store";
 import {PageContainer, VReactMarkdown} from "vwebapp-framework/Source";
 import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
 

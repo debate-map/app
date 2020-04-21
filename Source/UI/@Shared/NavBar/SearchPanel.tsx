@@ -6,10 +6,10 @@ import {Button, Column, Pre, Row, TextInput} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
 import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O} from "vwebapp-framework";
-import {ES} from "Source/Utils/UI/GlobalStyles";
-import {store} from "Source/Store";
-import {GetOpenMapID} from "Source/Store/main";
-import {MapNodeView, MapView, ACTMapViewMerge} from "Source/Store/main/maps/mapViews/$mapView";
+import {ES} from "Utils/UI/GlobalStyles";
+import {store} from "Store";
+import {GetOpenMapID} from "Store/main";
+import {MapNodeView, MapView, ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView";
 import {runInAction, flow} from "mobx";
 import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu";
 import {MapUI} from "../Maps/MapUI";
@@ -24,7 +24,7 @@ import {MapNodeType_Info} from "@debate-map/server-link/Source/Link";
 import {GetMap} from "@debate-map/server-link/Source/Link";
 import {MapType} from "@debate-map/server-link/Source/Link";
 import {GetSearchTerms_Advanced} from "@debate-map/server-link/Source/Link";
-import {GetNodeColor} from "Source/Store/firebase_ext/nodes";
+import {GetNodeColor} from "Store/firebase_ext/nodes";
 
 const columnWidths = [0.68, 0.2, 0.12];
 
