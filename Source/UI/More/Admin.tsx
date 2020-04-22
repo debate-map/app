@@ -243,7 +243,7 @@ export async function GetCollectionsDataAsync(versionRootPath: string, privateCo
 			// nodeViewers: await getDocs('nodeViewers'),
 			terms: getDocs("terms"),
 			termComponents: getDocs("termComponents"),
-			termNames: getDocs("termNames"),
+			//termNames: getDocs("termNames"),
 			timelines: getDocs("timelines"),
 			timelineSteps: getDocs("timelineSteps"),
 			users: getDocs("users"),
