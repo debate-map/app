@@ -395,7 +395,8 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 		backgroundColor: chroma.Color,
 	},
 	{hoverTermID: null as string},
-	) {
+) {
+	panelsOpened = new Set();
 	componentDidCatch(message, info) { EB_StoreError(this, message, info); }
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
@@ -405,6 +406,12 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 			backgroundColor,
 		} = this.props;
 		const nodeView = GetNodeView(map._key, path);
+
+		this.panelsOpened.add(panelToShow);
+		const renderPanel = (panelName: string, uiFunc: (show: boolean)=>JSX.Element)=> {
+			if (!this.panelsOpened.has(panelName)) return null;
+			return uiFunc(panelToShow == panelName);
+		};
 
 		return (
 			// <ErrorBoundary>
@@ -423,18 +430,18 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 					const ratings = GetRatings(node._key, panelToShow as RatingType);
 					return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 				})()}
-				{panelToShow == "definitions" &&
-					<DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{node, path, hoverTermID}}
+				{renderPanel("definitions", show=>
+					<DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{show, node, path, hoverTermID}}
 						openTermID={nodeView?.openTermID}
 						onHoverTerm={termID=>onTermHover(termID)}
-						onClickTerm={termID=>runInAction("NodeUI_Inner_onClickTerm", ()=>nodeView.openTermID = termID)}/>}
-				{panelToShow == "phrasings" && <PhrasingsPanel node={node} path={path}/>}
-				{panelToShow == "discussion" && <DiscussionPanel/>}
-				{panelToShow == "social" && <SocialPanel/>}
-				{panelToShow == "tags" && <TagsPanel map={map} node={node} path={path}/>}
-				{panelToShow == "details" && <DetailsPanel map={map} node={node} path={path}/>}
-				{panelToShow == "history" && <HistoryPanel map={map} node={node} path={path}/>}
-				{panelToShow == "others" && <OthersPanel map={map} node={node} path={path}/>}
+						onClickTerm={termID=>runInAction("NodeUI_Inner_onClickTerm", ()=>nodeView.openTermID = termID)}/>)}
+				{renderPanel("phrasings", show=><PhrasingsPanel {...{show, node, path}}/>)}
+				{renderPanel("discussion", show=><DiscussionPanel {...{show}}/>)}
+				{renderPanel("social", show=><SocialPanel {...{show}}/>)}
+				{renderPanel("tags", show=><TagsPanel {...{show, map, node, path}}/>)}
+				{renderPanel("details", show=><DetailsPanel {...{show, map, node, path}}/>)}
+				{renderPanel("history", show=><HistoryPanel {...{show, map, node, path}}/>)}
+				{renderPanel("others", show=><OthersPanel {...{show, map, node, path}}/>)}
 			</div>
 		);
 	}

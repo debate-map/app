@@ -3,11 +3,11 @@ import {BaseComponentPlus, GetInnerComp} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
 import {GetOpenMapID} from "Store/main";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView";
-import {Map} from "@debate-map/server-link/Source/Link";
-import {GetRatings} from "@debate-map/server-link/Source/Link";
-import {GetNodeChildrenL2, GetNodeParentsL2, GetParentNodeL2} from "@debate-map/server-link/Source/Link";
-import {AsNodeL3, GetNodeDisplayText, GetRatingTypesForNode} from "@debate-map/server-link/Source/Link";
-import {MapNodeL2} from "@debate-map/server-link/Source/Link";
+import {Map,GetRatings,GetNodeChildrenL2, GetNodeParentsL2, GetParentNodeL2,AsNodeL3, GetNodeDisplayText, GetRatingTypesForNode,MapNodeL2} from "@debate-map/server-link/Source/Link";
+
+
+
+
 import {Link} from "vwebapp-framework";
 import {DefinitionsPanel} from "./NodeUI/Panels/DefinitionsPanel";
 import {DetailsPanel} from "./NodeUI/Panels/DetailsPanel";
@@ -73,13 +73,13 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 						const ratings = GetRatings(node._key, ratingInfo.type);
 						return <RatingsPanel key={index} node={nodeL3} path={path} ratingType={ratingInfo.type} ratings={ratings}/>;
 					})}
-					<PhrasingsPanel node={node} path={path}/>
-					<DefinitionsPanel node={node} path={path}/>
-					<DiscussionPanel/>
-					<SocialPanel/>
-					<TagsPanel map={map} node={nodeL3} path={path}/>
-					<DetailsPanel map={map} node={nodeL3} path={path}/>
-					<OthersPanel map={map} node={nodeL3} path={path}/>
+					<PhrasingsPanel show={true} node={node} path={path}/>
+					<DefinitionsPanel show={true} node={node} path={path}/>
+					<DiscussionPanel show={true}/>
+					<SocialPanel show={true}/>
+					<TagsPanel show={true} map={map} node={nodeL3} path={path}/>
+					<DetailsPanel show={true} map={map} node={nodeL3} path={path}/>
+					<OthersPanel show={true} map={map} node={nodeL3} path={path}/>
 				</article>
 			</ScrollView>
 		);

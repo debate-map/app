@@ -14,12 +14,12 @@ import {ShowMessageBox} from "react-vmessagebox";
 import {DeleteNodeTag} from "@debate-map/server-link/Source/Link";
 
 @Observer
-export class TagsPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {}) {
+export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {}) {
 	render() {
-		const {node} = this.props;
+		const {show, node} = this.props;
 		const tags = GetNodeTags(node._key);
 		return (
-			<Column style={{position: "relative"}}>
+			<Column style={{position: "relative", display: show ? null : "none"}}>
 				<Row center mt={5}>
 					<Text style={{fontWeight: "bold"}}>Tags:</Text>
 					<Button ml={5} p="3px 7px" text="+" enabled={HasModPermissions(MeID())} onClick={()=>{

@@ -1,21 +1,20 @@
 import {Button, Column, Row} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {Link, Observer, ParseSegmentsForPatterns} from "vwebapp-framework";
-import {MapNodeL2} from "@debate-map/server-link/Source/Link";
-import {GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
-import {GetTermsAttached, GetTerm} from "@debate-map/server-link/Source/Link";
-import {Term} from "@debate-map/server-link/Source/Link";
+import {MapNodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term} from "@debate-map/server-link/Source/Link";
+
+
 import {GetSegmentsForTerms} from "../../NodeUI_Inner/TitlePanel";
 
 const termsPlaceholder = [];
 
 @Observer
 export class DefinitionsPanel extends BaseComponentPlus(
-	{} as {node: MapNodeL2, path: string, hoverTermID?: string, openTermID?: string, onHoverTerm?: (termID: string)=>void, onClickTerm?: (termID: string)=>void},
+	{} as {show: boolean, node: MapNodeL2, path: string, hoverTermID?: string, openTermID?: string, onHoverTerm?: (termID: string)=>void, onClickTerm?: (termID: string)=>void},
 	{/* localHoverTerm: Term, localClickTerm: Term */},
 ) {
 	render() {
-		const {node, path, hoverTermID, openTermID, onHoverTerm, onClickTerm} = this.props;
+		const {show, node, path, hoverTermID, openTermID, onHoverTerm, onClickTerm} = this.props;
 
 		const displayText = GetNodeDisplayText(node, path);
 
@@ -43,7 +42,7 @@ export class DefinitionsPanel extends BaseComponentPlus(
 		const term = hoverTerm || clickTerm;
 
 		return (
-			<Column style={{position: "relative"}}>
+			<Column style={{position: "relative", display: show ? null : "none"}}>
 				{/* <div style={{fontSize: 12, whiteSpace: "initial"}}>
 					Proponents of the claim can submit and upvote their definitions of the terms. (thus clarifying their meaning)
 				</div> */}

@@ -1,10 +1,11 @@
 import {Div, Column} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 
-export class SocialPanel extends BaseComponent<{}, {}> {
+export class SocialPanel extends BaseComponent<{show: boolean}, {}> {
 	render() {
+		const {show} = this.props;
 		return (
-			<Column style={{position: "relative"}}>
+			<Column style={{position: "relative", display: show ? null : "none"}}>
 				{/*<div style={{fontSize: 12, whiteSpace: "initial"}}>
 					TODO
 				</div>*/}

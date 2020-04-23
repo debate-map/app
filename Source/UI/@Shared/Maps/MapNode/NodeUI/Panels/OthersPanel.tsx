@@ -24,9 +24,9 @@ import {UpdateLink} from "@debate-map/server-link/Source/Link";
 import {UpdateNodeChildrenOrder} from "@debate-map/server-link/Source/Link";
 
 @Observer
-export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType}) {
+export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType}) {
 	render() {
-		const {map, node, path} = this.props;
+		const {show, map, node, path} = this.props;
 		let {convertToType} = this.state;
 
 		const mapID = map ? map._key : null;
@@ -70,7 +70,7 @@ export class OthersPanel extends BaseComponentPlus({} as {map?: Map, node: MapNo
 			|| HasAdminPermissions(MeID()) // or has admin permissions
 			|| (node.type === MapNodeType.Argument && node.multiPremiseArgument); // or it's a multi-premise argument (these start as manual)*/
 		return (
-			<Column sel style={{position: "relative"}}>
+			<Column sel style={{position: "relative", display: show ? null : "none"}}>
 				<IDAndCreationInfoUI id={node._key} creatorID={node.creator} createdAt={node.createdAt}/>
 				<Row style={{flexWrap: "wrap"}}>
 					<Text>Parents: </Text>

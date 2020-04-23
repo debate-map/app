@@ -7,22 +7,18 @@ import {ES} from "Utils/UI/GlobalStyles";
 import {UUIDStub} from "UI/@Shared/UUIDStub";
 import {Observer} from "vwebapp-framework";
 import {E} from "js-vextensions";
-import {Map} from "@debate-map/server-link/Source/Link";
-import {MapNodeL3} from "@debate-map/server-link/Source/Link";
-import {GetUser} from "@debate-map/server-link/Source/Link";
-import {MapNodeRevision} from "@debate-map/server-link/Source/Link";
-import {GetParentNodeL3} from "@debate-map/server-link/Source/Link";
-import {GetLinkUnderParent} from "@debate-map/server-link/Source/Link";
-import {GetNodeRevisions} from "@debate-map/server-link/Source/Link";
+import {Map, MapNodeL3, GetUser, MapNodeRevision, GetParentNodeL3, GetLinkUnderParent, GetNodeRevisions} from "@debate-map/server-link/Source/Link";
+
+
 import {NodeDetailsUI} from "../../NodeDetailsUI";
 
 export const columnWidths = [0.15, 0.3, 0.35, 0.2];
 
 @Observer
-export class HistoryPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {}) {
+export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {}) {
 	detailsUI: NodeDetailsUI;
 	render() {
-		const {map, node, path} = this.props;
+		const {show, map, node, path} = this.props;
 		// let mapID = map ? map._id : null;
 
 		// _link: GetLinkUnderParent(node._id, GetParentNode(path)),
@@ -33,7 +29,7 @@ export class HistoryPanel extends BaseComponentPlus({} as {map?: Map, node: MapN
 
 		// const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
 		return (
-			<Column style={{position: "relative", maxHeight: 300}}>
+			<Column style={{position: "relative", maxHeight: 300, display: show ? null : "none"}}>
 				<Column className="clickThrough" style={{background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 					<Row style={{padding: "4px 7px"}}>
 						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>ID</span>

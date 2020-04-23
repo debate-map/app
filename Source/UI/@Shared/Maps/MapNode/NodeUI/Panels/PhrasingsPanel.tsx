@@ -3,23 +3,16 @@ import {BaseComponentPlus} from "react-vextensions";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddPhrasingDialog} from "UI/Database/Phrasings/PhrasingDetailsUI";
 import {InfoButton, Observer} from "vwebapp-framework";
-import {MapNodeL2} from "@debate-map/server-link/Source/Link";
-import {GetNodePhrasings} from "@debate-map/server-link/Source/Link";
-import {MapNodePhrasing, MapNodePhrasingType} from "@debate-map/server-link/Source/Link";
-import {GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
-import {CanGetBasicPermissions} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {MapNodeType} from "@debate-map/server-link/Source/Link";
-import {DetailsPanel_Phrasings} from "./Phrasings_SubPanels/DetailsPanel";
+import {MapNodeL2, GetNodePhrasings, MapNodePhrasing, MapNodePhrasingType, GetNodeDisplayText, CanGetBasicPermissions, MeID, MapNodeType} from "@debate-map/server-link/Source/Link";
 import {GetNodeColor} from "Store/firebase_ext/nodes";
+import {DetailsPanel_Phrasings} from "./Phrasings_SubPanels/DetailsPanel";
 
 const Phrasing_FakeID = "FAKE";
 
-type Props = {node: MapNodeL2, path: string};
 @Observer
-export class PhrasingsPanel extends BaseComponentPlus({} as Props, {selectedPhrasingID: null as string}) {
+export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, node: MapNodeL2, path: string}, {selectedPhrasingID: null as string}) {
 	render() {
-		const {node, path} = this.props;
+		const {show, node, path} = this.props;
 		const {selectedPhrasingID} = this.state;
 		let phrasings = GetNodePhrasings(node._key);
 
@@ -28,7 +21,7 @@ export class PhrasingsPanel extends BaseComponentPlus({} as Props, {selectedPhra
 		phrasings.push(new MapNodePhrasing({_key: Phrasing_FakeID, node: node._key, type: MapNodePhrasingType.Precise, text: GetNodeDisplayText(node)}));
 
 		return (
-			<Column style={{position: "relative"}}>
+			<Column style={{position: "relative", display: show ? null : "none"}}>
 				<Row center>
 					<Pre style={{fontSize: 17}}>Precise Phrasings</Pre>
 					<InfoButton ml={5} text={'Precise phrasings are variants of the node\'s title that are meant to "compete" as the node\'s main display text. They should strive to be concise, of high quality, and neutral (ie. avoiding rhetoric).'}/>

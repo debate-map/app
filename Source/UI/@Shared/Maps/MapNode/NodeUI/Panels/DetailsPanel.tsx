@@ -17,10 +17,10 @@ import {UpdateLink} from "@debate-map/server-link/Source/Link";
 import {AddNodeRevision} from "@debate-map/server-link/Source/Link";
 import {Map} from "@debate-map/server-link/Source/Link";
 
-export class DetailsPanel extends BaseComponentPlus({} as {map?: Map, node: MapNodeL3, path: string}, {dataError: null as string}) {
+export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {dataError: null as string}) {
 	detailsUI: NodeDetailsUI;
 	render() {
-		const {map, node, path} = this.props;
+		const {show, map, node, path} = this.props;
 		const {dataError} = this.state;
 
 		const parentNode = GetParentNodeL3(path);
@@ -35,7 +35,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {map?: Map, node: MapN
 		// const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
 		const canEdit = CanEditNode(MeID(), node._key);
 		return (
-			<Column style={{position: "relative"}}>
+			<Column style={{position: "relative", display: show ? null : "none"}}>
 				<NodeDetailsUI ref={c=>this.detailsUI = c}
 					baseData={node} baseRevisionData={node.current} baseLinkData={link} parent={parentNode}
 					forNew={false} enabled={canEdit}
