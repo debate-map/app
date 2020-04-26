@@ -321,7 +321,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					text={<>
 						<TitlePanel {...{indexInNodeList, parent: this, map, node, path}} {...(dragInfo && dragInfo.provided.dragHandleProps)}
 							ref={c=>this.titlePanel = c}
-							style={E(GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont, fontSize: 15, letterSpacing: 1})}/>
+							style={E(GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont /*fontSize: 15, letterSpacing: 1*/})}/>
 						{subPanelShow && <SubPanel node={node}/>}
 						<NodeUI_Menu_Stub {...{map, node, path}}/>
 					</>}

@@ -90,7 +90,7 @@ export class AddArgumentButton extends BaseComponent<Props> {
 					{height: 17, fontSize: 11, padding: "0 12px"}, // vertical
 					// {fontSize: 18, padding: "0 12px"}, // horizontal
 					// canDrop && { outline: `1px solid ${isOver ? 'yellow' : 'white'}` },
-					GADDemo && {color: HSLA(222, 0.1, 0.8, 1), fontFamily: GADMainFont, fontSize: 12, letterSpacing: 1},
+					GADDemo && {color: HSLA(222, 0.1, 0.8, 1), fontFamily: GADMainFont /*fontSize: 12, letterSpacing: 1*/},
 					style,
 				)}
 				onClick={UseCallback(e=>{

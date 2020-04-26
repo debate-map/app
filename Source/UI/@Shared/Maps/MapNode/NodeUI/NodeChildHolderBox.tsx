@@ -109,7 +109,9 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 						padding="3px 5px 2px"
 						text={<span style={E(
 							{position: "relative", fontSize: 13},
-							GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont, fontSize: 15, letterSpacing: 1},
+							GADDemo && {
+								color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont, //fontSize: 11, letterSpacing: 1
+							},
 						)}>{text}</span>}
 						{...E(
 							{backgroundFillPercent, backgroundColor, markerPercent},
