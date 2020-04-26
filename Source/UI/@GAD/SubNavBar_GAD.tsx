@@ -49,7 +49,8 @@ export class SubNavBarButton_GAD extends BaseComponent<{page: string, subpage: s
 		};
 
 		if (subpage == "about") {
-			return <Link to="https://www.greatamericandebate.org/the-mission" text="About" style={E(style)}/>;
+			//return <Link to="https://www.greatamericandebate.org/the-mission" text="About" style={E(style)}/>;
+			return <Link to="https://www.covidconvo.org" text="About" style={E(style)}/>;
 		}
 
 		return (

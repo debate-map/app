@@ -107,7 +107,8 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 		const bottomBar = <div style={{position: "absolute", left: 0, right: 0, bottom: 0, height: 6, background: HSL(220, 0.2, 0.2)}}/>;
 
 		if (page == "website") {
-			return <Link to="https://greatamericandebate.org" style={finalStyle} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})}>
+			//return <Link to="https://greatamericandebate.org" style={finalStyle} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})}>
+			return <Link to="https://www.covidconvo.org" style={finalStyle} onMouseEnter={()=>this.SetState({hovered: true})} onMouseLeave={()=>this.SetState({hovered: false})}>
 				Website
 				{hovered && bottomBar}
 			</Link>;
@@ -133,12 +134,12 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 			});
 			text = <div style={{
 				position: "absolute", bottom: 10, pointerEvents: "none", left: "-50%", right: "-50%", width: "200%", height: 30,
-				backgroundImage: "url(/Images/@GAD/COVIDConvoTitle.png)", backgroundSize: "100%", backgroundRepeat: "no-repeat",
+				backgroundImage: "url(/Images/@GAD/COVID/Title.png)", backgroundSize: "100%", backgroundRepeat: "no-repeat",
 			}}/> as any;*/
 
 			finalStyle = E(finalStyle, {
 				margin: "0 30px", width: 300, height: 150,
-				backgroundImage: "url(/Images/@GAD/COVIDConvoTitle.png)", backgroundPosition: "center", backgroundSize: "100%", backgroundRepeat: "no-repeat",
+				backgroundImage: "url(/Images/@GAD/COVID/Title.png)", backgroundPosition: "center", backgroundSize: "100%", backgroundRepeat: "no-repeat",
 			});
 			text = null;
 		}

@@ -19,15 +19,30 @@ These arguments, claims, and evidence have been sourced from various forms of me
 export class HomeUI2_GAD extends BaseComponent<{}, {}> {
 	render() {
 		return (
-			<PageContainer scrollable={true} style={{flex: null, margin: 0, justifyContent: "center"}} innerStyle={{flex: "0 1 865px", padding: 0, borderRadius: 0, background: null}}>
-				<Row style={{margin: "50px 10px 20px 10px"}}>
+			<PageContainer scrollable={true}
+				style={{
+					flex: null, margin: 0, justifyContent: "center",
+					filter: null, // remove shadow from full page, so we can apply just to the left-box below
+				}}
+				innerStyle={{
+					flex: "0 1 865px", borderRadius: 0, background: null,
+					//padding: 0,
+					padding: "0 30px", boxSizing: "content-box", // adds extra space, so we can add internal "filter" without hitting edge-cutoff
+				}}
+			>
+				<Row style={{margin: "50px 10px 20px 10px", boxSizing: "border-box"}}>
 					<article style={{
 						flex: "0 0 55%", padding: "180px 50px 40px 50px",
 						fontFamily: "'Cinzel', serif", fontVariant: "small-caps", color: "#eee", textAlign: "justify", fontSize: 17,
-						backgroundColor: "#1C3749", backgroundImage: "url(/Images/@GAD/Home_LeftBox_Transparent.png)", backgroundPosition: "center 80px", backgroundSize: "100%", backgroundRepeat: "no-repeat"}}>
+						backgroundColor: "#1C3749", backgroundImage: "url(/Images/@GAD/Home_LeftBox_Transparent.png)", backgroundPosition: "center 80px", backgroundSize: "100%", backgroundRepeat: "no-repeat",
+						filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)",
+					}}>
 						<VReactMarkdown source={pageText} className='selectable'/>
 					</article>
-					<div style={{flex: "0 0 45%", backgroundImage: "url(/Images/@GAD/Home_RightBox.png)", backgroundPosition: "center center", backgroundSize: "100%", backgroundRepeat: "no-repeat"}}/>
+					<div style={{
+						flex: "0 0 45%", backgroundImage: "url(/Images/@GAD/COVID/Home_RightBox.png)", backgroundPosition: "center center", backgroundSize: "100%", backgroundRepeat: "no-repeat",
+						//filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)",
+					}}/>
 				</Row>
 			</PageContainer>
 		);

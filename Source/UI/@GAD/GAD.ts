@@ -15,8 +15,8 @@ if (GADDemo) {
 			const logoEl = document.getElementById("logo") as HTMLLinkElement;
 			if (titleEl == null || logoEl == null) return;
 
-			titleEl.innerText = "The Great American Debate";
-			logoEl.href = "/Images/@GAD/Logo.png";
+			titleEl.innerText = "COVID Convo: Combining Your Conversations About COVID-19";
+			logoEl.href = "/Images/@GAD/COVID/Logo.png";
 			timer.Stop();
 		} catch {}
 	}).Start();
