@@ -1,4 +1,4 @@
-import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
+import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "js-vextensions";
 import {CheckBox, Column, Pre, Row, RowLR, TextArea, TextInput} from "react-vcomponents";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import {EquationAttachment} from "@debate-map/server-link/Source/Link";
@@ -12,7 +12,7 @@ type Props = {baseData: EquationAttachment, creating: boolean, editing?: boolean
 export class EquationEditorUI extends BaseComponent<Props, {newData: EquationAttachment}> {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
-			this.SetState({newData: Clone(props.baseData)});
+			this.SetState({newData: CloneWithPrototypes(props.baseData)});
 		}
 	}
 
@@ -58,7 +58,7 @@ export class EquationEditorUI extends BaseComponent<Props, {newData: EquationAtt
 
 	GetNewData() {
 		const {newData} = this.state;
-		const result = Clone(newData) as EquationAttachment;
+		const result = CloneWithPrototypes(newData) as EquationAttachment;
 		if (!result.isStep) {
 			delete result.explanation;
 		}

@@ -1,10 +1,10 @@
-import {GetErrorMessagesUnderElement, Clone, ToNumber, DEL} from "js-vextensions";
+import {GetErrorMessagesUnderElement, Clone, ToNumber, DEL, CloneWithPrototypes} from "js-vextensions";
 import Moment from "moment";
 import {CheckBox, Column, Pre, RowLR, Spinner, TextInput, Row} from "react-vcomponents";
 import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {InfoButton} from "vwebapp-framework";
-import {Map_namePattern, MapType, Map} from "@debate-map/server-link/Source/Link";
-import {MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType} from "@debate-map/server-link/Source/Link";
+import {Map_namePattern, MapType, Map, MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType} from "@debate-map/server-link/Source/Link";
+
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
 import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel";
 
@@ -12,7 +12,7 @@ type Props = {baseData: Map, forNew: boolean, enabled?: boolean, style?, onChang
 export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {newData: null as Map}) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
-			this.SetState({newData: Clone(props.baseData)});
+			this.SetState({newData: CloneWithPrototypes(props.baseData)});
 		}
 	}
 
@@ -108,6 +108,6 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 
 	GetNewData() {
 		const {newData} = this.state;
-		return Clone(newData) as Map;
+		return CloneWithPrototypes(newData) as Map;
 	}
 }

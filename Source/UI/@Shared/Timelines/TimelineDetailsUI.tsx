@@ -1,4 +1,4 @@
-import {Clone, GetErrorMessagesUnderElement} from "js-vextensions";
+import {Clone, GetErrorMessagesUnderElement, CloneWithPrototypes} from "js-vextensions";
 import {Button, Column, Pre, Row, RowLR, TextInput} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM} from "react-vextensions";
 import {GetUpdates} from "vwebapp-framework";
@@ -9,7 +9,7 @@ import {UpdateTimeline} from "@debate-map/server-link/Source/Link";
 export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {baseData: Timeline, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Timeline, ui: TimelineDetailsUI)=>void}, {} as { newData: Timeline }) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
-			this.SetState({newData: Clone(props.baseData)});
+			this.SetState({newData: CloneWithPrototypes(props.baseData)});
 		}
 	}
 
@@ -42,14 +42,14 @@ export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {bas
 
 	GetNewData() {
 		const {newData} = this.state;
-		return Clone(newData) as Timeline;
+		return CloneWithPrototypes(newData) as Timeline;
 	}
 }
 
 export class TimelineDetailsEditor extends BaseComponentPlus({} as {timeline: Timeline, editing: boolean}, {dataError: null as string}) {
 	/* ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.timeline != this.props.timeline) { // if base-data changed
-			this.SetState({ newData: Clone(props.baseData) });
+			this.SetState({ newData: CloneWithPrototypes(props.baseData) });
 		}
 	} */
 	detailsUI: TimelineDetailsUI;

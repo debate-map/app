@@ -1,12 +1,12 @@
-import {Clone, DEL, E, GetEntries, GetErrorMessagesUnderElement} from "js-vextensions";
+import {Clone, DEL, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "js-vextensions";
 import {Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {ES} from "Utils/UI/GlobalStyles";
 import {InfoButton, observer_simple} from "vwebapp-framework";
-import {Term, Term_nameFormat, Term_disambiguationFormat, TermType} from "@debate-map/server-link/Source/Link";
-import {AddTerm} from "@debate-map/server-link/Source/Link";
+import {Term, Term_nameFormat, Term_disambiguationFormat, TermType, AddTerm} from "@debate-map/server-link/Source/Link";
+
 import {GetNiceNameForTermType} from "../../Database/TermsUI";
 
 export class TermDetailsUI extends BaseComponentPlus(
@@ -15,7 +15,7 @@ export class TermDetailsUI extends BaseComponentPlus(
 ) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
-			this.SetState({newData: Clone(props.baseData)});
+			this.SetState({newData: CloneWithPrototypes(props.baseData)});
 		}
 	}
 	OnChange() {
@@ -100,7 +100,7 @@ export class TermDetailsUI extends BaseComponentPlus(
 
 	GetNewData() {
 		const {newData} = this.state;
-		return Clone(newData) as Term;
+		return CloneWithPrototypes(newData) as Term;
 	}
 }
 

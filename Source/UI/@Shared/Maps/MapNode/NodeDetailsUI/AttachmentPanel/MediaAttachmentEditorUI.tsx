@@ -1,4 +1,4 @@
-import {GetErrorMessagesUnderElement, Clone, E} from "js-vextensions";
+import {GetErrorMessagesUnderElement, Clone, E, CloneWithPrototypes} from "js-vextensions";
 import {Column, Pre, RowLR, Spinner, TextInput, Row, DropDown, DropDownTrigger, Button, DropDownContent, Text, CheckBox} from "react-vcomponents";
 import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
@@ -17,7 +17,7 @@ type Props = {baseData: MediaAttachment, creating: boolean, editing?: boolean, s
 export class MediaAttachmentEditorUI extends BaseComponent<Props, {newData: MediaAttachment}> {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
-		{ this.SetState({newData: Clone(props.baseData)}); }
+		{ this.SetState({newData: CloneWithPrototypes(props.baseData)}); }
 	}
 
 	scrollView: ScrollView;
@@ -86,7 +86,7 @@ export class MediaAttachmentEditorUI extends BaseComponent<Props, {newData: Medi
 
 	GetNewData() {
 		const {newData} = this.state;
-		return Clone(newData) as MediaAttachment;
+		return CloneWithPrototypes(newData) as MediaAttachment;
 	}
 }
 

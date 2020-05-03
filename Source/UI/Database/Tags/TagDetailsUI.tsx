@@ -1,4 +1,4 @@
-import {Clone, E, DelIfFalsy} from "js-vextensions";
+import {Clone, E, DelIfFalsy, CloneWithPrototypes} from "js-vextensions";
 import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox, Button} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
@@ -19,8 +19,8 @@ export type TagDetailsUI_SharedProps = Props & State & {compClass: TagComp_Class
 export class TagDetailsUI extends BaseComponentPlus({enabled: true} as Props, {} as State) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
-			this.SetState({newData: Clone(props.baseData)});
-			/*this.SetState({newData: Clone(props.baseData)}, ()=> {
+			this.SetState({newData: CloneWithPrototypes(props.baseData)});
+			/*this.SetState({newData: CloneWithPrototypes(props.baseData)}, ()=> {
 				if (forMount) this.OnChange(); // call onChange once, so parent-ui has access to the newData value (without needing ref)
 			});*/
 		}
@@ -72,7 +72,7 @@ export class TagDetailsUI extends BaseComponentPlus({enabled: true} as Props, {}
 
 	GetNewData() {
 		const {newData} = this.state;
-		return Clone(newData) as MapNodeTag;
+		return CloneWithPrototypes(newData) as MapNodeTag;
 	}
 }
 

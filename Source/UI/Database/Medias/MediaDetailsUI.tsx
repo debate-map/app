@@ -1,4 +1,4 @@
-import {GetEntries, GetErrorMessagesUnderElement, Clone} from "js-vextensions";
+import {GetEntries, GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "js-vextensions";
 import Moment from "moment";
 import {Column, Div, Pre, Row, RowLR, Select, Spinner, TextInput, CheckBox} from "react-vcomponents";
 import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
@@ -16,7 +16,7 @@ export class MediaDetailsUI extends BaseComponentPlus(
 ) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
-			this.SetState({newData: Clone(props.baseData)});
+			this.SetState({newData: CloneWithPrototypes(props.baseData)});
 		}
 	}
 	OnChange() {
@@ -86,6 +86,6 @@ export class MediaDetailsUI extends BaseComponentPlus(
 
 	GetNewData() {
 		const {newData} = this.state;
-		return Clone(newData) as Media;
+		return CloneWithPrototypes(newData) as Media;
 	}
 }

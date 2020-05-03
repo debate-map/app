@@ -1,4 +1,4 @@
-import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
+import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "js-vextensions";
 import {Column, Pre, Row} from "react-vcomponents";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
@@ -18,7 +18,7 @@ export class QuoteInfoEditorUI extends BaseComponent
 		{newData: QuoteAttachment}> {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
-		{ this.SetState({newData: Clone(props.baseData)}); }
+		{ this.SetState({newData: CloneWithPrototypes(props.baseData)}); }
 	}
 
 	render() {
@@ -65,7 +65,7 @@ export class QuoteInfoEditorUI extends BaseComponent
 
 	GetNewData() {
 		const {newData} = this.state;
-		return CleanUpdatedQuoteAttachment(Clone(newData));
+		return CleanUpdatedQuoteAttachment(CloneWithPrototypes(newData));
 	}
 }
 

@@ -1,4 +1,4 @@
-import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
+import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "js-vextensions";
 import Moment from "moment";
 import {Column, Pre, RowLR, TextInput, Text} from "react-vcomponents";
 import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
@@ -9,7 +9,7 @@ type Props = {baseData: Layer, forNew: boolean, enabled?: boolean, style?, onCha
 export class LayerDetailsUI extends BaseComponentPlus({enabled: true} as Props, {newData: null as Layer}) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
-			this.SetState({newData: Clone(props.baseData)});
+			this.SetState({newData: CloneWithPrototypes(props.baseData)});
 		}
 	}
 
@@ -41,6 +41,6 @@ export class LayerDetailsUI extends BaseComponentPlus({enabled: true} as Props, 
 
 	GetNewData() {
 		const {newData} = this.state;
-		return Clone(newData) as Layer;
+		return CloneWithPrototypes(newData) as Layer;
 	}
 }

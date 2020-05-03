@@ -1,6 +1,6 @@
 import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
 import {Button, Column, Row, TextInput, Select, Text, Pre} from "react-vcomponents";
-import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL} from "js-vextensions";
+import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWithPrototypes} from "js-vextensions";
 import {ES} from "Utils/UI/GlobalStyles";
 import {Fragment} from "react";
 import {ShowMessageBox} from "react-vmessagebox";
@@ -17,7 +17,7 @@ export class SourceChainsEditorUI extends BaseComponentPlus(
 ) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
-			this.SetState({newData: Clone(props.baseData)});
+			this.SetState({newData: CloneWithPrototypes(props.baseData)});
 		}
 	}
 
@@ -106,7 +106,7 @@ export class SourceChainsEditorUI extends BaseComponentPlus(
 
 	GetNewData() {
 		const {newData} = this.state;
-		return CleanUpdatedSourceChains(Clone(newData) as SourceChain[]);
+		return CleanUpdatedSourceChains(CloneWithPrototypes(newData) as SourceChain[]);
 	}
 }
 

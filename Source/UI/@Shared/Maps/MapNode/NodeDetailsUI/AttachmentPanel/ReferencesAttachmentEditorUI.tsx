@@ -1,11 +1,10 @@
-import {GetErrorMessagesUnderElement, Clone} from "js-vextensions";
+import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "js-vextensions";
 import {Column, Pre, Row} from "react-vcomponents";
 import {BaseComponent, GetDOM} from "react-vextensions";
 import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
-import {ReferencesAttachment} from "@debate-map/server-link/Source/Link";
-import {GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
-import {MapNodeType} from "@debate-map/server-link/Source/Link";
-import {ClaimForm} from "@debate-map/server-link/Source/Link";
+import {ReferencesAttachment, GetNodeDisplayText, MapNodeType, ClaimForm} from "@debate-map/server-link/Source/Link";
+
+
 import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI";
 import {SubPanel_Quote, SubPanel_References} from "../../NodeUI_Inner/SubPanel";
 
@@ -15,7 +14,7 @@ export class ReferencesAttachmentEditorUI extends BaseComponent<
 > {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) // if base-data changed
-		{ this.SetState({newData: Clone(props.baseData)}); }
+		{ this.SetState({newData: CloneWithPrototypes(props.baseData)}); }
 	}
 
 	render() {
@@ -50,7 +49,7 @@ export class ReferencesAttachmentEditorUI extends BaseComponent<
 
 	GetNewData() {
 		const {newData} = this.state;
-		return CleanUpdatedReferencesAttachment(Clone(newData));
+		return CleanUpdatedReferencesAttachment(CloneWithPrototypes(newData));
 	}
 }
 
