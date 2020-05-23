@@ -8,7 +8,7 @@ import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI"
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {Media, Media_namePattern, MediaType, GetNiceNameForMediaType} from "@debate-map/server-link/Source/Link";
 import {SourceChainsEditorUI} from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
-import {YoutubePlayerUI, InfoButton, HSLA} from "vwebapp-framework";
+import {YoutubePlayerUI, InfoButton, HSLA, ParseYoutubeVideoID} from "vwebapp-framework";
 
 export class MediaDetailsUI extends BaseComponentPlus(
 	{} as {baseData: Media, creating: boolean, editing: boolean, style?, onChange?: (newData: Media, error: string)=>void},
@@ -31,7 +31,7 @@ export class MediaDetailsUI extends BaseComponentPlus(
 	render() {
 		const {baseData, creating, editing, style, onChange} = this.props;
 		const {newData, dataError} = this.state;
-		const videoID = newData.url.match(/v=([A-Za-z0-9_-]{11})/)?.[1];
+		const videoID = ParseYoutubeVideoID(newData.url);
 
 		const Change = (..._)=>this.OnChange();
 

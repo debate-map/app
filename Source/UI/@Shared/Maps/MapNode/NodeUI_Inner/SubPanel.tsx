@@ -1,8 +1,6 @@
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI} from "vwebapp-framework";
+import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoID} from "vwebapp-framework";
 import {MapNodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType} from "@debate-map/server-link/Source/Link";
-
-
 import {SourcesUI} from "./SourcesUI";
 
 export class SubPanel extends BaseComponent<{node: MapNodeL2}, {}> {
@@ -76,7 +74,7 @@ export class SubPanel_Media extends BaseComponentPlus({} as {mediaAttachment: Me
 				{media.type == MediaType.Image &&
 					<img src={media.url} style={{width: mediaAttachment.previewWidth != null ? `${mediaAttachment.previewWidth}%` : null, maxWidth: "100%"}}/>}
 				{media.type == MediaType.Video &&
-					<YoutubePlayerUI videoID={media.url.match(/v=([a-zA-Z0-9]+)/)?.[1]} /*startTime={0}*/ heightVSWidthPercent={.5625}
+					<YoutubePlayerUI videoID={ParseYoutubeVideoID(media.url)} /*startTime={0}*/ heightVSWidthPercent={.5625}
 						onPlayerInitialized={player=> {
 							player.GetPlayerUI().style.position = "absolute";
 						}}/>}
