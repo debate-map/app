@@ -1,5 +1,5 @@
 import {StandardCompProps} from "Utils/UI/General";
-import {DeepGet, E, SleepAsync, Timer, Vector2i, FindDOMAll, Assert, FromJSON, ToJSON, VRect, GetTreeNodesInObjTree} from "js-vextensions";
+import {DeepGet, E, SleepAsync, Timer, Vector2, FindDOMAll, Assert, FromJSON, ToJSON, VRect, GetTreeNodesInObjTree} from "js-vextensions";
 import {Column, Row} from "react-vcomponents";
 import {BaseComponentWithConnector, FindReact, GetDOM, BaseComponentPlus, BaseComponent} from "react-vextensions";
 import {VMenuStub, VMenuItem} from "react-vmenu";
@@ -34,11 +34,11 @@ export function GetNodeBoxForPath(path: string) {
 	return nodeInnerBoxes.FirstOrX(a=>a.props.path == path);
 }
 export function GetNodeBoxClosestToViewCenter() {
-	const viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
+	const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
 	return FindDOMAll(".NodeUI_Inner").Min(nodeBox=>GetDistanceBetweenRectAndPoint($(nodeBox).GetScreenRect(), viewCenter_onScreen));
 }
 export function GetViewOffsetForNodeBox(nodeBox: Element) {
-	const viewCenter_onScreen = new Vector2i(window.innerWidth / 2, window.innerHeight / 2);
+	const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
 	return viewCenter_onScreen.Minus($(nodeBox).GetScreenRect().Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
 }
 
@@ -65,7 +65,7 @@ export const ACTUpdateFocusNodeAndViewOffset = StoreAction((mapID: string)=>{
 
 	ACTSetFocusNodeAndViewOffset(mapID, focusNodePath, viewOffset);
 });
-export const ACTSetFocusNodeAndViewOffset = StoreAction((mapID: string, focusNodePath: string | string[], viewOffset: Vector2i)=>{
+export const ACTSetFocusNodeAndViewOffset = StoreAction((mapID: string, focusNodePath: string | string[], viewOffset: Vector2)=>{
 	let nodeView = GetNodeView(mapID, focusNodePath);
 	if (nodeView == null || !nodeView.focused || !viewOffset.Equals(nodeView.viewOffset)) {
 		if (nodeView == null) {
@@ -111,7 +111,7 @@ export class MapUI extends BaseComponentPlus({
 
 	scrollView: ScrollView;
 	mapUIEl: HTMLDivElement;
-	downPos: Vector2i;
+	downPos: Vector2;
 	render() {
 		const {map, rootNode: rootNode_passed, withinPage, padding, subNavBarWidth, ...rest} = this.props;
 		Assert(map._key, "map._key is null!");
@@ -191,7 +191,7 @@ export class MapUI extends BaseComponentPlus({
 								filter: GADDemo ? "drop-shadow(rgba(0,0,0,.7) 0px 0px 10px)" : "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)",
 							}}
 							onMouseDown={e=>{
-								this.downPos = new Vector2i(e.clientX, e.clientY);
+								this.downPos = new Vector2(e.clientX, e.clientY);
 								if (e.button == 2) { $(this.mapUIEl).addClass("scrolling"); }
 							}}
 							onMouseUp={e=>{
@@ -199,7 +199,7 @@ export class MapUI extends BaseComponentPlus({
 							}}
 							onClick={e=>{
 								if (e.target != this.mapUIEl) return;
-								if (this.downPos && new Vector2i(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
+								if (this.downPos && new Vector2(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
 								const mapView = GetMapView(GetOpenMapID());
 								if (GetSelectedNodePath(map._key)) {
 									ACTMapNodeSelect(map._key, null);
@@ -333,7 +333,7 @@ export class MapUI extends BaseComponentPlus({
 	ScrollToNode(nodePath: string) {
 		const {map} = this.props;
 
-		const viewOffset_target = GetViewOffset(GetMapView(map._key)); // || new Vector2i(200, 0);
+		const viewOffset_target = GetViewOffset(GetMapView(map._key)); // || new Vector2(200, 0);
 		// Log(`LoadingScroll:${nodePath};${ToJSON(viewOffset_target)}`);
 		if (nodePath == null || viewOffset_target == null) return true; // if invalid entry, count as success?
 
@@ -343,11 +343,11 @@ export class MapUI extends BaseComponentPlus({
 		this.ScrollToPosition_Center(focusNodeBoxPos.Plus(viewOffset_target));
 		return true;
 	}
-	ScrollToPosition_Center(posInContainer: Vector2i) {
+	ScrollToPosition_Center(posInContainer: Vector2) {
 		const {withinPage} = this.props;
 
 		const oldScroll = this.scrollView.GetScroll();
-		const newScroll = new Vector2i(posInContainer.x - (window.innerWidth / 2), posInContainer.y - (window.innerHeight / 2));
+		const newScroll = new Vector2(posInContainer.x - (window.innerWidth / 2), posInContainer.y - (window.innerHeight / 2));
 		if (withinPage) { // if within a page, don't apply stored vertical-scroll
 			newScroll.y = oldScroll.y;
 		}
@@ -373,7 +373,7 @@ export class MapUI extends BaseComponentPlus({
 		if (targetRect.Bottom > newViewportRect.Bottom) newViewportRect.y = targetRect.Bottom - newViewportRect.height; // if target-rect extends further down, reposition down
 
 		const scrollNeededToEnactNewViewportRect = newViewportRect.Position.Minus(viewportRect.Position);
-		const newScroll = new Vector2i(oldScroll).Plus(scrollNeededToEnactNewViewportRect);
+		const newScroll = new Vector2(oldScroll).Plus(scrollNeededToEnactNewViewportRect);
 		Log("Loading scroll:", newScroll, "@TargetRect", targetRect);
 		this.scrollView.SetScroll(newScroll);
 

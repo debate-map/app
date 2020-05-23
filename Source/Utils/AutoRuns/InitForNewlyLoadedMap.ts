@@ -3,7 +3,7 @@ import {GetOpenMapID} from "Store/main";
 import {GetNodeView, ACTMapNodeExpandedSet, MapView, MapNodeView} from "Store/main/maps/mapViews/$mapView";
 import {store} from "Store";
 import {GetAsync} from "mobx-firelink";
-import {Assert, Vector2i} from "js-vextensions";
+import {Assert, Vector2} from "js-vextensions";
 import {MapState, TimelineSubpanel} from "Store/main/maps/mapStates/@MapState";
 import {MapUI, ACTUpdateFocusNodeAndViewOffset, ACTSetFocusNodeAndViewOffset} from "UI/@Shared/Maps/MapUI";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
@@ -59,7 +59,7 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 	}
 
 	// have view start a bit to the right of the root node
-	ACTSetFocusNodeAndViewOffset(mapID, map.rootNode, new Vector2i(300, 0));
+	ACTSetFocusNodeAndViewOffset(mapID, map.rootNode, new Vector2(300, 0));
 
 	runInAction("StartInitForNewlyLoadedMap_markInitDone", ()=>mapState.initDone = true);
 

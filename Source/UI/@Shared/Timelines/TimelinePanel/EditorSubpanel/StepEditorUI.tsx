@@ -1,4 +1,4 @@
-import {ToJSON, Vector2i, VRect, WaitXThenRun, GetEntries, Clone, DEL, E} from "js-vextensions";
+import {ToJSON, Vector2, VRect, WaitXThenRun, GetEntries, Clone, DEL, E} from "js-vextensions";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "react-beautiful-dnd";
 import {Button, CheckBox, Column, Pre, Row, Select, Text, TextArea, TimeSpanInput, Spinner} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM, ShallowChanged} from "react-vextensions";
@@ -221,8 +221,8 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 				// if (dragBoxRect.Center.y > firstOffsetInnerRect.Center.y) {
 				placeholderRect.y += lastInnerRect.height;
 			} else {
-				// placeholderRect = new VRect(Vector2i.zero, dragBoxRect.Size);
-				placeholderRect = new VRect(new Vector2i(7, 7), dragBoxRect.Size); // adjust for padding
+				// placeholderRect = new VRect(Vector2.zero, dragBoxRect.Size);
+				placeholderRect = new VRect(new Vector2(7, 7), dragBoxRect.Size); // adjust for padding
 			}
 		}
 

@@ -1,4 +1,4 @@
-import {Assert, emptyObj, nl, ToJSON, Vector2i, VRect, WaitXThenRun, E, IsSpecialEmptyArray} from "js-vextensions";
+import {Assert, emptyObj, nl, ToJSON, Vector2, VRect, WaitXThenRun, E, IsSpecialEmptyArray} from "js-vextensions";
 import * as React from "react";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "react-beautiful-dnd";
 import {Button, Column, Div, Row} from "react-vcomponents";
@@ -28,7 +28,7 @@ type Props = {
 };
 const initialState = {
 	childrenWidthOverride: null as number,
-	oldChildBoxOffsets: null as {[key: number]: Vector2i},
+	oldChildBoxOffsets: null as {[key: number]: Vector2},
 	placeholderRect: null as VRect,
 };
 
@@ -175,8 +175,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				oldChildBoxOffsets == null && {opacity: 0, pointerEvents: "none"},
 			)}>
 				{linkSpawnPoint > 0 && oldChildBoxOffsets &&
-					// <NodeConnectorBackground node={node} linkSpawnPoint={vertical ? Vector2iCache.Get(0, linkSpawnPoint) : Vector2iCache.Get(-30, linkSpawnPoint)}
-					<NodeConnectorBackground node={node} path={path} linkSpawnPoint={vertical ? new Vector2i(-10, 0) : new Vector2i(-30, linkSpawnPoint)} straightLines={vertical}
+					// <NodeConnectorBackground node={node} linkSpawnPoint={vertical ? Vector2Cache.Get(0, linkSpawnPoint) : Vector2Cache.Get(-30, linkSpawnPoint)}
+					<NodeConnectorBackground node={node} path={path} linkSpawnPoint={vertical ? new Vector2(-10, 0) : new Vector2(-30, linkSpawnPoint)} straightLines={vertical}
 						shouldUpdate={true} // this.lastRender_source == RenderSource.SetState}
 						nodeChildren={nodeChildrenToShowHere} childBoxOffsets={oldChildBoxOffsets}/>}
 
@@ -214,7 +214,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 		const childHolderRect = VRect.FromLTWH(childHolder.DOM.getBoundingClientRect());
 		/* const match = firstOffsetInner.style.transform.match(/([0-9]+).+?([0-9]+)/);
-		const dragBoxSize = new Vector2i(match[1].ToInt(), match[2].ToInt());
+		const dragBoxSize = new Vector2(match[1].ToInt(), match[2].ToInt());
 		// delete dragInfo.provided.draggableProps.style.transform; */
 		const dragBox = document.querySelector(".NodeUI_Inner.DragPreview");
 		if (dragBox == null) return; // this can happen at end of drag
@@ -240,7 +240,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				// if (dragBoxRect.Center.y > firstOffsetInnerRect.Center.y) {
 				placeholderRect.y += lastInnerRect.height;
 			} else {
-				placeholderRect = new VRect(Vector2i.zero, dragBoxRect.Size);
+				placeholderRect = new VRect(Vector2.zero, dragBoxRect.Size);
 			}
 		}
 
@@ -360,7 +360,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 				let childBoxOffset = VRect.FromLTWH(childBox.getBoundingClientRect()).Position.Minus(holderRect.Position);
 				Assert(childBoxOffset.x < 100, "Something is wrong. X-offset should never be more than 100.");
-				childBoxOffset = childBoxOffset.Plus(new Vector2i(0, childBox.getBoundingClientRect().height / 2));
+				childBoxOffset = childBoxOffset.Plus(new Vector2(0, childBox.getBoundingClientRect().height / 2));
 				return childBoxOffset;
 			});
 			newState.oldChildBoxOffsets = oldChildBoxOffsets;

@@ -1,5 +1,5 @@
 import {CollectionReference, Query} from "@firebase/firestore-types";
-import {SleepAsync, Vector2i, WaitXThenRun, E} from "js-vextensions";
+import {SleepAsync, Vector2, WaitXThenRun, E} from "js-vextensions";
 import keycode from "keycode";
 import Moment from "moment";
 import {Button, Column, Pre, Row, TextInput} from "react-vcomponents";
@@ -338,7 +338,7 @@ export function JumpToNode(mapID: string, path: string) {
 			currentParentView = childView;
 		}
 		currentParentView.focused = true;
-		currentParentView.viewOffset = new Vector2i(0, 0);
+		currentParentView.viewOffset = new Vector2(0, 0);
 
 		ACTMapViewMerge(mapID, mapView);
 

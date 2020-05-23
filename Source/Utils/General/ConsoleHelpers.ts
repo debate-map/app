@@ -5,10 +5,18 @@ import {Clone, ToNumber, DEL, E, OmitIfNull, OMIT} from "js-vextensions";
 import {GetNodeL2} from "@debate-map/server-link/Source/Link";
 import {DeleteNodeSubtree} from "@debate-map/server-link/Source/Link";
 
+/*
+Reminders:
+* For large updates, usually perform process on subset of data before doing whole thing.
+* Use this before applying db-updates: MakeQuickBackupForDBUpdates() [to restore: RestoreQuickBackup()]
+*/
+
+// helpers
 export function StoreTempData(data: Object) {
 	g.tempData = g.tempData || [];
 	g.tempData.push(E({_time: Date.now()}, data));
 }
+
 
 // temp (for in-console db-upgrades and such)
 // ==========

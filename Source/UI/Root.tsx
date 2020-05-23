@@ -1,5 +1,5 @@
 import chroma from "chroma-js";
-import {Clone, FromJSON, Vector2i} from "js-vextensions";
+import {Clone, FromJSON, Vector2} from "js-vextensions";
 import keycode from "keycode";
 import {hasHotReloaded} from "Main";
 import {observable, runInAction} from "mobx";
@@ -216,7 +216,7 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 			if (event["handledGlobally"]) return;
 			event["handledGlobally"] = true;
 
-			g.mousePos = new Vector2i(event.pageX, event.pageY);
+			g.mousePos = new Vector2(event.pageX, event.pageY);
 		});
 
 		document.addEventListener("keydown", event=>{
@@ -251,12 +251,12 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 }
 
 declare global {
-	var mousePos: Vector2i;
+	var mousePos: Vector2;
 	var ctrlDown: boolean;
 	var shiftDown: boolean;
 	var altDown: boolean;
 }
-g.mousePos = new Vector2i(undefined, undefined);
+g.mousePos = new Vector2(undefined, undefined);
 G({ctrlDown: false, shiftDown: false, altDown: false});
 
 @Observer

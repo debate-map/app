@@ -1,6 +1,6 @@
 import {GetEntries, GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "js-vextensions";
 import Moment from "moment";
-import {Column, Div, Pre, Row, RowLR, Select, Spinner, TextInput, CheckBox} from "react-vcomponents";
+import {Column, Div, Pre, Row, RowLR, Select, Spinner, TextInput, CheckBox, Text, Span} from "react-vcomponents";
 import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
 import {ES} from "Utils/UI/GlobalStyles";
@@ -8,7 +8,7 @@ import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI"
 import {BoxController, ShowMessageBox} from "react-vmessagebox";
 import {Media, Media_namePattern, MediaType, GetNiceNameForMediaType} from "@debate-map/server-link/Source/Link";
 import {SourceChainsEditorUI} from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
-import {YoutubePlayerUI, InfoButton} from "vwebapp-framework";
+import {YoutubePlayerUI, InfoButton, HSLA} from "vwebapp-framework";
 
 export class MediaDetailsUI extends BaseComponentPlus(
 	{} as {baseData: Media, creating: boolean, editing: boolean, style?, onChange?: (newData: Media, error: string)=>void},
@@ -31,33 +31,36 @@ export class MediaDetailsUI extends BaseComponentPlus(
 	render() {
 		const {baseData, creating, editing, style, onChange} = this.props;
 		const {newData, dataError} = this.state;
+		const videoID = newData.url.match(/v=([A-Za-z0-9_-]{11})/)?.[1];
 
 		const Change = (..._)=>this.OnChange();
 
-		const splitAt = 170;
-		const width = 600;
+		const splitAt = 100;
+		//const width = 600;
 		return (
 			<Column style={style}>
 				{!creating &&
 					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
-				<RowLR mt={5} splitAt={splitAt} style={{width}}>
+				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Name: </Pre>
 					<TextInput
 						pattern={Media_namePattern} required
 						enabled={creating || editing} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
-				<RowLR mt={5} splitAt={splitAt} style={{width}}>
+				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Type: </Pre>
 					<Select options={GetEntries(MediaType, name=>GetNiceNameForMediaType(MediaType[name]))} enabled={creating || editing} style={ES({flex: 1})}
 						value={newData.type} onChange={val=>Change(newData.type = val)}/>
 				</RowLR>
-				<RowLR mt={5} splitAt={splitAt} style={{width}}>
+				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>URL: </Pre>
 					<TextInput
 						/*pattern={Media_urlPattern}*/ required
 						enabled={creating || editing} style={{width: "100%"}}
 						value={newData.url} onChange={val=>Change(newData.url = val)}/>
+					{newData.type == MediaType.Video && newData.url && videoID == null &&
+						<Span ml={5} style={{color: HSLA(30, 1, .6, 1), whiteSpace: "pre"}}>Only YouTube urls supported currently.</Span>}
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Description: </Pre>
@@ -71,10 +74,13 @@ export class MediaDetailsUI extends BaseComponentPlus(
 								<img src={newData.url} style={{width: "100%"}}/>
 							</Row>}
 						{newData.type == MediaType.Video &&
-							<YoutubePlayerUI videoID={newData.url.match(/v=([a-zA-Z0-9]+)/)?.[1]} /*startTime={0}*/ heightVSWidthPercent={.5625}
-								onPlayerInitialized={player=> {
-									player.GetPlayerUI().style.position = "absolute";
-								}}/>}
+						 	// use wrapper div (with video-id as key), to ensure element cleanup when video-id changes
+							<div key={videoID}>
+								<YoutubePlayerUI videoID={videoID} /*startTime={0}*/ heightVSWidthPercent={.5625}
+									onPlayerInitialized={player=> {
+										player.GetPlayerUI().style.position = "absolute";
+									}}/>
+							</div>}
 				</Column>
 				{dataError && dataError != "Please fill out this field." && <Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{dataError}</Row>}
 			</Column>

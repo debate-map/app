@@ -1,8 +1,8 @@
 // import React from "react/lib/ReactWithAddons";
 import "./Utils/General/ConsoleHelpers";
-import {JustBeforeInitLibs_listeners, JustBeforeUI_listeners} from "Main";
 import ReactDOM from "react-dom";
 import {supportReactDevTools} from "react-universal-hooks";
+import {JustBeforeInitLibs_listeners, JustBeforeUI_listeners} from "./Main";
 
 // supportReactDevTools({ active: DEV });
 supportReactDevTools({active: true});

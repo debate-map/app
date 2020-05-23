@@ -1,4 +1,4 @@
-import {Vector2i, Assert, IsString, GetTreeNodesInObjTree, DeepGet, IsPrimitive, DeepSet, Timer} from "js-vextensions";
+import {Vector2, Assert, IsString, GetTreeNodesInObjTree, DeepGet, IsPrimitive, DeepSet, Timer} from "js-vextensions";
 import {observable} from "mobx";
 import {O, StoreAction, LogWarning} from "vwebapp-framework";
 import {store} from "Store";
@@ -36,7 +36,7 @@ export class MapNodeView {
 	@O selected?: boolean;
 	@O focused?: boolean;
 	/** Offset of view-center from self (since we're the focus-node). */
-	@O viewOffset?: Vector2i;
+	@O viewOffset?: Vector2;
 	@O openPanel?: string;
 	@O openTermID?: string;
 
@@ -146,7 +146,7 @@ export const GetNodeView = StoreAccessor(s=>(mapID: string, pathOrPathNodes: str
 	if (nodeView.VKeys().length == 0 && returnEmptyNodeViewIfNull) return emptyNodeView;
 	return nodeView.Excluding('children') as MapNodeView_SelfOnly;*#/
 }); */
-export const GetViewOffset = StoreAccessor(s=>(mapView: MapView): Vector2i=>{
+export const GetViewOffset = StoreAccessor(s=>(mapView: MapView): Vector2=>{
 	if (mapView == null) return null;
 	const treeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "viewOffset" && a.Value);
 	return treeNode ? treeNode.Value : null;

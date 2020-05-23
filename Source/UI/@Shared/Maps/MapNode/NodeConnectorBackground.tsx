@@ -1,4 +1,4 @@
-import {Vector2i, E} from "js-vextensions";
+import {Vector2, E} from "js-vextensions";
 import {BaseComponent, SimpleShouldUpdate, WarnOfTransientObjectProps} from "react-vextensions";
 import {HSLA} from "vwebapp-framework";
 import {Fragment} from "react";
@@ -6,9 +6,9 @@ import {MapNodeL3} from "@debate-map/server-link/Source/Link";
 import {GetNodeColor} from "Store/firebase_ext/nodes";
 
 type Props = {
-	node: MapNodeL3, path: string, linkSpawnPoint: Vector2i, straightLines?: boolean, nodeChildren: MapNodeL3[],
-	// childBoxOffsets: Vector2i[],
-	childBoxOffsets: {[key: number]: Vector2i},
+	node: MapNodeL3, path: string, linkSpawnPoint: Vector2, straightLines?: boolean, nodeChildren: MapNodeL3[],
+	// childBoxOffsets: Vector2[],
+	childBoxOffsets: {[key: number]: Vector2},
 	shouldUpdate: boolean
 };
 // @ExpensiveComponent({ simpleShouldUpdate_options: { useShouldUpdateProp: true } })
@@ -98,9 +98,9 @@ export class Squiggle extends BaseComponent<{start: Position, startControl_offse
 	render() {
 		const {start, startControl_offset, end, endControl_offset, color, usePercents, style} = this.props;
 
-		const startPos = new Vector2i(start[0], start[1]);
+		const startPos = new Vector2(start[0], start[1]);
 		let startControl = startPos.Plus(startControl_offset[0], startControl_offset[1]);
-		const endPos = new Vector2i(end[0], end[1]);
+		const endPos = new Vector2(end[0], end[1]);
 		let endControl = endPos.Plus(endControl_offset[0], endControl_offset[1]);
 
 		const middleControl = startPos.Plus(endPos).Times(0.5); // average start-and-end to get middle-control

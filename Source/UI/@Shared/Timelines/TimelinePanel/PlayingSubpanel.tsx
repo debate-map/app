@@ -1,4 +1,4 @@
-import {Assert, GetPercentFromXToY, IsNaN, Lerp, Timer, ToNumber, Vector2i, WaitXThenRun, AssertWarn} from "js-vextensions";
+import {Assert, GetPercentFromXToY, IsNaN, Lerp, Timer, ToNumber, Vector2, WaitXThenRun, AssertWarn} from "js-vextensions";
 import {computed, observable, runInAction} from "mobx";
 import React, {useEffect} from "react";
 import ReactList from "react-list";
@@ -243,7 +243,7 @@ export class PlayingSubpanel extends BaseComponent<{map: Map}, {}, { messageArea
 
 	// autoScrollDisabling = true;
 	// ignoreNextScrollEvent = false;
-	OnScroll = (e: React.UIEvent<HTMLDivElement>, source: ScrollSource, pos: Vector2i)=>{
+	OnScroll = (e: React.UIEvent<HTMLDivElement>, source: ScrollSource, pos: Vector2)=>{
 		// if (!this.autoScrollDisabling) return;
 		/* if (this.ignoreNextScrollEvent) {
 			this.ignoreNextScrollEvent = false;

@@ -1,6 +1,6 @@
 import chroma, {Color} from "chroma-js";
 import classNames from "classnames";
-import {DoNothing, Timer, ToJSON, Vector2i, VRect, WaitXThenRun, ToNumber, E} from "js-vextensions";
+import {DoNothing, Timer, ToJSON, Vector2, VRect, WaitXThenRun, ToNumber, E} from "js-vextensions";
 import {Draggable} from "react-beautiful-dnd";
 import ReactDOM from "react-dom";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "react-vextensions";
@@ -99,7 +99,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const bottomPanelDOM = dom.querySelector(".NodeUI_BottomPanel");
 		const bottomPanelRect = bottomPanelDOM ? VRect.FromLTWH(bottomPanelDOM.getBoundingClientRect()) : null;
 
-		const mouseRect = new VRect(mousePos, new Vector2i(1, 1));
+		const mouseRect = new VRect(mousePos, new Vector2(1, 1));
 		const intersectsOne = mouseRect.Intersects(mainRect) || (leftBoxRect && mouseRect.Intersects(leftBoxRect)) || (bottomPanelRect && mouseRect.Intersects(bottomPanelRect));
 		// Log(`Main: ${mainRect} Mouse:${mousePos} Intersects one?:${intersectsOne}`);
 		this.SetState({hovered: intersectsOne});

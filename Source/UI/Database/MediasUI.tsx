@@ -90,7 +90,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as { selectedMedia_
 						{selectedMedia
 							? <MediaDetailsUI baseData={selectedMedia} creating={false} editing={creatorOrMod} style={{padding: 10}}
 								onChange={(data, error)=>this.SetState({selectedMedia_newData: data, selectedMedia_newDataError: error})}/>
-							: <div style={{padding: 10}}>No image selected.</div>}
+							: <div style={{padding: 10}}>No media selected.</div>}
 					</Column>
 				</ScrollView>
 			</Row>

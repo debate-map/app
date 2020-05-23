@@ -110,7 +110,7 @@ async function ExpandToAndFocusOnNodes(mapID: string, paths: string[]) {
 		nodeBoxesMerged = nodeBoxesMerged ? nodeBoxesMerged.Encapsulating(boxRect) : boxRect;
 	}
 	/* const nodeBoxPositionAverage = nodeBoxPositionSum.Times(1 / paths.length);
-	// mapUI.ScrollToPosition(new Vector2i((nodeBoxPositionAverage.x - 100).KeepAtLeast(0), nodeBoxPositionAverage.y));
+	// mapUI.ScrollToPosition(new Vector2((nodeBoxPositionAverage.x - 100).KeepAtLeast(0), nodeBoxPositionAverage.y));
 	mapUI.ScrollToPosition_Center(nodeBoxPositionAverage.Plus(-250, 0)); */
 	mapUI.ScrollToMakeRectVisible(nodeBoxesMerged, 100);
 	ACTUpdateFocusNodeAndViewOffset(mapID);

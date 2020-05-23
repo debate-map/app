@@ -1,4 +1,4 @@
-import {DN, Range, Vector2i} from "js-vextensions";
+import {DN, Range, Vector2} from "js-vextensions";
 import {Pre, Select, Spinner} from "react-vcomponents";
 import {BaseComponent, RenderSource, BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
@@ -30,7 +30,7 @@ import {MarkHandled} from "Utils/UI/General";
 type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: RatingType, ratings: Rating[]};
 
 @Observer
-export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {size: null as Vector2i}) {
+export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {size: null as Vector2}) {
 	render() {
 		const {node, path, ratingType, ratings} = this.props;
 		const {size} = this.state;
@@ -89,7 +89,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 					if (userID == null) return ShowSignInPopup();
 
 					const chart = chartHolder.find(".recharts-cartesian-grid");
-					const posOnChart = new Vector2i(e.pageX - chart.offset().left, e.pageY - chart.offset().top);
+					const posOnChart = new Vector2(e.pageX - chart.offset().left, e.pageY - chart.offset().top);
 					const percentOnChart = posOnChart.x / chart.width();
 					const ratingOnChart_exact = minLabel + (percentOnChart * range);
 					const closestRatingSlot = dataFinal.OrderBy(a=>a.label.Distance(ratingOnChart_exact)).First();
@@ -159,7 +159,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 		const dom = this.refs.root;
 		if (!dom) return;
 
-		const size = new Vector2i(dom.clientWidth, dom.clientHeight);
+		const size = new Vector2(dom.clientWidth, dom.clientHeight);
 		// if (!size.Equals(this.state.size))
 		this.SetState({size}, null, false);
 	}
