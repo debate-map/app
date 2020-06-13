@@ -1,6 +1,6 @@
 import chroma, {Color} from "chroma-js";
 import classNames from "classnames";
-import {DoNothing, Timer, ToJSON, Vector2, VRect, WaitXThenRun, ToNumber, E} from "js-vextensions";
+import {DoNothing, Timer, ToJSON, Vector2, VRect, WaitXThenRun, ToNumber, E, DEL} from "js-vextensions";
 import {Draggable} from "react-beautiful-dnd";
 import ReactDOM from "react-dom";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "react-vextensions";
@@ -8,7 +8,7 @@ import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
 import {DragInfo, EB_ShowError, EB_StoreError, HSLA, IsDoubleClick, Observer} from "vwebapp-framework";
 import {DraggableInfo} from "Utils/UI/DNDStructures";
 import {GetTimeFromWhichToShowChangedNodes, GetNodeRevealHighlightTime, GetTimeSinceNodeRevealedByPlayingTimeline} from "Store/main/maps/mapStates/$mapState";
-import {GetPathNodeIDs, MapNodeView, ACTMapNodeSelect, ACTMapNodeExpandedSet, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView";
+import {GetPathNodeIDs, ACTMapNodeSelect, ACTMapNodeExpandedSet, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView";
 import {store} from "Store";
 import {runInAction} from "mobx";
 import {SlicePath} from "mobx-firelink";
@@ -304,9 +304,9 @@ export class NodeUI_Inner extends BaseComponentPlus(
 									let nodeView_final = nodeView;
 									if (nodeView_final == null) nodeView_final = GetNodeViewsAlongPath(map._key, path, true).Last();
 									if (nodeView_final.openPanel != panel) {
-										nodeView_final.openPanel = panel;
+										nodeView_final.VSet("openPanel", panel ?? DEL);
 									} else {
-										nodeView_final.openPanel = null;
+										delete nodeView_final.openPanel;
 										this.SetState({hoverPanel: null});
 									}
 								});

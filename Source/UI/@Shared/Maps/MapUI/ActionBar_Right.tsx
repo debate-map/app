@@ -6,10 +6,11 @@ import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState";
 import {runInAction} from "mobx";
 import {Observer} from "vwebapp-framework";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {Map} from "@debate-map/server-link/Source/Link";
+import {Map,WeightingType} from "@debate-map/server-link/Source/Link";
 import {colors} from "../../../../Utils/UI/GlobalStyles";
 import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown";
-import {WeightingType} from "@debate-map/server-link/Source/Link";
+
+import {ShareDropDown} from "./ActionBar_Right/ShareDropDown";
 
 const changesSince_options = [];
 changesSince_options.push({name: "None", value: `${ShowChangesSinceType.None}_null`});
@@ -54,7 +55,7 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 							});
 						}}/>
 					</Row>
-					{/* <ShareDropDown map={map}/> // disabled for now, till we re-implement shareable map-views using json-based approach */}
+					<ShareDropDown map={map}/>
 					<LayoutDropDown map={map}/>
 				</Row>
 			</nav>

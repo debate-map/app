@@ -10,13 +10,13 @@ import {globalMapID} from "@debate-map/server-link/Source/Link";
 import {DatabaseState} from "./main/database";
 import {PublicPageState} from "./main/public";
 import {MapState} from "./main/maps/mapStates/@MapState";
-import {MapView, GetMapView} from "./main/maps/mapViews/$mapView";
 import {PrivatePageState} from "./main/private";
 import {RatingUIState} from "./main/ratingUI";
 import {SearchState} from "./main/search";
 import {MapsState} from "./main/maps";
 import {TimelinesState} from "./main/timelines";
 import {NotificationMessage} from "./main/@NotificationMessage";
+import {ShareUIState} from "./main/shareUI";
 
 export class MainState {
 	// [immerable] = true;
@@ -65,6 +65,7 @@ export class MainState {
 
 	@O maps = new MapsState();
 	@O timelines = new TimelinesState();
+	@O shareUI = new ShareUIState();
 	@O ratingUI = new RatingUIState();
 }
 

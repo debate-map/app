@@ -3,52 +3,7 @@ import {observable} from "mobx";
 import {O, StoreAction, LogWarning} from "vwebapp-framework";
 import {store} from "Store";
 import {SplitStringBySlash_Cached, StoreAccessor, Validate, UUID} from "mobx-firelink";
-import {PathSegmentToNodeID} from "@debate-map/server-link/Source/Link";
-
-export class MapView {
-	// rootNodeView = new MapNodeView();
-	// include root-node-view as a keyed-child, so that it's consistent with descendants (of key signifying id)
-	// rootNodeView;
-	// @O rootNodeViews = observable.map<string, MapNodeView>();
-	// use simple object rather than observable-map, since observable-map would lose its prototype on page refresh (when mobx-sync starts loading stored data, this path is not initialized-with-types, since it's nested/non-static)
-	// maybe todo: update mobx-sync to at least be able to handle the mobx classes (observable.map, observable.array, etc.)
-	@O rootNodeViews = {} as {[key: string]: MapNodeView};
-
-	// if bot
-	@O bot_currentNodeID?: string;
-}
-
-export class MapNodeView {
-	// constructor(childLimit?: number) {
-	// constructor(childLimit: number) {
-	/*constructor() {
-		//this.childLimit = State(a=>a.main.initialChildLimit);
-		// try to catch cause of odd "MapNodeView.children is undefined" issue hit sometimes
-		Assert(this.children != null);
-		new Timer(100, ()=>Assert(this.children != null), 1).Start();
-	}*/
-
-	@O expanded?: boolean;
-	/* expanded_truth?: boolean;
-	expanded_relevance?: boolean; */
-	@O expanded_truth? = true;
-	@O expanded_relevance? = true;
-	@O selected?: boolean;
-	@O focused?: boolean;
-	/** Offset of view-center from self (since we're the focus-node). */
-	@O viewOffset?: Vector2;
-	@O openPanel?: string;
-	@O openTermID?: string;
-
-	// @O children? = observable.map<string, MapNodeView>();
-	@O children = {} as {[key: string]: MapNodeView};
-	@O childLimit_up?: number;
-	@O childLimit_down?: number;
-}
-export const emptyNodeView = new MapNodeView();
-
-// export type MapNodeView_SelfOnly = Omit<MapNodeView, 'children'>;
-// export const MapNodeView_SelfOnly_props = ['expanded', 'expanded_truth', 'expanded_relevance', 'selected', 'focused', 'viewOffset', 'openPanel', 'openTermID', 'childLimit_up', 'childLimit_down'];
+import {PathSegmentToNodeID, MapView, MapNodeView} from "@debate-map/server-link/Source/Link";
 
 export function GetPathNodes(path: string) {
 	const pathSegments = SplitStringBySlash_Cached(path);
@@ -160,8 +115,8 @@ export const ACTMapNodeSelect = StoreAction((mapID: string, path: string)=>{
 	const nodes = GetTreeNodesInObjTree(GetMapView(mapID).rootNodeViews, true);
 	const selectedNode = nodes.FirstOrX(a=>a.Value && a.Value.selected)?.Value as MapNodeView;
 	if (selectedNode) {
-		selectedNode.selected = false;
-		selectedNode.openPanel = null;
+		delete selectedNode.selected;
+		delete selectedNode.openPanel;
 	}
 
 	if (path != null) {
@@ -261,16 +216,16 @@ export const ACTMapViewMerge = StoreAction((mapID: string, toMergeMapView: MapVi
 	const oldSelectedNode_treeNode = inStoreEntries.FirstOrX(a=>a.Value && a.Value.selected);
 	const newSelectedNode_treeNode = toMergeEntries.FirstOrX(a=>a.Value && a.Value.selected);
 	if (oldSelectedNode_treeNode && newSelectedNode_treeNode) {
-		oldSelectedNode_treeNode.Value.selected = false;
-		oldSelectedNode_treeNode.Value.openPanel = null;
+		delete oldSelectedNode_treeNode.Value.selected;
+		delete oldSelectedNode_treeNode.Value.openPanel;
 	}
 
 	// defocus old focused-node, if a new one's being set
 	const oldFocusedNode_treeNode = inStoreEntries.FirstOrX(a=>a.Value && a.Value.focused);
 	const newFocusedNode_treeNode = toMergeEntries.FirstOrX(a=>a.Value && a.Value.focused);
 	if (oldFocusedNode_treeNode && newFocusedNode_treeNode) {
-		oldFocusedNode_treeNode.Value.focused = false;
-		oldFocusedNode_treeNode.Value.viewOffset = null;
+		delete oldFocusedNode_treeNode.Value.focused;
+		delete oldFocusedNode_treeNode.Value.viewOffset;
 	}
 
 	const updatePrimitiveTreeNodes = GetTreeNodesInObjTree(toMergeMapView).filter(a=>IsPrimitive(a.Value) || a.Value == null);

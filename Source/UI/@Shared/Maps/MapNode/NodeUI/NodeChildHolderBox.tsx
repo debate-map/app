@@ -4,7 +4,7 @@ import {Row} from "react-vcomponents";
 import {BaseComponentPlus, GetDOM, UseCallback, WarnOfTransientObjectProps} from "react-vextensions";
 import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
 import {HSLA, Observer} from "vwebapp-framework";
-import {ACTMapNodeExpandedSet, GetNodeView, MapNodeView} from "Store/main/maps/mapViews/$mapView";
+import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
 import {ExpandableBox} from "../ExpandableBox";
 import {Squiggle} from "../NodeConnectorBackground";

@@ -9,12 +9,12 @@ import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O} from "
 import {ES} from "Utils/UI/GlobalStyles";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
-import {MapNodeView, MapView, ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView";
+import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView";
 import {runInAction, flow} from "mobx";
 import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu";
 import {MapUI} from "../Maps/MapUI";
 import {Validate, GetAsync, DBPath, UUID} from "mobx-firelink";
-import {GetNodeRevision} from "@debate-map/server-link/Source/Link";
+import {GetNodeRevision, MapView, MapNodeView} from "@debate-map/server-link/Source/Link";
 import {GetNode} from "@debate-map/server-link/Source/Link";
 import {fire} from "@debate-map/server-link/Source/Link";
 import {GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";

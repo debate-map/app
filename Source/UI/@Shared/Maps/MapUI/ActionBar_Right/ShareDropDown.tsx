@@ -1,49 +1,94 @@
-import {GetNewURL} from "Utils/URL/URLs";
-import {VURL, WaitXThenRun, CopyText} from "js-vextensions";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, RowLR, Select, TextInput} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {GetCurrentURL} from "vwebapp-framework";
-import {Map} from "@debate-map/server-link/Source/Link";
-import {Timeline} from "@debate-map/server-link/Source/Link";
-import {GetMapTimelines} from "@debate-map/server-link/Source/Link";
+import {DeleteShare, GetShares, Map, MeID, Share} from "@debate-map/server-link/Source/Link";
+import {GetEntries, VURL, CopyText} from "js-vextensions";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select, Text} from "react-vcomponents";
+import {BaseComponentPlus} from "react-vextensions";
+import {ShowMessageBox} from "react-vmessagebox";
+import {ScrollView} from "react-vscrollview";
+import {store} from "Store";
+import {GetOpenMapID} from "Store/main";
+import {ShareTab} from "Store/main/shareUI";
+import {Observer, RunInAction_Set, GetCurrentURL} from "vwebapp-framework";
+import {NewShareUI} from "./ShareDropDown/NewShareUI";
+import moment from "moment";
 
-export class ShareDropDown extends BaseComponentPlus({} as {map: Map}, {timeline: null as Timeline, justCopied: false}) {
+export function GetShareShortURL(share: Share) {
+	return new VURL(GetCurrentURL().domain, ["s", share?._key ?? "[SHARE_ID]"]);
+}
+export function GetShareLongURL(share: Share) {
+	const share_urlSafeName = share?.name.toLowerCase().replace(/[^A-Za-z0-9-_]/g, "-").replace(/-+/g, "-") ?? null;
+	return new VURL(GetCurrentURL().domain, ["s", share ? `${share_urlSafeName}.${share._key}` : "[SHARE_NAME_AND_ID]"]);
+}
+
+@Observer
+export class ShareDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 	render() {
 		const {map} = this.props;
-		const {timeline, justCopied} = this.state;
-		const newURL = GetNewURL();
-		const timelines = GetMapTimelines(map);
+		const uiState = store.main.shareUI;
 
-		newURL.queryVars.Clear();
-		newURL.domain = GetCurrentURL().domain;
-		if (timeline) {
-			newURL.SetQueryVar("timeline", timeline._key);
-		}
-
-		const splitAt = 130;
 		return (
 			<DropDown>
 				<DropDownTrigger><Button mr={5} text="Share"/></DropDownTrigger>
-				<DropDownContent style={{right: 0, width: 400, borderRadius: "0 0 0 5px"}}>
+				<DropDownContent style={{right: 0, width: 700, borderRadius: "0 0 0 5px"}}>
 					<Column>
-						<RowLR splitAt={splitAt}>
-							<Pre>URL: </Pre>
-							<Row style={{width: "100%"}}>
-								<TextInput value={newURL.toString({domain: true})} editable={false} style={{flex: 0.75}}/>
-								<Button text={justCopied ? "Copied!" : "Copy"} ml={5} style={{flex: ".25 0 auto"}} onClick={()=>{
-									CopyText(newURL.toString({domain: true}));
-									this.SetState({justCopied: true});
-									WaitXThenRun(1000, ()=>this.SetState({justCopied: false}));
-								}}/>
-							</Row>
-						</RowLR>
-						<RowLR mt={5} splitAt={splitAt}>
-							<Pre>Show timeline: </Pre>
-							<Select options={[{name: "None", value: null} as any].concat(timelines)} value={timeline} onChange={val=>this.SetState({timeline: val})}/>
-						</RowLR>
+						<Row mb={5}>
+							<Select options={GetEntries(ShareTab, "ui")} displayType="button bar"
+								value={uiState.tab} onChange={val=>RunInAction_Set(this, ()=>uiState.tab = val)}/>
+						</Row>
+						{uiState.tab == ShareTab.AllMaps && <SharesListUI mapID={null}/>}
+						{uiState.tab == ShareTab.ThisMap && <SharesListUI mapID={GetOpenMapID()}/>}
+						{uiState.tab == ShareTab.Current && <NewShareUI mapID={GetOpenMapID()}/>}
 					</Column>
 				</DropDownContent>
 			</DropDown>
+		);
+	}
+}
+
+const columnWidths = [.45, .25, .3];
+@Observer
+class SharesListUI extends BaseComponentPlus({} as {mapID: string}, {}) {
+	render() {
+		const {mapID} = this.props;
+		const shares = GetShares(MeID(), mapID).OrderByDescending(a=>a.createdAt);
+		return (
+			<>
+				<Row style={{height: 40, padding: 10}}>
+					<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>Name</span>
+					<span style={{flex: columnWidths[1], fontWeight: 500, fontSize: 17}}>Created at</span>
+					<span style={{flex: columnWidths[2], fontWeight: 500, fontSize: 17}}>Actions</span>
+				</Row>
+				<ScrollView>
+					{shares.map((share, index)=>{
+						const share_shortURL = new VURL(GetCurrentURL().domain, ["s", share?._key ?? "[SHARE_ID]"]);
+						const share_urlSafeName = share?.name.toLowerCase().replace(/[^A-Za-z0-9-_]/g, "-").replace(/-+/g, "-") ?? null;
+						const share_longURL = new VURL(GetCurrentURL().domain, ["s", share ? `${share_urlSafeName}.${share._key}` : "[SHARE_NAME_AND_ID]"]);
+						return (
+							<Row key={share._key} mt={index == 0 ? 0 : 5}>
+								<Text style={{flex: columnWidths[0]}}>{share.name}</Text>
+								<Text style={{flex: columnWidths[1]}}>{moment(share.createdAt).format("YYYY-MM-DD HH:mm:ss")}</Text>
+								<Row style={{flex: columnWidths[2], whiteSpace: "pre"}}>
+									<Button ml={5} p="5px 10px" text="Short link" onClick={()=>{
+										CopyText(GetShareShortURL(share).toString({domain: true}));
+									}}/>
+									<Button ml={5} p="5px 10px" text="Long link" onClick={()=>{
+										CopyText(GetShareLongURL(share).toString({domain: true}));
+									}}/>
+									<Button ml={5} p="5px 7px" text="X" onClick={()=>{
+										ShowMessageBox({
+											title: `Delete share "${share.name}"`, cancelButton: true,
+											message: `Delete the share named "${share.name}"?`,
+											onOK: async()=>{
+												const command = new DeleteShare({id: share._key});
+												await command.Run();
+											},
+										});
+									}}/>
+								</Row>
+							</Row>
+						);
+					})}
+				</ScrollView>
+			</>
 		);
 	}
 }

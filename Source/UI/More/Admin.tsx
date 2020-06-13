@@ -241,6 +241,7 @@ export async function GetCollectionsDataAsync(versionRootPath: string, privateCo
 			// nodeStats: await getDocs('nodeStats'),
 			nodeTags: getDocs("nodeTags"),
 			// nodeViewers: await getDocs('nodeViewers'),
+			shares: getDocs("shares"),
 			terms: getDocs("terms"),
 			termComponents: getDocs("termComponents"),
 			//termNames: getDocs("termNames"),
