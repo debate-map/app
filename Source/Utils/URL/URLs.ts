@@ -1,5 +1,5 @@
 import {GetSelectedProposalID} from "firebase-feedback";
-import {Assert, VURL} from "js-vextensions";
+import {Assert, VURL, ModifyString} from "js-vextensions";
 import {StoreAccessor} from "mobx-firelink";
 import ReactGA from "react-ga";
 import {RootState} from "Store";
@@ -10,23 +10,62 @@ import {MaybeLog} from "vwebapp-framework";
 import {GetMap} from "@debate-map/server-link/Source/Link";
 import {MapNodeL2} from "@debate-map/server-link/Source/Link";
 import {GetNodeDisplayText, GetNodeL2} from "@debate-map/server-link/Source/Link";
+import {runInAction} from "mobx";
 
-export const rootPages = [
-	"stream", "chat", "reputation",
-	"database", "feedback", "forum", "more",
-	"home",
-	"social", "private", "public", "global",
-	"search", "guide", "profile",
-];
-// a default-child is only used (ie. removed from url) if there are no path-nodes after it
-export const rootPageDefaultChilds = {
-	database: "users",
-	feedback: "proposals",
-	more: "links",
-	home: "home",
-	global: "map",
-};
-const pagesWithSimpleSubpages = ["database", "feedback", "more", "home", "global"].ToMap(page=>page, ()=>null);
+export class Page {
+	constructor(initialData?: Partial<Page>, children?: {[key: string]: Page}) {
+		if (initialData) this.VSet(initialData);
+		if (children) {
+			for (const {key, value: child} of children.Pairs()) {
+				if (child.key == null) child.key = key;
+				if (child.title == null) child.title = ModifyString(child.key, m=>[m.startLower_to_upper]);
+			}
+			this.children = children;
+		}
+	}
+	key: string;
+	title: string;
+	simpleSubpages? = true;
+	children?: {[key: string]: Page};
+}
+
+// for subpages, each page's first one is the default
+export const pageTree = new Page({}, {
+	//stream, chat, reputation
+	database: new Page({}, {
+		users: new Page(),
+		terms: new Page(),
+		media: new Page(),
+	}),
+	feedback: new Page({}, {
+		proposals: new Page(),
+		//roadmap: new Page(),
+		//neutrality: new Page(),
+	}),
+	more: new Page({}, {
+		links: new Page(),
+		admin: new Page(),
+	}),
+	home: new Page({}, {
+		home: new Page(),
+		about: new Page(),
+	}),
+	//social
+	private: new Page({simpleSubpages: false}),
+	public: new Page({simpleSubpages: false}),
+	global: new Page({}, {
+		map: new Page(),
+	}),
+	//search, guide
+	profile: new Page(),
+
+	// temp; resolves share urls into specific pages
+	s: new Page({simpleSubpages: false}),
+});
+export const rootPages = Object.keys(pageTree.children);
+export const rootPageDefaultChilds = pageTree.children.Pairs().filter(a=>a.value.children?.Pairs().length).ToMap(pair=>pair.key, pair=>{
+	return pair.value.children.Pairs()[0].key;
+});
 
 export function PushHistoryEntry() {
 	// history.pushState({}, document.title, GetNewURL());
@@ -97,7 +136,7 @@ export function GetLoadActionFuncForURL(url: VURL) {
 		const page = url.pathNodes[0];
 		store.main.page = page;
 		const subpage = url.pathNodes[1];
-		if (url.pathNodes[1] && page in pagesWithSimpleSubpages) {
+		if (url.pathNodes[1] && pageTree.children[page]?.simpleSubpages) {
 			store.main[page].subpage = subpage;
 		}
 
@@ -223,6 +262,14 @@ export function GetLoadActionFuncForURL(url: VURL) {
 				WaitXThenRun(0, UpdateURL, 1600); *#/
 			}
 		} */
+
+		// unroll a share-link into the target location
+		if (page == "s") {
+			const shareStr = url.pathNodes[1];
+			const shareID = shareStr.slice(-10);
+			store.main.shareBeingLoaded = shareID;
+			// actual loading handled by LoadShare.ts
+		}
 	};
 }
 
@@ -239,8 +286,8 @@ export const GetNewURL = StoreAccessor(s=>(includeMapViewStr = true)=>{
 	const page = GetPage();
 	newURL.pathNodes.push(page);
 
-	const subpage = GetSubpage();
-	if (page in pagesWithSimpleSubpages) {
+	var subpage = GetSubpage();
+	if (pageTree.children[page]?.simpleSubpages) {
 		newURL.pathNodes.push(subpage);
 	}
 

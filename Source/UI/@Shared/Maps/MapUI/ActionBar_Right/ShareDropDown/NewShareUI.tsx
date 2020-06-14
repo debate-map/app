@@ -26,7 +26,7 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 		const timelines = GetMapTimelines(map);
 
 		const newShareData = new Share({
-			name: "New share",
+			name: map.name,
 			type: ShareType.Map,
 			mapID,
 			mapView: GetMapView(mapID),
@@ -75,7 +75,7 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 					<TextArea style={{height: 200, resize: "vertical"}} editable={false} value={newShareJSON}/>
 				</Row>}
 				<Row mt={5}>
-					<Button text="Replace current" enabled={currentShare != null && newShare_updatesFromCurrent.VKeys().length > 0} onClick={()=>{
+					<Button text="Update current" enabled={currentShare != null && newShare_updatesFromCurrent.VKeys().length > 0} onClick={()=>{
 						new UpdateShare({id: currentShare._key, updates: newShare_updatesFromCurrent}).Run();
 					}}/>
 					<Button ml={5} text="Create new share" onClick={()=>{
@@ -90,7 +90,7 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 				</Row>
 				<RowLR mt={5} splitAt={80}>
 					<Text>Name:</Text>
-					<TextInput delayChangeTillDefocus={true} enabled={currentShare != null} value={currentShare?.name ?? ""} onChange={val=>{
+					<TextInput delayChangeTillDefocus={true} enabled={currentShare != null} style={{flex: 1}} value={currentShare?.name ?? ""} onChange={val=>{
 						new UpdateShare({id: currentShare._key, updates: {name: val}}).Run();
 					}}/>
 				</RowLR>
@@ -109,7 +109,7 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 					<Pre>Long URL: </Pre>
 					<Row style={{width: "100%"}}>
 						<TextInput value={currentShare_longURL.toString({domain: true})} editable={false} style={{flex: 1}}/>
-						<Button text={justCopied_type == "long" ? "Copied!" : "Copy"} ml={5} enabled={false} onClick={()=>{
+						<Button text={justCopied_type == "long" ? "Copied!" : "Copy"} ml={5} enabled={currentShare != null} onClick={()=>{
 							CopyText(currentShare_longURL.toString({domain: true}));
 							this.SetState({justCopied_type: "long"});
 							WaitXThenRun(1000, ()=>this.SetState({justCopied_type: null}));

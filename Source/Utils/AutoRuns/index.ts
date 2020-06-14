@@ -3,6 +3,7 @@ requireAll(require.context('./', true, /\.js$/)); */
 
 import "./AddUserInfoToRavenContext";
 import "./InitForNewlyLoadedMap";
+import "./LoadShare";
 import "./PageViewRecorder";
 import "./TimelineNodeFocuser";
 import "./UserSignUpHelper";

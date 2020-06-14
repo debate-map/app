@@ -29,7 +29,7 @@ export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 
 		// const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
 		return (
-			<Column style={{position: "relative", maxHeight: 300, display: show ? null : "none"}}>
+			<Column style={{position: "relative", maxHeight: 300, display: show ? "flex" : "none"}}>
 				<Column className="clickThrough" style={{background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
 					<Row style={{padding: "4px 7px"}}>
 						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>ID</span>

@@ -6,7 +6,7 @@ import {GetOpenMapID} from "Store/main";
 import {ACTEnsureMapStateInit} from "Store/main/maps";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState";
-import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView";
+import {ACTMapNodeExpandedSet, GetNodeView, GetMapView} from "Store/main/maps/mapViews/$mapView";
 import {ACTSetFocusNodeAndViewOffset, MapUI} from "UI/@Shared/Maps/MapUI";
 
 let lastMapID;
@@ -23,7 +23,7 @@ autorun(()=>{
 async function StartInitForNewlyLoadedMap(mapID: string) {
 	Assert(mapID != null, "mapID cannot be null.");
 	let mapState = GetMapState(mapID);
-	if (mapState?.initDone) return;
+	if (mapState?.initDone && GetMapView(mapID) != null) return; // 2nd-check for version-clearing
 	const map = await GetAsync(()=>GetMap(mapID));
 
 	// ACTEnsureMapStateInit(action.payload.id);

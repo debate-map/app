@@ -1,7 +1,7 @@
 import {GetNodeL3, WeightingType, MapView} from "@debate-map/server-link/Source/Link";
 import {observable} from "mobx";
 import {StoreAccessor} from "mobx-firelink";
-import {ignore} from "mobx-sync";
+import {ignore, version} from "mobx-sync";
 import {store} from "Store";
 import {O, StoreAction} from "vwebapp-framework";
 import {MapState} from "./maps/mapStates/@MapState";
@@ -17,7 +17,7 @@ export class MapsState {
 		if (this.maps.get(mapID)) return;
 		this.maps.set(mapID, new MapState());
 	} */
-	@O mapViews = observable.map<string, MapView>();
+	@O @version(2) mapViews = observable.map<string, MapView>();
 
 	@O nodeLastAcknowledgementTimes = observable.map<string, number>();
 	@O @ignore currentNodeBeingAdded_path: string;

@@ -306,7 +306,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 									if (nodeView_final.openPanel != panel) {
 										nodeView_final.VSet("openPanel", panel ?? DEL);
 									} else {
-										delete nodeView_final.openPanel;
+										//delete nodeView_final.openPanel;
+										nodeView_final.openPanel = undefined;
 										this.SetState({hoverPanel: null});
 									}
 								});

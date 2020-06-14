@@ -115,8 +115,11 @@ export const ACTMapNodeSelect = StoreAction((mapID: string, path: string)=>{
 	const nodes = GetTreeNodesInObjTree(GetMapView(mapID).rootNodeViews, true);
 	const selectedNode = nodes.FirstOrX(a=>a.Value && a.Value.selected)?.Value as MapNodeView;
 	if (selectedNode) {
-		delete selectedNode.selected;
-		delete selectedNode.openPanel;
+		/*delete selectedNode.selected;
+		delete selectedNode.openPanel;*/
+		// fsr, mobx has errors when deleting (https://github.com/mobxjs/mobx/issues/2375) -- so just set to undefined
+		selectedNode.selected = undefined;
+		selectedNode.openPanel = undefined;
 	}
 
 	if (path != null) {
@@ -216,16 +219,16 @@ export const ACTMapViewMerge = StoreAction((mapID: string, toMergeMapView: MapVi
 	const oldSelectedNode_treeNode = inStoreEntries.FirstOrX(a=>a.Value && a.Value.selected);
 	const newSelectedNode_treeNode = toMergeEntries.FirstOrX(a=>a.Value && a.Value.selected);
 	if (oldSelectedNode_treeNode && newSelectedNode_treeNode) {
-		delete oldSelectedNode_treeNode.Value.selected;
-		delete oldSelectedNode_treeNode.Value.openPanel;
+		oldSelectedNode_treeNode.Value.selected = undefined;
+		oldSelectedNode_treeNode.Value.openPanel = undefined;
 	}
 
 	// defocus old focused-node, if a new one's being set
 	const oldFocusedNode_treeNode = inStoreEntries.FirstOrX(a=>a.Value && a.Value.focused);
 	const newFocusedNode_treeNode = toMergeEntries.FirstOrX(a=>a.Value && a.Value.focused);
 	if (oldFocusedNode_treeNode && newFocusedNode_treeNode) {
-		delete oldFocusedNode_treeNode.Value.focused;
-		delete oldFocusedNode_treeNode.Value.viewOffset;
+		oldFocusedNode_treeNode.Value.focused = undefined;
+		oldFocusedNode_treeNode.Value.viewOffset = undefined;
 	}
 
 	const updatePrimitiveTreeNodes = GetTreeNodesInObjTree(toMergeMapView).filter(a=>IsPrimitive(a.Value) || a.Value == null);

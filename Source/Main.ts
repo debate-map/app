@@ -14,6 +14,9 @@ import "mobx-firelink";
 import ReactDOM from "react-dom";
 // import Promise from "bluebird";
 import {VURL} from "js-vextensions";
+import {RootState} from "Store";
+import {O} from "vwebapp-framework";
+import {observable} from "mobx";
 
 // startup (non-hot)
 // ==========
@@ -30,6 +33,18 @@ g.webpackData = __webpack_require__;
 const startURL = VURL.Parse(window.location.href);
 declare global { export const startURL: VURL; } G({startURL});
 
+const storeTemp_json = localStorage.__mobx_sync__;
+let storeTemp = {} as RootState;
+if (storeTemp_json) {
+	try { // defensive
+		storeTemp = JSON.parse(storeTemp_json);
+	} catch(ex) {}
+}
+function AsNotNull(val: any) {
+	if (val == null || val == "null") return null;
+	return val;
+}
+
 // always compile-time
 declare global { var ENV_COMPILE_TIME: string; }
 // only compile-time if compiled for production (otherwise, can be overriden)
@@ -38,8 +53,8 @@ declare global { var ENV: string; var DEV: boolean; var PROD: boolean; var TEST:
 // if environment at compile time was not "production" (ie. if these globals weren't set/locked), then set them here at runtime
 if (ENV_COMPILE_TIME != "production") {
 	g.ENV = ENV_COMPILE_TIME;
-	if (startURL.GetQueryVar("env") && startURL.GetQueryVar("env") != "null") {
-		const envStr = startURL.GetQueryVar("env");
+	const envStr = AsNotNull(startURL.GetQueryVar("env")) || storeTemp.main?.envOverride;
+	if (envStr) {
 		g.ENV = {dev: "development", prod: "production"}[envStr] || envStr;
 		// alert("Using env: " + g.ENV);
 		console.log(`Using env: ${ENV}`);
@@ -58,8 +73,8 @@ if (ENV_COMPILE_TIME != "production") {
 declare global { var DB: string; var DB_SHORT: string; }
 
 g.DB = g.ENV;
-if (startURL.GetQueryVar("db") && startURL.GetQueryVar("db") != "null") {
-	const dbStr = startURL.GetQueryVar("db");
+const dbStr = AsNotNull(startURL.GetQueryVar("db")) || storeTemp.main?.dbOverride;
+if (dbStr) {
 	g.DB = {dev: "development", prod: "production"}[dbStr] || dbStr;
 	console.log(`Using db: ${DB}`);
 }
@@ -72,8 +87,9 @@ g.DB_SHORT = {development: "dev", production: "prod"}[DB] || DB;
 const {version, firebaseConfig} = DB == "development" ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
 
 let dbVersion = 12;
-if (startURL.GetQueryVar("dbVersion") && startURL.GetQueryVar("dbVersion") != "null") {
-	dbVersion = parseInt(startURL.GetQueryVar("dbVersion"));
+const dbVersionStr = AsNotNull(startURL.GetQueryVar("dbVersion")) || storeTemp.main?.dbVersionOverride;
+if (dbVersionStr) {
+	dbVersion = parseInt(dbVersionStr);
 	console.log(`Using dbVersion: ${dbVersion}`);
 }
 export {version, dbVersion, firebaseConfig};
@@ -112,5 +128,9 @@ function LoadHotModules() {
 	require("./Main_Hot");
 }
 
-// setTimeout(()=>LoadHotModules());
-LoadHotModules();
+// delay useful for, eg. letting mobx dev-tools load before page loads
+if (DEV && startURL.GetQueryVar("delay")) {
+	setTimeout(()=>LoadHotModules(), parseFloat(startURL.GetQueryVar("delay")) * 1000);
+} else {
+	LoadHotModules();
+}

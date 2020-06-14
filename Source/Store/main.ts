@@ -6,7 +6,7 @@ import {O, StoreAction} from "vwebapp-framework";
 import {rootPageDefaultChilds} from "Utils/URL/URLs";
 import {StoreAccessor} from "mobx-firelink";
 import {store} from "Store";
-import {globalMapID} from "@debate-map/server-link/Source/Link";
+import {globalMapID, Share} from "@debate-map/server-link/Source/Link";
 import {DatabaseState} from "./main/database";
 import {PublicPageState} from "./main/public";
 import {MapState} from "./main/maps/mapStates/@MapState";
@@ -33,6 +33,7 @@ export class MainState {
 	// topLeftOpenPanel: string;
 	// topRightOpenPanel: string;
 	@O @ignore notificationMessages = [] as NotificationMessage[];
+	@O @ignore shareBeingLoaded: string;
 
 	// pages (and nav-bar panels)
 	// ==========
@@ -85,5 +86,5 @@ export const GetPage = StoreAccessor(s=>()=>{
 });
 export const GetSubpage = StoreAccessor(s=>()=>{
 	const page = GetPage();
-	return s.main[page].subpage as string || rootPageDefaultChilds[page];
+	return s.main[page]?.subpage as string || rootPageDefaultChilds[page];
 });
