@@ -82,7 +82,7 @@ export class TermDefinitionPanel extends BaseComponentPlus({showID: true} as {te
 		return (
 			<Column sel style={{whiteSpace: "normal"}}>
 				<Row>Term: {term.name}{formsStr}{disambiguationStr}{idStr}</Row>
-				<Row mt={5}>Definition: {term.definition}</Row>
+				<Row mt={5} style={{whiteSpace: "pre-wrap"}}>Definition: {term.definition}</Row>
 				{/* <Row>Details:</Row>
 				<TermDetailsUI baseData={term} creating={false} enabled={/*creatorOrMod*#/ false} style={{padding: 10}}
 					onChange={data=>this.SetState({selectedTerm_newData: data})}/> */}

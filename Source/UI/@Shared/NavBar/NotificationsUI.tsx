@@ -21,7 +21,7 @@ export class NotificationsUI extends BaseComponent<{}, {}> {
 	render() {
 		const messages = store.main.notificationMessages;
 		return (
-			<ScrollView ref={c=>this.scrollView = c} className="NotificationScrollView" scrollVBarStyle={{width: 10}} contentStyle={{willChange: "transform"}}>
+			<ScrollView ref={c=>this.scrollView = c} className="NotificationScrollView" scrollVBarStyle={{width: 10}} style={{height: "100%"}} contentStyle={{willChange: "transform"}}>
 				<Column ct style={{maxWidth: "calc(100% - 10px)", alignItems: "flex-start", filter: "drop-shadow(0px 0px 10px rgba(0,0,0,1))"}}>
 					{messages.map((message, index)=>{
 						return <MessageUI key={index} message={message}/>;
