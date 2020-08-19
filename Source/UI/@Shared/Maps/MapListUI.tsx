@@ -29,7 +29,7 @@ export class MapListUI extends BaseComponentPlus({} as {type: MapType}, {}) {
 		const maps_visible = maps_allOfType.filter(map=>{
 			if (map.visibility == MapVisibility.Unlisted) {
 				const creatorOrMod = IsUserCreatorOrMod(MeID(), map);
-				const mapEditor = map.editorIDs.includes(MeID());
+				const mapEditor = map.editorIDs?.includes(MeID()) ?? false;
 				if (!creatorOrMod && !mapEditor) return false;
 			}
 			return true;
