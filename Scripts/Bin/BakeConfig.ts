@@ -1,7 +1,11 @@
 import {CreateBakedConfigFile} from "vwebapp-framework/Scripts/Bin/BakeConfig";
 import {config} from "../Config";
 
-const pack = require("../../package.json");
+/*import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const pack = require("../../package.json");*/
+
+import pack from "../../package.json";
 
 CreateBakedConfigFile(config, "dev", {
 	version: pack.version,

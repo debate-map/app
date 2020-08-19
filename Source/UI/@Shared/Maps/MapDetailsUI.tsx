@@ -1,9 +1,9 @@
-import {GetErrorMessagesUnderElement, Clone, ToNumber, DEL, CloneWithPrototypes} from "js-vextensions";
+import {GetErrorMessagesUnderElement, Clone, ToNumber, DEL, CloneWithPrototypes, GetEntries} from "js-vextensions";
 import Moment from "moment";
-import {CheckBox, Column, Pre, RowLR, Spinner, TextInput, Row} from "react-vcomponents";
+import {CheckBox, Column, Pre, RowLR, Spinner, TextInput, Row, Select} from "react-vcomponents";
 import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
 import {InfoButton} from "vwebapp-framework";
-import {Map_namePattern, MapType, Map, MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType} from "@debate-map/server-link/Source/Link";
+import {Map_namePattern, MapType, Map, MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType, MapVisibility, IsUserCreatorOrMod, MeID} from "@debate-map/server-link/Source/Link";
 
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
 import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel";
@@ -19,6 +19,7 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 	render() {
 		const {baseData, forNew, enabled, style, onChange} = this.props;
 		const {newData} = this.state;
+		const creatorOrMod = IsUserCreatorOrMod(MeID(), newData);
 		const Change = (..._)=>{
 			if (onChange) onChange(this.GetNewData(), this);
 			this.Update();
@@ -47,6 +48,17 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 					<CheckBox enabled={enabled} style={{width: "100%"}}
 						value={newData.noteInline} onChange={val=>Change(newData.noteInline = val)}/>
 				</RowLR>
+				{newData.type == MapType.Private && !forNew && creatorOrMod &&
+				<RowLR mt={5} splitAt={splitAt} style={{width}}>
+					<Row center>
+						<Pre>Visibility:</Pre>
+						<InfoButton ml={5} text={`
+							Visible: Shown publicly in the list of maps. (the private/public map-types relate to who can edit the map, not who can view)
+							Unlisted: Hidden in map list (other than to map editors and mods), but still accessible through: 1) direct map link, 2) node searches, 3) reading raw db contents. (so not guarantee of privacy)
+						`.AsMultiline(0)}/>
+					</Row>
+					<Select options={GetEntries(MapVisibility)} enabled={enabled} value={newData.visibility} onChange={val=>Change(newData.visibility = val)}/>
+				</RowLR>}
 				{!forNew &&
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Default expand depth:</Pre>
@@ -84,7 +96,7 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 					</RowLR> */}
 				{!forNew && // we don't want to overwhelm new users trying to create their own map...
 				<Column mt={10}>
-					<CheckBox text="Node defaults:" value={newData.nodeDefaults != null} onChange={val=>{
+					<CheckBox text="Node defaults:" enabled={creatorOrMod} value={newData.nodeDefaults != null} onChange={val=>{
 						const defaultNodeDefaults = MapNodeRevision_Defaultable_DefaultsForMap(newData.type);
 						newData.VSet("nodeDefaults", val ? defaultNodeDefaults : DEL);
 						this.Update();

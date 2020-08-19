@@ -2,13 +2,18 @@ import {GetPlayingTimeline, GetSelectedTimeline} from "Store/main/maps/mapStates
 import {GetOpenMapID} from "Store/main";
 import {GetAsync, MergeDBUpdates, GetDocs, WhereOp, MergeDBUpdates_Multi} from "mobx-firelink";
 import {Clone, ToNumber, DEL, E, OmitIfNull, OMIT} from "js-vextensions";
-import {GetNodeL2} from "@debate-map/server-link/Source/Link";
+import {GetNodeL2, GetMaps, UpdateMapDetails, MapVisibility} from "@debate-map/server-link/Source/Link";
 import {DeleteNodeSubtree} from "@debate-map/server-link/Source/Link";
 
 /*
+Basic db-upgrade procedure:
+1) Retrieve list of db-updates by running "dbUpdates = await RR().GetDBUpdatesFor_XXX()" for the target function below, from console.
+2) Make "quick backup" of the data at the paths where those db-updates will be applied, using: RR.MakeQuickBackupForDBUpdates({}, dbUpdates)
+3) Check the quick-backup file downloaded to your computer, to make sure the old and new values look correct.
+4) Apply the given db-updates by running: RR.ApplyDBUpdates({}, dbUpdates)
+
 Reminders:
 * For large updates, usually perform process on subset of data before doing whole thing.
-* Use this before applying db-updates: MakeQuickBackupForDBUpdates() [to restore: RestoreQuickBackup()]
 */
 
 // helpers
@@ -99,5 +104,16 @@ export async function GetDBUpdatesFor_MediaRefactor() {
 	const dbUpdates = MergeDBUpdates_Multi(dbUpdates_revs, dbUpdates_images);
 
 	StoreTempData({revsWithImg, images, dbUpdates_revs, dbUpdates_images, dbUpdates});
+	return dbUpdates;
+}
+
+export async function GetDBUpdatesFor_AddMapVisibilityField() {
+	const maps = await GetAsync(()=>GetMaps());
+	let dbUpdates = {};
+	for (const map of maps) {
+		const command = new UpdateMapDetails({id: map._key, updates: {visibility: MapVisibility.Visible}});
+		await command.Validate_Async();
+		dbUpdates = MergeDBUpdates(dbUpdates, command.GetDBUpdates());
+	}
 	return dbUpdates;
 }

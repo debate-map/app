@@ -11,13 +11,7 @@ import {ES} from "Utils/UI/GlobalStyles";
 import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {runInAction} from "mobx";
-import {MapNodeL3, Polarity,HolderType, GetNodeChildrenL3,GetFillPercent_AtPath,IsMultiPremiseArgument,MapNodeType, MapNodeType_Info,ArgumentType,Map} from "@debate-map/server-link/Source/Link";
-
-
-
-
-
-
+import {MapNodeL3, Polarity, HolderType, GetNodeChildrenL3, GetFillPercent_AtPath, IsMultiPremiseArgument, MapNodeType, MapNodeType_Info, ArgumentType, Map} from "@debate-map/server-link/Source/Link";
 import {NodeChildHolderBox} from "./NodeChildHolderBox";
 import {ArgumentsControlBar} from "../ArgumentsControlBar";
 

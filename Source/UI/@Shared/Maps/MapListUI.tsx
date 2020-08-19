@@ -8,7 +8,7 @@ import {GetSelectedPrivateMap} from "Store/main/private";
 import {GetSelectedPublicMap} from "Store/main/public";
 import {ES} from "Utils/UI/GlobalStyles";
 import {HSLA, Observer, PageContainer} from "vwebapp-framework";
-import {MapType, MeID, GetUserPermissionGroups, CanGetBasicPermissions, GetMaps_Private, GetMaps_Public} from "@debate-map/server-link/Source/Link";
+import {MapType, MeID, GetUserPermissionGroups, CanGetBasicPermissions, GetMaps_Private, GetMaps_Public, MapVisibility, IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
 import {GADDemo} from "../../@GAD/GAD";
 import {ShowAddMapDialog} from "../../@Shared/Maps/AddMapDialog";
 import {MapEntryUI} from "../../@Shared/Maps/MapEntryUI";
@@ -23,12 +23,20 @@ export class MapListUI extends BaseComponentPlus({} as {type: MapType}, {}) {
 	render() {
 		const {type} = this.props;
 		const userID = MeID();
-		const permissions = GetUserPermissionGroups(userID);
+		//const permissions = GetUserPermissionGroups(userID);
 		const storeNode = store.main[type == MapType.Private ? "private" : "public"];
-		const maps = type == MapType.Private ? GetMaps_Private(true) : GetMaps_Public(true);
+		const maps_allOfType = (type == MapType.Private ? GetMaps_Private(true) : GetMaps_Public(true));
+		const maps_visible = maps_allOfType.filter(map=>{
+			if (map.visibility == MapVisibility.Unlisted) {
+				const creatorOrMod = IsUserCreatorOrMod(MeID(), map);
+				const mapEditor = map.editorIDs.includes(MeID());
+				if (!creatorOrMod && !mapEditor) return false;
+			}
+			return true;
+		});
 		// maps = maps.OrderByDescending(a => ToNumber(a.edits, 0));
-		const featuredMaps = maps.filter(a=>a.featured);
-		const mapsToShow = storeNode.listType == "featured" ? featuredMaps : maps;
+		const maps_featured = maps_visible.filter(a=>a.featured);
+		const maps_toShow = storeNode.listType == "featured" ? maps_featured : maps_visible;
 
 		const selectedMap = type == MapType.Private ? GetSelectedPrivateMap() : GetSelectedPublicMap();
 		if (selectedMap) {
@@ -39,7 +47,7 @@ export class MapListUI extends BaseComponentPlus({} as {type: MapType}, {}) {
 			);
 		}
 
-		const listTypeOptions = [{name: `Featured (${featuredMaps.length})`, value: "featured"}, {name: `All (${maps.length})`, value: "all"}];
+		const listTypeOptions = [{name: `Featured (${maps_featured.length})`, value: "featured"}, {name: `All (${maps_visible.length})`, value: "all"}];
 		return (
 			<PageContainer style={{margin: "20px auto 20px auto", padding: 0, background: null}}>
 				<Column className="clickThrough" style={E(
@@ -66,8 +74,8 @@ export class MapListUI extends BaseComponentPlus({} as {type: MapType}, {}) {
 					</Row>
 				</Column>
 				<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1})}>
-					{mapsToShow.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
-					{mapsToShow.map((map, index)=><MapEntryUI key={index} index={index} last={index == mapsToShow.length - 1} map={map}/>)}
+					{maps_toShow.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
+					{maps_toShow.map((map, index)=><MapEntryUI key={index} index={index} last={index == maps_toShow.length - 1} map={map}/>)}
 				</ScrollView>
 			</PageContainer>
 		);

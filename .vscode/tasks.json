@@ -1,5 +1,4 @@
 {
-	// See https://go.microsoft.com/fwlink/?LinkId=733558 for the documentation about the tasks.json format
 	"version": "2.0.0",
 	"tasks": [
 		{
@@ -9,21 +8,15 @@
 			"args": ["--watch", "--project", "."],
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			}
+			"group": "build"
 		},
 		{
 			"label": "#2 webpack",
 			"type": "npm",
-			"script": "dev",
+			"script": "start dev",
 			"problemMatcher": [],
 			"isBackground": true,
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
+			"group": "build"
 		},
 	]
 }

@@ -21,7 +21,7 @@ For recommended setup of your code editor and other tools, see: [Editor setup](#
 ### Running locally
 
 1) Run `tsc` in a console, and keep it running in the background.
-2) Run `npm run dev` in the root project folder. (or `npm run dev-with-stats`)
+2) Run `npm start dev` in the root project folder. (or `npm start dev-with-stats`)
 3) Navigate to `localhost:3005`.
 
 ### Firebase setup + project config (if forking)
@@ -36,8 +36,9 @@ For recommended setup of your code editor and other tools, see: [Editor setup](#
 
 ### Deploying to Firebase
 
-1) Run `tsc` in a console, and keep it running in the background. (this reduces deploy:prod-quick compile times from ~59s to ~32s, by enabling incremental compilation)
-2) Run `npm run deploy:[dev/prod/prod-quick]`. Note that `deploy:prod-quick` time is ~32s, vs ~86s for `deploy:prod` (since the former doesn't use minification and such).
+1) Make sure you have the firebase cli tools installed (`npm install -g firebase-tools`), and that you're logged in.
+2) Run `tsc` in a console, and keep it running in the background. (this reduces deploy:prod-quick compile times from ~59s to ~32s, by enabling incremental compilation)
+3) Run `npm start deploy.[dev/prod/prod-quick]`. Note that `deploy.prod-quick` time is ~32s, vs ~86s for `deploy.prod` (since the former doesn't use minification and such).
 
 ### Editor setup
 
