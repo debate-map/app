@@ -36,7 +36,7 @@ For recommended setup of your code editor and other tools, see: [Editor setup](#
 
 ### Deploying to Firebase
 
-1) Make sure you have the firebase cli tools installed (`npm install -g firebase-tools`), and that you're logged in.
+1) Make sure you have the firebase cli tools installed (`npm install -g firebase-tools`), and that you're logged in (`firebase login`).
 2) Run `tsc` in a console, and keep it running in the background. (this reduces deploy:prod-quick compile times from ~59s to ~32s, by enabling incremental compilation)
 3) Run `npm start deploy.[dev/prod/prod-quick]`. Note that `deploy.prod-quick` time is ~32s, vs ~86s for `deploy.prod` (since the former doesn't use minification and such).
 
