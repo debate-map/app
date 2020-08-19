@@ -58,10 +58,12 @@ if (supportedBrowsers.indexOf(browser) == -1 && !isBot) {
 
 // special, early codes
 // mwahahaha!! React can no longer freeze its objects, so we can do as we please
-/* Object.freeze = obj => {
+/*const fakeFrozenObjects = new WeakSet();
+Object.freeze = obj=>{
+	fakeFrozenObjects.add(obj);
 	return obj;
 };
-Object.isFrozen = obj => true; */
+Object.isFrozen = obj=>fakeFrozenObjects.has(obj);*/
 
 // set this up, so we can see Googlebot errors! (in "Fetch as Google" panel)
 if (isBot) {
