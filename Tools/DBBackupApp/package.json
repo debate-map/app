@@ -16,7 +16,7 @@
     "axios": "^0.18.0",
     "dateformat": "^3.0.3",
     "express": "^4.16.4",
-    "googleapis": "^34.0.0"
+    "googleapis": "^59.0.0"
   },
   "devDependencies": {
     "prettier": "^1.14.3"
