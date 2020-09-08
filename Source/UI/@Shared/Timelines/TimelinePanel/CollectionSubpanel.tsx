@@ -8,11 +8,8 @@ import {store} from "Store";
 import {Observer} from "vwebapp-framework";
 import {runInAction} from "mobx";
 import {E} from "js-vextensions";
-import {GetMapTimelines} from "@debate-map/server-link/Source/Link";
+import {GetMapTimelines, DeleteTimeline, MeID, Map} from "@debate-map/server-link/Source/Link";
 import {ES} from "Utils/UI/GlobalStyles";
-import {DeleteTimeline} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {Map} from "@debate-map/server-link/Source/Link";
 
 @Observer
 export class CollectionSubpanel extends BaseComponentPlus({} as {map: Map}, {}) {
@@ -25,7 +22,7 @@ export class CollectionSubpanel extends BaseComponentPlus({} as {map: Map}, {}) 
 		return (
 			<Row style={{height: 40, padding: 10}}>
 				<DropDown ref={c=>this.timelineSelect = c}>
-					<DropDownTrigger><Button text={timeline ? timeline.name : "[none]"} /></DropDownTrigger>
+					<DropDownTrigger><Button text={timeline ? timeline.name : "[none]"}/></DropDownTrigger>
 					<DropDownContent style={{left: 0, padding: null, background: null, borderRadius: null, zIndex: 1}}>
 						<Row style={{alignItems: "flex-start"}}>
 							<Column style={{width: 600}}>
@@ -44,7 +41,7 @@ export class CollectionSubpanel extends BaseComponentPlus({} as {map: Map}, {}) 
 												this.timelineSelect.Hide();
 											}}>
 											<Row>
-												<Pre>{timeline.name} </Pre><span style={{fontSize: 11}}>(id: {timeline._key})</span>
+												<Pre>{timeline.name}</Pre><span style={{fontSize: 11}}>(id: {timeline._key})</span>
 											</Row>
 										</Column>
 									))}

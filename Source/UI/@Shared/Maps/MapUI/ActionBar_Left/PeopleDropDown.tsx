@@ -1,16 +1,20 @@
 import {CloneWithPrototypes} from "js-vextensions";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput} from "react-vcomponents";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput, Pre} from "react-vcomponents";
 import {BaseComponent} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {GADDemo} from "UI/@GAD/GAD";
 import {Button_GAD} from "UI/@GAD/GADButton";
-import {InfoButton} from "vwebapp-framework";
+import {InfoButton, RunInAction_Set, Observer} from "vwebapp-framework";
 import {GetMapEditorIDs, GetMapEditors} from "@debate-map/server-link/Source/Link";
 import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";
 import {UpdateMapDetails} from "@debate-map/server-link/Source/Link";
 import {Map} from "@debate-map/server-link/Source/Link";
+import {UserPicker} from "UI/@Shared/Users/UserPicker";
 
+const userIDPlaceholder = "[user-id placeholder]";
+
+@Observer
 export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 	render() {
 		const {map} = this.props;
@@ -30,7 +34,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 						{creatorOrMod &&
 						<Button ml="auto" text="Add editor" onClick={()=>{
 							const newEditors = CloneWithPrototypes(map.editorIDs || []);
-							newEditors.push("(enter user-id here)");
+							newEditors.push(userIDPlaceholder);
 							new UpdateMapDetails({id: map._key, updates: {editorIDs: newEditors}}).Run();
 						}}/>}
 					</Row>
@@ -39,14 +43,15 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 						const displayName = editor?.displayName ?? "n/a";
 						return (
 							<Row key={index} mt={5}>
-								<TextInput delayChangeTillDefocus={true} style={{width: 250}} editable={creatorOrMod} value={editorID} onChange={val=>{
+								<UserPicker value={editorID} onChange={val=> {
 									const newEditors = CloneWithPrototypes(map.editorIDs);
 									newEditors[index] = val;
 									new UpdateMapDetails({id: map._key, updates: {editorIDs: newEditors}}).Run();
-								}}/>
-								<Text ml={5}>({displayName})</Text>
+								}}>
+									<Button enabled={creatorOrMod} text={editorID != userIDPlaceholder ? `${displayName} (id: ${editorID})` : "(click to select user)"} style={{width: "100%"}}/>
+								</UserPicker>
 								{creatorOrMod &&
-								<Button ml="auto" text="X" onClick={()=>{
+								<Button ml={5} text="X" onClick={()=>{
 									ShowMessageBox({
 										title: `Remove editor "${displayName}"`, cancelButton: true,
 										message: `Remove editor "${displayName}" (id: ${editorID})?`,

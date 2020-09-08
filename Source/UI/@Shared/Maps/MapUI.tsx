@@ -8,8 +8,6 @@ import {ScrollView} from "react-vscrollview";
 import {TimelinePlayerUI} from "UI/@Shared/Timelines/TimelinePlayerUI";
 import {GetDistanceBetweenRectAndPoint, inFirefox, GetScreenRect, StoreAction, Observer} from "vwebapp-framework";
 import {GADDemo} from "UI/@GAD/GAD";
-import {ActionBar_Left_GAD} from "UI/@GAD/ActionBar_Left_GAD";
-import {ActionBar_Right_GAD} from "UI/@GAD/ActionBar_Right_GAD";
 import {store} from "Store";
 import {GetNodeView, GetMapView, GetSelectedNodePath, GetViewOffset, GetFocusedNodePath, GetNodeViewsAlongPath, ACTMapNodeSelect} from "Store/main/maps/mapViews/$mapView";
 import {GetTimelinePanelOpen, GetPlayingTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState";
@@ -145,14 +143,12 @@ export class MapUI extends BaseComponentPlus({
 		const timelinePanelOpen = map ? GetTimelinePanelOpen(map._key) : null;
 		const playingTimeline = GetPlayingTimeline(map ? map._key : null);
 
-		const ActionBar_Left_Final = GADDemo ? ActionBar_Left_GAD : ActionBar_Left;
-		const ActionBar_Right_Final = GADDemo ? ActionBar_Right_GAD : ActionBar_Right;
 		return (
 			<Column style={ES({flex: 1})}>
 				{!withinPage &&
-					<ActionBar_Left_Final map={map} subNavBarWidth={subNavBarWidth}/>}
+					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth}/>}
 				{!withinPage &&
-					<ActionBar_Right_Final map={map} subNavBarWidth={subNavBarWidth}/>}
+					<ActionBar_Right map={map} subNavBarWidth={subNavBarWidth}/>}
 				{/* !withinPage &&
 					<TimelinePlayerUI map={map}/> */}
 				{/*! withinPage &&

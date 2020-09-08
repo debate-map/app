@@ -1,12 +1,13 @@
-import {FromJSON, GetEntries, ToNumber} from "js-vextensions";
+import {FromJSON, GetEntries, ToNumber, E} from "js-vextensions";
 import {Pre, Row, Select} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {store} from "Store";
 import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState";
 import {runInAction} from "mobx";
-import {Observer} from "vwebapp-framework";
+import {Observer, HSLA} from "vwebapp-framework";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {Map,WeightingType} from "@debate-map/server-link/Source/Link";
+import {Map, WeightingType} from "@debate-map/server-link/Source/Link";
+import {GADDemo} from "UI/@GAD/GAD";
 import {colors} from "../../../../Utils/UI/GlobalStyles";
 import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown";
 
@@ -35,27 +36,38 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 				position: "absolute", zIndex: 1, left: `calc(50% + ${subNavBarWidth / 2}px)`, right: 0, top: 0, textAlign: "center",
 				// background: "rgba(0,0,0,.5)", boxShadow: "3px 3px 7px rgba(0,0,0,.07)",
 			}}>
-				<Row style={{
-					justifyContent: "flex-end", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
-					width: "100%", height: 30, borderRadius: "0 0 0 10px",
-				}}>
-					<Row center mr={5}>
-						<Pre>Show changes since: </Pre>
-						<Select options={changesSince_options} value={`${showChangesSince_type}_${showChangesSince_visitOffset}`} onChange={val=>{
-							runInAction("ActionBar_Right.ShowChangesSince.onChange", ()=>{
-								const parts = val.split("_");
-								mapState.showChangesSince_type = ToNumber(parts[0]);
-								mapState.showChangesSince_visitOffset = FromJSON(parts[1]);
-							});
-						}}/>
-						<Pre ml={5}>Weighting: </Pre>
-						<Select options={GetEntries(WeightingType, name=>({ReasonScore: "Reason score"})[name] || name)} value={weighting} onChange={val=>{
-							runInAction("ActionBar_Right.Weighting.onChange", ()=>{
-								store.main.maps.weighting = val;
-							});
-						}}/>
-					</Row>
-					<ShareDropDown map={map}/>
+				<Row style={E(
+					{
+						justifyContent: "flex-end", background: "rgba(0,0,0,.7)", boxShadow: colors.navBarBoxShadow,
+						width: "100%", height: GADDemo ? 40 : 30, borderRadius: "0 0 0 10px",
+					},
+					GADDemo && {
+						background: HSLA(0, 0, 1, 1),
+						boxShadow: "rgba(100, 100, 100, .3) 0px 0px 3px, rgba(70,70,70,.5) 0px 0px 150px",
+						// boxShadow: null,
+						// filter: 'drop-shadow(rgba(0,0,0,.5) 0px 0px 10px)',
+					},
+				)}>
+					{!GADDemo &&
+					<>
+						<Row center mr={5}>
+							<Pre>Show changes since: </Pre>
+							<Select options={changesSince_options} value={`${showChangesSince_type}_${showChangesSince_visitOffset}`} onChange={val=>{
+								runInAction("ActionBar_Right.ShowChangesSince.onChange", ()=>{
+									const parts = val.split("_");
+									mapState.showChangesSince_type = ToNumber(parts[0]);
+									mapState.showChangesSince_visitOffset = FromJSON(parts[1]);
+								});
+							}}/>
+							<Pre ml={5}>Weighting: </Pre>
+							<Select options={GetEntries(WeightingType, name=>({ReasonScore: "Reason score"})[name] || name)} value={weighting} onChange={val=>{
+								runInAction("ActionBar_Right.Weighting.onChange", ()=>{
+									store.main.maps.weighting = val;
+								});
+							}}/>
+						</Row>
+						<ShareDropDown map={map}/>
+					</>}
 					<LayoutDropDown map={map}/>
 				</Row>
 			</nav>
