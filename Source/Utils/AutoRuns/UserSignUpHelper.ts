@@ -1,11 +1,6 @@
 import {autorun} from "mobx";
-import {store} from "Store";
 import {DBPath, GetAsync, GetDoc} from "mobx-firelink";
-import {fire} from "@debate-map/server-link/Source/Link";
-import {GetUser} from "@debate-map/server-link/Source/Link";
-import {GetUser_Private} from "@debate-map/server-link/Source/Link";
-import {SetUserData} from "@debate-map/server-link/Source/Link";
-import {SetUserData_Private} from "@debate-map/server-link/Source/Link";
+import {fire, GetUser, GetUser_Private, SetUserData, SetUserData_Private} from "@debate-map/server-link/Source/Link";
 
 let lastUserInfo;
 autorun(()=>{
@@ -17,7 +12,11 @@ autorun(()=>{
 	}
 }, {name: "UserSignUpHelper"});
 
+export let signUpInitInProgress = false;
 async function RunSignUpInitIfNotYetRun(userID: string) {
+	if (signUpInitInProgress) return; // avoid calling twice in a row (fire.userInfo can apparently change quickly, from firebase.auth().onAuthStateChanged() double-trigger)
+	signUpInitInProgress = true;
+
 	//const user = await GetAsync(()=>GetDoc({undefinedForLoading: true}, a=>a.users.get(userID)));
 	const user = await GetAsync(()=>GetUser(userID));
 	if (user == null) {
@@ -42,4 +41,5 @@ async function RunSignUpInitIfNotYetRun(userID: string) {
 	}
 
 	// Raven.setUserContext(action["auth"].Including("uid", "displayName", "email"));
+	signUpInitInProgress = false;
 }
