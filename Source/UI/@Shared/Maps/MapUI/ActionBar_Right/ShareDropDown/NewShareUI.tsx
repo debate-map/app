@@ -90,7 +90,7 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 				</Row>
 				<RowLR mt={5} splitAt={80}>
 					<Text>Name:</Text>
-					<TextInput delayChangeTillDefocus={true} enabled={currentShare != null} style={{flex: 1}} value={currentShare?.name ?? ""} onChange={val=>{
+					<TextInput enabled={currentShare != null} style={{flex: 1}} value={currentShare?.name ?? ""} onChange={val=>{
 						new UpdateShare({id: currentShare._key, updates: {name: val}}).Run();
 					}}/>
 				</RowLR>

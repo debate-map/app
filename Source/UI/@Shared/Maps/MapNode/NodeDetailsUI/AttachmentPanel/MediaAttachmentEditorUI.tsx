@@ -34,7 +34,7 @@ export class MediaAttachmentEditorUI extends BaseComponent<Props, {newData: Medi
 		return (
 			<Column style={style}>
 				<Row>
-					<TextInput placeholder="Media ID or URL..." enabled={enabled} delayChangeTillDefocus={true} style={{width: "100%", borderRadius: "5px 5px 0 0"}}
+					<TextInput placeholder="Media ID or URL..." enabled={enabled} style={{width: "100%", borderRadius: "5px 5px 0 0"}}
 						value={newData.id} onChange={val=>Change(newData.id = val)}/>
 				</Row>
 				<Row style={{position: "relative", flex: 1}}>

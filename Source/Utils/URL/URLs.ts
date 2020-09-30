@@ -287,7 +287,7 @@ export const GetNewURL = StoreAccessor(s=>(includeMapViewStr = true)=>{
 	newURL.pathNodes.push(page);
 
 	var subpage = GetSubpage();
-	if (pageTree.children[page]?.simpleSubpages) {
+	if (pageTree.children[page]?.simpleSubpages && subpage) {
 		newURL.pathNodes.push(subpage);
 	}
 

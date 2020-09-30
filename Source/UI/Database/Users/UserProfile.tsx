@@ -8,12 +8,12 @@ import {Fragment} from "react";
 import {PropNameToTitle} from "Utils/General/Others";
 import {ScrollView} from "react-vscrollview";
 import {E} from "js-vextensions";
-import {MeID, GetUser} from "@debate-map/server-link/Source/Link";
-import {GetUser_Private} from "@debate-map/server-link/Source/Link";
-import {GetUserPermissionGroups} from "@debate-map/server-link/Source/Link";
-import {SetUserData} from "@debate-map/server-link/Source/Link";
-import {SetUserData_Private} from "@debate-map/server-link/Source/Link";
-import {User} from "@debate-map/server-link/Source/Link";
+import {MeID, GetUser,GetUser_Private,GetUserPermissionGroups,SetUserData,SetUserData_Private,User} from "@debate-map/server-link/Source/Link";
+
+
+
+
+
 
 @Observer
 export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, {}) {
@@ -94,7 +94,7 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, 
 						</Row>
 						<Row mt={5}>
 							<Pre>URL: </Pre>
-							<TextInput delayChangeTillDefocus={true} style={ES({flex: 1})}
+							<TextInput style={ES({flex: 1})}
 								value={profileUser_p.backgroundCustom_url} onChange={val=>{
 									new SetUserData_Private({id: profileUser._key, updates: {backgroundCustom_url: val}}).Run();
 								}}/>

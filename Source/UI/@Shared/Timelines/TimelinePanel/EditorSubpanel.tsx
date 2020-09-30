@@ -78,7 +78,7 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 					{timeline.videoID != null &&
 					<Row center mb={7} p="7px 10px" style={{background: "rgba(0,0,0,.7)", borderRadius: 10, border: "1px solid rgba(255,255,255,.15)"}}>
 						<Pre>Video ID: </Pre>
-						<TextInput value={timeline.videoID} delayChangeTillDefocus={true} enabled={creatorOrMod} onChange={val=>{
+						<TextInput value={timeline.videoID} enabled={creatorOrMod} onChange={val=>{
 							new UpdateTimeline({id: timeline._key, updates: {videoID: val}}).Run();
 						}}/>
 						<CheckBox ml={5} text="Start: " value={timeline.videoStartTime != null} enabled={creatorOrMod} onChange={val=>{
@@ -89,7 +89,7 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 							}
 						}}/>
 						<TimeSpanInput mr={5} largeUnit="minute" smallUnit="second" style={{width: 60}}
-							enabled={creatorOrMod && timeline.videoStartTime != null} delayChangeTillDefocus={true} value={timeline.videoStartTime}
+							enabled={creatorOrMod && timeline.videoStartTime != null} value={timeline.videoStartTime}
 							onChange={val=>new UpdateTimeline({id: timeline._key, updates: {videoStartTime: val}}).Run()}/>
 						<Row center>
 							<Text>Height</Text>
@@ -101,7 +101,7 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 							`.AsMultiline(0)}/>
 							<Text>: </Text>
 						</Row>
-						<Spinner min={0} max={100} step={0.01} delayChangeTillDefocus={true} style={{width: 62}} value={(timeline.videoHeightVSWidthPercent * 100).RoundTo(0.01)} enabled={creatorOrMod} onChange={val=>{
+						<Spinner min={0} max={100} step={0.01} style={{width: 62}} value={(timeline.videoHeightVSWidthPercent * 100).RoundTo(0.01)} enabled={creatorOrMod} onChange={val=>{
 							new UpdateTimeline({id: timeline._key, updates: {videoHeightVSWidthPercent: (val / 100).RoundTo(0.0001)}}).Run();
 						}}/>
 						<Pre>%</Pre>

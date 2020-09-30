@@ -109,7 +109,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 										}
 									}}/>
 									<TimeSpanInput mr={5} largeUnit="minute" smallUnit="second" style={{width: 60}}
-										enabled={creatorOrMod && step.videoTime != null} delayChangeTillDefocus={true}
+										enabled={creatorOrMod && step.videoTime != null}
 										value={step.videoTime} onChange={val=>new UpdateTimelineStep({stepID: step._key, stepUpdates: {videoTime: val}}).Run()}/>
 								</>}
 							{/* <Pre>Speaker: </Pre>
@@ -143,7 +143,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 						</VMenuStub>}
 					</Row>
 					{/* <Row ml={5} style={{ minHeight: 20 }}>{step.message}</Row> */}
-					<TextArea /* {...{ useCacheForDOMMeasurements: true } as any} */ autoSize={true} delayChangeTillDefocus={true} style={{background: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.7)", padding: 5, outline: "none"}}
+					<TextArea /* {...{ useCacheForDOMMeasurements: true } as any} */ autoSize={true} style={{background: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.7)", padding: 5, outline: "none"}}
 						value={step.message} enabled={creatorOrMod}
 						onChange={val=>{
 							new UpdateTimelineStep({stepID: step._key, stepUpdates: {message: val}}).Run();

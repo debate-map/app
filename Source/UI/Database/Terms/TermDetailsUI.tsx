@@ -39,7 +39,7 @@ export class TermDetailsUI extends BaseComponentPlus(
 					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Text>Name:</Text>
-					<TextInput pattern={Term_nameFormat} required delayChangeTillDefocus={true}
+					<TextInput pattern={Term_nameFormat} required
 						enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>{
 							const lastName = newData.name;
@@ -54,7 +54,7 @@ export class TermDetailsUI extends BaseComponentPlus(
 						<InfoButton ml={5} text="Various forms of the term (as noun, adjective, etc). Used to add hover-based definition popups (for any forms found) to nodes that use this term as context."/>
 					</Row>
 					<Text>{newData.forms[0]}, </Text>
-					<TextInput enabled={enabled} delayChangeTillDefocus={true} style={{width: "100%"}}
+					<TextInput enabled={enabled} style={{width: "100%"}}
 						value={newData.forms.slice(1).join(", ")} onChange={val=>{
 							const otherForms = val.toLowerCase().split(",").map(a=>a.trim()).filter(a=>a.length);
 							newData.forms = [newData.name.toLowerCase()].concat(otherForms.Except(newData.name));
