@@ -2,7 +2,7 @@ import {CollectionReference, Query} from "@firebase/firestore-types";
 import {SleepAsync, Vector2, WaitXThenRun, E} from "js-vextensions";
 import keycode from "keycode";
 import Moment from "moment";
-import {Button, Column, Pre, Row, TextInput} from "react-vcomponents";
+import {Button, Column, Pre, Row, TextArea, TextInput} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {ScrollView} from "react-vscrollview";
 import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O} from "vwebapp-framework";
@@ -11,37 +11,33 @@ import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView";
 import {runInAction, flow} from "mobx";
-import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu";
-import {MapUI} from "../Maps/MapUI";
 import {Validate, GetAsync, DBPath, UUID} from "mobx-firelink";
-import {GetNodeRevision, MapView, MapNodeView} from "@debate-map/server-link/Source/Link";
-import {GetNode} from "@debate-map/server-link/Source/Link";
-import {fire} from "@debate-map/server-link/Source/Link";
-import {GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
-import {GetUser} from "@debate-map/server-link/Source/Link";
-import {GetRootNodeID} from "@debate-map/server-link/Source/Link";
-import {MapNodeType_Info} from "@debate-map/server-link/Source/Link";
-import {GetMap} from "@debate-map/server-link/Source/Link";
-import {MapType} from "@debate-map/server-link/Source/Link";
-import {GetSearchTerms_Advanced} from "@debate-map/server-link/Source/Link";
+import {GetNodeRevision, MapView, MapNodeView, GetNode, fire, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, MapType, GetSearchTerms_Advanced} from "@debate-map/server-link/Source/Link";
+
+
 import {GetNodeColor} from "Store/firebase_ext/nodes";
+import {MapUI} from "../Maps/MapUI";
+import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu";
 
 const columnWidths = [0.68, 0.2, 0.12];
 
 @Observer
 export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr: string}) {
+	ClearResults() {
+		runInAction("SearchPanel.ClearResults", ()=>{
+			store.main.search.searchResults_partialTerms = [];
+			store.main.search.searchResults_nodeRevisionIDs = null;
+		});
+	}
 	async PerformSearch() {
+		// first clear the old results
+		this.ClearResults();
+
 		let {queryStr} = this.stash;
 		const unrestricted = queryStr.endsWith(" /unrestricted");
 		if (unrestricted) {
 			queryStr = queryStr.slice(0, -" /unrestricted".length);
 		}
-
-		// first clear the old results
-		runInAction("SearchPanel.PerformSearch_part1", ()=>{
-			store.main.search.searchResults_partialTerms = [];
-			store.main.search.searchResults_nodeRevisionIDs = null;
-		});
 
 		if (Validate("UUID", queryStr) == null) {
 			const nodeRevisionMatch = await GetAsync(()=>GetNodeRevision(queryStr));
@@ -61,7 +57,9 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 		}
 
 		const searchTerms = GetSearchTerms_Advanced(queryStr);
+		// if no whole-terms, and not unrestricted mode, cancel search (db would give too many results)
 		if (searchTerms.wholeTerms.length == 0 && !unrestricted) return;
+
 		let query = fire.subs.firestoreDB.collection(DBPath({}, "nodeRevisions")) as CollectionReference | Query;
 		for (const term of searchTerms.wholeTerms) {
 			query = query.where(`titles.allTerms.${term}`, "==", true);
@@ -86,7 +84,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 			for (const term of searchResults_partialTerms) {
 				results_nodeRevisions = results_nodeRevisions.filter(a=>{
 					const titles = GetAllNodeRevisionTitles(a);
-					return titles.Any(a=>a.toLowerCase().includes(term));
+					return titles.every(a=>a.toLowerCase().includes(term));
 				});
 			}
 		}
@@ -99,6 +97,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 			<Column style={{width: 750, padding: 5, background: "rgba(0,0,0,.7)", borderRadius: "0 0 0 5px"}}>
 				<Row center>
 					<TextInput style={{flex: 1}} value={queryStr}
+						instant // since enter-key needs value pre-blur
 						onChange={val=>{
 							runInAction("SearchPanel.searchInput.onChange", ()=>store.main.search.queryStr = val);
 						}}

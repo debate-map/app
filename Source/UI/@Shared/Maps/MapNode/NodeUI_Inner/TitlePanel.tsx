@@ -2,24 +2,14 @@ import {Assert, Clone, E} from "js-vextensions";
 import keycode from "keycode";
 import _ from "lodash";
 import {runInAction} from "mobx";
-import {Button, Pre, Row, TextArea} from "react-vcomponents";
+import {Button, Pre, Row, TextArea, TextInput} from "react-vcomponents";
 import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "react-vextensions";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView";
 import {ES} from "Utils/UI/GlobalStyles";
-import {AddNodeRevision} from "@debate-map/server-link/Source/Link";
-import {GetParentNode, IsNodeSubnode} from "@debate-map/server-link/Source/Link";
-import {GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings} from "@debate-map/server-link/Source/Link";
-import {GetEquationStepNumber} from "@debate-map/server-link/Source/Link";
-import {ClaimForm, MapNodeL2} from "@debate-map/server-link/Source/Link";
-import {MapNodeRevision_titlePattern} from "@debate-map/server-link/Source/Link";
-import {MapNodeType} from "@debate-map/server-link/Source/Link";
-import {GetTermsAttached} from "@debate-map/server-link/Source/Link";
-import {Term} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {CanEditNode} from "@debate-map/server-link/Source/Link";
+import {AddNodeRevision, GetParentNode, IsNodeSubnode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, CanEditNode, Map} from "@debate-map/server-link/Source/Link";
 import {InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, VReactMarkdown_Remarkable} from "vwebapp-framework";
-import {Map} from "@debate-map/server-link/Source/Link";
+import React from "react";
 import {NodeMathUI} from "../NodeMathUI";
 import {NodeUI_Inner} from "../NodeUI_Inner";
 import {TermPlaceholder} from "./TermPlaceholder";
@@ -155,19 +145,20 @@ export class TitlePanel extends BaseComponentPlus(
 
 		return (
 			// <Row style={{position: "relative"}}>
-			<div {...FilterOutUnrecognizedProps(rest, "div")} style={E(
-				{
-					position: "relative", cursor: "pointer", fontSize: GetFontSizeForNode(node, isSubnode),
-					marginTop: !latex && GetSegmentsForTerms(newTitle, termsToSearchFor).length > 1 ? -2 : 0, // if has terms in text, bump up a bit (to offset bump-down from <sup> elements)
-				},
-				style,
-			)}
-			onClick={e=>IsDoubleClick(e) && this.OnDoubleClick()}
-		>
+			<div {...FilterOutUnrecognizedProps(rest, "div")}
+				style={E(
+					{
+						position: "relative", cursor: "pointer", fontSize: GetFontSizeForNode(node, isSubnode),
+						marginTop: !latex && GetSegmentsForTerms(newTitle, termsToSearchFor).length > 1 ? -2 : 0, // if has terms in text, bump up a bit (to offset bump-down from <sup> elements)
+					},
+					style,
+				)}
+				onClick={e=>void IsDoubleClick(e) && this.OnDoubleClick()}
+			>
 				{equationNumber != null &&
 					<Pre>{equationNumber}) </Pre>}
 				{!editing &&
-					<span style={E(
+					<span style={ES(
 						{position: "relative", whiteSpace: "initial"},
 						isSubnode && {margin: "4px 0 1px 0"},
 						missingTitleStrings.Contains(newTitle) && {color: "rgba(255,255,255,.3)"},
@@ -182,6 +173,7 @@ export class TitlePanel extends BaseComponentPlus(
 					)}>
 						{!applyingEdit &&
 							<TextArea required={true} pattern={MapNodeRevision_titlePattern} allowLineBreaks={false} autoSize={true} style={ES({flex: 1})}
+								instant // must be instant-apply, since rb-dnd blocks button-triggered on-blur
 								ref={a=>a && a.DOM_HTML.focus()}
 								onKeyDown={e=>{
 									if (e.keyCode == keycode.codes.esc) {

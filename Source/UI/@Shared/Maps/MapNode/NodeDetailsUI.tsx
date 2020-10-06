@@ -5,16 +5,13 @@ import {BaseComponentPlus, GetDOM, RenderSource} from "react-vextensions";
 import {store} from "Store";
 import {Observer} from "vwebapp-framework";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
-import {MapNode, ChildEntry, MapNodeL3,MapNodeRevision,AsNodeL1, AsNodeL2,GetAttachmentType} from "@debate-map/server-link/Source/Link";
+import {MapNode, ChildEntry, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType} from "@debate-map/server-link/Source/Link";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel";
 import {TextPanel} from "./NodeDetailsUI/TextPanel";
 import {QuoteInfoEditorUI} from "./NodeDetailsUI/AttachmentPanel/QuoteInfoEditorUI";
 import {TagsPanel} from "./NodeUI/Panels/TagsPanel";
-
-
-
 
 type Props = {
 	baseData: MapNode,

@@ -1,18 +1,23 @@
+import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, IsNodeSubnode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, RatingType, ratingTypes, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "@debate-map/server-link/Source/Link";
 import chroma, {Color} from "chroma-js";
 import classNames from "classnames";
-import {DoNothing, Timer, ToJSON, Vector2, VRect, WaitXThenRun, ToNumber, E, DEL} from "js-vextensions";
+import {DEL, DoNothing, E, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "js-vextensions";
+import {runInAction} from "mobx";
+import {SlicePath} from "mobx-firelink";
+import React from "react";
 import {Draggable} from "react-beautiful-dnd";
 import ReactDOM from "react-dom";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "react-vextensions";
-import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
-import {DragInfo, EB_ShowError, EB_StoreError, HSLA, IsDoubleClick, Observer} from "vwebapp-framework";
-import {DraggableInfo} from "Utils/UI/DNDStructures";
-import {GetTimeFromWhichToShowChangedNodes, GetNodeRevealHighlightTime, GetTimeSinceNodeRevealedByPlayingTimeline} from "Store/main/maps/mapStates/$mapState";
-import {GetPathNodeIDs, ACTMapNodeSelect, ACTMapNodeExpandedSet, GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView";
 import {store} from "Store";
-import {runInAction} from "mobx";
-import {SlicePath} from "mobx-firelink";
+import {GetNodeColor} from "Store/firebase_ext/nodes";
 import {GetLastAcknowledgementTime} from "Store/main/maps";
+import {GetNodeRevealHighlightTime, GetTimeFromWhichToShowChangedNodes, GetTimeSinceNodeRevealedByPlayingTimeline} from "Store/main/maps/mapStates/$mapState";
+import {ACTMapNodeExpandedSet, ACTMapNodeSelect, GetNodeView, GetNodeViewsAlongPath, GetPathNodeIDs} from "Store/main/maps/mapViews/$mapView";
+import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
+import {DraggableInfo} from "Utils/UI/DNDStructures";
+import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General";
+import {zIndexes} from "Utils/UI/ZIndexes";
+import {DragInfo, EB_ShowError, EB_StoreError, HSLA, IsDoubleClick, Observer} from "vwebapp-framework";
 import {ExpandableBox} from "./ExpandableBox";
 import {DefinitionsPanel} from "./NodeUI/Panels/DefinitionsPanel";
 import {DetailsPanel} from "./NodeUI/Panels/DetailsPanel";
@@ -27,20 +32,6 @@ import {SubPanel} from "./NodeUI_Inner/SubPanel";
 import {TitlePanel} from "./NodeUI_Inner/TitlePanel";
 import {MapNodeUI_LeftBox} from "./NodeUI_LeftBox";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu";
-import {zIndexes} from "Utils/UI/ZIndexes";
-import {MapNodeL3, ClaimForm} from "@debate-map/server-link/Source/Link";
-import {ChangeType, GetChangeTypeOutlineColor} from "@debate-map/server-link/Source/Link";
-import {GetNodeL3, IsPremiseOfSinglePremiseArgument, GetMainRatingType, GetNodeForm, GetPaddingForNode} from "@debate-map/server-link/Source/Link";
-import {WeightingType, GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings} from "@debate-map/server-link/Source/Link";
-import {MapNodeType, MapNodeType_Info} from "@debate-map/server-link/Source/Link";
-import {RS_GetAllValues, ReasonScoreValues_RSPrefix, RS_CalculateTruthScoreComposite, RS_CalculateTruthScore} from "@debate-map/server-link/Source/Link";
-import {IsNodeSubnode} from "@debate-map/server-link/Source/Link";
-import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General";
-import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {ratingTypes, RatingType} from "@debate-map/server-link/Source/Link";
-import {Map} from "@debate-map/server-link/Source/Link";
-import {GetNodeColor} from "Store/firebase_ext/nodes";
 
 // drag and drop
 // ==========
@@ -396,7 +387,7 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 		backgroundColor: chroma.Color,
 	},
 	{hoverTermID: null as string},
-) {
+	) {
 	panelsOpened = new Set();
 	componentDidCatch(message, info) { EB_StoreError(this, message, info); }
 	render() {
@@ -409,7 +400,7 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 		const nodeView = GetNodeView(map._key, path);
 
 		this.panelsOpened.add(panelToShow);
-		const renderPanel = (panelName: string, uiFunc: (show: boolean)=>JSX.Element)=> {
+		const renderPanel = (panelName: string, uiFunc: (show: boolean)=>JSX.Element)=>{
 			if (!this.panelsOpened.has(panelName)) return null;
 			return uiFunc(panelToShow == panelName);
 		};
@@ -431,8 +422,7 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 					const ratings = GetRatings(node._key, panelToShow as RatingType);
 					return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 				})()}
-				{renderPanel("definitions", show=>
-					<DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{show, node, path, hoverTermID}}
+				{renderPanel("definitions", show=><DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{show, node, path, hoverTermID}}
 						openTermID={nodeView?.openTermID}
 						onHoverTerm={termID=>onTermHover(termID)}
 						onClickTerm={termID=>runInAction("NodeUI_Inner_onClickTerm", ()=>nodeView.openTermID = termID)}/>)}

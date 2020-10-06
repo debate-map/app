@@ -9,21 +9,19 @@ import {logTypes} from "Utils/General/Logging";
 import {GetTimeFromWhichToShowChangedNodes, GetPlayingTimeline, GetPlayingTimelineStepIndex, GetPlayingTimelineRevealNodes_UpToAppliedStep} from "Store/main/maps/mapStates/$mapState";
 import {SlicePath} from "mobx-firelink";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
-import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker";
-import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker";
-import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer";
-import {NodeUI_Inner} from "./NodeUI_Inner";
-import {NodeUI_Menu_Stub} from "./NodeUI_Menu";
-import {Map} from "@debate-map/server-link/Source/Link";
-import {MapNodeL3, Polarity, AccessLevel} from "@debate-map/server-link/Source/Link";
-import {IsNodeL2, IsNodeL3, IsSinglePremiseArgument, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "@debate-map/server-link/Source/Link";
-import {GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsRootNode} from "@debate-map/server-link/Source/Link";
+import {Map, MapNodeL3, Polarity, AccessLevel, IsNodeL2, IsNodeL3, IsSinglePremiseArgument, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsRootNode, ChangeType, MapNodeType, GetSubnodesInEnabledLayersEnhanced, MeID} from "@debate-map/server-link/Source/Link";
+
+
 import {GetNodeChildrenL3_Advanced} from "Store/firebase_ext/nodes";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/firebase_ext/mapNodeEditTimes";
-import {ChangeType} from "@debate-map/server-link/Source/Link";
-import {MapNodeType} from "@debate-map/server-link/Source/Link";
-import {GetSubnodesInEnabledLayersEnhanced} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
+
+
+import {ES} from "Utils/UI/GlobalStyles";
+import {NodeUI_Menu_Stub} from "./NodeUI_Menu";
+import {NodeUI_Inner} from "./NodeUI_Inner";
+import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer";
+import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker";
+import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker";
 
 // @ExpensiveComponent
 @WarnOfTransientObjectProps
@@ -235,7 +233,7 @@ export class NodeUI extends BaseComponentPlus(
 				{position: "relative", display: "flex", alignItems: "flex-start", padding: "5px 0", opacity: widthOverride != 0 ? 1 : 0},
 				style,
 			)}>
-				<div className="innerBoxAndSuchHolder clickThrough" style={E(
+				<div className="innerBoxAndSuchHolder clickThrough" style={ES(
 					{position: "relative"},
 					/* useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
 					!useAutoOffset && {paddingTop: innerBoxOffset}, */
