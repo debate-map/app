@@ -97,3 +97,27 @@ const useScript = url=>{
 		};
 	}, [url]);
 };
+
+// 2020-election version
+export class HomeUI2_GAD2020 extends BaseComponent<{}, {}> {
+	render() {
+		return (
+			<PageContainer scrollable={true}
+				style={{
+					flex: null, margin: 0, justifyContent: "center",
+					filter: null, // remove shadow from page
+					overflow: "visible",
+				}}
+				innerStyle={{
+					//flex: "0 1 865px",
+					borderRadius: 0, background: null,
+					padding: 0,
+				}}
+			>
+				<Row style={{margin: "50px 10px 20px 10px", boxSizing: "border-box"}}>
+					<div style={{width: 960, height: 700, backgroundImage: "url(/Images/@GAD/2020ElectionDemo_HomePage.png)", backgroundPosition: "center center", backgroundSize: "100%", backgroundRepeat: "no-repeat"}}/>
+				</Row>
+			</PageContainer>
+		);
+	}
+}

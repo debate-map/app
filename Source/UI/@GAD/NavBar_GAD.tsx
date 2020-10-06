@@ -15,7 +15,7 @@ import {zIndexes} from "Utils/UI/ZIndexes";
 import {GetAuth} from "@debate-map/server-link/Source/Link";
 import {rootPageDefaultChilds} from "Utils/URL/URLs";
 import {colors} from "../../Utils/UI/GlobalStyles";
-import {GADHeaderFont} from "./GAD";
+import {GADHeaderFont, GADDemo_2020} from "./GAD";
 
 // main
 // ==========
@@ -61,11 +61,20 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 						<NotificationsUI/>
 					</Div>
 
+					{!GADDemo_2020 &&
 					<span style={{margin: "0 auto", paddingRight: 17}}>
 						<NavBarPageButton page="website" text="Website"/>
 						<NavBarPageButton page="home" text="Home"/>
 						<NavBarPageButton page="private" text="Debates"/>
-					</span>
+					</span>}
+					{GADDemo_2020 &&
+					<span style={{margin: "0 auto", paddingLeft: 100}}>
+						<NavBarPageButton page="home" text="Home"/>
+						<NavBarPageButton page="private" text="Debate" actionFunc={s=>{
+							s.main.page = "private";
+							s.main.private.selectedMapID = "a4znL3UZTki9C66mnvsFow";
+						}}/>
+					</span>}
 
 					<span style={{position: "absolute", right: 30, display: "flex"}}>
 						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
@@ -85,7 +94,7 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 }
 
 @Observer
-class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void}, {hovered: boolean}> {
+class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel?: boolean, active?: boolean, style?, onClick?: (e)=>void, actionFunc?: (s: RootState)=>any}, {hovered: boolean}> {
 	render() {
 		let {page, text, panel, active, style, onClick} = this.props;
 		const currentPage = store.main.page;
@@ -138,13 +147,14 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 			}}/> as any;*/
 
 			finalStyle = E(finalStyle, {
-				margin: "0 30px", width: 300, height: 150,
-				backgroundImage: "url(/Images/@GAD/COVID/Title.png)", backgroundPosition: "center", backgroundSize: "100%", backgroundRepeat: "no-repeat",
+				margin: "0 30px", width: 500, height: 150,
+				backgroundImage: GADDemo_2020 ? "url(/Images/@GAD/2020ElectionDemo.png)" : "url(/Images/@GAD/COVID/Title.png)",
+				backgroundPosition: "center", backgroundSize: "100%", backgroundRepeat: "no-repeat",
 			});
 			text = null;
 		}
 
-		const actionFunc = (s: RootState)=>{
+		const actionFunc = this.props.actionFunc ?? ((s: RootState)=>{
 			if (page) {
 				if (page != currentPage) {
 					s.main.page = page;
@@ -160,7 +170,7 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 					}
 				}
 			}
-		};
+		});
 
 		const hoverOrActive = hovered || active;
 		return (

@@ -4,14 +4,14 @@ import {Button, Row} from "react-vcomponents";
 import {BaseComponentPlus} from "react-vextensions";
 import {store} from "Store";
 import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {GADDemo} from "UI/@GAD/GAD";
+import {GADDemo, GADDemo_2020} from "UI/@GAD/GAD";
 import {HSLA, Observer} from "vwebapp-framework";
-import {Map, MapType} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {IsUserMap} from "@debate-map/server-link/Source/Link";
-import {colors} from "../../../../Utils/UI/GlobalStyles";
+import {Map, MapType,MeID,IsUserCreatorOrMod,IsUserMap} from "@debate-map/server-link/Source/Link";
+
+
+
 import {zIndexes} from "Utils/UI/ZIndexes";
+import {colors} from "../../../../Utils/UI/GlobalStyles";
 import {DetailsDropDown} from "./ActionBar_Left/DetailsDropDown";
 import {Button_GAD} from "UI/@GAD/GADButton";
 import {PeopleDropDown} from "./ActionBar_Left/PeopleDropDown";
@@ -42,7 +42,7 @@ export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBar
 						// filter: 'drop-shadow(rgba(0,0,0,.5) 0px 0px 10px)',
 					},
 				)}>
-					{IsUserMap(map) &&
+					{IsUserMap(map) && !GADDemo_2020 &&
 						<Button_Final text="Back" style={{height: "100%"}} onClick={()=>{
 							runInAction("ActionBar_Left.Back.onClick", ()=>{
 								store.main[map.type == MapType.Private ? "private" : "public"].selectedMapID = null;
