@@ -11,6 +11,6 @@ export function CreateMissingThumbnails() {
 		newBackgroundPairs.push(newPair);
 	}
 
-	const newJSON = ToJSON(newBackgroundPairs.ToMap(a => a.key, a => a.value));
+	const newJSON = ToJSON(newBackgroundPairs.ToMapObj(a => a.key, a => a.value));
 	console.log(newJSON);
 } */

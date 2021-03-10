@@ -9,6 +9,9 @@ import {useMemo, useCallback} from "react";
 import {store, RootState} from "Store";
 import {runInAction} from "mobx";
 import {GetDocs} from "mobx-firelink";
+import {zIndexes} from "Utils/UI/ZIndexes";
+import {fire} from "@debate-map/server-link/Source/Link";
+import {rootPageDefaultChilds} from "Utils/URL/URLs";
 import {colors} from "../../Utils/UI/GlobalStyles";
 import {ChatPanel} from "./NavBar/ChatPanel";
 import {GuidePanel} from "./NavBar/GuidePanel";
@@ -17,9 +20,6 @@ import {ReputationPanel} from "./NavBar/ReputationPanel";
 import {SearchPanel} from "./NavBar/SearchPanel";
 import {StreamPanel} from "./NavBar/StreamPanel";
 import {UserPanel} from "./NavBar/UserPanel";
-import {zIndexes} from "Utils/UI/ZIndexes";
-import {fire} from "@debate-map/server-link/Source/Link";
-import {rootPageDefaultChilds} from "Utils/URL/URLs";
 
 // main
 // ==========
@@ -44,7 +44,8 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 		const dbNeedsInit = GetDocs({}, a=>a.maps) === null; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
 		return (
 			<nav style={{
-				position: "relative", zIndex: zIndexes.navBar, padding: "0 10px", boxShadow: colors.navBarBoxShadow,
+				position: "relative", zIndex: zIndexes.navBar,
+				padding: "0 10px", boxShadow: colors.navBarBoxShadow,
 				// background: "#000 url('/Images/Tiling/TopMenu.png') repeat-x scroll",
 				background: "rgba(0,0,0,1)",
 			}}>
@@ -145,7 +146,7 @@ export class NavBarPageButton extends BaseComponentPlus(
 					// go to the page root-contents, if clicking on page in nav-bar we're already on
 					//s.main[currentPage].subpage = null;
 					s.main[currentPage].subpage = rootPageDefaultChilds[currentPage];
-					
+
 					if (page == "database") {
 						// if our default subpage is already active, then perform that subpage's action-if-already-active
 						if ([null, "users"].Contains(store.main.database.subpage)) {

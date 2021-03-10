@@ -6,20 +6,19 @@ import {store} from "Store";
 import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {GADDemo, GADDemo_2020} from "UI/@GAD/GAD";
 import {HSLA, Observer} from "vwebapp-framework";
-import {Map, MapType,MeID,IsUserCreatorOrMod,IsUserMap} from "@debate-map/server-link/Source/Link";
-
+import {Map, MapType, MeID, IsUserCreatorOrMod, IsUserMap} from "@debate-map/server-link/Source/Link";
 
 
 import {zIndexes} from "Utils/UI/ZIndexes";
+import {Button_GAD} from "UI/@GAD/GADButton";
 import {colors} from "../../../../Utils/UI/GlobalStyles";
 import {DetailsDropDown} from "./ActionBar_Left/DetailsDropDown";
-import {Button_GAD} from "UI/@GAD/GADButton";
 import {PeopleDropDown} from "./ActionBar_Left/PeopleDropDown";
 
 @Observer
-export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number}, {}) {
+export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number, backOnly?: boolean}, {}) {
 	render() {
-		const {map, subNavBarWidth} = this.props;
+		const {map, subNavBarWidth, backOnly} = this.props;
 		const userID = MeID();
 		IsUserCreatorOrMod(userID, map);
 		const timelinePanelOpen = GetTimelinePanelOpen(map._key);
@@ -48,17 +47,19 @@ export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBar
 								store.main[map.type == MapType.Private ? "private" : "public"].selectedMapID = null;
 							});
 						}}/>}
-					{IsUserMap(map) && <DetailsDropDown map={map}/>}
-					{map.type == MapType.Private && <PeopleDropDown map={map}/>}
-					{/* // disabled for now, so we can iterate quickly on the stuff we're actually using right now
-					{IsUserMap(map) && HasModPermissions(MeID()) && <LayersDropDown map={map}/>} */}
-					{/* IsUserMap(map) && HasModPermissions(MeID()) && <TimelineDropDown map={map}/> */}
-					{IsUserMap(map) && !GADDemo &&
-						<Button ml={5} text="Timelines" style={{height: "100%"}} onClick={()=>{
-							runInAction("ActionBar_Left.Timelines.onClick", ()=>{
-								GetMapState(map._key).timelinePanelOpen = !timelinePanelOpen;
-							});
-						}}/>}
+					{!backOnly && <>
+						{IsUserMap(map) && <DetailsDropDown map={map}/>}
+						{map.type == MapType.Private && <PeopleDropDown map={map}/>}
+						{/* // disabled for now, so we can iterate quickly on the stuff we're actually using right now
+						{IsUserMap(map) && HasModPermissions(MeID()) && <LayersDropDown map={map}/>} */}
+						{/* IsUserMap(map) && HasModPermissions(MeID()) && <TimelineDropDown map={map}/> */}
+						{IsUserMap(map) && !GADDemo &&
+							<Button ml={5} text="Timelines" style={{height: "100%"}} onClick={()=>{
+								runInAction("ActionBar_Left.Timelines.onClick", ()=>{
+									GetMapState(map._key).timelinePanelOpen = !timelinePanelOpen;
+								});
+							}}/>}
+					</>}
 				</Row>
 			</nav>
 		);

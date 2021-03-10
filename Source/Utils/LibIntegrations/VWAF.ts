@@ -1,7 +1,7 @@
 import {dbVersion, hasHotReloaded} from "Main";
 import {RootState, store} from "Store";
 import {logTypes, LogTypes_New} from "Utils/General/Logging";
-import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL} from "Utils/URL/URLs";
+import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs";
 import {manager as manager_framework, ActionFunc, GetMirrorOfMobXTree} from "vwebapp-framework";
 import "./VWAF/Overrides";
 import produce from "immer";
@@ -11,6 +11,8 @@ import {runInAction} from "mobx";
 import {Me, MeID, GetUserPermissionGroups, GetAuth, ValidateDBData} from "@debate-map/server-link/Source/Link";
 import {AddNotificationMessage} from "Store/main/@NotificationMessage";
 import {Assert} from "js-vextensions";
+import {zIndexes} from "Utils/UI/ZIndexes";
+import {colors} from "Utils/UI/GlobalStyles";
 
 const context = (require as any).context("../../../Resources/SVGs/", true, /\.svg$/);
 const iconInfo = {};
@@ -26,8 +28,13 @@ declare module "vwebapp-framework/Source/UserTypes" {
 
 export function InitVWAF() {
 	manager_framework.Populate({
+		// styling
+		colors,
+		zIndexes,
 		iconInfo,
+		useExpandedNavBar: ()=>true,
 
+		// core
 		db_short: DB_SHORT,
 		devEnv: DEV,
 		prodEnv: PROD,
@@ -36,6 +43,8 @@ export function InitVWAF() {
 		logTypes,
 		mobxCompatMode: true,
 
+		// urls
+		pageTree,
 		startURL,
 		GetLoadActionFuncForURL,
 		GetNewURL,

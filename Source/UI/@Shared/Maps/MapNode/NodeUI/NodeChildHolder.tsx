@@ -41,7 +41,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		childrenWidthOverride = (childrenWidthOverride | 0).KeepAtLeast(minWidth);
 
 		const nodeView = GetNodeView(map._key, path);
-		const nodeChildren_fillPercents = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMap(child=>`${child._key}`, child=>{
+		const nodeChildren_fillPercents = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMapObj(child=>`${child._key}`, child=>{
 			return GetFillPercent_AtPath(child, `${path}/${child._key}`);
 		});
 		this.Stash({nodeChildren_fillPercents});
@@ -341,7 +341,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		if (this.Expanded && this.childHolder) {
 			const holderRect = VRect.FromLTWH(this.childHolder.DOM.getBoundingClientRect());
 
-			const oldChildBoxOffsets = this.childBoxes.Pairs().filter(pair=>pair.value != null).ToMap(pair=>pair.key, pair=>{
+			const oldChildBoxOffsets = this.childBoxes.Pairs().filter(pair=>pair.value != null).ToMapObj(pair=>pair.key, pair=>{
 				// let childBox = FindDOM_(pair.value).find("> div:first-child > div"); // get inner-box of child
 				// let childBox = $(GetDOM(pair.value)).find(".NodeUI_Inner").first(); // get inner-box of child
 				// not sure why this is needed... (bad sign!)

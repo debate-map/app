@@ -3,7 +3,6 @@ import {DeepGet, E, SleepAsync, Timer, Vector2, FindDOMAll, Assert, FromJSON, To
 import {Column, Row} from "react-vcomponents";
 import {BaseComponentWithConnector, FindReact, GetDOM, BaseComponentPlus, BaseComponent} from "react-vextensions";
 import {VMenuStub, VMenuItem} from "react-vmenu";
-
 import {ScrollView} from "react-vscrollview";
 import {TimelinePlayerUI} from "UI/@Shared/Timelines/TimelinePlayerUI";
 import {GetDistanceBetweenRectAndPoint, inFirefox, GetScreenRect, StoreAction, Observer} from "vwebapp-framework";
@@ -14,6 +13,7 @@ import {GetTimelinePanelOpen, GetPlayingTimeline, GetMapState} from "Store/main/
 import {GetOpenMapID} from "Store/main";
 import {TimelinePanel} from "UI/@Shared/Timelines/TimelinePanel";
 import {TimelineIntroBox} from "UI/@Shared/Timelines/TimelineIntroBox";
+import {MapNodeL3, GetUserAccessLevel, MeID, IsNodeL2, IsNodeL3, GetNodeL3, IsPremiseOfSinglePremiseArgument, GetParentPath, GetParentNodeL3, Map} from "@debate-map/server-link/Source/Link";
 import {styles, ES} from "../../../Utils/UI/GlobalStyles";
 import {NodeUI} from "./MapNode/NodeUI";
 import {NodeUI_ForBots} from "./MapNode/NodeUI_ForBots";
@@ -21,10 +21,6 @@ import {NodeUI_Inner} from "./MapNode/NodeUI_Inner";
 import {ActionBar_Left} from "./MapUI/ActionBar_Left";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right";
 import {ExpandableBox} from "./MapNode/ExpandableBox";
-import {MapNodeL3} from "@debate-map/server-link/Source/Link";
-import {IsNodeL2, IsNodeL3, GetNodeL3, IsPremiseOfSinglePremiseArgument} from "@debate-map/server-link/Source/Link";
-import {GetParentPath, GetParentNodeL3} from "@debate-map/server-link/Source/Link";
-import {Map} from "@debate-map/server-link/Source/Link";
 
 
 export function GetNodeBoxForPath(path: string) {
@@ -78,7 +74,12 @@ class MapUIWaitMessage extends BaseComponent<{message: string}, {}> {
 	render() {
 		const {message} = this.props;
 		return (
-			<div style={ES({display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25})}>
+			<div style={ES({
+				display: "flex", alignItems: "center", justifyContent: "center", flex: 1, fontSize: 25,
+				//textShadow: "#000 0px 0px 1px,   #000 0px 0px 1px,   #000 0px 0px 1px, #000 0px 0px 1px,   #000 0px 0px 1px,   #000 0px 0px 1px",
+				color: "white",
+				textShadow: "-1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000",
+			})}>
 				{message}
 			</div>
 		);
@@ -135,6 +136,14 @@ export class MapUI extends BaseComponentPlus({
 		})();
 		if (rootNode == null) return <MapUIWaitMessage message="Loading root node..."/>;
 		// if (GetNodeView(map._key, rootNode._key, false) == null) return <MapUIWaitMessage message="Initializing root-node view..."/>; // maybe temp
+		if (rootNode.current.accessLevel > GetUserAccessLevel(MeID())) {
+			return <Column style={ES({flex: 1})}>
+				{!withinPage &&
+					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth} backOnly={true}/>}
+				<MapUIWaitMessage message="Insufficient permissions."/>
+			</Column>;
+		}
+
 
 		if (isBot) {
 			return <NodeUI_ForBots map={map} node={rootNode}/>;

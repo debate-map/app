@@ -5,11 +5,10 @@ import {Button, Column, Row} from "react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {PageContainer, Observer} from "vwebapp-framework";
+import {HasAdminPermissions, MeID, ValidateDBData, FirebaseDBShape} from "@debate-map/server-link/Source/Link";
+
+
 import {ResetCurrentDBRoot} from "./Admin/ResetCurrentDBRoot";
-import {HasAdminPermissions} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {ValidateDBData} from "@debate-map/server-link/Source/Link";
-import {FirebaseDBShape} from "@debate-map/server-link/Source/Link";
 
 type UpgradeFunc = (oldData: FirebaseDBShape, markProgress: MarkProgressFunc)=>Promise<FirebaseDBShape>;
 type MarkProgressFunc = (depth: number, entryIndex: number, entryCount?: number)=>void;
@@ -206,7 +205,7 @@ export async function GetCollectionsDataAsync(versionRootPath: string, privateCo
 			const docs = GetDocs({inLinkRoot: false}, [...SplitStringBySlash_Cached(versionRootPath), ...collectionSubpath]);
 			/* docs = docs.map((doc) => (doc != null && doc._key != null ? ({ ...doc, _key: doc._key }) : doc)); // make "_key" prop enumerable
 			return docs; */
-			return docs.ToMap(a=>a?._key ?? "[data loading]", a=>a);
+			return docs.ToMapObj(a=>a?._key ?? "[data loading]", a=>a);
 		}) as any;
 	}
 	async function getDoc(...collectionSubpath: string[]) {

@@ -6,28 +6,8 @@ import {RootState} from "Store";
 import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";
 import {GetSelectedMediaID, GetSelectedTermID, GetSelectedUserID} from "Store/main/database";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {MaybeLog} from "vwebapp-framework";
-import {GetMap} from "@debate-map/server-link/Source/Link";
-import {MapNodeL2} from "@debate-map/server-link/Source/Link";
-import {GetNodeDisplayText, GetNodeL2} from "@debate-map/server-link/Source/Link";
-import {runInAction} from "mobx";
-
-export class Page {
-	constructor(initialData?: Partial<Page>, children?: {[key: string]: Page}) {
-		if (initialData) this.VSet(initialData);
-		if (children) {
-			for (const {key, value: child} of children.Pairs()) {
-				if (child.key == null) child.key = key;
-				if (child.title == null) child.title = ModifyString(child.key, m=>[m.startLower_to_upper]);
-			}
-			this.children = children;
-		}
-	}
-	key: string;
-	title: string;
-	simpleSubpages? = true;
-	children?: {[key: string]: Page};
-}
+import {MaybeLog, Page} from "vwebapp-framework";
+import {GetMap, MapNodeL2, GetNodeDisplayText, GetNodeL2} from "@debate-map/server-link/Source/Link";
 
 // for subpages, each page's first one is the default
 export const pageTree = new Page({}, {
@@ -63,7 +43,7 @@ export const pageTree = new Page({}, {
 	s: new Page({simpleSubpages: false}),
 });
 export const rootPages = Object.keys(pageTree.children);
-export const rootPageDefaultChilds = pageTree.children.Pairs().filter(a=>a.value.children?.Pairs().length).ToMap(pair=>pair.key, pair=>{
+export const rootPageDefaultChilds = pageTree.children.Pairs().filter(a=>a.value.children?.Pairs().length).ToMapObj(pair=>pair.key, pair=>{
 	return pair.value.children.Pairs()[0].key;
 });
 
@@ -315,7 +295,7 @@ export const GetNewURL = StoreAccessor(s=>(includeMapViewStr = true)=>{
 		const proposalID = GetSelectedProposalID();
 		if (proposalID) newURL.pathNodes.push(`${proposalID}`);
 	}
-	
+
 	/* if (page == 'forum') {
 		const subforumID = GetSelectedSubforumID();
 		const threadID = GetSelectedThreadID();

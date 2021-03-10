@@ -3,16 +3,12 @@ import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Ro
 import {BaseComponentPlus} from "react-vextensions";
 import {ShowMessageBox} from "react-vmessagebox";
 import {ScrollView} from "react-vscrollview";
-import {MeID, GetUser} from "@debate-map/server-link/Source/Link";
-import {GetLayers, ForDeleteLayer_GetError, GetMapLayerIDs} from "@debate-map/server-link/Source/Link";
-import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {MeID, GetUser, GetLayers, ForDeleteLayer_GetError, GetMapLayerIDs, IsUserCreatorOrMod, Layer, GetUserLayerStateForMap, DeleteLayer, SetLayerAttachedToMap, SetMapLayerStateForUser, Map} from "@debate-map/server-link/Source/Link";
+
+
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
-import {Layer} from "@debate-map/server-link/Source/Link";
-import {GetUserLayerStateForMap} from "@debate-map/server-link/Source/Link";
-import {DeleteLayer} from "@debate-map/server-link/Source/Link";
-import {SetLayerAttachedToMap} from "@debate-map/server-link/Source/Link";
-import {SetMapLayerStateForUser} from "@debate-map/server-link/Source/Link";
-import {Map} from "@debate-map/server-link/Source/Link";
+
+
 import {ShowAddLayerDialog} from "../../Layers/AddLayerDialog";
 import {ES} from "../../../../../Utils/UI/GlobalStyles";
 
@@ -118,7 +114,7 @@ class LayerUI extends BaseComponentPlus({} as {index: number, last: boolean, map
 						}}/>
 					</span>
 					<span style={{flex: columnWidths[3]}}>
-						<CheckBox value={userLayerState} indeterminate={userLayerState == null} onChange={val=>{
+						<CheckBox value={userLayerState ?? "partial"} onChange={val=>{
 							if (MeID() == null) return ShowSignInPopup();
 							const newState =								userLayerState == null ? true
 								: userLayerState == true ? false

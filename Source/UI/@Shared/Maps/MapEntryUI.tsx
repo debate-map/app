@@ -6,8 +6,8 @@ import {GADDemo} from "UI/@GAD/GAD";
 import {HSLA, Link, Observer} from "vwebapp-framework";
 import {store} from "Store";
 import {runInAction} from "mobx";
-import {GetUser} from "@debate-map/server-link/Source/Link";
-import {MapType, Map} from "@debate-map/server-link/Source/Link";
+import {GetUser, MapType, Map} from "@debate-map/server-link/Source/Link";
+
 import {columnWidths} from "./MapListUI";
 
 @Observer
@@ -16,7 +16,7 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 		const {index, last, map} = this.props;
 		const creator = map && GetUser(map.creator);
 
-		const toURL = new VURL(null, [map.type == MapType.Private ? "private" : "public", `${map._key}`]);
+		const toURL = new VURL(undefined, [map.type == MapType.Private ? "private" : "public", `${map._key}`]);
 		return (
 			<Column p="7px 10px" style={E(
 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},

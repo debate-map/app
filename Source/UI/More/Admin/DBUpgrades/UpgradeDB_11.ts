@@ -1,8 +1,8 @@
 import {Clone} from "js-vextensions";
 import {TreeNode} from "mobx-firelink";
-import {FirebaseDBShape} from "@debate-map/server-link/Source/Link";
-import {MapNodeRevision} from "@debate-map/server-link/Source/Link";
-import {GetSearchTerms} from "@debate-map/server-link/Source/Link";
+import {FirebaseDBShape, MapNodeRevision, GetSearchTerms} from "@debate-map/server-link/Source/Link";
+
+
 import {AddUpgradeFunc} from "../../Admin";
 
 const newVersion = 11;
@@ -17,7 +17,7 @@ AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
 	for (const revision of data.nodeRevisions.VValues() as MapNodeRevision[]) {
 		if (revision.titles == null) continue;
 		const titles_joined = revision.titles.VValues().join(" ");
-		revision.titles.allTerms = GetSearchTerms(titles_joined).ToMap(a=>a, ()=>true);
+		revision.titles.allTerms = GetSearchTerms(titles_joined).ToMapObj(a=>a, ()=>true);
 	}
 
 	return data;
