@@ -1,8 +1,8 @@
 import {AddSchema, AssertValidate, Command, GenerateUUID, Assert, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {emptyArray_forLoading} from "web-vcore/nm/js-vextensions";
-import {RatingType} from "../Store/firebase/nodeRatings/@RatingType";
-import {Rating} from "../Store/firebase/nodeRatings/@Rating";
-import {GetRatings} from "../Store/firebase/nodeRatings";
+import {RatingType} from "../Store/db/nodeRatings/@RatingType";
+import {Rating} from "../Store/db/nodeRatings/@Rating";
+import {GetRatings} from "../Store/db/nodeRatings";
 
 export class SetNodeRating extends Command<{nodeID: string, ratingType: RatingType, value: number}, {}> {
 	oldRating: Rating;

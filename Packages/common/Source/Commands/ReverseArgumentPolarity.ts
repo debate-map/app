@@ -3,10 +3,10 @@ import {MapEdit} from "../CommandMacros";
 import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
-import {MapNodeL3, ChildEntry} from "../Store/firebase/nodes/@MapNode";
-import {GetNodeL3, ReversePolarity} from "../Store/firebase/nodes/$node";
-import {GetParentNodeID} from "../Store/firebase/nodes";
-import {MapNodeType} from "../Store/firebase/nodes/@MapNodeType";
+import {MapNodeL3, ChildEntry} from "../Store/db/nodes/@MapNode";
+import {GetNodeL3, ReversePolarity} from "../Store/db/nodes/$node";
+import {GetParentNodeID} from "../Store/db/nodes";
+import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
 
 AddSchema("ReverseArgumentPolarity_payload", {
 	properties: {

@@ -1,5 +1,5 @@
 {
-	"typescript.tsdk": "../../node_modules/typescript/lib",
+	"typescript.tsdk": "./node_modules/typescript/lib",
 	"javascript.preferences.quoteStyle": "double",
 	"typescript.preferences.quoteStyle": "double",
 	"eslint.validate": [

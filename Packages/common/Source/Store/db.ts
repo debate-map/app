@@ -1,28 +1,26 @@
-import {ObservableMap} from "web-vcore/nm/mobx";
-import {Collection_Closed, Collection, StoreAccessor, FireUserInfo} from "web-vcore/nm/mobx-graphlink";
-import {GeneralData} from "./firebase/general";
-import {Media} from "./firebase/media/@Media";
-import {Layer} from "./firebase/layers/@Layer";
-import {NodeEditTimes} from "./firebase/mapNodeEditTimes";
-import {Map} from "./firebase/maps/@Map";
-import {MapNodePhrasing} from "./firebase/nodePhrasings/@MapNodePhrasing";
-import {MapNode} from "./firebase/nodes/@MapNode";
-import {MapNodeRevision} from "./firebase/nodes/@MapNodeRevision";
-import {Term} from "./firebase/terms/@Term";
-import {Timeline} from "./firebase/timelines/@Timeline";
-import {TimelineStep} from "./firebase/timelineSteps/@TimelineStep";
-import {UserMapInfoSet} from "./firebase/userMapInfo/@UserMapInfo";
-import {User} from "./firebase/users/@User";
-import {User_Private} from "./firebase/users_private/@User_Private";
-import {MapNodeTag} from "./firebase/nodeTags/@MapNodeTag";
-import {fire} from "../MobXGraphlink";
-import {Rating} from "./firebase/nodeRatings/@Rating";
-import {Share} from "./firebase/shares/@Share";
+import {Collection_Closed, Collection} from "web-vcore/nm/mobx-graphlink";
+import {GeneralData} from "./db/general";
+import {Media} from "./db/media/@Media";
+import {Layer} from "./db/layers/@Layer";
+import {NodeEditTimes} from "./db/mapNodeEditTimes";
+import {Map} from "./db/maps/@Map";
+import {MapNodePhrasing} from "./db/nodePhrasings/@MapNodePhrasing";
+import {MapNode} from "./db/nodes/@MapNode";
+import {MapNodeRevision} from "./db/nodes/@MapNodeRevision";
+import {Term} from "./db/terms/@Term";
+import {Timeline} from "./db/timelines/@Timeline";
+import {TimelineStep} from "./db/timelineSteps/@TimelineStep";
+import {UserMapInfoSet} from "./db/userMapInfo/@UserMapInfo";
+import {User} from "./db/users/@User";
+import {User_Private} from "./db/users_private/@User_Private";
+import {MapNodeTag} from "./db/nodeTags/@MapNodeTag";
+import {Rating} from "./db/nodeRatings/@Rating";
+import {Share} from "./db/shares/@Share";
 
 // manually import these, since otherwise they're never runtime-imported
 require("./firebase/users_private/@User_Private");
 
-export interface FirebaseDBShape {
+export interface GraphDBShape {
 	general: Collection_Closed<{data: GeneralData}>;
 	modules: Collection_Closed<{
 		// feedback: FeedbackDBShape;
@@ -84,11 +82,11 @@ export interface FirebaseDBShape {
 	}>;
 } */
 
-export const GetAuth = StoreAccessor(s=>()=>{
+/*export const GetAuth = StoreAccessor(s=>()=>{
 	//return s.firelink.userInfo;
 	return fire.userInfo;
 }) as ()=>FireUserInfo;
 export const GetAuth_Raw = StoreAccessor(s=>()=>{
 	//return s.firelink.userInfo_raw;
 	return fire.userInfo_raw as any;
-});
+});*/

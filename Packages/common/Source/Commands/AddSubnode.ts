@@ -1,10 +1,10 @@
 import {AssertV, Command, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {AddNode} from "./AddNode";
-import {MapNode} from "../Store/firebase/nodes/@MapNode";
-import {MapNodeRevision} from "../Store/firebase/nodes/@MapNodeRevision";
-import {Layer} from "../Store/firebase/layers/@Layer";
-import {GetLayer} from "../Store/firebase/layers";
+import {MapNode} from "../Store/db/nodes/@MapNode";
+import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
+import {Layer} from "../Store/db/layers/@Layer";
+import {GetLayer} from "../Store/db/layers";
 
 @UserEdit
 export class AddSubnode extends Command<{mapID: string, layerID: string, anchorNodeID: string, subnode: MapNode, subnodeRevision: MapNodeRevision}, number> {

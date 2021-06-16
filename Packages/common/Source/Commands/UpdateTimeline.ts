@@ -1,7 +1,7 @@
 import {AssertV, Command} from "web-vcore/nm/mobx-graphlink";
 import {AddSchema, AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink";
-import {Timeline} from "../Store/firebase/timelines/@Timeline";
-import {GetTimeline} from "../Store/firebase/timelines";
+import {Timeline} from "../Store/db/timelines/@Timeline";
+import {GetTimeline} from "../Store/db/timelines";
 import {CE} from "web-vcore/nm/js-vextensions";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
 

@@ -1,9 +1,9 @@
 import {Command_Old, GetAsync, Command, AssertV, Schema} from "web-vcore/nm/mobx-graphlink";
 import {AddSchema, AssertValidate, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
-import {ChildEntry} from "../Store/firebase/nodes/@MapNode";
-import {GetNode} from "../Store/firebase/nodes";
-import {GetLinkUnderParent} from "../Store/firebase/nodes/$node";
+import {ChildEntry} from "../Store/db/nodes/@MapNode";
+import {GetNode} from "../Store/db/nodes";
+import {GetLinkUnderParent} from "../Store/db/nodes/$node";
 import {CE} from "web-vcore/nm/js-vextensions";
 
 AddSchema("UpdateLink_payload", ["ChildEntry"], ()=>({

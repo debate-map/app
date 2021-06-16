@@ -1,5 +1,5 @@
 import {GetDoc, GetDocs, IsAuthValid, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {GetAuth} from "../firebase";
+import {GetAuth} from "../db";
 import {User} from "./users/@User";
 
 /* export function GetAuth(state: RootState) {

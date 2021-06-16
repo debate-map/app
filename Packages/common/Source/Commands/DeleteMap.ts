@@ -1,11 +1,11 @@
 import {UserEdit} from "../CommandMacros";
 import {Command_Old, MergeDBUpdates, GetAsync, GetDocs, AssertV, Command} from "web-vcore/nm/mobx-graphlink";
-import {UserMapInfoSet} from "../Store/firebase/userMapInfo/@UserMapInfo";
+import {UserMapInfoSet} from "../Store/db/userMapInfo/@UserMapInfo";
 import {DeleteNode} from "./DeleteNode";
-import {GetMap} from "../Store/firebase/maps";
-import {Map} from "../Store/firebase/maps/@Map";
+import {GetMap} from "../Store/db/maps";
+import {Map} from "../Store/db/maps/@Map";
 import {CE} from "web-vcore/nm/js-vextensions";
-import {IsUserCreatorOrMod} from "../Store/firebase/users/$user";
+import {IsUserCreatorOrMod} from "../Store/db/users/$user";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
 
 @UserEdit

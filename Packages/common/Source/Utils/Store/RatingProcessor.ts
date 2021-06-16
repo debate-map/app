@@ -1,10 +1,10 @@
 import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from "web-vcore/nm/js-vextensions";
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {GetRatingAverage, GetRatingValue, GetRatings} from "../../Store/firebase/nodeRatings";
-import {Rating} from "../../Store/firebase/nodeRatings/@Rating";
-import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../Store/firebase/nodes/$node";
-import {ClaimForm, MapNodeL2} from "../../Store/firebase/nodes/@MapNode";
-import {ArgumentType} from "../../Store/firebase/nodes/@MapNodeRevision";
+import {GetRatingAverage, GetRatingValue, GetRatings} from "../../Store/db/nodeRatings";
+import {Rating} from "../../Store/db/nodeRatings/@Rating";
+import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../Store/db/nodes/$node";
+import {ClaimForm, MapNodeL2} from "../../Store/db/nodes/@MapNode";
+import {ArgumentType} from "../../Store/db/nodes/@MapNodeRevision";
 
 export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[], userID: string): Rating=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading

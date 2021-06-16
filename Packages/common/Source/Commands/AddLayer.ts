@@ -1,7 +1,7 @@
 import {UserEdit} from "../CommandMacros";
 import {Command_Old, Command} from "web-vcore/nm/mobx-graphlink";
 import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
-import {Layer} from "../Store/firebase/layers/@Layer";
+import {Layer} from "../Store/db/layers/@Layer";
 
 @UserEdit
 export class AddLayer extends Command<{layer: Layer}, {}> {

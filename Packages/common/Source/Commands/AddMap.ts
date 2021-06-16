@@ -3,11 +3,11 @@ import {AssertValidate, UUID, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
 import {OmitIfFalsy, Assert, E} from "web-vcore/nm/js-vextensions";
 import {UserEdit} from "../CommandMacros";
 import {AddChildNode} from "./AddChildNode";
-import {Map} from "../Store/firebase/maps/@Map";
-import {MapNode} from "../Store/firebase/nodes/@MapNode";
-import {MapNodeType} from "../Store/firebase/nodes/@MapNodeType";
-import {MapType} from "../Store/firebase/maps/@Map";
-import {MapNodeRevision} from "../Store/firebase/nodes/@MapNodeRevision";
+import {Map} from "../Store/db/maps/@Map";
+import {MapNode} from "../Store/db/nodes/@MapNode";
+import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
+import {MapType} from "../Store/db/maps/@Map";
+import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
 
 @UserEdit
 export class AddMap extends Command<{map: Map}, UUID> {

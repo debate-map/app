@@ -1,7 +1,7 @@
 import {UserEdit} from "../CommandMacros";
 import {Command_Old, Command} from "web-vcore/nm/mobx-graphlink";
 import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
-import {Timeline} from "../Store/firebase/timelines/@Timeline";
+import {Timeline} from "../Store/db/timelines/@Timeline";
 
 @UserEdit
 export class AddTimeline extends Command<{mapID: string, timeline: Timeline}, string> {

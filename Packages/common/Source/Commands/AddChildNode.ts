@@ -3,10 +3,10 @@ import {Command_Old, MergeDBUpdates, GetAsync, Command, AssertV} from "web-vcore
 import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {AddNode} from "./AddNode";
-import {MapNode, ChildEntry, Polarity} from "../Store/firebase/nodes/@MapNode";
-import {MapNodeRevision} from "../Store/firebase/nodes/@MapNodeRevision";
-import {MapNodeType} from "../Store/firebase/nodes/@MapNodeType";
-import {GetNode} from "../Store/firebase/nodes";
+import {MapNode, ChildEntry, Polarity} from "../Store/db/nodes/@MapNode";
+import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
+import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
+import {GetNode} from "../Store/db/nodes";
 import {AddArgumentAndClaim} from "../Commands";
 
 type Payload = {mapID: string, parentID: string, node: MapNode, revision: MapNodeRevision, link?: ChildEntry, asMapRoot?: boolean};

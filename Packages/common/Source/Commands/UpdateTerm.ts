@@ -2,8 +2,8 @@ import {Assert, CE} from "web-vcore/nm/js-vextensions";
 import {UserEdit} from "../CommandMacros";
 import {AssertValidate, AddSchema, GetSchemaJSON, Schema, WrapDBValue} from "web-vcore/nm/mobx-graphlink";
 import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {Term} from "../Store/firebase/terms/@Term";
-import {GetTerm} from "../Store/firebase/terms";
+import {Term} from "../Store/db/terms/@Term";
+import {GetTerm} from "../Store/db/terms";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
 
 type MainType = Term;

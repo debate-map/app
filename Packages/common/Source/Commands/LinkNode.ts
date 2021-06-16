@@ -3,9 +3,9 @@ import {Assert, E, CE} from "web-vcore/nm/js-vextensions";
 import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel";
-import {ClaimForm, Polarity, MapNode} from "../Store/firebase/nodes/@MapNode";
-import {GetNode} from "../Store/firebase/nodes";
-import {MapNodeType} from "../Store/firebase/nodes/@MapNodeType";
+import {ClaimForm, Polarity, MapNode} from "../Store/db/nodes/@MapNode";
+import {GetNode} from "../Store/db/nodes";
+import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
 
 @MapEdit
 @UserEdit

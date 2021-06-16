@@ -1,7 +1,7 @@
 import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
-import {FirebaseDBShape} from "../../Store/firebase";
+import {GraphDBShape} from "../../Store/db";
 
-export function ValidateDBData(data: FirebaseDBShape) {
+export function ValidateDBData(data: GraphDBShape) {
 	function ValidateCollection(collection, itemType: string) {
 		(collection || {}).VValues().forEach(entry=>{
 			AssertValidate(itemType, entry, `${itemType} invalid`);

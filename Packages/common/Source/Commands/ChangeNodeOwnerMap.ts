@@ -2,13 +2,13 @@ import {Command_Old, GetAsync, Command, AssertV, MergeDBUpdates, AV} from "web-v
 import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {E, OMIT, DEL, IsSpecialEmptyArray, CE} from "web-vcore/nm/js-vextensions";
 import {UserEdit} from "../CommandMacros";
-import {MapNode} from "../Store/firebase/nodes/@MapNode";
-import {GetNode, GetNodesByIDs, GetNodeChildren} from "../Store/firebase/nodes";
-import {IsUserCreatorOrMod} from "../Store/firebase/users/$user";
-import {GetMap} from "../Store/firebase/maps";
-import {MapType} from "../Store/firebase/maps/@Map";
-import {GetNodeRevision} from "../Store/firebase/nodeRevisions";
-import {PermissionInfoType} from "../Store/firebase/nodes/@MapNodeRevision";
+import {MapNode} from "../Store/db/nodes/@MapNode";
+import {GetNode, GetNodesByIDs, GetNodeChildren} from "../Store/db/nodes";
+import {IsUserCreatorOrMod} from "../Store/db/users/$user";
+import {GetMap} from "../Store/db/maps";
+import {MapType} from "../Store/db/maps/@Map";
+import {GetNodeRevision} from "../Store/db/nodeRevisions";
+import {PermissionInfoType} from "../Store/db/nodes/@MapNodeRevision";
 
 AddSchema("ChangeNodeOwnerMap_payload", {
 	properties: {

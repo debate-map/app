@@ -1,7 +1,7 @@
 import {UserEdit} from "../CommandMacros";
 import {Command_Old, GetAsync, Command, AssertV, WrapDBValue} from "web-vcore/nm/mobx-graphlink";
-import {Term} from "../Store/firebase/terms/@Term";
-import {GetTerm} from "../Store/firebase/terms";
+import {Term} from "../Store/db/terms/@Term";
+import {GetTerm} from "../Store/db/terms";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
 
 @UserEdit

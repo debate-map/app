@@ -1,8 +1,8 @@
 import {UserEdit} from "../CommandMacros";
 import {Command_Old, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
-import {HasModPermissions} from "../Store/firebase/users/$user";
-import {Media} from "../Store/firebase/media/@Media";
+import {HasModPermissions} from "../Store/db/users/$user";
+import {Media} from "../Store/db/media/@Media";
 
 @UserEdit
 export class AddMedia extends Command<{media: Media}, string> {

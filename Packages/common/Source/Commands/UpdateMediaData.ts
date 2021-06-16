@@ -1,7 +1,7 @@
 import {CE} from "web-vcore/nm/js-vextensions";
 import {AddSchema, AssertV, AssertValidate, Command, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
-import {Media} from "../Store/firebase/media/@Media";
+import {Media} from "../Store/db/media/@Media";
 import {GetMedia} from "../Commands";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
 

@@ -1,7 +1,7 @@
 import {AddSchema, AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink";
 import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {GetUser} from "../Store/firebase/users";
-import {User} from "../Store/firebase/users/@User";
+import {GetUser} from "../Store/db/users";
+import {User} from "../Store/db/users/@User";
 import {CE} from "web-vcore/nm/js-vextensions";
 
 type MainType = User;

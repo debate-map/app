@@ -1,7 +1,7 @@
 import {UserEdit} from "../CommandMacros";
 import {AssertValidate, GenerateUUID, WrapDBValue} from "web-vcore/nm/mobx-graphlink";
 import {Command_Old, Command} from "web-vcore/nm/mobx-graphlink";
-import {Term} from "../Store/firebase/terms/@Term";
+import {Term} from "../Store/db/terms/@Term";
 
 @UserEdit
 export class AddTerm extends Command<{term: Term}, string> {

@@ -1,9 +1,9 @@
 import {CE} from "web-vcore/nm/js-vextensions";
 import {AssertV, AssertValidate, Command, GenerateUUID, WrapDBValue} from "web-vcore/nm/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
-import {GetNode} from "../Store/firebase/nodes";
-import {MapNode} from "../Store/firebase/nodes/@MapNode";
-import {MapNodeRevision} from "../Store/firebase/nodes/@MapNodeRevision";
+import {GetNode} from "../Store/db/nodes";
+import {MapNode} from "../Store/db/nodes/@MapNode";
+import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
 
 /** Returned terms are all lowercase. */
 export function GetSearchTerms(str: string) {

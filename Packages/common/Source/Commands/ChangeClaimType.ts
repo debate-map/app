@@ -2,11 +2,11 @@ import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
 import {AssertV, AV, Command} from "web-vcore/nm/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {AddSchema, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
-import {AttachmentType, GetAttachmentType} from "../Store/firebase/nodeRevisions/@AttachmentType";
-import {MapNode} from "../Store/firebase/nodes/@MapNode";
-import {MapNodeRevision} from "../Store/firebase/nodes/@MapNodeRevision";
-import {GetNodeL2, AsNodeL1} from "../Store/firebase/nodes/$node";
-import {EquationAttachment} from "../Store/firebase/nodeRevisions/@EquationAttachment";
+import {AttachmentType, GetAttachmentType} from "../Store/db/nodeRevisions/@AttachmentType";
+import {MapNode} from "../Store/db/nodes/@MapNode";
+import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
+import {GetNodeL2, AsNodeL1} from "../Store/db/nodes/$node";
+import {EquationAttachment} from "../Store/db/nodeRevisions/@EquationAttachment";
 
 export const conversionTypes = [
 	// from normal to...

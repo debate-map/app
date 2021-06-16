@@ -1,9 +1,9 @@
 import {AssertV, Command, AV} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {AddSchema, AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink";
-import {MapNodeTag, TagComp_keys} from "../Store/firebase/nodeTags/@MapNodeTag";
-import {GetNodeTag} from "../Store/firebase/nodeTags";
-import {IsUserCreatorOrMod} from "../Store/firebase/users/$user";
+import {MapNodeTag, TagComp_keys} from "../Store/db/nodeTags/@MapNodeTag";
+import {GetNodeTag} from "../Store/db/nodeTags";
+import {IsUserCreatorOrMod} from "../Store/db/users/$user";
 import {CE} from "web-vcore/nm/js-vextensions";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
 

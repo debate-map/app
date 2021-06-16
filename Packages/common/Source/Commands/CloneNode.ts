@@ -2,9 +2,9 @@ import {DEL, E, Clone, CE} from "web-vcore/nm/js-vextensions";
 import {Command_Old, MergeDBUpdates, SplitStringBySlash_Cached, GetAsync, Command, AssertV, AV} from "web-vcore/nm/mobx-graphlink";
 import {AddChildNode} from "./AddChildNode";
 import {LinkNode} from "./LinkNode";
-import {GetNodeL2, GetNodeForm, GetLinkAtPath} from "../Store/firebase/nodes/$node";
-import {MapNodeType} from "../Store/firebase/nodes/@MapNodeType";
-import {MapNode} from "../Store/firebase/nodes/@MapNode";
+import {GetNodeL2, GetNodeForm, GetLinkAtPath} from "../Store/db/nodes/$node";
+import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
+import {MapNode} from "../Store/db/nodes/@MapNode";
 
 export class CloneNode extends Command<{mapID: string, baseNodePath: string, newParentID: string}, {nodeID: string, revisionID: string}> {
 	sub_addNode: AddChildNode;

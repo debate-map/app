@@ -1,26 +1,15 @@
 {
+	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
-		// general
-		//"sourceMap": true, // source-map doesn't work in dev-tools anyway fsr (with source-maps enabled, only ever shows es6, not ts), so no point creating
-		"watch": true,
-		"outDir": "Source_JS",
-		"forceConsistentCasingInFileNames": true, // creates duplicates in import-helper plugins otherwise
-
-		// modules/paths
-		"module": "ES2015", // leave the imports/exports alone (webpack will convert them to "require")
-		//"module": "commonjs", // needed, since this config file is used for "ts-node Scripts/Server" as well
-		"moduleResolution": "node",
 		"rootDir": "Source",
-		//"rootDir": ".",
-		/*"rootDirs": [
-			"Source",
-			"../node_modules/web-vcore",
-			"../node_modules/js-vextensions/....",
-		],*/
 		"baseUrl": "Source",
-		//"baseUrl": ".", // we need it at root so we can apply path-overrides, even when requester is outside of Source folder
-		//"baseUrl": ".",
-		"paths": { // ("paths" is relative to "baseUrl")
+		"resolveJsonModule": true,
+
+		//"noEmit": false,
+		"outDir": "Source_JS",
+		"esModuleInterop": true,
+
+		/*"paths": { // ("paths" is relative to "baseUrl")
 			"*": [
 				// prefer "/node_modules/@types" over "/node_modules/[something]/node_modules/@types" (eg. for when using npm link)
 				//"../node_modules/@types/*",
@@ -40,27 +29,7 @@
 			// consolidating for these wouldn't throw errors necessarily, but we do so to keep things tidy (since we know the different versions will be compatible anyway)
 			//"js-vextensions": ["../node_modules/js-vextensions"],
 			//"mobx-graphlink": ["../node_modules/mobx-graphlink"], // fixes odd ts issue
-		},
-		//"skipLibCheck": true,
-
-		// compiler options
-		//"target": "ES5",
-		//"target": "es2015",
-		//"target": "es2017",
-		"target": "esnext", // babel targets es2015 (ie. transpiles our code to it), so it's fine for TS to target es-next
-		"lib": [
-			"es5",
-			"es6",
-			"ESNext",
-			"dom"
-		],
-		//"allowJs": true,
-		//"maxNodeModuleJsDepth": 1,
-		"jsx": "react",
-
-		"experimentalDecorators": true,
-		"allowSyntheticDefaultImports": true,
-		"esModuleInterop": true,
+		},*/
 
 		//"strict": true, // enables all of the below (other than noImplicitReturns)
 		//"noImplicitAny": true,
@@ -75,7 +44,6 @@
 	//"files": ["Source/Main.ts"],
 	"include": [
 		"Typings/**/*.d.ts",
-		//"Typings/globals/**/*.d.ts",
 		"Source/**/*.ts",
 		"Source/**/*.tsx",
 		//"Source/**/*.js",
@@ -83,16 +51,6 @@
 		//"node_modules/web-vcore/Source/**/*.ts",
 		//"node_modules/@debate-map/server-link/Source/**/*.ts",
 	],
-	/*"exclude": [
-		"Build",
-		"Tests",
-		"node_modules"
-
-		/*"Typings/main",
-		"Typings/main.d.ts",
-		"Typings/browser",
-		"Typings/browser.d.ts",*#/
-	],*/
 	"compileOnSave": true
 	/*"references": [
 		{"path": "node_modules/@debate-map/server-link"},

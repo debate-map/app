@@ -1,7 +1,7 @@
 import {Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink";
-import {User_Private} from "../Store/firebase/users_private/@User_Private";
-import {GetUser_Private} from "../Store/firebase/users_private";
+import {User_Private} from "../Store/db/users_private/@User_Private";
+import {GetUser_Private} from "../Store/db/users_private";
 import {CE} from "web-vcore/nm/js-vextensions";
 
 type MainType = User_Private;

@@ -1,8 +1,8 @@
 import {AssertV, AV, Command, GetDocs} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
-import {Layer} from "../Store/firebase/layers/@Layer";
-import {UserMapInfoSet} from "../Store/firebase/userMapInfo/@UserMapInfo";
-import {GetLayer, ForDeleteLayer_GetError} from "../Store/firebase/layers";
+import {Layer} from "../Store/db/layers/@Layer";
+import {UserMapInfoSet} from "../Store/db/userMapInfo/@UserMapInfo";
+import {GetLayer, ForDeleteLayer_GetError} from "../Store/db/layers";
 import {IsUserCreatorOrMod} from "../Commands";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
 

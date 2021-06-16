@@ -1,7 +1,7 @@
 import {MergeDBUpdates, GetAsync, GetDoc, Command, Command_Old} from "web-vcore/nm/mobx-graphlink";
-import {GetMap} from "./Store/firebase/maps";
+import {GetMap} from "./Store/db/maps";
 import {IsString, IsFunction} from "web-vcore/nm/js-vextensions";
-import {GetUser} from "./Store/firebase/users";
+import {GetUser} from "./Store/db/users";
 
 export function MapEdit(targetClass: Function);
 export function MapEdit(mapIDKey: string);

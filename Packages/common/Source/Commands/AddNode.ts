@@ -1,6 +1,6 @@
 import {AssertV, AssertValidate, AssertValidate_Full, Command, GenerateUUID, GetSchemaJSON, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink";
-import {MapNode} from "../Store/firebase/nodes/@MapNode";
-import {MapNodeRevision} from "../Store/firebase/nodes/@MapNodeRevision";
+import {MapNode} from "../Store/db/nodes/@MapNode";
+import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
 import {AddNodeRevision} from "./AddNodeRevision";
 import {CE} from "web-vcore/nm/js-vextensions";
 

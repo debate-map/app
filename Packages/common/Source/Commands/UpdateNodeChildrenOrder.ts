@@ -1,11 +1,11 @@
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {MapNode} from "../Store/firebase/nodes/@MapNode";
-import {GetNode} from "../Store/firebase/nodes";
-import {HasAdminPermissions, IsUserCreatorOrMod} from "../Store/firebase/users/$user";
-import {MapNodeType} from "../Store/firebase/nodes/@MapNodeType";
-import {IsPrivateNode, IsMultiPremiseArgument} from "../Store/firebase/nodes/$node";
+import {MapNode} from "../Store/db/nodes/@MapNode";
+import {GetNode} from "../Store/db/nodes";
+import {HasAdminPermissions, IsUserCreatorOrMod} from "../Store/db/users/$user";
+import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
+import {IsPrivateNode, IsMultiPremiseArgument} from "../Store/db/nodes/$node";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
 
 @MapEdit

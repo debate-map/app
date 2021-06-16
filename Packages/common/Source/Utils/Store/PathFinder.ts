@@ -1,5 +1,5 @@
-import {MapNode} from "../../Store/firebase/nodes/@MapNode";
-import {GetNode} from "../../Store/firebase/nodes";
+import {MapNode} from "../../Store/db/nodes/@MapNode";
+import {GetNode} from "../../Store/db/nodes";
 import {CE} from "web-vcore/nm/js-vextensions";
 
 export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc: (nodeID: string)=>boolean, nodeIDsToIgnore?: string[]): string {

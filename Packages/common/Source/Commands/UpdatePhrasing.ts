@@ -1,8 +1,8 @@
 import {AddSchema, GetSchemaJSON, Schema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {MapNodePhrasing} from "../Store/firebase/nodePhrasings/@MapNodePhrasing";
-import {GetNodePhrasing} from "../Store/firebase/nodePhrasings";
+import {MapNodePhrasing} from "../Store/db/nodePhrasings/@MapNodePhrasing";
+import {GetNodePhrasing} from "../Store/db/nodePhrasings";
 import {CE} from "web-vcore/nm/js-vextensions";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
 

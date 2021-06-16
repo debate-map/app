@@ -3,8 +3,8 @@ import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {Command_Old, GetAsync, Command, AssertV, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink";
 import {Clone, CE} from "web-vcore/nm/js-vextensions";
 import {AddNodeRevision} from "./AddNodeRevision";
-import {MapNodeL2, MapNode} from "../Store/firebase/nodes/@MapNode";
-import {GetNodeL2, AsNodeL1, GetNodeL3, GetNodeDisplayText, GetNodeForm} from "../Store/firebase/nodes/$node";
+import {MapNodeL2, MapNode} from "../Store/db/nodes/@MapNode";
+import {GetNodeL2, AsNodeL1, GetNodeL3, GetNodeDisplayText, GetNodeForm} from "../Store/db/nodes/$node";
 
 @MapEdit
 @UserEdit

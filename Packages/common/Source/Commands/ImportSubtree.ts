@@ -5,12 +5,12 @@ import {AddChildNode} from "./AddChildNode";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel";
 import {LinkNode} from "./LinkNode";
 import {SetNodeRating} from "./SetNodeRating";
-import {HasAdminPermissions} from "../Store/firebase/users/$user";
-import {AsNodeL1} from "../Store/firebase/nodes/$node";
-import {MapNodeRevision} from "../Store/firebase/nodes/@MapNodeRevision";
-import {Source} from "../Store/firebase/nodeRevisions/@SourceChain";
-import {RatingType} from "../Store/firebase/nodeRatings/@RatingType";
-import {Rating} from "../Store/firebase/nodeRatings/@Rating";
+import {HasAdminPermissions} from "../Store/db/users/$user";
+import {AsNodeL1} from "../Store/db/nodes/$node";
+import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
+import {Source} from "../Store/db/nodeRevisions/@SourceChain";
+import {RatingType} from "../Store/db/nodeRatings/@RatingType";
+import {Rating} from "../Store/db/nodeRatings/@Rating";
 import {WithoutHelpers} from "./ImportSubtree_Old";
 
 // todo: replace with new structure, when actually used again

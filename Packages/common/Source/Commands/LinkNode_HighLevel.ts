@@ -5,15 +5,15 @@ import {DeleteNode} from "./DeleteNode";
 import {LinkNode} from "./LinkNode";
 import {UnlinkNode} from "./UnlinkNode";
 import {UUID} from "web-vcore/nm/mobx-graphlink";
-import {ClaimForm, Polarity, MapNode} from "../Store/firebase/nodes/@MapNode";
-import {GetNodeL3, GetNodeL2, IsPremiseOfMultiPremiseArgument, IsSinglePremiseArgument} from "../Store/firebase/nodes/$node";
-import {GetParentNodeL3, GetHolderType, GetParentNodeID, GetNode} from "../Store/firebase/nodes";
-import {MapNodeType} from "../Store/firebase/nodes/@MapNodeType";
-import {GetMap} from "../Store/firebase/maps";
-import {CanContributeToNode} from "../Store/firebase/users/$user";
-import {MeID} from "../Store/firebase/users";
-import {MapNodeRevision} from "../Store/firebase/nodes/@MapNodeRevision";
-import {Map} from "../Store/firebase/maps/@Map";
+import {ClaimForm, Polarity, MapNode} from "../Store/db/nodes/@MapNode";
+import {GetNodeL3, GetNodeL2, IsPremiseOfMultiPremiseArgument, IsSinglePremiseArgument} from "../Store/db/nodes/$node";
+import {GetParentNodeL3, GetHolderType, GetParentNodeID, GetNode} from "../Store/db/nodes";
+import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
+import {GetMap} from "../Store/db/maps";
+import {CanContributeToNode} from "../Store/db/users/$user";
+import {MeID} from "../Store/db/users";
+import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
+import {Map} from "../Store/db/maps/@Map";
 import {SearchUpFromNodeForNodeMatchingX} from "../Utils/Store/PathFinder";
 
 type Payload = {
