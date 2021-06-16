@@ -1,5 +1,5 @@
-import {E} from "js-vextensions";
-import {BaseComponent} from "react-vextensions";
+import {E} from "web-vcore/nm/js-vextensions";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {VReactMarkdown, PageContainer} from "vwebapp-framework";
 import {styles} from "../../Utils/UI/GlobalStyles";
 

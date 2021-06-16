@@ -1,4 +1,4 @@
-import {AV, Command} from "mobx-firelink";
+import {AV, Command} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {MapNodeTag} from "../Store/firebase/nodeTags/@MapNodeTag";
 import {GetNodeTag} from "../Store/firebase/nodeTags";

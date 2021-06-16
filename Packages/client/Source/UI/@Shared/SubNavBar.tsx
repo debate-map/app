@@ -1,5 +1,5 @@
-import {E} from "js-vextensions";
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+import {E} from "web-vcore/nm/js-vextensions";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {rootPageDefaultChilds} from "Utils/URL/URLs";
 import {ActionFunc, Link, Observer} from "vwebapp-framework";
 import {store, RootState} from "Store";

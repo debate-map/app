@@ -1,6 +1,6 @@
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {Row, Text, Column} from "react-vcomponents";
-import {VURL} from "js-vextensions";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {Row, Text, Column} from "web-vcore/nm/react-vcomponents";
+import {VURL} from "web-vcore/nm/js-vextensions";
 import {Link} from "vwebapp-framework";
 import {SourceChain, Source} from "@debate-map/server-link/Source/Link";
 

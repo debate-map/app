@@ -1,7 +1,7 @@
-import {Column, Div} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
+import {Column, Div} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {VReactMarkdown_Remarkable, Observer} from "vwebapp-framework";
-import {E} from "js-vextensions";
+import {E} from "web-vcore/nm/js-vextensions";
 import {Timeline} from "@debate-map/server-link/Source/Link";
 import {GetTimelineStep} from "@debate-map/server-link/Source/Link";
 

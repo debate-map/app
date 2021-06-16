@@ -1,7 +1,7 @@
-import {Assert} from "js-vextensions";
-import {Command, AssertV} from "mobx-firelink";
+import {Assert} from "web-vcore/nm/js-vextensions";
+import {Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
-import {AssertValidate, GenerateUUID} from "mobx-firelink";
+import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
 import {MapNodeTag} from "../Store/firebase/nodeTags/@MapNodeTag";
 import {HasModPermissions} from "../Store/firebase/users/$user";
 import {GetNode} from "../Store/firebase/nodes";

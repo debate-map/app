@@ -1,9 +1,9 @@
 import {StandardCompProps} from "Utils/UI/General";
-import {DeepGet, E, SleepAsync, Timer, Vector2, FindDOMAll, Assert, FromJSON, ToJSON, VRect, GetTreeNodesInObjTree} from "js-vextensions";
-import {Column, Row} from "react-vcomponents";
-import {BaseComponentWithConnector, FindReact, GetDOM, BaseComponentPlus, BaseComponent} from "react-vextensions";
+import {DeepGet, E, SleepAsync, Timer, Vector2, FindDOMAll, Assert, FromJSON, ToJSON, VRect, GetTreeNodesInObjTree} from "web-vcore/nm/js-vextensions";
+import {Column, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentWithConnector, FindReact, GetDOM, BaseComponentPlus, BaseComponent} from "web-vcore/nm/react-vextensions";
 import {VMenuStub, VMenuItem} from "react-vmenu";
-import {ScrollView} from "react-vscrollview";
+import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {TimelinePlayerUI} from "UI/@Shared/Timelines/TimelinePlayerUI";
 import {GetDistanceBetweenRectAndPoint, inFirefox, GetScreenRect, StoreAction, Observer} from "vwebapp-framework";
 import {GADDemo} from "UI/@GAD/GAD";

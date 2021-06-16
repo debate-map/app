@@ -1,6 +1,6 @@
-import {emptyArray, FromJSON, GetValues, ToNumber, emptyArray_forLoading} from "js-vextensions";
+import {emptyArray, FromJSON, GetValues, ToNumber, emptyArray_forLoading} from "web-vcore/nm/js-vextensions";
 import {O} from "vwebapp-framework";
-import {StoreAccessor} from "mobx-firelink";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetNode, Timeline, GetTimeline, GetTimelineStep, GetNodesRevealedInSteps, GetMap, GetTimelineSteps, TimelineStep, GetNodeRevealTimesInSteps} from "@debate-map/server-link/Source/Link";
 import {TimelineSubpanel, ShowChangesSinceType} from "./@MapState";
 

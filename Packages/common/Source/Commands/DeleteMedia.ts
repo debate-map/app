@@ -1,5 +1,5 @@
 import {UserEdit} from "../CommandMacros";
-import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
+import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {Media} from "../Store/firebase/media/@Media";
 import {GetMedia, IsUserCreatorOrMod} from "../Commands";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";

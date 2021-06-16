@@ -1,4 +1,4 @@
-import {ModifyString} from "js-vextensions";
+import {ModifyString} from "web-vcore/nm/js-vextensions";
 
 export function PropNameToTitle(propName: string) {
 	return ModifyString(propName, m=>[m.lowerUpper_to_lowerSpaceLower, m.startLower_to_upper]);

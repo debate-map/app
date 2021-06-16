@@ -1,6 +1,6 @@
 import {GetValues_ForSchema, CE} from "../../../../Commands/node_modules/js-vextensions";
 import {AddSchema, GetSchemaJSON, Schema, UUID_regex} from "../../../../Commands/node_modules/mobx-firelink";
-import {ObservableMap} from "mobx";
+import {ObservableMap} from "web-vcore/nm/mobx";
 import {MapNodeRevision_Defaultable, MapNodeRevision_Defaultable_props, MapNodeRevision_Defaultable_DefaultsForMap} from "../nodes/@MapNodeRevision";
 
 export enum MapType {

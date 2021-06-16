@@ -1,9 +1,9 @@
-import {FromJSON, GetEntries, ToNumber, E} from "js-vextensions";
-import {Pre, Row, Select} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
+import {FromJSON, GetEntries, ToNumber, E} from "web-vcore/nm/js-vextensions";
+import {Pre, Row, Select} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {store} from "Store";
 import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState";
-import {runInAction} from "mobx";
+import {runInAction} from "web-vcore/nm/mobx";
 import {Observer, HSLA} from "vwebapp-framework";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {Map, WeightingType} from "@debate-map/server-link/Source/Link";

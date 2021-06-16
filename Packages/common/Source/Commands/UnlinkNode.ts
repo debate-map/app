@@ -1,9 +1,9 @@
-import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
+import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {GetNode, IsRootNode, IsNodeSubnode} from "../Store/firebase/nodes";
 import {GetNodeL2} from "../Store/firebase/nodes/$node";
 import {IsUserCreatorOrMod} from "../Store/firebase/users/$user";
-import {CE} from "js-vextensions";
+import {CE} from "web-vcore/nm/js-vextensions";
 
 // todo: add full-fledged checking to ensure that nodes are never orphaned by move commands (probably use parents recursion to find at least one map root)
 

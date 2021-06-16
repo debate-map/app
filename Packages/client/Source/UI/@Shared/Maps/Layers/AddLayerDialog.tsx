@@ -1,5 +1,5 @@
-import {Column, Row} from "react-vcomponents";
-import {ShowMessageBox} from "react-vmessagebox";
+import {Column, Row} from "web-vcore/nm/react-vcomponents";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {Layer} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";
 import {AddLayer} from "@debate-map/server-link/Source/Link";

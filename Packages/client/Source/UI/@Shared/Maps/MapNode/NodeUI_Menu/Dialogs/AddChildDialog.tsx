@@ -1,7 +1,7 @@
-import {Assert, E, GetEntries, OmitIfFalsy} from "js-vextensions";
-import {runInAction} from "mobx";
-import {CheckBox, Column, Pre, Row, Select, Text, TextArea} from "react-vcomponents";
-import {ShowMessageBox} from "react-vmessagebox";
+import {Assert, E, GetEntries, OmitIfFalsy} from "web-vcore/nm/js-vextensions";
+import {runInAction} from "web-vcore/nm/mobx";
+import {CheckBox, Column, Pre, Row, Select, Text, TextArea} from "web-vcore/nm/react-vcomponents";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {store} from "Store";
 import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView";
 import {ES} from "Utils/UI/GlobalStyles";

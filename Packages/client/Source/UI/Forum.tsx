@@ -1,5 +1,5 @@
 // import { ForumUI as ForumUI_Base } from 'firebase-forum';
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
 
 export class ForumUI extends BaseComponent<{}, {}> {
 	render() {

@@ -1,6 +1,6 @@
-import {Assert, E} from "js-vextensions";
-import {Command_Old, MergeDBUpdates, GetAsync, Command, AssertV} from "mobx-firelink";
-import {AssertValidate} from "mobx-firelink";
+import {Assert, E} from "web-vcore/nm/js-vextensions";
+import {Command_Old, MergeDBUpdates, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {AddNode} from "./AddNode";
 import {MapNode, ChildEntry, Polarity} from "../Store/firebase/nodes/@MapNode";

@@ -1,6 +1,6 @@
 import {MapEdit, UserEdit} from "../CommandMacros";
-import {AddSchema, AssertValidate} from "mobx-firelink";
-import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
+import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
+import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {MapNode} from "../Store/firebase/nodes/@MapNode";
 import {GetNode} from "../Store/firebase/nodes";
 import {HasAdminPermissions, IsUserCreatorOrMod} from "../Store/firebase/users/$user";

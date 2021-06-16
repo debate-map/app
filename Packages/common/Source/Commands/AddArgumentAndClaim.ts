@@ -1,7 +1,7 @@
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {MapNodeRevision} from "../Store/firebase/nodes/@MapNodeRevision";
-import {Command_Old, MergeDBUpdates, Command} from "mobx-firelink";
-import {AssertValidate} from "mobx-firelink";
+import {Command_Old, MergeDBUpdates, Command} from "web-vcore/nm/mobx-graphlink";
+import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {ChildEntry, MapNode} from "../Store/firebase/nodes/@MapNode";
 import {AddChildNode} from "./AddChildNode";
 

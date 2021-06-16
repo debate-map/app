@@ -1,6 +1,6 @@
-import {GetEntries} from "js-vextensions";
-import {CheckBox, Row, RowLR, Select, Text} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
+import {GetEntries} from "web-vcore/nm/js-vextensions";
+import {CheckBox, Row, RowLR, Select, Text} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {GetOpenMapID} from "Store/main";
 import {InfoButton} from "vwebapp-framework";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";

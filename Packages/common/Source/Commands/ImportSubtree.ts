@@ -1,6 +1,6 @@
-import {AssertV, Command, MergeDBUpdates, GenerateUUID} from "mobx-firelink";
-import {AssertValidate, Validate} from "mobx-firelink";
-import {FromJSON, GetTreeNodesInObjTree, Clone, CE, DEL} from "js-vextensions";
+import {AssertV, Command, MergeDBUpdates, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
+import {AssertValidate, Validate} from "web-vcore/nm/mobx-graphlink";
+import {FromJSON, GetTreeNodesInObjTree, Clone, CE, DEL} from "web-vcore/nm/js-vextensions";
 import {AddChildNode} from "./AddChildNode";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel";
 import {LinkNode} from "./LinkNode";

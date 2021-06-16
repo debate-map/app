@@ -1,11 +1,11 @@
-import {DN, Range, Vector2} from "js-vextensions";
-import {Pre, Select, Spinner} from "react-vcomponents";
-import {BaseComponent, RenderSource, BaseComponentPlus} from "react-vextensions";
-import {ShowMessageBox} from "react-vmessagebox";
+import {DN, Range, Vector2} from "web-vcore/nm/js-vextensions";
+import {Pre, Select, Spinner} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, RenderSource, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {Area, AreaChart, CartesianGrid, ReferenceLine, Tooltip, XAxis, YAxis} from "recharts";
 import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI";
-import {SlicePath} from "mobx-firelink";
+import {SlicePath} from "web-vcore/nm/mobx-graphlink";
 import {Observer} from "vwebapp-framework";
 import {MapNodeL3} from "@debate-map/server-link/Source/Link";
 import {RatingType, GetRatingTypeInfo} from "@debate-map/server-link/Source/Link";

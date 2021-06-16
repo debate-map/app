@@ -1,8 +1,8 @@
-import {AssertV, AssertValidate, AssertValidate_Full, Command, GenerateUUID, GetSchemaJSON, MergeDBUpdates} from "mobx-firelink";
+import {AssertV, AssertValidate, AssertValidate_Full, Command, GenerateUUID, GetSchemaJSON, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink";
 import {MapNode} from "../Store/firebase/nodes/@MapNode";
 import {MapNodeRevision} from "../Store/firebase/nodes/@MapNodeRevision";
 import {AddNodeRevision} from "./AddNodeRevision";
-import {CE} from "js-vextensions";
+import {CE} from "web-vcore/nm/js-vextensions";
 
 /** Do not use this from client-side code. This is only to be used internally, by higher-level commands -- usually AddChildNode. */
 export class AddNode extends Command<{mapID: string, node: MapNode, revision: MapNodeRevision}, {}> {

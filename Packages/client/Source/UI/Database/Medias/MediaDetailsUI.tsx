@@ -1,11 +1,11 @@
-import {GetEntries, GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "js-vextensions";
-import Moment from "moment";
-import {Column, Div, Pre, Row, RowLR, Select, Spinner, TextInput, CheckBox, Text, Span} from "react-vcomponents";
-import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
-import {ScrollView} from "react-vscrollview";
+import {GetEntries, GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
+import Moment from "web-vcore/nm/moment";
+import {Column, Div, Pre, Row, RowLR, Select, Spinner, TextInput, CheckBox, Text, Span} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {ES} from "Utils/UI/GlobalStyles";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
-import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {Media, Media_namePattern, MediaType, GetNiceNameForMediaType} from "@debate-map/server-link/Source/Link";
 import {SourceChainsEditorUI} from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
 import {YoutubePlayerUI, InfoButton, HSLA, ParseYoutubeVideoID} from "vwebapp-framework";

@@ -1,7 +1,7 @@
-import {E} from "js-vextensions";
-import {runInAction} from "mobx";
-import {SlicePath} from "mobx-firelink";
-import {BaseComponent, BaseComponentPlus, WarnOfTransientObjectProps} from "react-vextensions";
+import {E} from "web-vcore/nm/js-vextensions";
+import {runInAction} from "web-vcore/nm/mobx";
+import {SlicePath} from "web-vcore/nm/mobx-graphlink";
+import {BaseComponent, BaseComponentPlus, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
 import {VMenuItem, VMenuStub} from "react-vmenu";
 import {store} from "Store";
 import {GetPathsToNodesChangedSinceX} from "Store/firebase_ext/mapNodeEditTimes";

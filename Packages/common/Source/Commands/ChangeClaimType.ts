@@ -1,7 +1,7 @@
-import {GetValues_ForSchema, CE} from "js-vextensions";
-import {AssertV, AV, Command} from "mobx-firelink";
+import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
+import {AssertV, AV, Command} from "web-vcore/nm/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
-import {AddSchema, AssertValidate, GenerateUUID} from "mobx-firelink";
+import {AddSchema, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
 import {AttachmentType, GetAttachmentType} from "../Store/firebase/nodeRevisions/@AttachmentType";
 import {MapNode} from "../Store/firebase/nodes/@MapNode";
 import {MapNodeRevision} from "../Store/firebase/nodes/@MapNodeRevision";

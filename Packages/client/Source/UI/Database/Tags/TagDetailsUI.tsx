@@ -1,11 +1,11 @@
-import {Clone, E, DelIfFalsy, CloneWithPrototypes} from "js-vextensions";
-import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox, Button} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
-import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {Clone, E, DelIfFalsy, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
+import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox, Button} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {ES} from "Utils/UI/GlobalStyles";
 import {InfoButton, observer_simple} from "vwebapp-framework";
-import {Validate} from "mobx-firelink";
+import {Validate} from "web-vcore/nm/mobx-graphlink";
 import {GetNodeL2, AsNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
 import {MapNodeType} from "@debate-map/server-link/Source/Link";
 import {AddNodeTag} from "@debate-map/server-link/Source/Link";

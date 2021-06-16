@@ -1,5 +1,5 @@
-import {CE} from "js-vextensions";
-import {AssertV, AssertValidate, Command, GenerateUUID, WrapDBValue} from "mobx-firelink";
+import {CE} from "web-vcore/nm/js-vextensions";
+import {AssertV, AssertValidate, Command, GenerateUUID, WrapDBValue} from "web-vcore/nm/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {GetNode} from "../Store/firebase/nodes";
 import {MapNode} from "../Store/firebase/nodes/@MapNode";

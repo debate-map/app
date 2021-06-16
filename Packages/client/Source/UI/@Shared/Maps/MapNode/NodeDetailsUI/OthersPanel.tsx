@@ -1,6 +1,6 @@
-import {ToNumber} from "js-vextensions";
-import {Pre, Row, Spinner} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
+import {ToNumber} from "web-vcore/nm/js-vextensions";
+import {Pre, Row, Spinner} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 import {HasAdminPermissions} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";

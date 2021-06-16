@@ -1,8 +1,8 @@
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import React from "react";
-import {ButtonProps, Button} from "react-vcomponents";
+import {ButtonProps, Button} from "web-vcore/nm/react-vcomponents";
 import {HSLA} from "vwebapp-framework";
-import {E} from "js-vextensions";
+import {E} from "web-vcore/nm/js-vextensions";
 
 export class Button_GAD extends BaseComponent<{} & ButtonProps, {}> {
 	render() {

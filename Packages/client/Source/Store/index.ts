@@ -1,8 +1,8 @@
-import {configure, onReactionError} from "mobx";
+import {configure, onReactionError} from "web-vcore/nm/mobx";
 import {O, HandleError, ConfigureMobX} from "vwebapp-framework";
-import {ignore} from "mobx-sync";
-import {Firelink} from "mobx-firelink";
-import {immerable, setUseProxies, setAutoFreeze} from "immer";
+import {ignore} from "web-vcore/nm/mobx-sync";
+import {Firelink} from "web-vcore/nm/mobx-graphlink";
+import {immerable, setUseProxies, setAutoFreeze} from "web-vcore/nm/immer";
 import {Feedback_RootState} from "firebase-feedback";
 import {FirebaseDBShape} from "@debate-map/server-link/Source/Link";
 import {MainState} from "./main";

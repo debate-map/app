@@ -1,4 +1,4 @@
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoID} from "vwebapp-framework";
 import {MapNodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType} from "@debate-map/server-link/Source/Link";
 import {SourcesUI} from "./SourcesUI";

@@ -1,6 +1,6 @@
 import {UserEdit} from "../CommandMacros";
-import {Command_Old, Command, AssertV} from "mobx-firelink";
-import {AssertValidate, GenerateUUID} from "mobx-firelink";
+import {Command_Old, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
 import {HasModPermissions} from "../Store/firebase/users/$user";
 import {Media} from "../Store/firebase/media/@Media";
 

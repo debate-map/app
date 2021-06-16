@@ -1,4 +1,4 @@
-import {autorun} from "mobx";
+import {autorun} from "web-vcore/nm/mobx";
 import {GetCurrentURL_SimplifiedForPageViewTracking, DoesURLChangeCountAsPageChange, RecordPageView} from "Utils/URL/URLs";
 
 let pageViewTracker_lastURL;

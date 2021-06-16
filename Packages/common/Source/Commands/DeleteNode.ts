@@ -1,4 +1,4 @@
-import {AddSchema, AssertV, AssertValidate, Command, MergeDBUpdates, WrapDBValue} from "mobx-firelink";
+import {AddSchema, AssertV, AssertValidate, Command, MergeDBUpdates, WrapDBValue} from "web-vcore/nm/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {MapNodeL2} from "../Store/firebase/nodes/@MapNode";
 import {MapNodeRevision} from "../Store/firebase/nodes/@MapNodeRevision";
@@ -6,7 +6,7 @@ import {GetNodeL2} from "../Store/firebase/nodes/$node";
 import {GetNodeRevisions} from "../Store/firebase/nodeRevisions";
 import {GetNode, ForDelete_GetError} from "../Store/firebase/nodes";
 import {GetMaps} from "../Store/firebase/maps";
-import {CE} from "js-vextensions";
+import {CE} from "web-vcore/nm/js-vextensions";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
 import {AddMap} from "./AddMap";
 

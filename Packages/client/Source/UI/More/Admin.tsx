@@ -1,9 +1,9 @@
-import {Assert, AwaitTree, SleepAsync, E, IsObject} from "js-vextensions";
+import {Assert, AwaitTree, SleepAsync, E, IsObject} from "web-vcore/nm/js-vextensions";
 import {dbVersion} from "Main";
-import {ConvertDataToValidDBUpdates, DBPath, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached, ApplyDBUpdates} from "mobx-firelink";
-import {Button, Column, Row} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {ShowMessageBox} from "react-vmessagebox";
+import {ConvertDataToValidDBUpdates, DBPath, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached, ApplyDBUpdates} from "web-vcore/nm/mobx-graphlink";
+import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {PageContainer, Observer} from "vwebapp-framework";
 import {HasAdminPermissions, MeID, ValidateDBData, FirebaseDBShape} from "@debate-map/server-link/Source/Link";
 

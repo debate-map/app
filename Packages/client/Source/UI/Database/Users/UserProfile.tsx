@@ -1,13 +1,13 @@
-import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
-import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select, ColorPickerBox, Text} from "react-vcomponents";
-import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select, ColorPickerBox, Text} from "web-vcore/nm/react-vcomponents";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds";
 import {PageContainer, Observer} from "vwebapp-framework";
 import {styles, ES} from "Utils/UI/GlobalStyles";
 import {Fragment} from "react";
 import {PropNameToTitle} from "Utils/General/Others";
-import {ScrollView} from "react-vscrollview";
-import {E} from "js-vextensions";
+import {ScrollView} from "web-vcore/nm/react-vscrollview";
+import {E} from "web-vcore/nm/js-vextensions";
 import {MeID, GetUser,GetUser_Private,GetUserPermissionGroups,SetUserData,SetUserData_Private,User} from "@debate-map/server-link/Source/Link";
 
 

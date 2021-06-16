@@ -1,7 +1,7 @@
-import {E} from "js-vextensions";
-import {runInAction} from "mobx";
-import {Button, Row} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
+import {E} from "web-vcore/nm/js-vextensions";
+import {runInAction} from "web-vcore/nm/mobx";
+import {Button, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {store} from "Store";
 import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {GADDemo, GADDemo_2020} from "UI/@GAD/GAD";

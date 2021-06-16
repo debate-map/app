@@ -1,10 +1,10 @@
-import {CE, Clone, GetEntries, ToJSON, StartDownload} from "js-vextensions";
-import {runInAction} from "mobx";
-import {ApplyDBUpdates, StoreAccessor} from "mobx-firelink";
-import {Column, Row, Select, TextArea, Button, Text, Spinner, CheckBox} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
+import {CE, Clone, GetEntries, ToJSON, StartDownload} from "web-vcore/nm/js-vextensions";
+import {runInAction} from "web-vcore/nm/mobx";
+import {ApplyDBUpdates, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {Column, Row, Select, TextArea, Button, Text, Spinner, CheckBox} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {VMenuItem} from "react-vmenu";
-import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {ES, styles} from "Utils/UI/GlobalStyles";
 import {AddChildNode} from "@debate-map/server-link/Source/Link";
 import {ImportSubtree} from "@debate-map/server-link/Source/Link";

@@ -1,4 +1,4 @@
-import {BaseComponentPlus} from "react-vextensions";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {MapType} from "@debate-map/server-link/Source/Link";
 import {MapListUI} from "./@Shared/Maps/MapListUI";
 

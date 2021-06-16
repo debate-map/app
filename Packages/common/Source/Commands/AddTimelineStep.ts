@@ -1,9 +1,9 @@
 import {UserEdit} from "../CommandMacros";
-import {AssertValidate, GenerateUUID} from "mobx-firelink";
-import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
+import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
+import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {TimelineStep} from "../Store/firebase/timelineSteps/@TimelineStep";
 import {GetTimeline} from "../Store/firebase/timelines";
-import {CE} from "js-vextensions";
+import {CE} from "web-vcore/nm/js-vextensions";
 
 @UserEdit
 export class AddTimelineStep extends Command<{timelineID: string, step: TimelineStep, stepIndex?: number}, {}> {

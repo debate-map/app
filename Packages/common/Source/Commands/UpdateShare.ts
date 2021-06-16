@@ -1,5 +1,5 @@
-import {CE} from "js-vextensions";
-import {AddSchema, AssertV, AssertValidate, Command, GetSchemaJSON, Schema} from "mobx-firelink";
+import {CE} from "web-vcore/nm/js-vextensions";
+import {AddSchema, AssertV, AssertValidate, Command, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {Media} from "../Store/firebase/media/@Media";
 import {GetMedia, Share, GetShare} from "../Commands";

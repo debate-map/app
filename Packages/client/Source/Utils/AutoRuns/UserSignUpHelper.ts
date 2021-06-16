@@ -1,5 +1,5 @@
-import {autorun} from "mobx";
-import {DBPath, GetAsync, GetDoc} from "mobx-firelink";
+import {autorun} from "web-vcore/nm/mobx";
+import {DBPath, GetAsync, GetDoc} from "web-vcore/nm/mobx-graphlink";
 import {fire, GetUser, GetUser_Private, SetUserData, SetUserData_Private} from "@debate-map/server-link/Source/Link";
 
 let lastUserInfo;

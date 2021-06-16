@@ -1,8 +1,8 @@
-import {E} from "js-vextensions";
-import {runInAction} from "mobx";
-import {Button, Column, Row, Select} from "react-vcomponents";
-import {BaseComponentPlus, UseCallback} from "react-vextensions";
-import {ScrollView} from "react-vscrollview";
+import {E} from "web-vcore/nm/js-vextensions";
+import {runInAction} from "web-vcore/nm/mobx";
+import {Button, Column, Row, Select} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus, UseCallback} from "web-vcore/nm/react-vextensions";
+import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {store} from "Store";
 import {GetSelectedPrivateMap} from "Store/main/private";
 import {GetSelectedPublicMap} from "Store/main/public";

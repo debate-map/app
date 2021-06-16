@@ -1,5 +1,5 @@
-import {Button, Column, Pre, Row} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
+import {Button, Column, Pre, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddPhrasingDialog} from "UI/Database/Phrasings/PhrasingDetailsUI";
 import {InfoButton, Observer} from "vwebapp-framework";

@@ -1,4 +1,4 @@
-import {AssertV, AV, Command, GetDocs} from "mobx-firelink";
+import {AssertV, AV, Command, GetDocs} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {Layer} from "../Store/firebase/layers/@Layer";
 import {UserMapInfoSet} from "../Store/firebase/userMapInfo/@UserMapInfo";

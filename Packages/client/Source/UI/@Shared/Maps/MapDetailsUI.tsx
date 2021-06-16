@@ -1,7 +1,7 @@
-import {GetErrorMessagesUnderElement, Clone, ToNumber, DEL, CloneWithPrototypes, GetEntries} from "js-vextensions";
-import Moment from "moment";
-import {CheckBox, Column, Pre, RowLR, Spinner, TextInput, Row, Select} from "react-vcomponents";
-import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
+import {GetErrorMessagesUnderElement, Clone, ToNumber, DEL, CloneWithPrototypes, GetEntries} from "web-vcore/nm/js-vextensions";
+import Moment from "web-vcore/nm/moment";
+import {CheckBox, Column, Pre, RowLR, Spinner, TextInput, Row, Select} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {InfoButton} from "vwebapp-framework";
 import {Map_namePattern, MapType, Map, MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType, MapVisibility, IsUserCreatorOrMod, MeID} from "@debate-map/server-link/Source/Link";
 

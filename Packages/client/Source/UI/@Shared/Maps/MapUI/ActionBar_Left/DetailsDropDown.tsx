@@ -1,7 +1,7 @@
-import {GetAsync} from "mobx-firelink";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBox, Text} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
-import {ShowMessageBox} from "react-vmessagebox";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBox, Text} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {store} from "Store";
 import {MapNodeRevision_Defaultable, CanEditNode, IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, GetChildCount, DeleteMap, Map} from "@debate-map/server-link/Source/Link";
 
@@ -11,8 +11,8 @@ import {GADDemo} from "UI/@GAD/GAD";
 import {Button_GAD} from "UI/@GAD/GADButton";
 
 
-import {runInAction} from "mobx";
-import {FromJSON, ToJSON, E} from "js-vextensions";
+import {runInAction} from "web-vcore/nm/mobx";
+import {FromJSON, ToJSON, E} from "web-vcore/nm/js-vextensions";
 
 import {MapDetailsUI} from "../../MapDetailsUI";
 

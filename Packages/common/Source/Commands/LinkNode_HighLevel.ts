@@ -1,10 +1,10 @@
-import {E, OmitIfFalsy, CE, ObjectCE} from "js-vextensions";
-import {AssertV, Command, MergeDBUpdates, AV} from "mobx-firelink";
+import {E, OmitIfFalsy, CE, ObjectCE} from "web-vcore/nm/js-vextensions";
+import {AssertV, Command, MergeDBUpdates, AV} from "web-vcore/nm/mobx-graphlink";
 import {AddChildNode} from "./AddChildNode";
 import {DeleteNode} from "./DeleteNode";
 import {LinkNode} from "./LinkNode";
 import {UnlinkNode} from "./UnlinkNode";
-import {UUID} from "mobx-firelink";
+import {UUID} from "web-vcore/nm/mobx-graphlink";
 import {ClaimForm, Polarity, MapNode} from "../Store/firebase/nodes/@MapNode";
 import {GetNodeL3, GetNodeL2, IsPremiseOfMultiPremiseArgument, IsSinglePremiseArgument} from "../Store/firebase/nodes/$node";
 import {GetParentNodeL3, GetHolderType, GetParentNodeID, GetNode} from "../Store/firebase/nodes";

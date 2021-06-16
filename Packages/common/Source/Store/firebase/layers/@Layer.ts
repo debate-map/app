@@ -1,5 +1,5 @@
 import {AddSchema, UUID_regex} from "../../../../Commands/node_modules/mobx-firelink";
-import {ObservableMap} from "mobx";
+import {ObservableMap} from "web-vcore/nm/mobx";
 import {CE} from "../../../../Commands/node_modules/js-vextensions";
 
 export class Layer {

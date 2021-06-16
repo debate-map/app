@@ -1,5 +1,5 @@
-import {Command, AssertV} from "mobx-firelink";
-import {AssertValidate} from "mobx-firelink";
+import {Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {HasModPermissions} from "../Store/firebase/users/$user";
 
 export class SetMapFeatured extends Command<{id: string, featured: boolean}, {}> {

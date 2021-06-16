@@ -1,5 +1,5 @@
 import {O} from "vwebapp-framework";
-import {StoreAccessor, GetDoc} from "mobx-firelink";
+import {StoreAccessor, GetDoc} from "web-vcore/nm/mobx-graphlink";
 import {GetTerms, GetMedias, FirebaseDBShape} from "@debate-map/server-link/Source/Link";
 
 export class DatabaseState {

@@ -1,9 +1,9 @@
-import {Assert, E} from "js-vextensions";
-import {runInAction} from "mobx";
-import {Button, Column, Div, Pre, Row, Span, Text} from "react-vcomponents";
-import {BaseComponentPlus, UseEffect} from "react-vextensions";
-import {ShowMessageBox} from "react-vmessagebox";
-import {ScrollView} from "react-vscrollview";
+import {Assert, E} from "web-vcore/nm/js-vextensions";
+import {runInAction} from "web-vcore/nm/mobx";
+import {Button, Column, Div, Pre, Row, Span, Text} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {store} from "Store";
 import {GetSelectedTerm} from "Store/main/database";
 import {ES} from "Utils/UI/GlobalStyles";

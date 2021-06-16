@@ -1,14 +1,14 @@
 import {GetMap, GetMapTimelines, Share, ShareType, Timeline, GetShares, MeID, UpdateShare, AddShare, GetNodesInSubtree, MapView} from "@debate-map/server-link/Source/Link";
-import {CopyText, GetEntries, ToJSON, WaitXThenRun, VURL, ModifyString, Clone, IsObject, GetTreeNodesInObjTree, CE} from "js-vextensions";
-import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
+import {CopyText, GetEntries, ToJSON, WaitXThenRun, VURL, ModifyString, Clone, IsObject, GetTreeNodesInObjTree, CE} from "web-vcore/nm/js-vextensions";
+import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {store} from "Store";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView";
 import {ExpandType, ScrollToType} from "Store/main/shareUI";
 import {GetNewURL} from "Utils/URL/URLs";
 import {GetCurrentURL, Observer, RunInAction_Set, GetUpdates} from "vwebapp-framework";
 import {GetShareLongURL, GetShareShortURL} from "../ShareDropDown";
-import {WithFirestoreNormalization} from "mobx-firelink";
+import {WithFirestoreNormalization} from "web-vcore/nm/mobx-graphlink";
 
 @Observer
 export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeline: null as Timeline, justCopied_type: null as string}) {

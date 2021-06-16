@@ -1,9 +1,9 @@
 import _ from "lodash";
-import {ObservableMap} from "mobx";
-import {Clone} from "js-vextensions";
+import {ObservableMap} from "web-vcore/nm/mobx";
+import {Clone} from "web-vcore/nm/js-vextensions";
 import {FirebaseDBShape, globalMapID, globalRootNodeID} from "@debate-map/server-link/Source/Link";
 
-import {GenerateUUID} from "mobx-firelink";
+import {GenerateUUID} from "web-vcore/nm/mobx-graphlink";
 import {AddUpgradeFunc} from "../../Admin";
 
 const newVersion = 12;

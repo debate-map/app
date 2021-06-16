@@ -1,7 +1,7 @@
-import {SlicePath} from "mobx-firelink";
-import {BaseComponentPlus} from "react-vextensions";
+import {SlicePath} from "web-vcore/nm/mobx-graphlink";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {VMenuItem} from "react-vmenu";
-import {ShowMessageBox} from "react-vmessagebox";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {styles} from "Utils/UI/GlobalStyles";
 import {Observer} from "vwebapp-framework";
 import {GetNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";

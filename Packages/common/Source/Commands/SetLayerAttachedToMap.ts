@@ -1,7 +1,7 @@
-import {Assert} from "js-vextensions";
+import {Assert} from "web-vcore/nm/js-vextensions";
 import {MapEdit} from "../CommandMacros";
-import {AddSchema, AssertValidate} from "mobx-firelink";
-import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
+import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
+import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {Map} from "../Store/firebase/maps/@Map";
 import {GetMap} from "../Store/firebase/maps";

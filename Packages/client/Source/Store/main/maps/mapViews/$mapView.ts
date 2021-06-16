@@ -1,8 +1,8 @@
-import {Vector2, Assert, IsString, GetTreeNodesInObjTree, DeepGet, IsPrimitive, DeepSet, Timer} from "js-vextensions";
-import {observable} from "mobx";
+import {Vector2, Assert, IsString, GetTreeNodesInObjTree, DeepGet, IsPrimitive, DeepSet, Timer} from "web-vcore/nm/js-vextensions";
+import {observable} from "web-vcore/nm/mobx";
 import {O, StoreAction, LogWarning} from "vwebapp-framework";
 import {store} from "Store";
-import {SplitStringBySlash_Cached, StoreAccessor, Validate, UUID} from "mobx-firelink";
+import {SplitStringBySlash_Cached, StoreAccessor, Validate, UUID} from "web-vcore/nm/mobx-graphlink";
 import {PathSegmentToNodeID, MapView, MapNodeView} from "@debate-map/server-link/Source/Link";
 
 export function GetPathNodes(path: string) {

@@ -1,8 +1,8 @@
-import {Button, Column, Row} from "react-vcomponents";
-import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
+import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {store} from "Store";
 import {GetSelectedTimeline, GetTimelineOpenSubpanel, GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {runInAction} from "mobx";
+import {runInAction} from "web-vcore/nm/mobx";
 import {Observer} from "vwebapp-framework";
 import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState";
 import {Map} from "@debate-map/server-link/Source/Link";

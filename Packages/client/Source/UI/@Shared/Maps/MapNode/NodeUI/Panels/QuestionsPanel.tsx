@@ -1,5 +1,5 @@
-import {Div, Column} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
+import {Div, Column} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
 
 export class QuestionsPanel extends BaseComponent<{}, {}> {
 	render() {

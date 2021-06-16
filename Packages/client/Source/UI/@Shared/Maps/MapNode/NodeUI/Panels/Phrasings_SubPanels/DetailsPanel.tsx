@@ -1,9 +1,9 @@
-import {Button, Column, Row} from "react-vcomponents";
-import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
-import {ShowMessageBox} from "react-vmessagebox";
+import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI";
 import {GetUpdates, Observer} from "vwebapp-framework";
-import {E} from "js-vextensions";
+import {E} from "web-vcore/nm/js-vextensions";
 import {MapNodePhrasing} from "@debate-map/server-link/Source/Link";
 import {GetUser, MeID} from "@debate-map/server-link/Source/Link";
 import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";

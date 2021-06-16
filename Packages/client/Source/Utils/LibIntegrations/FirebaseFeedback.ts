@@ -1,6 +1,6 @@
 import {feedback_manager, Feedback_store} from "firebase-feedback";
-import {DBPath} from "mobx-firelink";
-import Moment from "moment";
+import {DBPath} from "web-vcore/nm/mobx-graphlink";
+import Moment from "web-vcore/nm/moment";
 import {store} from "Store";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {logTypes} from "Utils/General/Logging";

@@ -1,5 +1,5 @@
-import {Column, Switch} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+import {Column, Switch} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ProposalsUI} from "UI/Feedback/ProposalsUI";
 import {store} from "Store";
 import {PageContainer, VReactMarkdown} from "vwebapp-framework/Source";

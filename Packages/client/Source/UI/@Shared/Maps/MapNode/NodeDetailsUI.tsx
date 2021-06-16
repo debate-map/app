@@ -1,7 +1,7 @@
-import {Clone, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "js-vextensions";
-import {runInAction} from "mobx";
-import {Column, Row, Select} from "react-vcomponents";
-import {BaseComponentPlus, GetDOM, RenderSource} from "react-vextensions";
+import {Clone, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
+import {runInAction} from "web-vcore/nm/mobx";
+import {Column, Row, Select} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vextensions";
 import {store} from "Store";
 import {Observer} from "vwebapp-framework";
 import {DetailsPanel_Subpanel} from "Store/main/maps";

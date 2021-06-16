@@ -1,6 +1,6 @@
-import {E, GetEntries, WaitXThenRun, DelIfFalsy} from "js-vextensions";
-import {Button, Column, Div, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Select, Text, TextArea, TextInput} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus, RenderSource} from "react-vextensions";
+import {E, GetEntries, WaitXThenRun, DelIfFalsy} from "web-vcore/nm/js-vextensions";
+import {Button, Column, Div, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, BaseComponentPlus, RenderSource} from "web-vcore/nm/react-vextensions";
 import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI";
 import {ES} from "Utils/UI/GlobalStyles";
 import {TermDefinitionPanel} from "../NodeUI/Panels/DefinitionsPanel";

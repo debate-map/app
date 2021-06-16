@@ -1,6 +1,6 @@
 import {UserEdit} from "../CommandMacros";
-import {Command_Old, Command} from "mobx-firelink";
-import {AssertValidate, GenerateUUID} from "mobx-firelink";
+import {Command_Old, Command} from "web-vcore/nm/mobx-graphlink";
+import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
 import {Timeline} from "../Store/firebase/timelines/@Timeline";
 
 @UserEdit

@@ -1,4 +1,4 @@
-import {ObservableMap} from "mobx";
+import {ObservableMap} from "web-vcore/nm/mobx";
 
 export type UserMapInfoSet = {
 	_key: string;

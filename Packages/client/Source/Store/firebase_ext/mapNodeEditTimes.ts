@@ -1,5 +1,5 @@
-import {StoreAccessor} from "mobx-firelink";
-import {emptyArray, CE} from "js-vextensions";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {emptyArray, CE} from "web-vcore/nm/js-vextensions";
 import {GetMapNodeEditTimes, GetRootNodeID, GetNode, SearchUpFromNodeForNodeMatchingX, GetNodeID, MapNode, ChangeType} from "@debate-map/server-link/Source/Link";
 import {GetLastAcknowledgementTime} from "../main/maps";
 

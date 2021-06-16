@@ -1,7 +1,7 @@
-import {CloneWithPrototypes} from "js-vextensions";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput, Pre} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
-import {ShowMessageBox} from "react-vmessagebox";
+import {CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput, Pre} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {GADDemo} from "UI/@GAD/GAD";
 import {Button_GAD} from "UI/@GAD/GADButton";
 import {InfoButton, RunInAction_Set, Observer} from "vwebapp-framework";

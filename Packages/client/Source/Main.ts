@@ -11,12 +11,12 @@ import "./Utils/UI/CodeMirrorConfig";
 // needed to fix odd ts issue (where, if first "import" call for library is in vwaf, all subsequent imports of it are assumed to be referencing that under-vwaf version)
 import "mobx-firelink";
 
-import ReactDOM from "react-dom";
+import ReactDOM from "web-vcore/nm/react-dom";
 // import Promise from "bluebird";
-import {VURL} from "js-vextensions";
+import {VURL} from "web-vcore/nm/js-vextensions";
 import {RootState} from "Store";
 import {O} from "vwebapp-framework";
-import {observable} from "mobx";
+import {observable} from "web-vcore/nm/mobx";
 
 // startup (non-hot)
 // ==========

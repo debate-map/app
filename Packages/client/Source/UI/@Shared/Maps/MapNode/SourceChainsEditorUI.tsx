@@ -1,13 +1,13 @@
-import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
-import {Button, Column, Row, TextInput, Select, Text, Pre} from "react-vcomponents";
-import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWithPrototypes} from "js-vextensions";
+import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {Button, Column, Row, TextInput, Select, Text, Pre} from "web-vcore/nm/react-vcomponents";
+import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
 import {ES} from "Utils/UI/GlobalStyles";
 import {Fragment} from "react";
-import {ShowMessageBox} from "react-vmessagebox";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern} from "@debate-map/server-link/Source/Link";
-import {Validate} from "mobx-firelink";
+import {Validate} from "web-vcore/nm/mobx-graphlink";
 import {VDateTime} from "vwebapp-framework";
-import Moment from "moment";
+import Moment from "web-vcore/nm/moment";
 
 type SharedProps = {enabled: boolean, Change: (..._)=>void};
 

@@ -1,6 +1,6 @@
 import {UserEdit} from "../CommandMacros";
-import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
-import {CE} from "js-vextensions";
+import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {CE} from "web-vcore/nm/js-vextensions";
 import {GetTimeline} from "../Store/firebase/timelines";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
 

@@ -1,7 +1,7 @@
 import {GetMap, GetShare, MapType, ShareType} from "@debate-map/server-link/Source/Link";
-import {Assert} from "js-vextensions";
-import {autorun, runInAction} from "mobx";
-import {GetAsync} from "mobx-firelink";
+import {Assert} from "web-vcore/nm/js-vextensions";
+import {autorun, runInAction} from "web-vcore/nm/mobx";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {store} from "Store";
 import {AddNotificationMessage} from "Store/main/@NotificationMessage";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView";

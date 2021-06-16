@@ -1,7 +1,7 @@
-import {ShowMessageBox} from "react-vmessagebox";
-import {observable} from "mobx";
-import {ConvertDataToValidDBUpdates, ApplyDBUpdates, DBPath, GenerateUUID} from "mobx-firelink";
-import {E} from "js-vextensions";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {observable} from "web-vcore/nm/mobx";
+import {ConvertDataToValidDBUpdates, ApplyDBUpdates, DBPath, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
+import {E} from "web-vcore/nm/js-vextensions";
 import {MeID} from "@debate-map/server-link/Source/Link";
 import {User} from "@debate-map/server-link/Source/Link";
 import {MapType, Map} from "@debate-map/server-link/Source/Link";

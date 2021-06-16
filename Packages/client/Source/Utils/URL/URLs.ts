@@ -1,6 +1,6 @@
 import {GetSelectedProposalID} from "firebase-feedback";
-import {Assert, VURL, ModifyString} from "js-vextensions";
-import {StoreAccessor} from "mobx-firelink";
+import {Assert, VURL, ModifyString} from "web-vcore/nm/js-vextensions";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import ReactGA from "react-ga";
 import {RootState} from "Store";
 import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";

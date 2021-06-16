@@ -1,8 +1,8 @@
-import {E} from "js-vextensions";
-import {IsAuthValid} from "mobx-firelink";
-import {Button, Column, Div, Row} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "react-vextensions";
-import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {E} from "web-vcore/nm/js-vextensions";
+import {IsAuthValid} from "web-vcore/nm/mobx-graphlink";
+import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {HandleError, Link, Observer} from "vwebapp-framework";
 import {fire} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";

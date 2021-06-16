@@ -1,6 +1,6 @@
-import {OMIT} from "js-vextensions";
-import {Column, Row} from "react-vcomponents";
-import {ShowMessageBox} from "react-vmessagebox";
+import {OMIT} from "web-vcore/nm/js-vextensions";
+import {Column, Row} from "web-vcore/nm/react-vcomponents";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {MapType, Map} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";
 import {AddMap} from "@debate-map/server-link/Source/Link";

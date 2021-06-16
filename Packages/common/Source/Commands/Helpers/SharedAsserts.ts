@@ -1,4 +1,4 @@
-import {Command, AssertV} from "mobx-firelink";
+import {Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {IsUserCreatorOrMod} from "../../Commands";
 
 export function AssertExistsAndUserIsCreatorOrMod(command: Command<any, any>, entity: {creator?: string}, act = "modify or delete") {

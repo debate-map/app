@@ -1,6 +1,6 @@
-import {E} from "js-vextensions";
-import {Button} from "react-vcomponents";
-import {BaseComponent, UseCallback} from "react-vextensions";
+import {E} from "web-vcore/nm/js-vextensions";
+import {Button} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, UseCallback} from "web-vcore/nm/react-vextensions";
 import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {HSLA, Observer} from "vwebapp-framework";

@@ -1,13 +1,13 @@
-import {ToJSON, Vector2, VRect, WaitXThenRun, GetEntries, Clone, DEL, E} from "js-vextensions";
+import {ToJSON, Vector2, VRect, WaitXThenRun, GetEntries, Clone, DEL, E} from "web-vcore/nm/js-vextensions";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "react-beautiful-dnd";
-import {Button, CheckBox, Column, Pre, Row, Select, Text, TextArea, TimeSpanInput, Spinner} from "react-vcomponents";
-import {BaseComponentPlus, GetDOM, ShallowChanged} from "react-vextensions";
-import {ShowMessageBox} from "react-vmessagebox";
+import {Button, CheckBox, Column, Pre, Row, Select, Text, TextArea, TimeSpanInput, Spinner} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus, GetDOM, ShallowChanged} from "web-vcore/nm/react-vextensions";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {DragInfo, MakeDraggable, Observer} from "vwebapp-framework";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures";
 import {UUIDPathStub} from "UI/@Shared/UUIDStub";
 import {GetPathNodes} from "Store/main/maps/mapViews/$mapView";
-import {GetAsync} from "mobx-firelink";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {VMenuStub, VMenuItem} from "react-vmenu";
 import {styles} from "Utils/UI/GlobalStyles";
 import {zIndexes} from "Utils/UI/ZIndexes";

@@ -1,14 +1,14 @@
-import {autorun, action} from "mobx";
+import {autorun, action} from "web-vcore/nm/mobx";
 import {GetPlayingTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {GetOpenMapID} from "Store/main";
 import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView";
 import {store} from "Store";
 import {MapUI, ACTUpdateFocusNodeAndViewOffset} from "UI/@Shared/Maps/MapUI";
-import {SleepAsync, VRect} from "js-vextensions";
+import {SleepAsync, VRect} from "web-vcore/nm/js-vextensions";
 import {NodeUI_Inner} from "UI/@Shared/Maps/MapNode/NodeUI_Inner";
-import {GetDOM} from "react-vextensions";
+import {GetDOM} from "web-vcore/nm/react-vextensions";
 import {GetScreenRect} from "vwebapp-framework";
-import {SlicePath, GetAsync} from "mobx-firelink";
+import {SlicePath, GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {GetTimelineStep, GetNodesRevealedInSteps} from "@debate-map/server-link/Source/Link";
 
 /* function AreSetsEqual(setA, setB) {

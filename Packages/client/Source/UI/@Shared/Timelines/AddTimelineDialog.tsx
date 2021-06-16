@@ -1,5 +1,5 @@
-import {Column, Row} from "react-vcomponents";
-import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {Column, Row} from "web-vcore/nm/react-vcomponents";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {Timeline} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";
 import {AddTimeline} from "@debate-map/server-link/Source/Link";

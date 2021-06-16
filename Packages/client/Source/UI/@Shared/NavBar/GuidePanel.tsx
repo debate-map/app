@@ -1,4 +1,4 @@
-import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
+import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions";
 
 export class GuidePanel extends BaseComponent<{auth?}, {}> {
 	render() {

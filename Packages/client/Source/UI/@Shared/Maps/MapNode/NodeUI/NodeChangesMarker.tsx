@@ -1,7 +1,7 @@
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {LimitBarPos} from "UI/@Shared/Maps/MapNode/NodeUI";
-import {Column, Row} from "react-vcomponents";
-import {E} from "js-vextensions";
+import {Column, Row} from "web-vcore/nm/react-vcomponents";
+import {E} from "web-vcore/nm/js-vextensions";
 import {GetChangeTypeOutlineColor, ChangeType} from "@debate-map/server-link/Source/Link";
 import {ChildLimitBar} from "./NodeChildHolder";
 

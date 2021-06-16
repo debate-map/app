@@ -1,7 +1,7 @@
-import {Clone, DEL, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "js-vextensions";
-import {Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "react-vcomponents";
-import {BaseComponentPlus, GetDOM} from "react-vextensions";
-import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {Clone, DEL, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
+import {Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {ES} from "Utils/UI/GlobalStyles";
 import {InfoButton, observer_simple} from "vwebapp-framework";

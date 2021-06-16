@@ -1,6 +1,6 @@
 import {O} from "vwebapp-framework";
 import {store} from "Store";
-import {StoreAccessor} from "mobx-firelink";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetMap} from "@debate-map/server-link/Source/Link";
 
 export class PrivatePageState {

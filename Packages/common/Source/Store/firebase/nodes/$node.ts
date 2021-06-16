@@ -13,7 +13,7 @@ import {GetNodeTags, GetNodeTagComps, GetFinalTagCompsForTag} from "../nodeTags"
 import {CanContributeToNode} from "../users/$user";
 import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@MapNodeTag";
 import {SourceType, Source} from "../nodeRevisions/@SourceChain";
-import Moment from "moment";
+import Moment from "web-vcore/nm/moment";
 
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");

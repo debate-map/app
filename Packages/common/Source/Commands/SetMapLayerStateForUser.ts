@@ -1,7 +1,7 @@
-import {Assert} from "js-vextensions";
+import {Assert} from "web-vcore/nm/js-vextensions";
 import {MapEdit} from "../CommandMacros";
-import {AddSchema, AssertValidate} from "mobx-firelink";
-import {Command, AssertV} from "mobx-firelink";
+import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
+import {Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 
 AddSchema("SetMapLayerStateForUser_payload", {

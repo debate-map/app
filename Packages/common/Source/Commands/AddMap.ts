@@ -1,6 +1,6 @@
-import {Command_Old, MergeDBUpdates, Command, AssertV} from "mobx-firelink";
-import {AssertValidate, UUID, GenerateUUID} from "mobx-firelink";
-import {OmitIfFalsy, Assert, E} from "js-vextensions";
+import {Command_Old, MergeDBUpdates, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {AssertValidate, UUID, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
+import {OmitIfFalsy, Assert, E} from "web-vcore/nm/js-vextensions";
 import {UserEdit} from "../CommandMacros";
 import {AddChildNode} from "./AddChildNode";
 import {Map} from "../Store/firebase/maps/@Map";

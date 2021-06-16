@@ -1,11 +1,11 @@
 import chroma from "chroma-js";
-import {AssertWarn, emptyArray, emptyArray_forLoading, E} from "js-vextensions";
-import {Row} from "react-vcomponents";
-import {BaseComponentPlus, GetDOM, UseCallback, WarnOfTransientObjectProps} from "react-vextensions";
+import {AssertWarn, emptyArray, emptyArray_forLoading, E} from "web-vcore/nm/js-vextensions";
+import {Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus, GetDOM, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
 import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
 import {HSLA, Observer} from "vwebapp-framework";
 import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView";
-import {runInAction} from "mobx";
+import {runInAction} from "web-vcore/nm/mobx";
 import {ExpandableBox} from "../ExpandableBox";
 import {Squiggle} from "../NodeConnectorBackground";
 import {NodeUI_Menu_Stub} from "../NodeUI_Menu";

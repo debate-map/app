@@ -1,13 +1,13 @@
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "react-vcomponents";
-import {BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
-import {ScrollView} from "react-vscrollview";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddTimelineDialog} from "UI/@Shared/Timelines/AddTimelineDialog";
 import {GetSelectedTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {store} from "Store";
 import {Observer} from "vwebapp-framework";
-import {runInAction} from "mobx";
-import {E} from "js-vextensions";
+import {runInAction} from "web-vcore/nm/mobx";
+import {E} from "web-vcore/nm/js-vextensions";
 import {GetMapTimelines, DeleteTimeline, MeID, Map} from "@debate-map/server-link/Source/Link";
 import {ES} from "Utils/UI/GlobalStyles";
 

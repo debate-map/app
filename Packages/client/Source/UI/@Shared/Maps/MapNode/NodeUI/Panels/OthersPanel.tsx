@@ -1,12 +1,12 @@
-import {GetEntries, E, OmitIfFalsy} from "js-vextensions";
+import {GetEntries, E, OmitIfFalsy} from "web-vcore/nm/js-vextensions";
 import {Fragment} from "react";
-import {Button, CheckBox, Column, Div, Pre, Row, Select, Text} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
-import {ShowMessageBox} from "react-vmessagebox";
+import {Button, CheckBox, Column, Div, Pre, Row, Select, Text} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub";
 import {ES} from "Utils/UI/GlobalStyles";
-import {SlicePath} from "mobx-firelink";
+import {SlicePath} from "web-vcore/nm/mobx-graphlink";
 import {Map, ChildOrderType} from "@debate-map/server-link/Source/Link";
 import {Observer, InfoButton, Icon} from "vwebapp-framework";
 import {MapNodeL3, ClaimForm} from "@debate-map/server-link/Source/Link";

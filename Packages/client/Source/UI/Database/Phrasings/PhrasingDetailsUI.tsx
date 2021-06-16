@@ -1,8 +1,8 @@
-import {Clone, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "js-vextensions";
-import Moment from "moment";
-import {Column, Pre, RowLR, Select, TextArea, TextInput, Row} from "react-vcomponents";
-import {BaseComponentWithConnector, GetDOM, BaseComponentPlus} from "react-vextensions";
-import {BoxController, ShowMessageBox} from "react-vmessagebox";
+import {Clone, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
+import Moment from "web-vcore/nm/moment";
+import {Column, Pre, RowLR, Select, TextArea, TextInput, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentWithConnector, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {ES} from "Utils/UI/GlobalStyles";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {MapNodePhrasing, MapNodePhrasingType, AddPhrasing} from "@debate-map/server-link/Source/Link";

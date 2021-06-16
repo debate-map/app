@@ -1,13 +1,13 @@
 import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, IsNodeSubnode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, RatingType, ratingTypes, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "@debate-map/server-link/Source/Link";
 import chroma, {Color} from "chroma-js";
 import classNames from "classnames";
-import {DEL, DoNothing, E, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "js-vextensions";
-import {runInAction} from "mobx";
-import {SlicePath} from "mobx-firelink";
+import {DEL, DoNothing, E, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions";
+import {runInAction} from "web-vcore/nm/mobx";
+import {SlicePath} from "web-vcore/nm/mobx-graphlink";
 import React from "react";
 import {Draggable} from "react-beautiful-dnd";
-import ReactDOM from "react-dom";
-import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "react-vextensions";
+import ReactDOM from "web-vcore/nm/react-dom";
+import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions";
 import {store} from "Store";
 import {GetNodeColor} from "Store/firebase_ext/nodes";
 import {GetLastAcknowledgementTime} from "Store/main/maps";

@@ -1,4 +1,4 @@
-import {StoreAccessor} from "mobx-firelink";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {O} from "vwebapp-framework";
 
 export enum ShareTab {

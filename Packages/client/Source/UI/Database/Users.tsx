@@ -1,11 +1,11 @@
-import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
-import {Row, Column} from "react-vcomponents";
-import Moment from "moment";
-import {ScrollView} from "react-vscrollview";
+import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {Row, Column} from "web-vcore/nm/react-vcomponents";
+import Moment from "web-vcore/nm/moment";
+import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {Link, PageContainer, Observer} from "vwebapp-framework";
 import {ES} from "Utils/UI/GlobalStyles";
 import {GetSelectedUser} from "Store/main/database";
-import {ToNumber, E} from "js-vextensions";
+import {ToNumber, E} from "web-vcore/nm/js-vextensions";
 import {UserProfileUI} from "./Users/UserProfile";
 import {GetUsers, GetUser} from "@debate-map/server-link/Source/Link";
 import {User} from "@debate-map/server-link/Source/Link";

@@ -1,6 +1,6 @@
-import {Button, Column, Pre, Row, Span} from "react-vcomponents";
-import {BaseComponent, FindReact, BaseComponentPlus} from "react-vextensions";
-import {GetEntries, E} from "js-vextensions";
+import {Button, Column, Pre, Row, Span} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, FindReact, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {GetEntries, E} from "web-vcore/nm/js-vextensions";
 import {VReactMarkdown_Remarkable, Segment} from "vwebapp-framework";
 import {store} from "Store";
 import {GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStep, GetPlayingTimeline, GetPlayingTimelineStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState";

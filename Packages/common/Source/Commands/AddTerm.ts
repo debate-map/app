@@ -1,6 +1,6 @@
 import {UserEdit} from "../CommandMacros";
-import {AssertValidate, GenerateUUID, WrapDBValue} from "mobx-firelink";
-import {Command_Old, Command} from "mobx-firelink";
+import {AssertValidate, GenerateUUID, WrapDBValue} from "web-vcore/nm/mobx-graphlink";
+import {Command_Old, Command} from "web-vcore/nm/mobx-graphlink";
 import {Term} from "../Store/firebase/terms/@Term";
 
 @UserEdit

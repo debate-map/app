@@ -1,5 +1,5 @@
 import {O} from "vwebapp-framework";
-import {ignore} from "mobx-sync";
+import {ignore} from "web-vcore/nm/mobx-sync";
 
 export class TimelinesState {
 	@O nodeRevealHighlightTime = 20;

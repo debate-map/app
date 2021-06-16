@@ -1,5 +1,5 @@
-import {GetContentWidth, GetContentHeight, GetAutoElement} from "js-vextensions";
-import {ConvertStyleObjectToCSSString} from "react-vextensions";
+import {GetContentWidth, GetContentHeight, GetAutoElement} from "web-vcore/nm/js-vextensions";
+import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions";
 import {MapNodeL3} from "@debate-map/server-link/Source/Link";
 import {MapNodeType_Info} from "@debate-map/server-link/Source/Link";
 import {GetNodeDisplayText, GetFontSizeForNode} from "@debate-map/server-link/Source/Link";

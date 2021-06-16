@@ -1,5 +1,5 @@
-import {Div, Column, Row, Button, TextInput, DropDown, DropDownTrigger, DropDownContent, Text} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+import {Div, Column, Row, Button, TextInput, DropDown, DropDownTrigger, DropDownContent, Text} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {InfoButton, Observer, GetUpdates, HSLA} from "vwebapp-framework";
 import {TermDefinitionPanel} from "./DefinitionsPanel";
 import {Map} from "@debate-map/server-link/Source/Link";
@@ -10,7 +10,7 @@ import {MeID} from "@debate-map/server-link/Source/Link";
 import {ShowAddTagDialog, TagDetailsUI} from "UI/Database/Tags/TagDetailsUI";
 import {TagComp_MirrorChildrenFromXToY, MapNodeTag, GetTagCompClassByTag} from "@debate-map/server-link/Source/Link";
 import {UpdateNodeTag} from "@debate-map/server-link/Source/Link";
-import {ShowMessageBox} from "react-vmessagebox";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {DeleteNodeTag} from "@debate-map/server-link/Source/Link";
 
 @Observer

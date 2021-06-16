@@ -1,7 +1,7 @@
 import {GetMap, GetNodeL2, MapView} from "@debate-map/server-link/Source/Link";
-import {Assert, Vector2} from "js-vextensions";
-import {autorun, runInAction} from "mobx";
-import {GetAsync} from "mobx-firelink";
+import {Assert, Vector2} from "web-vcore/nm/js-vextensions";
+import {autorun, runInAction} from "web-vcore/nm/mobx";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {GetOpenMapID} from "Store/main";
 import {ACTEnsureMapStateInit} from "Store/main/maps";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";

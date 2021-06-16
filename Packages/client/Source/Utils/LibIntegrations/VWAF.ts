@@ -4,13 +4,13 @@ import {logTypes, LogTypes_New} from "Utils/General/Logging";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs";
 import {manager as manager_framework, ActionFunc, GetMirrorOfMobXTree} from "vwebapp-framework";
 import "./VWAF/Overrides";
-import produce from "immer";
+import produce from "web-vcore/nm/immer";
 import {Feedback_store} from "firebase-feedback";
-import {WithStore} from "mobx-firelink";
-import {runInAction} from "mobx";
+import {WithStore} from "web-vcore/nm/mobx-graphlink";
+import {runInAction} from "web-vcore/nm/mobx";
 import {Me, MeID, GetUserPermissionGroups, GetAuth, ValidateDBData} from "@debate-map/server-link/Source/Link";
 import {AddNotificationMessage} from "Store/main/@NotificationMessage";
-import {Assert} from "js-vextensions";
+import {Assert} from "web-vcore/nm/js-vextensions";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {colors} from "Utils/UI/GlobalStyles";
 

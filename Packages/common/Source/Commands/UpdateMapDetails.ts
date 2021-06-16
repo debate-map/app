@@ -1,10 +1,10 @@
 import {MapEdit} from "../CommandMacros";
-import {AddSchema, AssertValidate, Schema, GetSchemaJSON} from "mobx-firelink";
-import {Command_Old, GetAsync, Command, AssertV} from "mobx-firelink";
+import {AddSchema, AssertValidate, Schema, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink";
+import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {Map} from "../Store/firebase/maps/@Map";
 import {GetMap} from "../Store/firebase/maps";
-import {CE} from "js-vextensions";
+import {CE} from "web-vcore/nm/js-vextensions";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
 
 type MainType = Map;

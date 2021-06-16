@@ -1,10 +1,10 @@
-import {Column, Div, Row} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
+import {Column, Div, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {VReactMarkdown_Remarkable, YoutubePlayer, YoutubePlayerState, Observer} from "vwebapp-framework";
-import {E} from "js-vextensions";
+import {E} from "web-vcore/nm/js-vextensions";
 import {VMenuItem, VMenuStub} from "react-vmenu";
 import {styles} from "Utils/UI/GlobalStyles";
-import {runInAction} from "mobx";
+import {runInAction} from "web-vcore/nm/mobx";
 import {store} from "Store";
 import {Map} from "@debate-map/server-link/Source/Link";
 import {Timeline} from "@debate-map/server-link/Source/Link";

@@ -1,7 +1,7 @@
-import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "js-vextensions";
-import Moment from "moment";
-import {Column, Pre, RowLR, TextInput, Text} from "react-vcomponents";
-import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
+import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
+import Moment from "web-vcore/nm/moment";
+import {Column, Pre, RowLR, TextInput, Text} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {Layer} from "@debate-map/server-link/Source/Link";
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
 

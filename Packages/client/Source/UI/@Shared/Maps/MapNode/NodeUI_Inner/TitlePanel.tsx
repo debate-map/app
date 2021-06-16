@@ -1,9 +1,9 @@
-import {Assert, Clone, E} from "js-vextensions";
+import {Assert, Clone, E} from "web-vcore/nm/js-vextensions";
 import keycode from "keycode";
 import _ from "lodash";
-import {runInAction} from "mobx";
-import {Button, Pre, Row, TextArea, TextInput} from "react-vcomponents";
-import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "react-vextensions";
+import {runInAction} from "web-vcore/nm/mobx";
+import {Button, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView";
 import {ES} from "Utils/UI/GlobalStyles";

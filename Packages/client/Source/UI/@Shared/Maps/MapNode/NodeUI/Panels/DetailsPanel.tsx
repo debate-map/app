@@ -1,10 +1,10 @@
-import {Button, Column, Row} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
+import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {GetUpdates} from "vwebapp-framework";
 import {store} from "Store";
-import {runInAction} from "mobx";
-import {E, ToJSON, Clone} from "js-vextensions";
-import {GetAsync} from "mobx-firelink";
+import {runInAction} from "web-vcore/nm/mobx";
+import {E, ToJSON, Clone} from "web-vcore/nm/js-vextensions";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink";
 import _ from "lodash";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
 import {MapNodeL3} from "@debate-map/server-link/Source/Link";

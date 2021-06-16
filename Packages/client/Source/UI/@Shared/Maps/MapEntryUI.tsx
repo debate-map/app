@@ -1,11 +1,11 @@
-import {VURL, E} from "js-vextensions";
-import Moment from "moment";
-import {Column, Div, Row} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
+import {VURL, E} from "web-vcore/nm/js-vextensions";
+import Moment from "web-vcore/nm/moment";
+import {Column, Div, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {GADDemo} from "UI/@GAD/GAD";
 import {HSLA, Link, Observer} from "vwebapp-framework";
 import {store} from "Store";
-import {runInAction} from "mobx";
+import {runInAction} from "web-vcore/nm/mobx";
 import {GetUser, MapType, Map} from "@debate-map/server-link/Source/Link";
 
 import {columnWidths} from "./MapListUI";

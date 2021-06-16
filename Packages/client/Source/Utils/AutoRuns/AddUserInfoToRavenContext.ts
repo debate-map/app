@@ -1,8 +1,8 @@
-import {autorun} from "mobx";
+import {autorun} from "web-vcore/nm/mobx";
 import {GetOpenMapID} from "Store/main";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView";
-import {Clone} from "js-vextensions";
-import Raven from "raven-js";
+import {Clone} from "web-vcore/nm/js-vextensions";
+import Raven from "web-vcore/nm/raven-js";
 import {GetAuth_Raw} from "@debate-map/server-link/Source/Link";
 
 autorun(()=>{

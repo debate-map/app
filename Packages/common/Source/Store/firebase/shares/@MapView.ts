@@ -1,4 +1,4 @@
-import {observable} from "mobx";
+import {observable} from "web-vcore/nm/mobx";
 import {Vector2, Clone} from "../../../../Commands/node_modules/js-vextensions";
 import {AddSchema} from "../../../../Commands/node_modules/mobx-firelink";
 

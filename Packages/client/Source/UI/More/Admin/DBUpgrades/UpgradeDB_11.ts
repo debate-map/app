@@ -1,5 +1,5 @@
-import {Clone} from "js-vextensions";
-import {TreeNode} from "mobx-firelink";
+import {Clone} from "web-vcore/nm/js-vextensions";
+import {TreeNode} from "web-vcore/nm/mobx-graphlink";
 import {FirebaseDBShape, MapNodeRevision, GetSearchTerms} from "@debate-map/server-link/Source/Link";
 
 

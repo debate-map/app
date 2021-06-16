@@ -1,11 +1,11 @@
-import {GetErrorMessagesUnderElement, Clone, E, CloneWithPrototypes} from "js-vextensions";
-import {Column, Pre, RowLR, Spinner, TextInput, Row, DropDown, DropDownTrigger, Button, DropDownContent, Text, CheckBox} from "react-vcomponents";
-import {BaseComponent, GetDOM, BaseComponentPlus} from "react-vextensions";
-import {ScrollView} from "react-vscrollview";
+import {GetErrorMessagesUnderElement, Clone, E, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
+import {Column, Pre, RowLR, Spinner, TextInput, Row, DropDown, DropDownTrigger, Button, DropDownContent, Text, CheckBox} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";
 import {ShowAddMediaDialog} from "UI/Database/Medias/AddMediaDialog";
 import {MediaAttachment} from "@debate-map/server-link/Source/Link";
-import {Validate} from "mobx-firelink";
+import {Validate} from "web-vcore/nm/mobx-graphlink";
 import {GetMedia, GetMediasByURL} from "@debate-map/server-link/Source/Link";
 import {Link, Observer, InfoButton} from "vwebapp-framework";
 import {HasModPermissions} from "@debate-map/server-link/Source/Link";

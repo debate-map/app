@@ -1,15 +1,15 @@
 import {DeleteShare, GetShares, Map, MeID, Share} from "@debate-map/server-link/Source/Link";
-import {GetEntries, VURL, CopyText} from "js-vextensions";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select, Text} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
-import {ShowMessageBox} from "react-vmessagebox";
-import {ScrollView} from "react-vscrollview";
+import {GetEntries, VURL, CopyText} from "web-vcore/nm/js-vextensions";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select, Text} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ShareTab} from "Store/main/shareUI";
 import {Observer, RunInAction_Set, GetCurrentURL} from "vwebapp-framework";
 import {NewShareUI} from "./ShareDropDown/NewShareUI";
-import moment from "moment";
+import moment from "web-vcore/nm/moment";
 
 export function GetShareShortURL(share: Share) {
 	return new VURL(GetCurrentURL().domain, ["s", share?._key ?? "[SHARE_ID]"]);

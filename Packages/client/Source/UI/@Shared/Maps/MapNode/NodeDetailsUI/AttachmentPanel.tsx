@@ -1,6 +1,6 @@
-import {GetEntries} from "js-vextensions";
-import {Row, Select, Text} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
+import {GetEntries} from "web-vcore/nm/js-vextensions";
+import {Row, Select, Text} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI";
 import {MediaAttachmentEditorUI as MediaAttachmentEditorUI} from "./AttachmentPanel/MediaAttachmentEditorUI";
 import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI";

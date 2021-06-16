@@ -1,6 +1,6 @@
-import {Button, Row} from "react-vcomponents";
-import {BaseComponent} from "react-vextensions";
-import {Assert, E} from "js-vextensions";
+import {Button, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {Assert, E} from "web-vcore/nm/js-vextensions";
 import React from "react";
 
 type Props = {

@@ -1,4 +1,4 @@
-import {BaseComponent, SimpleShouldUpdate} from "react-vextensions";
+import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions";
 import {VReactMarkdown, PageContainer} from "vwebapp-framework";
 import {styles} from "../../Utils/UI/GlobalStyles";
 

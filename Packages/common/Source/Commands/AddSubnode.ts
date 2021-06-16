@@ -1,4 +1,4 @@
-import {AssertV, Command, MergeDBUpdates} from "mobx-firelink";
+import {AssertV, Command, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {AddNode} from "./AddNode";
 import {MapNode} from "../Store/firebase/nodes/@MapNode";

@@ -1,10 +1,10 @@
-import {Assert, GetPercentFromXToY, IsNaN, Lerp, Timer, ToNumber, Vector2, WaitXThenRun, AssertWarn} from "js-vextensions";
-import {computed, observable, runInAction} from "mobx";
+import {Assert, GetPercentFromXToY, IsNaN, Lerp, Timer, ToNumber, Vector2, WaitXThenRun, AssertWarn} from "web-vcore/nm/js-vextensions";
+import {computed, observable, runInAction} from "web-vcore/nm/mobx";
 import React, {useEffect} from "react";
 import ReactList from "react-list";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text} from "react-vcomponents";
-import {BaseComponent, GetDOM, UseCallback} from "react-vextensions";
-import {ScrollSource, ScrollView} from "react-vscrollview";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, GetDOM, UseCallback} from "web-vcore/nm/react-vextensions";
+import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview";
 import {store} from "Store";
 import {GetScreenRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, YoutubePlayer, YoutubePlayerState, YoutubePlayerUI, ClassHooks, PosChangeSource} from "vwebapp-framework";
 import {ES} from "Utils/UI/GlobalStyles";

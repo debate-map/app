@@ -1,10 +1,10 @@
-import {BaseComponent} from "react-vextensions";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {VMenuItem} from "react-vmenu";
-import {ShowMessageBox} from "react-vmessagebox";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {styles} from "Utils/UI/GlobalStyles";
 import {Observer} from "vwebapp-framework";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
-import {runInAction} from "mobx";
+import {runInAction} from "web-vcore/nm/mobx";
 import {store} from "Store";
 import {GetParentNodeL3, GetParentNodeID} from "@debate-map/server-link/Source/Link";
 import {MapNodeType} from "@debate-map/server-link/Source/Link";

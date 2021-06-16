@@ -1,8 +1,8 @@
-import {AssertV, Command} from "mobx-firelink";
-import {AddSchema, AssertValidate, GetSchemaJSON, Schema} from "mobx-firelink";
+import {AssertV, Command} from "web-vcore/nm/mobx-graphlink";
+import {AddSchema, AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink";
 import {Timeline} from "../Store/firebase/timelines/@Timeline";
 import {GetTimeline} from "../Store/firebase/timelines";
-import {CE} from "js-vextensions";
+import {CE} from "web-vcore/nm/js-vextensions";
 import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
 
 type MainType = Timeline;

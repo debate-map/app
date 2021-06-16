@@ -1,12 +1,12 @@
-import Moment from "moment";
-import {Button, Column, Row} from "react-vcomponents";
-import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "react-vextensions";
-import {BoxController, ShowMessageBox} from "react-vmessagebox";
-import {ScrollView} from "react-vscrollview";
+import Moment from "web-vcore/nm/moment";
+import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {ES} from "Utils/UI/GlobalStyles";
 import {UUIDStub} from "UI/@Shared/UUIDStub";
 import {Observer} from "vwebapp-framework";
-import {E} from "js-vextensions";
+import {E} from "web-vcore/nm/js-vextensions";
 import {Map, MapNodeL3, GetUser, MapNodeRevision, GetParentNodeL3, GetLinkUnderParent, GetNodeRevisions} from "@debate-map/server-link/Source/Link";
 
 

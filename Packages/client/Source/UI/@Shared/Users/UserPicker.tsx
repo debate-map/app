@@ -1,8 +1,8 @@
 import {GetUsers} from "@debate-map/server-link/Source/Link";
-import {E} from "js-vextensions";
-import {Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "react-vcomponents";
-import {BaseComponentPlus} from "react-vextensions";
-import {ScrollView} from "react-vscrollview";
+import {E} from "web-vcore/nm/js-vextensions";
+import {Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {ES} from "Utils/UI/GlobalStyles";
 import {Observer} from "vwebapp-framework";
 

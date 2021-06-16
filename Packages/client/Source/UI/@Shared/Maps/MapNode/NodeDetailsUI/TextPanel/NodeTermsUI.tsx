@@ -1,11 +1,11 @@
-import {E} from "js-vextensions";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput} from "react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "react-vextensions";
+import {E} from "web-vcore/nm/js-vextensions";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI";
 import {InfoButton, Link, Observer} from "vwebapp-framework";
 import {NodeDetailsUI_SharedProps} from "../../NodeDetailsUI";
 import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";
-import {Validate} from "mobx-firelink";
+import {Validate} from "web-vcore/nm/mobx-graphlink";
 import {GetTerm, GetTermsByForm} from "@debate-map/server-link/Source/Link";
 import {TermAttachment} from "@debate-map/server-link/Source/Link";
 import {Term} from "@debate-map/server-link/Source/Link";

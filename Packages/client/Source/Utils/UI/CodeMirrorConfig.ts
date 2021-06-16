@@ -1,4 +1,4 @@
-import CodeMirror from "codemirror";
+import CodeMirror from "web-vcore/nm/codemirror";
 
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: http://codemirror.net/LICENSE
