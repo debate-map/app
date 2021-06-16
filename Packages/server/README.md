@@ -4,6 +4,8 @@ Codebase for the Debate Map website's backend ([debatemap.app](https://debatemap
 
 ## Setup
 
+### Local server
+
 > Continued from: https://github.com/debate-map/app#setup
 
 1) Ensure [PostgreSQL](https://www.postgresql.org/) (v10+) is installed.
@@ -23,6 +25,10 @@ max_replication_slots = 10
 5) Init `debate-map` db in PostgreSQL, by running `yarn start initDB`.
 
 6) Set environment variables for the database's username (PGUSER) and password (PGPASSWORD).
+
+### Remote server
+
+TODO
 
 ## Editing + running
 
