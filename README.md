@@ -2,7 +2,7 @@
 
 Monorepo for the client, server, etc. of the Debate Map website ([debatemap.app](https://debatemap.app)).
 
-> Note: The "master" branch of this repo is showing the codebase for the new monorepo setup, using [Postgraphile](https://github.com/graphile/postgraphile) for its database/backend rather than Firestore. It is still in development, so the <https://debatemap.app> website may have some discrepancies until the new version is ready and published.
+> Note: The "master" branch of this repo is showing the codebase for the new monorepo setup, using [Postgraphile](https://github.com/graphile/postgraphile) for its database/backend rather than Firestore. It is still in development, so the <https://debatemap.app> website may have some discrepancies until this new version is ready and published.
 
 # Overview
 
