@@ -33,13 +33,13 @@ For more information, visit the website at: <https://debatemap.app>
 
 ### Part 2 (client)
 
-5) Follow the instructions here: <https://github.com/debate-map/app/Packages/client#setup>
+5) Follow the instructions here: <https://github.com/debate-map/app/tree/master/Packages/client#setup>
 
 ### Part 3 (server)
 
 > This part is only necessary if you're making changes to the backend, or otherwise want to run your own server instance.
 
-6) Follow the instructions here: <https://github.com/debate-map/app/Packages/server#setup>
+6) Follow the instructions here: <https://github.com/debate-map/app/tree/master/Packages/server#setup>
 
 ## Editing + running
 
