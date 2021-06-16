@@ -1,4 +1,4 @@
-# Debate Map (Client)
+# Debate Map (Server)
 
 Codebase for the Debate Map website's backend ([debatemap.app](https://debatemap.app)).
 
