@@ -1,4 +1,4 @@
-import {GetMap, GetMapTimelines, Share, ShareType, Timeline, GetShares, MeID, UpdateShare, AddShare, GetNodesInSubtree, MapView} from "@debate-map/server-link/Source/Link";
+import {GetMap, GetMapTimelines, Share, ShareType, Timeline, GetShares, MeID, UpdateShare, AddShare, GetNodesInSubtree, MapView} from "dm_common/Source/Commands";
 import {CopyText, GetEntries, ToJSON, WaitXThenRun, VURL, ModifyString, Clone, IsObject, GetTreeNodesInObjTree, CE} from "web-vcore/nm/js-vextensions";
 import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
@@ -6,7 +6,7 @@ import {store} from "Store";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView";
 import {ExpandType, ScrollToType} from "Store/main/shareUI";
 import {GetNewURL} from "Utils/URL/URLs";
-import {GetCurrentURL, Observer, RunInAction_Set, GetUpdates} from "vwebapp-framework";
+import {GetCurrentURL, Observer, RunInAction_Set, GetUpdates} from "web-vcore";
 import {GetShareLongURL, GetShareShortURL} from "../ShareDropDown";
 import {WithFirestoreNormalization} from "web-vcore/nm/mobx-graphlink";
 

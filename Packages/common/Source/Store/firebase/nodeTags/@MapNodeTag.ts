@@ -1,5 +1,5 @@
-import {AddSchema, UUID_regex, GetSchemaJSON, Validate} from "../../../../Commands/node_modules/mobx-firelink";
-import {GetValues_ForSchema, ModifyString, CE} from "../../../../Commands/node_modules/js-vextensions";
+import {AddSchema, UUID_regex, GetSchemaJSON, Validate} from "web-vcore/nm/mobx-graphlink";
+import {GetValues_ForSchema, ModifyString, CE} from "web-vcore/nm/js-vextensions";
 import {Polarity} from "../nodes/@MapNode";
 
 export class MapNodeTag {

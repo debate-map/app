@@ -1,7 +1,7 @@
 /* import { Assert } from 'js-vextensions';
 import { GetNode } from 'Store/firebase/nodes';
-import {GetAsync} from 'vwebapp-framework';
-import {Command} from 'vwebapp-framework';
+import {GetAsync} from 'web-vcore';
+import {Command} from 'web-vcore';
 
 export class NotifyNodeViewed extends Command<{nodeID: string}, {}> {
 	Validate() {

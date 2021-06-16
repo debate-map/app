@@ -2,7 +2,7 @@ import {E} from "web-vcore/nm/js-vextensions";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI";
-import {InfoButton, Link, Observer} from "vwebapp-framework";
+import {InfoButton, Link, Observer} from "web-vcore";
 import {NodeDetailsUI_SharedProps} from "../../NodeDetailsUI";
 import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";
 import {Validate} from "web-vcore/nm/mobx-graphlink";

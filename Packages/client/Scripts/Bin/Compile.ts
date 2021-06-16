@@ -1,4 +1,4 @@
-import {Compile} from "vwebapp-framework/Scripts/Bin/Compile";
+import {Compile} from "web-vcore/Scripts/Bin/Compile";
 import {webpackConfig} from "../Build/WebpackConfig";
 import {config} from "../Config";
 

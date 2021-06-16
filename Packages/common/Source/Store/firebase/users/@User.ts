@@ -1,4 +1,4 @@
-import {AddSchema} from "../../../../Commands/node_modules/mobx-firelink";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink";
 
 // todo: make this have a length constraint as well
 export const User_id = "^[a-zA-Z0-9]+$";

@@ -8,7 +8,7 @@ import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {store} from "Store";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {TimelineDetailsEditor} from "UI/@Shared/Timelines/TimelineDetailsUI";
-import {InfoButton, Observer} from "vwebapp-framework";
+import {InfoButton, Observer} from "web-vcore";
 import {DroppableInfo} from "Utils/UI/DNDStructures";
 import {ES} from "Utils/UI/GlobalStyles";
 import {GetOpenMapID} from "Store/main";

@@ -1,4 +1,4 @@
-import {LogTypes} from "vwebapp-framework";
+import {LogTypes} from "web-vcore";
 
 export class LogTypes_New {
 	//actions = false;

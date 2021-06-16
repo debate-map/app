@@ -2,7 +2,7 @@ import {Button, Column, Pre, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddPhrasingDialog} from "UI/Database/Phrasings/PhrasingDetailsUI";
-import {InfoButton, Observer} from "vwebapp-framework";
+import {InfoButton, Observer} from "web-vcore";
 import {MapNodeL2, GetNodePhrasings, MapNodePhrasing, MapNodePhrasingType, GetNodeDisplayText, CanGetBasicPermissions, MeID, MapNodeType} from "@debate-map/server-link/Source/Link";
 import {GetNodeColor} from "Store/firebase_ext/nodes";
 import {DetailsPanel_Phrasings} from "./Phrasings_SubPanels/DetailsPanel";

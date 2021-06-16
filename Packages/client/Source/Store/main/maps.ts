@@ -3,7 +3,7 @@ import {observable} from "web-vcore/nm/mobx";
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ignore, version} from "web-vcore/nm/mobx-sync";
 import {store} from "Store";
-import {O, StoreAction} from "vwebapp-framework";
+import {O, StoreAction} from "web-vcore";
 import {MapState} from "./maps/mapStates/@MapState";
 import {GetMapView} from "./maps/mapViews/$mapView";
 

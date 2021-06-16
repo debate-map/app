@@ -3,7 +3,7 @@ import Moment from "web-vcore/nm/moment";
 import {Column, Div, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {GADDemo} from "UI/@GAD/GAD";
-import {HSLA, Link, Observer} from "vwebapp-framework";
+import {HSLA, Link, Observer} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx";
 import {GetUser, MapType, Map} from "@debate-map/server-link/Source/Link";

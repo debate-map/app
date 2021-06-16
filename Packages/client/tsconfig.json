@@ -14,7 +14,7 @@
 		//"rootDir": ".",
 		/*"rootDirs": [
 			"Source",
-			"../node_modules/vwebapp-framework",
+			"../node_modules/web-vcore",
 			"../node_modules/js-vextensions/....",
 		],*/
 		"baseUrl": "Source",
@@ -39,7 +39,7 @@
 			//"mst-decorators": ["../Typings/empty.d.ts"],
 			// consolidating for these wouldn't throw errors necessarily, but we do so to keep things tidy (since we know the different versions will be compatible anyway)
 			//"js-vextensions": ["../node_modules/js-vextensions"],
-			//"mobx-firelink": ["../node_modules/mobx-firelink"], // fixes odd ts issue
+			//"mobx-graphlink": ["../node_modules/mobx-graphlink"], // fixes odd ts issue
 		},
 		//"skipLibCheck": true,
 
@@ -80,7 +80,7 @@
 		"Source/**/*.tsx",
 		//"Source/**/*.js",
 		//"Source/**/*.jsx"
-		//"node_modules/vwebapp-framework/Source/**/*.ts",
+		//"node_modules/web-vcore/Source/**/*.ts",
 		//"node_modules/@debate-map/server-link/Source/**/*.ts",
 	],
 	/*"exclude": [
@@ -96,6 +96,6 @@
 	"compileOnSave": true
 	/*"references": [
 		{"path": "node_modules/@debate-map/server-link"},
-		{"path": "node_modules/vwebapp-framework"}
+		{"path": "node_modules/web-vcore"}
 	]*/
 }

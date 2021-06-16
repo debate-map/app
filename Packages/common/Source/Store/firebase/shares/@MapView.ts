@@ -1,6 +1,6 @@
 import {observable} from "web-vcore/nm/mobx";
-import {Vector2, Clone} from "../../../../Commands/node_modules/js-vextensions";
-import {AddSchema} from "../../../../Commands/node_modules/mobx-firelink";
+import {Vector2, Clone} from "web-vcore/nm/js-vextensions";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink";
 
 const O = observable;
 

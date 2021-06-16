@@ -1,5 +1,5 @@
-import {AddSchema} from "../../../../Commands/node_modules/mobx-firelink";
-import {GetValues_ForSchema, CE} from "../../../../Commands/node_modules/js-vextensions";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink";
+import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
 
 export class MapNodePhrasing {
 	constructor(initialData: {node: string} & Partial<MapNodePhrasing>) {

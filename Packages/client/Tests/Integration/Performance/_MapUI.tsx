@@ -5,15 +5,15 @@
 // import 'babel-polyfill';
 
 // const { MockFirebase, MockFirestore } = require('firebase-mock');
-// import { DBPath } from 'vwebapp-framework';
-// import { DBPath } from 'vwebapp-framework/Source/index';
+// import { DBPath } from 'web-vcore';
+// import { DBPath } from 'web-vcore/Source/index';
 
 // If something imported has wrong typing (eg. "any" when should be specific type), it's probably due to non-relative imports failing from the Tests folder.
 // To fix, make the needed imports relative. (long-term, either fix root cause, or use tsconfig to force all imports relative, so test-writers don't get confused down the road)
-// declare let { DBPath }: typeof import('../../../node_modules/vwebapp-framework/Source/index');
+// declare let { DBPath }: typeof import('../../../node_modules/web-vcore/Source/index');
 declare const { store }: typeof import('../../../Source/Store');
 // declare const { DBPath }: typeof import('../../../Source/Utils/FrameworkOverrides');
-declare const { DBPath }: typeof import('mobx-firelink');
+declare const { DBPath }: typeof import('mobx-graphlink');
 declare const { AddMap }: typeof import('../../../Source/Server/Commands/AddMap');
 declare const { Assert }: typeof import('../../../../../@Modules/react-vscrollview/Main/dist/Utils');
 declare const { MeID }: typeof import('../../../Source/Store/firebase/users');

@@ -1,4 +1,4 @@
-import {Serve} from "vwebapp-framework/Scripts/Bin/Server";
+import {Serve} from "web-vcore/Scripts/Bin/Server";
 import {webpackConfig} from "../Build/WebpackConfig";
 import {config} from "../Config";
 

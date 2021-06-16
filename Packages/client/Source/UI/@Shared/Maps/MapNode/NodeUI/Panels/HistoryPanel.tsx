@@ -5,7 +5,7 @@ import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {ES} from "Utils/UI/GlobalStyles";
 import {UUIDStub} from "UI/@Shared/UUIDStub";
-import {Observer} from "vwebapp-framework";
+import {Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions";
 import {Map, MapNodeL3, GetUser, MapNodeRevision, GetParentNodeL3, GetLinkUnderParent, GetNodeRevisions} from "@debate-map/server-link/Source/Link";
 

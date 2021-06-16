@@ -1,5 +1,5 @@
-import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE} from "../../../../Commands/node_modules/js-vextensions";
-import {SplitStringBySlash_Cached, SlicePath, StoreAccessor} from "../../../../Commands/node_modules/mobx-firelink";
+import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE} from "web-vcore/nm/js-vextensions";
+import {SplitStringBySlash_Cached, SlicePath, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetMedia} from "../media";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media";
 import {RatingType} from "../nodeRatings/@RatingType";

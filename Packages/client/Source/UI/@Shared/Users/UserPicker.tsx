@@ -4,7 +4,7 @@ import {Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {ES} from "Utils/UI/GlobalStyles";
-import {Observer} from "vwebapp-framework";
+import {Observer} from "web-vcore";
 
 @Observer
 export class UserPicker extends BaseComponentPlus({} as {value: string, onChange: (value: string)=>any}, {}) {

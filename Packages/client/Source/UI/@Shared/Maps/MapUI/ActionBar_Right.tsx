@@ -4,7 +4,7 @@ import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {store} from "Store";
 import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState";
 import {runInAction} from "web-vcore/nm/mobx";
-import {Observer, HSLA} from "vwebapp-framework";
+import {Observer, HSLA} from "web-vcore";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {Map, WeightingType} from "@debate-map/server-link/Source/Link";
 import {GADDemo} from "UI/@GAD/GAD";

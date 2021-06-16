@@ -1,5 +1,5 @@
-import {GetValues_ForSchema, CE} from "../../../../Commands/node_modules/js-vextensions";
-import {AddAJVExtraCheck, AddSchema, GetSchemaJSON, UUID, UUID_regex, UUID_regex_partial} from "../../../../Commands/node_modules/mobx-firelink";
+import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
+import {AddAJVExtraCheck, AddSchema, GetSchemaJSON, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink";
 import {MapNodeRevision} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
 

@@ -1,5 +1,5 @@
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {Observer, TreeView} from "vwebapp-framework";
+import {Observer, TreeView} from "web-vcore";
 import {VMenuItem} from "react-vmenu";
 import {styles, ES} from "Utils/UI/GlobalStyles";
 import {ShowMessageBox, BoxController} from "web-vcore/nm/react-vmessagebox";

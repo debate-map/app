@@ -1,6 +1,6 @@
 import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {Link, Observer, ParseSegmentsForPatterns} from "vwebapp-framework";
+import {Link, Observer, ParseSegmentsForPatterns} from "web-vcore";
 import {MapNodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term} from "@debate-map/server-link/Source/Link";
 
 

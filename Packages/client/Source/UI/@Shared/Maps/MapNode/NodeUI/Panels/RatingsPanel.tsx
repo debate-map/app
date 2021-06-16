@@ -6,7 +6,7 @@ import {Area, AreaChart, CartesianGrid, ReferenceLine, Tooltip, XAxis, YAxis} fr
 import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink";
-import {Observer} from "vwebapp-framework";
+import {Observer} from "web-vcore";
 import {MapNodeL3} from "@debate-map/server-link/Source/Link";
 import {RatingType, GetRatingTypeInfo} from "@debate-map/server-link/Source/Link";
 import {Rating} from "@debate-map/server-link/Source/Link";

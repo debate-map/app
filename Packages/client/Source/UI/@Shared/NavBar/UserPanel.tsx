@@ -3,7 +3,7 @@ import {IsAuthValid} from "web-vcore/nm/mobx-graphlink";
 import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {HandleError, Link, Observer} from "vwebapp-framework";
+import {HandleError, Link, Observer} from "web-vcore";
 import {fire} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";
 

@@ -1,6 +1,6 @@
 import {GetLinkUnderParent} from "../$node";
 import {GetNodeID, GetParentNode, GetNodeChildrenL2} from "../../nodes";
-import {CE} from "../../../../../Commands/node_modules/js-vextensions";
+import {CE} from "web-vcore/nm/js-vextensions";
 
 export function GetEquationStepNumber(path: string) {
 	const nodeID = GetNodeID(path);

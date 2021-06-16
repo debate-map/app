@@ -2,7 +2,7 @@ import {immerable} from "web-vcore/nm/immer";
 import {Global} from "web-vcore/nm/js-vextensions";
 import {observable, runInAction} from "web-vcore/nm/mobx";
 import {ignore} from "web-vcore/nm/mobx-sync";
-import {O, StoreAction} from "vwebapp-framework";
+import {O, StoreAction} from "web-vcore";
 import {rootPageDefaultChilds} from "Utils/URL/URLs";
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {store} from "Store";

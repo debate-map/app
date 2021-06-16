@@ -6,7 +6,7 @@ import {Fragment} from "react";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern} from "@debate-map/server-link/Source/Link";
 import {Validate} from "web-vcore/nm/mobx-graphlink";
-import {VDateTime} from "vwebapp-framework";
+import {VDateTime} from "web-vcore";
 import Moment from "web-vcore/nm/moment";
 
 type SharedProps = {enabled: boolean, Change: (..._)=>void};

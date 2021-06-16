@@ -1,5 +1,5 @@
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {O} from "vwebapp-framework";
+import {O} from "web-vcore";
 
 export class RatingUIState {
 	@O smoothing = 5;

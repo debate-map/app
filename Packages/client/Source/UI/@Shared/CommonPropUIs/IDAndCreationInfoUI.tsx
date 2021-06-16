@@ -1,7 +1,7 @@
 import Moment from "web-vcore/nm/moment";
 import {Column, Pre, Row, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {Link, Observer} from "vwebapp-framework";
+import {Link, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions";
 import {GetUser} from "@debate-map/server-link/Source/Link";
 

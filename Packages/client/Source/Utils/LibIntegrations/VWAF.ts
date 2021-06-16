@@ -2,7 +2,7 @@ import {dbVersion, hasHotReloaded} from "Main";
 import {RootState, store} from "Store";
 import {logTypes, LogTypes_New} from "Utils/General/Logging";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs";
-import {manager as manager_framework, ActionFunc, GetMirrorOfMobXTree} from "vwebapp-framework";
+import {manager as manager_framework, ActionFunc, GetMirrorOfMobXTree} from "web-vcore";
 import "./VWAF/Overrides";
 import produce from "web-vcore/nm/immer";
 import {Feedback_store} from "firebase-feedback";
@@ -20,7 +20,7 @@ context.keys().forEach(filename=>{
 	iconInfo[filename] = context(filename).default;
 });
 
-declare module "vwebapp-framework/Source/UserTypes" {
+declare module "web-vcore/Source/UserTypes" {
 	interface RootStore extends RootState {}
 	// interface DBShape extends FirebaseDBShape {}
 	interface LogTypes extends LogTypes_New {}

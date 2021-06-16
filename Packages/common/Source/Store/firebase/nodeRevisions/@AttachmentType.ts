@@ -5,7 +5,7 @@ import {MapNodeL2} from "../nodes/@MapNode";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {EquationAttachment} from "./@EquationAttachment";
 import {ReferencesAttachment} from "./@ReferencesAttachment";
-import {CE} from "../../../../Commands/node_modules/js-vextensions";
+import {CE} from "web-vcore/nm/js-vextensions";
 
 export enum AttachmentType {
 	None = 10,

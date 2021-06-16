@@ -6,7 +6,7 @@ import {RootState} from "Store";
 import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";
 import {GetSelectedMediaID, GetSelectedTermID, GetSelectedUserID} from "Store/main/database";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {MaybeLog, Page} from "vwebapp-framework";
+import {MaybeLog, Page} from "web-vcore";
 import {GetMap, MapNodeL2, GetNodeDisplayText, GetNodeL2} from "@debate-map/server-link/Source/Link";
 
 // for subpages, each page's first one is the default

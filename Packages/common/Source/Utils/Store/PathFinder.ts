@@ -1,6 +1,6 @@
 import {MapNode} from "../../Store/firebase/nodes/@MapNode";
 import {GetNode} from "../../Store/firebase/nodes";
-import {CE} from "../../../Commands/node_modules/js-vextensions";
+import {CE} from "web-vcore/nm/js-vextensions";
 
 export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc: (nodeID: string)=>boolean, nodeIDsToIgnore?: string[]): string {
 	// return CachedTransform_WithStore('GetShortestPathFromRootToNode', [rootNodeID, node._key], {}, () => {

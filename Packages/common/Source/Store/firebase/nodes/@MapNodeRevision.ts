@@ -1,5 +1,5 @@
-import {GetValues_ForSchema, CE} from "../../../../Commands/node_modules/js-vextensions";
-import {AddSchema, GetSchemaJSON} from "../../../../Commands/node_modules/mobx-firelink";
+import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
+import {AddSchema, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink";
 import {QuoteAttachment} from "../nodeRevisions/@QuoteAttachment";
 import {MapType} from "../maps/@Map";
 import {MediaAttachment} from "../nodeRevisions/@MediaAttachment";

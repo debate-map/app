@@ -1,6 +1,6 @@
 import {Vector2, E} from "web-vcore/nm/js-vextensions";
 import {BaseComponent, SimpleShouldUpdate, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
-import {HSLA} from "vwebapp-framework";
+import {HSLA} from "web-vcore";
 import {Fragment} from "react";
 import {MapNodeL3} from "@debate-map/server-link/Source/Link";
 import {GetNodeColor} from "Store/firebase_ext/nodes";

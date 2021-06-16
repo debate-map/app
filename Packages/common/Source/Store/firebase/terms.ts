@@ -1,5 +1,5 @@
-import {CachedTransform, IsNaN, emptyArray, emptyArray_forLoading, Assert, CE} from "../../../Commands/node_modules/js-vextensions";
-import {GetDoc, GetDocs, StoreAccessor, WhereOp, Validate} from "../../../Commands/node_modules/mobx-firelink";
+import {CachedTransform, IsNaN, emptyArray, emptyArray_forLoading, Assert, CE} from "web-vcore/nm/js-vextensions";
+import {GetDoc, GetDocs, StoreAccessor, WhereOp, Validate} from "web-vcore/nm/mobx-graphlink";
 import {Term} from "./terms/@Term";
 import {GetNodeRevision} from "./nodeRevisions";
 

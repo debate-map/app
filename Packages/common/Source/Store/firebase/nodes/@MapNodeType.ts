@@ -1,4 +1,4 @@
-import {Assert, CE} from "../../../../Commands/node_modules/js-vextensions";
+import {Assert, CE} from "web-vcore/nm/js-vextensions";
 import {ClaimForm, MapNode, MapNodeL3, Polarity} from "./@MapNode";
 
 export enum MapNodeType {

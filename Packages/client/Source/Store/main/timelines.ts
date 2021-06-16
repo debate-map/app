@@ -1,4 +1,4 @@
-import {O} from "vwebapp-framework";
+import {O} from "web-vcore";
 import {ignore} from "web-vcore/nm/mobx-sync";
 
 export class TimelinesState {

@@ -1,5 +1,5 @@
-import {CachedTransform, emptyArray_forLoading, ToNumber, CE, ObjectCE} from "../../../Commands/node_modules/js-vextensions";
-import {GetDoc, GetDocs, StoreAccessor} from "../../../Commands/node_modules/mobx-firelink";
+import {CachedTransform, emptyArray_forLoading, ToNumber, CE, ObjectCE} from "web-vcore/nm/js-vextensions";
+import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {Map, MapType} from "./maps/@Map";
 
 export const GetMaps = StoreAccessor(s=>(orderByEdits = false): Map[]=>{

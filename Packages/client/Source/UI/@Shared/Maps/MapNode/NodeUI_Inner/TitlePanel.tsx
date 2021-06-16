@@ -8,7 +8,7 @@ import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView";
 import {ES} from "Utils/UI/GlobalStyles";
 import {AddNodeRevision, GetParentNode, IsNodeSubnode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, CanEditNode, Map} from "@debate-map/server-link/Source/Link";
-import {InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, VReactMarkdown_Remarkable} from "vwebapp-framework";
+import {InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, VReactMarkdown_Remarkable} from "web-vcore";
 import React from "react";
 import {NodeMathUI} from "../NodeMathUI";
 import {NodeUI_Inner} from "../NodeUI_Inner";

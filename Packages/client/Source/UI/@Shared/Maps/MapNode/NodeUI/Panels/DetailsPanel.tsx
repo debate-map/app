@@ -1,6 +1,6 @@
 import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {GetUpdates} from "vwebapp-framework";
+import {GetUpdates} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx";
 import {E, ToJSON, Clone} from "web-vcore/nm/js-vextensions";

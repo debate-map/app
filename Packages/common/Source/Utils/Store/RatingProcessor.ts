@@ -1,5 +1,5 @@
-import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from "../../../Commands/node_modules/js-vextensions";
-import {StoreAccessor} from "../../../Commands/node_modules/mobx-firelink";
+import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from "web-vcore/nm/js-vextensions";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetRatingAverage, GetRatingValue, GetRatings} from "../../Store/firebase/nodeRatings";
 import {Rating} from "../../Store/firebase/nodeRatings/@Rating";
 import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../Store/firebase/nodes/$node";

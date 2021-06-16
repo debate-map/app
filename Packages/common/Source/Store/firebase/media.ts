@@ -1,5 +1,5 @@
-import {CachedTransform, IsNaN} from "../../../Commands/node_modules/js-vextensions";
-import {GetDoc, GetDocs, StoreAccessor, WhereOp} from "../../../Commands/node_modules/mobx-firelink";
+import {CachedTransform, IsNaN} from "web-vcore/nm/js-vextensions";
+import {GetDoc, GetDocs, StoreAccessor, WhereOp} from "web-vcore/nm/mobx-graphlink";
 import {Media} from "./media/@Media";
 
 export const GetMedia = StoreAccessor(s=>(id: string)=>{

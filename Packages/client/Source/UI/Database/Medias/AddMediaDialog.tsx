@@ -2,7 +2,7 @@ import {E} from "web-vcore/nm/js-vextensions";
 import {Column} from "web-vcore/nm/react-vcomponents";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {observer} from "mobx-react";
-import {observer_simple} from "vwebapp-framework";
+import {observer_simple} from "web-vcore";
 import {AddMedia, MediaType, Media} from "@debate-map/server-link/Source/Link";
 import {MediaDetailsUI} from "./MediaDetailsUI";
 

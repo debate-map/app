@@ -1,4 +1,4 @@
-import {WhereOp, GetDoc, GetDocs, StoreAccessor} from "../../../Commands/node_modules/mobx-firelink";
+import {WhereOp, GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {MapNodePhrasing} from "./nodePhrasings/@MapNodePhrasing";
 
 export const GetNodePhrasings = StoreAccessor(s=>(nodeID: string): MapNodePhrasing[]=>{

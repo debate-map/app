@@ -1,4 +1,4 @@
-import {O} from "vwebapp-framework";
+import {O} from "web-vcore";
 
 export enum SortType {
 	CreatorID = 10,

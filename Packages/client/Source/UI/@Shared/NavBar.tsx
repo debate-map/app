@@ -4,7 +4,7 @@ import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {ResetCurrentDBRoot} from "UI/More/Admin/ResetCurrentDBRoot";
 import {dbVersion} from "Main";
-import {Link, Observer} from "vwebapp-framework";
+import {Link, Observer} from "web-vcore";
 import {useMemo, useCallback} from "react";
 import {store, RootState} from "Store";
 import {runInAction} from "web-vcore/nm/mobx";

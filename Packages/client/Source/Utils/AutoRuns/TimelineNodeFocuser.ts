@@ -7,7 +7,7 @@ import {MapUI, ACTUpdateFocusNodeAndViewOffset} from "UI/@Shared/Maps/MapUI";
 import {SleepAsync, VRect} from "web-vcore/nm/js-vextensions";
 import {NodeUI_Inner} from "UI/@Shared/Maps/MapNode/NodeUI_Inner";
 import {GetDOM} from "web-vcore/nm/react-vextensions";
-import {GetScreenRect} from "vwebapp-framework";
+import {GetScreenRect} from "web-vcore";
 import {SlicePath, GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {GetTimelineStep, GetNodesRevealedInSteps} from "@debate-map/server-link/Source/Link";
 

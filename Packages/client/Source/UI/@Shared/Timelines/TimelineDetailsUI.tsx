@@ -1,7 +1,7 @@
 import {Clone, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
 import {Button, Column, Pre, Row, RowLR, TextInput} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions";
-import {GetUpdates} from "vwebapp-framework";
+import {GetUpdates} from "web-vcore";
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
 import {Timeline} from "@debate-map/server-link/Source/Link";
 import {UpdateTimeline} from "@debate-map/server-link/Source/Link";

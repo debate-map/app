@@ -17,7 +17,7 @@ import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
 import {DraggableInfo} from "Utils/UI/DNDStructures";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General";
 import {zIndexes} from "Utils/UI/ZIndexes";
-import {DragInfo, EB_ShowError, EB_StoreError, HSLA, IsDoubleClick, Observer} from "vwebapp-framework";
+import {DragInfo, EB_ShowError, EB_StoreError, HSLA, IsDoubleClick, Observer} from "web-vcore";
 import {ExpandableBox} from "./ExpandableBox";
 import {DefinitionsPanel} from "./NodeUI/Panels/DefinitionsPanel";
 import {DetailsPanel} from "./NodeUI/Panels/DetailsPanel";

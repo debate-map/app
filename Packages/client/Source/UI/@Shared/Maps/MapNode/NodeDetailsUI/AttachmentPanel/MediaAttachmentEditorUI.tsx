@@ -7,7 +7,7 @@ import {ShowAddMediaDialog} from "UI/Database/Medias/AddMediaDialog";
 import {MediaAttachment} from "@debate-map/server-link/Source/Link";
 import {Validate} from "web-vcore/nm/mobx-graphlink";
 import {GetMedia, GetMediasByURL} from "@debate-map/server-link/Source/Link";
-import {Link, Observer, InfoButton} from "vwebapp-framework";
+import {Link, Observer, InfoButton} from "web-vcore";
 import {HasModPermissions} from "@debate-map/server-link/Source/Link";
 import {MeID, GetUser} from "@debate-map/server-link/Source/Link";
 import {Media} from "@debate-map/server-link/Source/Link";

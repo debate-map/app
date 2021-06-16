@@ -1,9 +1,9 @@
-import {WhereOp, GetDoc, GetDocs, StoreAccessor} from "../../../Commands/node_modules/mobx-firelink";
-import {emptyArray_forLoading, CE} from "../../../Commands/node_modules/js-vextensions";
+import {WhereOp, GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions";
 import {MapNodePhrasing} from "./nodePhrasings/@MapNodePhrasing";
 import {MapNodeTag, TagComp, GetTagCompClassByTag, GetTagCompOfTag} from "./nodeTags/@MapNodeTag";
 
-// todo: add and use some sort of system where mobx-firelink auto-reattaches data to their classes, based on AJV metadata
+// todo: add and use some sort of system where mobx-graphlink auto-reattaches data to their classes, based on AJV metadata
 export const GetNodeTags = StoreAccessor(s=>(nodeID: string): MapNodeTag[]=>{
 	return GetDocs({
 		//queryOps: [new WhereOp(`nodes.${nodeID}`, ">", "")], // `if value > ""` means "if key exists"

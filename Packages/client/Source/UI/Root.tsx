@@ -15,7 +15,7 @@ import {VMenuLayer} from "react-vmenu";
 import {MessageBoxLayer, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {GetPathNodeIDs} from "Store/main/maps/mapViews/$mapView";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures";
-import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer} from "vwebapp-framework";
+import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer} from "web-vcore";
 import "../../Source/Utils/Styles/Main.scss"; // keep absolute-ish, since scss file not copied to Source_JS folder
 import {NavBar} from "../UI/@Shared/NavBar";
 import {GlobalUI} from "../UI/Global";

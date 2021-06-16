@@ -1,4 +1,4 @@
-import {GetDoc, StoreAccessor} from "../../../Commands/node_modules/mobx-firelink";
+import {GetDoc, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 
 export const GetUserMapInfo = StoreAccessor(s=>(userID: string, mapID: string)=>{
 	if (userID == null) return null;

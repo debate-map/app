@@ -1,4 +1,4 @@
-import {GetDoc, StoreAccessor} from "../../../Commands/node_modules/mobx-firelink";
+import {GetDoc, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {User_Private} from "./users_private/@User_Private";
 
 export const GetUser_Private = StoreAccessor(s=>(userID: string): User_Private=>{

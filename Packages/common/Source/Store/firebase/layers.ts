@@ -1,5 +1,5 @@
-import {CachedTransform, emptyArray, ToInt, emptyArray_forLoading, CE} from "../../../Commands/node_modules/js-vextensions";
-import {GetDoc, GetDocs, StoreAccessor} from "../../../Commands/node_modules/mobx-firelink";
+import {CachedTransform, emptyArray, ToInt, emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions";
+import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {Map} from "./maps/@Map";
 import {AsNodeL3, GetNodeL2} from "./nodes/$node";
 import {GetUserLayerStatesForMap} from "./userMapInfo";

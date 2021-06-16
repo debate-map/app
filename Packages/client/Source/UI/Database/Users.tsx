@@ -2,7 +2,7 @@ import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-
 import {Row, Column} from "web-vcore/nm/react-vcomponents";
 import Moment from "web-vcore/nm/moment";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
-import {Link, PageContainer, Observer} from "vwebapp-framework";
+import {Link, PageContainer, Observer} from "web-vcore";
 import {ES} from "Utils/UI/GlobalStyles";
 import {GetSelectedUser} from "Store/main/database";
 import {ToNumber, E} from "web-vcore/nm/js-vextensions";

@@ -1,4 +1,4 @@
-import {CreateWebpackConfig} from "vwebapp-framework/Scripts/Build/WebpackConfig";
+import {CreateWebpackConfig} from "web-vcore/Scripts/Build/WebpackConfig";
 import fs from "fs";
 import path from "path";
 import {config} from "../Config";
@@ -23,25 +23,25 @@ export const webpackConfig = CreateWebpackConfig({
 	},
 	//sourcesFromRoot: true,
 	/*tsLoaderPaths: [
-		/vwebapp-framework[/\\].*Source[/\\].*\.tsx?$/,
+		/web-vcore[/\\].*Source[/\\].*\.tsx?$/,
 		/js-vextensions[/\\].*Helpers[/\\].*@ApplyCETypes\.tsx?$/,
 		// custom
 		/@debate-map[/\\]server-link[/\\].*Source[/\\].*\.tsx?$/,
 	],*/
 	/*tsLoaderPaths: [
-		resolvePath("node_modules", "vwebapp-framework", "Source"),
+		resolvePath("node_modules", "web-vcore", "Source"),
 		resolvePath("node_modules", "js-vextensions", "Helpers", "@ApplyCETypes.d.ts"),
 		resolvePath("node_modules", "@debate-map", "server-link", "Source"),
 	],*/
 	/*tsLoaderEntries: [
-		{context: resolvePath("node_modules", "vwebapp-framework"), test: /vwebapp-framework[/\\]Source[/\\].*\.tsx?$/},
-		//{context: resolvePath("node_modules", "vwebapp-framework"), test: new RegExp(config.path_base.split(path.sep).concat("node_modules", "vwebapp-framework", "Source", ".*\\.tsx?$").join(path.sep))},
+		{context: resolvePath("node_modules", "web-vcore"), test: /web-vcore[/\\]Source[/\\].*\.tsx?$/},
+		//{context: resolvePath("node_modules", "web-vcore"), test: new RegExp(config.path_base.split(path.sep).concat("node_modules", "web-vcore", "Source", ".*\\.tsx?$").join(path.sep))},
 		{context: resolvePath("node_modules", "js-vextensions"), test: /js-vextensions[/\\]Helpers[/\\]@ApplyCETypes\.tsx?$/},
 		// custom
 		{context: resolvePath("node_modules", "@debate-map", "server-link"), test: /@debate-map[/\\]server-link[/\\]Source[/\\].*\.tsx?$/},
 	],*/
 	tsLoaderEntries: [
-		{test: /vwebapp-framework[/\\]Source[/\\].*\.tsx?$/},
+		{test: /web-vcore[/\\]Source[/\\].*\.tsx?$/},
 		{test: /js-vextensions[/\\]Helpers[/\\]@ApplyCETypes\.tsx?$/},
 		// custom
 		{test: /@debate-map[/\\]server-link[/\\]Source[/\\].*\.tsx?$/},

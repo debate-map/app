@@ -8,15 +8,11 @@ import "./Utils/PreRunners/Start_1";
 import "codemirror";
 import "codemirror/addon/scroll/simplescrollbars";
 import "./Utils/UI/CodeMirrorConfig";
-// needed to fix odd ts issue (where, if first "import" call for library is in vwaf, all subsequent imports of it are assumed to be referencing that under-vwaf version)
-import "mobx-firelink";
+// needed to fix odd ts issue (where, if first "import" call for library is in wvc, all subsequent imports of it are assumed to be referencing that under-wvc version)
+import "mobx-graphlink";
 
-import ReactDOM from "web-vcore/nm/react-dom";
-// import Promise from "bluebird";
 import {VURL} from "web-vcore/nm/js-vextensions";
 import {RootState} from "Store";
-import {O} from "vwebapp-framework";
-import {observable} from "web-vcore/nm/mobx";
 
 // startup (non-hot)
 // ==========

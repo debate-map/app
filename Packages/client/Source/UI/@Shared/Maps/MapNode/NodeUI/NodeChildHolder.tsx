@@ -5,7 +5,7 @@ import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
 import {NodeConnectorBackground} from "UI/@Shared/Maps/MapNode/NodeConnectorBackground";
 import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI";
-import {Icon, MaybeLog, Observer} from "vwebapp-framework";
+import {Icon, MaybeLog, Observer} from "web-vcore";
 import {DroppableInfo} from "Utils/UI/DNDStructures";
 import {ES} from "Utils/UI/GlobalStyles";
 import {store} from "Store";

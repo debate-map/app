@@ -4,7 +4,7 @@ import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {GADDemo} from "UI/@GAD/GAD";
 import {Button_GAD} from "UI/@GAD/GADButton";
-import {InfoButton, RunInAction_Set, Observer} from "vwebapp-framework";
+import {InfoButton, RunInAction_Set, Observer} from "web-vcore";
 import {GetMapEditorIDs, GetMapEditors} from "@debate-map/server-link/Source/Link";
 import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";

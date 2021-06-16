@@ -1,5 +1,5 @@
 import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions";
-import {VReactMarkdown_Remarkable, PageContainer} from "vwebapp-framework";
+import {VReactMarkdown_Remarkable, PageContainer} from "web-vcore";
 import {styles} from "../../Utils/UI/GlobalStyles";
 
 const pageText = `

@@ -11,7 +11,7 @@ import {ImportSubtree} from "@debate-map/server-link/Source/Link";
 import {GetNodeID, GetNodesByTitle, GetNodeChildrenL3} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";
 import {HasModPermissions} from "@debate-map/server-link/Source/Link";
-import {Observer, TreeView, RunInAction_Set} from "vwebapp-framework";
+import {Observer, TreeView, RunInAction_Set} from "web-vcore";
 import {store} from "Store";
 import {DataExchangeFormat} from "Store/main/maps";
 import {GetNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";

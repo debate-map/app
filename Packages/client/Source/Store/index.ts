@@ -1,5 +1,5 @@
 import {configure, onReactionError} from "web-vcore/nm/mobx";
-import {O, HandleError, ConfigureMobX} from "vwebapp-framework";
+import {O, HandleError, ConfigureMobX} from "web-vcore";
 import {ignore} from "web-vcore/nm/mobx-sync";
 import {Firelink} from "web-vcore/nm/mobx-graphlink";
 import {immerable, setUseProxies, setAutoFreeze} from "web-vcore/nm/immer";

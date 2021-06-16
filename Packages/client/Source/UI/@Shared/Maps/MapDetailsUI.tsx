@@ -2,7 +2,7 @@ import {GetErrorMessagesUnderElement, Clone, ToNumber, DEL, CloneWithPrototypes,
 import Moment from "web-vcore/nm/moment";
 import {CheckBox, Column, Pre, RowLR, Spinner, TextInput, Row, Select} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {InfoButton} from "vwebapp-framework";
+import {InfoButton} from "web-vcore";
 import {Map_namePattern, MapType, Map, MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType, MapVisibility, IsUserCreatorOrMod, MeID} from "@debate-map/server-link/Source/Link";
 
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";

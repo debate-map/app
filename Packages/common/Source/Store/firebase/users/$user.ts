@@ -1,5 +1,5 @@
-import {Assert, IsString} from "../../../../Commands/node_modules/js-vextensions";
-import {StoreAccessor} from "../../../../Commands/node_modules/mobx-firelink";
+import {Assert, IsString} from "web-vcore/nm/js-vextensions";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetMap} from "../maps";
 import {MapNodePhrasing} from "../nodePhrasings/@MapNodePhrasing";
 import {GetNodeL2} from "../nodes/$node";

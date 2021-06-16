@@ -1,7 +1,7 @@
-import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading} from "../../../Commands/node_modules/js-vextensions";
-import {GetDoc, StoreAccessor, GetDocs, WhereOp} from "../../../Commands/node_modules/mobx-firelink";
+import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading} from "web-vcore/nm/js-vextensions";
+import {GetDoc, StoreAccessor, GetDocs, WhereOp} from "web-vcore/nm/mobx-graphlink";
 import {observable} from "web-vcore/nm/mobx";
-import {Validate} from "../../../Commands/node_modules/mobx-firelink";
+import {Validate} from "web-vcore/nm/mobx-graphlink";
 import {RatingType, ratingTypes} from "./nodeRatings/@RatingType";
 import {Rating} from "./nodeRatings/@Rating";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore";

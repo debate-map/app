@@ -1,5 +1,5 @@
-import {Range, Assert, ModifyString, CE} from "../../../../Commands/node_modules/js-vextensions";
-import {AddSchema} from "../../../../Commands/node_modules/mobx-firelink";
+import {Range, Assert, ModifyString, CE} from "web-vcore/nm/js-vextensions";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink";
 import {GetDisplayPolarity, GetLinkUnderParent, GetNodeForm, IsMultiPremiseArgument} from "../nodes/$node";
 import {MapNodeL2, MapNodeL3, Polarity} from "../nodes/@MapNode";
 import {MapNodeType} from "../nodes/@MapNodeType";

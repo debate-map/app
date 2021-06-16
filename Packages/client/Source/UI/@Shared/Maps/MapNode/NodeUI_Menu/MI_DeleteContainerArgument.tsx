@@ -5,7 +5,7 @@ import {VMenuItem} from "react-vmenu";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {styles} from "Utils/UI/GlobalStyles";
 import {MI_SharedProps} from "../NodeUI_Menu";
-import {Observer} from "vwebapp-framework";
+import {Observer} from "web-vcore";
 import {GetNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
 import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";

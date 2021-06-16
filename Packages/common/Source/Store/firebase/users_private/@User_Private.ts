@@ -1,4 +1,4 @@
-import {AddSchema} from "../../../../Commands/node_modules/mobx-firelink";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink";
 
 // temp replaced
 // import {UserInfo as ProviderData} from "firebase";

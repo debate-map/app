@@ -9,7 +9,7 @@ import {NotificationsUI} from "UI/@Shared/NavBar/NotificationsUI";
 import {SearchPanel} from "UI/@Shared/NavBar/SearchPanel";
 import {UserPanel} from "UI/@Shared/NavBar/UserPanel";
 import {ResetCurrentDBRoot} from "UI/More/Admin/ResetCurrentDBRoot";
-import {Observer, Link, HSL} from "vwebapp-framework";
+import {Observer, Link, HSL} from "web-vcore";
 import {GetDocs} from "web-vcore/nm/mobx-graphlink";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {GetAuth} from "@debate-map/server-link/Source/Link";

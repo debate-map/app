@@ -1,4 +1,4 @@
-import {CreateConfig} from "vwebapp-framework/Scripts/Config";
+import {CreateConfig} from "web-vcore/Scripts/Config";
 import path, {dirname} from "path";
 
 // @ts-ignore

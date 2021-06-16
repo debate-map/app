@@ -1,5 +1,5 @@
-import {emptyArray_forLoading, Assert, IsNaN, CE, ArrayCE} from "../../../../Commands/node_modules/js-vextensions";
-import {StoreAccessor} from "../../../../Commands/node_modules/mobx-firelink";
+import {emptyArray_forLoading, Assert, IsNaN, CE, ArrayCE} from "web-vcore/nm/js-vextensions";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {GetNodeL3, GetNodeL2} from "../nodes/$node";
 import {GetNodeChildrenL3, GetParentNodeL3} from "../nodes";

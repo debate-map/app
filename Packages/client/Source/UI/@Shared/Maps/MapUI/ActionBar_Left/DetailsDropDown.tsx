@@ -6,7 +6,7 @@ import {store} from "Store";
 import {MapNodeRevision_Defaultable, CanEditNode, IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, GetChildCount, DeleteMap, Map} from "@debate-map/server-link/Source/Link";
 
 
-import {Observer, GetUpdates, InfoButton} from "vwebapp-framework";
+import {Observer, GetUpdates, InfoButton} from "web-vcore";
 import {GADDemo} from "UI/@GAD/GAD";
 import {Button_GAD} from "UI/@GAD/GADButton";
 

@@ -2,7 +2,7 @@ import {E} from "web-vcore/nm/js-vextensions";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {rootPageDefaultChilds} from "Utils/URL/URLs";
 import {store, RootState} from "Store";
-import {ActionFunc, Link, Observer} from "vwebapp-framework";
+import {ActionFunc, Link, Observer} from "web-vcore";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {colors} from "../../Utils/UI/GlobalStyles";
 import {GADHeaderFont} from "./GAD";

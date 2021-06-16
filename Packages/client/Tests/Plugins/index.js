@@ -40,14 +40,14 @@ module.exports = (on, config) => {
 								options: {
 									transpileOnly: true,
 									// configFile: 'tsconfig.json',
-									// configFile: 'C:/Root/Apps/@V/@Modules/vwebapp-framework/Main/tsconfig.json',
+									// configFile: 'C:/Root/Apps/@V/@Modules/web-vcore/Main/tsconfig.json',
 									/* exclude: [
 										'Build',
 										'Tests',
 										'node_modules',
                  				], */
 									/* compilerOptions: {
-										rootDir: './../..', // need to go higher, to wrap the vwebapp-framework repo as well
+										rootDir: './../..', // need to go higher, to wrap the web-vcore repo as well
 									}, */
 								},
 							},

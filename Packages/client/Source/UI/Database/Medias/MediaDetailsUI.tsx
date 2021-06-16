@@ -8,7 +8,7 @@ import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI"
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {Media, Media_namePattern, MediaType, GetNiceNameForMediaType} from "@debate-map/server-link/Source/Link";
 import {SourceChainsEditorUI} from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
-import {YoutubePlayerUI, InfoButton, HSLA, ParseYoutubeVideoID} from "vwebapp-framework";
+import {YoutubePlayerUI, InfoButton, HSLA, ParseYoutubeVideoID} from "web-vcore";
 
 export class MediaDetailsUI extends BaseComponentPlus(
 	{} as {baseData: Media, creating: boolean, editing: boolean, style?, onChange?: (newData: Media, error: string)=>void},

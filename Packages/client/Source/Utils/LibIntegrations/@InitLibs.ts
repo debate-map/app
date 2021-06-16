@@ -1,6 +1,6 @@
 import firebase from "firebase/app";
 import {firebaseConfig} from "Main";
-import {ExposeModuleExports, Log} from "vwebapp-framework";
+import {ExposeModuleExports, Log} from "web-vcore";
 import {InitVWAF} from "./VWAF";
 import {InitFeedback} from "./FirebaseFeedback";
 import {InitReactJS} from "./ReactJS";
@@ -27,7 +27,7 @@ function ExposeModuleExports_Final() {
 export function InitLibs() {
 	InitFirebase();
 	InitVWAF();
-	InitServerLink(); // init this early, so we can use mobx-firelink's DBPath() for the later modules (eg. firebase-feedback)
+	InitServerLink(); // init this early, so we can use mobx-graphlink's DBPath() for the later modules (eg. firebase-feedback)
 	InitFeedback();
 	// InitForum();
 	InitSentry();

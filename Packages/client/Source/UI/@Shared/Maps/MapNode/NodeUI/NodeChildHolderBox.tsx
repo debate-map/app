@@ -3,7 +3,7 @@ import {AssertWarn, emptyArray, emptyArray_forLoading, E} from "web-vcore/nm/js-
 import {Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus, GetDOM, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
 import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
-import {HSLA, Observer} from "vwebapp-framework";
+import {HSLA, Observer} from "web-vcore";
 import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {runInAction} from "web-vcore/nm/mobx";
 import {ExpandableBox} from "../ExpandableBox";

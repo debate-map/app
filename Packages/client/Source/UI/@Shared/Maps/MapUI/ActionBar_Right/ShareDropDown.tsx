@@ -7,7 +7,7 @@ import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ShareTab} from "Store/main/shareUI";
-import {Observer, RunInAction_Set, GetCurrentURL} from "vwebapp-framework";
+import {Observer, RunInAction_Set, GetCurrentURL} from "web-vcore";
 import {NewShareUI} from "./ShareDropDown/NewShareUI";
 import moment from "web-vcore/nm/moment";
 

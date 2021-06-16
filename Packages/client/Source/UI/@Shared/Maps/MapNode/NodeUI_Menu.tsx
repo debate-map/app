@@ -9,7 +9,7 @@ import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
 import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState";
 import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, HolderType, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, CanContributeToNode, GetUserPermissionGroups, IsUserCreatorOrMod, Map} from "@debate-map/server-link/Source/Link";
-import {Observer} from "vwebapp-framework";
+import {Observer} from "web-vcore";
 import {styles} from "../../../../Utils/UI/GlobalStyles";
 import {ShowSignInPopup} from "../../NavBar/UserPanel";
 import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog";

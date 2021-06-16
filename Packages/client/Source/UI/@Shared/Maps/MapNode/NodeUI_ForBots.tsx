@@ -8,7 +8,7 @@ import {Map,GetRatings,GetNodeChildrenL2, GetNodeParentsL2, GetParentNodeL2,AsNo
 
 
 
-import {Link} from "vwebapp-framework";
+import {Link} from "web-vcore";
 import {DefinitionsPanel} from "./NodeUI/Panels/DefinitionsPanel";
 import {DetailsPanel} from "./NodeUI/Panels/DetailsPanel";
 import {DiscussionPanel} from "./NodeUI/Panels/DiscussionPanel";

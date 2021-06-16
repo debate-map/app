@@ -1,4 +1,4 @@
-import {GetDoc, GetDocs, IsAuthValid, StoreAccessor} from "../../../Commands/node_modules/mobx-firelink";
+import {GetDoc, GetDocs, IsAuthValid, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetAuth} from "../firebase";
 import {User} from "./users/@User";
 

@@ -1,4 +1,4 @@
-import {CreateBakedConfigFile} from "vwebapp-framework/Scripts/Bin/BakeConfig";
+import {CreateBakedConfigFile} from "web-vcore/Scripts/Bin/BakeConfig";
 import {config} from "../Config";
 
 /*import { createRequire } from "module";

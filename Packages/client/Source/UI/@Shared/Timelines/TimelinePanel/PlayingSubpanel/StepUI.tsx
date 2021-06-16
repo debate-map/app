@@ -1,6 +1,6 @@
 import {Column, Div, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {VReactMarkdown_Remarkable, YoutubePlayer, YoutubePlayerState, Observer} from "vwebapp-framework";
+import {VReactMarkdown_Remarkable, YoutubePlayer, YoutubePlayerState, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions";
 import {VMenuItem, VMenuStub} from "react-vmenu";
 import {styles} from "Utils/UI/GlobalStyles";

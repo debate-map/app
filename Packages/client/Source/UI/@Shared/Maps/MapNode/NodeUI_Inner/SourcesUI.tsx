@@ -1,7 +1,7 @@
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {Row, Text, Column} from "web-vcore/nm/react-vcomponents";
 import {VURL} from "web-vcore/nm/js-vextensions";
-import {Link} from "vwebapp-framework";
+import {Link} from "web-vcore";
 import {SourceChain, Source} from "@debate-map/server-link/Source/Link";
 
 export class SourcesUI extends BaseComponentPlus({headerText: "Sources"} as {sourceChains: SourceChain[], headerText?: string}, {}) {

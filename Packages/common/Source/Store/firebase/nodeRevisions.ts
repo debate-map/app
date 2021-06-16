@@ -1,5 +1,5 @@
-import {IsNaN} from "../../../Commands/node_modules/js-vextensions";
-import {WhereOp, GetDoc, GetDocs, StoreAccessor} from "../../../Commands/node_modules/mobx-firelink";
+import {IsNaN} from "web-vcore/nm/js-vextensions";
+import {WhereOp, GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {MapNodeRevision, TitleKey} from "./nodes/@MapNodeRevision";
 
 export const GetNodeRevision = StoreAccessor(s=>(id: string): MapNodeRevision=>{

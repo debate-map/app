@@ -1,6 +1,6 @@
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {VReactMarkdown_Remarkable, PageContainer} from "vwebapp-framework";
+import {VReactMarkdown_Remarkable, PageContainer} from "web-vcore";
 import {styles, ES} from "../Utils/UI/GlobalStyles";
 
 const pageText = `

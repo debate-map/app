@@ -3,7 +3,7 @@ import {runInAction} from "web-vcore/nm/mobx";
 import {Column, Row, Select} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vextensions";
 import {store} from "Store";
-import {Observer} from "vwebapp-framework";
+import {Observer} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
 import {MapNode, ChildEntry, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType} from "@debate-map/server-link/Source/Link";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel";

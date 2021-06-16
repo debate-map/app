@@ -1,4 +1,4 @@
-import {AssertValidate} from "../../../Commands/node_modules/mobx-firelink";
+import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {FirebaseDBShape} from "../../Store/firebase";
 
 export function ValidateDBData(data: FirebaseDBShape) {

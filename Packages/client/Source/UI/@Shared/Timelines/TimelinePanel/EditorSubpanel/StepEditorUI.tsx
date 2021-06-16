@@ -3,7 +3,7 @@ import {Droppable, DroppableProvided, DroppableStateSnapshot} from "react-beauti
 import {Button, CheckBox, Column, Pre, Row, Select, Text, TextArea, TimeSpanInput, Spinner} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus, GetDOM, ShallowChanged} from "web-vcore/nm/react-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {DragInfo, MakeDraggable, Observer} from "vwebapp-framework";
+import {DragInfo, MakeDraggable, Observer} from "web-vcore";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures";
 import {UUIDPathStub} from "UI/@Shared/UUIDStub";
 import {GetPathNodes} from "Store/main/maps/mapViews/$mapView";

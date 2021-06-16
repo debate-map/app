@@ -5,7 +5,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {store} from "Store";
 import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView";
 import {ES} from "Utils/UI/GlobalStyles";
-import {InfoButton, Link, observer_simple} from "vwebapp-framework";
+import {InfoButton, Link, observer_simple} from "web-vcore";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
 import {MapNodeType, GetMapNodeTypeDisplayName} from "@debate-map/server-link/Source/Link";
 import {Polarity, MapNode, ClaimForm, ChildEntry} from "@debate-map/server-link/Source/Link";

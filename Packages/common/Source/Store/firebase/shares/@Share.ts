@@ -1,5 +1,5 @@
-import {AddSchema} from "../../../../Commands/node_modules/mobx-firelink";
-import {CE, GetValues_ForSchema} from "../../../../Commands/node_modules/js-vextensions";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink";
+import {CE, GetValues_ForSchema} from "web-vcore/nm/js-vextensions";
 import {MapView} from "./@MapView";
 
 export enum ShareType {

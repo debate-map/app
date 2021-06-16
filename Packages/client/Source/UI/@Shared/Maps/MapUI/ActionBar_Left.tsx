@@ -5,7 +5,7 @@ import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {store} from "Store";
 import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {GADDemo, GADDemo_2020} from "UI/@GAD/GAD";
-import {HSLA, Observer} from "vwebapp-framework";
+import {HSLA, Observer} from "web-vcore";
 import {Map, MapType, MeID, IsUserCreatorOrMod, IsUserMap} from "@debate-map/server-link/Source/Link";
 
 

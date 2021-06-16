@@ -4,7 +4,7 @@ import {Button, Span} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink";
-import {Observer} from "vwebapp-framework";
+import {Observer} from "web-vcore";
 import {MapNodeL3, ClaimForm} from "@debate-map/server-link/Source/Link";
 import {GetNodeForm, IsPremiseOfSinglePremiseArgument, GetRatingTypesForNode} from "@debate-map/server-link/Source/Link";
 import {GetParentNodeL3} from "@debate-map/server-link/Source/Link";

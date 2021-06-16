@@ -1,5 +1,5 @@
-import {GetValues_ForSchema, CE} from "../../../../Commands/node_modules/js-vextensions";
-import {AddSchema} from "../../../../Commands/node_modules/mobx-firelink";
+import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink";
 import {Source, SourceChain} from "../nodeRevisions/@SourceChain";
 
 export enum MediaType {

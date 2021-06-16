@@ -1,7 +1,7 @@
 import {E} from "web-vcore/nm/js-vextensions";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {rootPageDefaultChilds} from "Utils/URL/URLs";
-import {ActionFunc, Link, Observer} from "vwebapp-framework";
+import {ActionFunc, Link, Observer} from "web-vcore";
 import {store, RootState} from "Store";
 import {zIndexes} from "Utils/UI/ZIndexes";
 import {colors} from "../../Utils/UI/GlobalStyles";

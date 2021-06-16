@@ -1,6 +1,6 @@
 import {Div, Column, Row, Button, TextInput, DropDown, DropDownTrigger, DropDownContent, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {InfoButton, Observer, GetUpdates, HSLA} from "vwebapp-framework";
+import {InfoButton, Observer, GetUpdates, HSLA} from "web-vcore";
 import {TermDefinitionPanel} from "./DefinitionsPanel";
 import {Map} from "@debate-map/server-link/Source/Link";
 import {MapNodeL3} from "@debate-map/server-link/Source/Link";

@@ -1,5 +1,5 @@
-import {emptyArray} from "../../../../Commands/node_modules/js-vextensions";
-import {StoreAccessor} from "../../../../Commands/node_modules/mobx-firelink";
+import {emptyArray} from "web-vcore/nm/js-vextensions";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetMap} from "../maps";
 import {GetUser} from "../users";
 import {Map, MapType} from "./@Map";

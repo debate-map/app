@@ -4,7 +4,7 @@ import {ConvertDataToValidDBUpdates, DBPath, GetAsync, GetDoc, GetDocs, SplitStr
 import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {PageContainer, Observer} from "vwebapp-framework";
+import {PageContainer, Observer} from "web-vcore";
 import {HasAdminPermissions, MeID, ValidateDBData, FirebaseDBShape} from "@debate-map/server-link/Source/Link";
 
 

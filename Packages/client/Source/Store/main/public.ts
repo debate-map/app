@@ -1,4 +1,4 @@
-import {O} from "vwebapp-framework";
+import {O} from "web-vcore";
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetMap} from "@debate-map/server-link/Source/Link";
 

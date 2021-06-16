@@ -1,4 +1,4 @@
-import {MergeDBUpdates, GetAsync, GetDoc, Command, Command_Old} from "web-vcore/nm/mobx-firelink";
+import {MergeDBUpdates, GetAsync, GetDoc, Command, Command_Old} from "web-vcore/nm/mobx-graphlink";
 import {GetMap} from "./Store/firebase/maps";
 import {IsString, IsFunction} from "web-vcore/nm/js-vextensions";
 import {GetUser} from "./Store/firebase/users";

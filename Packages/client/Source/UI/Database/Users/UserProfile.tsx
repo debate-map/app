@@ -2,7 +2,7 @@ import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-
 import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select, ColorPickerBox, Text} from "web-vcore/nm/react-vcomponents";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds";
-import {PageContainer, Observer} from "vwebapp-framework";
+import {PageContainer, Observer} from "web-vcore";
 import {styles, ES} from "Utils/UI/GlobalStyles";
 import {Fragment} from "react";
 import {PropNameToTitle} from "Utils/General/Others";

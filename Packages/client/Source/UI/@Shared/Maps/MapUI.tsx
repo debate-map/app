@@ -5,7 +5,7 @@ import {BaseComponentWithConnector, FindReact, GetDOM, BaseComponentPlus, BaseCo
 import {VMenuStub, VMenuItem} from "react-vmenu";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {TimelinePlayerUI} from "UI/@Shared/Timelines/TimelinePlayerUI";
-import {GetDistanceBetweenRectAndPoint, inFirefox, GetScreenRect, StoreAction, Observer} from "vwebapp-framework";
+import {GetDistanceBetweenRectAndPoint, inFirefox, GetScreenRect, StoreAction, Observer} from "web-vcore";
 import {GADDemo} from "UI/@GAD/GAD";
 import {store} from "Store";
 import {GetNodeView, GetMapView, GetSelectedNodePath, GetViewOffset, GetFocusedNodePath, GetNodeViewsAlongPath, ACTMapNodeSelect} from "Store/main/maps/mapViews/$mapView";

@@ -4,7 +4,7 @@ import Moment from "web-vcore/nm/moment";
 import {store} from "Store";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {logTypes} from "Utils/General/Logging";
-import {VReactMarkdown_Remarkable} from "vwebapp-framework";
+import {VReactMarkdown_Remarkable} from "web-vcore";
 import {MeID, GetUser} from "@debate-map/server-link/Source/Link";
 import {GetUserPermissionGroups} from "@debate-map/server-link/Source/Link";
 import {GetNewURLForStoreChanges} from "./VWAF";

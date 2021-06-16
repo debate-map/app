@@ -8,7 +8,7 @@ import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub";
 import {ES} from "Utils/UI/GlobalStyles";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink";
 import {Map, ChildOrderType} from "@debate-map/server-link/Source/Link";
-import {Observer, InfoButton, Icon} from "vwebapp-framework";
+import {Observer, InfoButton, Icon} from "web-vcore";
 import {MapNodeL3, ClaimForm} from "@debate-map/server-link/Source/Link";
 import {AttachmentType, GetAttachmentType} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";

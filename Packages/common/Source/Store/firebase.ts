@@ -1,5 +1,5 @@
 import {ObservableMap} from "web-vcore/nm/mobx";
-import {Collection_Closed, Collection, StoreAccessor, FireUserInfo} from "../../Commands/node_modules/mobx-firelink";
+import {Collection_Closed, Collection, StoreAccessor, FireUserInfo} from "web-vcore/nm/mobx-graphlink";
 import {GeneralData} from "./firebase/general";
 import {Media} from "./firebase/media/@Media";
 import {Layer} from "./firebase/layers/@Layer";

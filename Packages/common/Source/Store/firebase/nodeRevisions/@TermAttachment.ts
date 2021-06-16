@@ -1,5 +1,5 @@
-import {AddSchema} from "../../../../Commands/node_modules/mobx-firelink";
-import {CE} from "../../../../Commands/node_modules/js-vextensions";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink";
+import {CE} from "web-vcore/nm/js-vextensions";
 
 export class TermAttachment {
 	constructor(initialData?: Partial<TermAttachment>) {

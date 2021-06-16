@@ -4,7 +4,7 @@ import {GADDemo} from "UI/@GAD/GAD";
 import {Button_GAD} from "UI/@GAD/GADButton";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx";
-import {Observer} from "vwebapp-framework";
+import {Observer} from "web-vcore";
 import {ACTEnsureMapStateInit} from "Store/main/maps";
 import {Map} from "@debate-map/server-link/Source/Link";
 

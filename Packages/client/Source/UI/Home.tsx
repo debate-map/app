@@ -1,7 +1,7 @@
 import {Switch} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {store} from "Store";
-import {Observer} from "vwebapp-framework";
+import {Observer} from "web-vcore";
 import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
 import {AboutUI} from "./Home/About";
 import {HomeUI2} from "./Home/Home";

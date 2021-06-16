@@ -2,7 +2,7 @@ import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {VMenuItem} from "react-vmenu";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {styles} from "Utils/UI/GlobalStyles";
-import {Observer} from "vwebapp-framework";
+import {Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions";
 import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";

@@ -1,5 +1,5 @@
-import {emptyArray, emptyArray_forLoading, IsNaN, CE, Assert} from "../../../Commands/node_modules/js-vextensions";
-import {GetDoc, SlicePath, SplitStringBySlash_Cached, StoreAccessor, UUID} from "../../../Commands/node_modules/mobx-firelink";
+import {emptyArray, emptyArray_forLoading, IsNaN, CE, Assert} from "web-vcore/nm/js-vextensions";
+import {GetDoc, SlicePath, SplitStringBySlash_Cached, StoreAccessor, UUID} from "web-vcore/nm/mobx-graphlink";
 import {GetNodeRevisionsByTitle} from "./nodeRevisions";
 import {AsNodeL1, GetNodeL2, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "./nodes/$node";
 import {globalRootNodeID, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./nodes/@MapNode";

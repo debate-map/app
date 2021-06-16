@@ -1,6 +1,6 @@
-import {emptyArray, CE} from "../../../Commands/node_modules/js-vextensions";
-import {AddSchema, UUID_regex} from "../../../Commands/node_modules/mobx-firelink";
-import {GetDoc, StoreAccessor} from "../../../Commands/node_modules/mobx-firelink";
+import {emptyArray, CE} from "web-vcore/nm/js-vextensions";
+import {AddSchema, UUID_regex} from "web-vcore/nm/mobx-graphlink";
+import {GetDoc, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {MapNode} from "./nodes/@MapNode";
 import {GetRootNodeID} from "./maps/$map";
 import {GetNode, GetNodeID} from "./nodes";

@@ -2,7 +2,7 @@ import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {VMenuItem} from "react-vmenu";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {styles} from "Utils/UI/GlobalStyles";
-import {Observer} from "vwebapp-framework";
+import {Observer} from "web-vcore";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {runInAction} from "web-vcore/nm/mobx";
 import {store} from "Store";

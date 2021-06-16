@@ -1,4 +1,4 @@
-import {AddSchema} from "../../../../Commands/node_modules/mobx-firelink";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink";
 import {Source, SourceChain} from "./@SourceChain";
 
 export class QuoteAttachment {

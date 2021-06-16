@@ -5,7 +5,7 @@ import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {ShowAddTimelineDialog} from "UI/@Shared/Timelines/AddTimelineDialog";
 import {GetSelectedTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {store} from "Store";
-import {Observer} from "vwebapp-framework";
+import {Observer} from "web-vcore";
 import {runInAction} from "web-vcore/nm/mobx";
 import {E} from "web-vcore/nm/js-vextensions";
 import {GetMapTimelines, DeleteTimeline, MeID, Map} from "@debate-map/server-link/Source/Link";

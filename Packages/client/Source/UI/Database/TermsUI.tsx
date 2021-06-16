@@ -7,7 +7,7 @@ import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {store} from "Store";
 import {GetSelectedTerm} from "Store/main/database";
 import {ES} from "Utils/UI/GlobalStyles";
-import {GetUpdates, Observer} from "vwebapp-framework";
+import {GetUpdates, Observer} from "web-vcore";
 import {Term, TermType} from "@debate-map/server-link/Source/Link";
 import {MeID} from "@debate-map/server-link/Source/Link";
 import {GetTerms, GetFullNameP} from "@debate-map/server-link/Source/Link";

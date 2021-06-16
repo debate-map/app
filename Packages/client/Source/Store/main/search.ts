@@ -1,4 +1,4 @@
-import {O} from "vwebapp-framework";
+import {O} from "web-vcore";
 
 export class SearchState {
 	@O queryStr: string;

@@ -4,7 +4,7 @@ import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {ES} from "Utils/UI/GlobalStyles";
-import {InfoButton, observer_simple} from "vwebapp-framework";
+import {InfoButton, observer_simple} from "web-vcore";
 import {Validate} from "web-vcore/nm/mobx-graphlink";
 import {GetNodeL2, AsNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
 import {MapNodeType} from "@debate-map/server-link/Source/Link";
