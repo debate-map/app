@@ -1,0 +1,8 @@
+{
+	"name": "dm_common",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"start": "nps"
+	}
+}

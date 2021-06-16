@@ -1,0 +1,63 @@
+{
+	"compilerOptions": {
+		// general
+		"sourceMap": true,
+		"watch": true,
+		//"noEmit": true,
+		"forceConsistentCasingInFileNames": true, // creates duplicates in import-helper plugins otherwise
+
+		// modules/paths
+		"module": "esnext",
+		"moduleResolution": "node",
+		"rootDir": ".",
+		//"rootDir": "../..", // go from "@V/DebateMap/Main" to "@V", so above modules
+		// paths are relative to "baseUrl" (ie. ./Packages/XXX/Source)
+		"paths": {
+			// from web-vcore
+			"react": [
+				//"../../../node_modules/web-vcore/nm/react",
+				"../../../node_modules/web-vcore/node_modules/react",
+				"../../../node_modules/react",
+			],
+			// project-specific
+			"mobx-graphlink": [
+				"../../../node_modules/web-vcore/node_modules/mobx-graphlink",
+				"../../../node_modules/mobx-graphlink",
+			],
+			"mobx-graphlink/*": [
+				"../../../node_modules/web-vcore/node_modules/mobx-graphlink/*",
+				"../../../node_modules/mobx-graphlink/*",
+			]
+		},
+
+		// compiler options
+		"target": "esnext",
+		"lib": [
+			"es6",
+			"es5",
+			"dom"
+		],
+		"jsx": "react",
+		"noImplicitAny": false,
+		"experimentalDecorators": true,
+		"allowSyntheticDefaultImports": true
+	},
+	"include": [
+		// these are relative to this file's folder (repo root)
+		//"Typings/**/*.d.ts",
+		//"Packages/client/Source/**/*.ts",
+		//"Packages/client/Source/**/*.tsx",
+		//"Packages/common/Source/**/*.ts",
+		//"Packages/common/Source/**/*.tsx",
+		//"Packages/server/Source/**/*.ts",
+		//"Packages/server/Source/**/*.tsx",
+		//"./Source/**/*.ts",
+		//"./Source/**/*.tsx",
+	],
+	/*"exclude": [
+		"Build",
+		"Tests",
+		"node_modules",
+	],*/
+	"compileOnSave": true
+}

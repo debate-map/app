@@ -1,0 +1,24 @@
+*.log
+**/*.log
+.DS_Store
+**/.DS_Store
+**/*-autosave.kra
+**/*.kra~
+
+node_modules
+coverage
+
+/.happypack
+/.firebase
+/.git-rewrite
+/Source/BakedConfig_Dev.ts
+/Source/BakedConfig_Prod.ts
+/Dist
+/Source_JS
+/Tools/Webpack Profiling/Stats.json
+/Tools/Webpack Profiling/Stats_Incremental.json
+/Tools/Webpack Profiling/ModuleTimings_Incremental.json
+/Tools/Webpack Profiling/ModuleTimings.json
+/Tools/Webpack Profiling/ModuleInfo.json
+/Info/Images/@NotTracked
+/Scripts/Config/dll

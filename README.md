@@ -1,4 +1,8 @@
-# Debate Map (Client)
+# Debate Map
+
+Monorepo for the client, server, etc. of the Debate Map website ([debatemap.app](https://debatemap.app)).
+
+# Overview
 
 The [Debate Map](https://debatemap.app) project is a web platform aimed at improving the efficiency of discussion and debate. It's crowd-sourced and open-source, and welcomes reader contributions.
 
@@ -11,45 +15,37 @@ The maps are constructed from "theses" (blue) which make claims, and "arguments"
 
 For more information, visit the website at: <https://debatemap.app>
 
-### Workspace setup
+# Development
 
-1) Clone the repo to disk: <https://github.com/debate-map/client.git>
-2) Run `npm install` in the project's root folder.
+## Setup
 
-For recommended setup of your code editor and other tools, see: [Editor setup](#editor-setup)
+### Part 1 (general)
 
-### Running locally
+1) Ensure [NodeJS](https://nodejs.org) (v8.6+) is installed, as well as [Yarn](https://yarnpkg.com/getting-started/migration) (needed for Yarn workspaces).
 
-1) Run `tsc` in a console, and keep it running in the background.
-2) Run `npm start dev` in the root project folder. (or `npm start dev-with-stats`)
-3) Navigate to `localhost:3005`.
+2) Clone/download this repo to disk. (https://github.com/debate-map/app.git)
 
-### Firebase setup + project config (if forking)
+3) Install this repo's dependencies by running: `yarn`
 
-1) Create two Google Firebase projects -- one for development, one for production.
-2) Edit the `.firebaserc` and `Scripts/Build/CreateConfig.js` files, replacing their paths and data with your own.
-3) Add at least one form of authentication to your Firebase projects. (Google sign-in is easiest)
-4) Run the project locally. (see "Running locally" section below)
-5) Sign in, using the panel at the top-right.
-6) Add "?init=true" to the address-bar url, and reload the page.
-7) Press the "Initialize database" button which will appear at the top-left.
+4) Ensure the yarn symlinks are set up properly. (they are currently hard-coded; instructions to be written)
 
-### Deploying to Firebase
+### Part 2 (client)
 
-1) Make sure you have the firebase cli tools installed (`npm install -g firebase-tools`), and that you're logged in (`firebase login`).
-2) Run `tsc` in a console, and keep it running in the background. (this reduces deploy:prod-quick compile times from ~59s to ~32s, by enabling incremental compilation)
-3) Run `npm start deploy.[dev/prod/prod-quick]`. Note that `deploy.prod-quick` time is ~32s, vs ~86s for `deploy.prod` (since the former doesn't use minification and such).
+5) Follow the instructions here: <https://github.com/debate-map/app/Packages/client#setup>
 
-### Editor setup
+### Part 3 (server)
 
-The below are recommendations for your editor setup, which will make editing the project more efficient and less error prone. (due to matching our setup)
+> This part is only necessary if you're making changes to the backend, or otherwise want to run your own server instance.
 
-Browser: [Chrome](https://www.google.com/chrome)  
-Editor: [Visual Studio Code](https://code.visualstudio.com)  
-VSCode extensions:
-* [Search node_modules](https://marketplace.visualstudio.com/items?itemName=jasonnutter.search-node-modules): Very helpful for quickly opening files in modules under `node_modules`.
-* [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint): Shows warnings when code does not match the project's coding style.
+6) Follow the instructions here: <https://github.com/debate-map/app/Packages/server#setup>
 
-### Other documentation
+## Editing + running
 
-* [Performance](/Docs/Performance.md)
+1) It's recommended to open two VSCode windows:
+   * The first in the `Packages/client` folder, for the ui and other frontend code.
+   * The second in the repo root, for everything else. (helps separate the concerns/contexts into roughly two halves)
+2) In vscode #1, start frontend ts-compiler: ctrl+shift+b, then `#1 tsc`.
+3) In vscode #1, start frontend webpack/dev-server: ctrl+shift+b, then `#2 webpack`.
+4) In vscode #2, start backend compiler: ctrl+shift+b, then `#1 snowpack`.
+5) In vscode #2, start backend: ctrl+shift+b, then `#2 start server`.
+6) Open website locally at: `localhost:3005`
