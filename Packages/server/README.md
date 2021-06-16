@@ -4,7 +4,7 @@ Codebase for the Debate Map website's backend ([debatemap.app](https://debatemap
 
 ## Setup
 
-> Continued from: https://github.com/debate-map/app#Setup
+> Continued from: https://github.com/debate-map/app#setup
 
 1) Ensure [PostgreSQL](https://www.postgresql.org/) (v10+) is installed.
 

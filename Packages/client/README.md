@@ -4,7 +4,7 @@ Codebase for the Debate Map website's frontend ([debatemap.app](https://debatema
 
 ## Setup
 
-> Continued from: https://github.com/debate-map/app#Setup
+> Continued from: https://github.com/debate-map/app#setup
 
 1) [opt] If you want easier debugging in the browser, it's recommended to install these extensions:
 	* [React Development Tools](https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi)
