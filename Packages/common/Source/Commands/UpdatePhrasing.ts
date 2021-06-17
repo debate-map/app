@@ -1,10 +1,10 @@
 import {AddSchema, GetSchemaJSON, Schema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
-import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {MapNodePhrasing} from "../Store/db/nodePhrasings/@MapNodePhrasing";
 import {GetNodePhrasing} from "../Store/db/nodePhrasings";
 import {CE} from "web-vcore/nm/js-vextensions";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 type MainType = MapNodePhrasing;
 const MTName = "MapNodePhrasing";
@@ -29,7 +29,7 @@ export class UpdatePhrasing extends Command<{id: string, updates: Partial<MainTy
 
 		const {id, updates} = this.payload;
 		this.oldData = GetNodePhrasing(id);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "update");
+		AssertUserCanModify(this, this.oldData);
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}

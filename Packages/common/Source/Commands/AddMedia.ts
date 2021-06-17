@@ -1,5 +1,5 @@
 import {UserEdit} from "../CommandMacros";
-import {Command_Old, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
 import {HasModPermissions} from "../Store/db/users/$user";
 import {Media} from "../Store/db/media/@Media";

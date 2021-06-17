@@ -7,7 +7,7 @@ import {GetNodeRevisions} from "../Store/db/nodeRevisions";
 import {GetNode, ForDelete_GetError} from "../Store/db/nodes";
 import {GetMaps} from "../Store/db/maps";
 import {CE} from "web-vcore/nm/js-vextensions";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
 import {AddMap} from "./AddMap";
 
 AddSchema("DeleteNode_payload", {
@@ -40,7 +40,7 @@ export class DeleteNode extends Command<{mapID?: string, nodeID: string, withCon
 		const {asPartOfMapDelete, parentsToIgnore, childrenToIgnore} = this;
 
 		this.oldData = GetNodeL2(nodeID);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "delete");
+		AssertUserCanDelete(this, this.oldData);
 		// this.oldRevisions = await GetAsync(() => GetNodeRevisions(nodeID));
 		// this.oldRevisions = await Promise.all(...oldRevisionIDs.map(id => GetDataAsync('nodeRevisions', id)));
 		// this.oldRevisions = await Promise.all(...oldRevisionIDs.map(id => GetAsync(() => GetNodeRevision(id))));

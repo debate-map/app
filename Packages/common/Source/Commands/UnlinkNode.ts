@@ -1,4 +1,4 @@
-import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {GetNode, IsRootNode, IsNodeSubnode} from "../Store/db/nodes";
 import {GetNodeL2} from "../Store/db/nodes/$node";

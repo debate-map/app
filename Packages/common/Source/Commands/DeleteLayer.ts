@@ -4,7 +4,7 @@ import {Layer} from "../Store/db/layers/@Layer";
 import {UserMapInfoSet} from "../Store/db/userMapInfo/@UserMapInfo";
 import {GetLayer, ForDeleteLayer_GetError} from "../Store/db/layers";
 import {IsUserCreatorOrMod} from "../Commands";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 @UserEdit
 export class DeleteLayer extends Command<{layerID: string}, {}> {
@@ -14,7 +14,7 @@ export class DeleteLayer extends Command<{layerID: string}, {}> {
 		const {layerID} = this.payload;
 		// this.oldData = await GetDoc_Async({}, (a) => a.layers.get(layerID));
 		this.oldData = AV.NonNull = GetLayer(layerID);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "delete");
+		AssertUserCanDelete(this, this.oldData);
 		this.userMapInfoSets = AV.NonNull = GetDocs({resultForLoading: undefined}, a=>a.userMapInfo);
 
 		const earlyError = ForDeleteLayer_GetError(this.userInfo.id, this.oldData);

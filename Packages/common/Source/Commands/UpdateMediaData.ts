@@ -3,7 +3,7 @@ import {AddSchema, AssertV, AssertValidate, Command, GetSchemaJSON, Schema} from
 import {UserEdit} from "../CommandMacros";
 import {Media} from "../Store/db/media/@Media";
 import {GetMedia} from "../Commands";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 type MainType = Media;
 const MTName = "Media";
@@ -27,7 +27,7 @@ export class UpdateMediaData extends Command<{id: string, updates: Partial<Media
 
 		const {id, updates} = this.payload;
 		this.oldData = GetMedia(id);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "update");
+		AssertUserCanModify(this, this.oldData);
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, "New-data invalid");
 	}

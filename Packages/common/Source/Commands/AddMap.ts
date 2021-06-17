@@ -1,4 +1,4 @@
-import {Command_Old, MergeDBUpdates, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {MergeDBUpdates, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {AssertValidate, UUID, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
 import {OmitIfFalsy, Assert, E} from "web-vcore/nm/js-vextensions";
 import {UserEdit} from "../CommandMacros";

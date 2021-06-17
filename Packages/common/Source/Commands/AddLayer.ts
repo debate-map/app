@@ -1,5 +1,5 @@
 import {UserEdit} from "../CommandMacros";
-import {Command_Old, Command} from "web-vcore/nm/mobx-graphlink";
+import {Command} from "web-vcore/nm/mobx-graphlink";
 import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
 import {Layer} from "../Store/db/layers/@Layer";
 

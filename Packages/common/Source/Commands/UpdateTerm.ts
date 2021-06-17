@@ -1,10 +1,10 @@
 import {Assert, CE} from "web-vcore/nm/js-vextensions";
 import {UserEdit} from "../CommandMacros";
 import {AssertValidate, AddSchema, GetSchemaJSON, Schema, WrapDBValue} from "web-vcore/nm/mobx-graphlink";
-import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {Term} from "../Store/db/terms/@Term";
 import {GetTerm} from "../Store/db/terms";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 type MainType = Term;
 const MTName = "Term";
@@ -26,7 +26,7 @@ export class UpdateTerm extends Command<{termID: string, updates: Partial<Term>}
 	Validate() {
 		const {termID, updates} = this.payload;
 		this.oldData = GetTerm(termID);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "update");
+		AssertUserCanModify(this, this.oldData);
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate("Term", this.newData, "New-data invalid");
 	}

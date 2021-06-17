@@ -1,6 +1,6 @@
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
-import {Command_Old, MergeDBUpdates, Command} from "web-vcore/nm/mobx-graphlink";
+import {MergeDBUpdates, Command} from "web-vcore/nm/mobx-graphlink";
 import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {ChildEntry, MapNode} from "../Store/db/nodes/@MapNode";
 import {AddChildNode} from "./AddChildNode";

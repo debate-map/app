@@ -3,7 +3,7 @@ import {AddSchema, AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mob
 import {Timeline} from "../Store/db/timelines/@Timeline";
 import {GetTimeline} from "../Store/db/timelines";
 import {CE} from "web-vcore/nm/js-vextensions";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 type MainType = Timeline;
 const MTName = "Timeline";
@@ -27,7 +27,7 @@ export class UpdateTimeline extends Command<{id: string, updates: Partial<MainTy
 		const {id, updates} = this.payload;
 		// this.oldData = await GetAsync(() => GetTimeline(id));
 		this.oldData = GetTimeline(id);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "update");
+		AssertUserCanModify(this, this.oldData);
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}

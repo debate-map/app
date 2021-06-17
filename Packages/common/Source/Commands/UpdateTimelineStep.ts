@@ -1,10 +1,10 @@
 import {AddSchema, AssertValidate, GetSchemaJSON, Schema, AV} from "web-vcore/nm/mobx-graphlink";
-import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {TimelineStep} from "../Store/db/timelineSteps/@TimelineStep";
 import {GetTimelineStep} from "../Store/db/timelineSteps";
 import {CE} from "web-vcore/nm/js-vextensions";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts";
 import {GetTimeline} from "../Commands";
 
 AddSchema("UpdateTimelineStep_payload", ["TimelineStep"], ()=>({
@@ -27,7 +27,7 @@ export class UpdateTimelineStep extends Command<{stepID: string, stepUpdates: Pa
 		const {stepID, stepUpdates} = this.payload;
 		this.oldData = GetTimelineStep(stepID);
 		const timeline = AV.NonNull = GetTimeline(this.oldData.timelineID);
-		AssertExistsAndUserIsCreatorOrMod(this, {creator: timeline.creator}, "update");
+		AssertUserCanModify(this, {creator: timeline.creator});
 		this.newData = {...this.oldData, ...stepUpdates};
 		AssertValidate("TimelineStep", this.newData, "New timeline-step-data invalid");
 	}

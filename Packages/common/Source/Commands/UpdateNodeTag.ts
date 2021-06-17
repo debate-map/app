@@ -5,7 +5,7 @@ import {MapNodeTag, TagComp_keys} from "../Store/db/nodeTags/@MapNodeTag";
 import {GetNodeTag} from "../Store/db/nodeTags";
 import {IsUserCreatorOrMod} from "../Store/db/users/$user";
 import {CE} from "web-vcore/nm/js-vextensions";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 type MainType = MapNodeTag;
 const MTName = "MapNodeTag";
@@ -30,7 +30,7 @@ export class UpdateNodeTag extends Command<{id: string, updates: Partial<MainTyp
 
 		const {id, updates} = this.payload;
 		this.oldData = AV.NonNull = GetNodeTag(id);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "update");
+		AssertUserCanModify(this, this.oldData);
 
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);

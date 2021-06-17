@@ -2,7 +2,7 @@ import {AV, Command} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {MapNodeTag} from "../Store/db/nodeTags/@MapNodeTag";
 import {GetNodeTag} from "../Store/db/nodeTags";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 @UserEdit
 export class DeleteNodeTag extends Command<{id: string}, {}> {
@@ -10,7 +10,7 @@ export class DeleteNodeTag extends Command<{id: string}, {}> {
 	Validate() {
 		const {id} = this.payload;
 		this.oldData = AV.NonNull = GetNodeTag(id);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "delete");
+		AssertUserCanDelete(this, this.oldData);
 	}
 
 	GetDBUpdates() {

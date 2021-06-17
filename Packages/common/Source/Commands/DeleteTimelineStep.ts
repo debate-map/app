@@ -1,10 +1,10 @@
-import {UserEdit} from "../CommandMacros";
-import {Command_Old, GetAsync, Command, AssertV, AV} from "web-vcore/nm/mobx-graphlink";
-import {TimelineStep} from "../Store/db/timelineSteps/@TimelineStep";
-import {GetTimelineStep} from "../Store/db/timelineSteps";
-import {GetTimeline} from "../Store/db/timelines";
 import {CE} from "web-vcore/nm/js-vextensions";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AV, Command} from "web-vcore/nm/mobx-graphlink";
+import {UserEdit} from "../CommandMacros";
+import {GetTimeline} from "../Store/db/timelines";
+import {GetTimelineStep} from "../Store/db/timelineSteps";
+import {TimelineStep} from "../Store/db/timelineSteps/@TimelineStep";
+import {AssertUserCanDelete} from "./Helpers/SharedAsserts";
 
 @UserEdit
 export class DeleteTimelineStep extends Command<{stepID: string}, {}> {
@@ -14,7 +14,7 @@ export class DeleteTimelineStep extends Command<{stepID: string}, {}> {
 		const {stepID} = this.payload;
 		this.oldData = AV.NonNull = GetTimelineStep(stepID);
 		const timeline = AV.NonNull = GetTimeline(this.oldData.timelineID);
-		AssertExistsAndUserIsCreatorOrMod(this, {creator: timeline.creator}, "delete");
+		AssertUserCanDelete(this, {creator: timeline.creator});
 		this.timeline_oldSteps = timeline.steps;
 	}
 

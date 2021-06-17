@@ -1,8 +1,8 @@
 import {UserEdit} from "../CommandMacros";
-import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {Media} from "../Store/db/media/@Media";
 import {GetMedia, IsUserCreatorOrMod} from "../Commands";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 @UserEdit
 export class DeleteMedia extends Command<{id: string}, {}> {
@@ -10,7 +10,7 @@ export class DeleteMedia extends Command<{id: string}, {}> {
 	Validate() {
 		const {id} = this.payload;
 		this.oldData = GetMedia(id);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "delete");
+		AssertUserCanDelete(this, this.oldData);
 	}
 
 	GetDBUpdates() {

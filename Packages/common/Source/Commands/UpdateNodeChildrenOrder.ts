@@ -1,12 +1,12 @@
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
-import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {MapNode} from "../Store/db/nodes/@MapNode";
 import {GetNode} from "../Store/db/nodes";
 import {HasAdminPermissions, IsUserCreatorOrMod} from "../Store/db/users/$user";
 import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
 import {IsPrivateNode, IsMultiPremiseArgument} from "../Store/db/nodes/$node";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 @MapEdit
 @UserEdit
@@ -25,7 +25,7 @@ export class UpdateNodeChildrenOrder extends Command<{mapID?: string, nodeID: st
 
 		const {mapID, nodeID, childrenOrder} = this.payload;
 		const node = this.oldNodeData = GetNode(nodeID);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldNodeData, "update");
+		AssertUserCanModify(this, this.oldNodeData);
 
 		const changeableForNonAdmins = IsPrivateNode(node) || IsMultiPremiseArgument(node);
 		const changeable_final = (IsUserCreatorOrMod(this.userInfo.id, node) && changeableForNonAdmins) || HasAdminPermissions(this.userInfo.id);

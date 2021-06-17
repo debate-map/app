@@ -1,4 +1,4 @@
-import {IsNaN} from "web-vcore/nm/js-vextensions";
+import {emptyArray, IsNaN} from "web-vcore/nm/js-vextensions";
 import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {MapNodeRevision, TitleKey} from "./nodes/@MapNodeRevision";
 
@@ -42,8 +42,9 @@ export const GetNodeRevisions = StoreAccessor(s=>(nodeID: string): MapNodeRevisi
 		}},
 	}, a=>a.nodeRevisions);
 });
-/*export const GetNodeRevisionsByTitle = StoreAccessor(s=>(title: string, titleKey: TitleKey): MapNodeRevision[]=>{
-	return GetDocs({
+export const GetNodeRevisionsByTitle = StoreAccessor(s=>(title: string, titleKey: TitleKey): MapNodeRevision[]=>{
+	/*return GetDocs({
 		//queryOps: [new WhereOp(`titles.${titleKey}`, "==", title)],
-	}, a=>a.nodeRevisions);
-});*/
+	}, a=>a.nodeRevisions);*/
+	return emptyArray; // temp
+});

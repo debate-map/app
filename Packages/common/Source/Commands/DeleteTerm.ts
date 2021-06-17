@@ -1,8 +1,8 @@
 import {UserEdit} from "../CommandMacros";
-import {Command_Old, GetAsync, Command, AssertV, WrapDBValue} from "web-vcore/nm/mobx-graphlink";
+import {GetAsync, Command, AssertV, WrapDBValue} from "web-vcore/nm/mobx-graphlink";
 import {Term} from "../Store/db/terms/@Term";
 import {GetTerm} from "../Store/db/terms";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 @UserEdit
 export class DeleteTerm extends Command<{termID: string}, {}> {
@@ -10,7 +10,7 @@ export class DeleteTerm extends Command<{termID: string}, {}> {
 	Validate() {
 		const {termID} = this.payload;
 		this.oldData = GetTerm(termID);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "delete");
+		AssertUserCanDelete(this, this.oldData);
 	}
 
 	GetDBUpdates() {

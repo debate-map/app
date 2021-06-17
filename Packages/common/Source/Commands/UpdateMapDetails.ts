@@ -1,11 +1,11 @@
 import {MapEdit} from "../CommandMacros";
 import {AddSchema, AssertValidate, Schema, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink";
-import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {Map} from "../Store/db/maps/@Map";
 import {GetMap} from "../Store/db/maps";
 import {CE} from "web-vcore/nm/js-vextensions";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 type MainType = Map;
 const MTName = "Map";
@@ -30,7 +30,7 @@ export class UpdateMapDetails extends Command<{id: string, updates: Partial<Main
 
 		const {id: mapID, updates: mapUpdates} = this.payload;
 		this.oldData = GetMap(mapID);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "update");
+		AssertUserCanModify(this, this.oldData);
 		this.newData = {...this.oldData, ...mapUpdates};
 		this.newData.editedAt = Date.now();
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);

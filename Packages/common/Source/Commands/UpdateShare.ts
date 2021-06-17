@@ -3,7 +3,7 @@ import {AddSchema, AssertV, AssertValidate, Command, GetSchemaJSON, Schema} from
 import {UserEdit} from "../CommandMacros";
 import {Media} from "../Store/db/media/@Media";
 import {GetMedia, Share, GetShare} from "../Commands";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 type MainType = Share;
 const MTName = "Share";
@@ -25,7 +25,7 @@ export class UpdateShare extends Command<{id: string, updates: Partial<MainType>
 
 		const {id, updates} = this.payload;
 		this.oldData = GetShare(id);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "update");
+		AssertUserCanModify(this, this.oldData);
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, "New-data invalid");
 	}

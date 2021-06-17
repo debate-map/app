@@ -1,8 +1,8 @@
-import {UserEdit} from "../CommandMacros";
-import {Command_Old, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {CE} from "web-vcore/nm/js-vextensions";
+import {Command} from "web-vcore/nm/mobx-graphlink";
+import {UserEdit} from "../CommandMacros";
 import {GetTimeline} from "../Store/db/timelines";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 @UserEdit
 export class UpdateTimelineStepOrder extends Command<{timelineID: string, stepID: string, newIndex: number}, {}> {
@@ -11,7 +11,7 @@ export class UpdateTimelineStepOrder extends Command<{timelineID: string, stepID
 	Validate() {
 		const {timelineID, stepID, newIndex} = this.payload;
 		const timeline = GetTimeline(timelineID);
-		AssertExistsAndUserIsCreatorOrMod(this, timeline, "update");
+		AssertUserCanModify(this, timeline);
 		this.timeline_oldSteps = timeline.steps ?? [];
 		this.timeline_newSteps = this.timeline_oldSteps.slice();
 		CE(this.timeline_newSteps).Move(stepID, newIndex, false); // dnd system applies index-fixing itself, so don't apply here

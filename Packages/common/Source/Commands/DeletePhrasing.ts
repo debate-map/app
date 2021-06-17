@@ -1,8 +1,8 @@
-import {Command_Old, GetAsync, AssertV, Command} from "web-vcore/nm/mobx-graphlink";
+import {Command} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
-import {MapNodePhrasing} from "../Store/db/nodePhrasings/@MapNodePhrasing";
 import {GetNodePhrasing} from "../Store/db/nodePhrasings";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {MapNodePhrasing} from "../Store/db/nodePhrasings/@MapNodePhrasing";
+import {AssertUserCanDelete} from "./Helpers/SharedAsserts";
 
 @UserEdit
 export class DeletePhrasing extends Command<{id: string}, {}> {
@@ -10,7 +10,7 @@ export class DeletePhrasing extends Command<{id: string}, {}> {
 	Validate() {
 		const {id} = this.payload;
 		this.oldData = GetNodePhrasing(id);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "delete");
+		AssertUserCanDelete(this, this.oldData);
 	}
 
 	GetDBUpdates() {

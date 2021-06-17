@@ -1,12 +1,12 @@
 import {UserEdit} from "../CommandMacros";
-import {Command_Old, MergeDBUpdates, GetAsync, GetDocs, AssertV, Command} from "web-vcore/nm/mobx-graphlink";
+import {MergeDBUpdates, GetAsync, GetDocs, AssertV, Command} from "web-vcore/nm/mobx-graphlink";
 import {UserMapInfoSet} from "../Store/db/userMapInfo/@UserMapInfo";
 import {DeleteNode} from "./DeleteNode";
 import {GetMap} from "../Store/db/maps";
 import {Map} from "../Store/db/maps/@Map";
 import {CE} from "web-vcore/nm/js-vextensions";
 import {IsUserCreatorOrMod} from "../Store/db/users/$user";
-import {AssertExistsAndUserIsCreatorOrMod} from "./Helpers/SharedAsserts";
+import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 @UserEdit
 export class DeleteMap extends Command<{mapID: string}, {}> {
@@ -16,7 +16,7 @@ export class DeleteMap extends Command<{mapID: string}, {}> {
 	Validate() {
 		const {mapID} = this.payload;
 		this.oldData = GetMap(mapID);
-		AssertExistsAndUserIsCreatorOrMod(this, this.oldData, "delete");
+		AssertUserCanDelete(this, this.oldData);
 		this.userMapInfoSets = GetDocs({}, a=>a.userMapInfo) || [];
 
 		this.sub_deleteNode = this.sub_deleteNode ?? new DeleteNode({mapID, nodeID: this.oldData.rootNode}).MarkAsSubcommand(this);

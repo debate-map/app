@@ -1,5 +1,5 @@
 import {Assert, E} from "web-vcore/nm/js-vextensions";
-import {Command_Old, MergeDBUpdates, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {MergeDBUpdates, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {AddNode} from "./AddNode";
