@@ -1,6 +1,6 @@
 import {GetPlayingTimeline, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState";
 import {GetOpenMapID} from "Store/main";
-import {GetAsync, MergeDBUpdates, GetDocs, WhereOp, MergeDBUpdates_Multi} from "web-vcore/nm/mobx-graphlink";
+import {GetAsync, MergeDBUpdates, GetDocs, MergeDBUpdates_Multi} from "web-vcore/nm/mobx-graphlink";
 import {Clone, ToNumber, DEL, E, OmitIfNull, OMIT} from "web-vcore/nm/js-vextensions";
 import {GetNodeL2, GetMaps, UpdateMapDetails, MapVisibility} from "@debate-map/server-link/Source/Link";
 import {DeleteNodeSubtree} from "@debate-map/server-link/Source/Link";

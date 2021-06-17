@@ -1,5 +1,5 @@
 import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading} from "web-vcore/nm/js-vextensions";
-import {GetDoc, StoreAccessor, GetDocs, WhereOp} from "web-vcore/nm/mobx-graphlink";
+import {GetDoc, StoreAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink";
 import {observable} from "web-vcore/nm/mobx";
 import {Validate} from "web-vcore/nm/mobx-graphlink";
 import {RatingType, ratingTypes} from "./nodeRatings/@RatingType";
@@ -29,11 +29,16 @@ export const GetRatings = StoreAccessor(s=>(nodeID: string, ratingType: RatingTy
 	//return FilterRatings(Array.from(ratingSet.values()), filter);*/
 
 	return GetDocs({
-		queryOps: [
+		/*queryOps: [
 			new WhereOp("node", "==", nodeID),
 			new WhereOp("type", "==", ratingType),
 			userID && new WhereOp("user", "==", userID),
-		].filter(a=>a),
+		].filter(a=>a),*/
+		params: {filter: {
+			node: {equalTo: nodeID},
+			type: {equalTo: ratingType},
+			user: userID && {equalTo: userID},
+		}}
 	}, a=>a.nodeRatings);
 });
 export const GetRating = StoreAccessor(s=>(nodeID: string, ratingType: RatingType, userID: string)=>{

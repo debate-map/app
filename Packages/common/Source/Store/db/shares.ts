@@ -1,4 +1,4 @@
-import {GetDoc, StoreAccessor, GetDocs, WhereOp} from "web-vcore/nm/mobx-graphlink";
+import {GetDoc, StoreAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink";
 import {Share} from "./shares/@Share";
 
 export const GetShare = StoreAccessor(s=>(id: string): Share=>{
@@ -7,9 +7,13 @@ export const GetShare = StoreAccessor(s=>(id: string): Share=>{
 });
 export const GetShares = StoreAccessor(s=>(userID: string, mapID?: string): Share[]=>{
 	return GetDocs({
-		queryOps: [
+		/*queryOps: [
 			new WhereOp("creator", "==", userID),
 			mapID && new WhereOp("mapID", "==", mapID),
-		].filter(a=>a),
+		].filter(a=>a),*/
+		params: {filter: {
+			creator: {equalTo: userID},
+			mapID: mapID && {equalTo: mapID},
+		}},
 	}, a=>a.shares);
 });

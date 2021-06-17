@@ -1,5 +1,5 @@
 import {IsNaN} from "web-vcore/nm/js-vextensions";
-import {WhereOp, GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {MapNodeRevision, TitleKey} from "./nodes/@MapNodeRevision";
 
 export const GetNodeRevision = StoreAccessor(s=>(id: string): MapNodeRevision=>{
@@ -36,11 +36,14 @@ export const GetNodeRevisions = StoreAccessor(s=>(nodeID: string): MapNodeRevisi
 	return entryMap ? entryMap.VValues(true).filter((a) => a && a.node == nodeID) : []; */
 	// return entryMap ? entryMap.VValues(true).filter(a => a && a.node == nodeID) : [];
 	return GetDocs({
-		queryOps: [new WhereOp("node", "==", nodeID)],
+		//queryOps: [new WhereOp("node", "==", nodeID)],
+		params: {filter: {
+			node: {equalTo: nodeID},
+		}},
 	}, a=>a.nodeRevisions);
 });
-export const GetNodeRevisionsByTitle = StoreAccessor(s=>(title: string, titleKey: TitleKey): MapNodeRevision[]=>{
+/*export const GetNodeRevisionsByTitle = StoreAccessor(s=>(title: string, titleKey: TitleKey): MapNodeRevision[]=>{
 	return GetDocs({
-		queryOps: [new WhereOp(`titles.${titleKey}`, "==", title)],
+		//queryOps: [new WhereOp(`titles.${titleKey}`, "==", title)],
 	}, a=>a.nodeRevisions);
-});
+});*/

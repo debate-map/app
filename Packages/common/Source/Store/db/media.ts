@@ -1,5 +1,5 @@
 import {CachedTransform, IsNaN} from "web-vcore/nm/js-vextensions";
-import {GetDoc, GetDocs, StoreAccessor, WhereOp} from "web-vcore/nm/mobx-graphlink";
+import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {Media} from "./media/@Media";
 
 export const GetMedia = StoreAccessor(s=>(id: string)=>{
@@ -15,6 +15,9 @@ export const GetMedias = StoreAccessor(s=>(): Media[]=>{
 });
 export const GetMediasByURL = StoreAccessor(s=>(url: string): Media[]=>{
 	return GetDocs({
-		queryOps: [new WhereOp("url", "==", url)],
+		//queryOps: [new WhereOp("url", "==", url)],
+		params: {filter: {
+			url: {equalTo: url},
+		}}
 	}, a=>a.medias);
 });

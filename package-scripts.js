@@ -65,6 +65,10 @@ Object.assign(scripts, {
 
 		//tscWatch: `./node_modules/.bin/tsc-watch.cmd --onSuccess "node ./Scripts/Build/OnSuccess.js"`,
 	},
+	common: {
+		// helps for spotting typescript errors in the "Packages/common" (client.dev script can work too, but it's nice to have one just for errors in "common")
+		tsc: "cd Packages/common && tsc --noEmit",
+	},
 	server: {
 		// setup
 		initDB: "psql -f ./Packages/server/Scripts/InitDB.sql debate-map",

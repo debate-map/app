@@ -7,7 +7,7 @@ import {pgClient} from "./PGLink";
 //declare module "web-vcore/node_modules/mobx-graphlink/Dist/UserTypes" { // temp fix; paths trick didn't work in this repo fsr
 declare module "mobx-graphlink/Dist/UserTypes" {
 	interface RootStoreShape extends RootState {}
-	interface DBShape extends GraphDBShape {}
+	//interface DBShape extends GraphDBShape {}
 }
 
 export const graph = new Graphlink<RootState, GraphDBShape>();

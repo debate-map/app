@@ -20,6 +20,10 @@ import {Share} from "./db/shares/@Share";
 // manually import these, since otherwise they're never runtime-imported
 require("./firebase/users_private/@User_Private");
 
+declare module "mobx-graphlink/Dist/UserTypes" {
+	interface DBShape extends GraphDBShape {}
+}
+
 export interface GraphDBShape {
 	general: Collection_Closed<{data: GeneralData}>;
 	modules: Collection_Closed<{

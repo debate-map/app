@@ -1,5 +1,5 @@
 import {CachedTransform, IsNaN, emptyArray, emptyArray_forLoading, Assert, CE} from "web-vcore/nm/js-vextensions";
-import {GetDoc, GetDocs, StoreAccessor, WhereOp, Validate} from "web-vcore/nm/mobx-graphlink";
+import {GetDoc, GetDocs, StoreAccessor, Validate} from "web-vcore/nm/mobx-graphlink";
 import {Term} from "./terms/@Term";
 import {GetNodeRevision} from "./nodeRevisions";
 
@@ -16,13 +16,20 @@ export const GetTerms = StoreAccessor(s=>(): Term[]=>{
 });
 export const GetTermsByName = StoreAccessor(s=>(name: string): Term[]=>{
 	return GetDocs({
-		queryOps: [new WhereOp("name", "==", name)],
+		//queryOps: [new WhereOp("name", "==", name)],
+		params: {filter: {name: {equalTo: name}}},
 	}, a=>a.terms);
 });
 export const GetTermsByForm = StoreAccessor(s=>(form: string): Term[]=>{
 	Assert(form.toLowerCase() == form, "Form cannot have uppercase characters.");
 	return GetDocs({
-		queryOps: [new WhereOp("forms", "array-contains", form)],
+		//queryOps: [new WhereOp("forms", "array-contains", form)],
+		/*params: {
+			variablesStr: "$form: String!",
+			filterStr: `filter: {forms: {contains: [$form]}}`,
+			variables: {form},
+		},*/
+		params: {filter: {forms: {contains: [form]}}},
 	}, a=>a.terms);
 });
 export const GetTermsAttached = StoreAccessor(s=>(nodeRevisionID: string, emptyForLoading = true): Term[]=>{

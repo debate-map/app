@@ -1,4 +1,4 @@
-import {WhereOp, GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions";
 import {MapNodePhrasing} from "./nodePhrasings/@MapNodePhrasing";
 import {MapNodeTag, TagComp, GetTagCompClassByTag, GetTagCompOfTag} from "./nodeTags/@MapNodeTag";
@@ -7,7 +7,10 @@ import {MapNodeTag, TagComp, GetTagCompClassByTag, GetTagCompOfTag} from "./node
 export const GetNodeTags = StoreAccessor(s=>(nodeID: string): MapNodeTag[]=>{
 	return GetDocs({
 		//queryOps: [new WhereOp(`nodes.${nodeID}`, ">", "")], // `if value > ""` means "if key exists"
-		queryOps: [new WhereOp(`nodes`, "array-contains", nodeID)],
+		//queryOps: [new WhereOp(`nodes`, "array-contains", nodeID)],
+		params: {filter: {
+			nodes: {contains: nodeID},
+		}}
 	}, a=>a.nodeTags);
 });
 export const GetNodeTag = StoreAccessor(s=>(tagID: string): MapNodeTag=>{
