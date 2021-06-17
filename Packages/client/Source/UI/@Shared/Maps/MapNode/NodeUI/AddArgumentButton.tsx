@@ -5,7 +5,7 @@ import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {HSLA, Observer} from "web-vcore";
 import {useCallback, useMemo, useEffect} from "react";
-import {MapNodeL3, Polarity, ClaimForm, MapNodeType, GetParentNodeL3, GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity, MeID, Map} from "@debate-map/server-link/Source/Link";
+import {MapNodeL3, Polarity, ClaimForm, MapNodeType, GetParentNodeL3, GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity, MeID, Map} from "dm_common";
 
 
 import {GetNodeColor} from "Store/firebase_ext/nodes";

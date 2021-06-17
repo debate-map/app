@@ -5,8 +5,8 @@ import {Observer} from "web-vcore";
 import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
 import {AdminUI} from "./More/Admin";
 import {LinksUI} from "./More/Links";
-import {HasAdminPermissions} from "@debate-map/server-link/Source/Link";
-import {MeID, GetUsers} from "@debate-map/server-link/Source/Link";
+import {HasAdminPermissions} from "dm_common";
+import {MeID, GetUsers} from "dm_common";
 
 @Observer
 export class MoreUI extends BaseComponentPlus({} as {}, {}) {

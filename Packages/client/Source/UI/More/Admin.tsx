@@ -1,16 +1,13 @@
 import {Assert, AwaitTree, SleepAsync, E, IsObject} from "web-vcore/nm/js-vextensions";
 import {dbVersion} from "Main";
-import {ConvertDataToValidDBUpdates, DBPath, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached, ApplyDBUpdates} from "web-vcore/nm/mobx-graphlink";
+import {ConvertDataToValidDBUpdates, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached, ApplyDBUpdates} from "web-vcore/nm/mobx-graphlink";
 import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {PageContainer, Observer} from "web-vcore";
-import {HasAdminPermissions, MeID, ValidateDBData, FirebaseDBShape} from "@debate-map/server-link/Source/Link";
+import {HasAdminPermissions, MeID, ValidateDBData, GraphDBShape} from "dm_common";
 
-
-import {ResetCurrentDBRoot} from "./Admin/ResetCurrentDBRoot";
-
-type UpgradeFunc = (oldData: FirebaseDBShape, markProgress: MarkProgressFunc)=>Promise<FirebaseDBShape>;
+type UpgradeFunc = (oldData: GraphDBShape, markProgress: MarkProgressFunc)=>Promise<GraphDBShape>;
 type MarkProgressFunc = (depth: number, entryIndex: number, entryCount?: number)=>void;
 
 // upgrade-funcs
@@ -52,7 +49,7 @@ export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes
 		let isAdmin = HasAdminPermissions(MeID());
 		// also check previous version for admin-rights (so we can increment db-version without losing our rights to complete the db-upgrade!)
 		if (!isAdmin && MeID() != null) {
-			isAdmin = GetDoc({inLinkRoot: false}, (a: any)=>(a.versions.get(`v${dbVersion - 1}-${DB_SHORT}`) as FirebaseDBShape).users.get(MeID())?.permissionGroups.admin) ?? false;
+			isAdmin = GetDoc({inLinkRoot: false}, (a: any)=>(a.versions.get(`v${dbVersion - 1}-${DB_SHORT}`) as GraphDBShape).users.get(MeID())?.permissionGroups.admin) ?? false;
 		}
 
 		if (!isAdmin) return <PageContainer>Please sign in.</PageContainer>;
@@ -64,7 +61,7 @@ export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes
 				</Row> */}
 				<Row><h4>General</h4></Row>
 				<Row>
-					<Button text={`Reset ${DBPath({})}`} onClick={()=>{
+					{/*<Button text={`Reset ${DBPath({})}`} onClick={()=>{
 						ShowMessageBox({
 							title: `Reset ${DBPath({})}?`,
 							message: "This will clear all existing data in this root, then replace it with a fresh, initial state.", cancelButton: true,
@@ -72,7 +69,7 @@ export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes
 								ResetCurrentDBRoot();
 							},
 						});
-					}}/>
+					}}/>*/}
 				</Row>
 				<Row mt={5}><h4>Upgrader</h4></Row>
 				<Column style={{alignItems: "flex-start"}}>
@@ -216,7 +213,7 @@ export async function GetCollectionsDataAsync(versionRootPath: string, privateCo
 		}) as any;
 	}
 
-	let versionCollectionsData: FirebaseDBShape;
+	let versionCollectionsData: GraphDBShape;
 	// we put the db-updates into this variable, so that we know we're importing data for every key (if not, Typescript throws error about value not matching FirebaseData's shape)
 	versionCollectionsData = await AwaitTree(E(
 		{

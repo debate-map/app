@@ -9,7 +9,7 @@ import {logTypes} from "Utils/General/Logging";
 import {GetTimeFromWhichToShowChangedNodes, GetPlayingTimeline, GetPlayingTimelineStepIndex, GetPlayingTimelineRevealNodes_UpToAppliedStep} from "Store/main/maps/mapStates/$mapState";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
-import {Map, MapNodeL3, Polarity, AccessLevel, IsNodeL2, IsNodeL3, IsSinglePremiseArgument, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsRootNode, ChangeType, MapNodeType, GetSubnodesInEnabledLayersEnhanced, MeID} from "@debate-map/server-link/Source/Link";
+import {Map, MapNodeL3, Polarity, AccessLevel, IsNodeL2, IsNodeL3, IsSinglePremiseArgument, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsRootNode, ChangeType, MapNodeType, GetSubnodesInEnabledLayersEnhanced, MeID} from "dm_common";
 
 
 import {GetNodeChildrenL3_Advanced} from "Store/firebase_ext/nodes";

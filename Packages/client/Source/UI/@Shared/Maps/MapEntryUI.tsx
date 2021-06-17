@@ -6,9 +6,10 @@ import {GADDemo} from "UI/@GAD/GAD";
 import {HSLA, Link, Observer} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx";
-import {GetUser, MapType, Map} from "@debate-map/server-link/Source/Link";
+import {GetUser, MapType, Map} from "dm_common";
 
 import {columnWidths} from "./MapListUI";
+import {ES} from "Utils/UI/GlobalStyles";
 
 @Observer
 export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: boolean, map: Map}, {}) {
@@ -43,7 +44,7 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 							});
 						}}/>
 						{map.note &&
-							<Div style={E(
+							<Div style={ES(
 								{fontSize: 11, color: "rgba(255,255,255,.5)", marginRight: 10, marginTop: 4},
 								map.noteInline && {marginLeft: 15, float: "right"},
 							)}>

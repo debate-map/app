@@ -6,6 +6,8 @@ import {styles} from "../../Utils/UI/GlobalStyles";
 const red = "rgba(255,0,0,.7)";
 const orange = "rgba(255,128,0,.7)";
 const green = "rgba(0,255,0,.6)";
+
+// todo: switch to component-based UI (rather than markdown-based)
 const pageText = `
 The Debate Map project is a web platform aimed at improving the efficiency of discussion and debate.
 It's crowd-sourced and open-source, and welcomes reader contributions.
@@ -133,7 +135,7 @@ export class HomeUI2 extends BaseComponent<{}, {}> {
 		return (
 			<PageContainer scrollable={true}>
 				<article>
-					<VReactMarkdown source={pageText} className='selectable' escapeHtml={false}/>
+					<VReactMarkdown source={pageText} className="selectable"/>
 				</article>
 			</PageContainer>
 		);

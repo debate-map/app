@@ -7,15 +7,15 @@ import {E, ToJSON, Clone} from "web-vcore/nm/js-vextensions";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink";
 import _ from "lodash";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
-import {MapNodeL3} from "@debate-map/server-link/Source/Link";
-import {GetParentNodeL3, IsNodeSubnode, GetParentNodeID} from "@debate-map/server-link/Source/Link";
-import {GetLinkUnderParent, IsPremiseOfSinglePremiseArgument} from "@debate-map/server-link/Source/Link";
-import {GetUser, MeID} from "@debate-map/server-link/Source/Link";
-import {CanEditNode, IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {PermissionInfoType} from "@debate-map/server-link/Source/Link";
-import {UpdateLink} from "@debate-map/server-link/Source/Link";
-import {AddNodeRevision} from "@debate-map/server-link/Source/Link";
-import {Map} from "@debate-map/server-link/Source/Link";
+import {MapNodeL3} from "dm_common";
+import {GetParentNodeL3, IsNodeSubnode, GetParentNodeID} from "dm_common";
+import {GetLinkUnderParent, IsPremiseOfSinglePremiseArgument} from "dm_common";
+import {GetUser, MeID} from "dm_common";
+import {CanEditNode, IsUserCreatorOrMod} from "dm_common";
+import {PermissionInfoType} from "dm_common";
+import {UpdateLink} from "dm_common";
+import {AddNodeRevision} from "dm_common";
+import {Map} from "dm_common";
 
 export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {dataError: null as string}) {
 	detailsUI: NodeDetailsUI;

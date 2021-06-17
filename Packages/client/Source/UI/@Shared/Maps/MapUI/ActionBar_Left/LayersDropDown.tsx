@@ -3,7 +3,7 @@ import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Ro
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
-import {MeID, GetUser, GetLayers, ForDeleteLayer_GetError, GetMapLayerIDs, IsUserCreatorOrMod, Layer, GetUserLayerStateForMap, DeleteLayer, SetLayerAttachedToMap, SetMapLayerStateForUser, Map} from "@debate-map/server-link/Source/Link";
+import {MeID, GetUser, GetLayers, ForDeleteLayer_GetError, GetMapLayerIDs, IsUserCreatorOrMod, Layer, GetUserLayerStateForMap, DeleteLayer, SetLayerAttachedToMap, SetMapLayerStateForUser, Map} from "dm_common";
 
 
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";

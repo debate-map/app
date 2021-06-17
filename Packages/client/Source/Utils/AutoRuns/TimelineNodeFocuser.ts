@@ -9,7 +9,7 @@ import {NodeUI_Inner} from "UI/@Shared/Maps/MapNode/NodeUI_Inner";
 import {GetDOM} from "web-vcore/nm/react-vextensions";
 import {GetScreenRect} from "web-vcore";
 import {SlicePath, GetAsync} from "web-vcore/nm/mobx-graphlink";
-import {GetTimelineStep, GetNodesRevealedInSteps} from "@debate-map/server-link/Source/Link";
+import {GetTimelineStep, GetNodesRevealedInSteps} from "dm_common";
 
 /* function AreSetsEqual(setA, setB) {
 	return setA.size === setB.size && [...setA].every((value) => setB.has(value));

@@ -1,8 +1,7 @@
 import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
 import {Column, Pre, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions";
-import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
-import {ReferencesAttachment, GetNodeDisplayText, MapNodeType, ClaimForm} from "@debate-map/server-link/Source/Link";
+import {ReferencesAttachment, GetNodeDisplayText, MapNodeType, ClaimForm} from "dm_common";
 
 
 import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI";

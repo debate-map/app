@@ -3,7 +3,7 @@ import {BaseComponentPlus, GetInnerComp} from "web-vcore/nm/react-vextensions";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {GetOpenMapID} from "Store/main";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView";
-import {Map,GetRatings,GetNodeChildrenL2, GetNodeParentsL2, GetParentNodeL2,AsNodeL3, GetNodeDisplayText, GetRatingTypesForNode,MapNodeL2} from "@debate-map/server-link/Source/Link";
+import {Map,GetRatings,GetNodeChildrenL2, GetNodeParentsL2, GetParentNodeL2,AsNodeL3, GetNodeDisplayText, GetRatingTypesForNode,MapNodeL2} from "dm_common";
 
 
 

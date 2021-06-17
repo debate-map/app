@@ -1,4 +1,4 @@
-import {GetNodeL3, WeightingType, MapView} from "@debate-map/server-link/Source/Link";
+import {GetNodeL3, WeightingType, MapView} from "dm_common";
 import {observable} from "web-vcore/nm/mobx";
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ignore, version} from "web-vcore/nm/mobx-sync";

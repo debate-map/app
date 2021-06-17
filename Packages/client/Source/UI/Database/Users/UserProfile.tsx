@@ -8,7 +8,7 @@ import {Fragment} from "react";
 import {PropNameToTitle} from "Utils/General/Others";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {E} from "web-vcore/nm/js-vextensions";
-import {MeID, GetUser,GetUser_Private,GetUserPermissionGroups,SetUserData,SetUserData_Private,User} from "@debate-map/server-link/Source/Link";
+import {MeID, GetUser,GetUser_Private,GetUserPermissionGroups,SetUserData,SetUserData_Private,User} from "dm_common";
 
 
 

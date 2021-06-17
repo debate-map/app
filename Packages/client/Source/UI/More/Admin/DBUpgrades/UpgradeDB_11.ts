@@ -1,13 +1,13 @@
 import {Clone} from "web-vcore/nm/js-vextensions";
 import {TreeNode} from "web-vcore/nm/mobx-graphlink";
-import {FirebaseDBShape, MapNodeRevision, GetSearchTerms} from "@debate-map/server-link/Source/Link";
+import {GraphDBShape, MapNodeRevision, GetSearchTerms} from "dm_common";
 
 
 import {AddUpgradeFunc} from "../../Admin";
 
 const newVersion = 11;
 AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
-	const data = Clone(oldData) as FirebaseDBShape;
+	const data = Clone(oldData) as GraphDBShape;
 
 	// populate "titles.allTerms" property of each node-revision
 	// ==========

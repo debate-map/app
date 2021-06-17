@@ -6,7 +6,7 @@ import {store} from "Store";
 import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {GADDemo, GADDemo_2020} from "UI/@GAD/GAD";
 import {HSLA, Observer} from "web-vcore";
-import {Map, MapType, MeID, IsUserCreatorOrMod, IsUserMap} from "@debate-map/server-link/Source/Link";
+import {Map, MapType, MeID, IsUserCreatorOrMod, IsUserMap} from "dm_common";
 
 
 import {zIndexes} from "Utils/UI/ZIndexes";

@@ -1,5 +1,5 @@
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {MapType} from "@debate-map/server-link/Source/Link";
+import {MapType} from "dm_common";
 import {MapListUI} from "./@Shared/Maps/MapListUI";
 
 export class PublicUI extends BaseComponentPlus({} as {}, {}) {

@@ -1,6 +1,6 @@
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {Observer, TreeView} from "web-vcore";
-import {VMenuItem} from "react-vmenu";
+import {VMenuItem} from "web-vcore/nm/react-vmenu";
 import {styles, ES} from "Utils/UI/GlobalStyles";
 import {ShowMessageBox, BoxController} from "web-vcore/nm/react-vmessagebox";
 import {Column, Row, TextArea, Button, CheckBox, Select, Text, TextInput} from "web-vcore/nm/react-vcomponents";
@@ -10,11 +10,11 @@ import {ApplyDBUpdates} from "web-vcore/nm/mobx-graphlink";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx";
-import {HasModPermissions, HasAdminPermissions} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {GetNodeID, GetNodesByTitle} from "@debate-map/server-link/Source/Link";
-import {AddChildNode} from "@debate-map/server-link/Source/Link";
-import {ImportSubtree} from "@debate-map/server-link/Source/Link";
+import {HasModPermissions, HasAdminPermissions} from "dm_common";
+import {MeID} from "dm_common";
+import {GetNodeID, GetNodesByTitle} from "dm_common";
+import {AddChildNode} from "dm_common";
+import {ImportSubtree} from "dm_common";
 
 @Observer
 export class MI_ImportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {

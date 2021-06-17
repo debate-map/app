@@ -1,18 +1,16 @@
+import {GetUserPermissionGroups, Me, MeID, ValidateDBData} from "dm_common";
 import {dbVersion, hasHotReloaded} from "Main";
 import {RootState, store} from "Store";
-import {logTypes, LogTypes_New} from "Utils/General/Logging";
-import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs";
-import {manager as manager_framework, ActionFunc, GetMirrorOfMobXTree} from "web-vcore";
-import "./VWAF/Overrides";
-import produce from "web-vcore/nm/immer";
-import {Feedback_store} from "firebase-feedback";
-import {WithStore} from "web-vcore/nm/mobx-graphlink";
-import {runInAction} from "web-vcore/nm/mobx";
-import {Me, MeID, GetUserPermissionGroups, GetAuth, ValidateDBData} from "@debate-map/server-link/Source/Link";
 import {AddNotificationMessage} from "Store/main/@NotificationMessage";
-import {Assert} from "web-vcore/nm/js-vextensions";
-import {zIndexes} from "Utils/UI/ZIndexes";
+import {logTypes, LogTypes_New} from "Utils/General/Logging";
 import {colors} from "Utils/UI/GlobalStyles";
+import {zIndexes} from "Utils/UI/ZIndexes";
+import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs";
+import {ActionFunc, GetMirrorOfMobXTree, manager as manager_framework} from "web-vcore";
+import produce from "web-vcore/nm/immer";
+import {runInAction} from "web-vcore/nm/mobx";
+import {WithStore} from "web-vcore/nm/mobx-graphlink";
+import "./WVC/Overrides";
 
 const context = (require as any).context("../../../Resources/SVGs/", true, /\.svg$/);
 const iconInfo = {};
@@ -22,11 +20,11 @@ context.keys().forEach(filename=>{
 
 declare module "web-vcore/Source/UserTypes" {
 	interface RootStore extends RootState {}
-	// interface DBShape extends FirebaseDBShape {}
+	// interface DBShape extends GraphDBShape {}
 	interface LogTypes extends LogTypes_New {}
 }
 
-export function InitVWAF() {
+export function InitWVC() {
 	manager_framework.Populate({
 		// styling
 		colors,
@@ -68,7 +66,7 @@ export function InitVWAF() {
 			});
 		},
 
-		GetAuth,
+		GetAuth: ()=>null, // todo
 		GetUserID: MeID,
 
 		ValidateDBData,
@@ -99,9 +97,9 @@ export function GetNewURLForStoreChanges<T = RootState>(actionFunc: ActionFunc<T
 	const newURL = WithStore({}, newState, ()=>{
 		// and have new-state used for firebase-feedback's store-accessors (ie. GetSelectedProposalID, as called by our GetNewURL)
 		// [this part's probably not actually needed, since project-level Link.actionFunc's are unlikely to modify firebase-feedback's internal state; we do this for completeness, though]
-		return WithStore({fire: Feedback_store.firelink as any}, newState.feedback, ()=>{
-			return GetNewURL();
-		});
+		//return WithStore({fire: Feedback_store.firelink as any}, newState.feedback, ()=>{
+		return GetNewURL();
+		//});
 	});
 	//CheckMutate();
 

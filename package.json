@@ -25,6 +25,7 @@
   "@resolutions_c": "The 'version locks' below (after portals) are for deps that are also subdeps (eg. under symlinked deps), 'locking' to the 'as subdep' version, to keep their types aligned. [not sure if actually needed/useful]",
   "resolutions": {
     "web-vcore": "portal:/C:/Root/Apps/@V/@Modules/web-vcore/Main",
+    "@types/react": "17.0.9",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },

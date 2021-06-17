@@ -1,4 +1,4 @@
-import {DeleteShare, GetShares, Map, MeID, Share} from "@debate-map/server-link/Source/Link";
+import {DeleteShare, GetShares, Map, MeID, Share} from "dm_common";
 import {GetEntries, VURL, CopyText} from "web-vcore/nm/js-vextensions";
 import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";

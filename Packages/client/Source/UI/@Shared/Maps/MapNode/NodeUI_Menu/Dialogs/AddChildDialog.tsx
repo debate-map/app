@@ -7,14 +7,14 @@ import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView";
 import {ES} from "Utils/UI/GlobalStyles";
 import {InfoButton, Link, observer_simple} from "web-vcore";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
-import {MapNodeType, GetMapNodeTypeDisplayName} from "@debate-map/server-link/Source/Link";
-import {Polarity, MapNode, ClaimForm, ChildEntry} from "@debate-map/server-link/Source/Link";
-import {GetMap} from "@debate-map/server-link/Source/Link";
-import {GetNode} from "@debate-map/server-link/Source/Link";
-import {MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern} from "@debate-map/server-link/Source/Link";
-import {AddArgumentAndClaim} from "@debate-map/server-link/Source/Link";
-import {AddChildNode} from "@debate-map/server-link/Source/Link";
-import {GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3} from "@debate-map/server-link/Source/Link";
+import {MapNodeType, GetMapNodeTypeDisplayName} from "dm_common";
+import {Polarity, MapNode, ClaimForm, ChildEntry} from "dm_common";
+import {GetMap} from "dm_common";
+import {GetNode} from "dm_common";
+import {MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern} from "dm_common";
+import {AddArgumentAndClaim} from "dm_common";
+import {AddChildNode} from "dm_common";
+import {GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3} from "dm_common";
 
 export class AddChildHelper {
 	constructor(parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string) {

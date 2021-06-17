@@ -2,8 +2,8 @@ import {Column, Div} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {VReactMarkdown_Remarkable, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions";
-import {Timeline} from "@debate-map/server-link/Source/Link";
-import {GetTimelineStep} from "@debate-map/server-link/Source/Link";
+import {Timeline} from "dm_common";
+import {GetTimelineStep} from "dm_common";
 
 @Observer
 export class TimelineIntroBox extends BaseComponentPlus({} as {timeline: Timeline}) {

@@ -2,7 +2,7 @@ import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcor
 import Moment from "web-vcore/nm/moment";
 import {Column, Pre, RowLR, TextInput, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {Layer} from "@debate-map/server-link/Source/Link";
+import {Layer} from "dm_common";
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
 
 type Props = {baseData: Layer, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Layer, ui: LayerDetailsUI)=>void};

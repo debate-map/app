@@ -6,12 +6,12 @@ import {ES} from "Utils/UI/GlobalStyles";
 import {TermDefinitionPanel} from "../NodeUI/Panels/DefinitionsPanel";
 import {NodeTermsUI} from "./TextPanel/NodeTermsUI";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
-import {GetAttachmentType, AttachmentType} from "@debate-map/server-link/Source/Link";
-import {MapNodeType} from "@debate-map/server-link/Source/Link";
-import {MapNodeL2, ChildEntry, ClaimForm} from "@debate-map/server-link/Source/Link";
-import {MapNodeRevision_titlePattern, ArgumentType, GetArgumentTypeDisplayText} from "@debate-map/server-link/Source/Link";
-import {TermAttachment} from "@debate-map/server-link/Source/Link";
-import {GetDisplayPolarity} from "@debate-map/server-link/Source/Link";
+import {GetAttachmentType, AttachmentType} from "dm_common";
+import {MapNodeType} from "dm_common";
+import {MapNodeL2, ChildEntry, ClaimForm} from "dm_common";
+import {MapNodeRevision_titlePattern, ArgumentType, GetArgumentTypeDisplayText} from "dm_common";
+import {TermAttachment} from "dm_common";
+import {GetDisplayPolarity} from "dm_common";
 
 export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 	render() {

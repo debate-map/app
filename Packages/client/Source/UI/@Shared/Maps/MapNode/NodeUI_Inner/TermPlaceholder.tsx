@@ -1,6 +1,6 @@
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {HSLA} from "web-vcore";
-import {GetTerm} from "@debate-map/server-link/Source/Link";
+import {GetTerm} from "dm_common";
 import {GADDemo} from "UI/@GAD/GAD";
 import {E} from "web-vcore/nm/js-vextensions";
 

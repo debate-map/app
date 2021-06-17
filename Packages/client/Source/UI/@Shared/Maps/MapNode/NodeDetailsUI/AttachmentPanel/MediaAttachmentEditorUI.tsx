@@ -4,13 +4,13 @@ import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vexte
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";
 import {ShowAddMediaDialog} from "UI/Database/Medias/AddMediaDialog";
-import {MediaAttachment} from "@debate-map/server-link/Source/Link";
+import {MediaAttachment} from "dm_common";
 import {Validate} from "web-vcore/nm/mobx-graphlink";
-import {GetMedia, GetMediasByURL} from "@debate-map/server-link/Source/Link";
+import {GetMedia, GetMediasByURL} from "dm_common";
 import {Link, Observer, InfoButton} from "web-vcore";
-import {HasModPermissions} from "@debate-map/server-link/Source/Link";
-import {MeID, GetUser} from "@debate-map/server-link/Source/Link";
-import {Media} from "@debate-map/server-link/Source/Link";
+import {HasModPermissions} from "dm_common";
+import {MeID, GetUser} from "dm_common";
+import {Media} from "dm_common";
 import {SourceChainsEditorUI} from "../../SourceChainsEditorUI";
 
 type Props = {baseData: MediaAttachment, creating: boolean, editing?: boolean, style?, onChange?: (newData: MediaAttachment)=>void};

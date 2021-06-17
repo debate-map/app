@@ -8,11 +8,9 @@ import {RootState, store} from "Store";
 import {NotificationsUI} from "UI/@Shared/NavBar/NotificationsUI";
 import {SearchPanel} from "UI/@Shared/NavBar/SearchPanel";
 import {UserPanel} from "UI/@Shared/NavBar/UserPanel";
-import {ResetCurrentDBRoot} from "UI/More/Admin/ResetCurrentDBRoot";
 import {Observer, Link, HSL} from "web-vcore";
 import {GetDocs} from "web-vcore/nm/mobx-graphlink";
 import {zIndexes} from "Utils/UI/ZIndexes";
-import {GetAuth} from "@debate-map/server-link/Source/Link";
 import {rootPageDefaultChilds} from "Utils/URL/URLs";
 import {colors} from "../../Utils/UI/GlobalStyles";
 import {GADHeaderFont, GADDemo_2020} from "./GAD";
@@ -24,7 +22,6 @@ import {GADHeaderFont, GADDemo_2020} from "./GAD";
 export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 	render() {
 		const {topRightOpenPanel} = store.main;
-		const auth = GetAuth();
 		const dbNeedsInit = GetDocs({}, a=>a.maps) === emptyArray; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
 		return (
 			<nav style={{
@@ -46,18 +43,6 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 						} panel="reputation" corner="top-left"/> */}
 					</span>
 					<Div ct style={{position: "fixed", left: 0, width: "30%", top: 150, bottom: 0}}>
-						{dbNeedsInit && startURL.GetQueryVar("init") &&
-							<Row>
-								<Button text="Initialize database" onClick={()=>{
-									const boxController = ShowMessageBox({
-										title: "Initialize database?", cancelButton: true,
-										message: `Initialize database content under db-root ${dbVersion}?`,
-										onOK: ()=>{
-											ResetCurrentDBRoot();
-										},
-									});
-								}}/>
-							</Row>}
 						<NotificationsUI/>
 					</Div>
 
@@ -78,7 +63,7 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 
 					<span style={{position: "absolute", right: 30, display: "flex"}}>
 						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
-						<NavBarPanelButton text={DeepGet(auth, "displayName") ? auth.displayName.match(/(.+?)( |$)/)[1] : "Login"} panel="profile" corner="top-right"/>
+						<NavBarPanelButton text={/*graph.userInfo?.displayName ? graph.userInfo.displayName.match(/(.+?)( |$)/)[1] :*/ "Sign in"} panel="profile" corner="top-right"/>
 					</span>
 					<div style={{
 						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: 150, maxHeight: "calc(100% - 150px - 30px)",

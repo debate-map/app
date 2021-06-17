@@ -5,7 +5,7 @@ import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {ES} from "Utils/UI/GlobalStyles";
 import {InfoButton, observer_simple} from "web-vcore";
-import {Term, Term_nameFormat, Term_disambiguationFormat, TermType, AddTerm} from "@debate-map/server-link/Source/Link";
+import {Term, Term_nameFormat, Term_disambiguationFormat, TermType, AddTerm} from "dm_common";
 
 import {GetNiceNameForTermType} from "../../Database/TermsUI";
 

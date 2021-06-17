@@ -1,17 +1,17 @@
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {VMenuItem} from "react-vmenu";
+import {VMenuItem} from "web-vcore/nm/react-vmenu";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {styles} from "Utils/UI/GlobalStyles";
 import {Observer} from "web-vcore";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
 import {runInAction} from "web-vcore/nm/mobx";
 import {store} from "Store";
-import {GetParentNodeL3, GetParentNodeID} from "@debate-map/server-link/Source/Link";
-import {MapNodeType} from "@debate-map/server-link/Source/Link";
-import {ClaimForm} from "@debate-map/server-link/Source/Link";
-import {GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {LinkNode_HighLevel} from "@debate-map/server-link/Source/Link";
+import {GetParentNodeL3, GetParentNodeID} from "dm_common";
+import {MapNodeType} from "dm_common";
+import {ClaimForm} from "dm_common";
+import {GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText} from "dm_common";
+import {MeID} from "dm_common";
+import {LinkNode_HighLevel} from "dm_common";
 import {MI_SharedProps} from "../NodeUI_Menu";
 
 @Observer

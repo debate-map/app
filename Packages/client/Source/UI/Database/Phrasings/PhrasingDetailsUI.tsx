@@ -5,7 +5,7 @@ import {BaseComponentWithConnector, GetDOM, BaseComponentPlus} from "web-vcore/n
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {ES} from "Utils/UI/GlobalStyles";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
-import {MapNodePhrasing, MapNodePhrasingType, AddPhrasing} from "@debate-map/server-link/Source/Link";
+import {MapNodePhrasing, MapNodePhrasingType, AddPhrasing} from "dm_common";
 
 
 export class PhrasingDetailsUI extends BaseComponentPlus(

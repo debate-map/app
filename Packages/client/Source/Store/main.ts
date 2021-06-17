@@ -6,7 +6,7 @@ import {O, StoreAction} from "web-vcore";
 import {rootPageDefaultChilds} from "Utils/URL/URLs";
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {store} from "Store";
-import {globalMapID, Share} from "@debate-map/server-link/Source/Link";
+import {globalMapID, Share} from "dm_common";
 import {DatabaseState} from "./main/database";
 import {PublicPageState} from "./main/public";
 import {MapState} from "./main/maps/mapStates/@MapState";

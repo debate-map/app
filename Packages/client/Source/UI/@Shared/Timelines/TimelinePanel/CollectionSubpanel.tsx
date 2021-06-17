@@ -8,7 +8,7 @@ import {store} from "Store";
 import {Observer} from "web-vcore";
 import {runInAction} from "web-vcore/nm/mobx";
 import {E} from "web-vcore/nm/js-vextensions";
-import {GetMapTimelines, DeleteTimeline, MeID, Map} from "@debate-map/server-link/Source/Link";
+import {GetMapTimelines, DeleteTimeline, MeID, Map} from "dm_common";
 import {ES} from "Utils/UI/GlobalStyles";
 
 @Observer

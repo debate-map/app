@@ -3,7 +3,7 @@ import {observable} from "web-vcore/nm/mobx";
 import {O, StoreAction, LogWarning} from "web-vcore";
 import {store} from "Store";
 import {SplitStringBySlash_Cached, StoreAccessor, Validate, UUID} from "web-vcore/nm/mobx-graphlink";
-import {PathSegmentToNodeID, MapView, MapNodeView} from "@debate-map/server-link/Source/Link";
+import {PathSegmentToNodeID, MapView, MapNodeView} from "dm_common";
 
 export function GetPathNodes(path: string) {
 	const pathSegments = SplitStringBySlash_Cached(path);

@@ -2,8 +2,8 @@ import {GetPlayingTimeline, GetSelectedTimeline} from "Store/main/maps/mapStates
 import {GetOpenMapID} from "Store/main";
 import {GetAsync, MergeDBUpdates, GetDocs, MergeDBUpdates_Multi} from "web-vcore/nm/mobx-graphlink";
 import {Clone, ToNumber, DEL, E, OmitIfNull, OMIT} from "web-vcore/nm/js-vextensions";
-import {GetNodeL2, GetMaps, UpdateMapDetails, MapVisibility} from "@debate-map/server-link/Source/Link";
-import {DeleteNodeSubtree} from "@debate-map/server-link/Source/Link";
+import {GetNodeL2, GetMaps, UpdateMapDetails, MapVisibility} from "dm_common";
+import {DeleteNodeSubtree} from "dm_common";
 
 /*
 Basic db-upgrade procedure:
@@ -73,7 +73,7 @@ export async function GetDBUpdatesFor_DeleteNodeSubtree(nodeID: string, maxDelet
 	return command.GetDBUpdates();
 }
 
-export async function GetDBUpdatesFor_MediaRefactor() {
+/*export async function GetDBUpdatesFor_MediaRefactor() {
 	const revsWithImg = await GetAsync(()=>GetDocs({
 		queryOps: [new WhereOp("image.id", ">", "")],
 	}, a=>a.nodeRevisions));
@@ -105,7 +105,7 @@ export async function GetDBUpdatesFor_MediaRefactor() {
 
 	StoreTempData({revsWithImg, images, dbUpdates_revs, dbUpdates_images, dbUpdates});
 	return dbUpdates;
-}
+}*/
 
 export async function GetDBUpdatesFor_AddMapVisibilityField() {
 	const maps = await GetAsync(()=>GetMaps());

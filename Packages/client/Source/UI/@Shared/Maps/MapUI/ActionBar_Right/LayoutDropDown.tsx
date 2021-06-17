@@ -6,7 +6,7 @@ import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx";
 import {Observer} from "web-vcore";
 import {ACTEnsureMapStateInit} from "Store/main/maps";
-import {Map} from "@debate-map/server-link/Source/Link";
+import {Map} from "dm_common";
 
 @Observer
 export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {

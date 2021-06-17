@@ -4,10 +4,10 @@ import {GetEntries, E} from "web-vcore/nm/js-vextensions";
 import {VReactMarkdown_Remarkable, Segment} from "web-vcore";
 import {store} from "Store";
 import {GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStep, GetPlayingTimeline, GetPlayingTimelineStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {Polarity} from "@debate-map/server-link/Source/Link";
-import {TimelineStep} from "@debate-map/server-link/Source/Link";
-import {GetNodeL2, AsNodeL3} from "@debate-map/server-link/Source/Link";
-import {Map} from "@debate-map/server-link/Source/Link";
+import {Polarity} from "dm_common";
+import {TimelineStep} from "dm_common";
+import {GetNodeL2, AsNodeL3} from "dm_common";
+import {Map} from "dm_common";
 import {NodeUI_Inner} from "../Maps/MapNode/NodeUI_Inner";
 
 function GetPropsFromPropsStr(propsStr: string) {

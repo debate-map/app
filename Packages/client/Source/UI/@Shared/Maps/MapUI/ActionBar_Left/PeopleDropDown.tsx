@@ -5,11 +5,11 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {GADDemo} from "UI/@GAD/GAD";
 import {Button_GAD} from "UI/@GAD/GADButton";
 import {InfoButton, RunInAction_Set, Observer} from "web-vcore";
-import {GetMapEditorIDs, GetMapEditors} from "@debate-map/server-link/Source/Link";
-import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {UpdateMapDetails} from "@debate-map/server-link/Source/Link";
-import {Map} from "@debate-map/server-link/Source/Link";
+import {GetMapEditorIDs, GetMapEditors} from "dm_common";
+import {IsUserCreatorOrMod} from "dm_common";
+import {MeID} from "dm_common";
+import {UpdateMapDetails} from "dm_common";
+import {Map} from "dm_common";
 import {UserPicker} from "UI/@Shared/Users/UserPicker";
 
 const userIDPlaceholder = "[user-id placeholder]";

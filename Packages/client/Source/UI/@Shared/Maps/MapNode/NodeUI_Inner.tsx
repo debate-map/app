@@ -1,11 +1,11 @@
-import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, IsNodeSubnode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, RatingType, ratingTypes, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "@debate-map/server-link/Source/Link";
+import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, IsNodeSubnode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, RatingType, ratingTypes, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "dm_common";
 import chroma, {Color} from "chroma-js";
-import classNames from "classnames";
+//import classNames from "classnames";
 import {DEL, DoNothing, E, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions";
 import {runInAction} from "web-vcore/nm/mobx";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink";
 import React from "react";
-import {Draggable} from "react-beautiful-dnd";
+import {Draggable} from "web-vcore/nm/react-beautiful-dnd";
 import ReactDOM from "web-vcore/nm/react-dom";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions";
 import {store} from "Store";
@@ -266,7 +266,10 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			return (
 				<ExpandableBox ref={c=>DoNothing(dragInfo && dragInfo.provided.innerRef(GetDOM(c) as any), this.root = c)}
 					{...{width, widthOverride, outlineColor, expanded}} parent={this}
-					className={classNames("NodeUI_Inner", asDragPreview && "DragPreview", {root: pathNodeIDs.length == 0})}
+					className={
+						//classNames("NodeUI_Inner", asDragPreview && "DragPreview", {root: pathNodeIDs.length == 0})
+						["NodeUI_Inner", asDragPreview && "DragPreview", pathNodeIDs.length == 0 && "root"].filter(a=>a).join(" ")
+					}
 					onMouseEnter={onMouseEnter}
 					onMouseLeave={onMouseLeave}
 					{...(dragInfo && dragInfo.provided.draggableProps)} // {...(dragInfo && dragInfo.provided.dragHandleProps)} // drag-handle is attached to just the TitlePanel, below
@@ -356,7 +359,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		return (
 			<>
 				{/* <div>asDragPreview: {asDragPreview}</div> */}
-				<Draggable type={dndProps.type} key={draggableID} draggableId={draggableID} index={dndProps.index}>
+				<Draggable /*type={dndProps.type}*/ key={draggableID} draggableId={draggableID} index={dndProps.index}>
 					{(provided, snapshot)=>{
 						const dragInfo = {provided, snapshot};
 						const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;

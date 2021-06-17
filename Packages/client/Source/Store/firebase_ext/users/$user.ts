@@ -1,6 +1,6 @@
 import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds";
 import {GADDemo} from "UI/@GAD/GAD";
-import {GetUser_Private} from "@debate-map/server-link/Source/Link";
+import {GetUser_Private} from "dm_common";
 
 // backgrounds
 // ==========

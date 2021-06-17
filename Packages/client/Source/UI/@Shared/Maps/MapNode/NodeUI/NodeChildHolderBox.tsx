@@ -12,15 +12,16 @@ import {NodeUI_Menu_Stub} from "../NodeUI_Menu";
 import {NodeChildCountMarker} from "./NodeChildCountMarker";
 import {NodeChildHolder} from "./NodeChildHolder";
 import {RatingsPanel} from "./Panels/RatingsPanel";
-import {MapNodeL3} from "@debate-map/server-link/Source/Link";
-import {HolderType, GetParentNodeL3} from "@debate-map/server-link/Source/Link";
-import {IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "@debate-map/server-link/Source/Link";
-import {GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings} from "@debate-map/server-link/Source/Link";
-import {ArgumentType} from "@debate-map/server-link/Source/Link";
-import {MapNodeType} from "@debate-map/server-link/Source/Link";
-import {RatingType} from "@debate-map/server-link/Source/Link";
-import {Map} from "@debate-map/server-link/Source/Link";
+import {MapNodeL3} from "dm_common";
+import {HolderType, GetParentNodeL3} from "dm_common";
+import {IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "dm_common";
+import {GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings} from "dm_common";
+import {ArgumentType} from "dm_common";
+import {MapNodeType} from "dm_common";
+import {RatingType} from "dm_common";
+import {Map} from "dm_common";
 import {GetNodeColor} from "Store/firebase_ext/nodes";
+import {ES} from "Utils/UI/GlobalStyles";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
@@ -107,7 +108,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 						ref={c=>this.expandableBox = c}
 						style={{marginTop: innerBoxOffset}}
 						padding="3px 5px 2px"
-						text={<span style={E(
+						text={<span style={ES(
 							{position: "relative", fontSize: 13},
 							GADDemo && {
 								color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont, //fontSize: 11, letterSpacing: 1
@@ -189,8 +190,10 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	childHolder: NodeChildHolder;
 
 	ComponentDidMount() {
-		$(this.expandableBox.DOM).hover(()=>$(".scrolling").length == 0 && this.SetState({hovered: true}), ()=>this.SetState({hovered: false}));
-		$(this.expandableBox.expandButton.DOM).hover(()=>$(".scrolling").length == 0 && this.SetState({hovered_button: true}), ()=>this.SetState({hovered_button: false}));
+		this.expandableBox.DOM.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered: true}));
+		this.expandableBox.DOM.addEventListener("mouseleave", ()=>this.SetState({hovered: false}));
+		this.expandableBox.expandButton.DOM.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered_button: true}));
+		this.expandableBox.expandButton.DOM.addEventListener("mouseleave", ()=>this.SetState({hovered_button: false}));
 	}
 
 	PostRender() {
@@ -203,13 +206,16 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	CheckForChanges = ()=>{
 		const {onHeightOrDividePointChange} = this.props;
 
-		const lineHolderHeight = $(this.lineHolder).outerHeight();
+		//const lineHolderHeight = $(this.lineHolder).outerHeight();
+		//const lineHolderHeight = this.lineHolder.height.height + /*this.lineHolder.marginTop + this.lineHolder.marginBottom*/ + document.body.borderTop + document.body.borderBottom;
+		const lineHolderHeight = this.lineHolder.getBoundingClientRect().height;
 		if (lineHolderHeight != this.lastLineHolderHeight) {
 			this.SetState({lineHolderHeight});
 		}
 		this.lastLineHolderHeight = lineHolderHeight;
 
-		const height = $(GetDOM(this)).outerHeight();
+		//const height = $(GetDOM(this)).outerHeight();
+		const height = GetDOM(this).getBoundingClientRect().height;
 		const dividePoint = this.childHolder && this.Expanded ? this.childHolder.GetDividePoint() : 0;
 		if (height != this.lastHeight || dividePoint != this.lastDividePoint) {
 			/* if (height != this.lastHeight) {

@@ -1,6 +1,6 @@
 import {O} from "web-vcore";
 import {StoreAccessor, GetDoc} from "web-vcore/nm/mobx-graphlink";
-import {GetTerms, GetMedias, FirebaseDBShape} from "@debate-map/server-link/Source/Link";
+import {GetTerms, GetMedias, GraphDBShape} from "dm_common";
 
 export class DatabaseState {
 	@O subpage: "users" | "terms" | "media";

@@ -8,12 +8,12 @@ import {store} from "Store";
 import {GetSelectedTerm} from "Store/main/database";
 import {ES} from "Utils/UI/GlobalStyles";
 import {GetUpdates, Observer} from "web-vcore";
-import {Term, TermType} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {GetTerms, GetFullNameP} from "@debate-map/server-link/Source/Link";
-import {GetUserPermissionGroups, IsUserCreatorOrMod, CanGetBasicPermissions} from "@debate-map/server-link/Source/Link";
-import {UpdateTerm} from "@debate-map/server-link/Source/Link";
-import {DeleteTerm} from "@debate-map/server-link/Source/Link";
+import {Term, TermType} from "dm_common";
+import {MeID} from "dm_common";
+import {GetTerms, GetFullNameP} from "dm_common";
+import {GetUserPermissionGroups, IsUserCreatorOrMod, CanGetBasicPermissions} from "dm_common";
+import {UpdateTerm} from "dm_common";
+import {DeleteTerm} from "dm_common";
 import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
 

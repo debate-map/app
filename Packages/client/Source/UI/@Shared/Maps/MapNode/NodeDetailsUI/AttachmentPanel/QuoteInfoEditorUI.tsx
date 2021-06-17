@@ -1,14 +1,14 @@
 import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
 import {Column, Pre, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions";
-import {MarkdownEditor, MarkdownToolbar} from "react-vmarkdown";
+import {MarkdownEditor, MarkdownToolbar} from "web-vcore/nm/react-vmarkdown";
 import {SubPanel_Quote} from "../../NodeUI_Inner/SubPanel";
 import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI";
-import {QuoteAttachment} from "@debate-map/server-link/Source/Link";
-import {GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
-import {MapNodeType} from "@debate-map/server-link/Source/Link";
-import {ClaimForm} from "@debate-map/server-link/Source/Link";
-import {MapNodeRevision} from "@debate-map/server-link/Source/Link";
+import {QuoteAttachment} from "dm_common";
+import {GetNodeDisplayText} from "dm_common";
+import {MapNodeType} from "dm_common";
+import {ClaimForm} from "dm_common";
+import {MapNodeRevision} from "dm_common";
 
 // @ApplyBasicStyles
 export class QuoteInfoEditorUI extends BaseComponent

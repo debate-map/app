@@ -1,14 +1,14 @@
 import _ from "lodash";
 import {ObservableMap} from "web-vcore/nm/mobx";
 import {Clone} from "web-vcore/nm/js-vextensions";
-import {FirebaseDBShape, globalMapID, globalRootNodeID} from "@debate-map/server-link/Source/Link";
+import {GraphDBShape, globalMapID, globalRootNodeID} from "dm_common";
 
 import {GenerateUUID} from "web-vcore/nm/mobx-graphlink";
 import {AddUpgradeFunc} from "../../Admin";
 
 const newVersion = 12;
 AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
-	const data = Clone(oldData) as FirebaseDBShape;
+	const data = Clone(oldData) as GraphDBShape;
 
 	// clear outdated data
 	// ==========

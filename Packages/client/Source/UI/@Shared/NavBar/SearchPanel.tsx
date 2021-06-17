@@ -1,7 +1,6 @@
-import {CollectionReference, Query} from "@firebase/firestore-types";
 import {SleepAsync, Vector2, WaitXThenRun, E} from "web-vcore/nm/js-vextensions";
 import keycode from "keycode";
-import Moment from "web-vcore/nm/moment";
+import moment from "web-vcore/nm/moment";
 import {Button, Column, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
@@ -11,10 +10,8 @@ import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView";
 import {runInAction, flow} from "web-vcore/nm/mobx";
-import {Validate, GetAsync, DBPath, UUID} from "web-vcore/nm/mobx-graphlink";
-import {GetNodeRevision, MapView, MapNodeView, GetNode, fire, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, MapType, GetSearchTerms_Advanced} from "@debate-map/server-link/Source/Link";
-
-
+import {Validate, GetAsync, UUID} from "web-vcore/nm/mobx-graphlink";
+import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, MapType, GetSearchTerms_Advanced} from "dm_common";
 import {GetNodeColor} from "Store/firebase_ext/nodes";
 import {MapUI} from "../Maps/MapUI";
 import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu";
@@ -60,7 +57,8 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 		// if no whole-terms, and not unrestricted mode, cancel search (db would give too many results)
 		if (searchTerms.wholeTerms.length == 0 && !unrestricted) return;
 
-		let query = fire.subs.firestoreDB.collection(DBPath({}, "nodeRevisions")) as CollectionReference | Query;
+		// todo
+		/*let query = fire.subs.firestoreDB.collection(DBPath({}, "nodeRevisions")) as CollectionReference | Query;
 		for (const term of searchTerms.wholeTerms) {
 			query = query.where(`titles.allTerms.${term}`, "==", true);
 		}
@@ -71,7 +69,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 		runInAction("SearchPanel.PerformSearch_part2", ()=>{
 			store.main.search.searchResults_partialTerms = searchTerms.partialTerms;
 			store.main.search.searchResults_nodeRevisionIDs = docIDs;
-		});
+		});*/
 	}
 
 	render() {
@@ -268,7 +266,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 					}}>
 					<span style={{flex: columnWidths[0]}}>{GetNodeDisplayText(node, path)}</span>
 					<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
-					<span style={{flex: columnWidths[2]}}>{Moment(node.createdAt).format("YYYY-MM-DD")}</span>
+					<span style={{flex: columnWidths[2]}}>{moment(node.createdAt).format("YYYY-MM-DD")}</span>
 					{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
 					<NodeUI_Menu_Stub {...{node: nodeL3, path: `${node._key}`, inList: true}}/>
 				</Row>

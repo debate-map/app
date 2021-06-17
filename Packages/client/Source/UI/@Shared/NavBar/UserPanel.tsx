@@ -4,8 +4,8 @@ import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {HandleError, Link, Observer} from "web-vcore";
-import {fire} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
+import {MeID} from "dm_common";
+import {graph} from "Utils/LibIntegrations/MobXGraphlink";
 
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {
@@ -15,7 +15,7 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 		// const auth = State((a) => a.firebase.auth);
 		// account: helpers.pathToJS(state.firebase, "profile")
 
-		if (!IsAuthValid(fire.userInfo)) {
+		if (!IsAuthValid(graph.userInfo)) {
 			return (
 				<Column style={{padding: 10, background: "rgba(0,0,0,.7)", borderRadius: "0 0 0 5px"}}>
 					<Div mt={-3} mb={5}>Takes under 30 seconds.</Div>
@@ -27,7 +27,7 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 		return (
 			<Column style={{padding: 5, background: "rgba(0,0,0,.7)", borderRadius: "0 0 0 5px"}}>
 				<Column sel>
-					<div>Name: {fire.userInfo.displayName}</div>
+					<div>Name: {graph.userInfo.displayName}</div>
 					<div>ID: {MeID()}</div>
 				</Column>
 				{/* DEV &&
@@ -42,7 +42,7 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 						<Button text="Edit profile" style={{width: 100}}/>
 					</Link>
 					<Button ml={5} text="Sign out" style={{width: 100}} onClick={()=>{
-						fire.LogOut();
+						graph.LogOut();
 					}}/>
 				</Row>
 			</Column>
@@ -92,7 +92,7 @@ class SignInButton extends BaseComponent<{provider: "google" | "facebook" | "twi
 			<Button text={text} style={E({outline: "none"}, BasicStyles(this.props), style)} onClick={async()=>{
 				this.SetState({loading: true});
 				try {
-					const account = await fire.LogIn({provider, type: "popup"});
+					const account = await graph.LogIn(/*{provider, type: "popup"}*/);
 					//const account = await store.firelink.LogIn({provider, type: "popup"});
 					if (this.mounted == false) return;
 					this.SetState({loading: false});

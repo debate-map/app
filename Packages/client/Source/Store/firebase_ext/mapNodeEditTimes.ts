@@ -1,6 +1,6 @@
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {emptyArray, CE} from "web-vcore/nm/js-vextensions";
-import {GetMapNodeEditTimes, GetRootNodeID, GetNode, SearchUpFromNodeForNodeMatchingX, GetNodeID, MapNode, ChangeType} from "@debate-map/server-link/Source/Link";
+import {GetMapNodeEditTimes, GetRootNodeID, GetNode, SearchUpFromNodeForNodeMatchingX, GetNodeID, MapNode, ChangeType} from "dm_common";
 import {GetLastAcknowledgementTime} from "../main/maps";
 
 export const GetNodeIDsChangedSinceX = StoreAccessor(s=>(mapID: string, sinceTime: number, includeAcknowledgement = true): string[]=>{

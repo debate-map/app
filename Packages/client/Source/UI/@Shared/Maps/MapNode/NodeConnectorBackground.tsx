@@ -2,8 +2,9 @@ import {Vector2, E} from "web-vcore/nm/js-vextensions";
 import {BaseComponent, SimpleShouldUpdate, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
 import {HSLA} from "web-vcore";
 import {Fragment} from "react";
-import {MapNodeL3} from "@debate-map/server-link/Source/Link";
+import {MapNodeL3} from "dm_common";
 import {GetNodeColor} from "Store/firebase_ext/nodes";
+import {ES} from "Utils/UI/GlobalStyles";
 
 type Props = {
 	node: MapNodeL3, path: string, linkSpawnPoint: Vector2, straightLines?: boolean, nodeChildren: MapNodeL3[],
@@ -109,7 +110,7 @@ export class Squiggle extends BaseComponent<{start: Position, startControl_offse
 
 		return (
 			<svg viewBox={usePercents ? "0 0 100 100" : null} preserveAspectRatio="none" style={E({position: "absolute", overflow: "visible", zIndex: -1}, style)}>
-				<path style={E({stroke: color.css(), strokeWidth: 3, fill: "none"}, usePercents && {vectorEffect: "non-scaling-stroke"})}
+				<path style={ES({stroke: color.css(), strokeWidth: 3, fill: "none"}, usePercents && {vectorEffect: "non-scaling-stroke"})}
 					d={`M${startPos.x},${startPos.y} C${startControl.x},${startControl.y} ${endControl.x},${endControl.y} ${endPos.x},${endPos.y}`}/>
 			</svg>
 		);

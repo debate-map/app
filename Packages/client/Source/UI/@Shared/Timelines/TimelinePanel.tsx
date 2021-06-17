@@ -5,7 +5,7 @@ import {GetSelectedTimeline, GetTimelineOpenSubpanel, GetMapState} from "Store/m
 import {runInAction} from "web-vcore/nm/mobx";
 import {Observer} from "web-vcore";
 import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState";
-import {Map} from "@debate-map/server-link/Source/Link";
+import {Map} from "dm_common";
 import {CollectionSubpanel} from "./TimelinePanel/CollectionSubpanel";
 import {EditorSubpanel} from "./TimelinePanel/EditorSubpanel";
 import {PlayingSubpanel} from "./TimelinePanel/PlayingSubpanel";

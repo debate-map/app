@@ -6,7 +6,7 @@ import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {ES} from "Utils/UI/GlobalStyles";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {Media, Media_namePattern, MediaType, GetNiceNameForMediaType} from "@debate-map/server-link/Source/Link";
+import {Media, Media_namePattern, MediaType, GetNiceNameForMediaType} from "dm_common";
 import {SourceChainsEditorUI} from "../../@Shared/Maps/MapNode/SourceChainsEditorUI";
 import {YoutubePlayerUI, InfoButton, HSLA, ParseYoutubeVideoID} from "web-vcore";
 

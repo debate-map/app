@@ -1,7 +1,7 @@
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {PageContainer, Observer} from "web-vcore";
-import {GetMap} from "@debate-map/server-link/Source/Link";
-import {globalMapID} from "@debate-map/server-link/Source/Link";
+import {GetMap} from "dm_common";
+import {globalMapID} from "dm_common";
 import {MapUI} from "../@Shared/Maps/MapUI";
 
 @Observer

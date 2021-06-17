@@ -2,7 +2,7 @@ import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {LimitBarPos} from "UI/@Shared/Maps/MapNode/NodeUI";
 import {Column, Row} from "web-vcore/nm/react-vcomponents";
 import {E} from "web-vcore/nm/js-vextensions";
-import {GetChangeTypeOutlineColor, ChangeType} from "@debate-map/server-link/Source/Link";
+import {GetChangeTypeOutlineColor, ChangeType} from "dm_common";
 import {ChildLimitBar} from "./NodeChildHolder";
 
 export class NodeChangesMarker extends BaseComponent<{addedDescendants: number, editedDescendants: number, textOutline?: string, limitBarPos?: LimitBarPos}, {}> {

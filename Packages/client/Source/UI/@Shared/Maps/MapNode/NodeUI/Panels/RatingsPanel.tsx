@@ -2,30 +2,29 @@ import {DN, Range, Vector2} from "web-vcore/nm/js-vextensions";
 import {Pre, Select, Spinner} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, RenderSource, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {Area, AreaChart, CartesianGrid, ReferenceLine, Tooltip, XAxis, YAxis} from "recharts";
 import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink";
 import {Observer} from "web-vcore";
-import {MapNodeL3} from "@debate-map/server-link/Source/Link";
-import {RatingType, GetRatingTypeInfo} from "@debate-map/server-link/Source/Link";
-import {Rating} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {GetNodeForm, GetNodeL3} from "@debate-map/server-link/Source/Link";
-import {GetNodeChildren} from "@debate-map/server-link/Source/Link";
-import {ShouldRatingTypeBeReversed, TransformRatingForContext} from "@debate-map/server-link/Source/Link";
-import {GetMapNodeTypeDisplayName} from "@debate-map/server-link/Source/Link";
-import {SetNodeRating} from "@debate-map/server-link/Source/Link";
+import {MapNodeL3} from "dm_common";
+import {RatingType, GetRatingTypeInfo} from "dm_common";
+import {Rating} from "dm_common";
+import {MeID} from "dm_common";
+import {GetNodeForm, GetNodeL3} from "dm_common";
+import {GetNodeChildren} from "dm_common";
+import {ShouldRatingTypeBeReversed, TransformRatingForContext} from "dm_common";
+import {GetMapNodeTypeDisplayName} from "dm_common";
+import {SetNodeRating} from "dm_common";
 import {ShowSignInPopup} from "../../../../NavBar/UserPanel";
 import {MarkHandled} from "Utils/UI/General";
 
-/* let sampleData = [
+/*let sampleData = [
 	{rating: 0, count: 0},
 	{rating: 25, count: 1},
 	{rating: 50, count: 2},
 	{rating: 75, count: 3},
 	{rating: 100, count: 4},
-]; */
+];*/
 
 type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: RatingType, ratings: Rating[]};
 
@@ -81,16 +80,19 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 			<div ref="root" style={{position: "relative"/* , minWidth: 496 */}}
 				onClick={e=>{
 					if (ratingType == "impact") return;
-					const target = $(e.target);
+					const target = e.target as HTMLElement;
 					// let chart = (target as any).plusParents().filter(".recharts-cartesian-grid");
-					const chartHolder = (target as any).plusParents().filter("div.recharts-wrapper");
-					if (chartHolder.length == 0) return;
+					//const chartHolder = (target as any).plusParents().filter("div.recharts-wrapper");
+					const chartHolder = target.GetSelfAndParents().filter(a=>a.matches("div.recharts-wrapper"))[0];
+					if (chartHolder == null) return;
 
 					if (userID == null) return ShowSignInPopup();
 
-					const chart = chartHolder.find(".recharts-cartesian-grid");
-					const posOnChart = new Vector2(e.pageX - chart.offset().left, e.pageY - chart.offset().top);
-					const percentOnChart = posOnChart.x / chart.width();
+					const chart = chartHolder.querySelector(".recharts-cartesian-grid") as HTMLElement;
+					//const posOnChart = new Vector2(e.pageX - chart.offset().left, e.pageY - chart.offset().top);
+					const posOnChart = new Vector2(e.pageX - chart.offsetLeft, e.pageY - chart.offsetTop);
+					//const percentOnChart = posOnChart.x / chart.width();
+					const percentOnChart = posOnChart.x / chart.clientWidth;
 					const ratingOnChart_exact = minLabel + (percentOnChart * range);
 					const closestRatingSlot = dataFinal.OrderBy(a=>a.label.Distance(ratingOnChart_exact)).First();
 					let newRating_label = closestRatingSlot.label;
@@ -137,19 +139,20 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 					{/* Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/> */}
 					<Pre>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.main.ratingUI.smoothing = val}/>
 				</div>
-				{this.lastRender_source == RenderSource.SetState &&
+				{/*this.lastRender_source == RenderSource.SetState &&
 					<AreaChart ref="chart" width={size.x} height={250} data={dataFinal}
-						margin={{top: 20, right: 10, bottom: 0, left: 10}} /* viewBox={{x: 0, y: 250 - height, width: size.x, height: 250}} */>
-						<XAxis dataKey="label" type="number" /* label={<XAxisLabel ratingType={ratingType}/>} */ ticks={Range(minLabel, maxLabel, ratingTypeInfo.tickInterval)}
+						margin={{top: 20, right: 10, bottom: 0, left: 10}} /* viewBox={{x: 0, y: 250 - height, width: size.x, height: 250}} *#/>
+						<XAxis dataKey="label" type="number" /* label={<XAxisLabel ratingType={ratingType}/>} *#/ ticks={Range(minLabel, maxLabel, ratingTypeInfo.tickInterval)}
 							tick={ratingTypeInfo.tickRender}
 							domain={[minLabel, maxLabel]} minTickGap={0}/>
-						{/* <YAxis tickCount={7} hasTick width={50}/> */}
+						{/* <YAxis tickCount={7} hasTick width={50}/> *#/}
 						<YAxis orientation="left" x={20} width={20} height={250} tickCount={9}/>
 						<CartesianGrid stroke="rgba(255,255,255,.3)"/>
 						<Area type="monotone" dataKey="count" stroke="#ff7300" fill="#ff7300" fillOpacity={0.9} layout="vertical" animationDuration={500}/>
 						{myRating != null && <ReferenceLine x={GetLabelForValue(myRating)} stroke="rgba(0,255,0,1)" fill="rgba(0,255,0,1)" label="You"/>}
 						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>
-					</AreaChart>}
+					</AreaChart>*/}
+				{"TODO"}
 			</div>
 		);
 	}
@@ -202,8 +205,8 @@ class CustomTooltip extends BaseComponent<{active?, payload?, external?, label?}
 	plusParents(topDown?: boolean): JQuery;
 }
 $.fn.plusParents = function(topDown = false) { */
-($.fn as any).plusParents = function(topDown = false) {
+/*($.fn as any).plusParents = function(topDown = false) {
 	const parentsAndSelf = this.parents().addBack().toArray(); // addBack concats lists, and orders it top-down
 	if (!topDown) { parentsAndSelf.reverse(); }
 	return $(parentsAndSelf);
-};
+};*/

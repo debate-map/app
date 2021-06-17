@@ -8,7 +8,7 @@ import {GetSelectedPrivateMap} from "Store/main/private";
 import {GetSelectedPublicMap} from "Store/main/public";
 import {ES} from "Utils/UI/GlobalStyles";
 import {HSLA, Observer, PageContainer} from "web-vcore";
-import {MapType, MeID, GetUserPermissionGroups, CanGetBasicPermissions, GetMaps_Private, GetMaps_Public, MapVisibility, IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
+import {MapType, MeID, GetUserPermissionGroups, CanGetBasicPermissions, GetMaps_Private, GetMaps_Public, MapVisibility, IsUserCreatorOrMod} from "dm_common";
 import {GADDemo} from "../../@GAD/GAD";
 import {ShowAddMapDialog} from "../../@Shared/Maps/AddMapDialog";
 import {MapEntryUI} from "../../@Shared/Maps/MapEntryUI";

@@ -10,8 +10,8 @@ import {GetScreenRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, Y
 import {ES} from "Utils/UI/GlobalStyles";
 import {GetSelectedTimeline, GetPlayingTimelineStepIndex, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {zIndexes} from "Utils/UI/ZIndexes";
-import {GetTimelineStep, GetTimelineSteps} from "@debate-map/server-link/Source/Link";
-import {Map} from "@debate-map/server-link/Source/Link";
+import {GetTimelineStep, GetTimelineSteps} from "dm_common";
+import {Map} from "dm_common";
 import {StepUI} from "./PlayingSubpanel/StepUI";
 
 /* export class PlayingSubpanel extends BaseComponentPlus(

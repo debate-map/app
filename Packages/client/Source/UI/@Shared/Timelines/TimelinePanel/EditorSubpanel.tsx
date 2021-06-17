@@ -1,5 +1,5 @@
 import {ToJSON} from "web-vcore/nm/js-vextensions";
-import {Droppable, DroppableProvided, DroppableStateSnapshot} from "react-beautiful-dnd";
+import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd";
 import ReactList from "react-list";
 import {Button, CheckBox, Column, Pre, Row, Spinner, Text, TextInput, TimeSpanInput} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions";
@@ -16,13 +16,13 @@ import {GetTimelinePanelOpen, GetTimelineOpenSubpanel, GetSelectedTimeline, GetS
 import {runInAction} from "web-vcore/nm/mobx";
 import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState";
 import {StepEditorUI} from "./EditorSubpanel/StepEditorUI";
-import {Map} from "@debate-map/server-link/Source/Link";
-import {Timeline} from "@debate-map/server-link/Source/Link";
-import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {UpdateTimeline} from "@debate-map/server-link/Source/Link";
-import {TimelineStep} from "@debate-map/server-link/Source/Link";
-import {AddTimelineStep} from "@debate-map/server-link/Source/Link";
+import {Map} from "dm_common";
+import {Timeline} from "dm_common";
+import {IsUserCreatorOrMod} from "dm_common";
+import {MeID} from "dm_common";
+import {UpdateTimeline} from "dm_common";
+import {TimelineStep} from "dm_common";
+import {AddTimelineStep} from "dm_common";
 
 // for use by react-beautiful-dnd (using text replacement)
 G({LockMapEdgeScrolling});

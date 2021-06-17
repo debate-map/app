@@ -21,7 +21,7 @@ export class FeedbackUI extends BaseComponentPlus({} as {}, {}) {
 		return (
 			<>
 				<SubNavBar>
-					<SubNavBarButton page={page} subpage="proposals" text="Proposals" actionFuncIfAlreadyActive={s=>s.feedback.main.proposals.selectedProposalID = null}/>
+					<SubNavBarButton page={page} subpage="proposals" text="Proposals" /*actionFuncIfAlreadyActive={s=>s.feedback.main.proposals.selectedProposalID = null}*//>
 					{/* <SubNavBarButton page={page} subpage="roadmap" text="Roadmap"/>
 					<SubNavBarButton page={page} subpage="neutrality" text="Neutrality"/> */}
 				</SubNavBar>

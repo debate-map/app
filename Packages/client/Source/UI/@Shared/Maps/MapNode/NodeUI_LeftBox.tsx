@@ -5,15 +5,15 @@ import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink";
 import {Observer} from "web-vcore";
-import {MapNodeL3, ClaimForm} from "@debate-map/server-link/Source/Link";
-import {GetNodeForm, IsPremiseOfSinglePremiseArgument, GetRatingTypesForNode} from "@debate-map/server-link/Source/Link";
-import {GetParentNodeL3} from "@debate-map/server-link/Source/Link";
-import {MapNodeType_Info} from "@debate-map/server-link/Source/Link";
-import {RatingType, GetRatingTypeInfo} from "@debate-map/server-link/Source/Link";
-import {GetRatings, GetRatingAverage_AtPath} from "@debate-map/server-link/Source/Link";
-import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {Map} from "@debate-map/server-link/Source/Link";
+import {MapNodeL3, ClaimForm} from "dm_common";
+import {GetNodeForm, IsPremiseOfSinglePremiseArgument, GetRatingTypesForNode} from "dm_common";
+import {GetParentNodeL3} from "dm_common";
+import {MapNodeType_Info} from "dm_common";
+import {RatingType, GetRatingTypeInfo} from "dm_common";
+import {GetRatings, GetRatingAverage_AtPath} from "dm_common";
+import {IsUserCreatorOrMod} from "dm_common";
+import {MeID} from "dm_common";
+import {Map} from "dm_common";
 
 type Props = {
 	map: Map, path: string, node: MapNodeL3,

@@ -1,9 +1,9 @@
 import {OMIT} from "web-vcore/nm/js-vextensions";
 import {Column, Row} from "web-vcore/nm/react-vcomponents";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {MapType, Map} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {AddMap} from "@debate-map/server-link/Source/Link";
+import {MapType, Map} from "dm_common";
+import {MeID} from "dm_common";
+import {AddMap} from "dm_common";
 import {MapDetailsUI} from "./MapDetailsUI";
 
 export function ShowAddMapDialog(userID: string, type: MapType) {

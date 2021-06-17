@@ -16,7 +16,10 @@ SetDefaultGraphOptions({graph});
 
 //const linkRootPath = `versions/v${dbVersion}-${DB_SHORT}`;
 export function InitGraphlink() {
-	graph.Initialize({rootStore: store, apollo: pgClient});
+	graph.Initialize({
+		rootStore: store,
+		apollo: pgClient as any, // the "as any" is needed if "mobx-graphlink" is npm-linked from "web-vcore"
+	});
 }
 
 // modify some default options

@@ -1,14 +1,12 @@
-import {GetMap, GetMapTimelines, Share, ShareType, Timeline, GetShares, MeID, UpdateShare, AddShare, GetNodesInSubtree, MapView} from "dm_common/Source/Commands";
-import {CopyText, GetEntries, ToJSON, WaitXThenRun, VURL, ModifyString, Clone, IsObject, GetTreeNodesInObjTree, CE} from "web-vcore/nm/js-vextensions";
-import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {AddShare, GetMap, GetMapTimelines, GetShares, MeID, Share, ShareType, Timeline, UpdateShare} from "dm_common";
 import {store} from "Store";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView";
 import {ExpandType, ScrollToType} from "Store/main/shareUI";
-import {GetNewURL} from "Utils/URL/URLs";
-import {GetCurrentURL, Observer, RunInAction_Set, GetUpdates} from "web-vcore";
+import {Observer, RunInAction_Set} from "web-vcore";
+import {CopyText, GetEntries, ToJSON, WaitXThenRun} from "web-vcore/nm/js-vextensions";
+import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {GetShareLongURL, GetShareShortURL} from "../ShareDropDown";
-import {WithFirestoreNormalization} from "web-vcore/nm/mobx-graphlink";
 
 @Observer
 export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeline: null as Timeline, justCopied_type: null as string}) {
@@ -41,8 +39,10 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 		//const newShare_updatesFromCurrent = GetUpdates(currentShare, newShareData, true).Including("mapView");
 		const newShare_updatesFromCurrent = {};
 		if (currentShare) {
-			const currentMapView_normalized = WithFirestoreNormalization(currentShare.mapView);
-			const newMapView_normalized = WithFirestoreNormalization(newShareData.mapView);
+			/*const currentMapView_normalized = WithFirestoreNormalization(currentShare.mapView);
+			const newMapView_normalized = WithFirestoreNormalization(newShareData.mapView);*/
+			const currentMapView_normalized = currentShare.mapView;
+			const newMapView_normalized = newShareData.mapView;
 			/*const mapViewChanges = GetUpdates(currentMapView_normalized, newMapView_normalized, true);
 			if (mapViewChanges.length) {*/
 			if (ToJSON(newMapView_normalized) != ToJSON(currentMapView_normalized)) {

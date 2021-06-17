@@ -2,8 +2,8 @@ import {ToNumber} from "web-vcore/nm/js-vextensions";
 import {Pre, Row, Spinner} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
-import {HasAdminPermissions} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
+import {HasAdminPermissions} from "dm_common";
+import {MeID} from "dm_common";
 
 export class OthersPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 	render() {

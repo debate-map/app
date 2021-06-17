@@ -7,21 +7,21 @@ import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI"
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub";
 import {ES} from "Utils/UI/GlobalStyles";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink";
-import {Map, ChildOrderType} from "@debate-map/server-link/Source/Link";
+import {Map, ChildOrderType} from "dm_common";
 import {Observer, InfoButton, Icon} from "web-vcore";
-import {MapNodeL3, ClaimForm} from "@debate-map/server-link/Source/Link";
-import {AttachmentType, GetAttachmentType} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {GetUserPermissionGroups, IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {GetParentNodeL3, GetNodeMirrorChildren, GetParentNodeID} from "@debate-map/server-link/Source/Link";
-import {MapNodeType} from "@debate-map/server-link/Source/Link";
-import {CanConvertFromClaimTypeXToY, ChangeClaimType} from "@debate-map/server-link/Source/Link";
-import {ArgumentType} from "@debate-map/server-link/Source/Link";
-import {IsSinglePremiseArgument, GetNodeDisplayText, GetNodeL3, GetNodeForm} from "@debate-map/server-link/Source/Link";
-import {ChangeNodeOwnerMap} from "@debate-map/server-link/Source/Link";
-import {ReverseArgumentPolarity} from "@debate-map/server-link/Source/Link";
-import {UpdateLink} from "@debate-map/server-link/Source/Link";
-import {UpdateNodeChildrenOrder} from "@debate-map/server-link/Source/Link";
+import {MapNodeL3, ClaimForm} from "dm_common";
+import {AttachmentType, GetAttachmentType} from "dm_common";
+import {MeID} from "dm_common";
+import {GetUserPermissionGroups, IsUserCreatorOrMod} from "dm_common";
+import {GetParentNodeL3, GetNodeMirrorChildren, GetParentNodeID} from "dm_common";
+import {MapNodeType} from "dm_common";
+import {CanConvertFromClaimTypeXToY, ChangeClaimType} from "dm_common";
+import {ArgumentType} from "dm_common";
+import {IsSinglePremiseArgument, GetNodeDisplayText, GetNodeL3, GetNodeForm} from "dm_common";
+import {ChangeNodeOwnerMap} from "dm_common";
+import {ReverseArgumentPolarity} from "dm_common";
+import {UpdateLink} from "dm_common";
+import {UpdateNodeChildrenOrder} from "dm_common";
 
 @Observer
 export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType}) {

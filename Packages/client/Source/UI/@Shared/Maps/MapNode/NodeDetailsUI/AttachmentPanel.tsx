@@ -6,8 +6,8 @@ import {MediaAttachmentEditorUI as MediaAttachmentEditorUI} from "./AttachmentPa
 import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI";
-import {GetAttachmentType, AttachmentType, ResetNodeRevisionAttachment} from "@debate-map/server-link/Source/Link";
-import {MapNodeType} from "@debate-map/server-link/Source/Link";
+import {GetAttachmentType, AttachmentType, ResetNodeRevisionAttachment} from "dm_common";
+import {MapNodeType} from "dm_common";
 
 export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {}, {}> {
 	render() {

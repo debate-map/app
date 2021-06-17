@@ -2,15 +2,15 @@ import {Column, Div, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {VReactMarkdown_Remarkable, YoutubePlayer, YoutubePlayerState, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions";
-import {VMenuItem, VMenuStub} from "react-vmenu";
+import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu";
 import {styles} from "Utils/UI/GlobalStyles";
 import {runInAction} from "web-vcore/nm/mobx";
 import {store} from "Store";
-import {Map} from "@debate-map/server-link/Source/Link";
-import {Timeline} from "@debate-map/server-link/Source/Link";
-import {GetTimelineStep} from "@debate-map/server-link/Source/Link";
-import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
+import {Map} from "dm_common";
+import {Timeline} from "dm_common";
+import {GetTimelineStep} from "dm_common";
+import {IsUserCreatorOrMod} from "dm_common";
+import {MeID} from "dm_common";
 import {PositionOptionsEnum, NodeRevealUI, StepEditorUI} from "../EditorSubpanel/StepEditorUI";
 
 @Observer

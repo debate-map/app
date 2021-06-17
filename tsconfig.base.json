@@ -14,12 +14,14 @@
 		// paths are relative to "baseUrl" (ie. ./Packages/XXX/Source)
 		"paths": {
 			// from web-vcore
+			// ==========
 			"react": [
 				//"../../../node_modules/web-vcore/nm/react",
 				"../../../node_modules/web-vcore/node_modules/react",
 				"../../../node_modules/react",
 			],
 			// project-specific
+			// ==========
 			"mobx-graphlink": [
 				"../../../node_modules/web-vcore/node_modules/mobx-graphlink",
 				"../../../node_modules/mobx-graphlink",
@@ -27,6 +29,15 @@
 			"mobx-graphlink/*": [
 				"../../../node_modules/web-vcore/node_modules/mobx-graphlink/*",
 				"../../../node_modules/mobx-graphlink/*",
+			],
+			// temp; fixes odd import bug in CodeMirrorConfig.ts
+			"codemirror": [
+				"../../../node_modules/web-vcore/node_modules/codemirror",
+				"../../../node_modules/codemirror",
+			],
+			"codemirror/*": [
+				"../../../node_modules/web-vcore/node_modules/codemirror/*",
+				"../../../node_modules/codemirror/*",
 			]
 		},
 

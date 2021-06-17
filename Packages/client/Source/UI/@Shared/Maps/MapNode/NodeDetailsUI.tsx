@@ -5,7 +5,7 @@ import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vexten
 import {store} from "Store";
 import {Observer} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
-import {MapNode, ChildEntry, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType} from "@debate-map/server-link/Source/Link";
+import {MapNode, ChildEntry, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType} from "dm_common";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel";

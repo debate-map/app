@@ -2,16 +2,16 @@ import {Div, Column, Row, Button, TextInput, DropDown, DropDownTrigger, DropDown
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {InfoButton, Observer, GetUpdates, HSLA} from "web-vcore";
 import {TermDefinitionPanel} from "./DefinitionsPanel";
-import {Map} from "@debate-map/server-link/Source/Link";
-import {MapNodeL3} from "@debate-map/server-link/Source/Link";
-import {GetNodeTags} from "@debate-map/server-link/Source/Link";
-import {HasModPermissions, IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
+import {Map} from "dm_common";
+import {MapNodeL3} from "dm_common";
+import {GetNodeTags} from "dm_common";
+import {HasModPermissions, IsUserCreatorOrMod} from "dm_common";
+import {MeID} from "dm_common";
 import {ShowAddTagDialog, TagDetailsUI} from "UI/Database/Tags/TagDetailsUI";
-import {TagComp_MirrorChildrenFromXToY, MapNodeTag, GetTagCompClassByTag} from "@debate-map/server-link/Source/Link";
-import {UpdateNodeTag} from "@debate-map/server-link/Source/Link";
+import {TagComp_MirrorChildrenFromXToY, MapNodeTag, GetTagCompClassByTag} from "dm_common";
+import {UpdateNodeTag} from "dm_common";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {DeleteNodeTag} from "@debate-map/server-link/Source/Link";
+import {DeleteNodeTag} from "dm_common";
 
 @Observer
 export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {}) {

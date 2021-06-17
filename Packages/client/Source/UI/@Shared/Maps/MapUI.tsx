@@ -2,7 +2,7 @@ import {StandardCompProps} from "Utils/UI/General";
 import {DeepGet, E, SleepAsync, Timer, Vector2, FindDOMAll, Assert, FromJSON, ToJSON, VRect, GetTreeNodesInObjTree} from "web-vcore/nm/js-vextensions";
 import {Column, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentWithConnector, FindReact, GetDOM, BaseComponentPlus, BaseComponent} from "web-vcore/nm/react-vextensions";
-import {VMenuStub, VMenuItem} from "react-vmenu";
+import {VMenuStub, VMenuItem} from "web-vcore/nm/react-vmenu";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {TimelinePlayerUI} from "UI/@Shared/Timelines/TimelinePlayerUI";
 import {GetDistanceBetweenRectAndPoint, inFirefox, GetScreenRect, StoreAction, Observer} from "web-vcore";
@@ -13,7 +13,7 @@ import {GetTimelinePanelOpen, GetPlayingTimeline, GetMapState} from "Store/main/
 import {GetOpenMapID} from "Store/main";
 import {TimelinePanel} from "UI/@Shared/Timelines/TimelinePanel";
 import {TimelineIntroBox} from "UI/@Shared/Timelines/TimelineIntroBox";
-import {MapNodeL3, GetUserAccessLevel, MeID, IsNodeL2, IsNodeL3, GetNodeL3, IsPremiseOfSinglePremiseArgument, GetParentPath, GetParentNodeL3, Map} from "@debate-map/server-link/Source/Link";
+import {MapNodeL3, GetUserAccessLevel, MeID, IsNodeL2, IsNodeL3, GetNodeL3, IsPremiseOfSinglePremiseArgument, GetParentPath, GetParentNodeL3, Map} from "dm_common";
 import {styles, ES} from "../../../Utils/UI/GlobalStyles";
 import {NodeUI} from "./MapNode/NodeUI";
 import {NodeUI_ForBots} from "./MapNode/NodeUI_ForBots";
@@ -29,11 +29,11 @@ export function GetNodeBoxForPath(path: string) {
 }
 export function GetNodeBoxClosestToViewCenter() {
 	const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
-	return FindDOMAll(".NodeUI_Inner").Min(nodeBox=>GetDistanceBetweenRectAndPoint($(nodeBox).GetScreenRect(), viewCenter_onScreen));
+	return FindDOMAll(".NodeUI_Inner").Min(nodeBox=>GetDistanceBetweenRectAndPoint(GetScreenRect(nodeBox), viewCenter_onScreen));
 }
 export function GetViewOffsetForNodeBox(nodeBox: Element) {
 	const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
-	return viewCenter_onScreen.Minus($(nodeBox).GetScreenRect().Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
+	return viewCenter_onScreen.Minus(GetScreenRect(nodeBox).Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
 }
 
 export const ACTUpdateFocusNodeAndViewOffset = StoreAction((mapID: string)=>{
@@ -197,10 +197,10 @@ export class MapUI extends BaseComponentPlus({
 							}}
 							onMouseDown={e=>{
 								this.downPos = new Vector2(e.clientX, e.clientY);
-								if (e.button == 2) { $(this.mapUIEl).addClass("scrolling"); }
+								if (e.button == 2) { this.mapUIEl.classList.add("scrolling"); }
 							}}
 							onMouseUp={e=>{
-								$(this.mapUIEl).removeClass("scrolling");
+								this.mapUIEl.classList.remove("scrolling");
 							}}
 							onClick={e=>{
 								if (e.target != this.mapUIEl) return;
@@ -280,7 +280,7 @@ export class MapUI extends BaseComponentPlus({
 	}
 	OnLoadComplete() {
 		console.log(`
-			NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / $(".NodeUI").length} per visible node)
+			NodeUI render count: ${NodeUI.renderCount} (${NodeUI.renderCount / document.querySelectorAll(".NodeUI").length} per visible node)
 			TimeSincePageLoad: ${Date.now() - performance.timing.domComplete}ms
 		`.AsMultiline(0));
 		this.LoadStoredScroll();

@@ -1,7 +1,7 @@
 import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
 import {CheckBox, Column, Pre, Row, RowLR, TextArea, TextInput} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions";
-import {EquationAttachment} from "@debate-map/server-link/Source/Link";
+import {EquationAttachment} from "dm_common";
 
 type Props = {baseData: EquationAttachment, creating: boolean, editing?: boolean, style?, onChange?: (newData: EquationAttachment)=>void};
 // & Partial<{creator: User, variantNumber: number}>;

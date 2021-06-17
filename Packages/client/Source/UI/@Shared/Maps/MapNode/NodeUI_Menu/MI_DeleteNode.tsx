@@ -1,14 +1,14 @@
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {VMenuItem} from "react-vmenu";
+import {VMenuItem} from "web-vcore/nm/react-vmenu";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {styles} from "Utils/UI/GlobalStyles";
 import {Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions";
-import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
-import {DeleteNode} from "@debate-map/server-link/Source/Link";
-import {IsNodeSubnode} from "@debate-map/server-link/Source/Link";
+import {IsUserCreatorOrMod} from "dm_common";
+import {MeID} from "dm_common";
+import {GetNodeDisplayText} from "dm_common";
+import {DeleteNode} from "dm_common";
+import {IsNodeSubnode} from "dm_common";
 import {MI_SharedProps} from "../NodeUI_Menu";
 
 @Observer

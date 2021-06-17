@@ -1,13 +1,13 @@
 import {SlicePath} from "web-vcore/nm/mobx-graphlink";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {VMenuItem} from "react-vmenu";
+import {VMenuItem} from "web-vcore/nm/react-vmenu";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {styles} from "Utils/UI/GlobalStyles";
 import {Observer} from "web-vcore";
-import {GetNodeL3, GetNodeDisplayText} from "@debate-map/server-link/Source/Link";
-import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {UnlinkNode} from "@debate-map/server-link/Source/Link";
+import {GetNodeL3, GetNodeDisplayText} from "dm_common";
+import {IsUserCreatorOrMod} from "dm_common";
+import {MeID} from "dm_common";
+import {UnlinkNode} from "dm_common";
 import {MI_SharedProps} from "../NodeUI_Menu";
 
 @Observer

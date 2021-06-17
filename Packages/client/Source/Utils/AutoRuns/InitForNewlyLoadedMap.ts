@@ -1,4 +1,4 @@
-import {GetMap, GetNodeL2, MapView} from "@debate-map/server-link/Source/Link";
+import {GetMap, GetNodeL2, MapView} from "dm_common";
 import {Assert, Vector2} from "web-vcore/nm/js-vextensions";
 import {autorun, runInAction} from "web-vcore/nm/mobx";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink";

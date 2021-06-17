@@ -1,17 +1,17 @@
 import {Assert, emptyObj, nl, ToJSON, Vector2, VRect, WaitXThenRun, E, IsSpecialEmptyArray} from "web-vcore/nm/js-vextensions";
 import * as React from "react";
-import {Droppable, DroppableProvided, DroppableStateSnapshot} from "react-beautiful-dnd";
+import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd";
 import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
 import {NodeConnectorBackground} from "UI/@Shared/Maps/MapNode/NodeConnectorBackground";
 import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI";
-import {Icon, MaybeLog, Observer} from "web-vcore";
+import {GetScreenRect, Icon, MaybeLog, Observer} from "web-vcore";
 import {DroppableInfo} from "Utils/UI/DNDStructures";
 import {ES} from "Utils/UI/GlobalStyles";
 import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {runInAction} from "web-vcore/nm/mobx";
-import {MapNodeL3, Polarity, HolderType, GetNodeChildrenL3, GetFillPercent_AtPath, IsMultiPremiseArgument, MapNodeType, MapNodeType_Info, ArgumentType, Map} from "@debate-map/server-link/Source/Link";
+import {MapNodeL3, Polarity, HolderType, GetNodeChildrenL3, GetFillPercent_AtPath, IsMultiPremiseArgument, MapNodeType, MapNodeType_Info, ArgumentType, Map} from "dm_common";
 import {NodeChildHolderBox} from "./NodeChildHolderBox";
 import {ArgumentsControlBar} from "../ArgumentsControlBar";
 
@@ -314,11 +314,11 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		if (this.argumentsControlBar) {
 			// return upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0;
 			return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden"
-				? $(this.argumentsControlBar.DOM).GetScreenRect().Center.y + 1 - $(this.childHolder.DOM).GetScreenRect().y
+				? GetScreenRect(this.argumentsControlBar.DOM).Center.y + 1 - GetScreenRect(this.childHolder.DOM).y
 				: 0;
 		}
 		// return childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0,
-		return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden" ? $(this.childHolder.DOM).GetScreenRect().height / 2 : 0;
+		return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden" ? GetScreenRect(this.childHolder.DOM).height / 2 : 0;
 	}
 
 	UpdateChildrenWidthOverride(forceUpdate = false) {

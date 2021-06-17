@@ -4,7 +4,7 @@ import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {GetOpenMapID} from "Store/main";
 import {InfoButton} from "web-vcore";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
-import {MapNodeRevision_Defaultable, GetMap, PermissionInfoType, HasModPermissions, MeID, AccessLevel, GetUserAccessLevel, HasAdminPermissions, MapType} from "@debate-map/server-link/Source/Link";
+import {MapNodeRevision_Defaultable, GetMap, PermissionInfoType, HasModPermissions, MeID, AccessLevel, GetUserAccessLevel, HasAdminPermissions, MapType} from "dm_common";
 
 // @Observer
 // export class PermissionsOptions extends BaseComponent<Pick<SharedProps, 'newData' | 'newRevisionData' | 'enabled' | 'Change'> & {forDefaultsInMap?: boolean}, {}> {

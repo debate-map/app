@@ -4,11 +4,11 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI";
 import {GetUpdates, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions";
-import {MapNodePhrasing} from "@debate-map/server-link/Source/Link";
-import {GetUser, MeID} from "@debate-map/server-link/Source/Link";
-import {IsUserCreatorOrMod} from "@debate-map/server-link/Source/Link";
-import {UpdatePhrasing} from "@debate-map/server-link/Source/Link";
-import {DeletePhrasing} from "@debate-map/server-link/Source/Link";
+import {MapNodePhrasing} from "dm_common";
+import {GetUser, MeID} from "dm_common";
+import {IsUserCreatorOrMod} from "dm_common";
+import {UpdatePhrasing} from "dm_common";
+import {DeletePhrasing} from "dm_common";
 
 @Observer
 export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {phrasing: MapNodePhrasing}, {dataError: null as string}) {

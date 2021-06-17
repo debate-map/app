@@ -19,7 +19,7 @@ AddSchema("ReverseArgumentPolarity_payload", {
 
 @MapEdit
 @UserEdit
-export class ReverseArgumentPolarity extends Command<{mapID?: number, nodeID: string, path: string}, {}> {
+export class ReverseArgumentPolarity extends Command<{mapID?: string, nodeID: string, path: string}, {}> {
 	parentID: string;
 	oldNodeData: MapNodeL3;
 	newLinkData: ChildEntry;

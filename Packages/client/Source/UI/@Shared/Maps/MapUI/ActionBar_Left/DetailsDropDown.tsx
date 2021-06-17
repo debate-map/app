@@ -3,7 +3,7 @@ import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBo
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {store} from "Store";
-import {MapNodeRevision_Defaultable, CanEditNode, IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, GetChildCount, DeleteMap, Map} from "@debate-map/server-link/Source/Link";
+import {MapNodeRevision_Defaultable, CanEditNode, IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, GetChildCount, DeleteMap, Map} from "dm_common";
 
 
 import {Observer, GetUpdates, InfoButton} from "web-vcore";

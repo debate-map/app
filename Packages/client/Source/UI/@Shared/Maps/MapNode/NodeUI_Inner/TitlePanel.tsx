@@ -7,7 +7,7 @@ import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProp
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView";
 import {ES} from "Utils/UI/GlobalStyles";
-import {AddNodeRevision, GetParentNode, IsNodeSubnode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, CanEditNode, Map} from "@debate-map/server-link/Source/Link";
+import {AddNodeRevision, GetParentNode, IsNodeSubnode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, CanEditNode, Map} from "dm_common";
 import {InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, VReactMarkdown_Remarkable} from "web-vcore";
 import React from "react";
 import {NodeMathUI} from "../NodeMathUI";

@@ -3,7 +3,7 @@ import {Column, Pre, Row, Text} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {Link, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions";
-import {GetUser} from "@debate-map/server-link/Source/Link";
+import {GetUser} from "dm_common";
 
 @Observer
 export class IDAndCreationInfoUI extends BaseComponentPlus({singleLine: false} as {id: string | number, creatorID: string, createdAt: number, singleLine?: boolean}, {}) {

@@ -1,4 +1,4 @@
-import {GetUsers} from "@debate-map/server-link/Source/Link";
+import {GetUsers} from "dm_common";
 import {E} from "web-vcore/nm/js-vextensions";
 import {Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";

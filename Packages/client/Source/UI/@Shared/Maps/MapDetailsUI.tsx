@@ -3,7 +3,7 @@ import Moment from "web-vcore/nm/moment";
 import {CheckBox, Column, Pre, RowLR, Spinner, TextInput, Row, Select} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {InfoButton} from "web-vcore";
-import {Map_namePattern, MapType, Map, MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType, MapVisibility, IsUserCreatorOrMod, MeID} from "@debate-map/server-link/Source/Link";
+import {Map_namePattern, MapType, Map, MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType, MapVisibility, IsUserCreatorOrMod, MeID} from "dm_common";
 
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
 import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel";

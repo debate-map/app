@@ -1,6 +1,5 @@
 import {ExposeModuleExports, Log} from "web-vcore";
-import {InitVWAF} from "./VWAF";
-import {InitFeedback} from "./FirebaseFeedback";
+import {InitWVC} from "./WVC";
 import {InitReactJS} from "./ReactJS";
 import {InitSentry} from "./Sentry";
 import {InitReactVComponents} from "./ReactVComponents";
@@ -23,11 +22,11 @@ function ExposeModuleExports_Final() {
 }
 
 export function InitLibs() {
-	InitFirebase();
-	InitVWAF();
+	//InitFirebase();
+	InitWVC();
 	InitGraphlink(); // init this early, so we can use mobx-graphlink's DBPath() for the later modules (eg. graphql-feedback)
-	InitFeedback();
-	// InitForum();
+	//InitFeedback();
+	//InitForum();
 	InitSentry();
 	InitReactJS();
 	InitReactVComponents();
@@ -42,8 +41,8 @@ export function InitLibs() {
 // minor lib-inits
 // ==========
 
-function InitFirebase() {
+/*function InitFirebase() {
 	// if first run (in firebase-mock/test, or not hot-reloading), initialize the firebase app/sdk
 	// if (!firebaseAppIsReal || firebaseApp.apps.length == 0) {
 	firebase.initializeApp(firebaseConfig);
-}
+}*/

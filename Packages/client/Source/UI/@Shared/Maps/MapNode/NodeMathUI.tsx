@@ -3,8 +3,8 @@ import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions";
 import ReactDOM from "web-vcore/nm/react-dom";
 import {IsNaN} from "web-vcore/nm/js-vextensions";
 import {store} from "Store";
-import {Term} from "@debate-map/server-link/Source/Link";
-import {PreProcessLatex} from "@debate-map/server-link/Source/Link";
+import {Term} from "dm_common";
+import {PreProcessLatex} from "dm_common";
 import {TermPlaceholder} from "./NodeUI_Inner/TermPlaceholder";
 
 // change InlineMath's generateHtml function to not break on katex parse-errors

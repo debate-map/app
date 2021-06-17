@@ -1,4 +1,4 @@
-import {GetMap, GetShare, MapType, ShareType} from "@debate-map/server-link/Source/Link";
+import {GetMap, GetShare, MapType, ShareType} from "dm_common";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {autorun, runInAction} from "web-vcore/nm/mobx";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink";

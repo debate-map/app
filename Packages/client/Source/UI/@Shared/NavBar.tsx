@@ -1,17 +1,13 @@
-import {DeepGet, E} from "web-vcore/nm/js-vextensions";
-import {Button, Div, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {ResetCurrentDBRoot} from "UI/More/Admin/ResetCurrentDBRoot";
-import {dbVersion} from "Main";
+import {useCallback} from "react";
+import {RootState, store} from "Store";
+import {zIndexes} from "Utils/UI/ZIndexes";
+import {rootPageDefaultChilds} from "Utils/URL/URLs";
 import {Link, Observer} from "web-vcore";
-import {useMemo, useCallback} from "react";
-import {store, RootState} from "Store";
+import {E} from "web-vcore/nm/js-vextensions";
 import {runInAction} from "web-vcore/nm/mobx";
 import {GetDocs} from "web-vcore/nm/mobx-graphlink";
-import {zIndexes} from "Utils/UI/ZIndexes";
-import {fire} from "@debate-map/server-link/Source/Link";
-import {rootPageDefaultChilds} from "Utils/URL/URLs";
+import {Div} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {colors} from "../../Utils/UI/GlobalStyles";
 import {ChatPanel} from "./NavBar/ChatPanel";
 import {GuidePanel} from "./NavBar/GuidePanel";
@@ -71,18 +67,6 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 						{topLeftOpenPanel == "reputation" && <ReputationPanel/>}
 					</div>
 					<Div ct style={{position: "fixed", left: 0, width: "30%", top: 45, bottom: 0}}>
-						{dbNeedsInit && startURL.GetQueryVar("init") &&
-							<Row>
-								<Button text="Initialize database" onClick={()=>{
-									const boxController = ShowMessageBox({
-										title: "Initialize database?", cancelButton: true,
-										message: `Initialize database content under db-root ${dbVersion}?`,
-										onOK: ()=>{
-											ResetCurrentDBRoot();
-										},
-									});
-								}}/>
-							</Row>}
 						<NotificationsUI/>
 					</Div>
 
@@ -100,7 +84,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
 						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
 						{/* <NavBarPanelButton text="Guide" panel="guide" corner="top-right"/> */}
-						<NavBarPanelButton text={fire.userInfo?.displayName ? fire.userInfo.displayName.match(/(.+?)( |$)/)[1] : "Sign in"} panel="profile" corner="top-right"/>
+						<NavBarPanelButton text={/*graph.userInfo?.displayName ? graph.userInfo.displayName.match(/(.+?)( |$)/)[1] :*/ "Sign in"} panel="profile" corner="top-right"/>
 					</span>
 					<div style={{
 						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",
@@ -152,9 +136,9 @@ export class NavBarPageButton extends BaseComponentPlus(
 						if ([null, "users"].Contains(store.main.database.subpage)) {
 							s.main.database.selectedUserID = null;
 						}
-					} else if (page == "feedback") {
+					} /*else if (page == "feedback") {
 						s.feedback.main.proposals.selectedProposalID = null;
-					} else if (page == "private") {
+					}*/ else if (page == "private") {
 						s.main.private.selectedMapID = null;
 					} else if (page == "public") {
 						s.main.public.selectedMapID = null;

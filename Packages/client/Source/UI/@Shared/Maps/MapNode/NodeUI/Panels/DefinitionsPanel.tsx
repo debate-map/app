@@ -1,7 +1,7 @@
 import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {Link, Observer, ParseSegmentsForPatterns} from "web-vcore";
-import {MapNodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term} from "@debate-map/server-link/Source/Link";
+import {MapNodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term} from "dm_common";
 
 
 import {GetSegmentsForTerms} from "../../NodeUI_Inner/TitlePanel";

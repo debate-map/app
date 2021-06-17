@@ -1,10 +1,10 @@
 import {Column, Row} from "web-vcore/nm/react-vcomponents";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {Timeline} from "@debate-map/server-link/Source/Link";
-import {MeID} from "@debate-map/server-link/Source/Link";
-import {AddTimeline} from "@debate-map/server-link/Source/Link";
-import {TimelineStep} from "@debate-map/server-link/Source/Link";
-import {AddTimelineStep} from "@debate-map/server-link/Source/Link";
+import {Timeline} from "dm_common";
+import {MeID} from "dm_common";
+import {AddTimeline} from "dm_common";
+import {TimelineStep} from "dm_common";
+import {AddTimelineStep} from "dm_common";
 import {TimelineDetailsUI} from "./TimelineDetailsUI";
 
 const defaultIntroMessage = `

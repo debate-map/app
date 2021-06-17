@@ -3,8 +3,8 @@ import {Button, Column, Pre, Row, RowLR, TextInput} from "web-vcore/nm/react-vco
 import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions";
 import {GetUpdates} from "web-vcore";
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
-import {Timeline} from "@debate-map/server-link/Source/Link";
-import {UpdateTimeline} from "@debate-map/server-link/Source/Link";
+import {Timeline} from "dm_common";
+import {UpdateTimeline} from "dm_common";
 
 export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {baseData: Timeline, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Timeline, ui: TimelineDetailsUI)=>void}, {} as { newData: Timeline }) {
 	ComponentWillMountOrReceiveProps(props, forMount) {

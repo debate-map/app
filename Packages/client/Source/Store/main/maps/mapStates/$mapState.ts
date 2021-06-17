@@ -1,7 +1,7 @@
 import {emptyArray, FromJSON, GetValues, ToNumber, emptyArray_forLoading} from "web-vcore/nm/js-vextensions";
 import {O} from "web-vcore";
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {GetNode, Timeline, GetTimeline, GetTimelineStep, GetNodesRevealedInSteps, GetMap, GetTimelineSteps, TimelineStep, GetNodeRevealTimesInSteps} from "@debate-map/server-link/Source/Link";
+import {GetNode, Timeline, GetTimeline, GetTimelineStep, GetNodesRevealedInSteps, GetMap, GetTimelineSteps, TimelineStep, GetNodeRevealTimesInSteps} from "dm_common";
 import {TimelineSubpanel, ShowChangesSinceType} from "./@MapState";
 
 export const GetMapState = StoreAccessor(s=>(mapID: string)=>{

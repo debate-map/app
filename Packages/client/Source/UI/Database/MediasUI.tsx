@@ -8,7 +8,7 @@ import {GetSelectedMedia} from "Store/main/database";
 import {Observer, GetUpdates} from "web-vcore";
 import {runInAction} from "web-vcore/nm/mobx";
 import {E} from "web-vcore/nm/js-vextensions";
-import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMediaData, DeleteMedia} from "@debate-map/server-link/Source/Link";
+import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMediaData, DeleteMedia} from "dm_common";
 import {MediaDetailsUI} from "./Medias/MediaDetailsUI";
 import {ShowAddMediaDialog} from "./Medias/AddMediaDialog";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";

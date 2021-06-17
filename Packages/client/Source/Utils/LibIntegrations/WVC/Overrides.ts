@@ -1,5 +1,5 @@
 import "."; // ensure file stays a module
-import {VWAF_OverrideExport} from "web-vcore";
+//import {VWAF_OverrideExport} from "web-vcore";
 
 /*
 Example contents:

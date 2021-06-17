@@ -4,7 +4,7 @@ import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWit
 import {ES} from "Utils/UI/GlobalStyles";
 import {Fragment} from "react";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern} from "@debate-map/server-link/Source/Link";
+import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern} from "dm_common";
 import {Validate} from "web-vcore/nm/mobx-graphlink";
 import {VDateTime} from "web-vcore";
 import Moment from "web-vcore/nm/moment";

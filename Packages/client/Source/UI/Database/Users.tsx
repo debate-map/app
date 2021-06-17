@@ -7,8 +7,8 @@ import {ES} from "Utils/UI/GlobalStyles";
 import {GetSelectedUser} from "Store/main/database";
 import {ToNumber, E} from "web-vcore/nm/js-vextensions";
 import {UserProfileUI} from "./Users/UserProfile";
-import {GetUsers, GetUser} from "@debate-map/server-link/Source/Link";
-import {User} from "@debate-map/server-link/Source/Link";
+import {GetUsers, GetUser} from "dm_common";
+import {User} from "dm_common";
 
 export const columnWidths = [0.35, 0.15, 0.1, 0.15, 0.25];
 

@@ -1,7 +1,7 @@
 import {O} from "web-vcore";
 import {store} from "Store";
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {GetMap} from "@debate-map/server-link/Source/Link";
+import {GetMap} from "dm_common";
 
 export class PrivatePageState {
 	@O listType = "featured" as "featured" | "all";

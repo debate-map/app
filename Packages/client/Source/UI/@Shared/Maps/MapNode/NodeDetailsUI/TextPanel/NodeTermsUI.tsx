@@ -6,10 +6,10 @@ import {InfoButton, Link, Observer} from "web-vcore";
 import {NodeDetailsUI_SharedProps} from "../../NodeDetailsUI";
 import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";
 import {Validate} from "web-vcore/nm/mobx-graphlink";
-import {GetTerm, GetTermsByForm} from "@debate-map/server-link/Source/Link";
-import {TermAttachment} from "@debate-map/server-link/Source/Link";
-import {Term} from "@debate-map/server-link/Source/Link";
-import {GetUser} from "@debate-map/server-link/Source/Link";
+import {GetTerm, GetTermsByForm} from "dm_common";
+import {TermAttachment} from "dm_common";
+import {Term} from "dm_common";
+import {GetUser} from "dm_common";
 
 @Observer
 export class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
