@@ -1,3 +1,3 @@
-export * from "./Commands.js";
-export * from "./Store.js";
-export * from "./Utils.js";
+export * from "./Commands";
+export * from "./Store";
+export * from "./Utils";

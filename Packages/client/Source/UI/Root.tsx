@@ -20,7 +20,6 @@ import {NavBar} from "../UI/@Shared/NavBar";
 import {GlobalUI} from "../UI/Global";
 import {HomeUI} from "../UI/Home";
 import {MoreUI} from "../UI/More";
-import "../Utils/UI/JQueryExtensions";
 import {GADDemo} from "./@GAD/GAD";
 import {HomeUI_GAD} from "./@GAD/Home_GAD";
 import {NavBar_GAD} from "./@GAD/NavBar_GAD";

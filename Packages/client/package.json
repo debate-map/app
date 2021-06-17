@@ -2,7 +2,7 @@
   "name": "dm_client",
   "private": true,
   "scripts": {
-    "start": "nps"
+    "start": "cd ../.. && npx nps"
   },
   "devDependencies": {
     "@cypress/webpack-preprocessor": "4.1.0",

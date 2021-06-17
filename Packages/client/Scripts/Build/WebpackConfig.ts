@@ -41,9 +41,12 @@ export const webpackConfig = CreateWebpackConfig({
 		{context: resolvePath("node_modules", "@debate-map", "server-link"), test: /@debate-map[/\\]server-link[/\\]Source[/\\].*\.tsx?$/},
 	],*/
 	tsLoaderEntries: [
+		// maybe temp removed (was to fix webpack compile errors in web-vcore ts files)
 		{test: /web-vcore[/\\]Source[/\\].*\.tsx?$/},
+		{test: /web-vcore[/\\]nm[/\\].*\.tsx?$/},
 		{test: /js-vextensions[/\\]Helpers[/\\]@ApplyCETypes\.tsx?$/},
 		// custom
-		{test: /@debate-map[/\\]server-link[/\\]Source[/\\].*\.tsx?$/},
+		{test: /dm_common[/\\]Source[/\\].*\.tsx?$/},
+		//{test: /@debate-map[/\\]server-link[/\\]Source[/\\].*\.tsx?$/},
 	],
 });

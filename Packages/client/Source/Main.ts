@@ -1,15 +1,15 @@
 // "static" imports
 //type __ = typeof import("js-vextensions/Helpers/@ApplyCETypes");
 import "./Utils/PreRunners/Start_0";
-import "babel-polyfill";
-import "webpack-runtime-require";
+//import "babel-polyfill";
+import "web-vcore/nm/webpack-runtime-require";
 import "./Utils/ClassExtensions/CE_General";
 import "./Utils/PreRunners/Start_1";
-import "codemirror";
-import "codemirror/addon/scroll/simplescrollbars";
+import "web-vcore/nm/codemirror";
+import "web-vcore/nm/@opt/codemirror_deep_simplescrollbars";
 import "./Utils/UI/CodeMirrorConfig";
 // needed to fix odd ts issue (where, if first "import" call for library is in wvc, all subsequent imports of it are assumed to be referencing that under-wvc version)
-import "mobx-graphlink";
+import "web-vcore/nm/mobx-graphlink";
 
 import {VURL} from "web-vcore/nm/js-vextensions";
 import {RootState} from "Store";
@@ -76,19 +76,13 @@ if (dbStr) {
 }
 g.DB_SHORT = {development: "dev", production: "prod"}[DB] || DB;
 
-// let {version} = require("../../../package.json");
-// Note: Use two BakedConfig files, so that dev-server can continue running, with its own baked-config data, even while prod-deploy occurs.
-// Note: Don't reference the BakedConfig files from anywhere but here (in runtime code) -- because we want to be able to override it, below.
-// let {version, dbVersion, firebaseConfig} = DEV ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
-const {version, firebaseConfig} = DB == "development" ? require("./BakedConfig_Dev") : require("./BakedConfig_Prod");
-
 let dbVersion = 12;
 const dbVersionStr = AsNotNull(startURL.GetQueryVar("dbVersion")) || storeTemp.main?.dbVersionOverride;
 if (dbVersionStr) {
 	dbVersion = parseInt(dbVersionStr);
 	console.log(`Using dbVersion: ${dbVersion}`);
 }
-export {version, dbVersion, firebaseConfig};
+export {dbVersion};
 // G({version, dbVersion, firebaseConfig}); declare global { var version: string, dbVersion: number, firebaseConfig; }
 
 // hot-reloading

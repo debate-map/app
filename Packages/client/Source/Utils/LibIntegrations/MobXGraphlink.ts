@@ -1,4 +1,4 @@
-import "mobx"; // import mobx before we declare the module below, otherwise vscode auto-importer gets confused at path to mobx
+import "web-vcore/nm/mobx"; // import mobx before we declare the module below, otherwise vscode auto-importer gets confused at path to mobx
 import {Graphlink, SetDefaultGraphOptions} from "web-vcore/nm/mobx-graphlink";
 import {RootState, store} from "../../Store";
 import {GraphDBShape} from "dm_common/Source/Store/db";

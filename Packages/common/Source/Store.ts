@@ -5,7 +5,7 @@ export * from "./Store/db/media/@Media";
 export * from "./Store/db/layers";
 export * from "./Store/db/layers/@Layer";
 export * from "./Store/db/mapNodeEditTimes";
-export * from "./Store/db/maps.js";
+export * from "./Store/db/maps";
 export * from "./Store/db/maps/$map";
 export * from "./Store/db/maps/@Map";
 export * from "./Store/db/nodePhrasings";
