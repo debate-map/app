@@ -1,13 +1,11 @@
-import {GetSelectedProposalID} from "firebase-feedback";
 import {Assert, VURL, ModifyString} from "web-vcore/nm/js-vextensions";
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import ReactGA from "react-ga";
 import {RootState} from "Store";
 import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";
 import {GetSelectedMediaID, GetSelectedTermID, GetSelectedUserID} from "Store/main/database";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {MaybeLog, Page} from "web-vcore";
-import {GetMap, MapNodeL2, GetNodeDisplayText, GetNodeL2} from "@debate-map/server-link/Source/Link";
+import {GetMap, MapNodeL2, GetNodeDisplayText, GetNodeL2} from "dm_common";
 
 // for subpages, each page's first one is the default
 export const pageTree = new Page({}, {
@@ -141,14 +139,14 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			result.push(new ACTThreadSelect({ id: threadID }));
 		} */
 
-		if (page == "feedback") {
+		/*if (page == "feedback") {
 			if (subpage == "proposals") {
 				const idStr = url.pathNodes[2];
 				const idStrMatch = idStr && idStr.match(/([A-Za-z0-9_-]+)$/);
 				const proposalID = idStrMatch ? idStrMatch[1] : null;
 				store.feedback.main.proposals.selectedProposalID = proposalID!;
 			}
-		}
+		}*/
 
 		let mapID: string|n;
 		if (page == "database") {
@@ -291,10 +289,10 @@ export const GetNewURL = StoreAccessor(s=>(includeMapViewStr = true)=>{
 		}
 	}
 
-	if (page == "feedback") {
+	/*if (page == "feedback") {
 		const proposalID = GetSelectedProposalID();
 		if (proposalID) newURL.pathNodes.push(`${proposalID}`);
-	}
+	}*/
 
 	/* if (page == 'forum') {
 		const subforumID = GetSelectedSubforumID();
@@ -375,10 +373,10 @@ export function DoesURLChangeCountAsPageChange(oldURL: VURL, newURL: VURL) {
 
 export function RecordPageView(url: VURL) {
 	// let url = window.location.pathname;
-	if (PROD) {
+	/*if (PROD) {
 		// todo: ms if react-ga is not initialized yet, we buffer up these commands, then run them once it is initialized
 		ReactGA.set({page: url.toString({domain: false})});
 		ReactGA.pageview(url.toString({domain: false}) || "/");
-	}
+	}*/
 	MaybeLog(a=>a.pageViews, ()=>`Page-view: ${url}`);
 }

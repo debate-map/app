@@ -1,7 +1,7 @@
 import {UserEdit} from "../CommandMacros";
 import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {Media} from "../Store/db/media/@Media";
-import {GetMedia, IsUserCreatorOrMod, GetShare, Share} from "../Commands";
+import {GetMedia, IsUserCreatorOrMod, GetShare, Share} from "../Store";
 import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 @UserEdit

@@ -2,7 +2,7 @@ import {CE} from "web-vcore/nm/js-vextensions";
 import {AddSchema, AssertV, AssertValidate, Command, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {Media} from "../Store/db/media/@Media";
-import {GetMedia, Share, GetShare} from "../Commands";
+import {GetMedia, Share, GetShare} from "../Store";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 type MainType = Share;

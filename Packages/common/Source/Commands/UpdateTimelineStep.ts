@@ -5,7 +5,7 @@ import {TimelineStep} from "../Store/db/timelineSteps/@TimelineStep";
 import {GetTimelineStep} from "../Store/db/timelineSteps";
 import {CE} from "web-vcore/nm/js-vextensions";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts";
-import {GetTimeline} from "../Commands";
+import {GetTimeline} from "..";
 
 AddSchema("UpdateTimelineStep_payload", ["TimelineStep"], ()=>({
 	properties: {

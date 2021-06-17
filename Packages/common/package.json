@@ -2,6 +2,8 @@
 	"name": "dm_common",
 	"private": true,
 	"type": "module",
+	"main": "./Source/index.ts",
+	"module": "./Source/index.ts",
 	"scripts": {
 		"start": "nps"
 	}

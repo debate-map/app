@@ -3,7 +3,7 @@ import {UserEdit} from "../CommandMacros";
 import {Layer} from "../Store/db/layers/@Layer";
 import {UserMapInfoSet} from "../Store/db/userMapInfo/@UserMapInfo";
 import {GetLayer, ForDeleteLayer_GetError} from "../Store/db/layers";
-import {IsUserCreatorOrMod} from "../Commands";
+import {IsUserCreatorOrMod} from "../Store";
 import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 @UserEdit
