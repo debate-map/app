@@ -1,4 +1,4 @@
-import {Collection_Closed, Collection} from "web-vcore/nm/mobx-graphlink";
+import {Collection_Closed, Collection, Col} from "web-vcore/nm/mobx-graphlink";
 import {GeneralData} from "./db/general";
 import {Media} from "./db/media/@Media";
 import {Layer} from "./db/layers/@Layer";
@@ -24,33 +24,33 @@ declare module "mobx-graphlink/Dist/UserTypes" {
 	interface DBShape extends GraphDBShape {}
 }
 
-export interface GraphDBShape {
-	general: Collection_Closed<{data: GeneralData}>;
-	modules: Collection_Closed<{
+export class GraphDBShape {
+	//general: Collection_Closed<{data: GeneralData}>;
+	/*modules: Collection_Closed<{
 		// feedback: FeedbackDBShape;
-	}>;
+	}>;*/
 
-	medias: Collection<Media>;
-	layers: Collection<Layer>;
-	maps: Collection<Map>;
-	mapNodeEditTimes: Collection<NodeEditTimes>;
-	nodes: Collection<MapNode>;
-	// nodeExtras: Collection<any>;
-	nodeRatings: Collection<Rating>;
-	nodeRevisions: Collection<MapNodeRevision>;
-	// nodeStats: Collection<MapNodeStats>;
-	// nodeViewers: Collection<ViewerSet>; // removed due to privacy concerns
-	nodePhrasings: Collection<MapNodePhrasing>;
-	nodeTags: Collection<MapNodeTag>;
-	shares: Collection<Share>;
-	terms: Collection<Term>;
+	@Col("Media") medias: Collection<Media>;
+	@Col("Layer") layers: Collection<Layer>;
+	@Col("Map") maps: Collection<Map>;
+	@Col("NodeEditTimes") mapNodeEditTimes: Collection<NodeEditTimes>;
+	@Col("MapNode") nodes: Collection<MapNode>;
+	//nodeExtras: Collection<any>;
+	@Col("Rating") nodeRatings: Collection<Rating>;
+	@Col("MapNodeRevision") nodeRevisions: Collection<MapNodeRevision>;
+	//nodeStats: Collection<MapNodeStats>;
+	//nodeViewers: Collection<ViewerSet>; // removed due to privacy concerns
+	@Col("MapNodePhrasing") nodePhrasings: Collection<MapNodePhrasing>;
+	@Col("MapNodeTag") nodeTags: Collection<MapNodeTag>;
+	@Col("Share") shares: Collection<Share>;
+	@Col("Term") terms: Collection<Term>;
 	//termNames: Collection<any>;
-	timelines: Collection<Timeline>;
-	timelineSteps: Collection<TimelineStep>;
-	users: Collection<User>;
-	users_private: Collection<User_Private>;
-	userMapInfo: Collection<UserMapInfoSet>; // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
-	// userViewedNodes: Collection<ViewedNodeSet>; // removed due to privacy concerns
+	@Col("Timeline") timelines: Collection<Timeline>;
+	@Col("TimelineStep") timelineSteps: Collection<TimelineStep>;
+	@Col("User") users: Collection<User>;
+	@Col("User_Private") users_private: Collection<User_Private>;
+	@Col("UserMapInfoSet") userMapInfo: Collection<UserMapInfoSet>; // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
+	//userViewedNodes: Collection<ViewedNodeSet>; // removed due to privacy concerns
 }
 
 /* export interface FirebaseDBShape {

@@ -1,8 +1,7 @@
 import {CreateWebpackConfig} from "web-vcore/Scripts/Build/WebpackConfig";
-import fs from "fs";
-import path from "path";
 import {config} from "../Config";
 import {npmPatch_replacerConfig} from "./NPMPatches";
+import JsonpTemplatePlugin from "web-vcore/node_modules/webpack/lib/web/JsonpTemplatePlugin";
 
 /*function resolvePath(...segmentsFromRoot: string[]) {
 	//return fs.realpathSync(path.resolve(config.path_base, ...segmentsFromRoot));

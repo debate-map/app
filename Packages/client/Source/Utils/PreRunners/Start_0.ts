@@ -8,8 +8,8 @@ export const fakeExport = null; // fake/empty export, so this module is correctl
 // var g = window as any;
 declare global { const g; } window['g'] = window;
 
-var __webpack_require__;
-g.webpackData = __webpack_require__;
+/*var __webpack_require__;
+g.webpackData = __webpack_require__;*/
 
 const isBot = /bot|crawler|spider|robot|crawling|google|bing|duckduckgo|msn|slurp|yandex|baidu|aolbuild|teoma/i.test(navigator.userAgent);
 // declare global { const isBot: string; } G({isBot});

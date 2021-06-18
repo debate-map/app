@@ -23,8 +23,8 @@ export function JustBeforeInitLibs(listener: ()=>any) { JustBeforeInitLibs_liste
 export const JustBeforeUI_listeners = [];
 export function JustBeforeUI(listener: ()=>any) { JustBeforeUI_listeners.push(listener); }
 
-declare const __webpack_require__;
-g.webpackData = __webpack_require__;
+/*declare const __webpack_require__;
+g.webpackData = __webpack_require__;*/
 
 const startURL = VURL.Parse(window.location.href);
 declare global { export const startURL: VURL; } G({startURL});
