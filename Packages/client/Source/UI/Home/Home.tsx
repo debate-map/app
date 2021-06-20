@@ -1,8 +1,6 @@
-import {E} from "web-vcore/nm/js-vextensions";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {VReactMarkdown, PageContainer, Link} from "web-vcore";
-import {styles} from "../../Utils/UI/GlobalStyles";
 import React from "react";
+import {Link, PageContainer, List, P} from "web-vcore";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
 
 const red = "rgba(255,0,0,.7)";
 const orange = "rgba(255,128,0,.7)";
@@ -27,24 +25,24 @@ export class HomeUI2 extends BaseComponent<{}, {}> {
 	render() {
 		return (
 			<PageContainer scrollable={true}>
-				<article>
-					<p>The Debate Map project is a web platform aimed at improving the efficiency of discussion and debate.
-					It's crowd-sourced and open-source, and welcomes reader contributions.</p>
+				<article className="selectable">
+					<P>The Debate Map project is a web platform aimed at improving the efficiency of discussion and debate.
+					It's crowd-sourced and open-source, and welcomes reader contributions.</P>
 
-					<p>Its primary improvements are (in short):
-					<ul>
-						<li>Restructuring dialogue to make use of both dimensions.</li>
-						<li>Breaking down lines of reasoning into single-sentence "nodes".</li>
-						<li>Providing rich tools that operate on those nodes -- such as rating, tagging, statistical analysis, and belief-tree sharing and comparison.</li>
-					</ul></p>
+					<P>Its primary improvements are (in short):
+					<List items={[
+						`Restructuring dialogue to make use of both dimensions.`,
+						`Breaking down lines of reasoning into single-sentence "nodes".`,
+						`Providing rich tools that operate on those nodes -- such as rating, tagging, statistical analysis, and belief-tree sharing and comparison.`,
+					]}/></P>
 
-					<p>Here are some demo maps:
-					<ul>
-						<li><Link text="What shape is the earth?" to="/private/what-shape-is-the-earth-demo.1xSIqiEQR7u4Xn88Q9_t_g"/></li>
-					</ul></p>
+					<P>Here are some demo maps:
+					<List items={[
+						<Link text="What shape is the earth?" to="/private/what-shape-is-the-earth-demo.1xSIqiEQR7u4Xn88Q9_t_g"/>
+					]}/></P>
 
-					<p>The maps are constructed from "claims" (blue), and "arguments" (green and red) which support/oppose those claims.
-					This structure cuts down on reading time, and lets us focus on the underlying chains of reasoning instead of parsing statement meanings and connections.</p>
+					<P>The maps are constructed from "claims" (blue), and "arguments" (green and red) which support/oppose those claims.
+					This structure cuts down on reading time, and lets us focus on the underlying chains of reasoning instead of parsing statement meanings and connections.</P>
 
 					<h2>Advantages</h2>
 
@@ -90,40 +88,40 @@ export class HomeUI2 extends BaseComponent<{}, {}> {
 
 					<h3>Fine-grained statistical information</h3>
 
-					<p>With:
-					<ul>
-						<li>Beliefs and arguments broken down into their constituent parts.</li>
-						<li>Rating and tagging of each piece by users.</li>
-						<li>Filtering of the data based on user self-tagging (and other properties).</li>
-					</ul>
-					it becomes possible to do very fine-grained studies of public opinion.</p>
+					<P>With:
+					<List items={[
+						`Beliefs and arguments broken down into their constituent parts.`,
+						`Rating and tagging of each piece by users.`,
+						`Filtering of the data based on user self-tagging (and other properties).`,
+					]}/>
+					it becomes possible to do very fine-grained studies of public opinion.</P>
 
-					<p>For example, one can now easily answer questions such as:
-					<ul>
-						<li>How do flat-earthers reconcile the time-zone differences between east and west hemispheres?</li>
-						<li>What president would have been elected, if the candidates were voted on by those living in country X?</li>
-						<li>Is there any correlation between one's political group, and their preference in mobile phone operating systems?</li>
-						<li>How much has support for legal marijuana changed over the past 5 years? And what changes in arguments and argument perceptions correspond with this?</li>
-					</ul></p>
+					<P>For example, one can now easily answer questions such as:
+					<List items={[
+						`How do flat-earthers reconcile the time-zone differences between east and west hemispheres?`,
+						`What president would have been elected, if the candidates were voted on by those living in country X?`,
+						`Is there any correlation between one's political group, and their preference in mobile phone operating systems?`,
+						`How much has support for legal marijuana changed over the past 5 years? And what changes in arguments and argument perceptions correspond with this?`,
+					]}/></P>
 
 					<h3>Detailed worldview sharing</h3>
 
-					<p>By acting as a global, crowd-sourced tree of theses, communicating your view of the world becomes much faster. Instead of writing instance-specific text
-						for each conversation, you can map your views once, and simply form a "remix" of your personal belief tree that is tailored for the conversation at hand.</p>
+					<P>By acting as a global, crowd-sourced tree of theses, communicating your view of the world becomes much faster. Instead of writing instance-specific text
+						for each conversation, you can map your views once, and simply form a "remix" of your personal belief tree that is tailored for the conversation at hand.</P>
 
-					<p>The conversation can then proceed from that point, with the reasoning behind your views now known and easily referencable in the background.</p>
+					<P>The conversation can then proceed from that point, with the reasoning behind your views now known and easily referencable in the background.</P>
 
 					<h3>Assisted worldview examination</h3>
 
-					<p>Engaging with a tool that operates on percentages, numbers, and weights makes self-accountability easier to achieve:
+					<P>Engaging with a tool that operates on percentages, numbers, and weights makes self-accountability easier to achieve:
 						by entering numbers, one is declaring to himself how much he considers his beliefs to be supported, and by what means.
-					This allows one to then do tool-based analysis on his views, and more easily spot areas of possible bias or unjustified conclusions.</p>
+					This allows one to then do tool-based analysis on his views, and more easily spot areas of possible bias or unjustified conclusions.</P>
 
-					<p>One can then proceed to look more closely at those areas, examining the pool of existing evidence and reasoning,
-						and referencing statistics on how the rest of the population considers each piece along the way.</p>
+					<P>One can then proceed to look more closely at those areas, examining the pool of existing evidence and reasoning,
+						and referencing statistics on how the rest of the population considers each piece along the way.</P>
 
-					<p>More info on open-source projects: <Link to="https://opensource.com/resources/what-open-source"/><br/>
-					This project's GitHub repo (source code): <Link to="https://github.com/debate-map/app"/></p>
+					<P>More info on open-source projects: <Link to="https://opensource.com/resources/what-open-source"/><br/>
+					This project's GitHub repo (source code): <Link to="https://github.com/debate-map/app"/></P>
 				</article>
 			</PageContainer>
 		);
