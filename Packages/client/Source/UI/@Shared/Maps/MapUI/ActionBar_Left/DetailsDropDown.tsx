@@ -118,7 +118,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 										message: `Delete the map "${map.name}"?`,
 										onOK: async()=>{
 											await new DeleteMap({mapID: map._key}).Run();
-											runInAction("DeleteMap.onDone", ()=>store.main.public.selectedMapID = null);
+											runInAction("DeleteMap.onDone", ()=>store.main.debates.selectedMapID = null);
 										},
 									});
 								}}/>

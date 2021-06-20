@@ -27,8 +27,7 @@ import {DatabaseUI} from "./Database";
 import {UserProfileUI} from "./Database/Users/UserProfile";
 import {FeedbackUI} from "./Feedback";
 import {ForumUI} from "./Forum";
-import {PrivateUI} from "./Private";
-import {PublicUI} from "./Public";
+import {DebatesUI} from "./Debates";
 import {SocialUI} from "./Social";
 import {GetNodeL3, GetNodeDisplayText, IsPremiseOfSinglePremiseArgument} from "dm_common";
 import {Polarity} from "dm_common";
@@ -308,8 +307,7 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 						{page == "home" && !GADDemo && <HomeUI/>}
 						{page == "home" && GADDemo && <HomeUI_GAD/>}
 						{page == "social" && <SocialUI/>}
-						{page == "private" && <PrivateUI/>}
-						{page == "public" && <PublicUI/>}
+						{page == "debates" && <DebatesUI/>}
 						{page == "global" && <GlobalUI/>}
 
 						{/* <Route path='/search'><SearchUI/></Route>

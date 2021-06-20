@@ -28,9 +28,8 @@ export const pageTree = new Page({}, {
 		home: new Page(),
 		about: new Page(),
 	}),
-	//social
-	private: new Page({simpleSubpages: false}),
-	public: new Page({simpleSubpages: false}),
+	social: new Page(),
+	debates: new Page({simpleSubpages: false}),
 	global: new Page({}, {
 		map: new Page(),
 	}),
@@ -159,16 +158,12 @@ export function GetLoadActionFuncForURL(url: VURL) {
 			} else if (subpage == "media" && subpageInURL) {
 				store.main.database.selectedMediaID = entryID!;
 			}
-		} else if (page == "private" || page == "public") {
+		} else if (page == "debates") {
 			const urlStr = url.pathNodes[1];
 			const match = urlStr && urlStr.match(/([A-Za-z0-9_-]+)$/);
 			mapID = match ? match[1] : null;
 
-			if (page == "private") {
-				store.main.private.selectedMapID = mapID!;
-			} else {
-				store.main.public.selectedMapID = mapID!;
-			}
+			store.main.debates.selectedMapID = mapID!;
 		} else if (page == "global") {
 			/* if (subpage == 'map') {
 				mapID = globalMapID;
@@ -304,16 +299,8 @@ export const GetNewURL = StoreAccessor(s=>(includeMapViewStr = true)=>{
 	} */
 
 	let mapID: string|n;
-	if (page == "private") {
-		mapID = s.main.private.selectedMapID;
-		if (mapID) {
-			// newURL.pathNodes.push(mapID+"");
-			const urlStr = GetCrawlerURLStrForMap(mapID);
-			newURL.pathNodes.push(urlStr);
-		}
-	}
-	if (page == "public") {
-		mapID = s.main.public.selectedMapID;
+	if (page == "debates") {
+		mapID = s.main.debates.selectedMapID;
 		if (mapID) {
 			// newURL.pathNodes.push(mapID+"");
 			const urlStr = GetCrawlerURLStrForMap(mapID);

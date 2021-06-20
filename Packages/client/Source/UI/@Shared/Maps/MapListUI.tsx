@@ -4,11 +4,10 @@ import {Button, Column, Row, Select} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus, UseCallback} from "web-vcore/nm/react-vextensions";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
 import {store} from "Store";
-import {GetSelectedPrivateMap} from "Store/main/private";
-import {GetSelectedPublicMap} from "Store/main/public";
+import {GetSelectedDebatesPageMap} from "Store/main/debates";
 import {ES} from "Utils/UI/GlobalStyles";
 import {HSLA, Observer, PageContainer} from "web-vcore";
-import {MapType, MeID, GetUserPermissionGroups, CanGetBasicPermissions, GetMaps_Private, GetMaps_Public, MapVisibility, IsUserCreatorOrMod} from "dm_common";
+import {MapType, MeID, GetUserPermissionGroups, CanGetBasicPermissions, GetMaps_Private, GetMaps_Public, MapVisibility, IsUserCreatorOrMod, GetMaps} from "dm_common";
 import {GADDemo} from "../../@GAD/GAD";
 import {ShowAddMapDialog} from "../../@Shared/Maps/AddMapDialog";
 import {MapEntryUI} from "../../@Shared/Maps/MapEntryUI";
@@ -19,13 +18,14 @@ import {ShowSignInPopup} from "../../@Shared/NavBar/UserPanel";
 export const columnWidths = [0.64, 0.06, 0.12, 0.18];
 
 @Observer
-export class MapListUI extends BaseComponentPlus({} as {type: MapType}, {}) {
+export class MapListUI extends BaseComponentPlus({}, {}) {
 	render() {
-		const {type} = this.props;
+		//const {type} = this.props;
 		const userID = MeID();
 		//const permissions = GetUserPermissionGroups(userID);
-		const storeNode = store.main[type == MapType.Private ? "private" : "public"];
-		const maps_allOfType = (type == MapType.Private ? GetMaps_Private(true) : GetMaps_Public(true));
+		const storeNode = store.main.debates;
+		//const maps_allOfType = (type == MapType.Private ? GetMaps_Private(true) : GetMaps_Public(true));
+		const maps_allOfType = GetMaps(true).filter(a=>a);
 		const maps_visible = maps_allOfType.filter(map=>{
 			if (map.visibility == MapVisibility.Unlisted) {
 				const creatorOrMod = IsUserCreatorOrMod(MeID(), map);
@@ -38,7 +38,7 @@ export class MapListUI extends BaseComponentPlus({} as {type: MapType}, {}) {
 		const maps_featured = maps_visible.filter(a=>a.featured);
 		const maps_toShow = storeNode.listType == "featured" ? maps_featured : maps_visible;
 
-		const selectedMap = type == MapType.Private ? GetSelectedPrivateMap() : GetSelectedPublicMap();
+		const selectedMap = GetSelectedDebatesPageMap();
 		if (selectedMap) {
 			return (
 				<PageContainer preset="full" style={{margin: 0}}>
@@ -63,8 +63,8 @@ export class MapListUI extends BaseComponentPlus({} as {type: MapType}, {}) {
 						}}/>
 						<Button text="Add map" ml="auto" enabled={CanGetBasicPermissions(MeID())} onClick={UseCallback(()=>{
 							if (userID == null) return void ShowSignInPopup();
-							ShowAddMapDialog(userID, type);
-						}, [type, userID])}/>
+							ShowAddMapDialog(userID);
+						}, [userID])}/>
 					</Row>
 					<Row style={{height: 40, padding: 10}}>
 						<span style={{flex: columnWidths[0], fontWeight: 500, fontSize: 17}}>Title</span>

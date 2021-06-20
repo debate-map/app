@@ -1,22 +1,17 @@
-import {immerable} from "web-vcore/nm/immer";
-import {Global} from "web-vcore/nm/js-vextensions";
-import {observable, runInAction} from "web-vcore/nm/mobx";
-import {ignore} from "web-vcore/nm/mobx-sync";
-import {O, StoreAction} from "web-vcore";
+import {globalMapID} from "dm_common";
 import {rootPageDefaultChilds} from "Utils/URL/URLs";
+import {O} from "web-vcore";
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {store} from "Store";
-import {globalMapID, Share} from "dm_common";
+import {ignore} from "web-vcore/nm/mobx-sync";
+import {NotificationMessage} from "./main/@NotificationMessage";
 import {DatabaseState} from "./main/database";
-import {PublicPageState} from "./main/public";
-import {MapState} from "./main/maps/mapStates/@MapState";
-import {PrivatePageState} from "./main/private";
+import {DebatesPageState} from "./main/debates";
+import {MapsState} from "./main/maps";
 import {RatingUIState} from "./main/ratingUI";
 import {SearchState} from "./main/search";
-import {MapsState} from "./main/maps";
-import {TimelinesState} from "./main/timelines";
-import {NotificationMessage} from "./main/@NotificationMessage";
 import {ShareUIState} from "./main/shareUI";
+import {SocialPageState} from "./main/social";
+import {TimelinesState} from "./main/timelines";
 
 export class MainState {
 	// [immerable] = true;
@@ -47,9 +42,8 @@ export class MainState {
 	// forum: Forum;
 	@O more = {} as {subpage: string};
 	@O home = {} as {subpage: string};
-	// @SocialStateM social: SocialState;
-	@O private = new PrivatePageState();
-	@O public = new PublicPageState();
+	@O social = new SocialPageState();
+	@O debates = new DebatesPageState();
 	@O global = {} as {subpage: string};
 
 	@O search = new SearchState();
@@ -74,8 +68,7 @@ export const GetOpenMapID = StoreAccessor(s=>()=>{
 	// return State(a=>a.main.openMap);
 	const {page} = s.main;
 	// if (page == 'home') return demoMap._id;
-	if (page == "private") return s.main.private.selectedMapID;
-	if (page == "public") return s.main.public.selectedMapID;
+	if (page == "debates") return s.main.debates.selectedMapID;
 	if (page == "global") return globalMapID;
 	return null;
 });

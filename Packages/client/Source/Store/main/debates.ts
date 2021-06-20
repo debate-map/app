@@ -1,16 +1,15 @@
 import {O} from "web-vcore";
-import {store} from "Store";
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetMap} from "dm_common";
 
-export class PrivatePageState {
+export class DebatesPageState {
 	@O listType = "featured" as "featured" | "all";
 	@O selectedMapID: string;
 }
 
-export const GetSelectedPrivateMap = StoreAccessor(s=>()=>{
-	const selectedID = store.main.private.selectedMapID;
+export const GetSelectedDebatesPageMap = StoreAccessor(s=>()=>{
+	const selectedID = s.main.debates.selectedMapID;
 	// return GetData(`maps/${selectedID}`);
-	// return (GetMapsOfType(MapType.Personal) || []).find(a=>a._id == selectedID);
+	// return (GetMapsOfType(MapType.Debate) || []).find(a=>a._id == selectedID);
 	return GetMap(selectedID);
 });

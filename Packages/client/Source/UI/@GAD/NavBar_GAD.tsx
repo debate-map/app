@@ -55,9 +55,9 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 					{GADDemo_2020 &&
 					<span style={{margin: "0 auto", paddingLeft: 100}}>
 						<NavBarPageButton page="home" text="Home"/>
-						<NavBarPageButton page="private" text="Debate" actionFunc={s=>{
-							s.main.page = "private";
-							s.main.private.selectedMapID = "a4znL3UZTki9C66mnvsFow";
+						<NavBarPageButton page="debates" text="Debate" actionFunc={s=>{
+							s.main.page = "debates";
+							s.main.debates.selectedMapID = "a4znL3UZTki9C66mnvsFow";
 						}}/>
 					</span>}
 
@@ -148,10 +148,8 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 					//root.main[currentPage].subpage = null;
 					s.main[currentPage].subpage = rootPageDefaultChilds[currentPage];
 
-					if (page == "private") {
-						s.main.private.selectedMapID = null;
-					} else if (page == "public") {
-						s.main.public.selectedMapID = null;
+					if (page == "debates") {
+						s.main.debates.selectedMapID = null;
 					}
 				}
 			}

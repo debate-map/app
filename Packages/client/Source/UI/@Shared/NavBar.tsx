@@ -76,8 +76,8 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 						{/* <NavBarButton page="forum" text="Forum"/> */}
 						<NavBarPageButton page="more" text="More"/>
 						<NavBarPageButton page="home" text="Debate Map" style={{margin: "0 auto", textAlign: "center", fontSize: 23}}/>
-						<NavBarPageButton page="private" text="Private"/>
-						<NavBarPageButton page="public" text="Public"/>
+						<NavBarPageButton page="social" text="Social"/>
+						<NavBarPageButton page="debates" text="Debates"/>
 						<NavBarPageButton page="global" text="Global"/>
 					</span>
 
@@ -138,10 +138,8 @@ export class NavBarPageButton extends BaseComponentPlus(
 						}
 					} /*else if (page == "feedback") {
 						s.feedback.main.proposals.selectedProposalID = null;
-					}*/ else if (page == "private") {
-						s.main.private.selectedMapID = null;
-					} else if (page == "public") {
-						s.main.public.selectedMapID = null;
+					}*/ else if (page == "debates") {
+						s.main.debates.selectedMapID = null;
 					}
 				}
 			}

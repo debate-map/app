@@ -8,7 +8,7 @@ import {AddUpgradeFunc} from "../../Admin";
 
 const newVersion = 12;
 AddUpgradeFunc(newVersion, async(oldData, markProgress)=>{
-	const data = Clone(oldData) as GraphDBShape;
+	const data = Clone(oldData) as any;
 
 	// clear outdated data
 	// ==========

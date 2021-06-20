@@ -6,7 +6,8 @@ import {MeID} from "dm_common";
 import {AddMap} from "dm_common";
 import {MapDetailsUI} from "./MapDetailsUI";
 
-export function ShowAddMapDialog(userID: string, type: MapType) {
+export function ShowAddMapDialog(userID: string) {
+	const type = MapType.Public as MapType; // hard-coded for now
 	let newMap = new Map({
 		name: "",
 		type,

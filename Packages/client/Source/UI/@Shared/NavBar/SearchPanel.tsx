@@ -298,14 +298,11 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 								} else {
 									if (mapRootNode_map == null) return; // still loading
 									runInAction("SearchResultRow.OpenContainingMap", ()=>{
-										if (mapRootNode_map.type == MapType.Private) {
-											store.main.page = "private";
-											store.main.private.selectedMapID = mapRootNode_map._key;
-										} else if (mapRootNode_map.type == MapType.Public) {
-											store.main.page = "public";
-											store.main.public.selectedMapID = mapRootNode_map._key;
-										} else {
+										if (mapRootNode_map.type != MapType.Global) {
 											store.main.page = "global";
+										} else {
+											store.main.page = "debates";
+											store.main.debates.selectedMapID = mapRootNode_map._key;
 										}
 									});
 								}
