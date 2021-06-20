@@ -70,7 +70,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 						<NotificationsUI/>
 					</Div>
 
-					<span style={{margin: "0 auto", paddingRight: 24}}>
+					<span style={{margin: "0 auto", paddingRight: 20}}>
 						<NavBarPageButton page="database" text="Database"/>
 						<NavBarPageButton page="feedback" text="Feedback"/>
 						{/* <NavBarButton page="forum" text="Forum"/> */}

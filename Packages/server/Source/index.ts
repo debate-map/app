@@ -7,6 +7,7 @@ const makePluginHook = postgraphile_["makePluginHook"] as typeof import("postgra
 import {GeneratePatchesPlugin} from "@pg-lq/postgraphile-plugin";
 
 import {createRequire} from "module";
+import {AuthenticationPlugin} from "./Authentication";
 const require = createRequire(import.meta.url);
 
 //program.option("-v, --variant <type>", "Which server variant to use (base, patches)");
@@ -18,7 +19,7 @@ export const variant = launchOpts.variant;
 const app = express();
 
 const dbURL = process.env.DATABASE_URL || `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@localhost:5432/game-dive`;
-const dbPort = process.env.PORT || 3110 as number;
+const dbPort = process.env.PORT || 3105 as number;
 
 const pluginHook = makePluginHook([
 	variant == "patches" && GeneratePatchesPlugin,
@@ -39,6 +40,7 @@ app.use(
 				require("@graphile-contrib/pg-simplify-inflector"),
 				require("@graphile/subscriptions-lds").default,
 				require("postgraphile-plugin-connection-filter"),
+				AuthenticationPlugin,
 			],
 			dynamicJson: true,
 			live: true,

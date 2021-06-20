@@ -42,7 +42,9 @@ const config = {
 			//"iterall",
 		],
 		external: builtinModules.concat(
-			"express", "postgraphile", "commander", "graphile-utils",
+			"express", "postgraphile", "commander",
+			"graphile-utils",
+			//"pg-pool", "pg-native",
 			"graphql",
 			"@n1ru4l/graphql-live-query-patch",
 			"iterall",
