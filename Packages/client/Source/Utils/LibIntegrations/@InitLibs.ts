@@ -4,6 +4,7 @@ import {InitReactJS} from "./ReactJS";
 import {InitSentry} from "./Sentry";
 import {InitReactVComponents} from "./ReactVComponents";
 import {InitGraphlink} from "./MobXGraphlink";
+import {InitPGLink} from "./PGLink";
 
 // helpers for exposing things (making them easier to access in console/dev-tools)
 function ExposeGlobals() {
@@ -22,6 +23,7 @@ function ExposeModuleExports_Final() {
 }
 
 export function InitLibs() {
+	InitPGLink();
 	//InitFirebase();
 	InitWVC();
 	InitGraphlink(); // init this early, so we can use mobx-graphlink's DBPath() for the later modules (eg. graphql-feedback)
