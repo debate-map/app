@@ -83,5 +83,6 @@ Object.assign(scripts, {
 function GetStartServerCommand() {
 	/*const variantPath = serverVariantPaths[server];
 	return `node ${variantPath}`;*/
-	return `node ./Packages/server/Build/esm/Source/index.js`;
+	//return `node ./Packages/server/Build/esm/Source/index.js`;
+	return `cd Packages/server && node ./Build/esm/Source/index.js`;
 }

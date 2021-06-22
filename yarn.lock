@@ -2053,7 +2053,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express@npm:^4.17.12":
+"@types/express@npm:*, @types/express@npm:^4.17.12":
   version: 4.17.12
   resolution: "@types/express@npm:4.17.12"
   dependencies:
@@ -2176,6 +2176,15 @@ __metadata:
   version: 4.0.0
   resolution: "@types/parse-json@npm:4.0.0"
   checksum: 4a8f720afac47b474d3f2eece312340e72bc31bc9561cda37b596ce2ed218c0099765d302625bb67d659a8452a1f93d514f4863c11c7ebaf65430428687dc426
+  languageName: node
+  linkType: hard
+
+"@types/passport@npm:^1.0.6":
+  version: 1.0.6
+  resolution: "@types/passport@npm:1.0.6"
+  dependencies:
+    "@types/express": "*"
+  checksum: 6d6a404e3ad0014f4724e0c48f213f3a2df6fc95d68ffabdbe619203e866e475cc0e76776a6833345bb0801dacf3ef1b6d29ef40c9da6ed1ea60a566ffbc4b2d
   languageName: node
   linkType: hard
 
@@ -3358,6 +3367,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"base64url@npm:3.x.x":
+  version: 3.0.1
+  resolution: "base64url@npm:3.0.1"
+  checksum: e7c3424af4c711e1fbfe6b6e7e3976af684a5a080aa7c17a3d1fd375a029ff5f831ada40223571a8032d7c45f91d48266a9c367467a5f0c995cfb69de90cbdd3
+  languageName: node
+  linkType: hard
+
 "base@npm:^0.11.1":
   version: 0.11.2
   resolution: "base@npm:0.11.2"
@@ -4289,6 +4305,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cookie-parser@npm:^1.4.5":
+  version: 1.4.5
+  resolution: "cookie-parser@npm:1.4.5"
+  dependencies:
+    cookie: 0.4.0
+    cookie-signature: 1.0.6
+  checksum: a3eeda832d81862477e40444a8d411595b91e15f9b1d2b397a173e9efa744a29129de9aaa99342cf9468641d854a464c4e215cd60d1df49374c9ccffa1af52bf
+  languageName: node
+  linkType: hard
+
+"cookie-session@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "cookie-session@npm:1.4.0"
+  dependencies:
+    cookies: 0.8.0
+    debug: 2.6.9
+    on-headers: ~1.0.2
+  checksum: 0923094cd86cb1c9181d4eaaef7800743280addc0061d8b2320adced280c9b80c5a94308a6e21a4c6ca0b2ee91d65afa04dfaa66d814f6cdfd24054605be9908
+  languageName: node
+  linkType: hard
+
 "cookie-signature@npm:1.0.6":
   version: 1.0.6
   resolution: "cookie-signature@npm:1.0.6"
@@ -4300,6 +4337,16 @@ __metadata:
   version: 0.4.0
   resolution: "cookie@npm:0.4.0"
   checksum: 7aaef4b642c533600fdd001d963a507dfcd814267503374e51d9743475d024feeff8b0b4ddd0777a25791a2efbdfd8bc4a0fe0696104efa195e8f8584807d410
+  languageName: node
+  linkType: hard
+
+"cookies@npm:0.8.0":
+  version: 0.8.0
+  resolution: "cookies@npm:0.8.0"
+  dependencies:
+    depd: ~2.0.0
+    keygrip: ~1.1.0
+  checksum: c401e0f791e5413af5a5e88db85610fad49a58c91b393a917294562b17cc30626d3730591ba73ce27e93a977f9483272c188e35fcc4ade6d2576c4f74628a9c4
   languageName: node
   linkType: hard
 
@@ -4910,6 +4957,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"depd@npm:~2.0.0":
+  version: 2.0.0
+  resolution: "depd@npm:2.0.0"
+  checksum: 20726d843f5ab5e933211fcb5a440a1a3986ef9d6f85d38cf1eae815ea3cc12fa4436bd35a38e21bdb391a021b57f2d97b9f856873852506acac1b07ac913ba4
+  languageName: node
+  linkType: hard
+
 "destroy@npm:~1.0.4":
   version: 1.0.4
   resolution: "destroy@npm:1.0.4"
@@ -4988,11 +5042,17 @@ __metadata:
     "@pg-lq/postgraphile-plugin": ^0.0.3
     "@types/express": ^4.17.12
     "@types/node": ^15.3.0
+    "@types/passport": ^1.0.6
     buffer: ^6.0.3
     commander: ^7.2.0
     concurrently: ^6.1.0
+    cookie-parser: ^1.4.5
+    cookie-session: ^1.4.0
+    dotenv: ^10.0.0
     express: ^4.17.1
     nps: ^5.10.0
+    passport: ^0.4.1
+    passport-google-oauth20: ^2.0.0
     postgraphile: ^4.11.0
     postgraphile-plugin-connection-filter: ^2.2.1
     snowpack: ^3.4.0
@@ -5137,6 +5197,13 @@ __metadata:
   dependencies:
     is-obj: ^2.0.0
   checksum: 76e6693d8803eeff9cb920988446bf223cf1f6e5b1c0c2fe07a66906392134931a481b11e3c0bd852c5cfc97fad65258bcb4359169ad1d8d624cb3f56932be98
+  languageName: node
+  linkType: hard
+
+"dotenv@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "dotenv@npm:10.0.0"
+  checksum: 9c45712e213de63bdb646b8e5344749b7566e25a67bbd3f03711d54e40eff10066c1f23eff0081d0949fda7c8efcc6e9e8bf18d0f023a8274f55f5d5f97bb6db
   languageName: node
   linkType: hard
 
@@ -8201,6 +8268,15 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"keygrip@npm:~1.1.0":
+  version: 1.1.0
+  resolution: "keygrip@npm:1.1.0"
+  dependencies:
+    tsscmp: 1.0.6
+  checksum: 917fc9c6ad8528537534ae181f85a566bf74716f3e38e83ff858862ebad24f31f70781b875fbf5a34bba115433361d2dbdad94d4debf0ca6631c85b47a5f0e31
+  languageName: node
+  linkType: hard
+
 "kind-of@npm:^3.0.2, kind-of@npm:^3.0.3, kind-of@npm:^3.2.0":
   version: 3.2.2
   resolution: "kind-of@npm:3.2.2"
@@ -9747,6 +9823,13 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"oauth@npm:0.9.x":
+  version: 0.9.15
+  resolution: "oauth@npm:0.9.15"
+  checksum: 2f1609b8e7fc548b3916d601d3bfe6d78585c20a668f36304ea587f6d6c33c9ad1f58c17dc7618fe1ceae9396fcc8e7a8be328960b9f07bd314c088a12f6cefe
+  languageName: node
+  linkType: hard
+
 "object-assign@npm:4.x, object-assign@npm:^4.0.1, object-assign@npm:^4.1.0, object-assign@npm:^4.1.1":
   version: 4.1.1
   resolution: "object-assign@npm:4.1.1"
@@ -9877,6 +9960,13 @@ fsevents@~2.1.2:
   dependencies:
     ee-first: 1.1.1
   checksum: 362e64608287d31ffd96a15fb9305a410b3e4d07c86f277fae907e38af46bc6f5ff948de90eabb81dc5632ca7f9a290085acc5410c378053dfa9860451d97ee5
+  languageName: node
+  linkType: hard
+
+"on-headers@npm:~1.0.2":
+  version: 1.0.2
+  resolution: "on-headers@npm:1.0.2"
+  checksum: 51e75c80755169e765aa76238722e5ad1623f62b13bbc23544ade20cdbb6950cf0e6aa91de35d02ec956f47dc072ee460d8eef82354e4abf8fa692885cb3f2d8
   languageName: node
   linkType: hard
 
@@ -10219,6 +10309,45 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"passport-google-oauth20@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "passport-google-oauth20@npm:2.0.0"
+  dependencies:
+    passport-oauth2: 1.x.x
+  checksum: 151d01295638bb4fb9fc7eb986770e862f9ba7e358ba707979b58fa05db02629f642bcc8adc60fed7dc81dec3a6a0822e1c37d37ab5702b8fb43d71773491f8a
+  languageName: node
+  linkType: hard
+
+"passport-oauth2@npm:1.x.x":
+  version: 1.5.0
+  resolution: "passport-oauth2@npm:1.5.0"
+  dependencies:
+    base64url: 3.x.x
+    oauth: 0.9.x
+    passport-strategy: 1.x.x
+    uid2: 0.0.x
+    utils-merge: 1.x.x
+  checksum: b63ff7843e21375cdf9f5d9580b19488c8f7c257d614dc0b0151c1692948b2f92410c14278843260608aec81330e249880cdc55fbbd1b82d85cdc8572e13e4e6
+  languageName: node
+  linkType: hard
+
+"passport-strategy@npm:1.x.x":
+  version: 1.0.0
+  resolution: "passport-strategy@npm:1.0.0"
+  checksum: 4ad0b62fcb411df70484aef44a958bc545801170e27c46a8bc38776c370d9cc67df9a4a4046ac6146fbd95d6650e554468df72b282cde22e81a42369472e9cfc
+  languageName: node
+  linkType: hard
+
+"passport@npm:^0.4.1":
+  version: 0.4.1
+  resolution: "passport@npm:0.4.1"
+  dependencies:
+    passport-strategy: 1.x.x
+    pause: 0.0.1
+  checksum: f26e8debe6397c3600d0172d8c4eb2b6eb3b5081a46da8db72877d341c0c734c35aff789282e36974733485c6e192051771c2e541a1c7f59da69ccac55c937e1
+  languageName: node
+  linkType: hard
+
 "path-exists@npm:^2.0.0":
   version: 2.1.0
   resolution: "path-exists@npm:2.1.0"
@@ -10317,6 +10446,13 @@ fsevents@~2.1.2:
   dependencies:
     through: ~2.3
   checksum: a6bcf306f5e7f2cca0adcb424a6c7fa2760233ffd0631695421fdb29cdf8fbaf734161a6e97ebd05c83764b950029167036b0bb9898b36ae772ad5ad48862e91
+  languageName: node
+  linkType: hard
+
+"pause@npm:0.0.1":
+  version: 0.0.1
+  resolution: "pause@npm:0.0.1"
+  checksum: 94ff516a34a46c79f274f2747f3c5889f92542c8b82faff824d176d25ea2db4cfdbf7f6575494260357d9ab9dc22ff409849319438d4f6c08eb85a128d7db71f
   languageName: node
   linkType: hard
 
@@ -14101,6 +14237,13 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
+"tsscmp@npm:1.0.6":
+  version: 1.0.6
+  resolution: "tsscmp@npm:1.0.6"
+  checksum: 1a5b76eb37c1a331f7e0b99f6414fdb1d58dffbc95301931a00e8728bc9fcb15b676d8e5eb2aecf884f424e8c9a218af388492cffe106539ffc0f8d09d8ab7c1
+  languageName: node
+  linkType: hard
+
 "tsutils@npm:^3.17.1":
   version: 3.21.0
   resolution: "tsutils@npm:3.21.0"
@@ -14192,6 +14335,13 @@ typescript@^4.3.2:
   version: 0.7.28
   resolution: "ua-parser-js@npm:0.7.28"
   checksum: bf65a24eb48d8ec31f6396494bff16b92228e88d7ea15d0bdaa71505313979d2fd176d832418d849a8fa6e119e8dea482f52a2acffe51a3f1810087d295a9adf
+  languageName: node
+  linkType: hard
+
+"uid2@npm:0.0.x":
+  version: 0.0.3
+  resolution: "uid2@npm:0.0.3"
+  checksum: 7b0fc54edb7e7366e2c4ff784167d557374f1733b4f6ff2c4cf8362f45fa5027c09c535a9c912137f94547bfc38e5d153ea7b499d999b34921da7630b826d189
   languageName: node
   linkType: hard
 
@@ -14512,7 +14662,7 @@ typescript@^4.3.2:
   languageName: node
   linkType: hard
 
-"utils-merge@npm:1.0.1":
+"utils-merge@npm:1.0.1, utils-merge@npm:1.x.x":
   version: 1.0.1
   resolution: "utils-merge@npm:1.0.1"
   checksum: a457956ebc09efbda05da8bf213ab89140bb9dffa3c42b3315dd8fc3c45d67a1b802741f58b7bba4872113201fc275fc86470289d8bd32b74297b5e5b5980705
@@ -14728,7 +14878,7 @@ typescript@^4.3.2:
     webpack-cli: ^4.7.2
     webpack-dependency-tools: 0.0.1
     webpack-dev-middleware: ^5.0.0
-    webpack-runtime-require: ^0.3.2
+    webpack-runtime-require: ^1.0.0
     webpack-string-replacer: 0.0.18
   peerDependencies:
     firebase: ^7.7.0
@@ -14819,10 +14969,10 @@ typescript@^4.3.2:
   languageName: node
   linkType: hard
 
-"webpack-runtime-require@npm:^0.3.2":
-  version: 0.3.2
-  resolution: "webpack-runtime-require@npm:0.3.2"
-  checksum: 9527ff804dfc0ac5bf10ea340a30aa3ed3de4e3fbfcbae87745f7ca6549ac5416d76d9f437236c1d29a9329b8f71303ffd05af62fc6b4e033e9f89520bbe9fb4
+"webpack-runtime-require@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "webpack-runtime-require@npm:1.0.0"
+  checksum: 72bce9e384036395f7f93d4b30d54329fffdb25fb8a5f36cf7820feaef066a839aaf2873de0ad1bd5e727fc5c750cd809f69587e7136ecbc62594da5b46779a9
   languageName: node
   linkType: hard
 

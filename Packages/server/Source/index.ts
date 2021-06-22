@@ -1,3 +1,5 @@
+import "./Start_0";
+
 import commander from "commander";
 const {program} = commander;
 import express from "express";
@@ -5,9 +7,11 @@ import postgraphile_ from "postgraphile";
 const postgraphile = postgraphile_["postgraphile"] as typeof import("postgraphile").postgraphile;
 const makePluginHook = postgraphile_["makePluginHook"] as typeof import("postgraphile").makePluginHook;
 import {GeneratePatchesPlugin} from "@pg-lq/postgraphile-plugin";
+import {Pool, PoolClient} from "pg";
 
 import {createRequire} from "module";
-import {AuthenticationPlugin} from "./Authentication";
+import {AuthenticationPlugin} from "./Mutations/Authentication";
+import {SetUpAuthHandling} from "./AuthHandling";
 const require = createRequire(import.meta.url);
 
 //program.option("-v, --variant <type>", "Which server variant to use (base, patches)");
@@ -25,9 +29,17 @@ const pluginHook = makePluginHook([
 	variant == "patches" && GeneratePatchesPlugin,
 ]);
 
+export const pgPool = new Pool({
+	connectionString: dbURL,
+});
+export var pgClient: PoolClient;
+pgPool.on("connect", client=>{
+	if (pgClient != null) console.warn("pgClient recreated...");
+	pgClient = client;
+});
 app.use(
 	postgraphile(
-		dbURL,
+		pgPool,
 		"app_public",
 		{
 			watchPg: true,
@@ -52,5 +64,7 @@ app.use(
 	)
 );
 
+SetUpAuthHandling(app);
+
 app.listen(dbPort);
-console.log("Postgraphile server started.");
+console.log("Server started.");

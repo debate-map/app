@@ -7,6 +7,7 @@
 		"preinstall": "npx only-allow yarn"
 	},
 	"devDependencies": {
+		"@types/passport": "^1.0.6",
 		"concurrently": "^6.1.0",
 		"nps": "^5.10.0",
 		"snowpack": "^3.4.0"
@@ -20,7 +21,12 @@
 		"@types/node": "^15.3.0",
 		"buffer": "^6.0.3",
 		"commander": "^7.2.0",
+		"cookie-parser": "^1.4.5",
+		"cookie-session": "^1.4.0",
+		"dotenv": "^10.0.0",
 		"express": "^4.17.1",
+		"passport": "^0.4.1",
+		"passport-google-oauth20": "^2.0.0",
 		"postgraphile": "^4.11.0",
 		"postgraphile-plugin-connection-filter": "^2.2.1"
 	}
