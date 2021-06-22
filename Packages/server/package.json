@@ -9,14 +9,14 @@
 	"devDependencies": {
 		"@types/passport": "^1.0.6",
 		"concurrently": "^6.1.0",
-		"nps": "^5.10.0",
-		"snowpack": "^3.4.0"
+		"nps": "^5.10.0"
 	},
 	"dependencies": {
 		"@graphile-contrib/pg-simplify-inflector": "^6.1.0",
 		"@graphile/subscriptions-lds": "^4.11.0",
+		"@n1ru4l/graphql-live-query": "^0.7.1",
 		"@n1ru4l/graphql-live-query-patch": "^0.3.1",
-		"@pg-lq/postgraphile-plugin": "^0.0.3",
+		"@pg-lq/postgraphile-plugin": "^0.0.5",
 		"@types/express": "^4.17.12",
 		"@types/node": "^15.3.0",
 		"buffer": "^6.0.3",

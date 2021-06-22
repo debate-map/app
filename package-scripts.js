@@ -68,7 +68,8 @@ Object.assign(scripts, {
 		initDB: TSScript("server", "Scripts/InitDB.ts"),
 
 		// first terminal
-		dev: "cd Packages/server && snowpack build --watch",
+		//dev: "cd Packages/server && snowpack build --watch",
+		dev: "cd Packages/server && tsc --watch",
 
 		// second terminal
 		run: GetStartServerCommand(),
@@ -78,5 +79,10 @@ function GetStartServerCommand() {
 	/*const variantPath = serverVariantPaths[server];
 	return `node ${variantPath}`;*/
 	//return `node ./Packages/server/Build/esm/Source/index.js`;
-	return `cd Packages/server && node ./Build/esm/Source/index.js`;
+	//return `cd Packages/server && node ./Build/esm/Source/index.js`;
+
+	return `cd Packages/server && node ./Dist/index.js`;
+	//return `cd Packages/server && node --experimental-modules ./Dist/index.js`;
+	//return `cd Packages/server && node -r esm ./Dist/index.js`; // didn't enable named-exports from common-js, despite this suggesting it would: https://github.com/standard-things/esm/issues/897
+	//return TSScript("server", "Source/index.ts");
 }

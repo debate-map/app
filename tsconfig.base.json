@@ -1,10 +1,23 @@
 {
 	"compilerOptions": {
 		// general
-		"sourceMap": true,
+		//"sourceMap": true,
 		"watch": true,
 		//"noEmit": true,
 		"forceConsistentCasingInFileNames": true, // creates duplicates in import-helper plugins otherwise
+
+		// compilation
+		"target": "esnext",
+		"lib": [
+			"es6",
+			"es5",
+			"dom"
+		],
+		"jsx": "react",
+		"noImplicitAny": false,
+		"experimentalDecorators": true,
+		"allowSyntheticDefaultImports": true,
+		//"esModuleInterop": true, // enable this within packages that aren't using webpack for compilation
 
 		// modules/paths
 		"module": "esnext",
@@ -40,18 +53,6 @@
 				"../../../node_modules/codemirror/*",
 			]
 		},
-
-		// compiler options
-		"target": "esnext",
-		"lib": [
-			"es6",
-			"es5",
-			"dom"
-		],
-		"jsx": "react",
-		"noImplicitAny": false,
-		"experimentalDecorators": true,
-		"allowSyntheticDefaultImports": true
 	},
 	"include": [
 		// these are relative to this file's folder (repo root)
@@ -70,5 +71,4 @@
 		"Tests",
 		"node_modules",
 	],*/
-	"compileOnSave": true
 }

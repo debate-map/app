@@ -23,7 +23,7 @@ For more information, visit the website at: <https://debatemap.app>
 
 ### Part 1 (general)
 
-1) Ensure [NodeJS](https://nodejs.org) (v8.6+) is installed, as well as [Yarn](https://yarnpkg.com/getting-started/migration) (needed for Yarn workspaces).
+1) Ensure [NodeJS](https://nodejs.org) (v14.13.0+) is installed, as well as [Yarn](https://yarnpkg.com/getting-started/migration) (needed for Yarn workspaces).
 
 2) Clone/download this repo to disk. (https://github.com/debate-map/app.git)
 

@@ -3,14 +3,6 @@
 		// general
 		"watch": true,
 		"forceConsistentCasingInFileNames": true, // creates duplicates in import-helper plugins otherwise
-
-		// modules/paths
-		"module": "ESNext",
-		//"module": "commonjs", // needed, since ts-node does not yet support imports from es2015-modules
-		"moduleResolution": "node",
-		//"rootDir": ".",
-		//"baseUrl": ".",
-
 		"resolveJsonModule": true,
 
 		// compiler options
@@ -18,10 +10,16 @@
 		"jsx": "react",
 		"noImplicitAny": false,
 		"alwaysStrict": true, // alternative: "@babel/plugin-transform-strict-mode"; went with this since doesn't require another npm package
-
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true,
-		"esModuleInterop": true
+		"esModuleInterop": true,
+
+		// modules/paths
+		"module": "ESNext",
+		//"module": "commonjs", // needed, since ts-node does not yet support imports from es2015-modules
+		"moduleResolution": "node",
+		//"rootDir": ".",
+		//"baseUrl": ".",
 	},
 	"include": [
 		"../Typings/**/*.d.ts",

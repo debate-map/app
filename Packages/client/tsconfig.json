@@ -1,36 +1,15 @@
 {
 	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
+		// general
 		"rootDir": "Source",
 		"baseUrl": "Source",
 		"resolveJsonModule": true,
-
 		//"noEmit": false,
 		"outDir": "Source_JS",
+
+		// compilation
 		"esModuleInterop": true,
-
-		/*"paths": { // ("paths" is relative to "baseUrl")
-			"*": [
-				// prefer "/node_modules/@types" over "/node_modules/[something]/node_modules/@types" (eg. for when using npm link)
-				//"../node_modules/@types/*",
-				// prefer "/node_modules/X" over "/node_modules/[something]/node_modules/X"
-				// (for when using npm link; fixes auto-importer sometimes using SomeLib/node_modules/TargetLib)
-				"../node_modules/*",
-				"*"
-			],
-			// remove @types/node and such (conflicts with typescript web definitions)
-			"@types/node": ["../Typings/empty.d.ts"],
-			// remove @types/react/global.d.ts, as it breaks the auto-import-finder for react-vcomponents/Text
-			"react/global.d.ts": ["../Typings/empty.d.ts"],
-			"react-vextensions/node_modules/react/global.d.ts": ["../Typings/empty.d.ts"],
-			"react-vcomponents/node_modules/react/global.d.ts": ["../Typings/empty.d.ts"],
-			// temp removals (lib definitions need updating)
-			//"mst-decorators": ["../Typings/empty.d.ts"],
-			// consolidating for these wouldn't throw errors necessarily, but we do so to keep things tidy (since we know the different versions will be compatible anyway)
-			//"js-vextensions": ["../node_modules/js-vextensions"],
-			//"mobx-graphlink": ["../node_modules/mobx-graphlink"], // fixes odd ts issue
-		},*/
-
 		//"strict": true, // enables all of the below (other than noImplicitReturns)
 		//"noImplicitAny": true,
 		//"noImplicitThis": true,
@@ -50,8 +29,7 @@
 		//"Source/**/*.jsx"
 		//"node_modules/web-vcore/Source/**/*.ts",
 		//"node_modules/@debate-map/server-link/Source/**/*.ts",
-	],
-	"compileOnSave": true
+	]
 	/*"references": [
 		{"path": "node_modules/@debate-map/server-link"},
 		{"path": "node_modules/web-vcore"}

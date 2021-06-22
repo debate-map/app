@@ -24,10 +24,10 @@ export const AuthenticationPlugin = makeExtendSchemaPlugin(build=>{
 		resolvers: {
 			Mutation: {
 				authenticate: async(parent, args, ctx: Context, info)=>{
-					const { rows } = await ctx.pgClient.query(
+					/*const { rows } = await ctx.pgClient.query(
 						sqlText, // e.g. "select * from users where id = $1"
 						optionalVariables // e.g. [27]
-					 );
+					 );*/
 					return {id: "tbd"};
 				},
 				test1: ((parent, args, ctx: Context, info)=>{

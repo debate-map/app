@@ -1,16 +1,16 @@
-import "./Start_0";
+import "./Start_0.js";
 
 import commander from "commander";
 const {program} = commander;
 import express from "express";
-import postgraphile_ from "postgraphile";
-const postgraphile = postgraphile_["postgraphile"] as typeof import("postgraphile").postgraphile;
-const makePluginHook = postgraphile_["makePluginHook"] as typeof import("postgraphile").makePluginHook;
+import {postgraphile, makePluginHook} from "postgraphile";
 import {GeneratePatchesPlugin} from "@pg-lq/postgraphile-plugin";
-import {Pool, PoolClient} from "pg";
+import pg from "pg";
 import {createRequire} from "module";
-import {AuthenticationPlugin} from "./Mutations/Authentication";
-import {SetUpAuthHandling} from "./AuthHandling";
+import {AuthenticationPlugin} from "./Mutations/Authentication.js";
+import {SetUpAuthHandling} from "./AuthHandling.js";
+type PoolClient = import("pg").PoolClient;
+const {Pool} = pg;
 const require = createRequire(import.meta.url);
 
 //program.option("-v, --variant <type>", "Which server variant to use (base, patches)");
@@ -25,7 +25,7 @@ const dbURL = process.env.DATABASE_URL || `postgres://${process.env.PGUSER}:${pr
 const dbPort = process.env.PORT || 3105 as number;
 
 const pluginHook = makePluginHook([
-	variant == "patches" && GeneratePatchesPlugin,
+	variant == "patches" && new GeneratePatchesPlugin(),
 ]);
 
 export const pgPool = new Pool({

@@ -1791,9 +1791,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@n1ru4l/graphql-live-query@npm:^0.7.1":
+  version: 0.7.1
+  resolution: "@n1ru4l/graphql-live-query@npm:0.7.1"
+  peerDependencies:
+    graphql: ^15.4.0
+  checksum: f38726cb6b950af820977d18b9f327d842494deca6388926afb55ad4247170aa381dfe04745de67a8fe57dd51baab10bb937e51979f2322cb63fda4465d77abf
+  languageName: node
+  linkType: hard
+
 "@npmcli/git@npm:^2.0.1":
-  version: 2.0.9
-  resolution: "@npmcli/git@npm:2.0.9"
+  version: 2.1.0
+  resolution: "@npmcli/git@npm:2.1.0"
   dependencies:
     "@npmcli/promise-spawn": ^1.3.2
     lru-cache: ^6.0.0
@@ -1803,7 +1812,7 @@ __metadata:
     promise-retry: ^2.0.1
     semver: ^7.3.5
     which: ^2.0.2
-  checksum: 31280e4ca4cd77919c44b1d4f1afa5dfb20cd31e69b802d5c904bc756f27b526b8d2f85671f04dc93b3b28746064981e3f5034ac316bc8a3a5fc43f90a3f4f7c
+  checksum: 3c718672d959a3e7408c4253bbaf212dc241d815955c2809c137bb19109c151b03632e25cb6855f01f3dd498d73de7c15eab04572e00be10f8a720f230191f47
   languageName: node
   linkType: hard
 
@@ -1858,14 +1867,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pg-lq/postgraphile-plugin@npm:^0.0.3":
-  version: 0.0.3
-  resolution: "@pg-lq/postgraphile-plugin@npm:0.0.3"
+"@pg-lq/postgraphile-plugin@portal:/C:/Root/Apps/@V/@Modules/postgraphile-live-query/Main/Packages/postgraphile-plugin::locator=%40debate-map%2Fapp%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@pg-lq/postgraphile-plugin@portal:/C:/Root/Apps/@V/@Modules/postgraphile-live-query/Main/Packages/postgraphile-plugin::locator=%40debate-map%2Fapp%40workspace%3A."
   dependencies:
     "@n1ru4l/graphql-live-query-patch": ^0.3.1
-  checksum: be5f8ab8038fdc3b90b1d6e163886f495731f6f854f22e839412cd361fd62457ab343600f921bbdbebe72e53ab6c887bda8c23dc79d7494e13baad678e217ae7
+    fast-json-patch: ^3.0.0-1
+    jsondiffpatch: ^0.4.1
+    nps: ^5.10.0
+    snowpack: ^3.4.0
   languageName: node
-  linkType: hard
+  linkType: soft
 
 "@protobufjs/aspromise@npm:^1.1.1, @protobufjs/aspromise@npm:^1.1.2":
   version: 1.1.2
@@ -3772,7 +3784,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:2.4.2, chalk@npm:^2.0.0, chalk@npm:^2.0.1, chalk@npm:^2.1.0, chalk@npm:^2.4.1, chalk@npm:^2.4.2":
+"chalk@npm:2.4.2, chalk@npm:^2.0.0, chalk@npm:^2.0.1, chalk@npm:^2.1.0, chalk@npm:^2.3.0, chalk@npm:^2.4.1, chalk@npm:^2.4.2":
   version: 2.4.2
   resolution: "chalk@npm:2.4.2"
   dependencies:
@@ -5008,6 +5020,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"diff-match-patch@npm:^1.0.0":
+  version: 1.0.5
+  resolution: "diff-match-patch@npm:1.0.5"
+  checksum: 4694f40dbfd725e6ceaaa94c4779b60ceaf2d3b382229118310154d469f983d665ecfddae3c5c402bc5bb51930db63a1d27bd30c5d91e38de13f9d8054f2f4ae
+  languageName: node
+  linkType: hard
+
 "diff@npm:^4.0.1":
   version: 4.0.2
   resolution: "diff@npm:4.0.2"
@@ -5057,8 +5076,9 @@ __metadata:
   dependencies:
     "@graphile-contrib/pg-simplify-inflector": ^6.1.0
     "@graphile/subscriptions-lds": ^4.11.0
+    "@n1ru4l/graphql-live-query": ^0.7.1
     "@n1ru4l/graphql-live-query-patch": ^0.3.1
-    "@pg-lq/postgraphile-plugin": ^0.0.3
+    "@pg-lq/postgraphile-plugin": ^0.0.4
     "@types/express": ^4.17.12
     "@types/node": ^15.3.0
     "@types/passport": ^1.0.6
@@ -5075,7 +5095,6 @@ __metadata:
     passport-google-oauth20: ^2.0.0
     postgraphile: ^4.11.0
     postgraphile-plugin-connection-filter: ^2.2.1
-    snowpack: ^3.4.0
   languageName: unknown
   linkType: soft
 
@@ -6086,7 +6105,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-json-patch@npm:3.0.0-1":
+"fast-json-patch@npm:3.0.0-1, fast-json-patch@npm:^3.0.0-1":
   version: 3.0.0-1
   resolution: "fast-json-patch@npm:3.0.0-1"
   checksum: 17cf1ffba2a95fd212c3538a2d5de7d13594f3bf1a9e3435629265af0fb1694e1cc714615589246bb670530ad0a65357597aa76fb3362d8041cb1dcd1618ed87
@@ -8192,6 +8211,18 @@ fsevents@~2.1.2:
   languageName: node
   linkType: hard
 
+"jsondiffpatch@npm:^0.4.1":
+  version: 0.4.1
+  resolution: "jsondiffpatch@npm:0.4.1"
+  dependencies:
+    chalk: ^2.3.0
+    diff-match-patch: ^1.0.0
+  bin:
+    jsondiffpatch: ./bin/jsondiffpatch
+  checksum: 1dbcabd80395a480967521a3324698b5ff55641855d3bd9cab3bb704f7bcf8ebc3c0e3cb2b1d058b30209926b8d75e87b418cf3703a83b4e508e3c2e1e3e253c
+  languageName: node
+  linkType: hard
+
 "jsonfile@npm:^2.1.0":
   version: 2.4.0
   resolution: "jsonfile@npm:2.4.0"
@@ -8793,8 +8824,8 @@ fsevents@~2.1.2:
   linkType: hard
 
 "make-fetch-happen@npm:^9.0.1":
-  version: 9.0.2
-  resolution: "make-fetch-happen@npm:9.0.2"
+  version: 9.0.3
+  resolution: "make-fetch-happen@npm:9.0.3"
   dependencies:
     agentkeepalive: ^4.1.3
     cacache: ^15.2.0
@@ -8812,7 +8843,7 @@ fsevents@~2.1.2:
     promise-retry: ^2.0.1
     socks-proxy-agent: ^5.0.0
     ssri: ^8.0.0
-  checksum: 3ff6056fae0c172fb0ebdb761627e337c2c4047db8f441d734ae431328621924ef219f0205a1cf133d34babdc7e91b3daf87dd650988904d3b2da61e9d3fc348
+  checksum: c93ac9c6f492ae8ba89f8f69c1888ac7c3841f2d816ed100c575f795b4efb5f2fa6935842865626e95d39c72966736f82cf561420d1e2435d722871458349ffd
   languageName: node
   linkType: hard
 
@@ -13107,8 +13138,8 @@ resolve@^2.0.0-next.3:
   linkType: hard
 
 "snowpack@npm:^3.4.0":
-  version: 3.5.7
-  resolution: "snowpack@npm:3.5.7"
+  version: 3.5.9
+  resolution: "snowpack@npm:3.5.9"
   dependencies:
     cli-spinners: ^2.5.0
     default-browser-id: ^2.0.0
@@ -13126,7 +13157,7 @@ resolve@^2.0.0-next.3:
   bin:
     snowpack: index.bin.js
     sp: index.bin.js
-  checksum: cb9fd1116b7c47750e810937cf0e117a1cfc71140d5696cdeba9e3672872738663359f5395c72c30337a514e0ae69402586b832fdaba3ef6502b4d51bde986bd
+  checksum: b2f4d38f2113985bfd4790dc504c21d98ff1148e5912a9fe974a9dd035abc6c73e0c9776ea2d6106cf56280bd2c8cc875bfbb494faaf0b57cca5257f9c88f299
   languageName: node
   linkType: hard
 

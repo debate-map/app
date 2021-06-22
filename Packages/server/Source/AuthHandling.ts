@@ -2,7 +2,7 @@ import passport from "passport";
 import {Strategy as GoogleStrategy} from "passport-google-oauth20";
 import express from "express";
 import cookieSession from "cookie-session";
-import {pgClient, pgPool} from ".";
+import {pgClient, pgPool} from "./index.js";
 
 //type ExpressApp = Express.Application;
 type ExpressApp = ReturnType<typeof express>;
