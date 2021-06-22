@@ -1,4 +1,6 @@
-import {Knex} from "knex";
-
-export async function up(knex: Knex) {
+module.exports.up = async(knex: Knex)=>{
+	// todo
 }
+module.exports.down = ()=>{
+	throw new Error("Not implemented.");
+};
