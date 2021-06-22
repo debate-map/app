@@ -4808,13 +4808,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"debounce@npm:^1.0.0":
-  version: 1.2.1
-  resolution: "debounce@npm:1.2.1"
-  checksum: 04a00c6c45173ac6fb03ad3a7cf742fa4a86f6bf86b22f5b867085f739d0010ad98cbb92e80d60293faf6efb5452c637941092bd8d783cfeabe55c2000b1b07f
-  languageName: node
-  linkType: hard
-
 "debug@npm:2.6.9, debug@npm:^2.2.0, debug@npm:^2.3.3, debug@npm:^2.6.8, debug@npm:^2.6.9":
   version: 2.6.9
   resolution: "debug@npm:2.6.9"
@@ -5056,8 +5049,8 @@ __metadata:
     react-list: 0.8.11
     sharp: ^0.23.4
     shx: 0.3.2
-    ts-node: ^8.10.2
-    ts-node-dev: 1.0.0-pre.44
+    ts-node: ^10.0.0
+    ts-node-dev: 1.1.6
     ua-parser-js: ^0.7.12
     updeep: ^1.0.0
     web-vcore: 0.0.3
@@ -5078,7 +5071,7 @@ __metadata:
     "@graphile/subscriptions-lds": ^4.11.0
     "@n1ru4l/graphql-live-query": ^0.7.1
     "@n1ru4l/graphql-live-query-patch": ^0.3.1
-    "@pg-lq/postgraphile-plugin": ^0.0.4
+    "@pg-lq/postgraphile-plugin": ^0.0.5
     "@types/express": ^4.17.12
     "@types/node": ^15.3.0
     "@types/passport": ^1.0.6
@@ -6221,15 +6214,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"filewatcher@npm:~3.0.0":
-  version: 3.0.1
-  resolution: "filewatcher@npm:3.0.1"
-  dependencies:
-    debounce: ^1.0.0
-  checksum: a1937f2903cd52b0f75115a5ae15746f524214453581ad961514221b821862ea675ce26aff68c9541803d39d5219fef4a3c80de456a5e34118946abbd420beb1
-  languageName: node
-  linkType: hard
-
 "fill-range@npm:^2.1.0":
   version: 2.2.4
   resolution: "fill-range@npm:2.2.4"
@@ -6859,13 +6843,6 @@ fsevents@~2.1.2:
   version: 15.5.0
   resolution: "graphql@npm:15.5.0"
   checksum: 789cdcb069a3e00592e779002217a6bc5fd09efad63ee8c4190c4b3ea96c89010e74f085fb1cba876a0bb0e324e01df2eddb84d79dca90a28e582bc425fef9ef
-  languageName: node
-  linkType: hard
-
-"growly@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "growly@npm:1.3.0"
-  checksum: c87f7e8c785cac6ee60719c9d62f7d790a85dafa13d62c4667664e3a21ee771f5fd19df3f374d2f7bdf297b8f687cf70e19bb066aba4832e6f6caa5190812578
   languageName: node
   linkType: hard
 
@@ -7990,13 +7967,6 @@ fsevents@~2.1.2:
   version: 1.0.2
   resolution: "is-windows@npm:1.0.2"
   checksum: dd1ed8339a28c68fb52f05931c832488dafc90063e53b97a69ead219a5584d7f3e6e564731c2f983962ff5403afeb05365d88ce9af34c8dae76a14911020d73a
-  languageName: node
-  linkType: hard
-
-"is-wsl@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "is-wsl@npm:1.1.0"
-  checksum: 0f15cf5d5ff025afb0ba9cb49fd425b5d533b2af700533d343b7fa9aaca2f6c8242ba1c1a4e30c925522816bf0172fec2ae7cacaae682c91ffa0cd3f88ff1e8e
   languageName: node
   linkType: hard
 
@@ -9660,19 +9630,6 @@ fsevents@~2.1.2:
   bin:
     node-gyp: bin/node-gyp.js
   checksum: 6e014ff491cc4fdd25c41e38f9f92ab665d3b2e1ef7cd18e292aff9b293ef485c6bb93194461a5538d3bfa4b678258df974800660dd7d40865866ef3188c5481
-  languageName: node
-  linkType: hard
-
-"node-notifier@npm:^5.4.0":
-  version: 5.4.5
-  resolution: "node-notifier@npm:5.4.5"
-  dependencies:
-    growly: ^1.3.0
-    is-wsl: ^1.1.0
-    semver: ^5.5.0
-    shellwords: ^0.1.1
-    which: ^1.3.0
-  checksum: 4d5c255ba52bca734b5966788e0053589b2e589ed4f3c8c514664f497ae2f444e04961720c6736b744f2169fd1a26a22dc440e10ed0963d26fa40b8a52447d3e
   languageName: node
   linkType: hard
 
@@ -12994,13 +12951,6 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"shellwords@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "shellwords@npm:0.1.1"
-  checksum: 3559ff550917ece921d252edf42eb54827540e9676e537137ace236df8f9b78e48c542ae0b3f8876fea0faf5826c97629d5b8cb9ac7dee287260e9804fb8132c
-  languageName: node
-  linkType: hard
-
 "shx@npm:0.3.2":
   version: 0.3.2
   resolution: "shx@npm:0.3.2"
@@ -14113,7 +14063,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"tree-kill@npm:^1.2.1, tree-kill@npm:^1.2.2":
+"tree-kill@npm:^1.2.2":
   version: 1.2.2
   resolution: "tree-kill@npm:1.2.2"
   bin:
@@ -14176,29 +14126,6 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"ts-node-dev@npm:1.0.0-pre.44":
-  version: 1.0.0-pre.44
-  resolution: "ts-node-dev@npm:1.0.0-pre.44"
-  dependencies:
-    dateformat: ~1.0.4-1.2.3
-    dynamic-dedupe: ^0.3.0
-    filewatcher: ~3.0.0
-    minimist: ^1.1.3
-    mkdirp: ^0.5.1
-    node-notifier: ^5.4.0
-    resolve: ^1.0.0
-    rimraf: ^2.6.1
-    source-map-support: ^0.5.12
-    tree-kill: ^1.2.1
-    ts-node: "*"
-    tsconfig: ^7.0.0
-  bin:
-    ts-node-dev: ./bin/ts-node-dev
-    tsnd: ./bin/ts-node-dev
-  checksum: a9f1ec880cb6de2e17da3c10c4cf00af47da893b3aa346ecf340a95edb4a90ee0a637c40fb13330004a44943dbf98c8f6b00eafdf4c884e3b896eb7426bba84c
-  languageName: node
-  linkType: hard
-
 "ts-node-dev@npm:1.1.6":
   version: 1.1.6
   resolution: "ts-node-dev@npm:1.1.6"
@@ -14227,7 +14154,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"ts-node@npm:*, ts-node@npm:^10.0.0":
+"ts-node@npm:^10.0.0":
   version: 10.0.0
   resolution: "ts-node@npm:10.0.0"
   dependencies:
@@ -14258,26 +14185,6 @@ resolve@^2.0.0-next.3:
     ts-node-transpile-only: dist/bin-transpile.js
     ts-script: dist/bin-script-deprecated.js
   checksum: dc461e2b9b931b00ff065530a0247f86da1d035e72a7ef6d7ed072dd8e6b236d1879f113dcc73a354d240c81b6b845445c3d32b16eeb68022ed27ab6d130c049
-  languageName: node
-  linkType: hard
-
-"ts-node@npm:^8.10.2":
-  version: 8.10.2
-  resolution: "ts-node@npm:8.10.2"
-  dependencies:
-    arg: ^4.1.0
-    diff: ^4.0.1
-    make-error: ^1.1.1
-    source-map-support: ^0.5.17
-    yn: 3.1.1
-  peerDependencies:
-    typescript: ">=2.7"
-  bin:
-    ts-node: dist/bin.js
-    ts-node-script: dist/bin-script.js
-    ts-node-transpile-only: dist/bin-transpile.js
-    ts-script: dist/bin-script-deprecated.js
-  checksum: cd6e023e073d65ea346cf4a5b70bfd1e7c7f342c967a23a83038fd3462067558a4dda4fc8b238e6709db69aca3847590a93b4c52ae001e23ed9fef3b4fecbc71
   languageName: node
   linkType: hard
 
@@ -15213,7 +15120,7 @@ typescript@^4.3.2:
   languageName: node
   linkType: hard
 
-"which@npm:^1.2.9, which@npm:^1.3.0":
+"which@npm:^1.2.9":
   version: 1.3.1
   resolution: "which@npm:1.3.1"
   dependencies:

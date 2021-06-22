@@ -1,7 +1,5 @@
 import "./Start_0.js";
-
-import commander from "commander";
-const {program} = commander;
+import {program} from "commander";
 import express from "express";
 import {postgraphile, makePluginHook} from "postgraphile";
 import {GeneratePatchesPlugin} from "@pg-lq/postgraphile-plugin";
@@ -9,6 +7,7 @@ import pg from "pg";
 import {createRequire} from "module";
 import {AuthenticationPlugin} from "./Mutations/Authentication.js";
 import {SetUpAuthHandling} from "./AuthHandling.js";
+
 type PoolClient = import("pg").PoolClient;
 const {Pool} = pg;
 const require = createRequire(import.meta.url);
