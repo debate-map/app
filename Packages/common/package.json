@@ -5,6 +5,6 @@
 	"main": "./Source/index.ts",
 	"module": "./Source/index.ts",
 	"scripts": {
-		"start": "nps"
+		"start": "cd ../.. && npx nps"
 	}
 }

@@ -8,7 +8,6 @@ const postgraphile = postgraphile_["postgraphile"] as typeof import("postgraphil
 const makePluginHook = postgraphile_["makePluginHook"] as typeof import("postgraphile").makePluginHook;
 import {GeneratePatchesPlugin} from "@pg-lq/postgraphile-plugin";
 import {Pool, PoolClient} from "pg";
-
 import {createRequire} from "module";
 import {AuthenticationPlugin} from "./Mutations/Authentication";
 import {SetUpAuthHandling} from "./AuthHandling";
@@ -22,7 +21,7 @@ export const variant = launchOpts.variant;
 
 const app = express();
 
-const dbURL = process.env.DATABASE_URL || `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@localhost:5432/game-dive`;
+const dbURL = process.env.DATABASE_URL || `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@localhost:5432/debate-map`;
 const dbPort = process.env.PORT || 3105 as number;
 
 const pluginHook = makePluginHook([

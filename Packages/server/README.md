@@ -22,14 +22,32 @@ max_replication_slots = 10
 
 4) Create a Postgres database for this project, by running: `createdb debate-map`
 
-5) Init `debate-map` db in PostgreSQL, by running `yarn start initDB`.
-
-6) Set environment variables for the database's username (PGUSER) and password (PGPASSWORD).
+5) Init `debate-map` db in PostgreSQL, by running `yarn start server.initDB`.
 
 ### Remote server
 
 TODO
 
+### Environment variables
+
+Create a `.env` file in the repo root, following this template:
+```
+# GCP web-client key/id
+CLIENT_ID=XXX
+CLIENT_SECRET=XXX
+
+# local database
+LOCALDB_USERNAME=XXX
+LOCALDB_PASSWORD=XXX
+```
+
 ## Editing + running
 
 See here: <https://github.com/debate-map/app#editing--running>
+
+## Database migrations
+
+See here for overview: <https://github.com/Venryx/web-vcore/tree/master/Docs/DatabaseMigrations.md>
+
+Actions:
+* To create a new migration, run: `npx knex --knexfile Knex/knexfile.ts migrate:make MIGRATION_NAME`

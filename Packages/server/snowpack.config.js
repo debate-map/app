@@ -18,6 +18,7 @@ const config = {
 	},*/
 	exclude: [
 		`./Scripts/**/*`,
+		`./Knex/**/*`,
 		`./Build/**/*`,
 		`./*.json`,
 		`./*.js`
@@ -40,6 +41,7 @@ const config = {
 			//"fast-json-patch",
 			//"postgraphile/build/postgraphile/http/mapAsyncIterator".replace(/\//g, "\\"),
 			//"iterall",
+			//"util",
 		],
 		external: builtinModules.concat(
 			"express", "postgraphile", "commander",
@@ -49,8 +51,9 @@ const config = {
 			"@n1ru4l/graphql-live-query-patch",
 			"iterall",
 			"postgraphile/build/postgraphile/http/mapAsyncIterator",
-			"postgraphile/build/postgraphile/http/mapAsyncIterator.js"
+			"postgraphile/build/postgraphile/http/mapAsyncIterator.js",
 		),
+		polyfillNode: true,
 	},
 	devOptions: {
 		open: "none",

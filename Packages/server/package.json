@@ -3,7 +3,7 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"start": "nps",
+		"start": "cd ../.. && npx nps",
 		"preinstall": "npx only-allow yarn"
 	},
 	"devDependencies": {
@@ -25,6 +25,7 @@
 		"cookie-session": "^1.4.0",
 		"dotenv": "^10.0.0",
 		"express": "^4.17.1",
+		"knex": "^0.95.6",
 		"passport": "^0.4.1",
 		"passport-google-oauth20": "^2.0.0",
 		"postgraphile": "^4.11.0",

@@ -5,7 +5,7 @@
 		"forceConsistentCasingInFileNames": true, // creates duplicates in import-helper plugins otherwise
 
 		// modules/paths
-		"module": "ES2015",
+		"module": "ESNext",
 		//"module": "commonjs", // needed, since ts-node does not yet support imports from es2015-modules
 		"moduleResolution": "node",
 		//"rootDir": ".",
