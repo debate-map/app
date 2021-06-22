@@ -22,6 +22,7 @@ module.exports = {
 			max: 10,
 		},
 		migrations: {
+			schemaName: "public",
 			tableName: "knex_migrations",
 			//directory: "./Knex/Migrations", // paths are relative to "Packages/server"
 			directory: `${__dirname}/Migrations`,

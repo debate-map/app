@@ -6,35 +6,22 @@ const require = createRequire(import.meta.url);
 const config = require("../Knex/knexfile");
 
 async function CreateDBIfNotExists(dbName: string) {
-	let knex = Knex({
-		//client: "postgresql",
-		client: "pg",
-		//connection: `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@localhost:5432/debate-map`,
-		//connection: `postgres://${config.development.connection.user}:${config.development.connection.password}@localhost:5432/debate-map`,
-		//connection: `postgres://${config.development.connection.user}:${config.development.connection.password}@localhost:5432`,
+	let knex_early = Knex({
+		...config.development,
 		connection: {
 			...config.development.connection,
-			//host: "localhost", port: 5432,
-    		//host: "127.0.0.1", //port: 5432,
-			//host: "localhost:5432",
 			database: null,
 		},
 	});
-	/*const config_final = JSON.parse(JSON.stringify(config.development));
-	delete config_final.connection.database;
-	let knex = Knex(config_final);
-	//let knex = new Knex.Client(config_final);
-	//knex.initializePool();*/
-
-	//await knex.raw("CREATE DATABASE ??", name);
-	//await knex.raw("CREATE DATABASE IF NOT EXISTS ??", [name]);
-	//await knex.raw("SELECT 'CREATE DATABASE ??' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '??')\\gexec", [name, name]);
-	//let result = await knex.raw("SELECT 'CREATE DATABASE ??' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '??')", [name, name]);
-	//let dbExists = (await knex.raw("SELECT 1 FROM pg_database WHERE datname = '??'", name)).rows.length >= 1;
-	let dbExists = (await knex.raw(`SELECT FROM pg_database WHERE datname = '${dbName}'`)).rows.length >= 1; // fsr, "rows" is empty if we use knex's var-substitution; so use string-concatenation
+	let dbExists = (await knex_early.raw(`SELECT FROM pg_database WHERE datname = '${dbName}'`)).rows.length >= 1; // fsr, "rows" is empty if we use knex's var-substitution; so use string-concatenation
 	if (!dbExists) {
 		console.log(`DB "${dbName}" not found. Creating now...`);
-		await knex.raw("CREATE DATABASE ??", dbName);
+		await knex_early.raw("CREATE DATABASE ??", dbName);
+
+		// create new connection, inside the new database, so we can initialize some things
+		const knex = Knex(config.development);
+		await knex.raw("CREATE SCHEMA app_public");
+		await knex.raw("ALTER DATABASE ?? SET search_path TO app_public, public;", dbName);
 	}
 }
 
