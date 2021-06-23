@@ -14,7 +14,7 @@ const pageText = `
 ### Development
 
 * Gitter (project chat): [https://gitter.im/DebateMap/Lobby](https://gitter.im/DebateMap/Lobby)
-* Github (source code): [https://github.com/Venryx/DebateMap](https://github.com/Venryx/DebateMap)
+* Github (source code): [https://github.com/debate-map/app](https://github.com/debate-map/app)
 
 ### Canonical Debate Lab
 

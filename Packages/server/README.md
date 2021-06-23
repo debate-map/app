@@ -50,4 +50,4 @@ See here: <https://github.com/debate-map/app#editing--running>
 See here for overview: <https://github.com/Venryx/web-vcore/tree/master/Docs/DatabaseMigrations.md>
 
 Actions:
-* To create a new migration, run: `cd Packages/server; npx knex --knexfile Knex/knexfile.ts migrate:make --stub "./@MigrationTemplate.ts" MIGRATION_NAME`
+* To create a new migration, make a copy of the latest migration in `Knex/Migrations`, rename it (incrementing the number), then clear the up/down functions.

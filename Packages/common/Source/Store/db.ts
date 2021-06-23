@@ -30,6 +30,9 @@ export class GraphDBShape {
 		// feedback: FeedbackDBShape;
 	}>;*/
 
+	// core tables
+	// ==========
+	
 	@Col("Media") medias: Collection<Media>;
 	@Col("Layer") layers: Collection<Layer>;
 	@Col("Map") maps: Collection<Map>;
@@ -40,17 +43,26 @@ export class GraphDBShape {
 	@Col("MapNodeRevision") nodeRevisions: Collection<MapNodeRevision>;
 	//nodeStats: Collection<MapNodeStats>;
 	//nodeViewers: Collection<ViewerSet>; // removed due to privacy concerns
-	@Col("MapNodePhrasing") nodePhrasings: Collection<MapNodePhrasing>;
+	//@Col("MapNodePhrasing") nodePhrasings: Collection<MapNodePhrasing>;
 	@Col("MapNodeTag") nodeTags: Collection<MapNodeTag>;
 	@Col("Share") shares: Collection<Share>;
 	@Col("Term") terms: Collection<Term>;
 	//termNames: Collection<any>;
-	@Col("Timeline") timelines: Collection<Timeline>;
-	@Col("TimelineStep") timelineSteps: Collection<TimelineStep>;
+	/*@Col("Timeline") timelines: Collection<Timeline>;
+	@Col("TimelineStep") timelineSteps: Collection<TimelineStep>;*/
 	@Col("User") users: Collection<User>;
 	@Col("User_Private") users_private: Collection<User_Private>;
-	@Col("UserMapInfoSet") userMapInfo: Collection<UserMapInfoSet>; // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
+	//@Col("UserMapInfoSet") userMapInfo: Collection<UserMapInfoSet>; // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
 	//userViewedNodes: Collection<ViewedNodeSet>; // removed due to privacy concerns
+
+	// relationship tables (actually, I'm not using these atm; see vnote "postgres structuring")
+	// ==========
+
+	// todo: fill in these types
+	nodeParent_nodeChildren: Collection<any>;
+	//map_editors: Collection<any>;
+	//map_layers: Collection<any>;
+	//map_timelines: Collection<any>;
 }
 
 /* export interface FirebaseDBShape {

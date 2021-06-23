@@ -18,7 +18,6 @@ export class Term {
 
 	definition: string;
 	note: string;
-
 }
 // export const termNameFormat = "^[^.#$\\[\\]]+$";
 export const Term_nameFormat = '^[a-zA-Z0-9 ,\'"%-]+$';

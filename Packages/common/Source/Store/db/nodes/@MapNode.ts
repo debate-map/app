@@ -43,7 +43,7 @@ export class MapNode {
 	multiPremiseArgument?: boolean;
 
 	// if subnode
-	layerPlusAnchorParents: LayerPlusAnchorParentSet;
+	//layerPlusAnchorParents: LayerPlusAnchorParentSet;
 	/* layerOwner: UUID;
 	layerAnchorNode: UUID; */
 
