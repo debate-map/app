@@ -1,4 +1,4 @@
-import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, IsNodeSubnode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, RatingType, ratingTypes, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "dm_common";
+import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, RatingType, ratingTypes, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "dm_common";
 import chroma, {Color} from "chroma-js";
 //import classNames from "classnames";
 import {DEL, DoNothing, E, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions";
@@ -193,7 +193,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const outlineColor = GetChangeTypeOutlineColor(changeType);
 		const barSize = 5;
 		const pathNodeIDs = GetPathNodeIDs(path);
-		const isSubnode = IsNodeSubnode(node);
+		//const isSubnode = IsNodeSubnode(node);
 
 		const nodeReversed = form == ClaimForm.Negation;
 
@@ -281,7 +281,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 						asDragPreview && {zIndex: zIndexes.draggable},
 						//outerNode.link._mirrorLink && {border: `solid ${HSLA(0, 0, 1, .3)}`, borderWidth: "0 0 0 1px"}, // if mirror-child, show white border at left
 					)}
-					padding={GetPaddingForNode(node, isSubnode)}
+					padding={GetPaddingForNode(node/*, isSubnode*/)}
 					onClick={onClick}
 					onDirectClick={onDirectClick}
 					beforeChildren={<>

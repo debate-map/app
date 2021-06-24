@@ -2,11 +2,13 @@ import {GetDoc, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 
 export const GetUserMapInfo = StoreAccessor(s=>(userID: string, mapID: string)=>{
 	if (userID == null) return null;
-	return GetDoc({}, a=>a.userMapInfo.get(userID))?.maps.get(mapID);
+	//return GetDoc({}, a=>a.userMapInfo.get(userID))?.maps.get(mapID);
+	return null;
 });
 export const GetUserLayerStatesForMap = StoreAccessor(s=>(userID: string, mapID: string)=>{
 	if (userID == null) return null;
-	return GetDoc({}, a=>a.userMapInfo.get(userID))?.maps.get(mapID)?.layerStates;
+	//return GetDoc({}, a=>a.userMapInfo.get(userID))?.maps.get(mapID)?.layerStates;
+	return null;
 });
 export const GetUserLayerStateForMap = StoreAccessor(s=>(userID: string, mapID: string, layerID: string)=>{
 	/* if (userID == null) return null;

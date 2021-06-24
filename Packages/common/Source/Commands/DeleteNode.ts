@@ -99,12 +99,12 @@ export class DeleteNode extends Command<{mapID?: string, nodeID: string, withCon
 		}
 
 		// delete placement in layer
-		if (this.oldData.layerPlusAnchorParents) {
+		/*if (this.oldData.layerPlusAnchorParents) {
 			for (const layerPlusAnchorStr of CE(this.oldData.layerPlusAnchorParents).VKeys()) {
 				const [layerID, anchorNodeID] = layerPlusAnchorStr.split("+");
 				updates[`layers/${layerID}/.nodeSubnodes/.${anchorNodeID}/.${nodeID}`] = null;
 			}
-		}
+		}*/
 
 		// delete revisions
 		for (const revision of this.oldRevisions) {

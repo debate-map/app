@@ -12,9 +12,9 @@ export function ValidateDBData(data: GraphDBShape) {
 	ValidateCollection(data.layers, "Layer");
 	ValidateCollection(data.maps, "Map");
 	ValidateCollection(data.nodes, "MapNode");
-	ValidateCollection(data.nodePhrasings, "MapNodePhrasing");
+	//ValidateCollection(data.nodePhrasings, "MapNodePhrasing");
 	ValidateCollection(data.nodeRevisions, "MapNodeRevision");
 	ValidateCollection(data.terms, "Term");
-	ValidateCollection(data.timelines, "Timeline");
-	ValidateCollection(data.timelineSteps, "TimelineStep");
+	//ValidateCollection(data.timelines, "Timeline");
+	//ValidateCollection(data.timelineSteps, "TimelineStep");
 }

@@ -8,7 +8,6 @@ import {IsUserCreatorOrMod} from "dm_common";
 import {MeID} from "dm_common";
 import {GetNodeDisplayText} from "dm_common";
 import {DeleteNode} from "dm_common";
-import {IsNodeSubnode} from "dm_common";
 import {MI_SharedProps} from "../NodeUI_Menu";
 
 @Observer
@@ -26,7 +25,8 @@ export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 				style={styles.vMenuItem} onClick={e=>{
 					if (e.button != 0) return;
 
-					const contextStr = IsNodeSubnode(node) ? ", and its placement in-layer" : ", and its link with 1 parent";
+					//const contextStr = IsNodeSubnode(node) ? ", and its placement in-layer" : ", and its link with 1 parent";
+					const contextStr = ", and its link with 1 parent";
 
 					ShowMessageBox({
 						title: `Delete "${nodeText}"`, cancelButton: true,

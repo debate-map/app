@@ -10,7 +10,8 @@ import {TimelineStep} from "./timelineSteps/@TimelineStep";
 } */
 export const GetTimeline = StoreAccessor(s=>(id: string): Timeline=>{
 	if (id == null) return null;
-	return GetDoc({}, a=>a.timelines.get(id));
+	//return GetDoc({}, a=>a.timelines.get(id));
+	return null;
 });
 
 export function GetMapTimelineIDs(map: Map) {

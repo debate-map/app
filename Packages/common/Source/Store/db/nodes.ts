@@ -66,12 +66,12 @@ export function GetChildCount(node: MapNode) {
 }
 
 export function IsRootNode(node: MapNode) {
-	if (IsNodeSubnode(node)) return false;
+	//if (IsNodeSubnode(node)) return false;
 	return node.type == MapNodeType.Category && GetParentCount(node) == 0;
 }
-export function IsNodeSubnode(node: MapNode) {
+/*export function IsNodeSubnode(node: MapNode) {
 	return node.layerPlusAnchorParents != null;
-}
+}*/
 
 export function GetParentPath(childPath: string) {
 	const childPathNodes = SplitStringBySlash_Cached(childPath);
@@ -295,14 +295,14 @@ export const ForCut_GetError = StoreAccessor(s=>(userID: string, node: MapNodeL2
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not its owner. (or a mod)`;
 	//if (!asPartOfCut && (node.parents || {}).VKeys().length <= 1) return `${baseText}doing so would orphan it. Try deleting it instead.`;
 	if (IsRootNode(node)) return `${baseText}it's the root-node of a map.`;
-	if (IsNodeSubnode(node)) return `${baseText}it's a subnode. Try deleting it instead.`;
+	//if (IsNodeSubnode(node)) return `${baseText}it's a subnode. Try deleting it instead.`;
 	return null;
 });
 
 export const ForCopy_GetError = StoreAccessor(s=>(userID: string, node: MapNode)=>{
 	if (!CanGetBasicPermissions(userID)) return "You're not signed in, or lack basic permissions.";
 	if (IsRootNode(node)) return "Cannot copy the root-node of a map.";
-	if (IsNodeSubnode(node)) return "Cannot copy a subnode.";
+	//if (IsNodeSubnode(node)) return "Cannot copy a subnode.";
 	return null;
 });
 

@@ -7,7 +7,7 @@ import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProp
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView";
 import {ES} from "Utils/UI/GlobalStyles";
-import {AddNodeRevision, GetParentNode, IsNodeSubnode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, CanEditNode, Map} from "dm_common";
+import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, CanEditNode, Map} from "dm_common";
 import {InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, VReactMarkdown_Remarkable} from "web-vcore";
 import React from "react";
 import {NodeMathUI} from "../NodeMathUI";
@@ -94,7 +94,7 @@ export class TitlePanel extends BaseComponentPlus(
 
 		const nodeView = GetNodeView(map._key, path);
 		const latex = node.current.equation && node.current.equation.latex;
-		const isSubnode = IsNodeSubnode(node);
+		//const isSubnode = IsNodeSubnode(node);
 
 		const displayText = GetNodeDisplayText(node, path);
 		const equationNumber = node.current.equation ? GetEquationStepNumber(path) : null;
@@ -148,7 +148,7 @@ export class TitlePanel extends BaseComponentPlus(
 			<div {...FilterOutUnrecognizedProps(rest, "div")}
 				style={E(
 					{
-						position: "relative", cursor: "pointer", fontSize: GetFontSizeForNode(node, isSubnode),
+						position: "relative", cursor: "pointer", fontSize: GetFontSizeForNode(node/*, isSubnode*/),
 						marginTop: !latex && GetSegmentsForTerms(newTitle, termsToSearchFor).length > 1 ? -2 : 0, // if has terms in text, bump up a bit (to offset bump-down from <sup> elements)
 					},
 					style,
@@ -160,7 +160,7 @@ export class TitlePanel extends BaseComponentPlus(
 				{!editing &&
 					<span style={ES(
 						{position: "relative", whiteSpace: "initial"},
-						isSubnode && {margin: "4px 0 1px 0"},
+						//isSubnode && {margin: "4px 0 1px 0"},
 						missingTitleStrings.Contains(newTitle) && {color: "rgba(255,255,255,.3)"},
 					)}>
 						{latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick} termsToSearchFor={termsToSearchFor}/>}
@@ -169,7 +169,7 @@ export class TitlePanel extends BaseComponentPlus(
 				{editing &&
 					<Row style={E(
 						{position: "relative", whiteSpace: "initial", alignItems: "stretch"},
-						isSubnode && {margin: "4px 0 1px 0"},
+						//isSubnode && {margin: "4px 0 1px 0"},
 					)}>
 						{!applyingEdit &&
 							<TextArea required={true} pattern={MapNodeRevision_titlePattern} allowLineBreaks={false} autoSize={true} style={ES({flex: 1})}

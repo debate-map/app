@@ -17,7 +17,7 @@ export class DeleteMap extends Command<{mapID: string}, {}> {
 		const {mapID} = this.payload;
 		this.oldData = GetMap(mapID);
 		AssertUserCanDelete(this, this.oldData);
-		this.userMapInfoSets = GetDocs({}, a=>a.userMapInfo) || [];
+		//this.userMapInfoSets = GetDocs({}, a=>a.userMapInfo) || [];
 
 		this.sub_deleteNode = this.sub_deleteNode ?? new DeleteNode({mapID, nodeID: this.oldData.rootNode}).MarkAsSubcommand(this);
 		this.sub_deleteNode.asPartOfMapDelete = true;
@@ -31,14 +31,14 @@ export class DeleteMap extends Command<{mapID: string}, {}> {
 
 		const newUpdates = {};
 		newUpdates[`maps/${mapID}`] = null;
-		for (const userMapInfoSet of this.userMapInfoSets) {
+		/*for (const userMapInfoSet of this.userMapInfoSets) {
 			const userID = userMapInfoSet._key;
 			for (const {key: mapID2, value: userMapInfo} of CE(userMapInfoSet.maps).Pairs()) {
 				if (mapID2 == mapID) {
 					newUpdates[`userMapInfo/${userID}/.${mapID}`] = null;
 				}
 			}
-		}
+		}*/
 		// delete entry in mapNodeEditTimes
 		newUpdates[`mapNodeEditTimes/${mapID}`] = null;
 		updates = MergeDBUpdates(updates, newUpdates);

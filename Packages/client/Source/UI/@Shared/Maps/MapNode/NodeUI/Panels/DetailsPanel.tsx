@@ -8,7 +8,7 @@ import {GetAsync} from "web-vcore/nm/mobx-graphlink";
 import _ from "lodash";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
 import {MapNodeL3} from "dm_common";
-import {GetParentNodeL3, IsNodeSubnode, GetParentNodeID} from "dm_common";
+import {GetParentNodeL3, GetParentNodeID} from "dm_common";
 import {GetLinkUnderParent, IsPremiseOfSinglePremiseArgument} from "dm_common";
 import {GetUser, MeID} from "dm_common";
 import {CanEditNode, IsUserCreatorOrMod} from "dm_common";
@@ -27,10 +27,10 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 		const link = GetLinkUnderParent(node._key, parentNode);
 		const creator = GetUser(node.creator);
 
-		const isSubnode = IsNodeSubnode(node);
+		//const isSubnode = IsNodeSubnode(node);
 
 		// if parent-node not loaded yet, don't render yet
-		if (!isSubnode && path.includes("/") && parentNode == null) return null;
+		if (/*!isSubnode &&*/ path.includes("/") && parentNode == null) return null;
 
 		// const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
 		const canEdit = CanEditNode(MeID(), node._key);

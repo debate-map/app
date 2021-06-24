@@ -6,7 +6,8 @@ import {GetNode, GetNodeChildren} from "./nodes";
 
 export const GetTimelineStep = StoreAccessor(s=>(id: string): TimelineStep=>{
 	if (id == null) return null;
-	return GetDoc({}, a=>a.timelineSteps.get(id));
+	//return GetDoc({}, a=>a.timelineSteps.get(id));
+	return null;
 });
 export const GetTimelineSteps = StoreAccessor(s=>(timeline: Timeline, emptyForLoading = true): TimelineStep[]=>{
 	const steps = (timeline.steps || []).map(id=>GetTimelineStep(id));

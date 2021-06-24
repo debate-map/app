@@ -4,7 +4,7 @@ import {GetMedia} from "../media";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media";
 import {RatingType} from "../nodeRatings/@RatingType";
 import {GetNodeRevision} from "../nodeRevisions";
-import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, HolderType, IsNodeSubnode, GetNodeChildrenL3} from "../nodes";
+import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, HolderType, GetNodeChildrenL3} from "../nodes";
 import {ChildEntry, ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode";
 import {MapNodeRevision, TitlesMap, TitleKey_values} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
@@ -27,14 +27,15 @@ export function PreProcessLatex(text: string) {
 	return text;
 }
 
-export function GetFontSizeForNode(node: MapNodeL2, isSubnode = false) {
+export function GetFontSizeForNode(node: MapNodeL2/*, isSubnode = false*/) {
 	if (node.current.fontSizeOverride) return node.current.fontSizeOverride;
 	if (node.current.equation) return node.current.equation.latex ? 14 : 13;
-	if (isSubnode) return 11;
+	//if (isSubnode) return 11;
 	return 14;
 }
-export function GetPaddingForNode(node: MapNodeL2, isSubnode = false) {
-	return isSubnode ? "1px 4px 2px" : "5px 5px 4px";
+export function GetPaddingForNode(node: MapNodeL2/*, isSubnode = false*/) {
+	//return isSubnode ? "1px 4px 2px" : "5px 5px 4px";
+	return "5px 5px 4px";
 }
 export type RatingTypeInfo = {type: RatingType, main?: boolean, collapsed?: boolean};
 export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
@@ -160,13 +161,13 @@ export const GetNodeL3 = StoreAccessor(s=>(path: string, tagsToIgnore?: string[]
 		if (displayPolarity == null) return null;
 	}
 
-	const isSubnode = IsNodeSubnode(node);
-	if (!isSubnode) {
-		const parent = GetParentNode(path);
-		if (parent == null && path.includes("/")) return null;
-		var link = GetLinkUnderParent(node._key, parent, true, tagsToIgnore);
-		if (link == null && path.includes("/")) return null;
-	}
+	/*const isSubnode = IsNodeSubnode(node);
+	if (!isSubnode) {*/
+	const parent = GetParentNode(path);
+	if (parent == null && path.includes("/")) return null;
+	var link = GetLinkUnderParent(node._key, parent, true, tagsToIgnore);
+	if (link == null && path.includes("/")) return null;
+	//}
 
 	const nodeL3 = AsNodeL3(node, displayPolarity, link);
 	// return CachedTransform('GetNodeL3', [path], nodeL3, () => nodeL3);

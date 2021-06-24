@@ -1,3 +1,4 @@
+import {emptyArray} from "web-vcore/nm/js-vextensions";
 import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {MapNodePhrasing} from "./nodePhrasings/@MapNodePhrasing";
 
@@ -5,12 +6,13 @@ export const GetNodePhrasings = StoreAccessor(s=>(nodeID: string): MapNodePhrasi
 	/* const entryMap = GetData({ collection: true }, 'nodePhrasings');
 	return entryMap ? entryMap.VValues(true).filter((a) => a && a.node == nodeID) : []; */
 	// store.fire.db.nodePhrasings.Get();
-	return GetDocs({
+	/*return GetDocs({
 		//queryOps: [new WhereOp("node", "==", nodeID)],
 		params: {filter: {
 			node: {equalTo: nodeID},
 		}}
-	}, a=>a.nodePhrasings);
+	}, a=>a.nodePhrasings);*/
+	return emptyArray;
 });
 
 /* export function GetPhrasings(nodeID: string): MapNodePhrasing[] {
@@ -18,5 +20,6 @@ export const GetNodePhrasings = StoreAccessor(s=>(nodeID: string): MapNodePhrasi
 	return CachedTransform('GetPhrasings', [], entryMap, () => (entryMap ? entryMap.VValues(true) : []));
 } */
 export const GetNodePhrasing = StoreAccessor(s=>(phrasingID: string): MapNodePhrasing=>{
-	return GetDoc({}, a=>a.nodePhrasings.get(phrasingID));
+	//return GetDoc({}, a=>a.nodePhrasings.get(phrasingID));
+	return null;
 });

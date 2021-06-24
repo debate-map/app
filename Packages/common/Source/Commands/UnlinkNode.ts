@@ -1,6 +1,6 @@
 import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
-import {GetNode, IsRootNode, IsNodeSubnode} from "../Store/db/nodes";
+import {GetNode, IsRootNode} from "../Store/db/nodes";
 import {GetNodeL2} from "../Store/db/nodes/$node";
 import {IsUserCreatorOrMod} from "../Store/db/users/$user";
 import {CE} from "web-vcore/nm/js-vextensions";
@@ -28,7 +28,7 @@ export class UnlinkNode extends Command<{mapID: string, parentID: string, childI
 		AssertV(IsUserCreatorOrMod(this.userInfo.id, oldData), `${baseText}you are not its owner. (or a mod)`);
 		AssertV(this.allowOrphaning || CE(oldData.parents || {}).VKeys().length > 1, `${baseText}doing so would orphan it. Try deleting it instead.`);
 		AssertV(!IsRootNode(oldData), `${baseText}it's the root-node of a map.`);
-		AssertV(!IsNodeSubnode(oldData), `${baseText}it's a subnode. Try deleting it instead.`);
+		//AssertV(!IsNodeSubnode(oldData), `${baseText}it's a subnode. Try deleting it instead.`);
 	}
 
 	GetDBUpdates() {
