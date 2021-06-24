@@ -165,6 +165,7 @@ module.exports.up = async(knex: Knex_Transaction)=>{
 	});
 
 	await knex.schema.createTable(`${v}nodes`, t=>{
+		t.comment("@name MapNode"); // avoids conflict with the default "Node" type that Postgraphile defines for Relay
 		t.text("id").primary();
 		t.text("accessPolicy").references("id").inTable(`${v}accessPolicies`).DeferRef();
 		t.text("type");
