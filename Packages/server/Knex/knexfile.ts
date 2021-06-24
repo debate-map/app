@@ -26,6 +26,7 @@ module.exports = {
 			tableName: "knex_migrations",
 			//directory: "./Knex/Migrations", // paths are relative to "Packages/server"
 			directory: `${__dirname}/Migrations`,
+			disableTransactions: true, // we need full control
 		},
 		//acquireConnectionTimeout: 3000,
 	},
