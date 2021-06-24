@@ -1,5 +1,5 @@
 import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
-import {AddAJVExtraCheck, AddSchema, GetSchemaJSON, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink";
+import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink";
 import {MapNodeRevision} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
 
@@ -20,73 +20,49 @@ export enum ClaimForm {
 	YesNoQuestion = 30,
 }
 
+//export const MapNode_id = UUID_regex;
+//export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
+@MGLClass({table: "nodes"}, null, t=>{
+	t.comment("@name MapNode"); // avoids conflict with the default "Node" type that Postgraphile defines for Relay
+})
 export class MapNode {
 	constructor(initialData: {type: MapNodeType} & Partial<MapNode>) {
 		CE(this).VSet(initialData);
 	}
 
-	_key?: string;
+	@DB((t,n)=>t.text(n).primary())
+	@Field({oneOf: GetValues_ForSchema(MapNodeType)})
+	id: string;
+
+	@DB((t,n)=>t.text(n).references("id").inTable(`{v}accessPolicies`).DeferRef())
+	@Field({type: "string"})
+	accessPolicy: string;
+
+	@DB((t,n)=>t.text(n))
+	@Field({$ref: "MapNodeType"}, {req: true})
 	type?: MapNodeType;
+
+	@DB((t,n)=>t.text(n).references("id").inTable(`{v}users`).DeferRef())
+	@Field({type: "string"}, {req: true})
 	creator?: string;
+
+	@DB((t,n)=>t.bigInteger(n))
+	@Field({type: "number"}, {req: true})
 	createdAt: number;
+
+	@DB((t,n)=>t.text(n).references("id").inTable(`{v}maps`).DeferRef())
+	@Field({$ref: "UUID"})
 	rootNodeForMap?: string;
-	ownerMapID?: string;
-
-	currentRevision: string;
-
-	parents: ParentSet;
-	children: ChildSet;
-	childrenOrder: UUID[];
-	//childOrderType = ChildOrderType.ByRating;
-	//childrenOrder: UUID[]; // only set when childOrderType is manual
-	// talkRoot: number;
-	multiPremiseArgument?: boolean;
 
 	// if subnode
 	//layerPlusAnchorParents: LayerPlusAnchorParentSet;
-	/* layerOwner: UUID;
-	layerAnchorNode: UUID; */
+	/*layerOwner: UUID;
+	layerAnchorNode: UUID;*/
 
 	// local-only
 	//informalArgumentsHolder?: boolean;
 	//premiseAddHelper?: boolean;
 }
-// export const MapNode_id = UUID_regex;
-// export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
-AddSchema("MapNode", {
-	properties: {
-		type: {oneOf: GetValues_ForSchema(MapNodeType)},
-		creator: {type: "string"},
-		createdAt: {type: "number"},
-		rootNodeForMap: {$ref: "UUID"},
-		ownerMapID: {$ref: "UUID"},
-
-		currentRevision: {type: "string"},
-
-		parents: {$ref: "ParentSet"},
-		children: {$ref: "ChildSet"},
-		childrenOrderType: {$ref: "ChildOrderType"},
-		childrenOrder: {items: {$ref: "UUID"}},
-		// talkRoot: {type: "number"},
-		multiPremiseArgument: {type: "boolean"},
-
-		layerPlusAnchorParents: {$ref: "LayerPlusAnchorParentSet"},
-		// layerOwner: { $ref: 'UUID' },
-	},
-	required: ["type", "creator", "createdAt", "currentRevision"],
-	/* allOf: [
-		// if an argument, require "childrenOrder" prop
-		{
-			if: {
-				properties: {
-					type: {const: MapNodeType.Argument},
-				}
-			},
-			then: {required: ["childrenOrder"]},
-			else: {prohibited: ["childrenOrder"]}
-		}
-	], */
-});
 AddSchema("MapNode_Partial", (()=>{
 	const schema = GetSchemaJSON("MapNode");
 	// schema.required = (schema.required as string[]).Except('creator', 'createdAt');
@@ -94,13 +70,13 @@ AddSchema("MapNode_Partial", (()=>{
 	return schema;
 })());
 // disabled for now, simply because we haven't finished making all places that manipulate "MapNode.children" reliably update "MapNode.childrenOrder" as well
-/* AddAJVExtraCheck('MapNode', (node: MapNode) => {
+/*AddAJVExtraCheck('MapNode', (node: MapNode) => {
 	if (node.type == MapNodeType.Argument) {
 		if ((node.childrenOrder ? node.childrenOrder.length : 0) !== (node.children ? node.children.VKeys().length : 0)) {
 			return 'Children and childrenOrder lengths differ!';
 		}
 	}
-}); */
+});*/
 
 // helpers
 // export type MapNodeL2 = MapNode & {finalType: MapNodeType};

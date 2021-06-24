@@ -17,7 +17,7 @@ export const GetRootNodeID = StoreAccessor(s=>(mapID: string): string=>{
 export const GetMapEditorIDs = StoreAccessor(s=>(mapID: string): string[]=>{
 	const map = GetMap(mapID);
 	if (map == null) return null;
-	return map.editorIDs ?? emptyArray;
+	return map.editors ?? emptyArray;
 });
 export const GetMapEditors = StoreAccessor(s=>(mapID: string)=>{
 	return GetMapEditorIDs(mapID).map(id=>GetUser(id));

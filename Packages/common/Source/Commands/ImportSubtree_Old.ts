@@ -9,8 +9,8 @@ import {HasAdminPermissions} from "../Store/db/users/$user";
 import {AsNodeL1} from "../Store/db/nodes/$node";
 import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
 import {Source} from "../Store/db/nodeRevisions/@SourceChain";
-import {RatingType} from "../Store/db/nodeRatings/@RatingType";
-import {Rating} from "../Store/db/nodeRatings/@Rating";
+import {NodeRatingType} from "../Store/db/nodeRatings/@NodeRatingType";
+import {NodeRating} from "../Store/db/nodeRatings/@NodeRating";
 
 // for export from old site (see commented code in MI_ExportSubtree.tsx)
 /*export class ImportSubtree_Old extends Command<{
@@ -94,7 +94,7 @@ import {Rating} from "../Store/db/nodeRatings/@Rating";
 
 		if (importRatings && subtreeData.ratings) {
 			for (let {key: ratingType, value: ratingsByUser} of subtreeData.ratings.Pairs()) {
-				if (Validate("RatingType", ratingType) != null) continue;
+				if (Validate("NodeRatingType", ratingType) != null) continue;
 				for (let {key: userID, value: rating} of ratingsByUser.Pairs()) {
 					if (Validate("UserID", userID) != null) continue;
 					if (importRatings_userIDs != null && !importRatings_userIDs.Contains(userID)) continue;

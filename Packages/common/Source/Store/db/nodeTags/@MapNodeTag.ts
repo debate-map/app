@@ -1,42 +1,53 @@
-import {AddSchema, UUID_regex, GetSchemaJSON, Validate} from "web-vcore/nm/mobx-graphlink";
+import {AddSchema, UUID_regex, GetSchemaJSON, Validate, MGLClass, Field, DB} from "web-vcore/nm/mobx-graphlink";
 import {GetValues_ForSchema, ModifyString, CE} from "web-vcore/nm/js-vextensions";
 import {Polarity} from "../nodes/@MapNode";
 
+@MGLClass({table: "nodeTags"})
 export class MapNodeTag {
 	constructor(initialData: Partial<MapNodeTag>) {
 		CE(this).VSet(initialData);
 	}
 
-	_key?: string;
+	@DB((t,n)=>t.text(n).primary())
+	@Field({type: "string"})
+	id: string;
+
+	@DB((t,n)=>t.text(n).references("id").inTable(`{v}users`).DeferRef())
+	@Field({type: "string"}, {req: true})
 	creator: string;
+
+	@DB((t,n)=>t.bigInteger(n))
+	@Field({type: "number"}, {req: true})
 	createdAt: number;
 
+	//@Field({$ref: "MapNodeTagType"})
 	//type: MapNodeTagType;
+	//@Field({patternProperties: {[UUID_regex]: {type: "string"}}})
 	//nodes: {[key: string]: string};
+
+	@DB((t,n)=>t.specificType(n, "text[]"))
+	@Field({items: {$ref: "UUID"}}, {req: true})
 	nodes: string[];
 
 	// type-specific fields (ie. tag comps)
+	// ==========
+
+	@DB((t,n)=>t.jsonb(n))
+	@Field({$ref: "TagComp_MirrorChildrenFromXToY"})
 	mirrorChildrenFromXToY: TagComp_MirrorChildrenFromXToY;
+
+	@DB((t,n)=>t.jsonb(n))
+	@Field({$ref: "TagComp_XIsExtendedByY"})
 	xIsExtendedByY: TagComp_XIsExtendedByY;
+
+	@DB((t,n)=>t.jsonb(n))
+	@Field({$ref: "TagComp_MutuallyExclusiveGroup"})
 	mutuallyExclusiveGroup: TagComp_MutuallyExclusiveGroup;
+
+	@DB((t,n)=>t.jsonb(n))
+	@Field({$ref: "TagComp_RestrictMirroringOfX"})
 	restrictMirroringOfX: TagComp_RestrictMirroringOfX;
 }
-AddSchema("MapNodeTag", {
-	properties: {
-		creator: {type: "string"},
-		createdAt: {type: "number"},
-
-		//type: {$ref: "MapNodeTagType"},
-		//nodes: {patternProperties: {[UUID_regex]: {type: "string"}}},
-		nodes: {items: {$ref: "UUID"}},
-
-		mirrorChildrenFromXToY: {$ref: "TagComp_MirrorChildrenFromXToY"},
-		xIsExtendedByY: {$ref: "TagComp_XIsExtendedByY"},
-		mutuallyExclusiveGroup: {$ref: "TagComp_MutuallyExclusiveGroup"},
-		restrictMirroringOfX: {$ref: "TagComp_RestrictMirroringOfX"},
-	},
-	required: ["creator", "createdAt", "nodes"],
-});
 
 // tag comps
 // ==========

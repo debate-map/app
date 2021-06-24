@@ -85,7 +85,7 @@ export const CanEditNode = StoreAccessor(s=>(userID: string, nodeID: string): bo
 	if (editPerm.type == PermissionInfoType.MapEditors) {
 		if (revision.creator == userID) return true; // node-creator can always edit
 		const map = GetMap(node.ownerMapID);
-		return map?.editorIDs?.includes(userID) ?? false;
+		return map?.editors?.includes(userID) ?? false;
 	}
 	Assert(false, "Invalid permission-info-type.");
 });
@@ -114,7 +114,7 @@ export const CanContributeToNode = StoreAccessor(s=>(userID: string, nodeID: str
 	if (contributePerm.type == PermissionInfoType.MapEditors) {
 		if (revision.creator == userID) return true; // node-creator can always contribute
 		const map = GetMap(node.ownerMapID);
-		return map?.editorIDs?.includes(userID) ?? false;
+		return map?.editors?.includes(userID) ?? false;
 	}
 	Assert(false, "Invalid permission-info-type.");
 });

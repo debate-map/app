@@ -1,5 +1,5 @@
 import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
-import {AddSchema, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink";
+import {AddSchema, DB, MGLClass, GetSchemaJSON, Field} from "web-vcore/nm/mobx-graphlink";
 import {QuoteAttachment} from "../nodeRevisions/@QuoteAttachment";
 import {MapType} from "../maps/@Map";
 import {MediaAttachment} from "../nodeRevisions/@MediaAttachment";
@@ -49,8 +49,18 @@ AddSchema("PermissionInfo", {
 	required: ["type"],
 });
 
-export const MapNodeRevision_Defaultable_props = ["accessLevel", "votingDisabled", "permission_edit", "permission_contribute"] as const;
-export type MapNodeRevision_Defaultable = Pick<MapNodeRevision, "accessLevel" | "votingDisabled" | "permission_edit" | "permission_contribute">;
+@MGLClass()
+export class NodeRevisionDisplayDetails {
+	@Field({type: ["number", "null"]})
+	fontSizeOverride: number;
+	@Field({type: ["number", "null"]})
+	widthOverride: number;
+}
+
+/*export const MapNodeRevision_Defaultable_props = ["accessLevel", "votingDisabled", "permission_edit", "permission_contribute"] as const;
+export type MapNodeRevision_Defaultable = Pick<MapNodeRevision, "accessLevel" | "votingDisabled" | "permission_edit" | "permission_contribute">;*/
+export const MapNodeRevision_Defaultable_props = [] as const;
+export type MapNodeRevision_Defaultable = Pick<MapNodeRevision, never>;
 export function MapNodeRevision_Defaultable_DefaultsForMap(mapType: MapType): MapNodeRevision_Defaultable {
 	return {
 		accessLevel: AccessLevel.Basic,
@@ -60,81 +70,9 @@ export function MapNodeRevision_Defaultable_DefaultsForMap(mapType: MapType): Ma
 	};
 }
 
-export class MapNodeRevision {
-	constructor(initialData: Partial<MapNodeRevision>) {
-		CE(this).VSet(initialData);
-	}
-
-	_key?: string;
-	node: string; // probably todo: rename to nodeID
-	creator?: string; // probably todo: rename to creatorID
-	createdAt: number;
-	// updatedAt: number;
-	// approved = false;
-
-	// text
-	titles = {base: ""} as TitlesMap;
-	note: string;
-	termAttachments: TermAttachment[];
-	argumentType: ArgumentType;
-
-	// attachment
-	equation: EquationAttachment;
-	references: ReferencesAttachment;
-	quote: QuoteAttachment;
-	media: MediaAttachment;
-
-	// permissions
-	// only applied client-side; would need to be in protected branch of tree (or use a long, random, and unreferenced node-id) to be "actually" inaccessible
-	accessLevel = AccessLevel.Basic;
-	// voteLevel = AccessLevel.Basic;
-	votingDisabled: boolean;
-	permission_edit = new PermissionInfo({type: PermissionInfoType.Creator});
-	permission_contribute = new PermissionInfo({type: PermissionInfoType.Anyone});
-
-	// others
-	fontSizeOverride: number;
-	widthOverride: number;
-}
-// export const MapNodeRevision_titlePattern = `(^\\S$)|(^\\S.*\\S$)`; // must start and end with non-whitespace
+//export const MapNodeRevision_titlePattern = `(^\\S$)|(^\\S.*\\S$)`; // must start and end with non-whitespace
 export const MapNodeRevision_titlePattern = "^\\S.*$"; // must start with non-whitespace
-AddSchema("MapNodeRevision", {
-	properties: {
-		node: {type: "string"},
-		creator: {type: "string"},
-		createdAt: {type: "number"},
-		//approved: {type: "boolean"},
-
-		// text
-		titles: {
-			properties: {
-				// base: {pattern: MapNodeRevision_titlePattern}, negation: {pattern: MapNodeRevision_titlePattern}, yesNoQuestion: {pattern: MapNodeRevision_titlePattern},
-				base: {type: "string"}, negation: {type: "string"}, yesNoQuestion: {type: "string"},
-			},
-			// required: ["base", "negation", "yesNoQuestion"],
-		},
-		note: {type: ["null", "string"]}, // add null-type, for later when the payload-validation schema is derived from the main schema
-		termAttachments: {items: {$ref: "TermAttachment"}},
-		argumentType: {$ref: "ArgumentType"},
-
-		// attachment
-		equation: {$ref: "EquationAttachment"},
-		references: {$ref: "ReferencesAttachment"},
-		quote: {$ref: "QuoteAttachment"},
-		media: {$ref: "MediaAttachment"},
-
-		// permissions
-		accessLevel: {oneOf: GetValues_ForSchema(AccessLevel).concat({const: null})},
-		votingDisabled: {type: ["null", "boolean"]},
-		// voteLevel: { oneOf: GetValues_ForSchema(AccessLevel).concat({ const: null }) }, // not currently used
-		permission_edit: {$ref: "PermissionInfo"},
-		permission_contribute: {$ref: "PermissionInfo"},
-
-		// others
-		fontSizeOverride: {type: ["number", "null"]},
-		widthOverride: {type: ["number", "null"]},
-	},
-	required: ["node", "creator", "createdAt"],
+@MGLClass({table: "nodeRevisions"}, {
 	allOf: [
 		// if not an argument or content-node, require "titles" prop
 		{
@@ -142,7 +80,85 @@ AddSchema("MapNodeRevision", {
 			then: {required: ["titles"]},
 		},
 	],
-});
+})
+export class MapNodeRevision {
+	constructor(initialData: Partial<MapNodeRevision>) {
+		CE(this).VSet(initialData);
+	}
+
+	@DB((t,n)=>t.text(n).primary())
+	@Field({type: "string"})
+	id: string;
+
+	@DB((t,n)=>t.text(n).references("id").inTable(`{v}nodes`).DeferRef())
+	@Field({type: "string"}, {req: true})
+	node: string;
+
+	@DB((t,n)=>t.text(n).references("id").inTable(`{v}users`).DeferRef())
+	@Field({type: "string"}, {req: true})
+	creator?: string;
+
+	@DB((t,n)=>t.bigInteger(n))
+	@Field({type: "number"}, {req: true})
+	createdAt: number;
+
+	//updatedAt: number;
+	//approved = false;
+
+	// text
+	@DB((t,n)=>t.jsonb(n))
+	@Field({
+		properties: {
+			// base: {pattern: MapNodeRevision_titlePattern}, negation: {pattern: MapNodeRevision_titlePattern}, yesNoQuestion: {pattern: MapNodeRevision_titlePattern},
+			base: {type: "string"}, negation: {type: "string"}, yesNoQuestion: {type: "string"},
+		},
+		// required: ["base", "negation", "yesNoQuestion"],
+	})
+	titles = {base: ""} as TitlesMap;
+
+	@DB((t,n)=>t.text(n))
+	@Field({type: ["null", "string"]}) // add null-type, for later when the payload-validation schema is derived from the main schema
+	note: string;
+
+	@DB((t,n)=>t.jsonb(n))
+	@Field({$ref: NodeRevisionDisplayDetails.name})
+	displayDetails: NodeRevisionDisplayDetails;
+
+	@DB((t,n)=>t.text(n))
+	@Field({$ref: "ArgumentType"})
+	argumentType: ArgumentType;
+
+	@DB((t,n)=>t.text(n))
+	@Field({type: "boolean"})
+	multiPremiseArgument: boolean;
+
+	@DB((t,n)=>t.boolean(n))
+	@Field({type: "boolean"})
+	votingEnabled: boolean;
+
+	// attachments
+	// ==========
+
+	@DB((t,n)=>t.specificType(n, "text[]"))
+	@Field({items: {$ref: TermAttachment.name}})
+	termAttachments: TermAttachment[];
+
+	@DB((t,n)=>t.jsonb(n))
+	@Field({$ref: EquationAttachment.name})
+	equation: EquationAttachment;
+
+	@DB((t,n)=>t.jsonb(n))
+	@Field({$ref: ReferencesAttachment.name})
+	references: ReferencesAttachment;
+
+	@DB((t,n)=>t.jsonb(n))
+	@Field({$ref: QuoteAttachment.name})
+	quote: QuoteAttachment;
+
+	@DB((t,n)=>t.jsonb(n))
+	@Field({$ref: MediaAttachment.name})
+	media: MediaAttachment;
+}
 AddSchema("MapNodeRevision_Partial", (()=>{
 	const schema = GetSchemaJSON("MapNodeRevision");
 	// schema.required = (schema.required as string[]).Except('creator', 'createdAt');

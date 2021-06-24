@@ -1,18 +1,18 @@
 import {AddSchema, AssertValidate, Command, GenerateUUID, Assert, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {emptyArray_forLoading} from "web-vcore/nm/js-vextensions";
-import {RatingType} from "../Store/db/nodeRatings/@RatingType";
-import {Rating} from "../Store/db/nodeRatings/@Rating";
+import {NodeRatingType} from "../Store/db/nodeRatings/@NodeRatingType";
+import {NodeRating} from "../Store/db/nodeRatings/@NodeRating";
 import {GetRatings} from "../Store/db/nodeRatings";
 
-export class SetNodeRating extends Command<{nodeID: string, ratingType: RatingType, value: number}, {}> {
-	oldRating: Rating;
+export class SetNodeRating extends Command<{nodeID: string, ratingType: NodeRatingType, value: number}, {}> {
+	oldRating: NodeRating;
 	newID: string;
-	newRating: Rating;
+	newRating: NodeRating;
 	Validate() {
 		AssertValidate({
 			properties: {
 				nodeID: {type: "string"},
-				ratingType: {$ref: "RatingType"},
+				ratingType: {$ref: "NodeRatingType"},
 				value: {type: ["number", "null"]},
 			},
 			required: ["nodeID", "ratingType", "value"],
@@ -26,9 +26,9 @@ export class SetNodeRating extends Command<{nodeID: string, ratingType: RatingTy
 
 		if (value != null) {
 			this.newID = GenerateUUID();
-			this.newRating = new Rating({
+			this.newRating = new NodeRating({
 				node: nodeID, type: ratingType, user: this.userInfo.id,
-				updated: Date.now(),
+				editedAt: Date.now(),
 				value,
 			});
 		}

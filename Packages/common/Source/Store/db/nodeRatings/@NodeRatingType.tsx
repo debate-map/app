@@ -8,18 +8,18 @@ import {ArgumentType} from "../nodes/@MapNodeRevision";
 // export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 // export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
 // export const ratingTypes = ["significance", "neutrality", "probability", "truth", "impact", "strength"];
-export const ratingTypes = ["significance", "neutrality", "truth", "relevance", "impact"];
-export type RatingType = "significance" | "neutrality" | "truth" | "relevance" | "impact";
-AddSchema("RatingType", {
-	oneOf: ratingTypes.map(a=>({const: a})),
+export const nodeRatingTypes = ["significance", "neutrality", "truth", "relevance", "impact"];
+export type NodeRatingType = "significance" | "neutrality" | "truth" | "relevance" | "impact";
+AddSchema("NodeRatingType", {
+	oneOf: nodeRatingTypes.map(a=>({const: a})),
 });
 
 export function PropNameToTitle(propName: string) {
 	return ModifyString(propName, m=>[m.lowerUpper_to_lowerSpaceLower, m.startLower_to_upper]);
 }
 
-export function GetRatingTypeInfo(ratingType: RatingType, node: MapNodeL2, parent: MapNodeL3, path: string) {
-	const link = GetLinkUnderParent(node._key, parent);
+export function GetRatingTypeInfo(ratingType: NodeRatingType, node: MapNodeL2, parent: MapNodeL3, path: string) {
+	const link = GetLinkUnderParent(node.id, parent);
 	const displayPolarity = link ? GetDisplayPolarity(link.polarity, GetNodeForm(parent)) : Polarity.Supporting;
 	const isMultiPremiseArgument = IsMultiPremiseArgument(node);
 

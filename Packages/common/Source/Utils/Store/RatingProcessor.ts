@@ -1,12 +1,12 @@
 import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from "web-vcore/nm/js-vextensions";
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetRatingAverage, GetRatingValue, GetRatings} from "../../Store/db/nodeRatings";
-import {Rating} from "../../Store/db/nodeRatings/@Rating";
+import {NodeRating} from "../../Store/db/nodeRatings/@NodeRating";
 import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../Store/db/nodes/$node";
 import {ClaimForm, MapNodeL2} from "../../Store/db/nodes/@MapNode";
 import {ArgumentType} from "../../Store/db/nodes/@MapNodeRevision";
 
-export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[], userID: string): Rating=>{
+export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[], userID: string): NodeRating=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading
 	if (premises.length == 0) return null;
 
@@ -47,7 +47,7 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 		node: argument._key,
 		type: "impact",
 		user: userID,
-		updated: null,
+		editedAt: null,
 		value: CE(result * 100).RoundTo(1),
 	};
 });
@@ -64,7 +64,7 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 } */
 
 // export function GetArgumentImpactPseudoRatingSet(argument: MapNodeL2, premises: MapNodeL2[]): {[key: string]: Rating} {
-export const GetArgumentImpactPseudoRatings = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[]): Rating[]=>{
+export const GetArgumentImpactPseudoRatings = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[]): NodeRating[]=>{
 	if (CE(premises).Any(a=>a == null)) return emptyArray_forLoading as any; // must still be loading
 	if (premises.length == 0) return emptyArray as any;
 
@@ -97,7 +97,7 @@ export const GetArgumentImpactPseudoRatings = StoreAccessor(s=>(argument: MapNod
 		}
 	}
 
-	const result = [] as Rating[];
+	const result = [] as NodeRating[];
 	for (const userID of CE(usersWhoRatedArgOrPremise).VKeys()) {
 		result.push(GetArgumentImpactPseudoRating(argument, premises, userID));
 	}

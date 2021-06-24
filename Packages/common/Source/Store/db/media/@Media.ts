@@ -1,6 +1,5 @@
 import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
-import {AddSchema} from "web-vcore/nm/mobx-graphlink";
-import {Source, SourceChain} from "../nodeRevisions/@SourceChain";
+import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink";
 
 export enum MediaType {
 	Image = 10,
@@ -12,34 +11,45 @@ export function GetNiceNameForMediaType(type: MediaType) {
 	return MediaType[type].toLowerCase();
 }
 
+export const Media_namePattern = '^[a-zA-Z0-9 ,\'"%\\-()\\/]+$';
+//export const Media_urlPattern = "^https?://[^\\s/$.?#]+\\.[^\\s]+\\.(jpg|jpeg|gif|png)$";
+@MGLClass({table: "medias"})
 export class Media {
 	constructor(initialData: {name: string, type: MediaType} & Partial<Media>) {
 		CE(this).VSet(initialData);
 		// this.createdAt = Date.now();
 	}
 
-	_key: string;
+	@DB((t,n)=>t.text(n).primary())
+	@Field({type: "string"})
+	id: string;
+
+	@DB((t,n)=>t.text(n).references("id").inTable(`{v}accessPolicies`).DeferRef())
+	@Field({type: "string"}, {req: true})
+	accessPolicy: string;
+
+	@DB((t,n)=>t.text(n).references("id").inTable(`{v}users`).DeferRef())
+	@Field({type: "string"}, {req: true})
 	creator: string;
+
+	@DB((t,n)=>t.bigInteger(n))
+	@Field({type: "number"}, {req: true})
 	createdAt: number;
 
+	@DB((t,n)=>t.text(n))
+	@Field({type: "string", pattern: Media_namePattern}, {req: true})
 	name: string;
+
+	@DB((t,n)=>t.text(n))
+	@Field({$ref: "MediaType"}, {req: true})
 	type: MediaType;
+
+	@DB((t,n)=>t.text(n))
+	//@Field({pattern: Media_urlPattern})
+	@Field({type: "string"}, {req: true}) // allow overriding url pattern; it just highlights possible mistakes
 	url = "";
+
+	@DB((t,n)=>t.text(n))
+	@Field({type: "string"}, {req: true})
 	description: string;
-
 }
-export const Media_namePattern = '^[a-zA-Z0-9 ,\'"%\\-()\\/]+$';
-//export const Media_urlPattern = "^https?://[^\\s/$.?#]+\\.[^\\s]+\\.(jpg|jpeg|gif|png)$";
-AddSchema("Media", {
-	properties: {
-		creator: {type: "string"},
-		createdAt: {type: "number"},
-
-		name: {type: "string", pattern: Media_namePattern},
-		type: {$ref: "MediaType"},
-		// url: { pattern: Media_urlPattern },
-		url: {type: "string"}, // allow overriding url pattern; it just highlights possible mistakes
-		description: {type: "string"},
-	},
-	required: ["name", "type", "url", "description", "creator", "createdAt"],
-});

@@ -1,21 +1,19 @@
-import {Collection_Closed, Collection, Col} from "web-vcore/nm/mobx-graphlink";
-import {GeneralData} from "./db/general";
-import {Media} from "./db/media/@Media";
+import {Collection} from "web-vcore/nm/mobx-graphlink";
+import {AccessPolicy} from "./db/accessPolicies/@AccessPolicy.js";
 import {Layer} from "./db/layers/@Layer";
-import {NodeEditTimes} from "./db/mapNodeEditTimes";
+import {Map_NodeEdit} from "./db/mapNodeEdits/@MapNodeEdit";
 import {Map} from "./db/maps/@Map";
-import {MapNodePhrasing} from "./db/nodePhrasings/@MapNodePhrasing";
+import {Media} from "./db/media/@Media";
+import {NodeParentChildLink} from "./db/nodeParentChildLinks/@NodeParentChildLink.js";
+import {NodeRating} from "./db/nodeRatings/@NodeRating";
 import {MapNode} from "./db/nodes/@MapNode";
 import {MapNodeRevision} from "./db/nodes/@MapNodeRevision";
+import {MapNodeTag} from "./db/nodeTags/@MapNodeTag";
+import {Share} from "./db/shares/@Share";
 import {Term} from "./db/terms/@Term";
-import {Timeline} from "./db/timelines/@Timeline";
-import {TimelineStep} from "./db/timelineSteps/@TimelineStep";
-import {UserMapInfoSet} from "./db/userMapInfo/@UserMapInfo";
 import {User} from "./db/users/@User";
 import {User_Private} from "./db/users_private/@User_Private";
-import {MapNodeTag} from "./db/nodeTags/@MapNodeTag";
-import {Rating} from "./db/nodeRatings/@Rating";
-import {Share} from "./db/shares/@Share";
+import {VisibilityDirective} from "./db/visibilityDirectives/@VisibilityDirective.js";
 
 // manually import these, since otherwise they're never runtime-imported
 require("./db/users_private/@User_Private");
@@ -30,39 +28,30 @@ export class GraphDBShape {
 		// feedback: FeedbackDBShape;
 	}>;*/
 
-	// core tables
-	// ==========
-	
-	@Col("Media") medias: Collection<Media>;
-	@Col("Layer") layers: Collection<Layer>;
-	@Col("Map") maps: Collection<Map>;
-	@Col("NodeEditTimes") mapNodeEditTimes: Collection<NodeEditTimes>;
-	@Col("MapNode") nodes: Collection<MapNode>;
+	accessPolicies: Collection<AccessPolicy>;
+	visibilityDirectives: Collection<VisibilityDirective>;
+	medias: Collection<Media>;
+	layers: Collection<Layer>;
+	maps: Collection<Map>;
+	mapNodeEdits: Collection<Map_NodeEdit>;
+	nodes: Collection<MapNode>;
 	//nodeExtras: Collection<any>;
-	@Col("Rating") nodeRatings: Collection<Rating>;
-	@Col("MapNodeRevision") nodeRevisions: Collection<MapNodeRevision>;
+	nodeRatings: Collection<NodeRating>;
+	nodeRevisions: Collection<MapNodeRevision>;
 	//nodeStats: Collection<MapNodeStats>;
 	//nodeViewers: Collection<ViewerSet>; // removed due to privacy concerns
-	//@Col("MapNodePhrasing") nodePhrasings: Collection<MapNodePhrasing>;
-	@Col("MapNodeTag") nodeTags: Collection<MapNodeTag>;
-	@Col("Share") shares: Collection<Share>;
-	@Col("Term") terms: Collection<Term>;
+	//nodePhrasings: Collection<MapNodePhrasing>;
+	nodeParentChildLinks: Collection<NodeParentChildLink>;
+	nodeTags: Collection<MapNodeTag>;
+	shares: Collection<Share>;
+	terms: Collection<Term>;
 	//termNames: Collection<any>;
-	/*@Col("Timeline") timelines: Collection<Timeline>;
-	@Col("TimelineStep") timelineSteps: Collection<TimelineStep>;*/
-	@Col("User") users: Collection<User>;
-	@Col("User_Private") users_private: Collection<User_Private>;
-	//@Col("UserMapInfoSet") userMapInfo: Collection<UserMapInfoSet>; // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
+	/*timelines: Collection<Timeline>;
+	timelineSteps: Collection<TimelineStep>;*/
+	users: Collection<User>;
+	users_private: Collection<User_Private>;
+	//userMapInfo: Collection<UserMapInfoSet>; // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
 	//userViewedNodes: Collection<ViewedNodeSet>; // removed due to privacy concerns
-
-	// relationship tables (actually, I'm not using these atm; see vnote "postgres structuring")
-	// ==========
-
-	// todo: fill in these types
-	nodeParent_nodeChildren: Collection<any>;
-	//map_editors: Collection<any>;
-	//map_layers: Collection<any>;
-	//map_timelines: Collection<any>;
 }
 
 /* export interface FirebaseDBShape {

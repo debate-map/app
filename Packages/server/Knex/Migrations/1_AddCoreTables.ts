@@ -95,16 +95,18 @@ module.exports.up = async(knex: Knex_Transaction)=>{
 	const info = await Start(knex);
 	const {v} = info;
 
+	// todo: have this script pull field db-init-funcs from "Packages/common/Source/Store/db/.../@XXX" classes (probably have frontend's dev-server output single file from that each time)
+
 	await knex.schema.createTable(`${v}accessPolicies`, t=>{
-		t.text("id").primary();
+		/*t.text("id").primary();
 		t.text("base").references("id").inTable(`${v}accessPolicies`).DeferRef(); // max-depth: ~3
 		//AddRef_Deferred(`${v}accessPolicies`, "base", `${v}accessPolicies`, "id");
 		t.jsonb("permissions_base"); // Partial<PermissionSet>
-		t.jsonb("permissions_userExtends"); // Partial<PermissionSet>
+		t.jsonb("permissions_userExtends"); // Partial<PermissionSet>*/
 	});
 
 	await knex.schema.createTable(`${v}visibilityDirectives`, t=>{
-		t.text("id").primary();
+		/*t.text("id").primary();
 		t.text("actor").references("id").inTable(`${v}users`).DeferRef();
 		t.float("priority");
 		t.specificType("context", "text[]"); // ie. actor only wants the directive to apply in the given context (eg. hide this node, when outside of this closed map)
@@ -116,24 +118,24 @@ module.exports.up = async(knex: Knex_Transaction)=>{
 
 		// visibility values: show, hide, trash
 		t.text("visibility_self"); // for target above
-		t.text("visibility_nodes"); // for any node shown within the map (if map) [eg. "hide all nodes, other than those explicitly accepted/whitelisted", ie. "closed maps"]
+		t.text("visibility_nodes"); // for any node shown within the map (if map) [eg. "hide all nodes, other than those explicitly accepted/whitelisted", ie. "closed maps"]*/
 	});
 	
 	await knex.schema.createTable(`${v}medias`, t=>{
-		t.text("id").primary();
+		/*t.text("id").primary();
 		t.text("accessPolicy").references("id").inTable(`${v}accessPolicies`).DeferRef();
 		t.text("creator").references("id").inTable(`${v}users`).DeferRef();
 		t.bigInteger("createdAt");
 		t.text("name");
 		t.text("type");
 		t.text("url");
-		t.text("description");
+		t.text("description");*/
 	});
 
 	//await knex.schema.createTable(`${v}layers`, t=>{}); // add later
 
 	await knex.schema.createTable(`${v}maps`, t=>{
-		t.text("id").primary();
+		/*t.text("id").primary();
 		t.text("accessPolicy").references("id").inTable(`${v}accessPolicies`).DeferRef();
 		t.text("name");
 		t.text("note");
@@ -153,40 +155,41 @@ module.exports.up = async(knex: Knex_Transaction)=>{
 		t.bigInteger("editedAt");
 
 		//t.specificType("layers", "text[]");
-		//t.specificType("timelines", "text[]");
+		//t.specificType("timelines", "text[]");*/
 	});
 
 	await knex.schema.createTable(`${v}map_nodeEdits`, t=>{
 		// uses map's access-policy
-		t.text("map").references("id").inTable(`${v}maps`).DeferRef();
+		/*t.text("map").references("id").inTable(`${v}maps`).DeferRef();
 		t.text("node").references("id").inTable(`${v}nodes`).DeferRef();
-		t.text("time");
-		//t.text("userID");
+		t.bigInteger("time");
+		t.text("type");
+		//t.text("userID");*/
 	});
 
 	await knex.schema.createTable(`${v}nodes`, t=>{
-		t.comment("@name MapNode"); // avoids conflict with the default "Node" type that Postgraphile defines for Relay
+		/*t.comment("@name MapNode"); // avoids conflict with the default "Node" type that Postgraphile defines for Relay
 		t.text("id").primary();
 		t.text("accessPolicy").references("id").inTable(`${v}accessPolicies`).DeferRef();
 		t.text("type");
 		t.text("creator").references("id").inTable(`${v}users`).DeferRef();
 		t.bigInteger("createdAt");
-		t.text("rootNodeForMap").references("id").inTable(`${v}maps`).DeferRef();
+		t.text("rootNodeForMap").references("id").inTable(`${v}maps`).DeferRef();*/
 	});
 
 	await knex.schema.createTable(`${v}nodeRatings`, t=>{
-		t.text("id").primary();
+		/*t.text("id").primary();
 		t.text("accessPolicy").references("id").inTable(`${v}accessPolicies`).DeferRef();
 		t.text("node").references("id").inTable(`${v}nodes`).DeferRef();
 		t.text("type");
 		t.text("user").references("id").inTable(`${v}users`).DeferRef();
 		t.bigInteger("editedAt");
-		t.float("value");
+		t.float("value");*/
 	});
 
 	await knex.schema.createTable(`${v}nodeRevisions`, t=>{
 		// uses node's access-policy
-		t.text("id").primary();
+		/*t.text("id").primary();
 		t.text("node").references("id").inTable(`${v}nodes`).DeferRef();
 		t.text("creator").references("id").inTable(`${v}users`).DeferRef();
 		t.bigInteger("createdAt");
@@ -203,21 +206,21 @@ module.exports.up = async(knex: Knex_Transaction)=>{
 		t.jsonb("equation");
 		t.jsonb("references");
 		t.jsonb("quote");
-		t.jsonb("media");
+		t.jsonb("media");*/
 	});
 
-	await knex.schema.createTable(`${v}nodeParent_nodeChildren`, t=>{
+	await knex.schema.createTable(`${v}nodeParentChildLinks`, t=>{
 		// uses access-policy of both parent-node and child-node (both must pass)
-		t.text("id").primary();
+		/*t.text("id").primary();
 		t.text("parent").references("id").inTable(`${v}nodes`).DeferRef();
 		t.text("child").references("id").inTable(`${v}nodes`).DeferRef();
 		//t.text("type"); // claim_premise (argument->claim), argument_truth (claim->argument), argument_relevance (argument->argument), note (?->note)
-		t.integer("slot"); // multiple parent->child entries can have the same slot; in that case, the UI displays (in that slot) the one entry with the highest "priority" (criteria configurable by user)
+		t.integer("slot"); // multiple parent->child entries can have the same slot; in that case, the UI displays (in that slot) the one entry with the highest "priority" (criteria configurable by user)*/
 	});
 
 	await knex.schema.createTable(`${v}nodeTags`, t=>{
 		// uses node's access-policy
-		t.text("id").primary();
+		/*t.text("id").primary();
 		t.text("creator").references("id").inTable(`${v}users`).DeferRef();
 		t.bigInteger("createdAt");
 		t.specificType("nodes", "text[]");
@@ -225,24 +228,24 @@ module.exports.up = async(knex: Knex_Transaction)=>{
 		t.jsonb("mirrorChildrenFromXToY");
 		t.jsonb("xIsExtendedByY");
 		t.jsonb("mutuallyExclusiveGroup");
-		t.jsonb("restrictMirroringOfX");
+		t.jsonb("restrictMirroringOfX");*/
 	});
 
 	await knex.schema.createTable(`${v}shares`, t=>{
 		// uses target's (ie. map's) access-policy
-		t.text("id").primary();
+		/*t.text("id").primary();
 		t.text("creator").references("id").inTable(`${v}users`).DeferRef();
 		t.bigInteger("createdAt");
 		t.text("name");
 		t.text("type");
 
 		t.text("map");
-		t.jsonb("mapView");
+		t.jsonb("mapView");*/
 	});
 
 	await knex.schema.createTable(`${v}terms`, t=>{
 		// uses node's access-policy
-		t.text("id").primary();
+		/*t.text("id").primary();
 		t.text("creator").references("id").inTable(`${v}users`).DeferRef();
 		t.bigInteger("createdAt");
 
@@ -252,22 +255,23 @@ module.exports.up = async(knex: Knex_Transaction)=>{
 		t.text("type");
 
 		t.text("definition");
-		t.text("note");
+		t.text("note");*/
 	});
 
 	await knex.schema.createTable(`${v}users`, t=>{
-		t.text("id").primary();
+		/*t.text("id").primary();
 		t.text("displayName");
 		t.text("photoURL");
 
 		t.bigInteger("joinDate");
-		t.specificType("permissionGroups", "text[]");
+		//t.specificType("permissionGroups", "text[]");
+		t.jsonb("permissionGroups");
 		t.integer("edits");
-		t.bigInteger("lastEditAt");
+		t.bigInteger("lastEditAt");*/
 	});
 
 	await knex.schema.createTable(`${v}users_private`, t=>{
-		t.text("id").primary();
+		/*t.text("id").primary();
 		t.text("email");
 		t.jsonb("providerData");
 
@@ -275,7 +279,7 @@ module.exports.up = async(knex: Knex_Transaction)=>{
 		t.boolean("backgroundCustom_enabled");
 		t.text("backgroundCustom_color");
 		t.text("backgroundCustom_url");
-		t.text("backgroundCustom_position");
+		t.text("backgroundCustom_position");*/
 	});
 
 	await End(knex, info);

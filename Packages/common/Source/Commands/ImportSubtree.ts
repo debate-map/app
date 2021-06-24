@@ -9,8 +9,8 @@ import {HasAdminPermissions} from "../Store/db/users/$user";
 import {AsNodeL1} from "../Store/db/nodes/$node";
 import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
 import {Source} from "../Store/db/nodeRevisions/@SourceChain";
-import {RatingType} from "../Store/db/nodeRatings/@RatingType";
-import {Rating} from "../Store/db/nodeRatings/@Rating";
+import {NodeRatingType} from "../Store/db/nodeRatings/@NodeRatingType";
+import {NodeRating} from "../Store/db/nodeRatings/@NodeRating";
 import {WithoutHelpers} from "./ImportSubtree_Old";
 
 // todo: replace with new structure, when actually used again
@@ -98,18 +98,18 @@ export class ImportSubtree extends Command<{
 
 		if (importRatings && subtreeData.ratings) {
 			for (let {key: ratingType, value: ratingsByUser} of subtreeData.ratings.Pairs()) {
-				if (Validate("RatingType", ratingType) != null) continue;
+				if (Validate("NodeRatingType", ratingType) != null) continue;
 				for (let {key: userID, value: rating} of ratingsByUser.Pairs()) {
 					if (Validate("UserID", userID) != null) continue;
 					if (importRatings_userIDs != null && !importRatings_userIDs.includes(userID)) continue;
 					let newNodeID = this.oldID_newID[oldID];
 					//let addRatingCommand = new SetNodeRating({nodeID: newNodeID, ratingType: ratingType as RatingType, value: rating.value, userID}).MarkAsSubcommand(this);
-					this.nodeRatingsToAdd.push({node: newNodeID, type: ratingType as RatingType, user: userID, updated: rating.updated, value: rating.value});
+					this.nodeRatingsToAdd.push({node: newNodeID, type: ratingType as NodeRatingType, user: userID, editedAt: rating.updated, value: rating.value});
 				}
 			}
 		}
 	}
-	nodeRatingsToAdd = [] as Rating[];
+	nodeRatingsToAdd = [] as NodeRating[];
 
 	GetDBUpdates() {
 		let updates = {};

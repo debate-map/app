@@ -2,7 +2,7 @@ import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE} from "
 import {SplitStringBySlash_Cached, SlicePath, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {GetMedia} from "../media";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media";
-import {RatingType} from "../nodeRatings/@RatingType";
+import {NodeRatingType} from "../nodeRatings/@NodeRatingType";
 import {GetNodeRevision} from "../nodeRevisions";
 import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, HolderType, GetNodeChildrenL3} from "../nodes";
 import {ChildEntry, ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode";
@@ -37,7 +37,7 @@ export function GetPaddingForNode(node: MapNodeL2/*, isSubnode = false*/) {
 	//return isSubnode ? "1px 4px 2px" : "5px 5px 4px";
 	return "5px 5px 4px";
 }
-export type RatingTypeInfo = {type: RatingType, main?: boolean, collapsed?: boolean};
+export type RatingTypeInfo = {type: NodeRatingType, main?: boolean, collapsed?: boolean};
 export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	if (node.type == MapNodeType.Category) {
 		if (node.current.votingDisabled) return [];
@@ -68,7 +68,7 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 export const GetMainRatingType = StoreAccessor(s=>(node: MapNodeL2)=>{
 	return CE(GetRatingTypesForNode(node)).FirstOrX(a=>a.main, {} as Partial<RatingTypeInfo>).type;
 });
-export function GetSortByRatingType(node: MapNodeL3): RatingType {
+export function GetSortByRatingType(node: MapNodeL3): NodeRatingType {
 	if (node.link && node.link.form == ClaimForm.YesNoQuestion) {
 		return "significance";
 	}

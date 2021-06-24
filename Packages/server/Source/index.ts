@@ -63,6 +63,7 @@ app.use(
 );
 
 SetUpAuthHandling(app);
+// todo: MS server somehow confirms that the db-schema matches the "latest schema target" at startup (as derived from "Knex/Migrations/...")
 
 app.listen(dbPort);
 console.log("Server started.");
