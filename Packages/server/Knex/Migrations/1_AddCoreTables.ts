@@ -1,6 +1,23 @@
-/*function AddRef_Deferred(fromTable: string, fromColumn: string, toTable: string, toColumn: string) {
-	deferredReferences.push({fromTable, fromColumn, toTable, toColumn});
-}*/
+// intercepted methods
+// ==========
+
+function InterceptMethods(knex: Knex_Transaction) {
+	const createTable_orig = knex.schema.createTable;
+	//knex.schema.createTable = createTable_custom;
+	knex.schema.constructor.prototype.createTable = createTable_custom;
+	function createTable_custom(...args) {
+		const [tableName] = args;
+		//console.log("Intercepted:", tableName);
+		knex["_createdTables"] = (knex["_createdTables"] ?? []);
+		knex["_createdTables"].push(tableName);
+		return createTable_orig.apply(this, args);
+	}
+	Object.defineProperty(knex.schema, "createTable", {value: createTable_custom});
+}
+
+// added methods
+// ==========
+
 interface Object {
 	DeferRef: typeof DeferRef;
 }
@@ -27,34 +44,56 @@ function DeferRef(this: Knex_ColumnBuilder): Knex_ColumnBuilder {
 	return this;
 }
 
-async function Start() {
+// standalone functions
+// ==========
+const vPrefix = "v1_draft_";
+function RemoveVPrefix(str: string) {
+	return str.replace(vPrefix, "");
+}
+
+async function Start(knex: Knex_Transaction) {
 	console.log("Starting");
+	InterceptMethods(knex);
+
 	//CreateDBIfNotExists("debate-map");
 	// todo: add function-call to satify: "[this script should also automatically remove the entry for the latest migration from the `knex_migrations_lock` table, if it exists, so that you can keep rerunning it without blockage]"
-	const v = "v1_draft_";
-	return {v};
+
+	return {v: vPrefix};
 }
-async function End(knex: Knex_Transaction) {
+type ThenArg<T> = T extends PromiseLike<infer U> ? U : T;
+async function End(knex: Knex_Transaction, info: ThenArg<ReturnType<typeof Start>>) {
 	for (const ref of deferredReferences) {
-		/*await knex.schema.raw(`
-			ALTER TABLE "${ref.fromTable}"
-			ADD CONSTRAINT "fk_${ref.fromTable}_${ref.toTable}""
-			FOREIGN KEY ("${ref.fromColumn}"") 
-			REFERENCES "${ref.toTable}" ("${ref.toColumn}");
-		`);*/
+		//const constraintName = `fk @from(${RemoveVPrefix(ref.fromTable)}.${ref.fromColumn}) @to(${RemoveVPrefix(ref.toTable)}.${ref.toColumn})`;
+		const constraintName = `fk @from(${ref.fromColumn}) @to(${RemoveVPrefix(ref.toTable)}.${ref.toColumn})`;
 		await knex.schema.raw(`
+			ALTER TABLE "${ref.fromTable}"
+			ADD CONSTRAINT "${constraintName}"
+			FOREIGN KEY ("${ref.fromColumn}") 
+			REFERENCES "${ref.toTable}" ("${ref.toColumn}");
+		`);
+		/*await knex.schema.raw(`
 			ALTER TABLE "${ref.fromTable}"
 			ADD FOREIGN KEY ("${ref.fromColumn}") 
 			REFERENCES "${ref.toTable}" ("${ref.toColumn}");
-		`);
+		`);*/
+	}
+
+	const createdTableNames = knex["_createdTables"] ?? [];
+	console.log("Activating new tables by renaming to:", createdTableNames.map(RemoveVPrefix));
+	for (const tableName of createdTableNames) {
+		await knex.schema.renameTable(tableName, RemoveVPrefix(tableName));
 	}
 
 	console.log("Done");
 }
 
+// migration script
+// ==========
+
 //export async function up(knex: Knex_Transaction) {
 module.exports.up = async(knex: Knex_Transaction)=>{
-	let {v} = await Start();
+	const info = await Start(knex);
+	const {v} = info;
 
 	await knex.schema.createTable(`${v}accessPolicies`, t=>{
 		t.text("id").primary();
@@ -238,7 +277,7 @@ module.exports.up = async(knex: Knex_Transaction)=>{
 		t.text("backgroundCustom_position");
 	});
 
-	await End(knex);
+	await End(knex, info);
 };
 module.exports.down = ()=>{
 	throw new Error("Not implemented.");
