@@ -27,20 +27,14 @@ function DeferRef(this: Knex_ColumnBuilder): Knex_ColumnBuilder {
 	return this;
 }
 
-async function Start(knexRoot: Knex) {
+async function Start() {
 	console.log("Starting");
 	//CreateDBIfNotExists("debate-map");
 	// todo: add function-call to satify: "[this script should also automatically remove the entry for the latest migration from the `knex_migrations_lock` table, if it exists, so that you can keep rerunning it without blockage]"
-	let knex = await knexRoot.transaction();
 	const v = "v1_draft_";
-	return {knex, v};
+	return {v};
 }
-async function End(knex: Knex_Transaction, knexRoot: Knex) {
-	// end previous transaction, and start a new one (needed for "alter table" commands to work on the new tables)
-	knex.commit();
-	//await knex.executionPromise;
-	knex = await knexRoot.transaction();
-	
+async function End(knex: Knex_Transaction) {
 	for (const ref of deferredReferences) {
 		/*await knex.schema.raw(`
 			ALTER TABLE "${ref.fromTable}"
@@ -55,15 +49,12 @@ async function End(knex: Knex_Transaction, knexRoot: Knex) {
 		`);
 	}
 
-	knex.commit();
-	//await knex.executionPromise;
-
 	console.log("Done");
 }
 
-//export async function up(knex: Knex) {
-module.exports.up = async(knexRoot: Knex)=>{
-	let {knex, v} = await Start(knexRoot);
+//export async function up(knex: Knex_Transaction) {
+module.exports.up = async(knex: Knex_Transaction)=>{
+	let {v} = await Start();
 
 	await knex.schema.createTable(`${v}accessPolicies`, t=>{
 		t.text("id").primary();
@@ -247,7 +238,7 @@ module.exports.up = async(knexRoot: Knex)=>{
 		t.text("backgroundCustom_position");
 	});
 
-	await End(knex, knexRoot);
+	await End(knex);
 };
 module.exports.down = ()=>{
 	throw new Error("Not implemented.");
