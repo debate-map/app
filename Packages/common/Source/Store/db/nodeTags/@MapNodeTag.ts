@@ -12,7 +12,7 @@ export class MapNodeTag {
 	@Field({type: "string"})
 	id: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}users`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	creator: string;
 

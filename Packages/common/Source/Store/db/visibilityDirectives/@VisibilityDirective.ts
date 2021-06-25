@@ -13,7 +13,7 @@ export class VisibilityDirective {
 	@Field({type: "string"})
 	id: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}users`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"})
 	actor: string;
 
@@ -25,17 +25,17 @@ export class VisibilityDirective {
 	@Field({items: {type: "string"}})
 	context: string[];
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}maps`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`maps`).DeferRef())
 	@Field({type: "string"})
 	target_map: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}nodes`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
 	@Field({type: "string"})
 	target_node: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}nodeParent_nodeChildren`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`nodeParentChildLinks`).DeferRef())
 	@Field({type: "string"})
-	target_nodeParent_nodeChildren: string;
+	target_nodeParentChildLink: string;
 
 	@DB((t,n)=>t.text(n))
 	@Field({type: "string"})

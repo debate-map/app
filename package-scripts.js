@@ -1,4 +1,7 @@
-function TSScript(packageName, scriptSubpath) {
+const fs = require("fs");
+const paths = require("path");
+
+function TSScript(packageName, scriptSubpath, ...args) {
 	let cdCommand = "";
 	if (packageName) {
 		cdCommand = `cd Packages/${packageName} && `;
@@ -6,7 +9,19 @@ function TSScript(packageName, scriptSubpath) {
 
 	const envPart = `TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true`;
 	const nodeFlags = `--loader ts-node/esm.mjs --experimental-specifier-resolution=node`;
-	return `${cdCommand}cross-env ${envPart} node ${nodeFlags} ${scriptSubpath}`;
+	return `${cdCommand}cross-env ${envPart} node ${nodeFlags} ${scriptSubpath} ${args.join(" ")}`;
+}
+function FindPackagePath(packageName) {
+	let pathsToCheck = [
+		`./node_modules/web-vcore/node_modules/${packageName}`, // if web-vcore is symlinked
+		`./node_modules/${packageName}`, // if web-vcore is not symlinked
+	];
+	for (const path of pathsToCheck) {
+		if (fs.existsSync(path)) {
+			return path;
+		}
+	}
+	throw new Error(`Could not find package: "${packageName}"`);
 }
 
 //const memLimit = 4096;
@@ -65,7 +80,15 @@ Object.assign(scripts, {
 	server: {
 		// setup
 		//initDB: "psql -f ./Packages/server/Scripts/InitDB.sql debate-map",
-		initDB: TSScript("server", "Scripts/InitDB.ts"),
+		//initDB: TSScript("server", "Scripts/InitDB.ts"),
+		initDB: TSScript("server", "Scripts/KnexWrapper.ts", "initDB"),
+		//migrateDBToLatest: TSScript("server", "Scripts/KnexWrapper.ts", "migrateDBToLatest"),
+
+		// db-shape and migrations
+		trackDBShape: TSScript("server", `../../${FindPackagePath("mobx-graphlink")}/Scripts/TrackDBShape.ts`,
+			`--classesFolder ../../Packages/common/Source/Store/db`,
+			`--templateFile ./Scripts/InitDB_Template.ts`,
+			`--outFile ./Scripts/InitDB_Generated.ts`),
 
 		// first terminal
 		//dev: "cd Packages/server && snowpack build --watch",

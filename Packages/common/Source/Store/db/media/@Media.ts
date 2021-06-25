@@ -24,11 +24,11 @@ export class Media {
 	@Field({type: "string"})
 	id: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}accessPolicies`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	accessPolicy: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}users`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	creator: string;
 

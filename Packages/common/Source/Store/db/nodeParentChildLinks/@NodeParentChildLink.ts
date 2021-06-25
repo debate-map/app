@@ -6,11 +6,11 @@ export class NodeParentChildLink {
 	@Field({type: "string"})
 	id: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}nodes`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
 	@Field({type: "string"})
 	parent: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}nodes`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
 	@Field({type: "string"})
 	child: string;
 

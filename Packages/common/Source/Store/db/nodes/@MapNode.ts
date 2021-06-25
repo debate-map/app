@@ -34,7 +34,7 @@ export class MapNode {
 	@Field({oneOf: GetValues_ForSchema(MapNodeType)})
 	id: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}accessPolicies`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"})
 	accessPolicy: string;
 
@@ -42,7 +42,7 @@ export class MapNode {
 	@Field({$ref: "MapNodeType"}, {req: true})
 	type?: MapNodeType;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}users`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	creator?: string;
 
@@ -50,7 +50,7 @@ export class MapNode {
 	@Field({type: "number"}, {req: true})
 	createdAt: number;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}maps`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`maps`).DeferRef())
 	@Field({$ref: "UUID"})
 	rootNodeForMap?: string;
 

@@ -28,7 +28,7 @@ export class Map {
 	@Field({type: "string"})
 	id: string;
 	
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}accessPolicies`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	accessPolicy: string;
 
@@ -48,7 +48,7 @@ export class Map {
 	@Field({oneOf: GetValues_ForSchema(MapType)}, {req: true})
 	type: MapType;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}nodes`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
 	@Field({type: "string"})
 	rootNode: string;
 
@@ -81,7 +81,7 @@ export class Map {
 	@Field({items: {type: "string"}})
 	editors: string[];
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}users`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	creator: string;
 

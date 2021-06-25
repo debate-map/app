@@ -5,7 +5,7 @@
 		"forceConsistentCasingInFileNames": true, // creates duplicates in import-helper plugins otherwise
 		"resolveJsonModule": true,
 
-		// compiler options
+		// compilation
 		"target": "ES2015",
 		"jsx": "react",
 		"noImplicitAny": false,

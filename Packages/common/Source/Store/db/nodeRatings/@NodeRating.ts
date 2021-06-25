@@ -12,11 +12,11 @@ export class NodeRating {
 	@Field({type: "string"})
 	id: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}accessPolicies`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"})
 	accessPolicy: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}nodes`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	node: string;
 
@@ -24,7 +24,7 @@ export class NodeRating {
 	@Field({$ref: "NodeRatingType"}, {req: true})
 	type: NodeRatingType;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`{v}users`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	user: string;
 
