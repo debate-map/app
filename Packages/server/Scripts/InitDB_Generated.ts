@@ -168,6 +168,7 @@ export async function up(knex: Knex.Transaction) {
 	});
 
 	await knex.schema.createTable(`${v}nodes`, t=>{
+		t.comment("@name MapNode"); 
 		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
 		RunFieldInit(t, "accessPolicy", (t,n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
 		RunFieldInit(t, "type", (t,n)=>t.text(n));
