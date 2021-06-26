@@ -27,7 +27,7 @@ export * from "./Commands/DeleteShare";
 export * from "./Commands/DeleteTerm";
 export * from "./Commands/DeleteTimeline";
 export * from "./Commands/DeleteTimelineStep";
-export * from "./Commands/ImportSubtree";
+//export * from "./Commands/ImportSubtree";
 export * from "./Commands/ImportSubtree_Old";
 export * from "./Commands/LinkNode";
 export * from "./Commands/LinkNode_HighLevel";

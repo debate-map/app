@@ -21,7 +21,11 @@ export class AddMap extends Command<{map: Map}, UUID> {
 		map.createdAt = Date.now();
 		map.editedAt = map.createdAt;
 
-		const newRootNode = new MapNode({type: MapNodeType.Category, creator: map.creator, rootNodeForMap: this.mapID, ownerMapID: OmitIfFalsy(map.type == MapType.Private && this.mapID)});
+		const newRootNode = new MapNode({
+			type: MapNodeType.Category, creator: map.creator, rootNodeForMap: this.mapID,
+			//ownerMapID: OmitIfFalsy(map.type == MapType.Private && this.mapID),
+			accessPolicy: null, // todo: set to user's default access-policy for new maps
+		});
 		const newRootNodeRevision = new MapNodeRevision(E(map.nodeDefaults, {titles: {base: "Root"}, votingDisabled: true}));
 		this.sub_addNode = this.sub_addNode ?? new AddChildNode({mapID: this.mapID, parentID: null, node: newRootNode, revision: newRootNodeRevision, asMapRoot: true}).MarkAsSubcommand(this);
 		this.sub_addNode.Validate();

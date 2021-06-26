@@ -10,7 +10,7 @@ import {MapNodeRevision_Defaultable, GetMap, PermissionInfoType, HasModPermissio
 // export class PermissionsOptions extends BaseComponent<Pick<SharedProps, 'newData' | 'newRevisionData' | 'enabled' | 'Change'> & {forDefaultsInMap?: boolean}, {}> {
 export class PermissionsPanel extends BaseComponent<Pick<NodeDetailsUI_SharedProps, "enabled" | "Change"> & {newRevisionData: MapNodeRevision_Defaultable, forDefaultsInMap?: boolean}, {}> {
 	render() {
-		const {newRevisionData, enabled, Change, forDefaultsInMap} = this.props;
+		/*const {newRevisionData, enabled, Change, forDefaultsInMap} = this.props;
 		const openMapID = GetOpenMapID();
 		const openMap = GetMap(openMapID);
 
@@ -41,7 +41,7 @@ export class PermissionsPanel extends BaseComponent<Pick<NodeDetailsUI_SharedPro
 				{HasAdminPermissions(MeID()) &&
 				<RowLR mt={5} splitAt={splitAt} style={{display: "flex", alignItems: "center"}}>
 					<Text>Rate:</Text>
-					<CheckBox enabled={enabled} value={!newRevisionData.votingDisabled} onChange={val=>Change(newRevisionData.votingDisabled = val ? null : true)}/>
+					<CheckBox enabled={enabled} value={newRevisionData.votingEnabled} onChange={val=>Change(newRevisionData.votingDisabled = val ? null : true)}/>
 				</RowLR>}
 				<RowLR mt={5} splitAt={splitAt} style={{display: "flex", alignItems: "center"}}>
 					<Text>Edit:</Text>
@@ -55,7 +55,7 @@ export class PermissionsPanel extends BaseComponent<Pick<NodeDetailsUI_SharedPro
 						* Anyone: Any signed-in user is allowed.
 					`.AsMultiline(0)}/>
 					{/* newRevisionData.permission_edit.type == PermissionInfoType.MapEditors &&
-						<Text ml={5} sel style={{ opacity: 0.5 }}>(of map: {newData.ownerMapID})</Text> */}
+						<Text ml={5} sel style={{ opacity: 0.5 }}>(of map: {newData.ownerMapID})</Text> *#/}
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{display: "flex", alignItems: "center"}}>
 					<Text>Contribute:</Text>
@@ -70,9 +70,10 @@ export class PermissionsPanel extends BaseComponent<Pick<NodeDetailsUI_SharedPro
 						* Anyone: Any signed-in user is allowed. (required for public/global maps)
 					`.AsMultiline(0)}/>
 					{/* newRevisionData.permission_contribute.type == PermissionInfoType.MapEditors &&
-						<Text ml={5} sel style={{ opacity: 0.5 }}>(of map: {newData.ownerMapID})</Text> */}
+						<Text ml={5} sel style={{ opacity: 0.5 }}>(of map: {newData.ownerMapID})</Text> *#/}
 				</RowLR>
 			</>
-		);
+		);*/
+		return null;
 	}
 }

@@ -1,7 +1,12 @@
+import {CE} from "web-vcore/nm/js-vextensions";
 import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink";
 
 @MGLClass({table: "nodeParentChildLinks"})
 export class NodeParentChildLink {
+	constructor(data?: Partial<NodeParentChildLink>) {
+		CE(this).VSet(data);
+	}
+
 	@DB((t,n)=>t.text(n).primary())
 	@Field({type: "string"})
 	id: string;

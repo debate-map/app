@@ -1,4 +1,4 @@
-import {AssertV, Command, MergeDBUpdates, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
+/*import {AssertV, Command, MergeDBUpdates, GenerateUUID, NoID} from "web-vcore/nm/mobx-graphlink";
 import {AssertValidate, Validate} from "web-vcore/nm/mobx-graphlink";
 import {FromJSON, GetTreeNodesInObjTree, Clone, CE, DEL} from "web-vcore/nm/js-vextensions";
 import {AddChildNode} from "./AddChildNode";
@@ -109,7 +109,7 @@ export class ImportSubtree extends Command<{
 			}
 		}
 	}
-	nodeRatingsToAdd = [] as NodeRating[];
+	nodeRatingsToAdd = [] as NoID<NodeRating>[];
 
 	GetDBUpdates() {
 		let updates = {};
@@ -121,4 +121,4 @@ export class ImportSubtree extends Command<{
 		}
 		return updates;
 	}
-}
+}*/

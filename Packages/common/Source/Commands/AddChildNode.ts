@@ -1,5 +1,5 @@
 import {Assert, E} from "web-vcore/nm/js-vextensions";
-import {MergeDBUpdates, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {MergeDBUpdates, GetAsync, Command, AssertV, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
 import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {AddNode} from "./AddNode";
@@ -8,6 +8,7 @@ import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
 import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
 import {GetNode} from "../Store/db/nodes";
 import {AddArgumentAndClaim} from "../Commands";
+import {NodeParentChildLink} from "../Store/db/nodeParentChildLinks/@NodeParentChildLink.js";
 
 type Payload = {mapID: string, parentID: string, node: MapNode, revision: MapNodeRevision, link?: ChildEntry, asMapRoot?: boolean};
 
@@ -25,7 +26,6 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 		}, this.payload, "Payload invalid");
 
 		const {mapID, parentID, node, revision, link, asMapRoot} = this.payload;
-		AssertV(node.parents == null, "node.parents must be empty. Instead, supply a parentID property in the payload.");
 
 		const node_withParents = E(node, parentID ? {parents: {[parentID]: {_: true}}} : {});
 		this.sub_addNode = this.sub_addNode ?? new AddNode({mapID, node: node_withParents, revision}).MarkAsSubcommand(this);
@@ -55,11 +55,17 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 		const newUpdates = {};
 		// add as child of parent
 		if (!asMapRoot) {
-			newUpdates[`nodes/${parentID}/.children/.${this.sub_addNode.nodeID}`] = link;
+			/*newUpdates[`nodes/${parentID}/.children/.${this.sub_addNode.nodeID}`] = link;
 			// if parent node is using manual children-ordering, update that array
 			if (this.parent_oldData?.childrenOrder) {
 				newUpdates[`nodes/${parentID}/.childrenOrder`] = (this.parent_oldData.childrenOrder || []).concat([this.sub_addNode.nodeID]);
-			}
+			}*/
+			const link = new NodeParentChildLink({
+				id: GenerateUUID(),
+				parent: parentID,
+				child: this.sub_addNode.nodeID,
+				slot: 0, // todo
+			});
 		}
 
 		return MergeDBUpdates(updates, newUpdates);

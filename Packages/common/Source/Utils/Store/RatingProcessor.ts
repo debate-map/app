@@ -1,12 +1,12 @@
 import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from "web-vcore/nm/js-vextensions";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {StoreAccessor, NoID} from "web-vcore/nm/mobx-graphlink";
 import {GetRatingAverage, GetRatingValue, GetRatings} from "../../Store/db/nodeRatings";
 import {NodeRating} from "../../Store/db/nodeRatings/@NodeRating";
 import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../Store/db/nodes/$node";
 import {ClaimForm, MapNodeL2} from "../../Store/db/nodes/@MapNode";
 import {ArgumentType} from "../../Store/db/nodes/@MapNodeRevision";
 
-export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[], userID: string): Partial<NodeRating>=>{
+export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[], userID: string): NoID<NodeRating>=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading
 	if (premises.length == 0) return null;
 
@@ -97,7 +97,7 @@ export const GetArgumentImpactPseudoRatings = StoreAccessor(s=>(argument: MapNod
 		}
 	}
 
-	const result = [] as NodeRating[];
+	const result = [] as NoID<NodeRating>[];
 	for (const userID of CE(usersWhoRatedArgOrPremise).VKeys()) {
 		result.push(GetArgumentImpactPseudoRating(argument, premises, userID));
 	}

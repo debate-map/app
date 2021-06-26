@@ -58,7 +58,7 @@ export const GetRatingAverage = StoreAccessor(s=>(nodeID: string, ratingType: No
 	if (ratings.length == 0) return resultIfNoData as any; */
 
 	const node = GetNodeL2(nodeID);
-	if (node && node.current.votingDisabled) return 100;
+	if (node && !node.current.votingEnabled) return 100;
 
 	const ratings = GetRatings(nodeID, ratingType, userID);
 	if (ratings.length == 0) return null;
