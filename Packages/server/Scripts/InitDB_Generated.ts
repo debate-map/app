@@ -114,6 +114,7 @@ export async function up(knex: Knex.Transaction) {
 	});
 
 	await knex.schema.createTable(`${v}map_nodeEdits`, t=>{
+		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
 		RunFieldInit(t, "map", (t,n)=>t.text(n).references("id").inTable(v + `maps`).DeferRef());
 		RunFieldInit(t, "node", (t,n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "time", (t,n)=>t.bigInteger(n));
@@ -150,7 +151,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "description", (t,n)=>t.text(n));
 	});
 
-	await knex.schema.createTable(`${v}nodeParentChildLinks`, t=>{
+	await knex.schema.createTable(`${v}nodeChildLinks`, t=>{
 		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
 		RunFieldInit(t, "parent", (t,n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "child", (t,n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
@@ -256,7 +257,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "context", (t,n)=>t.specificType(n, "text[]"));
 		RunFieldInit(t, "target_map", (t,n)=>t.text(n).references("id").inTable(v + `maps`).DeferRef());
 		RunFieldInit(t, "target_node", (t,n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
-		RunFieldInit(t, "target_nodeParentChildLink", (t,n)=>t.text(n).references("id").inTable(v + `nodeParentChildLinks`).DeferRef());
+		RunFieldInit(t, "target_nodeChildLink", (t,n)=>t.text(n).references("id").inTable(v + `nodeChildLinks`).DeferRef());
 		RunFieldInit(t, "visibility_self", (t,n)=>t.text(n));
 		RunFieldInit(t, "visibility_nodes", (t,n)=>t.text(n));
 	});

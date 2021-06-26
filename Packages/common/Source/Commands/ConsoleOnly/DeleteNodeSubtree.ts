@@ -15,7 +15,7 @@ await RR.ApplyDBUpdates({}, temp1)
 ==========
 */
 
-export function GetNodesInSubtree(rootNodeID: string, runInfo = {nodesVisited: new Set<string>()}) {
+/*export function GetNodesInSubtree(rootNodeID: string, runInfo = {nodesVisited: new Set<string>()}) {
 	if (runInfo.nodesVisited.has(rootNodeID)) return [];
 	runInfo.nodesVisited.add(rootNodeID);
 
@@ -31,14 +31,14 @@ export function GetNodesInSubtree(rootNodeID: string, runInfo = {nodesVisited: n
 	// add self last, so that deeper nodes are deleted first
 	result.push(rootNode);
 	return result;
-}
+}*/
 
 export class DeleteNodeSubtree extends Command<{nodeID: string, maxDeletes: number}, {}> {
 	nodesInSubtree: MapNode[];
 
 	subs_deleteNodes: DeleteNode[];
 	Validate() {
-		AssertValidate({
+		/*AssertValidate({
 			properties: {
 				nodeID: {type: "string"},
 				maxDeletes: {type: "number"},
@@ -57,7 +57,7 @@ export class DeleteNodeSubtree extends Command<{nodeID: string, maxDeletes: numb
 			deleteNodeCommand.childrenToIgnore = this.nodesInSubtree.map(a=>a.id);
 			deleteNodeCommand.Validate();
 			return deleteNodeCommand;
-		});
+		});*/
 	}
 
 	GetDBUpdates() {

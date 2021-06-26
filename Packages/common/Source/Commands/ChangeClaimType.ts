@@ -35,7 +35,7 @@ export class ChangeClaimType extends Command<{mapID?: string, nodeID: string, ne
 	newRevision: MapNodeRevision;
 	newRevisionID: string;
 	Validate() {
-		AssertValidate("ChangeClaimType_payload", this.payload, "Payload invalid");
+		/*AssertValidate("ChangeClaimType_payload", this.payload, "Payload invalid");
 		const {nodeID, newType} = this.payload;
 		// let oldData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
 		const oldData = AV.NonNull = GetNodeL2(nodeID);
@@ -60,7 +60,7 @@ export class ChangeClaimType extends Command<{mapID?: string, nodeID: string, ne
 		}
 		AssertV(CanConvertFromClaimTypeXToY(this.oldType, newType), `Cannot convert from claim-type ${AttachmentType[this.oldType]} to ${AttachmentType[newType]}.`);
 		AssertValidate("MapNode", this.newData, "New node-data invalid");
-		AssertValidate("MapNodeRevision", this.newRevisionID, "New revision-data invalid");
+		AssertValidate("MapNodeRevision", this.newRevisionID, "New revision-data invalid");*/
 	}
 
 	GetDBUpdates() {

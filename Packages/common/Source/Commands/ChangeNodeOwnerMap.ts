@@ -29,7 +29,7 @@ export class ChangeNodeOwnerMap extends Command<{nodeID: string, newOwnerMapID: 
 	sub_changeOwnerMapForArgument: ChangeNodeOwnerMap;
 
 	Validate() {
-		AssertValidate("ChangeNodeOwnerMap_payload", this.payload, "Payload invalid");
+		/*AssertValidate("ChangeNodeOwnerMap_payload", this.payload, "Payload invalid");
 		const {nodeID, newOwnerMapID, argumentNodeID} = this.payload;
 		const oldData = AV.NonNull = GetNode(nodeID);
 
@@ -68,7 +68,7 @@ export class ChangeNodeOwnerMap extends Command<{nodeID: string, newOwnerMapID: 
 		if (argumentNodeID) {
 			this.sub_changeOwnerMapForArgument = this.sub_changeOwnerMapForArgument ?? new ChangeNodeOwnerMap({nodeID: argumentNodeID, newOwnerMapID}).MarkAsSubcommand(this);
 			this.sub_changeOwnerMapForArgument.Validate();
-		}
+		}*/
 	}
 
 	GetDBUpdates() {

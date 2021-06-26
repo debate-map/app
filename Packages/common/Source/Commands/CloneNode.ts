@@ -10,7 +10,7 @@ export class CloneNode extends Command<{mapID: string, baseNodePath: string, new
 	sub_addNode: AddChildNode;
 	sub_linkChildren: LinkNode[];
 	Validate() {
-		const {mapID, baseNodePath, newParentID} = this.payload;
+		/*const {mapID, baseNodePath, newParentID} = this.payload;
 
 		// prepare add-node
 		// ==========
@@ -57,7 +57,7 @@ export class CloneNode extends Command<{mapID: string, baseNodePath: string, new
 			// linkChildSub.Prepare([]);
 			/* let dbUpdates = this.GetDBUpdates();
 			let node_childrenOrder = dbUpdates[`nodes/${this.sub_addNode.nodeID}/childrenOrder`];
-			linkChildSub.Prepare(node_childrenOrder); */
+			linkChildSub.Prepare(node_childrenOrder); *#/
 
 			this.sub_linkChildren.push(linkChildSub);
 		}
@@ -67,11 +67,11 @@ export class CloneNode extends Command<{mapID: string, baseNodePath: string, new
 		this.sub_addNode.Validate();
 		for (const sub of this.sub_linkChildren) {
 			sub.Validate();
-		}
+		}*/
 	}
 
 	GetDBUpdates() {
-		let updates = this.sub_addNode.GetDBUpdates();
+		/*let updates = this.sub_addNode.GetDBUpdates();
 		for (const sub of this.sub_linkChildren) {
 			// updates.Extend(sub.GetDBUpdates());
 			updates = MergeDBUpdates(updates, sub.GetDBUpdates());
@@ -85,6 +85,7 @@ export class CloneNode extends Command<{mapID: string, baseNodePath: string, new
 			updates[`nodes/${this.sub_addNode.sub_addNode.nodeID}`].childrenOrder = childrenOrder;
 		}
 
-		return updates;
+		return updates;*/
+		return {};
 	}
 }

@@ -1,6 +1,6 @@
 import {MapEdit} from "../CommandMacros";
 import {Assert, E, CE} from "web-vcore/nm/js-vextensions";
-import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
+import {GetAsync, Command, AssertV, dbp} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel";
 import {ClaimForm, Polarity, MapNode} from "../Store/db/nodes/@MapNode";
@@ -45,15 +45,15 @@ export class LinkNode extends Command<{mapID: string, parentID: string, childID:
 
 		const updates = {};
 		// add parent as parent-of-child
-		updates[`nodes/${childID}/.parents/.${parentID}`] = {_: true};
+		updates[dbp`nodes/${childID}/.parents/.${parentID}`] = {_: true};
 		// add child as child-of-parent
-		updates[`nodes/${parentID}/.children/.${childID}`] = E(
+		updates[dbp`nodes/${parentID}/.children/.${childID}`] = E(
 			{_: true},
 			childForm && {form: childForm},
 			childPolarity && {polarity: childPolarity},
 		);
 		if (this.parent_oldData?.childrenOrder) {
-			updates[`nodes/${parentID}/.childrenOrder`] = this.parent_oldData.childrenOrder.concat([childID]);
+			updates[dbp`nodes/${parentID}/.childrenOrder`] = this.parent_oldData.childrenOrder.concat([childID]);
 		}
 		return updates;
 	}

@@ -33,9 +33,9 @@ export class VisibilityDirective {
 	@Field({type: "string"})
 	target_node: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`nodeParentChildLinks`).DeferRef())
+	@DB((t,n)=>t.text(n).references("id").inTable(`nodeChildLinks`).DeferRef())
 	@Field({type: "string"})
-	target_nodeParentChildLink: string;
+	target_nodeChildLink: string;
 
 	@DB((t,n)=>t.text(n))
 	@Field({type: "string"})

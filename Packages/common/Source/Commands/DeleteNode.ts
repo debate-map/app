@@ -1,4 +1,4 @@
-import {AddSchema, AssertV, AssertValidate, Command, MergeDBUpdates, WrapDBValue} from "web-vcore/nm/mobx-graphlink";
+import {AddSchema, AssertV, AssertValidate, Command, dbp, MergeDBUpdates, WrapDBValue} from "web-vcore/node_modules/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {MapNodeL2} from "../Store/db/nodes/@MapNode";
 import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
@@ -9,6 +9,8 @@ import {GetMaps} from "../Store/db/maps";
 import {CE} from "web-vcore/nm/js-vextensions";
 import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
 import {AddMap} from "./AddMap";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
+import {GetNodeChildLinks} from "../Store/db/nodeChildLinks.js";
 
 AddSchema("DeleteNode_payload", {
 	properties: {
@@ -31,7 +33,8 @@ export class DeleteNode extends Command<{mapID?: string, nodeID: string, withCon
 
 	oldData: MapNodeL2;
 	oldRevisions: MapNodeRevision[];
-	oldParentChildrenOrders: string[][];
+	//oldParentChildrenOrders: string[][];
+	links: NodeChildLink[];
 	// viewerIDs_main: string[];
 	mapIDs: string[];
 	Validate() {
@@ -49,9 +52,10 @@ export class DeleteNode extends Command<{mapID?: string, nodeID: string, withCon
 		this.oldRevisions = GetNodeRevisions(nodeID);
 		AssertV(this.oldRevisions.every(a=>a != null) && this.oldRevisions.length, "oldRevisions has null entries, or length of zero.");
 
-		const parentIDs = CE(this.oldData.parents || {}).VKeys();
+		/*const parentIDs = CE(this.oldData.parents || {}).VKeys();
 		this.oldParentChildrenOrders = parentIDs.map(parentID=>GetNode(parentID)?.childrenOrder);
-		// AssertV(this.oldParentChildrenOrders.All((a) => a != null), 'oldParentChildrenOrders has null entries.');
+		// AssertV(this.oldParentChildrenOrders.All((a) => a != null), 'oldParentChildrenOrders has null entries.');*/
+		this.links = GetNodeChildLinks(nodeID, nodeID);
 
 		// this.viewerIDs_main = await GetAsync(() => GetNodeViewers(nodeID));
 
@@ -79,16 +83,16 @@ export class DeleteNode extends Command<{mapID?: string, nodeID: string, withCon
 		let updates = {};
 
 		// delete node's own data
-		updates[`nodes/${nodeID}`] = null;
+		updates[dbp`nodes/${nodeID}`] = null;
 		// updates[`nodeExtras/${nodeID}`] = null;
-		updates[`nodeRatings/${nodeID}`] = null;
-		updates[`nodeViewers/${nodeID}`] = null;
+		updates[dbp`nodeRatings/${nodeID}`] = null;
+		updates[dbp`nodeViewers/${nodeID}`] = null;
 		/* for (const viewerID of this.viewerIDs_main) {
 			updates[`userViewedNodes/${viewerID}/.${nodeID}}`] = null;
 		} */
 
 		// delete links with parents
-		for (const {index, key: parentID} of CE(this.oldData.parents || {}).Pairs()) {
+		/*for (const {index, key: parentID} of CE(this.oldData.parents || {}).Pairs()) {
 			updates[`nodes/${parentID}/.children/.${nodeID}`] = null;
 			// let parent_childrenOrder = this.oldParentID__childrenOrder[parentID];
 			const parent_childrenOrder = this.oldParentChildrenOrders[index];
@@ -96,6 +100,9 @@ export class DeleteNode extends Command<{mapID?: string, nodeID: string, withCon
 				//updates[`nodes/${parentID}/.childrenOrder`] = CE(CE(parent_childrenOrder).Except(nodeID)).IfEmptyThen(null);
 				updates[`nodes/${parentID}/.childrenOrder`] = CE(parent_childrenOrder).Except(nodeID);
 			}
+		}*/
+		for (const link of this.links) {
+			updates[dbp`nodeChildLinks/${link.id}`] = null;
 		}
 
 		// delete placement in layer
@@ -108,12 +115,12 @@ export class DeleteNode extends Command<{mapID?: string, nodeID: string, withCon
 
 		// delete revisions
 		for (const revision of this.oldRevisions) {
-			updates[`nodeRevisions/${revision.id}`] = null;
+			updates[dbp`nodeRevisions/${revision.id}`] = null;
 		}
 
 		// delete edit-time entry within each map (if it exists)
 		for (const mapID of this.mapIDs) {
-			updates[`mapNodeEditTimes/${mapID}/.${nodeID}`] = WrapDBValue(null, {merge: true});
+			updates[dbp`mapNodeEditTimes/${mapID}/.${nodeID}`] = WrapDBValue(null, {merge: true});
 		}
 
 		if (this.sub_deleteContainerArgument) {

@@ -10,6 +10,10 @@ AddSchema("ChangeType", {oneOf: GetValues_ForSchema(ChangeType)});
 
 @MGLClass({table: "map_nodeEdits"})
 export class Map_NodeEdit {
+	@DB((t,n)=>t.text(n).primary())
+	@Field({type: "string"})
+	id: string;
+
 	@DB((t,n)=>t.text(n).references("id").inTable(`maps`).DeferRef())
 	@Field({type: "string"})
 	map: string;

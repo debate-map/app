@@ -8,7 +8,7 @@ import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
 import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
 import {GetNode} from "../Store/db/nodes";
 import {AddArgumentAndClaim} from "../Commands";
-import {NodeParentChildLink} from "../Store/db/nodeParentChildLinks/@NodeParentChildLink.js";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
 
 type Payload = {mapID: string, parentID: string, node: MapNode, revision: MapNodeRevision, link?: ChildEntry, asMapRoot?: boolean};
 
@@ -60,7 +60,7 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 			if (this.parent_oldData?.childrenOrder) {
 				newUpdates[`nodes/${parentID}/.childrenOrder`] = (this.parent_oldData.childrenOrder || []).concat([this.sub_addNode.nodeID]);
 			}*/
-			const link = new NodeParentChildLink({
+			const link = new NodeChildLink({
 				id: GenerateUUID(),
 				parent: parentID,
 				child: this.sub_addNode.nodeID,

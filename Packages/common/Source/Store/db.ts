@@ -4,7 +4,7 @@ import {Layer} from "./db/layers/@Layer";
 import {Map_NodeEdit} from "./db/mapNodeEdits/@MapNodeEdit";
 import {Map} from "./db/maps/@Map";
 import {Media} from "./db/media/@Media";
-import {NodeParentChildLink} from "./db/nodeParentChildLinks/@NodeParentChildLink.js";
+import {NodeChildLink} from "./db/nodeChildLinks/@NodeChildLink.js";
 import {NodeRating} from "./db/nodeRatings/@NodeRating";
 import {MapNode} from "./db/nodes/@MapNode";
 import {MapNodeRevision} from "./db/nodes/@MapNodeRevision";
@@ -41,7 +41,7 @@ export class GraphDBShape {
 	//nodeStats: Collection<MapNodeStats>;
 	//nodeViewers: Collection<ViewerSet>; // removed due to privacy concerns
 	//nodePhrasings: Collection<MapNodePhrasing>;
-	nodeParentChildLinks: Collection<NodeParentChildLink>;
+	nodeChildLinks: Collection<NodeChildLink>;
 	nodeTags: Collection<MapNodeTag>;
 	shares: Collection<Share>;
 	terms: Collection<Term>;

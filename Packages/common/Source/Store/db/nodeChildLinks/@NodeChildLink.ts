@@ -1,9 +1,9 @@
 import {CE} from "web-vcore/nm/js-vextensions";
 import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink";
 
-@MGLClass({table: "nodeParentChildLinks"})
-export class NodeParentChildLink {
-	constructor(data?: Partial<NodeParentChildLink>) {
+@MGLClass({table: "nodeChildLinks"})
+export class NodeChildLink {
+	constructor(data?: Partial<NodeChildLink>) {
 		CE(this).VSet(data);
 	}
 
