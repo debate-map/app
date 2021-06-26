@@ -5,6 +5,7 @@ import {Clone, CE} from "web-vcore/nm/js-vextensions";
 import {AddNodeRevision} from "./AddNodeRevision";
 import {MapNodeL2, MapNode} from "../Store/db/nodes/@MapNode";
 import {GetNodeL2, AsNodeL1, GetNodeL3, GetNodeDisplayText, GetNodeForm} from "../Store/db/nodes/$node";
+import {GetNodeChildren} from "../Store/db/nodes.js";
 
 @MapEdit
 @UserEdit
@@ -29,12 +30,14 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 		this.newNodeData = {...AsNodeL1(this.oldNodeData), ...{multiPremiseArgument}};
 		if (multiPremiseArgument) {
 			//this.newNodeData.childrenOrderType = ChildOrderType.Manual;
-			this.newNodeData.childrenOrder = CE(this.oldNodeData.children).VKeys();
+			//this.newNodeData.childrenOrder = CE(this.oldNodeData.children).VKeys();
 
 			if (this.oldNodeData.current.titles.base.length == 0) {
 				const newRevision = Clone(this.oldNodeData.current);
 
-				const oldChildNode_partialPath = `${nodeID}/${CE(this.oldNodeData.children).VKeys()[0]}`;
+				const children = GetNodeChildren(this.oldNodeData.id);
+				//const oldChildNode_partialPath = `${nodeID}/${CE(this.oldNodeData.children).VKeys()[0]}`;
+				const oldChildNode_partialPath = `${nodeID}/${children[0].id}`;
 				const oldChildNode = GetNodeL3(oldChildNode_partialPath);
 				AssertV(oldChildNode, "oldChildNode is null.");
 				newRevision.titles.base = GetNodeDisplayText(oldChildNode, oldChildNode_partialPath, GetNodeForm(oldChildNode));
@@ -44,7 +47,7 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 			}
 		} else {
 			//this.newNodeData.childrenOrderType = ChildOrderType.ByRating;
-			this.newNodeData.childrenOrder = null;
+			//this.newNodeData.childrenOrder = null;
 		}
 
 		AssertValidate("MapNode", this.newNodeData, "New node-data invalid");

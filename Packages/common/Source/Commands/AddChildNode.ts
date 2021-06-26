@@ -3,14 +3,14 @@ import {MergeDBUpdates, GetAsync, Command, AssertV, GenerateUUID} from "web-vcor
 import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
 import {AddNode} from "./AddNode";
-import {MapNode, ChildEntry, Polarity} from "../Store/db/nodes/@MapNode";
+import {MapNode, Polarity} from "../Store/db/nodes/@MapNode";
 import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
 import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
 import {GetNode} from "../Store/db/nodes";
 import {AddArgumentAndClaim} from "../Commands";
 import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
 
-type Payload = {mapID: string, parentID: string, node: MapNode, revision: MapNodeRevision, link?: ChildEntry, asMapRoot?: boolean};
+type Payload = {mapID: string, parentID: string, node: MapNode, revision: MapNodeRevision, link?: Partial<NodeChildLink>, asMapRoot?: boolean};
 
 @MapEdit
 @UserEdit
@@ -27,12 +27,11 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 
 		const {mapID, parentID, node, revision, link, asMapRoot} = this.payload;
 
-		const node_withParents = E(node, parentID ? {parents: {[parentID]: {_: true}}} : {});
-		this.sub_addNode = this.sub_addNode ?? new AddNode({mapID, node: node_withParents, revision}).MarkAsSubcommand(this);
+		this.sub_addNode = this.sub_addNode ?? new AddNode({mapID, node, revision}).MarkAsSubcommand(this);
 		this.sub_addNode.Validate();
 
-		this.payload.link = link ?? E({_: true}, node.type == MapNodeType.Argument && {polarity: Polarity.Supporting});
-		if (node.type == MapNodeType.Argument) {
+		this.payload.link = link ?? E(node.type == MapNodeType.argument && {polarity: Polarity.supporting});
+		if (node.type == MapNodeType.argument) {
 			AssertV(this.payload.link.polarity != null, "An argument node must have its polarity specified in its parent-link.")
 		}
 
@@ -60,7 +59,8 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 			if (this.parent_oldData?.childrenOrder) {
 				newUpdates[`nodes/${parentID}/.childrenOrder`] = (this.parent_oldData.childrenOrder || []).concat([this.sub_addNode.nodeID]);
 			}*/
-			const link = new NodeChildLink({
+			const link_final = new NodeChildLink({
+				...link,
 				id: GenerateUUID(),
 				parent: parentID,
 				child: this.sub_addNode.nodeID,

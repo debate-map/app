@@ -6,6 +6,7 @@ import {store} from "Store";
 import {O, StoreAction} from "web-vcore";
 import {MapState} from "./maps/mapStates/@MapState";
 import {GetMapView} from "./maps/mapViews/$mapView";
+import {CreateStringEnum} from "web-vcore/nm/js-vextensions";
 
 export class MapsState {
 	// @Oervable maps = observable.map<string, MapState>();
@@ -30,7 +31,7 @@ export class MapsState {
 	@O lockMapScrolling = true;
 	@O initialChildLimit = 5;
 	@O showReasonScoreValues = false;
-	@O weighting = WeightingType.Votes;
+	@O weighting = WeightingType.votes;
 
 	// node panels
 	@O detailsPanel = new DetailsPanelState();
@@ -39,27 +40,29 @@ export class MapsState {
 	@O importSubtreeDialog = new ImportSubtreeDialogState();
 }
 
-export enum DetailsPanel_Subpanel {
-	Text = 10,
-	Attachment = 20,
-	Permissions = 30,
-	Others = 40,
-}
+export const [DetailsPanel_Subpanel] = CreateStringEnum({
+	text: 1,
+	attachment: 1,
+	permissions: 1,
+	others: 1,
+});
+export type DetailsPanel_Subpanel = keyof typeof DetailsPanel_Subpanel;
 export class DetailsPanelState {
-	@O subpanel = DetailsPanel_Subpanel.Text;
+	@O subpanel = DetailsPanel_Subpanel.text;
 }
 
 export class AddChildDialogState {
 	@O advanced = false;
 }
 
-export enum DataExchangeFormat {
-	//DebateMap_JSON = 10,
-	//CD_JSON = 20,
-	GAD_CSV = 30,
-}
+export const [DataExchangeFormat] = CreateStringEnum({
+	//debateMap_json: 1,
+	//cd_json: 1,
+	gad_csv: 1,
+});
+export type DataExchangeFormat = keyof typeof DataExchangeFormat;
 export class ExportSubtreeDialogState {
-	@O targetFormat = DataExchangeFormat.GAD_CSV;
+	@O targetFormat = DataExchangeFormat.gad_csv;
 	@O baseExportDepth = 5;
 }
 export class ImportSubtreeDialogState {

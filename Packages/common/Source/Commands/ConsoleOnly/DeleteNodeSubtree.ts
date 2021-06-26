@@ -48,7 +48,6 @@ export class DeleteNodeSubtree extends Command<{nodeID: string, maxDeletes: numb
 		const {nodeID, maxDeletes} = this.payload;
 
 		this.nodesInSubtree = GetNodesInSubtree(nodeID);
-		AssertV(this.nodesInSubtree, "List of nodes in subtree is still loading.");
 		AssertV(this.nodesInSubtree.length <= maxDeletes, `Length of nodes in subtree (${this.nodesInSubtree.length}) is greater than the max-deletes limit (${maxDeletes}).`);
 
 		this.subs_deleteNodes = this.nodesInSubtree.map(node=>{

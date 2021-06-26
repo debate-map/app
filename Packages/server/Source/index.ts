@@ -7,6 +7,7 @@ import pg from "pg";
 import {createRequire} from "module";
 import {AuthenticationPlugin} from "./Mutations/Authentication.js";
 import {SetUpAuthHandling} from "./AuthHandling.js";
+import "web-vcore/nm/js-vextensions_ApplyCETypes";
 
 type PoolClient = import("pg").PoolClient;
 const {Pool} = pg;

@@ -1,11 +1,11 @@
 import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE} from "web-vcore/nm/js-vextensions";
-import {SplitStringBySlash_Cached, SlicePath, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {SplitStringBySlash_Cached, SlicePath, StoreAccessor, PartialBy} from "web-vcore/nm/mobx-graphlink";
 import {GetMedia} from "../media";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media";
 import {NodeRatingType} from "../nodeRatings/@NodeRatingType";
-import {GetNodeRevision} from "../nodeRevisions";
+import {GetNodeRevision, GetNodeRevisions} from "../nodeRevisions";
 import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, HolderType, GetNodeChildrenL3} from "../nodes";
-import {ChildEntry, ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode";
+import {ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode";
 import {MapNodeRevision, TitlesMap, TitleKey_values} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
 import {PermissionGroupSet} from "../users/@User";
@@ -14,6 +14,8 @@ import {CanContributeToNode} from "../users/$user";
 import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@MapNodeTag";
 import {SourceType, Source} from "../nodeRevisions/@SourceChain";
 import Moment from "web-vcore/nm/moment";
+import {GetNodeChildLinks} from "../nodeChildLinks.js";
+import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
 
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");
@@ -28,7 +30,7 @@ export function PreProcessLatex(text: string) {
 }
 
 export function GetFontSizeForNode(node: MapNodeL2/*, isSubnode = false*/) {
-	if (node.current.fontSizeOverride) return node.current.fontSizeOverride;
+	if (node.current.displayDetails.fontSizeOverride) return node.current.displayDetails.fontSizeOverride;
 	if (node.current.equation) return node.current.equation.latex ? 14 : 13;
 	//if (isSubnode) return 11;
 	return 14;
@@ -39,17 +41,17 @@ export function GetPaddingForNode(node: MapNodeL2/*, isSubnode = false*/) {
 }
 export type RatingTypeInfo = {type: NodeRatingType, main?: boolean, collapsed?: boolean};
 export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
-	if (node.type == MapNodeType.Category) {
-		if (node.current.votingDisabled) return [];
+	if (node.type == MapNodeType.category) {
+		if (!node.current.votingEnabled) return [];
 		return [{type: "significance", main: true}];
 	}
-	if (node.type == MapNodeType.Package) {
+	if (node.type == MapNodeType.package) {
 		return [{type: "significance", main: true}];
 	}
-	if (node.type == MapNodeType.MultiChoiceQuestion) {
+	if (node.type == MapNodeType.multiChoiceQuestion) {
 		return [{type: "significance", main: true}];
 	}
-	if (node.type == MapNodeType.Claim) {
+	if (node.type == MapNodeType.claim) {
 		let result: RatingTypeInfo[];
 		// result = [{type: "truth", main: true}]; //, {type: "significance", main: true}];
 		result = [{type: "truth", main: true}]; // , {type: "relevance", main: true}];
@@ -59,7 +61,7 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 		} */
 		return result;
 	}
-	if (node.type == MapNodeType.Argument) {
+	if (node.type == MapNodeType.argument) {
 		// return [{type: "strength", main: true}, {type: "impact", main: true}];
 		return [{type: "relevance"}, {type: "impact", main: true}];
 	}
@@ -69,22 +71,22 @@ export const GetMainRatingType = StoreAccessor(s=>(node: MapNodeL2)=>{
 	return CE(GetRatingTypesForNode(node)).FirstOrX(a=>a.main, {} as Partial<RatingTypeInfo>).type;
 });
 export function GetSortByRatingType(node: MapNodeL3): NodeRatingType {
-	if (node.link && node.link.form == ClaimForm.YesNoQuestion) {
+	if (node.link && node.link.form == ClaimForm.yesNoQuestion) {
 		return "significance";
 	}
 	return GetMainRatingType(node);
 }
 
 export function ReversePolarity(polarity: Polarity) {
-	return polarity == Polarity.Supporting ? Polarity.Opposing : Polarity.Supporting;
+	return polarity == Polarity.supporting ? Polarity.opposing : Polarity.supporting;
 }
 export const GetDisplayPolarityAtPath = StoreAccessor(s=>(node: MapNodeL2, path: string, tagsToIgnore?: string[]): Polarity=>{
-	Assert(node.type == MapNodeType.Argument, "Only argument nodes have polarity.");
+	Assert(node.type == MapNodeType.argument, "Only argument nodes have polarity.");
 	const parent = GetParentNodeL2(path);
-	if (!parent) return Polarity.Supporting; // can be null, if for NodeUI_ForBots
+	if (!parent) return Polarity.supporting; // can be null, if for NodeUI_ForBots
 
 	const link = GetLinkUnderParent(node.id, parent, true, tagsToIgnore);
-	if (link == null) return Polarity.Supporting; // can be null, if path is invalid (eg. copied-node path)
+	if (link == null) return Polarity.supporting; // can be null, if path is invalid (eg. copied-node path)
 	Assert(link.polarity != null, `The link for the argument #${node.id} (from parent #${parent.id}) must specify the polarity.`);
 
 	const parentForm = GetNodeForm(parent, SplitStringBySlash_Cached(path).slice(0, -1).join("/"));
@@ -92,7 +94,7 @@ export const GetDisplayPolarityAtPath = StoreAccessor(s=>(node: MapNodeL2, path:
 });
 export function GetDisplayPolarity(basePolarity: Polarity, parentForm: ClaimForm): Polarity {
 	let result = basePolarity;
-	if (parentForm == ClaimForm.Negation) {
+	if (parentForm == ClaimForm.negation) {
 		result = ReversePolarity(result);
 	}
 	return result;
@@ -125,7 +127,8 @@ export const GetNodeL2 = StoreAccessor(s=>(nodeID: string | MapNode, path?: stri
 	const node = nodeID as MapNode;
 
 	// if any of the data in a MapNodeL2 is not loaded yet, just return null (we want it to be all or nothing)
-	const currentRevision = GetNodeRevision(node.currentRevision);
+	//const currentRevision = GetNodeRevision(node.currentRevision);
+	const currentRevision = GetNodeRevisions(node.id).OrderBy(a=>a.createdAt).LastOrX(); // todo: add logic deciding which revision to use, based on view context, etc.
 	if (currentRevision === undefined) return undefined; // if node-revision still loading, have GetNodeL2 return "still loading"
 	if (currentRevision === null) return null; // if node-revision non-existent, have GetNodeL2 return null as well
 
@@ -137,15 +140,18 @@ export const GetNodeL2 = StoreAccessor(s=>(nodeID: string | MapNode, path?: stri
 export function IsNodeL3(node: MapNode): node is MapNodeL3 {
 	return node["displayPolarity"] && node["link"];
 }
-export function AsNodeL3(node: MapNodeL2, displayPolarity?: Polarity, link?: ChildEntry) {
+/*export function AsNodeL3(node: MapNodeL2, displayPolarity?: Polarity, link?: NodeChildLink) {
 	Assert(IsNodeL2(node), "Node sent to AsNodeL3 was not an L2 node!");
-	displayPolarity = displayPolarity || Polarity.Supporting;
-	link = link || {
-		_: true,
-		form: ClaimForm.Base,
+	displayPolarity = displayPolarity || Polarity.supporting;
+	link = link ?? {
+		form: ClaimForm.base,
 		seriesAnchor: false,
-		polarity: Polarity.Supporting,
+		polarity: Polarity.supporting,
 	};
+	return E(node, {displayPolarity, link}) as MapNodeL3;
+}*/
+export function AsNodeL3(node: MapNodeL2, link: PartialBy<NodeChildLink, "polarity">, displayPolarity = Polarity.supporting) {
+	Assert(IsNodeL2(node), "Node sent to AsNodeL3 was not an L2 node!");
 	return E(node, {displayPolarity, link}) as MapNodeL3;
 }
 export const GetNodeL3 = StoreAccessor(s=>(path: string, tagsToIgnore?: string[])=>{
@@ -156,7 +162,7 @@ export const GetNodeL3 = StoreAccessor(s=>(path: string, tagsToIgnore?: string[]
 
 	// if any of the data in a MapNodeL3 is not loaded yet, just return null (we want it to be all or nothing)
 	let displayPolarity = null;
-	if (node.type == MapNodeType.Argument) {
+	if (node.type == MapNodeType.argument) {
 		displayPolarity = GetDisplayPolarityAtPath(node, path, tagsToIgnore);
 		if (displayPolarity == null) return null;
 	}
@@ -169,7 +175,7 @@ export const GetNodeL3 = StoreAccessor(s=>(path: string, tagsToIgnore?: string[]
 	if (link == null && path.includes("/")) return null;
 	//}
 
-	const nodeL3 = AsNodeL3(node, displayPolarity, link);
+	const nodeL3 = AsNodeL3(node, link, displayPolarity);
 	// return CachedTransform('GetNodeL3', [path], nodeL3, () => nodeL3);
 	return nodeL3;
 });
@@ -190,12 +196,14 @@ export const GetNodeForm = StoreAccessor(s=>(node: MapNodeL2 | MapNodeL3, pathOr
 
 	const parent: MapNodeL2 = IsString(pathOrParent) ? GetParentNodeL2(pathOrParent as string) : pathOrParent as MapNodeL2;
 	const link = GetLinkUnderParent(node.id, parent);
-	if (link == null) return ClaimForm.Base;
+	if (link == null) return ClaimForm.base;
 	return link.form;
 });
-export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapNode, includeMirrorLinks = true, tagsToIgnore?: string[]): ChildEntry=>{
+export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapNode, includeMirrorLinks = true, tagsToIgnore?: string[]): NodeChildLink=>{
 	if (parent == null) return null;
-	let link = parent.children?.[nodeID]; // null-check, since after child-delete, parent-data might have updated before child-data removed
+	//let link = parent.children?.[nodeID]; // null-check, since after child-delete, parent-data might have updated before child-data removed
+	const parentChildLinks = GetNodeChildLinks(parent.id);
+	let link = parentChildLinks.find(a=>a.child == nodeID);
 	if (includeMirrorLinks && link == null) {
 		let tags = GetNodeTags(parent.id).filter(tag=>tag && !tagsToIgnore?.includes(tag.id));
 		for (const tag of tags) {
@@ -205,7 +213,7 @@ export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapN
 				if (comp instanceof TagComp_MirrorChildrenFromXToY && comp.nodeY == parent.id) {
 					let mirrorChildren = GetNodeChildrenL3(comp.nodeX, undefined, undefined, (tagsToIgnore ?? []).concat(tag.id));
 					mirrorChildren = mirrorChildren.filter(child=> {
-						return child && ((child.link.polarity == Polarity.Supporting && comp.mirrorSupporting) || (child.link.polarity == Polarity.Opposing && comp.mirrorOpposing));
+						return child && ((child.link.polarity == Polarity.supporting && comp.mirrorSupporting) || (child.link.polarity == Polarity.opposing && comp.mirrorOpposing));
 					});
 					let nodeL3ForNodeAsMirrorChildInThisTag = mirrorChildren.find(a=>a.id == nodeID);
 					//const nodeL3ForNodeAsMirrorChildInThisTag = GetNodeL3(`${comp.nodeX}/${nodeID}`);
@@ -245,7 +253,7 @@ export class NodeContributionInfo_ForPolarity {
 	reversePolarities = false;
 }
 export function GetPolarityShortStr(polarity: Polarity) {
-	return polarity == Polarity.Supporting ? "pro" : "con";
+	return polarity == Polarity.supporting ? "pro" : "con";
 }
 
 export const GetNodeContributionInfo = StoreAccessor(s=>(nodeID: string, userID: string)=> {
@@ -291,13 +299,13 @@ export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: stri
 
 	// if (path && path.split('/').length > 3) throw new Error('Test1'); // for testing node error-boundaries
 
-	if (node.type == MapNodeType.Argument && !node.multiPremiseArgument && !titles.base) {
+	if (node.type == MapNodeType.argument && !node.current.multiPremiseArgument && !titles.base) {
 		// const baseClaim = GetNodeL2(node.children && node.children.VKeys().length ? node.children.VKeys()[0] : null);
 		// const baseClaim = GetArgumentPremises(node)[0];
-		const baseClaim = GetNodeChildrenL2(node.id).filter(a=>a && a.type == MapNodeType.Claim)[0];
+		const baseClaim = GetNodeChildrenL2(node.id).filter(a=>a && a.type == MapNodeType.claim)[0];
 		if (baseClaim) return GetNodeDisplayText(baseClaim);
 	}
-	if (node.type == MapNodeType.Claim) {
+	if (node.type == MapNodeType.claim) {
 		if (node.current.equation) {
 			let result = node.current.equation.text;
 			//if (node.current.equation.latex && !isBot) {
@@ -356,8 +364,8 @@ export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: stri
 		}
 
 		if (form) {
-			if (form == ClaimForm.Negation) return titles.negation || missingTitleStrings[1];
-			if (form == ClaimForm.YesNoQuestion) return titles.yesNoQuestion || missingTitleStrings[2];
+			if (form == ClaimForm.negation) return titles.negation || missingTitleStrings[1];
+			if (form == ClaimForm.yesNoQuestion) return titles.yesNoQuestion || missingTitleStrings[2];
 		}
 	}
 	return titles.base || missingTitleStrings[0];
@@ -376,40 +384,40 @@ export function GetValidNewChildTypes(parent: MapNodeL2, holderType: HolderType,
 }
 
 /** Returns whether the node provided is an argument, and marked as single-premise. */
-export const IsSinglePremiseArgument = StoreAccessor(s=>(node: MapNode)=>{
+export const IsSinglePremiseArgument = StoreAccessor(s=>(node: MapNodeL3)=>{
 	/* nodeChildren = nodeChildren || GetNodeChildren(node);
 	if (nodeChildren.Any(a=>a == null)) return null;
 	//return nodeChildren.Any(child=>IsPremiseOfSinglePremiseArgument(child, node));
 	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length == 1; */
-	return node && node.type == MapNodeType.Argument && !node.multiPremiseArgument;
+	return node && node.type == MapNodeType.argument && !node.current.multiPremiseArgument;
 });
 /** Returns whether the node provided is an argument, and marked as multi-premise. */
-export const IsMultiPremiseArgument = StoreAccessor(s=>(node: MapNode)=>{
+export const IsMultiPremiseArgument = StoreAccessor(s=>(node: MapNodeL3)=>{
 	/* nodeChildren = nodeChildren || GetNodeChildren(node);
 	if (nodeChildren.Any(a=>a == null)) return null;
 	//return node.type == MapNodeType.Argument && !IsSinglePremiseArgument(node, nodeChildren);
 	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length > 1; */
-	return node && node.type == MapNodeType.Argument && node.multiPremiseArgument;
+	return node && node.type == MapNodeType.argument && node.current.multiPremiseArgument;
 });
 
-export function IsPrivateNode(node: MapNode) {
+/*export function IsPrivateNode(node: MapNode) {
 	return node.ownerMapID != null;
 }
 export function IsPublicNode(node: MapNode) {
 	return node.ownerMapID == null;
-}
+}*/
 
-export const IsPremiseOfSinglePremiseArgument = StoreAccessor(s=>(node: MapNode, parent: MapNode)=>{
+export const IsPremiseOfSinglePremiseArgument = StoreAccessor(s=>(node: MapNode, parent: MapNodeL3)=>{
 	if (parent == null) return null;
 	// let parentChildren = GetNodeChildrenL2(parent);
 	/* if (parentChildren.Any(a=>a == null)) return false;
 	return node.type == MapNodeType.Claim && parentChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && node.link.form != ClaimForm.YesNoQuestion; */
 	//let node = GetNode(nodeID);
-	return node.type == MapNodeType.Claim && IsSinglePremiseArgument(parent);
+	return node.type == MapNodeType.claim && IsSinglePremiseArgument(parent);
 });
-export function IsPremiseOfMultiPremiseArgument(node: MapNode, parent: MapNode) {
+export function IsPremiseOfMultiPremiseArgument(node: MapNode, parent: MapNodeL3) {
 	if (parent == null) return null;
 	// let parentChildren = GetNodeChildrenL2(parent);
 	//let node = GetNode(nodeID);
-	return node.type == MapNodeType.Claim && IsMultiPremiseArgument(parent);
+	return node.type == MapNodeType.claim && IsMultiPremiseArgument(parent);
 }

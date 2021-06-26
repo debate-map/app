@@ -4,11 +4,11 @@ import {Map} from "./maps/@Map";
 import {Timeline} from "./timelines/@Timeline";
 import {TimelineStep} from "./timelineSteps/@TimelineStep";
 
-/* export function GetTimelines(): Timeline[] {
+/*export function GetTimelines(): Timeline[] {
 	let timelinesMap = GetData({collection: true}, "timelines");
 	return CachedTransform("GetTimelines", [], timelinesMap, ()=>timelinesMap ? timelinesMap.VValues(true) : []);
-} */
-export const GetTimeline = StoreAccessor(s=>(id: string): Timeline=>{
+}*/
+/*export const GetTimeline = StoreAccessor(s=>(id: string): Timeline=>{
 	if (id == null) return null;
 	//return GetDoc({}, a=>a.timelines.get(id));
 	return null;
@@ -21,4 +21,4 @@ export const GetMapTimelines = StoreAccessor(s=>(map: Map)=>{
 	const timelines = GetMapTimelineIDs(map).map(id=>GetTimeline(id));
 	if (CE(timelines).Any(a=>a == null)) return emptyArray_forLoading;
 	return timelines;
-});
+});*/

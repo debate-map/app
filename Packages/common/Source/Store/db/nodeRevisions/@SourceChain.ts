@@ -1,5 +1,6 @@
-import {GetValues_ForSchema, Assert} from "web-vcore/nm/js-vextensions";
+import {GetValues_ForSchema, Assert, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink";
+import {ChangeType} from "../mapNodeEdits/@MapNodeEdit.js";
 
 // export type SourceChain = { [key: number]: Source; };
 // export type SourceChainI = {[key: number]: Source;};
@@ -22,18 +23,19 @@ AddSchema("SourceChain", {
 	required: ["sources"],
 });
 
-export enum SourceType {
-	Speech = 10,
-	Text = 20,
-	Image = 30,
-	Video = 40,
-	Webpage = 50,
-}
+export const [SourceType] = CreateStringEnum({
+	speech: 1,
+	text: 1,
+	image: 1,
+	video: 1,
+	webpage: 1,
+});
+export type SourceType = keyof typeof SourceType;
 AddSchema("SourceType", {oneOf: GetValues_ForSchema(SourceType)});
 
 export const Source_linkURLPattern = "^https?://[^\\s/$.?#]+\\.[^\\s]+$";
 export class Source {
-	type = SourceType.Webpage;
+	type = SourceType.webpage;
 
 	// uses with * means shown in the main row (rather than in dropdown)
 	name: string; // used by: Speech, Text*
@@ -101,18 +103,18 @@ AddSchema("Source", {
 });
 
 export function GetSourceNamePlaceholderText(sourceType: SourceType) {
-	if (sourceType == SourceType.Speech) return "speech name";
-	if (sourceType == SourceType.Text) return "book/document name";
-	if (sourceType == SourceType.Image) return "image name";
-	if (sourceType == SourceType.Video) return "video name";
+	if (sourceType == SourceType.speech) return "speech name";
+	if (sourceType == SourceType.text) return "book/document name";
+	if (sourceType == SourceType.image) return "image name";
+	if (sourceType == SourceType.video) return "video name";
 	// if (sourceType == SourceType.Webpage) return "(webpage name)";
 	Assert(false);
 }
 export function GetSourceAuthorPlaceholderText(sourceType: SourceType) {
-	if (sourceType == SourceType.Speech) return "speaker";
-	if (sourceType == SourceType.Text) return "book/document author";
-	if (sourceType == SourceType.Image) return `image author`;
-	if (sourceType == SourceType.Video) return "video author";
-	if (sourceType == SourceType.Webpage) return "webpage author";
+	if (sourceType == SourceType.speech) return "speaker";
+	if (sourceType == SourceType.text) return "book/document author";
+	if (sourceType == SourceType.image) return `image author`;
+	if (sourceType == SourceType.video) return "video author";
+	if (sourceType == SourceType.webpage) return "webpage author";
 	Assert(false);
 }

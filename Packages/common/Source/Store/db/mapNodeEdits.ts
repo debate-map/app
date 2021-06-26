@@ -3,10 +3,10 @@ import {AddSchema, DB, MGLClass, Field, GetDoc, StoreAccessor, GetDocs} from "we
 import {ChangeType, Map_NodeEdit} from "./mapNodeEdits/@MapNodeEdit.js";
 
 const colorMap = {
-	[ChangeType.Add]: "0,255,0",
+	[ChangeType.add]: "0,255,0",
 	// [ChangeType.Edit]: "255,255,0",
-	[ChangeType.Edit]: "255,255,0",
-	[ChangeType.Remove]: "255,0,0",
+	[ChangeType.edit]: "255,255,0",
+	[ChangeType.remove]: "255,0,0",
 };
 export function GetChangeTypeOutlineColor(changeType: ChangeType) {
 	if (changeType == null) return null;

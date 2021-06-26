@@ -1,13 +1,14 @@
-import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
+import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 import {AddSchema, MGLClass, DB, Field, GetSchemaJSON, Schema, UUID_regex} from "web-vcore/nm/mobx-graphlink";
 import {ObservableMap} from "web-vcore/nm/mobx";
 import {MapNodeRevision_Defaultable, MapNodeRevision_Defaultable_props, MapNodeRevision_Defaultable_DefaultsForMap} from "../nodes/@MapNodeRevision";
 
-export enum MapType {
-	Private = 10,
-	Public = 20,
-	Global = 30,
-}
+export const [MapType] = CreateStringEnum({
+	private: 1,
+	public: 1,
+	global: 1,
+});
+export type MapType = keyof typeof MapType;
 
 //export const Map_namePattern = '^\\S.*$'; // must start with non-whitespace // todo: probably switch to a more lax pattern like this, eg. so works for other languages
 export const Map_namePattern = '^[a-zA-Z0-9 ,\'"%:.?\\-()\\/]+$';
@@ -17,7 +18,7 @@ export class Map {
 		CE(this).VSet(initialData);
 		// this.createdAt = Date.now();
 		if (!("requireMapEditorsCanEdit" in initialData)) {
-			this.requireMapEditorsCanEdit = this.type == MapType.Private;
+			this.requireMapEditorsCanEdit = this.type == MapType.private;
 		}
 		if (!("nodeDefaults" in initialData)) {
 			this.nodeDefaults = MapNodeRevision_Defaultable_DefaultsForMap(this.type);

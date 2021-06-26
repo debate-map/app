@@ -4,7 +4,7 @@ import {NodeRatingType} from "../Store/db/nodeRatings/@NodeRatingType";
 import {NodeRating} from "../Store/db/nodeRatings/@NodeRating";
 import {GetRatings} from "../Store/db/nodeRatings";
 
-export class SetNodeRating extends Command<{nodeID: string, ratingType: NodeRatingType, value: number}, {}> {
+export class SetNodeRating extends Command<{nodeID: string, ratingType: Exclude<NodeRatingType, "impact">, value: number}, {}> {
 	oldRating: NodeRating;
 	newID: string;
 	newRating: NodeRating;
@@ -20,7 +20,6 @@ export class SetNodeRating extends Command<{nodeID: string, ratingType: NodeRati
 		const {nodeID, ratingType, value} = this.payload;
 
 		const oldRatings = GetRatings(nodeID, ratingType, this.userInfo.id);
-		AssertV(oldRatings != emptyArray_forLoading, "Old-ratings still loading.");
 		Assert(oldRatings.length <= 1, `There should not be more than one rating for this given "slot"!`);
 		this.oldRating = oldRatings[0];
 

@@ -8,6 +8,7 @@ import {MapNode} from "../Store/db/nodes/@MapNode";
 import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
 import {MapType} from "../Store/db/maps/@Map";
 import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
+import {GetDefaultAccessPolicyID_ForNode} from "../Store/db/accessPolicies.js";
 
 @UserEdit
 export class AddMap extends Command<{map: Map}, UUID> {
@@ -22,9 +23,9 @@ export class AddMap extends Command<{map: Map}, UUID> {
 		map.editedAt = map.createdAt;
 
 		const newRootNode = new MapNode({
-			type: MapNodeType.Category, creator: map.creator, rootNodeForMap: this.mapID,
 			//ownerMapID: OmitIfFalsy(map.type == MapType.Private && this.mapID),
-			accessPolicy: null, // todo: set to user's default access-policy for new maps
+			accessPolicy: GetDefaultAccessPolicyID_ForNode(),
+			type: MapNodeType.category, creator: map.creator, rootNodeForMap: this.mapID,
 		});
 		const newRootNodeRevision = new MapNodeRevision(E(map.nodeDefaults, {titles: {base: "Root"}, votingDisabled: true}));
 		this.sub_addNode = this.sub_addNode ?? new AddChildNode({mapID: this.mapID, parentID: null, node: newRootNode, revision: newRootNodeRevision, asMapRoot: true}).MarkAsSubcommand(this);

@@ -152,10 +152,13 @@ export async function up(knex: Knex.Transaction) {
 	});
 
 	await knex.schema.createTable(`${v}nodeChildLinks`, t=>{
-		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
-		RunFieldInit(t, "parent", (t,n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
-		RunFieldInit(t, "child", (t,n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
+		RunFieldInit(t, "id", (t,n)=>t.text(n).notNullable().primary());
+		RunFieldInit(t, "parent", (t,n)=>t.text(n).notNullable().references("id").inTable(v + `nodes`).DeferRef());
+		RunFieldInit(t, "child", (t,n)=>t.text(n).notNullable().references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "slot", (t,n)=>t.integer(n));
+		RunFieldInit(t, "form", (t,n)=>t.text(n));
+		RunFieldInit(t, "seriesAnchor", (t,n)=>t.boolean(n));
+		RunFieldInit(t, "polarity", (t,n)=>t.text(n));
 	});
 
 	await knex.schema.createTable(`${v}nodeRatings`, t=>{

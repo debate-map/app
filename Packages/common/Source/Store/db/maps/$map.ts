@@ -5,7 +5,7 @@ import {GetUser} from "../users";
 import {Map, MapType} from "./@Map";
 
 export function IsUserMap(map: Map) {
-	return map.type == MapType.Private || map.type == MapType.Public;
+	return map.type == MapType.private || map.type == MapType.public;
 }
 
 export const GetRootNodeID = StoreAccessor(s=>(mapID: string): string=>{

@@ -6,6 +6,7 @@ import {LinkNode_HighLevel} from "./LinkNode_HighLevel";
 import {ClaimForm, Polarity, MapNode} from "../Store/db/nodes/@MapNode";
 import {GetNode} from "../Store/db/nodes";
 import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
+import {GetNodeChildLinks} from "../Store/db/nodeChildLinks.js";
 
 @MapEdit
 @UserEdit
@@ -28,16 +29,17 @@ export class LinkNode extends Command<{mapID: string, parentID: string, childID:
 			?? GetNode(parentID);
 		AssertV(this.parent_oldData || this.parentCommand != null, "Parent does not exist!");
 
+		const parentChildren = GetNodeChildLinks(this.parent_oldData.id);
 		if (this.parent_oldData) {
-			AssertV(!this.parent_oldData.childrenOrder?.includes(childID), `Node #${childID} is already a child of node #${parentID}.`);
+			AssertV(!parentChildren.Any(a=>a.child == childID), `Node #${childID} is already a child of node #${parentID}.`);
 		}
 
-		if (this.child_oldData?.ownerMapID != null) {
+		/*if (this.child_oldData?.ownerMapID != null) {
 			AssertV(this.parent_oldData?.ownerMapID == this.child_oldData.ownerMapID, `Cannot paste private node #${childID} into a map not matching its owner map (${this.child_oldData.ownerMapID}).`);
-			/* const newMap = GetMap(this.parent_oldData.ownerMapID);
+			/*const newMap = GetMap(this.parent_oldData.ownerMapID);
 			AssertV(newMap, 'newMap not yet loaded.');
-			if (newMap.requireMapEditorsCanEdit) */
-		}
+			if (newMap.requireMapEditorsCanEdit)*#/
+		}*/
 	}
 
 	GetDBUpdates() {
@@ -52,9 +54,9 @@ export class LinkNode extends Command<{mapID: string, parentID: string, childID:
 			childForm && {form: childForm},
 			childPolarity && {polarity: childPolarity},
 		);
-		if (this.parent_oldData?.childrenOrder) {
+		/*if (this.parent_oldData?.childrenOrder) {
 			updates[dbp`nodes/${parentID}/.childrenOrder`] = this.parent_oldData.childrenOrder.concat([childID]);
-		}
+		}*/
 		return updates;
 	}
 }

@@ -26,12 +26,12 @@ export const GetUserPermissionGroups = StoreAccessor(s=>(userID: string): Permis
 });
 export function GetUserAccessLevel(userID: string) {
 	const groups = GetUserPermissionGroups(userID);
-	if (groups == null) return AccessLevel.Basic;
+	if (groups == null) return AccessLevel.basic;
 
-	if (groups.admin) return AccessLevel.Admin;
-	if (groups.mod) return AccessLevel.Mod;
-	if (groups.verified) return AccessLevel.Verified;
-	// if (groups.basic) return AccessLevel.Basic;
+	if (groups.admin) return AccessLevel.admin;
+	if (groups.mod) return AccessLevel.mod;
+	if (groups.verified) return AccessLevel.verified;
+	// if (groups.basic) return AccessLevel.basic;
 	Assert(false);
 }
 
@@ -74,15 +74,15 @@ export const CanEditNode = StoreAccessor(s=>(userID: string, nodeID: string): bo
 	const revision = node.current;
 
 	// probably temp
-	const editPerm = revision.permission_edit ?? {type: PermissionInfoType.Anyone};
+	const editPerm = revision.permission_edit ?? {type: PermissionInfoType.anyone};
 
-	if (editPerm.type == PermissionInfoType.Anyone) {
+	if (editPerm.type == PermissionInfoType.anyone) {
 		return CanGetBasicPermissions(userID);
 	}
-	if (editPerm.type == PermissionInfoType.Creator) {
+	if (editPerm.type == PermissionInfoType.creator) {
 		return revision.creator == userID;
 	}
-	if (editPerm.type == PermissionInfoType.MapEditors) {
+	if (editPerm.type == PermissionInfoType.mapEditors) {
 		if (revision.creator == userID) return true; // node-creator can always edit
 		const map = GetMap(node.ownerMapID);
 		return map?.editors?.includes(userID) ?? false;
@@ -103,15 +103,15 @@ export const CanContributeToNode = StoreAccessor(s=>(userID: string, nodeID: str
 	const revision = node.current;
 
 	// probably temp
-	const contributePerm = revision.permission_contribute ?? {type: PermissionInfoType.Anyone};
+	const contributePerm = revision.permission_contribute ?? {type: PermissionInfoType.anyone};
 
-	if (contributePerm.type == PermissionInfoType.Anyone) {
+	if (contributePerm.type == PermissionInfoType.anyone) {
 		return CanGetBasicPermissions(userID);
 	}
-	if (contributePerm.type == PermissionInfoType.Creator) {
+	if (contributePerm.type == PermissionInfoType.creator) {
 		return revision.creator == userID;
 	}
-	if (contributePerm.type == PermissionInfoType.MapEditors) {
+	if (contributePerm.type == PermissionInfoType.mapEditors) {
 		if (revision.creator == userID) return true; // node-creator can always contribute
 		const map = GetMap(node.ownerMapID);
 		return map?.editors?.includes(userID) ?? false;

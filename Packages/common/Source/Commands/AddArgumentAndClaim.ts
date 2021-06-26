@@ -2,13 +2,14 @@ import {MapEdit, UserEdit} from "../CommandMacros";
 import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
 import {MergeDBUpdates, Command} from "web-vcore/nm/mobx-graphlink";
 import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
-import {ChildEntry, MapNode} from "../Store/db/nodes/@MapNode";
+import {MapNode} from "../Store/db/nodes/@MapNode";
 import {AddChildNode} from "./AddChildNode";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
 
 type Payload = {
 	mapID: string,
-	argumentParentID: string, argumentNode: MapNode, argumentRevision: MapNodeRevision, argumentLink?: ChildEntry,
-	claimNode: MapNode, claimRevision: MapNodeRevision, claimLink?: ChildEntry,
+	argumentParentID: string, argumentNode: MapNode, argumentRevision: MapNodeRevision, argumentLink?: NodeChildLink,
+	claimNode: MapNode, claimRevision: MapNodeRevision, claimLink?: NodeChildLink,
 };
 
 export class AddArgumentAndClaim extends Command<Payload, {argumentNodeID: string, argumentRevisionID: string, claimNodeID: string, claimRevisionID: string}> {
@@ -18,8 +19,8 @@ export class AddArgumentAndClaim extends Command<Payload, {argumentNodeID: strin
 		AssertValidate({
 			properties: {
 				mapID: {type: "string"},
-				argumentParentID: {type: "string"}, argumentNode: {$ref: "MapNode_Partial"}, argumentRevision: {$ref: "MapNodeRevision_Partial"}, argumentLink: {$ref: "ChildEntry"},
-				claimNode: {$ref: "MapNode_Partial"}, claimRevision: {$ref: "MapNodeRevision_Partial"}, claimLink: {$ref: "ChildEntry"},
+				argumentParentID: {type: "string"}, argumentNode: {$ref: "MapNode_Partial"}, argumentRevision: {$ref: "MapNodeRevision_Partial"}, argumentLink: {$ref: NodeChildLink.name},
+				claimNode: {$ref: "MapNode_Partial"}, claimRevision: {$ref: "MapNodeRevision_Partial"}, claimLink: {$ref: NodeChildLink.name},
 			},
 			required: ["mapID", "argumentParentID", "argumentNode", "argumentRevision", "claimNode", "claimRevision"],
 		}, this.payload, "Payload invalid");

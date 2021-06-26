@@ -17,8 +17,8 @@ export class NodeChildCountMarker extends BaseComponentPlus({textOutline: "rgba(
 				},
 				/* showLimitBar && {[limitBar_above ? "paddingTop" : "paddingBottom"]: ChildLimitBar.HEIGHT},
 				showBelowMessage && {paddingBottom: 13}, */
-				limitBarPos == LimitBarPos.Above && {paddingTop: ChildLimitBar.HEIGHT},
-				{paddingBottom: 0 + /* (showBelowMessage ? 13 : 0) +*/ (limitBarPos == LimitBarPos.Below ? ChildLimitBar.HEIGHT : 0)},
+				limitBarPos == LimitBarPos.above && {paddingTop: ChildLimitBar.HEIGHT},
+				{paddingBottom: 0 + /* (showBelowMessage ? 13 : 0) +*/ (limitBarPos == LimitBarPos.below ? ChildLimitBar.HEIGHT : 0)},
 			)}>
 				{childCount}
 			</div>

@@ -44,7 +44,7 @@ export const GetPlayingTimeline = StoreAccessor(s=>(mapID: string): Timeline=>{
 	if (mapInfo == null || !mapInfo.timelinePanelOpen || mapInfo.timelineOpenSubpanel != TimelineSubpanel.Playing) return null;
 	const timelineID = mapInfo.selectedTimeline;
 	return GetTimeline(timelineID); */
-	if (!s.main.maps.mapStates.get(mapID).timelinePanelOpen || s.main.maps.mapStates.get(mapID).timelineOpenSubpanel != TimelineSubpanel.Playing) return null;
+	if (!s.main.maps.mapStates.get(mapID).timelinePanelOpen || s.main.maps.mapStates.get(mapID).timelineOpenSubpanel != TimelineSubpanel.playing) return null;
 	const timelineID = s.main.maps.mapStates.get(mapID).selectedTimeline;
 	return GetTimeline(timelineID);
 });
@@ -124,8 +124,8 @@ export const GetTimeSinceNodeRevealedByPlayingTimeline = StoreAccessor(s=>(mapID
 
 export const GetTimeFromWhichToShowChangedNodes = StoreAccessor(s=>(mapID: string)=>{
 	const type = s.main.maps.mapStates.get(mapID).showChangesSince_type;
-	if (type == ShowChangesSinceType.None) return Number.MAX_SAFE_INTEGER; // from end of time (nothing)
-	if (type == ShowChangesSinceType.AllUnseenChanges) return 0; // from start of time (everything)
+	if (type == ShowChangesSinceType.none) return Number.MAX_SAFE_INTEGER; // from end of time (nothing)
+	if (type == ShowChangesSinceType.allUnseenChanges) return 0; // from start of time (everything)
 	if (PROD && !GetValues(ShowChangesSinceType).Contains(type)) return Number.MAX_SAFE_INTEGER; // defensive
 
 	const visitOffset = s.main.maps.mapStates.get(mapID).showChangesSince_visitOffset;

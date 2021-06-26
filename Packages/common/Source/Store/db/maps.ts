@@ -13,10 +13,10 @@ export const GetMaps = StoreAccessor(s=>(orderByEdits = false): Map[]=>{
 	return result;
 });
 export const GetMaps_Private = StoreAccessor(s=>(orderByEdits = false)=>{
-	return GetMaps(orderByEdits).filter(a=>a && a.type == MapType.Private);
+	return GetMaps(orderByEdits).filter(a=>a && a.type == MapType.private);
 });
 export const GetMaps_Public = StoreAccessor(s=>(orderByEdits = false)=>{
-	return GetMaps(orderByEdits).filter(a=>a && a.type == MapType.Public);
+	return GetMaps(orderByEdits).filter(a=>a && a.type == MapType.public);
 });
 
 /* export function GetMapsOfType(type: MapType): Map[] {

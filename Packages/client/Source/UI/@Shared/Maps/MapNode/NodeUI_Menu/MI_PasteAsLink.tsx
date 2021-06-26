@@ -38,7 +38,7 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 			mapID: map.id, oldParentID: GetParentNodeID(copiedNodePath), newParentID: contributeInfo_polarity.hostNodeID, nodeID: copiedNode.id,
 			newForm: copiedNode.type == MapNodeType.Claim ? formForClaimChildren : null,
 			newPolarity: contributeInfo_polarity.reversePolarities ? ReversePolarity(newPolarity) : newPolarity,
-			allowCreateWrapperArg: holderType != null || !node.multiPremiseArgument,
+			createWrapperArg: holderType != null || !node.multiPremiseArgument,
 			unlinkFromOldParent: copiedNode_asCut, deleteEmptyArgumentWrapper: true,
 		});
 		const error = linkCommand.Validate_Safe();

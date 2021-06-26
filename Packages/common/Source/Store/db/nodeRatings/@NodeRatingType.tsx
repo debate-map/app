@@ -1,4 +1,4 @@
-import {Range, Assert, ModifyString, CE} from "web-vcore/nm/js-vextensions";
+import {Range, Assert, ModifyString, CE, CreateStringEnum, GetValues_ForSchema} from "web-vcore/nm/js-vextensions";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink";
 import {GetDisplayPolarity, GetLinkUnderParent, GetNodeForm, IsMultiPremiseArgument} from "../nodes/$node";
 import {MapNodeL2, MapNodeL3, Polarity} from "../nodes/@MapNode";
@@ -8,19 +8,23 @@ import {ArgumentType} from "../nodes/@MapNodeRevision";
 // export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
 // export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
 // export const ratingTypes = ["significance", "neutrality", "probability", "truth", "impact", "strength"];
-export const nodeRatingTypes = ["significance", "neutrality", "truth", "relevance", "impact"];
-export type NodeRatingType = "significance" | "neutrality" | "truth" | "relevance" | "impact";
-AddSchema("NodeRatingType", {
-	oneOf: nodeRatingTypes.map(a=>({const: a})),
+export const [NodeRatingType] = CreateStringEnum({
+	significance: 1,
+	neutrality: 1,
+	truth: 1,
+	relevance: 1,
+	impact: 1,
 });
+export type NodeRatingType = keyof typeof NodeRatingType;
+AddSchema("NodeRatingType", {oneOf: GetValues_ForSchema(NodeRatingType)});
 
 export function PropNameToTitle(propName: string) {
 	return ModifyString(propName, m=>[m.lowerUpper_to_lowerSpaceLower, m.startLower_to_upper]);
 }
 
-export function GetRatingTypeInfo(ratingType: NodeRatingType, node: MapNodeL2, parent: MapNodeL3, path: string) {
+export function GetRatingTypeInfo(ratingType: NodeRatingType, node: MapNodeL3, parent: MapNodeL3, path: string) {
 	const link = GetLinkUnderParent(node.id, parent);
-	const displayPolarity = link ? GetDisplayPolarity(link.polarity, GetNodeForm(parent)) : Polarity.Supporting;
+	const displayPolarity = link ? GetDisplayPolarity(link.polarity, GetNodeForm(parent)) : Polarity.supporting;
 	const isMultiPremiseArgument = IsMultiPremiseArgument(node);
 
 	const result = new RatingType_Info();
@@ -42,13 +46,13 @@ export function GetRatingTypeInfo(ratingType: NodeRatingType, node: MapNodeL2, p
 	} else if (ratingType == "impact") {
 		result.description = "Argument impact is calculated by combining (multiplying) the truth and relevance ratings.";
 	} else if (ratingType == "relevance") {
-		Assert(node.type == MapNodeType.Argument, `Invalid state. Node with rating-type "relevance" should be an argument. @path:${path}`);
+		Assert(node.type == MapNodeType.argument, `Invalid state. Node with rating-type "relevance" should be an argument. @path:${path}`);
 
 		const premiseCountrStrMap = {
 			// [ArgumentType.All]: `all of the premises`,
-			[ArgumentType.All]: "they",
-			[ArgumentType.AnyTwo]: "at least two of them",
-			[ArgumentType.Any]: "at least one of them",
+			[ArgumentType.all]: "they",
+			[ArgumentType.anyTwo]: "at least two of them",
+			[ArgumentType.any]: "at least one of them",
 		};
 		const premiseCountStr = premiseCountrStrMap[node.current.argumentType];
 

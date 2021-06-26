@@ -1,4 +1,4 @@
-import {UserEdit} from "../CommandMacros";
+/*import {UserEdit} from "../CommandMacros";
 import {GetAsync, Command, AssertV, AV} from "web-vcore/nm/mobx-graphlink";
 import {Timeline} from "../Store/db/timelines/@Timeline";
 import {GetTimeline} from "../Store/db/timelines";
@@ -23,4 +23,4 @@ export class DeleteTimeline extends Command<{timelineID: string}, {}> {
 		updates[`maps/${this.oldData.mapID}/.timelines/.${timelineID}`] = null;
 		return updates;
 	}
-}
+}*/

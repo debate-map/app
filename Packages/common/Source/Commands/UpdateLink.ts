@@ -1,10 +1,11 @@
-import {GetAsync, Command, AssertV, Schema} from "web-vcore/nm/mobx-graphlink";
+import {GetAsync, Command, AssertV, Schema, AV} from "web-vcore/nm/mobx-graphlink";
 import {AddSchema, AssertValidate, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
-import {ChildEntry} from "../Store/db/nodes/@MapNode";
 import {GetNode} from "../Store/db/nodes";
 import {GetLinkUnderParent} from "../Store/db/nodes/$node";
 import {CE} from "web-vcore/nm/js-vextensions";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
+import {GetNodeChildLink} from "../Store/db/nodeChildLinks.js";
 
 AddSchema("UpdateLink_payload", ["ChildEntry"], ()=>({
 	properties: {
@@ -18,23 +19,21 @@ AddSchema("UpdateLink_payload", ["ChildEntry"], ()=>({
 }));
 
 @UserEdit
-export class UpdateLink extends Command<{linkParentID: string, linkChildID: string, linkUpdates: Partial<ChildEntry>}, {}> {
-	newData: ChildEntry;
+export class UpdateLink extends Command<{linkID: string, linkUpdates: Partial<NodeChildLink>}, {}> {
+	newData: NodeChildLink;
 	Validate() {
 		AssertValidate("UpdateLink_payload", this.payload, "Payload invalid");
 
-		const {linkParentID, linkChildID, linkUpdates} = this.payload;
-		const parent = GetNode(linkParentID);
-		AssertV(parent, "parent is null.");
-		const oldData = GetLinkUnderParent(linkChildID, parent);
+		const {linkID, linkUpdates} = this.payload;
+		const oldData = (a=>oldData).AV.NonNull = GetNodeChildLink(linkID);
 		this.newData = {...oldData, ...linkUpdates};
 		AssertValidate("ChildEntry", this.newData, "New link-data invalid");
 	}
 
 	GetDBUpdates() {
-		const {linkParentID, linkChildID} = this.payload;
+		const {linkID} = this.payload;
 		const updates = {};
-		updates[`nodes/${linkParentID}/.children/.${linkChildID}`] = this.newData;
+		updates[`nodeChildLinks/${linkID}`] = this.newData;
 		return updates;
 	}
 }

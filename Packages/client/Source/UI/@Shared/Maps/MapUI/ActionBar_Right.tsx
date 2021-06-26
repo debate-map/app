@@ -14,12 +14,12 @@ import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown";
 import {ShareDropDown} from "./ActionBar_Right/ShareDropDown";
 
 const changesSince_options = [];
-changesSince_options.push({name: "None", value: `${ShowChangesSinceType.None}_null`});
+changesSince_options.push({name: "None", value: `${ShowChangesSinceType.none}_null`});
 for (let offset = 1; offset <= 5; offset++) {
 	const offsetStr = [null, "", "2nd ", "3rd ", "4th ", "5th "][offset];
-	changesSince_options.push({name: `Your ${offsetStr}last visit`, value: `${ShowChangesSinceType.SinceVisitX}_${offset}`});
+	changesSince_options.push({name: `Your ${offsetStr}last visit`, value: `${ShowChangesSinceType.sinceVisitX}_${offset}`});
 }
-changesSince_options.push({name: "All unclicked changes", value: `${ShowChangesSinceType.AllUnseenChanges}_null`});
+changesSince_options.push({name: "All unclicked changes", value: `${ShowChangesSinceType.allUnseenChanges}_null`});
 
 @Observer
 export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number}, {}) {

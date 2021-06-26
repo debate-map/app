@@ -1,27 +1,31 @@
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {O} from "web-vcore";
+import {CreateStringEnum} from "web-vcore/nm/js-vextensions";
 
-export enum ShareTab {
-	AllMaps = 10,
-	ThisMap = 20,
-	Current = 30,
-}
-export enum ExpandType {
-	//MapDefault = 10,
-	//ToSelectedNode = 20,
-	MatchView = 30,
-}
-export enum ScrollToType {
-	//MapRoot = 10,
-	//SelectedNode = 20,
-	ViewCenter = 30,
-}
+export const [ShareTab] = CreateStringEnum({
+	allMaps: 1,
+	thisMap: 1,
+	current: 1,
+});
+export type ShareTab = keyof typeof ShareTab;
+export const [ExpandType] = CreateStringEnum({
+	//mapDefault: 1,
+	//toSelectedNode: 1,
+	matchView: 1,
+});
+export type ExpandType = keyof typeof ExpandType;
+export const [ScrollToType] = CreateStringEnum({
+	//mapRoot: 1,
+	//selectedNode: 1,
+	viewCenter: 1,
+});
+export type ScrollToType = keyof typeof ScrollToType;
 
 export class ShareUIState {
-	@O tab = ShareTab.Current;
+	@O tab = ShareTab.current;
 
 	// for new share
-	@O expandType = ExpandType.MatchView;
-	@O scrollToType = ScrollToType.ViewCenter;
+	@O expandType = ExpandType.matchView;
+	@O scrollToType = ScrollToType.viewCenter;
 	@O showJSON = false;
 }

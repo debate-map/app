@@ -1,27 +1,31 @@
 import {O} from "web-vcore";
+import {CreateStringEnum} from "web-vcore/nm/js-vextensions";
 
-export enum SortType {
-	CreatorID = 10,
-	CreationDate = 20,
-	// UpdateDate = 30,
-	// ViewerCount = 40,
-}
-export enum TimelineSubpanel {
-	Collection = 10,
-	Editor = 20,
-	Playing = 30,
-}
+export const [SortType] = CreateStringEnum({
+	creatorID: 1,
+	creationDate: 1,
+	//updateDate: 1,
+	//viewerCount: 1,
+});
+export type SortType = keyof typeof SortType;
+export const [TimelineSubpanel] = CreateStringEnum({
+	collection: 1,
+	editor: 1,
+	playing: 1,
+});
+export type TimelineSubpanel = keyof typeof TimelineSubpanel;
 
-export enum ShowChangesSinceType {
-	None = 10,
-	SinceVisitX = 20,
-	AllUnseenChanges = 30,
-}
+export const [ShowChangesSinceType] = CreateStringEnum({
+	none: 1,
+	sinceVisitX: 1,
+	allUnseenChanges: 1,
+});
+export type ShowChangesSinceType = keyof typeof ShowChangesSinceType;
 
 export class MapState {
 	@O initDone = false;
 
-	@O list_sortBy = SortType.CreationDate;
+	@O list_sortBy = SortType.creationDate;
 	@O list_filter = "";
 	@O list_page = 0;
 
@@ -29,11 +33,11 @@ export class MapState {
 	@O list_selectedNode_openPanel = null as string;
 
 	@O timelinePanelOpen = false;
-	@O timelineOpenSubpanel = TimelineSubpanel.Collection;
+	@O timelineOpenSubpanel = TimelineSubpanel.collection;
 	@O showTimelineDetails = false;
 	@O selectedTimeline = null as string;
 
-	@O showChangesSince_type = ShowChangesSinceType.SinceVisitX;
+	@O showChangesSince_type = ShowChangesSinceType.sinceVisitX;
 	@O showChangesSince_visitOffset = 1;
 
 	@O playingTimeline_time: number;

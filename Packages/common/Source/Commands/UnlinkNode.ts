@@ -4,6 +4,8 @@ import {GetNode, IsRootNode} from "../Store/db/nodes";
 import {GetNodeL2} from "../Store/db/nodes/$node";
 import {IsUserCreatorOrMod} from "../Store/db/users/$user";
 import {CE} from "web-vcore/nm/js-vextensions";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
+import {GetNodeChildLinks} from "../Store/db/nodeChildLinks.js";
 
 // todo: add full-fledged checking to ensure that nodes are never orphaned by move commands (probably use parents recursion to find at least one map root)
 
@@ -12,10 +14,12 @@ import {CE} from "web-vcore/nm/js-vextensions";
 export class UnlinkNode extends Command<{mapID: string, parentID: string, childID: string}, {}> {
 	allowOrphaning = false; // could also be named "asPartOfCut", to be consistent with ForUnlink_GetError parameter
 
-	parent_oldChildrenOrder: string[];
+	parentToChildLinks: NodeChildLink[];
 	Validate() {
 		const {parentID, childID} = this.payload;
-		this.parent_oldChildrenOrder = GetNode(parentID)?.childrenOrder;
+		const childParents = GetNodeChildLinks(null, childID);
+		this.parentToChildLinks = GetNodeChildLinks(parentID, childID);
+		AssertV(this.parentToChildLinks.length <= 1, "There should not be more than 1 link between parent and child.");
 
 		/* let {parentID, childID} = this.payload;
 		let childNode = await GetNodeAsync(childID);
@@ -26,7 +30,7 @@ export class UnlinkNode extends Command<{mapID: string, parentID: string, childI
 
 		const baseText = `Cannot unlink node #${oldData.id}, since `;
 		AssertV(IsUserCreatorOrMod(this.userInfo.id, oldData), `${baseText}you are not its owner. (or a mod)`);
-		AssertV(this.allowOrphaning || CE(oldData.parents || {}).VKeys().length > 1, `${baseText}doing so would orphan it. Try deleting it instead.`);
+		AssertV(this.allowOrphaning || childParents.length > 1, `${baseText}doing so would orphan it. Try deleting it instead.`);
 		AssertV(!IsRootNode(oldData), `${baseText}it's the root-node of a map.`);
 		//AssertV(!IsNodeSubnode(oldData), `${baseText}it's a subnode. Try deleting it instead.`);
 	}
@@ -37,9 +41,9 @@ export class UnlinkNode extends Command<{mapID: string, parentID: string, childI
 		const updates = {};
 		updates[`nodes/${childID}/.parents/.${parentID}`] = null;
 		updates[`nodes/${parentID}/.children/.${childID}`] = null;
-		if (this.parent_oldChildrenOrder) {
+		if (this.parentToChildLinks.length) {
 			//updates[`nodes/${parentID}/.childrenOrder`] = CE(CE(this.parent_oldChildrenOrder).Except(childID)).IfEmptyThen(null);
-			updates[`nodes/${parentID}/.childrenOrder`] = CE(this.parent_oldChildrenOrder).Except(childID);
+			updates[`nodeChildLinks/${this.parentToChildLinks[0].id}`] = null;
 		}
 		return updates;
 	}

@@ -1,4 +1,4 @@
-import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
+import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink";
 
 // export const termNameFormat = "^[^.#$\\[\\]]+$";
@@ -53,13 +53,14 @@ export class Term {
 	note: string;
 }
 
-export enum TermType {
-	CommonNoun = 10,
-	ProperNoun = 20,
-	Adjective = 30,
-	Verb = 40,
-	Adverb = 50,
-}
+export const [TermType] = CreateStringEnum({
+	commonNoun: 1,
+	properNoun: 1,
+	adjective: 1,
+	verb: 1,
+	adverb: 1,
+});
+export type TermType = keyof typeof TermType;
 AddSchema("TermType", {oneOf: GetValues_ForSchema(TermType)});
 
 /*export type TermComponentSet = ObservableMap<string, boolean>;

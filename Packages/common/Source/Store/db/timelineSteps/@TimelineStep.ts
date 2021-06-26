@@ -6,7 +6,7 @@ export class TimelineStep {
 		CE(this).VSet(initialData);
 	}
 
-	_key: string;
+	id: string;
 	timelineID: string;
 	title: string;
 	groupID: number;
@@ -19,6 +19,7 @@ export class TimelineStep {
 }
 AddSchema("TimelineStep", {
 	properties: {
+		id: {type: "string"},
 		timelineID: {type: "string"},
 		title: {type: "string"},
 		groupID: {type: ["number", "null"]},

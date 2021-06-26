@@ -1,27 +1,23 @@
-import {Assert, CachedTransform, E, emptyArray, emptyArray_forLoading, IsNaN, nl, AssertWarn} from "web-vcore/nm/js-vextensions";
+import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNodeL3, MapNodeType, MeID, Polarity} from "dm_common";
 import React from "react";
-import {Column, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus, GetInnerComp, RenderSource, ShallowEquals, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
+import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/firebase_ext/mapNodeEditTimes";
+import {GetNodeChildrenL3_Advanced} from "Store/firebase_ext/nodes";
+import {GetPlayingTimeline, GetPlayingTimelineRevealNodes_UpToAppliedStep, GetPlayingTimelineStepIndex, GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState";
+import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
 import {NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
-import {EB_ShowError, EB_StoreError, MaybeLog, ShouldLog, Observer} from "web-vcore";
 import {logTypes} from "Utils/General/Logging";
-import {GetTimeFromWhichToShowChangedNodes, GetPlayingTimeline, GetPlayingTimelineStepIndex, GetPlayingTimelineRevealNodes_UpToAppliedStep} from "Store/main/maps/mapStates/$mapState";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink";
-import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
-import {Map, MapNodeL3, Polarity, AccessLevel, IsNodeL2, IsNodeL3, IsSinglePremiseArgument, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsRootNode, ChangeType, MapNodeType, GetSubnodesInEnabledLayersEnhanced, MeID} from "dm_common";
-
-
-import {GetNodeChildrenL3_Advanced} from "Store/firebase_ext/nodes";
-import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/firebase_ext/mapNodeEditTimes";
-
-
 import {ES} from "Utils/UI/GlobalStyles";
-import {NodeUI_Menu_Stub} from "./NodeUI_Menu";
-import {NodeUI_Inner} from "./NodeUI_Inner";
-import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer";
-import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker";
+import {EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog} from "web-vcore";
+import {Assert, AssertWarn, CreateStringEnum, E, emptyArray_forLoading, IsNaN, nl} from "web-vcore/nm/js-vextensions";
+import {SlicePath} from "web-vcore/nm/mobx-graphlink";
+import {Column, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus, GetInnerComp, RenderSource, ShallowEquals, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
 import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker";
+import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker";
+import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer";
+import {NodeUI_Inner} from "./NodeUI_Inner";
+import {NodeUI_Menu_Stub} from "./NodeUI_Menu";
 
 // @ExpensiveComponent
 @WarnOfTransientObjectProps
@@ -65,8 +61,8 @@ export class NodeUI extends BaseComponentPlus(
 
 		const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
 		const pathsToChangedDescendantNodes_withChangeTypes = GetPathsToChangedDescendantNodes_WithChangeTypes(map.id, sinceTime, path);
-		const addedDescendants = pathsToChangedDescendantNodes_withChangeTypes.filter(a=>a == ChangeType.Add).length;
-		const editedDescendants = pathsToChangedDescendantNodes_withChangeTypes.filter(a=>a == ChangeType.Edit).length;
+		const addedDescendants = pathsToChangedDescendantNodes_withChangeTypes.filter(a=>a == ChangeType.add).length;
+		const editedDescendants = pathsToChangedDescendantNodes_withChangeTypes.filter(a=>a == ChangeType.edit).length;
 
 		const parent = GetParentNodeL3(path);
 		const parentPath = GetParentPath(path);
@@ -77,7 +73,7 @@ export class NodeUI extends BaseComponentPlus(
 		const isSinglePremiseArgument = IsSinglePremiseArgument(node);
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
-		const argumentNode = node.type == MapNodeType.Argument ? node : isPremiseOfSinglePremiseArg ? parent : null;
+		const argumentNode = node.type == MapNodeType.argument ? node : isPremiseOfSinglePremiseArg ? parent : null;
 
 		/* const initialChildLimit = State(a => a.main.initialChildLimit);
 		const form = GetNodeForm(node, GetParentNodeL2(path)); */
@@ -109,7 +105,7 @@ export class NodeUI extends BaseComponentPlus(
 
 		// if single-premise arg, combine arg and premise into one box, by rendering premise box directly (it will add-in this argument's child relevance-arguments)
 		if (isSinglePremiseArgument) {
-			const premises = nodeChildren.filter(a=>a && a.type == MapNodeType.Claim);
+			const premises = nodeChildren.filter(a=>a && a.type == MapNodeType.claim);
 			if (premises.length) {
 				AssertWarn(premises.length == 1, `Single-premise argument #${node.id} has more than one premise! (${premises.map(a=>a.id).join(",")})`);
 				const premise = premises[0];
@@ -153,13 +149,13 @@ export class NodeUI extends BaseComponentPlus(
 			);
 		}
 
-		const separateChildren = node.type == MapNodeType.Claim;
+		const separateChildren = node.type == MapNodeType.claim;
 
 		const parentChildren = GetNodeChildrenL3(parent?.id, parentPath);
 		if (isPremiseOfSinglePremiseArg) {
 			const argument = parent;
 			const argumentPath = SlicePath(path, 1);
-			var relevanceArguments = parentChildren.filter(a=>a && a.type == MapNodeType.Argument);
+			var relevanceArguments = parentChildren.filter(a=>a && a.type == MapNodeType.argument);
 			// Assert(!relevanceArguments.Any(a=>a.type == MapNodeType.Claim), "Single-premise argument has more than one premise!");
 			if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
 				// relevanceArguments = relevanceArguments.filter(child => playingTimelineVisibleNodes.Contains(`${argumentPath}/${child.id}`));
@@ -171,12 +167,12 @@ export class NodeUI extends BaseComponentPlus(
 		const {width, expectedHeight} = this.GetMeasurementInfo();
 
 		const showLimitBar = !!children; // the only type of child we ever pass into NodeUI is a LimitBar
-		const limitBar_above = argumentNode && argumentNode.displayPolarity == Polarity.Supporting;
-		const limitBarPos = showLimitBar ? (limitBar_above ? LimitBarPos.Above : LimitBarPos.Below) : LimitBarPos.None;
+		const limitBar_above = argumentNode && argumentNode.displayPolarity == Polarity.supporting;
+		const limitBarPos = showLimitBar ? (limitBar_above ? LimitBarPos.above : LimitBarPos.below) : LimitBarPos.none;
 
 		let nodeChildHolder_direct: JSX.Element;
 		if (!isPremiseOfSinglePremiseArg && boxExpanded) {
-			const showArgumentsControlBar = (node.type == MapNodeType.Claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
+			const showArgumentsControlBar = (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
 				// type={node.type == MapNodeType.Claim && node._id != demoRootNodeID ? HolderType.Truth : null}
 				type={null}
@@ -193,12 +189,12 @@ export class NodeUI extends BaseComponentPlus(
 				}, [isMultiPremiseArgument])}/>;
 		}
 		const nodeChildHolderBox_truth = isPremiseOfSinglePremiseArg && boxExpanded &&
-			<NodeChildHolderBox {...{map, node, path}} type={HolderType.Truth}
+			<NodeChildHolderBox {...{map, node, path}} type={HolderType.truth}
 				widthOfNode={widthOverride || width}
 				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
 		const nodeChildHolderBox_relevance = isPremiseOfSinglePremiseArg && boxExpanded &&
-			<NodeChildHolderBox {...{map, node: parent, path: parentPath}} type={HolderType.Relevance}
+			<NodeChildHolderBox {...{map, node: parent, path: parentPath}} type={HolderType.relevance}
 				widthOfNode={widthOverride || width}
 				nodeChildren={GetNodeChildrenL3(parent.id, parentPath)} nodeChildrenToShow={relevanceArguments}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
@@ -244,7 +240,7 @@ export class NodeUI extends BaseComponentPlus(
 					{asSubnode &&
 					<div style={{position: "absolute", left: 2, right: 2, top: -3, height: 3, borderRadius: "3px 3px 0 0", background: "rgba(255,255,0,.7)"}}/>}
 					<Column className="innerBoxHolder clickThrough" style={{position: "relative"}}>
-						{node.current.accessLevel != AccessLevel.Basic &&
+						{node.current.accessLevel != AccessLevel.basic &&
 						<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 							<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
 						</div>}
@@ -352,13 +348,13 @@ export class NodeUI extends BaseComponentPlus(
 		if (this.measurementInfo_cache && ShallowEquals(this.measurementInfo_cache_lastUsedProps, props_used)) return this.measurementInfo_cache;
 
 		const {map, node, path} = props_used;
-		const subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map.id, node.id);
+		//const subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map.id, node.id);
 		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode(node, path);
 
-		for (const subnode of subnodes) {
+		/*for (const subnode of subnodes) {
 			const subnodeMeasurementInfo = GetMeasurementInfoForNode(subnode, `${subnode.id}`);
 			expectedBoxWidth = Math.max(expectedBoxWidth, subnodeMeasurementInfo.expectedBoxWidth);
-		}
+		}*/
 
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
 		if (isMultiPremiseArgument) {
@@ -374,8 +370,9 @@ export class NodeUI extends BaseComponentPlus(
 	}
 }
 
-export enum LimitBarPos {
-	Above,
-	Below,
-	None,
-}
+export const [LimitBarPos] = CreateStringEnum({
+	above: 1,
+	below: 1,
+	none: 1,
+});
+export type LimitBarPos = keyof typeof LimitBarPos;

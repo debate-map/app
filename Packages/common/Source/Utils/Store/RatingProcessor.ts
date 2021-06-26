@@ -19,13 +19,13 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 		}
 
 		const form = GetNodeForm(premise, argument);
-		const probability = form == ClaimForm.Negation ? 1 - (ratingValue / 100) : (ratingValue / 100);
+		const probability = form == ClaimForm.negation ? 1 - (ratingValue / 100) : (ratingValue / 100);
 		return probability;
 	});
 	let combinedTruthOfPremises;
-	if (argument.current.argumentType == ArgumentType.All) {
+	if (argument.current.argumentType == ArgumentType.all) {
 		combinedTruthOfPremises = premiseProbabilities.reduce((total, current)=>total * current, 1);
-	} else if (argument.current.argumentType == ArgumentType.AnyTwo) {
+	} else if (argument.current.argumentType == ArgumentType.anyTwo) {
 		const strongest = CE(premiseProbabilities).Max(null, true);
 		const secondStrongest = premiseProbabilities.length > 1 ? CE(CE(premiseProbabilities).Except({excludeEachOnlyOnce: true}, strongest)).Max(null, true) : 0;
 		combinedTruthOfPremises = strongest * secondStrongest;
@@ -44,6 +44,7 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 
 	return {
 		//_key: userID,
+		accessPolicy: null,
 		node: argument.id,
 		type: "impact",
 		user: userID,
@@ -64,7 +65,7 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 } */
 
 // export function GetArgumentImpactPseudoRatingSet(argument: MapNodeL2, premises: MapNodeL2[]): {[key: string]: Rating} {
-export const GetArgumentImpactPseudoRatings = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[]): NodeRating[]=>{
+export const GetArgumentImpactPseudoRatings = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[]): NoID<NodeRating>[]=>{
 	if (CE(premises).Any(a=>a == null)) return emptyArray_forLoading as any; // must still be loading
 	if (premises.length == 0) return emptyArray as any;
 

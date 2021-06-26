@@ -15,11 +15,13 @@ import {MeID} from "../Store/db/users";
 import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
 import {Map} from "../Store/db/maps/@Map";
 import {SearchUpFromNodeForNodeMatchingX} from "../Utils/Store/PathFinder";
+import {GetDefaultAccessPolicyID_ForNode} from "../Store/db/accessPolicies.js";
+import {GetNodeChildLinks} from "../Store/db/nodeChildLinks.js";
 
 type Payload = {
 	mapID: string, oldParentID: string, newParentID: string, nodeID: string,
 	newForm?: ClaimForm, newPolarity?: Polarity,
-	allowCreateWrapperArg?: boolean,
+	createWrapperArg?: boolean,
 	//linkAsArgument?: boolean,
 	unlinkFromOldParent?: boolean, deleteEmptyArgumentWrapper?: boolean
 };
@@ -31,19 +33,20 @@ export function CreateLinkCommand(mapID: UUID, draggedNodePath: string, dropOnNo
 	// const draggedNode_parent = GetParentNodeL3(draggedNodePath);
 	const dropOnNode_parent = GetParentNodeL3(dropOnNodePath);
 	const holderType = GetHolderType(dropOnNode.type, dropOnNode_parent ? dropOnNode_parent.type : null);
-	const formForClaimChildren = dropOnNode.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
+	const formForClaimChildren = dropOnNode.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base;
 
 	return new LinkNode_HighLevel({
 		mapID, oldParentID: GetParentNodeID(draggedNodePath), newParentID: dropOnNode.id, nodeID: draggedNode.id,
-		newForm: draggedNode.type == MapNodeType.Claim ? formForClaimChildren : null,
+		newForm: draggedNode.type == MapNodeType.claim ? formForClaimChildren : null,
 		newPolarity: polarity,
-		allowCreateWrapperArg: holderType != null || !dropOnNode.multiPremiseArgument,
+		//createWrapperArg: holderType != null || !dropOnNode.multiPremiseArgument,
+		createWrapperArg: true, // todo
 		unlinkFromOldParent: !asCopy, deleteEmptyArgumentWrapper: true,
 	});
 }
 
 export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: string}> {
-	static defaultPayload = {allowCreateWrapperArg: true};
+	static defaultPayload = {createWrapperArg: true};
 
 	map_data: Map;
 	node_data: MapNode;
@@ -54,7 +57,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 	sub_unlinkFromOldParent: UnlinkNode;
 	sub_deleteOldParent: DeleteNode;
 	Validate() {
-		let {mapID, oldParentID, newParentID, nodeID, newForm, allowCreateWrapperArg, unlinkFromOldParent, deleteEmptyArgumentWrapper, newPolarity} = this.payload;
+		let {mapID, oldParentID, newParentID, nodeID, newForm, createWrapperArg, unlinkFromOldParent, deleteEmptyArgumentWrapper, newPolarity} = this.payload;
 		AssertV(oldParentID !== nodeID, "Old parent-id and child-id cannot be the same!");
 		AssertV(newParentID !== nodeID, "New parent-id and child-id cannot be the same!");
 		//AssertV(oldParentID !== newParentID, "Old-parent-id and new-parent-id cannot be the same!");
@@ -67,7 +70,8 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		//AssertV(oldParent_data, "oldParent_data is null."); // commented: allow linking orphaned nodes
 		this.newParent_data = AV.NonNull = GetNodeL2(newParentID);
 
-		let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && allowCreateWrapperArg;
+		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
+		let pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && createWrapperArg;
 		AssertV(oldParentID !== newParentID || pastingPremiseAsRelevanceArg, "Old-parent-id and new-parent-id cannot be the same! (unless changing between truth-arg and relevance-arg)");
 		AssertV(CanContributeToNode(MeID(), newParentID), "Cannot paste under a node with contributions disabled.");
 
@@ -82,28 +86,29 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 		let newParentID_forClaim = newParentID;
 
-		const canCreateWrapperArg = this.node_data.type === MapNodeType.Claim && ObjectCE(this.newParent_data.type).IsOneOf(MapNodeType.Claim, MapNodeType.Argument);
-		if (canCreateWrapperArg) {
-			const createWrapperArg = canCreateWrapperArg && allowCreateWrapperArg;
-			if (createWrapperArg) {
-				// Assert(newPolarity, 'Since this command has to create a wrapper-argument, you must supply the newPolarity property.');
-				newPolarity = newPolarity || Polarity.Supporting; // if new-polarity isn't supplied, just default to Supporting (this can happen if a claim is copied from search-results)
-				const argumentWrapper = new MapNode({type: MapNodeType.Argument, ownerMapID: OmitIfFalsy(this.newParent_data.ownerMapID)});
-				const argumentWrapperRevision = new MapNodeRevision(this.map_data.nodeDefaults);
+		if (createWrapperArg) {
+			const canCreateWrapperArg = this.node_data.type === MapNodeType.claim && ObjectCE(this.newParent_data.type).IsOneOf(MapNodeType.claim, MapNodeType.argument);
+			AssertV(canCreateWrapperArg);
 
-				this.sub_addArgumentWrapper = this.sub_addArgumentWrapper ?? new AddChildNode({
-					mapID, parentID: newParentID, node: argumentWrapper, revision: argumentWrapperRevision,
-					// link: E({ _: true }, newPolarity && { polarity: newPolarity }) as any,
-					link: E({_: true, polarity: newPolarity}) as any,
-				}).MarkAsSubcommand(this);
-				this.sub_addArgumentWrapper.Validate();
+			//const createWrapperArg = canCreateWrapperArg && createWrapperArg;
+			// Assert(newPolarity, 'Since this command has to create a wrapper-argument, you must supply the newPolarity property.');
+			newPolarity = newPolarity || Polarity.supporting; // if new-polarity isn't supplied, just default to Supporting (this can happen if a claim is copied from search-results)
+			const argumentWrapper = new MapNode({
+				//ownerMapID: OmitIfFalsy(this.newParent_data.ownerMapID),
+				accessPolicy: GetDefaultAccessPolicyID_ForNode(),
+				type: MapNodeType.argument,
+			});
+			const argumentWrapperRevision = new MapNodeRevision(this.map_data.nodeDefaults);
 
-				this.returnData.argumentWrapperID = this.sub_addArgumentWrapper.sub_addNode.nodeID;
-				newParentID_forClaim = this.sub_addArgumentWrapper.sub_addNode.nodeID;
-			} else {
-				const mustCreateWrapperArg = canCreateWrapperArg && !this.newParent_data.multiPremiseArgument;
-				AssertV(mustCreateWrapperArg === false, `Linking node #${nodeID} under #${newParentID} requires creating a wrapper-arg, but this was disallowed by passed prop.`);
-			}
+			this.sub_addArgumentWrapper = this.sub_addArgumentWrapper ?? new AddChildNode({
+				mapID, parentID: newParentID, node: argumentWrapper, revision: argumentWrapperRevision,
+				// link: E({ _: true }, newPolarity && { polarity: newPolarity }) as any,
+				link: E({_: true, polarity: newPolarity}) as any,
+			}).MarkAsSubcommand(this);
+			this.sub_addArgumentWrapper.Validate();
+
+			this.returnData.argumentWrapperID = this.sub_addArgumentWrapper.sub_addNode.nodeID;
+			newParentID_forClaim = this.sub_addArgumentWrapper.sub_addNode.nodeID;
 		}
 
 		this.sub_linkToNewParent = this.sub_linkToNewParent ?? new LinkNode({mapID, parentID: newParentID_forClaim, childID: nodeID, childForm: newForm, childPolarity: newPolarity}).MarkAsSubcommand(this);
@@ -115,7 +120,8 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			this.sub_unlinkFromOldParent.Validate();
 
 			// if the old parent was a single-premise argument, and the moved node was its only child, also delete the old parent
-			if (deleteEmptyArgumentWrapper && IsSinglePremiseArgument(oldParent_data) && CE(oldParent_data.children).VKeys().length === 1) {
+			const children = GetNodeChildLinks(oldParentID);
+			if (deleteEmptyArgumentWrapper && IsSinglePremiseArgument(oldParent_data) && children.length == 1) {
 				this.sub_deleteOldParent = this.sub_deleteOldParent ?? new DeleteNode({mapID, nodeID: oldParentID}).MarkAsSubcommand(this);
 				this.sub_deleteOldParent.childrenToIgnore = [nodeID]; // let DeleteNode sub that it doesn't need to wait for nodeID to be deleted (since we're moving it out from old-parent simultaneously with old-parent's deletion)
 				this.sub_deleteOldParent.Validate();

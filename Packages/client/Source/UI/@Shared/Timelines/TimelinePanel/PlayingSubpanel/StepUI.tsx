@@ -25,9 +25,9 @@ export class StepUI extends BaseComponentPlus(
 		if (step == null) return <div style={{height: 50}}/>;
 
 		let margin: string;
-		if (step.groupID == PositionOptionsEnum.Center) margin = "0 30px";
-		if (step.groupID == PositionOptionsEnum.Left) margin = "0 50px 0 0";
-		if (step.groupID == PositionOptionsEnum.Right) margin = "0 0 0 50px";
+		if (step.groupID == PositionOptionsEnum.center) margin = "0 30px";
+		if (step.groupID == PositionOptionsEnum.left) margin = "0 50px 0 0";
+		if (step.groupID == PositionOptionsEnum.right) margin = "0 0 0 50px";
 
 		return (
 			// wrapper needed to emulate margin-top (since react-list doesn't support margins)

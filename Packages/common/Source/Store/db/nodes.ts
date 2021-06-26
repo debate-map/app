@@ -1,5 +1,6 @@
-import {emptyArray, emptyArray_forLoading, IsNaN, CE, Assert} from "web-vcore/nm/js-vextensions";
+import {emptyArray, emptyArray_forLoading, IsNaN, CE, Assert, A, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 import {GetDoc, SlicePath, SplitStringBySlash_Cached, StoreAccessor, UUID} from "web-vcore/nm/mobx-graphlink";
+import {GetNodeChildLinks} from "./nodeChildLinks.js";
 import {GetNodeRevisionsByTitle} from "./nodeRevisions";
 import {AsNodeL1, GetNodeL2, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "./nodes/$node";
 import {globalRootNodeID, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./nodes/@MapNode";
@@ -11,10 +12,11 @@ import {MeID} from "./users";
 import {CanGetBasicPermissions, GetUserAccessLevel, HasAdminPermissions, IsUserCreatorOrMod} from "./users/$user";
 import {PermissionGroupSet} from "./users/@User";
 
-export enum HolderType {
-	Truth = 10,
-	Relevance = 20,
-}
+export const [HolderType] = CreateStringEnum({
+	truth: 1,
+	relevance: 1,
+});
+export type HolderType = keyof typeof HolderType;
 
 export function PathSegmentToNodeID(segment: string): UUID {
 	if (segment.length == 22) return segment; // if raw UUID
@@ -54,24 +56,16 @@ export const GetNode = StoreAccessor(s=>(id: string)=>{
 	if (id == null || IsNaN(id)) return null;
 	return GetDoc({}, a=>a.nodes.get(id));
 });
-/* export async function GetNodeAsync(id: string) {
+/*export async function GetNodeAsync(id: string) {
 	return await GetDataAsync("nodes", id) as MapNode;
-} */
-
-export function GetParentCount(node: MapNode) {
-	return CE(node.parents || {}).VKeys().length;
-}
-export function GetChildCount(node: MapNode) {
-	return CE(node.children || {}).VKeys().length;
-}
-
-export function IsRootNode(node: MapNode) {
-	//if (IsNodeSubnode(node)) return false;
-	return node.type == MapNodeType.Category && GetParentCount(node) == 0;
-}
-/*export function IsNodeSubnode(node: MapNode) {
-	return node.layerPlusAnchorParents != null;
 }*/
+
+export const IsRootNode = StoreAccessor(s=>(node: MapNode)=>{
+	if (node.type != MapNodeType.category) return false;
+	const parents = GetNodeChildLinks(null, node.id);
+	if (parents.length != 0) return false; // todo: probably change this (map root-nodes can have "parents" now I think, due to restructuring)
+	return true;
+});
 
 export function GetParentPath(childPath: string) {
 	const childPathNodes = SplitStringBySlash_Cached(childPath);
@@ -99,15 +93,14 @@ export const GetNodeID = StoreAccessor(s=>(path: string)=>{
 	return ownNodeStr ? PathSegmentToNodeID(ownNodeStr) : null;
 });
 
-export function CleanArray(array: any[], emptyArrayIfItemLoading = true) {
+export function CleanArray<T>(array: T[], emptyArrayIfItemLoading = true) {
 	if (emptyArrayIfItemLoading && CE(array).Any(a=>a === undefined)) return emptyArray_forLoading;
-	return array; 
+	return array;
 }
 
 export const GetNodeParents = StoreAccessor(s=>(nodeID: string, emptyForLoading = true)=>{
-	let node = GetNode(nodeID);
-	//return GetNodesByIDs(CE(node.parents || {}).VKeys());
-	return CleanArray(CE(node.parents || {}).VKeys().map(id=>GetNode(id)), emptyForLoading);
+	const parentLinks = GetNodeChildLinks(null, nodeID);
+	return CleanArray(parentLinks.map(a=>GetNode(a.parent)), emptyForLoading);
 });
 export const GetNodeParentsL2 = StoreAccessor(s=>(nodeID: string, emptyForLoading = true)=>{
 	return CleanArray(GetNodeParents(nodeID).map(parent=>(parent ? GetNodeL2(parent) : undefined)), emptyForLoading);
@@ -117,14 +110,15 @@ export const GetNodeParentsL3 = StoreAccessor(s=>(nodeID: string, path: string, 
 });
 
 export const GetNodeChildren = StoreAccessor(s=>(nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[], emptyForLoading = true): MapNode[]=>{
-	let node = GetNode(nodeID);
+	/*let node = GetNode(nodeID);
 	if (node == null) return emptyArray;
 	// special case, for demo map
 	if (node.children && node.children[0] instanceof MapNode) {
 		return node.children as any;
-	}
+	}*/
 
-	let result = CE(node.children || {}).VKeys().map(id=>GetNode(id));
+	const childLinks = GetNodeChildLinks(nodeID);
+	let result = childLinks.map(a=>GetNode(a.child));
 	if (includeMirrorChildren) {
 		//let tags = GetNodeTags(nodeID);
 		let tagComps = GetNodeTagComps(nodeID, true, tagsToIgnore);
@@ -159,7 +153,7 @@ export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string, tagsToIgn
 						return comp.blacklistAllMirrorParents || comp.blacklistedMirrorParents?.includes(nodeID);
 					});
 					if (mirroringBlacklisted) return false;
-					return (child.link.polarity == Polarity.Supporting && tagComp.mirrorSupporting) || (child.link.polarity == Polarity.Opposing && tagComp.mirrorOpposing);
+					return (child.link.polarity == Polarity.supporting && tagComp.mirrorSupporting) || (child.link.polarity == Polarity.opposing && tagComp.mirrorOpposing);
 				});
 
 				/*if (comp.reversePolarities) {
@@ -244,10 +238,10 @@ export const GetPremiseOfSinglePremiseArgument = StoreAccessor(s=>(argumentNodeI
 });
 
 export function GetHolderType(childType: MapNodeType, parentType: MapNodeType) {
-	if (parentType == MapNodeType.Argument) {
-		if (childType == MapNodeType.Argument) return HolderType.Relevance;
-	} else if (parentType == MapNodeType.Claim) {
-		if (childType == MapNodeType.Argument) return HolderType.Truth;
+	if (parentType == MapNodeType.argument) {
+		if (childType == MapNodeType.argument) return HolderType.relevance;
+	} else if (parentType == MapNodeType.claim) {
+		if (childType == MapNodeType.argument) return HolderType.truth;
 	}
 	return null;
 }
@@ -256,7 +250,7 @@ export const ForLink_GetError = StoreAccessor(s=>(parentType: MapNodeType, child
 	const parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;
 	if (!parentTypeInfo?.includes(childType)) return `The child's type (${MapNodeType[childType]}) is not valid for the parent's type (${MapNodeType[parentType]}).`;
 });
-export const ForNewLink_GetError = StoreAccessor(s=>(parentID: string, newChild: Pick<MapNode, "_key" | "type">, permissions: PermissionGroupSet, newHolderType?: HolderType)=>{
+export const ForNewLink_GetError = StoreAccessor(s=>(parentID: string, newChild: Pick<MapNode, "id" | "type">, permissions: PermissionGroupSet, newHolderType?: HolderType)=>{
 	if (!CanGetBasicPermissions(permissions)) return "You're not signed in, or lack basic permissions.";
 	const parent = GetNode(parentID);
 	if (parent == null) return "Parent data not found.";
@@ -267,7 +261,8 @@ export const ForNewLink_GetError = StoreAccessor(s=>(parentID: string, newChild:
 	// if (parentPathIDs[0] == globalRootNodeID && parentPathIDs.length == 2 && !HasModPermissions(permissions) && parent.creator != MeID()) return false;
 	if (parent.id == newChild.id) return "Cannot link node as its own child.";
 
-	const isAlreadyChild = CE(parent.children || {}).VKeys().includes(`${newChild.id}`);
+	const parentChildLinks = GetNodeChildLinks(parentID);
+	const isAlreadyChild = parentChildLinks.Any(a=>a.child == newChild.id);
 	// if new-holder-type is not specified, consider "any" and so don't check
 	if (newHolderType !== undefined) {
 		const currentHolderType = GetHolderType(newChild.type, parent.type);
@@ -279,7 +274,8 @@ export const ForNewLink_GetError = StoreAccessor(s=>(parentID: string, newChild:
 export const ForDelete_GetError = StoreAccessor(s=>(userID: string, node: MapNodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
 	const baseText = `Cannot delete node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
-	if (CE(CE(node.parents || {}).VKeys()).Except(...subcommandInfo?.parentsToIgnore ?? []).length > 1) return `${baseText}it has more than one parent. Try unlinking it instead.`;
+	const parentLinks = GetNodeChildLinks(null, node.id);
+	if (parentLinks.map(a=>a.parent).Except(...subcommandInfo?.parentsToIgnore ?? []).length > 1) return `${baseText}it has more than one parent. Try unlinking it instead.`;
 	if (IsRootNode(node) && !subcommandInfo?.asPartOfMapDelete) return `${baseText}it's the root-node of a map.`;
 
 	const nodeChildren = GetNodeChildrenL2(node.id);

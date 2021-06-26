@@ -1,6 +1,5 @@
 import {Collection} from "web-vcore/nm/mobx-graphlink";
 import {AccessPolicy} from "./db/accessPolicies/@AccessPolicy.js";
-import {Layer} from "./db/layers/@Layer";
 import {Map_NodeEdit} from "./db/mapNodeEdits/@MapNodeEdit";
 import {Map} from "./db/maps/@Map";
 import {Media} from "./db/media/@Media";
@@ -31,7 +30,6 @@ export class GraphDBShape {
 	accessPolicies: Collection<AccessPolicy>;
 	visibilityDirectives: Collection<VisibilityDirective>;
 	medias: Collection<Media>;
-	layers: Collection<Layer>;
 	maps: Collection<Map>;
 	mapNodeEdits: Collection<Map_NodeEdit>;
 	nodes: Collection<MapNode>;

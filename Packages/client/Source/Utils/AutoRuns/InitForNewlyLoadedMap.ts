@@ -33,7 +33,7 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 		({mapState, mapView} = ACTEnsureMapStateInit(mapID));
 		if (map.defaultTimelineID) {
 			mapState.timelinePanelOpen = true;
-			mapState.timelineOpenSubpanel = TimelineSubpanel.Playing;
+			mapState.timelineOpenSubpanel = TimelineSubpanel.playing;
 			mapState.selectedTimeline = map.defaultTimelineID;
 		}
 	});

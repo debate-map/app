@@ -1,6 +1,7 @@
 import {MapNode} from "../../Store/db/nodes/@MapNode";
 import {GetNode} from "../../Store/db/nodes";
 import {CE} from "web-vcore/nm/js-vextensions";
+import {GetNodeChildLinks} from "../../Store/db/nodeChildLinks.js";
 
 export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc: (nodeID: string)=>boolean, nodeIDsToIgnore?: string[]): string {
 	// return CachedTransform_WithStore('GetShortestPathFromRootToNode', [rootNodeID, node.id], {}, () => {
@@ -23,7 +24,8 @@ export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc
 		for (const layerHead of currentLayerHeads) {
 			const node = GetNode(layerHead.id);
 			if (node == null) return null;
-			for (const parentID of CE(node.parents || {}).VKeys()) {
+			const parentLinks = GetNodeChildLinks(null, node.id);
+			for (const parentID of parentLinks.map(a=>a.parent)) {
 				if (layerHead.path.includes(parentID)) continue; // parent-id is already part of path; ignore, so we don't cause infinite-loop
 				if (nodeIDsToIgnore?.includes(parentID)) continue;
 				newLayerHeads.push({id: parentID, path: [parentID].concat(layerHead.path)});

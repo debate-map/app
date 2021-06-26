@@ -60,13 +60,13 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 						runInAction("NodeDetailsUI.subpanel.onChange", ()=>store.main.maps.detailsPanel.subpanel = val);
 					}}/>
 				</Row>
-				{subpanel == DetailsPanel_Subpanel.Text &&
+				{subpanel == DetailsPanel_Subpanel.text &&
 					<TextPanel {...sharedProps}/>}
-				{subpanel == DetailsPanel_Subpanel.Attachment &&
+				{subpanel == DetailsPanel_Subpanel.attachment &&
 					<AttachmentPanel {...sharedProps}/>}
-				{subpanel == DetailsPanel_Subpanel.Permissions &&
+				{subpanel == DetailsPanel_Subpanel.permissions &&
 					<PermissionsPanel {...sharedProps}/>}
-				{subpanel == DetailsPanel_Subpanel.Others &&
+				{subpanel == DetailsPanel_Subpanel.others &&
 					<OthersPanel {...sharedProps}/>}
 			</Column>
 		);

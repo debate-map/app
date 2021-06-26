@@ -15,6 +15,7 @@ import {MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_title
 import {AddArgumentAndClaim} from "dm_common";
 import {AddChildNode} from "dm_common";
 import {GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3} from "dm_common";
+import {GetDefaultAccessPolicyID_ForNode} from "dm_common/Source/Store/db/accessPolicies";
 
 export class AddChildHelper {
 	constructor(parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string) {
@@ -26,6 +27,7 @@ export class AddChildHelper {
 		Assert(parentNode, "Parent-node was not pre-loaded into the store. Can use this beforehand: await GetAsync(()=>GetNode(parentID));");
 
 		this.node = new MapNode({
+			accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 			parents: {[this.Node_ParentID]: {_: true}},
 			type: childType,
 			ownerMapID: OmitIfFalsy(parentNode.ownerMapID),
@@ -39,7 +41,11 @@ export class AddChildHelper {
 
 		if (childType == MapNodeType.Argument) {
 			this.node_revision.argumentType = ArgumentType.All;
-			this.subNode = new MapNode({type: MapNodeType.Claim, creator: userID, ownerMapID: OmitIfFalsy(parentNode.ownerMapID)});
+			this.subNode = new MapNode({
+				//ownerMapID: OmitIfFalsy(parentNode.ownerMapID),
+				accessPolicy: GetDefaultAccessPolicyID_ForNode(),
+				type: MapNodeType.Claim, creator: userID,
+			});
 			this.subNode_revision = new MapNodeRevision(E(map.nodeDefaults, {titles: {base: title}}));
 			this.subNode_link = {_: true, form: ClaimForm.Base} as ChildEntry;
 		} else {

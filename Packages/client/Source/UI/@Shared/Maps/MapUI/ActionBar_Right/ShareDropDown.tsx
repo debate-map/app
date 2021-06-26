@@ -34,9 +34,9 @@ export class ShareDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 							<Select options={GetEntries(ShareTab, "ui")} displayType="button bar"
 								value={uiState.tab} onChange={val=>RunInAction_Set(this, ()=>uiState.tab = val)}/>
 						</Row>
-						{uiState.tab == ShareTab.AllMaps && <SharesListUI mapID={null}/>}
-						{uiState.tab == ShareTab.ThisMap && <SharesListUI mapID={GetOpenMapID()}/>}
-						{uiState.tab == ShareTab.Current && <NewShareUI mapID={GetOpenMapID()}/>}
+						{uiState.tab == ShareTab.allMaps && <SharesListUI mapID={null}/>}
+						{uiState.tab == ShareTab.thisMap && <SharesListUI mapID={GetOpenMapID()}/>}
+						{uiState.tab == ShareTab.current && <NewShareUI mapID={GetOpenMapID()}/>}
 					</Column>
 				</DropDownContent>
 			</DropDown>

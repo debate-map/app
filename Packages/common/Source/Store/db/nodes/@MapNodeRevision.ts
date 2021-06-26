@@ -1,4 +1,4 @@
-import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
+import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 import {AddSchema, DB, MGLClass, GetSchemaJSON, Field} from "web-vcore/nm/mobx-graphlink";
 import {QuoteAttachment} from "../nodeRevisions/@QuoteAttachment";
 import {MapType} from "../maps/@Map";
@@ -8,8 +8,10 @@ import {EquationAttachment} from "../nodeRevisions/@EquationAttachment";
 import {TermAttachment} from "../nodeRevisions/@TermAttachment";
 import {ReferencesAttachment} from "../nodeRevisions/@ReferencesAttachment";
 
-export type TitleKey = "base" | "negation" | "yesNoQuestion";
-export const TitleKey_values = ["base", "negation", "yesNoQuestion"];
+export const TitleKey_values = ["base", "negation", "yesNoQuestion"] as const;
+//export type TitleKey = "base" | "negation" | "yesNoQuestion";
+//export type TitleKey = keyof typeof TitleKey_values;
+export type TitleKey = typeof TitleKey_values[number];
 export class TitlesMap {
 	base?: string;
 	negation?: string;
@@ -30,11 +32,14 @@ AddSchema("TitlesMap", {
 	},
 });
 
-export enum PermissionInfoType {
-	Creator = 10,
-	MapEditors = 20,
-	Anyone = 30,
-}
+export const [PermissionInfoType] = CreateStringEnum({
+	creator: 1,
+	mapEditors: 1,
+	anyone: 1,
+});
+export type PermissionInfoType = keyof typeof PermissionInfoType;
+AddSchema("PermissionInfoType", {oneOf: GetValues_ForSchema(PermissionInfoType)});
+
 export class PermissionInfo {
 	constructor(initialData: Partial<PermissionInfo>) {
 		CE(this).VSet(initialData);
@@ -43,7 +48,7 @@ export class PermissionInfo {
 }
 AddSchema("PermissionInfo", {
 	properties: {
-		type: {oneOf: GetValues_ForSchema(PermissionInfoType)},
+		type: {$ref: "PermissionInfoType"},
 		mapID: {type: "string"},
 	},
 	required: ["type"],
@@ -63,10 +68,10 @@ export const MapNodeRevision_Defaultable_props = [] as const;
 export type MapNodeRevision_Defaultable = Pick<MapNodeRevision, never>;
 export function MapNodeRevision_Defaultable_DefaultsForMap(mapType: MapType): MapNodeRevision_Defaultable {
 	return {
-		accessLevel: AccessLevel.Basic,
+		accessLevel: AccessLevel.basic,
 		votingDisabled: false,
-		permission_edit: new PermissionInfo({type: mapType == MapType.Private ? PermissionInfoType.MapEditors : PermissionInfoType.Creator}),
-		permission_contribute: new PermissionInfo({type: mapType == MapType.Private ? PermissionInfoType.MapEditors : PermissionInfoType.Anyone}),
+		permission_edit: new PermissionInfo({type: mapType == MapType.private ? PermissionInfoType.mapEditors : PermissionInfoType.creator}),
+		permission_contribute: new PermissionInfo({type: mapType == MapType.private ? PermissionInfoType.mapEditors : PermissionInfoType.anyone}),
 	};
 }
 
@@ -169,11 +174,12 @@ AddSchema("MapNodeRevision_Partial", (()=>{
 // argument
 // ==========
 
-export enum ArgumentType {
-	Any = 10,
-	AnyTwo = 15,
-	All = 20,
-}
+export const [ArgumentType] = CreateStringEnum({
+	any: 1,
+	anyTwo: 1,
+	all: 1,
+});
+export type ArgumentType = keyof typeof ArgumentType;
 AddSchema("ArgumentType", {oneOf: GetValues_ForSchema(ArgumentType)});
 
 export function GetArgumentTypeDisplayText(type: ArgumentType) {

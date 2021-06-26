@@ -1,4 +1,4 @@
-import {ToJSON, Vector2, VRect, WaitXThenRun, GetEntries, Clone, DEL, E} from "web-vcore/nm/js-vextensions";
+import {ToJSON, Vector2, VRect, WaitXThenRun, GetEntries, Clone, DEL, E, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd";
 import {Button, CheckBox, Column, Pre, Row, Select, Text, TextArea, TimeSpanInput, Spinner} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus, GetDOM, ShallowChanged} from "web-vcore/nm/react-vextensions";
@@ -26,18 +26,18 @@ import {SearchUpFromNodeForNodeMatchingX} from "dm_common";
 import {Map} from "dm_common";
 import {GetNodeColor} from "Store/firebase_ext/nodes";
 
-export enum PositionOptionsEnum {
-	Full = null,
-	Left = 1,
-	Right = 2,
-	Center = 3,
-}
-/* export const positionOptions = [
+export const [PositionOptionsEnum] = CreateStringEnum({
+	full: 1,
+	left: 1,
+	right: 1,
+	center: 1,
+});
+/*export const positionOptions = [
 	{ name: 'Full', value: null },
 	{ name: 'Left', value: 1 },
 	{ name: 'Right', value: 2 },
 	{ name: 'Center', value: 3 },
-]; */
+];*/
 export const positionOptions = GetEntries(PositionOptionsEnum);
 
 /* let portal: HTMLElement;

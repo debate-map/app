@@ -3,10 +3,11 @@ import {MapEdit} from "../CommandMacros";
 import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
 import {UserEdit} from "../CommandMacros";
-import {MapNodeL3, ChildEntry} from "../Store/db/nodes/@MapNode";
+import {MapNodeL3} from "../Store/db/nodes/@MapNode";
 import {GetNodeL3, ReversePolarity} from "../Store/db/nodes/$node";
 import {GetParentNodeID} from "../Store/db/nodes";
 import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
 
 AddSchema("ReverseArgumentPolarity_payload", {
 	properties: {
@@ -22,7 +23,7 @@ AddSchema("ReverseArgumentPolarity_payload", {
 export class ReverseArgumentPolarity extends Command<{mapID?: string, nodeID: string, path: string}, {}> {
 	parentID: string;
 	oldNodeData: MapNodeL3;
-	newLinkData: ChildEntry;
+	newLinkData: NodeChildLink;
 	Validate() {
 		AssertValidate("ReverseArgumentPolarity_payload", this.payload, "Payload invalid");
 		const {nodeID, path} = this.payload;
@@ -34,7 +35,7 @@ export class ReverseArgumentPolarity extends Command<{mapID?: string, nodeID: st
 		this.newLinkData = {...this.oldNodeData.link};
 		this.newLinkData.polarity = ReversePolarity(this.newLinkData.polarity);
 
-		AssertV(this.oldNodeData.type == MapNodeType.Argument, "Can only reverse polarity of an argument node.");
+		AssertV(this.oldNodeData.type == MapNodeType.argument, "Can only reverse polarity of an argument node.");
 		AssertValidate("ChildEntry", this.newLinkData, "New link-data invalid");
 	}
 

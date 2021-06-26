@@ -37,7 +37,6 @@ export class ChangeNodeOwnerMap extends Command<{nodeID: string, newOwnerMapID: 
 		// if making private
 		if (oldData.ownerMapID == null) {
 			const newOwnerMap = GetMap(newOwnerMapID);
-			AssertV(newOwnerMapID, "newOwnerMap still loading.");
 			AssertV(newOwnerMap.type == MapType.Private, "Node must be in private map to be made private.");
 
 			const permittedPublicParentIDs = argumentNodeID ? [argumentNodeID] : [];
@@ -58,7 +57,6 @@ export class ChangeNodeOwnerMap extends Command<{nodeID: string, newOwnerMapID: 
 			const permittedPrivateChildrenIDs = this.parentCommand instanceof ChangeNodeOwnerMap ? [this.parentCommand.payload.nodeID] : [];
 
 			const children = GetNodeChildren(oldData.id);
-			AssertV(!IsSpecialEmptyArray(children), "children still loading.");
 			AssertV(children.every(a=>a.ownerMapID == null || permittedPrivateChildrenIDs.includes(a.id)), "To make node public, it must not have any private children.");
 		}
 

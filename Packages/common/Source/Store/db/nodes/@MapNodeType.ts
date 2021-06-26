@@ -1,44 +1,45 @@
-import {Assert, CE} from "web-vcore/nm/js-vextensions";
+import {Assert, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 import {ClaimForm, MapNode, MapNodeL3, Polarity} from "./@MapNode";
 
-export enum MapNodeType {
-	Category = 10,
-	Package = 20,
-	MultiChoiceQuestion = 30,
-	Claim = 40,
-	Argument = 50,
-}
+export const [MapNodeType] = CreateStringEnum({
+	category: 1,
+	package: 1,
+	multiChoiceQuestion: 1,
+	claim: 1,
+	argument: 1,
+});
+export type MapNodeType = keyof typeof MapNodeType;
 export class MapNodeType_Info {
 	static for = {
-		[MapNodeType.Category]: new MapNodeType_Info({
-			childTypes: [MapNodeType.Category, MapNodeType.Package, MapNodeType.MultiChoiceQuestion, MapNodeType.Claim],
+		[MapNodeType.category]: new MapNodeType_Info({
+			childTypes: [MapNodeType.category, MapNodeType.package, MapNodeType.multiChoiceQuestion, MapNodeType.claim],
+			minWidth: 100, maxWidth: 250,
+			/*mainRatingTypes: ["significance"],
+			otherRatingTypes: [],*/
+		}),
+		[MapNodeType.package]: new MapNodeType_Info({
+			childTypes: [MapNodeType.claim],
 			minWidth: 100, maxWidth: 250,
 			/* mainRatingTypes: ["significance"],
 			otherRatingTypes: [], */
 		}),
-		[MapNodeType.Package]: new MapNodeType_Info({
-			childTypes: [MapNodeType.Claim],
-			minWidth: 100, maxWidth: 250,
-			/* mainRatingTypes: ["significance"],
-			otherRatingTypes: [], */
-		}),
-		[MapNodeType.MultiChoiceQuestion]: new MapNodeType_Info({
-			childTypes: [MapNodeType.Claim],
+		[MapNodeType.multiChoiceQuestion]: new MapNodeType_Info({
+			childTypes: [MapNodeType.claim],
 			minWidth: 100, maxWidth: 250,
 			// minWidth: 100, maxWidth: 200, backgroundColor: "230,150,50",
 			/* mainRatingTypes: ["significance"],
 			otherRatingTypes: [], */
 		}),
-		[MapNodeType.Claim]: new MapNodeType_Info({
-			childTypes: [MapNodeType.Argument],
+		[MapNodeType.claim]: new MapNodeType_Info({
+			childTypes: [MapNodeType.argument],
 			minWidth: 350, maxWidth: 550,
 			// mainRatingTypes: ["probability", "intensity"],
 			// mainRatingTypes: ["probability", "support"],
 			/* mainRatingTypes: ["probability", "truth"],
 			otherRatingTypes: [], */
 		}),
-		[MapNodeType.Argument]: new MapNodeType_Info({
-			childTypes: [MapNodeType.Claim, MapNodeType.Argument],
+		[MapNodeType.argument]: new MapNodeType_Info({
+			childTypes: [MapNodeType.claim, MapNodeType.argument],
 			minWidth: 100, maxWidth: 300,
 			/* mainRatingTypes: ["strength"],
 			otherRatingTypes: [], */
@@ -60,15 +61,15 @@ export class MapNodeType_Info {
 }
 
 export function GetMapNodeTypeDisplayName(type: MapNodeType, parentNode: MapNode, parentNodeForm: ClaimForm, polarity: Polarity) {
-	if (type == MapNodeType.Category) return "category";
-	if (type == MapNodeType.Package) return "package";
-	if (type == MapNodeType.MultiChoiceQuestion) return "multi-choice question";
-	if (type == MapNodeType.Claim) {
-		if (parentNode && parentNode.type == MapNodeType.Category) { return "claim (in question form)"; }
+	if (type == MapNodeType.category) return "category";
+	if (type == MapNodeType.package) return "package";
+	if (type == MapNodeType.multiChoiceQuestion) return "multi-choice question";
+	if (type == MapNodeType.claim) {
+		if (parentNode && parentNode.type == MapNodeType.category) { return "claim (in question form)"; }
 		return "claim";
 	}
-	if (type == MapNodeType.Argument) {
-		return polarity == Polarity.Supporting ? "supporting argument" : "opposing argument";
+	if (type == MapNodeType.argument) {
+		return polarity == Polarity.supporting ? "supporting argument" : "opposing argument";
 	}
 	Assert(false, "Invalid node type.");
 }

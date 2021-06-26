@@ -28,7 +28,7 @@ import {AddTimelineStep} from "dm_common";
 G({LockMapEdgeScrolling});
 function LockMapEdgeScrolling() {
 	const mapID = GetOpenMapID();
-	return store.main.maps.lockMapScrolling && GetTimelinePanelOpen(mapID) && GetTimelineOpenSubpanel(mapID) == TimelineSubpanel.Editor;
+	return store.main.maps.lockMapScrolling && GetTimelinePanelOpen(mapID) && GetTimelineOpenSubpanel(mapID) == TimelineSubpanel.editor;
 }
 
 @Observer

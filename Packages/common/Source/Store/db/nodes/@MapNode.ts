@@ -1,5 +1,7 @@
-import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
+import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink";
+import {MapType} from "../maps/@Map.js";
+import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
 import {MapNodeRevision} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
 
@@ -7,18 +9,24 @@ import {MapNodeType} from "./@MapNodeType";
 export const globalMapID = "GLOBAL_MAP_00000000001";
 export const globalRootNodeID = "GLOBAL_ROOT_0000000001";
 
-export enum AccessLevel {
-	Basic = 10,
-	Verified = 20, // for accounts we're pretty sure are legitimate (an actual person's only account)
-	Mod = 30,
-	Admin = 40,
-}
+export const [AccessLevel] = CreateStringEnum({
+	basic: 1,
+	verified: 1,
+	mod: 1,
+	admin: 1,
+});
+export type AccessLevel = keyof typeof AccessLevel;
+AddSchema("AccessLevel", {oneOf: GetValues_ForSchema(AccessLevel)});
 
-export enum ClaimForm {
-	Base = 10,
-	Negation = 20,
-	YesNoQuestion = 30,
-}
+export const [ClaimForm] = CreateStringEnum({
+	/** Dangerous */
+	base: 1,
+	negation: 1,
+	yesNoQuestion: 1,
+});
+//export type ClaimForm = typeof ClaimForm_values[number];
+export type ClaimForm = keyof typeof ClaimForm;
+AddSchema("ClaimForm", {oneOf: GetValues_ForSchema(ClaimForm)});
 
 //export const MapNode_id = UUID_regex;
 //export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
@@ -88,56 +96,40 @@ export interface MapNodeL2 extends MapNode {
 export interface MapNodeL3 extends MapNodeL2 {
 	/** For this node (with the given ancestors): How the node would be displayed -- "supporting" being green, "opposing" being red. */
 	displayPolarity: Polarity;
-	link: ChildEntry;
+	link: NodeChildLink;
 	//linkToParent: ChildEntry;
 	//parentLinkToGrandParent: ChildEntry;
 }
 
-export enum Polarity {
+/*export enum Polarity {
 	Supporting = 10,
 	Opposing = 20,
 }
+AddSchema("Polarity", {oneOf: GetValues_ForSchema(Polarity)});*/
+/*export const Polarity_values = ["supporting", "opposing"] as const;
+export type Polarity = typeof Polarity_values[number];
+AddSchema("Polarity", {oneOf: Polarity_values});*/
+
+export const [Polarity] = CreateStringEnum({
+	supporting: 1,
+	opposing: 1,
+});
+export type Polarity = keyof typeof Polarity;
+//export type Polarity = typeof Polarity_values[number];
+AddSchema("Polarity", {oneOf: GetValues_ForSchema(Polarity)});
 
 // regular parents
 // ==========
 
-export type ParentSet = { [key: string]: ParentEntry; };
-AddSchema("ParentSet", {patternProperties: {[UUID_regex]: {$ref: "ParentEntry"}}});
-export type ParentEntry = { _: boolean; };
-AddSchema("ParentEntry", {
-	properties: {_: {type: "boolean"}},
-	required: ["_"],
+export const [ChildOrderType] = CreateStringEnum({
+	manual: 1,
+	byRating: 1,
 });
-
-export type ChildSet = { [key: string]: ChildEntry; };
-AddSchema("ChildSet", {patternProperties: {[UUID_regex]: {$ref: "ChildEntry"}}});
-export type ChildEntry = {
-	_: boolean;
-	form?: ClaimForm;
-	seriesAnchor?: boolean;
-	polarity?: Polarity;
-
-	// runtime only
-	_mirrorLink?: boolean;
-};
-AddSchema("ChildEntry", {
-	properties: {
-		_: {type: "boolean"},
-		form: {oneOf: GetValues_ForSchema(ClaimForm)},
-		seriesAnchor: {type: ["null", "boolean"]},
-		polarity: {oneOf: GetValues_ForSchema(Polarity)},
-	},
-	required: ["_"],
-});
-
-export enum ChildOrderType {
-	Manual = 10,
-	ByRating = 20,
-}
+export type ChildOrderType = keyof typeof ChildOrderType;
 AddSchema("ChildOrderType", {oneOf: GetValues_ForSchema(ChildOrderType)});
 
 // layer+anchor parents (for if subnode)
 // ==========
 
-export type LayerPlusAnchorParentSet = { [key: string]: boolean; };
-AddSchema("LayerPlusAnchorParentSet", {patternProperties: {[`${UUID_regex_partial}\\+${UUID_regex_partial}`]: {type: "boolean"}}});
+/*export type LayerPlusAnchorParentSet = { [key: string]: boolean; };
+AddSchema("LayerPlusAnchorParentSet", {patternProperties: {[`${UUID_regex_partial}\\+${UUID_regex_partial}`]: {type: "boolean"}}});*/

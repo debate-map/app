@@ -16,8 +16,8 @@ export class NodeChangesMarker extends BaseComponent<{addedDescendants: number, 
 					// filter: "drop-shadow(0px 0px 5px rgba(0,0,0,1))"
 					textShadow: `-1px 0 ${textOutline}, 0 1px ${textOutline}, 1px 0 ${textOutline}, 0 -1px ${textOutline}`,
 				},
-				limitBarPos == LimitBarPos.Above && {paddingTop: ChildLimitBar.HEIGHT},
-				{paddingBottom: 0 + (limitBarPos == LimitBarPos.Below ? ChildLimitBar.HEIGHT : 0)},
+				limitBarPos == LimitBarPos.above && {paddingTop: ChildLimitBar.HEIGHT},
+				{paddingBottom: 0 + (limitBarPos == LimitBarPos.below ? ChildLimitBar.HEIGHT : 0)},
 			)}>
 				{addedDescendants > 0 &&
 					<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Add)},.8)`}}>{addedDescendants} new</Row>}

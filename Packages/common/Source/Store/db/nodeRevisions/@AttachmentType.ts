@@ -5,39 +5,40 @@ import {MapNodeL2} from "../nodes/@MapNode";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {EquationAttachment} from "./@EquationAttachment";
 import {ReferencesAttachment} from "./@ReferencesAttachment";
-import {CE} from "web-vcore/nm/js-vextensions";
+import {CE, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 
-export enum AttachmentType {
-	None = 10,
-	// ImpactPremise = 20,
-	Equation = 20,
-	References = 30,
-	Quote = 40,
-	Media = 50,
-}
+export const [AttachmentType] = CreateStringEnum({
+	none: 1,
+	//ImpactPremise: 1,
+	equation: 1,
+	references: 1,
+	quote: 1,
+	media: 1,
+});
+export type AttachmentType = keyof typeof AttachmentType;
 
 export function GetAttachmentType(node: MapNodeL2) {
 	return GetAttachmentType_Revision(node.current);
 }
 export function GetAttachmentType_Revision(revision: MapNodeRevision) {
 	return (
-		revision.equation ? AttachmentType.Equation
-		: revision.references ? AttachmentType.References
-		: revision.quote ? AttachmentType.Quote
-		: revision.media ? AttachmentType.Media
-		: AttachmentType.None
+		revision.equation ? AttachmentType.equation
+		: revision.references ? AttachmentType.references
+		: revision.quote ? AttachmentType.quote
+		: revision.media ? AttachmentType.media
+		: AttachmentType.none
 	);
 }
 
 export function ResetNodeRevisionAttachment(revision: MapNodeRevision, attachmentType: AttachmentType) {
 	CE(revision).Extend({equation: null, references: null, quote: null, media: null});
-	if (attachmentType == AttachmentType.Equation) {
+	if (attachmentType == AttachmentType.equation) {
 		revision.equation = new EquationAttachment();
-	} else if (attachmentType == AttachmentType.References) {
+	} else if (attachmentType == AttachmentType.references) {
 		revision.references = new ReferencesAttachment();
-	} else if (attachmentType == AttachmentType.Quote) {
+	} else if (attachmentType == AttachmentType.quote) {
 		revision.quote = new QuoteAttachment();
-	} else if (attachmentType == AttachmentType.Media) {
+	} else if (attachmentType == AttachmentType.media) {
 		revision.media = new MediaAttachment();
 	}
 }

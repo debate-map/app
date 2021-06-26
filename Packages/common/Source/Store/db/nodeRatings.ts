@@ -1,8 +1,8 @@
-import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading} from "web-vcore/nm/js-vextensions";
-import {GetDoc, StoreAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink";
+import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading, CreateStringEnum} from "web-vcore/nm/js-vextensions";
+import {GetDoc, StoreAccessor, GetDocs, NoID} from "web-vcore/nm/mobx-graphlink";
 import {observable} from "web-vcore/nm/mobx";
 import {Validate} from "web-vcore/nm/mobx-graphlink";
-import {NodeRatingType, nodeRatingTypes} from "./nodeRatings/@NodeRatingType";
+import {NodeRatingType} from "./nodeRatings/@NodeRatingType";
 import {NodeRating} from "./nodeRatings/@NodeRating";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore";
 import {GetNodeChildrenL2, HolderType} from "./nodes";
@@ -12,14 +12,17 @@ import {MapNodeType} from "./nodes/@MapNodeType";
 import {MeID} from "./users";
 import {GetArgumentImpactPseudoRatings} from "../../Utils/Store/RatingProcessor";
 
-export const GetRatings = StoreAccessor(s=>(nodeID: string, ratingType: NodeRatingType, userID?: string): NodeRating[]=>{
+export const GetRatings = StoreAccessor(s=><
+	((nodeID: string, ratingType: Exclude<NodeRatingType, "impact">, userID?: string)=>NodeRating[]) & // if rating-type is known to not be "impact", all results will be "true ratings"
+	((nodeID: string, ratingType: NodeRatingType, userID?: string)=>NoID<NodeRating>[]) // else, some results may lack the "id" field
+>((nodeID: string, ratingType: NodeRatingType, userID?: string): NoID<NodeRating>[]=>{
 	if (ratingType == "impact") {
 		const node = GetNodeL2(nodeID);
 		if (node === undefined) return emptyArray_forLoading;
 		const nodeChildren = GetNodeChildrenL2(nodeID);
 		if (CE(nodeChildren).Any(a=>a == null)) return emptyArray_forLoading;
 		//if (nodeChildren.Any(a=>a == null)) return observable.map(emptyObj);
-		const premises = nodeChildren.filter(a=>a == null || a.type == MapNodeType.Claim);
+		const premises = nodeChildren.filter(a=>a == null || a.type == MapNodeType.claim);
 		return GetArgumentImpactPseudoRatings(node, premises);
 	}
 	
@@ -40,7 +43,7 @@ export const GetRatings = StoreAccessor(s=>(nodeID: string, ratingType: NodeRati
 			user: userID && {equalTo: userID},
 		}}
 	}, a=>a.nodeRatings);
-});
+}));
 export const GetRating = StoreAccessor(s=>(nodeID: string, ratingType: NodeRatingType, userID: string)=>{
 	return GetRatings(nodeID, ratingType, userID)[0];
 });
@@ -75,16 +78,17 @@ export const GetRatingAverage_AtPath = StoreAccessor(s=>(node: MapNodeL3, rating
 	return result;
 });
 
-export enum WeightingType {
-	Votes = 10,
-	ReasonScore = 20,
-}
+export const [WeightingType] = CreateStringEnum({
+	votes: 1,
+	reasonScore: 1,
+});
+export type WeightingType = keyof typeof WeightingType;
 
-const rsCompatibleNodeTypes = [MapNodeType.Argument, MapNodeType.Claim];
+const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
 // export const GetFillPercent_AtPath = StoreAccessor('GetFillPercent_AtPath', (node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null) => {
-export const GetFillPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: NodeRatingType, weighting = WeightingType.Votes, userID?: string, resultIfNoData = null)=>{
-	ratingType = ratingType || {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
-	if (weighting == WeightingType.Votes || !rsCompatibleNodeTypes?.includes(node.type)) {
+export const GetFillPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: NodeRatingType, weighting = WeightingType.votes, userID?: string, resultIfNoData = null)=>{
+	ratingType = ratingType || {[HolderType.truth]: "truth", [HolderType.relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
+	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes?.includes(node.type)) {
 		const result = GetRatingAverage_AtPath(node, ratingType, userID, resultIfNoData);
 		Assert(result >= 0 && result <= 100, `Fill-percent (${result}) not in range.`);
 		return result;
@@ -94,10 +98,10 @@ export const GetFillPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: st
 
 	// if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
 	let result: number;
-	if (node.type == MapNodeType.Claim) {
+	if (node.type == MapNodeType.claim) {
 		result = claimTruthScore * 100;
-	} else if (node.type == MapNodeType.Argument) {
-		if (boxType == HolderType.Relevance) {
+	} else if (node.type == MapNodeType.argument) {
+		if (boxType == HolderType.relevance) {
 			// return Lerp(0, 100, GetPercentFromXToY(0, 2, argWeightMultiplier));
 			result = Lerp(0, 100, argWeightMultiplier);
 		} else {
@@ -109,10 +113,10 @@ export const GetFillPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: st
 	return result;
 });
 
-export const GetMarkerPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: NodeRatingType, weighting = WeightingType.Votes)=>{
-	ratingType = ratingType || {[HolderType.Truth]: "truth", [HolderType.Relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
-	if (node.current.votingDisabled) return null;
-	if (weighting == WeightingType.Votes || !rsCompatibleNodeTypes.includes(node.type)) {
+export const GetMarkerPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
+	ratingType = ratingType || {[HolderType.truth]: "truth", [HolderType.relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
+	if (!node.current.votingEnabled) return null;
+	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes.includes(node.type)) {
 		return GetRatingAverage_AtPath(node, ratingType, MeID());
 	}
 });
@@ -196,5 +200,5 @@ export function TransformRatingForContext(ratingValue: number, reverseRating: bo
 export function ShouldRatingTypeBeReversed(node: MapNodeL3, ratingType: NodeRatingType) {
 	// return node.type == MapNodeType.Argument && node.finalPolarity != node.link.polarity;
 	// if (["impact", "relevance"].Contains(ratingType)) return false;
-	return node.link.form == ClaimForm.Negation;
+	return node.link.form == ClaimForm.negation;
 }
