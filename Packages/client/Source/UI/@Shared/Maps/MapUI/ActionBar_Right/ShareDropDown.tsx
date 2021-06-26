@@ -12,11 +12,11 @@ import {NewShareUI} from "./ShareDropDown/NewShareUI";
 import moment from "web-vcore/nm/moment";
 
 export function GetShareShortURL(share: Share) {
-	return new VURL(GetCurrentURL().domain, ["s", share?._key ?? "[SHARE_ID]"]);
+	return new VURL(GetCurrentURL().domain, ["s", share?.id ?? "[SHARE_ID]"]);
 }
 export function GetShareLongURL(share: Share) {
 	const share_urlSafeName = share?.name.toLowerCase().replace(/[^A-Za-z0-9-_]/g, "-").replace(/-+/g, "-") ?? null;
-	return new VURL(GetCurrentURL().domain, ["s", share ? `${share_urlSafeName}.${share._key}` : "[SHARE_NAME_AND_ID]"]);
+	return new VURL(GetCurrentURL().domain, ["s", share ? `${share_urlSafeName}.${share.id}` : "[SHARE_NAME_AND_ID]"]);
 }
 
 @Observer
@@ -59,11 +59,11 @@ class SharesListUI extends BaseComponentPlus({} as {mapID: string}, {}) {
 				</Row>
 				<ScrollView>
 					{shares.map((share, index)=>{
-						const share_shortURL = new VURL(GetCurrentURL().domain, ["s", share?._key ?? "[SHARE_ID]"]);
+						const share_shortURL = new VURL(GetCurrentURL().domain, ["s", share?.id ?? "[SHARE_ID]"]);
 						const share_urlSafeName = share?.name.toLowerCase().replace(/[^A-Za-z0-9-_]/g, "-").replace(/-+/g, "-") ?? null;
-						const share_longURL = new VURL(GetCurrentURL().domain, ["s", share ? `${share_urlSafeName}.${share._key}` : "[SHARE_NAME_AND_ID]"]);
+						const share_longURL = new VURL(GetCurrentURL().domain, ["s", share ? `${share_urlSafeName}.${share.id}` : "[SHARE_NAME_AND_ID]"]);
 						return (
-							<Row key={share._key} mt={index == 0 ? 0 : 5}>
+							<Row key={share.id} mt={index == 0 ? 0 : 5}>
 								<Text style={{flex: columnWidths[0]}}>{share.name}</Text>
 								<Text style={{flex: columnWidths[1]}}>{moment(share.createdAt).format("YYYY-MM-DD HH:mm:ss")}</Text>
 								<Row style={{flex: columnWidths[2], whiteSpace: "pre"}}>
@@ -78,7 +78,7 @@ class SharesListUI extends BaseComponentPlus({} as {mapID: string}, {}) {
 											title: `Delete share "${share.name}"`, cancelButton: true,
 											message: `Delete the share named "${share.name}"?`,
 											onOK: async()=>{
-												const command = new DeleteShare({id: share._key});
+												const command = new DeleteShare({id: share.id});
 												await command.Run();
 											},
 										});

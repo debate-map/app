@@ -27,7 +27,7 @@ export class TimelineDetailsUI extends BaseComponentPlus({enabled: true} as {bas
 		return (
 			<Column style={style}>
 				{!forNew &&
-					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
+					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Name: </Pre>
 					<TextInput required enabled={enabled} style={{width: "100%"}}
@@ -68,7 +68,7 @@ export class TimelineDetailsEditor extends BaseComponentPlus({} as {timeline: Ti
 				<Row>
 					<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
 						const updates = GetUpdates(timeline, this.detailsUI.GetNewData()).Excluding("steps");
-						new UpdateTimeline({id: timeline._key, updates}).Run();
+						new UpdateTimeline({id: timeline.id, updates}).Run();
 					}}/>
 					{/* error && <Pre>{error.message}</Pre> */}
 				</Row>}

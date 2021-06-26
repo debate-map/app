@@ -51,7 +51,7 @@ export class MediaAttachmentEditorUI extends BaseComponent<Props, {newData: Medi
 								<Link style={{marginTop: 5, alignSelf: "flex-start"}} onContextMenu={e=>e.nativeEvent["handled"] = true} actionFunc={s=>{
 									s.main.page = "database";
 									s.main.database.subpage = "media";
-									s.main.database.selectedMediaID = image._key;
+									s.main.database.selectedMediaID = image.id;
 								}}>
 									<Button text="Show details"/>
 								</Link>
@@ -99,7 +99,7 @@ class MediaSearchOrCreateUI extends BaseComponentPlus({} as {url: string, enable
 			<>
 				{mediasWithMatchingURL.length == 0 && <Row style={{padding: 5}}>No media found with the url "{url}".</Row>}
 				{mediasWithMatchingURL.map((media, index)=>{
-					return <FoundMediaUI key={media._key} media={media} index={index} enabled={enabled} onSelect={()=>onSelect(media._key)}/>;
+					return <FoundMediaUI key={media.id} media={media} index={index} enabled={enabled} onSelect={()=>onSelect(media.id)}/>;
 				})}
 				<Row mt={5} style={{
 					//borderTop: `1px solid ${HSLA(0, 0, 1, .5)}`,
@@ -132,12 +132,12 @@ export class FoundMediaUI extends BaseComponentPlus({} as {media: Media, index: 
 					index == 0 && {borderRadius: "5px 5px 0 0"},
 				)}
 			>
-				<Link text={`${media._key}\n(by ${creator?.displayName ?? "n/a"})`} style={{fontSize: 13, whiteSpace: "pre"}}
+				<Link text={`${media.id}\n(by ${creator?.displayName ?? "n/a"})`} style={{fontSize: 13, whiteSpace: "pre"}}
 					onContextMenu={e=>e.nativeEvent["handled"] = true}
 					actionFunc={s=>{
 						s.main.page = "database";
 						s.main.database.subpage = "media";
-						s.main.database.selectedMediaID = media._key;
+						s.main.database.selectedMediaID = media.id;
 					}}/>
 				<Text ml={5} sel style={{fontSize: 13}}>{media.name}</Text>
 				<Button ml="auto" text="Select" enabled={enabled} style={{flexShrink: 0}} onClick={onSelect}/>

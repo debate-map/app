@@ -36,8 +36,8 @@ export class LayoutDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 					<Row mt={5}>
 						<Button text="Clear map-view state" onClick={()=>{
 							runInAction("LayoutDropDown.clearMapViewState.onClick", ()=>{
-								store.main.maps.mapViews.delete(map._key);
-								ACTEnsureMapStateInit(map._key);
+								store.main.maps.mapViews.delete(map.id);
+								ACTEnsureMapStateInit(map.id);
 							});
 						}}/>
 					</Row>

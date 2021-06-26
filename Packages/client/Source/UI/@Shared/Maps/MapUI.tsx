@@ -113,10 +113,10 @@ export class MapUI extends BaseComponentPlus({
 	downPos: Vector2;
 	render() {
 		const {map, rootNode: rootNode_passed, withinPage, padding, subNavBarWidth, ...rest} = this.props;
-		Assert(map._key, "map._key is null!");
+		Assert(map.id, "map.id is null!");
 
-		if (!GetMapState(map._key)?.initDone) return <MapUIWaitMessage message="Initializing map metadata..."/>;
-		if (GetMapView(map._key) == null) return <MapUIWaitMessage message="Initializing map view..."/>;
+		if (!GetMapState(map.id)?.initDone) return <MapUIWaitMessage message="Initializing map metadata..."/>;
+		if (GetMapView(map.id) == null) return <MapUIWaitMessage message="Initializing map view..."/>;
 		if (map == null) return <MapUIWaitMessage message="Loading map..."/>;
 		const rootNode = (()=>{
 			let result = rootNode_passed;
@@ -124,7 +124,7 @@ export class MapUI extends BaseComponentPlus({
 				result = GetNodeL3(`${map.rootNode}`);
 			}
 			if (isBot && map) {
-				const mapView = GetMapView(map._key);
+				const mapView = GetMapView(map.id);
 				if (mapView) {
 					const nodeID = mapView.bot_currentNodeID;
 					if (nodeID) {
@@ -135,7 +135,7 @@ export class MapUI extends BaseComponentPlus({
 			return result;
 		})();
 		if (rootNode == null) return <MapUIWaitMessage message="Loading root node..."/>;
-		// if (GetNodeView(map._key, rootNode._key, false) == null) return <MapUIWaitMessage message="Initializing root-node view..."/>; // maybe temp
+		// if (GetNodeView(map.id, rootNode.id, false) == null) return <MapUIWaitMessage message="Initializing root-node view..."/>; // maybe temp
 		if (rootNode.current.accessLevel > GetUserAccessLevel(MeID())) {
 			return <Column style={ES({flex: 1})}>
 				{!withinPage &&
@@ -149,8 +149,8 @@ export class MapUI extends BaseComponentPlus({
 			return <NodeUI_ForBots map={map} node={rootNode}/>;
 		}
 
-		const timelinePanelOpen = map ? GetTimelinePanelOpen(map._key) : null;
-		const playingTimeline = GetPlayingTimeline(map ? map._key : null);
+		const timelinePanelOpen = map ? GetTimelinePanelOpen(map.id) : null;
+		const playingTimeline = GetPlayingTimeline(map ? map.id : null);
 
 		return (
 			<Column style={ES({flex: 1})}>
@@ -178,7 +178,7 @@ export class MapUI extends BaseComponentPlus({
 						// bufferScrollEventsBy={10000}
 						onScrollEnd={pos=>{
 							// if (withinPage) return;
-							ACTUpdateFocusNodeAndViewOffset(map._key);
+							ACTUpdateFocusNodeAndViewOffset(map.id);
 						}}
 					>
 						<style>{`
@@ -206,8 +206,8 @@ export class MapUI extends BaseComponentPlus({
 								if (e.target != this.mapUIEl) return;
 								if (this.downPos && new Vector2(e.clientX, e.clientY).DistanceTo(this.downPos) >= 3) return;
 								const mapView = GetMapView(GetOpenMapID());
-								if (GetSelectedNodePath(map._key)) {
-									ACTMapNodeSelect(map._key, null);
+								if (GetSelectedNodePath(map.id)) {
+									ACTMapNodeSelect(map.id, null);
 									// UpdateFocusNodeAndViewOffset(map._id);
 								}
 							}}
@@ -218,7 +218,7 @@ export class MapUI extends BaseComponentPlus({
 						>
 							{playingTimeline != null &&
 							<TimelineIntroBox timeline={playingTimeline}/>}
-							<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode._key != null), rootNode._key.toString())}/>
+							<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())}/>
 							{/* <ReactResizeDetector handleWidth handleHeight onResize={()=> { */}
 							{/* <ResizeSensor ref="resizeSensor" onResize={()=> {
 								this.LoadScroll();
@@ -255,7 +255,7 @@ export class MapUI extends BaseComponentPlus({
 		if (!this.mounted) return this.loadFocusedNodeTimer.Stop();
 
 		const {map} = this.props;
-		const focusNodePath = GetFocusedNodePath(map._key);
+		const focusNodePath = GetFocusedNodePath(map.id);
 
 		// if more nodes have been rendered, along the path to the focus-node
 		const foundBox = this.FindNodeBox(focusNodePath, true);
@@ -293,7 +293,7 @@ export class MapUI extends BaseComponentPlus({
 			this.scrollView.vScrollableDOM = $('#HomeScrollView').children('.content')[0];
 		} */
 		if (map) {
-			SetMapVisitTimeForThisSession(map._key, Date.now());
+			SetMapVisitTimeForThisSession(map.id, Date.now());
 		}
 	}
 
@@ -305,7 +305,7 @@ export class MapUI extends BaseComponentPlus({
 		if (this.scrollView.state.scrollOp_bar) return true;
 		// if (this.scrollView.state.scrollOp_bar) return false;
 
-		const focusNode_target = GetFocusedNodePath(GetMapView(map._key)); // || map.rootNode.toString();
+		const focusNode_target = GetFocusedNodePath(GetMapView(map.id)); // || map.rootNode.toString();
 		// Log(`FocusNode_target:${focusNode_target}`);
 		return this.ScrollToNode(focusNode_target);
 	}
@@ -338,7 +338,7 @@ export class MapUI extends BaseComponentPlus({
 	ScrollToNode(nodePath: string) {
 		const {map} = this.props;
 
-		const viewOffset_target = GetViewOffset(GetMapView(map._key)); // || new Vector2(200, 0);
+		const viewOffset_target = GetViewOffset(GetMapView(map.id)); // || new Vector2(200, 0);
 		// Log(`LoadingScroll:${nodePath};${ToJSON(viewOffset_target)}`);
 		if (nodePath == null || viewOffset_target == null) return true; // if invalid entry, count as success?
 

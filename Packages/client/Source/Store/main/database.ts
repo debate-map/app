@@ -24,7 +24,7 @@ export const GetSelectedTermID = StoreAccessor(s=>()=>{
 export const GetSelectedTerm = StoreAccessor(s=>()=>{
 	const selectedID = GetSelectedTermID();
 	// return GetData(`terms/${selectedID}`);
-	return (GetTerms() || []).find(a=>a && a._key == selectedID);
+	return (GetTerms() || []).find(a=>a && a.id == selectedID);
 });
 /* export function GetSelectedTermComponent() {
 	let selectedID = State().main.selectedTermComponent;
@@ -37,5 +37,5 @@ export const GetSelectedMediaID = StoreAccessor(s=>()=>{
 export const GetSelectedMedia = StoreAccessor(s=>()=>{
 	const selectedID = GetSelectedMediaID();
 	// return GetData(`terms/${selectedID}`);
-	return (GetMedias() || []).find(a=>a && a._key == selectedID);
+	return (GetMedias() || []).find(a=>a && a.id == selectedID);
 });

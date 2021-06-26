@@ -1,17 +1,17 @@
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
 import {emptyArray, CE} from "web-vcore/nm/js-vextensions";
-import {GetMapNodeEditTimes, GetRootNodeID, GetNode, SearchUpFromNodeForNodeMatchingX, GetNodeID, MapNode, ChangeType} from "dm_common";
+import {GetMapNodeEdits, GetRootNodeID, GetNode, SearchUpFromNodeForNodeMatchingX, GetNodeID, MapNode, ChangeType} from "dm_common";
 import {GetLastAcknowledgementTime} from "../main/maps";
 
 export const GetNodeIDsChangedSinceX = StoreAccessor(s=>(mapID: string, sinceTime: number, includeAcknowledgement = true): string[]=>{
-	const nodeEditTimes = GetMapNodeEditTimes(mapID);
-	if (nodeEditTimes == null) return emptyArray;
+	const nodeEdits = GetMapNodeEdits(mapID);
+	if (nodeEdits == null) return emptyArray;
 
 	const result = [] as string[];
-	for (const {key: nodeID, value: editTime} of CE(nodeEditTimes).Pairs()) {
+	for (const [nodeID, edit] of Object.entries(nodeEdits)) {
 		const lastAcknowledgementTime = includeAcknowledgement ? GetLastAcknowledgementTime(nodeID) : 0;
 		const sinceTimeForNode = CE(sinceTime).KeepAtLeast(lastAcknowledgementTime);
-		if (editTime > sinceTimeForNode) {
+		if (edit.time > sinceTimeForNode) {
 			result.push(nodeID);
 		}
 	}
@@ -62,7 +62,7 @@ export const GetPathsToChangedDescendantNodes_WithChangeTypes = StoreAccessor(s=
 });
 
 export const GetNodeChangeType = StoreAccessor(s=>(node: MapNode, sinceTime: number, includeAcknowledgement = true)=>{
-	const lastAcknowledgementTime = includeAcknowledgement ? GetLastAcknowledgementTime(node._key) : 0;
+	const lastAcknowledgementTime = includeAcknowledgement ? GetLastAcknowledgementTime(node.id) : 0;
 	const sinceTimeForNode = CE(sinceTime).KeepAtLeast(lastAcknowledgementTime);
 	if (node.createdAt >= sinceTimeForNode) return ChangeType.Add;
 	return ChangeType.Edit;

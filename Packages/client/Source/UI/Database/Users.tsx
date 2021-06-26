@@ -25,10 +25,10 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 		}
 
 		users = users.filter(a=>a);
-		/* users = users.OrderBy((a) => (userExtraInfoMap[a._key] ? userExtraInfoMap[a._key].joinDate : Number.MAX_SAFE_INTEGER));
-		users = users.OrderByDescending((a) => (userExtraInfoMap[a._key] ? (userExtraInfoMap[a._key].edits | 0) : Number.MIN_SAFE_INTEGER)); */
-		users = users.OrderBy(a=>ToNumber(GetUser(a._key)?.joinDate, Number.MAX_SAFE_INTEGER));
-		users = users.OrderByDescending(a=>ToNumber(GetUser(a._key)?.edits, 0));
+		/* users = users.OrderBy((a) => (userExtraInfoMap[a.id] ? userExtraInfoMap[a.id].joinDate : Number.MAX_SAFE_INTEGER));
+		users = users.OrderByDescending((a) => (userExtraInfoMap[a.id] ? (userExtraInfoMap[a.id].edits | 0) : Number.MIN_SAFE_INTEGER)); */
+		users = users.OrderBy(a=>ToNumber(GetUser(a.id)?.joinDate, Number.MAX_SAFE_INTEGER));
+		users = users.OrderByDescending(a=>ToNumber(GetUser(a.id)?.edits, 0));
 		return (
 			<PageContainer style={{padding: 0, background: null}}>
 				<Column className="clickThrough" style={{height: 40, background: "rgba(0,0,0,.7)", borderRadius: "10px 10px 0 0"}}>
@@ -66,7 +66,7 @@ export class UsersUI extends BaseComponentPlus({} as {}, {}) {
 				<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1})}>
 					{users.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
 					{users.map((user, index)=>{
-						return <UserRow key={user._key} index={index} last={index == users.length - 1} user={user}/>;
+						return <UserRow key={user.id} index={index} last={index == users.length - 1} user={user}/>;
 					})}
 				</ScrollView>
 			</PageContainer>
@@ -87,7 +87,7 @@ class UserRow extends BaseComponent<{index: number, last: boolean, user: User}, 
 				last && {borderRadius: "0 0 10px 10px"},
 			)}>
 				<Row>
-					<Link text={displayName} actionFunc={s=>s.main.database.selectedUserID = user._key} style={{flex: columnWidths[0], fontSize: 17}}/>
+					<Link text={displayName} actionFunc={s=>s.main.database.selectedUserID = user.id} style={{flex: columnWidths[0], fontSize: 17}}/>
 					{/* <span style={{ flex: columnWidths[0] }}>{displayName}</span> */}
 					<span style={{flex: columnWidths[1]}}>{Moment(user.joinDate).format("YYYY-MM-DD")}</span>
 					<span style={{flex: columnWidths[2]}}>{user.edits || 0}</span>

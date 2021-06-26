@@ -54,25 +54,25 @@ export class NodeUI extends BaseComponentPlus(
 		const {expectedBoxWidth, expectedBoxHeight, dividePoint, selfHeight} = this.state;
 
 		performance.mark("NodeUI_1");
-		path = path || node._key.toString();
+		path = path || node.id.toString();
 
-		const nodeChildren = GetNodeChildrenL3(node._key, path);
+		const nodeChildren = GetNodeChildrenL3(node.id, path);
 		// let nodeChildrenToShow: MapNodeL3[] = nodeChildren.Any(a => a == null) ? emptyArray_forLoading : nodeChildren; // only pass nodeChildren when all are loaded
-		const nodeChildrenToShow = GetNodeChildrenL3_Advanced(node._key, path, map._key, true, null, true, true, true);
+		const nodeChildrenToShow = GetNodeChildrenL3_Advanced(node.id, path, map.id, true, null, true, true, true);
 
-		/* let subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map, node._key);
+		/* let subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map, node.id);
 		subnodes = subnodes.Any(a => a == null) ? emptyArray : subnodes; // only pass subnodes when all are loaded */
 
-		const sinceTime = GetTimeFromWhichToShowChangedNodes(map._key);
-		const pathsToChangedDescendantNodes_withChangeTypes = GetPathsToChangedDescendantNodes_WithChangeTypes(map._key, sinceTime, path);
+		const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
+		const pathsToChangedDescendantNodes_withChangeTypes = GetPathsToChangedDescendantNodes_WithChangeTypes(map.id, sinceTime, path);
 		const addedDescendants = pathsToChangedDescendantNodes_withChangeTypes.filter(a=>a == ChangeType.Add).length;
 		const editedDescendants = pathsToChangedDescendantNodes_withChangeTypes.filter(a=>a == ChangeType.Edit).length;
 
 		const parent = GetParentNodeL3(path);
 		const parentPath = GetParentPath(path);
-		// const parentNodeView = GetNodeView(map._key, parentPath) || new MapNodeView();
-		// const parentNodeView = Watch(() => GetNodeView(map._key, parentPath) || new MapNodeView(), [map._key, parentPath]);
-		const parentNodeView = GetNodeView(map._key, parentPath);
+		// const parentNodeView = GetNodeView(map.id, parentPath) || new MapNodeView();
+		// const parentNodeView = Watch(() => GetNodeView(map.id, parentPath) || new MapNodeView(), [map.id, parentPath]);
+		const parentNodeView = GetNodeView(map.id, parentPath);
 
 		const isSinglePremiseArgument = IsSinglePremiseArgument(node);
 		const isPremiseOfSinglePremiseArg = IsPremiseOfSinglePremiseArgument(node, parent);
@@ -81,27 +81,27 @@ export class NodeUI extends BaseComponentPlus(
 
 		/* const initialChildLimit = State(a => a.main.initialChildLimit);
 		const form = GetNodeForm(node, GetParentNodeL2(path)); */
-		/* const nodeView_early = GetNodeView(map._key, path) || new MapNodeView();
-		const nodeView = CachedTransform('nodeView_transform1', [map._key, path], nodeView_early.Excluding('focused', 'viewOffset', 'children'), () => nodeView_early); */
-		// const nodeView = Watch(() => GetNodeView(map._key, path) || new MapNodeView(), [map._key, path]);
-		const nodeView = GetNodeView(map._key, path);
+		/* const nodeView_early = GetNodeView(map.id, path) || new MapNodeView();
+		const nodeView = CachedTransform('nodeView_transform1', [map.id, path], nodeView_early.Excluding('focused', 'viewOffset', 'children'), () => nodeView_early); */
+		// const nodeView = Watch(() => GetNodeView(map.id, path) || new MapNodeView(), [map.id, path]);
+		const nodeView = GetNodeView(map.id, path);
 		const boxExpanded = (isPremiseOfSinglePremiseArg ? parentNodeView?.expanded : nodeView?.expanded) ?? false;
 
-		const playingTimeline = GetPlayingTimeline(map._key);
-		const playingTimeline_currentStepIndex = GetPlayingTimelineStepIndex(map._key);
-		// const playingTimelineShowableNodes = GetPlayingTimelineRevealNodes_All(map._key);
-		// const playingTimelineVisibleNodes = GetPlayingTimelineRevealNodes_UpToAppliedStep(map._key, true);
+		const playingTimeline = GetPlayingTimeline(map.id);
+		const playingTimeline_currentStepIndex = GetPlayingTimelineStepIndex(map.id);
+		// const playingTimelineShowableNodes = GetPlayingTimelineRevealNodes_All(map.id);
+		// const playingTimelineVisibleNodes = GetPlayingTimelineRevealNodes_UpToAppliedStep(map.id, true);
 		// if users scrolls to step X and expands this node, keep expanded even if user goes back to a previous step
-		const playingTimelineVisibleNodes = GetPlayingTimelineRevealNodes_UpToAppliedStep(map._key);
+		const playingTimelineVisibleNodes = GetPlayingTimelineRevealNodes_UpToAppliedStep(map.id);
 
 		performance.mark("NodeUI_2");
 		if (ShouldLog(a=>a.nodeRenders)) {
 			if (logTypes.nodeRenders_for) {
-				if (logTypes.nodeRenders_for == node._key) {
-					Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._key}`, "\nPropsChanged:", this.GetPropChanges(), "\nStateChanged:", this.GetStateChanges());
+				if (logTypes.nodeRenders_for == node.id) {
+					Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node.id}`, "\nPropsChanged:", this.GetPropChanges(), "\nStateChanged:", this.GetStateChanges());
 				}
 			} else {
-				Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node._key}`, "\nPropsChanged:", this.GetPropChanges().map(a=>a.key), "\nStateChanged:", this.GetStateChanges().map(a=>a.key));
+				Log(`Updating NodeUI (${RenderSource[this.lastRender_source]}):${node.id}`, "\nPropsChanged:", this.GetPropChanges().map(a=>a.key), "\nStateChanged:", this.GetStateChanges().map(a=>a.key));
 			}
 		}
 		// NodeUI.renderCount++;
@@ -111,17 +111,17 @@ export class NodeUI extends BaseComponentPlus(
 		if (isSinglePremiseArgument) {
 			const premises = nodeChildren.filter(a=>a && a.type == MapNodeType.Claim);
 			if (premises.length) {
-				AssertWarn(premises.length == 1, `Single-premise argument #${node._key} has more than one premise! (${premises.map(a=>a._key).join(",")})`);
+				AssertWarn(premises.length == 1, `Single-premise argument #${node.id} has more than one premise! (${premises.map(a=>a.id).join(",")})`);
 				const premise = premises[0];
 
 				// if has child-limit bar, correct its path
 				const firstChildComp = this.FlattenedChildren[0] as any;
 				if (firstChildComp && firstChildComp.props.path == path) {
-					firstChildComp.props.path = `${firstChildComp.props.path}/${premise._key}`;
+					firstChildComp.props.path = `${firstChildComp.props.path}/${premise.id}`;
 				}
 
 				return (
-					<NodeUI ref={c=>this.proxyDisplayedNodeUI = c} {...this.props} key={premise._key} map={map} node={premise} path={`${path}/${premise._key}`}>
+					<NodeUI ref={c=>this.proxyDisplayedNodeUI = c} {...this.props} key={premise.id} map={map} node={premise} path={`${path}/${premise.id}`}>
 						{children}
 					</NodeUI>
 				);
@@ -155,16 +155,16 @@ export class NodeUI extends BaseComponentPlus(
 
 		const separateChildren = node.type == MapNodeType.Claim;
 
-		const parentChildren = GetNodeChildrenL3(parent?._key, parentPath);
+		const parentChildren = GetNodeChildrenL3(parent?.id, parentPath);
 		if (isPremiseOfSinglePremiseArg) {
 			const argument = parent;
 			const argumentPath = SlicePath(path, 1);
 			var relevanceArguments = parentChildren.filter(a=>a && a.type == MapNodeType.Argument);
 			// Assert(!relevanceArguments.Any(a=>a.type == MapNodeType.Claim), "Single-premise argument has more than one premise!");
 			if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
-				// relevanceArguments = relevanceArguments.filter(child => playingTimelineVisibleNodes.Contains(`${argumentPath}/${child._key}`));
+				// relevanceArguments = relevanceArguments.filter(child => playingTimelineVisibleNodes.Contains(`${argumentPath}/${child.id}`));
 				// if this node (or a descendent) is marked to be revealed by a currently-applied timeline-step, reveal this node
-				relevanceArguments = relevanceArguments.filter(child=>playingTimelineVisibleNodes.Any(a=>a.startsWith(`${argumentPath}/${child._key}`)));
+				relevanceArguments = relevanceArguments.filter(child=>playingTimelineVisibleNodes.Any(a=>a.startsWith(`${argumentPath}/${child.id}`)));
 			}
 		}
 
@@ -200,7 +200,7 @@ export class NodeUI extends BaseComponentPlus(
 		const nodeChildHolderBox_relevance = isPremiseOfSinglePremiseArg && boxExpanded &&
 			<NodeChildHolderBox {...{map, node: parent, path: parentPath}} type={HolderType.Relevance}
 				widthOfNode={widthOverride || width}
-				nodeChildren={GetNodeChildrenL3(parent._key, parentPath)} nodeChildrenToShow={relevanceArguments}
+				nodeChildren={GetNodeChildrenL3(parent.id, parentPath)} nodeChildrenToShow={relevanceArguments}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
 
 		// const hasExtraWrapper = subnodes.length || isMultiPremiseArgument;
@@ -218,7 +218,7 @@ export class NodeUI extends BaseComponentPlus(
 				{hasExtraWrapper && <>
 					{subnodes.map((subnode, index) => (
 						<NodeUI key={index} indexInNodeList={index} map={map} node={subnode} asSubnode={true} style={E({ marginTop: -5 })}
-							path={`${path}/L${subnode._key}`} widthOverride={widthOverride} onHeightOrPosChange={onHeightOrPosChange}/>
+							path={`${path}/L${subnode.id}`} widthOverride={widthOverride} onHeightOrPosChange={onHeightOrPosChange}/>
 					))}
 					<div className="clickThrough" style={E({ marginTop: -5 })}>
 						{isMultiPremiseArgument
@@ -289,8 +289,8 @@ export class NodeUI extends BaseComponentPlus(
 		// see UseSize_Method for difference between offsetHeight and the alternatives
 		const height = this.DOM_HTML.offsetHeight;
 		if (height != this.lastHeight) {
-			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._key),
-				()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._key}${nl}NewHeight:${height}`);
+			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
+				()=>`OnHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewHeight:${height}`);
 
 			// this.UpdateState(true);
 			// this.UpdateState();
@@ -300,8 +300,8 @@ export class NodeUI extends BaseComponentPlus(
 
 		const selfHeight = this.SafeGet(a=>a.innerUI.DOM_HTML.offsetHeight, 0);
 		if (selfHeight != this.lastSelfHeight) {
-			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._key),
-				()=>`OnSelfHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._key}${nl}NewSelfHeight:${selfHeight}`);
+			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
+				()=>`OnSelfHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewSelfHeight:${selfHeight}`);
 
 			// this.UpdateState(true);
 			// this.UpdateState();
@@ -327,8 +327,8 @@ export class NodeUI extends BaseComponentPlus(
 		if (MeID() == null) return;
 
 		const userViewedNodes_doneLoading = userViewedNodes !== undefined;
-		if (userViewedNodes_doneLoading && !(userViewedNodes || {}).VKeys().Contains(node._key)) {
-			new NotifyNodeViewed({ nodeID: node._key }).Run();
+		if (userViewedNodes_doneLoading && !(userViewedNodes || {}).VKeys().Contains(node.id)) {
+			new NotifyNodeViewed({ nodeID: node.id }).Run();
 		}
 	} */
 
@@ -352,11 +352,11 @@ export class NodeUI extends BaseComponentPlus(
 		if (this.measurementInfo_cache && ShallowEquals(this.measurementInfo_cache_lastUsedProps, props_used)) return this.measurementInfo_cache;
 
 		const {map, node, path} = props_used;
-		const subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map._key, node._key);
+		const subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map.id, node.id);
 		let {expectedBoxWidth, width, expectedHeight} = GetMeasurementInfoForNode(node, path);
 
 		for (const subnode of subnodes) {
-			const subnodeMeasurementInfo = GetMeasurementInfoForNode(subnode, `${subnode._key}`);
+			const subnodeMeasurementInfo = GetMeasurementInfoForNode(subnode, `${subnode.id}`);
 			expectedBoxWidth = Math.max(expectedBoxWidth, subnodeMeasurementInfo.expectedBoxWidth);
 		}
 

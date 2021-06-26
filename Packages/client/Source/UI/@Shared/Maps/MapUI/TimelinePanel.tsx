@@ -14,9 +14,9 @@ import {PlayingSubpanel} from "../../Timelines/TimelinePanel/PlayingSubpanel";
 export class TimelinePanel extends BaseComponentPlus({} as {map: Map}, {}) {
 	render() {
 		const {map} = this.props;
-		const subpanel = GetTimelineOpenSubpanel(map._key);
+		const subpanel = GetTimelineOpenSubpanel(map.id);
 
-		const mapInfo = GetMapState(map._key);
+		const mapInfo = GetMapState(map.id);
 		function SetSubpanel(subpanel: TimelineSubpanel) {
 			runInAction("TimelinePanel.SetSubpanel", ()=>mapInfo.timelineOpenSubpanel = subpanel);
 		}

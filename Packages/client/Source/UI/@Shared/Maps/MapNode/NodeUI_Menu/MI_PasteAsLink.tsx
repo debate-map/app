@@ -26,7 +26,7 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 			(copiedNode.type == MapNodeType.Argument ? copiedNode.link.polarity : null) // if node itself has polarity, use it
 			|| (copiedNode_parent && copiedNode_parent.type == MapNodeType.Argument ? copiedNode_parent.link.polarity : null); // else if our parent has a polarity, use that
 
-		const contributeInfo = GetNodeContributionInfo(node._key, MeID());
+		const contributeInfo = GetNodeContributionInfo(node.id, MeID());
 		let contributeInfo_polarity = contributeInfo[`${GetPolarityShortStr(newPolarity)}Args`] as NodeContributionInfo_ForPolarity;
 		// if can't add with source polarity, try adding with reversed polarity
 		if (!contributeInfo_polarity.canAdd) {
@@ -35,7 +35,7 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 		}
 
 		const linkCommand = new LinkNode_HighLevel({
-			mapID: map._key, oldParentID: GetParentNodeID(copiedNodePath), newParentID: contributeInfo_polarity.hostNodeID, nodeID: copiedNode._key,
+			mapID: map.id, oldParentID: GetParentNodeID(copiedNodePath), newParentID: contributeInfo_polarity.hostNodeID, nodeID: copiedNode.id,
 			newForm: copiedNode.type == MapNodeType.Claim ? formForClaimChildren : null,
 			newPolarity: contributeInfo_polarity.reversePolarities ? ReversePolarity(newPolarity) : newPolarity,
 			allowCreateWrapperArg: holderType != null || !node.multiPremiseArgument,

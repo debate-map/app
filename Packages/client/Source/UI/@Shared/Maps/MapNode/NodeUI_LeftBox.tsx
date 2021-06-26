@@ -30,7 +30,7 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 			backgroundColor, asHover, inList, onPanelButtonHover, onPanelButtonClick, style,
 			children,
 		} = this.props;
-		const nodeView = GetNodeView(map._key, path);
+		const nodeView = GetNodeView(map.id, path);
 		const openPanel = local_openPanel || nodeView?.openPanel;
 
 		const form = GetNodeForm(node, path);
@@ -69,7 +69,7 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 						// let ratingSet = ratingsRoot && ratingsRoot[ratingType];
 
 						let percentStr = "...";
-						const ratings = GetRatings(nodeForRatingType._key, ratingInfo.type);
+						const ratings = GetRatings(nodeForRatingType.id, ratingInfo.type);
 						const average = GetRatingAverage_AtPath(nodeForRatingType, ratingInfo.type, null, -1);
 						if (average != -1) {
 							percentStr = `${average}%`;

@@ -107,13 +107,13 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		// connector part
 		// ==========
 
-		const nodeView = GetNodeView(map._key, path);
-		let sinceTime = GetTimeFromWhichToShowChangedNodes(map._key);
+		const nodeView = GetNodeView(map.id, path);
+		let sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
 		/* let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
 		let ownNodeChanged = pathsToChangedNodes.Any(a=>a.split("/").Any(b=>b == node._id));
 		let changeType = ownNodeChanged ? GetNodeChangeType(node, sinceTime) : null; */
 
-		const lastAcknowledgementTime = GetLastAcknowledgementTime(node._key);
+		const lastAcknowledgementTime = GetLastAcknowledgementTime(node.id);
 		sinceTime = sinceTime.KeepAtLeast(lastAcknowledgementTime);
 
 		let changeType: ChangeType;
@@ -139,7 +139,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const mainRating_mine = Watch(() => GetRatingAverage_AtPath(ratingNode, mainRatingType, new RatingFilter({ includeUser: MeID() }))); */
 
 		const useReasonScoreValuesForThisNode = store.main.maps.weighting == WeightingType.ReasonScore && (node.type == MapNodeType.Argument || node.type == MapNodeType.Claim);
-		const reasonScoreValues = useReasonScoreValuesForThisNode && RS_GetAllValues(node._key, path, true) as ReasonScoreValues_RSPrefix;
+		const reasonScoreValues = useReasonScoreValuesForThisNode && RS_GetAllValues(node.id, path, true) as ReasonScoreValues_RSPrefix;
 
 		const backgroundFillPercent = GetFillPercent_AtPath(ratingNode, ratingNodePath, null);
 		const markerPercent = GetMarkerPercent_AtPath(ratingNode, ratingNodePath, null);
@@ -147,14 +147,14 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const form = GetNodeForm(node, path);
 		const {showReasonScoreValues} = store.main.maps;
 
-		/* const playingTimeline_currentStepRevealNodes = GetPlayingTimelineCurrentStepRevealNodes(map._key);
+		/* const playingTimeline_currentStepRevealNodes = GetPlayingTimelineCurrentStepRevealNodes(map.id);
 		let revealedByCurrentTimelineStep = playingTimeline_currentStepRevealNodes.Contains(path);
 		if (combinedWithParentArgument) {
 			revealedByCurrentTimelineStep = revealedByCurrentTimelineStep || playingTimeline_currentStepRevealNodes.Contains(parentPath);
 		} */
 		const nodeRevealHighlightTime = GetNodeRevealHighlightTime();
-		const timeSinceRevealedByTimeline_self = GetTimeSinceNodeRevealedByPlayingTimeline(map._key, path, true, true);
-		const timeSinceRevealedByTimeline_parent = GetTimeSinceNodeRevealedByPlayingTimeline(map._key, parentPath, true, true);
+		const timeSinceRevealedByTimeline_self = GetTimeSinceNodeRevealedByPlayingTimeline(map.id, path, true, true);
+		const timeSinceRevealedByTimeline_parent = GetTimeSinceNodeRevealedByPlayingTimeline(map.id, parentPath, true, true);
 		let timeSinceRevealedByTimeline = timeSinceRevealedByTimeline_self;
 		if (combinedWithParentArgument && timeSinceRevealedByTimeline_parent != null) {
 			timeSinceRevealedByTimeline = timeSinceRevealedByTimeline != null ? Math.min(timeSinceRevealedByTimeline, timeSinceRevealedByTimeline_parent) : timeSinceRevealedByTimeline_parent;
@@ -184,7 +184,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			local_openPanel = null;
 		} */
 
-		// Log(`${node._key} -- ${dragInfo && dragInfo.snapshot.isDragging}; ${dragInfo && dragInfo.snapshot.draggingOver}`);
+		// Log(`${node.id} -- ${dragInfo && dragInfo.snapshot.isDragging}; ${dragInfo && dragInfo.snapshot.draggingOver}`);
 
 		if (combinedWithParentArgument) {
 			backgroundColor = GetNodeColor(parent);
@@ -203,9 +203,9 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView?.expanded ?? false;
 
-		// const parentNodeView = GetNodeView(map._key, parentPath);
-		// const parentNodeView = Watch(() => parentPath && GetNodeView_SelfOnly(map._key, parentPath), [map._key, parentPath]);
-		const parentNodeView = GetNodeView(map._key, parentPath);
+		// const parentNodeView = GetNodeView(map.id, parentPath);
+		// const parentNodeView = Watch(() => parentPath && GetNodeView_SelfOnly(map.id, parentPath), [map.id, parentPath]);
+		const parentNodeView = GetNodeView(map.id, parentPath);
 		// if combined with parent arg (ie. premise of single-premise arg), use parent's expansion state for this box
 		if (combinedWithParentArgument) {
 			expanded = parentNodeView?.expanded ?? false;
@@ -229,17 +229,17 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			} */
 
 			if (!nodeView?.selected) {
-				ACTMapNodeSelect(map._key, path);
+				ACTMapNodeSelect(map.id, path);
 			}
-		}, [map._key, nodeView, path]);
+		}, [map.id, nodeView, path]);
 		const onDirectClick = UseCallback(e=>{
 			runInAction("NodeUI_Inner.onDirectClick", ()=>{
 				if (combinedWithParentArgument) {
-					store.main.maps.nodeLastAcknowledgementTimes.set(parent && parent._key, Date.now());
+					store.main.maps.nodeLastAcknowledgementTimes.set(parent && parent.id, Date.now());
 				}
-				store.main.maps.nodeLastAcknowledgementTimes.set(node._key, Date.now());
+				store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now());
 			});
-		}, [combinedWithParentArgument, node._key, parent]);
+		}, [combinedWithParentArgument, node.id, parent]);
 		const onTextHolderClick = UseCallback(e=>IsDoubleClick(e) && this.titlePanel && this.titlePanel.OnDoubleClick(), []);
 		const toggleExpanded = UseCallback(e=>{
 			/* let pathToApplyTo = path;
@@ -247,14 +247,14 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			if (expanded && e.altKey && combinedWithParentArgument) {
 				pathToApplyTo = parentPath;
 			}
-			store.dispatch(new ACTMapNodeExpandedSet({ mapID: map._key, path: pathToApplyTo, expanded: !expanded, recursive: expanded && e.altKey })); */
+			store.dispatch(new ACTMapNodeExpandedSet({ mapID: map.id, path: pathToApplyTo, expanded: !expanded, recursive: expanded && e.altKey })); */
 
 			// if collapsing subtree, and this node is premise of single-premise arg, start collapsing from parent (the argument node), so that its relevance args are collapsed as well
 			const recursivelyCollapsing = expanded && e.altKey;
-			ACTMapNodeExpandedSet({mapID: map._key, path: combinedWithParentArgument ? parentPath : path, expanded: !expanded, resetSubtree: recursivelyCollapsing});
+			ACTMapNodeExpandedSet({mapID: map.id, path: combinedWithParentArgument ? parentPath : path, expanded: !expanded, resetSubtree: recursivelyCollapsing});
 			e.nativeEvent["ignore"] = true; // for some reason, "return false" isn't working
 			// return false;
-		}, [combinedWithParentArgument, expanded, map._key, parentPath, path]);
+		}, [combinedWithParentArgument, expanded, map.id, parentPath, path]);
 
 		const renderInner = dragInfo=>{
 			const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
@@ -296,7 +296,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 								runInAction("NodeUI_Inner.onPanelButtonClick", ()=>{
 									let nodeView_final = nodeView;
-									if (nodeView_final == null) nodeView_final = GetNodeViewsAlongPath(map._key, path, true).Last();
+									if (nodeView_final == null) nodeView_final = GetNodeViewsAlongPath(map.id, path, true).Last();
 									if (nodeView_final.openPanel != panel) {
 										nodeView_final.VSet("openPanel", panel ?? DEL);
 									} else {
@@ -346,7 +346,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			if (!path.includes("/")) return null; // don't make draggable if root-node of map
 			return {
 				type: "MapNode",
-				draggableInfo: new DraggableInfo({nodePath: path, mapID: map._key}), // mapID needed for DND-completer to create the link command
+				draggableInfo: new DraggableInfo({nodePath: path, mapID: map.id}), // mapID needed for DND-completer to create the link command
 				index: indexInNodeList,
 			};
 		};
@@ -400,7 +400,7 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 			width, widthOverride, panelPosition, panelToShow, hovered, hoverTermID, onTermHover,
 			backgroundColor,
 		} = this.props;
-		const nodeView = GetNodeView(map._key, path);
+		const nodeView = GetNodeView(map.id, path);
 
 		this.panelsOpened.add(panelToShow);
 		const renderPanel = (panelName: string, uiFunc: (show: boolean)=>JSX.Element)=>{
@@ -419,10 +419,10 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 					if (["impact", "relevance"].Contains(panelToShow) && node.type == MapNodeType.Claim) {
 						const argumentNode = parent;
 						const argumentPath = SlicePath(path, 1);
-						const ratings = GetRatings(argumentNode._key, panelToShow as RatingType);
+						const ratings = GetRatings(argumentNode.id, panelToShow as RatingType);
 						return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 					}
-					const ratings = GetRatings(node._key, panelToShow as RatingType);
+					const ratings = GetRatings(node.id, panelToShow as RatingType);
 					return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 				})()}
 				{renderPanel("definitions", show=><DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{show, node, path, hoverTermID}}
@@ -445,7 +445,7 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 class ReasonScoreValueMarkers extends BaseComponent<{node: MapNodeL3, reasonScoreValues: ReasonScoreValues_RSPrefix, combinedWithParentArgument: boolean}, {}> {
 	render() {
 		const {node, reasonScoreValues, combinedWithParentArgument} = this.props;
-		const mainScore = node.type == MapNodeType.Argument ? RS_CalculateTruthScoreComposite(node._key) : RS_CalculateTruthScore(node._key);
+		const mainScore = node.type == MapNodeType.Argument ? RS_CalculateTruthScoreComposite(node.id) : RS_CalculateTruthScore(node.id);
 		const {rs_argTruthScoreComposite, rs_argWeightMultiplier, rs_argWeight, rs_claimTruthScore, rs_claimBaseWeight} = reasonScoreValues;
 		return (
 			<div className="clickThrough" style={{position: "absolute", top: "100%", width: "100%", zIndex: 1, textAlign: "center", fontSize: 14}}>

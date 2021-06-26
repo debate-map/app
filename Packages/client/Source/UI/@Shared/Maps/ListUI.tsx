@@ -8,9 +8,9 @@ type Props = {map: Map};
 export class ListUI extends BaseComponent<Props, {panelToShow?: string}> {
 	render() {
 		const { map } = this.props;
-		const mapInfo = store.main.mapStates.get(map._key);
+		const mapInfo = store.main.mapStates.get(map.id);
 		const selectedNodeL1 = GetNode(mapInfo.list_selectedNodeID);
-		const selectedNode = selectedNodeL1 && GetNodeL3(selectedNodeL1._key);
+		const selectedNode = selectedNodeL1 && GetNodeL3(selectedNodeL1.id);
 		let page = mapInfo.list_page;
 		// nodes: GetNodes({limitToFirst: entriesPerPage * (page + 1)}).Skip(page * entriesPerPage).Take(entriesPerPage),
 		let nodes = GetNodesL2();
@@ -104,7 +104,7 @@ export class ListUI extends BaseComponent<Props, {panelToShow?: string}> {
 					}}>
 						{nodes.length == 0 && <div style={{ textAlign: 'center', fontSize: 18 }}>Loading...</div>}
 						{nodesForPage.map((node, index) => {
-							return <NodeRow key={node._key} map={map} node={node} first={index == 0}/>;
+							return <NodeRow key={node.id} map={map} node={node} first={index == 0}/>;
 						})}
 					</ScrollView>
 				</Column>
@@ -127,11 +127,11 @@ class NodeRow extends BaseComponentPlus({} as NodeRow_Props, { menuOpened: false
 		const { menuOpened } = this.state;
 
 		const creator = GetUser(node.creator);
-		const mapInfo = store.main.mapStates.get(map._key);
+		const mapInfo = store.main.mapStates.get(map.id);
 		const selected = GetNode(mapInfo.list_selectedNodeID);
 
 		const nodeL3 = AsNodeL3(node);
-		const path = `${node._key}`;
+		const path = `${node.id}`;
 
 		const backgroundColor = GetNodeColor(nodeL3).desaturate(0.5).alpha(0.8);
 		const nodeTypeInfo = MapNodeType_Info.for[node.type];
@@ -143,7 +143,7 @@ class NodeRow extends BaseComponentPlus({} as NodeRow_Props, { menuOpened: false
 					selected && { background: backgroundColor.brighten(0.3).alpha(1).css() },
 				)}
 				onClick={(e) => {
-					mapInfo.list_selectedNodeID = node._key;
+					mapInfo.list_selectedNodeID = node.id;
 				}}
 				onMouseDown={(e) => {
 					if (e.button != 2) return false;
@@ -153,7 +153,7 @@ class NodeRow extends BaseComponentPlus({} as NodeRow_Props, { menuOpened: false
 				<span style={{ flex: columnWidths[1] }}>{creator ? creator.displayName : '...'}</span>
 				<span style={{ flex: columnWidths[2] }}>{Moment(node.createdAt).format('YYYY-MM-DD')}</span>
 				{/* <NodeUI_Menu_Helper {...{map, node}}/> *#/}
-				{menuOpened && <NodeUI_Menu {...{ map, node: nodeL3, path: `${node._key}`, inList: true }}/>}
+				{menuOpened && <NodeUI_Menu {...{ map, node: nodeL3, path: `${node.id}`, inList: true }}/>}
 			</Row>
 		);
 	}
@@ -177,12 +177,12 @@ class NodeColumn extends BaseComponentPlus({} as NodeColumn_Props, { width: null
 		const { map, node } = this.props;
 		const { width, hoverPanel } = this.state;
 
-		const ratingsRoot = GetNodeRatingsRoot(node._key);
-		const mapInfo = store.main.mapStates.get(map._key);
+		const ratingsRoot = GetNodeRatingsRoot(node.id);
+		const mapInfo = store.main.mapStates.get(map.id);
 		const openPanel = mapInfo.list_selectedNode_openPanel;
 
 		const nodeL3 = AsNodeL3(node);
-		const path = `${node._key}`;
+		const path = `${node.id}`;
 		const nodeTypeInfo = MapNodeType_Info.for[node.type];
 		const backgroundColor = GetNodeColor(nodeL3);
 		const nodeView = new MapNodeView();
@@ -215,7 +215,7 @@ class NodeColumn extends BaseComponentPlus({} as NodeColumn_Props, { width: null
 							<div style={{ position: 'relative', padding: 5, background: 'rgba(0,0,0,.7)', borderRadius: 5, boxShadow: 'rgba(0,0,0,1) 0px 0px 2px' }}>
 								<div style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: backgroundColor.css() }}/>
 								{ratingTypes.Contains(panelToShow) && (() => {
-									const ratings = GetRatings(node._key, panelToShow as RatingType);
+									const ratings = GetRatings(node.id, panelToShow as RatingType);
 									return <RatingsPanel ref="ratingsPanel" node={nodeL3} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
 								})()}
 								{panelToShow == 'definitions' &&

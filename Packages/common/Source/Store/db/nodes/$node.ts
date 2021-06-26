@@ -83,9 +83,9 @@ export const GetDisplayPolarityAtPath = StoreAccessor(s=>(node: MapNodeL2, path:
 	const parent = GetParentNodeL2(path);
 	if (!parent) return Polarity.Supporting; // can be null, if for NodeUI_ForBots
 
-	const link = GetLinkUnderParent(node._key, parent, true, tagsToIgnore);
+	const link = GetLinkUnderParent(node.id, parent, true, tagsToIgnore);
 	if (link == null) return Polarity.Supporting; // can be null, if path is invalid (eg. copied-node path)
-	Assert(link.polarity != null, `The link for the argument #${node._key} (from parent #${parent._key}) must specify the polarity.`);
+	Assert(link.polarity != null, `The link for the argument #${node.id} (from parent #${parent.id}) must specify the polarity.`);
 
 	const parentForm = GetNodeForm(parent, SplitStringBySlash_Cached(path).slice(0, -1).join("/"));
 	return GetDisplayPolarity(link.polarity, parentForm);
@@ -165,7 +165,7 @@ export const GetNodeL3 = StoreAccessor(s=>(path: string, tagsToIgnore?: string[]
 	if (!isSubnode) {*/
 	const parent = GetParentNode(path);
 	if (parent == null && path.includes("/")) return null;
-	var link = GetLinkUnderParent(node._key, parent, true, tagsToIgnore);
+	var link = GetLinkUnderParent(node.id, parent, true, tagsToIgnore);
 	if (link == null && path.includes("/")) return null;
 	//}
 
@@ -189,7 +189,7 @@ export const GetNodeForm = StoreAccessor(s=>(node: MapNodeL2 | MapNodeL3, pathOr
 	}
 
 	const parent: MapNodeL2 = IsString(pathOrParent) ? GetParentNodeL2(pathOrParent as string) : pathOrParent as MapNodeL2;
-	const link = GetLinkUnderParent(node._key, parent);
+	const link = GetLinkUnderParent(node.id, parent);
 	if (link == null) return ClaimForm.Base;
 	return link.form;
 });
@@ -197,17 +197,17 @@ export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapN
 	if (parent == null) return null;
 	let link = parent.children?.[nodeID]; // null-check, since after child-delete, parent-data might have updated before child-data removed
 	if (includeMirrorLinks && link == null) {
-		let tags = GetNodeTags(parent._key).filter(tag=>tag && !tagsToIgnore?.includes(tag._key));
+		let tags = GetNodeTags(parent.id).filter(tag=>tag && !tagsToIgnore?.includes(tag.id));
 		for (const tag of tags) {
-			//let tagComps = GetNodeTagComps(parent._key);
+			//let tagComps = GetNodeTagComps(parent.id);
 			const tagComps = GetFinalTagCompsForTag(tag);
 			for (const comp of tagComps) {
-				if (comp instanceof TagComp_MirrorChildrenFromXToY && comp.nodeY == parent._key) {
-					let mirrorChildren = GetNodeChildrenL3(comp.nodeX, undefined, undefined, (tagsToIgnore ?? []).concat(tag._key));
+				if (comp instanceof TagComp_MirrorChildrenFromXToY && comp.nodeY == parent.id) {
+					let mirrorChildren = GetNodeChildrenL3(comp.nodeX, undefined, undefined, (tagsToIgnore ?? []).concat(tag.id));
 					mirrorChildren = mirrorChildren.filter(child=> {
 						return child && ((child.link.polarity == Polarity.Supporting && comp.mirrorSupporting) || (child.link.polarity == Polarity.Opposing && comp.mirrorOpposing));
 					});
-					let nodeL3ForNodeAsMirrorChildInThisTag = mirrorChildren.find(a=>a._key == nodeID);
+					let nodeL3ForNodeAsMirrorChildInThisTag = mirrorChildren.find(a=>a.id == nodeID);
 					//const nodeL3ForNodeAsMirrorChildInThisTag = GetNodeL3(`${comp.nodeX}/${nodeID}`);
 					if (nodeL3ForNodeAsMirrorChildInThisTag) {
 						link = Clone(nodeL3ForNodeAsMirrorChildInThisTag.link);
@@ -294,7 +294,7 @@ export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: stri
 	if (node.type == MapNodeType.Argument && !node.multiPremiseArgument && !titles.base) {
 		// const baseClaim = GetNodeL2(node.children && node.children.VKeys().length ? node.children.VKeys()[0] : null);
 		// const baseClaim = GetArgumentPremises(node)[0];
-		const baseClaim = GetNodeChildrenL2(node._key).filter(a=>a && a.type == MapNodeType.Claim)[0];
+		const baseClaim = GetNodeChildrenL2(node.id).filter(a=>a && a.type == MapNodeType.Claim)[0];
 		if (baseClaim) return GetNodeDisplayText(baseClaim);
 	}
 	if (node.type == MapNodeType.Claim) {
@@ -371,7 +371,7 @@ export function GetValidChildTypes(nodeType: MapNodeType, path: string) {
 }
 export function GetValidNewChildTypes(parent: MapNodeL2, holderType: HolderType, permissions: PermissionGroupSet) {
 	const nodeTypes = GetValues<MapNodeType>(MapNodeType);
-	const validChildTypes = nodeTypes.filter(type=>ForNewLink_GetError(parent._key, {type} as any, permissions, holderType) == null);
+	const validChildTypes = nodeTypes.filter(type=>ForNewLink_GetError(parent.id, {type} as any, permissions, holderType) == null);
 	return validChildTypes;
 }
 

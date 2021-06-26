@@ -18,7 +18,7 @@ export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 		if (!IsUserCreatorOrMod(MeID(), node) || componentBox) return null;
 		const nodeText = GetNodeDisplayText(node, path);
 
-		const command = new DeleteNode(E({mapID, nodeID: node._key}));
+		const command = new DeleteNode(E({mapID, nodeID: node.id}));
 		return (
 			<VMenuItem text={`Delete${combinedWithParentArg ? " claim" : ""}`}
 				enabled={command.Validate_Safe() == null} title={command.validateError}

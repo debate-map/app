@@ -43,7 +43,7 @@ export class ChangeNodeOwnerMap extends Command<{nodeID: string, newOwnerMapID: 
 			const permittedPublicParentIDs = argumentNodeID ? [argumentNodeID] : [];
 
 			const parents = GetNodesByIDs(CE(oldData.parents ?? {}).VKeys());
-			const parentsArePrivateInSameMap = !IsSpecialEmptyArray(parents) && newOwnerMapID && parents.every(a=>a.ownerMapID == newOwnerMapID || permittedPublicParentIDs.includes(a._key));
+			const parentsArePrivateInSameMap = !IsSpecialEmptyArray(parents) && newOwnerMapID && parents.every(a=>a.ownerMapID == newOwnerMapID || permittedPublicParentIDs.includes(a.id));
 			AssertV(parentsArePrivateInSameMap, "To make node private, all its parents must be private nodes within the same map. (to ensure we don't leave links in other maps, which would make the owner-map-id invalid)");
 		} else {
 			// if making public
@@ -57,9 +57,9 @@ export class ChangeNodeOwnerMap extends Command<{nodeID: string, newOwnerMapID: 
 
 			const permittedPrivateChildrenIDs = this.parentCommand instanceof ChangeNodeOwnerMap ? [this.parentCommand.payload.nodeID] : [];
 
-			const children = GetNodeChildren(oldData._key);
+			const children = GetNodeChildren(oldData.id);
 			AssertV(!IsSpecialEmptyArray(children), "children still loading.");
-			AssertV(children.every(a=>a.ownerMapID == null || permittedPrivateChildrenIDs.includes(a._key)), "To make node public, it must not have any private children.");
+			AssertV(children.every(a=>a.ownerMapID == null || permittedPrivateChildrenIDs.includes(a.id)), "To make node public, it must not have any private children.");
 		}
 
 		this.newData = E(oldData, {ownerMapID: newOwnerMapID ?? DEL});

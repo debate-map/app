@@ -24,22 +24,22 @@ export class MI_DeleteContainerArgument extends BaseComponent<MI_SharedProps, {}
 		const argument = GetNodeL3(argumentPath);
 		if (argument == null) return null; // wait till loaded
 		const argumentText = GetNodeDisplayText(argument, argumentPath);
-		// const forDelete_error = ForDelete_GetError(MeID(), argument, { childrenToIgnore: [node._key] });
+		// const forDelete_error = ForDelete_GetError(MeID(), argument, { childrenToIgnore: [node.id] });
 		if (!IsUserCreatorOrMod(MeID(), argument)) return null;
 
-		/* const command = new DeleteNode({ mapID, nodeID: node._key, withContainerArgument: argument._key });
+		/* const command = new DeleteNode({ mapID, nodeID: node.id, withContainerArgument: argument.id });
 		const error = command.Validate_Safe(); */
 
 		const canDeleteBaseClaim = IsUserCreatorOrMod(MeID(), node);
 		const baseClaimCommand = node.parents.VKeys().length > 1 || !canDeleteBaseClaim
-			? new UnlinkNode({mapID, parentID: argument._key, childID: node._key})
-			: new DeleteNode({mapID, nodeID: node._key});
+			? new UnlinkNode({mapID, parentID: argument.id, childID: node.id})
+			: new DeleteNode({mapID, nodeID: node.id});
 
-		const argumentCommand = new DeleteNode(E({mapID, nodeID: argument._key}));
+		const argumentCommand = new DeleteNode(E({mapID, nodeID: argument.id}));
 		if (baseClaimCommand) {
 			// temp; client isn't supposed to be able to set asSubcommand (we do it for now, since we don't have a dedicated DeleteArgument command created yet)
 			argumentCommand.parentCommand = {} as any;
-			argumentCommand.childrenToIgnore = [node._key];
+			argumentCommand.childrenToIgnore = [node.id];
 		}
 		const error = argumentCommand.Validate_Safe() ?? baseClaimCommand?.Validate_Safe();
 

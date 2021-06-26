@@ -32,9 +32,9 @@ export const GetNodeRevealTimesInSteps = StoreAccessor(s=>(steps: TimelineStep[]
 					const node = GetNode(CE(reveal.path.split("/")).Last());
 					if (node == null) continue;
 					// todo: fix that a child being null, apparently breaks the GetAsync() call in ActionProcessor.ts (for scrolling to just-revealed nodes)
-					let currentChildren = GetNodeChildren(node._key).map(child=>({node: child, path: child && `${reveal.path}/${child._key}`}));
+					let currentChildren = GetNodeChildren(node.id).map(child=>({node: child, path: child && `${reveal.path}/${child.id}`}));
 					if (CE(currentChildren).Any(a=>a.node == null)) {
-						// if (steps.length == 1 && steps[0]._key == 'clDjK76mSsGXicwd7emriw') debugger;
+						// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;
 						return emptyArray_forLoading;
 					}
 
@@ -48,9 +48,9 @@ export const GetNodeRevealTimesInSteps = StoreAccessor(s=>(steps: TimelineStep[]
 							}
 							// if there's another loop/depth after this one
 							if (childrenDepth < revealDepth) {
-								const childChildren = GetNodeChildren(child.node._key).map(child2=>({node: child2, path: child2 && `${child.path}/${child2._key}`}));
+								const childChildren = GetNodeChildren(child.node.id).map(child2=>({node: child2, path: child2 && `${child.path}/${child2.id}`}));
 								if (CE(childChildren).Any(a=>a == null)) {
-									// if (steps.length == 1 && steps[0]._key == 'clDjK76mSsGXicwd7emriw') debugger;
+									// if (steps.length == 1 && steps[0].id == 'clDjK76mSsGXicwd7emriw') debugger;
 									return emptyArray_forLoading;
 								}
 								CE(nextChildren).AddRange(childChildren);

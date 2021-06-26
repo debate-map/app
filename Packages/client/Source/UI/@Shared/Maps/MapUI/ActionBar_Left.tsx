@@ -21,7 +21,7 @@ export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBar
 		const {map, subNavBarWidth, backOnly} = this.props;
 		const userID = MeID();
 		IsUserCreatorOrMod(userID, map);
-		const timelinePanelOpen = GetTimelinePanelOpen(map._key);
+		const timelinePanelOpen = GetTimelinePanelOpen(map.id);
 
 		const Button_Final = GADDemo ? Button_GAD : Button;
 		return (
@@ -56,7 +56,7 @@ export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBar
 						{IsUserMap(map) && !GADDemo &&
 							<Button ml={5} text="Timelines" style={{height: "100%"}} onClick={()=>{
 								runInAction("ActionBar_Left.Timelines.onClick", ()=>{
-									GetMapState(map._key).timelinePanelOpen = !timelinePanelOpen;
+									GetMapState(map.id).timelinePanelOpen = !timelinePanelOpen;
 								});
 							}}/>}
 					</>}

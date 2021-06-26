@@ -37,7 +37,7 @@ export class SetNodeRating extends Command<{nodeID: string, ratingType: NodeRati
 	GetDBUpdates() {
 		const updates = {};
 		if (this.oldRating) {
-			updates[`nodeRatings/${this.oldRating._key}`] = null;
+			updates[`nodeRatings/${this.oldRating.id}`] = null;
 		}
 		if (this.newRating) {
 			updates[`nodeRatings/${this.newID}`] = this.newRating;

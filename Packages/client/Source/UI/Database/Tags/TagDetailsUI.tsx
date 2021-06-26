@@ -45,7 +45,7 @@ export class TagDetailsUI extends BaseComponentPlus({enabled: true} as Props, {}
 		return (
 			<Column style={style}>
 				{!forNew &&
-					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt} singleLine={true}/>}
+					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt} singleLine={true}/>}
 				<RowLR mt={5} mb={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Type: </Pre>
 					<Select options={TagComp_classes.map(a=>({name: a.displayName, value: a}))} enabled={enabled} style={ES({flex: 1})} value={compClass} onChange={(newCompClass: TagComp_Class)=> {
@@ -166,7 +166,7 @@ class NodeSlotRow extends BaseComponentPlus({mt: 5} as TagDetailsUI_SharedProps 
 		let displayText = `(Node not found for ID: ${nodeID})`;
 		let backgroundColor = GetNodeColor({type: MapNodeType.Category} as any).desaturate(0.5).alpha(0.8);
 		if (nodeL2) {
-			const path = nodeL2._key;
+			const path = nodeL2.id;
 			const nodeL3 = AsNodeL3(nodeL2);
 			displayText = GetNodeDisplayText(nodeL2, path);
 			backgroundColor = GetNodeColor(nodeL3).desaturate(0.5).alpha(0.8);
@@ -204,7 +204,7 @@ class NodeInArrayRow extends BaseComponentPlus({} as TagDetailsUI_SharedProps & 
 		let displayText = `(Node not found for ID: ${nodeID})`;
 		let backgroundColor = GetNodeColor({type: MapNodeType.Category} as any).desaturate(0.5).alpha(0.8);
 		if (nodeL2) {
-			const path = nodeL2._key;
+			const path = nodeL2.id;
 			const nodeL3 = AsNodeL3(nodeL2);
 			displayText = GetNodeDisplayText(nodeL2, path);
 			backgroundColor = GetNodeColor(nodeL3).desaturate(0.5).alpha(0.8);

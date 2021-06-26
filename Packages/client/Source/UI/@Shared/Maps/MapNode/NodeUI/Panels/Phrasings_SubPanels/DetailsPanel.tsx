@@ -31,7 +31,7 @@ export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {phrasing: M
 						<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
 							const phrasingUpdates = GetUpdates(phrasing, this.detailsUI.GetNewData());
 							if (phrasingUpdates.VKeys().length) {
-								await new UpdatePhrasing(E({id: phrasing._key, updates: phrasingUpdates})).Run();
+								await new UpdatePhrasing(E({id: phrasing.id, updates: phrasingUpdates})).Run();
 							}
 						}}/>
 						<Button ml="auto" text="Delete" onLeftClick={async()=>{
@@ -43,7 +43,7 @@ export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {phrasing: M
 									Text: ${phrasing.text}
 								`.AsMultiline(0),
 								onOK: async()=>{
-									await new DeletePhrasing({id: phrasing._key}).Run();
+									await new DeletePhrasing({id: phrasing.id}).Run();
 								},
 							});
 						}}/>

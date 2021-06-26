@@ -67,7 +67,7 @@ export const GetRatingAverage = StoreAccessor(s=>(nodeID: string, ratingType: No
 	return result;
 });
 export const GetRatingAverage_AtPath = StoreAccessor(s=>(node: MapNodeL3, ratingType: NodeRatingType, userID?: string, resultIfNoData = null): number=>{
-	let result = GetRatingAverage(node._key, ratingType, userID);
+	let result = GetRatingAverage(node.id, ratingType, userID);
 	if (result == null) return resultIfNoData;
 	if (ShouldRatingTypeBeReversed(node, ratingType)) {
 		result = 100 - result;
@@ -90,7 +90,7 @@ export const GetFillPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: st
 		return result;
 	}
 
-	const {argTruthScoreComposite, argWeightMultiplier, claimTruthScore} = RS_GetAllValues(node._key, path);
+	const {argTruthScoreComposite, argWeightMultiplier, claimTruthScore} = RS_GetAllValues(node.id, path);
 
 	// if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
 	let result: number;
@@ -164,7 +164,7 @@ export function TransformRatingForContext(ratingValue: number, reverseRating: bo
 	includeUser = null as string;
 }
 export function FilterRatings(ratings: Rating[], filter: RatingFilter) {
-	return ratings.filter(a=>filter == null || filter.includeUser == a._key);
+	return ratings.filter(a=>filter == null || filter.includeUser == a.id);
 }*/
 
 export function TransformRatingForContext(ratingValue: number, reverseRating: boolean) {

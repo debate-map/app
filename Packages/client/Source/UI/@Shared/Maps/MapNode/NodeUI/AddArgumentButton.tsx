@@ -69,7 +69,7 @@ export class AddArgumentButton extends BaseComponent<Props> {
 		const parent = GetParentNodeL3(path);
 
 		const polarity_short = GetPolarityShortStr(polarity);
-		const contributeInfo = GetNodeContributionInfo(node._key, MeID());
+		const contributeInfo = GetNodeContributionInfo(node.id, MeID());
 		const contributeInfo_polarity = contributeInfo[`${polarity_short}Args`] as NodeContributionInfo_ForPolarity;
 
 		return (
@@ -97,7 +97,7 @@ export class AddArgumentButton extends BaseComponent<Props> {
 					if (e.button != 0) return;
 					if (MeID() == null) return ShowSignInPopup();
 
-					if (contributeInfo_polarity.hostNodeID == node._key) {
+					if (contributeInfo_polarity.hostNodeID == node.id) {
 						let newChildPolarity = polarity;
 						//GetFinalPolarity(polarity, parent.link.form);
 						// if display polarity is different then base polarity, we need to reverse the new-child polarity
@@ -108,15 +108,15 @@ export class AddArgumentButton extends BaseComponent<Props> {
 						if (node.link.form == ClaimForm.Negation) {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}
-						ShowAddChildDialog(path, MapNodeType.Argument, newChildPolarity, MeID(), map._key);
+						ShowAddChildDialog(path, MapNodeType.Argument, newChildPolarity, MeID(), map.id);
 					} else {
 						let newChildPolarity = polarity;
 						if (contributeInfo_polarity.reversePolarities) {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}
-						ShowAddChildDialog(contributeInfo_polarity.hostNodeID, MapNodeType.Argument, newChildPolarity, MeID(), map._key);
+						ShowAddChildDialog(contributeInfo_polarity.hostNodeID, MapNodeType.Argument, newChildPolarity, MeID(), map.id);
 					}
-				}, [contributeInfo_polarity.hostNodeID, contributeInfo_polarity.reversePolarities, map._key, node._key, node.link.form, path, polarity])}/>
+				}, [contributeInfo_polarity.hostNodeID, contributeInfo_polarity.reversePolarities, map.id, node.id, node.link.form, path, polarity])}/>
 		);
 	}
 }

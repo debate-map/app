@@ -21,7 +21,7 @@ export const GetNodeTagComps = StoreAccessor(s=>(nodeID: string, unwrapComposite
 	const tags = GetNodeTags(nodeID);
 	if (tags == emptyArray_forLoading) return emptyArray_forLoading;
 	return CE(tags).SelectMany(tag=>{
-		if (tagsToIgnore?.includes(tag._key)) return [];
+		if (tagsToIgnore?.includes(tag.id)) return [];
 		const baseComp = GetTagCompOfTag(tag);
 		return unwrapCompositeTags ? GetFinalTagCompsForTag(tag) : [baseComp];
 	});

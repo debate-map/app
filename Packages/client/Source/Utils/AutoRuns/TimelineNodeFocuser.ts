@@ -23,7 +23,7 @@ autorun(()=>{
 	// const playingTimeline_currentStep = GetPlayingTimelineStep(mapID);
 	/* const timeline = GetPlayingTimeline(GetOpenMapID());
 	const nodesThatShouldBeRevealed = GetNodesRevealedInSteps(GetPlayingTimelineCurrentStepRevealNodes eSteps([step]));
-	// Log(`@Step(${step._key}) @NewlyRevealedNodes(${newlyRevealedNodes})`);
+	// Log(`@Step(${step.id}) @NewlyRevealedNodes(${newlyRevealedNodes})`);
 	if (newlyRevealedNodes.length) {
 		// stats=>Log("Requested paths:\n==========\n" + stats.requestedPaths.VKeys().join("\n") + "\n\n"));
 		ExpandToAndFocusOnNodes(action.payload.mapID, newlyRevealedNodes);
@@ -68,7 +68,7 @@ async function StartExpandingToAndFocusingOnNodesForStep(mapID: string, stepInde
 	});
 	if (step == null) return;
 	const newlyRevealedNodes = await GetAsync(()=>GetNodesRevealedInSteps([step]));
-	// Log(`@Step(${step._key}) @NewlyRevealedNodes(${newlyRevealedNodes})`);
+	// Log(`@Step(${step.id}) @NewlyRevealedNodes(${newlyRevealedNodes})`);
 	if (newlyRevealedNodes.length) {
 		// stats=>Log("Requested paths:\n==========\n" + stats.requestedPaths.VKeys().join("\n") + "\n\n"));
 		ExpandToAndFocusOnNodes(mapID, newlyRevealedNodes);

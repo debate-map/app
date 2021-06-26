@@ -56,7 +56,7 @@ export class DeleteNode extends Command<{mapID?: string, nodeID: string, withCon
 		// this.viewerIDs_main = await GetAsync(() => GetNodeViewers(nodeID));
 
 		const maps = GetMaps();
-		this.mapIDs = maps?.map(a=>a?._key);
+		this.mapIDs = maps?.map(a=>a?.id);
 		AssertV(this.mapIDs && this.mapIDs.every(a=>a != null), "mapIDs is null, or has null entries.");
 
 		// probably todo: integrate this into the command Validate functions themselves
@@ -108,7 +108,7 @@ export class DeleteNode extends Command<{mapID?: string, nodeID: string, withCon
 
 		// delete revisions
 		for (const revision of this.oldRevisions) {
-			updates[`nodeRevisions/${revision._key}`] = null;
+			updates[`nodeRevisions/${revision.id}`] = null;
 		}
 
 		// delete edit-time entry within each map (if it exists)

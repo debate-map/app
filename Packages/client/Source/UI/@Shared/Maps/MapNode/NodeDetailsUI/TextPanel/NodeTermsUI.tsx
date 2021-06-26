@@ -81,7 +81,7 @@ class TermSearchOrCreateUI extends BaseComponentPlus({} as {name: string, enable
 			<>
 				{termsWithMatchingForm.length == 0 && <Row style={{padding: 5}}>No terms found with the name/form "{name}".</Row>}
 				{termsWithMatchingForm.map((term, index)=>{
-					return <FoundTermUI key={term._key} term={term} index={index} enabled={enabled} onSelect={()=>onSelect(term._key)}/>;
+					return <FoundTermUI key={term.id} term={term} index={index} enabled={enabled} onSelect={()=>onSelect(term.id)}/>;
 				})}
 				<Row mt={5} style={{
 					//borderTop: `1px solid ${HSLA(0, 0, 1, .5)}`,
@@ -115,12 +115,12 @@ export class FoundTermUI extends BaseComponentPlus({} as {term: Term, index: num
 				/*onClick={()=>{
 				}}*/
 			>
-				<Link text={`${term._key}\n(by ${creator?.displayName ?? "n/a"})`} style={{fontSize: 13, whiteSpace: "pre"}}
+				<Link text={`${term.id}\n(by ${creator?.displayName ?? "n/a"})`} style={{fontSize: 13, whiteSpace: "pre"}}
 					onContextMenu={e=>e.nativeEvent["handled"] = true}
 					actionFunc={s=>{
 						s.main.page = "database";
 						s.main.database.subpage = "terms";
-						s.main.database.selectedTermID = term._key;
+						s.main.database.selectedTermID = term.id;
 					}}/>
 				<Text ml={5} sel style={{fontSize: 13}}>{term.definition}</Text>
 				<Button ml="auto" text="Select" enabled={enabled} style={{flexShrink: 0}} onClick={onSelect}/>

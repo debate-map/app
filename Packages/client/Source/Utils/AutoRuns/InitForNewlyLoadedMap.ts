@@ -44,10 +44,10 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 		for (const path of pathsToExpand) {
 			const nodeID = path.split("/").Last();
 			const node = await GetAsync(()=>GetNodeL2(nodeID));
-			// console.log('NodeView:', path, GetNodeView(map._key, path, false));
-			if (GetNodeView(map._key, path, false) == null) {
+			// console.log('NodeView:', path, GetNodeView(map.id, path, false));
+			if (GetNodeView(map.id, path, false) == null) {
 				// console.log('Expanding:', path);
-				ACTMapNodeExpandedSet({mapID: map._key, path, expanded: true, resetSubtree: false});
+				ACTMapNodeExpandedSet({mapID: map.id, path, expanded: true, resetSubtree: false});
 			}
 			if (node.children) {
 				newPathsToExpand.push(...node.children.VKeys().map(childID=>`${path}/${childID}`));

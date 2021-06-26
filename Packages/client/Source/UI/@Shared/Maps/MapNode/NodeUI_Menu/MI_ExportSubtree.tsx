@@ -151,10 +151,10 @@ const GetSubtree = StoreAccessor(s=>(path: string, maxDepth: number, rootPathSeg
 	const currentDepth = pathSegments.length - rootPathSegments.length;
 	if (currentDepth < maxDepth) {
 		result.childrenData = {};
-		for (const child of GetNodeChildrenL3(nodeL3._key, path)) {
+		for (const child of GetNodeChildrenL3(nodeL3.id, path)) {
 			if (child == null) continue; // not yet loaded
-			if (pathSegments.Contains(child._key)) continue; // avoid loops
-			result.childrenData[child._key] = GetSubtree(`${path}/${child._key}`, maxDepth, rootPathSegments);
+			if (pathSegments.Contains(child.id)) continue; // avoid loops
+			result.childrenData[child.id] = GetSubtree(`${path}/${child.id}`, maxDepth, rootPathSegments);
 		}
 	}
 

@@ -13,17 +13,17 @@ export const RS_CalculateTruthScore = StoreAccessor(s=>(claimID: string, calcula
 	// if we've hit a cycle back to a claim we've already started calculating for (the root claim), consider the truth-score at this lower-location to be 100%
 	if (calculationPath.length && calculationPath.indexOf(CE(calculationPath).Last()) < calculationPath.length - 1) return 1;
 
-	const childArguments = GetChildArguments(claim._key);
+	const childArguments = GetChildArguments(claim.id);
 	if (childArguments == null || childArguments.length == 0) return 1;
 
 	let runningAverage;
 	let weightTotalSoFar = 0;
 	for (const argument of childArguments) {
-		const premises = GetNodeChildrenL3(argument._key).filter(a=>a && a.type == MapNodeType.Claim);
+		const premises = GetNodeChildrenL3(argument.id).filter(a=>a && a.type == MapNodeType.Claim);
 		if (premises.length == 0) continue;
 
-		let truthScoreComposite = RS_CalculateTruthScoreComposite(argument._key, calculationPath.concat(argument._key));
-		const weight = RS_CalculateWeight(argument._key, premises.map(a=>a._key), calculationPath.concat(argument._key));
+		let truthScoreComposite = RS_CalculateTruthScoreComposite(argument.id, calculationPath.concat(argument.id));
+		const weight = RS_CalculateWeight(argument.id, premises.map(a=>a.id), calculationPath.concat(argument.id));
 		if (weight == 0) continue; // if 0 weight, this argument won't change the result at all, so skip it
 
 		if (argument.displayPolarity == Polarity.Opposing) {
@@ -47,10 +47,10 @@ export const RS_CalculateTruthScoreComposite = StoreAccessor(s=>(argumentID: str
 	const argument = GetNodeL2(argumentID);
 	Assert(argument && argument.type == MapNodeType.Argument, "RS truth-score-composite can only be calculated for an argument.");
 
-	const premises = GetNodeChildrenL3(argument._key).filter(a=>a && a.type == MapNodeType.Claim);
+	const premises = GetNodeChildrenL3(argument.id).filter(a=>a && a.type == MapNodeType.Claim);
 	if (premises.length == 0) return 0;
 
-	const truthScores = premises.map(premise=>RS_CalculateTruthScore(premise._key, calculationPath.concat(premise._key)));
+	const truthScores = premises.map(premise=>RS_CalculateTruthScore(premise.id, calculationPath.concat(premise.id)));
 	const truthScoreComposite = CombinePremiseTruthScores(truthScores, argument.current.argumentType);
 	return truthScoreComposite;
 });
@@ -67,18 +67,18 @@ export const RS_CalculateWeightMultiplier = StoreAccessor(s=>(nodeID: string, ca
 	const node = GetNodeL2(nodeID);
 	Assert(node && node.type == MapNodeType.Argument, "RS weight-multiplier can only be calculated for an argument<>claim combo -- which is specified by providing its argument node.");
 
-	const childArguments = GetChildArguments(node._key);
+	const childArguments = GetChildArguments(node.id);
 	if (childArguments == null || childArguments.length == 0) return 1;
 
 	let runningMultiplier = 1;
 	let runningDivisor = 1;
 	for (const argument of childArguments) {
-		const premises = GetNodeChildrenL3(argument._key).filter(a=>a && a.type == MapNodeType.Claim);
+		const premises = GetNodeChildrenL3(argument.id).filter(a=>a && a.type == MapNodeType.Claim);
 		if (premises.length == 0) continue;
 
-		const truthScores = premises.map(premise=>RS_CalculateTruthScore(premise._key, calculationPath.concat(premise._key)));
+		const truthScores = premises.map(premise=>RS_CalculateTruthScore(premise.id, calculationPath.concat(premise.id)));
 		const truthScoresCombined = CombinePremiseTruthScores(truthScores, argument.current.argumentType);
-		const weight = RS_CalculateWeight(argument._key, premises.map(a=>a._key), calculationPath.concat(argument._key));
+		const weight = RS_CalculateWeight(argument.id, premises.map(a=>a.id), calculationPath.concat(argument.id));
 
 		if (argument.displayPolarity == Polarity.Supporting) {
 			runningMultiplier += truthScoresCombined * weight;
@@ -92,8 +92,8 @@ export const RS_CalculateWeight = StoreAccessor(s=>(argumentID: string, premiseI
 	const argument = GetNodeL2(argumentID);
 	const premises = premiseIDs.map(id=>GetNodeL2(id));
 	if (premises.length == 0) return 0;
-	const baseWeightsProduct = premises.map(premise=>RS_CalculateBaseWeight(premise._key, calculationPath.concat(premise._key))).reduce((prev, cur)=>prev * cur);
-	const weightMultiplier = RS_CalculateWeightMultiplier(argument._key, calculationPath);
+	const baseWeightsProduct = premises.map(premise=>RS_CalculateBaseWeight(premise.id, calculationPath.concat(premise.id))).reduce((prev, cur)=>prev * cur);
+	const weightMultiplier = RS_CalculateWeightMultiplier(argument.id, calculationPath);
 	return baseWeightsProduct * weightMultiplier;
 });
 
@@ -103,16 +103,16 @@ export const RS_GetAllValues = StoreAccessor(s=>(nodeID: string, path: string, u
 	const node = GetNodeL2(nodeID);
 	const parent = GetParentNodeL3(path);
 	const argument = node.type == MapNodeType.Argument ? node : parent && parent.type == MapNodeType.Argument ? parent : null;
-	const premises = node.type == MapNodeType.Argument ? GetNodeChildrenL3(argument._key, path).filter(a=>a && a.type == MapNodeType.Claim) : [node];
+	const premises = node.type == MapNodeType.Argument ? GetNodeChildrenL3(argument.id, path).filter(a=>a && a.type == MapNodeType.Claim) : [node];
 
 	if (node.type == MapNodeType.Claim) {
-		var claimTruthScore = RS_CalculateTruthScore(node._key, calculationPath);
-		var claimBaseWeight = RS_CalculateBaseWeight(node._key, calculationPath);
+		var claimTruthScore = RS_CalculateTruthScore(node.id, calculationPath);
+		var claimBaseWeight = RS_CalculateBaseWeight(node.id, calculationPath);
 	}
 	if (argument) { // (node could instead be a claim under category)
-		var argTruthScoreComposite = RS_CalculateTruthScoreComposite(argument._key, calculationPath);
-		var argWeightMultiplier = RS_CalculateWeightMultiplier(argument._key, calculationPath);
-		var argWeight = RS_CalculateWeight(argument._key, premises.map(a=>a._key), calculationPath);
+		var argTruthScoreComposite = RS_CalculateTruthScoreComposite(argument.id, calculationPath);
+		var argWeightMultiplier = RS_CalculateWeightMultiplier(argument.id, calculationPath);
+		var argWeight = RS_CalculateWeight(argument.id, premises.map(a=>a.id), calculationPath);
 	}
 
 	if (useRSPrefix) {

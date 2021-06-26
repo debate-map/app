@@ -134,13 +134,13 @@ export const GetNodeChildren = StoreAccessor(s=>(nodeID: string, includeMirrorCh
 		}
 		let mirrorChildren = GetNodeMirrorChildren(nodeID, tagsToIgnore);
 		// filter out duplicate children
-		mirrorChildren = mirrorChildren.filter(mirrorChild=>!CE(result).Any(directChild=>directChild._key == mirrorChild._key));
+		mirrorChildren = mirrorChildren.filter(mirrorChild=>!CE(result).Any(directChild=>directChild.id == mirrorChild.id));
 		result.push(...mirrorChildren);
 	}
 	return CleanArray(result, emptyForLoading);
 });
 export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string, tagsToIgnore?: string[], emptyForLoading = true)=> {
-	let tags = GetNodeTags(nodeID).filter(tag=>tag && !tagsToIgnore?.includes(tag._key));
+	let tags = GetNodeTags(nodeID).filter(tag=>tag && !tagsToIgnore?.includes(tag.id));
 	//let tagComps = GetNodeTagComps(nodeID, true, tagsToIgnore);
 
 	let result = [] as MapNode[];
@@ -149,10 +149,10 @@ export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string, tagsToIgn
 		for (const tagComp of tagComps) {
 			if (tagComp instanceof TagComp_MirrorChildrenFromXToY && tagComp.nodeY == nodeID) {
 				//let comp = tag.mirrorChildrenFromXToY;
-				let mirrorChildrenL3 = GetNodeChildrenL3(tagComp.nodeX, undefined, undefined, (tagsToIgnore ?? []).concat(tag._key));
+				let mirrorChildrenL3 = GetNodeChildrenL3(tagComp.nodeX, undefined, undefined, (tagsToIgnore ?? []).concat(tag.id));
 				mirrorChildrenL3 = mirrorChildrenL3.filter(child=> {
 					if (child == null) return false;
-					let childTagComps = GetNodeTagComps(child._key, true, (tagsToIgnore ?? []).concat(tag._key));
+					let childTagComps = GetNodeTagComps(child.id, true, (tagsToIgnore ?? []).concat(tag.id));
 					if (childTagComps == emptyArray_forLoading) return false; // don't include child until we're sure it's allowed to be mirrored
 					const mirroringBlacklisted = CE(childTagComps).Any(comp=> {
 						if (!(comp instanceof TagComp_RestrictMirroringOfX)) return false;
@@ -166,7 +166,7 @@ export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string, tagsToIgn
 					mirrorChildren = mirrorChildren.map(child=> {
 						let newChild = child;
 						if (child.link.polarity) {
-							newChild = Clone(child).VSet({_key: child._key}) as MapNodeL3;
+							newChild = Clone(child).VSet({_key: child.id}) as MapNodeL3;
 							newChild.link.polarity = ReversePolarity(newChild.link.polarity);
 						}
 						return newChild;
@@ -180,30 +180,30 @@ export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string, tagsToIgn
 
 	// exclude any mirror-child which is an extension of (ie. wider/weaker than) another child (that is, if it's the Y of an "X is extended by Y" tag, between children) 
 	result = result.filter(child=> {
-		let childTagComps = GetNodeTagComps(child._key, true, tagsToIgnore);
+		let childTagComps = GetNodeTagComps(child.id, true, tagsToIgnore);
 		const extensionOfAnotherMirrorChild = CE(childTagComps).Any(comp=> {
 			if (!(comp instanceof TagComp_XIsExtendedByY)) return false;
-			let childIsNodeY = comp.nodeY == child._key;
+			let childIsNodeY = comp.nodeY == child.id;
 			if (!childIsNodeY) return false;
 
 			let nodeDirectChildren = GetNodeChildren(nodeID, false);
-			let otherChildIsNodeX = CE(nodeDirectChildren.concat(result)).Any(otherChild=>comp.nodeX == otherChild._key);
+			let otherChildIsNodeX = CE(nodeDirectChildren.concat(result)).Any(otherChild=>comp.nodeX == otherChild.id);
 			return otherChildIsNodeX;
 		});
 		if (extensionOfAnotherMirrorChild) return false;
 
 		if (IsSinglePremiseArgument(child)) {
-			let childPremise = GetPremiseOfSinglePremiseArgument(child._key);
+			let childPremise = GetPremiseOfSinglePremiseArgument(child.id);
 			if (childPremise) {
-				let childPremiseTagComps = GetNodeTagComps(childPremise._key, true, tagsToIgnore);
+				let childPremiseTagComps = GetNodeTagComps(childPremise.id, true, tagsToIgnore);
 				const premiseIsExtensionOfAnotherMirrorChildPremise = CE(childPremiseTagComps).Any(comp=> {
 					if (!(comp instanceof TagComp_XIsExtendedByY)) return false;
-					let childPremiseIsNodeY = comp.nodeY == childPremise._key;
+					let childPremiseIsNodeY = comp.nodeY == childPremise.id;
 					if (!childPremiseIsNodeY) return false;
 
 					let nodeDirectChildren = GetNodeChildren(nodeID, false);
 					let otherChildPremiseIsNodeX = CE(nodeDirectChildren.concat(result)).Any(otherChild=>{
-						return IsSinglePremiseArgument(otherChild) && comp.nodeX == GetPremiseOfSinglePremiseArgument(otherChild._key)?._key;
+						return IsSinglePremiseArgument(otherChild) && comp.nodeX == GetPremiseOfSinglePremiseArgument(otherChild.id)?.id;
 					});
 					return otherChildPremiseIsNodeX;
 				});
@@ -217,7 +217,7 @@ export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string, tagsToIgn
 	// filter out duplicate children
 	result = result.filter((node, index)=> {
 		let earlierNodes = result.slice(0, index);
-		return !CE(earlierNodes).Any(a=>a._key == node._key);
+		return !CE(earlierNodes).Any(a=>a.id == node.id);
 	});
 
 	return CleanArray(result, emptyForLoading);
@@ -232,7 +232,7 @@ export const GetNodeChildrenL3 = StoreAccessor(s=>(nodeID: string, path?: string
 	path = path || nodeID;
 
 	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
-	let nodeChildrenL3 = nodeChildrenL2.map(child=>(child ? GetNodeL3(`${path}/${child._key}`, tagsToIgnore) : undefined));
+	let nodeChildrenL3 = nodeChildrenL2.map(child=>(child ? GetNodeL3(`${path}/${child.id}`, tagsToIgnore) : undefined));
 	return CleanArray(nodeChildrenL3, emptyForLoading);
 });
 
@@ -262,12 +262,12 @@ export const ForNewLink_GetError = StoreAccessor(s=>(parentID: string, newChild:
 	if (parent == null) return "Parent data not found.";
 	// const parentPathIDs = SplitStringBySlash_Cached(parentPath).map(a => a.ToInt());
 	// if (map.name == "Global" && parentPathIDs.length == 1) return false; // if parent is l1(root), don't accept new children
-	if (parent._key == globalRootNodeID && !HasAdminPermissions(permissions)) return "Only admins can add children to the global-root.";
+	if (parent.id == globalRootNodeID && !HasAdminPermissions(permissions)) return "Only admins can add children to the global-root.";
 	// if in global map, parent is l2, and user is not a mod (and not node creator), don't accept new children
 	// if (parentPathIDs[0] == globalRootNodeID && parentPathIDs.length == 2 && !HasModPermissions(permissions) && parent.creator != MeID()) return false;
-	if (parent._key == newChild._key) return "Cannot link node as its own child.";
+	if (parent.id == newChild.id) return "Cannot link node as its own child.";
 
-	const isAlreadyChild = CE(parent.children || {}).VKeys().includes(`${newChild._key}`);
+	const isAlreadyChild = CE(parent.children || {}).VKeys().includes(`${newChild.id}`);
 	// if new-holder-type is not specified, consider "any" and so don't check
 	if (newHolderType !== undefined) {
 		const currentHolderType = GetHolderType(newChild.type, parent.type);
@@ -277,21 +277,21 @@ export const ForNewLink_GetError = StoreAccessor(s=>(parentID: string, newChild:
 });
 
 export const ForDelete_GetError = StoreAccessor(s=>(userID: string, node: MapNodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
-	const baseText = `Cannot delete node #${node._key}, since `;
+	const baseText = `Cannot delete node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
 	if (CE(CE(node.parents || {}).VKeys()).Except(...subcommandInfo?.parentsToIgnore ?? []).length > 1) return `${baseText}it has more than one parent. Try unlinking it instead.`;
 	if (IsRootNode(node) && !subcommandInfo?.asPartOfMapDelete) return `${baseText}it's the root-node of a map.`;
 
-	const nodeChildren = GetNodeChildrenL2(node._key);
+	const nodeChildren = GetNodeChildrenL2(node.id);
 	if (CE(nodeChildren).Any(a=>a == null)) return "[still loading children...]";
-	if (CE(nodeChildren.map(a=>a._key)).Except(...(subcommandInfo?.childrenToIgnore ?? [])).length) {
-		return `Cannot delete this node (#${node._key}) until all its children have been unlinked or deleted.`;
+	if (CE(nodeChildren.map(a=>a.id)).Except(...(subcommandInfo?.childrenToIgnore ?? [])).length) {
+		return `Cannot delete this node (#${node.id}) until all its children have been unlinked or deleted.`;
 	}
 	return null;
 });
 
 export const ForCut_GetError = StoreAccessor(s=>(userID: string, node: MapNodeL2)=>{
-	const baseText = `Cannot unlink node #${node._key}, since `;
+	const baseText = `Cannot unlink node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not its owner. (or a mod)`;
 	//if (!asPartOfCut && (node.parents || {}).VKeys().length <= 1) return `${baseText}doing so would orphan it. Try deleting it instead.`;
 	if (IsRootNode(node)) return `${baseText}it's the root-node of a map.`;

@@ -17,15 +17,15 @@ import {DeleteNodeTag} from "dm_common";
 export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {}) {
 	render() {
 		const {show, node} = this.props;
-		const tags = GetNodeTags(node._key);
+		const tags = GetNodeTags(node.id);
 		return (
 			<Column style={{position: "relative", display: show ? null : "none"}}>
 				<Row center mt={5}>
 					<Text style={{fontWeight: "bold"}}>Tags:</Text>
 					<Button ml={5} p="3px 7px" text="+" enabled={HasModPermissions(MeID())} onClick={()=>{
 						ShowAddTagDialog({
-							mirrorChildrenFromXToY: new TagComp_MirrorChildrenFromXToY({nodeY: node._key}),
-							nodes: [node._key],
+							mirrorChildrenFromXToY: new TagComp_MirrorChildrenFromXToY({nodeY: node.id}),
+							nodes: [node.id],
 						} as Partial<MapNodeTag>);
 					}}/>
 				</Row>
@@ -49,10 +49,10 @@ class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: MapNodeTag, 
 		const comp = tag.mirrorChildrenFromXToY;
 		const compClass = GetTagCompClassByTag(tag);
 
-		const tempCommand = new UpdateNodeTag({id: tag._key, updates: GetUpdates(tag, newTag)});
+		const tempCommand = new UpdateNodeTag({id: tag.id, updates: GetUpdates(tag, newTag)});
 		let tempCommand_valid = tempCommand.Validate_Safe() == null;
 		let tempCommand_error = tempCommand.validateError;
-		if (tempCommand_valid && !newTag.nodes.Contains(node._key)) {
+		if (tempCommand_valid && !newTag.nodes.Contains(node.id)) {
 			tempCommand_valid = false;
 			tempCommand_error = `
 				The selected-node cannot be detached from a tag through the Tags panel.
@@ -80,7 +80,7 @@ class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: MapNodeTag, 
 									Type: ${compClass.displayName}
 								`.AsMultiline(0),
 								onOK: async()=>{
-									await new DeleteNodeTag({id: tag._key}).Run();
+									await new DeleteNodeTag({id: tag.id}).Run();
 								},
 							});
 						}}/>

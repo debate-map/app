@@ -6,16 +6,16 @@ import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../Store
 import {ClaimForm, MapNodeL2} from "../../Store/db/nodes/@MapNode";
 import {ArgumentType} from "../../Store/db/nodes/@MapNodeRevision";
 
-export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[], userID: string): NodeRating=>{
+export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[], userID: string): Partial<NodeRating>=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading
 	if (premises.length == 0) return null;
 
 	const premiseProbabilities = premises.map(premise=>{
 		const ratingType = GetRatingTypesForNode(premise)[0].type;
-		let ratingValue = GetRatingValue(premise._key, ratingType, userID, null);
+		let ratingValue = GetRatingValue(premise.id, ratingType, userID, null);
 		// if user didn't rate this premise, just use the average rating
 		if (ratingValue == null) {
-			ratingValue = GetRatingAverage(premise._key, ratingType, null) || 0;
+			ratingValue = GetRatingAverage(premise.id, ratingType, null) || 0;
 		}
 
 		const form = GetNodeForm(premise, argument);
@@ -33,10 +33,10 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 		combinedTruthOfPremises = CE(premiseProbabilities).Max(null, true);
 	}
 
-	let relevance = GetRatingValue(argument._key, "relevance", userID, null);
+	let relevance = GetRatingValue(argument.id, "relevance", userID, null);
 	// if user didn't rate the relevance, just use the average rating
 	if (relevance == null) {
-		relevance = GetRatingAverage(argument._key, "relevance", null) || 0;
+		relevance = GetRatingAverage(argument.id, "relevance", null) || 0;
 	}
 	// let strengthForType = adjustment.Distance(50) / 50;
 	const result = combinedTruthOfPremises * (relevance / 100);
@@ -44,7 +44,7 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 
 	return {
 		//_key: userID,
-		node: argument._key,
+		node: argument.id,
 		type: "impact",
 		user: userID,
 		editedAt: null,
@@ -58,7 +58,7 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 	let premises = nodeChildren.Except(impactPremise);
 	if (premises.length == 0) return [];
 
-	let usersWhoRated = nodeChildren.SelectMany(child=>GetRatings(child._id, MapNode.GetMainRatingTypes(child)[0]).map(a=>a._key)).Distinct();
+	let usersWhoRated = nodeChildren.SelectMany(child=>GetRatings(child._id, MapNode.GetMainRatingTypes(child)[0]).map(a=>a.id)).Distinct();
 	let result = usersWhoRated.map(userID=>GetArgumentStrengthPseudoRating(nodeChildren, userID));
 	return result;
 } */
@@ -76,21 +76,21 @@ export const GetArgumentImpactPseudoRatings = StoreAccessor(s=>(argument: MapNod
 	dataUsedInCalculation.argumentType = argument.current.argumentType;
 
 	const usersWhoRatedArgOrPremise = {};
-	/* const argRatingSet = GetRatingSet(argument._key, GetMainRatingType(argument)) || emptyObj;
+	/* const argRatingSet = GetRatingSet(argument.id, GetMainRatingType(argument)) || emptyObj;
 	for (const userID of argRatingSet.VKeys()) {
 		usersWhoRatedArgOrPremise[userID] = true;
 	} */
-	for (const userID of GetRatings(argument._key, "relevance").map(a=>a.user)) {
+	for (const userID of GetRatings(argument.id, "relevance").map(a=>a.user)) {
 		usersWhoRatedArgOrPremise[userID] = true;
 	}
 	for (const premise of premises) {
-		for (const userID of GetRatings(premise._key, "truth").map(a=>a.user)) {
+		for (const userID of GetRatings(premise.id, "truth").map(a=>a.user)) {
 			usersWhoRatedArgOrPremise[userID] = true;
 		}
 	}
 
 	for (const child of premises) {
-		const childRatings = GetRatings(child._key, GetMainRatingType(child));
+		const childRatings = GetRatings(child.id, GetMainRatingType(child));
 		//for (const userID of childRatingSet.VKeys()) {
 		for (const userID of childRatings.map(a=>a.user)) {
 			usersWhoRatedArgOrPremise[userID] = true;

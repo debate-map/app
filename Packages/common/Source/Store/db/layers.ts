@@ -45,11 +45,11 @@ export const GetSubnodesInEnabledLayersEnhanced = StoreAccessor(s=>(userID: stri
 	// if some layers aren't loaded yet, return nothing
 	if (CE(layersEnabled).Any(a=>a == null)) return emptyArray_forLoading;
 
-	// const userLayerStates = GetUserLayerStatesForMap(userID, map._key) || {};
+	// const userLayerStates = GetUserLayerStatesForMap(userID, map.id) || {};
 	const userLayerStates = GetUserLayerStatesForMap(userID, mapID);
 	if (userLayerStates != null) {
 		for (const {key: layerID, value: state} of CE(userLayerStates).Pairs()) {
-			const existingEntry = layersEnabled.find(a=>a._key == layerID);
+			const existingEntry = layersEnabled.find(a=>a.id == layerID);
 			if (state == true) {
 				if (existingEntry == null) {
 					layersEnabled.push(GetLayer(layerID));
@@ -62,7 +62,7 @@ export const GetSubnodesInEnabledLayersEnhanced = StoreAccessor(s=>(userID: stri
 
 	const subnodeIDs = [];
 	for (const layer of layersEnabled) {
-		subnodeIDs.push(...GetSubnodeIDsInLayer(anchorNodeID, layer._key));
+		subnodeIDs.push(...GetSubnodeIDsInLayer(anchorNodeID, layer.id));
 	}
 	const subnodesL3 = subnodeIDs.map(id=>{
 		const child = GetNodeL2(id);

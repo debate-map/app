@@ -1,5 +1,5 @@
 import {emptyArray, GetValues_ForSchema} from "web-vcore/nm/js-vextensions";
-import {AddSchema, DB, MGLClass, Field, GetDoc, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {AddSchema, DB, MGLClass, Field, GetDoc, StoreAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink";
 import {ChangeType, Map_NodeEdit} from "./mapNodeEdits/@MapNodeEdit.js";
 
 const colorMap = {
@@ -15,4 +15,11 @@ export function GetChangeTypeOutlineColor(changeType: ChangeType) {
 
 export const GetMapNodeEdit = StoreAccessor(s=>(id: string)=>{
 	return GetDoc({}, a=>a.mapNodeEdits.get(id)) as Map_NodeEdit;
+});
+export const GetMapNodeEdits = StoreAccessor(s=>(mapID: string)=>{
+	return GetDocs({
+		params: {filter: {
+			map: {equalTo: mapID},
+		}}
+	}, a=>a.mapNodeEdits);
 });

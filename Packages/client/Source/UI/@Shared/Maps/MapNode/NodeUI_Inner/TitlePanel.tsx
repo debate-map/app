@@ -35,12 +35,12 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 	]);*/
 	/*const patterns = termsToSearchFor.SelectMany(term=>{
 		return term.forms.map(form=>{
-			return {name: `termForm`, termID: term._key, regex: new RegExp(`(^|\\W)(${_.escapeRegExp(form)})(\\W|$)`)};
+			return {name: `termForm`, termID: term.id, regex: new RegExp(`(^|\\W)(${_.escapeRegExp(form)})(\\W|$)`)};
 		});
 	});
 	return ParseSegmentsForPatterns(text, patterns);*/
 
-	//const termForm_termIDs = termsToSearchFor.SelectMany(term=>term.forms.map(a=>term._key));
+	//const termForm_termIDs = termsToSearchFor.SelectMany(term=>term.forms.map(a=>term.id));
 	let patterns = [];
 	if (termsToSearchFor.length) {
 		const termForm_strings = termsToSearchFor.SelectMany(term=>{
@@ -64,7 +64,7 @@ export class TitlePanel extends BaseComponentPlus(
 		const {node} = this.props;
 		/* const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
 		if (creatorOrMod && node.current.equation == null) { */
-		if (CanEditNode(MeID(), node._key) && node.current.equation == null) {
+		if (CanEditNode(MeID(), node.id) && node.current.equation == null) {
 			this.SetState({editing: true});
 		}
 	};
@@ -77,9 +77,9 @@ export class TitlePanel extends BaseComponentPlus(
 		const {map, path} = this.props;
 		// parent.SetState({hoverPanel: "definitions", hoverTermID: termID});
 		runInAction("TitlePanel_OnTermClick", ()=>{
-			let nodeView_final = GetNodeView(map._key, path);
+			let nodeView_final = GetNodeView(map.id, path);
 			if (nodeView_final == null) {
-				nodeView_final = GetNodeViewsAlongPath(map._key, path, true).Last();
+				nodeView_final = GetNodeViewsAlongPath(map.id, path, true).Last();
 			}
 			nodeView_final.openPanel = "definitions";
 			nodeView_final.openTermID = termID;
@@ -92,7 +92,7 @@ export class TitlePanel extends BaseComponentPlus(
 		let {newTitle, editing, applyingEdit} = this.state;
 		// UseImperativeHandle(ref, () => ({ OnDoubleClick }));
 
-		const nodeView = GetNodeView(map._key, path);
+		const nodeView = GetNodeView(map.id, path);
 		const latex = node.current.equation && node.current.equation.latex;
 		//const isSubnode = IsNodeSubnode(node);
 
@@ -132,8 +132,8 @@ export class TitlePanel extends BaseComponentPlus(
 					const term = termsToSearchFor.find(a=>a.forms.map(form=>form.toLowerCase()).Contains(termStr.toLowerCase()));
 					elements.push(
 						segment.textParts[1],
-						<TermPlaceholder key={elements.length} refText={termStr} termID={term._key}
-							onHover={hovered=>this.OnTermHover(term._key, hovered)} onClick={()=>this.OnTermClick(term._key)}/>,
+						<TermPlaceholder key={elements.length} refText={termStr} termID={term.id}
+							onHover={hovered=>this.OnTermHover(term.id, hovered)} onClick={()=>this.OnTermClick(term.id)}/>,
 						segment.textParts[3],
 					);
 				} else {
@@ -217,9 +217,9 @@ export class TitlePanel extends BaseComponentPlus(
 		if (newRevision.titles[titleKey] != newTitle) {
 			newRevision.titles[titleKey] = newTitle;
 
-			const command = new AddNodeRevision({mapID: map._key, revision: newRevision});
+			const command = new AddNodeRevision({mapID: map.id, revision: newRevision});
 			const revisionID = await command.Run();
-			runInAction("TitlePanel.ApplyEdit", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node._key, Date.now()));
+			runInAction("TitlePanel.ApplyEdit", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 			// await WaitTillPathDataIsReceiving(DBPath(`nodeRevisions/${revisionID}`));
 			// await WaitTillPathDataIsReceived(DBPath(`nodeRevisions/${revisionID}`));
 			// await command.WaitTillDBUpdatesReceived();

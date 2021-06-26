@@ -18,9 +18,9 @@ const userIDPlaceholder = "[user-id placeholder]";
 export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 	render() {
 		const {map} = this.props;
-		// const editors = GetMapEditors(map._key).filter((a) => a);
-		const editorIDs = GetMapEditorIDs(map._key);
-		const editors = GetMapEditors(map._key);
+		// const editors = GetMapEditors(map.id).filter((a) => a);
+		const editorIDs = GetMapEditorIDs(map.id);
+		const editors = GetMapEditors(map.id);
 
 		const Button_Final = GADDemo ? Button_GAD : Button;
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), map);
@@ -35,7 +35,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 						<Button ml="auto" text="Add editor" onClick={()=>{
 							const newEditors = CloneWithPrototypes(map.editorIDs || []);
 							newEditors.push(userIDPlaceholder);
-							new UpdateMapDetails({id: map._key, updates: {editorIDs: newEditors}}).Run();
+							new UpdateMapDetails({id: map.id, updates: {editorIDs: newEditors}}).Run();
 						}}/>}
 					</Row>
 					{editorIDs.map((editorID, index)=>{
@@ -46,7 +46,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 								<UserPicker value={editorID} onChange={val=> {
 									const newEditors = CloneWithPrototypes(map.editorIDs);
 									newEditors[index] = val;
-									new UpdateMapDetails({id: map._key, updates: {editorIDs: newEditors}}).Run();
+									new UpdateMapDetails({id: map.id, updates: {editorIDs: newEditors}}).Run();
 								}}>
 									<Button enabled={creatorOrMod} text={editorID != userIDPlaceholder ? `${displayName} (id: ${editorID})` : "(click to select user)"} style={{width: "100%"}}/>
 								</UserPicker>
@@ -58,7 +58,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 										onOK: ()=>{
 											const newEditors = CloneWithPrototypes(map.editorIDs);
 											newEditors.RemoveAt(index);
-											new UpdateMapDetails({id: map._key, updates: {editorIDs: newEditors}}).Run();
+											new UpdateMapDetails({id: map.id, updates: {editorIDs: newEditors}}).Run();
 										},
 									});
 								}}/>}

@@ -23,7 +23,7 @@ export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 
 		// _link: GetLinkUnderParent(node._id, GetParentNode(path)),
 		const creator = GetUser(node.creator);
-		let revisions = GetNodeRevisions(node._key);
+		let revisions = GetNodeRevisions(node.id);
 		// we want the newest ones listed first
 		revisions = revisions.OrderByDescending(a=>a.createdAt);
 
@@ -40,7 +40,7 @@ export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 				</Column>
 				<ScrollView className="selectable" style={ES({flex: 1})} contentStyle={ES({flex: 1, position: "relative"})}>
 					{revisions.map((revision, index)=>{
-						return <RevisionEntryUI key={revision._key} index={index} last={index == revisions.length - 1} revision={revision} node={node} path={path}/>;
+						return <RevisionEntryUI key={revision.id} index={index} last={index == revisions.length - 1} revision={revision} node={node} path={path}/>;
 					})}
 				</ScrollView>
 			</Column>
@@ -55,7 +55,7 @@ class RevisionEntryUI extends BaseComponentPlus({} as RevisionEntryUI_Props, {})
 		const {index, last, revision, node, path} = this.props;
 		const parent = GetParentNodeL3(path);
 		const creator = GetUser(revision.creator);
-		const link = GetLinkUnderParent(node._key, parent);
+		const link = GetLinkUnderParent(node.id, parent);
 
 		return (
 			<Row p="4px 7px" style={E(
@@ -63,14 +63,14 @@ class RevisionEntryUI extends BaseComponentPlus({} as RevisionEntryUI_Props, {})
 				last && {borderRadius: "0 0 10px 10px"},
 			)}>
 				<span style={{flex: columnWidths[0]}}>
-					<UUIDStub id={revision._key}/>
+					<UUIDStub id={revision.id}/>
 				</span>
 				<span style={{flex: columnWidths[1]}}>{Moment(revision.createdAt).format("YYYY-MM-DD HH:mm:ss")}</span>
 				<span style={{flex: columnWidths[2]}}>{creator ? creator.displayName : "n/a"}</span>
 				<span style={{flex: columnWidths[3]}}>
 					<Button text="V" title="View details" style={{margin: "-2px 0", padding: "1px 3px"}} onClick={()=>{
 						const boxController = ShowMessageBox({
-							title: `Details for revision #${revision._key}`, cancelOnOverlayClick: true,
+							title: `Details for revision #${revision.id}`, cancelOnOverlayClick: true,
 							message: ()=>{
 								return (
 									<div style={{minWidth: 500}}>

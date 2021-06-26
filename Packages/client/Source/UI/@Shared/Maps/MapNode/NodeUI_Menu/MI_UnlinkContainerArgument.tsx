@@ -26,7 +26,7 @@ export class MI_UnlinkContainerArgument extends BaseComponentPlus({} as MI_Share
 		const argumentParentPath = SlicePath(argumentPath, 1);
 		const argumentParent = GetNodeL3(argumentParentPath);
 
-		const command = new UnlinkNode({mapID, parentID: argumentParent._key, childID: argument._key});
+		const command = new UnlinkNode({mapID, parentID: argumentParent.id, childID: argument.id});
 		return (
 			<VMenuItem text="Unlink argument"
 				enabled={command.Validate_Safe() == null} title={command.validateError}

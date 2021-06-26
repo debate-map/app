@@ -40,7 +40,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 			const nodeRevisionMatch = await GetAsync(()=>GetNodeRevision(queryStr));
 			if (nodeRevisionMatch) {
 				runInAction("SearchPanel.PerformSearch_part2_nodeRevisionID", ()=>{
-					store.main.search.searchResults_nodeRevisionIDs = [nodeRevisionMatch._key];
+					store.main.search.searchResults_nodeRevisionIDs = [nodeRevisionMatch.id];
 				});
 				return;
 			}
@@ -248,7 +248,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 		if (node == null) return <Row></Row>;
 
 		const nodeL3 = AsNodeL3(node);
-		const path = `${node._key}`;
+		const path = `${node.id}`;
 
 		const backgroundColor = GetNodeColor(nodeL3).desaturate(0.5).alpha(0.8);
 		const nodeTypeInfo = MapNodeType_Info.for[node.type];
@@ -268,7 +268,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 					<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
 					<span style={{flex: columnWidths[2]}}>{moment(node.createdAt).format("YYYY-MM-DD")}</span>
 					{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
-					<NodeUI_Menu_Stub {...{node: nodeL3, path: `${node._key}`, inList: true}}/>
+					<NodeUI_Menu_Stub {...{node: nodeL3, path: `${node.id}`, inList: true}}/>
 				</Row>
 				{findNode_node === nodeID &&
 					<Row>
@@ -302,7 +302,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 											store.main.page = "global";
 										} else {
 											store.main.page = "debates";
-											store.main.debates.selectedMapID = mapRootNode_map._key;
+											store.main.debates.selectedMapID = mapRootNode_map.id;
 										}
 									});
 								}

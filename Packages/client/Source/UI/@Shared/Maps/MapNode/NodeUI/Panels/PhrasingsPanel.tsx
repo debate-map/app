@@ -14,11 +14,11 @@ export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, node
 	render() {
 		const {show, node, path} = this.props;
 		const {selectedPhrasingID} = this.state;
-		let phrasings = GetNodePhrasings(node._key);
+		let phrasings = GetNodePhrasings(node.id);
 
 		// add one fake "precise" phrasing, matching the node's current text (temp)
 		phrasings = phrasings.slice();
-		phrasings.push(new MapNodePhrasing({_key: Phrasing_FakeID, node: node._key, type: MapNodePhrasingType.Precise, text: GetNodeDisplayText(node)}));
+		phrasings.push(new MapNodePhrasing({_key: Phrasing_FakeID, node: node.id, type: MapNodePhrasingType.Precise, text: GetNodeDisplayText(node)}));
 
 		return (
 			<Column style={{position: "relative", display: show ? null : "none"}}>
@@ -27,12 +27,12 @@ export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, node
 					<InfoButton ml={5} text={'Precise phrasings are variants of the node\'s title that are meant to "compete" as the node\'s main display text. They should strive to be concise, of high quality, and neutral (ie. avoiding rhetoric).'}/>
 					<Button ml="auto" text="Add phrasing" enabled={CanGetBasicPermissions(MeID()) && false} title="Add precise phrasing-variant for this node (disabled at the moment)" onClick={()=>{
 						if (MeID() == null) return ShowSignInPopup();
-						ShowAddPhrasingDialog(node._key, MapNodePhrasingType.Precise);
+						ShowAddPhrasingDialog(node.id, MapNodePhrasingType.Precise);
 					}}/>
 				</Row>
 				<Column ptb={5}>
 					{phrasings.filter(a=>a.type == MapNodePhrasingType.Precise).map((phrasing, index)=>{
-						return <PhrasingRow key={index} phrasing={phrasing} index={index} selected={phrasing._key == selectedPhrasingID} toggleSelected={()=>this.TogglePhrasingSelected(phrasing._key)}/>;
+						return <PhrasingRow key={index} phrasing={phrasing} index={index} selected={phrasing.id == selectedPhrasingID} toggleSelected={()=>this.TogglePhrasingSelected(phrasing.id)}/>;
 					})}
 				</Column>
 				<Row center>
@@ -40,14 +40,14 @@ export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, node
 					<InfoButton ml={5} text="Natural phrasings are variants of the node's title that you'd hear in everyday life. These aren't used as the main display text, but can help people better understand the meaning."/>
 					<Button ml="auto" text="Add phrasing" enabled={CanGetBasicPermissions(MeID())} title="Add natural phrasing-variant for this node" onClick={()=>{
 						if (MeID() == null) return ShowSignInPopup();
-						ShowAddPhrasingDialog(node._key, MapNodePhrasingType.Natural);
+						ShowAddPhrasingDialog(node.id, MapNodePhrasingType.Natural);
 					}}/>
 				</Row>
 				<Column ptb={5}>
 					{phrasings.filter(a=>a.type == MapNodePhrasingType.Natural).length == 0 &&
 						<Pre style={{color: "rgba(255,255,255,.5)"}}>No natural phrasings submitted yet.</Pre>}
 					{phrasings.filter(a=>a.type == MapNodePhrasingType.Natural).map((phrasing, index)=>{
-						return <PhrasingRow key={index} phrasing={phrasing} index={index} selected={phrasing._key == selectedPhrasingID} toggleSelected={()=>this.TogglePhrasingSelected(phrasing._key)}/>;
+						return <PhrasingRow key={index} phrasing={phrasing} index={index} selected={phrasing.id == selectedPhrasingID} toggleSelected={()=>this.TogglePhrasingSelected(phrasing.id)}/>;
 					})}
 				</Column>
 			</Column>
@@ -65,7 +65,7 @@ export class PhrasingRow extends BaseComponentPlus({} as {phrasing: MapNodePhras
 		return (
 			<Row mt={index == 0 ? 0 : 3} style={{position: "relative", backgroundColor: `rgba(255,255,255,${selected ? 0.3 : 0.15})`, borderRadius: 5, padding: "2px 5px", cursor: "pointer"}} onClick={event=>{
 				if (event.defaultPrevented) return;
-				if (phrasing._key == Phrasing_FakeID) return;
+				if (phrasing.id == Phrasing_FakeID) return;
 				toggleSelected();
 				// event.preventDefault();
 				// return false;

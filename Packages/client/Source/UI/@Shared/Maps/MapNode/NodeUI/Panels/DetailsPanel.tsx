@@ -24,7 +24,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 		const {dataError} = this.state;
 
 		const parentNode = GetParentNodeL3(path);
-		const link = GetLinkUnderParent(node._key, parentNode);
+		const link = GetLinkUnderParent(node.id, parentNode);
 		const creator = GetUser(node.creator);
 
 		//const isSubnode = IsNodeSubnode(node);
@@ -33,7 +33,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 		if (/*!isSubnode &&*/ path.includes("/") && parentNode == null) return null;
 
 		// const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
-		const canEdit = CanEditNode(MeID(), node._key);
+		const canEdit = CanEditNode(MeID(), node.id);
 		return (
 			<Column style={{position: "relative", display: show ? null : "none"}}>
 				<NodeDetailsUI ref={c=>this.detailsUI = c}
@@ -52,13 +52,13 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 							if (link) {
 								const linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
 								if (linkUpdates.VKeys().length) {
-									await new UpdateLink(E({linkParentID: GetParentNodeID(path), linkChildID: node._key, linkUpdates})).Run();
+									await new UpdateLink(E({linkParentID: GetParentNodeID(path), linkChildID: node.id, linkUpdates})).Run();
 								}
 							}
 
 							const newRevision = this.detailsUI.GetNewRevisionData();
-							const revisionID = await new AddNodeRevision({mapID: map._key, revision: newRevision}).Run();
-							runInAction("DetailsPanel.save.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node._key, Date.now()));
+							const revisionID = await new AddNodeRevision({mapID: map.id, revision: newRevision}).Run();
+							runInAction("DetailsPanel.save.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 
 							if (IsPremiseOfSinglePremiseArgument(node, parentNode)) {
 								const argumentNode = await GetAsync(()=>GetParentNodeL3(path));
@@ -70,8 +70,8 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 									if (!_.isEqual(argumentNodePermissions, nodePermissions)) {
 										const newArgumentRevision = Clone(argumentNode.current);
 										newArgumentRevision.VSet(nodePermissions);
-										const newArgumentRevisionID = await new AddNodeRevision({mapID: map._key, revision: newArgumentRevision}).Run();
-										runInAction("DetailsPanel.save.onClick_part2", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentNode._key, Date.now()));
+										const newArgumentRevisionID = await new AddNodeRevision({mapID: map.id, revision: newArgumentRevision}).Run();
+										runInAction("DetailsPanel.save.onClick_part2", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentNode.id, Date.now()));
 									}
 								}
 							}

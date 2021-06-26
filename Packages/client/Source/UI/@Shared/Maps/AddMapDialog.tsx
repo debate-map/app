@@ -12,7 +12,7 @@ export function ShowAddMapDialog(userID: string) {
 		name: "",
 		type,
 		creator: MeID(),
-		editorIDs: type == MapType.Private ? [MeID()] : OMIT as any,
+		editors: type == MapType.Private ? [MeID()] : OMIT as any,
 	});
 
 	let error = null;

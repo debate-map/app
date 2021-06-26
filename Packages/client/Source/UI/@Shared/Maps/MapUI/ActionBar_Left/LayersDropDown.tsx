@@ -65,7 +65,7 @@ class LayersDropDown extends BaseComponentPlus({} as LayersDropDownProps, {}) {
 							</Column>
 							<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1, position: "relative"})}>
 								{layers.length == 0 && <div style={{textAlign: "center", fontSize: 18}}>Loading...</div>}
-								{layers.map((layer, index)=><LayerUI key={layer._key} index={index} last={index == layers.length - 1} map={map} layer={layer}/>)}
+								{layers.map((layer, index)=><LayerUI key={layer.id} index={index} last={index == layers.length - 1} map={map} layer={layer}/>)}
 							</ScrollView>
 						</Column>
 						{false &&
@@ -84,7 +84,7 @@ class LayerUI extends BaseComponentPlus({} as {index: number, last: boolean, map
 		const userID = MeID();
 		// const creator = GetUser({if: layer}, layer.creator); // todo
 		const creator = GetUser(layer ? layer.creator : null);
-		const userLayerState = GetUserLayerStateForMap(userID, map._key, layer._key);
+		const userLayerState = GetUserLayerStateForMap(userID, map.id, layer.id);
 		const creatorOrMod = IsUserCreatorOrMod(userID, map);
 		const deleteLayerError = ForDeleteLayer_GetError(userID, layer);
 		return (
@@ -95,22 +95,22 @@ class LayerUI extends BaseComponentPlus({} as {index: number, last: boolean, map
 				<Row>
 					<span style={{flex: columnWidths[0]}}>
 						{layer.name}
-						{creator && creator._key == MeID() &&
+						{creator && creator.id == MeID() &&
 							<Button text="X" ml={5} style={{padding: "3px 5px"}} enabled={deleteLayerError == null} title={deleteLayerError}
 								onClick={()=>{
 									ShowMessageBox({
 										title: `Delete "${layer.name}"`, cancelButton: true,
 										message: `Delete the layer "${layer.name}"?`,
 										onOK: async()=>{
-											new DeleteLayer({layerID: layer._key}).Run();
+											new DeleteLayer({layerID: layer.id}).Run();
 										},
 									});
 								}}/>}
 					</span>
 					<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
 					<span style={{flex: columnWidths[2]}}>
-						<CheckBox enabled={creatorOrMod} value={GetMapLayerIDs(map._key).Contains(layer._key)} onChange={val=>{
-							new SetLayerAttachedToMap({mapID: map._key, layerID: layer._key, attached: val}).Run();
+						<CheckBox enabled={creatorOrMod} value={GetMapLayerIDs(map.id).Contains(layer.id)} onChange={val=>{
+							new SetLayerAttachedToMap({mapID: map.id, layerID: layer.id, attached: val}).Run();
 						}}/>
 					</span>
 					<span style={{flex: columnWidths[3]}}>
@@ -119,7 +119,7 @@ class LayerUI extends BaseComponentPlus({} as {index: number, last: boolean, map
 							const newState =								userLayerState == null ? true
 								: userLayerState == true ? false
 								: null;
-							new SetMapLayerStateForUser({userID: MeID(), mapID: map._key, layerID: layer._key, state: newState}).Run();
+							new SetMapLayerStateForUser({userID: MeID(), mapID: map.id, layerID: layer.id, state: newState}).Run();
 						}}/>
 					</span>
 				</Row>

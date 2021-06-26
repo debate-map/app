@@ -20,11 +20,11 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, 
 	render() {
 		const {profileUser} = this.props;
 		if (profileUser == null) return <PageContainer>User does not exist.</PageContainer>;
-		const profileUser_p = profileUser._key == MeID() ? GetUser_Private(profileUser._key) : null;
+		const profileUser_p = profileUser.id == MeID() ? GetUser_Private(profileUser.id) : null;
 		//if (profileUser_p == null) return <PageContainer>Loading...</PageContainer>;
 
 		const userID = MeID();
-		const profileUserPermissionGroups = GetUserPermissionGroups(profileUser ? profileUser._key : null);
+		const profileUserPermissionGroups = GetUserPermissionGroups(profileUser ? profileUser.id : null);
 		const currentUser = GetUser(userID);
 
 		return (
@@ -33,18 +33,18 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, 
 					<Text>Username: {profileUser.displayName}</Text>
 					{profileUser == currentUser &&
 						<Button ml={5} text="Change" onClick={()=>{
-							ShowChangeDisplayNameDialog(currentUser._key, currentUser.displayName);
+							ShowChangeDisplayNameDialog(currentUser.id, currentUser.displayName);
 						}}/>}
 				</Row>
 				<Row mt={3}>
 					<Pre>Permissions: </Pre>
 					{["basic", "verified", "mod", "admin"].map((group, index)=>{
 						const admin = userID && GetUserPermissionGroups(MeID()).admin;
-						const changingOwnAdminState = currentUser && profileUser._key == currentUser._key && group == "admin";
+						const changingOwnAdminState = currentUser && profileUser.id == currentUser.id && group == "admin";
 						return (
 							<CheckBox key={index} mr={index < 3 ? 5 : 0} text={PropNameToTitle(group)} value={(profileUserPermissionGroups || {})[group]} enabled={admin && !changingOwnAdminState} onChange={val=>{
 								const newPermissionGroups = E(profileUserPermissionGroups, {[group]: val});
-								new SetUserData({id: profileUser._key, updates: {permissionGroups: newPermissionGroups}}).Run();
+								new SetUserData({id: profileUser.id, updates: {permissionGroups: newPermissionGroups}}).Run();
 							}}/>
 						);
 					})}
@@ -71,7 +71,7 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, 
 												selected && {border: "1px solid rgba(255,255,255,.7)"},
 											)}
 											onClick={()=>{
-												new SetUserData_Private({id: profileUser._key, updates: {backgroundID: id}}).Run();
+												new SetUserData_Private({id: profileUser.id, updates: {backgroundID: id}}).Run();
 											}}>
 										</Div>
 									);
@@ -80,30 +80,30 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, 
 						</ScrollView>
 						<Row mt={5}>
 							<CheckBox text="Custom background" value={profileUser_p.backgroundCustom_enabled} onChange={val=>{
-								new SetUserData_Private({id: profileUser._key, updates: {backgroundCustom_enabled: val}}).Run();
+								new SetUserData_Private({id: profileUser.id, updates: {backgroundCustom_enabled: val}}).Run();
 							}}/>
 						</Row>
 						<Row mt={5}>
 							<Pre>Color: </Pre>
 							<ColorPickerBox color={profileUser_p.backgroundCustom_color || "#FFFFFF"} onChange={val=>{
-								new SetUserData_Private({id: profileUser._key, updates: {backgroundCustom_color: val}}).Run();
+								new SetUserData_Private({id: profileUser.id, updates: {backgroundCustom_color: val}}).Run();
 							}}/>
 							<Button ml={5} text="Clear" onClick={()=>{
-								new SetUserData_Private({id: profileUser._key, updates: {backgroundCustom_color: null}}).Run();
+								new SetUserData_Private({id: profileUser.id, updates: {backgroundCustom_color: null}}).Run();
 							}}/>
 						</Row>
 						<Row mt={5}>
 							<Pre>URL: </Pre>
 							<TextInput style={ES({flex: 1})}
 								value={profileUser_p.backgroundCustom_url} onChange={val=>{
-									new SetUserData_Private({id: profileUser._key, updates: {backgroundCustom_url: val}}).Run();
+									new SetUserData_Private({id: profileUser.id, updates: {backgroundCustom_url: val}}).Run();
 								}}/>
 						</Row>
 						<Row mt={5}>
 							<Pre>Anchor: </Pre>
 							<Select options={[{name: "top", value: "center top"}, {name: "center", value: "center center"}, {name: "bottom", value: "center bottom"}]}
 								value={profileUser_p.backgroundCustom_position || "center center"} onChange={val=>{
-									new SetUserData_Private({id: profileUser._key, updates: {backgroundCustom_position: val}}).Run();
+									new SetUserData_Private({id: profileUser.id, updates: {backgroundCustom_position: val}}).Run();
 								}}/>
 						</Row>
 					</Fragment>}

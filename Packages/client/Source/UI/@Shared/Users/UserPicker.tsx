@@ -29,11 +29,11 @@ export class UserPicker extends BaseComponentPlus({} as {value: string, onChange
 											index == users.length - 1 && {borderRadius: "0 0 10px 10px"},
 										)}
 										onClick={()=>{
-											onChange(user._key);
+											onChange(user.id);
 											this.dropDown.Hide();
 										}}>
 										<Row center>
-											<Pre>{user.displayName}</Pre><span style={{marginLeft: 5, fontSize: 11}}>(id: {user._key})</span>
+											<Pre>{user.displayName}</Pre><span style={{marginLeft: 5, fontSize: 11}}>(id: {user.id})</span>
 										</Row>
 									</Column>
 								))}

@@ -37,7 +37,7 @@ export function StoreTempData(data: Object) {
 			return newReveal;
 		});
 		return {
-			[`timelineSteps/${step._key}/.nodeReveals`]: newNodeReveals,
+			[`timelineSteps/${step.id}/.nodeReveals`]: newNodeReveals,
 		};
 	});
 	let mergedDBUpdates = {};
@@ -81,9 +81,9 @@ export async function GetDBUpdatesFor_DeleteNodeSubtree(nodeID: string, maxDelet
 	const images = await GetAsync(()=>GetDocs({}, (a: any)=>a.images));
 
 	const dbUpdates_revs = MergeDBUpdates_Multi(...revsWithImg.map(rev=> {
-		const img = images.find(a=>a._key == rev["image"].id);
+		const img = images.find(a=>a.id == rev["image"].id);
 		return {
-			[`nodeRevisions/${rev._key}`]: E(rev, {
+			[`nodeRevisions/${rev.id}`]: E(rev, {
 				image: DEL,
 				media: E(rev["image"], {previewWidth: img ? OmitIfNull(img.previewWidth) : OMIT, sourceChains: img ? img.sourceChains : OMIT, captured: img && img.type == 20 ? true : OMIT}),
 			}),
@@ -92,8 +92,8 @@ export async function GetDBUpdatesFor_DeleteNodeSubtree(nodeID: string, maxDelet
 
 	const dbUpdates_images = MergeDBUpdates_Multi(...images.map(img=> {
 		return {
-			[`images/${img._key}`]: null,
-			[`medias/${img._key}`]: E(img, {
+			[`images/${img.id}`]: null,
+			[`medias/${img.id}`]: E(img, {
 				previewWidth: DEL,
 				sourceChains: DEL,
 				type: 10,
@@ -111,7 +111,7 @@ export async function GetDBUpdatesFor_AddMapVisibilityField() {
 	const maps = await GetAsync(()=>GetMaps());
 	let dbUpdates = {};
 	for (const map of maps) {
-		const command = new UpdateMapDetails({id: map._key, updates: {visibility: MapVisibility.Visible}});
+		const command = new UpdateMapDetails({id: map.id, updates: {visibility: MapVisibility.Visible}});
 		await command.Validate_Async();
 		dbUpdates = MergeDBUpdates(dbUpdates, command.GetDBUpdates());
 	}

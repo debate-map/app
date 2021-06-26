@@ -103,20 +103,20 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 								<>
 									<CheckBox text="Video time: " value={step.videoTime != null} enabled={creatorOrMod} onChange={val=>{
 										if (val) {
-											new UpdateTimelineStep({stepID: step._key, stepUpdates: {videoTime: 0}}).Run();
+											new UpdateTimelineStep({stepID: step.id, stepUpdates: {videoTime: 0}}).Run();
 										} else {
-											new UpdateTimelineStep({stepID: step._key, stepUpdates: {videoTime: null}}).Run();
+											new UpdateTimelineStep({stepID: step.id, stepUpdates: {videoTime: null}}).Run();
 										}
 									}}/>
 									<TimeSpanInput mr={5} largeUnit="minute" smallUnit="second" style={{width: 60}}
 										enabled={creatorOrMod && step.videoTime != null}
-										value={step.videoTime} onChange={val=>new UpdateTimelineStep({stepID: step._key, stepUpdates: {videoTime: val}}).Run()}/>
+										value={step.videoTime} onChange={val=>new UpdateTimelineStep({stepID: step.id, stepUpdates: {videoTime: val}}).Run()}/>
 								</>}
 							{/* <Pre>Speaker: </Pre>
 							<Select value={} onChange={val=> {}}/> */}
 							<Pre>Position: </Pre>
 							<Select options={positionOptions} value={step.groupID} enabled={creatorOrMod} onChange={val=>{
-								new UpdateTimelineStep({stepID: step._key, stepUpdates: {groupID: val}}).Run();
+								new UpdateTimelineStep({stepID: step.id, stepUpdates: {groupID: val}}).Run();
 							}}/>
 							<Button ml={5} text="X" enabled={creatorOrMod} onClick={()=>{
 								ShowMessageBox({
@@ -127,7 +127,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 										${step.message}
 									`.AsMultiline(0),
 									onOK: ()=>{
-										new DeleteTimelineStep({stepID: step._key}).Run();
+										new DeleteTimelineStep({stepID: step.id}).Run();
 									},
 								});
 							}}/>
@@ -138,7 +138,7 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 								onClick={e=>{
 									if (e.button != 0) return;
 									const newTimelineStep = Clone(step);
-									new AddTimelineStep({timelineID: timeline._key, step: newTimelineStep, stepIndex: index + 1}).Run();
+									new AddTimelineStep({timelineID: timeline.id, step: newTimelineStep, stepIndex: index + 1}).Run();
 								}}/>
 						</VMenuStub>}
 					</Row>
@@ -146,9 +146,9 @@ export class StepEditorUI extends BaseComponentPlus({} as StepEditorUIProps, {pl
 					<TextArea /* {...{ useCacheForDOMMeasurements: true } as any} */ autoSize={true} style={{background: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.7)", padding: 5, outline: "none"}}
 						value={step.message} enabled={creatorOrMod}
 						onChange={val=>{
-							new UpdateTimelineStep({stepID: step._key, stepUpdates: {message: val}}).Run();
+							new UpdateTimelineStep({stepID: step.id, stepUpdates: {message: val}}).Run();
 						}}/>
-					<Droppable type="MapNode" droppableId={ToJSON(new DroppableInfo({type: "TimelineStepNodeRevealList", stepID: step._key}))} isDropDisabled={!creatorOrMod}>
+					<Droppable type="MapNode" droppableId={ToJSON(new DroppableInfo({type: "TimelineStepNodeRevealList", stepID: step.id}))} isDropDisabled={!creatorOrMod}>
 						{(provided: DroppableProvided, snapshot: DroppableStateSnapshot)=>{
 							const dragIsOverDropArea = provided.placeholder.props["on"] != null;
 							if (dragIsOverDropArea) {
@@ -251,7 +251,7 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 		// path is valid if every node in path, has the previous node as a parent
 		const pathValid = mapNodes.every((node, index)=>{
 			const parent = mapNodes[index - 1];
-			return index == 0 || (node && parent && parent.children[node._key] != null);
+			return index == 0 || (node && parent && parent.children[node.id] != null);
 		});
 
 		let displayText = node && nodeL3 ? GetNodeDisplayText(node, nodeReveal.path) : `(Node no longer exists: ${GetNodeID(nodeReveal.path)})`;
@@ -276,11 +276,11 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 				>
 					<span>{!nodeReveal.show && !nodeReveal.hide ? "[disabled] " : ""}{nodeReveal.hide ? "[hide] " : ""}{displayText}</span>
 					{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
-					{/* <NodeUI_Menu_Stub {...{ node: nodeL3, path: `${node._key}`, inList: true }}/> */}
+					{/* <NodeUI_Menu_Stub {...{ node: nodeL3, path: `${node.id}`, inList: true }}/> */}
 					{editing &&
 					<Button ml="auto" text="X" style={{margin: -3, padding: "3px 10px"}} onClick={()=>{
 						const newNodeReveals = step.nodeReveals.Except(nodeReveal);
-						new UpdateTimelineStep({stepID: step._key, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
+						new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
 					}}/>}
 				</Row>
 				{detailsOpen &&
@@ -290,10 +290,10 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 						<UUIDPathStub path={path}/>
 						{!pathValid && editing &&
 						<Button ml="auto" text="Fix path" onClick={async()=>{
-							const newPath = await GetAsync(()=>SearchUpFromNodeForNodeMatchingX(node._key, id=>id == map.rootNode));
+							const newPath = await GetAsync(()=>SearchUpFromNodeForNodeMatchingX(node.id, id=>id == map.rootNode));
 							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 							newNodeReveals[index].path = newPath;
-							new UpdateTimelineStep({stepID: step._key, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
+							new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
 						}}/>}
 					</Row>
 					{editing &&
@@ -302,7 +302,7 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 							newNodeReveals[index].show = val;
 							if (val) newNodeReveals[index].hide = false;
-							new UpdateTimelineStep({stepID: step._key, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
+							new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
 						}}/>
 						{nodeReveal.show &&
 						<>
@@ -310,7 +310,7 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 							<Spinner ml={5} min={0} max={50} value={nodeReveal.show_revealDepth} onChange={val=>{
 								const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 								newNodeReveals[index].VSet("show_revealDepth", val > 0 ? val : DEL);
-								new UpdateTimelineStep({stepID: step._key, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
+								new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
 							}}/>
 						</>}
 					</Row>}
@@ -320,7 +320,7 @@ export class NodeRevealUI extends BaseComponentPlus({} as {map: Map, step: Timel
 							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 							newNodeReveals[index].hide = val;
 							if (val) newNodeReveals[index].show = false;
-							new UpdateTimelineStep({stepID: step._key, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
+							new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
 						}}/>
 					</Row>}
 				</Column>}

@@ -53,7 +53,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 		const Button_Final = GADDemo ? Button_GAD : Button;
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), map);
 
-		const setMapFeaturedCommand = new SetMapFeatured({id: map._key, featured: !map.featured});
+		const setMapFeaturedCommand = new SetMapFeatured({id: map.id, featured: !map.featured});
 
 		return (
 			<DropDown>
@@ -68,7 +68,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 						<Row>
 							<Button mt={5} text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
 								const mapUpdates = GetUpdates(map, this.detailsUI.GetNewData()).Excluding("layers", "timelines");
-								await new UpdateMapDetails({id: map._key, updates: mapUpdates}).Run();
+								await new UpdateMapDetails({id: map.id, updates: mapUpdates}).Run();
 							}}/>
 						</Row>}
 					{creatorOrMod &&
@@ -94,7 +94,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 											* You cannot directly undo the operation. (though if the previous node settings were all the same, you could rerun this tool)
 										`.AsMultiline(0),
 										onOK: async()=>{
-											const runInfo = await ApplyNodeDefaults(map.rootNode, map.nodeDefaults, true, map._key);
+											const runInfo = await ApplyNodeDefaults(map.rootNode, map.nodeDefaults, true, map.id);
 											ShowMessageBox({title: "Done", message: `
 												Finished applying the node-defaults.
 
@@ -117,7 +117,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 										title: `Delete "${map.name}"`, cancelButton: true,
 										message: `Delete the map "${map.name}"?`,
 										onOK: async()=>{
-											await new DeleteMap({mapID: map._key}).Run();
+											await new DeleteMap({mapID: map.id}).Run();
 											runInAction("DeleteMap.onDone", ()=>store.main.debates.selectedMapID = null);
 										},
 									});

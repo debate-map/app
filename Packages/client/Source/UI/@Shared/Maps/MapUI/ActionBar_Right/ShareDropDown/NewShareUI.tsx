@@ -76,7 +76,7 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 				</Row>}
 				<Row mt={5}>
 					<Button text="Update current" enabled={currentShare != null && newShare_updatesFromCurrent.VKeys().length > 0} onClick={()=>{
-						new UpdateShare({id: currentShare._key, updates: newShare_updatesFromCurrent}).Run();
+						new UpdateShare({id: currentShare.id, updates: newShare_updatesFromCurrent}).Run();
 					}}/>
 					<Button ml={5} text="Create new share" onClick={()=>{
 						const share = new Share(newShareData);
@@ -86,12 +86,12 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 				</Row>
 
 				<Row mt={15}>
-					<Text>Current share ID: {currentShare?._key ?? "none"}</Text>
+					<Text>Current share ID: {currentShare?.id ?? "none"}</Text>
 				</Row>
 				<RowLR mt={5} splitAt={80}>
 					<Text>Name:</Text>
 					<TextInput enabled={currentShare != null} style={{flex: 1}} value={currentShare?.name ?? ""} onChange={val=>{
-						new UpdateShare({id: currentShare._key, updates: {name: val}}).Run();
+						new UpdateShare({id: currentShare.id, updates: {name: val}}).Run();
 					}}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={80}>

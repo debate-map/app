@@ -44,8 +44,8 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const parent = GetParentNodeL3(path);
 		const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
 		if (map) {
-			const sinceTime = GetTimeFromWhichToShowChangedNodes(map._key);
-			const pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._key, sinceTime);
+			const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
+			const pathsToChangedNodes = GetPathsToNodesChangedSinceX(map.id, sinceTime);
 			var pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == outerPath || a.startsWith(`${outerPath}/`)); // also include self, for this
 		}
 
@@ -56,11 +56,11 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const userID = MeID();
 		const permissions = GetUserPermissionGroups(userID);
 		// nodeChildren: GetNodeChildrenL3(node, path),
-		const nodeChildren = GetNodeChildrenL3(node._key, path);
+		const nodeChildren = GetNodeChildrenL3(node.id, path);
 		const combinedWithParentArg = IsPremiseOfSinglePremiseArgument(node, parent);
 		const copiedNode_asCut = store.main.maps.copiedNodePath_asCut;
 
-		const mapID = map ? map._key : null;
+		const mapID = map ? map.id : null;
 		// let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
 		let validChildTypes = GetValidNewChildTypes(node, holderType, permissions);
 		const componentBox = holderType != null;
@@ -75,7 +75,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
 		return (
 			<div>
-				{CanContributeToNode(userID, node._key) && !inList && validChildTypes.map(childType=>{
+				{CanContributeToNode(userID, node.id) && !inList && validChildTypes.map(childType=>{
 					const childTypeInfo = MapNodeType_Info.for[childType];
 					// let displayName = GetMapNodeTypeDisplayName(childType, node, form);
 					const polarities = childType == MapNodeType.Argument ? [Polarity.Supporting, Polarity.Opposing] : [null];
@@ -106,7 +106,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						onClick={async e=>{
 							if (e.button != 0) return;
 
-							await new SetNodeIsMultiPremiseArgument({nodeID: parent._key, multiPremiseArgument: true}).Run();
+							await new SetNodeIsMultiPremiseArgument({nodeID: parent.id, multiPremiseArgument: true}).Run();
 						}}/>}
 				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)
 					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && !componentBox &&
@@ -114,7 +114,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						onClick={async e=>{
 							if (e.button !== 0) return;
 
-							await new SetNodeIsMultiPremiseArgument({nodeID: node._key, multiPremiseArgument: false}).Run();
+							await new SetNodeIsMultiPremiseArgument({nodeID: node.id, multiPremiseArgument: false}).Run();
 						}}/>}
 				{pathsToChangedInSubtree && pathsToChangedInSubtree.length > 0 && !componentBox &&
 					<VMenuItem text="Mark subtree as viewed" style={styles.vMenuItem}
@@ -129,7 +129,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						onClick={e=>{
 							runInAction("NodeUIMenu.FindInCurrentMap", ()=>{
 								store.main.search.findNode_state = "activating";
-								store.main.search.findNode_node = node._key;
+								store.main.search.findNode_node = node.id;
 								store.main.search.findNode_resultPaths = [];
 							});
 						}}/>}

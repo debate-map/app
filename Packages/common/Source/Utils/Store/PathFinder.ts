@@ -3,13 +3,13 @@ import {GetNode} from "../../Store/db/nodes";
 import {CE} from "web-vcore/nm/js-vextensions";
 
 export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc: (nodeID: string)=>boolean, nodeIDsToIgnore?: string[]): string {
-	// return CachedTransform_WithStore('GetShortestPathFromRootToNode', [rootNodeID, node._key], {}, () => {
+	// return CachedTransform_WithStore('GetShortestPathFromRootToNode', [rootNodeID, node.id], {}, () => {
 	const startNode = GetNode(startNodeID); // call this so cache system knows to recalculate when node-data changes
 	if (startNode == null) return null;
 
 	type Head = {id: string, path: string[]};
 	// let currentLayerHeads: Head[] = (startNode.parents || {}).VKeys().map((id) => ({ id, path: [id, startNodeID] }));
-	let currentLayerHeads: Head[] = [{id: startNode._key, path: [startNode._key]}];
+	let currentLayerHeads: Head[] = [{id: startNode.id, path: [startNode.id]}];
 	while (currentLayerHeads.length) {
 		// first, check if any current-layer-head nodes are the root-node (if so, return right away, as we found a shortest path)
 		for (const layerHead of currentLayerHeads) {

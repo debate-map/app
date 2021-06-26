@@ -40,7 +40,7 @@ export class MediaDetailsUI extends BaseComponentPlus(
 		return (
 			<Column style={style}>
 				{!creating &&
-					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
+					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Name: </Pre>
 					<TextInput

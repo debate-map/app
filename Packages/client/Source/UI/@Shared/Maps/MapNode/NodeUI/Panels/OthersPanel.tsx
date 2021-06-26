@@ -29,11 +29,11 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 		const {show, map, node, path} = this.props;
 		let {convertToType} = this.state;
 
-		const mapID = map ? map._key : null;
+		const mapID = map ? map.id : null;
 		const userID = MeID();
 		const _ = GetUserPermissionGroups(userID);
 		//const creator = GetUser(node.creator);
-		// viewers: GetNodeViewers(node._key),
+		// viewers: GetNodeViewers(node.id),
 		const creatorOrMod = IsUserCreatorOrMod(userID, node);
 
 		const parent = GetParentNodeL3(path);
@@ -62,16 +62,16 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 
 		const changeControlType_currentType = node.ownerMapID != null ? "Private" : "Public";
 		// const changeControlType_newType = changeControlType_currentType == 'Private' ? 'Public' : 'Private';
-		const changeControlTypeCommand = new ChangeNodeOwnerMap(E({nodeID: node._key, newOwnerMapID: node.ownerMapID != null ? null : mapID, argumentNodeID: OmitIfFalsy(argumentWrapper?._key)}));
-		//const changeChildOrderTypeCommand = new ChangeNodeChildOrderType(E({nodeID: node._key, newOrderType: node.childrenOrderType == ChildOrderType.Manual ? ChildOrderType.ByRating : ChildOrderType.Manual}));
+		const changeControlTypeCommand = new ChangeNodeOwnerMap(E({nodeID: node.id, newOwnerMapID: node.ownerMapID != null ? null : mapID, argumentNodeID: OmitIfFalsy(argumentWrapper?.id)}));
+		//const changeChildOrderTypeCommand = new ChangeNodeChildOrderType(E({nodeID: node.id, newOrderType: node.childrenOrderType == ChildOrderType.Manual ? ChildOrderType.ByRating : ChildOrderType.Manual}));
 
-		const mirrorChildren = GetNodeMirrorChildren(node._key);
+		const mirrorChildren = GetNodeMirrorChildren(node.id);
 		/*const childOrderTypeChangeable = node.ownerMapID != null // if private node
 			|| HasAdminPermissions(MeID()) // or has admin permissions
 			|| (node.type === MapNodeType.Argument && node.multiPremiseArgument); // or it's a multi-premise argument (these start as manual)*/
 		return (
 			<Column sel style={{position: "relative", display: show ? null : "none"}}>
-				<IDAndCreationInfoUI id={node._key} creatorID={node.creator} createdAt={node.createdAt}/>
+				<IDAndCreationInfoUI id={node.id} creatorID={node.creator} createdAt={node.createdAt}/>
 				<Row style={{flexWrap: "wrap"}}>
 					<Text>Parents: </Text>
 					{node.parents == null ? "none" : node.parents.VKeys().map((parentID, index)=>{
@@ -92,7 +92,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 				</Row>
 				<Row style={{flexWrap: "wrap"}}>
 					<Text>Mirror children: </Text>
-					{mirrorChildren.length == 0 ? "none" : mirrorChildren.map(a=>a._key).map((childID, index)=>{
+					{mirrorChildren.length == 0 ? "none" : mirrorChildren.map(a=>a.id).map((childID, index)=>{
 						return <Fragment key={index}>
 							{index != 0 && <Text>, </Text>}
 							<UUIDStub id={childID}/>
@@ -115,7 +115,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 								// message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_controlled)}"?\n\nAll relevance ratings will be deleted.`,
 								message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_controlled)}"?`,
 								onOK: ()=>{
-									new ReverseArgumentPolarity(E(mapID && {mapID}, {nodeID: nodeArgOrParentSPArg_controlled._key, path: nodeArgOrParentSPArg_controlled_path})).Run();
+									new ReverseArgumentPolarity(E(mapID && {mapID}, {nodeID: nodeArgOrParentSPArg_controlled.id, path: nodeArgOrParentSPArg_controlled_path})).Run();
 								},
 							});
 						}}/>
@@ -125,7 +125,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 						<Pre>Convert to: </Pre>
 						<Select options={convertToTypes} value={convertToType} onChange={val=>this.SetState({convertToType: val})}/>
 						<Button ml={5} text="Convert" onClick={()=>{
-							new ChangeClaimType(E({mapID, nodeID: node._key, newType: convertToType})).Run();
+							new ChangeClaimType(E({mapID, nodeID: node.id, newType: convertToType})).Run();
 						}}/>
 					</Row>}
 				{/*childOrderTypeChangeable &&
@@ -171,7 +171,7 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 						<CheckBox value={node.link.form == ClaimForm.Negation}
 							onChange={val=>{
 								new UpdateLink({
-									linkParentID: GetParentNodeID(path), linkChildID: node._key,
+									linkParentID: GetParentNodeID(path), linkChildID: node.id,
 									linkUpdates: {form: val ? ClaimForm.Negation : ClaimForm.Base},
 								}).Run();
 							}}/>
@@ -183,7 +183,7 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 							// onChange={val=>Change(val ? newLinkData.isStep = true : delete newLinkData.isStep)}/>
 							onChange={val=>{
 								new UpdateLink({
-									linkParentID: GetParentNodeID(path), linkChildID: node._key,
+									linkParentID: GetParentNodeID(path), linkChildID: node.id,
 									linkUpdates: {seriesAnchor: val || null},
 								}).Run();
 							}}/>
@@ -201,7 +201,7 @@ class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> 
 		//const oldChildrenOrderValid = oldChildrenOrder.length == node.children.VKeys().length && oldChildrenOrder.every(id=>node.children[id] != null);
 
 		const childOrderType = node.childrenOrder ? ChildOrderType.Manual : ChildOrderType.ByRating;
-		const updateChildrenOrderCommand = new UpdateNodeChildrenOrder({mapID, nodeID: node._key, childrenOrder: null});
+		const updateChildrenOrderCommand = new UpdateNodeChildrenOrder({mapID, nodeID: node.id, childrenOrder: null});
 		return (
 			<Column mt={5}>
 				<Row style={E(childOrderType == ChildOrderType.Manual && {fontWeight: "bold"})}>
@@ -218,7 +218,7 @@ class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> 
 					}}/>
 				</Row>
 				{node.childrenOrder && oldChildrenOrder.map((childID, index)=>{
-					const childPath = (node._key ? `${node._key}/` : "") + childID;
+					const childPath = (node.id ? `${node.id}/` : "") + childID;
 					const child = GetNodeL3(childPath);
 					const childTitle = child ? GetNodeDisplayText(child, childPath, GetNodeForm(child, node)) : "...";
 					return (
@@ -237,14 +237,14 @@ class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> 
 									const newOrder = oldChildrenOrder.slice(0);
 									newOrder.RemoveAt(index);
 									newOrder.Insert(index - 1, childID);
-									new UpdateNodeChildrenOrder({mapID, nodeID: node._key, childrenOrder: newOrder}).Run();
+									new UpdateNodeChildrenOrder({mapID, nodeID: node.id, childrenOrder: newOrder}).Run();
 								}}/>
 							<Button text={<Icon size={16} icon="arrow-down"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index < oldChildrenOrder.length - 1}
 								onClick={()=>{
 									const newOrder = oldChildrenOrder.slice(0);
 									newOrder.RemoveAt(index);
 									newOrder.Insert(index + 1, childID);
-									new UpdateNodeChildrenOrder({mapID, nodeID: node._key, childrenOrder: newOrder}).Run();
+									new UpdateNodeChildrenOrder({mapID, nodeID: node.id, childrenOrder: newOrder}).Run();
 								}}/>
 						</Row>
 					);

@@ -25,7 +25,7 @@ changesSince_options.push({name: "All unclicked changes", value: `${ShowChangesS
 export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number}, {}) {
 	render() {
 		const {map, subNavBarWidth} = this.props;
-		const mapState = GetMapState(map._key);
+		const mapState = GetMapState(map.id);
 		const {showChangesSince_type} = mapState;
 		const {showChangesSince_visitOffset} = mapState;
 		const {weighting} = store.main.maps;

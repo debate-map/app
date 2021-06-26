@@ -75,7 +75,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 									<Button ml="auto" text="Save details" enabled={selectedTerm_newData != null && selectedTerm_newDataError == null}
 										onClick={async e=>{
 											const updates = GetUpdates(selectedTerm, selectedTerm_newData);
-											await new UpdateTerm({termID: selectedTerm._key, updates}).Run();
+											await new UpdateTerm({termID: selectedTerm.id, updates}).Run();
 											// this.SetState({selectedTerm_newData: null});
 										}}/>}
 								{creatorOrMod &&
@@ -85,7 +85,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 												title: `Delete "${GetFullNameP(selectedTerm)}"`, cancelButton: true,
 												message: `Delete the term "${GetFullNameP(selectedTerm)}"?`,
 												onOK: async()=>{
-													await new DeleteTerm({termID: selectedTerm._key}).Run();
+													await new DeleteTerm({termID: selectedTerm.id}).Run();
 												},
 											});
 										}}/>}
@@ -112,13 +112,13 @@ export class TermUI extends BaseComponentPlus({} as {term: Term, first: boolean,
 					selected && {background: "rgba(100,100,100,.7)"},
 				)}
 				onClick={e=>{
-					runInAction("TermUI.onClick", ()=>store.main.database.selectedTermID = term._key);
+					runInAction("TermUI.onClick", ()=>store.main.database.selectedTermID = term.id);
 				}}>
-				<Pre>{GetFullNameP(term)}<sup>{term._key.substr(0, 2)}</sup>: </Pre>
+				<Pre>{GetFullNameP(term)}<sup>{term.id.substr(0, 2)}</sup>: </Pre>
 				<Text>{term.definition}</Text>
 				<Span ml="auto">
 					<Pre style={{opacity: 0.7}}>({GetNiceNameForTermType(term.type)}) </Pre>
-					<Pre>#{term._key}</Pre>
+					<Pre>#{term.id}</Pre>
 				</Span>
 			</Row>
 		);

@@ -30,7 +30,7 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 		return (
 			<Column style={style}>
 				{!forNew &&
-					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
+					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={100} style={{width}}>
 					<Pre>Name:</Pre>
 					<TextInput

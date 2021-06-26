@@ -29,7 +29,7 @@ export class DeleteLayer extends Command<{layerID: string}, {}> {
 			updates[`maps/${mapID}/.layers/.${layerID}`] = null;
 		}
 		/*for (const userMapInfoSet of this.userMapInfoSets) {
-			const userID = userMapInfoSet._key;
+			const userID = userMapInfoSet.id;
 			for (const [mapID2, userMapInfo] of userMapInfoSet.maps.entries()) {
 				if (userMapInfo.layerStates[layerID] != null) {
 					updates[`userMapInfo/${userID}/.${mapID2}/.layerStates/.${layerID}`] = null;

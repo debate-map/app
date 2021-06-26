@@ -75,7 +75,8 @@ Object.assign(scripts, {
 	},
 	common: {
 		// helps for spotting typescript errors in the "Packages/common" (client.dev script can work too, but it's nice to have one just for errors in "common")
-		tsc: "cd Packages/common && tsc --noEmit",
+		//tsc: "cd Packages/common && tsc --noEmit",
+		tsc: "tsc --noEmit --project Packages/common/tsconfig.json",
 	},
 	server: {
 		// setup

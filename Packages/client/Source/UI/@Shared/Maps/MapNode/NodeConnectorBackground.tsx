@@ -33,7 +33,7 @@ export class NodeConnectorBackground extends BaseComponent<Props, {}> {
 
 					// let child = A.NonNull = childNodes.First(a=>a._id == childIDStr.ToInt());
 					// maybe temp; see if causes problems ignoring not-found error
-					const child = nodeChildren.FirstOrX(a=>a._key == childID);
+					const child = nodeChildren.FirstOrX(a=>a.id == childID);
 					if (child == null) return null;
 
 					const backgroundColor = GetNodeColor(/* node.type == MapNodeType.Argument ? node : */ child, "raw");
@@ -58,9 +58,9 @@ export class NodeConnectorBackground extends BaseComponent<Props, {}> {
 						const end = childOffset;
 						// return <line x1={start.x} y1={start.y} x2={mid.x} y2={mid.y} x3={end.x} y3={end.y}/>;
 						// return <polyline stroke="orange" fill="transparent" stroke-width="5"points={`${start.x} ${start.y} ${mid.x} ${mid.y} ${end.x} ${end.y}`}/>;
-						return <path key={`connectorLine_${child._key}`} style={E({stroke: backgroundColor.css(), strokeWidth: 3, fill: "none"})}
+						return <path key={`connectorLine_${child.id}`} style={E({stroke: backgroundColor.css(), strokeWidth: 3, fill: "none"})}
 							d={`M${start.x},${start.y} L${mid.x},${mid.y} L${end.x},${end.y}`}/>;
-						/*return <Fragment key={`connectorLine_${child._key}`}>
+						/*return <Fragment key={`connectorLine_${child.id}`}>
 							{straightLine(child.link._mirrorLink && {strokeDasharray: "10 5"})}
 							{child.link._mirrorLink && straightLine({strokeDasharray: "5 10", strokeDashoffset: 5, stroke: HSLA(0, 0, 1, .1)})}
 						</Fragment>;*/
@@ -76,7 +76,7 @@ export class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					endControl = endControl.Plus(middleControl).Times(0.5); // average with middle-control
 
 					const curvedLine = style=>{
-						return <path //key={`connectorLine_${child._key}`}
+						return <path //key={`connectorLine_${child.id}`}
 							style={E(
 								{stroke: backgroundColor.css(), strokeWidth: 3, fill: "none"},
 								style,
@@ -84,7 +84,7 @@ export class NodeConnectorBackground extends BaseComponent<Props, {}> {
 							d={`M${start.x},${start.y} C${startControl.x},${startControl.y} ${endControl.x},${endControl.y} ${end.x},${end.y}`}/>;
 					};
 
-					return <Fragment key={`connectorLine_${child._key}`}>
+					return <Fragment key={`connectorLine_${child.id}`}>
 						{curvedLine(child.link._mirrorLink && {strokeDasharray: "10 5"})}
 						{child.link._mirrorLink && curvedLine({strokeDasharray: "5 10", strokeDashoffset: 5, stroke: HSLA(0, 0, 1, .1)})}
 					</Fragment>;

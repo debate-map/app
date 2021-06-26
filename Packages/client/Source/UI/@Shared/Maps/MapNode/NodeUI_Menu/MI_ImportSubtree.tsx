@@ -86,11 +86,11 @@ class ImportSubtreeUI extends BaseComponentPlus(
 								let title = node.current.titles.base || "(empty title)";
 								return (
 									<Row key={index} style={{whiteSpace: "normal"}}>
-										<CheckBox text={title} value={nodesToLink.includes(node._key)} enabled={GetNodesByTitle(title, "base").length > 0} onChange={val=> {
+										<CheckBox text={title} value={nodesToLink.includes(node.id)} enabled={GetNodesByTitle(title, "base").length > 0} onChange={val=> {
 											if (val) {
-												this.SetState({nodesToLink: nodesToLink.concat(node._key)})
+												this.SetState({nodesToLink: nodesToLink.concat(node.id)})
 											} else {
-												this.SetState({nodesToLink: nodesToLink.Except(node._key)})
+												this.SetState({nodesToLink: nodesToLink.Except(node.id)})
 											}
 										}}/>
 									</Row>
@@ -98,7 +98,7 @@ class ImportSubtreeUI extends BaseComponentPlus(
 							})*/}
 							<ScrollView style={ES({flex: 1})}>
 								{subtreeData &&
-									<SubtreeTreeView node={subtreeData} path={[subtreeData._key]} nodesToLink={nodesToLink} setNodesToLink={val=>this.SetState({nodesToLink: val})}/>}
+									<SubtreeTreeView node={subtreeData} path={[subtreeData.id]} nodesToLink={nodesToLink} setNodesToLink={val=>this.SetState({nodesToLink: val})}/>}
 							</ScrollView>
 						</>}
 						{tab == ImportSubtreeUI_MidTab.Others &&
@@ -179,7 +179,7 @@ class ImportSubtreeUI extends BaseComponentPlus(
 	}
 	return result;*#/
 	let nodes = GetNodesInSubtree(subtreeData);
-	nodes = nodes.filter((node, index)=>!nodes.slice(0, index).Any(a=>a._key == node._key)); // remove duplicate nodes
+	nodes = nodes.filter((node, index)=>!nodes.slice(0, index).Any(a=>a.id == node.id)); // remove duplicate nodes
 	//return nodes.map(node=>node.current.titles.Excluding("_key" as any).VValues().FirstOrX(a=>a as any, "(empty title)"));
 	return nodes.map(node=>node.current.titles.base || "(empty title)");
 }*/
@@ -203,19 +203,19 @@ class SubtreeTreeView extends BaseComponentPlus({} as {node: SubtreeExportData_O
 		return (
 			<TreeView title={
 				<Row style={{whiteSpace: "normal"}}>
-					<CheckBox text={title} value={nodesToLink[node._key] != null} enabled={nodeMatches.length > 0} onChange={val=> {
+					<CheckBox text={title} value={nodesToLink[node.id] != null} enabled={nodeMatches.length > 0} onChange={val=> {
 						let newNodesToLink = Clone(nodesToLink);
 						if (val) {
-							newNodesToLink[node._key] = nodeMatches[0]._key;
+							newNodesToLink[node.id] = nodeMatches[0].id;
 						} else {
-							delete newNodesToLink[node._key];
+							delete newNodesToLink[node.id];
 						}
 						setNodesToLink(newNodesToLink);
 					}}/>
 				</Row>
 			}>
-				{nodesToLink[node._key] == null && node.childrenData.Pairs().map(pair=> {
-					return <SubtreeTreeView key={pair.key} node={pair.value} path={path.concat(pair.value._key)} nodesToLink={nodesToLink} setNodesToLink={setNodesToLink}/>;
+				{nodesToLink[node.id] == null && node.childrenData.Pairs().map(pair=> {
+					return <SubtreeTreeView key={pair.key} node={pair.value} path={path.concat(pair.value.id)} nodesToLink={nodesToLink} setNodesToLink={setNodesToLink}/>;
 				})}
 			</TreeView>
 		);

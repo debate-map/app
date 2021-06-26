@@ -24,7 +24,7 @@ export class UnlinkNode extends Command<{mapID: string, parentID: string, childI
 		const oldData = GetNodeL2(childID);
 		AssertV(oldData, "oldData was null.");
 
-		const baseText = `Cannot unlink node #${oldData._key}, since `;
+		const baseText = `Cannot unlink node #${oldData.id}, since `;
 		AssertV(IsUserCreatorOrMod(this.userInfo.id, oldData), `${baseText}you are not its owner. (or a mod)`);
 		AssertV(this.allowOrphaning || CE(oldData.parents || {}).VKeys().length > 1, `${baseText}doing so would orphan it. Try deleting it instead.`);
 		AssertV(!IsRootNode(oldData), `${baseText}it's the root-node of a map.`);

@@ -69,7 +69,7 @@ export function GetCrawlerURLStrForMap(mapID: string) {
 	while (result.Contains("--")) {
 		result = result.replace(/--/g, "-");
 	}
-	result = `${result.TrimStart("-").TrimEnd("-")}.${map._key.toString()}`;
+	result = `${result.TrimStart("-").TrimEnd("-")}.${map.id.toString()}`;
 	return result;
 }
 
@@ -79,7 +79,7 @@ export function GetCrawlerURLStrForNode(node: MapNodeL2) {
 	while (result.Contains("--")) {
 		result = result.replace(/--/g, "-");
 	}
-	result = `${result.TrimStart("-").TrimEnd("-")}.${node._key.toString()}`;
+	result = `${result.TrimStart("-").TrimEnd("-")}.${node.id.toString()}`;
 	return result;
 }
 export function GetCurrentURL_SimplifiedForPageViewTracking() {

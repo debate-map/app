@@ -196,7 +196,7 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 			newNodeReveal.path = path;
 			newNodeReveal.show = true;
 			const newNodeReveals = (step.nodeReveals || []).concat(newNodeReveal);
-			new UpdateTimelineStep({stepID: step._key, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
+			new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
 		}
 	};
 

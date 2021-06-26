@@ -35,12 +35,12 @@ function LockMapEdgeScrolling() {
 export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} as {timeline: Timeline, creatorOrMod: boolean}) {
 	render() {
 		const {map} = this.props;
-		const timeline = GetSelectedTimeline(map && map._key);
+		const timeline = GetSelectedTimeline(map && map.id);
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), timeline);
 		// timelineSteps: timeline && GetTimelineSteps(timeline, false),
-		const showTimelineDetails = GetShowTimelineDetails(map && map._key);
+		const showTimelineDetails = GetShowTimelineDetails(map && map.id);
 		const {lockMapScrolling} = store.main.maps;
-		const droppableInfo = new DroppableInfo({type: "TimelineStepList", timelineID: timeline ? timeline._key : null});
+		const droppableInfo = new DroppableInfo({type: "TimelineStepList", timelineID: timeline ? timeline.id : null});
 
 		this.Stash({timeline, creatorOrMod});
 		if (timeline == null) return null;
@@ -51,7 +51,7 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 						<Text>Add: </Text>
 						<Button ml={5} text="Video" enabled={timeline != null && timeline.videoID == null} onClick={()=>{
 							if (MeID() == null) return ShowSignInPopup();
-							new UpdateTimeline({id: timeline._key, updates: {videoID: ""}}).Run();
+							new UpdateTimeline({id: timeline.id, updates: {videoID: ""}}).Run();
 						}}/>
 						<Button ml={5} text="Statement" enabled={timeline != null} onClick={()=>{
 							if (MeID() == null) return ShowSignInPopup();
@@ -59,11 +59,11 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 							const newStepIndex = lastVisibleStepIndex == timeline.steps.length - 1 ? null : lastVisibleStepIndex;
 
 							const newStep = new TimelineStep({});
-							new AddTimelineStep({timelineID: timeline._key, step: newStep, stepIndex: newStepIndex}).Run();
+							new AddTimelineStep({timelineID: timeline.id, step: newStep, stepIndex: newStepIndex}).Run();
 						}}/>
 					</>}
 					<CheckBox ml={5} text="Details" value={showTimelineDetails} onChange={val=>{
-						runInAction("EditorSubpanel.Details.onChange", ()=>GetMapState(map._key).showTimelineDetails = val);
+						runInAction("EditorSubpanel.Details.onChange", ()=>GetMapState(map.id).showTimelineDetails = val);
 					}}/>
 					<CheckBox ml="auto" text="Lock map scrolling" title="Lock map edge-scrolling. (for dragging onto timeline steps)" value={lockMapScrolling} onChange={val=>{
 						runInAction("EditorSubpanel.lockMapScrolling.onChange", ()=>store.main.maps.lockMapScrolling = val);
@@ -79,18 +79,18 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 					<Row center mb={7} p="7px 10px" style={{background: "rgba(0,0,0,.7)", borderRadius: 10, border: "1px solid rgba(255,255,255,.15)"}}>
 						<Pre>Video ID: </Pre>
 						<TextInput value={timeline.videoID} enabled={creatorOrMod} onChange={val=>{
-							new UpdateTimeline({id: timeline._key, updates: {videoID: val}}).Run();
+							new UpdateTimeline({id: timeline.id, updates: {videoID: val}}).Run();
 						}}/>
 						<CheckBox ml={5} text="Start: " value={timeline.videoStartTime != null} enabled={creatorOrMod} onChange={val=>{
 							if (val) {
-								new UpdateTimeline({id: timeline._key, updates: {videoStartTime: 0}}).Run();
+								new UpdateTimeline({id: timeline.id, updates: {videoStartTime: 0}}).Run();
 							} else {
-								new UpdateTimeline({id: timeline._key, updates: {videoStartTime: null}}).Run();
+								new UpdateTimeline({id: timeline.id, updates: {videoStartTime: null}}).Run();
 							}
 						}}/>
 						<TimeSpanInput mr={5} largeUnit="minute" smallUnit="second" style={{width: 60}}
 							enabled={creatorOrMod && timeline.videoStartTime != null} value={timeline.videoStartTime}
-							onChange={val=>new UpdateTimeline({id: timeline._key, updates: {videoStartTime: val}}).Run()}/>
+							onChange={val=>new UpdateTimeline({id: timeline.id, updates: {videoStartTime: val}}).Run()}/>
 						<Row center>
 							<Text>Height</Text>
 							<InfoButton text={`
@@ -102,7 +102,7 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 							<Text>: </Text>
 						</Row>
 						<Spinner min={0} max={100} step={0.01} style={{width: 62}} value={(timeline.videoHeightVSWidthPercent * 100).RoundTo(0.01)} enabled={creatorOrMod} onChange={val=>{
-							new UpdateTimeline({id: timeline._key, updates: {videoHeightVSWidthPercent: (val / 100).RoundTo(0.0001)}}).Run();
+							new UpdateTimeline({id: timeline.id, updates: {videoHeightVSWidthPercent: (val / 100).RoundTo(0.0001)}}).Run();
 						}}/>
 						<Pre>%</Pre>
 						<Button ml="auto" text="X" enabled={creatorOrMod} onClick={()=>{
@@ -110,12 +110,12 @@ export class EditorSubpanel extends BaseComponentPlus({} as {map: Map}, {}, {} a
 								title: "Delete video attachment", cancelButton: true,
 								message: "Remove the video attachment for this timeline?",
 								onOK: ()=>{
-									new UpdateTimeline({id: timeline._key, updates: {videoID: null}}).Run();
+									new UpdateTimeline({id: timeline.id, updates: {videoID: null}}).Run();
 								},
 							});
 						}}/>
 					</Row>}
-					<Droppable type="TimelineStep" droppableId={ToJSON(droppableInfo.VSet({timelineID: timeline._key}))} isDropDisabled={!creatorOrMod}>
+					<Droppable type="TimelineStep" droppableId={ToJSON(droppableInfo.VSet({timelineID: timeline.id}))} isDropDisabled={!creatorOrMod}>
 						{(provided: DroppableProvided, snapshot: DroppableStateSnapshot)=>(
 							<Column ref={c=>provided.innerRef(GetDOM(c) as any)} {...provided.droppableProps}>
 								{/* timelineSteps && timelineSteps.map((step, index) => {

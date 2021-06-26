@@ -27,7 +27,7 @@ export const GetNodeChildrenL3_Advanced = StoreAccessor(s=>(nodeID: string, path
 	path = path || nodeID;
 
 	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
-	let nodeChildrenL3 = nodeChildrenL2.map(child=>(child ? GetNodeL3(`${path}/${child._key}`) : null));
+	let nodeChildrenL3 = nodeChildrenL2.map(child=>(child ? GetNodeL3(`${path}/${child.id}`) : null));
 	if (applyAccessLevels) {
 		nodeChildrenL3 = nodeChildrenL3.filter(child=>{
 			// if null, keep (so receiver knows there's an entry here, but it's still loading)
@@ -42,14 +42,14 @@ export const GetNodeChildrenL3_Advanced = StoreAccessor(s=>(nodeID: string, path
 	if (applyTimeline) {
 		const playingTimeline = GetPlayingTimeline(mapID);
 		const playingTimeline_currentStepIndex = GetPlayingTimelineStepIndex(mapID);
-		// const playingTimelineShowableNodes = GetPlayingTimelineRevealNodes_All(map._key);
-		// const playingTimelineVisibleNodes = GetPlayingTimelineRevealNodes_UpToAppliedStep(map._key, true);
+		// const playingTimelineShowableNodes = GetPlayingTimelineRevealNodes_All(map.id);
+		// const playingTimelineVisibleNodes = GetPlayingTimelineRevealNodes_UpToAppliedStep(map.id, true);
 		// if users scrolls to step X and expands this node, keep expanded even if user goes back to a previous step
 		const playingTimelineVisibleNodes = GetPlayingTimelineRevealNodes_UpToAppliedStep(mapID);
 		if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
-			// nodeChildrenToShow = nodeChildrenToShow.filter(child => playingTimelineVisibleNodes.Contains(`${path}/${child._key}`));
+			// nodeChildrenToShow = nodeChildrenToShow.filter(child => playingTimelineVisibleNodes.Contains(`${path}/${child.id}`));
 			// if this node (or a descendent) is marked to be revealed by a currently-applied timeline-step, reveal this node
-			nodeChildrenL3 = nodeChildrenL3.filter(child=>child != null && playingTimelineVisibleNodes.Any(a=>a.startsWith(`${path}/${child._key}`)));
+			nodeChildrenL3 = nodeChildrenL3.filter(child=>child != null && playingTimelineVisibleNodes.Any(a=>a.startsWith(`${path}/${child.id}`)));
 		}
 	}
 	if (emptyForLoading) {

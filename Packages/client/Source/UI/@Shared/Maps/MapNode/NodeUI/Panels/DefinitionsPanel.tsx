@@ -78,7 +78,7 @@ export class TermDefinitionPanel extends BaseComponentPlus({showID: true} as {te
 
 		const formsStr = term.forms.length > 1 ? ` [${term.forms.slice(1).join(", ")}]` : "";
 		const disambiguationStr = term.disambiguation ? ` (${term.disambiguation})` : "";
-		const idStr = showID ? ` (id: ${term._key})` : "";
+		const idStr = showID ? ` (id: ${term.id})` : "";
 		return (
 			<Column sel style={{whiteSpace: "normal"}}>
 				<Row>Term: {term.name}{formsStr}{disambiguationStr}{idStr}</Row>
@@ -89,7 +89,7 @@ export class TermDefinitionPanel extends BaseComponentPlus({showID: true} as {te
 				<Link style={{marginTop: 5, alignSelf: "flex-start"}} onContextMenu={e=>e.nativeEvent["handled"] = true} actionFunc={s=>{
 					s.main.page = "database";
 					s.main.database.subpage = "terms";
-					s.main.database.selectedTermID = term._key;
+					s.main.database.selectedTermID = term.id;
 				}}>
 					<Button text="Show details"/>
 				</Link>

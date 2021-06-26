@@ -35,7 +35,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		const {node, nodeChildren} = props;
 		// ms only asserts in dev for now (and only as warning); causes error sometimes when cut+pasting otherwise (firebase doesn`t send DB updates atomically?)
 		if (DEV) {
-			AssertWarn(nodeChildren.every(a=>a == null || (a.parents || {})[node._key] != null), "Supplied node is not a parent of all the supplied node-children!");
+			AssertWarn(nodeChildren.every(a=>a == null || (a.parents || {})[node.id] != null), "Supplied node is not a parent of all the supplied node-children!");
 		}
 	}
 	lineHolder: HTMLDivElement;
@@ -43,9 +43,9 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		const {map, node, path, nodeChildren, nodeChildrenToShow, type, widthOfNode, widthOverride} = this.props;
 		const {innerBoxOffset, lineHolderHeight, hovered, hovered_button} = this.state;
 
-		// const nodeView = GetNodeView(map._key, path) ?? new MapNodeView();
-		// const nodeView = GetNodeView(map._key, path, true);
-		const nodeView = GetNodeView(map._key, path);
+		// const nodeView = GetNodeView(map.id, path) ?? new MapNodeView();
+		// const nodeView = GetNodeView(map.id, path, true);
+		const nodeView = GetNodeView(map.id, path);
 		const parent = GetParentNodeL3(path);
 		const combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
 
@@ -124,18 +124,18 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 							runInAction("NodeChildHolderBox_toggleExpanded", ()=>{
 								if (type == HolderType.Truth) {
 									ACTMapNodeExpandedSet({
-										mapID: map._key, path, resetSubtree: recursivelyCollapsing,
+										mapID: map.id, path, resetSubtree: recursivelyCollapsing,
 										[expandKey]: newExpanded,
 									});
 								} else {
 									ACTMapNodeExpandedSet({
-										mapID: map._key, path, resetSubtree: false,
+										mapID: map.id, path, resetSubtree: false,
 										[expandKey]: newExpanded,
 									});
 									if (recursivelyCollapsing) {
 										for (const child of nodeChildrenToShow) {
 											ACTMapNodeExpandedSet({
-												mapID: map._key, path: `${path}/${child._key}`, resetSubtree: true,
+												mapID: map.id, path: `${path}/${child.id}`, resetSubtree: true,
 												[expandKey]: newExpanded,
 											});
 										}
@@ -147,7 +147,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 							if (nodeView[expandKey]) {
 								this.CheckForChanges();
 							}
-						}, [expandKey, map._key, nodeChildrenToShow, nodeView, path, type])}
+						}, [expandKey, map.id, nodeChildrenToShow, nodeView, path, type])}
 						afterChildren={<>
 							{ratingPanelShow &&
 								<div ref={c=>this.ratingPanelHolder = c} style={{
@@ -156,7 +156,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 									padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 								}}>
 									{(()=>{
-										const ratings = GetRatings(node._key, holderTypeStr as RatingType);
+										const ratings = GetRatings(node.id, holderTypeStr as RatingType);
 										return <RatingsPanel node={node} path={path} ratingType={holderTypeStr as RatingType} ratings={ratings}/>;
 									})()}
 								</div>}
@@ -180,7 +180,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	get Expanded() {
 		const {map, path, type} = this.props;
 		const expandKey = `expanded_${HolderType[type].toLowerCase()}`;
-		const nodeView = GetNodeView(map._key, path);
+		const nodeView = GetNodeView(map.id, path);
 		return nodeView[expandKey];
 	}
 

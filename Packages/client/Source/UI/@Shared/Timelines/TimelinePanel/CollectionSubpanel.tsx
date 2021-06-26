@@ -17,7 +17,7 @@ export class CollectionSubpanel extends BaseComponentPlus({} as {map: Map}, {}) 
 	render() {
 		const {map} = this.props;
 		const timelines = GetMapTimelines(map);
-		const timeline = GetSelectedTimeline(map._key);
+		const timeline = GetSelectedTimeline(map.id);
 
 		return (
 			<Row style={{height: 40, padding: 10}}>
@@ -37,11 +37,11 @@ export class CollectionSubpanel extends BaseComponentPlus({} as {map: Map}, {}) 
 												index == timelines.length - 1 && {borderRadius: "0 0 10px 10px"},
 											)}
 											onClick={()=>{
-												runInAction("CollectionSubpanel.selectedTimeline.onChange", ()=>GetMapState(map._key).selectedTimeline = timeline._key);
+												runInAction("CollectionSubpanel.selectedTimeline.onChange", ()=>GetMapState(map.id).selectedTimeline = timeline.id);
 												this.timelineSelect.Hide();
 											}}>
 											<Row>
-												<Pre>{timeline.name}</Pre><span style={{fontSize: 11}}>(id: {timeline._key})</span>
+												<Pre>{timeline.name}</Pre><span style={{fontSize: 11}}>(id: {timeline.id})</span>
 											</Row>
 										</Column>
 									))}
@@ -51,16 +51,16 @@ export class CollectionSubpanel extends BaseComponentPlus({} as {map: Map}, {}) 
 					</DropDownContent>
 				</DropDown>
 				<Button ml={5} text="X" title="Delete timeline" enabled={timeline != null && timeline.steps == null} onClick={()=>{
-					new DeleteTimeline({timelineID: timeline._key}).Run();
+					new DeleteTimeline({timelineID: timeline.id}).Run();
 				}} />
 				<Button ml={5} text="+" title="Add new timeline" onClick={()=>{
 					if (MeID() == null) return ShowSignInPopup();
-					ShowAddTimelineDialog(MeID(), map._key);
+					ShowAddTimelineDialog(MeID(), map.id);
 				}} />
 				{/* <Button ml="auto" text="Play" title="Start playing this timeline" enabled={selectedTimeline != null} style={{ flexShrink: 0 }} onClick={() => {
-					store.dispatch(new ACTMap_PlayingTimelineSet({ mapID: map._key, timelineID: selectedTimeline._key }));
-					store.dispatch(new ACTMap_PlayingTimelineStepSet({ mapID: map._key, stepIndex: 0 }));
-					store.dispatch(new ACTMap_PlayingTimelineAppliedStepSet({ mapID: map._key, stepIndex: null }));
+					store.dispatch(new ACTMap_PlayingTimelineSet({ mapID: map.id, timelineID: selectedTimeline.id }));
+					store.dispatch(new ACTMap_PlayingTimelineStepSet({ mapID: map.id, stepIndex: 0 }));
+					store.dispatch(new ACTMap_PlayingTimelineAppliedStepSet({ mapID: map.id, stepIndex: null }));
 				}}/> */}
 			</Row>
 		);

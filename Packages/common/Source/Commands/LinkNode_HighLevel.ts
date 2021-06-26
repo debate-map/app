@@ -34,7 +34,7 @@ export function CreateLinkCommand(mapID: UUID, draggedNodePath: string, dropOnNo
 	const formForClaimChildren = dropOnNode.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
 
 	return new LinkNode_HighLevel({
-		mapID, oldParentID: GetParentNodeID(draggedNodePath), newParentID: dropOnNode._key, nodeID: draggedNode._key,
+		mapID, oldParentID: GetParentNodeID(draggedNodePath), newParentID: dropOnNode.id, nodeID: draggedNode.id,
 		newForm: draggedNode.type == MapNodeType.Claim ? formForClaimChildren : null,
 		newPolarity: polarity,
 		allowCreateWrapperArg: holderType != null || !dropOnNode.multiPremiseArgument,

@@ -26,7 +26,7 @@ export class LayerDetailsUI extends BaseComponentPlus({enabled: true} as Props, 
 		return (
 			<Column style={style}>
 				{!forNew &&
-					<IDAndCreationInfoUI id={baseData._key} creatorID={newData.creator} createdAt={newData.createdAt}/>}
+					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Text>Name: </Text>
 					<TextInput required enabled={enabled} style={{width: "100%"}}

@@ -50,7 +50,7 @@ const replacements = {
 		const currentStep = extraInfo.currentStep as TimelineStep;
 		// let ids = currentStep.actions.filter(a=>a.type == TimelineStepActionType.ShowNode).map(a=>a.showNode_nodeID);
 		// let ids = (currentStep.nodeReveals || []).map(a=>a.nodeID);
-		const mapState = GetMapState(extraInfo.map._key);
+		const mapState = GetMapState(extraInfo.map.id);
 		return (
 			<Button text={props.text || "Place into debate map"} enabled={!extraInfo.stepApplied}
 				style={{alignSelf: "center", fontSize: 16, fontWeight: 500, color: "rgba(255,255,255,.7)"}}
@@ -93,18 +93,18 @@ export class TimelinePlayerUI extends BaseComponentPlus({} as {map: Map}, {}) {
 	root: Column;
 	render() {
 		const {map} = this.props;
-		const playingTimeline = GetPlayingTimeline(map._key);
-		const currentStep = GetPlayingTimelineStep(map._key);
-		const appliedStepIndex = GetPlayingTimelineAppliedStepIndex(map._key);
+		const playingTimeline = GetPlayingTimeline(map.id);
+		const currentStep = GetPlayingTimelineStep(map.id);
+		const appliedStepIndex = GetPlayingTimelineAppliedStepIndex(map.id);
 
 		if (!playingTimeline) return <div/>;
 		if (!currentStep) return <div/>;
 
-		const currentStepIndex = playingTimeline.steps.indexOf(currentStep._key);
+		const currentStepIndex = playingTimeline.steps.indexOf(currentStep.id);
 
 		const stepApplied = appliedStepIndex >= currentStepIndex || (currentStep.nodeReveals || []).length == 0;
 
-		const mapState = GetMapState(map._key);
+		const mapState = GetMapState(map.id);
 		return (
 			<Column ref={c=>this.root = c}
 				style={{position: "absolute", zIndex: 2, left: 10, top: 40, width: 500, padding: 10, background: "rgba(0,0,0,.7)", borderRadius: 5}}
@@ -160,8 +160,8 @@ export class TimelinePlayerUI extends BaseComponentPlus({} as {map: Map}, {}) {
 export class TimelineOverlayUI extends BaseComponentPlus({} as {map: Map}, {}) {
 	render() {
 		const {map} = this.props;
-		const playingTimeline = GetPlayingTimeline(map._key);
-		const currentStepIndex = GetPlayingTimelineStepIndex(map._key);
+		const playingTimeline = GetPlayingTimeline(map.id);
+		const currentStepIndex = GetPlayingTimelineStepIndex(map.id);
 		if (!playingTimeline) return <div/>;
 		return (
 			<Column style={{position: "absolute", zIndex: 1, left: 0, right: 0, top: 30, bottom: 0}}>

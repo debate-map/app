@@ -40,9 +40,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		let {childrenWidthOverride, oldChildBoxOffsets, placeholderRect} = this.state;
 		childrenWidthOverride = (childrenWidthOverride | 0).KeepAtLeast(minWidth);
 
-		const nodeView = GetNodeView(map._key, path);
-		const nodeChildren_fillPercents = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMapObj(child=>`${child._key}`, child=>{
-			return GetFillPercent_AtPath(child, `${path}/${child._key}`);
+		const nodeView = GetNodeView(map.id, path);
+		const nodeChildren_fillPercents = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMapObj(child=>`${child.id}`, child=>{
+			return GetFillPercent_AtPath(child, `${path}/${child.id}`);
 		});
 		this.Stash({nodeChildren_fillPercents});
 
@@ -61,26 +61,26 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 		// apply sorting (regardless of direction, both are ordered by score/priority; "up" reordering is applied on the *child-ui list*, not the child-node list)
 		if (separateChildren) {
-			upChildren = upChildren.OrderByDescending(child=>nodeChildren_fillPercents[child._key]);
-			downChildren = downChildren.OrderByDescending(child=>nodeChildren_fillPercents[child._key]);
+			upChildren = upChildren.OrderByDescending(child=>nodeChildren_fillPercents[child.id]);
+			downChildren = downChildren.OrderByDescending(child=>nodeChildren_fillPercents[child.id]);
 			// this is really not recommended, but I guess there could be use-cases (only admins are allowed to manually order this type anyway)
 			if (node.childrenOrder) {
-				upChildren = upChildren.OrderByDescending(child=>node.childrenOrder.indexOf(child._key).IfN1Then(Number.MAX_SAFE_INTEGER)); // descending, since index0 of upChildren group shows at bottom
-				downChildren = downChildren.OrderBy(child=>node.childrenOrder.indexOf(child._key).IfN1Then(Number.MAX_SAFE_INTEGER));
+				upChildren = upChildren.OrderByDescending(child=>node.childrenOrder.indexOf(child.id).IfN1Then(Number.MAX_SAFE_INTEGER)); // descending, since index0 of upChildren group shows at bottom
+				downChildren = downChildren.OrderBy(child=>node.childrenOrder.indexOf(child.id).IfN1Then(Number.MAX_SAFE_INTEGER));
 			}
 		} else {
-			nodeChildrenToShowHere = nodeChildrenToShowHere.OrderByDescending(child=>nodeChildren_fillPercents[child._key]);
+			nodeChildrenToShowHere = nodeChildrenToShowHere.OrderByDescending(child=>nodeChildren_fillPercents[child.id]);
 			// if (IsArgumentNode(node)) {
 			//const isArgument_any = node.type == MapNodeType.Argument && node.current.argumentType == ArgumentType.Any;
 			if (node.childrenOrder) {
-				nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(child=>node.childrenOrder.indexOf(child._key).IfN1Then(Number.MAX_SAFE_INTEGER));
+				nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(child=>node.childrenOrder.indexOf(child.id).IfN1Then(Number.MAX_SAFE_INTEGER));
 			}
 		}
 
 		let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 		let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 		// if the map's root node, or an argument node, show all children
-		const showAll = node._key == map.rootNode || node.type == MapNodeType.Argument;
+		const showAll = node.id == map.rootNode || node.type == MapNodeType.Argument;
 		if (showAll) [childLimit_up, childLimit_down] = [100, 100];
 
 		const RenderChild = (child: MapNodeL3, index: number, collection_untrimmed: MapNodeL3[], direction = "down" as "up" | "down")=>{
@@ -93,9 +93,9 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			// const isFarthestChildFromDivider = index == childLimit - 1;
 			return (
 				// <ErrorBoundary errorUI={props=>props.defaultUI(E(props, {style: {width: 500, height: 300}}))}>
-				// <ErrorBoundary key={child._key} errorUIStyle={{ width: 500, height: 300 }}>
-				<NodeUI key={child._key} ref={c=>this.childBoxes[child._key] = c} indexInNodeList={index} map={map} node={child}
-					path={`${path}/${child._key}`} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
+				// <ErrorBoundary key={child.id} errorUIStyle={{ width: 500, height: 300 }}>
+				<NodeUI key={child.id} ref={c=>this.childBoxes[child.id] = c} indexInNodeList={index} map={map} node={child}
+					path={`${path}/${child.id}`} widthOverride={childrenWidthOverride} onHeightOrPosChange={this.OnChildHeightOrPosChange}>
 					{isFarthestChildFromDivider && !showAll && (collection_untrimmed.length > childLimit || childLimit != initialChildLimit) &&
 						<ChildLimitBar {...{map, path, childrenWidthOverride, childLimit}} direction={direction} childCount={collection_untrimmed.length}/>}
 				</NodeUI>
@@ -122,7 +122,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			const dragBoxRect = dragBox && VRect.FromLTWH(dragBox.getBoundingClientRect());
 
 			return (
-				<Droppable type="MapNode" droppableId={ToJSON(droppableInfo.VSet({subtype: group, childIDs: childrenHere.map(a=>a._key)}))} /* renderClone={(provided, snapshot, descriptor) => {
+				<Droppable type="MapNode" droppableId={ToJSON(droppableInfo.VSet({subtype: group, childIDs: childrenHere.map(a=>a.id)}))} /* renderClone={(provided, snapshot, descriptor) => {
 					const index = descriptor.index;
 					const pack = childrenHere.slice(0, childLimit)[index];
 					return RenderChild(pack, index, childrenHere);
@@ -178,7 +178,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 				{IsMultiPremiseArgument(node) && type != HolderType.Relevance &&
 					<NodeChildHolderBox {...{map, node, path}} type={HolderType.Relevance} widthOverride={childrenWidthOverride}
 						widthOfNode={childrenWidthOverride}
-						nodeChildren={GetNodeChildrenL3(node._key, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}
+						nodeChildren={GetNodeChildrenL3(node.id, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}
 						onHeightOrDividePointChange={dividePoint=>this.CheckForLocalChanges()}/>}
 				{!separateChildren &&
 					RenderGroup("all")}
@@ -244,13 +244,13 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	get Expanded() {
 		const {map, path, type} = this.props;
 		const expandKey = type ? `expanded_${HolderType[type].toLowerCase()}` : "expanded";
-		const nodeView = GetNodeView(map._key, path);
+		const nodeView = GetNodeView(map.id, path);
 		return nodeView[expandKey];
 	}
 
 	get ChildOrderStr() {
 		const {nodeChildrenToShow, nodeChildren_fillPercents} = this.PropsStash;
-		return nodeChildrenToShow.OrderBy(a=>nodeChildren_fillPercents[a._key]).map(a=>a._key).join(",");
+		return nodeChildrenToShow.OrderBy(a=>nodeChildren_fillPercents[a.id]).map(a=>a.id).join(",");
 	}
 
 	PostRender() {
@@ -269,8 +269,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const height = this.DOM_HTML.offsetHeight;
 		const dividePoint = this.GetDividePoint();
 		if (height != this.lastHeight || dividePoint != this.lastDividePoint) {
-			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._key),
-				()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.node._key}${nl}dividePoint:${dividePoint}`);
+			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
+				()=>`OnHeightChange NodeChildHolder (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}dividePoint:${dividePoint}`);
 
 			// this.UpdateState(true);
 			this.UpdateChildrenWidthOverride();
@@ -293,8 +293,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	OnChildHeightOrPosChange_updateStateQueued = false;
 	OnChildHeightOrPosChange = ()=>{
 		const {node} = this.props;
-		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node._key),
-			()=>`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node._key}\ncenterY:${this.GetDividePoint()}`);
+		MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
+			()=>`OnChildHeightOrPosChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}\ncenterY:${this.GetDividePoint()}`);
 
 		// this.OnHeightOrPosChange();
 		// wait one frame, so that if multiple calls to this method occur in the same frame, we only have to call OnHeightOrPosChange() once
@@ -370,7 +370,7 @@ export class ChildLimitBar extends BaseComponentPlus({} as {map: Map, path: stri
 	static HEIGHT = 36;
 	render() {
 		const {map, path, childrenWidthOverride, direction, childCount, childLimit} = this.props;
-		const nodeView = GetNodeView(map._key, path);
+		const nodeView = GetNodeView(map.id, path);
 		const {initialChildLimit} = store.main.maps;
 		return (
 			<Row style={{

@@ -32,7 +32,7 @@ export class DeleteMap extends Command<{mapID: string}, {}> {
 		const newUpdates = {};
 		newUpdates[`maps/${mapID}`] = null;
 		/*for (const userMapInfoSet of this.userMapInfoSets) {
-			const userID = userMapInfoSet._key;
+			const userID = userMapInfoSet.id;
 			for (const {key: mapID2, value: userMapInfo} of CE(userMapInfoSet.maps).Pairs()) {
 				if (mapID2 == mapID) {
 					newUpdates[`userMapInfo/${userID}/.${mapID}`] = null;

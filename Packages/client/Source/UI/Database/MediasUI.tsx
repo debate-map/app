@@ -72,7 +72,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as { selectedMedia_
 									<Button ml="auto" text="Save details" enabled={selectedMedia_newData != null && selectedMedia_newDataError == null}
 										onClick={async e=>{
 											const updates = GetUpdates(selectedMedia, selectedMedia_newData);
-											await new UpdateMediaData({id: selectedMedia._key, updates}).Run();
+											await new UpdateMediaData({id: selectedMedia.id, updates}).Run();
 											// this.SetState({selectedImage_newData: null});
 										}}/>}
 								{creatorOrMod &&
@@ -81,7 +81,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as { selectedMedia_
 											title: `Delete "${selectedMedia.name}"`, cancelButton: true,
 											message: `Delete the media "${selectedMedia.name}"?`,
 											onOK: async()=>{
-												await new DeleteMedia({id: selectedMedia._key}).Run();
+												await new DeleteMedia({id: selectedMedia.id}).Run();
 											},
 										});
 									}}/>}
@@ -109,13 +109,13 @@ export class MediaUI extends BaseComponent<MediaUI_Props, {}> {
 					selected && {background: "rgba(100,100,100,.7)"},
 				)}
 				onClick={e=>{
-					runInAction("MediaUI.onClick", ()=>store.main.database.selectedMediaID = image._key);
+					runInAction("MediaUI.onClick", ()=>store.main.database.selectedMediaID = image.id);
 				}}>
 				<Pre>{image.name}: </Pre>
 				{image.description.KeepAtMost(100)}
 				<Span ml="auto">
 					<Pre style={{opacity: 0.7}}>({GetNiceNameForMediaType(image.type)}) </Pre>
-					<Pre>#{image._key}</Pre>
+					<Pre>#{image.id}</Pre>
 				</Span>
 			</Row>
 		);

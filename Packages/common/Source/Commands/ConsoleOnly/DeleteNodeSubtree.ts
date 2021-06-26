@@ -52,9 +52,9 @@ export class DeleteNodeSubtree extends Command<{nodeID: string, maxDeletes: numb
 		AssertV(this.nodesInSubtree.length <= maxDeletes, `Length of nodes in subtree (${this.nodesInSubtree.length}) is greater than the max-deletes limit (${maxDeletes}).`);
 
 		this.subs_deleteNodes = this.nodesInSubtree.map(node=>{
-			const deleteNodeCommand = new DeleteNode({nodeID: node._key}).MarkAsSubcommand(this);
-			deleteNodeCommand.parentsToIgnore = this.nodesInSubtree.map(a=>a._key);
-			deleteNodeCommand.childrenToIgnore = this.nodesInSubtree.map(a=>a._key);
+			const deleteNodeCommand = new DeleteNode({nodeID: node.id}).MarkAsSubcommand(this);
+			deleteNodeCommand.parentsToIgnore = this.nodesInSubtree.map(a=>a.id);
+			deleteNodeCommand.childrenToIgnore = this.nodesInSubtree.map(a=>a.id);
 			deleteNodeCommand.Validate();
 			return deleteNodeCommand;
 		});
