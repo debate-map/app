@@ -370,9 +370,8 @@ export class NodeUI extends BaseComponentPlus(
 	}
 }
 
-export const [LimitBarPos] = CreateStringEnum({
-	above: 1,
-	below: 1,
-	none: 1,
-});
-export type LimitBarPos = keyof typeof LimitBarPos;
+export enum LimitBarPos {
+	above = "above",
+	below = "below",
+	none = "none",
+}

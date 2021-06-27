@@ -29,9 +29,8 @@ AddSchema("MapNodePhrasing", {
 	required: ["creator", "createdAt", "node", "type", "text"],
 });
 
-export const [MapNodePhrasingType] = CreateStringEnum({
-	precise: 1,
-	natural: 1,
-});
-export type MapNodePhrasingType = keyof typeof MapNodePhrasingType;
+export enum MapNodePhrasingType {
+	precise = "precise",
+	natural = "natural",
+}
 AddSchema("MapNodePhrasingType", {oneOf: GetValues_ForSchema(MapNodePhrasingType)});

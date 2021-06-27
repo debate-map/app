@@ -78,11 +78,10 @@ export const GetRatingAverage_AtPath = StoreAccessor(s=>(node: MapNodeL3, rating
 	return result;
 });
 
-export const [WeightingType] = CreateStringEnum({
-	votes: 1,
-	reasonScore: 1,
-});
-export type WeightingType = keyof typeof WeightingType;
+export enum WeightingType {
+	votes = "votes",
+	reasonScore = "reasonScore",
+}
 
 const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
 // export const GetFillPercent_AtPath = StoreAccessor('GetFillPercent_AtPath', (node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null) => {

@@ -7,15 +7,14 @@ import {EquationAttachment} from "./@EquationAttachment";
 import {ReferencesAttachment} from "./@ReferencesAttachment";
 import {CE, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 
-export const [AttachmentType] = CreateStringEnum({
-	none: 1,
+export enum AttachmentType {
+	none = "none",
 	//ImpactPremise: 1,
-	equation: 1,
-	references: 1,
-	quote: 1,
-	media: 1,
-});
-export type AttachmentType = keyof typeof AttachmentType;
+	equation = "equation",
+	references = "references",
+	quote = "quote",
+	media = "media",
+}
 
 export function GetAttachmentType(node: MapNodeL2) {
 	return GetAttachmentType_Revision(node.current);

@@ -23,14 +23,13 @@ AddSchema("SourceChain", {
 	required: ["sources"],
 });
 
-export const [SourceType] = CreateStringEnum({
-	speech: 1,
-	text: 1,
-	image: 1,
-	video: 1,
-	webpage: 1,
-});
-export type SourceType = keyof typeof SourceType;
+export enum SourceType {
+	speech = "speech",
+	text = "text",
+	image = "image",
+	video = "video",
+	webpage = "webpage",
+}
 AddSchema("SourceType", {oneOf: GetValues_ForSchema(SourceType)});
 
 export const Source_linkURLPattern = "^https?://[^\\s/$.?#]+\\.[^\\s]+$";

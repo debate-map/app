@@ -9,23 +9,21 @@ import {MapNodeType} from "./@MapNodeType";
 export const globalMapID = "GLOBAL_MAP_00000000001";
 export const globalRootNodeID = "GLOBAL_ROOT_0000000001";
 
-export const [AccessLevel] = CreateStringEnum({
-	basic: 1,
-	verified: 1,
-	mod: 1,
-	admin: 1,
-});
-export type AccessLevel = keyof typeof AccessLevel;
+export enum AccessLevel {
+	basic = "basic",
+	verified = "verified",
+	mod = "mod",
+	admin = "admin",
+}
 AddSchema("AccessLevel", {oneOf: GetValues_ForSchema(AccessLevel)});
 
-export const [ClaimForm] = CreateStringEnum({
+export enum ClaimForm {
 	/** Dangerous */
-	base: 1,
-	negation: 1,
-	yesNoQuestion: 1,
-});
+	base = "base",
+	negation = "negation",
+	yesNoQuestion = "yesNoQuestion",
+}
 //export type ClaimForm = typeof ClaimForm_values[number];
-export type ClaimForm = keyof typeof ClaimForm;
 AddSchema("ClaimForm", {oneOf: GetValues_ForSchema(ClaimForm)});
 
 //export const MapNode_id = UUID_regex;
@@ -110,22 +108,20 @@ AddSchema("Polarity", {oneOf: GetValues_ForSchema(Polarity)});*/
 export type Polarity = typeof Polarity_values[number];
 AddSchema("Polarity", {oneOf: Polarity_values});*/
 
-export const [Polarity] = CreateStringEnum({
-	supporting: 1,
-	opposing: 1,
-});
-export type Polarity = keyof typeof Polarity;
+export enum Polarity {
+	supporting = "supporting",
+	opposing = "opposing",
+}
 //export type Polarity = typeof Polarity_values[number];
 AddSchema("Polarity", {oneOf: GetValues_ForSchema(Polarity)});
 
 // regular parents
 // ==========
 
-export const [ChildOrderType] = CreateStringEnum({
-	manual: 1,
-	byRating: 1,
-});
-export type ChildOrderType = keyof typeof ChildOrderType;
+export enum ChildOrderType {
+	manual = "manual",
+	byRating = "byRating",
+}
 AddSchema("ChildOrderType", {oneOf: GetValues_ForSchema(ChildOrderType)});
 
 // layer+anchor parents (for if subnode)

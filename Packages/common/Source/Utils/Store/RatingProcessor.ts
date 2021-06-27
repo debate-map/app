@@ -2,6 +2,7 @@ import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from 
 import {StoreAccessor, NoID} from "web-vcore/nm/mobx-graphlink";
 import {GetRatingAverage, GetRatingValue, GetRatings} from "../../Store/db/nodeRatings";
 import {NodeRating} from "../../Store/db/nodeRatings/@NodeRating";
+import {NodeRatingType} from "../../Store/db/nodeRatings/@NodeRatingType.js";
 import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../Store/db/nodes/$node";
 import {ClaimForm, MapNodeL2} from "../../Store/db/nodes/@MapNode";
 import {ArgumentType} from "../../Store/db/nodes/@MapNodeRevision";
@@ -33,10 +34,10 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 		combinedTruthOfPremises = CE(premiseProbabilities).Max(null, true);
 	}
 
-	let relevance = GetRatingValue(argument.id, "relevance", userID, null);
+	let relevance = GetRatingValue(argument.id, NodeRatingType.relevance, userID, null);
 	// if user didn't rate the relevance, just use the average rating
 	if (relevance == null) {
-		relevance = GetRatingAverage(argument.id, "relevance", null) || 0;
+		relevance = GetRatingAverage(argument.id, NodeRatingType.relevance, null) || 0;
 	}
 	// let strengthForType = adjustment.Distance(50) / 50;
 	const result = combinedTruthOfPremises * (relevance / 100);
@@ -46,7 +47,7 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 		//_key: userID,
 		accessPolicy: null,
 		node: argument.id,
-		type: "impact",
+		type: NodeRatingType.impact,
 		user: userID,
 		editedAt: null,
 		value: CE(result * 100).RoundTo(1),
@@ -81,11 +82,11 @@ export const GetArgumentImpactPseudoRatings = StoreAccessor(s=>(argument: MapNod
 	for (const userID of argRatingSet.VKeys()) {
 		usersWhoRatedArgOrPremise[userID] = true;
 	} */
-	for (const userID of GetRatings(argument.id, "relevance").map(a=>a.user)) {
+	for (const userID of GetRatings(argument.id, NodeRatingType.relevance).map(a=>a.user)) {
 		usersWhoRatedArgOrPremise[userID] = true;
 	}
 	for (const premise of premises) {
-		for (const userID of GetRatings(premise.id, "truth").map(a=>a.user)) {
+		for (const userID of GetRatings(premise.id, NodeRatingType.truth).map(a=>a.user)) {
 			usersWhoRatedArgOrPremise[userID] = true;
 		}
 	}

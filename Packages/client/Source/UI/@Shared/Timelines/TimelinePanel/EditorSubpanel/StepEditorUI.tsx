@@ -26,12 +26,12 @@ import {SearchUpFromNodeForNodeMatchingX} from "dm_common";
 import {Map} from "dm_common";
 import {GetNodeColor} from "Store/firebase_ext/nodes";
 
-export const [PositionOptionsEnum] = CreateStringEnum({
-	full: 1,
-	left: 1,
-	right: 1,
-	center: 1,
-});
+export enum PositionOptionsEnum {
+	full = "full",
+	left = "left",
+	right = "right",
+	center = "center",
+}
 /*export const positionOptions = [
 	{ name: 'Full', value: null },
 	{ name: 'Left', value: 1 },

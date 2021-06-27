@@ -40,13 +40,12 @@ export class MapsState {
 	@O importSubtreeDialog = new ImportSubtreeDialogState();
 }
 
-export const [DetailsPanel_Subpanel] = CreateStringEnum({
-	text: 1,
-	attachment: 1,
-	permissions: 1,
-	others: 1,
-});
-export type DetailsPanel_Subpanel = keyof typeof DetailsPanel_Subpanel;
+export enum DetailsPanel_Subpanel {
+	text = "text",
+	attachment = "attachment",
+	permissions = "permissions",
+	others = "others",
+}
 export class DetailsPanelState {
 	@O subpanel = DetailsPanel_Subpanel.text;
 }
@@ -55,12 +54,11 @@ export class AddChildDialogState {
 	@O advanced = false;
 }
 
-export const [DataExchangeFormat] = CreateStringEnum({
+export enum DataExchangeFormat {
 	//debateMap_json: 1,
 	//cd_json: 1,
-	gad_csv: 1,
-});
-export type DataExchangeFormat = keyof typeof DataExchangeFormat;
+	gad_csv = "gad_csv",
+}
 export class ExportSubtreeDialogState {
 	@O targetFormat = DataExchangeFormat.gad_csv;
 	@O baseExportDepth = 5;

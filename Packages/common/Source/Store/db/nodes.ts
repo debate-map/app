@@ -12,11 +12,10 @@ import {MeID} from "./users";
 import {CanGetBasicPermissions, GetUserAccessLevel, HasAdminPermissions, IsUserCreatorOrMod} from "./users/$user";
 import {PermissionGroupSet} from "./users/@User";
 
-export const [HolderType] = CreateStringEnum({
-	truth: 1,
-	relevance: 1,
-});
-export type HolderType = keyof typeof HolderType;
+export enum HolderType {
+	truth = "truth",
+	relevance = "relevance",
+}
 
 export function PathSegmentToNodeID(segment: string): UUID {
 	if (segment.length == 22) return segment; // if raw UUID

@@ -3,12 +3,11 @@ import {AddSchema, MGLClass, DB, Field, GetSchemaJSON, Schema, UUID_regex} from 
 import {ObservableMap} from "web-vcore/nm/mobx";
 import {MapNodeRevision_Defaultable, MapNodeRevision_Defaultable_props, MapNodeRevision_Defaultable_DefaultsForMap} from "../nodes/@MapNodeRevision";
 
-export const [MapType] = CreateStringEnum({
-	private: 1,
-	public: 1,
-	global: 1,
-});
-export type MapType = keyof typeof MapType;
+export enum MapType {
+	private = "private",
+	public = "public",
+	global = "global",
+}
 
 //export const Map_namePattern = '^\\S.*$'; // must start with non-whitespace // todo: probably switch to a more lax pattern like this, eg. so works for other languages
 export const Map_namePattern = '^[a-zA-Z0-9 ,\'"%:.?\\-()\\/]+$';

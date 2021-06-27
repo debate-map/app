@@ -1,14 +1,13 @@
 import {Assert, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 import {ClaimForm, MapNode, MapNodeL3, Polarity} from "./@MapNode";
 
-export const [MapNodeType] = CreateStringEnum({
-	category: 1,
-	package: 1,
-	multiChoiceQuestion: 1,
-	claim: 1,
-	argument: 1,
-});
-export type MapNodeType = keyof typeof MapNodeType;
+export enum MapNodeType {
+	category = "category",
+	package = "package",
+	multiChoiceQuestion = "multiChoiceQuestion",
+	claim = "claim",
+	argument = "argument",
+}
 export class MapNodeType_Info {
 	static for = {
 		[MapNodeType.category]: new MapNodeType_Info({

@@ -32,12 +32,11 @@ AddSchema("TitlesMap", {
 	},
 });
 
-export const [PermissionInfoType] = CreateStringEnum({
-	creator: 1,
-	mapEditors: 1,
-	anyone: 1,
-});
-export type PermissionInfoType = keyof typeof PermissionInfoType;
+export enum PermissionInfoType {
+	creator = "creator",
+	mapEditors = "mapEditors",
+	anyone = "anyone",
+}
 AddSchema("PermissionInfoType", {oneOf: GetValues_ForSchema(PermissionInfoType)});
 
 export class PermissionInfo {
@@ -174,12 +173,11 @@ AddSchema("MapNodeRevision_Partial", (()=>{
 // argument
 // ==========
 
-export const [ArgumentType] = CreateStringEnum({
-	any: 1,
-	anyTwo: 1,
-	all: 1,
-});
-export type ArgumentType = keyof typeof ArgumentType;
+export enum ArgumentType {
+	any = "any",
+	anyTwo = "anyTwo",
+	all = "all",
+}
 AddSchema("ArgumentType", {oneOf: GetValues_ForSchema(ArgumentType)});
 
 export function GetArgumentTypeDisplayText(type: ArgumentType) {

@@ -1,11 +1,10 @@
 import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink";
 
-export const [MediaType] = CreateStringEnum({
-	image: 1,
-	video: 1,
-});
-export type MediaType = keyof typeof MediaType;
+export enum MediaType {
+	image = "image",
+	video = "video",
+}
 AddSchema("MediaType", {oneOf: GetValues_ForSchema(MediaType)});
 
 export function GetNiceNameForMediaType(type: MediaType) {

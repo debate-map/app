@@ -43,18 +43,18 @@ export type RatingTypeInfo = {type: NodeRatingType, main?: boolean, collapsed?: 
 export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	if (node.type == MapNodeType.category) {
 		if (!node.current.votingEnabled) return [];
-		return [{type: "significance", main: true}];
+		return [{type: NodeRatingType.significance, main: true}];
 	}
 	if (node.type == MapNodeType.package) {
-		return [{type: "significance", main: true}];
+		return [{type: NodeRatingType.significance, main: true}];
 	}
 	if (node.type == MapNodeType.multiChoiceQuestion) {
-		return [{type: "significance", main: true}];
+		return [{type: NodeRatingType.significance, main: true}];
 	}
 	if (node.type == MapNodeType.claim) {
 		let result: RatingTypeInfo[];
 		// result = [{type: "truth", main: true}]; //, {type: "significance", main: true}];
-		result = [{type: "truth", main: true}]; // , {type: "relevance", main: true}];
+		result = [{type: NodeRatingType.truth, main: true}]; // , {type: "relevance", main: true}];
 		/* if ((node as MapNodeL2).link && (node as MapNodeL2).link.form == ClaimForm.YesNoQuestion) {
 			result.Remove(result.First(a=>a.type == "significance"));
 			result.Insert(0, {type: "significance", main: true});
@@ -63,7 +63,7 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	}
 	if (node.type == MapNodeType.argument) {
 		// return [{type: "strength", main: true}, {type: "impact", main: true}];
-		return [{type: "relevance"}, {type: "impact", main: true}];
+		return [{type: NodeRatingType.relevance}, {type: NodeRatingType.impact, main: true}];
 	}
 	Assert(false);
 }
@@ -72,7 +72,7 @@ export const GetMainRatingType = StoreAccessor(s=>(node: MapNodeL2)=>{
 });
 export function GetSortByRatingType(node: MapNodeL3): NodeRatingType {
 	if (node.link && node.link.form == ClaimForm.yesNoQuestion) {
-		return "significance";
+		return NodeRatingType.significance;
 	}
 	return GetMainRatingType(node);
 }

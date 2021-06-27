@@ -53,14 +53,13 @@ export class Term {
 	note: string;
 }
 
-export const [TermType] = CreateStringEnum({
-	commonNoun: 1,
-	properNoun: 1,
-	adjective: 1,
-	verb: 1,
-	adverb: 1,
-});
-export type TermType = keyof typeof TermType;
+export enum TermType {
+	commonNoun = "commonNoun",
+	properNoun = "properNoun",
+	adjective = "adjective",
+	verb = "verb",
+	adverb = "adverb",
+}
 AddSchema("TermType", {oneOf: GetValues_ForSchema(TermType)});
 
 /*export type TermComponentSet = ObservableMap<string, boolean>;

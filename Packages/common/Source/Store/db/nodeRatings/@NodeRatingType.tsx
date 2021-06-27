@@ -5,20 +5,24 @@ import {MapNodeL2, MapNodeL3, Polarity} from "../nodes/@MapNode";
 import {MapNodeType} from "../nodes/@MapNodeType";
 import {ArgumentType} from "../nodes/@MapNodeRevision";
 
-// export type RatingType = "significance" | "neutrality" | "probability" | "intensity" | "adjustment" | "strength";
-// export type RatingType = "significance" | "neutrality" | "probability" | "support" | "adjustment" | "strength";
-// export const ratingTypes = ["significance", "neutrality", "probability", "truth", "impact", "strength"];
-export const [NodeRatingType] = CreateStringEnum({
-	significance: 1,
-	neutrality: 1,
-	truth: 1,
-	relevance: 1,
-	impact: 1,
-});
-export type NodeRatingType = keyof typeof NodeRatingType;
+/*export enum NodeRatingType {
+	significance = "significance",
+	neutrality = "neutrality",
+	truth = "truth",
+	relevance = "relevance",
+	impact = "impact",
+}*/
+export enum NodeRatingType {
+	significance = "significance",
+	neutrality = "neutrality",
+	truth = "truth",
+	relevance = "relevance",
+	impact = "impact",
+}
+//type NodeRatingType_flat = keyof typeof NodeRatingType;
 AddSchema("NodeRatingType", {oneOf: GetValues_ForSchema(NodeRatingType)});
 
-export function PropNameToTitle(propName: string) {
+export function PropNameToTitle(propName: NodeRatingType) {
 	return ModifyString(propName, m=>[m.lowerUpper_to_lowerSpaceLower, m.startLower_to_upper]);
 }
 

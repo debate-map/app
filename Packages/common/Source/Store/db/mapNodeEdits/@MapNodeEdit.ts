@@ -1,12 +1,11 @@
 import {CreateStringEnum, GetValues_ForSchema} from "web-vcore/nm/js-vextensions";
 import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink";
 
-export const [ChangeType] = CreateStringEnum({
-	add: 1,
-	edit: 1,
-	remove: 1,
-});
-export type ChangeType = keyof typeof ChangeType;
+export enum ChangeType {
+	add = "add",
+	edit = "edit",
+	remove = "remove",
+}
 AddSchema("ChangeType", {oneOf: GetValues_ForSchema(ChangeType)});
 
 @MGLClass({table: "map_nodeEdits"})

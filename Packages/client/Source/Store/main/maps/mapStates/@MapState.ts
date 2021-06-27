@@ -1,26 +1,23 @@
 import {O} from "web-vcore";
 import {CreateStringEnum} from "web-vcore/nm/js-vextensions";
 
-export const [SortType] = CreateStringEnum({
-	creatorID: 1,
-	creationDate: 1,
+export enum SortType {
+	creatorID = "creatorID",
+	creationDate = "creationDate",
 	//updateDate: 1,
 	//viewerCount: 1,
-});
-export type SortType = keyof typeof SortType;
-export const [TimelineSubpanel] = CreateStringEnum({
-	collection: 1,
-	editor: 1,
-	playing: 1,
-});
-export type TimelineSubpanel = keyof typeof TimelineSubpanel;
+}
+export enum TimelineSubpanel {
+	collection = "collection",
+	editor = "editor",
+	playing = "playing",
+}
 
-export const [ShowChangesSinceType] = CreateStringEnum({
-	none: 1,
-	sinceVisitX: 1,
-	allUnseenChanges: 1,
-});
-export type ShowChangesSinceType = keyof typeof ShowChangesSinceType;
+export enum ShowChangesSinceType {
+	none = "none",
+	sinceVisitX = "sinceVisitX",
+	allUnseenChanges = "allUnseenChanges",
+}
 
 export class MapState {
 	@O initDone = false;
