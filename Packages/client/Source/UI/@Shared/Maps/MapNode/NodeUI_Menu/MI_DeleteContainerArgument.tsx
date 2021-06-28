@@ -6,7 +6,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {styles} from "Utils/UI/GlobalStyles";
 import {MI_SharedProps} from "../NodeUI_Menu";
 import {Observer} from "web-vcore";
-import {GetNodeL3, GetNodeDisplayText} from "dm_common";
+import {GetNodeL3, GetNodeDisplayText, GetNodeChildLinks} from "dm_common";
 import {IsUserCreatorOrMod} from "dm_common";
 import {MeID} from "dm_common";
 import {UnlinkNode} from "dm_common";
@@ -31,7 +31,8 @@ export class MI_DeleteContainerArgument extends BaseComponent<MI_SharedProps, {}
 		const error = command.Validate_Safe(); */
 
 		const canDeleteBaseClaim = IsUserCreatorOrMod(MeID(), node);
-		const baseClaimCommand = node.parents.VKeys().length > 1 || !canDeleteBaseClaim
+		const parentLinks = GetNodeChildLinks(null, node.id);
+		const baseClaimCommand = parentLinks.length > 1 || !canDeleteBaseClaim
 			? new UnlinkNode({mapID, parentID: argument.id, childID: node.id})
 			: new DeleteNode({mapID, nodeID: node.id});
 

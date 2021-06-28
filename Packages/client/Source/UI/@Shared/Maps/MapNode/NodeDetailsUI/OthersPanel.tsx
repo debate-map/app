@@ -14,12 +14,12 @@ export class OthersPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 				{HasAdminPermissions(MeID()) &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Font-size override: </Pre>
-						<Spinner max={25} enabled={enabled} value={ToNumber(newRevisionData.fontSizeOverride, 0)} onChange={val=>Change(newRevisionData.fontSizeOverride = val != 0 ? val : null)}/>
+						<Spinner max={25} enabled={enabled} value={ToNumber(newRevisionData.displayDetails.fontSizeOverride, 0)} onChange={val=>Change(newRevisionData.displayDetails.fontSizeOverride = val != 0 ? val : null)}/>
 						<Pre> px (0 for auto)</Pre>
 					</Row>}
 				<Row mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Width override: </Pre>
-					<Spinner step={10} max={1000} enabled={enabled} value={ToNumber(newRevisionData.widthOverride, 0)} onChange={val=>Change(newRevisionData.widthOverride = val != 0 ? val : null)}/>
+					<Spinner step={10} max={1000} enabled={enabled} value={ToNumber(newRevisionData.displayDetails.widthOverride, 0)} onChange={val=>Change(newRevisionData.displayDetails.widthOverride = val != 0 ? val : null)}/>
 					<Pre> px (0 for auto)</Pre>
 				</Row>
 			</>

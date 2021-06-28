@@ -1,7 +1,7 @@
-import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, RatingType, ratingTypes, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "dm_common";
+import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "dm_common";
 import chroma, {Color} from "chroma-js";
 //import classNames from "classnames";
-import {DEL, DoNothing, E, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions";
+import {DEL, DoNothing, E, GetValues, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions";
 import {runInAction} from "web-vcore/nm/mobx";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink";
 import React from "react";
@@ -9,9 +9,8 @@ import {Draggable} from "web-vcore/nm/react-beautiful-dnd";
 import ReactDOM from "web-vcore/nm/react-dom";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions";
 import {store} from "Store";
-import {GetNodeColor} from "Store/firebase_ext/nodes";
+import {GetNodeColor} from "Store/db_ext/nodes";
 import {GetLastAcknowledgementTime} from "Store/main/maps";
-import {GetNodeRevealHighlightTime, GetTimeFromWhichToShowChangedNodes, GetTimeSinceNodeRevealedByPlayingTimeline} from "Store/main/maps/mapStates/$mapState";
 import {ACTMapNodeExpandedSet, ACTMapNodeSelect, GetNodeView, GetNodeViewsAlongPath, GetPathNodeIDs} from "Store/main/maps/mapViews/$mapView";
 import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
 import {DraggableInfo} from "Utils/UI/DNDStructures";
@@ -24,7 +23,6 @@ import {DetailsPanel} from "./NodeUI/Panels/DetailsPanel";
 import {DiscussionPanel} from "./NodeUI/Panels/DiscussionPanel";
 import {HistoryPanel} from "./NodeUI/Panels/HistoryPanel";
 import {OthersPanel} from "./NodeUI/Panels/OthersPanel";
-import {PhrasingsPanel} from "./NodeUI/Panels/PhrasingsPanel";
 import {RatingsPanel} from "./NodeUI/Panels/RatingsPanel";
 import {SocialPanel} from "./NodeUI/Panels/SocialPanel";
 import {TagsPanel} from "./NodeUI/Panels/TagsPanel";
@@ -108,7 +106,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		// ==========
 
 		const nodeView = GetNodeView(map.id, path);
-		let sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
+		//let sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
+		let sinceTime = 0;
 		/* let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
 		let ownNodeChanged = pathsToChangedNodes.Any(a=>a.split("/").Any(b=>b == node._id));
 		let changeType = ownNodeChanged ? GetNodeChangeType(node, sinceTime) : null; */
@@ -117,8 +116,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		sinceTime = sinceTime.KeepAtLeast(lastAcknowledgementTime);
 
 		let changeType: ChangeType;
-		if (node.createdAt > sinceTime) changeType = ChangeType.Add;
-		else if (node.current.createdAt > sinceTime) changeType = ChangeType.Edit;
+		if (node.createdAt > sinceTime) changeType = ChangeType.add;
+		else if (node.current.createdAt > sinceTime) changeType = ChangeType.edit;
 
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);
@@ -130,7 +129,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		let ratingNode = node;
 		let ratingNodePath = path;
 		if (combinedWithParentArgument) {
-			mainRatingType = "impact";
+			mainRatingType = NodeRatingType.impact;
 			ratingNode = parent;
 			ratingNodePath = parentPath;
 		}
@@ -138,7 +137,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		// let mainRating_mine = GetRatingValue(ratingNode._id, mainRatingType, MeID());
 		const mainRating_mine = Watch(() => GetRatingAverage_AtPath(ratingNode, mainRatingType, new RatingFilter({ includeUser: MeID() }))); */
 
-		const useReasonScoreValuesForThisNode = store.main.maps.weighting == WeightingType.ReasonScore && (node.type == MapNodeType.Argument || node.type == MapNodeType.Claim);
+		const useReasonScoreValuesForThisNode = store.main.maps.weighting == WeightingType.reasonScore && (node.type == MapNodeType.argument || node.type == MapNodeType.claim);
 		const reasonScoreValues = useReasonScoreValuesForThisNode && RS_GetAllValues(node.id, path, true) as ReasonScoreValues_RSPrefix;
 
 		const backgroundFillPercent = GetFillPercent_AtPath(ratingNode, ratingNodePath, null);
@@ -147,18 +146,18 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const form = GetNodeForm(node, path);
 		const {showReasonScoreValues} = store.main.maps;
 
-		/* const playingTimeline_currentStepRevealNodes = GetPlayingTimelineCurrentStepRevealNodes(map.id);
+		/*/*const playingTimeline_currentStepRevealNodes = GetPlayingTimelineCurrentStepRevealNodes(map.id);
 		let revealedByCurrentTimelineStep = playingTimeline_currentStepRevealNodes.Contains(path);
 		if (combinedWithParentArgument) {
 			revealedByCurrentTimelineStep = revealedByCurrentTimelineStep || playingTimeline_currentStepRevealNodes.Contains(parentPath);
-		} */
+		}*#/
 		const nodeRevealHighlightTime = GetNodeRevealHighlightTime();
 		const timeSinceRevealedByTimeline_self = GetTimeSinceNodeRevealedByPlayingTimeline(map.id, path, true, true);
 		const timeSinceRevealedByTimeline_parent = GetTimeSinceNodeRevealedByPlayingTimeline(map.id, parentPath, true, true);
 		let timeSinceRevealedByTimeline = timeSinceRevealedByTimeline_self;
 		if (combinedWithParentArgument && timeSinceRevealedByTimeline_parent != null) {
 			timeSinceRevealedByTimeline = timeSinceRevealedByTimeline != null ? Math.min(timeSinceRevealedByTimeline, timeSinceRevealedByTimeline_parent) : timeSinceRevealedByTimeline_parent;
-		}
+		}*/
 
 		// the rest
 		// ==========
@@ -195,11 +194,11 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const pathNodeIDs = GetPathNodeIDs(path);
 		//const isSubnode = IsNodeSubnode(node);
 
-		const nodeReversed = form == ClaimForm.Negation;
+		const nodeReversed = form == ClaimForm.negation;
 
 		const leftPanelShow = nodeView?.selected || hovered; // || local_selected;
 		const panelToShow = hoverPanel || local_openPanel || nodeView?.openPanel;
-		const subPanelShow = node.type == MapNodeType.Claim && (node.current.references || node.current.quote || node.current.media);
+		const subPanelShow = node.type == MapNodeType.claim && (node.current.references || node.current.quote || node.current.media);
 		const bottomPanelShow = leftPanelShow && panelToShow;
 		let expanded = nodeView?.expanded ?? false;
 
@@ -274,8 +273,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					onMouseLeave={onMouseLeave}
 					{...(dragInfo && dragInfo.provided.draggableProps)} // {...(dragInfo && dragInfo.provided.dragHandleProps)} // drag-handle is attached to just the TitlePanel, below
 					style={E(
-						timeSinceRevealedByTimeline != null && timeSinceRevealedByTimeline <= nodeRevealHighlightTime &&
-							{boxShadow: `rgba(255,255,0,${1 - (timeSinceRevealedByTimeline / nodeRevealHighlightTime)}) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px`},
+						/*timeSinceRevealedByTimeline != null && timeSinceRevealedByTimeline <= nodeRevealHighlightTime &&
+							{boxShadow: `rgba(255,255,0,${1 - (timeSinceRevealedByTimeline / nodeRevealHighlightTime)}) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px`},*/
 						style,
 						dragInfo && dragInfo.provided.draggableProps.style,
 						asDragPreview && {zIndex: zIndexes.draggable},
@@ -415,21 +414,21 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 				width, minWidth: (widthOverride | 0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
 				padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 			}}>
-				{ratingTypes.Contains(panelToShow) && (()=>{
-					if (["impact", "relevance"].Contains(panelToShow) && node.type == MapNodeType.Claim) {
+				{GetValues(NodeRatingType).Contains(panelToShow) && (()=>{
+					if (["impact", "relevance"].Contains(panelToShow) && node.type == MapNodeType.claim) {
 						const argumentNode = parent;
 						const argumentPath = SlicePath(path, 1);
-						const ratings = GetRatings(argumentNode.id, panelToShow as RatingType);
-						return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as RatingType} ratings={ratings}/>;
+						const ratings = GetRatings(argumentNode.id, panelToShow as NodeRatingType);
+						return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as NodeRatingType} ratings={ratings}/>;
 					}
-					const ratings = GetRatings(node.id, panelToShow as RatingType);
-					return <RatingsPanel node={node} path={path} ratingType={panelToShow as RatingType} ratings={ratings}/>;
+					const ratings = GetRatings(node.id, panelToShow as NodeRatingType);
+					return <RatingsPanel node={node} path={path} ratingType={panelToShow as NodeRatingType} ratings={ratings}/>;
 				})()}
-				{renderPanel("definitions", show=><DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{show, node, path, hoverTermID}}
+				{renderPanel("definitions", show=><DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{show, map, node, path, hoverTermID}}
 						openTermID={nodeView?.openTermID}
 						onHoverTerm={termID=>onTermHover(termID)}
 						onClickTerm={termID=>runInAction("NodeUI_Inner_onClickTerm", ()=>nodeView.openTermID = termID)}/>)}
-				{renderPanel("phrasings", show=><PhrasingsPanel {...{show, node, path}}/>)}
+				{/*renderPanel("phrasings", show=><PhrasingsPanel {...{show, node, path}}/>)*/}
 				{renderPanel("discussion", show=><DiscussionPanel {...{show}}/>)}
 				{renderPanel("social", show=><SocialPanel {...{show}}/>)}
 				{renderPanel("tags", show=><TagsPanel {...{show, map, node, path}}/>)}
@@ -445,14 +444,14 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 class ReasonScoreValueMarkers extends BaseComponent<{node: MapNodeL3, reasonScoreValues: ReasonScoreValues_RSPrefix, combinedWithParentArgument: boolean}, {}> {
 	render() {
 		const {node, reasonScoreValues, combinedWithParentArgument} = this.props;
-		const mainScore = node.type == MapNodeType.Argument ? RS_CalculateTruthScoreComposite(node.id) : RS_CalculateTruthScore(node.id);
+		const mainScore = node.type == MapNodeType.argument ? RS_CalculateTruthScoreComposite(node.id) : RS_CalculateTruthScore(node.id);
 		const {rs_argTruthScoreComposite, rs_argWeightMultiplier, rs_argWeight, rs_claimTruthScore, rs_claimBaseWeight} = reasonScoreValues;
 		return (
 			<div className="clickThrough" style={{position: "absolute", top: "100%", width: "100%", zIndex: 1, textAlign: "center", fontSize: 14}}>
-				{node.type == MapNodeType.Argument && `Truth score: ${mainScore.ToPercentStr()}${
+				{node.type == MapNodeType.argument && `Truth score: ${mainScore.ToPercentStr()}${
 					` Weight: [...]x${rs_argWeightMultiplier.RoundTo_Str(0.01)} = ${rs_argWeight.RoundTo_Str(0.01)}`
 				}`}
-				{node.type == MapNodeType.Claim && `Truth score: ${mainScore.ToPercentStr()}${
+				{node.type == MapNodeType.claim && `Truth score: ${mainScore.ToPercentStr()}${
 					combinedWithParentArgument
 						? ` Weight: ${rs_claimBaseWeight.RoundTo_Str(0.01)}x${rs_argWeightMultiplier.RoundTo_Str(0.01)} = ${rs_argWeight.RoundTo_Str(0.01)}`
 						: ""

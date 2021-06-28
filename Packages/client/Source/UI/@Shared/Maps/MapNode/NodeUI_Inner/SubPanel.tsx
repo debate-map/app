@@ -71,9 +71,9 @@ export class SubPanel_Media extends BaseComponentPlus({} as {mediaAttachment: Me
 		return (
 			<div style={{position: "relative"}}>
 				{/*<Row mt={5} style={{display: "flex", alignItems: "center"}}>*/}
-				{media.type == MediaType.Image &&
+				{media.type == MediaType.image &&
 					<img src={media.url} style={{width: mediaAttachment.previewWidth != null ? `${mediaAttachment.previewWidth}%` : null, maxWidth: "100%"}}/>}
-				{media.type == MediaType.Video &&
+				{media.type == MediaType.video &&
 					<YoutubePlayerUI videoID={ParseYoutubeVideoID(media.url)} /*startTime={0}*/ heightVSWidthPercent={.5625}
 						onPlayerInitialized={player=> {
 							player.GetPlayerUI().style.position = "absolute";

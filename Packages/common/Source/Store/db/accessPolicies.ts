@@ -1,7 +1,7 @@
 import {IsNaN} from "web-vcore/nm/js-vextensions";
 import {StoreAccessor, GetDoc} from "web-vcore/node_modules/mobx-graphlink";
-import {AccessPolicy} from "./accessPolicies/@AccessPolicy.js";
-import {NodeChildLink} from "./nodeChildLinks/@NodeChildLink.js";
+import {AccessPolicy} from "./accessPolicies/@AccessPolicy";
+import {NodeChildLink} from "./nodeChildLinks/@NodeChildLink";
 
 export const GetAccessPolicy = StoreAccessor(s=>(id: string): AccessPolicy=>{
 	if (id == null || IsNaN(id)) return null;

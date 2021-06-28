@@ -47,5 +47,7 @@ export const webpackConfig = CreateWebpackConfig({
 		// custom
 		{test: /dm_common[/\\]Source[/\\].*\.tsx?$/},
 		//{test: /@debate-map[/\\]server-link[/\\]Source[/\\].*\.tsx?$/},
+
+		// todo: fix that the "web-vcore/nm" folder is not handled properly, when recompiling one of its files (the recompiling uses dm_common's ts-config instead of web-vcore/nm's, which causes errors)
 	],
 });

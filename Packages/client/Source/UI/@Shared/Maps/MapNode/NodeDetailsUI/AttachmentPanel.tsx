@@ -16,29 +16,29 @@ export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {
 
 		return (
 			<>
-				{newData.type != MapNodeType.Claim &&
+				{newData.type != MapNodeType.claim &&
 					<Text>Only claim nodes can have attachments.</Text>}
-				{newData.type == MapNodeType.Claim &&
+				{newData.type == MapNodeType.claim &&
 				<>
-					<Row mb={attachmentType == AttachmentType.None ? 0 : 5}>
+					<Row mb={attachmentType == AttachmentType.none ? 0 : 5}>
 						<Text>Type:</Text>
 						<Select ml={5} options={GetEntries(AttachmentType)} enabled={enabled} value={attachmentType} onChange={val=>{
 							ResetNodeRevisionAttachment(newRevisionData, val);
 							Change();
 						}}/>
 					</Row>
-					{attachmentType == AttachmentType.Equation &&
+					{attachmentType == AttachmentType.equation &&
 						<EquationEditorUI creating={forNew} editing={enabled}
 							baseData={newRevisionData.equation} onChange={val=>Change(newRevisionData.equation = val)}/>}
-					{attachmentType == AttachmentType.Quote &&
+					{attachmentType == AttachmentType.quote &&
 						<QuoteInfoEditorUI /*ref={c=>this.quoteEditor = c}*/ creating={forNew} editing={enabled}
 							baseData={newRevisionData.quote} onChange={val=>Change(newRevisionData.quote = val)}
 							showPreview={false} justShowed={false}/>}
-					{attachmentType == AttachmentType.References &&
+					{attachmentType == AttachmentType.references &&
 						<ReferencesAttachmentEditorUI creating={forNew} editing={enabled}
 							baseData={newRevisionData.references} onChange={val=>Change(newRevisionData.references = val)}
 							showPreview={false} justShowed={false}/>}
-					{attachmentType == AttachmentType.Media &&
+					{attachmentType == AttachmentType.media &&
 						<MediaAttachmentEditorUI creating={forNew} editing={enabled}
 							baseData={newRevisionData.media} onChange={val=>Change(newRevisionData.media = val)}/>}
 				</>}

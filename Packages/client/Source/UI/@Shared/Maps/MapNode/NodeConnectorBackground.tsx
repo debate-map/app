@@ -3,7 +3,7 @@ import {BaseComponent, SimpleShouldUpdate, WarnOfTransientObjectProps} from "web
 import {HSLA} from "web-vcore";
 import {Fragment} from "react";
 import {MapNodeL3} from "dm_common";
-import {GetNodeColor} from "Store/firebase_ext/nodes";
+import {GetNodeColor} from "Store/db_ext/nodes";
 import {ES} from "Utils/UI/GlobalStyles";
 
 type Props = {
@@ -36,7 +36,7 @@ export class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					const child = nodeChildren.FirstOrX(a=>a.id == childID);
 					if (child == null) return null;
 
-					const backgroundColor = GetNodeColor(/* node.type == MapNodeType.Argument ? node : */ child, "raw");
+					const backgroundColor = GetNodeColor(/* node.type == MapNodeType.argument ? node : */ child, "raw");
 
 					/* var start = mainBoxOffset;
 					var startControl = start.Plus(30, 0);

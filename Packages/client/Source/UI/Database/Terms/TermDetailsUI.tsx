@@ -108,7 +108,7 @@ export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: st
 	let newTerm = new Term(E({
 		name: "",
 		forms: [""],
-		type: TermType.CommonNoun,
+		type: TermType.commonNoun,
 		definition: "",
 	}, initialData));
 	const getCommand = ()=>new AddTerm({term: newTerm});

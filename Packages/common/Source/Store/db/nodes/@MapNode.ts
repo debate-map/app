@@ -1,8 +1,8 @@
 import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink";
-import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
-import {MapType} from "../maps/@Map.js";
-import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
+import {AccessPolicy} from "../accessPolicies/@AccessPolicy";
+import {MapType} from "../maps/@Map";
+import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink";
 import {ArgumentType, MapNodeRevision} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
 

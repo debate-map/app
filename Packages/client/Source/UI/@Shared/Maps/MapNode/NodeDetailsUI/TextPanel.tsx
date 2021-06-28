@@ -8,7 +8,7 @@ import {NodeTermsUI} from "./TextPanel/NodeTermsUI";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
 import {GetAttachmentType, AttachmentType} from "dm_common";
 import {MapNodeType} from "dm_common";
-import {MapNodeL2, ChildEntry, ClaimForm} from "dm_common";
+import {MapNodeL2, NodeChildLink, ClaimForm} from "dm_common";
 import {MapNodeRevision_titlePattern, ArgumentType, GetArgumentTypeDisplayText} from "dm_common";
 import {TermAttachment} from "dm_common";
 import {GetDisplayPolarity} from "dm_common";
@@ -21,12 +21,12 @@ export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 		const sharedProps = this.props;
 		return (
 			<>
-				{(attachmentType == AttachmentType.None || attachmentType == AttachmentType.References) &&
+				{(attachmentType == AttachmentType.none || attachmentType == AttachmentType.references) &&
 				<>
 					<Title_Base {...sharedProps}/>
-					{newData.type == MapNodeType.Claim &&
+					{newData.type == MapNodeType.claim &&
 						<OtherTitles {...sharedProps}/>}
-					{newData.type == MapNodeType.Argument &&
+					{newData.type == MapNodeType.argument &&
 						<ArgumentInfo {...sharedProps}/>}
 				</>}
 				<Row mt={5}>
@@ -34,7 +34,7 @@ export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 					<TextInput enabled={enabled} style={{width: "100%"}}
 						value={newRevisionData.note} onChange={val=>Change(newRevisionData.note = val)}/>
 				</Row>
-				{(attachmentType == AttachmentType.None || attachmentType == AttachmentType.References || attachmentType == AttachmentType.Equation) &&
+				{(attachmentType == AttachmentType.none || attachmentType == AttachmentType.references || attachmentType == AttachmentType.equation) &&
 					<NodeTermsUI {...sharedProps}/>}
 			</>
 		);
@@ -52,7 +52,7 @@ class Title_Base extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 					<Text>Title (base): </Text>
 					<TitleInput {...this.props} titleKey="base" innerRef={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM && a.DOM_HTML.focus())}/>
 				</Row>
-				{forNew && newData.type == MapNodeType.Argument &&
+				{forNew && newData.type == MapNodeType.argument &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
 						<Pre allowWrap={true}>{`
 An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
@@ -71,8 +71,8 @@ The detailed version of the argument will be embodied in its premises/child-clai
 	}
 }
 
-function WillNodeUseQuestionTitleHere(node: MapNodeL2, linkData: ChildEntry) {
-	return node.type == MapNodeType.Claim && !node.current.quote && linkData && linkData.form == ClaimForm.YesNoQuestion;
+function WillNodeUseQuestionTitleHere(node: MapNodeL2, linkData: NodeChildLink) {
+	return node.type == MapNodeType.claim && !node.current.quote && linkData && linkData.form == ClaimForm.yesNoQuestion;
 }
 
 class OtherTitles extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
@@ -105,7 +105,7 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: string, innerRef?: a
 		let {titleKey, newDataAsL2, newRevisionData, forNew, enabled, newLinkData, Change} = this.props;
 		let extraProps = {};
 		if (titleKey == "base") {
-			//const hasOtherTitles = newDataAsL2.type == MapNodeType.Claim && newDataAsL2 == AttachmentType.None;
+			//const hasOtherTitles = newDataAsL2.type == MapNodeType.claim && newDataAsL2 == AttachmentType.none;
 			const hasOtherTitlesEntered = newRevisionData.titles.negation || newRevisionData.titles.yesNoQuestion;
 			const willUseYesNoTitleHere = WillNodeUseQuestionTitleHere(newDataAsL2, newLinkData);
 			extraProps = {
@@ -151,8 +151,8 @@ class ArgumentInfo extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 			<Row mt={5}>
 				<Pre>Type: If </Pre>
 				<Select options={GetEntries(ArgumentType, name=>GetArgumentTypeDisplayText(ArgumentType[name]))}
-					enabled={enabled} value={newRevisionData.argumentType} onChange={val=>{
-						Change(newRevisionData.argumentType = val);
+					enabled={enabled} value={newData.argumentType} onChange={val=>{
+						Change(newData.argumentType = val);
 					}}/>
 				<Pre> premises are true, they impact the parent.</Pre>
 			</Row>

@@ -7,7 +7,7 @@ import {store} from "Store";
 import {GetSelectedDebatesPageMap} from "Store/main/debates";
 import {ES} from "Utils/UI/GlobalStyles";
 import {HSLA, Observer, PageContainer} from "web-vcore";
-import {MapType, MeID, GetUserPermissionGroups, CanGetBasicPermissions, GetMaps_Private, GetMaps_Public, MapVisibility, IsUserCreatorOrMod, GetMaps} from "dm_common";
+import {MapType, MeID, GetUserPermissionGroups, CanGetBasicPermissions, GetMaps_Private, GetMaps_Public, IsUserCreatorOrMod, GetMaps} from "dm_common";
 import {GADDemo} from "../../@GAD/GAD";
 import {ShowAddMapDialog} from "../../@Shared/Maps/AddMapDialog";
 import {MapEntryUI} from "../../@Shared/Maps/MapEntryUI";
@@ -24,14 +24,14 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 		const userID = MeID();
 		//const permissions = GetUserPermissionGroups(userID);
 		const storeNode = store.main.debates;
-		//const maps_allOfType = (type == MapType.Private ? GetMaps_Private(true) : GetMaps_Public(true));
+		//const maps_allOfType = (type == MapType.private ? GetMaps_Private(true) : GetMaps_Public(true));
 		const maps_allOfType = GetMaps(true).filter(a=>a);
 		const maps_visible = maps_allOfType.filter(map=>{
-			if (map.visibility == MapVisibility.Unlisted) {
+			/*if (map.visibility == MapVisibility.Unlisted) {
 				const creatorOrMod = IsUserCreatorOrMod(MeID(), map);
-				const mapEditor = map.editorIDs?.includes(MeID()) ?? false;
+				const mapEditor = map.editors?.includes(MeID()) ?? false;
 				if (!creatorOrMod && !mapEditor) return false;
-			}
+			}*/
 			return true;
 		});
 		// maps = maps.OrderByDescending(a => ToNumber(a.edits, 0));

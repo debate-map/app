@@ -55,7 +55,7 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 							<Select options={changesSince_options} value={`${showChangesSince_type}_${showChangesSince_visitOffset}`} onChange={val=>{
 								runInAction("ActionBar_Right.ShowChangesSince.onChange", ()=>{
 									const parts = val.split("_");
-									mapState.showChangesSince_type = ToNumber(parts[0]);
+									mapState.showChangesSince_type = parts[0];
 									mapState.showChangesSince_visitOffset = FromJSON(parts[1]);
 								});
 							}}/>

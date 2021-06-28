@@ -1,20 +1,21 @@
 import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {Link, Observer, ParseSegmentsForPatterns} from "web-vcore";
-import {MapNodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term} from "dm_common";
+import {MapNodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term, Map} from "dm_common";
 
 
 import {GetSegmentsForTerms} from "../../NodeUI_Inner/TitlePanel";
+import {GetCurrentRevision} from "Store/db_ext/nodes";
 
 const termsPlaceholder = [];
 
 @Observer
 export class DefinitionsPanel extends BaseComponentPlus(
-	{} as {show: boolean, node: MapNodeL2, path: string, hoverTermID?: string, openTermID?: string, onHoverTerm?: (termID: string)=>void, onClickTerm?: (termID: string)=>void},
+	{} as {show: boolean, map: Map, node: MapNodeL2, path: string, hoverTermID?: string, openTermID?: string, onHoverTerm?: (termID: string)=>void, onClickTerm?: (termID: string)=>void},
 	{/* localHoverTerm: Term, localClickTerm: Term */},
 ) {
 	render() {
-		const {show, node, path, hoverTermID, openTermID, onHoverTerm, onClickTerm} = this.props;
+		const {map, show, node, path, hoverTermID, openTermID, onHoverTerm, onClickTerm} = this.props;
 
 		const displayText = GetNodeDisplayText(node, path);
 
@@ -22,7 +23,7 @@ export class DefinitionsPanel extends BaseComponentPlus(
 		/*const segments = ParseSegmentsForPatterns(displayText, [
 			{name: "term", regex: /{(.+?)\}\[(.+?)\]/},
 		]);*/
-		const termsToSearchFor = GetTermsAttached(node.currentRevision).filter(a=>a);
+		const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map.id).id).filter(a=>a);
 		const segments = GetSegmentsForTerms(displayText, termsToSearchFor);
 
 		//let terms = segments.filter(a=>a.patternMatched?.name == "term").map(a=>GetTerm(a.textParts[2]));

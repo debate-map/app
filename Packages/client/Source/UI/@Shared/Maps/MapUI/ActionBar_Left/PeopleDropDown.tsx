@@ -33,9 +33,9 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 						<InfoButton ml={5} text="Editors have extended permissions, like being able to contribute anywhere in the map. (use node permissions to restrict other users)"/>
 						{creatorOrMod &&
 						<Button ml="auto" text="Add editor" onClick={()=>{
-							const newEditors = CloneWithPrototypes(map.editorIDs || []);
+							const newEditors = CloneWithPrototypes(map.editors || []);
 							newEditors.push(userIDPlaceholder);
-							new UpdateMapDetails({id: map.id, updates: {editorIDs: newEditors}}).Run();
+							new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).Run();
 						}}/>}
 					</Row>
 					{editorIDs.map((editorID, index)=>{
@@ -44,9 +44,9 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 						return (
 							<Row key={index} mt={5}>
 								<UserPicker value={editorID} onChange={val=> {
-									const newEditors = CloneWithPrototypes(map.editorIDs);
+									const newEditors = CloneWithPrototypes(map.editors);
 									newEditors[index] = val;
-									new UpdateMapDetails({id: map.id, updates: {editorIDs: newEditors}}).Run();
+									new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).Run();
 								}}>
 									<Button enabled={creatorOrMod} text={editorID != userIDPlaceholder ? `${displayName} (id: ${editorID})` : "(click to select user)"} style={{width: "100%"}}/>
 								</UserPicker>
@@ -56,9 +56,9 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 										title: `Remove editor "${displayName}"`, cancelButton: true,
 										message: `Remove editor "${displayName}" (id: ${editorID})?`,
 										onOK: ()=>{
-											const newEditors = CloneWithPrototypes(map.editorIDs);
+											const newEditors = CloneWithPrototypes(map.editors);
 											newEditors.RemoveAt(index);
-											new UpdateMapDetails({id: map.id, updates: {editorIDs: newEditors}}).Run();
+											new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).Run();
 										},
 									});
 								}}/>}

@@ -64,6 +64,6 @@ export const GetPathsToChangedDescendantNodes_WithChangeTypes = StoreAccessor(s=
 export const GetNodeChangeType = StoreAccessor(s=>(node: MapNode, sinceTime: number, includeAcknowledgement = true)=>{
 	const lastAcknowledgementTime = includeAcknowledgement ? GetLastAcknowledgementTime(node.id) : 0;
 	const sinceTimeForNode = CE(sinceTime).KeepAtLeast(lastAcknowledgementTime);
-	if (node.createdAt >= sinceTimeForNode) return ChangeType.Add;
-	return ChangeType.Edit;
+	if (node.createdAt >= sinceTimeForNode) return ChangeType.add;
+	return ChangeType.edit;
 });

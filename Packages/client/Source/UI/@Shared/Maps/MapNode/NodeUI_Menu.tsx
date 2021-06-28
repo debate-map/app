@@ -4,11 +4,10 @@ import {SlicePath} from "web-vcore/nm/mobx-graphlink";
 import {BaseComponent, BaseComponentPlus, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
 import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu";
 import {store} from "Store";
-import {GetPathsToNodesChangedSinceX} from "Store/firebase_ext/mapNodeEditTimes";
+import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEditTimes";
 import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
-import {GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState";
-import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, HolderType, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, CanContributeToNode, GetUserPermissionGroups, IsUserCreatorOrMod, Map} from "dm_common";
+import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, HolderType, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map} from "dm_common";
 import {Observer} from "web-vcore";
 import {styles} from "../../../../Utils/UI/GlobalStyles";
 import {ShowSignInPopup} from "../../NavBar/UserPanel";
@@ -16,7 +15,6 @@ import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog";
 import {MI_DeleteContainerArgument} from "./NodeUI_Menu/MI_DeleteContainerArgument";
 import {MI_DeleteNode} from "./NodeUI_Menu/MI_DeleteNode";
 import {MI_ExportSubtree} from "./NodeUI_Menu/MI_ExportSubtree";
-import {MI_ImportSubtree} from "./NodeUI_Menu/MI_ImportSubtree";
 import {MI_PasteAsLink} from "./NodeUI_Menu/MI_PasteAsLink";
 import {MI_UnlinkContainerArgument} from "./NodeUI_Menu/MI_UnlinkContainerArgument";
 import {MI_UnlinkNode} from "./NodeUI_Menu/MI_UnlinkNode";
@@ -44,7 +42,8 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const parent = GetParentNodeL3(path);
 		const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
 		if (map) {
-			const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
+			//const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
+			const sinceTime = 0;
 			const pathsToChangedNodes = GetPathsToNodesChangedSinceX(map.id, sinceTime);
 			var pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == outerPath || a.startsWith(`${outerPath}/`)); // also include self, for this
 		}
@@ -65,22 +64,22 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		let validChildTypes = GetValidNewChildTypes(node, holderType, permissions);
 		const componentBox = holderType != null;
 		if (holderType) {
-			validChildTypes = validChildTypes.Except(MapNodeType.Claim);
+			validChildTypes = validChildTypes.Except(MapNodeType.claim);
 		} else {
-			validChildTypes = validChildTypes.Except(MapNodeType.Argument);
+			validChildTypes = validChildTypes.Except(MapNodeType.argument);
 		}
 
-		const formForClaimChildren = node.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
+		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base;
 
 		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
 		return (
 			<div>
-				{CanContributeToNode(userID, node.id) && !inList && validChildTypes.map(childType=>{
+				{/*CanContributeToNode(userID, node.id) &&*/ !inList && validChildTypes.map(childType=>{
 					const childTypeInfo = MapNodeType_Info.for[childType];
 					// let displayName = GetMapNodeTypeDisplayName(childType, node, form);
-					const polarities = childType == MapNodeType.Argument ? [Polarity.Supporting, Polarity.Opposing] : [null];
+					const polarities = childType == MapNodeType.argument ? [Polarity.supporting, Polarity.opposing] : [null];
 					return polarities.map(polarity=>{
-						const displayName = GetMapNodeTypeDisplayName(childType, node, ClaimForm.Base, polarity);
+						const displayName = GetMapNodeTypeDisplayName(childType, node, ClaimForm.base, polarity);
 						return (
 							<VMenuItem key={`${childType}_${polarity}`} text={`Add ${displayName}`} style={styles.vMenuItem}
 								onClick={e=>{
@@ -101,7 +100,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							if (userID == null) return ShowSignInPopup();
 							ShowAddSubnodeDialog(mapID, node, path);
 						}}/> */}
-				{IsUserCreatorOrMod(userID, parent) && node.type == MapNodeType.Claim && IsSinglePremiseArgument(parent) && !componentBox &&
+				{IsUserCreatorOrMod(userID, parent) && node.type == MapNodeType.claim && IsSinglePremiseArgument(parent) && !componentBox &&
 					<VMenuItem text="Convert to multi-premise" style={styles.vMenuItem}
 						onClick={async e=>{
 							if (e.button != 0) return;
@@ -109,7 +108,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							await new SetNodeIsMultiPremiseArgument({nodeID: parent.id, multiPremiseArgument: true}).Run();
 						}}/>}
 				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)
-					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && !componentBox &&
+					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.claim).length == 1 && !componentBox &&
 					<VMenuItem text="Convert to single-premise" style={styles.vMenuItem}
 						onClick={async e=>{
 							if (e.button !== 0) return;
@@ -145,7 +144,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							}
 
 							/* let pathToCut = path;
-							if (node.type == MapNodeType.Claim && combinedWithParentArg) {
+							if (node.type == MapNodeType.claim && combinedWithParentArg) {
 								pathToCut = SlicePath(path, 1);
 							} */
 							ACTCopyNode(path, true);
@@ -161,7 +160,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 							}
 
 							/* let pathToCopy = path;
-							if (node.type == MapNodeType.Claim && combinedWithParentArg) {
+							if (node.type == MapNodeType.claim && combinedWithParentArg) {
 								pathToCopy = SlicePath(path, 1);
 							} */
 							ACTCopyNode(path, false);
@@ -184,7 +183,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						}
 					}}/> */}
 				<MI_ExportSubtree {...sharedProps}/>
-				<MI_ImportSubtree {...sharedProps}/>
+				{/*<MI_ImportSubtree {...sharedProps}/>*/}
 				<MI_UnlinkContainerArgument {...sharedProps}/>
 				<MI_UnlinkNode {...sharedProps}/>
 				<MI_DeleteContainerArgument {...sharedProps}/>

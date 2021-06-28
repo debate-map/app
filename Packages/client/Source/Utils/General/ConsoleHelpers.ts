@@ -1,9 +1,6 @@
-import {GetPlayingTimeline, GetSelectedTimeline} from "Store/main/maps/mapStates/$mapState";
-import {GetOpenMapID} from "Store/main";
-import {GetAsync, MergeDBUpdates, GetDocs, MergeDBUpdates_Multi} from "web-vcore/nm/mobx-graphlink";
-import {Clone, ToNumber, DEL, E, OmitIfNull, OMIT} from "web-vcore/nm/js-vextensions";
-import {GetNodeL2, GetMaps, UpdateMapDetails, MapVisibility} from "dm_common";
-import {DeleteNodeSubtree} from "dm_common";
+import {DeleteNodeSubtree, GetMaps, GetNodeL2, UpdateMapDetails} from "dm_common";
+import {E} from "web-vcore/nm/js-vextensions";
+import {GetAsync, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink";
 
 /*
 Basic db-upgrade procedure:
@@ -47,32 +44,6 @@ export function StoreTempData(data: Object) {
 	return mergedDBUpdates;
 } */
 
-export async function GetDBUpdatesFor_MakeNodesPrivate_Recursive(mapID: string, nodeID: string, runInfo = {nodesVisited: new Set<string>()}) {
-	if (runInfo.nodesVisited.has(nodeID)) return;
-	runInfo.nodesVisited.add(nodeID);
-	const node = await GetAsync(()=>GetNodeL2(nodeID));
-
-	let dbUpdates = {};
-	// if (node.ownerMapID != mapID) {
-	if (node.ownerMapID == null) {
-		dbUpdates[`nodes/${nodeID}/.ownerMapID`] = mapID;
-	}
-	if (node.children) {
-		for (const childID of node.children.VKeys()) {
-			dbUpdates = MergeDBUpdates(dbUpdates, await GetDBUpdatesFor_MakeNodesPrivate_Recursive(mapID, childID));
-		}
-	}
-	return dbUpdates;
-}
-
-export async function GetDBUpdatesFor_DeleteNodeSubtree(nodeID: string, maxDeletes: number, maxIterations?: number) {
-	maxIterations = maxIterations ?? maxDeletes * 10; // there shouldn't be more than about 10 mobx-loops per node-delete
-
-	const command = new DeleteNodeSubtree({nodeID, maxDeletes});
-	await command.Validate_Async({maxIterations});
-	return command.GetDBUpdates();
-}
-
 /*export async function GetDBUpdatesFor_MediaRefactor() {
 	const revsWithImg = await GetAsync(()=>GetDocs({
 		queryOps: [new WhereOp("image.id", ">", "")],
@@ -106,14 +77,3 @@ export async function GetDBUpdatesFor_DeleteNodeSubtree(nodeID: string, maxDelet
 	StoreTempData({revsWithImg, images, dbUpdates_revs, dbUpdates_images, dbUpdates});
 	return dbUpdates;
 }*/
-
-export async function GetDBUpdatesFor_AddMapVisibilityField() {
-	const maps = await GetAsync(()=>GetMaps());
-	let dbUpdates = {};
-	for (const map of maps) {
-		const command = new UpdateMapDetails({id: map.id, updates: {visibility: MapVisibility.Visible}});
-		await command.Validate_Async();
-		dbUpdates = MergeDBUpdates(dbUpdates, command.GetDBUpdates());
-	}
-	return dbUpdates;
-}

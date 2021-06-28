@@ -7,15 +7,14 @@ import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView";
 import {ES} from "Utils/UI/GlobalStyles";
 import {InfoButton, Link, observer_simple} from "web-vcore";
 import {NodeDetailsUI} from "../../NodeDetailsUI";
-import {MapNodeType, GetMapNodeTypeDisplayName} from "dm_common";
-import {Polarity, MapNode, ClaimForm, ChildEntry} from "dm_common";
+import {MapNodeType, GetMapNodeTypeDisplayName, GetDefaultAccessPolicyID_ForNode, NodeChildLink} from "dm_common";
+import {Polarity, MapNode, ClaimForm} from "dm_common";
 import {GetMap} from "dm_common";
 import {GetNode} from "dm_common";
 import {MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern} from "dm_common";
 import {AddArgumentAndClaim} from "dm_common";
 import {AddChildNode} from "dm_common";
 import {GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3} from "dm_common";
-import {GetDefaultAccessPolicyID_ForNode} from "dm_common/Source/Store/db/accessPolicies";
 
 export class AddChildHelper {
 	constructor(parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string) {
@@ -28,29 +27,28 @@ export class AddChildHelper {
 
 		this.node = new MapNode({
 			accessPolicy: GetDefaultAccessPolicyID_ForNode(),
-			parents: {[this.Node_ParentID]: {_: true}},
+			//parents: {[this.Node_ParentID]: {_: true}},
 			type: childType,
-			ownerMapID: OmitIfFalsy(parentNode.ownerMapID),
+			//ownerMapID: OmitIfFalsy(parentNode.ownerMapID),
 		});
 		this.node_revision = new MapNodeRevision(map.nodeDefaults);
 		this.node_link = E(
-			{_: true},
-			childType == MapNodeType.Claim && {form: parentNode.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base},
-			childType == MapNodeType.Argument && {polarity: childPolarity},
-		) as ChildEntry;
+			childType == MapNodeType.claim && {form: parentNode.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base},
+			childType == MapNodeType.argument && {polarity: childPolarity},
+		) as NodeChildLink;
 
-		if (childType == MapNodeType.Argument) {
-			this.node_revision.argumentType = ArgumentType.All;
+		if (childType == MapNodeType.argument) {
+			this.node.argumentType = ArgumentType.all;
 			this.subNode = new MapNode({
 				//ownerMapID: OmitIfFalsy(parentNode.ownerMapID),
 				accessPolicy: GetDefaultAccessPolicyID_ForNode(),
-				type: MapNodeType.Claim, creator: userID,
+				type: MapNodeType.claim, creator: userID,
 			});
 			this.subNode_revision = new MapNodeRevision(E(map.nodeDefaults, {titles: {base: title}}));
-			this.subNode_link = {_: true, form: ClaimForm.Base} as ChildEntry;
+			this.subNode_link = {form: ClaimForm.base} as NodeChildLink;
 		} else {
 			let usedTitleKey = "base";
-			if (childType == MapNodeType.Claim) {
+			if (childType == MapNodeType.claim) {
 				usedTitleKey = ClaimForm[this.node_link.form].replace(/^./, ch=>ch.toLowerCase());
 			}
 			this.node_revision.titles[usedTitleKey] = title;
@@ -63,22 +61,22 @@ export class AddChildHelper {
 	get Node_ParentID() { return this.node_parentPath.split("/").Last(); }
 	node: MapNode;
 	node_revision: MapNodeRevision;
-	node_link: ChildEntry;
+	node_link: NodeChildLink;
 	subNode?: MapNode;
 	subNode_revision?: MapNodeRevision;
-	subNode_link: ChildEntry;
+	subNode_link: NodeChildLink;
 
 	GetCommand(): AddArgumentAndClaim | AddChildNode {
 		let result;
-		if (this.node.type == MapNodeType.Argument) {
+		if (this.node.type == MapNodeType.argument) {
 			result = new AddArgumentAndClaim({
 				mapID: this.mapID,
-				argumentParentID: this.Node_ParentID, argumentNode: this.node.Excluding("parents") as MapNode, argumentRevision: this.node_revision, argumentLink: this.node_link,
+				argumentParentID: this.Node_ParentID, argumentNode: this.node, argumentRevision: this.node_revision, argumentLink: this.node_link,
 				claimNode: this.subNode, claimRevision: this.subNode_revision, claimLink: this.subNode_link,
 			});
 		} else {
 			result = new AddChildNode({
-				mapID: this.mapID, parentID: this.Node_ParentID, node: this.node.Excluding("parents") as MapNode, revision: this.node_revision, link: this.node_link,
+				mapID: this.mapID, parentID: this.Node_ParentID, node: this.node, revision: this.node_revision, link: this.node_link,
 			});
 		}
 		return result;
@@ -96,7 +94,7 @@ export class AddChildHelper {
 
 		const command = this.GetCommand();
 		let runResult_copy;
-		if (this.node.type == MapNodeType.Argument) {
+		if (this.node.type == MapNodeType.argument) {
 			if (!(command instanceof AddArgumentAndClaim)) throw new Error("Expected AddArgumentAndClaim command.");
 			const runResult = runResult_copy = await command.Run();
 
@@ -152,15 +150,15 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 				title: tempCommand.validateError,
 			};
 
-			const newNodeAsL2 = AsNodeL2(helper.node, helper.node_revision);
-			const newNodeAsL3 = AsNodeL3(newNodeAsL2, childPolarity, helper.node_link);
+			const newNodeAsL2 = AsNodeL2(helper.node, helper.node_revision, null);
+			const newNodeAsL3 = AsNodeL3(newNodeAsL2, helper.node_link, childPolarity);
 
 			const advanced = store.main.maps.addChildDialog.advanced;
 			return (
 				<Column ref={c=>root = c} style={{width: 600}}>
-					{childType == MapNodeType.Argument && // right now, the "advanced" UI is only different when adding an argument, so only let user see/set it in that case
+					{childType == MapNodeType.argument && // right now, the "advanced" UI is only different when adding an argument, so only let user see/set it in that case
 					<Row center mb={5}>
-						{childType == MapNodeType.Argument && advanced &&
+						{childType == MapNodeType.argument && advanced &&
 						<>
 							<Text>Data:</Text>
 							<Select ml={5} displayType="button bar" options={GetEntries(AddChildDialogTab)} style={{display: "inline-block"}}
@@ -182,16 +180,16 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: 0}} parent={parentNode}
 							baseData={newNodeAsL3} baseRevisionData={helper.node_revision} baseLinkData={helper.node_link} forNew={true}
 							onChange={(newNodeData, newRevisionData, newLinkData, comp)=>{
-								if (map?.requireMapEditorsCanEdit) {
-									comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.MapEditors};
-								}
+								/*if (map?.requireMapEditorsCanEdit) {
+									comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.mapEditors};
+								}*/
 								helper.VSet({node: newNodeData, node_revision: newRevisionData, node_link: newLinkData});
 								Change();
 							}}/>
 					</>}
 					{tab == AddChildDialogTab.Claim &&
 					<>
-						{childType == MapNodeType.Argument &&
+						{childType == MapNodeType.argument &&
 						<>
 							{!advanced &&
 							<Column>
@@ -213,20 +211,20 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 							<NodeDetailsUI style={{padding: "5px 0 0 0"}} parent={newNodeAsL3}
 								baseData={helper.subNode} baseRevisionData={helper.subNode_revision} baseLinkData={helper.subNode_link} forNew={true}
 								onChange={(newNodeData, newRevisionData, newLinkData, comp)=>{
-									if (map?.requireMapEditorsCanEdit) {
-										comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.MapEditors};
-									}
+									/*if (map?.requireMapEditorsCanEdit) {
+										comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.mapEditors};
+									}*/
 									helper.VSet({subNode: newNodeData, subNode_revision: newRevisionData, subNode_link: newLinkData});
 									Change();
 								}}/>}
 						</>}
-						{childType != MapNodeType.Argument &&
-						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: childType == MapNodeType.Claim ? "5px 0 0 0" : 0}} parent={parentNode}
+						{childType != MapNodeType.argument &&
+						<NodeDetailsUI ref={c=>nodeEditorUI = c} style={{padding: childType == MapNodeType.claim ? "5px 0 0 0" : 0}} parent={parentNode}
 							baseData={newNodeAsL3} baseRevisionData={helper.node_revision} baseLinkData={helper.node_link} forNew={true}
 							onChange={(newNodeData, newRevisionData, newLinkData, comp)=>{
-								if (map?.requireMapEditorsCanEdit) {
-									comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.MapEditors};
-								}
+								/*if (map?.requireMapEditorsCanEdit) {
+									comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.mapEditors};
+								}*/
 								helper.VSet({node: newNodeData, node_revision: newRevisionData, node_link: newLinkData});
 								Change();
 							}}/>}

@@ -7,12 +7,13 @@ import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProp
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView";
 import {ES} from "Utils/UI/GlobalStyles";
-import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, CanEditNode, Map} from "dm_common";
+import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod} from "dm_common";
 import {InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, VReactMarkdown_Remarkable} from "web-vcore";
 import React from "react";
 import {NodeMathUI} from "../NodeMathUI";
 import {NodeUI_Inner} from "../NodeUI_Inner";
 import {TermPlaceholder} from "./TermPlaceholder";
+import {GetCurrentRevision} from "Store/db_ext/nodes";
 
 /* type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeL2, nodeView: MapNodeView, path: string, indexInNodeList: number, style};
 const TitlePanel_connector = (state, { node, path }: TitlePanelProps) => ({
@@ -64,7 +65,8 @@ export class TitlePanel extends BaseComponentPlus(
 		const {node} = this.props;
 		/* const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
 		if (creatorOrMod && node.current.equation == null) { */
-		if (CanEditNode(MeID(), node.id) && node.current.equation == null) {
+		//if (CanEditNode(MeID(), node.id) && node.current.equation == null) {
+		if (IsUserCreatorOrMod(MeID(), node) && node.current.equation == null) {
 			this.SetState({editing: true});
 		}
 	};
@@ -103,7 +105,7 @@ export class TitlePanel extends BaseComponentPlus(
 
 		const noteText = (node.current.equation && node.current.equation.explanation) || node.current.note;
 
-		const termsToSearchFor = GetTermsAttached(node.currentRevision).filter(a=>a);
+		const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map.id).id).filter(a=>a);
 
 		const RenderNodeDisplayText = (text: string)=>{
 			const segments = GetSegmentsForTerms(text, termsToSearchFor);
@@ -198,7 +200,7 @@ export class TitlePanel extends BaseComponentPlus(
 						{/*noteText*/}
 						{RenderNodeDisplayText(noteText)}
 					</Pre>}
-				{node.type == MapNodeType.Claim && node.current.quote &&
+				{node.type == MapNodeType.claim && node.current.quote &&
 					<InfoButton ml={5} text="Allowed modifications: bold, [...] (collapsed segments)"/>}
 			</div>
 		);
@@ -212,7 +214,7 @@ export class TitlePanel extends BaseComponentPlus(
 		const parentNode = GetParentNode(path);
 
 		const form = GetNodeForm(node, path);
-		const titleKey = {[ClaimForm.Negation]: "negation", [ClaimForm.YesNoQuestion]: "yesNoQuestion"}[form] || "base";
+		const titleKey = {[ClaimForm.negation]: "negation", [ClaimForm.yesNoQuestion]: "yesNoQuestion"}[form] || "base";
 		const newRevision = Clone(node.current);
 		if (newRevision.titles[titleKey] != newTitle) {
 			newRevision.titles[titleKey] = newTitle;

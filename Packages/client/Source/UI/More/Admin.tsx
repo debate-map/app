@@ -5,7 +5,7 @@ import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {PageContainer, Observer} from "web-vcore";
-import {HasAdminPermissions, MeID, ValidateDBData, GraphDBShape} from "dm_common";
+import {HasAdminPermissions, MeID, GraphDBShape} from "dm_common";
 
 @Observer
 export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes: [] as number[], dbUpgrade_entryCounts: [] as number[]}) {

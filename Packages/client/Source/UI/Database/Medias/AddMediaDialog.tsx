@@ -8,7 +8,7 @@ import {MediaDetailsUI} from "./MediaDetailsUI";
 export function ShowAddMediaDialog(initialData?: Partial<Media>, postAdd?: (id: string)=>void) {
 	let newMedia = new Media(E({
 		name: "",
-		type: MediaType.Image,
+		type: MediaType.image,
 		description: "",
 	}, initialData));
 	const getCommand = ()=>new AddMedia({media: newMedia});

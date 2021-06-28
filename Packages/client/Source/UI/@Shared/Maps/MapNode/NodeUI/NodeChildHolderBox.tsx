@@ -18,9 +18,9 @@ import {IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "dm_commo
 import {GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings} from "dm_common";
 import {ArgumentType} from "dm_common";
 import {MapNodeType} from "dm_common";
-import {RatingType} from "dm_common";
+import {NodeRatingType} from "dm_common";
 import {Map} from "dm_common";
-import {GetNodeColor} from "Store/firebase_ext/nodes";
+import {GetNodeColor} from "Store/db_ext/nodes";
 import {ES} from "Utils/UI/GlobalStyles";
 
 type Props = {
@@ -34,9 +34,9 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	static ValidateProps(props: Props) {
 		const {node, nodeChildren} = props;
 		// ms only asserts in dev for now (and only as warning); causes error sometimes when cut+pasting otherwise (firebase doesn`t send DB updates atomically?)
-		if (DEV) {
+		/*if (DEV) {
 			AssertWarn(nodeChildren.every(a=>a == null || (a.parents || {})[node.id] != null), "Supplied node is not a parent of all the supplied node-children!");
-		}
+		}*/
 	}
 	lineHolder: HTMLDivElement;
 	render() {
@@ -53,26 +53,26 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		const markerPercent = GetMarkerPercent_AtPath(node, path, type);
 
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
-		let text = type == HolderType.Truth ? "True?" : "Relevant?";
+		let text = type == HolderType.truth ? "True?" : "Relevant?";
 		if (isMultiPremiseArgument) {
 			//text = "When taken together, are these claims relevant?";
-			if (node.current.argumentType == ArgumentType.All) text = "If all these claims were true, would they be relevant?";
-			else if (node.current.argumentType == ArgumentType.Any) text = "If 1 (or more) of these claims were true, would they be relevant?";
-			else if (node.current.argumentType == ArgumentType.AnyTwo) text = "If 2 (or more) of these claims were true, would they be relevant?";
+			if (node.argumentType == ArgumentType.all) text = "If all these claims were true, would they be relevant?";
+			else if (node.argumentType == ArgumentType.any) text = "If 1 (or more) of these claims were true, would they be relevant?";
+			else if (node.argumentType == ArgumentType.anyTwo) text = "If 2 (or more) of these claims were true, would they be relevant?";
 		}
 		// let backgroundColor = chroma(`rgb(40,60,80)`) as Color;
-		const backgroundColor = GetNodeColor({type: MapNodeType.Claim} as any as MapNodeL3);
+		const backgroundColor = GetNodeColor({type: MapNodeType.claim} as any as MapNodeL3);
 		// let lineColor = GetNodeColor(node, "raw");
-		const lineColor = GetNodeColor({type: MapNodeType.Claim} as any as MapNodeL3, "raw");
+		const lineColor = GetNodeColor({type: MapNodeType.claim} as any as MapNodeL3, "raw");
 
 		const lineOffset = 50.0.KeepAtMost(innerBoxOffset);
-		// let expandKey = type == HolderType.Truth ? "expanded_truth" : "expanded_relevance";
+		// let expandKey = type == HolderType.truth ? "expanded_truth" : "expanded_relevance";
 		const holderTypeStr = HolderType[type].toLowerCase();
 		const expandKey = `expanded_${holderTypeStr}`;
 		const expanded = nodeView[expandKey]; // this.Expanded
 
-		const separateChildren = node.type == MapNodeType.Claim || node.type == MapNodeType.Argument;
-		const showArgumentsControlBar = /* (node.type == MapNodeType.Claim || combineWithChildClaim) && */ expanded && nodeChildrenToShow != emptyArray_forLoading;
+		const separateChildren = node.type == MapNodeType.claim || node.type == MapNodeType.argument;
+		const showArgumentsControlBar = /* (node.type == MapNodeType.claim || combineWithChildClaim) && */ expanded && nodeChildrenToShow != emptyArray_forLoading;
 
 		let {width, height} = this.GetMeasurementInfo();
 		if (widthOverride) {
@@ -95,13 +95,13 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 					{/* position: "relative", /* removal fixes */ alignItems: "flex-start", /* marginLeft: `calc(100% - ${width}px)`, */ width},
 				)}>
 					<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{position: "absolute", width: "100%", height: "100%"}}>
-						{type == HolderType.Truth &&
+						{type == HolderType.truth &&
 							<Squiggle start={[0, lineHolderHeight + 2]} startControl_offset={[0, -lineOffset]}
 								end={[(width / 2) - 2, innerBoxOffset + height - 2]} endControl_offset={[0, lineOffset]} color={lineColor}/>}
-						{type == HolderType.Relevance && !isMultiPremiseArgument &&
+						{type == HolderType.relevance && !isMultiPremiseArgument &&
 							<Squiggle start={[0, -2]} startControl_offset={[0, lineOffset]}
 								end={[(width / 2) - 2, innerBoxOffset + 2]} endControl_offset={[0, -lineOffset]} color={lineColor}/>}
-						{type == HolderType.Relevance && isMultiPremiseArgument &&
+						{type == HolderType.relevance && isMultiPremiseArgument &&
 							<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
 					</div>
 					<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
@@ -122,7 +122,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 							const newExpanded = !nodeView[expandKey];
 							const recursivelyCollapsing = !newExpanded && e.altKey;
 							runInAction("NodeChildHolderBox_toggleExpanded", ()=>{
-								if (type == HolderType.Truth) {
+								if (type == HolderType.truth) {
 									ACTMapNodeExpandedSet({
 										mapID: map.id, path, resetSubtree: recursivelyCollapsing,
 										[expandKey]: newExpanded,
@@ -156,8 +156,8 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 									padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 								}}>
 									{(()=>{
-										const ratings = GetRatings(node.id, holderTypeStr as RatingType);
-										return <RatingsPanel node={node} path={path} ratingType={holderTypeStr as RatingType} ratings={ratings}/>;
+										const ratings = GetRatings(node.id, holderTypeStr as NodeRatingType);
+										return <RatingsPanel node={node} path={path} ratingType={holderTypeStr as NodeRatingType} ratings={ratings}/>;
 									})()}
 								</div>}
 							<NodeUI_Menu_Stub {...{map, node, path}} holderType={type}/>

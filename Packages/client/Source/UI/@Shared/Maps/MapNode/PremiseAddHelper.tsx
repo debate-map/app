@@ -40,9 +40,9 @@ import {OmitIfFalsy} from "web-vcore/nm/js-vextensions";
 
 		this.SetState({ adding: true });
 
-		const newNode = new MapNode({ type: MapNodeType.Claim, ownerMapID: OmitIfFalsy(parentNode.ownerMapID) });
+		const newNode = new MapNode({ type: MapNodeType.claim, ownerMapID: OmitIfFalsy(parentNode.ownerMapID) });
 		const newRevision = new MapNodeRevision({ titles: { base: premiseTitle } });
-		const newLink = { _: true, form: ClaimForm.Base } as ChildEntry;
+		const newLink = { _: true, form: ClaimForm.base } as NodeChildLink;
 
 		const info = await new AddChildNode({ mapID, parentID: parentNode.id, node: newNode, revision: newRevision, link: newLink }).Run();
 		ACTMapNodeExpandedSet({ mapID, path: `${parentPath}/${info.nodeID}`, expanded: true, resetSubtree: false });

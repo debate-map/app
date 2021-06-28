@@ -1,8 +1,7 @@
 import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNodeL3, MapNodeType, MeID, Polarity} from "dm_common";
 import React from "react";
-import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/firebase_ext/mapNodeEditTimes";
-import {GetNodeChildrenL3_Advanced} from "Store/firebase_ext/nodes";
-import {GetPlayingTimeline, GetPlayingTimelineRevealNodes_UpToAppliedStep, GetPlayingTimelineStepIndex, GetTimeFromWhichToShowChangedNodes} from "Store/main/maps/mapStates/$mapState";
+import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEditTimes";
+import {GetNodeChildrenL3_Advanced} from "Store/db_ext/nodes";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
 import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
 import {NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
@@ -59,7 +58,8 @@ export class NodeUI extends BaseComponentPlus(
 		/* let subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map, node.id);
 		subnodes = subnodes.Any(a => a == null) ? emptyArray : subnodes; // only pass subnodes when all are loaded */
 
-		const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
+		//const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
+		const sinceTime = 0;
 		const pathsToChangedDescendantNodes_withChangeTypes = GetPathsToChangedDescendantNodes_WithChangeTypes(map.id, sinceTime, path);
 		const addedDescendants = pathsToChangedDescendantNodes_withChangeTypes.filter(a=>a == ChangeType.add).length;
 		const editedDescendants = pathsToChangedDescendantNodes_withChangeTypes.filter(a=>a == ChangeType.edit).length;
@@ -83,12 +83,12 @@ export class NodeUI extends BaseComponentPlus(
 		const nodeView = GetNodeView(map.id, path);
 		const boxExpanded = (isPremiseOfSinglePremiseArg ? parentNodeView?.expanded : nodeView?.expanded) ?? false;
 
-		const playingTimeline = GetPlayingTimeline(map.id);
+		/*const playingTimeline = GetPlayingTimeline(map.id);
 		const playingTimeline_currentStepIndex = GetPlayingTimelineStepIndex(map.id);
 		// const playingTimelineShowableNodes = GetPlayingTimelineRevealNodes_All(map.id);
 		// const playingTimelineVisibleNodes = GetPlayingTimelineRevealNodes_UpToAppliedStep(map.id, true);
 		// if users scrolls to step X and expands this node, keep expanded even if user goes back to a previous step
-		const playingTimelineVisibleNodes = GetPlayingTimelineRevealNodes_UpToAppliedStep(map.id);
+		const playingTimelineVisibleNodes = GetPlayingTimelineRevealNodes_UpToAppliedStep(map.id);*/
 
 		performance.mark("NodeUI_2");
 		if (ShouldLog(a=>a.nodeRenders)) {
@@ -156,12 +156,12 @@ export class NodeUI extends BaseComponentPlus(
 			const argument = parent;
 			const argumentPath = SlicePath(path, 1);
 			var relevanceArguments = parentChildren.filter(a=>a && a.type == MapNodeType.argument);
-			// Assert(!relevanceArguments.Any(a=>a.type == MapNodeType.Claim), "Single-premise argument has more than one premise!");
-			if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
+			// Assert(!relevanceArguments.Any(a=>a.type == MapNodeType.claim), "Single-premise argument has more than one premise!");
+			/*if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
 				// relevanceArguments = relevanceArguments.filter(child => playingTimelineVisibleNodes.Contains(`${argumentPath}/${child.id}`));
 				// if this node (or a descendent) is marked to be revealed by a currently-applied timeline-step, reveal this node
 				relevanceArguments = relevanceArguments.filter(child=>playingTimelineVisibleNodes.Any(a=>a.startsWith(`${argumentPath}/${child.id}`)));
-			}
+			}*/
 		}
 
 		const {width, expectedHeight} = this.GetMeasurementInfo();
@@ -174,7 +174,7 @@ export class NodeUI extends BaseComponentPlus(
 		if (!isPremiseOfSinglePremiseArg && boxExpanded) {
 			const showArgumentsControlBar = (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
-				// type={node.type == MapNodeType.Claim && node._id != demoRootNodeID ? HolderType.Truth : null}
+				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? HolderType.truth : null}
 				type={null}
 				linkSpawnPoint={dividePoint || (selfHeight / 2)}
 				vertical={isMultiPremiseArgument}
@@ -240,10 +240,10 @@ export class NodeUI extends BaseComponentPlus(
 					{asSubnode &&
 					<div style={{position: "absolute", left: 2, right: 2, top: -3, height: 3, borderRadius: "3px 3px 0 0", background: "rgba(255,255,0,.7)"}}/>}
 					<Column className="innerBoxHolder clickThrough" style={{position: "relative"}}>
-						{node.current.accessLevel != AccessLevel.basic &&
+						{/*node.current.accessLevel != AccessLevel.basic &&
 						<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
 							<span style={{margin: "auto 0"}}>{AccessLevel[node.current.accessLevel][0].toUpperCase()}</span>
-						</div>}
+						</div>*/}
 						{nodeChildHolderBox_truth}
 						<NodeUI_Inner ref={c=>this.innerUI = GetInnerComp(c)} {...{indexInNodeList, map, node, path, width, widthOverride}}/>
 						{nodeChildHolderBox_relevance}
@@ -255,7 +255,7 @@ export class NodeUI extends BaseComponentPlus(
 
 				{nodeChildrenToShow == emptyArray_forLoading &&
 					<div style={{margin: "auto 0 auto 10px"}}>...</div>}
-				{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && playingTimeline == null &&
+				{IsRootNode(node) && nodeChildrenToShow != emptyArray_forLoading && nodeChildrenToShow.length == 0 && /*playingTimeline == null &&*/
 					<div style={{margin: "auto 0 auto 10px", background: "rgba(0,0,0,.7)", padding: 5, borderRadius: 5}}>To add a node, right click on the root node.</div>}
 				{!boxExpanded &&
 					<NodeChildCountMarker {...{limitBarPos}} childCount={nodeChildrenToShow.length + (relevanceArguments ? relevanceArguments.length : 0)}/>}

@@ -2,7 +2,7 @@ import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from 
 import {StoreAccessor, NoID} from "web-vcore/nm/mobx-graphlink";
 import {GetRatingAverage, GetRatingValue, GetRatings} from "../../Store/db/nodeRatings";
 import {NodeRating} from "../../Store/db/nodeRatings/@NodeRating";
-import {NodeRatingType} from "../../Store/db/nodeRatings/@NodeRatingType.js";
+import {NodeRatingType} from "../../Store/db/nodeRatings/@NodeRatingType";
 import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../Store/db/nodes/$node";
 import {ClaimForm, MapNodeL2} from "../../Store/db/nodes/@MapNode";
 import {ArgumentType} from "../../Store/db/nodes/@MapNodeRevision";

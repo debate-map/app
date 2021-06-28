@@ -134,12 +134,12 @@ async function SeedDB(firebase) {
 		return nodeID;
 	}
 
-	const claimNodeID = await AddNode(rootNodeID, MapNodeType.Claim, 'Claim');
+	const claimNodeID = await AddNode(rootNodeID, MapNodeType.claim, 'Claim');
 	for (let i1 = 0; i1 < 5; i1++) {
-		const sub1ProID = await AddNode(`${rootNodeID}/${claimNodeID}`, MapNodeType.Argument, `L1.Pro${i1 + 1}`, Polarity.Supporting, false);
-		const sub1ConID = await AddNode(`${rootNodeID}/${claimNodeID}`, MapNodeType.Argument, `L1.Con${i1 + 1}`, Polarity.Opposing);
+		const sub1ProID = await AddNode(`${rootNodeID}/${claimNodeID}`, MapNodeType.argument, `L1.Pro${i1 + 1}`, Polarity.supporting, false);
+		const sub1ConID = await AddNode(`${rootNodeID}/${claimNodeID}`, MapNodeType.argument, `L1.Con${i1 + 1}`, Polarity.opposing);
 		for (let i2 = 0; i2 < 5; i2++) {
-			await AddNode(`${rootNodeID}/${claimNodeID}/${sub1ConID}`, MapNodeType.Argument, `L2.Pro${i2 + 1}`, Polarity.Supporting, false);
+			await AddNode(`${rootNodeID}/${claimNodeID}/${sub1ConID}`, MapNodeType.argument, `L2.Pro${i2 + 1}`, Polarity.supporting, false);
 		}
 	}
 

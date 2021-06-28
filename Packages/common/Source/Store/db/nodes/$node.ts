@@ -13,10 +13,10 @@ import {GetNodeTags, GetNodeTagComps, GetFinalTagCompsForTag} from "../nodeTags"
 import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@MapNodeTag";
 import {SourceType, Source} from "../nodeRevisions/@SourceChain";
 import Moment from "web-vcore/nm/moment";
-import {GetNodeChildLinks} from "../nodeChildLinks.js";
-import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
-import {GetAccessPolicy} from "../accessPolicies.js";
-import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
+import {GetNodeChildLinks} from "../nodeChildLinks";
+import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink";
+import {GetAccessPolicy} from "../accessPolicies";
+import {AccessPolicy} from "../accessPolicies/@AccessPolicy";
 
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");
@@ -254,7 +254,7 @@ export class NodeContributionInfo_ForPolarity {
 	constructor(nodeID: string) {
 		this.hostNodeID = nodeID;
 	}
-	//canAdd = true;
+	canAdd = true;
 	hostNodeID: string;
 	reversePolarities = false;
 }
@@ -265,11 +265,11 @@ export function GetPolarityShortStr(polarity: Polarity) {
 export const GetNodeContributionInfo = StoreAccessor(s=>(nodeID: string, userID: string)=> {
 	let result = new NodeContributionInfo(nodeID);
 	let tags = GetNodeTags(nodeID);
-	/*let directChildrenDisabled = CE(tags).Any(a=>a.mirrorChildrenFromXToY?.nodeY == nodeID && a.mirrorChildrenFromXToY?.disableDirectChildren);
+	let directChildrenDisabled = CE(tags).Any(a=>a.mirrorChildrenFromXToY?.nodeY == nodeID && a.mirrorChildrenFromXToY?.disableDirectChildren);
 	if (directChildrenDisabled) {
 		result.proArgs.canAdd = false;
 		result.conArgs.canAdd = false;
-	}*/
+	}
 	for (let tag of tags) {
 		if (tag.mirrorChildrenFromXToY && tag.mirrorChildrenFromXToY.nodeY == nodeID) {
 			let comp = tag.mirrorChildrenFromXToY;

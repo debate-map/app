@@ -162,22 +162,22 @@ class SourceEditorUI extends BaseComponentPlus({} as {chain: SourceChain, source
 				<Row center>
 					<Select enabled={enabled} options={GetEntries(SourceType)}
 						value={source.type} onChange={val=>Change(source.type = val)}/>
-					{source.type == SourceType.Speech && <>{locationUI()}{authorUI()}</>}
-					{source.type == SourceType.Text && <>{nameUI()}{authorUI()}</>}
-					{source.type == SourceType.Image && <>{locationUI()}{authorUI()}</>}
-					{source.type == SourceType.Video && <>{locationUI()}{authorUI()}</>}
-					{source.type == SourceType.Webpage && <>{linkUI()}</>}
+					{source.type == SourceType.speech && <>{locationUI()}{authorUI()}</>}
+					{source.type == SourceType.text && <>{nameUI()}{authorUI()}</>}
+					{source.type == SourceType.image && <>{locationUI()}{authorUI()}</>}
+					{source.type == SourceType.video && <>{locationUI()}{authorUI()}</>}
+					{source.type == SourceType.webpage && <>{linkUI()}</>}
 					{<Button text="..." ml={3} style={{padding: "1px 7px"}} onClick={()=>this.SetState({expanded: !expanded})}/>}
 					{chain.sources.length > 1 && enabled &&
 						<Button text="X" ml={3} style={{padding: "1px 7px"}} onClick={()=>Change(chain.sources.RemoveAt(index))}/>}
 				</Row>
 				{expanded &&
 				<Row center>
-					{source.type == SourceType.Speech && <>{nameUI()}{timeMinUI()}{timeMaxUI()}</>}
-					{source.type == SourceType.Text && <>{timeMinUI()}{timeMaxUI()}</>}
-					{source.type == SourceType.Image && <>{nameUI()}{timeMinUI()}{timeMaxUI()}</>}
-					{source.type == SourceType.Video && <>{nameUI()}{timeMinUI()}{timeMaxUI()}</>}
-					{source.type == SourceType.Webpage && <>{authorUI()}{timeMinUI()}{timeMaxUI()}</>}
+					{source.type == SourceType.speech && <>{nameUI()}{timeMinUI()}{timeMaxUI()}</>}
+					{source.type == SourceType.text && <>{timeMinUI()}{timeMaxUI()}</>}
+					{source.type == SourceType.image && <>{nameUI()}{timeMinUI()}{timeMaxUI()}</>}
+					{source.type == SourceType.video && <>{nameUI()}{timeMinUI()}{timeMaxUI()}</>}
+					{source.type == SourceType.webpage && <>{authorUI()}{timeMinUI()}{timeMaxUI()}</>}
 				</Row>}
 			</>
 		);
@@ -188,15 +188,15 @@ export function CleanUpdatedSourceChains(sourceChains: SourceChain[]) {
 	// clean data (according to rules defined in Source schema, in @SourceChain.ts)
 	for (const chain of sourceChains) {
 		for (const source of chain.sources) {
-			if (source.type == SourceType.Speech) {
+			if (source.type == SourceType.speech) {
 				delete source.link;
-			} else if (source.type == SourceType.Text) {
+			} else if (source.type == SourceType.text) {
 				delete source.link;
-			} else if (source.type == SourceType.Image) {
+			} else if (source.type == SourceType.image) {
 				delete source.link;
-			} else if (source.type == SourceType.Video) {
+			} else if (source.type == SourceType.video) {
 				delete source.link;
-			} else if (source.type == SourceType.Webpage) {
+			} else if (source.type == SourceType.webpage) {
 				delete source.name;
 			}
 		}

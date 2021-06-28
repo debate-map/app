@@ -21,10 +21,10 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 		if (copiedNode == null) return null;
 		if (inList) return null;
 		const copiedNode_parent = GetParentNodeL3(copiedNodePath);
-		const formForClaimChildren = node.type == MapNodeType.Category ? ClaimForm.YesNoQuestion : ClaimForm.Base;
+		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base;
 		let newPolarity =
-			(copiedNode.type == MapNodeType.Argument ? copiedNode.link.polarity : null) // if node itself has polarity, use it
-			|| (copiedNode_parent && copiedNode_parent.type == MapNodeType.Argument ? copiedNode_parent.link.polarity : null); // else if our parent has a polarity, use that
+			(copiedNode.type == MapNodeType.argument ? copiedNode.link.polarity : null) // if node itself has polarity, use it
+			|| (copiedNode_parent && copiedNode_parent.type == MapNodeType.argument ? copiedNode_parent.link.polarity : null); // else if our parent has a polarity, use that
 
 		const contributeInfo = GetNodeContributionInfo(node.id, MeID());
 		let contributeInfo_polarity = contributeInfo[`${GetPolarityShortStr(newPolarity)}Args`] as NodeContributionInfo_ForPolarity;
@@ -36,7 +36,7 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 
 		const linkCommand = new LinkNode_HighLevel({
 			mapID: map.id, oldParentID: GetParentNodeID(copiedNodePath), newParentID: contributeInfo_polarity.hostNodeID, nodeID: copiedNode.id,
-			newForm: copiedNode.type == MapNodeType.Claim ? formForClaimChildren : null,
+			newForm: copiedNode.type == MapNodeType.claim ? formForClaimChildren : null,
 			newPolarity: contributeInfo_polarity.reversePolarities ? ReversePolarity(newPolarity) : newPolarity,
 			createWrapperArg: holderType != null || !node.multiPremiseArgument,
 			unlinkFromOldParent: copiedNode_asCut, deleteEmptyArgumentWrapper: true,
@@ -50,7 +50,7 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 					if (e.button != 0) return;
 					if (MeID() == null) return ShowSignInPopup();
 
-					if (copiedNode.type == MapNodeType.Argument && !copiedNode_asCut) {
+					if (copiedNode.type == MapNodeType.argument && !copiedNode_asCut) {
 						// eslint-disable-next-line
 						return void ShowMessageBox({
 							title: "Argument at two locations?", cancelButton: true, onOK: proceed,

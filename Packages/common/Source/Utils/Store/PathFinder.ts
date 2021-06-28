@@ -1,7 +1,7 @@
 import {MapNode} from "../../Store/db/nodes/@MapNode";
 import {GetNode} from "../../Store/db/nodes";
 import {CE} from "web-vcore/nm/js-vextensions";
-import {GetNodeChildLinks} from "../../Store/db/nodeChildLinks.js";
+import {GetNodeChildLinks} from "../../Store/db/nodeChildLinks";
 
 export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc: (nodeID: string)=>boolean, nodeIDsToIgnore?: string[]): string {
 	// return CachedTransform_WithStore('GetShortestPathFromRootToNode', [rootNodeID, node.id], {}, () => {

@@ -9,8 +9,8 @@ import {GetMaps} from "../Store/db/maps";
 import {CE} from "web-vcore/nm/js-vextensions";
 import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
 import {AddMap} from "./AddMap";
-import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
-import {GetNodeChildLinks} from "../Store/db/nodeChildLinks.js";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink";
+import {GetNodeChildLinks} from "../Store/db/nodeChildLinks";
 
 AddSchema("DeleteNode_payload", {
 	properties: {

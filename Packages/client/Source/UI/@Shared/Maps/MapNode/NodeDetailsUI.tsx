@@ -5,24 +5,25 @@ import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vexten
 import {store} from "Store";
 import {Observer} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
-import {MapNode, ChildEntry, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType} from "dm_common";
+import {MapNode, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType} from "dm_common";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel";
 import {TextPanel} from "./NodeDetailsUI/TextPanel";
 import {QuoteInfoEditorUI} from "./NodeDetailsUI/AttachmentPanel/QuoteInfoEditorUI";
 import {TagsPanel} from "./NodeUI/Panels/TagsPanel";
+import {NodeChildLink} from "dm_common/Source/Store/db/nodeChildLinks/@NodeChildLink";
 
 type Props = {
 	baseData: MapNode,
 	baseRevisionData: MapNodeRevision,
-	baseLinkData: ChildEntry,
+	baseLinkData: NodeChildLink,
 	parent: MapNodeL3, forNew: boolean, forOldRevision?: boolean, enabled?: boolean,
-	style?, onChange?: (newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: ChildEntry, component: NodeDetailsUI)=>void,
+	style?, onChange?: (newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: NodeChildLink, component: NodeDetailsUI)=>void,
 	// onSetError: (error: string)=>void,
 	// validateNewData: (newData: MapNode, newRevisionData: MapNodeRevision)=>void,
 };
-type State = {newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: ChildEntry};
+type State = {newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: NodeChildLink};
 export type NodeDetailsUI_SharedProps = Props & State & {newDataAsL2, Change, SetState};
 
 @Observer
@@ -46,7 +47,7 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 			this.Update();
 		};
 
-		const newDataAsL2 = AsNodeL2(newData, newRevisionData);
+		const newDataAsL2 = AsNodeL2(newData, newRevisionData, null);
 
 		const sharedProps: NodeDetailsUI_SharedProps = {...this.props, Change, newDataAsL2, ...this.state, SetState: this.SetState};
 		const attachmentType = GetAttachmentType(newDataAsL2);
@@ -94,6 +95,6 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 	}
 	GetNewLinkData() {
 		const {newLinkData} = this.state;
-		return CloneWithPrototypes(newLinkData) as ChildEntry;
+		return CloneWithPrototypes(newLinkData) as NodeChildLink;
 	}
 }

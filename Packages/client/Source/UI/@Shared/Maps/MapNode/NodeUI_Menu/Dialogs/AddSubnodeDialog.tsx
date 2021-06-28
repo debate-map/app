@@ -8,14 +8,14 @@
 }
 
 type Props = {mapID: string, anchorNode: MapNode, anchorNodePath: string, boxController: BoxController};
-class AddSubnodeDialog extends BaseComponentPlus({} as Props, {} as {layer: Layer, newNode: MapNode, newRevision: MapNodeRevision, newLink: ChildEntry, validationError: string}) {
+class AddSubnodeDialog extends BaseComponentPlus({} as Props, {} as {layer: Layer, newNode: MapNode, newRevision: MapNodeRevision, newLink: NodeChildLink, validationError: string}) {
 	constructor(props) {
 		super(props);
 		const newNode = new MapNode({
-			type: MapNodeType.Claim,
+			type: MapNodeType.claim,
 		});
 		const newRevision = new MapNodeRevision({});
-		const newLink = E({ _: true }, newNode.type == MapNodeType.Claim && { form: ClaimForm.Base }) as ChildEntry; // not actually used
+		const newLink = E({ _: true }, newNode.type == MapNodeType.claim && { form: ClaimForm.base }) as NodeChildLink; // not actually used
 		this.state = { newNode, newRevision, newLink } as any;
 	}
 	UpdateOKButton() {
@@ -51,7 +51,7 @@ class AddSubnodeDialog extends BaseComponentPlus({} as Props, {} as {layer: Laye
 						<Pre>Layer: </Pre>
 						<Select options={layerOptions} value={layer} onChange={(val) => this.SetState({ layer: val })}/>
 					</Row>
-					{newNode.type == MapNodeType.Claim &&
+					{newNode.type == MapNodeType.claim &&
 					<Row mt={5}>
 						<Pre>Type: </Pre>
 						<Select displayType="button bar" options={claimTypes} style={{ display: 'inline-block' }}

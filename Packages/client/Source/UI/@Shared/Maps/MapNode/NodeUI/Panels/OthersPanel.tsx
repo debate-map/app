@@ -22,6 +22,7 @@ import {ChangeNodeOwnerMap} from "dm_common";
 import {ReverseArgumentPolarity} from "dm_common";
 import {UpdateLink} from "dm_common";
 import {UpdateNodeChildrenOrder} from "dm_common";
+import {GetNodeChildLinks} from "dm_common/Source/Store/db/nodeChildLinks";
 
 @Observer
 export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType}) {
@@ -40,53 +41,55 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 		const parentPath = SlicePath(path, 1);
 		const parentCreatorOrMod = IsUserCreatorOrMod(userID, parent);
 
-		const nodeArgOrParentSPArg_controlled = (node.type == MapNodeType.Argument && creatorOrMod ? node : null)
-			|| (parent && parent.type === MapNodeType.Argument && parentCreatorOrMod ? parent : null);
+		const nodeArgOrParentSPArg_controlled = (node.type == MapNodeType.argument && creatorOrMod ? node : null)
+			|| (parent && parent.type === MapNodeType.argument && parentCreatorOrMod ? parent : null);
 		const nodeArgOrParentSPArg_controlled_path = nodeArgOrParentSPArg_controlled && (nodeArgOrParentSPArg_controlled === node ? path : parentPath);
 
-		const convertToTypes = GetEntries(AttachmentType).filter(pair=>CanConvertFromClaimTypeXToY(GetAttachmentType(node), pair.value));
-		convertToType = convertToType || convertToTypes.map(a=>a.value).FirstOrX();
+		const convertToTypes = GetEntries(AttachmentType).filter(pair=>CanConvertFromClaimTypeXToY(GetAttachmentType(node), pair.value as any));
+		convertToType = convertToType ?? convertToTypes.map(a=>a.value as any as AttachmentType).FirstOrX();
 
-		const isArgument_any = node.current.argumentType === ArgumentType.Any;
+		const isArgument_any = node.argumentType === ArgumentType.any;
 		/* const parents = GetNodesByIDs(node.parents?.VKeys() ?? []);
 		const parentsArePrivateInSameMap = !IsSpecialEmptyArray(parents) && mapID && parents.All((a) => a.ownerMapID == mapID);
 		const canChangeOwnershipType = creatorOrMod && (
 			node.ownerMapID == null
 				// if making private, node must be in a private map, and all its parents must be private nodes within that map (to ensure we don't leave links in other maps, which would make the owner-map-id invalid)
-				? (mapID && map.type == MapType.Private && parentsArePrivateInSameMap)
+				? (mapID && map.type == MapType.private && parentsArePrivateInSameMap)
 				// if making public, can't be root node, and the owner map must allow public nodes (at some point, may remove this restriction, by having action cause node to be auto-replaced with in-map private-copy)
 				: (node.parents?.VKeys().length > 0) // && map.allowPublicNodes)
 		); */
 
 		const argumentWrapper = IsSinglePremiseArgument(parent) ? parent : null;
 
-		const changeControlType_currentType = node.ownerMapID != null ? "Private" : "Public";
+		/*const changeControlType_currentType = node.ownerMapID != null ? "Private" : "Public";
 		// const changeControlType_newType = changeControlType_currentType == 'Private' ? 'Public' : 'Private';
 		const changeControlTypeCommand = new ChangeNodeOwnerMap(E({nodeID: node.id, newOwnerMapID: node.ownerMapID != null ? null : mapID, argumentNodeID: OmitIfFalsy(argumentWrapper?.id)}));
-		//const changeChildOrderTypeCommand = new ChangeNodeChildOrderType(E({nodeID: node.id, newOrderType: node.childrenOrderType == ChildOrderType.Manual ? ChildOrderType.ByRating : ChildOrderType.Manual}));
+		//const changeChildOrderTypeCommand = new ChangeNodeChildOrderType(E({nodeID: node.id, newOrderType: node.childrenOrderType == ChildOrderType.manual ? ChildOrderType.byRating : ChildOrderType.manual}));*/
 
+		const parentLinks = GetNodeChildLinks(null, node.id);
+		const childLinks = GetNodeChildLinks(node.id);
 		const mirrorChildren = GetNodeMirrorChildren(node.id);
 		/*const childOrderTypeChangeable = node.ownerMapID != null // if private node
 			|| HasAdminPermissions(MeID()) // or has admin permissions
-			|| (node.type === MapNodeType.Argument && node.multiPremiseArgument); // or it's a multi-premise argument (these start as manual)*/
+			|| (node.type === MapNodeType.argument && node.multiPremiseArgument); // or it's a multi-premise argument (these start as manual)*/
 		return (
 			<Column sel style={{position: "relative", display: show ? null : "none"}}>
 				<IDAndCreationInfoUI id={node.id} creatorID={node.creator} createdAt={node.createdAt}/>
 				<Row style={{flexWrap: "wrap"}}>
 					<Text>Parents: </Text>
-					{node.parents == null ? "none" : node.parents.VKeys().map((parentID, index)=>{
+					{parentLinks.length == 0 ? "none" : parentLinks.map((link, index)=>{
 						return <Fragment key={index}>
 							{index != 0 && <Text>, </Text>}
-							<UUIDStub id={parentID}/>
+							<UUIDStub id={link.parent}/>
 						</Fragment>;
 					})}
 				</Row>
 				<Row style={{flexWrap: "wrap"}}>
 					<Text>Children: </Text>
-					{node.children == null ? "none" : node.children.VKeys().map((childID, index)=>{
+					{childLinks.length == 0 ? "none" : childLinks.map((link, index)=>{
 						return <Fragment key={index}>
 							{index != 0 && <Text>, </Text>}
-							<UUIDStub id={childID}/>
+							<UUIDStub id={link.child}/>
 						</Fragment>;
 					})}
 				</Row>
@@ -99,13 +102,13 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 						</Fragment>;
 					})}
 				</Row>
-				<Row center>
+				{/*<Row center>
 					<Text>Control type:</Text>
 					<Select ml={5} options={["Private", "Public"]} value={changeControlType_currentType} enabled={changeControlTypeCommand.Validate_Safe() == null} title={changeControlTypeCommand.validateError} onChange={val=>{
 						changeControlTypeCommand.Run();
 					}}/>
 					<InfoButton ml={5} text="Private nodes are locked to a given map, but allow more permission controls to the node-creator and map-editors."/>
-				</Row>
+				</Row>*/}
 				{/* <Row>Viewers: {viewers.length || '...'} <InfoButton text="The number of registered users who have had this node displayed in-map at some point."/></Row> */}
 				{nodeArgOrParentSPArg_controlled &&
 					<Row>
@@ -120,7 +123,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 							});
 						}}/>
 					</Row>}
-				{node.type == MapNodeType.Claim && convertToTypes.length > 0 &&
+				{node.type == MapNodeType.claim && convertToTypes.length > 0 &&
 					<Row center>
 						<Pre>Convert to: </Pre>
 						<Select options={convertToTypes} value={convertToType} onChange={val=>this.SetState({convertToType: val})}/>
@@ -136,9 +139,9 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 						}}/>
 						<InfoButton ml={5} text="Private nodes are locked to a given map, but allow more permission controls to the node-creator and map-editors."/>
 					</Row>*/}
-				{/*node.childrenOrderType == ChildOrderType.Manual &&
+				{/*node.childrenOrderType == ChildOrderType.manual &&
 					<ChildrenOrder mapID={mapID} node={node}/>*/}
-				<ChildrenOrder mapID={mapID} node={node}/>
+				{/*<ChildrenOrder mapID={mapID} node={node}/>*/}
 				<AtThisLocation node={node} path={path}/>
 			</Column>
 		);
@@ -152,10 +155,10 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 
 		let canSetAsNegation;
 		let canSetAsSeriesAnchor;
-		if (node.type == MapNodeType.Claim) {
+		if (node.type == MapNodeType.claim) {
 			const claimType = GetAttachmentType(node);
-			canSetAsNegation = claimType === AttachmentType.None && node.link.form !== ClaimForm.YesNoQuestion;
-			canSetAsSeriesAnchor = claimType === AttachmentType.Equation && !node.current.equation.isStep; // && !creating;
+			canSetAsNegation = claimType === AttachmentType.none && node.link.form !== ClaimForm.yesNoQuestion;
+			canSetAsSeriesAnchor = claimType === AttachmentType.equation && !node.current.equation.isStep; // && !creating;
 		}
 
 		return (
@@ -168,11 +171,11 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 				{canSetAsNegation &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Show as negation: </Pre>
-						<CheckBox value={node.link.form == ClaimForm.Negation}
+						<CheckBox value={node.link.form == ClaimForm.negation}
 							onChange={val=>{
 								new UpdateLink({
-									linkParentID: GetParentNodeID(path), linkChildID: node.id,
-									linkUpdates: {form: val ? ClaimForm.Negation : ClaimForm.Base},
+									linkID: node.link.id,
+									linkUpdates: {form: val ? ClaimForm.negation : ClaimForm.base},
 								}).Run();
 							}}/>
 					</Row>}
@@ -183,7 +186,7 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 							// onChange={val=>Change(val ? newLinkData.isStep = true : delete newLinkData.isStep)}/>
 							onChange={val=>{
 								new UpdateLink({
-									linkParentID: GetParentNodeID(path), linkChildID: node.id,
+									linkID: node.link.id,
 									linkUpdates: {seriesAnchor: val || null},
 								}).Run();
 							}}/>
@@ -193,21 +196,21 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 	}
 }
 
-@Observer
+/*@Observer
 class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> {
 	render() {
 		const {mapID, node} = this.props;
 		const oldChildrenOrder = node.childrenOrder || [];
 		//const oldChildrenOrderValid = oldChildrenOrder.length == node.children.VKeys().length && oldChildrenOrder.every(id=>node.children[id] != null);
 
-		const childOrderType = node.childrenOrder ? ChildOrderType.Manual : ChildOrderType.ByRating;
+		const childOrderType = node.childrenOrder ? ChildOrderType.manual : ChildOrderType.byRating;
 		const updateChildrenOrderCommand = new UpdateNodeChildrenOrder({mapID, nodeID: node.id, childrenOrder: null});
 		return (
 			<Column mt={5}>
-				<Row style={E(childOrderType == ChildOrderType.Manual && {fontWeight: "bold"})}>
+				<Row style={E(childOrderType == ChildOrderType.manual && {fontWeight: "bold"})}>
 					<Text>Children order:</Text>
 					<Select ml={5} options={GetEntries(ChildOrderType)} value={childOrderType} enabled={updateChildrenOrderCommand.Validate_Safe() == null} title={updateChildrenOrderCommand.validateError} onChange={val=>{
-						if (val == ChildOrderType.Manual) {
+						if (val == ChildOrderType.manual) {
 							const existingValidIDs = oldChildrenOrder.filter(id=>node.children[id] != null);
 							const missingChildIDs = (node.children || {}).Pairs().filter(pair=>!oldChildrenOrder.Contains(pair.key)).map(pair=>pair.key);
 							updateChildrenOrderCommand.payload.childrenOrder = existingValidIDs.concat(missingChildIDs);
@@ -231,7 +234,7 @@ class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> 
 							{/* <TextInput enabled={false} style={ES({flex: 1})} required pattern={MapNode_id}
 								value={`#${childID.toString()}: ${childTitle}`}
 								//onChange={val=>Change(!IsNaN(val.ToInt()) && (newData.childrenOrder[index] = val.ToInt()))}
-							/> */}
+							/> *#/}
 							<Button text={<Icon size={16} icon="arrow-up"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index > 0}
 								onClick={()=>{
 									const newOrder = oldChildrenOrder.slice(0);
@@ -252,8 +255,8 @@ class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> 
 				{/*node.childrenOrder && !oldChildrenOrderValid && updateChildrenOrderCommand.Validate_Safe() == null &&
 					<Button mr="auto" text="Fix children-order" onClick={()=>{
 						InitializeChildrenOrder();
-					}}/>*/}
+					}}/>*#/}
 			</Column>
 		);
 	}
-}
+}*/

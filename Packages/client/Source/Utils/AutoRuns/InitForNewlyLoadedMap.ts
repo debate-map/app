@@ -1,4 +1,4 @@
-import {GetMap, GetNodeL2, MapView} from "dm_common";
+import {GetMap, GetNodeChildLinks, GetNodeL2, MapView} from "dm_common";
 import {Assert, Vector2} from "web-vcore/nm/js-vextensions";
 import {autorun, runInAction} from "web-vcore/nm/mobx";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink";
@@ -29,14 +29,14 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 	// ACTEnsureMapStateInit(action.payload.id);
 	// storeM.ACTEnsureMapStateInit(action.payload.id);
 	let mapView: MapView;
-	runInAction("StartInitForNewlyLoadedMap_part1", ()=>{
+	/*runInAction("StartInitForNewlyLoadedMap_part1", ()=>{
 		({mapState, mapView} = ACTEnsureMapStateInit(mapID));
 		if (map.defaultTimelineID) {
 			mapState.timelinePanelOpen = true;
 			mapState.timelineOpenSubpanel = TimelineSubpanel.playing;
 			mapState.selectedTimeline = map.defaultTimelineID;
 		}
-	});
+	});*/
 
 	let pathsToExpand = [map.rootNode];
 	for (let depth = 0; depth < map.defaultExpandDepth; depth++) {
@@ -49,8 +49,9 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 				// console.log('Expanding:', path);
 				ACTMapNodeExpandedSet({mapID: map.id, path, expanded: true, resetSubtree: false});
 			}
-			if (node.children) {
-				newPathsToExpand.push(...node.children.VKeys().map(childID=>`${path}/${childID}`));
+			const childLinks = await GetAsync(()=>GetNodeChildLinks(node.id));
+			if (childLinks.length) {
+				newPathsToExpand.push(...childLinks.map(a=>`${path}/${a.child}`));
 			}
 		}
 		pathsToExpand = newPathsToExpand;

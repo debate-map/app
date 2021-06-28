@@ -32,12 +32,10 @@ import {SocialUI} from "./Social";
 import {GetNodeL3, GetNodeDisplayText, IsPremiseOfSinglePremiseArgument} from "dm_common";
 import {Polarity} from "dm_common";
 import {CreateLinkCommand} from "dm_common";
-import {UpdateTimelineStepOrder} from "dm_common";
 import {GetNode, GetNodeID, GetParentNode, GetParentPath} from "dm_common";
 import {GetTimelineStep} from "dm_common";
 import {NodeReveal} from "dm_common";
-import {UpdateTimelineStep} from "dm_common";
-import {GetUserBackground} from "Store/firebase_ext/users/$user";
+import {GetUserBackground} from "Store/db_ext/users/$user";
 import {MeID, Me} from "dm_common";
 import {store} from "Store";
 
@@ -135,7 +133,7 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 			const {parentPath: newParentPath} = targetDroppableInfo;
 			const newParentID = GetPathNodeIDs(newParentPath).Last();
 			const newParent = GetNodeL3(newParentID);
-			const polarity = targetDroppableInfo.subtype == "up" ? Polarity.Supporting : Polarity.Opposing;
+			const polarity = targetDroppableInfo.subtype == "up" ? Polarity.supporting : Polarity.opposing;
 
 			const {mapID, nodePath: draggedNodePath} = draggableInfo;
 			const draggedNodeID = GetPathNodeIDs(draggedNodePath).Last();
@@ -175,7 +173,7 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 					<Button ml={5} text="Cancel" onClick={()=>controller.Close()}/>
 				</>,
 			});
-		} else if (targetDroppableInfo.type == "TimelineStepList") {
+		} /*else if (targetDroppableInfo.type == "TimelineStepList") {
 			// if we're moving an item to later in the same list, increment the target-index again (since react-beautiful-dnd pre-applies target-index adjustment, unlike the rest of our code that uses UpdateTimelineStepsOrder/Array.Move())
 			if (sourceDroppableInfo.type == targetDroppableInfo.type && sourceIndex < targetIndex) {
 				targetIndex++;
@@ -197,7 +195,7 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 			newNodeReveal.show = true;
 			const newNodeReveals = (step.nodeReveals || []).concat(newNodeReveal);
 			new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
-		}
+		}*/
 	};
 
 	ComponentDidMount() {

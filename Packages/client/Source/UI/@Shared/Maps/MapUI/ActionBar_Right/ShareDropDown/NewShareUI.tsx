@@ -1,4 +1,4 @@
-import {AddShare, GetMap, GetMapTimelines, GetShares, MeID, Share, ShareType, Timeline, UpdateShare} from "dm_common";
+import {AddShare, GetMap, GetShares, MeID, Share, ShareType, Timeline, UpdateShare} from "dm_common";
 import {store} from "Store";
 import {GetMapView} from "Store/main/maps/mapViews/$mapView";
 import {ExpandType, ScrollToType} from "Store/main/shareUI";
@@ -21,11 +21,11 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 		const currentShare_longURL = GetShareLongURL(currentShare);
 
 		const map = GetMap(mapID);
-		const timelines = GetMapTimelines(map);
+		//const timelines = GetMapTimelines(map);
 
 		const newShareData = new Share({
 			name: map.name,
-			type: ShareType.Map,
+			type: ShareType.map,
 			mapID,
 			mapView: GetMapView(mapID),
 			createdAt: Date.now(), // overridden by server, but added for informational convenience, for mere copy-pastes
@@ -53,10 +53,10 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 		const splitAt = 120;
 		return (
 			<Column>
-				<RowLR splitAt={splitAt}>
+				{/*<RowLR splitAt={splitAt}>
 					<Text>Show timeline:</Text>
 					<Select options={[{name: "None", value: null} as any].concat(timelines)} value={timeline} onChange={val=>this.SetState({timeline: val})}/>
-				</RowLR>
+				</RowLR>*/}
 				<RowLR mt={5} splitAt={splitAt}>
 					<Text>Expand type:</Text>
 					<Select options={GetEntries(ExpandType, "ui")}

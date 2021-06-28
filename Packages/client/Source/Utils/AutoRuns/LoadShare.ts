@@ -34,7 +34,7 @@ async function LoadShare(shareID: string) {
 		return void LoadHomePage();
 	}
 
-	if (share.type == ShareType.Map) {
+	if (share.type == ShareType.map) {
 		const map = await GetAsync(()=>GetMap(share.mapID));
 		if (map == null) {
 			AddNotificationMessage(`Could not find map with id: ${share.mapID} (redirecting to home page)`);
@@ -42,7 +42,7 @@ async function LoadShare(shareID: string) {
 		}
 
 		runInAction("LoadShare", ()=>{
-			const page: "private" | "public" | "global" = map.type == MapType.Private ? "private" : map.type == MapType.Public ? "public" : "global";
+			const page: "private" | "public" | "global" = map.type == MapType.private ? "private" : map.type == MapType.public ? "public" : "global";
 			store.main.page = page;
 			store.main[page]["subpage"] = rootPageDefaultChilds[page];
 			store.main[page]["selectedMapID"] = share.mapID;

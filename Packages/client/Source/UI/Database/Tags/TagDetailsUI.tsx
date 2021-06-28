@@ -10,7 +10,7 @@ import {GetNodeL2, AsNodeL3, GetNodeDisplayText} from "dm_common";
 import {MapNodeType} from "dm_common";
 import {AddNodeTag} from "dm_common";
 import {MapNodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp} from "dm_common";
-import {GetNodeColor} from "Store/firebase_ext/nodes";
+import {GetNodeColor} from "Store/db_ext/nodes";
 
 type Props = {baseData: MapNodeTag, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: MapNodeTag)=>void};
 type State = {newData: MapNodeTag};
@@ -164,10 +164,10 @@ class NodeSlotRow extends BaseComponentPlus({mt: 5} as TagDetailsUI_SharedProps 
 		let nodeID = comp[nodeKey];
 		let nodeL2 = Validate("UUID", nodeID) == null ? GetNodeL2(nodeID) : null;
 		let displayText = `(Node not found for ID: ${nodeID})`;
-		let backgroundColor = GetNodeColor({type: MapNodeType.Category} as any).desaturate(0.5).alpha(0.8);
+		let backgroundColor = GetNodeColor({type: MapNodeType.category} as any).desaturate(0.5).alpha(0.8);
 		if (nodeL2) {
 			const path = nodeL2.id;
-			const nodeL3 = AsNodeL3(nodeL2);
+			const nodeL3 = AsNodeL3(nodeL2, null);
 			displayText = GetNodeDisplayText(nodeL2, path);
 			backgroundColor = GetNodeColor(nodeL3).desaturate(0.5).alpha(0.8);
 		}
@@ -202,10 +202,10 @@ class NodeInArrayRow extends BaseComponentPlus({} as TagDetailsUI_SharedProps & 
 		let nodeID = nodeEntry;
 		let nodeL2 = Validate("UUID", nodeID) == null ? GetNodeL2(nodeID) : null;
 		let displayText = `(Node not found for ID: ${nodeID})`;
-		let backgroundColor = GetNodeColor({type: MapNodeType.Category} as any).desaturate(0.5).alpha(0.8);
+		let backgroundColor = GetNodeColor({type: MapNodeType.category} as any).desaturate(0.5).alpha(0.8);
 		if (nodeL2) {
 			const path = nodeL2.id;
-			const nodeL3 = AsNodeL3(nodeL2);
+			const nodeL3 = AsNodeL3(nodeL2, null);
 			displayText = GetNodeDisplayText(nodeL2, path);
 			backgroundColor = GetNodeColor(nodeL3).desaturate(0.5).alpha(0.8);
 		}

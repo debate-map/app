@@ -8,7 +8,7 @@ import {useCallback, useMemo, useEffect} from "react";
 import {MapNodeL3, Polarity, ClaimForm, MapNodeType, GetParentNodeL3, GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity, MeID, Map} from "dm_common";
 
 
-import {GetNodeColor} from "Store/firebase_ext/nodes";
+import {GetNodeColor} from "Store/db_ext/nodes";
 import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog";
 
 type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style?};
@@ -65,7 +65,7 @@ type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style
 export class AddArgumentButton extends BaseComponent<Props> {
 	render() {
 		const {map, node, path, polarity, style} = this.props;
-		const backgroundColor = GetNodeColor({type: MapNodeType.Argument, displayPolarity: polarity} as MapNodeL3);
+		const backgroundColor = GetNodeColor({type: MapNodeType.argument, displayPolarity: polarity} as MapNodeL3);
 		const parent = GetParentNodeL3(path);
 
 		const polarity_short = GetPolarityShortStr(polarity);
@@ -85,8 +85,8 @@ export class AddArgumentButton extends BaseComponent<Props> {
 						width: 60, padding: "2px 12px",
 						":hover": {backgroundColor: backgroundColor.Mix("white", 0.05).alpha(0.9).css()},
 					},
-					/* polarity == Polarity.Supporting && {marginBottom: 5},
-					polarity == Polarity.Opposing && {marginTop: 5}, */
+					/* polarity == Polarity.supporting && {marginBottom: 5},
+					polarity == Polarity.opposing && {marginTop: 5}, */
 					{height: 17, fontSize: 11, padding: "0 12px"}, // vertical
 					// {fontSize: 18, padding: "0 12px"}, // horizontal
 					// canDrop && { outline: `1px solid ${isOver ? 'yellow' : 'white'}` },
@@ -105,16 +105,16 @@ export class AddArgumentButton extends BaseComponent<Props> {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}*/
 						// if parent is a claim "shown as negation", we need to reverse the new-child polarity
-						if (node.link.form == ClaimForm.Negation) {
+						if (node.link.form == ClaimForm.negation) {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}
-						ShowAddChildDialog(path, MapNodeType.Argument, newChildPolarity, MeID(), map.id);
+						ShowAddChildDialog(path, MapNodeType.argument, newChildPolarity, MeID(), map.id);
 					} else {
 						let newChildPolarity = polarity;
 						if (contributeInfo_polarity.reversePolarities) {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}
-						ShowAddChildDialog(contributeInfo_polarity.hostNodeID, MapNodeType.Argument, newChildPolarity, MeID(), map.id);
+						ShowAddChildDialog(contributeInfo_polarity.hostNodeID, MapNodeType.argument, newChildPolarity, MeID(), map.id);
 					}
 				}, [contributeInfo_polarity.hostNodeID, contributeInfo_polarity.reversePolarities, map.id, node.id, node.link.form, path, polarity])}/>
 		);

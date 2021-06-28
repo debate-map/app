@@ -20,9 +20,9 @@ export class NodeChangesMarker extends BaseComponent<{addedDescendants: number, 
 				{paddingBottom: 0 + (limitBarPos == LimitBarPos.below ? ChildLimitBar.HEIGHT : 0)},
 			)}>
 				{addedDescendants > 0 &&
-					<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Add)},.8)`}}>{addedDescendants} new</Row>}
+					<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.add)},.8)`}}>{addedDescendants} new</Row>}
 				{editedDescendants > 0 &&
-					<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.Edit)},.8)`}}>{editedDescendants} edited</Row>}
+					<Row style={{color: `rgba(${GetChangeTypeOutlineColor(ChangeType.edit)},.8)`}}>{editedDescendants} edited</Row>}
 			</Column>
 		);
 	}

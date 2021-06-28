@@ -14,8 +14,8 @@ import {MeID} from "../Store/db/users";
 import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
 import {Map} from "../Store/db/maps/@Map";
 import {SearchUpFromNodeForNodeMatchingX} from "../Utils/Store/PathFinder";
-import {GetDefaultAccessPolicyID_ForNode} from "../Store/db/accessPolicies.js";
-import {GetNodeChildLinks} from "../Store/db/nodeChildLinks.js";
+import {GetDefaultAccessPolicyID_ForNode} from "../Store/db/accessPolicies";
+import {GetNodeChildLinks} from "../Store/db/nodeChildLinks";
 
 type Payload = {
 	mapID: string, oldParentID: string, newParentID: string, nodeID: string,

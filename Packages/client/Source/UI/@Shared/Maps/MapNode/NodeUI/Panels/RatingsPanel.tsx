@@ -4,11 +4,11 @@ import {BaseComponent, RenderSource, BaseComponentPlus} from "web-vcore/nm/react
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink";
+import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink";
 import {Observer} from "web-vcore";
 import {MapNodeL3} from "dm_common";
-import {RatingType, GetRatingTypeInfo} from "dm_common";
-import {Rating} from "dm_common";
+import {NodeRatingType, GetRatingTypeInfo} from "dm_common";
+import {NodeRating} from "dm_common";
 import {MeID} from "dm_common";
 import {GetNodeForm, GetNodeL3} from "dm_common";
 import {GetNodeChildren} from "dm_common";
@@ -26,7 +26,7 @@ import {MarkHandled} from "Utils/UI/General";
 	{rating: 100, count: 4},
 ];*/
 
-type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: RatingType, ratings: Rating[]};
+type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRatingType, ratings: NoID<NodeRating>[]};
 
 @Observer
 export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {size: null as Vector2}) {

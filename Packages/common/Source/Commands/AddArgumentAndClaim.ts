@@ -4,7 +4,7 @@ import {MergeDBUpdates, Command} from "web-vcore/nm/mobx-graphlink";
 import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
 import {MapNode} from "../Store/db/nodes/@MapNode";
 import {AddChildNode} from "./AddChildNode";
-import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink";
 
 type Payload = {
 	mapID: string,

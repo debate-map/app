@@ -6,7 +6,7 @@ import {LinkNode_HighLevel} from "./LinkNode_HighLevel";
 import {ClaimForm, Polarity, MapNode} from "../Store/db/nodes/@MapNode";
 import {GetNode} from "../Store/db/nodes";
 import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
-import {GetNodeChildLinks} from "../Store/db/nodeChildLinks.js";
+import {GetNodeChildLinks} from "../Store/db/nodeChildLinks";
 
 @MapEdit
 @UserEdit

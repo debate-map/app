@@ -54,12 +54,12 @@ export class PermissionsPanel extends BaseComponent<Pick<NodeDetailsUI_SharedPro
 						* MapEditors: Only editors of the current map (and node creator) are allowed.
 						* Anyone: Any signed-in user is allowed.
 					`.AsMultiline(0)}/>
-					{/* newRevisionData.permission_edit.type == PermissionInfoType.MapEditors &&
+					{/* newRevisionData.permission_edit.type == PermissionInfoType.mapEditors &&
 						<Text ml={5} sel style={{ opacity: 0.5 }}>(of map: {newData.ownerMapID})</Text> *#/}
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{display: "flex", alignItems: "center"}}>
 					<Text>Contribute:</Text>
-					<Select options={GetEntries(PermissionInfoType).filter(a=>(openMap?.type != MapType.Private && !HasModPermissions(MeID()) ? a.value == PermissionInfoType.Anyone : true))} enabled={enabled}
+					<Select options={GetEntries(PermissionInfoType).filter(a=>(openMap?.type != MapType.private && !HasModPermissions(MeID()) ? a.value == PermissionInfoType.Anyone : true))} enabled={enabled}
 						value={newRevisionData.permission_contribute.type}
 						// onChange={val => Change(val == AccessLevel.Basic ? delete newRevisionData.accessLevel : newRevisionData.accessLevel = val)}/>
 						onChange={val=>Change(newRevisionData.permission_contribute.type = val)}/>
@@ -69,7 +69,7 @@ export class PermissionsPanel extends BaseComponent<Pick<NodeDetailsUI_SharedPro
 						* MapEditors: Only editors of the current map (and node creator) are allowed.
 						* Anyone: Any signed-in user is allowed. (required for public/global maps)
 					`.AsMultiline(0)}/>
-					{/* newRevisionData.permission_contribute.type == PermissionInfoType.MapEditors &&
+					{/* newRevisionData.permission_contribute.type == PermissionInfoType.mapEditors &&
 						<Text ml={5} sel style={{ opacity: 0.5 }}>(of map: {newData.ownerMapID})</Text> *#/}
 				</RowLR>
 			</>

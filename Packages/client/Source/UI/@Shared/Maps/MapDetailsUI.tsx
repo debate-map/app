@@ -1,10 +1,8 @@
-import {GetErrorMessagesUnderElement, Clone, ToNumber, DEL, CloneWithPrototypes, GetEntries} from "web-vcore/nm/js-vextensions";
-import Moment from "web-vcore/nm/moment";
-import {CheckBox, Column, Pre, RowLR, Spinner, TextInput, Row, Select} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {IsUserCreatorOrMod, Map, MapNodeRevision_Defaultable_DefaultsForMap, MapType, Map_namePattern, MeID} from "dm_common";
 import {InfoButton} from "web-vcore";
-import {Map_namePattern, MapType, Map, MapNodeRevision_Defaultable_DefaultsForMap, PermissionInfoType, MapVisibility, IsUserCreatorOrMod, MeID} from "dm_common";
-
+import {CloneWithPrototypes, DEL, GetErrorMessagesUnderElement, ToNumber} from "web-vcore/nm/js-vextensions";
+import {CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput} from "web-vcore/nm/react-vcomponents";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
 import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel";
 
@@ -48,7 +46,7 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 					<CheckBox enabled={enabled} style={{width: "100%"}}
 						value={newData.noteInline} onChange={val=>Change(newData.noteInline = val)}/>
 				</RowLR>
-				{newData.type == MapType.Private && !forNew && creatorOrMod &&
+				{/*newData.type == MapType.private && !forNew && creatorOrMod &&
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Row center>
 						<Pre>Visibility:</Pre>
@@ -58,19 +56,19 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 						`.AsMultiline(0)}/>
 					</Row>
 					<Select options={GetEntries(MapVisibility)} enabled={enabled} value={newData.visibility} onChange={val=>Change(newData.visibility = val)}/>
-				</RowLR>}
+				</RowLR>*/}
 				{!forNew &&
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Default expand depth:</Pre>
 					<Spinner min={1} max={3} enabled={enabled}
 						value={ToNumber(newData.defaultExpandDepth, 0)} onChange={val=>Change(newData.defaultExpandDepth = val)}/>
 				</RowLR>}
-				{!forNew &&
+				{/*!forNew &&
 				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Default timeline:</Pre>
 					<TextInput enabled={enabled} value={newData.defaultTimelineID} onChange={val=>Change(newData.defaultTimelineID = val)}/>
-				</RowLR>}
-				{newData.type == MapType.Private && !forNew &&
+				</RowLR>*/}
+				{newData.type == MapType.private && !forNew &&
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Row center>
 						<Pre>Require map-editors can edit:</Pre>
@@ -104,9 +102,9 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 					{newData.nodeDefaults != null &&
 					<Column ml={20}>
 						<PermissionsPanel newRevisionData={newData.nodeDefaults} enabled={enabled} forDefaultsInMap={true} Change={()=>{
-							if (newData.nodeDefaults.permission_edit.type == PermissionInfoType.Creator && newData.requireMapEditorsCanEdit) {
-								newData.nodeDefaults.permission_edit.type = PermissionInfoType.MapEditors;
-							}
+							/*if (newData.nodeDefaults.permission_edit.type == PermissionInfoType.creator && newData.requireMapEditorsCanEdit) {
+								newData.nodeDefaults.permission_edit.type = PermissionInfoType.mapEditors;
+							}*/
 							this.Update();
 						}}/>
 					</Column>}

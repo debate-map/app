@@ -59,7 +59,7 @@ export class MediaDetailsUI extends BaseComponentPlus(
 						/*pattern={Media_urlPattern}*/ required
 						enabled={creating || editing} style={{width: "100%"}}
 						value={newData.url} onChange={val=>Change(newData.url = val)}/>
-					{newData.type == MediaType.Video && newData.url && videoID == null &&
+					{newData.type == MediaType.video && newData.url && videoID == null &&
 						<Span ml={5} style={{color: HSLA(30, 1, .6, 1), whiteSpace: "pre"}}>Only YouTube urls supported currently.</Span>}
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
@@ -69,11 +69,11 @@ export class MediaDetailsUI extends BaseComponentPlus(
 				</RowLR>
 				<Column mt={10}>
 					<Row style={{fontWeight: "bold"}}>Preview:</Row>
-						{newData.type == MediaType.Image &&
+						{newData.type == MediaType.image &&
 							<Row mt={5} style={{display: "flex", alignItems: "center"}}>
 								<img src={newData.url} style={{width: "100%"}}/>
 							</Row>}
-						{newData.type == MediaType.Video &&
+						{newData.type == MediaType.video &&
 						 	// use wrapper div (with video-id as key), to ensure element cleanup when video-id changes
 							<div key={videoID}>
 								<YoutubePlayerUI videoID={videoID} /*startTime={0}*/ heightVSWidthPercent={.5625}

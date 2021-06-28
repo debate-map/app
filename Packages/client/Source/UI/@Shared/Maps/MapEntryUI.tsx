@@ -17,7 +17,7 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 		const {index, last, map} = this.props;
 		const creator = map && GetUser(map.creator);
 
-		const toURL = new VURL(undefined, [map.type == MapType.Private ? "private" : "public", `${map.id}`]);
+		const toURL = new VURL(undefined, [map.type == MapType.private ? "private" : "public", `${map.id}`]);
 		return (
 			<Column p="7px 10px" style={E(
 				{background: index % 2 == 0 ? "rgba(30,30,30,.7)" : "rgba(0,0,0,.7)"},
@@ -32,7 +32,7 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 					{/* <Column style={{flex: columnWidths[0]}}>
 						<Link text={map.name} to={toURL.toString({domain: false})} style={{fontSize: 17}} onClick={e=> {
 							e.preventDefault();
-							store.dispatch(new (map.type == MapType.Personal ? ACTPersonalMapSelect : ACTDebateMapSelect)({id: map._id}));
+							store.dispatch(new (map.type == MapType.personal ? ACTPersonalMapSelect : ACTDebateMapSelect)({id: map._id}));
 						}}/>
 						<Row style={{fontSize: 13}}>{map.note}</Row>
 					</Column> */}
@@ -40,7 +40,7 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 						<Link text={map.name} to={toURL.toString({domain: false})} style={E({fontSize: 17}, GADDemo && {color: HSLA(222, 0.33, 0.5, 0.8)})} onClick={e=>{
 							e.preventDefault();
 							runInAction("MapEntryUI.onClick", ()=>{
-								store.main[map.type == MapType.Private ? "private" : "public"].selectedMapID = map.id;
+								store.main[map.type == MapType.private ? "private" : "public"].selectedMapID = map.id;
 							});
 						}}/>
 						{map.note &&

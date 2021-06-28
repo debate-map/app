@@ -30,7 +30,7 @@ export class ReferencesAttachmentEditorUI extends BaseComponent<
 					<Row key={0}>Preview:</Row>,
 					<Column key={1} mt={5}>
 						<Pre style={{padding: 5, background: "rgba(255,255,255,.2)", borderRadius: 5}}>
-							{GetNodeDisplayText({type: MapNodeType.Claim, current: {references: CleanUpdatedReferencesAttachment(Clone(newData))}} as any, null, ClaimForm.Base)}
+							{GetNodeDisplayText({type: MapNodeType.claim, current: {references: CleanUpdatedReferencesAttachment(Clone(newData))}} as any, null, ClaimForm.base)}
 							<SubPanel_References attachment={newData} fontSize={15}/>
 						</Pre>
 					</Column>,

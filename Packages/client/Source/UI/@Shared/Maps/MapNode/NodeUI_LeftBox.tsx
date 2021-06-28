@@ -9,7 +9,7 @@ import {MapNodeL3, ClaimForm} from "dm_common";
 import {GetNodeForm, IsPremiseOfSinglePremiseArgument, GetRatingTypesForNode} from "dm_common";
 import {GetParentNodeL3} from "dm_common";
 import {MapNodeType_Info} from "dm_common";
-import {RatingType, GetRatingTypeInfo} from "dm_common";
+import {NodeRatingType, GetRatingTypeInfo} from "dm_common";
 import {GetRatings, GetRatingAverage_AtPath} from "dm_common";
 import {IsUserCreatorOrMod} from "dm_common";
 import {MeID} from "dm_common";
@@ -36,7 +36,7 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 		const form = GetNodeForm(node, path);
 		const parentNode = GetParentNodeL3(path);
 
-		const nodeReversed = form == ClaimForm.Negation;
+		const nodeReversed = form == ClaimForm.negation;
 		const nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		const combinedWithParent = IsPremiseOfSinglePremiseArgument(node, parentNode);
@@ -48,7 +48,7 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 		let ratingTypes = GetRatingTypesForNode(node);
 		if (argumentNode) {
 			// ratingTypes = [{type: "impact" as RatingType, main: true}].concat(ratingTypes).concat([{type: "relevance" as RatingType, main: true}]);
-			ratingTypes = ratingTypes.concat([{type: "relevance" as RatingType}, {type: "impact" as RatingType, main: true}]);
+			ratingTypes = ratingTypes.concat([{type: NodeRatingType.relevance}, {type: NodeRatingType.impact, main: true}]);
 		}
 
 		return (

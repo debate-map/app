@@ -1,7 +1,7 @@
 import {emptyArray, FromJSON, GetValues, ToNumber, emptyArray_forLoading} from "web-vcore/nm/js-vextensions";
 import {O} from "web-vcore";
 import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {GetNode, Timeline, GetTimeline, GetTimelineStep, GetNodesRevealedInSteps, GetMap, GetTimelineSteps, TimelineStep, GetNodeRevealTimesInSteps} from "dm_common";
+import {GetNode, GetNodesRevealedInSteps, GetMap} from "dm_common";
 import {TimelineSubpanel, ShowChangesSinceType} from "./@MapState";
 
 export const GetMapState = StoreAccessor(s=>(mapID: string)=>{
@@ -32,7 +32,11 @@ export const GetShowTimelineDetails = StoreAccessor(s=>(mapID: string): boolean=
 	if (mapID == null) return null;
 	return s.main.maps.mapStates.get(mapID).showTimelineDetails;
 });
-export const GetSelectedTimeline = StoreAccessor(s=>(mapID: string): Timeline=>{
+
+// timeline-related
+// ==========
+
+/*export const GetSelectedTimeline = StoreAccessor(s=>(mapID: string): Timeline=>{
 	if (mapID == null) return null;
 	const timelineID = s.main.maps.mapStates.get(mapID).selectedTimeline;
 	return GetTimeline(timelineID);
@@ -43,7 +47,7 @@ export const GetPlayingTimeline = StoreAccessor(s=>(mapID: string): Timeline=>{
 	// const timelineID = State('main', 'maps', mapID, 'playingTimeline');
 	if (mapInfo == null || !mapInfo.timelinePanelOpen || mapInfo.timelineOpenSubpanel != TimelineSubpanel.Playing) return null;
 	const timelineID = mapInfo.selectedTimeline;
-	return GetTimeline(timelineID); */
+	return GetTimeline(timelineID); *#/
 	if (!s.main.maps.mapStates.get(mapID).timelinePanelOpen || s.main.maps.mapStates.get(mapID).timelineOpenSubpanel != TimelineSubpanel.playing) return null;
 	const timelineID = s.main.maps.mapStates.get(mapID).selectedTimeline;
 	return GetTimeline(timelineID);
@@ -51,7 +55,7 @@ export const GetPlayingTimeline = StoreAccessor(s=>(mapID: string): Timeline=>{
 /* export const GetPlayingTimelineTime = StoreAccessor((mapID: string): number => {
 	if (mapID == null) return null;
 	return State('main', 'maps', mapID, 'playingTimeline_time');
-}); */
+}); *#/
 export const GetPlayingTimelineStepIndex = StoreAccessor(s=>(mapID: string): number=>{
 	if (mapID == null) return null;
 	return s.main.maps.mapStates.get(mapID).playingTimeline_step;
@@ -134,4 +138,4 @@ export const GetTimeFromWhichToShowChangedNodes = StoreAccessor(s=>(mapID: strin
 
 	const timeOfSpecifiedVisit = lastMapViewTimes[visitOffset.KeepAtMost(lastMapViewTimes.length - 1)];
 	return timeOfSpecifiedVisit;
-});
+});*/

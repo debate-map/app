@@ -8,7 +8,7 @@ import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
 import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
 import {GetNode} from "../Store/db/nodes";
 import {AddArgumentAndClaim} from "../Commands";
-import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink";
 
 type Payload = {mapID: string, parentID: string, node: MapNode, revision: MapNodeRevision, link?: Partial<NodeChildLink>, asMapRoot?: boolean};
 

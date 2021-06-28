@@ -1,6 +1,6 @@
 import {emptyArray, GetValues_ForSchema} from "web-vcore/nm/js-vextensions";
 import {AddSchema, DB, MGLClass, Field, GetDoc, StoreAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink";
-import {ChangeType, Map_NodeEdit} from "./mapNodeEdits/@MapNodeEdit.js";
+import {ChangeType, Map_NodeEdit} from "./mapNodeEdits/@MapNodeEdit";
 
 const colorMap = {
 	[ChangeType.add]: "0,255,0",

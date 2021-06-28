@@ -5,7 +5,7 @@ import {Clone, CE} from "web-vcore/nm/js-vextensions";
 import {AddNodeRevision} from "./AddNodeRevision";
 import {MapNodeL2, MapNode} from "../Store/db/nodes/@MapNode";
 import {GetNodeL2, AsNodeL1, GetNodeL3, GetNodeDisplayText, GetNodeForm} from "../Store/db/nodes/$node";
-import {GetNodeChildren} from "../Store/db/nodes.js";
+import {GetNodeChildren} from "../Store/db/nodes";
 
 @MapEdit
 @UserEdit

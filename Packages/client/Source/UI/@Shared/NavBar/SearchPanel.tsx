@@ -11,8 +11,8 @@ import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView";
 import {runInAction, flow} from "web-vcore/nm/mobx";
 import {Validate, GetAsync, UUID} from "web-vcore/nm/mobx-graphlink";
-import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, MapType, GetSearchTerms_Advanced} from "dm_common";
-import {GetNodeColor} from "Store/firebase_ext/nodes";
+import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, MapType, GetSearchTerms_Advanced, GetNodeChildLinks} from "dm_common";
+import {GetNodeColor} from "Store/db_ext/nodes";
 import {MapUI} from "../Maps/MapUI";
 import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu";
 
@@ -47,7 +47,8 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 			const node = await GetAsync(()=>GetNode(queryStr));
 			if (node) {
 				runInAction("SearchPanel.PerformSearch_part2_nodeID", ()=>{
-					store.main.search.searchResults_nodeRevisionIDs = [node.currentRevision];
+					//store.main.search.searchResults_nodeRevisionIDs = [node.currentRevision];
+					store.main.search.searchResults_nodeRevisionIDs = [nodeRevisionMatch.id];
 				});
 				return;
 			}
@@ -192,7 +193,9 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 					// continue; // commented; node may be a map-root, and still have parents
 				}
 
-				for (const parentID of (node.parents || {}).Pairs().map(a=>a.key)) {
+				//const parentIDs = (node.parents || {}).Pairs().map(a=>a.key);
+				const parentIDs = GetNodeChildLinks(null, node.id);
+				for (const parentID of parentIDs) {
 					const newUpPath = `${parentID}/${upPath}`;
 					newUpPathAttempts.push(newUpPath);
 				}
@@ -247,7 +250,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 		// if (node == null) return <Row>Loading... (#{nodeID})</Row>;
 		if (node == null) return <Row></Row>;
 
-		const nodeL3 = AsNodeL3(node);
+		const nodeL3 = AsNodeL3(node, null);
 		const path = `${node.id}`;
 
 		const backgroundColor = GetNodeColor(nodeL3).desaturate(0.5).alpha(0.8);
@@ -298,7 +301,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 								} else {
 									if (mapRootNode_map == null) return; // still loading
 									runInAction("SearchResultRow.OpenContainingMap", ()=>{
-										if (mapRootNode_map.type != MapType.Global) {
+										if (mapRootNode_map.type != MapType.global) {
 											store.main.page = "global";
 										} else {
 											store.main.page = "debates";

@@ -1,22 +1,14 @@
-import {CE, Clone, GetEntries, ToJSON, StartDownload} from "web-vcore/nm/js-vextensions";
-import {runInAction} from "web-vcore/nm/mobx";
-import {ApplyDBUpdates, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {Column, Row, Select, TextArea, Button, Text, Spinner, CheckBox} from "web-vcore/nm/react-vcomponents";
+import {GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, HasModPermissions, MapNodeL3, MeID} from "dm_common";
+import {store} from "Store";
+import {DataExchangeFormat} from "Store/main/maps";
+import {styles} from "Utils/UI/GlobalStyles";
+import {Observer, RunInAction_Set} from "web-vcore";
+import {Clone, GetEntries, StartDownload} from "web-vcore/nm/js-vextensions";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {Button, CheckBox, Column, Row, Select, Spinner, Text, TextArea} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
 import {VMenuItem} from "web-vcore/nm/react-vmenu";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {ES, styles} from "Utils/UI/GlobalStyles";
-import {AddChildNode} from "dm_common";
-import {ImportSubtree} from "dm_common";
-import {GetNodeID, GetNodesByTitle, GetNodeChildrenL3} from "dm_common";
-import {MeID} from "dm_common";
-import {HasModPermissions} from "dm_common";
-import {Observer, TreeView, RunInAction_Set} from "web-vcore";
-import {store} from "Store";
-import {DataExchangeFormat} from "Store/main/maps";
-import {GetNodeL3, GetNodeDisplayText} from "dm_common";
-import {MapNodeL3} from "dm_common";
-import {GetNodesInSubtree} from "dm_common";
 import {MI_SharedProps} from "../NodeUI_Menu";
 
 @Observer
@@ -70,7 +62,7 @@ class ExportSubtreeUI extends BaseComponentPlus(
 		let subtreeExportData: string;
 		if (getData) {
 			var subtree = GetSubtree(path, dialogState.baseExportDepth);
-			if (dialogState.targetFormat == DataExchangeFormat.GAD_CSV) {
+			if (dialogState.targetFormat == DataExchangeFormat.gad_csv) {
 				let positions = subtree.childrenData.VValues();
 				subtreeExportData = positions.map(position=> {
 					let categories = position.childrenData.VValues();

@@ -7,7 +7,7 @@ import {Map} from "dm_common";
 export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node: MapNodeL3, path: string, childBeingAdded: boolean}, {premiseTitle: ""}) {
 	render() {
 		const {map, node, path, childBeingAdded} = this.props;
-		// const backgroundColor = GetNodeColor({ type: MapNodeType.Category } as MapNodeL3);
+		// const backgroundColor = GetNodeColor({ type: MapNodeType.category } as MapNodeL3);
 
 		return (
 			<Row className="argumentsControlBar clickThrough">
@@ -25,12 +25,12 @@ export class ArgumentsControlBar extends BaseComponentPlus({} as {map: Map, node
 					<Row>Opposing arguments</Row>
 				</Column> */}
 				<Column ml={0}> {/* vertical */}
-					<AddArgumentButton map={map} node={node} path={path} polarity={Polarity.Supporting}/>
-					<AddArgumentButton map={map} node={node} path={path} polarity={Polarity.Opposing} style={{marginTop: 1}}/>
+					<AddArgumentButton map={map} node={node} path={path} polarity={Polarity.supporting}/>
+					<AddArgumentButton map={map} node={node} path={path} polarity={Polarity.opposing} style={{marginTop: 1}}/>
 				</Column>
 				{/* <Row ml={0}> // horizontal
-					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.Supporting}/>
-					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.Opposing} style={{marginLeft: 3}}/>
+					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.supporting}/>
+					<AddArgumentButton map={map} node={node} path={parentPath} polarity={Polarity.opposing} style={{marginLeft: 3}}/>
 				</Row> */}
 				{childBeingAdded &&
 					<div style={{marginLeft: 15}}>

@@ -1,19 +1,14 @@
+import {AsNodeL3, GetNodeChildrenL2, GetNodeDisplayText, GetNodeParentsL2, GetParentNodeL2, GetRatings, GetRatingTypesForNode, Map, MapNodeL2} from "dm_common";
+import {GetOpenMapID} from "Store/main";
+import {GetMapView} from "Store/main/maps/mapViews/$mapView";
+import {Link} from "web-vcore";
 import {Pre, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentPlus, GetInnerComp} from "web-vcore/nm/react-vextensions";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
-import {GetOpenMapID} from "Store/main";
-import {GetMapView} from "Store/main/maps/mapViews/$mapView";
-import {Map,GetRatings,GetNodeChildrenL2, GetNodeParentsL2, GetParentNodeL2,AsNodeL3, GetNodeDisplayText, GetRatingTypesForNode,MapNodeL2} from "dm_common";
-
-
-
-
-import {Link} from "web-vcore";
 import {DefinitionsPanel} from "./NodeUI/Panels/DefinitionsPanel";
 import {DetailsPanel} from "./NodeUI/Panels/DetailsPanel";
 import {DiscussionPanel} from "./NodeUI/Panels/DiscussionPanel";
 import {OthersPanel} from "./NodeUI/Panels/OthersPanel";
-import {PhrasingsPanel} from "./NodeUI/Panels/PhrasingsPanel";
 import {RatingsPanel} from "./NodeUI/Panels/RatingsPanel";
 import {SocialPanel} from "./NodeUI/Panels/SocialPanel";
 import {TagsPanel} from "./NodeUI/Panels/TagsPanel";
@@ -31,7 +26,7 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 		// just list one of the parents as the "current parent", so code relying on a parent doesn't error
 		const path = `${nodeParents.length ? `${nodeParents[0].id}/` : ""}${node.id}`;
 		const parent = GetParentNodeL2(path);
-		const nodeL3 = AsNodeL3(node);
+		const nodeL3 = AsNodeL3(node, null);
 		return (
 			<ScrollView ref="scrollView"
 				// backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.refs.scrollView.content) || a == this.refs.mapUI}
@@ -73,8 +68,8 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 						const ratings = GetRatings(node.id, ratingInfo.type);
 						return <RatingsPanel key={index} node={nodeL3} path={path} ratingType={ratingInfo.type} ratings={ratings}/>;
 					})}
-					<PhrasingsPanel show={true} node={node} path={path}/>
-					<DefinitionsPanel show={true} node={node} path={path}/>
+					{/*<PhrasingsPanel show={true} node={node} path={path}/>*/}
+					<DefinitionsPanel show={true} map={map} node={node} path={path}/>
 					<DiscussionPanel show={true}/>
 					<SocialPanel show={true}/>
 					<TagsPanel show={true} map={map} node={nodeL3} path={path}/>

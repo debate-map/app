@@ -1,9 +1,9 @@
 import {Collection} from "web-vcore/nm/mobx-graphlink";
-import {AccessPolicy} from "./db/accessPolicies/@AccessPolicy.js";
+import {AccessPolicy} from "./db/accessPolicies/@AccessPolicy";
 import {Map_NodeEdit} from "./db/mapNodeEdits/@MapNodeEdit";
 import {Map} from "./db/maps/@Map";
 import {Media} from "./db/media/@Media";
-import {NodeChildLink} from "./db/nodeChildLinks/@NodeChildLink.js";
+import {NodeChildLink} from "./db/nodeChildLinks/@NodeChildLink";
 import {NodeRating} from "./db/nodeRatings/@NodeRating";
 import {MapNode} from "./db/nodes/@MapNode";
 import {MapNodeRevision} from "./db/nodes/@MapNodeRevision";
@@ -12,7 +12,7 @@ import {Share} from "./db/shares/@Share";
 import {Term} from "./db/terms/@Term";
 import {User} from "./db/users/@User";
 import {User_Private} from "./db/users_private/@User_Private";
-import {VisibilityDirective} from "./db/visibilityDirectives/@VisibilityDirective.js";
+import {VisibilityDirective} from "./db/visibilityDirectives/@VisibilityDirective";
 
 // manually import these, since otherwise they're never runtime-imported
 require("./db/users_private/@User_Private");

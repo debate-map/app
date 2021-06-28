@@ -51,36 +51,36 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 		let nodeChildrenToShowHere = nodeChildrenToShow;
 		let nodeChildrenToShowInRelevanceBox;
-		if (IsMultiPremiseArgument(node) && type != HolderType.Relevance) {
-			nodeChildrenToShowHere = nodeChildrenToShow.filter(a=>a && a.type != MapNodeType.Argument);
-			nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == MapNodeType.Argument);
+		if (IsMultiPremiseArgument(node) && type != HolderType.relevance) {
+			nodeChildrenToShowHere = nodeChildrenToShow.filter(a=>a && a.type != MapNodeType.argument);
+			nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == MapNodeType.argument);
 		}
 
-		let upChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.Supporting) : [];
-		let downChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.Opposing) : [];
+		let upChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.supporting) : [];
+		let downChildren = separateChildren ? nodeChildrenToShowHere.filter(a=>a.displayPolarity == Polarity.opposing) : [];
 
 		// apply sorting (regardless of direction, both are ordered by score/priority; "up" reordering is applied on the *child-ui list*, not the child-node list)
 		if (separateChildren) {
 			upChildren = upChildren.OrderByDescending(child=>nodeChildren_fillPercents[child.id]);
 			downChildren = downChildren.OrderByDescending(child=>nodeChildren_fillPercents[child.id]);
 			// this is really not recommended, but I guess there could be use-cases (only admins are allowed to manually order this type anyway)
-			if (node.childrenOrder) {
+			/*if (node.childrenOrder) {
 				upChildren = upChildren.OrderByDescending(child=>node.childrenOrder.indexOf(child.id).IfN1Then(Number.MAX_SAFE_INTEGER)); // descending, since index0 of upChildren group shows at bottom
 				downChildren = downChildren.OrderBy(child=>node.childrenOrder.indexOf(child.id).IfN1Then(Number.MAX_SAFE_INTEGER));
-			}
+			}*/
 		} else {
 			nodeChildrenToShowHere = nodeChildrenToShowHere.OrderByDescending(child=>nodeChildren_fillPercents[child.id]);
 			// if (IsArgumentNode(node)) {
-			//const isArgument_any = node.type == MapNodeType.Argument && node.current.argumentType == ArgumentType.Any;
-			if (node.childrenOrder) {
+			//const isArgument_any = node.type == MapNodeType.argument && node.current.argumentType == ArgumentType.any;
+			/*if (node.childrenOrder) {
 				nodeChildrenToShowHere = nodeChildrenToShowHere.OrderBy(child=>node.childrenOrder.indexOf(child.id).IfN1Then(Number.MAX_SAFE_INTEGER));
-			}
+			}*/
 		}
 
 		let childLimit_up = ((nodeView || {}).childLimit_up || initialChildLimit).KeepAtLeast(initialChildLimit);
 		let childLimit_down = ((nodeView || {}).childLimit_down || initialChildLimit).KeepAtLeast(initialChildLimit);
 		// if the map's root node, or an argument node, show all children
-		const showAll = node.id == map.rootNode || node.type == MapNodeType.Argument;
+		const showAll = node.id == map.rootNode || node.type == MapNodeType.argument;
 		if (showAll) [childLimit_up, childLimit_down] = [100, 100];
 
 		const RenderChild = (child: MapNodeL3, index: number, collection_untrimmed: MapNodeL3[], direction = "down" as "up" | "down")=>{
@@ -137,7 +137,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 							<Column ref={c=>{ this[`${group}ChildHolder`] = c; provided.innerRef(GetDOM(c) as any); }} ct className={refName} {...provided.droppableProps}
 								style={E(
 									{position: "relative"},
-									childrenHere.length == 0 && {position: "absolute", top: group == "down" ? "100%" : 0, width: MapNodeType_Info.for[MapNodeType.Claim].minWidth, height: 100},
+									childrenHere.length == 0 && {position: "absolute", top: group == "down" ? "100%" : 0, width: MapNodeType_Info.for[MapNodeType.claim].minWidth, height: 100},
 								)}>
 								{/* childrenHere.length == 0 && <div style={{ position: 'absolute', top: '100%', width: '100%', height: 200 }}/> */}
 								{childrenHereUIs}
@@ -175,8 +175,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 						nodeChildren={nodeChildrenToShowHere} childBoxOffsets={oldChildBoxOffsets}/>}
 
 				{/* if we're for multi-premise arg, and this comp is not already showing relevance-args, show them in a "Taken together, are these claims relevant?" box */}
-				{IsMultiPremiseArgument(node) && type != HolderType.Relevance &&
-					<NodeChildHolderBox {...{map, node, path}} type={HolderType.Relevance} widthOverride={childrenWidthOverride}
+				{IsMultiPremiseArgument(node) && type != HolderType.relevance &&
+					<NodeChildHolderBox {...{map, node, path}} type={HolderType.relevance} widthOverride={childrenWidthOverride}
 						widthOfNode={childrenWidthOverride}
 						nodeChildren={GetNodeChildrenL3(node.id, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}
 						onHeightOrDividePointChange={dividePoint=>this.CheckForLocalChanges()}/>}
@@ -336,7 +336,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const childBoxes = this.childBoxes.VValues().filter(a=>a != null);
 		const newState = {} as any;
 
-		const showAddArgumentButtons = false; // node.type == MapNodeType.Claim && expanded && nodeChildren != emptyArray_forLoading; // && nodeChildren.length > 0;
+		const showAddArgumentButtons = false; // node.type == MapNodeType.claim && expanded && nodeChildren != emptyArray_forLoading; // && nodeChildren.length > 0;
 		// if (this.lastRender_source == RenderSource.SetState && this.childHolder) {
 		if (this.Expanded && this.childHolder) {
 			const holderRect = VRect.FromLTWH(this.childHolder.DOM.getBoundingClientRect());

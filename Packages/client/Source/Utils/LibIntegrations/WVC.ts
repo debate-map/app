@@ -1,4 +1,4 @@
-import {GetUserPermissionGroups, Me, MeID, ValidateDBData} from "dm_common";
+import {GetUserPermissionGroups, Me, MeID} from "dm_common";
 import {dbVersion, hasHotReloaded} from "Main";
 import {RootState, store} from "Store";
 import {AddNotificationMessage} from "Store/main/@NotificationMessage";
@@ -69,7 +69,7 @@ export function InitWVC() {
 		GetAuth: ()=>null, // todo
 		GetUserID: MeID,
 
-		ValidateDBData,
+		ValidateDBData: ()=>{},
 
 		GetNewURLForStoreChanges,
 	});

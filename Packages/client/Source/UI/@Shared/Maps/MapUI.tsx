@@ -4,14 +4,12 @@ import {Column, Row} from "web-vcore/nm/react-vcomponents";
 import {BaseComponentWithConnector, FindReact, GetDOM, BaseComponentPlus, BaseComponent} from "web-vcore/nm/react-vextensions";
 import {VMenuStub, VMenuItem} from "web-vcore/nm/react-vmenu";
 import {ScrollView} from "web-vcore/nm/react-vscrollview";
-import {TimelinePlayerUI} from "UI/@Shared/Timelines/TimelinePlayerUI";
 import {GetDistanceBetweenRectAndPoint, inFirefox, GetScreenRect, StoreAction, Observer} from "web-vcore";
 import {GADDemo} from "UI/@GAD/GAD";
 import {store} from "Store";
 import {GetNodeView, GetMapView, GetSelectedNodePath, GetViewOffset, GetFocusedNodePath, GetNodeViewsAlongPath, ACTMapNodeSelect} from "Store/main/maps/mapViews/$mapView";
-import {GetTimelinePanelOpen, GetPlayingTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState";
+import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {GetOpenMapID} from "Store/main";
-import {TimelinePanel} from "UI/@Shared/Timelines/TimelinePanel";
 import {TimelineIntroBox} from "UI/@Shared/Timelines/TimelineIntroBox";
 import {MapNodeL3, GetUserAccessLevel, MeID, IsNodeL2, IsNodeL3, GetNodeL3, IsPremiseOfSinglePremiseArgument, GetParentPath, GetParentNodeL3, Map} from "dm_common";
 import {styles, ES} from "../../../Utils/UI/GlobalStyles";
@@ -136,21 +134,20 @@ export class MapUI extends BaseComponentPlus({
 		})();
 		if (rootNode == null) return <MapUIWaitMessage message="Loading root node..."/>;
 		// if (GetNodeView(map.id, rootNode.id, false) == null) return <MapUIWaitMessage message="Initializing root-node view..."/>; // maybe temp
-		if (rootNode.current.accessLevel > GetUserAccessLevel(MeID())) {
+		/*if (rootNode.current.accessLevel > GetUserAccessLevel(MeID())) {
 			return <Column style={ES({flex: 1})}>
 				{!withinPage &&
 					<ActionBar_Left map={map} subNavBarWidth={subNavBarWidth} backOnly={true}/>}
 				<MapUIWaitMessage message="Insufficient permissions."/>
 			</Column>;
-		}
-
+		}*/
 
 		if (isBot) {
 			return <NodeUI_ForBots map={map} node={rootNode}/>;
 		}
 
 		const timelinePanelOpen = map ? GetTimelinePanelOpen(map.id) : null;
-		const playingTimeline = GetPlayingTimeline(map ? map.id : null);
+		//const playingTimeline = GetPlayingTimeline(map ? map.id : null);
 
 		return (
 			<Column style={ES({flex: 1})}>
@@ -163,8 +160,8 @@ export class MapUI extends BaseComponentPlus({
 				{/*! withinPage &&
 					<TimelineOverlayUI map={map}/> */}
 				<Row style={{marginTop: 30, height: "calc(100% - 30px)", alignItems: "flex-start"}}>
-					{!withinPage && timelinePanelOpen &&
-						<TimelinePanel map={map}/>}
+					{/*!withinPage && timelinePanelOpen &&
+						<TimelinePanel map={map}/>*/}
 					<ScrollView {...rest.Excluding(...StandardCompProps() as any)} ref={c=>this.scrollView = c}
 						backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView.content) || a == this.mapUIEl}
 						style={ES({height: "100%"}, withinPage && {overflow: "visible"})}
@@ -216,8 +213,8 @@ export class MapUI extends BaseComponentPlus({
 								e.preventDefault();
 							}}
 						>
-							{playingTimeline != null &&
-							<TimelineIntroBox timeline={playingTimeline}/>}
+							{/*playingTimeline != null &&
+							<TimelineIntroBox timeline={playingTimeline}/>*/}
 							<NodeUI indexInNodeList={0} map={map} node={rootNode} path={(Assert(rootNode.id != null), rootNode.id.toString())}/>
 							{/* <ReactResizeDetector handleWidth handleHeight onResize={()=> { */}
 							{/* <ResizeSensor ref="resizeSensor" onResize={()=> {

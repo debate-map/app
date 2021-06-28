@@ -7,7 +7,7 @@ import {MapNodeL3} from "../Store/db/nodes/@MapNode";
 import {GetNodeL3, ReversePolarity} from "../Store/db/nodes/$node";
 import {GetParentNodeID} from "../Store/db/nodes";
 import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
-import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink";
 
 AddSchema("ReverseArgumentPolarity_payload", {
 	properties: {

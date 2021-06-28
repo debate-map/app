@@ -22,7 +22,7 @@ autorun(()=>{
 		};
 		// if (auth != lastAuth) ExtendNewContextData({ auth: auth ? auth.Including('id', 'displayName') : null });
 		//if (auth != lastAuth) ExtendNewContextData({auth: auth ? auth.Including("uid", "displayName", "email", "photoURL") : null});
-		if (auth != lastAuth) ExtendNewContextData({auth: auth ? auth.Including("_key", "displayName", /*"email",*/ "photoURL") : null});
+		if (auth != lastAuth) ExtendNewContextData({auth: auth ? auth.Including("id", "displayName", /*"email",*/ "photoURL") : null});
 		if (mapView != lastMapView) ExtendNewContextData({mapView});
 
 		if (newContextData != null) {

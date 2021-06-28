@@ -3,21 +3,16 @@ import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBo
 import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {store} from "Store";
-import {MapNodeRevision_Defaultable, CanEditNode, IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, GetChildCount, DeleteMap, Map} from "dm_common";
-
-
+import {MapNodeRevision_Defaultable, IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, Map, GetNodeChildLinks} from "dm_common";
 import {Observer, GetUpdates, InfoButton} from "web-vcore";
 import {GADDemo} from "UI/@GAD/GAD";
 import {Button_GAD} from "UI/@GAD/GADButton";
-
-
 import {runInAction} from "web-vcore/nm/mobx";
 import {FromJSON, ToJSON, E} from "web-vcore/nm/js-vextensions";
-
 import {MapDetailsUI} from "../../MapDetailsUI";
 
 // todo: probably ms this runs in two steps: 1) gets db-updates, 2) user looks over and approves, 3) user presses continue (to apply using ApplyDBUpdates, or a composite command)
-export async function ApplyNodeDefaults(nodeID: string, nodeDefaults: MapNodeRevision_Defaultable, recursive: boolean, mapID: string, runInfo = {revisionsUpdated: new Set<string>()}) {
+/*export async function ApplyNodeDefaults(nodeID: string, nodeDefaults: MapNodeRevision_Defaultable, recursive: boolean, mapID: string, runInfo = {revisionsUpdated: new Set<string>()}) {
 	if (!CanEditNode(MeID(), nodeID)) return;
 	const node = await GetAsync(()=>GetNodeL2(nodeID));
 	if (runInfo.revisionsUpdated.has(node.currentRevision)) return;
@@ -40,7 +35,7 @@ export async function ApplyNodeDefaults(nodeID: string, nodeDefaults: MapNodeRev
 	}
 
 	return runInfo;
-}
+}*/
 
 @Observer
 export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: string}> {
@@ -81,7 +76,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 							</Row>
 							<Row center>
 								<Text>Actions:</Text>
-								<Button ml={5} text="Apply node-defaults" onLeftClick={async()=>{
+								{/*<Button ml={5} text="Apply node-defaults" onLeftClick={async()=>{
 									ShowMessageBox({
 										title: "Recursively apply node-defaults", cancelButton: true,
 										message: `
@@ -103,10 +98,10 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 										},
 									});
 								}}/>
-								<InfoButton ml={5} text="Recurses down from the root node, modifying non-matching nodes to match the node-defaults; ignores paths where we lack the edit permission."/>
+								<InfoButton ml={5} text="Recurses down from the root node, modifying non-matching nodes to match the node-defaults; ignores paths where we lack the edit permission."/>*/}
 								<Button ml={5} text="Delete" onLeftClick={async()=>{
 									const rootNode = await GetAsync(()=>GetNodeL2(map.rootNode));
-									if (GetChildCount(rootNode) != 0) {
+									if (GetNodeChildLinks(rootNode.id).length != 0) {
 										return void ShowMessageBox({
 											title: "Still has children",
 											message: "Cannot delete this map until all the children of its root-node have been unlinked or deleted.",

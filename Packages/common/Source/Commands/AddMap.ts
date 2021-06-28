@@ -8,7 +8,7 @@ import {MapNode} from "../Store/db/nodes/@MapNode";
 import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
 import {MapType} from "../Store/db/maps/@Map";
 import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
-import {GetDefaultAccessPolicyID_ForNode} from "../Store/db/accessPolicies.js";
+import {GetDefaultAccessPolicyID_ForNode} from "../Store/db/accessPolicies";
 
 @UserEdit
 export class AddMap extends Command<{map: Map}, UUID> {

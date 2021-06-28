@@ -1,6 +1,6 @@
 import {IsNaN} from "web-vcore/nm/js-vextensions";
 import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {NodeChildLink} from "./nodeChildLinks/@NodeChildLink.js";
+import {NodeChildLink} from "./nodeChildLinks/@NodeChildLink";
 
 export const GetNodeChildLink = StoreAccessor(s=>(id: string): NodeChildLink=>{
 	if (id == null || IsNaN(id)) return null;

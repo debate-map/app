@@ -1,6 +1,6 @@
 import {GetValues_ForSchema, Assert, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink";
-import {ChangeType} from "../mapNodeEdits/@MapNodeEdit.js";
+import {ChangeType} from "../mapNodeEdits/@MapNodeEdit";
 
 // export type SourceChain = { [key: number]: Source; };
 // export type SourceChainI = {[key: number]: Source;};

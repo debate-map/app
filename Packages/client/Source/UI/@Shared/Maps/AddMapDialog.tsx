@@ -7,12 +7,12 @@ import {AddMap} from "dm_common";
 import {MapDetailsUI} from "./MapDetailsUI";
 
 export function ShowAddMapDialog(userID: string) {
-	const type = MapType.Public as MapType; // hard-coded for now
+	const type = MapType.public as MapType; // hard-coded for now
 	let newMap = new Map({
 		name: "",
 		type,
 		creator: MeID(),
-		editors: type == MapType.Private ? [MeID()] : OMIT as any,
+		editors: type == MapType.private ? [MeID()] : OMIT as any,
 	});
 
 	let error = null;

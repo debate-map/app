@@ -1,6 +1,6 @@
 import {CE} from "web-vcore/nm/js-vextensions";
 import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink";
-import {ClaimForm, Polarity} from "../nodes/@MapNode.js";
+import {ClaimForm, Polarity} from "../nodes/@MapNode";
 
 @MGLClass({table: "nodeChildLinks"})
 export class NodeChildLink {
@@ -46,5 +46,5 @@ export class NodeChildLink {
 	polarity?: Polarity;
 
 	// runtime only
-	//_mirrorLink?: boolean;
+	_mirrorLink?: boolean;
 }

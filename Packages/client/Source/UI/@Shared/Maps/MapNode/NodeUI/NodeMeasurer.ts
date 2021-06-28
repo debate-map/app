@@ -45,7 +45,7 @@ export function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 		expectedBoxWidth = nodeTypeInfo.maxWidth;
 	}
 
-	const width = node.current.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
+	const width = node.current.displayDetails.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
 
 	const maxTextWidth = width - expectedOtherStuffWidth;
 	const expectedTextHeight_tester = GetAutoElement(`<a id="nodeHeightTester" style='${ConvertStyleObjectToCSSString({whiteSpace: "initial", display: "inline-block"})}'>`) as HTMLElement;

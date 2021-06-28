@@ -42,7 +42,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 					forNew={false} enabled={canEdit}
 					onChange={(newData, newRevisionData, newLinkData, comp)=>{
 						/*if (map?.requireMapEditorsCanEdit) {
-							comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.MapEditors};
+							comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.mapEditors};
 						}*/
 						this.SetState({dataError: this.detailsUI.GetValidationError()});
 					}}/>
