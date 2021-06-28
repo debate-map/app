@@ -61,6 +61,12 @@ app.use(
 			enableCors: true, // cors flag temporary; enables mutations, from any origin
 			showErrorStack: true,
 			extendedErrors: ["hint", "detail", "errcode"], // to show error text in console (doesn't seem to be working)
+
+			// test
+			/*simpleCollections: "only",
+			graphileBuildOptions: {
+				pgOmitListSuffix: true,
+			},*/
 		},
 	)
 );

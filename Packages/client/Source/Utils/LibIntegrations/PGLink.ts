@@ -52,6 +52,8 @@ export function InitPGLink() {
 		//link,
 		link: link_withErrorHandling,
 		cache: new InMemoryCache({
+ 			//dataIdFromObject: a=>a.nodeId as string ?? null,
+ 			dataIdFromObject: a=>a.id as string ?? null,
 			typePolicies: {
 				Query: {
 					fields: {
