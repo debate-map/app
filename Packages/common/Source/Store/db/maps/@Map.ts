@@ -64,8 +64,6 @@ export class Map {
 	@Field({type: "boolean"})
 	requireMapEditorsCanEdit: boolean;
 
-	// allowPublicNodes = true; // todo
-
 	@DB((t,n)=>t.jsonb(n))
 	@Field(()=>Schema({
 		properties: CE(GetSchemaJSON("MapNodeRevision").properties).Including(...MapNodeRevision_Defaultable_props),
