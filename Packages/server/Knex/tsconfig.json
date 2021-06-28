@@ -1,8 +1,10 @@
 {
 	"extends": "../tsconfig.json",
 	"compilerOptions": {
+		"rootDir": ".",
 		//"target": "ES5",
-		"module": "CommonJS"
+		//"module": "CommonJS"
+		//"module": "ESNext",
 	},
 	"include": [
 		"./**/*.ts",

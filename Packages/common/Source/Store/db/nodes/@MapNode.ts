@@ -58,11 +58,11 @@ export class MapNode {
 
 	@DB((t,n)=>t.text(n))
 	@Field({$ref: "ArgumentType"})
-	argumentType: ArgumentType;
+	argumentType?: ArgumentType;
 
 	@DB((t,n)=>t.boolean(n))
 	@Field({type: "boolean"})
-	multiPremiseArgument: boolean;
+	multiPremiseArgument?: boolean;
 
 	@DB((t,n)=>t.text(n).references("id").inTable(`maps`).DeferRef())
 	@Field({$ref: "UUID"})

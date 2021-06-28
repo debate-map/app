@@ -1,10 +1,12 @@
 import Knex from "knex";
 import {up} from "./InitDB_Generated";
+//import {seed} from "../Knex/Seeds/1_Main";
+import seed from "../Knex/Seeds/1_Main";
 
-//import config from "../Knex/knexfile";
-import {createRequire} from "module";
+import config from "../Knex/knexfile";
+/*import {createRequire} from "module";
 const require = createRequire(import.meta.url);
-const config = require("../Knex/knexfile");
+const config = require("../Knex/knexfile");*/
 
 async function ConnectToDB_CreatingIfNonExistent(dbName: string) {
 	// use knex object without db-name in connection-config at first, in case db doesn't exist yet
@@ -35,19 +37,51 @@ async function ConnectToDB_CreatingIfNonExistent(dbName: string) {
 const command = process.argv[2];
 if (command == "initDB") {
 	InitDB();
+} else if (command == "seedDB") {
+	SeedDB();
 } else if (command == "migrateDBToLatest") {
 	MigrateDBToLatest();
 }
+
+// these were to try to fix the "try-finally gobbles unhandled errors" issue, but they didn't work
+/*process.on("uncaughtException", err=>console.error(err));
+process.on("unhandledRejection", err=>console.error(err));*/
 
 async function InitDB() {
 	const knex = await ConnectToDB_CreatingIfNonExistent("debate-map");
 
 	const transaction = await knex.transaction();
-	await up(transaction);
-	await transaction.commit();
-	knex.destroy();
+	try {
+		await up(transaction); // init db
+		console.log("Seeding db...");
+		await seed(transaction); // add seed data
+		console.log("Committing transaction...");
+		await transaction.commit();
+	} catch(ex) {
+		console.error(ex);
+	} finally {
+		await knex.destroy();
+	}
 
 	console.log(`InitDB function done.`);
+	process.exit();
+}
+async function SeedDB() {
+	const knex = await ConnectToDB_CreatingIfNonExistent("debate-map");
+
+	const transaction = await knex.transaction();
+	try {
+		console.log("Seeding db...");
+		await seed(transaction); // add seed data
+		console.log("Committing transaction...");
+		await transaction.commit();
+	} catch(ex) {
+		console.error(ex);
+	} finally {
+		await knex.destroy();
+	}
+
+	console.log(`SeedDB function done.`);
 	process.exit();
 }
 async function MigrateDBToLatest() {

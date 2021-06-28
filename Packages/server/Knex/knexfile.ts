@@ -1,15 +1,15 @@
-require("dotenv").config({path: "../../.env"});
+//require("dotenv").config({path: "../../.env"});
 
-/*import dotenv from "dotenv";
+import dotenv from "dotenv";
 dotenv.config({path: "../../.env"});
 import {dirname} from "path";
 import {fileURLToPath} from "url";
-const __dirname = dirname(fileURLToPath(import.meta.url));*/
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 //console.log("dirname", __dirname);
 
-module.exports = {
-//export default {
+//module.exports = {
+export default {
 	development: {
 		client: "postgresql",
 		connection: {
@@ -26,6 +26,9 @@ module.exports = {
 			tableName: "knex_migrations",
 			//directory: "./Knex/Migrations", // paths are relative to "Packages/server"
 			directory: `${__dirname}/Migrations`,
+		},
+		seeds: {
+			directory: `${__dirname}/Seeds`,
 		},
 		//acquireConnectionTimeout: 3000,
 	},

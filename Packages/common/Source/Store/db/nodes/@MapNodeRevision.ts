@@ -122,34 +122,34 @@ export class MapNodeRevision {
 
 	@DB((t,n)=>t.text(n))
 	@Field({type: ["null", "string"]}) // add null-type, for later when the payload-validation schema is derived from the main schema
-	note: string;
+	note?: string;
 
 	@DB((t,n)=>t.jsonb(n))
 	@Field({$ref: NodeRevisionDisplayDetails.name})
-	displayDetails: NodeRevisionDisplayDetails;
+	displayDetails?: NodeRevisionDisplayDetails;
 
 	// attachments
 	// ==========
 
 	@DB((t,n)=>t.specificType(n, "text[]"))
 	@Field({items: {$ref: TermAttachment.name}})
-	termAttachments: TermAttachment[];
+	termAttachments?: TermAttachment[];
 
 	@DB((t,n)=>t.jsonb(n))
 	@Field({$ref: EquationAttachment.name})
-	equation: EquationAttachment;
+	equation?: EquationAttachment;
 
 	@DB((t,n)=>t.jsonb(n))
 	@Field({$ref: ReferencesAttachment.name})
-	references: ReferencesAttachment;
+	references?: ReferencesAttachment;
 
 	@DB((t,n)=>t.jsonb(n))
 	@Field({$ref: QuoteAttachment.name})
-	quote: QuoteAttachment;
+	quote?: QuoteAttachment;
 
 	@DB((t,n)=>t.jsonb(n))
 	@Field({$ref: MediaAttachment.name})
-	media: MediaAttachment;
+	media?: MediaAttachment;
 }
 AddSchema("MapNodeRevision_Partial", (()=>{
 	const schema = GetSchemaJSON("MapNodeRevision");

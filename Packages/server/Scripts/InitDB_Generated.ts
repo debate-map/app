@@ -131,7 +131,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "rootNode", (t,n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "defaultExpandDepth", (t,n)=>t.integer(n));
 		RunFieldInit(t, "requireMapEditorsCanEdit", (t,n)=>t.boolean(n));
-		RunFieldInit(t, "properties", (t,n)=>t.jsonb(n));
+		RunFieldInit(t, "nodeDefaults", (t,n)=>t.jsonb(n));
 		RunFieldInit(t, "featured", (t,n)=>t.boolean(n));
 		RunFieldInit(t, "editors", (t,n)=>t.specificType(n, "text[]"));
 		RunFieldInit(t, "creator", (t,n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
@@ -158,6 +158,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "slot", (t,n)=>t.integer(n));
 		RunFieldInit(t, "form", (t,n)=>t.text(n));
 		RunFieldInit(t, "seriesAnchor", (t,n)=>t.boolean(n));
+		RunFieldInit(t, "seriesEnd", (t,n)=>t.boolean(n));
 		RunFieldInit(t, "polarity", (t,n)=>t.text(n));
 	});
 
@@ -175,9 +176,11 @@ export async function up(knex: Knex.Transaction) {
 		t.comment("@name MapNode"); 
 		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
 		RunFieldInit(t, "accessPolicy", (t,n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
-		RunFieldInit(t, "type", (t,n)=>t.text(n));
 		RunFieldInit(t, "creator", (t,n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
 		RunFieldInit(t, "createdAt", (t,n)=>t.bigInteger(n));
+		RunFieldInit(t, "type", (t,n)=>t.text(n));
+		RunFieldInit(t, "argumentType", (t,n)=>t.text(n));
+		RunFieldInit(t, "multiPremiseArgument", (t,n)=>t.boolean(n));
 		RunFieldInit(t, "rootNodeForMap", (t,n)=>t.text(n).references("id").inTable(v + `maps`).DeferRef());
 	});
 
@@ -186,12 +189,9 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "node", (t,n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "creator", (t,n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
 		RunFieldInit(t, "createdAt", (t,n)=>t.bigInteger(n));
-		RunFieldInit(t, "properties", (t,n)=>t.jsonb(n));
+		RunFieldInit(t, "titles", (t,n)=>t.jsonb(n));
 		RunFieldInit(t, "note", (t,n)=>t.text(n));
 		RunFieldInit(t, "displayDetails", (t,n)=>t.jsonb(n));
-		RunFieldInit(t, "argumentType", (t,n)=>t.text(n));
-		RunFieldInit(t, "multiPremiseArgument", (t,n)=>t.text(n));
-		RunFieldInit(t, "votingEnabled", (t,n)=>t.boolean(n));
 		RunFieldInit(t, "termAttachments", (t,n)=>t.specificType(n, "text[]"));
 		RunFieldInit(t, "equation", (t,n)=>t.jsonb(n));
 		RunFieldInit(t, "references", (t,n)=>t.jsonb(n));
