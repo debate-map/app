@@ -1,16 +1,14 @@
 import {AddSchema, AssertV, AssertValidate, Command, dbp, MergeDBUpdates, WrapDBValue} from "web-vcore/node_modules/mobx-graphlink";
 import {MapEdit, UserEdit} from "../CommandMacros";
+import {GetMaps} from "../Store/db/maps";
+import {GetNodeChildLinks} from "../Store/db/nodeChildLinks";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink";
+import {GetNodeRevisions} from "../Store/db/nodeRevisions";
+import {ForDelete_GetError} from "../Store/db/nodes";
+import {GetNodeL2} from "../Store/db/nodes/$node";
 import {MapNodeL2} from "../Store/db/nodes/@MapNode";
 import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
-import {GetNodeL2} from "../Store/db/nodes/$node";
-import {GetNodeRevisions} from "../Store/db/nodeRevisions";
-import {GetNode, ForDelete_GetError} from "../Store/db/nodes";
-import {GetMaps} from "../Store/db/maps";
-import {CE} from "web-vcore/nm/js-vextensions";
-import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
-import {AddMap} from "./AddMap";
-import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink";
-import {GetNodeChildLinks} from "../Store/db/nodeChildLinks";
+import {AssertUserCanDelete} from "./Helpers/SharedAsserts";
 
 AddSchema("DeleteNode_payload", {
 	properties: {

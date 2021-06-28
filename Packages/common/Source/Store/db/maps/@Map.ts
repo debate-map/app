@@ -38,11 +38,11 @@ export class Map {
 
 	@DB((t,n)=>t.text(n))
 	@Field({type: "string"})
-	note: string;
+	note?: string;
 
 	@DB((t,n)=>t.boolean(n))
 	@Field({type: "boolean"})
-	noteInline = true;
+	noteInline? = true;
 
 	@DB((t,n)=>t.text(n))
 	@Field({oneOf: GetValues_ForSchema(MapType)}, {req: true})
@@ -62,17 +62,17 @@ export class Map {
 
 	@DB((t,n)=>t.boolean(n))
 	@Field({type: "boolean"})
-	requireMapEditorsCanEdit: boolean;
+	requireMapEditorsCanEdit?: boolean;
 
 	@DB((t,n)=>t.jsonb(n))
 	@Field(()=>Schema({
 		properties: CE(GetSchemaJSON("MapNodeRevision").properties).Including(...MapNodeRevision_Defaultable_props),
 	}))
-	nodeDefaults: MapNodeRevision_Defaultable;
+	nodeDefaults?: MapNodeRevision_Defaultable;
 
 	@DB((t,n)=>t.boolean(n))
 	@Field({type: "boolean"})
-	featured: boolean;
+	featured?: boolean;
 
 	@DB((t,n)=>t.specificType(n, "text[]"))
 	//@Field({patternProperties: {[UUID_regex]: {type: "boolean"}}})

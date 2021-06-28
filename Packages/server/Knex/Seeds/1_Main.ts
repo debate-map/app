@@ -1,16 +1,38 @@
+import {MapNode, MapNodeRevision, Map, MapType} from "dm_common";
 import {Knex} from "knex";
-import {MapNode, MapNodeRevision} from "dm_common";
-import {GenerateUUID, LastUUID} from "web-vcore/nm/mobx-graphlink";
 import {CE} from "web-vcore/nm/js-vextensions";
+import {GenerateUUID} from "web-vcore/nm/mobx-graphlink";
+
+// use literal, instead of importing from dm_common (avoids ts-node issues with import-tree)
+const globalMapID = "GLOBAL_MAP_00000000001";
+const globalRootNodeID = "GLOBAL_ROOT_0000000001";
+
+const maps: Map[] = [
+	{
+		id: globalMapID,
+		accessPolicy: null,
+		name: "Global",
+		creator: null,
+		createdAt: Date.now(),
+		type: "global" as MapType,
+		rootNode: globalRootNodeID,
+		defaultExpandDepth: 3,
+		editors: [],
+		edits: 0,
+		editedAt: null,
+	}
+];
 
 const nodes: (MapNode & {revision: MapNodeRevision})[] = [
 	{
-		id: GenerateUUID(),
+		//id: GenerateUUID(),
+		id: globalRootNodeID,
 		accessPolicy: null,
 		createdAt: Date.now(),
 		revision: {
 			id: GenerateUUID(),
-			node: LastUUID(-1),
+			//node: LastUUID(-1),
+			node: globalRootNodeID,
 			createdAt: Date.now(),
 			titles: JSON.stringify({
 				base: "Root",
@@ -20,11 +42,17 @@ const nodes: (MapNode & {revision: MapNodeRevision})[] = [
 ];
 
 export default async function seed(knex: Knex.Transaction) {
-	for (const [index, node] of nodes.entries()) {
-		console.log(`Adding node ${index}.`);
+	console.log(`Adding nodes and node-revisions...`);
+	for (const node of nodes) {
 		await knex("nodes").insert(CE(node).Excluding("revision"));
-		console.log(`Adding node revision ${index}.`);
 		await knex("nodeRevisions").insert(node.revision);
 	}
-	console.log(`Done adding nodes.`);
+
+	// maps after nodes, for Map.rootNode fk-constraint
+	console.log(`Adding maps...`);
+	for (const map of maps) {
+		await knex("maps").insert(map);
+	}
+	
+	console.log(`Done seeding data.`);
 };
