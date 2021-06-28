@@ -5,7 +5,7 @@ import {MapNode} from "../Store/db/nodes/@MapNode";
 import {GetNode} from "../Store/db/nodes";
 import {HasAdminPermissions, IsUserCreatorOrMod} from "../Store/db/users/$user";
 import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
-import {IsPrivateNode, IsMultiPremiseArgument} from "../Store/db/nodes/$node";
+import {IsMultiPremiseArgument} from "../Store/db/nodes/$node";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts";
 
 @MapEdit
@@ -14,7 +14,7 @@ export class UpdateNodeChildrenOrder extends Command<{mapID?: string, nodeID: st
 	oldNodeData: MapNode;
 	newNodeData: MapNode;
 	Validate() {
-		AssertValidate({
+		/*AssertValidate({
 			properties: {
 				mapID: {type: "string"},
 				nodeID: {type: "string"},
@@ -32,7 +32,12 @@ export class UpdateNodeChildrenOrder extends Command<{mapID?: string, nodeID: st
 		AssertV(changeable_final, "You don't have permission to change this node's children-order.");
 		
 		this.newNodeData = {...this.oldNodeData, ...{childrenOrder}};
-		AssertValidate("MapNode", this.newNodeData, "New node-data invalid");
+		AssertValidate("MapNode", this.newNodeData, "New node-data invalid");*/
+
+		// todo: this should basically
+		// 1) verify the actor has permission (currently, this is basically just whether they're the parent-node owner)
+		// 2) search for parent-child-links for each child that is owned by the actor (creating them if necessary)
+		// 3) update their "slot" to match the provided order
 	}
 
 	GetDBUpdates() {

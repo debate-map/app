@@ -10,12 +10,13 @@ import {MapNodeRevision, TitlesMap, TitleKey_values} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
 import {PermissionGroupSet} from "../users/@User";
 import {GetNodeTags, GetNodeTagComps, GetFinalTagCompsForTag} from "../nodeTags";
-import {CanContributeToNode} from "../users/$user";
 import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@MapNodeTag";
 import {SourceType, Source} from "../nodeRevisions/@SourceChain";
 import Moment from "web-vcore/nm/moment";
 import {GetNodeChildLinks} from "../nodeChildLinks.js";
 import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
+import {GetAccessPolicy} from "../accessPolicies.js";
+import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");
@@ -42,7 +43,7 @@ export function GetPaddingForNode(node: MapNodeL2/*, isSubnode = false*/) {
 export type RatingTypeInfo = {type: NodeRatingType, main?: boolean, collapsed?: boolean};
 export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	if (node.type == MapNodeType.category) {
-		if (!node.current.votingEnabled) return [];
+		if (!node.policy.permissions_base.vote) return [];
 		return [{type: NodeRatingType.significance, main: true}];
 	}
 	if (node.type == MapNodeType.package) {
@@ -113,10 +114,13 @@ export function AsNodeL1(node: MapNodeL2 | MapNodeL3) {
 export function IsNodeL2(node: MapNode): node is MapNodeL2 {
 	return node["current"];
 }
-export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision) {
+export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision, accessPolicy: AccessPolicy) {
 	Assert(currentRevision, "Empty node-revision sent to AsNodeL2!");
 	// Assert(currentRevision.titles, "A MapNodeRevision object must have a titles property!"); // temp removed (for db-upgrade)
-	const result = E(node, {current: currentRevision}) as MapNodeL2;
+	const result = E(node, {
+		policy: accessPolicy,
+		current: currentRevision,
+	}) as MapNodeL2;
 	delete result["displayPolarity"];
 	delete result["link"];
 	return result;
@@ -132,7 +136,9 @@ export const GetNodeL2 = StoreAccessor(s=>(nodeID: string | MapNode, path?: stri
 	if (currentRevision === undefined) return undefined; // if node-revision still loading, have GetNodeL2 return "still loading"
 	if (currentRevision === null) return null; // if node-revision non-existent, have GetNodeL2 return null as well
 
-	const nodeL2 = AsNodeL2(node, currentRevision);
+	const accessPolicy = GetAccessPolicy(node.accessPolicy);
+
+	const nodeL2 = AsNodeL2(node, currentRevision, accessPolicy);
 	//return CachedTransform("GetNodeL2", [path], nodeL2, ()=>nodeL2);
 	return nodeL2;
 });
@@ -248,7 +254,7 @@ export class NodeContributionInfo_ForPolarity {
 	constructor(nodeID: string) {
 		this.hostNodeID = nodeID;
 	}
-	canAdd = true;
+	//canAdd = true;
 	hostNodeID: string;
 	reversePolarities = false;
 }
@@ -259,11 +265,11 @@ export function GetPolarityShortStr(polarity: Polarity) {
 export const GetNodeContributionInfo = StoreAccessor(s=>(nodeID: string, userID: string)=> {
 	let result = new NodeContributionInfo(nodeID);
 	let tags = GetNodeTags(nodeID);
-	let directChildrenDisabled = CE(tags).Any(a=>a.mirrorChildrenFromXToY?.nodeY == nodeID && a.mirrorChildrenFromXToY?.disableDirectChildren);
+	/*let directChildrenDisabled = CE(tags).Any(a=>a.mirrorChildrenFromXToY?.nodeY == nodeID && a.mirrorChildrenFromXToY?.disableDirectChildren);
 	if (directChildrenDisabled) {
 		result.proArgs.canAdd = false;
 		result.conArgs.canAdd = false;
-	}
+	}*/
 	for (let tag of tags) {
 		if (tag.mirrorChildrenFromXToY && tag.mirrorChildrenFromXToY.nodeY == nodeID) {
 			let comp = tag.mirrorChildrenFromXToY;
@@ -277,8 +283,8 @@ export const GetNodeContributionInfo = StoreAccessor(s=>(nodeID: string, userID:
 			}
 		}
 	}
-	if (!CanContributeToNode(userID, result.proArgs.hostNodeID)) result.proArgs.canAdd = false;
-	if (!CanContributeToNode(userID, result.conArgs.hostNodeID)) result.conArgs.canAdd = false;
+	/*if (!CanContributeToNode(userID, result.proArgs.hostNodeID)) result.proArgs.canAdd = false;
+	if (!CanContributeToNode(userID, result.conArgs.hostNodeID)) result.conArgs.canAdd = false;*/
 	return result;
 });
 
@@ -299,7 +305,7 @@ export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: stri
 
 	// if (path && path.split('/').length > 3) throw new Error('Test1'); // for testing node error-boundaries
 
-	if (node.type == MapNodeType.argument && !node.current.multiPremiseArgument && !titles.base) {
+	if (node.type == MapNodeType.argument && !node.multiPremiseArgument && !titles.base) {
 		// const baseClaim = GetNodeL2(node.children && node.children.VKeys().length ? node.children.VKeys()[0] : null);
 		// const baseClaim = GetArgumentPremises(node)[0];
 		const baseClaim = GetNodeChildrenL2(node.id).filter(a=>a && a.type == MapNodeType.claim)[0];
@@ -384,20 +390,12 @@ export function GetValidNewChildTypes(parent: MapNodeL2, holderType: HolderType,
 }
 
 /** Returns whether the node provided is an argument, and marked as single-premise. */
-export const IsSinglePremiseArgument = StoreAccessor(s=>(node: MapNodeL3)=>{
-	/* nodeChildren = nodeChildren || GetNodeChildren(node);
-	if (nodeChildren.Any(a=>a == null)) return null;
-	//return nodeChildren.Any(child=>IsPremiseOfSinglePremiseArgument(child, node));
-	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length == 1; */
-	return node && node.type == MapNodeType.argument && !node.current.multiPremiseArgument;
+export const IsSinglePremiseArgument = StoreAccessor(s=>(node: MapNode)=>{
+	return node && node.type == MapNodeType.argument && !node.multiPremiseArgument;
 });
 /** Returns whether the node provided is an argument, and marked as multi-premise. */
-export const IsMultiPremiseArgument = StoreAccessor(s=>(node: MapNodeL3)=>{
-	/* nodeChildren = nodeChildren || GetNodeChildren(node);
-	if (nodeChildren.Any(a=>a == null)) return null;
-	//return node.type == MapNodeType.Argument && !IsSinglePremiseArgument(node, nodeChildren);
-	return node.type == MapNodeType.Argument && nodeChildren.filter(a=>a.type == MapNodeType.Claim).length > 1; */
-	return node && node.type == MapNodeType.argument && node.current.multiPremiseArgument;
+export const IsMultiPremiseArgument = StoreAccessor(s=>(node: MapNode)=>{
+	return node && node.type == MapNodeType.argument && node.multiPremiseArgument;
 });
 
 /*export function IsPrivateNode(node: MapNode) {
@@ -407,17 +405,11 @@ export function IsPublicNode(node: MapNode) {
 	return node.ownerMapID == null;
 }*/
 
-export const IsPremiseOfSinglePremiseArgument = StoreAccessor(s=>(node: MapNode, parent: MapNodeL3)=>{
+export const IsPremiseOfSinglePremiseArgument = StoreAccessor(s=>(node: MapNode, parent: MapNode)=>{
 	if (parent == null) return null;
-	// let parentChildren = GetNodeChildrenL2(parent);
-	/* if (parentChildren.Any(a=>a == null)) return false;
-	return node.type == MapNodeType.Claim && parentChildren.filter(a=>a.type == MapNodeType.Claim).length == 1 && node.link.form != ClaimForm.YesNoQuestion; */
-	//let node = GetNode(nodeID);
 	return node.type == MapNodeType.claim && IsSinglePremiseArgument(parent);
 });
 export function IsPremiseOfMultiPremiseArgument(node: MapNode, parent: MapNodeL3) {
 	if (parent == null) return null;
-	// let parentChildren = GetNodeChildrenL2(parent);
-	//let node = GetNode(nodeID);
 	return node.type == MapNodeType.claim && IsMultiPremiseArgument(parent);
 }

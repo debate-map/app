@@ -1,8 +1,9 @@
 import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum} from "web-vcore/nm/js-vextensions";
 import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink";
+import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {MapType} from "../maps/@Map.js";
 import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
-import {MapNodeRevision} from "./@MapNodeRevision";
+import {ArgumentType, MapNodeRevision} from "./@MapNodeRevision";
 import {MapNodeType} from "./@MapNodeType";
 
 // these are 22-chars, matching 22-char uuids/slug-ids
@@ -18,7 +19,6 @@ export enum AccessLevel {
 AddSchema("AccessLevel", {oneOf: GetValues_ForSchema(AccessLevel)});
 
 export enum ClaimForm {
-	/** Dangerous */
 	base = "base",
 	negation = "negation",
 	yesNoQuestion = "yesNoQuestion",
@@ -44,10 +44,6 @@ export class MapNode {
 	@Field({type: "string"})
 	accessPolicy: string;
 
-	@DB((t,n)=>t.text(n))
-	@Field({$ref: "MapNodeType"}, {req: true})
-	type?: MapNodeType;
-
 	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	creator?: string;
@@ -55,6 +51,18 @@ export class MapNode {
 	@DB((t,n)=>t.bigInteger(n))
 	@Field({type: "number"}, {req: true})
 	createdAt: number;
+
+	@DB((t,n)=>t.text(n))
+	@Field({$ref: "MapNodeType"}, {req: true})
+	type?: MapNodeType;
+
+	@DB((t,n)=>t.text(n))
+	@Field({$ref: "ArgumentType"})
+	argumentType: ArgumentType;
+
+	@DB((t,n)=>t.boolean(n))
+	@Field({type: "boolean"})
+	multiPremiseArgument: boolean;
 
 	@DB((t,n)=>t.text(n).references("id").inTable(`maps`).DeferRef())
 	@Field({$ref: "UUID"})
@@ -86,11 +94,12 @@ AddSchema("MapNode_Partial", (()=>{
 
 // helpers
 // export type MapNodeL2 = MapNode & {finalType: MapNodeType};
-/** MapNode, except with the current-revision data attached. */
+/** MapNode, except with the access-policy and current-revision data attached. (no view-related stuff) */
 export interface MapNodeL2 extends MapNode {
+	policy: AccessPolicy;
 	current: MapNodeRevision;
 }
-/** MapNodeL2, except with positional data (and derivations, eg. display-polarity) attached. */
+/** MapNodeL2, except with some view-related stuff included. (eg. display-polarity based on path, current lens) */
 export interface MapNodeL3 extends MapNodeL2 {
 	/** For this node (with the given ancestors): How the node would be displayed -- "supporting" being green, "opposing" being red. */
 	displayPolarity: Polarity;

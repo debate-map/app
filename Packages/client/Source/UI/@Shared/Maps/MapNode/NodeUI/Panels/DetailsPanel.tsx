@@ -11,7 +11,7 @@ import {MapNodeL3} from "dm_common";
 import {GetParentNodeL3, GetParentNodeID} from "dm_common";
 import {GetLinkUnderParent, IsPremiseOfSinglePremiseArgument} from "dm_common";
 import {GetUser, MeID} from "dm_common";
-import {CanEditNode, IsUserCreatorOrMod} from "dm_common";
+import {IsUserCreatorOrMod} from "dm_common";
 import {PermissionInfoType} from "dm_common";
 import {UpdateLink} from "dm_common";
 import {AddNodeRevision} from "dm_common";
@@ -33,16 +33,17 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 		if (/*!isSubnode &&*/ path.includes("/") && parentNode == null) return null;
 
 		// const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
-		const canEdit = CanEditNode(MeID(), node.id);
+		//const canEdit = CanSubmitRevisions(MeID(), node.id);
+		const canEdit = IsUserCreatorOrMod(MeID(), node); // temp
 		return (
 			<Column style={{position: "relative", display: show ? null : "none"}}>
 				<NodeDetailsUI ref={c=>this.detailsUI = c}
 					baseData={node} baseRevisionData={node.current} baseLinkData={link} parent={parentNode}
 					forNew={false} enabled={canEdit}
 					onChange={(newData, newRevisionData, newLinkData, comp)=>{
-						if (map?.requireMapEditorsCanEdit) {
+						/*if (map?.requireMapEditorsCanEdit) {
 							comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.MapEditors};
-						}
+						}*/
 						this.SetState({dataError: this.detailsUI.GetValidationError()});
 					}}/>
 				{canEdit &&
@@ -52,7 +53,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 							if (link) {
 								const linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
 								if (linkUpdates.VKeys().length) {
-									await new UpdateLink(E({linkParentID: GetParentNodeID(path), linkChildID: node.id, linkUpdates})).Run();
+									await new UpdateLink(E({linkID: GetParentNodeID(path), linkUpdates})).Run();
 								}
 							}
 
@@ -60,10 +61,10 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 							const revisionID = await new AddNodeRevision({mapID: map.id, revision: newRevision}).Run();
 							runInAction("DetailsPanel.save.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 
-							if (IsPremiseOfSinglePremiseArgument(node, parentNode)) {
+							/*if (IsPremiseOfSinglePremiseArgument(node, parentNode)) {
 								const argumentNode = await GetAsync(()=>GetParentNodeL3(path));
 								if (IsUserCreatorOrMod(MeID(), argumentNode)) {
-									const permissionKeys = ["accessLevel", "votingDisabled", /* "permission_edit", */ "permission_contribute"] as const;
+									const permissionKeys = ["accessLevel", "votingDisabled", /* "permission_edit", *#/ "permission_contribute"] as const;
 									const nodePermissions = newRevision.Including(...permissionKeys);
 									const argumentNodePermissions = argumentNode.current.Including(...permissionKeys);
 									// if argument permissions do not match premise, update argument's permissions to match
@@ -74,7 +75,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 										runInAction("DetailsPanel.save.onClick_part2", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentNode.id, Date.now()));
 									}
 								}
-							}
+							}*/
 						}}/>
 						{/* error && <Pre>{error.message}</Pre> */}
 					</Row>}

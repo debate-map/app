@@ -58,7 +58,7 @@ export function GetRatingTypeInfo(ratingType: NodeRatingType, node: MapNodeL3, p
 			[ArgumentType.anyTwo]: "at least two of them",
 			[ArgumentType.any]: "at least one of them",
 		};
-		const premiseCountStr = premiseCountrStrMap[node.current.argumentType];
+		const premiseCountStr = premiseCountrStrMap[node.argumentType];
 
 		result.description = isMultiPremiseArgument
 			? `Assuming ${premiseCountStr} were true, how relevant/impactful would the statements (premises) below this be toward the parent claim? (0: not at all, 50: moderately, 100: game-changing)`

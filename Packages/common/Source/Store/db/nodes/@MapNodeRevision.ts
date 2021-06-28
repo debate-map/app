@@ -113,10 +113,10 @@ export class MapNodeRevision {
 	@DB((t,n)=>t.jsonb(n))
 	@Field({
 		properties: {
-			// base: {pattern: MapNodeRevision_titlePattern}, negation: {pattern: MapNodeRevision_titlePattern}, yesNoQuestion: {pattern: MapNodeRevision_titlePattern},
+			//base: {pattern: MapNodeRevision_titlePattern}, negation: {pattern: MapNodeRevision_titlePattern}, yesNoQuestion: {pattern: MapNodeRevision_titlePattern},
 			base: {type: "string"}, negation: {type: "string"}, yesNoQuestion: {type: "string"},
 		},
-		// required: ["base", "negation", "yesNoQuestion"],
+		//required: ["base", "negation", "yesNoQuestion"],
 	})
 	titles = {base: ""} as TitlesMap;
 
@@ -127,18 +127,6 @@ export class MapNodeRevision {
 	@DB((t,n)=>t.jsonb(n))
 	@Field({$ref: NodeRevisionDisplayDetails.name})
 	displayDetails: NodeRevisionDisplayDetails;
-
-	@DB((t,n)=>t.text(n))
-	@Field({$ref: "ArgumentType"})
-	argumentType: ArgumentType;
-
-	@DB((t,n)=>t.text(n))
-	@Field({type: "boolean"})
-	multiPremiseArgument: boolean;
-
-	@DB((t,n)=>t.boolean(n))
-	@Field({type: "boolean"})
-	votingEnabled: boolean;
 
 	// attachments
 	// ==========

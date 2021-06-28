@@ -24,9 +24,9 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 		return probability;
 	});
 	let combinedTruthOfPremises;
-	if (argument.current.argumentType == ArgumentType.all) {
+	if (argument.argumentType == ArgumentType.all) {
 		combinedTruthOfPremises = premiseProbabilities.reduce((total, current)=>total * current, 1);
-	} else if (argument.current.argumentType == ArgumentType.anyTwo) {
+	} else if (argument.argumentType == ArgumentType.anyTwo) {
 		const strongest = CE(premiseProbabilities).Max(null, true);
 		const secondStrongest = premiseProbabilities.length > 1 ? CE(CE(premiseProbabilities).Except({excludeEachOnlyOnce: true}, strongest)).Max(null, true) : 0;
 		combinedTruthOfPremises = strongest * secondStrongest;
@@ -75,7 +75,7 @@ export const GetArgumentImpactPseudoRatings = StoreAccessor(s=>(argument: MapNod
 	});
 	// let dataUsedInCalculation = {...childRatingSets, ...childForms_map};
 	const dataUsedInCalculation = {...childForms_map} as any;
-	dataUsedInCalculation.argumentType = argument.current.argumentType;
+	dataUsedInCalculation.argumentType = argument.argumentType;
 
 	const usersWhoRatedArgOrPremise = {};
 	/* const argRatingSet = GetRatingSet(argument.id, GetMainRatingType(argument)) || emptyObj;

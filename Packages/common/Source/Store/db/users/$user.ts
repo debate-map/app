@@ -61,14 +61,14 @@ export const IsUserCreatorOrMod = StoreAccessor(s=>(userID: string, entity: {cre
 	return (entity && entity.creator === userID && HasBasicPermissions(userID)) || HasModPermissions(userID);
 });
 
-export const CanEditNode = StoreAccessor(s=>(userID: string, nodeID: string): boolean=>{
+/*export const CanSubmitRevisions = StoreAccessor(s=>(userID: string, nodeID: string): boolean=>{
 	// mods and admins can always edit
 	if (HasModPermissions(userID) || HasAdminPermissions(userID)) {
 		return true;
 	}
 
-	/* let user = GetUser(userID);
-	if (user == null) return false; */
+	/*let user = GetUser(userID);
+	if (user == null) return false;*#/
 	const node = GetNodeL2(nodeID);
 	if (node == null) return false;
 	const revision = node.current;
@@ -88,16 +88,16 @@ export const CanEditNode = StoreAccessor(s=>(userID: string, nodeID: string): bo
 		return map?.editors?.includes(userID) ?? false;
 	}
 	Assert(false, "Invalid permission-info-type.");
-});
+});*/
 
-export const CanContributeToNode = StoreAccessor(s=>(userID: string, nodeID: string): boolean=>{
+/*export const CanContributeToNode = StoreAccessor(s=>(userID: string, nodeID: string): boolean=>{
 	// mods and admins can always contribute
 	if (HasModPermissions(userID) || HasAdminPermissions(userID)) {
 		return true;
 	}
 
-	/* let user = GetUser(userID);
-	if (user == null) return false; */
+	/*let user = GetUser(userID);
+	if (user == null) return false;*#/
 	const node = GetNodeL2(nodeID);
 	if (node == null) return false;
 	const revision = node.current;
@@ -117,4 +117,4 @@ export const CanContributeToNode = StoreAccessor(s=>(userID: string, nodeID: str
 		return map?.editors?.includes(userID) ?? false;
 	}
 	Assert(false, "Invalid permission-info-type.");
-});
+});*/

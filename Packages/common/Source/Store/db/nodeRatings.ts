@@ -11,6 +11,7 @@ import {ClaimForm, MapNodeL3} from "./nodes/@MapNode";
 import {MapNodeType} from "./nodes/@MapNodeType";
 import {MeID} from "./users";
 import {GetArgumentImpactPseudoRatings} from "../../Utils/Store/RatingProcessor";
+import {GetAccessPolicy} from "./accessPolicies.js";
 
 export const GetRatings = StoreAccessor(s=><
 	((nodeID: string, ratingType: Exclude<NodeRatingType, "impact">, userID?: string)=>NodeRating[]) & // if rating-type is known to not be "impact", all results will be "true ratings"
@@ -61,7 +62,7 @@ export const GetRatingAverage = StoreAccessor(s=>(nodeID: string, ratingType: No
 	if (ratings.length == 0) return resultIfNoData as any; */
 
 	const node = GetNodeL2(nodeID);
-	if (node && !node.current.votingEnabled) return 100;
+	if (node && !node.policy.permissions_base.vote) return 100;
 
 	const ratings = GetRatings(nodeID, ratingType, userID);
 	if (ratings.length == 0) return null;
@@ -114,7 +115,7 @@ export const GetFillPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: st
 
 export const GetMarkerPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
 	ratingType = ratingType || {[HolderType.truth]: "truth", [HolderType.relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
-	if (!node.current.votingEnabled) return null;
+	if (!node.policy.permissions_base.vote) return null;
 	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes.includes(node.type)) {
 		return GetRatingAverage_AtPath(node, ratingType, MeID());
 	}

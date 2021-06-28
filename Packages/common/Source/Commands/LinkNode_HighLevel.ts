@@ -10,7 +10,6 @@ import {GetNodeL3, GetNodeL2, IsPremiseOfMultiPremiseArgument, IsSinglePremiseAr
 import {GetParentNodeL3, GetHolderType, GetParentNodeID, GetNode} from "../Store/db/nodes";
 import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
 import {GetMap} from "../Store/db/maps";
-import {CanContributeToNode} from "../Store/db/users/$user";
 import {MeID} from "../Store/db/users";
 import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
 import {Map} from "../Store/db/maps/@Map";
@@ -73,7 +72,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
 		let pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && createWrapperArg;
 		AssertV(oldParentID !== newParentID || pastingPremiseAsRelevanceArg, "Old-parent-id and new-parent-id cannot be the same! (unless changing between truth-arg and relevance-arg)");
-		AssertV(CanContributeToNode(MeID(), newParentID), "Cannot paste under a node with contributions disabled.");
+		//AssertV(CanContributeToNode(MeID(), newParentID), "Cannot paste under a node with contributions disabled.");
 
 		// if (command.payload.unlinkFromOldParent && node.parents.VKeys().length == 1 && newParentPath.startsWith(draggedNodePath)) {
 		/* if (unlinkFromOldParent && newParentPath.startsWith(draggedNodePath)) {
@@ -119,9 +118,9 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			this.sub_unlinkFromOldParent.allowOrphaning = true; // allow "orphaning" of nodeID, since we're going to reparent it simultaneously -- using the sub_linkToNewParent subcommand
 			this.sub_unlinkFromOldParent.Validate();
 
-			// if the old parent was a single-premise argument, and the moved node was its only child, also delete the old parent
+			// if the moved node was the parent's only child, and actor allows it (ie. their view has node as single-premise arg), also delete the old parent
 			const children = GetNodeChildLinks(oldParentID);
-			if (deleteEmptyArgumentWrapper && IsSinglePremiseArgument(oldParent_data) && children.length == 1) {
+			if (children.length == 1 && deleteEmptyArgumentWrapper) {
 				this.sub_deleteOldParent = this.sub_deleteOldParent ?? new DeleteNode({mapID, nodeID: oldParentID}).MarkAsSubcommand(this);
 				this.sub_deleteOldParent.childrenToIgnore = [nodeID]; // let DeleteNode sub that it doesn't need to wait for nodeID to be deleted (since we're moving it out from old-parent simultaneously with old-parent's deletion)
 				this.sub_deleteOldParent.Validate();

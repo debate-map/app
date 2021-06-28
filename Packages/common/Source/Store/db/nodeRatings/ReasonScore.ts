@@ -51,7 +51,7 @@ export const RS_CalculateTruthScoreComposite = StoreAccessor(s=>(argumentID: str
 	if (premises.length == 0) return 0;
 
 	const truthScores = premises.map(premise=>RS_CalculateTruthScore(premise.id, calculationPath.concat(premise.id)));
-	const truthScoreComposite = CombinePremiseTruthScores(truthScores, argument.current.argumentType);
+	const truthScoreComposite = CombinePremiseTruthScores(truthScores, argument.argumentType);
 	return truthScoreComposite;
 });
 
@@ -77,7 +77,7 @@ export const RS_CalculateWeightMultiplier = StoreAccessor(s=>(nodeID: string, ca
 		if (premises.length == 0) continue;
 
 		const truthScores = premises.map(premise=>RS_CalculateTruthScore(premise.id, calculationPath.concat(premise.id)));
-		const truthScoresCombined = CombinePremiseTruthScores(truthScores, argument.current.argumentType);
+		const truthScoresCombined = CombinePremiseTruthScores(truthScores, argument.argumentType);
 		const weight = RS_CalculateWeight(argument.id, premises.map(a=>a.id), calculationPath.concat(argument.id));
 
 		if (argument.displayPolarity == Polarity.supporting) {
