@@ -20,4 +20,7 @@ JustBeforeUI_listeners.forEach(a=>a());
 const mountNode = document.getElementById("root");
 const {RootUIWrapper} = require("./UI/Root");
 
-ReactDOM.render(<RootUIWrapper/>, mountNode);
+// wait a moment before rendering; apparently react is more synchronous than before, and can call componentWillMount before all schemas (eg. Map) have had a chance to resolve!
+setTimeout(()=>{
+	ReactDOM.render(<RootUIWrapper/>, mountNode);
+});

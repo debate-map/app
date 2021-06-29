@@ -8,6 +8,7 @@ import {GetMapState} from "Store/main/maps/mapStates/$mapState";
 import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState";
 import {ACTMapNodeExpandedSet, GetNodeView, GetMapView} from "Store/main/maps/mapViews/$mapView";
 import {ACTSetFocusNodeAndViewOffset, MapUI} from "UI/@Shared/Maps/MapUI";
+import {JustBeforeUI_listeners} from "Main";
 
 let lastMapID;
 autorun(()=>{
@@ -29,14 +30,14 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 	// ACTEnsureMapStateInit(action.payload.id);
 	// storeM.ACTEnsureMapStateInit(action.payload.id);
 	let mapView: MapView;
-	/*runInAction("StartInitForNewlyLoadedMap_part1", ()=>{
+	runInAction("StartInitForNewlyLoadedMap_part1", ()=>{
 		({mapState, mapView} = ACTEnsureMapStateInit(mapID));
-		if (map.defaultTimelineID) {
+		/*if (map.defaultTimelineID) {
 			mapState.timelinePanelOpen = true;
 			mapState.timelineOpenSubpanel = TimelineSubpanel.playing;
 			mapState.selectedTimeline = map.defaultTimelineID;
-		}
-	});*/
+		}*/
+	});
 
 	let pathsToExpand = [map.rootNode];
 	for (let depth = 0; depth < map.defaultExpandDepth; depth++) {

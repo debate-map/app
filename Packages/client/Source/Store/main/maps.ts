@@ -95,6 +95,7 @@ export const ACTEnsureMapStateInit = StoreAction((mapID: string)=>{
 	}
 	if (GetMapView(mapID) == null) {
 		store.main.maps.mapViews.set(mapID, new MapView());
+		store.main.maps.mapViews.get(mapID).rootNodeViews = {}; // for some reason this is needed
 	}
 	return {
 		mapState: store.main.maps.mapStates.get(mapID),
