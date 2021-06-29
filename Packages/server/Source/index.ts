@@ -7,6 +7,7 @@ import pg from "pg";
 import {createRequire} from "module";
 import {AuthenticationPlugin} from "./Mutations/Authentication.js";
 import {SetUpAuthHandling} from "./AuthHandling.js";
+import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
 
 //import "web-vcore/nm/js-vextensions_ApplyCETypes.ts";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
@@ -53,6 +54,7 @@ app.use(
 				require("@graphile-contrib/pg-simplify-inflector"),
 				require("@graphile/subscriptions-lds").default,
 				require("postgraphile-plugin-connection-filter"),
+				CustomInflectorPlugin,
 				AuthenticationPlugin,
 			],
 			skipPlugins: [
