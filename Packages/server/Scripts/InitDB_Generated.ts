@@ -113,7 +113,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "permissions_userExtends", (t,n)=>t.jsonb(n));
 	});
 
-	await knex.schema.createTable(`${v}map_nodeEdits`, t=>{
+	await knex.schema.createTable(`${v}mapNodeEdits`, t=>{
 		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
 		RunFieldInit(t, "map", (t,n)=>t.text(n).references("id").inTable(v + `maps`).DeferRef());
 		RunFieldInit(t, "node", (t,n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
@@ -173,7 +173,7 @@ export async function up(knex: Knex.Transaction) {
 	});
 
 	await knex.schema.createTable(`${v}nodes`, t=>{
-		t.comment("@name MapNode"); 
+		
 		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
 		RunFieldInit(t, "accessPolicy", (t,n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
 		RunFieldInit(t, "creator", (t,n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
@@ -242,7 +242,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "lastEditAt", (t,n)=>t.bigInteger(n));
 	});
 
-	await knex.schema.createTable(`${v}users_private`, t=>{
+	await knex.schema.createTable(`${v}usersPrivates`, t=>{
 		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
 		RunFieldInit(t, "email", (t,n)=>t.text(n));
 		RunFieldInit(t, "providerData", (t,n)=>t.jsonb(n));

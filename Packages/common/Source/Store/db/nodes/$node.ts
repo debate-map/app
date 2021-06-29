@@ -144,7 +144,15 @@ export const GetNodeL2 = StoreAccessor(s=>(nodeID: string | MapNode, path?: stri
 });
 
 export function IsNodeL3(node: MapNode): node is MapNodeL3 {
-	return node["displayPolarity"] && node["link"];
+	//return node["displayPolarity"] && node["link"];
+	//if (node.type == MapNodeType.category) {
+		
+	// merely check for prop existence (values can be null, yet valid)
+	return "displayPolarity" in node && "link" in node;
+
+	/*}
+	// check for both existence and non-nullness (values must be non-null to be valid)
+	return node["displayPolarity"] != null && node["link"] != null;*/
 }
 /*export function AsNodeL3(node: MapNodeL2, displayPolarity?: Polarity, link?: NodeChildLink) {
 	Assert(IsNodeL2(node), "Node sent to AsNodeL3 was not an L2 node!");

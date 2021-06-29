@@ -37,14 +37,15 @@ export function InitPGLink() {
 		httpLink,
 	);
 	link_withErrorHandling = from([
-		onError(({graphQLErrors, networkError})=>{
+		onError(info=>{
+			const {graphQLErrors, networkError, response, operation, forward} = info;
 			if (graphQLErrors) {
 				graphQLErrors.forEach(({message, locations, path})=>{
-					console.error(`[GraphQL error] @message:`, message, "@locations:", locations, "@path:", path);
+					console.error(`[GraphQL error] @message:`, message, "@locations:", locations, "@path:", path, "@response:", response, "@operation", operation);
 				});
 			}
 
-			if (networkError) console.error(`[Network error]: ${networkError}`);
+			if (networkError) console.error(`[Network error]: ${networkError}`, "@response:", response, "@operation", operation);
 		}),
 		link,
 	]);

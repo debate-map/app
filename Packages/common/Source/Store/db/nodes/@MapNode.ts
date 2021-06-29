@@ -29,7 +29,7 @@ AddSchema("ClaimForm", {oneOf: GetValues_ForSchema(ClaimForm)});
 //export const MapNode_id = UUID_regex;
 //export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
 @MGLClass({table: "nodes"}, null, t=>{
-	t.comment("@name MapNode"); // avoids conflict with the default "Node" type that Postgraphile defines for Relay
+	//t.comment("@name MapNode"); // avoids conflict with the default "Node" type that Postgraphile defines for Relay
 })
 export class MapNode {
 	constructor(initialData: {type: MapNodeType} & Partial<MapNode>) {

@@ -8,7 +8,8 @@ export enum ChangeType {
 }
 AddSchema("ChangeType", {oneOf: GetValues_ForSchema(ChangeType)});
 
-@MGLClass({table: "map_nodeEdits"})
+//@MGLClass({table: "map_nodeEdits"})
+@MGLClass({table: "mapNodeEdits"})
 export class Map_NodeEdit {
 	@DB((t,n)=>t.text(n).primary())
 	@Field({type: "string"})

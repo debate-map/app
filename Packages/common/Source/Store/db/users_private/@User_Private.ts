@@ -4,7 +4,8 @@ import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink";
 // import {UserInfo as ProviderData} from "firebase";
 type ProviderData = any;
 
-@MGLClass({table: "users_private"})
+//@MGLClass({table: "users_private"})
+@MGLClass({table: "usersPrivates"})
 export class User_Private {
 	@DB((t,n)=>t.text(n).primary())
 	@Field({type: "string"})

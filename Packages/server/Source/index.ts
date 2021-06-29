@@ -55,6 +55,9 @@ app.use(
 				require("postgraphile-plugin-connection-filter"),
 				AuthenticationPlugin,
 			],
+			skipPlugins: [
+				require("graphile-build").NodePlugin,
+			],
 			dynamicJson: true,
 			live: true,
 			ownerConnectionString: dbURL, // passed in a 2nd time, for live-query module (connection-string with elevated privileges)
