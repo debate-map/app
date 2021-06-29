@@ -1,4 +1,4 @@
-import {LogTypes} from "web-vcore";
+import {LogTypes} from "web-vcore_UserTypes";
 
 export class LogTypes_New {
 	//actions = false;

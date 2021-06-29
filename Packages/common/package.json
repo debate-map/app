@@ -2,8 +2,10 @@
 	"name": "dm_common",
 	"private": true,
 	"type": "module",
-	"main": "./Source/index.ts",
-	"module": "./Source/index.ts",
+	"#main": "./Source/index.ts",
+	"main": "./Dist/index.js",
+	"#module": "./Source/index.ts",
+	"module": "./Dist/index.js",
 	"scripts": {
 		"start": "cd ../.. && npx nps"
 	}

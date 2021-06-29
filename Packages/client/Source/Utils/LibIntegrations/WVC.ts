@@ -18,7 +18,12 @@ context.keys().forEach(filename=>{
 	iconInfo[filename] = context(filename).default;
 });
 
-declare module "web-vcore/Source/UserTypes" {
+//declare module "web-vcore/Source/UserTypes" {
+//declare module "web-vcore/Source/UserTypes" {
+declare module "web-vcore_UserTypes" {
+//declare module "../../../../../node_modules/web-vcore/Source/UserTypes" {
+//declare module "../../../../../node_modules/web-vcore/Dist/UserTypes.js" {
+//declare module "../../../../../node_modules/web-vcore/Dist/UserTypes.d.ts" {
 	interface RootStore extends RootState {}
 	// interface DBShape extends GraphDBShape {}
 	interface LogTypes extends LogTypes_New {}

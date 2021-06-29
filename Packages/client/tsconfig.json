@@ -29,9 +29,11 @@
 		//"Source/**/*.jsx"
 		//"node_modules/web-vcore/Source/**/*.ts",
 		//"node_modules/@debate-map/server-link/Source/**/*.ts",
+	],
+	"references": [
+		// in-repo packages
+		{"path": "../common"},
+		// external packages
+		{"path": "../../node_modules/web-vcore"},
 	]
-	/*"references": [
-		{"path": "node_modules/@debate-map/server-link"},
-		{"path": "node_modules/web-vcore"}
-	]*/
 }

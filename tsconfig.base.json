@@ -22,6 +22,7 @@
 		// modules/paths
 		"module": "esnext",
 		"moduleResolution": "node",
+		"composite": true,
 		"rootDir": ".",
 		//"rootDir": "../..", // go from "@V/DebateMap/Main" to "@V", so above modules
 		// paths are relative to "baseUrl" (ie. ./Packages/XXX/Source)

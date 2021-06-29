@@ -1,7 +1,7 @@
 {
 	"typescript.tsdk": "./node_modules/typescript/lib",
-	/*"typescript.preferences.importModuleSpecifierEnding": "js",
-	"javascript.preferences.importModuleSpecifierEnding": "js",*/
+	"typescript.preferences.importModuleSpecifierEnding": "js",
+	"javascript.preferences.importModuleSpecifierEnding": "js",
 	"typescript.preferences.quoteStyle": "double",
 	"javascript.preferences.quoteStyle": "double",
 	// needed for "Packages/common", since the others import its source files directly (which would break any non-relative paths it was using)

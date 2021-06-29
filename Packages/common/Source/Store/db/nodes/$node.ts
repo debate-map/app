@@ -194,7 +194,7 @@ export const GetNodeL3 = StoreAccessor(s=>(path: string, tagsToIgnore?: string[]
 	return nodeL3;
 });
 
-/* export function GetNodeForm(node: MapNode, path: string): ClaimForm {
+/*export function GetNodeForm(node: MapNode, path: string): ClaimForm {
 	let parent = GetParentNode(path);
 	return GetNodeForm(node, parent);
 }
@@ -202,7 +202,7 @@ export function GetClaimFormUnderParent(node: MapNode, parent: MapNode): ClaimFo
 	let link = GetLinkUnderParent(node._id, parent);
 	if (link == null) return ClaimForm.Base;
 	return link.form;
-} */
+}*/
 export const GetNodeForm = StoreAccessor(s=>(node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2): ClaimForm=>{
 	if (IsNodeL3(node)) {
 		return node.link.form;

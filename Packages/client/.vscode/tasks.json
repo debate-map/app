@@ -5,15 +5,15 @@
 			"label": "#1 tsc",
 			"type": "shell",
 			"command": "../../node_modules/.bin/tsc",
-			"args": ["--watch", "--project", "."],
+			"args": ["--build", "--watch"],
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"
 		},
 		{
 			"label": "#2 webpack",
-			"type": "npm",
-			"script": "start client.dev",
+			"type": "shell",
+			"command": "yarn start client.dev",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"

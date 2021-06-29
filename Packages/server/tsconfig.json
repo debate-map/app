@@ -12,5 +12,11 @@
 	"include": [
 		"Source/**/*.ts",
 		"Source/**/*.tsx"
+	],
+	"references": [
+		// in-repo packages
+		{"path": "../common"},
+		// external packages
+		{"path": "../../node_modules/web-vcore"},
 	]
 }

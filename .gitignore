@@ -2,6 +2,7 @@
 /.env
 /Packages/*/node_modules
 /Packages/*/Dist
+/Packages/*/tsconfig.tsbuildinfo
 
 # yarn
 .yarn/*

@@ -40,13 +40,14 @@ export const webpackConfig = CreateWebpackConfig({
 		{context: resolvePath("node_modules", "@debate-map", "server-link"), test: /@debate-map[/\\]server-link[/\\]Source[/\\].*\.tsx?$/},
 	],*/
 	tsLoaderEntries: [
-		// maybe temp removed (was to fix webpack compile errors in web-vcore ts files)
-		{test: /web-vcore[/\\]Source[/\\].*\.tsx?$/},
-		{test: /web-vcore[/\\]nm[/\\].*\.tsx?$/},
+		// maybe temp removed
+		/*{test: /web-vcore[/\\]Source[/\\].*\.tsx?$/},
+		{test: /web-vcore[/\\]nm[/\\].*\.tsx?$/},*/
 		{test: /js-vextensions[/\\]Helpers[/\\]@ApplyCETypes\.tsx?$/},
 		// custom
-		{test: /dm_common[/\\]Source[/\\].*\.tsx?$/},
-		//{test: /@debate-map[/\\]server-link[/\\]Source[/\\].*\.tsx?$/},
+		/*{test: /dm_common[/\\]Source[/\\].*\.tsx?$/},
+		{test: /Packages[/\\]common[/\\]Source[/\\].*\.tsx?$/},*/
+		//{test: /(Packages[/\\]common|dm_common)[/\\]Source[/\\].*\.tsx?$/},
 
 		// todo: fix that the "web-vcore/nm" folder is not handled properly, when recompiling one of its files (the recompiling uses dm_common's ts-config instead of web-vcore/nm's, which causes errors)
 	],
