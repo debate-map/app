@@ -5,6 +5,7 @@ import {InitSentry} from "./Sentry";
 import {InitReactVComponents} from "./ReactVComponents";
 import {InitGraphlink} from "./MobXGraphlink";
 import {InitPGLink} from "./PGLink";
+import {WRR} from "web-vcore/node_modules/webpack-runtime-require";
 
 // helpers for exposing things (making them easier to access in console/dev-tools)
 function ExposeGlobals() {
@@ -15,12 +16,27 @@ function ExposeModuleExports_Final() {
 	// expose exports
 	if (DEV) {
 		setTimeout(()=>{
-			ExposeModuleExports();
+			const wrr = ExposeModuleExports();
+			//FixStoreAccessorFuncNames(wrr);
 		}, 500); // wait a bit, since otherwise some modules are missed/empty during ParseModuleData it seems
 	} else {
-		G({RR: ()=>ExposeModuleExports()});
+		G({RR: ()=>{
+			const wrr = ExposeModuleExports();
+			//FixStoreAccessorFuncNames(wrr);
+			return wrr.moduleExports_flat;
+		}});
 	}
 }
+// not needed; NPMPatches.ts in web-vcore already passes the store-accessor-funcs their names
+/*function FixStoreAccessorFuncNames(wrr: WRR) {
+	for (const [exportName, exportValue] of Object.entries(wrr.moduleExports["dm_common"])) {
+		// if module-export is one of the store-accessor-funcs, without a name specified
+		if (exportValue instanceof Function && exportValue.name == "[name missing]") {
+			// set the store-accessor-func's name to the export-name
+			Object.defineProperty(exportValue, "name", {value: exportName})
+		}
+	}
+}*/
 
 export function InitLibs() {
 	InitPGLink();
