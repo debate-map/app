@@ -1,7 +1,7 @@
-import {Column, Div} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {Column, Div} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown_Remarkable, Observer} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions";
+import {E} from "web-vcore/nm/js-vextensions.js";
 import {Timeline} from "dm_common";
 import {GetTimelineStep} from "dm_common";
 

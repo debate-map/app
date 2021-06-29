@@ -1,15 +1,15 @@
 import {GetNodeChildrenL3, GetNodeDisplayText, GetNodeL3, HasModPermissions, MapNodeL3, MeID} from "dm_common";
 import {store} from "Store";
 import {DataExchangeFormat} from "Store/main/maps";
-import {styles} from "Utils/UI/GlobalStyles";
+import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer, RunInAction_Set} from "web-vcore";
-import {Clone, GetEntries, StartDownload} from "web-vcore/nm/js-vextensions";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {Button, CheckBox, Column, Row, Select, Spinner, Text, TextArea} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {VMenuItem} from "web-vcore/nm/react-vmenu";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {MI_SharedProps} from "../NodeUI_Menu";
+import {Clone, GetEntries, StartDownload} from "web-vcore/nm/js-vextensions.js";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {Button, CheckBox, Column, Row, Select, Spinner, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
 export class MI_ExportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}) {

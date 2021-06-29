@@ -1,9 +1,9 @@
-import {Assert, VURL, ModifyString} from "web-vcore/nm/js-vextensions";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {Assert, VURL, ModifyString} from "web-vcore/nm/js-vextensions.js";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {RootState} from "Store";
 import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";
 import {GetSelectedMediaID, GetSelectedTermID, GetSelectedUserID} from "Store/main/database";
-import {GetMapState} from "Store/main/maps/mapStates/$mapState";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {MaybeLog, Page} from "web-vcore";
 import {GetMap, MapNodeL2, GetNodeDisplayText, GetNodeL2} from "dm_common";
 

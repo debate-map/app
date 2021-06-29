@@ -1,11 +1,11 @@
-import {AssertV, Command, AV} from "web-vcore/nm/mobx-graphlink";
-import {UserEdit} from "../CommandMacros";
-import {AddSchema, AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink";
-import {MapNodeTag, TagComp_keys} from "../Store/db/nodeTags/@MapNodeTag";
-import {GetNodeTag} from "../Store/db/nodeTags";
-import {IsUserCreatorOrMod} from "../Store/db/users/$user";
-import {CE} from "web-vcore/nm/js-vextensions";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts";
+import {AssertV, Command, AV} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros.js";
+import {AddSchema, AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
+import {MapNodeTag, TagComp_keys} from "../Store/db/nodeTags/@MapNodeTag.js";
+import {GetNodeTag} from "../Store/db/nodeTags.js";
+import {IsUserCreatorOrMod} from "../Store/db/users/$user.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 type MainType = MapNodeTag;
 const MTName = "MapNodeTag";

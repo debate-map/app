@@ -1,5 +1,5 @@
-import {Div, Column} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {Div, Column} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 
 export class SocialPanel extends BaseComponent<{show: boolean}, {}> {
 	render() {

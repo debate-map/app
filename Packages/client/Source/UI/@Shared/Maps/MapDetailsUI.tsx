@@ -1,10 +1,10 @@
 import {IsUserCreatorOrMod, Map, MapNodeRevision_Defaultable_DefaultsForMap, MapType, Map_namePattern, MeID} from "dm_common";
 import {InfoButton} from "web-vcore";
-import {CloneWithPrototypes, DEL, GetErrorMessagesUnderElement, ToNumber} from "web-vcore/nm/js-vextensions";
-import {CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
-import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel";
+import {CloneWithPrototypes, DEL, GetErrorMessagesUnderElement, ToNumber} from "web-vcore/nm/js-vextensions.js";
+import {CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI.js";
+import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel.js";
 
 type Props = {baseData: Map, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Map, ui: MapDetailsUI)=>void};
 export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {newData: null as Map}) {

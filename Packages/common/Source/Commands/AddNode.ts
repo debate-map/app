@@ -1,8 +1,8 @@
-import {AssertV, AssertValidate, AssertValidate_Full, Command, GenerateUUID, GetSchemaJSON, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink";
-import {MapNode} from "../Store/db/nodes/@MapNode";
-import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
-import {AddNodeRevision} from "./AddNodeRevision";
-import {CE} from "web-vcore/nm/js-vextensions";
+import {AssertV, AssertValidate, AssertValidate_Full, Command, GenerateUUID, GetSchemaJSON, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink.js";
+import {MapNode} from "../Store/db/nodes/@MapNode.js";
+import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision.js";
+import {AddNodeRevision} from "./AddNodeRevision.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
 
 /** Do not use this from client-side code. This is only to be used internally, by higher-level commands -- usually AddChildNode. */
 export class AddNode extends Command<{mapID: string, node: MapNode, revision: MapNodeRevision}, {}> {

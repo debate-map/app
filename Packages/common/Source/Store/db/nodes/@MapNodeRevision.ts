@@ -1,12 +1,12 @@
-import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions";
-import {AddSchema, DB, MGLClass, GetSchemaJSON, Field} from "web-vcore/nm/mobx-graphlink";
-import {QuoteAttachment} from "../nodeRevisions/@QuoteAttachment";
-import {MapType} from "../maps/@Map";
-import {MediaAttachment} from "../nodeRevisions/@MediaAttachment";
-import {AccessLevel} from "./@MapNode";
-import {EquationAttachment} from "../nodeRevisions/@EquationAttachment";
-import {TermAttachment} from "../nodeRevisions/@TermAttachment";
-import {ReferencesAttachment} from "../nodeRevisions/@ReferencesAttachment";
+import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema, DB, MGLClass, GetSchemaJSON, Field} from "web-vcore/nm/mobx-graphlink.js";
+import {QuoteAttachment} from "../nodeRevisions/@QuoteAttachment.js";
+import {MapType} from "../maps/@Map.js";
+import {MediaAttachment} from "../nodeRevisions/@MediaAttachment.js";
+import {AccessLevel} from "./@MapNode.js";
+import {EquationAttachment} from "../nodeRevisions/@EquationAttachment.js";
+import {TermAttachment} from "../nodeRevisions/@TermAttachment.js";
+import {ReferencesAttachment} from "../nodeRevisions/@ReferencesAttachment.js";
 
 export const TitleKey_values = ["base", "negation", "yesNoQuestion"] as const;
 //export type TitleKey = "base" | "negation" | "yesNoQuestion";

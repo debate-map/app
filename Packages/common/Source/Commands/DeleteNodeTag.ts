@@ -1,8 +1,8 @@
-import {AV, Command} from "web-vcore/nm/mobx-graphlink";
-import {UserEdit} from "../CommandMacros";
-import {MapNodeTag} from "../Store/db/nodeTags/@MapNodeTag";
-import {GetNodeTag} from "../Store/db/nodeTags";
-import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
+import {AV, Command} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros.js";
+import {MapNodeTag} from "../Store/db/nodeTags/@MapNodeTag.js";
+import {GetNodeTag} from "../Store/db/nodeTags.js";
+import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
 export class DeleteNodeTag extends Command<{id: string}, {}> {

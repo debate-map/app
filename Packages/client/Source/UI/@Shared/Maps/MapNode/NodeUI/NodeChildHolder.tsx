@@ -1,19 +1,19 @@
-import {Assert, emptyObj, nl, ToJSON, Vector2, VRect, WaitXThenRun, E, IsSpecialEmptyArray} from "web-vcore/nm/js-vextensions";
+import {Assert, emptyObj, nl, ToJSON, Vector2, VRect, WaitXThenRun, E, IsSpecialEmptyArray} from "web-vcore/nm/js-vextensions.js";
 import * as React from "react";
-import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd";
-import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
-import {NodeConnectorBackground} from "UI/@Shared/Maps/MapNode/NodeConnectorBackground";
-import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI";
+import {Droppable, DroppableProvided, DroppableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd.js";
+import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {NodeConnectorBackground} from "UI/@Shared/Maps/MapNode/NodeConnectorBackground.js";
+import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI.js";
 import {GetScreenRect, Icon, MaybeLog, Observer} from "web-vcore";
-import {DroppableInfo} from "Utils/UI/DNDStructures";
-import {ES} from "Utils/UI/GlobalStyles";
+import {DroppableInfo} from "Utils/UI/DNDStructures.js";
+import {ES} from "Utils/UI/GlobalStyles.js";
 import {store} from "Store";
-import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
-import {runInAction} from "web-vcore/nm/mobx";
+import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
+import {runInAction} from "web-vcore/nm/mobx.js";
 import {MapNodeL3, Polarity, HolderType, GetNodeChildrenL3, GetFillPercent_AtPath, IsMultiPremiseArgument, MapNodeType, MapNodeType_Info, ArgumentType, Map} from "dm_common";
-import {NodeChildHolderBox} from "./NodeChildHolderBox";
-import {ArgumentsControlBar} from "../ArgumentsControlBar";
+import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
+import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], type: HolderType,

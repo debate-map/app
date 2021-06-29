@@ -1,10 +1,10 @@
-import {emptyArray_forLoading, Assert, IsNaN, CE, ArrayCE} from "web-vcore/nm/js-vextensions";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {MapNodeType} from "../nodes/@MapNodeType";
-import {GetNodeL3, GetNodeL2} from "../nodes/$node";
-import {GetNodeChildrenL3, GetParentNodeL3} from "../nodes";
-import {Polarity, MapNodeL3} from "../nodes/@MapNode";
-import {ArgumentType} from "../nodes/@MapNodeRevision";
+import {emptyArray_forLoading, Assert, IsNaN, CE, ArrayCE} from "web-vcore/nm/js-vextensions.js";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {MapNodeType} from "../nodes/@MapNodeType.js";
+import {GetNodeL3, GetNodeL2} from "../nodes/$node.js";
+import {GetNodeChildrenL3, GetParentNodeL3} from "../nodes.js";
+import {Polarity, MapNodeL3} from "../nodes/@MapNode.js";
+import {ArgumentType} from "../nodes/@MapNodeRevision.js";
 
 export const RS_CalculateTruthScore = StoreAccessor(s=>(claimID: string, calculationPath: string[] = []): number=>{
 	const claim = GetNodeL2(claimID);

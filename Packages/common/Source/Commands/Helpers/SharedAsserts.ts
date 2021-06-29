@@ -1,5 +1,5 @@
-import {Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {IsUserCreatorOrMod} from "../../Store";
+import {Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {IsUserCreatorOrMod} from "../../Store.js";
 
 /*export function AssertUserCanModify(command: Command<any, any>, entity: {creator?: string}, act = "modify or delete") {
 	AssertV(entity, "Entry does not exist.");

@@ -1,10 +1,10 @@
-import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {Link, Observer, ParseSegmentsForPatterns} from "web-vcore";
 import {MapNodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term, Map} from "dm_common";
 
 
-import {GetSegmentsForTerms} from "../../NodeUI_Inner/TitlePanel";
+import {GetSegmentsForTerms} from "../../NodeUI_Inner/TitlePanel.js";
 import {GetCurrentRevision} from "Store/db_ext/nodes";
 
 const termsPlaceholder = [];

@@ -1,8 +1,8 @@
-import {Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink";
-import {User_Private} from "../Store/db/users_private/@User_Private";
-import {GetUser_Private} from "../Store/db/users_private";
-import {CE} from "web-vcore/nm/js-vextensions";
+import {Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
+import {User_Private} from "../Store/db/users_private/@User_Private.js";
+import {GetUser_Private} from "../Store/db/users_private.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
 
 type MainType = User_Private;
 const MTName = "User_Private";

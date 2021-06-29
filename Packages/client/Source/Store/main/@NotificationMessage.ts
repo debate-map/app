@@ -1,5 +1,5 @@
-import {Global} from "web-vcore/nm/js-vextensions";
-import {runInAction} from "web-vcore/nm/mobx";
+import {Global} from "web-vcore/nm/js-vextensions.js";
+import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "..";
 
 @Global

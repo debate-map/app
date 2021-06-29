@@ -1,18 +1,18 @@
 import {AsNodeL3, GetNodeChildrenL2, GetNodeDisplayText, GetNodeParentsL2, GetParentNodeL2, GetRatings, GetRatingTypesForNode, Map, MapNodeL2} from "dm_common";
 import {GetOpenMapID} from "Store/main";
-import {GetMapView} from "Store/main/maps/mapViews/$mapView";
+import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {Link} from "web-vcore";
-import {Pre, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus, GetInnerComp} from "web-vcore/nm/react-vextensions";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
-import {DefinitionsPanel} from "./NodeUI/Panels/DefinitionsPanel";
-import {DetailsPanel} from "./NodeUI/Panels/DetailsPanel";
-import {DiscussionPanel} from "./NodeUI/Panels/DiscussionPanel";
-import {OthersPanel} from "./NodeUI/Panels/OthersPanel";
-import {RatingsPanel} from "./NodeUI/Panels/RatingsPanel";
-import {SocialPanel} from "./NodeUI/Panels/SocialPanel";
-import {TagsPanel} from "./NodeUI/Panels/TagsPanel";
-import {NodeUI_Inner} from "./NodeUI_Inner";
+import {Pre, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, GetInnerComp} from "web-vcore/nm/react-vextensions.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {DefinitionsPanel} from "./NodeUI/Panels/DefinitionsPanel.js";
+import {DetailsPanel} from "./NodeUI/Panels/DetailsPanel.js";
+import {DiscussionPanel} from "./NodeUI/Panels/DiscussionPanel.js";
+import {OthersPanel} from "./NodeUI/Panels/OthersPanel.js";
+import {RatingsPanel} from "./NodeUI/Panels/RatingsPanel.js";
+import {SocialPanel} from "./NodeUI/Panels/SocialPanel.js";
+import {TagsPanel} from "./NodeUI/Panels/TagsPanel.js";
+import {NodeUI_Inner} from "./NodeUI_Inner.js";
 
 type Props = {map: Map, node: MapNodeL2};
 export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {

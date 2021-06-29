@@ -1,4 +1,4 @@
-import {UUID} from "web-vcore/nm/mobx-graphlink";
+import {UUID} from "web-vcore/nm/mobx-graphlink.js";
 
 export class DroppableInfo {
 	constructor(data: Partial<DroppableInfo>) {

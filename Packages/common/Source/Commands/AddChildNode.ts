@@ -1,14 +1,14 @@
-import {Assert, E} from "web-vcore/nm/js-vextensions";
-import {MergeDBUpdates, GetAsync, Command, AssertV, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
-import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
-import {MapEdit, UserEdit} from "../CommandMacros";
-import {AddNode} from "./AddNode";
-import {MapNode, Polarity} from "../Store/db/nodes/@MapNode";
-import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
-import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
-import {GetNode} from "../Store/db/nodes";
-import {AddArgumentAndClaim} from "../Commands";
-import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink";
+import {Assert, E} from "web-vcore/nm/js-vextensions.js";
+import {MergeDBUpdates, GetAsync, Command, AssertV, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
+import {MapEdit, UserEdit} from "../CommandMacros.js";
+import {AddNode} from "./AddNode.js";
+import {MapNode, Polarity} from "../Store/db/nodes/@MapNode.js";
+import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision.js";
+import {MapNodeType} from "../Store/db/nodes/@MapNodeType.js";
+import {GetNode} from "../Store/db/nodes.js";
+import {AddArgumentAndClaim} from "../Commands.js";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
 
 type Payload = {mapID: string, parentID: string, node: MapNode, revision: MapNodeRevision, link?: Partial<NodeChildLink>, asMapRoot?: boolean};
 

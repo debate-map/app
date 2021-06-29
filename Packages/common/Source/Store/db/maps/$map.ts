@@ -1,8 +1,8 @@
-import {emptyArray} from "web-vcore/nm/js-vextensions";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {GetMap} from "../maps";
-import {GetUser} from "../users";
-import {Map, MapType} from "./@Map";
+import {emptyArray} from "web-vcore/nm/js-vextensions.js";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {GetMap} from "../maps.js";
+import {GetUser} from "../users.js";
+import {Map, MapType} from "./@Map.js";
 
 export function IsUserMap(map: Map) {
 	return map.type == MapType.private || map.type == MapType.public;

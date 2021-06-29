@@ -1,18 +1,18 @@
-// import {Assert, GetPercentFromXToY, IsNaN, Lerp, Timer, ToNumber, Vector2, WaitXThenRun, AssertWarn} from "web-vcore/nm/js-vextensions";
-// import {computed, observable, runInAction} from "web-vcore/nm/mobx";
+// import {Assert, GetPercentFromXToY, IsNaN, Lerp, Timer, ToNumber, Vector2, WaitXThenRun, AssertWarn} from "web-vcore/nm/js-vextensions.js";
+// import {computed, observable, runInAction} from "web-vcore/nm/mobx.js";
 // import React, {useEffect} from "react";
 // import ReactList from "react-list";
-// import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text} from "web-vcore/nm/react-vcomponents";
-// import {BaseComponent, GetDOM, UseCallback} from "web-vcore/nm/react-vextensions";
-// import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview";
+// import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Spinner, Text} from "web-vcore/nm/react-vcomponents.js";
+// import {BaseComponent, GetDOM, UseCallback} from "web-vcore/nm/react-vextensions.js";
+// import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview.js";
 // import {store} from "Store";
 // import {GetScreenRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, YoutubePlayer, YoutubePlayerState, YoutubePlayerUI, ClassHooks, PosChangeSource} from "web-vcore";
-// import {ES} from "Utils/UI/GlobalStyles";
-// import {GetSelectedTimeline, GetPlayingTimelineStepIndex, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState";
-// import {zIndexes} from "Utils/UI/ZIndexes";
+// import {ES} from "Utils/UI/GlobalStyles.js";
+// import {GetSelectedTimeline, GetPlayingTimelineStepIndex, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
+// import {zIndexes} from "Utils/UI/ZIndexes.js";
 // import {GetTimelineStep, GetTimelineSteps} from "dm_common";
 // import {Map} from "dm_common";
-// import {StepUI} from "./PlayingSubpanel/StepUI";
+// import {StepUI} from "./PlayingSubpanel/StepUI.js";
 
 // /* export class PlayingSubpanel extends BaseComponentPlus(
 // 	{} as {map: Map},

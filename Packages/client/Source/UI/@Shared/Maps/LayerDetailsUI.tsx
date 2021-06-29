@@ -1,9 +1,9 @@
-// import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
+// import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
 // import Moment from "web-vcore/nm/moment";
-// import {Column, Pre, RowLR, TextInput, Text} from "web-vcore/nm/react-vcomponents";
-// import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+// import {Column, Pre, RowLR, TextInput, Text} from "web-vcore/nm/react-vcomponents.js";
+// import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 // import {Layer} from "dm_common";
-// import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
+// import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI.js";
 
 // type Props = {baseData: Layer, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Layer, ui: LayerDetailsUI)=>void};
 // export class LayerDetailsUI extends BaseComponentPlus({enabled: true} as Props, {newData: null as Layer}) {

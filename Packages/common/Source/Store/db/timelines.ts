@@ -1,8 +1,8 @@
-import {CachedTransform, emptyArray, ToInt, emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions";
-import {GetDoc, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {Map} from "./maps/@Map";
-import {Timeline} from "./timelines/@Timeline";
-import {TimelineStep} from "./timelineSteps/@TimelineStep";
+import {CachedTransform, emptyArray, ToInt, emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions.js";
+import {GetDoc, StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {Map} from "./maps/@Map.js";
+import {Timeline} from "./timelines/@Timeline.js";
+import {TimelineStep} from "./timelineSteps/@TimelineStep.js";
 
 /*export function GetTimelines(): Timeline[] {
 	let timelinesMap = GetData({collection: true}, "timelines");

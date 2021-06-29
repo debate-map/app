@@ -1,9 +1,9 @@
-import {Range, Assert, ModifyString, CE, CreateStringEnum, GetValues_ForSchema} from "web-vcore/nm/js-vextensions";
-import {AddSchema} from "web-vcore/nm/mobx-graphlink";
-import {GetDisplayPolarity, GetLinkUnderParent, GetNodeForm, IsMultiPremiseArgument} from "../nodes/$node";
-import {MapNodeL2, MapNodeL3, Polarity} from "../nodes/@MapNode";
-import {MapNodeType} from "../nodes/@MapNodeType";
-import {ArgumentType} from "../nodes/@MapNodeRevision";
+import {Range, Assert, ModifyString, CE, CreateStringEnum, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {GetDisplayPolarity, GetLinkUnderParent, GetNodeForm, IsMultiPremiseArgument} from "../nodes/$node.js";
+import {MapNodeL2, MapNodeL3, Polarity} from "../nodes/@MapNode.js";
+import {MapNodeType} from "../nodes/@MapNodeType.js";
+import {ArgumentType} from "../nodes/@MapNodeRevision.js";
 
 /*export enum NodeRatingType {
 	significance = "significance",

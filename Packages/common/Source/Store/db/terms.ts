@@ -1,7 +1,7 @@
-import {CachedTransform, IsNaN, emptyArray, emptyArray_forLoading, Assert, CE} from "web-vcore/nm/js-vextensions";
-import {GetDoc, GetDocs, StoreAccessor, Validate} from "web-vcore/nm/mobx-graphlink";
-import {Term} from "./terms/@Term";
-import {GetNodeRevision} from "./nodeRevisions";
+import {CachedTransform, IsNaN, emptyArray, emptyArray_forLoading, Assert, CE} from "web-vcore/nm/js-vextensions.js";
+import {GetDoc, GetDocs, StoreAccessor, Validate} from "web-vcore/nm/mobx-graphlink.js";
+import {Term} from "./terms/@Term.js";
+import {GetNodeRevision} from "./nodeRevisions.js";
 
 export const GetTerm = StoreAccessor(s=>(id: string)=>{
 	if (id == null || IsNaN(id)) return null;

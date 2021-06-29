@@ -1,12 +1,12 @@
 import {GetMap, GetShare, MapType, ShareType} from "dm_common";
-import {Assert} from "web-vcore/nm/js-vextensions";
-import {autorun, runInAction} from "web-vcore/nm/mobx";
-import {GetAsync} from "web-vcore/nm/mobx-graphlink";
+import {Assert} from "web-vcore/nm/js-vextensions.js";
+import {autorun, runInAction} from "web-vcore/nm/mobx.js";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {store} from "Store";
-import {AddNotificationMessage} from "Store/main/@NotificationMessage";
-import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView";
-import {MapUI} from "UI/@Shared/Maps/MapUI";
-import {rootPageDefaultChilds} from "Utils/URL/URLs";
+import {AddNotificationMessage} from "Store/main/@NotificationMessage.js";
+import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
+import {MapUI} from "UI/@Shared/Maps/MapUI.js";
+import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 
 let lastShareBeingLoaded;
 autorun(()=>{

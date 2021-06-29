@@ -1,6 +1,6 @@
-import {AddSchema} from "web-vcore/nm/mobx-graphlink";
-import {SourceChain, Source} from "./@SourceChain";
-import {CE} from "web-vcore/nm/js-vextensions";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {SourceChain, Source} from "./@SourceChain.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
 
 export class MediaAttachment {
 	constructor(initialData?: Partial<MediaAttachment>) {

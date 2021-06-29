@@ -1,4 +1,4 @@
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {O} from "web-vcore";
 
 export class RatingUIState {

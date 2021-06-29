@@ -1,15 +1,15 @@
-import {E} from "web-vcore/nm/js-vextensions";
-import {Button} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, UseCallback} from "web-vcore/nm/react-vextensions";
-import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
-import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {Button} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, UseCallback} from "web-vcore/nm/react-vextensions.js";
+import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
+import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {HSLA, Observer} from "web-vcore";
 import {useCallback, useMemo, useEffect} from "react";
 import {MapNodeL3, Polarity, ClaimForm, MapNodeType, GetParentNodeL3, GetPolarityShortStr, GetNodeContributionInfo, NodeContributionInfo_ForPolarity, ReversePolarity, MeID, Map} from "dm_common";
 
 
 import {GetNodeColor} from "Store/db_ext/nodes";
-import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog";
+import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog.js";
 
 type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style?};
 /* const dropTargetDecorator = DropTarget('node',

@@ -1,17 +1,17 @@
-import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading, CreateStringEnum} from "web-vcore/nm/js-vextensions";
-import {GetDoc, StoreAccessor, GetDocs, NoID} from "web-vcore/nm/mobx-graphlink";
-import {observable} from "web-vcore/nm/mobx";
-import {Validate} from "web-vcore/nm/mobx-graphlink";
-import {NodeRatingType} from "./nodeRatings/@NodeRatingType";
-import {NodeRating} from "./nodeRatings/@NodeRating";
-import {RS_GetAllValues} from "./nodeRatings/ReasonScore";
-import {GetNodeChildrenL2, HolderType} from "./nodes";
-import {GetMainRatingType, GetNodeL2} from "./nodes/$node";
-import {ClaimForm, MapNodeL3} from "./nodes/@MapNode";
-import {MapNodeType} from "./nodes/@MapNodeType";
-import {MeID} from "./users";
-import {GetArgumentImpactPseudoRatings} from "../../Utils/Store/RatingProcessor";
-import {GetAccessPolicy} from "./accessPolicies";
+import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {GetDoc, StoreAccessor, GetDocs, NoID} from "web-vcore/nm/mobx-graphlink.js";
+import {observable} from "web-vcore/nm/mobx.js";
+import {Validate} from "web-vcore/nm/mobx-graphlink.js";
+import {NodeRatingType} from "./nodeRatings/@NodeRatingType.js";
+import {NodeRating} from "./nodeRatings/@NodeRating.js";
+import {RS_GetAllValues} from "./nodeRatings/ReasonScore.js";
+import {GetNodeChildrenL2, HolderType} from "./nodes.js";
+import {GetMainRatingType, GetNodeL2} from "./nodes/$node.js";
+import {ClaimForm, MapNodeL3} from "./nodes/@MapNode.js";
+import {MapNodeType} from "./nodes/@MapNodeType.js";
+import {MeID} from "./users.js";
+import {GetArgumentImpactPseudoRatings} from "../../Utils/Store/RatingProcessor.js";
+import {GetAccessPolicy} from "./accessPolicies.js";
 
 export const GetRatings = StoreAccessor(s=><
 	((nodeID: string, ratingType: Exclude<NodeRatingType, "impact">, userID?: string)=>NodeRating[]) & // if rating-type is known to not be "impact", all results will be "true ratings"

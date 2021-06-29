@@ -1,16 +1,16 @@
 import {GetUserPermissionGroups, Me, MeID} from "dm_common";
-import {dbVersion, hasHotReloaded} from "Main";
-import {RootState, store} from "Store";
-import {AddNotificationMessage} from "Store/main/@NotificationMessage";
-import {logTypes, LogTypes_New} from "Utils/General/Logging";
-import {colors} from "Utils/UI/GlobalStyles";
-import {zIndexes} from "Utils/UI/ZIndexes";
-import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs";
+import {dbVersion, hasHotReloaded} from "Main.js";
+import {RootState, store} from "Store/index.js";
+import {AddNotificationMessage} from "Store/main/@NotificationMessage.js";
+import {logTypes, LogTypes_New} from "Utils/General/Logging.js";
+import {colors} from "Utils/UI/GlobalStyles.js";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
+import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs.js";
 import {ActionFunc, GetMirrorOfMobXTree, manager as manager_framework} from "web-vcore";
 import produce from "web-vcore/nm/immer";
-import {runInAction} from "web-vcore/nm/mobx";
-import {WithStore} from "web-vcore/nm/mobx-graphlink";
-import "./WVC/Overrides";
+import {runInAction} from "web-vcore/nm/mobx.js";
+import {WithStore} from "web-vcore/nm/mobx-graphlink.js";
+import "./WVC/Overrides.js";
 
 const context = (require as any).context("../../../Resources/SVGs/", true, /\.svg$/);
 const iconInfo = {};

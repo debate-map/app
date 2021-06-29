@@ -1,6 +1,6 @@
 import {MouseEventHandler, MouseEvent} from "react";
 import katex from "katex";
-import {VRect} from "web-vcore/nm/js-vextensions";
+import {VRect} from "web-vcore/nm/js-vextensions.js";
 
 // expose katex on window, for use by $node.ts (in dm-server shared-code, when running on client)
 G({katex});

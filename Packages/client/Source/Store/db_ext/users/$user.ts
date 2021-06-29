@@ -1,5 +1,5 @@
-import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds";
-import {GADDemo} from "UI/@GAD/GAD";
+import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds.js";
+import {GADDemo} from "UI/@GAD/GAD.js";
 import {GetUser_Private} from "dm_common";
 
 // backgrounds

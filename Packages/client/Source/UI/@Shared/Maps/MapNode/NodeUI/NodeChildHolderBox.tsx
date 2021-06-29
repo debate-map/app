@@ -1,17 +1,17 @@
 import chroma from "chroma-js";
-import {AssertWarn, emptyArray, emptyArray_forLoading, E} from "web-vcore/nm/js-vextensions";
-import {Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus, GetDOM, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
-import {GADDemo, GADMainFont} from "UI/@GAD/GAD";
+import {AssertWarn, emptyArray, emptyArray_forLoading, E} from "web-vcore/nm/js-vextensions.js";
+import {Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, GetDOM, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
 import {HSLA, Observer} from "web-vcore";
-import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView";
-import {runInAction} from "web-vcore/nm/mobx";
-import {ExpandableBox} from "../ExpandableBox";
-import {Squiggle} from "../NodeConnectorBackground";
-import {NodeUI_Menu_Stub} from "../NodeUI_Menu";
-import {NodeChildCountMarker} from "./NodeChildCountMarker";
-import {NodeChildHolder} from "./NodeChildHolder";
-import {RatingsPanel} from "./Panels/RatingsPanel";
+import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
+import {runInAction} from "web-vcore/nm/mobx.js";
+import {ExpandableBox} from "../ExpandableBox.js";
+import {Squiggle} from "../NodeConnectorBackground.js";
+import {NodeUI_Menu_Stub} from "../NodeUI_Menu.js";
+import {NodeChildCountMarker} from "./NodeChildCountMarker.js";
+import {NodeChildHolder} from "./NodeChildHolder.js";
+import {RatingsPanel} from "./Panels/RatingsPanel.js";
 import {MapNodeL3} from "dm_common";
 import {HolderType, GetParentNodeL3} from "dm_common";
 import {IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "dm_common";
@@ -21,7 +21,7 @@ import {MapNodeType} from "dm_common";
 import {NodeRatingType} from "dm_common";
 import {Map} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
-import {ES} from "Utils/UI/GlobalStyles";
+import {ES} from "Utils/UI/GlobalStyles.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],

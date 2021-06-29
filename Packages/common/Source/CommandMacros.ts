@@ -1,7 +1,7 @@
-import {MergeDBUpdates, GetAsync, GetDoc, Command} from "web-vcore/nm/mobx-graphlink";
-import {GetMap} from "./Store/db/maps";
-import {IsString, IsFunction} from "web-vcore/nm/js-vextensions";
-import {GetUser} from "./Store/db/users";
+import {MergeDBUpdates, GetAsync, GetDoc, Command} from "web-vcore/nm/mobx-graphlink.js";
+import {GetMap} from "./Store/db/maps.js";
+import {IsString, IsFunction} from "web-vcore/nm/js-vextensions.js";
+import {GetUser} from "./Store/db/users.js";
 
 export function MapEdit(targetClass: Function);
 export function MapEdit(mapIDKey: string);

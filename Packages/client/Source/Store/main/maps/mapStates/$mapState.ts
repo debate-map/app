@@ -1,8 +1,8 @@
-import {emptyArray, FromJSON, GetValues, ToNumber, emptyArray_forLoading} from "web-vcore/nm/js-vextensions";
+import {emptyArray, FromJSON, GetValues, ToNumber, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
 import {O} from "web-vcore";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNode, GetNodesRevealedInSteps, GetMap} from "dm_common";
-import {TimelineSubpanel, ShowChangesSinceType} from "./@MapState";
+import {TimelineSubpanel, ShowChangesSinceType} from "./@MapState.js";
 
 export const GetMapState = StoreAccessor(s=>(mapID: string)=>{
 	return s.main.maps.mapStates.get(mapID);

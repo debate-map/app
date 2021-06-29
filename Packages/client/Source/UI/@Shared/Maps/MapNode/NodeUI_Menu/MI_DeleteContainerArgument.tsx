@@ -1,10 +1,10 @@
-import {SlicePath} from "web-vcore/nm/mobx-graphlink";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {E} from "web-vcore/nm/js-vextensions";
-import {VMenuItem} from "web-vcore/nm/react-vmenu";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {styles} from "Utils/UI/GlobalStyles";
-import {MI_SharedProps} from "../NodeUI_Menu";
+import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {styles} from "Utils/UI/GlobalStyles.js";
+import {MI_SharedProps} from "../NodeUI_Menu.js";
 import {Observer} from "web-vcore";
 import {GetNodeL3, GetNodeDisplayText, GetNodeChildLinks} from "dm_common";
 import {IsUserCreatorOrMod} from "dm_common";

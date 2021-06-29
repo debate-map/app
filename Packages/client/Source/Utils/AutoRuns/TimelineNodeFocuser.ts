@@ -1,14 +1,14 @@
-// import {autorun, action} from "web-vcore/nm/mobx";
-// import {GetPlayingTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState";
+// import {autorun, action} from "web-vcore/nm/mobx.js";
+// import {GetPlayingTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 // import {GetOpenMapID} from "Store/main";
-// import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView";
+// import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 // import {store} from "Store";
-// import {MapUI, ACTUpdateFocusNodeAndViewOffset} from "UI/@Shared/Maps/MapUI";
-// import {SleepAsync, VRect} from "web-vcore/nm/js-vextensions";
-// import {NodeUI_Inner} from "UI/@Shared/Maps/MapNode/NodeUI_Inner";
-// import {GetDOM} from "web-vcore/nm/react-vextensions";
+// import {MapUI, ACTUpdateFocusNodeAndViewOffset} from "UI/@Shared/Maps/MapUI.js";
+// import {SleepAsync, VRect} from "web-vcore/nm/js-vextensions.js";
+// import {NodeUI_Inner} from "UI/@Shared/Maps/MapNode/NodeUI_Inner.js";
+// import {GetDOM} from "web-vcore/nm/react-vextensions.js";
 // import {GetScreenRect} from "web-vcore";
-// import {SlicePath, GetAsync} from "web-vcore/nm/mobx-graphlink";
+// import {SlicePath, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 // import {GetTimelineStep, GetNodesRevealedInSteps} from "dm_common";
 
 // /* function AreSetsEqual(setA, setB) {

@@ -1,6 +1,6 @@
-import {CE} from "web-vcore/nm/js-vextensions";
-import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink";
-import {ClaimForm, Polarity} from "../nodes/@MapNode";
+import {CE} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
+import {ClaimForm, Polarity} from "../nodes/@MapNode.js";
 
 @MGLClass({table: "nodeChildLinks"})
 export class NodeChildLink {

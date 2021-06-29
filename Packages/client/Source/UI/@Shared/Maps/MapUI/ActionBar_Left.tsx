@@ -1,19 +1,19 @@
-import {E} from "web-vcore/nm/js-vextensions";
-import {runInAction} from "web-vcore/nm/mobx";
-import {Button, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {runInAction} from "web-vcore/nm/mobx.js";
+import {Button, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
-import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {GADDemo, GADDemo_2020} from "UI/@GAD/GAD";
+import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
+import {GADDemo, GADDemo_2020} from "UI/@GAD/GAD.js";
 import {HSLA, Observer} from "web-vcore";
 import {Map, MapType, MeID, IsUserCreatorOrMod, IsUserMap} from "dm_common";
 
 
-import {zIndexes} from "Utils/UI/ZIndexes";
-import {Button_GAD} from "UI/@GAD/GADButton";
-import {colors} from "../../../../Utils/UI/GlobalStyles";
-import {DetailsDropDown} from "./ActionBar_Left/DetailsDropDown";
-import {PeopleDropDown} from "./ActionBar_Left/PeopleDropDown";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
+import {Button_GAD} from "UI/@GAD/GADButton.js";
+import {colors} from "../../../../Utils/UI/GlobalStyles.js";
+import {DetailsDropDown} from "./ActionBar_Left/DetailsDropDown.js";
+import {PeopleDropDown} from "./ActionBar_Left/PeopleDropDown.js";
 
 @Observer
 export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number, backOnly?: boolean}, {}) {

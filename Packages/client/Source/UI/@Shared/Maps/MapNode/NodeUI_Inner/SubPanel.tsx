@@ -1,7 +1,7 @@
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown_Remarkable, Observer, YoutubePlayerUI, ParseYoutubeVideoID} from "web-vcore";
 import {MapNodeL2, GetFontSizeForNode, ReferencesAttachment, QuoteAttachment, MediaAttachment, GetMedia, MediaType} from "dm_common";
-import {SourcesUI} from "./SourcesUI";
+import {SourcesUI} from "./SourcesUI.js";
 
 export class SubPanel extends BaseComponent<{node: MapNodeL2}, {}> {
 	render() {

@@ -1,15 +1,15 @@
-import {GetAsync} from "web-vcore/nm/mobx-graphlink";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBox, Text} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, CheckBox, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {MapNodeRevision_Defaultable, IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, Map, GetNodeChildLinks} from "dm_common";
 import {Observer, GetUpdates, InfoButton} from "web-vcore";
-import {GADDemo} from "UI/@GAD/GAD";
-import {Button_GAD} from "UI/@GAD/GADButton";
-import {runInAction} from "web-vcore/nm/mobx";
-import {FromJSON, ToJSON, E} from "web-vcore/nm/js-vextensions";
-import {MapDetailsUI} from "../../MapDetailsUI";
+import {GADDemo} from "UI/@GAD/GAD.js";
+import {Button_GAD} from "UI/@GAD/GADButton.js";
+import {runInAction} from "web-vcore/nm/mobx.js";
+import {FromJSON, ToJSON, E} from "web-vcore/nm/js-vextensions.js";
+import {MapDetailsUI} from "../../MapDetailsUI.js";
 
 // todo: probably ms this runs in two steps: 1) gets db-updates, 2) user looks over and approves, 3) user presses continue (to apply using ApplyDBUpdates, or a composite command)
 /*export async function ApplyNodeDefaults(nodeID: string, nodeDefaults: MapNodeRevision_Defaultable, recursive: boolean, mapID: string, runInfo = {revisionsUpdated: new Set<string>()}) {

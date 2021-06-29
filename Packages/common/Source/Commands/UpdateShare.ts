@@ -1,9 +1,9 @@
-import {CE} from "web-vcore/nm/js-vextensions";
-import {AddSchema, AssertV, AssertValidate, Command, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink";
-import {UserEdit} from "../CommandMacros";
-import {Media} from "../Store/db/media/@Media";
-import {GetMedia, Share, GetShare} from "../Store";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts";
+import {CE} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema, AssertV, AssertValidate, Command, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros.js";
+import {Media} from "../Store/db/media/@Media.js";
+import {GetMedia, Share, GetShare} from "../Store.js";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 type MainType = Share;
 const MTName = "Share";

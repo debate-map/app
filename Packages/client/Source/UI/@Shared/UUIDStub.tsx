@@ -1,7 +1,7 @@
-import {BaseComponent, BaseComponentPlus, ApplyBasicStyles} from "web-vcore/nm/react-vextensions";
-import {Text, Row} from "web-vcore/nm/react-vcomponents";
+import {BaseComponent, BaseComponentPlus, ApplyBasicStyles} from "web-vcore/nm/react-vextensions.js";
+import {Text, Row} from "web-vcore/nm/react-vcomponents.js";
 import {Fragment} from "react";
-import {SplitStringBySlash_Cached} from "web-vcore/nm/mobx-graphlink";
+import {SplitStringBySlash_Cached} from "web-vcore/nm/mobx-graphlink.js";
 
 export class UUIDStub extends BaseComponent<{id: string}, {}> {
 	render() {

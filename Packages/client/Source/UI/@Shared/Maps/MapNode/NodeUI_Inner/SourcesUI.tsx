@@ -1,6 +1,6 @@
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {Row, Text, Column} from "web-vcore/nm/react-vcomponents";
-import {VURL} from "web-vcore/nm/js-vextensions";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Row, Text, Column} from "web-vcore/nm/react-vcomponents.js";
+import {VURL} from "web-vcore/nm/js-vextensions.js";
 import {Link} from "web-vcore";
 import {SourceChain, Source} from "dm_common";
 

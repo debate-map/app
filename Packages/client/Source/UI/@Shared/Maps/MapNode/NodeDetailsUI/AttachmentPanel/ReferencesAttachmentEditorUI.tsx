@@ -1,11 +1,11 @@
-import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
-import {Column, Pre, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions";
+import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
+import {Column, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {ReferencesAttachment, GetNodeDisplayText, MapNodeType, ClaimForm} from "dm_common";
 
 
-import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI";
-import {SubPanel_Quote, SubPanel_References} from "../../NodeUI_Inner/SubPanel";
+import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI.js";
+import {SubPanel_Quote, SubPanel_References} from "../../NodeUI_Inner/SubPanel.js";
 
 export class ReferencesAttachmentEditorUI extends BaseComponent<
 	{creating?: boolean, editing?: boolean, baseData: ReferencesAttachment, showPreview: boolean, justShowed: boolean, onChange?: (newData: ReferencesAttachment)=>void},

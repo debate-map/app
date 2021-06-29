@@ -1,4 +1,4 @@
-import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink";
+import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 
 // todo: make this have a length constraint as well
 export const User_id = "^[a-zA-Z0-9]+$";

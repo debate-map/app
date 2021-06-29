@@ -1,5 +1,5 @@
-import {GetDoc, StoreAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink";
-import {Share} from "./shares/@Share";
+import {GetDoc, StoreAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
+import {Share} from "./shares/@Share.js";
 
 export const GetShare = StoreAccessor(s=>(id: string): Share=>{
 	if (id == null) return null;

@@ -1,7 +1,7 @@
-import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions";
-import {AddSchema, MGLClass, DB, Field, GetSchemaJSON, Schema, UUID_regex} from "web-vcore/nm/mobx-graphlink";
-import {ObservableMap} from "web-vcore/nm/mobx";
-import {MapNodeRevision_Defaultable, MapNodeRevision_Defaultable_props, MapNodeRevision_Defaultable_DefaultsForMap} from "../nodes/@MapNodeRevision";
+import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema, MGLClass, DB, Field, GetSchemaJSON, Schema, UUID_regex} from "web-vcore/nm/mobx-graphlink.js";
+import {ObservableMap} from "web-vcore/nm/mobx.js";
+import {MapNodeRevision_Defaultable, MapNodeRevision_Defaultable_props, MapNodeRevision_Defaultable_DefaultsForMap} from "../nodes/@MapNodeRevision.js";
 
 export enum MapType {
 	private = "private",

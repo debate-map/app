@@ -1,21 +1,21 @@
-import {E, OmitIfFalsy, CE, ObjectCE} from "web-vcore/nm/js-vextensions";
-import {AssertV, Command, MergeDBUpdates, AV} from "web-vcore/nm/mobx-graphlink";
-import {AddChildNode} from "./AddChildNode";
-import {DeleteNode} from "./DeleteNode";
-import {LinkNode} from "./LinkNode";
-import {UnlinkNode} from "./UnlinkNode";
-import {UUID} from "web-vcore/nm/mobx-graphlink";
-import {ClaimForm, Polarity, MapNode} from "../Store/db/nodes/@MapNode";
-import {GetNodeL3, GetNodeL2, IsPremiseOfMultiPremiseArgument, IsSinglePremiseArgument} from "../Store/db/nodes/$node";
-import {GetParentNodeL3, GetHolderType, GetParentNodeID, GetNode} from "../Store/db/nodes";
-import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
-import {GetMap} from "../Store/db/maps";
-import {MeID} from "../Store/db/users";
-import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
-import {Map} from "../Store/db/maps/@Map";
-import {SearchUpFromNodeForNodeMatchingX} from "../Utils/Store/PathFinder";
-import {GetDefaultAccessPolicyID_ForNode} from "../Store/db/accessPolicies";
-import {GetNodeChildLinks} from "../Store/db/nodeChildLinks";
+import {E, OmitIfFalsy, CE, ObjectCE} from "web-vcore/nm/js-vextensions.js";
+import {AssertV, Command, MergeDBUpdates, AV} from "web-vcore/nm/mobx-graphlink.js";
+import {AddChildNode} from "./AddChildNode.js";
+import {DeleteNode} from "./DeleteNode.js";
+import {LinkNode} from "./LinkNode.js";
+import {UnlinkNode} from "./UnlinkNode.js";
+import {UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {ClaimForm, Polarity, MapNode} from "../Store/db/nodes/@MapNode.js";
+import {GetNodeL3, GetNodeL2, IsPremiseOfMultiPremiseArgument, IsSinglePremiseArgument} from "../Store/db/nodes/$node.js";
+import {GetParentNodeL3, GetHolderType, GetParentNodeID, GetNode} from "../Store/db/nodes.js";
+import {MapNodeType} from "../Store/db/nodes/@MapNodeType.js";
+import {GetMap} from "../Store/db/maps.js";
+import {MeID} from "../Store/db/users.js";
+import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision.js";
+import {Map} from "../Store/db/maps/@Map.js";
+import {SearchUpFromNodeForNodeMatchingX} from "../Utils/Store/PathFinder.js";
+import {GetDefaultAccessPolicyID_ForNode} from "../Store/db/accessPolicies.js";
+import {GetNodeChildLinks} from "../Store/db/nodeChildLinks.js";
 
 type Payload = {
 	mapID: string, oldParentID: string, newParentID: string, nodeID: string,

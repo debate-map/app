@@ -1,17 +1,8 @@
-import {Assert, IsString} from "web-vcore/nm/js-vextensions";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {GetMap} from "../maps";
-import {MapNodePhrasing} from "../nodePhrasings/@MapNodePhrasing";
-import {GetNodeL2} from "../nodes/$node";
-import {AccessLevel, MapNode} from "../nodes/@MapNode";
-import {PermissionInfoType} from "../nodes/@MapNodeRevision";
-import {Term} from "../terms/@Term";
-import {Timeline} from "../timelines/@Timeline";
-import {GetUser} from "../users";
-import {GetUser_Private} from "../users_private";
-import {Media} from "../media/@Media";
-import {Map} from "../maps/@Map";
-import {PermissionGroupSet} from "./@User";
+import {Assert, IsString} from "web-vcore/nm/js-vextensions.js";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {AccessLevel} from "../nodes/@MapNode.js";
+import {GetUser} from "../users.js";
+import {PermissionGroupSet} from "./@User.js";
 
 // permissions
 // ==========

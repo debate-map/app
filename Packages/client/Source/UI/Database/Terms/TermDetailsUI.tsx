@@ -1,13 +1,13 @@
-import {Clone, DEL, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
-import {Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
-import {ES} from "Utils/UI/GlobalStyles";
+import {Clone, DEL, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
+import {Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
+import {ES} from "Utils/UI/GlobalStyles.js";
 import {InfoButton, observer_simple} from "web-vcore";
 import {Term, Term_nameFormat, Term_disambiguationFormat, TermType, AddTerm} from "dm_common";
 
-import {GetNiceNameForTermType} from "../../Database/TermsUI";
+import {GetNiceNameForTermType} from "../../Database/TermsUI.js";
 
 export class TermDetailsUI extends BaseComponentPlus(
 	{enabled: true} as {baseData: Term, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Term, error: string)=>void},

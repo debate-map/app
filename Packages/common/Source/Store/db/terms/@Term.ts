@@ -1,5 +1,5 @@
-import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions";
-import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink";
+import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 
 // export const termNameFormat = "^[^.#$\\[\\]]+$";
 export const Term_nameFormat = '^[a-zA-Z0-9 ,\'"%-]+$';

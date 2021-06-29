@@ -29,6 +29,6 @@
     "react-list": "0.8.11",
     "ua-parser-js": "^0.7.12",
     "updeep": "^1.0.0",
-    "web-vcore": "0.0.3"
+    "web-vcore": "0.0.4"
   }
 }

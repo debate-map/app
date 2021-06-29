@@ -1,17 +1,17 @@
-// import {Column, Div, Row} from "web-vcore/nm/react-vcomponents";
-// import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+// import {Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
+// import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 // import {VReactMarkdown_Remarkable, YoutubePlayer, YoutubePlayerState, Observer} from "web-vcore";
-// import {E} from "web-vcore/nm/js-vextensions";
-// import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu";
-// import {styles} from "Utils/UI/GlobalStyles";
-// import {runInAction} from "web-vcore/nm/mobx";
+// import {E} from "web-vcore/nm/js-vextensions.js";
+// import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
+// import {styles} from "Utils/UI/GlobalStyles.js";
+// import {runInAction} from "web-vcore/nm/mobx.js";
 // import {store} from "Store";
 // import {Map} from "dm_common";
 // import {Timeline} from "dm_common";
 // import {GetTimelineStep} from "dm_common";
 // import {IsUserCreatorOrMod} from "dm_common";
 // import {MeID} from "dm_common";
-// import {PositionOptionsEnum, NodeRevealUI, StepEditorUI} from "../EditorSubpanel/StepEditorUI";
+// import {PositionOptionsEnum, NodeRevealUI, StepEditorUI} from "../EditorSubpanel/StepEditorUI.js";
 
 // @Observer
 // export class StepUI extends BaseComponentPlus(

@@ -1,11 +1,11 @@
-import {GetEntries} from "web-vcore/nm/js-vextensions";
-import {Row, Select, Text} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI";
-import {MediaAttachmentEditorUI as MediaAttachmentEditorUI} from "./AttachmentPanel/MediaAttachmentEditorUI";
-import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI";
-import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
-import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI";
+import {GetEntries} from "web-vcore/nm/js-vextensions.js";
+import {Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI.js";
+import {MediaAttachmentEditorUI as MediaAttachmentEditorUI} from "./AttachmentPanel/MediaAttachmentEditorUI.js";
+import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI.js";
+import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
+import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI.js";
 import {GetAttachmentType, AttachmentType, ResetNodeRevisionAttachment} from "dm_common";
 import {MapNodeType} from "dm_common";
 

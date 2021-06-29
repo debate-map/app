@@ -1,9 +1,9 @@
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {LimitBarPos} from "UI/@Shared/Maps/MapNode/NodeUI";
-import {Column, Row} from "web-vcore/nm/react-vcomponents";
-import {E} from "web-vcore/nm/js-vextensions";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {LimitBarPos} from "UI/@Shared/Maps/MapNode/NodeUI.js";
+import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {E} from "web-vcore/nm/js-vextensions.js";
 import {GetChangeTypeOutlineColor, ChangeType} from "dm_common";
-import {ChildLimitBar} from "./NodeChildHolder";
+import {ChildLimitBar} from "./NodeChildHolder.js";
 
 export class NodeChangesMarker extends BaseComponent<{addedDescendants: number, editedDescendants: number, textOutline?: string, limitBarPos?: LimitBarPos}, {}> {
 	static defaultProps = {textOutline: "rgba(10,10,10,1)"};

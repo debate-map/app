@@ -1,11 +1,11 @@
-import {E} from "web-vcore/nm/js-vextensions";
-import {IsAuthValid} from "web-vcore/nm/mobx-graphlink";
-import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {IsAuthValid} from "web-vcore/nm/mobx-graphlink.js";
+import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {HandleError, Link, Observer} from "web-vcore";
 import {MeID} from "dm_common";
-import {graph} from "Utils/LibIntegrations/MobXGraphlink";
+import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {

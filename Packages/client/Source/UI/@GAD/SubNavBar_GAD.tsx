@@ -1,11 +1,11 @@
-import {E} from "web-vcore/nm/js-vextensions";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {rootPageDefaultChilds} from "Utils/URL/URLs";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 import {store, RootState} from "Store";
 import {ActionFunc, Link, Observer} from "web-vcore";
-import {zIndexes} from "Utils/UI/ZIndexes";
-import {colors} from "../../Utils/UI/GlobalStyles";
-import {GADHeaderFont} from "./GAD";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
+import {colors} from "../../Utils/UI/GlobalStyles.js";
+import {GADHeaderFont} from "./GAD.js";
 
 // @Observer
 export class SubNavBar_GAD extends BaseComponent<{fullWidth?: boolean}, {}> {

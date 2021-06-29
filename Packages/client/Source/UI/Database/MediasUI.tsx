@@ -1,17 +1,17 @@
-import {Button, Column, Div, Pre, Row, Span, Text} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
-import {ES} from "Utils/UI/GlobalStyles";
+import {Button, Column, Div, Pre, Row, Span, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {ES} from "Utils/UI/GlobalStyles.js";
 import {store} from "Store";
 import {GetSelectedMedia} from "Store/main/database";
 import {Observer, GetUpdates} from "web-vcore";
-import {runInAction} from "web-vcore/nm/mobx";
-import {E} from "web-vcore/nm/js-vextensions";
+import {runInAction} from "web-vcore/nm/mobx.js";
+import {E} from "web-vcore/nm/js-vextensions.js";
 import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMediaData, DeleteMedia} from "dm_common";
-import {MediaDetailsUI} from "./Medias/MediaDetailsUI";
-import {ShowAddMediaDialog} from "./Medias/AddMediaDialog";
-import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
+import {MediaDetailsUI} from "./Medias/MediaDetailsUI.js";
+import {ShowAddMediaDialog} from "./Medias/AddMediaDialog.js";
+import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 
 @Observer
 export class MediasUI extends BaseComponentPlus({} as {}, {} as { selectedMedia_newData: Media, selectedMedia_newDataError: string }) {

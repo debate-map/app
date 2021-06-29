@@ -1,11 +1,11 @@
-// import {Column, Row} from "web-vcore/nm/react-vcomponents";
-// import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+// import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
+// import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 // import {Timeline} from "dm_common";
 // import {MeID} from "dm_common";
 // import {AddTimeline} from "dm_common";
 // import {TimelineStep} from "dm_common";
 // import {AddTimelineStep} from "dm_common";
-// import {TimelineDetailsUI} from "./TimelineDetailsUI";
+// import {TimelineDetailsUI} from "./TimelineDetailsUI.js";
 
 // const defaultIntroMessage = `
 // Welcome to the Debate Map platform.

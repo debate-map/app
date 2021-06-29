@@ -1,8 +1,8 @@
-import {emptyArray, ToNumber, emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions";
-import {GetDoc, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {Timeline} from "./timelines/@Timeline";
-import {TimelineStep} from "./timelineSteps/@TimelineStep";
-import {GetNode, GetNodeChildren} from "./nodes";
+import {emptyArray, ToNumber, emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions.js";
+import {GetDoc, StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {Timeline} from "./timelines/@Timeline.js";
+import {TimelineStep} from "./timelineSteps/@TimelineStep.js";
+import {GetNode, GetNodeChildren} from "./nodes.js";
 
 export const GetTimelineStep = StoreAccessor(s=>(id: string): TimelineStep=>{
 	if (id == null) return null;

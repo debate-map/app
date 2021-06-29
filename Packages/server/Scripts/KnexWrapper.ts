@@ -1,6 +1,6 @@
 import Knex from "knex";
-import {up} from "./InitDB_Generated";
-//import {seed} from "../Knex/Seeds/1_Main";
+import {up} from "./InitDB_Generated.js";
+//import {seed} from "../Knex/Seeds/1_Main.js";
 import seed from "../Knex/Seeds/1_Main";
 
 import config from "../Knex/knexfile";

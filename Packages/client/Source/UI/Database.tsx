@@ -1,11 +1,11 @@
-import {Switch} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {Switch} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {Observer} from "web-vcore";
-import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
-import {MediasUI} from "./Database/MediasUI";
-import {TermsUI} from "./Database/TermsUI";
-import {UsersUI} from "./Database/Users";
+import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar.js";
+import {MediasUI} from "./Database/MediasUI.js";
+import {TermsUI} from "./Database/TermsUI.js";
+import {UsersUI} from "./Database/Users.js";
 
 @Observer
 export class DatabaseUI extends BaseComponentPlus({} as {}, {}) {

@@ -1,9 +1,9 @@
-import {E} from "web-vcore/nm/js-vextensions";
-import {Column} from "web-vcore/nm/react-vcomponents";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {Column} from "web-vcore/nm/react-vcomponents.js";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {observer_simple} from "web-vcore";
 import {AddMedia, MediaType, Media} from "dm_common";
-import {MediaDetailsUI} from "./MediaDetailsUI";
+import {MediaDetailsUI} from "./MediaDetailsUI.js";
 
 export function ShowAddMediaDialog(initialData?: Partial<Media>, postAdd?: (id: string)=>void) {
 	let newMedia = new Media(E({

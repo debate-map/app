@@ -1,8 +1,8 @@
-import {Switch} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {Switch} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
-import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
-import {GlobalMapUI} from "./Global/GlobalMapUI";
+import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar.js";
+import {GlobalMapUI} from "./Global/GlobalMapUI.js";
 
 export class GlobalUI extends BaseComponentPlus({} as {}, {}) {
 	render() {

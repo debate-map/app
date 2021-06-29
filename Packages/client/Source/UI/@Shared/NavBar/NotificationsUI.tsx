@@ -1,10 +1,10 @@
-import {Button, Column, Div} from "web-vcore/nm/react-vcomponents";
-import {AddGlobalStyle, BaseComponent} from "web-vcore/nm/react-vextensions";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
+import {Button, Column, Div} from "web-vcore/nm/react-vcomponents.js";
+import {AddGlobalStyle, BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
 import {Observer} from "web-vcore";
-import {runInAction} from "web-vcore/nm/mobx";
-import {NotificationMessage} from "Store/main/@NotificationMessage";
+import {runInAction} from "web-vcore/nm/mobx.js";
+import {NotificationMessage} from "Store/main/@NotificationMessage.js";
 
 AddGlobalStyle(`
 .NotificationScrollView > * { pointer-events: auto; }

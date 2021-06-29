@@ -1,13 +1,13 @@
 import {GetMap, GetNodeChildLinks, GetNodeL2, MapView} from "dm_common";
-import {Assert, Vector2} from "web-vcore/nm/js-vextensions";
-import {autorun, runInAction} from "web-vcore/nm/mobx";
-import {GetAsync} from "web-vcore/nm/mobx-graphlink";
+import {Assert, Vector2} from "web-vcore/nm/js-vextensions.js";
+import {autorun, runInAction} from "web-vcore/nm/mobx.js";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTEnsureMapStateInit} from "Store/main/maps";
-import {GetMapState} from "Store/main/maps/mapStates/$mapState";
-import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState";
-import {ACTMapNodeExpandedSet, GetNodeView, GetMapView} from "Store/main/maps/mapViews/$mapView";
-import {ACTSetFocusNodeAndViewOffset, MapUI} from "UI/@Shared/Maps/MapUI";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
+import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState.js";
+import {ACTMapNodeExpandedSet, GetNodeView, GetMapView} from "Store/main/maps/mapViews/$mapView.js";
+import {ACTSetFocusNodeAndViewOffset, MapUI} from "UI/@Shared/Maps/MapUI.js";
 import {JustBeforeUI_listeners} from "Main";
 
 let lastMapID;

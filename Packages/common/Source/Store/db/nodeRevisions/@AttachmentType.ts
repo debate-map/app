@@ -1,11 +1,11 @@
-import {MapNodeRevision} from "../nodes/@MapNodeRevision";
-import {QuoteAttachment} from "./@QuoteAttachment";
-import {MediaAttachment} from "./@MediaAttachment";
-import {MapNodeL2} from "../nodes/@MapNode";
-import {MapNodeType} from "../nodes/@MapNodeType";
-import {EquationAttachment} from "./@EquationAttachment";
-import {ReferencesAttachment} from "./@ReferencesAttachment";
-import {CE, CreateStringEnum} from "web-vcore/nm/js-vextensions";
+import {MapNodeRevision} from "../nodes/@MapNodeRevision.js";
+import {QuoteAttachment} from "./@QuoteAttachment.js";
+import {MediaAttachment} from "./@MediaAttachment.js";
+import {MapNodeL2} from "../nodes/@MapNode.js";
+import {MapNodeType} from "../nodes/@MapNodeType.js";
+import {EquationAttachment} from "./@EquationAttachment.js";
+import {ReferencesAttachment} from "./@ReferencesAttachment.js";
+import {CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
 
 export enum AttachmentType {
 	none = "none",

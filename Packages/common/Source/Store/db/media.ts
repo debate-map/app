@@ -1,6 +1,6 @@
-import {CachedTransform, IsNaN} from "web-vcore/nm/js-vextensions";
-import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {Media} from "./media/@Media";
+import {CachedTransform, IsNaN} from "web-vcore/nm/js-vextensions.js";
+import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {Media} from "./media/@Media.js";
 
 export const GetMedia = StoreAccessor(s=>(id: string)=>{
 	if (id == null || IsNaN(id)) return null;

@@ -1,11 +1,11 @@
-import {MapEdit} from "../CommandMacros";
-import {AddSchema, AssertValidate, Schema, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink";
-import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {UserEdit} from "../CommandMacros";
-import {Map} from "../Store/db/maps/@Map";
-import {GetMap} from "../Store/db/maps";
-import {CE} from "web-vcore/nm/js-vextensions";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts";
+import {MapEdit} from "../CommandMacros.js";
+import {AddSchema, AssertValidate, Schema, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros.js";
+import {Map} from "../Store/db/maps/@Map.js";
+import {GetMap} from "../Store/db/maps.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 type MainType = Map;
 const MTName = "Map";

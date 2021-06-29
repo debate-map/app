@@ -1,9 +1,9 @@
-import {UserEdit} from "../CommandMacros";
-import {AddSchema, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
-import {Assert} from "web-vcore/nm/js-vextensions";
-import {GetAsync, Command} from "web-vcore/nm/mobx-graphlink";
-import {MapNodePhrasing} from "../Store/db/nodePhrasings/@MapNodePhrasing";
-import {GetNode} from "../Store/db/nodes";
+import {UserEdit} from "../CommandMacros.js";
+import {AddSchema, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert} from "web-vcore/nm/js-vextensions.js";
+import {GetAsync, Command} from "web-vcore/nm/mobx-graphlink.js";
+import {MapNodePhrasing} from "../Store/db/nodePhrasings/@MapNodePhrasing.js";
+import {GetNode} from "../Store/db/nodes.js";
 
 @UserEdit
 export class AddPhrasing extends Command<{phrasing: MapNodePhrasing}, string> {

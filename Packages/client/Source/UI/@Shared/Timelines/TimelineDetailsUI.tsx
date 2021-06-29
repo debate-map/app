@@ -1,8 +1,8 @@
-// import {Clone, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
-// import {Button, Column, Pre, Row, RowLR, TextInput} from "web-vcore/nm/react-vcomponents";
-// import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions";
+// import {Clone, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
+// import {Button, Column, Pre, Row, RowLR, TextInput} from "web-vcore/nm/react-vcomponents.js";
+// import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
 // import {GetUpdates} from "web-vcore";
-// import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI";
+// import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI.js";
 // import {Timeline} from "dm_common";
 // import {UpdateTimeline} from "dm_common";
 

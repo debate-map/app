@@ -1,10 +1,10 @@
-import {Switch} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {Switch} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {Observer} from "web-vcore";
-import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
-import {AdminUI} from "./More/Admin";
-import {LinksUI} from "./More/Links";
+import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar.js";
+import {AdminUI} from "./More/Admin.js";
+import {LinksUI} from "./More/Links.js";
 import {HasAdminPermissions} from "dm_common";
 import {MeID, GetUsers} from "dm_common";
 

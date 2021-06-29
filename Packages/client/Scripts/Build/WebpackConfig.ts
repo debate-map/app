@@ -1,6 +1,6 @@
-import {CreateWebpackConfig} from "web-vcore/Scripts/Build/WebpackConfig";
-import {config} from "../Config";
-import {npmPatch_replacerConfig} from "./NPMPatches";
+import {CreateWebpackConfig} from "web-vcore/Scripts/Build/WebpackConfig.js";
+import {config} from "../Config.js";
+import {npmPatch_replacerConfig} from "./NPMPatches.js";
 import JsonpTemplatePlugin from "web-vcore/node_modules/webpack/lib/web/JsonpTemplatePlugin";
 
 /*function resolvePath(...segmentsFromRoot: string[]) {
@@ -48,7 +48,5 @@ export const webpackConfig = CreateWebpackConfig({
 		/*{test: /dm_common[/\\]Source[/\\].*\.tsx?$/},
 		{test: /Packages[/\\]common[/\\]Source[/\\].*\.tsx?$/},*/
 		//{test: /(Packages[/\\]common|dm_common)[/\\]Source[/\\].*\.tsx?$/},
-
-		// todo: fix that the "web-vcore/nm" folder is not handled properly, when recompiling one of its files (the recompiling uses dm_common's ts-config instead of web-vcore/nm's, which causes errors)
 	],
 });

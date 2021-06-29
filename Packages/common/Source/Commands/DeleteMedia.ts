@@ -1,8 +1,8 @@
-import {UserEdit} from "../CommandMacros";
-import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {Media} from "../Store/db/media/@Media";
-import {GetMedia, IsUserCreatorOrMod} from "../Store";
-import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
+import {UserEdit} from "../CommandMacros.js";
+import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {Media} from "../Store/db/media/@Media.js";
+import {GetMedia, IsUserCreatorOrMod} from "../Store.js";
+import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
 export class DeleteMedia extends Command<{id: string}, {}> {

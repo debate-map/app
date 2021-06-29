@@ -1,10 +1,10 @@
-import {Assert} from "web-vcore/nm/js-vextensions";
-import {MapEdit} from "../CommandMacros";
-import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
-import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {UserEdit} from "../CommandMacros";
-import {Map} from "../Store/db/maps/@Map";
-import {GetMap} from "../Store/db/maps";
+import {Assert} from "web-vcore/nm/js-vextensions.js";
+import {MapEdit} from "../CommandMacros.js";
+import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros.js";
+import {Map} from "../Store/db/maps/@Map.js";
+import {GetMap} from "../Store/db/maps.js";
 
 AddSchema("SetLayerAttachedToMap_payload", {
 	properties: {

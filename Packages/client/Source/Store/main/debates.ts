@@ -1,5 +1,5 @@
 import {O} from "web-vcore";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GetMap} from "dm_common";
 
 export class DebatesPageState {

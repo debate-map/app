@@ -1,9 +1,9 @@
-/*import {UserEdit} from "../CommandMacros";
-import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
-import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {TimelineStep} from "../Store/db/timelineSteps/@TimelineStep";
-import {GetTimeline} from "../Store/db/timelines";
-import {CE} from "web-vcore/nm/js-vextensions";
+/*import {UserEdit} from "../CommandMacros.js";
+import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {TimelineStep} from "../Store/db/timelineSteps/@TimelineStep.js";
+import {GetTimeline} from "../Store/db/timelines.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
 
 @UserEdit
 export class AddTimelineStep extends Command<{timelineID: string, step: TimelineStep, stepIndex?: number}, {}> {

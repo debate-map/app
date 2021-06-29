@@ -1,17 +1,17 @@
-import {GetErrorMessagesUnderElement, Clone, E, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
-import {Column, Pre, RowLR, Spinner, TextInput, Row, DropDown, DropDownTrigger, Button, DropDownContent, Text, CheckBox} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
-import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";
-import {ShowAddMediaDialog} from "UI/Database/Medias/AddMediaDialog";
+import {GetErrorMessagesUnderElement, Clone, E, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
+import {Column, Pre, RowLR, Spinner, TextInput, Row, DropDown, DropDownTrigger, Button, DropDownContent, Text, CheckBox} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel.js";
+import {ShowAddMediaDialog} from "UI/Database/Medias/AddMediaDialog.js";
 import {MediaAttachment} from "dm_common";
-import {Validate} from "web-vcore/nm/mobx-graphlink";
+import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetMedia, GetMediasByURL} from "dm_common";
 import {Link, Observer, InfoButton} from "web-vcore";
 import {HasModPermissions} from "dm_common";
 import {MeID, GetUser} from "dm_common";
 import {Media} from "dm_common";
-import {SourceChainsEditorUI} from "../../SourceChainsEditorUI";
+import {SourceChainsEditorUI} from "../../SourceChainsEditorUI.js";
 
 type Props = {baseData: MediaAttachment, creating: boolean, editing?: boolean, style?, onChange?: (newData: MediaAttachment)=>void};
 export class MediaAttachmentEditorUI extends BaseComponent<Props, {newData: MediaAttachment}> {

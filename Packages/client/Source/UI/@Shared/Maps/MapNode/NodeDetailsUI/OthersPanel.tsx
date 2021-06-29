@@ -1,7 +1,7 @@
-import {ToNumber} from "web-vcore/nm/js-vextensions";
-import {Pre, Row, Spinner} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI";
+import {ToNumber} from "web-vcore/nm/js-vextensions.js";
+import {Pre, Row, Spinner} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
 import {HasAdminPermissions} from "dm_common";
 import {MeID} from "dm_common";
 

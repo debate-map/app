@@ -1,6 +1,6 @@
-import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions";
+import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown, PageContainer} from "web-vcore";
-import {styles} from "../../Utils/UI/GlobalStyles";
+import {styles} from "../../Utils/UI/GlobalStyles.js";
 
 const pageText = `
 This project started as a personal goal of mine (Stephen Wicklund, aka "Venryx") around 2013. The main thing prompting it was frustration with how difficult

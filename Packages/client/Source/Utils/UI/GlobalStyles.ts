@@ -1,5 +1,5 @@
-import {AddGlobalStyle} from "web-vcore/nm/react-vextensions";
-import {E} from "web-vcore/nm/js-vextensions";
+import {AddGlobalStyle} from "web-vcore/nm/react-vextensions.js";
+import {E} from "web-vcore/nm/js-vextensions.js";
 
 export const styles = {
 	page: ES({

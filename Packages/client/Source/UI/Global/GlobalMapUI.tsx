@@ -1,8 +1,8 @@
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {PageContainer, Observer} from "web-vcore";
 import {GetMap} from "dm_common";
 import {globalMapID} from "dm_common";
-import {MapUI} from "../@Shared/Maps/MapUI";
+import {MapUI} from "../@Shared/Maps/MapUI.js";
 
 @Observer
 export class GlobalMapUI extends BaseComponentPlus({} as {}, {}) {

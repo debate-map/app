@@ -1,20 +1,20 @@
-import {SleepAsync, Vector2, WaitXThenRun, E} from "web-vcore/nm/js-vextensions";
+import {SleepAsync, Vector2, WaitXThenRun, E} from "web-vcore/nm/js-vextensions.js";
 import keycode from "keycode";
 import moment from "web-vcore/nm/moment";
-import {Button, Column, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
+import {Button, Column, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O} from "web-vcore";
-import {ES} from "Utils/UI/GlobalStyles";
+import {ES} from "Utils/UI/GlobalStyles.js";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
-import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView";
-import {runInAction, flow} from "web-vcore/nm/mobx";
-import {Validate, GetAsync, UUID} from "web-vcore/nm/mobx-graphlink";
+import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
+import {runInAction, flow} from "web-vcore/nm/mobx.js";
+import {Validate, GetAsync, UUID} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, MapType, GetSearchTerms_Advanced, GetNodeChildLinks} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
-import {MapUI} from "../Maps/MapUI";
-import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu";
+import {MapUI} from "../Maps/MapUI.js";
+import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu.js";
 
 const columnWidths = [0.68, 0.2, 0.12];
 

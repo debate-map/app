@@ -1,4 +1,4 @@
-import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions";
+import {BaseComponent, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
 
 export class StreamPanel extends BaseComponent<{auth?}, {}> {
 	render() {

@@ -1,5 +1,5 @@
-import {Assert, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions";
-import {ClaimForm, MapNode, MapNodeL3, Polarity} from "./@MapNode";
+import {Assert, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {ClaimForm, MapNode, MapNodeL3, Polarity} from "./@MapNode.js";
 
 export enum MapNodeType {
 	category = "category",

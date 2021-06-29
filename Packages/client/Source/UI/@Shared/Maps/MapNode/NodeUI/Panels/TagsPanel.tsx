@@ -1,16 +1,16 @@
-import {Div, Column, Row, Button, TextInput, DropDown, DropDownTrigger, DropDownContent, Text} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {Div, Column, Row, Button, TextInput, DropDown, DropDownTrigger, DropDownContent, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {InfoButton, Observer, GetUpdates, HSLA} from "web-vcore";
-import {TermDefinitionPanel} from "./DefinitionsPanel";
+import {TermDefinitionPanel} from "./DefinitionsPanel.js";
 import {Map} from "dm_common";
 import {MapNodeL3} from "dm_common";
 import {GetNodeTags} from "dm_common";
 import {HasModPermissions, IsUserCreatorOrMod} from "dm_common";
 import {MeID} from "dm_common";
-import {ShowAddTagDialog, TagDetailsUI} from "UI/Database/Tags/TagDetailsUI";
+import {ShowAddTagDialog, TagDetailsUI} from "UI/Database/Tags/TagDetailsUI.js";
 import {TagComp_MirrorChildrenFromXToY, MapNodeTag, GetTagCompClassByTag} from "dm_common";
 import {UpdateNodeTag} from "dm_common";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {DeleteNodeTag} from "dm_common";
 
 @Observer

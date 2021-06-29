@@ -1,6 +1,6 @@
 import {DeleteNodeSubtree, GetMaps, GetNodeL2, UpdateMapDetails} from "dm_common";
-import {E} from "web-vcore/nm/js-vextensions";
-import {GetAsync, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {GetAsync, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink.js";
 
 /*
 Basic db-upgrade procedure:

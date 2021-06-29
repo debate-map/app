@@ -1,11 +1,11 @@
-import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from "web-vcore/nm/js-vextensions";
-import {StoreAccessor, NoID} from "web-vcore/nm/mobx-graphlink";
-import {GetRatingAverage, GetRatingValue, GetRatings} from "../../Store/db/nodeRatings";
-import {NodeRating} from "../../Store/db/nodeRatings/@NodeRating";
-import {NodeRatingType} from "../../Store/db/nodeRatings/@NodeRatingType";
-import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../Store/db/nodes/$node";
-import {ClaimForm, MapNodeL2} from "../../Store/db/nodes/@MapNode";
-import {ArgumentType} from "../../Store/db/nodes/@MapNodeRevision";
+import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from "web-vcore/nm/js-vextensions.js";
+import {StoreAccessor, NoID} from "web-vcore/nm/mobx-graphlink.js";
+import {GetRatingAverage, GetRatingValue, GetRatings} from "../../Store/db/nodeRatings.js";
+import {NodeRating} from "../../Store/db/nodeRatings/@NodeRating.js";
+import {NodeRatingType} from "../../Store/db/nodeRatings/@NodeRatingType.js";
+import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../Store/db/nodes/$node.js";
+import {ClaimForm, MapNodeL2} from "../../Store/db/nodes/@MapNode.js";
+import {ArgumentType} from "../../Store/db/nodes/@MapNodeRevision.js";
 
 export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[], userID: string): NoID<NodeRating>=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading

@@ -1,6 +1,6 @@
-import {Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {AssertValidate} from "web-vcore/nm/mobx-graphlink";
-import {HasModPermissions} from "../Store/db/users/$user";
+import {Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
+import {HasModPermissions} from "../Store/db/users/$user.js";
 
 export class SetMapFeatured extends Command<{id: string, featured: boolean}, {}> {
 	Validate() {

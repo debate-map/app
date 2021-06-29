@@ -1,5 +1,5 @@
 import {O} from "web-vcore";
-import {StoreAccessor, GetDoc} from "web-vcore/nm/mobx-graphlink";
+import {StoreAccessor, GetDoc} from "web-vcore/nm/mobx-graphlink.js";
 import {GetTerms, GetMedias, GraphDBShape} from "dm_common";
 
 export class DatabaseState {

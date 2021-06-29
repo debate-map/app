@@ -1,17 +1,17 @@
-import {FromJSON, GetEntries, ToNumber, E} from "web-vcore/nm/js-vextensions";
-import {Pre, Row, Select} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {FromJSON, GetEntries, ToNumber, E} from "web-vcore/nm/js-vextensions.js";
+import {Pre, Row, Select} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
-import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState";
-import {runInAction} from "web-vcore/nm/mobx";
+import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState.js";
+import {runInAction} from "web-vcore/nm/mobx.js";
 import {Observer, HSLA} from "web-vcore";
-import {GetMapState} from "Store/main/maps/mapStates/$mapState";
+import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {Map, WeightingType} from "dm_common";
-import {GADDemo} from "UI/@GAD/GAD";
-import {colors} from "../../../../Utils/UI/GlobalStyles";
-import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown";
+import {GADDemo} from "UI/@GAD/GAD.js";
+import {colors} from "../../../../Utils/UI/GlobalStyles.js";
+import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown.js";
 
-import {ShareDropDown} from "./ActionBar_Right/ShareDropDown";
+import {ShareDropDown} from "./ActionBar_Right/ShareDropDown.js";
 
 const changesSince_options = [];
 changesSince_options.push({name: "None", value: `${ShowChangesSinceType.none}_null`});

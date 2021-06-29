@@ -1,12 +1,12 @@
 import {GetNodeL3, WeightingType, MapView} from "dm_common";
-import {observable} from "web-vcore/nm/mobx";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {ignore, version} from "web-vcore/nm/mobx-sync";
+import {observable} from "web-vcore/nm/mobx.js";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {ignore, version} from "web-vcore/nm/mobx-sync.js";
 import {store} from "Store";
 import {O, StoreAction} from "web-vcore";
-import {MapState} from "./maps/mapStates/@MapState";
-import {GetMapView} from "./maps/mapViews/$mapView";
-import {CreateStringEnum} from "web-vcore/nm/js-vextensions";
+import {MapState} from "./maps/mapStates/@MapState.js";
+import {GetMapView} from "./maps/mapViews/$mapView.js";
+import {CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
 
 export class MapsState {
 	// @Oervable maps = observable.map<string, MapState>();

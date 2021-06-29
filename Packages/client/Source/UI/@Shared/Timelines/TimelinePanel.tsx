@@ -1,14 +1,14 @@
-// import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
-// import {BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+// import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
+// import {BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 // import {store} from "Store";
-// import {GetSelectedTimeline, GetTimelineOpenSubpanel, GetMapState} from "Store/main/maps/mapStates/$mapState";
-// import {runInAction} from "web-vcore/nm/mobx";
+// import {GetSelectedTimeline, GetTimelineOpenSubpanel, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
+// import {runInAction} from "web-vcore/nm/mobx.js";
 // import {Observer} from "web-vcore";
-// import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState";
+// import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState.js";
 // import {Map} from "dm_common";
-// import {CollectionSubpanel} from "./TimelinePanel/CollectionSubpanel";
-// import {EditorSubpanel} from "./TimelinePanel/EditorSubpanel";
-// import {PlayingSubpanel} from "./TimelinePanel/PlayingSubpanel";
+// import {CollectionSubpanel} from "./TimelinePanel/CollectionSubpanel.js";
+// import {EditorSubpanel} from "./TimelinePanel/EditorSubpanel.js";
+// import {PlayingSubpanel} from "./TimelinePanel/PlayingSubpanel.js";
 
 // @Observer
 // export class TimelinePanel extends BaseComponentPlus({} as {map: Map}, {}) {

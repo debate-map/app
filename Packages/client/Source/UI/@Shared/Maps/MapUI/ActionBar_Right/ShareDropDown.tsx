@@ -1,14 +1,14 @@
 import {DeleteShare, GetShares, Map, MeID, Share} from "dm_common";
-import {GetEntries, VURL, CopyText} from "web-vcore/nm/js-vextensions";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select, Text} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
+import {GetEntries, VURL, CopyText} from "web-vcore/nm/js-vextensions.js";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
-import {ShareTab} from "Store/main/shareUI";
+import {ShareTab} from "Store/main/shareUI.js";
 import {Observer, RunInAction_Set, GetCurrentURL} from "web-vcore";
-import {NewShareUI} from "./ShareDropDown/NewShareUI";
+import {NewShareUI} from "./ShareDropDown/NewShareUI.js";
 import moment from "web-vcore/nm/moment";
 
 export function GetShareShortURL(share: Share) {

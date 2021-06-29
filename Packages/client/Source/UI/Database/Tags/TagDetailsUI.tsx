@@ -1,11 +1,11 @@
-import {Clone, E, DelIfFalsy, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
-import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox, Button} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
-import {ES} from "Utils/UI/GlobalStyles";
+import {Clone, E, DelIfFalsy, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
+import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox, Button} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
+import {ES} from "Utils/UI/GlobalStyles.js";
 import {InfoButton, observer_simple} from "web-vcore";
-import {Validate} from "web-vcore/nm/mobx-graphlink";
+import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNodeL2, AsNodeL3, GetNodeDisplayText} from "dm_common";
 import {MapNodeType} from "dm_common";
 import {AddNodeTag} from "dm_common";

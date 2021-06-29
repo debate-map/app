@@ -1,8 +1,8 @@
-/*import {CE} from "web-vcore/nm/js-vextensions";
-import {Command} from "web-vcore/nm/mobx-graphlink";
-import {UserEdit} from "../CommandMacros";
-import {GetTimeline} from "../Store/db/timelines";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts";
+/*import {CE} from "web-vcore/nm/js-vextensions.js";
+import {Command} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros.js";
+import {GetTimeline} from "../Store/db/timelines.js";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
 export class UpdateTimelineStepOrder extends Command<{timelineID: string, stepID: string, newIndex: number}, {}> {

@@ -1,10 +1,10 @@
 import {ExposeModuleExports, Log} from "web-vcore";
-import {InitWVC} from "./WVC";
-import {InitReactJS} from "./ReactJS";
-import {InitSentry} from "./Sentry";
-import {InitReactVComponents} from "./ReactVComponents";
-import {InitGraphlink} from "./MobXGraphlink";
-import {InitPGLink} from "./PGLink";
+import {InitWVC} from "./WVC.js";
+import {InitReactJS} from "./ReactJS.js";
+import {InitSentry} from "./Sentry.js";
+import {InitReactVComponents} from "./ReactVComponents.js";
+import {InitGraphlink} from "./MobXGraphlink.js";
+import {InitPGLink} from "./PGLink.js";
 import {WRR} from "web-vcore/node_modules/webpack-runtime-require";
 
 // helpers for exposing things (making them easier to access in console/dev-tools)

@@ -1,13 +1,13 @@
-import {Assert} from "web-vcore/nm/js-vextensions";
-import {MapEdit} from "../CommandMacros";
-import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
-import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {UserEdit} from "../CommandMacros";
-import {MapNodeL3} from "../Store/db/nodes/@MapNode";
-import {GetNodeL3, ReversePolarity} from "../Store/db/nodes/$node";
-import {GetParentNodeID} from "../Store/db/nodes";
-import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
-import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink";
+import {Assert} from "web-vcore/nm/js-vextensions.js";
+import {MapEdit} from "../CommandMacros.js";
+import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros.js";
+import {MapNodeL3} from "../Store/db/nodes/@MapNode.js";
+import {GetNodeL3, ReversePolarity} from "../Store/db/nodes/$node.js";
+import {GetParentNodeID} from "../Store/db/nodes.js";
+import {MapNodeType} from "../Store/db/nodes/@MapNodeType.js";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
 
 AddSchema("ReverseArgumentPolarity_payload", {
 	properties: {

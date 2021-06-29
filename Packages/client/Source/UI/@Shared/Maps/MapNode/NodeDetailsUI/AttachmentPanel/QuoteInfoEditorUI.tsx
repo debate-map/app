@@ -1,9 +1,9 @@
-import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
-import {Column, Pre, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions";
-import {MarkdownEditor, MarkdownToolbar} from "web-vcore/nm/react-vmarkdown";
-import {SubPanel_Quote} from "../../NodeUI_Inner/SubPanel";
-import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI";
+import {GetErrorMessagesUnderElement, Clone, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
+import {Column, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {MarkdownEditor, MarkdownToolbar} from "web-vcore/nm/react-vmarkdown.js";
+import {SubPanel_Quote} from "../../NodeUI_Inner/SubPanel.js";
+import {SourceChainsEditorUI, CleanUpdatedSourceChains} from "../../SourceChainsEditorUI.js";
 import {QuoteAttachment} from "dm_common";
 import {GetNodeDisplayText} from "dm_common";
 import {MapNodeType} from "dm_common";

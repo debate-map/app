@@ -1,6 +1,6 @@
-import {emptyArray, IsNaN} from "web-vcore/nm/js-vextensions";
-import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {MapNodeRevision, TitleKey} from "./nodes/@MapNodeRevision";
+import {emptyArray, IsNaN} from "web-vcore/nm/js-vextensions.js";
+import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {MapNodeRevision, TitleKey} from "./nodes/@MapNodeRevision.js";
 
 export const GetNodeRevision = StoreAccessor(s=>(id: string): MapNodeRevision=>{
 	if (id == null || IsNaN(id)) return null;

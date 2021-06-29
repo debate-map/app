@@ -1,6 +1,6 @@
-import {Column, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {AddArgumentButton} from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton";
+import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {AddArgumentButton} from "UI/@Shared/Maps/MapNode/NodeUI/AddArgumentButton.js";
 import {MapNodeL3, Polarity} from "dm_common";
 import {Map} from "dm_common";
 

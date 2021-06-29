@@ -1,18 +1,18 @@
-import {Clone, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
-import {runInAction} from "web-vcore/nm/mobx";
-import {Column, Row, Select} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vextensions";
+import {Clone, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
+import {runInAction} from "web-vcore/nm/mobx.js";
+import {Column, Row, Select} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {Observer} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
 import {MapNode, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType} from "dm_common";
-import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel";
-import {OthersPanel} from "./NodeDetailsUI/OthersPanel";
-import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel";
-import {TextPanel} from "./NodeDetailsUI/TextPanel";
-import {QuoteInfoEditorUI} from "./NodeDetailsUI/AttachmentPanel/QuoteInfoEditorUI";
-import {TagsPanel} from "./NodeUI/Panels/TagsPanel";
-import {NodeChildLink} from "dm_common/Source/Store/db/nodeChildLinks/@NodeChildLink";
+import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel.js";
+import {OthersPanel} from "./NodeDetailsUI/OthersPanel.js";
+import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel.js";
+import {TextPanel} from "./NodeDetailsUI/TextPanel.js";
+import {QuoteInfoEditorUI} from "./NodeDetailsUI/AttachmentPanel/QuoteInfoEditorUI.js";
+import {TagsPanel} from "./NodeUI/Panels/TagsPanel.js";
+import {NodeChildLink} from "dm_common/Source/Store/db/nodeChildLinks/@NodeChildLink.js";
 
 type Props = {
 	baseData: MapNode,

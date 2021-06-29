@@ -1,11 +1,11 @@
-import {E} from "web-vcore/nm/js-vextensions";
-import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI.js";
 import {InfoButton, Link, Observer} from "web-vcore";
-import {NodeDetailsUI_SharedProps} from "../../NodeDetailsUI";
-import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel";
-import {Validate} from "web-vcore/nm/mobx-graphlink";
+import {NodeDetailsUI_SharedProps} from "../../NodeDetailsUI.js";
+import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel.js";
+import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetTerm, GetTermsByForm} from "dm_common";
 import {TermAttachment} from "dm_common";
 import {Term} from "dm_common";

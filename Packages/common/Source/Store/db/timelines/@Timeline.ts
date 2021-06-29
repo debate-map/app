@@ -1,5 +1,5 @@
-import {AddSchema} from "web-vcore/nm/mobx-graphlink";
-import {CE} from "web-vcore/nm/js-vextensions";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
 
 export class Timeline {
 	constructor(initialData: {name: string, creator: string} & Partial<Timeline>) {

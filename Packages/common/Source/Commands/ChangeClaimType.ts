@@ -1,12 +1,12 @@
-import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions";
-import {AssertV, AV, Command} from "web-vcore/nm/mobx-graphlink";
-import {MapEdit, UserEdit} from "../CommandMacros";
-import {AddSchema, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
-import {AttachmentType, GetAttachmentType} from "../Store/db/nodeRevisions/@AttachmentType";
-import {MapNode} from "../Store/db/nodes/@MapNode";
-import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
-import {GetNodeL2, AsNodeL1} from "../Store/db/nodes/$node";
-import {EquationAttachment} from "../Store/db/nodeRevisions/@EquationAttachment";
+import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions.js";
+import {AssertV, AV, Command} from "web-vcore/nm/mobx-graphlink.js";
+import {MapEdit, UserEdit} from "../CommandMacros.js";
+import {AddSchema, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AttachmentType, GetAttachmentType} from "../Store/db/nodeRevisions/@AttachmentType.js";
+import {MapNode} from "../Store/db/nodes/@MapNode.js";
+import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision.js";
+import {GetNodeL2, AsNodeL1} from "../Store/db/nodes/$node.js";
+import {EquationAttachment} from "../Store/db/nodeRevisions/@EquationAttachment.js";
 
 export const conversionTypes = [
 	// from normal to...

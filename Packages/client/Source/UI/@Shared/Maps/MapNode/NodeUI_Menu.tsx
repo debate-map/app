@@ -1,23 +1,23 @@
-import {E} from "web-vcore/nm/js-vextensions";
-import {runInAction} from "web-vcore/nm/mobx";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink";
-import {BaseComponent, BaseComponentPlus, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
-import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {runInAction} from "web-vcore/nm/mobx.js";
+import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import {BaseComponent, BaseComponentPlus, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
 import {store} from "Store";
-import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEditTimes";
+import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEditTimes.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
 import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, HolderType, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map} from "dm_common";
 import {Observer} from "web-vcore";
-import {styles} from "../../../../Utils/UI/GlobalStyles";
-import {ShowSignInPopup} from "../../NavBar/UserPanel";
-import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog";
-import {MI_DeleteContainerArgument} from "./NodeUI_Menu/MI_DeleteContainerArgument";
-import {MI_DeleteNode} from "./NodeUI_Menu/MI_DeleteNode";
-import {MI_ExportSubtree} from "./NodeUI_Menu/MI_ExportSubtree";
-import {MI_PasteAsLink} from "./NodeUI_Menu/MI_PasteAsLink";
-import {MI_UnlinkContainerArgument} from "./NodeUI_Menu/MI_UnlinkContainerArgument";
-import {MI_UnlinkNode} from "./NodeUI_Menu/MI_UnlinkNode";
+import {styles} from "../../../../Utils/UI/GlobalStyles.js";
+import {ShowSignInPopup} from "../../NavBar/UserPanel.js";
+import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog.js";
+import {MI_DeleteContainerArgument} from "./NodeUI_Menu/MI_DeleteContainerArgument.js";
+import {MI_DeleteNode} from "./NodeUI_Menu/MI_DeleteNode.js";
+import {MI_ExportSubtree} from "./NodeUI_Menu/MI_ExportSubtree.js";
+import {MI_PasteAsLink} from "./NodeUI_Menu/MI_PasteAsLink.js";
+import {MI_UnlinkContainerArgument} from "./NodeUI_Menu/MI_UnlinkContainerArgument.js";
+import {MI_UnlinkNode} from "./NodeUI_Menu/MI_UnlinkNode.js";
 
 export class NodeUI_Menu_Stub extends BaseComponent<Props, {}> {
 	render() {

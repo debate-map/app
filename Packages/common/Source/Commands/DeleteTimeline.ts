@@ -1,8 +1,8 @@
-/*import {UserEdit} from "../CommandMacros";
-import {GetAsync, Command, AssertV, AV} from "web-vcore/nm/mobx-graphlink";
-import {Timeline} from "../Store/db/timelines/@Timeline";
-import {GetTimeline} from "../Store/db/timelines";
-import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
+/*import {UserEdit} from "../CommandMacros.js";
+import {GetAsync, Command, AssertV, AV} from "web-vcore/nm/mobx-graphlink.js";
+import {Timeline} from "../Store/db/timelines/@Timeline.js";
+import {GetTimeline} from "../Store/db/timelines.js";
+import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
 export class DeleteTimeline extends Command<{timelineID: string}, {}> {

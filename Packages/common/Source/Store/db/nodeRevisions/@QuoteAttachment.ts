@@ -1,5 +1,5 @@
-import {AddSchema} from "web-vcore/nm/mobx-graphlink";
-import {Source, SourceChain} from "./@SourceChain";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Source, SourceChain} from "./@SourceChain.js";
 
 export class QuoteAttachment {
 	constructor() {

@@ -1,4 +1,4 @@
-import {AddSchema} from "web-vcore/nm/mobx-graphlink";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
 
 export class EquationAttachment {
 	latex: boolean;

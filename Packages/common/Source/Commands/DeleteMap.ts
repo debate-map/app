@@ -1,12 +1,12 @@
-import {UserEdit} from "../CommandMacros";
-import {MergeDBUpdates, GetAsync, GetDocs, AssertV, Command} from "web-vcore/nm/mobx-graphlink";
-import {UserMapInfoSet} from "../Store/db/userMapInfo/@UserMapInfo";
-import {DeleteNode} from "./DeleteNode";
-import {GetMap} from "../Store/db/maps";
-import {Map} from "../Store/db/maps/@Map";
-import {CE} from "web-vcore/nm/js-vextensions";
-import {IsUserCreatorOrMod} from "../Store/db/users/$user";
-import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts";
+import {UserEdit} from "../CommandMacros.js";
+import {MergeDBUpdates, GetAsync, GetDocs, AssertV, Command} from "web-vcore/nm/mobx-graphlink.js";
+import {UserMapInfoSet} from "../Store/db/userMapInfo/@UserMapInfo.js";
+import {DeleteNode} from "./DeleteNode.js";
+import {GetMap} from "../Store/db/maps.js";
+import {Map} from "../Store/db/maps/@Map.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
+import {IsUserCreatorOrMod} from "../Store/db/users/$user.js";
+import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
 export class DeleteMap extends Command<{mapID: string}, {}> {

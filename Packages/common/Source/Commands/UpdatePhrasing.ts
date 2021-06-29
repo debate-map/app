@@ -1,10 +1,10 @@
-import {AddSchema, GetSchemaJSON, Schema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
-import {UserEdit} from "../CommandMacros";
-import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {MapNodePhrasing} from "../Store/db/nodePhrasings/@MapNodePhrasing";
-import {GetNodePhrasing} from "../Store/db/nodePhrasings";
-import {CE} from "web-vcore/nm/js-vextensions";
-import {AssertUserCanModify} from "./Helpers/SharedAsserts";
+import {AddSchema, GetSchemaJSON, Schema, AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros.js";
+import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {MapNodePhrasing} from "../Store/db/nodePhrasings/@MapNodePhrasing.js";
+import {GetNodePhrasing} from "../Store/db/nodePhrasings.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
+import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 type MainType = MapNodePhrasing;
 const MTName = "MapNodePhrasing";

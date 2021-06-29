@@ -1,14 +1,14 @@
-import {MergeDBUpdates, Command, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {AssertValidate, UUID, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
-import {OmitIfFalsy, Assert, E} from "web-vcore/nm/js-vextensions";
-import {UserEdit} from "../CommandMacros";
-import {AddChildNode} from "./AddChildNode";
-import {Map} from "../Store/db/maps/@Map";
-import {MapNode} from "../Store/db/nodes/@MapNode";
-import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
-import {MapType} from "../Store/db/maps/@Map";
-import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision";
-import {GetDefaultAccessPolicyID_ForNode} from "../Store/db/accessPolicies";
+import {MergeDBUpdates, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, UUID, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {OmitIfFalsy, Assert, E} from "web-vcore/nm/js-vextensions.js";
+import {UserEdit} from "../CommandMacros.js";
+import {AddChildNode} from "./AddChildNode.js";
+import {Map} from "../Store/db/maps/@Map.js";
+import {MapNode} from "../Store/db/nodes/@MapNode.js";
+import {MapNodeType} from "../Store/db/nodes/@MapNodeType.js";
+import {MapType} from "../Store/db/maps/@Map.js";
+import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision.js";
+import {GetDefaultAccessPolicyID_ForNode} from "../Store/db/accessPolicies.js";
 
 @UserEdit
 export class AddMap extends Command<{map: Map}, UUID> {

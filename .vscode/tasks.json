@@ -3,40 +3,40 @@
 	"tasks": [
 		{
 			"label": "#1 server.dev",
-			"type": "npm",
-			"script": "start server.dev",
+			"type": "shell",
+			"command": "yarn start server.dev",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
 		},
 		{
 			"label": "#2 server.trackDBShape",
-			"type": "npm",
-			"script": "start server.trackDBShape",
+			"type": "shell",
+			"command": "yarn start server.trackDBShape",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
 		},
 		{
 			"label": "#3 server.run",
-			"type": "npm",
-			"script": "start server.run",
+			"type": "shell",
+			"command": "yarn start server.run",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
 		},
 		{
 			"label": "## server.initDB",
-			"type": "npm",
-			"script": "start server.initDB",
+			"type": "shell",
+			"command": "yarn start server.initDB",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
 		},
 		{
 			"label": "## common.tsc (typecheck)",
-			"type": "npm",
-			"script": "start common.tsc",
+			"type": "shell",
+			"command": "yarn start common.tsc",
 			"problemMatcher": [
 				"$tsc-watch"
 			],

@@ -1,21 +1,21 @@
 import {useCallback} from "react";
 import {RootState, store} from "Store";
-import {zIndexes} from "Utils/UI/ZIndexes";
-import {rootPageDefaultChilds} from "Utils/URL/URLs";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
+import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 import {Link, Observer} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions";
-import {runInAction} from "web-vcore/nm/mobx";
-import {GetDocs} from "web-vcore/nm/mobx-graphlink";
-import {Div} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {colors} from "../../Utils/UI/GlobalStyles";
-import {ChatPanel} from "./NavBar/ChatPanel";
-import {GuidePanel} from "./NavBar/GuidePanel";
-import {NotificationsUI} from "./NavBar/NotificationsUI";
-import {ReputationPanel} from "./NavBar/ReputationPanel";
-import {SearchPanel} from "./NavBar/SearchPanel";
-import {StreamPanel} from "./NavBar/StreamPanel";
-import {UserPanel} from "./NavBar/UserPanel";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {runInAction} from "web-vcore/nm/mobx.js";
+import {GetDocs} from "web-vcore/nm/mobx-graphlink.js";
+import {Div} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {colors} from "../../Utils/UI/GlobalStyles.js";
+import {ChatPanel} from "./NavBar/ChatPanel.js";
+import {GuidePanel} from "./NavBar/GuidePanel.js";
+import {NotificationsUI} from "./NavBar/NotificationsUI.js";
+import {ReputationPanel} from "./NavBar/ReputationPanel.js";
+import {SearchPanel} from "./NavBar/SearchPanel.js";
+import {StreamPanel} from "./NavBar/StreamPanel.js";
+import {UserPanel} from "./NavBar/UserPanel.js";
 
 // main
 // ==========

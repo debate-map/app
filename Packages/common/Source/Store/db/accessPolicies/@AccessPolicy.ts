@@ -1,4 +1,4 @@
-import {AddSchema, MGLClass, DB, Field, UUID_regex} from "web-vcore/nm/mobx-graphlink";
+import {AddSchema, MGLClass, DB, Field, UUID_regex} from "web-vcore/nm/mobx-graphlink.js";
 
 @MGLClass()
 export class PermissionSet {

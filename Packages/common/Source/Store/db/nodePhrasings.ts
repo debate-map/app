@@ -1,6 +1,6 @@
-import {emptyArray} from "web-vcore/nm/js-vextensions";
-import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {MapNodePhrasing} from "./nodePhrasings/@MapNodePhrasing";
+import {emptyArray} from "web-vcore/nm/js-vextensions.js";
+import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {MapNodePhrasing} from "./nodePhrasings/@MapNodePhrasing.js";
 
 export const GetNodePhrasings = StoreAccessor(s=>(nodeID: string): MapNodePhrasing[]=>{
 	/* const entryMap = GetData({ collection: true }, 'nodePhrasings');

@@ -1,7 +1,7 @@
-import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions";
-import {MapNodePhrasing} from "./nodePhrasings/@MapNodePhrasing";
-import {MapNodeTag, TagComp, GetTagCompClassByTag, GetTagCompOfTag} from "./nodeTags/@MapNodeTag";
+import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions.js";
+import {MapNodePhrasing} from "./nodePhrasings/@MapNodePhrasing.js";
+import {MapNodeTag, TagComp, GetTagCompClassByTag, GetTagCompOfTag} from "./nodeTags/@MapNodeTag.js";
 
 // todo: add and use some sort of system where mobx-graphlink auto-reattaches data to their classes, based on AJV metadata
 export const GetNodeTags = StoreAccessor(s=>(nodeID: string): MapNodeTag[]=>{

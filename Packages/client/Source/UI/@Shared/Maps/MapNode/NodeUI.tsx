@@ -1,22 +1,22 @@
 import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNodeL3, MapNodeType, MeID, Polarity} from "dm_common";
 import React from "react";
-import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEditTimes";
+import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEditTimes.js";
 import {GetNodeChildrenL3_Advanced} from "Store/db_ext/nodes";
-import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
-import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder";
-import {NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox";
-import {logTypes} from "Utils/General/Logging";
-import {ES} from "Utils/UI/GlobalStyles";
+import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
+import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder.js";
+import {NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox.js";
+import {logTypes} from "Utils/General/Logging.js";
+import {ES} from "Utils/UI/GlobalStyles.js";
 import {EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog} from "web-vcore";
-import {Assert, AssertWarn, CreateStringEnum, E, emptyArray_forLoading, IsNaN, nl} from "web-vcore/nm/js-vextensions";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink";
-import {Column, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus, GetInnerComp, RenderSource, ShallowEquals, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
-import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker";
-import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker";
-import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer";
-import {NodeUI_Inner} from "./NodeUI_Inner";
-import {NodeUI_Menu_Stub} from "./NodeUI_Menu";
+import {Assert, AssertWarn, CreateStringEnum, E, emptyArray_forLoading, IsNaN, nl} from "web-vcore/nm/js-vextensions.js";
+import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, GetInnerComp, RenderSource, ShallowEquals, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {NodeChangesMarker} from "./NodeUI/NodeChangesMarker.js";
+import {NodeChildCountMarker} from "./NodeUI/NodeChildCountMarker.js";
+import {GetMeasurementInfoForNode} from "./NodeUI/NodeMeasurer.js";
+import {NodeUI_Inner} from "./NodeUI_Inner.js";
+import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 
 // @ExpensiveComponent
 @WarnOfTransientObjectProps

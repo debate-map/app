@@ -1,12 +1,12 @@
 import {AddShare, GetMap, GetShares, MeID, Share, ShareType, Timeline, UpdateShare} from "dm_common";
 import {store} from "Store";
-import {GetMapView} from "Store/main/maps/mapViews/$mapView";
-import {ExpandType, ScrollToType} from "Store/main/shareUI";
+import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
+import {ExpandType, ScrollToType} from "Store/main/shareUI.js";
 import {Observer, RunInAction_Set} from "web-vcore";
-import {CopyText, GetEntries, ToJSON, WaitXThenRun} from "web-vcore/nm/js-vextensions";
-import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {GetShareLongURL, GetShareShortURL} from "../ShareDropDown";
+import {CopyText, GetEntries, ToJSON, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {Button, CheckBox, Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {GetShareLongURL, GetShareShortURL} from "../ShareDropDown.js";
 
 @Observer
 export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeline: null as Timeline, justCopied_type: null as string}) {

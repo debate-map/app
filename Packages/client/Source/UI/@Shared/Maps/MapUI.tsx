@@ -1,24 +1,24 @@
-import {StandardCompProps} from "Utils/UI/General";
-import {DeepGet, E, SleepAsync, Timer, Vector2, FindDOMAll, Assert, FromJSON, ToJSON, VRect, GetTreeNodesInObjTree} from "web-vcore/nm/js-vextensions";
-import {Column, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentWithConnector, FindReact, GetDOM, BaseComponentPlus, BaseComponent} from "web-vcore/nm/react-vextensions";
-import {VMenuStub, VMenuItem} from "web-vcore/nm/react-vmenu";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
+import {StandardCompProps} from "Utils/UI/General.js";
+import {DeepGet, E, SleepAsync, Timer, Vector2, FindDOMAll, Assert, FromJSON, ToJSON, VRect, GetTreeNodesInObjTree} from "web-vcore/nm/js-vextensions.js";
+import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentWithConnector, FindReact, GetDOM, BaseComponentPlus, BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {VMenuStub, VMenuItem} from "web-vcore/nm/react-vmenu.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {GetDistanceBetweenRectAndPoint, inFirefox, GetScreenRect, StoreAction, Observer} from "web-vcore";
-import {GADDemo} from "UI/@GAD/GAD";
+import {GADDemo} from "UI/@GAD/GAD.js";
 import {store} from "Store";
-import {GetNodeView, GetMapView, GetSelectedNodePath, GetViewOffset, GetFocusedNodePath, GetNodeViewsAlongPath, ACTMapNodeSelect} from "Store/main/maps/mapViews/$mapView";
-import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState";
+import {GetNodeView, GetMapView, GetSelectedNodePath, GetViewOffset, GetFocusedNodePath, GetNodeViewsAlongPath, ACTMapNodeSelect} from "Store/main/maps/mapViews/$mapView.js";
+import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {GetOpenMapID} from "Store/main";
-import {TimelineIntroBox} from "UI/@Shared/Timelines/TimelineIntroBox";
+import {TimelineIntroBox} from "UI/@Shared/Timelines/TimelineIntroBox.js";
 import {MapNodeL3, GetUserAccessLevel, MeID, IsNodeL2, IsNodeL3, GetNodeL3, IsPremiseOfSinglePremiseArgument, GetParentPath, GetParentNodeL3, Map} from "dm_common";
-import {styles, ES} from "../../../Utils/UI/GlobalStyles";
-import {NodeUI} from "./MapNode/NodeUI";
-import {NodeUI_ForBots} from "./MapNode/NodeUI_ForBots";
-import {NodeUI_Inner} from "./MapNode/NodeUI_Inner";
-import {ActionBar_Left} from "./MapUI/ActionBar_Left";
-import {ActionBar_Right} from "./MapUI/ActionBar_Right";
-import {ExpandableBox} from "./MapNode/ExpandableBox";
+import {styles, ES} from "../../../Utils/UI/GlobalStyles.js";
+import {NodeUI} from "./MapNode/NodeUI.js";
+import {NodeUI_ForBots} from "./MapNode/NodeUI_ForBots.js";
+import {NodeUI_Inner} from "./MapNode/NodeUI_Inner.js";
+import {ActionBar_Left} from "./MapUI/ActionBar_Left.js";
+import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
+import {ExpandableBox} from "./MapNode/ExpandableBox.js";
 
 
 export function GetNodeBoxForPath(path: string) {

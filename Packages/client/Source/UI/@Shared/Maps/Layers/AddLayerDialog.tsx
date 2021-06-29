@@ -1,9 +1,9 @@
-// import {Column, Row} from "web-vcore/nm/react-vcomponents";
-// import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+// import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
+// import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 // import {Layer} from "dm_common";
 // import {MeID} from "dm_common";
 // import {AddLayer} from "dm_common";
-// import {LayerDetailsUI} from "../LayerDetailsUI";
+// import {LayerDetailsUI} from "../LayerDetailsUI.js";
 
 // export function ShowAddLayerDialog(userID: string) {
 // 	let newLayer = new Layer({

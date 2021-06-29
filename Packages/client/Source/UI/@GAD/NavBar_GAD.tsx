@@ -1,19 +1,19 @@
-import {DeepGet, E, emptyArray} from "web-vcore/nm/js-vextensions";
+import {DeepGet, E, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {dbVersion} from "Main";
-import {runInAction} from "web-vcore/nm/mobx";
-import {Button, Div, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {runInAction} from "web-vcore/nm/mobx.js";
+import {Button, Div, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {RootState, store} from "Store";
-import {NotificationsUI} from "UI/@Shared/NavBar/NotificationsUI";
-import {SearchPanel} from "UI/@Shared/NavBar/SearchPanel";
-import {UserPanel} from "UI/@Shared/NavBar/UserPanel";
+import {NotificationsUI} from "UI/@Shared/NavBar/NotificationsUI.js";
+import {SearchPanel} from "UI/@Shared/NavBar/SearchPanel.js";
+import {UserPanel} from "UI/@Shared/NavBar/UserPanel.js";
 import {Observer, Link, HSL} from "web-vcore";
-import {GetDocs} from "web-vcore/nm/mobx-graphlink";
-import {zIndexes} from "Utils/UI/ZIndexes";
-import {rootPageDefaultChilds} from "Utils/URL/URLs";
-import {colors} from "../../Utils/UI/GlobalStyles";
-import {GADHeaderFont, GADDemo_2020} from "./GAD";
+import {GetDocs} from "web-vcore/nm/mobx-graphlink.js";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
+import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
+import {colors} from "../../Utils/UI/GlobalStyles.js";
+import {GADHeaderFont, GADDemo_2020} from "./GAD.js";
 
 // main
 // ==========

@@ -1,8 +1,8 @@
-import {Command} from "web-vcore/nm/mobx-graphlink";
-import {UserEdit} from "../CommandMacros";
-import {GetNodePhrasing} from "../Store/db/nodePhrasings";
-import {MapNodePhrasing} from "../Store/db/nodePhrasings/@MapNodePhrasing";
-import {AssertUserCanDelete} from "./Helpers/SharedAsserts";
+import {Command} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros.js";
+import {GetNodePhrasing} from "../Store/db/nodePhrasings.js";
+import {MapNodePhrasing} from "../Store/db/nodePhrasings/@MapNodePhrasing.js";
+import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
 export class DeletePhrasing extends Command<{id: string}, {}> {

@@ -1,16 +1,16 @@
-import {emptyArray, emptyArray_forLoading, IsNaN, CE, Assert, A, CreateStringEnum} from "web-vcore/nm/js-vextensions";
-import {GetDoc, SlicePath, SplitStringBySlash_Cached, StoreAccessor, UUID} from "web-vcore/nm/mobx-graphlink";
-import {GetNodeChildLinks} from "./nodeChildLinks";
-import {GetNodeRevisionsByTitle} from "./nodeRevisions";
-import {AsNodeL1, GetNodeL2, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "./nodes/$node";
-import {globalRootNodeID, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./nodes/@MapNode";
-import {TitleKey} from "./nodes/@MapNodeRevision";
-import {MapNodeType, MapNodeType_Info} from "./nodes/@MapNodeType";
-import {GetFinalTagCompsForTag, GetNodeTagComps, GetNodeTags} from "./nodeTags";
-import {TagComp_MirrorChildrenFromXToY, TagComp_RestrictMirroringOfX, TagComp_XIsExtendedByY} from "./nodeTags/@MapNodeTag";
-import {MeID} from "./users";
-import {CanGetBasicPermissions, GetUserAccessLevel, HasAdminPermissions, IsUserCreatorOrMod} from "./users/$user";
-import {PermissionGroupSet} from "./users/@User";
+import {emptyArray, emptyArray_forLoading, IsNaN, CE, Assert, A, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {GetDoc, SlicePath, SplitStringBySlash_Cached, StoreAccessor, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {GetNodeChildLinks} from "./nodeChildLinks.js";
+import {GetNodeRevisionsByTitle} from "./nodeRevisions.js";
+import {AsNodeL1, GetNodeL2, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "./nodes/$node.js";
+import {globalRootNodeID, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./nodes/@MapNode.js";
+import {TitleKey} from "./nodes/@MapNodeRevision.js";
+import {MapNodeType, MapNodeType_Info} from "./nodes/@MapNodeType.js";
+import {GetFinalTagCompsForTag, GetNodeTagComps, GetNodeTags} from "./nodeTags.js";
+import {TagComp_MirrorChildrenFromXToY, TagComp_RestrictMirroringOfX, TagComp_XIsExtendedByY} from "./nodeTags/@MapNodeTag.js";
+import {MeID} from "./users.js";
+import {CanGetBasicPermissions, GetUserAccessLevel, HasAdminPermissions, IsUserCreatorOrMod} from "./users/$user.js";
+import {PermissionGroupSet} from "./users/@User.js";
 
 export enum HolderType {
 	truth = "truth",

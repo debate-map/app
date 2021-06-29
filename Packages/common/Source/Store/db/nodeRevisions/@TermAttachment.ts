@@ -1,5 +1,5 @@
-import {AddSchema} from "web-vcore/nm/mobx-graphlink";
-import {CE} from "web-vcore/nm/js-vextensions";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
 
 export class TermAttachment {
 	constructor(initialData?: Partial<TermAttachment>) {

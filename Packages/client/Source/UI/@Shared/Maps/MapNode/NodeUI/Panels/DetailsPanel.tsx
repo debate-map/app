@@ -1,12 +1,12 @@
-import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
+import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {GetUpdates} from "web-vcore";
 import {store} from "Store";
-import {runInAction} from "web-vcore/nm/mobx";
-import {E, ToJSON, Clone} from "web-vcore/nm/js-vextensions";
-import {GetAsync} from "web-vcore/nm/mobx-graphlink";
+import {runInAction} from "web-vcore/nm/mobx.js";
+import {E, ToJSON, Clone} from "web-vcore/nm/js-vextensions.js";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import _ from "lodash";
-import {NodeDetailsUI} from "../../NodeDetailsUI";
+import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 import {MapNodeL3} from "dm_common";
 import {GetParentNodeL3, GetParentNodeID} from "dm_common";
 import {GetLinkUnderParent, IsPremiseOfSinglePremiseArgument} from "dm_common";

@@ -1,14 +1,14 @@
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {VMenuItem} from "web-vcore/nm/react-vmenu";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {styles} from "Utils/UI/GlobalStyles";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions";
+import {E} from "web-vcore/nm/js-vextensions.js";
 import {IsUserCreatorOrMod} from "dm_common";
 import {MeID} from "dm_common";
 import {GetNodeDisplayText} from "dm_common";
 import {DeleteNode} from "dm_common";
-import {MI_SharedProps} from "../NodeUI_Menu";
+import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
 export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {

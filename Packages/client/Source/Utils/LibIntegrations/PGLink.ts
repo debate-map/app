@@ -1,8 +1,8 @@
-import {ApolloClient, ApolloLink, from, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client";
-import {WebSocketLink} from "web-vcore/nm/@apollo/client_deep";
-import {getMainDefinition} from "web-vcore/nm/@apollo/client_deep";
-import {onError} from "web-vcore/nm/@apollo/client_deep";
-import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink";
+import {ApolloClient, ApolloLink, from, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
+import {WebSocketLink} from "web-vcore/nm/@apollo/client_deep.js";
+import {getMainDefinition} from "web-vcore/nm/@apollo/client_deep.js";
+import {onError} from "web-vcore/nm/@apollo/client_deep.js";
+import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
 
 const GRAPHQL_URL = "http://localhost:3105/graphql";
 

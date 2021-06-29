@@ -1,10 +1,10 @@
-// import {Clone, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
+// import {Clone, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
 // import Moment from "web-vcore/nm/moment";
-// import {Column, Pre, RowLR, Select, TextArea, TextInput, Row} from "web-vcore/nm/react-vcomponents";
-// import {BaseComponentWithConnector, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-// import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-// import {ES} from "Utils/UI/GlobalStyles";
-// import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
+// import {Column, Pre, RowLR, Select, TextArea, TextInput, Row} from "web-vcore/nm/react-vcomponents.js";
+// import {BaseComponentWithConnector, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+// import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+// import {ES} from "Utils/UI/GlobalStyles.js";
+// import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
 // import {MapNodePhrasing, MapNodePhrasingType, AddPhrasing} from "dm_common";
 
 // export class PhrasingDetailsUI extends BaseComponentPlus(

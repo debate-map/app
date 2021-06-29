@@ -1,4 +1,4 @@
-import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink";
+import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
 
 // todo
 type PermissionSet = any;

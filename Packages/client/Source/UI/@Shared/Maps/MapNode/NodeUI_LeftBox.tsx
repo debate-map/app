@@ -1,9 +1,9 @@
 import chroma from "chroma-js";
-import {E} from "web-vcore/nm/js-vextensions";
-import {Button, Span} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {GetNodeView} from "Store/main/maps/mapViews/$mapView";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {Button, Span} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
+import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Observer} from "web-vcore";
 import {MapNodeL3, ClaimForm} from "dm_common";
 import {GetNodeForm, IsPremiseOfSinglePremiseArgument, GetRatingTypesForNode} from "dm_common";

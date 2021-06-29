@@ -1,6 +1,6 @@
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {O} from "web-vcore";
-import {CreateStringEnum} from "web-vcore/nm/js-vextensions";
+import {CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
 
 export enum ShareTab {
 	allMaps = "allMaps",

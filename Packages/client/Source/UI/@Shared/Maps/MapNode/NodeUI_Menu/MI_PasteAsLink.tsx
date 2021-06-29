@@ -1,10 +1,10 @@
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
-import {VMenuItem} from "web-vcore/nm/react-vmenu";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {styles} from "Utils/UI/GlobalStyles";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer} from "web-vcore";
-import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
-import {runInAction} from "web-vcore/nm/mobx";
+import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
+import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "Store";
 import {GetParentNodeL3, GetParentNodeID} from "dm_common";
 import {MapNodeType} from "dm_common";
@@ -12,7 +12,7 @@ import {ClaimForm} from "dm_common";
 import {GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText} from "dm_common";
 import {MeID} from "dm_common";
 import {LinkNode_HighLevel} from "dm_common";
-import {MI_SharedProps} from "../NodeUI_Menu";
+import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
 export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {

@@ -1,12 +1,12 @@
-import {Assert, E} from "web-vcore/nm/js-vextensions";
-import {runInAction} from "web-vcore/nm/mobx";
-import {Button, Column, Div, Pre, Row, Span, Text} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
+import {Assert, E} from "web-vcore/nm/js-vextensions.js";
+import {runInAction} from "web-vcore/nm/mobx.js";
+import {Button, Column, Div, Pre, Row, Span, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
 import {GetSelectedTerm} from "Store/main/database";
-import {ES} from "Utils/UI/GlobalStyles";
+import {ES} from "Utils/UI/GlobalStyles.js";
 import {GetUpdates, Observer} from "web-vcore";
 import {Term, TermType} from "dm_common";
 import {MeID} from "dm_common";
@@ -14,8 +14,8 @@ import {GetTerms, GetFullNameP} from "dm_common";
 import {GetUserPermissionGroups, IsUserCreatorOrMod, CanGetBasicPermissions} from "dm_common";
 import {UpdateTerm} from "dm_common";
 import {DeleteTerm} from "dm_common";
-import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI";
-import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel";
+import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI.js";
+import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 
 @Observer
 export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_newData: Term, selectedTerm_newDataError: string}) {

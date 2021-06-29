@@ -1,12 +1,11 @@
-import {MapEdit} from "../CommandMacros";
-import {Assert, E, CE} from "web-vcore/nm/js-vextensions";
-import {GetAsync, Command, AssertV, dbp} from "web-vcore/nm/mobx-graphlink";
-import {UserEdit} from "../CommandMacros";
-import {LinkNode_HighLevel} from "./LinkNode_HighLevel";
-import {ClaimForm, Polarity, MapNode} from "../Store/db/nodes/@MapNode";
-import {GetNode} from "../Store/db/nodes";
-import {MapNodeType} from "../Store/db/nodes/@MapNodeType";
-import {GetNodeChildLinks} from "../Store/db/nodeChildLinks";
+import {MapEdit} from "../CommandMacros.js";
+import {Assert, E, CE} from "web-vcore/nm/js-vextensions.js";
+import {GetAsync, Command, AssertV, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros.js";
+import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
+import {ClaimForm, Polarity, MapNode} from "../Store/db/nodes/@MapNode.js";
+import {GetNode} from "../Store/db/nodes.js";
+import {GetNodeChildLinks} from "../Store/db/nodeChildLinks.js";
 
 @MapEdit
 @UserEdit

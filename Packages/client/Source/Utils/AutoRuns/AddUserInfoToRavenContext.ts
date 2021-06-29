@@ -1,7 +1,7 @@
-import {autorun} from "web-vcore/nm/mobx";
+import {autorun} from "web-vcore/nm/mobx.js";
 import {GetOpenMapID} from "Store/main";
-import {GetMapView} from "Store/main/maps/mapViews/$mapView";
-import {Clone} from "web-vcore/nm/js-vextensions";
+import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
+import {Clone} from "web-vcore/nm/js-vextensions.js";
 import Raven from "web-vcore/nm/raven-js";
 import {Me} from "dm_common";
 

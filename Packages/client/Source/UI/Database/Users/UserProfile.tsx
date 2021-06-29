@@ -1,13 +1,13 @@
-import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select, ColorPickerBox, Text} from "web-vcore/nm/react-vcomponents";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds";
+import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select, ColorPickerBox, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds.js";
 import {PageContainer, Observer} from "web-vcore";
-import {styles, ES} from "Utils/UI/GlobalStyles";
+import {styles, ES} from "Utils/UI/GlobalStyles.js";
 import {Fragment} from "react";
-import {PropNameToTitle} from "Utils/General/Others";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
-import {E} from "web-vcore/nm/js-vextensions";
+import {PropNameToTitle} from "Utils/General/Others.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {E} from "web-vcore/nm/js-vextensions.js";
 import {MeID, GetUser,GetUser_Private,GetUserPermissionGroups,SetUserData,SetUserData_Private,User} from "dm_common";
 
 

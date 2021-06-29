@@ -1,10 +1,10 @@
-import {DN, Range, Vector2} from "web-vcore/nm/js-vextensions";
-import {Pre, Select, Spinner} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, RenderSource, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {DN, Range, Vector2} from "web-vcore/nm/js-vextensions.js";
+import {Pre, Select, Spinner} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, RenderSource, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
-import {GetRatingUISmoothing} from "Store/main/ratingUI";
-import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink";
+import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
+import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Observer} from "web-vcore";
 import {MapNodeL3} from "dm_common";
 import {NodeRatingType, GetRatingTypeInfo} from "dm_common";
@@ -15,8 +15,8 @@ import {GetNodeChildren} from "dm_common";
 import {ShouldRatingTypeBeReversed, TransformRatingForContext} from "dm_common";
 import {GetMapNodeTypeDisplayName} from "dm_common";
 import {SetNodeRating} from "dm_common";
-import {ShowSignInPopup} from "../../../../NavBar/UserPanel";
-import {MarkHandled} from "Utils/UI/General";
+import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
+import {MarkHandled} from "Utils/UI/General.js";
 
 /*let sampleData = [
 	{rating: 0, count: 0},

@@ -1,14 +1,14 @@
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {VMenuItem} from "web-vcore/nm/react-vmenu";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {styles} from "Utils/UI/GlobalStyles";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer} from "web-vcore";
 import {IsUserCreatorOrMod} from "dm_common";
 import {MeID} from "dm_common";
 import {GetParentNodeL3} from "dm_common";
 import {GetNodeDisplayText} from "dm_common";
 import {UnlinkNode} from "dm_common";
-import {MI_SharedProps} from "../NodeUI_Menu";
+import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
 export class MI_UnlinkNode extends BaseComponentPlus({} as MI_SharedProps, {}) {

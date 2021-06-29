@@ -1,9 +1,8 @@
-import {Column, Switch} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {ProposalsUI} from "UI/Feedback/ProposalsUI";
+import {Column, Switch} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {ProposalsUI} from "UI/Feedback/ProposalsUI.js";
 import {store} from "Store";
-import {PageContainer, VReactMarkdown} from "web-vcore/Source";
-import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar";
+import {SubNavBar, SubNavBarButton} from "./@Shared/SubNavBar.js";
 
 export class FeedbackUI extends BaseComponentPlus({} as {}, {}) {
 	render() {

@@ -1,9 +1,9 @@
-import {Assert, AwaitTree, SleepAsync, E, IsObject} from "web-vcore/nm/js-vextensions";
+import {Assert, AwaitTree, SleepAsync, E, IsObject} from "web-vcore/nm/js-vextensions.js";
 import {dbVersion} from "Main";
-import {ConvertDataToValidDBUpdates, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached, ApplyDBUpdates} from "web-vcore/nm/mobx-graphlink";
-import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {ConvertDataToValidDBUpdates, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached, ApplyDBUpdates} from "web-vcore/nm/mobx-graphlink.js";
+import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {PageContainer, Observer} from "web-vcore";
 import {HasAdminPermissions, MeID, GraphDBShape} from "dm_common";
 

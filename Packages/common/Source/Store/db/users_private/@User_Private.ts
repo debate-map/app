@@ -1,4 +1,4 @@
-import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink";
+import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 
 // temp replaced
 // import {UserInfo as ProviderData} from "firebase";

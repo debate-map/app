@@ -1,15 +1,15 @@
-// import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents";
-// import {BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-// import {ScrollView} from "web-vcore/nm/react-vscrollview";
-// import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
-// import {ShowAddTimelineDialog} from "UI/@Shared/Timelines/AddTimelineDialog";
-// import {GetSelectedTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState";
+// import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
+// import {BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+// import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+// import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
+// import {ShowAddTimelineDialog} from "UI/@Shared/Timelines/AddTimelineDialog.js";
+// import {GetSelectedTimeline, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 // import {store} from "Store";
 // import {Observer} from "web-vcore";
-// import {runInAction} from "web-vcore/nm/mobx";
-// import {E} from "web-vcore/nm/js-vextensions";
+// import {runInAction} from "web-vcore/nm/mobx.js";
+// import {E} from "web-vcore/nm/js-vextensions.js";
 // import {GetMapTimelines, DeleteTimeline, MeID, Map} from "dm_common";
-// import {ES} from "Utils/UI/GlobalStyles";
+// import {ES} from "Utils/UI/GlobalStyles.js";
 
 // @Observer
 // export class CollectionSubpanel extends BaseComponentPlus({} as {map: Map}, {}) {

@@ -1,16 +1,16 @@
 import Moment from "web-vcore/nm/moment";
-import {Button, Column, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
-import {ES} from "Utils/UI/GlobalStyles";
-import {UUIDStub} from "UI/@Shared/UUIDStub";
+import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {ES} from "Utils/UI/GlobalStyles.js";
+import {UUIDStub} from "UI/@Shared/UUIDStub.js";
 import {Observer} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions";
+import {E} from "web-vcore/nm/js-vextensions.js";
 import {Map, MapNodeL3, GetUser, MapNodeRevision, GetParentNodeL3, GetLinkUnderParent, GetNodeRevisions} from "dm_common";
 
 
-import {NodeDetailsUI} from "../../NodeDetailsUI";
+import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 export const columnWidths = [0.15, 0.3, 0.35, 0.2];
 

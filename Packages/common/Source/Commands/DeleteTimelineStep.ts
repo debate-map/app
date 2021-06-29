@@ -1,10 +1,10 @@
-/*import {CE} from "web-vcore/nm/js-vextensions";
-import {AV, Command} from "web-vcore/nm/mobx-graphlink";
-import {UserEdit} from "../CommandMacros";
-import {GetTimeline} from "../Store/db/timelines";
-import {GetTimelineStep} from "../Store/db/timelineSteps";
-import {TimelineStep} from "../Store/db/timelineSteps/@TimelineStep";
-import {AssertUserCanDelete} from "./Helpers/SharedAsserts";
+/*import {CE} from "web-vcore/nm/js-vextensions.js";
+import {AV, Command} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros.js";
+import {GetTimeline} from "../Store/db/timelines.js";
+import {GetTimelineStep} from "../Store/db/timelineSteps.js";
+import {TimelineStep} from "../Store/db/timelineSteps/@TimelineStep.js";
+import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
 export class DeleteTimelineStep extends Command<{stepID: string}, {}> {

@@ -1,5 +1,5 @@
-import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink";
-import {User} from "./users/@User";
+import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {User} from "./users/@User.js";
 
 /*export function GetAuth(state: RootState) {
 	return state.firebase.auth;

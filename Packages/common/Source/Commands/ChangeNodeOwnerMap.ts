@@ -1,14 +1,14 @@
-import {GetAsync, Command, AssertV, MergeDBUpdates, AV} from "web-vcore/nm/mobx-graphlink";
-import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink";
-import {E, OMIT, DEL, IsSpecialEmptyArray, CE} from "web-vcore/nm/js-vextensions";
-import {UserEdit} from "../CommandMacros";
-import {MapNode} from "../Store/db/nodes/@MapNode";
-import {GetNode, GetNodesByIDs, GetNodeChildren} from "../Store/db/nodes";
-import {IsUserCreatorOrMod} from "../Store/db/users/$user";
-import {GetMap} from "../Store/db/maps";
-import {MapType} from "../Store/db/maps/@Map";
-import {GetNodeRevision} from "../Store/db/nodeRevisions";
-import {PermissionInfoType} from "../Store/db/nodes/@MapNodeRevision";
+import {GetAsync, Command, AssertV, MergeDBUpdates, AV} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
+import {E, OMIT, DEL, IsSpecialEmptyArray, CE} from "web-vcore/nm/js-vextensions.js";
+import {UserEdit} from "../CommandMacros.js";
+import {MapNode} from "../Store/db/nodes/@MapNode.js";
+import {GetNode, GetNodesByIDs, GetNodeChildren} from "../Store/db/nodes.js";
+import {IsUserCreatorOrMod} from "../Store/db/users/$user.js";
+import {GetMap} from "../Store/db/maps.js";
+import {MapType} from "../Store/db/maps/@Map.js";
+import {GetNodeRevision} from "../Store/db/nodeRevisions.js";
+import {PermissionInfoType} from "../Store/db/nodes/@MapNodeRevision.js";
 
 AddSchema("ChangeNodeOwnerMap_payload", {
 	properties: {

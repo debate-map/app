@@ -1,4 +1,4 @@
-import {MapNodeTag} from "./@MapNodeTag";
+import {MapNodeTag} from "./@MapNodeTag.js";
 
 /*export const tagNodeSlotNames = ["x", "y"];
 export function GetNodeTagNodeSlots(tag: MapNodeTag) {

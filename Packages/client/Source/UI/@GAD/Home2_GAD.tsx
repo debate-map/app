@@ -1,9 +1,9 @@
-import {E} from "web-vcore/nm/js-vextensions";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown, PageContainer} from "web-vcore";
-import {Row} from "web-vcore/nm/react-vcomponents";
+import {Row} from "web-vcore/nm/react-vcomponents.js";
 import {useEffect} from "react";
-import {styles} from "../../Utils/UI/GlobalStyles";
+import {styles} from "../../Utils/UI/GlobalStyles.js";
 
 const pageText = `
 The Great American Debate is committed to scaling up societal communications, so we can debate nation-wide, and literally see all available positions to take on a given issue.

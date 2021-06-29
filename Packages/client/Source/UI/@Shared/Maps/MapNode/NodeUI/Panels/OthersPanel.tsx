@@ -1,28 +1,13 @@
-import {GetEntries, E, OmitIfFalsy} from "web-vcore/nm/js-vextensions";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAttachmentType, GetNodeChildLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MeID, ReverseArgumentPolarity, UpdateLink} from "dm_common";
 import {Fragment} from "react";
-import {Button, CheckBox, Column, Div, Pre, Row, Select, Text} from "web-vcore/nm/react-vcomponents";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI";
-import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub";
-import {ES} from "Utils/UI/GlobalStyles";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink";
-import {Map, ChildOrderType} from "dm_common";
-import {Observer, InfoButton, Icon} from "web-vcore";
-import {MapNodeL3, ClaimForm} from "dm_common";
-import {AttachmentType, GetAttachmentType} from "dm_common";
-import {MeID} from "dm_common";
-import {GetUserPermissionGroups, IsUserCreatorOrMod} from "dm_common";
-import {GetParentNodeL3, GetNodeMirrorChildren, GetParentNodeID} from "dm_common";
-import {MapNodeType} from "dm_common";
-import {CanConvertFromClaimTypeXToY, ChangeClaimType} from "dm_common";
-import {ArgumentType} from "dm_common";
-import {IsSinglePremiseArgument, GetNodeDisplayText, GetNodeL3, GetNodeForm} from "dm_common";
-import {ChangeNodeOwnerMap} from "dm_common";
-import {ReverseArgumentPolarity} from "dm_common";
-import {UpdateLink} from "dm_common";
-import {UpdateNodeChildrenOrder} from "dm_common";
-import {GetNodeChildLinks} from "dm_common/Source/Store/db/nodeChildLinks";
+import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
+import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
+import {Observer} from "web-vcore";
+import {E, GetEntries} from "web-vcore/nm/js-vextensions.js";
+import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import {Button, CheckBox, Column, Pre, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 
 @Observer
 export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType}) {

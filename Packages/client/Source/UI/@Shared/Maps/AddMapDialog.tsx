@@ -1,10 +1,10 @@
-import {OMIT} from "web-vcore/nm/js-vextensions";
-import {Column, Row} from "web-vcore/nm/react-vcomponents";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {OMIT} from "web-vcore/nm/js-vextensions.js";
+import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {MapType, Map} from "dm_common";
 import {MeID} from "dm_common";
 import {AddMap} from "dm_common";
-import {MapDetailsUI} from "./MapDetailsUI";
+import {MapDetailsUI} from "./MapDetailsUI.js";
 
 export function ShowAddMapDialog(userID: string) {
 	const type = MapType.public as MapType; // hard-coded for now

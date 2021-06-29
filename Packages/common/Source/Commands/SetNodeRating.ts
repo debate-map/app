@@ -1,8 +1,8 @@
-import {AddSchema, AssertValidate, Command, GenerateUUID, Assert, AssertV} from "web-vcore/nm/mobx-graphlink";
-import {emptyArray_forLoading} from "web-vcore/nm/js-vextensions";
-import {NodeRatingType} from "../Store/db/nodeRatings/@NodeRatingType";
-import {NodeRating} from "../Store/db/nodeRatings/@NodeRating";
-import {GetRatings} from "../Store/db/nodeRatings";
+import {AddSchema, AssertValidate, Command, GenerateUUID, Assert, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
+import {NodeRatingType} from "../Store/db/nodeRatings/@NodeRatingType.js";
+import {NodeRating} from "../Store/db/nodeRatings/@NodeRating.js";
+import {GetRatings} from "../Store/db/nodeRatings.js";
 
 export class SetNodeRating extends Command<{nodeID: string, ratingType: Exclude<NodeRatingType, "impact">, value: number}, {}> {
 	oldRating: NodeRating;

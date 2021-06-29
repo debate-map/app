@@ -1,6 +1,6 @@
 import chroma from "chroma-js";
-import {emptyArray_forLoading} from "web-vcore/nm/js-vextensions";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink";
+import {emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
+import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {MapNodeL3, MapNodeType, Polarity, GetNodeChildrenL2, GetNodeL3, GetUserAccessLevel, MeID, GetNode, GetNodeRevisions, MapNodeRevision} from "dm_common";
 
 export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "background"): chroma.Color {

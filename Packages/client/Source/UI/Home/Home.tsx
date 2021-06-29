@@ -1,6 +1,6 @@
 import React from "react";
 import {Link, PageContainer, List, P} from "web-vcore";
-import {BaseComponent} from "web-vcore/nm/react-vextensions";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 
 const red = "rgba(255,0,0,.7)";
 const orange = "rgba(255,128,0,.7)";

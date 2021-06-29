@@ -1,9 +1,9 @@
 import {GetUsers} from "dm_common";
-import {E} from "web-vcore/nm/js-vextensions";
-import {Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {ScrollView} from "web-vcore/nm/react-vscrollview";
-import {ES} from "Utils/UI/GlobalStyles";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
+import {ES} from "Utils/UI/GlobalStyles.js";
 import {Observer} from "web-vcore";
 
 @Observer

@@ -1,9 +1,9 @@
-import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, RowLR, Spinner} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {GADDemo} from "UI/@GAD/GAD";
-import {Button_GAD} from "UI/@GAD/GADButton";
+import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row, RowLR, Spinner} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {GADDemo} from "UI/@GAD/GAD.js";
+import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {store} from "Store";
-import {runInAction} from "web-vcore/nm/mobx";
+import {runInAction} from "web-vcore/nm/mobx.js";
 import {Observer} from "web-vcore";
 import {ACTEnsureMapStateInit} from "Store/main/maps";
 import {Map} from "dm_common";

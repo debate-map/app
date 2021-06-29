@@ -1,5 +1,5 @@
 import {O} from "web-vcore";
-import {ignore} from "web-vcore/nm/mobx-sync";
+import {ignore} from "web-vcore/nm/mobx-sync.js";
 
 export class TimelinesState {
 	@O nodeRevealHighlightTime = 20;

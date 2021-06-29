@@ -1,11 +1,11 @@
-import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-import {Button, Column, Row, TextInput, Select, Text, Pre} from "web-vcore/nm/react-vcomponents";
-import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWithPrototypes} from "web-vcore/nm/js-vextensions";
-import {ES} from "Utils/UI/GlobalStyles";
+import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {Button, Column, Row, TextInput, Select, Text, Pre} from "web-vcore/nm/react-vcomponents.js";
+import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
+import {ES} from "Utils/UI/GlobalStyles.js";
 import {Fragment} from "react";
-import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern} from "dm_common";
-import {Validate} from "web-vcore/nm/mobx-graphlink";
+import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {VDateTime} from "web-vcore";
 import Moment from "web-vcore/nm/moment";
 

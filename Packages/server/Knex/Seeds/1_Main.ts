@@ -1,7 +1,7 @@
 import {MapNode, MapNodeRevision, Map, MapType} from "dm_common";
 import {Knex} from "knex";
-import {CE} from "web-vcore/nm/js-vextensions";
-import {GenerateUUID} from "web-vcore/nm/mobx-graphlink";
+import {CE} from "web-vcore/nm/js-vextensions.js";
+import {GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 
 // use literal, instead of importing from dm_common (avoids ts-node issues with import-tree)
 const globalMapID = "GLOBAL_MAP_00000000001";

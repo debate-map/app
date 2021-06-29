@@ -1,10 +1,10 @@
-import {configure, onReactionError} from "web-vcore/nm/mobx";
+import {configure, onReactionError} from "web-vcore/nm/mobx.js";
 import {O, HandleError, ConfigureMobX} from "web-vcore";
-import {ignore} from "web-vcore/nm/mobx-sync";
-import {Graphlink} from "web-vcore/nm/mobx-graphlink";
-import {immerable, setUseProxies, setAutoFreeze} from "web-vcore/nm/immer";
-import {MainState} from "./main";
-import {GraphDBShape} from "dm_common/Source/Store/db";
+import {ignore} from "web-vcore/nm/mobx-sync.js";
+import {Graphlink} from "web-vcore/nm/mobx-graphlink.js";
+import {immerable, setUseProxies, setAutoFreeze} from "web-vcore/nm/immer.js";
+import {MainState} from "./main.js";
+import {GraphDBShape} from "dm_common/Source/Store/db.js";
 
 //ConfigureMobX();
 

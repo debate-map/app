@@ -1,6 +1,6 @@
-import {AssertValidate, Command, GenerateUUID} from "web-vcore/nm/mobx-graphlink";
-import {Share} from "../Store";
-import {UserEdit} from "../CommandMacros";
+import {AssertValidate, Command, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {Share} from "../Store.js";
+import {UserEdit} from "../CommandMacros.js";
 
 /*
 ID-generation schemes

@@ -1,11 +1,11 @@
-import {GetAsync, Command, AssertV, Schema, AV} from "web-vcore/nm/mobx-graphlink";
-import {AddSchema, AssertValidate, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink";
-import {UserEdit} from "../CommandMacros";
-import {GetNode} from "../Store/db/nodes";
-import {GetLinkUnderParent} from "../Store/db/nodes/$node";
-import {CE} from "web-vcore/nm/js-vextensions";
-import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink";
-import {GetNodeChildLink} from "../Store/db/nodeChildLinks";
+import {GetAsync, Command, AssertV, Schema, AV} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink.js";
+import {UserEdit} from "../CommandMacros.js";
+import {GetNode} from "../Store/db/nodes.js";
+import {GetLinkUnderParent} from "../Store/db/nodes/$node.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
+import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
+import {GetNodeChildLink} from "../Store/db/nodeChildLinks.js";
 
 AddSchema("UpdateLink_payload", ["ChildEntry"], ()=>({
 	properties: {

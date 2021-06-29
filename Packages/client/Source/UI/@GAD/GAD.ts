@@ -1,4 +1,4 @@
-import {Timer} from "web-vcore/nm/js-vextensions";
+import {Timer} from "web-vcore/nm/js-vextensions.js";
 
 export const GADDemo = startURL.domain == "demo.greatamericandebate.org" || (startURL.GetQueryVar("extra") == "gad" || startURL.GetQueryVar("extra") == "2020");
 export const GADDemo_2020 = startURL.GetQueryVar("extra") == "2020";

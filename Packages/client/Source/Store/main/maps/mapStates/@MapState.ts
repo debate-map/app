@@ -1,5 +1,5 @@
 import {O} from "web-vcore";
-import {CreateStringEnum} from "web-vcore/nm/js-vextensions";
+import {CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
 
 export enum SortType {
 	creatorID = "creatorID",

@@ -1,14 +1,14 @@
-// import {Button, Column, Pre, Row, Span} from "web-vcore/nm/react-vcomponents";
-// import {BaseComponent, FindReact, BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-// import {GetEntries, E} from "web-vcore/nm/js-vextensions";
+// import {Button, Column, Pre, Row, Span} from "web-vcore/nm/react-vcomponents.js";
+// import {BaseComponent, FindReact, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+// import {GetEntries, E} from "web-vcore/nm/js-vextensions.js";
 // import {VReactMarkdown_Remarkable, Segment} from "web-vcore";
 // import {store} from "Store";
-// import {GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStep, GetPlayingTimeline, GetPlayingTimelineStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState";
+// import {GetPlayingTimelineAppliedStepIndex, GetPlayingTimelineStep, GetPlayingTimeline, GetPlayingTimelineStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 // import {Polarity} from "dm_common";
 // import {TimelineStep} from "dm_common";
 // import {GetNodeL2, AsNodeL3} from "dm_common";
 // import {Map} from "dm_common";
-// import {NodeUI_Inner} from "../Maps/MapNode/NodeUI_Inner";
+// import {NodeUI_Inner} from "../Maps/MapNode/NodeUI_Inner.js";
 
 // function GetPropsFromPropsStr(propsStr: string) {
 // 	const propStrMatches = propsStr.Matches(/ (.+?)="(.+?)"/g);

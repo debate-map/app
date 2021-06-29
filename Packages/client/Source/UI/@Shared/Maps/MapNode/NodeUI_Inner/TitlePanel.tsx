@@ -1,18 +1,18 @@
-import {Assert, Clone, E} from "web-vcore/nm/js-vextensions";
+import {Assert, Clone, E} from "web-vcore/nm/js-vextensions.js";
 import keycode from "keycode";
 import _ from "lodash";
-import {runInAction} from "web-vcore/nm/mobx";
-import {Button, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents";
-import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions";
+import {runInAction} from "web-vcore/nm/mobx.js";
+import {Button, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
-import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView";
-import {ES} from "Utils/UI/GlobalStyles";
+import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
+import {ES} from "Utils/UI/GlobalStyles.js";
 import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod} from "dm_common";
 import {InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, VReactMarkdown_Remarkable} from "web-vcore";
 import React from "react";
-import {NodeMathUI} from "../NodeMathUI";
-import {NodeUI_Inner} from "../NodeUI_Inner";
-import {TermPlaceholder} from "./TermPlaceholder";
+import {NodeMathUI} from "../NodeMathUI.js";
+import {NodeUI_Inner} from "../NodeUI_Inner.js";
+import {TermPlaceholder} from "./TermPlaceholder.js";
 import {GetCurrentRevision} from "Store/db_ext/nodes";
 
 /* type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeL2, nodeView: MapNodeView, path: string, indexInNodeList: number, style};

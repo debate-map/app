@@ -11,7 +11,7 @@ import "./Utils/UI/CodeMirrorConfig";
 // needed to fix odd ts issue (where, if first "import" call for library is in wvc, all subsequent imports of it are assumed to be referencing that under-wvc version)
 import "web-vcore/nm/mobx-graphlink";
 
-import {VURL} from "web-vcore/nm/js-vextensions";
+import {VURL} from "web-vcore/nm/js-vextensions.js";
 import {RootState} from "Store";
 
 // startup (non-hot)

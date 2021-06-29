@@ -1,16 +1,16 @@
-// import {E} from "web-vcore/nm/js-vextensions";
-// import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row} from "web-vcore/nm/react-vcomponents";
-// import {BaseComponentPlus} from "web-vcore/nm/react-vextensions";
-// import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-// import {ScrollView} from "web-vcore/nm/react-vscrollview";
+// import {E} from "web-vcore/nm/js-vextensions.js";
+// import {Button, CheckBox, Column, DropDown, DropDownContent, DropDownTrigger, Row} from "web-vcore/nm/react-vcomponents.js";
+// import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+// import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+// import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 // import {MeID, GetUser, GetLayers, ForDeleteLayer_GetError, GetMapLayerIDs, IsUserCreatorOrMod, Layer, GetUserLayerStateForMap, DeleteLayer, SetLayerAttachedToMap, SetMapLayerStateForUser, Map} from "dm_common";
 
 
-// import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel";
+// import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 
 
-// import {ShowAddLayerDialog} from "../../Layers/AddLayerDialog";
-// import {ES} from "../../../../../Utils/UI/GlobalStyles";
+// import {ShowAddLayerDialog} from "../../Layers/AddLayerDialog.js";
+// import {ES} from "../../../../../Utils/UI/GlobalStyles.js";
 
 // export const columnWidths = [0.5, 0.3, 0.1, 0.1];
 
