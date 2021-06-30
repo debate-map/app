@@ -1,5 +1,5 @@
-import {E, OmitIfFalsy, CE, ObjectCE} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, Command, MergeDBUpdates, AV} from "web-vcore/nm/mobx-graphlink.js";
+import {E, OmitIfFalsy, CE, ObjectCE, Assert} from "web-vcore/nm/js-vextensions.js";
+import {AssertV, Command, MergeDBUpdates, AV, NNV} from "web-vcore/nm/mobx-graphlink.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {DeleteNode} from "./DeleteNode.js";
 import {LinkNode} from "./LinkNode.js";
@@ -19,7 +19,7 @@ import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 
 type Payload = {
 	mapID: string, oldParentID: string, newParentID: string, nodeID: string,
-	newForm?: ClaimForm, newPolarity?: Polarity,
+	newForm?: ClaimForm|n, newPolarity?: Polarity,
 	createWrapperArg?: boolean,
 	//linkAsArgument?: boolean,
 	unlinkFromOldParent?: boolean, deleteEmptyArgumentWrapper?: boolean
@@ -28,14 +28,15 @@ type Payload = {
 export function CreateLinkCommand(mapID: UUID, draggedNodePath: string, dropOnNodePath: string, polarity: Polarity, asCopy: boolean) {
 	const draggedNode = GetNodeL3(draggedNodePath);
 	const dropOnNode = GetNodeL3(dropOnNodePath);
+	if (draggedNode == null || dropOnNode == null) return null;
 
 	// const draggedNode_parent = GetParentNodeL3(draggedNodePath);
 	const dropOnNode_parent = GetParentNodeL3(dropOnNodePath);
-	const holderType = GetHolderType(dropOnNode.type, dropOnNode_parent ? dropOnNode_parent.type : null);
+	const holderType = GetHolderType(dropOnNode.type, dropOnNode_parent?.type);
 	const formForClaimChildren = dropOnNode.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base;
 
 	return new LinkNode_HighLevel({
-		mapID, oldParentID: GetParentNodeID(draggedNodePath), newParentID: dropOnNode.id, nodeID: draggedNode.id,
+		mapID, oldParentID: GetParentNodeID(draggedNodePath)!, newParentID: dropOnNode.id, nodeID: draggedNode.id,
 		newForm: draggedNode.type == MapNodeType.claim ? formForClaimChildren : null,
 		newPolarity: polarity,
 		//createWrapperArg: holderType != null || !dropOnNode.multiPremiseArgument,
@@ -63,11 +64,11 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 		this.returnData = {};
 
-		this.map_data = AV.NonNull = GetMap(mapID);
-		this.node_data = AV.NonNull = GetNodeL2(nodeID);
+		this.map_data = GetMap.NN(mapID);
+		this.node_data = GetNodeL2.NN(nodeID);
 		const oldParent_data = GetNodeL2(oldParentID);
 		//AssertV(oldParent_data, "oldParent_data is null."); // commented: allow linking orphaned nodes
-		this.newParent_data = AV.NonNull = GetNodeL2(newParentID);
+		this.newParent_data = GetNodeL2.NN(newParentID);
 
 		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
 		let pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && createWrapperArg;

@@ -15,7 +15,7 @@ export class DeleteMap extends Command<{mapID: string}, {}> {
 	sub_deleteNode: DeleteNode;
 	Validate() {
 		const {mapID} = this.payload;
-		this.oldData = GetMap(mapID);
+		this.oldData = GetMap.NN(mapID);
 		AssertUserCanDelete(this, this.oldData);
 		//this.userMapInfoSets = GetDocs({}, a=>a.userMapInfo) || [];
 

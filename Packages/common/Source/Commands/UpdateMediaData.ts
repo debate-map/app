@@ -26,7 +26,7 @@ export class UpdateMediaData extends Command<{id: string, updates: Partial<Media
 		AssertValidate(`Update${MTName}Data_payload`, this.payload, "Payload invalid");
 
 		const {id, updates} = this.payload;
-		this.oldData = GetMedia(id);
+		this.oldData = GetMedia.NN(id);
 		AssertUserCanModify(this, this.oldData);
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, "New-data invalid");

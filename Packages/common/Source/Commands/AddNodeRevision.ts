@@ -19,11 +19,11 @@ export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard =
 
 @MapEdit
 @UserEdit
-export class AddNodeRevision extends Command<{mapID: string, revision: MapNodeRevision}, number> {
+export class AddNodeRevision extends Command<{mapID?: string, revision: MapNodeRevision}, number> {
 	// lastNodeRevisionID_addAmount = 0;
 
 	revisionID: string;
-	node_oldData: MapNode;
+	node_oldData: MapNode|n;
 	Validate() {
 		const {revision} = this.payload;
 
@@ -32,8 +32,8 @@ export class AddNodeRevision extends Command<{mapID: string, revision: MapNodeRe
 		revision.creator = this.userInfo.id;
 		revision.createdAt = Date.now();
 
-		const titles_joined = CE(revision.titles || {}).VValues().join(" ");
-		revision.titles.allTerms = CE(GetSearchTerms(titles_joined)).ToMapObj(a=>a, ()=>true);
+		/*const titles_joined = CE(revision.titles || {}).VValues().join(" ");
+		revision.titles.allTerms = CE(GetSearchTerms(titles_joined)).ToMapObj(a=>a, ()=>true);*/
 
 		if (this.parentCommand == null) {
 			this.node_oldData = GetNode(revision.node);

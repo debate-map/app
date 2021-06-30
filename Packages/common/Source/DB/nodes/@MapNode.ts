@@ -50,7 +50,7 @@ export class MapNode {
 
 	@DB((t,n)=>t.text(n).notNullable())
 	@Field({$ref: "MapNodeType"}, {req: true})
-	type?: MapNodeType;
+	type: MapNodeType;
 
 	@DB((t,n)=>t.text(n))
 	@Field({$ref: "ArgumentType"})
@@ -103,6 +103,7 @@ export interface MapNodeL3 extends MapNodeL2 {
 	//linkToParent: ChildEntry;
 	//parentLinkToGrandParent: ChildEntry;
 }
+export type MapNodeL3_Argument = MapNodeL3 & Required<Pick<MapNodeL3, "argumentType" | "multiPremiseArgument">>;
 
 /*export enum Polarity {
 	Supporting = 10,

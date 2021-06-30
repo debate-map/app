@@ -17,7 +17,7 @@ export class UnlinkNode extends Command<{mapID: string, parentID: string, childI
 	parentToChildLinks: NodeChildLink[];
 	Validate() {
 		const {parentID, childID} = this.payload;
-		const childParents = GetNodeChildLinks(null, childID);
+		const childParents = GetNodeChildLinks(undefined, childID);
 		this.parentToChildLinks = GetNodeChildLinks(parentID, childID);
 		AssertV(this.parentToChildLinks.length <= 1, "There should not be more than 1 link between parent and child.");
 

@@ -1,8 +1,8 @@
-import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading, CreateStringEnum, emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {GetDoc, StoreAccessor, GetDocs, NoID} from "web-vcore/nm/mobx-graphlink.js";
 import {observable} from "web-vcore/nm/mobx.js";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
-import {NodeRatingType} from "./nodeRatings/@NodeRatingType.js";
+import {NodeRatingType, RatingType_Info} from "./nodeRatings/@NodeRatingType.js";
 import {NodeRating} from "./nodeRatings/@NodeRating.js";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore.js";
 import {GetNodeChildrenL2, HolderType} from "./nodes.js";
@@ -14,12 +14,13 @@ import {GetAccessPolicy} from "./accessPolicies.js";
 import {GetArgumentImpactPseudoRatings} from "../Utils/DB/RatingProcessor.js";
 
 export const GetRatings = StoreAccessor(s=><
-	((nodeID: string, ratingType: Exclude<NodeRatingType, "impact">, userID?: string)=>NodeRating[]) & // if rating-type is known to not be "impact", all results will be "true ratings"
-	((nodeID: string, ratingType: NodeRatingType, userID?: string)=>NoID<NodeRating>[]) // else, some results may lack the "id" field
->((nodeID: string, ratingType: NodeRatingType, userID?: string): NoID<NodeRating>[]=>{
+	((nodeID: string, ratingType: Exclude<NodeRatingType, "impact">|n, userID?: string)=>NodeRating[]) & // if rating-type is known to not be "impact", all results will be "true ratings"
+	((nodeID: string, ratingType: NodeRatingType|n, userID?: string)=>NoID<NodeRating>[]) // else, some results may lack the "id" field
+>((nodeID: string, ratingType: NodeRatingType|n, userID?: string): NoID<NodeRating>[]=>{
 	if (ratingType == "impact") {
 		const node = GetNodeL2(nodeID);
 		if (node === undefined) return emptyArray_forLoading;
+		if (node === null) return emptyArray;
 		const nodeChildren = GetNodeChildrenL2(nodeID);
 		if (CE(nodeChildren).Any(a=>a == null)) return emptyArray_forLoading;
 		//if (nodeChildren.Any(a=>a == null)) return observable.map(emptyObj);
@@ -43,11 +44,11 @@ export const GetRatings = StoreAccessor(s=><
 export const GetRating = StoreAccessor(s=>(nodeID: string, ratingType: NodeRatingType, userID: string)=>{
 	return GetRatings(nodeID, ratingType, userID)[0];
 });
-export const GetRatingValue = StoreAccessor(s=>(nodeID: string, ratingType: NodeRatingType, userID: string, resultIfNoData = null): number=>{
+export const GetRatingValue = StoreAccessor(s=><T>(nodeID: string, ratingType: NodeRatingType, userID: string, resultIfNoData?: T): number|T=>{
 	const rating = GetRating(nodeID, ratingType, userID);
-	return rating ? rating.value : resultIfNoData;
+	return rating ? rating.value : resultIfNoData as T;
 });
-export const GetRatingAverage = StoreAccessor(s=>(nodeID: string, ratingType: NodeRatingType, userID?: string): number=>{
+export const GetRatingAverage = StoreAccessor(s=>(nodeID: string, ratingType: NodeRatingType, userID?: string): number|null=>{
 	// return CachedTransform_WithStore('GetRatingAverage', [nodeID, ratingType, resultIfNoData].concat((filter || {}).VValues()), {}, () => {
 	// if voting disabled, always show full bar
 	/* let node = GetNodeL2(nodeID);
@@ -65,9 +66,9 @@ export const GetRatingAverage = StoreAccessor(s=>(nodeID: string, ratingType: No
 	Assert(result >= 0 && result <= 100, `Rating-average (${result}) not in range. Invalid ratings: ${ToJSON(ratings.map(a=>a.value).filter(a=>!IsNumber(a)))}`);
 	return result;
 });
-export const GetRatingAverage_AtPath = StoreAccessor(s=>(node: MapNodeL3, ratingType: NodeRatingType, userID?: string, resultIfNoData = null): number=>{
+export const GetRatingAverage_AtPath = StoreAccessor(s=><T>(node: MapNodeL3, ratingType: NodeRatingType, userID?: string, resultIfNoData?: T): number|T=>{
 	let result = GetRatingAverage(node.id, ratingType, userID);
-	if (result == null) return resultIfNoData;
+	if (result == null) return resultIfNoData as T;
 	if (ShouldRatingTypeBeReversed(node, ratingType)) {
 		result = 100 - result;
 	}
@@ -79,20 +80,28 @@ export enum WeightingType {
 	reasonScore = "reasonScore",
 }
 
+function HolderTypeToRatingType(holderType: HolderType|n) {
+	return {
+		[HolderType.truth]: NodeRatingType.truth,
+		[HolderType.relevance]: NodeRatingType.relevance
+	}[holderType!] as any;
+}
+
 const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
 // export const GetFillPercent_AtPath = StoreAccessor('GetFillPercent_AtPath', (node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null) => {
 export const GetFillPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: NodeRatingType, weighting = WeightingType.votes, userID?: string, resultIfNoData = null)=>{
-	ratingType = ratingType || {[HolderType.truth]: "truth", [HolderType.relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
+	ratingType = ratingType ?? HolderTypeToRatingType(boxType) ?? GetMainRatingType(node);
+	if (ratingType == null) return resultIfNoData;
 	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes?.includes(node.type)) {
 		const result = GetRatingAverage_AtPath(node, ratingType, userID, resultIfNoData);
-		Assert(result >= 0 && result <= 100, `Fill-percent (${result}) not in range.`);
+		Assert(result != null && result >= 0 && result <= 100, `Fill-percent (${result}) not in range.`);
 		return result;
 	}
 
 	const {argTruthScoreComposite, argWeightMultiplier, claimTruthScore} = RS_GetAllValues(node.id, path);
 
 	// if (State(a=>a.main.weighting) == WeightingType.ReasonScore) {
-	let result: number;
+	let result: number|n;
 	if (node.type == MapNodeType.claim) {
 		result = claimTruthScore * 100;
 	} else if (node.type == MapNodeType.argument) {
@@ -104,12 +113,13 @@ export const GetFillPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: st
 		}
 	}
 
-	Assert(result >= 0 && result <= 100, `Fill-percent (${result}) not in range.`);
+	Assert(result != null && result >= 0 && result <= 100, `Fill-percent (${result}) not in range.`);
 	return result;
 });
 
 export const GetMarkerPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
-	ratingType = ratingType || {[HolderType.truth]: "truth", [HolderType.relevance]: "relevance"}[boxType] as any || GetMainRatingType(node);
+	ratingType = ratingType ?? HolderTypeToRatingType(boxType) ?? GetMainRatingType(node);
+	if (ratingType == null) return null;
 	if (!node.policy.permissions_base.vote) return null;
 	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes.includes(node.type)) {
 		return GetRatingAverage_AtPath(node, ratingType, MeID());

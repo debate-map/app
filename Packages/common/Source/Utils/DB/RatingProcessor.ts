@@ -1,5 +1,5 @@
 import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from "web-vcore/nm/js-vextensions.js";
-import {StoreAccessor, NoID} from "web-vcore/nm/mobx-graphlink.js";
+import {StoreAccessor, NoID, PartialBy} from "web-vcore/nm/mobx-graphlink.js";
 import {GetRatingAverage, GetRatingValue, GetRatings} from "../../DB/nodeRatings.js";
 import {NodeRating} from "../../DB/nodeRatings/@NodeRating.js";
 import {NodeRatingType} from "../../DB/nodeRatings/@NodeRatingType.js";
@@ -7,7 +7,7 @@ import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../DB/no
 import {ClaimForm, MapNodeL2} from "../../DB/nodes/@MapNode.js";
 import {ArgumentType} from "../../DB/nodes/@MapNodeRevision.js";
 
-export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[], userID: string): NoID<NodeRating>=>{
+export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[], userID: string): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading
 	if (premises.length == 0) return null;
 
@@ -16,7 +16,7 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 		let ratingValue = GetRatingValue(premise.id, ratingType, userID, null);
 		// if user didn't rate this premise, just use the average rating
 		if (ratingValue == null) {
-			ratingValue = GetRatingAverage(premise.id, ratingType, null) || 0;
+			ratingValue = GetRatingAverage(premise.id, ratingType, undefined) || 0;
 		}
 
 		const form = GetNodeForm(premise, argument);
@@ -27,17 +27,17 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 	if (argument.argumentType == ArgumentType.all) {
 		combinedTruthOfPremises = premiseProbabilities.reduce((total, current)=>total * current, 1);
 	} else if (argument.argumentType == ArgumentType.anyTwo) {
-		const strongest = CE(premiseProbabilities).Max(null, true);
-		const secondStrongest = premiseProbabilities.length > 1 ? CE(CE(premiseProbabilities).Except({excludeEachOnlyOnce: true}, strongest)).Max(null, true) : 0;
+		const strongest = CE(premiseProbabilities).Max(undefined, true);
+		const secondStrongest = premiseProbabilities.length > 1 ? CE(CE(premiseProbabilities).Except({excludeEachOnlyOnce: true}, strongest)).Max(undefined, true) : 0;
 		combinedTruthOfPremises = strongest * secondStrongest;
 	} else {
-		combinedTruthOfPremises = CE(premiseProbabilities).Max(null, true);
+		combinedTruthOfPremises = CE(premiseProbabilities).Max(undefined, true);
 	}
 
 	let relevance = GetRatingValue(argument.id, NodeRatingType.relevance, userID, null);
 	// if user didn't rate the relevance, just use the average rating
 	if (relevance == null) {
-		relevance = GetRatingAverage(argument.id, NodeRatingType.relevance, null) || 0;
+		relevance = GetRatingAverage(argument.id, NodeRatingType.relevance) || 0;
 	}
 	// let strengthForType = adjustment.Distance(50) / 50;
 	const result = combinedTruthOfPremises * (relevance / 100);
@@ -45,11 +45,11 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 
 	return {
 		//_key: userID,
-		accessPolicy: null,
+		//accessPolicy: null,
 		node: argument.id,
 		type: NodeRatingType.impact,
 		user: userID,
-		editedAt: null,
+		editedAt: Date.now(),
 		value: CE(result * 100).RoundTo(1),
 	};
 });

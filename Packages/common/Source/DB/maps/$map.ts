@@ -8,17 +8,17 @@ export function IsUserMap(map: Map) {
 	return map.type == MapType.private || map.type == MapType.public;
 }
 
-export const GetRootNodeID = StoreAccessor(s=>(mapID: string): string=>{
+export const GetRootNodeID = StoreAccessor(s=>(mapID: string)=>{
 	const map = GetMap(mapID);
 	if (map == null) return null;
 	return map.rootNode;
 });
 
-export const GetMapEditorIDs = StoreAccessor(s=>(mapID: string): string[]=>{
+export const GetMapEditorIDs = StoreAccessor(s=>(mapID: string)=>{
 	const map = GetMap(mapID);
 	if (map == null) return null;
 	return map.editors ?? emptyArray;
 });
 export const GetMapEditors = StoreAccessor(s=>(mapID: string)=>{
-	return GetMapEditorIDs(mapID).map(id=>GetUser(id));
+	return GetMapEditorIDs.NN(mapID).map(id=>GetUser(id));
 });

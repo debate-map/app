@@ -18,6 +18,16 @@
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true,
 		//"esModuleInterop": true, // enable this within packages that aren't using webpack for compilation
+		// strictness settings
+		//"strict": true, // enables all of the below (other than noImplicitReturns)
+		//"noImplicitAny": true,
+		//"noImplicitThis": true,
+		//"noImplicitReturns": true,
+		"alwaysStrict": true,
+		//"strictBindCallApply": true,
+		"strictNullChecks": true,
+		//"strictFunctionTypes": true,
+		//"strictPropertyInitialization": true,
 
 		// modules/paths
 		"module": "esnext",

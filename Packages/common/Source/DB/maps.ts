@@ -23,6 +23,6 @@ export const GetMaps_Public = StoreAccessor(s=>(orderByEdits = false)=>{
 	const mapsMap = GetData({ collection: true }, 'maps');
 	return CachedTransform('GetMaps', [type], mapsMap, () => (mapsMap ? mapsMap.VValues(true).filter(a => a && a.type == type) : []));
 } */
-export const GetMap = StoreAccessor(s=>(id: string): Map=>{
+export const GetMap = StoreAccessor(s=>(id: string)=>{
 	return GetDoc({}, a=>a.maps.get(id));
 });

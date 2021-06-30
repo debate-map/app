@@ -30,7 +30,7 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 		this.sub_addNode = this.sub_addNode ?? new AddNode({mapID, node, revision}).MarkAsSubcommand(this);
 		this.sub_addNode.Validate();
 
-		this.payload.link = link ?? E(node.type == MapNodeType.argument && {polarity: Polarity.supporting});
+		this.payload.link = link! ?? E(node.type == MapNodeType.argument && {polarity: Polarity.supporting});
 		if (node.type == MapNodeType.argument) {
 			AssertV(this.payload.link.polarity != null, "An argument node must have its polarity specified in its parent-link.")
 		}
@@ -38,7 +38,7 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 		const isAddClaimSub = this.parentCommand instanceof AddArgumentAndClaim && this.parentCommand.sub_addClaim == this;
 		if (!asMapRoot && !isAddClaimSub) {
 			// this.parent_oldChildrenOrder = await GetDataAsync('nodes', parentID, '.childrenOrder') as number[];
-			this.parent_oldData = GetNode(parentID);
+			this.parent_oldData = GetNode(parentID)!;
 		}
 
 		this.returnData = {

@@ -25,7 +25,7 @@ export class SetLayerAttachedToMap extends Command<{mapID: string, layerID: stri
 	oldData: Map;
 	Validate() {
 		const {mapID} = this.payload;
-		this.oldData = GetMap(mapID);
+		this.oldData = GetMap.NN(mapID);
 		AssertV(this.oldData, "Map does not exist!");
 	}
 

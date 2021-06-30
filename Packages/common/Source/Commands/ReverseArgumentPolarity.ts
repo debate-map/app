@@ -28,14 +28,14 @@ export class ReverseArgumentPolarity extends Command<{mapID?: string, nodeID: st
 		AssertValidate("ReverseArgumentPolarity_payload", this.payload, "Payload invalid");
 		const {nodeID, path} = this.payload;
 
-		this.oldNodeData = GetNodeL3(path);
-		// AssertV(this.oldNodeData, "oldNodeData is null"); // realized I don't need to add these; the null-ref exceptions are sufficient
-		this.parentID = GetParentNodeID(path);
+		this.oldNodeData = GetNodeL3.NN(path);
+		AssertV(this.oldNodeData.type == MapNodeType.argument, "Can only reverse polarity of an argument node.");
+		this.parentID = GetParentNodeID.NN(path);
 
 		this.newLinkData = {...this.oldNodeData.link};
+		Assert(this.newLinkData.polarity, "Polarity must be non-null, if calling ReverseArgumentPolarity.");
 		this.newLinkData.polarity = ReversePolarity(this.newLinkData.polarity);
 
-		AssertV(this.oldNodeData.type == MapNodeType.argument, "Can only reverse polarity of an argument node.");
 		AssertValidate("ChildEntry", this.newLinkData, "New link-data invalid");
 	}
 

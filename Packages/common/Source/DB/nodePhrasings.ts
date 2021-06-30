@@ -21,5 +21,5 @@ export const GetNodePhrasings = StoreAccessor(s=>(nodeID: string): MapNodePhrasi
 } */
 export const GetNodePhrasing = StoreAccessor(s=>(phrasingID: string): MapNodePhrasing=>{
 	//return GetDoc({}, a=>a.nodePhrasings.get(phrasingID));
-	return null;
+	return null as any as MapNodePhrasing;
 });

@@ -29,7 +29,7 @@ export class DeleteNode extends Command<{mapID?: string, nodeID: string, withCon
 
 	sub_deleteContainerArgument: DeleteNode;
 
-	oldData: MapNodeL2;
+	oldData: MapNodeL2|n;
 	oldRevisions: MapNodeRevision[];
 	//oldParentChildrenOrders: string[][];
 	links: NodeChildLink[];
@@ -65,7 +65,7 @@ export class DeleteNode extends Command<{mapID?: string, nodeID: string, withCon
 		/* Assert((this.oldData.parents || {}).VKeys().length <= 1, "Cannot delete this child, as it has more than one parent. Try unlinking it instead.");
 		let normalChildCount = (this.oldData.children || {}).VKeys().length;
 		Assert(normalChildCount == 0, "Cannot delete this node until all its (non-impact-premise) children have been unlinked or deleted."); */
-		const earlyError = ForDelete_GetError(this.userInfo.id, this.oldData, this.parentCommand && {asPartOfMapDelete, parentsToIgnore, childrenToIgnore});
+		const earlyError = ForDelete_GetError(this.userInfo.id, this.oldData!, this.parentCommand && {asPartOfMapDelete, parentsToIgnore, childrenToIgnore});
 		AssertV(earlyError == null, earlyError);
 
 		if (withContainerArgument) {

@@ -9,8 +9,8 @@ import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 
 @MapEdit
 @UserEdit
-export class LinkNode extends Command<{mapID: string, parentID: string, childID: string, childForm?: ClaimForm, childPolarity?: Polarity}, {}> {
-	child_oldData: MapNode;
+export class LinkNode extends Command<{mapID: string, parentID: string, childID: string, childForm?: ClaimForm|n, childPolarity?: Polarity}, {}> {
+	child_oldData: MapNode|n;
 	parent_oldData: MapNode;
 	/* async Prepare(parent_oldChildrenOrder_override?: number[]) {
 		let {parentID, childID, childForm} = this.payload;
@@ -21,12 +21,12 @@ export class LinkNode extends Command<{mapID: string, parentID: string, childID:
 		AssertV(parentID != childID, "Parent-id and child-id cannot be the same!");
 
 		this.child_oldData = GetNode(childID);
-		AssertV(this.child_oldData || this.parentCommand != null, "Child does not exist!");
+		AssertV(this.child_oldData || this.parentCommand != null, "Child does not exist! (and it should, since no parent-command)");
 		this.parent_oldData =
 			(this.parentCommand instanceof LinkNode_HighLevel && this == this.parentCommand.sub_linkToNewParent ? this.parentCommand.sub_addArgumentWrapper?.payload.node : null)
 			//?? (this.parentCommand instanceof ImportSubtree_Old ? "" as any : null) // hack; use empty-string to count as non-null for this chain, but count as false for if-statements (ye...)
-			?? GetNode(parentID);
-		AssertV(this.parent_oldData || this.parentCommand != null, "Parent does not exist!");
+			?? GetNode.NN(parentID);
+		AssertV(this.parent_oldData || this.parentCommand != null, "Parent does not exist! (and it should, since no parent-command)");
 
 		const parentChildren = GetNodeChildLinks(this.parent_oldData.id);
 		if (this.parent_oldData) {

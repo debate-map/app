@@ -3,7 +3,7 @@ import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {MapNodeType} from "../nodes/@MapNodeType.js";
 import {GetNodeL3, GetNodeL2} from "../nodes/$node.js";
 import {GetNodeChildrenL3, GetParentNodeL3} from "../nodes.js";
-import {Polarity, MapNodeL3} from "../nodes/@MapNode.js";
+import {Polarity, MapNodeL3, MapNodeL3_Argument} from "../nodes/@MapNode.js";
 import {ArgumentType} from "../nodes/@MapNodeRevision.js";
 
 export const RS_CalculateTruthScore = StoreAccessor(s=>(claimID: string, calculationPath: string[] = []): number=>{
@@ -51,7 +51,7 @@ export const RS_CalculateTruthScoreComposite = StoreAccessor(s=>(argumentID: str
 	if (premises.length == 0) return 0;
 
 	const truthScores = premises.map(premise=>RS_CalculateTruthScore(premise.id, calculationPath.concat(premise.id)));
-	const truthScoreComposite = CombinePremiseTruthScores(truthScores, argument.argumentType);
+	const truthScoreComposite = CombinePremiseTruthScores(truthScores, argument.argumentType!);
 	return truthScoreComposite;
 });
 
@@ -90,12 +90,13 @@ export const RS_CalculateWeightMultiplier = StoreAccessor(s=>(nodeID: string, ca
 });
 export const RS_CalculateWeight = StoreAccessor(s=>(argumentID: string, premiseIDs: string[], calculationPath = [] as string[])=>{
 	const argument = GetNodeL2(argumentID);
-	const premises = premiseIDs.map(id=>GetNodeL2(id));
+	const premises = premiseIDs.map(id=>GetNodeL2.WithBail(0, id));
 	if (premises.length == 0) return 0;
 	const baseWeightsProduct = premises.map(premise=>RS_CalculateBaseWeight(premise.id, calculationPath.concat(premise.id))).reduce((prev, cur)=>prev * cur);
 	const weightMultiplier = RS_CalculateWeightMultiplier(argument.id, calculationPath);
 	return baseWeightsProduct * weightMultiplier;
 });
+//}, ()=>0);
 
 export type ReasonScoreValues = {argument, premises, argTruthScoreComposite, argWeightMultiplier, argWeight, claimTruthScore, claimBaseWeight};
 export type ReasonScoreValues_RSPrefix = {argument, premises, rs_argTruthScoreComposite, rs_argWeightMultiplier, rs_argWeight, rs_claimTruthScore, rs_claimBaseWeight};
@@ -139,13 +140,13 @@ function CombinePremiseTruthScores(truthScores: number[], argumentType: Argument
 	return CE(truthScores).Max(); // ArgumentType.Any
 }
 
-const GetChildArguments = StoreAccessor(s=>(nodeID: string): MapNodeL3[]=>{
+const GetChildArguments = StoreAccessor(s=>(nodeID: string): MapNodeL3_Argument[]=>{
 	const children = GetNodeChildrenL3(nodeID);
-	if (children == emptyArray_forLoading || CE(children).Any(a=>a == null)) return null; // null means still loading
-	const childArguments = children.filter(a=>a.type == MapNodeType.argument);
+	if (children == emptyArray_forLoading || CE(children).Any(a=>a == null)) return emptyArray_forLoading;
+	const childArguments = children.filter(a=>a.type == MapNodeType.argument) as MapNodeL3_Argument[];
 	for (const child of childArguments) {
 		const childChildren = GetNodeChildrenL3(nodeID);
-		if (childChildren == emptyArray_forLoading || CE(childChildren).Any(a=>a == null)) return null; // null means still loading
+		if (childChildren == emptyArray_forLoading || CE(childChildren).Any(a=>a == null)) return emptyArray_forLoading;
 	}
 
 	return childArguments;

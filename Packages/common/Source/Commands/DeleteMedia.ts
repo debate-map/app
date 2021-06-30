@@ -6,7 +6,7 @@ import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.
 
 @UserEdit
 export class DeleteMedia extends Command<{id: string}, {}> {
-	oldData: Media;
+	oldData: Media|n;
 	Validate() {
 		const {id} = this.payload;
 		this.oldData = GetMedia(id);

@@ -69,7 +69,7 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	Assert(false);
 }
 export const GetMainRatingType = StoreAccessor(s=>(node: MapNodeL2)=>{
-	return CE(GetRatingTypesForNode(node)).FirstOrX(a=>a.main, {} as Partial<RatingTypeInfo>).type;
+	return GetRatingTypesForNode(node).FirstOrX(a=>a.main, {} as Partial<RatingTypeInfo>).type;
 });
 export function GetSortByRatingType(node: MapNodeL3): NodeRatingType {
 	if (node.link && node.link.form == ClaimForm.yesNoQuestion) {
@@ -128,7 +128,7 @@ export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision, access
 	return result;
 }
 export const GetNodeL2 = StoreAccessor(s=>(nodeID: string | MapNode, path?: string)=>{
-	if (IsString(nodeID)) nodeID = GetNode(nodeID);
+	if (IsString(nodeID)) nodeID = GetNode(nodeID) as MapNode;
 	if (nodeID == null) return null;
 	const node = nodeID as MapNode;
 

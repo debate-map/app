@@ -24,22 +24,20 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 		}, this.payload, "Payload invalid");
 
 		const {mapID, nodeID, multiPremiseArgument} = this.payload;
-		this.oldNodeData = GetNodeL2(nodeID);
-		AssertV(this.oldNodeData, "oldNodeData is null.");
+		this.oldNodeData = GetNodeL2.NN(nodeID);
 
 		this.newNodeData = {...AsNodeL1(this.oldNodeData), ...{multiPremiseArgument}};
 		if (multiPremiseArgument) {
 			//this.newNodeData.childrenOrderType = ChildOrderType.Manual;
 			//this.newNodeData.childrenOrder = CE(this.oldNodeData.children).VKeys();
 
-			if (this.oldNodeData.current.titles.base.length == 0) {
+			if (this.oldNodeData.current.titles.base?.length ?? 0 == 0) {
 				const newRevision = Clone(this.oldNodeData.current);
 
 				const children = GetNodeChildren(this.oldNodeData.id);
 				//const oldChildNode_partialPath = `${nodeID}/${CE(this.oldNodeData.children).VKeys()[0]}`;
 				const oldChildNode_partialPath = `${nodeID}/${children[0].id}`;
-				const oldChildNode = GetNodeL3(oldChildNode_partialPath);
-				AssertV(oldChildNode, "oldChildNode is null.");
+				const oldChildNode = GetNodeL3.NN(oldChildNode_partialPath);
 				newRevision.titles.base = GetNodeDisplayText(oldChildNode, oldChildNode_partialPath, GetNodeForm(oldChildNode));
 
 				this.sub_addRevision = new AddNodeRevision({mapID, revision: newRevision});

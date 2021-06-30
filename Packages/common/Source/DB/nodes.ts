@@ -237,7 +237,7 @@ export const GetPremiseOfSinglePremiseArgument = StoreAccessor(s=>(argumentNodeI
 	return childPremise;
 });
 
-export function GetHolderType(childType: MapNodeType, parentType: MapNodeType) {
+export function GetHolderType(childType: MapNodeType, parentType: MapNodeType|n) {
 	if (parentType == MapNodeType.argument) {
 		if (childType == MapNodeType.argument) return HolderType.relevance;
 	} else if (parentType == MapNodeType.claim) {

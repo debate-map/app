@@ -9,7 +9,7 @@ export class DeleteTerm extends Command<{termID: string}, {}> {
 	oldData: Term;
 	Validate() {
 		const {termID} = this.payload;
-		this.oldData = GetTerm(termID);
+		this.oldData = GetTerm(termID)!;
 		AssertUserCanDelete(this, this.oldData);
 	}
 

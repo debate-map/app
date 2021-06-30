@@ -17,9 +17,7 @@ export class TitlesMap {
 	negation?: string;
 	yesNoQuestion?: string;
 
-	// allTerms?: string[];
-	// allTerms?: ObservableMap<string, boolean>;
-	allTerms?: {[key: string]: boolean};
+	//allTerms?: {[key: string]: boolean};
 }
 AddSchema("TitlesMap", {
 	properties: {
@@ -27,8 +25,7 @@ AddSchema("TitlesMap", {
 		negation: {type: "string"},
 		yesNoQuestion: {type: "string"},
 
-		// allTerms: { items: { type: 'string' } },
-		allTerms: {type: "object"},
+		//allTerms: {type: "object"},
 	},
 });
 
@@ -86,7 +83,7 @@ export const MapNodeRevision_titlePattern = "^\\S.*$"; // must start with non-wh
 	],
 })
 export class MapNodeRevision {
-	constructor(initialData: Partial<MapNodeRevision>) {
+	constructor(initialData?: Partial<MapNodeRevision>|n) {
 		CE(this).VSet(initialData);
 	}
 
