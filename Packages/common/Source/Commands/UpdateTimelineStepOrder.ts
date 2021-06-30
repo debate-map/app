@@ -1,7 +1,7 @@
 /*import {CE} from "web-vcore/nm/js-vextensions.js";
 import {Command} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
-import {GetTimeline} from "../Store/db/timelines.js";
+import {GetTimeline} from "../DB/timelines.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 @UserEdit

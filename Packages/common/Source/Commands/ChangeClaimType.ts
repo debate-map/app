@@ -2,11 +2,11 @@ import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, AV, Command} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {AddSchema, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
-import {AttachmentType, GetAttachmentType} from "../Store/db/nodeRevisions/@AttachmentType.js";
-import {MapNode} from "../Store/db/nodes/@MapNode.js";
-import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision.js";
-import {GetNodeL2, AsNodeL1} from "../Store/db/nodes/$node.js";
-import {EquationAttachment} from "../Store/db/nodeRevisions/@EquationAttachment.js";
+import {AttachmentType, GetAttachmentType} from "../DB/nodeRevisions/@AttachmentType.js";
+import {MapNode} from "../DB/nodes/@MapNode.js";
+import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
+import {GetNodeL2, AsNodeL1} from "../DB/nodes/$node.js";
+import {EquationAttachment} from "../DB/nodeRevisions/@EquationAttachment.js";
 
 export const conversionTypes = [
 	// from normal to...

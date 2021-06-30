@@ -5,12 +5,12 @@ import {AddChildNode} from "./AddChildNode.js";
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 import {LinkNode} from "./LinkNode.js";
 import {SetNodeRating} from "./SetNodeRating.js";
-import {HasAdminPermissions} from "../Store/db/users/$user.js";
-import {AsNodeL1} from "../Store/db/nodes/$node.js";
-import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision.js";
-import {Source} from "../Store/db/nodeRevisions/@SourceChain.js";
-import {NodeRatingType} from "../Store/db/nodeRatings/@NodeRatingType.js";
-import {NodeRating} from "../Store/db/nodeRatings/@NodeRating.js";
+import {HasAdminPermissions} from "../DB/users/$user.js";
+import {AsNodeL1} from "../DB/nodes/$node.js";
+import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
+import {Source} from "../DB/nodeRevisions/@SourceChain.js";
+import {NodeRatingType} from "../DB/nodeRatings/@NodeRatingType.js";
+import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 import {WithoutHelpers} from "./ImportSubtree_Old.js";
 
 // todo: replace with new structure, when actually used again

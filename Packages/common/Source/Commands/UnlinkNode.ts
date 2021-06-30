@@ -1,11 +1,11 @@
 import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
-import {GetNode, IsRootNode} from "../Store/db/nodes.js";
-import {GetNodeL2} from "../Store/db/nodes/$node.js";
-import {IsUserCreatorOrMod} from "../Store/db/users/$user.js";
+import {GetNode, IsRootNode} from "../DB/nodes.js";
+import {GetNodeL2} from "../DB/nodes/$node.js";
+import {IsUserCreatorOrMod} from "../DB/users/$user.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
-import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
-import {GetNodeChildLinks} from "../Store/db/nodeChildLinks.js";
+import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
+import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 
 // todo: add full-fledged checking to ensure that nodes are never orphaned by move commands (probably use parents recursion to find at least one map root)
 

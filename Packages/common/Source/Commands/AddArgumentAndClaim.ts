@@ -1,10 +1,10 @@
 import {MapEdit, UserEdit} from "../CommandMacros.js";
-import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision.js";
+import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {MergeDBUpdates, Command} from "web-vcore/nm/mobx-graphlink.js";
 import {AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNode} from "../Store/db/nodes/@MapNode.js";
+import {MapNode} from "../DB/nodes/@MapNode.js";
 import {AddChildNode} from "./AddChildNode.js";
-import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
+import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 
 type Payload = {
 	mapID: string,

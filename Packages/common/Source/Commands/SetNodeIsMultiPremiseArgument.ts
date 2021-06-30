@@ -3,9 +3,9 @@ import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetAsync, Command, AssertV, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink.js";
 import {Clone, CE} from "web-vcore/nm/js-vextensions.js";
 import {AddNodeRevision} from "./AddNodeRevision.js";
-import {MapNodeL2, MapNode} from "../Store/db/nodes/@MapNode.js";
-import {GetNodeL2, AsNodeL1, GetNodeL3, GetNodeDisplayText, GetNodeForm} from "../Store/db/nodes/$node.js";
-import {GetNodeChildren} from "../Store/db/nodes.js";
+import {MapNodeL2, MapNode} from "../DB/nodes/@MapNode.js";
+import {GetNodeL2, AsNodeL1, GetNodeL3, GetNodeDisplayText, GetNodeForm} from "../DB/nodes/$node.js";
+import {GetNodeChildren} from "../DB/nodes.js";
 
 @MapEdit
 @UserEdit

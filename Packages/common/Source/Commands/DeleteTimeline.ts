@@ -1,7 +1,7 @@
 /*import {UserEdit} from "../CommandMacros.js";
 import {GetAsync, Command, AssertV, AV} from "web-vcore/nm/mobx-graphlink.js";
-import {Timeline} from "../Store/db/timelines/@Timeline.js";
-import {GetTimeline} from "../Store/db/timelines.js";
+import {Timeline} from "../DB/timelines/@Timeline.js";
+import {GetTimeline} from "../DB/timelines.js";
 import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 @UserEdit

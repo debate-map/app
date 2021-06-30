@@ -1,13 +1,13 @@
-import {AddSchema, AssertV, AssertValidate, Command, dbp, MergeDBUpdates, WrapDBValue} from "web-vcore/node_modules/mobx-graphlink";
+import {AddSchema, AssertV, AssertValidate, Command, dbp, MergeDBUpdates, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
-import {GetMaps} from "../Store/db/maps.js";
-import {GetNodeChildLinks} from "../Store/db/nodeChildLinks.js";
-import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
-import {GetNodeRevisions} from "../Store/db/nodeRevisions.js";
-import {ForDelete_GetError} from "../Store/db/nodes.js";
-import {GetNodeL2} from "../Store/db/nodes/$node.js";
-import {MapNodeL2} from "../Store/db/nodes/@MapNode.js";
-import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision.js";
+import {GetMaps} from "../DB/maps.js";
+import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
+import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
+import {GetNodeRevisions} from "../DB/nodeRevisions.js";
+import {ForDelete_GetError} from "../DB/nodes.js";
+import {GetNodeL2} from "../DB/nodes/$node.js";
+import {MapNodeL2} from "../DB/nodes/@MapNode.js";
+import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 AddSchema("DeleteNode_payload", {

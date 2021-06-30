@@ -4,6 +4,7 @@
 		"rootDir": "Source",
 		"baseUrl": "Source",
 		"outDir": "Dist",
+		"declarationMap": true
 	},
 	"include": [
 		"Source/**/*.ts",

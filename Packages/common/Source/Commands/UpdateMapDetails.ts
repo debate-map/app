@@ -2,8 +2,8 @@ import {MapEdit} from "../CommandMacros.js";
 import {AddSchema, AssertValidate, Schema, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink.js";
 import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
-import {Map} from "../Store/db/maps/@Map.js";
-import {GetMap} from "../Store/db/maps.js";
+import {Map} from "../DB/maps/@Map.js";
+import {GetMap} from "../DB/maps.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 

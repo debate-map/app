@@ -2,13 +2,13 @@ import {GetAsync, Command, AssertV, MergeDBUpdates, AV} from "web-vcore/nm/mobx-
 import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
 import {E, OMIT, DEL, IsSpecialEmptyArray, CE} from "web-vcore/nm/js-vextensions.js";
 import {UserEdit} from "../CommandMacros.js";
-import {MapNode} from "../Store/db/nodes/@MapNode.js";
-import {GetNode, GetNodesByIDs, GetNodeChildren} from "../Store/db/nodes.js";
-import {IsUserCreatorOrMod} from "../Store/db/users/$user.js";
-import {GetMap} from "../Store/db/maps.js";
-import {MapType} from "../Store/db/maps/@Map.js";
-import {GetNodeRevision} from "../Store/db/nodeRevisions.js";
-import {PermissionInfoType} from "../Store/db/nodes/@MapNodeRevision.js";
+import {MapNode} from "../DB/nodes/@MapNode.js";
+import {GetNode, GetNodesByIDs, GetNodeChildren} from "../DB/nodes.js";
+import {IsUserCreatorOrMod} from "../DB/users/$user.js";
+import {GetMap} from "../DB/maps.js";
+import {MapType} from "../DB/maps/@Map.js";
+import {GetNodeRevision} from "../DB/nodeRevisions.js";
+import {PermissionInfoType} from "../DB/nodes/@MapNodeRevision.js";
 
 AddSchema("ChangeNodeOwnerMap_payload", {
 	properties: {

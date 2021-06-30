@@ -87,7 +87,7 @@ Object.assign(scripts, {
 
 		// db-shape and migrations
 		trackDBShape: TSScript("server", `../../${FindPackagePath("mobx-graphlink")}/Scripts/TrackDBShape.ts`,
-			`--classesFolder ../../Packages/common/Source/Store/db`,
+			`--classesFolder ../../Packages/common/Source/DB`,
 			`--templateFile ./Scripts/InitDB_Template.ts`,
 			`--outFile ./Scripts/InitDB_Generated.ts`),
 

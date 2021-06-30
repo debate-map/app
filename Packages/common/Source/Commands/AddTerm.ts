@@ -1,7 +1,7 @@
 import {UserEdit} from "../CommandMacros.js";
 import {AssertValidate, GenerateUUID, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
 import {Command} from "web-vcore/nm/mobx-graphlink.js";
-import {Term} from "../Store/db/terms/@Term.js";
+import {Term} from "../DB/terms/@Term.js";
 
 @UserEdit
 export class AddTerm extends Command<{term: Term}, string> {

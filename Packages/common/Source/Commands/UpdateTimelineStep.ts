@@ -1,8 +1,8 @@
 /*import {AddSchema, AssertValidate, GetSchemaJSON, Schema, AV} from "web-vcore/nm/mobx-graphlink.js";
 import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
-import {TimelineStep} from "../Store/db/timelineSteps/@TimelineStep.js";
-import {GetTimelineStep} from "../Store/db/timelineSteps.js";
+import {TimelineStep} from "../DB/timelineSteps/@TimelineStep.js";
+import {GetTimelineStep} from "../DB/timelineSteps.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 import {GetTimeline} from "..";

@@ -2,8 +2,8 @@ import {Assert, CE} from "web-vcore/nm/js-vextensions.js";
 import {UserEdit} from "../CommandMacros.js";
 import {AssertValidate, AddSchema, GetSchemaJSON, Schema, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
 import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
-import {Term} from "../Store/db/terms/@Term.js";
-import {GetTerm} from "../Store/db/terms.js";
+import {Term} from "../DB/terms/@Term.js";
+import {GetTerm} from "../DB/terms.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 type MainType = Term;

@@ -6,10 +6,6 @@ import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
 import {ArgumentType, MapNodeRevision} from "./@MapNodeRevision.js";
 import {MapNodeType} from "./@MapNodeType.js";
 
-// these are 22-chars, matching 22-char uuids/slug-ids
-export const globalMapID = "GLOBAL_MAP_00000000001";
-export const globalRootNodeID = "GLOBAL_ROOT_0000000001";
-
 export enum AccessLevel {
 	basic = "basic",
 	verified = "verified",
@@ -44,15 +40,15 @@ export class MapNode {
 	@Field({type: "string"})
 	accessPolicy: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
+	@DB((t,n)=>t.text(n).notNullable().references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	creator?: string;
 
-	@DB((t,n)=>t.bigInteger(n))
+	@DB((t,n)=>t.bigInteger(n).notNullable())
 	@Field({type: "number"}, {req: true})
 	createdAt: number;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t,n)=>t.text(n).notNullable())
 	@Field({$ref: "MapNodeType"}, {req: true})
 	type?: MapNodeType;
 

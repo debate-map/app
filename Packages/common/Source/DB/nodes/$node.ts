@@ -31,7 +31,7 @@ export function PreProcessLatex(text: string) {
 }
 
 export function GetFontSizeForNode(node: MapNodeL2/*, isSubnode = false*/) {
-	if (node.current.displayDetails.fontSizeOverride) return node.current.displayDetails.fontSizeOverride;
+	if (node.current.displayDetails?.fontSizeOverride) return node.current.displayDetails?.fontSizeOverride;
 	if (node.current.equation) return node.current.equation.latex ? 14 : 13;
 	//if (isSubnode) return 11;
 	return 14;
@@ -204,7 +204,7 @@ export function GetClaimFormUnderParent(node: MapNode, parent: MapNode): ClaimFo
 	return link.form;
 }*/
 export const GetNodeForm = StoreAccessor(s=>(node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2): ClaimForm=>{
-	if (IsNodeL3(node)) {
+	if (IsNodeL3(node) && node.link) {
 		return node.link.form;
 	}
 

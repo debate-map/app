@@ -1,11 +1,11 @@
 import {UserEdit} from "../CommandMacros.js";
 import {MergeDBUpdates, GetAsync, GetDocs, AssertV, Command} from "web-vcore/nm/mobx-graphlink.js";
-import {UserMapInfoSet} from "../Store/db/userMapInfo/@UserMapInfo.js";
+import {UserMapInfoSet} from "../DB/userMapInfo/@UserMapInfo.js";
 import {DeleteNode} from "./DeleteNode.js";
-import {GetMap} from "../Store/db/maps.js";
-import {Map} from "../Store/db/maps/@Map.js";
+import {GetMap} from "../DB/maps.js";
+import {Map} from "../DB/maps/@Map.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
-import {IsUserCreatorOrMod} from "../Store/db/users/$user.js";
+import {IsUserCreatorOrMod} from "../DB/users/$user.js";
 import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 @UserEdit

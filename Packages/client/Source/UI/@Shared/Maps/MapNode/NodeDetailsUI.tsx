@@ -5,14 +5,13 @@ import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vexten
 import {store} from "Store";
 import {Observer} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
-import {MapNode, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType} from "dm_common";
+import {MapNode, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType, NodeChildLink} from "dm_common";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel.js";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel.js";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel.js";
 import {TextPanel} from "./NodeDetailsUI/TextPanel.js";
 import {QuoteInfoEditorUI} from "./NodeDetailsUI/AttachmentPanel/QuoteInfoEditorUI.js";
 import {TagsPanel} from "./NodeUI/Panels/TagsPanel.js";
-import {NodeChildLink} from "dm_common/Source/Store/db/nodeChildLinks/@NodeChildLink.js";
 
 type Props = {
 	baseData: MapNode,

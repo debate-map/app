@@ -1,22 +1,22 @@
 import {Collection} from "web-vcore/nm/mobx-graphlink.js";
-import {AccessPolicy} from "./db/accessPolicies/@AccessPolicy.js";
-import {Map_NodeEdit} from "./db/mapNodeEdits/@MapNodeEdit.js";
-import {Map} from "./db/maps/@Map.js";
-import {Media} from "./db/media/@Media.js";
-import {NodeChildLink} from "./db/nodeChildLinks/@NodeChildLink.js";
-import {NodeRating} from "./db/nodeRatings/@NodeRating.js";
-import {MapNode} from "./db/nodes/@MapNode.js";
-import {MapNodeRevision} from "./db/nodes/@MapNodeRevision.js";
-import {MapNodeTag} from "./db/nodeTags/@MapNodeTag.js";
-import {Share} from "./db/shares/@Share.js";
-import {Term} from "./db/terms/@Term.js";
-import {User} from "./db/users/@User.js";
-import {User_Private} from "./db/users_private/@User_Private.js";
-import {VisibilityDirective} from "./db/visibilityDirectives/@VisibilityDirective.js";
+import {AccessPolicy} from "./DB/accessPolicies/@AccessPolicy.js";
+import {Map_NodeEdit} from "./DB/mapNodeEdits/@MapNodeEdit.js";
+import {Map} from "./DB/maps/@Map.js";
+import {Media} from "./DB/media/@Media.js";
+import {NodeChildLink} from "./DB/nodeChildLinks/@NodeChildLink.js";
+import {NodeRating} from "./DB/nodeRatings/@NodeRating.js";
+import {MapNode} from "./DB/nodes/@MapNode.js";
+import {MapNodeRevision} from "./DB/nodes/@MapNodeRevision.js";
+import {MapNodeTag} from "./DB/nodeTags/@MapNodeTag.js";
+import {Share} from "./DB/shares/@Share.js";
+import {Term} from "./DB/terms/@Term.js";
+import {User} from "./DB/users/@User.js";
+import {User_Private} from "./DB/users_private/@User_Private.js";
+import {VisibilityDirective} from "./DB/visibilityDirectives/@VisibilityDirective.js";
 
 // manually import these, since otherwise they're never runtime-imported
 //require("./db/users_private/@User_Private.js");
-import "./db/users_private/@User_Private.js";
+import "./DB/users_private/@User_Private.js";
 
 declare module "mobx-graphlink/Dist/UserTypes" {
 	interface DBShape extends GraphDBShape {}

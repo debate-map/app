@@ -5,17 +5,17 @@ import {DeleteNode} from "./DeleteNode.js";
 import {LinkNode} from "./LinkNode.js";
 import {UnlinkNode} from "./UnlinkNode.js";
 import {UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {ClaimForm, Polarity, MapNode} from "../Store/db/nodes/@MapNode.js";
-import {GetNodeL3, GetNodeL2, IsPremiseOfMultiPremiseArgument, IsSinglePremiseArgument} from "../Store/db/nodes/$node.js";
-import {GetParentNodeL3, GetHolderType, GetParentNodeID, GetNode} from "../Store/db/nodes.js";
-import {MapNodeType} from "../Store/db/nodes/@MapNodeType.js";
-import {GetMap} from "../Store/db/maps.js";
-import {MeID} from "../Store/db/users.js";
-import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision.js";
-import {Map} from "../Store/db/maps/@Map.js";
+import {ClaimForm, Polarity, MapNode} from "../DB/nodes/@MapNode.js";
+import {GetNodeL3, GetNodeL2, IsPremiseOfMultiPremiseArgument, IsSinglePremiseArgument} from "../DB/nodes/$node.js";
+import {GetParentNodeL3, GetHolderType, GetParentNodeID, GetNode} from "../DB/nodes.js";
+import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
+import {GetMap} from "../DB/maps.js";
+import {MeID} from "../DB/users.js";
+import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
+import {Map} from "../DB/maps/@Map.js";
 import {SearchUpFromNodeForNodeMatchingX} from "../Utils/Store/PathFinder.js";
-import {GetDefaultAccessPolicyID_ForNode} from "../Store/db/accessPolicies.js";
-import {GetNodeChildLinks} from "../Store/db/nodeChildLinks.js";
+import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
+import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 
 type Payload = {
 	mapID: string, oldParentID: string, newParentID: string, nodeID: string,

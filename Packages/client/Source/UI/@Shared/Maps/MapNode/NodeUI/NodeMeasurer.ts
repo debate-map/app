@@ -1,8 +1,6 @@
-import {GetContentWidth, GetContentHeight, GetAutoElement} from "web-vcore/nm/js-vextensions.js";
+import {GetFontSizeForNode, GetNodeDisplayText, MapNodeL3, MapNodeType_Info} from "dm_common";
+import {GetAutoElement, GetContentSize} from "web-vcore";
 import {ConvertStyleObjectToCSSString} from "web-vcore/nm/react-vextensions.js";
-import {MapNodeL3} from "dm_common";
-import {MapNodeType_Info} from "dm_common";
-import {GetNodeDisplayText, GetFontSizeForNode} from "dm_common";
 
 /* interface JQuery {
 	positionFrom(referenceControl): void;
@@ -26,12 +24,12 @@ export function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 	if (node.current.note) {
 		const noteWidth_tester = GetAutoElement(`<span style='${ConvertStyleObjectToCSSString({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>`) as HTMLElement;
 		noteWidth_tester.innerHTML = node.current.note;
-		noteWidth = Math.max(noteWidth, GetContentWidth(noteWidth_tester));
+		noteWidth = Math.max(noteWidth, GetContentSize(noteWidth_tester).width);
 	}
 	if (node.current.equation && node.current.equation.explanation) {
 		const noteWidth_tester = GetAutoElement(`<span style='${ConvertStyleObjectToCSSString({marginLeft: 15, fontSize: 11, whiteSpace: "nowrap"})}'>`) as HTMLElement;
 		noteWidth_tester.innerHTML = node.current.equation.explanation;
-		noteWidth = Math.max(noteWidth, GetContentWidth(noteWidth_tester));
+		noteWidth = Math.max(noteWidth, GetContentSize(noteWidth_tester).width);
 	}
 	expectedTextWidth += noteWidth;
 
@@ -45,14 +43,14 @@ export function GetMeasurementInfoForNode(node: MapNodeL3, path: string) {
 		expectedBoxWidth = nodeTypeInfo.maxWidth;
 	}
 
-	const width = node.current.displayDetails.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
+	const width = node.current.displayDetails?.widthOverride || expectedBoxWidth.KeepBetween(nodeTypeInfo.minWidth, nodeTypeInfo.maxWidth);
 
 	const maxTextWidth = width - expectedOtherStuffWidth;
 	const expectedTextHeight_tester = GetAutoElement(`<a id="nodeHeightTester" style='${ConvertStyleObjectToCSSString({whiteSpace: "initial", display: "inline-block"})}'>`) as HTMLElement;
 	expectedTextHeight_tester.style.fontSize = `${fontSize}px`;
 	expectedTextHeight_tester.style.width = `${maxTextWidth}px`;
 	expectedTextHeight_tester.innerHTML = displayText;
-	const expectedTextHeight = GetContentHeight(expectedTextHeight_tester);
+	const expectedTextHeight = GetContentSize(expectedTextHeight_tester).height;
 	const expectedHeight = expectedTextHeight + 10; // * + top-plus-bottom-padding
 	// this.Extend({expectedTextWidth, maxTextWidth, expectedTextHeight, expectedHeight}); // for debugging
 

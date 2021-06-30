@@ -1,9 +1,10 @@
 import {emptyArray, emptyArray_forLoading, IsNaN, CE, Assert, A, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
 import {GetDoc, SlicePath, SplitStringBySlash_Cached, StoreAccessor, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {globalRootNodeID} from "../DB_Constants.js";
 import {GetNodeChildLinks} from "./nodeChildLinks.js";
 import {GetNodeRevisionsByTitle} from "./nodeRevisions.js";
 import {AsNodeL1, GetNodeL2, GetNodeL3, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument} from "./nodes/$node.js";
-import {globalRootNodeID, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./nodes/@MapNode.js";
+import {MapNode, MapNodeL2, MapNodeL3, Polarity} from "./nodes/@MapNode.js";
 import {TitleKey} from "./nodes/@MapNodeRevision.js";
 import {MapNodeType, MapNodeType_Info} from "./nodes/@MapNodeType.js";
 import {GetFinalTagCompsForTag, GetNodeTagComps, GetNodeTags} from "./nodeTags.js";

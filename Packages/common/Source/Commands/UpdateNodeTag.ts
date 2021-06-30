@@ -1,9 +1,9 @@
 import {AssertV, Command, AV} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {AddSchema, AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNodeTag, TagComp_keys} from "../Store/db/nodeTags/@MapNodeTag.js";
-import {GetNodeTag} from "../Store/db/nodeTags.js";
-import {IsUserCreatorOrMod} from "../Store/db/users/$user.js";
+import {MapNodeTag, TagComp_keys} from "../DB/nodeTags/@MapNodeTag.js";
+import {GetNodeTag} from "../DB/nodeTags.js";
+import {IsUserCreatorOrMod} from "../DB/users/$user.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 

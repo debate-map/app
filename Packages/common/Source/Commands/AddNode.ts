@@ -1,6 +1,6 @@
 import {AssertV, AssertValidate, AssertValidate_Full, Command, GenerateUUID, GetSchemaJSON, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNode} from "../Store/db/nodes/@MapNode.js";
-import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision.js";
+import {MapNode} from "../DB/nodes/@MapNode.js";
+import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {AddNodeRevision} from "./AddNodeRevision.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 

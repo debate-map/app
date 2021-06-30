@@ -1,9 +1,9 @@
 /*import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AV, Command} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
-import {GetTimeline} from "../Store/db/timelines.js";
-import {GetTimelineStep} from "../Store/db/timelineSteps.js";
-import {TimelineStep} from "../Store/db/timelineSteps/@TimelineStep.js";
+import {GetTimeline} from "../DB/timelines.js";
+import {GetTimelineStep} from "../DB/timelineSteps.js";
+import {TimelineStep} from "../DB/timelineSteps/@TimelineStep.js";
 import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 @UserEdit

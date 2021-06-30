@@ -1,7 +1,7 @@
 import {UserEdit} from "../CommandMacros.js";
 import {Command} from "web-vcore/nm/mobx-graphlink.js";
 import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
-import {Timeline} from "../Store/db/timelines/@Timeline.js";
+import {Timeline} from "../DB/timelines/@Timeline.js";
 
 @UserEdit
 export class AddTimeline extends Command<{mapID: string, timeline: Timeline}, string> {

@@ -3,11 +3,11 @@ import {MapEdit} from "../CommandMacros.js";
 import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
-import {MapNodeL3} from "../Store/db/nodes/@MapNode.js";
-import {GetNodeL3, ReversePolarity} from "../Store/db/nodes/$node.js";
-import {GetParentNodeID} from "../Store/db/nodes.js";
-import {MapNodeType} from "../Store/db/nodes/@MapNodeType.js";
-import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
+import {MapNodeL3} from "../DB/nodes/@MapNode.js";
+import {GetNodeL3, ReversePolarity} from "../DB/nodes/$node.js";
+import {GetParentNodeID} from "../DB/nodes.js";
+import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
+import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 
 AddSchema("ReverseArgumentPolarity_payload", {
 	properties: {

@@ -94,15 +94,15 @@ export class MapNodeRevision {
 	@Field({type: "string"})
 	id: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
+	@DB((t,n)=>t.text(n).notNullable().references("id").inTable(`nodes`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	node: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
+	@DB((t,n)=>t.text(n).notNullable().references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
-	creator?: string;
+	creator: string;
 
-	@DB((t,n)=>t.bigInteger(n))
+	@DB((t,n)=>t.bigInteger(n).notNullable())
 	@Field({type: "number"}, {req: true})
 	createdAt: number;
 

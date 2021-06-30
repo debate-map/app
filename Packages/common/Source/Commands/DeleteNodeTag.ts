@@ -1,7 +1,7 @@
 import {AV, Command} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
-import {MapNodeTag} from "../Store/db/nodeTags/@MapNodeTag.js";
-import {GetNodeTag} from "../Store/db/nodeTags.js";
+import {MapNodeTag} from "../DB/nodeTags/@MapNodeTag.js";
+import {GetNodeTag} from "../DB/nodeTags.js";
 import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 @UserEdit

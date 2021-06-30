@@ -1,7 +1,7 @@
 import {UserEdit} from "../CommandMacros.js";
 import {GetAsync, Command, AssertV, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
-import {Term} from "../Store/db/terms/@Term.js";
-import {GetTerm} from "../Store/db/terms.js";
+import {Term} from "../DB/terms/@Term.js";
+import {GetTerm} from "../DB/terms.js";
 import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 @UserEdit

@@ -3,12 +3,12 @@ import {MergeDBUpdates, GetAsync, Command, AssertV, GenerateUUID} from "web-vcor
 import {AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {AddNode} from "./AddNode.js";
-import {MapNode, Polarity} from "../Store/db/nodes/@MapNode.js";
-import {MapNodeRevision} from "../Store/db/nodes/@MapNodeRevision.js";
-import {MapNodeType} from "../Store/db/nodes/@MapNodeType.js";
-import {GetNode} from "../Store/db/nodes.js";
+import {MapNode, Polarity} from "../DB/nodes/@MapNode.js";
+import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
+import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
+import {GetNode} from "../DB/nodes.js";
 import {AddArgumentAndClaim} from "../Commands.js";
-import {NodeChildLink} from "../Store/db/nodeChildLinks/@NodeChildLink.js";
+import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 
 type Payload = {mapID: string, parentID: string, node: MapNode, revision: MapNodeRevision, link?: Partial<NodeChildLink>, asMapRoot?: boolean};
 

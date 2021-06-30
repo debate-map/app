@@ -1,8 +1,8 @@
 import {UserEdit} from "../CommandMacros.js";
 import {Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
 import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
-import {HasModPermissions} from "../Store/db/users/$user.js";
-import {Media} from "../Store/db/media/@Media.js";
+import {HasModPermissions} from "../DB/users/$user.js";
+import {Media} from "../DB/media/@Media.js";
 
 @UserEdit
 export class AddMedia extends Command<{media: Media}, string> {

@@ -1,8 +1,8 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, AssertV, AssertValidate, Command, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
-import {Media} from "../Store/db/media/@Media.js";
-import {GetMedia} from "../Store.js";
+import {Media} from "../DB/media/@Media.js";
+import {GetMedia} from "../DB.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 type MainType = Media;

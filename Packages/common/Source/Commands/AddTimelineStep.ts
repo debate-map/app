@@ -1,8 +1,8 @@
 /*import {UserEdit} from "../CommandMacros.js";
 import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
-import {TimelineStep} from "../Store/db/timelineSteps/@TimelineStep.js";
-import {GetTimeline} from "../Store/db/timelines.js";
+import {TimelineStep} from "../DB/timelineSteps/@TimelineStep.js";
+import {GetTimeline} from "../DB/timelines.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 
 @UserEdit

@@ -4,7 +4,7 @@ import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {Graphlink} from "web-vcore/nm/mobx-graphlink.js";
 import {immerable, setUseProxies, setAutoFreeze} from "web-vcore/nm/immer.js";
 import {MainState} from "./main.js";
-import {GraphDBShape} from "dm_common/Source/Store/db.js";
+import {GraphDBShape} from "dm_common/Source/DBShape";
 
 //ConfigureMobX();
 

@@ -1,5 +1,5 @@
 import {AssertValidate, Command, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
-import {Share} from "../Store.js";
+import {Share} from "../DB.js";
 import {UserEdit} from "../CommandMacros.js";
 
 /*
