@@ -33,11 +33,6 @@ export const GetRatings = StoreAccessor(s=><
 	//return FilterRatings(Array.from(ratingSet.values()), filter);*/
 
 	return GetDocs({
-		/*queryOps: [
-			new WhereOp("node", "==", nodeID),
-			new WhereOp("type", "==", ratingType),
-			userID && new WhereOp("user", "==", userID),
-		].filter(a=>a),*/
 		params: {filter: {
 			node: {equalTo: nodeID},
 			type: {equalTo: ratingType},
