@@ -1,6 +1,7 @@
 import {makeAddInflectorsPlugin} from "graphile-utils";
+import type {PgAttribute} from "graphile-build-pg";
 
-export const CustomInflectorPlugin = makeAddInflectorsPlugin(inflectors => {
+export const CustomInflectorPlugin = makeAddInflectorsPlugin(inflectors=>{
 	// Here 'enumName' is dereferenced to 'oldEnumName' from the existing inflectors.
 	const old = {...inflectors};
 
@@ -24,11 +25,17 @@ export const CustomInflectorPlugin = makeAddInflectorsPlugin(inflectors => {
 			console.log("Test1", value);
 			return oldGetBaseName.call(this, value)?.replace(/Id/g, "ID");
 		},*/
-		camelCase(value: string) {
+		/*camelCase(value: string) {
 			return old.camelCase(value).replace(/Id/g, "ID");
 		},
 		upperCamelCase(value: string) {
-			return old.upperCamelCase(value).replace(/Id/g, "ID");
-		},
+			//return old.upperCamelCase(value).replace(/Id/g, "ID");
+			return value;
+		},*/
+		column(attr: PgAttribute) {
+			//return old.column(attr).replace(/Id/g, "ID"); // call to old-func
+			//return this.camelCase(this._columnName(attr)); // old-func code
+			return this._columnName(attr); // modified version, without call to camelCase
+		}
 	};
 }, true);

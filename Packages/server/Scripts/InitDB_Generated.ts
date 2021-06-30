@@ -108,6 +108,7 @@ export async function up(knex: Knex.Transaction) {
 
 	await knex.schema.createTable(`${v}accessPolicies`, t=>{
 		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
+		RunFieldInit(t, "name", (t,n)=>t.text(n).notNullable());
 		RunFieldInit(t, "base", (t,n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
 		RunFieldInit(t, "permissions_base", (t,n)=>t.jsonb(n));
 		RunFieldInit(t, "permissions_userExtends", (t,n)=>t.jsonb(n));

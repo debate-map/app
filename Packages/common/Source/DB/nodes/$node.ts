@@ -1,4 +1,4 @@
-import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE} from "web-vcore/nm/js-vextensions.js";
+import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE, A} from "web-vcore/nm/js-vextensions.js";
 import {SplitStringBySlash_Cached, SlicePath, StoreAccessor, PartialBy} from "web-vcore/nm/mobx-graphlink.js";
 import {GetMedia} from "../media.js";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
@@ -116,6 +116,8 @@ export function IsNodeL2(node: MapNode): node is MapNodeL2 {
 }
 export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision, accessPolicy: AccessPolicy) {
 	Assert(currentRevision, "Empty node-revision sent to AsNodeL2!");
+	Assert(accessPolicy, "Empty access-policy sent to AsNodeL2!");
+
 	// Assert(currentRevision.titles, "A MapNodeRevision object must have a titles property!"); // temp removed (for db-upgrade)
 	const result = E(node, {
 		policy: accessPolicy,
@@ -133,10 +135,12 @@ export const GetNodeL2 = StoreAccessor(s=>(nodeID: string | MapNode, path?: stri
 	// if any of the data in a MapNodeL2 is not loaded yet, just return null (we want it to be all or nothing)
 	//const currentRevision = GetNodeRevision(node.currentRevision);
 	const currentRevision = GetNodeRevisions(node.id).OrderBy(a=>a.createdAt).LastOrX(); // todo: add logic deciding which revision to use, based on view context, etc.
-	if (currentRevision === undefined) return undefined; // if node-revision still loading, have GetNodeL2 return "still loading"
-	if (currentRevision === null) return null; // if node-revision non-existent, have GetNodeL2 return null as well
+	/*if (currentRevision === undefined) return undefined; // if node-revision still loading, have GetNodeL2 return "still loading"
+	if (currentRevision === null) return null; // if node-revision non-existent, have GetNodeL2 return null as well*/
+	if (currentRevision == null) return null;
 
 	const accessPolicy = GetAccessPolicy(node.accessPolicy);
+	if (accessPolicy == null) return null;
 
 	const nodeL2 = AsNodeL2(node, currentRevision, accessPolicy);
 	//return CachedTransform("GetNodeL2", [path], nodeL2, ()=>nodeL2);
