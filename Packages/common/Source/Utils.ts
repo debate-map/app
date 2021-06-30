@@ -1,2 +1,2 @@
-export * from "./Utils/Store/PathFinder.js";
-export * from "./Utils/Store/RatingProcessor.js";
+export * from "./Utils/DB/PathFinder.js";
+export * from "./Utils/DB/RatingProcessor.js";

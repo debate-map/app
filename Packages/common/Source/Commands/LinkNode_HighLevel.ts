@@ -13,7 +13,7 @@ import {GetMap} from "../DB/maps.js";
 import {MeID} from "../DB/users.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {Map} from "../DB/maps/@Map.js";
-import {SearchUpFromNodeForNodeMatchingX} from "../Utils/Store/PathFinder.js";
+import {SearchUpFromNodeForNodeMatchingX} from "../Utils/DB/PathFinder.js";
 import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 

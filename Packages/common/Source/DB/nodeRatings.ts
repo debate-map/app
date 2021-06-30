@@ -11,7 +11,7 @@ import {ClaimForm, MapNodeL3} from "./nodes/@MapNode.js";
 import {MapNodeType} from "./nodes/@MapNodeType.js";
 import {MeID} from "./users.js";
 import {GetAccessPolicy} from "./accessPolicies.js";
-import {GetArgumentImpactPseudoRatings} from "../Utils/Store/RatingProcessor.js";
+import {GetArgumentImpactPseudoRatings} from "../Utils/DB/RatingProcessor.js";
 
 export const GetRatings = StoreAccessor(s=><
 	((nodeID: string, ratingType: Exclude<NodeRatingType, "impact">, userID?: string)=>NodeRating[]) & // if rating-type is known to not be "impact", all results will be "true ratings"
