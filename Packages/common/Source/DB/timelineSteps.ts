@@ -4,15 +4,13 @@ import {Timeline} from "./timelines/@Timeline.js";
 import {TimelineStep} from "./timelineSteps/@TimelineStep.js";
 import {GetNode, GetNodeChildren} from "./nodes.js";
 
-export const GetTimelineStep = StoreAccessor(s=>(id: string): TimelineStep=>{
+export const GetTimelineStep = StoreAccessor(s=>(id: string): TimelineStep|n=>{
 	if (id == null) return null;
 	//return GetDoc({}, a=>a.timelineSteps.get(id));
 	return null;
 });
-export const GetTimelineSteps = StoreAccessor(s=>(timeline: Timeline, emptyForLoading = true): TimelineStep[]=>{
-	const steps = (timeline.steps || []).map(id=>GetTimelineStep(id));
-	if (!emptyForLoading && CE(steps).Any(a=>a == null)) return emptyArray_forLoading;
-	return steps;
+export const GetTimelineSteps = StoreAccessor(s=>(timeline: Timeline, allowPartial = false): TimelineStep[]=>{
+	return timeline.steps?.map(id=>GetTimelineStep[allowPartial ? "normal" : "BIN"](id)) ?? [];
 });
 
 export const GetNodeRevealTimesInSteps = StoreAccessor(s=>(steps: TimelineStep[], baseOnLastReveal = false)=>{
@@ -20,7 +18,7 @@ export const GetNodeRevealTimesInSteps = StoreAccessor(s=>(steps: TimelineStep[]
 	for (const [index, step] of steps.entries()) {
 		for (const reveal of step.nodeReveals || []) {
 			if (reveal.show) {
-				const stepTime_safe = step.videoTime != null ? step.videoTime : CE(steps.slice(0, index).map(a=>a.videoTime)).LastOrX(a=>a != null);
+				const stepTime_safe = (step.videoTime != null ? step.videoTime : CE(steps.slice(0, index).map(a=>a.videoTime)).LastOrX(a=>a != null)) ?? 0;
 				if (baseOnLastReveal) {
 					nodeRevealTimes[reveal.path] = Math.max(stepTime_safe, ToNumber(nodeRevealTimes[reveal.path], 0));
 				} else {

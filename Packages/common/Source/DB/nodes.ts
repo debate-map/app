@@ -41,17 +41,16 @@ export const GetNodesL2 = StoreAccessor((s) => (): MapNodeL2[] => {
 	let nodeMap = GetNodeMap();
 	return CachedTransform("GetNodes_Enhanced", [], nodeMap, ()=>nodeMap ? nodeMap.VValues(true) : []);
 } */
-export const GetNodesByIDs = StoreAccessor(s=>(ids: string[], emptyForLoading = true): MapNode[]=>{
-	const nodes = ids.map(id=>GetNode(id));
-	if (emptyForLoading && CE(nodes).Any(a=>a == null)) return emptyArray_forLoading;
-	return nodes;
+export const GetNodesByIDs = StoreAccessor(s=>(ids: string[]): MapNode[]=>{
+	//return ids.map(id=>GetNode[emptyForLoading ? "BIN" : "normal"](id));
+	return ids.map(id=>GetNode.BIN(id));
 });
 export const GetNodesByTitle = StoreAccessor(s=>(title: string, titleKey: TitleKey): MapNode[]=>{
 	let nodeRevisions = GetNodeRevisionsByTitle(title, titleKey);
-	return nodeRevisions.map(a=>GetNode(a.node));
+	return nodeRevisions.map(a=>GetNode.BIN(a.node));
 });
 
-export const GetNode = StoreAccessor(s=>(id: string)=>{
+export const GetNode = StoreAccessor(s=>(id: string|n)=>{
 	// Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");
 	if (id == null || IsNaN(id)) return null;
 	return GetDoc({}, a=>a.nodes.get(id));
@@ -62,7 +61,7 @@ export const GetNode = StoreAccessor(s=>(id: string)=>{
 
 export const IsRootNode = StoreAccessor(s=>(node: MapNode)=>{
 	if (node.type != MapNodeType.category) return false;
-	const parents = GetNodeChildLinks(null, node.id);
+	const parents = GetNodeChildLinks(undefined, node.id);
 	if (parents.length != 0) return false; // todo: probably change this (map root-nodes can have "parents" now I think, due to restructuring)
 	return true;
 });
@@ -88,7 +87,8 @@ export const GetParentNodeL2 = StoreAccessor(s=>(childPath: string)=>{
 export const GetParentNodeL3 = StoreAccessor(s=>(childPath: string)=>{
 	return GetNodeL3(GetParentPath(childPath));
 });
-export const GetNodeID = StoreAccessor(s=>(path: string)=>{
+export const GetNodeID = StoreAccessor(s=>(path: string|n)=>{
+	if (path == null) return null;
 	const ownNodeStr = CE(SplitStringBySlash_Cached(path)).LastOrX();
 	return ownNodeStr ? PathSegmentToNodeID(ownNodeStr) : null;
 });
@@ -99,7 +99,7 @@ export function CleanArray<T>(array: T[], emptyArrayIfItemLoading = true) {
 }
 
 export const GetNodeParents = StoreAccessor(s=>(nodeID: string, emptyForLoading = true)=>{
-	const parentLinks = GetNodeChildLinks(null, nodeID);
+	const parentLinks = GetNodeChildLinks(undefined, nodeID);
 	return CleanArray(parentLinks.map(a=>GetNode(a.parent)), emptyForLoading);
 });
 export const GetNodeParentsL2 = StoreAccessor(s=>(nodeID: string, emptyForLoading = true)=>{
@@ -118,7 +118,7 @@ export const GetNodeChildren = StoreAccessor(s=>(nodeID: string, includeMirrorCh
 	}*/
 
 	const childLinks = GetNodeChildLinks(nodeID);
-	let result = childLinks.map(a=>GetNode(a.child));
+	let result = childLinks.map(a=>GetNode.BIN(a.child));
 	if (includeMirrorChildren) {
 		//let tags = GetNodeTags(nodeID);
 		let tagComps = GetNodeTagComps(nodeID, true, tagsToIgnore);
@@ -187,7 +187,7 @@ export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string, tagsToIgn
 		if (extensionOfAnotherMirrorChild) return false;
 
 		if (IsSinglePremiseArgument(child)) {
-			let childPremise = GetPremiseOfSinglePremiseArgument(child.id);
+			const childPremise = GetPremiseOfSinglePremiseArgument(child.id);
 			if (childPremise) {
 				let childPremiseTagComps = GetNodeTagComps(childPremise.id, true, tagsToIgnore);
 				const premiseIsExtensionOfAnotherMirrorChildPremise = CE(childPremiseTagComps).Any(comp=> {
@@ -231,7 +231,7 @@ export const GetNodeChildrenL3 = StoreAccessor(s=>(nodeID: string, path?: string
 });
 
 export const GetPremiseOfSinglePremiseArgument = StoreAccessor(s=>(argumentNodeID: string)=>{
-	let argument = GetNode(argumentNodeID);
+	let argument = GetNode.BIN(argumentNodeID);
 	let children = GetNodeChildren(argumentNodeID, false);
 	let childPremise = children.find(child=>child && IsPremiseOfSinglePremiseArgument(child, argument));
 	return childPremise;
@@ -274,7 +274,7 @@ export const ForNewLink_GetError = StoreAccessor(s=>(parentID: string, newChild:
 export const ForDelete_GetError = StoreAccessor(s=>(userID: string, node: MapNodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
 	const baseText = `Cannot delete node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
-	const parentLinks = GetNodeChildLinks(null, node.id);
+	const parentLinks = GetNodeChildLinks(undefined, node.id);
 	if (parentLinks.map(a=>a.parent).Except(...subcommandInfo?.parentsToIgnore ?? []).length > 1) return `${baseText}it has more than one parent. Try unlinking it instead.`;
 	if (IsRootNode(node) && !subcommandInfo?.asPartOfMapDelete) return `${baseText}it's the root-node of a map.`;
 

@@ -20,5 +20,5 @@ export const GetMapEditorIDs = StoreAccessor(s=>(mapID: string)=>{
 	return map.editors ?? emptyArray;
 });
 export const GetMapEditors = StoreAccessor(s=>(mapID: string)=>{
-	return GetMapEditorIDs.NN(mapID).map(id=>GetUser(id));
+	return GetMapEditorIDs.BIN(mapID).map(id=>GetUser(id));
 });

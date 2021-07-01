@@ -1,4 +1,4 @@
-import {AddSchema, AssertValidate, Command, GenerateUUID, Assert, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate, BU, Command, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
 import {NodeRatingType} from "../DB/nodeRatings/@NodeRatingType.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
@@ -20,7 +20,7 @@ export class SetNodeRating extends Command<{nodeID: string, ratingType: Exclude<
 		const {nodeID, ratingType, value} = this.payload;
 
 		const oldRatings = GetRatings(nodeID, ratingType, this.userInfo.id);
-		Assert(oldRatings.length <= 1, `There should not be more than one rating for this given "slot"!`);
+		BU(oldRatings.length <= 1, `There should not be more than one rating for this given "slot"!`);
 		this.oldRating = oldRatings[0];
 
 		if (value != null) {

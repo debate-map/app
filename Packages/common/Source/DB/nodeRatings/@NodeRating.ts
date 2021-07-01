@@ -1,5 +1,5 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
-import {DB, MGLClass, Field} from "web-vcore/nm/mobx-graphlink.js";
+import {DB, MGLClass, Field, PartialBy} from "web-vcore/nm/mobx-graphlink.js";
 import {NodeRatingType} from "./@NodeRatingType.js";
 
 @MGLClass({table: "nodeRatings"})
@@ -36,3 +36,4 @@ export class NodeRating {
 	@Field({type: "number"}, {req: true})
 	value: number;
 }
+export type NodeRating_Pseudo = PartialBy<NodeRating, "id" | "accessPolicy">;

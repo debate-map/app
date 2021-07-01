@@ -29,7 +29,7 @@ export class UpdateNodeTag extends Command<{id: string, updates: Partial<MainTyp
 		AssertValidate(`Update${MTName}_payload`, this.payload, "Payload invalid");
 
 		const {id, updates} = this.payload;
-		this.oldData = AV.NonNull = GetNodeTag(id);
+		this.oldData = GetNodeTag.BIN(id);
 		AssertUserCanModify(this, this.oldData);
 
 		this.newData = {...this.oldData, ...updates};

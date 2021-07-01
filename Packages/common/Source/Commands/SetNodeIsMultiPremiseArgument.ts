@@ -24,7 +24,7 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 		}, this.payload, "Payload invalid");
 
 		const {mapID, nodeID, multiPremiseArgument} = this.payload;
-		this.oldNodeData = GetNodeL2.NN(nodeID);
+		this.oldNodeData = GetNodeL2.BIN(nodeID);
 
 		this.newNodeData = {...AsNodeL1(this.oldNodeData), ...{multiPremiseArgument}};
 		if (multiPremiseArgument) {
@@ -37,7 +37,7 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 				const children = GetNodeChildren(this.oldNodeData.id);
 				//const oldChildNode_partialPath = `${nodeID}/${CE(this.oldNodeData.children).VKeys()[0]}`;
 				const oldChildNode_partialPath = `${nodeID}/${children[0].id}`;
-				const oldChildNode = GetNodeL3.NN(oldChildNode_partialPath);
+				const oldChildNode = GetNodeL3.BIN(oldChildNode_partialPath);
 				newRevision.titles.base = GetNodeDisplayText(oldChildNode, oldChildNode_partialPath, GetNodeForm(oldChildNode));
 
 				this.sub_addRevision = new AddNodeRevision({mapID, revision: newRevision});

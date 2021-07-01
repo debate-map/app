@@ -9,7 +9,7 @@ export class DeleteShare extends Command<{id: string}, {}> {
 	oldData: Share;
 	Validate() {
 		const {id} = this.payload;
-		this.oldData = GetShare(id);
+		this.oldData = GetShare.BIN(id);
 		AssertUserCanDelete(this, this.oldData);
 	}
 

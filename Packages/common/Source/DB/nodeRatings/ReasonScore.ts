@@ -1,5 +1,5 @@
 import {emptyArray_forLoading, Assert, IsNaN, CE, ArrayCE} from "web-vcore/nm/js-vextensions.js";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {StoreAccessor, BailUnless, BIN, BU} from "web-vcore/nm/mobx-graphlink.js";
 import {MapNodeType} from "../nodes/@MapNodeType.js";
 import {GetNodeL3, GetNodeL2} from "../nodes/$node.js";
 import {GetNodeChildrenL3, GetParentNodeL3} from "../nodes.js";
@@ -88,32 +88,36 @@ export const RS_CalculateWeightMultiplier = StoreAccessor(s=>(nodeID: string, ca
 	}
 	return runningMultiplier / runningDivisor;
 });
-export const RS_CalculateWeight = StoreAccessor(s=>(argumentID: string, premiseIDs: string[], calculationPath = [] as string[])=>{
-	const argument = GetNodeL2(argumentID);
-	const premises = premiseIDs.map(id=>GetNodeL2.WithBail(0, id));
+export const RS_CalculateWeight = StoreAccessor({onBail: 0}, s=>(argumentID: string, premiseIDs: string[], calculationPath = [] as string[])=>{
+	const argument = GetNodeL2.BIN(argumentID);
+	const premises = premiseIDs.map(id=>GetNodeL2.BIN(id));
 	if (premises.length == 0) return 0;
 	const baseWeightsProduct = premises.map(premise=>RS_CalculateBaseWeight(premise.id, calculationPath.concat(premise.id))).reduce((prev, cur)=>prev * cur);
 	const weightMultiplier = RS_CalculateWeightMultiplier(argument.id, calculationPath);
 	return baseWeightsProduct * weightMultiplier;
 });
-//}, ()=>0);
 
 export type ReasonScoreValues = {argument, premises, argTruthScoreComposite, argWeightMultiplier, argWeight, claimTruthScore, claimBaseWeight};
 export type ReasonScoreValues_RSPrefix = {argument, premises, rs_argTruthScoreComposite, rs_argWeightMultiplier, rs_argWeight, rs_claimTruthScore, rs_claimBaseWeight};
 export const RS_GetAllValues = StoreAccessor(s=>(nodeID: string, path: string, useRSPrefix = false, calculationPath = [] as string[])=>{
-	const node = GetNodeL2(nodeID);
+	const node = GetNodeL2.BIN(nodeID);
 	const parent = GetParentNodeL3(path);
-	const argument = node.type == MapNodeType.argument ? node : parent && parent.type == MapNodeType.argument ? parent : null;
-	const premises = node.type == MapNodeType.argument ? GetNodeChildrenL3(argument.id, path).filter(a=>a && a.type == MapNodeType.claim) : [node];
+	const argument =
+		node.type == MapNodeType.argument ? node :
+		parent?.type == MapNodeType.argument ? parent :
+		null;
+	const premises = argument != null ? GetNodeChildrenL3(argument.id, path).filter(a=>a && a.type == MapNodeType.claim) : [node];
 
+	let claimTruthScore: number|n, claimBaseWeight: number|n;
 	if (node.type == MapNodeType.claim) {
-		var claimTruthScore = RS_CalculateTruthScore(node.id, calculationPath);
-		var claimBaseWeight = RS_CalculateBaseWeight(node.id, calculationPath);
+		claimTruthScore = RS_CalculateTruthScore(node.id, calculationPath);
+		claimBaseWeight = RS_CalculateBaseWeight(node.id, calculationPath);
 	}
+	let argTruthScoreComposite: number|n, argWeightMultiplier: number|n, argWeight: number|n;
 	if (argument) { // (node could instead be a claim under category)
-		var argTruthScoreComposite = RS_CalculateTruthScoreComposite(argument.id, calculationPath);
-		var argWeightMultiplier = RS_CalculateWeightMultiplier(argument.id, calculationPath);
-		var argWeight = RS_CalculateWeight(argument.id, premises.map(a=>a.id), calculationPath);
+		argTruthScoreComposite = RS_CalculateTruthScoreComposite(argument.id, calculationPath);
+		argWeightMultiplier = RS_CalculateWeightMultiplier(argument.id, calculationPath);
+		argWeight = RS_CalculateWeight(argument.id, premises.map(a=>a.id), calculationPath);
 	}
 
 	if (useRSPrefix) {

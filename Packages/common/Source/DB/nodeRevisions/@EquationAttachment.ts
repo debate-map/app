@@ -4,7 +4,7 @@ export class EquationAttachment {
 	latex: boolean;
 	text = "";
 	isStep? = true;
-	explanation = null as string;
+	explanation = null as string|n;
 }
 AddSchema("EquationAttachment", {
 	properties: {

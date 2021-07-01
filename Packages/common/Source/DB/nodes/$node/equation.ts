@@ -6,7 +6,7 @@ export function GetEquationStepNumber(path: string) {
 	const parent = GetParentNode(path);
 	if (parent == null) return 0;
 
-	const parentChildLinks = GetNodeChildLinks(parent.id);
+	const parentChildLinks = GetNodeChildLinks.BILA(parent.id);
 
 	// let equationStepNodeIDs = parent.children.VKeys().map(a=>a.ToInt());
 	/*let equationStepNodes = GetNodeChildrenL2(parent.id).filter(a=>{
@@ -20,5 +20,5 @@ export function GetEquationStepNumber(path: string) {
 	}
 	return equationStepNodes.map(a=>a.id).indexOf(nodeID) + 1;*/
 
-	return parentChildLinks.find(a=>a.child == nodeID).slot;
+	return parentChildLinks.find(a=>a.child == nodeID)?.slot ?? null;
 }

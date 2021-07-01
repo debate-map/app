@@ -27,7 +27,7 @@ export class SetUserData extends Command<{id: string, updates: Partial<MainType>
 
 		const {id, updates} = this.payload;
 		//AssertV(id == this.userInfo.id, "Cannot set user-data for another user!");
-		this.oldData = GetUser(id);
+		this.oldData = GetUser.BIN(id);
 		/*if (!allowPrevious) {
 			AssertV(this.oldData == null, "oldData must be null, since allowPrevious is false.");
 		}*/

@@ -25,7 +25,7 @@ export class UpdateTerm extends Command<{termID: string, updates: Partial<Term>}
 	newData: Term;
 	Validate() {
 		const {termID, updates} = this.payload;
-		this.oldData = GetTerm.NN(termID);
+		this.oldData = GetTerm.BIN(termID);
 		AssertUserCanModify(this, this.oldData);
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate("Term", this.newData, "New-data invalid");

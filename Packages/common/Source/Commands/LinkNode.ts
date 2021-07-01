@@ -25,7 +25,7 @@ export class LinkNode extends Command<{mapID: string, parentID: string, childID:
 		this.parent_oldData =
 			(this.parentCommand instanceof LinkNode_HighLevel && this == this.parentCommand.sub_linkToNewParent ? this.parentCommand.sub_addArgumentWrapper?.payload.node : null)
 			//?? (this.parentCommand instanceof ImportSubtree_Old ? "" as any : null) // hack; use empty-string to count as non-null for this chain, but count as false for if-statements (ye...)
-			?? GetNode.NN(parentID);
+			?? GetNode.BIN(parentID);
 		AssertV(this.parent_oldData || this.parentCommand != null, "Parent does not exist! (and it should, since no parent-command)");
 
 		const parentChildren = GetNodeChildLinks(this.parent_oldData.id);

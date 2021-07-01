@@ -69,9 +69,9 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	Assert(false);
 }
 export const GetMainRatingType = StoreAccessor(s=>(node: MapNodeL2)=>{
-	return GetRatingTypesForNode(node).FirstOrX(a=>a.main, {} as Partial<RatingTypeInfo>).type;
+	return GetRatingTypesForNode(node).FirstOrX(a=>!!a.main, {} as Partial<RatingTypeInfo>)!.type;
 });
-export function GetSortByRatingType(node: MapNodeL3): NodeRatingType {
+export function GetSortByRatingType(node: MapNodeL3): NodeRatingType|n {
 	if (node.link && node.link.form == ClaimForm.yesNoQuestion) {
 		return NodeRatingType.significance;
 	}
@@ -104,10 +104,10 @@ export function IsNodeL1(node): node is MapNode {
 	return !node["current"];
 }
 export function AsNodeL1(node: MapNodeL2 | MapNodeL3) {
-	const result = E(node);
+	const result = E(node) as any;
 	delete result.current;
-	delete result["displayPolarity"];
-	delete result["link"];
+	delete result.displayPolarity;
+	delete result.link;
 	return result as MapNode;
 }
 
@@ -127,7 +127,7 @@ export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision, access
 	delete result["link"];
 	return result;
 }
-export const GetNodeL2 = StoreAccessor(s=>(nodeID: string | MapNode, path?: string)=>{
+export const GetNodeL2 = StoreAccessor(s=>(nodeID: string | MapNode | n, path?: string)=>{
 	if (IsString(nodeID)) nodeID = GetNode(nodeID) as MapNode;
 	if (nodeID == null) return null;
 	const node = nodeID as MapNode;
@@ -168,22 +168,18 @@ export function IsNodeL3(node: MapNode): node is MapNodeL3 {
 	};
 	return E(node, {displayPolarity, link}) as MapNodeL3;
 }*/
-export function AsNodeL3(node: MapNodeL2, link: PartialBy<NodeChildLink, "polarity">, displayPolarity = Polarity.supporting) {
+export function AsNodeL3(node: MapNodeL2, link: PartialBy<NodeChildLink, "polarity">|n, displayPolarity: Polarity|n = Polarity.supporting) {
 	Assert(IsNodeL2(node), "Node sent to AsNodeL3 was not an L2 node!");
 	return E(node, {displayPolarity, link}) as MapNodeL3;
 }
-export const GetNodeL3 = StoreAccessor(s=>(path: string, tagsToIgnore?: string[])=>{
+export const GetNodeL3 = StoreAccessor(s=>(path: string | n, tagsToIgnore?: string[])=>{
 	if (path == null) return null;
 	const nodeID = GetNodeID(path);
 	const node = GetNodeL2(nodeID);
 	if (node == null) return null;
 
-	// if any of the data in a MapNodeL3 is not loaded yet, just return null (we want it to be all or nothing)
-	let displayPolarity = null;
-	if (node.type == MapNodeType.argument) {
-		displayPolarity = GetDisplayPolarityAtPath(node, path, tagsToIgnore);
-		if (displayPolarity == null) return null;
-	}
+	// if any of the data in a MapNodeL3 is not loaded yet, just bail (we want it to be all or nothing)
+	let displayPolarity = node.type == MapNodeType.argument ? GetDisplayPolarityAtPath.BIN(node, path, tagsToIgnore) : null;
 
 	/*const isSubnode = IsNodeSubnode(node);
 	if (!isSubnode) {*/
@@ -209,15 +205,14 @@ export function GetClaimFormUnderParent(node: MapNode, parent: MapNode): ClaimFo
 }*/
 export const GetNodeForm = StoreAccessor(s=>(node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2): ClaimForm=>{
 	if (IsNodeL3(node) && node.link) {
-		return node.link.form;
+		return node.link.form ?? ClaimForm.base;
 	}
 
-	const parent: MapNodeL2 = IsString(pathOrParent) ? GetParentNodeL2(pathOrParent as string) : pathOrParent as MapNodeL2;
+	const parent = IsString(pathOrParent) ? GetParentNodeL2(pathOrParent as string) : pathOrParent as MapNodeL2;
 	const link = GetLinkUnderParent(node.id, parent);
-	if (link == null) return ClaimForm.base;
-	return link.form;
+	return link?.form ?? ClaimForm.base;
 });
-export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapNode, includeMirrorLinks = true, tagsToIgnore?: string[]): NodeChildLink=>{
+export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapNode|n, includeMirrorLinks = true, tagsToIgnore?: string[])=>{
 	if (parent == null) return null;
 	//let link = parent.children?.[nodeID]; // null-check, since after child-delete, parent-data might have updated before child-data removed
 	const parentChildLinks = GetNodeChildLinks(parent.id);
@@ -236,9 +231,9 @@ export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapN
 					let nodeL3ForNodeAsMirrorChildInThisTag = mirrorChildren.find(a=>a.id == nodeID);
 					//const nodeL3ForNodeAsMirrorChildInThisTag = GetNodeL3(`${comp.nodeX}/${nodeID}`);
 					if (nodeL3ForNodeAsMirrorChildInThisTag) {
-						link = Clone(nodeL3ForNodeAsMirrorChildInThisTag.link);
+						link = Clone(nodeL3ForNodeAsMirrorChildInThisTag.link) as NodeChildLink;
 						Object.defineProperty(link, "_mirrorLink", {value: true});
-						if (comp.reversePolarities) {
+						if (comp.reversePolarities && link.polarity) {
 							link.polarity = ReversePolarity(link.polarity);
 						}
 					}
@@ -249,7 +244,7 @@ export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapN
 	return link;
 });
 export function GetLinkAtPath(path: string) {
-	const nodeID = GetNodeID(path);
+	const nodeID = GetNodeID(path)!;
 	const parent = GetNode(GetNodeID(SlicePath(path, 1)));
 	return GetLinkUnderParent(nodeID, parent);
 }
@@ -307,7 +302,7 @@ export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
 
 export function GetAllNodeRevisionTitles(nodeRevision: MapNodeRevision): string[] {
 	if (nodeRevision == null || nodeRevision.titles == null) return [];
-	return TitleKey_values.map(key=>nodeRevision.titles[key]).filter(a=>a != null);
+	return TitleKey_values.map(key=>nodeRevision.titles[key]).filter(a=>a != null) as string[];
 }
 
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
@@ -351,8 +346,7 @@ export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: stri
 				firstSource = node.current.quote.sourceChains[0].sources[0];
 
 				if (firstSource.name) text += ` as part of ${firstSource.name}`;
-			}
-			if (node.current.media) {
+			} else if (node.current.media) {
 				const media = GetMedia(node.current.media.id);
 				if (media == null) return "...";
 				// if (image.sourceChains == null) return `The ${GetNiceNameForImageType(image.type)} below is unmodified.`; // temp
@@ -361,6 +355,8 @@ export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: stri
 
 				if (firstSource.name) text += `, as part of ${firstSource.name},`;
 				text += ` was ${node.current.media.captured ? "captured" : "produced"}`;
+			} else {
+				throw "[can't happen]";
 			}
 
 			if (firstSource.location) text += ` at ${firstSource.location}`;

@@ -3,10 +3,9 @@ import {GetNode} from "../../DB/nodes.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {GetNodeChildLinks} from "../../DB/nodeChildLinks.js";
 
-export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc: (nodeID: string)=>boolean, nodeIDsToIgnore?: string[]): string {
+export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc: (nodeID: string)=>boolean, nodeIDsToIgnore?: string[]): string|n {
 	// return CachedTransform_WithStore('GetShortestPathFromRootToNode', [rootNodeID, node.id], {}, () => {
-	const startNode = GetNode(startNodeID); // call this so cache system knows to recalculate when node-data changes
-	if (startNode == null) return null;
+	const startNode = GetNode.BIN(startNodeID); // call this so cache system knows to recalculate when node-data changes
 
 	type Head = {id: string, path: string[]};
 	// let currentLayerHeads: Head[] = (startNode.parents || {}).VKeys().map((id) => ({ id, path: [id, startNodeID] }));
@@ -20,11 +19,10 @@ export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc
 		}
 
 		// else, find new-layer-heads for next search loop
-		const newLayerHeads = [];
+		const newLayerHeads = [] as {id: string, path: string[]}[];
 		for (const layerHead of currentLayerHeads) {
-			const node = GetNode(layerHead.id);
-			if (node == null) return null;
-			const parentLinks = GetNodeChildLinks(null, node.id);
+			const node = GetNode.BIN(layerHead.id);
+			const parentLinks = GetNodeChildLinks(undefined, node.id);
 			for (const parentID of parentLinks.map(a=>a.parent)) {
 				if (layerHead.path.includes(parentID)) continue; // parent-id is already part of path; ignore, so we don't cause infinite-loop
 				if (nodeIDsToIgnore?.includes(parentID)) continue;

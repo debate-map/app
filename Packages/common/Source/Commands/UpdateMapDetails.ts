@@ -29,7 +29,7 @@ export class UpdateMapDetails extends Command<{id: string, updates: Partial<Main
 		AssertValidate(`Update${MTName}Details_payload`, this.payload, "Payload invalid");
 
 		const {id: mapID, updates: mapUpdates} = this.payload;
-		this.oldData = GetMap.NN(mapID);
+		this.oldData = GetMap.BIN(mapID);
 		AssertUserCanModify(this, this.oldData);
 		this.newData = {...this.oldData, ...mapUpdates};
 		this.newData.editedAt = Date.now();

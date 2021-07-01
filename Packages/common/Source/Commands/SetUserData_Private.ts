@@ -25,7 +25,7 @@ export class SetUserData_Private extends Command<{id: string, updates: Partial<M
 		}, this.payload, "Payload invalid");
 
 		const {id, updates} = this.payload;
-		this.oldData = GetUser_Private(id);
+		this.oldData = GetUser_Private.BIN(id);
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}

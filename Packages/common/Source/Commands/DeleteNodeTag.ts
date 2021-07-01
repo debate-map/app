@@ -9,7 +9,7 @@ export class DeleteNodeTag extends Command<{id: string}, {}> {
 	oldData: MapNodeTag;
 	Validate() {
 		const {id} = this.payload;
-		this.oldData = AV.NonNull = GetNodeTag(id);
+		this.oldData = GetNodeTag.BIN(id);
 		AssertUserCanDelete(this, this.oldData);
 	}
 

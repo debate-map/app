@@ -256,7 +256,7 @@ export function GetTagCompClassByDisplayName(displayName: string) {
 	return TagComp_classes.find(a=>a.displayName == displayName);
 }
 export function GetTagCompClassByTag(tag: MapNodeTag) {
-	return TagComp_classes.find(a=>a.key in tag);
+	return TagComp_classes.find(a=>a.key in tag)!;
 }
 export function GetTagCompOfTag(tag: MapNodeTag): TagComp {
 	let compClass = GetTagCompClassByTag(tag);

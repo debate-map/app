@@ -10,15 +10,6 @@
 
 		// compilation
 		"esModuleInterop": true,
-		//"strict": true, // enables all of the below (other than noImplicitReturns)
-		//"noImplicitAny": true,
-		//"noImplicitThis": true,
-		//"noImplicitReturns": true,
-		"alwaysStrict": true,
-		//"strictBindCallApply": true,
-		//"strictNullChecks": true, // enable this at some point
-		//"strictFunctionTypes": true,
-		//"strictPropertyInitialization": true,
 	},
 	//"files": ["Source/Main.ts"],
 	"include": [

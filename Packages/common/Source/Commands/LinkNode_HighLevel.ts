@@ -64,11 +64,11 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 		this.returnData = {};
 
-		this.map_data = GetMap.NN(mapID);
-		this.node_data = GetNodeL2.NN(nodeID);
+		this.map_data = GetMap.BIN(mapID);
+		this.node_data = GetNodeL2.BIN(nodeID);
 		const oldParent_data = GetNodeL2(oldParentID);
 		//AssertV(oldParent_data, "oldParent_data is null."); // commented: allow linking orphaned nodes
-		this.newParent_data = GetNodeL2.NN(newParentID);
+		this.newParent_data = GetNodeL2.BIN(newParentID);
 
 		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
 		let pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && createWrapperArg;

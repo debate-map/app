@@ -11,7 +11,7 @@ import {PermissionGroupSet} from "./@User.js";
 	return GetUser(userID)?.joinDate;
 });*/
 const defaultPermissions = {basic: true, verified: true, mod: false, admin: false} as PermissionGroupSet; // temp
-export const GetUserPermissionGroups = StoreAccessor(s=>(userID: string): PermissionGroupSet=>{
+export const GetUserPermissionGroups = StoreAccessor(s=>(userID: string|n): PermissionGroupSet|n=>{
 	if (userID == null) return null;
 	return GetUser(userID)?.permissionGroups ?? defaultPermissions;
 });
