@@ -9,7 +9,7 @@ export const GetTimelineStep = StoreAccessor(s=>(id: string): TimelineStep|n=>{
 	//return GetDoc({}, a=>a.timelineSteps.get(id));
 	return null;
 });
-export const GetTimelineSteps = StoreAccessor(s=>(timeline: Timeline, allowPartial = false): TimelineStep[]=>{
+export const GetTimelineSteps = StoreAccessor(s=>(timeline: Timeline, allowPartial = false): (TimelineStep|n)[]=>{
 	return timeline.steps?.map(id=>GetTimelineStep[allowPartial ? "normal" : "BIN"](id)) ?? [];
 });
 

@@ -17,10 +17,10 @@ import {RootState} from "Store";
 // startup (non-hot)
 // ==========
 
-export const JustBeforeInitLibs_listeners = [];
+export const JustBeforeInitLibs_listeners = [] as (()=>any)[];
 export function JustBeforeInitLibs(listener: ()=>any) { JustBeforeInitLibs_listeners.push(listener); }
 
-export const JustBeforeUI_listeners = [];
+export const JustBeforeUI_listeners = [] as (()=>any)[];
 export function JustBeforeUI(listener: ()=>any) { JustBeforeUI_listeners.push(listener); }
 
 /*declare const __webpack_require__;

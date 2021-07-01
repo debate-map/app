@@ -45,6 +45,14 @@ export class NodeChildLink {
 	@Field({$ref: "Polarity"})
 	polarity?: Polarity;
 
+	@DB((t,n)=>t.text(n))
+	@Field({type: "string"})
+	c_parentType: number;
+
+	@DB((t,n)=>t.text(n))
+	@Field({type: "string"})
+	c_childType: number;
+
 	// runtime only
 	_mirrorLink?: boolean;
 }
