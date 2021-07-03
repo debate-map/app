@@ -1,8 +1,8 @@
 import {emptyArray, IsNaN} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {MapNodeRevision, TitleKey} from "./nodes/@MapNodeRevision.js";
 
-export const GetNodeRevision = StoreAccessor(s=>(id: string)=>{
+export const GetNodeRevision = CreateAccessor(c=>(id: string)=>{
 	if (id == null || IsNaN(id)) return null;
 	return GetDoc({}, a=>a.nodeRevisions.get(id));
 });
@@ -24,7 +24,7 @@ export const GetNodeRevision = StoreAccessor(s=>(id: string)=>{
 	const docIDs = docs.map(a => a.id);
 	return docIDs;
 } */
-export const GetNodeRevisions = StoreAccessor(s=>(nodeID: string): MapNodeRevision[]=>{
+export const GetNodeRevisions = CreateAccessor(c=>(nodeID: string): MapNodeRevision[]=>{
 	/* const entryMap = GetData_Query(
 		{
 			// key: `GetNodeRevisions_${nodeID}`,
@@ -42,7 +42,7 @@ export const GetNodeRevisions = StoreAccessor(s=>(nodeID: string): MapNodeRevisi
 		}},
 	}, a=>a.nodeRevisions);
 });
-export const GetNodeRevisionsByTitle = StoreAccessor(s=>(title: string, titleKey: TitleKey): MapNodeRevision[]=>{
+export const GetNodeRevisionsByTitle = CreateAccessor(c=>(title: string, titleKey: TitleKey): MapNodeRevision[]=>{
 	/*return GetDocs({
 		//queryOps: [new WhereOp(`titles.${titleKey}`, "==", title)],
 	}, a=>a.nodeRevisions);*/

@@ -136,7 +136,7 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 				backgroundImage: GADDemo_2020 ? "url(/Images/@GAD/2020ElectionDemo.png)" : "url(/Images/@GAD/COVID/Title.png)",
 				backgroundPosition: "center", backgroundSize: "100%", backgroundRepeat: "no-repeat",
 			});
-			text = null;
+			text = null as any;
 		}
 
 		const actionFunc = this.props.actionFunc ?? ((s: RootState)=>{

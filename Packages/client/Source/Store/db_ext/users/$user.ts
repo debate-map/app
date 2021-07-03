@@ -34,6 +34,6 @@ export function GetUserBackground(userID: string): BackgroundConfig {
 		};
 	}
 
-	const background = presetBackgrounds[user_p.backgroundID] || presetBackgrounds[defaultPresetBackground];
+	const background = presetBackgrounds[user_p.backgroundID!] || presetBackgrounds[defaultPresetBackground];
 	return background;
 }

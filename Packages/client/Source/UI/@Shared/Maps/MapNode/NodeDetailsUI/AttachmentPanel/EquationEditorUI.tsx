@@ -30,7 +30,7 @@ export class EquationEditorUI extends BaseComponent<Props, {newData: EquationAtt
 				<RowLR splitAt={splitAt}>
 					<Pre>LaTeX: </Pre>
 					<CheckBox enabled={creating || editing} style={{width: "100%"}}
-						value={newData.latex} onChange={val=>Change(val ? newData.latex = true : delete newData.latex)}/>
+						value={newData.latex ?? false} onChange={val=>Change(val ? newData.latex = true : delete newData.latex)}/>
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Text: </Pre>
@@ -39,9 +39,9 @@ export class EquationEditorUI extends BaseComponent<Props, {newData: EquationAtt
 				</RowLR>
 				<Row mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Step in series: </Pre>
-					<CheckBox enabled={editing} value={newData.isStep}
+					<CheckBox enabled={editing} value={newData.isStep ?? false}
 						// onChange={val=>Change(val ? newLinkData.isStep = true : delete newLinkData.isStep)}/>
-						onChange={val=>Change(newData.isStep = val || null)}/>
+						onChange={val=>Change(newData.isStep = val ?? undefined)}/>
 				</Row>
 				{newData.isStep &&
 					<RowLR mt={5} splitAt={splitAt}>

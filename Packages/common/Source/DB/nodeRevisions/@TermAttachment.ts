@@ -9,7 +9,7 @@ export class TermAttachment {
 }
 AddSchema("TermAttachment", {
 	properties: {
-		id: {type: "string"},
+		id: {$ref: "UUID"},
 	},
 	required: ["id"],
 });

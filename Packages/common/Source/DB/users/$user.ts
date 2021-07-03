@@ -1,5 +1,5 @@
 import {Assert, IsString} from "web-vcore/nm/js-vextensions.js";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {AccessLevel} from "../nodes/@MapNode.js";
 import {GetUser} from "../users.js";
 import {PermissionGroupSet} from "./@User.js";
@@ -7,11 +7,11 @@ import {PermissionGroupSet} from "./@User.js";
 // permissions
 // ==========
 
-/*export const GetUserJoinDate = StoreAccessor(s=>(userID: string): number=>{
+/*export const GetUserJoinDate = CreateAccessor(c=>(userID: string): number=>{
 	return GetUser(userID)?.joinDate;
 });*/
 const defaultPermissions = {basic: true, verified: true, mod: false, admin: false} as PermissionGroupSet; // temp
-export const GetUserPermissionGroups = StoreAccessor(s=>(userID: string|n): PermissionGroupSet|n=>{
+export const GetUserPermissionGroups = CreateAccessor(c=>(userID: string|n): PermissionGroupSet|n=>{
 	if (userID == null) return null;
 	return GetUser(userID)?.permissionGroups ?? defaultPermissions;
 });
@@ -26,33 +26,33 @@ export function GetUserAccessLevel(userID: string) {
 	Assert(false);
 }
 
-export const CanGetBasicPermissions = StoreAccessor(s=>(userIDOrPermissions: string | PermissionGroupSet)=>{
+export const CanGetBasicPermissions = CreateAccessor(c=>(userIDOrPermissions: string | PermissionGroupSet | n)=>{
 	// if (true) return HasModPermissions(userIDOrPermissions); // temp; will be removed once GAD is over
 
 	const permissions = IsString(userIDOrPermissions) ? GetUserPermissionGroups(userIDOrPermissions) : userIDOrPermissions;
 	return permissions == null || permissions.basic; // if anon/not-logged-in, assume user can get basic permissions once logged in
 });
-export const HasBasicPermissions = StoreAccessor(s=>(userIDOrPermissions: string | PermissionGroupSet)=>{
+export const HasBasicPermissions = CreateAccessor(c=>(userIDOrPermissions: string | PermissionGroupSet | n)=>{
 	// if (true) return HasModPermissions(userIDOrPermissions); // temp; will be removed once GAD is over
 
 	const permissions = IsString(userIDOrPermissions) ? GetUserPermissionGroups(userIDOrPermissions) : userIDOrPermissions;
 	return permissions ? permissions.basic : false;
 });
-export const HasModPermissions = StoreAccessor(s=>(userIDOrPermissions: string | PermissionGroupSet)=>{
+export const HasModPermissions = CreateAccessor(c=>(userIDOrPermissions: string | PermissionGroupSet | n)=>{
 	const permissions = IsString(userIDOrPermissions) ? GetUserPermissionGroups(userIDOrPermissions) : userIDOrPermissions;
 	return permissions ? permissions.mod : false;
 });
-export const HasAdminPermissions = StoreAccessor(s=>(userIDOrPermissions: string | PermissionGroupSet)=>{
+export const HasAdminPermissions = CreateAccessor(c=>(userIDOrPermissions: string | PermissionGroupSet | n)=>{
 	const permissions = IsString(userIDOrPermissions) ? GetUserPermissionGroups(userIDOrPermissions) : userIDOrPermissions;
 	return permissions ? permissions.admin : false;
 });
 /** If user is the creator, also requires that they (still) have basic permissions. */
-//export const IsUserCreatorOrMod = StoreAccessor(s=>(userID: string, entity: Term | Image | Map | MapNode | MapNodePhrasing | Timeline /* | Post | Thread */)=>{
-export const IsUserCreatorOrMod = StoreAccessor(s=>(userID: string, entity: {creator?: string}|n)=>{
+//export const IsUserCreatorOrMod = CreateAccessor(c=>(userID: string, entity: Term | Image | Map | MapNode | MapNodePhrasing | Timeline /* | Post | Thread */)=>{
+export const IsUserCreatorOrMod = CreateAccessor(c=>(userID: string|n, entity: {creator?: string}|n)=>{
 	return (entity?.creator === userID && HasBasicPermissions(userID)) || HasModPermissions(userID);
 });
 
-/*export const CanSubmitRevisions = StoreAccessor(s=>(userID: string, nodeID: string): boolean=>{
+/*export const CanSubmitRevisions = CreateAccessor(c=>(userID: string, nodeID: string): boolean=>{
 	// mods and admins can always edit
 	if (HasModPermissions(userID) || HasAdminPermissions(userID)) {
 		return true;
@@ -81,7 +81,7 @@ export const IsUserCreatorOrMod = StoreAccessor(s=>(userID: string, entity: {cre
 	Assert(false, "Invalid permission-info-type.");
 });*/
 
-/*export const CanContributeToNode = StoreAccessor(s=>(userID: string, nodeID: string): boolean=>{
+/*export const CanContributeToNode = CreateAccessor(c=>(userID: string, nodeID: string): boolean=>{
 	// mods and admins can always contribute
 	if (HasModPermissions(userID) || HasAdminPermissions(userID)) {
 		return true;

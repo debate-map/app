@@ -30,7 +30,7 @@ export class MediaAttachmentEditorUI extends BaseComponent<Props, {newData: Medi
 		};
 		const image = Validate("UUID", newData.id) == null ? GetMedia(newData.id) : null;
 
-		const enabled = creating || editing;
+		const enabled = creating || !!editing;
 		return (
 			<Column style={style}>
 				<Row>
@@ -70,7 +70,7 @@ export class MediaAttachmentEditorUI extends BaseComponent<Props, {newData: Medi
 				<Row mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Preview width:</Pre>
 					<Spinner ml={5} max={100} enabled={creating || editing}
-						value={newData.previewWidth | 0} onChange={val=>Change(newData.previewWidth = val != 0 ? val : null)}/>
+						value={newData.previewWidth ?? 0} onChange={val=>Change(newData.previewWidth = val != 0 ? val : undefined)}/>
 					<Pre>% (0 for auto)</Pre>
 				</Row>
 				<Row mt={10}>
@@ -79,9 +79,9 @@ export class MediaAttachmentEditorUI extends BaseComponent<Props, {newData: Medi
 			</Column>
 		);
 	}
-	chainsEditor: SourceChainsEditorUI;
+	chainsEditor: SourceChainsEditorUI|n;
 	GetValidationError() {
-		return GetErrorMessagesUnderElement(GetDOM(this))[0] || this.chainsEditor.GetValidationError();
+		return GetErrorMessagesUnderElement(GetDOM(this))[0] ?? this.chainsEditor?.GetValidationError();
 	}
 
 	GetNewData() {
@@ -108,7 +108,7 @@ class MediaSearchOrCreateUI extends BaseComponentPlus({} as {url: string, enable
 					borderRadius: "0 0 5px 5px",
 				}}>
 					<Button text="Create new image" enabled={enabled && HasModPermissions(MeID())}
-						title={HasModPermissions(MeID()) ? null : "Only moderators can add media currently. (till review/approval system is implemented)"}
+						title={HasModPermissions(MeID()) ? undefined : "Only moderators can add media currently. (till review/approval system is implemented)"}
 						onClick={e=>{
 							ShowAddMediaDialog({url}, onSelect);
 						}}/>

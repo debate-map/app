@@ -36,4 +36,4 @@ export class NodeRating {
 	@Field({type: "number"}, {req: true})
 	value: number;
 }
-export type NodeRating_Pseudo = PartialBy<NodeRating, "id" | "accessPolicy">;
+export type NodeRating_MaybePseudo = PartialBy<NodeRating, "id" | "accessPolicy">;

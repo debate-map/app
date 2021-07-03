@@ -26,7 +26,7 @@ export class NodeUI extends BaseComponentPlus(
 		indexInNodeList: number, map: Map, node: MapNodeL3, path?: string, asSubnode?: boolean, widthOverride?: number, style?,
 		onHeightOrPosChange?: ()=>void
 	},
-	{expectedBoxWidth: 0, expectedBoxHeight: 0, dividePoint: null as number, selfHeight: 0},
+	{expectedBoxWidth: 0, expectedBoxHeight: 0, dividePoint: null as number|n, selfHeight: 0},
 ) {
 	/* static renderCount = 0;
 	static lastRenderTime = -1; */

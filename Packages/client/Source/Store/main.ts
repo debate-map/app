@@ -1,7 +1,7 @@
 import {globalMapID} from "dm_common";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 import {O} from "web-vcore";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {NotificationMessage} from "./main/@NotificationMessage.js";
 import {DatabaseState} from "./main/database.js";
@@ -50,9 +50,9 @@ export class MainState {
 	// guide: {subpage: string};
 	@O profile = {} as {subpage: string};
 
-	@O topLeftOpenPanel: string;
+	@O topLeftOpenPanel: string|n;
 	// set topLeftOpenPanel_set(val) { this.topLeftOpenPanel = val; }
-	@O topRightOpenPanel: string;
+	@O topRightOpenPanel: string|n;
 	// set topRightOpenPanel_set(val) { this.topRightOpenPanel = val; }
 
 	// non-page-specific sections/components (corresponds to @Shared folder)
@@ -64,20 +64,20 @@ export class MainState {
 	@O ratingUI = new RatingUIState();
 }
 
-export const GetOpenMapID = StoreAccessor(s=>()=>{
+export const GetOpenMapID = CreateAccessor(c=>()=>{
 	// return State(a=>a.main.openMap);
-	const {page} = s.main;
+	const {page} = c.store.main;
 	// if (page == 'home') return demoMap._id;
-	if (page == "debates") return s.main.debates.selectedMapID;
+	if (page == "debates") return c.store.main.debates.selectedMapID;
 	if (page == "global") return globalMapID;
 	return null;
 });
 
 // export type PageKey = "home" | ""
-export const GetPage = StoreAccessor(s=>()=>{
-	return s.main.page || "home";
+export const GetPage = CreateAccessor(c=>()=>{
+	return c.store.main.page || "home";
 });
-export const GetSubpage = StoreAccessor(s=>()=>{
+export const GetSubpage = CreateAccessor(c=>()=>{
 	const page = GetPage();
-	return s.main[page]?.subpage as string || rootPageDefaultChilds[page];
+	return c.store.main[page]?.subpage as string || rootPageDefaultChilds[page];
 });

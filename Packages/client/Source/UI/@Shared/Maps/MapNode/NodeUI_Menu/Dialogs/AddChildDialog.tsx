@@ -7,7 +7,7 @@ import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES} from "Utils/UI/GlobalStyles.js";
 import {InfoButton, Link, observer_simple} from "web-vcore";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
-import {MapNodeType, GetMapNodeTypeDisplayName, GetDefaultAccessPolicyID_ForNode, NodeChildLink} from "dm_common";
+import {MapNodeType, GetMapNodeTypeDisplayName, GetDefaultAccessPolicyID_ForNode, NodeChildLink, Map} from "dm_common";
 import {Polarity, MapNode, ClaimForm} from "dm_common";
 import {GetMap} from "dm_common";
 import {GetNode} from "dm_common";
@@ -20,8 +20,8 @@ export class AddChildHelper {
 	constructor(parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string) {
 		this.mapID = mapID;
 		this.node_parentPath = parentPath;
-		const map = GetMap(mapID);
-		Assert(map, "Map was not pre-loaded into the store. Can use this beforehand: await GetAsync(()=>GetMap(mapID));");
+		this.map = GetMap(mapID)!;
+		Assert(this.map, "Map was not pre-loaded into the store. Can use this beforehand: await GetAsync(()=>GetMap(mapID));");
 		const parentNode = GetNode(this.Node_ParentID);
 		Assert(parentNode, "Parent-node was not pre-loaded into the store. Can use this beforehand: await GetAsync(()=>GetNode(parentID));");
 
@@ -31,7 +31,7 @@ export class AddChildHelper {
 			type: childType,
 			//ownerMapID: OmitIfFalsy(parentNode.ownerMapID),
 		});
-		this.node_revision = new MapNodeRevision(map.nodeDefaults);
+		this.node_revision = new MapNodeRevision(this.map.nodeDefaults);
 		this.node_link = E(
 			childType == MapNodeType.claim && {form: parentNode.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base},
 			childType == MapNodeType.argument && {polarity: childPolarity},
@@ -44,18 +44,19 @@ export class AddChildHelper {
 				accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 				type: MapNodeType.claim, creator: userID,
 			});
-			this.subNode_revision = new MapNodeRevision(E(map.nodeDefaults, {titles: {base: title}}));
+			this.subNode_revision = new MapNodeRevision(E(this.map.nodeDefaults, {titles: {base: title}}));
 			this.subNode_link = {form: ClaimForm.base} as NodeChildLink;
 		} else {
 			let usedTitleKey = "base";
 			if (childType == MapNodeType.claim) {
-				usedTitleKey = ClaimForm[this.node_link.form].replace(/^./, ch=>ch.toLowerCase());
+				usedTitleKey = ClaimForm[this.node_link.form!].replace(/^./, ch=>ch.toLowerCase());
 			}
 			this.node_revision.titles[usedTitleKey] = title;
 		}
 	}
 
 	mapID: string;
+	map: Map;
 	node_parentPath: string;
 	// get Node_Parent() { return GetNodeL3(this.node_parentPath); }
 	get Node_ParentID() { return this.node_parentPath.split("/").Last(); }
@@ -72,7 +73,7 @@ export class AddChildHelper {
 			result = new AddArgumentAndClaim({
 				mapID: this.mapID,
 				argumentParentID: this.Node_ParentID, argumentNode: this.node, argumentRevision: this.node_revision, argumentLink: this.node_link,
-				claimNode: this.subNode, claimRevision: this.subNode_revision, claimLink: this.subNode_link,
+				claimNode: this.subNode!, claimRevision: this.subNode_revision!, claimLink: this.subNode_link,
 			});
 		} else {
 			result = new AddChildNode({
@@ -130,7 +131,7 @@ enum AddChildDialogTab {
 }
 export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: string) {
 	const helper = new AddChildHelper(parentPath, childType, "", childPolarity, userID, mapID);
-	const parentNode = GetNodeL3(parentPath);
+	const parentNode = GetNodeL3.NN(parentPath);
 	const parentForm = GetNodeForm(parentNode);
 	const displayName = GetMapNodeTypeDisplayName(childType, parentNode, parentForm, childPolarity);
 
@@ -147,10 +148,10 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 			let tempCommand = helper.GetCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
-				title: tempCommand.validateError,
+				title: tempCommand.validateError as any,
 			};
 
-			const newNodeAsL2 = AsNodeL2(helper.node, helper.node_revision, null);
+			const newNodeAsL2 = AsNodeL2(helper.node, helper.node_revision, helper.acce);
 			const newNodeAsL3 = AsNodeL3(newNodeAsL2, helper.node_link, childPolarity);
 
 			const advanced = store.main.maps.addChildDialog.advanced;

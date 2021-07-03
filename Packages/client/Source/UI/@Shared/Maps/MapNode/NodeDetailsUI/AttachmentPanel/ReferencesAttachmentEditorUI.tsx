@@ -30,7 +30,7 @@ export class ReferencesAttachmentEditorUI extends BaseComponent<
 					<Row key={0}>Preview:</Row>,
 					<Column key={1} mt={5}>
 						<Pre style={{padding: 5, background: "rgba(255,255,255,.2)", borderRadius: 5}}>
-							{GetNodeDisplayText({type: MapNodeType.claim, current: {references: CleanUpdatedReferencesAttachment(Clone(newData))}} as any, null, ClaimForm.base)}
+							{GetNodeDisplayText({type: MapNodeType.claim, current: {references: CleanUpdatedReferencesAttachment(Clone(newData))}} as any, undefined, ClaimForm.base)}
 							<SubPanel_References attachment={newData} fontSize={15}/>
 						</Pre>
 					</Column>,
@@ -41,9 +41,9 @@ export class ReferencesAttachmentEditorUI extends BaseComponent<
 			</Column>
 		);
 	}
-	chainsEditor: SourceChainsEditorUI;
+	chainsEditor: SourceChainsEditorUI|n;
 	GetValidationError() {
-		return GetErrorMessagesUnderElement(GetDOM(this))[0] || this.chainsEditor.GetValidationError();
+		return GetErrorMessagesUnderElement(GetDOM(this))[0] ?? this.chainsEditor?.GetValidationError();
 	}
 
 	GetNewData() {

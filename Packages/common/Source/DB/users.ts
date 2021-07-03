@@ -1,10 +1,10 @@
-import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {User} from "./users/@User.js";
 
 /*export function GetAuth(state: RootState) {
 	return state.firebase.auth;
 }*/
-export const MeID = StoreAccessor(s=>(): string|n=>{
+export const MeID = CreateAccessor(c=>(): string|n=>{
 	// return state.firebase.data.auth ? state.firebase.data.auth.uid : null;
 	// return GetData(state.firebase, "auth");
 	/* var result = helpers.pathToJS(firebase, "auth").uid;
@@ -15,15 +15,15 @@ export const MeID = StoreAccessor(s=>(): string|n=>{
 	//return IsAuthValid(GetAuth()) ? GetAuth().id : null;
 	return null;
 });
-export const Me = StoreAccessor(s=>()=>{
+export const Me = CreateAccessor(c=>()=>{
 	const id = MeID();
 	if (id == null) return null;
 	return GetUser(id);
 });
 
-export const GetUser = StoreAccessor(s=>(userID: string): User|n=>{
+export const GetUser = CreateAccessor(c=>(userID: string): User|n=>{
 	return GetDoc({}, a=>a.users.get(userID));
 });
-export const GetUsers = StoreAccessor(s=>(): User[]=>{
+export const GetUsers = CreateAccessor(c=>(): User[]=>{
 	return GetDocs({}, a=>a.users);
 });

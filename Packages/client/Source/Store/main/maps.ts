@@ -1,6 +1,6 @@
 import {GetNodeL3, WeightingType, MapView} from "dm_common";
 import {observable} from "web-vcore/nm/mobx.js";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {ignore, version} from "web-vcore/nm/mobx-sync.js";
 import {store} from "Store";
 import {O, StoreAction} from "web-vcore";
@@ -68,8 +68,8 @@ export class ImportSubtreeDialogState {
 	@O importRatings_userIDsStr = "";
 }
 
-export const GetLastAcknowledgementTime = StoreAccessor(s=>(nodeID: string)=>{
-	return s.main.maps.nodeLastAcknowledgementTimes.get(nodeID) || 0;
+export const GetLastAcknowledgementTime = CreateAccessor(c=>(nodeID: string)=>{
+	return c.store.main.maps.nodeLastAcknowledgementTimes.get(nodeID) || 0;
 });
 
 /* export const GetLastAcknowledgementTime2 = StoreAccessor((nodeID: string) => {
@@ -77,10 +77,10 @@ export const GetLastAcknowledgementTime = StoreAccessor(s=>(nodeID: string)=>{
 	return State('main', 'nodeLastAcknowledgementTimes', nodeID) as number || 0;
 }); */
 
-export const GetCopiedNodePath = StoreAccessor(s=>()=>{
-	return s.main.maps.copiedNodePath;
+export const GetCopiedNodePath = CreateAccessor(c=>()=>{
+	return c.store.main.maps.copiedNodePath;
 });
-export const GetCopiedNode = StoreAccessor(s=>()=>{
+export const GetCopiedNode = CreateAccessor(c=>()=>{
 	const path = GetCopiedNodePath();
 	if (!path) return null;
 	return GetNodeL3(path);
@@ -95,7 +95,7 @@ export const ACTEnsureMapStateInit = StoreAction((mapID: string)=>{
 	}
 	if (GetMapView(mapID) == null) {
 		store.main.maps.mapViews.set(mapID, new MapView());
-		store.main.maps.mapViews.get(mapID).rootNodeViews = {}; // for some reason this is needed
+		store.main.maps.mapViews.get(mapID)!.rootNodeViews = {}; // for some reason this is needed
 	}
 	return {
 		mapState: store.main.maps.mapStates.get(mapID),

@@ -1,13 +1,13 @@
 import {emptyObj, IsNumber, Assert, CE, emptyArray_forLoading, emptyArray} from "web-vcore/nm/js-vextensions.js";
-import {StoreAccessor, NoID, PartialBy} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor, NoID, PartialBy} from "web-vcore/nm/mobx-graphlink.js";
 import {GetRatingAverage, GetRatingValue, GetRatings} from "../../DB/nodeRatings.js";
-import {NodeRating, NodeRating_Pseudo} from "../../DB/nodeRatings/@NodeRating.js";
+import {NodeRating, NodeRating_MaybePseudo} from "../../DB/nodeRatings/@NodeRating.js";
 import {NodeRatingType} from "../../DB/nodeRatings/@NodeRatingType.js";
 import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../DB/nodes/$node.js";
 import {ClaimForm, MapNodeL2} from "../../DB/nodes/@MapNode.js";
 import {ArgumentType} from "../../DB/nodes/@MapNodeRevision.js";
 
-export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[], userID: string): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
+export const GetArgumentImpactPseudoRating = CreateAccessor(c=>(argument: MapNodeL2, premises: MapNodeL2[], userID: string): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading
 	if (premises.length == 0) return null;
 
@@ -66,7 +66,7 @@ export const GetArgumentImpactPseudoRating = StoreAccessor(s=>(argument: MapNode
 } */
 
 // export function GetArgumentImpactPseudoRatingSet(argument: MapNodeL2, premises: MapNodeL2[]): {[key: string]: Rating} {
-export const GetArgumentImpactPseudoRatings = StoreAccessor(s=>(argument: MapNodeL2, premises: MapNodeL2[]): NodeRating_Pseudo[]=>{
+export const GetArgumentImpactPseudoRatings = CreateAccessor(c=>(argument: MapNodeL2, premises: MapNodeL2[]): NodeRating_MaybePseudo[]=>{
 	if (CE(premises).Any(a=>a == null)) return emptyArray_forLoading as any; // must still be loading
 	if (premises.length == 0) return emptyArray as any;
 
@@ -99,7 +99,7 @@ export const GetArgumentImpactPseudoRatings = StoreAccessor(s=>(argument: MapNod
 		}
 	}
 
-	const result = [] as NodeRating_Pseudo[];
+	const result = [] as NodeRating_MaybePseudo[];
 	for (const userID of CE(usersWhoRatedArgOrPremise).VKeys()) {
 		result.push(GetArgumentImpactPseudoRating(argument, premises, userID)!);
 	}

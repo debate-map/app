@@ -6,12 +6,12 @@ import {MeID} from "dm_common";
 import {AddMap} from "dm_common";
 import {MapDetailsUI} from "./MapDetailsUI.js";
 
-export function ShowAddMapDialog(userID: string) {
+export function ShowAddMapDialog() {
 	const type = MapType.public as MapType; // hard-coded for now
 	let newMap = new Map({
 		name: "",
 		type,
-		creator: MeID(),
+		creator: MeID.NN(),
 		editors: type == MapType.private ? [MeID()] : OMIT as any,
 	});
 

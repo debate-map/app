@@ -12,7 +12,7 @@ export class MediaAttachment {
 
 	id: string;
 	captured: boolean; // whether the image/video is claimed to be a capturing of real-world footage
-	previewWidth: number; // used to limit the display-width, eg. to keep a tall-but-skinny image from extending multiple screens down
+	previewWidth?: number; // used to limit the display-width, eg. to keep a tall-but-skinny image from extending multiple screens down
 	sourceChains: SourceChain[];
 }
 AddSchema("MediaAttachment", {

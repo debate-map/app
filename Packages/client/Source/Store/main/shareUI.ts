@@ -1,4 +1,4 @@
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {O} from "web-vcore";
 import {CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
 

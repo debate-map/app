@@ -120,7 +120,7 @@ function LoadHotModules() {
 
 // delay useful for, eg. letting mobx dev-tools load before page loads
 if (DEV && startURL.GetQueryVar("delay")) {
-	setTimeout(()=>LoadHotModules(), parseFloat(startURL.GetQueryVar("delay")) * 1000);
+	setTimeout(()=>LoadHotModules(), parseFloat(startURL.GetQueryVar("delay")!) * 1000);
 } else {
 	LoadHotModules();
 }

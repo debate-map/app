@@ -63,7 +63,7 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 						}}/>
 						<Button text="Add map" ml="auto" enabled={CanGetBasicPermissions(MeID())} onClick={UseCallback(()=>{
 							if (userID == null) return void ShowSignInPopup();
-							ShowAddMapDialog(userID);
+							ShowAddMapDialog();
 						}, [userID])}/>
 					</Row>
 					<Row style={{height: 40, padding: 10}}>

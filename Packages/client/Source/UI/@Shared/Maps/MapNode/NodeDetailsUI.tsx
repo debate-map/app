@@ -5,7 +5,7 @@ import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vexten
 import {store} from "Store";
 import {Observer} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
-import {MapNode, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType, NodeChildLink} from "dm_common";
+import {MapNode, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType, NodeChildLink, GetAccessPolicy} from "dm_common";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel.js";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel.js";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel.js";
@@ -46,7 +46,9 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 			this.Update();
 		};
 
-		const newDataAsL2 = AsNodeL2(newData, newRevisionData, null);
+		const policy = GetAccessPolicy(newData.accessPolicy);
+		if (policy == null) return null;
+		const newDataAsL2 = AsNodeL2(newData, newRevisionData, policy);
 
 		const sharedProps: NodeDetailsUI_SharedProps = {...this.props, Change, newDataAsL2, ...this.state, SetState: this.SetState};
 		const attachmentType = GetAttachmentType(newDataAsL2);

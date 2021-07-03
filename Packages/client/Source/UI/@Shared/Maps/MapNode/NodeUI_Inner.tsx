@@ -50,7 +50,7 @@ import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 // export type NodeHoverExtras = {panel?: string, term?: number};
 
 type Props = {
-	indexInNodeList: number, map: Map, node: MapNodeL3, path: string, width: number, widthOverride?: number,
+	indexInNodeList: number, map: Map, node: MapNodeL3, path: string, width?: number|n, widthOverride?: number|n,
 	panelPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 } & {dragInfo?: DragInfo};
 
@@ -68,7 +68,7 @@ type Props = {
 @Observer
 export class NodeUI_Inner extends BaseComponentPlus(
 	{panelPosition: "left"} as Props,
-	{hovered: false, hoverPanel: null as string, hoverTermID: null as string, local_openPanel: null as string, lastWidthWhenNotPreview: 0},
+	{hovered: false, hoverPanel: null as string|n, hoverTermID: null as string|n, local_openPanel: null as string|n, lastWidthWhenNotPreview: 0},
 ) {
 	root: ExpandableBox;
 	titlePanel: TitlePanel;
@@ -89,7 +89,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const bottomPanelRect = bottomPanelDOM ? VRect.FromLTWH(bottomPanelDOM.getBoundingClientRect()) : null;
 
 		const mouseRect = new VRect(mousePos, new Vector2(1, 1));
-		const intersectsOne = mouseRect.Intersects(mainRect) || (leftBoxRect && mouseRect.Intersects(leftBoxRect)) || (bottomPanelRect && mouseRect.Intersects(bottomPanelRect));
+		const intersectsOne = !!(mouseRect.Intersects(mainRect) || (leftBoxRect && mouseRect.Intersects(leftBoxRect)) || (bottomPanelRect && mouseRect.Intersects(bottomPanelRect)));
 		// Log(`Main: ${mainRect} Mouse:${mousePos} Intersects one?:${intersectsOne}`);
 		this.SetState({hovered: intersectsOne});
 

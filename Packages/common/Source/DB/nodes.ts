@@ -1,5 +1,5 @@
 import {emptyArray, emptyArray_forLoading, IsNaN, CE, Assert, A, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, SlicePath, SplitStringBySlash_Cached, StoreAccessor, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {GetDoc, SlicePath, SplitStringBySlash_Cached, CreateAccessor, UUID} from "web-vcore/nm/mobx-graphlink.js";
 import {globalRootNodeID} from "../DB_Constants.js";
 import {GetNodeChildLinks} from "./nodeChildLinks.js";
 import {GetNodeRevisionsByTitle} from "./nodeRevisions.js";
@@ -18,9 +18,9 @@ export enum HolderType {
 	relevance = "relevance",
 }
 
-export function PathSegmentToNodeID(segment: string): UUID {
-	if (segment.length == 22) return segment; // if raw UUID
-	if (segment.length == 23) return segment.slice(1); // if UUID, but with marker at front (marking as subnode, I believe)
+export function PathSegmentToNodeID(segment: string|n): UUID {
+	if (segment?.length == 22) return segment; // if raw UUID
+	if (segment?.length == 23) return segment.slice(1); // if UUID, but with marker at front (marking as subnode, I believe)
 	Assert(false, "Segment text is invalid.");
 }
 
@@ -41,16 +41,16 @@ export const GetNodesL2 = StoreAccessor((s) => (): MapNodeL2[] => {
 	let nodeMap = GetNodeMap();
 	return CachedTransform("GetNodes_Enhanced", [], nodeMap, ()=>nodeMap ? nodeMap.VValues(true) : []);
 } */
-export const GetNodesByIDs = StoreAccessor(s=>(ids: string[]): MapNode[]=>{
+export const GetNodesByIDs = CreateAccessor(c=>(ids: string[]): MapNode[]=>{
 	//return ids.map(id=>GetNode[emptyForLoading ? "BIN" : "normal"](id));
 	return ids.map(id=>GetNode.BIN(id));
 });
-export const GetNodesByTitle = StoreAccessor(s=>(title: string, titleKey: TitleKey): MapNode[]=>{
+export const GetNodesByTitle = CreateAccessor(c=>(title: string, titleKey: TitleKey): MapNode[]=>{
 	let nodeRevisions = GetNodeRevisionsByTitle(title, titleKey);
 	return nodeRevisions.map(a=>GetNode.BIN(a.node));
 });
 
-export const GetNode = StoreAccessor(s=>(id: string|n)=>{
+export const GetNode = CreateAccessor(c=>(id: string|n)=>{
 	// Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");
 	if (id == null || IsNaN(id)) return null;
 	return GetDoc({}, a=>a.nodes.get(id));
@@ -59,7 +59,7 @@ export const GetNode = StoreAccessor(s=>(id: string|n)=>{
 	return await GetDataAsync("nodes", id) as MapNode;
 }*/
 
-export const IsRootNode = StoreAccessor(s=>(node: MapNode)=>{
+export const IsRootNode = CreateAccessor(c=>(node: MapNode)=>{
 	if (node.type != MapNodeType.category) return false;
 	const parents = GetNodeChildLinks(undefined, node.id);
 	if (parents.length != 0) return false; // todo: probably change this (map root-nodes can have "parents" now I think, due to restructuring)
@@ -78,38 +78,33 @@ export function GetParentNodeID(path: string) {
 	return parentNodeStr ? PathSegmentToNodeID(parentNodeStr) : null;
 }
 
-export const GetParentNode = StoreAccessor(s=>(childPath: string)=>{
+export const GetParentNode = CreateAccessor(c=>(childPath: string)=>{
 	return GetNode(GetParentNodeID(childPath));
 });
-export const GetParentNodeL2 = StoreAccessor(s=>(childPath: string)=>{
+export const GetParentNodeL2 = CreateAccessor(c=>(childPath: string)=>{
 	return GetNodeL2(GetParentNodeID(childPath));
 });
-export const GetParentNodeL3 = StoreAccessor(s=>(childPath: string)=>{
+export const GetParentNodeL3 = CreateAccessor(c=>(childPath: string)=>{
 	return GetNodeL3(GetParentPath(childPath));
 });
-export const GetNodeID = StoreAccessor(s=>(path: string|n)=>{
+export const GetNodeID = CreateAccessor(c=>(path: string|n)=>{
 	if (path == null) return null;
 	const ownNodeStr = CE(SplitStringBySlash_Cached(path)).LastOrX();
 	return ownNodeStr ? PathSegmentToNodeID(ownNodeStr) : null;
 });
 
-export function CleanArray<T>(array: T[], emptyArrayIfItemLoading = true) {
-	if (emptyArrayIfItemLoading && CE(array).Any(a=>a === undefined)) return emptyArray_forLoading;
-	return array;
-}
-
-export const GetNodeParents = StoreAccessor(s=>(nodeID: string, emptyForLoading = true)=>{
+export const GetNodeParents = CreateAccessor(c=>(nodeID: string)=>{
 	const parentLinks = GetNodeChildLinks(undefined, nodeID);
-	return CleanArray(parentLinks.map(a=>GetNode(a.parent)), emptyForLoading);
+	return parentLinks.map(a=>c.MaybeCatchItemBail(()=>GetNode(a.parent)));
 });
-export const GetNodeParentsL2 = StoreAccessor(s=>(nodeID: string, emptyForLoading = true)=>{
-	return CleanArray(GetNodeParents(nodeID).map(parent=>(parent ? GetNodeL2(parent) : undefined)), emptyForLoading);
+export const GetNodeParentsL2 = CreateAccessor(c=>(nodeID: string)=>{
+	return GetNodeParents(nodeID).map(parent=>c.MaybeCatchItemBail(()=>parent ? GetNodeL2(parent) : undefined));
 });
-export const GetNodeParentsL3 = StoreAccessor(s=>(nodeID: string, path: string, emptyForLoading = true)=>{
-	return CleanArray(GetNodeParents(nodeID).map(parent=>(parent ? GetNodeL3(SlicePath(path, 1)) : undefined)), emptyForLoading);
+export const GetNodeParentsL3 = CreateAccessor(c=>(nodeID: string, path: string)=>{
+	return GetNodeParents(nodeID).map(parent=>c.MaybeCatchItemBail(()=>parent ? GetNodeL3(SlicePath(path, 1)) : undefined));
 });
 
-export const GetNodeChildren = StoreAccessor(s=>(nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[], emptyForLoading = true): MapNode[]=>{
+export const GetNodeChildren = CreateAccessor(c=>(nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[])=>{
 	/*let node = GetNode(nodeID);
 	if (node == null) return emptyArray;
 	// special case, for demo map
@@ -118,7 +113,11 @@ export const GetNodeChildren = StoreAccessor(s=>(nodeID: string, includeMirrorCh
 	}*/
 
 	const childLinks = GetNodeChildLinks(nodeID);
-	let result = childLinks.map(a=>GetNode.BIN(a.child));
+	/*let result = childLinks.map(link=>{
+		if (c.catchItemBails) return GetNode.CatchBail(c.catchItemBails_asX, link.child);
+		return GetNode(link.child);
+	});*/
+	let result = childLinks.map(link=>c.MaybeCatchItemBail(()=>GetNode(link.child) as MapNode)); // cast as MapNode, because db guarantees that node exists
 	if (includeMirrorChildren) {
 		//let tags = GetNodeTags(nodeID);
 		let tagComps = GetNodeTagComps(nodeID, true, tagsToIgnore);
@@ -126,14 +125,15 @@ export const GetNodeChildren = StoreAccessor(s=>(nodeID: string, includeMirrorCh
 		if (CE(tagComps).Any(a=>a instanceof TagComp_MirrorChildrenFromXToY && a.nodeY == nodeID && a.disableDirectChildren)) {
 			result = [];
 		}
-		let mirrorChildren = GetNodeMirrorChildren(nodeID, tagsToIgnore);
+		//let mirrorChildren = GetNodeMirrorChildren(nodeID, tagsToIgnore, catchBailsAsNullItems);
+		let mirrorChildren = GetNodeMirrorChildren(nodeID, tagsToIgnore); // maybe todo: MS GetNodeMirrorChildren() supports "catchItemBails" opt, and use it
 		// filter out duplicate children
-		mirrorChildren = mirrorChildren.filter(mirrorChild=>!CE(result).Any(directChild=>directChild.id == mirrorChild.id));
+		mirrorChildren = mirrorChildren.filter(mirrorChild=>!CE(result).Any(directChild=>directChild?.id == mirrorChild.id));
 		result.push(...mirrorChildren);
 	}
-	return CleanArray(result, emptyForLoading);
+	return result;
 });
-export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string, tagsToIgnore?: string[], emptyForLoading = true)=> {
+export const GetNodeMirrorChildren = CreateAccessor(c=>(nodeID: string, tagsToIgnore?: string[])=> {
 	let tags = GetNodeTags(nodeID).filter(tag=>tag && !tagsToIgnore?.includes(tag.id));
 	//let tagComps = GetNodeTagComps(nodeID, true, tagsToIgnore);
 
@@ -214,23 +214,23 @@ export const GetNodeMirrorChildren = StoreAccessor(s=>(nodeID: string, tagsToIgn
 		return !CE(earlierNodes).Any(a=>a.id == node.id);
 	});
 
-	return CleanArray(result, emptyForLoading);
+	return result;
 });
 
-export const GetNodeChildrenL2 = StoreAccessor(s=>(nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[], emptyForLoading = true)=>{
+export const GetNodeChildrenL2 = CreateAccessor(c=>(nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[])=>{
 	const nodeChildren = GetNodeChildren(nodeID, includeMirrorChildren, tagsToIgnore);
-	let nodeChildrenL2 = nodeChildren.map(child=>(child ? GetNodeL2(child) : undefined));
-	return CleanArray(nodeChildrenL2, emptyForLoading);
+	let nodeChildrenL2 = nodeChildren.map(child=>c.MaybeCatchItemBail(()=>GetNodeL2.NN(child))); // assert non-null, because we know node exists, so rest should as well
+	return nodeChildrenL2;
 });
-export const GetNodeChildrenL3 = StoreAccessor(s=>(nodeID: string, path?: string, includeMirrorChildren = true, tagsToIgnore?: string[], emptyForLoading = true): MapNodeL3[]=>{
+export const GetNodeChildrenL3 = CreateAccessor(c=>(nodeID: string, path?: string, includeMirrorChildren = true, tagsToIgnore?: string[])=>{
 	path = path || nodeID;
 
 	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
-	let nodeChildrenL3 = nodeChildrenL2.map(child=>(child ? GetNodeL3(`${path}/${child.id}`, tagsToIgnore) : undefined));
-	return CleanArray(nodeChildrenL3, emptyForLoading);
+	let nodeChildrenL3 = nodeChildrenL2.map(child=>c.MaybeCatchItemBail(()=>GetNodeL3.NN(`${path}/${child.id}`, tagsToIgnore))); // assert non-null, because we know node exists, so rest should as well
+	return nodeChildrenL3;
 });
 
-export const GetPremiseOfSinglePremiseArgument = StoreAccessor(s=>(argumentNodeID: string)=>{
+export const GetPremiseOfSinglePremiseArgument = CreateAccessor(c=>(argumentNodeID: string)=>{
 	let argument = GetNode.BIN(argumentNodeID);
 	let children = GetNodeChildren(argumentNodeID, false);
 	let childPremise = children.find(child=>child && IsPremiseOfSinglePremiseArgument(child, argument));
@@ -246,11 +246,11 @@ export function GetHolderType(childType: MapNodeType, parentType: MapNodeType|n)
 	return null;
 }
 
-export const ForLink_GetError = StoreAccessor(s=>(parentType: MapNodeType, childType: MapNodeType)=>{
+export const ForLink_GetError = CreateAccessor(c=>(parentType: MapNodeType, childType: MapNodeType)=>{
 	const parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;
 	if (!parentTypeInfo?.includes(childType)) return `The child's type (${MapNodeType[childType]}) is not valid for the parent's type (${MapNodeType[parentType]}).`;
 });
-export const ForNewLink_GetError = StoreAccessor(s=>(parentID: string, newChild: Pick<MapNode, "id" | "type">, permissions: PermissionGroupSet, newHolderType?: HolderType)=>{
+export const ForNewLink_GetError = CreateAccessor(c=>(parentID: string, newChild: Pick<MapNode, "id" | "type">, permissions: PermissionGroupSet, newHolderType?: HolderType)=>{
 	if (!CanGetBasicPermissions(permissions)) return "You're not signed in, or lack basic permissions.";
 	const parent = GetNode(parentID);
 	if (parent == null) return "Parent data not found.";
@@ -271,7 +271,7 @@ export const ForNewLink_GetError = StoreAccessor(s=>(parentID: string, newChild:
 	return ForLink_GetError(parent.type, newChild.type);
 });
 
-export const ForDelete_GetError = StoreAccessor(s=>(userID: string, node: MapNodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
+export const ForDelete_GetError = CreateAccessor(c=>(userID: string, node: MapNodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
 	const baseText = `Cannot delete node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
 	const parentLinks = GetNodeChildLinks(undefined, node.id);
@@ -286,7 +286,7 @@ export const ForDelete_GetError = StoreAccessor(s=>(userID: string, node: MapNod
 	return null;
 });
 
-export const ForCut_GetError = StoreAccessor(s=>(userID: string, node: MapNodeL2)=>{
+export const ForCut_GetError = CreateAccessor(c=>(userID: string, node: MapNodeL2)=>{
 	const baseText = `Cannot unlink node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not its owner. (or a mod)`;
 	//if (!asPartOfCut && (node.parents || {}).VKeys().length <= 1) return `${baseText}doing so would orphan it. Try deleting it instead.`;
@@ -295,7 +295,7 @@ export const ForCut_GetError = StoreAccessor(s=>(userID: string, node: MapNodeL2
 	return null;
 });
 
-export const ForCopy_GetError = StoreAccessor(s=>(userID: string, node: MapNode)=>{
+export const ForCopy_GetError = CreateAccessor(c=>(userID: string, node: MapNode)=>{
 	if (!CanGetBasicPermissions(userID)) return "You're not signed in, or lack basic permissions.";
 	if (IsRootNode(node)) return "Cannot copy the root-node of a map.";
 	//if (IsNodeSubnode(node)) return "Cannot copy a subnode.";

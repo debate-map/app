@@ -1,4 +1,4 @@
-import {E, GetEntries, WaitXThenRun, DelIfFalsy} from "web-vcore/nm/js-vextensions.js";
+import {E, GetEntries, WaitXThenRun, DelIfFalsy, A} from "web-vcore/nm/js-vextensions.js";
 import {Button, Column, Div, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, RenderSource} from "web-vcore/nm/react-vextensions.js";
 import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI.js";
@@ -145,7 +145,7 @@ class ArgumentInfo extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 	render() {
 		const {enabled, baseRevisionData, parent, newData, newDataAsL2, newRevisionData, newLinkData, Change} = this.props;
 
-		const polarity = GetDisplayPolarity(newLinkData.polarity, newLinkData.form);
+		//const polarity = GetDisplayPolarity(A.NonNull_(newLinkData.polarity), A.NonNull_(newLinkData.form));
 
 		return (
 			<Row mt={5}>

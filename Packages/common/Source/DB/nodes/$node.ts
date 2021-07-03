@@ -1,5 +1,5 @@
 import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE, A} from "web-vcore/nm/js-vextensions.js";
-import {SplitStringBySlash_Cached, SlicePath, StoreAccessor, PartialBy} from "web-vcore/nm/mobx-graphlink.js";
+import {SplitStringBySlash_Cached, SlicePath, CreateAccessor, PartialBy} from "web-vcore/nm/mobx-graphlink.js";
 import {GetMedia} from "../media.js";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
 import {NodeRatingType} from "../nodeRatings/@NodeRatingType.js";
@@ -68,7 +68,7 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	}
 	Assert(false);
 }
-export const GetMainRatingType = StoreAccessor(s=>(node: MapNodeL2)=>{
+export const GetMainRatingType = CreateAccessor(c=>(node: MapNodeL2)=>{
 	return GetRatingTypesForNode(node).FirstOrX(a=>!!a.main, {} as Partial<RatingTypeInfo>)!.type;
 });
 export function GetSortByRatingType(node: MapNodeL3): NodeRatingType|n {
@@ -81,7 +81,7 @@ export function GetSortByRatingType(node: MapNodeL3): NodeRatingType|n {
 export function ReversePolarity(polarity: Polarity) {
 	return polarity == Polarity.supporting ? Polarity.opposing : Polarity.supporting;
 }
-export const GetDisplayPolarityAtPath = StoreAccessor(s=>(node: MapNodeL2, path: string, tagsToIgnore?: string[]): Polarity=>{
+export const GetDisplayPolarityAtPath = CreateAccessor(c=>(node: MapNodeL2, path: string, tagsToIgnore?: string[]): Polarity=>{
 	Assert(node.type == MapNodeType.argument, "Only argument nodes have polarity.");
 	const parent = GetParentNodeL2(path);
 	if (!parent) return Polarity.supporting; // can be null, if for NodeUI_ForBots
@@ -127,7 +127,7 @@ export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision, access
 	delete result["link"];
 	return result;
 }
-export const GetNodeL2 = StoreAccessor(s=>(nodeID: string | MapNode | n, path?: string)=>{
+export const GetNodeL2 = CreateAccessor(c=>(nodeID: string | MapNode | n, path?: string)=>{
 	if (IsString(nodeID)) nodeID = GetNode(nodeID) as MapNode;
 	if (nodeID == null) return null;
 	const node = nodeID as MapNode;
@@ -172,7 +172,7 @@ export function AsNodeL3(node: MapNodeL2, link: PartialBy<NodeChildLink, "polari
 	Assert(IsNodeL2(node), "Node sent to AsNodeL3 was not an L2 node!");
 	return E(node, {displayPolarity, link}) as MapNodeL3;
 }
-export const GetNodeL3 = StoreAccessor(s=>(path: string | n, tagsToIgnore?: string[])=>{
+export const GetNodeL3 = CreateAccessor(c=>(path: string | n, tagsToIgnore?: string[])=>{
 	if (path == null) return null;
 	const nodeID = GetNodeID(path);
 	const node = GetNodeL2(nodeID);
@@ -203,7 +203,7 @@ export function GetClaimFormUnderParent(node: MapNode, parent: MapNode): ClaimFo
 	if (link == null) return ClaimForm.Base;
 	return link.form;
 }*/
-export const GetNodeForm = StoreAccessor(s=>(node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2): ClaimForm=>{
+export const GetNodeForm = CreateAccessor(c=>(node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2): ClaimForm=>{
 	if (IsNodeL3(node) && node.link) {
 		return node.link.form ?? ClaimForm.base;
 	}
@@ -212,7 +212,7 @@ export const GetNodeForm = StoreAccessor(s=>(node: MapNodeL2 | MapNodeL3, pathOr
 	const link = GetLinkUnderParent(node.id, parent);
 	return link?.form ?? ClaimForm.base;
 });
-export const GetLinkUnderParent = StoreAccessor(s=>(nodeID: string, parent: MapNode|n, includeMirrorLinks = true, tagsToIgnore?: string[])=>{
+export const GetLinkUnderParent = CreateAccessor(c=>(nodeID: string, parent: MapNode|n, includeMirrorLinks = true, tagsToIgnore?: string[])=>{
 	if (parent == null) return null;
 	//let link = parent.children?.[nodeID]; // null-check, since after child-delete, parent-data might have updated before child-data removed
 	const parentChildLinks = GetNodeChildLinks(parent.id);
@@ -269,7 +269,7 @@ export function GetPolarityShortStr(polarity: Polarity) {
 	return polarity == Polarity.supporting ? "pro" : "con";
 }
 
-export const GetNodeContributionInfo = StoreAccessor(s=>(nodeID: string, userID: string)=> {
+export const GetNodeContributionInfo = CreateAccessor(c=>(nodeID: string, userID: string)=> {
 	let result = new NodeContributionInfo(nodeID);
 	let tags = GetNodeTags(nodeID);
 	let directChildrenDisabled = CE(tags).Any(a=>a.mirrorChildrenFromXToY?.nodeY == nodeID && a.mirrorChildrenFromXToY?.disableDirectChildren);
@@ -306,7 +306,7 @@ export function GetAllNodeRevisionTitles(nodeRevision: MapNodeRevision): string[
 }
 
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
-export const GetNodeDisplayText = StoreAccessor(s=>(node: MapNodeL2, path?: string, form?: ClaimForm): string=>{
+export const GetNodeDisplayText = CreateAccessor(c=>(node: MapNodeL2, path?: string, form?: ClaimForm): string=>{
 	form = form || GetNodeForm(node, path);
 	const titles = node.current.titles || {} as TitlesMap;
 
@@ -398,11 +398,11 @@ export function GetValidNewChildTypes(parent: MapNodeL2, holderType: HolderType,
 }
 
 /** Returns whether the node provided is an argument, and marked as single-premise. */
-export const IsSinglePremiseArgument = StoreAccessor(s=>(node: MapNode)=>{
+export const IsSinglePremiseArgument = CreateAccessor(c=>(node: MapNode)=>{
 	return node && node.type == MapNodeType.argument && !node.multiPremiseArgument;
 });
 /** Returns whether the node provided is an argument, and marked as multi-premise. */
-export const IsMultiPremiseArgument = StoreAccessor(s=>(node: MapNode)=>{
+export const IsMultiPremiseArgument = CreateAccessor(c=>(node: MapNode)=>{
 	return node && node.type == MapNodeType.argument && node.multiPremiseArgument;
 });
 
@@ -413,7 +413,7 @@ export function IsPublicNode(node: MapNode) {
 	return node.ownerMapID == null;
 }*/
 
-export const IsPremiseOfSinglePremiseArgument = StoreAccessor(s=>(node: MapNode, parent: MapNode)=>{
+export const IsPremiseOfSinglePremiseArgument = CreateAccessor(c=>(node: MapNode, parent: MapNode)=>{
 	if (parent == null) return null;
 	return node.type == MapNodeType.claim && IsSinglePremiseArgument(parent);
 });

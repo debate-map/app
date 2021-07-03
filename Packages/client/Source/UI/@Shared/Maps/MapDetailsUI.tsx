@@ -7,7 +7,7 @@ import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI.js";
 import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel.js";
 
 type Props = {baseData: Map, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Map, ui: MapDetailsUI)=>void};
-export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {newData: null as Map}) {
+export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {newData: null as any as Map}) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
 			this.SetState({newData: CloneWithPrototypes(props.baseData)});
@@ -44,7 +44,7 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 				<RowLR mt={5} splitAt={100} style={{width}}>
 					<Pre>Inline note:</Pre>
 					<CheckBox enabled={enabled} style={{width: "100%"}}
-						value={newData.noteInline} onChange={val=>Change(newData.noteInline = val)}/>
+						value={newData.noteInline ?? false} onChange={val=>Change(newData.noteInline = val)}/>
 				</RowLR>
 				{/*newData.type == MapType.private && !forNew && creatorOrMod &&
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
@@ -77,7 +77,7 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 							(Note: Doesn't apply to already-contributed nodes; those can be unlinked, then cloned as private nodes.)
 						`.AsMultiline(0)}/>
 					</Row>
-					<CheckBox enabled={enabled} value={newData.requireMapEditorsCanEdit} onChange={val=>Change(newData.requireMapEditorsCanEdit = val)}/>
+					<CheckBox enabled={enabled} value={!!newData.requireMapEditorsCanEdit} onChange={val=>Change(newData.requireMapEditorsCanEdit = val)}/>
 				</RowLR>}
 				{/* <RowLR mt={5} splitAt={splitAt} style={{ width }}>
 					<Row center>

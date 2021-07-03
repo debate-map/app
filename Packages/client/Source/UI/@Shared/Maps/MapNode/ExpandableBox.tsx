@@ -17,8 +17,8 @@ export class ExpandableBox extends BaseComponent<Props, {}> {
 	}
 
 	parent;
-	textHolder: HTMLDivElement;
-	expandButton: Button;
+	textHolder: HTMLDivElement|n;
+	expandButton: Button|n;
 	render() {
 		const {parent,
 			className, width, widthOverride, innerWidth, outlineColor, padding, style, onClick, onDirectClick, onMouseEnter, onMouseLeave,

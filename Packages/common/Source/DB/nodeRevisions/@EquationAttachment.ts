@@ -1,7 +1,7 @@
 import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
 
 export class EquationAttachment {
-	latex: boolean;
+	latex?: boolean;
 	text = "";
 	isStep? = true;
 	explanation = null as string|n;

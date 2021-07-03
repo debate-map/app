@@ -1,8 +1,8 @@
 import {CachedTransform, emptyArray_forLoading, ToNumber, CE, ObjectCE} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, GetDocs, StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {Map, MapType} from "./maps/@Map.js";
 
-export const GetMaps = StoreAccessor(s=>(orderByEdits = false): Map[]=>{
+export const GetMaps = CreateAccessor(c=>(orderByEdits = false): Map[]=>{
 	/* const mapsMap = GetData({ collection: true }, 'maps');
 	return CachedTransform('GetMaps', [], mapsMap, () => (mapsMap ? mapsMap.VValues(true) : [])); */
 	/*const mapsMap = GetDocs({}, a=>a.maps);
@@ -12,10 +12,10 @@ export const GetMaps = StoreAccessor(s=>(orderByEdits = false): Map[]=>{
 	if (orderByEdits) result = CE(result).OrderByDescending(a=>ToNumber(a && a.edits, 0));
 	return result;
 });
-export const GetMaps_Private = StoreAccessor(s=>(orderByEdits = false)=>{
+export const GetMaps_Private = CreateAccessor(c=>(orderByEdits = false)=>{
 	return GetMaps(orderByEdits).filter(a=>a && a.type == MapType.private);
 });
-export const GetMaps_Public = StoreAccessor(s=>(orderByEdits = false)=>{
+export const GetMaps_Public = CreateAccessor(c=>(orderByEdits = false)=>{
 	return GetMaps(orderByEdits).filter(a=>a && a.type == MapType.public);
 });
 
@@ -23,6 +23,6 @@ export const GetMaps_Public = StoreAccessor(s=>(orderByEdits = false)=>{
 	const mapsMap = GetData({ collection: true }, 'maps');
 	return CachedTransform('GetMaps', [type], mapsMap, () => (mapsMap ? mapsMap.VValues(true).filter(a => a && a.type == type) : []));
 } */
-export const GetMap = StoreAccessor(s=>(id: string)=>{
-	return GetDoc({}, a=>a.maps.get(id));
+export const GetMap = CreateAccessor(c=>(id: string|n)=>{
+	return GetDoc({}, a=>a.maps.get(id!));
 });

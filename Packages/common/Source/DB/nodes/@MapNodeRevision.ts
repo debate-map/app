@@ -53,9 +53,9 @@ AddSchema("PermissionInfo", {
 @MGLClass()
 export class NodeRevisionDisplayDetails {
 	@Field({type: ["number", "null"]})
-	fontSizeOverride: number;
+	fontSizeOverride?: number;
 	@Field({type: ["number", "null"]})
-	widthOverride: number;
+	widthOverride?: number;
 }
 
 /*export const MapNodeRevision_Defaultable_props = ["accessLevel", "votingDisabled", "permission_edit", "permission_contribute"] as const;
@@ -128,9 +128,9 @@ export class MapNodeRevision {
 	// attachments
 	// ==========
 
-	@DB((t,n)=>t.specificType(n, "text[]"))
-	@Field({items: {$ref: TermAttachment.name}})
-	termAttachments?: TermAttachment[];
+	@DB((t,n)=>t.specificType(n, "text[]").notNullable())
+	@Field({items: {$ref: TermAttachment.name}}, {req: true})
+	termAttachments: TermAttachment[];
 
 	@DB((t,n)=>t.jsonb(n))
 	@Field({$ref: EquationAttachment.name})

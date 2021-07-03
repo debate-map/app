@@ -1,9 +1,9 @@
 import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading, CreateStringEnum, emptyArray} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, StoreAccessor, GetDocs, NoID} from "web-vcore/nm/mobx-graphlink.js";
+import {GetDoc, CreateAccessor, GetDocs, NoID} from "web-vcore/nm/mobx-graphlink.js";
 import {observable} from "web-vcore/nm/mobx.js";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {NodeRatingType, RatingType_Info} from "./nodeRatings/@NodeRatingType.js";
-import {NodeRating, NodeRating_Pseudo as NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
+import {NodeRating, NodeRating_MaybePseudo as NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore.js";
 import {GetNodeChildrenL2, HolderType} from "./nodes.js";
 import {GetMainRatingType, GetNodeL2} from "./nodes/$node.js";
@@ -13,7 +13,7 @@ import {MeID} from "./users.js";
 import {GetAccessPolicy} from "./accessPolicies.js";
 import {GetArgumentImpactPseudoRatings} from "../Utils/DB/RatingProcessor.js";
 
-export const GetRatings = StoreAccessor(s=><
+export const GetRatings = CreateAccessor(c=><
 	((nodeID: string, ratingType: Exclude<NodeRatingType, "impact">|n, userID?: string|n)=>NodeRating[]) & // if rating-type is known to not be "impact", all results will be "true ratings"
 	((nodeID: string, ratingType: NodeRatingType|n, userID?: string|n)=>NodeRating_MaybePseudo[]) // else, some results may lack the "id" field
 >((nodeID: string, ratingType: NodeRatingType|n, userID?: string|n): NodeRating_MaybePseudo[]=>{
@@ -39,14 +39,14 @@ export const GetRatings = StoreAccessor(s=><
 		}}
 	}, a=>a.nodeRatings);
 }));
-export const GetRating = StoreAccessor(s=>(nodeID: string, ratingType: NodeRatingType, userID: string)=>{
+export const GetRating = CreateAccessor(c=>(nodeID: string, ratingType: NodeRatingType, userID: string)=>{
 	return GetRatings(nodeID, ratingType, userID)[0];
 });
-export const GetRatingValue = StoreAccessor(s=><T>(nodeID: string, ratingType: NodeRatingType, userID: string, resultIfNoData?: T): number|T=>{
+export const GetRatingValue = CreateAccessor(c=><T>(nodeID: string, ratingType: NodeRatingType, userID: string, resultIfNoData?: T): number|T=>{
 	const rating = GetRating(nodeID, ratingType, userID);
 	return rating ? rating.value : resultIfNoData as T;
 });
-export const GetRatingAverage = StoreAccessor(s=>(nodeID: string, ratingType: NodeRatingType, userID?: string|n): number|null=>{
+export const GetRatingAverage = CreateAccessor(c=>(nodeID: string, ratingType: NodeRatingType, userID?: string|n): number|null=>{
 	// return CachedTransform_WithStore('GetRatingAverage', [nodeID, ratingType, resultIfNoData].concat((filter || {}).VValues()), {}, () => {
 	// if voting disabled, always show full bar
 	/* let node = GetNodeL2(nodeID);
@@ -64,7 +64,7 @@ export const GetRatingAverage = StoreAccessor(s=>(nodeID: string, ratingType: No
 	Assert(result >= 0 && result <= 100, `Rating-average (${result}) not in range. Invalid ratings: ${ToJSON(ratings.map(a=>a.value).filter(a=>!IsNumber(a)))}`);
 	return result;
 });
-export const GetRatingAverage_AtPath = StoreAccessor(s=><T>(node: MapNodeL3, ratingType: NodeRatingType, userID?: string|n, resultIfNoData?: T): number|T=>{
+export const GetRatingAverage_AtPath = CreateAccessor(c=><T>(node: MapNodeL3, ratingType: NodeRatingType, userID?: string|n, resultIfNoData?: T): number|T=>{
 	let result = GetRatingAverage(node.id, ratingType, userID);
 	if (result == null) return resultIfNoData as T;
 	if (ShouldRatingTypeBeReversed(node, ratingType)) {
@@ -87,7 +87,7 @@ function HolderTypeToRatingType(holderType: HolderType|n) {
 
 const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
 // export const GetFillPercent_AtPath = StoreAccessor('GetFillPercent_AtPath', (node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null) => {
-export const GetFillPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: NodeRatingType, weighting = WeightingType.votes, userID?: string, resultIfNoData = null)=>{
+export const GetFillPercent_AtPath = CreateAccessor(c=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: NodeRatingType, weighting = WeightingType.votes, userID?: string, resultIfNoData = null)=>{
 	ratingType = ratingType ?? HolderTypeToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return resultIfNoData;
 	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes?.includes(node.type)) {
@@ -115,7 +115,7 @@ export const GetFillPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: st
 	return result;
 });
 
-export const GetMarkerPercent_AtPath = StoreAccessor(s=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
+export const GetMarkerPercent_AtPath = CreateAccessor(c=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
 	ratingType = ratingType ?? HolderTypeToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return null;
 	if (!node.policy.permissions_base.vote) return null;

@@ -1,19 +1,19 @@
 import {emptyArray, ToNumber, emptyArray_forLoading, CE} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {GetDoc, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {Timeline} from "./timelines/@Timeline.js";
 import {TimelineStep} from "./timelineSteps/@TimelineStep.js";
 import {GetNode, GetNodeChildren} from "./nodes.js";
 
-export const GetTimelineStep = StoreAccessor(s=>(id: string): TimelineStep|n=>{
+export const GetTimelineStep = CreateAccessor(c=>(id: string): TimelineStep|n=>{
 	if (id == null) return null;
 	//return GetDoc({}, a=>a.timelineSteps.get(id));
 	return null;
 });
-export const GetTimelineSteps = StoreAccessor(s=>(timeline: Timeline, allowPartial = false): (TimelineStep|n)[]=>{
+export const GetTimelineSteps = CreateAccessor(c=>(timeline: Timeline, allowPartial = false): (TimelineStep|n)[]=>{
 	return timeline.steps?.map(id=>GetTimelineStep[allowPartial ? "normal" : "BIN"](id)) ?? [];
 });
 
-export const GetNodeRevealTimesInSteps = StoreAccessor(s=>(steps: TimelineStep[], baseOnLastReveal = false)=>{
+export const GetNodeRevealTimesInSteps = CreateAccessor(c=>(steps: TimelineStep[], baseOnLastReveal = false)=>{
 	const nodeRevealTimes = {} as {[key: string]: number};
 	for (const [index, step] of steps.entries()) {
 		for (const reveal of step.nodeReveals || []) {
@@ -68,6 +68,6 @@ export const GetNodeRevealTimesInSteps = StoreAccessor(s=>(steps: TimelineStep[]
 	}
 	return nodeRevealTimes;
 });
-export const GetNodesRevealedInSteps = StoreAccessor(s=>(steps: TimelineStep[])=>{
+export const GetNodesRevealedInSteps = CreateAccessor(c=>(steps: TimelineStep[])=>{
 	return CE(GetNodeRevealTimesInSteps(steps)).VKeys();
 });

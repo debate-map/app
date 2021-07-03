@@ -1,47 +1,44 @@
 import {emptyArray, FromJSON, GetValues, ToNumber, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
 import {O} from "web-vcore";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNode, GetNodesRevealedInSteps, GetMap} from "dm_common";
 import {TimelineSubpanel, ShowChangesSinceType} from "./@MapState.js";
 
-export const GetMapState = StoreAccessor(s=>(mapID: string)=>{
-	return s.main.maps.mapStates.get(mapID);
+export const GetMapState = CreateAccessor(c=>(mapID: string)=>{
+	return c.store.main.maps.mapStates.get(mapID);
 });
 
-export const GetSelectedNodeID_InList = StoreAccessor(s=>(mapID: string)=>{
-	return s.main.maps.mapStates.get(mapID).list_selectedNodeID;
+export const GetSelectedNodeID_InList = CreateAccessor(c=>(mapID: string)=>{
+	return c.store.main.maps.mapStates.get(mapID)?.list_selectedNodeID;
 });
-export const GetSelectedNode_InList = StoreAccessor(s=>(mapID: string)=>{
+export const GetSelectedNode_InList = CreateAccessor(c=>(mapID: string)=>{
 	const nodeID = GetSelectedNodeID_InList(mapID);
 	return GetNode(nodeID);
 });
 
-export const GetMap_List_SelectedNode_OpenPanel = StoreAccessor(s=>(mapID: string)=>{
-	return s.main.maps.mapStates.get(mapID).list_selectedNode_openPanel;
+export const GetMap_List_SelectedNode_OpenPanel = CreateAccessor(c=>(mapID: string)=>{
+	return c.store.main.maps.mapStates.get(mapID)?.list_selectedNode_openPanel;
 });
 
-export const GetTimelinePanelOpen = StoreAccessor(s=>(mapID: string): boolean=>{
-	if (mapID == null) return false;
-	return s.main.maps.mapStates.get(mapID).timelinePanelOpen;
+export const GetTimelinePanelOpen = CreateAccessor(c=>(mapID: string): boolean=>{
+	return c.store.main.maps.mapStates.get(mapID)?.timelinePanelOpen ?? false;
 });
-export const GetTimelineOpenSubpanel = StoreAccessor(s=>(mapID: string)=>{
-	if (mapID == null) return null;
-	return s.main.maps.mapStates.get(mapID).timelineOpenSubpanel;
+export const GetTimelineOpenSubpanel = CreateAccessor(c=>(mapID: string)=>{
+	return c.store.main.maps.mapStates.get(mapID)?.timelineOpenSubpanel;
 });
-export const GetShowTimelineDetails = StoreAccessor(s=>(mapID: string): boolean=>{
-	if (mapID == null) return null;
-	return s.main.maps.mapStates.get(mapID).showTimelineDetails;
+export const GetShowTimelineDetails = CreateAccessor(c=>(mapID: string): boolean=>{
+	return c.store.main.maps.mapStates.get(mapID)?.showTimelineDetails ?? false;
 });
 
 // timeline-related
 // ==========
 
-/*export const GetSelectedTimeline = StoreAccessor(s=>(mapID: string): Timeline=>{
+/*export const GetSelectedTimeline = CreateAccessor(c=>(mapID: string): Timeline=>{
 	if (mapID == null) return null;
 	const timelineID = s.main.maps.mapStates.get(mapID).selectedTimeline;
 	return GetTimeline(timelineID);
 });
-export const GetPlayingTimeline = StoreAccessor(s=>(mapID: string): Timeline=>{
+export const GetPlayingTimeline = CreateAccessor(c=>(mapID: string): Timeline=>{
 	if (mapID == null) return null;
 	/* const mapInfo = State('main', 'maps', mapID) as MapInfo;
 	// const timelineID = State('main', 'maps', mapID, 'playingTimeline');
@@ -56,24 +53,24 @@ export const GetPlayingTimeline = StoreAccessor(s=>(mapID: string): Timeline=>{
 	if (mapID == null) return null;
 	return State('main', 'maps', mapID, 'playingTimeline_time');
 }); *#/
-export const GetPlayingTimelineStepIndex = StoreAccessor(s=>(mapID: string): number=>{
+export const GetPlayingTimelineStepIndex = CreateAccessor(c=>(mapID: string): number=>{
 	if (mapID == null) return null;
 	return s.main.maps.mapStates.get(mapID).playingTimeline_step;
 });
-export const GetPlayingTimelineStep = StoreAccessor(s=>(mapID: string)=>{
+export const GetPlayingTimelineStep = CreateAccessor(c=>(mapID: string)=>{
 	const playingTimeline = GetPlayingTimeline(mapID);
 	if (playingTimeline == null) return null;
 	const stepIndex = GetPlayingTimelineStepIndex(mapID) || 0;
 	const stepID = playingTimeline.steps[stepIndex];
 	return GetTimelineStep(stepID);
 });
-export const GetPlayingTimelineCurrentStepRevealNodes = StoreAccessor(s=>(mapID: string): string[]=>{
+export const GetPlayingTimelineCurrentStepRevealNodes = CreateAccessor(c=>(mapID: string): string[]=>{
 	const playingTimeline_currentStep = GetPlayingTimelineStep(mapID);
 	if (playingTimeline_currentStep == null) return emptyArray;
 	return GetNodesRevealedInSteps([playingTimeline_currentStep]);
 });
 
-export const GetPlayingTimelineRevealNodes_All = StoreAccessor(s=>(mapID: string): string[]=>{
+export const GetPlayingTimelineRevealNodes_All = CreateAccessor(c=>(mapID: string): string[]=>{
 	const map = GetMap(mapID);
 	if (!map) return emptyArray;
 
@@ -82,11 +79,11 @@ export const GetPlayingTimelineRevealNodes_All = StoreAccessor(s=>(mapID: string
 	return [`${map.rootNode}`].concat(GetNodesRevealedInSteps(steps));
 });
 
-export const GetPlayingTimelineAppliedStepIndex = StoreAccessor(s=>(mapID: string): number=>{
+export const GetPlayingTimelineAppliedStepIndex = CreateAccessor(c=>(mapID: string): number=>{
 	if (mapID == null) return null;
 	return s.main.maps.mapStates.get(mapID).playingTimeline_appliedStep;
 });
-export const GetPlayingTimelineAppliedSteps = StoreAccessor(s=>(mapID: string, excludeAfterCurrentStep = false): TimelineStep[]=>{
+export const GetPlayingTimelineAppliedSteps = CreateAccessor(c=>(mapID: string, excludeAfterCurrentStep = false): TimelineStep[]=>{
 	const playingTimeline = GetPlayingTimeline(mapID);
 	if (playingTimeline == null) return emptyArray;
 	let stepIndex = GetPlayingTimelineAppliedStepIndex(mapID) || -1;
@@ -99,7 +96,7 @@ export const GetPlayingTimelineAppliedSteps = StoreAccessor(s=>(mapID: string, e
 	if (steps.Any(a=>a == null)) return emptyArray_forLoading;
 	return steps;
 });
-export const GetPlayingTimelineRevealNodes_UpToAppliedStep = StoreAccessor(s=>(mapID: string, excludeAfterCurrentStep = false): string[]=>{
+export const GetPlayingTimelineRevealNodes_UpToAppliedStep = CreateAccessor(c=>(mapID: string, excludeAfterCurrentStep = false): string[]=>{
 	const map = GetMap(mapID);
 	if (!map) return emptyArray;
 
@@ -107,10 +104,10 @@ export const GetPlayingTimelineRevealNodes_UpToAppliedStep = StoreAccessor(s=>(m
 	return [`${map.rootNode}`].concat(GetNodesRevealedInSteps(appliedSteps));
 });
 
-export const GetNodeRevealHighlightTime = StoreAccessor(s=>()=>{
+export const GetNodeRevealHighlightTime = CreateAccessor(c=>()=>{
 	return s.main.timelines.nodeRevealHighlightTime;
 });
-export const GetTimeSinceNodeRevealedByPlayingTimeline = StoreAccessor(s=>(mapID: string, nodePath: string, timeSinceLastReveal = false, limitToJustPastHighlightRange = false): number=>{
+export const GetTimeSinceNodeRevealedByPlayingTimeline = CreateAccessor(c=>(mapID: string, nodePath: string, timeSinceLastReveal = false, limitToJustPastHighlightRange = false): number=>{
 	const appliedSteps = GetPlayingTimelineAppliedSteps(mapID, true);
 	const nodeRevealTimes = GetNodeRevealTimesInSteps(appliedSteps, timeSinceLastReveal);
 	const nodeRevealTime = nodeRevealTimes[nodePath];
@@ -126,7 +123,7 @@ export const GetTimeSinceNodeRevealedByPlayingTimeline = StoreAccessor(s=>(mapID
 	return result;
 });
 
-export const GetTimeFromWhichToShowChangedNodes = StoreAccessor(s=>(mapID: string)=>{
+export const GetTimeFromWhichToShowChangedNodes = CreateAccessor(c=>(mapID: string)=>{
 	const type = s.main.maps.mapStates.get(mapID).showChangesSince_type;
 	if (type == ShowChangesSinceType.none) return Number.MAX_SAFE_INTEGER; // from end of time (nothing)
 	if (type == ShowChangesSinceType.allUnseenChanges) return 0; // from start of time (everything)

@@ -1,4 +1,4 @@
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 import {store, RootState} from "Store";
@@ -39,6 +39,8 @@ export class SubNavBarButton_GAD extends BaseComponent<{page: string, subpage: s
 			actionFunc = s=>s.main[page].subpage = subpage;
 		} else if (actionFuncIfAlreadyActive) {
 			actionFunc = actionFuncIfAlreadyActive;
+		} else {
+			Assert(false);
 		}
 
 		const style = {

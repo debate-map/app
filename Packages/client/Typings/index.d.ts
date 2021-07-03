@@ -14,4 +14,6 @@ declare function require(name: string): any;*/
 // temp fix for mobx/flow.d.ts (fixed by updating @types/webpack, I believe)
 //declare type AsyncGenerator<A, B, C> = any;
 
-declare type n = null;
+//declare type n = null;
+//declare type u = undefined;
+//declare type nu = null | undefined;

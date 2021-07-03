@@ -19,9 +19,10 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 	innerUI: NodeUI_Inner;
 	render() {
 		const {map, node} = this.props;
-		const nodeParents = GetNodeParentsL2(node.id);
-		const nodeChildren = GetNodeChildrenL2(node.id);
-		if (nodeParents.Any(a=>a == null) || nodeChildren.Any(a=>a == null)) return <div/>;
+		const mapView = GetMapView(GetOpenMapID()!);
+		const nodeParents = GetNodeParentsL2(node.id) as MapNodeL2[];
+		const nodeChildren = GetNodeChildrenL2(node.id) as MapNodeL2[];
+		if (mapView == null || nodeParents.Any(a=>a == null) || nodeChildren.Any(a=>a == null)) return <div/>;
 
 		// just list one of the parents as the "current parent", so code relying on a parent doesn't error
 		const path = `${nodeParents.length ? `${nodeParents[0].id}/` : ""}${node.id}`;
@@ -36,7 +37,7 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 						return (
 							<span key={index}>
 								{index > 0 ? ", " : ""}
-								<Link actionFunc={s=>GetMapView(GetOpenMapID()).bot_currentNodeID = parent.id}>
+								<Link actionFunc={s=>mapView.bot_currentNodeID = parent.id}>
 									{GetNodeDisplayText(parent)} ({parent.id})
 								</Link>
 							</span>
@@ -48,7 +49,7 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 						return (
 							<span key={index}>
 								{index > 0 ? ", " : ""}
-								<Link actionFunc={s=>GetMapView(GetOpenMapID()).bot_currentNodeID = child.id}>
+								<Link actionFunc={s=>mapView.bot_currentNodeID = child.id}>
 									{GetNodeDisplayText(child)} ({child.id})
 								</Link>
 							</span>

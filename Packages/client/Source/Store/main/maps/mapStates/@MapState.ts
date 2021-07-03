@@ -26,13 +26,13 @@ export class MapState {
 	@O list_filter = "";
 	@O list_page = 0;
 
-	@O list_selectedNodeID = null as string;
-	@O list_selectedNode_openPanel = null as string;
+	@O list_selectedNodeID: string|n;
+	@O list_selectedNode_openPanel: string|n;
 
 	@O timelinePanelOpen = false;
 	@O timelineOpenSubpanel = TimelineSubpanel.collection;
 	@O showTimelineDetails = false;
-	@O selectedTimeline = null as string;
+	@O selectedTimeline: string|n;
 
 	@O showChangesSince_type = ShowChangesSinceType.sinceVisitX;
 	@O showChangesSince_visitOffset = 1;

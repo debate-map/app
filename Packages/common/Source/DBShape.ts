@@ -86,11 +86,11 @@ export class GraphDBShape {
 	}>;
 } */
 
-/*export const GetAuth = StoreAccessor(s=>()=>{
+/*export const GetAuth = CreateAccessor(c=>()=>{
 	//return s.firelink.userInfo;
 	return fire.userInfo;
 }) as ()=>FireUserInfo;
-export const GetAuth_Raw = StoreAccessor(s=>()=>{
+export const GetAuth_Raw = CreateAccessor(c=>()=>{
 	//return s.firelink.userInfo_raw;
 	return fire.userInfo_raw as any;
 });*/

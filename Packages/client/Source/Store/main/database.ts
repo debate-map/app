@@ -1,5 +1,5 @@
 import {O} from "web-vcore";
-import {StoreAccessor, GetDoc} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor, GetDoc} from "web-vcore/nm/mobx-graphlink.js";
 import {GetTerms, GetMedias, GraphDBShape} from "dm_common";
 
 export class DatabaseState {
@@ -10,18 +10,18 @@ export class DatabaseState {
 	@O selectedMediaID: string;
 }
 
-export const GetSelectedUserID = StoreAccessor(s=>()=>{
-	return s.main.database.selectedUserID;
+export const GetSelectedUserID = CreateAccessor(c=>()=>{
+	return c.store.main.database.selectedUserID;
 });
-export const GetSelectedUser = StoreAccessor(s=>()=>{
+export const GetSelectedUser = CreateAccessor(c=>()=>{
 	const selectedID = GetSelectedUserID();
 	return GetDoc({}, a=>a.users.get(selectedID));
 });
 
-export const GetSelectedTermID = StoreAccessor(s=>()=>{
-	return s.main.database.selectedTermID;
+export const GetSelectedTermID = CreateAccessor(c=>()=>{
+	return c.store.main.database.selectedTermID;
 });
-export const GetSelectedTerm = StoreAccessor(s=>()=>{
+export const GetSelectedTerm = CreateAccessor(c=>()=>{
 	const selectedID = GetSelectedTermID();
 	// return GetData(`terms/${selectedID}`);
 	return (GetTerms() || []).find(a=>a && a.id == selectedID);
@@ -31,10 +31,10 @@ export const GetSelectedTerm = StoreAccessor(s=>()=>{
 	return GetTermComponent(selectedID);
 } */
 
-export const GetSelectedMediaID = StoreAccessor(s=>()=>{
-	return s.main.database.selectedMediaID;
+export const GetSelectedMediaID = CreateAccessor(c=>()=>{
+	return c.store.main.database.selectedMediaID;
 });
-export const GetSelectedMedia = StoreAccessor(s=>()=>{
+export const GetSelectedMedia = CreateAccessor(c=>()=>{
 	const selectedID = GetSelectedMediaID();
 	// return GetData(`terms/${selectedID}`);
 	return (GetMedias() || []).find(a=>a && a.id == selectedID);

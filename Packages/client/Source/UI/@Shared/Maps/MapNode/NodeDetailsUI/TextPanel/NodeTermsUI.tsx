@@ -55,7 +55,7 @@ export class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 										{term && <TermDefinitionPanel term={term} showID={false}/>}
 										{!term &&
 										<Column>
-											<TermSearchOrCreateUI name={termAttachment.id} enabled={enabled} onSelect={id=>Change(termAttachment.id = id)}/>
+											<TermSearchOrCreateUI name={termAttachment.id} enabled={!!enabled} onSelect={id=>Change(termAttachment.id = id)}/>
 										</Column>}
 									</Column></DropDownContent>
 								</DropDown>

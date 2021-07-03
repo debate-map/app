@@ -1,7 +1,7 @@
 import chroma from "chroma-js";
 import {emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNodeL3, MapNodeType, Polarity, GetNodeChildrenL2, GetNodeL3, GetUserAccessLevel, MeID, GetNode, GetNodeRevisions, MapNodeRevision} from "dm_common";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {MapNodeL3, MapNodeType, Polarity, GetNodeChildrenL2, GetNodeL3, GetUserAccessLevel, MeID, GetNode, GetNodeRevisions, MapNodeRevision, GetNodeChildrenL3} from "dm_common";
 
 export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "background"): chroma.Color {
 	let result;
@@ -22,12 +22,13 @@ export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "back
 	return result;
 }
 
-export const GetNodeChildrenL3_Advanced = StoreAccessor(s=>(nodeID: string, path: string, mapID: string, includeMirrorChildren = true, tagsToIgnore?: string[], applyAccessLevels = false, applyTimeline = false, emptyForLoading = false): MapNodeL3[]=>{
+export const GetNodeChildrenL3_Advanced = CreateAccessor(c=>(nodeID: string, path: string, mapID: string, includeMirrorChildren = true, tagsToIgnore?: string[], applyAccessLevels = false, applyTimeline = false): MapNodeL3[]=>{
 	path = path || nodeID;
 
-	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
-	let nodeChildrenL3 = nodeChildrenL2.map(child=>(child ? GetNodeL3(`${path}/${child.id}`) : null));
-	if (applyAccessLevels) {
+	/*const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
+	let nodeChildrenL3 = nodeChildrenL2.map(child=>(child ? GetNodeL3(`${path}/${child.id}`) : null));*/
+	const nodeChildrenL3 = GetNodeChildrenL3(nodeID, path, includeMirrorChildren, tagsToIgnore);
+	/*if (applyAccessLevels) {
 		nodeChildrenL3 = nodeChildrenL3.filter(child=>{
 			// if null, keep (so receiver knows there's an entry here, but it's still loading)
 			if (child == null) return true;
@@ -37,7 +38,7 @@ export const GetNodeChildrenL3_Advanced = StoreAccessor(s=>(nodeID: string, path
 			// if (!IsNodeVisibleToNonModNonCreators(child, GetNodeChildren(child)) && !IsUserCreatorOrMod(MeID(), child)) return false;
 			return true;
 		});
-	}
+	}*/
 	/*if (applyTimeline) {
 		const playingTimeline = GetPlayingTimeline(mapID);
 		const playingTimeline_currentStepIndex = GetPlayingTimelineStepIndex(mapID);
@@ -51,13 +52,10 @@ export const GetNodeChildrenL3_Advanced = StoreAccessor(s=>(nodeID: string, path
 			nodeChildrenL3 = nodeChildrenL3.filter(child=>child != null && playingTimelineVisibleNodes.Any(a=>a.startsWith(`${path}/${child.id}`)));
 		}
 	}*/
-	if (emptyForLoading) {
-		nodeChildrenL3 = nodeChildrenL3.Any(a=>a == null) ? emptyArray_forLoading : nodeChildrenL3; // only pass nodeChildren when all are loaded
-	}
 	return nodeChildrenL3;
 });
 
-export const GetCurrentRevision = StoreAccessor(s=>(nodeID: string, path: string, mapID: string): MapNodeRevision=>{
+export const GetCurrentRevision = CreateAccessor(c=>(nodeID: string, path: string, mapID: string): MapNodeRevision=>{
 	const revisions = GetNodeRevisions(nodeID);
 	// todo: make this take into account the "current lens", etc.
 	return revisions.OrderBy(a=>a.createdAt).Last();

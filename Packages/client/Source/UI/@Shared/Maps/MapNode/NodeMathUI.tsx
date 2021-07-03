@@ -32,7 +32,7 @@ export class NodeMathUI extends BaseComponent<{text: string, onTermHover: (termI
 	PostRender() {
 		const {onTermHover, onTermClick, termsToSearchFor} = this.props;
 
-		const dom = GetDOM(this);
+		const dom = GetDOM(this)!;
 		const termUIs = Array.from(dom.querySelectorAll(".text")) as HTMLSpanElement[];
 		for (const termUI of termUIs) {
 			//const termTextMatch = termUI.text().match(/^@term\[(.+?),([A-Za-z0-9_-]+?)\]$/);

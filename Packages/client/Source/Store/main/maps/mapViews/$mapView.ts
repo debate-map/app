@@ -2,7 +2,7 @@ import {Vector2, Assert, IsString, GetTreeNodesInObjTree, DeepGet, IsPrimitive, 
 import {observable} from "web-vcore/nm/mobx.js";
 import {O, StoreAction, LogWarning} from "web-vcore";
 import {store} from "Store";
-import {SplitStringBySlash_Cached, StoreAccessor, Validate, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {SplitStringBySlash_Cached, CreateAccessor, Validate, UUID} from "web-vcore/nm/mobx-graphlink.js";
 import {PathSegmentToNodeID, MapView, MapNodeView} from "dm_common";
 
 export function GetPathNodes(path: string) {
@@ -19,7 +19,7 @@ export function GetPathNodeIDs(path: string): UUID[] {
 	return nodes.map(a=>PathSegmentToNodeID(a));
 }
 
-export const GetSelectedNodePathNodes = StoreAccessor(s=>(mapViewOrMapID: string | MapView)=>{
+export const GetSelectedNodePathNodes = CreateAccessor(c=>(mapViewOrMapID: string | MapView)=>{
 	const mapView = IsString(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
 	if (mapView == null) return [];
 
@@ -38,7 +38,7 @@ export function GetSelectedNodeID(mapID: string): string {
 }
 
 export function GetPathFromDataPath(dataPathUnderRootNodeViews: string[]): string[] {
-	const result = [];
+	const result = [] as string[];
 	for (const [index, prop] of dataPathUnderRootNodeViews.entries()) {
 		if (index == 0) { // first one is the root-node-id
 			result.push(prop);
@@ -49,7 +49,7 @@ export function GetPathFromDataPath(dataPathUnderRootNodeViews: string[]): strin
 	return result;
 }
 
-export const GetFocusedNodePathNodes = StoreAccessor(s=>(mapViewOrMapID: string | MapView): string[]=>{
+export const GetFocusedNodePathNodes = CreateAccessor(c=>(mapViewOrMapID: string | MapView): string[]=>{
 	const mapView = IsString(mapViewOrMapID) ? GetMapView(mapViewOrMapID) : mapViewOrMapID;
 	if (mapView == null) return [];
 
@@ -60,16 +60,16 @@ export const GetFocusedNodePathNodes = StoreAccessor(s=>(mapViewOrMapID: string 
 	// return focusedNodeView.PathNodes.filter(a=>a != "children").map(ToInt);
 	return GetPathFromDataPath(focusedNodeView.PathNodes);
 });
-export const GetFocusedNodePath = StoreAccessor(s=>(mapViewOrMapID: string | MapView)=>{
+export const GetFocusedNodePath = CreateAccessor(c=>(mapViewOrMapID: string | MapView)=>{
 	return GetFocusedNodePathNodes(mapViewOrMapID).join("/").toString(); // toString() needed if only 1 item
 });
-export const GetFocusedNodeID = StoreAccessor(s=>(mapID: string)=>{
+export const GetFocusedNodeID = CreateAccessor(c=>(mapID: string)=>{
 	const focusedNodeStr = GetFocusedNodePathNodes(mapID).LastOrX();
 	return focusedNodeStr ? PathSegmentToNodeID(focusedNodeStr) : null;
 });
 
-export const GetMapView = StoreAccessor(s=>(mapID: string)=>{
-	return s.main.maps.mapViews.get(mapID);
+export const GetMapView = CreateAccessor(c=>(mapID: string)=>{
+	return c.store.main.maps.mapViews.get(mapID);
 });
 export function GetNodeViewDataPath_FromRootNodeViews(mapID: string, pathOrPathNodes: string | string[]): string[] {
 	const pathNodes = ToPathNodes(pathOrPathNodes);
@@ -82,7 +82,7 @@ export function GetNodeViewDataPath_FromRootNodeViews(mapID: string, pathOrPathN
 	return ['main', 'mapViews', `${mapID}`, 'rootNodeViews', ...childPathNodes];
 } */
 
-export const GetNodeView = StoreAccessor(s=>(mapID: string, pathOrPathNodes: string | string[], createNodeViewsIfMissing = true): MapNodeView=>{
+export const GetNodeView = CreateAccessor(c=>(mapID: string, pathOrPathNodes: string | string[], createNodeViewsIfMissing = true): MapNodeView|n=>{
 	const nodeViews = GetNodeViewsAlongPath(mapID, pathOrPathNodes, createNodeViewsIfMissing);
 	return nodeViews.LastOrX();
 });
@@ -101,7 +101,7 @@ export const GetNodeView = StoreAccessor(s=>(mapID: string, pathOrPathNodes: str
 	if (nodeView.VKeys().length == 0 && returnEmptyNodeViewIfNull) return emptyNodeView;
 	return nodeView.Excluding('children') as MapNodeView_SelfOnly;*#/
 }); */
-export const GetViewOffset = StoreAccessor(s=>(mapView: MapView): Vector2=>{
+export const GetViewOffset = CreateAccessor(c=>(mapView: MapView): Vector2|n=>{
 	if (mapView == null) return null;
 	const treeNode = GetTreeNodesInObjTree(mapView.rootNodeViews).FirstOrX(a=>a.prop == "viewOffset" && a.Value);
 	return treeNode ? treeNode.Value : null;
@@ -112,7 +112,7 @@ export const GetViewOffset = StoreAccessor(s=>(mapView: MapView): Vector2=>{
 
 export const ACTMapNodeSelect = StoreAction((mapID: string, path: string)=>{
 	// CreateMapViewIfMissing(mapID);
-	const nodes = GetTreeNodesInObjTree(GetMapView(mapID).rootNodeViews, true);
+	const nodes = GetTreeNodesInObjTree(GetMapView(mapID)?.rootNodeViews ?? {}, true);
 	const selectedNode = nodes.FirstOrX(a=>a.Value && a.Value.selected)?.Value as MapNodeView;
 	if (selectedNode) {
 		/*delete selectedNode.selected;
@@ -125,46 +125,47 @@ export const ACTMapNodeSelect = StoreAction((mapID: string, path: string)=>{
 	if (path != null) {
 		// const nodeView = GetNodeView(mapID, path);
 		const nodeView = GetNodeViewsAlongPath(mapID, path, true).Last();
+		Assert(nodeView, `NodeView does not exist where it should: ${path}`);
 		nodeView.selected = true;
 	}
 });
 
 // export const GetNodeView_Advanced = StoreAccessor({ cache_unwrapArgs: [1] }, (s) => (mapID: string, pathOrPathNodes: string | string[], createNodeViewsIfMissing = false): MapNodeView[] => {
 // export const GetNodeViewsAlongPath = StoreAccessor({ cache_unwrapArgs: [1] }, (s) => (mapID: string, pathOrPathNodes: string | string[], createNodeViewsIfMissing = false): MapNodeView[] => {
-export function GetNodeViewsAlongPath(mapID: string, pathOrPathNodes: string | string[], createNodeViewsIfMissing = false): MapNodeView[] {
+export function GetNodeViewsAlongPath(mapID: string, pathOrPathNodes: string | string[], createNodeViewsIfMissing = false) {
 	if (pathOrPathNodes == null) return [];
-	const {rootNodeViews} = GetMapView(mapID);
+	const rootNodeViews = GetMapView(mapID)?.rootNodeViews ?? {};
 	const pathNodes = ToPathNodes(pathOrPathNodes);
-	const nodeViews = [] as MapNodeView[];
+	const nodeViews = [] as (MapNodeView|n)[];
 	for (const pathNode of pathNodes) {
 		if (nodeViews.length && nodeViews.Last() == null) {
 			nodeViews.push(null);
 			continue;
 		}
-		let childGroup = nodeViews.length ? nodeViews.Last().children : rootNodeViews;
+		let childGroup = nodeViews.length ? nodeViews.Last()!.children : rootNodeViews;
 		if (createNodeViewsIfMissing) {
 			// temp safeguard against sometimes-occuring bug (which shouldn't ever occur but somehow has/had been)
 			if (childGroup == null) {
 				LogWarning("MapNodeView.children is null; this shouldn't occur. (devs: find root cause)");
 				//debugger;
-				childGroup = nodeViews.Last().children = {};
+				childGroup = nodeViews.Last()!.children = {};
 			}
 			
 			if (childGroup[pathNode] == null) {
 				childGroup[pathNode] = new MapNodeView();
 			}
 		}
-		// return childGroup[pathNode];
+		//return childGroup[pathNode];
 		nodeViews.push(childGroup[pathNode]);
 	}
 	return nodeViews;
 }
-export const GetNodeViewsBelowPath = StoreAccessor(s=>(mapID: string, pathOrPathNodes: string | string[]): MapNodeView[]=>{
-	if (pathOrPathNodes == null) return null;
+export const GetNodeViewsBelowPath = CreateAccessor(c=>(mapID: string, pathOrPathNodes: string | string[]): MapNodeView[]=>{
+	//if (pathOrPathNodes == null) return null;
 	const pathNodes = ToPathNodes(pathOrPathNodes);
 	const nodeView = GetNodeView(mapID, pathOrPathNodes);
 	const result = [] as MapNodeView[];
-	for (const {key, value: child} of nodeView.children?.Pairs() ?? []) {
+	for (const {key, value: child} of nodeView?.children?.Pairs() ?? []) {
 		result.push(child);
 		result.push(...GetNodeViewsBelowPath(mapID, pathNodes.concat(key)));
 	}
@@ -181,7 +182,7 @@ export const ACTMapNodeExpandedSet = StoreAction((opt: {
 	const nodeViews = GetNodeViewsAlongPath(opt.mapID, pathNodes, true);
 
 	if (opt.expandAncestors) {
-		nodeViews.Take(nodeViews.length - 1).forEach(a=>a.expanded = true);
+		nodeViews.Take(nodeViews.length - 1).forEach(a=>a && (a.expanded = true));
 	}
 	const nodeView = nodeViews.Last();
 	const expandKeysPresent = (["expanded", "expanded_truth", "expanded_relevance"] as const).filter(key=>opt[key] != null);
@@ -210,8 +211,7 @@ export const ACTMapViewMerge = StoreAction((mapID: string, toMergeMapView: MapVi
 		store.main.maps.mapViews.set(mapID, toMergeMapView);
 		return;
 	}
-	const inStoreMapView = GetMapView(mapID);
-
+	const inStoreMapView = GetMapView.NN(mapID);
 	const inStoreEntries = GetTreeNodesInObjTree(inStoreMapView, true);
 	const toMergeEntries = GetTreeNodesInObjTree(toMergeMapView, true);
 

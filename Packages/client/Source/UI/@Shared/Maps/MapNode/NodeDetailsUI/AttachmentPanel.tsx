@@ -1,4 +1,4 @@
-import {GetEntries} from "web-vcore/nm/js-vextensions.js";
+import {A, GetEntries} from "web-vcore/nm/js-vextensions.js";
 import {Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI.js";
@@ -29,18 +29,18 @@ export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {
 					</Row>
 					{attachmentType == AttachmentType.equation &&
 						<EquationEditorUI creating={forNew} editing={enabled}
-							baseData={newRevisionData.equation} onChange={val=>Change(newRevisionData.equation = val)}/>}
+							baseData={A.NonNull_(newRevisionData.equation)} onChange={val=>Change(newRevisionData.equation = val)}/>}
 					{attachmentType == AttachmentType.quote &&
 						<QuoteInfoEditorUI /*ref={c=>this.quoteEditor = c}*/ creating={forNew} editing={enabled}
-							baseData={newRevisionData.quote} onChange={val=>Change(newRevisionData.quote = val)}
+							baseData={A.NonNull_(newRevisionData.quote)} onChange={val=>Change(newRevisionData.quote = val)}
 							showPreview={false} justShowed={false}/>}
 					{attachmentType == AttachmentType.references &&
 						<ReferencesAttachmentEditorUI creating={forNew} editing={enabled}
-							baseData={newRevisionData.references} onChange={val=>Change(newRevisionData.references = val)}
+							baseData={A.NonNull_(newRevisionData.references)} onChange={val=>Change(newRevisionData.references = val)}
 							showPreview={false} justShowed={false}/>}
 					{attachmentType == AttachmentType.media &&
 						<MediaAttachmentEditorUI creating={forNew} editing={enabled}
-							baseData={newRevisionData.media} onChange={val=>Change(newRevisionData.media = val)}/>}
+							baseData={A.NonNull_(newRevisionData.media)} onChange={val=>Change(newRevisionData.media = val)}/>}
 				</>}
 			</>
 		);

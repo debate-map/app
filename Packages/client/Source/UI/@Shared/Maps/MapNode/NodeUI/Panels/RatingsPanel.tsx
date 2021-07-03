@@ -6,7 +6,7 @@ import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
 import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Observer} from "web-vcore";
-import {MapNodeL3} from "dm_common";
+import {MapNodeL3, NodeRating_MaybePseudo} from "dm_common";
 import {NodeRatingType, GetRatingTypeInfo} from "dm_common";
 import {NodeRating} from "dm_common";
 import {MeID} from "dm_common";
@@ -26,10 +26,10 @@ import {MarkHandled} from "Utils/UI/General.js";
 	{rating: 100, count: 4},
 ];*/
 
-type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRatingType, ratings: NoID<NodeRating>[]};
+type RatingsPanel_Props = {node: MapNodeL3, path: string, ratingType: NodeRatingType, ratings: NodeRating_MaybePseudo[]};
 
 @Observer
-export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {size: null as Vector2}) {
+export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {size: null as Vector2|n}) {
 	render() {
 		const {node, path, ratingType, ratings} = this.props;
 		const {size} = this.state;

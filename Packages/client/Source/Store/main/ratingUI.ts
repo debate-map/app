@@ -1,10 +1,10 @@
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {O} from "web-vcore";
 
 export class RatingUIState {
 	@O smoothing = 5;
 }
 
-export const GetRatingUISmoothing = StoreAccessor(s=>()=>{
-	return s.main.ratingUI.smoothing;
+export const GetRatingUISmoothing = CreateAccessor(c=>()=>{
+	return c.store.main.ratingUI.smoothing;
 });
