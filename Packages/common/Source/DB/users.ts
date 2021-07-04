@@ -21,8 +21,8 @@ export const Me = CreateAccessor(c=>()=>{
 	return GetUser(id);
 });
 
-export const GetUser = CreateAccessor(c=>(userID: string): User|n=>{
-	return GetDoc({}, a=>a.users.get(userID));
+export const GetUser = CreateAccessor(c=>(userID: string|n): User|n=>{
+	return GetDoc({}, a=>a.users.get(userID!));
 });
 export const GetUsers = CreateAccessor(c=>(): User[]=>{
 	return GetDocs({}, a=>a.users);

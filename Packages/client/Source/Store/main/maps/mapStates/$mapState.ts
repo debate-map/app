@@ -4,8 +4,8 @@ import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNode, GetNodesRevealedInSteps, GetMap} from "dm_common";
 import {TimelineSubpanel, ShowChangesSinceType} from "./@MapState.js";
 
-export const GetMapState = CreateAccessor(c=>(mapID: string)=>{
-	return c.store.main.maps.mapStates.get(mapID);
+export const GetMapState = CreateAccessor(c=>(mapID: string|n)=>{
+	return c.store.main.maps.mapStates.get(mapID!); // nn: get() actually accepts undefined
 });
 
 export const GetSelectedNodeID_InList = CreateAccessor(c=>(mapID: string)=>{

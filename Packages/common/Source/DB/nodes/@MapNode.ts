@@ -42,7 +42,7 @@ export class MapNode {
 
 	@DB((t,n)=>t.text(n).notNullable().references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
-	creator?: string;
+	creator: string;
 
 	@DB((t,n)=>t.bigInteger(n).notNullable())
 	@Field({type: "number"}, {req: true})

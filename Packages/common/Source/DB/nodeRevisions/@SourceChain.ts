@@ -37,12 +37,12 @@ export class Source {
 	type = SourceType.webpage;
 
 	// uses with * means shown in the main row (rather than in dropdown)
-	name: string; // used by: Speech, Text*
-	author: string; // used by: Speech*, Text*, Image*, Video*
-	location: string; // used by: Speech*, Image*, Video*
-	time_min: number; // used by: Speech, Text, Image, Video, Webpage
-	time_max: number; // used by: Speech, Text, Image, Video, Webpage
-	link: string; // used by: Webpage*
+	name?: string; // used by: Speech, Text*
+	author?: string; // used by: Speech*, Text*, Image*, Video*
+	location?: string; // used by: Speech*, Image*, Video*
+	time_min?: number; // used by: Speech, Text, Image, Video, Webpage
+	time_max?: number; // used by: Speech, Text, Image, Video, Webpage
+	link?: string; // used by: Webpage*
 }
 AddSchema("Source", {
 	properties: {

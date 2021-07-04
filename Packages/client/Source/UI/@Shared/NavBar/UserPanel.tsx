@@ -6,6 +6,7 @@ import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {HandleError, Link, Observer} from "web-vcore";
 import {MeID} from "dm_common";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
+import {Assert} from "../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE";
 
 @Observer
 export class UserPanel extends BaseComponentPlus({}, {}) {
@@ -23,6 +24,7 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 				</Column>
 			);
 		}
+		Assert(graph.userInfo);
 
 		return (
 			<Column style={{padding: 5, background: "rgba(0,0,0,.7)", borderRadius: "0 0 0 5px"}}>

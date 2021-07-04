@@ -15,9 +15,7 @@ export const GetRootNodeID = CreateAccessor(c=>(mapID: string)=>{
 });
 
 export const GetMapEditorIDs = CreateAccessor(c=>(mapID: string)=>{
-	const map = GetMap(mapID);
-	if (map == null) return null;
-	return map.editors ?? emptyArray;
+	return GetMap.NN(mapID).editors; // nn: this function should only be called for maps known to exist (and maps still-loading will just bail)
 });
 export const GetMapEditors = CreateAccessor(c=>(mapID: string)=>{
 	return GetMapEditorIDs.BIN(mapID).map(id=>GetUser(id));

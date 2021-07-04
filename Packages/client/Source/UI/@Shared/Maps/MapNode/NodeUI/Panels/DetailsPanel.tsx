@@ -17,14 +17,14 @@ import {UpdateLink} from "dm_common";
 import {AddNodeRevision} from "dm_common";
 import {Map} from "dm_common";
 
-export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {dataError: null as string}) {
-	detailsUI: NodeDetailsUI;
+export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {dataError: null as string|n}) {
+	detailsUI: NodeDetailsUI|n;
 	render() {
 		const {show, map, node, path} = this.props;
 		const {dataError} = this.state;
 
-		const parentNode = GetParentNodeL3(path);
-		const link = GetLinkUnderParent(node.id, parentNode);
+		const parentNode = GetParentNodeL3.NN(path);
+		const link = GetLinkUnderParent.NN(node.id, parentNode);
 		const creator = GetUser(node.creator);
 
 		//const isSubnode = IsNodeSubnode(node);
@@ -44,21 +44,21 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 						/*if (map?.requireMapEditorsCanEdit) {
 							comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.mapEditors};
 						}*/
-						this.SetState({dataError: this.detailsUI.GetValidationError()});
+						this.SetState({dataError: this.detailsUI!.GetValidationError()});
 					}}/>
 				{canEdit &&
 					<Row>
 						<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
 							// let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "layerPlusAnchorParents", "finalType", "link");
 							if (link) {
-								const linkUpdates = GetUpdates(link, this.detailsUI.GetNewLinkData());
+								const linkUpdates = GetUpdates(link, this.detailsUI!.GetNewLinkData());
 								if (linkUpdates.VKeys().length) {
-									await new UpdateLink(E({linkID: GetParentNodeID(path), linkUpdates})).Run();
+									await new UpdateLink(E({linkID: link.id, linkUpdates})).Run();
 								}
 							}
 
-							const newRevision = this.detailsUI.GetNewRevisionData();
-							const revisionID = await new AddNodeRevision({mapID: map.id, revision: newRevision}).Run();
+							const newRevision = this.detailsUI!.GetNewRevisionData();
+							const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).Run();
 							runInAction("DetailsPanel.save.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 
 							/*if (IsPremiseOfSinglePremiseArgument(node, parentNode)) {

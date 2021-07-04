@@ -4,10 +4,10 @@ import {GetTerms, GetMedias, GraphDBShape} from "dm_common";
 
 export class DatabaseState {
 	@O subpage: "users" | "terms" | "media";
-	@O selectedUserID: string;
-	@O selectedTermID: string;
-	// @O selectedTermComponentID: string;
-	@O selectedMediaID: string;
+	@O selectedUserID: string|n;
+	@O selectedTermID: string|n;
+	//@O selectedTermComponentID: string|n;
+	@O selectedMediaID: string|n;
 }
 
 export const GetSelectedUserID = CreateAccessor(c=>()=>{
@@ -15,7 +15,7 @@ export const GetSelectedUserID = CreateAccessor(c=>()=>{
 });
 export const GetSelectedUser = CreateAccessor(c=>()=>{
 	const selectedID = GetSelectedUserID();
-	return GetDoc({}, a=>a.users.get(selectedID));
+	return GetDoc({}, a=>a.users.get(selectedID!));
 });
 
 export const GetSelectedTermID = CreateAccessor(c=>()=>{

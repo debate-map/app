@@ -7,7 +7,7 @@ import {AddChildNode} from "./AddChildNode.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 
 type Payload = {
-	mapID: string,
+	mapID: string|n,
 	argumentParentID: string, argumentNode: MapNode, argumentRevision: MapNodeRevision, argumentLink?: NodeChildLink,
 	claimNode: MapNode, claimRevision: MapNodeRevision, claimLink?: NodeChildLink,
 };

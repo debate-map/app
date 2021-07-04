@@ -4,10 +4,9 @@ import {CheckBox, Column, Pre, Row, Select, Text, TextArea} from "web-vcore/nm/r
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
-import {ES} from "Utils/UI/GlobalStyles.js";
-import {InfoButton, Link, observer_simple} from "web-vcore";
+import {ES, InfoButton, Link, observer_simple} from "web-vcore";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
-import {MapNodeType, GetMapNodeTypeDisplayName, GetDefaultAccessPolicyID_ForNode, NodeChildLink, Map} from "dm_common";
+import {MapNodeType, GetMapNodeTypeDisplayName, GetDefaultAccessPolicyID_ForNode, NodeChildLink, Map, GetAccessPolicy} from "dm_common";
 import {Polarity, MapNode, ClaimForm} from "dm_common";
 import {GetMap} from "dm_common";
 import {GetNode} from "dm_common";
@@ -15,12 +14,13 @@ import {MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_title
 import {AddArgumentAndClaim} from "dm_common";
 import {AddChildNode} from "dm_common";
 import {GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3} from "dm_common";
+import {CatchBail} from "web-vcore/nm/mobx-graphlink";
 
 export class AddChildHelper {
-	constructor(parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string) {
+	constructor(parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string|n) {
 		this.mapID = mapID;
 		this.node_parentPath = parentPath;
-		this.map = GetMap(mapID)!;
+		this.map = GetMap(mapID);
 		Assert(this.map, "Map was not pre-loaded into the store. Can use this beforehand: await GetAsync(()=>GetMap(mapID));");
 		const parentNode = GetNode(this.Node_ParentID);
 		Assert(parentNode, "Parent-node was not pre-loaded into the store. Can use this beforehand: await GetAsync(()=>GetNode(parentID));");
@@ -55,8 +55,8 @@ export class AddChildHelper {
 		}
 	}
 
-	mapID: string;
-	map: Map;
+	mapID: string|n;
+	map: Map|n;
 	node_parentPath: string;
 	// get Node_Parent() { return GetNodeL3(this.node_parentPath); }
 	get Node_ParentID() { return this.node_parentPath.split("/").Last(); }
@@ -129,7 +129,7 @@ enum AddChildDialogTab {
 	Argument,
 	Claim,
 }
-export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: string) {
+export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, childPolarity: Polarity, userID: string, mapID: string|n) {
 	const helper = new AddChildHelper(parentPath, childType, "", childPolarity, userID, mapID);
 	const parentNode = GetNodeL3.NN(parentPath);
 	const parentForm = GetNodeForm(parentNode);
@@ -138,7 +138,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 	const map = GetMap(mapID); // "not in observer" -- humbug; technically true, but map-data must be loaded already, for this func to be called
 
 	let root;
-	let nodeEditorUI: NodeDetailsUI;
+	let nodeEditorUI: NodeDetailsUI|n;
 	const Change = (..._)=>boxController.UpdateUI();
 
 	let tab = AddChildDialogTab.Claim;
@@ -151,7 +151,9 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 				title: tempCommand.validateError as any,
 			};
 
-			const newNodeAsL2 = AsNodeL2(helper.node, helper.node_revision, helper.acce);
+			const accessPolicy = CatchBail(null, ()=>GetAccessPolicy(helper.node.accessPolicy));
+			if (accessPolicy == null) return null as any as JSX.Element; // wait
+			const newNodeAsL2 = AsNodeL2(helper.node, helper.node_revision, accessPolicy);
 			const newNodeAsL3 = AsNodeL3(newNodeAsL2, helper.node_link, childPolarity);
 
 			const advanced = store.main.maps.addChildDialog.advanced;
@@ -203,14 +205,14 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 								<Row style={{display: "flex", alignItems: "center"}}>
 									<TextArea required={true} pattern={MapNodeRevision_titlePattern}
 										allowLineBreaks={false} autoSize={true} style={ES({flex: 1})}
-										value={helper.subNode_revision.titles["base"]}
-										onChange={val=>Change(helper.subNode_revision.titles["base"] = val)}/>
+										value={helper.subNode_revision!.titles["base"]}
+										onChange={val=>Change(helper.subNode_revision!.titles["base"] = val)}/>
 								</Row>
 								<Row mt={5} style={{fontSize: 12}}>{`To add a second premise later, right click on your new argument and press "Convert to multi-premise".`}</Row>
 							</Column>}
 							{advanced &&
 							<NodeDetailsUI style={{padding: "5px 0 0 0"}} parent={newNodeAsL3}
-								baseData={helper.subNode} baseRevisionData={helper.subNode_revision} baseLinkData={helper.subNode_link} forNew={true}
+								baseData={helper.subNode!} baseRevisionData={helper.subNode_revision!} baseLinkData={helper.subNode_link} forNew={true}
 								onChange={(newNodeData, newRevisionData, newLinkData, comp)=>{
 									/*if (map?.requireMapEditorsCanEdit) {
 										comp.state.newRevisionData.permission_edit = {type: PermissionInfoType.mapEditors};

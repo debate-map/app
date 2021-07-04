@@ -5,7 +5,7 @@ import {AddNodeRevision} from "./AddNodeRevision.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 
 /** Do not use this from client-side code. This is only to be used internally, by higher-level commands -- usually AddChildNode. */
-export class AddNode extends Command<{mapID: string, node: MapNode, revision: MapNodeRevision}, {}> {
+export class AddNode extends Command<{mapID: string|n, node: MapNode, revision: MapNodeRevision}, {}> {
 	sub_addRevision: AddNodeRevision;
 
 	nodeID: string;

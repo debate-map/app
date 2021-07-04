@@ -9,18 +9,18 @@ import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {GetShareLongURL, GetShareShortURL} from "../ShareDropDown.js";
 
 @Observer
-export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeline: null as Timeline, justCopied_type: null as string}) {
+export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeline: null as Timeline|n, justCopied_type: null as string|n}) {
 	render() {
 		const {mapID} = this.props;
 		const {timeline, justCopied_type} = this.state;
 		const uiState = store.main.shareUI;
-		const userSharesForMap = GetShares(MeID(), mapID);
+		const userSharesForMap = GetShares(MeID.NN(), mapID);
 		
 		const currentShare = userSharesForMap.OrderByDescending(a=>a.createdAt)[0];
 		const currentShare_shortURL = GetShareShortURL(currentShare);
 		const currentShare_longURL = GetShareLongURL(currentShare);
 
-		const map = GetMap(mapID);
+		const map = GetMap.NN(mapID);
 		//const timelines = GetMapTimelines(map);
 
 		const newShareData = new Share({
@@ -35,7 +35,7 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 		} else if (uiState.expandType == ExpandType.ToSelectedNode) {
 			// todo
 		}*/
-		const newShareJSON = ToJSON(newShareData, null, 2);
+		const newShareJSON = ToJSON(newShareData, undefined, 2);
 		//const newShare_updatesFromCurrent = GetUpdates(currentShare, newShareData, true).Including("mapView");
 		const newShare_updatesFromCurrent = {};
 		if (currentShare) {

@@ -6,7 +6,7 @@ import {Observer} from "web-vcore";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "Store";
-import {GetParentNodeL3, GetParentNodeID} from "dm_common";
+import {GetParentNodeL3, GetParentNodeID, Polarity} from "dm_common";
 import {MapNodeType} from "dm_common";
 import {ClaimForm} from "dm_common";
 import {GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText} from "dm_common";
@@ -24,27 +24,30 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base;
 		let newPolarity =
 			(copiedNode.type == MapNodeType.argument ? copiedNode.link.polarity : null) // if node itself has polarity, use it
-			|| (copiedNode_parent && copiedNode_parent.type == MapNodeType.argument ? copiedNode_parent.link.polarity : null); // else if our parent has a polarity, use that
+			|| (copiedNode_parent?.type == MapNodeType.argument ? copiedNode_parent.link.polarity : null); // else if our parent has a polarity, use that
 
-		const contributeInfo = GetNodeContributionInfo(node.id, MeID());
-		let contributeInfo_polarity = contributeInfo[`${GetPolarityShortStr(newPolarity)}Args`] as NodeContributionInfo_ForPolarity;
-		// if can't add with source polarity, try adding with reversed polarity
-		if (!contributeInfo_polarity.canAdd) {
-			newPolarity = ReversePolarity(newPolarity);
+		const contributeInfo = GetNodeContributionInfo(node.id);
+		let contributeInfo_polarity: NodeContributionInfo_ForPolarity|n;
+		if (newPolarity) {
 			contributeInfo_polarity = contributeInfo[`${GetPolarityShortStr(newPolarity)}Args`] as NodeContributionInfo_ForPolarity;
+			// if can't add with source polarity, try adding with reversed polarity
+			if (!contributeInfo_polarity.canAdd) {
+				newPolarity = ReversePolarity(newPolarity);
+				contributeInfo_polarity = contributeInfo[`${GetPolarityShortStr(newPolarity)}Args`] as NodeContributionInfo_ForPolarity;
+			}
 		}
 
 		const linkCommand = new LinkNode_HighLevel({
-			mapID: map.id, oldParentID: GetParentNodeID(copiedNodePath), newParentID: contributeInfo_polarity.hostNodeID, nodeID: copiedNode.id,
+			mapID: map?.id, oldParentID: GetParentNodeID(copiedNodePath), newParentID: contributeInfo_polarity?.hostNodeID ?? node.id, nodeID: copiedNode.id,
 			newForm: copiedNode.type == MapNodeType.claim ? formForClaimChildren : null,
-			newPolarity: contributeInfo_polarity.reversePolarities ? ReversePolarity(newPolarity) : newPolarity,
+			newPolarity: contributeInfo_polarity?.reversePolarities ? ReversePolarity(newPolarity!) : newPolarity,
 			createWrapperArg: holderType != null || !node.multiPremiseArgument,
 			unlinkFromOldParent: copiedNode_asCut, deleteEmptyArgumentWrapper: true,
 		});
 		const error = linkCommand.Validate_Safe();
 
 		return (
-			<VMenuItem text={`Paste${copiedNode_asCut ? "" : " as link"}: "${GetNodeDisplayText(copiedNode, null, formForClaimChildren).KeepAtMost(50)}"`}
+			<VMenuItem text={`Paste${copiedNode_asCut ? "" : " as link"}: "${GetNodeDisplayText(copiedNode, undefined, formForClaimChildren).KeepAtMost(50)}"`}
 				enabled={error == null} title={error}
 				style={styles.vMenuItem} onClick={e=>{
 					if (e.button != 0) return;

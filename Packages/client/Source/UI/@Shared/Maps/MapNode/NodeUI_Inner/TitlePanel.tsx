@@ -6,9 +6,8 @@ import {Button, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcompone
 import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {ES} from "Utils/UI/GlobalStyles.js";
 import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod} from "dm_common";
-import {InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, VReactMarkdown_Remarkable} from "web-vcore";
+import {ES, InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, VReactMarkdown_Remarkable} from "web-vcore";
 import React from "react";
 import {NodeMathUI} from "../NodeMathUI.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
@@ -42,7 +41,7 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 	return ParseSegmentsForPatterns(text, patterns);*/
 
 	//const termForm_termIDs = termsToSearchFor.SelectMany(term=>term.forms.map(a=>term.id));
-	let patterns = [];
+	let patterns = [] as {name: string, regex: RegExp}[];
 	if (termsToSearchFor.length) {
 		const termForm_strings = termsToSearchFor.SelectMany(term=>{
 			const formsForTerm = term.forms.map(form=>_.escapeRegExp(form));
@@ -59,7 +58,7 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 @Observer
 export class TitlePanel extends BaseComponentPlus(
 	{} as {parent: NodeUI_Inner, map: Map, node: MapNodeL2, path: string, indexInNodeList: number, style},
-	{newTitle: null as string, editing: false, applyingEdit: false},
+	{newTitle: null as string|n, editing: false, applyingEdit: false},
 ) {
 	OnDoubleClick = ()=>{
 		const {node} = this.props;
@@ -95,7 +94,7 @@ export class TitlePanel extends BaseComponentPlus(
 		// UseImperativeHandle(ref, () => ({ OnDoubleClick }));
 
 		const nodeView = GetNodeView(map.id, path);
-		const latex = node.current.equation && node.current.equation.latex;
+		const latex = node.current.equation?.latex;
 		//const isSubnode = IsNodeSubnode(node);
 
 		const displayText = GetNodeDisplayText(node, path);
@@ -111,27 +110,29 @@ export class TitlePanel extends BaseComponentPlus(
 			const segments = GetSegmentsForTerms(text, termsToSearchFor);
 			this.Stash({segments}); // for debugging
 
-			const elements = [];
+			const elements = [] as (string|JSX.Element)[];
 			for (const [index, segment] of segments.entries()) {
 				if (segment.patternMatched == null) {
 					const segmentText = segment.textParts[0];
 					const edgeWhiteSpaceMatch = segmentText.match(/^( *).*?( *)$/);
-					if (edgeWhiteSpaceMatch[1]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[1]}</span>);
-					elements.push(
-						<VReactMarkdown_Remarkable key={elements.length} containerType="span" source={segmentText}
-							rendererOptions={{
-								components: {
-									p: props=><span>{props.children}</span>,
-								},
-							}}/>,
-					);
-					if (edgeWhiteSpaceMatch[2]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[2]}</span>);
+					if (edgeWhiteSpaceMatch) {
+						if (edgeWhiteSpaceMatch[1]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[1]}</span>);
+						elements.push(
+							<VReactMarkdown_Remarkable key={elements.length} containerType="span" source={segmentText}
+								rendererOptions={{
+									components: {
+										p: props=><span>{props.children}</span>,
+									},
+								}}/>,
+						);
+						if (edgeWhiteSpaceMatch[2]) elements.push(<span key={elements.length}>{edgeWhiteSpaceMatch[2]}</span>);
+					}
 				} else if (segment.patternMatched.name == "termForm") {
 					/*const refText = segment.textParts[1];
 					const termID = segment.textParts[2];*/
 					const termStr = segment.textParts[2];
 					//const termID = segment.patternMatched["termID"] as string;
-					const term = termsToSearchFor.find(a=>a.forms.map(form=>form.toLowerCase()).Contains(termStr.toLowerCase()));
+					const term = termsToSearchFor.find(a=>a.forms.map(form=>form.toLowerCase()).includes(termStr.toLowerCase()))!; // nn: segments were initially found based on termsToSearchFor array
 					elements.push(
 						segment.textParts[1],
 						<TermPlaceholder key={elements.length} refText={termStr} termID={term.id}
@@ -165,7 +166,7 @@ export class TitlePanel extends BaseComponentPlus(
 						//isSubnode && {margin: "4px 0 1px 0"},
 						missingTitleStrings.Contains(newTitle) && {color: "rgba(255,255,255,.3)"},
 					)}>
-						{latex && <NodeMathUI text={node.current.equation.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick} termsToSearchFor={termsToSearchFor}/>}
+						{latex && <NodeMathUI text={node.current.equation!.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick} termsToSearchFor={termsToSearchFor}/>}
 						{!latex && RenderNodeDisplayText(newTitle)}
 					</span>}
 				{editing &&
@@ -211,7 +212,7 @@ export class TitlePanel extends BaseComponentPlus(
 
 		this.SetState({applyingEdit: true});
 
-		const parentNode = GetParentNode(path);
+		//const parentNode = GetParentNode(path);
 
 		const form = GetNodeForm(node, path);
 		const titleKey = {[ClaimForm.negation]: "negation", [ClaimForm.yesNoQuestion]: "yesNoQuestion"}[form] || "base";
@@ -222,9 +223,9 @@ export class TitlePanel extends BaseComponentPlus(
 			const command = new AddNodeRevision({mapID: map.id, revision: newRevision});
 			const revisionID = await command.Run();
 			runInAction("TitlePanel.ApplyEdit", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
-			// await WaitTillPathDataIsReceiving(DBPath(`nodeRevisions/${revisionID}`));
-			// await WaitTillPathDataIsReceived(DBPath(`nodeRevisions/${revisionID}`));
-			// await command.WaitTillDBUpdatesReceived();
+			//await WaitTillPathDataIsReceiving(DBPath(`nodeRevisions/${revisionID}`));
+			//await WaitTillPathDataIsReceived(DBPath(`nodeRevisions/${revisionID}`));
+			//await command.WaitTillDBUpdatesReceived();
 		}
 		if (this.mounted) {
 			this.SetState({applyingEdit: false, editing: false});

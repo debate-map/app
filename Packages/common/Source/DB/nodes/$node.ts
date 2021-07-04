@@ -269,7 +269,7 @@ export function GetPolarityShortStr(polarity: Polarity) {
 	return polarity == Polarity.supporting ? "pro" : "con";
 }
 
-export const GetNodeContributionInfo = CreateAccessor(c=>(nodeID: string, userID: string)=> {
+export const GetNodeContributionInfo = CreateAccessor(c=>(nodeID: string)=> {
 	let result = new NodeContributionInfo(nodeID);
 	let tags = GetNodeTags(nodeID);
 	let directChildrenDisabled = CE(tags).Any(a=>a.mirrorChildrenFromXToY?.nodeY == nodeID && a.mirrorChildrenFromXToY?.disableDirectChildren);
@@ -391,19 +391,21 @@ export function GetValidChildTypes(nodeType: MapNodeType, path: string) {
 	const validChildTypes = nodeTypes.filter(type=>ForLink_GetError(nodeType, type) == null);
 	return validChildTypes;
 }
-export function GetValidNewChildTypes(parent: MapNodeL2, holderType: HolderType, permissions: PermissionGroupSet) {
+export function GetValidNewChildTypes(parent: MapNodeL2, holderType: HolderType|n, permissions: PermissionGroupSet) {
 	const nodeTypes = GetValues<MapNodeType>(MapNodeType);
 	const validChildTypes = nodeTypes.filter(type=>ForNewLink_GetError(parent.id, {type} as any, permissions, holderType) == null);
 	return validChildTypes;
 }
 
 /** Returns whether the node provided is an argument, and marked as single-premise. */
-export const IsSinglePremiseArgument = CreateAccessor(c=>(node: MapNode)=>{
-	return node && node.type == MapNodeType.argument && !node.multiPremiseArgument;
+export const IsSinglePremiseArgument = CreateAccessor(c=>(node: MapNode|n)=>{
+	if (node == null) return false;
+	return node.type == MapNodeType.argument && !node.multiPremiseArgument;
 });
 /** Returns whether the node provided is an argument, and marked as multi-premise. */
-export const IsMultiPremiseArgument = CreateAccessor(c=>(node: MapNode)=>{
-	return node && node.type == MapNodeType.argument && node.multiPremiseArgument;
+export const IsMultiPremiseArgument = CreateAccessor(c=>(node: MapNode|n)=>{
+	if (node == null) return false;
+	return node.type == MapNodeType.argument && node.multiPremiseArgument;
 });
 
 /*export function IsPrivateNode(node: MapNode) {
@@ -413,8 +415,8 @@ export function IsPublicNode(node: MapNode) {
 	return node.ownerMapID == null;
 }*/
 
-export const IsPremiseOfSinglePremiseArgument = CreateAccessor(c=>(node: MapNode, parent: MapNode)=>{
-	if (parent == null) return null;
+export const IsPremiseOfSinglePremiseArgument = CreateAccessor(c=>(node: MapNode, parent: MapNode|n)=>{
+	if (parent == null) return false; // if parent is null, we'll assume there is no parent (most callers will already have bailed if parent-node was merely still-loading)
 	return node.type == MapNodeType.claim && IsSinglePremiseArgument(parent);
 });
 export function IsPremiseOfMultiPremiseArgument(node: MapNode, parent: MapNodeL3) {

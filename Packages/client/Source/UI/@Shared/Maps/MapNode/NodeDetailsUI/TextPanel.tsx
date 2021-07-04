@@ -2,7 +2,6 @@ import {E, GetEntries, WaitXThenRun, DelIfFalsy, A} from "web-vcore/nm/js-vexten
 import {Button, Column, Div, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, RenderSource} from "web-vcore/nm/react-vextensions.js";
 import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI.js";
-import {ES} from "Utils/UI/GlobalStyles.js";
 import {TermDefinitionPanel} from "../NodeUI/Panels/DefinitionsPanel.js";
 import {NodeTermsUI} from "./TextPanel/NodeTermsUI.js";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
@@ -12,6 +11,7 @@ import {MapNodeL2, NodeChildLink, ClaimForm} from "dm_common";
 import {MapNodeRevision_titlePattern, ArgumentType, GetArgumentTypeDisplayText} from "dm_common";
 import {TermAttachment} from "dm_common";
 import {GetDisplayPolarity} from "dm_common";
+import {ES} from "web-vcore";
 
 export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 	render() {

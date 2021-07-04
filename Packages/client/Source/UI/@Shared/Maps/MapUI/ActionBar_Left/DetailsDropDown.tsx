@@ -8,7 +8,7 @@ import {Observer, GetUpdates, InfoButton} from "web-vcore";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {FromJSON, ToJSON, E} from "web-vcore/nm/js-vextensions.js";
+import {FromJSON, ToJSON, E, NN} from "web-vcore/nm/js-vextensions.js";
 import {MapDetailsUI} from "../../MapDetailsUI.js";
 
 // todo: probably ms this runs in two steps: 1) gets db-updates, 2) user looks over and approves, 3) user presses continue (to apply using ApplyDBUpdates, or a composite command)
@@ -39,7 +39,7 @@ import {MapDetailsUI} from "../../MapDetailsUI.js";
 
 @Observer
 export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: string}> {
-	detailsUI: MapDetailsUI;
+	detailsUI: MapDetailsUI|n;
 	// permOptions: PermissionsOptions;
 	render() {
 		const {map} = this.props;
@@ -57,12 +57,12 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 					<MapDetailsUI ref={c=>this.detailsUI = c} baseData={map}
 						forNew={false} enabled={creatorOrMod}
 						onChange={newData=>{
-							this.SetState({dataError: this.detailsUI.GetValidationError()});
+							this.SetState({dataError: this.detailsUI!.GetValidationError()});
 						}}/>
 					{creatorOrMod &&
 						<Row>
 							<Button mt={5} text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
-								const mapUpdates = GetUpdates(map, this.detailsUI.GetNewData()).Excluding("layers", "timelines");
+								const mapUpdates = GetUpdates(map, this.detailsUI!.GetNewData()).Excluding("layers", "timelines");
 								await new UpdateMapDetails({id: map.id, updates: mapUpdates}).Run();
 							}}/>
 						</Row>}
@@ -70,7 +70,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 						<Column mt={10}>
 							<Row style={{fontWeight: "bold"}}>Advanced:</Row>
 							<Row mt={5} center>
-								<CheckBox text="Featured" enabled={setMapFeaturedCommand.Validate_Safe() == null} title={setMapFeaturedCommand.validateError} value={map.featured} onChange={val=>{
+								<CheckBox text="Featured" enabled={setMapFeaturedCommand.Validate_Safe() == null} title={setMapFeaturedCommand.validateError} value={map.featured ?? false} onChange={val=>{
 									setMapFeaturedCommand.Run();
 								}}/>
 							</Row>
@@ -100,7 +100,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 								}}/>
 								<InfoButton ml={5} text="Recurses down from the root node, modifying non-matching nodes to match the node-defaults; ignores paths where we lack the edit permission."/>*/}
 								<Button ml={5} text="Delete" onLeftClick={async()=>{
-									const rootNode = await GetAsync(()=>GetNodeL2(map.rootNode));
+									const rootNode = NN(await GetAsync(()=>GetNodeL2(map.rootNode)));
 									if (GetNodeChildLinks(rootNode.id).length != 0) {
 										return void ShowMessageBox({
 											title: "Still has children",

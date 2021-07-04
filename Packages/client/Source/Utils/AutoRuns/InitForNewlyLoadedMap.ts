@@ -1,5 +1,5 @@
 import {GetMap, GetNodeChildLinks, GetNodeL2, MapView} from "dm_common";
-import {Assert, Vector2} from "web-vcore/nm/js-vextensions.js";
+import {A, Assert, NN, Vector2} from "web-vcore/nm/js-vextensions.js";
 import {autorun, runInAction} from "web-vcore/nm/mobx.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import {GetOpenMapID} from "Store/main";
@@ -26,10 +26,11 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 	let mapState = GetMapState(mapID);
 	if (mapState?.initDone && GetMapView(mapID) != null) return; // 2nd-check for version-clearing
 	const map = await GetAsync(()=>GetMap(mapID));
+	Assert(map);
 
 	// ACTEnsureMapStateInit(action.payload.id);
 	// storeM.ACTEnsureMapStateInit(action.payload.id);
-	let mapView: MapView;
+	let mapView: MapView|n;
 	runInAction("StartInitForNewlyLoadedMap_part1", ()=>{
 		({mapState, mapView} = ACTEnsureMapStateInit(mapID));
 		/*if (map.defaultTimelineID) {
@@ -41,10 +42,11 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 
 	let pathsToExpand = [map.rootNode];
 	for (let depth = 0; depth < map.defaultExpandDepth; depth++) {
-		const newPathsToExpand = [];
+		const newPathsToExpand = [] as string[];
 		for (const path of pathsToExpand) {
 			const nodeID = path.split("/").Last();
 			const node = await GetAsync(()=>GetNodeL2(nodeID));
+			Assert(node);
 			// console.log('NodeView:', path, GetNodeView(map.id, path, false));
 			if (GetNodeView(map.id, path, false) == null) {
 				// console.log('Expanding:', path);
@@ -61,7 +63,7 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 	// have view start a bit to the right of the root node
 	ACTSetFocusNodeAndViewOffset(mapID, map.rootNode, new Vector2(300, 0));
 
-	runInAction("StartInitForNewlyLoadedMap_markInitDone", ()=>mapState.initDone = true);
+	runInAction("StartInitForNewlyLoadedMap_markInitDone", ()=>NN(mapState).initDone = true);
 
 	// probably temp (find more elegant way)
 	const mapUI = MapUI.CurrentMapUI;

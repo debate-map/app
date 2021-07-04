@@ -9,7 +9,7 @@ export class SourcesUI extends BaseComponentPlus({headerText: "Sources"} as {sou
 		const {sourceChains, headerText} = this.props;
 		return (
 			<Column mt={3} style={{whiteSpace: "normal"}}>
-				{sourceChains.Any(chain=>chain.sources.Any((source: Source)=>source.link && source.link.startsWith("https://biblia.com/bible/nkjv/"))) &&
+				{sourceChains.Any(chain=>chain.sources.Any((source: Source)=>source.link?.startsWith("https://biblia.com/bible/nkjv/") ?? false)) &&
 					<Row style={{marginBottom: 3, opacity: 0.5, fontSize: 10}}>
 						Scripture taken from the NKJV®. Copyright © 1982 by Thomas Nelson. Used by permission. All rights reserved.
 					</Row>}

@@ -18,8 +18,7 @@ const userIDPlaceholder = "[user-id placeholder]";
 export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 	render() {
 		const {map} = this.props;
-		// const editors = GetMapEditors(map.id).filter((a) => a);
-		const editorIDs = GetMapEditorIDs(map.id);
+		//const editors = GetMapEditors(map.id).filter(a=>a);
 		const editors = GetMapEditors(map.id);
 
 		const Button_Final = GADDemo ? Button_GAD : Button;
@@ -38,7 +37,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 							new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).Run();
 						}}/>}
 					</Row>
-					{editorIDs.map((editorID, index)=>{
+					{map.editors.map((editorID, index)=>{
 						const editor = editors[index];
 						const displayName = editor?.displayName ?? "n/a";
 						return (

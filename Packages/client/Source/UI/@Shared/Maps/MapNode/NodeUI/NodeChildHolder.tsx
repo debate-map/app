@@ -5,9 +5,8 @@ import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {NodeConnectorBackground} from "UI/@Shared/Maps/MapNode/NodeConnectorBackground.js";
 import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI.js";
-import {GetScreenRect, Icon, MaybeLog, Observer} from "web-vcore";
+import {ES, GetScreenRect, Icon, MaybeLog, Observer} from "web-vcore";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
-import {ES} from "Utils/UI/GlobalStyles.js";
 import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
@@ -16,14 +15,14 @@ import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], type: HolderType,
+	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], type: HolderType|n,
 	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, vertical?: boolean, minWidth?: number,
 	onHeightOrDividePointChange?: (dividePoint: number)=>void,
 };
 const initialState = {
-	childrenWidthOverride: null as number,
-	oldChildBoxOffsets: null as {[key: number]: Vector2},
-	placeholderRect: null as VRect,
+	childrenWidthOverride: null as number|n,
+	oldChildBoxOffsets: null as {[key: number]: Vector2}|n,
+	placeholderRect: null as VRect|n,
 };
 
 @WarnOfTransientObjectProps
@@ -38,7 +37,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	render() {
 		const {map, node, path, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, minWidth, onHeightOrDividePointChange} = this.props;
 		let {childrenWidthOverride, oldChildBoxOffsets, placeholderRect} = this.state;
-		childrenWidthOverride = (childrenWidthOverride | 0).KeepAtLeast(minWidth);
+		childrenWidthOverride = (childrenWidthOverride ?? 0).KeepAtLeast(minWidth ?? 0);
 
 		const nodeView = GetNodeView(map.id, path);
 		const nodeChildren_fillPercents = IsSpecialEmptyArray(nodeChildrenToShow) ? emptyObj : nodeChildrenToShow.filter(a=>a).ToMapObj(child=>`${child.id}`, child=>{
@@ -128,7 +127,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 					return RenderChild(pack, index, childrenHere);
 				}} */>
 					{(provided: DroppableProvided, snapshot: DroppableStateSnapshot)=>{
-						const dragIsOverDropArea = provided.placeholder.props["on"] != null;
+						const dragIsOverDropArea = provided.placeholder?.props["on"] != null;
 						if (dragIsOverDropArea) {
 							WaitXThenRun(0, ()=>this.StartGeneratingPositionedPlaceholder(group));
 						}
@@ -191,11 +190,11 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			</Column>
 		);
 	}
-	childHolder: Column;
-	allChildHolder: Column;
-	upChildHolder: Column;
-	downChildHolder: Column;
-	argumentsControlBar: ArgumentsControlBar;
+	childHolder: Column|n;
+	allChildHolder: Column|n;
+	upChildHolder: Column|n;
+	downChildHolder: Column|n;
+	argumentsControlBar: ArgumentsControlBar|n;
 
 	StartGeneratingPositionedPlaceholder(group: "all" | "up" | "down") {
 		const groups = {all: this.allChildHolder, up: this.upChildHolder, down: this.downChildHolder};
@@ -215,7 +214,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		const dragBoxRect = VRect.FromLTWH(dragBox.getBoundingClientRect());
 
 		const siblingNodeUIs = (Array.from(childHolder.DOM.childNodes) as HTMLElement[]).filter(a=>a.classList.contains("NodeUI"));
-		const siblingNodeUIInnerDOMs = siblingNodeUIs.map(nodeUI=>nodeUI.QuerySelector_BreadthFirst(".NodeUI_Inner")).filter(a=>a != null); // entry can be null if inner-ui still loading
+		const siblingNodeUIInnerDOMs = siblingNodeUIs.map(nodeUI=>nodeUI.QuerySelector_BreadthFirst(".NodeUI_Inner")).filter(a=>a != null) as HTMLElement[]; // entry can be null if inner-ui still loading
 		const firstOffsetInner = siblingNodeUIInnerDOMs.find(a=>a && a.style.transform && a.style.transform.includes("translate("));
 
 		let placeholderRect: VRect;
@@ -259,7 +258,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 	lastHeight = 0;
 	lastDividePoint = 0;
-	lastOrderStr = null;
+	lastOrderStr = null as string|n;
 	// Checks for at-our-level state that may require us to update our width or child-box-offsets (for positioning our lines to child nodes).
 	// Note that there are other pathways by which our width/child-box-offsets may be updated. (eg. if child box repositions, an update is triggered through OnChildHeightOrPosChange)
 	CheckForLocalChanges() {
@@ -314,7 +313,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		if (this.argumentsControlBar) {
 			// return upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0;
 			return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden"
-				? GetScreenRect(this.argumentsControlBar.DOM).Center.y + 1 - GetScreenRect(this.childHolder.DOM).y
+				? GetScreenRect(this.argumentsControlBar.DOM!).Center.y + 1 - GetScreenRect(this.childHolder.DOM).y
 				: 0;
 		}
 		// return childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0,
@@ -328,8 +327,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 		const cancelIfStateSame = !forceUpdate;
 		const changedState = this.SetState({
-			childrenWidthOverride: childBoxes.map(comp=>comp.GetMeasurementInfo().width).concat(0).Max(null, true),
-		}, null, cancelIfStateSame, true);
+			childrenWidthOverride: childBoxes.map(comp=>comp.GetMeasurementInfo().width).concat(0).Max(undefined, true),
+		}, undefined, cancelIfStateSame, true);
 		// Log(`Changed state? (${this.props.node._id}): ` + changedState);
 	}
 	UpdateChildBoxOffsets(forceUpdate = false) {
@@ -361,12 +360,12 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		}
 
 		const cancelIfStateSame = !forceUpdate;
-		const changedState = this.SetState(newState, null, cancelIfStateSame, true);
+		const changedState = this.SetState(newState, undefined, cancelIfStateSame, true);
 		// Log(`Changed state? (${this.props.node._id}): ` + changedState);
 	}
 }
 
-export class ChildLimitBar extends BaseComponentPlus({} as {map: Map, path: string, childrenWidthOverride: number, direction: "up" | "down", childCount: number, childLimit: number}, {}) {
+export class ChildLimitBar extends BaseComponentPlus({} as {map: Map, path: string, childrenWidthOverride: number|n, direction: "up" | "down", childCount: number, childLimit: number}, {}) {
 	static HEIGHT = 36;
 	render() {
 		const {map, path, childrenWidthOverride, direction, childCount, childLimit} = this.props;

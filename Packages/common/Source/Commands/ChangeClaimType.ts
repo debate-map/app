@@ -29,7 +29,7 @@ AddSchema("ChangeClaimType_payload", {
 
 @MapEdit
 @UserEdit
-export class ChangeClaimType extends Command<{mapID?: string, nodeID: string, newType: AttachmentType}, {}> {
+export class ChangeClaimType extends Command<{mapID?: string|n, nodeID: string, newType: AttachmentType}, {}> {
 	oldType: AttachmentType;
 	newData: MapNode;
 	newRevision: MapNodeRevision;

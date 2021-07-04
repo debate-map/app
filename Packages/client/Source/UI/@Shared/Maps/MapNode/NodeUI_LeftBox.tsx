@@ -17,7 +17,7 @@ import {Map} from "dm_common";
 
 type Props = {
 	map: Map, path: string, node: MapNodeL3,
-	panelPosition?: "left" | "below", local_openPanel?: string,
+	panelPosition?: "left" | "below", local_openPanel?: string|n,
 	backgroundColor: chroma.Color, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
 };
@@ -40,14 +40,15 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 		const nodeTypeInfo = MapNodeType_Info.for[node.type];
 
 		const combinedWithParent = IsPremiseOfSinglePremiseArgument(node, parentNode);
+		let argumentNode: MapNodeL3|n, argumentPath: string|n;
 		if (combinedWithParent) {
-			var argumentNode = parentNode;
-			var argumentPath = SlicePath(path, 1);
+			argumentNode = parentNode;
+			argumentPath = SlicePath(path, 1);
 		}
 
 		let ratingTypes = GetRatingTypesForNode(node);
 		if (argumentNode) {
-			// ratingTypes = [{type: "impact" as RatingType, main: true}].concat(ratingTypes).concat([{type: "relevance" as RatingType, main: true}]);
+			//ratingTypes = [{type: "impact" as RatingType, main: true}].concat(ratingTypes).concat([{type: "relevance" as RatingType, main: true}]);
 			ratingTypes = ratingTypes.concat([{type: NodeRatingType.relevance}, {type: NodeRatingType.impact, main: true}]);
 		}
 
@@ -61,12 +62,12 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 				{children}
 				<div style={{position: "relative", background: backgroundColor.alpha(0.95).css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
 					{ratingTypes.map((ratingInfo, index)=>{
-						const nodeForRatingType = combinedWithParent && ["impact", "relevance"].Contains(ratingInfo.type) ? argumentNode : node;
-						const pathForRatingType = combinedWithParent && ["impact", "relevance"].Contains(ratingInfo.type) ? argumentPath : path;
-						const parentNodeForRatingType = GetParentNodeL3(pathForRatingType);
+						const nodeForRatingType = combinedWithParent && ["impact", "relevance"].Contains(ratingInfo.type) ? argumentNode! : node;
+						const pathForRatingType = combinedWithParent && ["impact", "relevance"].Contains(ratingInfo.type) ? argumentPath! : path;
+						const parentNodeForRatingType = GetParentNodeL3(pathForRatingType)!; // nn: bail
 
 						const ratingTypeInfo = GetRatingTypeInfo(ratingInfo.type, nodeForRatingType, parentNodeForRatingType, pathForRatingType);
-						// let ratingSet = ratingsRoot && ratingsRoot[ratingType];
+						//let ratingSet = ratingsRoot && ratingsRoot[ratingType];
 
 						let percentStr = "...";
 						const ratings = GetRatings(nodeForRatingType.id, ratingInfo.type);
@@ -122,8 +123,8 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 }
 
 type PanelButton_Props = {
-	map: Map, path: string, openPanel: string, panel: string, text: string, style?,
-	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
+	map: Map, path: string, openPanel: string|n, panel: string, text: string, style?,
+	onPanelButtonHover: (panel: string|n)=>void, onPanelButtonClick: (panel: string)=>void,
 };
 class PanelButton extends BaseComponent<PanelButton_Props, {}> {
 	render() {

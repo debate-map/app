@@ -21,7 +21,7 @@ AddSchema("DeleteNode_payload", {
 
 @MapEdit
 @UserEdit
-export class DeleteNode extends Command<{mapID?: string, nodeID: string, withContainerArgument?: string}, {}> {
+export class DeleteNode extends Command<{mapID?: string|n, nodeID: string, withContainerArgument?: string}, {}> {
 	// as subcommand
 	asPartOfMapDelete = false;
 	parentsToIgnore = [] as string[];

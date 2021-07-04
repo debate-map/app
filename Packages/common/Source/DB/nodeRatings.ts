@@ -64,7 +64,7 @@ export const GetRatingAverage = CreateAccessor(c=>(nodeID: string, ratingType: N
 	Assert(result >= 0 && result <= 100, `Rating-average (${result}) not in range. Invalid ratings: ${ToJSON(ratings.map(a=>a.value).filter(a=>!IsNumber(a)))}`);
 	return result;
 });
-export const GetRatingAverage_AtPath = CreateAccessor(c=><T>(node: MapNodeL3, ratingType: NodeRatingType, userID?: string|n, resultIfNoData?: T): number|T=>{
+export const GetRatingAverage_AtPath = CreateAccessor(c=><T = undefined>(node: MapNodeL3, ratingType: NodeRatingType, userID?: string|n, resultIfNoData?: T): number|T=>{
 	let result = GetRatingAverage(node.id, ratingType, userID);
 	if (result == null) return resultIfNoData as T;
 	if (ShouldRatingTypeBeReversed(node, ratingType)) {
@@ -87,7 +87,7 @@ function HolderTypeToRatingType(holderType: HolderType|n) {
 
 const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
 // export const GetFillPercent_AtPath = StoreAccessor('GetFillPercent_AtPath', (node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null) => {
-export const GetFillPercent_AtPath = CreateAccessor(c=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: NodeRatingType, weighting = WeightingType.votes, userID?: string, resultIfNoData = null)=>{
+export const GetFillPercent_AtPath = CreateAccessor(c=>(node: MapNodeL3, path: string, boxType?: HolderType|n, ratingType?: NodeRatingType, weighting = WeightingType.votes, userID?: string, resultIfNoData = null)=>{
 	ratingType = ratingType ?? HolderTypeToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return resultIfNoData;
 	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes?.includes(node.type)) {
@@ -115,7 +115,7 @@ export const GetFillPercent_AtPath = CreateAccessor(c=>(node: MapNodeL3, path: s
 	return result;
 });
 
-export const GetMarkerPercent_AtPath = CreateAccessor(c=>(node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
+export const GetMarkerPercent_AtPath = CreateAccessor(c=>(node: MapNodeL3, path: string, boxType?: HolderType|n, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
 	ratingType = ratingType ?? HolderTypeToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return null;
 	if (!node.policy.permissions_base.vote) return null;
@@ -174,7 +174,9 @@ export function FilterRatings(ratings: Rating[], filter: RatingFilter) {
 	return ratings.filter(a=>filter == null || filter.includeUser == a.id);
 }*/
 
-export function TransformRatingForContext(ratingValue: number, reverseRating: boolean) {
+export function TransformRatingForContext(ratingValue: number, reverseRating: boolean): number;
+export function TransformRatingForContext(ratingValue: number|n, reverseRating: boolean): number|n;
+export function TransformRatingForContext(ratingValue: number|n, reverseRating: boolean) {
 	if (ratingValue == null) return null;
 	if (reverseRating) return 100 - ratingValue;
 	return ratingValue;

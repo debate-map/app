@@ -22,7 +22,7 @@ export class MI_DeleteContainerArgument extends BaseComponent<MI_SharedProps, {}
 
 		const argumentPath = SlicePath(path, 1);
 		const argument = GetNodeL3(argumentPath);
-		if (argument == null) return null; // wait till loaded
+		if (argumentPath == null || argument == null) return null; // wait till loaded
 		const argumentText = GetNodeDisplayText(argument, argumentPath);
 		// const forDelete_error = ForDelete_GetError(MeID(), argument, { childrenToIgnore: [node.id] });
 		if (!IsUserCreatorOrMod(MeID(), argument)) return null;

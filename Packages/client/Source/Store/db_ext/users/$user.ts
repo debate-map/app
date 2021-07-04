@@ -6,19 +6,19 @@ import {GetUser_Private} from "dm_common";
 // ==========
 
 export class BackgroundConfig {
-	color?: string;
+	color?: string|n;
 
-	extension?: string; // used to infer the urls (default: jpg)
-	url_max?: string;
-	url_256?: string;
-	url_1920?: string;
-	url_3840?: string;
+	extension?: string|n; // used to infer the urls (default: jpg)
+	url_max?: string|n;
+	url_256?: string|n;
+	url_1920?: string|n;
+	url_3840?: string|n;
 
-	position?: string;
-	size?: string;
+	position?: string|n;
+	size?: string|n;
 }
 
-export function GetUserBackground(userID: string): BackgroundConfig {
+export function GetUserBackground(userID: string|n): BackgroundConfig {
 	if (GADDemo) return {color: "#ffffff"};
 
 	const user_p = GetUser_Private(userID);

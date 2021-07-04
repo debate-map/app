@@ -10,7 +10,7 @@ import {GetNode} from "../DB/nodes.js";
 import {AddArgumentAndClaim} from "../Commands.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 
-type Payload = {mapID: string, parentID: string, node: MapNode, revision: MapNodeRevision, link?: Partial<NodeChildLink>, asMapRoot?: boolean};
+type Payload = {mapID: string|n, parentID: string, node: MapNode, revision: MapNodeRevision, link?: Partial<NodeChildLink>, asMapRoot?: boolean};
 
 @MapEdit
 @UserEdit

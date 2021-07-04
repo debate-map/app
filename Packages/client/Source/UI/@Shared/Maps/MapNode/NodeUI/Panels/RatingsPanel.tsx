@@ -51,9 +51,9 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 		const myRating = TransformRatingForContext(ratings.find(a=>a.user == userID)?.value, reverseRatings);
 
 		const smoothingOptions = [1, 2, 4, 5, 10, 20, 25, 50, 100]; // .concat(labels.Max(null, true) == 200 ? [200] : []);
-		const minLabel = labels.Min(null, true); const maxLabel = labels.Max(null, true); const
+		const minLabel = labels.Min(undefined, true); const maxLabel = labels.Max(undefined, true); const
 			range = maxLabel - minLabel;
-		smoothing = smoothing.KeepAtMost(labels.Max(null, true)); // smoothing might have been set higher, from when on another rating-type
+		smoothing = smoothing.KeepAtMost(labels.Max(undefined, true)); // smoothing might have been set higher, from when on another rating-type
 		const ticksForChart = labels.Select(a=>a.RoundTo(smoothing)).Distinct();
 		const dataFinal = ticksForChart.Select(tick=>{
 			const rating = tick;
@@ -164,7 +164,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 
 		const size = new Vector2(dom.clientWidth, dom.clientHeight);
 		// if (!size.Equals(this.state.size))
-		this.SetState({size}, null, false);
+		this.SetState({size}, undefined, false);
 	}
 }
 

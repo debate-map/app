@@ -6,7 +6,7 @@ export class SearchState {
 	@O searchResults_nodeRevisionIDs = [] as string[];
 
 	@O findNode_state = "inactive" as "inactive" | "activating" | "active";
-	@O findNode_node: string;
+	@O findNode_node: string|n;
 	// @O findNode_type: 'FindContainingMaps' | 'FindInCurrentMap';
 	@O findNode_resultPaths = [] as string[];
 	@O findNode_currentSearchDepth = 0 as number;

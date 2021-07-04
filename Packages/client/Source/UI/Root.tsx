@@ -9,7 +9,7 @@ import {GetUserBackground} from "Store/db_ext/users/$user";
 import {GetPathNodeIDs} from "Store/main/maps/mapViews/$mapView.js";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer} from "web-vcore";
-import {Clone, FromJSON, Vector2} from "web-vcore/nm/js-vextensions.js";
+import {Clone, FromJSON, NN, Vector2} from "web-vcore/nm/js-vextensions.js";
 import {observable, runInAction} from "web-vcore/nm/mobx.js";
 import {AsyncTrunk} from "web-vcore/nm/mobx-sync.js";
 import {DragDropContext as DragDropContext_Beautiful} from "web-vcore/nm/react-beautiful-dnd.js";
@@ -32,6 +32,7 @@ import {DebatesUI} from "./Debates.js";
 import {FeedbackUI} from "./Feedback.js";
 import {ForumUI} from "./Forum.js";
 import {SocialUI} from "./Social.js";
+import {Assert} from "../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE";
 
 ColorPickerBox.Init(ReactColor, chroma);
 
@@ -125,16 +126,18 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 			if (result.destination && result.source.droppableId == result.destination.droppableId) return;
 
 			const {parentPath: newParentPath} = targetDroppableInfo;
-			const newParentID = GetPathNodeIDs(newParentPath).Last();
-			const newParent = GetNodeL3(newParentID);
+			const newParentID = NN(GetPathNodeIDs(newParentPath).Last());
+			const newParent = GetNodeL3.NN(newParentID);
 			const polarity = targetDroppableInfo.subtype == "up" ? Polarity.supporting : Polarity.opposing;
 
 			const {mapID, nodePath: draggedNodePath} = draggableInfo;
-			const draggedNodeID = GetPathNodeIDs(draggedNodePath).Last();
-			const draggedNode = GetNodeL3(draggedNodeID);
+			Assert(draggedNodePath);
+			const draggedNodeID = NN(GetPathNodeIDs(draggedNodePath!).Last());
+			const draggedNode = GetNodeL3.NN(draggedNodeID);
 
 			const copyCommand = CreateLinkCommand(mapID, draggedNodePath, newParentPath, polarity, true);
 			const moveCommand = CreateLinkCommand(mapID, draggedNodePath, newParentPath, polarity, false);
+			Assert(copyCommand && moveCommand);
 
 			if (copyCommand.Validate_Safe()) {
 				ShowMessageBox({title: "Cannot copy/move node", message: `Reason: ${copyCommand.validateError}`});
@@ -221,7 +224,7 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 
 		// if in dev-mode, disable the body`s minHeight attribute
 		if (DEV) {
-			document.body.style.minHeight = null;
+			document.body.style.minHeight = null as any;
 		}
 
 		if (GADDemo) {

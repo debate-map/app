@@ -24,6 +24,7 @@ export class ShareDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 	render() {
 		const {map} = this.props;
 		const uiState = store.main.shareUI;
+		if (MeID() == null) return "Must sign in to view/create custom shares.";
 
 		return (
 			<DropDown>
@@ -34,9 +35,9 @@ export class ShareDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 							<Select options={GetEntries(ShareTab, "ui")} displayType="button bar"
 								value={uiState.tab} onChange={val=>RunInAction_Set(this, ()=>uiState.tab = val)}/>
 						</Row>
-						{uiState.tab == ShareTab.allMaps && <SharesListUI mapID={null}/>}
-						{uiState.tab == ShareTab.thisMap && <SharesListUI mapID={GetOpenMapID()}/>}
-						{uiState.tab == ShareTab.current && <NewShareUI mapID={GetOpenMapID()}/>}
+						{uiState.tab == ShareTab.allMaps && <SharesListUI filter_mapID={null}/>}
+						{uiState.tab == ShareTab.thisMap && <SharesListUI filter_mapID={map.id}/>}
+						{uiState.tab == ShareTab.current && <NewShareUI mapID={map.id}/>}
 					</Column>
 				</DropDownContent>
 			</DropDown>
@@ -46,10 +47,10 @@ export class ShareDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 
 const columnWidths = [.45, .25, .3];
 @Observer
-class SharesListUI extends BaseComponentPlus({} as {mapID: string}, {}) {
+class SharesListUI extends BaseComponentPlus({} as {filter_mapID: string|n}, {}) {
 	render() {
-		const {mapID} = this.props;
-		const shares = GetShares(MeID(), mapID).OrderByDescending(a=>a.createdAt);
+		const {filter_mapID} = this.props;
+		const shares = GetShares(MeID.NN(), filter_mapID).OrderByDescending(a=>a.createdAt);
 		return (
 			<>
 				<Row style={{height: 40, padding: 10}}>

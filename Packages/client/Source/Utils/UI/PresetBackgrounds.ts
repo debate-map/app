@@ -88,7 +88,7 @@ for (const {key, value: background} of presetBackgrounds.Pairs()) {
 		background.url_max = `https://firebasestorage.googleapis.com/v0/b/canonical-debate-prod.appspot.com/o/backgrounds%2Foriginal%2F${key}.${background.extension || "jpg"}?alt=media`;
 	}
 	if (background.url_256 == null) {
-		const fileName = background.url_max.match(/%2F([A-Za-z0-9_-]{22}(_x[0-9]+)?\.[a-z]+)/)[1];
+		const fileName = background.url_max.match(/%2F([A-Za-z0-9_-]{22}(_x[0-9]+)?\.[a-z]+)/)?.[1];
 		background.url_256 = `https://firebasestorage.googleapis.com/v0/b/canonical-debate-prod.appspot.com/o/backgrounds%2Fx256%2F${fileName}?alt=media`;
 	}
 }

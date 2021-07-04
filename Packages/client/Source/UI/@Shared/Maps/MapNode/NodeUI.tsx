@@ -1,4 +1,4 @@
-import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNodeL3, MapNodeType, MeID, Polarity} from "dm_common";
+import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNode, MapNodeL3, MapNodeType, MeID, Polarity} from "dm_common";
 import React from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEditTimes.js";
 import {GetNodeChildrenL3_Advanced} from "Store/db_ext/nodes";
@@ -6,9 +6,8 @@ import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder.js";
 import {NodeChildHolderBox} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolderBox.js";
 import {logTypes} from "Utils/General/Logging.js";
-import {ES} from "Utils/UI/GlobalStyles.js";
-import {EB_ShowError, EB_StoreError, MaybeLog, Observer, ShouldLog} from "web-vcore";
-import {Assert, AssertWarn, CreateStringEnum, E, emptyArray_forLoading, IsNaN, nl} from "web-vcore/nm/js-vextensions.js";
+import {EB_ShowError, EB_StoreError, ES, MaybeLog, Observer, ShouldLog} from "web-vcore";
+import {Assert, AssertWarn, CreateStringEnum, E, EA, ea, emptyArray_forLoading, IsNaN, nl} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetInnerComp, RenderSource, ShallowEquals, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
@@ -23,7 +22,7 @@ import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 @Observer
 export class NodeUI extends BaseComponentPlus(
 	{} as {
-		indexInNodeList: number, map: Map, node: MapNodeL3, path?: string, asSubnode?: boolean, widthOverride?: number, style?,
+		indexInNodeList: number, map: Map, node: MapNodeL3, path: string, widthOverride?: number|n, style?,
 		onHeightOrPosChange?: ()=>void
 	},
 	{expectedBoxWidth: 0, expectedBoxHeight: 0, dividePoint: null as number|n, selfHeight: 0},
@@ -40,20 +39,20 @@ export class NodeUI extends BaseComponentPlus(
 		Assert(!IsNaN(dividePoint) && !IsNaN(selfHeight));
 	}
 
-	nodeUI: HTMLDivElement;
-	innerUI: NodeUI_Inner;
-	componentDidCatch(message, info) { EB_StoreError(this, message, info); }
+	nodeUI: HTMLDivElement|n;
+	innerUI: NodeUI_Inner|n;
+	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
-		let {indexInNodeList, map, node, path, asSubnode, widthOverride, style, onHeightOrPosChange, children} = this.props;
+		let {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, children} = this.props;
 		const {expectedBoxWidth, expectedBoxHeight, dividePoint, selfHeight} = this.state;
 
 		performance.mark("NodeUI_1");
-		path = path || node.id.toString();
+		//path = path || node.id.toString();
 
 		const nodeChildren = GetNodeChildrenL3(node.id, path);
 		// let nodeChildrenToShow: MapNodeL3[] = nodeChildren.Any(a => a == null) ? emptyArray_forLoading : nodeChildren; // only pass nodeChildren when all are loaded
-		const nodeChildrenToShow = GetNodeChildrenL3_Advanced(node.id, path, map.id, true, null, true, true, true);
+		const nodeChildrenToShow = GetNodeChildrenL3_Advanced(node.id, path, map.id, true, undefined, true, true);
 
 		/* let subnodes = GetSubnodesInEnabledLayersEnhanced(MeID(), map, node.id);
 		subnodes = subnodes.Any(a => a == null) ? emptyArray : subnodes; // only pass subnodes when all are loaded */
@@ -151,11 +150,12 @@ export class NodeUI extends BaseComponentPlus(
 
 		const separateChildren = node.type == MapNodeType.claim;
 
-		const parentChildren = GetNodeChildrenL3(parent?.id, parentPath);
+		const parentChildren = parent && parentPath ? GetNodeChildrenL3(parent.id, parentPath) : EA<MapNodeL3>();
+		let relevanceArguments: MapNodeL3[] = [];
 		if (isPremiseOfSinglePremiseArg) {
 			const argument = parent;
 			const argumentPath = SlicePath(path, 1);
-			var relevanceArguments = parentChildren.filter(a=>a && a.type == MapNodeType.argument);
+			relevanceArguments = parentChildren.filter(a=>a && a.type == MapNodeType.argument);
 			// Assert(!relevanceArguments.Any(a=>a.type == MapNodeType.claim), "Single-premise argument has more than one premise!");
 			/*if (playingTimeline && playingTimeline_currentStepIndex < playingTimeline.steps.length - 1) {
 				// relevanceArguments = relevanceArguments.filter(child => playingTimelineVisibleNodes.Contains(`${argumentPath}/${child.id}`));
@@ -170,7 +170,7 @@ export class NodeUI extends BaseComponentPlus(
 		const limitBar_above = argumentNode && argumentNode.displayPolarity == Polarity.supporting;
 		const limitBarPos = showLimitBar ? (limitBar_above ? LimitBarPos.above : LimitBarPos.below) : LimitBarPos.none;
 
-		let nodeChildHolder_direct: JSX.Element;
+		let nodeChildHolder_direct: JSX.Element|n;
 		if (!isPremiseOfSinglePremiseArg && boxExpanded) {
 			const showArgumentsControlBar = (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
@@ -194,9 +194,9 @@ export class NodeUI extends BaseComponentPlus(
 				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
 		const nodeChildHolderBox_relevance = isPremiseOfSinglePremiseArg && boxExpanded &&
-			<NodeChildHolderBox {...{map, node: parent, path: parentPath}} type={HolderType.relevance}
+			<NodeChildHolderBox {...{map, node: parent!, path: parentPath!}} type={HolderType.relevance}
 				widthOfNode={widthOverride || width}
-				nodeChildren={GetNodeChildrenL3(parent.id, parentPath)} nodeChildrenToShow={relevanceArguments}
+				nodeChildren={parentChildren} nodeChildrenToShow={relevanceArguments!}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
 
 		// const hasExtraWrapper = subnodes.length || isMultiPremiseArgument;
@@ -234,11 +234,9 @@ export class NodeUI extends BaseComponentPlus(
 					/* useAutoOffset && {display: "flex", height: "100%", flexDirection: "column", justifyContent: "center"},
 					!useAutoOffset && {paddingTop: innerBoxOffset}, */
 					// {paddingTop: innerBoxOffset},
-					{marginTop: boxExpanded && !isMultiPremiseArgument ? (dividePoint - (selfHeight / 2)).NaNTo(0).KeepAtLeast(0) : 0},
+					{marginTop: boxExpanded && !isMultiPremiseArgument ? (dividePoint! - (selfHeight / 2)).NaNTo(0).KeepAtLeast(0) : 0},
 				)}>
 					{limitBar_above && children}
-					{asSubnode &&
-					<div style={{position: "absolute", left: 2, right: 2, top: -3, height: 3, borderRadius: "3px 3px 0 0", background: "rgba(255,255,0,.7)"}}/>}
 					<Column className="innerBoxHolder clickThrough" style={{position: "relative"}}>
 						{/*node.current.accessLevel != AccessLevel.basic &&
 						<div style={{position: "absolute", right: "calc(100% + 5px)", top: 0, bottom: 0, display: "flex", fontSize: 10}}>
@@ -266,7 +264,7 @@ export class NodeUI extends BaseComponentPlus(
 			</div>
 		);
 	}
-	proxyDisplayedNodeUI: NodeUI;
+	proxyDisplayedNodeUI: NodeUI|n;
 	get NodeUIForDisplayedNode() {
 		return this.proxyDisplayedNodeUI || this;
 	}
@@ -294,7 +292,7 @@ export class NodeUI extends BaseComponentPlus(
 		}
 		this.lastHeight = height;
 
-		const selfHeight = this.SafeGet(a=>a.innerUI.DOM_HTML.offsetHeight, 0);
+		const selfHeight = this.SafeGet(a=>a.innerUI!.DOM_HTML.offsetHeight, 0);
 		if (selfHeight != this.lastSelfHeight) {
 			MaybeLog(a=>a.nodeRenderDetails && (a.nodeRenderDetails_for == null || a.nodeRenderDetails_for == node.id),
 				()=>`OnSelfHeightChange NodeUI (${RenderSource[this.lastRender_source]}):${this.props.node.id}${nl}NewSelfHeight:${selfHeight}`);

@@ -28,9 +28,9 @@ export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes
 		const {dbUpgrade_entryIndexes, dbUpgrade_entryCounts} = this.state;
 		let isAdmin = HasAdminPermissions(MeID());
 		// also check previous version for admin-rights (so we can increment db-version without losing our rights to complete the db-upgrade!)
-		if (!isAdmin && MeID() != null) {
+		/*if (!isAdmin && MeID() != null) {
 			isAdmin = GetDoc({inLinkRoot: false}, (a: any)=>(a.versions.get(`v${dbVersion - 1}-${DB_SHORT}`) as GraphDBShape).users.get(MeID())?.permissionGroups.admin) ?? false;
-		}
+		}*/
 
 		if (!isAdmin) return <PageContainer>Please sign in.</PageContainer>;
 		return (

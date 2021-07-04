@@ -2,19 +2,19 @@ import {Button, Column, Div, Pre, Row, Span, Text} from "web-vcore/nm/react-vcom
 import {BaseComponent, BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {ES} from "Utils/UI/GlobalStyles.js";
 import {store} from "Store";
 import {GetSelectedMedia} from "Store/main/database";
-import {Observer, GetUpdates} from "web-vcore";
+import {Observer, GetUpdates, ES} from "web-vcore";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMediaData, DeleteMedia} from "dm_common";
 import {MediaDetailsUI} from "./Medias/MediaDetailsUI.js";
 import {ShowAddMediaDialog} from "./Medias/AddMediaDialog.js";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
+import {Assert} from "../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE.js";
 
 @Observer
-export class MediasUI extends BaseComponentPlus({} as {}, {} as { selectedMedia_newData: Media, selectedMedia_newDataError: string }) {
+export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_newData: Media|n, selectedMedia_newDataError: string|n}) {
 	scrollView: ScrollView;
 	render() {
 		const {selectedMedia_newData, selectedMedia_newDataError} = this.state;
@@ -71,12 +71,14 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as { selectedMedia_
 								{creatorOrMod &&
 									<Button ml="auto" text="Save details" enabled={selectedMedia_newData != null && selectedMedia_newDataError == null}
 										onClick={async e=>{
+											Assert(selectedMedia); // nn: button would be disabled otherwise
 											const updates = GetUpdates(selectedMedia, selectedMedia_newData);
 											await new UpdateMediaData({id: selectedMedia.id, updates}).Run();
 											// this.SetState({selectedImage_newData: null});
 										}}/>}
 								{creatorOrMod &&
 									<Button text="Delete media" ml={10} enabled={selectedMedia != null} onClick={async e=>{
+										Assert(selectedMedia); // nn: button would be disabled otherwise
 										ShowMessageBox({
 											title: `Delete "${selectedMedia.name}"`, cancelButton: true,
 											message: `Delete the media "${selectedMedia.name}"?`,

@@ -34,7 +34,7 @@ export class SubNavBarButton extends BaseComponentPlus({} as {page: string, subp
 		const currentSubpage = store.main[page].subpage || rootPageDefaultChilds[page];
 		const active = subpage == currentSubpage;
 
-		let actionFunc: ActionFunc<RootState>;
+		let actionFunc: ActionFunc<RootState>|n;
 		if (!active) {
 			actionFunc = s=>s.main[page].subpage = subpage;
 		} else if (actionFuncIfAlreadyActive) {

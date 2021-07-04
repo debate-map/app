@@ -9,7 +9,7 @@ import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 
 @MapEdit
 @UserEdit
-export class LinkNode extends Command<{mapID: string, parentID: string, childID: string, childForm?: ClaimForm|n, childPolarity?: Polarity}, {}> {
+export class LinkNode extends Command<{mapID: string|n, parentID: string, childID: string, childForm?: ClaimForm|n, childPolarity?: Polarity|n}, {}> {
 	child_oldData: MapNode|n;
 	parent_oldData: MapNode;
 	/* async Prepare(parent_oldChildrenOrder_override?: number[]) {

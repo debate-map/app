@@ -41,7 +41,7 @@ export class EquationEditorUI extends BaseComponent<Props, {newData: EquationAtt
 					<Pre>Step in series: </Pre>
 					<CheckBox enabled={editing} value={newData.isStep ?? false}
 						// onChange={val=>Change(val ? newLinkData.isStep = true : delete newLinkData.isStep)}/>
-						onChange={val=>Change(newData.isStep = val ?? undefined)}/>
+						onChange={val=>Change(newData.isStep = val)}/>
 				</Row>
 				{newData.isStep &&
 					<RowLR mt={5} splitAt={splitAt}>

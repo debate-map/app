@@ -6,8 +6,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
 import {GetSelectedTerm} from "Store/main/database";
-import {ES} from "Utils/UI/GlobalStyles.js";
-import {GetUpdates, Observer} from "web-vcore";
+import {ES, GetUpdates, Observer} from "web-vcore";
 import {Term, TermType} from "dm_common";
 import {MeID} from "dm_common";
 import {GetTerms, GetFullNameP} from "dm_common";
@@ -18,7 +17,7 @@ import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI.js";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
 
 @Observer
-export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_newData: Term, selectedTerm_newDataError: string}) {
+export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_newData: Term|n, selectedTerm_newDataError: string|n}) {
 	render() {
 		const {selectedTerm_newData, selectedTerm_newDataError} = this.state;
 
@@ -74,6 +73,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 								{creatorOrMod &&
 									<Button ml="auto" text="Save details" enabled={selectedTerm_newData != null && selectedTerm_newDataError == null}
 										onClick={async e=>{
+											Assert(selectedTerm); // nn: button would be disabled otherwise
 											const updates = GetUpdates(selectedTerm, selectedTerm_newData);
 											await new UpdateTerm({termID: selectedTerm.id, updates}).Run();
 											// this.SetState({selectedTerm_newData: null});
@@ -81,6 +81,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 								{creatorOrMod &&
 									<Button text="Delete term" ml={10} enabled={selectedTerm != null}
 										onClick={async e=>{
+											Assert(selectedTerm); // nn: button would be disabled otherwise
 											ShowMessageBox({
 												title: `Delete "${GetFullNameP(selectedTerm)}"`, cancelButton: true,
 												message: `Delete the term "${GetFullNameP(selectedTerm)}"?`,

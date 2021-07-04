@@ -1,17 +1,16 @@
-import {SleepAsync, Vector2, WaitXThenRun, E} from "web-vcore/nm/js-vextensions.js";
+import {SleepAsync, Vector2, WaitXThenRun, E, ea} from "web-vcore/nm/js-vextensions.js";
 import keycode from "keycode";
 import moment from "web-vcore/nm/moment";
 import {Button, Column, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O} from "web-vcore";
-import {ES} from "Utils/UI/GlobalStyles.js";
+import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O, ES} from "web-vcore";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction, flow} from "web-vcore/nm/mobx.js";
 import {Validate, GetAsync, UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, MapType, GetSearchTerms_Advanced, GetNodeChildLinks} from "dm_common";
+import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, MapType, GetSearchTerms_Advanced, GetNodeChildLinks, GetNodeRevisions, MapNodeRevision} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {MapUI} from "../Maps/MapUI.js";
 import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu.js";
@@ -22,8 +21,8 @@ const columnWidths = [0.68, 0.2, 0.12];
 export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr: string}) {
 	ClearResults() {
 		runInAction("SearchPanel.ClearResults", ()=>{
-			store.main.search.searchResults_partialTerms = [];
-			store.main.search.searchResults_nodeRevisionIDs = null;
+			store.main.search.searchResults_partialTerms = ea;
+			store.main.search.searchResults_nodeRevisionIDs = ea;
 		});
 	}
 	async PerformSearch() {
@@ -46,9 +45,10 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 			}
 			const node = await GetAsync(()=>GetNode(queryStr));
 			if (node) {
+				const visibleNodeRevision = await GetAsync(()=>GetNodeRevisions(node.id).OrderBy(a=>a.createdAt).Last()); // todo: replace with actual "find node-revision to show" function
 				runInAction("SearchPanel.PerformSearch_part2_nodeID", ()=>{
 					//store.main.search.searchResults_nodeRevisionIDs = [node.currentRevision];
-					store.main.search.searchResults_nodeRevisionIDs = [nodeRevisionMatch.id];
+					store.main.search.searchResults_nodeRevisionIDs = [visibleNodeRevision.id];
 				});
 				return;
 			}
@@ -77,7 +77,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 		const {searchResults_partialTerms} = store.main.search;
 		const searchResultIDs = store.main.search.searchResults_nodeRevisionIDs;
 
-		let results_nodeRevisions = searchResultIDs == null ? null : searchResultIDs.map(revisionID=>GetNodeRevision(revisionID));
+		let results_nodeRevisions = searchResultIDs.map(id=>GetNodeRevision(id)).filter(a=>a != null) as MapNodeRevision[]; // filter, cause search-results may be old (before an entry's deletion)
 		// after finding node-revisions matching the whole-terms, filter to those that match the partial-terms as well
 		if (searchResults_partialTerms.length) {
 			for (const term of searchResults_partialTerms) {
@@ -175,10 +175,10 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 	// StartFindingPathsFromXToY = flow(function* StartFindingPathsFromXToY(rootNodeX: UUID, targetNodeY: UUID) {
 		const searchDepth = 100;
 
-		const upPathCompletions = [];
+		const upPathCompletions = [] as string[];
 		let upPathAttempts = [`${targetNodeY}`];
 		for (let depth = 0; depth < searchDepth; depth++) {
-			const newUpPathAttempts = [];
+			const newUpPathAttempts = [] as string[];
 			for (const upPath of upPathAttempts) {
 				const nodeID = upPath.split("/").First();
 				const node = await GetAsync(()=>GetNodeL2(nodeID));
@@ -223,7 +223,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 		runInAction("SearchResultRow.StopSearch", ()=>store.main.search.findNode_state = "inactive");
 	}
 
-	componentDidCatch(message, info) { EB_StoreError(this, message, info); }
+	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
 	// searchInProgress = false;
 	static searchInProgress = false;
 	render() {
@@ -232,8 +232,9 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 		const node = GetNodeL2(nodeID);
 		const creator = node ? GetUser(node.creator) : null;
 
-		const mapID = GetOpenMapID();
-		const rootNodeID = GetRootNodeID(GetOpenMapID());
+		const openMapID = GetOpenMapID();
+		const openMap = GetMap(openMapID);
+		const openMap_rootNodeID = openMapID ? GetRootNodeID(openMapID) : null;
 
 		const {findNode_state} = store.main.search;
 		const {findNode_node} = store.main.search;
@@ -288,24 +289,24 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 						}}/>
 					</Row>}
 				{findNode_node === nodeID && findNode_resultPaths.length > 0 && findNode_resultPaths.map(resultPath=>{
-					const mapRootNodeID = resultPath.split("/")[0];
-					const mapRootNode = GetNode(mapRootNodeID);
-					if (mapRootNode == null) return; // still loading
-					const mapRootNode_map = GetMap(mapRootNode.rootNodeForMap);
-					const inCurrentMap = mapRootNodeID == rootNodeID;
+					const searchResult_path_rootNodeID = resultPath.split("/")[0];
+					const searchResult_path_rootNode = GetNode(searchResult_path_rootNodeID);
+					const searchResult_map = GetMap(searchResult_path_rootNode?.rootNodeForMap);
+					
+					const inCurrentMap = openMap && searchResult_path_rootNodeID == openMap_rootNodeID;
 					return (
 						<Row key={resultPath}>
-							<Button mr="auto" text={inCurrentMap ? `Jump to ${resultPath}` : `Open containing map (${mapRootNode.rootNodeForMap})`} onClick={()=>{
+							<Button mr="auto" text={inCurrentMap ? `Jump to ${resultPath}` : `Open containing map (${searchResult_map?.name ?? "n/a"})`} onClick={()=>{
 								if (inCurrentMap) {
-									JumpToNode(mapID, resultPath);
+									JumpToNode(openMapID!, resultPath);
 								} else {
-									if (mapRootNode_map == null) return; // still loading
+									if (searchResult_map == null) return; // still loading
 									runInAction("SearchResultRow.OpenContainingMap", ()=>{
-										if (mapRootNode_map.type != MapType.global) {
+										if (searchResult_map.type != MapType.global) {
 											store.main.page = "global";
 										} else {
 											store.main.page = "debates";
-											store.main.debates.selectedMapID = mapRootNode_map.id;
+											store.main.debates.selectedMapID = searchResult_map.id;
 										}
 									});
 								}

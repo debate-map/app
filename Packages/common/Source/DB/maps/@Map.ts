@@ -74,9 +74,9 @@ export class Map {
 	@Field({type: "boolean"})
 	featured?: boolean;
 
-	@DB((t,n)=>t.specificType(n, "text[]"))
+	@DB((t,n)=>t.specificType(n, "text[]").notNullable())
 	//@Field({patternProperties: {[UUID_regex]: {type: "boolean"}}})
-	@Field({items: {type: "string"}})
+	@Field({items: {type: "string"}}, {req: true})
 	editors: string[];
 
 	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())

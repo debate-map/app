@@ -3,13 +3,11 @@ import Moment from "web-vcore/nm/moment";
 import {Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
-import {HSLA, Link, Observer} from "web-vcore";
+import {ES, HSLA, Link, Observer} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {GetUser, MapType, Map} from "dm_common";
-
 import {columnWidths} from "./MapListUI.js";
-import {ES} from "Utils/UI/GlobalStyles.js";
 
 @Observer
 export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: boolean, map: Map}, {}) {

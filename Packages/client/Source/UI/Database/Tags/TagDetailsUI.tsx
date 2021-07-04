@@ -3,8 +3,7 @@ import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox, Button} from
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
-import {ES} from "Utils/UI/GlobalStyles.js";
-import {InfoButton, observer_simple} from "web-vcore";
+import {ES, InfoButton, observer_simple} from "web-vcore";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNodeL2, AsNodeL3, GetNodeDisplayText} from "dm_common";
 import {MapNodeType} from "dm_common";

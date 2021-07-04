@@ -1,19 +1,18 @@
 import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {Button, Column, Row, TextInput, Select, Text, Pre} from "web-vcore/nm/react-vcomponents.js";
 import {GetErrorMessagesUnderElement, GetEntries, Clone, E, Range, DEL, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
-import {ES} from "Utils/UI/GlobalStyles.js";
 import {Fragment} from "react";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {SourceChain, Source, SourceType, GetSourceNamePlaceholderText, GetSourceAuthorPlaceholderText, Source_linkURLPattern} from "dm_common";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
-import {VDateTime} from "web-vcore";
+import {ES, VDateTime} from "web-vcore";
 import Moment from "web-vcore/nm/moment";
 
 type SharedProps = {enabled: boolean, Change: (..._)=>void};
 
 export class SourceChainsEditorUI extends BaseComponentPlus(
 	{enabled: true} as {baseData: SourceChain[], enabled?: boolean, style?, onChange?: (newData: SourceChain[])=>void},
-	{newData: null as SourceChain[], selectedChainIndex: 0},
+	{newData: null as any as SourceChain[], selectedChainIndex: 0},
 ) {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
@@ -35,7 +34,7 @@ export class SourceChainsEditorUI extends BaseComponentPlus(
 		const splitAt = 100; // , width = 600;
 		// const urlRegex = new RegExp('^https?://[^\\s/$.?#]+\\.[^\\s]+$');
 		const selectedChain = newData[selectedChainIndex];
-		const sharedProps = {enabled, Change};
+		const sharedProps = {enabled: enabled ?? true, Change};
 		return (
 			<Column style={ES({flex: 1})}>
 				<Row>

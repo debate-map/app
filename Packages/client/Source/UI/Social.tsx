@@ -1,7 +1,6 @@
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {VReactMarkdown_Remarkable, PageContainer} from "web-vcore";
-import {styles, ES} from "../Utils/UI/GlobalStyles.js";
 
 const pageText = `
 The Social page is under development.

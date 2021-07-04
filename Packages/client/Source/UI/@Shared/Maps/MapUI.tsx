@@ -1,10 +1,10 @@
 import {StandardCompProps} from "Utils/UI/General.js";
-import {DeepGet, E, SleepAsync, Timer, Vector2, FindDOMAll, Assert, FromJSON, ToJSON, VRect, GetTreeNodesInObjTree} from "web-vcore/nm/js-vextensions.js";
+import {DeepGet, E, SleepAsync, Timer, Vector2, FindDOMAll, Assert, FromJSON, ToJSON, VRect, GetTreeNodesInObjTree, NN} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentWithConnector, FindReact, GetDOM, BaseComponentPlus, BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {VMenuStub, VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {GetDistanceBetweenRectAndPoint, inFirefox, GetScreenRect, StoreAction, Observer} from "web-vcore";
+import {GetDistanceBetweenRectAndPoint, inFirefox, GetScreenRect, StoreAction, Observer, ES, HTMLProps} from "web-vcore";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {store} from "Store";
 import {GetNodeView, GetMapView, GetSelectedNodePath, GetViewOffset, GetFocusedNodePath, GetNodeViewsAlongPath, ACTMapNodeSelect} from "Store/main/maps/mapViews/$mapView.js";
@@ -12,7 +12,7 @@ import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapS
 import {GetOpenMapID} from "Store/main";
 import {TimelineIntroBox} from "UI/@Shared/Timelines/TimelineIntroBox.js";
 import {MapNodeL3, GetUserAccessLevel, MeID, IsNodeL2, IsNodeL3, GetNodeL3, IsPremiseOfSinglePremiseArgument, GetParentPath, GetParentNodeL3, Map} from "dm_common";
-import {styles, ES} from "../../../Utils/UI/GlobalStyles.js";
+import {styles} from "../../../Utils/UI/GlobalStyles.js";
 import {NodeUI} from "./MapNode/NodeUI.js";
 import {NodeUI_ForBots} from "./MapNode/NodeUI_ForBots.js";
 import {NodeUI_Inner} from "./MapNode/NodeUI_Inner.js";
@@ -36,12 +36,14 @@ export function GetViewOffsetForNodeBox(nodeBox: Element) {
 
 export const ACTUpdateFocusNodeAndViewOffset = StoreAction((mapID: string)=>{
 	// unfocus the old focused node
-	const {rootNodeViews} = GetMapView(mapID);
-	const nodes = GetTreeNodesInObjTree(rootNodeViews, true);
-	const oldFocusNode = nodes.FirstOrX(a=>a.Value && a.Value.focused);
-	if (oldFocusNode) {
-		oldFocusNode.Value.focused = false;
-		oldFocusNode.Value.viewOffset = null;
+	const mapView = GetMapView(mapID);
+	if (mapView) {
+		const nodes = GetTreeNodesInObjTree(mapView.rootNodeViews, true);
+		const oldFocusNode = nodes.FirstOrX(a=>a.Value && a.Value.focused);
+		if (oldFocusNode) {
+			oldFocusNode.Value.focused = false;
+			oldFocusNode.Value.viewOffset = null;
+		}
 	}
 
 	// CreateMapViewIfMissing(mapID);
@@ -88,14 +90,14 @@ type Props = {
 	map: Map, rootNode?: MapNodeL3, withinPage?: boolean,
 	padding?: {left: number, right: number, top: number, bottom: number},
 	subNavBarWidth?: number,
-} & React.HTMLProps<HTMLDivElement>;
+} & HTMLProps<"div">;
 @Observer
 export class MapUI extends BaseComponentPlus({
 	// padding: {left: 2000, right: 2000, top: 1000, bottom: 1000}
 	padding: {left: screen.availWidth, right: screen.availWidth, top: screen.availHeight, bottom: screen.availHeight},
 	subNavBarWidth: 0,
 } as Props, {}) {
-	private static currentMapUI: MapUI;
+	private static currentMapUI: MapUI|n;
 	static get CurrentMapUI() { return MapUI.currentMapUI && MapUI.currentMapUI.mounted ? MapUI.currentMapUI : null; }
 
 	static ValidateProps(props) {
@@ -106,18 +108,19 @@ export class MapUI extends BaseComponentPlus({
 		}
 	}
 
-	scrollView: ScrollView;
-	mapUIEl: HTMLDivElement;
-	downPos: Vector2;
+	scrollView: ScrollView|n;
+	mapUIEl: HTMLDivElement|n;
+	downPos: Vector2|n;
 	render() {
 		const {map, rootNode: rootNode_passed, withinPage, padding, subNavBarWidth, ...rest} = this.props;
+		Assert(padding && subNavBarWidth); // nn: default-values set
 		Assert(map.id, "map.id is null!");
 
 		if (!GetMapState(map.id)?.initDone) return <MapUIWaitMessage message="Initializing map metadata..."/>;
 		if (GetMapView(map.id) == null) return <MapUIWaitMessage message="Initializing map view..."/>;
 		if (map == null) return <MapUIWaitMessage message="Loading map..."/>;
 		const rootNode = (()=>{
-			let result = rootNode_passed;
+			let result: MapNodeL3|n = rootNode_passed;
 			if (result == null && map && map.rootNode) {
 				result = GetNodeL3(`${map.rootNode}`);
 			}
@@ -163,7 +166,7 @@ export class MapUI extends BaseComponentPlus({
 					{/*!withinPage && timelinePanelOpen &&
 						<TimelinePanel map={map}/>*/}
 					<ScrollView {...rest.Excluding(...StandardCompProps() as any)} ref={c=>this.scrollView = c}
-						backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView.content) || a == this.mapUIEl}
+						backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.content) || a == this.mapUIEl}
 						style={ES({height: "100%"}, withinPage && {overflow: "visible"})}
 						scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}
 						contentStyle={E(
@@ -194,10 +197,10 @@ export class MapUI extends BaseComponentPlus({
 							}}
 							onMouseDown={e=>{
 								this.downPos = new Vector2(e.clientX, e.clientY);
-								if (e.button == 2) { this.mapUIEl.classList.add("scrolling"); }
+								if (e.button == 2) { this.mapUIEl!.classList.add("scrolling"); }
 							}}
 							onMouseUp={e=>{
-								this.mapUIEl.classList.remove("scrolling");
+								this.mapUIEl!.classList.remove("scrolling");
 							}}
 							onClick={e=>{
 								if (e.target != this.mapUIEl) return;
@@ -315,7 +318,7 @@ export class MapUI extends BaseComponentPlus({
 			return result;
 		});
 
-		let targetNodeUI: NodeUI_Inner;
+		let targetNodeUI: NodeUI_Inner|n;
 		let nextPathTry = nodePath;
 		while (targetNodeUI == null) {
 			targetNodeUI = nodeUIs.FirstOrX(nodeUI=>{
@@ -341,12 +344,13 @@ export class MapUI extends BaseComponentPlus({
 
 		const focusNodeBox = this.FindNodeBox(nodePath, true);
 		if (focusNodeBox == null) return false;
-		const focusNodeBoxPos = GetScreenRect(GetDOM(focusNodeBox)).Center.Minus(GetScreenRect(this.mapUIEl).Position);
+		const focusNodeBoxPos = GetScreenRect(NN(GetDOM(focusNodeBox))).Center.Minus(GetScreenRect(NN(this.mapUIEl)).Position);
 		this.ScrollToPosition_Center(focusNodeBoxPos.Plus(viewOffset_target));
 		return true;
 	}
 	ScrollToPosition_Center(posInContainer: Vector2) {
 		const {withinPage} = this.props;
+		Assert(this.scrollView);
 
 		const oldScroll = this.scrollView.GetScroll();
 		const newScroll = new Vector2(posInContainer.x - (window.innerWidth / 2), posInContainer.y - (window.innerHeight / 2));
@@ -354,7 +358,7 @@ export class MapUI extends BaseComponentPlus({
 			newScroll.y = oldScroll.y;
 		}
 		Log("Loading scroll:", newScroll);
-		this.scrollView.SetScroll(newScroll);
+		this.scrollView!.SetScroll(newScroll);
 		// Log("Scrolling to position: " + newScroll);
 
 		/* if (nextPathTry == nodePath)
@@ -363,10 +367,11 @@ export class MapUI extends BaseComponentPlus({
 
 	ScrollToMakeRectVisible(targetRect: VRect, padding = 0, stopLoadingStoredScroll = true) {
 		if (padding != 0) targetRect = targetRect.Grow(padding);
+		Assert(this.scrollView && this.mapUIEl);
 
 		const mapUIBackgroundRect = GetScreenRect(this.mapUIEl);
 		const oldScroll = this.scrollView.GetScroll();
-		const viewportRect = GetScreenRect(GetDOM(this.scrollView.content)).NewPosition(a=>a.Minus(mapUIBackgroundRect));
+		const viewportRect = GetScreenRect(GetDOM(this.scrollView.content)!).NewPosition(a=>a.Minus(mapUIBackgroundRect));
 
 		const newViewportRect = viewportRect.Clone();
 		if (targetRect.Left < newViewportRect.Left) newViewportRect.x = targetRect.x; // if target-rect extends further left, reposition left
@@ -391,7 +396,7 @@ window.addEventListener("beforeunload", ()=>{
 	SetMapVisitTimeForThisSession(mapID, Date.now());
 });
 
-function SetMapVisitTimeForThisSession(mapID: string, time: number) {
+function SetMapVisitTimeForThisSession(mapID: string|n, time: number) {
 	if (mapID == null) return;
 	const lastMapViewTimes = FromJSON(localStorage.getItem(`lastMapViewTimes_${mapID}`) || `[${Date.now()}]`) as number[];
 

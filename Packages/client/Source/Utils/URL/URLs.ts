@@ -1,5 +1,5 @@
-import {Assert, VURL, ModifyString} from "web-vcore/nm/js-vextensions.js";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, VURL, ModifyString, ATS} from "web-vcore/nm/js-vextensions.js";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {RootState} from "Store";
 import {GetOpenMapID, GetPage, GetSubpage} from "Store/main";
 import {GetSelectedMediaID, GetSelectedTermID, GetSelectedUserID} from "Store/main/database";
@@ -251,6 +251,7 @@ export function GetLoadActionFuncForURL(url: VURL) {
 
 // g.justChangedURLFromCode = false;
 export const GetNewURL = CreateAccessor(c=>(includeMapViewStr = true)=>{
+	const s = c.store;
 	// let newURL = URL.Current();
 	/* let oldURL = URL.Current(true);
 	let newURL = new VURL(oldURL.domain, oldURL.pathNodes); */
@@ -312,11 +313,11 @@ export const GetNewURL = CreateAccessor(c=>(includeMapViewStr = true)=>{
 		if (isBot) {
 			const map = GetMap(mapID);
 			// const rootNodeID = store.main.mapViews.get(mapID).rootNodeID;
-			const rootNodeID = map.rootNode;
+			const rootNodeID = map?.rootNode;
 			const rootNode = GetNodeL2(rootNodeID);
 			if (rootNode) {
 				const nodeStr = GetCrawlerURLStrForNode(rootNode);
-				if (rootNodeID && rootNodeID != map.rootNode) {
+				if (rootNodeID && rootNodeID != map!.rootNode) {
 					newURL.pathNodes.push(nodeStr);
 				}
 			}
@@ -327,6 +328,7 @@ export const GetNewURL = CreateAccessor(c=>(includeMapViewStr = true)=>{
 	// const playingTimeline = mapInfo && mapInfo.playingTimeline;
 	const playingTimeline = mapState?.selectedTimeline;
 	if (playingTimeline) {
+		Assert(mapState);
 		newURL.SetQueryVar("timeline", playingTimeline);
 
 		const playingTimeline_step = mapID ? mapState.playingTimeline_step : null;

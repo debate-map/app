@@ -1,9 +1,9 @@
-import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "dm_common";
+import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, HolderType, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "dm_common";
 import chroma, {Color} from "chroma-js";
 //import classNames from "classnames";
-import {DEL, DoNothing, E, GetValues, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
+import {A, DEL, DoNothing, E, GetValues, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import {Bail, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import React from "react";
 import {Draggable} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom";
@@ -30,6 +30,7 @@ import {SubPanel} from "./NodeUI_Inner/SubPanel.js";
 import {TitlePanel} from "./NodeUI_Inner/TitlePanel.js";
 import {MapNodeUI_LeftBox} from "./NodeUI_LeftBox.js";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
+import {Assert} from "../../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE.js";
 
 // drag and drop
 // ==========
@@ -70,8 +71,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 	{panelPosition: "left"} as Props,
 	{hovered: false, hoverPanel: null as string|n, hoverTermID: null as string|n, local_openPanel: null as string|n, lastWidthWhenNotPreview: 0},
 ) {
-	root: ExpandableBox;
-	titlePanel: TitlePanel;
+	root: ExpandableBox|n;
+	titlePanel: TitlePanel|n;
 
 	// todo: replace this system by just using the new IsMouseEnterReal and IsMouseLeaveReal functions
 	checkStillHoveredTimer = new Timer(100, ()=>{
@@ -118,10 +119,11 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		let changeType: ChangeType;
 		if (node.createdAt > sinceTime) changeType = ChangeType.add;
 		else if (node.current.createdAt > sinceTime) changeType = ChangeType.edit;
+		else Assert(false);
 
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);
-		const combinedWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
+		const combinedWithParentArgument = parent ? IsPremiseOfSinglePremiseArgument(node, parent)! : false; // nn, else would bail
 		//const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
 		//const outerNode = IsPremiseOfSinglePremiseArgument(node, parent) ? parent : node;
 
@@ -130,8 +132,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		let ratingNodePath = path;
 		if (combinedWithParentArgument) {
 			mainRatingType = NodeRatingType.impact;
-			ratingNode = parent;
-			ratingNodePath = parentPath;
+			ratingNode = parent!;
+			ratingNodePath = parentPath!;
 		}
 		/* const mainRating_average = Watch(() => GetRatingAverage_AtPath(ratingNode, mainRatingType));
 		// let mainRating_mine = GetRatingValue(ratingNode._id, mainRatingType, MeID());
@@ -186,7 +188,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		// Log(`${node.id} -- ${dragInfo && dragInfo.snapshot.isDragging}; ${dragInfo && dragInfo.snapshot.draggingOver}`);
 
 		if (combinedWithParentArgument) {
-			backgroundColor = GetNodeColor(parent);
+			backgroundColor = GetNodeColor(parent!);
 		}
 
 		const outlineColor = GetChangeTypeOutlineColor(changeType);
@@ -233,8 +235,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		}, [map.id, nodeView, path]);
 		const onDirectClick = UseCallback(e=>{
 			runInAction("NodeUI_Inner.onDirectClick", ()=>{
-				if (combinedWithParentArgument) {
-					store.main.maps.nodeLastAcknowledgementTimes.set(parent && parent.id, Date.now());
+				if (combinedWithParentArgument && parent) {
+					store.main.maps.nodeLastAcknowledgementTimes.set(parent.id, Date.now());
 				}
 				store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now());
 			});
@@ -250,7 +252,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 			// if collapsing subtree, and this node is premise of single-premise arg, start collapsing from parent (the argument node), so that its relevance args are collapsed as well
 			const recursivelyCollapsing = expanded && e.altKey;
-			ACTMapNodeExpandedSet({mapID: map.id, path: combinedWithParentArgument ? parentPath : path, expanded: !expanded, resetSubtree: recursivelyCollapsing});
+			ACTMapNodeExpandedSet({mapID: map.id, path: combinedWithParentArgument ? parentPath! : path, expanded: !expanded, resetSubtree: recursivelyCollapsing});
 			e.nativeEvent["ignore"] = true; // for some reason, "return false" isn't working
 			// return false;
 		}, [combinedWithParentArgument, expanded, map.id, parentPath, path]);
@@ -294,8 +296,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 								}
 
 								runInAction("NodeUI_Inner.onPanelButtonClick", ()=>{
-									let nodeView_final = nodeView;
-									if (nodeView_final == null) nodeView_final = GetNodeViewsAlongPath(map.id, path, true).Last();
+									let nodeView_final = nodeView ?? GetNodeViewsAlongPath(map.id, path, true).Last();
 									if (nodeView_final.openPanel != panel) {
 										nodeView_final.VSet("openPanel", panel ?? DEL);
 									} else {
@@ -317,7 +318,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							ref={c=>this.titlePanel = c}
 							style={E(GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont /*fontSize: 15, letterSpacing: 1*/})}/>
 						{subPanelShow && <SubPanel node={node}/>}
-						<NodeUI_Menu_Stub {...{map, node, path}}/>
+						<NodeUI_Menu_Stub {...{map, node, path}} holderType={HolderType.generic}/>
 					</>}
 					{...E(
 						{backgroundFillPercent, backgroundColor, markerPercent},
@@ -326,7 +327,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					toggleExpanded={toggleExpanded}
 					afterChildren={<>
 						{bottomPanelShow
-							&& <NodeUI_BottomPanel {...{map, node, path, parent, width, widthOverride, panelPosition, panelToShow, hovered, backgroundColor}}
+							&& <NodeUI_BottomPanel {...{map, node, path, parent, width, widthOverride, hovered, backgroundColor}}
+								panelPosition={panelPosition!} panelToShow={panelToShow!} 
 								hoverTermID={hoverTermID} onTermHover={termID=>this.SetState({hoverTermID: termID})}/>}
 						{reasonScoreValues && showReasonScoreValues
 							&& <ReasonScoreValueMarkers {...{node, combinedWithParentArgument, reasonScoreValues}}/>}
@@ -384,14 +386,14 @@ WaitXThenRun(0, ()=>{
 @Observer
 class NodeUI_BottomPanel extends BaseComponentPlus(
 	{} as {
-		map: Map, node: MapNodeL3, path: string, parent: MapNodeL3,
-		width: number, widthOverride: number, panelPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermID: string, onTermHover: (id: string)=>void,
+		map: Map, node: MapNodeL3, path: string, parent: MapNodeL3|n,
+		width: number|n, widthOverride: number|n, panelPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermID: string|n, onTermHover: (id: string)=>void,
 		backgroundColor: chroma.Color,
 	},
-	{hoverTermID: null as string},
-	) {
+	{hoverTermID: null as string|n},
+) {
 	panelsOpened = new Set();
-	componentDidCatch(message, info) { EB_StoreError(this, message, info); }
+	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
 		const {
@@ -411,13 +413,13 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 			// <ErrorBoundary>
 			<div className="NodeUI_BottomPanel" style={{
 				position: "absolute", left: panelPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
-				width, minWidth: (widthOverride | 0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
+				width: width ?? "100%", minWidth: (widthOverride ?? 0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
 				padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 			}}>
 				{GetValues(NodeRatingType).Contains(panelToShow) && (()=>{
 					if (["impact", "relevance"].Contains(panelToShow) && node.type == MapNodeType.claim) {
-						const argumentNode = parent;
-						const argumentPath = SlicePath(path, 1);
+						const argumentNode = NN(parent);
+						const argumentPath = NN(SlicePath(path, 1));
 						const ratings = GetRatings(argumentNode.id, panelToShow as NodeRatingType);
 						return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as NodeRatingType} ratings={ratings}/>;
 					}
@@ -438,7 +440,7 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 			</div>
 		);
 	}
-	definitionsPanel: DefinitionsPanel;
+	definitionsPanel: DefinitionsPanel|n;
 }
 
 class ReasonScoreValueMarkers extends BaseComponent<{node: MapNodeL3, reasonScoreValues: ReasonScoreValues_RSPrefix, combinedWithParentArgument: boolean}, {}> {

@@ -9,6 +9,7 @@ import {IsUserCreatorOrMod} from "dm_common";
 import {MeID} from "dm_common";
 import {UnlinkNode} from "dm_common";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
+import {Assert, NN} from "web-vcore/nm/js-vextensions";
 
 @Observer
 export class MI_UnlinkContainerArgument extends BaseComponentPlus({} as MI_SharedProps, {}) {
@@ -18,18 +19,19 @@ export class MI_UnlinkContainerArgument extends BaseComponentPlus({} as MI_Share
 		const componentBox = holderType != null;
 		if (componentBox) return null;
 
-		const argumentPath = SlicePath(path, 1);
-		const argument = GetNodeL3(argumentPath);
+		const argumentPath = NN(SlicePath(path, 1));
+		const argument = GetNodeL3.NN(argumentPath);
 		const argumentText = GetNodeDisplayText(argument, argumentPath);
 		if (!IsUserCreatorOrMod(MeID(), argument)) return null;
 
 		const argumentParentPath = SlicePath(argumentPath, 1);
 		const argumentParent = GetNodeL3(argumentParentPath);
+		Assert(argumentParent, "Cannot find parent of specified argument.");
 
 		const command = new UnlinkNode({mapID, parentID: argumentParent.id, childID: argument.id});
 		return (
 			<VMenuItem text="Unlink argument"
-				enabled={command.Validate_Safe() == null} title={command.validateError}
+				enabled={command.Validate_Safe() == null} title={command.validateError ?? undefined}
 				style={styles.vMenuItem} onClick={e=>{
 					if (e.button != 0) return;
 					ShowMessageBox({

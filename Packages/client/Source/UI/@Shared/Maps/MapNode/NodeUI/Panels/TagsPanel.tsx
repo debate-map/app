@@ -40,7 +40,7 @@ export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map
 }
 
 @Observer
-class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: MapNodeTag, index: number}, {newTag: null as MapNodeTag}) {
+class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: MapNodeTag, index: number}, {newTag: null as MapNodeTag|n}) {
 	//detailsUI: TagDetailsUI;
 	render() {
 		const {tag, index, node} = this.props;

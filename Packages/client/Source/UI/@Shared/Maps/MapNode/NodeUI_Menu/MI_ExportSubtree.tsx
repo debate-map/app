@@ -3,12 +3,13 @@ import {store} from "Store";
 import {DataExchangeFormat} from "Store/main/maps";
 import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer, RunInAction_Set} from "web-vcore";
-import {Clone, GetEntries, StartDownload} from "web-vcore/nm/js-vextensions.js";
-import {StoreAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {Clone, GetEntries, NN, StartDownload} from "web-vcore/nm/js-vextensions.js";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {Button, CheckBox, Column, Row, Select, Spinner, Text, TextArea} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {Assert} from "../../../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE.js";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
@@ -20,7 +21,7 @@ export class MI_ExportSubtree extends BaseComponentPlus({} as MI_SharedProps, {}
 		return (
 			<VMenuItem text="Export subtree" style={styles.vMenuItem} onClick={async e=>{
 				if (e.button != 0) return;
-				let ui: ExportSubtreeUI;
+				let ui: ExportSubtreeUI|n;
 				const controller = ShowMessageBox({
 					title: `Export subtree under "${GetNodeDisplayText(node, path)}"`,
 					okButton: false, buttonBarStyle: {display: "none"},
@@ -51,7 +52,7 @@ class ExportSubtreeUI extends BaseComponentPlus(
 		getData: false,
 		tab: ExportSubtreeUI_MidTab.Nodes,
 		nodesToLink: {} as {[key: string]: string},
-		error: null as string, dbUpdates: null,
+		error: null as string|n, dbUpdates: null,
 	},
 	) {
 	render() {
@@ -59,7 +60,7 @@ class ExportSubtreeUI extends BaseComponentPlus(
 		const {getData, tab, nodesToLink, error, dbUpdates} = this.state;
 		const dialogState = store.main.maps.exportSubtreeDialog;
 
-		let subtreeExportData: string;
+		let subtreeExportData: string|n;
 		if (getData) {
 			var subtree = GetSubtree(path, dialogState.baseExportDepth);
 			if (dialogState.targetFormat == DataExchangeFormat.gad_csv) {
@@ -68,7 +69,7 @@ class ExportSubtreeUI extends BaseComponentPlus(
 					let categories = position.childrenData.VValues();
 					return categories.map((category, categoryIndex)=> {
 						let subcategories = category.childrenData.VValues();
-						let cells = [];
+						let cells = [] as string[];
 						cells.push(CSVCell(categoryIndex == 0 ? GetNodeDisplayText(position) : ""));
 						cells.push(CSVCell(GetNodeDisplayText(category)));
 						cells.push(...subcategories.map(subcategory=> {
@@ -106,13 +107,13 @@ class ExportSubtreeUI extends BaseComponentPlus(
 					</Column>*/}
 					<Column style={{width: 700}}>
 						<Row>Data:</Row>
-						<TextArea value={subtreeExportData} style={{flex: 1}} editable={false}/>
+						<TextArea value={subtreeExportData ?? ""} style={{flex: 1}} editable={false}/>
 					</Column>
 				</Row>
 				<Row mt={5}>
 					<CheckBox text="Get data" value={getData} onChange={val=>this.SetState({getData: val})}/>
-					<Button ml={5} text="Download data" enabled={subtreeExportData?.length > 0} onClick={()=>{
-						StartDownload(subtreeExportData, DataExchangeFormat[dialogState.targetFormat].endsWith("_CSV") ? "Data.csv" : "Data.json");
+					<Button ml={5} text="Download data" enabled={(subtreeExportData?.length ?? 0) > 0} onClick={()=>{
+						StartDownload(subtreeExportData!, DataExchangeFormat[dialogState.targetFormat].endsWith("_CSV") ? "Data.csv" : "Data.json");
 						/*ShowMessageBox({
 							title: "Data downloaded",
 							message: `Completed export of subtree.`,
@@ -135,7 +136,7 @@ const GetSubtree = CreateAccessor(c=>(path: string, maxDepth: number, rootPathSe
 	const pathSegments = path.split("/");
 	if (rootPathSegments == null) rootPathSegments = pathSegments;
 
-	const nodeL3 = GetNodeL3(path);
+	const nodeL3 = NN(GetNodeL3(path));
 	const result = Clone(nodeL3) as SubtreeNode;
 	/*result.ratings = GetNodeRatingsRoot(nodeL3._id);
 	if (result.ratings == null) delete result.ratings;*/

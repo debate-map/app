@@ -29,7 +29,7 @@ const dbPort = process.env.PORT || 3105 as number;
 
 const pluginHook = makePluginHook([
 	variant == "patches" && new GeneratePatchesPlugin(),
-]);
+] as any[]);
 
 export const pgPool = new Pool({
 	connectionString: dbURL,

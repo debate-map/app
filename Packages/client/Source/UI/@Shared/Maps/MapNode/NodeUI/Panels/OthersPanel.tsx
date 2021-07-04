@@ -10,7 +10,7 @@ import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.j
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 
 @Observer
-export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType}) {
+export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType|n}) {
 	render() {
 		const {show, map, node, path} = this.props;
 		let {convertToType} = this.state;
@@ -103,7 +103,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 								// message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_controlled)}"?\n\nAll relevance ratings will be deleted.`,
 								message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_controlled)}"?`,
 								onOK: ()=>{
-									new ReverseArgumentPolarity(E(mapID && {mapID}, {nodeID: nodeArgOrParentSPArg_controlled.id, path: nodeArgOrParentSPArg_controlled_path})).Run();
+									new ReverseArgumentPolarity(E(mapID && {mapID}, {nodeID: nodeArgOrParentSPArg_controlled.id, path: nodeArgOrParentSPArg_controlled_path!})).Run();
 								},
 							});
 						}}/>
@@ -113,7 +113,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 						<Pre>Convert to: </Pre>
 						<Select options={convertToTypes} value={convertToType} onChange={val=>this.SetState({convertToType: val})}/>
 						<Button ml={5} text="Convert" onClick={()=>{
-							new ChangeClaimType(E({mapID, nodeID: node.id, newType: convertToType})).Run();
+							new ChangeClaimType(E({mapID, nodeID: node.id, newType: convertToType!})).Run();
 						}}/>
 					</Row>}
 				{/*childOrderTypeChangeable &&
@@ -143,7 +143,7 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 		if (node.type == MapNodeType.claim) {
 			const claimType = GetAttachmentType(node);
 			canSetAsNegation = claimType === AttachmentType.none && node.link.form !== ClaimForm.yesNoQuestion;
-			canSetAsSeriesAnchor = claimType === AttachmentType.equation && !node.current.equation.isStep; // && !creating;
+			canSetAsSeriesAnchor = claimType === AttachmentType.equation && !node.current.equation!.isStep; // && !creating;
 		}
 
 		return (
@@ -167,12 +167,12 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 				{canSetAsSeriesAnchor &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Show as series anchor: </Pre>
-						<CheckBox value={node.link.seriesAnchor}
+						<CheckBox value={node.link.seriesAnchor ?? false}
 							// onChange={val=>Change(val ? newLinkData.isStep = true : delete newLinkData.isStep)}/>
 							onChange={val=>{
 								new UpdateLink({
 									linkID: node.link.id,
-									linkUpdates: {seriesAnchor: val || null},
+									linkUpdates: {seriesAnchor: val || undefined},
 								}).Run();
 							}}/>
 					</Row>}

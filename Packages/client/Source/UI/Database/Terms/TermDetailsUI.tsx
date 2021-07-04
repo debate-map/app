@@ -3,8 +3,7 @@ import {Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vc
 import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
-import {ES} from "Utils/UI/GlobalStyles.js";
-import {InfoButton, observer_simple} from "web-vcore";
+import {ES, InfoButton, observer_simple} from "web-vcore";
 import {Term, Term_nameFormat, Term_disambiguationFormat, TermType, AddTerm} from "dm_common";
 
 import {GetNiceNameForTermType} from "../../Database/TermsUI.js";

@@ -30,8 +30,8 @@ export class NodeUI_Menu_Stub extends BaseComponent<Props, {}> {
 	}
 }
 
-type Props = {map?: Map, node: MapNodeL3, path: string, inList?: boolean, holderType?: HolderType};
-export type MI_SharedProps = Props & {mapID: string, combinedWithParentArg: boolean, copiedNode: MapNodeL3, copiedNodePath: string, copiedNode_asCut: boolean};
+type Props = {map?: Map, node: MapNodeL3, path: string, inList?: boolean, holderType?: HolderType|n};
+export type MI_SharedProps = Props & {mapID: string|n, combinedWithParentArg: boolean, copiedNode: MapNodeL3|n, copiedNodePath: string|n, copiedNode_asCut: boolean};
 
 @WarnOfTransientObjectProps
 @Observer
@@ -41,11 +41,12 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 
 		const parent = GetParentNodeL3(path);
 		const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
+		let pathsToChangedInSubtree = [] as string[];
 		if (map) {
 			//const sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
 			const sinceTime = 0;
 			const pathsToChangedNodes = GetPathsToNodesChangedSinceX(map.id, sinceTime);
-			var pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == outerPath || a.startsWith(`${outerPath}/`)); // also include self, for this
+			pathsToChangedInSubtree = pathsToChangedNodes.filter(a=>a == outerPath || a.startsWith(`${outerPath}/`)); // also include self, for this
 		}
 
 		const copiedNode = GetCopiedNode();
@@ -105,7 +106,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						onClick={async e=>{
 							if (e.button != 0) return;
 
-							await new SetNodeIsMultiPremiseArgument({nodeID: parent.id, multiPremiseArgument: true}).Run();
+							await new SetNodeIsMultiPremiseArgument({nodeID: parent!.id, multiPremiseArgument: true}).Run();
 						}}/>}
 				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)
 					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.claim).length == 1 && !componentBox &&

@@ -7,8 +7,6 @@ import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapS
 import {GADDemo, GADDemo_2020} from "UI/@GAD/GAD.js";
 import {HSLA, Observer} from "web-vcore";
 import {Map, MapType, MeID, IsUserCreatorOrMod, IsUserMap} from "dm_common";
-
-
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {colors} from "../../../../Utils/UI/GlobalStyles.js";
@@ -56,7 +54,7 @@ export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBar
 						{IsUserMap(map) && !GADDemo &&
 							<Button ml={5} text="Timelines" style={{height: "100%"}} onClick={()=>{
 								runInAction("ActionBar_Left.Timelines.onClick", ()=>{
-									GetMapState(map.id).timelinePanelOpen = !timelinePanelOpen;
+									GetMapState.NN(map.id).timelinePanelOpen = !timelinePanelOpen;
 								});
 							}}/>}
 					</>}

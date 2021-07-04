@@ -3,12 +3,11 @@ import Moment from "web-vcore/nm/moment";
 import {Column, Div, Pre, Row, RowLR, Select, Spinner, TextInput, CheckBox, Text, Span} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {ES} from "Utils/UI/GlobalStyles.js";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {Media, Media_namePattern, MediaType, GetNiceNameForMediaType} from "dm_common";
 import {SourceChainsEditorUI} from "../../@Shared/Maps/MapNode/SourceChainsEditorUI.js";
-import {YoutubePlayerUI, InfoButton, HSLA, ParseYoutubeVideoID} from "web-vcore";
+import {YoutubePlayerUI, InfoButton, HSLA, ParseYoutubeVideoID, ES} from "web-vcore";
 
 export class MediaDetailsUI extends BaseComponentPlus(
 	{} as {baseData: Media, creating: boolean, editing: boolean, style?, onChange?: (newData: Media, error: string)=>void},
@@ -76,10 +75,11 @@ export class MediaDetailsUI extends BaseComponentPlus(
 						{newData.type == MediaType.video &&
 						 	// use wrapper div (with video-id as key), to ensure element cleanup when video-id changes
 							<div key={videoID}>
-								<YoutubePlayerUI videoID={videoID} /*startTime={0}*/ heightVSWidthPercent={.5625}
+								{!videoID && <div>Invalid YouTube video url: {newData.url}</div>}
+								{videoID && <YoutubePlayerUI videoID={videoID} /*startTime={0}*/ heightVSWidthPercent={.5625}
 									onPlayerInitialized={player=> {
 										player.GetPlayerUI().style.position = "absolute";
-									}}/>
+									}}/>}
 							</div>}
 				</Column>
 				{dataError && dataError != "Please fill out this field." && <Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{dataError}</Row>}

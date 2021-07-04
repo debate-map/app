@@ -13,7 +13,7 @@ import {LayoutDropDown} from "./ActionBar_Right/LayoutDropDown.js";
 
 import {ShareDropDown} from "./ActionBar_Right/ShareDropDown.js";
 
-const changesSince_options = [];
+const changesSince_options = [] as {name: string, value: string}[];
 changesSince_options.push({name: "None", value: `${ShowChangesSinceType.none}_null`});
 for (let offset = 1; offset <= 5; offset++) {
 	const offsetStr = [null, "", "2nd ", "3rd ", "4th ", "5th "][offset];
@@ -25,7 +25,7 @@ changesSince_options.push({name: "All unclicked changes", value: `${ShowChangesS
 export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBarWidth: number}, {}) {
 	render() {
 		const {map, subNavBarWidth} = this.props;
-		const mapState = GetMapState(map.id);
+		const mapState = GetMapState.NN(map.id);
 		const {showChangesSince_type} = mapState;
 		const {showChangesSince_visitOffset} = mapState;
 		const {weighting} = store.main.maps;

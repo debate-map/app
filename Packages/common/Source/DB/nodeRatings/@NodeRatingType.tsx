@@ -26,8 +26,8 @@ export function PropNameToTitle(propName: NodeRatingType) {
 	return ModifyString(propName, m=>[m.lowerUpper_to_lowerSpaceLower, m.startLower_to_upper]);
 }
 
-export function GetRatingTypeInfo(ratingType: NodeRatingType, node: MapNodeL3, parent: MapNodeL3, path: string) {
-	const link = GetLinkUnderParent(node.id, parent);
+export function GetRatingTypeInfo(ratingType: NodeRatingType, node: MapNodeL3, parent: MapNodeL3|n, path: string) {
+	//const link = GetLinkUnderParent(node.id, parent);
 	//const displayPolarity = link ? GetDisplayPolarity(link.polarity, GetNodeForm(parent)) : Polarity.supporting;
 	const isMultiPremiseArgument = IsMultiPremiseArgument(node);
 

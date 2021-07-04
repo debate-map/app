@@ -3,9 +3,8 @@ import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {ES} from "Utils/UI/GlobalStyles.js";
 import {UUIDStub} from "UI/@Shared/UUIDStub.js";
-import {Observer} from "web-vcore";
+import {ES, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {Map, MapNodeL3, GetUser, MapNodeRevision, GetParentNodeL3, GetLinkUnderParent, GetNodeRevisions} from "dm_common";
 
@@ -53,9 +52,9 @@ type RevisionEntryUI_Props = {index: number, last: boolean, revision: MapNodeRev
 class RevisionEntryUI extends BaseComponentPlus({} as RevisionEntryUI_Props, {}) {
 	render() {
 		const {index, last, revision, node, path} = this.props;
-		const parent = GetParentNodeL3(path);
+		const parent = GetParentNodeL3.NN(path);
 		const creator = GetUser(revision.creator);
-		const link = GetLinkUnderParent(node.id, parent);
+		const link = GetLinkUnderParent.NN(node.id, parent);
 
 		return (
 			<Row p="4px 7px" style={E(

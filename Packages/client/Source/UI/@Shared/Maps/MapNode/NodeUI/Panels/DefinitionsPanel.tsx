@@ -11,7 +11,7 @@ const termsPlaceholder = [];
 
 @Observer
 export class DefinitionsPanel extends BaseComponentPlus(
-	{} as {show: boolean, map: Map, node: MapNodeL2, path: string, hoverTermID?: string, openTermID?: string, onHoverTerm?: (termID: string)=>void, onClickTerm?: (termID: string)=>void},
+	{} as {show: boolean, map: Map, node: MapNodeL2, path: string, hoverTermID?: string|n, openTermID?: string|n, onHoverTerm?: (termID: string)=>void, onClickTerm?: (termID: string)=>void},
 	{/* localHoverTerm: Term, localClickTerm: Term */},
 ) {
 	render() {

@@ -10,6 +10,7 @@ import {MapNodeL3, Polarity, ClaimForm, MapNodeType, GetParentNodeL3, GetPolarit
 
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {ShowAddChildDialog} from "../NodeUI_Menu/Dialogs/AddChildDialog.js";
+import {Assert} from "../../../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE.js";
 
 type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style?};
 /* const dropTargetDecorator = DropTarget('node',
@@ -69,7 +70,7 @@ export class AddArgumentButton extends BaseComponent<Props> {
 		const parent = GetParentNodeL3(path);
 
 		const polarity_short = GetPolarityShortStr(polarity);
-		const contributeInfo = GetNodeContributionInfo(node.id, MeID());
+		const contributeInfo = GetNodeContributionInfo(node.id);
 		const contributeInfo_polarity = contributeInfo[`${polarity_short}Args`] as NodeContributionInfo_ForPolarity;
 
 		return (
@@ -96,6 +97,7 @@ export class AddArgumentButton extends BaseComponent<Props> {
 				onClick={UseCallback(e=>{
 					if (e.button != 0) return;
 					if (MeID() == null) return ShowSignInPopup();
+					const userID = MeID.NN();
 
 					if (contributeInfo_polarity.hostNodeID == node.id) {
 						let newChildPolarity = polarity;
@@ -108,13 +110,13 @@ export class AddArgumentButton extends BaseComponent<Props> {
 						if (node.link.form == ClaimForm.negation) {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}
-						ShowAddChildDialog(path, MapNodeType.argument, newChildPolarity, MeID(), map.id);
+						ShowAddChildDialog(path, MapNodeType.argument, newChildPolarity, userID, map.id);
 					} else {
 						let newChildPolarity = polarity;
 						if (contributeInfo_polarity.reversePolarities) {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}
-						ShowAddChildDialog(contributeInfo_polarity.hostNodeID, MapNodeType.argument, newChildPolarity, MeID(), map.id);
+						ShowAddChildDialog(contributeInfo_polarity.hostNodeID, MapNodeType.argument, newChildPolarity, userID, map.id);
 					}
 				}, [contributeInfo_polarity.hostNodeID, contributeInfo_polarity.reversePolarities, map.id, node.id, node.link.form, path, polarity])}/>
 		);

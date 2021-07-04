@@ -14,6 +14,7 @@ import {CanGetBasicPermissions, GetUserAccessLevel, HasAdminPermissions, IsUserC
 import {PermissionGroupSet} from "./users/@User.js";
 
 export enum HolderType {
+	generic = "generic",
 	truth = "truth",
 	relevance = "relevance",
 }
@@ -66,32 +67,38 @@ export const IsRootNode = CreateAccessor(c=>(node: MapNode)=>{
 	return true;
 });
 
-export function GetParentPath(childPath: string) {
+export function GetParentPath(childPath: string|n) {
+	if (childPath == null) return null;
 	const childPathNodes = SplitStringBySlash_Cached(childPath);
 	if (childPathNodes.length == 1) return null;
 	return childPathNodes.slice(0, -1).join("/");
 }
-export function GetParentNodeID(path: string) {
+export function GetParentNodeID(path: string|n) {
+	if (path == null) return null;
 	const pathNodes = SplitStringBySlash_Cached(path);
 	if (CE(pathNodes).Last()[0] == "*") return null;
 	const parentNodeStr = CE(pathNodes).XFromLast(1);
 	return parentNodeStr ? PathSegmentToNodeID(parentNodeStr) : null;
 }
 
-export const GetParentNode = CreateAccessor(c=>(childPath: string)=>{
+export const GetParentNode = CreateAccessor(c=>(childPath: string|n)=>{
 	return GetNode(GetParentNodeID(childPath));
 });
-export const GetParentNodeL2 = CreateAccessor(c=>(childPath: string)=>{
+export const GetParentNodeL2 = CreateAccessor(c=>(childPath: string|n)=>{
 	return GetNodeL2(GetParentNodeID(childPath));
 });
-export const GetParentNodeL3 = CreateAccessor(c=>(childPath: string)=>{
+export const GetParentNodeL3 = CreateAccessor(c=>(childPath: string|n)=>{
 	return GetNodeL3(GetParentPath(childPath));
 });
-export const GetNodeID = CreateAccessor(c=>(path: string|n)=>{
+export const GetNodeID = CreateAccessor(c=><{
+	(path: string): string;
+	(path: string|n): string|n;
+}>((path: string|n)=>{
 	if (path == null) return null;
 	const ownNodeStr = CE(SplitStringBySlash_Cached(path)).LastOrX();
-	return ownNodeStr ? PathSegmentToNodeID(ownNodeStr) : null;
-});
+	Assert(ownNodeStr, `Invalid path:${path}`);
+	return PathSegmentToNodeID(ownNodeStr);
+}));
 
 export const GetNodeParents = CreateAccessor(c=>(nodeID: string)=>{
 	const parentLinks = GetNodeChildLinks(undefined, nodeID);
@@ -219,14 +226,14 @@ export const GetNodeMirrorChildren = CreateAccessor(c=>(nodeID: string, tagsToIg
 
 export const GetNodeChildrenL2 = CreateAccessor(c=>(nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[])=>{
 	const nodeChildren = GetNodeChildren(nodeID, includeMirrorChildren, tagsToIgnore);
-	let nodeChildrenL2 = nodeChildren.map(child=>c.MaybeCatchItemBail(()=>GetNodeL2.NN(child))); // assert non-null, because we know node exists, so rest should as well
+	let nodeChildrenL2 = nodeChildren.map(child=>c.MaybeCatchItemBail(()=>GetNodeL2.NN(child))); // nn: we know node exists, so rest should as well
 	return nodeChildrenL2;
 });
 export const GetNodeChildrenL3 = CreateAccessor(c=>(nodeID: string, path?: string, includeMirrorChildren = true, tagsToIgnore?: string[])=>{
 	path = path || nodeID;
 
 	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
-	let nodeChildrenL3 = nodeChildrenL2.map(child=>c.MaybeCatchItemBail(()=>GetNodeL3.NN(`${path}/${child.id}`, tagsToIgnore))); // assert non-null, because we know node exists, so rest should as well
+	let nodeChildrenL3 = nodeChildrenL2.map(child=>c.MaybeCatchItemBail(()=>GetNodeL3.NN(`${path}/${child.id}`, tagsToIgnore))); // nn: we know node exists, so rest should as well
 	return nodeChildrenL3;
 });
 
@@ -250,7 +257,7 @@ export const ForLink_GetError = CreateAccessor(c=>(parentType: MapNodeType, chil
 	const parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;
 	if (!parentTypeInfo?.includes(childType)) return `The child's type (${MapNodeType[childType]}) is not valid for the parent's type (${MapNodeType[parentType]}).`;
 });
-export const ForNewLink_GetError = CreateAccessor(c=>(parentID: string, newChild: Pick<MapNode, "id" | "type">, permissions: PermissionGroupSet, newHolderType?: HolderType)=>{
+export const ForNewLink_GetError = CreateAccessor(c=>(parentID: string, newChild: Pick<MapNode, "id" | "type">, permissions: PermissionGroupSet, newHolderType?: HolderType|n)=>{
 	if (!CanGetBasicPermissions(permissions)) return "You're not signed in, or lack basic permissions.";
 	const parent = GetNode(parentID);
 	if (parent == null) return "Parent data not found.";
@@ -271,7 +278,7 @@ export const ForNewLink_GetError = CreateAccessor(c=>(parentID: string, newChild
 	return ForLink_GetError(parent.type, newChild.type);
 });
 
-export const ForDelete_GetError = CreateAccessor(c=>(userID: string, node: MapNodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
+export const ForDelete_GetError = CreateAccessor(c=>(userID: string|n, node: MapNodeL2, subcommandInfo?: {asPartOfMapDelete?: boolean, parentsToIgnore?: string[], childrenToIgnore?: string[]})=>{
 	const baseText = `Cannot delete node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
 	const parentLinks = GetNodeChildLinks(undefined, node.id);
@@ -286,7 +293,7 @@ export const ForDelete_GetError = CreateAccessor(c=>(userID: string, node: MapNo
 	return null;
 });
 
-export const ForCut_GetError = CreateAccessor(c=>(userID: string, node: MapNodeL2)=>{
+export const ForCut_GetError = CreateAccessor(c=>(userID: string|n, node: MapNodeL2)=>{
 	const baseText = `Cannot unlink node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not its owner. (or a mod)`;
 	//if (!asPartOfCut && (node.parents || {}).VKeys().length <= 1) return `${baseText}doing so would orphan it. Try deleting it instead.`;
@@ -295,7 +302,7 @@ export const ForCut_GetError = CreateAccessor(c=>(userID: string, node: MapNodeL
 	return null;
 });
 
-export const ForCopy_GetError = CreateAccessor(c=>(userID: string, node: MapNode)=>{
+export const ForCopy_GetError = CreateAccessor(c=>(userID: string|n, node: MapNode)=>{
 	if (!CanGetBasicPermissions(userID)) return "You're not signed in, or lack basic permissions.";
 	if (IsRootNode(node)) return "Cannot copy the root-node of a map.";
 	//if (IsNodeSubnode(node)) return "Cannot copy a subnode.";

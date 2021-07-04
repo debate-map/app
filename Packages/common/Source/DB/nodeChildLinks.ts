@@ -6,7 +6,7 @@ export const GetNodeChildLink = CreateAccessor(c=>(id: string)=>{
 	if (id == null || IsNaN(id)) return null;
 	return GetDoc({}, a=>a.nodeChildLinks.get(id));
 });
-export const GetNodeChildLinks = CreateAccessor(c=>(parentID?: string, childID?: string): NodeChildLink[]=>{
+export const GetNodeChildLinks = CreateAccessor(c=>(parentID?: string|n, childID?: string|n): NodeChildLink[]=>{
 	return GetDocs({
 		params: {filter: {
 			or: [

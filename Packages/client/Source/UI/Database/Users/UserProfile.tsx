@@ -2,21 +2,15 @@ import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-
 import {Column, Row, Pre, Button, TextInput, Div, CheckBox, Select, ColorPickerBox, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds.js";
-import {PageContainer, Observer} from "web-vcore";
-import {styles, ES} from "Utils/UI/GlobalStyles.js";
+import {PageContainer, Observer, ES} from "web-vcore";
 import {Fragment} from "react";
 import {PropNameToTitle} from "Utils/General/Others.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {MeID, GetUser,GetUser_Private,GetUserPermissionGroups,SetUserData,SetUserData_Private,User} from "dm_common";
 
-
-
-
-
-
 @Observer
-export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, {}) {
+export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User|n}, {}) {
 	render() {
 		const {profileUser} = this.props;
 		if (profileUser == null) return <PageContainer>User does not exist.</PageContainer>;
@@ -39,8 +33,8 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, 
 				<Row mt={3}>
 					<Pre>Permissions: </Pre>
 					{["basic", "verified", "mod", "admin"].map((group, index)=>{
-						const admin = userID && GetUserPermissionGroups(MeID()).admin;
-						const changingOwnAdminState = currentUser && profileUser.id == currentUser.id && group == "admin";
+						const admin = userID != null && GetUserPermissionGroups(MeID()).admin;
+						const changingOwnAdminState = currentUser != null && profileUser.id == currentUser.id && group == "admin";
 						return (
 							<CheckBox key={index} mr={index < 3 ? 5 : 0} text={PropNameToTitle(group)} value={(profileUserPermissionGroups || {})[group]} enabled={admin && !changingOwnAdminState} onChange={val=>{
 								const newPermissionGroups = E(profileUserPermissionGroups, {[group]: val});
@@ -62,7 +56,7 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, 
 									const selected = (profileUser_p.backgroundID || defaultPresetBackground) == id;
 									return (
 										<Div key={prop.index}
-											style={E(
+											style={ES(
 												{
 													width: 100, height: 100, border: "1px solid black", cursor: "pointer",
 													backgroundColor: background.color, backgroundImage: `url(${background.url_256 || background.url_1920 || background.url_3840 || background.url_max})`,
@@ -79,7 +73,7 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User}, 
 							</Row>
 						</ScrollView>
 						<Row mt={5}>
-							<CheckBox text="Custom background" value={profileUser_p.backgroundCustom_enabled} onChange={val=>{
+							<CheckBox text="Custom background" value={profileUser_p.backgroundCustom_enabled ?? false} onChange={val=>{
 								new SetUserData_Private({id: profileUser.id, updates: {backgroundCustom_enabled: val}}).Run();
 							}}/>
 						</Row>

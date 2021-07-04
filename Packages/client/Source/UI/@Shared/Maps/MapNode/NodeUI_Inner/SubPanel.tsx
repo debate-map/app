@@ -66,18 +66,20 @@ export class SubPanel_Quote extends BaseComponent<{attachment: QuoteAttachment, 
 export class SubPanel_Media extends BaseComponentPlus({} as {mediaAttachment: MediaAttachment}, {}) {
 	render() {
 		const {mediaAttachment} = this.props;
-		const media = GetMedia(mediaAttachment.id);
-		if (media == null) return <div/>;
+		const media = GetMedia(mediaAttachment.id)!; // nn: db-ref, bail
+		const videoID = ParseYoutubeVideoID(media.url);
 		return (
 			<div style={{position: "relative"}}>
 				{/*<Row mt={5} style={{display: "flex", alignItems: "center"}}>*/}
 				{media.type == MediaType.image &&
-					<img src={media.url} style={{width: mediaAttachment.previewWidth != null ? `${mediaAttachment.previewWidth}%` : null, maxWidth: "100%"}}/>}
-				{media.type == MediaType.video &&
-					<YoutubePlayerUI videoID={ParseYoutubeVideoID(media.url)} /*startTime={0}*/ heightVSWidthPercent={.5625}
+					<img src={media.url} style={{width: mediaAttachment.previewWidth != null ? `${mediaAttachment.previewWidth}%` : undefined, maxWidth: "100%"}}/>}
+				{media.type == MediaType.video && <>
+					{videoID == null && <div>Invalid YouTube video url: {media.url}</div>}
+					{videoID != null && <YoutubePlayerUI videoID={videoID} /*startTime={0}*/ heightVSWidthPercent={.5625}
 						onPlayerInitialized={player=> {
 							player.GetPlayerUI().style.position = "absolute";
 						}}/>}
+				</>}
 				<div style={{margin: "3px 0", height: 1, background: "rgba(255,255,255,.3)"}}/>
 				<SourcesUI sourceChains={mediaAttachment.sourceChains}/>
 			</div>

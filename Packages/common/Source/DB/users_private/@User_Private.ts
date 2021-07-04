@@ -27,21 +27,21 @@ export class User_Private {
 	
 	@DB((t,n)=>t.text(n))
 	@Field({type: "string"})
-	backgroundID?: string;
+	backgroundID?: string|n;
 
 	@DB((t,n)=>t.boolean(n))
 	@Field({type: "boolean"})
-	backgroundCustom_enabled?: boolean;
+	backgroundCustom_enabled?: boolean|n;
 
 	@DB((t,n)=>t.text(n))
 	@Field({type: ["null", "string"]})
-	backgroundCustom_color?: string;
+	backgroundCustom_color?: string|n;
 
 	@DB((t,n)=>t.text(n))
 	@Field({type: "string"})
-	backgroundCustom_url?: string;
+	backgroundCustom_url?: string|n;
 
 	@DB((t,n)=>t.text(n))
 	@Field({type: "string"})
-	backgroundCustom_position?: string;
+	backgroundCustom_position?: string|n;
 }

@@ -18,14 +18,14 @@ import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 
 type Payload = {
-	mapID: string, oldParentID: string, newParentID: string, nodeID: string,
-	newForm?: ClaimForm|n, newPolarity?: Polarity,
+	mapID: string|n, oldParentID: string|n, newParentID: string, nodeID: string,
+	newForm?: ClaimForm|n, newPolarity?: Polarity|n,
 	createWrapperArg?: boolean,
 	//linkAsArgument?: boolean,
 	unlinkFromOldParent?: boolean, deleteEmptyArgumentWrapper?: boolean
 };
 
-export function CreateLinkCommand(mapID: UUID, draggedNodePath: string, dropOnNodePath: string, polarity: Polarity, asCopy: boolean) {
+export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOnNodePath: string, polarity: Polarity, asCopy: boolean) {
 	const draggedNode = GetNodeL3(draggedNodePath);
 	const dropOnNode = GetNodeL3(dropOnNodePath);
 	if (draggedNode == null || dropOnNode == null) return null;
@@ -66,8 +66,8 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 		this.map_data = GetMap.BIN(mapID);
 		this.node_data = GetNodeL2.BIN(nodeID);
-		const oldParent_data = GetNodeL2(oldParentID);
-		//AssertV(oldParent_data, "oldParent_data is null."); // commented: allow linking orphaned nodes
+		const oldParent = GetNodeL2(oldParentID);
+		if (oldParentID) AssertV(oldParent, "Old-parent-id was specified, yet no node exists with that ID!");
 		this.newParent_data = GetNodeL2.BIN(newParentID);
 
 		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
@@ -114,15 +114,15 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		this.sub_linkToNewParent = this.sub_linkToNewParent ?? new LinkNode({mapID, parentID: newParentID_forClaim, childID: nodeID, childForm: newForm, childPolarity: newPolarity}).MarkAsSubcommand(this);
 		this.sub_linkToNewParent.Validate();
 
-		if (unlinkFromOldParent) {
-			this.sub_unlinkFromOldParent = this.sub_unlinkFromOldParent ?? new UnlinkNode({mapID, parentID: oldParentID, childID: nodeID}).MarkAsSubcommand(this);
+		if (unlinkFromOldParent && oldParent) {
+			this.sub_unlinkFromOldParent = this.sub_unlinkFromOldParent ?? new UnlinkNode({mapID, parentID: oldParentID!, childID: nodeID}).MarkAsSubcommand(this);
 			this.sub_unlinkFromOldParent.allowOrphaning = true; // allow "orphaning" of nodeID, since we're going to reparent it simultaneously -- using the sub_linkToNewParent subcommand
 			this.sub_unlinkFromOldParent.Validate();
 
 			// if the moved node was the parent's only child, and actor allows it (ie. their view has node as single-premise arg), also delete the old parent
 			const children = GetNodeChildLinks(oldParentID);
 			if (children.length == 1 && deleteEmptyArgumentWrapper) {
-				this.sub_deleteOldParent = this.sub_deleteOldParent ?? new DeleteNode({mapID, nodeID: oldParentID}).MarkAsSubcommand(this);
+				this.sub_deleteOldParent = this.sub_deleteOldParent ?? new DeleteNode({mapID, nodeID: oldParentID!}).MarkAsSubcommand(this);
 				this.sub_deleteOldParent.childrenToIgnore = [nodeID]; // let DeleteNode sub that it doesn't need to wait for nodeID to be deleted (since we're moving it out from old-parent simultaneously with old-parent's deletion)
 				this.sub_deleteOldParent.Validate();
 			}

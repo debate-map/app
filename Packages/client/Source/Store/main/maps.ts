@@ -21,11 +21,11 @@ export class MapsState {
 	@O @version(2) mapViews = observable.map<string, MapView>();
 
 	@O nodeLastAcknowledgementTimes = observable.map<string, number>();
-	@O @ignore currentNodeBeingAdded_path: string;
+	@O @ignore currentNodeBeingAdded_path: string|n;
 
 	// openMap: number;
 
-	@O copiedNodePath: string;
+	@O copiedNodePath: string|n;
 	@O copiedNodePath_asCut: boolean;
 
 	@O lockMapScrolling = true;
@@ -109,7 +109,7 @@ ACTCopyNode_broadcastChannel.onmessage = (ev: MessageEvent)=>{
 	const {path, asCut} = ev.data as {path: string, asCut: boolean};
 	ACTCopyNode(path, asCut, false);
 };
-export const ACTCopyNode = StoreAction((path: string, asCut: boolean, broadcastToOtherTabs = true)=>{
+export const ACTCopyNode = StoreAction((path: string|n, asCut: boolean, broadcastToOtherTabs = true)=>{
 	store.main.maps.copiedNodePath = path;
 	store.main.maps.copiedNodePath_asCut = asCut;
 	if (broadcastToOtherTabs) {

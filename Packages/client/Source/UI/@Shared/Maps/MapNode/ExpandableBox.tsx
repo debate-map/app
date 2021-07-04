@@ -5,8 +5,8 @@ import React from "react";
 
 type Props = {
 	parent?,
-	className?: string, width: number, widthOverride: number, innerWidth?: number, outlineColor?: string, padding: number | string, style, onClick?, onDirectClick?, onMouseEnter?: Function, onMouseLeave?: Function,
-	backgroundFillPercent: number, backgroundColor: chroma.Color, markerPercent: number,
+	className?: string, width: number, widthOverride: number|n, innerWidth?: number, outlineColor?: string, padding: number | string, style, onClick?, onDirectClick?, onMouseEnter?: Function, onMouseLeave?: Function,
+	backgroundFillPercent: number, backgroundColor: chroma.Color, markerPercent: number|n,
 	text, onTextHolderClick?, beforeChildren?, afterChildren?,
 	expanded: boolean, toggleExpanded: (event: React.MouseEvent<any>)=>any,
 };

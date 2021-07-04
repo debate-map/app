@@ -5,8 +5,7 @@ import {BaseComponentPlus, UseCallback} from "web-vcore/nm/react-vextensions.js"
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
 import {GetSelectedDebatesPageMap} from "Store/main/debates";
-import {ES} from "Utils/UI/GlobalStyles.js";
-import {HSLA, Observer, PageContainer} from "web-vcore";
+import {ES, HSLA, Observer, PageContainer} from "web-vcore";
 import {MapType, MeID, GetUserPermissionGroups, CanGetBasicPermissions, GetMaps_Private, GetMaps_Public, IsUserCreatorOrMod, GetMaps} from "dm_common";
 import {GADDemo} from "../../@GAD/GAD.js";
 import {ShowAddMapDialog} from "../../@Shared/Maps/AddMapDialog.js";

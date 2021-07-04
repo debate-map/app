@@ -5,7 +5,7 @@ export const GetShare = CreateAccessor(c=>(id: string): Share|n=>{
 	if (id == null) return null;
 	return GetDoc({}, a=>a.shares.get(id));
 });
-export const GetShares = CreateAccessor(c=>(userID: string, mapID?: string): Share[]=>{
+export const GetShares = CreateAccessor(c=>(userID: string, mapID?: string|n): Share[]=>{
 	return GetDocs({
 		/*queryOps: [
 			new WhereOp("creator", "==", userID),

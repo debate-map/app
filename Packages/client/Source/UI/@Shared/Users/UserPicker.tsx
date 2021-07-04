@@ -3,12 +3,11 @@ import {E} from "web-vcore/nm/js-vextensions.js";
 import {Column, DropDown, DropDownContent, DropDownTrigger, Pre, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {ES} from "Utils/UI/GlobalStyles.js";
-import {Observer} from "web-vcore";
+import {ES, Observer} from "web-vcore";
 
 @Observer
 export class UserPicker extends BaseComponentPlus({} as {value: string, onChange: (value: string)=>any}, {}) {
-	dropDown: DropDown;
+	dropDown: DropDown|n;
 	render() {
 		const {value, onChange, children} = this.props;
 		const users = GetUsers().OrderBy(a=>a.displayName);
@@ -30,7 +29,7 @@ export class UserPicker extends BaseComponentPlus({} as {value: string, onChange
 										)}
 										onClick={()=>{
 											onChange(user.id);
-											this.dropDown.Hide();
+											this.dropDown!.Hide();
 										}}>
 										<Row center>
 											<Pre>{user.displayName}</Pre><span style={{marginLeft: 5, fontSize: 11}}>(id: {user.id})</span>

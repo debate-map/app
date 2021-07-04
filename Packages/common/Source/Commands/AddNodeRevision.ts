@@ -19,7 +19,7 @@ export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard =
 
 @MapEdit
 @UserEdit
-export class AddNodeRevision extends Command<{mapID?: string, revision: MapNodeRevision}, number> {
+export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNodeRevision}, number> {
 	// lastNodeRevisionID_addAmount = 0;
 
 	revisionID: string;

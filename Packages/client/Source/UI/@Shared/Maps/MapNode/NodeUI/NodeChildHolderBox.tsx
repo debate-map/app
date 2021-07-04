@@ -3,7 +3,7 @@ import {AssertWarn, emptyArray, emptyArray_forLoading, E} from "web-vcore/nm/js-
 import {Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
-import {HSLA, Observer} from "web-vcore";
+import {ES, HSLA, Observer} from "web-vcore";
 import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {ExpandableBox} from "../ExpandableBox.js";
@@ -21,7 +21,6 @@ import {MapNodeType} from "dm_common";
 import {NodeRatingType} from "dm_common";
 import {Map} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
-import {ES} from "Utils/UI/GlobalStyles.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
@@ -38,7 +37,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 			AssertWarn(nodeChildren.every(a=>a == null || (a.parents || {})[node.id] != null), "Supplied node is not a parent of all the supplied node-children!");
 		}*/
 	}
-	lineHolder: HTMLDivElement;
+	lineHolder: HTMLDivElement|n;
 	render() {
 		const {map, node, path, nodeChildren, nodeChildrenToShow, type, widthOfNode, widthOverride} = this.props;
 		const {innerBoxOffset, lineHolderHeight, hovered, hovered_button} = this.state;
@@ -115,7 +114,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 							},
 						)}>{text}</span>}
 						{...E(
-							{backgroundFillPercent, backgroundColor, markerPercent},
+							{backgroundFillPercent: backgroundFillPercent ?? 0, backgroundColor, markerPercent},
 							GADDemo && {backgroundFillPercent: 100, backgroundColor: chroma(HSLA(0, 0, 1)) as chroma.Color},
 						)}
 						toggleExpanded={UseCallback(e=>{
@@ -152,7 +151,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 							{ratingPanelShow &&
 								<div ref={c=>this.ratingPanelHolder = c} style={{
 									position: "absolute", left: 0, top: "calc(100% + 1px)",
-									width, minWidth: (widthOverride | 0).KeepAtLeast(550), zIndex: hovered_main ? 6 : 5,
+									width, minWidth: (widthOverride ?? 0).KeepAtLeast(550), zIndex: hovered_main ? 6 : 5,
 									padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 								}}>
 									{(()=>{
@@ -184,16 +183,16 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		return nodeView[expandKey];
 	}
 
-	expandableBox: ExpandableBox;
-	ratingPanelHolder: HTMLDivElement;
-	ratingPanel: RatingsPanel;
-	childHolder: NodeChildHolder;
+	expandableBox: ExpandableBox|n;
+	ratingPanelHolder: HTMLDivElement|n;
+	ratingPanel: RatingsPanel|n;
+	childHolder: NodeChildHolder|n;
 
 	ComponentDidMount() {
-		this.expandableBox.DOM.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered: true}));
-		this.expandableBox.DOM.addEventListener("mouseleave", ()=>this.SetState({hovered: false}));
-		this.expandableBox.expandButton.DOM.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered_button: true}));
-		this.expandableBox.expandButton.DOM.addEventListener("mouseleave", ()=>this.SetState({hovered_button: false}));
+		this.expandableBox!.DOM!.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered: true}));
+		this.expandableBox!.DOM!.addEventListener("mouseleave", ()=>this.SetState({hovered: false}));
+		this.expandableBox!.expandButton!.DOM.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered_button: true}));
+		this.expandableBox!.expandButton!.DOM.addEventListener("mouseleave", ()=>this.SetState({hovered_button: false}));
 	}
 
 	PostRender() {
@@ -204,6 +203,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	lastHeight = 0;
 	lastDividePoint = 0;
 	CheckForChanges = ()=>{
+		if (this.lineHolder == null) return;
 		const {onHeightOrDividePointChange} = this.props;
 
 		//const lineHolderHeight = $(this.lineHolder).outerHeight();
@@ -215,7 +215,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		this.lastLineHolderHeight = lineHolderHeight;
 
 		//const height = $(GetDOM(this)).outerHeight();
-		const height = GetDOM(this).getBoundingClientRect().height;
+		const height = GetDOM(this)!.getBoundingClientRect().height;
 		const dividePoint = this.childHolder && this.Expanded ? this.childHolder.GetDividePoint() : 0;
 		if (height != this.lastHeight || dividePoint != this.lastDividePoint) {
 			/* if (height != this.lastHeight) {

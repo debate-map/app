@@ -17,18 +17,18 @@ export class MainState {
 	// [immerable] = true;
 
 	@O page = "home";
-	@O urlExtraStr: string;
+	@O urlExtraStr: string|n;
 
-	@O lastDBVersion: number; // tracks the last db-version the client started with, so we can know when we need to upgrade the store-data
-	@O envOverride: string;
-	@O dbOverride: string;
-	@O dbVersionOverride: string;
+	@O lastDBVersion: number|n; // tracks the last db-version the client started with, so we can know when we need to upgrade the store-data
+	@O envOverride: string|n;
+	@O dbOverride: string|n;
+	@O dbVersionOverride: string|n;
 
 	@O analyticsEnabled = true;
 	// topLeftOpenPanel: string;
 	// topRightOpenPanel: string;
 	@O @ignore notificationMessages = [] as NotificationMessage[];
-	@O @ignore shareBeingLoaded: string;
+	@O @ignore shareBeingLoaded: string|n;
 
 	// pages (and nav-bar panels)
 	// ==========

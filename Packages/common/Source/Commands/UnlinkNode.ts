@@ -11,7 +11,7 @@ import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 
 @MapEdit
 @UserEdit
-export class UnlinkNode extends Command<{mapID: string, parentID: string, childID: string}, {}> {
+export class UnlinkNode extends Command<{mapID: string|n, parentID: string, childID: string}, {}> {
 	allowOrphaning = false; // could also be named "asPartOfCut", to be consistent with ForUnlink_GetError parameter
 
 	parentToChildLinks: NodeChildLink[];
