@@ -52,9 +52,9 @@ type RevisionEntryUI_Props = {index: number, last: boolean, revision: MapNodeRev
 class RevisionEntryUI extends BaseComponentPlus({} as RevisionEntryUI_Props, {}) {
 	render() {
 		const {index, last, revision, node, path} = this.props;
-		const parent = GetParentNodeL3.NN(path);
+		const parent = GetParentNodeL3(path);
+		const link = GetLinkUnderParent(node.id, parent);
 		const creator = GetUser(revision.creator);
-		const link = GetLinkUnderParent.NN(node.id, parent);
 
 		return (
 			<Row p="4px 7px" style={E(

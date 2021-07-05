@@ -23,8 +23,8 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 		const {show, map, node, path} = this.props;
 		const {dataError} = this.state;
 
-		const parentNode = GetParentNodeL3.NN(path);
-		const link = GetLinkUnderParent.NN(node.id, parentNode);
+		const parentNode = GetParentNodeL3(path);
+		const link = GetLinkUnderParent(node.id, parentNode);
 		const creator = GetUser(node.creator);
 
 		//const isSubnode = IsNodeSubnode(node);

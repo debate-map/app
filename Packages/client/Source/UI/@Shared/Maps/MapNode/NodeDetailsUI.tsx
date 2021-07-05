@@ -16,8 +16,8 @@ import {TagsPanel} from "./NodeUI/Panels/TagsPanel.js";
 type Props = {
 	baseData: MapNode,
 	baseRevisionData: MapNodeRevision,
-	baseLinkData: NodeChildLink,
-	parent: MapNodeL3, forNew: boolean, forOldRevision?: boolean, enabled?: boolean,
+	baseLinkData: NodeChildLink|n, parent: MapNodeL3|n,
+	forNew: boolean, forOldRevision?: boolean, enabled?: boolean,
 	style?, onChange?: (newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: NodeChildLink, component: NodeDetailsUI)=>void,
 	// onSetError: (error: string)=>void,
 	// validateNewData: (newData: MapNode, newRevisionData: MapNodeRevision)=>void,
