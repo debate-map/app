@@ -22,7 +22,7 @@ import {GADHeaderFont, GADDemo_2020} from "./GAD.js";
 export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 	render() {
 		const {topRightOpenPanel} = store.main;
-		const dbNeedsInit = GetDocs({}, a=>a.maps) === emptyArray; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
+		//const dbNeedsInit = GetDocs({}, a=>a.maps) === emptyArray; // use maps because it won't cause too much data to be downloaded-and-watched; improve this later
 		return (
 			<nav style={{
 				position: "relative", zIndex: zIndexes.navBar, height: 150, boxShadow: colors.navBarBoxShadow,
