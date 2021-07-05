@@ -160,7 +160,7 @@ export const GetNodeMirrorChildren = CreateAccessor(c=>(nodeID: string, tagsToIg
 						return comp.blacklistAllMirrorParents || comp.blacklistedMirrorParents?.includes(nodeID);
 					});
 					if (mirroringBlacklisted) return false;
-					return (child.link.polarity == Polarity.supporting && tagComp.mirrorSupporting) || (child.link.polarity == Polarity.opposing && tagComp.mirrorOpposing);
+					return (child.link?.polarity == Polarity.supporting && tagComp.mirrorSupporting) || (child.link?.polarity == Polarity.opposing && tagComp.mirrorOpposing);
 				});
 
 				/*if (comp.reversePolarities) {

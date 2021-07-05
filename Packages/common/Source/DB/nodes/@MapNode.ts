@@ -99,7 +99,7 @@ export interface MapNodeL2 extends MapNode {
 export interface MapNodeL3 extends MapNodeL2 {
 	/** For this node (with the given ancestors): How the node would be displayed -- "supporting" being green, "opposing" being red. */
 	displayPolarity: Polarity;
-	link: NodeChildLink;
+	link: NodeChildLink|n;
 	//linkToParent: ChildEntry;
 	//parentLinkToGrandParent: ChildEntry;
 }

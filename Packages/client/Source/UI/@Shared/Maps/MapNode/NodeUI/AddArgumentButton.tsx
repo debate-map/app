@@ -107,7 +107,7 @@ export class AddArgumentButton extends BaseComponent<Props> {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}*/
 						// if parent is a claim "shown as negation", we need to reverse the new-child polarity
-						if (node.link.form == ClaimForm.negation) {
+						if (node.link?.form == ClaimForm.negation) {
 							newChildPolarity = ReversePolarity(newChildPolarity);
 						}
 						ShowAddChildDialog(path, MapNodeType.argument, newChildPolarity, userID, map.id);
@@ -118,7 +118,7 @@ export class AddArgumentButton extends BaseComponent<Props> {
 						}
 						ShowAddChildDialog(contributeInfo_polarity.hostNodeID, MapNodeType.argument, newChildPolarity, userID, map.id);
 					}
-				}, [contributeInfo_polarity.hostNodeID, contributeInfo_polarity.reversePolarities, map.id, node.id, node.link.form, path, polarity])}/>
+				}, [contributeInfo_polarity.hostNodeID, contributeInfo_polarity.reversePolarities, map.id, node.id, node.link?.form, path, polarity])}/>
 		);
 	}
 }

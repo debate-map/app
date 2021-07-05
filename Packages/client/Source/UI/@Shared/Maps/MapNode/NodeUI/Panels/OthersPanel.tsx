@@ -138,9 +138,9 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 		const {node, path} = this.props;
 		if (path.split("/").length === 0) return <div/>; // if the root of a map, or subnode
 
-		let canSetAsNegation;
-		let canSetAsSeriesAnchor;
-		if (node.type == MapNodeType.claim) {
+		let canSetAsNegation = false;
+		let canSetAsSeriesAnchor = false;
+		if (node.type == MapNodeType.claim && node.link) {
 			const claimType = GetAttachmentType(node);
 			canSetAsNegation = claimType === AttachmentType.none && node.link.form !== ClaimForm.yesNoQuestion;
 			canSetAsSeriesAnchor = claimType === AttachmentType.equation && !node.current.equation!.isStep; // && !creating;
@@ -153,25 +153,25 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 					<Text>Path: </Text>
 					<UUIDPathStub path={path}/>
 				</Row>
-				{canSetAsNegation &&
+				{node.link && canSetAsNegation &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Show as negation: </Pre>
 						<CheckBox value={node.link.form == ClaimForm.negation}
 							onChange={val=>{
 								new UpdateLink({
-									linkID: node.link.id,
+									linkID: node.link!.id,
 									linkUpdates: {form: val ? ClaimForm.negation : ClaimForm.base},
 								}).Run();
 							}}/>
 					</Row>}
-				{canSetAsSeriesAnchor &&
+				{node.link && canSetAsSeriesAnchor &&
 					<Row style={{display: "flex", alignItems: "center"}}>
 						<Pre>Show as series anchor: </Pre>
 						<CheckBox value={node.link.seriesAnchor ?? false}
 							// onChange={val=>Change(val ? newLinkData.isStep = true : delete newLinkData.isStep)}/>
 							onChange={val=>{
 								new UpdateLink({
-									linkID: node.link.id,
+									linkID: node.link!.id,
 									linkUpdates: {seriesAnchor: val || undefined},
 								}).Run();
 							}}/>

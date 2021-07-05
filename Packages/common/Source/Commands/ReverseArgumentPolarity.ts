@@ -30,6 +30,7 @@ export class ReverseArgumentPolarity extends Command<{mapID?: string, nodeID: st
 
 		this.oldNodeData = GetNodeL3.BIN(path);
 		AssertV(this.oldNodeData.type == MapNodeType.argument, "Can only reverse polarity of an argument node.");
+		AssertV(this.oldNodeData.link, `Failed to find parent-child link for node in path: ${path}`);
 		this.parentID = GetParentNodeID.BIN(path);
 
 		this.newLinkData = {...this.oldNodeData.link};

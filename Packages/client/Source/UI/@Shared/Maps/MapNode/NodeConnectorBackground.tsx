@@ -4,6 +4,7 @@ import {ES, HSLA} from "web-vcore";
 import {Fragment} from "react";
 import {MapNodeL3} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
+import {Assert} from "../../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE";
 
 type Props = {
 	node: MapNodeL3, path: string, linkSpawnPoint: Vector2, straightLines?: boolean, nodeChildren: MapNodeL3[],
@@ -34,6 +35,7 @@ export class NodeConnectorBackground extends BaseComponent<Props, {}> {
 					// maybe temp; see if causes problems ignoring not-found error
 					const child = nodeChildren.FirstOrX(a=>a.id == childID);
 					if (child == null) return null;
+					Assert(child.link, `Node shown as child in a path must have its "MapNodeL3.link" prop exist.`);
 
 					const backgroundColor = GetNodeColor(/* node.type == MapNodeType.argument ? node : */ child, "raw");
 

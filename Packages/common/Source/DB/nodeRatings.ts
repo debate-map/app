@@ -210,5 +210,5 @@ export function TransformRatingForContext(ratingValue: number|n, reverseRating: 
 export function ShouldRatingTypeBeReversed(node: MapNodeL3, ratingType: NodeRatingType) {
 	// return node.type == MapNodeType.Argument && node.finalPolarity != node.link.polarity;
 	// if (["impact", "relevance"].Contains(ratingType)) return false;
-	return node.link.form == ClaimForm.negation;
+	return node.link?.form == ClaimForm.negation;
 }

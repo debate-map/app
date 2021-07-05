@@ -226,7 +226,7 @@ export const GetLinkUnderParent = CreateAccessor(c=>(nodeID: string, parent: Map
 				if (comp instanceof TagComp_MirrorChildrenFromXToY && comp.nodeY == parent.id) {
 					let mirrorChildren = GetNodeChildrenL3(comp.nodeX, undefined, undefined, (tagsToIgnore ?? []).concat(tag.id));
 					mirrorChildren = mirrorChildren.filter(child=> {
-						return child && ((child.link.polarity == Polarity.supporting && comp.mirrorSupporting) || (child.link.polarity == Polarity.opposing && comp.mirrorOpposing));
+						return child && ((child.link?.polarity == Polarity.supporting && comp.mirrorSupporting) || (child.link?.polarity == Polarity.opposing && comp.mirrorOpposing));
 					});
 					let nodeL3ForNodeAsMirrorChildInThisTag = mirrorChildren.find(a=>a.id == nodeID);
 					//const nodeL3ForNodeAsMirrorChildInThisTag = GetNodeL3(`${comp.nodeX}/${nodeID}`);
