@@ -9,9 +9,10 @@ import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState.js";
 import {ACTMapNodeExpandedSet, GetNodeView, GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {ACTSetFocusNodeAndViewOffset, MapUI} from "UI/@Shared/Maps/MapUI.js";
 import {JustBeforeUI_listeners} from "Main";
+import {AutoRun_HandleBail} from "./@Helpers.js";
 
 let lastMapID;
-autorun(()=>{
+AutoRun_HandleBail(()=>{
 	const mapID = GetOpenMapID();
 	if (mapID != lastMapID) {
 		lastMapID = mapID;

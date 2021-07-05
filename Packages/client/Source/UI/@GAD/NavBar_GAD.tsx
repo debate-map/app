@@ -8,12 +8,13 @@ import {RootState, store} from "Store";
 import {NotificationsUI} from "UI/@Shared/NavBar/NotificationsUI.js";
 import {SearchPanel} from "UI/@Shared/NavBar/SearchPanel.js";
 import {UserPanel} from "UI/@Shared/NavBar/UserPanel.js";
-import {Observer, Link, HSL} from "web-vcore";
+import {Observer, Link, HSL, NavBarPanelButton} from "web-vcore";
 import {GetDocs} from "web-vcore/nm/mobx-graphlink.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 import {colors} from "../../Utils/UI/GlobalStyles.js";
 import {GADHeaderFont, GADDemo_2020} from "./GAD.js";
+import React from "react";
 
 // main
 // ==========
@@ -50,7 +51,7 @@ export class NavBar_GAD extends BaseComponentPlus({}, {}) {
 					<span style={{margin: "0 auto", paddingRight: 17}}>
 						<NavBarPageButton page="website" text="Website"/>
 						<NavBarPageButton page="home" text="Home"/>
-						<NavBarPageButton page="private" text="Debates"/>
+						<NavBarPageButton page="debates" text="Debates"/>
 					</span>}
 					{GADDemo_2020 &&
 					<span style={{margin: "0 auto", paddingLeft: 100}}>
@@ -163,36 +164,4 @@ class NavBarPageButton extends BaseComponent<{page?: string, text: string, panel
 			</Link>
 		);
 	}
-}
-
-@Observer
-class NavBarPanelButton extends BaseComponentPlus({} as {text: string, panel: string, corner: "top-left" | "top-right"}, {}, {active: false}) {
-	render() {
-		const {text, panel, corner} = this.props;
-		const {topLeftOpenPanel, topRightOpenPanel} = store.main;
-		const active = (corner == "top-left" ? topLeftOpenPanel : topRightOpenPanel) == panel;
-		/* return (
-			<NavBarPageButton page={panel} text={text} panel={true} active={active} onClick={useCallback((e) => {
-				e.preventDefault();
-				if (corner == 'top-left') { store.dispatch(new ACTTopLeftOpenPanelSet(active ? null : panel)); } else { store.dispatch(new ACTTopRightOpenPanelSet(active ? null : panel)); }
-			}, [active, corner, panel])}/>
-		); */
-
-		this.Stash({active});
-		return (
-			<NavBarPageButton page={panel} text={text} panel={true} active={active} onClick={this.OnClick}/>
-		);
-	}
-	OnClick = (e: MouseEvent)=>{
-		e.preventDefault();
-		const {panel, corner} = this.props;
-		const {active} = this.stash;
-		runInAction("NavBarPanelButton_OnClick", ()=>{
-			if (corner == "top-left") {
-				store.main.topLeftOpenPanel = active ? null : panel;
-			} else {
-				store.main.topRightOpenPanel = active ? null : panel;
-			}
-		});
-	};
 }

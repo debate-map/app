@@ -1,8 +1,8 @@
-import {useCallback} from "react";
+import React, {useCallback} from "react";
 import {RootState, store} from "Store";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
-import {Link, Observer} from "web-vcore";
+import {Link, NavBarPanelButton, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {GetDocs} from "web-vcore/nm/mobx-graphlink.js";
@@ -154,29 +154,4 @@ export class NavBarPageButton extends BaseComponentPlus(
 			</Link>
 		);
 	}
-}
-
-@Observer
-export class NavBarPanelButton extends BaseComponentPlus({} as {text: string, panel: string, corner: "top-left" | "top-right"}, {}, {active: false}) {
-	render() {
-		const {text, panel, corner} = this.props;
-		const {topLeftOpenPanel, topRightOpenPanel} = store.main;
-		const active = (corner == "top-left" ? topLeftOpenPanel : topRightOpenPanel) == panel;
-
-		this.Stash({active});
-		return (
-			<NavBarPageButton page={panel} text={text} panel={true} active={active} onClick={this.OnClick}/>
-		);
-	}
-	OnClick = (e: MouseEvent)=>{
-		e.preventDefault();
-		const {corner, panel, active} = this.PropsStateStash;
-		runInAction("NavBarPanelButton_OnClick", ()=>{
-			if (corner == "top-left") {
-				store.main.topLeftOpenPanel = active ? null : panel;
-			} else {
-				store.main.topRightOpenPanel = active ? null : panel;
-			}
-		});
-	};
 }

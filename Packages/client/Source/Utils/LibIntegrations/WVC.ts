@@ -82,6 +82,7 @@ export function InitWVC() {
 
 export function GetNewURLForStoreChanges<T = RootState>(actionFunc: ActionFunc<T>, getSubOperatedOnByActionFunc: (root: RootState)=>T = (root=>root as any)) {
 	const store_mirror = GetMirrorOfMobXTree(store);
+	if (store_mirror.main == null) return null; // workaround for first-call-not-populated issue
 
 	// for detecting mutation
 	/*const store_oldJSON = JSON.stringify(store);

@@ -4,12 +4,14 @@ import {GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {Clone} from "web-vcore/nm/js-vextensions.js";
 import Raven from "web-vcore/nm/raven-js";
 import {Me} from "dm_common";
+import {AutoRun_HandleBail} from "./@Helpers.js";
 
-autorun(()=>{
+AutoRun_HandleBail(()=>{
+	// edit: something used to be here?
 	let lastAuth;
 	let lastMapView;
 	let lastContextData; // only gets updated when one of the above components change
-	autorun(()=>{
+	AutoRun_HandleBail(()=>{
 		// const auth = GetAuth();
 		//const auth = GetAuth_Raw();
 		const auth = Me();

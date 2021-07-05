@@ -1,8 +1,9 @@
 import {GraphDBShape} from "dm_common";
 import "web-vcore/nm/mobx"; // import mobx before we declare the module below, otherwise vscode auto-importer gets confused at path to mobx
-import {Graphlink, SetDefaultGraphOptions} from "web-vcore/nm/mobx-graphlink.js";
+import {Graphlink, SetDefaultGraphOptions, ProvideReactModule} from "web-vcore/nm/mobx-graphlink.js";
 import {RootState, store} from "../../Store/index.js";
 import {pgClient} from "./PGLink.js";
+import React from "react";
 
 //declare module "web-vcore/node_modules/mobx-graphlink/Dist/UserTypes" { // temp fix; paths trick didn't work in this repo fsr
 declare module "mobx-graphlink/Dist/UserTypes" {
@@ -20,6 +21,7 @@ export function InitGraphlink() {
 		rootStore: store,
 		apollo: pgClient as any, // the "as any" is needed if "mobx-graphlink" is npm-linked from "web-vcore"
 	});
+	ProvideReactModule(React);
 }
 
 // modify some default options

@@ -1,6 +1,6 @@
 import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {GetUpdates} from "web-vcore";
+import {GetUpdates, Observer} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {E, ToJSON, Clone} from "web-vcore/nm/js-vextensions.js";
@@ -17,6 +17,7 @@ import {UpdateLink} from "dm_common";
 import {AddNodeRevision} from "dm_common";
 import {Map} from "dm_common";
 
+@Observer
 export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {dataError: null as string|n}) {
 	detailsUI: NodeDetailsUI|n;
 	render() {

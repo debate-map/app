@@ -1,18 +1,17 @@
+import {CanGetBasicPermissions, GetMaps, MeID} from "dm_common";
+import {store} from "Store";
+import {GetSelectedDebatesPageMap} from "Store/main/debates";
+import {ES, HSLA, Observer, PageContainer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {Button, Column, Row, Select} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, UseCallback} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {store} from "Store";
-import {GetSelectedDebatesPageMap} from "Store/main/debates";
-import {ES, HSLA, Observer, PageContainer} from "web-vcore";
-import {MapType, MeID, GetUserPermissionGroups, CanGetBasicPermissions, GetMaps_Private, GetMaps_Public, IsUserCreatorOrMod, GetMaps} from "dm_common";
 import {GADDemo} from "../../@GAD/GAD.js";
 import {ShowAddMapDialog} from "../../@Shared/Maps/AddMapDialog.js";
 import {MapEntryUI} from "../../@Shared/Maps/MapEntryUI.js";
 import {MapUI} from "../../@Shared/Maps/MapUI.js";
 import {ShowSignInPopup} from "../../@Shared/NavBar/UserPanel.js";
-
 
 export const columnWidths = [0.64, 0.06, 0.12, 0.18];
 

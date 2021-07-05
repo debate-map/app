@@ -10,7 +10,7 @@ import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction, flow} from "web-vcore/nm/mobx.js";
 import {Validate, GetAsync, UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, MapType, GetSearchTerms_Advanced, GetNodeChildLinks, GetNodeRevisions, MapNodeRevision} from "dm_common";
+import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, GetSearchTerms_Advanced, GetNodeChildLinks, GetNodeRevisions, MapNodeRevision, globalMapID} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {MapUI} from "../Maps/MapUI.js";
 import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu.js";
@@ -302,7 +302,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 								} else {
 									if (searchResult_map == null) return; // still loading
 									runInAction("SearchResultRow.OpenContainingMap", ()=>{
-										if (searchResult_map.type != MapType.global) {
+										if (searchResult_map.id != globalMapID) {
 											store.main.page = "global";
 										} else {
 											store.main.page = "debates";

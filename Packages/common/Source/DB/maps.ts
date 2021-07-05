@@ -1,6 +1,6 @@
 import {CachedTransform, emptyArray_forLoading, ToNumber, CE, ObjectCE} from "web-vcore/nm/js-vextensions.js";
 import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {Map, MapType} from "./maps/@Map.js";
+import {Map} from "./maps/@Map.js";
 
 export const GetMaps = CreateAccessor(c=>(orderByEdits = false): Map[]=>{
 	/* const mapsMap = GetData({ collection: true }, 'maps');
@@ -12,12 +12,12 @@ export const GetMaps = CreateAccessor(c=>(orderByEdits = false): Map[]=>{
 	if (orderByEdits) result = CE(result).OrderByDescending(a=>ToNumber(a && a.edits, 0));
 	return result;
 });
-export const GetMaps_Private = CreateAccessor(c=>(orderByEdits = false)=>{
+/*export const GetMaps_Private = CreateAccessor(c=>(orderByEdits = false)=>{
 	return GetMaps(orderByEdits).filter(a=>a && a.type == MapType.private);
 });
 export const GetMaps_Public = CreateAccessor(c=>(orderByEdits = false)=>{
 	return GetMaps(orderByEdits).filter(a=>a && a.type == MapType.public);
-});
+});*/
 
 /* export function GetMapsOfType(type: MapType): Map[] {
 	const mapsMap = GetData({ collection: true }, 'maps');

@@ -128,10 +128,8 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "name", (t,n)=>t.text(n));
 		RunFieldInit(t, "note", (t,n)=>t.text(n));
 		RunFieldInit(t, "noteInline", (t,n)=>t.boolean(n));
-		RunFieldInit(t, "type", (t,n)=>t.text(n));
 		RunFieldInit(t, "rootNode", (t,n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "defaultExpandDepth", (t,n)=>t.integer(n));
-		RunFieldInit(t, "requireMapEditorsCanEdit", (t,n)=>t.boolean(n));
 		RunFieldInit(t, "nodeDefaults", (t,n)=>t.jsonb(n));
 		RunFieldInit(t, "featured", (t,n)=>t.boolean(n));
 		RunFieldInit(t, "editors", (t,n)=>t.specificType(n, "text[]").notNullable());

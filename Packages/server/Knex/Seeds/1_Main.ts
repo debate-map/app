@@ -1,4 +1,4 @@
-import {MapNode, MapNodeRevision, Map, MapType, MapNodeType, User, globalMapID, globalRootNodeID, systemUserID, AccessPolicy} from "dm_common";
+import {MapNode, MapNodeRevision, Map, MapNodeType, User, globalMapID, globalRootNodeID, systemUserID, AccessPolicy} from "dm_common";
 import {Knex} from "knex";
 import {CE, string} from "web-vcore/nm/js-vextensions.js";
 import {GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
@@ -74,7 +74,6 @@ const maps = TypeCheck(Map, {
 		name: "Global",
 		creator: systemUserID,
 		createdAt: Date.now(),
-		type: "global" as MapType,
 		rootNode: globalRootNodeID,
 		defaultExpandDepth: 3,
 		editors: [],

@@ -1,7 +1,6 @@
 import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
 import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
-import {MapType} from "../maps/@Map.js";
 import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
 import {ArgumentType, MapNodeRevision} from "./@MapNodeRevision.js";
 import {MapNodeType} from "./@MapNodeType.js";
@@ -33,7 +32,7 @@ export class MapNode {
 	}
 
 	@DB((t,n)=>t.text(n).primary())
-	@Field({oneOf: GetValues_ForSchema(MapNodeType)})
+	@Field({type: "string"})
 	id: string;
 
 	@DB((t,n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())

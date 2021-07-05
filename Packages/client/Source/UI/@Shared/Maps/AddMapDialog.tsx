@@ -1,18 +1,16 @@
 import {OMIT} from "web-vcore/nm/js-vextensions.js";
 import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {MapType, Map} from "dm_common";
+import {Map} from "dm_common";
 import {MeID} from "dm_common";
 import {AddMap} from "dm_common";
 import {MapDetailsUI} from "./MapDetailsUI.js";
 
 export function ShowAddMapDialog() {
-	const type = MapType.public as MapType; // hard-coded for now
 	let newMap = new Map({
 		name: "",
-		type,
 		creator: MeID.NN(),
-		editors: type == MapType.private ? [MeID()] : OMIT as any,
+		editors: [MeID.NN()],
 	});
 
 	let error = null;

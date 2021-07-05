@@ -113,7 +113,7 @@ export class MapUI extends BaseComponentPlus({
 	downPos: Vector2|n;
 	render() {
 		const {map, rootNode: rootNode_passed, withinPage, padding, subNavBarWidth, ...rest} = this.props;
-		Assert(padding && subNavBarWidth); // nn: default-values set
+		Assert(padding && subNavBarWidth != null); // nn: default-values set
 		Assert(map.id, "map.id is null!");
 
 		if (!GetMapState(map.id)?.initDone) return <MapUIWaitMessage message="Initializing map metadata..."/>;

@@ -1,4 +1,4 @@
-import {GetMap, GetShare, MapType, ShareType} from "dm_common";
+import {GetMap, GetShare, globalMapID, ShareType} from "dm_common";
 import {Assert} from "web-vcore/nm/js-vextensions.js";
 import {autorun, runInAction} from "web-vcore/nm/mobx.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
@@ -7,9 +7,10 @@ import {AddNotificationMessage} from "Store/main/@NotificationMessage.js";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
 import {MapUI} from "UI/@Shared/Maps/MapUI.js";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
+import {AutoRun_HandleBail} from "./@Helpers.js";
 
 let lastShareBeingLoaded;
-autorun(()=>{
+AutoRun_HandleBail(()=>{
 	const shareID = store.main.shareBeingLoaded;
 	if (shareID != lastShareBeingLoaded) {
 		lastShareBeingLoaded = shareID;
@@ -42,10 +43,12 @@ async function LoadShare(shareID: string) {
 		}
 
 		runInAction("LoadShare", ()=>{
-			const page: "private" | "public" | "global" = map.type == MapType.private ? "private" : map.type == MapType.public ? "public" : "global";
+			const page: "debates" | "global" = map.id == globalMapID ? "global" : "debates";
 			store.main.page = page;
 			store.main[page]["subpage"] = rootPageDefaultChilds[page];
-			store.main[page]["selectedMapID"] = share.mapID;
+			if (page == "debates") {
+				store.main[page]["selectedMapID"] = share.mapID;
+			}
 			ACTMapViewMerge(share.mapID, share.mapView);
 
 			// const mapUI = FindReact(document.querySelector('.MapUI')) as MapUI;

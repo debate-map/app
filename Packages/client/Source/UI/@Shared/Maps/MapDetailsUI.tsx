@@ -1,4 +1,4 @@
-import {IsUserCreatorOrMod, Map, MapNodeRevision_Defaultable_DefaultsForMap, MapType, Map_namePattern, MeID} from "dm_common";
+import {IsUserCreatorOrMod, Map, MapNodeRevision_Defaultable_DefaultsForMap, Map_namePattern, MeID} from "dm_common";
 import {InfoButton} from "web-vcore";
 import {CloneWithPrototypes, DEL, GetErrorMessagesUnderElement, ToNumber} from "web-vcore/nm/js-vextensions.js";
 import {CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput} from "web-vcore/nm/react-vcomponents.js";
@@ -68,17 +68,6 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 					<Pre>Default timeline:</Pre>
 					<TextInput enabled={enabled} value={newData.defaultTimelineID} onChange={val=>Change(newData.defaultTimelineID = val)}/>
 				</RowLR>*/}
-				{newData.type == MapType.private && !forNew &&
-				<RowLR mt={5} splitAt={splitAt} style={{width}}>
-					<Row center>
-						<Pre>Require map-editors can edit:</Pre>
-						<InfoButton ml={5} text={`
-							Requires that any private nodes contributed have the Edit permission set to MapEditors.
-							(Note: Doesn't apply to already-contributed nodes; those can be unlinked, then cloned as private nodes.)
-						`.AsMultiline(0)}/>
-					</Row>
-					<CheckBox enabled={enabled} value={!!newData.requireMapEditorsCanEdit} onChange={val=>Change(newData.requireMapEditorsCanEdit = val)}/>
-				</RowLR>}
 				{/* <RowLR mt={5} splitAt={splitAt} style={{ width }}>
 					<Row center>
 						<Pre>Allow public nodes:</Pre>
@@ -95,7 +84,7 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 				{!forNew && // we don't want to overwhelm new users trying to create their own map...
 				<Column mt={10}>
 					<CheckBox text="Node defaults:" enabled={creatorOrMod} value={newData.nodeDefaults != null} onChange={val=>{
-						const defaultNodeDefaults = MapNodeRevision_Defaultable_DefaultsForMap(newData.type);
+						const defaultNodeDefaults = MapNodeRevision_Defaultable_DefaultsForMap();
 						newData.VSet("nodeDefaults", val ? defaultNodeDefaults : DEL);
 						this.Update();
 					}}/>

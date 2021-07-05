@@ -6,7 +6,7 @@ import {store} from "Store";
 import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {GADDemo, GADDemo_2020} from "UI/@GAD/GAD.js";
 import {HSLA, Observer} from "web-vcore";
-import {Map, MapType, MeID, IsUserCreatorOrMod, IsUserMap} from "dm_common";
+import {Map, MeID, IsUserCreatorOrMod, IsUserMap} from "dm_common";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {colors} from "../../../../Utils/UI/GlobalStyles.js";
@@ -42,12 +42,12 @@ export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBar
 					{IsUserMap(map) && !GADDemo_2020 &&
 						<Button_Final text="Back" style={{height: "100%"}} onClick={()=>{
 							runInAction("ActionBar_Left.Back.onClick", ()=>{
-								store.main[map.type == MapType.private ? "private" : "public"].selectedMapID = null;
+								store.main.debates.selectedMapID = null;
 							});
 						}}/>}
 					{!backOnly && <>
 						{IsUserMap(map) && <DetailsDropDown map={map}/>}
-						{map.type == MapType.private && <PeopleDropDown map={map}/>}
+						<PeopleDropDown map={map}/>
 						{/* // disabled for now, so we can iterate quickly on the stuff we're actually using right now
 						{IsUserMap(map) && HasModPermissions(MeID()) && <LayersDropDown map={map}/>} */}
 						{/* IsUserMap(map) && HasModPermissions(MeID()) && <TimelineDropDown map={map}/> */}

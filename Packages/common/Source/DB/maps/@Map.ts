@@ -3,24 +3,24 @@ import {AddSchema, MGLClass, DB, Field, GetSchemaJSON, Schema, UUID_regex} from 
 import {ObservableMap} from "web-vcore/nm/mobx.js";
 import {MapNodeRevision_Defaultable, MapNodeRevision_Defaultable_props, MapNodeRevision_Defaultable_DefaultsForMap} from "../nodes/@MapNodeRevision.js";
 
-export enum MapType {
+/*export enum MapType {
 	private = "private",
 	public = "public",
 	global = "global",
-}
+}*/
 
 //export const Map_namePattern = '^\\S.*$'; // must start with non-whitespace // todo: probably switch to a more lax pattern like this, eg. so works for other languages
 export const Map_namePattern = '^[a-zA-Z0-9 ,\'"%:.?\\-()\\/]+$';
 @MGLClass({table: "maps", schemaDeps: ["MapNodeRevision"]})
 export class Map {
-	constructor(initialData: {name: string, type: MapType, creator: string} & Partial<Map>) {
+	constructor(initialData: {name: string, creator: string} & Partial<Map>) {
 		CE(this).VSet(initialData);
 		// this.createdAt = Date.now();
-		if (!("requireMapEditorsCanEdit" in initialData)) {
+		/*if (!("requireMapEditorsCanEdit" in initialData)) {
 			this.requireMapEditorsCanEdit = this.type == MapType.private;
-		}
+		}*/
 		if (!("nodeDefaults" in initialData)) {
-			this.nodeDefaults = MapNodeRevision_Defaultable_DefaultsForMap(this.type);
+			this.nodeDefaults = MapNodeRevision_Defaultable_DefaultsForMap();
 		}
 	}
 
@@ -44,9 +44,9 @@ export class Map {
 	@Field({type: "boolean"})
 	noteInline? = true;
 
-	@DB((t,n)=>t.text(n))
+	/*@DB((t,n)=>t.text(n))
 	@Field({oneOf: GetValues_ForSchema(MapType)}, {req: true})
-	type: MapType;
+	type: MapType;*/
 
 	@DB((t,n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
 	@Field({type: "string"})
@@ -60,9 +60,9 @@ export class Map {
 	@Field({type: "string"})
 	defaultTimelineID: string;*/
 
-	@DB((t,n)=>t.boolean(n))
+	/*@DB((t,n)=>t.boolean(n))
 	@Field({type: "boolean"})
-	requireMapEditorsCanEdit?: boolean;
+	requireMapEditorsCanEdit?: boolean;*/
 
 	@DB((t,n)=>t.jsonb(n))
 	@Field(()=>Schema({

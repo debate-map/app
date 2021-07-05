@@ -5,7 +5,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {InfoButton, RunInAction_Set, Observer} from "web-vcore";
-import {GetMapEditorIDs, GetMapEditors} from "dm_common";
+import {GetMapEditors} from "dm_common";
 import {IsUserCreatorOrMod} from "dm_common";
 import {MeID} from "dm_common";
 import {UpdateMapDetails} from "dm_common";

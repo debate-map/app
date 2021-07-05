@@ -1,10 +1,6 @@
-import {GetEntries} from "web-vcore/nm/js-vextensions.js";
-import {CheckBox, Row, RowLR, Select, Text} from "web-vcore/nm/react-vcomponents.js";
+import {MapNodeRevision_Defaultable} from "dm_common";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {GetOpenMapID} from "Store/main";
-import {InfoButton} from "web-vcore";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
-import {MapNodeRevision_Defaultable, GetMap, PermissionInfoType, HasModPermissions, MeID, AccessLevel, GetUserAccessLevel, HasAdminPermissions, MapType} from "dm_common";
 
 // @Observer
 // export class PermissionsOptions extends BaseComponent<Pick<SharedProps, 'newData' | 'newRevisionData' | 'enabled' | 'Change'> & {forDefaultsInMap?: boolean}, {}> {

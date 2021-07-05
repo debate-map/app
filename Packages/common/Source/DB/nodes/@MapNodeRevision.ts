@@ -1,7 +1,6 @@
 import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, DB, MGLClass, GetSchemaJSON, Field} from "web-vcore/nm/mobx-graphlink.js";
 import {QuoteAttachment} from "../nodeRevisions/@QuoteAttachment.js";
-import {MapType} from "../maps/@Map.js";
 import {MediaAttachment} from "../nodeRevisions/@MediaAttachment.js";
 import {AccessLevel} from "./@MapNode.js";
 import {EquationAttachment} from "../nodeRevisions/@EquationAttachment.js";
@@ -62,13 +61,8 @@ export class NodeRevisionDisplayDetails {
 export type MapNodeRevision_Defaultable = Pick<MapNodeRevision, "accessLevel" | "votingDisabled" | "permission_edit" | "permission_contribute">;*/
 export const MapNodeRevision_Defaultable_props = [] as const;
 export type MapNodeRevision_Defaultable = Pick<MapNodeRevision, never>;
-export function MapNodeRevision_Defaultable_DefaultsForMap(mapType: MapType): MapNodeRevision_Defaultable {
-	return {
-		accessLevel: AccessLevel.basic,
-		votingDisabled: false,
-		permission_edit: new PermissionInfo({type: mapType == MapType.private ? PermissionInfoType.mapEditors : PermissionInfoType.creator}),
-		permission_contribute: new PermissionInfo({type: mapType == MapType.private ? PermissionInfoType.mapEditors : PermissionInfoType.anyone}),
-	};
+export function MapNodeRevision_Defaultable_DefaultsForMap(): MapNodeRevision_Defaultable {
+	return {};
 }
 
 //export const MapNodeRevision_titlePattern = `(^\\S$)|(^\\S.*\\S$)`; // must start and end with non-whitespace

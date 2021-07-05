@@ -1,11 +1,12 @@
 import {emptyArray} from "web-vcore/nm/js-vextensions.js";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {globalMapID} from "../../DB_Constants.js";
 import {GetMap} from "../maps.js";
 import {GetUser} from "../users.js";
-import {Map, MapType} from "./@Map.js";
+import {Map} from "./@Map.js";
 
 export function IsUserMap(map: Map) {
-	return map.type == MapType.private || map.type == MapType.public;
+	return map.id != globalMapID;
 }
 
 export const GetRootNodeID = CreateAccessor(c=>(mapID: string)=>{
