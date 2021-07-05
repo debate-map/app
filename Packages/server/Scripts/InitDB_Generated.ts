@@ -134,7 +134,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "requireMapEditorsCanEdit", (t,n)=>t.boolean(n));
 		RunFieldInit(t, "nodeDefaults", (t,n)=>t.jsonb(n));
 		RunFieldInit(t, "featured", (t,n)=>t.boolean(n));
-		RunFieldInit(t, "editors", (t,n)=>t.specificType(n, "text[]"));
+		RunFieldInit(t, "editors", (t,n)=>t.specificType(n, "text[]").notNullable());
 		RunFieldInit(t, "creator", (t,n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
 		RunFieldInit(t, "createdAt", (t,n)=>t.bigInteger(n));
 		RunFieldInit(t, "edits", (t,n)=>t.integer(n));
@@ -161,6 +161,8 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "seriesAnchor", (t,n)=>t.boolean(n));
 		RunFieldInit(t, "seriesEnd", (t,n)=>t.boolean(n));
 		RunFieldInit(t, "polarity", (t,n)=>t.text(n));
+		RunFieldInit(t, "c_parentType", (t,n)=>t.text(n));
+		RunFieldInit(t, "c_childType", (t,n)=>t.text(n));
 	});
 
 	await knex.schema.createTable(`${v}nodeRatings`, t=>{
@@ -193,7 +195,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "titles", (t,n)=>t.jsonb(n));
 		RunFieldInit(t, "note", (t,n)=>t.text(n));
 		RunFieldInit(t, "displayDetails", (t,n)=>t.jsonb(n));
-		RunFieldInit(t, "termAttachments", (t,n)=>t.specificType(n, "text[]"));
+		RunFieldInit(t, "termAttachments", (t,n)=>t.specificType(n, "text[]").notNullable());
 		RunFieldInit(t, "equation", (t,n)=>t.jsonb(n));
 		RunFieldInit(t, "references", (t,n)=>t.jsonb(n));
 		RunFieldInit(t, "quote", (t,n)=>t.jsonb(n));
@@ -237,9 +239,9 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
 		RunFieldInit(t, "displayName", (t,n)=>t.text(n));
 		RunFieldInit(t, "photoURL", (t,n)=>t.text(n));
-		RunFieldInit(t, "joinDate", (t,n)=>t.bigInteger(n));
-		RunFieldInit(t, "permissionGroups", (t,n)=>t.jsonb(n));
-		RunFieldInit(t, "edits", (t,n)=>t.integer(n));
+		RunFieldInit(t, "joinDate", (t,n)=>t.bigInteger(n).notNullable());
+		RunFieldInit(t, "permissionGroups", (t,n)=>t.jsonb(n).notNullable());
+		RunFieldInit(t, "edits", (t,n)=>t.integer(n).notNullable());
 		RunFieldInit(t, "lastEditAt", (t,n)=>t.bigInteger(n));
 	});
 

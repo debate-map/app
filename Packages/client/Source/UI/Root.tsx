@@ -289,7 +289,9 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 					{GADDemo && <NavBar_GAD/>}
 				</ErrorBoundary>
 				{/* <InfoButton_TooltipWrapper/> */}
-				<ErrorBoundary>
+				<ErrorBoundary
+					key={page} // use key, so that error-message clears when user changes pages
+				>
 					<main style={{position: "relative", flex: 1, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "flex-start"}}>
 						{/* <Route path='/stream'><StreamUI/></Route>
 						<Route path='/chat'><ChatUI/></Route>

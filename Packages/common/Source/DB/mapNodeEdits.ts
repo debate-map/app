@@ -8,7 +8,7 @@ const colorMap = {
 	[ChangeType.edit]: "255,255,0",
 	[ChangeType.remove]: "255,0,0",
 };
-export function GetChangeTypeOutlineColor(changeType: ChangeType) {
+export function GetChangeTypeOutlineColor(changeType: ChangeType|n) {
 	if (changeType == null) return null;
 	return colorMap[changeType];
 }

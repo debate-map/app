@@ -16,26 +16,26 @@ export class User {
 
 	@DB((t,n)=>t.text(n))
 	@Field({type: "string"})
-	photoURL: string;
+	photoURL?: string|n;
 
 	// custom
 	// ==========
 
-	@DB((t,n)=>t.bigInteger(n))
-	@Field({type: "number"})
+	@DB((t,n)=>t.bigInteger(n).notNullable())
+	@Field({type: "number"}, {req: true})
 	joinDate: number;
 
-	@DB((t,n)=>t.jsonb(n))
-	@Field({$ref: "PermissionGroupSet"})
+	@DB((t,n)=>t.jsonb(n).notNullable())
+	@Field({$ref: "PermissionGroupSet"}, {req: true})
 	permissionGroups: PermissionGroupSet;
 
-	@DB((t,n)=>t.integer(n))
-	@Field({type: "number"})
+	@DB((t,n)=>t.integer(n).notNullable())
+	@Field({type: "number"}, {req: true})
 	edits: number;
 
 	@DB((t,n)=>t.bigInteger(n))
 	@Field({type: "number"})
-	lastEditAt: number;
+	lastEditAt?: number|n;
 }
 
 export class PermissionGroupSet {

@@ -116,10 +116,9 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const lastAcknowledgementTime = GetLastAcknowledgementTime(node.id);
 		sinceTime = sinceTime.KeepAtLeast(lastAcknowledgementTime);
 
-		let changeType: ChangeType;
+		let changeType: ChangeType|n;
 		if (node.createdAt > sinceTime) changeType = ChangeType.add;
 		else if (node.current.createdAt > sinceTime) changeType = ChangeType.edit;
-		else Assert(false);
 
 		const parentPath = SlicePath(path, 1);
 		const parent = GetNodeL3(parentPath);

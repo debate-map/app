@@ -85,14 +85,19 @@ function HolderTypeToRatingType(holderType: HolderType|n) {
 	}[holderType!] as any;
 }
 
+export function AssertBetween0And100OrNull(val: number|n) {
+	Assert(val == null || (val >= 0 && val <= 100), `Fill-percent (${val}) not in range, and not null.`);
+}
+
 const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
 // export const GetFillPercent_AtPath = StoreAccessor('GetFillPercent_AtPath', (node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null) => {
 export const GetFillPercent_AtPath = CreateAccessor(c=>(node: MapNodeL3, path: string, boxType?: HolderType|n, ratingType?: NodeRatingType, weighting = WeightingType.votes, userID?: string, resultIfNoData = null)=>{
 	ratingType = ratingType ?? HolderTypeToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return resultIfNoData;
+
 	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes?.includes(node.type)) {
 		const result = GetRatingAverage_AtPath(node, ratingType, userID, resultIfNoData);
-		Assert(result != null && result >= 0 && result <= 100, `Fill-percent (${result}) not in range.`);
+		AssertBetween0And100OrNull(result);
 		return result;
 	}
 
@@ -111,7 +116,7 @@ export const GetFillPercent_AtPath = CreateAccessor(c=>(node: MapNodeL3, path: s
 		}
 	}
 
-	Assert(result != null && result >= 0 && result <= 100, `Fill-percent (${result}) not in range.`);
+	AssertBetween0And100OrNull(result);
 	return result;
 });
 

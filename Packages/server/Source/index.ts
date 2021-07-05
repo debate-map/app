@@ -11,6 +11,8 @@ import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
 
 //import "web-vcore/nm/js-vextensions_ApplyCETypes.ts";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
+import {CustomWrapResolversPlugin} from "./Plugins/CustomWrapResolversPlugin.js";
+import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
 
 type PoolClient = import("pg").PoolClient;
 const {Pool} = pg;
@@ -51,10 +53,12 @@ app.use(
 			pluginHook,
 			// schema-builder plugins
 			appendPlugins: [
+				CustomBuildHooksPlugin,
 				require("@graphile-contrib/pg-simplify-inflector"),
 				require("@graphile/subscriptions-lds").default,
 				require("postgraphile-plugin-connection-filter"),
 				CustomInflectorPlugin,
+				//CustomWrapResolversPlugin,
 				AuthenticationPlugin,
 			],
 			skipPlugins: [

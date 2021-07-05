@@ -3,6 +3,15 @@ import {Knex} from "knex";
 import {CE, string} from "web-vcore/nm/js-vextensions.js";
 import {GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 
+//import {GenerateUUID} from "web-vcore/node_modules/mobx-graphlink/Source/Extensions/KeyGenerator.js";
+/*import fs from "fs";
+import {createRequire} from "module";
+const require = createRequire(import.meta.url);
+const {GenerateUUID} =
+	fs.existsSync("web-vcore/node_modules/mobx-graphlink/Source/Extensions/KeyGenerator.js") ? require("web-vcore/node_modules/mobx-graphlink/Source/Extensions/KeyGenerator.js") :
+	fs.existsSync("mobx-graphlink/Source/Extensions/KeyGenerator.js") ? require("mobx-graphlink/Source/Extensions/KeyGenerator.js") :
+	(()=>{ throw new Error("Could not find mobx-graphlink's KeyGenerator.ts file."); })();*/
+
 const rand = ()=>Math.random();
 // example: [rand()]: {...},
 
@@ -70,7 +79,7 @@ const maps = TypeCheck(Map, {
 		defaultExpandDepth: 3,
 		editors: [],
 		edits: 0,
-		editedAt: null,
+		editedAt: Date.now(),
 	},
 });
 
@@ -91,6 +100,7 @@ const nodes = TypeCheck(MapNode as new()=>(MapNode & {revision: MapNodeRevision}
 			titles: JSON.stringify({
 				base: "Root",
 			}) as any,
+			termAttachments: [],
 		},
 	}
 });

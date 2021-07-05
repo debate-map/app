@@ -31,7 +31,7 @@ export class AccessPolicy {
 
 	@DB((t,n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"})
-	base: string;
+	base?: string|n;
 
 	@DB((t,n)=>t.jsonb(n))
 	@Field({$ref: PermissionSet.name})
@@ -39,5 +39,5 @@ export class AccessPolicy {
 
 	@DB((t,n)=>t.jsonb(n))
 	@Field({patternProperties: {[UUID_regex]: {$ref: PermissionSet.name}}})
-	permissions_userExtends?: {[key: string]: PermissionSet};
+	permissions_userExtends?: {[key: string]: PermissionSet}|n;
 }
