@@ -30,7 +30,6 @@ import {SubPanel} from "./NodeUI_Inner/SubPanel.js";
 import {TitlePanel} from "./NodeUI_Inner/TitlePanel.js";
 import {MapNodeUI_LeftBox} from "./NodeUI_LeftBox.js";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
-import {Assert} from "../../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE.js";
 
 // drag and drop
 // ==========

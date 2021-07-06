@@ -20,7 +20,6 @@ import {ActionBar_Left} from "./MapUI/ActionBar_Left.js";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
 import {ExpandableBox} from "./MapNode/ExpandableBox.js";
 
-
 export function GetNodeBoxForPath(path: string) {
 	const nodeInnerBoxes = FindDOMAll(".NodeUI_Inner").map(a=>DeepGet(FindReact(a), "props/parent") as NodeUI_Inner);
 	return nodeInnerBoxes.FirstOrX(a=>a.props.path == path);

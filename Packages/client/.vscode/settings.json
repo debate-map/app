@@ -10,5 +10,7 @@
 	],
 	"editor.codeActionsOnSave": {
 		"source.fixAll.eslint": true
-	}
+	},
+	// fixes eslint's plugin/config imports (alternative: https://github.com/microsoft/rushstack/tree/master/stack/eslint-patch)
+	"eslint.options.resolvePluginsRelativeTo": "../../node_modules/web-vcore",
 }

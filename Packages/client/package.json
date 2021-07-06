@@ -12,6 +12,7 @@
     "commander": "2.19.0",
     "cross-env": "6.0.3",
     "cypress": "3.4.1",
+    "eslint": "^7.30.0",
     "fs-extra": "^1.0.0",
     "nps": "^5.10.0",
     "sharp": "^0.23.4",
