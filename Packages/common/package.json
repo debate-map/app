@@ -1,5 +1,6 @@
 {
 	"name": "dm_common",
+	"version": "0.0.1",
 	"private": true,
 	"type": "module",
 	"#main": "./Source/index.ts",
