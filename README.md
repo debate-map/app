@@ -29,12 +29,7 @@ For more information, visit the website at: <https://debatemap.app>
 
 3) Install this repo's dependencies by running: `yarn`
 
-4) Provide valid targets for the Yarn "portals" (ie. package symlinks). For me, these commands are:
-```
-cmd /c mklink /j .\Portals\web-vcore C:\Root\Apps\@V\@Modules\web-vcore\Main
-cmd /c mklink /j .\Portals\@pg-lq_postgraphile-plugin C:\Root\Apps\@V\@Modules\postgraphile-live-query\Main\Packages\postgraphile-plugin
-```
-4.1) Yarn's symlink support is kinda broken right now
+4) Provide valid targets for the Yarn "portals" (ie. package symlinks). Inspect the "resolutions" field in the root `package.json` to know where to clone/install the symlinked packages.
 
 ### Part 2 (client)
 

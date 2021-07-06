@@ -6,10 +6,9 @@ import {VMenuStub, VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {GetDistanceBetweenRectAndPoint, inFirefox, GetScreenRect, StoreAction, Observer, ES, HTMLProps} from "web-vcore";
 import {GADDemo} from "UI/@GAD/GAD.js";
-import {store} from "Store";
 import {GetNodeView, GetMapView, GetSelectedNodePath, GetViewOffset, GetFocusedNodePath, GetNodeViewsAlongPath, ACTMapNodeSelect} from "Store/main/maps/mapViews/$mapView.js";
 import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
-import {GetOpenMapID} from "Store/main";
+import {GetOpenMapID} from "Store/main.js";
 import {TimelineIntroBox} from "UI/@Shared/Timelines/TimelineIntroBox.js";
 import {MapNodeL3, GetUserAccessLevel, MeID, IsNodeL2, IsNodeL3, GetNodeL3, IsPremiseOfSinglePremiseArgument, GetParentPath, GetParentNodeL3, Map} from "dm_common";
 import {styles} from "../../../Utils/UI/GlobalStyles.js";
@@ -320,7 +319,7 @@ export class MapUI extends BaseComponentPlus({
 		let targetNodeUI: NodeUI_Inner|n;
 		let nextPathTry = nodePath;
 		while (targetNodeUI == null) {
-			targetNodeUI = nodeUIs.FirstOrX(nodeUI=>{
+			targetNodeUI = nodeUIs.FirstOrX(nodeUI=>{ // eslint-disable-line
 				const {node, path} = nodeUI.props;
 				const parentPath = GetParentPath(path);
 				const parent = GetParentNodeL3(path);

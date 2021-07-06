@@ -4,10 +4,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {IsUserCreatorOrMod} from "dm_common";
-import {MeID} from "dm_common";
-import {GetNodeDisplayText} from "dm_common";
-import {DeleteNode} from "dm_common";
+import {IsUserCreatorOrMod, MeID, GetNodeDisplayText, DeleteNode} from "dm_common";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer

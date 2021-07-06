@@ -7,41 +7,41 @@ type ProviderData = any;
 //@MGLClass({table: "users_private"})
 @MGLClass({table: "usersPrivates"})
 export class User_Private {
-	@DB((t,n)=>t.text(n).primary())
+	@DB((t, n)=>t.text(n).primary())
 	@Field({type: "string"})
 	id: string;
 
 	//displayName: string;
 	//avatarUrl: string;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	email: string;
 
-	@DB((t,n)=>t.jsonb(n))
+	@DB((t, n)=>t.jsonb(n))
 	@Field({type: "array"})
 	providerData: ProviderData[];
 
 	// custom
 	// ==========
-	
-	@DB((t,n)=>t.text(n))
+
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	backgroundID?: string|n;
 
-	@DB((t,n)=>t.boolean(n))
+	@DB((t, n)=>t.boolean(n))
 	@Field({type: "boolean"})
 	backgroundCustom_enabled?: boolean|n;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: ["null", "string"]})
 	backgroundCustom_color?: string|n;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	backgroundCustom_url?: string|n;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	backgroundCustom_position?: string|n;
 }

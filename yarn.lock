@@ -1261,6 +1261,7 @@ __metadata:
     ts-node-dev: 1.1.6
     tsc-watch: ^4.4.0
     typescript: ^4.3.2
+    web-vcore: 0.0.4
   languageName: unknown
   linkType: soft
 
@@ -2883,7 +2884,6 @@ __metadata:
     ts-node-dev: 1.1.6
     ua-parser-js: ^0.7.12
     updeep: ^1.0.0
-    web-vcore: 0.0.4
   languageName: unknown
   linkType: soft
 

@@ -26,10 +26,10 @@ export class NodeUI_ForBots extends BaseComponentPlus({} as Props, {}) {
 
 		// just list one of the parents as the "current parent", so code relying on a parent doesn't error
 		const path = `${nodeParents.length ? `${nodeParents[0].id}/` : ""}${node.id}`;
-		const parent = GetParentNodeL2(path);
+		//const parentAtPath = GetParentNodeL2(path);
 		const nodeL3 = AsNodeL3(node, null);
 		return (
-			<ScrollView ref="scrollView"
+			<ScrollView
 				// backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.refs.scrollView.content) || a == this.refs.mapUI}
 				scrollVBarStyle={{width: 10}} /* contentStyle={{willChange: "transform"}} */>
 				<Row>

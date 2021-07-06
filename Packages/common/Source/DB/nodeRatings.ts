@@ -1,9 +1,9 @@
 import {Lerp, emptyObj, ToJSON, Assert, IsNumber, CE, emptyArray_forLoading, CreateStringEnum, emptyArray} from "web-vcore/nm/js-vextensions.js";
-import {GetDoc, CreateAccessor, GetDocs, NoID} from "web-vcore/nm/mobx-graphlink.js";
+import {GetDoc, CreateAccessor, GetDocs, NoID, Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {observable} from "web-vcore/nm/mobx.js";
-import {Validate} from "web-vcore/nm/mobx-graphlink.js";
+
 import {NodeRatingType, RatingType_Info} from "./nodeRatings/@NodeRatingType.js";
-import {NodeRating, NodeRating_MaybePseudo as NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
+import {NodeRating, NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore.js";
 import {GetNodeChildrenL2, HolderType} from "./nodes.js";
 import {GetMainRatingType, GetNodeL2} from "./nodes/$node.js";
@@ -25,7 +25,7 @@ export const GetRatings = CreateAccessor(c=><
 		const premises = nodeChildren.filter(a=>a == null || a.type == MapNodeType.claim);
 		return GetArgumentImpactPseudoRatings(node, premises);
 	}
-	
+
 	/*const ratings = GetRatings(nodeID, ratingType);
 	if (ratingSet == null) return [];
 	return FilterRatings(CE(ratingSet).VValues(), filter);
@@ -36,7 +36,7 @@ export const GetRatings = CreateAccessor(c=><
 			node: {equalTo: nodeID},
 			type: {equalTo: ratingType},
 			user: userID && {equalTo: userID},
-		}}
+		}},
 	}, a=>a.nodeRatings);
 }));
 export const GetRating = CreateAccessor(c=>(nodeID: string, ratingType: NodeRatingType, userID: string)=>{
@@ -81,7 +81,7 @@ export enum WeightingType {
 function HolderTypeToRatingType(holderType: HolderType|n) {
 	return {
 		[HolderType.truth]: NodeRatingType.truth,
-		[HolderType.relevance]: NodeRatingType.relevance
+		[HolderType.relevance]: NodeRatingType.relevance,
 	}[holderType!] as any;
 }
 

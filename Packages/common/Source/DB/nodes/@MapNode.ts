@@ -31,35 +31,35 @@ export class MapNode {
 		CE(this).VSet(initialData);
 	}
 
-	@DB((t,n)=>t.text(n).primary())
+	@DB((t, n)=>t.text(n).primary())
 	@Field({type: "string"})
 	id: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
+	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"})
 	accessPolicy: string;
 
-	@DB((t,n)=>t.text(n).notNullable().references("id").inTable(`users`).DeferRef())
+	@DB((t, n)=>t.text(n).notNullable().references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	creator: string;
 
-	@DB((t,n)=>t.bigInteger(n).notNullable())
+	@DB((t, n)=>t.bigInteger(n).notNullable())
 	@Field({type: "number"}, {req: true})
 	createdAt: number;
 
-	@DB((t,n)=>t.text(n).notNullable())
+	@DB((t, n)=>t.text(n).notNullable())
 	@Field({$ref: "MapNodeType"}, {req: true})
 	type: MapNodeType;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({$ref: "ArgumentType"})
 	argumentType?: ArgumentType;
 
-	@DB((t,n)=>t.boolean(n))
+	@DB((t, n)=>t.boolean(n))
 	@Field({type: "boolean"})
 	multiPremiseArgument?: boolean;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`maps`).DeferRef())
+	@DB((t, n)=>t.text(n).references("id").inTable(`maps`).DeferRef())
 	@Field({$ref: "UUID"})
 	rootNodeForMap?: string;
 

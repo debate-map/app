@@ -81,19 +81,19 @@ export class MapNodeRevision {
 		CE(this).VSet(initialData);
 	}
 
-	@DB((t,n)=>t.text(n).primary())
+	@DB((t, n)=>t.text(n).primary())
 	@Field({type: "string"})
 	id: string;
 
-	@DB((t,n)=>t.text(n).notNullable().references("id").inTable(`nodes`).DeferRef())
+	@DB((t, n)=>t.text(n).notNullable().references("id").inTable(`nodes`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	node: string;
 
-	@DB((t,n)=>t.text(n).notNullable().references("id").inTable(`users`).DeferRef())
+	@DB((t, n)=>t.text(n).notNullable().references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	creator: string;
 
-	@DB((t,n)=>t.bigInteger(n).notNullable())
+	@DB((t, n)=>t.bigInteger(n).notNullable())
 	@Field({type: "number"}, {req: true})
 	createdAt: number;
 
@@ -101,7 +101,7 @@ export class MapNodeRevision {
 	//approved = false;
 
 	// text
-	@DB((t,n)=>t.jsonb(n))
+	@DB((t, n)=>t.jsonb(n))
 	@Field({
 		properties: {
 			//base: {pattern: MapNodeRevision_titlePattern}, negation: {pattern: MapNodeRevision_titlePattern}, yesNoQuestion: {pattern: MapNodeRevision_titlePattern},
@@ -111,34 +111,34 @@ export class MapNodeRevision {
 	})
 	titles = {base: ""} as TitlesMap;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: ["null", "string"]}) // add null-type, for later when the payload-validation schema is derived from the main schema
 	note?: string;
 
-	@DB((t,n)=>t.jsonb(n))
+	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: NodeRevisionDisplayDetails.name})
 	displayDetails?: NodeRevisionDisplayDetails;
 
 	// attachments
 	// ==========
 
-	@DB((t,n)=>t.specificType(n, "text[]").notNullable())
+	@DB((t, n)=>t.specificType(n, "text[]").notNullable())
 	@Field({items: {$ref: TermAttachment.name}}, {req: true})
 	termAttachments: TermAttachment[];
 
-	@DB((t,n)=>t.jsonb(n))
+	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: EquationAttachment.name})
 	equation?: EquationAttachment;
 
-	@DB((t,n)=>t.jsonb(n))
+	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: ReferencesAttachment.name})
 	references?: ReferencesAttachment;
 
-	@DB((t,n)=>t.jsonb(n))
+	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: QuoteAttachment.name})
 	quote?: QuoteAttachment;
 
-	@DB((t,n)=>t.jsonb(n))
+	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: MediaAttachment.name})
 	media?: MediaAttachment;
 }

@@ -6,9 +6,9 @@ export const GetMedia = CreateAccessor(c=>(id: string)=>{
 	if (id == null || IsNaN(id)) return null;
 	return GetDoc({}, a=>a.medias.get(id));
 });
-/* export async function GetImageAsync(id: string) {
+/*export async function GetImageAsync(id: string) {
 	return await GetDataAsync(`images/${id}`) as Image;
-} */
+}*/
 
 export const GetMedias = CreateAccessor(c=>(): Media[]=>{
 	return GetDocs({}, a=>a.medias);
@@ -18,6 +18,6 @@ export const GetMediasByURL = CreateAccessor(c=>(url: string): Media[]=>{
 		//queryOps: [new WhereOp("url", "==", url)],
 		params: {filter: {
 			url: {equalTo: url},
-		}}
+		}},
 	}, a=>a.medias);
 });

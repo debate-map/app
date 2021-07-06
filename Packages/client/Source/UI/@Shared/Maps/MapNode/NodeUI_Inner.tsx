@@ -294,7 +294,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 								}
 
 								runInAction("NodeUI_Inner.onPanelButtonClick", ()=>{
-									let nodeView_final = nodeView ?? GetNodeViewsAlongPath(map.id, path, true).Last();
+									const nodeView_final = nodeView ?? GetNodeViewsAlongPath(map.id, path, true).Last();
 									if (nodeView_final.openPanel != panel) {
 										nodeView_final.VSet("openPanel", panel ?? DEL);
 									} else {
@@ -326,7 +326,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					afterChildren={<>
 						{bottomPanelShow
 							&& <NodeUI_BottomPanel {...{map, node, path, parent, width, widthOverride, hovered, backgroundColor}}
-								panelPosition={panelPosition!} panelToShow={panelToShow!} 
+								panelPosition={panelPosition!} panelToShow={panelToShow!}
 								hoverTermID={hoverTermID} onTermHover={termID=>this.SetState({hoverTermID: termID})}/>}
 						{reasonScoreValues && showReasonScoreValues
 							&& <ReasonScoreValueMarkers {...{node, combinedWithParentArgument, reasonScoreValues}}/>}
@@ -389,7 +389,7 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 		backgroundColor: chroma.Color,
 	},
 	{hoverTermID: null as string|n},
-) {
+	) {
 	panelsOpened = new Set();
 	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
 	render() {

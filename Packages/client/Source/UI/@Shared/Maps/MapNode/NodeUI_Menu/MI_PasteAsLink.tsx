@@ -6,12 +6,7 @@ import {Observer} from "web-vcore";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "Store";
-import {GetParentNodeL3, GetParentNodeID, Polarity} from "dm_common";
-import {MapNodeType} from "dm_common";
-import {ClaimForm} from "dm_common";
-import {GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText} from "dm_common";
-import {MeID} from "dm_common";
-import {LinkNode_HighLevel} from "dm_common";
+import {GetParentNodeL3, GetParentNodeID, Polarity, MapNodeType, ClaimForm, GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText, MeID, LinkNode_HighLevel} from "dm_common";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer

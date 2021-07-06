@@ -9,39 +9,39 @@ AddSchema("PermissionSet", {
 
 @MGLClass({table: "visibilityDirectives"})
 export class VisibilityDirective {
-	@DB((t,n)=>t.text(n).primary())
+	@DB((t, n)=>t.text(n).primary())
 	@Field({type: "string"})
 	id: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
+	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"})
 	actor: string;
 
-	@DB((t,n)=>t.float(n))
+	@DB((t, n)=>t.float(n))
 	@Field({type: "number"})
 	priority: number;
 
-	@DB((t,n)=>t.specificType(n, "text[]"))
+	@DB((t, n)=>t.specificType(n, "text[]"))
 	@Field({items: {type: "string"}})
 	context: string[];
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`maps`).DeferRef())
+	@DB((t, n)=>t.text(n).references("id").inTable(`maps`).DeferRef())
 	@Field({type: "string"})
 	target_map: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
+	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
 	@Field({type: "string"})
 	target_node: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`nodeChildLinks`).DeferRef())
+	@DB((t, n)=>t.text(n).references("id").inTable(`nodeChildLinks`).DeferRef())
 	@Field({type: "string"})
 	target_nodeChildLink: string;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	visibility_self: string;
-	
-	@DB((t,n)=>t.text(n))
+
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	visibility_nodes: string;
 }

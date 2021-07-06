@@ -5,16 +5,9 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple} from "web-vcore";
-import {NodeDetailsUI} from "../../NodeDetailsUI.js";
-import {MapNodeType, GetMapNodeTypeDisplayName, GetDefaultAccessPolicyID_ForNode, NodeChildLink, Map, GetAccessPolicy} from "dm_common";
-import {Polarity, MapNode, ClaimForm} from "dm_common";
-import {GetMap} from "dm_common";
-import {GetNode} from "dm_common";
-import {MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern} from "dm_common";
-import {AddArgumentAndClaim} from "dm_common";
-import {AddChildNode} from "dm_common";
-import {GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3} from "dm_common";
+import {MapNodeType, GetMapNodeTypeDisplayName, GetDefaultAccessPolicyID_ForNode, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3} from "dm_common";
 import {CatchBail} from "web-vcore/nm/mobx-graphlink";
+import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 export class AddChildHelper {
 	constructor(parentPath: string, childType: MapNodeType, title: string, childPolarity: Polarity, userID: string, mapID: string|n) {
@@ -145,7 +138,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 	let boxController = ShowMessageBox({
 		title: `Add ${displayName}`, cancelButton: true,
 		message: observer_simple(()=>{
-			let tempCommand = helper.GetCommand();
+			const tempCommand = helper.GetCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
 				title: tempCommand.validateError as any,

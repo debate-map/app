@@ -6,16 +6,8 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {E, ToJSON, Clone} from "web-vcore/nm/js-vextensions.js";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import _ from "lodash";
+import {MapNodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, IsPremiseOfSinglePremiseArgument, GetUser, MeID, IsUserCreatorOrMod, PermissionInfoType, UpdateLink, AddNodeRevision, Map} from "dm_common";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
-import {MapNodeL3} from "dm_common";
-import {GetParentNodeL3, GetParentNodeID} from "dm_common";
-import {GetLinkUnderParent, IsPremiseOfSinglePremiseArgument} from "dm_common";
-import {GetUser, MeID} from "dm_common";
-import {IsUserCreatorOrMod} from "dm_common";
-import {PermissionInfoType} from "dm_common";
-import {UpdateLink} from "dm_common";
-import {AddNodeRevision} from "dm_common";
-import {Map} from "dm_common";
 
 @Observer
 export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {dataError: null as string|n}) {
