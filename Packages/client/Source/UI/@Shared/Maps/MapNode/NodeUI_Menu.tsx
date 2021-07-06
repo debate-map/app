@@ -30,7 +30,7 @@ export class NodeUI_Menu_Stub extends BaseComponent<Props, {}> {
 	}
 }
 
-type Props = {map?: Map, node: MapNodeL3, path: string, inList?: boolean, holderType?: HolderType|n};
+type Props = {map?: Map, node: MapNodeL3, path: string, inList?: boolean, holderType: HolderType};
 export type MI_SharedProps = Props & {mapID: string|n, combinedWithParentArg: boolean, copiedNode: MapNodeL3|n, copiedNodePath: string|n, copiedNode_asCut: boolean};
 
 @WarnOfTransientObjectProps
@@ -63,7 +63,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		const mapID = map ? map.id : null;
 		// let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
 		let validChildTypes = GetValidNewChildTypes(node, holderType, permissions);
-		const componentBox = holderType != null;
+		const componentBox = holderType != HolderType.generic;
 		if (holderType) {
 			validChildTypes = validChildTypes.Except(MapNodeType.claim);
 		} else {

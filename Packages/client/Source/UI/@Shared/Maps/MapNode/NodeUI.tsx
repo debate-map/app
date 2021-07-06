@@ -44,7 +44,7 @@ export class NodeUI extends BaseComponentPlus(
 	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
 	render() {
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
-		let {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, children} = this.props;
+		const {indexInNodeList, map, node, path, widthOverride, style, onHeightOrPosChange, children} = this.props;
 		const {expectedBoxWidth, expectedBoxHeight, dividePoint, selfHeight} = this.state;
 
 		performance.mark("NodeUI_1");
@@ -142,7 +142,7 @@ export class NodeUI extends BaseComponentPlus(
 					>
 						<span style={{opacity: 0.5}}>(single-premise arg lacks base-claim; right-click to add)</span>
 						{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
-						<NodeUI_Menu_Stub {...{map, node, path}}/>
+						<NodeUI_Menu_Stub {...{map, node, path}} holderType={HolderType.generic}/>
 					</Row>
 				</Column>
 			);

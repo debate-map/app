@@ -10,7 +10,7 @@ import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction, flow} from "web-vcore/nm/mobx.js";
 import {Validate, GetAsync, UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, GetSearchTerms_Advanced, GetNodeChildLinks, GetNodeRevisions, MapNodeRevision, globalMapID} from "dm_common";
+import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, GetSearchTerms_Advanced, GetNodeChildLinks, GetNodeRevisions, MapNodeRevision, globalMapID, HolderType} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {MapUI} from "../Maps/MapUI.js";
 import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu.js";
@@ -272,7 +272,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 					<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
 					<span style={{flex: columnWidths[2]}}>{moment(node.createdAt).format("YYYY-MM-DD")}</span>
 					{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
-					<NodeUI_Menu_Stub {...{node: nodeL3, path: `${node.id}`, inList: true}}/>
+					<NodeUI_Menu_Stub {...{node: nodeL3, path: `${node.id}`, inList: true}} holderType={HolderType.generic}/>
 				</Row>
 				{findNode_node === nodeID &&
 					<Row>
@@ -292,7 +292,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 					const searchResult_path_rootNodeID = resultPath.split("/")[0];
 					const searchResult_path_rootNode = GetNode(searchResult_path_rootNodeID);
 					const searchResult_map = GetMap(searchResult_path_rootNode?.rootNodeForMap);
-					
+
 					const inCurrentMap = openMap && searchResult_path_rootNodeID == openMap_rootNodeID;
 					return (
 						<Row key={resultPath}>
