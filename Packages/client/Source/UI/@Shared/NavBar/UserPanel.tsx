@@ -99,6 +99,7 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {}
 						//window.location.href = `${window.location.origin}/auth/google`;
 						window.location.href = GetDBServerURL("/auth/google");
 						// todo: make client-side retrieval of access-token impossible (so if frontend gets hacked, code can't trick user into providing access-token)
+						// todo: make sure the access-token data that server retrieves is never made accessible to frontend code (eg. use cookies, and set to http-only)
 						// todo: make this sign-in flow not require our main page to redirect (instead use a new-tab or popup-window)
 					});
 				}}/>
