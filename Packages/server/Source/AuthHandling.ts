@@ -5,7 +5,6 @@ import cookieSession from "cookie-session";
 import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden} from "dm_common";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import expressSession from "express-session";
-import qs from "qs";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {pgClient, pgPool} from "./Main.js";
 
@@ -116,14 +115,9 @@ export function SetUpAuthHandling(app: ExpressApp) {
 	app.get("/auth/google", passport.authenticate("google", {
 		scope: ["profile", "email"],
 	}));
-	app.get(
-		"/auth/google/callback",
+	app.get("/auth/google/callback",
 		passport.authenticate("google", {
 			successRedirect: "http://localhost:3005",
 			failureRedirect: "http://localhost:3005/login-failed",
-		}),
-		/*(req, res)=>{
-			res.redirect("/");
-		},*/
-	);
+		}));
 }

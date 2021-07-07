@@ -9,7 +9,6 @@ import {makePluginHook, postgraphile} from "postgraphile";
 //import "web-vcore/nm/js-vextensions_ApplyCETypes.ts";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
 import fetch from "node-fetch";
-//import ws from "ws";
 import cookieParser from "cookie-parser";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthenticationPlugin} from "./Mutations/Authentication.js";
@@ -93,12 +92,6 @@ app.use(
 			enableCors: true, // cors flag temporary; enables mutations, from any origin
 			showErrorStack: true,
 			extendedErrors: ["hint", "detail", "errcode"], // to show error text in console (doesn't seem to be working)
-
-			// test
-			/*simpleCollections: "only",
-			graphileBuildOptions: {
-				pgOmitListSuffix: true,
-			},*/
 		},
 	),
 );

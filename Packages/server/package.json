@@ -40,7 +40,6 @@
 		"passport-google-oauth20": "^2.0.0",
 		"postgraphile": "^4.11.0",
 		"postgraphile-plugin-connection-filter": "^2.2.1",
-		"qs": "^6.10.1",
 		"ws": "^7.5.2"
 	}
 }

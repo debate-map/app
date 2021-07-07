@@ -99,6 +99,7 @@ Object.assign(scripts, {
 		run: GetStartServerCommand(),
 	},
 });
+// if server-start command/flags change, update the entry in "launch.json" as well
 function GetStartServerCommand() {
 	/*const variantPath = serverVariantPaths[server];
 	return `node ${variantPath}`;*/

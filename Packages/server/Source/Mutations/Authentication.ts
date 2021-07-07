@@ -8,6 +8,7 @@ type Context = Context_base<any> & {
 	pgClient: PoolClient;
 };
 
+// todo: probably delete this for now (may make GraphQL auth system someday, but for now passportjs works fine)
 export const AuthenticationPlugin = makeExtendSchemaPlugin(build=>{
 	return {
 		typeDefs: gql`
