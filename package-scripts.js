@@ -12,7 +12,7 @@ function TSScript(packageName, scriptSubpath, ...args) {
 	return `${cdCommand}cross-env ${envPart} node ${nodeFlags} ${scriptSubpath} ${args.join(" ")}`;
 }
 function FindPackagePath(packageName) {
-	let pathsToCheck = [
+	const pathsToCheck = [
 		`./node_modules/web-vcore/node_modules/${packageName}`, // if web-vcore is symlinked
 		`./node_modules/${packageName}`, // if web-vcore is not symlinked
 	];
@@ -97,16 +97,17 @@ Object.assign(scripts, {
 
 		// second terminal
 		run: GetStartServerCommand(),
-	}
+	},
 });
 function GetStartServerCommand() {
 	/*const variantPath = serverVariantPaths[server];
 	return `node ${variantPath}`;*/
-	//return `node ./Packages/server/Build/esm/Source/index.js`;
-	//return `cd Packages/server && node ./Build/esm/Source/index.js`;
+	//return `node ./Packages/server/Build/esm/Source/Main.js`;
+	//return `cd Packages/server && node ./Build/esm/Source/Main.js`;
 
-	return `cd Packages/server && node ./Dist/index.js`;
-	//return `cd Packages/server && node --experimental-modules ./Dist/index.js`;
-	//return `cd Packages/server && node -r esm ./Dist/index.js`; // didn't enable named-exports from common-js, despite this suggesting it would: https://github.com/standard-things/esm/issues/897
-	//return TSScript("server", "Source/index.ts");
+	//return `cd Packages/server && node ./Dist/Main.js`;
+	//return `cd Packages/server && node --experimental-modules ./Dist/Main.js`;
+	//return `cd Packages/server && node -r esm ./Dist/Main.js`; // didn't enable named-exports from common-js, despite this suggesting it would: https://github.com/standard-things/esm/issues/897
+	//return TSScript("server", "Source/Main.ts");
+	return TSScript("server", "Dist/Main.js"); // use TSScript helper for its module-resolution flags (not used for TS->JS transpilation)
 }

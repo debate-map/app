@@ -1,4 +1,4 @@
-import {MapNode, MapNodeRevision, Map, MapNodeType, User, globalMapID, globalRootNodeID, systemUserID, AccessPolicy} from "dm_common";
+import {MapNode, MapNodeRevision, Map, MapNodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy} from "dm_common";
 import {Knex} from "knex";
 import {CE, string} from "web-vcore/nm/js-vextensions.js";
 import {GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
@@ -15,20 +15,20 @@ const {GenerateUUID} =
 const rand = ()=>Math.random();
 // example: [rand()]: {...},
 
-function TypeCheck<T, T2 extends {[key: string]: T}>(_: new(..._)=>T, collection: T2) {
+function TypeCheck<T, T2 extends {[key: string]: T}>(__: new(..._)=>T, collection: T2) {
 	return collection;
 }
 
 const users = TypeCheck(User, {
 	system: {
 		id: systemUserID,
-		displayName: "[system]",
+		displayName: systemUserName,
 		photoURL: null,
 		joinDate: Date.now(),
 		permissionGroups: {basic: true, verified: true, mod: true, admin: true},
 		edits: 0,
 		lastEditAt: null,
-	}
+	},
 });
 
 const accessPolicies = TypeCheck(AccessPolicy, {
@@ -101,7 +101,7 @@ const nodes = TypeCheck(MapNode as new()=>(MapNode & {revision: MapNodeRevision}
 			}) as any,
 			termAttachments: [],
 		},
-	}
+	},
 });
 
 export default async function seed(knex: Knex.Transaction) {
@@ -126,6 +126,6 @@ export default async function seed(knex: Knex.Transaction) {
 	for (const map of Object.values(maps)) {
 		await knex("maps").insert(map);
 	}
-	
+
 	console.log(`Done seeding data.`);
-};
+}

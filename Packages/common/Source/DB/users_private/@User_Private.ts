@@ -7,6 +7,10 @@ type ProviderData = any;
 //@MGLClass({table: "users_private"})
 @MGLClass({table: "usersPrivates"})
 export class User_Private {
+	constructor(data?: Partial<User_Private>) {
+		this.VSet(data);
+	}
+
 	@DB((t, n)=>t.text(n).primary())
 	@Field({type: "string"})
 	id: string;

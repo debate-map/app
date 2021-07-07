@@ -1,18 +1,18 @@
-import "./Start_0.js";
-import {program} from "commander";
-import express from "express";
-import {postgraphile, makePluginHook} from "postgraphile";
+import "./Start_0.js"; // this must come first // eslint-disable-line
 import {GeneratePatchesPlugin} from "@pg-lq/postgraphile-plugin";
-import pg from "pg";
+import {program} from "commander";
+import cors from "cors";
+import express from "express";
 import {createRequire} from "module";
-import {AuthenticationPlugin} from "./Mutations/Authentication.js";
-import {SetUpAuthHandling} from "./AuthHandling.js";
-import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
-
+import pg from "pg";
+import {makePluginHook, postgraphile} from "postgraphile";
 //import "web-vcore/nm/js-vextensions_ApplyCETypes.ts";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
-import {CustomWrapResolversPlugin} from "./Plugins/CustomWrapResolversPlugin.js";
+import bodyParser from "body-parser";
+import {SetUpAuthHandling} from "./AuthHandling.js";
+import {AuthenticationPlugin} from "./Mutations/Authentication.js";
 import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
+import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
 
 type PoolClient = import("pg").PoolClient;
 const {Pool} = pg;
@@ -25,6 +25,15 @@ export const launchOpts = program.opts();
 export const variant = launchOpts.variant;
 
 const app = express();
+
+app.use(cors({
+	//origin: "debatemap.app",
+	origin: "*", // let any origin make calls to our server (that's fine)
+}));
+
+// enable parsing of different request body types 
+//app.use(bodyParser.urlencoded({extended: true})); // application/x-www-form-urlencoded
+app.use(bodyParser.json()); // application/json
 
 const dbURL = process.env.DATABASE_URL || `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@localhost:5432/debate-map`;
 const dbPort = process.env.PORT || 3105 as number;
@@ -77,7 +86,7 @@ app.use(
 				pgOmitListSuffix: true,
 			},*/
 		},
-	)
+	),
 );
 
 SetUpAuthHandling(app);

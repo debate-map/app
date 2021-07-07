@@ -1,4 +1,4 @@
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {E, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {IsAuthValid} from "web-vcore/nm/mobx-graphlink.js";
 import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
@@ -72,7 +72,30 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {}
 		const {style, onSignIn} = this.props;
 		return (
 			<Column style={style}>
-				<SignInButton provider="google" text="Sign in with Google" onSignIn={onSignIn}/>
+				{/*<SignInButton provider="google" text="Sign in with Google" onSignIn={onSignIn}/>*/}
+				{/*<div id="g_id_onload"
+					data-client_id={googleClientID}
+					//data-login_uri="https://your.domain/your_login_endpoint"
+					data-callback="handleCredentialResponse"
+					data-auto_prompt="false">
+				</div>
+				<div className="g_id_signin"
+					data-type="standard"
+					data-size="large"
+					data-theme="outline"
+					data-text="sign_in_with"
+					data-shape="rectangular"
+					data-logo_alignment="left">
+				</div>*/}
+				<div ref={c=>{
+					if (!c) return;
+					if (g.google == null) WaitXThenRun(100, ()=>this.Update()); // wait until google-id api is loaded
+					InitGoogleIDAPIIfNotYet();
+
+					const options: GsiButtonConfiguration = {};
+					//g.google.accounts.id.renderButton(c, options, ()=>console.log("Clicked..."));
+					g.google.accounts.id.renderButton(c, options);
+				}}/>
 				{/* <SignInButton provider="facebook" text="Sign in with Facebook" mt={10} onSignIn={onSignIn}/>
 				<SignInButton provider="twitter" text="Sign in with Twitter" mt={10} onSignIn={onSignIn}/>
 				<SignInButton provider="github" text="Sign in with GitHub" mt={10} onSignIn={onSignIn}/> */}
@@ -81,7 +104,52 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {}
 	}
 }
 
-@SimpleShouldUpdate
+// from: https://developers.google.com/identity/gsi/web/reference/js-reference
+type GsiButtonConfiguration = {
+	type?: string; // The button type: icon, or standard button.
+	theme?: string; // The button theme. For example, white or blue.
+	size?: string; // The button size. For example, samll or large.
+	text?: string; // The button text. For example, "Sign in with Google" or "Sign up with Google".
+	shape?: string; // The button shape. For example, rectangular or circular.
+	logo_alignment?: string; // The Google logo alignment: left or center.
+	width?: number; // The button width, in pixels.
+	locale?: string; // If set, then the button language is rendered.
+}
+export const googleClientID = process.env.CLIENT_ID; // supplied by NPMPatches.ts
+export function InitGoogleIDAPIIfNotYet() {
+	if (g.google.accounts.id._initCalled) return;
+	g.google.accounts.id.initialize({
+      client_id: googleClientID,
+      callback: googleID_handleCredentialResponse,
+	});
+	g.google.accounts.id._initCalled = true;
+}
+export type GoogleID_CredentialResponse = {clientId: string, credential: string, select_by: "string"};
+export const googleID_handleCredentialResponse = async(response: GoogleID_CredentialResponse)=>{
+	console.log("Data:", response);
+	await fetch(GetDBServerURL("/auth/google/callback"), {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			idToken: response.credential,
+		}),
+	});
+};
+
+export function GetAppServerURL(subpath: string) {
+	Assert(subpath.startsWith("/"));
+	if (location.hostname == "localhost") return subpath;
+	return `https://debatemap.app/${subpath.slice(1)}`;
+}
+export function GetDBServerURL(subpath: string) {
+	Assert(subpath.startsWith("/"));
+	if (location.hostname == "localhost") return `http://localhost:3105/${subpath.slice(1)}`;
+	return `https://db.debatemap.app/${subpath.slice(1)}`;
+}
+
+/*@SimpleShouldUpdate
 // @ApplyBasicStyles
 class SignInButton extends BaseComponent<{provider: "google" | "facebook" | "twitter" | "github", text: string, style?, onSignIn?: ()=>void}, {loading: boolean}> {
 	render() {
@@ -94,7 +162,7 @@ class SignInButton extends BaseComponent<{provider: "google" | "facebook" | "twi
 			<Button text={text} style={E({outline: "none"}, BasicStyles(this.props), style)} onClick={async()=>{
 				this.SetState({loading: true});
 				try {
-					const account = await graph.LogIn(/*{provider, type: "popup"}*/);
+					const account = await graph.LogIn(/*{provider, type: "popup"}*#/);
 					//const account = await store.firelink.LogIn({provider, type: "popup"});
 					if (this.mounted == false) return;
 					this.SetState({loading: false});
@@ -107,4 +175,4 @@ class SignInButton extends BaseComponent<{provider: "google" | "facebook" | "twi
 			}}/>
 		);
 	}
-}
+}*/

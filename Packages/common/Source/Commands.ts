@@ -13,6 +13,7 @@ export * from "./Commands/AddShare.js";
 export * from "./Commands/AddTerm.js";
 //export * from "./Commands/AddTimeline.js";
 //export * from "./Commands/AddTimelineStep.js";
+export * from "./Commands/AddUser.js";
 export * from "./Commands/ChangeClaimType.js";
 export * from "./Commands/ChangeNodeOwnerMap.js";
 export * from "./Commands/CloneNode.js";
