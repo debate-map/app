@@ -11,12 +11,12 @@ import {MapNodeTag} from "./DB/nodeTags/@MapNodeTag.js";
 import {Share} from "./DB/shares/@Share.js";
 import {Term} from "./DB/terms/@Term.js";
 import {User} from "./DB/users/@User.js";
-import {User_Private} from "./DB/users_private/@User_Private.js";
+import {UserHidden} from "./DB/userHiddens/@UserHidden.js"; // eslint-disable-line
 import {VisibilityDirective} from "./DB/visibilityDirectives/@VisibilityDirective.js";
 
 // manually import these, since otherwise they're never runtime-imported
-//require("./db/users_private/@User_Private.js");
-import "./DB/users_private/@User_Private.js";
+//require("./DB/userHiddens/@UserHidden.js");
+import "./DB/userHiddens/@UserHidden.js"; // eslint-disable-line
 
 declare module "mobx-graphlink/Dist/UserTypes" {
 	interface DBShape extends GraphDBShape {}
@@ -48,7 +48,7 @@ export class GraphDBShape {
 	/*timelines: Collection<Timeline>;
 	timelineSteps: Collection<TimelineStep>;*/
 	users: Collection<User>;
-	users_private: Collection<User_Private>;
+	userHiddens: Collection<UserHidden>;
 	//userMapInfo: Collection<UserMapInfoSet>; // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
 	//userViewedNodes: Collection<ViewedNodeSet>; // removed due to privacy concerns
 }

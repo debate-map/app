@@ -1,13 +1,12 @@
-import {Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
-import {AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
-import {User_Private} from "../DB/users_private/@User_Private.js";
-import {GetUser_Private} from "../DB/users_private.js";
+import {Command, AssertV, AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
+import {UserHidden} from "../DB/userHiddens/@UserHidden.js";
+import {GetUserHidden} from "../DB/userHiddens.js";
 
-type MainType = User_Private;
-const MTName = "User_Private";
+type MainType = UserHidden;
+const MTName = "UserHidden";
 
-export class SetUserData_Private extends Command<{id: string, updates: Partial<MainType>}, {}> {
+export class SetUserData_Hidden extends Command<{id: string, updates: Partial<MainType>}, {}> {
 	oldData: MainType;
 	newData: MainType;
 	Validate() {
@@ -25,7 +24,7 @@ export class SetUserData_Private extends Command<{id: string, updates: Partial<M
 		}, this.payload, "Payload invalid");
 
 		const {id, updates} = this.payload;
-		this.oldData = GetUser_Private.BIN(id);
+		this.oldData = GetUserHidden.BIN(id);
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}
@@ -33,7 +32,7 @@ export class SetUserData_Private extends Command<{id: string, updates: Partial<M
 	GetDBUpdates() {
 		const {id} = this.payload;
 		const updates = {};
-		updates[`users_private/${id}`] = this.newData;
+		updates[`userHiddens/${id}`] = this.newData;
 		return updates;
 	}
 }

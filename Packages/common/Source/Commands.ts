@@ -36,7 +36,7 @@ export * from "./Commands/SetMapFeatured.js";
 export * from "./Commands/SetNodeIsMultiPremiseArgument.js";
 export * from "./Commands/SetNodeRating.js";
 export * from "./Commands/SetUserData.js";
-export * from "./Commands/SetUserData_Private.js";
+export * from "./Commands/SetUserData_Hidden.js";
 export * from "./Commands/UnlinkNode.js";
 export * from "./Commands/UpdateMediaData.js";
 export * from "./Commands/UpdateLink.js";

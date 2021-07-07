@@ -4,10 +4,9 @@ import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 // import {UserInfo as ProviderData} from "firebase";
 type ProviderData = any;
 
-//@MGLClass({table: "users_private"})
-@MGLClass({table: "usersPrivates"})
-export class User_Private {
-	constructor(data?: Partial<User_Private>) {
+@MGLClass({table: "userHiddens"})
+export class UserHidden {
+	constructor(data?: Partial<UserHidden>) {
 		this.VSet(data);
 	}
 

@@ -1,6 +1,6 @@
 import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
-import {GetUser_Private} from "dm_common";
+import {GetUserHidden} from "dm_common";
 
 // backgrounds
 // ==========
@@ -21,7 +21,7 @@ export class BackgroundConfig {
 export function GetUserBackground(userID: string|n): BackgroundConfig {
 	if (GADDemo) return {color: "#ffffff"};
 
-	const user_p = GetUser_Private(userID);
+	const user_p = GetUserHidden(userID);
 	if (!user_p) return presetBackgrounds[defaultPresetBackground];
 
 	if (user_p.backgroundCustom_enabled) {

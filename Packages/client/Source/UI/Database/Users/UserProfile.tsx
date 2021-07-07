@@ -7,14 +7,14 @@ import {Fragment} from "react";
 import {PropNameToTitle} from "Utils/General/Others.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {MeID, GetUser,GetUser_Private,GetUserPermissionGroups,SetUserData,SetUserData_Private,User} from "dm_common";
+import {MeID, GetUser, GetUserHidden, GetUserPermissionGroups, SetUserData, SetUserData_Hidden, User} from "dm_common";
 
 @Observer
 export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User|n}, {}) {
 	render() {
 		const {profileUser} = this.props;
 		if (profileUser == null) return <PageContainer>User does not exist.</PageContainer>;
-		const profileUser_p = profileUser.id == MeID() ? GetUser_Private(profileUser.id) : null;
+		const profileUser_p = profileUser.id == MeID() ? GetUserHidden(profileUser.id) : null;
 		//if (profileUser_p == null) return <PageContainer>Loading...</PageContainer>;
 
 		const userID = MeID();
@@ -65,7 +65,7 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User|n}
 												selected && {border: "1px solid rgba(255,255,255,.7)"},
 											)}
 											onClick={()=>{
-												new SetUserData_Private({id: profileUser.id, updates: {backgroundID: id}}).Run();
+												new SetUserData_Hidden({id: profileUser.id, updates: {backgroundID: id}}).Run();
 											}}>
 										</Div>
 									);
@@ -74,30 +74,30 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User|n}
 						</ScrollView>
 						<Row mt={5}>
 							<CheckBox text="Custom background" value={profileUser_p.backgroundCustom_enabled ?? false} onChange={val=>{
-								new SetUserData_Private({id: profileUser.id, updates: {backgroundCustom_enabled: val}}).Run();
+								new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_enabled: val}}).Run();
 							}}/>
 						</Row>
 						<Row mt={5}>
 							<Pre>Color: </Pre>
 							<ColorPickerBox color={profileUser_p.backgroundCustom_color || "#FFFFFF"} onChange={val=>{
-								new SetUserData_Private({id: profileUser.id, updates: {backgroundCustom_color: val}}).Run();
+								new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_color: val}}).Run();
 							}}/>
 							<Button ml={5} text="Clear" onClick={()=>{
-								new SetUserData_Private({id: profileUser.id, updates: {backgroundCustom_color: null}}).Run();
+								new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_color: null}}).Run();
 							}}/>
 						</Row>
 						<Row mt={5}>
 							<Pre>URL: </Pre>
 							<TextInput style={ES({flex: 1})}
 								value={profileUser_p.backgroundCustom_url} onChange={val=>{
-									new SetUserData_Private({id: profileUser.id, updates: {backgroundCustom_url: val}}).Run();
+									new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_url: val}}).Run();
 								}}/>
 						</Row>
 						<Row mt={5}>
 							<Pre>Anchor: </Pre>
 							<Select options={[{name: "top", value: "center top"}, {name: "center", value: "center center"}, {name: "bottom", value: "center bottom"}]}
 								value={profileUser_p.backgroundCustom_position || "center center"} onChange={val=>{
-									new SetUserData_Private({id: profileUser.id, updates: {backgroundCustom_position: val}}).Run();
+									new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_position: val}}).Run();
 								}}/>
 						</Row>
 					</Fragment>}

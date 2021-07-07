@@ -2,10 +2,11 @@ import passport from "passport";
 import {Strategy as GoogleStrategy} from "passport-google-oauth20";
 import express from "express";
 import cookieSession from "cookie-session";
-import {AddUser, GetUser, User, User_Private} from "dm_common";
+import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden} from "dm_common";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import expressSession from "express-session";
 import qs from "qs";
+import {Assert} from "web-vcore/nm/js-vextensions";
 import {pgClient, pgPool} from "./Main.js";
 
 //type ExpressApp = Express.Application;
@@ -28,17 +29,30 @@ passport.use(new GoogleStrategy(
 	},
 	async(accessToken, refreshToken, profile, done)=>{
 		console.log("Test1");
+		const profile_firstEmail = profile.emails?.map(a=>a.value).find(a=>a);
+		if (profile_firstEmail == null) return void done("Account must have associated email-address to sign-in.");
+
 		//await pgPool.query("INSERT INTO users(name, email) VALUES($1, $2) ON CONFLICT (id) DO NOTHING", [profile.id, profile.email]);
+
+		//const existingUser = await GetAsync(()=>GetUsers()));
+		const existingUser_hidden = await GetAsync(()=>GetUserHiddensWithEmail(profile_firstEmail)[0], {errorHandling: "log"});
+		if (existingUser_hidden != null) {
+			console.log("Found existing user for email:", profile_firstEmail);
+			const existingUser = await GetAsync(()=>GetUser(existingUser_hidden.id), {errorHandling: "log"});
+			Assert(existingUser != null, `Could not find user with id matching that of the entry in userHiddens (${existingUser_hidden.id}), which was found based on your provided account's email (${existingUser_hidden.email}).`);
+			return void done(null, existingUser);
+		}
+
 		const user = new User({
 			displayName: profile.displayName,
 			permissionGroups: {basic: true, verified: false, mod: false, admin: false},
 			photoURL: profile.photos?.[0]?.value,
 		});
-		const user_private = new User_Private({
-			email: profile.emails?.map(a=>a.value).find(a=>a),
+		const userHidden = new UserHidden({
+			email: profile_firstEmail,
 			providerData: [profile._json],
 		});
-		const command = new AddUser({user, user_private});
+		const command = new AddUser({user, userHidden});
 		const newID = await command.Run();
 		console.log("AddUser done! NewID:", newID);
 
@@ -79,109 +93,37 @@ export function SetUpAuthHandling(app: ExpressApp) {
 	app.use(passport.initialize());
 	app.use(passport.session());
 
-	app.get("/Test1", async(req, res, next)=>{
+	// for testing commands, as server-side
+	/*app.get("/Test1", async(req, res, next)=>{
 		console.log("Trying to add user... @req.body:", req.body);
 		const user = new User({
 			displayName: "displayName",
 			permissionGroups: {basic: true, verified: false, mod: false, admin: false},
 			photoURL: null,
 		});
-		const user_private = new User_Private({
+		const userHidden = new UserHidden({
 			email: "test@gmail.com",
 			providerData: ["n/a"],
 		});
-		const command = new AddUser({user, user_private});
+		const command = new AddUser({user, userHidden});
 		console.log("Running command...");
 		const result = await command.Run();
 		console.log("Command done! Result:", result);
 		next();
-	});
+	});*/
 
 	// server-side access-token-retrieval approach
 	app.get("/auth/google", passport.authenticate("google", {
 		scope: ["profile", "email"],
 	}));
-	app.get("/auth/google/callback",
-		(req, res, next)=>{
-			console.log("Early got-request. @reqBody:", req.body, req.url);
-
-			// hack fixes
-			/*req.body = req.url;
-			req.headers["content-type"] = "application/x-www-form-urlencoded";
-			//req.headers["content-length"] = `${req.url.length}`;
-			//req.headers["content-length"] = Buffer.byteLength(req.url, "utf8").toString();
-			req.headers["content-length"] = new TextEncoder().encode(req.url).length.toString();
-			//req.headers["content-length"] = "0";*/
-			const url_queryStrPart = new URL(`http://localhost/${req.url}`).search.slice(1); // remove "?" at start
-			console.log("QueryStrPart:", url_queryStrPart);
-			req.body = qs.parse(url_queryStrPart, {
-				allowPrototypes: true,
-				arrayLimit: 100,
-				depth: Infinity,
-				parameterLimit: 1000,
-			});
-
-			/*req.body = JSON.stringify(qs.parse(url_queryStrPart, {
-				allowPrototypes: true,
-				arrayLimit: 100,
-				depth: Infinity,
-				parameterLimit: 1000,
-			}));
-			req.headers["content-type"] = "application/json";
-			req.headers["content-length"] = Buffer.byteLength(req.body, "utf8").toString();*/
-
-			//res.send("Kay...");
-			next();
-		},
-		//express.urlencoded({extended: true}),
-		//express.urlencoded({extended: false}),
-		express.json(),
-		(req, res, next)=>{
-			console.log("Got request. @reqBody:", req.body, req.url);
-			//res.send("Kay...");
-			next();
-		},
+	app.get(
+		"/auth/google/callback",
 		passport.authenticate("google", {
-			//failureRedirect: "/login-failed",
-			//failureMessage: true,
-			failWithError: true, // passes error to client (bad for security; temp)
-			//failureFlash: true,
-		/*}, (err, user, info)=>{
-			console.log("Got:", err, user, info); // this is finally getting called!
-		}*/
+			successRedirect: "http://localhost:3005",
+			failureRedirect: "http://localhost:3005/login-failed",
 		}),
-		(req, res)=>{
-			console.log("Passport authentication complete. @req.user:", req.user);
-			// Successful authentication, redirect home.
-			res.redirect("/good");
-			//res.send("Success.");
-		});
-	/*app.get("/auth/google/callback", (req, res, next)=>{
-		console.log("Got request. @reqBody:", req.body, "@req.url:", req.url, req.baseUrl, req.originalUrl);
-		passport.authenticate("google", (err, user, info)=>{
-			console.log("Got2:", err, user, info);
-
-			//req.logIn(user, )
-
-			console.log("Passport authentication complete. @req.user:", req.user);
-			// Successful authentication, redirect home.
-			res.redirect("http://localhost:3005");
-			//res.send("Success.");
-		})(req, res, next);
-	});*/
-
-	// client-side access-token-retrieval approach
-	/*app.post("/auth/google/callback", (req, res, next)=>{
-		console.log("Got request. @reqBody:", req.body);
-		//res.send("Kay...");
-		/*passport.authenticate("google", {
-			//failureRedirect: "/login-failed",
-			failureFlash: true,
-		}, (err, user, info)=>{
-			console.log("Got1:", err, user, info);
-		})(req, res, next);*#/
-		passport.authorize("google", (err, user, info)=>{
-			console.log("Got2:", err, user, info);
-		})(req, res, next);
-	});*/
+		/*(req, res)=>{
+			res.redirect("/");
+		},*/
+	);
 }
