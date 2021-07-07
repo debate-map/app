@@ -1,6 +1,6 @@
+import {AssertValidate, dbp, GenerateUUID, WrapDBValue, Command} from "web-vcore/nm/mobx-graphlink.js";
+
 import {UserEdit} from "../CommandMacros.js";
-import {AssertValidate, GenerateUUID, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
-import {Command} from "web-vcore/nm/mobx-graphlink.js";
 import {Term} from "../DB/terms/@Term.js";
 
 @UserEdit
@@ -20,7 +20,7 @@ export class AddTerm extends Command<{term: Term}, string> {
 		const {term} = this.payload;
 		const updates = {
 			// 'general/data/.lastTermID': this.termID,
-			[`terms/${this.termID}`]: term,
+			[dbp`terms/${this.termID}`]: term,
 			//[`termNames/${term.name.toLowerCase()}/.${this.termID}`]: WrapDBValue(true, {merge: true}),
 		};
 		return updates;

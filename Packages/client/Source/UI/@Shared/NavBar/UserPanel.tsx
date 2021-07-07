@@ -90,11 +90,17 @@ export class SignInPanel extends BaseComponent<{style?, onSignIn?: ()=>void}, {}
 				<div ref={c=>{
 					if (!c) return;
 					if (g.google == null) WaitXThenRun(100, ()=>this.Update()); // wait until google-id api is loaded
-					InitGoogleIDAPIIfNotYet();
+					EnsureGoogleIDAPIReady();
 
 					const options: GsiButtonConfiguration = {};
-					//g.google.accounts.id.renderButton(c, options, ()=>console.log("Clicked..."));
-					g.google.accounts.id.renderButton(c, options);
+					//g.google.accounts.id.renderButton(c, options);
+					g.google.accounts.id.renderButton(c, options, ()=>{
+						// rather than using client-side retrieval of access-token, use server-side retrieval (it's safer)
+						//window.location.href = `${window.location.origin}/auth/google`;
+						window.location.href = GetDBServerURL("/auth/google");
+						// todo: make client-side retrieval of access-token impossible (so if frontend gets hacked, code can't trick user into providing access-token)
+						// todo: make this sign-in flow not require our main page to redirect (instead use a new-tab or popup-window)
+					});
 				}}/>
 				{/* <SignInButton provider="facebook" text="Sign in with Facebook" mt={10} onSignIn={onSignIn}/>
 				<SignInButton provider="twitter" text="Sign in with Twitter" mt={10} onSignIn={onSignIn}/>
@@ -116,7 +122,7 @@ type GsiButtonConfiguration = {
 	locale?: string; // If set, then the button language is rendered.
 }
 export const googleClientID = process.env.CLIENT_ID; // supplied by NPMPatches.ts
-export function InitGoogleIDAPIIfNotYet() {
+export function EnsureGoogleIDAPIReady() {
 	if (g.google.accounts.id._initCalled) return;
 	g.google.accounts.id.initialize({
       client_id: googleClientID,

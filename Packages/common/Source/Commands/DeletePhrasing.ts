@@ -1,4 +1,4 @@
-import {Command} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {GetNodePhrasing} from "../DB/nodePhrasings.js";
 import {MapNodePhrasing} from "../DB/nodePhrasings/@MapNodePhrasing.js";
@@ -16,7 +16,7 @@ export class DeletePhrasing extends Command<{id: string}, {}> {
 	GetDBUpdates() {
 		const {id} = this.payload;
 		const updates = {
-			[`nodePhrasings/${id}`]: null,
+			[dbp`nodePhrasings/${id}`]: null,
 		};
 		return updates;
 	}

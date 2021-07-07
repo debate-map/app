@@ -1,4 +1,4 @@
-import {AV, Command} from "web-vcore/nm/mobx-graphlink.js";
+import {AV, Command, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {MapNodeTag} from "../DB/nodeTags/@MapNodeTag.js";
 import {GetNodeTag} from "../DB/nodeTags.js";
@@ -16,7 +16,7 @@ export class DeleteNodeTag extends Command<{id: string}, {}> {
 	GetDBUpdates() {
 		const {id} = this.payload;
 		const updates = {
-			[`nodeTags/${id}`]: null,
+			[dbp`nodeTags/${id}`]: null,
 		};
 		return updates;
 	}

@@ -1,6 +1,6 @@
+import {Command, dbp, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+
 import {UserEdit} from "../CommandMacros.js";
-import {Command} from "web-vcore/nm/mobx-graphlink.js";
-import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {Timeline} from "../DB/timelines/@Timeline.js";
 
 @UserEdit
@@ -19,8 +19,8 @@ export class AddTimeline extends Command<{mapID: string, timeline: Timeline}, st
 		const {mapID, timeline} = this.payload;
 		const updates = {
 			// 'general/data/.lastTimelineID': this.timelineID,
-			[`timelines/${this.timelineID}`]: timeline,
-			[`maps/${mapID}/.timelines/.${this.timelineID}`]: true,
+			[dbp`timelines/${this.timelineID}`]: timeline,
+			[dbp`maps/${mapID}/.timelines/.${this.timelineID}`]: true,
 		} as any;
 		return updates;
 	}

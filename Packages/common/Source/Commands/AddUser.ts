@@ -1,4 +1,4 @@
-import {AssertV, AssertValidate, Command, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AssertValidate, Command, dbp, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {User} from "../DB/users/@User.js";
 import {User_Private} from "../DB/users_private/@User_Private.js";
@@ -24,8 +24,8 @@ export class AddUser extends Command<{user: User, user_private: User_Private}, s
 	GetDBUpdates() {
 		const {user, user_private} = this.payload;
 		const updates = {
-			[`users/${this.id}`]: user,
-			[`users_private/${this.id}`]: user_private,
+			[dbp`users/${this.id}`]: user,
+			[dbp`users_private/${this.id}`]: user_private,
 		};
 		return updates;
 	}

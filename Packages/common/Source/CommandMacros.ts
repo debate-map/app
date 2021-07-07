@@ -1,6 +1,6 @@
-import {MergeDBUpdates, GetAsync, GetDoc, Command} from "web-vcore/nm/mobx-graphlink.js";
-import {GetMap} from "./DB/maps.js";
+import {MergeDBUpdates, GetAsync, GetDoc, Command, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {IsString, IsFunction} from "web-vcore/nm/js-vextensions.js";
+import {GetMap} from "./DB/maps.js";
 import {GetUser} from "./DB/users.js";
 
 export function MapEdit(targetClass: Function);
@@ -48,8 +48,8 @@ export function MapEdit(...args) {
 			if (this.map_oldEditCount != null) {
 				const mapID = this.payload[mapIDKey];
 				if (mapID) {
-					newUpdates[`maps/${mapID}/.edits`] = this.map_oldEditCount + 1;
-					newUpdates[`maps/${mapID}/.editedAt`] = Date.now();
+					newUpdates[dbp`maps/${mapID}/.edits`] = this.map_oldEditCount + 1;
+					newUpdates[dbp`maps/${mapID}/.editedAt`] = Date.now();
 				}
 			}
 			return MergeDBUpdates(updates, newUpdates);
@@ -83,8 +83,8 @@ export function UserEdit(targetClass: Function) {
 		const updates = oldGetDBUpdates.apply(this);
 		const newUpdates = {};
 		if (this.user_oldEditCount != null) {
-			newUpdates[`users/${this.userInfo.id}/.edits`] = this.user_oldEditCount + 1;
-			newUpdates[`users/${this.userInfo.id}/.lastEditAt`] = Date.now();
+			newUpdates[dbp`users/${this.userInfo.id}/.edits`] = this.user_oldEditCount + 1;
+			newUpdates[dbp`users/${this.userInfo.id}/.lastEditAt`] = Date.now();
 		}
 		return MergeDBUpdates(updates, newUpdates);
 	};

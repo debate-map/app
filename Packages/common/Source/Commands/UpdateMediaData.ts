@@ -1,5 +1,5 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, AssertV, AssertValidate, Command, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertV, AssertValidate, Command, dbp, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {Media} from "../DB/media/@Media.js";
 import {GetMedia} from "../DB.js";
@@ -36,7 +36,7 @@ export class UpdateMediaData extends Command<{id: string, updates: Partial<Media
 		const {id} = this.payload;
 
 		const updates = {
-			[`medias/${id}`]: this.newData,
+			[dbp`medias/${id}`]: this.newData,
 		} as any;
 		return updates;
 	}

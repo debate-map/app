@@ -8,11 +8,15 @@ import pg from "pg";
 import {makePluginHook, postgraphile} from "postgraphile";
 //import "web-vcore/nm/js-vextensions_ApplyCETypes.ts";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
-import bodyParser from "body-parser";
+import fetch from "node-fetch";
+//import ws from "ws";
+import cookieParser from "cookie-parser";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthenticationPlugin} from "./Mutations/Authentication.js";
 import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
 import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
+import {InitPGLink} from "./Utils/LibIntegrations/PGLink.js";
+import {InitGraphlink} from "./Utils/LibIntegrations/MobXGraphlink.js";
 
 type PoolClient = import("pg").PoolClient;
 const {Pool} = pg;
@@ -24,6 +28,14 @@ program.parse(process.argv);
 export const launchOpts = program.opts();
 export const variant = launchOpts.variant;
 
+if (!globalThis.fetch) {
+	globalThis.fetch = fetch;
+}
+/*if (!globalThis.WebSocket) {
+	const WebSocket = require("ws");
+	globalThis.WebSocket = WebSocket;
+}*/
+
 const app = express();
 
 app.use(cors({
@@ -31,9 +43,11 @@ app.use(cors({
 	origin: "*", // let any origin make calls to our server (that's fine)
 }));
 
+app.use(cookieParser());
 // enable parsing of different request body types 
-//app.use(bodyParser.urlencoded({extended: true})); // application/x-www-form-urlencoded
-app.use(bodyParser.json()); // application/json
+app.use(express.json()); // application/json
+//app.use(express.urlencoded({extended: false})); // application/x-www-form-urlencoded
+app.use(express.urlencoded({extended: true})); // application/x-www-form-urlencoded
 
 const dbURL = process.env.DATABASE_URL || `postgres://${process.env.PGUSER}:${process.env.PGPASSWORD}@localhost:5432/debate-map`;
 const dbPort = process.env.PORT || 3105 as number;
@@ -91,6 +105,10 @@ app.use(
 
 SetUpAuthHandling(app);
 // todo: MS server somehow confirms that the db-schema matches the "latest schema target" at startup (as derived from "Knex/Migrations/...")
+
+// set up libs
+InitPGLink();
+InitGraphlink();
 
 app.listen(dbPort);
 console.log("Server started.");

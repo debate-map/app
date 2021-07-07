@@ -1,10 +1,10 @@
+import {MergeDBUpdates, GetAsync, GetDocs, AssertV, Command, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
 import {UserEdit} from "../CommandMacros.js";
-import {MergeDBUpdates, GetAsync, GetDocs, AssertV, Command} from "web-vcore/nm/mobx-graphlink.js";
 import {UserMapInfoSet} from "../DB/userMapInfo/@UserMapInfo.js";
 import {DeleteNode} from "./DeleteNode.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
-import {CE} from "web-vcore/nm/js-vextensions.js";
 import {IsUserCreatorOrMod} from "../DB/users/$user.js";
 import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
@@ -30,17 +30,17 @@ export class DeleteMap extends Command<{mapID: string}, {}> {
 		let updates = this.sub_deleteNode.GetDBUpdates();
 
 		const newUpdates = {};
-		newUpdates[`maps/${mapID}`] = null;
+		newUpdates[dbp`maps/${mapID}`] = null;
 		/*for (const userMapInfoSet of this.userMapInfoSets) {
 			const userID = userMapInfoSet.id;
 			for (const {key: mapID2, value: userMapInfo} of CE(userMapInfoSet.maps).Pairs()) {
 				if (mapID2 == mapID) {
-					newUpdates[`userMapInfo/${userID}/.${mapID}`] = null;
+					newUpdates[dbp`userMapInfo/${userID}/.${mapID}`] = null;
 				}
 			}
 		}*/
 		// delete entry in mapNodeEditTimes
-		newUpdates[`mapNodeEditTimes/${mapID}`] = null;
+		newUpdates[dbp`mapNodeEditTimes/${mapID}`] = null;
 		updates = MergeDBUpdates(updates, newUpdates);
 
 		return updates;

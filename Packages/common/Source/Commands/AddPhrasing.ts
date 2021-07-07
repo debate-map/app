@@ -1,7 +1,7 @@
-import {UserEdit} from "../CommandMacros.js";
-import {AddSchema, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate, dbp, GenerateUUID, GetAsync, Command} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert} from "web-vcore/nm/js-vextensions.js";
-import {GetAsync, Command} from "web-vcore/nm/mobx-graphlink.js";
+
+import {UserEdit} from "../CommandMacros.js";
 import {MapNodePhrasing} from "../DB/nodePhrasings/@MapNodePhrasing.js";
 import {GetNode} from "../DB/nodes.js";
 
@@ -26,7 +26,7 @@ export class AddPhrasing extends Command<{phrasing: MapNodePhrasing}, string> {
 	GetDBUpdates() {
 		const {phrasing} = this.payload;
 		const updates = {
-			[`nodePhrasings/${this.id}`]: phrasing,
+			[dbp`nodePhrasings/${this.id}`]: phrasing,
 		};
 		return updates;
 	}

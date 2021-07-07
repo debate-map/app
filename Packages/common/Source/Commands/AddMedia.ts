@@ -1,6 +1,6 @@
+import {Command, AssertV, dbp, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+
 import {UserEdit} from "../CommandMacros.js";
-import {Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
-import {AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {HasModPermissions} from "../DB/users/$user.js";
 import {Media} from "../DB/media/@Media.js";
 
@@ -22,7 +22,7 @@ export class AddMedia extends Command<{media: Media}, string> {
 	GetDBUpdates() {
 		const {media} = this.payload;
 		const updates = {
-			[`medias/${this.mediaID}`]: media,
+			[dbp`medias/${this.mediaID}`]: media,
 		};
 		return updates;
 	}

@@ -22,6 +22,7 @@
 		"@types/body-parser": "^1.19.1",
 		"@types/cors": "^2.8.11",
 		"@types/express": "^4.17.12",
+		"@types/express-session": "^1.17.4",
 		"@types/node": "^15.3.0",
 		"body-parser": "^1.19.0",
 		"buffer": "^6.0.3",
@@ -32,10 +33,14 @@
 		"dm_common": "workspace:*",
 		"dotenv": "^10.0.0",
 		"express": "^4.17.1",
+		"express-session": "^1.17.2",
 		"knex": "^0.95.6",
+		"node-fetch": "^2.6.1",
 		"passport": "^0.4.1",
 		"passport-google-oauth20": "^2.0.0",
 		"postgraphile": "^4.11.0",
-		"postgraphile-plugin-connection-filter": "^2.2.1"
+		"postgraphile-plugin-connection-filter": "^2.2.1",
+		"qs": "^6.10.1",
+		"ws": "^7.5.2"
 	}
 }

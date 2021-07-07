@@ -20,7 +20,7 @@ export class UpdateTimelineStepOrder extends Command<{timelineID: string, stepID
 	GetDBUpdates() {
 		const {timelineID} = this.payload;
 		const updates = {
-			[`timelines/${timelineID}/.steps`]: this.timeline_newSteps,
+			[dbp`timelines/${timelineID}/.steps`]: this.timeline_newSteps,
 		} as any;
 		return updates;
 	}

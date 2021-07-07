@@ -1,6 +1,6 @@
 import {Assert, E} from "web-vcore/nm/js-vextensions.js";
-import {MergeDBUpdates, GetAsync, Command, AssertV, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
-import {AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
+import {MergeDBUpdates, GetAsync, Command, AssertV, GenerateUUID, AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
+
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {AddNode} from "./AddNode.js";
 import {MapNode, Polarity} from "../DB/nodes/@MapNode.js";
@@ -32,7 +32,7 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 
 		this.payload.link = link! ?? E(node.type == MapNodeType.argument && {polarity: Polarity.supporting});
 		if (node.type == MapNodeType.argument) {
-			AssertV(this.payload.link.polarity != null, "An argument node must have its polarity specified in its parent-link.")
+			AssertV(this.payload.link.polarity != null, "An argument node must have its polarity specified in its parent-link.");
 		}
 
 		const isAddClaimSub = this.parentCommand instanceof AddArgumentAndClaim && this.parentCommand.sub_addClaim == this;
@@ -54,10 +54,10 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 		const newUpdates = {};
 		// add as child of parent
 		if (!asMapRoot) {
-			/*newUpdates[`nodes/${parentID}/.children/.${this.sub_addNode.nodeID}`] = link;
+			/*newUpdates[dbp`nodes/${parentID}/.children/.${this.sub_addNode.nodeID}`] = link;
 			// if parent node is using manual children-ordering, update that array
 			if (this.parent_oldData?.childrenOrder) {
-				newUpdates[`nodes/${parentID}/.childrenOrder`] = (this.parent_oldData.childrenOrder || []).concat([this.sub_addNode.nodeID]);
+				newUpdates[dbp`nodes/${parentID}/.childrenOrder`] = (this.parent_oldData.childrenOrder || []).concat([this.sub_addNode.nodeID]);
 			}*/
 			const link_final = new NodeChildLink({
 				...link,

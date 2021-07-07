@@ -1,4 +1,4 @@
-import {AssertValidate, Command, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, Command, dbp, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {Share} from "../DB.js";
 import {UserEdit} from "../CommandMacros.js";
 
@@ -18,7 +18,7 @@ I feel this is a suitable balance between:
 */
 
 const avoidStrings = ["pp", "kkk", "xxx"];
-const avoidStrings_regexes_atStart = avoidStrings.map(str=>new RegExp("^" + str));
+const avoidStrings_regexes_atStart = avoidStrings.map(str=>new RegExp(`^${str}`));
 const avoidStrings_regexes_anywhere = avoidStrings.map(str=>new RegExp(str, "g"));
 
 /** Generates a base-50, 10-char id. Designed as a balance between compactness, clash-avoidance, and profanity-avoidance. */
@@ -61,7 +61,7 @@ export class AddShare extends Command<{share: Share}, string> {
 	GetDBUpdates() {
 		const {share} = this.payload;
 		const updates = {
-			[`shares/${this.shareID}`]: share,
+			[dbp`shares/${this.shareID}`]: share,
 		} as any;
 		return updates;
 	}

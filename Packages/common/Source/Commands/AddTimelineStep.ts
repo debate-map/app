@@ -36,9 +36,9 @@ export class AddTimelineStep extends Command<{timelineID: string, step: Timeline
 		const updates = {
 			// add step
 			// 'general/data/.lastTimelineStepID': this.stepID,
-			[`timelineSteps/${this.stepID}`]: step,
+			[dbp`timelineSteps/${this.stepID}`]: step,
 			// add to timeline
-			[`timelines/${timelineID}/.steps`]: this.timeline_newSteps,
+			[dbp`timelines/${timelineID}/.steps`]: this.timeline_newSteps,
 		} as any;
 		return updates;
 	}

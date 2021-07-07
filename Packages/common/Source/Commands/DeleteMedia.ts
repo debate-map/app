@@ -1,5 +1,5 @@
+import {GetAsync, Command, AssertV, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
-import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
 import {Media} from "../DB/media/@Media.js";
 import {GetMedia, IsUserCreatorOrMod} from "../DB.js";
 import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
@@ -16,7 +16,7 @@ export class DeleteMedia extends Command<{id: string}, {}> {
 	GetDBUpdates() {
 		const {id} = this.payload;
 		const updates = {
-			[`medias/${id}`]: null,
+			[dbp`medias/${id}`]: null,
 		};
 		return updates;
 	}
