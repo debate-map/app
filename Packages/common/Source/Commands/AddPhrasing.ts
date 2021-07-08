@@ -23,11 +23,8 @@ export class AddPhrasing extends Command<{phrasing: MapNodePhrasing}, string> {
 
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {phrasing} = this.payload;
-		const updates = {
-			[dbp`nodePhrasings/${this.id}`]: phrasing,
-		};
-		return updates;
+		db.set(dbp`nodePhrasings/${this.id}`, phrasing);
 	}
 }

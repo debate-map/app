@@ -1,5 +1,5 @@
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, AssertValidate, Command, GenerateUUID, MergeDBUpdates, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AssertValidate, Command, GenerateUUID, UUID} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
 import {Map} from "../DB/maps/@Map.js";
@@ -35,12 +35,9 @@ export class AddMap extends Command<{map: Map}, UUID> {
 		this.returnData = this.mapID;
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {map} = this.payload;
-
-		let updates = {};
-		updates[`maps/${this.mapID}`] = map;
-		updates = MergeDBUpdates(updates, this.sub_addNode.GetDBUpdates());
-		return updates;
+		db.set(`maps/${this.mapID}`, map);
+		db.add(this.sub_addNode.GetDBUpdates());
 	}
 }

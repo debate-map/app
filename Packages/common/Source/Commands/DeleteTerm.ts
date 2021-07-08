@@ -13,12 +13,9 @@ export class DeleteTerm extends Command<{termID: string}, {}> {
 		AssertUserCanDelete(this, this.oldData);
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {termID} = this.payload;
-		const updates = {
-			[dbp`terms/${termID}`]: null,
-			//[`termNames/${this.oldData.name.toLowerCase()}/.${termID}`]: WrapDBValue(null, {merge: true}),
-		};
-		return updates;
+		db.set(dbp`terms/${termID}`, null);
+		//db.set(`termNames/${this.oldData.name.toLowerCase()}/.${termID}`, WrapDBValue(null, {merge: true}));
 	}
 }

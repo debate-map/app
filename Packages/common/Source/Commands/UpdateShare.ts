@@ -30,12 +30,8 @@ export class UpdateShare extends Command<{id: string, updates: Partial<MainType>
 		AssertValidate(MTName, this.newData, "New-data invalid");
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {id} = this.payload;
-
-		const updates = {
-			[dbp`shares/${id}`]: this.newData,
-		} as any;
-		return updates;
+		db.set(dbp`shares/${id}`, this.newData);
 	}
 }

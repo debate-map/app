@@ -1,4 +1,4 @@
-import {AddSchema, AssertV, AssertValidate, Command, dbp, MergeDBUpdates, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertV, AssertValidate, Command, dbp, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {GetMaps} from "../DB/maps.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
@@ -76,57 +76,54 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string, withC
 		}
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {nodeID} = this.payload;
-		let updates = {};
 
 		// delete node's own data
-		updates[dbp`nodes/${nodeID}`] = null;
-		// updates[`nodeExtras/${nodeID}`] = null;
-		updates[dbp`nodeRatings/${nodeID}`] = null;
-		updates[dbp`nodeViewers/${nodeID}`] = null;
+		db.set(dbp`nodes/${nodeID}`, null);
+		//db.set(dbp`nodeExtras/${nodeID}`, null);
+		db.set(dbp`nodeRatings/${nodeID}`, null);
+		db.set(dbp`nodeViewers/${nodeID}`, null);
 		/* for (const viewerID of this.viewerIDs_main) {
-			updates[`userViewedNodes/${viewerID}/.${nodeID}}`] = null;
+			db.set(`userViewedNodes/${viewerID}/.${nodeID}}`, null);
 		} */
 
 		// delete links with parents
 		/*for (const {index, key: parentID} of CE(this.oldData.parents || {}).Pairs()) {
-			updates[`nodes/${parentID}/.children/.${nodeID}`] = null;
+			db.set(`nodes/${parentID}/.children/.${nodeID}`, null);
 			// let parent_childrenOrder = this.oldParentID__childrenOrder[parentID];
 			const parent_childrenOrder = this.oldParentChildrenOrders[index];
 			if (parent_childrenOrder) {
-				//updates[`nodes/${parentID}/.childrenOrder`] = CE(CE(parent_childrenOrder).Except(nodeID)).IfEmptyThen(null);
-				updates[`nodes/${parentID}/.childrenOrder`] = CE(parent_childrenOrder).Except(nodeID);
+				//db.set(`nodes/${parentID}/.childrenOrder`, CE(CE(parent_childrenOrder).Except(nodeID)).IfEmptyThen(null));
+				db.set(`nodes/${parentID}/.childrenOrder`, CE(parent_childrenOrder).Except(nodeID));
 			}
 		}*/
 		for (const link of this.links) {
-			updates[dbp`nodeChildLinks/${link.id}`] = null;
+			db.set(dbp`nodeChildLinks/${link.id}`, null);
 		}
 
 		// delete placement in layer
 		/*if (this.oldData.layerPlusAnchorParents) {
 			for (const layerPlusAnchorStr of CE(this.oldData.layerPlusAnchorParents).VKeys()) {
 				const [layerID, anchorNodeID] = layerPlusAnchorStr.split("+");
-				updates[`layers/${layerID}/.nodeSubnodes/.${anchorNodeID}/.${nodeID}`] = null;
+				db.set(`layers/${layerID}/.nodeSubnodes/.${anchorNodeID}/.${nodeID}`, null);
 			}
 		}*/
 
 		// delete revisions
 		for (const revision of this.oldRevisions) {
-			updates[dbp`nodeRevisions/${revision.id}`] = null;
+			db.set(dbp`nodeRevisions/${revision.id}`, null);
 		}
 
 		// delete edit-time entry within each map (if it exists)
 		for (const mapID of this.mapIDs) {
-			updates[dbp`mapNodeEditTimes/${mapID}/.${nodeID}`] = WrapDBValue(null, {merge: true});
+			db.set(dbp`mapNodeEditTimes/${mapID}/.${nodeID}`, WrapDBValue(null, {merge: true}));
 		}
 
 		if (this.sub_deleteContainerArgument) {
-			updates = MergeDBUpdates(updates, this.sub_deleteContainerArgument.GetDBUpdates());
+			db.add(this.sub_deleteContainerArgument.GetDBUpdates());
 		}
 
 		// todo: we also need to delete ourselves from our children's "parents" prop! (for when you can delete nodes with children)
-
-		return updates;
 	}
 }

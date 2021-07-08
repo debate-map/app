@@ -1,14 +1,13 @@
-import {Assert, E} from "web-vcore/nm/js-vextensions.js";
-import {MergeDBUpdates, GetAsync, Command, AssertV, GenerateUUID, AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
-
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {AssertV, AssertValidate, Command, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
-import {AddNode} from "./AddNode.js";
+import {AddArgumentAndClaim} from "../Commands.js";
+import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
+import {GetNode} from "../DB/nodes.js";
 import {MapNode, Polarity} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
-import {GetNode} from "../DB/nodes.js";
-import {AddArgumentAndClaim} from "../Commands.js";
-import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
+import {AddNode} from "./AddNode.js";
 
 type Payload = {mapID: string|n, parentID: string, node: MapNode, revision: MapNodeRevision, link?: Partial<NodeChildLink>, asMapRoot?: boolean};
 
@@ -47,17 +46,16 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 		};
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {parentID, link, asMapRoot} = this.payload;
-		const updates = this.sub_addNode.GetDBUpdates();
+		db.add(this.sub_addNode.GetDBUpdates());
 
-		const newUpdates = {};
 		// add as child of parent
 		if (!asMapRoot) {
-			/*newUpdates[dbp`nodes/${parentID}/.children/.${this.sub_addNode.nodeID}`] = link;
+			/*db.set(dbp`nodes/${parentID}/.children/.${this.sub_addNode.nodeID}`, link);
 			// if parent node is using manual children-ordering, update that array
 			if (this.parent_oldData?.childrenOrder) {
-				newUpdates[dbp`nodes/${parentID}/.childrenOrder`] = (this.parent_oldData.childrenOrder || []).concat([this.sub_addNode.nodeID]);
+				db.set(dbp`nodes/${parentID}/.childrenOrder`, (this.parent_oldData.childrenOrder || []).concat([this.sub_addNode.nodeID]));
 			}*/
 			const link_final = new NodeChildLink({
 				...link,
@@ -67,7 +65,5 @@ export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: 
 				slot: 0, // todo
 			});
 		}
-
-		return MergeDBUpdates(updates, newUpdates);
 	}
 }

@@ -16,13 +16,9 @@ export class AddTerm extends Command<{term: Term}, string> {
 		AssertValidate("Term", term, "Term invalid");
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {term} = this.payload;
-		const updates = {
-			// 'general/data/.lastTermID': this.termID,
-			[dbp`terms/${this.termID}`]: term,
-			//[`termNames/${term.name.toLowerCase()}/.${this.termID}`]: WrapDBValue(true, {merge: true}),
-		};
-		return updates;
+		db.set(dbp`terms/${this.termID}`, term);
+		//db.set(`termNames/${term.name.toLowerCase()}/.${this.termID}`, WrapDBValue(true, {merge: true}));
 	}
 }

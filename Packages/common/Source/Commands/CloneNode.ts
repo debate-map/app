@@ -1,10 +1,6 @@
-import {DEL, E, Clone, CE} from "web-vcore/nm/js-vextensions.js";
-import {MergeDBUpdates, SplitStringBySlash_Cached, GetAsync, Command, AssertV, AV} from "web-vcore/nm/mobx-graphlink.js";
+import {Command} from "web-vcore/nm/mobx-graphlink.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {LinkNode} from "./LinkNode.js";
-import {GetNodeL2, GetNodeForm, GetLinkAtPath} from "../DB/nodes/$node.js";
-import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
-import {MapNode} from "../DB/nodes/@MapNode.js";
 
 export class CloneNode extends Command<{mapID: string, baseNodePath: string, newParentID: string}, {nodeID: string, revisionID: string}> {
 	sub_addNode: AddChildNode;
@@ -70,7 +66,7 @@ export class CloneNode extends Command<{mapID: string, baseNodePath: string, new
 		}*/
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		/*let updates = this.sub_addNode.GetDBUpdates();
 		for (const sub of this.sub_linkChildren) {
 			// updates.Extend(sub.GetDBUpdates());
@@ -86,6 +82,5 @@ export class CloneNode extends Command<{mapID: string, baseNodePath: string, new
 		}
 
 		return updates;*/
-		return {};
 	}
 }

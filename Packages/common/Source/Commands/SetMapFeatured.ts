@@ -14,7 +14,7 @@ export class SetMapFeatured extends Command<{id: string, featured: boolean}, {}>
 		}, this.payload, "Payload invalid");
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {id, featured} = this.payload;
 		return {
 			[dbp`maps/${id}/.featured`]: featured,

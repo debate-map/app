@@ -5,7 +5,7 @@
 			"label": "#1 server.dev",
 			"type": "shell",
 			"command": "yarn start server.dev",
-			"problemMatcher": [],
+			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"
 		},
@@ -37,9 +37,7 @@
 			"label": "## common.tsc (typecheck)",
 			"type": "shell",
 			"command": "yarn start common.tsc",
-			"problemMatcher": [
-				"$tsc-watch"
-			],
+			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"
 		}

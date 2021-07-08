@@ -29,10 +29,8 @@ export class SetUserData_Hidden extends Command<{id: string, updates: Partial<Ma
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {id} = this.payload;
-		const updates = {};
-		updates[`userHiddens/${id}`] = this.newData;
-		return updates;
+		db.set(`userHiddens/${id}`, this.newData);
 	}
 }

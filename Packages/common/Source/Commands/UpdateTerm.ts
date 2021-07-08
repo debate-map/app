@@ -31,16 +31,12 @@ export class UpdateTerm extends Command<{termID: string, updates: Partial<Term>}
 		AssertValidate("Term", this.newData, "New-data invalid");
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {termID} = this.payload;
-
-		const updates = {
-			[dbp`terms/${termID}`]: this.newData,
-		} as any;
+		db.set(dbp`terms/${termID}`, this.newData);
 		/*if (this.newData.name != this.oldData.name) {
-			updates[`termNames/${this.oldData.name.toLowerCase()}/.${termID}`] = WrapDBValue(null, {merge: true});
-			updates[`termNames/${this.newData.name.toLowerCase()}/.${termID}`] = WrapDBValue(true, {merge: true});
+			db.set(`termNames/${this.oldData.name.toLowerCase()}/.${termID}`, WrapDBValue(null, {merge: true}));
+			db.set(`termNames/${this.newData.name.toLowerCase()}/.${termID}`, WrapDBValue(true, {merge: true}));
 		}*/
-		return updates;
 	}
 }

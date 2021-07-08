@@ -1,12 +1,10 @@
-import {MergeDBUpdates, GetAsync, GetDocs, AssertV, Command, dbp} from "web-vcore/nm/mobx-graphlink.js";
-import {CE} from "web-vcore/nm/js-vextensions.js";
+import {Command, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
-import {UserMapInfoSet} from "../DB/userMapInfo/@UserMapInfo.js";
-import {DeleteNode} from "./DeleteNode.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
-import {IsUserCreatorOrMod} from "../DB/users/$user.js";
-import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
+import {UserMapInfoSet} from "../DB/userMapInfo/@UserMapInfo.js";
+import {DeleteNode} from "./DeleteNode.js";
+import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
 export class DeleteMap extends Command<{mapID: string}, {}> {
@@ -25,12 +23,10 @@ export class DeleteMap extends Command<{mapID: string}, {}> {
 		// todo: use parents recursion on l2 nodes to make sure they're all connected to at least one other map root
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {mapID} = this.payload;
-		let updates = this.sub_deleteNode.GetDBUpdates();
-
-		const newUpdates = {};
-		newUpdates[dbp`maps/${mapID}`] = null;
+		db.add(this.sub_deleteNode.GetDBUpdates());
+		db.set(dbp`maps/${mapID}`, null);
 		/*for (const userMapInfoSet of this.userMapInfoSets) {
 			const userID = userMapInfoSet.id;
 			for (const {key: mapID2, value: userMapInfo} of CE(userMapInfoSet.maps).Pairs()) {
@@ -40,9 +36,6 @@ export class DeleteMap extends Command<{mapID: string}, {}> {
 			}
 		}*/
 		// delete entry in mapNodeEditTimes
-		newUpdates[dbp`mapNodeEditTimes/${mapID}`] = null;
-		updates = MergeDBUpdates(updates, newUpdates);
-
-		return updates;
+		db.set(dbp`mapNodeEditTimes/${mapID}`, null);
 	}
 }

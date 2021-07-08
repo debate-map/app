@@ -13,11 +13,8 @@ export class DeleteMedia extends Command<{id: string}, {}> {
 		AssertUserCanDelete(this, this.oldData);
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {id} = this.payload;
-		const updates = {
-			[dbp`medias/${id}`]: null,
-		};
-		return updates;
+		db.set(dbp`medias/${id}`, null);
 	}
 }

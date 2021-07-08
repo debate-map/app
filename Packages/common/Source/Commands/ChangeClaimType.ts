@@ -1,7 +1,7 @@
 import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, AV, Command} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AV, Command, dbp, AddSchema, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
-import {AddSchema, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+
 import {AttachmentType, GetAttachmentType} from "../DB/nodeRevisions/@AttachmentType.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
@@ -63,12 +63,9 @@ export class ChangeClaimType extends Command<{mapID?: string|n, nodeID: string, 
 		AssertValidate("MapNodeRevision", this.newRevisionID, "New revision-data invalid");*/
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {nodeID} = this.payload;
-		const updates = {};
-		updates[`nodes/${nodeID}`] = this.newData;
-		// updates['general/data/.lastNodeRevisionID'] = this.newRevisionID;
-		updates[`nodeRevisions/${this.newRevisionID}`] = this.newRevision;
-		return updates;
+		db.set(dbp`nodes/${nodeID}`, this.newData);
+		db.set(dbp`nodeRevisions/${this.newRevisionID}`, this.newRevision);
 	}
 }

@@ -1,6 +1,6 @@
 import {Assert, AwaitTree, SleepAsync, E, IsObject} from "web-vcore/nm/js-vextensions.js";
 import {dbVersion} from "Main";
-import {ConvertDataToValidDBUpdates, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached, ApplyDBUpdates} from "web-vcore/nm/mobx-graphlink.js";
+import {ConvertDataToValidDBUpdates, GetAsync, GetDoc, GetDocs, SplitStringBySlash_Cached} from "web-vcore/nm/mobx-graphlink.js";
 import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
@@ -26,7 +26,7 @@ export class AdminUI extends BaseComponentPlus({} as {}, {dbUpgrade_entryIndexes
 
 	render() {
 		const {dbUpgrade_entryIndexes, dbUpgrade_entryCounts} = this.state;
-		let isAdmin = HasAdminPermissions(MeID());
+		const isAdmin = HasAdminPermissions(MeID());
 		// also check previous version for admin-rights (so we can increment db-version without losing our rights to complete the db-upgrade!)
 		/*if (!isAdmin && MeID() != null) {
 			isAdmin = GetDoc({inLinkRoot: false}, (a: any)=>(a.versions.get(`v${dbVersion - 1}-${DB_SHORT}`) as GraphDBShape).users.get(MeID())?.permissionGroups.admin) ?? false;

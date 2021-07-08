@@ -32,10 +32,8 @@ export class UpdateTimelineStep extends Command<{stepID: string, stepUpdates: Pa
 		AssertValidate("TimelineStep", this.newData, "New timeline-step-data invalid");
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {stepID} = this.payload;
-		const updates = {};
-		updates[`timelineSteps/${stepID}`] = this.newData;
-		return updates;
+		db.set(`timelineSteps/${stepID}`, this.newData);
 	}
 }*/

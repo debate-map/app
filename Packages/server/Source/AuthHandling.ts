@@ -55,7 +55,7 @@ passport.use(new GoogleStrategy(
 		const newID = await command.Run();
 		console.log("AddUser done! NewID:", newID);
 
-		if (true) return void done(null, {id: newID}); // temp (till AddUser actually adds a user that can be retrieved in next step)
+		//if (true) return void done(null, {id: newID}); // temp (till AddUser actually adds a user that can be retrieved in next step)
 
 		const result = await GetAsync(()=>GetUser(newID), {errorHandling: "log"});
 		console.log("User result:", result);
@@ -71,7 +71,7 @@ passport.deserializeUser(async(id: string, done)=>{
 	if (rows.length == 0) done(`Cannot find user with id "${id}".`);*/
 	console.log("Test2");
 
-	if (true) return void done(null, {id}); // temp (till AddUser actually adds a user that can be retrieved in next step)
+	//if (true) return void done(null, {id}); // temp (till AddUser actually adds a user that can be retrieved in next step)
 
 	const user = await GetAsync(()=>GetUser(id));
 	if (user == null) done(`Cannot find user with id "${id}".`);

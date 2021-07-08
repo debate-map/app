@@ -58,11 +58,8 @@ export class AddShare extends Command<{share: Share}, string> {
 		AssertValidate("Share", share, "Share invalid");
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {share} = this.payload;
-		const updates = {
-			[dbp`shares/${this.shareID}`]: share,
-		} as any;
-		return updates;
+		db.set(dbp`shares/${this.shareID}`, share);
 	}
 }

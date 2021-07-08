@@ -32,12 +32,8 @@ export class UpdateMediaData extends Command<{id: string, updates: Partial<Media
 		AssertValidate(MTName, this.newData, "New-data invalid");
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {id} = this.payload;
-
-		const updates = {
-			[dbp`medias/${id}`]: this.newData,
-		} as any;
-		return updates;
+		db.set(dbp`medias/${id}`, this.newData);
 	}
 }

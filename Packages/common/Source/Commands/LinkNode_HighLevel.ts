@@ -1,21 +1,19 @@
-import {E, OmitIfFalsy, CE, ObjectCE, Assert} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, Command, MergeDBUpdates, AV, NNV} from "web-vcore/nm/mobx-graphlink.js";
+import {E, ObjectCE} from "web-vcore/nm/js-vextensions.js";
+import {AssertV, Command, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
+import {GetMap} from "../DB/maps.js";
+import {Map} from "../DB/maps/@Map.js";
+import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
+import {GetHolderType, GetNode, GetParentNodeID, GetParentNodeL3} from "../DB/nodes.js";
+import {GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
+import {ClaimForm, MapNode, Polarity} from "../DB/nodes/@MapNode.js";
+import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
+import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
+import {SearchUpFromNodeForNodeMatchingX} from "../Utils/DB/PathFinder.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {DeleteNode} from "./DeleteNode.js";
 import {LinkNode} from "./LinkNode.js";
 import {UnlinkNode} from "./UnlinkNode.js";
-import {UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {ClaimForm, Polarity, MapNode} from "../DB/nodes/@MapNode.js";
-import {GetNodeL3, GetNodeL2, IsPremiseOfMultiPremiseArgument, IsSinglePremiseArgument} from "../DB/nodes/$node.js";
-import {GetParentNodeL3, GetHolderType, GetParentNodeID, GetNode} from "../DB/nodes.js";
-import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
-import {GetMap} from "../DB/maps.js";
-import {MeID} from "../DB/users.js";
-import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
-import {Map} from "../DB/maps/@Map.js";
-import {SearchUpFromNodeForNodeMatchingX} from "../Utils/DB/PathFinder.js";
-import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
-import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 
 type Payload = {
 	mapID: string|n, oldParentID: string|n, newParentID: string, nodeID: string,
@@ -71,7 +69,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		this.newParent_data = GetNodeL2.BIN(newParentID);
 
 		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
-		let pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && createWrapperArg;
+		const pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && createWrapperArg;
 		AssertV(oldParentID !== newParentID || pastingPremiseAsRelevanceArg, "Old-parent-id and new-parent-id cannot be the same! (unless changing between truth-arg and relevance-arg)");
 		//AssertV(CanContributeToNode(MeID(), newParentID), "Cannot paste under a node with contributions disabled.");
 
@@ -129,12 +127,10 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		}
 	}
 
-	GetDBUpdates() {
-		let updates = {};
-		if (this.sub_unlinkFromOldParent) updates = MergeDBUpdates(updates, this.sub_unlinkFromOldParent.GetDBUpdates());
-		if (this.sub_deleteOldParent) updates = MergeDBUpdates(updates, this.sub_deleteOldParent.GetDBUpdates());
-		if (this.sub_addArgumentWrapper) updates = MergeDBUpdates(updates, this.sub_addArgumentWrapper.GetDBUpdates());
-		updates = MergeDBUpdates(updates, this.sub_linkToNewParent.GetDBUpdates());
-		return updates;
+	DeclareDBUpdates(db) {
+		if (this.sub_unlinkFromOldParent) db.add(this.sub_unlinkFromOldParent.GetDBUpdates());
+		if (this.sub_deleteOldParent) db.add(this.sub_deleteOldParent.GetDBUpdates());
+		if (this.sub_addArgumentWrapper) db.add(this.sub_addArgumentWrapper.GetDBUpdates());
+		db.add(this.sub_linkToNewParent.GetDBUpdates());
 	}
 }

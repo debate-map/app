@@ -31,15 +31,11 @@ export class AddTimelineStep extends Command<{timelineID: string, step: Timeline
 		AssertValidate("TimelineStep", step, "TimelineStep invalid");
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {timelineID, step} = this.payload;
-		const updates = {
-			// add step
-			// 'general/data/.lastTimelineStepID': this.stepID,
-			[dbp`timelineSteps/${this.stepID}`]: step,
-			// add to timeline
-			[dbp`timelines/${timelineID}/.steps`]: this.timeline_newSteps,
-		} as any;
-		return updates;
+		// add step
+		db.set(dbp`timelineSteps/${this.stepID}`, step);
+		// add to timeline
+		db.set(dbp`timelines/${timelineID}/.steps`, this.timeline_newSteps);
 	}
 }*/

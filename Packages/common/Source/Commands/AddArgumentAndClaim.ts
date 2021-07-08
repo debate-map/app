@@ -1,10 +1,8 @@
-import {MapEdit, UserEdit} from "../CommandMacros.js";
-import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
-import {MergeDBUpdates, Command} from "web-vcore/nm/mobx-graphlink.js";
-import {AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNode} from "../DB/nodes/@MapNode.js";
-import {AddChildNode} from "./AddChildNode.js";
+import {AssertValidate, Command} from "web-vcore/nm/mobx-graphlink.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
+import {MapNode} from "../DB/nodes/@MapNode.js";
+import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
+import {AddChildNode} from "./AddChildNode.js";
 
 type Payload = {
 	mapID: string|n,
@@ -47,10 +45,14 @@ export class AddArgumentAndClaim extends Command<Payload, {argumentNodeID: strin
 		};
 	}
 
-	GetDBUpdates() {
-		let updates = {};
-		updates = MergeDBUpdates(updates, this.sub_addArgument.GetDBUpdates());
-		updates = MergeDBUpdates(updates, this.sub_addClaim.GetDBUpdates());
+	/*GetDBUpdates(db) {
+		const updates = [] as DBUpdate[];
+		updates.push(...this.sub_addArgument.GetDBUpdates());
+		updates.push(...this.sub_addClaim.GetDBUpdates());
 		return updates;
+	}*/
+	DeclareDBUpdates(db) {
+		db.add(this.sub_addArgument.GetDBUpdates());
+		db.add(this.sub_addClaim.GetDBUpdates());
 	}
 }

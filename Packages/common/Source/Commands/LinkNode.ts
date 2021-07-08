@@ -1,7 +1,7 @@
-import {MapEdit} from "../CommandMacros.js";
 import {Assert, E, CE} from "web-vcore/nm/js-vextensions.js";
 import {GetAsync, Command, AssertV, dbp} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
+import {MapEdit, UserEdit} from "../CommandMacros.js";
+
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
 import {ClaimForm, Polarity, MapNode} from "../DB/nodes/@MapNode.js";
 import {GetNode} from "../DB/nodes.js";
@@ -41,21 +41,18 @@ export class LinkNode extends Command<{mapID: string|n, parentID: string, childI
 		}*/
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {parentID, childID, childForm, childPolarity} = this.payload;
-
-		const updates = {};
 		// add parent as parent-of-child
-		updates[dbp`nodes/${childID}/.parents/.${parentID}`] = {_: true};
+		db.set(dbp`nodes/${childID}/.parents/.${parentID}`, {_: true});
 		// add child as child-of-parent
-		updates[dbp`nodes/${parentID}/.children/.${childID}`] = E(
+		db.set(dbp`nodes/${parentID}/.children/.${childID}`, E(
 			{_: true},
 			childForm && {form: childForm},
 			childPolarity && {polarity: childPolarity},
-		);
+		));
 		/*if (this.parent_oldData?.childrenOrder) {
-			updates[dbp`nodes/${parentID}/.childrenOrder`] = this.parent_oldData.childrenOrder.concat([childID]);
+			db.set(dbp`nodes/${parentID}/.childrenOrder`, this.parent_oldData.childrenOrder.concat([childID]));
 		}*/
-		return updates;
 	}
 }

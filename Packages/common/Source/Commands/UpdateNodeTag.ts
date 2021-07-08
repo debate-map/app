@@ -1,10 +1,10 @@
-import {AssertV, Command, AV} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, Command, AV, AddSchema, AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
 import {UserEdit} from "../CommandMacros.js";
-import {AddSchema, AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
+
 import {MapNodeTag, TagComp_keys} from "../DB/nodeTags/@MapNodeTag.js";
 import {GetNodeTag} from "../DB/nodeTags.js";
 import {IsUserCreatorOrMod} from "../DB/users/$user.js";
-import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 type MainType = MapNodeTag;
@@ -36,10 +36,8 @@ export class UpdateNodeTag extends Command<{id: string, updates: Partial<MainTyp
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {id} = this.payload;
-		const updates = {};
-		updates[`nodeTags/${id}`] = this.newData;
-		return updates;
+		db.set(`nodeTags/${id}`, this.newData);
 	}
 }

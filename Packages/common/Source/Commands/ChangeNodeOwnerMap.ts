@@ -1,4 +1,4 @@
-import {AddSchema, Command, dbp, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, Command, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
 
@@ -61,14 +61,11 @@ export class ChangeNodeOwnerMap extends Command<{nodeID: string, newOwnerMapID: 
 		}*/
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {nodeID} = this.payload;
-		let result = {
-			[dbp`nodes/${nodeID}`]: this.newData,
-		};
+		db.set(dbp`nodes/${nodeID}`, this.newData);
 		if (this.sub_changeOwnerMapForArgument) {
-			result = MergeDBUpdates(result, this.sub_changeOwnerMapForArgument.GetDBUpdates());
+			db.add(this.sub_changeOwnerMapForArgument.GetDBUpdates());
 		}
-		return result;
 	}
 }

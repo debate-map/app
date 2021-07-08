@@ -13,11 +13,8 @@ export class DeleteNodeTag extends Command<{id: string}, {}> {
 		AssertUserCanDelete(this, this.oldData);
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {id} = this.payload;
-		const updates = {
-			[dbp`nodeTags/${id}`]: null,
-		};
-		return updates;
+		db.set(dbp`nodeTags/${id}`, null);
 	}
 }

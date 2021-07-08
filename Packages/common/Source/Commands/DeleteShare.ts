@@ -13,11 +13,8 @@ export class DeleteShare extends Command<{id: string}, {}> {
 		AssertUserCanDelete(this, this.oldData);
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {id} = this.payload;
-		const updates = {
-			[dbp`shares/${id}`]: null,
-		};
-		return updates;
+		db.set(dbp`shares/${id}`, null);
 	}
 }

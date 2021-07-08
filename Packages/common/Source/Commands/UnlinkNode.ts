@@ -1,9 +1,9 @@
 import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {GetNode, IsRootNode} from "../DB/nodes.js";
 import {GetNodeL2} from "../DB/nodes/$node.js";
 import {IsUserCreatorOrMod} from "../DB/users/$user.js";
-import {CE} from "web-vcore/nm/js-vextensions.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 
@@ -35,16 +35,13 @@ export class UnlinkNode extends Command<{mapID: string|n, parentID: string, chil
 		//AssertV(!IsNodeSubnode(oldData), `${baseText}it's a subnode. Try deleting it instead.`);
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {parentID, childID} = this.payload;
-
-		const updates = {};
-		updates[`nodes/${childID}/.parents/.${parentID}`] = null;
-		updates[`nodes/${parentID}/.children/.${childID}`] = null;
+		db.set(`nodes/${childID}/.parents/.${parentID}`, null);
+		db.set(`nodes/${parentID}/.children/.${childID}`, null);
 		if (this.parentToChildLinks.length) {
-			//updates[`nodes/${parentID}/.childrenOrder`] = CE(CE(this.parent_oldChildrenOrder).Except(childID)).IfEmptyThen(null);
-			updates[`nodeChildLinks/${this.parentToChildLinks[0].id}`] = null;
+			//db.set(`nodes/${parentID}/.childrenOrder`, CE(CE(this.parent_oldChildrenOrder).Except(childID)).IfEmptyThen(null));
+			db.set(`nodeChildLinks/${this.parentToChildLinks[0].id}`, null);
 		}
-		return updates;
 	}
 }

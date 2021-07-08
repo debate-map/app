@@ -16,11 +16,9 @@ export class DeleteTimeline extends Command<{timelineID: string}, {}> {
 		}
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {timelineID} = this.payload;
-		const updates = {};
-		updates[`timelines/${timelineID}`] = null;
-		updates[`maps/${this.oldData.mapID}/.timelines/.${timelineID}`] = null;
-		return updates;
+		db.set(`timelines/${timelineID}`, null);
+		db.set(`maps/${this.oldData.mapID}/.timelines/.${timelineID}`, null);
 	}
 }*/

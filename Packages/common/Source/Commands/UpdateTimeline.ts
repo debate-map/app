@@ -32,10 +32,8 @@ export class UpdateTimeline extends Command<{id: string, updates: Partial<MainTy
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {id} = this.payload;
-		const updates = {};
-		updates[`timelines/${id}`] = this.newData;
-		return updates;
+		db.set(`timelines/${id}`, this.newData);
 	}
 }*/

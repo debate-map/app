@@ -1,8 +1,6 @@
-import {Command, MergeDBUpdates, AssertV, AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
-import {CE} from "web-vcore/nm/js-vextensions.js";
-import {DeleteNode} from "../DeleteNode.js";
-import {GetNode} from "../../DB/nodes.js";
+import {Command} from "web-vcore/nm/mobx-graphlink.js";
 import {MapNode} from "../../DB/nodes/@MapNode.js";
+import {DeleteNode} from "../DeleteNode.js";
 
 /*
 ==========
@@ -59,11 +57,9 @@ export class DeleteNodeSubtree extends Command<{nodeID: string, maxDeletes: numb
 		});*/
 	}
 
-	GetDBUpdates() {
-		let updates = {};
+	DeclareDBUpdates(db) {
 		for (const deleteNodeCommand of this.subs_deleteNodes) {
-			updates = MergeDBUpdates(updates, deleteNodeCommand.GetDBUpdates());
+			db.add(deleteNodeCommand.GetDBUpdates());
 		}
-		return updates;
 	}
 }

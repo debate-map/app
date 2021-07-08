@@ -4,8 +4,7 @@
 		{
 			"label": "#1 tsc",
 			"type": "shell",
-			"command": "../../node_modules/.bin/tsc",
-			"args": ["--build", "--watch"],
+			"command": "yarn start client.tsc",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"

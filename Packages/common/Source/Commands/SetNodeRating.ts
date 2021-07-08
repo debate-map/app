@@ -33,14 +33,12 @@ export class SetNodeRating extends Command<{nodeID: string, ratingType: Exclude<
 		}
 	}
 
-	GetDBUpdates() {
-		const updates = {};
+	DeclareDBUpdates(db) {
 		if (this.oldRating) {
-			updates[`nodeRatings/${this.oldRating.id}`] = null;
+			db.set(`nodeRatings/${this.oldRating.id}`, null);
 		}
 		if (this.newRating) {
-			updates[`nodeRatings/${this.newID}`] = this.newRating;
+			db.set(`nodeRatings/${this.newID}`, this.newRating);
 		}
-		return updates;
 	}
 }

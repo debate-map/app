@@ -1,11 +1,11 @@
 import {ExposeModuleExports, Log} from "web-vcore";
+import {WRR} from "web-vcore/node_modules/webpack-runtime-require";
 import {InitWVC} from "./WVC.js";
 import {InitReactJS} from "./ReactJS.js";
 import {InitSentry} from "./Sentry.js";
 import {InitReactVComponents} from "./ReactVComponents.js";
 import {InitGraphlink} from "./MobXGraphlink.js";
-import {InitPGLink} from "./PGLink.js";
-import {WRR} from "web-vcore/node_modules/webpack-runtime-require";
+import {InitApollo} from "./Apollo.js";
 
 // helpers for exposing things (making them easier to access in console/dev-tools)
 function ExposeGlobals() {
@@ -39,7 +39,7 @@ function ExposeModuleExports_Final() {
 }*/
 
 export function InitLibs() {
-	InitPGLink();
+	InitApollo();
 	//InitFirebase();
 	InitWVC();
 	InitGraphlink(); // init this early, so we can use mobx-graphlink's DBPath() for the later modules (eg. graphql-feedback)

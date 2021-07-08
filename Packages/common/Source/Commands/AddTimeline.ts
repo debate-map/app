@@ -15,13 +15,9 @@ export class AddTimeline extends Command<{mapID: string, timeline: Timeline}, st
 		AssertValidate("Timeline", timeline, "Timeline invalid");
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {mapID, timeline} = this.payload;
-		const updates = {
-			// 'general/data/.lastTimelineID': this.timelineID,
-			[dbp`timelines/${this.timelineID}`]: timeline,
-			[dbp`maps/${mapID}/.timelines/.${this.timelineID}`]: true,
-		} as any;
-		return updates;
+		db.set(dbp`timelines/${this.timelineID}`, timeline);
+		db.set(dbp`maps/${mapID}/.timelines/.${this.timelineID}`, true);
 	}
 }

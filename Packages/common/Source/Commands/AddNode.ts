@@ -1,8 +1,7 @@
-import {AssertV, AssertValidate, AssertValidate_Full, Command, GenerateUUID, GetSchemaJSON, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AssertValidate, AssertValidate_Full, Command, GenerateUUID, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {AddNodeRevision} from "./AddNodeRevision.js";
-import {CE} from "web-vcore/nm/js-vextensions.js";
 
 /** Do not use this from client-side code. This is only to be used internally, by higher-level commands -- usually AddChildNode. */
 export class AddNode extends Command<{mapID: string|n, node: MapNode, revision: MapNodeRevision}, {}> {
@@ -32,20 +31,17 @@ export class AddNode extends Command<{mapID: string|n, node: MapNode, revision: 
 		}
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {node} = this.payload;
 
-		let updates = {};
 		// add node
-		updates[`nodes/${this.nodeID}`] = node;
+		db.set(`nodes/${this.nodeID}`, node);
 
 		// add as parent of (pre-existing) children
 		/*for (const childID of CE(node.children || {}).VKeys()) {
-			updates[`nodes/${childID}/.parents/.${this.nodeID}`] = {_: true};
+			db.set(`nodes/${childID}/.parents/.${this.nodeID}`, {_: true});
 		}*/
 
-		updates = MergeDBUpdates(updates, this.sub_addRevision.GetDBUpdates());
-
-		return updates;
+		db.add(this.sub_addRevision.GetDBUpdates());
 	}
 }

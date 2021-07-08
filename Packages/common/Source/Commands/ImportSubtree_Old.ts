@@ -1,16 +1,4 @@
-import {AssertV, Command, MergeDBUpdates,AssertValidate, Validate} from "web-vcore/nm/mobx-graphlink.js";
-
-import {FromJSON, GetTreeNodesInObjTree, Clone, CE, DEL} from "web-vcore/nm/js-vextensions.js";
-import {AddChildNode} from "./AddChildNode.js";
-import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
-import {LinkNode} from "./LinkNode.js";
-import {SetNodeRating} from "./SetNodeRating.js";
-import {HasAdminPermissions} from "../DB/users/$user.js";
-import {AsNodeL1} from "../DB/nodes/$node.js";
-import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
-import {Source} from "../DB/nodeRevisions/@SourceChain.js";
-import {NodeRatingType} from "../DB/nodeRatings/@NodeRatingType.js";
-import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
+import {Clone, GetTreeNodesInObjTree} from "web-vcore/nm/js-vextensions.js";
 
 // for export from old site (see commented code in MI_ExportSubtree.tsx)
 /*export class ImportSubtree_Old extends Command<{
@@ -107,15 +95,13 @@ import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 	}
 	nodeRatingsToAdd = [] as (Rating & {nodeID: string, ratingType: RatingType, userID: string})[];
 
-	GetDBUpdates() {
-		let updates = {};
+	DeclareDBUpdates(db) {
 		for (const sub of this.subs) {
-			updates = MergeDBUpdates(updates, sub.GetDBUpdates());
+			db.add(sub.GetDBUpdates());
 		}
 		for (let ratingEnhanced of this.nodeRatingsToAdd) {
-			updates[`nodeRatings/${ratingEnhanced.nodeID}/${ratingEnhanced.ratingType}/${ratingEnhanced.userID}`] = ratingEnhanced.Excluding("nodeID", "ratingType", "userID");
+			db.set(`nodeRatings/${ratingEnhanced.nodeID}/${ratingEnhanced.ratingType}/${ratingEnhanced.userID}`, ratingEnhanced.Excluding("nodeID", "ratingType", "userID"));
 		}
-		return updates;
 	}
 }*/
 

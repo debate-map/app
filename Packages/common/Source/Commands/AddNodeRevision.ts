@@ -45,15 +45,12 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 		AssertValidate("MapNodeRevision", revision, "Revision invalid");
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {mapID, revision} = this.payload;
-
-		const updates = {};
-		// updates['general/data/.lastNodeRevisionID'] = this.revisionID;
-		updates[`nodes/${revision.node}/.currentRevision`] = this.revisionID;
-		updates[`nodeRevisions/${this.revisionID}`] = revision;
-		// updates[`maps/${mapID}/nodeEditTimes/data/.${revision.node}`] = revision.createdAt;
-		updates[`mapNodeEditTimes/${mapID}/.${revision.node}`] = WrapDBValue(revision.createdAt, {merge: true});
-		return updates;
+		//db.set('general/data/.lastNodeRevisionID', this.revisionID);
+		db.set(`nodes/${revision.node}/.currentRevision`, this.revisionID);
+		db.set(`nodeRevisions/${this.revisionID}`, revision);
+		//db.set(`maps/${mapID}/nodeEditTimes/data/.${revision.node}`, revision.createdAt);
+		db.set(`mapNodeEditTimes/${mapID}/.${revision.node}`, WrapDBValue(revision.createdAt, {merge: true}));
 	}
 }

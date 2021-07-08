@@ -19,11 +19,8 @@ export class AddMedia extends Command<{media: Media}, string> {
 		AssertValidate("Media", media, "Media invalid");
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {media} = this.payload;
-		const updates = {
-			[dbp`medias/${this.mediaID}`]: media,
-		};
-		return updates;
+		db.set(dbp`medias/${this.mediaID}`, media);
 	}
 }

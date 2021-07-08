@@ -1,11 +1,10 @@
+import {Clone} from "web-vcore/nm/js-vextensions.js";
+import {AssertValidate, Command} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
-import {AddSchema, AssertValidate} from "web-vcore/nm/mobx-graphlink.js";
-import {GetAsync, Command, AssertV, MergeDBUpdates} from "web-vcore/nm/mobx-graphlink.js";
-import {Clone, CE} from "web-vcore/nm/js-vextensions.js";
-import {AddNodeRevision} from "./AddNodeRevision.js";
-import {MapNodeL2, MapNode} from "../DB/nodes/@MapNode.js";
-import {GetNodeL2, AsNodeL1, GetNodeL3, GetNodeDisplayText, GetNodeForm} from "../DB/nodes/$node.js";
 import {GetNodeChildren} from "../DB/nodes.js";
+import {AsNodeL1, GetNodeDisplayText, GetNodeForm, GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
+import {MapNode, MapNodeL2} from "../DB/nodes/@MapNode.js";
+import {AddNodeRevision} from "./AddNodeRevision.js";
 
 @MapEdit
 @UserEdit
@@ -31,7 +30,7 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 			//this.newNodeData.childrenOrderType = ChildOrderType.Manual;
 			//this.newNodeData.childrenOrder = CE(this.oldNodeData.children).VKeys();
 
-			if (this.oldNodeData.current.titles.base?.length ?? 0 == 0) {
+			if ((this.oldNodeData.current.titles.base?.length ?? 0) == 0) {
 				const newRevision = Clone(this.oldNodeData.current);
 
 				const children = GetNodeChildren(this.oldNodeData.id);
@@ -51,13 +50,11 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 		AssertValidate("MapNode", this.newNodeData, "New node-data invalid");
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {nodeID} = this.payload;
-		let updates = {};
-		updates[`nodes/${nodeID}`] = this.newNodeData;
+		db.set(`nodes/${nodeID}`, this.newNodeData);
 		if (this.sub_addRevision) {
-			updates = MergeDBUpdates(updates, this.sub_addRevision.GetDBUpdates());
+			db.add(this.sub_addRevision.GetDBUpdates());
 		}
-		return updates;
 	}
 }

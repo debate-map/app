@@ -1,10 +1,10 @@
-import {MapEdit} from "../CommandMacros.js";
-import {AddSchema, AssertValidate, Schema, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink.js";
-import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
-import {UserEdit} from "../CommandMacros.js";
+import {AddSchema, AssertValidate, Schema, GetSchemaJSON, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
+import {MapEdit, UserEdit} from "../CommandMacros.js";
+
+
 import {Map} from "../DB/maps/@Map.js";
 import {GetMap} from "../DB/maps.js";
-import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 type MainType = Map;
@@ -36,10 +36,8 @@ export class UpdateMapDetails extends Command<{id: string, updates: Partial<Main
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {id} = this.payload;
-		const updates = {};
-		updates[`maps/${id}`] = this.newData;
-		return updates;
+		db.set(`maps/${id}`, this.newData);
 	}
 }

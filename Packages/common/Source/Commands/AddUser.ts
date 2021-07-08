@@ -21,12 +21,9 @@ export class AddUser extends Command<{user: User, userHidden: UserHidden}, strin
 		this.returnData = this.id;
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {user, userHidden} = this.payload;
-		const updates = {
-			[dbp`users/${this.id}`]: user,
-			[dbp`userHiddens/${this.id}`]: userHidden,
-		};
-		return updates;
+		db.set(dbp`users/${this.id}`, user);
+		db.set(dbp`userHiddens/${this.id}`, userHidden);
 	}
 }

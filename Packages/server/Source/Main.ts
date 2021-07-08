@@ -14,8 +14,8 @@ import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthenticationPlugin} from "./Mutations/Authentication.js";
 import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
 import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
-import {InitPGLink} from "./Utils/LibIntegrations/PGLink.js";
-import {InitGraphlink} from "./Utils/LibIntegrations/MobXGraphlink.js";
+import {InitApollo} from "./Utils/LibIntegrations/Apollo.js";
+import {graph, InitGraphlink} from "./Utils/LibIntegrations/MobXGraphlink.js";
 
 type PoolClient = import("pg").PoolClient;
 const {Pool} = pg;
@@ -62,6 +62,7 @@ export var pgClient: PoolClient;
 pgPool.on("connect", client=>{
 	if (pgClient != null) console.warn("pgClient recreated...");
 	pgClient = client;
+	graph.subs.pgClient = pgClient;
 });
 app.use(
 	postgraphile(
@@ -92,6 +93,7 @@ app.use(
 			enableCors: true, // cors flag temporary; enables mutations, from any origin
 			showErrorStack: true,
 			extendedErrors: ["hint", "detail", "errcode"], // to show error text in console (doesn't seem to be working)
+			disableDefaultMutations: true, // we use custom mutations for everything, letting us use TypeScript+MobXGraphlink for all validations
 		},
 	),
 );
@@ -100,7 +102,7 @@ SetUpAuthHandling(app);
 // todo: MS server somehow confirms that the db-schema matches the "latest schema target" at startup (as derived from "Knex/Migrations/...")
 
 // set up libs
-InitPGLink();
+InitApollo();
 InitGraphlink();
 
 app.listen(dbPort);

@@ -1,8 +1,8 @@
 import {ApolloClient, ApolloLink, from, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
-import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
+import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep.js";
 
-// @ts-ignore // temp fix for import error
-import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep_cjs.js";
+
+import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
 
 const GRAPHQL_URL = "http://localhost:3105/graphql";
 
@@ -10,9 +10,9 @@ let httpLink: HttpLink;
 let wsLink: WebSocketLink;
 let link: ApolloLink;
 let link_withErrorHandling: ApolloLink;
-export let pgClient: ApolloClient<NormalizedCacheObject>;
+export let apolloClient: ApolloClient<NormalizedCacheObject>;
 
-export function InitPGLink() {
+export function InitApollo() {
 	httpLink = new HttpLink({
 		uri: GRAPHQL_URL,
 	});
@@ -49,7 +49,8 @@ export function InitPGLink() {
 		}),
 		link,
 	]);
-	pgClient = new ApolloClient({
+	apolloClient = new ApolloClient({
+		//link,
 		link: link_withErrorHandling,
 		cache: new InMemoryCache({
 			//dataIdFromObject: a=>a.nodeId as string ?? null,

@@ -13,11 +13,8 @@ export class DeletePhrasing extends Command<{id: string}, {}> {
 		AssertUserCanDelete(this, this.oldData);
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {id} = this.payload;
-		const updates = {
-			[dbp`nodePhrasings/${id}`]: null,
-		};
-		return updates;
+		db.set(dbp`nodePhrasings/${id}`, null);
 	}
 }

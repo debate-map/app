@@ -18,11 +18,9 @@ export class DeleteTimelineStep extends Command<{stepID: string}, {}> {
 		this.timeline_oldSteps = timeline.steps;
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {stepID} = this.payload;
-		const updates = {};
-		updates[`timelines/${this.oldData.timelineID}/.steps`] = CE(this.timeline_oldSteps).Except(stepID);
-		updates[`timelineSteps/${stepID}`] = null;
-		return updates;
+		db.set(`timelines/${this.oldData.timelineID}/.steps`, CE(this.timeline_oldSteps).Except(stepID));
+		db.set(`timelineSteps/${stepID}`, null);
 	}
 }*/

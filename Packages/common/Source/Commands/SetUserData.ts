@@ -1,8 +1,8 @@
-import {AddSchema, AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
-import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate, GetSchemaJSON, Schema, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+
+import {CE} from "web-vcore/nm/js-vextensions.js";
 import {GetUser} from "../DB/users.js";
 import {User} from "../DB/users/@User.js";
-import {CE} from "web-vcore/nm/js-vextensions.js";
 
 type MainType = User;
 const MTName = "User";
@@ -41,10 +41,8 @@ export class SetUserData extends Command<{id: string, updates: Partial<MainType>
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {id} = this.payload;
-		const updates = {};
-		updates[`users/${id}`] = this.newData;
-		return updates;
+		db.set(`users/${id}`, this.newData);
 	}
 }

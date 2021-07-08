@@ -1,5 +1,5 @@
-import {MergeDBUpdates, GetAsync, GetDoc, Command, dbp} from "web-vcore/nm/mobx-graphlink.js";
-import {IsString, IsFunction} from "web-vcore/nm/js-vextensions.js";
+import {GetAsync, GetDoc, Command, dbp, DeclareDBUpdates_Helper} from "web-vcore/nm/mobx-graphlink.js";
+import {IsString, IsFunction, Assert} from "web-vcore/nm/js-vextensions.js";
 import {GetMap} from "./DB/maps.js";
 import {GetUser} from "./DB/users.js";
 
@@ -14,78 +14,51 @@ export function MapEdit(...args) {
 		return ApplyToClass;
 	}
 
-	function ApplyToClass(targetClass: Function) {
-		/* if (targetClass.prototype instanceof Command_Old) {
-			const oldPrepare = targetClass.prototype.Prepare;
-			targetClass.prototype.Prepare = async function () {
-				await oldPrepare.apply(this);
-				const mapID = this.payload[mapIDKey];
-				if (mapID) {
-					this.map_oldEditCount = (await GetAsync(() => GetMap(mapID)))?.edits ?? 0;
+	function ApplyToClass(targetClass: typeof Command) {
+		const Validate_old = targetClass.prototype.Validate;
+		targetClass.prototype.Validate = function() {
+			const result = Validate_old.apply(this);
+			const mapID = this.payload[mapIDKey];
+			if (mapID) {
+				const map = GetMap(mapID);
+				if (map != null) {
+					this.map_oldEditCount = map.edits ?? 0;
 				}
-			};
-		} */
+			}
+			return result;
+		};
 
-		if (targetClass.prototype instanceof Command) {
-			const oldValidate = targetClass.prototype.Validate;
-			targetClass.prototype.Validate = function() {
-				const result = oldValidate.apply(this);
-				const mapID = this.payload[mapIDKey];
-				if (mapID) {
-					const map = GetMap(mapID);
-					if (map != null) {
-						this.map_oldEditCount = map.edits ?? 0;
-					}
-				}
-				return result;
-			};
-		}
-
-		const oldGetDBUpdates = targetClass.prototype.GetDBUpdates;
-		targetClass.prototype.GetDBUpdates = function() {
-			const updates = oldGetDBUpdates.apply(this);
-			const newUpdates = {};
+		const DeclareDBUpdates_old = targetClass.prototype.DeclareDBUpdates;
+		targetClass.prototype.DeclareDBUpdates = function(db) {
+			DeclareDBUpdates_old.call(this, db);
 			if (this.map_oldEditCount != null) {
 				const mapID = this.payload[mapIDKey];
 				if (mapID) {
-					newUpdates[dbp`maps/${mapID}/.edits`] = this.map_oldEditCount + 1;
-					newUpdates[dbp`maps/${mapID}/.editedAt`] = Date.now();
+					db.set(dbp`maps/${mapID}/.edits`, this.map_oldEditCount + 1);
+					db.set(dbp`maps/${mapID}/.editedAt`, Date.now());
 				}
 			}
-			return MergeDBUpdates(updates, newUpdates);
 		};
 	}
 }
 
-export function UserEdit(targetClass: Function) {
-	/* if (targetClass.prototype instanceof Command_Old) {
-		const oldPrepare = targetClass.prototype.Prepare;
-		targetClass.prototype.Prepare = async function () {
-			await oldPrepare.apply(this);
-			this.user_oldEditCount = (await GetAsync(() => GetUserExtraInfo(this.userInfo.id)))?.edits ?? 0;
-		};
-	} */
-
-	if (targetClass.prototype instanceof Command) {
-		const oldValidate = targetClass.prototype.Validate;
-		targetClass.prototype.Validate = function() {
-			const result = oldValidate.apply(this);
-			const user = GetUser(this.userInfo.id);
-			if (user) {
-				this.user_oldEditCount = user.edits ?? 0;
-			}
-			return result;
-		};
-	}
-
-	const oldGetDBUpdates = targetClass.prototype.GetDBUpdates;
-	targetClass.prototype.GetDBUpdates = function() {
-		const updates = oldGetDBUpdates.apply(this);
-		const newUpdates = {};
-		if (this.user_oldEditCount != null) {
-			newUpdates[dbp`users/${this.userInfo.id}/.edits`] = this.user_oldEditCount + 1;
-			newUpdates[dbp`users/${this.userInfo.id}/.lastEditAt`] = Date.now();
+export function UserEdit(targetClass: typeof Command) {
+	const Validate_old = targetClass.prototype.Validate;
+	targetClass.prototype.Validate = function() {
+		const result = Validate_old.apply(this);
+		const user = GetUser(this.userInfo.id);
+		if (user) {
+			this.user_oldEditCount = user.edits ?? 0;
 		}
-		return MergeDBUpdates(updates, newUpdates);
+		return result;
+	};
+
+	const DeclareDBUpdates_old = targetClass.prototype.DeclareDBUpdates;
+	targetClass.prototype.DeclareDBUpdates = function(db) {
+		DeclareDBUpdates_old.call(this, db);
+		if (this.user_oldEditCount != null) {
+			db.set(dbp`users/${this.userInfo.id}/.edits`, this.user_oldEditCount + 1);
+			db.set(dbp`users/${this.userInfo.id}/.lastEditAt`, Date.now());
+		}
 	};
 }

@@ -35,6 +35,7 @@ function GetServeCommand(nodeEnv = null) {
 }
 Object.assign(scripts, {
 	client: {
+		tsc: `cd Packages/client && ${paths.normalize("../../node_modules/.bin/tsc")} --build --watch`,
 		dev: {
 			//default: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true NODE_OPTIONS="--max-old-space-size=${memLimit} --experimental-modules" "npm start dev-part2"`,
 			default: GetServeCommand("development"),
@@ -49,8 +50,8 @@ Object.assign(scripts, {
 			withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=${memLimit}" "ts-node-dev --project Scripts/tsconfig.json --ignore none Scripts/Bin/Server"`,
 		},
 		cypress: {
-			open: "cypress open",
-			run: "cypress run",
+			open: "cd Packages/client && cypress open",
+			run: "cd Packages/client && cypress run",
 		},
 		clean: "cd Packages/client && shx rm -rf Dist",
 		compile: TSScript("client", "Scripts/Bin/Compile"),
@@ -75,8 +76,9 @@ Object.assign(scripts, {
 	},
 	common: {
 		// helps for spotting typescript errors in the "Packages/common" (client.dev script can work too, but it's nice to have one just for errors in "common")
+		// (not really useful anymore; just use server.dev instead)
 		//tsc: "cd Packages/common && tsc --noEmit",
-		tsc: "tsc --noEmit --project Packages/common/tsconfig.json",
+		tsc: "tsc --noEmit --project Packages/common/tsconfig.json", // must do this way, else tsc output has "../common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
 	},
 	server: {
 		// setup
@@ -93,7 +95,8 @@ Object.assign(scripts, {
 
 		// first terminal
 		//dev: "cd Packages/server && snowpack build --watch",
-		dev: "cd Packages/server && tsc --watch",
+		//dev: "cd Packages/server && tsc --build --watch",
+		dev: "tsc --build --watch Packages/server/tsconfig.json", // must do this way, else tsc output has "../common" paths, which "$tsc-watch" problem-matcher resolves relative to repo-root
 
 		// second terminal
 		run: GetStartServerCommand(),

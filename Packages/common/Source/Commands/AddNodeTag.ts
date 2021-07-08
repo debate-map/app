@@ -27,11 +27,8 @@ export class AddNodeTag extends Command<{tag: MapNodeTag}, string> {
 		this.returnData = this.id;
 	}
 
-	GetDBUpdates() {
+	DeclareDBUpdates(db) {
 		const {tag} = this.payload;
-		const updates = {
-			[dbp`nodeTags/${this.id}`]: tag,
-		};
-		return updates;
+		db.set(dbp`nodeTags/${this.id}`, tag);
 	}
 }
