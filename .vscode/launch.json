@@ -2,7 +2,7 @@
 	"version": "0.2.0",
 	"configurations": [
 	  {
-		 "name": "Example",
+		 "name": "server.run (debug)",
 		 "type": "node",
 		 "request": "launch",
 		 "runtimeExecutable": "node",
@@ -12,8 +12,8 @@
 			 "--loader", "ts-node/esm.mjs", "--experimental-specifier-resolution=node" // from package-scripts.json
 			],
  
-		 //"args": ["Source\\Main.ts"],
-		 "args": ["Dist\\Main.js"], // this also works, though apparently causes "catch exceptions" options to miss more cases
+		 "args": ["Source\\Main.ts"],
+		 //"args": ["Dist\\Main.js"], // this works, but means breakpoints set in .ts files aren't hit
 		 
 		 "cwd": "${workspaceFolder}\\Packages\\server",
 		 "internalConsoleOptions": "openOnSessionStart",

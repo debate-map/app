@@ -10,16 +10,17 @@ import {MapNodeRevision} from "./DB/nodes/@MapNodeRevision.js";
 import {MapNodeTag} from "./DB/nodeTags/@MapNodeTag.js";
 import {Share} from "./DB/shares/@Share.js";
 import {Term} from "./DB/terms/@Term.js";
-import {User} from "./DB/users/@User.js";
+import {User} from "./DB/users/@User.js"; // eslint-disable-line
 import {UserHidden} from "./DB/userHiddens/@UserHidden.js"; // eslint-disable-line
 import {VisibilityDirective} from "./DB/visibilityDirectives/@VisibilityDirective.js";
 
-// manually import these, since otherwise they're never runtime-imported
-//require("./DB/userHiddens/@UserHidden.js");
-import "./DB/userHiddens/@UserHidden.js"; // eslint-disable-line
-
 declare module "mobx-graphlink/Dist/UserTypes" {
 	interface DBShape extends GraphDBShape {}
+}
+
+// helper, to avoid need to ensure each type is runtime-imported as well (needed for their schemas to be registered)
+function DefineCollection<T>(typeConstructor: new(..._)=>T): Collection<T> {
+	return undefined as any;
 }
 
 export class GraphDBShape {
@@ -28,29 +29,30 @@ export class GraphDBShape {
 		// feedback: FeedbackDBShape;
 	}>;*/
 
-	accessPolicies: Collection<AccessPolicy>;
-	visibilityDirectives: Collection<VisibilityDirective>;
-	medias: Collection<Media>;
-	maps: Collection<Map>;
-	mapNodeEdits: Collection<Map_NodeEdit>;
-	nodes: Collection<MapNode>;
-	//nodeExtras: Collection<any>;
-	nodeRatings: Collection<NodeRating>;
-	nodeRevisions: Collection<MapNodeRevision>;
-	//nodeStats: Collection<MapNodeStats>;
-	//nodeViewers: Collection<ViewerSet>; // removed due to privacy concerns
-	//nodePhrasings: Collection<MapNodePhrasing>;
-	nodeChildLinks: Collection<NodeChildLink>;
-	nodeTags: Collection<MapNodeTag>;
-	shares: Collection<Share>;
-	terms: Collection<Term>;
-	//termNames: Collection<any>;
-	/*timelines: Collection<Timeline>;
-	timelineSteps: Collection<TimelineStep>;*/
-	users: Collection<User>;
-	userHiddens: Collection<UserHidden>;
-	//userMapInfo: Collection<UserMapInfoSet>; // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
-	//userViewedNodes: Collection<ViewedNodeSet>; // removed due to privacy concerns
+	//accessPolicies: Collection<AccessPolicy>;
+	accessPolicies = DefineCollection(AccessPolicy);
+	visibilityDirectives = DefineCollection(VisibilityDirective);
+	medias = DefineCollection(Media);
+	maps = DefineCollection(Map);
+	mapNodeEdits = DefineCollection(Map_NodeEdit);
+	nodes = DefineCollection(MapNode);
+	//nodeExtras = DefineCollection(any);
+	nodeRatings = DefineCollection(NodeRating);
+	nodeRevisions = DefineCollection(MapNodeRevision);
+	//nodeStats = DefineCollection(MapNodeStats);
+	//nodeViewers = DefineCollection(ViewerSet); // removed due to privacy concerns
+	//nodePhrasings = DefineCollection(MapNodePhrasing);
+	nodeChildLinks = DefineCollection(NodeChildLink);
+	nodeTags = DefineCollection(MapNodeTag);
+	shares = DefineCollection(Share);
+	terms = DefineCollection(Term);
+	//termNames = DefineCollection(any);
+	/*timelines = DefineCollection(Timeline);
+	timelineSteps = DefineCollection(TimelineStep);*/
+	users = DefineCollection(User);
+	userHiddens = DefineCollection(UserHidden);
+	//userMapInfo = DefineCollection(UserMapInfoSet); // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
+	//userViewedNodes = DefineCollection(ViewedNodeSet); // removed due to privacy concerns
 }
 
 /* export interface FirebaseDBShape {
