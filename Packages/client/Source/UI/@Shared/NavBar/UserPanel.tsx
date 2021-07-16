@@ -1,10 +1,9 @@
 import {E, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
-import {IsAuthValid} from "web-vcore/nm/mobx-graphlink.js";
 import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, BasicStyles, SimpleShouldUpdate} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {HandleError, Link, Observer} from "web-vcore";
-import {MeID} from "dm_common";
+import {Me, MeID} from "dm_common";
 import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
 import {Assert} from "../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE";
 
@@ -16,7 +15,9 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 		// const auth = State((a) => a.firebase.auth);
 		// account: helpers.pathToJS(state.firebase, "profile")
 
-		if (!IsAuthValid(graph.userInfo)) {
+		const user = Me();
+		//if (graph.userInfo?.id == null) {
+		if (user == null) {
 			return (
 				<Column style={{padding: 10, background: "rgba(0,0,0,.7)", borderRadius: "0 0 0 5px"}}>
 					<Div mt={-3} mb={5}>Takes under 30 seconds.</Div>
@@ -24,12 +25,13 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 				</Column>
 			);
 		}
-		Assert(graph.userInfo);
+		Assert(graph.userInfo?.id != null);
 
 		return (
 			<Column style={{padding: 5, background: "rgba(0,0,0,.7)", borderRadius: "0 0 0 5px"}}>
 				<Column sel>
-					<div>Name: {graph.userInfo.displayName}</div>
+					{/*<div>Name: {graph.userInfo.displayName}</div>*/}
+					<div>Name: {Me()?.displayName ?? "n/a"}</div>
 					<div>ID: {MeID()}</div>
 				</Column>
 				{/* DEV &&
@@ -44,7 +46,8 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 						<Button text="Edit profile" style={{width: 100}}/>
 					</Link>
 					<Button ml={5} text="Sign out" style={{width: 100}} onClick={()=>{
-						graph.LogOut();
+						//graph.LogOut();
+						// todo
 					}}/>
 				</Row>
 			</Column>

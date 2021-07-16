@@ -22,6 +22,7 @@ export function InitGraphlink() {
 		knexModule: Knex,
 		//pgClient, // rather than set it here, update the field each time pgClient is recreated (ie. in pgPool's "connect" handler) 
 	});
-	graph.userInfo = {id: systemUserID, displayName: systemUserName};
+	//graph.userInfo = {id: systemUserID, displayName: systemUserName};
+	graph.userInfo = {id: systemUserID};
 	ProvideReactModule(React);
 }

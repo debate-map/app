@@ -62,35 +62,51 @@ passport.use(new GoogleStrategy(
 		done(null, result!);
 	},
 ));
-passport.serializeUser((user, done)=>{
-	console.log("Test1.5");
-	done(null, user["id"]);
+type UserBasicInfo = {id: string, displayName: string, photoURL: string|n};
+passport.serializeUser((user: User, done)=>{
+	//console.log("Test1.5:"); //, JSON.stringify(user));
+	const basicInfo: UserBasicInfo = {id: user["id"], displayName: user["displayName"], photoURL: user["photoURL"]}; // todo: maybe serialize just the user-id, like before
+	done(null, basicInfo);
 });
-passport.deserializeUser(async(id: string, done)=>{
+passport.deserializeUser(async(userBasicInfo: UserBasicInfo, done)=>{
 	/*const {rows} = await pgClient.query("select * from users where id = $1", []);
 	if (rows.length == 0) done(`Cannot find user with id "${id}".`);*/
-	console.log("Test2");
+	//console.log("Test2:", JSON.stringify(userBasicInfo));
 
 	//if (true) return void done(null, {id}); // temp (till AddUser actually adds a user that can be retrieved in next step)
 
-	const user = await GetAsync(()=>GetUser(id));
-	if (user == null) done(`Cannot find user with id "${id}".`);
+	const user = await GetAsync(()=>GetUser(userBasicInfo.id));
+	if (user == null) done(`Cannot find user with id "${userBasicInfo.id}".`);
 	done(null, user);
 });
 
 export function SetUpAuthHandling(app: ExpressApp) {
 	//app.use(express.session({ secret: 'keyboard cat' }));
-	/*app.use(cookieSession({
+	app.use(cookieSession({
 		name: "debate-map-session",
-		keys: ["test1"],
-	}));*/
-	app.use(expressSession({
+		keys: ["key1", "key2"],
+	}));
+	/*app.use(expressSession({
 		secret: "debate-map-session-123123",
 		resave: false,
 		saveUninitialized: false,
-	}));
+	}));*/
 	app.use(passport.initialize());
 	app.use(passport.session());
+
+	// add middleware that sends the current user-id (as known through passportjs) to the frontend
+	app.use((req, res, next)=>{
+		var userIDCookie = req.cookies["debate-map-userid"];
+		// if user doesn't have the user-id cookie set, or it's out of date, send the new user-id cookie value
+		if (userIDCookie == null || userIDCookie != req.user?.["id"]) {
+			res.cookie("debate-map-userid", req.user?.["id"], {
+				//maxAge: new Date(2147483647 * 1000).toUTCString(),
+				expires: new Date(253402300000000), // from: https://stackoverflow.com/a/28289961/2441655
+				httpOnly: false, // httpOnly:false, so frontend code can access it
+			});
+		}
+		next();
+	});
 
 	// for testing commands, as server-side
 	/*app.get("/Test1", async(req, res, next)=>{

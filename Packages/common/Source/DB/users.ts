@@ -1,5 +1,15 @@
 import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {GetCookie} from "web-vcore";
+import {systemUserID} from "../DB_Constants.js";
 import {User} from "./users/@User.js";
+
+export function DMCommon_InServer() {
+	return typeof global != "undefined";
+}
+export function DMCommon_InFrontend() {
+	//return typeof window != "undefined";
+	return !DMCommon_InServer();
+}
 
 /*export function GetAuth(state: RootState) {
 	return state.firebase.auth;
@@ -13,7 +23,9 @@ export const MeID = CreateAccessor(c=>(): string|n=>{
 	return firebaseSet.toJS().auth.uid; */
 	// return State(a=>a.firebase.auth) ? State(a=>a.firebase.auth.uid) : null;
 	//return IsAuthValid(GetAuth()) ? GetAuth().id : null;
-	return null;
+	/*if (DMCommon_InServer()) return systemUserID;
+	return GetCookie("debate-map-userid"); // set by dm_server's AuthHandling.ts*/
+	return c.graph.userInfo?.id;
 });
 export const Me = CreateAccessor(c=>()=>{
 	const id = MeID();
