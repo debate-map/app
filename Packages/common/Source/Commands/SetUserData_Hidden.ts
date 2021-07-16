@@ -1,4 +1,4 @@
-import {Command, AssertV, AssertValidate, GetSchemaJSON, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, AssertV, AssertValidate, GetSchemaJSON, NewSchema, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {UserHidden} from "../DB/userHiddens/@UserHidden.js";
 import {GetUserHidden} from "../DB/userHiddens.js";
@@ -31,6 +31,6 @@ export class SetUserData_Hidden extends Command<{id: string, updates: Partial<Ma
 
 	DeclareDBUpdates(db) {
 		const {id} = this.payload;
-		db.set(`userHiddens/${id}`, this.newData);
+		db.set(dbp`userHiddens/${id}`, this.newData);
 	}
 }
