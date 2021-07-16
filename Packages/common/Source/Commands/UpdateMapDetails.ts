@@ -1,4 +1,4 @@
-import {AddSchema, AssertValidate, Schema, GetSchemaJSON, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate, NewSchema, GetSchemaJSON, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 
@@ -12,8 +12,8 @@ const MTName = "Map";
 
 AddSchema(`Update${MTName}Details_payload`, [MTName], ()=>({
 	properties: {
-		id: {type: "string"},
-		updates: Schema({
+		id: {$ref: "UUID"},
+		updates: NewSchema({
 			properties: CE(GetSchemaJSON(MTName).properties).Including("name", "note", "noteInline", "visibility", "defaultExpandDepth", "defaultTimelineID", "requireMapEditorsCanEdit", "nodeDefaults", "editorIDs"),
 		}),
 	},

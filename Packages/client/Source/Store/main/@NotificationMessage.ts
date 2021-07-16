@@ -21,7 +21,7 @@ export function AddNotificationMessage(message: string) {
 		try {
 			store.main.notificationMessages.push(new NotificationMessage(message));
 		} catch (ex) {
-			g.alertCount_notifications = (g.alertCount_notifications | 0) + 1;
+			g.alertCount_notifications = (g.alertCount_notifications ?? 0) + 1;
 			if (g.alertCount_notifications <= 2) {
 				alert(message);
 			} else {

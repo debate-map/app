@@ -1,5 +1,4 @@
-import {AddSchema, AssertValidate, GetSchemaJSON, Schema, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
-
+import {AddSchema, AssertValidate, GetSchemaJSON, NewSchema, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {GetUser} from "../DB/users.js";
 import {User} from "../DB/users/@User.js";
@@ -14,8 +13,8 @@ export class SetUserData extends Command<{id: string, updates: Partial<MainType>
 	Validate() {
 		AssertValidate({
 			properties: {
-				id: {type: "string"},
-				updates: Schema({
+				id: {$ref: "UUID"},
+				updates: NewSchema({
 					properties: CE(GetSchemaJSON(MTName)["properties"]).Including(
 						"displayName", "photoURL",
 						"joinDate", "permissionGroups",

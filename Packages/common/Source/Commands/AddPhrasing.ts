@@ -7,11 +7,10 @@ import {GetNode} from "../DB/nodes.js";
 
 @UserEdit
 export class AddPhrasing extends Command<{phrasing: MapNodePhrasing}, string> {
-	id: string;
 	Validate() {
 		const {phrasing} = this.payload;
 
-		this.id = this.id ?? GenerateUUID();
+		phrasing.id = phrasing.id ?? GenerateUUID();
 		phrasing.creator = this.userInfo.id;
 		phrasing.createdAt = Date.now();
 		AssertValidate("MapNodePhrasing", phrasing, "MapNodePhrasing invalid");
@@ -19,12 +18,12 @@ export class AddPhrasing extends Command<{phrasing: MapNodePhrasing}, string> {
 		const node = GetNode(phrasing.node);
 		Assert(node, `Node with id ${phrasing.node} does not exist.`);
 
-		this.returnData = this.id;
+		this.returnData = phrasing.id;
 
 	}
 
 	DeclareDBUpdates(db) {
 		const {phrasing} = this.payload;
-		db.set(dbp`nodePhrasings/${this.id}`, phrasing);
+		db.set(dbp`nodePhrasings/${phrasing.id}`, phrasing);
 	}
 }

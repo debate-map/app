@@ -1,7 +1,6 @@
-import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, MGLClass, DB, Field, GetSchemaJSON, Schema, UUID_regex} from "web-vcore/nm/mobx-graphlink.js";
-import {ObservableMap} from "web-vcore/nm/mobx.js";
-import {MapNodeRevision_Defaultable, MapNodeRevision_Defaultable_props, MapNodeRevision_Defaultable_DefaultsForMap} from "../nodes/@MapNodeRevision.js";
+import {CE} from "web-vcore/nm/js-vextensions.js";
+import {DB, Field, GetSchemaJSON, MGLClass, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {MapNodeRevision_Defaultable, MapNodeRevision_Defaultable_DefaultsForMap, MapNodeRevision_Defaultable_props} from "../nodes/@MapNodeRevision.js";
 
 /*export enum MapType {
 	private = "private",
@@ -24,23 +23,23 @@ export class Map {
 		}
 	}
 
-	@DB((t,n)=>t.text(n).primary())
+	@DB((t, n)=>t.text(n).primary())
 	@Field({type: "string"})
 	id: string;
-	
-	@DB((t,n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
+
+	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	accessPolicy: string;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string", pattern: Map_namePattern}, {req: true})
 	name: string;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	note?: string;
 
-	@DB((t,n)=>t.boolean(n))
+	@DB((t, n)=>t.boolean(n))
 	@Field({type: "boolean"})
 	noteInline? = true;
 
@@ -48,11 +47,11 @@ export class Map {
 	@Field({oneOf: GetValues_ForSchema(MapType)}, {req: true})
 	type: MapType;*/
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
+	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
 	@Field({type: "string"})
 	rootNode: string;
 
-	@DB((t,n)=>t.integer(n))
+	@DB((t, n)=>t.integer(n))
 	@Field({type: "number"})
 	defaultExpandDepth = 2;
 
@@ -64,34 +63,34 @@ export class Map {
 	@Field({type: "boolean"})
 	requireMapEditorsCanEdit?: boolean;*/
 
-	@DB((t,n)=>t.jsonb(n))
-	@Field(()=>Schema({
+	@DB((t, n)=>t.jsonb(n))
+	@Field(()=>NewSchema({
 		properties: CE(GetSchemaJSON("MapNodeRevision").properties).Including(...MapNodeRevision_Defaultable_props),
 	}))
 	nodeDefaults?: MapNodeRevision_Defaultable;
 
-	@DB((t,n)=>t.boolean(n))
+	@DB((t, n)=>t.boolean(n))
 	@Field({type: "boolean"})
 	featured?: boolean;
 
-	@DB((t,n)=>t.specificType(n, "text[]").notNullable())
+	@DB((t, n)=>t.specificType(n, "text[]").notNullable())
 	//@Field({patternProperties: {[UUID_regex]: {type: "boolean"}}})
 	@Field({items: {type: "string"}}, {req: true})
 	editors: string[];
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
+	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	creator: string;
 
-	@DB((t,n)=>t.bigInteger(n))
+	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"}, {req: true})
 	createdAt: number;
 
-	@DB((t,n)=>t.integer(n))
+	@DB((t, n)=>t.integer(n))
 	@Field({type: "number"})
 	edits: number;
 
-	@DB((t,n)=>t.bigInteger(n))
+	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"})
 	editedAt: number;
 

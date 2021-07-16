@@ -8,13 +8,12 @@ import {GetNode} from "../DB/nodes.js";
 
 @UserEdit
 export class AddNodeTag extends Command<{tag: MapNodeTag}, string> {
-	id: string;
 	Validate() {
 		AssertV(HasModPermissions(this.userInfo.id), "Only moderators can add tags currently.");
 
 		const {tag} = this.payload;
 
-		this.id = this.id ?? GenerateUUID();
+		tag.id = tag.id ?? GenerateUUID();
 		tag.creator = this.userInfo.id;
 		tag.createdAt = Date.now();
 		AssertValidate("MapNodeTag", tag, "MapNodeTag invalid");
@@ -24,11 +23,11 @@ export class AddNodeTag extends Command<{tag: MapNodeTag}, string> {
 			AssertV(node, `Node with id ${nodeID} does not exist.`);
 		}
 
-		this.returnData = this.id;
+		this.returnData = tag.id;
 	}
 
 	DeclareDBUpdates(db) {
 		const {tag} = this.payload;
-		db.set(dbp`nodeTags/${this.id}`, tag);
+		db.set(dbp`nodeTags/${tag.id}`, tag);
 	}
 }

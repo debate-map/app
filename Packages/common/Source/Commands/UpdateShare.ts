@@ -1,5 +1,5 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, AssertV, AssertValidate, Command, dbp, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertV, AssertValidate, Command, dbp, GetSchemaJSON, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {Media} from "../DB/media/@Media.js";
 import {GetMedia, Share, GetShare} from "../DB.js";
@@ -15,8 +15,8 @@ export class UpdateShare extends Command<{id: string, updates: Partial<MainType>
 	Validate() {
 		AssertValidate({
 			properties: {
-				id: {type: "string"},
-				updates: Schema({
+				id: {$ref: "UUID"},
+				updates: NewSchema({
 					properties: CE(GetSchemaJSON(MTName).properties).Including("name", "mapID", "mapView"),
 				}),
 			},

@@ -19,7 +19,7 @@ export class TimelineStep {
 }
 AddSchema("TimelineStep", {
 	properties: {
-		id: {type: "string"},
+		id: {$ref: "UUID"},
 		timelineID: {type: "string"},
 		title: {type: "string"},
 		groupID: {type: ["number", "null"]},

@@ -6,7 +6,7 @@ export class MapNodePhrasing {
 		CE(this).VSet(initialData);
 	}
 
-	_key?: string;
+	id: string;
 	creator: string;
 	createdAt: number;
 
@@ -18,6 +18,7 @@ export class MapNodePhrasing {
 }
 AddSchema("MapNodePhrasing", {
 	properties: {
+		id: {$ref: "UUID"},
 		creator: {type: "string"},
 		createdAt: {type: "number"},
 

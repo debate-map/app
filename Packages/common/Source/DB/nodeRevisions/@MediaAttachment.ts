@@ -1,6 +1,6 @@
 import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {SourceChain, Source} from "./@SourceChain.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
+import {SourceChain, Source} from "./@SourceChain.js";
 
 export class MediaAttachment {
 	constructor(initialData?: Partial<MediaAttachment>) {
@@ -17,7 +17,7 @@ export class MediaAttachment {
 }
 AddSchema("MediaAttachment", {
 	properties: {
-		id: {type: "string"},
+		id: {$ref: "UUID"},
 		captured: {type: "boolean"},
 		previewWidth: {type: ["number", "null"]},
 		sourceChains: {items: {$ref: "SourceChain"}},

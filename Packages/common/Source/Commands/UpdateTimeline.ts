@@ -10,7 +10,7 @@ const MTName = "Timeline";
 
 AddSchema(`Update${MTName}_payload`, [MTName], ()=>({
 	properties: {
-		id: {type: "string"},
+		id: {$ref: "UUID"},
 		updates: Schema({
 			properties: CE(GetSchemaJSON(MTName).properties).Including("name", "videoID", "videoStartTime", "videoHeightVSWidthPercent"),
 		}),

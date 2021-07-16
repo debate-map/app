@@ -1,4 +1,4 @@
-import {AddSchema, GetSchemaJSON, Schema, AssertValidate, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, GetSchemaJSON, NewSchema, AssertValidate, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {UserEdit} from "../CommandMacros.js";
 
@@ -11,8 +11,8 @@ const MTName = "MapNodePhrasing";
 
 AddSchema(`Update${MTName}_payload`, [MTName], ()=>({
 	properties: {
-		id: {type: "string"},
-		updates: Schema({
+		id: {$ref: "UUID"},
+		updates: NewSchema({
 			properties: CE(GetSchemaJSON(MTName).properties).Including("type", "text", "description"),
 			//minProperties: 1,
 		}),

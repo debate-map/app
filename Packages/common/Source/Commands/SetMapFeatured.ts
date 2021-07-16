@@ -7,7 +7,7 @@ export class SetMapFeatured extends Command<{id: string, featured: boolean}, {}>
 		AssertV(HasModPermissions(this.userInfo.id), "Only mods can set whether a map is featured.");
 		AssertValidate({
 			properties: {
-				id: {type: "string"},
+				id: {$ref: "UUID"},
 				featured: {type: "boolean"},
 			},
 			required: ["id", "featured"],

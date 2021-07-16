@@ -35,7 +35,7 @@ export class User {
 
 	@DB((t, n)=>t.integer(n).notNullable())
 	@Field({type: "number"}, {req: true})
-	edits: number;
+	edits = 0;
 
 	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"})

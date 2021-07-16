@@ -21,23 +21,23 @@ export class PermissionSet {
 
 @MGLClass({table: "accessPolicies"})
 export class AccessPolicy {
-	@DB((t,n)=>t.text(n).primary())
+	@DB((t, n)=>t.text(n).primary())
 	@Field({type: "string"})
 	id: string;
 
-	@DB((t,n)=>t.text(n).notNullable())
+	@DB((t, n)=>t.text(n).notNullable())
 	@Field({type: "string"}, {req: true})
 	name: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
+	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"})
 	base?: string|n;
 
-	@DB((t,n)=>t.jsonb(n))
+	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: PermissionSet.name})
 	permissions_base: PermissionSet;
 
-	@DB((t,n)=>t.jsonb(n))
+	@DB((t, n)=>t.jsonb(n))
 	@Field({patternProperties: {[UUID_regex]: {$ref: PermissionSet.name}}})
 	permissions_userExtends?: {[key: string]: PermissionSet}|n;
 }

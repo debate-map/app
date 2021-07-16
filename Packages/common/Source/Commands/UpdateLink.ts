@@ -1,4 +1,4 @@
-import {GetAsync, Command, AssertV, Schema, AV, AddSchema, AssertValidate, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV, NewSchema, AV, AddSchema, AssertValidate, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink.js";
 
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {UserEdit} from "../CommandMacros.js";
@@ -11,7 +11,7 @@ AddSchema("UpdateLink_payload", ["ChildEntry"], ()=>({
 	properties: {
 		linkParentID: {type: "string"},
 		linkChildID: {type: "string"},
-		linkUpdates: Schema({
+		linkUpdates: NewSchema({
 			properties: CE(GetSchemaJSON("ChildEntry").properties).Including("form", "polarity"),
 		}),
 	},

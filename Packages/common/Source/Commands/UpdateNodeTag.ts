@@ -1,4 +1,4 @@
-import {AssertV, Command, AV, AddSchema, AssertValidate, GetSchemaJSON, Schema} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, Command, AV, AddSchema, AssertValidate, GetSchemaJSON, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {UserEdit} from "../CommandMacros.js";
 
@@ -12,8 +12,8 @@ const MTName = "MapNodeTag";
 
 AddSchema(`Update${MTName}_payload`, [MTName], ()=>({
 	properties: {
-		id: {type: "string"},
-		updates: Schema({
+		id: {$ref: "UUID"},
+		updates: NewSchema({
 			properties: CE(GetSchemaJSON(MTName).properties).Including("nodes", ...TagComp_keys),
 			minProperties: 1,
 		}),

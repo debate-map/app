@@ -6,24 +6,23 @@ import {systemUserID} from "../DB_Constants.js";
 
 @UserEdit
 export class AddUser extends Command<{user: User, userHidden: UserHidden}, string> {
-	id: string;
 	Validate() {
 		const {user, userHidden} = this.payload;
 		AssertV(this.userInfo.id == systemUserID, "Only the system-user can add a user.");
 
-		this.id = this.id ?? GenerateUUID();
+		user.id = user.id ?? GenerateUUID();
 		user.joinDate = Date.now();
 		AssertValidate("User", user, "User invalid.");
 
-		userHidden.id = this.id;
+		userHidden.id = user.id;
 		AssertValidate("UserHidden", userHidden, "User's hidden-data is invalid.");
 
-		this.returnData = this.id;
+		this.returnData = user.id;
 	}
 
 	DeclareDBUpdates(db) {
 		const {user, userHidden} = this.payload;
-		db.set(dbp`users/${this.id}`, user);
-		db.set(dbp`userHiddens/${this.id}`, userHidden);
+		db.set(dbp`users/${user.id}`, user);
+		db.set(dbp`userHiddens/${user.id}`, userHidden);
 	}
 }
