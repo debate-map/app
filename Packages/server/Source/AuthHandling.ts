@@ -24,7 +24,8 @@ passport.use(new GoogleStrategy(
 	{
 		clientID: process.env.CLIENT_ID as string,
 		clientSecret: process.env.CLIENT_SECRET as string,
-		callbackURL: "http://localhost:3105/auth/google/callback",
+		//callbackURL: "http://db.app.localhost:3105/auth/google/callback",
+		callbackURL: "http://[::1]:3105/auth/google/callback", // google doesn't allow redirect-url to be a localhost subdomain, so for this one place leave it out (the cookie gets set properly anyway?)
 	},
 	async(accessToken, refreshToken, profile, done)=>{
 		console.log("Test1");
@@ -38,10 +39,12 @@ passport.use(new GoogleStrategy(
 		if (existingUser_hidden != null) {
 			console.log("Found existing user for email:", profile_firstEmail);
 			const existingUser = await GetAsync(()=>GetUser(existingUser_hidden.id), {errorHandling: "log"});
+			console.log("Also found user-data:", existingUser);
 			Assert(existingUser != null, `Could not find user with id matching that of the entry in userHiddens (${existingUser_hidden.id}), which was found based on your provided account's email (${existingUser_hidden.email}).`);
 			return void done(null, existingUser);
 		}
 
+		console.log(`User not found for email "${profile_firstEmail}". Creating new.`);
 		const user = new User({
 			displayName: profile.displayName,
 			permissionGroups: {basic: true, verified: false, mod: false, admin: false},
@@ -85,6 +88,10 @@ export function SetUpAuthHandling(app: ExpressApp) {
 	app.use(cookieSession({
 		name: "debate-map-session",
 		keys: ["key1", "key2"],
+
+		//domain: ".app.localhost", // explicitly set domain to ".app.localhost", so that it ignores the port segment, letting cookie be seen by both [app.]localhost:3005 and [db.app.]localhost:3105
+		//domain: ".localhost",
+		domain: "[::1]",
 	}));
 	/*app.use(expressSession({
 		secret: "debate-map-session-123123",
@@ -103,6 +110,10 @@ export function SetUpAuthHandling(app: ExpressApp) {
 				//maxAge: new Date(2147483647 * 1000).toUTCString(),
 				expires: new Date(253402300000000), // from: https://stackoverflow.com/a/28289961/2441655
 				httpOnly: false, // httpOnly:false, so frontend code can access it
+
+				//domain: ".app.localhost", // see above for reason
+				//domain: ".localhost", // see above for reason
+				domain: "[::1]",
 			});
 		}
 		next();
@@ -133,7 +144,7 @@ export function SetUpAuthHandling(app: ExpressApp) {
 	}));
 	app.get("/auth/google/callback",
 		passport.authenticate("google", {
-			successRedirect: "http://localhost:3005",
-			failureRedirect: "http://localhost:3005/login-failed",
+			successRedirect: "http://[::1]:3005",
+			failureRedirect: "http://[::1]:3005/login-failed",
 		}));
 }

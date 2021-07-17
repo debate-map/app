@@ -150,12 +150,12 @@ export const googleID_handleCredentialResponse = async(response: GoogleID_Creden
 
 export function GetAppServerURL(subpath: string) {
 	Assert(subpath.startsWith("/"));
-	if (location.hostname == "localhost") return subpath;
+	if (location.hostname == "localhost" || location.hostname == "[::1]") return subpath;
 	return `https://debatemap.app/${subpath.slice(1)}`;
 }
 export function GetDBServerURL(subpath: string) {
 	Assert(subpath.startsWith("/"));
-	if (location.hostname == "localhost") return `http://localhost:3105/${subpath.slice(1)}`;
+	if (location.hostname == "localhost" || location.hostname == "[::1]") return `http://[::1]:3105/${subpath.slice(1)}`;
 	return `https://db.debatemap.app/${subpath.slice(1)}`;
 }
 

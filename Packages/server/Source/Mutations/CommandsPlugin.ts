@@ -42,16 +42,19 @@ extend type Mutation {
 	}
 
 	const mutationResolvers = commandClassMetas.ToMapObj(meta=>meta.commandClass.name, classInfo=>{
-		return async(parent, args, ctx: Context, info)=>{
-			/*const { rows } = await ctx.pgClient.query(
+		return async(parent, args, context: Context, info)=>{
+			/*const { rows } = await context.pgClient.query(
 				sqlText, // e.g. "select * from users where id = $1"
 				optionalVariables // e.g. [27]
 			);*/
 
-			//ctx.pgClient.query()
+			//context.pgClient.query()
 
 			const CommandClass = classInfo.commandClass as any;
 			const command: Command<any> = new CommandClass(args);
+			command._userInfo_override = context.req.user;
+			console.log("User in command resolver:", context.req.user);
+			debugger;
 			const returnData = await command.RunLocally();
 			console.log(`Command "${CommandClass.name}" done! @args:`, args, `@returnData:`, returnData);
 
@@ -66,7 +69,7 @@ extend type Mutation {
 		}
 		return GQL_BetterErrorHandling(str);
 	});
-	console.log("CommandsPlugin init done. @typeDefs:\n==========\n", allNewTypeDefs_strings.join("\n\n"), "\n==========\n@mutationResolvers:", mutationResolvers);
+	//console.log("CommandsPlugin init done. @typeDefs:\n==========\n", allNewTypeDefs_strings.join("\n\n"), "\n==========\n@mutationResolvers:", mutationResolvers);
 	return {
 		typeDefs: allNewTypeDefs,
 		resolvers: {

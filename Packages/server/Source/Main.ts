@@ -38,9 +38,38 @@ if (!globalThis.fetch) {
 
 const app = express();
 
+/*app.use((req, res, next)=>{
+	console.log("URL:", req.url, req.header("origin"));
+	//const isWebsocketRequest = req.url.startsWith("ws://");
+	const isWebsocketRequest = req.header("Upgrade")?.toLowerCase() == "websocket" || req.header("connection")?.toLowerCase() == "upgrade";
+	if (!isWebsocketRequest) {
+		console.log("Header:", req.header("origin"), req.url, req.headers, req.rawHeaders);
+		//res.header("Access-Control-Allow-Origin", req.header("origin"));
+		res.setHeader("Access-Control-Allow-Origin", req.header("origin") ?? "*");
+		res.setHeader("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
+		// Set custom headers for CORS
+		res.setHeader("Access-Control-Allow-Headers", "Content-type,Accept,X-Custom-Header");
+		res.setHeader("Access-Control-Allow-Credentials", "true");
+	}
+
+	// if this is a pre-flight request, return right away (so later middleware can't mess up the allow-origin value)
+	if (req.method === "OPTIONS") {
+		return res.status(200).end();
+	}
+	next();
+});*/
 app.use(cors({
 	//origin: "debatemap.app",
-	origin: "*", // let any origin make calls to our server (that's fine)
+	//origin: "*", // let any origin make calls to our server (that's fine)
+	origin: true, // must use true (ie. have response's "allowed-origin" always equal the request origin) instead of "*", since we have credential-inclusion enabled
+	credentials: true,
+	/*origin(origin, callback) {
+		return callback(null, true);
+	},
+	credentials: true,*/
+	/*origin: "sdfsdfsdfsdf.app",
+	optionsSuccessStatus: 200,
+	credentials: true,*/
 }));
 
 app.use(cookieParser());
@@ -65,6 +94,10 @@ pgPool.on("connect", client=>{
 	pgClient = client;
 	graph.subs.pgClient = pgClient;
 });
+
+// set up auth-handling before postgraphile; this way postgraphile resolvers have access to request.user
+SetUpAuthHandling(app);
+
 app.use(
 	postgraphile(
 		pgPool,
@@ -89,10 +122,14 @@ app.use(
 			skipPlugins: [
 				require("graphile-build").NodePlugin,
 			],
+			async additionalGraphQLContextFromRequest(req, res) {
+				// expose the express-js request and response objects on the postgraphile "context" object
+				return {req, res};
+			},
 			dynamicJson: true,
 			live: true,
 			ownerConnectionString: dbURL, // passed in a 2nd time, for live-query module (connection-string with elevated privileges)
-			enableCors: true, // cors flag temporary; enables mutations, from any origin
+			//enableCors: true, // maybe temp; enables mutations, from any origin // disabled; use cors() above instead, as postgraphile just does "allow-origin: *", which causes error in browser (since credentials are included)
 			showErrorStack: true,
 			extendedErrors: ["hint", "detail", "errcode"], // to show error text in console (doesn't seem to be working)
 			disableDefaultMutations: true, // we use custom mutations for everything, letting us use TypeScript+MobXGraphlink for all validations
@@ -100,12 +137,21 @@ app.use(
 	),
 );
 
-SetUpAuthHandling(app);
 // todo: MS server somehow confirms that the db-schema matches the "latest schema target" at startup (as derived from "Knex/Migrations/...")
 
 // set up libs
 InitApollo();
 InitGraphlink();
+
+/*app.use((req, res, next)=>{
+	console.log("URL2:", req.url, req.header("origin"));
+	const isWebsocketRequest = req.header("Upgrade")?.toLowerCase() == "websocket" || req.header("connection")?.toLowerCase() == "upgrade";
+	if (!isWebsocketRequest) {
+		res.setHeader("Access-Control-Allow-Origin", req.header("origin") ?? "*");
+		//return res.status(200).end();
+	}
+	next();
+});*/
 
 app.listen(dbPort);
 console.log("Server started.");

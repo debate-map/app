@@ -4,7 +4,7 @@ import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/cl
 
 import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
 
-const GRAPHQL_URL = "http://localhost:3105/graphql";
+const GRAPHQL_URL = "http://[::1]:3105/graphql";
 
 let httpLink: HttpLink;
 let wsLink: WebSocketLink;
@@ -15,6 +15,9 @@ export let apolloClient: ApolloClient<NormalizedCacheObject>;
 export function InitApollo() {
 	httpLink = new HttpLink({
 		uri: GRAPHQL_URL,
+		fetchOptions: {
+			credentials: "include",
+		},
 	});
 	wsLink = new WebSocketLink({
 		uri: GRAPHQL_URL.replace(/^http/, "ws"),
@@ -50,6 +53,7 @@ export function InitApollo() {
 		link,
 	]);
 	apolloClient = new ApolloClient({
+		credentials: "include", // needed for cookies to be sent with "graphql" calls (eg. for mutation/command calls)
 		//link,
 		link: link_withErrorHandling,
 		cache: new InMemoryCache({
