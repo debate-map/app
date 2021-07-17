@@ -1,6 +1,6 @@
+import {CE} from "web-vcore/nm/js-vextensions.js";
 import {MapNode} from "../../DB/nodes/@MapNode.js";
 import {GetNode} from "../../DB/nodes.js";
-import {CE} from "web-vcore/nm/js-vextensions.js";
 import {GetNodeChildLinks} from "../../DB/nodeChildLinks.js";
 
 export function SearchUpFromNodeForNodeMatchingX(startNodeID: string, xMatchFunc: (nodeID: string)=>boolean, nodeIDsToIgnore?: string[]): string|n {

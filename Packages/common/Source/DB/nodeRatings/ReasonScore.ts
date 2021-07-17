@@ -136,9 +136,9 @@ function CombinePremiseTruthScores(truthScores: number[], argumentType: Argument
 	}
 	if (argumentType == ArgumentType.anyTwo) {
 		if (truthScores.length < 2) return 0;
-		let highestTruthScore = CE(truthScores).Max();
-		let otherTruthScores = CE(truthScores).Except({excludeEachOnlyOnce: true}, highestTruthScore);
-		let secondHighestTruthScore = CE(otherTruthScores).Max();
+		const highestTruthScore = CE(truthScores).Max();
+		const otherTruthScores = CE(truthScores).Except({excludeEachOnlyOnce: true}, highestTruthScore);
+		const secondHighestTruthScore = CE(otherTruthScores).Max();
 		return highestTruthScore * secondHighestTruthScore;
 	}
 	return CE(truthScores).Max(); // ArgumentType.Any

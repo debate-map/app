@@ -3,14 +3,6 @@ import {GetCookie} from "web-vcore";
 import {systemUserID} from "../DB_Constants.js";
 import {User} from "./users/@User.js";
 
-export function DMCommon_InServer() {
-	return typeof global != "undefined";
-}
-export function DMCommon_InFrontend() {
-	//return typeof window != "undefined";
-	return !DMCommon_InServer();
-}
-
 /*export function GetAuth(state: RootState) {
 	return state.firebase.auth;
 }*/

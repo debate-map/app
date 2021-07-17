@@ -1,5 +1,6 @@
 import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE, A} from "web-vcore/nm/js-vextensions.js";
 import {SplitStringBySlash_Cached, SlicePath, CreateAccessor, PartialBy} from "web-vcore/nm/mobx-graphlink.js";
+import Moment from "web-vcore/nm/moment";
 import {GetMedia} from "../media.js";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
 import {NodeRatingType} from "../nodeRatings/@NodeRatingType.js";
@@ -12,7 +13,6 @@ import {PermissionGroupSet} from "../users/@User.js";
 import {GetNodeTags, GetNodeTagComps, GetFinalTagCompsForTag} from "../nodeTags.js";
 import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@MapNodeTag.js";
 import {SourceType, Source} from "../nodeRevisions/@SourceChain.js";
-import Moment from "web-vcore/nm/moment";
 import {GetNodeChildLinks} from "../nodeChildLinks.js";
 import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
 import {GetAccessPolicy} from "../accessPolicies.js";
@@ -150,7 +150,7 @@ export const GetNodeL2 = CreateAccessor(c=>(nodeID: string | MapNode | n, path?:
 export function IsNodeL3(node: MapNode): node is MapNodeL3 {
 	//return node["displayPolarity"] && node["link"];
 	//if (node.type == MapNodeType.category) {
-		
+
 	// merely check for prop existence (values can be null, yet valid)
 	return "displayPolarity" in node && "link" in node;
 
@@ -179,7 +179,7 @@ export const GetNodeL3 = CreateAccessor(c=>(path: string | n, tagsToIgnore?: str
 	if (node == null) return null;
 
 	// if any of the data in a MapNodeL3 is not loaded yet, just bail (we want it to be all or nothing)
-	let displayPolarity = node.type == MapNodeType.argument ? GetDisplayPolarityAtPath.BIN(node, path, tagsToIgnore) : null;
+	const displayPolarity = node.type == MapNodeType.argument ? GetDisplayPolarityAtPath.BIN(node, path, tagsToIgnore) : null;
 
 	/*const isSubnode = IsNodeSubnode(node);
 	if (!isSubnode) {*/
@@ -218,17 +218,17 @@ export const GetLinkUnderParent = CreateAccessor(c=>(nodeID: string, parent: Map
 	const parentChildLinks = GetNodeChildLinks(parent.id);
 	let link = parentChildLinks.find(a=>a.child == nodeID);
 	if (includeMirrorLinks && link == null) {
-		let tags = GetNodeTags(parent.id).filter(tag=>tag && !tagsToIgnore?.includes(tag.id));
+		const tags = GetNodeTags(parent.id).filter(tag=>tag && !tagsToIgnore?.includes(tag.id));
 		for (const tag of tags) {
 			//let tagComps = GetNodeTagComps(parent.id);
 			const tagComps = GetFinalTagCompsForTag(tag);
 			for (const comp of tagComps) {
 				if (comp instanceof TagComp_MirrorChildrenFromXToY && comp.nodeY == parent.id) {
 					let mirrorChildren = GetNodeChildrenL3(comp.nodeX, undefined, undefined, (tagsToIgnore ?? []).concat(tag.id));
-					mirrorChildren = mirrorChildren.filter(child=> {
+					mirrorChildren = mirrorChildren.filter(child=>{
 						return child && ((child.link?.polarity == Polarity.supporting && comp.mirrorSupporting) || (child.link?.polarity == Polarity.opposing && comp.mirrorOpposing));
 					});
-					let nodeL3ForNodeAsMirrorChildInThisTag = mirrorChildren.find(a=>a.id == nodeID);
+					const nodeL3ForNodeAsMirrorChildInThisTag = mirrorChildren.find(a=>a.id == nodeID);
 					//const nodeL3ForNodeAsMirrorChildInThisTag = GetNodeL3(`${comp.nodeX}/${nodeID}`);
 					if (nodeL3ForNodeAsMirrorChildInThisTag) {
 						link = Clone(nodeL3ForNodeAsMirrorChildInThisTag.link) as NodeChildLink;
@@ -269,21 +269,21 @@ export function GetPolarityShortStr(polarity: Polarity) {
 	return polarity == Polarity.supporting ? "pro" : "con";
 }
 
-export const GetNodeContributionInfo = CreateAccessor(c=>(nodeID: string)=> {
-	let result = new NodeContributionInfo(nodeID);
-	let tags = GetNodeTags(nodeID);
-	let directChildrenDisabled = CE(tags).Any(a=>a.mirrorChildrenFromXToY?.nodeY == nodeID && a.mirrorChildrenFromXToY?.disableDirectChildren);
+export const GetNodeContributionInfo = CreateAccessor(c=>(nodeID: string)=>{
+	const result = new NodeContributionInfo(nodeID);
+	const tags = GetNodeTags(nodeID);
+	const directChildrenDisabled = CE(tags).Any(a=>a.mirrorChildrenFromXToY?.nodeY == nodeID && a.mirrorChildrenFromXToY?.disableDirectChildren);
 	if (directChildrenDisabled) {
 		result.proArgs.canAdd = false;
 		result.conArgs.canAdd = false;
 	}
-	for (let tag of tags) {
+	for (const tag of tags) {
 		if (tag.mirrorChildrenFromXToY && tag.mirrorChildrenFromXToY.nodeY == nodeID) {
-			let comp = tag.mirrorChildrenFromXToY;
-			let addForPolarities_short = [] as ("pro" | "con")[];
+			const comp = tag.mirrorChildrenFromXToY;
+			const addForPolarities_short = [] as ("pro" | "con")[];
 			if (comp.mirrorSupporting) addForPolarities_short.push(comp.reversePolarities ? "con" : "pro");
 			if (comp.mirrorOpposing) addForPolarities_short.push(comp.reversePolarities ? "pro" : "con");
-			for (let polarity_short of addForPolarities_short) {
+			for (const polarity_short of addForPolarities_short) {
 				result[`${polarity_short}Args`].canAdd = true;
 				result[`${polarity_short}Args`].hostNodeID = comp.nodeX;
 				result[`${polarity_short}Args`].reversePolarities = comp.reversePolarities;
@@ -337,7 +337,7 @@ export const GetNodeDisplayText = CreateAccessor(c=>(node: MapNodeL2, path?: str
 			}
 			return result;
 		}
-		
+
 		if (node.current.quote || node.current.media) {
 			let text: string;
 			let firstSource: Source;

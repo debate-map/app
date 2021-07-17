@@ -24,7 +24,7 @@ export class UpdateShare extends Command<{id: string, updates: Partial<MainType>
 		}, this.payload, "Payload invalid");
 
 		const {id, updates} = this.payload;
-		this.oldData = GetShare.BIN(id);
+		this.oldData = GetShare.NN(id);
 		AssertUserCanModify(this, this.oldData);
 		this.newData = {...this.oldData, ...updates};
 		AssertValidate(MTName, this.newData, "New-data invalid");

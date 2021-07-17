@@ -15,8 +15,8 @@ export function MapEdit(...args) {
 	}
 
 	function ApplyToClass(targetClass: typeof Command) {
-		const Validate_old = targetClass.prototype.Validate;
-		targetClass.prototype.Validate = function() {
+		const Validate_old = targetClass.prototype["Validate"];
+		targetClass.prototype["Validate"] = function() {
 			const result = Validate_old.apply(this);
 			const mapID = this.payload[mapIDKey];
 			if (mapID) {
@@ -43,8 +43,8 @@ export function MapEdit(...args) {
 }
 
 export function UserEdit(targetClass: typeof Command) {
-	const Validate_old = targetClass.prototype.Validate;
-	targetClass.prototype.Validate = function() {
+	const Validate_old = targetClass.prototype["Validate"];
+	targetClass.prototype["Validate"] = function() {
 		const result = Validate_old.apply(this);
 		const user = GetUser(this.userInfo.id);
 		if (user) {

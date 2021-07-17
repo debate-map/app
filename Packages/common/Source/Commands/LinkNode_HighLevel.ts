@@ -62,11 +62,11 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 		this.returnData = {};
 
-		this.map_data = GetMap.BIN(mapID);
-		this.node_data = GetNodeL2.BIN(nodeID);
+		this.map_data = GetMap.NN(mapID);
+		this.node_data = GetNodeL2.NN(nodeID);
 		const oldParent = GetNodeL2(oldParentID);
 		if (oldParentID) AssertV(oldParent, "Old-parent-id was specified, yet no node exists with that ID!");
-		this.newParent_data = GetNodeL2.BIN(newParentID);
+		this.newParent_data = GetNodeL2.NN(newParentID);
 
 		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
 		const pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && createWrapperArg;

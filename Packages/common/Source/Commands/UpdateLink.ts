@@ -25,7 +25,7 @@ export class UpdateLink extends Command<{linkID: string, linkUpdates: Partial<No
 		AssertValidate("UpdateLink_payload", this.payload, "Payload invalid");
 
 		const {linkID, linkUpdates} = this.payload;
-		const oldData = GetNodeChildLink.BIN(linkID);
+		const oldData = GetNodeChildLink.NN(linkID);
 		this.newData = {...oldData, ...linkUpdates};
 		AssertValidate("ChildEntry", this.newData, "New link-data invalid");
 	}

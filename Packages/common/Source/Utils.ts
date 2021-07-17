@@ -1,5 +1,6 @@
 export * from "./Utils/DB/PathFinder.js";
 export * from "./Utils/DB/RatingProcessor.js";
+export * from "./Utils/General/General.js";
 
 // probably todo: remove these, and find way to specify it (infectiously) from web-vcore
 declare global {

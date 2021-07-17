@@ -52,3 +52,7 @@ For more information, visit the website at: <https://debatemap.app>
 5) In vscode #2, start db-shape tracker: ctrl+shift+b, then `#2 server.trackDBShape`.
 6) In vscode #2, start backend: ctrl+shift+b, then `#3 server.run`.
 7) Open website locally at: `localhost:3005`
+
+# Additional documentation
+
+* [Client/server infrastructure](https://github.com/debate-map/app/tree/master/Docs/ClientServerInfrastructure.md)

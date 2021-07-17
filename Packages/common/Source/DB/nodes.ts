@@ -47,7 +47,7 @@ export const GetNodesByIDs = CreateAccessor(c=>(ids: string[]): MapNode[]=>{
 	return ids.map(id=>GetNode.BIN(id));
 });
 export const GetNodesByTitle = CreateAccessor(c=>(title: string, titleKey: TitleKey): MapNode[]=>{
-	let nodeRevisions = GetNodeRevisionsByTitle(title, titleKey);
+	const nodeRevisions = GetNodeRevisionsByTitle(title, titleKey);
 	return nodeRevisions.map(a=>GetNode.BIN(a.node));
 });
 
@@ -105,10 +105,10 @@ export const GetNodeParents = CreateAccessor(c=>(nodeID: string)=>{
 	return parentLinks.map(a=>c.MaybeCatchItemBail(()=>GetNode(a.parent)));
 });
 export const GetNodeParentsL2 = CreateAccessor(c=>(nodeID: string)=>{
-	return GetNodeParents(nodeID).map(parent=>c.MaybeCatchItemBail(()=>parent ? GetNodeL2(parent) : undefined));
+	return GetNodeParents(nodeID).map(parent=>c.MaybeCatchItemBail(()=>(parent ? GetNodeL2(parent) : undefined)));
 });
 export const GetNodeParentsL3 = CreateAccessor(c=>(nodeID: string, path: string)=>{
-	return GetNodeParents(nodeID).map(parent=>c.MaybeCatchItemBail(()=>parent ? GetNodeL3(SlicePath(path, 1)) : undefined));
+	return GetNodeParents(nodeID).map(parent=>c.MaybeCatchItemBail(()=>(parent ? GetNodeL3(SlicePath(path, 1)) : undefined)));
 });
 
 export const GetNodeChildren = CreateAccessor(c=>(nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[])=>{
@@ -127,7 +127,7 @@ export const GetNodeChildren = CreateAccessor(c=>(nodeID: string, includeMirrorC
 	let result = childLinks.map(link=>c.MaybeCatchItemBail(()=>GetNode(link.child) as MapNode)); // cast as MapNode, because db guarantees that node exists
 	if (includeMirrorChildren) {
 		//let tags = GetNodeTags(nodeID);
-		let tagComps = GetNodeTagComps(nodeID, true, tagsToIgnore);
+		const tagComps = GetNodeTagComps(nodeID, true, tagsToIgnore);
 		// maybe todo: have disable-direct-children merely stop you from adding new direct children, not hide existing ones
 		if (CE(tagComps).Any(a=>a instanceof TagComp_MirrorChildrenFromXToY && a.nodeY == nodeID && a.disableDirectChildren)) {
 			result = [];
@@ -140,8 +140,8 @@ export const GetNodeChildren = CreateAccessor(c=>(nodeID: string, includeMirrorC
 	}
 	return result;
 });
-export const GetNodeMirrorChildren = CreateAccessor(c=>(nodeID: string, tagsToIgnore?: string[])=> {
-	let tags = GetNodeTags(nodeID).filter(tag=>tag && !tagsToIgnore?.includes(tag.id));
+export const GetNodeMirrorChildren = CreateAccessor(c=>(nodeID: string, tagsToIgnore?: string[])=>{
+	const tags = GetNodeTags(nodeID).filter(tag=>tag && !tagsToIgnore?.includes(tag.id));
 	//let tagComps = GetNodeTagComps(nodeID, true, tagsToIgnore);
 
 	let result = [] as MapNode[];
@@ -151,11 +151,11 @@ export const GetNodeMirrorChildren = CreateAccessor(c=>(nodeID: string, tagsToIg
 			if (tagComp instanceof TagComp_MirrorChildrenFromXToY && tagComp.nodeY == nodeID) {
 				//let comp = tag.mirrorChildrenFromXToY;
 				let mirrorChildrenL3 = GetNodeChildrenL3(tagComp.nodeX, undefined, undefined, (tagsToIgnore ?? []).concat(tag.id));
-				mirrorChildrenL3 = mirrorChildrenL3.filter(child=> {
+				mirrorChildrenL3 = mirrorChildrenL3.filter(child=>{
 					if (child == null) return false;
-					let childTagComps = GetNodeTagComps(child.id, true, (tagsToIgnore ?? []).concat(tag.id));
+					const childTagComps = GetNodeTagComps(child.id, true, (tagsToIgnore ?? []).concat(tag.id));
 					if (childTagComps == emptyArray_forLoading) return false; // don't include child until we're sure it's allowed to be mirrored
-					const mirroringBlacklisted = CE(childTagComps).Any(comp=> {
+					const mirroringBlacklisted = CE(childTagComps).Any(comp=>{
 						if (!(comp instanceof TagComp_RestrictMirroringOfX)) return false;
 						return comp.blacklistAllMirrorParents || comp.blacklistedMirrorParents?.includes(nodeID);
 					});
@@ -173,22 +173,22 @@ export const GetNodeMirrorChildren = CreateAccessor(c=>(nodeID: string, tagsToIg
 						return newChild;
 					});
 				}*/
-				let mirrorChildrenL1 = mirrorChildrenL3.map(childL3=>AsNodeL1(childL3));
+				const mirrorChildrenL1 = mirrorChildrenL3.map(childL3=>AsNodeL1(childL3));
 				result.push(...mirrorChildrenL1);
 			}
 		}
 	}
 
 	// exclude any mirror-child which is an extension of (ie. wider/weaker than) another child (that is, if it's the Y of an "X is extended by Y" tag, between children) 
-	result = result.filter(child=> {
-		let childTagComps = GetNodeTagComps(child.id, true, tagsToIgnore);
-		const extensionOfAnotherMirrorChild = CE(childTagComps).Any(comp=> {
+	result = result.filter(child=>{
+		const childTagComps = GetNodeTagComps(child.id, true, tagsToIgnore);
+		const extensionOfAnotherMirrorChild = CE(childTagComps).Any(comp=>{
 			if (!(comp instanceof TagComp_XIsExtendedByY)) return false;
-			let childIsNodeY = comp.nodeY == child.id;
+			const childIsNodeY = comp.nodeY == child.id;
 			if (!childIsNodeY) return false;
 
-			let nodeDirectChildren = GetNodeChildren(nodeID, false);
-			let otherChildIsNodeX = CE(nodeDirectChildren.concat(result)).Any(otherChild=>comp.nodeX == otherChild.id);
+			const nodeDirectChildren = GetNodeChildren(nodeID, false);
+			const otherChildIsNodeX = CE(nodeDirectChildren.concat(result)).Any(otherChild=>comp.nodeX == otherChild.id);
 			return otherChildIsNodeX;
 		});
 		if (extensionOfAnotherMirrorChild) return false;
@@ -196,14 +196,14 @@ export const GetNodeMirrorChildren = CreateAccessor(c=>(nodeID: string, tagsToIg
 		if (IsSinglePremiseArgument(child)) {
 			const childPremise = GetPremiseOfSinglePremiseArgument(child.id);
 			if (childPremise) {
-				let childPremiseTagComps = GetNodeTagComps(childPremise.id, true, tagsToIgnore);
-				const premiseIsExtensionOfAnotherMirrorChildPremise = CE(childPremiseTagComps).Any(comp=> {
+				const childPremiseTagComps = GetNodeTagComps(childPremise.id, true, tagsToIgnore);
+				const premiseIsExtensionOfAnotherMirrorChildPremise = CE(childPremiseTagComps).Any(comp=>{
 					if (!(comp instanceof TagComp_XIsExtendedByY)) return false;
-					let childPremiseIsNodeY = comp.nodeY == childPremise.id;
+					const childPremiseIsNodeY = comp.nodeY == childPremise.id;
 					if (!childPremiseIsNodeY) return false;
 
-					let nodeDirectChildren = GetNodeChildren(nodeID, false);
-					let otherChildPremiseIsNodeX = CE(nodeDirectChildren.concat(result)).Any(otherChild=>{
+					const nodeDirectChildren = GetNodeChildren(nodeID, false);
+					const otherChildPremiseIsNodeX = CE(nodeDirectChildren.concat(result)).Any(otherChild=>{
 						return IsSinglePremiseArgument(otherChild) && comp.nodeX == GetPremiseOfSinglePremiseArgument(otherChild.id)?.id;
 					});
 					return otherChildPremiseIsNodeX;
@@ -216,8 +216,8 @@ export const GetNodeMirrorChildren = CreateAccessor(c=>(nodeID: string, tagsToIg
 	});
 
 	// filter out duplicate children
-	result = result.filter((node, index)=> {
-		let earlierNodes = result.slice(0, index);
+	result = result.filter((node, index)=>{
+		const earlierNodes = result.slice(0, index);
 		return !CE(earlierNodes).Any(a=>a.id == node.id);
 	});
 
@@ -226,21 +226,21 @@ export const GetNodeMirrorChildren = CreateAccessor(c=>(nodeID: string, tagsToIg
 
 export const GetNodeChildrenL2 = CreateAccessor(c=>(nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[])=>{
 	const nodeChildren = GetNodeChildren(nodeID, includeMirrorChildren, tagsToIgnore);
-	let nodeChildrenL2 = nodeChildren.map(child=>c.MaybeCatchItemBail(()=>GetNodeL2.NN(child))); // nn: we know node exists, so rest should as well
+	const nodeChildrenL2 = nodeChildren.map(child=>c.MaybeCatchItemBail(()=>GetNodeL2.NN(child))); // nn: we know node exists, so rest should as well
 	return nodeChildrenL2;
 });
 export const GetNodeChildrenL3 = CreateAccessor(c=>(nodeID: string, path?: string, includeMirrorChildren = true, tagsToIgnore?: string[])=>{
 	path = path || nodeID;
 
 	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
-	let nodeChildrenL3 = nodeChildrenL2.map(child=>c.MaybeCatchItemBail(()=>GetNodeL3.NN(`${path}/${child.id}`, tagsToIgnore))); // nn: we know node exists, so rest should as well
+	const nodeChildrenL3 = nodeChildrenL2.map(child=>c.MaybeCatchItemBail(()=>GetNodeL3.NN(`${path}/${child.id}`, tagsToIgnore))); // nn: we know node exists, so rest should as well
 	return nodeChildrenL3;
 });
 
 export const GetPremiseOfSinglePremiseArgument = CreateAccessor(c=>(argumentNodeID: string)=>{
-	let argument = GetNode.BIN(argumentNodeID);
-	let children = GetNodeChildren(argumentNodeID, false);
-	let childPremise = children.find(child=>child && IsPremiseOfSinglePremiseArgument(child, argument));
+	const argument = GetNode.BIN(argumentNodeID);
+	const children = GetNodeChildren(argumentNodeID, false);
+	const childPremise = children.find(child=>child && IsPremiseOfSinglePremiseArgument(child, argument));
 	return childPremise;
 });
 

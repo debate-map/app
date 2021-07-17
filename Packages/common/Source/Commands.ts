@@ -1,5 +1,3 @@
-export * from "./CommandMacros.js";
-
 export * from "./Commands/AddArgumentAndClaim.js";
 export * from "./Commands/AddChildNode.js";
 export * from "./Commands/AddMedia.js";

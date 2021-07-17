@@ -1417,6 +1417,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/common-tags@npm:1.8.1":
+  version: 1.8.1
+  resolution: "@types/common-tags@npm:1.8.1"
+  checksum: bec6f68c8c434834380abd1dc057aa6ba26661bb0c65c700b65049e9b104d7be96a987d93dbe8726be68554a23a52514a6967d8903fdb51fb8c78cf909d1e4c1
+  languageName: node
+  linkType: hard
+
 "@types/connect@npm:*":
   version: 3.4.34
   resolution: "@types/connect@npm:3.4.34"
@@ -1469,6 +1476,13 @@ __metadata:
   version: 4.7.3
   resolution: "@types/history@npm:4.7.3"
   checksum: e768adc6af27a9ca1df9e5e4f07daa723e3ac9c38b0f91cc2fc7f0216dfa9886b2ff2be7d0ccbeaaa9fbc6e92e709a8d7960fc62cb1271f95ab46be11e89c3ac
+  languageName: node
+  linkType: hard
+
+"@types/json-schema@npm:7.0.8":
+  version: 7.0.8
+  resolution: "@types/json-schema@npm:7.0.8"
+  checksum: f1d0fe76ab1db93846f36a9179faa44b9b66f2f5f44597e46e65456a1c998f632c63b94ed347058ed1a230cbf95a9a164b4daf4d70aa3d651d5033f7856df83c
   languageName: node
   linkType: hard
 
@@ -2872,6 +2886,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"defekt@npm:7.3.1":
+  version: 7.3.1
+  resolution: "defekt@npm:7.3.1"
+  checksum: f6ef2b7109b147efc64e6aab13fb19d721ce94450cf4498335bb9a08123332031596a9c07bd08977be5b4b1cdc0203f729509ac4fd8185d5f7c9724775add7c1
+  languageName: node
+  linkType: hard
+
 "define-properties@npm:^1.1.3":
   version: 1.1.3
   resolution: "define-properties@npm:1.1.3"
@@ -2994,6 +3015,7 @@ __metadata:
     dotenv: ^10.0.0
     express: ^4.17.1
     express-session: ^1.17.2
+    get-graphql-from-jsonschema: ^8.0.12
     knex: ^0.95.6
     node-fetch: ^2.6.1
     nps: ^5.10.0
@@ -3001,7 +3023,6 @@ __metadata:
     passport-google-oauth20: ^2.0.0
     postgraphile: ^4.11.0
     postgraphile-plugin-connection-filter: ^2.2.1
-    qs: ^6.10.1
     ws: ^7.5.2
   languageName: unknown
   linkType: soft
@@ -3603,6 +3624,18 @@ fsevents@~2.3.2:
   version: 2.0.5
   resolution: "get-caller-file@npm:2.0.5"
   checksum: b9769a836d2a98c3ee734a88ba712e62703f1df31b94b784762c433c27a386dd6029ff55c2a920c392e33657d80191edbf18c61487e198844844516f843496b9
+  languageName: node
+  linkType: hard
+
+"get-graphql-from-jsonschema@npm:^8.0.12":
+  version: 8.0.12
+  resolution: "get-graphql-from-jsonschema@npm:8.0.12"
+  dependencies:
+    "@types/common-tags": 1.8.1
+    "@types/json-schema": 7.0.8
+    common-tags: 1.8.0
+    defekt: 7.3.1
+  checksum: 284b07d7a0899631fd753a6d8212be1c5ddca7d5c8646cbb2f12bc4851313dd5faa430760b5b2ca5ef5cbd36c7cd09a9d0ad1cf432b9fcc7cad2cba75eef54f5
   languageName: node
   linkType: hard
 
@@ -5265,13 +5298,6 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"object-inspect@npm:^1.9.0":
-  version: 1.10.3
-  resolution: "object-inspect@npm:1.10.3"
-  checksum: 9a56db2e0146fe94a7a9c78f677a2a28eec11d0ae13430e0bb2cb908fdd2d3feb7dbba7c638b9b7f88ace01d9a937227a8801709d13afb76613775aeb68632d3
-  languageName: node
-  linkType: hard
-
 "object-keys@npm:^1.0.12, object-keys@npm:^1.1.1":
   version: 1.1.1
   resolution: "object-keys@npm:1.1.1"
@@ -5974,15 +6000,6 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"qs@npm:^6.10.1":
-  version: 6.10.1
-  resolution: "qs@npm:6.10.1"
-  dependencies:
-    side-channel: ^1.0.4
-  checksum: 00e390dbf98eff4d8ff121b61ab2fe32106852290de99ecd0e40fc76651c4101f43fc6cc8313cb69423563876fc532951b11dda55d2917def05f292258263480
-  languageName: node
-  linkType: hard
-
 "qs@npm:~6.5.2":
   version: 6.5.2
   resolution: "qs@npm:6.5.2"
@@ -6618,17 +6635,6 @@ fsevents@~2.3.2:
   bin:
     shx: lib/cli.js
   checksum: 4b62e894b48f78d180243aec0ebc411aefd17110ac10c9d1d339acd429c38fd63c6e1bc1aa1aec0daea13601625c89653f5430b470828be81ae8b7aeb77f84c8
-  languageName: node
-  linkType: hard
-
-"side-channel@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "side-channel@npm:1.0.4"
-  dependencies:
-    call-bind: ^1.0.0
-    get-intrinsic: ^1.0.2
-    object-inspect: ^1.9.0
-  checksum: 351e41b947079c10bd0858364f32bb3a7379514c399edb64ab3dce683933483fc63fb5e4efe0a15a2e8a7e3c436b6a91736ddb8d8c6591b0460a24bb4a1ee245
   languageName: node
   linkType: hard
 
