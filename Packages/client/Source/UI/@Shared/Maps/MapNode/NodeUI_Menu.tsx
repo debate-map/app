@@ -106,7 +106,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						onClick={async e=>{
 							if (e.button != 0) return;
 
-							await new SetNodeIsMultiPremiseArgument({nodeID: parent!.id, multiPremiseArgument: true}).Run();
+							await new SetNodeIsMultiPremiseArgument({nodeID: parent!.id, multiPremiseArgument: true}).RunOnServer();
 						}}/>}
 				{IsUserCreatorOrMod(userID, node) && IsMultiPremiseArgument(node)
 					&& nodeChildren.every(a=>a != null) && nodeChildren.filter(a=>a.type == MapNodeType.claim).length == 1 && !componentBox &&
@@ -114,7 +114,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						onClick={async e=>{
 							if (e.button !== 0) return;
 
-							await new SetNodeIsMultiPremiseArgument({nodeID: node.id, multiPremiseArgument: false}).Run();
+							await new SetNodeIsMultiPremiseArgument({nodeID: node.id, multiPremiseArgument: false}).RunOnServer();
 						}}/>}
 				{pathsToChangedInSubtree && pathsToChangedInSubtree.length > 0 && !componentBox &&
 					<VMenuItem text="Mark subtree as viewed" style={styles.vMenuItem}
@@ -175,12 +175,12 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 
 						const baseNodePath = State(a => a.main.copiedNodePath);
 						const baseNodePath_ids = GetPathNodeIDs(baseNodePath);
-						const info = await new CloneNode({ mapID: mapID, baseNodePath, newParentID: node._id }).Run();
+						const info = await new CloneNode({ mapID: mapID, baseNodePath, newParentID: node._id }).RunOnServer();
 
 						store.dispatch(new ACTSetLastAcknowledgementTime({ nodeID: info.nodeID, time: Date.now() }));
 
 						if (copiedNode_asCut) {
-							await new UnlinkNode({ mapID: mapID, parentID: baseNodePath_ids.XFromLast(1), childID: baseNodePath_ids.Last() }).Run();
+							await new UnlinkNode({ mapID: mapID, parentID: baseNodePath_ids.XFromLast(1), childID: baseNodePath_ids.Last() }).RunOnServer();
 						}
 					}}/> */}
 				<MI_ExportSubtree {...sharedProps}/>

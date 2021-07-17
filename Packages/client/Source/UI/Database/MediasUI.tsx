@@ -73,7 +73,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 										onClick={async e=>{
 											Assert(selectedMedia); // nn: button would be disabled otherwise
 											const updates = GetUpdates(selectedMedia, selectedMedia_newData);
-											await new UpdateMediaData({id: selectedMedia.id, updates}).Run();
+											await new UpdateMediaData({id: selectedMedia.id, updates}).RunOnServer();
 											// this.SetState({selectedImage_newData: null});
 										}}/>}
 								{creatorOrMod &&
@@ -83,7 +83,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 											title: `Delete "${selectedMedia.name}"`, cancelButton: true,
 											message: `Delete the media "${selectedMedia.name}"?`,
 											onOK: async()=>{
-												await new DeleteMedia({id: selectedMedia.id}).Run();
+												await new DeleteMedia({id: selectedMedia.id}).RunOnServer();
 											},
 										});
 									}}/>}

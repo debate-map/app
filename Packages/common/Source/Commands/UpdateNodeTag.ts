@@ -14,7 +14,7 @@ AddSchema(`Update${MTName}_payload`, [MTName], ()=>({
 	properties: {
 		id: {$ref: "UUID"},
 		updates: NewSchema({
-			properties: CE(GetSchemaJSON(MTName).properties).Including("nodes", ...TagComp_keys),
+			properties: CE(GetSchemaJSON(MTName).properties!).Including("nodes", ...TagComp_keys),
 			minProperties: 1,
 		}),
 	},

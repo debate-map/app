@@ -50,7 +50,7 @@
 // 						<Text>Add: </Text>
 // 						<Button ml={5} text="Video" enabled={timeline != null && timeline.videoID == null} onClick={()=>{
 // 							if (MeID() == null) return ShowSignInPopup();
-// 							new UpdateTimeline({id: timeline.id, updates: {videoID: ""}}).Run();
+// 							new UpdateTimeline({id: timeline.id, updates: {videoID: ""}}).RunOnServer();
 // 						}}/>
 // 						<Button ml={5} text="Statement" enabled={timeline != null} onClick={()=>{
 // 							if (MeID() == null) return ShowSignInPopup();
@@ -58,7 +58,7 @@
 // 							const newStepIndex = lastVisibleStepIndex == timeline.steps.length - 1 ? null : lastVisibleStepIndex;
 
 // 							const newStep = new TimelineStep({});
-// 							new AddTimelineStep({timelineID: timeline.id, step: newStep, stepIndex: newStepIndex}).Run();
+// 							new AddTimelineStep({timelineID: timeline.id, step: newStep, stepIndex: newStepIndex}).RunOnServer();
 // 						}}/>
 // 					</>}
 // 					<CheckBox ml={5} text="Details" value={showTimelineDetails} onChange={val=>{
@@ -78,13 +78,13 @@
 // 					<Row center mb={7} p="7px 10px" style={{background: "rgba(0,0,0,.7)", borderRadius: 10, border: "1px solid rgba(255,255,255,.15)"}}>
 // 						<Pre>Video ID: </Pre>
 // 						<TextInput value={timeline.videoID} enabled={creatorOrMod} onChange={val=>{
-// 							new UpdateTimeline({id: timeline.id, updates: {videoID: val}}).Run();
+// 							new UpdateTimeline({id: timeline.id, updates: {videoID: val}}).RunOnServer();
 // 						}}/>
 // 						<CheckBox ml={5} text="Start: " value={timeline.videoStartTime != null} enabled={creatorOrMod} onChange={val=>{
 // 							if (val) {
-// 								new UpdateTimeline({id: timeline.id, updates: {videoStartTime: 0}}).Run();
+// 								new UpdateTimeline({id: timeline.id, updates: {videoStartTime: 0}}).RunOnServer();
 // 							} else {
-// 								new UpdateTimeline({id: timeline.id, updates: {videoStartTime: null}}).Run();
+// 								new UpdateTimeline({id: timeline.id, updates: {videoStartTime: null}}).RunOnServer();
 // 							}
 // 						}}/>
 // 						<TimeSpanInput mr={5} largeUnit="minute" smallUnit="second" style={{width: 60}}
@@ -101,7 +101,7 @@
 // 							<Text>: </Text>
 // 						</Row>
 // 						<Spinner min={0} max={100} step={0.01} style={{width: 62}} value={(timeline.videoHeightVSWidthPercent * 100).RoundTo(0.01)} enabled={creatorOrMod} onChange={val=>{
-// 							new UpdateTimeline({id: timeline.id, updates: {videoHeightVSWidthPercent: (val / 100).RoundTo(0.0001)}}).Run();
+// 							new UpdateTimeline({id: timeline.id, updates: {videoHeightVSWidthPercent: (val / 100).RoundTo(0.0001)}}).RunOnServer();
 // 						}}/>
 // 						<Pre>%</Pre>
 // 						<Button ml="auto" text="X" enabled={creatorOrMod} onClick={()=>{
@@ -109,7 +109,7 @@
 // 								title: "Delete video attachment", cancelButton: true,
 // 								message: "Remove the video attachment for this timeline?",
 // 								onOK: ()=>{
-// 									new UpdateTimeline({id: timeline.id, updates: {videoID: null}}).Run();
+// 									new UpdateTimeline({id: timeline.id, updates: {videoID: null}}).RunOnServer();
 // 								},
 // 							});
 // 						}}/>

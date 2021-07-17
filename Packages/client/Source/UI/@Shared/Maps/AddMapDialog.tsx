@@ -27,7 +27,7 @@ export function ShowAddMapDialog() {
 			);
 		},
 		onOK: ()=>{
-			new AddMap({map: newMap}).Run();
+			new AddMap({map: newMap}).RunOnServer();
 		},
 	});
 }

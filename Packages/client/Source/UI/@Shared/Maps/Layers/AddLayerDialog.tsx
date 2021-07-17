@@ -25,7 +25,7 @@
 // 			);
 // 		},
 // 		onOK: ()=>{
-// 			new AddLayer({layer: newLayer}).Run();
+// 			new AddLayer({layer: newLayer}).RunOnServer();
 // 		},
 // 	});
 // }

@@ -155,14 +155,14 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 				extraButtons: ()=><>
 					<Button text="Copy" onClick={async()=>{
 						controller.Close();
-						const {argumentWrapperID} = await copyCommand.Run();
+						const {argumentWrapperID} = await copyCommand.RunOnServer();
 						if (argumentWrapperID) {
 							runInAction("OnDragEnd.Copy.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
 						}
 					}}/>
 					<Button ml={5} text="Move" enabled={moveCommand.Validate_Safe() == null} title={moveCommand.validateError} onClick={async()=>{
 						controller.Close();
-						const {argumentWrapperID} = await moveCommand.Run();
+						const {argumentWrapperID} = await moveCommand.RunOnServer();
 						if (argumentWrapperID) {
 							runInAction("OnDragEnd.Move.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
 						}
@@ -176,7 +176,7 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 				targetIndex++;
 			}
 
-			new UpdateTimelineStepOrder({timelineID: sourceDroppableInfo.timelineID, stepID: draggableInfo.stepID, newIndex: targetIndex}).Run();
+			new UpdateTimelineStepOrder({timelineID: sourceDroppableInfo.timelineID, stepID: draggableInfo.stepID, newIndex: targetIndex}).RunOnServer();
 		} else if (targetDroppableInfo.type == "TimelineStepNodeRevealList") {
 			let path = draggableInfo.nodePath;
 			const draggedNode = GetNode(GetNodeID(path));
@@ -191,7 +191,7 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 			newNodeReveal.path = path;
 			newNodeReveal.show = true;
 			const newNodeReveals = (step.nodeReveals || []).concat(newNodeReveal);
-			new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
+			new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).RunOnServer();
 		}*/
 	};
 

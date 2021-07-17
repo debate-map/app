@@ -65,7 +65,7 @@ export class Map {
 
 	@DB((t, n)=>t.jsonb(n))
 	@Field(()=>NewSchema({
-		properties: CE(GetSchemaJSON("MapNodeRevision").properties).Including(...MapNodeRevision_Defaultable_props),
+		properties: CE(GetSchemaJSON("MapNodeRevision").properties!).Including(...MapNodeRevision_Defaultable_props),
 	}))
 	nodeDefaults?: MapNodeRevision_Defaultable;
 

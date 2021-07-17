@@ -90,7 +90,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 				{/*<Row center>
 					<Text>Control type:</Text>
 					<Select ml={5} options={["Private", "Public"]} value={changeControlType_currentType} enabled={changeControlTypeCommand.Validate_Safe() == null} title={changeControlTypeCommand.validateError} onChange={val=>{
-						changeControlTypeCommand.Run();
+						changeControlTypeCommand.RunOnServer();
 					}}/>
 					<InfoButton ml={5} text="Private nodes are locked to a given map, but allow more permission controls to the node-creator and map-editors."/>
 				</Row>*/}
@@ -103,7 +103,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 								// message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_controlled)}"?\n\nAll relevance ratings will be deleted.`,
 								message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_controlled)}"?`,
 								onOK: ()=>{
-									new ReverseArgumentPolarity(E(mapID && {mapID}, {nodeID: nodeArgOrParentSPArg_controlled.id, path: nodeArgOrParentSPArg_controlled_path!})).Run();
+									new ReverseArgumentPolarity(E(mapID && {mapID}, {nodeID: nodeArgOrParentSPArg_controlled.id, path: nodeArgOrParentSPArg_controlled_path!})).RunOnServer();
 								},
 							});
 						}}/>
@@ -113,14 +113,14 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 						<Pre>Convert to: </Pre>
 						<Select options={convertToTypes} value={convertToType} onChange={val=>this.SetState({convertToType: val})}/>
 						<Button ml={5} text="Convert" onClick={()=>{
-							new ChangeClaimType(E({mapID, nodeID: node.id, newType: convertToType!})).Run();
+							new ChangeClaimType(E({mapID, nodeID: node.id, newType: convertToType!})).RunOnServer();
 						}}/>
 					</Row>}
 				{/*childOrderTypeChangeable &&
 					<Row center>
 						<Text>Children order type:</Text>
 						<Select ml={5} options={GetEntries(ChildOrderType)} value={node.childrenOrderType} enabled={changeControlTypeCommand.Validate_Safe() == null} title={changeControlTypeCommand.validateError} onChange={val=>{
-							changeControlTypeCommand.Run();
+							changeControlTypeCommand.RunOnServer();
 						}}/>
 						<InfoButton ml={5} text="Private nodes are locked to a given map, but allow more permission controls to the node-creator and map-editors."/>
 					</Row>*/}
@@ -161,7 +161,7 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 								new UpdateLink({
 									linkID: node.link!.id,
 									linkUpdates: {form: val ? ClaimForm.negation : ClaimForm.base},
-								}).Run();
+								}).RunOnServer();
 							}}/>
 					</Row>}
 				{node.link && canSetAsSeriesAnchor &&
@@ -173,7 +173,7 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 								new UpdateLink({
 									linkID: node.link!.id,
 									linkUpdates: {seriesAnchor: val || undefined},
-								}).Run();
+								}).RunOnServer();
 							}}/>
 					</Row>}
 			</Column>
@@ -199,9 +199,9 @@ class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> 
 							const existingValidIDs = oldChildrenOrder.filter(id=>node.children[id] != null);
 							const missingChildIDs = (node.children || {}).Pairs().filter(pair=>!oldChildrenOrder.Contains(pair.key)).map(pair=>pair.key);
 							updateChildrenOrderCommand.payload.childrenOrder = existingValidIDs.concat(missingChildIDs);
-							updateChildrenOrderCommand.Run();
+							updateChildrenOrderCommand.RunOnServer();
 						} else {
-							updateChildrenOrderCommand.Run();
+							updateChildrenOrderCommand.RunOnServer();
 						}
 					}}/>
 				</Row>
@@ -225,14 +225,14 @@ class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> 
 									const newOrder = oldChildrenOrder.slice(0);
 									newOrder.RemoveAt(index);
 									newOrder.Insert(index - 1, childID);
-									new UpdateNodeChildrenOrder({mapID, nodeID: node.id, childrenOrder: newOrder}).Run();
+									new UpdateNodeChildrenOrder({mapID, nodeID: node.id, childrenOrder: newOrder}).RunOnServer();
 								}}/>
 							<Button text={<Icon size={16} icon="arrow-down"/> as any} m={2} ml={5} style={{padding: 3}} enabled={index < oldChildrenOrder.length - 1}
 								onClick={()=>{
 									const newOrder = oldChildrenOrder.slice(0);
 									newOrder.RemoveAt(index);
 									newOrder.Insert(index + 1, childID);
-									new UpdateNodeChildrenOrder({mapID, nodeID: node.id, childrenOrder: newOrder}).Run();
+									new UpdateNodeChildrenOrder({mapID, nodeID: node.id, childrenOrder: newOrder}).RunOnServer();
 								}}/>
 						</Row>
 					);

@@ -44,7 +44,7 @@ import {OmitIfFalsy} from "web-vcore/nm/js-vextensions.js";
 		const newRevision = new MapNodeRevision({ titles: { base: premiseTitle } });
 		const newLink = { _: true, form: ClaimForm.base } as NodeChildLink;
 
-		const info = await new AddChildNode({ mapID, parentID: parentNode.id, node: newNode, revision: newRevision, link: newLink }).Run();
+		const info = await new AddChildNode({ mapID, parentID: parentNode.id, node: newNode, revision: newRevision, link: newLink }).RunOnServer();
 		ACTMapNodeExpandedSet({ mapID, path: `${parentPath}/${info.nodeID}`, expanded: true, resetSubtree: false });
 		runInAction('PremiseAddHelper.CreatePremise', () => store.main.nodeLastAcknowledgementTimes.set(info.nodeID, Date.now()));
 

@@ -103,9 +103,9 @@
 // 								<>
 // 									<CheckBox text="Video time: " value={step.videoTime != null} enabled={creatorOrMod} onChange={val=>{
 // 										if (val) {
-// 											new UpdateTimelineStep({stepID: step.id, stepUpdates: {videoTime: 0}}).Run();
+// 											new UpdateTimelineStep({stepID: step.id, stepUpdates: {videoTime: 0}}).RunOnServer();
 // 										} else {
-// 											new UpdateTimelineStep({stepID: step.id, stepUpdates: {videoTime: null}}).Run();
+// 											new UpdateTimelineStep({stepID: step.id, stepUpdates: {videoTime: null}}).RunOnServer();
 // 										}
 // 									}}/>
 // 									<TimeSpanInput mr={5} largeUnit="minute" smallUnit="second" style={{width: 60}}
@@ -116,7 +116,7 @@
 // 							<Select value={} onChange={val=> {}}/> */}
 // 							<Pre>Position: </Pre>
 // 							<Select options={positionOptions} value={step.groupID} enabled={creatorOrMod} onChange={val=>{
-// 								new UpdateTimelineStep({stepID: step.id, stepUpdates: {groupID: val}}).Run();
+// 								new UpdateTimelineStep({stepID: step.id, stepUpdates: {groupID: val}}).RunOnServer();
 // 							}}/>
 // 							<Button ml={5} text="X" enabled={creatorOrMod} onClick={()=>{
 // 								ShowMessageBox({
@@ -127,7 +127,7 @@
 // 										${step.message}
 // 									`.AsMultiline(0),
 // 									onOK: ()=>{
-// 										new DeleteTimelineStep({stepID: step.id}).Run();
+// 										new DeleteTimelineStep({stepID: step.id}).RunOnServer();
 // 									},
 // 								});
 // 							}}/>
@@ -138,7 +138,7 @@
 // 								onClick={e=>{
 // 									if (e.button != 0) return;
 // 									const newTimelineStep = Clone(step);
-// 									new AddTimelineStep({timelineID: timeline.id, step: newTimelineStep, stepIndex: index + 1}).Run();
+// 									new AddTimelineStep({timelineID: timeline.id, step: newTimelineStep, stepIndex: index + 1}).RunOnServer();
 // 								}}/>
 // 						</VMenuStub>}
 // 					</Row>
@@ -146,7 +146,7 @@
 // 					<TextArea /* {...{ useCacheForDOMMeasurements: true } as any} */ autoSize={true} style={{background: "rgba(255,255,255,.2)", color: "rgba(255,255,255,.7)", padding: 5, outline: "none"}}
 // 						value={step.message} enabled={creatorOrMod}
 // 						onChange={val=>{
-// 							new UpdateTimelineStep({stepID: step.id, stepUpdates: {message: val}}).Run();
+// 							new UpdateTimelineStep({stepID: step.id, stepUpdates: {message: val}}).RunOnServer();
 // 						}}/>
 // 					<Droppable type="MapNode" droppableId={ToJSON(new DroppableInfo({type: "TimelineStepNodeRevealList", stepID: step.id}))} isDropDisabled={!creatorOrMod}>
 // 						{(provided: DroppableProvided, snapshot: DroppableStateSnapshot)=>{
@@ -280,7 +280,7 @@
 // 					{editing &&
 // 					<Button ml="auto" text="X" style={{margin: -3, padding: "3px 10px"}} onClick={()=>{
 // 						const newNodeReveals = step.nodeReveals.Except(nodeReveal);
-// 						new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
+// 						new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).RunOnServer();
 // 					}}/>}
 // 				</Row>
 // 				{detailsOpen &&
@@ -293,7 +293,7 @@
 // 							const newPath = await GetAsync(()=>SearchUpFromNodeForNodeMatchingX(node.id, id=>id == map.rootNode));
 // 							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 // 							newNodeReveals[index].path = newPath;
-// 							new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
+// 							new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).RunOnServer();
 // 						}}/>}
 // 					</Row>
 // 					{editing &&
@@ -302,7 +302,7 @@
 // 							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 // 							newNodeReveals[index].show = val;
 // 							if (val) newNodeReveals[index].hide = false;
-// 							new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
+// 							new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).RunOnServer();
 // 						}}/>
 // 						{nodeReveal.show &&
 // 						<>
@@ -310,7 +310,7 @@
 // 							<Spinner ml={5} min={0} max={50} value={nodeReveal.show_revealDepth} onChange={val=>{
 // 								const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 // 								newNodeReveals[index].VSet("show_revealDepth", val > 0 ? val : DEL);
-// 								new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
+// 								new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).RunOnServer();
 // 							}}/>
 // 						</>}
 // 					</Row>}
@@ -320,7 +320,7 @@
 // 							const newNodeReveals = Clone(step.nodeReveals) as NodeReveal[];
 // 							newNodeReveals[index].hide = val;
 // 							if (val) newNodeReveals[index].show = false;
-// 							new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).Run();
+// 							new UpdateTimelineStep({stepID: step.id, stepUpdates: {nodeReveals: newNodeReveals}}).RunOnServer();
 // 						}}/>
 // 					</Row>}
 // 				</Column>}

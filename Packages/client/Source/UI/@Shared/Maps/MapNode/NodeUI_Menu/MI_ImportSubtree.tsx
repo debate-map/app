@@ -153,7 +153,7 @@
 // 						title="It's recommended to use the standard option, since it's what we'll need to use when we don't have unrestricted, direct client-access."
 // 						enabled={dbUpdates?.VKeys().length > 0}
 // 						onClick={async ()=>{
-// 							let result = await this.importCommand.Run();
+// 							let result = await this.importCommand.RunOnServer();
 // 							let nodesAdded = this.importCommand.subs.filter(a=>a instanceof AddChildNode).length;
 // 							ShowMessageBox({
 // 								title: "Subtree imported",

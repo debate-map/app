@@ -64,7 +64,7 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 					proceed();
 
 					async function proceed() {
-						const {argumentWrapperID} = await linkCommand.Run();
+						const {argumentWrapperID} = await linkCommand.RunOnServer();
 						if (argumentWrapperID) {
 							runInAction("PasteAsLink_MenuItem.proceed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
 						}

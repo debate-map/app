@@ -49,12 +49,12 @@ export class MI_DeleteContainerArgument extends BaseComponent<MI_SharedProps, {}
 						title: `Delete "${argumentText}"`, cancelButton: true,
 						message: `Delete the argument "${argumentText}", and ${baseClaimCommand instanceof UnlinkNode ? "unlink" : "delete"} its base-claim?`,
 						onOK: async()=>{
-							// await command.Run();
+							// await command.RunOnServer();
 							// if deleting single-premise argument, first delete or unlink the base-claim
 							if (baseClaimCommand) {
-								await baseClaimCommand.Run();
+								await baseClaimCommand.RunOnServer();
 							}
-							await argumentCommand.Run();
+							await argumentCommand.RunOnServer();
 						},
 					});
 				}}/>

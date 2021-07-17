@@ -50,7 +50,7 @@
 // 					</DropDownContent>
 // 				</DropDown>
 // 				<Button ml={5} text="X" title="Delete timeline" enabled={timeline != null && timeline.steps == null} onClick={()=>{
-// 					new DeleteTimeline({timelineID: timeline.id}).Run();
+// 					new DeleteTimeline({timelineID: timeline.id}).RunOnServer();
 // 				}} />
 // 				<Button ml={5} text="+" title="Add new timeline" onClick={()=>{
 // 					if (MeID() == null) return ShowSignInPopup();

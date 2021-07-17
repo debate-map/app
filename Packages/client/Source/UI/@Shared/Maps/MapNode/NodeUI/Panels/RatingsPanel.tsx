@@ -110,7 +110,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 							// todo: have submitted date be based on local<>Firebase time-offset (retrieved from Firebase) [this prevents fail from security rules]
 							let newRating_value = GetValueForLabel(newRating_label);
 							newRating_value = TransformRatingForContext(newRating_value, reverseRatings);
-							new SetNodeRating({nodeID: node.id, ratingType, value: newRating_value}).Run();
+							new SetNodeRating({nodeID: node.id, ratingType, value: newRating_value}).RunOnServer();
 						},
 					});
 				}}
@@ -121,7 +121,7 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 						title: "Delete rating", cancelButton: true,
 						message: `Delete your "${ratingType}" rating for ${nodeTypeDisplayName}`,
 						onOK: ()=>{
-							new SetNodeRating({nodeID: node.id, ratingType, value: null}).Run();
+							new SetNodeRating({nodeID: node.id, ratingType, value: null}).RunOnServer();
 						},
 					});
 				}}>

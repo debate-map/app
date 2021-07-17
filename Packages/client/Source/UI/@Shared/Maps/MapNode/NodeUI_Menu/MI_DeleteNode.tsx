@@ -29,7 +29,7 @@ export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 						title: `Delete "${nodeText}"`, cancelButton: true,
 						message: `Delete the node "${nodeText}"${contextStr}?`,
 						onOK: async()=>{
-							await command.Run();
+							await command.RunOnServer();
 						},
 					});
 				}}/>

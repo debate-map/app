@@ -12,7 +12,7 @@ AddSchema(`Update${MTName}_payload`, [MTName], ()=>({
 	properties: {
 		id: {$ref: "UUID"},
 		updates: NewSchema({
-			properties: CE(GetSchemaJSON(MTName).properties).Including("name", "forms", "disambiguation", "type", "definition", "note"),
+			properties: CE(GetSchemaJSON(MTName).properties!).Including("name", "forms", "disambiguation", "type", "definition", "note"),
 		}),
 	},
 	required: ["id", "updates"],

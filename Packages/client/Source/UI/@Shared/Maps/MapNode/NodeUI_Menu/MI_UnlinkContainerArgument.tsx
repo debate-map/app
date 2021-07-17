@@ -35,7 +35,7 @@ export class MI_UnlinkContainerArgument extends BaseComponentPlus({} as MI_Share
 						title: `Unlink "${argumentText}"`, cancelButton: true,
 						message: `Unlink the argument "${argumentText}"?`,
 						onOK: async()=>{
-							command.Run();
+							command.RunOnServer();
 						},
 					});
 				}}/>

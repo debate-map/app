@@ -85,7 +85,7 @@
 // 			);
 // 		},
 // 		onOK: ()=>{
-// 			new AddPhrasing({phrasing: newEntry}).Run();
+// 			new AddPhrasing({phrasing: newEntry}).RunOnServer();
 // 		},
 // 	});
 // }

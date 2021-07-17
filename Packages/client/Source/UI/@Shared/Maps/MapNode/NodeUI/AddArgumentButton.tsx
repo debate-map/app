@@ -47,7 +47,7 @@ type Props = {map: Map, node: MapNodeL3, path: string, polarity: Polarity, style
 					Dragged claim/argument: ${GetNodeDisplayText(draggedNode)}
 				`.AsMultiline(0),
 				onOK: async () => {
-					const { argumentWrapperID } = await linkCommand.Run();
+					const { argumentWrapperID } = await linkCommand.RunOnServer();
 					if (argumentWrapperID) {
 						store.dispatch(new ACTSetLastAcknowledgementTime({ nodeID: argumentWrapperID, time: Date.now() }));
 					}

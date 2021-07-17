@@ -80,7 +80,7 @@ class SharesListUI extends BaseComponentPlus({} as {filter_mapID: string|n}, {})
 											message: `Delete the share named "${share.name}"?`,
 											onOK: async()=>{
 												const command = new DeleteShare({id: share.id});
-												await command.Run();
+												await command.RunOnServer();
 											},
 										});
 									}}/>

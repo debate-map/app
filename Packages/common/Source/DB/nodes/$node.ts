@@ -387,12 +387,12 @@ export const GetNodeDisplayText = CreateAccessor(c=>(node: MapNodeL2, path?: str
 export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(question title not set)"];
 
 export function GetValidChildTypes(nodeType: MapNodeType, path: string) {
-	const nodeTypes = GetValues<MapNodeType>(MapNodeType);
+	const nodeTypes = GetValues(MapNodeType);
 	const validChildTypes = nodeTypes.filter(type=>ForLink_GetError(nodeType, type) == null);
 	return validChildTypes;
 }
 export function GetValidNewChildTypes(parent: MapNodeL2, holderType: HolderType|n, permissions: PermissionGroupSet) {
-	const nodeTypes = GetValues<MapNodeType>(MapNodeType);
+	const nodeTypes = GetValues(MapNodeType);
 	const validChildTypes = nodeTypes.filter(type=>ForNewLink_GetError(parent.id, {type} as any, permissions, holderType) == null);
 	return validChildTypes;
 }

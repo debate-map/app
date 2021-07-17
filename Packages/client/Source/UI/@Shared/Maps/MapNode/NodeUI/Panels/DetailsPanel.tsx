@@ -46,12 +46,12 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 							if (link) {
 								const linkUpdates = GetUpdates(link, this.detailsUI!.GetNewLinkData());
 								if (linkUpdates.VKeys().length) {
-									await new UpdateLink(E({linkID: link.id, linkUpdates})).Run();
+									await new UpdateLink(E({linkID: link.id, linkUpdates})).RunOnServer();
 								}
 							}
 
 							const newRevision = this.detailsUI!.GetNewRevisionData();
-							const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).Run();
+							const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).RunOnServer();
 							runInAction("DetailsPanel.save.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 
 							/*if (IsPremiseOfSinglePremiseArgument(node, parentNode)) {
@@ -64,7 +64,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 									if (!_.isEqual(argumentNodePermissions, nodePermissions)) {
 										const newArgumentRevision = Clone(argumentNode.current);
 										newArgumentRevision.VSet(nodePermissions);
-										const newArgumentRevisionID = await new AddNodeRevision({mapID: map.id, revision: newArgumentRevision}).Run();
+										const newArgumentRevisionID = await new AddNodeRevision({mapID: map.id, revision: newArgumentRevision}).RunOnServer();
 										runInAction("DetailsPanel.save.onClick_part2", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentNode.id, Date.now()));
 									}
 								}

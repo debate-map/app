@@ -17,7 +17,7 @@ export class UpdateShare extends Command<{id: string, updates: Partial<MainType>
 			properties: {
 				id: {$ref: "UUID"},
 				updates: NewSchema({
-					properties: CE(GetSchemaJSON(MTName).properties).Including("name", "mapID", "mapView"),
+					properties: CE(GetSchemaJSON(MTName).properties!).Including("name", "mapID", "mapView"),
 				}),
 			},
 			required: ["id", "updates"],

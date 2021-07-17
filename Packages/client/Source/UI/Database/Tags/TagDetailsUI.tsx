@@ -255,7 +255,7 @@ export function ShowAddTagDialog(initialData: Partial<MapNodeTag>, postAdd?: (id
 			);
 		}),
 		onOK: async()=>{
-			const id = await getCommand().Run();
+			const id = await getCommand().RunOnServer();
 			if (postAdd) postAdd(id);
 		},
 	});

@@ -22,7 +22,7 @@ import {MapDetailsUI} from "../../MapDetailsUI.js";
 	const newJSON = ToJSON(newRevision);
 	if (newJSON != oldJSON) {
 		const updateCommand = new AddNodeRevision({mapID, revision: newRevision});
-		await updateCommand.Run();
+		await updateCommand.RunOnServer();
 		runInfo.revisionsUpdated.add(node.currentRevision);
 	}
 
@@ -63,7 +63,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 						<Row>
 							<Button mt={5} text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
 								const mapUpdates = GetUpdates(map, this.detailsUI!.GetNewData()).Excluding("layers", "timelines");
-								await new UpdateMapDetails({id: map.id, updates: mapUpdates}).Run();
+								await new UpdateMapDetails({id: map.id, updates: mapUpdates}).RunOnServer();
 							}}/>
 						</Row>}
 					{creatorOrMod &&
@@ -71,7 +71,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 							<Row style={{fontWeight: "bold"}}>Advanced:</Row>
 							<Row mt={5} center>
 								<CheckBox text="Featured" enabled={setMapFeaturedCommand.Validate_Safe() == null} title={setMapFeaturedCommand.validateError} value={map.featured ?? false} onChange={val=>{
-									setMapFeaturedCommand.Run();
+									setMapFeaturedCommand.RunOnServer();
 								}}/>
 							</Row>
 							<Row center>
@@ -112,7 +112,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 										title: `Delete "${map.name}"`, cancelButton: true,
 										message: `Delete the map "${map.name}"?`,
 										onOK: async()=>{
-											await new DeleteMap({mapID: map.id}).Run();
+											await new DeleteMap({mapID: map.id}).RunOnServer();
 											runInAction("DeleteMap.onDone", ()=>store.main.debates.selectedMapID = null);
 										},
 									});

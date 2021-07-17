@@ -38,7 +38,7 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User|n}
 						return (
 							<CheckBox key={index} mr={index < 3 ? 5 : 0} text={PropNameToTitle(group)} value={(profileUserPermissionGroups || {})[group]} enabled={admin && !changingOwnAdminState} onChange={val=>{
 								const newPermissionGroups = E(profileUserPermissionGroups, {[group]: val});
-								new SetUserData({id: profileUser.id, updates: {permissionGroups: newPermissionGroups}}).Run();
+								new SetUserData({id: profileUser.id, updates: {permissionGroups: newPermissionGroups}}).RunOnServer();
 							}}/>
 						);
 					})}
@@ -65,7 +65,7 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User|n}
 												selected && {border: "1px solid rgba(255,255,255,.7)"},
 											)}
 											onClick={()=>{
-												new SetUserData_Hidden({id: profileUser.id, updates: {backgroundID: id}}).Run();
+												new SetUserData_Hidden({id: profileUser.id, updates: {backgroundID: id}}).RunOnServer();
 											}}>
 										</Div>
 									);
@@ -74,30 +74,30 @@ export class UserProfileUI extends BaseComponentPlus({} as {profileUser: User|n}
 						</ScrollView>
 						<Row mt={5}>
 							<CheckBox text="Custom background" value={profileUser_p.backgroundCustom_enabled ?? false} onChange={val=>{
-								new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_enabled: val}}).Run();
+								new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_enabled: val}}).RunOnServer();
 							}}/>
 						</Row>
 						<Row mt={5}>
 							<Pre>Color: </Pre>
 							<ColorPickerBox color={profileUser_p.backgroundCustom_color || "#FFFFFF"} onChange={val=>{
-								new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_color: val}}).Run();
+								new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_color: val}}).RunOnServer();
 							}}/>
 							<Button ml={5} text="Clear" onClick={()=>{
-								new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_color: null}}).Run();
+								new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_color: null}}).RunOnServer();
 							}}/>
 						</Row>
 						<Row mt={5}>
 							<Pre>URL: </Pre>
 							<TextInput style={ES({flex: 1})}
 								value={profileUser_p.backgroundCustom_url} onChange={val=>{
-									new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_url: val}}).Run();
+									new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_url: val}}).RunOnServer();
 								}}/>
 						</Row>
 						<Row mt={5}>
 							<Pre>Anchor: </Pre>
 							<Select options={[{name: "top", value: "center top"}, {name: "center", value: "center center"}, {name: "bottom", value: "center bottom"}]}
 								value={profileUser_p.backgroundCustom_position || "center center"} onChange={val=>{
-									new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_position: val}}).Run();
+									new SetUserData_Hidden({id: profileUser.id, updates: {backgroundCustom_position: val}}).RunOnServer();
 								}}/>
 						</Row>
 					</Fragment>}
@@ -154,7 +154,7 @@ export function ShowChangeDisplayNameDialog(userID: string, oldDisplayName: stri
 			);
 		},
 		onOK: ()=>{
-			new SetUserData({id: userID, updates: {displayName: newDisplayName}}).Run();
+			new SetUserData({id: userID, updates: {displayName: newDisplayName}}).RunOnServer();
 		},
 	});
 }

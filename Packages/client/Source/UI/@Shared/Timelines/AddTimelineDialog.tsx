@@ -37,11 +37,11 @@
 // 			);
 // 		},
 // 		onOK: async()=>{
-// 			const timelineID = await new AddTimeline({mapID, timeline: newTimeline}).Run();
+// 			const timelineID = await new AddTimeline({mapID, timeline: newTimeline}).RunOnServer();
 // 			const step = new TimelineStep({
 // 				message: defaultIntroMessage.trim(),
 // 			});
-// 			new AddTimelineStep({timelineID, step}).Run();
+// 			new AddTimelineStep({timelineID, step}).RunOnServer();
 // 		},
 // 	});
 // }

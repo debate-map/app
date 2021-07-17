@@ -106,7 +106,7 @@ class AddSubnodeDialog extends BaseComponentPlus({} as Props, {} as {layer: Laye
 		const newNodeID = await new AddSubnode({
 			mapID, layerID: layer.id, anchorNodeID: anchorNode.id,
 			subnode: newNode, subnodeRevision: newRevision, // link: newLink,
-		}).Run();
+		}).RunOnServer();
 		// store.dispatch(new ACTMapNodeExpandedSet_InLayer({mapID, anchorNodePath, layerID: layer._id, layerPath: newNodeID, expanded: true, recursive: false}));
 	}
 }

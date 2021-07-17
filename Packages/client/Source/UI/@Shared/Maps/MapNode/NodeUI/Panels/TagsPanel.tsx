@@ -69,7 +69,7 @@ class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: MapNodeTag, 
 				{creatorOrMod &&
 					<Row mt={5}>
 						<Button text="Save" enabled={tempCommand_valid} title={tempCommand_error} onLeftClick={async()=>{
-							await tempCommand.Run();
+							await tempCommand.RunOnServer();
 						}}/>
 						<Button ml="auto" text="Delete" onLeftClick={async()=>{
 							ShowMessageBox({
@@ -80,7 +80,7 @@ class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: MapNodeTag, 
 									Type: ${compClass.displayName}
 								`.AsMultiline(0),
 								onOK: async()=>{
-									await new DeleteNodeTag({id: tag.id}).Run();
+									await new DeleteNodeTag({id: tag.id}).RunOnServer();
 								},
 							});
 						}}/>

@@ -12,7 +12,7 @@ AddSchema("UpdateLink_payload", ["ChildEntry"], ()=>({
 		linkParentID: {type: "string"},
 		linkChildID: {type: "string"},
 		linkUpdates: NewSchema({
-			properties: CE(GetSchemaJSON("ChildEntry").properties).Including("form", "polarity"),
+			properties: CE(GetSchemaJSON("ChildEntry").properties!).Including("form", "polarity"),
 		}),
 	},
 	required: ["linkParentID", "linkChildID", "linkUpdates"],

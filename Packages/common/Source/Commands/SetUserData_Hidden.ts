@@ -1,7 +1,8 @@
 import {Command, AssertV, AssertValidate, GetSchemaJSON, NewSchema, dbp, CommandMeta, DeriveJSONSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {CE} from "web-vcore/nm/js-vextensions.js";
+import {CE, GetEntries, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
 import {UserHidden} from "../DB/userHiddens/@UserHidden.js";
 import {GetUserHidden} from "../DB/userHiddens.js";
+import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
 
 type MainType = UserHidden;
 const MTName = "UserHidden";
@@ -15,7 +16,7 @@ const MTName = "UserHidden";
 			"backgroundID", "backgroundCustom_enabled", "backgroundCustom_color", "backgroundCustom_url", "backgroundCustom_position",
 		]}),
 	}),*/
-	payloadInfo: ()=>({
+	payloadSchema: ()=>({
 		properties: {
 			id: {$ref: "UUID"},
 			updates: DeriveJSONSchema(MTName, {includeOnly: [

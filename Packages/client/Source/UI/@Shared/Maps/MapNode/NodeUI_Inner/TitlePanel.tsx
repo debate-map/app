@@ -221,7 +221,7 @@ export class TitlePanel extends BaseComponentPlus(
 			newRevision.titles[titleKey] = newTitle;
 
 			const command = new AddNodeRevision({mapID: map.id, revision: newRevision});
-			const revisionID = await command.Run();
+			const revisionID = await command.RunOnServer();
 			runInAction("TitlePanel.ApplyEdit", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 			//await WaitTillPathDataIsReceiving(DBPath(`nodeRevisions/${revisionID}`));
 			//await WaitTillPathDataIsReceived(DBPath(`nodeRevisions/${revisionID}`));

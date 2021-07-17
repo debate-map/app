@@ -75,7 +75,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 										onClick={async e=>{
 											Assert(selectedTerm); // nn: button would be disabled otherwise
 											const updates = GetUpdates(selectedTerm, selectedTerm_newData);
-											await new UpdateTerm({termID: selectedTerm.id, updates}).Run();
+											await new UpdateTerm({termID: selectedTerm.id, updates}).RunOnServer();
 											// this.SetState({selectedTerm_newData: null});
 										}}/>}
 								{creatorOrMod &&
@@ -86,7 +86,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 												title: `Delete "${GetFullNameP(selectedTerm)}"`, cancelButton: true,
 												message: `Delete the term "${GetFullNameP(selectedTerm)}"?`,
 												onOK: async()=>{
-													await new DeleteTerm({termID: selectedTerm.id}).Run();
+													await new DeleteTerm({termID: selectedTerm.id}).RunOnServer();
 												},
 											});
 										}}/>}

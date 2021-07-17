@@ -34,7 +34,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 						<Button ml="auto" text="Add editor" onClick={()=>{
 							const newEditors = CloneWithPrototypes(map.editors || []);
 							newEditors.push(userIDPlaceholder);
-							new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).Run();
+							new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
 						}}/>}
 					</Row>
 					{map.editors.map((editorID, index)=>{
@@ -45,7 +45,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 								<UserPicker value={editorID} onChange={val=> {
 									const newEditors = CloneWithPrototypes(map.editors);
 									newEditors[index] = val;
-									new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).Run();
+									new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
 								}}>
 									<Button enabled={creatorOrMod} text={editorID != userIDPlaceholder ? `${displayName} (id: ${editorID})` : "(click to select user)"} style={{width: "100%"}}/>
 								</UserPicker>
@@ -57,7 +57,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 										onOK: ()=>{
 											const newEditors = CloneWithPrototypes(map.editors);
 											newEditors.RemoveAt(index);
-											new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).Run();
+											new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
 										},
 									});
 								}}/>}

@@ -90,7 +90,7 @@ export class AddChildHelper {
 		let runResult_copy;
 		if (this.node.type == MapNodeType.argument) {
 			if (!(command instanceof AddArgumentAndClaim)) throw new Error("Expected AddArgumentAndClaim command.");
-			const runResult = runResult_copy = await command.Run();
+			const runResult = runResult_copy = await command.RunOnServer();
 
 			if (opt.expandSelf) {
 				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.argumentNodeID}`, expanded: true, resetSubtree: false});
@@ -103,7 +103,7 @@ export class AddChildHelper {
 			}
 		} else {
 			if (!(command instanceof AddChildNode)) throw new Error("Expected AddChildNode command.");
-			const runResult = runResult_copy = await command.Run();
+			const runResult = runResult_copy = await command.RunOnServer();
 
 			if (opt.expandSelf) {
 				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.nodeID}`, expanded: true,

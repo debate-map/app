@@ -8,6 +8,8 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {GetDocs} from "web-vcore/nm/mobx-graphlink.js";
 import {Div} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {graph} from "Utils/LibIntegrations/MobXGraphlink.js";
+import {Me} from "dm_common";
 import {colors} from "../../Utils/UI/GlobalStyles.js";
 import {ChatPanel} from "./NavBar/ChatPanel.js";
 import {GuidePanel} from "./NavBar/GuidePanel.js";
@@ -84,7 +86,7 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 					<span style={{position: "absolute", right: 0, display: "flex"}}>
 						<NavBarPanelButton text="Search" panel="search" corner="top-right"/>
 						{/* <NavBarPanelButton text="Guide" panel="guide" corner="top-right"/> */}
-						<NavBarPanelButton text={/*graph.userInfo?.displayName ? graph.userInfo.displayName.match(/(.+?)( |$)/)[1] :*/ "Sign in"} panel="profile" corner="top-right"/>
+						<NavBarPanelButton text={Me() ? Me()!.displayName.match(/(.+?)( |$)/)![1] : "Sign in"} panel="profile" corner="top-right"/>
 					</span>
 					<div style={{
 						position: "fixed", display: "flex", zIndex: zIndexes.navBar, right: 0, top: 45, maxHeight: "calc(100% - 45px - 30px)",

@@ -31,7 +31,7 @@
 // 						<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
 // 							const phrasingUpdates = GetUpdates(phrasing, this.detailsUI.GetNewData());
 // 							if (phrasingUpdates.VKeys().length) {
-// 								await new UpdatePhrasing(E({id: phrasing.id, updates: phrasingUpdates})).Run();
+// 								await new UpdatePhrasing(E({id: phrasing.id, updates: phrasingUpdates})).RunOnServer();
 // 							}
 // 						}}/>
 // 						<Button ml="auto" text="Delete" onLeftClick={async()=>{
@@ -43,7 +43,7 @@
 // 									Text: ${phrasing.text}
 // 								`.AsMultiline(0),
 // 								onOK: async()=>{
-// 									await new DeletePhrasing({id: phrasing.id}).Run();
+// 									await new DeletePhrasing({id: phrasing.id}).RunOnServer();
 // 								},
 // 							});
 // 						}}/>

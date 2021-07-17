@@ -68,7 +68,7 @@
 // 				<Row>
 // 					<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
 // 						const updates = GetUpdates(timeline, this.detailsUI.GetNewData()).Excluding("steps");
-// 						new UpdateTimeline({id: timeline.id, updates}).Run();
+// 						new UpdateTimeline({id: timeline.id, updates}).RunOnServer();
 // 					}}/>
 // 					{/* error && <Pre>{error.message}</Pre> */}
 // 				</Row>}

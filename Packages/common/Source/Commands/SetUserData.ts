@@ -15,7 +15,7 @@ export class SetUserData extends Command<{id: string, updates: Partial<MainType>
 			properties: {
 				id: {$ref: "UUID"},
 				updates: NewSchema({
-					properties: CE(GetSchemaJSON(MTName)["properties"]).Including(
+					properties: CE(GetSchemaJSON(MTName).properties!).Including(
 						"displayName", "photoURL",
 						"joinDate", "permissionGroups",
 					),

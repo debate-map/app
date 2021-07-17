@@ -33,7 +33,7 @@ export class MI_UnlinkNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 						title: `Unlink child "${nodeText}"`, cancelButton: true,
 						message: `Unlink the child "${nodeText}" from its parent "${parentText}"?`,
 						onOK: ()=>{
-							command.Run();
+							command.RunOnServer();
 						},
 					});
 				}}/>

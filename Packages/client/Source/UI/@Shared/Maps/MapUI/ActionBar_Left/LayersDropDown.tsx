@@ -102,7 +102,7 @@
 // 										title: `Delete "${layer.name}"`, cancelButton: true,
 // 										message: `Delete the layer "${layer.name}"?`,
 // 										onOK: async()=>{
-// 											new DeleteLayer({layerID: layer.id}).Run();
+// 											new DeleteLayer({layerID: layer.id}).RunOnServer();
 // 										},
 // 									});
 // 								}}/>}
@@ -110,7 +110,7 @@
 // 					<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
 // 					<span style={{flex: columnWidths[2]}}>
 // 						<CheckBox enabled={creatorOrMod} value={GetMapLayerIDs(map.id).Contains(layer.id)} onChange={val=>{
-// 							new SetLayerAttachedToMap({mapID: map.id, layerID: layer.id, attached: val}).Run();
+// 							new SetLayerAttachedToMap({mapID: map.id, layerID: layer.id, attached: val}).RunOnServer();
 // 						}}/>
 // 					</span>
 // 					<span style={{flex: columnWidths[3]}}>
@@ -119,7 +119,7 @@
 // 							const newState =								userLayerState == null ? true
 // 								: userLayerState == true ? false
 // 								: null;
-// 							new SetMapLayerStateForUser({userID: MeID(), mapID: map.id, layerID: layer.id, state: newState}).Run();
+// 							new SetMapLayerStateForUser({userID: MeID(), mapID: map.id, layerID: layer.id, state: newState}).RunOnServer();
 // 						}}/>
 // 					</span>
 // 				</Row>
