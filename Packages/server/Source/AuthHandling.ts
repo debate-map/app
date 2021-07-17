@@ -1,6 +1,6 @@
 import passport from "passport";
 import {Strategy as GoogleStrategy} from "passport-google-oauth20";
-import express from "express";
+import express, {RequestHandler} from "express";
 import cookieSession from "cookie-session";
 import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden} from "dm_common";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
@@ -24,8 +24,7 @@ passport.use(new GoogleStrategy(
 	{
 		clientID: process.env.CLIENT_ID as string,
 		clientSecret: process.env.CLIENT_SECRET as string,
-		//callbackURL: "http://db.app.localhost:3105/auth/google/callback",
-		callbackURL: "http://[::1]:3105/auth/google/callback", // google doesn't allow redirect-url to be a localhost subdomain, so for this one place leave it out (the cookie gets set properly anyway?)
+		callbackURL: "http://localhost:3105/auth/google/callback",
 	},
 	async(accessToken, refreshToken, profile, done)=>{
 		console.log("Test1");
@@ -83,6 +82,30 @@ passport.deserializeUser(async(userBasicInfo: UserBasicInfo, done)=>{
 	done(null, user);
 });
 
+const setUserIDResponseCookie: RequestHandler = (req, res, next)=>{
+	const currentUserID = req.user?.["id"];
+	//console.log("Afterward, got user:", currentUserID);
+
+	var userIDCookie = req.cookies["debate-map-userid"];
+	// if user-id cookie is out of date, update it
+	if (currentUserID != userIDCookie) {
+		if (currentUserID) {
+			res.cookie("debate-map-userid", currentUserID, {
+				//maxAge: new Date(2147483647 * 1000).toUTCString(),
+				expires: new Date(253402300000000), // from: https://stackoverflow.com/a/28289961/2441655
+				httpOnly: false, // httpOnly:false, so frontend code can access it
+
+				//domain: ".app.localhost", // see above for reason
+				//domain: ".localhost", // see above for reason
+				//domain: "localhost",
+			});
+		} else {
+			res.clearCookie("debate-map-userid");
+		}
+	}
+	next();
+};
+
 export function SetUpAuthHandling(app: ExpressApp) {
 	//app.use(express.session({ secret: 'keyboard cat' }));
 	app.use(cookieSession({
@@ -91,7 +114,7 @@ export function SetUpAuthHandling(app: ExpressApp) {
 
 		//domain: ".app.localhost", // explicitly set domain to ".app.localhost", so that it ignores the port segment, letting cookie be seen by both [app.]localhost:3005 and [db.app.]localhost:3105
 		//domain: ".localhost",
-		domain: "[::1]",
+		//domain: "localhost",
 	}));
 	/*app.use(expressSession({
 		secret: "debate-map-session-123123",
@@ -101,23 +124,24 @@ export function SetUpAuthHandling(app: ExpressApp) {
 	app.use(passport.initialize());
 	app.use(passport.session());
 
-	// add middleware that sends the current user-id (as known through passportjs) to the frontend
-	app.use((req, res, next)=>{
-		var userIDCookie = req.cookies["debate-map-userid"];
-		// if user doesn't have the user-id cookie set, or it's out of date, send the new user-id cookie value
-		if (userIDCookie == null || userIDCookie != req.user?.["id"]) {
-			res.cookie("debate-map-userid", req.user?.["id"], {
-				//maxAge: new Date(2147483647 * 1000).toUTCString(),
-				expires: new Date(253402300000000), // from: https://stackoverflow.com/a/28289961/2441655
-				httpOnly: false, // httpOnly:false, so frontend code can access it
-
-				//domain: ".app.localhost", // see above for reason
-				//domain: ".localhost", // see above for reason
-				domain: "[::1]",
-			});
-		}
-		next();
-	});
+	// server-side access-token-retrieval approach
+	app.get("/auth/google",
+		passport.authenticate("google", {
+			scope: ["profile", "email"],
+		}));
+	//includeUserIDAsResponseCookie);
+	app.get("/auth/google/callback",
+		passport.authenticate("google"),
+		setUserIDResponseCookie,
+		(req, res, next)=>{
+			// if success
+			if (req.user) {
+				res.redirect("http://localhost:3005");
+			} else {
+				res.redirect("http://localhost:3005/login-failed");
+			}
+			next();
+		});
 
 	// for testing commands, as server-side
 	/*app.get("/Test1", async(req, res, next)=>{
@@ -137,14 +161,4 @@ export function SetUpAuthHandling(app: ExpressApp) {
 		console.log("Command done! Result:", result);
 		next();
 	});*/
-
-	// server-side access-token-retrieval approach
-	app.get("/auth/google", passport.authenticate("google", {
-		scope: ["profile", "email"],
-	}));
-	app.get("/auth/google/callback",
-		passport.authenticate("google", {
-			successRedirect: "http://[::1]:3005",
-			failureRedirect: "http://[::1]:3005/login-failed",
-		}));
 }

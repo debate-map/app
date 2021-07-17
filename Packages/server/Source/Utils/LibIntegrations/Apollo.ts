@@ -4,7 +4,7 @@ import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mo
 // @ts-ignore // temp fix for import error
 import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep_cjs.js";
 
-const GRAPHQL_URL = "http://[::1]:3105/graphql";
+const GRAPHQL_URL = "http://localhost:3105/graphql";
 
 let httpLink: HttpLink;
 let wsLink: WebSocketLink;

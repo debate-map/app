@@ -4,7 +4,7 @@ import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/cl
 
 import {GetTypePolicyFieldsMappingSingleDocQueriesToCache} from "web-vcore/nm/mobx-graphlink.js";
 
-const GRAPHQL_URL = "http://[::1]:3105/graphql";
+const GRAPHQL_URL = "http://localhost:3105/graphql";
 
 let httpLink: HttpLink;
 let wsLink: WebSocketLink;
@@ -15,6 +15,7 @@ export let apolloClient: ApolloClient<NormalizedCacheObject>;
 export function InitApollo() {
 	httpLink = new HttpLink({
 		uri: GRAPHQL_URL,
+		// allows cookies to be sent with "graphql" calls (eg. for passing passportjs session-token with mutation/command calls)
 		fetchOptions: {
 			credentials: "include",
 		},
@@ -53,7 +54,7 @@ export function InitApollo() {
 		link,
 	]);
 	apolloClient = new ApolloClient({
-		credentials: "include", // needed for cookies to be sent with "graphql" calls (eg. for mutation/command calls)
+		//credentials: "include", // allows cookies to be sent with "graphql" calls (eg. for passing passportjs session-token with mutation/command calls) // this way doesn't work, I think because we send a custom "link"
 		//link,
 		link: link_withErrorHandling,
 		cache: new InMemoryCache({
