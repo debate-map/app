@@ -1,4 +1,4 @@
-import {GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {GetNode, IsRootNode} from "../DB/nodes.js";
@@ -11,6 +11,9 @@ import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 
 @MapEdit
 @UserEdit
+@CommandMeta({
+	payloadSchema: ()=>({}),
+})
 export class UnlinkNode extends Command<{mapID: string|n, parentID: string, childID: string}, {}> {
 	allowOrphaning = false; // could also be named "asPartOfCut", to be consistent with ForUnlink_GetError parameter
 

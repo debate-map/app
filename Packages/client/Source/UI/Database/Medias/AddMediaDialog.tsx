@@ -33,7 +33,7 @@ export function ShowAddMediaDialog(initialData?: Partial<Media>, postAdd?: (id: 
 			);
 		}),
 		onOK: async()=>{
-			const id = await getCommand().RunOnServer();
+			const {id} = await getCommand().RunOnServer();
 			if (postAdd) postAdd(id);
 		},
 	});

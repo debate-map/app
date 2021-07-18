@@ -1,4 +1,4 @@
-import {Command, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, CommandMeta, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
@@ -7,6 +7,9 @@ import {DeleteNode} from "./DeleteNode.js";
 import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
+@CommandMeta({
+	payloadSchema: ()=>({}),
+})
 export class DeleteMap extends Command<{mapID: string}, {}> {
 	oldData: Map;
 	userMapInfoSets: UserMapInfoSet[];

@@ -1,5 +1,5 @@
 import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, AV, Command, dbp, AddSchema, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AV, Command, dbp, AddSchema, AssertValidate, GenerateUUID, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 
 import {AttachmentType, GetAttachmentType} from "../DB/nodeRevisions/@AttachmentType.js";
@@ -18,25 +18,25 @@ export function CanConvertFromClaimTypeXToY(from: AttachmentType, to: Attachment
 	return conversionTypes.includes(`${AttachmentType[from]}>${AttachmentType[to]}`);
 }
 
-AddSchema("ChangeClaimType_payload", {
-	properties: {
-		mapID: {type: "string"},
-		nodeID: {type: "string"},
-		newType: {oneOf: GetValues_ForSchema(AttachmentType)},
-	},
-	required: ["nodeID", "newType"],
-});
-
 @MapEdit
 @UserEdit
+@CommandMeta({
+	payloadSchema: ()=>({
+		properties: {
+			mapID: {type: "string"},
+			nodeID: {type: "string"},
+			newType: {oneOf: GetValues_ForSchema(AttachmentType)},
+		},
+		required: ["nodeID", "newType"],
+	}),
+})
 export class ChangeClaimType extends Command<{mapID?: string|n, nodeID: string, newType: AttachmentType}, {}> {
 	oldType: AttachmentType;
 	newData: MapNode;
 	newRevision: MapNodeRevision;
 	newRevisionID: string;
 	Validate() {
-		/*AssertValidate("ChangeClaimType_payload", this.payload, "Payload invalid");
-		const {nodeID, newType} = this.payload;
+		/*const {nodeID, newType} = this.payload;
 		// let oldData = await GetDataAsync({addHelpers: false}, "nodes", nodeID) as MapNode;
 		const oldData = AV.NonNull = GetNodeL2(nodeID);
 		this.oldType = GetAttachmentType(oldData);

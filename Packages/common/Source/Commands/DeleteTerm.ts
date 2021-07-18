@@ -1,10 +1,13 @@
-import {GetAsync, Command, AssertV, WrapDBValue, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV, WrapDBValue, dbp, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {Term} from "../DB/terms/@Term.js";
 import {GetTerm} from "../DB/terms.js";
 import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
+@CommandMeta({
+	payloadSchema: ()=>({}),
+})
 export class DeleteTerm extends Command<{termID: string}, {}> {
 	oldData: Term;
 	Validate() {

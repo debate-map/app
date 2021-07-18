@@ -1,5 +1,5 @@
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, AssertValidate, Command, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AssertValidate, Command, CommandMeta, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {AddArgumentAndClaim} from "../Commands.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
@@ -13,17 +13,18 @@ type Payload = {mapID: string|n, parentID: string, node: MapNode, revision: MapN
 
 @MapEdit
 @UserEdit
+@CommandMeta({
+	payloadSchema: ()=>({
+		properties: {
+			mapID: {type: "string"}, parentID: {type: ["null", "string"]}, node: {$ref: "MapNode_Partial"}, revision: {$ref: "MapNodeRevision_Partial"}, link: {$ref: "ChildEntry"}, asMapRoot: {type: "boolean"},
+		},
+		required: ["mapID", "parentID", "node", "revision"],
+	}),
+})
 export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: string}> {
 	sub_addNode: AddNode;
 	parent_oldData: MapNode;
 	Validate() {
-		AssertValidate({
-			properties: {
-				mapID: {type: "string"}, parentID: {type: ["null", "string"]}, node: {$ref: "MapNode_Partial"}, revision: {$ref: "MapNodeRevision_Partial"}, link: {$ref: "ChildEntry"}, asMapRoot: {type: "boolean"},
-			},
-			required: ["mapID", "parentID", "node", "revision"],
-		}, this.payload, "Payload invalid");
-
 		const {mapID, parentID, node, revision, link, asMapRoot} = this.payload;
 
 		this.sub_addNode = this.sub_addNode ?? new AddNode({mapID, node, revision}).MarkAsSubcommand(this);

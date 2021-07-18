@@ -1,4 +1,4 @@
-import {AssertValidate, Command, dbp, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, Command, CommandMeta, dbp, GenerateUUID, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {Share} from "../DB.js";
 import {UserEdit} from "../CommandMacros.js";
 
@@ -46,7 +46,11 @@ export function GenerateSafeID(targetLength = 10, hardCodedStringAvoidance = "an
 }
 
 @UserEdit
-export class AddShare extends Command<{share: Share}, string> {
+@CommandMeta({
+	payloadSchema: ()=>({}),
+	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
+})
+export class AddShare extends Command<{share: Share}, {id: string}> {
 	shareID: string;
 	Validate() {
 		const {share} = this.payload;
@@ -54,7 +58,7 @@ export class AddShare extends Command<{share: Share}, string> {
 		share.creator = this.userInfo.id;
 		share.createdAt = Date.now();
 
-		this.returnData = this.shareID;
+		this.returnData = {id: this.shareID};
 		AssertValidate("Share", share, "Share invalid");
 	}
 

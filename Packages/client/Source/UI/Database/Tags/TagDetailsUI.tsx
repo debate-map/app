@@ -5,10 +5,9 @@ import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
 import {ES, InfoButton, observer_simple} from "web-vcore";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNodeL2, AsNodeL3, GetNodeDisplayText} from "dm_common";
-import {MapNodeType} from "dm_common";
-import {AddNodeTag} from "dm_common";
-import {MapNodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp} from "dm_common";
+import {GetNodeL2, AsNodeL3, GetNodeDisplayText, MapNodeType, AddNodeTag, MapNodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp} from "dm_common";
+
+
 import {GetNodeColor} from "Store/db_ext/nodes";
 
 type Props = {baseData: MapNodeTag, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: MapNodeTag)=>void};
@@ -40,14 +39,14 @@ export class TagDetailsUI extends BaseComponentPlus({enabled: true} as Props, {}
 
 		//const splitAt = compClass == TagComp_XIsExtendedByY ? 140 : 70;
 		const splitAt = 70;
-		let sharedProps = E(this.props, this.state, {compClass, splitAt, Change});
+		const sharedProps = E(this.props, this.state, {compClass, splitAt, Change});
 		return (
 			<Column style={style}>
 				{!forNew &&
 					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt} singleLine={true}/>}
 				<RowLR mt={5} mb={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Type: </Pre>
-					<Select options={TagComp_classes.map(a=>({name: a.displayName, value: a}))} enabled={enabled} style={ES({flex: 1})} value={compClass} onChange={(newCompClass: TagComp_Class)=> {
+					<Select options={TagComp_classes.map(a=>({name: a.displayName, value: a}))} enabled={enabled} style={ES({flex: 1})} value={compClass} onChange={(newCompClass: TagComp_Class)=>{
 						delete newData[compClass.key];
 						newData[newCompClass.key] = new newCompClass();
 						Change();
@@ -77,8 +76,8 @@ export class TagDetailsUI extends BaseComponentPlus({enabled: true} as Props, {}
 
 class TagCompUI_MirrorChildrenFromXToY extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
 	render() {
-		let {newData, enabled, splitAt, Change} = this.props;
-		let comp = newData.mirrorChildrenFromXToY;
+		const {newData, enabled, splitAt, Change} = this.props;
+		const comp = newData.mirrorChildrenFromXToY;
 		return (
 			<>
 				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X" mt={0}/>
@@ -97,8 +96,8 @@ class TagCompUI_MirrorChildrenFromXToY extends BaseComponentPlus({} as TagDetail
 
 class TagCompUI_XIsExtendedByY extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
 	render() {
-		let {newData, enabled, splitAt, Change} = this.props;
-		let comp = newData.xIsExtendedByY;
+		const {newData, enabled, splitAt, Change} = this.props;
+		const comp = newData.xIsExtendedByY;
 		return (
 			<>
 				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X" mt={0}/>
@@ -110,8 +109,8 @@ class TagCompUI_XIsExtendedByY extends BaseComponentPlus({} as TagDetailsUI_Shar
 
 class TagCompUI_MutuallyExclusiveGroup extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
 	render() {
-		let {newData, enabled, splitAt, Change} = this.props;
-		let comp = newData.mutuallyExclusiveGroup;
+		const {newData, enabled, splitAt, Change} = this.props;
+		const comp = newData.mutuallyExclusiveGroup;
 		return (
 			<>
 				<Row>
@@ -121,7 +120,7 @@ class TagCompUI_MutuallyExclusiveGroup extends BaseComponentPlus({} as TagDetail
 						Change();
 					}}/>
 				</Row>
-				{comp.nodes.map((nodeID, index)=> {
+				{comp.nodes.map((nodeID, index)=>{
 					return <NodeInArrayRow key={index} {...this.props} comp={comp} nodeArrayKey="nodes" nodeEntry={nodeID} nodeEntryIndex={index}/>;
 				})}
 				<Row center mt={5}>
@@ -135,8 +134,8 @@ class TagCompUI_MutuallyExclusiveGroup extends BaseComponentPlus({} as TagDetail
 
 class TagCompUI_RestrictMirroringOfX extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
 	render() {
-		let {newData, enabled, splitAt, Change} = this.props;
-		let comp = newData.restrictMirroringOfX;
+		const {newData, enabled, splitAt, Change} = this.props;
+		const comp = newData.restrictMirroringOfX;
 		return (
 			<>
 				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X" mt={0}/>
@@ -148,7 +147,7 @@ class TagCompUI_RestrictMirroringOfX extends BaseComponentPlus({} as TagDetailsU
 						Change();
 					}}/>
 				</Row>
-				{comp.blacklistedMirrorParents.map((nodeID, index)=> {
+				{comp.blacklistedMirrorParents.map((nodeID, index)=>{
 					return <NodeInArrayRow key={index} {...this.props} enabled={enabled && !comp.blacklistAllMirrorParents} comp={comp} nodeArrayKey="blacklistedMirrorParents" nodeEntry={nodeID} nodeEntryIndex={index}/>;
 				})}
 			</>
@@ -158,10 +157,10 @@ class TagCompUI_RestrictMirroringOfX extends BaseComponentPlus({} as TagDetailsU
 
 class NodeSlotRow extends BaseComponentPlus({mt: 5} as TagDetailsUI_SharedProps & {comp: TagComp, nodeKey: string, label: string, mt?: number | string}, {}) {
 	render() {
-		let {newData, enabled, compClass, splitAt, Change, comp, nodeKey, label, mt} = this.props;
+		const {newData, enabled, compClass, splitAt, Change, comp, nodeKey, label, mt} = this.props;
 
-		let nodeID = comp[nodeKey];
-		let nodeL2 = Validate("UUID", nodeID) == null ? GetNodeL2(nodeID) : null;
+		const nodeID = comp[nodeKey];
+		const nodeL2 = Validate("UUID", nodeID) == null ? GetNodeL2(nodeID) : null;
 		let displayText = `(Node not found for ID: ${nodeID})`;
 		let backgroundColor = GetNodeColor({type: MapNodeType.category} as any).desaturate(0.5).alpha(0.8);
 		if (nodeL2) {
@@ -174,7 +173,7 @@ class NodeSlotRow extends BaseComponentPlus({mt: 5} as TagDetailsUI_SharedProps 
 		return (
 			<RowLR mt={mt} splitAt={splitAt} style={{width: "100%"}}>
 				<Text>{label}:</Text>
-				<TextInput value={nodeID} enabled={enabled} style={{flex: 25, minWidth: 0}} onChange={val=> {
+				<TextInput value={nodeID} enabled={enabled} style={{flex: 25, minWidth: 0}} onChange={val=>{
 					comp.VSet(nodeKey, DelIfFalsy(val));
 					newData.nodes = CalculateNodeIDsForTagComp(comp, compClass);
 					Change();
@@ -196,10 +195,10 @@ class NodeSlotRow extends BaseComponentPlus({mt: 5} as TagDetailsUI_SharedProps 
 
 class NodeInArrayRow extends BaseComponentPlus({} as TagDetailsUI_SharedProps & {comp: TagComp, nodeArrayKey: string, nodeEntry: string, nodeEntryIndex: number}, {}) {
 	render() {
-		let {newData, enabled, compClass, splitAt, Change, comp, nodeArrayKey, nodeEntry, nodeEntryIndex} = this.props;
+		const {newData, enabled, compClass, splitAt, Change, comp, nodeArrayKey, nodeEntry, nodeEntryIndex} = this.props;
 
-		let nodeID = nodeEntry;
-		let nodeL2 = Validate("UUID", nodeID) == null ? GetNodeL2(nodeID) : null;
+		const nodeID = nodeEntry;
+		const nodeL2 = Validate("UUID", nodeID) == null ? GetNodeL2(nodeID) : null;
 		let displayText = `(Node not found for ID: ${nodeID})`;
 		let backgroundColor = GetNodeColor({type: MapNodeType.category} as any).desaturate(0.5).alpha(0.8);
 		if (nodeL2) {
@@ -213,7 +212,7 @@ class NodeInArrayRow extends BaseComponentPlus({} as TagDetailsUI_SharedProps & 
 			<RowLR mt={5} splitAt={30} style={{width: "100%"}}>
 				<Text>#{nodeEntryIndex + 1}:</Text>
 				<Row style={{flex: 1, alignItems: "stretch"}}>
-					<TextInput value={nodeEntry} enabled={enabled} style={{flex: 25, minWidth: 0, borderRadius: "5px 0 0 5px"}} onChange={val=> {
+					<TextInput value={nodeEntry} enabled={enabled} style={{flex: 25, minWidth: 0, borderRadius: "5px 0 0 5px"}} onChange={val=>{
 						comp[nodeArrayKey][nodeEntryIndex] = val;
 						newData.nodes = CalculateNodeIDsForTagComp(comp, compClass);
 						Change();
@@ -255,7 +254,7 @@ export function ShowAddTagDialog(initialData: Partial<MapNodeTag>, postAdd?: (id
 			);
 		}),
 		onOK: async()=>{
-			const id = await getCommand().RunOnServer();
+			const {id} = await getCommand().RunOnServer();
 			if (postAdd) postAdd(id);
 		},
 	});

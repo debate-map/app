@@ -1,11 +1,14 @@
-import {Command, AssertV, dbp, AssertValidate, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
-
+import {Command, AssertV, dbp, AssertValidate, GenerateUUID, CommandMeta, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {HasModPermissions} from "../DB/users/$user.js";
 import {Media} from "../DB/media/@Media.js";
 
 @UserEdit
-export class AddMedia extends Command<{media: Media}, string> {
+@CommandMeta({
+	payloadSchema: ()=>({}),
+	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
+})
+export class AddMedia extends Command<{media: Media}, {id: string}> {
 	mediaID: string;
 	Validate() {
 		AssertV(HasModPermissions(this.userInfo.id), "Only moderators can add media currently. (till review/approval system is implemented)");
@@ -15,7 +18,7 @@ export class AddMedia extends Command<{media: Media}, string> {
 		media.creator = this.userInfo.id;
 		media.createdAt = Date.now();
 
-		this.returnData = this.mediaID;
+		this.returnData = {id: this.mediaID};
 		AssertValidate("Media", media, "Media invalid");
 	}
 

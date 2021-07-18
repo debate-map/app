@@ -1,4 +1,4 @@
-import {AddSchema, AssertValidate, GetSchemaJSON, NewSchema, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate, GetSchemaJSON, NewSchema, GetAsync, Command, AssertV, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {GetUser} from "../DB/users.js";
 import {User} from "../DB/users/@User.js";
@@ -7,23 +7,24 @@ type MainType = User;
 const MTName = "User";
 
 //export class SetUserData extends Command<{id: string, updates: Partial<MainType>, allowPrevious?: boolean}, {}> {
+@CommandMeta({
+	payloadSchema: ()=>({
+		properties: {
+			id: {$ref: "UUID"},
+			updates: NewSchema({
+				properties: CE(GetSchemaJSON(MTName).properties!).Including(
+					"displayName", "photoURL",
+					"joinDate", "permissionGroups",
+				),
+			}),
+		},
+		required: ["id", "updates"],
+	}),
+})
 export class SetUserData extends Command<{id: string, updates: Partial<MainType>}, {}> {
 	oldData: MainType;
 	newData: MainType;
 	Validate() {
-		AssertValidate({
-			properties: {
-				id: {$ref: "UUID"},
-				updates: NewSchema({
-					properties: CE(GetSchemaJSON(MTName).properties!).Including(
-						"displayName", "photoURL",
-						"joinDate", "permissionGroups",
-					),
-				}),
-			},
-			required: ["id", "updates"],
-		}, this.payload, "Payload invalid");
-
 		const {id, updates} = this.payload;
 		//AssertV(id == this.userInfo.id, "Cannot set user-data for another user!");
 		this.oldData = GetUser.NN(id);

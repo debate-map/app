@@ -1,4 +1,4 @@
-import {AssertValidate, Command} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, Command, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
@@ -10,19 +10,20 @@ type Payload = {
 	claimNode: MapNode, claimRevision: MapNodeRevision, claimLink?: NodeChildLink,
 };
 
+@CommandMeta({
+	payloadSchema: ()=>({
+		properties: {
+			mapID: {type: "string"},
+			argumentParentID: {type: "string"}, argumentNode: {$ref: "MapNode_Partial"}, argumentRevision: {$ref: "MapNodeRevision_Partial"}, argumentLink: {$ref: NodeChildLink.name},
+			claimNode: {$ref: "MapNode_Partial"}, claimRevision: {$ref: "MapNodeRevision_Partial"}, claimLink: {$ref: NodeChildLink.name},
+		},
+		required: ["mapID", "argumentParentID", "argumentNode", "argumentRevision", "claimNode", "claimRevision"],
+	}),
+})
 export class AddArgumentAndClaim extends Command<Payload, {argumentNodeID: string, argumentRevisionID: string, claimNodeID: string, claimRevisionID: string}> {
 	sub_addArgument: AddChildNode;
 	sub_addClaim: AddChildNode;
 	Validate() {
-		AssertValidate({
-			properties: {
-				mapID: {type: "string"},
-				argumentParentID: {type: "string"}, argumentNode: {$ref: "MapNode_Partial"}, argumentRevision: {$ref: "MapNodeRevision_Partial"}, argumentLink: {$ref: NodeChildLink.name},
-				claimNode: {$ref: "MapNode_Partial"}, claimRevision: {$ref: "MapNodeRevision_Partial"}, claimLink: {$ref: NodeChildLink.name},
-			},
-			required: ["mapID", "argumentParentID", "argumentNode", "argumentRevision", "claimNode", "claimRevision"],
-		}, this.payload, "Payload invalid");
-
 		const {mapID, argumentParentID, argumentNode, argumentRevision, argumentLink, claimNode, claimRevision, claimLink} = this.payload;
 
 		this.sub_addArgument = this.sub_addArgument ?? new AddChildNode({

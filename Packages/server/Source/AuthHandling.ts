@@ -54,7 +54,7 @@ passport.use(new GoogleStrategy(
 			providerData: [profile._json],
 		});
 		const command = new AddUser({user, userHidden});
-		const newID = await command.RunLocally();
+		const {id: newID} = await command.RunLocally();
 		console.log("AddUser done! NewID:", newID);
 
 		//if (true) return void done(null, {id: newID}); // temp (till AddUser actually adds a user that can be retrieved in next step)

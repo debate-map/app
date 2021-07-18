@@ -1,22 +1,24 @@
-import {AddSchema, AssertValidate, BU, Command, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate, BU, Command, CommandMeta, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
 import {NodeRatingType} from "../DB/nodeRatings/@NodeRatingType.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 import {GetRatings} from "../DB/nodeRatings.js";
 
+@CommandMeta({
+	payloadSchema: ()=>({
+		properties: {
+			nodeID: {type: "string"},
+			ratingType: {$ref: "NodeRatingType"},
+			value: {type: ["number", "null"]},
+		},
+		required: ["nodeID", "ratingType", "value"],
+	}),
+})
 export class SetNodeRating extends Command<{nodeID: string, ratingType: Exclude<NodeRatingType, "impact">, value: number|n}, {}> {
 	oldRating: NodeRating;
 	newID: string;
 	newRating: NodeRating;
 	Validate() {
-		AssertValidate({
-			properties: {
-				nodeID: {type: "string"},
-				ratingType: {$ref: "NodeRatingType"},
-				value: {type: ["number", "null"]},
-			},
-			required: ["nodeID", "ratingType", "value"],
-		}, this.payload, "Payload invalid");
 		const {nodeID, ratingType, value} = this.payload;
 
 		const oldRatings = GetRatings(nodeID, ratingType, this.userInfo.id);

@@ -1,5 +1,5 @@
 import {Assert, E, CE} from "web-vcore/nm/js-vextensions.js";
-import {GetAsync, Command, AssertV, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV, dbp, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
@@ -9,6 +9,9 @@ import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 
 @MapEdit
 @UserEdit
+@CommandMeta({
+	payloadSchema: ()=>({}),
+})
 export class LinkNode extends Command<{mapID: string|n, parentID: string, childID: string, childForm?: ClaimForm|n, childPolarity?: Polarity|n}, {}> {
 	child_oldData: MapNode|n;
 	parent_oldData: MapNode;

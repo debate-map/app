@@ -132,7 +132,7 @@ export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: st
 			);
 		}),
 		onOK: async()=>{
-			const id = await getCommand().RunOnServer();
+			const {id} = await getCommand().RunOnServer();
 			if (postAdd) postAdd(id);
 		},
 	});

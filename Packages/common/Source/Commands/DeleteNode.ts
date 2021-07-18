@@ -1,4 +1,4 @@
-import {AddSchema, AssertV, AssertValidate, Command, dbp, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertV, AssertValidate, Command, CommandMeta, dbp, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {GetMaps} from "../DB/maps.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
@@ -10,17 +10,18 @@ import {MapNodeL2} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
-AddSchema("DeleteNode_payload", {
-	properties: {
-		mapID: {type: "string"},
-		nodeID: {type: "string"},
-		withContainerArgument: {type: "string"},
-	},
-	required: ["nodeID"],
-});
-
 @MapEdit
 @UserEdit
+@CommandMeta({
+	payloadSchema: ()=>({
+		properties: {
+			mapID: {type: "string"},
+			nodeID: {type: "string"},
+			withContainerArgument: {type: "string"},
+		},
+		required: ["nodeID"],
+	}),
+})
 export class DeleteNode extends Command<{mapID?: string|n, nodeID: string, withContainerArgument?: string}, {}> {
 	// as subcommand
 	asPartOfMapDelete = false;

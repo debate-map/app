@@ -1,10 +1,14 @@
-import {AssertValidate, dbp, GenerateUUID, WrapDBValue, Command} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, dbp, GenerateUUID, WrapDBValue, Command, CommandMeta, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 
 import {UserEdit} from "../CommandMacros.js";
 import {Term} from "../DB/terms/@Term.js";
 
 @UserEdit
-export class AddTerm extends Command<{term: Term}, string> {
+@CommandMeta({
+	payloadSchema: ()=>({}),
+	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
+})
+export class AddTerm extends Command<{term: Term}, {id: string}> {
 	termID: string;
 	Validate() {
 		const {term} = this.payload;
@@ -12,7 +16,7 @@ export class AddTerm extends Command<{term: Term}, string> {
 		term.creator = this.userInfo.id;
 		term.createdAt = Date.now();
 
-		this.returnData = this.termID;
+		this.returnData = {id: this.termID};
 		AssertValidate("Term", term, "Term invalid");
 	}
 

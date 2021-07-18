@@ -1,5 +1,5 @@
 import {Clone} from "web-vcore/nm/js-vextensions.js";
-import {AssertValidate, Command} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, Command, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {GetNodeChildren} from "../DB/nodes.js";
 import {AsNodeL1, GetNodeDisplayText, GetNodeForm, GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
@@ -8,20 +8,21 @@ import {AddNodeRevision} from "./AddNodeRevision.js";
 
 @MapEdit
 @UserEdit
+@CommandMeta({
+	payloadSchema: ()=>({
+		properties: {
+			mapID: {type: "string"},
+			nodeID: {type: "string"},
+			multiPremiseArgument: {type: "boolean"},
+		},
+		required: ["nodeID", "multiPremiseArgument"],
+	}),
+})
 export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, nodeID: string, multiPremiseArgument: boolean}, {}> {
 	oldNodeData: MapNodeL2;
 	newNodeData: MapNode;
 	sub_addRevision: AddNodeRevision;
 	Validate() {
-		AssertValidate({
-			properties: {
-				mapID: {type: "string"},
-				nodeID: {type: "string"},
-				multiPremiseArgument: {type: "boolean"},
-			},
-			required: ["nodeID", "multiPremiseArgument"],
-		}, this.payload, "Payload invalid");
-
 		const {mapID, nodeID, multiPremiseArgument} = this.payload;
 		this.oldNodeData = GetNodeL2.NN(nodeID);
 

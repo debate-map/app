@@ -1,5 +1,5 @@
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, AssertValidate, Command, GenerateUUID, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AssertValidate, Command, CommandMeta, GenerateUUID, UUID} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
 import {Map} from "../DB/maps/@Map.js";
@@ -9,6 +9,9 @@ import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
 import {AddChildNode} from "./AddChildNode.js";
 
 @UserEdit
+@CommandMeta({
+	payloadSchema: ()=>({}),
+})
 export class AddMap extends Command<{map: Map}, UUID> {
 	mapID: string;
 	sub_addNode: AddChildNode;

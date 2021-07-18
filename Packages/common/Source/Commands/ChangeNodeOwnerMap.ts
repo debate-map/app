@@ -1,28 +1,28 @@
-import {AddSchema, Command, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, Command, CommandMeta, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
-
-AddSchema("ChangeNodeOwnerMap_payload", {
-	properties: {
-		nodeID: {type: "string"},
-		newOwnerMapID: {type: ["null", "string"]},
-		argumentNodeID: {type: "string"},
-	},
-	required: ["nodeID", "newOwnerMapID"],
-});
 
 // todo: integrate rest of validation code, preferably using system callable from both here and the ui (this is needed for many other commands as well)
 
 // @MapEdit
 @UserEdit
+@CommandMeta({
+	payloadSchema: ()=>({
+		properties: {
+			nodeID: {type: "string"},
+			newOwnerMapID: {type: ["null", "string"]},
+			argumentNodeID: {type: "string"},
+		},
+		required: ["nodeID", "newOwnerMapID"],
+	}),
+})
 export class ChangeNodeOwnerMap extends Command<{nodeID: string, newOwnerMapID: string, argumentNodeID?: string}, {}> {
 	newData: MapNode;
 
 	sub_changeOwnerMapForArgument: ChangeNodeOwnerMap;
 
 	Validate() {
-		/*AssertValidate("ChangeNodeOwnerMap_payload", this.payload, "Payload invalid");
-		const {nodeID, newOwnerMapID, argumentNodeID} = this.payload;
+		/*const {nodeID, newOwnerMapID, argumentNodeID} = this.payload;
 		const oldData = AV.NonNull = GetNode(nodeID);
 
 		AssertV(IsUserCreatorOrMod(this.userInfo.id, oldData), "User is not the node's creator, or a moderator.");

@@ -1,7 +1,10 @@
-import {Command} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {LinkNode} from "./LinkNode.js";
 
+@CommandMeta({
+	payloadSchema: ()=>({}),
+})
 export class CloneNode extends Command<{mapID: string, baseNodePath: string, newParentID: string}, {nodeID: string, revisionID: string}> {
 	sub_addNode: AddChildNode;
 	sub_linkChildren: LinkNode[];
