@@ -19,6 +19,7 @@ export class PermissionSet {
 	delete: boolean;
 }
 
+/** See "Docs/AccessPolicies.md" for more info. */
 @MGLClass({table: "accessPolicies"})
 export class AccessPolicy {
 	@DB((t, n)=>t.text(n).primary())

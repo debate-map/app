@@ -38,38 +38,11 @@ if (!globalThis.fetch) {
 
 const app = express();
 
-/*app.use((req, res, next)=>{
-	console.log("URL:", req.url, req.header("origin"));
-	//const isWebsocketRequest = req.url.startsWith("ws://");
-	const isWebsocketRequest = req.header("Upgrade")?.toLowerCase() == "websocket" || req.header("connection")?.toLowerCase() == "upgrade";
-	if (!isWebsocketRequest) {
-		console.log("Header:", req.header("origin"), req.url, req.headers, req.rawHeaders);
-		//res.header("Access-Control-Allow-Origin", req.header("origin"));
-		res.setHeader("Access-Control-Allow-Origin", req.header("origin") ?? "*");
-		res.setHeader("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-		// Set custom headers for CORS
-		res.setHeader("Access-Control-Allow-Headers", "Content-type,Accept,X-Custom-Header");
-		res.setHeader("Access-Control-Allow-Credentials", "true");
-	}
-
-	// if this is a pre-flight request, return right away (so later middleware can't mess up the allow-origin value)
-	if (req.method === "OPTIONS") {
-		return res.status(200).end();
-	}
-	next();
-});*/
 app.use(cors({
 	//origin: "debatemap.app",
 	//origin: "*", // let any origin make calls to our server (that's fine)
 	origin: true, // must use true (ie. have response's "allowed-origin" always equal the request origin) instead of "*", since we have credential-inclusion enabled
 	credentials: true, // allows cookies to be sent with requests (eg. for passing passportjs session-token with mutation/command calls)
-	/*origin(origin, callback) {
-		return callback(null, true);
-	},
-	credentials: true,*/
-	/*origin: "sdfsdfsdfsdf.app",
-	optionsSuccessStatus: 200,
-	credentials: true,*/
 }));
 
 app.use(cookieParser());
@@ -142,16 +115,6 @@ app.use(
 // set up libs
 InitApollo();
 InitGraphlink();
-
-/*app.use((req, res, next)=>{
-	console.log("URL2:", req.url, req.header("origin"));
-	const isWebsocketRequest = req.header("Upgrade")?.toLowerCase() == "websocket" || req.header("connection")?.toLowerCase() == "upgrade";
-	if (!isWebsocketRequest) {
-		res.setHeader("Access-Control-Allow-Origin", req.header("origin") ?? "*");
-		//return res.status(200).end();
-	}
-	next();
-});*/
 
 app.listen(dbPort);
 console.log("Server started.");
