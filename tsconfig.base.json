@@ -54,6 +54,18 @@
 				"../../../node_modules/web-vcore/node_modules/mobx-graphlink/*",
 				"../../../node_modules/mobx-graphlink/*",
 			],
+			"pg": [
+				"../../../node_modules/web-vcore/node_modules/pg",
+				"../../../node_modules/pg",
+			],
+			"postgraphile": [
+				"../../../node_modules/web-vcore/node_modules/postgraphile",
+				"../../../node_modules/postgraphile",
+			],
+			"graphile-utils": [
+				"../../../node_modules/web-vcore/node_modules/graphile-utils",
+				"../../../node_modules/graphile-utils",
+			],
 			// temp; fixes odd import bug in CodeMirrorConfig.ts
 			"codemirror": [
 				"../../../node_modules/web-vcore/node_modules/codemirror",

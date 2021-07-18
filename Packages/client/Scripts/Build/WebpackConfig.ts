@@ -1,7 +1,6 @@
-import {CreateWebpackConfig} from "web-vcore/Scripts/Build/WebpackConfig.js";
+import {CreateWebpackConfig, FindNodeModule_FromUserProjectRoot} from "web-vcore/Scripts/Build/WebpackConfig.js";
 import {config} from "../Config.js";
 import {npmPatch_replacerConfig} from "./NPMPatches.js";
-import JsonpTemplatePlugin from "web-vcore/node_modules/webpack/lib/web/JsonpTemplatePlugin";
 
 /*function resolvePath(...segmentsFromRoot: string[]) {
 	//return fs.realpathSync(path.resolve(config.path_base, ...segmentsFromRoot));
@@ -50,3 +49,9 @@ export const webpackConfig = CreateWebpackConfig({
 		//{test: /(Packages[/\\]common|dm_common)[/\\]Source[/\\].*\.tsx?$/},
 	],
 });
+/*webpackConfig.resolve.alias["postgraphile"] = FindNodeModule_FromUserProjectRoot(config, "postgraphile");
+webpackConfig.resolve.alias["graphile-utils"] = FindNodeModule_FromUserProjectRoot(config, "graphile-utils");*/
+// we don't use pg, postgraphile, and graphile-utils from frontend, so resolve to nothing
+webpackConfig.resolve.alias["pg"] = false;
+webpackConfig.resolve.alias["postgraphile"] = false;
+webpackConfig.resolve.alias["graphile-utils"] = false;

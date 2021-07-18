@@ -10,13 +10,13 @@ import {makePluginHook, postgraphile} from "postgraphile";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
 import fetch from "node-fetch";
 import cookieParser from "cookie-parser";
+import {CreateCommandsPlugin} from "web-vcore/nm/mobx-graphlink.js";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthenticationPlugin} from "./Mutations/AuthenticationPlugin.js";
 import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
 import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
 import {InitApollo} from "./Utils/LibIntegrations/Apollo.js";
 import {graph, InitGraphlink} from "./Utils/LibIntegrations/MobXGraphlink.js";
-import {CommandsPlugin} from "./Mutations/CommandsPlugin.js";
 
 type PoolClient = import("pg").PoolClient;
 const {Pool} = pg;
@@ -117,7 +117,7 @@ app.use(
 				CustomInflectorPlugin,
 				//CustomWrapResolversPlugin,
 				//AuthenticationPlugin,
-				CommandsPlugin,
+				CreateCommandsPlugin(),
 			],
 			skipPlugins: [
 				require("graphile-build").NodePlugin,
