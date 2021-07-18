@@ -2,6 +2,7 @@
 import graphileUtils from "graphile-utils";
 import {PoolClient} from "pg";
 import {Context as Context_base} from "postgraphile";
+import {Assert} from "web-vcore/nm/js-vextensions";
 import {Command, GetCommandClassMetadatas, WithBrackets} from "web-vcore/nm/mobx-graphlink.js";
 const {makeExtendSchemaPlugin, gql} = graphileUtils;
 
@@ -52,7 +53,9 @@ extend type Mutation {
 
 			const CommandClass = classInfo.commandClass as any;
 			const command: Command<any> = new CommandClass(args);
+			Assert(context.req.user != null, "Cannot run command on server unless logged in.");
 			command._userInfo_override = context.req.user;
+			command._userInfo_override_set = true;
 			console.log("User in command resolver:", context.req.user);
 			debugger;
 			const returnData = await command.RunLocally();

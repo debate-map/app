@@ -1,5 +1,5 @@
 import {E, ObjectCE} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, Command, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, Command, CommandMeta, UUID} from "web-vcore/nm/mobx-graphlink.js";
 import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
@@ -43,9 +43,11 @@ export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOn
 	});
 }
 
+@CommandMeta({
+	payloadSchema: ()=>({}),
+	defaultPayload: {createWrapperArg: true},
+})
 export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: string}> {
-	static defaultPayload = {createWrapperArg: true};
-
 	map_data: Map;
 	node_data: MapNode;
 	newParent_data: MapNode;
