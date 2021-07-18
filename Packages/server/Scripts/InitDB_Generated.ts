@@ -107,11 +107,11 @@ export async function up(knex: Knex.Transaction) {
 	}
 
 	await knex.schema.createTable(`${v}accessPolicies`, t=>{
-		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
-		RunFieldInit(t, "name", (t,n)=>t.text(n).notNullable());
-		RunFieldInit(t, "base", (t,n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
-		RunFieldInit(t, "permissions_base", (t,n)=>t.jsonb(n));
-		RunFieldInit(t, "permissions_userExtends", (t,n)=>t.jsonb(n));
+		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "name", (t, n)=>t.text(n).notNullable());
+		RunFieldInit(t, "base", (t, n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
+		RunFieldInit(t, "permissions_base", (t, n)=>t.jsonb(n));
+		RunFieldInit(t, "permissions_userExtends", (t, n)=>t.jsonb(n));
 	});
 
 	await knex.schema.createTable(`${v}mapNodeEdits`, t=>{
@@ -123,20 +123,20 @@ export async function up(knex: Knex.Transaction) {
 	});
 
 	await knex.schema.createTable(`${v}maps`, t=>{
-		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
-		RunFieldInit(t, "accessPolicy", (t,n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
-		RunFieldInit(t, "name", (t,n)=>t.text(n));
-		RunFieldInit(t, "note", (t,n)=>t.text(n));
-		RunFieldInit(t, "noteInline", (t,n)=>t.boolean(n));
-		RunFieldInit(t, "rootNode", (t,n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
-		RunFieldInit(t, "defaultExpandDepth", (t,n)=>t.integer(n));
-		RunFieldInit(t, "nodeDefaults", (t,n)=>t.jsonb(n));
-		RunFieldInit(t, "featured", (t,n)=>t.boolean(n));
-		RunFieldInit(t, "editors", (t,n)=>t.specificType(n, "text[]").notNullable());
-		RunFieldInit(t, "creator", (t,n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
-		RunFieldInit(t, "createdAt", (t,n)=>t.bigInteger(n));
-		RunFieldInit(t, "edits", (t,n)=>t.integer(n));
-		RunFieldInit(t, "editedAt", (t,n)=>t.bigInteger(n));
+		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "accessPolicy", (t, n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
+		RunFieldInit(t, "name", (t, n)=>t.text(n));
+		RunFieldInit(t, "note", (t, n)=>t.text(n));
+		RunFieldInit(t, "noteInline", (t, n)=>t.boolean(n));
+		RunFieldInit(t, "rootNode", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
+		RunFieldInit(t, "defaultExpandDepth", (t, n)=>t.integer(n));
+		RunFieldInit(t, "nodeDefaults", (t, n)=>t.jsonb(n));
+		RunFieldInit(t, "featured", (t, n)=>t.boolean(n));
+		RunFieldInit(t, "editors", (t, n)=>t.specificType(n, "text[]").notNullable());
+		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
+		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
+		RunFieldInit(t, "edits", (t, n)=>t.integer(n));
+		RunFieldInit(t, "editedAt", (t, n)=>t.bigInteger(n));
 	});
 
 	await knex.schema.createTable(`${v}medias`, t=>{

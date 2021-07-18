@@ -1,4 +1,4 @@
-import {MapNode, MapNodeRevision, Map, MapNodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy} from "dm_common";
+import {MapNode, MapNodeRevision, Map, MapNodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden} from "dm_common";
 import {Knex} from "knex";
 import {CE, string} from "web-vcore/nm/js-vextensions.js";
 import {GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
@@ -19,7 +19,7 @@ function TypeCheck<T, T2 extends {[key: string]: T}>(__: new(..._)=>T, collectio
 	return collection;
 }
 
-const users = TypeCheck(User, {
+const users = TypeCheck(User as new()=>(User & {hidden: UserHidden}), {
 	system: {
 		id: systemUserID,
 		displayName: systemUserName,
@@ -28,6 +28,11 @@ const users = TypeCheck(User, {
 		permissionGroups: {basic: true, verified: true, mod: true, admin: true},
 		edits: 0,
 		lastEditAt: null,
+		hidden: {
+			id: systemUserID,
+			email: "debatemap@gmail.com",
+			providerData: [],
+		},
 	},
 });
 
@@ -105,9 +110,10 @@ const nodes = TypeCheck(MapNode as new()=>(MapNode & {revision: MapNodeRevision}
 });
 
 export default async function seed(knex: Knex.Transaction) {
-	console.log(`Adding users...`);
+	console.log(`Adding users and userHiddens...`);
 	for (const user of Object.values(users)) {
-		await knex("users").insert(user);
+		await knex("users").insert(CE(user).Excluding("hidden"));
+		await knex("userHiddens").insert(user.hidden);
 	}
 
 	console.log(`Adding access-policies...`);
