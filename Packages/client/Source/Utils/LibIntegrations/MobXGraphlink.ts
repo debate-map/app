@@ -25,6 +25,7 @@ export function InitGraphlink() {
 		rootStore: store,
 		apollo: apolloClient as any, // the "as any" is needed if "mobx-graphlink" is npm-linked from "web-vcore"
 	});
+	// user-info is now supplied at the end of InitApollo() instead
 	/*graph.userInfo = {
 		// todo: probably replace debate-map-userid with just the return-result of _PassConnectionID
 		id: GetCookie("debate-map-userid")!,

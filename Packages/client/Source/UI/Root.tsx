@@ -106,7 +106,8 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 		const {storeReady} = this;
 		// if (!g.storeRehydrated) return <div/>;
 		if (!storeReady) return null;
-		if (!store.main.userID_apollo_ready) return null; // wait for sign in to complete (so that restricted content loads, even if first content requested)
+		//if (!store.main.userID_apollo_ready) return null; // wait for sign in to complete (so that restricted content loads, even if first content requested)
+		//const userIDReady = store.main.userID_apollo_ready; // access mobx field; this way, once user-id is retrieved, RootUI reloads (may need something like this in lower levels too)
 
 		return (
 			<DragDropContext_Beautiful onDragEnd={this.OnDragEnd}>

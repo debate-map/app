@@ -107,12 +107,13 @@ export function InitApollo() {
 
 		//apolloSignInPromise_resolve({userID});
 		runInAction("ApolloSignInDone", ()=>{
-			store.main.userID_apollo = userID;
-			store.main.userID_apollo_ready = true;
+			/*store.main.userID_apollo = userID;
+			store.main.userID_apollo_ready = true;*/
 			// rather than getting user-id from cookie, get it from the server's websocket-helper response
 			if (graph.userInfo == null) {
 				graph.userInfo = {
-					id: store.main.userID_apollo!,
+					//id: store.main.userID_apollo!,
+					id: userID,
 				};
 			}
 		});

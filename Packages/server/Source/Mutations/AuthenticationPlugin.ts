@@ -52,6 +52,7 @@ type Context = Context_base<any> & {
 // ==========
 
 // probably todo: replace this system with a system that just reads the auth-cookies from the websocket connection headers (ie. parsing of req.headers["debate-map-session"], preferrably using an existing passportjs function)
+// see here for mention (that example shows usage with cookie set from frontend js, but we'd use the debate-map-session http-only cookie set by server): https://stackoverflow.com/a/48618910
 // EDIT: Then again, one advantage this way has: User-data can be attached to the WS-connection after its creation, ie. no need to delay WS creation, or recreate it if user changes (currently blocked by an Assert, but easy to enable).
 
 export const connectionIDs_usedUp = new Set<string>();
