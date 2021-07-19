@@ -103,7 +103,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		--grant ALL on schema app_public to app_user;
 
 		--alter default privileges in schema app_public grant select, insert, update, delete on tables to app_user;
-		-- The "default privileges" doesn't seem to work for some reason, so just loop through tables, granting permissions
+		-- loop through all tables, granting permissions (the above doesn't work, because the "default permissions" are only used for future tables that are made)
 		grant select, insert, update, delete on all tables in schema app_public to app_user;
 
 		alter table app_public."userHiddens" enable row level security;

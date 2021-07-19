@@ -12,7 +12,7 @@ let link: ApolloLink;
 let link_withErrorHandling: ApolloLink;
 export let apolloClient: ApolloClient<NormalizedCacheObject>;
 
-export function InitApollo() {
+export function InitApollo(serverLaunchID: string) {
 	httpLink = new HttpLink({
 		uri: GRAPHQL_URL,
 	});
@@ -20,6 +20,19 @@ export function InitApollo() {
 		uri: GRAPHQL_URL.replace(/^http/, "ws"),
 		options: {
 			reconnect: true,
+			//lazy: true, // needed for async connectionParams()
+			connectionParams: ()=>{
+				return {
+					// needed so postgraphile knows this is the server-to-server websocket connection (for some reason, the param key needs to exactly be "authorization")
+					authorization: serverLaunchID,
+					/*headers: {
+						//serverLaunchID, // needed so postgraphile knows this is the server-to-server websocket connection
+						Authorization: serverLaunchID,
+					},
+					serverLaunchID, // same; test
+					token: serverLaunchID,*/
+				};
+			},
 		},
 	});
 

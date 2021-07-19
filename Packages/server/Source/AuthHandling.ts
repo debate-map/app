@@ -27,7 +27,7 @@ passport.use(new GoogleStrategy(
 		callbackURL: "http://localhost:3105/auth/google/callback",
 	},
 	async(accessToken, refreshToken, profile, done)=>{
-		console.log("Test1");
+		//console.log("Test1");
 		const profile_firstEmail = profile.emails?.map(a=>a.value).find(a=>a);
 		if (profile_firstEmail == null) return void done("Account must have associated email-address to sign-in.");
 

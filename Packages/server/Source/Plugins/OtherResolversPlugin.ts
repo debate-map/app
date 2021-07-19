@@ -60,7 +60,7 @@ export const OtherResolversPlugin = makeExtendSchemaPlugin(build=>{
 					// for the connection-id, associate the user-info retrieved from passportjs (derived from the "debate-map-session" http-only cookie)
 					const attachInfo = {ipAddress: GetIPAddress(ctx.req), userInfo: ctx.req["user"] as User};
 					connectionID_attachInfo.set(connectionID, attachInfo);
-					console.log(`Stored connection-id attach info. @connectionID:`, connectionID, "@ipAddress:", attachInfo.ipAddress, "@user:", attachInfo.userInfo);
+					console.log(`Stored connection-id attach info. @connectionID:`, connectionID, "@ipAddress:", attachInfo.ipAddress, "@userID:", attachInfo.userInfo?.id);
 					return {id: connectionID};
 				},
 			},
@@ -78,7 +78,7 @@ export const OtherResolversPlugin = makeExtendSchemaPlugin(build=>{
 
 					connectionIDs_usedUp.add(connectionID); // mark as used first; guarantees can't be used twice
 					ctx.req["user"] = attachInfo.userInfo; // attaches the discovered user-id to the persistent websocket connection/request
-					console.log(`Attached info to websocket request. @ipAddress:`, attachInfo.ipAddress, "@user:", attachInfo.userInfo);
+					console.log(`Attached info to websocket request. @ipAddress:`, attachInfo.ipAddress, "@userID:", attachInfo.userInfo?.id);
 
 					//return {userInfo};
 					//return {_: true};
@@ -91,6 +91,6 @@ export const OtherResolversPlugin = makeExtendSchemaPlugin(build=>{
 
 function GetIPAddress(req: Request) {
 	//var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim(); // commented, since x-forwarded-for can be spoofed
-	console.log("IPAddress:", req.ip ?? req.ips?.[0] ?? req.socket.remoteAddress ?? req.connection.address);
+	//console.log("IPAddress:", req.ip ?? req.ips?.[0] ?? req.socket.remoteAddress ?? req.connection.address);
 	return req.ip ?? req.ips?.[0] ?? req.socket.remoteAddress ?? req.connection.address;
 }

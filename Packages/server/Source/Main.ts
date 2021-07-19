@@ -10,7 +10,8 @@ import {makePluginHook, postgraphile} from "postgraphile";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
 import fetch from "node-fetch";
 import cookieParser from "cookie-parser";
-import {CreateCommandsPlugin} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateCommandsPlugin, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert} from "web-vcore/nm/js-vextensions";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthenticationPlugin} from "./Mutations/AuthenticationPlugin.js";
 import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
@@ -38,6 +39,7 @@ if (!globalThis.fetch) {
 }*/
 
 const app = express();
+export const serverLaunchID = GenerateUUID(); // token used to identify the server-to-server websocket
 
 app.use(cors({
 	//origin: "debatemap.app",
@@ -72,11 +74,13 @@ pgPool.on("connect", client=>{
 // set up auth-handling before postgraphile; this way postgraphile resolvers have access to request.user
 SetUpAuthHandling(app);
 
-let req_real;
+/*let req_real;
 app.use((req, res, next)=>{
 	req_real = req;
 	next();
-});
+});*/
+
+let serverWS_currentCommandUserID: string|n;
 
 app.use(
 	postgraphile(
@@ -98,7 +102,22 @@ app.use(
 				//CustomWrapResolversPlugin,
 				//AuthenticationPlugin,
 				OtherResolversPlugin,
-				CreateCommandsPlugin(),
+				CreateCommandsPlugin({
+					preCommandRun: info=>{
+						//console.log("User in command resolver:", info.context.req.user?.id);
+						Assert(info.context.req.user != null, "Cannot run command on server unless logged in.");
+						console.log(`Preparing to run command "${info.command.constructor.name}". @args:`, info.args, "@userID:", info.context.req.user.id);
+						serverWS_currentCommandUserID = info.context.req.user.id;
+					},
+					postCommandRun: info=>{
+						if (info.error) {
+							console.log(`Command "${info.command.constructor.name}" errored! @error:`, info.error);
+						} else {
+							console.log(`Command "${info.command.constructor.name}" done! @returnData:`, info.returnData);
+						}
+						serverWS_currentCommandUserID = null;
+					},
+				}),
 			],
 			skipPlugins: [
 				require("graphile-build").NodePlugin,
@@ -118,13 +137,27 @@ app.use(
 			//pgDefaultRole: "pg_execute_server_program", // have postgraphile use the "pg_execute_server_program" user for client requests (which, by default, has no beyond-base permissions), rather than the "postgres" superuser (needed for RLS policies to work)
 			pgSettings: req=>{
 				const settings = {};
-				// have postgraphile use the "app_user" user for client requests, rather than the "postgres" superuser (needed for RLS policies to work)
-				settings["role"] = "app_user";
-				// make user-id accessible to Postgres sql-code, so RLS can function
-				settings["app.current_user_id"] = req["user"]?.id ?? "[not signed in]"; // if user isn't signed-in, still set setting (else RLS errors)
-				console.log("Settings:", settings, "@req:", req.headers, "@req_real.user:", req_real.user);
 
-				// todo: fix that "req.user" is null for the server-to-server websocket connection/request (since Apollo client setup/calling doesn't transfer user-info data from main http/websocket connections)
+				//const isServerWS = req.headers.searchLaunchID && req.headers.searchLaunchID == serverLaunchID;
+				//const isServerWS = req.headers.Authorization && req.headers.Authorization == serverLaunchID;
+				const isServerWS = req.headers.authorization && req.headers.authorization == serverLaunchID;
+				//console.log("Settings:", settings, "@req:", req.headers);
+				if (isServerWS) {
+					// have postgraphile use the "postgres" user for server-to-server-ws requests (which is used for db-requests within Command runs)
+					//settings["role"] = "postgres";
+
+					console.log("Making pg-request, for server-to-server websocket connection (for ws init, and Command runs). @currentCommandUserID:", serverWS_currentCommandUserID);
+					//Assert(serverWS_currentCommandUserID, "serverWS_currentCommandUserID is null!");
+					if (serverWS_currentCommandUserID) {
+						settings["app.current_user_id"] = serverWS_currentCommandUserID; // if user isn't signed-in, still set setting (else RLS errors)
+					}
+				} else {
+					// have postgraphile use the "app_user" user for client requests, rather than the "postgres" superuser (needed for RLS policies to work)
+					settings["role"] = "app_user";
+
+					// make user-id accessible to Postgres sql-code, so RLS can function
+					settings["app.current_user_id"] = req["user"]?.id ?? "[not signed in]"; // if user isn't signed-in, still set setting (else RLS errors)
+				}
 
 				return settings;
 			},
@@ -135,7 +168,7 @@ app.use(
 // todo: MS server somehow confirms that the db-schema matches the "latest schema target" at startup (as derived from "Knex/Migrations/...")
 
 // set up libs
-InitApollo();
+InitApollo(serverLaunchID);
 InitGraphlink();
 
 app.listen(dbPort);
