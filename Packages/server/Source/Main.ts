@@ -13,12 +13,12 @@ import cookieParser from "cookie-parser";
 import {CreateCommandsPlugin, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {SetUpAuthHandling} from "./AuthHandling.js";
-import {AuthenticationPlugin} from "./Mutations/AuthenticationPlugin.js";
+import {AuthenticationPlugin, AuthExtrasPlugin} from "./Mutations/AuthenticationPlugin.js";
 import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
 import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
 import {InitApollo} from "./Utils/LibIntegrations/Apollo.js";
 import {graph, InitGraphlink} from "./Utils/LibIntegrations/MobXGraphlink.js";
-import {OtherResolversPlugin} from "./Plugins/OtherResolversPlugin.js";
+//import {OtherResolversPlugin} from "./Plugins/OtherResolversPlugin.js";
 
 type PoolClient = import("pg").PoolClient;
 const {Pool} = pg;
@@ -101,7 +101,8 @@ app.use(
 				CustomInflectorPlugin,
 				//CustomWrapResolversPlugin,
 				//AuthenticationPlugin,
-				OtherResolversPlugin,
+				AuthExtrasPlugin,
+				//OtherResolversPlugin,
 				CreateCommandsPlugin({
 					preCommandRun: info=>{
 						//console.log("User in command resolver:", info.context.req.user?.id);
@@ -141,7 +142,7 @@ app.use(
 				//const isServerWS = req.headers.searchLaunchID && req.headers.searchLaunchID == serverLaunchID;
 				//const isServerWS = req.headers.Authorization && req.headers.Authorization == serverLaunchID;
 				const isServerWS = req.headers.authorization && req.headers.authorization == serverLaunchID;
-				//console.log("Settings:", settings, "@req:", req.headers);
+				console.log("Settings:", settings, "@req:", req.headers);
 				if (isServerWS) {
 					// have postgraphile use the "postgres" user for server-to-server-ws requests (which is used for db-requests within Command runs)
 					//settings["role"] = "postgres";
