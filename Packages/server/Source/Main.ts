@@ -13,7 +13,7 @@ import cookieParser from "cookie-parser";
 import {CreateCommandsPlugin, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {SetUpAuthHandling} from "./AuthHandling.js";
-import {AuthenticationPlugin, AuthExtrasPlugin} from "./Mutations/AuthenticationPlugin.js";
+import {AuthExtrasPlugin} from "./Mutations/AuthenticationPlugin.js";
 import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
 import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
 import {InitApollo} from "./Utils/LibIntegrations/Apollo.js";
