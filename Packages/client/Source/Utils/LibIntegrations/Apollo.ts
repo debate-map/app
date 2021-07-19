@@ -99,7 +99,10 @@ export function InitApollo() {
 			variables: {connectionID},
 		});
 		const fetchResult2 = await new Promise<FetchResult<any>>(resolve=>{
-			fetchResult2_subscription.subscribe(data=>resolve(data));
+			const subscription = fetchResult2_subscription.subscribe(data=>{
+				subscription.unsubscribe(); // unsubscribe as soon as first (and only) result is received
+				resolve(data);
+			});
 		});
 		const result2 = fetchResult2.data["_PassConnectionID"];
 		const userID = result2.userID;
