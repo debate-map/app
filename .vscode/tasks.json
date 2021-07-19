@@ -10,9 +10,9 @@
 			"group": "build"
 		},
 		{
-			"label": "#2 server.trackDBShape",
+			"label": "#2 server.buildInitDBScript_watch",
 			"type": "shell",
-			"command": "yarn start server.trackDBShape",
+			"command": "yarn start server.buildInitDBScript_watch",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
@@ -26,9 +26,9 @@
 			"group": "build"
 		},
 		{
-			"label": "## server.initDB",
+			"label": "## server.initDB_freshScript",
 			"type": "shell",
-			"command": "yarn start server.initDB",
+			"command": "yarn start server.initDB_freshScript",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"

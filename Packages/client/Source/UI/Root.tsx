@@ -19,6 +19,7 @@ import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.j
 import {VMenuLayer} from "web-vcore/nm/react-vmenu.js";
 import {MessageBoxLayer, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import "../../Source/Utils/Styles/Main.scss"; // keep absolute-ish, since scss file not copied to Source_JS folder
+import {graph} from "Utils/LibIntegrations/MobXGraphlink";
 import {NavBar} from "../UI/@Shared/NavBar.js";
 import {GlobalUI} from "../UI/Global.js";
 import {HomeUI} from "../UI/Home.js";
@@ -105,6 +106,7 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 		const {storeReady} = this;
 		// if (!g.storeRehydrated) return <div/>;
 		if (!storeReady) return null;
+		if (!store.main.userID_apollo_ready) return null; // wait for sign in to complete (so that restricted content loads, even if first content requested)
 
 		return (
 			<DragDropContext_Beautiful onDragEnd={this.OnDragEnd}>
@@ -117,7 +119,7 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 		const sourceDroppableInfo = FromJSON(result.source.droppableId) as DroppableInfo;
 		const sourceIndex = result.source.index as number;
 		const targetDroppableInfo = result.destination && FromJSON(result.destination.droppableId) as DroppableInfo;
-		let targetIndex = result.destination && result.destination.index as number;
+		const targetIndex = result.destination && result.destination.index as number;
 		const draggableInfo = FromJSON(result.draggableId) as DraggableInfo;
 
 		if (targetDroppableInfo == null) {

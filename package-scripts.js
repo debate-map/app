@@ -85,13 +85,12 @@ Object.assign(scripts, {
 		//initDB: "psql -f ./Packages/server/Scripts/InitDB.sql debate-map",
 		//initDB: TSScript("server", "Scripts/InitDB.ts"),
 		initDB: TSScript("server", "Scripts/KnexWrapper.ts", "initDB"),
+		initDB_freshScript: `nps server.buildInitDBScript && nps server.initDB`,
 		//migrateDBToLatest: TSScript("server", "Scripts/KnexWrapper.ts", "migrateDBToLatest"),
 
 		// db-shape and migrations
-		trackDBShape: TSScript("server", `../../${FindPackagePath("mobx-graphlink")}/Scripts/TrackDBShape.ts`,
-			`--classesFolder ../../Packages/common/Source/DB`,
-			`--templateFile ./Scripts/InitDB_Template.ts`,
-			`--outFile ./Scripts/InitDB_Generated.ts`),
+		buildInitDBScript: GetBuildInitDBScriptCommand(false),
+		buildInitDBScript_watch: GetBuildInitDBScriptCommand(true),
 
 		// first terminal
 		//dev: "cd Packages/server && snowpack build --watch",
@@ -102,6 +101,16 @@ Object.assign(scripts, {
 		run: GetStartServerCommand(),
 	},
 });
+
+function GetBuildInitDBScriptCommand(watch) {
+	return TSScript("server", `../../${FindPackagePath("mobx-graphlink")}/Scripts/BuildInitDBScript.ts`,
+	`--classesFolder ../../Packages/common/Source/DB`,
+	`--templateFile ./Scripts/InitDB_Template.ts`,
+	`--outFile ./Scripts/InitDB_Generated.ts`,
+	watch ? "--watch" : "");
+}
+
+
 // if server-start command/flags change, update the entry in "launch.json" as well
 function GetStartServerCommand() {
 	/*const variantPath = serverVariantPaths[server];

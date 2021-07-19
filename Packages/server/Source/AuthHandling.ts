@@ -34,10 +34,10 @@ passport.use(new GoogleStrategy(
 		//await pgPool.query("INSERT INTO users(name, email) VALUES($1, $2) ON CONFLICT (id) DO NOTHING", [profile.id, profile.email]);
 
 		//const existingUser = await GetAsync(()=>GetUsers()));
-		const existingUser_hidden = await GetAsync(()=>GetUserHiddensWithEmail(profile_firstEmail)[0], {errorHandling: "log"});
+		const existingUser_hidden = await GetAsync(()=>GetUserHiddensWithEmail(profile_firstEmail)[0], {errorHandling_final: "log"});
 		if (existingUser_hidden != null) {
 			console.log("Found existing user for email:", profile_firstEmail);
-			const existingUser = await GetAsync(()=>GetUser(existingUser_hidden.id), {errorHandling: "log"});
+			const existingUser = await GetAsync(()=>GetUser(existingUser_hidden.id), {errorHandling_final: "log"});
 			console.log("Also found user-data:", existingUser);
 			Assert(existingUser != null, `Could not find user with id matching that of the entry in userHiddens (${existingUser_hidden.id}), which was found based on your provided account's email (${existingUser_hidden.email}).`);
 			return void done(null, existingUser);
@@ -59,7 +59,7 @@ passport.use(new GoogleStrategy(
 
 		//if (true) return void done(null, {id: newID}); // temp (till AddUser actually adds a user that can be retrieved in next step)
 
-		const result = await GetAsync(()=>GetUser(newID), {errorHandling: "log"});
+		const result = await GetAsync(()=>GetUser(newID), {errorHandling_final: "log"});
 		console.log("User result:", result);
 		done(null, result!);
 	},
@@ -82,7 +82,8 @@ passport.deserializeUser(async(userBasicInfo: UserBasicInfo, done)=>{
 	done(null, user);
 });
 
-const setUserIDResponseCookie: RequestHandler = (req, res, next)=>{
+// commented; we just use the return-value of "_PassConnectionID" now
+/*const setUserIDResponseCookie: RequestHandler = (req, res, next)=>{
 	const currentUserID = req.user?.["id"];
 	//console.log("Afterward, got user:", currentUserID);
 
@@ -104,7 +105,7 @@ const setUserIDResponseCookie: RequestHandler = (req, res, next)=>{
 		}
 	}
 	next();
-};
+};*/
 
 export function SetUpAuthHandling(app: ExpressApp) {
 	//app.use(express.session({ secret: 'keyboard cat' }));
@@ -132,7 +133,7 @@ export function SetUpAuthHandling(app: ExpressApp) {
 	//includeUserIDAsResponseCookie);
 	app.get("/auth/google/callback",
 		passport.authenticate("google"),
-		setUserIDResponseCookie,
+		//setUserIDResponseCookie,
 		(req, res, next)=>{
 			// if success
 			if (req.user) {

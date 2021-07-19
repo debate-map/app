@@ -30,6 +30,9 @@ export class MainState {
 	@O @ignore notificationMessages = [] as NotificationMessage[];
 	@O @ignore shareBeingLoaded: string|n;
 
+	@O @ignore userID_apollo: string|n; // maybe rework
+	@O @ignore userID_apollo_ready = false; // maybe rework
+
 	// pages (and nav-bar panels)
 	// ==========
 

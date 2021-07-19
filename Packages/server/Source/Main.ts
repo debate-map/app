@@ -17,6 +17,7 @@ import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
 import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
 import {InitApollo} from "./Utils/LibIntegrations/Apollo.js";
 import {graph, InitGraphlink} from "./Utils/LibIntegrations/MobXGraphlink.js";
+import {OtherResolversPlugin} from "./Plugins/OtherResolversPlugin.js";
 
 type PoolClient = import("pg").PoolClient;
 const {Pool} = pg;
@@ -71,6 +72,12 @@ pgPool.on("connect", client=>{
 // set up auth-handling before postgraphile; this way postgraphile resolvers have access to request.user
 SetUpAuthHandling(app);
 
+let req_real;
+app.use((req, res, next)=>{
+	req_real = req;
+	next();
+});
+
 app.use(
 	postgraphile(
 		pgPool,
@@ -90,6 +97,7 @@ app.use(
 				CustomInflectorPlugin,
 				//CustomWrapResolversPlugin,
 				//AuthenticationPlugin,
+				OtherResolversPlugin,
 				CreateCommandsPlugin(),
 			],
 			skipPlugins: [
@@ -106,6 +114,20 @@ app.use(
 			showErrorStack: true,
 			extendedErrors: ["hint", "detail", "errcode"], // to show error text in console (doesn't seem to be working)
 			disableDefaultMutations: true, // we use custom mutations for everything, letting us use TypeScript+MobXGraphlink for all validations
+
+			//pgDefaultRole: "pg_execute_server_program", // have postgraphile use the "pg_execute_server_program" user for client requests (which, by default, has no beyond-base permissions), rather than the "postgres" superuser (needed for RLS policies to work)
+			pgSettings: req=>{
+				const settings = {};
+				// have postgraphile use the "app_user" user for client requests, rather than the "postgres" superuser (needed for RLS policies to work)
+				settings["role"] = "app_user";
+				// make user-id accessible to Postgres sql-code, so RLS can function
+				settings["app.current_user_id"] = req["user"]?.id ?? "[not signed in]"; // if user isn't signed-in, still set setting (else RLS errors)
+				console.log("Settings:", settings, "@req:", req.headers, "@req_real.user:", req_real.user);
+
+				// todo: fix that "req.user" is null for the server-to-server websocket connection/request (since Apollo client setup/calling doesn't transfer user-info data from main http/websocket connections)
+
+				return settings;
+			},
 		},
 	),
 );

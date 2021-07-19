@@ -49,7 +49,7 @@ For more information, visit the website at: <https://debatemap.app>
 2) In vscode #1, start frontend ts-compiler: ctrl+shift+b, then `#1 tsc`.
 3) In vscode #1, start frontend webpack/dev-server: ctrl+shift+b, then `#2 webpack`.
 4) In vscode #2, start backend compiler: ctrl+shift+b, then `#1 server.dev`.
-5) In vscode #2, start db-shape tracker: ctrl+shift+b, then `#2 server.trackDBShape`.
+5) In vscode #2, start db-shape tracker: ctrl+shift+b, then `#2 server.buildInitDBScript_watch`. (optional)
 6) In vscode #2, start backend: ctrl+shift+b, then `#3 server.run`.
 7) Open website locally at: `localhost:3005`
 

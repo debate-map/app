@@ -23,7 +23,7 @@ function InterceptMethods(knex: Knex.Transaction) {
 declare module "knex" {
 	namespace Knex {
 		interface ColumnBuilder {
-			DeferRef: (this: Knex.ColumnBuilder)=>Knex.ColumnBuilder; 
+			DeferRef: (this: Knex.ColumnBuilder)=>Knex.ColumnBuilder;
 		}
 	}
 }
@@ -36,7 +36,7 @@ function DeferRef(this: Knex.ColumnBuilder): Knex.ColumnBuilder {
 	//console.log("Test0:", this);
 	const statements = this["_tableBuilder"]["_statements"] as any[];
 	//console.log("Test1:", statements);
-	
+
 	const refInfo = statements.filter(a=>a.grouping == "alterTable" && a.method == "foreign").pop().args[0];
 	const ref = {
 		fromTable: this["_tableBuilder"]["_tableName"], fromColumn: refInfo.column,
@@ -90,6 +90,29 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 	for (const tableName of createdTableNames) {
 		await knex.schema.renameTable(tableName, RemoveVPrefix(tableName));
 	}
+
+	// set up app_user role for postgraphile connection, set up RLS, etc.
+	await knex.raw(`
+		DO $$ BEGIN
+			CREATE ROLE app_user WITH NOLOGIN;
+		EXCEPTION WHEN DUPLICATE_OBJECT THEN
+			RAISE NOTICE 'Role app_user already exists, not re-creating';
+		END $$;
+		grant connect on database "debate-map" to app_user;
+		grant usage on schema app_public to app_user;
+		--grant ALL on schema app_public to app_user;
+
+		--alter default privileges in schema app_public grant select, insert, update, delete on tables to app_user;
+		-- The "default privileges" doesn't seem to work for some reason, so just loop through tables, granting permissions
+		grant select, insert, update, delete on all tables in schema app_public to app_user;
+
+		alter table app_public."userHiddens" enable row level security;
+		DO $$ BEGIN
+			create policy "accessPolicy_idMustMatchCallerID" on app_public."userHiddens" as PERMISSIVE for all using (id = current_setting('app.current_user_id'));
+		EXCEPTION WHEN DUPLICATE_OBJECT THEN
+			RAISE NOTICE 'RLS policy accessPolicy_idMustMatchCallerID already exists, not re-creating';
+		END $$;
+	`);
 
 	console.log("Done");
 }

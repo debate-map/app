@@ -18,11 +18,18 @@ SetDefaultGraphOptions({graph});
 
 //const linkRootPath = `versions/v${dbVersion}-${DB_SHORT}`;
 export function InitGraphlink() {
+	//apolloPromise: Promise<{userID: string}>
+	//const {userID} = await apolloPromise;
+
 	graph.Initialize({
 		rootStore: store,
 		apollo: apolloClient as any, // the "as any" is needed if "mobx-graphlink" is npm-linked from "web-vcore"
 	});
-	graph.userInfo = {id: GetCookie("debate-map-userid")!};
+	/*graph.userInfo = {
+		// todo: probably replace debate-map-userid with just the return-result of _PassConnectionID
+		id: GetCookie("debate-map-userid")!,
+		//id: userID,
+	};*/
 	ProvideReactModule(React);
 }
 
