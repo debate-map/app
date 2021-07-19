@@ -22,4 +22,4 @@ Currently I have:
 * Definition 2: declared manually, but using a small field decorator right next to the Typescript field declaration (easing maintenance)
 * Definition 3: derived automatically from the PostgreSQL column types (by Postgraphile)
 * Definition 4: declared manually, but using a small field decorator right next to the Typescript field declaration (easing maintenance)
-* Partial definition 5: I'm working right now on having the JSON schema for this derived from definition 2, and the GraphQL schema derived from either definition 2 or 3
+* Partial definition 5: derived automatically from definition 2 (for both the JSON schema and GraphQL schema)

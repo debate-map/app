@@ -56,4 +56,5 @@ For more information, visit the website at: <https://debatemap.app>
 # Additional documentation
 
 * [Client/server infrastructure](https://github.com/debate-map/app/tree/master/Docs/ClientServerInfrastructure.md)
+* [Authentication](https://github.com/debate-map/app/tree/master/Docs/Authentication.md)
 * [Access policies](https://github.com/debate-map/app/tree/master/Docs/AccessPolicies.md)
