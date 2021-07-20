@@ -1,5 +1,5 @@
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, AssertValidate, Command, CommandMeta, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AssertValidate, Command, CommandMeta, GenerateUUID, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {AddArgumentAndClaim} from "../Commands.js";
 import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
@@ -14,11 +14,13 @@ type Payload = {mapID: string|n, parentID: string, node: MapNode, revision: MapN
 @MapEdit
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({
-		properties: {
-			mapID: {type: "string"}, parentID: {type: ["null", "string"]}, node: {$ref: "MapNode_Partial"}, revision: {$ref: "MapNodeRevision_Partial"}, link: {$ref: "ChildEntry"}, asMapRoot: {type: "boolean"},
-		},
-		required: ["mapID", "parentID", "node", "revision"],
+	payloadSchema: ()=>SimpleSchema({
+		$mapID: {type: "string"},
+		$parentID: {type: ["null", "string"]},
+		$node: {$ref: "MapNode_Partial"},
+		$revision: {$ref: "MapNodeRevision_Partial"},
+		link: {$ref: NodeChildLink.name},
+		asMapRoot: {type: "boolean"},
 	}),
 })
 export class AddChildNode extends Command<Payload, {nodeID: string, revisionID: string}> {

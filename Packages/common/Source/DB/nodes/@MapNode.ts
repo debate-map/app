@@ -1,4 +1,4 @@
-import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {GetValues_ForSchema, CE, IsNumberString, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddAJVExtraCheck, AddSchema, DB, MGLClass, Field, GetSchemaJSON, UUID, UUID_regex, UUID_regex_partial} from "web-vcore/nm/mobx-graphlink.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
@@ -11,7 +11,7 @@ export enum AccessLevel {
 	mod = "mod",
 	admin = "admin",
 }
-AddSchema("AccessLevel", {oneOf: GetValues_ForSchema(AccessLevel)});
+AddSchema("AccessLevel", {enum: GetValues(AccessLevel)});
 
 export enum ClaimForm {
 	base = "base",
@@ -19,7 +19,7 @@ export enum ClaimForm {
 	yesNoQuestion = "yesNoQuestion",
 }
 //export type ClaimForm = typeof ClaimForm_values[number];
-AddSchema("ClaimForm", {oneOf: GetValues_ForSchema(ClaimForm)});
+AddSchema("ClaimForm", {enum: GetValues(ClaimForm)});
 
 //export const MapNode_id = UUID_regex;
 //export const MapNode_chainAfterFormat = "^(\\[start\\]|[0-9]+)$";
@@ -72,12 +72,12 @@ export class MapNode {
 	//informalArgumentsHolder?: boolean;
 	//premiseAddHelper?: boolean;
 }
-AddSchema("MapNode_Partial", (()=>{
+AddSchema("MapNode_Partial", ["MapNode"], ()=>{
 	const schema = GetSchemaJSON("MapNode");
 	// schema.required = (schema.required as string[]).Except('creator', 'createdAt');
 	schema.required = ["type"];
 	return schema;
-})());
+});
 // disabled for now, simply because we haven't finished making all places that manipulate "MapNode.children" reliably update "MapNode.childrenOrder" as well
 /*AddAJVExtraCheck('MapNode', (node: MapNode) => {
 	if (node.type == MapNodeType.Argument) {
@@ -108,7 +108,7 @@ export type MapNodeL3_Argument = MapNodeL3 & Required<Pick<MapNodeL3, "argumentT
 	Supporting = 10,
 	Opposing = 20,
 }
-AddSchema("Polarity", {oneOf: GetValues_ForSchema(Polarity)});*/
+AddSchema("Polarity", {enum: GetValues(Polarity)});*/
 /*export const Polarity_values = ["supporting", "opposing"] as const;
 export type Polarity = typeof Polarity_values[number];
 AddSchema("Polarity", {oneOf: Polarity_values});*/
@@ -118,7 +118,7 @@ export enum Polarity {
 	opposing = "opposing",
 }
 //export type Polarity = typeof Polarity_values[number];
-AddSchema("Polarity", {oneOf: GetValues_ForSchema(Polarity)});
+AddSchema("Polarity", {enum: GetValues(Polarity)});
 
 // regular parents
 // ==========
@@ -127,7 +127,7 @@ export enum ChildOrderType {
 	manual = "manual",
 	byRating = "byRating",
 }
-AddSchema("ChildOrderType", {oneOf: GetValues_ForSchema(ChildOrderType)});
+AddSchema("ChildOrderType", {enum: GetValues(ChildOrderType)});
 
 // layer+anchor parents (for if subnode)
 // ==========

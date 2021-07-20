@@ -1,4 +1,4 @@
-import {GetValues_ForSchema, CE} from "web-vcore/nm/js-vextensions.js";
+import {GetValues_ForSchema, CE, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, AV, Command, dbp, AddSchema, AssertValidate, GenerateUUID, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 
@@ -25,7 +25,7 @@ export function CanConvertFromClaimTypeXToY(from: AttachmentType, to: Attachment
 		properties: {
 			mapID: {type: "string"},
 			nodeID: {type: "string"},
-			newType: {oneOf: GetValues_ForSchema(AttachmentType)},
+			newType: {enum: GetValues(AttachmentType)},
 		},
 		required: ["nodeID", "newType"],
 	}),

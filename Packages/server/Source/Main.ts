@@ -10,7 +10,7 @@ import {makePluginHook, postgraphile} from "postgraphile";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
 import fetch from "node-fetch";
 import cookieParser from "cookie-parser";
-import {CreateCommandsPlugin, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {CreateCommandsPlugin, GenerateUUID, mglClasses, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthExtrasPlugin} from "./Mutations/AuthenticationPlugin.js";
@@ -104,6 +104,27 @@ app.use(
 				AuthExtrasPlugin,
 				//OtherResolversPlugin,
 				CreateCommandsPlugin({
+					schemaDeps_auto: true,
+					// till we find way to auto-avoid conflicts with pgl introspection types, use this
+					schemaDeps_auto_exclude: mglClasses.filter(a=>a["_table"] != null).map(a=>a.name),
+					//schemaDeps: ["MapNode_Partial", "MapNodeRevision_Partial"],
+					typeDefStrFinalizer: str=>{
+						const replacements = {
+							Uuid: "UUID",
+						};
+
+						// undo the underscore-removing that jsonschema2graphql does
+						for (const key of schemaEntryJSONs.keys()) {
+							if (key.includes("_")) {
+								replacements[key.replace(/_/g, "")] = key;
+							}
+						}
+
+						for (const [from, to] of Object.entries(replacements)) {
+							str = str.replace(new RegExp(from, "g"), to);
+						}
+						return str;
+					},
 					preCommandRun: info=>{
 						//console.log("User in command resolver:", info.context.req.user?.id);
 						Assert(info.context.req.user != null, "Cannot run command on server unless logged in.");

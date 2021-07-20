@@ -44,7 +44,7 @@ export class Map {
 	noteInline? = true;
 
 	/*@DB((t,n)=>t.text(n))
-	@Field({oneOf: GetValues_ForSchema(MapType)}, {req: true})
+	@Field({enum: GetValues(MapType)}, {req: true})
 	type: MapType;*/
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())

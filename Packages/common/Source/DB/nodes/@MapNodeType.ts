@@ -1,4 +1,5 @@
-import {Assert, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {Assert, CE, CreateStringEnum, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema} from "web-vcore/nm/mobx-graphlink";
 import {ClaimForm, MapNode, MapNodeL3, Polarity} from "./@MapNode.js";
 
 export enum MapNodeType {
@@ -8,6 +9,9 @@ export enum MapNodeType {
 	claim = "claim",
 	argument = "argument",
 }
+//AddSchema("MapNodeType", {enum: GetValues(MapNodeType)});
+AddSchema("MapNodeType", {enum: GetValues(MapNodeType)});
+
 export class MapNodeType_Info {
 	static for = {
 		[MapNodeType.category]: new MapNodeType_Info({

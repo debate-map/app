@@ -1,13 +1,10 @@
-import {Command, AssertV, dbp, AssertValidate, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, AssertV, dbp, AssertValidate, CommandMeta, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {HasModPermissions} from "../DB/users/$user.js";
 
 @CommandMeta({
-	payloadSchema: ()=>({
-		properties: {
-			id: {$ref: "UUID"},
-			featured: {type: "boolean"},
-		},
-		required: ["id", "featured"],
+	payloadSchema: ()=>SimpleSchema({
+		$id: {$ref: "UUID"},
+		$featured: {type: "boolean"},
 	}),
 })
 export class SetMapFeatured extends Command<{id: string, featured: boolean}, {}> {

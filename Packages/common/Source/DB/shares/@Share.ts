@@ -1,11 +1,11 @@
 import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
-import {CE, CreateStringEnum, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
+import {CE, CreateStringEnum, GetValues, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
 import {MapView} from "./@MapView.js";
 
 export enum ShareType {
 	map = "map",
 }
-AddSchema("ShareType", {oneOf: GetValues_ForSchema(ShareType)});
+AddSchema("ShareType", {enum: GetValues(ShareType)});
 
 @MGLClass({table: "shares"})
 export class Share {

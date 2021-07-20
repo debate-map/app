@@ -35,7 +35,7 @@ export class ReverseArgumentPolarity extends Command<{mapID?: string, nodeID: st
 		Assert(this.newLinkData.polarity, "Polarity must be non-null, if calling ReverseArgumentPolarity.");
 		this.newLinkData.polarity = ReversePolarity(this.newLinkData.polarity);
 
-		AssertValidate("ChildEntry", this.newLinkData, "New link-data invalid");
+		AssertValidate(NodeChildLink.name, this.newLinkData, "New link-data invalid");
 	}
 
 	DeclareDBUpdates(db) {

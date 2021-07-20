@@ -1,5 +1,5 @@
 import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 
 export class MapNodePhrasing {
 	constructor(initialData: {node: string} & Partial<MapNodePhrasing>) {
@@ -34,4 +34,4 @@ export enum MapNodePhrasingType {
 	precise = "precise",
 	natural = "natural",
 }
-AddSchema("MapNodePhrasingType", {oneOf: GetValues_ForSchema(MapNodePhrasingType)});
+AddSchema("MapNodePhrasingType", {enum: GetValues(MapNodePhrasingType)});

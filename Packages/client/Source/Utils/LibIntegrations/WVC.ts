@@ -6,10 +6,10 @@ import {logTypes, LogTypes_New} from "Utils/General/Logging.js";
 import {colors} from "Utils/UI/GlobalStyles.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs.js";
-import {ActionFunc, GetMirrorOfMobXTree, manager as manager_framework} from "web-vcore";
+import {ActionFunc, AddVectorSchemas, GetMirrorOfMobXTree, manager as manager_framework} from "web-vcore";
 import produce from "web-vcore/nm/immer";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {WithStore} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, WithStore} from "web-vcore/nm/mobx-graphlink.js";
 import "./WVC/Overrides.js";
 
 const context = (require as any).context("../../../Resources/SVGs/", true, /\.svg$/);
@@ -29,6 +29,7 @@ declare module "web-vcore_UserTypes" {
 	interface LogTypes extends LogTypes_New {}
 }
 
+AddVectorSchemas(AddSchema);
 export function InitWVC() {
 	manager_framework.Populate({
 		// styling

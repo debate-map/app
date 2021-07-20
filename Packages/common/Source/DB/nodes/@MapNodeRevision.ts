@@ -1,4 +1,4 @@
-import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, DB, MGLClass, GetSchemaJSON, Field} from "web-vcore/nm/mobx-graphlink.js";
 import {QuoteAttachment} from "../nodeRevisions/@QuoteAttachment.js";
 import {MediaAttachment} from "../nodeRevisions/@MediaAttachment.js";
@@ -33,7 +33,7 @@ export enum PermissionInfoType {
 	mapEditors = "mapEditors",
 	anyone = "anyone",
 }
-AddSchema("PermissionInfoType", {oneOf: GetValues_ForSchema(PermissionInfoType)});
+AddSchema("PermissionInfoType", {enum: GetValues(PermissionInfoType)});
 
 export class PermissionInfo {
 	constructor(initialData: Partial<PermissionInfo>) {
@@ -142,12 +142,12 @@ export class MapNodeRevision {
 	@Field({$ref: MediaAttachment.name})
 	media?: MediaAttachment;
 }
-AddSchema("MapNodeRevision_Partial", (()=>{
+AddSchema("MapNodeRevision_Partial", ["MapNodeRevision"], ()=>{
 	const schema = GetSchemaJSON("MapNodeRevision");
 	// schema.required = (schema.required as string[]).Except('creator', 'createdAt');
 	schema.required = [];
 	return schema;
-})());
+});
 
 // argument
 // ==========
@@ -157,7 +157,7 @@ export enum ArgumentType {
 	anyTwo = "anyTwo",
 	all = "all",
 }
-AddSchema("ArgumentType", {oneOf: GetValues_ForSchema(ArgumentType)});
+AddSchema("ArgumentType", {enum: GetValues(ArgumentType)});
 
 export function GetArgumentTypeDisplayText(type: ArgumentType) {
 	return {Any: "any", AnyTwo: "any two", All: "all"}[ArgumentType[type]];

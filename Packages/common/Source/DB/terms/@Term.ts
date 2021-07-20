@@ -1,4 +1,4 @@
-import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 
 // export const termNameFormat = "^[^.#$\\[\\]]+$";
@@ -16,39 +16,39 @@ export class Term {
 		// this.createdAt = Date.now();
 	}
 
-	@DB((t,n)=>t.text(n).primary())
+	@DB((t, n)=>t.text(n).primary())
 	@Field({type: "string"})
 	id: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
+	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	creator: string;
 
-	@DB((t,n)=>t.bigInteger(n))
+	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"}, {req: true})
 	createdAt: number;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string", pattern: Term_nameFormat}, {req: true})
 	name: string;
 
-	@DB((t,n)=>t.specificType(n, "text[]"))
+	@DB((t, n)=>t.specificType(n, "text[]"))
 	@Field({items: {type: "string", pattern: Term_formsEntryFormat}, minItems: 1, uniqueItems: true}, {req: true})
 	forms: string[];
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string", pattern: Term_disambiguationFormat})
 	disambiguation: string;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({$ref: "TermType"}, {req: true})
 	type: TermType;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string", pattern: Term_definitionFormat}, {req: true})
 	definition: string;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	note: string;
 }
@@ -60,7 +60,7 @@ export enum TermType {
 	verb = "verb",
 	adverb = "adverb",
 }
-AddSchema("TermType", {oneOf: GetValues_ForSchema(TermType)});
+AddSchema("TermType", {enum: GetValues(TermType)});
 
 /*export type TermComponentSet = ObservableMap<string, boolean>;
 AddSchema("TermComponentSet", {patternProperties: {[UUID_regex]: {type: "boolean"}}});*/

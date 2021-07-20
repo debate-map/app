@@ -1,11 +1,11 @@
-import {GetValues_ForSchema, CE, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
 
 export enum MediaType {
 	image = "image",
 	video = "video",
 }
-AddSchema("MediaType", {oneOf: GetValues_ForSchema(MediaType)});
+AddSchema("MediaType", {enum: GetValues(MediaType)});
 
 export function GetNiceNameForMediaType(type: MediaType) {
 	return MediaType[type].toLowerCase();
@@ -20,36 +20,36 @@ export class Media {
 		// this.createdAt = Date.now();
 	}
 
-	@DB((t,n)=>t.text(n).primary())
+	@DB((t, n)=>t.text(n).primary())
 	@Field({type: "string"})
 	id: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
+	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	accessPolicy: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
+	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {req: true})
 	creator: string;
 
-	@DB((t,n)=>t.bigInteger(n))
+	@DB((t, n)=>t.bigInteger(n))
 	@Field({type: "number"}, {req: true})
 	createdAt: number;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string", pattern: Media_namePattern}, {req: true})
 	name: string;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({$ref: "MediaType"}, {req: true})
 	type: MediaType;
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	//@Field({pattern: Media_urlPattern})
 	@Field({type: "string"}, {req: true}) // allow overriding url pattern; it just highlights possible mistakes
 	url = "";
 
-	@DB((t,n)=>t.text(n))
+	@DB((t, n)=>t.text(n))
 	@Field({type: "string"}, {req: true})
 	description: string;
 }

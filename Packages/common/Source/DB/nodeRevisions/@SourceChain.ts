@@ -1,4 +1,4 @@
-import {GetValues_ForSchema, Assert, CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {GetValues_ForSchema, Assert, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {ChangeType} from "../mapNodeEdits/@MapNodeEdit.js";
 
@@ -30,7 +30,7 @@ export enum SourceType {
 	video = "video",
 	webpage = "webpage",
 }
-AddSchema("SourceType", {oneOf: GetValues_ForSchema(SourceType)});
+AddSchema("SourceType", {enum: GetValues(SourceType)});
 
 export const Source_linkURLPattern = "^https?://[^\\s/$.?#]+\\.[^\\s]+$";
 export class Source {

@@ -1,4 +1,4 @@
-import {Range, Assert, ModifyString, CE, CreateStringEnum, GetValues_ForSchema} from "web-vcore/nm/js-vextensions.js";
+import {Range, Assert, ModifyString, CE, CreateStringEnum, GetValues_ForSchema, GetValues} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {GetDisplayPolarity, GetLinkUnderParent, GetNodeForm, IsMultiPremiseArgument} from "../nodes/$node.js";
 import {MapNodeL2, MapNodeL3, Polarity} from "../nodes/@MapNode.js";
@@ -20,7 +20,7 @@ export enum NodeRatingType {
 	impact = "impact",
 }
 //type NodeRatingType_flat = keyof typeof NodeRatingType;
-AddSchema("NodeRatingType", {oneOf: GetValues_ForSchema(NodeRatingType)});
+AddSchema("NodeRatingType", {enum: GetValues(NodeRatingType)});
 
 export function PropNameToTitle(propName: NodeRatingType) {
 	return ModifyString(propName, m=>[m.lowerUpper_to_lowerSpaceLower, m.startLower_to_upper]);
