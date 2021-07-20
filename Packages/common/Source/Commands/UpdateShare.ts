@@ -1,5 +1,5 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, AssertV, AssertValidate, Command, CommandMeta, dbp, GetSchemaJSON, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GetSchemaJSON, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {Media} from "../DB/media/@Media.js";
 import {GetMedia, Share, GetShare} from "../DB.js";
@@ -31,7 +31,7 @@ export class UpdateShare extends Command<{id: string, updates: Partial<MainType>
 		AssertValidate(MTName, this.newData, "New-data invalid");
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {id} = this.payload;
 		db.set(dbp`shares/${id}`, this.newData);
 	}

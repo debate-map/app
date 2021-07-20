@@ -1,4 +1,4 @@
-import {AddSchema, Command, CommandMeta, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, Command, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
 
@@ -61,7 +61,7 @@ export class ChangeNodeOwnerMap extends Command<{nodeID: string, newOwnerMapID: 
 		}*/
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {nodeID} = this.payload;
 		db.set(dbp`nodes/${nodeID}`, this.newData);
 		if (this.sub_changeOwnerMapForArgument) {

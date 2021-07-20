@@ -1,4 +1,4 @@
-import {Command} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
 import {MapNode} from "../../DB/nodes/@MapNode.js";
 import {DeleteNode} from "../DeleteNode.js";
 
@@ -57,7 +57,7 @@ export class DeleteNodeSubtree extends Command<{nodeID: string, maxDeletes: numb
 		});*/
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		for (const deleteNodeCommand of this.subs_deleteNodes) {
 			db.add(deleteNodeCommand.GetDBUpdates());
 		}

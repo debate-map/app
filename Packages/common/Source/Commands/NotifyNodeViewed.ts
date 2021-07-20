@@ -11,9 +11,9 @@ export class NotifyNodeViewed extends Command<{nodeID: string}, {}> {
 		AssertV(nodeData, `Node #${nodeID} must exist for you to view it!`);
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const { nodeID } = this.payload;
-		db.set(`nodeViewers/${nodeID}/.${this.userInfo.id}`, true);
-		db.set(`userViewedNodes/${this.userInfo.id}/.${nodeID}`, true);
+		db.set(dbp`nodeViewers/${nodeID}/.${this.userInfo.id}`, true);
+		db.set(dbp`userViewedNodes/${this.userInfo.id}/.${nodeID}`, true);
 	}
 } */

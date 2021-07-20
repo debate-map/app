@@ -1,4 +1,4 @@
-import {AssertV, AssertValidate, Command, CommandMeta, dbp, GenerateUUID, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {User} from "../DB/users/@User.js";
 import {UserHidden} from "../DB/userHiddens/@UserHidden.js";
@@ -27,7 +27,7 @@ export class AddUser extends Command<{user: User, userHidden: UserHidden}, {id: 
 		this.returnData = {id: user.id};
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {user, userHidden} = this.payload;
 		db.set(dbp`users/${user.id}`, user);
 		db.set(dbp`userHiddens/${user.id}`, userHidden);

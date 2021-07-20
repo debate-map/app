@@ -1,4 +1,4 @@
-import {AddSchema, AssertValidate, dbp, GenerateUUID, GetAsync, Command, CommandMeta, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate, dbp, GenerateUUID, GetAsync, Command, CommandMeta, SimpleSchema, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert} from "web-vcore/nm/js-vextensions.js";
 
 import {UserEdit} from "../CommandMacros.js";
@@ -25,7 +25,7 @@ export class AddPhrasing extends Command<{phrasing: MapNodePhrasing}, {id: strin
 		this.returnData = {id: phrasing.id};
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {phrasing} = this.payload;
 		db.set(dbp`nodePhrasings/${phrasing.id}`, phrasing);
 	}

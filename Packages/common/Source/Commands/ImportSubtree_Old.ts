@@ -95,12 +95,12 @@ import {Clone, GetTreeNodesInObjTree} from "web-vcore/nm/js-vextensions.js";
 	}
 	nodeRatingsToAdd = [] as (Rating & {nodeID: string, ratingType: RatingType, userID: string})[];
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		for (const sub of this.subs) {
 			db.add(sub.GetDBUpdates());
 		}
 		for (let ratingEnhanced of this.nodeRatingsToAdd) {
-			db.set(`nodeRatings/${ratingEnhanced.nodeID}/${ratingEnhanced.ratingType}/${ratingEnhanced.userID}`, ratingEnhanced.Excluding("nodeID", "ratingType", "userID"));
+			db.set(dbp`nodeRatings/${ratingEnhanced.nodeID}/${ratingEnhanced.ratingType}/${ratingEnhanced.userID}`, ratingEnhanced.Excluding("nodeID", "ratingType", "userID"));
 		}
 	}
 }*/

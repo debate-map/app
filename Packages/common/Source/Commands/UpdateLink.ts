@@ -1,4 +1,4 @@
-import {GetAsync, Command, AssertV, NewSchema, AV, AddSchema, AssertValidate, GetSchemaJSON, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV, NewSchema, AV, AddSchema, AssertValidate, GetSchemaJSON, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {UserEdit} from "../CommandMacros.js";
 import {GetNode} from "../DB/nodes.js";
@@ -28,8 +28,8 @@ export class UpdateLink extends Command<{linkID: string, linkUpdates: Partial<No
 		AssertValidate("NodeChildLink", this.newData, "New node-child-link data invalid");
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {linkID} = this.payload;
-		db.set(`nodeChildLinks/${linkID}`, this.newData);
+		db.set(dbp`nodeChildLinks/${linkID}`, this.newData);
 	}
 }

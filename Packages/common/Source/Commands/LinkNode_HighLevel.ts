@@ -1,5 +1,5 @@
 import {E, ObjectCE} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, Command, CommandMeta, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, Command, CommandMeta, DBHelper, UUID} from "web-vcore/nm/mobx-graphlink.js";
 import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
@@ -129,7 +129,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		}
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		if (this.sub_unlinkFromOldParent) db.add(this.sub_unlinkFromOldParent.GetDBUpdates());
 		if (this.sub_deleteOldParent) db.add(this.sub_deleteOldParent.GetDBUpdates());
 		if (this.sub_addArgumentWrapper) db.add(this.sub_addArgumentWrapper.GetDBUpdates());

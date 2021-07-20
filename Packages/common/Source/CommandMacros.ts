@@ -1,4 +1,4 @@
-import {GetAsync, GetDoc, Command, dbp, DeclareDBUpdates_Helper} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, GetDoc, Command, dbp, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
 import {IsString, IsFunction, Assert} from "web-vcore/nm/js-vextensions.js";
 import {GetMap} from "./DB/maps.js";
 import {GetUser} from "./DB/users.js";

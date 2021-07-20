@@ -1,5 +1,5 @@
 import {Clone} from "web-vcore/nm/js-vextensions.js";
-import {AssertValidate, Command, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {GetNodeChildren} from "../DB/nodes.js";
 import {AsNodeL1, GetNodeDisplayText, GetNodeForm, GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
@@ -51,9 +51,9 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 		AssertValidate("MapNode", this.newNodeData, "New node-data invalid");
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {nodeID} = this.payload;
-		db.set(`nodes/${nodeID}`, this.newNodeData);
+		db.set(dbp`nodes/${nodeID}`, this.newNodeData);
 		if (this.sub_addRevision) {
 			db.add(this.sub_addRevision.GetDBUpdates());
 		}

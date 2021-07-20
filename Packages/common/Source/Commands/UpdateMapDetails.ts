@@ -1,4 +1,4 @@
-import {AddSchema, AssertValidate, NewSchema, GetSchemaJSON, GetAsync, Command, AssertV, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate, NewSchema, GetSchemaJSON, GetAsync, Command, AssertV, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 
@@ -35,8 +35,8 @@ export class UpdateMapDetails extends Command<{id: string, updates: Partial<Main
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {id} = this.payload;
-		db.set(`maps/${id}`, this.newData);
+		db.set(dbp`maps/${id}`, this.newData);
 	}
 }

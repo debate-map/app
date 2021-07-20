@@ -1,5 +1,5 @@
 import {Assert} from "web-vcore/nm/js-vextensions.js";
-import {Command, AssertV, dbp, AssertValidate, GenerateUUID, CommandMeta, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, AssertV, dbp, AssertValidate, GenerateUUID, CommandMeta, SimpleSchema, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {MapNodeTag} from "../DB/nodeTags/@MapNodeTag.js";
 import {HasModPermissions} from "../DB/users/$user.js";
@@ -29,7 +29,7 @@ export class AddNodeTag extends Command<{tag: MapNodeTag}, {id: string}> {
 		this.returnData = {id: tag.id};
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {tag} = this.payload;
 		db.set(dbp`nodeTags/${tag.id}`, tag);
 	}

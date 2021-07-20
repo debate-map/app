@@ -1,5 +1,5 @@
 import {Assert} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, AssertValidate, GetAsync, Command, AssertV, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate, GetAsync, Command, AssertV, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {MapNodeL3} from "../DB/nodes/@MapNode.js";
 import {GetNodeL3, ReversePolarity} from "../DB/nodes/$node.js";
@@ -38,8 +38,8 @@ export class ReverseArgumentPolarity extends Command<{mapID?: string, nodeID: st
 		AssertValidate(NodeChildLink.name, this.newLinkData, "New link-data invalid");
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {nodeID} = this.payload;
-		db.set(`nodes/${this.parentID}/.children/.${nodeID}`, this.newLinkData);
+		db.set(dbp`nodes/${this.parentID}/.children/.${nodeID}`, this.newLinkData);
 	}
 }

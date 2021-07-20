@@ -1,4 +1,4 @@
-import {AssertV, AssertValidate, AssertValidate_Full, Command, CommandMeta, GenerateUUID, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AssertValidate, AssertValidate_Full, Command, CommandMeta, DBHelper, dbp, GenerateUUID, GetSchemaJSON} from "web-vcore/nm/mobx-graphlink.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {AddNodeRevision} from "./AddNodeRevision.js";
@@ -34,15 +34,15 @@ export class AddNode extends Command<{mapID: string|n, node: MapNode, revision: 
 		}
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {node} = this.payload;
 
 		// add node
-		db.set(`nodes/${this.nodeID}`, node);
+		db.set(dbp`nodes/${this.nodeID}`, node);
 
 		// add as parent of (pre-existing) children
 		/*for (const childID of CE(node.children || {}).VKeys()) {
-			db.set(`nodes/${childID}/.parents/.${this.nodeID}`, {_: true});
+			db.set(dbp`nodes/${childID}/.parents/.${this.nodeID}`, {_: true});
 		}*/
 
 		db.add(this.sub_addRevision.GetDBUpdates());

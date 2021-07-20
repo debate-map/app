@@ -1,4 +1,4 @@
-import {AddSchema, AssertValidate, GetAsync, Command, AssertV} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate, GetAsync, Command, AssertV, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
 
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
@@ -40,8 +40,8 @@ export class UpdateNodeChildrenOrder extends Command<{mapID?: string, nodeID: st
 		// 3) update their "slot" to match the provided order
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {nodeID} = this.payload;
-		db.set(`nodes/${nodeID}`, this.newNodeData);
+		db.set(dbp`nodes/${nodeID}`, this.newNodeData);
 	}
 }

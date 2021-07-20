@@ -17,7 +17,7 @@ export class UpdateTimelineStepOrder extends Command<{timelineID: string, stepID
 		CE(this.timeline_newSteps).Move(stepID, newIndex, false); // dnd system applies index-fixing itself, so don't apply here
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {timelineID} = this.payload;
 		db.set(dbp`timelines/${timelineID}/.steps`, this.timeline_newSteps);
 	}

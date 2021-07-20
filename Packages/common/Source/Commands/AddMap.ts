@@ -1,5 +1,5 @@
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, AssertValidate, Command, CommandMeta, GenerateUUID, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema, UUID} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
 import {Map} from "../DB/maps/@Map.js";
@@ -10,9 +10,12 @@ import {AddChildNode} from "./AddChildNode.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({}),
+	payloadSchema: ()=>SimpleSchema({
+		$map: {$ref: "Map"},
+	}),
+	returnSchema: ()=>SimpleSchema({$id: {$ref: "UUID"}}),
 })
-export class AddMap extends Command<{map: Map}, UUID> {
+export class AddMap extends Command<{map: Map}, {id: UUID}> {
 	mapID: string;
 	sub_addNode: AddChildNode;
 	Validate() {
@@ -35,12 +38,12 @@ export class AddMap extends Command<{map: Map}, UUID> {
 		map.rootNode = this.sub_addNode.sub_addNode.nodeID;
 		AssertValidate("Map", map, "Map invalid");
 
-		this.returnData = this.mapID;
+		this.returnData = {id: this.mapID};
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {map} = this.payload;
-		db.set(`maps/${this.mapID}`, map);
+		db.set(dbp`maps/${this.mapID}`, map);
 		db.add(this.sub_addNode.GetDBUpdates());
 	}
 }

@@ -1,4 +1,4 @@
-import {Command, dbp, AssertValidate, GenerateUUID, CommandMeta, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, dbp, AssertValidate, GenerateUUID, CommandMeta, SimpleSchema, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {Timeline} from "../DB/timelines/@Timeline.js";
 
@@ -18,7 +18,7 @@ export class AddTimeline extends Command<{mapID: string, timeline: Timeline}, {i
 		AssertValidate("Timeline", timeline, "Timeline invalid");
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {mapID, timeline} = this.payload;
 		db.set(dbp`timelines/${this.timelineID}`, timeline);
 		db.set(dbp`maps/${mapID}/.timelines/.${this.timelineID}`, true);

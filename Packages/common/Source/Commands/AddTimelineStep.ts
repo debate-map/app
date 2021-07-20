@@ -31,7 +31,7 @@ export class AddTimelineStep extends Command<{timelineID: string, step: Timeline
 		AssertValidate("TimelineStep", step, "TimelineStep invalid");
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {timelineID, step} = this.payload;
 		// add step
 		db.set(dbp`timelineSteps/${this.stepID}`, step);

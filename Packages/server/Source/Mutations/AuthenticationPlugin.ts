@@ -6,7 +6,13 @@ import {Context as Context_base} from "postgraphile";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import express, {Request, Response} from "express";
 import {GenerateUUID, UserInfo} from "web-vcore/nm/mobx-graphlink";
+import {createRequire} from "module";
 const {makeExtendSchemaPlugin, gql} = graphileUtils;
+
+//import ipAddress_ from "ip-address";
+//import ipAddress_ from "ip-address/Dist/cjs/ip-address.js";
+const require = createRequire(import.meta.url);
+const {Address4, Address6} = require("ip-address") as typeof import("ip-address");
 
 type Context = Context_base<any> & {
 	pgClient: PoolClient;
@@ -114,7 +120,7 @@ export const AuthExtrasPlugin = makeExtendSchemaPlugin(build=>{
 					Assert(!connectionIDs_usedUp.has(connectionID), "The connection-id provided has already been used to attach a user-id!");
 					const attachInfo = connectionID_attachInfo.get(connectionID);
 					Assert(attachInfo != null, `Could not find user-id for connection-id: ${connectionID}`);
-					Assert(GetIPAddress(ctx.req) == attachInfo.ipAddress, `Cannot call PassConnectionID; the ip-address does not match the caller of _GetConnectionID!`);
+					Assert(AreIPsEquivalent(GetIPAddress(ctx.req), attachInfo.ipAddress), `Cannot call PassConnectionID; the ip-address does not match the caller of _GetConnectionID!`);
 
 					connectionIDs_usedUp.add(connectionID); // mark as used first; guarantees can't be used twice
 					ctx.req["user"] = attachInfo.userInfo; // attaches the discovered user-id to the persistent websocket connection/request
@@ -129,8 +135,30 @@ export const AuthExtrasPlugin = makeExtendSchemaPlugin(build=>{
 	};
 });
 
-function GetIPAddress(req: Request) {
+function GetIPAddress(req: Request): string {
 	//var ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || '').split(',')[0].trim(); // commented, since x-forwarded-for can be spoofed
 	//console.log("IPAddress:", req.ip ?? req.ips?.[0] ?? req.socket.remoteAddress ?? req.connection.address);
-	return req.ip ?? req.ips?.[0] ?? req.socket.remoteAddress ?? req.connection.address;
+	//return req.ip ?? req.ips?.[0] ?? req.socket.remoteAddress; //?? req.connection.address;
+	return req.socket.remoteAddress!;
 }
+function AreIPsEquivalent(ip1_str: string, ip2_str: string) {
+	//const ip1_canonical = (ip1.includes(":") ? new Address6(ip1) : new Address4(ip1)).canonicalForm();
+	if (ip1_str == ip2_str) return true;
+
+	const ip1 = new Address6(ip1_str);
+	const ip2 = new Address6(ip2_str);
+	//console.log("ips.canonicalForm:", ip1_canonical.canonicalForm(), ip2.canonicalForm());
+	if (ip1.canonicalForm() == ip2.canonicalForm()) return true;
+
+	// fixes observed situation where "::1" and "::ffff:127.0.0.1" were both obtained (while running on localhost), but were considered inequivalent
+	// commented; I think the mismatch was only occurring because I was using multiple ways to get the ip; now that I always use just req.socket.remoteAddress, I think it'll be consistent (we'll see)
+	/*function IsLoopback(ip: InstanceType<typeof Address6>, ipStr: string) {
+		//return ip.isLoopback() || ip.correctForm() == "::ffff:7f00:1";
+		return ip.isLoopback() || ipStr == "::ffff:127.0.0.1";
+	}
+	//console.log("ips.IsLoopback:", IsLoopback(ip1, ip1_str), IsLoopback(ip2, ip2_str));
+	if (IsLoopback(ip1, ip1_str) && IsLoopback(ip2, ip2_str)) return true;*/
+
+	return false;
+}
+//setTimeout(()=>console.log("Same:", AreIPsEquivalent("::1", "::ffff:127.0.0.1")), 2000);

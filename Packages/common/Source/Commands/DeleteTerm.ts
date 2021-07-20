@@ -1,4 +1,4 @@
-import {GetAsync, Command, AssertV, WrapDBValue, dbp, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV, WrapDBValue, dbp, CommandMeta, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {Term} from "../DB/terms/@Term.js";
 import {GetTerm} from "../DB/terms.js";
@@ -16,9 +16,9 @@ export class DeleteTerm extends Command<{termID: string}, {}> {
 		AssertUserCanDelete(this, this.oldData);
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {termID} = this.payload;
 		db.set(dbp`terms/${termID}`, null);
-		//db.set(`termNames/${this.oldData.name.toLowerCase()}/.${termID}`, WrapDBValue(null, {merge: true}));
+		//db.set(dbp`termNames/${this.oldData.name.toLowerCase()}/.${termID}`, WrapDBValue(null, {merge: true}));
 	}
 }

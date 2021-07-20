@@ -1,6 +1,6 @@
 import {observable} from "web-vcore/nm/mobx.js";
 import {Vector2, Clone} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, RunXOnceSchemasAdded, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
 
 const O = observable;
 
@@ -69,6 +69,7 @@ AddSchema("MapNodeView", ["Vector2"], ()=>({
 		childLimit_down: {type: "number"},
 	},
 }));
+//RunXOnceSchemasAdded(["Vector2"], ()=>console.log("Should be done...", schemaEntryJSONs.get("MapNodeView")));
 
 // export type MapNodeView_SelfOnly = Omit<MapNodeView, 'children'>;
 // export const MapNodeView_SelfOnly_props = ['expanded', 'expanded_truth', 'expanded_relevance', 'selected', 'focused', 'viewOffset', 'openPanel', 'openTermID', 'childLimit_up', 'childLimit_down'];

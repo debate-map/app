@@ -1,4 +1,4 @@
-import {Command, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, CommandMeta, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {LinkNode} from "./LinkNode.js";
 
@@ -69,7 +69,7 @@ export class CloneNode extends Command<{mapID: string, baseNodePath: string, new
 		}*/
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		/*let updates = this.sub_addNode.GetDBUpdates();
 		for (const sub of this.sub_linkChildren) {
 			// updates.Extend(sub.GetDBUpdates());

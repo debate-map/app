@@ -1,4 +1,4 @@
-import {Command, CommandMeta, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
@@ -26,7 +26,7 @@ export class DeleteMap extends Command<{mapID: string}, {}> {
 		// todo: use parents recursion on l2 nodes to make sure they're all connected to at least one other map root
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {mapID} = this.payload;
 		db.add(this.sub_deleteNode.GetDBUpdates());
 		db.set(dbp`maps/${mapID}`, null);

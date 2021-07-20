@@ -1,4 +1,4 @@
-import {AssertValidate, Command, CommandMeta, dbp, GenerateUUID, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {Share} from "../DB.js";
 import {UserEdit} from "../CommandMacros.js";
 
@@ -62,7 +62,7 @@ export class AddShare extends Command<{share: Share}, {id: string}> {
 		AssertValidate("Share", share, "Share invalid");
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {share} = this.payload;
 		db.set(dbp`shares/${this.shareID}`, share);
 	}

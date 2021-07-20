@@ -111,12 +111,12 @@ export class ImportSubtree extends Command<{
 	}
 	nodeRatingsToAdd = [] as NoID<NodeRating>[];
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		for (const sub of this.subs) {
 			db.add(sub.GetDBUpdates());
 		}
 		for (let rating of this.nodeRatingsToAdd) {
-			db.set(`nodeRatings/${GenerateUUID()}`, rating);
+			db.set(dbp`nodeRatings/${GenerateUUID()}`, rating);
 		}
 	}
 }*/

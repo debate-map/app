@@ -1,5 +1,5 @@
 import {Assert, E, CE} from "web-vcore/nm/js-vextensions.js";
-import {GetAsync, Command, AssertV, dbp, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV, dbp, CommandMeta, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 
 import {LinkNode_HighLevel} from "./LinkNode_HighLevel.js";
@@ -44,7 +44,7 @@ export class LinkNode extends Command<{mapID: string|n, parentID: string, childI
 		}*/
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {parentID, childID, childForm, childPolarity} = this.payload;
 		// add parent as parent-of-child
 		db.set(dbp`nodes/${childID}/.parents/.${parentID}`, {_: true});

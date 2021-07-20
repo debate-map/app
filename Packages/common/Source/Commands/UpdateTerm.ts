@@ -1,5 +1,5 @@
 import {Assert, CE} from "web-vcore/nm/js-vextensions.js";
-import {AssertValidate, AddSchema, GetSchemaJSON, NewSchema, WrapDBValue, dbp, GetAsync, Command, AssertV, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, AddSchema, GetSchemaJSON, NewSchema, WrapDBValue, dbp, GetAsync, Command, AssertV, CommandMeta, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {Term} from "../DB/terms/@Term.js";
 import {GetTerm} from "../DB/terms.js";
@@ -31,12 +31,12 @@ export class UpdateTerm extends Command<{termID: string, updates: Partial<Term>}
 		AssertValidate("Term", this.newData, "New-data invalid");
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {termID} = this.payload;
 		db.set(dbp`terms/${termID}`, this.newData);
 		/*if (this.newData.name != this.oldData.name) {
-			db.set(`termNames/${this.oldData.name.toLowerCase()}/.${termID}`, WrapDBValue(null, {merge: true}));
-			db.set(`termNames/${this.newData.name.toLowerCase()}/.${termID}`, WrapDBValue(true, {merge: true}));
+			db.set(dbp`termNames/${this.oldData.name.toLowerCase()}/.${termID}`, WrapDBValue(null, {merge: true}));
+			db.set(dbp`termNames/${this.newData.name.toLowerCase()}/.${termID}`, WrapDBValue(true, {merge: true}));
 		}*/
 	}
 }

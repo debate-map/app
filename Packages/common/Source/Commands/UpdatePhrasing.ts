@@ -1,4 +1,4 @@
-import {AddSchema, GetSchemaJSON, NewSchema, AssertValidate, GetAsync, Command, AssertV, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, GetSchemaJSON, NewSchema, AssertValidate, GetAsync, Command, AssertV, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {UserEdit} from "../CommandMacros.js";
 
@@ -33,8 +33,8 @@ export class UpdatePhrasing extends Command<{id: string, updates: Partial<MainTy
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {id} = this.payload;
-		db.set(`nodePhrasings/${id}`, this.newData);
+		db.set(dbp`nodePhrasings/${id}`, this.newData);
 	}
 }

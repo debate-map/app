@@ -10,8 +10,9 @@ import {makePluginHook, postgraphile} from "postgraphile";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
 import fetch from "node-fetch";
 import cookieParser from "cookie-parser";
-import {CreateCommandsPlugin, GenerateUUID, mglClasses, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, CreateCommandsPlugin, GenerateUUID, mglClasses, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert} from "web-vcore/nm/js-vextensions";
+import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthExtrasPlugin} from "./Mutations/AuthenticationPlugin.js";
 import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
@@ -105,24 +106,42 @@ app.use(
 				//OtherResolversPlugin,
 				CreateCommandsPlugin({
 					schemaDeps_auto: true,
-					// till we find way to auto-avoid conflicts with pgl introspection types, use this
-					schemaDeps_auto_exclude: mglClasses.filter(a=>a["_table"] != null).map(a=>a.name),
+					// till we find way to auto-avoid conflicts with pgl introspection types, use this // commented; not needed anymore, since "get-graphql-from-jsonschema" adds "T0" to end of type-names
+					//schemaDeps_auto_exclude: mglClasses.filter(a=>a["_table"] != null).map(a=>a.name),
 					//schemaDeps: ["MapNode_Partial", "MapNodeRevision_Partial"],
+					/*typeDefFinalizer: typeDef=>{
+						function CleanUpGraphQLTypeName(name: string) {
+							if (name.includes("T0")) name = name.replace(/T0/g, ".").replace(/\.$/, "");
+							return name;
+						}
+						typeDef.name = CleanUpGraphQLTypeName(typeDef.name);
+						typeDef.str = typeDef.str.replace(/(\W)(.*?T0.*?)(\W)/g, (str, g1, typeName, g3)=>{
+							return `${g1}${CleanUpGraphQLTypeName(typeName)}${g3}`;
+						});
+						return typeDef;
+					},*/
 					typeDefStrFinalizer: str=>{
 						const replacements = {
-							Uuid: "UUID",
+							//Uuid: "UUID",
+							// replace refs to scalar json-schemas, with just their scalar type (no graphql types are created for these, since graphql can't represent them as a separate type)
+							// commented; now automated within mobx-graphlink (in FindGQLTypeName())
+							//UUIDT0: "String",
 						};
 
 						// undo the underscore-removing that jsonschema2graphql does
-						for (const key of schemaEntryJSONs.keys()) {
+						/*for (const key of schemaEntryJSONs.keys()) {
 							if (key.includes("_")) {
 								replacements[key.replace(/_/g, "")] = key;
 							}
-						}
+						}*/
 
 						for (const [from, to] of Object.entries(replacements)) {
-							str = str.replace(new RegExp(from, "g"), to);
+							//str = str.replace(new RegExp(from, "g"), to);
+							str = str.replace(new RegExp(`(^|[^a-zA-Z0-9_])(${from})([^a-zA-Z0-9_]|$)`, "g"), (matchStr, g1, typeName, g3)=>{
+								return `${g1}${to}${g3}`;
+							});
 						}
+
 						return str;
 					},
 					preCommandRun: info=>{
@@ -192,6 +211,7 @@ app.use(
 // set up libs
 InitApollo(serverLaunchID);
 InitGraphlink();
+AddWVCSchemas(AddSchema); // while we don't want to initialize the full web-vcore lib, we do want its vector schemas
 
 app.listen(dbPort);
 console.log("Server started.");

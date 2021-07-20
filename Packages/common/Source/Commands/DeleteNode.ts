@@ -1,4 +1,4 @@
-import {AddSchema, AssertV, AssertValidate, Command, CommandMeta, dbp, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {GetMaps} from "../DB/maps.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
@@ -77,7 +77,7 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string, withC
 		}
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {nodeID} = this.payload;
 
 		// delete node's own data
@@ -86,17 +86,17 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string, withC
 		db.set(dbp`nodeRatings/${nodeID}`, null);
 		db.set(dbp`nodeViewers/${nodeID}`, null);
 		/* for (const viewerID of this.viewerIDs_main) {
-			db.set(`userViewedNodes/${viewerID}/.${nodeID}}`, null);
+			db.set(dbp`userViewedNodes/${viewerID}/.${nodeID}}`, null);
 		} */
 
 		// delete links with parents
 		/*for (const {index, key: parentID} of CE(this.oldData.parents || {}).Pairs()) {
-			db.set(`nodes/${parentID}/.children/.${nodeID}`, null);
+			db.set(dbp`nodes/${parentID}/.children/.${nodeID}`, null);
 			// let parent_childrenOrder = this.oldParentID__childrenOrder[parentID];
 			const parent_childrenOrder = this.oldParentChildrenOrders[index];
 			if (parent_childrenOrder) {
-				//db.set(`nodes/${parentID}/.childrenOrder`, CE(CE(parent_childrenOrder).Except(nodeID)).IfEmptyThen(null));
-				db.set(`nodes/${parentID}/.childrenOrder`, CE(parent_childrenOrder).Except(nodeID));
+				//db.set(dbp`nodes/${parentID}/.childrenOrder`, CE(CE(parent_childrenOrder).Except(nodeID)).IfEmptyThen(null));
+				db.set(dbp`nodes/${parentID}/.childrenOrder`, CE(parent_childrenOrder).Except(nodeID));
 			}
 		}*/
 		for (const link of this.links) {
@@ -107,7 +107,7 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string, withC
 		/*if (this.oldData.layerPlusAnchorParents) {
 			for (const layerPlusAnchorStr of CE(this.oldData.layerPlusAnchorParents).VKeys()) {
 				const [layerID, anchorNodeID] = layerPlusAnchorStr.split("+");
-				db.set(`layers/${layerID}/.nodeSubnodes/.${anchorNodeID}/.${nodeID}`, null);
+				db.set(dbp`layers/${layerID}/.nodeSubnodes/.${anchorNodeID}/.${nodeID}`, null);
 			}
 		}*/
 

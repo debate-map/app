@@ -1,4 +1,4 @@
-import {GetAsync, Command, AssertV, dbp, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV, dbp, CommandMeta, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {Media} from "../DB/media/@Media.js";
 import {GetMedia, IsUserCreatorOrMod, GetShare, Share} from "../DB.js";
@@ -16,7 +16,7 @@ export class DeleteShare extends Command<{id: string}, {}> {
 		AssertUserCanDelete(this, this.oldData);
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {id} = this.payload;
 		db.set(dbp`shares/${id}`, null);
 	}

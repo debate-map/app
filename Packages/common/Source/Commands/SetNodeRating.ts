@@ -1,4 +1,4 @@
-import {AddSchema, AssertValidate, BU, Command, CommandMeta, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertValidate, BU, Command, CommandMeta, DBHelper, dbp, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
 import {NodeRatingType} from "../DB/nodeRatings/@NodeRatingType.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
@@ -35,12 +35,12 @@ export class SetNodeRating extends Command<{nodeID: string, ratingType: Exclude<
 		}
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		if (this.oldRating) {
-			db.set(`nodeRatings/${this.oldRating.id}`, null);
+			db.set(dbp`nodeRatings/${this.oldRating.id}`, null);
 		}
 		if (this.newRating) {
-			db.set(`nodeRatings/${this.newID}`, this.newRating);
+			db.set(dbp`nodeRatings/${this.newID}`, this.newRating);
 		}
 	}
 }

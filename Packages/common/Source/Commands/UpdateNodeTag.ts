@@ -1,4 +1,4 @@
-import {AssertV, Command, AV, AddSchema, AssertValidate, GetSchemaJSON, NewSchema, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, Command, AV, AddSchema, AssertValidate, GetSchemaJSON, NewSchema, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {UserEdit} from "../CommandMacros.js";
 
@@ -35,8 +35,8 @@ export class UpdateNodeTag extends Command<{id: string, updates: Partial<MainTyp
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {id} = this.payload;
-		db.set(`nodeTags/${id}`, this.newData);
+		db.set(dbp`nodeTags/${id}`, this.newData);
 	}
 }

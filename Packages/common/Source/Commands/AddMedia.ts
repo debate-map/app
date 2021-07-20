@@ -1,4 +1,4 @@
-import {Command, AssertV, dbp, AssertValidate, GenerateUUID, CommandMeta, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, AssertV, dbp, AssertValidate, GenerateUUID, CommandMeta, SimpleSchema, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {HasModPermissions} from "../DB/users/$user.js";
 import {Media} from "../DB/media/@Media.js";
@@ -22,7 +22,7 @@ export class AddMedia extends Command<{media: Media}, {id: string}> {
 		AssertValidate("Media", media, "Media invalid");
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {media} = this.payload;
 		db.set(dbp`medias/${this.mediaID}`, media);
 	}

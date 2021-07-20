@@ -1,4 +1,4 @@
-import {AV, Command, CommandMeta, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {AV, Command, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {MapNodeTag} from "../DB/nodeTags/@MapNodeTag.js";
 import {GetNodeTag} from "../DB/nodeTags.js";
@@ -16,7 +16,7 @@ export class DeleteNodeTag extends Command<{id: string}, {}> {
 		AssertUserCanDelete(this, this.oldData);
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {id} = this.payload;
 		db.set(dbp`nodeTags/${id}`, null);
 	}

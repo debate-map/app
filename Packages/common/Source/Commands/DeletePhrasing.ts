@@ -1,4 +1,4 @@
-import {Command, CommandMeta, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {GetNodePhrasing} from "../DB/nodePhrasings.js";
 import {MapNodePhrasing} from "../DB/nodePhrasings/@MapNodePhrasing.js";
@@ -16,7 +16,7 @@ export class DeletePhrasing extends Command<{id: string}, {}> {
 		AssertUserCanDelete(this, this.oldData);
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {id} = this.payload;
 		db.set(dbp`nodePhrasings/${id}`, null);
 	}

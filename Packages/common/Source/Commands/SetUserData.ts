@@ -1,5 +1,5 @@
-import {AddSchema, AssertValidate, GetSchemaJSON, NewSchema, GetAsync, Command, AssertV, CommandMeta} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
+import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GetSchemaJSON, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {GetUser} from "../DB/users.js";
 import {User} from "../DB/users/@User.js";
 
@@ -41,8 +41,8 @@ export class SetUserData extends Command<{id: string, updates: Partial<MainType>
 		AssertValidate(MTName, this.newData, `New ${MTName.toLowerCase()}-data invalid`);
 	}
 
-	DeclareDBUpdates(db) {
+	DeclareDBUpdates(db: DBHelper) {
 		const {id} = this.payload;
-		db.set(`users/${id}`, this.newData);
+		db.set(dbp`users/${id}`, this.newData);
 	}
 }
