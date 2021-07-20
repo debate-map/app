@@ -108,6 +108,7 @@ app.use(
 					schemaDeps_auto: true,
 					// till we find way to auto-avoid conflicts with pgl introspection types, use this // commented; not needed anymore, since "get-graphql-from-jsonschema" adds "T0" to end of type-names
 					//schemaDeps_auto_exclude: mglClasses.filter(a=>a["_table"] != null).map(a=>a.name),
+					//schemaDeps_auto_exclude: ["MapView", "MapNodeView"], // exclude classes we know aren't needed for the graphql api, and which cause warnings (eg. "$ref" cycles)
 					//schemaDeps: ["MapNode_Partial", "MapNodeRevision_Partial"],
 					/*typeDefFinalizer: typeDef=>{
 						function CleanUpGraphQLTypeName(name: string) {
@@ -144,6 +145,8 @@ app.use(
 
 						return str;
 					},
+					logTypeDefs: true,
+
 					preCommandRun: info=>{
 						//console.log("User in command resolver:", info.context.req.user?.id);
 						Assert(info.context.req.user != null, "Cannot run command on server unless logged in.");
