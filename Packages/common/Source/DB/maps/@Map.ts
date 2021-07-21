@@ -24,27 +24,27 @@ export class Map {
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({type: "string"})
+	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
 	id: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@Field({type: "string"})
 	accessPolicy: string;
 
 	@DB((t, n)=>t.text(n))
-	@Field({type: "string", pattern: Map_namePattern}, {req: true})
+	@Field({type: "string", pattern: Map_namePattern})
 	name: string;
 
-	@DB((t, n)=>t.text(n))
-	@Field({type: "string"})
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({type: "string"}, {opt: true})
 	note?: string;
 
-	@DB((t, n)=>t.boolean(n))
-	@Field({type: "boolean"})
+	@DB((t, n)=>t.boolean(n).nullable())
+	@Field({type: "boolean"}, {opt: true})
 	noteInline? = true;
 
 	/*@DB((t,n)=>t.text(n))
-	@Field({enum: GetValues(MapType)}, {req: true})
+	@Field({enum: GetValues(MapType)})
 	type: MapType;*/
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
@@ -56,43 +56,43 @@ export class Map {
 	defaultExpandDepth = 2;
 
 	/*@DB((t,n)=>t.text(n))
-	@Field({type: "string"})
+	@Field({type: "string"}, {opt: true})
 	defaultTimelineID: string;*/
 
 	/*@DB((t,n)=>t.boolean(n))
-	@Field({type: "boolean"})
+	@Field({type: "boolean"}, {opt: true})
 	requireMapEditorsCanEdit?: boolean;*/
 
-	@DB((t, n)=>t.jsonb(n))
+	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field(()=>NewSchema({
 		properties: CE(GetSchemaJSON("MapNodeRevision").properties!).Including(...MapNodeRevision_Defaultable_props),
 	}))
 	nodeDefaults?: MapNodeRevision_Defaultable;
 
-	@DB((t, n)=>t.boolean(n))
-	@Field({type: "boolean"})
+	@DB((t, n)=>t.boolean(n).nullable())
+	@Field({type: "boolean"}, {opt: true})
 	featured?: boolean;
 
-	@DB((t, n)=>t.specificType(n, "text[]").notNullable())
+	@DB((t, n)=>t.specificType(n, "text[]"))
 	//@Field({patternProperties: {[UUID_regex]: {type: "boolean"}}})
-	@Field({items: {type: "string"}}, {req: true})
+	@Field({items: {type: "string"}})
 	editors: string[];
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@Field({type: "string"})
 	creator: string;
 
 	@DB((t, n)=>t.bigInteger(n))
-	@Field({type: "number"}, {req: true})
+	@Field({type: "number"})
 	createdAt: number;
 
 	@DB((t, n)=>t.integer(n))
 	@Field({type: "number"})
 	edits: number;
 
-	@DB((t, n)=>t.bigInteger(n))
-	@Field({type: "number"})
-	editedAt: number;
+	@DB((t, n)=>t.bigInteger(n).nullable())
+	@Field({type: "number"}, {opt: true})
+	editedAt?: number;
 
 	/*@DB((t,n)=>t.specificType(n, "text[]"))
 	@Field({patternProperties: {[UUID_regex]: {type: "boolean"}}})

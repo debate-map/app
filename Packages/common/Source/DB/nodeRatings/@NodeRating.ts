@@ -8,32 +8,32 @@ export class NodeRating {
 		CE(this).VSet(initialData);
 	}
 
-	@DB((t,n)=>t.text(n).primary())
-	@Field({type: "string"})
+	@DB((t, n)=>t.text(n).primary())
+	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
 	id: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
+	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"})
 	accessPolicy: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
+	@Field({type: "string"})
 	node: string;
 
-	@DB((t,n)=>t.text(n))
-	@Field({$ref: "NodeRatingType"}, {req: true})
+	@DB((t, n)=>t.text(n))
+	@Field({$ref: "NodeRatingType"})
 	type: NodeRatingType;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
+	@Field({type: "string"})
 	user: string;
 
-	@DB((t,n)=>t.bigInteger(n))
+	@DB((t, n)=>t.bigInteger(n).nullable())
+	@Field({type: "number"}, {opt: true})
+	editedAt?: number;
+
+	@DB((t, n)=>t.float(n))
 	@Field({type: "number"})
-	editedAt: number;
-	
-	@DB((t,n)=>t.float(n))
-	@Field({type: "number"}, {req: true})
 	value: number;
 }
 export type NodeRating_MaybePseudo = PartialBy<NodeRating, "id" | "accessPolicy">;

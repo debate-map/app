@@ -65,7 +65,7 @@ class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: MapNodeTag, 
 		return (
 			<Column mt={5} style={{background: HSLA(0, 0, 0, .3), padding: 5, borderRadius: 5}}>
 				{/*<Text>Type: {compClass.displayName}</Text>*/}
-				<TagDetailsUI /*ref={c=>this.detailsUI = c}*/ baseData={tag} forNew={false} enabled={creatorOrMod} onChange={val=>this.SetState({newTag: val})}/>
+				<TagDetailsUI /*ref={c=>this.detailsUI = c}*/ baseData={tag} phase={creatorOrMod ? "edit" : "view"} onChange={val=>this.SetState({newTag: val})}/>
 				{creatorOrMod &&
 					<Row mt={5}>
 						<Button text="Save" enabled={tempCommand_valid} title={tempCommand_error} onLeftClick={async()=>{

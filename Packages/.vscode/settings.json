@@ -1,5 +1,5 @@
 {
-	"typescript.tsdk": "../../node_modules/typescript/lib",
+	"typescript.tsdk": "../node_modules/typescript/lib",
 	"javascript.preferences.quoteStyle": "double",
 	"typescript.preferences.quoteStyle": "double",
 	"eslint.validate": [
@@ -12,6 +12,10 @@
 		"source.fixAll.eslint": true
 	},
 	// fixes eslint's plugin/config imports (alternative: https://github.com/microsoft/rushstack/tree/master/stack/eslint-patch)
-	"eslint.options.resolvePluginsRelativeTo": "../../node_modules/web-vcore",
-	"eslint.nodePath": "../../node_modules/web-vcore"
+	/*"eslint.workingDirectories": [
+		//"./client"
+		".."
+	],*/
+	"eslint.options.resolvePluginsRelativeTo": "../node_modules/web-vcore",
+	"eslint.nodePath": "../node_modules/web-vcore"
 }

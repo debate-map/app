@@ -5,7 +5,7 @@ import {Term} from "../DB/terms/@Term.js";
 import {GetTerm} from "../DB/terms.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
-type MainType = Term;
+type MT = Term;
 const MTName = "Term";
 
 @UserEdit
@@ -20,23 +20,23 @@ const MTName = "Term";
 		required: ["id", "updates"],
 	}),
 })
-export class UpdateTerm extends Command<{termID: string, updates: Partial<Term>}, {}> {
-	oldData: Term;
-	newData: Term;
+export class UpdateTerm extends Command<{id: string, updates: Partial<MT>}, {}> {
+	oldData: MT;
+	newData: MT;
 	Validate() {
-		const {termID, updates} = this.payload;
-		this.oldData = GetTerm.NN(termID);
+		const {id, updates} = this.payload;
+		this.oldData = GetTerm.NN(id);
 		AssertUserCanModify(this, this.oldData);
 		this.newData = {...this.oldData, ...updates};
-		AssertValidate("Term", this.newData, "New-data invalid");
+		AssertValidate(MTName, this.newData, "New-data invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {termID} = this.payload;
-		db.set(dbp`terms/${termID}`, this.newData);
+		const {id} = this.payload;
+		db.set(dbp`terms/${id}`, this.newData);
 		/*if (this.newData.name != this.oldData.name) {
-			db.set(dbp`termNames/${this.oldData.name.toLowerCase()}/.${termID}`, WrapDBValue(null, {merge: true}));
-			db.set(dbp`termNames/${this.newData.name.toLowerCase()}/.${termID}`, WrapDBValue(true, {merge: true}));
+			db.set(dbp`termNames/${this.oldData.name.toLowerCase()}/.${id}`, WrapDBValue(null, {merge: true}));
+			db.set(dbp`termNames/${this.newData.name.toLowerCase()}/.${id}`, WrapDBValue(true, {merge: true}));
 		}*/
 	}
 }

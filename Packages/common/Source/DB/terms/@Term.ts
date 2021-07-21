@@ -13,44 +13,43 @@ export const Term_definitionFormat = "^(.|\n)+$";
 export class Term {
 	constructor(initialData: {name: string, type: TermType} & Partial<Term>) {
 		CE(this).VSet(initialData);
-		// this.createdAt = Date.now();
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({type: "string"})
+	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
 	id: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@Field({type: "string"})
 	creator: string;
 
 	@DB((t, n)=>t.bigInteger(n))
-	@Field({type: "number"}, {req: true})
+	@Field({type: "number"})
 	createdAt: number;
 
 	@DB((t, n)=>t.text(n))
-	@Field({type: "string", pattern: Term_nameFormat}, {req: true})
+	@Field({type: "string", pattern: Term_nameFormat})
 	name: string;
 
 	@DB((t, n)=>t.specificType(n, "text[]"))
-	@Field({items: {type: "string", pattern: Term_formsEntryFormat}, minItems: 1, uniqueItems: true}, {req: true})
+	@Field({items: {type: "string", pattern: Term_formsEntryFormat}, minItems: 1, uniqueItems: true})
 	forms: string[];
 
-	@DB((t, n)=>t.text(n))
-	@Field({type: "string", pattern: Term_disambiguationFormat})
-	disambiguation: string;
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({type: "string", pattern: Term_disambiguationFormat}, {opt: true})
+	disambiguation?: string;
 
 	@DB((t, n)=>t.text(n))
-	@Field({$ref: "TermType"}, {req: true})
+	@Field({$ref: "TermType"})
 	type: TermType;
 
 	@DB((t, n)=>t.text(n))
-	@Field({type: "string", pattern: Term_definitionFormat}, {req: true})
+	@Field({type: "string", pattern: Term_definitionFormat})
 	definition: string;
 
-	@DB((t, n)=>t.text(n))
-	@Field({type: "string"})
-	note: string;
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({type: "string"}, {opt: true})
+	note?: string;
 }
 
 export enum TermType {

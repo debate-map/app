@@ -44,7 +44,7 @@ For more information, visit the website at: <https://debatemap.app>
 ## Editing + running
 
 1) It's recommended to open two VSCode windows:
-   * The first in the `Packages/client` folder, for the ui and other frontend code.
+   * The first in the `Packages` folder, for the ui and other frontend code. (different folders mainly just so they can have/keep separate tab-sets)
    * The second in the repo root, for everything else. (helps separate the concerns/contexts into roughly two halves)
 2) In vscode #1, start frontend ts-compiler: ctrl+shift+b, then `#1 tsc`.
 3) In vscode #1, start frontend webpack/dev-server: ctrl+shift+b, then `#2 webpack`.

@@ -12,7 +12,7 @@ AddSchema("ChangeType", {enum: GetValues(ChangeType)});
 @MGLClass({table: "mapNodeEdits"})
 export class Map_NodeEdit {
 	@DB((t, n)=>t.text(n).primary())
-	@Field({type: "string"})
+	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
 	id: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`maps`).DeferRef())

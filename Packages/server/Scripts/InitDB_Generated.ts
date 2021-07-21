@@ -103,7 +103,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		--grant ALL on schema app_public to app_user;
 
 		--alter default privileges in schema app_public grant select, insert, update, delete on tables to app_user;
-		-- The "default privileges" doesn't seem to work for some reason, so just loop through tables, granting permissions
+		-- loop through all tables, granting permissions (the above doesn't work, because the "default permissions" are only used for future tables that are made)
 		grant select, insert, update, delete on all tables in schema app_public to app_user;
 
 		alter table app_public."userHiddens" enable row level security;
@@ -125,113 +125,131 @@ export async function up(knex: Knex.Transaction) {
 	const {v} = info;
 
 	// used by generated code
-	function RunFieldInit(tableBuilder: Knex.TableBuilder, fieldName: string, fieldInitFunc: (t: Knex.TableBuilder, n: string)=>any) {
-		fieldInitFunc(tableBuilder, fieldName);
+	function RunFieldInit(tableBuilder: Knex.TableBuilder, fieldName: string, fieldInitFunc: (t: Knex.TableBuilder, n: string)=>Knex.ColumnBuilder) {
+		const methodsCalled = [] as string[];
+		const methodCallInterceptor = new Proxy({}, {
+			get(target, methodName: string) {
+				methodsCalled.push(methodName);
+				return ()=>methodCallInterceptor;
+			},
+		});
+		// do one early call, with the "builder"/"chain" object being the method-call-interceptor; this way, we know what methods are called, ie. the field characteristics
+		fieldInitFunc(methodCallInterceptor as any, fieldName);
+		//const fieldMarkedNullable = fieldInitFunc.toString().includes(".nullable()");
+		const fieldMarkedNullable = methodsCalled.includes("nullable");
+
+		const chain = fieldInitFunc(tableBuilder, fieldName);
+		// if field is not explicitly marked nullable, assume it is intended to be non-nullable (the safer default; and makes the default match that of TypeScript and the @Field decorator)
+		if (!fieldMarkedNullable) {
+			chain.notNullable();
+		}
 	}
 
 	await knex.schema.createTable(`${v}accessPolicies`, t=>{
 		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
-		RunFieldInit(t, "name", (t, n)=>t.text(n).notNullable());
-		RunFieldInit(t, "base", (t, n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
+		RunFieldInit(t, "name", (t, n)=>t.text(n));
+		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
+		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
+		RunFieldInit(t, "base", (t, n)=>t.text(n).nullable().references("id").inTable(v + `accessPolicies`).DeferRef());
 		RunFieldInit(t, "permissions_base", (t, n)=>t.jsonb(n));
 		RunFieldInit(t, "permissions_userExtends", (t, n)=>t.jsonb(n));
 	});
 
 	await knex.schema.createTable(`${v}mapNodeEdits`, t=>{
-		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
-		RunFieldInit(t, "map", (t,n)=>t.text(n).references("id").inTable(v + `maps`).DeferRef());
-		RunFieldInit(t, "node", (t,n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
-		RunFieldInit(t, "time", (t,n)=>t.bigInteger(n));
-		RunFieldInit(t, "type", (t,n)=>t.text(n));
+		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "map", (t, n)=>t.text(n).references("id").inTable(v + `maps`).DeferRef());
+		RunFieldInit(t, "node", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
+		RunFieldInit(t, "time", (t, n)=>t.bigInteger(n));
+		RunFieldInit(t, "type", (t, n)=>t.text(n));
 	});
 
 	await knex.schema.createTable(`${v}maps`, t=>{
 		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
 		RunFieldInit(t, "accessPolicy", (t, n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
 		RunFieldInit(t, "name", (t, n)=>t.text(n));
-		RunFieldInit(t, "note", (t, n)=>t.text(n));
-		RunFieldInit(t, "noteInline", (t, n)=>t.boolean(n));
+		RunFieldInit(t, "note", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "noteInline", (t, n)=>t.boolean(n).nullable());
 		RunFieldInit(t, "rootNode", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "defaultExpandDepth", (t, n)=>t.integer(n));
-		RunFieldInit(t, "nodeDefaults", (t, n)=>t.jsonb(n));
-		RunFieldInit(t, "featured", (t, n)=>t.boolean(n));
-		RunFieldInit(t, "editors", (t, n)=>t.specificType(n, "text[]").notNullable());
+		RunFieldInit(t, "nodeDefaults", (t, n)=>t.jsonb(n).nullable());
+		RunFieldInit(t, "featured", (t, n)=>t.boolean(n).nullable());
+		RunFieldInit(t, "editors", (t, n)=>t.specificType(n, "text[]"));
 		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
 		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
 		RunFieldInit(t, "edits", (t, n)=>t.integer(n));
-		RunFieldInit(t, "editedAt", (t, n)=>t.bigInteger(n));
+		RunFieldInit(t, "editedAt", (t, n)=>t.bigInteger(n).nullable());
 	});
 
 	await knex.schema.createTable(`${v}medias`, t=>{
-		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
-		RunFieldInit(t, "accessPolicy", (t,n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
-		RunFieldInit(t, "creator", (t,n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
-		RunFieldInit(t, "createdAt", (t,n)=>t.bigInteger(n));
-		RunFieldInit(t, "name", (t,n)=>t.text(n));
-		RunFieldInit(t, "type", (t,n)=>t.text(n));
-		RunFieldInit(t, "url", (t,n)=>t.text(n));
-		RunFieldInit(t, "description", (t,n)=>t.text(n));
+		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "accessPolicy", (t, n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
+		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
+		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
+		RunFieldInit(t, "name", (t, n)=>t.text(n));
+		RunFieldInit(t, "type", (t, n)=>t.text(n));
+		RunFieldInit(t, "url", (t, n)=>t.text(n));
+		RunFieldInit(t, "description", (t, n)=>t.text(n));
 	});
 
 	await knex.schema.createTable(`${v}nodeChildLinks`, t=>{
-		RunFieldInit(t, "id", (t, n)=>t.text(n).notNullable().primary());
-		RunFieldInit(t, "parent", (t, n)=>t.text(n).notNullable().references("id").inTable(v + `nodes`).DeferRef());
-		RunFieldInit(t, "child", (t, n)=>t.text(n).notNullable().references("id").inTable(v + `nodes`).DeferRef());
+		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "parent", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
+		RunFieldInit(t, "child", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "slot", (t, n)=>t.integer(n));
 		RunFieldInit(t, "form", (t, n)=>t.text(n));
-		RunFieldInit(t, "seriesAnchor", (t, n)=>t.boolean(n));
-		RunFieldInit(t, "seriesEnd", (t, n)=>t.boolean(n));
-		RunFieldInit(t, "polarity", (t, n)=>t.text(n));
+		RunFieldInit(t, "seriesAnchor", (t, n)=>t.boolean(n).nullable());
+		RunFieldInit(t, "seriesEnd", (t, n)=>t.boolean(n).nullable());
+		RunFieldInit(t, "polarity", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "c_parentType", (t, n)=>t.text(n));
 		RunFieldInit(t, "c_childType", (t, n)=>t.text(n));
 	});
 
 	await knex.schema.createTable(`${v}nodeRatings`, t=>{
-		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
-		RunFieldInit(t, "accessPolicy", (t,n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
-		RunFieldInit(t, "node", (t,n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
-		RunFieldInit(t, "type", (t,n)=>t.text(n));
-		RunFieldInit(t, "user", (t,n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
-		RunFieldInit(t, "editedAt", (t,n)=>t.bigInteger(n));
-		RunFieldInit(t, "value", (t,n)=>t.float(n));
+		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "accessPolicy", (t, n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
+		RunFieldInit(t, "node", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
+		RunFieldInit(t, "type", (t, n)=>t.text(n));
+		RunFieldInit(t, "user", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
+		RunFieldInit(t, "editedAt", (t, n)=>t.bigInteger(n).nullable());
+		RunFieldInit(t, "value", (t, n)=>t.float(n));
 	});
 
 	await knex.schema.createTable(`${v}nodes`, t=>{
 		
 		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
 		RunFieldInit(t, "accessPolicy", (t, n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
-		RunFieldInit(t, "creator", (t, n)=>t.text(n).notNullable().references("id").inTable(v + `users`).DeferRef());
-		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n).notNullable());
-		RunFieldInit(t, "type", (t, n)=>t.text(n).notNullable());
-		RunFieldInit(t, "argumentType", (t, n)=>t.text(n));
-		RunFieldInit(t, "multiPremiseArgument", (t, n)=>t.boolean(n));
-		RunFieldInit(t, "rootNodeForMap", (t, n)=>t.text(n).references("id").inTable(v + `maps`).DeferRef());
+		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
+		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
+		RunFieldInit(t, "type", (t, n)=>t.text(n));
+		RunFieldInit(t, "argumentType", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "multiPremiseArgument", (t, n)=>t.boolean(n).nullable());
+		RunFieldInit(t, "rootNodeForMap", (t, n)=>t.text(n).nullable().references("id").inTable(v + `maps`).DeferRef());
 	});
 
 	await knex.schema.createTable(`${v}nodeRevisions`, t=>{
 		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
-		RunFieldInit(t, "node", (t, n)=>t.text(n).notNullable().references("id").inTable(v + `nodes`).DeferRef());
-		RunFieldInit(t, "creator", (t, n)=>t.text(n).notNullable().references("id").inTable(v + `users`).DeferRef());
-		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n).notNullable());
+		RunFieldInit(t, "node", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
+		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
+		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
 		RunFieldInit(t, "titles", (t, n)=>t.jsonb(n));
-		RunFieldInit(t, "note", (t, n)=>t.text(n));
-		RunFieldInit(t, "displayDetails", (t, n)=>t.jsonb(n));
-		RunFieldInit(t, "termAttachments", (t, n)=>t.specificType(n, "text[]").notNullable());
-		RunFieldInit(t, "equation", (t, n)=>t.jsonb(n));
-		RunFieldInit(t, "references", (t, n)=>t.jsonb(n));
-		RunFieldInit(t, "quote", (t, n)=>t.jsonb(n));
-		RunFieldInit(t, "media", (t, n)=>t.jsonb(n));
+		RunFieldInit(t, "note", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "displayDetails", (t, n)=>t.jsonb(n).nullable());
+		RunFieldInit(t, "termAttachments", (t, n)=>t.specificType(n, "text[]"));
+		RunFieldInit(t, "equation", (t, n)=>t.jsonb(n).nullable());
+		RunFieldInit(t, "references", (t, n)=>t.jsonb(n).nullable());
+		RunFieldInit(t, "quote", (t, n)=>t.jsonb(n).nullable());
+		RunFieldInit(t, "media", (t, n)=>t.jsonb(n).nullable());
 	});
 
 	await knex.schema.createTable(`${v}nodeTags`, t=>{
-		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
-		RunFieldInit(t, "creator", (t,n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
-		RunFieldInit(t, "createdAt", (t,n)=>t.bigInteger(n));
-		RunFieldInit(t, "nodes", (t,n)=>t.specificType(n, "text[]"));
-		RunFieldInit(t, "mirrorChildrenFromXToY", (t,n)=>t.jsonb(n));
-		RunFieldInit(t, "xIsExtendedByY", (t,n)=>t.jsonb(n));
-		RunFieldInit(t, "mutuallyExclusiveGroup", (t,n)=>t.jsonb(n));
-		RunFieldInit(t, "restrictMirroringOfX", (t,n)=>t.jsonb(n));
+		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
+		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
+		RunFieldInit(t, "nodes", (t, n)=>t.specificType(n, "text[]"));
+		RunFieldInit(t, "mirrorChildrenFromXToY", (t, n)=>t.jsonb(n).nullable());
+		RunFieldInit(t, "xIsExtendedByY", (t, n)=>t.jsonb(n).nullable());
+		RunFieldInit(t, "mutuallyExclusiveGroup", (t, n)=>t.jsonb(n).nullable());
+		RunFieldInit(t, "restrictMirroringOfX", (t, n)=>t.jsonb(n).nullable());
 	});
 
 	await knex.schema.createTable(`${v}shares`, t=>{
@@ -240,41 +258,41 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
 		RunFieldInit(t, "name", (t, n)=>t.text(n));
 		RunFieldInit(t, "type", (t, n)=>t.text(n));
-		RunFieldInit(t, "mapID", (t, n)=>t.text(n));
-		RunFieldInit(t, "mapView", (t, n)=>t.jsonb(n));
+		RunFieldInit(t, "mapID", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "mapView", (t, n)=>t.jsonb(n).nullable());
 	});
 
 	await knex.schema.createTable(`${v}terms`, t=>{
-		RunFieldInit(t, "id", (t,n)=>t.text(n).primary());
-		RunFieldInit(t, "creator", (t,n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
-		RunFieldInit(t, "createdAt", (t,n)=>t.bigInteger(n));
-		RunFieldInit(t, "name", (t,n)=>t.text(n));
-		RunFieldInit(t, "forms", (t,n)=>t.specificType(n, "text[]"));
-		RunFieldInit(t, "disambiguation", (t,n)=>t.text(n));
-		RunFieldInit(t, "type", (t,n)=>t.text(n));
-		RunFieldInit(t, "definition", (t,n)=>t.text(n));
-		RunFieldInit(t, "note", (t,n)=>t.text(n));
+		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
+		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
+		RunFieldInit(t, "name", (t, n)=>t.text(n));
+		RunFieldInit(t, "forms", (t, n)=>t.specificType(n, "text[]"));
+		RunFieldInit(t, "disambiguation", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "type", (t, n)=>t.text(n));
+		RunFieldInit(t, "definition", (t, n)=>t.text(n));
+		RunFieldInit(t, "note", (t, n)=>t.text(n).nullable());
 	});
 
 	await knex.schema.createTable(`${v}userHiddens`, t=>{
 		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
 		RunFieldInit(t, "email", (t, n)=>t.text(n));
 		RunFieldInit(t, "providerData", (t, n)=>t.jsonb(n));
-		RunFieldInit(t, "backgroundID", (t, n)=>t.text(n));
-		RunFieldInit(t, "backgroundCustom_enabled", (t, n)=>t.boolean(n));
-		RunFieldInit(t, "backgroundCustom_color", (t, n)=>t.text(n));
-		RunFieldInit(t, "backgroundCustom_url", (t, n)=>t.text(n));
-		RunFieldInit(t, "backgroundCustom_position", (t, n)=>t.text(n));
+		RunFieldInit(t, "backgroundID", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "backgroundCustom_enabled", (t, n)=>t.boolean(n).nullable());
+		RunFieldInit(t, "backgroundCustom_color", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "backgroundCustom_url", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "backgroundCustom_position", (t, n)=>t.text(n).nullable());
 	});
 
 	await knex.schema.createTable(`${v}users`, t=>{
 		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
 		RunFieldInit(t, "displayName", (t, n)=>t.text(n));
-		RunFieldInit(t, "photoURL", (t, n)=>t.text(n));
-		RunFieldInit(t, "joinDate", (t, n)=>t.bigInteger(n).notNullable());
-		RunFieldInit(t, "permissionGroups", (t, n)=>t.jsonb(n).notNullable());
-		RunFieldInit(t, "edits", (t, n)=>t.integer(n).notNullable());
-		RunFieldInit(t, "lastEditAt", (t, n)=>t.bigInteger(n));
+		RunFieldInit(t, "photoURL", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "joinDate", (t, n)=>t.bigInteger(n));
+		RunFieldInit(t, "permissionGroups", (t, n)=>t.jsonb(n));
+		RunFieldInit(t, "edits", (t, n)=>t.integer(n));
+		RunFieldInit(t, "lastEditAt", (t, n)=>t.bigInteger(n).nullable());
 	});
 
 	await knex.schema.createTable(`${v}visibilityDirectives`, t=>{
@@ -282,11 +300,11 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "actor", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
 		RunFieldInit(t, "priority", (t, n)=>t.float(n));
 		RunFieldInit(t, "context", (t, n)=>t.specificType(n, "text[]"));
-		RunFieldInit(t, "target_map", (t, n)=>t.text(n).references("id").inTable(v + `maps`).DeferRef());
-		RunFieldInit(t, "target_node", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
-		RunFieldInit(t, "target_nodeChildLink", (t, n)=>t.text(n).references("id").inTable(v + `nodeChildLinks`).DeferRef());
-		RunFieldInit(t, "visibility_self", (t, n)=>t.text(n));
-		RunFieldInit(t, "visibility_nodes", (t, n)=>t.text(n));
+		RunFieldInit(t, "target_map", (t, n)=>t.text(n).nullable().references("id").inTable(v + `maps`).DeferRef());
+		RunFieldInit(t, "target_node", (t, n)=>t.text(n).nullable().references("id").inTable(v + `nodes`).DeferRef());
+		RunFieldInit(t, "target_nodeChildLink", (t, n)=>t.text(n).nullable().references("id").inTable(v + `nodeChildLinks`).DeferRef());
+		RunFieldInit(t, "visibility_self", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "visibility_nodes", (t, n)=>t.text(n).nullable());
 	});
 
 	await End(knex, info);

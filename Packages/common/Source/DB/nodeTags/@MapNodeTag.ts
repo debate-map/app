@@ -8,16 +8,16 @@ export class MapNodeTag {
 		CE(this).VSet(initialData);
 	}
 
-	@DB((t,n)=>t.text(n).primary())
-	@Field({type: "string"})
+	@DB((t, n)=>t.text(n).primary())
+	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
 	id: string;
 
-	@DB((t,n)=>t.text(n).references("id").inTable(`users`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
+	@Field({type: "string"})
 	creator: string;
 
-	@DB((t,n)=>t.bigInteger(n))
-	@Field({type: "number"}, {req: true})
+	@DB((t, n)=>t.bigInteger(n))
+	@Field({type: "number"})
 	createdAt: number;
 
 	//@Field({$ref: "MapNodeTagType"})
@@ -25,28 +25,28 @@ export class MapNodeTag {
 	//@Field({patternProperties: {[UUID_regex]: {type: "string"}}})
 	//nodes: {[key: string]: string};
 
-	@DB((t,n)=>t.specificType(n, "text[]"))
-	@Field({items: {$ref: "UUID"}}, {req: true})
+	@DB((t, n)=>t.specificType(n, "text[]"))
+	@Field({items: {$ref: "UUID"}})
 	nodes: string[];
 
 	// type-specific fields (ie. tag comps)
 	// ==========
 
-	@DB((t,n)=>t.jsonb(n))
-	@Field({$ref: "TagComp_MirrorChildrenFromXToY"})
-	mirrorChildrenFromXToY: TagComp_MirrorChildrenFromXToY;
+	@DB((t, n)=>t.jsonb(n).nullable())
+	@Field({$ref: "TagComp_MirrorChildrenFromXToY"}, {opt: true})
+	mirrorChildrenFromXToY?: TagComp_MirrorChildrenFromXToY;
 
-	@DB((t,n)=>t.jsonb(n))
-	@Field({$ref: "TagComp_XIsExtendedByY"})
-	xIsExtendedByY: TagComp_XIsExtendedByY;
+	@DB((t, n)=>t.jsonb(n).nullable())
+	@Field({$ref: "TagComp_XIsExtendedByY"}, {opt: true})
+	xIsExtendedByY?: TagComp_XIsExtendedByY;
 
-	@DB((t,n)=>t.jsonb(n))
-	@Field({$ref: "TagComp_MutuallyExclusiveGroup"})
-	mutuallyExclusiveGroup: TagComp_MutuallyExclusiveGroup;
+	@DB((t, n)=>t.jsonb(n).nullable())
+	@Field({$ref: "TagComp_MutuallyExclusiveGroup"}, {opt: true})
+	mutuallyExclusiveGroup?: TagComp_MutuallyExclusiveGroup;
 
-	@DB((t,n)=>t.jsonb(n))
-	@Field({$ref: "TagComp_RestrictMirroringOfX"})
-	restrictMirroringOfX: TagComp_RestrictMirroringOfX;
+	@DB((t, n)=>t.jsonb(n).nullable())
+	@Field({$ref: "TagComp_RestrictMirroringOfX"}, {opt: true})
+	restrictMirroringOfX?: TagComp_RestrictMirroringOfX;
 }
 
 // tag comps
@@ -60,7 +60,7 @@ export abstract class TagComp {
 
 	/** Has side-effect: Casts data to its original class/type. */
 	GetFinalTagComps(): TagComp[] {
-		let compClass = GetTagCompClassByKey(this["_key"]);
+		const compClass = GetTagCompClassByKey(this["_key"]);
 		if (compClass) return [CE(this).As(compClass as any)];
 		return [this];
 	}
@@ -127,9 +127,9 @@ export class TagComp_XIsExtendedByY extends TagComp {
 	nodeY: string;
 
 	GetFinalTagComps() {
-		let result = super.GetFinalTagComps();
+		const result = super.GetFinalTagComps();
 
-		let mirrorComp_xConsToY = new TagComp_MirrorChildrenFromXToY({
+		const mirrorComp_xConsToY = new TagComp_MirrorChildrenFromXToY({
 			nodeX: this.nodeX,
 			nodeY: this.nodeY,
 			mirrorSupporting: false,
@@ -137,7 +137,7 @@ export class TagComp_XIsExtendedByY extends TagComp {
 		});
 		result.push(mirrorComp_xConsToY);
 
-		let mirrorComp_yProsToX = new TagComp_MirrorChildrenFromXToY({
+		const mirrorComp_yProsToX = new TagComp_MirrorChildrenFromXToY({
 			nodeX: this.nodeY,
 			nodeY: this.nodeX,
 			mirrorSupporting: true,
@@ -169,11 +169,11 @@ export class TagComp_MutuallyExclusiveGroup extends TagComp {
 	mirrorXProsAsYCons = true;
 
 	GetFinalTagComps() {
-		let result = super.GetFinalTagComps();
+		const result = super.GetFinalTagComps();
 		if (this.mirrorXProsAsYCons) {
-			for (let nodeX of this.nodes) {
-				for (let nodeY of CE(this.nodes).Except(nodeX)) {
-					let mirrorComp = new TagComp_MirrorChildrenFromXToY({
+			for (const nodeX of this.nodes) {
+				for (const nodeY of CE(this.nodes).Except(nodeX)) {
+					const mirrorComp = new TagComp_MirrorChildrenFromXToY({
 						nodeX, nodeY,
 						mirrorSupporting: true,
 						mirrorOpposing: false,
@@ -259,7 +259,7 @@ export function GetTagCompClassByTag(tag: MapNodeTag) {
 	return TagComp_classes.find(a=>a.key in tag)!;
 }
 export function GetTagCompOfTag(tag: MapNodeTag): TagComp {
-	let compClass = GetTagCompClassByTag(tag);
+	const compClass = GetTagCompClassByTag(tag);
 	return tag[compClass.key];
 }
 
@@ -282,9 +282,9 @@ export function CalculateNodeIDsForTagComp(tagComp: TagComp, compClass: TagComp_
 	/*let compClass = GetTagCompClassByTag(tag);
 	let comp = GetTagCompOfTag(tag);*/
 	//let compClass = GetTagCompClassByKey(tagComp["_key"]);
-	return CE(compClass.nodeKeys).SelectMany(key=> {
-		let nodeKeyValue = tagComp[key];
-		let nodeIDsForKey = Array.isArray(nodeKeyValue) ? nodeKeyValue : [nodeKeyValue];
+	return CE(compClass.nodeKeys).SelectMany(key=>{
+		const nodeKeyValue = tagComp[key];
+		const nodeIDsForKey = Array.isArray(nodeKeyValue) ? nodeKeyValue : [nodeKeyValue];
 		return nodeIDsForKey.filter(nodeID=>Validate("UUID", nodeID) == null);
 	});
 }

@@ -1,40 +1,22 @@
-import {Clone, DEL, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
-import {Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, GetDOM} from "web-vcore/nm/react-vextensions.js";
-import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
+import {AddTerm, Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "dm_common";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
+import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
 import {ES, InfoButton, observer_simple} from "web-vcore";
-import {Term, Term_nameFormat, Term_disambiguationFormat, TermType, AddTerm} from "dm_common";
-
+import {DEL, E, GetEntries} from "web-vcore/nm/js-vextensions.js";
+import {Column, Pre, Row, RowLR, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {GetNiceNameForTermType} from "../../Database/TermsUI.js";
 
-export class TermDetailsUI extends BaseComponentPlus(
-	{enabled: true} as {baseData: Term, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Term, error: string)=>void},
-	{} as {newData: Term, dataError: string},
-) {
-	ComponentWillMountOrReceiveProps(props, forMount) {
-		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
-			this.SetState({newData: CloneWithPrototypes(props.baseData)});
-		}
-	}
-	OnChange() {
-		const {onChange} = this.props;
-		const newData = this.GetNewData();
-		const error = this.GetValidationError();
-		if (onChange) onChange(newData, error);
-		this.SetState({newData, dataError: error});
-	}
-
+export class TermDetailsUI extends DetailsUI_Base<Term, TermDetailsUI> {
 	render() {
-		const {baseData, forNew, enabled, style, onChange} = this.props;
+		const {baseData, style, onChange} = this.props;
 		const {newData} = this.state;
+		const {Change, creating, enabled} = this.helpers;
 
-		const Change = (..._)=>this.OnChange();
-
-		const splitAt = 140; const width = 400;
+		const splitAt = 140, width = 400;
 		return (
 			<Column style={style}>
-				{!forNew &&
+				{!creating &&
 					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Text>Name:</Text>
@@ -93,24 +75,16 @@ export class TermDetailsUI extends BaseComponentPlus(
 			</Column>
 		);
 	}
-	GetValidationError() {
-		return GetErrorMessagesUnderElement(GetDOM(this))[0];
-	}
-
-	GetNewData() {
-		const {newData} = this.state;
-		return CloneWithPrototypes(newData) as Term;
-	}
 }
 
 export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: string)=>void) {
-	let newTerm = new Term(E({
+	let newEntry = new Term(E({
 		name: "",
 		forms: [""],
 		type: TermType.commonNoun,
 		definition: "",
 	}, initialData));
-	const getCommand = ()=>new AddTerm({term: newTerm});
+	const getCommand = ()=>new AddTerm({term: newEntry});
 
 	const boxController: BoxController = ShowMessageBox({
 		title: "Add term", cancelButton: true,
@@ -123,9 +97,9 @@ export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: st
 
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
-					<TermDetailsUI baseData={newTerm} forNew={true}
+					<TermDetailsUI baseData={newEntry} phase="create"
 						onChange={(val, error)=>{
-							newTerm = val;
+							newEntry = val;
 							boxController.UpdateUI();
 						}}/>
 				</Column>

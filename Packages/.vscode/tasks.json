@@ -1,0 +1,32 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "#1 tsc",
+			"type": "shell",
+			"command": "yarn start client.tsc",
+
+			//"problemMatcher": "$tsc-watch",
+			// The below are needed so that tsc's errors (as shown in Terminal and Problems panels) are resolved properly. (caused by our unusual usage, of opening vscode window #1 in "./Packages")
+			// It's needed here only because tsc requires working directly to be "./Packages/client". (because it doesn't allow specifying both "--build" and "--project")
+			"options": {
+				"cwd": "${workspaceRoot}/client"
+		  	},
+			"problemMatcher": {
+				"base": "$tsc-watch",
+				"fileLocation": ["relative", "${workspaceRoot}/client"]
+		  	},
+
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "#2 webpack",
+			"type": "shell",
+			"command": "yarn start client.dev",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build"
+		},
+	]
+}

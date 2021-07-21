@@ -1,11 +1,13 @@
 import {IsNaN} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor, GetDoc} from "web-vcore/nm/mobx-graphlink";
+import {CreateAccessor, GetDoc, GetDocs} from "web-vcore/nm/mobx-graphlink";
 import {AccessPolicy} from "./accessPolicies/@AccessPolicy.js";
 import {NodeChildLink} from "./nodeChildLinks/@NodeChildLink.js";
 
-export const GetAccessPolicy = CreateAccessor(c=>(id: string)=>{
-	if (id == null || IsNaN(id)) return null;
-	return GetDoc({}, a=>a.accessPolicies.get(id));
+export const GetAccessPolicies = CreateAccessor(c=>()=>{
+	return GetDocs({}, a=>a.accessPolicies);
+});
+export const GetAccessPolicy = CreateAccessor(c=>(id: string|n)=>{
+	return GetDoc({}, a=>a.accessPolicies.get(id!));
 });
 
 export function GetDefaultAccessPolicyID_ForMap() {

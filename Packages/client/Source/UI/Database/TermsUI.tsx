@@ -1,20 +1,15 @@
+import {CanGetBasicPermissions, DeleteTerm, GetFullNameP, GetTerms, GetUserPermissionGroups, IsUserCreatorOrMod, MeID, Term, TermType, UpdateTerm} from "dm_common";
+import {store} from "Store";
+import {GetSelectedTerm} from "Store/main/database";
+import {ES, GetUpdates, Observer} from "web-vcore";
 import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {Button, Column, Div, Pre, Row, Span, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {store} from "Store";
-import {GetSelectedTerm} from "Store/main/database";
-import {ES, GetUpdates, Observer} from "web-vcore";
-import {Term, TermType} from "dm_common";
-import {MeID} from "dm_common";
-import {GetTerms, GetFullNameP} from "dm_common";
-import {GetUserPermissionGroups, IsUserCreatorOrMod, CanGetBasicPermissions} from "dm_common";
-import {UpdateTerm} from "dm_common";
-import {DeleteTerm} from "dm_common";
-import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI.js";
 import {ShowSignInPopup} from "../@Shared/NavBar/UserPanel.js";
+import {ShowAddTermDialog, TermDetailsUI} from "./Terms/TermDetailsUI.js";
 
 @Observer
 export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_newData: Term|n, selectedTerm_newDataError: string|n}) {
@@ -75,7 +70,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 										onClick={async e=>{
 											Assert(selectedTerm); // nn: button would be disabled otherwise
 											const updates = GetUpdates(selectedTerm, selectedTerm_newData);
-											await new UpdateTerm({termID: selectedTerm.id, updates}).RunOnServer();
+											await new UpdateTerm({id: selectedTerm.id, updates}).RunOnServer();
 											// this.SetState({selectedTerm_newData: null});
 										}}/>}
 								{creatorOrMod &&
@@ -93,7 +88,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 							</Div>
 						</Row>
 						{selectedTerm
-							? <TermDetailsUI baseData={selectedTerm} forNew={false} enabled={creatorOrMod} style={{padding: 10}}
+							? <TermDetailsUI baseData={selectedTerm} phase={creatorOrMod ? "edit" : "view"} style={{padding: 10}}
 								onChange={(data, error)=>this.SetState({selectedTerm_newData: data, selectedTerm_newDataError: error})}/>
 							: <div style={{padding: 10}}>No term selected.</div>}
 					</Column>

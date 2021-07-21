@@ -10,7 +10,7 @@ import {makePluginHook, postgraphile} from "postgraphile";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
 import fetch from "node-fetch";
 import cookieParser from "cookie-parser";
-import {AddSchema, CreateCommandsPlugin, GenerateUUID, mglClasses, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, CreateCommandsPlugin, GenerateUUID, GetSchemaJSON, mglClasses, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
 import {SetUpAuthHandling} from "./AuthHandling.js";
@@ -145,7 +145,8 @@ app.use(
 
 						return str;
 					},
-					logTypeDefs: true,
+					//logTypeDefs: true,
+					//logTypeDefs_detailed: ["PermissionSet"],
 
 					preCommandRun: info=>{
 						//console.log("User in command resolver:", info.context.req.user?.id);

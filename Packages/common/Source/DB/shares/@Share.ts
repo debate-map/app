@@ -14,15 +14,15 @@ export class Share {
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({type: "string"})
+	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
 	id: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@Field({type: "string"})
 	creator: string;
 
 	@DB((t, n)=>t.bigInteger(n))
-	@Field({type: "number"}, {req: true})
+	@Field({type: "number"})
 	createdAt: number;
 
 	@DB((t, n)=>t.text(n))
@@ -30,17 +30,17 @@ export class Share {
 	name: string;
 
 	@DB((t, n)=>t.text(n))
-	@Field({$ref: "ShareType"}, {req: true})
+	@Field({$ref: "ShareType"})
 	type: ShareType;
 
 	// if map
 	// ==========
 
-	@DB((t, n)=>t.text(n))
-	@Field({type: "string"})
-	mapID: string;
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({type: "string"}, {opt: true})
+	mapID?: string;
 
-	@DB((t, n)=>t.jsonb(n))
-	@Field({$ref: "MapView"})
-	mapView: MapView;
+	@DB((t, n)=>t.jsonb(n).nullable())
+	@Field({$ref: "MapView"}, {opt: true})
+	mapView?: MapView;
 }

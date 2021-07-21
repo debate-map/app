@@ -49,12 +49,15 @@ async function LoadShare(shareID: string) {
 			if (page == "debates") {
 				store.main[page]["selectedMapID"] = share.mapID;
 			}
-			ACTMapViewMerge(share.mapID, share.mapView);
 
-			// const mapUI = FindReact(document.querySelector('.MapUI')) as MapUI;
-			const mapUI = MapUI.CurrentMapUI;
-			if (mapUI) {
-				mapUI.StartLoadingScroll();
+			if (share.mapID) {
+				ACTMapViewMerge(share.mapID, share.mapView!);
+
+				// const mapUI = FindReact(document.querySelector('.MapUI')) as MapUI;
+				const mapUI = MapUI.CurrentMapUI;
+				if (mapUI) {
+					mapUI.StartLoadingScroll();
+				}
 			}
 
 			//if (store.main.shareBeingLoaded == shareID)

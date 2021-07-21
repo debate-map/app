@@ -8,19 +8,19 @@ export class NodeChildLink {
 		CE(this).VSet(data);
 	}
 
-	@DB((t, n)=>t.text(n).notNullable().primary())
-	@Field({type: "string"}, {req: true})
+	@DB((t, n)=>t.text(n).primary())
+	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
 	id: string;
 
 	// access-policy is based on both the parent node and child node
 	// * Link is accessible if either the parent or child is accessible
 
-	@DB((t, n)=>t.text(n).notNullable().references("id").inTable(`nodes`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
+	@Field({type: "string"})
 	parent: string;
 
-	@DB((t, n)=>t.text(n).notNullable().references("id").inTable(`nodes`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
+	@Field({type: "string"})
 	child: string;
 
 	@DB((t, n)=>t.integer(n))
@@ -28,30 +28,30 @@ export class NodeChildLink {
 	slot: number;
 
 	@DB((t, n)=>t.text(n))
-	@Field({$ref: "ClaimForm"})
+	@Field({$ref: "ClaimForm"}, {opt: true})
 	form?: ClaimForm;
 
 	/** I forget what this is for. */
-	@DB((t, n)=>t.boolean(n))
-	@Field({type: "boolean"})
+	@DB((t, n)=>t.boolean(n).nullable())
+	@Field({type: "boolean"}, {opt: true})
 	seriesAnchor?: boolean;
 
 	/** If true, the child's in a multi-premise arg, and the link-creator think the premise-series is complete. (ie. no additional premises needed) */
-	@DB((t, n)=>t.boolean(n))
-	@Field({type: "boolean"})
+	@DB((t, n)=>t.boolean(n).nullable())
+	@Field({type: "boolean"}, {opt: true})
 	seriesEnd?: boolean;
 
-	@DB((t, n)=>t.text(n))
-	@Field({$ref: "Polarity"})
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({$ref: "Polarity"}, {opt: true})
 	polarity?: Polarity;
 
 	@DB((t, n)=>t.text(n))
-	@Field({type: "string"})
-	c_parentType: number;
+	@Field({type: "string"}, {opt: true}) // leave optional here; only required at db-write time
+	c_parentType?: number;
 
 	@DB((t, n)=>t.text(n))
-	@Field({type: "string"})
-	c_childType: number;
+	@Field({type: "string"}, {opt: true}) // leave optional here; only required at db-write time
+	c_childType?: number;
 
 	// runtime only
 	_mirrorLink?: boolean;

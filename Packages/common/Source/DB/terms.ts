@@ -3,9 +3,8 @@ import {GetDoc, GetDocs, CreateAccessor, Validate, BailIfNull} from "web-vcore/n
 import {Term} from "./terms/@Term.js";
 import {GetNodeRevision} from "./nodeRevisions.js";
 
-export const GetTerm = CreateAccessor(c=>(id: string)=>{
-	if (id == null || IsNaN(id)) return null;
-	return GetDoc({}, a=>a.terms.get(id));
+export const GetTerm = CreateAccessor(c=>(id: string|n)=>{
+	return GetDoc({}, a=>a.terms.get(id!));
 });
 /* export async function GetTermAsync(id: string) {
 	return await GetDoc_Async((a) => a.terms.get(id));

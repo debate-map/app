@@ -24,7 +24,7 @@ export function ShowAddMediaDialog(initialData?: Partial<Media>, postAdd?: (id: 
 
 			return (
 				<Column style={{padding: "10px 0", width: 600}}>
-					<MediaDetailsUI baseData={newMedia} creating={true} editing={false}
+					<MediaDetailsUI baseData={newMedia} phase="create"
 						onChange={(val, error)=>{
 							newMedia = val;
 							boxController.UpdateUI();

@@ -21,35 +21,35 @@ export class Media {
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({type: "string"})
+	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
 	id: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@Field({type: "string"})
 	accessPolicy: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@Field({type: "string"})
 	creator: string;
 
 	@DB((t, n)=>t.bigInteger(n))
-	@Field({type: "number"}, {req: true})
+	@Field({type: "number"})
 	createdAt: number;
 
 	@DB((t, n)=>t.text(n))
-	@Field({type: "string", pattern: Media_namePattern}, {req: true})
+	@Field({type: "string", pattern: Media_namePattern})
 	name: string;
 
 	@DB((t, n)=>t.text(n))
-	@Field({$ref: "MediaType"}, {req: true})
+	@Field({$ref: "MediaType"})
 	type: MediaType;
 
 	@DB((t, n)=>t.text(n))
 	//@Field({pattern: Media_urlPattern})
-	@Field({type: "string"}, {req: true}) // allow overriding url pattern; it just highlights possible mistakes
+	@Field({type: "string"}) // allow overriding url pattern; it just highlights possible mistakes
 	url = "";
 
 	@DB((t, n)=>t.text(n))
-	@Field({type: "string"}, {req: true})
+	@Field({type: "string"})
 	description: string;
 }

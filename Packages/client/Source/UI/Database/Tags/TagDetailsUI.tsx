@@ -6,43 +6,23 @@ import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.
 import {ES, InfoButton, observer_simple} from "web-vcore";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNodeL2, AsNodeL3, GetNodeDisplayText, MapNodeType, AddNodeTag, MapNodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp} from "dm_common";
-
-
 import {GetNodeColor} from "Store/db_ext/nodes";
+import {DetailsUI_Base, DetailsUI_Base_Props, DetailsUI_Base_State} from "UI/@Shared/DetailsUI_Base";
 
-type Props = {baseData: MapNodeTag, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: MapNodeTag)=>void};
-type State = {newData: MapNodeTag};
-export type TagDetailsUI_SharedProps = Props & State & {compClass: TagComp_Class, splitAt, Change};
-
-export class TagDetailsUI extends BaseComponentPlus({enabled: true} as Props, {} as State) {
-	ComponentWillMountOrReceiveProps(props, forMount) {
-		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
-			this.SetState({newData: CloneWithPrototypes(props.baseData)});
-			/*this.SetState({newData: CloneWithPrototypes(props.baseData)}, ()=> {
-				if (forMount) this.OnChange(); // call onChange once, so parent-ui has access to the newData value (without needing ref)
-			});*/
-		}
-	}
-	OnChange() {
-		const {onChange} = this.props;
-		const newData = this.GetNewData();
-		if (onChange) onChange(newData);
-		this.SetState({newData});
-	}
-
+export type TagDetailsUI_SharedProps = DetailsUI_Base_Props<MapNodeTag, TagDetailsUI> & DetailsUI_Base_State<MapNodeTag> & {compClass: TagComp_Class, splitAt, Change, enabled};
+export class TagDetailsUI extends DetailsUI_Base<MapNodeTag, TagDetailsUI> {
 	render() {
-		const {baseData, forNew, enabled, style} = this.props;
+		const {baseData, style} = this.props;
 		const {newData} = this.state;
+		const {Change, creating, enabled} = this.helpers;
 		const compClass = GetTagCompClassByTag(newData);
-
-		const Change = (..._)=>this.OnChange();
 
 		//const splitAt = compClass == TagComp_XIsExtendedByY ? 140 : 70;
 		const splitAt = 70;
-		const sharedProps = E(this.props, this.state, {compClass, splitAt, Change});
+		const sharedProps: TagDetailsUI_SharedProps = E(this.props, this.state, {compClass, splitAt, Change, enabled});
 		return (
 			<Column style={style}>
-				{!forNew &&
+				{!creating &&
 					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt} singleLine={true}/>}
 				<RowLR mt={5} mb={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Type: </Pre>
@@ -64,20 +44,12 @@ export class TagDetailsUI extends BaseComponentPlus({enabled: true} as Props, {}
 			</Column>
 		);
 	}
-	/*GetValidationError() {
-		return GetErrorMessagesUnderElement(GetDOM(this))[0];
-	}*/
-
-	GetNewData() {
-		const {newData} = this.state;
-		return CloneWithPrototypes(newData) as MapNodeTag;
-	}
 }
 
 class TagCompUI_MirrorChildrenFromXToY extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
 	render() {
 		const {newData, enabled, splitAt, Change} = this.props;
-		const comp = newData.mirrorChildrenFromXToY;
+		const comp = newData.mirrorChildrenFromXToY!;
 		return (
 			<>
 				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X" mt={0}/>
@@ -97,7 +69,7 @@ class TagCompUI_MirrorChildrenFromXToY extends BaseComponentPlus({} as TagDetail
 class TagCompUI_XIsExtendedByY extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
 	render() {
 		const {newData, enabled, splitAt, Change} = this.props;
-		const comp = newData.xIsExtendedByY;
+		const comp = newData.xIsExtendedByY!;
 		return (
 			<>
 				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X" mt={0}/>
@@ -110,7 +82,7 @@ class TagCompUI_XIsExtendedByY extends BaseComponentPlus({} as TagDetailsUI_Shar
 class TagCompUI_MutuallyExclusiveGroup extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
 	render() {
 		const {newData, enabled, splitAt, Change} = this.props;
-		const comp = newData.mutuallyExclusiveGroup;
+		const comp = newData.mutuallyExclusiveGroup!;
 		return (
 			<>
 				<Row>
@@ -135,7 +107,7 @@ class TagCompUI_MutuallyExclusiveGroup extends BaseComponentPlus({} as TagDetail
 class TagCompUI_RestrictMirroringOfX extends BaseComponentPlus({} as TagDetailsUI_SharedProps, {}) {
 	render() {
 		const {newData, enabled, splitAt, Change} = this.props;
-		const comp = newData.restrictMirroringOfX;
+		const comp = newData.restrictMirroringOfX!;
 		return (
 			<>
 				<NodeSlotRow {...this.props} comp={comp} nodeKey="nodeX" label="Node X" mt={0}/>
@@ -245,7 +217,7 @@ export function ShowAddTagDialog(initialData: Partial<MapNodeTag>, postAdd?: (id
 
 			return (
 				<Column style={{padding: "10px 0", width: 500}}>
-					<TagDetailsUI baseData={newTag} forNew={true}
+					<TagDetailsUI baseData={newTag} phase="create"
 						onChange={val=>{
 							newTag = val;
 							boxController.UpdateUI();

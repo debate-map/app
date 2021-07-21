@@ -52,9 +52,7 @@ export const GetNodesByTitle = CreateAccessor(c=>(title: string, titleKey: Title
 });
 
 export const GetNode = CreateAccessor(c=>(id: string|n)=>{
-	// Assert(id != null && !IsNaN(id), "Node-id cannot be null or NaN.");
-	if (id == null || IsNaN(id)) return null;
-	return GetDoc({}, a=>a.nodes.get(id));
+	return GetDoc({}, a=>a.nodes.get(id!));
 });
 /*export async function GetNodeAsync(id: string) {
 	return await GetDataAsync("nodes", id) as MapNode;

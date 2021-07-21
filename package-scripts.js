@@ -1,13 +1,21 @@
 const fs = require("fs");
 const paths = require("path");
 
+const _packagesRootStr = "{packagesRoot}"; // useful for setting working-directory to "./Packages/", eg. so when running webpack, its error paths are "resolvable" by vscode window #1
 function TSScript(packageName, scriptSubpath, ...args) {
 	let cdCommand = "";
+	let tsConfigPath = "";
 	if (packageName) {
-		cdCommand = `cd Packages/${packageName} && `;
+		if (packageName == _packagesRootStr) {
+			cdCommand = `cd Packages && `;
+			tsConfigPath = "client/Scripts/tsconfig.json";
+		} else {
+			cdCommand = `cd Packages/${packageName} && `;
+			tsConfigPath = "Scripts/tsconfig.json";
+		}
 	}
 
-	const envPart = `TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=Scripts/tsconfig.json TS_NODE_TRANSPILE_ONLY=true`;
+	const envPart = `TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=${tsConfigPath} TS_NODE_TRANSPILE_ONLY=true`;
 	const nodeFlags = `--loader ts-node/esm.mjs --experimental-specifier-resolution=node`;
 	return `${cdCommand}cross-env ${envPart} node ${nodeFlags} ${scriptSubpath} ${args.join(" ")}`;
 }
@@ -44,10 +52,11 @@ Object.assign(scripts, {
 			//part2: `cross-env TS_NODE_OPTIONS="--experimental-modules" ts-node-dev --project Scripts/tsconfig.json Scripts/Bin/Server.ts`,
 			//part2: `cross-env NODE_OPTIONS="--experimental-modules" ts-node --project Scripts/tsconfig.json Scripts/Bin/Server.ts`,
 			//part2: `cross-env ts-node-dev --project Scripts/tsconfig.json --ignore none Scripts/Bin/Server.ts`,
-			part2: TSScript("client", "Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
+			//part2: TSScript("client", "Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
+			part2: TSScript(_packagesRootStr, "client/Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
 
 			//withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=${memLimit} --experimental-modules" "ts-node-dev --project Scripts/tsconfig.json Scripts/Bin/Server"`,
-			withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=${memLimit}" "ts-node-dev --project Scripts/tsconfig.json --ignore none Scripts/Bin/Server"`,
+			withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=${memLimit}" "ts-node-dev --project client/Scripts/tsconfig.json --ignore none client/Scripts/Bin/Server"`,
 		},
 		cypress: {
 			open: "cd Packages/client && cypress open",
@@ -104,10 +113,10 @@ Object.assign(scripts, {
 
 function GetBuildInitDBScriptCommand(watch) {
 	return TSScript("server", `../../${FindPackagePath("mobx-graphlink")}/Scripts/BuildInitDBScript.ts`,
-	`--classesFolder ../../Packages/common/Source/DB`,
-	`--templateFile ./Scripts/InitDB_Template.ts`,
-	`--outFile ./Scripts/InitDB_Generated.ts`,
-	watch ? "--watch" : "");
+		`--classesFolder ../../Packages/common/Source/DB`,
+		`--templateFile ./Scripts/InitDB_Template.ts`,
+		`--outFile ./Scripts/InitDB_Generated.ts`,
+		watch ? "--watch" : "");
 }
 
 

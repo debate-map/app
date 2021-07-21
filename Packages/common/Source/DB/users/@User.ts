@@ -11,34 +11,34 @@ export class User {
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({type: "string"})
+	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
 	id: string;
 
 	@DB((t, n)=>t.text(n))
 	@Field({type: "string"})
 	displayName: string;
 
-	@DB((t, n)=>t.text(n))
-	@Field({type: "string"})
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({type: "string"}, {opt: true})
 	photoURL?: string|n;
 
 	// custom
 	// ==========
 
-	@DB((t, n)=>t.bigInteger(n).notNullable())
-	@Field({type: "number"}, {req: true})
+	@DB((t, n)=>t.bigInteger(n))
+	@Field({type: "number"}, {opt: true}) // optional during creation
 	joinDate: number;
 
-	@DB((t, n)=>t.jsonb(n).notNullable())
-	@Field({$ref: "PermissionGroupSet"}, {req: true})
+	@DB((t, n)=>t.jsonb(n))
+	@Field({$ref: "PermissionGroupSet"})
 	permissionGroups: PermissionGroupSet;
 
-	@DB((t, n)=>t.integer(n).notNullable())
-	@Field({type: "number"}, {req: true})
+	@DB((t, n)=>t.integer(n))
+	@Field({type: "number"})
 	edits = 0;
 
-	@DB((t, n)=>t.bigInteger(n))
-	@Field({type: "number"})
+	@DB((t, n)=>t.bigInteger(n).nullable())
+	@Field({type: "number"}, {opt: true})
 	lastEditAt?: number|n;
 }
 

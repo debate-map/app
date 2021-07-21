@@ -51,9 +51,10 @@ AddSchema("PermissionInfo", {
 
 @MGLClass()
 export class NodeRevisionDisplayDetails {
-	@Field({type: ["number", "null"]})
+	@Field({type: ["number", "null"]}, {opt: true})
 	fontSizeOverride?: number;
-	@Field({type: ["number", "null"]})
+
+	@Field({type: ["number", "null"]}, {opt: true})
 	widthOverride?: number;
 }
 
@@ -82,19 +83,19 @@ export class MapNodeRevision {
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({type: "string"})
+	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
 	id: string;
 
-	@DB((t, n)=>t.text(n).notNullable().references("id").inTable(`nodes`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
+	@Field({type: "string"})
 	node: string;
 
-	@DB((t, n)=>t.text(n).notNullable().references("id").inTable(`users`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
+	@Field({type: "string"})
 	creator: string;
 
-	@DB((t, n)=>t.bigInteger(n).notNullable())
-	@Field({type: "number"}, {req: true})
+	@DB((t, n)=>t.bigInteger(n))
+	@Field({type: "number"})
 	createdAt: number;
 
 	//updatedAt: number;
@@ -111,35 +112,35 @@ export class MapNodeRevision {
 	})
 	titles = {base: ""} as TitlesMap;
 
-	@DB((t, n)=>t.text(n))
-	@Field({type: ["null", "string"]}) // add null-type, for later when the payload-validation schema is derived from the main schema
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({type: ["null", "string"]}, {opt: true}) // add null-type, for later when the payload-validation schema is derived from the main schema
 	note?: string;
 
-	@DB((t, n)=>t.jsonb(n))
-	@Field({$ref: NodeRevisionDisplayDetails.name})
+	@DB((t, n)=>t.jsonb(n).nullable())
+	@Field({$ref: NodeRevisionDisplayDetails.name}, {opt: true})
 	displayDetails?: NodeRevisionDisplayDetails;
 
 	// attachments
 	// ==========
 
-	@DB((t, n)=>t.specificType(n, "text[]").notNullable())
-	@Field({items: {$ref: TermAttachment.name}}, {req: true})
+	@DB((t, n)=>t.specificType(n, "text[]"))
+	@Field({items: {$ref: TermAttachment.name}})
 	termAttachments: TermAttachment[];
 
-	@DB((t, n)=>t.jsonb(n))
-	@Field({$ref: EquationAttachment.name})
+	@DB((t, n)=>t.jsonb(n).nullable())
+	@Field({$ref: EquationAttachment.name}, {opt: true})
 	equation?: EquationAttachment;
 
-	@DB((t, n)=>t.jsonb(n))
-	@Field({$ref: ReferencesAttachment.name})
+	@DB((t, n)=>t.jsonb(n).nullable())
+	@Field({$ref: ReferencesAttachment.name}, {opt: true})
 	references?: ReferencesAttachment;
 
-	@DB((t, n)=>t.jsonb(n))
-	@Field({$ref: QuoteAttachment.name})
+	@DB((t, n)=>t.jsonb(n).nullable())
+	@Field({$ref: QuoteAttachment.name}, {opt: true})
 	quote?: QuoteAttachment;
 
-	@DB((t, n)=>t.jsonb(n))
-	@Field({$ref: MediaAttachment.name})
+	@DB((t, n)=>t.jsonb(n).nullable())
+	@Field({$ref: MediaAttachment.name}, {opt: true})
 	media?: MediaAttachment;
 }
 AddSchema("MapNodeRevision_Partial", ["MapNodeRevision"], ()=>{

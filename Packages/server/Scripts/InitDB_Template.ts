@@ -125,8 +125,24 @@ export async function up(knex: Knex.Transaction) {
 	const {v} = info;
 
 	// used by generated code
-	function RunFieldInit(tableBuilder: Knex.TableBuilder, fieldName: string, fieldInitFunc: (t: Knex.TableBuilder, n: string)=>any) {
-		fieldInitFunc(tableBuilder, fieldName);
+	function RunFieldInit(tableBuilder: Knex.TableBuilder, fieldName: string, fieldInitFunc: (t: Knex.TableBuilder, n: string)=>Knex.ColumnBuilder) {
+		const methodsCalled = [] as string[];
+		const methodCallInterceptor = new Proxy({}, {
+			get(target, methodName: string) {
+				methodsCalled.push(methodName);
+				return ()=>methodCallInterceptor;
+			},
+		});
+		// do one early call, with the "builder"/"chain" object being the method-call-interceptor; this way, we know what methods are called, ie. the field characteristics
+		fieldInitFunc(methodCallInterceptor as any, fieldName);
+		//const fieldMarkedNullable = fieldInitFunc.toString().includes(".nullable()");
+		const fieldMarkedNullable = methodsCalled.includes("nullable");
+
+		const chain = fieldInitFunc(tableBuilder, fieldName);
+		// if field is not explicitly marked nullable, assume it is intended to be non-nullable (the safer default; and makes the default match that of TypeScript and the @Field decorator)
+		if (!fieldMarkedNullable) {
+			chain.notNullable();
+		}
 	}
 
 	// PLACEHOLDER_FOR_DYNAMIC_CODE

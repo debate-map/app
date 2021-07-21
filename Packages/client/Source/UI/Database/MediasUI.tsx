@@ -90,7 +90,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 							</Div>
 						</Row>
 						{selectedMedia
-							? <MediaDetailsUI baseData={selectedMedia} creating={false} editing={creatorOrMod} style={{padding: 10}}
+							? <MediaDetailsUI baseData={selectedMedia} phase={creatorOrMod ? "edit" : "view"} style={{padding: 10}}
 								onChange={(data, error)=>this.SetState({selectedMedia_newData: data, selectedMedia_newDataError: error})}/>
 							: <div style={{padding: 10}}>No media selected.</div>}
 					</Column>

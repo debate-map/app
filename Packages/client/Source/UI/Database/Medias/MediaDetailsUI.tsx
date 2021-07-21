@@ -8,31 +8,15 @@ import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {Media, Media_namePattern, MediaType, GetNiceNameForMediaType} from "dm_common";
 import {SourceChainsEditorUI} from "../../@Shared/Maps/MapNode/SourceChainsEditorUI.js";
 import {YoutubePlayerUI, InfoButton, HSLA, ParseYoutubeVideoID, ES} from "web-vcore";
+import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
 
-export class MediaDetailsUI extends BaseComponentPlus(
-	{} as {baseData: Media, creating: boolean, editing: boolean, style?, onChange?: (newData: Media, error: string)=>void},
-	{} as {newData: Media, dataError: string},
-) {
-	ComponentWillMountOrReceiveProps(props, forMount) {
-		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
-			this.SetState({newData: CloneWithPrototypes(props.baseData)});
-		}
-	}
-	OnChange() {
-		const {onChange} = this.props;
-		const newData = this.GetNewData();
-		const error = this.GetValidationError();
-		if (onChange) onChange(newData, error);
-		this.SetState({newData, dataError: error});
-	}
-
+export class MediaDetailsUI extends DetailsUI_Base<Media, MediaDetailsUI> {
 	scrollView: ScrollView;
 	render() {
-		const {baseData, creating, editing, style, onChange} = this.props;
+		const {baseData, style, onChange} = this.props;
 		const {newData, dataError} = this.state;
+		const {Change, creating, editing} = this.helpers;
 		const videoID = ParseYoutubeVideoID(newData.url);
-
-		const Change = (..._)=>this.OnChange();
 
 		const splitAt = 100;
 		//const width = 600;
@@ -85,13 +69,5 @@ export class MediaDetailsUI extends BaseComponentPlus(
 				{dataError && dataError != "Please fill out this field." && <Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{dataError}</Row>}
 			</Column>
 		);
-	}
-	GetValidationError() {
-		return GetErrorMessagesUnderElement(GetDOM(this))[0];
-	}
-
-	GetNewData() {
-		const {newData} = this.state;
-		return CloneWithPrototypes(newData) as Media;
 	}
 }

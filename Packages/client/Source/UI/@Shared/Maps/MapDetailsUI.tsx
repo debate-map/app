@@ -4,30 +4,22 @@ import {CloneWithPrototypes, DEL, GetErrorMessagesUnderElement, ToNumber} from "
 import {CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI.js";
+import {DetailsUI_Base} from "../DetailsUI_Base.js";
 import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel.js";
 
-type Props = {baseData: Map, forNew: boolean, enabled?: boolean, style?, onChange?: (newData: Map, ui: MapDetailsUI)=>void};
-export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {newData: null as any as Map}) {
-	ComponentWillMountOrReceiveProps(props, forMount) {
-		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
-			this.SetState({newData: CloneWithPrototypes(props.baseData)});
-		}
-	}
-
+export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 	render() {
-		const {baseData, forNew, enabled, style, onChange} = this.props;
+		const {baseData, style, onChange} = this.props;
 		const {newData} = this.state;
+		const {Change, creating, enabled} = this.helpers;
+
 		const creatorOrMod = IsUserCreatorOrMod(MeID(), newData);
-		const Change = (..._)=>{
-			if (onChange) onChange(this.GetNewData(), this);
-			this.Update();
-		};
 
 		const splitAt = 230;
 		const width = 600;
 		return (
 			<Column style={style}>
-				{!forNew &&
+				{!creating &&
 					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={100} style={{width}}>
 					<Pre>Name:</Pre>
@@ -57,7 +49,7 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 					</Row>
 					<Select options={GetEntries(MapVisibility)} enabled={enabled} value={newData.visibility} onChange={val=>Change(newData.visibility = val)}/>
 				</RowLR>*/}
-				{!forNew &&
+				{!creating &&
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Pre>Default expand depth:</Pre>
 					<Spinner min={1} max={3} enabled={enabled}
@@ -81,7 +73,7 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 						<Spinner enabled={enabled} style={{width: "100%"}}
 							value={newData.rootNode} onChange={val=>Change(newData.rootNode = val)}/>
 					</RowLR> */}
-				{!forNew && // we don't want to overwhelm new users trying to create their own map...
+				{!creating && // we don't want to overwhelm new users trying to create their own map...
 				<Column mt={10}>
 					<CheckBox text="Node defaults:" enabled={creatorOrMod} value={newData.nodeDefaults != null} onChange={val=>{
 						const defaultNodeDefaults = MapNodeRevision_Defaultable_DefaultsForMap();
@@ -100,13 +92,5 @@ export class MapDetailsUI extends BaseComponentPlus({enabled: true} as Props, {n
 				</Column>}
 			</Column>
 		);
-	}
-	GetValidationError() {
-		return GetErrorMessagesUnderElement(this.DOM)[0];
-	}
-
-	GetNewData() {
-		const {newData} = this.state;
-		return CloneWithPrototypes(newData) as Map;
 	}
 }

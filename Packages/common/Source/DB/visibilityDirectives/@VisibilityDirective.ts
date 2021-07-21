@@ -1,16 +1,9 @@
 import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
 
-// todo
-type PermissionSet = any;
-AddSchema("PermissionSet", {
-	properties: {
-	},
-});
-
 @MGLClass({table: "visibilityDirectives"})
 export class VisibilityDirective {
 	@DB((t, n)=>t.text(n).primary())
-	@Field({type: "string"})
+	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
 	id: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
@@ -25,23 +18,23 @@ export class VisibilityDirective {
 	@Field({items: {type: "string"}})
 	context: string[];
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`maps`).DeferRef())
-	@Field({type: "string"})
-	target_map: string;
+	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`maps`).DeferRef())
+	@Field({type: "string"}, {opt: true})
+	target_map?: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
-	@Field({type: "string"})
-	target_node: string;
+	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`nodes`).DeferRef())
+	@Field({type: "string"}, {opt: true})
+	target_node?: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`nodeChildLinks`).DeferRef())
-	@Field({type: "string"})
-	target_nodeChildLink: string;
+	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`nodeChildLinks`).DeferRef())
+	@Field({type: "string"}, {opt: true})
+	target_nodeChildLink?: string;
 
-	@DB((t, n)=>t.text(n))
-	@Field({type: "string"})
-	visibility_self: string;
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({type: "string"}, {opt: true})
+	visibility_self?: string;
 
-	@DB((t, n)=>t.text(n))
-	@Field({type: "string"})
-	visibility_nodes: string;
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({type: "string"}, {opt: true})
+	visibility_nodes?: string;
 }

@@ -32,35 +32,35 @@ export class MapNode {
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({type: "string"})
+	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
 	id: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
 	@Field({type: "string"})
 	accessPolicy: string;
 
-	@DB((t, n)=>t.text(n).notNullable().references("id").inTable(`users`).DeferRef())
-	@Field({type: "string"}, {req: true})
+	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
+	@Field({type: "string"})
 	creator: string;
 
-	@DB((t, n)=>t.bigInteger(n).notNullable())
-	@Field({type: "number"}, {req: true})
+	@DB((t, n)=>t.bigInteger(n))
+	@Field({type: "number"})
 	createdAt: number;
 
-	@DB((t, n)=>t.text(n).notNullable())
-	@Field({$ref: "MapNodeType"}, {req: true})
+	@DB((t, n)=>t.text(n))
+	@Field({$ref: "MapNodeType"})
 	type: MapNodeType;
 
-	@DB((t, n)=>t.text(n))
-	@Field({$ref: "ArgumentType"})
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({$ref: "ArgumentType"}, {opt: true})
 	argumentType?: ArgumentType;
 
-	@DB((t, n)=>t.boolean(n))
-	@Field({type: "boolean"})
+	@DB((t, n)=>t.boolean(n).nullable())
+	@Field({type: "boolean"}, {opt: true})
 	multiPremiseArgument?: boolean;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`maps`).DeferRef())
-	@Field({$ref: "UUID"})
+	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`maps`).DeferRef())
+	@Field({$ref: "UUID"}, {opt: true})
 	rootNodeForMap?: string;
 
 	// if subnode

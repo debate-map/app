@@ -135,7 +135,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 	const Change = (..._)=>boxController.UpdateUI();
 
 	let tab = AddChildDialogTab.Claim;
-	let boxController = ShowMessageBox({
+	const boxController = ShowMessageBox({
 		title: `Add ${displayName}`, cancelButton: true,
 		message: observer_simple(()=>{
 			const tempCommand = helper.GetCommand();
@@ -144,7 +144,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 				title: tempCommand.validateError as any,
 			};
 
-			const accessPolicy = CatchBail(null, ()=>GetAccessPolicy(helper.node.accessPolicy));
+			const accessPolicy = GetAccessPolicy.CatchBail(null, helper.node.accessPolicy);
 			if (accessPolicy == null) return null as any as JSX.Element; // wait
 			const newNodeAsL2 = AsNodeL2(helper.node, helper.node_revision, accessPolicy);
 			const newNodeAsL3 = AsNodeL3(newNodeAsL2, helper.node_link, childPolarity);

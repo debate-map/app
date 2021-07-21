@@ -54,11 +54,9 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 			<DropDown>
 				<DropDownTrigger><Button_Final ml={5} style={{height: "100%"}} text="Details"/></DropDownTrigger>
 				<DropDownContent style={{left: 0, borderRadius: "0 0 5px 0"}}><Column>
-					<MapDetailsUI ref={c=>this.detailsUI = c} baseData={map}
-						forNew={false} enabled={creatorOrMod}
-						onChange={newData=>{
-							this.SetState({dataError: this.detailsUI!.GetValidationError()});
-						}}/>
+					<MapDetailsUI ref={c=>this.detailsUI = c} baseData={map} phase={creatorOrMod ? "edit" : "view"} onChange={newData=>{
+						this.SetState({dataError: this.detailsUI!.GetValidationError()});
+					}}/>
 					{creatorOrMod &&
 						<Row>
 							<Button mt={5} text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{

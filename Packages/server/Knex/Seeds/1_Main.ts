@@ -40,6 +40,8 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 	public_ungoverned: {
 		id: GenerateUUID(),
 		name: "Public, ungoverned (standard)",
+		creator: systemUserID,
+		createdAt: Date.now(),
 		base: null,
 		permissions_base: {
 			access: true,
@@ -47,10 +49,13 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 			vote: true,
 			delete: false,
 		},
+		permissions_userExtends: {},
 	},
 	public_governed: {
 		id: GenerateUUID(),
 		name: "Public, governed (standard)",
+		creator: systemUserID,
+		createdAt: Date.now(),
 		base: null,
 		permissions_base: {
 			access: true,
@@ -58,10 +63,13 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 			vote: true,
 			delete: false,
 		},
+		permissions_userExtends: {},
 	},
 	private_governed: {
 		id: GenerateUUID(),
 		name: "Private, governed (standard)",
+		creator: systemUserID,
+		createdAt: Date.now(),
 		base: null,
 		permissions_base: {
 			access: false,
@@ -69,6 +77,7 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 			vote: false,
 			delete: false,
 		},
+		permissions_userExtends: {},
 	},
 });
 

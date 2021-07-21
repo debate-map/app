@@ -11,7 +11,7 @@ export class UserHidden {
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({type: "string"})
+	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
 	id: string;
 
 	//displayName: string;
@@ -28,23 +28,23 @@ export class UserHidden {
 	// custom
 	// ==========
 
-	@DB((t, n)=>t.text(n))
-	@Field({type: "string"})
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({type: "string"}, {opt: true})
 	backgroundID?: string|n;
 
-	@DB((t, n)=>t.boolean(n))
-	@Field({type: "boolean"})
+	@DB((t, n)=>t.boolean(n).nullable())
+	@Field({type: "boolean"}, {opt: true})
 	backgroundCustom_enabled?: boolean|n;
 
-	@DB((t, n)=>t.text(n))
-	@Field({type: ["null", "string"]})
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({type: ["null", "string"]}, {opt: true})
 	backgroundCustom_color?: string|n;
 
-	@DB((t, n)=>t.text(n))
-	@Field({type: "string"})
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({type: "string"}, {opt: true})
 	backgroundCustom_url?: string|n;
 
-	@DB((t, n)=>t.text(n))
-	@Field({type: "string"})
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({type: "string"}, {opt: true})
 	backgroundCustom_position?: string|n;
 }

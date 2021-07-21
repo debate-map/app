@@ -14,6 +14,7 @@ export const pageTree = new Page({}, {
 		users: new Page(),
 		terms: new Page(),
 		media: new Page(),
+		policies: new Page(),
 	}),
 	feedback: new Page({}, {
 		proposals: new Page(),
