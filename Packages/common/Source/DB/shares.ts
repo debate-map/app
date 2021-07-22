@@ -1,11 +1,11 @@
 import {GetDoc, CreateAccessor, GetDocs} from "web-vcore/nm/mobx-graphlink.js";
 import {Share} from "./shares/@Share.js";
 
-export const GetShare = CreateAccessor(c=>(id: string): Share|n=>{
+export const GetShare = CreateAccessor((id: string): Share|n=>{
 	if (id == null) return null;
 	return GetDoc({}, a=>a.shares.get(id));
 });
-export const GetShares = CreateAccessor(c=>(userID: string, mapID?: string|n): Share[]=>{
+export const GetShares = CreateAccessor((userID: string, mapID?: string|n): Share[]=>{
 	return GetDocs({
 		/*queryOps: [
 			new WhereOp("creator", "==", userID),

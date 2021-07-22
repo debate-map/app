@@ -15,7 +15,7 @@ import {UserHidden} from "./DB/userHiddens/@UserHidden.js"; // eslint-disable-li
 import {VisibilityDirective} from "./DB/visibilityDirectives/@VisibilityDirective.js";
 
 declare module "mobx-graphlink/Dist/UserTypes" {
-	interface DBShape extends GraphDBShape {}
+	interface UT_DBShape extends GraphDBShape {}
 }
 
 // helper, to avoid need to ensure each type is runtime-imported as well (needed for their schemas to be registered)
@@ -88,11 +88,11 @@ export class GraphDBShape {
 	}>;
 } */
 
-/*export const GetAuth = CreateAccessor(c=>()=>{
+/*export const GetAuth = CreateAccessor(()=>{
 	//return s.firelink.userInfo;
 	return fire.userInfo;
 }) as ()=>FireUserInfo;
-export const GetAuth_Raw = CreateAccessor(c=>()=>{
+export const GetAuth_Raw = CreateAccessor(()=>{
 	//return s.firelink.userInfo_raw;
 	return fire.userInfo_raw as any;
 });*/

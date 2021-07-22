@@ -132,7 +132,7 @@ type SubtreeNode = MapNodeL3 & {
 	childrenData: {[key: string]: SubtreeNode};
 };
 
-const GetSubtree = CreateAccessor(c=>(path: string, maxDepth: number, rootPathSegments?: string[])=>{
+const GetSubtree = CreateAccessor((path: string, maxDepth: number, rootPathSegments?: string[])=>{
 	const pathSegments = path.split("/");
 	if (rootPathSegments == null) rootPathSegments = pathSegments;
 

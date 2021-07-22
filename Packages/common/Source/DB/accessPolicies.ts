@@ -1,13 +1,13 @@
 import {CreateAccessor, GetDoc, GetDocs} from "web-vcore/nm/mobx-graphlink";
 import {systemUserID} from "../DB_Constants.js";
 
-export const GetAccessPolicies = CreateAccessor(c=>(creatorID?: string)=>{
+export const GetAccessPolicies = CreateAccessor((creatorID?: string)=>{
 	return GetDocs({
 		//queryOps: [new WhereOp("name", "==", name)],
 		params: {filter: {creator: {equalTo: systemUserID}}},
 	}, a=>a.accessPolicies);
 });
-export const GetAccessPolicy = CreateAccessor(c=>(id: string|n)=>{
+export const GetAccessPolicy = CreateAccessor((id: string|n)=>{
 	return GetDoc({}, a=>a.accessPolicies.get(id!));
 });
 

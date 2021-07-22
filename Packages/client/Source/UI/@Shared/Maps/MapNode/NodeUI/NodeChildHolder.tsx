@@ -249,7 +249,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 	get ChildOrderStr() {
 		const {nodeChildrenToShow, nodeChildren_fillPercents} = this.PropsStash;
-		return nodeChildrenToShow.OrderBy(a=>nodeChildren_fillPercents[a.id]).map(a=>a.id).join(",");
+		return nodeChildrenToShow.OrderBy(a=>nodeChildren_fillPercents?.[a.id] ?? 0).map(a=>a.id).join(",");
 	}
 
 	PostRender() {

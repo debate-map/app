@@ -7,7 +7,7 @@ import {GetMainRatingType, GetNodeForm, GetRatingTypesForNode} from "../../DB/no
 import {ClaimForm, MapNodeL2} from "../../DB/nodes/@MapNode.js";
 import {ArgumentType} from "../../DB/nodes/@MapNodeRevision.js";
 
-export const GetArgumentImpactPseudoRating = CreateAccessor(c=>(argument: MapNodeL2, premises: MapNodeL2[], userID: string): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
+export const GetArgumentImpactPseudoRating = CreateAccessor((argument: MapNodeL2, premises: MapNodeL2[], userID: string): PartialBy<NodeRating, "id" | "accessPolicy">|n=>{
 	if (CE(premises).Any(a=>a == null)) return null; // must still be loading
 	if (premises.length == 0) return null;
 
@@ -66,7 +66,7 @@ export const GetArgumentImpactPseudoRating = CreateAccessor(c=>(argument: MapNod
 } */
 
 // export function GetArgumentImpactPseudoRatingSet(argument: MapNodeL2, premises: MapNodeL2[]): {[key: string]: Rating} {
-export const GetArgumentImpactPseudoRatings = CreateAccessor(c=>(argument: MapNodeL2, premises: MapNodeL2[]): NodeRating_MaybePseudo[]=>{
+export const GetArgumentImpactPseudoRatings = CreateAccessor((argument: MapNodeL2, premises: MapNodeL2[]): NodeRating_MaybePseudo[]=>{
 	if (CE(premises).Any(a=>a == null)) return emptyArray_forLoading as any; // must still be loading
 	if (premises.length == 0) return emptyArray as any;
 

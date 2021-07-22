@@ -7,8 +7,8 @@ export class DebatesPageState {
 	@O selectedMapID: string|n;
 }
 
-export const GetSelectedDebatesPageMap = CreateAccessor(c=>()=>{
-	const selectedID = c.store.main.debates.selectedMapID;
+export const GetSelectedDebatesPageMap = CreateAccessor(function() {
+	const selectedID = this!.store.main.debates.selectedMapID;
 	// return GetData(`maps/${selectedID}`);
 	// return (GetMapsOfType(MapType.Debate) || []).find(a=>a._id == selectedID);
 	return GetMap(selectedID);

@@ -68,7 +68,7 @@ export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	}
 	Assert(false);
 }
-export const GetMainRatingType = CreateAccessor(c=>(node: MapNodeL2)=>{
+export const GetMainRatingType = CreateAccessor((node: MapNodeL2)=>{
 	return GetRatingTypesForNode(node).FirstOrX(a=>!!a.main, {} as Partial<RatingTypeInfo>)!.type;
 });
 export function GetSortByRatingType(node: MapNodeL3): NodeRatingType|n {
@@ -81,7 +81,7 @@ export function GetSortByRatingType(node: MapNodeL3): NodeRatingType|n {
 export function ReversePolarity(polarity: Polarity) {
 	return polarity == Polarity.supporting ? Polarity.opposing : Polarity.supporting;
 }
-export const GetDisplayPolarityAtPath = CreateAccessor(c=>(node: MapNodeL2, path: string, tagsToIgnore?: string[]): Polarity=>{
+export const GetDisplayPolarityAtPath = CreateAccessor((node: MapNodeL2, path: string, tagsToIgnore?: string[]): Polarity=>{
 	Assert(node.type == MapNodeType.argument, "Only argument nodes have polarity.");
 	const parent = GetParentNodeL2(path);
 	if (!parent) return Polarity.supporting; // can be null, if for NodeUI_ForBots
@@ -128,7 +128,7 @@ export function AsNodeL2(node: MapNode, currentRevision: MapNodeRevision, access
 	delete result["link"];
 	return result;
 }
-export const GetNodeL2 = CreateAccessor(c=>(nodeID: string | MapNode | n, path?: string)=>{
+export const GetNodeL2 = CreateAccessor((nodeID: string | MapNode | n, path?: string)=>{
 	if (IsString(nodeID)) nodeID = GetNode(nodeID) as MapNode;
 	if (nodeID == null) return null;
 	const node = nodeID as MapNode;
@@ -173,7 +173,7 @@ export function AsNodeL3(node: MapNodeL2, link: PartialBy<NodeChildLink, "polari
 	Assert(IsNodeL2(node), "Node sent to AsNodeL3 was not an L2 node!");
 	return E(node, {displayPolarity, link}) as MapNodeL3;
 }
-export const GetNodeL3 = CreateAccessor(c=>(path: string | n, tagsToIgnore?: string[])=>{
+export const GetNodeL3 = CreateAccessor((path: string | n, tagsToIgnore?: string[])=>{
 	if (path == null) return null;
 	const nodeID = GetNodeID(path);
 	const node = GetNodeL2(nodeID);
@@ -204,7 +204,7 @@ export function GetClaimFormUnderParent(node: MapNode, parent: MapNode): ClaimFo
 	if (link == null) return ClaimForm.Base;
 	return link.form;
 }*/
-export const GetNodeForm = CreateAccessor(c=>(node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2): ClaimForm=>{
+export const GetNodeForm = CreateAccessor((node: MapNodeL2 | MapNodeL3, pathOrParent?: string | MapNodeL2): ClaimForm=>{
 	if (IsNodeL3(node) && node.link) {
 		return node.link.form ?? ClaimForm.base;
 	}
@@ -213,7 +213,7 @@ export const GetNodeForm = CreateAccessor(c=>(node: MapNodeL2 | MapNodeL3, pathO
 	const link = GetLinkUnderParent(node.id, parent);
 	return link?.form ?? ClaimForm.base;
 });
-export const GetLinkUnderParent = CreateAccessor(c=>(nodeID: string, parent: MapNode|n, includeMirrorLinks = true, tagsToIgnore?: string[])=>{
+export const GetLinkUnderParent = CreateAccessor((nodeID: string, parent: MapNode|n, includeMirrorLinks = true, tagsToIgnore?: string[])=>{
 	if (parent == null) return null;
 	//let link = parent.children?.[nodeID]; // null-check, since after child-delete, parent-data might have updated before child-data removed
 	const parentChildLinks = GetNodeChildLinks(parent.id);
@@ -270,7 +270,7 @@ export function GetPolarityShortStr(polarity: Polarity) {
 	return polarity == Polarity.supporting ? "pro" : "con";
 }
 
-export const GetNodeContributionInfo = CreateAccessor(c=>(nodeID: string)=>{
+export const GetNodeContributionInfo = CreateAccessor((nodeID: string)=>{
 	const result = new NodeContributionInfo(nodeID);
 	const tags = GetNodeTags(nodeID);
 	const directChildrenDisabled = CE(tags).Any(a=>a.mirrorChildrenFromXToY?.nodeY == nodeID && a.mirrorChildrenFromXToY?.disableDirectChildren);
@@ -307,7 +307,7 @@ export function GetAllNodeRevisionTitles(nodeRevision: MapNodeRevision): string[
 }
 
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
-export const GetNodeDisplayText = CreateAccessor(c=>(node: MapNodeL2, path?: string, form?: ClaimForm): string=>{
+export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string, form?: ClaimForm): string=>{
 	form = form || GetNodeForm(node, path);
 	const titles = node.current.titles || {} as TitlesMap;
 
@@ -399,12 +399,12 @@ export function GetValidNewChildTypes(parent: MapNodeL2, holderType: HolderType|
 }
 
 /** Returns whether the node provided is an argument, and marked as single-premise. */
-export const IsSinglePremiseArgument = CreateAccessor(c=>(node: MapNode|n)=>{
+export const IsSinglePremiseArgument = CreateAccessor((node: MapNode|n)=>{
 	if (node == null) return false;
 	return node.type == MapNodeType.argument && !node.multiPremiseArgument;
 });
 /** Returns whether the node provided is an argument, and marked as multi-premise. */
-export const IsMultiPremiseArgument = CreateAccessor(c=>(node: MapNode|n)=>{
+export const IsMultiPremiseArgument = CreateAccessor((node: MapNode|n)=>{
 	if (node == null) return false;
 	return node.type == MapNodeType.argument && node.multiPremiseArgument;
 });
@@ -416,7 +416,7 @@ export function IsPublicNode(node: MapNode) {
 	return node.ownerMapID == null;
 }*/
 
-export const IsPremiseOfSinglePremiseArgument = CreateAccessor(c=>(node: MapNode, parent: MapNode|n)=>{
+export const IsPremiseOfSinglePremiseArgument = CreateAccessor((node: MapNode, parent: MapNode|n)=>{
 	if (parent == null) return false; // if parent is null, we'll assume there is no parent (most callers will already have bailed if parent-node was merely still-loading)
 	return node.type == MapNodeType.claim && IsSinglePremiseArgument(parent);
 });

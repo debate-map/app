@@ -4,16 +4,16 @@ import {Timeline} from "./timelines/@Timeline.js";
 import {TimelineStep} from "./timelineSteps/@TimelineStep.js";
 import {GetNode, GetNodeChildren} from "./nodes.js";
 
-export const GetTimelineStep = CreateAccessor(c=>(id: string): TimelineStep|n=>{
+export const GetTimelineStep = CreateAccessor((id: string): TimelineStep|n=>{
 	if (id == null) return null;
 	//return GetDoc({}, a=>a.timelineSteps.get(id));
 	return null;
 });
-export const GetTimelineSteps = CreateAccessor(c=>(timeline: Timeline, allowPartial = false): (TimelineStep|n)[]=>{
+export const GetTimelineSteps = CreateAccessor((timeline: Timeline, allowPartial = false): (TimelineStep|n)[]=>{
 	return timeline.steps?.map(id=>GetTimelineStep[allowPartial ? "normal" : "BIN"](id)) ?? [];
 });
 
-export const GetNodeRevealTimesInSteps = CreateAccessor(c=>(steps: TimelineStep[], baseOnLastReveal = false)=>{
+export const GetNodeRevealTimesInSteps = CreateAccessor((steps: TimelineStep[], baseOnLastReveal = false)=>{
 	const nodeRevealTimes = {} as {[key: string]: number};
 	for (const [index, step] of steps.entries()) {
 		for (const reveal of step.nodeReveals || []) {
@@ -68,6 +68,6 @@ export const GetNodeRevealTimesInSteps = CreateAccessor(c=>(steps: TimelineStep[
 	}
 	return nodeRevealTimes;
 });
-export const GetNodesRevealedInSteps = CreateAccessor(c=>(steps: TimelineStep[])=>{
+export const GetNodesRevealedInSteps = CreateAccessor((steps: TimelineStep[])=>{
 	return CE(GetNodeRevealTimesInSteps(steps)).VKeys();
 });

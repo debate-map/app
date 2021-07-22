@@ -11,17 +11,17 @@ export class DatabaseState {
 	@O selectedPolicyID: string|n;
 }
 
-export const GetSelectedUserID = CreateAccessor(c=>()=>{
-	return c.store.main.database.selectedUserID;
+export const GetSelectedUserID = CreateAccessor(function() {
+	return this!.store.main.database.selectedUserID;
 });
-export const GetSelectedUser = CreateAccessor(c=>()=>{
+export const GetSelectedUser = CreateAccessor(()=>{
 	return GetUser(GetSelectedUserID());
 });
 
-export const GetSelectedTermID = CreateAccessor(c=>()=>{
-	return c.store.main.database.selectedTermID;
+export const GetSelectedTermID = CreateAccessor(function() {
+	return this!.store.main.database.selectedTermID;
 });
-export const GetSelectedTerm = CreateAccessor(c=>()=>{
+export const GetSelectedTerm = CreateAccessor(()=>{
 	return GetTerm(GetSelectedTermID());
 });
 /*export function GetSelectedTermComponent() {
@@ -29,16 +29,16 @@ export const GetSelectedTerm = CreateAccessor(c=>()=>{
 	return GetTermComponent(selectedID);
 }*/
 
-export const GetSelectedMediaID = CreateAccessor(c=>()=>{
-	return c.store.main.database.selectedMediaID;
+export const GetSelectedMediaID = CreateAccessor(function() {
+	return this!.store.main.database.selectedMediaID;
 });
-export const GetSelectedMedia = CreateAccessor(c=>()=>{
+export const GetSelectedMedia = CreateAccessor(()=>{
 	return GetMedia(GetSelectedMediaID());
 });
 
-export const GetSelectedPolicyID = CreateAccessor(c=>()=>{
-	return c.store.main.database.selectedPolicyID;
+export const GetSelectedPolicyID = CreateAccessor(function() {
+	return this!.store.main.database.selectedPolicyID;
 });
-export const GetSelectedPolicy = CreateAccessor(c=>()=>{
+export const GetSelectedPolicy = CreateAccessor(()=>{
 	return GetAccessPolicy(GetSelectedPolicyID());
 });

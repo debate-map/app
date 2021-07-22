@@ -8,7 +8,7 @@ import {TimelineStep} from "./timelineSteps/@TimelineStep.js";
 	let timelinesMap = GetData({collection: true}, "timelines");
 	return CachedTransform("GetTimelines", [], timelinesMap, ()=>timelinesMap ? timelinesMap.VValues(true) : []);
 }*/
-/*export const GetTimeline = CreateAccessor(c=>(id: string): Timeline=>{
+/*export const GetTimeline = CreateAccessor((id: string): Timeline=>{
 	if (id == null) return null;
 	//return GetDoc({}, a=>a.timelines.get(id));
 	return null;
@@ -17,7 +17,7 @@ import {TimelineStep} from "./timelineSteps/@TimelineStep.js";
 export function GetMapTimelineIDs(map: Map) {
 	return CE(map.timelines || {}).VKeys();
 }
-export const GetMapTimelines = CreateAccessor(c=>(map: Map)=>{
+export const GetMapTimelines = CreateAccessor((map: Map)=>{
 	const timelines = GetMapTimelineIDs(map).map(id=>GetTimeline(id));
 	if (CE(timelines).Any(a=>a == null)) return emptyArray_forLoading;
 	return timelines;

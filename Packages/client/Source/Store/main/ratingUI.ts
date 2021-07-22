@@ -5,6 +5,6 @@ export class RatingUIState {
 	@O smoothing = 5;
 }
 
-export const GetRatingUISmoothing = CreateAccessor(c=>()=>{
-	return c.store.main.ratingUI.smoothing;
+export const GetRatingUISmoothing = CreateAccessor(function() {
+	return this!.store.main.ratingUI.smoothing;
 });

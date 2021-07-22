@@ -13,7 +13,7 @@ import {MeID} from "./users.js";
 import {GetAccessPolicy} from "./accessPolicies.js";
 import {GetArgumentImpactPseudoRatings} from "../Utils/DB/RatingProcessor.js";
 
-export const GetRatings = CreateAccessor(c=><
+export const GetRatings = CreateAccessor(<
 	((nodeID: string, ratingType: Exclude<NodeRatingType, "impact">|n, userID?: string|n)=>NodeRating[]) & // if rating-type is known to not be "impact", all results will be "true ratings"
 	((nodeID: string, ratingType: NodeRatingType|n, userID?: string|n)=>NodeRating_MaybePseudo[]) // else, some results may lack the "id" field
 >((nodeID: string, ratingType: NodeRatingType|n, userID?: string|n): NodeRating_MaybePseudo[]=>{
@@ -39,14 +39,14 @@ export const GetRatings = CreateAccessor(c=><
 		}},
 	}, a=>a.nodeRatings);
 }));
-export const GetRating = CreateAccessor(c=>(nodeID: string, ratingType: NodeRatingType, userID: string)=>{
+export const GetRating = CreateAccessor((nodeID: string, ratingType: NodeRatingType, userID: string)=>{
 	return GetRatings(nodeID, ratingType, userID)[0];
 });
-export const GetRatingValue = CreateAccessor(c=><T>(nodeID: string, ratingType: NodeRatingType, userID: string, resultIfNoData?: T): number|T=>{
+export const GetRatingValue = CreateAccessor(<T>(nodeID: string, ratingType: NodeRatingType, userID: string, resultIfNoData?: T): number|T=>{
 	const rating = GetRating(nodeID, ratingType, userID);
 	return rating ? rating.value : resultIfNoData as T;
 });
-export const GetRatingAverage = CreateAccessor(c=>(nodeID: string, ratingType: NodeRatingType, userID?: string|n): number|null=>{
+export const GetRatingAverage = CreateAccessor((nodeID: string, ratingType: NodeRatingType, userID?: string|n): number|null=>{
 	// return CachedTransform_WithStore('GetRatingAverage', [nodeID, ratingType, resultIfNoData].concat((filter || {}).VValues()), {}, () => {
 	// if voting disabled, always show full bar
 	/* let node = GetNodeL2(nodeID);
@@ -64,7 +64,7 @@ export const GetRatingAverage = CreateAccessor(c=>(nodeID: string, ratingType: N
 	Assert(result >= 0 && result <= 100, `Rating-average (${result}) not in range. Invalid ratings: ${ToJSON(ratings.map(a=>a.value).filter(a=>!IsNumber(a)))}`);
 	return result;
 });
-export const GetRatingAverage_AtPath = CreateAccessor(c=><T = undefined>(node: MapNodeL3, ratingType: NodeRatingType, userID?: string|n, resultIfNoData?: T): number|T=>{
+export const GetRatingAverage_AtPath = CreateAccessor(<T = undefined>(node: MapNodeL3, ratingType: NodeRatingType, userID?: string|n, resultIfNoData?: T): number|T=>{
 	let result = GetRatingAverage(node.id, ratingType, userID);
 	if (result == null) return resultIfNoData as T;
 	if (ShouldRatingTypeBeReversed(node, ratingType)) {
@@ -91,7 +91,7 @@ export function AssertBetween0And100OrNull(val: number|n) {
 
 const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
 // export const GetFillPercent_AtPath = StoreAccessor('GetFillPercent_AtPath', (node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null) => {
-export const GetFillPercent_AtPath = CreateAccessor(c=>(node: MapNodeL3, path: string, boxType?: HolderType|n, ratingType?: NodeRatingType, weighting = WeightingType.votes, userID?: string, resultIfNoData = null)=>{
+export const GetFillPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: HolderType|n, ratingType?: NodeRatingType, weighting = WeightingType.votes, userID?: string, resultIfNoData = null)=>{
 	ratingType = ratingType ?? HolderTypeToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return resultIfNoData;
 
@@ -120,7 +120,7 @@ export const GetFillPercent_AtPath = CreateAccessor(c=>(node: MapNodeL3, path: s
 	return result;
 });
 
-export const GetMarkerPercent_AtPath = CreateAccessor(c=>(node: MapNodeL3, path: string, boxType?: HolderType|n, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
+export const GetMarkerPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: HolderType|n, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
 	ratingType = ratingType ?? HolderTypeToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return null;
 	if (!node.policy.permissions_base.vote) return null;

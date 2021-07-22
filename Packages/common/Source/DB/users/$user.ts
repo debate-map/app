@@ -7,11 +7,11 @@ import {PermissionGroupSet} from "./@User.js";
 // permissions
 // ==========
 
-/*export const GetUserJoinDate = CreateAccessor(c=>(userID: string): number=>{
+/*export const GetUserJoinDate = CreateAccessor((userID: string): number=>{
 	return GetUser(userID)?.joinDate;
 });*/
 const defaultPermissions = {basic: true, verified: true, mod: false, admin: false} as PermissionGroupSet; // temp
-export const GetUserPermissionGroups = CreateAccessor(c=>(userID: string|n): PermissionGroupSet=>{
+export const GetUserPermissionGroups = CreateAccessor((userID: string|n): PermissionGroupSet=>{
 	//if (userID == null) return null;
 	if (userID == null) return defaultPermissions;
 	return GetUser(userID)?.permissionGroups ?? defaultPermissions;
@@ -27,33 +27,33 @@ export function GetUserAccessLevel(userID: string) {
 	Assert(false);
 }
 
-export const CanGetBasicPermissions = CreateAccessor(c=>(userIDOrPermissions: string | PermissionGroupSet | n)=>{
+export const CanGetBasicPermissions = CreateAccessor((userIDOrPermissions: string | PermissionGroupSet | n)=>{
 	// if (true) return HasModPermissions(userIDOrPermissions); // temp; will be removed once GAD is over
 
 	const permissions = IsString(userIDOrPermissions) ? GetUserPermissionGroups(userIDOrPermissions) : userIDOrPermissions;
 	return permissions == null || permissions.basic; // if anon/not-logged-in, assume user can get basic permissions once logged in
 });
-export const HasBasicPermissions = CreateAccessor(c=>(userIDOrPermissions: string | PermissionGroupSet | n)=>{
+export const HasBasicPermissions = CreateAccessor((userIDOrPermissions: string | PermissionGroupSet | n)=>{
 	// if (true) return HasModPermissions(userIDOrPermissions); // temp; will be removed once GAD is over
 
 	const permissions = IsString(userIDOrPermissions) ? GetUserPermissionGroups(userIDOrPermissions) : userIDOrPermissions;
 	return permissions ? permissions.basic : false;
 });
-export const HasModPermissions = CreateAccessor(c=>(userIDOrPermissions: string | PermissionGroupSet | n)=>{
+export const HasModPermissions = CreateAccessor((userIDOrPermissions: string | PermissionGroupSet | n)=>{
 	const permissions = IsString(userIDOrPermissions) ? GetUserPermissionGroups(userIDOrPermissions) : userIDOrPermissions;
 	return permissions ? permissions.mod : false;
 });
-export const HasAdminPermissions = CreateAccessor(c=>(userIDOrPermissions: string | PermissionGroupSet | n)=>{
+export const HasAdminPermissions = CreateAccessor((userIDOrPermissions: string | PermissionGroupSet | n)=>{
 	const permissions = IsString(userIDOrPermissions) ? GetUserPermissionGroups(userIDOrPermissions) : userIDOrPermissions;
 	return permissions ? permissions.admin : false;
 });
 /** If user is the creator, also requires that they (still) have basic permissions. */
-//export const IsUserCreatorOrMod = CreateAccessor(c=>(userID: string, entity: Term | Image | Map | MapNode | MapNodePhrasing | Timeline /* | Post | Thread */)=>{
-export const IsUserCreatorOrMod = CreateAccessor(c=>(userID: string|n, entity: {creator?: string}|n)=>{
+//export const IsUserCreatorOrMod = CreateAccessor((userID: string, entity: Term | Image | Map | MapNode | MapNodePhrasing | Timeline /* | Post | Thread */)=>{
+export const IsUserCreatorOrMod = CreateAccessor((userID: string|n, entity: {creator?: string}|n)=>{
 	return (entity?.creator === userID && HasBasicPermissions(userID)) || HasModPermissions(userID);
 });
 
-/*export const CanSubmitRevisions = CreateAccessor(c=>(userID: string, nodeID: string): boolean=>{
+/*export const CanSubmitRevisions = CreateAccessor((userID: string, nodeID: string): boolean=>{
 	// mods and admins can always edit
 	if (HasModPermissions(userID) || HasAdminPermissions(userID)) {
 		return true;
@@ -82,7 +82,7 @@ export const IsUserCreatorOrMod = CreateAccessor(c=>(userID: string|n, entity: {
 	Assert(false, "Invalid permission-info-type.");
 });*/
 
-/*export const CanContributeToNode = CreateAccessor(c=>(userID: string, nodeID: string): boolean=>{
+/*export const CanContributeToNode = CreateAccessor((userID: string, nodeID: string): boolean=>{
 	// mods and admins can always contribute
 	if (HasModPermissions(userID) || HasAdminPermissions(userID)) {
 		return true;

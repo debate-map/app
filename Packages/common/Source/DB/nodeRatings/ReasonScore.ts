@@ -6,7 +6,7 @@ import {GetNodeChildrenL3, GetParentNodeL3} from "../nodes.js";
 import {Polarity, MapNodeL3, MapNodeL3_Argument} from "../nodes/@MapNode.js";
 import {ArgumentType} from "../nodes/@MapNodeRevision.js";
 
-export const RS_CalculateTruthScore = CreateAccessor(c=>(claimID: string, calculationPath: string[] = []): number=>{
+export const RS_CalculateTruthScore = CreateAccessor((claimID: string, calculationPath: string[] = []): number=>{
 	const claim = GetNodeL2(claimID);
 	Assert(claim && claim.type == MapNodeType.claim, "RS truth-score can only be calculated for a claim.");
 
@@ -43,7 +43,7 @@ export const RS_CalculateTruthScore = CreateAccessor(c=>(claimID: string, calcul
 	}
 	return runningAverage || 0;
 });
-export const RS_CalculateTruthScoreComposite = CreateAccessor(c=>(argumentID: string, calculationPath = [] as string[])=>{
+export const RS_CalculateTruthScoreComposite = CreateAccessor((argumentID: string, calculationPath = [] as string[])=>{
 	const argument = GetNodeL2(argumentID);
 	Assert(argument && argument.type == MapNodeType.argument, "RS truth-score-composite can only be calculated for an argument.");
 
@@ -55,7 +55,7 @@ export const RS_CalculateTruthScoreComposite = CreateAccessor(c=>(argumentID: st
 	return truthScoreComposite;
 });
 
-export const RS_CalculateBaseWeight = CreateAccessor(c=>(claimID: string, calculationPath = [] as string[])=>{
+export const RS_CalculateBaseWeight = CreateAccessor((claimID: string, calculationPath = [] as string[])=>{
 	const truthScore = RS_CalculateTruthScore(claimID, calculationPath);
 	// if truth-score drops below 50, it has 0 weight
 	if (truthScore <= 0.5) return 0;
@@ -63,7 +63,7 @@ export const RS_CalculateBaseWeight = CreateAccessor(c=>(claimID: string, calcul
 	const weight = (truthScore - 0.5) / 0.5;
 	return weight;
 });
-export const RS_CalculateWeightMultiplier = CreateAccessor(c=>(nodeID: string, calculationPath = [] as string[])=>{
+export const RS_CalculateWeightMultiplier = CreateAccessor((nodeID: string, calculationPath = [] as string[])=>{
 	const node = GetNodeL2(nodeID);
 	Assert(node && node.type == MapNodeType.argument, "RS weight-multiplier can only be calculated for an argument<>claim combo -- which is specified by providing its argument node.");
 
@@ -88,7 +88,7 @@ export const RS_CalculateWeightMultiplier = CreateAccessor(c=>(nodeID: string, c
 	}
 	return runningMultiplier / runningDivisor;
 });
-export const RS_CalculateWeight = CreateAccessor({onBail: 0}, s=>(argumentID: string, premiseIDs: string[], calculationPath = [] as string[])=>{
+export const RS_CalculateWeight = CreateAccessor((argumentID: string, premiseIDs: string[], calculationPath = [] as string[])=>{
 	const argument = GetNodeL2.BIN(argumentID);
 	const premises = premiseIDs.map(id=>GetNodeL2.BIN(id));
 	if (premises.length == 0) return 0;
@@ -99,7 +99,7 @@ export const RS_CalculateWeight = CreateAccessor({onBail: 0}, s=>(argumentID: st
 
 export type ReasonScoreValues = {argument, premises, argTruthScoreComposite, argWeightMultiplier, argWeight, claimTruthScore, claimBaseWeight};
 export type ReasonScoreValues_RSPrefix = {argument, premises, rs_argTruthScoreComposite, rs_argWeightMultiplier, rs_argWeight, rs_claimTruthScore, rs_claimBaseWeight};
-export const RS_GetAllValues = CreateAccessor(c=>(nodeID: string, path: string, useRSPrefix = false, calculationPath = [] as string[])=>{
+export const RS_GetAllValues = CreateAccessor((nodeID: string, path: string, useRSPrefix = false, calculationPath = [] as string[])=>{
 	const node = GetNodeL2.BIN(nodeID);
 	const parent = GetParentNodeL3(path);
 	const argument =
@@ -144,7 +144,7 @@ function CombinePremiseTruthScores(truthScores: number[], argumentType: Argument
 	return CE(truthScores).Max(); // ArgumentType.Any
 }
 
-const GetChildArguments = CreateAccessor(c=>(nodeID: string): MapNodeL3_Argument[]=>{
+const GetChildArguments = CreateAccessor((nodeID: string): MapNodeL3_Argument[]=>{
 	const children = GetNodeChildrenL3(nodeID);
 	if (children == emptyArray_forLoading || CE(children).Any(a=>a == null)) return emptyArray_forLoading;
 	const childArguments = children.filter(a=>a.type == MapNodeType.argument) as MapNodeL3_Argument[];

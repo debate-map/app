@@ -67,20 +67,20 @@ export class MainState {
 	@O ratingUI = new RatingUIState();
 }
 
-export const GetOpenMapID = CreateAccessor(c=>()=>{
+export const GetOpenMapID = CreateAccessor(function() {
 	// return State(a=>a.main.openMap);
-	const {page} = c.store.main;
+	const {page} = this!.store.main;
 	// if (page == 'home') return demoMap._id;
-	if (page == "debates") return c.store.main.debates.selectedMapID;
+	if (page == "debates") return this!.store.main.debates.selectedMapID;
 	if (page == "global") return globalMapID;
 	return null;
 });
 
 // export type PageKey = "home" | ""
-export const GetPage = CreateAccessor(c=>()=>{
-	return c.store.main.page || "home";
+export const GetPage = CreateAccessor(function() {
+	return this!.store.main.page || "home";
 });
-export const GetSubpage = CreateAccessor(c=>()=>{
+export const GetSubpage = CreateAccessor(function() {
 	const page = GetPage();
-	return c.store.main[page]?.subpage as string || rootPageDefaultChilds[page];
+	return this!.store.main[page]?.subpage as string || rootPageDefaultChilds[page];
 });

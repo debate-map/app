@@ -3,23 +3,23 @@ import {GetDoc, GetDocs, CreateAccessor, Validate, BailIfNull} from "web-vcore/n
 import {Term} from "./terms/@Term.js";
 import {GetNodeRevision} from "./nodeRevisions.js";
 
-export const GetTerm = CreateAccessor(c=>(id: string|n)=>{
+export const GetTerm = CreateAccessor((id: string|n)=>{
 	return GetDoc({}, a=>a.terms.get(id!));
 });
 /* export async function GetTermAsync(id: string) {
 	return await GetDoc_Async((a) => a.terms.get(id));
 } */
 
-export const GetTerms = CreateAccessor(c=>(): Term[]=>{
+export const GetTerms = CreateAccessor((): Term[]=>{
 	return GetDocs({}, a=>a.terms);
 });
-export const GetTermsByName = CreateAccessor(c=>(name: string): Term[]=>{
+export const GetTermsByName = CreateAccessor((name: string): Term[]=>{
 	return GetDocs({
 		//queryOps: [new WhereOp("name", "==", name)],
 		params: {filter: {name: {equalTo: name}}},
 	}, a=>a.terms);
 });
-export const GetTermsByForm = CreateAccessor(c=>(form: string): Term[]=>{
+export const GetTermsByForm = CreateAccessor((form: string): Term[]=>{
 	Assert(form.toLowerCase() == form, "Form cannot have uppercase characters.");
 	return GetDocs({
 		//queryOps: [new WhereOp("forms", "array-contains", form)],
@@ -31,7 +31,7 @@ export const GetTermsByForm = CreateAccessor(c=>(form: string): Term[]=>{
 		params: {filter: {forms: {contains: [form]}}},
 	}, a=>a.terms);
 });
-export const GetTermsAttached = CreateAccessor(c=>(nodeRevisionID: string): Term[]=>{
+export const GetTermsAttached = CreateAccessor((nodeRevisionID: string): Term[]=>{
 	const revision = GetNodeRevision(nodeRevisionID);
 	if (revision == null) return emptyArray;
 	//const terms = revision.termAttachments?.map(a=>GetTerm(a.id)) ?? emptyArray;
@@ -47,7 +47,7 @@ export function GetFullNameP(term: Term) {
 	return term.name + (term.disambiguation ? ` (${term.disambiguation})` : "");
 }
 
-/*export const GetTermVariantNumber = CreateAccessor(c=>(term: Term): number=>{
+/*export const GetTermVariantNumber = CreateAccessor((term: Term): number=>{
 	const termsWithSameName_map = GetDoc({}, a=>a.termNames.get(term.name));
 	if (termsWithSameName_map == null) return 1;
 	const termsWithSameNameAndLowerIDs = termsWithSameName_map.VKeys().map(a=>a).filter(a=>a < term.id);

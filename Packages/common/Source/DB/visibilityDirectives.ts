@@ -4,7 +4,7 @@ import {AccessPolicy} from "./accessPolicies/@AccessPolicy.js";
 import {NodeChildLink} from "./nodeChildLinks/@NodeChildLink.js";
 import {VisibilityDirective} from "./visibilityDirectives/@VisibilityDirective.js";
 
-export const GetVisibilityDirective = CreateAccessor(c=>(id: string): VisibilityDirective|n=>{
+export const GetVisibilityDirective = CreateAccessor((id: string): VisibilityDirective|n=>{
 	if (id == null || IsNaN(id)) return null;
 	return GetDoc({}, a=>a.visibilityDirectives.get(id));
 });

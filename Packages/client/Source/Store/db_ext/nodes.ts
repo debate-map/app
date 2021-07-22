@@ -22,7 +22,7 @@ export function GetNodeColor(node: MapNodeL3, type: "raw" | "background" = "back
 	return result;
 }
 
-export const GetNodeChildrenL3_Advanced = CreateAccessor(c=>(nodeID: string, path: string, mapID: string, includeMirrorChildren = true, tagsToIgnore?: string[], applyAccessLevels = false, applyTimeline = false): MapNodeL3[]=>{
+export const GetNodeChildrenL3_Advanced = CreateAccessor((nodeID: string, path: string, mapID: string, includeMirrorChildren = true, tagsToIgnore?: string[], applyAccessLevels = false, applyTimeline = false): MapNodeL3[]=>{
 	path = path || nodeID;
 
 	/*const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
@@ -55,7 +55,7 @@ export const GetNodeChildrenL3_Advanced = CreateAccessor(c=>(nodeID: string, pat
 	return nodeChildrenL3;
 });
 
-export const GetCurrentRevision = CreateAccessor(c=>(nodeID: string, path: string, mapID: string): MapNodeRevision=>{
+export const GetCurrentRevision = CreateAccessor((nodeID: string, path: string, mapID: string): MapNodeRevision=>{
 	const revisions = GetNodeRevisions(nodeID);
 	// todo: make this take into account the "current lens", etc.
 	return revisions.OrderBy(a=>a.createdAt).Last();

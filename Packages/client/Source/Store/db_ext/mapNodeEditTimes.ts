@@ -3,7 +3,7 @@ import {emptyArray, CE, eal} from "web-vcore/nm/js-vextensions.js";
 import {GetMapNodeEdits, GetRootNodeID, GetNode, SearchUpFromNodeForNodeMatchingX, GetNodeID, MapNode, ChangeType} from "dm_common";
 import {GetLastAcknowledgementTime} from "../main/maps.js";
 
-export const GetNodeIDsChangedSinceX = CreateAccessor(c=>(mapID: string, sinceTime: number, includeAcknowledgement = true): string[]=>{
+export const GetNodeIDsChangedSinceX = CreateAccessor((mapID: string, sinceTime: number, includeAcknowledgement = true): string[]=>{
 	const nodeEdits = GetMapNodeEdits(mapID);
 	if (nodeEdits == null) return emptyArray;
 
@@ -17,7 +17,7 @@ export const GetNodeIDsChangedSinceX = CreateAccessor(c=>(mapID: string, sinceTi
 	}
 	return result;
 });
-export const GetPathsToNodesChangedSinceX = CreateAccessor(c=>(mapID: string, time: number, includeAcknowledgement = true)=>{
+export const GetPathsToNodesChangedSinceX = CreateAccessor((mapID: string, time: number, includeAcknowledgement = true)=>{
 	// return CachedTransform_WithStore('GetPathsToNodesChangedSinceX', [mapID, time, includeAcknowledgement], {}, () => {
 	const nodeIDs = GetNodeIDsChangedSinceX(mapID, time, includeAcknowledgement);
 	const mapRootNodeID = GetRootNodeID(mapID);
@@ -53,7 +53,7 @@ export const GetPathsToNodesChangedSinceX = CreateAccessor(c=>(mapID: string, ti
 	}
 	return result;
 }); */
-export const GetPathsToChangedDescendantNodes_WithChangeTypes = CreateAccessor(/*{onBail: eal},*/ s=>(mapID: string, sinceTime: number, path: string, includeAcknowledgement = true)=>{
+export const GetPathsToChangedDescendantNodes_WithChangeTypes = CreateAccessor(/*{onBail: eal},*/ (mapID: string, sinceTime: number, path: string, includeAcknowledgement = true)=>{
 	const pathsToChangedNodes = GetPathsToNodesChangedSinceX(mapID, sinceTime, includeAcknowledgement);
 	const pathsToChangedDescendantNodes = pathsToChangedNodes.filter(a=>a.startsWith(`${path}/`));
 	//const changeTypesOfChangedDescendantNodes = pathsToChangedDescendantNodes.map(path=>GetNodeChangeType(GetNode.BIN(GetNodeID(path)), sinceTime));
@@ -71,7 +71,7 @@ export const GetPathsToChangedDescendantNodes_WithChangeTypes = CreateAccessor(/
 	return changeTypesOfChangedDescendantNodes;
 });
 
-export const GetNodeChangeType = CreateAccessor(c=>(node: MapNode, sinceTime: number, includeAcknowledgement = true)=>{
+export const GetNodeChangeType = CreateAccessor((node: MapNode, sinceTime: number, includeAcknowledgement = true)=>{
 	const lastAcknowledgementTime = includeAcknowledgement ? GetLastAcknowledgementTime(node.id) : 0;
 	const sinceTimeForNode = CE(sinceTime).KeepAtLeast(lastAcknowledgementTime);
 	if (node.createdAt >= sinceTimeForNode) return ChangeType.add;
