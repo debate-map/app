@@ -5,14 +5,11 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {InfoButton, RunInAction_Set, Observer} from "web-vcore";
-import {GetMapEditors} from "dm_common";
-import {IsUserCreatorOrMod} from "dm_common";
-import {MeID} from "dm_common";
-import {UpdateMapDetails} from "dm_common";
-import {Map} from "dm_common";
+import {GetMapEditors, IsUserCreatorOrMod, MeID, UpdateMapDetails, Map} from "dm_common";
 import {UserPicker} from "UI/@Shared/Users/UserPicker.js";
+import {styles} from "Utils/UI/GlobalStyles";
 
-const userIDPlaceholder = "[user-id placeholder]";
+export const userIDPlaceholder = "[user-id placeholder]";
 
 @Observer
 export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
@@ -42,7 +39,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 						const displayName = editor?.displayName ?? "n/a";
 						return (
 							<Row key={index} mt={5}>
-								<UserPicker value={editorID} onChange={val=> {
+								<UserPicker value={editorID} onChange={val=>{
 									const newEditors = CloneWithPrototypes(map.editors);
 									newEditors[index] = val;
 									new UpdateMapDetails({id: map.id, updates: {editors: newEditors}}).RunOnServer();
@@ -50,7 +47,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 									<Button enabled={creatorOrMod} text={editorID != userIDPlaceholder ? `${displayName} (id: ${editorID})` : "(click to select user)"} style={{width: "100%"}}/>
 								</UserPicker>
 								{creatorOrMod &&
-								<Button ml={5} text="X" onClick={()=>{
+								<Button ml={5} text="X" {...styles.xButton} onClick={()=>{
 									ShowMessageBox({
 										title: `Remove editor "${displayName}"`, cancelButton: true,
 										message: `Remove editor "${displayName}" (id: ${editorID})?`,

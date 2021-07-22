@@ -9,6 +9,8 @@ export const styles = {
 
 	// fixes that height:100% doesn't work in safari, when in flex container
 	fillParent_abs: {position: "absolute", left: 0, right: 0, top: 0, bottom: 0},
+
+	xButton: {padding: "5px 10px"},
 };
 export const colors = {
 	// navBarBoxShadow: "rgba(70,70,70,.5) 0px 0px 150px",

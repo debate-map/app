@@ -20,6 +20,15 @@ export class PermissionSet {
 	delete: boolean;
 }
 
+/*@MGLClass()
+export class PermissionSet_ForUser {
+	@Field({$ref: "UUID"})
+	user: string;
+
+	@Field({$ref: "PermissionSet"})
+	permissions: PermissionSet;
+}*/
+
 /** See "Docs/AccessPolicies.md" for more info. */
 @MGLClass({table: "accessPolicies"})
 export class AccessPolicy {
@@ -52,6 +61,13 @@ export class AccessPolicy {
 	permissions_base: PermissionSet = {access: false, addRevisions: false, vote: false, delete: false};
 
 	@DB((t, n)=>t.jsonb(n))
-	@Field({patternProperties: {[UUID_regex]: {$ref: PermissionSet.name}}})
+	@Field({
+		$gqlType: "JSON", // graphql doesn't support key-value-pair structures, so just mark as JSON
+		patternProperties: {[UUID_regex]: {$ref: PermissionSet.name}},
+	})
 	permissions_userExtends: {[key: string]: PermissionSet} = {};
+
+	/*@DB((t, n)=>t.jsonb(n))
+	@Field({items: {$ref: PermissionSet_ForUser.name}})
+	permissions_userExtends: PermissionSet_ForUser[] = [];*/
 }

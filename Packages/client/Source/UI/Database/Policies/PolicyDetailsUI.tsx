@@ -1,11 +1,17 @@
-import {AccessPolicy, AddAccessPolicy} from "dm_common";
+import {AccessPolicy, AddAccessPolicy, GetUser, PermissionSet} from "dm_common";
+import React from "react";
 import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
-import {observer_simple} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions.js";
-import {CheckBox, Column, RowLR, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {userIDPlaceholder} from "UI/@Shared/Maps/MapUI/ActionBar_Left/PeopleDropDown";
+import {UserPicker} from "UI/@Shared/Users/UserPicker";
+import {styles} from "Utils/UI/GlobalStyles";
+import {Observer, observer_simple} from "web-vcore";
+import {Clone, E} from "web-vcore/nm/js-vextensions.js";
+import {Button, CheckBox, Column, Row, RowLR, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent} from "web-vcore/nm/react-vextensions";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 
+@Observer
 export class PolicyDetailsUI extends DetailsUI_Base<AccessPolicy, PolicyDetailsUI> {
 	render() {
 		const {baseData, style, onChange} = this.props;
@@ -24,12 +30,60 @@ export class PolicyDetailsUI extends DetailsUI_Base<AccessPolicy, PolicyDetailsU
 				</RowLR>
 				<RowLR mt={5} splitAt={splitAt}>
 					<Text>Base permissions:</Text>
-					<CheckBox enabled={enabled} text="access" value={newData.permissions_base.access} onChange={val=>Change(newData.permissions_base.access = val)}/>
-					<CheckBox ml={10} enabled={enabled} text="add revisions" value={newData.permissions_base.addRevisions} onChange={val=>Change(newData.permissions_base.addRevisions = val)}/>
-					<CheckBox ml={10} enabled={enabled} text="vote" value={newData.permissions_base.vote} onChange={val=>Change(newData.permissions_base.vote = val)}/>
-					<CheckBox ml={10} enabled={enabled} text="delete" value={newData.permissions_base.delete} onChange={val=>Change(newData.permissions_base.delete = val)}/>
+					<PermissionSetEditor enabled={enabled} value={newData.permissions_base} onChange={val=>Change(newData.permissions_base = val)}/>
 				</RowLR>
+				<Row mt={5}>
+					<Text>User overrides:</Text>
+					<Button ml={5} enabled={enabled} text="Add" onClick={()=>{
+						newData.permissions_userExtends["NEW_USER_ID"] = new PermissionSet();
+						Change();
+					}}/>
+				</Row>
+				{Object.entries(newData.permissions_userExtends).map(entry=>{
+					const [userID, permissions] = entry;
+					const userDisplayName = GetUser(userID)?.displayName;
+					return (
+						<Row key={userID}>
+							{/*<TextInput mr={5} enabled={enabled} style={{}} value={userID} onChange={val=>{
+								delete newData.permissions_userExtends[userID];
+								newData.permissions_userExtends[val] = permissions;
+								Change();
+							}}/>*/}
+							<UserPicker value={userID} onChange={val=>{
+								delete newData.permissions_userExtends[userID];
+								newData.permissions_userExtends[val] = permissions;
+								Change();
+							}}>
+								<Button mr={5} style={{width: "calc(100% - 5px)"}} enabled={enabled} text={userID != userIDPlaceholder ? `${userDisplayName} (id: ${userID})` : "(click to select user)"}/>
+							</UserPicker>
+							<PermissionSetEditor enabled={enabled} value={permissions} onChange={val=>Change(newData.permissions_userExtends[userID] = val)}/>
+							<Button ml={5} enabled={enabled} text="X" {...styles.xButton} onClick={()=>{
+								delete newData.permissions_userExtends[userID];
+								Change();
+							}}/>
+						</Row>
+					);
+				})}
 			</Column>
+		);
+	}
+}
+
+class PermissionSetEditor extends BaseComponent<{enabled: boolean, value: PermissionSet, onChange: (val: PermissionSet)=>any}, {}> {
+	render() {
+		const {enabled, value, onChange} = this.props;
+		const Change = (setter: (newVal: PermissionSet)=>any)=>{
+			const newVal = Clone(value);
+			setter(newVal);
+			onChange(newVal);
+		};
+		return (
+			<Row>
+				<CheckBox enabled={enabled} text="access" value={value.access} onChange={val=>Change(a=>a.access = val)}/>
+				<CheckBox ml={10} enabled={enabled} text="add revisions" value={value.addRevisions} onChange={val=>Change(a=>a.addRevisions = val)}/>
+				<CheckBox ml={10} enabled={enabled} text="vote" value={value.vote} onChange={val=>Change(a=>a.vote = val)}/>
+				<CheckBox ml={10} enabled={enabled} text="delete" value={value.delete} onChange={val=>Change(a=>a.delete = val)}/>
+			</Row>
 		);
 	}
 }
