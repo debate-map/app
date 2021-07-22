@@ -47,7 +47,7 @@ export class PeopleDropDown extends BaseComponent<{map: Map}, {}> {
 									<Button enabled={creatorOrMod} text={editorID != userIDPlaceholder ? `${displayName} (id: ${editorID})` : "(click to select user)"} style={{width: "100%"}}/>
 								</UserPicker>
 								{creatorOrMod &&
-								<Button ml={5} text="X" {...styles.xButton} onClick={()=>{
+								<Button ml={5} text="X" style={{...styles.xButton}} onClick={()=>{
 									ShowMessageBox({
 										title: `Remove editor "${displayName}"`, cancelButton: true,
 										message: `Remove editor "${displayName}" (id: ${editorID})?`,

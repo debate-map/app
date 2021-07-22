@@ -57,7 +57,7 @@ export class PolicyDetailsUI extends DetailsUI_Base<AccessPolicy, PolicyDetailsU
 								<Button mr={5} style={{width: "calc(100% - 5px)"}} enabled={enabled} text={userID != userIDPlaceholder ? `${userDisplayName} (id: ${userID})` : "(click to select user)"}/>
 							</UserPicker>
 							<PermissionSetEditor enabled={enabled} value={permissions} onChange={val=>Change(newData.permissions_userExtends[userID] = val)}/>
-							<Button ml={5} enabled={enabled} text="X" {...styles.xButton} onClick={()=>{
+							<Button ml={5} enabled={enabled} text="X" style={{...styles.xButton}} onClick={()=>{
 								delete newData.permissions_userExtends[userID];
 								Change();
 							}}/>
