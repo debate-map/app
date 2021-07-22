@@ -3,7 +3,8 @@ import React from "react";
 import {store} from "Store";
 import {GetSelectedPolicy} from "Store/main/database";
 import {ES, GetUpdates, Observer, RunInAction_Set} from "web-vcore";
-import {Assert, E} from "web-vcore/nm/js-vextensions.js";
+import {AddSpacesAt_Options, Assert, E, ToJSON_Advanced} from "web-vcore/nm/js-vextensions.js";
+import {JSONStringify_NoQuotesForKeys} from "web-vcore/nm/mobx-graphlink";
 import {Button, Column, Div, Pre, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
@@ -109,8 +110,10 @@ export class PolicyUI extends BaseComponentPlus({} as {policy: AccessPolicy, fir
 				onClick={e=>{
 					RunInAction_Set(this, ()=>store.main.database.selectedPolicyID = policy.id);
 				}}>
-				<Pre>{policy.name}<sup>{policy.id.substr(0, 2)}</sup>: </Pre>
-				TODO
+				<Pre style={{flex: 40}}>{policy.name}<sup>{policy.id.substr(0, 2)}</sup>:</Pre>
+				{/*<Text> Base: {ToJSON_Advanced(policy.permissions_base, {addSpacesAt: {betweenPropNameAndValue: true, betweenPropsOrItems: true}}).replace(/"/g, "")}</Text>*/}
+				<Text style={{flex: 40}}> Base: [{["vote", "access", "delete", "addRevisions"].filter(a=>policy.permissions_base[a]).join(", ")}]</Text>
+				<Text style={{flex: 20}}> User-overrides: {Object.keys(policy.permissions_userExtends ?? {}).length}</Text>
 			</Row>
 		);
 	}
