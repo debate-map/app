@@ -15,7 +15,7 @@ const MTName = "MapNodePhrasing";
 		properties: {
 			id: {$ref: "UUID"},
 			updates: NewSchema({
-				properties: CE(GetSchemaJSON(MTName).properties!).Including("type", "text", "description"),
+				properties: CE(GetSchemaJSON(MTName).properties!).IncludeKeys("type", "text", "description"),
 				//minProperties: 1,
 			}),
 		},

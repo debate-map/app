@@ -16,7 +16,7 @@ export class AddNodeTag extends Command<{tag: MapNodeTag}, {id: string}> {
 
 		const {tag} = this.payload;
 
-		tag.id = tag.id ?? GenerateUUID();
+		tag.id = GenerateUUID();
 		tag.creator = this.userInfo.id;
 		tag.createdAt = Date.now();
 		AssertValidate("MapNodeTag", tag, "MapNodeTag invalid");

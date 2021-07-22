@@ -172,7 +172,7 @@ export class TagComp_MutuallyExclusiveGroup extends TagComp {
 		const result = super.GetFinalTagComps();
 		if (this.mirrorXProsAsYCons) {
 			for (const nodeX of this.nodes) {
-				for (const nodeY of CE(this.nodes).Except(nodeX)) {
+				for (const nodeY of CE(this.nodes).Exclude(nodeX)) {
 					const mirrorComp = new TagComp_MirrorChildrenFromXToY({
 						nodeX, nodeY,
 						mirrorSupporting: true,

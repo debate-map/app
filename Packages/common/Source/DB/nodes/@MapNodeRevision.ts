@@ -125,7 +125,7 @@ export class MapNodeRevision {
 
 	@DB((t, n)=>t.specificType(n, "text[]"))
 	@Field({items: {$ref: TermAttachment.name}})
-	termAttachments: TermAttachment[];
+	termAttachments: TermAttachment[] = [];
 
 	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: EquationAttachment.name}, {opt: true})

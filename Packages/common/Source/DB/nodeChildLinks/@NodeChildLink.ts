@@ -1,3 +1,4 @@
+import {MapNodeType} from "DB/nodes/@MapNodeType.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
 import {ClaimForm, Polarity} from "../nodes/@MapNode.js";
@@ -27,7 +28,7 @@ export class NodeChildLink {
 	@Field({type: "number"})
 	slot: number;
 
-	@DB((t, n)=>t.text(n))
+	@DB((t, n)=>t.text(n).nullable())
 	@Field({$ref: "ClaimForm"}, {opt: true})
 	form?: ClaimForm;
 
@@ -46,12 +47,12 @@ export class NodeChildLink {
 	polarity?: Polarity;
 
 	@DB((t, n)=>t.text(n))
-	@Field({type: "string"}, {opt: true}) // leave optional here; only required at db-write time
-	c_parentType?: number;
+	@Field({$ref: "MapNodeType"}, {opt: true})
+	c_parentType?: MapNodeType;
 
 	@DB((t, n)=>t.text(n))
-	@Field({type: "string"}, {opt: true}) // leave optional here; only required at db-write time
-	c_childType?: number;
+	@Field({$ref: "MapNodeType"}, {opt: true})
+	c_childType?: MapNodeType;
 
 	// runtime only
 	_mirrorLink?: boolean;

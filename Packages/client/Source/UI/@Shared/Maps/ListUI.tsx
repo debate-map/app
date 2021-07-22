@@ -36,7 +36,7 @@ export class ListUI extends BaseComponent<Props, {panelToShow?: string}> {
 				} catch (ex) {}
 			}
 			nodesFiltered = nodesFiltered.filter((node) => {
-				const titles = node.current.titles ? node.current.titles.Excluding('allTerms').VValues(true) as string[] : [];
+				const titles = node.current.titles ? node.current.titles.ExcludeKeys('allTerms').VValues(true) as string[] : [];
 				if (regExp) {
 					return titles.find((a) => a.match(regExp) != null);
 				}

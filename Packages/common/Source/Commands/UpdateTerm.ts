@@ -14,7 +14,7 @@ const MTName = "Term";
 		properties: {
 			id: {$ref: "UUID"},
 			updates: NewSchema({
-				properties: CE(GetSchemaJSON(MTName).properties!).Including("name", "forms", "disambiguation", "type", "definition", "note"),
+				properties: CE(GetSchemaJSON(MTName).properties!).IncludeKeys("name", "forms", "disambiguation", "type", "definition", "note"),
 			}),
 		},
 		required: ["id", "updates"],

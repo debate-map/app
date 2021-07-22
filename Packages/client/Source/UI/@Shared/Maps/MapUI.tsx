@@ -163,7 +163,7 @@ export class MapUI extends BaseComponentPlus({
 				<Row style={{marginTop: 30, height: "calc(100% - 30px)", alignItems: "flex-start"}}>
 					{/*!withinPage && timelinePanelOpen &&
 						<TimelinePanel map={map}/>*/}
-					<ScrollView {...rest.Excluding(...StandardCompProps() as any)} ref={c=>this.scrollView = c}
+					<ScrollView {...rest.ExcludeKeys(...StandardCompProps() as any)} ref={c=>this.scrollView = c}
 						backgroundDrag={true} backgroundDragMatchFunc={a=>a == GetDOM(this.scrollView!.content) || a == this.mapUIEl}
 						style={ES({height: "100%"}, withinPage && {overflow: "visible"})}
 						scrollHBarStyle={E({height: 10}, withinPage && {display: "none"})} scrollVBarStyle={E({width: 10}, withinPage && {display: "none"})}

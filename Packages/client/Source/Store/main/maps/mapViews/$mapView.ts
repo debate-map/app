@@ -102,7 +102,7 @@ export const GetNodeView = CreateAccessor(c=>(<{
 	}
 
 	if (nodeView.VKeys().length == 0 && returnEmptyNodeViewIfNull) return emptyNodeView;
-	return nodeView.Excluding('children') as MapNodeView_SelfOnly;*#/
+	return nodeView.ExcludeKeys('children') as MapNodeView_SelfOnly;*#/
 }); */
 export const GetViewOffset = CreateAccessor(c=>(mapView: MapView|n): Vector2|n=>{
 	if (mapView == null) return null;
@@ -155,7 +155,7 @@ export function GetNodeViewsAlongPath(mapID: string|n, pathOrPathNodes: string |
 				//debugger;
 				childGroup = nodeViews.Last()!.children = {};
 			}
-			
+
 			if (childGroup[pathNode] == null) {
 				childGroup[pathNode] = new MapNodeView();
 			}
@@ -192,17 +192,17 @@ export const ACTMapNodeExpandedSet = StoreAction((opt: {
 	}
 	const nodeView = nodeViews.Last();
 	const expandKeysPresent = (["expanded", "expanded_truth", "expanded_relevance"] as const).filter(key=>opt[key] != null);
-	if (nodeView) nodeView.Extend(opt.Including(...expandKeysPresent));
+	if (nodeView) nodeView.Extend(opt.IncludeKeys(...expandKeysPresent));
 
 	// and action is recursive (ie. supposed to apply past target-node), with expansion being set to false
-	if (opt.resetSubtree && opt.Including(...expandKeysPresent).VValues().every(newVal=>newVal == false)) {
+	if (opt.resetSubtree && opt.IncludeKeys(...expandKeysPresent).VValues().every(newVal=>newVal == false)) {
 		const descendantNodeViews = GetNodeViewsBelowPath(opt.mapID, pathNodes);
 		for (const descendantNodeView of descendantNodeViews) {
 			// set all expansion keys to false (key might be different on clicked node than descendants)
 			// state = { ...state, expanded: false, expanded_truth: false, expanded_relevance: false };
 			// if recursively collapsing, collapse the main node box itself, but reset the [truth/relevance]-box expansions to their default state (of expanded)
 			descendantNodeView.Extend({expanded: false, expanded_truth: true, expanded_relevance: true});
-			// state = { ...state, ...action.payload.Including(...expandKeysPresent) };
+			// state = { ...state, ...action.payload.IncludeKeys(...expandKeysPresent) };
 		}
 	}
 });

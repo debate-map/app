@@ -14,7 +14,7 @@ const MTName = "Media";
 		properties: {
 			id: {$ref: "UUID"},
 			updates: NewSchema({
-				properties: CE(GetSchemaJSON(MTName).properties!).Including("name", "type", "url", "description"),
+				properties: CE(GetSchemaJSON(MTName).properties!).IncludeKeys("name", "type", "url", "description"),
 			}),
 		},
 		required: ["id", "updates"],

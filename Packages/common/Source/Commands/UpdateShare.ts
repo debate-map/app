@@ -14,7 +14,7 @@ const MTName = "Share";
 		properties: {
 			id: {$ref: "UUID"},
 			updates: NewSchema({
-				properties: CE(GetSchemaJSON(MTName).properties!).Including("name", "mapID", "mapView"),
+				properties: CE(GetSchemaJSON(MTName).properties!).IncludeKeys("name", "mapID", "mapView"),
 			}),
 		},
 		required: ["id", "updates"],

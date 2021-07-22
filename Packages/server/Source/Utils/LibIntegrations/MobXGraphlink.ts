@@ -7,8 +7,8 @@ import {RootState, store} from "../Store/Store.js";
 import {apolloClient} from "./Apollo.js";
 
 declare module "mobx-graphlink/Dist/UserTypes" {
-	interface RootStoreShape extends RootState {}
-	//interface DBShape extends GraphDBShape {}
+	interface UT_StoreShape extends RootState {}
+	//interface UT_DBShape extends GraphDBShape {}
 }
 
 export const graph = new Graphlink<RootState, GraphDBShape>();

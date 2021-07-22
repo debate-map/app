@@ -36,7 +36,7 @@ export class NewShareUI extends BaseComponentPlus({} as {mapID: string}, {timeli
 			// todo
 		}*/
 		const newShareJSON = ToJSON(newShareData, undefined, 2);
-		//const newShare_updatesFromCurrent = GetUpdates(currentShare, newShareData, true).Including("mapView");
+		//const newShare_updatesFromCurrent = GetUpdates(currentShare, newShareData, true).IncludeKeys("mapView");
 		const newShare_updatesFromCurrent = {};
 		if (currentShare) {
 			/*const currentMapView_normalized = WithFirestoreNormalization(currentShare.mapView);

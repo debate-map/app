@@ -12,7 +12,7 @@ AddSchema(`Update${MTName}_payload`, [MTName], ()=>({
 	properties: {
 		id: {$ref: "UUID"},
 		updates: Schema({
-			properties: CE(GetSchemaJSON(MTName).properties).Including("name", "videoID", "videoStartTime", "videoHeightVSWidthPercent"),
+			properties: CE(GetSchemaJSON(MTName).properties).IncludeKeys("name", "videoID", "videoStartTime", "videoHeightVSWidthPercent"),
 		}),
 	},
 	required: ["id", "updates"],

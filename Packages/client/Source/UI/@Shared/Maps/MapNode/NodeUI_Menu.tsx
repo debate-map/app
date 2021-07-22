@@ -65,9 +65,9 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		let validChildTypes = GetValidNewChildTypes(node, holderType, permissions);
 		const componentBox = holderType != HolderType.generic;
 		if (holderType) {
-			validChildTypes = validChildTypes.Except(MapNodeType.claim);
+			validChildTypes = validChildTypes.Exclude(MapNodeType.claim);
 		} else {
-			validChildTypes = validChildTypes.Except(MapNodeType.argument);
+			validChildTypes = validChildTypes.Exclude(MapNodeType.argument);
 		}
 
 		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base;

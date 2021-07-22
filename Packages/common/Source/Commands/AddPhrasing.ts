@@ -14,7 +14,7 @@ export class AddPhrasing extends Command<{phrasing: MapNodePhrasing}, {id: strin
 	Validate() {
 		const {phrasing} = this.payload;
 
-		phrasing.id = phrasing.id ?? GenerateUUID();
+		phrasing.id = GenerateUUID();
 		phrasing.creator = this.userInfo.id;
 		phrasing.createdAt = Date.now();
 		AssertValidate("MapNodePhrasing", phrasing, "MapNodePhrasing invalid");

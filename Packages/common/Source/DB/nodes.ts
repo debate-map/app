@@ -280,12 +280,12 @@ export const ForDelete_GetError = CreateAccessor(c=>(userID: string|n, node: Map
 	const baseText = `Cannot delete node #${node.id}, since `;
 	if (!IsUserCreatorOrMod(userID, node)) return `${baseText}you are not the owner of this node. (or a mod)`;
 	const parentLinks = GetNodeChildLinks(undefined, node.id);
-	if (parentLinks.map(a=>a.parent).Except(...subcommandInfo?.parentsToIgnore ?? []).length > 1) return `${baseText}it has more than one parent. Try unlinking it instead.`;
+	if (parentLinks.map(a=>a.parent).Exclude(...subcommandInfo?.parentsToIgnore ?? []).length > 1) return `${baseText}it has more than one parent. Try unlinking it instead.`;
 	if (IsRootNode(node) && !subcommandInfo?.asPartOfMapDelete) return `${baseText}it's the root-node of a map.`;
 
 	const nodeChildren = GetNodeChildrenL2(node.id);
 	if (CE(nodeChildren).Any(a=>a == null)) return "[still loading children...]";
-	if (CE(nodeChildren.map(a=>a.id)).Except(...(subcommandInfo?.childrenToIgnore ?? [])).length) {
+	if (CE(nodeChildren.map(a=>a.id)).Exclude(...(subcommandInfo?.childrenToIgnore ?? [])).length) {
 		return `Cannot delete this node (#${node.id}) until all its children have been unlinked or deleted.`;
 	}
 	return null;

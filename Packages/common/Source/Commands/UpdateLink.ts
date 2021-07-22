@@ -13,7 +13,7 @@ import {GetNodeChildLink} from "../DB/nodeChildLinks.js";
 			linkParentID: {type: "string"},
 			linkChildID: {type: "string"},
 			linkUpdates: NewSchema({
-				properties: CE(GetSchemaJSON("NodeChildLink").properties!).Including("form", "polarity"),
+				properties: CE(GetSchemaJSON("NodeChildLink").properties!).IncludeKeys("form", "polarity"),
 			}),
 		},
 		required: ["linkParentID", "linkChildID", "linkUpdates"],

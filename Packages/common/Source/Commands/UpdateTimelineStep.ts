@@ -11,7 +11,7 @@ AddSchema("UpdateTimelineStep_payload", ["TimelineStep"], ()=>({
 	properties: {
 		stepID: {type: "string"},
 		stepUpdates: Schema({
-			properties: CE(GetSchemaJSON("TimelineStep").properties).Including("title", "message", "groupID", "videoTime", "nodeReveals"),
+			properties: CE(GetSchemaJSON("TimelineStep").properties).IncludeKeys("title", "message", "groupID", "videoTime", "nodeReveals"),
 		}),
 	},
 	required: ["stepID", "stepUpdates"],

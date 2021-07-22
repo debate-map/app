@@ -67,7 +67,7 @@
 // 	} */
 
 // 	/* shouldComponentUpdate(newProps, newState) {
-// 		if (ShallowChanged(this.props.Excluding('dragInfo'), newProps.Excluding('dragInfo')) || ShallowChanged(this.state, newState)) return true;
+// 		if (ShallowChanged(this.props.ExcludeKeys('dragInfo'), newProps.ExcludeKeys('dragInfo')) || ShallowChanged(this.state, newState)) return true;
 // 		// for dragInfo, do a json-based comparison (I think this is fine?)
 // 		if (ToJSON(this.props.dragInfo) != ToJSON(newProps.dragInfo)) return true;
 // 		return false;

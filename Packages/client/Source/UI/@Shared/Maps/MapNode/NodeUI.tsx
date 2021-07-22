@@ -77,7 +77,7 @@ export class NodeUI extends BaseComponentPlus(
 		/* const initialChildLimit = State(a => a.main.initialChildLimit);
 		const form = GetNodeForm(node, GetParentNodeL2(path)); */
 		/* const nodeView_early = GetNodeView(map.id, path) || new MapNodeView();
-		const nodeView = CachedTransform('nodeView_transform1', [map.id, path], nodeView_early.Excluding('focused', 'viewOffset', 'children'), () => nodeView_early); */
+		const nodeView = CachedTransform('nodeView_transform1', [map.id, path], nodeView_early.ExcludeKeys('focused', 'viewOffset', 'children'), () => nodeView_early); */
 		// const nodeView = Watch(() => GetNodeView(map.id, path) || new MapNodeView(), [map.id, path]);
 		const nodeView = GetNodeView(map.id, path);
 		const boxExpanded = (isPremiseOfSinglePremiseArg ? parentNodeView?.expanded : nodeView?.expanded) ?? false;
@@ -341,7 +341,7 @@ export class NodeUI extends BaseComponentPlus(
 		if (this.proxyDisplayedNodeUI) return this.proxyDisplayedNodeUI.GetMeasurementInfo();
 
 		const {props} = this;
-		const props_used = this.props.Including("map", "node", "path") as typeof props;
+		const props_used = this.props.IncludeKeys("map", "node", "path") as typeof props;
 		// Log("Checking whether should remeasure info for: " + props_used.node._id);
 		if (this.measurementInfo_cache && ShallowEquals(this.measurementInfo_cache_lastUsedProps, props_used)) return this.measurementInfo_cache;
 

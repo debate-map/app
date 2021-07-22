@@ -17,7 +17,7 @@ const MTName = "Map";
 		properties: {
 			id: {$ref: "UUID"},
 			updates: NewSchema({
-				properties: CE(GetSchemaJSON(MTName).properties!).Including("name", "note", "noteInline", "visibility", "defaultExpandDepth", "defaultTimelineID", "requireMapEditorsCanEdit", "nodeDefaults", "editorIDs"),
+				properties: CE(GetSchemaJSON(MTName).properties!).IncludeKeys("name", "note", "noteInline", "visibility", "defaultExpandDepth", "defaultTimelineID", "requireMapEditorsCanEdit", "nodeDefaults", "editorIDs"),
 			}),
 		},
 		required: ["id", "updates"],

@@ -14,7 +14,7 @@ const MTName = "AccessPolicy";
 		properties: {
 			id: {$ref: "UUID"},
 			updates: NewSchema({
-				properties: CE(GetSchemaJSON(MTName).properties!).Including("name", "base", "permissions_base", "permissions_userExtends"),
+				properties: CE(GetSchemaJSON(MTName).properties!).IncludeKeys("name", "base", "permissions_base", "permissions_userExtends"),
 			}),
 		},
 		required: ["id", "updates"],

@@ -107,8 +107,8 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			}).MarkAsSubcommand(this);
 			this.sub_addArgumentWrapper.Validate();
 
-			this.returnData.argumentWrapperID = this.sub_addArgumentWrapper.sub_addNode.nodeID;
-			newParentID_forClaim = this.sub_addArgumentWrapper.sub_addNode.nodeID;
+			this.returnData.argumentWrapperID = this.sub_addArgumentWrapper.sub_addNode.payload.node.id;
+			newParentID_forClaim = this.sub_addArgumentWrapper.sub_addNode.payload.node.id;
 		}
 
 		this.sub_linkToNewParent = this.sub_linkToNewParent ?? new LinkNode({mapID, parentID: newParentID_forClaim, childID: nodeID, childForm: newForm, childPolarity: newPolarity}).MarkAsSubcommand(this);

@@ -12,7 +12,7 @@ const MTName = "User";
 		properties: {
 			id: {$ref: "UUID"},
 			updates: NewSchema({
-				properties: CE(GetSchemaJSON(MTName).properties!).Including(
+				properties: CE(GetSchemaJSON(MTName).properties!).IncludeKeys(
 					"displayName", "photoURL",
 					"joinDate", "permissionGroups",
 				),

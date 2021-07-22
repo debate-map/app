@@ -40,6 +40,14 @@
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"
+		},
+		{
+			"label": "## server.dcAllDBSessions",
+			"type": "shell",
+			"command": "yarn start server.dcAllDBSessions",
+			"problemMatcher": [],
+			"isBackground": true,
+			"group": "build",
 		}
 	]
 }

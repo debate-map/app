@@ -150,14 +150,13 @@ function AreIPsEquivalent(ip1_str: string, ip2_str: string) {
 	//console.log("ips.canonicalForm:", ip1_canonical.canonicalForm(), ip2.canonicalForm());
 	if (ip1.canonicalForm() == ip2.canonicalForm()) return true;
 
-	// fixes observed situation where "::1" and "::ffff:127.0.0.1" were both obtained (while running on localhost), but were considered inequivalent
-	// commented; I think the mismatch was only occurring because I was using multiple ways to get the ip; now that I always use just req.socket.remoteAddress, I think it'll be consistent (we'll see)
-	/*function IsLoopback(ip: InstanceType<typeof Address6>, ipStr: string) {
+	// fixes observed situation where "::1" and "::ffff:127.0.0.1" were both obtained from req.socket.remoteAddress (while running on localhost), but were considered inequivalent
+	function IsLoopback(ip: InstanceType<typeof Address6>, ipStr: string) {
 		//return ip.isLoopback() || ip.correctForm() == "::ffff:7f00:1";
 		return ip.isLoopback() || ipStr == "::ffff:127.0.0.1";
 	}
 	//console.log("ips.IsLoopback:", IsLoopback(ip1, ip1_str), IsLoopback(ip2, ip2_str));
-	if (IsLoopback(ip1, ip1_str) && IsLoopback(ip2, ip2_str)) return true;*/
+	if (IsLoopback(ip1, ip1_str) && IsLoopback(ip2, ip2_str)) return true;
 
 	return false;
 }

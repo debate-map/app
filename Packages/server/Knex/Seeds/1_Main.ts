@@ -121,7 +121,7 @@ const nodes = TypeCheck(MapNode as new()=>(MapNode & {revision: MapNodeRevision}
 export default async function seed(knex: Knex.Transaction) {
 	console.log(`Adding users and userHiddens...`);
 	for (const user of Object.values(users)) {
-		await knex("users").insert(CE(user).Excluding("hidden"));
+		await knex("users").insert(CE(user).ExcludeKeys("hidden"));
 		await knex("userHiddens").insert(user.hidden);
 	}
 
@@ -132,7 +132,7 @@ export default async function seed(knex: Knex.Transaction) {
 
 	console.log(`Adding nodes and node-revisions...`);
 	for (const node of Object.values(nodes)) {
-		await knex("nodes").insert(CE(node).Excluding("revision"));
+		await knex("nodes").insert(CE(node).ExcludeKeys("revision"));
 		await knex("nodeRevisions").insert(node.revision);
 	}
 

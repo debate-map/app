@@ -39,10 +39,10 @@ export class AddArgumentAndClaim extends Command<Payload, {argumentNodeID: strin
 		this.sub_addClaim.parent_oldData = argumentNode; // needed so add-claim sub knows to update the children-order prop of argument
 
 		this.returnData = {
-			argumentNodeID: this.sub_addArgument.sub_addNode.nodeID,
-			argumentRevisionID: this.sub_addArgument.sub_addNode.sub_addRevision.revisionID,
-			claimNodeID: this.sub_addClaim.sub_addNode.nodeID,
-			claimRevisionID: this.sub_addClaim.sub_addNode.sub_addRevision.revisionID,
+			argumentNodeID: this.sub_addArgument.sub_addNode.payload.node.id,
+			argumentRevisionID: this.sub_addArgument.sub_addNode.sub_addRevision.payload.revision.id,
+			claimNodeID: this.sub_addClaim.sub_addNode.payload.node.id,
+			claimRevisionID: this.sub_addClaim.sub_addNode.sub_addRevision.payload.revision.id,
 		};
 	}
 

@@ -1,4 +1,4 @@
-import {Clone, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes} from "web-vcore/nm/js-vextensions.js";
+import {Clone, E, GetEntries, GetErrorMessagesUnderElement, CloneWithPrototypes, Assert} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {Column, Row, Select} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vextensions.js";
@@ -6,6 +6,7 @@ import {store} from "Store";
 import {Observer} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
 import {MapNode, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType, NodeChildLink, GetAccessPolicy} from "dm_common";
+import {AssertValidate, Validate} from "web-vcore/nm/mobx-graphlink";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel.js";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel.js";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel.js";
@@ -30,7 +31,7 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 	ComponentWillMountOrReceiveProps(props, forMount) {
 		if (forMount || props.baseData != this.props.baseData) { // if base-data changed
 			this.SetState({
-				newData: AsNodeL1(Clone(props.baseData)),
+				newData: AsNodeL1(Clone(props.baseData)), // ensure no "extra props" are present on baseData (else the result returned will have extra props, which can cause issues)
 				newRevisionData: Clone(props.baseRevisionData),
 				newLinkData: Clone(props.baseLinkData),
 			});
@@ -88,6 +89,8 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 
 	GetNewData() {
 		const {newData} = this.state;
+		//Assert(newData["policy"] == null); // catch regressions
+		AssertValidate("MapNode", newData, "NodeDetailsUI returned map-node data that is invalid. Is the AsNodeL1() function up-to-date?"); // catch regressions
 		return CloneWithPrototypes(newData) as MapNode;
 	}
 	GetNewRevisionData() {

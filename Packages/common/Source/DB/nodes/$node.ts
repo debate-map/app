@@ -105,6 +105,7 @@ export function IsNodeL1(node): node is MapNode {
 }
 export function AsNodeL1(node: MapNodeL2 | MapNodeL3) {
 	const result = E(node) as any;
+	delete result.policy;
 	delete result.current;
 	delete result.displayPolarity;
 	delete result.link;

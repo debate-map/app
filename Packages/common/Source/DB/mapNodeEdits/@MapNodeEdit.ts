@@ -11,6 +11,10 @@ AddSchema("ChangeType", {enum: GetValues(ChangeType)});
 //@MGLClass({table: "map_nodeEdits"})
 @MGLClass({table: "mapNodeEdits"})
 export class Map_NodeEdit {
+	constructor(data?: Partial<Map_NodeEdit>) {
+		this.VSet(data);
+	}
+
 	@DB((t, n)=>t.text(n).primary())
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;

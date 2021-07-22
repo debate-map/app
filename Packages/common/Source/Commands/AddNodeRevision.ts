@@ -1,6 +1,7 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
+import {ChangeType, Map_NodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
 import {GetNode} from "../DB/nodes.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
@@ -25,13 +26,13 @@ export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard =
 export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNodeRevision}, {id: string}> {
 	// lastNodeRevisionID_addAmount = 0;
 
-	revisionID: string;
 	node_oldData: MapNode|n;
+	nodeEdit?: Map_NodeEdit;
 	Validate() {
-		const {revision} = this.payload;
+		const {mapID, revision} = this.payload;
 
 		// this.revisionID = (await GetDataAsync('general', 'data', '.lastNodeRevisionID')) + this.lastNodeRevisionID_addAmount + 1;
-		this.revisionID = this.revisionID ?? GenerateUUID();
+		revision.id = this.GenerateUUID_Once("revision.id");
 		revision.creator = this.userInfo.id;
 		revision.createdAt = Date.now();
 
@@ -42,19 +43,31 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 			this.node_oldData = GetNode.NN(revision.node);
 		}
 
-		this.returnData = {id: this.revisionID};
+		if (mapID != null) {
+			this.nodeEdit = new Map_NodeEdit({
+				id: this.GenerateUUID_Once("nodeEdit.id"),
+				map: mapID,
+				node: revision.node,
+				time: Date.now(),
+				type: ChangeType.edit,
+			});
+			AssertValidate("Map_NodeEdit", this.nodeEdit, "Node-edit entry invalid");
+		}
+
+		this.returnData = {id: revision.id};
 
 		AssertValidate("MapNodeRevision", revision, "Revision invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {mapID, revision} = this.payload;
+		const {revision} = this.payload;
 		//db.set('general/data/.lastNodeRevisionID', this.revisionID);
-		db.set(dbp`nodes/${revision.node}/.currentRevision`, this.revisionID);
-		db.set(dbp`nodeRevisions/${this.revisionID}`, revision);
-		if (mapID != null) {
+		//db.set(dbp`nodes/${revision.node}/.currentRevision`, this.revisionID);
+		db.set(dbp`nodeRevisions/${revision.id}`, revision);
+		if (this.nodeEdit) {
 			//db.set(dbp`maps/${mapID}/nodeEditTimes/data/.${revision.node}`, revision.createdAt);
-			db.set(dbp`mapNodeEditTimes/${mapID}/.${revision.node}`, WrapDBValue(revision.createdAt, {merge: true}));
+			//db.set(dbp`mapNodeEditTimes/${mapID}/.${revision.node}`, WrapDBValue(revision.createdAt, {merge: true}));
+			db.set(dbp`mapNodeEdits/${this.nodeEdit.id}`, this.nodeEdit);
 		}
 	}
 }

@@ -8,7 +8,7 @@ import {apolloClient} from "./Apollo.js";
 
 //declare module "web-vcore/node_modules/mobx-graphlink/Dist/UserTypes" { // temp fix; paths trick didn't work in this repo fsr
 declare module "mobx-graphlink/Dist/UserTypes" {
-	interface RootStoreShape extends RootState {}
+	interface UT_StoreShape extends RootState {}
 	//interface DBShape extends GraphDBShape {}
 }
 

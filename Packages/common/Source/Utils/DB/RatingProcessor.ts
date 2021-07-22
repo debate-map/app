@@ -28,7 +28,7 @@ export const GetArgumentImpactPseudoRating = CreateAccessor(c=>(argument: MapNod
 		combinedTruthOfPremises = premiseProbabilities.reduce((total, current)=>total * current, 1);
 	} else if (argument.argumentType == ArgumentType.anyTwo) {
 		const strongest = CE(premiseProbabilities).Max(undefined, true);
-		const secondStrongest = premiseProbabilities.length > 1 ? CE(CE(premiseProbabilities).Except({excludeEachOnlyOnce: true}, strongest)).Max(undefined, true) : 0;
+		const secondStrongest = premiseProbabilities.length > 1 ? CE(CE(premiseProbabilities).Exclude({excludeEachOnlyOnce: true}, strongest)).Max(undefined, true) : 0;
 		combinedTruthOfPremises = strongest * secondStrongest;
 	} else {
 		combinedTruthOfPremises = CE(premiseProbabilities).Max(undefined, true);

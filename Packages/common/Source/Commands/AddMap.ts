@@ -35,7 +35,7 @@ export class AddMap extends Command<{map: Map}, {id: UUID}> {
 		this.sub_addNode = this.sub_addNode ?? new AddChildNode({mapID: this.mapID, parentID: null as any, node: newRootNode, revision: newRootNodeRevision, asMapRoot: true}).MarkAsSubcommand(this);
 		this.sub_addNode.Validate();
 
-		map.rootNode = this.sub_addNode.sub_addNode.nodeID;
+		map.rootNode = this.sub_addNode.sub_addNode.payload.node.id;
 		AssertValidate("Map", map, "Map invalid");
 
 		this.returnData = {id: this.mapID};

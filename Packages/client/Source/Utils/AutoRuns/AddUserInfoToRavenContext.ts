@@ -22,9 +22,9 @@ AutoRun_HandleBail(()=>{
 			if (newContextData == null) newContextData = Clone(lastContextData || {});
 			newContextData.Extend(newData);
 		};
-		// if (auth != lastAuth) ExtendNewContextData({ auth: auth ? auth.Including('id', 'displayName') : null });
-		//if (auth != lastAuth) ExtendNewContextData({auth: auth ? auth.Including("uid", "displayName", "email", "photoURL") : null});
-		if (auth != lastAuth) ExtendNewContextData({auth: auth ? auth.Including("id", "displayName", /*"email",*/ "photoURL") : null});
+		// if (auth != lastAuth) ExtendNewContextData({ auth: auth ? auth.IncludeKeys('id', 'displayName') : null });
+		//if (auth != lastAuth) ExtendNewContextData({auth: auth ? auth.IncludeKeys("uid", "displayName", "email", "photoURL") : null});
+		if (auth != lastAuth) ExtendNewContextData({auth: auth ? auth.IncludeKeys("id", "displayName", /*"email",*/ "photoURL") : null});
 		if (mapView != lastMapView) ExtendNewContextData({mapView});
 
 		if (newContextData != null) {

@@ -96,6 +96,11 @@ Object.assign(scripts, {
 		initDB: TSScript("server", "Scripts/KnexWrapper.ts", "initDB"),
 		initDB_freshScript: `nps server.buildInitDBScript && nps server.initDB`,
 		//migrateDBToLatest: TSScript("server", "Scripts/KnexWrapper.ts", "migrateDBToLatest"),
+		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
+		dcAllDBSessions: `psql -c "
+			SELECT pg_terminate_backend(pg_stat_activity.pid)
+			FROM pg_stat_activity
+			WHERE datname = "debate-map";"`,
 
 		// db-shape and migrations
 		buildInitDBScript: GetBuildInitDBScriptCommand(false),

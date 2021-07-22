@@ -196,7 +196,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "parent", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "child", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "slot", (t, n)=>t.integer(n));
-		RunFieldInit(t, "form", (t, n)=>t.text(n));
+		RunFieldInit(t, "form", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "seriesAnchor", (t, n)=>t.boolean(n).nullable());
 		RunFieldInit(t, "seriesEnd", (t, n)=>t.boolean(n).nullable());
 		RunFieldInit(t, "polarity", (t, n)=>t.text(n).nullable());

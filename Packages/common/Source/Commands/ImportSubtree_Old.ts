@@ -40,8 +40,8 @@ import {Clone, GetTreeNodesInObjTree} from "web-vcore/nm/js-vextensions.js";
 	ProcessSubtree(subtreeData: SubtreeExportData_Old, parentID: string) {
 		const {mapID, importRatings, importRatings_userIDs} = this.payload;
 
-		const node = AsNodeL1(WithoutHelpers(subtreeData).Excluding("ratings", "childrenData", "finalPolarity", "currentRevision", "parents", "children", "childrenOrder"));
-		const revision = WithoutHelpers(subtreeData.current).Excluding("node", "approved", "relative", "voteLevel") as MapNodeRevision;
+		const node = AsNodeL1(WithoutHelpers(subtreeData).ExcludeKeys("ratings", "childrenData", "finalPolarity", "currentRevision", "parents", "children", "childrenOrder"));
+		const revision = WithoutHelpers(subtreeData.current).ExcludeKeys("node", "approved", "relative", "voteLevel") as MapNodeRevision;
 		if (revision.image) revision.image.id = `${revision.image.id}`;
 		if (revision["contentNode"]) {
 			revision.VSet({quote: revision["contentNode"], contentNode: DEL});
@@ -100,7 +100,7 @@ import {Clone, GetTreeNodesInObjTree} from "web-vcore/nm/js-vextensions.js";
 			db.add(sub.GetDBUpdates());
 		}
 		for (let ratingEnhanced of this.nodeRatingsToAdd) {
-			db.set(dbp`nodeRatings/${ratingEnhanced.nodeID}/${ratingEnhanced.ratingType}/${ratingEnhanced.userID}`, ratingEnhanced.Excluding("nodeID", "ratingType", "userID"));
+			db.set(dbp`nodeRatings/${ratingEnhanced.nodeID}/${ratingEnhanced.ratingType}/${ratingEnhanced.userID}`, ratingEnhanced.ExcludeKeys("nodeID", "ratingType", "userID"));
 		}
 	}
 }*/

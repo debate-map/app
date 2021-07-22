@@ -67,7 +67,7 @@
 // 				{editing &&
 // 				<Row>
 // 					<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
-// 						const updates = GetUpdates(timeline, this.detailsUI.GetNewData()).Excluding("steps");
+// 						const updates = GetUpdates(timeline, this.detailsUI.GetNewData()).ExcludeKeys("steps");
 // 						new UpdateTimeline({id: timeline.id, updates}).RunOnServer();
 // 					}}/>
 // 					{/* error && <Pre>{error.message}</Pre> */}

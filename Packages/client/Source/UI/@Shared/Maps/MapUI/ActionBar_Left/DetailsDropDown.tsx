@@ -60,7 +60,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 					{creatorOrMod &&
 						<Row>
 							<Button mt={5} text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
-								const mapUpdates = GetUpdates(map, this.detailsUI!.GetNewData()).Excluding("layers", "timelines");
+								const mapUpdates = GetUpdates(map, this.detailsUI!.GetNewData()).ExcludeKeys("layers", "timelines");
 								await new UpdateMapDetails({id: map.id, updates: mapUpdates}).RunOnServer();
 							}}/>
 						</Row>}

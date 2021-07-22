@@ -42,7 +42,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 				{canEdit &&
 					<Row>
 						<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
-							// let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).Excluding("parents", "children", "layerPlusAnchorParents", "finalType", "link");
+							// let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).ExcludeKeys("parents", "children", "layerPlusAnchorParents", "finalType", "link");
 							if (link) {
 								const linkUpdates = GetUpdates(link, this.detailsUI!.GetNewLinkData());
 								if (linkUpdates.VKeys().length) {
@@ -58,8 +58,8 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 								const argumentNode = await GetAsync(()=>GetParentNodeL3(path));
 								if (IsUserCreatorOrMod(MeID(), argumentNode)) {
 									const permissionKeys = ["accessLevel", "votingDisabled", /* "permission_edit", *#/ "permission_contribute"] as const;
-									const nodePermissions = newRevision.Including(...permissionKeys);
-									const argumentNodePermissions = argumentNode.current.Including(...permissionKeys);
+									const nodePermissions = newRevision.IncludeKeys(...permissionKeys);
+									const argumentNodePermissions = argumentNode.current.IncludeKeys(...permissionKeys);
 									// if argument permissions do not match premise, update argument's permissions to match
 									if (!_.isEqual(argumentNodePermissions, nodePermissions)) {
 										const newArgumentRevision = Clone(argumentNode.current);

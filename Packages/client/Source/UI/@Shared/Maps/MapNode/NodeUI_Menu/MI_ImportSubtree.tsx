@@ -171,7 +171,7 @@
 
 // /*function GetNodeTitlesInSubtree(subtreeData: SubtreeExportData_Old) {
 // 	/*let result = [];
-// 	let nodeTitle = subtreeData.current.titles.Excluding("_key" as any).VValues().FirstOrX(a=>a as any, "(empty title)");
+// 	let nodeTitle = subtreeData.current.titles.ExcludeKeys("_key" as any).VValues().FirstOrX(a=>a as any, "(empty title)");
 // 	if (nodeTitle) result.push(nodeTitle);
 	
 // 	for (const pair of CE(subtreeData.childrenData).Pairs()) {
@@ -180,12 +180,12 @@
 // 	return result;*#/
 // 	let nodes = GetNodesInSubtree(subtreeData);
 // 	nodes = nodes.filter((node, index)=>!nodes.slice(0, index).Any(a=>a.id == node.id)); // remove duplicate nodes
-// 	//return nodes.map(node=>node.current.titles.Excluding("_key" as any).VValues().FirstOrX(a=>a as any, "(empty title)"));
+// 	//return nodes.map(node=>node.current.titles.ExcludeKeys("_key" as any).VValues().FirstOrX(a=>a as any, "(empty title)"));
 // 	return nodes.map(node=>node.current.titles.base || "(empty title)");
 // }*/
 // function GetNodesInSubtree(subtreeData: SubtreeExportData_Old) {
 // 	let result = [] as SubtreeExportData_Old[];
-// 	result.push(subtreeData.Excluding("childrenData") as SubtreeExportData_Old);
+// 	result.push(subtreeData.ExcludeKeys("childrenData") as SubtreeExportData_Old);
 // 	for (const pair of CE(subtreeData.childrenData).Pairs()) {
 // 		result.push(...GetNodesInSubtree(pair.value));
 // 	}

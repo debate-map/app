@@ -48,7 +48,7 @@ export class SubPanel_Quote extends BaseComponent<{attachment: QuoteAttachment, 
 						Text: props=> {
 							//return <span {...props}>{props.literal}</span>;
 							//return React.DOM.span(null, props.literal, props);
-							//return React.createElement("section", props.Excluding("literal", "nodeKey"), props.literal);
+							//return React.createElement("section", props.ExcludeKeys("literal", "nodeKey"), props.literal);
 							return "[text]" as any;
 						},
 						Link: props=><span/>,
