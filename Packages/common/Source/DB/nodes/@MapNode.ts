@@ -32,7 +32,7 @@ export class MapNode {
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
+	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
@@ -40,11 +40,11 @@ export class MapNode {
 	accessPolicy: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
-	@Field({type: "string"})
+	@Field({type: "string"}, {opt: true})
 	creator: string;
 
 	@DB((t, n)=>t.bigInteger(n))
-	@Field({type: "number"})
+	@Field({type: "number"}, {opt: true})
 	createdAt: number;
 
 	@DB((t, n)=>t.text(n))

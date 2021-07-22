@@ -68,7 +68,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 						<Column mt={10}>
 							<Row style={{fontWeight: "bold"}}>Advanced:</Row>
 							<Row mt={5} center>
-								<CheckBox text="Featured" enabled={setMapFeaturedCommand.Validate_Safe() == null} title={setMapFeaturedCommand.validateError} value={map.featured ?? false} onChange={val=>{
+								<CheckBox text="Featured" enabled={setMapFeaturedCommand.Validate_Safe() == null} title={setMapFeaturedCommand.ValidateErrorStr} value={map.featured ?? false} onChange={val=>{
 									setMapFeaturedCommand.RunOnServer();
 								}}/>
 							</Row>

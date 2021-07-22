@@ -6,7 +6,6 @@ import {MapDetailsUI} from "./MapDetailsUI.js";
 export function ShowAddMapDialog() {
 	let newMap = new Map({
 		name: "",
-		creator: MeID.NN(),
 		editors: [MeID.NN()],
 	});
 

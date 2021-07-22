@@ -141,7 +141,7 @@ export function ShowAddChildDialog(parentPath: string, childType: MapNodeType, c
 			const tempCommand = helper.GetCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
-				title: tempCommand.validateError as any,
+				title: tempCommand.ValidateErrorStr as any,
 			};
 
 			const accessPolicy = GetAccessPolicy.CatchBail(null, helper.node.accessPolicy);

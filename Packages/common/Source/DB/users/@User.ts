@@ -11,7 +11,7 @@ export class User {
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
+	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
 	@DB((t, n)=>t.text(n))
@@ -26,7 +26,7 @@ export class User {
 	// ==========
 
 	@DB((t, n)=>t.bigInteger(n))
-	@Field({type: "number"}, {opt: true}) // optional during creation
+	@Field({type: "number"}, {opt: true})
 	joinDate: number;
 
 	@DB((t, n)=>t.jsonb(n))

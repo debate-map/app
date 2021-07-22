@@ -3,7 +3,7 @@ import {AddSchema, MGLClass, DB, Field} from "web-vcore/nm/mobx-graphlink.js";
 @MGLClass({table: "visibilityDirectives"})
 export class VisibilityDirective {
 	@DB((t, n)=>t.text(n).primary())
-	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
+	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())

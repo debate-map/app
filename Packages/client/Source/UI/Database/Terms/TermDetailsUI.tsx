@@ -92,7 +92,7 @@ export function ShowAddTermDialog(initialData?: Partial<Term>, postAdd?: (id: st
 			const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
-				title: tempCommand.validateError,
+				title: tempCommand.ValidateErrorStr,
 			};
 
 			return (

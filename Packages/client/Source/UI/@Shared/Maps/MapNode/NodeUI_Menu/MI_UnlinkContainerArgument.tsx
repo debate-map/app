@@ -28,7 +28,7 @@ export class MI_UnlinkContainerArgument extends BaseComponentPlus({} as MI_Share
 		const command = new UnlinkNode({mapID, parentID: argumentParent.id, childID: argument.id});
 		return (
 			<VMenuItem text="Unlink argument"
-				enabled={command.Validate_Safe() == null} title={command.validateError ?? undefined}
+				enabled={command.Validate_Safe() == null} title={command.ValidateErrorStr ?? undefined}
 				style={styles.vMenuItem} onClick={e=>{
 					if (e.button != 0) return;
 					ShowMessageBox({

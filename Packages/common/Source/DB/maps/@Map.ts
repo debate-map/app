@@ -12,7 +12,7 @@ import {MapNodeRevision_Defaultable, MapNodeRevision_Defaultable_DefaultsForMap,
 export const Map_namePattern = '^[a-zA-Z0-9 ,\'"%:.?\\-()\\/]+$';
 @MGLClass({table: "maps", schemaDeps: ["MapNodeRevision"]})
 export class Map {
-	constructor(initialData: {name: string, creator: string} & Partial<Map>) {
+	constructor(initialData: {name: string} & Partial<Map>) {
 		CE(this).VSet(initialData);
 		// this.createdAt = Date.now();
 		/*if (!("requireMapEditorsCanEdit" in initialData)) {
@@ -24,7 +24,7 @@ export class Map {
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
+	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
@@ -79,11 +79,11 @@ export class Map {
 	editors: string[];
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
-	@Field({type: "string"})
+	@Field({type: "string"}, {opt: true})
 	creator: string;
 
 	@DB((t, n)=>t.bigInteger(n))
-	@Field({type: "number"})
+	@Field({type: "number"}, {opt: true})
 	createdAt: number;
 
 	@DB((t, n)=>t.integer(n))

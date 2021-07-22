@@ -143,7 +143,7 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 			Assert(copyCommand && moveCommand);
 
 			if (copyCommand.Validate_Safe()) {
-				ShowMessageBox({title: "Cannot copy/move node", message: `Reason: ${copyCommand.validateError}`});
+				ShowMessageBox({title: "Cannot copy/move node", message: `Reason: ${copyCommand.ValidateErrorStr}`});
 				return;
 			}
 
@@ -163,7 +163,7 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 							runInAction("OnDragEnd.Copy.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
 						}
 					}}/>
-					<Button ml={5} text="Move" enabled={moveCommand.Validate_Safe() == null} title={moveCommand.validateError} onClick={async()=>{
+					<Button ml={5} text="Move" enabled={moveCommand.Validate_Safe() == null} title={moveCommand.ValidateErrorStr} onClick={async()=>{
 						controller.Close();
 						const {argumentWrapperID} = await moveCommand.RunOnServer();
 						if (argumentWrapperID) {

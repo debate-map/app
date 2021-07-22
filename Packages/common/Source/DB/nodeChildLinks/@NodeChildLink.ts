@@ -9,7 +9,7 @@ export class NodeChildLink {
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
+	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
 	// access-policy is based on both the parent node and child node

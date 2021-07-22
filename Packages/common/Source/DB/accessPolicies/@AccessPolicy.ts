@@ -28,7 +28,7 @@ export class AccessPolicy {
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({$ref: "UUID"}, {opt: true}) // optional during creation
+	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
 	@DB((t, n)=>t.text(n))
@@ -36,11 +36,11 @@ export class AccessPolicy {
 	name: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
-	@Field({type: "string"})
+	@Field({type: "string"}, {opt: true})
 	creator: string;
 
 	@DB((t, n)=>t.bigInteger(n))
-	@Field({type: "number"})
+	@Field({type: "number"}, {opt: true})
 	createdAt: number;
 
 	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`accessPolicies`).DeferRef())
@@ -49,9 +49,9 @@ export class AccessPolicy {
 
 	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: PermissionSet.name})
-	permissions_base: PermissionSet;
+	permissions_base: PermissionSet = {access: false, addRevisions: false, vote: false, delete: false};
 
 	@DB((t, n)=>t.jsonb(n))
 	@Field({patternProperties: {[UUID_regex]: {$ref: PermissionSet.name}}})
-	permissions_userExtends: {[key: string]: PermissionSet};
+	permissions_userExtends: {[key: string]: PermissionSet} = {};
 }

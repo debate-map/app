@@ -19,7 +19,7 @@ export function ShowAddMediaDialog(initialData?: Partial<Media>, postAdd?: (id: 
 			const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
-				title: tempCommand.validateError,
+				title: tempCommand.ValidateErrorStr,
 			};
 
 			return (

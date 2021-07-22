@@ -51,7 +51,7 @@ class TagRow extends BaseComponentPlus({} as {node: MapNodeL3, tag: MapNodeTag, 
 
 		const tempCommand = new UpdateNodeTag({id: tag.id, updates: GetUpdates(tag, newTag)});
 		let tempCommand_valid = tempCommand.Validate_Safe() == null;
-		let tempCommand_error = tempCommand.validateError;
+		let tempCommand_error = tempCommand.ValidateErrorStr;
 		if (tempCommand_valid && !newTag.nodes.Contains(node.id)) {
 			tempCommand_valid = false;
 			tempCommand_error = `

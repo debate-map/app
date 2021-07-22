@@ -89,7 +89,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 				</Row>
 				{/*<Row center>
 					<Text>Control type:</Text>
-					<Select ml={5} options={["Private", "Public"]} value={changeControlType_currentType} enabled={changeControlTypeCommand.Validate_Safe() == null} title={changeControlTypeCommand.validateError} onChange={val=>{
+					<Select ml={5} options={["Private", "Public"]} value={changeControlType_currentType} enabled={changeControlTypeCommand.Validate_Safe() == null} title={changeControlTypeCommand.ValidateErrorStr} onChange={val=>{
 						changeControlTypeCommand.RunOnServer();
 					}}/>
 					<InfoButton ml={5} text="Private nodes are locked to a given map, but allow more permission controls to the node-creator and map-editors."/>
@@ -119,7 +119,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 				{/*childOrderTypeChangeable &&
 					<Row center>
 						<Text>Children order type:</Text>
-						<Select ml={5} options={GetEntries(ChildOrderType)} value={node.childrenOrderType} enabled={changeControlTypeCommand.Validate_Safe() == null} title={changeControlTypeCommand.validateError} onChange={val=>{
+						<Select ml={5} options={GetEntries(ChildOrderType)} value={node.childrenOrderType} enabled={changeControlTypeCommand.Validate_Safe() == null} title={changeControlTypeCommand.ValidateErrorStr} onChange={val=>{
 							changeControlTypeCommand.RunOnServer();
 						}}/>
 						<InfoButton ml={5} text="Private nodes are locked to a given map, but allow more permission controls to the node-creator and map-editors."/>
@@ -194,7 +194,7 @@ class ChildrenOrder extends BaseComponent<{mapID: string, node: MapNodeL3}, {}> 
 			<Column mt={5}>
 				<Row style={E(childOrderType == ChildOrderType.manual && {fontWeight: "bold"})}>
 					<Text>Children order:</Text>
-					<Select ml={5} options={GetEntries(ChildOrderType)} value={childOrderType} enabled={updateChildrenOrderCommand.Validate_Safe() == null} title={updateChildrenOrderCommand.validateError} onChange={val=>{
+					<Select ml={5} options={GetEntries(ChildOrderType)} value={childOrderType} enabled={updateChildrenOrderCommand.Validate_Safe() == null} title={updateChildrenOrderCommand.ValidateErrorStr} onChange={val=>{
 						if (val == ChildOrderType.manual) {
 							const existingValidIDs = oldChildrenOrder.filter(id=>node.children[id] != null);
 							const missingChildIDs = (node.children || {}).Pairs().filter(pair=>!oldChildrenOrder.Contains(pair.key)).map(pair=>pair.key);

@@ -25,7 +25,7 @@ export class MI_UnlinkNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 		const command = new UnlinkNode({mapID, parentID: parent.id, childID: node.id});
 		return (
 			<VMenuItem text={`Unlink${combinedWithParentArg ? " claim" : ""}`}
-				enabled={command.Validate_Safe() == null} title={command.validateError}
+				enabled={command.Validate_Safe() == null} title={command.ValidateErrorStr}
 				style={styles.vMenuItem} onClick={async e=>{
 					if (e.button != 0) return;
 					const parentText = GetNodeDisplayText(parent, path.substr(0, path.lastIndexOf("/")));

@@ -3,7 +3,7 @@ import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
 import {observer_simple} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {Column, RowLR, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
+import {CheckBox, Column, RowLR, Text, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 
 export class PolicyDetailsUI extends DetailsUI_Base<AccessPolicy, PolicyDetailsUI> {
@@ -22,6 +22,13 @@ export class PolicyDetailsUI extends DetailsUI_Base<AccessPolicy, PolicyDetailsU
 					<TextInput required enabled={enabled} style={{width: "100%"}}
 						value={newData.name} onChange={val=>Change(newData.name = val)}/>
 				</RowLR>
+				<RowLR mt={5} splitAt={splitAt}>
+					<Text>Base permissions:</Text>
+					<CheckBox enabled={enabled} text="access" value={newData.permissions_base.access} onChange={val=>Change(newData.permissions_base.access = val)}/>
+					<CheckBox ml={10} enabled={enabled} text="add revisions" value={newData.permissions_base.addRevisions} onChange={val=>Change(newData.permissions_base.addRevisions = val)}/>
+					<CheckBox ml={10} enabled={enabled} text="vote" value={newData.permissions_base.vote} onChange={val=>Change(newData.permissions_base.vote = val)}/>
+					<CheckBox ml={10} enabled={enabled} text="delete" value={newData.permissions_base.delete} onChange={val=>Change(newData.permissions_base.delete = val)}/>
+				</RowLR>
 			</Column>
 		);
 	}
@@ -39,7 +46,7 @@ export function ShowAddAccessPolicyDialog(initialData?: Partial<AccessPolicy>, p
 			const tempCommand = getCommand();
 			boxController.options.okButtonProps = {
 				enabled: tempCommand.Validate_Safe() == null,
-				title: tempCommand.validateError,
+				title: tempCommand.ValidateErrorStr,
 			};
 
 			return (
