@@ -1,4 +1,4 @@
-import {GetAsync, Command, AssertV, WrapDBValue, dbp, CommandMeta, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV, WrapDBValue, dbp, CommandMeta, DBHelper, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {Term} from "../DB/terms/@Term.js";
 import {GetTerm} from "../DB/terms.js";
@@ -6,19 +6,21 @@ import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({}),
+	payloadSchema: ()=>SimpleSchema({
+		$id: {type: "string"},
+	}),
 })
-export class DeleteTerm extends Command<{termID: string}, {}> {
+export class DeleteTerm extends Command<{id: string}, {}> {
 	oldData: Term;
 	Validate() {
-		const {termID} = this.payload;
-		this.oldData = GetTerm(termID)!;
+		const {id} = this.payload;
+		this.oldData = GetTerm(id)!;
 		AssertUserCanDelete(this, this.oldData);
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {termID} = this.payload;
-		db.set(dbp`terms/${termID}`, null);
-		//db.set(dbp`termNames/${this.oldData.name.toLowerCase()}/.${termID}`, WrapDBValue(null, {merge: true}));
+		const {id} = this.payload;
+		db.set(dbp`terms/${id}`, null);
+		//db.set(dbp`termNames/${this.oldData.name.toLowerCase()}/.${id}`, WrapDBValue(null, {merge: true}));
 	}
 }

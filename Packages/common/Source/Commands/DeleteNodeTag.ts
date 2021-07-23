@@ -1,4 +1,4 @@
-import {AV, Command, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {AV, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {MapNodeTag} from "../DB/nodeTags/@MapNodeTag.js";
 import {GetNodeTag} from "../DB/nodeTags.js";
@@ -6,7 +6,9 @@ import {AssertUserCanDelete, AssertUserCanModify} from "./Helpers/SharedAsserts.
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({}),
+	payloadSchema: ()=>SimpleSchema({
+		$id: {type: "string"},
+	}),
 })
 export class DeleteNodeTag extends Command<{id: string}, {}> {
 	oldData: MapNodeTag;

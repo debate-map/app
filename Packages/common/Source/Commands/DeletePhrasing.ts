@@ -1,4 +1,4 @@
-import {Command, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {GetNodePhrasing} from "../DB/nodePhrasings.js";
 import {MapNodePhrasing} from "../DB/nodePhrasings/@MapNodePhrasing.js";
@@ -6,7 +6,9 @@ import {AssertUserCanDelete} from "./Helpers/SharedAsserts.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({}),
+	payloadSchema: ()=>SimpleSchema({
+		$id: {type: "string"},
+	}),
 })
 export class DeletePhrasing extends Command<{id: string}, {}> {
 	oldData: MapNodePhrasing;

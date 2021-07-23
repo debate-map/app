@@ -1,9 +1,17 @@
-import {Command, CommandMeta, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
+import {Command, CommandMeta, DBHelper, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {AddChildNode} from "./AddChildNode.js";
 import {LinkNode} from "./LinkNode.js";
 
 @CommandMeta({
-	payloadSchema: ()=>({}),
+	payloadSchema: ()=>SimpleSchema({
+		$mapID: {$ref: "UUID"},
+		$baseNodePath: {type: "string"},
+		$newParentID: {$ref: "UUID"},
+	}),
+	returnSchema: ()=>SimpleSchema({
+		$nodeID: {$ref: "UUID"},
+		$revisionID: {$ref: "UUID"},
+	}),
 })
 export class CloneNode extends Command<{mapID: string, baseNodePath: string, newParentID: string}, {nodeID: string, revisionID: string}> {
 	sub_addNode: AddChildNode;

@@ -7,7 +7,9 @@ import {GetNode} from "../DB/nodes.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({}),
+	payloadSchema: ()=>SimpleSchema({
+		$phrasing: {$ref: MapNodePhrasing.name},
+	}),
 	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })
 export class AddPhrasing extends Command<{phrasing: MapNodePhrasing}, {id: string}> {

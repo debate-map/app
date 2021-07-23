@@ -1,5 +1,5 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUUID, SimpleSchema, WrapDBValue} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {ChangeType, Map_NodeEdit} from "../DB/mapNodeEdits/@MapNodeEdit.js";
 import {GetNode} from "../DB/nodes.js";
@@ -21,7 +21,11 @@ export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard =
 @MapEdit
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({}),
+	payloadSchema: ()=>SimpleSchema({
+		mapID: {type: "string"},
+		revision: {$ref: MapNodeRevision.name},
+	}),
+	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })
 export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNodeRevision}, {id: string}> {
 	// lastNodeRevisionID_addAmount = 0;

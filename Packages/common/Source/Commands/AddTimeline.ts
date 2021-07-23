@@ -4,7 +4,10 @@ import {Timeline} from "../DB/timelines/@Timeline.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({}),
+	payloadSchema: ()=>SimpleSchema({
+		$mapID: {$ref: "UUID"},
+		$timeline: {$ref: Timeline.name},
+	}),
 	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })
 export class AddTimeline extends Command<{mapID: string, timeline: Timeline}, {id: string}> {

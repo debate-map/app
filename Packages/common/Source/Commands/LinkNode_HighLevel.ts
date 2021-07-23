@@ -1,5 +1,5 @@
 import {E, ObjectCE} from "web-vcore/nm/js-vextensions.js";
-import {AssertV, Command, CommandMeta, DBHelper, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertV, Command, CommandMeta, DBHelper, SimpleSchema, UUID} from "web-vcore/nm/mobx-graphlink.js";
 import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
@@ -14,14 +14,6 @@ import {AddChildNode} from "./AddChildNode.js";
 import {DeleteNode} from "./DeleteNode.js";
 import {LinkNode} from "./LinkNode.js";
 import {UnlinkNode} from "./UnlinkNode.js";
-
-type Payload = {
-	mapID: string|n, oldParentID: string|n, newParentID: string, nodeID: string,
-	newForm?: ClaimForm|n, newPolarity?: Polarity|n,
-	createWrapperArg?: boolean,
-	//linkAsArgument?: boolean,
-	unlinkFromOldParent?: boolean, deleteEmptyArgumentWrapper?: boolean
-};
 
 export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOnNodePath: string, polarity: Polarity, asCopy: boolean) {
 	const draggedNode = GetNodeL3(draggedNodePath);
@@ -43,8 +35,29 @@ export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOn
 	});
 }
 
+type Payload = {
+	mapID: string|n, oldParentID: string|n, newParentID: string, nodeID: string,
+	newForm?: ClaimForm|n, newPolarity?: Polarity|n,
+	createWrapperArg?: boolean,
+	//linkAsArgument?: boolean,
+	unlinkFromOldParent?: boolean, deleteEmptyArgumentWrapper?: boolean
+};
+
 @CommandMeta({
-	payloadSchema: ()=>({}),
+	payloadSchema: ()=>SimpleSchema({
+		mapID: {$ref: "UUID"},
+		oldParentID: {$ref: "UUID"},
+		$newParentID: {$ref: "UUID"},
+		$nodeID: {$ref: "UUID"},
+		newForm: {$ref: "ClaimForm"},
+		newPolarity: {$ref: "Polarity"},
+		createWrapperArg: {type: "boolean"},
+		unlinkFromOldParent: {type: "boolean"},
+		deleteEmptyArgumentWrapper: {type: "boolean"},
+	}),
+	returnSchema: ()=>SimpleSchema({
+		argumentWrapperID: {$ref: "UUID"},
+	}),
 	defaultPayload: {createWrapperArg: true},
 })
 export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: string}> {

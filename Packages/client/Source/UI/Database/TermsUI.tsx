@@ -81,7 +81,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 												title: `Delete "${GetFullNameP(selectedTerm)}"`, cancelButton: true,
 												message: `Delete the term "${GetFullNameP(selectedTerm)}"?`,
 												onOK: async()=>{
-													await new DeleteTerm({termID: selectedTerm.id}).RunOnServer();
+													await new DeleteTerm({id: selectedTerm.id}).RunOnServer();
 												},
 											});
 										}}/>}

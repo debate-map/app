@@ -7,7 +7,9 @@ import {GetNode} from "../DB/nodes.js";
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({}),
+	payloadSchema: ()=>SimpleSchema({
+		$tag: {$ref: MapNodeTag.name},
+	}),
 	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })
 export class AddNodeTag extends Command<{tag: MapNodeTag}, {id: string}> {

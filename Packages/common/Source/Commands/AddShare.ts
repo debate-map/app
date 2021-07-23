@@ -47,7 +47,9 @@ export function GenerateSafeID(targetLength = 10, hardCodedStringAvoidance = "an
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({}),
+	payloadSchema: ()=>SimpleSchema({
+		$share: {$ref: Share.name},
+	}),
 	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })
 export class AddShare extends Command<{share: Share}, {id: string}> {
