@@ -59,7 +59,7 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 		return (
 			<Column style={E({padding: 5}, style)}>
 				<Row mb={5}>
-					<Select displayType="button bar" options={GetEntries(DetailsPanel_Subpanel)} value={subpanel} onChange={val=>{
+					<Select displayType="button bar" options={GetEntries(DetailsPanel_Subpanel, "ui")} value={subpanel} onChange={val=>{
 						runInAction("NodeDetailsUI.subpanel.onChange", ()=>store.main.maps.detailsPanel.subpanel = val);
 					}}/>
 				</Row>
