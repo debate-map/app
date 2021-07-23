@@ -19,6 +19,9 @@ export function InitGraphlink() {
 	graph.Initialize({
 		rootStore: store,
 		apollo: apolloClient as any, // the "as any" is needed if "mobx-graphlink" is npm-linked from "web-vcore"
+		onServer: true,
+
+		// server-specific
 		knexModule: Knex,
 		//pgClient, // rather than set it here, update the field each time pgClient is recreated (ie. in pgPool's "connect" handler) 
 	});

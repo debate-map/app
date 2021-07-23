@@ -41,9 +41,11 @@ export const GetNodeRevisions = CreateAccessor((nodeID: string): MapNodeRevision
 		}},
 	}, a=>a.nodeRevisions);
 });
-export const GetNodeRevisionsByTitle = CreateAccessor((title: string, titleKey: TitleKey): MapNodeRevision[]=>{
-	/*return GetDocs({
+export const GetNodeRevisionsByTitle = CreateAccessor((title: string, titleKey: TitleKey = "base"): MapNodeRevision[]=>{
+	return GetDocs({
 		//queryOps: [new WhereOp(`titles.${titleKey}`, "==", title)],
-	}, a=>a.nodeRevisions);*/
-	return emptyArray; // temp
+		params: {filter: {
+			titles: {contains: {[titleKey]: title}},
+		}},
+	}, a=>a.nodeRevisions);
 });

@@ -24,6 +24,7 @@ export function InitGraphlink() {
 	graph.Initialize({
 		rootStore: store,
 		apollo: apolloClient as any, // the "as any" is needed if "mobx-graphlink" is npm-linked from "web-vcore"
+		onServer: false,
 	});
 	// user-info is now supplied at the end of InitApollo() instead
 	/*graph.userInfo = {
