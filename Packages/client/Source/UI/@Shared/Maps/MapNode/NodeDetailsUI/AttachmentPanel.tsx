@@ -1,13 +1,12 @@
 import {A, GetEntries, NN} from "web-vcore/nm/js-vextensions.js";
 import {Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
+import {GetAttachmentType, AttachmentType, ResetNodeRevisionAttachment, MapNodeType} from "dm_common";
 import {EquationEditorUI} from "./AttachmentPanel/EquationEditorUI.js";
-import {MediaAttachmentEditorUI as MediaAttachmentEditorUI} from "./AttachmentPanel/MediaAttachmentEditorUI.js";
+import {MediaAttachmentEditorUI} from "./AttachmentPanel/MediaAttachmentEditorUI.js";
 import {QuoteInfoEditorUI} from "./AttachmentPanel/QuoteInfoEditorUI.js";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
 import {ReferencesAttachmentEditorUI} from "./AttachmentPanel/ReferencesAttachmentEditorUI.js";
-import {GetAttachmentType, AttachmentType, ResetNodeRevisionAttachment} from "dm_common";
-import {MapNodeType} from "dm_common";
 
 export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {}, {}> {
 	render() {
@@ -22,7 +21,7 @@ export class AttachmentPanel extends BaseComponent<NodeDetailsUI_SharedProps & {
 				<>
 					<Row mb={attachmentType == AttachmentType.none ? 0 : 5}>
 						<Text>Type:</Text>
-						<Select ml={5} options={GetEntries(AttachmentType)} enabled={enabled} value={attachmentType} onChange={val=>{
+						<Select ml={5} options={GetEntries(AttachmentType, "ui")} enabled={enabled} value={attachmentType} onChange={val=>{
 							ResetNodeRevisionAttachment(newRevisionData, val);
 							Change();
 						}}/>
