@@ -167,7 +167,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
 			if (!asDragPreview && this.draggableDiv) { */
 			// setDragActive(this.root.DOM.getBoundingClientRect().width);
-			if (this.root && this.root.DOM) {
+			if (this.root?.DOM) {
 				if (this.root.DOM.getBoundingClientRect().width != lastWidthWhenNotPreview) {
 					this.SetState({lastWidthWhenNotPreview: this.root.DOM.getBoundingClientRect().width});
 				}
@@ -255,15 +255,15 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			// return false;
 		}, [combinedWithParentArgument, expanded, map.id, parentPath, path]);
 
-		const renderInner = dragInfo=>{
-			const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
-			// const offsetByAnotherDrag = dragInfo && dragInfo.provided.draggableProps.style.transform;
+		const renderInner = (dragInfo?: DragInfo)=>{
+			const asDragPreview = dragInfo?.snapshot.isDragging;
+			// const offsetByAnotherDrag = dragInfo?.provided.draggableProps.style.transform;
 			if (asDragPreview) {
 				hovered = false;
 				local_openPanel = null;
 			}
 			return (
-				<ExpandableBox ref={c=>DoNothing(dragInfo && dragInfo.provided.innerRef(GetDOM(c) as any), this.root = c)}
+				<ExpandableBox ref={c=>DoNothing(dragInfo?.provided.innerRef(GetDOM(c) as any), this.root = c)}
 					{...{width, widthOverride, outlineColor, expanded}} parent={this}
 					className={
 						//classNames("NodeUI_Inner", asDragPreview && "DragPreview", {root: pathNodeIDs.length == 0})
@@ -271,12 +271,12 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					}
 					onMouseEnter={onMouseEnter}
 					onMouseLeave={onMouseLeave}
-					{...(dragInfo && dragInfo.provided.draggableProps)} // {...(dragInfo && dragInfo.provided.dragHandleProps)} // drag-handle is attached to just the TitlePanel, below
+					{...dragInfo?.provided.draggableProps} // {...dragInfo?.provided.dragHandleProps} // drag-handle is attached to just the TitlePanel, below
 					style={E(
 						/*timeSinceRevealedByTimeline != null && timeSinceRevealedByTimeline <= nodeRevealHighlightTime &&
 							{boxShadow: `rgba(255,255,0,${1 - (timeSinceRevealedByTimeline / nodeRevealHighlightTime)}) 0px 0px 7px, rgb(0, 0, 0) 0px 0px 2px`},*/
 						style,
-						dragInfo && dragInfo.provided.draggableProps.style,
+						dragInfo?.provided.draggableProps.style,
 						asDragPreview && {zIndex: zIndexes.draggable},
 						//outerNode.link._mirrorLink && {border: `solid ${HSLA(0, 0, 1, .3)}`, borderWidth: "0 0 0 1px"}, // if mirror-child, show white border at left
 					)}
@@ -312,7 +312,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					</>}
 					onTextHolderClick={onTextHolderClick}
 					text={<>
-						<TitlePanel {...{indexInNodeList, parent: this, map, node, path}} {...(dragInfo && dragInfo.provided.dragHandleProps)}
+						<TitlePanel {...{indexInNodeList, parent: this, map, node, path}} {...dragInfo?.provided.dragHandleProps}
 							ref={c=>this.titlePanel = c}
 							style={E(GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont /*fontSize: 15, letterSpacing: 1*/})}/>
 						{subPanelShow && <SubPanel node={node}/>}
@@ -351,7 +351,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		};
 		const dndProps = GetDNDProps();
 		if (dndProps == null) {
-			return renderInner(null);
+			return renderInner();
 		}
 
 		const draggableID = ToJSON(dndProps.draggableInfo);
@@ -360,7 +360,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 				{/* <div>asDragPreview: {asDragPreview}</div> */}
 				<Draggable /*type={dndProps.type}*/ key={draggableID} draggableId={draggableID} index={dndProps.index}>
 					{(provided, snapshot)=>{
-						const dragInfo = {provided, snapshot};
+						const dragInfo: DragInfo = {provided, snapshot};
 						const asDragPreview = dragInfo && dragInfo.snapshot.isDragging;
 
 						// if drag preview, we have to put in portal, since otherwise the "filter" effect of ancestors causes the {position:fixed} style to not be relative-to-page

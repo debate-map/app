@@ -1,4 +1,5 @@
 import {UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {DraggableProvided, DraggableStateSnapshot} from "web-vcore/nm/react-beautiful-dnd";
 
 export class DroppableInfo {
 	constructor(data: Partial<DroppableInfo>) {
@@ -29,3 +30,21 @@ export class DraggableInfo {
 	// if TimelineStep (in TimelineStepList)
 	stepID?: string;
 }
+
+// example usage
+// ==========
+
+/*
+const ListUI = ()=>{
+	return (
+		<div>
+		</div>
+	);
+};
+const ItemUI = ()=>{
+	return (
+		<div>
+		</div>
+	);
+};
+*/
