@@ -3,7 +3,7 @@ import {runInAction} from "web-vcore/nm/mobx.js";
 import {Column, Row, Select} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
-import {Observer} from "web-vcore";
+import {Observer, RunInAction} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
 import {MapNode, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType, NodeChildLink, GetAccessPolicy} from "dm_common";
 import {AssertValidate, Validate} from "web-vcore/nm/mobx-graphlink";
@@ -60,7 +60,7 @@ export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {
 			<Column style={E({padding: 5}, style)}>
 				<Row mb={5}>
 					<Select displayType="button bar" options={GetEntries(DetailsPanel_Subpanel, "ui")} value={subpanel} onChange={val=>{
-						runInAction("NodeDetailsUI.subpanel.onChange", ()=>store.main.maps.detailsPanel.subpanel = val);
+						RunInAction("NodeDetailsUI.subpanel.onChange", ()=>store.main.maps.detailsPanel.subpanel = val);
 					}}/>
 				</Row>
 				{subpanel == DetailsPanel_Subpanel.text &&

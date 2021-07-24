@@ -1,10 +1,12 @@
-import {observable} from "web-vcore/nm/mobx.js";
+import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {Vector2, Clone} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, RunXOnceSchemasAdded, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
 
 const O = observable;
 
 export class MapView {
+	constructor() { makeObservable(this); }
+
 	// rootNodeView = new MapNodeView();
 	// include root-node-view as a keyed-child, so that it's consistent with descendants (of key signifying id)
 	// rootNodeView;

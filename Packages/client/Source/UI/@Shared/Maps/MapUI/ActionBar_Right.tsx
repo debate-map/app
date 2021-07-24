@@ -4,7 +4,7 @@ import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {ShowChangesSinceType} from "Store/main/maps/mapStates/@MapState.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {Observer, HSLA} from "web-vcore";
+import {Observer, HSLA, RunInAction} from "web-vcore";
 import {GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 import {Map, WeightingType} from "dm_common";
 import {GADDemo} from "UI/@GAD/GAD.js";
@@ -53,7 +53,7 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 						<Row center mr={5}>
 							<Pre>Show changes since: </Pre>
 							<Select options={changesSince_options} value={`${showChangesSince_type}_${showChangesSince_visitOffset}`} onChange={val=>{
-								runInAction("ActionBar_Right.ShowChangesSince.onChange", ()=>{
+								RunInAction("ActionBar_Right.ShowChangesSince.onChange", ()=>{
 									const parts = val.split("_");
 									mapState.showChangesSince_type = parts[0];
 									mapState.showChangesSince_visitOffset = FromJSON(parts[1]);
@@ -61,7 +61,7 @@ export class ActionBar_Right extends BaseComponentPlus({} as {map: Map, subNavBa
 							}}/>
 							<Pre ml={5}>Weighting: </Pre>
 							<Select options={GetEntries(WeightingType, name=>({ReasonScore: "Reason score"})[name] || name)} value={weighting} onChange={val=>{
-								runInAction("ActionBar_Right.Weighting.onChange", ()=>{
+								RunInAction("ActionBar_Right.Weighting.onChange", ()=>{
 									store.main.maps.weighting = val;
 								});
 							}}/>

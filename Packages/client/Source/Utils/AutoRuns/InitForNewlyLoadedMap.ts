@@ -9,6 +9,7 @@ import {TimelineSubpanel} from "Store/main/maps/mapStates/@MapState.js";
 import {ACTMapNodeExpandedSet, GetNodeView, GetMapView} from "Store/main/maps/mapViews/$mapView.js";
 import {ACTSetFocusNodeAndViewOffset, MapUI} from "UI/@Shared/Maps/MapUI.js";
 import {JustBeforeUI_listeners} from "Main";
+import {RunInAction} from "web-vcore";
 import {AutoRun_HandleBail} from "./@Helpers.js";
 
 let lastMapID;
@@ -32,7 +33,7 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 	// ACTEnsureMapStateInit(action.payload.id);
 	// storeM.ACTEnsureMapStateInit(action.payload.id);
 	let mapView: MapView|n;
-	runInAction("StartInitForNewlyLoadedMap_part1", ()=>{
+	RunInAction("StartInitForNewlyLoadedMap_part1", ()=>{
 		({mapState, mapView} = ACTEnsureMapStateInit(mapID));
 		/*if (map.defaultTimelineID) {
 			mapState.timelinePanelOpen = true;
@@ -64,7 +65,7 @@ async function StartInitForNewlyLoadedMap(mapID: string) {
 	// have view start a bit to the right of the root node
 	ACTSetFocusNodeAndViewOffset(mapID, map.rootNode, new Vector2(300, 0));
 
-	runInAction("StartInitForNewlyLoadedMap_markInitDone", ()=>NN(mapState).initDone = true);
+	RunInAction("StartInitForNewlyLoadedMap_markInitDone", ()=>NN(mapState).initDone = true);
 
 	// probably temp (find more elegant way)
 	const mapUI = MapUI.CurrentMapUI;

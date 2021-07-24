@@ -1,6 +1,9 @@
 import {O} from "web-vcore";
+import {makeObservable} from "web-vcore/nm/mobx";
 
 export class SearchState {
+	constructor() { makeObservable(this); }
+
 	@O queryStr: string;
 	@O searchResults_partialTerms = [] as string[];
 	@O searchResults_nodeRevisionIDs = [] as string[];

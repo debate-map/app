@@ -4,7 +4,7 @@ import {CheckBox, Column, Pre, Row, Select, Text, TextArea} from "web-vcore/nm/r
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
-import {ES, InfoButton, Link, observer_simple} from "web-vcore";
+import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
 import {MapNodeType, GetMapNodeTypeDisplayName, GetDefaultAccessPolicyID_ForNode, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3} from "dm_common";
 import {BailMessage, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
@@ -85,7 +85,7 @@ export class AddChildHelper {
 		/* if (validationError) {
 			return void setTimeout(()=>ShowMessageBox({title: `Validation error`, message: `Validation error: ${validationError}`}));
 		} */
-		runInAction("AddChildDialog.Apply_start", ()=>store.main.maps.currentNodeBeingAdded_path = `${this.node_parentPath}/?`);
+		RunInAction("AddChildDialog.Apply_start", ()=>store.main.maps.currentNodeBeingAdded_path = `${this.node_parentPath}/?`);
 
 		/*if (opt.uiType == AddChildDialogTab.MultiPremise) {
 			this.node.multiPremiseArgument = true;
@@ -101,7 +101,7 @@ export class AddChildHelper {
 				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.argumentNodeID}`, expanded: true, resetSubtree: false});
 				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.argumentNodeID}/${runResult.claimNodeID}`, expanded: true,
 					expanded_truth: opt.expandTruthAndRelevance, expanded_relevance: opt.expandTruthAndRelevance, resetSubtree: false});
-				runInAction("AddChildDialog.Apply_mid", ()=>{
+				RunInAction("AddChildDialog.Apply_mid", ()=>{
 					store.main.maps.nodeLastAcknowledgementTimes.set(runResult.argumentNodeID, Date.now());
 					store.main.maps.nodeLastAcknowledgementTimes.set(runResult.claimNodeID, Date.now());
 				});
@@ -113,11 +113,11 @@ export class AddChildHelper {
 			if (opt.expandSelf) {
 				ACTMapNodeExpandedSet({mapID: this.mapID, path: `${this.node_parentPath}/${runResult.nodeID}`, expanded: true,
 					expanded_truth: opt.expandTruthAndRelevance, expanded_relevance: opt.expandTruthAndRelevance, resetSubtree: false});
-				runInAction("AddChildDialog.Apply_mid", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(runResult.nodeID, Date.now()));
+				RunInAction("AddChildDialog.Apply_mid", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(runResult.nodeID, Date.now()));
 			}
 		}
 
-		runInAction("AddChildDialog.Apply_end", ()=>store.main.maps.currentNodeBeingAdded_path = null);
+		RunInAction("AddChildDialog.Apply_end", ()=>store.main.maps.currentNodeBeingAdded_path = null);
 
 		return runResult_copy;
 	}
@@ -188,7 +188,7 @@ export async function ShowAddChildDialog(parentPath: string, childType: MapNodeT
 							`.AsMultiline(0)}/>
 						</>}
 						<CheckBox text="Advanced" value={advanced} onChange={val=>{
-							runInAction("AddChildDialog.advanced.onChange", ()=>store.main.maps.addChildDialog.advanced = val);
+							RunInAction("AddChildDialog.advanced.onChange", ()=>store.main.maps.addChildDialog.advanced = val);
 							if (!val) tab = AddChildDialogTab.Claim;
 							Change();
 						}}/>

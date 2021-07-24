@@ -52,7 +52,7 @@
 // 									player.SetPosition(step.videoTime);
 // 									// this.SetState({ targetTime: step.videoTime, autoScroll: true });
 // 									// this.SetState({ autoScroll: true });
-// 									runInAction("PlayingSubpanel.StepUI.jumpToStep", ()=>store.main.timelines.autoScroll = true);
+// 									RunInAction("PlayingSubpanel.StepUI.jumpToStep", ()=>store.main.timelines.autoScroll = true);
 // 								})();
 // 							}
 // 						}}

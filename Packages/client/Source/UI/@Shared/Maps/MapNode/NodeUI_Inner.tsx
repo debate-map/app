@@ -16,7 +16,7 @@ import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {DragInfo, EB_ShowError, EB_StoreError, HSLA, IsDoubleClick, Observer} from "web-vcore";
+import {DragInfo, EB_ShowError, EB_StoreError, HSLA, IsDoubleClick, Observer, RunInAction} from "web-vcore";
 import {ExpandableBox} from "./ExpandableBox.js";
 import {DefinitionsPanel} from "./NodeUI/Panels/DefinitionsPanel.js";
 import {DetailsPanel} from "./NodeUI/Panels/DetailsPanel.js";
@@ -232,7 +232,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			}
 		}, [map.id, nodeView, path]);
 		const onDirectClick = UseCallback(e=>{
-			runInAction("NodeUI_Inner.onDirectClick", ()=>{
+			RunInAction("NodeUI_Inner.onDirectClick", ()=>{
 				if (combinedWithParentArgument && parent) {
 					store.main.maps.nodeLastAcknowledgementTimes.set(parent.id, Date.now());
 				}
@@ -293,7 +293,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 									return;
 								}
 
-								runInAction("NodeUI_Inner.onPanelButtonClick", ()=>{
+								RunInAction("NodeUI_Inner.onPanelButtonClick", ()=>{
 									const nodeView_final = nodeView ?? GetNodeViewsAlongPath(map.id, path, true).Last();
 									if (nodeView_final.openPanel != panel) {
 										nodeView_final.VSet("openPanel", panel ?? DEL);
@@ -427,7 +427,7 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 				{renderPanel("definitions", show=><DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{show, map, node, path, hoverTermID}}
 						openTermID={nodeView?.openTermID}
 						onHoverTerm={termID=>onTermHover(termID)}
-						onClickTerm={termID=>runInAction("NodeUI_Inner_onClickTerm", ()=>nodeView.openTermID = termID)}/>)}
+						onClickTerm={termID=>RunInAction("NodeUI_Inner_onClickTerm", ()=>nodeView.openTermID = termID)}/>)}
 				{/*renderPanel("phrasings", show=><PhrasingsPanel {...{show, node, path}}/>)*/}
 				{renderPanel("discussion", show=><DiscussionPanel {...{show}}/>)}
 				{renderPanel("social", show=><SocialPanel {...{show}}/>)}

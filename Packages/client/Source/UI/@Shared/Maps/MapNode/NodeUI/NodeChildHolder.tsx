@@ -5,7 +5,7 @@ import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {NodeConnectorBackground} from "UI/@Shared/Maps/MapNode/NodeConnectorBackground.js";
 import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI.js";
-import {ES, GetScreenRect, Icon, MaybeLog, Observer} from "web-vcore";
+import {ES, GetScreenRect, Icon, MaybeLog, Observer, RunInAction} from "web-vcore";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
@@ -383,7 +383,7 @@ export class ChildLimitBar extends BaseComponentPlus({} as {map: Map, path: stri
 					</Row>
 				} title="Show more"
 				enabled={childLimit < childCount} style={ES({flex: 1})} onClick={()=>{
-					runInAction("ChildLimitBar.showMore.onClick", ()=>{
+					RunInAction("ChildLimitBar.showMore.onClick", ()=>{
 						nodeView[`childLimit_${direction}`] = (childLimit + 3).KeepAtMost(childCount);
 					});
 				}}/>
@@ -394,7 +394,7 @@ export class ChildLimitBar extends BaseComponentPlus({} as {map: Map, path: stri
 					</Row>
 				} title="Show less"
 				enabled={childLimit > initialChildLimit} style={ES({flex: 1})} onClick={()=>{
-					runInAction("ChildLimitBar.showLess.onClick", ()=>{
+					RunInAction("ChildLimitBar.showLess.onClick", ()=>{
 						nodeView[`childLimit_${direction}`] = (childLimit - 3).KeepAtLeast(initialChildLimit);
 					});
 				}}/>

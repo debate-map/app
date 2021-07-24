@@ -1,7 +1,7 @@
 import {CanGetBasicPermissions, GetMaps, MeID} from "dm_common";
 import {store} from "Store";
 import {GetSelectedDebatesPageMap} from "Store/main/debates";
-import {ES, HSLA, Observer, PageContainer} from "web-vcore";
+import {ES, HSLA, Observer, PageContainer, RunInAction} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {Button, Column, Row, Select} from "web-vcore/nm/react-vcomponents.js";
@@ -57,7 +57,7 @@ export class MapListUI extends BaseComponentPlus({}, {}) {
 				)}>
 					<Row style={{height: 40, padding: 10}}>
 						<Select displayType="button bar" options={listTypeOptions} value={storeNode.listType} onChange={val=>{
-							runInAction("MapListUI.listTypeBar.onChange", ()=>storeNode.listType = val);
+							RunInAction("MapListUI.listTypeBar.onChange", ()=>storeNode.listType = val);
 						}}/>
 						<Button text="Add map" ml="auto" enabled={CanGetBasicPermissions(MeID())} onClick={UseCallback(()=>{
 							if (userID == null) return void ShowSignInPopup();

@@ -17,7 +17,7 @@ export class AddUser extends Command<{user: User, userHidden: UserHidden}, {id: 
 		const {user, userHidden} = this.payload;
 		AssertV(this.userInfo.id == systemUserID, "Only the system-user can add a user.");
 
-		user.id = GenerateUUID();
+		user.id = this.GenerateUUID_Once("id");
 		user.joinDate = Date.now();
 		AssertValidate("User", user, "User invalid.");
 

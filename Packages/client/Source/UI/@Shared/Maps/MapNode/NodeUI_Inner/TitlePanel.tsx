@@ -7,12 +7,12 @@ import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProp
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
 import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod} from "dm_common";
-import {ES, InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, VReactMarkdown_Remarkable} from "web-vcore";
+import {ES, InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, RunInAction, VReactMarkdown_Remarkable} from "web-vcore";
 import React from "react";
+import {GetCurrentRevision} from "Store/db_ext/nodes";
 import {NodeMathUI} from "../NodeMathUI.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 import {TermPlaceholder} from "./TermPlaceholder.js";
-import {GetCurrentRevision} from "Store/db_ext/nodes";
 
 /* type TitlePanelProps = {parent: NodeUI_Inner, map: Map, node: MapNodeL2, nodeView: MapNodeView, path: string, indexInNodeList: number, style};
 const TitlePanel_connector = (state, { node, path }: TitlePanelProps) => ({
@@ -77,7 +77,7 @@ export class TitlePanel extends BaseComponentPlus(
 	OnTermClick = (termID: string)=>{
 		const {map, path} = this.props;
 		// parent.SetState({hoverPanel: "definitions", hoverTermID: termID});
-		runInAction("TitlePanel_OnTermClick", ()=>{
+		RunInAction("TitlePanel_OnTermClick", ()=>{
 			let nodeView_final = GetNodeView(map.id, path);
 			if (nodeView_final == null) {
 				nodeView_final = GetNodeViewsAlongPath(map.id, path, true).Last();
@@ -222,7 +222,7 @@ export class TitlePanel extends BaseComponentPlus(
 
 			const command = new AddNodeRevision({mapID: map.id, revision: newRevision});
 			const revisionID = await command.RunOnServer();
-			runInAction("TitlePanel.ApplyEdit", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
+			RunInAction("TitlePanel.ApplyEdit", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 			//await WaitTillPathDataIsReceiving(DBPath(`nodeRevisions/${revisionID}`));
 			//await WaitTillPathDataIsReceived(DBPath(`nodeRevisions/${revisionID}`));
 			//await command.WaitTillDBUpdatesReceived();

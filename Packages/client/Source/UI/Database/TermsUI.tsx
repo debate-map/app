@@ -1,7 +1,7 @@
 import {CanGetBasicPermissions, DeleteTerm, GetFullNameP, GetTerms, GetUserPermissionGroups, IsUserCreatorOrMod, MeID, Term, TermType, UpdateTerm} from "dm_common";
 import {store} from "Store";
 import {GetSelectedTerm} from "Store/main/database";
-import {ES, GetUpdates, Observer} from "web-vcore";
+import {ES, GetUpdates, Observer, RunInAction} from "web-vcore";
 import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {Button, Column, Div, Pre, Row, Span, Text} from "web-vcore/nm/react-vcomponents.js";
@@ -48,7 +48,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 					</Row>
 					<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1, padding: 10})} onClick={e=>{
 						if (e.target != e.currentTarget) return;
-						runInAction("TermsUI.ScrollView.onClick", ()=>store.main.database.selectedTermID = null);
+						RunInAction("TermsUI.ScrollView.onClick", ()=>store.main.database.selectedTermID = null);
 					}}>
 						{terms.map((term, index)=><TermUI key={index} first={index == 0} term={term} selected={selectedTerm == term}/>)}
 					</ScrollView>
@@ -108,7 +108,7 @@ export class TermUI extends BaseComponentPlus({} as {term: Term, first: boolean,
 					selected && {background: "rgba(100,100,100,.7)"},
 				)}
 				onClick={e=>{
-					runInAction("TermUI.onClick", ()=>store.main.database.selectedTermID = term.id);
+					RunInAction("TermUI.onClick", ()=>store.main.database.selectedTermID = term.id);
 				}}>
 				<Pre>{GetFullNameP(term)}<sup>{term.id.substr(0, 2)}</sup>: </Pre>
 				<Text>{term.definition}</Text>

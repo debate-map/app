@@ -4,7 +4,7 @@ import moment from "web-vcore/nm/moment";
 import {Button, Column, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O, ES} from "web-vcore";
+import {EB_ShowError, EB_StoreError, InfoButton, LogWarning, Observer, O, ES, RunInAction} from "web-vcore";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
@@ -20,7 +20,7 @@ const columnWidths = [0.68, 0.2, 0.12];
 @Observer
 export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr: string}) {
 	ClearResults() {
-		runInAction("SearchPanel.ClearResults", ()=>{
+		RunInAction("SearchPanel.ClearResults", ()=>{
 			store.main.search.searchResults_partialTerms = ea;
 			store.main.search.searchResults_nodeRevisionIDs = ea;
 		});
@@ -38,7 +38,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 		if (Validate("UUID", queryStr) == null) {
 			const nodeRevisionMatch = await GetAsync(()=>GetNodeRevision(queryStr));
 			if (nodeRevisionMatch) {
-				runInAction("SearchPanel.PerformSearch_part2_nodeRevisionID", ()=>{
+				RunInAction("SearchPanel.PerformSearch_part2_nodeRevisionID", ()=>{
 					store.main.search.searchResults_nodeRevisionIDs = [nodeRevisionMatch.id];
 				});
 				return;
@@ -46,7 +46,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 			const node = await GetAsync(()=>GetNode(queryStr));
 			if (node) {
 				const visibleNodeRevision = await GetAsync(()=>GetNodeRevisions(node.id).OrderBy(a=>a.createdAt).Last()); // todo: replace with actual "find node-revision to show" function
-				runInAction("SearchPanel.PerformSearch_part2_nodeID", ()=>{
+				RunInAction("SearchPanel.PerformSearch_part2_nodeID", ()=>{
 					//store.main.search.searchResults_nodeRevisionIDs = [node.currentRevision];
 					store.main.search.searchResults_nodeRevisionIDs = [visibleNodeRevision.id];
 				});
@@ -67,7 +67,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 		// perform the actual search and show the results
 		const {docs} = await query.get();
 		const docIDs = docs.map(a=>a.id);
-		runInAction("SearchPanel.PerformSearch_part2", ()=>{
+		RunInAction("SearchPanel.PerformSearch_part2", ()=>{
 			store.main.search.searchResults_partialTerms = searchTerms.partialTerms;
 			store.main.search.searchResults_nodeRevisionIDs = docIDs;
 		});*/
@@ -98,7 +98,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 					<TextInput style={{flex: 1}} value={queryStr}
 						instant // since enter-key needs value pre-blur
 						onChange={val=>{
-							runInAction("SearchPanel.searchInput.onChange", ()=>store.main.search.queryStr = val);
+							RunInAction("SearchPanel.searchInput.onChange", ()=>store.main.search.queryStr = val);
 						}}
 						onKeyDown={e=>{
 							if (e.keyCode == keycode.codes.enter) {
@@ -203,7 +203,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 			upPathAttempts = newUpPathAttempts;
 
 			// if (depth === 0 || upPathCompletions.length !== State(a => a.main.search.findNode_resultPaths).length) {
-			runInAction("SearchResultRow.StartFindingPathsFromXToY_inLoop", ()=>{
+			RunInAction("SearchResultRow.StartFindingPathsFromXToY_inLoop", ()=>{
 				store.main.search.findNode_resultPaths = upPathCompletions.slice();
 				store.main.search.findNode_currentSearchDepth = depth + 1;
 			});
@@ -220,7 +220,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 		this.StopSearch();
 	}
 	StopSearch() {
-		runInAction("SearchResultRow.StopSearch", ()=>store.main.search.findNode_state = "inactive");
+		RunInAction("SearchResultRow.StopSearch", ()=>store.main.search.findNode_state = "inactive");
 	}
 
 	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
@@ -241,7 +241,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 		if (findNode_state === "activating" && findNode_node == nodeID && !SearchResultRow.searchInProgress) {
 			SearchResultRow.searchInProgress = true;
 			WaitXThenRun(0, ()=>{
-				runInAction("SearchResultRow.call_StartFindingPathsFromXToY_pre", ()=>store.main.search.findNode_state = "active");
+				RunInAction("SearchResultRow.call_StartFindingPathsFromXToY_pre", ()=>store.main.search.findNode_state = "active");
 				this.StartFindingPathsFromRootsToX(nodeID).then(()=>SearchResultRow.searchInProgress = false);
 			});
 		}
@@ -280,7 +280,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 						{findNode_state === "inactive" && <Pre>Locations found in maps: (depth: {findNode_currentSearchDepth})</Pre>}
 						<Button ml={5} text="Stop" enabled={findNode_state === "active"} onClick={()=>this.StopSearch()}/>
 						<Button ml={5} text="Close" onClick={()=>{
-							runInAction("SearchResultRow.Close", ()=>{
+							RunInAction("SearchResultRow.Close", ()=>{
 								store.main.search.findNode_state = "inactive";
 								store.main.search.findNode_node = null;
 								store.main.search.findNode_resultPaths = [];
@@ -301,7 +301,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 									JumpToNode(openMapID!, resultPath);
 								} else {
 									if (searchResult_map == null) return; // still loading
-									runInAction("SearchResultRow.OpenContainingMap", ()=>{
+									RunInAction("SearchResultRow.OpenContainingMap", ()=>{
 										if (searchResult_map.id != globalMapID) {
 											store.main.page = "global";
 										} else {
@@ -320,7 +320,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 }
 
 export function JumpToNode(mapID: string, path: string) {
-	runInAction("JumpToNode", ()=>{
+	RunInAction("JumpToNode", ()=>{
 		const pathNodeIDs = path.split("/");
 
 		const mapView = new MapView();

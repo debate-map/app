@@ -18,6 +18,7 @@
 		"experimentalDecorators": true,
 		"allowSyntheticDefaultImports": true,
 		//"esModuleInterop": true, // enable this within packages that aren't using webpack for compilation
+		"useDefineForClassFields": true, // needed for mobx @observable
 		// strictness settings
 		//"strict": true, // enables all of the below (other than noImplicitReturns)
 		//"noImplicitAny": true,

@@ -1,8 +1,10 @@
 import {O} from "web-vcore";
 import {CreateAccessor, GetDoc} from "web-vcore/nm/mobx-graphlink.js";
 import {GetTerms, GetMedias, GraphDBShape, GetUser, GetAccessPolicy, GetTerm, GetMedia} from "dm_common";
+import {makeObservable} from "web-vcore/nm/mobx";
 
 export class DatabaseState {
+	constructor() { makeObservable(this); }
 	@O subpage: "users" | "policies" | "terms" | "media";
 	@O selectedUserID: string|n;
 	@O selectedTermID: string|n;

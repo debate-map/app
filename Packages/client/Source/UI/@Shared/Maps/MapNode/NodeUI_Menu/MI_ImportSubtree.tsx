@@ -105,9 +105,9 @@
 // 						<>
 // 							<Row>
 // 								<CheckBox text="Import ratings, from users:" value={dialogState.importRatings}
-// 									onChange={val=>runInAction("MI_ImportSubtree.importRatings.onChange", ()=>dialogState.importRatings = val)}/>
+// 									onChange={val=>RunInAction("MI_ImportSubtree.importRatings.onChange", ()=>dialogState.importRatings = val)}/>
 // 								<TextInput ml={5} placeholder="Leave empty for all users..." style={{flex: 1}} value={dialogState.importRatings_userIDsStr}
-// 									onChange={val=>runInAction("MI_ImportSubtree.importRatings_userIDsStr.onChange", ()=>dialogState.importRatings_userIDsStr = val)}/>
+// 									onChange={val=>RunInAction("MI_ImportSubtree.importRatings_userIDsStr.onChange", ()=>dialogState.importRatings_userIDsStr = val)}/>
 // 							</Row>
 // 						</>}
 // 					</Column>

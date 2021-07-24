@@ -1,6 +1,6 @@
 import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {GetUpdates, Observer} from "web-vcore";
+import {GetUpdates, Observer, RunInAction} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {E, ToJSON, Clone} from "web-vcore/nm/js-vextensions.js";
@@ -52,7 +52,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 
 							const newRevision = this.detailsUI!.GetNewRevisionData();
 							const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).RunOnServer();
-							runInAction("DetailsPanel.save.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
+							RunInAction("DetailsPanel.save.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 
 							/*if (IsPremiseOfSinglePremiseArgument(node, parentNode)) {
 								const argumentNode = await GetAsync(()=>GetParentNodeL3(path));
@@ -65,7 +65,7 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 										const newArgumentRevision = Clone(argumentNode.current);
 										newArgumentRevision.VSet(nodePermissions);
 										const newArgumentRevisionID = await new AddNodeRevision({mapID: map.id, revision: newArgumentRevision}).RunOnServer();
-										runInAction("DetailsPanel.save.onClick_part2", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentNode.id, Date.now()));
+										RunInAction("DetailsPanel.save.onClick_part2", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentNode.id, Date.now()));
 									}
 								}
 							}*/

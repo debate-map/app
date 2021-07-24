@@ -36,7 +36,7 @@
 // 												index == timelines.length - 1 && {borderRadius: "0 0 10px 10px"},
 // 											)}
 // 											onClick={()=>{
-// 												runInAction("CollectionSubpanel.selectedTimeline.onChange", ()=>GetMapState(map.id).selectedTimeline = timeline.id);
+// 												RunInAction("CollectionSubpanel.selectedTimeline.onChange", ()=>GetMapState(map.id).selectedTimeline = timeline.id);
 // 												this.timelineSelect.Hide();
 // 											}}>
 // 											<Row>

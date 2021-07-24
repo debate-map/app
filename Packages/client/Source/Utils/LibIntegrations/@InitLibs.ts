@@ -7,6 +7,7 @@ import {InitSentry} from "./Sentry.js";
 import {InitReactVComponents} from "./ReactVComponents.js";
 import {InitGraphlink} from "./MobXGraphlink.js";
 import {InitApollo} from "./Apollo.js";
+import {InitGraphQLFeedback} from "./GraphQLFeedback.js";
 
 // helpers for exposing things (making them easier to access in console/dev-tools)
 function ExposeGlobals() {
@@ -45,7 +46,7 @@ export function InitLibs() {
 	//InitFirebase();
 	InitWVC();
 	InitGraphlink(); // init this early, so we can use mobx-graphlink's DBPath() for the later modules (eg. graphql-feedback)
-	//InitFeedback();
+	InitGraphQLFeedback();
 	//InitForum();
 	InitSentry();
 	InitReactJS();

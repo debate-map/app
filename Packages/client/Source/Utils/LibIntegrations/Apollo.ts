@@ -1,4 +1,5 @@
 import {store} from "Store";
+import {RunInAction} from "web-vcore";
 import {ApolloClient, ApolloLink, FetchResult, from, gql, HttpLink, InMemoryCache, NormalizedCacheObject, split} from "web-vcore/nm/@apollo/client.js";
 import {WebSocketLink, getMainDefinition, onError} from "web-vcore/nm/@apollo/client_deep.js";
 import {runInAction} from "web-vcore/nm/mobx";
@@ -109,7 +110,7 @@ export function InitApollo() {
 		console.log("After passing connection id, got user id:", userID);
 
 		//apolloSignInPromise_resolve({userID});
-		runInAction("ApolloSignInDone", ()=>{
+		RunInAction("ApolloSignInDone", ()=>{
 			/*store.main.userID_apollo = userID;
 			store.main.userID_apollo_ready = true;*/
 			// rather than getting user-id from cookie, get it from the server's websocket-helper response

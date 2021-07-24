@@ -1,6 +1,7 @@
 import {presetBackgrounds, defaultPresetBackground} from "Utils/UI/PresetBackgrounds.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {GetUserHidden} from "dm_common";
+import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 
 // backgrounds
 // ==========
@@ -18,7 +19,7 @@ export class BackgroundConfig {
 	size?: string|n;
 }
 
-export function GetUserBackground(userID: string|n): BackgroundConfig {
+export const GetUserBackground = CreateAccessor((userID: string|n): BackgroundConfig=>{
 	if (GADDemo) return {color: "#ffffff"};
 
 	const user_p = GetUserHidden(userID);
@@ -36,4 +37,4 @@ export function GetUserBackground(userID: string|n): BackgroundConfig {
 
 	const background = presetBackgrounds[user_p.backgroundID!] || presetBackgrounds[defaultPresetBackground];
 	return background;
-}
+});

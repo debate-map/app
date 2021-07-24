@@ -4,7 +4,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
 import {GetSelectedMedia} from "Store/main/database";
-import {Observer, GetUpdates, ES} from "web-vcore";
+import {Observer, GetUpdates, ES, RunInAction} from "web-vcore";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
 import {Media, GetNiceNameForMediaType, GetUserPermissionGroups, IsUserCreatorOrMod, HasModPermissions, MeID, GetMedias, UpdateMediaData, DeleteMedia} from "dm_common";
@@ -50,7 +50,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 					</Row>
 					<ScrollView ref={c=>this.scrollView = c} style={ES({flex: 1})} contentStyle={ES({flex: 1, padding: 10})} onClick={e=>{
 						if (e.target != e.currentTarget) return;
-						runInAction("MediasUI.ScrollView.onClick", ()=>store.main.database.selectedMediaID = null);
+						RunInAction("MediasUI.ScrollView.onClick", ()=>store.main.database.selectedMediaID = null);
 					}}>
 						{medias.map((media, index)=><MediaUI key={index} first={index == 0} image={media} selected={selectedMedia == media}/>)}
 					</ScrollView>
@@ -110,7 +110,7 @@ export class MediaUI extends BaseComponent<MediaUI_Props, {}> {
 					selected && {background: "rgba(100,100,100,.7)"},
 				)}
 				onClick={e=>{
-					runInAction("MediaUI.onClick", ()=>store.main.database.selectedMediaID = image.id);
+					RunInAction("MediaUI.onClick", ()=>store.main.database.selectedMediaID = image.id);
 				}}>
 				<Pre>{image.name}: </Pre>
 				{image.description.KeepAtMost(100)}

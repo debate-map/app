@@ -6,7 +6,7 @@ import {logTypes, LogTypes_New} from "Utils/General/Logging.js";
 import {colors} from "Utils/UI/GlobalStyles.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {DoesURLChangeCountAsPageChange, GetLoadActionFuncForURL, GetNewURL, pageTree} from "Utils/URL/URLs.js";
-import {ActionFunc, AddWVCSchemas, GetMirrorOfMobXTree, manager as manager_framework} from "web-vcore";
+import {ActionFunc, AddWVCSchemas, GetMirrorOfMobXTree, manager as manager_framework, RunInAction} from "web-vcore";
 import produce from "web-vcore/nm/immer";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {AddSchema, WithStore} from "web-vcore/nm/mobx-graphlink.js";
@@ -68,7 +68,7 @@ export function InitWVC() {
 		PostHandleError: (error, errorStr)=>{
 			// wait a bit, in case we're in a reducer function (calling dispatch from within a reducer errors)
 			setTimeout(()=>{
-				runInAction("VWAF.PostHandleError", ()=>AddNotificationMessage(errorStr));
+				RunInAction("VWAF.PostHandleError", ()=>AddNotificationMessage(errorStr));
 			});
 		},
 

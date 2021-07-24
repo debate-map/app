@@ -3,24 +3,19 @@ import {AssertWarn, emptyArray, emptyArray_forLoading, E} from "web-vcore/nm/js-
 import {Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, GetDOM, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
-import {ES, HSLA, Observer} from "web-vcore";
+import {ES, HSLA, Observer, RunInAction} from "web-vcore";
 import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {ExpandableBox} from "../ExpandableBox.js";
-import {Squiggle} from "../NodeConnectorBackground.js";
-import {NodeUI_Menu_Stub} from "../NodeUI_Menu.js";
-import {NodeChildCountMarker} from "./NodeChildCountMarker.js";
-import {NodeChildHolder} from "./NodeChildHolder.js";
-import {RatingsPanel} from "./Panels/RatingsPanel.js";
-import {MapNodeL3} from "dm_common";
-import {HolderType, GetParentNodeL3} from "dm_common";
-import {IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument} from "dm_common";
-import {GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings} from "dm_common";
-import {ArgumentType} from "dm_common";
-import {MapNodeType} from "dm_common";
-import {NodeRatingType} from "dm_common";
-import {Map} from "dm_common";
+import {MapNodeL3, HolderType, GetParentNodeL3, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument, GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings, ArgumentType, MapNodeType, NodeRatingType, Map} from "dm_common";
+
+
 import {GetNodeColor} from "Store/db_ext/nodes";
+import {RatingsPanel} from "./Panels/RatingsPanel.js";
+import {NodeChildHolder} from "./NodeChildHolder.js";
+import {NodeChildCountMarker} from "./NodeChildCountMarker.js";
+import {NodeUI_Menu_Stub} from "../NodeUI_Menu.js";
+import {Squiggle} from "../NodeConnectorBackground.js";
+import {ExpandableBox} from "../ExpandableBox.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
@@ -120,7 +115,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 						toggleExpanded={UseCallback(e=>{
 							const newExpanded = !nodeView[expandKey];
 							const recursivelyCollapsing = !newExpanded && e.altKey;
-							runInAction("NodeChildHolderBox_toggleExpanded", ()=>{
+							RunInAction("NodeChildHolderBox_toggleExpanded", ()=>{
 								if (type == HolderType.truth) {
 									ACTMapNodeExpandedSet({
 										mapID: map.id, path, resetSubtree: recursivelyCollapsing,

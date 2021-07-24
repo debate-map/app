@@ -4,7 +4,7 @@ import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {MapNodeRevision_Defaultable, IsUserCreatorOrMod, MeID, GetNodeL2, AddNodeRevision, SetMapFeatured, UpdateMapDetails, DeleteMap, Map, GetNodeChildLinks} from "dm_common";
-import {Observer, GetUpdates, InfoButton} from "web-vcore";
+import {Observer, GetUpdates, InfoButton, RunInAction} from "web-vcore";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {Button_GAD} from "UI/@GAD/GADButton.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
@@ -111,7 +111,7 @@ export class DetailsDropDown extends BaseComponent<{map: Map}, {dataError: strin
 										message: `Delete the map "${map.name}"?`,
 										onOK: async()=>{
 											await new DeleteMap({id: map.id}).RunOnServer();
-											runInAction("DeleteMap.onDone", ()=>store.main.debates.selectedMapID = null);
+											RunInAction("DeleteMap.onDone", ()=>store.main.debates.selectedMapID = null);
 										},
 									});
 								}}/>

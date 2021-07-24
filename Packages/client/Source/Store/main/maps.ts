@@ -1,5 +1,5 @@
 import {GetNodeL3, WeightingType, MapView} from "dm_common";
-import {observable} from "web-vcore/nm/mobx.js";
+import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
 import {ignore, version} from "web-vcore/nm/mobx-sync.js";
 import {store} from "Store";
@@ -9,6 +9,7 @@ import {MapState} from "./maps/mapStates/@MapState.js";
 import {GetMapView} from "./maps/mapViews/$mapView.js";
 
 export class MapsState {
+	constructor() { makeObservable(this); }
 	// @Oervable maps = observable.map<string, MapState>();
 	// @ref(MapState_) maps = {} as {[key: string]: MapState};
 	// @map(MapState_) maps = observable.map<string, MapState>();
@@ -47,10 +48,12 @@ export enum DetailsPanel_Subpanel {
 	others = "others",
 }
 export class DetailsPanelState {
+	constructor() { makeObservable(this); }
 	@O subpanel = DetailsPanel_Subpanel.text;
 }
 
 export class AddChildDialogState {
+	constructor() { makeObservable(this); }
 	@O advanced = false;
 }
 
@@ -60,10 +63,12 @@ export enum DataExchangeFormat {
 	gad_csv = "gad_csv",
 }
 export class ExportSubtreeDialogState {
+	constructor() { makeObservable(this); }
 	@O targetFormat = DataExchangeFormat.gad_csv;
 	@O baseExportDepth = 5;
 }
 export class ImportSubtreeDialogState {
+	constructor() { makeObservable(this); }
 	@O importRatings = false;
 	@O importRatings_userIDsStr = "";
 }

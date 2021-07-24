@@ -1,3 +1,4 @@
+import {RunInAction} from "web-vcore";
 import {Global} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "..";
@@ -17,7 +18,7 @@ export class NotificationMessage {
 
 // helper (main use: for use from Start_0.ts)
 export function AddNotificationMessage(message: string) {
-	runInAction("VWAF.PostHandleError", ()=>{
+	RunInAction("VWAF.PostHandleError", ()=>{
 		try {
 			store.main.notificationMessages.push(new NotificationMessage(message));
 		} catch (ex) {

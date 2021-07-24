@@ -62,10 +62,10 @@
 // 						}}/>
 // 					</>}
 // 					<CheckBox ml={5} text="Details" value={showTimelineDetails} onChange={val=>{
-// 						runInAction("EditorSubpanel.Details.onChange", ()=>GetMapState(map.id).showTimelineDetails = val);
+// 						RunInAction("EditorSubpanel.Details.onChange", ()=>GetMapState(map.id).showTimelineDetails = val);
 // 					}}/>
 // 					<CheckBox ml="auto" text="Lock map scrolling" title="Lock map edge-scrolling. (for dragging onto timeline steps)" value={lockMapScrolling} onChange={val=>{
-// 						runInAction("EditorSubpanel.lockMapScrolling.onChange", ()=>store.main.maps.lockMapScrolling = val);
+// 						RunInAction("EditorSubpanel.lockMapScrolling.onChange", ()=>store.main.maps.lockMapScrolling = val);
 // 					}}/>
 // 				</Row>
 // 				<ScrollView style={ES({flex: 1})} contentStyle={ES({

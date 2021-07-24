@@ -1,6 +1,7 @@
 import {globalMapID} from "dm_common";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
 import {O} from "web-vcore";
+import {makeObservable} from "web-vcore/nm/mobx";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink";
 import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {NotificationMessage} from "./main/@NotificationMessage.js";
@@ -14,6 +15,7 @@ import {SocialPageState} from "./main/social.js";
 import {TimelinesState} from "./main/timelines.js";
 
 export class MainState {
+	constructor() { makeObservable(this); }
 	// [immerable] = true;
 
 	@O page = "home";

@@ -8,9 +8,9 @@ import {store} from "Store";
 import {GetUserBackground} from "Store/db_ext/users/$user";
 import {GetPathNodeIDs} from "Store/main/maps/mapViews/$mapView.js";
 import {DraggableInfo, DroppableInfo} from "Utils/UI/DNDStructures.js";
-import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer} from "web-vcore";
-import {Clone, FromJSON, NN, Vector2} from "web-vcore/nm/js-vextensions.js";
-import {observable, runInAction} from "web-vcore/nm/mobx.js";
+import {AddressBarWrapper, ErrorBoundary, LoadURL, Observer, RunInAction} from "web-vcore";
+import {Assert, Clone, FromJSON, NN, Vector2} from "web-vcore/nm/js-vextensions.js";
+import {makeObservable, observable, runInAction} from "web-vcore/nm/mobx.js";
 import {AsyncTrunk} from "web-vcore/nm/mobx-sync.js";
 import {DragDropContext as DragDropContext_Beautiful} from "web-vcore/nm/react-beautiful-dnd.js";
 import ReactDOM from "web-vcore/nm/react-dom";
@@ -33,13 +33,17 @@ import {DebatesUI} from "./Debates.js";
 import {FeedbackUI} from "./Feedback.js";
 import {ForumUI} from "./Forum.js";
 import {SocialUI} from "./Social.js";
-import {Assert} from "../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE";
 
 ColorPickerBox.Init(ReactColor, chroma);
 
 // export class RootUIWrapper extends BaseComponentPlus({}, { storeReady: false }) {
 @Observer
-export class RootUIWrapper extends BaseComponentPlus({}, {}) {
+export class RootUIWrapper extends BaseComponent<{}, {}> {
+	constructor(props) {
+		super(props);
+		makeObservable(this);
+	}
+
 	/* ComponentWillMount() {
 		let startVal = g.storeRehydrated;
 		// wrap storeRehydrated property, so we know when it's set (from CreateStore.ts callback)
@@ -96,7 +100,8 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 		/* try {
 			this.SetState({ storeReady: true });
 		} finally { */
-		runInAction("RootUIWrapper.ComponentWillMount.notifyStoreReady", ()=>this.storeReady = true);
+		RunInAction("RootUIWrapper.ComponentWillMount.notifyStoreReady", ()=>this.storeReady = true);
+		//console.log("Marked ready!:", this.storeReady);
 	}
 	// use observable field for this rather than react state, since setState synchronously triggers rendering -- which breaks loading process above, when rendering fails
 	@observable storeReady = false;
@@ -104,6 +109,7 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 	render() {
 		// const { storeReady } = this.state;
 		const {storeReady} = this;
+		//console.log("StoreReady?:", storeReady);
 		// if (!g.storeRehydrated) return <div/>;
 		if (!storeReady) return null;
 		//if (!store.main.userID_apollo_ready) return null; // wait for sign in to complete (so that restricted content loads, even if first content requested)
@@ -160,14 +166,14 @@ export class RootUIWrapper extends BaseComponentPlus({}, {}) {
 						controller.Close();
 						const {argumentWrapperID} = await copyCommand.RunOnServer();
 						if (argumentWrapperID) {
-							runInAction("OnDragEnd.Copy.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
+							RunInAction("OnDragEnd.Copy.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
 						}
 					}}/>
 					<Button ml={5} text="Move" enabled={moveCommand.Validate_Safe() == null} title={moveCommand.ValidateErrorStr} onClick={async()=>{
 						controller.Close();
 						const {argumentWrapperID} = await moveCommand.RunOnServer();
 						if (argumentWrapperID) {
-							runInAction("OnDragEnd.Move.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
+							RunInAction("OnDragEnd.Move.onClick", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
 						}
 					}}/>
 					<Button ml={5} text="Cancel" onClick={()=>controller.Close()}/>

@@ -7,6 +7,7 @@ import {AddNotificationMessage} from "Store/main/@NotificationMessage.js";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
 import {MapUI} from "UI/@Shared/Maps/MapUI.js";
 import {rootPageDefaultChilds} from "Utils/URL/URLs.js";
+import {RunInAction} from "web-vcore";
 import {AutoRun_HandleBail} from "./@Helpers.js";
 
 let lastShareBeingLoaded;
@@ -21,7 +22,7 @@ AutoRun_HandleBail(()=>{
 }, {name: "LoadShare"});
 
 function LoadHomePage() {
-	runInAction("LoadHomePage", ()=>{
+	RunInAction("LoadHomePage", ()=>{
 		store.main.page = "home";
 		store.main.home.subpage = "home";
 	});
@@ -42,7 +43,7 @@ async function LoadShare(shareID: string) {
 			return void LoadHomePage();
 		}
 
-		runInAction("LoadShare", ()=>{
+		RunInAction("LoadShare", ()=>{
 			const page: "debates" | "global" = map.id == globalMapID ? "global" : "debates";
 			store.main.page = page;
 			store.main[page]["subpage"] = rootPageDefaultChilds[page];

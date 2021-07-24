@@ -8,7 +8,7 @@ import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEditTimes.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
 import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, HolderType, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map} from "dm_common";
-import {Observer} from "web-vcore";
+import {Observer, RunInAction} from "web-vcore";
 import {styles} from "../../../../Utils/UI/GlobalStyles.js";
 import {ShowSignInPopup} from "../../NavBar/UserPanel.js";
 import {ShowAddChildDialog} from "./NodeUI_Menu/Dialogs/AddChildDialog.js";
@@ -121,13 +121,13 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						onClick={e=>{
 							if (e.button != 0) return;
 							for (const path of pathsToChangedInSubtree) {
-								runInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path), Date.now()));
+								RunInAction("NodeUIMenu.MarkSubtreeAsViewed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(GetNodeID(path), Date.now()));
 							}
 						}}/>}
 				{inList &&
 					<VMenuItem text="Find in maps" style={styles.vMenuItem}
 						onClick={e=>{
-							runInAction("NodeUIMenu.FindInCurrentMap", ()=>{
+							RunInAction("NodeUIMenu.FindInCurrentMap", ()=>{
 								store.main.search.findNode_state = "activating";
 								store.main.search.findNode_node = node.id;
 								store.main.search.findNode_resultPaths = [];

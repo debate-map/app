@@ -3,7 +3,7 @@ import Moment from "web-vcore/nm/moment";
 import {Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {GADDemo} from "UI/@GAD/GAD.js";
-import {ES, HSLA, Link, Observer} from "web-vcore";
+import {ES, HSLA, Link, Observer, RunInAction} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {GetUser, Map} from "dm_common";
@@ -37,7 +37,7 @@ export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: bo
 					<Div style={{position: "relative", flex: columnWidths[0]}}>
 						<Link text={map.name} to={toURL.toString({domain: false})} style={E({fontSize: 17}, GADDemo && {color: HSLA(222, 0.33, 0.5, 0.8)})} onClick={e=>{
 							e.preventDefault();
-							runInAction("MapEntryUI.onClick", ()=>{
+							RunInAction("MapEntryUI.onClick", ()=>{
 								store.main.debates.selectedMapID = map.id;
 							});
 						}}/>

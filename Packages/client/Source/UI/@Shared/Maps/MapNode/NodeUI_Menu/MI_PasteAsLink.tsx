@@ -2,7 +2,7 @@ import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {styles} from "Utils/UI/GlobalStyles.js";
-import {Observer} from "web-vcore";
+import {Observer, RunInAction} from "web-vcore";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "Store";
@@ -66,7 +66,7 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 					async function proceed() {
 						const {argumentWrapperID} = await linkCommand.RunOnServer();
 						if (argumentWrapperID) {
-							runInAction("PasteAsLink_MenuItem.proceed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
+							RunInAction("PasteAsLink_MenuItem.proceed", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(argumentWrapperID, Date.now()));
 						}
 					}
 				}}/>

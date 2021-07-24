@@ -1,5 +1,6 @@
 import {O} from "web-vcore";
 import {CreateStringEnum} from "web-vcore/nm/js-vextensions.js";
+import {makeObservable} from "web-vcore/nm/mobx";
 
 export enum SortType {
 	creatorID = "creatorID",
@@ -20,6 +21,8 @@ export enum ShowChangesSinceType {
 }
 
 export class MapState {
+	constructor() { makeObservable(this); }
+
 	@O initDone = false;
 
 	@O list_sortBy = SortType.creationDate;

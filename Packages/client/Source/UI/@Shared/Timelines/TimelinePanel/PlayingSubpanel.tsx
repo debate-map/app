@@ -161,7 +161,7 @@
 // 		} */
 // 		const newListY = GetScreenRect(this.listRootEl).y;
 // 		if (this.listY != newListY) {
-// 			runInAction("PlayingSubpanel_timer.setListY", ()=>this.listY = newListY);
+// 			RunInAction("PlayingSubpanel_timer.setListY", ()=>this.listY = newListY);
 // 		}
 
 // 		const mapState = GetMapState(map.id);
@@ -183,7 +183,7 @@
 // 						new ACTMap_PlayingTimelineStepSet({ mapID: map.id, stepIndex: newTargetStepIndex }),
 // 						new ACTMap_PlayingTimelineAppliedStepSet({ mapID: map.id, stepIndex: newMaxTargetStepIndex }),
 // 					)); */
-// 					runInAction("PlayingSubpanel_timer.setStepAndAppliedStep", ()=>{
+// 					RunInAction("PlayingSubpanel_timer.setStepAndAppliedStep", ()=>{
 // 						mapState.playingTimeline_step = newTargetStepIndex;
 // 						mapState.playingTimeline_appliedStep = newMaxTargetStepIndex;
 // 					});
@@ -260,7 +260,7 @@
 // 		// const { targetTimeDirection } = this.state;
 // 		if (this.targetTimeDirection != "right") {
 // 			// this.SetState({ autoScroll: false });
-// 			runInAction("PlayingSubpanel.OnScroll", ()=>store.main.timelines.autoScroll = false);
+// 			RunInAction("PlayingSubpanel.OnScroll", ()=>store.main.timelines.autoScroll = false);
 // 		}
 
 // 		// this.UpdateTargetInfo_Throttled();
@@ -282,7 +282,7 @@
 // 		// this.Stash({ messageAreaHeight });
 // 		// todo: make sure this is correct
 // 		useEffect(()=>{
-// 			runInAction("PlayingSubpanel.render.useEffect", ()=>this.messageAreaHeight = messageAreaHeight); // set for other observers
+// 			RunInAction("PlayingSubpanel.render.useEffect", ()=>this.messageAreaHeight = messageAreaHeight); // set for other observers
 // 		});
 
 // 		// const targetTime_floored = GetPlayingTimelineTime(map.id); // no need to watch, since only used as start-pos for video, if in initial mount
@@ -339,7 +339,7 @@
 // 					}}
 // 					onPosChanged={(pos, source)=>{
 // 						if (pos == 0) return; // ignore "pos 0" event; this just happens when the video first loads (even if seek-to time set otherwise)
-// 						runInAction("VideoPlayer.onPosChanged", ()=>{
+// 						RunInAction("VideoPlayer.onPosChanged", ()=>{
 // 							// this.SetState({ targetTime: pos });
 // 							// just set state directly, because the timer above will handle the refreshing
 // 							// this.state['targetTime'] = pos;
@@ -377,7 +377,7 @@
 // 							<DropDownContent style={{right: 0, width: 300, zIndex: zIndexes.subNavBar}}><Column>
 // 								<Row>
 // 									<Text>Node-reveal highlight time:</Text>
-// 									<Spinner ml={5} min={0} value={nodeRevealHighlightTime} onChange={val=>runInAction("PlayingSubpanel.nodeRevealHighlightTime.onChange", ()=>store.main.timelines.nodeRevealHighlightTime = val)}/>
+// 									<Spinner ml={5} min={0} value={nodeRevealHighlightTime} onChange={val=>RunInAction("PlayingSubpanel.nodeRevealHighlightTime.onChange", ()=>store.main.timelines.nodeRevealHighlightTime = val)}/>
 // 								</Row>
 // 							</Column></DropDownContent>
 // 						</DropDown>
@@ -408,7 +408,7 @@
 // 								/* this.autoScrollDisabling = false;
 // 								this.SetState({ autoScroll: newAutoScroll }, () => WaitXThenRun(0, () => this.autoScrollDisabling = true)); */
 // 								// this.SetState({ autoScroll: newAutoScroll });
-// 								runInAction("PlayingSubpanel.targetArrow.onClick", ()=>store.main.timelines.autoScroll = newAutoScroll);
+// 								RunInAction("PlayingSubpanel.targetArrow.onClick", ()=>store.main.timelines.autoScroll = newAutoScroll);
 // 							}, [targetStepIndex])}/>
 // 					</Column>
 // 					<ScrollView style={ES({flex: 1})} contentStyle={ES({flex: 1, position: "relative", padding: 7, filter: "drop-shadow(rgb(0, 0, 0) 0px 0px 10px)"})} onScroll={this.OnScroll}>

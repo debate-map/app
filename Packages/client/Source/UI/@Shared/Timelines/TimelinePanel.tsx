@@ -18,7 +18,7 @@
 
 // 		const mapState = GetMapState(map.id);
 // 		function SetSubpanel(subpanel: TimelineSubpanel) {
-// 			runInAction("TimelinePanel.SetSubpanel", ()=>mapState.timelineOpenSubpanel = subpanel);
+// 			RunInAction("TimelinePanel.SetSubpanel", ()=>mapState.timelineOpenSubpanel = subpanel);
 // 		}
 // 		return (
 // 			<Row style={{height: "100%", alignItems: "flex-start"}}>

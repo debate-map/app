@@ -2,7 +2,7 @@ import {Button, Column, Div} from "web-vcore/nm/react-vcomponents.js";
 import {AddGlobalStyle, BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
-import {Observer} from "web-vcore";
+import {Observer, RunInAction} from "web-vcore";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {NotificationMessage} from "Store/main/@NotificationMessage.js";
 
@@ -74,7 +74,7 @@ export class MessageUI extends BaseComponent<{message: NotificationMessage}, {}>
 							":hover": {backgroundColor: `rgba(${backgroundColor.split(",").map(a=>(parseInt(a) * 0.9).RoundTo(1)).join(",")},.7)`},
 						}}
 						onClick={e=>{
-							runInAction("MessageUI.RemoveMessage.onClick", ()=>store.main.notificationMessages.Remove(message));
+							RunInAction("MessageUI.RemoveMessage.onClick", ()=>store.main.notificationMessages.Remove(message));
 						}}>
 						X
 					</Button>
