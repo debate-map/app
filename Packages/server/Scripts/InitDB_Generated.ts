@@ -307,6 +307,22 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "visibility_nodes", (t, n)=>t.text(n).nullable());
 	});
 
+	await knex.schema.createTable(`${v}feedback_proposals`, t=>{
+		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "type", (t, n)=>t.text(n));
+		RunFieldInit(t, "title", (t, n)=>t.text(n));
+		RunFieldInit(t, "text", (t, n)=>t.text(n));
+		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
+		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
+		RunFieldInit(t, "editedAt", (t, n)=>t.bigInteger(n).nullable());
+		RunFieldInit(t, "completedAt", (t, n)=>t.bigInteger(n).nullable());
+	});
+
+	await knex.schema.createTable(`${v}feedback_userInfos`, t=>{
+		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "proposalsOrder", (t, n)=>t.specificType(n, "text[]"));
+	});
+
 	await End(knex, info);
 }
 /*export function down() {

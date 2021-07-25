@@ -10,4 +10,16 @@ export const CustomBuildHooksPlugin = function PgNumericToFloatPlugin(builder: S
 		);
 		return build;
 	});
+
+	/*builder.hook("inflection", inflectors=>{
+		return {
+			...inflectors,
+			_tableName(table) {
+				const result = inflectors._tableName.call(this, table);
+				if (result == "feedbackProposal") return "feedback_proposal";
+				if (result == "feedbackProposals") return "feedback_proposals";
+				return result;
+			},
+		};
+	});*/
 };

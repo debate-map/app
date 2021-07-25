@@ -4,7 +4,7 @@ import {ignore} from "web-vcore/nm/mobx-sync.js";
 import {Graphlink} from "web-vcore/nm/mobx-graphlink.js";
 import {immerable, setUseProxies, setAutoFreeze} from "web-vcore/nm/immer.js";
 import {GraphDBShape} from "dm_common/Source/DBShape";
-import {Feedback_RootState} from "web-vcore/nm/graphql-feedback";
+import {Feedback_DBShape, Feedback_RootState, Feedback_store} from "web-vcore/nm/graphql-feedback";
 import {MainState} from "./main.js";
 
 //ConfigureMobX();
@@ -18,12 +18,15 @@ export class RootState {
 
 	// @O forum: any;
 	// @O feedback: Feedback_RootState;
-	@O.ref feedback = new Feedback_RootState(); // needed due to details of how mobx/immer work -- will probably make unneeded later
 	//@O.ref feedback: Feedback_RootState; // O.ref needed due to details of how mobx/immer work -- will probably make unneeded later
 
 	/* @O @ignore firebase: any;
 	@O @ignore firestore: any; */
 	@O @ignore graphlink: Graphlink<RootState, GraphDBShape>;
+
+	// modules
+	@O.ref feedback = Feedback_store; // @O.ref needed due to details of how mobx/immer work -- will probably make unneeded later
+	//@O @ignore feedback_graphlink = feedback_graph;
 
 	// @O @ignore vMenu: VMenuState;
 }

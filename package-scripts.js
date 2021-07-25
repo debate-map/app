@@ -19,14 +19,14 @@ function TSScript(packageName, scriptSubpath, ...args) {
 	const nodeFlags = `--loader ts-node/esm.mjs --experimental-specifier-resolution=node`;
 	return `${cdCommand}cross-env ${envPart} node ${nodeFlags} ${scriptSubpath} ${args.join(" ")}`;
 }
-function FindPackagePath(packageName) {
+function FindPackagePath(packageName, asAbsolute = true) {
 	const pathsToCheck = [
 		`./node_modules/web-vcore/node_modules/${packageName}`, // if web-vcore is symlinked
 		`./node_modules/${packageName}`, // if web-vcore is not symlinked
 	];
 	for (const path of pathsToCheck) {
 		if (fs.existsSync(path)) {
-			return path;
+			return asAbsolute ? paths.resolve(path) : path;
 		}
 	}
 	throw new Error(`Could not find package: "${packageName}"`);
@@ -117,13 +117,12 @@ Object.assign(scripts, {
 });
 
 function GetBuildInitDBScriptCommand(watch) {
-	return TSScript("server", `../../${FindPackagePath("mobx-graphlink")}/Scripts/BuildInitDBScript.ts`,
-		`--classesFolder ../../Packages/common/Source/DB`,
+	return TSScript("server", `${FindPackagePath("mobx-graphlink")}/Scripts/BuildInitDBScript.ts`,
+		`--classFolders ../../Packages/common/Source/DB ${paths.join(FindPackagePath("graphql-feedback"), "Source/Store/db")}`,
 		`--templateFile ./Scripts/InitDB_Template.ts`,
 		`--outFile ./Scripts/InitDB_Generated.ts`,
 		watch ? "--watch" : "");
 }
-
 
 // if server-start command/flags change, update the entry in "launch.json" as well
 function GetStartServerCommand() {

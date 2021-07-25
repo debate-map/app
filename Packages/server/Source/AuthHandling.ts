@@ -2,11 +2,12 @@ import passport from "passport";
 import {Strategy as GoogleStrategy} from "passport-google-oauth20";
 import express, {RequestHandler} from "express";
 import cookieSession from "cookie-session";
-import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden} from "dm_common";
+import {AddUser, GetUser, GetUsers, GetUserHiddensWithEmail, User, UserHidden, systemUserID} from "dm_common";
 import {GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 import expressSession from "express-session";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {pgClient, pgPool} from "./Main.js";
+import {graph} from "./Utils/LibIntegrations/MobXGraphlink.js";
 
 //type ExpressApp = Express.Application;
 type ExpressApp = ReturnType<typeof express>;
@@ -54,6 +55,7 @@ passport.use(new GoogleStrategy(
 			providerData: [profile._json],
 		});
 		const command = new AddUser({user, userHidden});
+		command._userInfo_override = graph.userInfo; // use system-user to run the AddUser command
 		const {id: newID} = await command.RunLocally();
 		console.log("AddUser done! NewID:", newID);
 

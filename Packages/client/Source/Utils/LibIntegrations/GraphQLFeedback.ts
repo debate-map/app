@@ -65,5 +65,6 @@ export function InitGraphQLFeedback() {
 		}, */
 		GetNewURLForStoreChanges: actionFunc=>GetNewURLForStoreChanges(actionFunc, rootStore=>rootStore.feedback),
 	});
-	store.feedback = Feedback_store;
+	/*store.feedback = Feedback_store;
+	store.feedback_graphlink = feedback_graph;*/
 }

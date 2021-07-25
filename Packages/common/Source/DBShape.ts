@@ -1,4 +1,5 @@
 import {Collection} from "web-vcore/nm/mobx-graphlink.js";
+import {Proposal, Feedback_UserInfo} from "web-vcore/nm/graphql-feedback.js";
 import {AccessPolicy} from "./DB/accessPolicies/@AccessPolicy.js";
 import {Map_NodeEdit} from "./DB/mapNodeEdits/@MapNodeEdit.js";
 import {Map} from "./DB/maps/@Map.js";
@@ -10,8 +11,8 @@ import {MapNodeRevision} from "./DB/nodes/@MapNodeRevision.js";
 import {MapNodeTag} from "./DB/nodeTags/@MapNodeTag.js";
 import {Share} from "./DB/shares/@Share.js";
 import {Term} from "./DB/terms/@Term.js";
-import {User} from "./DB/users/@User.js"; // eslint-disable-line
-import {UserHidden} from "./DB/userHiddens/@UserHidden.js"; // eslint-disable-line
+import {User} from "./DB/users/@User.js";
+import {UserHidden} from "./DB/userHiddens/@UserHidden.js";
 import {VisibilityDirective} from "./DB/visibilityDirectives/@VisibilityDirective.js";
 
 declare module "mobx-graphlink/Dist/UserTypes" {
@@ -25,9 +26,13 @@ function DefineCollection<T>(typeConstructor: new(..._)=>T): Collection<T> {
 
 export class GraphDBShape {
 	//general: Collection_Closed<{data: GeneralData}>;
+
+	// from modules
 	/*modules: Collection_Closed<{
 		// feedback: FeedbackDBShape;
 	}>;*/
+	feedback_proposals = DefineCollection(Proposal);
+	feedback_userInfos = DefineCollection(Feedback_UserInfo);
 
 	//accessPolicies: Collection<AccessPolicy>;
 	accessPolicies = DefineCollection(AccessPolicy);
