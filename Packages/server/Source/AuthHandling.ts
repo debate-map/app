@@ -45,9 +45,19 @@ passport.use(new GoogleStrategy(
 		}
 
 		console.log(`User not found for email "${profile_firstEmail}". Creating new.`);
+
+		let permissionGroups = {basic: true, verified: false, mod: false, admin: false};
+		if (process.env.DEV == "true") {
+			const usersCount = await pgClient.query("SELECT count(*) FROM (SELECT 1 FROM users LIMIT 10) t;");
+			if (usersCount.rowCount <= 1) {
+				console.log("First non-system user signing-in; marking as admin.");
+				permissionGroups = {basic: true, verified: true, mod: true, admin: true};
+			}
+		}
+
 		const user = new User({
 			displayName: profile.displayName,
-			permissionGroups: {basic: true, verified: false, mod: false, admin: false},
+			permissionGroups,
 			photoURL: profile.photos?.[0]?.value,
 		});
 		const userHidden = new UserHidden({

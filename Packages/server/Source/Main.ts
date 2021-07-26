@@ -99,6 +99,7 @@ app.use(
 				require("@graphile-contrib/pg-simplify-inflector"),
 				require("@graphile/subscriptions-lds").default,
 				require("postgraphile-plugin-connection-filter"),
+				require("@pyramation/postgraphile-plugin-fulltext-filter"),
 				CustomInflectorPlugin,
 				//CustomWrapResolversPlugin,
 				//AuthenticationPlugin,

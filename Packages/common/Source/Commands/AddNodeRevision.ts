@@ -12,7 +12,8 @@ export function GetSearchTerms(str: string) {
 }
 /** Returned terms are all lowercase. */
 export function GetSearchTerms_Advanced(str: string, separateTermsWithWildcard = true) {
-	const terms = str.toLowerCase().replace(/[^a-zA-Z0-9*]/g, ' ').replace(/ +/g, ' ').trim().split(' ').filter(a=>a != ""); // eslint-disable-line
+	//const terms = str.toLowerCase().replace(/[^a-zA-Z0-9*\-]/g, " ").replace(/ +/g, " ").trim().split(" ").filter(a=>a != ""); // eslint-disable-line
+	const terms = str.replace(/ +/g, " ").trim().split(" ").filter(a=>a != ""); // eslint-disable-line
 	const wholeTerms = CE(terms.filter(a=>(separateTermsWithWildcard ? !a.includes("*") : true)).map(a=>a.replace(/\*/g, ""))).Distinct().filter(a=>a != "");
 	const partialTerms = CE(terms.filter(a=>(separateTermsWithWildcard ? a.includes("*") : false)).map(a=>a.replace(/\*/g, ""))).Distinct().filter(a=>a != "");
 	return {wholeTerms, partialTerms};
@@ -67,6 +68,7 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 		const {revision} = this.payload;
 		//db.set('general/data/.lastNodeRevisionID', this.revisionID);
 		//db.set(dbp`nodes/${revision.node}/.currentRevision`, this.revisionID);
+		delete revision.titles_tsvector; // db populates this automatically
 		db.set(dbp`nodeRevisions/${revision.id}`, revision);
 		if (this.nodeEdit) {
 			//db.set(dbp`maps/${mapID}/nodeEditTimes/data/.${revision.node}`, revision.createdAt);

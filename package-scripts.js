@@ -2,20 +2,20 @@ const fs = require("fs");
 const paths = require("path");
 
 const _packagesRootStr = "{packagesRoot}"; // useful for setting working-directory to "./Packages/", eg. so when running webpack, its error paths are "resolvable" by vscode window #1
-function TSScript(packageName, scriptSubpath, ...args) {
+function TSScript(/** @type {{pkg: string, envStrAdd: string}} */ opts, scriptSubpath, ...args) {
 	let cdCommand = "";
 	let tsConfigPath = "";
-	if (packageName) {
-		if (packageName == _packagesRootStr) {
+	if (opts.pkg) {
+		if (opts.pkg == _packagesRootStr) {
 			cdCommand = `cd Packages && `;
 			tsConfigPath = "client/Scripts/tsconfig.json";
 		} else {
-			cdCommand = `cd Packages/${packageName} && `;
+			cdCommand = `cd Packages/${opts.pkg} && `;
 			tsConfigPath = "Scripts/tsconfig.json";
 		}
 	}
 
-	const envPart = `TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=${tsConfigPath} TS_NODE_TRANSPILE_ONLY=true`;
+	const envPart = `TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=${tsConfigPath} TS_NODE_TRANSPILE_ONLY=true ${opts.envStrAdd}`;
 	const nodeFlags = `--loader ts-node/esm.mjs --experimental-specifier-resolution=node`;
 	return `${cdCommand}cross-env ${envPart} node ${nodeFlags} ${scriptSubpath} ${args.join(" ")}`;
 }
@@ -53,7 +53,7 @@ Object.assign(scripts, {
 			//part2: `cross-env NODE_OPTIONS="--experimental-modules" ts-node --project Scripts/tsconfig.json Scripts/Bin/Server.ts`,
 			//part2: `cross-env ts-node-dev --project Scripts/tsconfig.json --ignore none Scripts/Bin/Server.ts`,
 			//part2: TSScript("client", "Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
-			part2: TSScript(_packagesRootStr, "client/Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
+			part2: TSScript({pkg: _packagesRootStr}, "client/Scripts/Bin/Server"), // for now, call directly; no ts-node-dev [watching] till figure out use with new type:module approach
 
 			//withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=${memLimit} --experimental-modules" "ts-node-dev --project Scripts/tsconfig.json Scripts/Bin/Server"`,
 			withStats: `cross-env-shell NODE_ENV=development _USE_TSLOADER=true OUTPUT_STATS=true NODE_OPTIONS="--max-old-space-size=${memLimit}" "ts-node-dev --project client/Scripts/tsconfig.json --ignore none client/Scripts/Bin/Server"`,
@@ -63,7 +63,7 @@ Object.assign(scripts, {
 			run: "cd Packages/client && cypress run",
 		},
 		clean: "cd Packages/client && shx rm -rf Dist",
-		compile: TSScript("client", "Scripts/Bin/Compile"),
+		compile: TSScript({pkg: "client"}, "Scripts/Bin/Compile"),
 		build: {
 			default: `cross-env-shell "npm start client.clean && npm start client.compile"`,
 			dev: `cross-env NODE_ENV=development npm start client.build`,
@@ -93,7 +93,7 @@ Object.assign(scripts, {
 		// setup
 		//initDB: "psql -f ./Packages/server/Scripts/InitDB.sql debate-map",
 		//initDB: TSScript("server", "Scripts/InitDB.ts"),
-		initDB: TSScript("server", "Scripts/KnexWrapper.ts", "initDB"),
+		initDB: TSScript({pkg: "server"}, "Scripts/KnexWrapper.ts", "initDB"),
 		initDB_freshScript: `nps server.buildInitDBScript && nps server.initDB`,
 		//migrateDBToLatest: TSScript("server", "Scripts/KnexWrapper.ts", "migrateDBToLatest"),
 		// use this to dc sessions, so you can delete the debate-map db, so you can recreate it with the commands above
@@ -117,7 +117,7 @@ Object.assign(scripts, {
 });
 
 function GetBuildInitDBScriptCommand(watch) {
-	return TSScript("server", `${FindPackagePath("mobx-graphlink")}/Scripts/BuildInitDBScript.ts`,
+	return TSScript({pkg: "server"}, `${FindPackagePath("mobx-graphlink")}/Scripts/BuildInitDBScript.ts`,
 		`--classFolders ../../Packages/common/Source/DB ${paths.join(FindPackagePath("graphql-feedback"), "Source/Store/db")}`,
 		`--templateFile ./Scripts/InitDB_Template.ts`,
 		`--outFile ./Scripts/InitDB_Generated.ts`,
@@ -135,5 +135,5 @@ function GetStartServerCommand() {
 	//return `cd Packages/server && node --experimental-modules ./Dist/Main.js`;
 	//return `cd Packages/server && node -r esm ./Dist/Main.js`; // didn't enable named-exports from common-js, despite this suggesting it would: https://github.com/standard-things/esm/issues/897
 	//return TSScript("server", "Source/Main.ts");
-	return TSScript("server", "Dist/Main.js"); // use TSScript helper for its module-resolution flags (not used for TS->JS transpilation)
+	return TSScript({pkg: "server", envStrAdd: "DEV=true"}, "Dist/Main.js"); // use TSScript helper for its module-resolution flags (not used for TS->JS transpilation)
 }

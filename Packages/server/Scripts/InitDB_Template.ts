@@ -91,6 +91,28 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		await knex.schema.renameTable(tableName, RemoveVPrefix(tableName));
 	}
 
+	// set up trigger to auto set/update the tsvector columns in each table
+	/*await knex.raw(`
+		CREATE TRIGGER "nodeRevisions_tsvectorUpdate" 
+		BEFORE INSERT OR UPDATE ON "nodeRevisions"
+		FOR EACH ROW 
+		WHEN (OLD.titles IS DISTINCT FROM NEW.titles)
+		EXECUTE PROCEDURE tsvector_update_trigger(search_vector, 'nodeRevisions.titles', NEW.name);
+	`);*/
+	/*await knex.raw(`
+		CREATE TRIGGER "nodeRevisions_tsvectorUpdate" 
+		BEFORE INSERT OR UPDATE ON "nodeRevisions"
+		FOR EACH ROW 
+		WHEN (OLD.titles IS DISTINCT FROM NEW.titles)
+		EXECUTE PROCEDURE tsvector_update_trigger(search_vector, 'nodeRevisions.titles', NEW.name);
+	`);*/
+
+	// set up indexes
+	await knex.raw(`
+		CREATE INDEX ON "nodeRevisions"
+		USING gin (titles_tsvector);
+	`);
+
 	// set up app_user role for postgraphile connection, set up RLS, etc.
 	await knex.raw(`
 		DO $$ BEGIN

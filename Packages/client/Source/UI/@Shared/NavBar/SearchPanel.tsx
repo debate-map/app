@@ -10,8 +10,10 @@ import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction, flow} from "web-vcore/nm/mobx.js";
 import {Validate, GetAsync, UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, GetSearchTerms_Advanced, GetNodeChildLinks, GetNodeRevisions, MapNodeRevision, globalMapID, HolderType} from "dm_common";
+import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, GetNodeChildLinks, GetNodeRevisions, MapNodeRevision, globalMapID, HolderType, GetSearchTerms_Advanced} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
+import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
+import {gql} from "web-vcore/nm/@apollo/client";
 import {MapUI} from "../Maps/MapUI.js";
 import {NodeUI_Menu_Stub} from "../Maps/MapNode/NodeUI_Menu.js";
 
@@ -57,20 +59,24 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 		const searchTerms = GetSearchTerms_Advanced(queryStr);
 		// if no whole-terms, and not unrestricted mode, cancel search (db would give too many results)
 		if (searchTerms.wholeTerms.length == 0 && !unrestricted) return;
+		const queryStr_withoutPartialTerms = searchTerms.wholeTerms.join(" ");
 
-		// todo
-		/*let query = fire.subs.firestoreDB.collection(DBPath({}, "nodeRevisions")) as CollectionReference | Query;
-		for (const term of searchTerms.wholeTerms) {
-			query = query.where(`titles.allTerms.${term}`, "==", true);
-		}
+		const result = await apolloClient.query({
+			query: gql`
+				query SearchQuery($queryStr: String!) {
+					nodeRevisions(filter: {titles_tsvector: {matches: $queryStr}}) {
+						nodes { id }
+					}
+				}
+			`,
+			variables: {queryStr},
+		});
+		const docIDs = result.data.nodeRevisions.nodes.map(a=>a.id);
 
-		// perform the actual search and show the results
-		const {docs} = await query.get();
-		const docIDs = docs.map(a=>a.id);
 		RunInAction("SearchPanel.PerformSearch_part2", ()=>{
 			store.main.search.searchResults_partialTerms = searchTerms.partialTerms;
 			store.main.search.searchResults_nodeRevisionIDs = docIDs;
-		});*/
+		});
 	}
 
 	render() {
@@ -83,7 +89,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 			for (const term of searchResults_partialTerms) {
 				results_nodeRevisions = results_nodeRevisions.filter(a=>{
 					const titles = GetAllNodeRevisionTitles(a);
-					return titles.every(a=>a.toLowerCase().includes(term));
+					return titles.every(b=>b.toLowerCase().includes(term));
 				});
 			}
 		}
@@ -106,9 +112,9 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 							}
 						}}/>
 					<InfoButton ml={5} text={`
-						Wildcards can be used, but there must be at least one non-wildcard term. Example: climate chang*
-
-						(You can also enter the exact ID of a node or node-revision, to see the single matching node.)
+						* Terms can be excluded from the search results be adding "-" to the start. (eg: climate change -solar)
+						* If you enter the exact ID of a node or node-revision, that matching entry will be shown.
+						* Advanced: If match-by-stem is insufficient, wildcards can be used for basic match-by-contains, but there must be at least one non-wildcard term. (eg: climate chang*)
 					`.AsMultiline(0)}/>
 					<Button ml={5} text="Search" onClick={()=>this.PerformSearch()}/>
 				</Row>

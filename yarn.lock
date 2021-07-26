@@ -1355,6 +1355,20 @@ __metadata:
   languageName: node
   linkType: soft
 
+"@pyramation/postgraphile-plugin-fulltext-filter@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@pyramation/postgraphile-plugin-fulltext-filter@npm:2.0.0"
+  dependencies:
+    graphile-build-pg: ^4.2.0
+    pg-tsquery: ^8.1.0
+    postgraphile-plugin-connection-filter: ^2.0.0
+  peerDependencies:
+    postgraphile-core: ^4.2.0
+    postgraphile-plugin-connection-filter: ^2.0.0
+  checksum: a59111b0d58bb9581156f70a6c81df6067aea4689e125349ec4d51199924386a4a6d8ef8f549e4e6fc1a8e19cf6cfff8063ca6cbcc91f0ae0f8d259980546ff9
+  languageName: node
+  linkType: hard
+
 "@tootallnate/once@npm:1":
   version: 1.1.2
   resolution: "@tootallnate/once@npm:1.1.2"
@@ -2997,6 +3011,7 @@ __metadata:
     "@n1ru4l/graphql-live-query": ^0.7.1
     "@n1ru4l/graphql-live-query-patch": ^0.3.1
     "@pg-lq/postgraphile-plugin": ^0.0.5
+    "@pyramation/postgraphile-plugin-fulltext-filter": ^2.0.0
     "@types/body-parser": ^1.19.1
     "@types/cors": ^2.8.11
     "@types/express": ^4.17.12
@@ -3743,7 +3758,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"graphile-build-pg@npm:4.12.1":
+"graphile-build-pg@npm:4.12.1, graphile-build-pg@npm:^4.2.0":
   version: 4.12.1
   resolution: "graphile-build-pg@npm:4.12.1"
   dependencies:
@@ -5699,6 +5714,13 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
+"pg-tsquery@npm:^8.1.0":
+  version: 8.2.0
+  resolution: "pg-tsquery@npm:8.2.0"
+  checksum: fa0bc42d83219b3be86673a2e7fc47068827aea51a4fd75f199f2c517c68f77af7039902806d7500132f64171c03d28c97f5b5a805d42c7b0e38b1a1553a6f36
+  languageName: node
+  linkType: hard
+
 "pg-types@npm:^2.1.0, pg-types@npm:^2.2.0":
   version: 2.2.0
   resolution: "pg-types@npm:2.2.0"
@@ -5801,7 +5823,7 @@ fsevents@~2.3.2:
   languageName: node
   linkType: hard
 
-"postgraphile-plugin-connection-filter@npm:^2.2.1":
+"postgraphile-plugin-connection-filter@npm:^2.0.0, postgraphile-plugin-connection-filter@npm:^2.2.1":
   version: 2.2.1
   resolution: "postgraphile-plugin-connection-filter@npm:2.2.1"
   checksum: 225b404d5cf774ac5c7a5c0d79efbbeacf145d5de47742f1136c7e2eabad37643f5a2143c07f78e6c9b9123482c5fc94ad17067b2957b4fd74db6fb0cad1ee90

@@ -112,6 +112,13 @@ export class MapNodeRevision {
 	})
 	titles = {base: ""} as TitlesMap;
 
+	//@DB((t, n)=>t.specificType(n, "tsvector"))
+	//@DB((t, n)=>t.specificType(n, "tsvector generated always as (to_tsvector('pg_catalog.english', translations#>>'{en,name}')) stored"))
+	@DB((t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english', titles, '["string"]')) stored`).notNullable())
+	//@Field({type: "null"}) // user should not pass this in themselves
+	@Field({$gqlType: "JSON", $noWrite: true}, {opt: true})
+	titles_tsvector?: any;
+
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: ["null", "string"]}, {opt: true}) // add null-type, for later when the payload-validation schema is derived from the main schema
 	note?: string;

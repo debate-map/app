@@ -19,6 +19,7 @@
 		"@n1ru4l/graphql-live-query": "^0.7.1",
 		"@n1ru4l/graphql-live-query-patch": "^0.3.1",
 		"@pg-lq/postgraphile-plugin": "^0.0.5",
+		"@pyramation/postgraphile-plugin-fulltext-filter": "^2.0.0",
 		"@types/body-parser": "^1.19.1",
 		"@types/cors": "^2.8.11",
 		"@types/express": "^4.17.12",
