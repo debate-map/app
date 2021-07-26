@@ -1,7 +1,7 @@
 import {O} from "web-vcore";
-import {store} from "Store";
-import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {GetMap} from "dm_common";
+import {makeObservable} from "web-vcore/nm/mobx";
 
 export class SocialPageState {
+	constructor() { makeObservable(this); }
+	@O showAll = false;
 }

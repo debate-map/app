@@ -10,9 +10,10 @@ import {makePluginHook, postgraphile} from "postgraphile";
 import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
 import fetch from "node-fetch";
 import cookieParser from "cookie-parser";
-import {AddSchema, CreateCommandsPlugin, GenerateUUID, GetSchemaJSON, mglClasses, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, CreateCommandsPlugin, GenerateUUID, GetSchemaJSON, mglClasses, schemaEntryJSONs, UserInfo} from "web-vcore/nm/mobx-graphlink.js";
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
+import type {User} from "dm_common";
 import {SetUpAuthHandling} from "./AuthHandling.js";
 import {AuthExtrasPlugin} from "./Mutations/AuthenticationPlugin.js";
 import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
@@ -82,7 +83,8 @@ app.use((req, res, next)=>{
 	next();
 });*/
 
-let serverWS_currentCommandUserID: string|n;
+//let serverWS_currentCommandUserID: string|n;
+let serverWS_currentCommandUser: User|n;
 
 app.use(
 	postgraphile(
@@ -155,7 +157,7 @@ app.use(
 						//console.log("User in command resolver:", info.context.req.user?.id);
 						Assert(info.context.req.user != null, "Cannot run command on server unless logged in.");
 						console.log(`Preparing to run command "${info.command.constructor.name}". @args:`, info.args, "@userID:", info.context.req.user.id);
-						serverWS_currentCommandUserID = info.context.req.user.id;
+						serverWS_currentCommandUser = info.context.req.user;
 					},
 					postCommandRun: info=>{
 						if (info.error) {
@@ -163,7 +165,7 @@ app.use(
 						} else {
 							console.log(`Command "${info.command.constructor.name}" done! @returnData:`, info.returnData);
 						}
-						serverWS_currentCommandUserID = null;
+						serverWS_currentCommandUser = null;
 					},
 				}),
 			],
@@ -194,17 +196,23 @@ app.use(
 					// have postgraphile use the "postgres" user for server-to-server-ws requests (which is used for db-requests within Command runs)
 					//settings["role"] = "postgres";
 
-					console.log("Making pg-request, for server-to-server websocket connection (for ws init, and Command runs). @currentCommandUserID:", serverWS_currentCommandUserID);
-					//Assert(serverWS_currentCommandUserID, "serverWS_currentCommandUserID is null!");
-					if (serverWS_currentCommandUserID) {
-						settings["app.current_user_id"] = serverWS_currentCommandUserID; // if user isn't signed-in, still set setting (else RLS errors)
-					}
+					console.log("Making pg-request, for server-to-server websocket connection (for ws init, and Command runs). @currentCommandUserID:", serverWS_currentCommandUser?.id);
+					//Assert(serverWS_currentCommandUser?.id, "serverWS_currentCommandUser is null!");
+					SetUserFlags(serverWS_currentCommandUser);
 				} else {
 					// have postgraphile use the "app_user" user for client requests, rather than the "postgres" superuser (needed for RLS policies to work)
 					settings["role"] = "app_user";
 
-					// make user-id accessible to Postgres sql-code, so RLS can function
-					settings["app.current_user_id"] = req["user"]?.id ?? "[not signed in]"; // if user isn't signed-in, still set setting (else RLS errors)
+					SetUserFlags(req["user"]);
+				}
+
+				// make user-info accessible to Postgres sql-code, so RLS can function
+				function SetUserFlags(user: User|n) {
+					settings["app.current_user_id"] = user?.id ?? "[not signed in]"; // if user isn't signed-in, still set setting (else RLS errors)
+					settings["app.current_user_basic"] = `${user?.permissionGroups.basic ?? false}`;
+					settings["app.current_user_verified"] = `${user?.permissionGroups.verified ?? false}`;
+					settings["app.current_user_mod"] = `${user?.permissionGroups.mod ?? false}`;
+					settings["app.current_user_admin"] = `${user?.permissionGroups.admin ?? false}`;
 				}
 
 				return settings;

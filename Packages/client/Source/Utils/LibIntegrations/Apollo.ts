@@ -115,10 +115,10 @@ export function InitApollo() {
 			store.main.userID_apollo_ready = true;*/
 			// rather than getting user-id from cookie, get it from the server's websocket-helper response
 			if (graph.userInfo == null) {
-				graph.userInfo = {
+				graph.SetUserInfo({
 					//id: store.main.userID_apollo!,
 					id: userID,
-				};
+				});
 			}
 		});
 	})();

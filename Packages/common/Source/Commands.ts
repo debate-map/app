@@ -14,7 +14,6 @@ export * from "./Commands/AddTerm.js";
 //export * from "./Commands/AddTimelineStep.js";
 export * from "./Commands/AddUser.js";
 export * from "./Commands/ChangeClaimType.js";
-export * from "./Commands/ChangeNodeOwnerMap.js";
 export * from "./Commands/CloneNode.js";
 export * from "./Commands/DeleteAccessPolicy.js";
 export * from "./Commands/DeleteMedia.js";

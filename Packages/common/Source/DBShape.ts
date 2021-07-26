@@ -1,5 +1,6 @@
 import {Collection} from "web-vcore/nm/mobx-graphlink.js";
 import {Proposal, Feedback_UserInfo} from "web-vcore/nm/graphql-feedback.js";
+import {CommandRun} from "./DB/commandRuns/@CommandRun.js";
 import {AccessPolicy} from "./DB/accessPolicies/@AccessPolicy.js";
 import {Map_NodeEdit} from "./DB/mapNodeEdits/@MapNodeEdit.js";
 import {Map} from "./DB/maps/@Map.js";
@@ -36,7 +37,7 @@ export class GraphDBShape {
 
 	//accessPolicies: Collection<AccessPolicy>;
 	accessPolicies = DefineCollection(AccessPolicy);
-	visibilityDirectives = DefineCollection(VisibilityDirective);
+	commandRuns = DefineCollection(CommandRun);
 	medias = DefineCollection(Media);
 	maps = DefineCollection(Map);
 	mapNodeEdits = DefineCollection(Map_NodeEdit);
@@ -58,6 +59,7 @@ export class GraphDBShape {
 	userHiddens = DefineCollection(UserHidden);
 	//userMapInfo = DefineCollection(UserMapInfoSet); // $userID (key) -> $mapID -> layerStates -> $layerID -> [boolean, for whether enabled]
 	//userViewedNodes = DefineCollection(ViewedNodeSet); // removed due to privacy concerns
+	visibilityDirectives = DefineCollection(VisibilityDirective);
 }
 
 /* export interface FirebaseDBShape {

@@ -25,7 +25,7 @@ export class UserHidden {
 	@Field({type: "array"})
 	providerData: ProviderData[];
 
-	// custom
+	// background
 	// ==========
 
 	@DB((t, n)=>t.text(n).nullable())
@@ -47,4 +47,11 @@ export class UserHidden {
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
 	backgroundCustom_position?: string|n;
+
+	// others
+	// ==========
+
+	@DB((t, n)=>t.boolean(n))
+	@Field({type: "boolean"})
+	addToStream = true;
 }

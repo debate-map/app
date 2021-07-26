@@ -1,5 +1,7 @@
 export * from "./DB/accessPolicies.js";
 export * from "./DB/accessPolicies/@AccessPolicy.js";
+export * from "./DB/commandRuns.js";
+export * from "./DB/commandRuns/@CommandRun.js";
 export * from "./DB/general.js";
 export * from "./DB/media.js";
 export * from "./DB/media/@Media.js";

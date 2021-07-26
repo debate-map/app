@@ -38,9 +38,9 @@ export class MainState {
 	// pages (and nav-bar panels)
 	// ==========
 
-	// stream: {subpage: string};
-	// chat: {subpage: string};
-	// reputation: {subpage: string};
+	//@O stream = new StreamState();
+	//@O chat: {subpage: string};
+	//@O reputation: {subpage: string};
 
 	@O database = new DatabaseState();
 	@O feedback = {} as {subpage: string};

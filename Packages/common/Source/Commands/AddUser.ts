@@ -11,6 +11,7 @@ import {systemUserID} from "../DB_Constants.js";
 		$userHidden: {$ref: "UserHidden"},
 	}),
 	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
+	exposeToGraphQL: false,
 })
 export class AddUser extends Command<{user: User, userHidden: UserHidden}, {id: string}> {
 	Validate() {

@@ -8,6 +8,7 @@ import {AddNodeRevision} from "./AddNodeRevision.js";
 	payloadSchema: ()=>SimpleSchema({
 		// leave empty; clients shouldn't be calling this anyway
 	}),
+	exposeToGraphQL: false,
 })
 export class AddNode extends Command<{mapID: string|n, node: MapNode, revision: MapNodeRevision}, {}> {
 	sub_addRevision: AddNodeRevision;

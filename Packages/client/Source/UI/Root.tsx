@@ -33,6 +33,7 @@ import {DebatesUI} from "./Debates.js";
 import {FeedbackUI} from "./Feedback.js";
 import {ForumUI} from "./Forum.js";
 import {SocialUI} from "./Social.js";
+import {StreamPanel} from "./@Shared/NavBar/StreamPanel";
 
 ColorPickerBox.Init(ReactColor, chroma);
 
@@ -302,9 +303,9 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 					key={page} // use key, so that error-message clears when user changes pages
 				>
 					<main style={{position: "relative", flex: 1, overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "flex-start"}}>
-						{/* <Route path='/stream'><StreamUI/></Route>
+						{/*{page == "stream" && <StreamPanel/>}
 						<Route path='/chat'><ChatUI/></Route>
-						<Route path='/reputation'><ReputationUI/></Route> */}
+						<Route path='/reputation'><ReputationUI/></Route>*/}
 
 						{page == "database" && <DatabaseUI/>}
 						{page == "forum" && <ForumUI/>}
@@ -316,8 +317,8 @@ class RootUI extends BaseComponentPlus({} as {}, {}) {
 						{page == "debates" && <DebatesUI/>}
 						{page == "global" && <GlobalUI/>}
 
-						{/* <Route path='/search'><SearchUI/></Route>
-						<Route path='/guide'><GuideUI/></Route> */}
+						{/*<Route path='/search'><SearchUI/></Route>
+						<Route path='/guide'><GuideUI/></Route>*/}
 						{page == "profile" && <UserProfileUI profileUser={Me()}/>}
 					</main>
 				</ErrorBoundary>

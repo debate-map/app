@@ -126,9 +126,20 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 
 		alter table app_public."userHiddens" enable row level security;
 		DO $$ BEGIN
-			create policy "accessPolicy_idMustMatchCallerID" on app_public."userHiddens" as PERMISSIVE for all using (id = current_setting('app.current_user_id'));
+			create policy "userHiddens_rls" on app_public."userHiddens" as PERMISSIVE for all using (id = current_setting('app.current_user_id'));
 		EXCEPTION WHEN DUPLICATE_OBJECT THEN
-			RAISE NOTICE 'RLS policy accessPolicy_idMustMatchCallerID already exists, not re-creating';
+			RAISE NOTICE 'RLS policy userHiddens_rls already exists, not re-creating';
+		END $$;
+
+		alter table app_public."commandRuns" enable row level security;
+		DO $$ BEGIN
+			create policy "commandRuns_rls" on app_public."commandRuns" as PERMISSIVE for all using (
+				public = true
+				OR actor = current_setting('app.current_user_id')
+				OR current_setting('app.current_user_admin') = 'true'
+			);
+		EXCEPTION WHEN DUPLICATE_OBJECT THEN
+			RAISE NOTICE 'RLS policy commandRuns_rls already exists, not re-creating';
 		END $$;
 	`);
 

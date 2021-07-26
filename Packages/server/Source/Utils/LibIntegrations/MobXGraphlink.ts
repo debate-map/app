@@ -26,6 +26,6 @@ export function InitGraphlink() {
 		//pgClient, // rather than set it here, update the field each time pgClient is recreated (ie. in pgPool's "connect" handler) 
 	});
 	//graph.userInfo = {id: systemUserID, displayName: systemUserName};
-	graph.userInfo = {id: systemUserID};
+	graph.SetUserInfo({id: systemUserID});
 	ProvideReactModule(React);
 }

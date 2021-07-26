@@ -29,6 +29,7 @@ const users = TypeCheck(User as new()=>(User & {hidden: UserHidden}), {
 		edits: 0,
 		lastEditAt: null,
 		hidden: {
+			addToStream: false,
 			id: systemUserID,
 			email: "debatemap@gmail.com",
 			providerData: [],

@@ -126,9 +126,19 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 
 		alter table app_public."userHiddens" enable row level security;
 		DO $$ BEGIN
-			create policy "accessPolicy_idMustMatchCallerID" on app_public."userHiddens" as PERMISSIVE for all using (id = current_setting('app.current_user_id'));
+			create policy "userHiddens_rls" on app_public."userHiddens" as PERMISSIVE for all using (id = current_setting('app.current_user_id'));
 		EXCEPTION WHEN DUPLICATE_OBJECT THEN
-			RAISE NOTICE 'RLS policy accessPolicy_idMustMatchCallerID already exists, not re-creating';
+			RAISE NOTICE 'RLS policy userHiddens_rls already exists, not re-creating';
+		END $$;
+
+		alter table app_public."commandRuns" enable row level security;
+		DO $$ BEGIN
+			create policy "commandRuns_rls" on app_public."commandRuns" as PERMISSIVE for all using (
+				actor = current_setting('app.current_user_id')
+				OR current_setting('app.current_user_admin') = 'true'
+			);
+		EXCEPTION WHEN DUPLICATE_OBJECT THEN
+			RAISE NOTICE 'RLS policy commandRuns_rls already exists, not re-creating';
 		END $$;
 	`);
 
@@ -171,6 +181,16 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "base", (t, n)=>t.text(n).nullable().references("id").inTable(v + `accessPolicies`).DeferRef());
 		RunFieldInit(t, "permissions_base", (t, n)=>t.jsonb(n));
 		RunFieldInit(t, "permissions_userExtends", (t, n)=>t.jsonb(n));
+	});
+
+	await knex.schema.createTable(`${v}commandRuns`, t=>{
+		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "actor", (t, n)=>t.text(n).references("id").inTable(v + "users").DeferRef());
+		RunFieldInit(t, "runTime", (t, n)=>t.bigInteger(n));
+		RunFieldInit(t, "public", (t, n)=>t.boolean(n));
+		RunFieldInit(t, "commandName", (t, n)=>t.text(n));
+		RunFieldInit(t, "commandPayload", (t, n)=>t.jsonb(n));
+		RunFieldInit(t, "returnData", (t, n)=>t.jsonb(n));
 	});
 
 	await knex.schema.createTable(`${v}mapNodeEdits`, t=>{
@@ -302,6 +322,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "backgroundCustom_color", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "backgroundCustom_url", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "backgroundCustom_position", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "addToStream", (t, n)=>t.boolean(n));
 	});
 
 	await knex.schema.createTable(`${v}users`, t=>{

@@ -49,8 +49,8 @@ export class NavBar extends BaseComponentPlus({} as {}, {}) {
 			}}>
 				<div style={{display: "flex"}}>
 					<span style={{position: "absolute", left: 0}}>
-						{/* <NavBarPanelButton text="Stream" panel="stream" corner="top-left"/>
-						<NavBarPanelButton text="Chat" panel="chat" corner="top-left"/>
+						<NavBarPanelButton text="Stream" panel="stream" corner="top-left"/>
+						{/* <NavBarPanelButton text="Chat" panel="chat" corner="top-left"/>
 						<NavBarPanelButton text={
 							<Div className="cursorSet" style={{position: "relative", height: 45}}>
 								<Div style={{color: "rgba(255,255,255,1)", justifyContent: "center"}}>Rep: n/a</Div>
