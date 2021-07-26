@@ -46,8 +46,7 @@ export class UserPanel extends BaseComponentPlus({}, {}) {
 						<Button text="Edit profile" style={{width: 100}}/>
 					</Link>
 					<Button ml={5} text="Sign out" style={{width: 100}} onClick={()=>{
-						//graph.LogOut();
-						// todo
+						window.location.href = GetDBServerURL("/signOut");
 					}}/>
 				</Row>
 			</Column>

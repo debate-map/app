@@ -68,7 +68,7 @@ export const pgPool = new Pool({
 });
 export var pgClient: PoolClient;
 pgPool.on("connect", client=>{
-	if (pgClient != null) console.warn("pgClient recreated...");
+	console.warn(`pgClient ${pgClient != null ? "re" : ""}created...`);
 	pgClient = client;
 	graph.subs.pgClient = pgClient;
 });
@@ -219,6 +219,13 @@ app.use(
 InitApollo(serverLaunchID);
 InitGraphlink();
 AddWVCSchemas(AddSchema); // while we don't want to initialize the full web-vcore lib, we do want its vector schemas
+
+app.get("/", (req, res)=>{
+	res.send(`
+		<p>This is the URL for the database server, which is not meant to be opened directly by your browser.</p>
+		<p>Navigate to <a href="https://debatemap.app">debatemap.app</a> instead. (or <a href="http://localhost:3005">localhost:3005</a> if running Debate Map locally)</p>
+	`.AsMultiline(0));
+});
 
 app.listen(dbPort);
 console.log("Server started.");

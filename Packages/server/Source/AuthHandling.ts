@@ -156,6 +156,17 @@ export function SetUpAuthHandling(app: ExpressApp) {
 			next();
 		});
 
+	app.get("/signOut", (req, res)=>{
+		req.logOut();
+		if (req.session?.destroy) {
+			req.session.destroy(()=>{
+				res.redirect("http://localhost:3005");
+			});
+		} else {
+			res.redirect("http://localhost:3005");
+		}
+	});
+
 	// for testing commands, as server-side
 	/*app.get("/Test1", async(req, res, next)=>{
 		console.log("Trying to add user... @req.body:", req.body);
