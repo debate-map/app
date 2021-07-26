@@ -29,7 +29,9 @@ export const pageTree = new Page({}, {
 		home: new Page(),
 		about: new Page(),
 	}),
-	social: new Page(),
+	social: new Page({}, {
+		stream: new Page(),
+	}),
 	debates: new Page({simpleSubpages: false}),
 	global: new Page({}, {
 		map: new Page(),

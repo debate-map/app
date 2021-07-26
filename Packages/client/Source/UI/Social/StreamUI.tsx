@@ -16,7 +16,8 @@ export class StreamUI extends BaseComponentPlus({panel: false} as {panel?: boole
 		return (
 			<Column>
 				<Row center mb={5}>
-					<CheckBox text="Add to stream:" enabled={userHidden != null} value={userHidden?.addToStream ?? false} onChange={val=>{
+					<Text>Recent changes:</Text>
+					<CheckBox ml="auto" text="Add to stream:" enabled={userHidden != null} value={userHidden?.addToStream ?? false} onChange={val=>{
 						new SetUserData_Hidden({id: MeID()!, updates: {addToStream: val}}).RunOnServer();
 					}}/>
 					<InfoButton ml={5} text="When enabled, contributions you make to maps and such will be shown publicly on the Social page and Stream panel."/>
