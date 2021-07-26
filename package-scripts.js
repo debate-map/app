@@ -15,7 +15,7 @@ function TSScript(/** @type {{pkg: string, envStrAdd: string}} */ opts, scriptSu
 		}
 	}
 
-	const envPart = `TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=${tsConfigPath} TS_NODE_TRANSPILE_ONLY=true ${opts.envStrAdd}`;
+	const envPart = `TS_NODE_SKIP_IGNORE=true TS_NODE_PROJECT=${tsConfigPath} TS_NODE_TRANSPILE_ONLY=true ${opts.envStrAdd ?? ""}`;
 	const nodeFlags = `--loader ts-node/esm.mjs --experimental-specifier-resolution=node`;
 	return `${cdCommand}cross-env ${envPart} node ${nodeFlags} ${scriptSubpath} ${args.join(" ")}`;
 }

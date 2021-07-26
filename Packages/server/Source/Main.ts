@@ -19,6 +19,7 @@ import {CustomBuildHooksPlugin} from "./Plugins/CustomBuildHooksPlugin.js";
 import {CustomInflectorPlugin} from "./Plugins/CustomInflectorPlugin.js";
 import {InitApollo} from "./Utils/LibIntegrations/Apollo.js";
 import {graph, InitGraphlink} from "./Utils/LibIntegrations/MobXGraphlink.js";
+import {PostGraphileFulltextFilterPlugin} from "./Plugins/FullTextFilterPlugin.js";
 //import {OtherResolversPlugin} from "./Plugins/OtherResolversPlugin.js";
 
 type PoolClient = import("pg").PoolClient;
@@ -99,7 +100,8 @@ app.use(
 				require("@graphile-contrib/pg-simplify-inflector"),
 				require("@graphile/subscriptions-lds").default,
 				require("postgraphile-plugin-connection-filter"),
-				require("@pyramation/postgraphile-plugin-fulltext-filter"),
+				//require("@pyramation/postgraphile-plugin-fulltext-filter"),
+				PostGraphileFulltextFilterPlugin,
 				CustomInflectorPlugin,
 				//CustomWrapResolversPlugin,
 				//AuthenticationPlugin,

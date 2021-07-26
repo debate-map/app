@@ -64,6 +64,18 @@ async function Start(knex: Knex.Transaction) {
 	//CreateDBIfNotExists("debate-map");
 	// todo: add function-call to satify: "[this script should also automatically remove the entry for the latest migration from the `knex_migrations_lock` table, if it exists, so that you can keep rerunning it without blockage]"
 
+	// create custom english dictionary, with all stop-words excluded; this makes searching a bit more powerful, by letting you include/exclude words like "the", "other", "might", "over", etc.
+	await knex.raw(`
+		CREATE TEXT SEARCH DICTIONARY english_stem_nostop (
+			Template = snowball,
+			Language = english
+		);
+
+		CREATE TEXT SEARCH CONFIGURATION public.english_nostop ( COPY = pg_catalog.english );
+		ALTER TEXT SEARCH CONFIGURATION public.english_nostop
+			ALTER MAPPING FOR asciiword, asciihword, hword_asciipart, hword, hword_part, word WITH english_stem_nostop;
+	`);
+
 	return {v: vPrefix};
 }
 type ThenArg<T> = T extends PromiseLike<infer U> ? U : T;
@@ -91,21 +103,11 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		await knex.schema.renameTable(tableName, RemoveVPrefix(tableName));
 	}
 
-	// set up trigger to auto set/update the tsvector columns in each table
-	/*await knex.raw(`
-		CREATE TRIGGER "nodeRevisions_tsvectorUpdate" 
-		BEFORE INSERT OR UPDATE ON "nodeRevisions"
-		FOR EACH ROW 
-		WHEN (OLD.titles IS DISTINCT FROM NEW.titles)
-		EXECUTE PROCEDURE tsvector_update_trigger(search_vector, 'nodeRevisions.titles', NEW.name);
-	`);*/
-	/*await knex.raw(`
-		CREATE TRIGGER "nodeRevisions_tsvectorUpdate" 
-		BEFORE INSERT OR UPDATE ON "nodeRevisions"
-		FOR EACH ROW 
-		WHEN (OLD.titles IS DISTINCT FROM NEW.titles)
-		EXECUTE PROCEDURE tsvector_update_trigger(search_vector, 'nodeRevisions.titles', NEW.name);
-	`);*/
+	// set up indexes
+	await knex.raw(`
+		CREATE INDEX ON "nodeRevisions"
+		USING gin (titles_tsvector);
+	`);
 
 	// set up app_user role for postgraphile connection, set up RLS, etc.
 	await knex.raw(`
@@ -248,7 +250,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
 		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
 		RunFieldInit(t, "titles", (t, n)=>t.jsonb(n));
-		RunFieldInit(t, "titles_tsvector", (t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english', titles, '["string"]')) stored`).notNullable());
+		RunFieldInit(t, "titles_tsvector", (t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english_nostop', titles, '["string"]')) stored`).notNullable());
 		RunFieldInit(t, "note", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "displayDetails", (t, n)=>t.jsonb(n).nullable());
 		RunFieldInit(t, "termAttachments", (t, n)=>t.specificType(n, "text[]"));
