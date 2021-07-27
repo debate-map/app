@@ -10,7 +10,7 @@ import {MapNodeL3, GetParentNodeL3, GetParentNodeID, GetLinkUnderParent, IsPremi
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
 @Observer
-export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {dataError: null as string|n}) {
+export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: MapNodeL3, path: string}, {dataError: null as string|n}) {
 	detailsUI: NodeDetailsUI|n;
 	render() {
 		const {show, map, node, path} = this.props;

@@ -14,11 +14,10 @@ Some brief notes:
 
 To improve performance (and make it easier for the live-query system to detect permission changes), the access policies are not "used directly" for controlling access. Instead, an access-policy's settings are "baked" into special columns within the rows that they apply to.
 
-Specifically, these two fields/columns:
-* c_groupAccess
-* c_userAccess
+Specifically, this field/column:
+* c_accessFlags
 
-Order of application (strongest last): c_groupAccess.GROUPX_grant, c_groupAccess.GROUPX_deny, c_userAccess.USERX_grant, c_userAccess.USERX_deny
+Order of application (strongest last): c_accessFlags.group_grant_GROUPX, c_accessFlags.group_deny_GROUPX, c_accessFlags.user_grant_USERX, c_accessFlags.user_deny_USERX
 
 This "baking" process occurs:
 * When a row is first created.
@@ -26,17 +25,21 @@ This "baking" process occurs:
 
 ## Tables using access-policies
 
-The below is the list of tables where row-access is controlled by access-policies:
+Tables where row-access is controlled by own-field access-policies (`row -> refToAccessPolicy [check access through c_accessFlags cache-field]`):
 * medias
 * maps
-* mapNodeEdits (uses access-policy of node)
 * nodes
 * nodeRatings
 * nodeRevisions
+
+Tables where row-access is controlled by other-table access-policies (`row -> refToOtherTableRow -> otherTableRow [verify by attempting other-table-row access]`):
+* commandRuns (uses access-policy of associated map/node/etc.)
+* mapNodeEdits (uses access-policy of node)
 * nodeChildLinks (uses access-policy of parent and child, denying if either denies)
 * nodeTags (uses access-policy of referenced nodes, denying if any denies)
 
 ## Other access restrictions
 
 While access-policies are the main way that row access is controlled, there are some others as well:
+* commandRuns: In addition to the access-policy restrictions, the "public_base" field must be true.
 * userHiddens: Each user can only access their own row.

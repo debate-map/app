@@ -83,9 +83,10 @@ export function GetNodeViewDataPath_FromRootNodeViews(mapID: string, pathOrPathN
 } */
 
 export const GetNodeView = CreateAccessor((<{
-	(mapID: string, pathOrPathNodes: string | string[] | n, createNodeViewsIfMissing?: true): MapNodeView;
-	(mapID: string, pathOrPathNodes: string | string[] | n, createNodeViewsIfMissing?: false): MapNodeView|n;
-}>((mapID: string, pathOrPathNodes: string | string[] | n, createNodeViewsIfMissing = true): MapNodeView|n=>{
+	(mapID: string|n, pathOrPathNodes: string | string[] | n, createNodeViewsIfMissing?: true): MapNodeView;
+	(mapID: string|n, pathOrPathNodes: string | string[] | n, createNodeViewsIfMissing?: false): MapNodeView|n;
+}>((mapID: string|n, pathOrPathNodes: string | string[] | n, createNodeViewsIfMissing = true): MapNodeView|n=>{
+	if (mapID == null) return null;
 	const nodeViews = GetNodeViewsAlongPath(mapID, pathOrPathNodes, createNodeViewsIfMissing);
 	return nodeViews.LastOrX();
 })));

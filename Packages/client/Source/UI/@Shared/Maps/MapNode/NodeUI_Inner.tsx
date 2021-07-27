@@ -50,7 +50,8 @@ import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
 // export type NodeHoverExtras = {panel?: string, term?: number};
 
 type Props = {
-	indexInNodeList: number, map: Map, node: MapNodeL3, path: string, width?: number|n, widthOverride?: number|n,
+	indexInNodeList: number, node: MapNodeL3, path: string, map?: Map,
+	width?: number|n, widthOverride?: number|n, backgroundFillPercentOverride?: number,
 	panelPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 } & {dragInfo?: DragInfo};
 
@@ -68,7 +69,7 @@ type Props = {
 @Observer
 export class NodeUI_Inner extends BaseComponentPlus(
 	{panelPosition: "left"} as Props,
-	{hovered: false, hoverPanel: null as string|n, hoverTermID: null as string|n, local_openPanel: null as string|n, lastWidthWhenNotPreview: 0},
+	{hovered: false, hoverPanel: null as string|n, hoverTermID: null as string|n, local_selected: false as boolean|n, local_openPanel: null as string|n, lastWidthWhenNotPreview: 0},
 ) {
 	root: ExpandableBox|n;
 	titlePanel: TitlePanel|n;
@@ -99,13 +100,13 @@ export class NodeUI_Inner extends BaseComponentPlus(
 	});
 
 	render() {
-		const {indexInNodeList, map, node, path, width, widthOverride, panelPosition, useLocalPanelState, style} = this.props;
-		let {hovered, hoverPanel, hoverTermID, local_openPanel, lastWidthWhenNotPreview} = this.state;
+		const {indexInNodeList, map, node, path, width, widthOverride, backgroundFillPercentOverride, panelPosition, useLocalPanelState, style} = this.props;
+		let {hovered, hoverPanel, hoverTermID, local_selected, local_openPanel, lastWidthWhenNotPreview} = this.state;
 
 		// connector part
 		// ==========
 
-		const nodeView = GetNodeView(map.id, path);
+		const nodeView = GetNodeView(map?.id, path);
 		//let sinceTime = GetTimeFromWhichToShowChangedNodes(map.id);
 		let sinceTime = 0;
 		/* let pathsToChangedNodes = GetPathsToNodesChangedSinceX(map._id, sinceTime);
@@ -140,7 +141,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		const useReasonScoreValuesForThisNode = store.main.maps.weighting == WeightingType.reasonScore && (node.type == MapNodeType.argument || node.type == MapNodeType.claim);
 		const reasonScoreValues = useReasonScoreValuesForThisNode && RS_GetAllValues(node.id, path, true) as ReasonScoreValues_RSPrefix;
 
-		const backgroundFillPercent = GetFillPercent_AtPath(ratingNode, ratingNodePath, null);
+		const backgroundFillPercent = backgroundFillPercentOverride ?? GetFillPercent_AtPath(ratingNode, ratingNodePath, null);
 		const markerPercent = GetMarkerPercent_AtPath(ratingNode, ratingNodePath, null);
 
 		const form = GetNodeForm(node, path);
@@ -196,7 +197,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 		const nodeReversed = form == ClaimForm.negation;
 
-		const leftPanelShow = nodeView?.selected || hovered; // || local_selected;
+		const leftPanelShow = nodeView?.selected || hovered || local_selected;
 		const panelToShow = hoverPanel || local_openPanel || nodeView?.openPanel;
 		const subPanelShow = node.type == MapNodeType.claim && (node.current.references || node.current.quote || node.current.media);
 		const bottomPanelShow = leftPanelShow && panelToShow;
@@ -204,7 +205,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 		// const parentNodeView = GetNodeView(map.id, parentPath);
 		// const parentNodeView = Watch(() => parentPath && GetNodeView_SelfOnly(map.id, parentPath), [map.id, parentPath]);
-		const parentNodeView = GetNodeView(map.id, parentPath);
+		const parentNodeView = GetNodeView(map?.id, parentPath);
 		// if combined with parent arg (ie. premise of single-premise arg), use parent's expansion state for this box
 		if (combinedWithParentArgument) {
 			expanded = parentNodeView?.expanded ?? false;
@@ -222,15 +223,15 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		}, []);
 		const onClick = UseCallback(e=>{
 			if ((e.nativeEvent as any).ignore) return;
-			/* if (useLocalPanelState) {
-				this.SetState({local_selected: true});
+			if (useLocalPanelState) {
+				this.SetState({local_selected: !local_selected});
 				return;
-			} */
+			}
 
-			if (!nodeView?.selected) {
+			if (!nodeView?.selected && map) {
 				ACTMapNodeSelect(map.id, path);
 			}
-		}, [map.id, nodeView, path]);
+		}, [local_selected, map, nodeView?.selected, path, useLocalPanelState]);
 		const onDirectClick = UseCallback(e=>{
 			RunInAction("NodeUI_Inner.onDirectClick", ()=>{
 				if (combinedWithParentArgument && parent) {
@@ -250,10 +251,10 @@ export class NodeUI_Inner extends BaseComponentPlus(
 
 			// if collapsing subtree, and this node is premise of single-premise arg, start collapsing from parent (the argument node), so that its relevance args are collapsed as well
 			const recursivelyCollapsing = expanded && e.altKey;
-			ACTMapNodeExpandedSet({mapID: map.id, path: combinedWithParentArgument ? parentPath! : path, expanded: !expanded, resetSubtree: recursivelyCollapsing});
+			ACTMapNodeExpandedSet({mapID: map?.id, path: combinedWithParentArgument ? parentPath! : path, expanded: !expanded, resetSubtree: recursivelyCollapsing});
 			e.nativeEvent["ignore"] = true; // for some reason, "return false" isn't working
 			// return false;
-		}, [combinedWithParentArgument, expanded, map.id, parentPath, path]);
+		}, [combinedWithParentArgument, expanded, map?.id, parentPath, path]);
 
 		const renderInner = (dragInfo?: DragInfo)=>{
 			const asDragPreview = dragInfo?.snapshot.isDragging;
@@ -294,7 +295,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 								}
 
 								RunInAction("NodeUI_Inner.onPanelButtonClick", ()=>{
-									const nodeView_final = nodeView ?? GetNodeViewsAlongPath(map.id, path, true).Last();
+									const nodeView_final = nodeView ?? GetNodeViewsAlongPath(map?.id, path, true).Last();
 									if (nodeView_final.openPanel != panel) {
 										nodeView_final.VSet("openPanel", panel ?? DEL);
 									} else {
@@ -345,7 +346,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			if (!path.includes("/")) return null; // don't make draggable if root-node of map
 			return {
 				type: "MapNode",
-				draggableInfo: new DraggableInfo({nodePath: path, mapID: map.id}), // mapID needed for DND-completer to create the link command
+				draggableInfo: new DraggableInfo({nodePath: path, mapID: map?.id}), // mapID needed for DND-completer to create the link command
 				index: indexInNodeList,
 			};
 		};
@@ -384,7 +385,7 @@ WaitXThenRun(0, ()=>{
 @Observer
 class NodeUI_BottomPanel extends BaseComponentPlus(
 	{} as {
-		map: Map, node: MapNodeL3, path: string, parent: MapNodeL3|n,
+		map: Map|n, node: MapNodeL3, path: string, parent: MapNodeL3|n,
 		width: number|n, widthOverride: number|n, panelPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermID: string|n, onTermHover: (id: string)=>void,
 		backgroundColor: chroma.Color,
 	},
@@ -399,7 +400,7 @@ class NodeUI_BottomPanel extends BaseComponentPlus(
 			width, widthOverride, panelPosition, panelToShow, hovered, hoverTermID, onTermHover,
 			backgroundColor,
 		} = this.props;
-		const nodeView = GetNodeView(map.id, path);
+		const nodeView = GetNodeView(map?.id, path);
 
 		this.panelsOpened.add(panelToShow);
 		const renderPanel = (panelName: string, uiFunc: (show: boolean)=>JSX.Element)=>{

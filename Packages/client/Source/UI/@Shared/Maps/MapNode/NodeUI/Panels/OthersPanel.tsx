@@ -10,7 +10,7 @@ import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.j
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 
 @Observer
-export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType|n}) {
+export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: MapNodeL3, path: string}, {convertToType: null as AttachmentType|n}) {
 	render() {
 		const {show, map, node, path} = this.props;
 		let {convertToType} = this.state;

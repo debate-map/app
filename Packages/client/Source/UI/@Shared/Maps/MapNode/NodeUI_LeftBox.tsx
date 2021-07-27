@@ -1,22 +1,14 @@
 import chroma from "chroma-js";
-import {E} from "web-vcore/nm/js-vextensions.js";
-import {Button, Span} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentWithConnector, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingAverage_AtPath, GetRatings, GetRatingTypeInfo, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType_Info, MeID, NodeRatingType} from "dm_common";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Observer} from "web-vcore";
-import {MapNodeL3, ClaimForm} from "dm_common";
-import {GetNodeForm, IsPremiseOfSinglePremiseArgument, GetRatingTypesForNode} from "dm_common";
-import {GetParentNodeL3} from "dm_common";
-import {MapNodeType_Info} from "dm_common";
-import {NodeRatingType, GetRatingTypeInfo} from "dm_common";
-import {GetRatings, GetRatingAverage_AtPath} from "dm_common";
-import {IsUserCreatorOrMod} from "dm_common";
-import {MeID} from "dm_common";
-import {Map} from "dm_common";
+import {E} from "web-vcore/nm/js-vextensions.js";
+import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import {Button, Span} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 
 type Props = {
-	map: Map, path: string, node: MapNodeL3,
+	map: Map|n, path: string, node: MapNodeL3,
 	panelPosition?: "left" | "below", local_openPanel?: string|n,
 	backgroundColor: chroma.Color, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
@@ -30,7 +22,7 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 			backgroundColor, asHover, inList, onPanelButtonHover, onPanelButtonClick, style,
 			children,
 		} = this.props;
-		const nodeView = GetNodeView(map.id, path);
+		const nodeView = GetNodeView(map?.id, path);
 		const openPanel = local_openPanel || nodeView?.openPanel;
 
 		const form = GetNodeForm(node, path);
@@ -123,7 +115,7 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 }
 
 type PanelButton_Props = {
-	map: Map, path: string, openPanel: string|n, panel: string, text: string, style?,
+	map: Map|n, path: string, openPanel: string|n, panel: string, text: string, style?,
 	onPanelButtonHover: (panel: string|n)=>void, onPanelButtonClick: (panel: string)=>void,
 };
 class PanelButton extends BaseComponent<PanelButton_Props, {}> {

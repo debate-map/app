@@ -14,13 +14,13 @@ export class IDAndCreationInfoUI extends BaseComponentPlus({singleLine: false} a
 		const createdAtTimeStr = Moment(createdAt).format("YYYY-MM-DD HH:mm:ss");
 		const userLink = (
 			<Link text={creator == null ? "n/a" : creator.displayName}
-						actionFunc={s=>{
-							if (creator != null) {
-								s.main.page = "database";
-								s.main.database.subpage = "users";
-								s.main.database.selectedUserID = creatorID;
-							}
-						}} />
+				actionFunc={s=>{
+					if (creator != null) {
+						s.main.page = "database";
+						s.main.database.subpage = "users";
+						s.main.database.selectedUserID = creatorID;
+					}
+				}}/>
 		);
 		return (
 			<Column sel style={E(singleLine && {fontSize: 14})}>

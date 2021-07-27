@@ -55,7 +55,7 @@ export const GetNodeChildrenL3_Advanced = CreateAccessor((nodeID: string, path: 
 	return nodeChildrenL3;
 });
 
-export const GetCurrentRevision = CreateAccessor((nodeID: string, path: string, mapID: string): MapNodeRevision=>{
+export const GetCurrentRevision = CreateAccessor((nodeID: string, path: string, mapID: string|n): MapNodeRevision=>{
 	const revisions = GetNodeRevisions(nodeID);
 	// todo: make this take into account the "current lens", etc.
 	return revisions.OrderBy(a=>a.createdAt).Last();

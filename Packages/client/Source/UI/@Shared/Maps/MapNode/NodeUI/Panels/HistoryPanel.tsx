@@ -14,7 +14,7 @@ import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 export const columnWidths = [0.15, 0.3, 0.35, 0.2];
 
 @Observer
-export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {}) {
+export class HistoryPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: MapNodeL3, path: string}, {}) {
 	detailsUI: NodeDetailsUI;
 	render() {
 		const {show, map, node, path} = this.props;

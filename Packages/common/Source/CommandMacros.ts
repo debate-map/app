@@ -75,14 +75,15 @@ Command.augmentDBUpdates = (command: Command<any>, db: DBHelper)=>{
 	const commandClass = command.constructor as typeof Command;
 	if (commandsToCompletelyIgnore.includes(commandClass)) return;
 
-	const makePublic = commandsToMakePublic.includes(commandClass) && command["user_addToStream"]; // field set in augmentValidate
+	const makePublic_base = commandsToMakePublic.includes(commandClass)
+		&& command["user_addToStream"]; // field set in augmentValidate
 
 	const id = GenerateUUID();
 	db.set(dbp`commandRuns/${id}`, new CommandRun({
 		id,
 		actor: command.userInfo.id,
 		runTime: Date.now(),
-		public: makePublic,
+		public_base: makePublic_base,
 		commandName: commandClass.name,
 		// Use "command.payload_orig" to be on the safe side, since "command.payload" is often modified during Validate();
 		// 	normally that's fine, but this way's safer, to prevent private data leakage. (return-data should be/be-made sufficient for info-display needs)

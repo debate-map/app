@@ -6,7 +6,7 @@ import {Button, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcompone
 import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod} from "dm_common";
+import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, MapNodeRevision} from "dm_common";
 import {ES, InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, RunInAction, VReactMarkdown_Remarkable} from "web-vcore";
 import React from "react";
 import {GetCurrentRevision} from "Store/db_ext/nodes";
@@ -57,7 +57,7 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 @WarnOfTransientObjectProps
 @Observer
 export class TitlePanel extends BaseComponentPlus(
-	{} as {parent: NodeUI_Inner, map: Map, node: MapNodeL2, path: string, indexInNodeList: number, style},
+	{} as {parent: NodeUI_Inner, map: Map|n, node: MapNodeL2, path: string, indexInNodeList: number, style},
 	{newTitle: null as string|n, editing: false, applyingEdit: false},
 ) {
 	OnDoubleClick = ()=>{
@@ -78,9 +78,9 @@ export class TitlePanel extends BaseComponentPlus(
 		const {map, path} = this.props;
 		// parent.SetState({hoverPanel: "definitions", hoverTermID: termID});
 		RunInAction("TitlePanel_OnTermClick", ()=>{
-			let nodeView_final = GetNodeView(map.id, path);
+			let nodeView_final = GetNodeView(map?.id, path);
 			if (nodeView_final == null) {
-				nodeView_final = GetNodeViewsAlongPath(map.id, path, true).Last();
+				nodeView_final = GetNodeViewsAlongPath(map?.id, path, true).Last();
 			}
 			nodeView_final.openPanel = "definitions";
 			nodeView_final.openTermID = termID;
@@ -93,7 +93,7 @@ export class TitlePanel extends BaseComponentPlus(
 		let {newTitle, editing, applyingEdit} = this.state;
 		// UseImperativeHandle(ref, () => ({ OnDoubleClick }));
 
-		const nodeView = GetNodeView(map.id, path);
+		const nodeView = GetNodeView(map?.id, path);
 		const latex = node.current.equation?.latex;
 		//const isSubnode = IsNodeSubnode(node);
 
@@ -104,7 +104,7 @@ export class TitlePanel extends BaseComponentPlus(
 
 		const noteText = (node.current.equation && node.current.equation.explanation) || node.current.note;
 
-		const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map.id).id).filter(a=>a);
+		const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map?.id).id).filter(a=>a);
 
 		const RenderNodeDisplayText = (text: string)=>{
 			const segments = GetSegmentsForTerms(text, termsToSearchFor);
@@ -216,11 +216,11 @@ export class TitlePanel extends BaseComponentPlus(
 
 		const form = GetNodeForm(node, path);
 		const titleKey = {[ClaimForm.negation]: "negation", [ClaimForm.yesNoQuestion]: "yesNoQuestion"}[form] || "base";
-		const newRevision = Clone(node.current);
+		const newRevision = (Clone(node.current) as MapNodeRevision).ExcludeKeys("titles_tsvector").OmitUndefined(true);
 		if (newRevision.titles[titleKey] != newTitle) {
 			newRevision.titles[titleKey] = newTitle;
 
-			const command = new AddNodeRevision({mapID: map.id, revision: newRevision});
+			const command = new AddNodeRevision({mapID: map?.id, revision: newRevision});
 			const revisionID = await command.RunOnServer();
 			RunInAction("TitlePanel.ApplyEdit", ()=>store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now()));
 			//await WaitTillPathDataIsReceiving(DBPath(`nodeRevisions/${revisionID}`));

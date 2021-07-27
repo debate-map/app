@@ -1,20 +1,12 @@
-import {Div, Column, Row, Button, TextInput, DropDown, DropDownTrigger, DropDownContent, Text} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
-import {InfoButton, Observer, GetUpdates, HSLA} from "web-vcore";
-import {TermDefinitionPanel} from "./DefinitionsPanel.js";
-import {Map} from "dm_common";
-import {MapNodeL3} from "dm_common";
-import {GetNodeTags} from "dm_common";
-import {HasModPermissions, IsUserCreatorOrMod} from "dm_common";
-import {MeID} from "dm_common";
+import {DeleteNodeTag, GetNodeTags, GetTagCompClassByTag, HasModPermissions, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeTag, MeID, TagComp_MirrorChildrenFromXToY, UpdateNodeTag} from "dm_common";
 import {ShowAddTagDialog, TagDetailsUI} from "UI/Database/Tags/TagDetailsUI.js";
-import {TagComp_MirrorChildrenFromXToY, MapNodeTag, GetTagCompClassByTag} from "dm_common";
-import {UpdateNodeTag} from "dm_common";
+import {GetUpdates, HSLA, Observer} from "web-vcore";
+import {Button, Column, Row, Text} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {DeleteNodeTag} from "dm_common";
 
 @Observer
-export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map, node: MapNodeL3, path: string}, {}) {
+export class TagsPanel extends BaseComponentPlus({} as {show: boolean, map?: Map|n, node: MapNodeL3, path: string}, {}) {
 	render() {
 		const {show, node} = this.props;
 		const tags = GetNodeTags(node.id);
