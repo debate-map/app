@@ -1,4 +1,4 @@
-import {E} from "web-vcore/nm/js-vextensions.js";
+import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, GenerateUUID, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {AddArgumentAndClaim} from "../Commands.js";
@@ -26,18 +26,20 @@ import {AddNode} from "./AddNode.js";
 		$revisionID: {$ref: "UUID"},
 	}),
 })
-export class AddChildNode extends Command<{mapID: string|n, parentID: string, node: MapNode, revision: MapNodeRevision, link?: NodeChildLink, asMapRoot?: boolean}, {nodeID: string, revisionID: string}> {
+export class AddChildNode extends Command<{mapID: string|n, parentID: string, node: MapNode, revision: MapNodeRevision, link?: NodeChildLink}, {nodeID: string, revisionID: string}> {
 	sub_addNode: AddNode;
-	parent_oldData: MapNode;
+	parent_oldData: MapNode|n;
 	Validate() {
-		const {mapID, parentID, node, revision, asMapRoot} = this.payload;
+		const {mapID, parentID, node, revision} = this.payload;
 		const link = this.payload.link = this.payload.link ?? {} as NodeChildLink;
 
 		this.sub_addNode = this.sub_addNode ?? new AddNode({mapID, node, revision}).MarkAsSubcommand(this);
 		this.sub_addNode.Validate();
 
 		const isAddClaimSub = this.parentCommand instanceof AddArgumentAndClaim && this.parentCommand.sub_addClaim == this;
-		if (!asMapRoot && !isAddClaimSub) {
+		if (isAddClaimSub) {
+			Assert(this.parent_oldData != null);
+		} else {
 			// this.parent_oldChildrenOrder = await GetDataAsync('nodes', parentID, '.childrenOrder') as number[];
 			this.parent_oldData = GetNode.NN(parentID)!;
 		}
@@ -58,17 +60,15 @@ export class AddChildNode extends Command<{mapID: string|n, parentID: string, no
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {parentID, link, asMapRoot} = this.payload;
+		const {parentID, link} = this.payload;
 		db.add(this.sub_addNode.GetDBUpdates());
 
 		// add as child of parent
-		if (!asMapRoot) {
-			/*db.set(dbp`nodes/${parentID}/.children/.${this.sub_addNode.nodeID}`, link);
-			// if parent node is using manual children-ordering, update that array
-			if (this.parent_oldData?.childrenOrder) {
-				db.set(dbp`nodes/${parentID}/.childrenOrder`, (this.parent_oldData.childrenOrder || []).concat([this.sub_addNode.nodeID]));
-			}*/
-			db.set(dbp`nodeChildLinks/${link!.id}`, link);
-		}
+		/*db.set(dbp`nodes/${parentID}/.children/.${this.sub_addNode.nodeID}`, link);
+		// if parent node is using manual children-ordering, update that array
+		if (this.parent_oldData?.childrenOrder) {
+			db.set(dbp`nodes/${parentID}/.childrenOrder`, (this.parent_oldData.childrenOrder || []).concat([this.sub_addNode.nodeID]));
+		}*/
+		db.set(dbp`nodeChildLinks/${link!.id}`, link);
 	}
 }

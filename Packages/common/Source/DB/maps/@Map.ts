@@ -47,8 +47,8 @@ export class Map {
 	@Field({enum: GetValues(MapType)})
 	type: MapType;*/
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
-	@Field({type: "string"})
+	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef({enforceAtTransactionEnd: true}))
+	@Field({type: "string"}, {opt: true})
 	rootNode: string;
 
 	@DB((t, n)=>t.integer(n))
@@ -87,7 +87,7 @@ export class Map {
 	createdAt: number;
 
 	@DB((t, n)=>t.integer(n))
-	@Field({type: "number"})
+	@Field({type: "number"}, {opt: true})
 	edits: number;
 
 	@DB((t, n)=>t.bigInteger(n).nullable())

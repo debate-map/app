@@ -7,7 +7,7 @@ import {ES, HSLA, Link, Observer, RunInAction} from "web-vcore";
 import {store} from "Store";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {GetUser, Map} from "dm_common";
-import {columnWidths} from "./MapListUI.js";
+import {columnWidths} from "UI/Debates";
 
 @Observer
 export class MapEntryUI extends BaseComponentPlus({} as {index: number, last: boolean, map: Map}, {}) {

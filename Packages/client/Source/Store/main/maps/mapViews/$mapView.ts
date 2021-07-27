@@ -2,7 +2,7 @@ import {Vector2, Assert, IsString, GetTreeNodesInObjTree, DeepGet, IsPrimitive, 
 import {observable} from "web-vcore/nm/mobx.js";
 import {O, StoreAction, LogWarning} from "web-vcore";
 import {store} from "Store";
-import {SplitStringBySlash_Cached, CreateAccessor, Validate, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {SplitStringBySlash_Cached, CreateAccessor, Validate, UUID, MobX_AllowStateChanges} from "web-vcore/nm/mobx-graphlink.js";
 import {PathSegmentToNodeID, MapView, MapNodeView} from "dm_common";
 
 export function GetPathNodes(path: string) {
@@ -153,11 +153,13 @@ export function GetNodeViewsAlongPath(mapID: string|n, pathOrPathNodes: string |
 			// temp safeguard against sometimes-occuring bug (which shouldn't ever occur but somehow has/had been)
 			if (childGroup == null) {
 				LogWarning("MapNodeView.children is null; this shouldn't occur. (devs: find root cause)");
+				//Assert(MobX_AllowStateChanges(), "GetNodeViewsAlongPath cannot create-node-views-if-missing, as call-stack is in mobx reaction.");
 				//debugger;
 				childGroup = nodeViews.Last()!.children = {};
 			}
 
 			if (childGroup[pathNode] == null) {
+				//Assert(MobX_AllowStateChanges(), "GetNodeViewsAlongPath cannot create-node-views-if-missing, as call-stack is in mobx reaction.");
 				childGroup[pathNode] = new MapNodeView();
 			}
 		}

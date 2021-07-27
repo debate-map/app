@@ -1,8 +1,7 @@
 import {makeObservable, observable} from "web-vcore/nm/mobx.js";
 import {Vector2, Clone} from "web-vcore/nm/js-vextensions.js";
 import {AddSchema, RunXOnceSchemasAdded, schemaEntryJSONs} from "web-vcore/nm/mobx-graphlink.js";
-
-const O = observable;
+import {O} from "web-vcore";
 
 export class MapView {
 	constructor() { makeObservable(this); }
@@ -26,6 +25,8 @@ AddSchema("MapView", {
 });
 
 export class MapNodeView {
+	constructor() { makeObservable(this); }
+
 	// constructor(childLimit?: number) {
 	// constructor(childLimit: number) {
 	/*constructor() {

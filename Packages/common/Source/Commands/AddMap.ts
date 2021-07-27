@@ -7,6 +7,7 @@ import {MapNode} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
 import {AddChildNode} from "./AddChildNode.js";
+import {AddNode} from "./AddNode.js";
 
 @UserEdit
 @CommandMeta({
@@ -16,34 +17,35 @@ import {AddChildNode} from "./AddChildNode.js";
 	returnSchema: ()=>SimpleSchema({$id: {$ref: "UUID"}}),
 })
 export class AddMap extends Command<{map: Map}, {id: UUID}> {
-	mapID: string;
-	sub_addNode: AddChildNode;
+	sub_addNode: AddNode;
 	Validate() {
 		const {map} = this.payload;
 		AssertV(map.featured === undefined, 'Cannot set "featured" to true while first adding a map. (hmmm)');
 
-		this.mapID = this.mapID ?? GenerateUUID();
+		map.id = this.GenerateUUID_Once("id");
+		map.creator = this.userInfo.id;
 		map.createdAt = Date.now();
+		map.edits = 0;
 		map.editedAt = map.createdAt;
 
 		const newRootNode = new MapNode({
 			//ownerMapID: OmitIfFalsy(map.type == MapType.Private && this.mapID),
 			accessPolicy: GetDefaultAccessPolicyID_ForNode(),
-			type: MapNodeType.category, creator: map.creator, rootNodeForMap: this.mapID,
+			type: MapNodeType.category, creator: map.creator, rootNodeForMap: map.id,
 		});
-		const newRootNodeRevision = new MapNodeRevision(E(map.nodeDefaults, {titles: {base: "Root"}, votingDisabled: true}));
-		this.sub_addNode = this.sub_addNode ?? new AddChildNode({mapID: this.mapID, parentID: null as any, node: newRootNode, revision: newRootNodeRevision, asMapRoot: true}).MarkAsSubcommand(this);
+		const newRootNodeRevision = new MapNodeRevision(E(map.nodeDefaults, {titles: {base: "Root"}}));
+		this.sub_addNode = this.sub_addNode ?? new AddNode({mapID: map.id, node: newRootNode, revision: newRootNodeRevision}).MarkAsSubcommand(this);
 		this.sub_addNode.Validate();
 
-		map.rootNode = this.sub_addNode.sub_addNode.payload.node.id;
+		map.rootNode = this.sub_addNode.payload.node.id;
 		AssertValidate("Map", map, "Map invalid");
 
-		this.returnData = {id: this.mapID};
+		this.returnData = {id: map.id};
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
 		const {map} = this.payload;
-		db.set(dbp`maps/${this.mapID}`, map);
-		db.add(this.sub_addNode.GetDBUpdates());
+		db.set(dbp`maps/${map.id}`, map);
+		db.add(this.sub_addNode.GetDBUpdates()); // add node first, since map has fk-ref to it
 	}
 }

@@ -17,22 +17,28 @@ function InterceptMethods(knex: Knex.Transaction) {
 	Object.defineProperty(knex.schema, "createTable", {value: createTable_custom});
 }
 
-// added methods
+// copied from mobx-graphlink (Decorators.ts)
 // ==========
 
+// todo: move as much of the code in this file as possible into mobx-graphlink (not sure of the ideal approach...)
 declare module "knex" {
 	namespace Knex {
 		interface ColumnBuilder {
-			DeferRef: (this: Knex.ColumnBuilder)=>Knex.ColumnBuilder;
+			DeferRef: (this: Knex.ColumnBuilder, opts?: DeferRef_Options)=>Knex.ColumnBuilder;
 		}
 	}
 }
-const deferredReferences = [] as {fromTable: string, fromColumn: string, toTable: string, toColumn: string}[];
+export type DeferRef_Options = {enforceAtTransactionEnd?: boolean};
+
+// added methods
+// ==========
+
+const deferredReferences = [] as {fromTable: string, fromColumn: string, toTable: string, toColumn: string, enforceAtTransactionEnd: boolean}[];
 //Object.prototype["DeferRefs"] = DeferRefs;
 Object.defineProperties(Object.prototype, {
 	DeferRef: {value: DeferRef},
 });
-function DeferRef(this: Knex.ColumnBuilder): Knex.ColumnBuilder {
+function DeferRef(this: Knex.ColumnBuilder, opts?: DeferRef_Options): Knex.ColumnBuilder {
 	//console.log("Test0:", this);
 	const statements = this["_tableBuilder"]["_statements"] as any[];
 	//console.log("Test1:", statements);
@@ -41,6 +47,7 @@ function DeferRef(this: Knex.ColumnBuilder): Knex.ColumnBuilder {
 	const ref = {
 		fromTable: this["_tableBuilder"]["_tableName"], fromColumn: refInfo.column,
 		toTable: refInfo.inTable, toColumn: refInfo.references,
+		enforceAtTransactionEnd: opts?.enforceAtTransactionEnd ?? false,
 	};
 	//console.log("Test2:", ref);
 
@@ -88,7 +95,8 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 			ALTER TABLE "${ref.fromTable}"
 			ADD CONSTRAINT "${constraintName}"
 			FOREIGN KEY ("${ref.fromColumn}") 
-			REFERENCES "${ref.toTable}" ("${ref.toColumn}");
+			REFERENCES "${ref.toTable}" ("${ref.toColumn}")
+			${ref.enforceAtTransactionEnd ? "DEFERRABLE INITIALLY DEFERRED;" : ";"}
 		`);
 		/*await knex.schema.raw(`
 			ALTER TABLE "${ref.fromTable}"

@@ -35,8 +35,8 @@ export class AddArgumentAndClaim extends Command<Payload, {argumentNodeID: strin
 		this.sub_addClaim = this.sub_addClaim ?? new AddChildNode({mapID, parentID: this.sub_addArgument.returnData.nodeID, node: claimNode, revision: claimRevision, link: claimLink}).MarkAsSubcommand(this);
 		/* this.sub_addClaim.lastNodeID_addAmount = 1;
 		this.sub_addClaim.lastNodeRevisionID_addAmount = 1; */
-		this.sub_addClaim.Validate();
 		this.sub_addClaim.parent_oldData = argumentNode; // needed so add-claim sub knows to update the children-order prop of argument
+		this.sub_addClaim.Validate();
 
 		this.returnData = {
 			argumentNodeID: this.sub_addArgument.sub_addNode.payload.node.id,

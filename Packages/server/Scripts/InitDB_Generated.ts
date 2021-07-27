@@ -17,22 +17,28 @@ function InterceptMethods(knex: Knex.Transaction) {
 	Object.defineProperty(knex.schema, "createTable", {value: createTable_custom});
 }
 
-// added methods
+// copied from mobx-graphlink (Decorators.ts)
 // ==========
 
+// todo: move as much of the code in this file as possible into mobx-graphlink (not sure of the ideal approach...)
 declare module "knex" {
 	namespace Knex {
 		interface ColumnBuilder {
-			DeferRef: (this: Knex.ColumnBuilder)=>Knex.ColumnBuilder;
+			DeferRef: (this: Knex.ColumnBuilder, opts?: DeferRef_Options)=>Knex.ColumnBuilder;
 		}
 	}
 }
-const deferredReferences = [] as {fromTable: string, fromColumn: string, toTable: string, toColumn: string}[];
+export type DeferRef_Options = {enforceAtTransactionEnd?: boolean};
+
+// added methods
+// ==========
+
+const deferredReferences = [] as {fromTable: string, fromColumn: string, toTable: string, toColumn: string, enforceAtTransactionEnd: boolean}[];
 //Object.prototype["DeferRefs"] = DeferRefs;
 Object.defineProperties(Object.prototype, {
 	DeferRef: {value: DeferRef},
 });
-function DeferRef(this: Knex.ColumnBuilder): Knex.ColumnBuilder {
+function DeferRef(this: Knex.ColumnBuilder, opts?: DeferRef_Options): Knex.ColumnBuilder {
 	//console.log("Test0:", this);
 	const statements = this["_tableBuilder"]["_statements"] as any[];
 	//console.log("Test1:", statements);
@@ -41,6 +47,7 @@ function DeferRef(this: Knex.ColumnBuilder): Knex.ColumnBuilder {
 	const ref = {
 		fromTable: this["_tableBuilder"]["_tableName"], fromColumn: refInfo.column,
 		toTable: refInfo.inTable, toColumn: refInfo.references,
+		enforceAtTransactionEnd: opts?.enforceAtTransactionEnd ?? false,
 	};
 	//console.log("Test2:", ref);
 
@@ -88,7 +95,8 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 			ALTER TABLE "${ref.fromTable}"
 			ADD CONSTRAINT "${constraintName}"
 			FOREIGN KEY ("${ref.fromColumn}") 
-			REFERENCES "${ref.toTable}" ("${ref.toColumn}");
+			REFERENCES "${ref.toTable}" ("${ref.toColumn}")
+			${ref.enforceAtTransactionEnd ? "DEFERRABLE INITIALLY DEFERRED;" : ";"}
 		`);
 		/*await knex.schema.raw(`
 			ALTER TABLE "${ref.fromTable}"
@@ -134,7 +142,8 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		alter table app_public."commandRuns" enable row level security;
 		DO $$ BEGIN
 			create policy "commandRuns_rls" on app_public."commandRuns" as PERMISSIVE for all using (
-				actor = current_setting('app.current_user_id')
+				public = true
+				OR actor = current_setting('app.current_user_id')
 				OR current_setting('app.current_user_admin') = 'true'
 			);
 		EXCEPTION WHEN DUPLICATE_OBJECT THEN
@@ -187,7 +196,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
 		RunFieldInit(t, "actor", (t, n)=>t.text(n).references("id").inTable(v + "users").DeferRef());
 		RunFieldInit(t, "runTime", (t, n)=>t.bigInteger(n));
-		RunFieldInit(t, "public", (t, n)=>t.boolean(n));
+		RunFieldInit(t, "public_base", (t, n)=>t.boolean(n));
 		RunFieldInit(t, "commandName", (t, n)=>t.text(n));
 		RunFieldInit(t, "commandPayload", (t, n)=>t.jsonb(n));
 		RunFieldInit(t, "returnData", (t, n)=>t.jsonb(n));
@@ -207,7 +216,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "name", (t, n)=>t.text(n));
 		RunFieldInit(t, "note", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "noteInline", (t, n)=>t.boolean(n).nullable());
-		RunFieldInit(t, "rootNode", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
+		RunFieldInit(t, "rootNode", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef({enforceAtTransactionEnd: true}));
 		RunFieldInit(t, "defaultExpandDepth", (t, n)=>t.integer(n));
 		RunFieldInit(t, "nodeDefaults", (t, n)=>t.jsonb(n).nullable());
 		RunFieldInit(t, "featured", (t, n)=>t.boolean(n).nullable());

@@ -1,8 +1,10 @@
-import {IsUserCreatorOrMod, Map, MapNodeRevision_Defaultable_DefaultsForMap, Map_namePattern, MeID} from "dm_common";
+import {AddMap, GetDefaultAccessPolicyID_ForMap, GetDefaultAccessPolicyID_ForMedia, IsUserCreatorOrMod, Map, MapNodeRevision_Defaultable_DefaultsForMap, Map_namePattern, MeID} from "dm_common";
 import {InfoButton} from "web-vcore";
 import {CloneWithPrototypes, DEL, GetErrorMessagesUnderElement, ToNumber} from "web-vcore/nm/js-vextensions.js";
+import {GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
 import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI.js";
 import {DetailsUI_Base} from "../DetailsUI_Base.js";
 import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel.js";
@@ -93,4 +95,36 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 			</Column>
 		);
 	}
+}
+
+export async function ShowAddMapDialog() {
+	const prep = await GetAsync(()=>{
+		return {
+			accessPolicy: GetDefaultAccessPolicyID_ForMap(),
+		};
+	});
+
+	let newMap = new Map({
+		accessPolicy: prep.accessPolicy,
+		name: "",
+		editors: [MeID.NN()],
+	});
+
+	let error = null;
+	const Change = (..._)=>boxController.UpdateUI();
+	const boxController = ShowMessageBox({
+		title: "Add map", cancelButton: true,
+		message: ()=>{
+			boxController.options.okButtonProps = {enabled: error == null};
+			return (
+				<Column style={{padding: "10px 0", width: 600}}>
+					<MapDetailsUI baseData={newMap} phase="create" onChange={(val, _, ui)=>Change(newMap = val, error = ui.GetValidationError())}/>
+					{error && error != "Please fill out this field." && <Row mt={5} style={{color: "rgba(200,70,70,1)"}}>{error}</Row>}
+				</Column>
+			);
+		},
+		onOK: ()=>{
+			new AddMap({map: newMap}).RunOnServer();
+		},
+	});
 }
