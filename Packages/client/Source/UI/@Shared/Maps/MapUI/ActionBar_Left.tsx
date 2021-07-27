@@ -51,12 +51,12 @@ export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBar
 						{/* // disabled for now, so we can iterate quickly on the stuff we're actually using right now
 						{IsUserMap(map) && HasModPermissions(MeID()) && <LayersDropDown map={map}/>} */}
 						{/* IsUserMap(map) && HasModPermissions(MeID()) && <TimelineDropDown map={map}/> */}
-						{IsUserMap(map) && !GADDemo &&
+						{/*IsUserMap(map) && !GADDemo &&
 							<Button ml={5} text="Timelines" style={{height: "100%"}} onClick={()=>{
 								RunInAction("ActionBar_Left.Timelines.onClick", ()=>{
 									GetMapState.NN(map.id).timelinePanelOpen = !timelinePanelOpen;
 								});
-							}}/>}
+							}}/>*/}
 					</>}
 				</Row>
 			</nav>
