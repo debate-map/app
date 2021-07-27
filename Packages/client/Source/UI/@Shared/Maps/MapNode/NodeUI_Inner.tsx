@@ -222,11 +222,15 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		}, []);
 		const onClick = UseCallback(e=>{
 			if ((e.nativeEvent as any).ignore) return;
+			if (useLocalPanelState && !local_selected) {
+				this.SetState({local_selected: true});
+				return;
+			}
 
 			if (!nodeView?.selected && map) {
 				ACTMapNodeSelect(map.id, path);
 			}
-		}, [map, nodeView?.selected, path]);
+		}, [local_selected, map, nodeView?.selected, path, useLocalPanelState]);
 		if (usePortalForDetailBoxes) {
 			UseEffect(()=>{
 				const doc_onClick = (e: MouseEvent)=>{
@@ -241,11 +245,6 @@ export class NodeUI_Inner extends BaseComponentPlus(
 			});
 		}
 		const onDirectClick = UseCallback(e=>{
-			if (useLocalPanelState) {
-				this.SetState({local_selected: !local_selected});
-				return;
-			}
-
 			RunInAction("NodeUI_Inner.onDirectClick", ()=>{
 				if (combinedWithParentArgument && parent) {
 					store.main.maps.nodeLastAcknowledgementTimes.set(parent.id, Date.now());
