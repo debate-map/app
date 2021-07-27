@@ -10,7 +10,7 @@ import {MapNodeL3, HolderType, GetParentNodeL3, IsPremiseOfSinglePremiseArgument
 
 
 import {GetNodeColor} from "Store/db_ext/nodes";
-import {RatingsPanel} from "./Panels/RatingsPanel.js";
+import {RatingsPanel} from "../DetailBoxes/Panels/RatingsPanel.js";
 import {NodeChildHolder} from "./NodeChildHolder.js";
 import {NodeChildCountMarker} from "./NodeChildCountMarker.js";
 import {NodeUI_Menu_Stub} from "../NodeUI_Menu.js";

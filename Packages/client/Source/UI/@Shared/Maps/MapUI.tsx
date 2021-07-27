@@ -84,6 +84,10 @@ class MapUIWaitMessage extends BaseComponent<{message: string}, {}> {
 	}
 }
 
+export function GetMapUICSSFilter() {
+	return GADDemo ? "drop-shadow(rgba(0,0,0,.7) 0px 0px 10px)" : "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)";
+}
+
 type Props = {
 	map: Map, rootNode?: MapNodeL3, withinPage?: boolean,
 	padding?: {left: number, right: number, top: number, bottom: number},
@@ -191,7 +195,7 @@ export class MapUI extends BaseComponentPlus({
 								position: "relative", /* display: "flex", */ whiteSpace: "nowrap",
 								padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`,
 								alignItems: "center",
-								filter: GADDemo ? "drop-shadow(rgba(0,0,0,.7) 0px 0px 10px)" : "drop-shadow(rgba(0,0,0,1) 0px 0px 10px)",
+								filter: GetMapUICSSFilter(),
 							}}
 							onMouseDown={e=>{
 								this.downPos = new Vector2(e.clientX, e.clientY);

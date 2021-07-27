@@ -2,16 +2,13 @@ import {E, GetEntries, WaitXThenRun, DelIfFalsy, A} from "web-vcore/nm/js-vexten
 import {Button, Column, Div, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, RenderSource} from "web-vcore/nm/react-vextensions.js";
 import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI.js";
-import {TermDefinitionPanel} from "../NodeUI/Panels/DefinitionsPanel.js";
-import {NodeTermsUI} from "./TextPanel/NodeTermsUI.js";
-import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
-import {GetAttachmentType, AttachmentType} from "dm_common";
-import {MapNodeType} from "dm_common";
-import {MapNodeL2, NodeChildLink, ClaimForm} from "dm_common";
-import {MapNodeRevision_titlePattern, ArgumentType, GetArgumentTypeDisplayText} from "dm_common";
-import {TermAttachment} from "dm_common";
-import {GetDisplayPolarity} from "dm_common";
+import {GetAttachmentType, AttachmentType, MapNodeType, MapNodeL2, NodeChildLink, ClaimForm, MapNodeRevision_titlePattern, ArgumentType, GetArgumentTypeDisplayText, TermAttachment, GetDisplayPolarity} from "dm_common";
+
+
 import {ES} from "web-vcore";
+import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
+import {NodeTermsUI} from "./TextPanel/NodeTermsUI.js";
+import {TermDefinitionPanel} from "../DetailBoxes/Panels/DefinitionsPanel.js";
 
 export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 	render() {
@@ -102,7 +99,7 @@ class OtherTitles extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 
 class TitleInput extends BaseComponentPlus({} as {titleKey: string, innerRef?: any} & NodeDetailsUI_SharedProps & React.Props<TextArea>, {}) {
 	render() {
-		let {titleKey, newDataAsL2, newRevisionData, forNew, enabled, newLinkData, Change} = this.props;
+		const {titleKey, newDataAsL2, newRevisionData, forNew, enabled, newLinkData, Change} = this.props;
 		let extraProps = {};
 		if (titleKey == "base") {
 			//const hasOtherTitles = newDataAsL2.type == MapNodeType.claim && newDataAsL2 == AttachmentType.none;
@@ -117,12 +114,12 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: string, innerRef?: a
 			//<TextInput enabled={enabled} style={ES({flex: 1})} value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/>
 			<TextArea
 				enabled={enabled} allowLineBreaks={false} style={ES({flex: 1})} pattern={MapNodeRevision_titlePattern} autoSize={true}
-				value={newRevisionData.titles[titleKey]} onChange={val=> {
+				value={newRevisionData.titles[titleKey]} onChange={val=>{
 					//let matches = val.Matches(/\{(.+?)\}(\[[0-9]+?\])?/);
 					//let termNames = [];
-					let cleanedVal = val ? val.replace(/\{(.+?)\}(\[[0-9]+?\])?/g, (m, g1, g2)=> {
+					const cleanedVal = val ? val.replace(/\{(.+?)\}(\[[0-9]+?\])?/g, (m, g1, g2)=>{
 						//termNames.push(g1);
-						let termName = g1;
+						const termName = g1;
 						if (newRevisionData.termAttachments == null) {
 							newRevisionData.termAttachments = [];
 						}

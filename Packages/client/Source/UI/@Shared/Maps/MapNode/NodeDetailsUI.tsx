@@ -12,7 +12,7 @@ import {OthersPanel} from "./NodeDetailsUI/OthersPanel.js";
 import {PermissionsPanel} from "./NodeDetailsUI/PermissionsPanel.js";
 import {TextPanel} from "./NodeDetailsUI/TextPanel.js";
 import {QuoteInfoEditorUI} from "./NodeDetailsUI/AttachmentPanel/QuoteInfoEditorUI.js";
-import {TagsPanel} from "./NodeUI/Panels/TagsPanel.js";
+import {TagsPanel} from "./DetailBoxes/Panels/TagsPanel.js";
 
 type Props = {
 	baseData: MapNode,

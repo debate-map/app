@@ -1,4 +1,5 @@
 export const zIndexes = {
+	nodeDetailBoxes: 5,
 	draggable: 10,
 	//scrollBars: 10, // for ref; in react-vscrollview
 	subNavBar: 11,

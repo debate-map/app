@@ -34,6 +34,7 @@ import {FeedbackUI} from "./Feedback.js";
 import {ForumUI} from "./Forum.js";
 import {SocialUI} from "./Social.js";
 import {StreamPanel} from "./@Shared/NavBar/StreamPanel";
+import {NodeDetailBoxesLayer} from "./@Shared/Maps/MapNode/DetailBoxes/NodeDetailBoxesLayer";
 
 ColorPickerBox.Init(ReactColor, chroma);
 
@@ -331,6 +332,7 @@ class OverlayUI extends BaseComponent<{}, {}> {
 	render() {
 		return (
 			<div style={{position: "absolute", top: 0, bottom: 0, left: 0, right: 0, overflow: "hidden"}}>
+				<NodeDetailBoxesLayer/>
 				<MessageBoxLayer/>
 				<VMenuLayer/>
 			</div>

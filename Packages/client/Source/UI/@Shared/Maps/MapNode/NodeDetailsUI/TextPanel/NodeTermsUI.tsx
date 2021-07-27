@@ -3,13 +3,12 @@ import {Button, Column, DropDown, DropDownContent, DropDownTrigger, Row, Text, T
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI.js";
 import {InfoButton, Link, Observer} from "web-vcore";
-import {NodeDetailsUI_SharedProps} from "../../NodeDetailsUI.js";
-import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel.js";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
-import {GetTerm, GetTermsByForm} from "dm_common";
-import {TermAttachment} from "dm_common";
-import {Term} from "dm_common";
-import {GetUser} from "dm_common";
+import {GetTerm, GetTermsByForm, TermAttachment, Term, GetUser} from "dm_common";
+
+
+import {TermDefinitionPanel} from "../../DetailBoxes/Panels/DefinitionsPanel.js";
+import {NodeDetailsUI_SharedProps} from "../../NodeDetailsUI.js";
 
 @Observer
 export class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {

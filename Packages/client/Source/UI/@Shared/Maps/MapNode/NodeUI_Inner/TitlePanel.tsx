@@ -10,6 +10,7 @@ import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, 
 import {ES, InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, RunInAction, VReactMarkdown_Remarkable} from "web-vcore";
 import React from "react";
 import {GetCurrentRevision} from "Store/db_ext/nodes";
+import {BailInfo} from "web-vcore/nm/mobx-graphlink";
 import {NodeMathUI} from "../NodeMathUI.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 import {TermPlaceholder} from "./TermPlaceholder.js";

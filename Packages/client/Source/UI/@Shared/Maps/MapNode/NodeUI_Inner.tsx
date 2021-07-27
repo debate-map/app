@@ -3,10 +3,10 @@ import chroma, {Color} from "chroma-js";
 //import classNames from "classnames";
 import {A, DEL, DoNothing, E, GetValues, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {Bail, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import {Bail, BailInfo, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import React from "react";
 import {Draggable} from "web-vcore/nm/react-beautiful-dnd.js";
-import ReactDOM from "web-vcore/nm/react-dom";
+import ReactDOM from "web-vcore/nm/react-dom.js";
 import {BaseComponent, BaseComponentPlus, GetDOM, UseCallback, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {GetNodeColor} from "Store/db_ext/nodes";
@@ -16,20 +16,14 @@ import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
 import {DraggableInfo} from "Utils/UI/DNDStructures.js";
 import {IsMouseEnterReal, IsMouseLeaveReal} from "Utils/UI/General.js";
 import {zIndexes} from "Utils/UI/ZIndexes.js";
-import {DragInfo, EB_ShowError, EB_StoreError, HSLA, IsDoubleClick, Observer, RunInAction} from "web-vcore";
+import {DefaultLoadingUI, DragInfo, EB_ShowError, EB_StoreError, HSLA, IsDoubleClick, Observer, RunInAction} from "web-vcore";
 import {ExpandableBox} from "./ExpandableBox.js";
-import {DefinitionsPanel} from "./NodeUI/Panels/DefinitionsPanel.js";
-import {DetailsPanel} from "./NodeUI/Panels/DetailsPanel.js";
-import {DiscussionPanel} from "./NodeUI/Panels/DiscussionPanel.js";
-import {HistoryPanel} from "./NodeUI/Panels/HistoryPanel.js";
-import {OthersPanel} from "./NodeUI/Panels/OthersPanel.js";
-import {RatingsPanel} from "./NodeUI/Panels/RatingsPanel.js";
-import {SocialPanel} from "./NodeUI/Panels/SocialPanel.js";
-import {TagsPanel} from "./NodeUI/Panels/TagsPanel.js";
+import {DefinitionsPanel} from "./DetailBoxes/Panels/DefinitionsPanel.js";
 import {SubPanel} from "./NodeUI_Inner/SubPanel.js";
 import {TitlePanel} from "./NodeUI_Inner/TitlePanel.js";
-import {MapNodeUI_LeftBox} from "./NodeUI_LeftBox.js";
+import {MapNodeUI_LeftBox} from "./DetailBoxes/NodeUI_LeftBox.js";
 import {NodeUI_Menu_Stub} from "./NodeUI_Menu.js";
+import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 
 // drag and drop
 // ==========
@@ -53,6 +47,7 @@ type Props = {
 	indexInNodeList: number, node: MapNodeL3, path: string, map?: Map,
 	width?: number|n, widthOverride?: number|n, backgroundFillPercentOverride?: number,
 	panelPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
+	usePortalForDetailBoxes?: boolean,
 } & {dragInfo?: DragInfo};
 
 /* @MakeDraggable(({ node, path, indexInNodeList }: TitlePanelProps) => {
@@ -73,6 +68,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 ) {
 	root: ExpandableBox|n;
 	titlePanel: TitlePanel|n;
+	leftPanel: MapNodeUI_LeftBox|n;
+	bottomPanel: NodeUI_BottomPanel|n;
 
 	// todo: replace this system by just using the new IsMouseEnterReal and IsMouseLeaveReal functions
 	checkStillHoveredTimer = new Timer(100, ()=>{
@@ -83,11 +80,13 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		}
 		const mainRect = VRect.FromLTWH(dom.getBoundingClientRect());
 
-		const leftBoxDOM = dom.querySelector(".NodeUI_LeftBox");
+		//const leftBoxDOM = dom.querySelector(".NodeUI_LeftBox");
+		const leftBoxDOM = this.leftPanel?.DOM;
 		const leftBoxRect = leftBoxDOM ? VRect.FromLTWH(leftBoxDOM.getBoundingClientRect()) : null;
 
-		const bottomPanelDOM = dom.querySelector(".NodeUI_BottomPanel");
-		const bottomPanelRect = bottomPanelDOM ? VRect.FromLTWH(bottomPanelDOM.getBoundingClientRect()) : null;
+		//const bottomPanelDOM = dom.querySelector(".NodeUI_BottomPanel");
+		const bottomPanelDOM = this.bottomPanel?.DOM;
+		const bottomPanelRect = bottomPanelDOM ? VRect.FromLTWH(bottomPanelDOM.getBoundingClientRect()).NewTop(top=>top - 1) : null; // add 1px to top, for box-shadow outline
 
 		const mouseRect = new VRect(mousePos, new Vector2(1, 1));
 		const intersectsOne = !!(mouseRect.Intersects(mainRect) || (leftBoxRect && mouseRect.Intersects(leftBoxRect)) || (bottomPanelRect && mouseRect.Intersects(bottomPanelRect)));
@@ -100,7 +99,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 	});
 
 	render() {
-		const {indexInNodeList, map, node, path, width, widthOverride, backgroundFillPercentOverride, panelPosition, useLocalPanelState, style} = this.props;
+		const {indexInNodeList, map, node, path, width, widthOverride, backgroundFillPercentOverride, panelPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
 		let {hovered, hoverPanel, hoverTermID, local_selected, local_openPanel, lastWidthWhenNotPreview} = this.state;
 
 		// connector part
@@ -223,23 +222,37 @@ export class NodeUI_Inner extends BaseComponentPlus(
 		}, []);
 		const onClick = UseCallback(e=>{
 			if ((e.nativeEvent as any).ignore) return;
+
+			if (!nodeView?.selected && map) {
+				ACTMapNodeSelect(map.id, path);
+			}
+		}, [map, nodeView?.selected, path]);
+		if (usePortalForDetailBoxes) {
+			UseEffect(()=>{
+				const doc_onClick = (e: MouseEvent)=>{
+					const uiRoots = [this.root?.DOM, this.leftPanel?.DOM, this.bottomPanel?.DOM].filter(a=>a);
+					// if user clicked outside of node-ui-inner's descendant tree, close the detail-boxes
+					if (uiRoots.every(a=>!a!.contains(e.target as HTMLElement))) {
+						this.SetState({local_selected: false, local_openPanel: null});
+					}
+				};
+				document.addEventListener("click", doc_onClick);
+				return ()=>document.removeEventListener("click", doc_onClick);
+			});
+		}
+		const onDirectClick = UseCallback(e=>{
 			if (useLocalPanelState) {
 				this.SetState({local_selected: !local_selected});
 				return;
 			}
 
-			if (!nodeView?.selected && map) {
-				ACTMapNodeSelect(map.id, path);
-			}
-		}, [local_selected, map, nodeView?.selected, path, useLocalPanelState]);
-		const onDirectClick = UseCallback(e=>{
 			RunInAction("NodeUI_Inner.onDirectClick", ()=>{
 				if (combinedWithParentArgument && parent) {
 					store.main.maps.nodeLastAcknowledgementTimes.set(parent.id, Date.now());
 				}
 				store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now());
 			});
-		}, [combinedWithParentArgument, node.id, parent]);
+		}, [combinedWithParentArgument, local_selected, node.id, parent, useLocalPanelState]);
 		const onTextHolderClick = UseCallback(e=>IsDoubleClick(e) && this.titlePanel && this.titlePanel.OnDoubleClick(), []);
 		const toggleExpanded = UseCallback(e=>{
 			/* let pathToApplyTo = path;
@@ -287,6 +300,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					beforeChildren={<>
 						{leftPanelShow &&
 						<MapNodeUI_LeftBox {...{map, path, node, panelPosition, local_openPanel, backgroundColor}} asHover={hovered}
+							ref={c=>this.leftPanel = c}
+							usePortal={usePortalForDetailBoxes} nodeUI={this}
 							onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
 							onPanelButtonClick={panel=>{
 								if (useLocalPanelState) {
@@ -327,6 +342,8 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					afterChildren={<>
 						{bottomPanelShow
 							&& <NodeUI_BottomPanel {...{map, node, path, parent, width, widthOverride, hovered, backgroundColor}}
+								ref={c=>this.bottomPanel = c}
+								usePortal={usePortalForDetailBoxes} nodeUI={this}
 								panelPosition={panelPosition!} panelToShow={panelToShow!}
 								hoverTermID={hoverTermID} onTermHover={termID=>this.SetState({hoverTermID: termID})}/>}
 						{reasonScoreValues && showReasonScoreValues
@@ -381,66 +398,6 @@ WaitXThenRun(0, ()=>{
 	portal = document.createElement("div");
 	document.body.appendChild(portal);
 });
-
-@Observer
-class NodeUI_BottomPanel extends BaseComponentPlus(
-	{} as {
-		map: Map|n, node: MapNodeL3, path: string, parent: MapNodeL3|n,
-		width: number|n, widthOverride: number|n, panelPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermID: string|n, onTermHover: (id: string)=>void,
-		backgroundColor: chroma.Color,
-	},
-	{hoverTermID: null as string|n},
-	) {
-	panelsOpened = new Set();
-	componentDidCatch(message, info) { EB_StoreError(this as any, message, info); }
-	render() {
-		if (this.state["error"]) return EB_ShowError(this.state["error"]);
-		const {
-			map, node, path, parent,
-			width, widthOverride, panelPosition, panelToShow, hovered, hoverTermID, onTermHover,
-			backgroundColor,
-		} = this.props;
-		const nodeView = GetNodeView(map?.id, path);
-
-		this.panelsOpened.add(panelToShow);
-		const renderPanel = (panelName: string, uiFunc: (show: boolean)=>JSX.Element)=>{
-			if (!this.panelsOpened.has(panelName)) return null;
-			return uiFunc(panelToShow == panelName);
-		};
-
-		return (
-			// <ErrorBoundary>
-			<div className="NodeUI_BottomPanel" style={{
-				position: "absolute", left: panelPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
-				width: width ?? "100%", minWidth: (widthOverride ?? 0).KeepAtLeast(550), zIndex: hovered ? 6 : 5,
-				padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
-			}}>
-				{GetValues(NodeRatingType).Contains(panelToShow) && (()=>{
-					if (["impact", "relevance"].Contains(panelToShow) && node.type == MapNodeType.claim) {
-						const argumentNode = NN(parent);
-						const argumentPath = NN(SlicePath(path, 1));
-						const ratings = GetRatings(argumentNode.id, panelToShow as NodeRatingType);
-						return <RatingsPanel node={argumentNode} path={argumentPath} ratingType={panelToShow as NodeRatingType} ratings={ratings}/>;
-					}
-					const ratings = GetRatings(node.id, panelToShow as NodeRatingType);
-					return <RatingsPanel node={node} path={path} ratingType={panelToShow as NodeRatingType} ratings={ratings}/>;
-				})()}
-				{renderPanel("definitions", show=><DefinitionsPanel ref={c=>this.definitionsPanel = c} {...{show, map, node, path, hoverTermID}}
-						openTermID={nodeView?.openTermID}
-						onHoverTerm={termID=>onTermHover(termID)}
-						onClickTerm={termID=>RunInAction("NodeUI_Inner_onClickTerm", ()=>nodeView.openTermID = termID)}/>)}
-				{/*renderPanel("phrasings", show=><PhrasingsPanel {...{show, node, path}}/>)*/}
-				{renderPanel("discussion", show=><DiscussionPanel {...{show}}/>)}
-				{renderPanel("social", show=><SocialPanel {...{show}}/>)}
-				{renderPanel("tags", show=><TagsPanel {...{show, map, node, path}}/>)}
-				{renderPanel("details", show=><DetailsPanel {...{show, map, node, path}}/>)}
-				{renderPanel("history", show=><HistoryPanel {...{show, map, node, path}}/>)}
-				{renderPanel("others", show=><OthersPanel {...{show, map, node, path}}/>)}
-			</div>
-		);
-	}
-	definitionsPanel: DefinitionsPanel|n;
-}
 
 class ReasonScoreValueMarkers extends BaseComponent<{node: MapNodeL3, reasonScoreValues: ReasonScoreValues_RSPrefix, combinedWithParentArgument: boolean}, {}> {
 	render() {

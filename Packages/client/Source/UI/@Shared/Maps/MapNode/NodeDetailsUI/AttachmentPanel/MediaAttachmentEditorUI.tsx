@@ -10,7 +10,7 @@ import {Link, Observer, InfoButton} from "web-vcore";
 
 import {ShowAddMediaDialog} from "UI/Database/Medias/MediaDetailsUI.js";
 import {SourceChainsEditorUI} from "../../SourceChainsEditorUI.js";
-import {TermDefinitionPanel} from "../../NodeUI/Panels/DefinitionsPanel.js";
+import {TermDefinitionPanel} from "../../DetailBoxes/Panels/DefinitionsPanel.js";
 
 type Props = {baseData: MediaAttachment, creating: boolean, editing?: boolean, style?, onChange?: (newData: MediaAttachment)=>void};
 export class MediaAttachmentEditorUI extends BaseComponent<Props, {newData: MediaAttachment}> {

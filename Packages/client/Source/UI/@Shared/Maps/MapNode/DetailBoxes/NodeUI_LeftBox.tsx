@@ -1,26 +1,38 @@
 import chroma from "chroma-js";
 import {ClaimForm, GetNodeForm, GetParentNodeL3, GetRatingAverage_AtPath, GetRatings, GetRatingTypeInfo, GetRatingTypesForNode, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType_Info, MeID, NodeRatingType} from "dm_common";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
-import {Observer} from "web-vcore";
-import {E} from "web-vcore/nm/js-vextensions.js";
-import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
+import {DefaultLoadingUI, Observer} from "web-vcore";
+import {E, Timer} from "web-vcore/nm/js-vextensions.js";
+import {BailInfo, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Button, Span} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponent, BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
+import ReactDOM from "web-vcore/nm/react-dom.js";
+import React from "react";
+import {NodeUI_Inner} from "../NodeUI_Inner";
+import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer";
+import {GetMapUICSSFilter} from "../../MapUI";
 
 type Props = {
 	map: Map|n, path: string, node: MapNodeL3,
 	panelPosition?: "left" | "below", local_openPanel?: string|n,
 	backgroundColor: chroma.Color, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
+	usePortal?: boolean, nodeUI?: NodeUI_Inner,
 };
 @Observer
 export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"} as Props, {}) {
+	loadingUI(bailInfo: BailInfo) {
+		if (this.props.usePortal) return <div/>; // don't show loading-ui in portal, else layout flashes
+		return <DefaultLoadingUI comp={bailInfo.comp} bailMessage={bailInfo.bailMessage}/>;
+	}
+
 	render() {
 		const {
 			map, path, node,
 			panelPosition, local_openPanel,
 			backgroundColor, asHover, inList, onPanelButtonHover, onPanelButtonClick, style,
 			children,
+			usePortal, nodeUI,
 		} = this.props;
 		const nodeView = GetNodeView(map?.id, path);
 		const openPanel = local_openPanel || nodeView?.openPanel;
@@ -44,9 +56,50 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 			ratingTypes = ratingTypes.concat([{type: NodeRatingType.relevance}, {type: NodeRatingType.impact, main: true}]);
 		}
 
-		return (
-			<div className="NodeUI_LeftBox" style={E(
-				{display: "flex", flexDirection: "column", whiteSpace: "nowrap", zIndex: asHover ? 6 : 5},
+		if (usePortal) {
+			/*UseEffect(()=>{
+				const timer = new Timer(1000 / 60, ()=>{
+					if (uiRoot == null || nodeUI.root?.DOM == null) return;
+					const nodeUIRect = nodeUI.root.DOM.getBoundingClientRect();
+					uiRoot.style.left = `${nodeUIRect.left - 110}px`;
+					uiRoot.style.top = `${nodeUIRect.top}px`;
+				}).Start();
+				return ()=>timer.Stop();
+			});*/
+			UseEffect(()=>{
+				let stop = false;
+				requestAnimationFrame(update);
+				function update() {
+					if (stop) return;
+					if (uiRoot != null && nodeUI!.root?.DOM != null) {
+						const nodeUIRect = nodeUI!.root.DOM.getBoundingClientRect();
+						uiRoot.style.display = "initial";
+						uiRoot.style.left = `${nodeUIRect.left - 110}px`;
+						uiRoot.style.top = `${nodeUIRect.top}px`;
+					}
+					requestAnimationFrame(update);
+				}
+				return ()=>{
+					stop = true;
+				};
+			});
+		}
+		const MaybeCreatePortal = (el: JSX.Element, portal: HTMLElement)=>{
+			if (usePortal) return ReactDOM.createPortal(el, portal);
+			return el;
+		};
+
+		let uiRoot: HTMLDivElement;
+		return MaybeCreatePortal(
+			<div ref={c=>uiRoot = c!} className="NodeUI_LeftBox" style={E(
+				{flexDirection: "column", whiteSpace: "nowrap", width: 110, zIndex: asHover ? 6 : 5},
+				!usePortal && {
+					display: "flex",
+				},
+				usePortal && {
+					display: "none", // wait for UseEffect func to align position and make visible
+					filter: GetMapUICSSFilter(),
+				},
 				!inList && panelPosition == "left" && {position: "absolute", right: "calc(100% + 1px)"},
 				!inList && panelPosition == "below" && {position: "absolute", top: "calc(100% + 1px)", width: 130},
 				style,
@@ -109,7 +162,8 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 							":hover": {background: backgroundColor.alpha(0.5).css()},
 						}}/>
 				</div>
-			</div>
+			</div>,
+			nodeDetailBoxesLayer_container,
 		);
 	}
 }
