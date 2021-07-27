@@ -8,6 +8,7 @@ import {GetValues, NN, Timer} from "web-vcore/nm/js-vextensions.js";
 import {BailInfo, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
+import {zIndexes} from "Utils/UI/ZIndexes.js";
 import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer.js";
 import {DefinitionsPanel} from "./Panels/DefinitionsPanel.js";
 import {DetailsPanel} from "./Panels/DetailsPanel.js";
@@ -19,12 +20,13 @@ import {SocialPanel} from "./Panels/SocialPanel.js";
 import {TagsPanel} from "./Panels/TagsPanel.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 import {GetMapUICSSFilter} from "../../MapUI.js";
+import {NodeUI_LeftBox_width} from "./NodeUI_LeftBox.js";
 
 @Observer
 export class NodeUI_BottomPanel extends BaseComponentPlus(
 	{} as {
 		map: Map|n, node: MapNodeL3, path: string, parent: MapNodeL3|n,
-		width: number|n, widthOverride: number|n, panelPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermID: string|n, onTermHover: (id: string)=>void,
+		width: number|n, widthOverride: number|n, panelsPosition: "left" | "below", panelToShow: string, hovered: boolean, hoverTermID: string|n, onTermHover: (id: string)=>void,
 		backgroundColor: chroma.Color,
 		usePortal?: boolean, nodeUI?: NodeUI_Inner,
 	},
@@ -42,7 +44,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 		if (this.state["error"]) return EB_ShowError(this.state["error"]);
 		const {
 			map, node, path, parent,
-			width, widthOverride, panelPosition, panelToShow, hovered, hoverTermID, onTermHover,
+			width, widthOverride, panelsPosition, panelToShow, hovered, hoverTermID, onTermHover,
 			backgroundColor,
 			usePortal, nodeUI,
 		} = this.props;
@@ -72,8 +74,13 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 					if (uiRoot != null && nodeUI!.root?.DOM != null) {
 						const nodeUIRect = nodeUI!.root.DOM.getBoundingClientRect();
 						uiRoot.style.display = "initial";
-						uiRoot.style.left = `${nodeUIRect.left}px`;
-						uiRoot.style.top = `${nodeUIRect.bottom + 1}px`;
+						if (panelsPosition == "left") {
+							uiRoot.style.left = `${nodeUIRect.left}px`;
+							uiRoot.style.top = `${nodeUIRect.bottom + 1}px`;
+						} else {
+							uiRoot.style.left = `${nodeUIRect.left + NodeUI_LeftBox_width}px`;
+							uiRoot.style.top = `${nodeUIRect.bottom + 1}px`;
+						}
 						uiRoot.style.width = `${nodeUIRect.width}px`;
 					}
 					requestAnimationFrame(update);
@@ -98,8 +105,9 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 					minWidth: (widthOverride ?? 0).KeepAtLeast(550),
 					padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 				},
+				panelsPosition == "below" && {zIndex: zIndexes.overNavBarDropdowns},
 				!usePortal && {
-					left: panelPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
+					left: panelsPosition == "below" ? 130 + 1 : 0, top: "calc(100% + 1px)",
 					width: width ?? "100%",
 				},
 				usePortal && {

@@ -33,7 +33,7 @@ export class StreamUI extends BaseComponentPlus({panel: false} as {panel?: boole
 				</Row>
 				<ScrollView>
 					{commandRuns.map((run, index)=>{
-						return <CommandRunUI key={index} run={run} index={index} last={index == commandRuns.length - 1}/>;
+						return <CommandRunUI key={index} run={run} index={index} last={index == commandRuns.length - 1} panel={panel ?? false}/>;
 					})}
 				</ScrollView>
 			</Column>
@@ -47,9 +47,9 @@ const commandTypesToShow = [
 ] as Array<new(..._)=>Command<any>>;
 
 @Observer
-class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: number, last: boolean}, {}) {
+class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: number, last: boolean, panel: boolean}, {}) {
 	render() {
-		const {run, index, last} = this.props;
+		const {run, index, last, panel} = this.props;
 		const actor = GetUser(run.actor);
 		const actorLink = (
 			<Link className="selectable" text={actor == null ? "[unknown user]" : actor.displayName} style={{textAlign: "center"}} actionFunc={s=>{
@@ -86,7 +86,7 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 				messageUI_row2 = <>
 					{node && // check if node and such exists (node may have been deleted after creation)
 						<NodeUI_Inner indexInNodeList={0} node={node_final} path={node.id}
-							backgroundFillPercentOverride={100} useLocalPanelState={true} usePortalForDetailBoxes={true}/>}
+							backgroundFillPercentOverride={100} useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"}/>}
 				</>;
 			}
 		} else if (run.commandName == AddNodeRevision.name) {
@@ -107,7 +107,7 @@ class CommandRunUI extends BaseComponentPlus({} as {run: CommandRun, index: numb
 				messageUI_row2 = <>
 					{node && // check if node and such exists (node may have been deleted after creation)
 						<NodeUI_Inner indexInNodeList={0} node={node_final} path={node.id}
-							backgroundFillPercentOverride={100} useLocalPanelState={true} usePortalForDetailBoxes={true}/>}
+							backgroundFillPercentOverride={100} useLocalPanelState={true} usePortalForDetailBoxes={true} panelsPosition={panel ? "below" : "left"}/>}
 				</>;
 			}
 		} else {

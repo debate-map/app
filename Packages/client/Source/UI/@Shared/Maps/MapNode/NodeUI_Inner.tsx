@@ -46,7 +46,7 @@ import {NodeUI_BottomPanel} from "./DetailBoxes/NodeUI_BottomPanel.js";
 type Props = {
 	indexInNodeList: number, node: MapNodeL3, path: string, map?: Map,
 	width?: number|n, widthOverride?: number|n, backgroundFillPercentOverride?: number,
-	panelPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
+	panelsPosition?: "left" | "below", useLocalPanelState?: boolean, style?,
 	usePortalForDetailBoxes?: boolean,
 } & {dragInfo?: DragInfo};
 
@@ -63,7 +63,7 @@ type Props = {
 // @ExpensiveComponent
 @Observer
 export class NodeUI_Inner extends BaseComponentPlus(
-	{panelPosition: "left"} as Props,
+	{panelsPosition: "left"} as Props,
 	{hovered: false, hoverPanel: null as string|n, hoverTermID: null as string|n, local_selected: false as boolean|n, local_openPanel: null as string|n, lastWidthWhenNotPreview: 0},
 ) {
 	root: ExpandableBox|n;
@@ -99,7 +99,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 	});
 
 	render() {
-		const {indexInNodeList, map, node, path, width, widthOverride, backgroundFillPercentOverride, panelPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
+		const {indexInNodeList, map, node, path, width, widthOverride, backgroundFillPercentOverride, panelsPosition, useLocalPanelState, style, usePortalForDetailBoxes} = this.props;
 		let {hovered, hoverPanel, hoverTermID, local_selected, local_openPanel, lastWidthWhenNotPreview} = this.state;
 
 		// connector part
@@ -251,7 +251,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 				}
 				store.main.maps.nodeLastAcknowledgementTimes.set(node.id, Date.now());
 			});
-		}, [combinedWithParentArgument, local_selected, node.id, parent, useLocalPanelState]);
+		}, [combinedWithParentArgument, node.id, parent]);
 		const onTextHolderClick = UseCallback(e=>IsDoubleClick(e) && this.titlePanel && this.titlePanel.OnDoubleClick(), []);
 		const toggleExpanded = UseCallback(e=>{
 			/* let pathToApplyTo = path;
@@ -298,7 +298,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 					onDirectClick={onDirectClick}
 					beforeChildren={<>
 						{leftPanelShow &&
-						<MapNodeUI_LeftBox {...{map, path, node, panelPosition, local_openPanel, backgroundColor}} asHover={hovered}
+						<MapNodeUI_LeftBox {...{map, path, node, panelsPosition, local_openPanel, backgroundColor}} asHover={hovered}
 							ref={c=>this.leftPanel = c}
 							usePortal={usePortalForDetailBoxes} nodeUI={this}
 							onPanelButtonHover={panel=>this.SetState({hoverPanel: panel})}
@@ -320,10 +320,10 @@ export class NodeUI_Inner extends BaseComponentPlus(
 								});
 							}}>
 							{/* fixes click-gap */}
-							{panelPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
+							{panelsPosition == "below" && <div style={{position: "absolute", right: -1, width: 1, top: 0, bottom: 0}}/>}
 						</MapNodeUI_LeftBox>}
 						{/* fixes click-gap */}
-						{leftPanelShow && panelPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
+						{leftPanelShow && panelsPosition == "left" && <div style={{position: "absolute", right: "100%", width: 1, top: 0, bottom: 0}}/>}
 					</>}
 					onTextHolderClick={onTextHolderClick}
 					text={<>
@@ -343,7 +343,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							&& <NodeUI_BottomPanel {...{map, node, path, parent, width, widthOverride, hovered, backgroundColor}}
 								ref={c=>this.bottomPanel = c}
 								usePortal={usePortalForDetailBoxes} nodeUI={this}
-								panelPosition={panelPosition!} panelToShow={panelToShow!}
+								panelsPosition={panelsPosition!} panelToShow={panelToShow!}
 								hoverTermID={hoverTermID} onTermHover={termID=>this.SetState({hoverTermID: termID})}/>}
 						{reasonScoreValues && showReasonScoreValues
 							&& <ReasonScoreValueMarkers {...{node, combinedWithParentArgument, reasonScoreValues}}/>}

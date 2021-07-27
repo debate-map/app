@@ -8,19 +8,22 @@ import {Button, Span} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus, UseEffect} from "web-vcore/nm/react-vextensions.js";
 import ReactDOM from "web-vcore/nm/react-dom.js";
 import React from "react";
+import {zIndexes} from "Utils/UI/ZIndexes";
 import {NodeUI_Inner} from "../NodeUI_Inner";
 import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer";
 import {GetMapUICSSFilter} from "../../MapUI";
 
+export const NodeUI_LeftBox_width = 130;
+
 type Props = {
 	map: Map|n, path: string, node: MapNodeL3,
-	panelPosition?: "left" | "below", local_openPanel?: string|n,
+	panelsPosition?: "left" | "below", local_openPanel?: string|n,
 	backgroundColor: chroma.Color, asHover: boolean, inList?: boolean, style?,
 	onPanelButtonHover: (panel: string)=>void, onPanelButtonClick: (panel: string)=>void,
 	usePortal?: boolean, nodeUI?: NodeUI_Inner,
 };
 @Observer
-export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"} as Props, {}) {
+export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"} as Props, {}) {
 	loadingUI(bailInfo: BailInfo) {
 		if (this.props.usePortal) return <div/>; // don't show loading-ui in portal, else layout flashes
 		return <DefaultLoadingUI comp={bailInfo.comp} bailMessage={bailInfo.bailMessage}/>;
@@ -29,7 +32,7 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 	render() {
 		const {
 			map, path, node,
-			panelPosition, local_openPanel,
+			panelsPosition, local_openPanel,
 			backgroundColor, asHover, inList, onPanelButtonHover, onPanelButtonClick, style,
 			children,
 			usePortal, nodeUI,
@@ -74,8 +77,13 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 					if (uiRoot != null && nodeUI!.root?.DOM != null) {
 						const nodeUIRect = nodeUI!.root.DOM.getBoundingClientRect();
 						uiRoot.style.display = "initial";
-						uiRoot.style.left = `${nodeUIRect.left - 110}px`;
-						uiRoot.style.top = `${nodeUIRect.top}px`;
+						if (panelsPosition == "left") {
+							uiRoot.style.left = `${nodeUIRect.left - 110}px`;
+							uiRoot.style.top = `${nodeUIRect.top}px`;
+						} else {
+							uiRoot.style.left = `${nodeUIRect.left}px`;
+							uiRoot.style.top = `${nodeUIRect.bottom + 1}px`;
+						}
 					}
 					requestAnimationFrame(update);
 				}
@@ -93,6 +101,11 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 		return MaybeCreatePortal(
 			<div ref={c=>uiRoot = c!} className="NodeUI_LeftBox" style={E(
 				{flexDirection: "column", whiteSpace: "nowrap", width: 110, zIndex: asHover ? 6 : 5},
+				!inList && panelsPosition == "left" && {position: "absolute", right: "calc(100% + 1px)"},
+				!inList && panelsPosition == "below" && {
+					position: "absolute", top: "calc(100% + 1px)", width: NodeUI_LeftBox_width,
+					zIndex: zIndexes.overNavBarDropdowns,
+				},
 				!usePortal && {
 					display: "flex",
 				},
@@ -100,8 +113,6 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelPosition: "left"}
 					display: "none", // wait for UseEffect func to align position and make visible
 					filter: GetMapUICSSFilter(),
 				},
-				!inList && panelPosition == "left" && {position: "absolute", right: "calc(100% + 1px)"},
-				!inList && panelPosition == "below" && {position: "absolute", top: "calc(100% + 1px)", width: 130},
 				style,
 			)}>
 				{children}
