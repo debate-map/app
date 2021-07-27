@@ -14,7 +14,8 @@ export class Share {
 	}
 
 	@DB((t, n)=>t.text(n).primary())
-	@Field({$ref: "UUID"}, {opt: true})
+	//@Field({$ref: "UUID"}, {opt: true})
+	@Field({type: "string"}, {opt: true})
 	id: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())

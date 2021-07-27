@@ -16,7 +16,6 @@ import {GetRatings} from "../DB/nodeRatings.js";
 })
 export class SetNodeRating extends Command<{nodeID: string, ratingType: Exclude<NodeRatingType, "impact">, value: number|n}, {}> {
 	oldRating: NodeRating;
-	newID: string;
 	newRating: NodeRating;
 	Validate() {
 		const {nodeID, ratingType, value} = this.payload;
@@ -26,12 +25,12 @@ export class SetNodeRating extends Command<{nodeID: string, ratingType: Exclude<
 		this.oldRating = oldRatings[0];
 
 		if (value != null) {
-			this.newID = GenerateUUID();
 			this.newRating = new NodeRating({
 				node: nodeID, type: ratingType, user: this.userInfo.id,
 				editedAt: Date.now(),
 				value,
 			});
+			this.newRating.id = this.GenerateUUID_Once("newRating.id");
 		}
 	}
 
@@ -40,7 +39,7 @@ export class SetNodeRating extends Command<{nodeID: string, ratingType: Exclude<
 			db.set(dbp`nodeRatings/${this.oldRating.id}`, null);
 		}
 		if (this.newRating) {
-			db.set(dbp`nodeRatings/${this.newID}`, this.newRating);
+			db.set(dbp`nodeRatings/${this.newRating.id}`, this.newRating);
 		}
 	}
 }

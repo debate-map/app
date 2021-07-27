@@ -47,7 +47,7 @@ export class ActionBar_Left extends BaseComponentPlus({} as {map: Map, subNavBar
 						}}/>}
 					{!backOnly && <>
 						{IsUserMap(map) && <DetailsDropDown map={map}/>}
-						<PeopleDropDown map={map}/>
+						{IsUserMap(map) && <PeopleDropDown map={map}/>}
 						{/* // disabled for now, so we can iterate quickly on the stuff we're actually using right now
 						{IsUserMap(map) && HasModPermissions(MeID()) && <LayersDropDown map={map}/>} */}
 						{/* IsUserMap(map) && HasModPermissions(MeID()) && <TimelineDropDown map={map}/> */}

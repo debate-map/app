@@ -7,7 +7,7 @@ import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
 import {GetOpenMapID} from "Store/main";
 import {ShareTab} from "Store/main/shareUI.js";
-import {Observer, RunInAction_Set, GetCurrentURL} from "web-vcore";
+import {Observer, RunInAction_Set, GetCurrentURL, InfoButton} from "web-vcore";
 import {NewShareUI} from "./ShareDropDown/NewShareUI.js";
 import moment from "web-vcore/nm/moment";
 
@@ -24,7 +24,7 @@ export class ShareDropDown extends BaseComponentPlus({} as {map: Map}, {}) {
 	render() {
 		const {map} = this.props;
 		const uiState = store.main.shareUI;
-		if (MeID() == null) return "Must sign in to view/create custom shares.";
+		if (MeID() == null) return <InfoButton mr={5} style={{alignSelf: "center"}} text="Must sign in to view/create custom shares."/>;
 
 		return (
 			<DropDown>

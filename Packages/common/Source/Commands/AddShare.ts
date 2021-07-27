@@ -53,19 +53,18 @@ export function GenerateSafeID(targetLength = 10, hardCodedStringAvoidance = "an
 	returnSchema: ()=>SimpleSchema({$id: {type: "string"}}),
 })
 export class AddShare extends Command<{share: Share}, {id: string}> {
-	shareID: string;
 	Validate() {
 		const {share} = this.payload;
-		this.shareID = this.shareID ?? GenerateSafeID();
+		share.id = this.CallX_Once("id", GenerateSafeID);
 		share.creator = this.userInfo.id;
 		share.createdAt = Date.now();
 
-		this.returnData = {id: this.shareID};
+		this.returnData = {id: share.id};
 		AssertValidate("Share", share, "Share invalid");
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
 		const {share} = this.payload;
-		db.set(dbp`shares/${this.shareID}`, share);
+		db.set(dbp`shares/${share.id}`, share);
 	}
 }
