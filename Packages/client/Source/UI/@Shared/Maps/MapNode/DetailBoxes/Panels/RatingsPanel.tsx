@@ -75,7 +75,6 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 		/* let marginTop = myRating != null ? 20 : 10;
 		let height = myRating != null ? 260 : 250; */
 
-
 		return (
 			<div ref="root" style={{position: "relative"/* , minWidth: 496 */}}
 				onClick={e=>{

@@ -1,4 +1,4 @@
-import {GetAsync, Command, AssertV, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAsync, Command, AssertV, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {CE} from "web-vcore/nm/js-vextensions.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {GetNode, IsRootNode} from "../DB/nodes.js";
@@ -12,7 +12,11 @@ import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
 @MapEdit
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({}),
+	payloadSchema: ()=>SimpleSchema({
+		mapID: {type: "string"},
+		parentID: {type: "string"},
+		childID: {type: "string"},
+	}),
 })
 export class UnlinkNode extends Command<{mapID: string|n, parentID: string, childID: string}, {}> {
 	allowOrphaning = false; // could also be named "asPartOfCut", to be consistent with ForUnlink_GetError parameter
@@ -28,8 +32,7 @@ export class UnlinkNode extends Command<{mapID: string|n, parentID: string, chil
 		let childNode = await GetNodeAsync(childID);
 		let parentNodes = await GetNodeParentsAsync(childNode);
 		Assert(parentNodes.length > 1, "Cannot unlink this child, as doing so would orphan it. Try deleting it instead."); */
-		const oldData = GetNodeL2(childID);
-		AssertV(oldData, "oldData was null.");
+		const oldData = GetNodeL2.NN(childID);
 
 		const baseText = `Cannot unlink node #${oldData.id}, since `;
 		AssertV(IsUserCreatorOrMod(this.userInfo.id, oldData), `${baseText}you are not its owner. (or a mod)`);
@@ -39,12 +42,8 @@ export class UnlinkNode extends Command<{mapID: string|n, parentID: string, chil
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {parentID, childID} = this.payload;
-		db.set(dbp`nodes/${childID}/.parents/.${parentID}`, null);
-		db.set(dbp`nodes/${parentID}/.children/.${childID}`, null);
-		if (this.parentToChildLinks.length) {
-			//db.set(dbp`nodes/${parentID}/.childrenOrder`, CE(CE(this.parent_oldChildrenOrder).Except(childID)).IfEmptyThen(null));
-			db.set(dbp`nodeChildLinks/${this.parentToChildLinks[0].id}`, null);
+		for (const link of this.parentToChildLinks) {
+			db.set(dbp`nodeChildLinks/${link.id}`, null);
 		}
 	}
 }

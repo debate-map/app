@@ -64,9 +64,11 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 		// let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
 		let validChildTypes = GetValidNewChildTypes(node, holderType, permissions);
 		const componentBox = holderType != HolderType.generic;
-		if (holderType) {
+		// if in relevance or truth group, claims cannot be direct children (must be within argument)
+		if (holderType == HolderType.relevance || holderType == HolderType.truth) {
 			validChildTypes = validChildTypes.Exclude(MapNodeType.claim);
 		} else {
+			// in the other cases, arguments cannot be direct children (those are only meant for in relevance/truth groups)
 			validChildTypes = validChildTypes.Exclude(MapNodeType.argument);
 		}
 

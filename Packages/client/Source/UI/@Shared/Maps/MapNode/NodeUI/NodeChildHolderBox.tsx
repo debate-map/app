@@ -1,14 +1,12 @@
 import chroma from "chroma-js";
 import {AssertWarn, emptyArray, emptyArray_forLoading, E} from "web-vcore/nm/js-vextensions.js";
 import {Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentPlus, GetDOM, UseCallback, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
+import {BaseComponentPlus, GetDOM, UseCallback, UseEffect, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
 import {ES, HSLA, Observer, RunInAction} from "web-vcore";
 import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {MapNodeL3, HolderType, GetParentNodeL3, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument, GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings, ArgumentType, MapNodeType, NodeRatingType, Map} from "dm_common";
-
-
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {RatingsPanel} from "../DetailBoxes/Panels/RatingsPanel.js";
 import {NodeChildHolder} from "./NodeChildHolder.js";
@@ -75,6 +73,13 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 
 		const hovered_main = hovered && !hovered_button;
 		const ratingPanelShow = (nodeView && nodeView[`selected_${holderTypeStr}`]) || hovered_main; // || local_selected;
+
+		UseEffect(()=>{
+			this.expandableBox!.DOM!.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered: true}));
+			this.expandableBox!.DOM!.addEventListener("mouseleave", ()=>this.SetState({hovered: false}));
+			this.expandableBox!.expandButton!.DOM.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered_button: true}));
+			this.expandableBox!.expandButton!.DOM.addEventListener("mouseleave", ()=>this.SetState({hovered_button: false}));
+		});
 
 		return (
 			<Row className="clickThrough" style={E(
@@ -182,13 +187,6 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	ratingPanelHolder: HTMLDivElement|n;
 	ratingPanel: RatingsPanel|n;
 	childHolder: NodeChildHolder|n;
-
-	ComponentDidMount() {
-		this.expandableBox!.DOM!.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered: true}));
-		this.expandableBox!.DOM!.addEventListener("mouseleave", ()=>this.SetState({hovered: false}));
-		this.expandableBox!.expandButton!.DOM.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered_button: true}));
-		this.expandableBox!.expandButton!.DOM.addEventListener("mouseleave", ()=>this.SetState({hovered_button: false}));
-	}
 
 	PostRender() {
 		this.CheckForChanges();

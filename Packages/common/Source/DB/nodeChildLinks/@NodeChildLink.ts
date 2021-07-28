@@ -21,7 +21,7 @@ export class NodeChildLink {
 	parent: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`nodes`).DeferRef())
-	@Field({type: "string"})
+	@Field({type: "string"}, {opt: true})
 	child: string;
 
 	@DB((t, n)=>t.integer(n))
@@ -30,7 +30,7 @@ export class NodeChildLink {
 
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({$ref: "ClaimForm"}, {opt: true})
-	form?: ClaimForm;
+	form?: ClaimForm|n;
 
 	/** I forget what this is for. */
 	@DB((t, n)=>t.boolean(n).nullable())
@@ -44,7 +44,7 @@ export class NodeChildLink {
 
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({$ref: "Polarity"}, {opt: true})
-	polarity?: Polarity;
+	polarity?: Polarity|n;
 
 	@DB((t, n)=>t.text(n))
 	@Field({$ref: "MapNodeType"}, {opt: true})
