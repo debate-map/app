@@ -4,7 +4,7 @@ import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
-import {GetHolderType, GetNode, GetParentNodeID, GetParentNodeL3} from "../DB/nodes.js";
+import {GetHolderType, GetNode, GetParentNodeID, GetParentNodeL3, HolderType} from "../DB/nodes.js";
 import {GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
 import {ClaimForm, MapNode, Polarity} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
@@ -29,8 +29,8 @@ export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOn
 		mapID, oldParentID: GetParentNodeID(draggedNodePath)!, newParentID: dropOnNode.id, nodeID: draggedNode.id,
 		newForm: draggedNode.type == MapNodeType.claim ? formForClaimChildren : null,
 		newPolarity: polarity,
-		//createWrapperArg: holderType != null || !dropOnNode.multiPremiseArgument,
-		createWrapperArg: true, // todo
+		createWrapperArg: holderType != HolderType.generic || !dropOnNode.multiPremiseArgument,
+		//createWrapperArg: true, // todo
 		unlinkFromOldParent: !asCopy, deleteEmptyArgumentWrapper: true,
 	});
 }

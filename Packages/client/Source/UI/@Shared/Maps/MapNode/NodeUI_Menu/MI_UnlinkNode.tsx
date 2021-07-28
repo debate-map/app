@@ -3,7 +3,7 @@ import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer} from "web-vcore";
-import {IsUserCreatorOrMod} from "dm_common";
+import {HolderType, IsUserCreatorOrMod} from "dm_common";
 import {MeID} from "dm_common";
 import {GetParentNodeL3} from "dm_common";
 import {GetNodeDisplayText} from "dm_common";
@@ -16,7 +16,7 @@ export class MI_UnlinkNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 		const {map, mapID, node, path, holderType, combinedWithParentArg, inList} = this.props;
 		if (!IsUserCreatorOrMod(MeID(), node)) return null;
 		if (inList) return null;
-		const componentBox = holderType != null;
+		const componentBox = holderType != HolderType.generic;
 		if (componentBox) return null;
 		const parent = GetParentNodeL3(path);
 		if (parent == null) return null;

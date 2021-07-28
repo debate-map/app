@@ -46,7 +46,6 @@ export class GraphDBShape {
 	nodeRatings = DefineCollection(NodeRating);
 	nodeRevisions = DefineCollection(MapNodeRevision);
 	//nodeStats = DefineCollection(MapNodeStats);
-	//nodeViewers = DefineCollection(ViewerSet); // removed due to privacy concerns
 	//nodePhrasings = DefineCollection(MapNodePhrasing);
 	nodeChildLinks = DefineCollection(NodeChildLink);
 	nodeTags = DefineCollection(MapNodeTag);

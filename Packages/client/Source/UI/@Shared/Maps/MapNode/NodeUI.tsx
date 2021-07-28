@@ -1,6 +1,6 @@
 import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNode, MapNodeL3, MapNodeType, MeID, Polarity} from "dm_common";
 import React from "react";
-import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEditTimes.js";
+import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced} from "Store/db_ext/nodes";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {NodeChildHolder} from "UI/@Shared/Maps/MapNode/NodeUI/NodeChildHolder.js";

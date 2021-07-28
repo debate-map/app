@@ -1,5 +1,5 @@
 import {Assert, CachedTransform, GetValues, IsString, VURL, E, Clone, CE, A} from "web-vcore/nm/js-vextensions.js";
-import {SplitStringBySlash_Cached, SlicePath, CreateAccessor, PartialBy} from "web-vcore/nm/mobx-graphlink.js";
+import {SplitStringBySlash_Cached, SlicePath, CreateAccessor, PartialBy, BailIfNull} from "web-vcore/nm/mobx-graphlink.js";
 import Moment from "web-vcore/nm/moment";
 import {GetMedia} from "../media.js";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
@@ -136,14 +136,11 @@ export const GetNodeL2 = CreateAccessor((nodeID: string | MapNode | n, path?: st
 	// if any of the data in a MapNodeL2 is not loaded yet, just return null (we want it to be all or nothing)
 	//const currentRevision = GetNodeRevision(node.currentRevision);
 	const currentRevision = GetNodeRevisions(node.id).OrderBy(a=>a.createdAt).LastOrX(); // todo: add logic deciding which revision to use, based on view context, etc.
-	/*if (currentRevision === undefined) return undefined; // if node-revision still loading, have GetNodeL2 return "still loading"
-	if (currentRevision === null) return null; // if node-revision non-existent, have GetNodeL2 return null as well*/
-	if (currentRevision == null) return null;
+	BailIfNull(currentRevision); // BIN: db should make-sure at least 1 revision exists, so if none, change must be loading
 
-	const accessPolicy = GetAccessPolicy(node.accessPolicy);
-	if (accessPolicy == null) return null;
+	const accessPolicy = GetAccessPolicy.BIN(node.accessPolicy); // BIN: access-policy is db-certain to exist, so if null, change must be loading
 
-	const nodeL2 = AsNodeL2(node, currentRevision, accessPolicy);
+	const nodeL2 = AsNodeL2(node, currentRevision!, accessPolicy);
 	//return CachedTransform("GetNodeL2", [path], nodeL2, ()=>nodeL2);
 	return nodeL2;
 });

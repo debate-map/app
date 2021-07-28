@@ -248,7 +248,7 @@ export function GetHolderType(childType: MapNodeType, parentType: MapNodeType|n)
 	} else if (parentType == MapNodeType.claim) {
 		if (childType == MapNodeType.argument) return HolderType.truth;
 	}
-	return null;
+	return HolderType.generic;
 }
 
 export const ForLink_GetError = CreateAccessor((parentType: MapNodeType, childType: MapNodeType)=>{

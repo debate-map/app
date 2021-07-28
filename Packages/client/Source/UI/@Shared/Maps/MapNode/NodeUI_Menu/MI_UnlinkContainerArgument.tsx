@@ -4,7 +4,7 @@ import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer} from "web-vcore";
-import {GetNodeL3, GetNodeDisplayText, IsUserCreatorOrMod, MeID, UnlinkNode} from "dm_common";
+import {GetNodeL3, GetNodeDisplayText, IsUserCreatorOrMod, MeID, UnlinkNode, HolderType} from "dm_common";
 import {Assert, NN} from "web-vcore/nm/js-vextensions";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
@@ -13,7 +13,7 @@ export class MI_UnlinkContainerArgument extends BaseComponentPlus({} as MI_Share
 	render() {
 		const {map, mapID, node, path, holderType, combinedWithParentArg} = this.props;
 		if (!combinedWithParentArg) return null;
-		const componentBox = holderType != null;
+		const componentBox = holderType != HolderType.generic;
 		if (componentBox) return null;
 
 		const argumentPath = NN(SlicePath(path, 1));

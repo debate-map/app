@@ -4,14 +4,14 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {IsUserCreatorOrMod, MeID, GetNodeDisplayText, DeleteNode} from "dm_common";
+import {IsUserCreatorOrMod, MeID, GetNodeDisplayText, DeleteNode, HolderType} from "dm_common";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
 export class MI_DeleteNode extends BaseComponentPlus({} as MI_SharedProps, {}) {
 	render() {
 		const {map, mapID, node, path, holderType, combinedWithParentArg} = this.props;
-		const componentBox = holderType != null;
+		const componentBox = holderType != HolderType.generic;
 		if (!IsUserCreatorOrMod(MeID(), node) || componentBox) return null;
 		const nodeText = GetNodeDisplayText(node, path);
 

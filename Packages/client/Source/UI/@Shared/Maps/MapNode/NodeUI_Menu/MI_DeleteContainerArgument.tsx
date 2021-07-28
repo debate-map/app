@@ -5,7 +5,7 @@ import {VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {styles} from "Utils/UI/GlobalStyles.js";
 import {Observer} from "web-vcore";
-import {GetNodeL3, GetNodeDisplayText, GetNodeChildLinks, IsUserCreatorOrMod, MeID, UnlinkNode, DeleteNode} from "dm_common";
+import {GetNodeL3, GetNodeDisplayText, GetNodeChildLinks, IsUserCreatorOrMod, MeID, UnlinkNode, DeleteNode, HolderType} from "dm_common";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
@@ -13,7 +13,7 @@ export class MI_DeleteContainerArgument extends BaseComponent<MI_SharedProps, {}
 	render() {
 		const {map, mapID, node, path, holderType, combinedWithParentArg} = this.props;
 		if (!combinedWithParentArg) return <div/>;
-		const componentBox = holderType != null;
+		const componentBox = holderType != HolderType.generic;
 		if (componentBox) return <div/>;
 
 		const argumentPath = SlicePath(path, 1);

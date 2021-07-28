@@ -16,10 +16,11 @@ export function GetChangeTypeOutlineColor(changeType: ChangeType|n) {
 export const GetMapNodeEdit = CreateAccessor((id: string)=>{
 	return GetDoc({}, a=>a.mapNodeEdits.get(id)) as Map_NodeEdit;
 });
-export const GetMapNodeEdits = CreateAccessor((mapID: string)=>{
+export const GetMapNodeEdits = CreateAccessor((mapID?: string|n, nodeID?: string|n)=>{
 	return GetDocs({
 		params: {filter: {
-			map: {equalTo: mapID},
-		}}
+			map: mapID && {equalTo: mapID},
+			node: nodeID && {equalTo: nodeID},
+		}},
 	}, a=>a.mapNodeEdits);
 });

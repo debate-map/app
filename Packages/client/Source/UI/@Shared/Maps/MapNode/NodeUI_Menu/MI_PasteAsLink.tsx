@@ -6,7 +6,7 @@ import {Observer, RunInAction} from "web-vcore";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {store} from "Store";
-import {GetParentNodeL3, GetParentNodeID, Polarity, MapNodeType, ClaimForm, GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText, MeID, LinkNode_HighLevel} from "dm_common";
+import {GetParentNodeL3, GetParentNodeID, Polarity, MapNodeType, ClaimForm, GetNodeContributionInfo, GetPolarityShortStr, NodeContributionInfo_ForPolarity, ReversePolarity, GetNodeDisplayText, MeID, LinkNode_HighLevel, HolderType} from "dm_common";
 import {MI_SharedProps} from "../NodeUI_Menu.js";
 
 @Observer
@@ -36,7 +36,7 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 			mapID: map?.id, oldParentID: GetParentNodeID(copiedNodePath), newParentID: contributeInfo_polarity?.hostNodeID ?? node.id, nodeID: copiedNode.id,
 			newForm: copiedNode.type == MapNodeType.claim ? formForClaimChildren : null,
 			newPolarity: contributeInfo_polarity?.reversePolarities ? ReversePolarity(newPolarity!) : newPolarity,
-			createWrapperArg: holderType != null || !node.multiPremiseArgument,
+			createWrapperArg: holderType != HolderType.generic || !node.multiPremiseArgument,
 			unlinkFromOldParent: copiedNode_asCut, deleteEmptyArgumentWrapper: true,
 		});
 		const error = linkCommand.Validate_Safe();
