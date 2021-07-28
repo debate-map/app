@@ -96,7 +96,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 			ADD CONSTRAINT "${constraintName}"
 			FOREIGN KEY ("${ref.fromColumn}") 
 			REFERENCES "${ref.toTable}" ("${ref.toColumn}")
-			${ref.enforceAtTransactionEnd ? "DEFERRABLE INITIALLY DEFERRED;" : ";"}
+			${ref.enforceAtTransactionEnd ? "DEFERRABLE INITIALLY DEFERRED;" : "DEFERRABLE INITIALLY IMMEDIATE;"}
 		`);
 		/*await knex.schema.raw(`
 			ALTER TABLE "${ref.fromTable}"
