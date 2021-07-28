@@ -55,5 +55,5 @@ export class NodeChildLink {
 	c_childType?: MapNodeType;
 
 	// runtime only
-	_mirrorLink?: boolean;
+	declare _mirrorLink?: boolean;
 }

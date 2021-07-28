@@ -1,5 +1,5 @@
 import {GetAsync, Command, AssertV, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
-import {CE} from "web-vcore/nm/js-vextensions.js";
+import {CE, FancyFormat, ToJSON_Advanced} from "web-vcore/nm/js-vextensions.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {GetNode, IsRootNode} from "../DB/nodes.js";
 import {GetNodeL2} from "../DB/nodes/$node.js";
@@ -26,7 +26,7 @@ export class UnlinkNode extends Command<{mapID: string|n, parentID: string, chil
 		const {parentID, childID} = this.payload;
 		const childParents = GetNodeChildLinks(undefined, childID);
 		this.parentToChildLinks = GetNodeChildLinks(parentID, childID);
-		AssertV(this.parentToChildLinks.length <= 1, "There should not be more than 1 link between parent and child.");
+		AssertV(this.parentToChildLinks.length == 1, FancyFormat({}, `There should be 1 and only 1 link between parent and child. Links:`, this.parentToChildLinks));
 
 		/* let {parentID, childID} = this.payload;
 		let childNode = await GetNodeAsync(childID);

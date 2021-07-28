@@ -40,7 +40,7 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 				const oldChildNode = GetNodeL3.NN(oldChildNode_partialPath);
 				newRevision.titles.base = GetNodeDisplayText(oldChildNode, oldChildNode_partialPath, GetNodeForm(oldChildNode));
 
-				this.sub_addRevision = new AddNodeRevision({mapID, revision: newRevision});
+				this.sub_addRevision = new AddNodeRevision({mapID, revision: newRevision}).MarkAsSubcommand(this);
 				this.sub_addRevision.Validate();
 			}
 		} else {

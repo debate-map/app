@@ -1,4 +1,4 @@
-import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, HolderType, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNode, MapNodeL3, MapNodeType, MeID, Polarity} from "dm_common";
+import {AccessLevel, ChangeType, GetNodeChildrenL3, GetParentNodeL3, GetParentPath, ChildGroup, IsMultiPremiseArgument, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, IsRootNode, IsSinglePremiseArgument, Map, MapNode, MapNodeL3, MapNodeType, MeID, Polarity} from "dm_common";
 import React from "react";
 import {GetPathsToChangedDescendantNodes_WithChangeTypes} from "Store/db_ext/mapNodeEdits.js";
 import {GetNodeChildrenL3_Advanced} from "Store/db_ext/nodes";
@@ -142,7 +142,7 @@ export class NodeUI extends BaseComponentPlus(
 					>
 						<span style={{opacity: 0.5}}>(single-premise arg lacks base-claim; right-click to add)</span>
 						{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
-						<NodeUI_Menu_Stub {...{map, node, path}} holderType={HolderType.generic}/>
+						<NodeUI_Menu_Stub {...{map, node, path}} childGroup={ChildGroup.generic}/>
 					</Row>
 				</Column>
 			);
@@ -174,7 +174,7 @@ export class NodeUI extends BaseComponentPlus(
 		if (!isPremiseOfSinglePremiseArg && boxExpanded) {
 			const showArgumentsControlBar = (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
-				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? HolderType.truth : null}
+				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
 				type={null}
 				linkSpawnPoint={dividePoint || (selfHeight / 2)}
 				vertical={isMultiPremiseArgument}
@@ -189,12 +189,12 @@ export class NodeUI extends BaseComponentPlus(
 				}, [isMultiPremiseArgument])}/>;
 		}
 		const nodeChildHolderBox_truth = isPremiseOfSinglePremiseArg && boxExpanded &&
-			<NodeChildHolderBox {...{map, node, path}} type={HolderType.truth}
+			<NodeChildHolderBox {...{map, node, path}} type={ChildGroup.truth}
 				widthOfNode={widthOverride || width}
 				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
 		const nodeChildHolderBox_relevance = isPremiseOfSinglePremiseArg && boxExpanded &&
-			<NodeChildHolderBox {...{map, node: parent!, path: parentPath!}} type={HolderType.relevance}
+			<NodeChildHolderBox {...{map, node: parent!, path: parentPath!}} type={ChildGroup.relevance}
 				widthOfNode={widthOverride || width}
 				nodeChildren={parentChildren} nodeChildrenToShow={relevanceArguments!}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;

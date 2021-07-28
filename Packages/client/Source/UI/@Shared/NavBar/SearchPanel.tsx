@@ -10,7 +10,7 @@ import {GetOpenMapID} from "Store/main";
 import {ACTMapViewMerge} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction, flow} from "web-vcore/nm/mobx.js";
 import {Validate, GetAsync, UUID} from "web-vcore/nm/mobx-graphlink.js";
-import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, GetNodeChildLinks, GetNodeRevisions, MapNodeRevision, globalMapID, HolderType, GetSearchTerms_Advanced} from "dm_common";
+import {GetNodeRevision, MapView, MapNodeView, GetNode, GetAllNodeRevisionTitles, GetNodeL2, AsNodeL3, GetNodeDisplayText, GetUser, GetRootNodeID, MapNodeType_Info, GetMap, GetNodeChildLinks, GetNodeRevisions, MapNodeRevision, globalMapID, ChildGroup, GetSearchTerms_Advanced} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {apolloClient} from "Utils/LibIntegrations/Apollo.js";
 import {gql} from "web-vcore/nm/@apollo/client";
@@ -278,7 +278,7 @@ export class SearchResultRow extends BaseComponentPlus({} as {nodeID: string, in
 					<span style={{flex: columnWidths[1]}}>{creator ? creator.displayName : "..."}</span>
 					<span style={{flex: columnWidths[2]}}>{moment(node.createdAt).format("YYYY-MM-DD")}</span>
 					{/* <NodeUI_Menu_Helper {...{map, node}}/> */}
-					<NodeUI_Menu_Stub {...{node: nodeL3, path: `${node.id}`, inList: true}} holderType={HolderType.generic}/>
+					<NodeUI_Menu_Stub {...{node: nodeL3, path: `${node.id}`, inList: true}} childGroup={ChildGroup.generic}/>
 				</Row>
 				{findNode_node === nodeID &&
 					<Row>

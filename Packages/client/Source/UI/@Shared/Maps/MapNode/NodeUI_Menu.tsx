@@ -7,7 +7,7 @@ import {store} from "Store";
 import {GetPathsToNodesChangedSinceX} from "Store/db_ext/mapNodeEdits.js";
 import {GetOpenMapID} from "Store/main";
 import {ACTCopyNode, GetCopiedNode, GetCopiedNodePath} from "Store/main/maps";
-import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, HolderType, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map} from "dm_common";
+import {SetNodeIsMultiPremiseArgument, ForCopy_GetError, ForCut_GetError, ForDelete_GetError, GetNodeChildrenL3, GetNodeID, GetParentNodeL3, ChildGroup, GetValidNewChildTypes, IsMultiPremiseArgument, IsPremiseOfSinglePremiseArgument, IsSinglePremiseArgument, ClaimForm, MapNodeL3, Polarity, GetMapNodeTypeDisplayName, MapNodeType, MapNodeType_Info, MeID, GetUserPermissionGroups, IsUserCreatorOrMod, Map} from "dm_common";
 import {Observer, RunInAction} from "web-vcore";
 import {styles} from "../../../../Utils/UI/GlobalStyles.js";
 import {ShowSignInPopup} from "../../NavBar/UserPanel.js";
@@ -30,14 +30,14 @@ export class NodeUI_Menu_Stub extends BaseComponent<Props, {}> {
 	}
 }
 
-type Props = {map?: Map, node: MapNodeL3, path: string, inList?: boolean, holderType: HolderType};
+type Props = {map?: Map, node: MapNodeL3, path: string, inList?: boolean, childGroup: ChildGroup};
 export type MI_SharedProps = Props & {mapID: string|n, combinedWithParentArg: boolean, copiedNode: MapNodeL3|n, copiedNodePath: string|n, copiedNode_asCut: boolean};
 
 @WarnOfTransientObjectProps
 @Observer
 export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 	render() {
-		const {map, node, path, inList, holderType} = this.props;
+		const {map, node, path, inList, childGroup} = this.props;
 
 		const parent = GetParentNodeL3(path);
 		const outerPath = IsPremiseOfSinglePremiseArgument(node, parent) ? SlicePath(path, 1) : path;
@@ -62,10 +62,10 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 
 		const mapID = map ? map.id : null;
 		// let validChildTypes = MapNodeType_Info.for[node.type].childTypes;
-		let validChildTypes = GetValidNewChildTypes(node, holderType, permissions);
-		const componentBox = holderType != HolderType.generic;
+		let validChildTypes = GetValidNewChildTypes(node, childGroup, permissions);
+		const componentBox = childGroup != ChildGroup.generic;
 		// if in relevance or truth group, claims cannot be direct children (must be within argument)
-		if (holderType == HolderType.relevance || holderType == HolderType.truth) {
+		if (childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth) {
 			validChildTypes = validChildTypes.Exclude(MapNodeType.claim);
 		} else {
 			// in the other cases, arguments cannot be direct children (those are only meant for in relevance/truth groups)
@@ -170,7 +170,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 						}}/>}
 				<MI_PasteAsLink {...sharedProps}/>
 				{/* // disabled for now, since I need to create a new command to wrap the logic. One route: create a CloneNode_HighLevel command, modeled after LinkNode_HighLevel (or containing it as a sub)
-					IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(GetParentNodeID(path), copiedNode.Extended({ _key: -1 }), permissions, holderType) && !copiedNode_asCut &&
+					IsUserBasicOrAnon(userID) && copiedNode && IsNewLinkValid(GetParentNodeID(path), copiedNode.Extended({ _key: -1 }), permissions, childGroup) && !copiedNode_asCut &&
 					<VMenuItem text={`Paste as clone: "${GetNodeDisplayText(copiedNode, null, formForClaimChildren).KeepAtMost(50)}"`} style={styles.vMenuItem} onClick={async (e) => {
 						if (e.button != 0) return;
 						if (userID == null) return ShowSignInPopup();

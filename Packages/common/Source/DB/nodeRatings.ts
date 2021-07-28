@@ -5,7 +5,7 @@ import {observable} from "web-vcore/nm/mobx.js";
 import {NodeRatingType, RatingType_Info} from "./nodeRatings/@NodeRatingType.js";
 import {NodeRating, NodeRating_MaybePseudo} from "./nodeRatings/@NodeRating.js";
 import {RS_GetAllValues} from "./nodeRatings/ReasonScore.js";
-import {GetNodeChildrenL2, HolderType} from "./nodes.js";
+import {GetNodeChildrenL2, ChildGroup} from "./nodes.js";
 import {GetMainRatingType, GetNodeL2} from "./nodes/$node.js";
 import {ClaimForm, MapNodeL3} from "./nodes/@MapNode.js";
 import {MapNodeType} from "./nodes/@MapNodeType.js";
@@ -78,11 +78,11 @@ export enum WeightingType {
 	reasonScore = "reasonScore",
 }
 
-function HolderTypeToRatingType(holderType: HolderType|n) {
+function ChildGroupToRatingType(childGroup: ChildGroup|n) {
 	return {
-		[HolderType.truth]: NodeRatingType.truth,
-		[HolderType.relevance]: NodeRatingType.relevance,
-	}[holderType!] as any;
+		[ChildGroup.truth]: NodeRatingType.truth,
+		[ChildGroup.relevance]: NodeRatingType.relevance,
+	}[childGroup!] as any;
 }
 
 export function AssertBetween0And100OrNull(val: number|n) {
@@ -90,9 +90,9 @@ export function AssertBetween0And100OrNull(val: number|n) {
 }
 
 const rsCompatibleNodeTypes = [MapNodeType.argument, MapNodeType.claim];
-// export const GetFillPercent_AtPath = StoreAccessor('GetFillPercent_AtPath', (node: MapNodeL3, path: string, boxType?: HolderType, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null) => {
-export const GetFillPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: HolderType|n, ratingType?: NodeRatingType, weighting = WeightingType.votes, userID?: string, resultIfNoData = null)=>{
-	ratingType = ratingType ?? HolderTypeToRatingType(boxType) ?? GetMainRatingType(node);
+// export const GetFillPercent_AtPath = StoreAccessor('GetFillPercent_AtPath', (node: MapNodeL3, path: string, boxType?: ChildGroup, ratingType?: RatingType, filter?: RatingFilter, resultIfNoData = null) => {
+export const GetFillPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = WeightingType.votes, userID?: string, resultIfNoData = null)=>{
+	ratingType = ratingType ?? ChildGroupToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return resultIfNoData;
 
 	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes?.includes(node.type)) {
@@ -108,7 +108,7 @@ export const GetFillPercent_AtPath = CreateAccessor((node: MapNodeL3, path: stri
 	if (node.type == MapNodeType.claim) {
 		result = claimTruthScore * 100;
 	} else if (node.type == MapNodeType.argument) {
-		if (boxType == HolderType.relevance) {
+		if (boxType == ChildGroup.relevance) {
 			// return Lerp(0, 100, GetPercentFromXToY(0, 2, argWeightMultiplier));
 			result = Lerp(0, 100, argWeightMultiplier);
 		} else {
@@ -120,8 +120,8 @@ export const GetFillPercent_AtPath = CreateAccessor((node: MapNodeL3, path: stri
 	return result;
 });
 
-export const GetMarkerPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: HolderType|n, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
-	ratingType = ratingType ?? HolderTypeToRatingType(boxType) ?? GetMainRatingType(node);
+export const GetMarkerPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
+	ratingType = ratingType ?? ChildGroupToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return null;
 	if (!node.policy.permissions_base.vote) return null;
 	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes.includes(node.type)) {

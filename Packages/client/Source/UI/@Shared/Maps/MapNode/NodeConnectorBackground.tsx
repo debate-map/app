@@ -1,10 +1,9 @@
-import {Vector2, E} from "web-vcore/nm/js-vextensions.js";
+import {Vector2, E, Assert} from "web-vcore/nm/js-vextensions.js";
 import {BaseComponent, SimpleShouldUpdate, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {ES, HSLA} from "web-vcore";
 import {Fragment} from "react";
 import {MapNodeL3} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
-import {Assert} from "../../../../../../../../../@Modules/web-vcore/Main/node_modules/react-vextensions/Dist/Internals/FromJSVE";
 
 type Props = {
 	node: MapNodeL3, path: string, linkSpawnPoint: Vector2, straightLines?: boolean, nodeChildren: MapNodeL3[],

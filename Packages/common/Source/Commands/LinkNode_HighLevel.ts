@@ -1,10 +1,11 @@
 import {E, ObjectCE} from "web-vcore/nm/js-vextensions.js";
 import {AssertV, Command, CommandMeta, DBHelper, SimpleSchema, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
 import {GetMap} from "../DB/maps.js";
 import {Map} from "../DB/maps/@Map.js";
 import {GetNodeChildLinks} from "../DB/nodeChildLinks.js";
-import {GetHolderType, GetNode, GetParentNodeID, GetParentNodeL3, HolderType} from "../DB/nodes.js";
+import {GetChildGroup, GetNode, GetParentNodeID, GetParentNodeL3, ChildGroup} from "../DB/nodes.js";
 import {GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
 import {ClaimForm, MapNode, Polarity} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
@@ -22,15 +23,16 @@ export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOn
 
 	// const draggedNode_parent = GetParentNodeL3(draggedNodePath);
 	const dropOnNode_parent = GetParentNodeL3(dropOnNodePath);
-	const holderType = GetHolderType(dropOnNode.type, dropOnNode_parent?.type);
+	const childGroup = GetChildGroup(dropOnNode.type, dropOnNode_parent?.type);
 	const formForClaimChildren = dropOnNode.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base;
 
 	return new LinkNode_HighLevel({
 		mapID, oldParentID: GetParentNodeID(draggedNodePath)!, newParentID: dropOnNode.id, nodeID: draggedNode.id,
 		newForm: draggedNode.type == MapNodeType.claim ? formForClaimChildren : null,
 		newPolarity: polarity,
-		createWrapperArg: holderType != HolderType.generic || !dropOnNode.multiPremiseArgument,
+		//createWrapperArg: childGroup != ChildGroup.generic || !dropOnNode.multiPremiseArgument,
 		//createWrapperArg: true, // todo
+		childGroup,
 		unlinkFromOldParent: !asCopy, deleteEmptyArgumentWrapper: true,
 	});
 }
@@ -38,7 +40,8 @@ export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOn
 type Payload = {
 	mapID: string|n, oldParentID: string|n, newParentID: string, nodeID: string,
 	newForm?: ClaimForm|n, newPolarity?: Polarity|n,
-	createWrapperArg?: boolean,
+	//createWrapperArg?: boolean,
+	childGroup: ChildGroup,
 	//linkAsArgument?: boolean,
 	unlinkFromOldParent?: boolean, deleteEmptyArgumentWrapper?: boolean
 };
@@ -51,14 +54,19 @@ type Payload = {
 		$nodeID: {$ref: "UUID"},
 		newForm: {$ref: "ClaimForm"},
 		newPolarity: {$ref: "Polarity"},
-		createWrapperArg: {type: "boolean"},
+		//createWrapperArg: {type: "boolean"},
+		childGroup: {$ref: "ChildGroup"},
 		unlinkFromOldParent: {type: "boolean"},
 		deleteEmptyArgumentWrapper: {type: "boolean"},
 	}),
 	returnSchema: ()=>SimpleSchema({
 		argumentWrapperID: {$ref: "UUID"},
+		/*argumentWrapperID: {anyOf: [
+			{$ref: "UUID"},
+			{type: "null"},
+		]},*/
 	}),
-	defaultPayload: {createWrapperArg: true},
+	//defaultPayload: {createWrapperArg: true},
 })
 export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: string}> {
 	map_data: Map;
@@ -70,7 +78,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 	sub_unlinkFromOldParent: UnlinkNode;
 	sub_deleteOldParent: DeleteNode;
 	Validate() {
-		let {mapID, oldParentID, newParentID, nodeID, newForm, createWrapperArg, unlinkFromOldParent, deleteEmptyArgumentWrapper, newPolarity} = this.payload;
+		let {mapID, oldParentID, newParentID, nodeID, newForm, /*createWrapperArg,*/ childGroup, unlinkFromOldParent, deleteEmptyArgumentWrapper, newPolarity} = this.payload;
 		AssertV(oldParentID !== nodeID, "Old parent-id and child-id cannot be the same!");
 		AssertV(newParentID !== nodeID, "New parent-id and child-id cannot be the same!");
 		//AssertV(oldParentID !== newParentID, "Old-parent-id and new-parent-id cannot be the same!");
@@ -84,7 +92,8 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 		this.newParent_data = GetNodeL2.NN(newParentID);
 
 		//let pastingPremiseAsRelevanceArg = IsPremiseOfMultiPremiseArgument(this.node_data, oldParent_data) && createWrapperArg;
-		const pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && createWrapperArg;
+		//const pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && createWrapperArg;
+		const pastingPremiseAsRelevanceArg = this.node_data.type == MapNodeType.claim && childGroup == ChildGroup.relevance;
 		AssertV(oldParentID !== newParentID || pastingPremiseAsRelevanceArg, "Old-parent-id and new-parent-id cannot be the same! (unless changing between truth-arg and relevance-arg)");
 		//AssertV(CanContributeToNode(MeID(), newParentID), "Cannot paste under a node with contributions disabled.");
 
@@ -99,9 +108,10 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 
 		let newParentID_forClaim = newParentID;
 
-		if (createWrapperArg) {
-			const canCreateWrapperArg = this.node_data.type === MapNodeType.claim && ObjectCE(this.newParent_data.type).IsOneOf(MapNodeType.claim, MapNodeType.argument);
-			AssertV(canCreateWrapperArg);
+		const wrapperArgNeeded = this.node_data.type === MapNodeType.claim && ObjectCE(this.newParent_data.type).IsOneOf(MapNodeType.claim, MapNodeType.argument);
+		if (wrapperArgNeeded) {
+			AssertV(childGroup == ChildGroup.relevance || childGroup == ChildGroup.truth,
+				`Claim is being linked under parent that requires a wrapper-argument, but the specified child-group (${childGroup}) is incompatible with that.`);
 
 			//const createWrapperArg = canCreateWrapperArg && createWrapperArg;
 			// Assert(newPolarity, 'Since this command has to create a wrapper-argument, you must supply the newPolarity property.');
@@ -116,7 +126,7 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			this.sub_addArgumentWrapper = this.sub_addArgumentWrapper ?? new AddChildNode({
 				mapID, parentID: newParentID, node: argumentWrapper, revision: argumentWrapperRevision,
 				// link: E({ _: true }, newPolarity && { polarity: newPolarity }) as any,
-				link: E({_: true, polarity: newPolarity}) as any,
+				link: new NodeChildLink({slot: 0, polarity: newPolarity}),
 			}).MarkAsSubcommand(this);
 			this.sub_addArgumentWrapper.Validate();
 
@@ -132,9 +142,9 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 			this.sub_unlinkFromOldParent.allowOrphaning = true; // allow "orphaning" of nodeID, since we're going to reparent it simultaneously -- using the sub_linkToNewParent subcommand
 			this.sub_unlinkFromOldParent.Validate();
 
-			// if the moved node was the parent's only child, and actor allows it (ie. their view has node as single-premise arg), also delete the old parent
+			// if parent was argument, and node being moved is arg's only premise, and actor allows it (ie. their view has node as single-premise arg), also delete the argument parent
 			const children = GetNodeChildLinks(oldParentID);
-			if (children.length == 1 && deleteEmptyArgumentWrapper) {
+			if (oldParent.type == MapNodeType.argument && children.length == 1 && deleteEmptyArgumentWrapper) {
 				this.sub_deleteOldParent = this.sub_deleteOldParent ?? new DeleteNode({mapID, nodeID: oldParentID!}).MarkAsSubcommand(this);
 				this.sub_deleteOldParent.childrenToIgnore = [nodeID]; // let DeleteNode sub that it doesn't need to wait for nodeID to be deleted (since we're moving it out from old-parent simultaneously with old-parent's deletion)
 				this.sub_deleteOldParent.Validate();

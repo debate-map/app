@@ -1,5 +1,5 @@
-import {Assert, CE, emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
-import {CreateAccessor, GetDoc, SlicePath, SplitStringBySlash_Cached, UUID} from "web-vcore/nm/mobx-graphlink.js";
+import {Assert, CE, emptyArray_forLoading, GetValues} from "web-vcore/nm/js-vextensions.js";
+import {AddSchema, CreateAccessor, GetDoc, SlicePath, SplitStringBySlash_Cached, UUID} from "web-vcore/nm/mobx-graphlink.js";
 import {globalRootNodeID} from "../DB_Constants.js";
 import {GetNodeChildLinks} from "./nodeChildLinks.js";
 import {GetNodeRevisionsByTitle} from "./nodeRevisions.js";
@@ -12,11 +12,12 @@ import {TagComp_MirrorChildrenFromXToY, TagComp_RestrictMirroringOfX, TagComp_XI
 import {CanGetBasicPermissions, HasAdminPermissions, IsUserCreatorOrMod} from "./users/$user.js";
 import {PermissionGroupSet} from "./users/@User.js";
 
-export enum HolderType {
+export enum ChildGroup {
 	generic = "generic",
 	truth = "truth",
 	relevance = "relevance",
 }
+AddSchema("ChildGroup", {enum: GetValues(ChildGroup)});
 
 export function PathSegmentToNodeID(segment: string|n): UUID {
 	if (segment?.length == 22) return segment; // if raw UUID
@@ -224,14 +225,14 @@ export const GetNodeMirrorChildren = CreateAccessor((nodeID: string, tagsToIgnor
 
 export const GetNodeChildrenL2 = CreateAccessor(function(nodeID: string, includeMirrorChildren = true, tagsToIgnore?: string[]) {
 	const nodeChildren = GetNodeChildren(nodeID, includeMirrorChildren, tagsToIgnore);
-	const nodeChildrenL2 = nodeChildren.map(child=>this!.MaybeCatchItemBail(()=>GetNodeL2.NN(child))); // nn: we know node exists, so rest should as well
+	const nodeChildrenL2 = nodeChildren.map(child=>this!.MaybeCatchItemBail(()=>GetNodeL2.BIN(child))); // BIN: we know node exists, so rest should as well (so null must mean change loading)
 	return nodeChildrenL2;
 });
 export const GetNodeChildrenL3 = CreateAccessor(function(nodeID: string, path?: string, includeMirrorChildren = true, tagsToIgnore?: string[]) {
 	path = path || nodeID;
 
 	const nodeChildrenL2 = GetNodeChildrenL2(nodeID, includeMirrorChildren, tagsToIgnore);
-	const nodeChildrenL3 = nodeChildrenL2.map(child=>this!.MaybeCatchItemBail(()=>GetNodeL3.NN(`${path}/${child.id}`, tagsToIgnore))); // nn: we know node exists, so rest should as well
+	const nodeChildrenL3 = nodeChildrenL2.map(child=>this!.MaybeCatchItemBail(()=>GetNodeL3.BIN(`${path}/${child.id}`, tagsToIgnore))); // BIN: we know node exists, so rest should as well (so null must mean change loading)
 	return nodeChildrenL3;
 });
 
@@ -242,20 +243,20 @@ export const GetPremiseOfSinglePremiseArgument = CreateAccessor((argumentNodeID:
 	return childPremise;
 });
 
-export function GetHolderType(childType: MapNodeType, parentType: MapNodeType|n) {
+export function GetChildGroup(childType: MapNodeType, parentType: MapNodeType|n) {
 	if (parentType == MapNodeType.argument) {
-		if (childType == MapNodeType.argument) return HolderType.relevance;
+		if (childType == MapNodeType.argument) return ChildGroup.relevance;
 	} else if (parentType == MapNodeType.claim) {
-		if (childType == MapNodeType.argument) return HolderType.truth;
+		if (childType == MapNodeType.argument) return ChildGroup.truth;
 	}
-	return HolderType.generic;
+	return ChildGroup.generic;
 }
 
 export const ForLink_GetError = CreateAccessor((parentType: MapNodeType, childType: MapNodeType)=>{
 	const parentTypeInfo = MapNodeType_Info.for[parentType].childTypes;
 	if (!parentTypeInfo?.includes(childType)) return `The child's type (${MapNodeType[childType]}) is not valid for the parent's type (${MapNodeType[parentType]}).`;
 });
-export const ForNewLink_GetError = CreateAccessor((parentID: string, newChild: Pick<MapNode, "id" | "type">, permissions: PermissionGroupSet, newHolderType?: HolderType|n)=>{
+export const ForNewLink_GetError = CreateAccessor((parentID: string, newChild: Pick<MapNode, "id" | "type">, permissions: PermissionGroupSet, newChildGroup?: ChildGroup|n)=>{
 	if (!CanGetBasicPermissions(permissions)) return "You're not signed in, or lack basic permissions.";
 	const parent = GetNode(parentID);
 	if (parent == null) return "Parent data not found.";
@@ -269,9 +270,9 @@ export const ForNewLink_GetError = CreateAccessor((parentID: string, newChild: P
 	const parentChildLinks = GetNodeChildLinks(parentID);
 	const isAlreadyChild = parentChildLinks.Any(a=>a.child == newChild.id);
 	// if new-holder-type is not specified, consider "any" and so don't check
-	if (newHolderType !== undefined) {
-		const currentHolderType = GetHolderType(newChild.type, parent.type);
-		if (isAlreadyChild && currentHolderType == newHolderType) return false; // if already a child of this parent, reject (unless it's a claim, in which case allow, as can be)
+	if (newChildGroup !== undefined) {
+		const currentChildGroup = GetChildGroup(newChild.type, parent.type);
+		if (isAlreadyChild && currentChildGroup == newChildGroup) return false; // if already a child of this parent, reject (unless it's a claim, in which case allow, as can be)
 	}
 	return ForLink_GetError(parent.type, newChild.type);
 });

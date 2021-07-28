@@ -9,10 +9,12 @@ export const GetNodeChildLink = CreateAccessor((id: string)=>{
 export const GetNodeChildLinks = CreateAccessor((parentID?: string|n, childID?: string|n): NodeChildLink[]=>{
 	return GetDocs({
 		params: {filter: {
-			or: [
+			/*and: [
 				parentID != null && {parent: {equalTo: parentID}},
 				childID != null && {child: {equalTo: childID}},
-			].filter(a=>a),
+			].filter(a=>a),*/
+			parent: parentID && {equalTo: parentID},
+			child: childID && {equalTo: childID},
 		}},
 	}, a=>a.nodeChildLinks);
 });

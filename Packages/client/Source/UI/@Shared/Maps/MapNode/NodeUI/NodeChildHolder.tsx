@@ -10,12 +10,12 @@ import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {MapNodeL3, Polarity, HolderType, GetNodeChildrenL3, GetFillPercent_AtPath, IsMultiPremiseArgument, MapNodeType, MapNodeType_Info, ArgumentType, Map} from "dm_common";
+import {MapNodeL3, Polarity, ChildGroup, GetNodeChildrenL3, GetFillPercent_AtPath, IsMultiPremiseArgument, MapNodeType, MapNodeType_Info, ArgumentType, Map} from "dm_common";
 import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], type: HolderType|n,
+	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], type: ChildGroup|n,
 	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, vertical?: boolean, minWidth?: number,
 	onHeightOrDividePointChange?: (dividePoint: number)=>void,
 };
@@ -50,7 +50,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 		let nodeChildrenToShowHere = nodeChildrenToShow;
 		let nodeChildrenToShowInRelevanceBox;
-		if (IsMultiPremiseArgument(node) && type != HolderType.relevance) {
+		if (IsMultiPremiseArgument(node) && type != ChildGroup.relevance) {
 			nodeChildrenToShowHere = nodeChildrenToShow.filter(a=>a && a.type != MapNodeType.argument);
 			nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == MapNodeType.argument);
 		}
@@ -174,8 +174,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 						nodeChildren={nodeChildrenToShowHere} childBoxOffsets={oldChildBoxOffsets}/>}
 
 				{/* if we're for multi-premise arg, and this comp is not already showing relevance-args, show them in a "Taken together, are these claims relevant?" box */}
-				{IsMultiPremiseArgument(node) && type != HolderType.relevance &&
-					<NodeChildHolderBox {...{map, node, path}} type={HolderType.relevance} widthOverride={childrenWidthOverride}
+				{IsMultiPremiseArgument(node) && type != ChildGroup.relevance &&
+					<NodeChildHolderBox {...{map, node, path}} type={ChildGroup.relevance} widthOverride={childrenWidthOverride}
 						widthOfNode={childrenWidthOverride}
 						nodeChildren={GetNodeChildrenL3(node.id, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}
 						onHeightOrDividePointChange={dividePoint=>this.CheckForLocalChanges()}/>}
@@ -242,7 +242,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 	get Expanded() {
 		const {map, path, type} = this.props;
-		const expandKey = type ? `expanded_${HolderType[type].toLowerCase()}` : "expanded";
+		const expandKey = type ? `expanded_${ChildGroup[type].toLowerCase()}` : "expanded";
 		const nodeView = GetNodeView(map.id, path);
 		return nodeView[expandKey];
 	}

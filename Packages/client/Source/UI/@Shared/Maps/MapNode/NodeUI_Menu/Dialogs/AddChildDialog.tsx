@@ -43,10 +43,10 @@ export class AddChildHelper {
 				type: MapNodeType.claim, creator: userID,
 			});
 			this.subNode_revision = new MapNodeRevision(E(this.map.nodeDefaults, {titles: {base: title}}));
-			this.subNode_link = {
+			this.subNode_link = new NodeChildLink({
 				slot: 0,
 				form: ClaimForm.base,
-			} as NodeChildLink;
+			});
 		} else {
 			let usedTitleKey = "base";
 			if (childType == MapNodeType.claim) {

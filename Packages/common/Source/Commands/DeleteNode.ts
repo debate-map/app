@@ -32,7 +32,8 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string, withC
 	oldData: MapNodeL2|n;
 	oldRevisions: MapNodeRevision[];
 	//oldParentChildrenOrders: string[][];
-	links: NodeChildLink[];
+	linksAsParent: NodeChildLink[];
+	linksAsChild: NodeChildLink[];
 	mapNodeEdits: Map_NodeEdit[];
 	Validate() {
 		const {mapID, nodeID, withContainerArgument} = this.payload;
@@ -51,7 +52,8 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string, withC
 		/*const parentIDs = CE(this.oldData.parents || {}).VKeys();
 		this.oldParentChildrenOrders = parentIDs.map(parentID=>GetNode(parentID)?.childrenOrder);
 		// AssertV(this.oldParentChildrenOrders.All((a) => a != null), 'oldParentChildrenOrders has null entries.');*/
-		this.links = GetNodeChildLinks(nodeID, nodeID);
+		this.linksAsParent = GetNodeChildLinks(nodeID);
+		this.linksAsChild = GetNodeChildLinks(null, nodeID);
 		this.mapNodeEdits = GetMapNodeEdits(null, nodeID);
 
 		// probably todo: integrate this into the command Validate functions themselves
@@ -75,7 +77,10 @@ export class DeleteNode extends Command<{mapID?: string|n, nodeID: string, withC
 		//db.set(dbp`nodeExtras/${nodeID}`, null);
 		db.set(dbp`nodeRatings/${nodeID}`, null);
 
-		for (const link of this.links) {
+		for (const link of this.linksAsParent) {
+			db.set(dbp`nodeChildLinks/${link.id}`, null);
+		}
+		for (const link of this.linksAsChild) {
 			db.set(dbp`nodeChildLinks/${link.id}`, null);
 		}
 		// delete edit-time entries within each map (where such entries exist)

@@ -6,7 +6,7 @@ import {GADDemo, GADMainFont} from "UI/@GAD/GAD.js";
 import {ES, HSLA, Observer, RunInAction} from "web-vcore";
 import {ACTMapNodeExpandedSet, GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
-import {MapNodeL3, HolderType, GetParentNodeL3, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument, GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings, ArgumentType, MapNodeType, NodeRatingType, Map} from "dm_common";
+import {MapNodeL3, ChildGroup, GetParentNodeL3, IsPremiseOfSinglePremiseArgument, IsMultiPremiseArgument, GetFillPercent_AtPath, GetMarkerPercent_AtPath, GetRatings, ArgumentType, MapNodeType, NodeRatingType, Map} from "dm_common";
 import {GetNodeColor} from "Store/db_ext/nodes";
 import {RatingsPanel} from "../DetailBoxes/Panels/RatingsPanel.js";
 import {NodeChildHolder} from "./NodeChildHolder.js";
@@ -17,7 +17,7 @@ import {ExpandableBox} from "../ExpandableBox.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
-	type: HolderType, widthOfNode: number, widthOverride?: number, onHeightOrDividePointChange?: (dividePoint: number)=>void,
+	type: ChildGroup, widthOfNode: number, widthOverride?: number, onHeightOrDividePointChange?: (dividePoint: number)=>void,
 };
 
 @WarnOfTransientObjectProps
@@ -45,7 +45,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		const markerPercent = GetMarkerPercent_AtPath(node, path, type);
 
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
-		let text = type == HolderType.truth ? "True?" : "Relevant?";
+		let text = type == ChildGroup.truth ? "True?" : "Relevant?";
 		if (isMultiPremiseArgument) {
 			//text = "When taken together, are these claims relevant?";
 			if (node.argumentType == ArgumentType.all) text = "If all these claims were true, would they be relevant?";
@@ -58,9 +58,9 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		const lineColor = GetNodeColor({type: MapNodeType.claim} as any as MapNodeL3, "raw");
 
 		const lineOffset = 50.0.KeepAtMost(innerBoxOffset);
-		// let expandKey = type == HolderType.truth ? "expanded_truth" : "expanded_relevance";
-		const holderTypeStr = HolderType[type].toLowerCase();
-		const expandKey = `expanded_${holderTypeStr}`;
+		// let expandKey = type == ChildGroup.truth ? "expanded_truth" : "expanded_relevance";
+		const childGroupStr = ChildGroup[type].toLowerCase();
+		const expandKey = `expanded_${childGroupStr}`;
 		const expanded = nodeView[expandKey]; // this.Expanded
 
 		const separateChildren = node.type == MapNodeType.claim || node.type == MapNodeType.argument;
@@ -72,7 +72,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		}
 
 		const hovered_main = hovered && !hovered_button;
-		const ratingPanelShow = (nodeView && nodeView[`selected_${holderTypeStr}`]) || hovered_main; // || local_selected;
+		const ratingPanelShow = (nodeView && nodeView[`selected_${childGroupStr}`]) || hovered_main; // || local_selected;
 
 		UseEffect(()=>{
 			this.expandableBox!.DOM!.addEventListener("mouseenter", ()=>document.querySelectorAll(".scrolling").length == 0 && this.SetState({hovered: true}));
@@ -94,13 +94,13 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 					{/* position: "relative", /* removal fixes */ alignItems: "flex-start", /* marginLeft: `calc(100% - ${width}px)`, */ width},
 				)}>
 					<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{position: "absolute", width: "100%", height: "100%"}}>
-						{type == HolderType.truth &&
+						{type == ChildGroup.truth &&
 							<Squiggle start={[0, lineHolderHeight + 2]} startControl_offset={[0, -lineOffset]}
 								end={[(width / 2) - 2, innerBoxOffset + height - 2]} endControl_offset={[0, lineOffset]} color={lineColor}/>}
-						{type == HolderType.relevance && !isMultiPremiseArgument &&
+						{type == ChildGroup.relevance && !isMultiPremiseArgument &&
 							<Squiggle start={[0, -2]} startControl_offset={[0, lineOffset]}
 								end={[(width / 2) - 2, innerBoxOffset + 2]} endControl_offset={[0, -lineOffset]} color={lineColor}/>}
-						{type == HolderType.relevance && isMultiPremiseArgument &&
+						{type == ChildGroup.relevance && isMultiPremiseArgument &&
 							<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
 					</div>
 					<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
@@ -121,7 +121,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 							const newExpanded = !nodeView[expandKey];
 							const recursivelyCollapsing = !newExpanded && e.altKey;
 							RunInAction("NodeChildHolderBox_toggleExpanded", ()=>{
-								if (type == HolderType.truth) {
+								if (type == ChildGroup.truth) {
 									ACTMapNodeExpandedSet({
 										mapID: map.id, path, resetSubtree: recursivelyCollapsing,
 										[expandKey]: newExpanded,
@@ -155,11 +155,11 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 									padding: 5, background: backgroundColor.css(), borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px",
 								}}>
 									{(()=>{
-										const ratings = GetRatings(node.id, holderTypeStr as NodeRatingType);
-										return <RatingsPanel node={node} path={path} ratingType={holderTypeStr as NodeRatingType} ratings={ratings}/>;
+										const ratings = GetRatings(node.id, childGroupStr as NodeRatingType);
+										return <RatingsPanel node={node} path={path} ratingType={childGroupStr as NodeRatingType} ratings={ratings}/>;
 									})()}
 								</div>}
-							<NodeUI_Menu_Stub {...{map, node, path}} holderType={type}/>
+							<NodeUI_Menu_Stub {...{map, node, path}} childGroup={type}/>
 						</>}
 					/>
 					{nodeChildrenToShow != emptyArray && !expanded && nodeChildrenToShow.length != 0 &&
@@ -178,7 +178,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 
 	get Expanded() {
 		const {map, path, type} = this.props;
-		const expandKey = `expanded_${HolderType[type].toLowerCase()}`;
+		const expandKey = `expanded_${ChildGroup[type].toLowerCase()}`;
 		const nodeView = GetNodeView(map.id, path);
 		return nodeView[expandKey];
 	}

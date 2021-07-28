@@ -1,4 +1,4 @@
-import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, HolderType, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "dm_common";
+import {ChangeType, ClaimForm, GetChangeTypeOutlineColor, GetFillPercent_AtPath, GetMainRatingType, GetMarkerPercent_AtPath, GetNodeForm, GetNodeL3, GetPaddingForNode, GetRatings, ChildGroup, IsPremiseOfSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MapNodeType_Info, MeID, NodeRatingType, ReasonScoreValues_RSPrefix, RS_CalculateTruthScore, RS_CalculateTruthScoreComposite, RS_GetAllValues, WeightingType} from "dm_common";
 import chroma, {Color} from "chroma-js";
 //import classNames from "classnames";
 import {A, DEL, DoNothing, E, GetValues, NN, Timer, ToJSON, Vector2, VRect, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
@@ -331,7 +331,7 @@ export class NodeUI_Inner extends BaseComponentPlus(
 							ref={c=>this.titlePanel = c}
 							style={E(GADDemo && {color: HSLA(222, 0.33, 0.25, 1), fontFamily: GADMainFont /*fontSize: 15, letterSpacing: 1*/})}/>
 						{subPanelShow && <SubPanel node={node}/>}
-						<NodeUI_Menu_Stub {...{map, node, path}} holderType={HolderType.generic}/>
+						<NodeUI_Menu_Stub {...{map, node, path}} childGroup={ChildGroup.generic}/>
 					</>}
 					{...E(
 						{backgroundFillPercent, backgroundColor, markerPercent},

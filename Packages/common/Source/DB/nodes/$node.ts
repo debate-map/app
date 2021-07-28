@@ -5,7 +5,7 @@ import {GetMedia} from "../media.js";
 import {GetNiceNameForMediaType, MediaType} from "../media/@Media.js";
 import {NodeRatingType} from "../nodeRatings/@NodeRatingType.js";
 import {GetNodeRevision, GetNodeRevisions} from "../nodeRevisions.js";
-import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, HolderType, GetNodeChildrenL3} from "../nodes.js";
+import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, ChildGroup, GetNodeChildrenL3} from "../nodes.js";
 import {ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode.js";
 import {MapNodeRevision, TitlesMap, TitleKey_values} from "./@MapNodeRevision.js";
 import {MapNodeType} from "./@MapNodeType.js";
@@ -389,9 +389,9 @@ export function GetValidChildTypes(nodeType: MapNodeType, path: string) {
 	const validChildTypes = nodeTypes.filter(type=>ForLink_GetError(nodeType, type) == null);
 	return validChildTypes;
 }
-export function GetValidNewChildTypes(parent: MapNodeL2, holderType: HolderType|n, permissions: PermissionGroupSet) {
+export function GetValidNewChildTypes(parent: MapNodeL2, childGroup: ChildGroup|n, permissions: PermissionGroupSet) {
 	const nodeTypes = GetValues(MapNodeType);
-	const validChildTypes = nodeTypes.filter(type=>ForNewLink_GetError(parent.id, {type} as any, permissions, holderType) == null);
+	const validChildTypes = nodeTypes.filter(type=>ForNewLink_GetError(parent.id, {type} as any, permissions, childGroup) == null);
 	return validChildTypes;
 }
 

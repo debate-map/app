@@ -124,7 +124,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 		);
 	}
 
-	OnDragEnd = result=>{
+	OnDragEnd = async result=>{
 		const sourceDroppableInfo = FromJSON(result.source.droppableId) as DroppableInfo;
 		const sourceIndex = result.source.index as number;
 		const targetDroppableInfo = result.destination && FromJSON(result.destination.droppableId) as DroppableInfo;
@@ -150,7 +150,8 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 			const moveCommand = CreateLinkCommand(mapID, draggedNodePath, newParentPath, polarity, false);
 			Assert(copyCommand && moveCommand);
 
-			if (copyCommand.Validate_Safe()) {
+			//if (copyCommand.Validate_Safe()) {
+			if (await copyCommand.Validate_Async_Safe()) {
 				ShowMessageBox({title: "Cannot copy/move node", message: `Reason: ${copyCommand.ValidateErrorStr}`});
 				return;
 			}

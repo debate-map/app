@@ -105,6 +105,7 @@ const nodes = TypeCheck(MapNode as new()=>(MapNode & {revision: MapNodeRevision}
 		creator: systemUserID,
 		createdAt: Date.now(),
 		type: MapNodeType.category,
+		rootNodeForMap: globalMapID,
 		revision: {
 			id: GenerateUUID(),
 			//node: LastUUID(-1),
