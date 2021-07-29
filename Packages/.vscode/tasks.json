@@ -23,7 +23,7 @@
 		{
 			"label": "#2 webpack",
 			"type": "shell",
-			"command": "yarn start client.dev",
+			"command": "npm start client.dev",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"

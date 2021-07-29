@@ -4,7 +4,7 @@
 		{
 			"label": "#1 server.dev",
 			"type": "shell",
-			"command": "yarn start server.dev",
+			"command": "npm start server.dev",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"
@@ -12,7 +12,7 @@
 		{
 			"label": "#2 server.buildInitDBScript_watch",
 			"type": "shell",
-			"command": "yarn start server.buildInitDBScript_watch",
+			"command": "npm start server.buildInitDBScript_watch",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
@@ -20,7 +20,7 @@
 		{
 			"label": "#3 server.run",
 			"type": "shell",
-			"command": "yarn start server.run",
+			"command": "npm start server.run",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
@@ -28,7 +28,7 @@
 		{
 			"label": "## server.initDB_freshScript",
 			"type": "shell",
-			"command": "yarn start server.initDB_freshScript",
+			"command": "npm start server.initDB_freshScript",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build"
@@ -36,7 +36,7 @@
 		{
 			"label": "## common.tsc (typecheck)",
 			"type": "shell",
-			"command": "yarn start common.tsc",
+			"command": "npm start common.tsc",
 			"problemMatcher": "$tsc-watch",
 			"isBackground": true,
 			"group": "build"
@@ -44,7 +44,7 @@
 		{
 			"label": "## server.dcAllDBSessions",
 			"type": "shell",
-			"command": "yarn start server.dcAllDBSessions",
+			"command": "npm start server.dcAllDBSessions",
 			"problemMatcher": [],
 			"isBackground": true,
 			"group": "build",
