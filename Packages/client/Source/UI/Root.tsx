@@ -33,8 +33,7 @@ import {DebatesUI} from "./Debates.js";
 import {FeedbackUI} from "./Feedback.js";
 import {ForumUI} from "./Forum.js";
 import {SocialUI} from "./Social.js";
-import {StreamPanel} from "./@Shared/NavBar/StreamPanel";
-import {NodeDetailBoxesLayer} from "./@Shared/Maps/MapNode/DetailBoxes/NodeDetailBoxesLayer";
+import {NodeDetailBoxesLayer} from "./@Shared/Maps/MapNode/DetailBoxes/NodeDetailBoxesLayer.js";
 
 ColorPickerBox.Init(ReactColor, chroma);
 
@@ -127,7 +126,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 	OnDragEnd = async result=>{
 		const sourceDroppableInfo = FromJSON(result.source.droppableId) as DroppableInfo;
 		const sourceIndex = result.source.index as number;
-		const targetDroppableInfo = result.destination && FromJSON(result.destination.droppableId) as DroppableInfo;
+		const targetDroppableInfo: DroppableInfo = result.destination && FromJSON(result.destination.droppableId);
 		const targetIndex = result.destination && result.destination.index as number;
 		const draggableInfo = FromJSON(result.draggableId) as DraggableInfo;
 
@@ -137,7 +136,7 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 			if (result.destination && result.source.droppableId == result.destination.droppableId) return;
 
 			const {parentPath: newParentPath} = targetDroppableInfo;
-			const newParentID = NN(GetPathNodeIDs(newParentPath).Last());
+			const newParentID = NN(GetPathNodeIDs(newParentPath!).Last());
 			const newParent = GetNodeL3.NN(newParentID);
 			const polarity = targetDroppableInfo.subtype == "up" ? Polarity.supporting : Polarity.opposing;
 
@@ -146,8 +145,8 @@ export class RootUIWrapper extends BaseComponent<{}, {}> {
 			const draggedNodeID = NN(GetPathNodeIDs(draggedNodePath!).Last());
 			const draggedNode = GetNodeL3.NN(draggedNodeID);
 
-			const copyCommand = CreateLinkCommand(mapID, draggedNodePath, newParentPath, polarity, true);
-			const moveCommand = CreateLinkCommand(mapID, draggedNodePath, newParentPath, polarity, false);
+			const copyCommand = CreateLinkCommand(mapID, draggedNodePath, newParentPath!, targetDroppableInfo.childGroup!, polarity, true);
+			const moveCommand = CreateLinkCommand(mapID, draggedNodePath, newParentPath!, targetDroppableInfo.childGroup!, polarity, false);
 			Assert(copyCommand && moveCommand);
 
 			//if (copyCommand.Validate_Safe()) {

@@ -15,7 +15,7 @@ import {NodeChildHolderBox} from "./NodeChildHolderBox.js";
 import {ArgumentsControlBar} from "../ArgumentsControlBar.js";
 
 type Props = {
-	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], type: ChildGroup|n,
+	map: Map, node: MapNodeL3, path: string, nodeChildrenToShow: MapNodeL3[], group: ChildGroup,
 	separateChildren: boolean, showArgumentsControlBar: boolean, linkSpawnPoint: number, vertical?: boolean, minWidth?: number,
 	onHeightOrDividePointChange?: (dividePoint: number)=>void,
 };
@@ -35,7 +35,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 	childBoxes: {[key: number]: NodeUI} = {};
 	render() {
-		const {map, node, path, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, minWidth, onHeightOrDividePointChange} = this.props;
+		const {map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar, linkSpawnPoint, vertical, minWidth, onHeightOrDividePointChange} = this.props;
 		let {childrenWidthOverride, oldChildBoxOffsets, placeholderRect} = this.state;
 		childrenWidthOverride = (childrenWidthOverride ?? 0).KeepAtLeast(minWidth ?? 0);
 
@@ -50,7 +50,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 
 		let nodeChildrenToShowHere = nodeChildrenToShow;
 		let nodeChildrenToShowInRelevanceBox;
-		if (IsMultiPremiseArgument(node) && type != ChildGroup.relevance) {
+		if (IsMultiPremiseArgument(node) && group != ChildGroup.relevance) {
 			nodeChildrenToShowHere = nodeChildrenToShow.filter(a=>a && a.type != MapNodeType.argument);
 			nodeChildrenToShowInRelevanceBox = nodeChildrenToShow.filter(a=>a && a.type == MapNodeType.argument);
 		}
@@ -101,12 +101,12 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			);
 		};
 
-		const RenderGroup = (group: "all" | "up" | "down")=>{
-			const direction = group == "up" ? "up" : "down";
-			const refName = `${group}ChildHolder`;
-			const childLimit = group == "up" ? childLimit_up : childLimit_down; // "all" and "down" share a child-limit
+		const RenderPolarityGroup = (polarityGroup: "all" | "up" | "down")=>{
+			const direction = polarityGroup == "up" ? "up" : "down";
+			const refName = `${polarityGroup}ChildHolder`;
+			const childLimit = polarityGroup == "up" ? childLimit_up : childLimit_down; // "all" and "down" share a child-limit
 
-			const childrenHere_untrimmed = group == "all" ? nodeChildrenToShowHere : group == "up" ? upChildren : downChildren;
+			const childrenHere_untrimmed = polarityGroup == "all" ? nodeChildrenToShowHere : polarityGroup == "up" ? upChildren : downChildren;
 			const childrenHere = childrenHere_untrimmed.slice(0, childLimit); // trim to the X most significant children (ie. strongest arguments)
 			// if direction is up, we need to have the first-in-children-array/highest-fill-percent entries show at the *bottom*, so reverse the children-here array
 			if (direction == "up") childrenHere.reverse();
@@ -121,7 +121,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			const dragBoxRect = dragBox && VRect.FromLTWH(dragBox.getBoundingClientRect());
 
 			return (
-				<Droppable type="MapNode" droppableId={ToJSON(droppableInfo.VSet({subtype: group, childIDs: childrenHere.map(a=>a.id)}))} /* renderClone={(provided, snapshot, descriptor) => {
+				<Droppable type="MapNode" droppableId={ToJSON(droppableInfo.VSet({subtype: polarityGroup, childIDs: childrenHere.map(a=>a.id)}))} /* renderClone={(provided, snapshot, descriptor) => {
 					const index = descriptor.index;
 					const pack = childrenHere.slice(0, childLimit)[index];
 					return RenderChild(pack, index, childrenHere);
@@ -129,14 +129,14 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 					{(provided: DroppableProvided, snapshot: DroppableStateSnapshot)=>{
 						const dragIsOverDropArea = provided.placeholder?.props["on"] != null;
 						if (dragIsOverDropArea) {
-							WaitXThenRun(0, ()=>this.StartGeneratingPositionedPlaceholder(group));
+							WaitXThenRun(0, ()=>this.StartGeneratingPositionedPlaceholder(polarityGroup));
 						}
 
 						return (
-							<Column ref={c=>{ this[`${group}ChildHolder`] = c; provided.innerRef(GetDOM(c) as any); }} ct className={refName} {...provided.droppableProps}
+							<Column ref={c=>{ this[`${polarityGroup}ChildHolder`] = c; provided.innerRef(GetDOM(c) as any); }} ct className={refName} {...provided.droppableProps}
 								style={E(
 									{position: "relative"},
-									childrenHere.length == 0 && {position: "absolute", top: group == "down" ? "100%" : 0, width: MapNodeType_Info.for[MapNodeType.claim].minWidth, height: 100},
+									childrenHere.length == 0 && {position: "absolute", top: polarityGroup == "down" ? "100%" : 0, width: MapNodeType_Info.for[MapNodeType.claim].minWidth, height: 100},
 								)}>
 								{/* childrenHere.length == 0 && <div style={{ position: 'absolute', top: '100%', width: '100%', height: 200 }}/> */}
 								{childrenHereUIs}
@@ -153,7 +153,7 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 			);
 		};
 
-		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath: path});
+		const droppableInfo = new DroppableInfo({type: "NodeChildHolder", parentPath: path, childGroup: group});
 		this.childBoxes = {};
 		return (
 			<Column ref={c=>this.childHolder = c} className="childHolder clickThrough" style={E(
@@ -174,19 +174,19 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 						nodeChildren={nodeChildrenToShowHere} childBoxOffsets={oldChildBoxOffsets}/>}
 
 				{/* if we're for multi-premise arg, and this comp is not already showing relevance-args, show them in a "Taken together, are these claims relevant?" box */}
-				{IsMultiPremiseArgument(node) && type != ChildGroup.relevance &&
-					<NodeChildHolderBox {...{map, node, path}} type={ChildGroup.relevance} widthOverride={childrenWidthOverride}
+				{IsMultiPremiseArgument(node) && group != ChildGroup.relevance &&
+					<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.relevance} widthOverride={childrenWidthOverride}
 						widthOfNode={childrenWidthOverride}
 						nodeChildren={GetNodeChildrenL3(node.id, path)} nodeChildrenToShow={nodeChildrenToShowInRelevanceBox}
 						onHeightOrDividePointChange={dividePoint=>this.CheckForLocalChanges()}/>}
 				{!separateChildren &&
-					RenderGroup("all")}
+					RenderPolarityGroup("all")}
 				{separateChildren &&
-					RenderGroup("up")}
+					RenderPolarityGroup("up")}
 				{showArgumentsControlBar &&
 					<ArgumentsControlBar ref={c=>this.argumentsControlBar = c} map={map} node={node} path={path} childBeingAdded={currentNodeBeingAdded_path == `${path}/?`}/>}
 				{separateChildren &&
-					RenderGroup("down")}
+					RenderPolarityGroup("down")}
 			</Column>
 		);
 	}
@@ -241,8 +241,8 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 	}
 
 	get Expanded() {
-		const {map, path, type} = this.props;
-		const expandKey = type ? `expanded_${ChildGroup[type].toLowerCase()}` : "expanded";
+		const {map, path, group} = this.props;
+		const expandKey = group != ChildGroup.generic ? `expanded_${ChildGroup[group].toLowerCase()}` : "expanded";
 		const nodeView = GetNodeView(map.id, path);
 		return nodeView[expandKey];
 	}

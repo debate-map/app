@@ -17,7 +17,7 @@ import {ExpandableBox} from "../ExpandableBox.js";
 
 type Props = {
 	map: Map, node: MapNodeL3, path: string, nodeChildren: MapNodeL3[], nodeChildrenToShow: MapNodeL3[],
-	type: ChildGroup, widthOfNode: number, widthOverride?: number, onHeightOrDividePointChange?: (dividePoint: number)=>void,
+	group: ChildGroup, widthOfNode: number, widthOverride?: number, onHeightOrDividePointChange?: (dividePoint: number)=>void,
 };
 
 @WarnOfTransientObjectProps
@@ -32,7 +32,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	}
 	lineHolder: HTMLDivElement|n;
 	render() {
-		const {map, node, path, nodeChildren, nodeChildrenToShow, type, widthOfNode, widthOverride} = this.props;
+		const {map, node, path, nodeChildren, nodeChildrenToShow, group, widthOfNode, widthOverride} = this.props;
 		const {innerBoxOffset, lineHolderHeight, hovered, hovered_button} = this.state;
 
 		// const nodeView = GetNodeView(map.id, path) ?? new MapNodeView();
@@ -41,11 +41,11 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 		const parent = GetParentNodeL3(path);
 		const combineWithParentArgument = IsPremiseOfSinglePremiseArgument(node, parent);
 
-		const backgroundFillPercent = GetFillPercent_AtPath(node, path, type);
-		const markerPercent = GetMarkerPercent_AtPath(node, path, type);
+		const backgroundFillPercent = GetFillPercent_AtPath(node, path, group);
+		const markerPercent = GetMarkerPercent_AtPath(node, path, group);
 
 		const isMultiPremiseArgument = IsMultiPremiseArgument(node);
-		let text = type == ChildGroup.truth ? "True?" : "Relevant?";
+		let text = group == ChildGroup.truth ? "True?" : "Relevant?";
 		if (isMultiPremiseArgument) {
 			//text = "When taken together, are these claims relevant?";
 			if (node.argumentType == ArgumentType.all) text = "If all these claims were true, would they be relevant?";
@@ -59,7 +59,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 
 		const lineOffset = 50.0.KeepAtMost(innerBoxOffset);
 		// let expandKey = type == ChildGroup.truth ? "expanded_truth" : "expanded_relevance";
-		const childGroupStr = ChildGroup[type].toLowerCase();
+		const childGroupStr = ChildGroup[group].toLowerCase();
 		const expandKey = `expanded_${childGroupStr}`;
 		const expanded = nodeView[expandKey]; // this.Expanded
 
@@ -94,13 +94,13 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 					{/* position: "relative", /* removal fixes */ alignItems: "flex-start", /* marginLeft: `calc(100% - ${width}px)`, */ width},
 				)}>
 					<div ref={c=>this.lineHolder = c} className="clickThroughChain" style={{position: "absolute", width: "100%", height: "100%"}}>
-						{type == ChildGroup.truth &&
+						{group == ChildGroup.truth &&
 							<Squiggle start={[0, lineHolderHeight + 2]} startControl_offset={[0, -lineOffset]}
 								end={[(width / 2) - 2, innerBoxOffset + height - 2]} endControl_offset={[0, lineOffset]} color={lineColor}/>}
-						{type == ChildGroup.relevance && !isMultiPremiseArgument &&
+						{group == ChildGroup.relevance && !isMultiPremiseArgument &&
 							<Squiggle start={[0, -2]} startControl_offset={[0, lineOffset]}
 								end={[(width / 2) - 2, innerBoxOffset + 2]} endControl_offset={[0, -lineOffset]} color={lineColor}/>}
-						{type == ChildGroup.relevance && isMultiPremiseArgument &&
+						{group == ChildGroup.relevance && isMultiPremiseArgument &&
 							<div style={{position: "absolute", right: "100%", width: 10, top: innerBoxOffset + (height / 2) - 2, height: 3, backgroundColor: lineColor.css()}}/>}
 					</div>
 					<ExpandableBox {...{width, widthOverride, expanded}} innerWidth={width}
@@ -121,7 +121,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 							const newExpanded = !nodeView[expandKey];
 							const recursivelyCollapsing = !newExpanded && e.altKey;
 							RunInAction("NodeChildHolderBox_toggleExpanded", ()=>{
-								if (type == ChildGroup.truth) {
+								if (group == ChildGroup.truth) {
 									ACTMapNodeExpandedSet({
 										mapID: map.id, path, resetSubtree: recursivelyCollapsing,
 										[expandKey]: newExpanded,
@@ -146,7 +146,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 							if (nodeView[expandKey]) {
 								this.CheckForChanges();
 							}
-						}, [expandKey, map.id, nodeChildrenToShow, nodeView, path, type])}
+						}, [expandKey, map.id, nodeChildrenToShow, nodeView, path, group])}
 						afterChildren={<>
 							{ratingPanelShow &&
 								<div ref={c=>this.ratingPanelHolder = c} style={{
@@ -159,7 +159,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 										return <RatingsPanel node={node} path={path} ratingType={childGroupStr as NodeRatingType} ratings={ratings}/>;
 									})()}
 								</div>}
-							<NodeUI_Menu_Stub {...{map, node, path}} childGroup={type}/>
+							<NodeUI_Menu_Stub {...{map, node, path}} childGroup={group}/>
 						</>}
 					/>
 					{nodeChildrenToShow != emptyArray && !expanded && nodeChildrenToShow.length != 0 &&
@@ -169,7 +169,7 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 				</Row>
 				{nodeView[expandKey] &&
 					<NodeChildHolder ref={c=>this.childHolder = c}
-						{...{map, node, path, nodeChildrenToShow, type, separateChildren, showArgumentsControlBar}}
+						{...{map, node, path, nodeChildrenToShow, group, separateChildren, showArgumentsControlBar}}
 						linkSpawnPoint={innerBoxOffset + (height / 2)}
 						onHeightOrDividePointChange={this.CheckForChanges}/>}
 			</Row>
@@ -177,8 +177,8 @@ export class NodeChildHolderBox extends BaseComponentPlus({} as Props, {innerBox
 	}
 
 	get Expanded() {
-		const {map, path, type} = this.props;
-		const expandKey = `expanded_${ChildGroup[type].toLowerCase()}`;
+		const {map, path, group} = this.props;
+		const expandKey = `expanded_${ChildGroup[group].toLowerCase()}`;
 		const nodeView = GetNodeView(map.id, path);
 		return nodeView[expandKey];
 	}

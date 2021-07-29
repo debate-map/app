@@ -16,14 +16,14 @@ import {DeleteNode} from "./DeleteNode.js";
 import {LinkNode} from "./LinkNode.js";
 import {UnlinkNode} from "./UnlinkNode.js";
 
-export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOnNodePath: string, polarity: Polarity, asCopy: boolean) {
+export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOnNodePath: string, dropOnChildGroup: ChildGroup, polarity: Polarity, asCopy: boolean) {
 	const draggedNode = GetNodeL3(draggedNodePath);
 	const dropOnNode = GetNodeL3(dropOnNodePath);
 	if (draggedNode == null || dropOnNode == null) return null;
 
 	// const draggedNode_parent = GetParentNodeL3(draggedNodePath);
 	const dropOnNode_parent = GetParentNodeL3(dropOnNodePath);
-	const childGroup = GetChildGroup(dropOnNode.type, dropOnNode_parent?.type);
+	//const childGroup = GetChildGroup(dropOnNode.type, dropOnNode_parent?.type);
 	const formForClaimChildren = dropOnNode.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base;
 
 	return new LinkNode_HighLevel({
@@ -32,9 +32,9 @@ export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOn
 		newPolarity: polarity,
 		//createWrapperArg: childGroup != ChildGroup.generic || !dropOnNode.multiPremiseArgument,
 		//createWrapperArg: true, // todo
-		childGroup,
+		childGroup: dropOnChildGroup,
 		unlinkFromOldParent: !asCopy, deleteEmptyArgumentWrapper: true,
-	});
+	}.OmitNull());
 }
 
 type Payload = {

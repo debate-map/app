@@ -18,7 +18,7 @@ import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 	}),
 	returnSchema: ()=>SimpleSchema({
 		$linkID: {type: "string"},
-	})
+	}),
 })
 export class LinkNode extends Command<{mapID: string|n, parentID: string, childID: string, childForm?: ClaimForm|n, childPolarity?: Polarity|n}, {linkID: string}> {
 	child_oldData: MapNode|n;
@@ -36,10 +36,8 @@ export class LinkNode extends Command<{mapID: string|n, parentID: string, childI
 			?? GetNode.NN(parentID);
 		AssertV(this.parent_oldData, "Cannot link child-node to parent that does not exist!");
 
-		const parentToChildLinks = GetNodeChildLinks(this.parent_oldData.id);
-		if (this.parent_oldData) {
-			AssertV(!parentToChildLinks.Any(a=>a.child == childID), `Node #${childID} is already a child of node #${parentID}.`);
-		}
+		const parentToChildLinks = GetNodeChildLinks(parentID, childID);
+		AssertV(parentToChildLinks.length == 0, `Node #${childID} is already a child of node #${parentID}.`);
 
 		this.link = new NodeChildLink({
 			parent: parentID,

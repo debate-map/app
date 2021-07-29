@@ -175,7 +175,7 @@ export class NodeUI extends BaseComponentPlus(
 			const showArgumentsControlBar = (node.type == MapNodeType.claim || isSinglePremiseArgument) && boxExpanded && nodeChildrenToShow != emptyArray_forLoading;
 			nodeChildHolder_direct = <NodeChildHolder {...{map, node, path, nodeChildren, nodeChildrenToShow, separateChildren, showArgumentsControlBar}}
 				// type={node.type == MapNodeType.claim && node._id != demoRootNodeID ? ChildGroup.truth : null}
-				type={null}
+				group={node.type == MapNodeType.claim ? ChildGroup.truth : ChildGroup.generic}
 				linkSpawnPoint={dividePoint || (selfHeight / 2)}
 				vertical={isMultiPremiseArgument}
 				minWidth={isMultiPremiseArgument && widthOverride ? widthOverride - 20 : 0}
@@ -189,12 +189,12 @@ export class NodeUI extends BaseComponentPlus(
 				}, [isMultiPremiseArgument])}/>;
 		}
 		const nodeChildHolderBox_truth = isPremiseOfSinglePremiseArg && boxExpanded &&
-			<NodeChildHolderBox {...{map, node, path}} type={ChildGroup.truth}
+			<NodeChildHolderBox {...{map, node, path}} group={ChildGroup.truth}
 				widthOfNode={widthOverride || width}
 				nodeChildren={nodeChildren} nodeChildrenToShow={nodeChildrenToShow}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
 		const nodeChildHolderBox_relevance = isPremiseOfSinglePremiseArg && boxExpanded &&
-			<NodeChildHolderBox {...{map, node: parent!, path: parentPath!}} type={ChildGroup.relevance}
+			<NodeChildHolderBox {...{map, node: parent!, path: parentPath!}} group={ChildGroup.relevance}
 				widthOfNode={widthOverride || width}
 				nodeChildren={parentChildren} nodeChildrenToShow={relevanceArguments!}
 				onHeightOrDividePointChange={UseCallback(dividePoint=>this.CheckForChanges(), [])}/>;
