@@ -5,7 +5,7 @@ import {Button, Column, Div, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus, BaseComponentWithConnector, GetDOM, RenderSource, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {NodeConnectorBackground} from "UI/@Shared/Maps/MapNode/NodeConnectorBackground.js";
 import {NodeUI} from "UI/@Shared/Maps/MapNode/NodeUI.js";
-import {ES, GetScreenRect, Icon, MaybeLog, Observer, RunInAction} from "web-vcore";
+import {ES, GetViewportRect, Icon, MaybeLog, Observer, RunInAction} from "web-vcore";
 import {DroppableInfo} from "Utils/UI/DNDStructures.js";
 import {store} from "Store";
 import {GetNodeView} from "Store/main/maps/mapViews/$mapView.js";
@@ -313,11 +313,11 @@ export class NodeChildHolder extends BaseComponentPlus({minWidth: 0} as Props, i
 		if (this.argumentsControlBar) {
 			// return upChildHolder.css("display") != "none" ? upChildHolder.outerHeight() : 0;
 			return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden"
-				? GetScreenRect(this.argumentsControlBar.DOM!).Center.y + 1 - GetScreenRect(this.childHolder.DOM).y
+				? GetViewportRect(this.argumentsControlBar.DOM!).Center.y + 1 - GetViewportRect(this.childHolder.DOM).y
 				: 0;
 		}
 		// return childHolder.css("display") != "none" ? childHolder.outerHeight() / 2 : 0,
-		return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden" ? GetScreenRect(this.childHolder.DOM).height / 2 : 0;
+		return this.childHolder && (this.childHolder.DOM as HTMLElement).style.visibility != "hidden" ? GetViewportRect(this.childHolder.DOM).height / 2 : 0;
 	}
 
 	UpdateChildrenWidthOverride(forceUpdate = false) {

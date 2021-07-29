@@ -6,7 +6,7 @@
 // import {BaseComponent, GetDOM, UseCallback} from "web-vcore/nm/react-vextensions.js";
 // import {ScrollSource, ScrollView} from "web-vcore/nm/react-vscrollview.js";
 // import {store} from "Store";
-// import {GetScreenRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, YoutubePlayer, YoutubePlayerState, YoutubePlayerUI, ClassHooks, PosChangeSource} from "web-vcore";
+// import {GetViewportRect, HSLA, Icon, Observer, RunWithRenderingBatched, UseSize, YoutubePlayer, YoutubePlayerState, YoutubePlayerUI, ClassHooks, PosChangeSource} from "web-vcore";
 // // import {GetSelectedTimeline, GetPlayingTimelineStepIndex, GetNodeRevealHighlightTime, GetPlayingTimelineAppliedStepIndex, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
 // import {zIndexes} from "Utils/UI/ZIndexes.js";
 // import {GetTimelineStep, GetTimelineSteps} from "dm_common";
@@ -52,7 +52,7 @@
 
 // 		const firstNormalStep = GetTimelineStep(timeline ? timeline.steps[1] : null);
 
-// 		// tell mobx to track scroll-pos (we use the derivative, eg. GetScreenRect(listRoot), but mobx doesn't track that; so we explicitly track its source)
+// 		// tell mobx to track scroll-pos (we use the derivative, eg. GetViewportRect(listRoot), but mobx doesn't track that; so we explicitly track its source)
 // 		this.listY;
 
 // 		let targetStepIndex: number;
@@ -73,19 +73,19 @@
 // 				const targetStep_el = this.stepElements[targetStepIndex];
 // 				if (postTargetStep && targetStep_el && document.body.contains(targetStep_el)) {
 // 					const listRoot = targetStep_el.parentElement.parentElement.parentElement;
-// 					const listRect = GetScreenRect(listRoot);
-// 					const targetStep_rect = GetScreenRect(targetStep_el);
+// 					const listRect = GetViewportRect(listRoot);
+// 					const targetStep_rect = GetViewportRect(targetStep_el);
 // 					targetStep_rect.Position = targetStep_rect.Position.Minus(listRect.Position);
 // 					// Log('Target step rect:', targetStep_rect);
 
 // 					// const postTargetStep_rect = this.stepRects[postTargetStepIndex];
 // 					/* const targetTime_screenY = Lerp(targetStep_rect.Top, targetStep_rect.Bottom, GetPercentFromXToY(targetStep.videoTime, postTargetStep.videoTime, targetTime));
-// 					targetTime_yInParent = targetTime_screenY - GetScreenRect(this.sideBarEl).y; */
+// 					targetTime_yInParent = targetTime_screenY - GetViewportRect(this.sideBarEl).y; */
 // 					const percentThroughStep = GetPercentFromXToY(targetStep.videoTime, postTargetStep.videoTime, this.targetTime);
 // 					const targetTime_yInList = Lerp(targetStep_rect.Top, targetStep_rect.Bottom, percentThroughStep);
-// 					// const listY = GetScreenRect(this.listRootEl).y;
+// 					// const listY = GetViewportRect(this.listRootEl).y;
 // 					// const { listY } = this.state;
-// 					const messageAreaY = GetScreenRect(this.sideBarEl).y;
+// 					const messageAreaY = GetViewportRect(this.sideBarEl).y;
 // 					const messageAreaYDiffFromListY = messageAreaY - this.listY;
 // 					targetTime_yInMessageArea = targetTime_yInList - messageAreaYDiffFromListY;
 // 					AssertWarn(!IsNaN(targetTime_yInMessageArea));
@@ -145,21 +145,21 @@
 // 		} */
 
 // 		/* if (this.listRootEl != null) {
-// 			// this.SetState({ listY: GetScreenRect(this.listRootEl).y });
-// 			// Log(`Setting...${GetScreenRect(this.listRootEl).y}`);
-// 			const listY = GetScreenRect(this.listRootEl).y;
+// 			// this.SetState({ listY: GetViewportRect(this.listRootEl).y });
+// 			// Log(`Setting...${GetViewportRect(this.listRootEl).y}`);
+// 			const listY = GetViewportRect(this.listRootEl).y;
 // 			if (listY != this.lastListY) {
 // 				this.UpdateTargetInfo();
 // 				this.lastListY = listY;
 // 			}
 // 		} */
 
-// 		/* const listY = this.listRootEl ? GetScreenRect(this.listRootEl).y : null;
+// 		/* const listY = this.listRootEl ? GetViewportRect(this.listRootEl).y : null;
 // 		if (this.targetTime != oldTargetTime || listY != this.lastListY) {
 // 			this.UpdateTargetInfo();
 // 			this.lastListY = listY;
 // 		} */
-// 		const newListY = GetScreenRect(this.listRootEl).y;
+// 		const newListY = GetViewportRect(this.listRootEl).y;
 // 		if (this.listY != newListY) {
 // 			RunInAction("PlayingSubpanel_timer.setListY", ()=>this.listY = newListY);
 // 		}
@@ -435,10 +435,10 @@
 // 									ref={c=>{
 // 										if (c == null || c.DOM_HTML == null) return;
 // 										/* const listRoot = c.DOM_HTML.parentElement.parentElement.parentElement;
-// 										const listRect = GetScreenRect(listRoot);
+// 										const listRect = GetViewportRect(listRoot);
 
 // 										const el = c.DOM_HTML;
-// 										const rect = GetScreenRect(el);
+// 										const rect = GetViewportRect(el);
 // 										rect.Position = rect.Position.Minus(listRect.Position);
 // 										// this.SetState({ [`step${index}_rect`]: rect }, null, null, true);
 // 										this.stepRects[index] = rect; */

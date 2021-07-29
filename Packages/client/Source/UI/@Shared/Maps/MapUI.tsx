@@ -4,7 +4,7 @@ import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentWithConnector, FindReact, GetDOM, BaseComponentPlus, BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {VMenuStub, VMenuItem} from "web-vcore/nm/react-vmenu.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {GetDistanceBetweenRectAndPoint, inFirefox, GetScreenRect, StoreAction, Observer, ES, HTMLProps} from "web-vcore";
+import {GetDistanceBetweenRectAndPoint, inFirefox, GetViewportRect, StoreAction, Observer, ES, HTMLProps} from "web-vcore";
 import {GADDemo} from "UI/@GAD/GAD.js";
 import {GetNodeView, GetMapView, GetSelectedNodePath, GetViewOffset, GetFocusedNodePath, GetNodeViewsAlongPath, ACTMapNodeSelect} from "Store/main/maps/mapViews/$mapView.js";
 import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
@@ -25,11 +25,11 @@ export function GetNodeBoxForPath(path: string) {
 }
 export function GetNodeBoxClosestToViewCenter() {
 	const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
-	return FindDOMAll(".NodeUI_Inner").Min(nodeBox=>GetDistanceBetweenRectAndPoint(GetScreenRect(nodeBox), viewCenter_onScreen));
+	return FindDOMAll(".NodeUI_Inner").Min(nodeBox=>GetDistanceBetweenRectAndPoint(GetViewportRect(nodeBox), viewCenter_onScreen));
 }
 export function GetViewOffsetForNodeBox(nodeBox: Element) {
 	const viewCenter_onScreen = new Vector2(window.innerWidth / 2, window.innerHeight / 2);
-	return viewCenter_onScreen.Minus(GetScreenRect(nodeBox).Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
+	return viewCenter_onScreen.Minus(GetViewportRect(nodeBox).Position).NewX(x=>x.RoundTo(1)).NewY(y=>y.RoundTo(1));
 }
 
 export const ACTUpdateFocusNodeAndViewOffset = StoreAction((mapID: string)=>{
@@ -346,7 +346,7 @@ export class MapUI extends BaseComponentPlus({
 
 		const focusNodeBox = this.FindNodeBox(nodePath, true);
 		if (focusNodeBox == null) return false;
-		const focusNodeBoxPos = GetScreenRect(NN(GetDOM(focusNodeBox))).Center.Minus(GetScreenRect(NN(this.mapUIEl)).Position);
+		const focusNodeBoxPos = GetViewportRect(NN(GetDOM(focusNodeBox))).Center.Minus(GetViewportRect(NN(this.mapUIEl)).Position);
 		this.ScrollToPosition_Center(focusNodeBoxPos.Plus(viewOffset_target));
 		return true;
 	}
@@ -371,9 +371,9 @@ export class MapUI extends BaseComponentPlus({
 		if (padding != 0) targetRect = targetRect.Grow(padding);
 		Assert(this.scrollView && this.mapUIEl);
 
-		const mapUIBackgroundRect = GetScreenRect(this.mapUIEl);
+		const mapUIBackgroundRect = GetViewportRect(this.mapUIEl);
 		const oldScroll = this.scrollView.GetScroll();
-		const viewportRect = GetScreenRect(GetDOM(this.scrollView.content)!).NewPosition(a=>a.Minus(mapUIBackgroundRect));
+		const viewportRect = GetViewportRect(GetDOM(this.scrollView.content)!).NewPosition(a=>a.Minus(mapUIBackgroundRect));
 
 		const newViewportRect = viewportRect.Clone();
 		if (targetRect.Left < newViewportRect.Left) newViewportRect.x = targetRect.x; // if target-rect extends further left, reposition left

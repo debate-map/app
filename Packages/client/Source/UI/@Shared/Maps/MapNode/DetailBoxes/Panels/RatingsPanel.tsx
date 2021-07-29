@@ -5,18 +5,14 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {GetRatingUISmoothing} from "Store/main/ratingUI.js";
 import {NoID, SlicePath} from "web-vcore/nm/mobx-graphlink.js";
-import {Observer} from "web-vcore";
-import {MapNodeL3, NodeRating_MaybePseudo} from "dm_common";
-import {NodeRatingType, GetRatingTypeInfo} from "dm_common";
-import {NodeRating} from "dm_common";
-import {MeID} from "dm_common";
-import {GetNodeForm, GetNodeL3} from "dm_common";
-import {GetNodeChildren} from "dm_common";
-import {ShouldRatingTypeBeReversed, TransformRatingForContext} from "dm_common";
-import {GetMapNodeTypeDisplayName} from "dm_common";
-import {SetNodeRating} from "dm_common";
-import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
+import {GetViewportRect, Observer} from "web-vcore";
+import {MapNodeL3, NodeRating_MaybePseudo, NodeRatingType, GetRatingTypeInfo, NodeRating, MeID, GetNodeForm, GetNodeL3, GetNodeChildren, ShouldRatingTypeBeReversed, TransformRatingForContext, GetMapNodeTypeDisplayName, SetNodeRating} from "dm_common";
+
+
 import {MarkHandled} from "Utils/UI/General.js";
+import React from "react";
+import {AreaChart, XAxis, YAxis, CartesianGrid, Area, ReferenceLine, Tooltip} from "recharts";
+import {ShowSignInPopup} from "../../../../NavBar/UserPanel.js";
 
 /*let sampleData = [
 	{rating: 0, count: 0},
@@ -88,10 +84,9 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 					if (userID == null) return ShowSignInPopup();
 
 					const chart = chartHolder.querySelector(".recharts-cartesian-grid") as HTMLElement;
-					//const posOnChart = new Vector2(e.pageX - chart.offset().left, e.pageY - chart.offset().top);
-					const posOnChart = new Vector2(e.pageX - chart.offsetLeft, e.pageY - chart.offsetTop);
-					//const percentOnChart = posOnChart.x / chart.width();
-					const percentOnChart = posOnChart.x / chart.clientWidth;
+					const chartRect = GetViewportRect(chart);
+					const posOnChart = new Vector2(e.clientX, e.clientY).Minus(chartRect);
+					const percentOnChart = posOnChart.x / chartRect.width;
 					const ratingOnChart_exact = minLabel + (percentOnChart * range);
 					const closestRatingSlot = dataFinal.OrderBy(a=>a.label.Distance(ratingOnChart_exact)).First();
 					let newRating_label = closestRatingSlot.label;
@@ -138,20 +133,19 @@ export class RatingsPanel extends BaseComponentPlus({} as RatingsPanel_Props, {s
 					{/* Smoothing: <Spinner value={smoothing} onChange={val=>store.dispatch(new ACTRatingUISmoothnessSet(val))}/> */}
 					<Pre>Smoothing: </Pre><Select options={smoothingOptions} value={smoothing} onChange={val=>store.main.ratingUI.smoothing = val}/>
 				</div>
-				{/*this.lastRender_source == RenderSource.SetState &&
-					<AreaChart ref="chart" width={size.x} height={250} data={dataFinal}
-						margin={{top: 20, right: 10, bottom: 0, left: 10}} /* viewBox={{x: 0, y: 250 - height, width: size.x, height: 250}} *#/>
-						<XAxis dataKey="label" type="number" /* label={<XAxisLabel ratingType={ratingType}/>} *#/ ticks={Range(minLabel, maxLabel, ratingTypeInfo.tickInterval)}
+				{this.lastRender_source == RenderSource.SetState && size != null &&
+					<AreaChart width={size.x} height={250} data={dataFinal}
+						margin={{top: 20, right: 10, bottom: 0, left: 10}} /* viewBox={{x: 0, y: 250 - height, width: size.x, height: 250}} */>
+						<XAxis dataKey="label" type="number" /* label={<XAxisLabel ratingType={ratingType}/>} */ ticks={Range(minLabel, maxLabel, ratingTypeInfo.tickInterval)}
 							tick={ratingTypeInfo.tickRender}
 							domain={[minLabel, maxLabel]} minTickGap={0}/>
-						{/* <YAxis tickCount={7} hasTick width={50}/> *#/}
+						{/* <YAxis tickCount={7} hasTick width={50}/> */}
 						<YAxis orientation="left" x={20} width={20} height={250} tickCount={9}/>
 						<CartesianGrid stroke="rgba(255,255,255,.3)"/>
 						<Area type="monotone" dataKey="count" stroke="#ff7300" fill="#ff7300" fillOpacity={0.9} layout="vertical" animationDuration={500}/>
 						{myRating != null && <ReferenceLine x={GetLabelForValue(myRating)} stroke="rgba(0,255,0,1)" fill="rgba(0,255,0,1)" label="You"/>}
 						<Tooltip content={<CustomTooltip external={dataFinal}/>}/>
-					</AreaChart>*/}
-				{"TODO"}
+					</AreaChart>}
 			</div>
 		);
 	}

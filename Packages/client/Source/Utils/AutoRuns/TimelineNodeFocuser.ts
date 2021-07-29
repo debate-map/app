@@ -7,7 +7,7 @@
 // import {SleepAsync, VRect} from "web-vcore/nm/js-vextensions.js";
 // import {NodeUI_Inner} from "UI/@Shared/Maps/MapNode/NodeUI_Inner.js";
 // import {GetDOM} from "web-vcore/nm/react-vextensions.js";
-// import {GetScreenRect} from "web-vcore";
+// import {GetViewportRect} from "web-vcore";
 // import {SlicePath, GetAsync} from "web-vcore/nm/mobx-graphlink.js";
 // import {GetTimelineStep, GetNodesRevealedInSteps} from "dm_common";
 
@@ -105,8 +105,8 @@
 
 // 	let nodeBoxesMerged: VRect;
 // 	for (const box of nodeBoxes) {
-// 		// const boxPos = GetScreenRect(GetDOM(box)).Center.Minus(GetScreenRect(mapUI.mapUIEl).Position);
-// 		const boxRect = GetScreenRect(GetDOM(box)).NewPosition(a=>a.Minus(GetScreenRect(mapUI.mapUIEl).Position));
+// 		// const boxPos = GetViewportRect(GetDOM(box)).Center.Minus(GetViewportRect(mapUI.mapUIEl).Position);
+// 		const boxRect = GetViewportRect(GetDOM(box)).NewPosition(a=>a.Minus(GetViewportRect(mapUI.mapUIEl).Position));
 // 		nodeBoxesMerged = nodeBoxesMerged ? nodeBoxesMerged.Encapsulating(boxRect) : boxRect;
 // 	}
 // 	/* const nodeBoxPositionAverage = nodeBoxPositionSum.Times(1 / paths.length);

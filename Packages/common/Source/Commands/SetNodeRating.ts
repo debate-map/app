@@ -1,5 +1,6 @@
 import {AddSchema, AssertValidate, BU, Command, CommandMeta, DBHelper, dbp, GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
 import {emptyArray_forLoading} from "web-vcore/nm/js-vextensions.js";
+import {GetDefaultAccessPolicyID_ForNodeRating} from "../DB/accessPolicies.js";
 import {NodeRatingType} from "../DB/nodeRatings/@NodeRatingType.js";
 import {NodeRating} from "../DB/nodeRatings/@NodeRating.js";
 import {GetRatings} from "../DB/nodeRatings.js";
@@ -26,6 +27,7 @@ export class SetNodeRating extends Command<{nodeID: string, ratingType: Exclude<
 
 		if (value != null) {
 			this.newRating = new NodeRating({
+				accessPolicy: GetDefaultAccessPolicyID_ForNodeRating(),
 				node: nodeID, type: ratingType, user: this.userInfo.id,
 				editedAt: Date.now(),
 				value,
