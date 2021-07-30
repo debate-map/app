@@ -64,7 +64,7 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 		const result = await apolloClient.query({
 			query: gql`
 				query SearchQuery($queryStr: String!) {
-					nodeRevisions(filter: {titles_tsvector: {matches: $queryStr}}) {
+					nodeRevisions(filter: {phrasing_tsvector: {matches: $queryStr}}) {
 						nodes { id }
 					}
 				}
