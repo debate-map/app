@@ -114,7 +114,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 	// set up indexes
 	await knex.raw(`
 		CREATE INDEX ON "nodeRevisions"
-		USING gin (titles_tsvector);
+		USING gin (phrasing_tsvector);
 	`);
 
 	// set up app_user role for postgraphile connection, set up RLS, etc.

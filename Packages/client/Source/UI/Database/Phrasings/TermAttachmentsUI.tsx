@@ -5,16 +5,15 @@ import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI.js";
 import {InfoButton, Link, Observer} from "web-vcore";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetTerm, GetTermsByForm, TermAttachment, Term, GetUser} from "dm_common";
-
-
-import {TermDefinitionPanel} from "../../DetailBoxes/Panels/DefinitionsPanel.js";
-import {NodeDetailsUI_SharedProps} from "../../NodeDetailsUI.js";
+import {TermDefinitionPanel} from "../../@Shared/Maps/MapNode/DetailBoxes/Panels/DefinitionsPanel.js";
+import {NodeDetailsUI_SharedProps} from "../../@Shared/Maps/MapNode/NodeDetailsUI.js";
+import {PhrasingDetailsUI_SharedProps} from "./PhrasingDetailsUI.js";
 
 @Observer
-export class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
+export class TermAttachmentsUI extends BaseComponent<PhrasingDetailsUI_SharedProps, {}> {
 	render() {
-		const {enabled, baseRevisionData, parent, newData, newDataAsL2, newRevisionData, newLinkData, Change} = this.props;
-		const terms = (newRevisionData.termAttachments || []).map(a=>(Validate("UUID", a.id) == null ? GetTerm(a.id) : null));
+		const {enabled, baseData, newData, Change} = this.props;
+		const terms = (newData.terms || []).map(a=>(Validate("UUID", a.id) == null ? GetTerm(a.id) : null));
 
 		return (
 			<>
@@ -28,12 +27,12 @@ export class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 						(An alternative is to type curly-brackets around the term in the title-input, creating a new context/term slot with the given name.)
 					`.AsMultiline(0)}/>
 					<Button ml={5} p="3px 7px" text="+" enabled={enabled} onClick={()=>{
-						if (newRevisionData.termAttachments == null) newRevisionData.termAttachments = [];
-						newRevisionData.termAttachments.push(new TermAttachment({id: ""}));
+						if (newData.terms == null) newData.terms = [];
+						newData.terms.push(new TermAttachment({id: ""}));
 						Change();
 					}}/>
 				</Row>
-				{(newRevisionData.termAttachments || []).map((termAttachment, index)=>{
+				{(newData.terms || []).map((termAttachment, index)=>{
 					const term = terms[index];
 					return (
 						<Row key={index} mt={2}>
@@ -60,7 +59,7 @@ export class NodeTermsUI extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 								</DropDown>
 							</Row>
 							<Button text="X" enabled={enabled} style={{padding: "3px 5px", borderRadius: "0 5px 5px 0"}} onClick={()=>{
-								newRevisionData.termAttachments.Remove(termAttachment);
+								newData.terms.Remove(termAttachment);
 								Change();
 							}}/>
 						</Row>

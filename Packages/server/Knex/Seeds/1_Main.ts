@@ -115,10 +115,10 @@ const nodes = TypeCheck(MapNode as new()=>(MapNode & {revision: MapNodeRevision}
 			node: globalRootNodeID,
 			creator: systemUserID,
 			createdAt: Date.now(),
-			titles: JSON.stringify({
-				base: "Root",
+			phrasing: JSON.stringify({
+				text_base: "Root",
+				terms: [],
 			}) as any,
-			termAttachments: [],
 		},
 	},
 });
@@ -138,16 +138,15 @@ export default async function seed(knex: Knex.Transaction) {
 		await knex("accessPolicies").insert(policy);
 	}
 
+	console.log(`Adding maps...`);
+	for (const map of Object.values(maps)) {
+		await knex("maps").insert(map);
+	}
+
 	console.log(`Adding nodes and node-revisions...`);
 	for (const node of Object.values(nodes)) {
 		await knex("nodes").insert(CE(node).ExcludeKeys("revision"));
 		await knex("nodeRevisions").insert(node.revision);
-	}
-
-	// maps after nodes, for Map.rootNode fk-constraint
-	console.log(`Adding maps...`);
-	for (const map of Object.values(maps)) {
-		await knex("maps").insert(map);
 	}
 
 	console.log(`Done seeding data.`);

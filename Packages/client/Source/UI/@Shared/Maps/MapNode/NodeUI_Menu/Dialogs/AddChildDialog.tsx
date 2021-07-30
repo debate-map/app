@@ -5,7 +5,7 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {store} from "Store";
 import {ACTMapNodeExpandedSet} from "Store/main/maps/mapViews/$mapView.js";
 import {ES, InfoButton, Link, observer_simple, RunInAction} from "web-vcore";
-import {MapNodeType, GetMapNodeTypeDisplayName, GetDefaultAccessPolicyID_ForNode, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3} from "dm_common";
+import {MapNodeType, GetMapNodeTypeDisplayName, GetDefaultAccessPolicyID_ForNode, NodeChildLink, Map, GetAccessPolicy, Polarity, MapNode, ClaimForm, GetMap, GetNode, MapNodeRevision, ArgumentType, PermissionInfoType, MapNodeRevision_titlePattern, AddArgumentAndClaim, AddChildNode, GetNodeL3, GetNodeForm, AsNodeL2, AsNodeL3, MapNodePhrasing} from "dm_common";
 import {BailMessage, CatchBail, GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {NodeDetailsUI} from "../../NodeDetailsUI.js";
 
@@ -42,17 +42,17 @@ export class AddChildHelper {
 				accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 				type: MapNodeType.claim, creator: userID,
 			});
-			this.subNode_revision = new MapNodeRevision(E(this.map.nodeDefaults, {titles: {base: title}}));
+			this.subNode_revision = new MapNodeRevision(E(this.map.nodeDefaults, {phrasing: new MapNodePhrasing({text_base: title})}));
 			this.subNode_link = new NodeChildLink({
 				slot: 0,
 				form: ClaimForm.base,
 			});
 		} else {
-			let usedTitleKey = "base";
+			let usedTitleKey = "text_base";
 			if (childType == MapNodeType.claim) {
-				usedTitleKey = ClaimForm[this.node_link.form!].replace(/^./, ch=>ch.toLowerCase());
+				usedTitleKey = `text_${ClaimForm[this.node_link.form!].replace(/^./, ch=>ch.toLowerCase())}`;
 			}
-			this.node_revision.titles[usedTitleKey] = title;
+			this.node_revision.phrasing[usedTitleKey] = title;
 		}
 	}
 
@@ -223,8 +223,8 @@ export async function ShowAddChildDialog(parentPath: string, childType: MapNodeT
 								<Row style={{display: "flex", alignItems: "center"}}>
 									<TextArea required={true} pattern={MapNodeRevision_titlePattern}
 										allowLineBreaks={false} autoSize={true} style={ES({flex: 1})}
-										value={helper.subNode_revision!.titles["base"]}
-										onChange={val=>Change(helper.subNode_revision!.titles["base"] = val)}/>
+										value={helper.subNode_revision!.phrasing["text_base"]}
+										onChange={val=>Change(helper.subNode_revision!.phrasing["text_base"] = val)}/>
 								</Row>
 								<Row mt={5} style={{fontSize: 12}}>{`To add a second premise later, right click on your new argument and press "Convert to multi-premise".`}</Row>
 							</Column>}

@@ -68,7 +68,7 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 		const {revision} = this.payload;
 		//db.set('general/data/.lastNodeRevisionID', this.revisionID);
 		//db.set(dbp`nodes/${revision.node}/.currentRevision`, this.revisionID);
-		delete revision.titles_tsvector; // db populates this automatically
+		delete revision.phrasing_tsvector; // db populates this automatically
 		db.set(dbp`nodeRevisions/${revision.id}`, revision);
 		if (this.nodeEdit) {
 			//db.set(dbp`maps/${mapID}/nodeEditTimes/data/.${revision.node}`, revision.createdAt);

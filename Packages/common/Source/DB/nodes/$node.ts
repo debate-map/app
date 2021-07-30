@@ -7,7 +7,7 @@ import {NodeRatingType} from "../nodeRatings/@NodeRatingType.js";
 import {GetNodeRevision, GetNodeRevisions} from "../nodeRevisions.js";
 import {ForLink_GetError, ForNewLink_GetError, GetNode, GetNodeChildrenL2, GetNodeID, GetParentNode, GetParentNodeL2, ChildGroup, GetNodeChildrenL3} from "../nodes.js";
 import {ClaimForm, MapNode, MapNodeL2, MapNodeL3, Polarity} from "./@MapNode.js";
-import {MapNodeRevision, TitlesMap, TitleKey_values} from "./@MapNodeRevision.js";
+import {MapNodeRevision} from "./@MapNodeRevision.js";
 import {MapNodeType} from "./@MapNodeType.js";
 import {PermissionGroupSet} from "../users/@User.js";
 import {GetNodeTags, GetNodeTagComps, GetFinalTagCompsForTag} from "../nodeTags.js";
@@ -17,6 +17,7 @@ import {GetNodeChildLinks} from "../nodeChildLinks.js";
 import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
 import {GetAccessPolicy} from "../accessPolicies.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
+import {MapNodePhrasing_Embedded, TitleKey_values} from "../nodePhrasings/@MapNodePhrasing.js";
 
 export function PreProcessLatex(text: string) {
 	// text = text.replace(/\\term{/g, "\\text{");
@@ -299,18 +300,18 @@ export function IsNodeTitleValid_GetError(node: MapNode, title: string) {
 }
 
 export function GetAllNodeRevisionTitles(nodeRevision: MapNodeRevision): string[] {
-	if (nodeRevision == null || nodeRevision.titles == null) return [];
-	return TitleKey_values.map(key=>nodeRevision.titles[key]).filter(a=>a != null) as string[];
+	if (nodeRevision == null || nodeRevision.phrasing == null) return [];
+	return TitleKey_values.map(key=>nodeRevision.phrasing[key]).filter(a=>a != null) as string[];
 }
 
 /** Gets the main display-text for a node. (doesn't include equation explanation, quote sources, etc.) */
 export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string, form?: ClaimForm): string=>{
 	form = form || GetNodeForm(node, path);
-	const titles = node.current.titles || {} as TitlesMap;
+	const phrasing = node.current.phrasing || {} as MapNodePhrasing_Embedded;
 
 	// if (path && path.split('/').length > 3) throw new Error('Test1'); // for testing node error-boundaries
 
-	if (node.type == MapNodeType.argument && !node.multiPremiseArgument && !titles.base) {
+	if (node.type == MapNodeType.argument && !node.multiPremiseArgument && !phrasing.text_base) {
 		// const baseClaim = GetNodeL2(node.children && node.children.VKeys().length ? node.children.VKeys()[0] : null);
 		// const baseClaim = GetArgumentPremises(node)[0];
 		const baseClaim = GetNodeChildrenL2(node.id).filter(a=>a && a.type == MapNodeType.claim)[0];
@@ -376,11 +377,11 @@ export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string
 		}
 
 		if (form) {
-			if (form == ClaimForm.negation) return titles.negation || missingTitleStrings[1];
-			if (form == ClaimForm.question) return titles.question || missingTitleStrings[2];
+			if (form == ClaimForm.negation) return phrasing.text_negation || missingTitleStrings[1];
+			if (form == ClaimForm.question) return phrasing.text_question || missingTitleStrings[2];
 		}
 	}
-	return titles.base || missingTitleStrings[0];
+	return phrasing.text_base || missingTitleStrings[0];
 });
 export const missingTitleStrings = ["(base title not set)", "(negation title not set)", "(question title not set)"];
 

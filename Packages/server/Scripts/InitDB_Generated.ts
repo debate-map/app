@@ -114,7 +114,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 	// set up indexes
 	await knex.raw(`
 		CREATE INDEX ON "nodeRevisions"
-		USING gin (titles_tsvector);
+		USING gin (phrasing_tsvector);
 	`);
 
 	// set up app_user role for postgraphile connection, set up RLS, etc.
@@ -260,7 +260,8 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "text_base", (t, n)=>t.text(n));
 		RunFieldInit(t, "text_negation", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "text_question", (t, n)=>t.text(n).nullable());
-		RunFieldInit(t, "description", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "note", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "terms", (t, n)=>t.specificType(n, "jsonb[]"));
 	});
 
 	await knex.schema.createTable(`${v}nodeRatings`, t=>{
@@ -290,11 +291,10 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "node", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
 		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
-		RunFieldInit(t, "titles", (t, n)=>t.jsonb(n));
-		RunFieldInit(t, "titles_tsvector", (t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english_nostop', titles, '["string"]')) stored`).notNullable());
+		RunFieldInit(t, "phrasing", (t, n)=>t.jsonb(n));
+		RunFieldInit(t, "phrasing_tsvector", (t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english_nostop', phrasing, '["string"]')) stored`).notNullable());
 		RunFieldInit(t, "note", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "displayDetails", (t, n)=>t.jsonb(n).nullable());
-		RunFieldInit(t, "termAttachments", (t, n)=>t.specificType(n, "jsonb[]"));
 		RunFieldInit(t, "equation", (t, n)=>t.jsonb(n).nullable());
 		RunFieldInit(t, "references", (t, n)=>t.jsonb(n).nullable());
 		RunFieldInit(t, "quote", (t, n)=>t.jsonb(n).nullable());

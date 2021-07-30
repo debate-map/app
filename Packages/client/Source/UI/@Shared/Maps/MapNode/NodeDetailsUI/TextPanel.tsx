@@ -1,14 +1,9 @@
-import {E, GetEntries, WaitXThenRun, DelIfFalsy, A} from "web-vcore/nm/js-vextensions.js";
-import {Button, Column, Div, DropDown, DropDownContent, DropDownTrigger, Pre, Row, Select, Text, TextArea, TextInput} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponent, BaseComponentPlus, RenderSource} from "web-vcore/nm/react-vextensions.js";
-import {ShowAddTermDialog} from "UI/Database/Terms/TermDetailsUI.js";
-import {GetAttachmentType, AttachmentType, MapNodeType, MapNodeL2, NodeChildLink, ClaimForm, MapNodeRevision_titlePattern, ArgumentType, GetArgumentTypeDisplayText, TermAttachment, GetDisplayPolarity} from "dm_common";
-
-
-import {ES} from "web-vcore";
+import {ArgumentType, AttachmentType, GetArgumentTypeDisplayText, GetAttachmentType, MapNodeType} from "dm_common";
+import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI.js";
+import {GetEntries} from "web-vcore/nm/js-vextensions.js";
+import {Pre, Row, Select} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
-import {NodeTermsUI} from "./TextPanel/NodeTermsUI.js";
-import {TermDefinitionPanel} from "../DetailBoxes/Panels/DefinitionsPanel.js";
 
 export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 	render() {
@@ -20,120 +15,13 @@ export class TextPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 			<>
 				{(attachmentType == AttachmentType.none || attachmentType == AttachmentType.references) &&
 				<>
-					<Title_Base {...sharedProps}/>
-					{newData.type == MapNodeType.claim &&
-						<OtherTitles {...sharedProps}/>}
+					<PhrasingDetailsUI baseData={newRevisionData.phrasing} node={newDataAsL2} forNew={forNew} enabled={enabled} onChange={val=>{
+						Change(newRevisionData.phrasing = val);
+					}}/>
 					{newData.type == MapNodeType.argument &&
 						<ArgumentInfo {...sharedProps}/>}
 				</>}
-				<Row mt={5}>
-					<Text>Note: </Text>
-					<TextInput enabled={enabled} style={{width: "100%"}}
-						value={newRevisionData.note} onChange={val=>Change(newRevisionData.note = val)}/>
-				</Row>
-				{(attachmentType == AttachmentType.none || attachmentType == AttachmentType.references || attachmentType == AttachmentType.equation) &&
-					<NodeTermsUI {...sharedProps}/>}
 			</>
-		);
-	}
-}
-
-class Title_Base extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
-	render() {
-		const {forNew, enabled, newData, newDataAsL2, newRevisionData, newLinkData, Change} = this.props;
-		const claimType = GetAttachmentType(newDataAsL2);
-
-		return (
-			<div>
-				<Row center>
-					<Text>Title (base): </Text>
-					<TitleInput {...this.props} titleKey="base" innerRef={a=>a && forNew && this.lastRender_source == RenderSource.Mount && WaitXThenRun(0, ()=>a.DOM && a.DOM_HTML.focus())}/>
-				</Row>
-				{forNew && newData.type == MapNodeType.argument &&
-					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
-						<Pre allowWrap={true}>{`
-An argument title should be a short "key phrase" that gives the gist of the argument, for easy remembering/scanning.
-
-Examples:
-* Shadow during lunar eclipses
-* May have used biased sources
-* Quote: Socrates
-
-The detailed version of the argument will be embodied in its premises/child-claims.
-						`.trim()}
-						</Pre>
-					</Row>}
-			</div>
-		);
-	}
-}
-
-function WillNodeUseQuestionTitleHere(node: MapNodeL2, linkData: NodeChildLink) {
-	return node.type == MapNodeType.claim && !node.current.quote && linkData && linkData.form == ClaimForm.question;
-}
-
-class OtherTitles extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
-	render() {
-		const {newDataAsL2, newRevisionData, forNew, enabled, newLinkData, Change} = this.props;
-		const willUseQuestionTitleHere = WillNodeUseQuestionTitleHere(newDataAsL2, newLinkData);
-		return (
-			<Div>
-				<Row key={0} mt={5} style={{display: "flex", alignItems: "center"}}>
-					<Pre>Title (negation): </Pre>
-					<TitleInput {...this.props} titleKey="negation"/>
-				</Row>
-				<Row key={1} mt={5} style={{display: "flex", alignItems: "center"}}>
-					<Pre>Title (question): </Pre>
-					{/* <TextInput enabled={enabled} style={ES({flex: 1})} required={willUseQuestionTitleHere}
-						value={newRevisionData.titles["question"]} onChange={val=>Change(newRevisionData.titles["question"] = val)}/> */}
-					<TitleInput {...this.props} titleKey="question"/>
-				</Row>
-				{willUseQuestionTitleHere && forNew &&
-					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
-						<Pre allowWrap={true}>At this location (under a category node), the node will be displayed with the (yes or no) question title.</Pre>
-					</Row>}
-			</Div>
-		);
-	}
-}
-
-class TitleInput extends BaseComponentPlus({} as {titleKey: string, innerRef?: any} & NodeDetailsUI_SharedProps & React.Props<TextArea>, {}) {
-	render() {
-		const {titleKey, newDataAsL2, newRevisionData, forNew, enabled, newLinkData, Change} = this.props;
-		let extraProps = {};
-		if (titleKey == "base") {
-			//const hasOtherTitles = newDataAsL2.type == MapNodeType.claim && newDataAsL2 == AttachmentType.none;
-			const hasOtherTitlesEntered = newRevisionData.titles.negation || newRevisionData.titles.question;
-			const willUseYesNoTitleHere = WillNodeUseQuestionTitleHere(newDataAsL2, newLinkData);
-			extraProps = {
-				required: !hasOtherTitlesEntered && !willUseYesNoTitleHere,
-				ref: this.props.innerRef, // if supplied
-			};
-		}
-		return (
-			//<TextInput enabled={enabled} style={ES({flex: 1})} value={newRevisionData.titles["negation"]} onChange={val=>Change(newRevisionData.titles["negation"] = val)}/>
-			<TextArea
-				enabled={enabled} allowLineBreaks={false} style={ES({flex: 1})} pattern={MapNodeRevision_titlePattern} autoSize={true}
-				value={newRevisionData.titles[titleKey]} onChange={val=>{
-					//let matches = val.Matches(/\{(.+?)\}(\[[0-9]+?\])?/);
-					//let termNames = [];
-					const cleanedVal = val ? val.replace(/\{(.+?)\}(\[[0-9]+?\])?/g, (m, g1, g2)=>{
-						//termNames.push(g1);
-						const termName = g1;
-						if (newRevisionData.termAttachments == null) {
-							newRevisionData.termAttachments = [];
-						}
-						if (!newRevisionData.termAttachments.Any(a=>a.id == termName)) {
-							newRevisionData.termAttachments.push(new TermAttachment({id: termName}));
-						}
-						return g1;
-					}) : null;
-					newRevisionData.titles.VSet(titleKey, DelIfFalsy(cleanedVal));
-					Change();
-				}}
-				// for "base" title-key
-				{...extraProps}
-			/>
 		);
 	}
 }

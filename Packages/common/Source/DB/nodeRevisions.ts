@@ -1,6 +1,7 @@
 import {emptyArray, IsNaN} from "web-vcore/nm/js-vextensions.js";
 import {GetDoc, GetDocs, CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {MapNodeRevision, TitleKey} from "./nodes/@MapNodeRevision.js";
+import {TitleKey} from "./nodePhrasings/@MapNodePhrasing.js";
+import {MapNodeRevision} from "./nodes/@MapNodeRevision.js";
 
 export const GetNodeRevision = CreateAccessor((id: string|n)=>{
 	return GetDoc({}, a=>a.nodeRevisions.get(id!));
@@ -41,11 +42,11 @@ export const GetNodeRevisions = CreateAccessor((nodeID: string): MapNodeRevision
 		}},
 	}, a=>a.nodeRevisions);
 });
-export const GetNodeRevisionsByTitle = CreateAccessor((title: string, titleKey: TitleKey = "base"): MapNodeRevision[]=>{
+export const GetNodeRevisionsByTitle = CreateAccessor((title: string, titleKey: TitleKey = "text_base"): MapNodeRevision[]=>{
 	return GetDocs({
 		//queryOps: [new WhereOp(`titles.${titleKey}`, "==", title)],
 		params: {filter: {
-			titles: {contains: {[titleKey]: title}},
+			phrasing: {contains: {[titleKey]: title}},
 		}},
 	}, a=>a.nodeRevisions);
 });

@@ -1,4 +1,4 @@
-import {Assert, Clone, E} from "web-vcore/nm/js-vextensions.js";
+import {Assert, Clone, E, WaitXThenRun} from "web-vcore/nm/js-vextensions.js";
 import keycode from "keycode";
 import _ from "lodash";
 import {runInAction} from "web-vcore/nm/mobx.js";
@@ -6,7 +6,7 @@ import {Button, Pre, Row, TextArea, TextInput} from "web-vcore/nm/react-vcompone
 import {BaseComponentPlus, FilterOutUnrecognizedProps, WarnOfTransientObjectProps} from "web-vcore/nm/react-vextensions.js";
 import {store} from "Store";
 import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapView.js";
-import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, MapNodeRevision} from "dm_common";
+import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, MapNodeRevision, TitleKey} from "dm_common";
 import {ES, InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, RunInAction, VReactMarkdown_Remarkable} from "web-vcore";
 import React from "react";
 import {GetCurrentRevision} from "Store/db_ext/nodes";
@@ -91,7 +91,7 @@ export class TitlePanel extends BaseComponentPlus(
 	render() {
 		// const { map, parent, node, nodeView, path, displayText, equationNumber, style, ...rest } = this.props;
 		const {map, parent, node, path, style, ...rest} = this.props;
-		let {newTitle, editing, applyingEdit} = this.state;
+		const {newTitle, editing, applyingEdit} = this.state;
 		// UseImperativeHandle(ref, () => ({ OnDoubleClick }));
 
 		const nodeView = GetNodeView(map?.id, path);
@@ -99,12 +99,14 @@ export class TitlePanel extends BaseComponentPlus(
 		//const isSubnode = IsNodeSubnode(node);
 
 		const displayText = GetNodeDisplayText(node, path);
+		//newTitle = newTitle != null ? newTitle : displayText;
+		if (newTitle == null) {
+			WaitXThenRun(0, ()=>this.SetState({newTitle: displayText}));
+			return null;
+		}
+
 		const equationNumber = node.current.equation ? GetEquationStepNumber(path) : null;
-
-		newTitle = newTitle != null ? newTitle : displayText;
-
 		const noteText = (node.current.equation && node.current.equation.explanation) || node.current.note;
-
 		const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map?.id).id).filter(a=>a);
 
 		const RenderNodeDisplayText = (text: string)=>{
@@ -210,16 +212,17 @@ export class TitlePanel extends BaseComponentPlus(
 
 	async ApplyEdit() {
 		const {map, node, path, newTitle} = this.PropsStateStash;
+		Assert(newTitle != null);
 
 		this.SetState({applyingEdit: true});
 
 		//const parentNode = GetParentNode(path);
 
 		const form = GetNodeForm(node, path);
-		const titleKey = {[ClaimForm.negation]: "negation", [ClaimForm.question]: "question"}[form] || "base";
-		const newRevision = (Clone(node.current) as MapNodeRevision).ExcludeKeys("titles_tsvector").OmitUndefined(true);
-		if (newRevision.titles[titleKey] != newTitle) {
-			newRevision.titles[titleKey] = newTitle;
+		const titleKey: TitleKey = {[ClaimForm.negation]: "text_negation", [ClaimForm.question]: "text_question"}[form] || "text_base";
+		const newRevision = (Clone(node.current) as MapNodeRevision).ExcludeKeys("phrasing_tsvector").OmitUndefined(true);
+		if (newRevision.phrasing[titleKey] != newTitle) {
+			newRevision.phrasing[titleKey] = newTitle;
 
 			const command = new AddNodeRevision({mapID: map?.id, revision: newRevision});
 			const revisionID = await command.RunOnServer();

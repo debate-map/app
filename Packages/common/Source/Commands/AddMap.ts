@@ -3,6 +3,7 @@ import {AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GenerateUU
 import {UserEdit} from "../CommandMacros.js";
 import {GetDefaultAccessPolicyID_ForNode} from "../DB/accessPolicies.js";
 import {Map} from "../DB/maps/@Map.js";
+import {MapNodePhrasing} from "../DB/nodePhrasings/@MapNodePhrasing.js";
 import {MapNode} from "../DB/nodes/@MapNode.js";
 import {MapNodeRevision} from "../DB/nodes/@MapNodeRevision.js";
 import {MapNodeType} from "../DB/nodes/@MapNodeType.js";
@@ -33,7 +34,7 @@ export class AddMap extends Command<{map: Map}, {id: UUID}> {
 			accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 			type: MapNodeType.category, creator: map.creator, rootNodeForMap: map.id,
 		});
-		const newRootNodeRevision = new MapNodeRevision(E(map.nodeDefaults, {titles: {base: "Root"}}));
+		const newRootNodeRevision = new MapNodeRevision(E(map.nodeDefaults, {phrasing: new MapNodePhrasing({text_base: "Root"})}));
 		this.sub_addNode = this.sub_addNode ?? new AddNode({mapID: map.id, node: newRootNode, revision: newRootNodeRevision}).MarkAsSubcommand(this);
 		this.sub_addNode.Validate();
 

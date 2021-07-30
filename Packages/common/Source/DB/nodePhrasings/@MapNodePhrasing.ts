@@ -1,5 +1,6 @@
-import {AddSchema, DB, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, DB, DeriveJSONSchema, Field, MGLClass} from "web-vcore/nm/mobx-graphlink.js";
 import {GetValues_ForSchema, CE, CreateStringEnum, GetValues} from "web-vcore/nm/js-vextensions.js";
+import {TermAttachment} from "../nodeRevisions/@TermAttachment.js";
 
 @MGLClass({table: "nodePhrasings"})
 export class MapNodePhrasing {
@@ -33,7 +34,7 @@ export class MapNodePhrasing {
 
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
-	text_negation: string;
+	text_negation?: string;
 
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
@@ -41,8 +42,20 @@ export class MapNodePhrasing {
 
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: "string"}, {opt: true})
-	description: string;
+	note: string;
+
+	//@DB((t, n)=>t.jsonb(n)) // commented; the root of a jsonb column must be an object (not an array)
+	@DB((t, n)=>t.specificType(n, "jsonb[]"))
+	@Field({items: {$ref: TermAttachment.name}})
+	terms: TermAttachment[] = [];
 }
+
+const MapNodePhrasing_Embedded_keys = ["text_base", "text_negation", "text_question", "note", "terms"] as const;
+export type MapNodePhrasing_Embedded = Pick<MapNodePhrasing, typeof MapNodePhrasing_Embedded_keys[number]>;
+AddSchema("MapNodePhrasing_Embedded", DeriveJSONSchema(MapNodePhrasing, {includeOnly: MapNodePhrasing_Embedded_keys as any}));
+
+export const TitleKey_values = ["text_base", "text_negation", "text_question"] as const;
+export type TitleKey = typeof TitleKey_values[number];
 
 export enum MapNodePhrasingType {
 	standard = "standard",

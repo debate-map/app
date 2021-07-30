@@ -6,27 +6,7 @@ import {AccessLevel} from "./@MapNode.js";
 import {EquationAttachment} from "../nodeRevisions/@EquationAttachment.js";
 import {TermAttachment} from "../nodeRevisions/@TermAttachment.js";
 import {ReferencesAttachment} from "../nodeRevisions/@ReferencesAttachment.js";
-
-export const TitleKey_values = ["base", "negation", "question"] as const;
-//export type TitleKey = "base" | "negation" | "question";
-//export type TitleKey = keyof typeof TitleKey_values;
-export type TitleKey = typeof TitleKey_values[number];
-export class TitlesMap {
-	base?: string;
-	negation?: string;
-	question?: string;
-
-	//allTerms?: {[key: string]: boolean};
-}
-AddSchema("TitlesMap", {
-	properties: {
-		base: {type: "string"},
-		negation: {type: "string"},
-		question: {type: "string"},
-
-		//allTerms: {type: "object"},
-	},
-});
+import {MapNodePhrasing, MapNodePhrasing_Embedded} from "../nodePhrasings/@MapNodePhrasing.js";
 
 export enum PermissionInfoType {
 	creator = "creator",
@@ -70,10 +50,10 @@ export function MapNodeRevision_Defaultable_DefaultsForMap(): MapNodeRevision_De
 export const MapNodeRevision_titlePattern = "^\\S.*$"; // must start with non-whitespace
 @MGLClass({table: "nodeRevisions"}, {
 	allOf: [
-		// if not an argument or content-node, require "titles" prop
+		// if not an argument or content-node, require "phrasing" prop
 		{
 			if: {prohibited: ["argumentType", "equation", "quote", "media"]},
-			then: {required: ["titles"]},
+			then: {required: ["phrasing"]},
 		},
 	],
 })
@@ -101,23 +81,14 @@ export class MapNodeRevision {
 	//updatedAt: number;
 	//approved = false;
 
-	// text
 	@DB((t, n)=>t.jsonb(n))
-	@Field({
-		properties: {
-			//base: {pattern: MapNodeRevision_titlePattern}, negation: {pattern: MapNodeRevision_titlePattern}, question: {pattern: MapNodeRevision_titlePattern},
-			base: {type: "string"}, negation: {type: "string"}, question: {type: "string"},
-		},
-		//required: ["base", "negation", "question"],
-	})
-	titles = {base: ""} as TitlesMap;
+	@Field({$ref: "MapNodePhrasing_Embedded"})
+	phrasing: MapNodePhrasing_Embedded = new MapNodePhrasing({text_base: ""});
 
-	//@DB((t, n)=>t.specificType(n, "tsvector"))
-	//@DB((t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english', titles, '["string"]')) stored`).notNullable())
-	@DB((t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english_nostop', titles, '["string"]')) stored`).notNullable())
+	@DB((t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english_nostop', phrasing, '["string"]')) stored`).notNullable())
 	//@Field({type: "null"}) // user should not pass this in themselves
 	@Field({$gqlType: "JSON", $noWrite: true}, {opt: true})
-	titles_tsvector?: any;
+	phrasing_tsvector?: any;
 
 	@DB((t, n)=>t.text(n).nullable())
 	@Field({type: ["null", "string"]}, {opt: true}) // add null-type, for later when the payload-validation schema is derived from the main schema
@@ -129,11 +100,6 @@ export class MapNodeRevision {
 
 	// attachments
 	// ==========
-
-	//@DB((t, n)=>t.jsonb(n)) // commented; the root of a jsonb column must be an object (not an array)
-	@DB((t, n)=>t.specificType(n, "jsonb[]"))
-	@Field({items: {$ref: TermAttachment.name}})
-	termAttachments: TermAttachment[] = [];
 
 	@DB((t, n)=>t.jsonb(n).nullable())
 	@Field({$ref: EquationAttachment.name}, {opt: true})

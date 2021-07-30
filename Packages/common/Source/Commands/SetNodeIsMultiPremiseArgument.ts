@@ -31,14 +31,14 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 			//this.newNodeData.childrenOrderType = ChildOrderType.Manual;
 			//this.newNodeData.childrenOrder = CE(this.oldNodeData.children).VKeys();
 
-			if ((this.oldNodeData.current.titles.base?.length ?? 0) == 0) {
+			if ((this.oldNodeData.current.phrasing.text_base?.length ?? 0) == 0) {
 				const newRevision = Clone(this.oldNodeData.current);
 
 				const children = GetNodeChildren(this.oldNodeData.id);
 				//const oldChildNode_partialPath = `${nodeID}/${CE(this.oldNodeData.children).VKeys()[0]}`;
 				const oldChildNode_partialPath = `${nodeID}/${children[0].id}`;
 				const oldChildNode = GetNodeL3.NN(oldChildNode_partialPath);
-				newRevision.titles.base = GetNodeDisplayText(oldChildNode, oldChildNode_partialPath, GetNodeForm(oldChildNode));
+				newRevision.phrasing.base = GetNodeDisplayText(oldChildNode, oldChildNode_partialPath, GetNodeForm(oldChildNode));
 
 				this.sub_addRevision = new AddNodeRevision({mapID, revision: newRevision}).MarkAsSubcommand(this);
 				this.sub_addRevision.Validate();

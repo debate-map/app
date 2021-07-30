@@ -35,7 +35,7 @@ export const GetTermsAttached = CreateAccessor((nodeRevisionID: string): Term[]=
 	const revision = GetNodeRevision(nodeRevisionID);
 	if (revision == null) return emptyArray;
 	//const terms = revision.termAttachments?.map(a=>GetTerm(a.id)) ?? emptyArray;
-	const terms = revision.termAttachments?.map(attachment=> {
+	const terms = revision.phrasing.terms?.map(attachment=>{
 		//if (Validate("UUID", attachment.id) != null) return null; // if invalid term-id, don't try to retrieve entry
 		return BailIfNull(GetDoc({}, a=>a.terms.get(attachment.id)));
 	}) ?? emptyArray;

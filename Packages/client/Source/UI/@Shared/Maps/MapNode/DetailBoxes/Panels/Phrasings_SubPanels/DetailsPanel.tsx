@@ -4,13 +4,13 @@ import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {PhrasingDetailsUI} from "UI/Database/Phrasings/PhrasingDetailsUI.js";
 import {GetUpdates, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {MapNodePhrasing, GetUser, MeID, IsUserCreatorOrMod, UpdatePhrasing, DeletePhrasing} from "dm_common";
+import {MapNodePhrasing, GetUser, MeID, IsUserCreatorOrMod, UpdatePhrasing, DeletePhrasing, MapNodeL3} from "dm_common";
 
 @Observer
-export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {phrasing: MapNodePhrasing}, {dataError: null as string|n}) {
+export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {node: MapNodeL3, phrasing: MapNodePhrasing}, {dataError: null as string|n}) {
 	detailsUI: PhrasingDetailsUI;
 	render() {
-		const {phrasing} = this.props;
+		const {node, phrasing} = this.props;
 		const {dataError} = this.state;
 		const creator = GetUser(phrasing.creator);
 
@@ -18,7 +18,8 @@ export class DetailsPanel_Phrasings extends BaseComponentPlus({} as {phrasing: M
 		return (
 			<Column style={{position: "relative", width: "100%"}}>
 				<PhrasingDetailsUI ref={c=>this.detailsUI = c!}
-					baseData={phrasing} forNew={false} enabled={creatorOrMod}
+					baseData={phrasing} node={node}
+					forNew={false} enabled={creatorOrMod}
 					onChange={(val, error)=>{
 						this.SetState({dataError: error});
 					}}/>
