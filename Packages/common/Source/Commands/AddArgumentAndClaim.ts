@@ -15,10 +15,10 @@ type Payload = {
 		$mapID: {type: "string"},
 		$argumentParentID: {type: "string"}, $argumentNode: {$ref: "MapNode_Partial"}, $argumentRevision: {$ref: "MapNodeRevision_Partial"},
 		//argumentLink: {$ref: NodeChildLink.name},
-		argumentLink: DeriveJSONSchema(NodeChildLink.name, {makeOptional: ["parent", "child"]}),
+		argumentLink: DeriveJSONSchema(NodeChildLink, {makeOptional: ["parent", "child"]}),
 		$claimNode: {$ref: "MapNode_Partial"}, $claimRevision: {$ref: "MapNodeRevision_Partial"},
 		//claimLink: {$ref: NodeChildLink.name},
-		claimLink: DeriveJSONSchema(NodeChildLink.name, {makeOptional: ["parent", "child"]}),
+		claimLink: DeriveJSONSchema(NodeChildLink, {makeOptional: ["parent", "child"]}),
 	}),
 	returnSchema: ()=>SimpleSchema({
 		$argumentNodeID: {$ref: "UUID"},

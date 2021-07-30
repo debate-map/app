@@ -46,9 +46,10 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 		base: null,
 		permissions_base: {
 			access: true,
-			addRevisions: true,
-			vote: true,
+			modify: true,
 			delete: false,
+			vote: true,
+			addPhrasing: true,
 		},
 		permissions_userExtends: {},
 	},
@@ -60,9 +61,10 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 		base: null,
 		permissions_base: {
 			access: true,
-			addRevisions: false,
-			vote: true,
+			modify: false,
 			delete: false,
+			vote: true,
+			addPhrasing: false,
 		},
 		permissions_userExtends: {},
 	},
@@ -74,9 +76,10 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 		base: null,
 		permissions_base: {
 			access: false,
-			addRevisions: false,
-			vote: false,
+			modify: false,
 			delete: false,
+			vote: false,
+			addPhrasing: false,
 		},
 		permissions_userExtends: {},
 	},
@@ -121,6 +124,9 @@ const nodes = TypeCheck(MapNode as new()=>(MapNode & {revision: MapNodeRevision}
 });
 
 export default async function seed(knex: Knex.Transaction) {
+	// needed, since "maps" and "nodeRevisions" both have fk-refs to each other, so whichever is added first would error (without this flag)
+	await knex.raw("SET CONSTRAINTS ALL DEFERRED;");
+
 	console.log(`Adding users and userHiddens...`);
 	for (const user of Object.values(users)) {
 		await knex("users").insert(CE(user).ExcludeKeys("hidden"));

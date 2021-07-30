@@ -24,7 +24,7 @@ export function CreateLinkCommand(mapID: UUID|n, draggedNodePath: string, dropOn
 	// const draggedNode_parent = GetParentNodeL3(draggedNodePath);
 	const dropOnNode_parent = GetParentNodeL3(dropOnNodePath);
 	//const childGroup = GetChildGroup(dropOnNode.type, dropOnNode_parent?.type);
-	const formForClaimChildren = dropOnNode.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base;
+	const formForClaimChildren = dropOnNode.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
 
 	return new LinkNode_HighLevel({
 		mapID, oldParentID: GetParentNodeID(draggedNodePath)!, newParentID: dropOnNode.id, nodeID: draggedNode.id,

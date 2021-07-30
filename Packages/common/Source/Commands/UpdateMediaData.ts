@@ -1,28 +1,24 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
-import {AddSchema, AssertV, AssertValidate, Command, CommandMeta, DBHelper, dbp, GetSchemaJSON, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AddSchema, AssertV, AssertValidate, ClassKeys, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, GetSchemaJSON, NewSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {Media} from "../DB/media/@Media.js";
 import {GetMedia} from "../DB.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
-type MainType = Media;
-const MTName = "Media";
+const MTClass = Media;
+type MT = typeof MTClass.prototype;
+const MTName = MTClass.name;
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({
-		properties: {
-			id: {$ref: "UUID"},
-			updates: NewSchema({
-				properties: CE(GetSchemaJSON(MTName).properties!).IncludeKeys("name", "type", "url", "description"),
-			}),
-		},
-		required: ["id", "updates"],
+	payloadSchema: ()=>SimpleSchema({
+		$id: {$ref: "UUID"},
+		$updates: DeriveJSONSchema(MTClass, {includeOnly: ["name", "type", "url", "description"], makeOptional_all: true}),
 	}),
 })
 export class UpdateMediaData extends Command<{id: string, updates: Partial<Media>}, {}> {
-	oldData: MainType;
-	newData: MainType;
+	oldData: MT;
+	newData: MT;
 	Validate() {
 		const {id, updates} = this.payload;
 		this.oldData = GetMedia.NN(id);

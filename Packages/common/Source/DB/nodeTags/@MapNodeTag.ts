@@ -1,5 +1,5 @@
 import {AddSchema, UUID_regex, GetSchemaJSON, Validate, MGLClass, Field, DB} from "web-vcore/nm/mobx-graphlink.js";
-import {GetValues_ForSchema, ModifyString, CE} from "web-vcore/nm/js-vextensions.js";
+import {GetValues_ForSchema, ModifyString, CE, Assert} from "web-vcore/nm/js-vextensions.js";
 import {Polarity} from "../nodes/@MapNode.js";
 
 @MGLClass({table: "nodeTags"})
@@ -58,9 +58,11 @@ export abstract class TagComp {
 	static description: string;
 	static nodeKeys: string[]; // fields whose values should be added to MapNodeTag.nodes array (field-value can be a node-id string, or an array of such strings)
 
-	/** Has side-effect: Casts data to its original class/type. */
+	/** Has side-effect: Casts tag-comps to their original classes/types. */
+	//abstract GetFinalTagComps(): TagComp[];
 	GetFinalTagComps(): TagComp[] {
-		const compClass = GetTagCompClassByKey(this["_key"]);
+		//const compClass = GetTagCompClassByKey(this["_key"]);
+		const compClass = this.constructor;
 		if (compClass) return [CE(this).As(compClass as any)];
 		return [this];
 	}
@@ -257,6 +259,8 @@ export function GetTagCompClassByDisplayName(displayName: string) {
 }
 export function GetTagCompClassByTag(tag: MapNodeTag) {
 	return TagComp_classes.find(a=>a.key in tag)!;
+	/*Assert(tag.constructor.name.startsWith("TagComp_"), "Tag-comp must have prototype re-applied before this point.");
+	return tag.constructor as TagComp_Class;*/
 }
 export function GetTagCompOfTag(tag: MapNodeTag): TagComp {
 	const compClass = GetTagCompClassByTag(tag);

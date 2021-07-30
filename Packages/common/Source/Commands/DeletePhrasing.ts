@@ -14,7 +14,7 @@ export class DeletePhrasing extends Command<{id: string}, {}> {
 	oldData: MapNodePhrasing;
 	Validate() {
 		const {id} = this.payload;
-		this.oldData = GetNodePhrasing(id);
+		this.oldData = GetNodePhrasing.NN(id);
 		AssertUserCanDelete(this, this.oldData);
 	}
 

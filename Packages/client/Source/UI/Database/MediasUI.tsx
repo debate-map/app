@@ -3,7 +3,7 @@ import {BaseComponent, BaseComponentPlus, UseEffect} from "web-vcore/nm/react-ve
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {store} from "Store";
-import {GetSelectedMedia} from "Store/main/database";
+import {GetSelectedMedia, GetSelectedMediaID} from "Store/main/database";
 import {Observer, GetUpdates, ES, RunInAction} from "web-vcore";
 import {runInAction} from "web-vcore/nm/mobx.js";
 import {E} from "web-vcore/nm/js-vextensions.js";
@@ -52,7 +52,7 @@ export class MediasUI extends BaseComponentPlus({} as {}, {} as {selectedMedia_n
 						if (e.target != e.currentTarget) return;
 						RunInAction("MediasUI.ScrollView.onClick", ()=>store.main.database.selectedMediaID = null);
 					}}>
-						{medias.map((media, index)=><MediaUI key={index} first={index == 0} image={media} selected={selectedMedia == media}/>)}
+						{medias.map((media, index)=><MediaUI key={index} first={index == 0} image={media} selected={GetSelectedMediaID() == media.id}/>)}
 					</ScrollView>
 				</Column>
 				<ScrollView ref={c=>this.scrollView = c} style={{
@@ -107,7 +107,7 @@ export class MediaUI extends BaseComponent<MediaUI_Props, {}> {
 			<Row mt={first ? 0 : 5} className="cursorSet"
 				style={E(
 					{padding: 5, background: "rgba(100,100,100,.5)", borderRadius: 5, cursor: "pointer"},
-					selected && {background: "rgba(100,100,100,.7)"},
+					selected && {background: "rgba(150,150,150,.5)"},
 				)}
 				onClick={e=>{
 					RunInAction("MediaUI.onClick", ()=>store.main.database.selectedMediaID = image.id);

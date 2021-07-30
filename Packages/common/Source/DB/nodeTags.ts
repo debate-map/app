@@ -31,5 +31,8 @@ export const GetFinalTagCompsForTag = CreateAccessor((tag: MapNodeTag): TagComp[
 	const compClass = GetTagCompClassByTag(tag);
 	const comp = GetTagCompOfTag(tag);
 	//return comp.As(compClass).GetFinalTagComps();
-	return compClass.prototype.GetFinalTagComps.call(comp);
+	//comp.As(compClass);
+	Object.setPrototypeOf(comp, compClass.prototype);
+	//return compClass.prototype.GetFinalTagComps.call(comp);
+	return comp.GetFinalTagComps();
 });

@@ -142,7 +142,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		alter table app_public."commandRuns" enable row level security;
 		DO $$ BEGIN
 			create policy "commandRuns_rls" on app_public."commandRuns" as PERMISSIVE for all using (
-				public = true
+				public_base = true
 				OR actor = current_setting('app.current_user_id')
 				OR current_setting('app.current_user_admin') = 'true'
 			);

@@ -9,9 +9,9 @@ import {BaseComponent, BaseComponentPlus, UseEffect} from "web-vcore/nm/react-ve
 import ReactDOM from "web-vcore/nm/react-dom.js";
 import React from "react";
 import {zIndexes} from "Utils/UI/ZIndexes";
-import {NodeUI_Inner} from "../NodeUI_Inner";
-import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer";
-import {GetMapUICSSFilter} from "../../MapUI";
+import {NodeUI_Inner} from "../NodeUI_Inner.js";
+import {nodeDetailBoxesLayer_container} from "./NodeDetailBoxesLayer.js";
+import {GetMapUICSSFilter} from "../../MapUI.js";
 
 export const NodeUI_LeftBox_width = 130;
 
@@ -154,8 +154,7 @@ export class MapNodeUI_LeftBox extends BaseComponentPlus({panelsPosition: "left"
 				</div>
 				<div style={{position: "relative", marginTop: 1, background: "rgba(0,0,0,.8)", borderRadius: 5, boxShadow: "rgba(0,0,0,1) 0px 0px 2px"}}>
 					<div style={{position: "absolute", left: 0, right: 0, top: 0, bottom: 0, borderRadius: 5, background: backgroundColor.alpha(0.7).css()}}/>
-					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="phrasings" text="Phrasings"
-						style={{marginTop: 0, borderRadius: "5px 5px 0 0"}}/>
+					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="phrasings" text="Phrasings" style={{marginTop: 0, borderRadius: "5px 5px 0 0"}}/>
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="definitions" text="Definitions"/>
 					{/* <PanelButton {...{ onPanelButtonHover, onPanelButtonClick, map, path, openPanel }} panel="discussion" text="Discussion"/>
 					<PanelButton {...{onPanelButtonHover, onPanelButtonClick, map, path, openPanel}} panel="social" text="Social"/> */}

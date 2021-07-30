@@ -7,14 +7,14 @@ import {EquationAttachment} from "../nodeRevisions/@EquationAttachment.js";
 import {TermAttachment} from "../nodeRevisions/@TermAttachment.js";
 import {ReferencesAttachment} from "../nodeRevisions/@ReferencesAttachment.js";
 
-export const TitleKey_values = ["base", "negation", "yesNoQuestion"] as const;
-//export type TitleKey = "base" | "negation" | "yesNoQuestion";
+export const TitleKey_values = ["base", "negation", "question"] as const;
+//export type TitleKey = "base" | "negation" | "question";
 //export type TitleKey = keyof typeof TitleKey_values;
 export type TitleKey = typeof TitleKey_values[number];
 export class TitlesMap {
 	base?: string;
 	negation?: string;
-	yesNoQuestion?: string;
+	question?: string;
 
 	//allTerms?: {[key: string]: boolean};
 }
@@ -22,7 +22,7 @@ AddSchema("TitlesMap", {
 	properties: {
 		base: {type: "string"},
 		negation: {type: "string"},
-		yesNoQuestion: {type: "string"},
+		question: {type: "string"},
 
 		//allTerms: {type: "object"},
 	},
@@ -91,7 +91,7 @@ export class MapNodeRevision {
 	node: string;
 
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
-	@Field({type: "string"}, {opt: true})
+	@Field({$ref: "UUID"}, {opt: true})
 	creator: string;
 
 	@DB((t, n)=>t.bigInteger(n))
@@ -105,10 +105,10 @@ export class MapNodeRevision {
 	@DB((t, n)=>t.jsonb(n))
 	@Field({
 		properties: {
-			//base: {pattern: MapNodeRevision_titlePattern}, negation: {pattern: MapNodeRevision_titlePattern}, yesNoQuestion: {pattern: MapNodeRevision_titlePattern},
-			base: {type: "string"}, negation: {type: "string"}, yesNoQuestion: {type: "string"},
+			//base: {pattern: MapNodeRevision_titlePattern}, negation: {pattern: MapNodeRevision_titlePattern}, question: {pattern: MapNodeRevision_titlePattern},
+			base: {type: "string"}, negation: {type: "string"}, question: {type: "string"},
 		},
-		//required: ["base", "negation", "yesNoQuestion"],
+		//required: ["base", "negation", "question"],
 	})
 	titles = {base: ""} as TitlesMap;
 
@@ -130,7 +130,8 @@ export class MapNodeRevision {
 	// attachments
 	// ==========
 
-	@DB((t, n)=>t.specificType(n, "text[]"))
+	//@DB((t, n)=>t.jsonb(n)) // commented; the root of a jsonb column must be an object (not an array)
+	@DB((t, n)=>t.specificType(n, "jsonb[]"))
 	@Field({items: {$ref: TermAttachment.name}})
 	termAttachments: TermAttachment[] = [];
 

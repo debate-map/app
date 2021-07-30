@@ -3,7 +3,7 @@ import Moment from "web-vcore/nm/moment";
 import {Column, Div, Pre, Row, RowLR, Select, Spinner, TextInput, CheckBox, Text, Span} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, GetDOM, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
+import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
 import {Media, Media_namePattern, MediaType, GetNiceNameForMediaType, GetDefaultAccessPolicyID_ForMap, GetDefaultAccessPolicyID_ForMedia, AddMedia} from "dm_common";
 import {YoutubePlayerUI, InfoButton, HSLA, ParseYoutubeVideoID, ES, observer_simple} from "web-vcore";
@@ -25,7 +25,7 @@ export class MediaDetailsUI extends DetailsUI_Base<Media, MediaDetailsUI> {
 		return (
 			<Column style={style}>
 				{!creating &&
-					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
+					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt}>
 					<Pre>Name: </Pre>
 					<TextInput

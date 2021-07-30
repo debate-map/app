@@ -72,7 +72,7 @@ export class NodeUI_Menu extends BaseComponentPlus({} as Props, {}) {
 			validChildTypes = validChildTypes.Exclude(MapNodeType.argument);
 		}
 
-		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base;
+		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
 
 		const sharedProps: MI_SharedProps = E(this.props, {mapID, combinedWithParentArg, copiedNode, copiedNodePath, copiedNode_asCut});
 		return (

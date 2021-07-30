@@ -1,23 +1,22 @@
-import {StandardCompProps} from "Utils/UI/General.js";
-import {DeepGet, E, SleepAsync, Timer, Vector2, FindDOMAll, Assert, FromJSON, ToJSON, VRect, GetTreeNodesInObjTree, NN} from "web-vcore/nm/js-vextensions.js";
-import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
-import {BaseComponentWithConnector, FindReact, GetDOM, BaseComponentPlus, BaseComponent} from "web-vcore/nm/react-vextensions.js";
-import {VMenuStub, VMenuItem} from "web-vcore/nm/react-vmenu.js";
-import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
-import {GetDistanceBetweenRectAndPoint, inFirefox, GetViewportRect, StoreAction, Observer, ES, HTMLProps} from "web-vcore";
-import {GADDemo} from "UI/@GAD/GAD.js";
-import {GetNodeView, GetMapView, GetSelectedNodePath, GetViewOffset, GetFocusedNodePath, GetNodeViewsAlongPath, ACTMapNodeSelect} from "Store/main/maps/mapViews/$mapView.js";
-import {GetTimelinePanelOpen, GetMapState} from "Store/main/maps/mapStates/$mapState.js";
+import {GetNodeL3, GetParentNodeL3, GetParentPath, IsNodeL2, IsNodeL3, IsPremiseOfSinglePremiseArgument, Map, MapNodeL3} from "dm_common";
 import {GetOpenMapID} from "Store/main.js";
-import {TimelineIntroBox} from "UI/@Shared/Timelines/TimelineIntroBox.js";
-import {MapNodeL3, GetUserAccessLevel, MeID, IsNodeL2, IsNodeL3, GetNodeL3, IsPremiseOfSinglePremiseArgument, GetParentPath, GetParentNodeL3, Map} from "dm_common";
+import {GetMapState, GetTimelinePanelOpen} from "Store/main/maps/mapStates/$mapState.js";
+import {ACTMapNodeSelect, GetFocusedNodePath, GetMapView, GetNodeView, GetNodeViewsAlongPath, GetSelectedNodePath, GetViewOffset} from "Store/main/maps/mapViews/$mapView.js";
+import {GADDemo} from "UI/@GAD/GAD.js";
+import {StandardCompProps} from "Utils/UI/General.js";
+import {ES, GetDistanceBetweenRectAndPoint, GetViewportRect, HTMLProps, inFirefox, Observer, StoreAction} from "web-vcore";
+import {Assert, DeepGet, E, FindDOMAll, FromJSON, GetTreeNodesInObjTree, NN, SleepAsync, Timer, ToJSON, Vector2, VRect} from "web-vcore/nm/js-vextensions.js";
+import {Column, Row} from "web-vcore/nm/react-vcomponents.js";
+import {BaseComponent, BaseComponentPlus, FindReact, GetDOM} from "web-vcore/nm/react-vextensions.js";
+import {VMenuItem, VMenuStub} from "web-vcore/nm/react-vmenu.js";
+import {ScrollView} from "web-vcore/nm/react-vscrollview.js";
 import {styles} from "../../../Utils/UI/GlobalStyles.js";
+import {ExpandableBox} from "./MapNode/ExpandableBox.js";
 import {NodeUI} from "./MapNode/NodeUI.js";
 import {NodeUI_ForBots} from "./MapNode/NodeUI_ForBots.js";
 import {NodeUI_Inner} from "./MapNode/NodeUI_Inner.js";
 import {ActionBar_Left} from "./MapUI/ActionBar_Left.js";
 import {ActionBar_Right} from "./MapUI/ActionBar_Right.js";
-import {ExpandableBox} from "./MapNode/ExpandableBox.js";
 
 export function GetNodeBoxForPath(path: string) {
 	const nodeInnerBoxes = FindDOMAll(".NodeUI_Inner").map(a=>DeepGet(FindReact(a), "props/parent") as NodeUI_Inner);

@@ -96,7 +96,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 			ADD CONSTRAINT "${constraintName}"
 			FOREIGN KEY ("${ref.fromColumn}") 
 			REFERENCES "${ref.toTable}" ("${ref.toColumn}")
-			${ref.enforceAtTransactionEnd ? "DEFERRABLE INITIALLY DEFERRED;" : ";"}
+			${ref.enforceAtTransactionEnd ? "DEFERRABLE INITIALLY DEFERRED;" : "DEFERRABLE INITIALLY IMMEDIATE;"}
 		`);
 		/*await knex.schema.raw(`
 			ALTER TABLE "${ref.fromTable}"
@@ -142,7 +142,7 @@ async function End(knex: Knex.Transaction, info: ThenArg<ReturnType<typeof Start
 		alter table app_public."commandRuns" enable row level security;
 		DO $$ BEGIN
 			create policy "commandRuns_rls" on app_public."commandRuns" as PERMISSIVE for all using (
-				public = true
+				public_base = true
 				OR actor = current_setting('app.current_user_id')
 				OR current_setting('app.current_user_admin') = 'true'
 			);
@@ -251,6 +251,18 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "c_childType", (t, n)=>t.text(n));
 	});
 
+	await knex.schema.createTable(`${v}nodePhrasings`, t=>{
+		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
+		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
+		RunFieldInit(t, "node", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
+		RunFieldInit(t, "type", (t, n)=>t.text(n));
+		RunFieldInit(t, "text_base", (t, n)=>t.text(n));
+		RunFieldInit(t, "text_negation", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "text_question", (t, n)=>t.text(n).nullable());
+		RunFieldInit(t, "description", (t, n)=>t.text(n).nullable());
+	});
+
 	await knex.schema.createTable(`${v}nodeRatings`, t=>{
 		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
 		RunFieldInit(t, "accessPolicy", (t, n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
@@ -282,7 +294,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "titles_tsvector", (t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english_nostop', titles, '["string"]')) stored`).notNullable());
 		RunFieldInit(t, "note", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "displayDetails", (t, n)=>t.jsonb(n).nullable());
-		RunFieldInit(t, "termAttachments", (t, n)=>t.specificType(n, "text[]"));
+		RunFieldInit(t, "termAttachments", (t, n)=>t.specificType(n, "jsonb[]"));
 		RunFieldInit(t, "equation", (t, n)=>t.jsonb(n).nullable());
 		RunFieldInit(t, "references", (t, n)=>t.jsonb(n).nullable());
 		RunFieldInit(t, "quote", (t, n)=>t.jsonb(n).nullable());

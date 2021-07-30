@@ -72,7 +72,7 @@ export const GetMainRatingType = CreateAccessor((node: MapNodeL2)=>{
 	return GetRatingTypesForNode(node).FirstOrX(a=>!!a.main, {} as Partial<RatingTypeInfo>)!.type;
 });
 export function GetSortByRatingType(node: MapNodeL3): NodeRatingType|n {
-	if (node.link && node.link.form == ClaimForm.yesNoQuestion) {
+	if (node.link && node.link.form == ClaimForm.question) {
 		return NodeRatingType.significance;
 	}
 	return GetMainRatingType(node);
@@ -377,7 +377,7 @@ export const GetNodeDisplayText = CreateAccessor((node: MapNodeL2, path?: string
 
 		if (form) {
 			if (form == ClaimForm.negation) return titles.negation || missingTitleStrings[1];
-			if (form == ClaimForm.yesNoQuestion) return titles.yesNoQuestion || missingTitleStrings[2];
+			if (form == ClaimForm.question) return titles.question || missingTitleStrings[2];
 		}
 	}
 	return titles.base || missingTitleStrings[0];

@@ -3,13 +3,19 @@ import {Column, Pre, Row, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {Link, Observer} from "web-vcore";
 import {E} from "web-vcore/nm/js-vextensions.js";
-import {GetUser} from "dm_common";
+import {GetAccessPolicy, GetUser} from "dm_common";
 
 @Observer
-export class IDAndCreationInfoUI extends BaseComponentPlus({singleLine: false} as {id: string | number, creatorID: string, createdAt: number, singleLine?: boolean}, {}) {
+export class GenericEntryInfoUI extends BaseComponentPlus({singleLine: false} as {
+	id: string | number,
+	creatorID: string, createdAt: number,
+	accessPolicyID?: string,
+	singleLine?: boolean,
+}, {}) {
 	render() {
-		const {id, creatorID, createdAt, singleLine} = this.props;
+		const {id, creatorID, createdAt, accessPolicyID, singleLine} = this.props;
 		const creator = GetUser(creatorID);
+		const accessPolicy = accessPolicyID ? GetAccessPolicy(accessPolicyID) : null;
 
 		const createdAtTimeStr = Moment(createdAt).format("YYYY-MM-DD HH:mm:ss");
 		const userLink = (
@@ -22,6 +28,15 @@ export class IDAndCreationInfoUI extends BaseComponentPlus({singleLine: false} a
 					}
 				}}/>
 		);
+		const accessPolicyLink = accessPolicy == null ? null : (
+			<Link text={accessPolicy.name}
+				actionFunc={s=>{
+					s.main.page = "database";
+					s.main.database.subpage = "policies";
+					s.main.database.selectedPolicyID = accessPolicyID;
+				}}/>
+		);
+
 		return (
 			<Column sel style={E(singleLine && {fontSize: 14})}>
 				{singleLine &&
@@ -38,6 +53,10 @@ export class IDAndCreationInfoUI extends BaseComponentPlus({singleLine: false} a
 						{userLink}
 						<Text>)</Text>
 					</Row>
+					{accessPolicy &&
+					<Row>
+						<Text>Access-policy: </Text>{accessPolicyLink}
+					</Row>}
 				</>}
 			</Column>
 		);

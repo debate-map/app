@@ -2,7 +2,7 @@ import {Clone, E, DelIfFalsy, CloneWithPrototypes} from "web-vcore/nm/js-vextens
 import {Column, Pre, RowLR, Select, Text, Row, TextInput, CheckBox, Button} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {BoxController, ShowMessageBox} from "web-vcore/nm/react-vmessagebox.js";
-import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
+import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {ES, InfoButton, observer_simple} from "web-vcore";
 import {Validate} from "web-vcore/nm/mobx-graphlink.js";
 import {GetNodeL2, AsNodeL3, GetNodeDisplayText, MapNodeType, AddNodeTag, MapNodeTag, TagComp_Class, GetTagCompClassByTag, TagComp_classes, TagComp_MirrorChildrenFromXToY, TagComp_XIsExtendedByY, TagComp_MutuallyExclusiveGroup, TagComp_RestrictMirroringOfX, TagComp, CalculateNodeIDsForTagComp} from "dm_common";
@@ -23,7 +23,7 @@ export class TagDetailsUI extends DetailsUI_Base<MapNodeTag, TagDetailsUI> {
 		return (
 			<Column style={style}>
 				{!creating &&
-					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt} singleLine={true}/>}
+					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt} singleLine={true}/>}
 				<RowLR mt={5} mb={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Type: </Pre>
 					<Select options={TagComp_classes.map(a=>({name: a.displayName, value: a}))} enabled={enabled} style={ES({flex: 1})} value={compClass} onChange={(newCompClass: TagComp_Class)=>{

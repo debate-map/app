@@ -69,7 +69,7 @@ The detailed version of the argument will be embodied in its premises/child-clai
 }
 
 function WillNodeUseQuestionTitleHere(node: MapNodeL2, linkData: NodeChildLink) {
-	return node.type == MapNodeType.claim && !node.current.quote && linkData && linkData.form == ClaimForm.yesNoQuestion;
+	return node.type == MapNodeType.claim && !node.current.quote && linkData && linkData.form == ClaimForm.question;
 }
 
 class OtherTitles extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
@@ -85,8 +85,8 @@ class OtherTitles extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 				<Row key={1} mt={5} style={{display: "flex", alignItems: "center"}}>
 					<Pre>Title (question): </Pre>
 					{/* <TextInput enabled={enabled} style={ES({flex: 1})} required={willUseQuestionTitleHere}
-						value={newRevisionData.titles["yesNoQuestion"]} onChange={val=>Change(newRevisionData.titles["yesNoQuestion"] = val)}/> */}
-					<TitleInput {...this.props} titleKey="yesNoQuestion"/>
+						value={newRevisionData.titles["question"]} onChange={val=>Change(newRevisionData.titles["question"] = val)}/> */}
+					<TitleInput {...this.props} titleKey="question"/>
 				</Row>
 				{willUseQuestionTitleHere && forNew &&
 					<Row mt={5} style={{background: "rgba(255,255,255,.1)", padding: 5, borderRadius: 5}}>
@@ -103,7 +103,7 @@ class TitleInput extends BaseComponentPlus({} as {titleKey: string, innerRef?: a
 		let extraProps = {};
 		if (titleKey == "base") {
 			//const hasOtherTitles = newDataAsL2.type == MapNodeType.claim && newDataAsL2 == AttachmentType.none;
-			const hasOtherTitlesEntered = newRevisionData.titles.negation || newRevisionData.titles.yesNoQuestion;
+			const hasOtherTitlesEntered = newRevisionData.titles.negation || newRevisionData.titles.question;
 			const willUseYesNoTitleHere = WillNodeUseQuestionTitleHere(newDataAsL2, newLinkData);
 			extraProps = {
 				required: !hasOtherTitlesEntered && !willUseYesNoTitleHere,

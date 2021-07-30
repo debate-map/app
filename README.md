@@ -58,3 +58,5 @@ For more information, visit the website at: <https://debatemap.app>
 * [Client/server infrastructure](https://github.com/debate-map/app/tree/master/Docs/ClientServerInfrastructure.md)
 * [Authentication](https://github.com/debate-map/app/tree/master/Docs/Authentication.md)
 * [Access policies](https://github.com/debate-map/app/tree/master/Docs/AccessPolicies.md)
+* [User reputation](https://github.com/debate-map/app/tree/master/Docs/UserReputation.md)
+* [Node revisions](https://github.com/debate-map/app/tree/master/Docs/NodeRevisions.md)

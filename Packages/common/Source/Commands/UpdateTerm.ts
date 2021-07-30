@@ -1,23 +1,19 @@
 import {Assert, CE} from "web-vcore/nm/js-vextensions.js";
-import {AssertValidate, AddSchema, GetSchemaJSON, NewSchema, WrapDBValue, dbp, GetAsync, Command, AssertV, CommandMeta, DBHelper} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, AddSchema, GetSchemaJSON, NewSchema, WrapDBValue, dbp, GetAsync, Command, AssertV, CommandMeta, DBHelper, DeriveJSONSchema, SimpleSchema, ClassKeys} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {Term} from "../DB/terms/@Term.js";
 import {GetTerm} from "../DB/terms.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
-type MT = Term;
-const MTName = "Term";
+const MTClass = Term;
+type MT = typeof MTClass.prototype;
+const MTName = MTClass.name;
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({
-		properties: {
-			id: {$ref: "UUID"},
-			updates: NewSchema({
-				properties: CE(GetSchemaJSON(MTName).properties!).IncludeKeys("name", "forms", "disambiguation", "type", "definition", "note"),
-			}),
-		},
-		required: ["id", "updates"],
+	payloadSchema: ()=>SimpleSchema({
+		$id: {$ref: "UUID"},
+		$updates: DeriveJSONSchema(MTClass, {includeOnly: ["name", "forms", "disambiguation", "type", "definition", "note"], makeOptional_all: true}),
 	}),
 })
 export class UpdateTerm extends Command<{id: string, updates: Partial<MT>}, {}> {

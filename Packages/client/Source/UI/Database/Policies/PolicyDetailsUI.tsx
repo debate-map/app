@@ -1,6 +1,6 @@
 import {AccessPolicy, AddAccessPolicy, GetUser, PermissionSet} from "dm_common";
 import React from "react";
-import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
+import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base";
 import {userIDPlaceholder} from "UI/@Shared/Maps/MapUI/ActionBar_Left/PeopleDropDown";
 import {UserPicker} from "UI/@Shared/Users/UserPicker";
@@ -22,7 +22,7 @@ export class PolicyDetailsUI extends DetailsUI_Base<AccessPolicy, PolicyDetailsU
 		return (
 			<Column style={style}>
 				{!creating &&
-					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
+					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Text>Name:</Text>
 					<TextInput required enabled={enabled} style={{width: "100%"}}
@@ -80,9 +80,10 @@ class PermissionSetEditor extends BaseComponent<{enabled: boolean, value: Permis
 		return (
 			<Row>
 				<CheckBox enabled={enabled} text="access" value={value.access} onChange={val=>Change(a=>a.access = val)}/>
-				<CheckBox ml={10} enabled={enabled} text="add revisions" value={value.addRevisions} onChange={val=>Change(a=>a.addRevisions = val)}/>
-				<CheckBox ml={10} enabled={enabled} text="vote" value={value.vote} onChange={val=>Change(a=>a.vote = val)}/>
+				<CheckBox ml={10} enabled={enabled} text="modify" value={value.modify} onChange={val=>Change(a=>a.modify = val)}/>
 				<CheckBox ml={10} enabled={enabled} text="delete" value={value.delete} onChange={val=>Change(a=>a.delete = val)}/>
+				<CheckBox ml={10} enabled={enabled} text="vote" value={value.vote} onChange={val=>Change(a=>a.vote = val)}/>
+				<CheckBox ml={10} enabled={enabled} text="addPhrasing" value={value.addPhrasing} onChange={val=>Change(a=>a.addPhrasing = val)}/>
 			</Row>
 		);
 	}

@@ -1,5 +1,5 @@
 import {AddTerm, Term, TermType, Term_disambiguationFormat, Term_nameFormat} from "dm_common";
-import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
+import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {DetailsUI_Base} from "UI/@Shared/DetailsUI_Base.js";
 import {ES, InfoButton, observer_simple} from "web-vcore";
 import {DEL, E, GetEntries} from "web-vcore/nm/js-vextensions.js";
@@ -17,7 +17,7 @@ export class TermDetailsUI extends DetailsUI_Base<Term, TermDetailsUI> {
 		return (
 			<Column style={style}>
 				{!creating &&
-					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
+					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={splitAt} style={{width}}>
 					<Text>Name:</Text>
 					<TextInput pattern={Term_nameFormat} required

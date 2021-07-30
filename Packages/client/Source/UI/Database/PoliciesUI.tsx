@@ -1,7 +1,7 @@
 import {AccessPolicy, CanGetBasicPermissions, DeleteAccessPolicy, GetAccessPolicies, IsUserCreatorOrMod, MeID, UpdateAccessPolicy} from "dm_common";
 import React from "react";
 import {store} from "Store";
-import {GetSelectedPolicy} from "Store/main/database";
+import {GetSelectedPolicy, GetSelectedPolicyID} from "Store/main/database";
 import {ES, GetUpdates, Observer, RunInAction_Set} from "web-vcore";
 import {AddSpacesAt_Options, Assert, E, ToJSON_Advanced} from "web-vcore/nm/js-vextensions.js";
 import {JSONStringify_NoQuotesForKeys} from "web-vcore/nm/mobx-graphlink";
@@ -50,7 +50,7 @@ export class PoliciesUI extends BaseComponentPlus({} as {}, {} as {selectedPolic
 						if (e.target != e.currentTarget) return;
 						RunInAction_Set(this, ()=>store.main.database.selectedPolicyID = null);
 					}}>
-						{policies.map((policy, index)=><PolicyUI key={index} first={index == 0} policy={policy} selected={selectedPolicy == policy}/>)}
+						{policies.map((policy, index)=><PolicyUI key={index} first={index == 0} policy={policy} selected={GetSelectedPolicyID() == policy.id}/>)}
 					</ScrollView>
 				</Column>
 				<ScrollView style={{
@@ -105,7 +105,7 @@ export class PolicyUI extends BaseComponentPlus({} as {policy: AccessPolicy, fir
 			<Row mt={first ? 0 : 5} className="cursorSet"
 				style={E(
 					{padding: 5, background: "rgba(100,100,100,.5)", borderRadius: 5, cursor: "pointer"},
-					selected && {background: "rgba(100,100,100,.7)"},
+					selected && {background: "rgba(150,150,150,.5)"},
 				)}
 				onClick={e=>{
 					RunInAction_Set(this, ()=>store.main.database.selectedPolicyID = policy.id);

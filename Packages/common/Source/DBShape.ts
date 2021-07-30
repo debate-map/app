@@ -15,6 +15,7 @@ import {Term} from "./DB/terms/@Term.js";
 import {User} from "./DB/users/@User.js";
 import {UserHidden} from "./DB/userHiddens/@UserHidden.js";
 import {VisibilityDirective} from "./DB/visibilityDirectives/@VisibilityDirective.js";
+import {MapNodePhrasing} from "./DB/nodePhrasings/@MapNodePhrasing.js";
 
 declare module "mobx-graphlink/Dist/UserTypes" {
 	interface UT_DBShape extends GraphDBShape {}
@@ -46,7 +47,7 @@ export class GraphDBShape {
 	nodeRatings = DefineCollection(NodeRating);
 	nodeRevisions = DefineCollection(MapNodeRevision);
 	//nodeStats = DefineCollection(MapNodeStats);
-	//nodePhrasings = DefineCollection(MapNodePhrasing);
+	nodePhrasings = DefineCollection(MapNodePhrasing);
 	nodeChildLinks = DefineCollection(NodeChildLink);
 	nodeTags = DefineCollection(MapNodeTag);
 	shares = DefineCollection(Share);

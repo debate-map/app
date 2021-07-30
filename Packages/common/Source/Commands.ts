@@ -29,7 +29,6 @@ export * from "./Commands/DeleteTerm.js";
 export * from "./Commands/ImportSubtree_Old.js";
 export * from "./Commands/LinkNode.js";
 export * from "./Commands/LinkNode_HighLevel.js";
-//export * from "../@Shared/Commands/NotifyNodeViewed.js";
 export * from "./Commands/ReverseArgumentPolarity.js";
 export * from "./Commands/SetMapFeatured.js";
 export * from "./Commands/SetNodeIsMultiPremiseArgument.js";

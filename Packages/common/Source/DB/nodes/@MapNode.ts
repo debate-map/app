@@ -16,7 +16,7 @@ AddSchema("AccessLevel", {enum: GetValues(AccessLevel)});
 export enum ClaimForm {
 	base = "base",
 	negation = "negation",
-	yesNoQuestion = "yesNoQuestion",
+	question = "question",
 }
 //export type ClaimForm = typeof ClaimForm_values[number];
 AddSchema("ClaimForm", {enum: GetValues(ClaimForm)});

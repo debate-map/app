@@ -16,7 +16,7 @@ export class MI_PasteAsLink extends BaseComponent<MI_SharedProps, {}> {
 		if (copiedNode == null) return null;
 		if (inList) return null;
 		const copiedNode_parent = GetParentNodeL3(copiedNodePath);
-		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base;
+		const formForClaimChildren = node.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base;
 		let newPolarity =
 			(copiedNode.type == MapNodeType.argument ? copiedNode.link?.polarity : null) // if node itself has polarity, use it
 			|| (copiedNode_parent?.type == MapNodeType.argument ? copiedNode_parent.link?.polarity : null); // else if our parent has a polarity, use that

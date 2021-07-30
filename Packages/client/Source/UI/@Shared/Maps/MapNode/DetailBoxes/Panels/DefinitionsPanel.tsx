@@ -65,7 +65,7 @@ export class DefinitionsPanel extends BaseComponentPlus(
 				{!term && terms.length > 0 &&
 					<div style={{fontSize: 12, whiteSpace: "initial"}}>Select a highlighted term above to see the definition for it here.</div>}
 				{!term && terms.length == 0 &&
-					<div style={{fontSize: 12, whiteSpace: "initial"}}>This node does not currently have any term definitions attached.</div>}
+					<div style={{fontSize: 12, whiteSpace: "initial"}}>The current phrasing being shown does not currently have any term definitions attached.</div>}
 			</Column>
 		);
 	}

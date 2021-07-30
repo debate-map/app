@@ -107,13 +107,13 @@ import {Clone, GetTreeNodesInObjTree} from "web-vcore/nm/js-vextensions.js";
 
 const helperProps = ["_key", "_id"];
 /** Note: this mutates the original object. */
-export function RemoveHelpers(data) {
+function RemoveHelpers(data) {
 	var treeNodes = GetTreeNodesInObjTree(data, true);
 	for (const treeNode of treeNodes) {
 		if (helperProps.includes(treeNode.prop)) { delete treeNode.obj[treeNode.prop]; }
 	}
 	return data;
 }
-export function WithoutHelpers(data) {
+function WithoutHelpers(data) {
 	return RemoveHelpers(Clone(data));
 }

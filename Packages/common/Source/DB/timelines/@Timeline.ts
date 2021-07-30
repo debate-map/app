@@ -6,7 +6,7 @@ export class Timeline {
 		CE(this).VSet(initialData);
 	}
 
-	_key: string;
+	id: string;
 	creator: string; // probably todo: rename to creatorID
 	createdAt: number;
 
@@ -21,9 +21,10 @@ export class Timeline {
 }
 AddSchema("Timeline", {
 	properties: {
+		id: {type: "string"},
 		creator: {type: "string"},
 		createdAt: {type: "number"},
-		
+
 		mapID: {type: "string"},
 		name: {type: "string"},
 

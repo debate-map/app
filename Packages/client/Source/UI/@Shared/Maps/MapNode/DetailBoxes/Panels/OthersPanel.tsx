@@ -1,6 +1,6 @@
 import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAttachmentType, GetNodeChildLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MeID, ReverseArgumentPolarity, UpdateLink} from "dm_common";
 import {Fragment} from "react";
-import {IDAndCreationInfoUI} from "UI/@Shared/CommonPropUIs/IDAndCreationInfoUI.js";
+import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
 import {Observer} from "web-vcore";
 import {E, GetEntries} from "web-vcore/nm/js-vextensions.js";
@@ -59,7 +59,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 			|| (node.type === MapNodeType.argument && node.multiPremiseArgument); // or it's a multi-premise argument (these start as manual)*/
 		return (
 			<Column sel style={{position: "relative", display: show ? null : "none"}}>
-				<IDAndCreationInfoUI id={node.id} creatorID={node.creator} createdAt={node.createdAt}/>
+				<GenericEntryInfoUI id={node.id} creatorID={node.creator} createdAt={node.createdAt} accessPolicyID={node.accessPolicy}/>
 				<Row style={{flexWrap: "wrap"}}>
 					<Text>Parents: </Text>
 					{parentLinks.length == 0 ? "none" : parentLinks.map((link, index)=>{
@@ -142,7 +142,7 @@ class AtThisLocation extends BaseComponent<{node: MapNodeL3, path: string}, {}> 
 		let canSetAsSeriesAnchor = false;
 		if (node.type == MapNodeType.claim && node.link) {
 			const claimType = GetAttachmentType(node);
-			canSetAsNegation = claimType === AttachmentType.none && node.link.form !== ClaimForm.yesNoQuestion;
+			canSetAsNegation = claimType === AttachmentType.none && node.link.form !== ClaimForm.question;
 			canSetAsSeriesAnchor = claimType === AttachmentType.equation && !node.current.equation!.isStep; // && !creating;
 		}
 

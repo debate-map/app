@@ -1,6 +1,6 @@
 import {CanGetBasicPermissions, DeleteTerm, GetFullNameP, GetTerms, GetUserPermissionGroups, IsUserCreatorOrMod, MeID, Term, TermType, UpdateTerm} from "dm_common";
 import {store} from "Store";
-import {GetSelectedTerm} from "Store/main/database";
+import {GetSelectedTerm, GetSelectedTermID} from "Store/main/database";
 import {ES, GetUpdates, Observer, RunInAction} from "web-vcore";
 import {Assert, E} from "web-vcore/nm/js-vextensions.js";
 import {runInAction} from "web-vcore/nm/mobx.js";
@@ -50,7 +50,7 @@ export class TermsUI extends BaseComponentPlus({} as {}, {} as {selectedTerm_new
 						if (e.target != e.currentTarget) return;
 						RunInAction("TermsUI.ScrollView.onClick", ()=>store.main.database.selectedTermID = null);
 					}}>
-						{terms.map((term, index)=><TermUI key={index} first={index == 0} term={term} selected={selectedTerm == term}/>)}
+						{terms.map((term, index)=><TermUI key={index} first={index == 0} term={term} selected={GetSelectedTermID() == term.id}/>)}
 					</ScrollView>
 				</Column>
 				<ScrollView style={{
@@ -105,7 +105,7 @@ export class TermUI extends BaseComponentPlus({} as {term: Term, first: boolean,
 			<Row mt={first ? 0 : 5} className="cursorSet"
 				style={E(
 					{padding: 5, background: "rgba(100,100,100,.5)", borderRadius: 5, cursor: "pointer"},
-					selected && {background: "rgba(100,100,100,.7)"},
+					selected && {background: "rgba(150,150,150,.5)"},
 				)}
 				onClick={e=>{
 					RunInAction("TermUI.onClick", ()=>store.main.database.selectedTermID = term.id);

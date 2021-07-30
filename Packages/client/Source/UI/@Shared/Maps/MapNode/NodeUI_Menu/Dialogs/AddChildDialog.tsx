@@ -31,7 +31,7 @@ export class AddChildHelper {
 		this.node_revision = new MapNodeRevision(this.map.nodeDefaults);
 		this.node_link = E(
 			{slot: 0}, // todo
-			childType == MapNodeType.claim && {form: parentNode.type == MapNodeType.category ? ClaimForm.yesNoQuestion : ClaimForm.base},
+			childType == MapNodeType.claim && {form: parentNode.type == MapNodeType.category ? ClaimForm.question : ClaimForm.base},
 			childType == MapNodeType.argument && {polarity: childPolarity},
 		) as NodeChildLink;
 

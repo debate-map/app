@@ -1,5 +1,6 @@
-import {Assert, IsString} from "web-vcore/nm/js-vextensions.js";
+import {Assert, Clone, IsString} from "web-vcore/nm/js-vextensions.js";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
+import {GetAccessPolicy} from "../../DB/accessPolicies.js";
 import {AccessLevel} from "../nodes/@MapNode.js";
 import {GetUser} from "../users.js";
 import {PermissionGroupSet} from "./@User.js";
@@ -10,22 +11,20 @@ import {PermissionGroupSet} from "./@User.js";
 /*export const GetUserJoinDate = CreateAccessor((userID: string): number=>{
 	return GetUser(userID)?.joinDate;
 });*/
-const defaultPermissions = {basic: true, verified: true, mod: false, admin: false} as PermissionGroupSet; // temp
-export const GetUserPermissionGroups = CreateAccessor((userID: string|n): PermissionGroupSet=>{
+const emptyUserPerms = {basic: false, verified: false, mod: false, admin: false} as PermissionGroupSet; // temp
+const standardUserPerms = {basic: true, verified: true, mod: false, admin: false} as PermissionGroupSet; // temp
+export const GetUserPermissionGroups = CreateAccessor((userID: string|n, upgradeAnonToStandardUserPerms = false): PermissionGroupSet=>{
 	//if (userID == null) return null;
-	if (userID == null) return defaultPermissions;
-	return GetUser(userID)?.permissionGroups ?? defaultPermissions;
+	/*if (userID == null) return standardUserPerms;
+	return GetUser(userID)?.permissionGroups ?? standardUserPerms;*/
+	const user = GetUser(userID);
+	let result = user?.permissionGroups;
+	// if null, user is not logged in; handle based on passed flag
+	if (result == null) {
+		result = upgradeAnonToStandardUserPerms ? Clone(standardUserPerms) as PermissionGroupSet : emptyUserPerms;
+	}
+	return result;
 });
-export function GetUserAccessLevel(userID: string) {
-	const groups = GetUserPermissionGroups(userID);
-	if (groups == null) return AccessLevel.basic;
-
-	if (groups.admin) return AccessLevel.admin;
-	if (groups.mod) return AccessLevel.mod;
-	if (groups.verified) return AccessLevel.verified;
-	// if (groups.basic) return AccessLevel.basic;
-	Assert(false);
-}
 
 export const CanGetBasicPermissions = CreateAccessor((userIDOrPermissions: string | PermissionGroupSet | n)=>{
 	// if (true) return HasModPermissions(userIDOrPermissions); // temp; will be removed once GAD is over
@@ -110,3 +109,16 @@ export const IsUserCreatorOrMod = CreateAccessor((userID: string|n, entity: {cre
 	}
 	Assert(false, "Invalid permission-info-type.");
 });*/
+
+// new set (aware of access-policies)
+// ==========
+
+export const CanAddPhrasing = CreateAccessor((userID: string|n, accessPolicyID: string, upgradeAnonToStandardUserPerms = true)=>{
+	const groups = GetUserPermissionGroups(userID, upgradeAnonToStandardUserPerms);
+	if (groups.mod) return true; // mods can always add phrasings
+
+	const accessPolicy = GetAccessPolicy.NN(accessPolicyID);
+	const userPermOverride = accessPolicy.permissions_userExtends[userID as any];
+	if (userPermOverride) return userPermOverride.addPhrasing; // if user-specific perm-override is set, use that
+	return accessPolicy.permissions_base.addPhrasing; // else use the default for everyone
+});

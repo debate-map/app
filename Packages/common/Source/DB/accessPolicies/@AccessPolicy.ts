@@ -7,17 +7,23 @@ export class PermissionSet {
 	access: boolean;
 
 	@Field({type: "boolean"}, {opt: true})
-	addRevisions: boolean;
+	modify: boolean;
 
-	// commented; users can always add "children" (however, governed maps can set a lens entry that hides unapproved children by default)
-	/*@Field({type: "boolean"}, {opt: true})
-	addChildren: boolean;*/
+	@Field({type: "boolean"}, {opt: true})
+	delete: boolean;
+
+	// for nodes only
+	// ==========
 
 	@Field({type: "boolean"}, {opt: true})
 	vote: boolean;
 
 	@Field({type: "boolean"}, {opt: true})
-	delete: boolean;
+	addPhrasing: boolean;
+
+	// commented; users can always add "children" (however, governed maps can set a lens entry that hides unapproved children by default)
+	/*@Field({type: "boolean"}, {opt: true})
+	addChild: boolean;*/
 }
 
 /*@MGLClass()
@@ -58,7 +64,7 @@ export class AccessPolicy {
 
 	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: PermissionSet.name})
-	permissions_base: PermissionSet = {access: false, addRevisions: false, vote: false, delete: false};
+	permissions_base: PermissionSet = {access: false, modify: false, delete: false, vote: false, addPhrasing: false};
 
 	@DB((t, n)=>t.jsonb(n))
 	@Field({

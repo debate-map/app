@@ -18,7 +18,7 @@ import {AddNode} from "./AddNode.js";
 		$node: {$ref: "MapNode_Partial"},
 		$revision: {$ref: "MapNodeRevision_Partial"},
 		//link: {$ref: NodeChildLink.name},
-		link: DeriveJSONSchema(NodeChildLink.name, {makeOptional: ["parent", "child"]}),
+		link: DeriveJSONSchema(NodeChildLink, {makeOptional: ["parent", "child"]}),
 		asMapRoot: {type: "boolean"},
 	}),
 	returnSchema: ()=>SimpleSchema({

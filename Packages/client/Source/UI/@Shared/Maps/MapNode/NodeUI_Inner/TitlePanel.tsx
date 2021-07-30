@@ -216,7 +216,7 @@ export class TitlePanel extends BaseComponentPlus(
 		//const parentNode = GetParentNode(path);
 
 		const form = GetNodeForm(node, path);
-		const titleKey = {[ClaimForm.negation]: "negation", [ClaimForm.yesNoQuestion]: "yesNoQuestion"}[form] || "base";
+		const titleKey = {[ClaimForm.negation]: "negation", [ClaimForm.question]: "question"}[form] || "base";
 		const newRevision = (Clone(node.current) as MapNodeRevision).ExcludeKeys("titles_tsvector").OmitUndefined(true);
 		if (newRevision.titles[titleKey] != newTitle) {
 			newRevision.titles[titleKey] = newTitle;

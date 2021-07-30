@@ -1,23 +1,19 @@
 import {CE} from "web-vcore/nm/js-vextensions.js";
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp, GetSchemaJSON, NewSchema} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, DeriveJSONSchema, GetSchemaJSON, NewSchema, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {UserEdit} from "../CommandMacros.js";
 import {GetAccessPolicy} from "../DB/accessPolicies.js";
 import {AccessPolicy} from "../DB/accessPolicies/@AccessPolicy.js";
 import {AssertUserCanModify} from "./Helpers/SharedAsserts.js";
 
-type MT = AccessPolicy;
-const MTName = "AccessPolicy";
+const MTClass = AccessPolicy;
+type MT = typeof MTClass.prototype;
+const MTName = MTClass.name;
 
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({
-		properties: {
-			id: {$ref: "UUID"},
-			updates: NewSchema({
-				properties: CE(GetSchemaJSON(MTName).properties!).IncludeKeys("name", "base", "permissions_base", "permissions_userExtends"),
-			}),
-		},
-		required: ["id", "updates"],
+	payloadSchema: ()=>SimpleSchema({
+		$id: {$ref: "UUID"},
+		$updates: DeriveJSONSchema(MTClass, {includeOnly: ["name", "base", "permissions_base", "permissions_userExtends"], makeOptional_all: true}),
 	}),
 })
 export class UpdateAccessPolicy extends Command<{id: string, updates: Partial<MT>}, {}> {

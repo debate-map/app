@@ -5,7 +5,7 @@ import {GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {CheckBox, Column, Pre, Row, RowLR, Spinner, TextInput} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowMessageBox} from "web-vcore/nm/react-vmessagebox";
-import {IDAndCreationInfoUI} from "../CommonPropUIs/IDAndCreationInfoUI.js";
+import {GenericEntryInfoUI} from "../CommonPropUIs/GenericEntryInfoUI.js";
 import {DetailsUI_Base} from "../DetailsUI_Base.js";
 import {PermissionsPanel} from "./MapNode/NodeDetailsUI/PermissionsPanel.js";
 
@@ -22,7 +22,7 @@ export class MapDetailsUI extends DetailsUI_Base<Map, MapDetailsUI> {
 		return (
 			<Column style={style}>
 				{!creating &&
-					<IDAndCreationInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
+					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
 				<RowLR mt={5} splitAt={100} style={{width}}>
 					<Pre>Name:</Pre>
 					<TextInput

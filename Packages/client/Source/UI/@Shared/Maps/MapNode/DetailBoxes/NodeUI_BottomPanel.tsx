@@ -21,6 +21,7 @@ import {TagsPanel} from "./Panels/TagsPanel.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 import {GetMapUICSSFilter} from "../../MapUI.js";
 import {NodeUI_LeftBox_width} from "./NodeUI_LeftBox.js";
+import {PhrasingsPanel} from "./Panels/PhrasingsPanel.js";
 
 @Observer
 export class NodeUI_BottomPanel extends BaseComponentPlus(
@@ -129,7 +130,7 @@ export class NodeUI_BottomPanel extends BaseComponentPlus(
 						openTermID={nodeView?.openTermID}
 						onHoverTerm={termID=>onTermHover(termID)}
 						onClickTerm={termID=>RunInAction("NodeUI_Inner_onClickTerm", ()=>nodeView.openTermID = termID)}/>)}
-				{/*renderPanel("phrasings", show=><PhrasingsPanel {...{show, node, path}}/>)*/}
+				{renderPanel("phrasings", show=><PhrasingsPanel {...{show, map, node, path}}/>)}
 				{renderPanel("discussion", show=><DiscussionPanel {...{show}}/>)}
 				{renderPanel("social", show=><SocialPanel {...{show}}/>)}
 				{renderPanel("tags", show=><TagsPanel {...{show, map, node, path}}/>)}
