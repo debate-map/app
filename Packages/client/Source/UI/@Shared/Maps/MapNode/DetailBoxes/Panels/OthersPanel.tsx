@@ -97,6 +97,7 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 				{/* <Row>Viewers: {viewers.length || '...'} <InfoButton text="The number of registered users who have had this node displayed in-map at some point."/></Row> */}
 
 				{nodeArgOrParentSPArg_info && <>
+					<Row mt={10} style={{fontWeight: "bold"}}>Argument:</Row>
 					<Row mt={5}>
 						<Pre>Type: If </Pre>
 						<Select options={GetEntries(ArgumentType, name=>ModifyString(name, m=>[m.lowerUpper_to_lowerSpaceLower]))}
