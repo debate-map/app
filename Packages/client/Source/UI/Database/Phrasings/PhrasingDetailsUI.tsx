@@ -49,7 +49,7 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 			<Column style={style}>
 				{!forNew && baseData.id != null &&
 					<GenericEntryInfoUI id={baseData.id} creatorID={newData.creator} createdAt={newData.createdAt}/>}
-				{forNew && node.link != null &&
+				{forNew && node.link?.id != null &&
 				<RowLR mt={5} splitAt={splitAt} style={{width: "100%"}}>
 					<Pre>Type: </Pre>
 					<Select options={GetEntries(MapNodePhrasingType)} enabled={false} style={ES({flex: 1})}

@@ -1,9 +1,9 @@
-import {ToNumber} from "web-vcore/nm/js-vextensions.js";
-import {Pre, Row, Spinner} from "web-vcore/nm/react-vcomponents.js";
+import {ArgumentType, HasAdminPermissions, MapNodeType, MeID, NodeRevisionDisplayDetails} from "dm_common";
+import React from "react";
+import {GetEntries, ModifyString, ToNumber} from "web-vcore/nm/js-vextensions.js";
+import {Pre, Row, Select, Spinner} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent} from "web-vcore/nm/react-vextensions.js";
 import {NodeDetailsUI_SharedProps} from "../NodeDetailsUI.js";
-import {HasAdminPermissions, NodeRevisionDisplayDetails} from "dm_common";
-import {MeID} from "dm_common";
 
 export class OthersPanel extends BaseComponent<NodeDetailsUI_SharedProps, {}> {
 	render() {

@@ -133,7 +133,3 @@ export enum ArgumentType {
 	all = "all",
 }
 AddSchema("ArgumentType", {enum: GetValues(ArgumentType)});
-
-export function GetArgumentTypeDisplayText(type: ArgumentType) {
-	return {Any: "any", AnyTwo: "any two", All: "all"}[ArgumentType[type]];
-}

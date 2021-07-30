@@ -31,6 +31,7 @@ export * from "./Commands/LinkNode.js";
 export * from "./Commands/LinkNode_HighLevel.js";
 export * from "./Commands/ReverseArgumentPolarity.js";
 export * from "./Commands/SetMapFeatured.js";
+export * from "./Commands/SetNodeArgumentType.js";
 export * from "./Commands/SetNodeIsMultiPremiseArgument.js";
 export * from "./Commands/SetNodeRating.js";
 export * from "./Commands/SetUserData.js";

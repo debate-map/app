@@ -10,7 +10,7 @@ import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, 
 import {ES, InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, RunInAction, VReactMarkdown_Remarkable} from "web-vcore";
 import React from "react";
 import {GetCurrentRevision} from "Store/db_ext/nodes";
-import {BailInfo} from "web-vcore/nm/mobx-graphlink";
+import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {NodeMathUI} from "../NodeMathUI.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
 import {TermPlaceholder} from "./TermPlaceholder.js";
@@ -59,15 +59,16 @@ export function GetSegmentsForTerms(text: string, termsToSearchFor: Term[]) {
 @Observer
 export class TitlePanel extends BaseComponentPlus(
 	{} as {parent: NodeUI_Inner, map: Map|n, node: MapNodeL2, path: string, indexInNodeList: number, style},
-	{newTitle: null as string|n, editing: false, applyingEdit: false},
+	{editing: false, edit_newTitle: null as string|n, applyingEdit: false},
 ) {
-	OnDoubleClick = ()=>{
-		const {node} = this.props;
+	OnDoubleClick = async()=>{
+		const {node, path} = this.props;
 		/* const creatorOrMod = IsUserCreatorOrMod(MeID(), node);
 		if (creatorOrMod && node.current.equation == null) { */
 		//if (CanEditNode(MeID(), node.id) && node.current.equation == null) {
+		const displayText = await GetAsync(()=>GetNodeDisplayText(node, path));
 		if (IsUserCreatorOrMod(MeID(), node) && node.current.equation == null) {
-			this.SetState({editing: true});
+			this.SetState({editing: true, edit_newTitle: displayText});
 		}
 	};
 
@@ -91,7 +92,7 @@ export class TitlePanel extends BaseComponentPlus(
 	render() {
 		// const { map, parent, node, nodeView, path, displayText, equationNumber, style, ...rest } = this.props;
 		const {map, parent, node, path, style, ...rest} = this.props;
-		const {newTitle, editing, applyingEdit} = this.state;
+		const {editing, edit_newTitle, applyingEdit} = this.state;
 		// UseImperativeHandle(ref, () => ({ OnDoubleClick }));
 
 		const nodeView = GetNodeView(map?.id, path);
@@ -99,11 +100,6 @@ export class TitlePanel extends BaseComponentPlus(
 		//const isSubnode = IsNodeSubnode(node);
 
 		const displayText = GetNodeDisplayText(node, path);
-		//newTitle = newTitle != null ? newTitle : displayText;
-		if (newTitle == null) {
-			WaitXThenRun(0, ()=>this.SetState({newTitle: displayText}));
-			return null;
-		}
 
 		const equationNumber = node.current.equation ? GetEquationStepNumber(path) : null;
 		const noteText = (node.current.equation && node.current.equation.explanation) || node.current.note;
@@ -155,7 +151,7 @@ export class TitlePanel extends BaseComponentPlus(
 				style={E(
 					{
 						position: "relative", cursor: "pointer", fontSize: GetFontSizeForNode(node/*, isSubnode*/),
-						marginTop: !latex && GetSegmentsForTerms(newTitle, termsToSearchFor).length > 1 ? -2 : 0, // if has terms in text, bump up a bit (to offset bump-down from <sup> elements)
+						marginTop: !latex && GetSegmentsForTerms(displayText, termsToSearchFor).length > 1 ? -2 : 0, // if has terms in text, bump up a bit (to offset bump-down from <sup> elements)
 					},
 					style,
 				)}
@@ -167,10 +163,10 @@ export class TitlePanel extends BaseComponentPlus(
 					<span style={ES(
 						{position: "relative", whiteSpace: "initial"},
 						//isSubnode && {margin: "4px 0 1px 0"},
-						missingTitleStrings.Contains(newTitle) && {color: "rgba(255,255,255,.3)"},
+						missingTitleStrings.Contains(displayText) && {color: "rgba(255,255,255,.3)"},
 					)}>
 						{latex && <NodeMathUI text={node.current.equation!.text} onTermHover={this.OnTermHover} onTermClick={this.OnTermClick} termsToSearchFor={termsToSearchFor}/>}
-						{!latex && RenderNodeDisplayText(newTitle)}
+						{!latex && RenderNodeDisplayText(displayText)}
 					</span>}
 				{editing &&
 					<Row style={E(
@@ -183,14 +179,14 @@ export class TitlePanel extends BaseComponentPlus(
 								ref={a=>a && a.DOM_HTML.focus()}
 								onKeyDown={e=>{
 									if (e.keyCode == keycode.codes.esc) {
-										this.SetState({editing: false});
+										this.SetState({editing: false, edit_newTitle: null});
 									} else if (e.keyCode == keycode.codes.enter) {
 										this.ApplyEdit();
 									}
 								}}
-								value={newTitle} onChange={val=>this.SetState({newTitle: val})}/>}
+								value={edit_newTitle!} onChange={val=>this.SetState({edit_newTitle: val})}/>}
 						{!applyingEdit &&
-							<Button enabled={newTitle.match(MapNodeRevision_titlePattern) != null} text="✔️" p="0 3px" style={{borderRadius: "0 5px 5px 0"}}
+							<Button enabled={edit_newTitle!.match(MapNodeRevision_titlePattern) != null} text="✔️" p="0 3px" style={{borderRadius: "0 5px 5px 0"}}
 								onClick={()=>this.ApplyEdit()}/>}
 						{applyingEdit && <Row>Applying edit...</Row>}
 					</Row>}
@@ -211,8 +207,8 @@ export class TitlePanel extends BaseComponentPlus(
 	}
 
 	async ApplyEdit() {
-		const {map, node, path, newTitle} = this.PropsStateStash;
-		Assert(newTitle != null);
+		const {map, node, path, edit_newTitle} = this.PropsStateStash;
+		if (edit_newTitle == null) return; // wait till loaded, within render() [yes, this could benefit from a cleanup]
 
 		this.SetState({applyingEdit: true});
 
@@ -221,8 +217,8 @@ export class TitlePanel extends BaseComponentPlus(
 		const form = GetNodeForm(node, path);
 		const titleKey: TitleKey = {[ClaimForm.negation]: "text_negation", [ClaimForm.question]: "text_question"}[form] || "text_base";
 		const newRevision = (Clone(node.current) as MapNodeRevision).ExcludeKeys("phrasing_tsvector").OmitUndefined(true);
-		if (newRevision.phrasing[titleKey] != newTitle) {
-			newRevision.phrasing[titleKey] = newTitle;
+		if (newRevision.phrasing[titleKey] != edit_newTitle) {
+			newRevision.phrasing[titleKey] = edit_newTitle;
 
 			const command = new AddNodeRevision({mapID: map?.id, revision: newRevision});
 			const revisionID = await command.RunOnServer();
@@ -232,7 +228,7 @@ export class TitlePanel extends BaseComponentPlus(
 			//await command.WaitTillDBUpdatesReceived();
 		}
 		if (this.mounted) {
-			this.SetState({applyingEdit: false, editing: false});
+			this.SetState({editing: false, edit_newTitle: null, applyingEdit: false});
 		}
 	}
 }

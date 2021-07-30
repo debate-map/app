@@ -45,6 +45,8 @@ export class AddChildNode extends Command<{mapID: string|n, parentID: string, no
 		}
 
 		link.id = this.GenerateUUID_Once("link.id");
+		link.creator = this.userInfo.id;
+		link.createdAt = Date.now();
 		link.parent = parentID;
 		link.child = this.sub_addNode.payload.node.id;
 		link.c_parentType = this.parent_oldData.type;

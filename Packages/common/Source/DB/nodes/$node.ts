@@ -214,8 +214,8 @@ export const GetNodeForm = CreateAccessor((node: MapNodeL2 | MapNodeL3, pathOrPa
 export const GetLinkUnderParent = CreateAccessor((nodeID: string, parent: MapNode|n, includeMirrorLinks = true, tagsToIgnore?: string[])=>{
 	if (parent == null) return null;
 	//let link = parent.children?.[nodeID]; // null-check, since after child-delete, parent-data might have updated before child-data removed
-	const parentChildLinks = GetNodeChildLinks(parent.id);
-	let link = parentChildLinks.find(a=>a.child == nodeID);
+	const parentChildLinks = GetNodeChildLinks(parent.id, nodeID);
+	let link = parentChildLinks[0];
 	if (includeMirrorLinks && link == null) {
 		const tags = GetNodeTags(parent.id).filter(tag=>tag && !tagsToIgnore?.includes(tag.id));
 		for (const tag of tags) {

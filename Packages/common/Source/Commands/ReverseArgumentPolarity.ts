@@ -19,7 +19,7 @@ import {NodeChildLink} from "../DB/nodeChildLinks/@NodeChildLink.js";
 		required: ["nodeID"],
 	}),
 })
-export class ReverseArgumentPolarity extends Command<{mapID?: string, nodeID: string, path: string}, {}> {
+export class ReverseArgumentPolarity extends Command<{mapID?: string|n, nodeID: string, path: string}, {}> {
 	parentID: string;
 	oldNodeData: MapNodeL3;
 	newLinkData: NodeChildLink;
@@ -39,7 +39,6 @@ export class ReverseArgumentPolarity extends Command<{mapID?: string, nodeID: st
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {nodeID} = this.payload;
-		db.set(dbp`nodes/${this.parentID}/.children/.${nodeID}`, this.newLinkData);
+		db.set(dbp`nodeChildLinks/${this.newLinkData.id}`, this.newLinkData);
 	}
 }

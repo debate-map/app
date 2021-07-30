@@ -13,6 +13,14 @@ export class NodeChildLink {
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
+	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
+	@Field({$ref: "UUID"}, {opt: true})
+	creator: string;
+
+	@DB((t, n)=>t.bigInteger(n))
+	@Field({type: "number"}, {opt: true})
+	createdAt: number;
+
 	// access-policy is based on both the parent node and child node
 	// * Link is accessible if either the parent or child is accessible
 

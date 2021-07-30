@@ -1,9 +1,9 @@
-import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAttachmentType, GetNodeChildLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MeID, ReverseArgumentPolarity, UpdateLink} from "dm_common";
+import {ArgumentType, AttachmentType, CanConvertFromClaimTypeXToY, ChangeClaimType, ClaimForm, GetAttachmentType, GetNodeChildLinks, GetNodeDisplayText, GetNodeMirrorChildren, GetParentNodeL3, GetUserPermissionGroups, IsSinglePremiseArgument, IsUserCreatorOrMod, Map, MapNodeL3, MapNodeType, MeID, ReverseArgumentPolarity, SetNodeArgumentType, UpdateLink} from "dm_common";
 import {Fragment} from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI.js";
 import {UUIDPathStub, UUIDStub} from "UI/@Shared/UUIDStub.js";
 import {Observer} from "web-vcore";
-import {E, GetEntries} from "web-vcore/nm/js-vextensions.js";
+import {E, GetEntries, ModifyString} from "web-vcore/nm/js-vextensions.js";
 import {SlicePath} from "web-vcore/nm/mobx-graphlink.js";
 import {Button, CheckBox, Column, Pre, Row, Select, Text} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponent, BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
@@ -23,12 +23,12 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 		const creatorOrMod = IsUserCreatorOrMod(userID, node);
 
 		const parent = GetParentNodeL3(path);
-		const parentPath = SlicePath(path, 1);
+		const parentPath = SlicePath(path, 1) as string;
 		const parentCreatorOrMod = IsUserCreatorOrMod(userID, parent);
 
-		const nodeArgOrParentSPArg_controlled = (node.type == MapNodeType.argument && creatorOrMod ? node : null)
-			|| (parent && parent.type === MapNodeType.argument && parentCreatorOrMod ? parent : null);
-		const nodeArgOrParentSPArg_controlled_path = nodeArgOrParentSPArg_controlled && (nodeArgOrParentSPArg_controlled === node ? path : parentPath);
+		let nodeArgOrParentSPArg_info: {node: MapNodeL3, path: string, creatorOrMod: boolean}|n;
+		if (node.type == MapNodeType.argument) nodeArgOrParentSPArg_info = {node, path, creatorOrMod};
+		else if (parent?.type === MapNodeType.argument) nodeArgOrParentSPArg_info = {node: parent, path: parentPath, creatorOrMod: parentCreatorOrMod};
 
 		const convertToTypes = GetEntries(AttachmentType).filter(pair=>CanConvertFromClaimTypeXToY(GetAttachmentType(node), pair.value as any));
 		convertToType = convertToType ?? convertToTypes.map(a=>a.value as any as AttachmentType).FirstOrX();
@@ -95,25 +95,35 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 					<InfoButton ml={5} text="Private nodes are locked to a given map, but allow more permission controls to the node-creator and map-editors."/>
 				</Row>*/}
 				{/* <Row>Viewers: {viewers.length || '...'} <InfoButton text="The number of registered users who have had this node displayed in-map at some point."/></Row> */}
-				{nodeArgOrParentSPArg_controlled &&
+
+				{nodeArgOrParentSPArg_info && <>
+					<Row mt={5}>
+						<Pre>Type: If </Pre>
+						<Select options={GetEntries(ArgumentType, name=>ModifyString(name, m=>[m.lowerUpper_to_lowerSpaceLower]))}
+							enabled={nodeArgOrParentSPArg_info.creatorOrMod} value={nodeArgOrParentSPArg_info.node.argumentType} onChange={val=>{
+								new SetNodeArgumentType({mapID, nodeID: nodeArgOrParentSPArg_info!.node.id, argumentType: val}).RunOnServer();
+							}}/>
+						<Pre> premises are true, they impact the parent.</Pre>
+					</Row>
 					<Row>
-						<Button mt={3} text="Reverse argument polarity" onLeftClick={()=>{
+						<Button mt={3} text="Reverse argument polarity" enabled={nodeArgOrParentSPArg_info.creatorOrMod} onLeftClick={()=>{
 							ShowMessageBox({
 								title: "Reverse argument polarity?", cancelButton: true,
 								// message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_controlled)}"?\n\nAll relevance ratings will be deleted.`,
-								message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_controlled)}"?`,
+								message: `Reverse polarity of argument "${GetNodeDisplayText(nodeArgOrParentSPArg_info!.node)}"?`,
 								onOK: ()=>{
-									new ReverseArgumentPolarity(E(mapID && {mapID}, {nodeID: nodeArgOrParentSPArg_controlled.id, path: nodeArgOrParentSPArg_controlled_path!})).RunOnServer();
+									new ReverseArgumentPolarity({mapID, nodeID: nodeArgOrParentSPArg_info!.node.id, path: nodeArgOrParentSPArg_info!.path}).RunOnServer();
 								},
 							});
 						}}/>
-					</Row>}
+					</Row>
+				</>}
 				{node.type == MapNodeType.claim && convertToTypes.length > 0 &&
 					<Row center>
 						<Pre>Convert to: </Pre>
 						<Select options={convertToTypes} value={convertToType} onChange={val=>this.SetState({convertToType: val})}/>
 						<Button ml={5} text="Convert" onClick={()=>{
-							new ChangeClaimType(E({mapID, nodeID: node.id, newType: convertToType!})).RunOnServer();
+							new ChangeClaimType({mapID, nodeID: node.id, newType: convertToType!}).RunOnServer();
 						}}/>
 					</Row>}
 				{/*childOrderTypeChangeable &&

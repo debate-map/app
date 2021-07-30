@@ -40,6 +40,8 @@ export class LinkNode extends Command<{mapID: string|n, parentID: string, childI
 		AssertV(parentToChildLinks.length == 0, `Node #${childID} is already a child of node #${parentID}.`);
 
 		this.link = new NodeChildLink({
+			creator: this.userInfo.id,
+			createdAt: Date.now(),
 			parent: parentID,
 			child: childID,
 			form: childForm,

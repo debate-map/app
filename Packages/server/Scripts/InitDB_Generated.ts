@@ -240,6 +240,8 @@ export async function up(knex: Knex.Transaction) {
 
 	await knex.schema.createTable(`${v}nodeChildLinks`, t=>{
 		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
+		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
 		RunFieldInit(t, "parent", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "child", (t, n)=>t.text(n).references("id").inTable(v + `nodes`).DeferRef());
 		RunFieldInit(t, "slot", (t, n)=>t.integer(n));
@@ -277,13 +279,13 @@ export async function up(knex: Knex.Transaction) {
 	await knex.schema.createTable(`${v}nodes`, t=>{
 		
 		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
-		RunFieldInit(t, "accessPolicy", (t, n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
 		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
 		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
 		RunFieldInit(t, "type", (t, n)=>t.text(n));
-		RunFieldInit(t, "argumentType", (t, n)=>t.text(n).nullable());
-		RunFieldInit(t, "multiPremiseArgument", (t, n)=>t.boolean(n).nullable());
 		RunFieldInit(t, "rootNodeForMap", (t, n)=>t.text(n).nullable().references("id").inTable(v + `maps`).DeferRef());
+		RunFieldInit(t, "accessPolicy", (t, n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
+		RunFieldInit(t, "multiPremiseArgument", (t, n)=>t.boolean(n).nullable());
+		RunFieldInit(t, "argumentType", (t, n)=>t.text(n).nullable());
 	});
 
 	await knex.schema.createTable(`${v}nodeRevisions`, t=>{

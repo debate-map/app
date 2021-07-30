@@ -5,7 +5,7 @@ import {BaseComponentPlus, GetDOM, RenderSource} from "web-vcore/nm/react-vexten
 import {store} from "Store";
 import {Observer, RunInAction} from "web-vcore";
 import {DetailsPanel_Subpanel} from "Store/main/maps";
-import {MapNode, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType, NodeChildLink, GetAccessPolicy} from "dm_common";
+import {MapNode, MapNodeL3, MapNodeRevision, AsNodeL1, AsNodeL2, GetAttachmentType, NodeChildLink, GetAccessPolicy, MapNodeL2} from "dm_common";
 import {AssertValidate, Validate} from "web-vcore/nm/mobx-graphlink";
 import {AttachmentPanel} from "./NodeDetailsUI/AttachmentPanel.js";
 import {OthersPanel} from "./NodeDetailsUI/OthersPanel.js";
@@ -24,7 +24,7 @@ type Props = {
 	// validateNewData: (newData: MapNode, newRevisionData: MapNodeRevision)=>void,
 };
 type State = {newData: MapNode, newRevisionData: MapNodeRevision, newLinkData: NodeChildLink};
-export type NodeDetailsUI_SharedProps = Props & State & {newDataAsL2, Change, SetState};
+export type NodeDetailsUI_SharedProps = Props & State & {newDataAsL2: MapNodeL2, Change, SetState};
 
 @Observer
 export class NodeDetailsUI extends BaseComponentPlus({enabled: true} as Props, {} as State) {

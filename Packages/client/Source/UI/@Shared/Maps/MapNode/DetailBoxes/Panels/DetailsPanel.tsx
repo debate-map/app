@@ -43,12 +43,12 @@ export class DetailsPanel extends BaseComponentPlus({} as {show: boolean, map?: 
 					<Row>
 						<Button text="Save" enabled={dataError == null} title={dataError} onLeftClick={async()=>{
 							// let nodeUpdates = GetUpdates(node, this.detailsUI.GetNewData()).ExcludeKeys("parents", "children", "layerPlusAnchorParents", "finalType", "link");
-							if (link) {
+							/*if (link) {
 								const linkUpdates = GetUpdates(link, this.detailsUI!.GetNewLinkData());
 								if (linkUpdates.VKeys().length) {
 									await new UpdateLink(E({linkID: link.id, linkUpdates})).RunOnServer();
 								}
-							}
+							}*/
 
 							const newRevision = this.detailsUI!.GetNewRevisionData();
 							const revisionID = await new AddNodeRevision({mapID: map?.id, revision: newRevision}).RunOnServer();

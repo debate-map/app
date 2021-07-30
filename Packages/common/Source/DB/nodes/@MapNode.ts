@@ -31,14 +31,14 @@ export class MapNode {
 		CE(this).VSet(initialData);
 	}
 
+	// cannot be modified
+	// ==========
+
 	@DB((t, n)=>t.text(n).primary())
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
-	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
-	@Field({type: "string"})
-	accessPolicy: string;
-
+	// creator-id cannot be detached through interface; if user needs their username detached fsr, they can contact an admin
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {opt: true})
 	creator: string;
@@ -51,26 +51,26 @@ export class MapNode {
 	@Field({$ref: "MapNodeType"})
 	type: MapNodeType;
 
-	@DB((t, n)=>t.text(n).nullable())
-	@Field({$ref: "ArgumentType"}, {opt: true})
-	argumentType?: ArgumentType;
+	// cannot be modified manually, but entry will become null if the map is deleted
+	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`maps`).DeferRef())
+	@Field({$ref: "UUID"}, {opt: true})
+	rootNodeForMap?: string;
+
+	// modifiable if: 1) node's access-policy is not "public ungoverned", or 2) minimal # of users have built upon node, eg. added revisions or children [# depends on user rep]
+	// (these are left out of node-revisions because they are "structural", ie. node-revisions are for node-internal changes, whereas the below affect the approach taken for adding children and such)
+	// ==========
+
+	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
+	@Field({type: "string"})
+	accessPolicy: string;
 
 	@DB((t, n)=>t.boolean(n).nullable())
 	@Field({type: "boolean"}, {opt: true})
 	multiPremiseArgument?: boolean;
 
-	@DB((t, n)=>t.text(n).nullable().references("id").inTable(`maps`).DeferRef())
-	@Field({$ref: "UUID"}, {opt: true})
-	rootNodeForMap?: string;
-
-	// if subnode
-	//layerPlusAnchorParents: LayerPlusAnchorParentSet;
-	/*layerOwner: UUID;
-	layerAnchorNode: UUID;*/
-
-	// local-only
-	//informalArgumentsHolder?: boolean;
-	//premiseAddHelper?: boolean;
+	@DB((t, n)=>t.text(n).nullable())
+	@Field({$ref: "ArgumentType"}, {opt: true})
+	argumentType?: ArgumentType;
 }
 AddSchema("MapNode_Partial", ["MapNode"], ()=>{
 	const schema = GetSchemaJSON("MapNode");

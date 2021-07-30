@@ -1,5 +1,6 @@
+import {MapNodeRevision} from "DB/nodes/@MapNodeRevision.js";
 import {Clone} from "web-vcore/nm/js-vextensions.js";
-import {AssertValidate, Command, CommandMeta, DBHelper, dbp} from "web-vcore/nm/mobx-graphlink.js";
+import {AssertValidate, Command, CommandMeta, DBHelper, dbp, SimpleSchema} from "web-vcore/nm/mobx-graphlink.js";
 import {MapEdit, UserEdit} from "../CommandMacros.js";
 import {GetNodeChildren} from "../DB/nodes.js";
 import {AsNodeL1, GetNodeDisplayText, GetNodeForm, GetNodeL2, GetNodeL3} from "../DB/nodes/$node.js";
@@ -9,13 +10,10 @@ import {AddNodeRevision} from "./AddNodeRevision.js";
 @MapEdit
 @UserEdit
 @CommandMeta({
-	payloadSchema: ()=>({
-		properties: {
-			mapID: {type: "string"},
-			nodeID: {type: "string"},
-			multiPremiseArgument: {type: "boolean"},
-		},
-		required: ["nodeID", "multiPremiseArgument"],
+	payloadSchema: ()=>SimpleSchema({
+		mapID: {$ref: "UUID"},
+		$nodeID: {$ref: "UUID"},
+		$multiPremiseArgument: {type: "boolean"},
 	}),
 })
 export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, nodeID: string, multiPremiseArgument: boolean}, {}> {
@@ -26,19 +24,19 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 		const {mapID, nodeID, multiPremiseArgument} = this.payload;
 		this.oldNodeData = GetNodeL2.NN(nodeID);
 
-		this.newNodeData = {...AsNodeL1(this.oldNodeData), ...{multiPremiseArgument}};
+		this.newNodeData = {...AsNodeL1(this.oldNodeData), multiPremiseArgument};
 		if (multiPremiseArgument) {
 			//this.newNodeData.childrenOrderType = ChildOrderType.Manual;
 			//this.newNodeData.childrenOrder = CE(this.oldNodeData.children).VKeys();
 
 			if ((this.oldNodeData.current.phrasing.text_base?.length ?? 0) == 0) {
-				const newRevision = Clone(this.oldNodeData.current);
+				const newRevision = Clone(this.oldNodeData.current) as MapNodeRevision;
 
 				const children = GetNodeChildren(this.oldNodeData.id);
 				//const oldChildNode_partialPath = `${nodeID}/${CE(this.oldNodeData.children).VKeys()[0]}`;
 				const oldChildNode_partialPath = `${nodeID}/${children[0].id}`;
 				const oldChildNode = GetNodeL3.NN(oldChildNode_partialPath);
-				newRevision.phrasing.base = GetNodeDisplayText(oldChildNode, oldChildNode_partialPath, GetNodeForm(oldChildNode));
+				newRevision.phrasing.text_base = GetNodeDisplayText(oldChildNode, oldChildNode_partialPath, GetNodeForm(oldChildNode));
 
 				this.sub_addRevision = new AddNodeRevision({mapID, revision: newRevision}).MarkAsSubcommand(this);
 				this.sub_addRevision.Validate();
