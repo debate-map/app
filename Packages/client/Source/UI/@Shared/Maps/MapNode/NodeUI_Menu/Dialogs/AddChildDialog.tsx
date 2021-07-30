@@ -42,7 +42,7 @@ export class AddChildHelper {
 				accessPolicy: GetDefaultAccessPolicyID_ForNode(),
 				type: MapNodeType.claim, creator: userID,
 			});
-			this.subNode_revision = new MapNodeRevision(E(this.map.nodeDefaults, {phrasing: new MapNodePhrasing({text_base: title})}));
+			this.subNode_revision = new MapNodeRevision(E(this.map.nodeDefaults, {phrasing: MapNodePhrasing.Embedded({text_base: title})}));
 			this.subNode_link = new NodeChildLink({
 				slot: 0,
 				form: ClaimForm.base,

@@ -4,6 +4,16 @@ import {TermAttachment} from "../nodeRevisions/@TermAttachment.js";
 
 @MGLClass({table: "nodePhrasings"})
 export class MapNodePhrasing {
+	static Embedded(data: Partial<MapNodePhrasing>) {
+		const result = new MapNodePhrasing(data);
+		for (const key of Object.keys(result)) {
+			if (!MapNodePhrasing_Embedded_keys.includes(key as any)) {
+				delete result[key];
+			}
+		}
+		return result as MapNodePhrasing_Embedded;
+	}
+
 	constructor(data: Partial<MapNodePhrasing>) {
 		CE(this).VSet(data);
 	}
@@ -48,6 +58,13 @@ export class MapNodePhrasing {
 	@DB((t, n)=>t.specificType(n, "jsonb[]"))
 	@Field({items: {$ref: TermAttachment.name}})
 	terms: TermAttachment[] = [];
+
+	// for web phrasings
+	// ==========
+
+	@DB((t, n)=>t.specificType(n, "text[]"))
+	@Field({items: {type: "string"}})
+	references: string[] = [];
 }
 
 const MapNodePhrasing_Embedded_keys = ["text_base", "text_negation", "text_question", "note", "terms"] as const;

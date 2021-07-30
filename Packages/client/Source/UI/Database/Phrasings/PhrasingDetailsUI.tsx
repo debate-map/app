@@ -9,6 +9,7 @@ import React from "react";
 import {GenericEntryInfoUI} from "UI/@Shared/CommonPropUIs/GenericEntryInfoUI";
 import {ES} from "web-vcore";
 import {TermAttachmentsUI} from "./TermAttachmentsUI";
+import {PhrasingReferencesUI} from "./PhrasingReferencesUI";
 
 type Props = {
 	baseData: MapNodePhrasing_Embedded & {id?: string},
@@ -65,6 +66,8 @@ export class PhrasingDetailsUI extends BaseComponentPlus({enabled: true} as Prop
 				</RowLR>
 				{(attachmentType == AttachmentType.none || attachmentType == AttachmentType.references || attachmentType == AttachmentType.equation) &&
 					<TermAttachmentsUI {...sharedProps}/>}
+				{newData.type == MapNodePhrasingType.web &&
+					<PhrasingReferencesUI {...sharedProps}/>}
 			</Column>
 		);
 	}

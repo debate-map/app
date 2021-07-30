@@ -264,6 +264,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "text_question", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "note", (t, n)=>t.text(n).nullable());
 		RunFieldInit(t, "terms", (t, n)=>t.specificType(n, "jsonb[]"));
+		RunFieldInit(t, "references", (t, n)=>t.specificType(n, "text[]"));
 	});
 
 	await knex.schema.createTable(`${v}nodeRatings`, t=>{

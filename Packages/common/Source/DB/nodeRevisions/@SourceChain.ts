@@ -37,6 +37,7 @@ export class Source {
 	type = SourceType.webpage;
 
 	// uses with * means shown in the main row (rather than in dropdown)
+	// todo: either MS the time fields are only for type:video, or clarify their purpose in code and UI (eg. date-range of occurrence?)
 	name?: string; // used by: Speech, Text*
 	author?: string; // used by: Speech*, Text*, Image*, Video*
 	location?: string; // used by: Speech*, Image*, Video*

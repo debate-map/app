@@ -120,7 +120,7 @@ class SourceEditorUI extends BaseComponentPlus({} as {chain: SourceChain, source
 			value={source.author} onChange={val=>Change(source.VSet("author", val || DEL))}/>;
 		const locationUI = ()=><TextInput enabled={enabled} style={{width: "90%"}} placeholder="location"
 			value={source.location} onChange={val=>Change(source.VSet("location", val || DEL))}/>;
-		const timeMinUI = ()=> {
+		const timeMinUI = ()=>{
 			return <>
 				<Pre>Time (min): </Pre>
 				<VDateTime dateFormat="YYYY-MM-DD" timeFormat="HH:mm" value={source.time_min ? Moment(source.time_min) : null} max={source.time_max ? Moment(source.time_max) : null}
@@ -128,9 +128,9 @@ class SourceEditorUI extends BaseComponentPlus({} as {chain: SourceChain, source
 					onChange={val=>{
 						Change(source.VSet("time_min", val ? Moment(val).valueOf() : DEL));
 					}}/>
-			</>
+			</>;
 		};
-		const timeMaxUI = ()=> {
+		const timeMaxUI = ()=>{
 			return <>
 				<Pre>Time (max): </Pre>
 				<VDateTime dateFormat="YYYY-MM-DD" timeFormat="HH:mm" value={source.time_max ? Moment(source.time_max) : null} min={source.time_min ? Moment(source.time_min) : null}
@@ -138,12 +138,12 @@ class SourceEditorUI extends BaseComponentPlus({} as {chain: SourceChain, source
 					onChange={val=>{
 						Change(source.VSet("time_max", val ? Moment(val).valueOf() : DEL));
 					}}/>
-			</>
+			</>;
 		};
 		const linkUI = ()=><TextInput enabled={enabled} type="url"
 			// pattern="^(https?|ftp)://[^\\s/$.?#]+\\.[^\\s]+$" required style={ES({flex: 1})}
 			pattern={Source_linkURLPattern} required style={ES({flex: 1})}
-			value={source.link} onChange={val=> {
+			value={source.link} onChange={val=>{
 				if (!val) val = DEL as any;
 				else if (val.endsWith("@bible")) {
 					const reference = val.replace("@bible", "").replace(/:/g, ".").replace(/ /g, "%20");

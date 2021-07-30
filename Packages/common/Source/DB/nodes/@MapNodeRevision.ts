@@ -83,7 +83,7 @@ export class MapNodeRevision {
 
 	@DB((t, n)=>t.jsonb(n))
 	@Field({$ref: "MapNodePhrasing_Embedded"})
-	phrasing: MapNodePhrasing_Embedded = new MapNodePhrasing({text_base: ""});
+	phrasing = MapNodePhrasing.Embedded({text_base: ""});
 
 	@DB((t, n)=>t.specificType(n, `tsvector generated always as (jsonb_to_tsvector('english_nostop', phrasing, '["string"]')) stored`).notNullable())
 	//@Field({type: "null"}) // user should not pass this in themselves
