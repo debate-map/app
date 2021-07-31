@@ -284,6 +284,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
 		RunFieldInit(t, "type", (t, n)=>t.text(n));
 		RunFieldInit(t, "rootNodeForMap", (t, n)=>t.text(n).nullable().references("id").inTable(v + `maps`).DeferRef());
+		RunFieldInit(t, "c_currentRevision", (t, n)=>t.text(n).references("id").inTable(v + `nodeRevisions`).DeferRef());
 		RunFieldInit(t, "accessPolicy", (t, n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
 		RunFieldInit(t, "multiPremiseArgument", (t, n)=>t.boolean(n).nullable());
 		RunFieldInit(t, "argumentType", (t, n)=>t.text(n).nullable());

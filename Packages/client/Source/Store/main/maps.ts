@@ -58,14 +58,14 @@ export class AddChildDialogState {
 }
 
 export enum DataExchangeFormat {
-	//debateMap_json: 1,
-	//cd_json: 1,
-	gad_csv = "gad_csv",
+	dm_json = "dm_json",
+	//cd_json = "cd_json",
+	//gad_csv = "gad_csv",
 }
 export class ExportSubtreeDialogState {
 	constructor() { makeObservable(this); }
-	@O targetFormat = DataExchangeFormat.gad_csv;
-	@O baseExportDepth = 5;
+	@O targetFormat = DataExchangeFormat.dm_json;
+	@O maxExportDepth = 5;
 }
 export class ImportSubtreeDialogState {
 	constructor() { makeObservable(this); }

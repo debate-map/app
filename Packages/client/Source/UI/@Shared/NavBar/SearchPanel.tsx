@@ -45,9 +45,11 @@ export class SearchPanel extends BaseComponentPlus({} as {}, {}, {} as {queryStr
 				});
 				return;
 			}
-			const node = await GetAsync(()=>GetNode(queryStr));
+			const node = await GetAsync(()=>GetNodeL2(queryStr));
 			if (node) {
-				const visibleNodeRevision = await GetAsync(()=>GetNodeRevisions(node.id).OrderBy(a=>a.createdAt).Last()); // todo: replace with actual "find node-revision to show" function
+				//const visibleNodeRevision = await GetAsync(()=>GetCurrentRevision(node.id, node.id+"", null));
+				//const visibleNodeRevision = await GetAsync(()=>GetNodeRevision(node.c_currentRevision));
+				const visibleNodeRevision = node.current;
 				RunInAction("SearchPanel.PerformSearch_part2_nodeID", ()=>{
 					//store.main.search.searchResults_nodeRevisionIDs = [node.currentRevision];
 					store.main.search.searchResults_nodeRevisionIDs = [visibleNodeRevision.id];

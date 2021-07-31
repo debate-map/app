@@ -59,7 +59,7 @@ export class DeleteNodeSubtree extends Command<{nodeID: string, maxDeletes: numb
 
 	DeclareDBUpdates(db: DBHelper) {
 		for (const deleteNodeCommand of this.subs_deleteNodes) {
-			db.add(deleteNodeCommand.GetDBUpdates());
+			db.add(deleteNodeCommand.GetDBUpdates(db));
 		}
 	}
 }

@@ -30,7 +30,7 @@ export class DeleteMap extends Command<{id: string}, {}> {
 
 	DeclareDBUpdates(db: DBHelper) {
 		const {id} = this.payload;
-		db.add(this.sub_deleteNode.GetDBUpdates());
+		db.add(this.sub_deleteNode.GetDBUpdates(db));
 		db.set(dbp`maps/${id}`, null);
 		/*for (const userMapInfoSet of this.userMapInfoSets) {
 			const userID = userMapInfoSet.id;

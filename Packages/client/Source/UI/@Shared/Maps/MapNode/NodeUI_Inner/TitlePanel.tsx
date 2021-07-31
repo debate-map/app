@@ -9,7 +9,6 @@ import {GetNodeView, GetNodeViewsAlongPath} from "Store/main/maps/mapViews/$mapV
 import {AddNodeRevision, GetParentNode, GetFontSizeForNode, GetNodeDisplayText, GetNodeForm, missingTitleStrings, GetEquationStepNumber, ClaimForm, MapNodeL2, MapNodeRevision_titlePattern, MapNodeType, GetTermsAttached, Term, MeID, Map, IsUserCreatorOrMod, MapNodeRevision, TitleKey} from "dm_common";
 import {ES, InfoButton, IsDoubleClick, Observer, ParseSegmentsForPatterns, RunInAction, VReactMarkdown_Remarkable} from "web-vcore";
 import React from "react";
-import {GetCurrentRevision} from "Store/db_ext/nodes";
 import {BailInfo, GetAsync} from "web-vcore/nm/mobx-graphlink";
 import {NodeMathUI} from "../NodeMathUI.js";
 import {NodeUI_Inner} from "../NodeUI_Inner.js";
@@ -103,7 +102,8 @@ export class TitlePanel extends BaseComponentPlus(
 
 		const equationNumber = node.current.equation ? GetEquationStepNumber(path) : null;
 		const noteText = (node.current.equation && node.current.equation.explanation) || node.current.note;
-		const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map?.id).id).filter(a=>a);
+		//const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map?.id).id).filter(a=>a);
+		const termsToSearchFor = GetTermsAttached(node.current.id).filter(a=>a);
 
 		const RenderNodeDisplayText = (text: string)=>{
 			const segments = GetSegmentsForTerms(text, termsToSearchFor);

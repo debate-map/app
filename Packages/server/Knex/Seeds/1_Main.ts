@@ -1,7 +1,7 @@
 import {MapNode, MapNodeRevision, Map, MapNodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden} from "dm_common";
 import {Knex} from "knex";
 import {CE, string} from "web-vcore/nm/js-vextensions.js";
-import {GenerateUUID} from "web-vcore/nm/mobx-graphlink.js";
+import {GenerateUUID, LastUUID} from "web-vcore/nm/mobx-graphlink.js";
 
 //import {GenerateUUID} from "web-vcore/node_modules/mobx-graphlink/Source/Extensions/KeyGenerator.js";
 /*import fs from "fs";
@@ -120,6 +120,7 @@ const nodes = TypeCheck(MapNode as new()=>(MapNode & {revision: MapNodeRevision}
 				terms: [],
 			}) as any,
 		},
+		c_currentRevision: LastUUID(),
 	},
 });
 

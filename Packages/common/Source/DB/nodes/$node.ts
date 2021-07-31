@@ -136,7 +136,8 @@ export const GetNodeL2 = CreateAccessor((nodeID: string | MapNode | n, path?: st
 
 	// if any of the data in a MapNodeL2 is not loaded yet, just return null (we want it to be all or nothing)
 	//const currentRevision = GetNodeRevision(node.currentRevision);
-	const currentRevision = GetNodeRevisions(node.id).OrderBy(a=>a.createdAt).LastOrX(); // todo: add logic deciding which revision to use, based on view context, etc.
+	//const currentRevision = GetCurrentRevision(node.id, path, mapID);
+	const currentRevision = GetNodeRevision(node.c_currentRevision);
 	BailIfNull(currentRevision); // BIN: db should make-sure at least 1 revision exists, so if none, change must be loading
 
 	const accessPolicy = GetAccessPolicy.BIN(node.accessPolicy); // BIN: access-policy is db-certain to exist, so if null, change must be loading

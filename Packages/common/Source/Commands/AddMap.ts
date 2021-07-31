@@ -47,6 +47,6 @@ export class AddMap extends Command<{map: Map}, {id: UUID}> {
 	DeclareDBUpdates(db: DBHelper) {
 		const {map} = this.payload;
 		db.set(dbp`maps/${map.id}`, map);
-		db.add(this.sub_addNode.GetDBUpdates()); // add node first, since map has fk-ref to it
+		db.add(this.sub_addNode.GetDBUpdates(db)); // add node first, since map has fk-ref to it
 	}
 }

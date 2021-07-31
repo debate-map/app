@@ -56,6 +56,11 @@ export class MapNode {
 	@Field({$ref: "UUID"}, {opt: true})
 	rootNodeForMap?: string;
 
+	// cannot be modified manually, but entry will be updated to the id of the latest revision
+	@DB((t, n)=>t.text(n).references("id").inTable(`nodeRevisions`).DeferRef())
+	@Field({$ref: "UUID"}, {opt: true})
+	c_currentRevision: string;
+
 	// modifiable if: 1) node's access-policy is not "public ungoverned", or 2) minimal # of users have built upon node, eg. added revisions or children [# depends on user rep]
 	// (these are left out of node-revisions because they are "structural", ie. node-revisions are for node-internal changes, whereas the below affect the approach taken for adding children and such)
 	// ==========
@@ -91,6 +96,7 @@ AddSchema("MapNode_Partial", ["MapNode"], ()=>{
 // export type MapNodeL2 = MapNode & {finalType: MapNodeType};
 /** MapNode, except with the access-policy and current-revision data attached. (no view-related stuff) */
 export interface MapNodeL2 extends MapNode {
+	// todo: maybe make-so these added/attached cached-data properties have "_" at the start of their name, to make them easier to recognize
 	policy: AccessPolicy;
 	current: MapNodeRevision;
 }

@@ -71,6 +71,9 @@ Command.augmentValidate = (command: Command<any>)=>{
 	command["user_addToStream"] = userHidden.addToStream;
 };
 Command.augmentDBUpdates = (command: Command<any>, db: DBHelper)=>{
+	// some commands (eg. AddNodeRevision) need contraint-deferring till end of transaction, so just do that always (instant-checking doesn't really improve debugging in this context anyway)
+	db.DeferConstraints = true;
+
 	if (command.parentCommand != null) return; // ignore subcommands (it would be redundant)
 	const commandClass = command.constructor as typeof Command;
 	if (commandsToCompletelyIgnore.includes(commandClass)) return;

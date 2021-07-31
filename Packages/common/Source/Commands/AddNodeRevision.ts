@@ -66,8 +66,11 @@ export class AddNodeRevision extends Command<{mapID?: string|n, revision: MapNod
 
 	DeclareDBUpdates(db: DBHelper) {
 		const {revision} = this.payload;
+		// needed, since "node.c_currentRevision" and "nodeRevision.node" are fk-refs to each other
+		//db.DeferConstraints = true; // commented; done globally in Command.augmentDBUpdates now (instant-checking doesn't really improve debugging in this context)
+
 		//db.set('general/data/.lastNodeRevisionID', this.revisionID);
-		//db.set(dbp`nodes/${revision.node}/.currentRevision`, this.revisionID);
+		db.set(dbp`nodes/${revision.node}/.c_currentRevision`, revision.id);
 		delete revision.phrasing_tsvector; // db populates this automatically
 		db.set(dbp`nodeRevisions/${revision.id}`, revision);
 		if (this.nodeEdit) {

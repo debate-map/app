@@ -97,7 +97,7 @@ import {Clone, GetTreeNodesInObjTree} from "web-vcore/nm/js-vextensions.js";
 
 	DeclareDBUpdates(db: DBHelper) {
 		for (const sub of this.subs) {
-			db.add(sub.GetDBUpdates());
+			db.add(sub.GetDBUpdates(db));
 		}
 		for (let ratingEnhanced of this.nodeRatingsToAdd) {
 			db.set(dbp`nodeRatings/${ratingEnhanced.nodeID}/${ratingEnhanced.ratingType}/${ratingEnhanced.userID}`, ratingEnhanced.ExcludeKeys("nodeID", "ratingType", "userID"));

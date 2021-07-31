@@ -64,8 +64,8 @@ export class ChangeClaimType extends Command<{mapID?: string|n, nodeID: string, 
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		const {nodeID} = this.payload;
+		/*const {nodeID} = this.payload;
 		db.set(dbp`nodes/${nodeID}`, this.newData);
-		db.set(dbp`nodeRevisions/${this.newRevisionID}`, this.newRevision);
+		db.set(dbp`nodeRevisions/${this.newRevisionID}`, this.newRevision);*/
 	}
 }

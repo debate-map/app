@@ -62,7 +62,7 @@ export class CloneNode extends Command<{mapID: string, baseNodePath: string, new
 			const linkChildSub = new LinkNode({mapID, parentID: this.sub_addNode.sub_addNode.nodeID, childID, childForm}).MarkAsSubcommand(this);
 
 			// linkChildSub.Prepare([]);
-			/* let dbUpdates = this.GetDBUpdates();
+			/* let dbUpdates = this.GetDBUpdates(db);
 			let node_childrenOrder = dbUpdates[`nodes/${this.sub_addNode.nodeID}/childrenOrder`];
 			linkChildSub.Prepare(node_childrenOrder); *#/
 
@@ -78,10 +78,10 @@ export class CloneNode extends Command<{mapID: string, baseNodePath: string, new
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		/*let updates = this.sub_addNode.GetDBUpdates();
+		/*let updates = this.sub_addNode.GetDBUpdates(db);
 		for (const sub of this.sub_linkChildren) {
-			// updates.Extend(sub.GetDBUpdates());
-			updates = MergeDBUpdates(updates, sub.GetDBUpdates());
+			// updates.Extend(sub.GetDBUpdates(db));
+			updates = MergeDBUpdates(updates, sub.GetDBUpdates(db));
 		}
 
 		// override the setting of new-node/childrenOrder (otherwise each link-node sub-command tries to set it to: [old-list] + [its-own-child])

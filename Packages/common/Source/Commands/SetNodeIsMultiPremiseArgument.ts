@@ -53,7 +53,7 @@ export class SetNodeIsMultiPremiseArgument extends Command<{mapID?: string, node
 		const {nodeID} = this.payload;
 		db.set(dbp`nodes/${nodeID}`, this.newNodeData);
 		if (this.sub_addRevision) {
-			db.add(this.sub_addRevision.GetDBUpdates());
+			db.add(this.sub_addRevision.GetDBUpdates(db));
 		}
 	}
 }

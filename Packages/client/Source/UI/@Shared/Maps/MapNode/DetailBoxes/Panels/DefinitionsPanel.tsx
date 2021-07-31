@@ -2,7 +2,6 @@ import {Button, Column, Row} from "web-vcore/nm/react-vcomponents.js";
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {Link, Observer, ParseSegmentsForPatterns} from "web-vcore";
 import {MapNodeL2, GetNodeDisplayText, GetTermsAttached, GetTerm, Term, Map} from "dm_common";
-import {GetCurrentRevision} from "Store/db_ext/nodes";
 import {GetSegmentsForTerms} from "../../NodeUI_Inner/TitlePanel.js";
 
 const termsPlaceholder = [];
@@ -21,7 +20,8 @@ export class DefinitionsPanel extends BaseComponentPlus(
 		/*const segments = ParseSegmentsForPatterns(displayText, [
 			{name: "term", regex: /{(.+?)\}\[(.+?)\]/},
 		]);*/
-		const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map?.id).id).filter(a=>a);
+		//const termsToSearchFor = GetTermsAttached(GetCurrentRevision(node.id, path, map?.id).id).filter(a=>a);
+		const termsToSearchFor = GetTermsAttached(node.current.id).filter(a=>a);
 		const segments = GetSegmentsForTerms(displayText, termsToSearchFor);
 
 		//let terms = segments.filter(a=>a.patternMatched?.name == "term").map(a=>GetTerm(a.textParts[2]));

@@ -119,14 +119,14 @@ export class OthersPanel extends BaseComponentPlus({} as {show: boolean, map?: M
 						}}/>
 					</Row>
 				</>}
-				{node.type == MapNodeType.claim && convertToTypes.length > 0 &&
+				{/*node.type == MapNodeType.claim && convertToTypes.length > 0 &&
 					<Row center>
 						<Pre>Convert to: </Pre>
 						<Select options={convertToTypes} value={convertToType} onChange={val=>this.SetState({convertToType: val})}/>
 						<Button ml={5} text="Convert" onClick={()=>{
 							new ChangeClaimType({mapID, nodeID: node.id, newType: convertToType!}).RunOnServer();
 						}}/>
-					</Row>}
+					</Row>*/}
 				{/*childOrderTypeChangeable &&
 					<Row center>
 						<Text>Children order type:</Text>

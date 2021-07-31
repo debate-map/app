@@ -153,9 +153,9 @@ export class LinkNode_HighLevel extends Command<Payload, {argumentWrapperID?: st
 	}
 
 	DeclareDBUpdates(db: DBHelper) {
-		if (this.sub_unlinkFromOldParent) db.add(this.sub_unlinkFromOldParent.GetDBUpdates());
-		if (this.sub_deleteOldParent) db.add(this.sub_deleteOldParent.GetDBUpdates());
-		if (this.sub_addArgumentWrapper) db.add(this.sub_addArgumentWrapper.GetDBUpdates());
-		db.add(this.sub_linkToNewParent.GetDBUpdates());
+		if (this.sub_unlinkFromOldParent) db.add(this.sub_unlinkFromOldParent.GetDBUpdates(db));
+		if (this.sub_deleteOldParent) db.add(this.sub_deleteOldParent.GetDBUpdates(db));
+		if (this.sub_addArgumentWrapper) db.add(this.sub_addArgumentWrapper.GetDBUpdates(db));
+		db.add(this.sub_linkToNewParent.GetDBUpdates(db));
 	}
 }

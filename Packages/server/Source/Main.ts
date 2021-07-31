@@ -11,7 +11,7 @@ import "web-vcore/nm/js-vextensions_ApplyCETypes.js";
 import fetch from "node-fetch";
 import cookieParser from "cookie-parser";
 import {AddSchema, CreateCommandsPlugin, GenerateUUID, GetSchemaJSON, mglClasses, schemaEntryJSONs, UserInfo} from "web-vcore/nm/mobx-graphlink.js";
-import {Assert} from "web-vcore/nm/js-vextensions";
+import {Assert, FancyFormat} from "web-vcore/nm/js-vextensions";
 import {AddWVCSchemas} from "web-vcore/Dist/Utils/General/WVCSchemas.js";
 import type {User} from "dm_common";
 import {SetUpAuthHandling} from "./AuthHandling.js";
@@ -161,7 +161,18 @@ app.use(
 					},
 					postCommandRun: info=>{
 						if (info.error) {
-							console.log(`Command "${info.command.constructor.name}" errored! @error:`, info.error);
+							const commandInfoStr_deep = FancyFormat({toJSON_opts: {
+								trimDuplicates: true,
+								entryReplacer_post: (key, value)=>{
+									//if (typeof value == "object" && value?.options?.graph) {
+									if (key == "options" && value?.graph) {
+										return {$omit: true};
+									}
+								},
+							}}, info.command);
+							console.error(`Command "${info.command.constructor.name}" errored!`,
+								`\n@Command:`, commandInfoStr_deep, // NodeJS logging doesn't show deep enough
+								`\n@error:`, info.error);
 						} else {
 							console.log(`Command "${info.command.constructor.name}" done! @returnData:`, info.returnData);
 						}

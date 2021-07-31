@@ -55,12 +55,12 @@ export class AddArgumentAndClaim extends Command<Payload, {argumentNodeID: strin
 
 	/*GetDBUpdates(db) {
 		const updates = [] as DBUpdate[];
-		updates.push(...this.sub_addArgument.GetDBUpdates());
-		updates.push(...this.sub_addClaim.GetDBUpdates());
+		updates.push(...this.sub_addArgument.GetDBUpdates(db));
+		updates.push(...this.sub_addClaim.GetDBUpdates(db));
 		return updates;
 	}*/
 	DeclareDBUpdates(db: DBHelper) {
-		db.add(this.sub_addArgument.GetDBUpdates());
-		db.add(this.sub_addClaim.GetDBUpdates());
+		db.add(this.sub_addArgument.GetDBUpdates(db));
+		db.add(this.sub_addClaim.GetDBUpdates(db));
 	}
 }

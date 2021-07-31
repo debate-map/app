@@ -113,7 +113,7 @@ export class ImportSubtree extends Command<{
 
 	DeclareDBUpdates(db: DBHelper) {
 		for (const sub of this.subs) {
-			db.add(sub.GetDBUpdates());
+			db.add(sub.GetDBUpdates(db));
 		}
 		for (let rating of this.nodeRatingsToAdd) {
 			db.set(dbp`nodeRatings/${GenerateUUID()}`, rating);

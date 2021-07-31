@@ -51,6 +51,6 @@ export class AddNode extends Command<{mapID: string|n, node: MapNode, revision: 
 			db.set(dbp`nodes/${childID}/.parents/.${this.nodeID}`, {_: true});
 		}*/
 
-		db.add(this.sub_addRevision.GetDBUpdates());
+		db.add(this.sub_addRevision.GetDBUpdates(db));
 	}
 }

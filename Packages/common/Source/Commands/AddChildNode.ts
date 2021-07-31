@@ -63,7 +63,7 @@ export class AddChildNode extends Command<{mapID: string|n, parentID: string, no
 
 	DeclareDBUpdates(db: DBHelper) {
 		const {parentID, link} = this.payload;
-		db.add(this.sub_addNode.GetDBUpdates());
+		db.add(this.sub_addNode.GetDBUpdates(db));
 
 		// add as child of parent
 		/*db.set(dbp`nodes/${parentID}/.children/.${this.sub_addNode.nodeID}`, link);
