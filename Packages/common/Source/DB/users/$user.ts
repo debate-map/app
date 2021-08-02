@@ -1,6 +1,6 @@
 import {Assert, Clone, IsString} from "web-vcore/nm/js-vextensions.js";
 import {CreateAccessor} from "web-vcore/nm/mobx-graphlink.js";
-import {GetAccessPolicy} from "../../DB/accessPolicies.js";
+import {GetAccessPolicy, UserFulfillsPermitCriteria} from "../../DB/accessPolicies.js";
 import {AccessLevel} from "../nodes/@MapNode.js";
 import {GetUser} from "../users.js";
 import {PermissionGroupSet} from "./@User.js";
@@ -119,6 +119,6 @@ export const CanAddPhrasing = CreateAccessor((userID: string|n, accessPolicyID: 
 
 	const accessPolicy = GetAccessPolicy.NN(accessPolicyID);
 	const userPermOverride = accessPolicy.permissions_userExtends[userID as any];
-	if (userPermOverride) return userPermOverride.addPhrasing; // if user-specific perm-override is set, use that
-	return accessPolicy.permissions_base.addPhrasing; // else use the default for everyone
+	if (userPermOverride) return UserFulfillsPermitCriteria(userID, userPermOverride.nodes.addPhrasing); // if user-specific perm-override is set, use that
+	return UserFulfillsPermitCriteria(userID, accessPolicy.permissions.nodes.addPhrasing); // else use the default for everyone
 });

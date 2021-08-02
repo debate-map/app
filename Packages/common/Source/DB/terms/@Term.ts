@@ -19,6 +19,10 @@ export class Term {
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
+	@DB((t, n)=>t.text(n).references("id").inTable(`accessPolicies`).DeferRef())
+	@Field({type: "string"})
+	accessPolicy: string;
+
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {opt: true})
 	creator: string;

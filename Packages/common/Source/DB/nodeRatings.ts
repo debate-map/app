@@ -10,7 +10,7 @@ import {GetMainRatingType, GetNodeL2} from "./nodes/$node.js";
 import {ClaimForm, MapNodeL3} from "./nodes/@MapNode.js";
 import {MapNodeType} from "./nodes/@MapNodeType.js";
 import {MeID} from "./users.js";
-import {GetAccessPolicy} from "./accessPolicies.js";
+import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "./accessPolicies.js";
 import {GetArgumentImpactPseudoRatings} from "../Utils/DB/RatingProcessor.js";
 
 export const GetRatings = CreateAccessor(<
@@ -56,7 +56,7 @@ export const GetRatingAverage = CreateAccessor((nodeID: string, ratingType: Node
 	if (ratings.length == 0) return resultIfNoData as any; */
 
 	const node = GetNodeL2(nodeID);
-	if (node && !node.policy.permissions_base.vote) return 100;
+	if (node && PermitCriteriaPermitsNoOne(node.policy.permissions.nodes.vote)) return 100;
 
 	const ratings = GetRatings(nodeID, ratingType, userID);
 	if (ratings.length == 0) return null;
@@ -123,7 +123,7 @@ export const GetFillPercent_AtPath = CreateAccessor((node: MapNodeL3, path: stri
 export const GetMarkerPercent_AtPath = CreateAccessor((node: MapNodeL3, path: string, boxType?: ChildGroup|n, ratingType?: NodeRatingType, weighting = WeightingType.votes)=>{
 	ratingType = ratingType ?? ChildGroupToRatingType(boxType) ?? GetMainRatingType(node);
 	if (ratingType == null) return null;
-	if (!node.policy.permissions_base.vote) return null;
+	if (PermitCriteriaPermitsNoOne(node.policy.permissions.nodes.vote)) return null;
 	if (weighting == WeightingType.votes || !rsCompatibleNodeTypes.includes(node.type)) {
 		return GetRatingAverage_AtPath(node, ratingType, MeID());
 	}

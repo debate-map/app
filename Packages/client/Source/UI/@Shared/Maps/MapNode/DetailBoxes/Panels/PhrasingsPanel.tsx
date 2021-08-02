@@ -2,7 +2,7 @@ import {Button, Column, Pre, Row, Select} from "web-vcore/nm/react-vcomponents.j
 import {BaseComponentPlus} from "web-vcore/nm/react-vextensions.js";
 import {ShowSignInPopup} from "UI/@Shared/NavBar/UserPanel.js";
 import {InfoButton, Observer} from "web-vcore";
-import {MapNodeL2, GetNodePhrasings, MapNodePhrasing, MapNodePhrasingType, GetNodeDisplayText, CanGetBasicPermissions, MeID, MapNodeType, Map, GetAccessPolicy, CanAddPhrasing, MapNodeL3} from "dm_common";
+import {MapNodeL2, GetNodePhrasings, MapNodePhrasing, MapNodePhrasingType, GetNodeDisplayText, CanGetBasicPermissions, MeID, MapNodeType, Map, GetAccessPolicy, CanAddPhrasing, MapNodeL3, PermitCriteriaPermitsNoOne} from "dm_common";
 import {GetEntries} from "web-vcore/nm/js-vextensions";
 import React from "react";
 import {GetNodeColor} from "Store/db_ext/nodes.js";
@@ -25,8 +25,8 @@ export class PhrasingsPanel extends BaseComponentPlus({} as {show: boolean, map:
 		//const mapAccessPolicy = GetAccessPolicy.NN(map.accessPolicy);
 		const accessPolicy = GetAccessPolicy.NN(node.accessPolicy);
 		let phrasingTypeOptions = GetEntries(MapNodePhrasingType, "ui");
-		// if phrasing-adding is allowed for anyone (ie. "ungoverned"), disallow "humor" type
-		if (accessPolicy.permissions_base.addPhrasing) {
+		// unless phrasing-adding is restricted to a hand-picked user-list, disallow "humor" type
+		if (!PermitCriteriaPermitsNoOne(accessPolicy.permissions.nodes.addPhrasing)) {
 			phrasingTypeOptions = phrasingTypeOptions.filter(a=>a.value != MapNodePhrasingType.humor);
 		}
 

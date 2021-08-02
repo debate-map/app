@@ -29,3 +29,10 @@ export const GetUser = CreateAccessor((userID: string|n): User|n=>{
 export const GetUsers = CreateAccessor((): User[]=>{
 	return GetDocs({}, a=>a.users);
 });
+
+export const GetUserReputation_Approvals = CreateAccessor((userID: string|n)=>{
+	return 0;
+});
+export const GetUserReputation_ApprovalPercent = CreateAccessor((userID: string|n)=>{
+	return 0;
+});

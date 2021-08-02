@@ -111,9 +111,9 @@ export class PolicyUI extends BaseComponentPlus({} as {policy: AccessPolicy, fir
 					RunInAction_Set(this, ()=>store.main.database.selectedPolicyID = policy.id);
 				}}>
 				<Pre style={{flex: 40}}>{policy.name}<sup>{policy.id.substr(0, 2)}</sup>:</Pre>
-				{/*<Text> Base: {ToJSON_Advanced(policy.permissions_base, {addSpacesAt: {betweenPropNameAndValue: true, betweenPropsOrItems: true}}).replace(/"/g, "")}</Text>*/}
+				{/*<Text> Base: {ToJSON_Advanced(policy.permissions, {addSpacesAt: {betweenPropNameAndValue: true, betweenPropsOrItems: true}}).replace(/"/g, "")}</Text>*/}
 				<Text style={{flex: 40}}> Base: [{
-					["access", "add revisions", "vote", "delete"].filter(a=>policy.permissions_base[a.replace("add revisions", "addRevisions")]).join(", ")
+					["access", "add revisions", "vote", "delete"].filter(a=>policy.permissions[a.replace("add revisions", "addRevisions")]).join(", ")
 				}]</Text>
 				<Text style={{flex: 20}}> User-overrides: {Object.keys(policy.permissions_userExtends ?? {}).length}</Text>
 			</Row>

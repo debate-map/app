@@ -1,6 +1,8 @@
 import {Assert} from "web-vcore/nm/js-vextensions";
 import {CreateAccessor, GetDoc, GetDocs} from "web-vcore/nm/mobx-graphlink";
 import {systemUserID} from "../DB_Constants.js";
+import {PermissionSet, PermissionSetForType, PermitCriteria} from "./accessPolicies/@AccessPolicy.js";
+import {GetUserReputation_ApprovalPercent, GetUserReputation_Approvals} from "./users.js";
 
 export const GetAccessPolicies = CreateAccessor((creatorID?: string)=>{
 	return GetDocs({
@@ -40,3 +42,22 @@ export const GetDefaultAccessPolicyID_ForNodeRating = CreateAccessor(()=>{
 export const GetDefaultAccessPolicyID_ForMedia = CreateAccessor(()=>{
 	return GetSystemAccessPolicyID("Public, ungoverned (standard)");
 });
+
+export function UserFulfillsPermitCriteria(userID: string|n, criteria: PermitCriteria) {
+	const approvals = GetUserReputation_Approvals(userID);
+	if (criteria.minApprovals == -1 || approvals < criteria.minApprovals) return false;
+	const approvalPercent = GetUserReputation_ApprovalPercent(userID);
+	if (criteria.minApprovalPercent == -1 || approvalPercent < criteria.minApprovalPercent) return false;
+	return true;
+}
+
+// used for, eg. whether to show the voting panel for a node (if no one is permitted, there's no point in even showing it)
+/*export function PermissionSetPermitsNoOne(permissionSet: PermissionSet, collection: keyof PermissionSet, permission: keyof PermissionSetForType) {
+	const permitCriteriaOrBoolean = permissionSet[collection][permission];
+	if (typeof permitCriteriaOrBoolean == "boolean") return permitCriteriaOrBoolean == false;
+	Assert(permitCriteriaOrBoolean != null, "Access-policy inheritance not yet implemented.");
+	return PermitCriteriaPermitsNoOne(permitCriteriaOrBoolean);
+}*/
+export function PermitCriteriaPermitsNoOne(criteria: PermitCriteria) {
+	return criteria.minApprovals == -1 || criteria.minApprovalPercent == -1;
+}

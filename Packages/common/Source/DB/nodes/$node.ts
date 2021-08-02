@@ -15,7 +15,7 @@ import {TagComp_MirrorChildrenFromXToY} from "../nodeTags/@MapNodeTag.js";
 import {SourceType, Source} from "../nodeRevisions/@SourceChain.js";
 import {GetNodeChildLinks} from "../nodeChildLinks.js";
 import {NodeChildLink} from "../nodeChildLinks/@NodeChildLink.js";
-import {GetAccessPolicy} from "../accessPolicies.js";
+import {GetAccessPolicy, PermitCriteriaPermitsNoOne} from "../accessPolicies.js";
 import {AccessPolicy} from "../accessPolicies/@AccessPolicy.js";
 import {MapNodePhrasing_Embedded, TitleKey_values} from "../nodePhrasings/@MapNodePhrasing.js";
 
@@ -44,7 +44,7 @@ export function GetPaddingForNode(node: MapNodeL2/*, isSubnode = false*/) {
 export type RatingTypeInfo = {type: NodeRatingType, main?: boolean, collapsed?: boolean};
 export function GetRatingTypesForNode(node: MapNodeL2): RatingTypeInfo[] {
 	if (node.type == MapNodeType.category) {
-		if (!node.policy.permissions_base.vote) return [];
+		if (PermitCriteriaPermitsNoOne(node.policy.permissions.nodes.vote)) return [];
 		return [{type: NodeRatingType.significance, main: true}];
 	}
 	if (node.type == MapNodeType.package) {

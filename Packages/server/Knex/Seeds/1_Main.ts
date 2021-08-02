@@ -1,4 +1,4 @@
-import {MapNode, MapNodeRevision, Map, MapNodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden} from "dm_common";
+import {MapNode, MapNodeRevision, Map, MapNodeType, User, globalMapID, globalRootNodeID, systemUserID, systemUserName, AccessPolicy, UserHidden, PermissionSet, PermissionSetForType, PermitCriteria} from "dm_common";
 import {Knex} from "knex";
 import {CE, string} from "web-vcore/nm/js-vextensions.js";
 import {GenerateUUID, LastUUID} from "web-vcore/nm/mobx-graphlink.js";
@@ -11,6 +11,13 @@ const {GenerateUUID} =
 	fs.existsSync("web-vcore/node_modules/mobx-graphlink/Source/Extensions/KeyGenerator.js") ? require("web-vcore/node_modules/mobx-graphlink/Source/Extensions/KeyGenerator.js") :
 	fs.existsSync("mobx-graphlink/Source/Extensions/KeyGenerator.js") ? require("mobx-graphlink/Source/Extensions/KeyGenerator.js") :
 	(()=>{ throw new Error("Could not find mobx-graphlink's KeyGenerator.ts file."); })();*/
+
+const temp = [] as any[];
+const Store = <T>(val: T)=>{
+	temp.push(val);
+	return val;
+};
+const Pop = <T>()=>temp.pop() as T;
 
 const rand = ()=>Math.random();
 // example: [rand()]: {...},
@@ -37,20 +44,22 @@ const users = TypeCheck(User as new()=>(User & {hidden: UserHidden}), {
 	},
 });
 
+const PC_Anyone = ()=>new PermitCriteria({minApprovals: 0, minApprovalPercent: 0});
+const PC_NoOne = ()=>new PermitCriteria({minApprovals: -1, minApprovalPercent: -1});
+
 const accessPolicies = TypeCheck(AccessPolicy, {
 	public_ungoverned: {
 		id: GenerateUUID(),
 		name: "Public, ungoverned (standard)",
 		creator: systemUserID,
 		createdAt: Date.now(),
-		base: null,
-		permissions_base: {
-			access: true,
-			modify: true,
-			delete: false,
-			vote: true,
-			addPhrasing: true,
-		},
+		permissions: Store(new PermissionSet({
+			terms:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
+			medias:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
+			maps:				new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
+			nodes:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne(), vote: PC_Anyone(), addPhrasing: PC_Anyone()}),
+			nodeRatings:	new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
+		})),
 		permissions_userExtends: {},
 	},
 	public_governed: {
@@ -58,14 +67,13 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 		name: "Public, governed (standard)",
 		creator: systemUserID,
 		createdAt: Date.now(),
-		base: null,
-		permissions_base: {
-			access: true,
-			modify: false,
-			delete: false,
-			vote: true,
-			addPhrasing: false,
-		},
+		permissions: Store(new PermissionSet({
+			terms:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
+			medias:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
+			maps:				new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
+			nodes:			new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne(), vote: PC_Anyone(), addPhrasing: PC_NoOne()}),
+			nodeRatings:	new PermissionSetForType({access: true, modify: PC_NoOne(), delete: PC_NoOne()}),
+		})),
 		permissions_userExtends: {},
 	},
 	private_governed: {
@@ -73,14 +81,13 @@ const accessPolicies = TypeCheck(AccessPolicy, {
 		name: "Private, governed (standard)",
 		creator: systemUserID,
 		createdAt: Date.now(),
-		base: null,
-		permissions_base: {
-			access: false,
-			modify: false,
-			delete: false,
-			vote: false,
-			addPhrasing: false,
-		},
+		permissions: Store(new PermissionSet({
+			terms:			new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne()}),
+			medias:			new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne()}),
+			maps:				new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne()}),
+			nodes:			new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne(), vote: PC_NoOne(), addPhrasing: PC_NoOne()}),
+			nodeRatings:	new PermissionSetForType({access: false, modify: PC_NoOne(), delete: PC_NoOne()}),
+		})),
 		permissions_userExtends: {},
 	},
 });

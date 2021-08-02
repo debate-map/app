@@ -187,8 +187,7 @@ export async function up(knex: Knex.Transaction) {
 		RunFieldInit(t, "name", (t, n)=>t.text(n));
 		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
 		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
-		RunFieldInit(t, "base", (t, n)=>t.text(n).nullable().references("id").inTable(v + `accessPolicies`).DeferRef());
-		RunFieldInit(t, "permissions_base", (t, n)=>t.jsonb(n));
+		RunFieldInit(t, "permissions", (t, n)=>t.jsonb(n));
 		RunFieldInit(t, "permissions_userExtends", (t, n)=>t.jsonb(n));
 	});
 
@@ -328,6 +327,7 @@ export async function up(knex: Knex.Transaction) {
 
 	await knex.schema.createTable(`${v}terms`, t=>{
 		RunFieldInit(t, "id", (t, n)=>t.text(n).primary());
+		RunFieldInit(t, "accessPolicy", (t, n)=>t.text(n).references("id").inTable(v + `accessPolicies`).DeferRef());
 		RunFieldInit(t, "creator", (t, n)=>t.text(n).references("id").inTable(v + `users`).DeferRef());
 		RunFieldInit(t, "createdAt", (t, n)=>t.bigInteger(n));
 		RunFieldInit(t, "name", (t, n)=>t.text(n));

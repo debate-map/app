@@ -38,7 +38,6 @@ export class MapNode {
 	@Field({$ref: "UUID"}, {opt: true})
 	id: string;
 
-	// creator-id cannot be detached through interface; if user needs their username detached fsr, they can contact an admin
 	@DB((t, n)=>t.text(n).references("id").inTable(`users`).DeferRef())
 	@Field({type: "string"}, {opt: true})
 	creator: string;
